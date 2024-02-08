@@ -101,7 +101,7 @@ export class HtmlToUSMService {
         };
 
         const rowProperties: IClipboardPropertyItem[] = [];
-        let colProperties: IClipboardPropertyItem[] = [];
+        const colProperties: IClipboardPropertyItem[] = [];
         // pick tables
         const tableStrings = html.match(/<table\b[^>]*>([\s\S]*?)<\/table>/gi);
         const tables: IParsedTablesInfo[] = [];
@@ -154,13 +154,13 @@ export class HtmlToUSMService {
                                 rowProperties: tableRowProp,
                             } = this._parseTable(tableString!);
 
-                            if (tableColProp) {
-                                colProperties = tableColProp;
-                            }
                             cellMatrix &&
                                 cellMatrix.forValue((row, col, value) => {
                                     valueMatrix.setValue(curRow + row, col, value);
                                 });
+                            if (tableColProp) {
+                                colProperties.push(...tableColProp);
+                            }
                             rowProperties.push(...tableRowProp);
                         }
                     });
@@ -187,7 +187,7 @@ export class HtmlToUSMService {
             if (tableStrings) {
                 tableStrings.forEach((t) => {
                     const curRow = valueMatrix.getDataRange().endRow + 1;
-                    const { cellMatrix } = this._parseTable(t!);
+                    const { cellMatrix, rowProperties: tableRowProp, colProperties: tableColProp } = this._parseTable(t!);
                     if (cellMatrix) {
                         cellMatrix.forValue((row, col, value) => {
                             const { rowSpan = 1, colSpan = 1 } = value;
@@ -201,14 +201,16 @@ export class HtmlToUSMService {
                             valueMatrix.setValue(curRow + row, col, value);
                         });
                     }
-
-                    rowProperties.push(...rowProperties);
+                    if (tableColProp) {
+                        colProperties.push(...tableColProp);
+                    }
+                    rowProperties.push(...tableRowProp);
                 });
             }
         }
         return {
-            rowProperties: [],
-            colProperties: [],
+            rowProperties,
+            colProperties,
             cellMatrix: valueMatrix,
         };
     }
@@ -244,8 +246,8 @@ export class HtmlToUSMService {
                 }
             });
         return {
-            rowProperties: [],
-            colProperties: [],
+            rowProperties,
+            colProperties,
             cellMatrix: valueMatrix,
         };
     }

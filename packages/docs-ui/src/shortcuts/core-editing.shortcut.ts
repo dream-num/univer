@@ -18,8 +18,7 @@ import { FOCUSING_DOC } from '@univerjs/core';
 import type { IShortcutItem } from '@univerjs/ui';
 import { KeyCode } from '@univerjs/ui';
 
-import { BreakLineCommand } from '../commands/commands/break-line.command';
-import { DeleteLeftCommand, DeleteRightCommand } from '../commands/commands/delete.command';
+import { BreakLineCommand, DeleteLeftCommand, DeleteRightCommand } from '@univerjs/docs';
 
 export const BreakLineShortcut: IShortcutItem = {
     id: BreakLineCommand.id,

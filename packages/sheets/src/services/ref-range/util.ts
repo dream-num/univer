@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IRange, Nullable } from '@univerjs/core';
+import type { ICommandInfo, IRange, Nullable } from '@univerjs/core';
 import { RANGE_TYPE, Rectangle } from '@univerjs/core';
 
 import type {
@@ -30,7 +30,7 @@ import type {
     IOperator,
     IRemoveRowColCommand,
 } from './type';
-import { OperatorType } from './type';
+import { EffectRefRangId, OperatorType } from './type';
 
 const MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER;
 export const handleRangeTypeInput = (range: IRange) => {
@@ -537,4 +537,56 @@ export const runRefRangeMutations = (operators: IOperator[], range: IRange) => {
         }
     }
     return result;
+};
+
+export const handleDefaultRangeChangeWithEffectRefCommands = (range: IRange, commandInfo: ICommandInfo) => {
+    let operator: IOperator[] = [];
+    switch (commandInfo.id) {
+        case EffectRefRangId.DeleteRangeMoveLeftCommandId:{
+            operator = handleDeleteRangeMoveLeft(commandInfo as IDeleteRangeMoveLeftCommand, range);
+            break;
+        }
+        case EffectRefRangId.DeleteRangeMoveUpCommandId:{
+            operator = handleDeleteRangeMoveUp(commandInfo as IDeleteRangeMoveUpCommand, range);
+            break;
+        }
+        case EffectRefRangId.InsertColCommandId:{
+            operator = handleInsertCol(commandInfo as IInsertColCommand, range);
+            break;
+        }
+        case EffectRefRangId.InsertRangeMoveDownCommandId:{
+            operator = handleInsertRangeMoveDown(commandInfo as IInsertRangeMoveDownCommand, range);
+            break;
+        }
+        case EffectRefRangId.InsertRangeMoveRightCommandId:{
+            operator = handleInsertRangeMoveRight(commandInfo as IInsertRangeMoveRightCommand, range);
+            break;
+        }
+        case EffectRefRangId.InsertRowCommandId:{
+            operator = handleInsertRow(commandInfo as IInsertRowCommand, range);
+            break;
+        }
+        case EffectRefRangId.MoveColsCommandId:{
+            operator = handleMoveCols(commandInfo as IMoveColsCommand, range);
+            break;
+        }
+        case EffectRefRangId.MoveRangeCommandId:{
+            operator = handleMoveRange(commandInfo as IMoveRangeCommand, range);
+            break;
+        }
+        case EffectRefRangId.MoveRowsCommandId:{
+            operator = handleMoveRows(commandInfo as IMoveRowsCommand, range);
+            break;
+        }
+        case EffectRefRangId.RemoveColCommandId:{
+            operator = handleIRemoveCol(commandInfo as IRemoveRowColCommand, range);
+            break;
+        }
+        case EffectRefRangId.RemoveRowCommandId:{
+            operator = handleIRemoveRow(commandInfo as IRemoveRowColCommand, range);
+            break;
+        }
+    }
+    const resultRange = runRefRangeMutations(operator, range);
+    return resultRange;
 };

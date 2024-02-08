@@ -21,5 +21,6 @@
  * @returns if the system supports clipboard API
  */
 export function supportClipboardAPI(): boolean {
-    return typeof navigator.clipboard.readText !== 'undefined';
+    // In unsecure context, navigator.clipboard does not exist.
+    return typeof navigator.clipboard !== 'undefined' && typeof navigator.clipboard.readText !== 'undefined';
 }

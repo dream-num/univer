@@ -59,7 +59,7 @@
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": ">=0.12.13",
+        "@wendellhu/redi": "^0.13.0",
         "react": ">=16.9.0"
     },
     "dependencies": {},
@@ -73,7 +73,7 @@
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": "^0.12.13",
+        "@wendellhu/redi": "^0.13.0",
         "less": "^4.2.0",
         "react": "^18.2.0",
         "typescript": "^5.3.3",

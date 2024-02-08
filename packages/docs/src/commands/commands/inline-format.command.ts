@@ -276,7 +276,8 @@ function getReverseFormatValueInSelection(
                 }
             }
 
-            if (isTextDecoration(ts?.[key]) && (ts[key] as ITextDecoration).s === BooleanNumber.FALSE) {
+            // Add second ?. in just use fix TS checker.
+            if (isTextDecoration(ts?.[key]) && (ts?.[key] as ITextDecoration).s === BooleanNumber.FALSE) {
                 return {
                     s: BooleanNumber.TRUE,
                 };

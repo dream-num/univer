@@ -36,7 +36,7 @@ export class ComponentExtension<T, U, V> {
 
     type!: U;
 
-    Z_INDEX: number = 0;
+    protected Z_INDEX: number = 0;
 
     parent: Nullable<BaseObject>;
 

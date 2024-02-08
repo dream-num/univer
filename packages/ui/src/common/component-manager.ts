@@ -200,7 +200,6 @@ export class ComponentManager {
             LeftTridiagonalSingle,
             SlashSingle,
             RightDoubleDiagonalSingle,
-            PrintSingle,
         };
 
         for (const k in iconList) {

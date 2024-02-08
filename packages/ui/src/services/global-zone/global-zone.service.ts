@@ -18,7 +18,7 @@ import type { IDisposable } from '@wendellhu/redi';
 import { createIdentifier } from '@wendellhu/redi';
 import type { Subject } from 'rxjs';
 
-export const IGlobalZoneService = createIdentifier<IGlobalZoneService>('univer.print-service');
+export const IGlobalZoneService = createIdentifier<IGlobalZoneService>('univer.global-zone-service');
 
 export interface IGlobalZoneService {
     readonly visible$: Subject<boolean>;

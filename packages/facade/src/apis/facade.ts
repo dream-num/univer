@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { CommandListener, IDocumentData, IExecutionOptions, IWorkbookData } from '@univerjs/core';
+import type { CommandListener, IDocumentData, IExecutionOptions, IWorkbookData, Nullable } from '@univerjs/core';
 import {
     BorderStyleTypes,
     ICommandService,
@@ -29,8 +29,11 @@ import { IRegisterFunctionService, RegisterFunctionService } from '@univerjs/she
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject, Injector, Quantity } from '@wendellhu/redi';
 
-import { FWorkbook } from './sheets/f-workbook';
+import type { RenderComponentType, SheetComponent, SheetExtension } from '@univerjs/engine-render';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import { SHEET_VIEW_KEY } from '@univerjs/sheets-ui';
 import { FDocument } from './docs/f-document';
+import { FWorkbook } from './sheets/f-workbook';
 
 export class FUniver {
     /**
@@ -54,7 +57,8 @@ export class FUniver {
         @Inject(Injector) private readonly _injector: Injector,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
-        @ISocketService private readonly _ws: ISocketService
+        @ISocketService private readonly _ws: ISocketService,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {}
 
     /**
@@ -163,6 +167,68 @@ export class FUniver {
         registerFunctionService.unregisterFunctions(config);
     }
 
+    /**
+     * Register sheet row header render extensions.
+     * @param unitId
+     * @param extensions
+     */
+    registerSheetRowHeaderExtension(unitId: string, ...extensions: SheetExtension[]) {
+        const mainComponent = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.ROW) as SheetComponent;
+
+        mainComponent.register(...extensions);
+    }
+
+    /**
+     * Unregister sheet row header render extensions.
+     * @param unitId
+     * @param uKeys
+     */
+    unregisterSheetRowHeaderExtension(unitId: string, ...uKeys: string[]) {
+        const mainComponent = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.ROW) as SheetComponent;
+
+        mainComponent.unRegister(...uKeys);
+    }
+
+    /**
+     * Register sheet column header render extensions.
+     * @param unitId
+     * @param extensions
+     */
+    registerSheetColumnHeaderExtension(unitId: string, ...extensions: SheetExtension[]) {
+        const mainComponent = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.COLUMN) as SheetComponent;
+        mainComponent.register(...extensions);
+    }
+
+    /**
+     * Unregister sheet column header render extensions.
+     * @param unitId
+     * @param uKeys
+     */
+    unregisterSheetColumnHeaderExtension(unitId: string, ...uKeys: string[]) {
+        const mainComponent = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.COLUMN) as SheetComponent;
+        mainComponent.unRegister(...uKeys);
+    }
+
+    /**
+     * Register sheet main render extensions.
+     * @param unitId
+     * @param uKeys
+     */
+    registerSheetMainExtension(unitId: string, ...extensions: SheetExtension[]) {
+        const mainComponent = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.MAIN) as SheetComponent;
+        mainComponent.register(...extensions);
+    }
+
+    /**
+     * Unregister sheet main render extensions.
+     * @param unitId
+     * @param uKeys
+     */
+    unregisterSheetMainExtension(unitId: string, ...uKeys: string[]) {
+        const mainComponent = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.MAIN) as SheetComponent;
+        mainComponent.unRegister(...uKeys);
+    }
+
     // #region
 
     /**
@@ -239,6 +305,29 @@ export class FUniver {
         }
 
         return ws;
+    }
+
+    /**
+     * Get sheet render component from render by unitId and view key.
+     * @param unitId
+     * @returns
+     */
+    private _getSheetRenderComponent(unitId: string, viewKey: SHEET_VIEW_KEY): Nullable<RenderComponentType> {
+        const render = this._renderManagerService.getRenderById(unitId);
+
+        if (!render) {
+            throw new Error('Render not found');
+        }
+
+        const { components } = render;
+
+        const renderComponent = components.get(viewKey);
+
+        if (!renderComponent) {
+            throw new Error('Render component not found');
+        }
+
+        return renderComponent;
     }
 
     // @endregion

@@ -63,11 +63,13 @@
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/docs": "workspace:*",
+        "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/network": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-formula": "workspace:*",
         "@univerjs/sheets-numfmt": "workspace:*",
+        "@univerjs/sheets-ui": "workspace:*",
         "@wendellhu/redi": "^0.13.0",
         "rxjs": ">=7.0.0"
     },
@@ -82,6 +84,7 @@
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-formula": "workspace:*",
         "@univerjs/sheets-numfmt": "workspace:*",
+        "@univerjs/sheets-ui": "workspace:*",
         "@wendellhu/redi": "^0.13.0",
         "rxjs": "^7.8.1",
         "typescript": "^5.3.3",

@@ -612,6 +612,9 @@ importers:
       '@univerjs/sheets-numfmt':
         specifier: workspace:*
         version: link:../sheets-numfmt
+      '@univerjs/sheets-ui':
+        specifier: workspace:*
+        version: link:../sheets-ui
       '@wendellhu/redi':
         specifier: ^0.13.0
         version: 0.13.0

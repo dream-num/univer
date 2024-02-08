@@ -76,7 +76,7 @@ export class ColumnHeaderLayout extends SheetExtension {
 
             const columnEndPosition = columnWidthAccumulation[c];
             if (preColumnPosition === columnEndPosition) {
-                // Skip hidden rows
+                // Skip hidden columns
                 continue;
             }
 

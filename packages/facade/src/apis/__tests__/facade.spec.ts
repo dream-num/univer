@@ -20,6 +20,9 @@ import { SetRangeValuesCommand, SetRangeValuesMutation, SetStyleCommand } from '
 import type { Injector } from '@wendellhu/redi';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import type { RenderComponentType } from '@univerjs/engine-render';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import type { SHEET_VIEW_KEY } from '@univerjs/sheets-ui';
 import type { FUniver } from '../facade';
 import { createTestBed } from './create-test-bed';
 
@@ -39,6 +42,7 @@ describe('Test FUniver', () => {
         endRow: number,
         endColumn: number
     ) => Nullable<IStyleData>;
+    let getSheetRenderComponent: (unitId: string, viewKey: SHEET_VIEW_KEY) => Nullable<RenderComponentType>;
 
     beforeEach(() => {
         const testBed = createTestBed();
@@ -73,6 +77,24 @@ describe('Test FUniver', () => {
             if (value && styles) {
                 return styles.getStyleByCell(value);
             }
+        };
+
+        getSheetRenderComponent = (unitId: string, viewKey: SHEET_VIEW_KEY): Nullable<RenderComponentType> => {
+            const render = get(IRenderManagerService).getRenderById(unitId);
+
+            if (!render) {
+                throw new Error('Render not found');
+            }
+
+            const { components } = render;
+
+            const renderComponent = components.get(viewKey);
+
+            if (!renderComponent) {
+                throw new Error('Render component not found');
+            }
+
+            return renderComponent;
         };
     });
 
@@ -137,4 +159,14 @@ describe('Test FUniver', () => {
     it('Function createSocket', () => {
         expect(() => univerAPI.createSocket('URL')).toThrowError();
     });
+
+    // FIXME: test render
+    // it('Function registerSheetRowHeaderExtension', () => {
+    //     univerAPI.registerSheetRowHeaderExtension('test', new RowHeaderCustomExtension());
+
+    //     const sheetComponent = getSheetRenderComponent('test', SHEET_VIEW_KEY.ROW) as SheetComponent;
+
+    //     // getExtensionByKey
+    //     const rowHeaderExtension = sheetComponent.getExtensionByKey(ROW_UNIQUE_KEY);
+    // });
 });

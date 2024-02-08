@@ -30,7 +30,7 @@ import type { IDisposable } from '@wendellhu/redi';
 import { Inject, Injector, Quantity } from '@wendellhu/redi';
 
 import type { RenderComponentType, SheetComponent, SheetExtension } from '@univerjs/engine-render';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { SHEET_VIEW_KEY } from '@univerjs/sheets-ui';
 import { FDocument } from './docs/f-document';
 import { FWorkbook } from './sheets/f-workbook';
@@ -45,6 +45,11 @@ export class FUniver {
         const socketService = injector.get(ISocketService, Quantity.OPTIONAL);
         if (!socketService) {
             injector.add([ISocketService, { useClass: WebSocketService }]);
+        }
+
+        const renderManagerService = injector.get(IRenderManagerService, Quantity.OPTIONAL);
+        if (!renderManagerService) {
+            injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
         }
 
         return injector.createInstance(FUniver);
@@ -173,9 +178,9 @@ export class FUniver {
      * @param extensions
      */
     registerSheetRowHeaderExtension(unitId: string, ...extensions: SheetExtension[]) {
-        const mainComponent = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.ROW) as SheetComponent;
+        const sheetComponent = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.ROW) as SheetComponent;
 
-        mainComponent.register(...extensions);
+        sheetComponent.register(...extensions);
     }
 
     /**
@@ -184,9 +189,9 @@ export class FUniver {
      * @param uKeys
      */
     unregisterSheetRowHeaderExtension(unitId: string, ...uKeys: string[]) {
-        const mainComponent = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.ROW) as SheetComponent;
+        const sheetComponent = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.ROW) as SheetComponent;
 
-        mainComponent.unRegister(...uKeys);
+        sheetComponent.unRegister(...uKeys);
     }
 
     /**
@@ -195,8 +200,8 @@ export class FUniver {
      * @param extensions
      */
     registerSheetColumnHeaderExtension(unitId: string, ...extensions: SheetExtension[]) {
-        const mainComponent = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.COLUMN) as SheetComponent;
-        mainComponent.register(...extensions);
+        const sheetComponent = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.COLUMN) as SheetComponent;
+        sheetComponent.register(...extensions);
     }
 
     /**
@@ -205,8 +210,8 @@ export class FUniver {
      * @param uKeys
      */
     unregisterSheetColumnHeaderExtension(unitId: string, ...uKeys: string[]) {
-        const mainComponent = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.COLUMN) as SheetComponent;
-        mainComponent.unRegister(...uKeys);
+        const sheetComponent = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.COLUMN) as SheetComponent;
+        sheetComponent.unRegister(...uKeys);
     }
 
     /**
@@ -215,8 +220,8 @@ export class FUniver {
      * @param uKeys
      */
     registerSheetMainExtension(unitId: string, ...extensions: SheetExtension[]) {
-        const mainComponent = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.MAIN) as SheetComponent;
-        mainComponent.register(...extensions);
+        const sheetComponent = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.MAIN) as SheetComponent;
+        sheetComponent.register(...extensions);
     }
 
     /**
@@ -225,8 +230,8 @@ export class FUniver {
      * @param uKeys
      */
     unregisterSheetMainExtension(unitId: string, ...uKeys: string[]) {
-        const mainComponent = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.MAIN) as SheetComponent;
-        mainComponent.unRegister(...uKeys);
+        const sheetComponent = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.MAIN) as SheetComponent;
+        sheetComponent.unRegister(...uKeys);
     }
 
     // #region

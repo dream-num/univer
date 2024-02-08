@@ -97,6 +97,7 @@ export function createTestBed(workbookConfig?: IWorkbookData, dependencies?: Dep
             injector.add([IFunctionService, { useClass: FunctionService }]);
             injector.add([IFormulaCustomFunctionService, { useClass: FormulaCustomFunctionService }]);
             injector.add([ISocketService, { useClass: WebSocketService }]);
+            // injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
 
             dependencies?.forEach((d) => injector.add(d));
         }

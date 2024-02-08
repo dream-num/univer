@@ -48,7 +48,7 @@ export class ConditionalFormatRuleModel {
     }
 
     private _ensureList(unitId: string, subUnitId: string) {
-        let list = this._model.get(unitId)?.get(subUnitId);
+        let list = this.getSubunitRules(unitId, subUnitId);
         if (!list) {
             list = [];
             let unitMap = this._model.get(unitId);
@@ -62,20 +62,20 @@ export class ConditionalFormatRuleModel {
     }
 
     getRule(unitId: string, subUnitId: string, cfId?: string) {
-        const list = this._model.get(unitId)?.get(subUnitId);
+        const list = this.getSubunitRules(unitId, subUnitId);
         if (list) {
             return list.find((item) => item.cfId === cfId);
         }
         return null;
     }
 
-    getAllRule(unitId: string, subUnitId: string) {
+    getSubunitRules(unitId: string, subUnitId: string) {
         const list = this._model.get(unitId)?.get(subUnitId);
         return list || null;
     }
 
     deleteRule(unitId: string, subUnitId: string, cfId: string) {
-        const list = this._model.get(unitId)?.get(subUnitId);
+        const list = this.getSubunitRules(unitId, subUnitId);
         if (list) {
             const index = list.findIndex((e) => e.cfId === cfId);
             const rule = list[index];

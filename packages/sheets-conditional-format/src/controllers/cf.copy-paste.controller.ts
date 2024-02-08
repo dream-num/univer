@@ -186,7 +186,7 @@ export class ConditionalFormatCopyPasteController extends Disposable {
                 return cacheCfIdMap[copyRangeCfId];
             }
             const oldRule = info?.cfMap[copyRangeCfId];
-            const targetRule = [...(this._conditionalFormatRuleModel.getAllRule(unitId, subUnitId) || []), ...waitAddRule].find((rule) => {
+            const targetRule = [...(this._conditionalFormatRuleModel.getSubunitRules(unitId, subUnitId) || []), ...waitAddRule].find((rule) => {
                 return Tools.diffValue(rule.rule, oldRule);
             });
             if (targetRule) {

@@ -79,7 +79,6 @@ import {
     PaintBucket,
     PasteSpecial,
     PipingSingle,
-    PrintSingle,
     RedoSingle,
     Reduce,
     RightBorder,

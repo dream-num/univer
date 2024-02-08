@@ -39,10 +39,6 @@ export class Background extends SheetExtension {
         return (this.parent as Spreadsheet)?.isPrinting ? this.PRINTING_Z_INDEX : this.Z_INDEX;
     }
 
-    override clone() {
-        return new Background();
-    }
-
     override draw(
         ctx: UniverRenderingContext,
         parentScale: IScale,
@@ -128,4 +124,4 @@ export class Background extends SheetExtension {
     }
 }
 
-SpreadsheetExtensionRegistry.add(new Background());
+SpreadsheetExtensionRegistry.add(Background);

@@ -272,4 +272,4 @@ export class Font extends SheetExtension {
     }
 }
 
-SpreadsheetExtensionRegistry.add(new Font());
+SpreadsheetExtensionRegistry.add(Font);

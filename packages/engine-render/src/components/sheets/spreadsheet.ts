@@ -420,8 +420,8 @@ export class Spreadsheet extends SheetComponent {
     private _initialDefaultExtension() {
         SpreadsheetExtensionRegistry.getData()
             .sort(sortRules)
-            .forEach((extension) => {
-                this.register(extension.clone());
+            .forEach((Extension) => {
+                this.register(new Extension());
             });
         // this._borderAuxiliaryExtension = this.getExtensionByKey('DefaultBorderAuxiliaryExtension') as BorderAuxiliary;
         this._backgroundExtension = this.getExtensionByKey('DefaultBackgroundExtension') as Background;

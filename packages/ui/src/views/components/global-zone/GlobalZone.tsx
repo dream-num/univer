@@ -18,7 +18,7 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import clsx from 'clsx';
 import React, { useEffect, useMemo, useState } from 'react';
 import { ComponentManager } from '../../../common/component-manager';
-import { IGlobalZoneService } from '../../../services/global-zone';
+import { IGlobalZoneService } from '../../../services/global-zone/global-zone.service';
 import { useObservable } from '../../../components/hooks/observable';
 
 import styles from './index.module.less';

@@ -37,10 +37,6 @@ export class SheetExtension extends ComponentExtension<SpreadsheetSkeleton, SHEE
         return getCellByIndex(rowIndex, columnIndex, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
     }
 
-    clone(): SheetExtension {
-        return this;
-    }
-
     isRenderDiffRangesByCell(range: IRange, diffRanges?: IRange[]) {
         if (diffRanges == null || diffRanges.length === 0) {
             return true;

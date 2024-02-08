@@ -19,7 +19,15 @@ import { createCanvasElement } from './basics/tools';
 import { UniverPrintingContext, UniverRenderingContext } from './context';
 
 export enum CanvasRenderMode {
+    /**
+     * Normal canvas render mode
+     */
     Rendering,
+    /**
+     * Printing render mode,
+     * in case of to generate high dpi pdf,
+     * some canvas api was disabled by some unknown reason.
+     */
     Printing,
 }
 

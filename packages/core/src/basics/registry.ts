@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-export class Registry {
-    private _data: any[] = [];
+export class Registry<T = any> {
+    private _data: T[] = [];
 
-    static create() {
-        return new Registry();
+    static create<T = any>() {
+        return new Registry<T>();
     }
 
-    add(dataInstance: any) {
+    add(dataInstance: T) {
         if (this._data.indexOf(dataInstance) > -1) {
             return;
         }
         this._data.push(dataInstance);
     }
 
-    delete(dataInstance: any) {
+    delete(dataInstance: T) {
         const index = this._data.indexOf(dataInstance);
         this._data.splice(index, 1);
     }

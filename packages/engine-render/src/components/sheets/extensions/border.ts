@@ -172,4 +172,4 @@ export class Border extends SheetExtension {
     }
 }
 
-SpreadsheetExtensionRegistry.add(new Border());
+SpreadsheetExtensionRegistry.add(Border);

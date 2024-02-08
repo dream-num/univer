@@ -29,7 +29,7 @@
         "@univerjs/slides-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "@univerjs/uniscript": "workspace:*",
-        "@wendellhu/redi": "^0.12.13",
+        "@wendellhu/redi": "^0.13.0",
         "clsx": "^2.1.0",
         "monaco-editor": "0.45.0",
         "react": "^18.2.0",

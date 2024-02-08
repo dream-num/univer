@@ -52,7 +52,7 @@
         "@univerjs/design": "workspace:*",
         "@univerjs/icons": "^0.1.28",
         "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": ">=0.12.13",
+        "@wendellhu/redi": "^0.13.0",
         "react": "^18.2.0",
         "rxjs": ">=7.0.0"
     },
@@ -65,7 +65,7 @@
         "@univerjs/design": "workspace:*",
         "@univerjs/shared": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": "^0.12.13",
+        "@wendellhu/redi": "^0.13.0",
         "react": "^18.2.0",
         "rxjs": "^7.8.1",
         "typescript": "^5.3.3",

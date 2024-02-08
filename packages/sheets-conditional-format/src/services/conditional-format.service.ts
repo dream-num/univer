@@ -175,7 +175,7 @@ export class ConditionalFormatService extends Disposable {
                     case InsertColMutation.id:
                     case RemoveColMutation.id:{
                         const { range, unitId, subUnitId } = commandInfo.params as IInsertColMutationParams;
-                        const allRules = this._conditionalFormatRuleModel.getAllRule(unitId, subUnitId);
+                        const allRules = this._conditionalFormatRuleModel.getSubunitRules(unitId, subUnitId);
                         const effectRange: IRange = { ...range, endColumn: Number.MAX_SAFE_INTEGER };
                         if (allRules) {
                             const effectRule = allRules.filter((rule) => rule.ranges.some((ruleRange) => Rectangle.intersects(ruleRange, effectRange)));
@@ -189,7 +189,7 @@ export class ConditionalFormatService extends Disposable {
                     case RemoveRowMutation.id:
                     case InsertRowMutation.id:{
                         const { range, unitId, subUnitId } = commandInfo.params as IRemoveRowsMutationParams;
-                        const allRules = this._conditionalFormatRuleModel.getAllRule(unitId, subUnitId);
+                        const allRules = this._conditionalFormatRuleModel.getSubunitRules(unitId, subUnitId);
                         const effectRange: IRange = { ...range, endRow: Number.MAX_SAFE_INTEGER };
                         if (allRules) {
                             const effectRule = allRules.filter((rule) => rule.ranges.some((ruleRange) => Rectangle.intersects(ruleRange, effectRange)));
@@ -202,7 +202,7 @@ export class ConditionalFormatService extends Disposable {
                     }
                     case MoveRowsMutation.id:{
                         const { sourceRange, targetRange, unitId, subUnitId } = commandInfo.params as IMoveRowsMutationParams;
-                        const allRules = this._conditionalFormatRuleModel.getAllRule(unitId, subUnitId);
+                        const allRules = this._conditionalFormatRuleModel.getSubunitRules(unitId, subUnitId);
                         const effectRange: IRange = { startRow: Math.min(sourceRange.startRow, targetRange.startRow),
                                                       endRow: Number.MAX_SAFE_INTEGER,
                                                       startColumn: 0,
@@ -218,7 +218,7 @@ export class ConditionalFormatService extends Disposable {
                     }
                     case MoveColsMutation.id:{
                         const { sourceRange, targetRange, unitId, subUnitId } = commandInfo.params as IMoveColumnsMutationParams;
-                        const allRules = this._conditionalFormatRuleModel.getAllRule(unitId, subUnitId);
+                        const allRules = this._conditionalFormatRuleModel.getSubunitRules(unitId, subUnitId);
                         const effectRange: IRange = { startRow: 0,
                                                       endRow: Number.MAX_SAFE_INTEGER,
                                                       startColumn: Math.min(sourceRange.startColumn, targetRange.startColumn),

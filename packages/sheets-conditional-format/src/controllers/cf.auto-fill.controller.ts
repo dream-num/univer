@@ -28,8 +28,8 @@ import { ConditionalFormatRuleModel } from '../models/conditional-format-rule-mo
 
 import { SHEET_CONDITION_FORMAT_PLUGIN } from '../base/const';
 
-@OnLifecycle(LifecycleStages.Rendered, ConditionAlFormatAutoFillController)
-export class ConditionAlFormatAutoFillController extends Disposable {
+@OnLifecycle(LifecycleStages.Rendered, ConditionalFormatAutoFillController)
+export class ConditionalFormatAutoFillController extends Disposable {
     constructor(
         @Inject(Injector) private _injector: Injector,
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,

@@ -140,4 +140,26 @@ describe('lexer nodeMaker test', () => {
             );
         });
     });
+
+    describe('checkIfAddBracket', () => {
+        it('blank function bracket', () => {
+            expect(lexerTreeBuilder.checkIfAddBracket('=sum(')).toStrictEqual(1);
+        });
+
+        it('normal function bracket', () => {
+            expect(lexerTreeBuilder.checkIfAddBracket('=sum(A1:B10')).toStrictEqual(1);
+        });
+
+        it('lambda function bracket', () => {
+            expect(lexerTreeBuilder.checkIfAddBracket('=lambda(x,y,x*y)(1,2')).toStrictEqual(1);
+        });
+
+        it('nest function bracket', () => {
+            expect(lexerTreeBuilder.checkIfAddBracket('=sum(sum(sum(sum(A1:B2')).toStrictEqual(4);
+        });
+
+        it('nest blank function bracket', () => {
+            expect(lexerTreeBuilder.checkIfAddBracket('=sum(sum(sum(sum(')).toStrictEqual(4);
+        });
+    });
 });

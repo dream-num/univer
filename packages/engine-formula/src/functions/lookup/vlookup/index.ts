@@ -27,6 +27,10 @@ export class Vlookup extends BaseFunction {
         colIndexNum: BaseValueObject,
         rangeLookup?: BaseValueObject
     ) {
+        if (lookupValue == null || tableArray == null || colIndexNum == null) {
+            return new ErrorValueObject(ErrorType.NA);
+        }
+
         if (lookupValue.isError()) {
             return lookupValue;
         }

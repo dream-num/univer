@@ -28,6 +28,10 @@ export class Lookup extends BaseFunction {
         lookupVectorOrArray: ArrayValueObject,
         resultVector?: BaseValueObject
     ) {
+        if (lookupValue == null || lookupVectorOrArray == null) {
+            return new ErrorValueObject(ErrorType.NA);
+        }
+
         if (lookupValue.isError()) {
             return lookupValue;
         }

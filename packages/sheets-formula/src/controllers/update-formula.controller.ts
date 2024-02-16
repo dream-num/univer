@@ -1459,13 +1459,13 @@ export class UpdateFormulaController extends Disposable {
             newRange.startColumn = startColumn;
             newRange.endRow = endRow;
             newRange.endColumn = endColumn;
-        } else if (fromRangeType === RANGE_TYPE.ROW) {
+        } else if (fromStartColumn <= originStartColumn && fromEndColumn >= originEndColumn) {
             if (toStartRow > originEndRow) {
                 newRange.endRow -= fromEndRow - fromStartRow + 1;
             } else if (toEndRow < originStartRow) {
                 newRange.startRow += fromEndRow - fromStartRow + 1;
             }
-        } else if (fromRangeType === RANGE_TYPE.COLUMN) {
+        } else if (fromStartRow <= originStartRow && fromEndRow >= originEndRow) {
             if (toStartColumn > originEndColumn) {
                 newRange.endColumn -= fromEndColumn - fromStartColumn + 1;
             } else if (toEndColumn < originStartColumn) {

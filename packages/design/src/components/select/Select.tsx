@@ -47,6 +47,9 @@ export interface ISelectProps {
     style?: React.CSSProperties;
 
     className?: string;
+    /**
+     * select mode
+     */
     mode?: 'combobox' | 'multiple' | 'tags' | undefined;
     dropdownRender?: (
         menu: React.ReactElement<any, string | React.JSXElementConstructor<any>>

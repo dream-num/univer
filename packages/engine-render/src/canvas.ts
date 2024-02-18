@@ -18,6 +18,9 @@ import { getDevicePixelRatio } from './basics/draw';
 import { createCanvasElement } from './basics/tools';
 import { UniverPrintingContext, UniverRenderingContext } from './context';
 
+/**
+ * canvas render mode
+ */
 export enum CanvasRenderMode {
     /**
      * Normal canvas render mode

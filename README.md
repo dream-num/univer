@@ -41,14 +41,14 @@ Univer is a set of enterprise document and data collaboration solutions, includi
 
 Highlights of Univer:
 
--   📈 Univer supports spreadsheets. Documents and slides will be supported in the future.
--   🌌 Highly extensible architecture design.
-    -   🔌 Plug-in architecture, the capabilities of documents can be combined on demand, support third-party plug-ins, and facilitate customization development.
-    -   💄 Provide component library and icons to help developers present a consistent user experience.
--   ⚡ High performance.
-    -   ✏️ Unified and efficient rendering engine and formula engine, based on Canvas.
-    -   🧮 High-performance formula engine, supports Web Worker.
--   🌍 Internationalization support.
+- 📈 Univer supports spreadsheets. Documents and slides will be supported in the future.
+- 🌌 Highly extensible architecture design.
+  - 🔌 Plug-in architecture, the capabilities of documents can be combined on demand, support third-party plug-ins, and facilitate customization development.
+  - 💄 Provide component library and icons to help developers present a consistent user experience.
+- ⚡ High performance.
+  - ✏️ Unified and efficient rendering engine and formula engine, based on Canvas.
+  - 🧮 High-performance formula engine, supports Web Worker.
+- 🌍 Internationalization support.
 
 ## Examples
 
@@ -93,19 +93,41 @@ We appreciate any kinds of contributing. You can submit [issues or feature reque
 
 If you would like to contribute code to Univer, please refer to the contributing guide as well. It would guide you through the process of setting up the development environment and submitting a pull request.
 
+## Sponsors
+
+The growth and development of the Univer project rely on the support of its backers and sponsors. If you are interested in supporting our project, we kindly invite you to consider becoming a sponsor. You can sponsor us through [Open Collective](https://opencollective.com/univer).
+
+Thanks to our sponsors, just part of them are listed here because of the space limit, ranking is no particular order:
+
+<a href="https://opencollective.com/univer/sponsor/0/website" target="_blank"><img src="https://opencollective.com/univer/sponsor/0/avatar.svg"></a>
+<a href="https://opencollective.com/univer/sponsor/1/website" target="_blank"><img src="https://opencollective.com/univer/sponsor/1/avatar.svg"></a>
+<a href="https://opencollective.com/univer/sponsor/2/website" target="_blank"><img src="https://opencollective.com/univer/sponsor/2/avatar.svg"></a>
+<a href="https://opencollective.com/univer/sponsor/3/website" target="_blank"><img src="https://opencollective.com/univer/sponsor/3/avatar.svg"></a>
+<a href="https://opencollective.com/univer/sponsor/4/website" target="_blank"><img src="https://opencollective.com/univer/sponsor/4/avatar.svg"></a>
+<a href="https://opencollective.com/univer/sponsor/5/website" target="_blank"><img src="https://opencollective.com/univer/sponsor/5/avatar.svg"></a>
+<a href="https://opencollective.com/univer/sponsor/6/website" target="_blank"><img src="https://opencollective.com/univer/sponsor/6/avatar.svg"></a>
+
+<a href="https://opencollective.com/univer/backer/0/website" target="_blank"><img src="https://opencollective.com/univer/backer/0/avatar.svg"></a>
+<a href="https://opencollective.com/univer/backer/1/website" target="_blank"><img src="https://opencollective.com/univer/backer/1/avatar.svg"></a>
+<a href="https://opencollective.com/univer/backer/2/website" target="_blank"><img src="https://opencollective.com/univer/backer/2/avatar.svg"></a>
+<a href="https://opencollective.com/univer/backer/3/website" target="_blank"><img src="https://opencollective.com/univer/backer/3/avatar.svg"></a>
+<a href="https://opencollective.com/univer/backer/4/website" target="_blank"><img src="https://opencollective.com/univer/backer/4/avatar.svg"></a>
+<a href="https://opencollective.com/univer/backer/5/website" target="_blank"><img src="https://opencollective.com/univer/backer/5/avatar.svg"></a>
+<a href="https://opencollective.com/univer/backer/6/website" target="_blank"><img src="https://opencollective.com/univer/backer/6/avatar.svg"></a>
+
 ## Stargazers
 
 [![Stargazers repo roster for @dream-num/univer](https://bytecrank.com/nastyox/reporoster/php/stargazersSVG.php?user=dream-num&repo=univer)](https://github.com/dream-num/univer/stargazers)
 
 ## Links
 
--   [Documentation](https://univer.ai/en-us/guides/introduction/)
--   [Online Playground](https://univer.ai/playground/)
--   [Official Website](https://univer.ai)
+- [Documentation](https://univer.ai/en-us/guides/introduction/)
+- [Online Playground](https://univer.ai/playground/)
+- [Official Website](https://univer.ai)
 
 ### Community
 
--   [Discord community](https://discord.gg/z3NKNT6D2f)
+- [Discord community](https://discord.gg/z3NKNT6D2f)
 
 ## License
 

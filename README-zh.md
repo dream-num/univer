@@ -41,14 +41,14 @@ Univer 是一套企业文档与数据协同解决方案，包括电子表格、�
 
 Univer 的功能特性包括：
 
--   📈 支持电子表格，后续还会支持文档和幻灯片
--   🌌 高度可扩展的架构设计
-    -   🔌 插件化架构，文档的能力可按需组合，支持自定义插件，方便二次开发
-    -   💄 提供组件库和图标以帮助开发者呈现一致的用户体验
--   ⚡ 高性能
-    -   ✏️ 统一高效的渲染引擎和公式引擎，基于 Canvas
-    -   🧮 高性能的公式引擎，支持 Web Worker
--   🌍 国际化支持
+- 📈 支持电子表格，后续还会支持文档和幻灯片
+- 🌌 高度可扩展的架构设计
+  - 🔌 插件化架构，文档的能力可按需组合，支持自定义插件，方便二次开发
+  - 💄 提供组件库和图标以帮助开发者呈现一致的用户体验
+- ⚡ 高性能
+  - ✏️ 统一高效的渲染引擎和公式引擎，基于 Canvas
+  - 🧮 高性能的公式引擎，支持 Web Worker
+- 🌍 国际化支持
 
 点击[这里](https://univer.ai/guides/features)以了解 Univer 目前已经推出的功能。
 
@@ -95,21 +95,43 @@ Univer 基于插件化架构设计，你可以安装以下包来增强 Univer �
 
 如果你想要提交代码，也请先阅读贡献指南，它会指导你如何在本地搭建开发环境以及提交 pull request。
 
+## 赞助
+
+Univer 持续稳定发展离不开它的支持者和赞助者，如果你想要支持我们的项目，请考虑成为我们的赞助者。你可以通过 [Open Collective](https://opencollective.com/univer) 赞助我们。
+
+感谢支持我们的赞助者，受篇幅限制，仅列举部分，排名不分先后：
+
+<a href="https://opencollective.com/univer/sponsor/0/website" target="_blank"><img src="https://opencollective.com/univer/sponsor/0/avatar.svg"></a>
+<a href="https://opencollective.com/univer/sponsor/1/website" target="_blank"><img src="https://opencollective.com/univer/sponsor/1/avatar.svg"></a>
+<a href="https://opencollective.com/univer/sponsor/2/website" target="_blank"><img src="https://opencollective.com/univer/sponsor/2/avatar.svg"></a>
+<a href="https://opencollective.com/univer/sponsor/3/website" target="_blank"><img src="https://opencollective.com/univer/sponsor/3/avatar.svg"></a>
+<a href="https://opencollective.com/univer/sponsor/4/website" target="_blank"><img src="https://opencollective.com/univer/sponsor/4/avatar.svg"></a>
+<a href="https://opencollective.com/univer/sponsor/5/website" target="_blank"><img src="https://opencollective.com/univer/sponsor/5/avatar.svg"></a>
+<a href="https://opencollective.com/univer/sponsor/6/website" target="_blank"><img src="https://opencollective.com/univer/sponsor/6/avatar.svg"></a>
+
+<a href="https://opencollective.com/univer/backer/0/website" target="_blank"><img src="https://opencollective.com/univer/backer/0/avatar.svg"></a>
+<a href="https://opencollective.com/univer/backer/1/website" target="_blank"><img src="https://opencollective.com/univer/backer/1/avatar.svg"></a>
+<a href="https://opencollective.com/univer/backer/2/website" target="_blank"><img src="https://opencollective.com/univer/backer/2/avatar.svg"></a>
+<a href="https://opencollective.com/univer/backer/3/website" target="_blank"><img src="https://opencollective.com/univer/backer/3/avatar.svg"></a>
+<a href="https://opencollective.com/univer/backer/4/website" target="_blank"><img src="https://opencollective.com/univer/backer/4/avatar.svg"></a>
+<a href="https://opencollective.com/univer/backer/5/website" target="_blank"><img src="https://opencollective.com/univer/backer/5/avatar.svg"></a>
+<a href="https://opencollective.com/univer/backer/6/website" target="_blank"><img src="https://opencollective.com/univer/backer/6/avatar.svg"></a>
+
 ## 关注者
 
 [![Stargazers repo roster for @dream-num/univer](https://bytecrank.com/nastyox/reporoster/php/stargazersSVG.php?user=dream-num&repo=univer)](https://github.com/dream-num/univer/stargazers)
 
 ## 链接
 
--   [文档](https://univer.ai/guides/introduction/)
--   [在线 Playground](https://univer.ai/playground/)
--   [官方网站](https://univer.ai)
+- [文档](https://univer.ai/guides/introduction/)
+- [在线 Playground](https://univer.ai/playground/)
+- [官方网站](https://univer.ai)
 
 ### 社区
 
--   [Discord 社区](https://discord.gg/XPGnMBmpd6)
--   [Github Discussions](https://github.com/dream-num/univer/discussions)
--   微信扫描下方二维码，加入 Univer 中文社群
+- [Discord 社区](https://discord.gg/XPGnMBmpd6)
+- [Github Discussions](https://github.com/dream-num/univer/discussions)
+- 微信扫描下方二维码，加入 Univer 中文社群
 
 ![wecom-qr-code](https://univer.ai/_astro/business-qr-code.3zPwMdHH_ZGnJEl.webp)
 

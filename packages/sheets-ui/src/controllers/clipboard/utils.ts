@@ -21,6 +21,7 @@ import type {
     IMoveRangeMutationParams,
     IRemoveWorksheetMergeMutationParams,
     ISetRangeValuesMutationParams,
+    ISetSelectionsOperationParams,
 } from '@univerjs/sheets';
 import {
     AddMergeUndoMutationFactory,
@@ -251,10 +252,10 @@ export function getMoveRangeMutations(
                     id: SetSelectionsOperation.id,
                     params: {
                         unitId,
-                        sheetId: toSubUnitId,
+                        subUnitId: toSubUnitId,
                         pluginName: NORMAL_SELECTION_PLUGIN_NAME,
                         selections: [{ range: toRange }],
-                    },
+                    } as ISetSelectionsOperationParams,
                 },
             ];
             undos = [

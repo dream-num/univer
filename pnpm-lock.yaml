@@ -1168,9 +1168,6 @@ importers:
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui
-      '@wendellhu/redi':
-        specifier: ^0.12.13
-        version: 0.12.13
       clsx:
         specifier: ^2.1.0
         version: 2.1.0
@@ -1193,6 +1190,9 @@ importers:
       '@vitest/coverage-istanbul':
         specifier: ^1.2.1
         version: 1.2.1(vitest@1.2.1)
+      '@wendellhu/redi':
+        specifier: ^0.13.0
+        version: 0.13.0
       happy-dom:
         specifier: ^13.2.1
         version: 13.2.1

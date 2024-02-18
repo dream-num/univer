@@ -77,24 +77,50 @@ export class ConditionalFormatAutoFillController extends Disposable {
                     },
                     sourceRange
                 );
-                const cellCf = this._conditionalFormatViewModel.getCellCf(
+                const targetPositionRange = Rectangle.getPositionRange(
+                    {
+                        startRow: row,
+                        startColumn: col,
+                        endColumn: col,
+                        endRow: row,
+                    },
+                    targetRange
+                );
+                const sourceCellCf = this._conditionalFormatViewModel.getCellCf(
                     unitId,
                     subUnitId,
                     sourcePositionRange.startRow,
                     sourcePositionRange.startColumn
                 );
 
-                if (cellCf) {
-                    const targetPositionRange = Rectangle.getPositionRange(
-                        {
-                            startRow: row,
-                            startColumn: col,
-                            endColumn: col,
-                            endRow: row,
-                        },
-                        targetRange
-                    );
-                    cellCf.cfList.forEach((cf) => {
+                const targetCellCf = this._conditionalFormatViewModel.getCellCf(
+                    unitId,
+                    subUnitId,
+                    targetPositionRange.startRow,
+                    targetPositionRange.startColumn
+                );
+                if (targetCellCf) {
+                    targetCellCf.cfList.forEach((cf) => {
+                        let matrix = matrixMap.get(cf.cfId);
+                        if (!matrixMap.get(cf.cfId)) {
+                            const rule = this._conditionalFormatRuleModel.getRule(unitId, subUnitId, cf.cfId);
+                            if (!rule) {
+                                return;
+                            }
+                            matrix = new ObjectMatrix();
+                            rule.ranges.forEach((range) => {
+                                Range.foreach(range, (row, col) => {
+                                    matrix!.setValue(row, col, 1);
+                                });
+                            });
+                            matrixMap.set(cf.cfId, matrix);
+                        }
+                        matrix!.realDeleteValue(targetPositionRange.startRow, targetPositionRange.startColumn);
+                    });
+                }
+
+                if (sourceCellCf) {
+                    sourceCellCf.cfList.forEach((cf) => {
                         let matrix = matrixMap.get(cf.cfId);
                         if (!matrixMap.get(cf.cfId)) {
                             const rule = this._conditionalFormatRuleModel.getRule(unitId, subUnitId, cf.cfId);

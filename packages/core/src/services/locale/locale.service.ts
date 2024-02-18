@@ -53,7 +53,7 @@ export class LocaleService extends Disposable {
         function resolveKeyPath(obj: ILanguagePack | ILanguagePack[], keys: string[]): string | ILanguagePack | ILanguagePack[] | null {
             const currentKey = keys.shift();
 
-            if (currentKey && currentKey in obj) {
+            if (currentKey && obj && currentKey in obj) {
                 const nextObj = (obj as ILanguagePack)[currentKey];
 
                 if (keys.length > 0 && (typeof nextObj === 'object' || Array.isArray(nextObj))) {

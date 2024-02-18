@@ -23,6 +23,7 @@ import { ColumnManager } from './column-manager';
 import { Range } from './range';
 import { RowManager } from './row-manager';
 import { mergeWorksheetSnapshotWithDefault } from './sheet-snapshot-utils';
+import { SheetDataValidationManager } from './sheet-data-validation-manager';
 import type { Styles } from './styles';
 import { SheetViewModel } from './view-model';
 
@@ -41,13 +42,15 @@ export class Worksheet {
 
     protected readonly _viewModel: SheetViewModel;
 
+    protected _dataValidationManager: SheetDataValidationManager;
+
     constructor(
         snapshot: Partial<IWorksheetData>,
         private readonly _styles: Styles
     ) {
         this._snapshot = mergeWorksheetSnapshotWithDefault(snapshot);
 
-        const { columnData, rowData, cellData } = this._snapshot;
+        const { columnData, rowData, cellData, dataValidation } = this._snapshot;
         this._sheetId = this._snapshot.id ?? Tools.generateRandomId(6);
         this._initialized = false;
         this._cellData = new ObjectMatrix<ICellData>(cellData);
@@ -57,6 +60,7 @@ export class Worksheet {
         // This view model will immediately injected with hooks from SheetViewModel service as Worksheet
         // is constructed.
         this._viewModel = new SheetViewModel();
+        this._dataValidationManager = new SheetDataValidationManager(dataValidation);
     }
 
     /**
@@ -186,6 +190,13 @@ export class Worksheet {
      */
     getColumnManager(): ColumnManager {
         return this._columnManager;
+    }
+
+    /**
+     * @returns Data validation manager
+     */
+    getDataValidationManager(): SheetDataValidationManager {
+        return this._dataValidationManager;
     }
 
     /**

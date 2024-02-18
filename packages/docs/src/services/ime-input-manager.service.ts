@@ -21,6 +21,11 @@ import type { IDisposable } from '@wendellhu/redi';
 
 import type { IRichTextEditingMutationParams } from '../commands/mutations/core-editing.mutation';
 
+interface ICacheParams {
+    undoCache: IRichTextEditingMutationParams[];
+    redoCache: IRichTextEditingMutationParams[];
+}
+
 // Used to record all intermediate states when typing with IME,
 // and then output the entire undo and redo operations.
 export class IMEInputManagerService implements IDisposable {
@@ -31,6 +36,22 @@ export class IMEInputManagerService implements IDisposable {
     clearUndoRedoMutationParamsCache() {
         this._undoMutationParamsCache = [];
         this._redoMutationParamsCache = [];
+    }
+
+    getUndoRedoMutationParamsCache() {
+        return {
+            undoCache: this._undoMutationParamsCache,
+            redoCache: this._redoMutationParamsCache,
+        };
+    }
+
+    setUndoRedoMutationParamsCache({ undoCache = [], redoCache = [] }: ICacheParams) {
+        this._undoMutationParamsCache = undoCache;
+        this._redoMutationParamsCache = redoCache;
+    }
+
+    getActiveRange(): Nullable<ITextRangeWithStyle> {
+        return this._previousActiveRange;
     }
 
     setActiveRange(range: Nullable<ITextRangeWithStyle>) {

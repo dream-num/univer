@@ -20,11 +20,17 @@ import { SetRangeValuesCommand, SetRangeValuesMutation, SetStyleCommand } from '
 import type { Injector } from '@wendellhu/redi';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { RenderComponentType } from '@univerjs/engine-render';
+import type { RenderComponentType, SheetComponent } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import type { SHEET_VIEW_KEY } from '@univerjs/sheets-ui';
+import { SHEET_VIEW_KEY } from '@univerjs/sheets-ui';
 import type { FUniver } from '../facade';
 import { createTestBed } from './create-test-bed';
+import { COLUMN_UNIQUE_KEY, ColumnHeaderCustomExtension, MAIN_UNIQUE_KEY, MainCustomExtension, ROW_UNIQUE_KEY, RowHeaderCustomExtension } from './utils/sheet-extension-util';
+
+// globalThis.HTMLCanvasElement.prototype.getContext = function () {
+//     const canvas = createCanvas(this.width, this.height);
+//     return canvas.getContext('2d');
+// };
 
 describe('Test FUniver', () => {
     let get: Injector['get'];
@@ -160,13 +166,51 @@ describe('Test FUniver', () => {
         expect(() => univerAPI.createSocket('URL')).toThrowError();
     });
 
-    // FIXME: test render
-    // it('Function registerSheetRowHeaderExtension', () => {
-    //     univerAPI.registerSheetRowHeaderExtension('test', new RowHeaderCustomExtension());
+    it('Function registerSheetRowHeaderExtension and unregisterSheetRowHeaderExtension', () => {
+        univerAPI.registerSheetRowHeaderExtension('test', new RowHeaderCustomExtension());
 
-    //     const sheetComponent = getSheetRenderComponent('test', SHEET_VIEW_KEY.ROW) as SheetComponent;
+        const sheetComponent = getSheetRenderComponent('test', SHEET_VIEW_KEY.ROW) as SheetComponent;
 
-    //     // getExtensionByKey
-    //     const rowHeaderExtension = sheetComponent.getExtensionByKey(ROW_UNIQUE_KEY);
-    // });
+        let rowHeaderExtension = sheetComponent.getExtensionByKey(ROW_UNIQUE_KEY);
+
+        expect(rowHeaderExtension).toBeDefined();
+
+        univerAPI.unregisterSheetRowHeaderExtension('test', ROW_UNIQUE_KEY);
+
+        rowHeaderExtension = sheetComponent.getExtensionByKey(ROW_UNIQUE_KEY);
+
+        expect(rowHeaderExtension).toBeUndefined();
+    });
+
+    it('Function registerSheetColumnHeaderExtension and unregisterSheetColumnHeaderExtension', () => {
+        univerAPI.registerSheetColumnHeaderExtension('test', new ColumnHeaderCustomExtension());
+
+        const sheetComponent = getSheetRenderComponent('test', SHEET_VIEW_KEY.COLUMN) as SheetComponent;
+
+        let columnHeaderExtension = sheetComponent.getExtensionByKey(COLUMN_UNIQUE_KEY);
+
+        expect(columnHeaderExtension).toBeDefined();
+
+        univerAPI.unregisterSheetColumnHeaderExtension('test', COLUMN_UNIQUE_KEY);
+
+        columnHeaderExtension = sheetComponent.getExtensionByKey(COLUMN_UNIQUE_KEY);
+
+        expect(columnHeaderExtension).toBeUndefined();
+    });
+
+    it('Function registerSheetMainExtension and unregisterSheetMainExtension', () => {
+        univerAPI.registerSheetMainExtension('test', new MainCustomExtension());
+
+        const sheetComponent = getSheetRenderComponent('test', SHEET_VIEW_KEY.MAIN) as SheetComponent;
+
+        let mainExtension = sheetComponent.getExtensionByKey(MAIN_UNIQUE_KEY);
+
+        expect(mainExtension).toBeDefined();
+
+        univerAPI.unregisterSheetMainExtension('test', MAIN_UNIQUE_KEY);
+
+        mainExtension = sheetComponent.getExtensionByKey(MAIN_UNIQUE_KEY);
+
+        expect(mainExtension).toBeUndefined();
+    });
 });

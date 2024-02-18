@@ -41,3 +41,15 @@ export class RowHeaderCustomExtension extends SheetExtension {
     override draw(ctx: UniverRenderingContext, parentScale: IScale, spreadsheetSkeleton: SpreadsheetSkeleton) {
     }
 }
+
+export const MAIN_UNIQUE_KEY = 'MainCustomExtension';
+
+export class MainCustomExtension extends SheetExtension {
+    override uKey = MAIN_UNIQUE_KEY;
+
+    // Must be greater than 50
+    override zIndex = 51;
+
+    override draw(ctx: UniverRenderingContext, parentScale: IScale, spreadsheetSkeleton: SpreadsheetSkeleton) {
+    }
+}

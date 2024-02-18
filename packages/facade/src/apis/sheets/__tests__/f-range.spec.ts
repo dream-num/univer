@@ -21,7 +21,7 @@ import type { Injector } from '@wendellhu/redi';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import type { FUniver } from '../../facade';
-import { createTestBed } from './create-test-bed';
+import { createTestBed } from '../../__tests__/create-test-bed';
 
 describe('Test FRange', () => {
     let get: Injector['get'];

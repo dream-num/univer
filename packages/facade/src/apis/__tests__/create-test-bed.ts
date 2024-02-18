@@ -23,6 +23,7 @@ import {
     LogLevel,
     Plugin,
     PluginType,
+    ThemeService,
     Univer,
 } from '@univerjs/core';
 import { FunctionService, IFunctionService } from '@univerjs/engine-formula';
@@ -41,6 +42,10 @@ import {
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
+import { createCanvas } from 'canvas';
+import { Engine, IRenderingEngine, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
+import { ISelectionRenderService, SelectionRenderService, SheetCanvasView, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { DesktopPlatformService, DesktopShortcutService, IPlatformService, IShortcutService } from '@univerjs/ui';
 import { FUniver } from '../facade';
 
 function getTestWorkbookDataDemo(): IWorkbookData {
@@ -97,13 +102,29 @@ export function createTestBed(workbookConfig?: IWorkbookData, dependencies?: Dep
             injector.add([IFunctionService, { useClass: FunctionService }]);
             injector.add([IFormulaCustomFunctionService, { useClass: FormulaCustomFunctionService }]);
             injector.add([ISocketService, { useClass: WebSocketService }]);
-            // injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+            injector.add([IRenderingEngine, { useFactory: () => new Engine() }]);
+            injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
+            injector.add([ISelectionRenderService, { useClass: SelectionRenderService }]);
+            injector.add([SheetCanvasView]);
+            injector.add([IShortcutService, { useClass: DesktopShortcutService }]);
+            injector.add([IPlatformService, { useClass: DesktopPlatformService }]);
+            injector.add([SheetSkeletonManagerService]);
 
             dependencies?.forEach((d) => injector.add(d));
         }
     }
 
     injector.get(LocaleService).load({ zhCN, enUS });
+
+    window.HTMLCanvasElement.prototype.getContext = function () {
+        const canvas = createCanvas(this.width, this.height);
+        return canvas.getContext('2d');
+    };
+
+    const themeService = injector.get(ThemeService);
+    themeService.setTheme({
+        colorBlack: '#35322b',
+    });
 
     univer.registerPlugin(TestSpyPlugin);
     const sheet = univer.createUniverSheet(workbookConfig || getTestWorkbookDataDemo());

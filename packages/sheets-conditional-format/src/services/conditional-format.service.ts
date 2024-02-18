@@ -15,7 +15,7 @@
  */
 
 import type { IRange, Worksheet } from '@univerjs/core';
-import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, Rectangle, Tools } from '@univerjs/core';
+import { createInterceptorKey, Disposable, ICommandService, InterceptorManager, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, Rectangle, Tools } from '@univerjs/core';
 import type { IInsertColMutationParams, IMoveColumnsMutationParams, IMoveRangeMutationParams, IMoveRowsMutationParams, IRemoveRowsMutationParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { InsertColMutation, InsertRowMutation, MoveColsMutation, MoveRangeMutation, MoveRowsMutation, RemoveColMutation, RemoveRowMutation, SetRangeValuesMutation } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
@@ -39,6 +39,8 @@ interface ICalculationUnit< R = ObjectMatrix<any>> {
     handle(rule: IConditionFormatRule, worksheet: Worksheet): R;
 };
 interface ComputeCache { status: ComputeStatus };
+
+const beforeUpdateRuleResult = createInterceptorKey< { subUnitId: string; unitId: string; cfId: string }>('conditional-format-before-update-rule-result');
 @OnLifecycle(LifecycleStages.Rendered, ConditionalFormatService)
 export class ConditionalFormatService extends Disposable {
     // <unitId,<subUnitId,<cfId,ComputeCache>>>
@@ -46,6 +48,8 @@ export class ConditionalFormatService extends Disposable {
 
     private _ruleComputeStatus$: Subject<{ status: ComputeStatus;result?: ObjectMatrix<any>;unitId: string; subUnitId: string; cfId: string }> = new Subject();
     public ruleComputeStatus$ = this._ruleComputeStatus$.asObservable();
+
+    public interceptorManager = new InterceptorManager({ beforeUpdateRuleResult });
 
     private _calculationUnitMap: Map<IConditionFormatRule['rule']['type'], ICalculationUnit> = new Map();
 
@@ -259,6 +263,9 @@ export class ConditionalFormatService extends Disposable {
             cache.status = status;
             this._setComputedCache(unitId, subUnitId, cfId, cache);
             if (status === 'end' && result) {
+                this.interceptorManager.fetchThroughInterceptors(this.interceptorManager.getInterceptPoints().beforeUpdateRuleResult)({
+                    subUnitId, unitId, cfId,
+                }, undefined);
                 result.forValue((row, col, value) => {
                     this._conditionalFormatViewModel.setCellCfRuleCache(unitId, subUnitId, row, col, cfId, value);
                 });

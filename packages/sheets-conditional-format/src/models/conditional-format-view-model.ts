@@ -124,7 +124,7 @@ export class ConditionalFormatViewModel {
             const cfIdList = cellValue.cfList;
             const index = cfIdList.findIndex((item) => item.cfId === cfId);
             if (index > -1) {
-                cfIdList.splice(index, 1);
+                return;
             }
             cfIdList.push({ cfId, isDirty: true });
         }

@@ -90,7 +90,7 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
         segmentViewModel.reset(segmentDocumentDataModel);
 
         // Step 3: Update cursor & selection.
-        // make sure update cursor & selection after doc skeleton is calculated.
+        // Make sure update cursor & selection after doc skeleton is calculated.
         if (!noNeedSetTextRange && textRanges) {
             queueMicrotask(() => {
                 textSelectionManagerService.replaceTextRanges(textRanges);
@@ -113,7 +113,7 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
             },
         };
 
-        // Handle ime input.
+        // Handle IME input.
         if (isCompositionEnd) {
             const historyParams = imeInputManagerService.fetchComposedUndoRedoMutationParams();
 

@@ -31,12 +31,14 @@ import { takeUntil } from 'rxjs';
 import type { IRichTextEditingMutationParams } from '../commands/mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../commands/mutations/core-editing.mutation';
 import { DocSkeletonManagerService } from '../services/doc-skeleton-manager.service';
+import { TextSelectionManagerService } from '../services/text-selection-manager.service';
 
 @OnLifecycle(LifecycleStages.Rendered, DocRenderController)
 export class DocRenderController extends RxDisposable {
     constructor(
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
         @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
@@ -126,7 +128,7 @@ export class DocRenderController extends RxDisposable {
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (updateCommandList.includes(command.id)) {
                     const params = command.params as IRichTextEditingMutationParams;
-                    const { unitId } = params;
+                    const { unitId, noNeedSetTextRange, textRanges } = params;
 
                     const docsSkeletonObject = this._docSkeletonManagerService.getSkeletonByUnitId(unitId);
 
@@ -146,10 +148,13 @@ export class DocRenderController extends RxDisposable {
 
                     if (excludeUnitList.includes(unitId)) {
                         currentRender.mainComponent?.makeDirty();
-                        return;
+                    } else {
+                        this._recalculateSizeBySkeleton(currentRender, skeleton);
                     }
 
-                    this._recalculateSizeBySkeleton(currentRender, skeleton);
+                    if (!noNeedSetTextRange && textRanges) {
+                        this._textSelectionManagerService.replaceTextRanges(textRanges);
+                    }
                 }
             })
         );

@@ -16,32 +16,10 @@
 
 import { Subject } from 'rxjs';
 
-import type { Nullable } from '../../common/type-utils';
 import { Disposable, toDisposable } from '../../shared/lifecycle';
-import type { ILocales } from '../../shared/locale';
+import type { ILanguagePack, ILocales } from '../../shared/locale';
 import { Tools } from '../../shared/tools';
 import { LocaleType } from '../../types/enum/locale-type';
-
-/**
- * get value from Locale object and key
- * @param locale - A specified language pack
- * @param key - Specify key
- * @returns Get the translation corresponding to the Key
- *
- * @private
- */
-function getValue(locale: ILocales[LocaleType], key: string): Nullable<string> {
-    if (!locale) return;
-
-    try {
-        if (locale[key]) return locale[key] as string;
-
-        return key.split('.').reduce((a: any, b: string) => a[b], locale);
-    } catch (error) {
-        console.warn('Key %s not found', key);
-        return key;
-    }
-}
 
 /**
  * This service provides i18n and timezone / location features to other modules.
@@ -63,29 +41,53 @@ export class LocaleService extends Disposable {
      * Load more locales after init
      *
      * @param locales - Locale object
-     * @returns void
      *
      */
     load(locales: ILocales) {
         this._locales = Tools.deepMerge(this._locales ?? {}, locales);
     }
 
-    t = (key: string): string => {
+    t = (key: string, ...args: string[]): string => {
         if (!this._locales) throw new Error('Locale not initialized');
 
-        return getValue(this._locales[this._currentLocale], key) ?? key;
+        function resolveKeyPath(obj: ILanguagePack | ILanguagePack[], keys: string[]): string | ILanguagePack | ILanguagePack[] | null {
+            const currentKey = keys.shift();
+
+            if (currentKey && currentKey in obj) {
+                const nextObj = (obj as ILanguagePack)[currentKey];
+
+                if (keys.length > 0 && (typeof nextObj === 'object' || Array.isArray(nextObj))) {
+                    return resolveKeyPath(nextObj as ILanguagePack, keys);
+                } else {
+                    return nextObj;
+                }
+            }
+
+            return null;
+        }
+
+        // 使用点分隔符拆分key
+        const keys = key.split('.');
+        const resolvedValue = resolveKeyPath(this._locales[this._currentLocale], keys);
+
+        if (typeof resolvedValue === 'string') {
+            // 如果找到的是字符串，进行插值
+            let result = resolvedValue;
+            args.forEach((arg, index) => {
+                result = result.replace(`{${index}}`, arg);
+            });
+            return result;
+        } else {
+            return key;
+        }
     };
 
-    setLocale(locale: LocaleType): void {
+    setLocale(locale: LocaleType) {
         this._currentLocale = locale;
         this.localeChanged$.next();
     }
 
     getLocales() {
         return this._locales?.[this._currentLocale];
-    }
-
-    getCurrentLocale() {
-        return this._currentLocale;
     }
 }

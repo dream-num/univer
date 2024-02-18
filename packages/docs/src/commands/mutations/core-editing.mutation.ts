@@ -54,6 +54,7 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
             trigger,
             noHistory,
             isCompositionEnd,
+            noNeedSetTextRange,
         } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const documentDataModel = univerInstanceService.getUniverDocInstance(unitId);
@@ -89,7 +90,12 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
         segmentViewModel.reset(segmentDocumentDataModel);
 
         // Step 3: Update cursor & selection.
-        // Move to doc-render.controller.ts, make sure update cursor & selection after doc skeleton is calculated.
+        // make sure update cursor & selection after doc skeleton is calculated.
+        if (!noNeedSetTextRange && textRanges) {
+            queueMicrotask(() => {
+                textSelectionManagerService.replaceTextRanges(textRanges);
+            });
+        }
 
         // Step 4: emit state change event.
         const changeState: IDocStateChangeParams = {

@@ -919,18 +919,18 @@ describe('Test clipboard', () => {
 
             (sheetClipboardService as any)._pasteInternal(copyId, 'default-paste');
 
-            expect(getValues(24, 0, 24, 0)?.[0][0]).toBe(null);
-            expect(getValues(24, 1, 24, 1)?.[0]?.[0]?.v).toBe('A25');
+            expect(getValues(24, 0, 24, 0)![0][0]).toBe(null);
+            expect(getValues(24, 1, 24, 1)![0][0]!.v).toBe('A25');
 
             // undo
             expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
-            expect(getValues(24, 0, 24, 0)?.[0]?.[0]?.v).toStrictEqual('A25');
-            expect(getValues(24, 1, 24, 1)?.[0]?.[0]?.v).toStrictEqual('B25');
+            expect(getValues(24, 0, 24, 0)![0][0]!.v).toStrictEqual('A25');
+            expect(getValues(24, 1, 24, 1)![0][0]!.v).toStrictEqual('B25');
 
             // redo
             expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
-            expect(getValues(24, 0, 24, 0)?.[0]?.[0]?.v).toBe(undefined);
-            expect(getValues(24, 1, 24, 1)?.[0]?.[0]?.v).toBe('A25');
+            expect(getValues(24, 0, 24, 0)![0][0]!.v).toBe(undefined);
+            expect(getValues(24, 1, 24, 1)![0][0]!.v).toBe('A25');
         });
     });
 });

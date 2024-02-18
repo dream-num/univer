@@ -39,6 +39,7 @@ import {
 } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
+import { debounceTime } from 'rxjs';
 import type { IStatusBarServiceStatus } from '../services/status-bar.service';
 import { IStatusBarService } from '../services/status-bar.service';
 
@@ -85,21 +86,20 @@ export class StatusBarController extends Disposable {
         );
         this.disposeWithMe(
             toDisposable(
-                this._selectionManagerService.selectionMoveEnd$.subscribe((selections) => {
-                    if (this._selectionManagerService.getCurrent()?.pluginName !== NORMAL_SELECTION_PLUGIN_NAME) {
-                        return;
-                    }
-                    if (selections) {
-                        const primary = selections[selections.length - 1].primary;
-                        clearTimeout(this._calculateTimeout);
-                        this._calculateTimeout = setTimeout(() => {
+                this._selectionManagerService.selectionMoveEnd$
+                    .pipe(debounceTime(100))
+                    .subscribe((selections) => {
+                        if (this._selectionManagerService.getCurrent()?.pluginName !== NORMAL_SELECTION_PLUGIN_NAME) {
+                            return;
+                        }
+                        if (selections) {
+                            const primary = selections[selections.length - 1].primary;
                             this._calculateSelection(
                                 selections.map((selection) => selection.range),
                                 primary
                             );
-                        }, 100);
-                    }
-                })
+                        }
+                    })
             )
         );
         this.disposeWithMe(

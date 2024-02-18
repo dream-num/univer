@@ -30,9 +30,10 @@
  * limitations under the License.
  */
 
-import { Inject } from '@wendellhu/redi';
+import { Inject, Injector } from '@wendellhu/redi';
 import { Range } from '@univerjs/core';
 import { Subject } from 'rxjs';
+import { ConditionalFormatService } from '../services/conditional-format.service';
 import type { IConditionFormatRule } from './type';
 import { ConditionalFormatViewModel } from './conditional-format-view-model';
 
@@ -43,7 +44,10 @@ export class ConditionalFormatRuleModel {
     private _ruleChange$ = new Subject<{ rule: IConditionFormatRule;unitId: string;subUnitId: string; type: RuleOperatorType }>();
     $ruleChange = this._ruleChange$.asObservable();
 
-    constructor(@Inject(ConditionalFormatViewModel) private _conditionalFormatViewModel: ConditionalFormatViewModel) {
+    constructor(@Inject(ConditionalFormatViewModel) private _conditionalFormatViewModel: ConditionalFormatViewModel,
+        @Inject(Injector) private _injector: Injector
+
+    ) {
 
     }
 
@@ -99,18 +103,35 @@ export class ConditionalFormatRuleModel {
                 map.set(cur, index);
                 return map;
             }, new Map<string, number>());
-            oldRule.ranges.forEach((range) => {
-                Range.foreach(range, (row, col) => {
-                    this._conditionalFormatViewModel.deleteCellCf(unitId, subUnitId, row, col, oldRule.cfId);
-                });
+            // After each setting, the cache needs to be cleared,
+            // and this cleanup is deferred until the end of the calculation.
+            // Otherwise the render will flash once
+            const cloneRange = [...oldRule.ranges];
+            const conditionalFormatService = this._injector.get(ConditionalFormatService);
+            const dispose = conditionalFormatService.interceptorManager.intercept(conditionalFormatService.interceptorManager.getInterceptPoints().beforeUpdateRuleResult, {
+                handler: (config) => {
+                    if (unitId === config?.unitId && subUnitId === config.subUnitId && rule.cfId === config.cfId) {
+                        cloneRange.forEach((range) => {
+                            Range.foreach(range, (row, col) => {
+                                this._conditionalFormatViewModel.deleteCellCf(unitId, subUnitId, row, col, oldRule.cfId);
+                            });
+                        });
+                        rule.ranges.forEach((range) => {
+                            Range.foreach(range, (row, col) => {
+                                this._conditionalFormatViewModel.pushCellCf(unitId, subUnitId, row, col, rule.cfId);
+                                this._conditionalFormatViewModel.sortCellCf(unitId, subUnitId, row, col, cfPriorityMap);
+                            });
+                        });
+                        dispose();
+                    }
+                },
             });
-            Object.assign(oldRule, rule);
             rule.ranges.forEach((range) => {
                 Range.foreach(range, (row, col) => {
                     this._conditionalFormatViewModel.pushCellCf(unitId, subUnitId, row, col, rule.cfId);
-                    this._conditionalFormatViewModel.sortCellCf(unitId, subUnitId, row, col, cfPriorityMap);
                 });
             });
+            Object.assign(oldRule, rule);
             this._conditionalFormatViewModel.markRuleDirty(unitId, subUnitId, rule);
             this._ruleChange$.next({ rule, subUnitId, unitId, type: 'set' });
         }

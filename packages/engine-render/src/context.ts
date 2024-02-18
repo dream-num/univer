@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { fixLineWidthByScale } from './basics/tools';
+import { fixLineWidthByScale, getColor } from './basics/tools';
 
 export class UniverRenderingContext2D implements CanvasRenderingContext2D {
     readonly canvas: HTMLCanvasElement;
@@ -770,16 +770,51 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
         const { scaleX, scaleY } = this._getScale();
         this._context.translate(x / scaleX, y / scaleY);
     }
+
+    clearRectForTexture(x: number, y: number, width: number, height: number) {
+        this.clearRect(x, y, width, height);
+    }
+
+    setGlobalCompositeOperation(val: GlobalCompositeOperation) {
+        this._context.globalCompositeOperation = val;
+    }
 }
 
 /**
  * TODO
  */
-export class UniverRenderingContextWebGL {}
+export class UniverRenderingContextWebGL { }
 
 /**
  * TODO
  */
-export class UniverRenderingContextWebGPU {}
+export class UniverRenderingContextWebGPU { }
 
-export class UniverRenderingContext extends UniverRenderingContext2D {}
+export class UniverRenderingContext extends UniverRenderingContext2D { }
+
+export class UniverPrintingContext extends UniverRenderingContext2D {
+    private __getScale() {
+        const m = this.getTransform();
+        return {
+            scaleX: m.a,
+            scaleY: m.d,
+        };
+    }
+
+    override clearRect(x: number, y: number, width: number, height: number): void {
+        const { scaleX, scaleY } = this.__getScale();
+        x = fixLineWidthByScale(x, scaleX);
+        y = fixLineWidthByScale(y, scaleY);
+        width = fixLineWidthByScale(width, scaleX);
+        height = fixLineWidthByScale(height, scaleY);
+
+        this._context.save();
+        this._context.fillStyle = getColor([255, 255, 255]);
+        this._context.fillRect(x, y, width, height);
+        this._context.restore();
+    }
+
+    override clearRectForTexture(x: number, y: number, width: number, height: number) { }
+
+    override setGlobalCompositeOperation(val: GlobalCompositeOperation) { }
+}

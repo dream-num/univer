@@ -18,8 +18,10 @@ import type { IRange, ISelectionCellWithCoord, Nullable } from '@univerjs/core';
 import { BooleanNumber, ObjectMatrix, sortRules } from '@univerjs/core';
 
 import type { BaseObject } from '../../base-object';
+
 import { FIX_ONE_PIXEL_BLUR_OFFSET, RENDER_CLASS_TYPE } from '../../basics/const';
-import { clearLineByBorderType } from '../../basics/draw';
+
+// import { clearLineByBorderType } from '../../basics/draw';
 import { getCellPositionByIndex, getColor } from '../../basics/tools';
 import type { IViewportBound, Vector2 } from '../../basics/vector2';
 import { Canvas } from '../../canvas';
@@ -30,12 +32,15 @@ import type { SceneViewer } from '../../scene-viewer';
 import type { Viewport } from '../../viewport';
 import { Documents } from '../docs/document';
 import { SpreadsheetExtensionRegistry } from '../extension';
+import { clearLineByBorderType } from '../../basics/draw';
 import type { Background } from './extensions/background';
 import type { Border } from './extensions/border';
 import type { Font } from './extensions/font';
-import type { BorderCacheItem } from './interfaces';
+
+// import type { BorderCacheItem } from './interfaces';
 import { SheetComponent } from './sheet-component';
 import type { SpreadsheetSkeleton } from './sheet-skeleton';
+import type { BorderCacheItem } from './interfaces';
 
 const OBJECT_KEY = '__SHEET_EXTENSION_FONT_DOCUMENT_INSTANCE__';
 
@@ -58,10 +63,14 @@ export class Spreadsheet extends SheetComponent {
 
     private _overflowCacheRuntimeTimeout: number | NodeJS.Timeout = -1;
 
+    private _forceDisableGridlines = false;
+
     private _documents: Documents = new Documents(OBJECT_KEY, undefined, {
         pageMarginLeft: 0,
         pageMarginTop: 0,
     });
+
+    isPrinting = false;
 
     constructor(
         oKey: string,
@@ -103,6 +112,14 @@ export class Spreadsheet extends SheetComponent {
         return this._documents;
     }
 
+    get allowCache() {
+        return this._allowCache;
+    }
+
+    get forceDisableGridlines() {
+        return this._forceDisableGridlines;
+    }
+
     override draw(ctx: UniverRenderingContext, bounds?: IViewportBound) {
         // const { parent = { scaleX: 1, scaleY: 1 } } = this;
         // const mergeData = this.getMergeData();
@@ -118,6 +135,7 @@ export class Spreadsheet extends SheetComponent {
             ? bounds?.diffBounds.map((bound) => spreadsheetSkeleton.getRowColumnSegmentByViewBound(bound))
             : undefined;
         const extensions = this.getExtensionsByOrder();
+
         for (const extension of extensions) {
             extension.draw(ctx, parentScale, spreadsheetSkeleton, diffRanges);
         }
@@ -186,6 +204,10 @@ export class Spreadsheet extends SheetComponent {
         this._forceDirty = state;
     }
 
+    setForceDisableGridlines(disabled: boolean) {
+        this._forceDisableGridlines = disabled;
+    }
+
     override getSelectionBounding(startRow: number, startColumn: number, endRow: number, endColumn: number) {
         return this.getSkeleton()?.getMergeBounding(startRow, startColumn, endRow, endColumn);
     }
@@ -221,7 +243,7 @@ export class Spreadsheet extends SheetComponent {
 
         mainCtx.translateWithPrecision(rowHeaderWidth, columnHeaderHeight);
 
-        this._drawAuxiliary(mainCtx);
+        this._drawAuxiliary(mainCtx, bounds);
 
         if (bounds && this._allowCache === true) {
             const { viewBound, diffBounds, diffX, diffY, viewPortPosition, viewPortKey } = bounds;
@@ -398,8 +420,8 @@ export class Spreadsheet extends SheetComponent {
     private _initialDefaultExtension() {
         SpreadsheetExtensionRegistry.getData()
             .sort(sortRules)
-            .forEach((extension) => {
-                this.register(extension);
+            .forEach((Extension) => {
+                this.register(new Extension());
             });
         // this._borderAuxiliaryExtension = this.getExtensionByKey('DefaultBorderAuxiliaryExtension') as BorderAuxiliary;
         this._backgroundExtension = this.getExtensionByKey('DefaultBackgroundExtension') as Background;
@@ -442,9 +464,8 @@ export class Spreadsheet extends SheetComponent {
         return newViewports;
     }
 
-    private _drawAuxiliary(ctx: UniverRenderingContext) {
+    private _drawAuxiliary(ctx: UniverRenderingContext, bounds?: IViewportBound) {
         const spreadsheetSkeleton = this.getSkeleton();
-
         if (spreadsheetSkeleton == null) {
             return;
         }
@@ -452,13 +473,12 @@ export class Spreadsheet extends SheetComponent {
         const { rowColumnSegment, dataMergeCache, overflowCache, stylesCache, showGridlines } = spreadsheetSkeleton;
         const { border, backgroundPositions } = stylesCache;
         const { startRow, endRow, startColumn, endColumn } = rowColumnSegment;
-        if (!spreadsheetSkeleton || showGridlines === BooleanNumber.FALSE) {
+        if (!spreadsheetSkeleton || showGridlines === BooleanNumber.FALSE || this._forceDisableGridlines) {
             return;
         }
 
         const { rowHeightAccumulation, columnTotalWidth, columnWidthAccumulation, rowTotalHeight } =
             spreadsheetSkeleton;
-
         if (
             !rowHeightAccumulation ||
             !columnWidthAccumulation ||
@@ -467,7 +487,6 @@ export class Spreadsheet extends SheetComponent {
         ) {
             return;
         }
-
         ctx.save();
 
         ctx.beginPath();
@@ -475,43 +494,47 @@ export class Spreadsheet extends SheetComponent {
 
         ctx.strokeStyle = getColor([212, 212, 212]);
 
-        const width = columnTotalWidth;
-
-        const height = rowTotalHeight;
-
         const columnWidthAccumulationLength = columnWidthAccumulation.length;
         const rowHeightAccumulationLength = rowHeightAccumulation.length;
 
-        const rowStart = startRow;
+        const rowStart = this._allowCache ? startRow : 0;
+        const rowEnd = this._allowCache ? endRow : rowHeightAccumulationLength - 1;
+        const columnEnd = this._allowCache ? endColumn : columnWidthAccumulationLength - 1;
+        const columnStart = this._allowCache ? startColumn : 0;
 
-        const rowEnd = endRow;
-
-        const columnDrawTopStart = 0;
+        const startX = columnWidthAccumulation[columnStart - 1] || 0;
+        const startY = rowHeightAccumulation[rowStart - 1] || 0;
+        const endX = columnWidthAccumulation[columnEnd];
+        const endY = rowHeightAccumulation[rowEnd];
 
         ctx.translateWithPrecisionRatio(FIX_ONE_PIXEL_BLUR_OFFSET, FIX_ONE_PIXEL_BLUR_OFFSET);
 
-        for (let r = rowStart; r <= rowEnd; r++) {
+        ctx.moveTo(startX, startY);
+        ctx.lineTo(endX, startY);
+
+        for (let r = 0; r <= rowEnd; r++) {
             if (r < 0 || r > rowHeightAccumulationLength - 1) {
                 continue;
             }
             const rowEndPosition = rowHeightAccumulation[r];
-            ctx.moveTo(0, rowEndPosition);
-            ctx.lineTo(width, rowEndPosition);
+            ctx.moveTo(startX, rowEndPosition);
+            ctx.lineTo(endX, rowEndPosition);
         }
 
-        for (let c = startColumn; c <= endColumn; c++) {
+        ctx.moveTo(startX, startY);
+        ctx.lineTo(startX, endY);
+        for (let c = 0; c <= endColumn; c++) {
             if (c < 0 || c > columnWidthAccumulationLength - 1) {
                 continue;
             }
             const columnEndPosition = columnWidthAccumulation[c];
-            ctx.moveTo(columnEndPosition, columnDrawTopStart);
-            ctx.lineTo(columnEndPosition, height);
+            ctx.moveTo(columnEndPosition, startY);
+            ctx.lineTo(columnEndPosition, endY);
         }
         // console.log('xx2', scaleX, scaleY, columnTotalWidth, rowTotalHeight, rowHeightAccumulation, columnWidthAccumulation);
         ctx.stroke();
         ctx.closePath();
 
-        // Clearing the dashed line issue caused by overlaid auxiliary lines and strokes
         border?.forValue((rowIndex, columnIndex, borderCaches) => {
             if (!borderCaches) {
                 return true;
@@ -543,6 +566,8 @@ export class Spreadsheet extends SheetComponent {
                 clearLineByBorderType(ctx, type, { startX, startY, endX, endY });
             }
         });
+        // Clearing the dashed line issue caused by overlaid auxiliary lines and strokes
+
         ctx.closePath();
         // merge cell
         this._clearRectangle(ctx, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
@@ -606,7 +631,7 @@ export class Spreadsheet extends SheetComponent {
                 endX = mergeInfo.endX;
             }
 
-            ctx.clearRect(startX, startY, endX - startX + 0.5, endY - startY + 0.5);
+            ctx.clearRectForTexture(startX, startY, endX - startX + 0.5, endY - startY + 0.5);
         });
     }
 }

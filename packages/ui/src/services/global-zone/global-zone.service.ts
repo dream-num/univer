@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-import type { ComponentType } from 'react';
+import type { IDisposable } from '@wendellhu/redi';
+import { createIdentifier } from '@wendellhu/redi';
+import type { Subject } from 'rxjs';
 
-import { Notification } from '../components/notification/Notification';
-import { ConfirmPart } from './components/confirm-part/ConfirmPart';
-import { ContextMenu } from './components/context-menu/ContextMenu';
-import { DialogPart } from './components/dialog-part/DialogPart';
-import { GlobalZone } from './components/global-zone/GlobalZone';
+export const IGlobalZoneService = createIdentifier<IGlobalZoneService>('univer.global-zone-service');
 
-export const globalComponents: Set<() => ComponentType> = new Set([
-    () => DialogPart,
-    () => ConfirmPart,
-    () => Notification,
-    () => ContextMenu,
-    () => GlobalZone,
-]);
+export interface IGlobalZoneService {
+    readonly visible$: Subject<boolean>;
+    readonly componentKey$: Subject<string>;
+
+    set(key: string, component: any): IDisposable;
+
+    open(): void;
+
+    close(): void;
+}

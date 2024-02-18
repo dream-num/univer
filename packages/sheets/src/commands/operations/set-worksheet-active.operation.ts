@@ -27,6 +27,7 @@ export const SetWorksheetActiveOperation: IOperation<ISetWorksheetActiveOperatio
     type: CommandType.OPERATION,
     handler: (accessor, params) => {
         const workbook = accessor.get(IUniverInstanceService).getUniverSheetInstance(params.unitId);
+
         if (!workbook) return false;
 
         const worksheets = workbook.getWorksheets();

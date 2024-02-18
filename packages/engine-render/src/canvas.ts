@@ -16,12 +16,29 @@
 
 import { getDevicePixelRatio } from './basics/draw';
 import { createCanvasElement } from './basics/tools';
-import { UniverRenderingContext } from './context';
+import { UniverPrintingContext, UniverRenderingContext } from './context';
+
+/**
+ * canvas render mode
+ */
+export enum CanvasRenderMode {
+    /**
+     * Normal canvas render mode
+     */
+    Rendering,
+    /**
+     * Printing render mode,
+     * in case of to generate high dpi pdf,
+     * some canvas api was disabled by some unknown reason.
+     */
+    Printing,
+}
 
 interface ICanvasProps {
     width?: number;
     height?: number;
     pixelRatio?: number;
+    mode?: CanvasRenderMode;
 }
 
 /**
@@ -65,7 +82,11 @@ export class Canvas {
         this._canvasEle.style.touchAction = 'none';
         this._canvasEle.style.outline = '0';
 
-        this._context = new UniverRenderingContext(this._canvasEle?.getContext('2d')!);
+        if (props.mode === CanvasRenderMode.Printing) {
+            this._context = new UniverPrintingContext(this._canvasEle?.getContext('2d')!);
+        } else {
+            this._context = new UniverRenderingContext(this._canvasEle?.getContext('2d')!);
+        }
 
         this.setSize(props.width, props.height, props.pixelRatio);
     }

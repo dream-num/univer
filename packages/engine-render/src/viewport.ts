@@ -15,7 +15,7 @@
  */
 
 import type { EventState, IPosition, IRange, Nullable } from '@univerjs/core';
-import { Observable, Rectangle } from '@univerjs/core';
+import { Observable, Rectangle, Tools } from '@univerjs/core';
 
 import type { BaseObject } from './base-object';
 import { RENDER_CLASS_TYPE } from './basics/const';
@@ -1112,7 +1112,7 @@ export class Viewport {
         this.bottom = props?.bottom || 0;
         this.right = props?.right || 0;
 
-        if (props?.width) {
+        if (Tools.isDefine(props?.width)) {
             this.width = props?.width;
             this._widthOrigin = this.width;
             this._isRelativeX = false;
@@ -1122,7 +1122,7 @@ export class Viewport {
             this._isRelativeX = true;
         }
 
-        if (props?.height) {
+        if (Tools.isDefine(props?.height)) {
             this.height = props?.height;
             this._heightOrigin = this.height;
             this._isRelativeY = false;

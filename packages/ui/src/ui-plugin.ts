@@ -18,6 +18,8 @@ import { ILocalStorageService, LocaleService, Plugin, PluginType } from '@univer
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
+import { DesktopGlobalZoneService } from './services/global-zone/desktop-global-zone.service';
+import { IGlobalZoneService } from './services/global-zone/global-zone.service';
 import { ComponentManager } from './common/component-manager';
 import { ZIndexManager } from './common/z-index-manager';
 import { ErrorController } from './controllers/error/error.controller';
@@ -105,6 +107,7 @@ export class UniverUIPlugin extends Plugin {
             [IConfirmService, { useClass: DesktopConfirmService, lazy: true }],
             [ISidebarService, { useClass: DesktopSidebarService, lazy: true }],
             [IZenZoneService, { useClass: DesktopZenZoneService, lazy: true }],
+            [IGlobalZoneService, { useClass: DesktopGlobalZoneService, lazy: true }],
             [IMessageService, { useClass: DesktopMessageService, lazy: true }],
             [ILocalStorageService, { useClass: DesktopLocalStorageService, lazy: true }],
             [IBeforeCloseService, { useClass: DesktopBeforeCloseService }],

@@ -37,13 +37,15 @@ export interface ICheckboxGroupProps {
      * The callback function triggered when switching options
      */
     onChange: (value: Array<string | number | boolean>) => void;
+
+    style?: React.CSSProperties;
 }
 
 /**
  * CheckboxGroup Component
  */
 export function CheckboxGroup(props: ICheckboxGroupProps) {
-    const { children, value, disabled = false, onChange } = props;
+    const { children, value, disabled, onChange, style } = props;
 
     const handleChange = (item: string | number | boolean) => {
         if (value.includes(item)) {
@@ -54,14 +56,14 @@ export function CheckboxGroup(props: ICheckboxGroupProps) {
     };
 
     return (
-        <div className={styles.checkboxGroup}>
+        <div className={styles.checkboxGroup} style={style}>
             {React.Children.map(children, (child, index) => {
                 if (React.isValidElement<ICheckboxProps>(child)) {
                     return React.cloneElement(child, {
                         key: index,
                         children: child.props.children,
                         value: child.props.value,
-                        checked: value.includes(child.props.value),
+                        checked: value.includes(child.props.value!),
                         disabled: disabled ?? child.props.disabled,
                         onChange: handleChange,
                     });

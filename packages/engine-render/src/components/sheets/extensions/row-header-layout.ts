@@ -28,7 +28,7 @@ const UNIQUE_KEY = 'DefaultRowHeaderLayoutExtension';
 export class RowHeaderLayout extends SheetExtension {
     override uKey = UNIQUE_KEY;
 
-    override zIndex = 10;
+    override Z_INDEX = 10;
 
     override draw(ctx: UniverRenderingContext, parentScale: IScale, spreadsheetSkeleton: SpreadsheetSkeleton) {
         const { rowColumnSegment, rowHeaderWidth = 0, columnHeaderHeight = 0 } = spreadsheetSkeleton;

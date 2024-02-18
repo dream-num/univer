@@ -23,6 +23,7 @@ import { SpreadsheetExtensionRegistry } from '../../extension';
 import type { IFontCacheItem } from '../interfaces';
 import type { SheetComponent } from '../sheet-component';
 import { getDocsSkeletonPageSize, type SpreadsheetSkeleton } from '../sheet-skeleton';
+import type { Spreadsheet } from '../spreadsheet';
 import { SheetExtension } from './sheet-extension';
 
 const UNIQUE_KEY = 'DefaultFontExtension';
@@ -32,9 +33,13 @@ const EXTENSION_Z_INDEX = 30;
 export class Font extends SheetExtension {
     override uKey = UNIQUE_KEY;
 
-    override zIndex = EXTENSION_Z_INDEX;
+    override Z_INDEX = EXTENSION_Z_INDEX;
 
     changeFontColor: ObjectMatrix<IColorStyle> = new ObjectMatrix();
+
+    get spreadsheet() {
+        return this.parent as Spreadsheet;
+    }
 
     getDocuments() {
         const parent = this.parent as SheetComponent;
@@ -133,7 +138,7 @@ export class Font extends SheetExtension {
                                 cellHeight - 2 / scale
                             );
                             ctx.clip();
-                            ctx.clearRect(
+                            ctx.clearRectForTexture(
                                 startX + 1 / scale,
                                 startY + 1 / scale,
                                 cellWidth - 2 / scale,
@@ -178,7 +183,7 @@ export class Font extends SheetExtension {
                     } else {
                         ctx.rect(startX + 1 / scale, startY + 1 / scale, cellWidth - 2 / scale, cellHeight - 2 / scale);
                         ctx.clip();
-                        ctx.clearRect(
+                        ctx.clearRectForTexture(
                             startX + 1 / scale,
                             startY + 1 / scale,
                             cellWidth - 2 / scale,
@@ -263,8 +268,8 @@ export class Font extends SheetExtension {
 
         ctx.rect(startX, startY, endX - startX, endY - startY);
         ctx.clip();
-        ctx.clearRect(startX, startY, endX - startX, endY - startY);
+        ctx.clearRectForTexture(startX, startY, endX - startX, endY - startY);
     }
 }
 
-SpreadsheetExtensionRegistry.add(new Font());
+SpreadsheetExtensionRegistry.add(Font);

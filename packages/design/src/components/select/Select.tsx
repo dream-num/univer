@@ -43,15 +43,27 @@ export interface ISelectProps {
      * The callback function that is triggered when the value is changed
      */
     onChange: (value: string) => void;
+
+    style?: React.CSSProperties;
+
+    className?: string;
+    /**
+     * select mode
+     */
+    mode?: 'combobox' | 'multiple' | 'tags' | undefined;
+    dropdownRender?: (
+        menu: React.ReactElement<any, string | React.JSXElementConstructor<any>>
+    ) => React.ReactElement<any, string | React.JSXElementConstructor<any>>;
 }
 
 export function Select(props: ISelectProps) {
-    const { value, options = [], onChange } = props;
+    const { value, options = [], onChange, style, className, mode, dropdownRender } = props;
 
     const { mountContainer } = useContext(ConfigContext);
 
     return (
         <RcSelect
+            mode={mode}
             prefixCls={styles.select}
             getPopupContainer={() => mountContainer}
             options={options}
@@ -59,6 +71,9 @@ export function Select(props: ISelectProps) {
             menuItemSelectedIcon={null}
             suffixIcon={<MoreDownSingle />}
             onChange={onChange}
+            style={style}
+            className={className}
+            dropdownRender={dropdownRender}
         />
     );
 }

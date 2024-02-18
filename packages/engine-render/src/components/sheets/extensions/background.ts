@@ -20,16 +20,24 @@ import { getColor } from '../../../basics/tools';
 import type { UniverRenderingContext } from '../../../context';
 import { SpreadsheetExtensionRegistry } from '../../extension';
 import type { SpreadsheetSkeleton } from '../sheet-skeleton';
+import type { Spreadsheet } from '../spreadsheet';
 import { SheetExtension } from './sheet-extension';
 
 const UNIQUE_KEY = 'DefaultBackgroundExtension';
 
 const DOC_EXTENSION_Z_INDEX = 40;
+const PRINTING_Z_INDEX = 20;
 
 export class Background extends SheetExtension {
     override uKey = UNIQUE_KEY;
 
-    override zIndex = DOC_EXTENSION_Z_INDEX;
+    override Z_INDEX = DOC_EXTENSION_Z_INDEX;
+
+    PRINTING_Z_INDEX = PRINTING_Z_INDEX;
+
+    override get zIndex() {
+        return (this.parent as Spreadsheet)?.isPrinting ? this.PRINTING_Z_INDEX : this.Z_INDEX;
+    }
 
     override draw(
         ctx: UniverRenderingContext,
@@ -37,7 +45,7 @@ export class Background extends SheetExtension {
         spreadsheetSkeleton: SpreadsheetSkeleton,
         diffRanges?: IRange[]
     ) {
-        const { dataMergeCache, stylesCache } = spreadsheetSkeleton;
+        const { stylesCache } = spreadsheetSkeleton;
         const { background, backgroundPositions } = stylesCache;
         if (!spreadsheetSkeleton) {
             return;
@@ -56,7 +64,7 @@ export class Background extends SheetExtension {
         }
         ctx.save();
 
-        ctx.globalCompositeOperation = 'destination-over';
+        ctx.setGlobalCompositeOperation('destination-over');
 
         background &&
             Object.keys(background).forEach((rgb: string) => {
@@ -116,4 +124,4 @@ export class Background extends SheetExtension {
     }
 }
 
-SpreadsheetExtensionRegistry.add(new Background());
+SpreadsheetExtensionRegistry.add(Background);

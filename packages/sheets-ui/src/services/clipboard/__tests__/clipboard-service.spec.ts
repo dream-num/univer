@@ -929,7 +929,7 @@ describe('Test clipboard', () => {
 
             // redo
             expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
-            expect(getValues(24, 0, 24, 0)![0][0]!.v).toBe(undefined);
+            expect(getValues(24, 0, 24, 0)![0][0]).toBe(null);
             expect(getValues(24, 1, 24, 1)![0][0]!.v).toBe('A25');
         });
     });

@@ -26,14 +26,14 @@ import { SheetExtension } from './sheet-extension';
 const UNIQUE_KEY = 'DefaultBackgroundExtension';
 
 const DOC_EXTENSION_Z_INDEX = 40;
-const NO_CACHE_Z_INDEX = 20;
+const PRINTING_Z_INDEX = 20;
 
 export class Background extends SheetExtension {
     override uKey = UNIQUE_KEY;
 
     override Z_INDEX = DOC_EXTENSION_Z_INDEX;
 
-    PRINTING_Z_INDEX = NO_CACHE_Z_INDEX;
+    PRINTING_Z_INDEX = PRINTING_Z_INDEX;
 
     override get zIndex() {
         return (this.parent as Spreadsheet)?.isPrinting ? this.PRINTING_Z_INDEX : this.Z_INDEX;

@@ -165,11 +165,11 @@ export class FunctionNode extends BaseAstNode {
         const resultCountRow = reEndRow - reStartRow + 1;
         const resultCountColumn = reEndColumn - reStartColumn + 1;
 
-        if (lookupCountRow > resultCountRow) {
+        if (lookupCountRow !== resultCountRow) {
             resultVectorRange.endRow += lookupCountRow - resultCountRow;
         }
 
-        if (lookupCountColumn > resultCountColumn) {
+        if (lookupCountColumn !== resultCountColumn) {
             resultVectorRange.endColumn += lookupCountColumn - resultCountColumn;
         }
     }

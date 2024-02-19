@@ -475,16 +475,17 @@ export class SelectionShape {
         if (strokeDash == null) {
             this.dashRect.hide();
         } else {
+            const dashRectWidth = style.strokeWidth * 4;
             this.dashRect.transformByState({
-                height: endY - startY - strokeWidth / 2,
-                width: endX - startX - strokeWidth / 2,
-                strokeWidth,
-                left: strokeWidth / 2 - 1 / scale,
-                top: strokeWidth / 2 - 1 / scale,
+                height: endY - startY,
+                width: endX - startX,
+                strokeWidth: dashRectWidth,
+                left: -dashRectWidth / 2 + fixOnePixelBlurOffset,
+                top: -dashRectWidth / 2 + fixOnePixelBlurOffset,
             });
 
             this.dashRect.setProps({
-                strokeDashArray: [0, strokeDash],
+                strokeDashArray: [0, strokeDash / scale],
             });
 
             this.dashRect.show();

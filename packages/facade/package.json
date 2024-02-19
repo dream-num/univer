@@ -87,10 +87,11 @@
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "@wendellhu/redi": "^0.13.0",
-        "canvas": "^2.11.2",
+        "jsdom": "^24.0.0",
         "rxjs": "^7.8.1",
         "typescript": "^5.3.3",
         "vite": "^5.1.4",
-        "vitest": "^1.3.1"
+        "vitest": "^1.3.1",
+        "vitest-canvas-mock": "^0.3.3"
     }
 }

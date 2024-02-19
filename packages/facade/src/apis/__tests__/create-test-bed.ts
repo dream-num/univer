@@ -42,7 +42,6 @@ import {
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { createCanvas } from 'canvas';
 import { Engine, IRenderingEngine, IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { ISelectionRenderService, SelectionRenderService, SheetCanvasView, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { DesktopPlatformService, DesktopShortcutService, IPlatformService, IShortcutService } from '@univerjs/ui';
@@ -115,11 +114,6 @@ export function createTestBed(workbookConfig?: IWorkbookData, dependencies?: Dep
     }
 
     injector.get(LocaleService).load({ zhCN, enUS });
-
-    window.HTMLCanvasElement.prototype.getContext = function () {
-        const canvas = createCanvas(this.width, this.height);
-        return canvas.getContext('2d');
-    };
 
     const themeService = injector.get(ThemeService);
     themeService.setTheme({

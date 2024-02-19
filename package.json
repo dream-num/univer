@@ -21,13 +21,19 @@
         "build:demo": "turbo build:demo",
         "build:storybook": "storybook build",
         "lint": "eslint .",
-        "lint:fix": "eslint . --fix"
+        "lint:fix": "eslint . --fix",
+        "release": "release-it",
+        "release:alpha": "release-it preminor --preRelease=alpha",
+        "release:beta": "release-it preminor --preRelease=beta",
+        "release:rc": "release-it prerelease --preRelease=rc"
     },
     "devDependencies": {
         "@antfu/eslint-config": "^2.6.4",
         "@commitlint/cli": "^18.6.0",
         "@commitlint/config-conventional": "^18.6.0",
         "@playwright/test": "^1.41.2",
+        "@release-it-plugins/workspaces": "^4.2.0",
+        "@release-it/conventional-changelog": "^8.0.1",
         "@storybook/addon-docs": "^7.6.10",
         "@storybook/addon-essentials": "^7.6.10",
         "@storybook/addon-interactions": "^7.6.10",
@@ -51,6 +57,7 @@
         "lint-staged": "^15.2.1",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
+        "release-it": "^17.1.1",
         "storybook": "^7.6.10",
         "turbo": "^1.12.2",
         "typescript": "^5.3.3"

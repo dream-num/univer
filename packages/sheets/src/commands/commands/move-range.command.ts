@@ -32,6 +32,7 @@ import { NORMAL_SELECTION_PLUGIN_NAME } from '../../services/selection-manager.s
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import type { IMoveRangeMutationParams } from '../mutations/move-range.mutation';
 import { MoveRangeMutation } from '../mutations/move-range.mutation';
+import type { ISetSelectionsOperationParams } from '../operations/selection.operation';
 import { SetSelectionsOperation } from '../operations/selection.operation';
 import { alignToMergedCellsBorders, getPrimaryForRange } from './utils/selection-utils';
 
@@ -76,10 +77,10 @@ export const MoveRangeCommand: ICommand = {
                 id: SetSelectionsOperation.id,
                 params: {
                     unitId,
-                    sheetId: subUnitId,
+                    subUnitId,
                     pluginName: NORMAL_SELECTION_PLUGIN_NAME,
                     selections: [{ range: params.toRange, primary: getPrimaryForRange(params.toRange, worksheet) }],
-                },
+                } as ISetSelectionsOperationParams,
             },
         ];
         const undos = [
@@ -87,10 +88,10 @@ export const MoveRangeCommand: ICommand = {
                 id: SetSelectionsOperation.id,
                 params: {
                     unitId,
-                    sheetId: subUnitId,
+                    subUnitId,
                     pluginName: NORMAL_SELECTION_PLUGIN_NAME,
                     selections: [{ range: params.fromRange, primary: getPrimaryForRange(params.fromRange, worksheet) }],
-                },
+                } as ISetSelectionsOperationParams,
             },
             ...moveRangeMutations.undos,
             ...interceptorCommands.undos,

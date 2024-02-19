@@ -39,6 +39,7 @@ import {
 } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
+import { debounceTime } from 'rxjs';
 import type { IStatusBarServiceStatus } from '../services/status-bar.service';
 import { IStatusBarService } from '../services/status-bar.service';
 
@@ -85,18 +86,20 @@ export class StatusBarController extends Disposable {
         );
         this.disposeWithMe(
             toDisposable(
-                this._selectionManagerService.selectionMoveEnd$.subscribe((selections) => {
-                    if (this._selectionManagerService.getCurrent()?.pluginName !== NORMAL_SELECTION_PLUGIN_NAME) {
-                        return;
-                    }
-                    if (selections) {
-                        const primary = selections[selections.length - 1].primary;
-                        this._calculateSelection(
-                            selections.map((selection) => selection.range),
-                            primary
-                        );
-                    }
-                })
+                this._selectionManagerService.selectionMoveEnd$
+                    .pipe(debounceTime(100))
+                    .subscribe((selections) => {
+                        if (this._selectionManagerService.getCurrent()?.pluginName !== NORMAL_SELECTION_PLUGIN_NAME) {
+                            return;
+                        }
+                        if (selections) {
+                            const primary = selections[selections.length - 1].primary;
+                            this._calculateSelection(
+                                selections.map((selection) => selection.range),
+                                primary
+                            );
+                        }
+                    })
             )
         );
         this.disposeWithMe(
@@ -151,12 +154,13 @@ export class StatusBarController extends Disposable {
                     return ref.toArrayValueObject(false);
                 });
                 const res = executor?.calculate(...arrayValue) as BaseValueObject;
-                if (!res.getValue) {
+                const value = res?.getValue();
+                if (!value) {
                     return undefined;
                 }
                 return {
                     func: f.func,
-                    value: (executor?.calculate(...arrayValue) as BaseValueObject).getValue(),
+                    value,
                 };
             });
             if (calcResult.every((r) => r === undefined)) {

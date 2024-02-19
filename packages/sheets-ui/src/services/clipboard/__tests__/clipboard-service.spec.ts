@@ -15,9 +15,10 @@
  */
 
 import type { ICellData, IRange, IStyleData, Nullable, Univer } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, RANGE_TYPE, Rectangle } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, RANGE_TYPE, Rectangle, RedoCommand, UndoCommand } from '@univerjs/core';
 import {
     AddWorksheetMergeMutation,
+    MoveRangeMutation,
     NORMAL_SELECTION_PLUGIN_NAME,
     RemoveWorksheetMergeMutation,
     SelectionManagerService,
@@ -30,6 +31,7 @@ import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { ISheetClipboardService } from '../clipboard.service';
+import { COPY_TYPE } from '../type';
 import { clipboardTestBed } from './clipboard-test-bed';
 import type { IClipboardItem } from './mock-clipboard';
 import { MockClipboard } from './mock-clipboard';
@@ -72,6 +74,7 @@ describe('Test clipboard', () => {
         commandService.registerCommand(AddWorksheetMergeMutation);
         commandService.registerCommand(RemoveWorksheetMergeMutation);
         commandService.registerCommand(SetSelectionsOperation);
+        commandService.registerCommand(MoveRangeMutation);
 
         sheetClipboardService = get(ISheetClipboardService);
 
@@ -877,6 +880,57 @@ describe('Test clipboard', () => {
                     endColumn: 12,
                 },
             ]);
+        });
+    });
+
+    describe('Test cut command in single selection', () => {
+        it('cut value from A25 to B25', async () => {
+            const unitId = 'test';
+            const subUnitId = 'sheet1';
+            const fromRange = { startRow: 24, startColumn: 0, endRow: 24, endColumn: 0 };
+            const toRange = { startRow: 24, startColumn: 1, endRow: 24, endColumn: 1 };
+            const copyContentCache = sheetClipboardService.copyContentCache();
+            const { matrixFragment, copyId } = (sheetClipboardService as any)._generateCopyContent(unitId, subUnitId, fromRange, []);
+
+            // cache the copy content for internal paste
+            copyContentCache.set(copyId, {
+                unitId,
+                subUnitId,
+                range: fromRange,
+                matrix: matrixFragment,
+                copyType: COPY_TYPE.CUT,
+            });
+
+            const selectionManager = get(SelectionManagerService);
+
+            selectionManager.setCurrentSelection({
+                pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+                unitId: 'test',
+                sheetId: 'sheet1',
+            });
+
+            selectionManager.add([
+                {
+                    range: { ...toRange, rangeType: RANGE_TYPE.NORMAL },
+                    primary: null,
+                    style: null,
+                },
+            ]);
+
+            (sheetClipboardService as any)._pasteInternal(copyId, 'default-paste');
+
+            expect(getValues(24, 0, 24, 0)![0][0]).toBe(null);
+            expect(getValues(24, 1, 24, 1)![0][0]!.v).toBe('A25');
+
+            // undo
+            expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+            expect(getValues(24, 0, 24, 0)![0][0]!.v).toStrictEqual('A25');
+            expect(getValues(24, 1, 24, 1)![0][0]!.v).toStrictEqual('B25');
+
+            // redo
+            expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+            expect(getValues(24, 0, 24, 0)![0][0]).toBe(null);
+            expect(getValues(24, 1, 24, 1)![0][0]!.v).toBe('A25');
         });
     });
 });

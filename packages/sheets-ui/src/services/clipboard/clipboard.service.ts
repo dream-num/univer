@@ -40,7 +40,7 @@ import { BehaviorSubject } from 'rxjs';
 
 import { IMarkSelectionService } from '../mark-selection/mark-selection.service';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
-import { copyContentCache, extractId, genId } from './copy-content-cache';
+import { CopyContentCache, extractId, genId } from './copy-content-cache';
 import { HtmlToUSMService } from './html-to-usm/converter';
 import PastePluginLark from './html-to-usm/paste-plugins/plugin-lark';
 import PastePluginWord from './html-to-usm/paste-plugins/plugin-word';
@@ -72,11 +72,12 @@ HtmlToUSMService.use(PastePluginLark);
 export interface ISheetClipboardService {
     copy(): Promise<boolean>;
     cut(): Promise<boolean>;
-    paste(item: ClipboardItem, pasteType?: string): Promise<boolean>;
-    legacyPaste(html?: string, text?: string): Promise<boolean>;
+    paste(item: ClipboardItem, pasteType?: string): Promise<boolean>; // get content from a ClipboardItem and paste it.
+    legacyPaste(html?: string, text?: string): Promise<boolean>; // paste a HTML string or plain text directly.
 
-    addClipboardHook(hook: ISheetClipboardHook): IDisposable;
-    getClipboardHooks(): ISheetClipboardHook[];
+    copyContentCache(): CopyContentCache; // return the cache content for inner copy/cut/paste.
+    addClipboardHook(hook: ISheetClipboardHook): IDisposable; // add a hook to the clipboard service
+    getClipboardHooks(): ISheetClipboardHook[]; // get all hooks
 }
 
 export const ISheetClipboardService = createIdentifier<ISheetClipboardService>('sheet.clipboard-service');
@@ -90,6 +91,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
     private _htmlToUSM: HtmlToUSMService;
     private _usmToHtml: USMToHtmlService;
 
+    private _copyContentCache: CopyContentCache;
     private _copyMarkId: string | null = null;
 
     constructor(
@@ -107,59 +109,36 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             getCurrentSkeleton: () => this._sheetSkeletonManagerService.getCurrent(),
         });
         this._usmToHtml = new USMToHtmlService();
+        this._copyContentCache = new CopyContentCache();
+    }
+
+    copyContentCache(): CopyContentCache {
+        return this._copyContentCache;
     }
 
     async copy(copyType = COPY_TYPE.COPY): Promise<boolean> {
-        // 1. get the selected range, the range should be the last one of selected ranges
         const selection = this._selectionManagerService.getLast();
         if (!selection) {
             return false; // maybe we should notify user that there is no selection
         }
 
-        // 2. get filtered out rows those are filtered out by plugins (e.g. filter feature)
-        const hooks = this._clipboardHooks;
-        const filteredRows = hooks.reduce((acc, cur) => {
-            const rows = cur.getFilteredOutRows?.();
-            rows?.forEach((r) => acc.add(r));
-            return acc;
-        }, new Set<number>());
-
-        // 3. calculate selection matrix, span cells would only - maybe warn uses that cells are too may in the future
-        const { startColumn, startRow, endColumn, endRow } = selection.range;
         const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
-        const matrix = worksheet.getMatrixWithMergedCells(startRow, startColumn, endRow, endColumn);
-        const matrixFragment = new ObjectMatrix<ICellDataWithSpanInfo>();
-        for (let r = startRow; r <= endRow; r++) {
-            for (let c = startColumn; c <= endColumn; c++) {
-                const cellData = matrix.getValue(r, c);
-                if (cellData) {
-                    matrixFragment.setValue(r - startRow, c - startColumn, {
-                        ...getEmptyCell(),
-                        ...Tools.deepClone(cellData),
-                    });
-                } else {
-                    matrixFragment.setValue(r - startRow, c - startColumn, getEmptyCell());
-                }
-            }
-        }
+        const hooks = this._clipboardHooks;
 
-        // 4. use filteredRows into to remove rows for the matrix
-        // TODO: filtering
-
-        // tell hooks to get ready for copying
+        // 1. tell hooks to get ready for copying
         hooks.forEach((h) => h.onBeforeCopy?.(workbook.getUnitId(), worksheet.getSheetId(), selection.range));
 
-        // 5. convert matrix to html
-        let html = this._usmToHtml.convert(matrix, selection.range, hooks);
+        const copyContent = this._generateCopyContent(workbook.getUnitId(), worksheet.getSheetId(), selection.range, hooks);
+        if (!copyContent) {
+            return false;
+        }
 
-        const plain = getMatrixPlainText(matrixFragment);
-        // 6. cache inner copy content
-        const copyId = genId();
-        html = html.replace(/(<[a-z]+)/, (_p0, p1) => `${p1} data-copy-id="${copyId}"`);
+        // 2. extract copy content for both internal and external
+        const { html, plain, matrixFragment, copyId } = copyContent;
 
-        // 7. cache the copy content for internal paste
-        copyContentCache.set(copyId, {
+        // 3. cache the copy content for internal paste
+        this._copyContentCache.set(copyId, {
             unitId: workbook.getUnitId(),
             subUnitId: worksheet.getSheetId(),
             range: selection.range,
@@ -167,16 +146,16 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             copyType,
         });
 
-        // 8. write html and get plain text info the clipboard interface
+        // 4. write html and get plain text info the clipboard interface
         await this._clipboardInterfaceService.write(plain, html);
 
-        // 9. mark the copy range
+        // 5. mark the copy range
         this._markSelectionService.removeAllShapes();
 
         const style = this._selectionManagerService.createCopyPasteSelection();
         this._copyMarkId = this._markSelectionService.addShape({ ...selection, style });
 
-        // tell hooks to clean up
+        // 6. tell hooks to clean up
         hooks.forEach((h) => h.onAfterCopy?.());
 
         return true;
@@ -250,6 +229,55 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         return this._clipboardHooks;
     }
 
+    private _generateCopyContent(unitId: string, subUnitId: string, range: IRange, hooks: ISheetClipboardHook[]) {
+        const workbook = this._currentUniverService.getUniverSheetInstance(unitId);
+        const worksheet = workbook?.getSheetBySheetId(subUnitId);
+
+        if (!workbook || !worksheet) {
+            return null;
+        }
+
+        // get filtered out rows those are filtered out by plugins (e.g. filter feature)
+        const filteredRows = hooks.reduce((acc, cur) => {
+            const rows = cur.getFilteredOutRows?.();
+            rows?.forEach((r) => acc.add(r));
+            return acc;
+        }, new Set<number>());
+
+        // calculate selection matrix, span cells would only - maybe warn uses that cells are too may in the future
+        const { startColumn, startRow, endColumn, endRow } = range;
+
+        const matrix = worksheet.getMatrixWithMergedCells(startRow, startColumn, endRow, endColumn);
+        const matrixFragment = new ObjectMatrix<ICellDataWithSpanInfo>();
+        for (let r = startRow; r <= endRow; r++) {
+            for (let c = startColumn; c <= endColumn; c++) {
+                const cellData = matrix.getValue(r, c);
+                if (cellData) {
+                    matrixFragment.setValue(r - startRow, c - startColumn, {
+                        ...getEmptyCell(),
+                        ...Tools.deepClone(cellData),
+                    });
+                } else {
+                    matrixFragment.setValue(r - startRow, c - startColumn, getEmptyCell());
+                }
+            }
+        }
+
+        // convert matrix to html
+        let html = this._usmToHtml.convert(matrix, range, hooks);
+
+        const plain = getMatrixPlainText(matrixFragment);
+        const copyId = genId();
+        html = html.replace(/(<[a-z]+)/, (_p0, p1) => `${p1} data-copy-id="${copyId}"`);
+
+        return {
+            copyId,
+            plain,
+            html,
+            matrixFragment,
+        };
+    }
+
     private _notifyClipboardHook() {
         this._clipboardHooks$.next(this._clipboardHooks);
     }
@@ -309,7 +337,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
 
         const copyId = extractId(html);
 
-        if (copyId && copyContentCache.get(copyId)) {
+        if (copyId && this._copyContentCache.get(copyId)) {
             return this._pasteInternal(copyId, pasteType);
         }
         return this._pasteExternal(html, pasteType);
@@ -372,7 +400,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
     private async _pasteInternal(copyId: string, pasteType: string): Promise<boolean> {
         const target = this._getPastingTarget();
         const { selection, unitId, subUnitId } = target;
-        const cachedData = Tools.deepClone(copyContentCache.get(copyId));
+        const cachedData = Tools.deepClone(this._copyContentCache.get(copyId));
         const { range, matrix: cellMatrix, unitId: copyUnitId, subUnitId: copySubUnitId } = cachedData || {};
         if (!selection || !cellMatrix || !cachedData || !range || !copyUnitId || !copySubUnitId) {
             return false;
@@ -449,7 +477,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         );
 
         if (cachedData.copyType === COPY_TYPE.CUT) {
-            copyContentCache.set(copyId, { ...cachedData, matrix: null });
+            this._copyContentCache.set(copyId, { ...cachedData, matrix: null });
             this._copyMarkId && this._markSelectionService.removeShape(this._copyMarkId);
             this._copyMarkId = null;
         }

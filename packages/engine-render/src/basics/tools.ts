@@ -258,10 +258,10 @@ export function getFontStyleString(textStyle?: IStyleBase, localeService?: Local
     // TODO: @jikkai @DR-Univer should read default font from configuration, not from locale service
     const defaultFont = 'Arial';
 
-    const defaultFontSize = 13;
+    const defaultFontSize = 11;
 
     if (!textStyle) {
-        const fontString = `${defaultFontSize}px  ${defaultFont}`;
+        const fontString = `${defaultFontSize}pt  ${defaultFont}`;
 
         return {
             fontCache: fontString,
@@ -321,7 +321,7 @@ export function getFontStyleString(textStyle?: IStyleBase, localeService?: Local
         fontSize *= baselineOffset === BaselineOffset.SUBSCRIPT ? sbr : spr;
     }
 
-    const fontStringPure = `${italic} ${bold} ${fontSize}px ${fontFamilyResult}`;
+    const fontStringPure = `${italic} ${bold} ${fontSize}pt ${fontFamilyResult}`;
 
     const fontString = `${fontStringPure}, ${DEFAULT_FONTFACE_PLANE} `;
 
@@ -415,7 +415,7 @@ export function hasSpace(text: string) {
 
 const one_thousand = 1000;
 
-// 返回屏幕DPI
+// 返回屏幕 DPI
 let dpi_cache: Nullable<number>;
 export function getDPI() {
     if (dpi_cache) {

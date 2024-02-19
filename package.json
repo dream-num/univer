@@ -58,7 +58,7 @@
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
         "release-it": "^17.1.1",
-        "storybook": "^7.6.10",
+        "storybook": "^7.6.16",
         "turbo": "^1.12.2",
         "typescript": "^5.3.3"
     },

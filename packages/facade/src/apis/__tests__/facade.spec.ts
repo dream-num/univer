@@ -162,7 +162,7 @@ describe('Test FUniver', () => {
     });
 
     it('Function registerSheetRowHeaderExtension and unregisterSheetRowHeaderExtension', () => {
-        univerAPI.registerSheetRowHeaderExtension('test', new RowHeaderCustomExtension());
+        const rowHeader = univerAPI.registerSheetRowHeaderExtension('test', new RowHeaderCustomExtension());
 
         const sheetComponent = getSheetRenderComponent('test', SHEET_VIEW_KEY.ROW) as SheetComponent;
 
@@ -170,7 +170,7 @@ describe('Test FUniver', () => {
 
         expect(rowHeaderExtension).toBeDefined();
 
-        univerAPI.unregisterSheetRowHeaderExtension('test', ROW_UNIQUE_KEY);
+        rowHeader.dispose();
 
         rowHeaderExtension = sheetComponent.getExtensionByKey(ROW_UNIQUE_KEY);
 
@@ -178,7 +178,7 @@ describe('Test FUniver', () => {
     });
 
     it('Function registerSheetColumnHeaderExtension and unregisterSheetColumnHeaderExtension', () => {
-        univerAPI.registerSheetColumnHeaderExtension('test', new ColumnHeaderCustomExtension());
+        const columnHeader = univerAPI.registerSheetColumnHeaderExtension('test', new ColumnHeaderCustomExtension());
 
         const sheetComponent = getSheetRenderComponent('test', SHEET_VIEW_KEY.COLUMN) as SheetComponent;
 
@@ -186,7 +186,7 @@ describe('Test FUniver', () => {
 
         expect(columnHeaderExtension).toBeDefined();
 
-        univerAPI.unregisterSheetColumnHeaderExtension('test', COLUMN_UNIQUE_KEY);
+        columnHeader.dispose();
 
         columnHeaderExtension = sheetComponent.getExtensionByKey(COLUMN_UNIQUE_KEY);
 
@@ -194,7 +194,7 @@ describe('Test FUniver', () => {
     });
 
     it('Function registerSheetMainExtension and unregisterSheetMainExtension', () => {
-        univerAPI.registerSheetMainExtension('test', new MainCustomExtension());
+        const main = univerAPI.registerSheetMainExtension('test', new MainCustomExtension());
 
         const sheetComponent = getSheetRenderComponent('test', SHEET_VIEW_KEY.MAIN) as SheetComponent;
 
@@ -202,7 +202,7 @@ describe('Test FUniver', () => {
 
         expect(mainExtension).toBeDefined();
 
-        univerAPI.unregisterSheetMainExtension('test', MAIN_UNIQUE_KEY);
+        main.dispose();
 
         mainExtension = sheetComponent.getExtensionByKey(MAIN_UNIQUE_KEY);
 

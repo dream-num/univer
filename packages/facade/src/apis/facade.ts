@@ -19,6 +19,7 @@ import {
     BorderStyleTypes,
     ICommandService,
     IUniverInstanceService,
+    toDisposable,
     UndoCommand,
     Univer,
     WrapStrategy,
@@ -30,7 +31,7 @@ import type { IDisposable } from '@wendellhu/redi';
 import { Inject, Injector, Quantity } from '@wendellhu/redi';
 
 import type { RenderComponentType, SheetComponent, SheetExtension } from '@univerjs/engine-render';
-import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { SHEET_VIEW_KEY } from '@univerjs/sheets-ui';
 import { FDocument } from './docs/f-document';
 import { FWorkbook } from './sheets/f-workbook';
@@ -45,11 +46,6 @@ export class FUniver {
         const socketService = injector.get(ISocketService, Quantity.OPTIONAL);
         if (!socketService) {
             injector.add([ISocketService, { useClass: WebSocketService }]);
-        }
-
-        const renderManagerService = injector.get(IRenderManagerService, Quantity.OPTIONAL);
-        if (!renderManagerService) {
-            injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
         }
 
         return injector.createInstance(FUniver);
@@ -177,21 +173,14 @@ export class FUniver {
      * @param unitId
      * @param extensions
      */
-    registerSheetRowHeaderExtension(unitId: string, ...extensions: SheetExtension[]) {
+    registerSheetRowHeaderExtension(unitId: string, ...extensions: SheetExtension[]): IDisposable {
         const sheetComponent = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.ROW) as SheetComponent;
 
         sheetComponent.register(...extensions);
-    }
 
-    /**
-     * Unregister sheet row header render extensions.
-     * @param unitId
-     * @param uKeys
-     */
-    unregisterSheetRowHeaderExtension(unitId: string, ...uKeys: string[]) {
-        const sheetComponent = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.ROW) as SheetComponent;
-
-        sheetComponent.unRegister(...uKeys);
+        return toDisposable(() => {
+            sheetComponent.unRegister(...extensions.map((ext) => ext.uKey));
+        });
     }
 
     /**
@@ -199,19 +188,13 @@ export class FUniver {
      * @param unitId
      * @param extensions
      */
-    registerSheetColumnHeaderExtension(unitId: string, ...extensions: SheetExtension[]) {
+    registerSheetColumnHeaderExtension(unitId: string, ...extensions: SheetExtension[]): IDisposable {
         const sheetComponent = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.COLUMN) as SheetComponent;
         sheetComponent.register(...extensions);
-    }
 
-    /**
-     * Unregister sheet column header render extensions.
-     * @param unitId
-     * @param uKeys
-     */
-    unregisterSheetColumnHeaderExtension(unitId: string, ...uKeys: string[]) {
-        const sheetComponent = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.COLUMN) as SheetComponent;
-        sheetComponent.unRegister(...uKeys);
+        return toDisposable(() => {
+            sheetComponent.unRegister(...extensions.map((ext) => ext.uKey));
+        });
     }
 
     /**
@@ -219,19 +202,13 @@ export class FUniver {
      * @param unitId
      * @param uKeys
      */
-    registerSheetMainExtension(unitId: string, ...extensions: SheetExtension[]) {
+    registerSheetMainExtension(unitId: string, ...extensions: SheetExtension[]): IDisposable {
         const sheetComponent = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.MAIN) as SheetComponent;
         sheetComponent.register(...extensions);
-    }
 
-    /**
-     * Unregister sheet main render extensions.
-     * @param unitId
-     * @param uKeys
-     */
-    unregisterSheetMainExtension(unitId: string, ...uKeys: string[]) {
-        const sheetComponent = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.MAIN) as SheetComponent;
-        sheetComponent.unRegister(...uKeys);
+        return toDisposable(() => {
+            sheetComponent.unRegister(...extensions.map((ext) => ext.uKey));
+        });
     }
 
     // #region

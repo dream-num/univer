@@ -17,8 +17,6 @@
 import type { ITextStyle } from '@univerjs/core';
 import { BaselineOffset, BooleanNumber, ColorKit } from '@univerjs/core';
 
-import { ptToPixel } from './utils';
-
 export function extractNodeStyle(node: HTMLElement): ITextStyle {
     const styles = node.style;
     const docStyles: ITextStyle = {};
@@ -74,7 +72,9 @@ export function extractNodeStyle(node: HTMLElement): ITextStyle {
 
                 if (!Number.isNaN(fontSize)) {
                     // TODO: @JOCS, hand other CSS value unit, rem, em, pt, %
-                    docStyles.fs = cssValue.endsWith('pt') ? ptToPixel(fontSize) : fontSize;
+                    if (cssValue.endsWith('pt')) {
+                        docStyles.fs = fontSize;
+                    }
                 }
 
                 break;

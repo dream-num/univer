@@ -23,7 +23,7 @@ import {
     OnLifecycle,
     Tools,
 } from '@univerjs/core';
-import type { IEditorInputConfig, ITextRangeWithStyle } from '@univerjs/engine-render';
+import type { IEditorInputConfig } from '@univerjs/engine-render';
 import { ITextSelectionRenderManager } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
 import type { Subscription } from 'rxjs';
@@ -36,7 +36,7 @@ import { IMEInputManagerService } from '../services/ime-input-manager.service';
 export class IMEInputController extends Disposable {
     private _previousIMEContent: string = '';
 
-    private _previousIMERange: Nullable<ITextRangeWithStyle>;
+    private _isCompositionStart: boolean = true;
 
     private _onStartSubscription: Nullable<Subscription>;
 
@@ -86,7 +86,7 @@ export class IMEInputController extends Disposable {
 
             this._imeInputManagerService.setActiveRange(Tools.deepClone(activeRange));
 
-            this._previousIMERange = activeRange;
+            this._isCompositionStart = true;
         });
     }
 
@@ -105,15 +105,13 @@ export class IMEInputController extends Disposable {
     private async _updateContent(config: Nullable<IEditorInputConfig>, isUpdate: boolean) {
         const skeleton = this._docSkeletonManagerService.getCurrent()?.skeleton;
 
-        if (this._previousIMERange == null || config == null || skeleton == null) {
+        if (config == null || skeleton == null) {
             return;
         }
 
         const documentModel = this._currentUniverService.getCurrentUniverDocInstance();
 
         const { event, activeRange } = config;
-
-        const { startOffset, segmentId, style } = this._previousIMERange;
 
         if (skeleton == null || activeRange == null) {
             return;
@@ -127,29 +125,17 @@ export class IMEInputController extends Disposable {
             return;
         }
 
-        const len = content.length;
-
-        const textRanges = [
-            {
-                startOffset: startOffset + len,
-                endOffset: startOffset + len,
-                style,
-            },
-        ];
-
         await this._commandService.executeCommand(IMEInputCommand.id, {
             unitId: documentModel.getUnitId(),
             newText: content,
             oldTextLen: this._previousIMEContent.length,
-            range: this._previousIMERange,
-            textRanges,
+            isCompositionStart: this._isCompositionStart,
             isCompositionEnd: !isUpdate,
-            segmentId,
         });
 
         if (isUpdate) {
-            if (!this._previousIMERange.collapsed) {
-                this._previousIMERange.collapsed = true;
+            if (this._isCompositionStart) {
+                this._isCompositionStart = false;
             }
 
             this._previousIMEContent = content;
@@ -161,7 +147,7 @@ export class IMEInputController extends Disposable {
     private _resetIME() {
         this._previousIMEContent = '';
 
-        this._previousIMERange = null;
+        this._isCompositionStart = true;
 
         this._imeInputManagerService.clearUndoRedoMutationParamsCache();
 

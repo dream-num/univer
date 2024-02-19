@@ -34,9 +34,11 @@ jobs:
             - name: 🚚 Get release type
               id: release-type
               run: |
-                  if [[ ${{ github.ref_name }} =~ -(alpha)\. ]]; then
+                  if [[ ${{ github.ref_name }} =~ -(alpha|beta|rc)\. ]]; then
                       extracted_type="${BASH_REMATCH[1]}"
                       echo "value=$extracted_type" >> $GITHUB_OUTPUT
+                  else
+                      echo "value=stable" >> $GITHUB_OUTPUT
                   fi
 
     release-npm:
@@ -70,9 +72,9 @@ jobs:
             - name: 🐙 Publish
               run: |
                   if [[ ${{ needs.prepare.outputs.release_type }} == "alpha" ]]; then
-                      pnpm publish --access public --tag ${{ needs.prepare.outputs.release_type }} -r
+                      pnpm publish --access public --tag ${{ needs.prepare.outputs.release_type }} -r --no-git-checks
                   else
-                      pnpm publish --access public -r
+                      pnpm publish --access public -r --no-git-checks
                   fi
               env:
                   NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -109,9 +111,9 @@ jobs:
             - name: 🐙 Publish
               run: |
                   if [[ ${{ needs.prepare.outputs.release_type }} == "alpha" ]]; then
-                      pnpm publish --access public --tag ${{ needs.prepare.outputs.release_type }} -r
+                      pnpm publish --access public --tag ${{ needs.prepare.outputs.release_type }} -r --no-git-checks
                   else
-                      pnpm publish --access public -r
+                      pnpm publish --access public -r --no-git-checks
                   fi
               env:
                   NODE_AUTH_TOKEN: ${{ secrets.VERDACCIO_TOKEN }}

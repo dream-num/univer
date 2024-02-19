@@ -17,7 +17,7 @@
 import type { IRangeWithCoord, ISelectionCellWithCoord, Nullable, ThemeService } from '@univerjs/core';
 import { ColorKit, RANGE_TYPE } from '@univerjs/core';
 import type { Scene } from '@univerjs/engine-render';
-import { DEFAULT_SELECTION_LAYER_INDEX, FIX_ONE_PIXEL_BLUR_OFFSET, Group, Rect, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
+import { cancelRequestFrame, DEFAULT_SELECTION_LAYER_INDEX, FIX_ONE_PIXEL_BLUR_OFFSET, Group, Rect, requestNewFrame, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
 import type { ISelectionStyle, ISelectionWidgetConfig, ISelectionWithCoordAndStyle } from '@univerjs/sheets';
 import {
     getNormalSelectionStyle,
@@ -398,6 +398,8 @@ export class SelectionShape {
             AutofillStroke = defaultStyle.AutofillStroke!,
 
             strokeDash,
+
+            isAnimationDash,
         } = style;
 
         let {
@@ -474,6 +476,7 @@ export class SelectionShape {
 
         if (strokeDash == null) {
             this.dashRect.hide();
+            this._stopAntLineAnimation();
         } else {
             const dashRectWidth = style.strokeWidth * 4;
             this.dashRect.transformByState({
@@ -487,6 +490,12 @@ export class SelectionShape {
             this.dashRect.setProps({
                 strokeDashArray: [0, strokeDash / scale],
             });
+
+            this._stopAntLineAnimation();
+
+            if (isAnimationDash !== false) {
+                this._startAntLineAnimation();
+            }
 
             this.dashRect.show();
         }
@@ -1064,5 +1073,28 @@ export class SelectionShape {
     private _getScale() {
         const { scaleX, scaleY } = this._scene.getAncestorScale();
         return Math.max(scaleX, scaleY);
+    }
+
+    private _antLineOffset = 0;
+
+    private _antRequestNewFrame: number = -1;
+
+    private _stopAntLineAnimation() {
+        this._antLineOffset = 0;
+        cancelRequestFrame(this._antRequestNewFrame);
+    }
+
+    private _startAntLineAnimation() {
+        const scale = this._getScale();
+        this._antLineOffset += 0.5 / scale;
+        if (this._antLineOffset > 16 / scale) {
+            this._antLineOffset = 0;
+        }
+        this.dashRect.setProps({
+            strokeDashOffset: -this._antLineOffset,
+        });
+        this._antRequestNewFrame = requestNewFrame(() => {
+            this._startAntLineAnimation();
+        });
     }
 }

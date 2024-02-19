@@ -22,10 +22,10 @@ importers:
         version: 1.41.2
       '@release-it-plugins/workspaces':
         specifier: ^4.2.0
-        version: 4.2.0(release-it@17.1.0)
+        version: 4.2.0(release-it@17.1.1)
       '@release-it/conventional-changelog':
         specifier: ^8.0.1
-        version: 8.0.1(release-it@17.1.0)
+        version: 8.0.1(release-it@17.1.1)
       '@storybook/addon-docs':
         specifier: ^7.6.10
         version: 7.6.10(@types/react@18.2.53)(react-dom@18.2.0)(react@18.2.0)
@@ -96,8 +96,8 @@ importers:
         specifier: ^18.2.0
         version: 18.2.0(react@18.2.0)
       release-it:
-        specifier: ^17.1.0
-        version: 17.1.0(typescript@5.3.3)
+        specifier: ^17.1.1
+        version: 17.1.1(typescript@5.3.3)
       storybook:
         specifier: ^7.6.10
         version: 7.6.10
@@ -4449,7 +4449,7 @@ packages:
     resolution: {integrity: sha512-/RVXdLvJxLg4QKvMoM5WlwNR9ViO9z8B/qPcc+C0Sa/teJY7QG7kJ441DwzOjMYEY7GmU4dj5EcGHIkKZiQZCA==}
     dev: false
 
-  /@release-it-plugins/workspaces@4.2.0(release-it@17.1.0):
+  /@release-it-plugins/workspaces@4.2.0(release-it@17.1.1):
     resolution: {integrity: sha512-hzQMdYWFnLBS/7dfasIWyeD2LUKeL7LT8ldxZgpzon90lW1cEU4Kpad78KmpZl1L188YHAbwVnboE+6i14jlEQ==}
     engines: {node: '>= 16'}
     peerDependencies:
@@ -4457,7 +4457,7 @@ packages:
     dependencies:
       detect-indent: 6.1.0
       detect-newline: 3.1.0
-      release-it: 17.1.0(typescript@5.3.3)
+      release-it: 17.1.1(typescript@5.3.3)
       semver: 7.6.0
       url-join: 4.0.1
       validate-peer-dependencies: 1.2.0
@@ -4465,7 +4465,7 @@ packages:
       yaml: 2.3.4
     dev: true
 
-  /@release-it/conventional-changelog@8.0.1(release-it@17.1.0):
+  /@release-it/conventional-changelog@8.0.1(release-it@17.1.1):
     resolution: {integrity: sha512-pwc9jaBYDaSX5TXw6rEnPfqDkKJN2sFBhYpON1kBi9T3sA9EOBncC4ed0Bv3L1ciNb6eqEJXPfp+tQMqVlv/eg==}
     engines: {node: '>=18'}
     peerDependencies:
@@ -4474,7 +4474,7 @@ packages:
       concat-stream: 2.0.0
       conventional-changelog: 5.1.0
       conventional-recommended-bump: 9.0.0
-      release-it: 17.1.0(typescript@5.3.3)
+      release-it: 17.1.1(typescript@5.3.3)
       semver: 7.6.0
     dev: true
 
@@ -4927,7 +4927,7 @@ packages:
       prompts: 2.4.2
       puppeteer-core: 2.1.1
       read-pkg-up: 7.0.1
-      semver: 7.5.4
+      semver: 7.6.0
       strip-json-comments: 3.1.1
       tempy: 1.0.1
       ts-dedent: 2.2.0
@@ -5069,7 +5069,7 @@ packages:
       pretty-hrtime: 1.0.3
       prompts: 2.4.2
       read-pkg-up: 7.0.1
-      semver: 7.5.4
+      semver: 7.6.0
       telejson: 7.2.0
       tiny-invariant: 1.3.1
       ts-dedent: 2.2.0
@@ -5871,7 +5871,7 @@ packages:
       globby: 11.1.0
       is-glob: 4.0.3
       minimatch: 9.0.3
-      semver: 7.5.4
+      semver: 7.6.0
       ts-api-utils: 1.0.3(typescript@5.3.3)
       typescript: 5.3.3
     transitivePeerDependencies:
@@ -5893,7 +5893,7 @@ packages:
       globby: 11.1.0
       is-glob: 4.0.3
       minimatch: 9.0.3
-      semver: 7.5.4
+      semver: 7.6.0
       ts-api-utils: 1.0.3(typescript@5.3.3)
       typescript: 5.3.3
     transitivePeerDependencies:
@@ -5913,7 +5913,7 @@ packages:
       '@typescript-eslint/types': 6.19.0
       '@typescript-eslint/typescript-estree': 6.19.0(typescript@5.3.3)
       eslint: 8.56.0
-      semver: 7.5.4
+      semver: 7.6.0
     transitivePeerDependencies:
       - supports-color
       - typescript
@@ -5932,7 +5932,7 @@ packages:
       '@typescript-eslint/types': 6.20.0
       '@typescript-eslint/typescript-estree': 6.20.0(typescript@5.3.3)
       eslint: 8.56.0
-      semver: 7.5.4
+      semver: 7.6.0
     transitivePeerDependencies:
       - supports-color
       - typescript
@@ -6747,7 +6747,7 @@ packages:
   /builtins@5.0.1:
     resolution: {integrity: sha512-qwVpFEHNfhYJIzNRBvd2C1kyo6jz3ZSMPyyuR47OPdiKWlbYnZNyDWuyR175qDnAJLiCo5fBBqPb3RiXgWlkOQ==}
     dependencies:
-      semver: 7.5.4
+      semver: 7.6.0
     dev: true
 
   /bundle-name@4.1.0:
@@ -8122,7 +8122,7 @@ packages:
       eslint: '>=6.0.0'
     dependencies:
       eslint: 8.56.0
-      semver: 7.5.4
+      semver: 7.6.0
     dev: true
 
   /eslint-config-flat-gitignore@0.1.2:
@@ -9137,7 +9137,7 @@ packages:
     dependencies:
       colorette: 2.0.20
       defu: 6.1.3
-      https-proxy-agent: 7.0.2
+      https-proxy-agent: 7.0.4
       mri: 1.2.0
       node-fetch-native: 1.4.1
       pathe: 1.1.1
@@ -9513,16 +9513,6 @@ packages:
     engines: {node: '>= 6.0.0'}
     dependencies:
       agent-base: 5.1.1
-      debug: 4.3.4
-    transitivePeerDependencies:
-      - supports-color
-    dev: true
-
-  /https-proxy-agent@7.0.2:
-    resolution: {integrity: sha512-NmLNjm6ucYwtcUmL7JQC1ZQ57LmHP4lT15FQ8D61nak1rO6DH+fz5qNK2Ap5UN4ZapYICE3/0KodcLYSPsPbaA==}
-    engines: {node: '>= 14'}
-    dependencies:
-      agent-base: 7.1.0
       debug: 4.3.4
     transitivePeerDependencies:
       - supports-color
@@ -10780,7 +10770,7 @@ packages:
     resolution: {integrity: sha512-hXdUTZYIVOt1Ex//jAQi+wTZZpUpwBj/0QsOzqegb3rGMMeJiSEu5xLHnYfBrRV4RH2+OCSOO95Is/7x1WJ4bw==}
     engines: {node: '>=10'}
     dependencies:
-      semver: 7.5.4
+      semver: 7.6.0
     dev: false
 
   /makeerror@1.0.12:
@@ -11185,7 +11175,7 @@ packages:
     dependencies:
       hosted-git-info: 4.1.0
       is-core-module: 2.13.1
-      semver: 7.5.4
+      semver: 7.6.0
       validate-npm-package-license: 3.0.4
     dev: true
 
@@ -12704,8 +12694,8 @@ packages:
       jsesc: 0.5.0
     dev: true
 
-  /release-it@17.1.0(typescript@5.3.3):
-    resolution: {integrity: sha512-1/vS82JuEVQt2mENqq9/9HQo48R/ECSxYDKhNd3JHnmoyYGaHQdN3ojHNvHgUD4mwJsxGANYNXZR7SCD6G/c6Q==}
+  /release-it@17.1.1(typescript@5.3.3):
+    resolution: {integrity: sha512-b+4Tu2eb5f2wIdIe5E9hre0evbMQrXp/kRq0natHsHYJVqu1Bd4/h2a+swFi0faGmC3cJdB16uYR6LscG9SchQ==}
     engines: {node: '>=18'}
     hasBin: true
     dependencies:
@@ -13013,7 +13003,6 @@ packages:
     hasBin: true
     dependencies:
       lru-cache: 6.0.0
-    dev: true
 
   /send@0.18.0:
     resolution: {integrity: sha512-qqWzuOjSFOuqPjFe4NOsMLafToQQwBSOEpS+FwEt3A2V3vKubTquT3vmLTQpFgMXp8AlFWFuP1qKaJZOtPpVXg==}

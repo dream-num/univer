@@ -214,7 +214,7 @@ export class DocumentDataModel extends DocumentDataModelSimple {
     }
 
     getRev(): number {
-        return this.snapshot.rev ?? 0;
+        return this.snapshot.rev ?? 1;
     }
 
     incrementRev(): void {

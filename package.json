@@ -30,7 +30,7 @@
     "devDependencies": {
         "@antfu/eslint-config": "^2.6.4",
         "@commitlint/cli": "^18.6.0",
-        "@commitlint/config-conventional": "^18.6.0",
+        "@commitlint/config-conventional": "^18.6.2",
         "@playwright/test": "^1.41.2",
         "@release-it-plugins/workspaces": "^4.2.0",
         "@release-it/conventional-changelog": "^8.0.1",

@@ -34,7 +34,7 @@
         "@playwright/test": "^1.41.2",
         "@release-it-plugins/workspaces": "^4.2.0",
         "@release-it/conventional-changelog": "^8.0.1",
-        "@storybook/addon-docs": "^7.6.10",
+        "@storybook/addon-docs": "^7.6.16",
         "@storybook/addon-essentials": "^7.6.10",
         "@storybook/addon-interactions": "^7.6.10",
         "@storybook/addon-links": "^7.6.10",

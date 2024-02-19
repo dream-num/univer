@@ -32,7 +32,6 @@ import {
     serializeRange,
 } from '@univerjs/engine-formula';
 import { DeviceInputEventType, IRenderManagerService, ITextSelectionRenderManager } from '@univerjs/engine-render';
-import type { EditorBridgeService } from '@univerjs/sheets-ui';
 import { getEditorObject, IEditorBridgeService } from '@univerjs/sheets-ui';
 import { KeyCode } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';

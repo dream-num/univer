@@ -73,7 +73,7 @@ import {
     NORMAL_SELECTION_PLUGIN_NAME,
     SelectionManagerService,
 } from '@univerjs/sheets';
-import type { EditorBridgeService, SelectionShape } from '@univerjs/sheets-ui';
+import type { SelectionShape } from '@univerjs/sheets-ui';
 import {
     ExpandSelectionCommand,
     getEditorObject,

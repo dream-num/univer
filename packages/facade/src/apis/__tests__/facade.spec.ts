@@ -27,11 +27,6 @@ import type { FUniver } from '../facade';
 import { createTestBed } from './create-test-bed';
 import { COLUMN_UNIQUE_KEY, ColumnHeaderCustomExtension, MAIN_UNIQUE_KEY, MainCustomExtension, ROW_UNIQUE_KEY, RowHeaderCustomExtension } from './utils/sheet-extension-util';
 
-// globalThis.HTMLCanvasElement.prototype.getContext = function () {
-//     const canvas = createCanvas(this.width, this.height);
-//     return canvas.getContext('2d');
-// };
-
 describe('Test FUniver', () => {
     let get: Injector['get'];
     let commandService: ICommandService;

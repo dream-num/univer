@@ -24,7 +24,9 @@ export class ColumnHeaderCustomExtension extends SheetExtension {
     override uKey = COLUMN_UNIQUE_KEY;
 
     // Must be greater than 10
-    override zIndex = 11;
+    override get zIndex() {
+        return 11;
+    }
 
     override draw(ctx: UniverRenderingContext, parentScale: IScale, spreadsheetSkeleton: SpreadsheetSkeleton) {
     }
@@ -36,7 +38,9 @@ export class RowHeaderCustomExtension extends SheetExtension {
     override uKey = ROW_UNIQUE_KEY;
 
     // Must be greater than 10
-    override zIndex = 11;
+    override get zIndex() {
+        return 11;
+    }
 
     override draw(ctx: UniverRenderingContext, parentScale: IScale, spreadsheetSkeleton: SpreadsheetSkeleton) {
     }
@@ -48,7 +52,9 @@ export class MainCustomExtension extends SheetExtension {
     override uKey = MAIN_UNIQUE_KEY;
 
     // Must be greater than 50
-    override zIndex = 51;
+    override get zIndex() {
+        return 51;
+    }
 
     override draw(ctx: UniverRenderingContext, parentScale: IScale, spreadsheetSkeleton: SpreadsheetSkeleton) {
     }

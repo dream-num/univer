@@ -180,6 +180,7 @@ export class FUniver {
 
         return toDisposable(() => {
             sheetComponent.unRegister(...extensions.map((ext) => ext.uKey));
+            sheetComponent.makeDirty(true);
         });
     }
 
@@ -194,6 +195,7 @@ export class FUniver {
 
         return toDisposable(() => {
             sheetComponent.unRegister(...extensions.map((ext) => ext.uKey));
+            sheetComponent.makeDirty(true);
         });
     }
 
@@ -208,6 +210,7 @@ export class FUniver {
 
         return toDisposable(() => {
             sheetComponent.unRegister(...extensions.map((ext) => ext.uKey));
+            sheetComponent.makeDirty(true);
         });
     }
 

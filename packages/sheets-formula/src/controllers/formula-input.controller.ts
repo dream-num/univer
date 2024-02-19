@@ -47,7 +47,7 @@ export class FormulaInputController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
-        @Inject(IEditorBridgeService) private readonly _editorBridgeService: EditorBridgeService,
+        @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
         @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IFormulaInputService private readonly _formulaInputService: IFormulaInputService,

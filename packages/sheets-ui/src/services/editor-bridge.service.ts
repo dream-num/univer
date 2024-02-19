@@ -71,6 +71,7 @@ const AFTER_CELL_EDIT = createInterceptorKey<ICellDataForSheetInterceptor, IShee
 export interface IEditorBridgeService {
     currentEditCellState$: Observable<Nullable<IEditorBridgeServiceParam>>;
     visible$: Observable<IEditorBridgeServiceVisibleParam>;
+    afterVisible$: Observable<IEditorBridgeServiceVisibleParam>;
     interceptor: InterceptorManager<{
         BEFORE_CELL_EDIT: typeof BEFORE_CELL_EDIT;
         AFTER_CELL_EDIT: typeof AFTER_CELL_EDIT;
@@ -89,6 +90,7 @@ export interface IEditorBridgeService {
     disableForceKeepVisible(): void;
     isForceKeepVisible(): boolean;
     getCurrentEditorId(): Nullable<string>;
+
 }
 
 export class EditorBridgeService extends Disposable implements IEditorBridgeService, IDisposable {

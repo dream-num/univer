@@ -150,7 +150,7 @@ export class PromptController extends Disposable {
         @ICommandService private readonly _commandService: ICommandService,
         @IContextService private readonly _contextService: IContextService,
         @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
-        @Inject(IEditorBridgeService) private readonly _editorBridgeService: EditorBridgeService,
+        @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
         @Inject(IFormulaPromptService) private readonly _formulaPromptService: IFormulaPromptService,
         @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,

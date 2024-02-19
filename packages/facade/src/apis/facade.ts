@@ -137,6 +137,17 @@ export class FUniver {
     // #region listeners
 
     /**
+     * Register a callback that will be triggered before invoking a command.
+     * @param callback the callback.
+     * @returns A function to dispose the listening.
+     */
+    onBeforeCommandExecute(callback: CommandListener): IDisposable {
+        return this._commandService.beforeCommandExecuted((command, options?: IExecutionOptions) => {
+            callback(command, options);
+        });
+    }
+
+    /**
      * Register a callback that will be triggered when a command is invoked.
      * @param callback the callback.
      * @returns A function to dispose the listening.

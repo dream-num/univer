@@ -116,6 +116,21 @@ export class FWorkbook {
     // #region callbacks
 
     /**
+     * Register a callback that will be triggered before invoking a command targeting the Univer sheet.
+     * @param callback the callback.
+     * @returns A function to dispose the listening.
+     */
+    onBeforeCommandExecute(callback: CommandListener): IDisposable {
+        return this._commandService.beforeCommandExecuted((command) => {
+            if ((command as ICommandInfo<ISheetCommandSharedParams>).params?.unitId !== this.id) {
+                return;
+            }
+
+            callback(command);
+        });
+    }
+
+    /**
      * Register a callback that will be triggered when a command is invoked targeting the Univer sheet.
      * @param callback the callback.
      * @returns A function to dispose the listening.

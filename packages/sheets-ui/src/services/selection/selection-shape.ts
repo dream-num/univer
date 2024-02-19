@@ -478,7 +478,7 @@ export class SelectionShape {
             this.dashRect.hide();
             this._stopAntLineAnimation();
         } else {
-            const dashRectWidth = style.strokeWidth * 4;
+            const dashRectWidth = style.strokeWidth * 2 / scale;
             this.dashRect.transformByState({
                 height: endY - startY,
                 width: endX - startX,
@@ -1086,7 +1086,7 @@ export class SelectionShape {
 
     private _startAntLineAnimation() {
         const scale = this._getScale();
-        this._antLineOffset += 0.5 / scale;
+        this._antLineOffset += 0.6 / scale;
         if (this._antLineOffset > 16 / scale) {
             this._antLineOffset = 0;
         }

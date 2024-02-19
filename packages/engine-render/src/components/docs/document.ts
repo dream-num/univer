@@ -465,10 +465,10 @@ export class Documents extends DocComponent {
         let offsetTop = 0;
         if (verticalAlign === VerticalAlign.MIDDLE) {
             offsetTop = (this.height - pageHeight) / 2;
-        } else if (verticalAlign === VerticalAlign.BOTTOM) {
-            offsetTop = this.height - pageHeight - pagePaddingBottom;
-        } else {
+        } else if (verticalAlign === VerticalAlign.TOP) {
             offsetTop = pagePaddingTop;
+        } else {
+            offsetTop = this.height - pageHeight - pagePaddingBottom;
         }
         return offsetTop;
     }

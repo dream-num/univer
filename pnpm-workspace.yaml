@@ -1,4 +1,4 @@
 packages:
-    - ./common/*
-    - ./packages/*
-    - ./examples
+    - common/*
+    - packages/*
+    - examples

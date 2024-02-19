@@ -23,6 +23,7 @@ export default {
         panel: {
             execute: 'Execute Script',
         },
+        example: 'Example',
     },
     uniscript: {
         message: {

@@ -18,8 +18,14 @@ import { Disposable, toDisposable } from '@univerjs/core';
 import type { IDisposable } from '@wendellhu/redi';
 import type { editor } from 'monaco-editor';
 
+export interface IExampleItem {
+    label: string;
+    value: string;
+}
+
 export interface IScriptEditorServiceConfig {
     getWorkerUrl(moduleID: string, label: string): string;
+    example: IExampleItem[];
 }
 
 /**
@@ -48,5 +54,9 @@ export class ScriptEditorService extends Disposable {
                 getWorkerUrl: this._config.getWorkerUrl,
             };
         }
+    }
+
+    getExample() {
+        return this._config.example;
     }
 }

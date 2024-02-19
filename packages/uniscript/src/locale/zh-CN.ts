@@ -23,6 +23,7 @@ export default {
         panel: {
             execute: '执行 Uniscript',
         },
+        example: '案例',
     },
     uniscript: {
         message: {

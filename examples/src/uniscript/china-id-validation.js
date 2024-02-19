@@ -57,7 +57,7 @@ function validIDNum(szID) {
 
 const redColor = 'rgb(240, 55, 31)';
 
-const activeSheet = univerAPI.getCurrentSheet().getActiveSheet();
+const activeSheet = univerAPI.getActiveWorkbook().getActiveSheet();
 const range = activeSheet.getRange(1, 1, 50, 1);
 const row = range.getRow();
 const col = range.getColumn();

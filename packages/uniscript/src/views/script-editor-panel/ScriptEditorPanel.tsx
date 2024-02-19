@@ -25,6 +25,7 @@ import React, { useCallback, useEffect, useRef } from 'react';
 
 import { ScriptEditorService } from '../../services/script-editor.service';
 import { UniscriptExecutionService } from '../../services/script-execution.service';
+import { ScriptExample } from '../script-example/ScriptExample';
 import styles from './index.module.less';
 
 export function ScriptEditorPanel() {
@@ -39,6 +40,12 @@ export function ScriptEditorPanel() {
     const editorService = useDependency(ScriptEditorService);
     const messageService = useDependency(IMessageService);
 
+    const options = editorService.getExample();
+
+    const getExampleValue = () => {
+        return options?.[0]?.value || '';
+    };
+
     useEffect(() => {
         const containerElement = editorContainerRef.current;
         const contentElement = editorContentRef.current;
@@ -49,7 +56,7 @@ export function ScriptEditorPanel() {
         if (containerElement && contentElement) {
             editorService.requireVscodeEditor();
             const monacoEditor = (monacoEditorRef.current = editor.create(containerElement, {
-                value: '',
+                value: getExampleValue(),
                 language: 'javascript',
             }));
 
@@ -111,16 +118,27 @@ export function ScriptEditorPanel() {
         }
     }, [scriptService]);
 
+    function onExampleChange(value: string) {
+        monacoEditorRef.current?.setValue(value);
+    }
+
     return (
+
         <div className={styles.scriptEditorPanel}>
+
+            {options?.length && <ScriptExample onChange={onExampleChange} options={options} />}
+
             <div className={styles.scriptEditorContent} ref={editorContentRef}>
                 <div className={styles.scriptEditorContainer} ref={editorContainerRef} />
             </div>
+
             <div className={styles.scriptEditorActions}>
                 <Button type="primary" size="small" onClick={startExecution}>
                     {localeService.t('script-panel.panel.execute')}
                 </Button>
+
             </div>
         </div>
+
     );
 }

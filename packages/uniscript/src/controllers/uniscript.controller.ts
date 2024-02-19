@@ -19,7 +19,7 @@ import { ComponentManager, IMenuService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { ScriptPanelComponentName, ToggleScriptPanelOperation } from '../commands/operations/panel.operation';
-import { ScriptEditorPanel } from '../views/components/ScriptEditorPanel';
+import { ScriptEditorPanel } from '../views/script-editor-panel/ScriptEditorPanel';
 import { UniscriptMenuItemFactory } from './menu';
 
 @OnLifecycle(LifecycleStages.Steady, UniscriptController)

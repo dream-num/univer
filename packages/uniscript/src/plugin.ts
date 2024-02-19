@@ -27,7 +27,7 @@ import { ScriptPanelService } from './services/script-panel.service';
 
 const PLUGIN_NAME = 'uniscript';
 
-export interface IUniscriptConfig extends IScriptEditorServiceConfig {}
+export interface IUniscriptConfig extends IScriptEditorServiceConfig { }
 
 export class UniverUniscriptPlugin extends Plugin {
     static override type = PluginType.Univer;

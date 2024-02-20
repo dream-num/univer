@@ -347,7 +347,7 @@ export default {
         },
     },
     ROW: {
-        description: 'セル参照の行番号を返します。',
+        description: '引数として指定された配列の行番号を返します。',
         abstract: 'セル参照の行番号を返します。',
         links: [
             {
@@ -356,8 +356,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            reference: { name: '範囲', detail: '行番号を調べるセルまたはセル範囲の参照を指定します。' },
         },
     },
     ROWS: {

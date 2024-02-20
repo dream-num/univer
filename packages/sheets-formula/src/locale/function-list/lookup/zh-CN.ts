@@ -345,7 +345,7 @@ export default {
         },
     },
     ROW: {
-        description: '返回引用的行号',
+        description: '返回引用的行号。',
         abstract: '返回引用的行号',
         links: [
             {
@@ -354,8 +354,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            reference: { name: '引用', detail: '需要得到其行号的单元格或单元格区域。' },
         },
     },
     ROWS: {

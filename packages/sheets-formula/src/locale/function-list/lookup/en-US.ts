@@ -367,8 +367,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            reference: { name: 'reference', detail: 'The cell or range of cells for which you want the row number.' },
         },
     },
     ROWS: {

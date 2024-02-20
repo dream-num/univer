@@ -16,32 +16,10 @@
 
 import { Subject } from 'rxjs';
 
-import type { Nullable } from '../../common/type-utils';
 import { Disposable, toDisposable } from '../../shared/lifecycle';
-import type { ILocales } from '../../shared/locale';
+import type { ILanguagePack, ILocales } from '../../shared/locale';
 import { Tools } from '../../shared/tools';
 import { LocaleType } from '../../types/enum/locale-type';
-
-/**
- * get value from Locale object and key
- * @param locale - A specified language pack
- * @param key - Specify key
- * @returns Get the translation corresponding to the Key
- *
- * @private
- */
-function getValue(locale: ILocales[LocaleType], key: string): Nullable<string> {
-    if (!locale) return;
-
-    try {
-        if (locale[key]) return locale[key] as string;
-
-        return key.split('.').reduce((a: any, b: string) => a[b], locale);
-    } catch (error) {
-        console.warn('Key %s not found', key);
-        return key;
-    }
-}
 
 /**
  * This service provides i18n and timezone / location features to other modules.
@@ -63,29 +41,74 @@ export class LocaleService extends Disposable {
      * Load more locales after init
      *
      * @param locales - Locale object
-     * @returns void
      *
      */
     load(locales: ILocales) {
         this._locales = Tools.deepMerge(this._locales ?? {}, locales);
     }
 
-    t = (key: string): string => {
+    /**
+     * Translate a key to the current locale
+     * @param {string} key the key to translate
+     * @param {string[]} args optional arguments to replace in the translated string
+     * @returns {string} the translated string
+     * @example
+     * const locales = {
+     *   [LocaleType.EN_US]: {
+     *     foo: {
+     *       bar: 'Hello'
+     *    }
+     * }
+     * t('foo.bar') => 'Hello'
+     *
+     * @example
+     * const locales = {
+     *   [LocaleType.EN_US]: {
+     *     foo: {
+     *       bar: 'Hello {0}'
+     *    }
+     * }
+     * t('foo.bar', 'World') => 'Hello World'
+     */
+    t = (key: string, ...args: string[]): string => {
         if (!this._locales) throw new Error('Locale not initialized');
 
-        return getValue(this._locales[this._currentLocale], key) ?? key;
+        function resolveKeyPath(obj: ILanguagePack | ILanguagePack[], keys: string[]): string | ILanguagePack | ILanguagePack[] | null {
+            const currentKey = keys.shift();
+
+            if (currentKey && obj && currentKey in obj) {
+                const nextObj = (obj as ILanguagePack)[currentKey];
+
+                if (keys.length > 0 && (typeof nextObj === 'object' || Array.isArray(nextObj))) {
+                    return resolveKeyPath(nextObj as ILanguagePack, keys);
+                } else {
+                    return nextObj;
+                }
+            }
+
+            return null;
+        }
+
+        const keys = key.split('.');
+        const resolvedValue = resolveKeyPath(this._locales[this._currentLocale], keys);
+
+        if (typeof resolvedValue === 'string') {
+            let result = resolvedValue;
+            args.forEach((arg, index) => {
+                result = result.replace(`{${index}}`, arg);
+            });
+            return result;
+        } else {
+            return key;
+        }
     };
 
-    setLocale(locale: LocaleType): void {
+    setLocale(locale: LocaleType) {
         this._currentLocale = locale;
         this.localeChanged$.next();
     }
 
     getLocales() {
         return this._locales?.[this._currentLocale];
-    }
-
-    getCurrentLocale() {
-        return this._currentLocale;
     }
 }

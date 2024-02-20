@@ -19,9 +19,11 @@ import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univ
 import type {
     IDirtyUnitFeatureMap,
     IDirtyUnitSheetNameMap,
+    INumfmtItemMap,
     ISetFormulaCalculationNotificationMutation,
 } from '@univerjs/engine-formula';
 import {
+    FormulaDataModel,
     FormulaExecutedStateType,
     SetFormulaCalculationNotificationMutation,
     SetFormulaCalculationStartMutation,
@@ -29,11 +31,13 @@ import {
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import {
     ClearSelectionFormatCommand,
+    INumfmtService,
     SetBorderCommand,
     SetRangeValuesMutation,
     SetStyleCommand,
 } from '@univerjs/sheets';
 
+import { Inject } from '@wendellhu/redi';
 import { IActiveDirtyManagerService } from '../services/active-dirty-manager.service';
 
 @OnLifecycle(LifecycleStages.Ready, TriggerCalculationController)
@@ -48,7 +52,9 @@ export class TriggerCalculationController extends Disposable {
 
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
-        @IActiveDirtyManagerService private readonly _activeDirtyManagerService: IActiveDirtyManagerService
+        @IActiveDirtyManagerService private readonly _activeDirtyManagerService: IActiveDirtyManagerService,
+        @Inject(INumfmtService) private readonly _numfmtService: INumfmtService,
+        @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel
     ) {
         super();
 
@@ -126,6 +132,7 @@ export class TriggerCalculationController extends Disposable {
         const allDirtyRanges: IUnitRange[] = [];
         const allDirtyNameMap: IDirtyUnitSheetNameMap = {};
         const allDirtyUnitFeatureMap: IDirtyUnitFeatureMap = {};
+        const numfmtItemMap: INumfmtItemMap = this._formulaDataModel.getNumfmtItemMap();
 
         for (const command of commands) {
             const conversion = this._activeDirtyManagerService.get(command.id);
@@ -151,10 +158,44 @@ export class TriggerCalculationController extends Disposable {
             }
         }
 
+        // number format data
+        allDirtyRanges.forEach((dirtyRange) => {
+            const { unitId, sheetId } = dirtyRange;
+
+            if (numfmtItemMap[unitId] == null) {
+                numfmtItemMap[unitId] = {};
+            }
+
+            if (numfmtItemMap[unitId]![sheetId] == null) {
+                numfmtItemMap[unitId]![sheetId] = {};
+            }
+
+            const numfmtModel = this._numfmtService.getModel(unitId, sheetId);
+
+            if (!numfmtModel) return;
+
+            const refMode = this._numfmtService.getRefModel(unitId);
+
+            numfmtModel.forValue((row, col, numfmtValue) => {
+                if (numfmtValue && refMode) {
+                    const refValue = refMode.getValue(numfmtValue?.i);
+
+                    if (!refValue) return;
+
+                    if (numfmtItemMap[unitId]![sheetId][row] == null) {
+                        numfmtItemMap[unitId]![sheetId][row] = {};
+                    }
+
+                    numfmtItemMap[unitId]![sheetId][row][col] = refValue.pattern;
+                }
+            });
+        });
+
         return {
             dirtyRanges: allDirtyRanges,
             dirtyNameMap: allDirtyNameMap,
             dirtyUnitFeatureMap: allDirtyUnitFeatureMap,
+            numfmtItemMap,
         };
     }
 

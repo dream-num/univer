@@ -17,6 +17,16 @@
 import { Disposable } from '@univerjs/core';
 
 export class ObjectClassType extends Disposable {
+    pattern: string = '';
+
+    getPattern() {
+        return this.pattern;
+    }
+
+    setPattern(pattern: string) {
+        this.pattern = pattern;
+    }
+
     isError() {
         return false;
     }

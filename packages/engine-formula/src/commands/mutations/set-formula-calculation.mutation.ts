@@ -20,6 +20,7 @@ import { CommandType } from '@univerjs/core';
 import type {
     IDirtyUnitFeatureMap,
     IDirtyUnitSheetNameMap,
+    INumfmtItemMap,
     IRuntimeOtherUnitDataType,
     IRuntimeUnitDataType,
 } from '../../basics/common';
@@ -30,6 +31,7 @@ export interface ISetFormulaCalculationStartMutation {
     dirtyNameMap: IDirtyUnitSheetNameMap;
     dirtyUnitFeatureMap: IDirtyUnitFeatureMap;
     options: Nullable<IExecutionOptions>;
+    numfmtItemMap: INumfmtItemMap;
     forceCalculation?: boolean;
 }
 /**

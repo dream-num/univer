@@ -29,14 +29,18 @@ import { BaseFunction } from '../../base-function';
 
 export class Indirect extends BaseFunction {
     override calculate(refText: BaseValueObject, a1?: BaseValueObject) {
+        if (refText == null) {
+            return new ErrorValueObject(ErrorType.NA);
+        }
+
+        if (refText.isError()) {
+            return refText;
+        }
+
         let a1Value = this.getZeroOrOneByOneDefault(a1);
 
         if (a1Value == null) {
             a1Value = 1;
-        }
-
-        if (refText.isError()) {
-            return new ErrorValueObject(ErrorType.NA);
         }
 
         if (refText.isArray()) {

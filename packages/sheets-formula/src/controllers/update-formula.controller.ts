@@ -50,6 +50,7 @@ import {
     serializeRangeToRefString,
     SetArrayFormulaDataMutation,
     SetFormulaDataMutation,
+    SetNumfmtFormulaDataMutation,
 } from '@univerjs/engine-formula';
 import type {
     IDeleteRangeMoveLeftCommandParams,
@@ -253,6 +254,7 @@ export class UpdateFormulaController extends Disposable {
         this._formulaDataModel.updateFormulaData(unitId, sheetId, cellValue);
         this._formulaDataModel.updateArrayFormulaCellData(unitId, sheetId, cellValue);
         this._formulaDataModel.updateArrayFormulaRange(unitId, sheetId, cellValue);
+        this._formulaDataModel.updateNumfmtData(unitId, sheetId, cellValue);
 
         this._commandService.executeCommand(
             SetFormulaDataMutation.id,
@@ -273,6 +275,16 @@ export class UpdateFormulaController extends Disposable {
             {
                 onlyLocal: true,
                 remove: true, // remove array formula range shape
+            }
+        );
+
+        this._commandService.executeCommand(
+            SetNumfmtFormulaDataMutation.id,
+            {
+                numfmtItemMap: this._formulaDataModel.getNumfmtItemMap(),
+            },
+            {
+                onlyLocal: true,
             }
         );
     }
@@ -378,6 +390,7 @@ export class UpdateFormulaController extends Disposable {
         if (result) {
             const { unitSheetNameMap } = this._formulaDataModel.getCalculateData();
             let oldFormulaData = this._formulaDataModel.getFormulaData();
+            const oldNumfmtItemMap = this._formulaDataModel.getNumfmtItemMap();
 
             // change formula reference
             const { newFormulaData: formulaData, refRanges } = this._getFormulaReferenceMoveInfo(
@@ -434,6 +447,12 @@ export class UpdateFormulaController extends Disposable {
             // Synchronous to the worker thread
             this._commandService.executeCommand(SetFormulaDataMutation.id, {
                 formulaData: this._formulaDataModel.getFormulaData(),
+            });
+
+            // offset numfmtItemMap
+            const offsetNumfmtItemMap = offsetFormula(oldNumfmtItemMap, command, unitId, sheetId, selections);
+            this._commandService.executeCommand(SetNumfmtFormulaDataMutation.id, {
+                numfmtItemMap: offsetNumfmtItemMap,
             });
 
             return this._getUpdateFormulaMutations(oldFormulaData, offsetFormulaData);

@@ -33,6 +33,10 @@ export class Xlookup extends BaseFunction {
         matchMode?: BaseValueObject,
         searchMode?: BaseValueObject
     ) {
+        if (lookupValue == null || lookupArray == null || returnArray == null) {
+            return new ErrorValueObject(ErrorType.NA);
+        }
+
         if (lookupValue.isError()) {
             return lookupValue;
         }
@@ -85,10 +89,10 @@ export class Xlookup extends BaseFunction {
             ifNotFound = new ErrorValueObject(ErrorType.NA);
         }
 
-        const matchModeVale = this.getIndexNumValue(matchMode || new NumberValueObject(0));
+        const matchModeValue = this.getIndexNumValue(matchMode || new NumberValueObject(0));
 
-        if (matchModeVale instanceof ErrorValueObject) {
-            return matchModeVale;
+        if (matchModeValue instanceof ErrorValueObject) {
+            return matchModeValue;
         }
 
         const searchModeValue = this.getIndexNumValue(searchMode || new NumberValueObject(1));
@@ -115,7 +119,7 @@ export class Xlookup extends BaseFunction {
                     value,
                     lookupArray,
                     resultArray!,
-                    matchModeVale,
+                    matchModeValue,
                     searchModeValue
                 );
 
@@ -132,7 +136,7 @@ export class Xlookup extends BaseFunction {
                 lookupValue,
                 lookupArray,
                 returnArray!,
-                matchModeVale,
+                matchModeValue,
                 searchModeValue
             );
 
@@ -156,7 +160,7 @@ export class Xlookup extends BaseFunction {
             lookupValue,
             lookupArray,
             returnArray,
-            matchModeVale,
+            matchModeValue,
             searchModeValue,
             axis
         );
@@ -196,11 +200,11 @@ export class Xlookup extends BaseFunction {
         value: BaseValueObject,
         searchArray: ArrayValueObject,
         resultArray: ArrayValueObject,
-        matchModeVale: number,
+        matchModeValue: number,
         searchModeValue: number,
         axis: number = 0
     ) {
-        if ((searchModeValue === 2 || searchModeValue === -2) && matchModeVale !== 2) {
+        if ((searchModeValue === 2 || searchModeValue === -2) && matchModeValue !== 2) {
             return this.binarySearchExpand(
                 value,
                 searchArray,
@@ -210,15 +214,15 @@ export class Xlookup extends BaseFunction {
             );
         }
 
-        if (matchModeVale === 2) {
+        if (matchModeValue === 2) {
             return this.fuzzySearchExpand(value, searchArray, resultArray, searchModeValue !== -1, axis);
         }
-        if (matchModeVale === -1 || matchModeVale === 1) {
+        if (matchModeValue === -1 || matchModeValue === 1) {
             return this.orderSearchExpand(
                 value,
                 searchArray,
                 resultArray,
-                matchModeVale === 1 ? ArrayOrderSearchType.MAX : ArrayOrderSearchType.MIN,
+                matchModeValue === 1 ? ArrayOrderSearchType.MAX : ArrayOrderSearchType.MIN,
                 searchModeValue === -1,
                 axis
             );
@@ -231,22 +235,22 @@ export class Xlookup extends BaseFunction {
         value: BaseValueObject,
         searchArray: ArrayValueObject,
         resultArray: ArrayValueObject,
-        matchModeVale: number,
+        matchModeValue: number,
         searchModeValue: number
     ) {
-        if ((searchModeValue === 2 || searchModeValue === -2) && matchModeVale !== 2) {
+        if ((searchModeValue === 2 || searchModeValue === -2) && matchModeValue !== 2) {
             return this.binarySearch(value, searchArray, resultArray, this._getSearchModeValue(searchModeValue));
         }
 
-        if (matchModeVale === 2) {
+        if (matchModeValue === 2) {
             return this.fuzzySearch(value, searchArray, resultArray, searchModeValue !== -1);
         }
-        if (matchModeVale === -1 || matchModeVale === 1) {
+        if (matchModeValue === -1 || matchModeValue === 1) {
             return this.orderSearch(
                 value,
                 searchArray,
                 resultArray,
-                matchModeVale === 1 ? ArrayOrderSearchType.MAX : ArrayOrderSearchType.MIN,
+                matchModeValue === 1 ? ArrayOrderSearchType.MAX : ArrayOrderSearchType.MIN,
                 searchModeValue === -1
             );
         }

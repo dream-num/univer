@@ -22,6 +22,10 @@ import { BaseFunction } from '../../base-function';
 
 export class Sumif extends BaseFunction {
     override calculate(range: BaseValueObject, criteria: BaseValueObject, sumRange?: BaseValueObject) {
+        if (range == null || criteria == null) {
+            return new ErrorValueObject(ErrorType.NA);
+        }
+
         if (range.isError() || criteria.isError() || sumRange?.isError()) {
             return new ErrorValueObject(ErrorType.NA);
         }

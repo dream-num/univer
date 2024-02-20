@@ -63,6 +63,9 @@ export class SuffixNode extends BaseAstNode {
                 value as BaseValueObject,
                 new NumberValueObject(100)
             ) as FunctionVariantType;
+
+            // set number format
+            result.setPattern('0.00%');
         } else if (this._operatorString === suffixToken.POUND) {
             result = this._handlerPound(value);
         } else {

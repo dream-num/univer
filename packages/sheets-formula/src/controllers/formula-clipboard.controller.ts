@@ -61,6 +61,7 @@ export class FormulaClipboardController extends Disposable {
     private _pasteFormulaHook(): ISheetClipboardHook {
         const specialPasteFormulaHook: ISheetClipboardHook = {
             id: SPECIAL_PASTE_FORMULA,
+            priority: 10,
             specialPasteInfo: {
                 label: 'specialPaste.formula',
             },
@@ -96,6 +97,7 @@ export class FormulaClipboardController extends Disposable {
     private _pasteWithFormulaHook(): ISheetClipboardHook {
         const specialPasteFormulaHook: ISheetClipboardHook = {
             id: DEFAULT_PASTE_FORMULA,
+            priority: 10,
             onPasteCells: (pasteFrom, pasteTo, data, payload) => {
                 const copyInfo = {
                     copyType: payload.copyType || COPY_TYPE.COPY,

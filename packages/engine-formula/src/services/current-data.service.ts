@@ -23,6 +23,7 @@ import type {
     IDirtyUnitSheetNameMap,
     IFormulaData,
     IFormulaDatasetConfig,
+    INumfmtItemMap,
     IRuntimeUnitDataType,
     ISheetData,
     IUnitData,
@@ -78,6 +79,8 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
 
     private _dirtyNameMap: IDirtyUnitSheetNameMap = {};
 
+    private _numfmtItemMap: INumfmtItemMap = {};
+
     private _dirtyUnitFeatureMap: IDirtyUnitFeatureMap = {};
 
     private _excludedCell: Nullable<IUnitExcludedCell>;
@@ -93,6 +96,7 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         this._sheetNameMap = {};
         this._dirtyRanges = [];
         this._dirtyNameMap = {};
+        this._numfmtItemMap = {};
         this._dirtyUnitFeatureMap = {};
         this._excludedCell = {};
     }
@@ -129,6 +133,10 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         return this._dirtyNameMap;
     }
 
+    getNumfmtItemMap() {
+        return this._numfmtItemMap;
+    }
+
     getDirtyUnitFeatureMap() {
         return this._dirtyUnitFeatureMap;
     }
@@ -154,6 +162,8 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         this._dirtyRanges = config.dirtyRanges;
 
         this._dirtyNameMap = config.dirtyNameMap;
+
+        this._numfmtItemMap = config.numfmtItemMap;
 
         this._dirtyUnitFeatureMap = config.dirtyUnitFeatureMap;
 

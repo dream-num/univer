@@ -313,7 +313,7 @@ export default {
         },
     },
     MATCH: {
-        description: '在引用或数组中查找值',
+        description: '使用 MATCH 函数在 范围 单元格中搜索特定的项，然后返回该项在此区域中的相对位置。 例如，如果 A1:A3 区域中包含值 5、25 和 38，那么公式 =MATCH(25,A1:A3,0) 返回数字 2，因为 25 是该区域中的第二项。',
         abstract: '在引用或数组中查找值',
         links: [
             {
@@ -322,8 +322,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            lookupValue: { name: '查找值', detail: '要在 lookup_array 中匹配的值。 例如，如果要在电话簿中查找某人的电话号码，则应该将姓名作为查找值，但实际上需要的是电话号码。lookup_value 参数可以为值（数字、文本或逻辑值）或对数字、文本或逻辑值的单元格引用。' },
+            lookupArray: { name: '搜索区域', detail: '要搜索的单元格区域。' },
+            matchType: { name: '匹配类型', detail: '数字 -1、0 或 1。 match_type 参数指定 Excel 如何将 lookup_value 与 lookup_array 中的值匹配。 此参数的默认值为 1。' },
         },
     },
     OFFSET: {
@@ -586,8 +587,8 @@ export default {
         },
     },
     XMATCH: {
-        description: '返回项目在数组或单元格区域中的相对位置。&nbsp;',
-        abstract: '返回项目在数组或单元格区域中的相对位置。&nbsp;',
+        description: '在数组或单元格区域中搜索指定项，然后返回项的相对位置。',
+        abstract: '返回项目在数组或单元格区域中的相对位置。',
         links: [
             {
                 title: '教学',
@@ -595,8 +596,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            lookupValue: { name: '查找值', detail: '查找值' },
+            lookupArray: { name: '搜索区域', detail: '要搜索的数组或区域' },
+            matchMode: { name: '匹配类型', detail: '指定匹配类型：\n0 - 完全匹配（默认值）\n-1 - 完全匹配或下一个最小项\n1 - 完全匹配或下一个最大项\n2 - 通配符匹配，其中 *, ? 和 ~ 有特殊含义。' },
+            searchMode: { name: '搜索类型', detail: '指定搜索类型：\n1 - 搜索从第一到最后一个（默认值）\n-1 - 搜索从最后到第一个（反向搜索）。\n2 - 执行依赖于 lookup_array 按升序排序的二进制搜索。 如果未排序，将返回无效结果。\n2 - 执行依赖于 lookup_array 按降序排序的二进制搜索。 如果未排序，将返回无效结果。' },
         },
     },
 };

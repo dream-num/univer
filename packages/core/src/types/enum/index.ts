@@ -36,3 +36,4 @@ export * from './data-validation-error-style';
 export * from './data-validation-ime-mode';
 export * from './data-validation-operator';
 export * from './data-validation-type';
+export * from './data-validation-status';

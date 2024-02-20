@@ -15,3 +15,43 @@
  */
 
 export { DataValidationPlugin } from './plugin';
+export { type IDataValidatorProvider, DataValidatorService, IDataValidatorService, type IRulePosition } from './services/data-validator.service';
+export { DataValidatorRegistryService } from './services/data-validator-registry.service';
+export { DataValidationModel } from './models/data-validation-model';
+export {
+    OpenValidationPanelOperation,
+    CloseValidationPanelOperation,
+    ToggleValidationPanelOperation,
+    DataValidationPanelName,
+} from './commands/operations/data-validation.operation';
+
+export {
+    AddDataValidationCommand,
+    RemoveDataValidationCommand,
+    UpdateDataValidationCommand,
+    RemoveAllDataValidationCommand,
+} from './commands/commands/data-validation.command';
+
+export type {
+    IRemoveAllDataValidationCommand,
+    IRemoveDataValidationCommandParams,
+    IUpdateDataValidationCommand,
+} from './commands/commands/data-validation.command';
+
+export {
+    AddDataValidationMutation,
+    RemoveAllDataValidationMutationMutation,
+    RemoveDataValidationMutation,
+    ReplaceDataValidationMutation,
+    UpdateDataValidationMutation,
+} from './commands/mutations/data-validation.mutation';
+
+export type {
+    IAddDataValidationMutationParams,
+    IRemoveAllDataValidationMutationParams,
+    IRemoveDataValidationMutationParams,
+    IReplaceDataValidationMutationParams,
+    IUpdateDataValidationMutationParams,
+} from './commands/mutations/data-validation.mutation';
+
+export * from './types';

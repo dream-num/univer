@@ -14,20 +14,52 @@
  * limitations under the License.
  */
 
-import { CommandType, type ICommand } from '@univerjs/core';
+import { CommandType, type ICommand, ICommandService } from '@univerjs/core';
+import { ISidebarService } from '@univerjs/ui';
+import { DataValidationPanelService } from '../../services/data-validation-panel';
 
-export const OpenValidationDrawerOperation: ICommand = {
-    id: 'ui.operation.open-validation-drawer',
+export const DataValidationPanelName = 'DataValidationPanel';
+
+export const OpenValidationPanelOperation: ICommand = {
+    id: 'data-validation.operation.open-validation-panel',
     type: CommandType.OPERATION,
-    handler(accessor, params) {
+    handler(accessor) {
+        const dataValidationPanelService = accessor.get(DataValidationPanelService);
+        const sidebarService = accessor.get(ISidebarService);
+        dataValidationPanelService.open();
+        sidebarService.open({
+            header: { title: 'data-validation-panel.title' },
+            children: { label: DataValidationPanelName },
+            width: 600,
+        });
         return true;
     },
 };
 
-export const CloseValidationDrawerOperation: ICommand = {
-    id: 'ui.operation.close-validation-drawer',
+export const CloseValidationPanelOperation: ICommand = {
+    id: 'data-validation.operation.close-validation-panel',
     type: CommandType.OPERATION,
-    handler(accessor, params) {
+    handler(accessor) {
+        const dataValidationPanelService = accessor.get(DataValidationPanelService);
+        dataValidationPanelService.close();
+        return true;
+    },
+};
+
+export const ToggleValidationPanelOperation: ICommand = {
+    id: 'data-validation.operation.toggle-validation-panel',
+    type: CommandType.OPERATION,
+    handler(accessor) {
+        const commandService = accessor.get(ICommandService);
+        const dataValidationPanelService = accessor.get(DataValidationPanelService);
+        dataValidationPanelService.open();
+        const isOpen = dataValidationPanelService.isOpen;
+
+        if (isOpen) {
+            commandService.executeCommand(CloseValidationPanelOperation.id);
+        } else {
+            commandService.executeCommand(OpenValidationPanelOperation.id);
+        }
         return true;
     },
 };

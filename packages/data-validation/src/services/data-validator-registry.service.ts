@@ -18,7 +18,10 @@ import { toDisposable } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
 import type { IDataValidator } from '../types';
 
-export class DataValidatorRegisterService {
+/**
+ * Register data validator
+ */
+export class DataValidatorRegistryService {
     private _validatorByScopes = new Map<string, Array<IDataValidator>>();
 
     private _validatorMap = new Map<string, IDataValidator>();

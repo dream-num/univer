@@ -14,13 +14,5 @@
  * limitations under the License.
  */
 
-export enum DataValidationType {
-    CUSTOM = 'custom',
-    DATE = 'date',
-    DECIMAL = 'decimal',
-    LIST = 'list',
-    NONE = 'none',
-    TEXT_LENGTH = 'textLength',
-    TIME = 'time',
-    WHOLE = 'whole',
-}
+export { UniverSheetsDataValidationPlugin } from './plugin';
+// export {} from './'

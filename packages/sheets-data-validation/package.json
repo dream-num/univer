@@ -1,5 +1,5 @@
 {
-    "name": "@univerjs/data-validation",
+    "name": "@univerjs/sheets-data-validation",
     "version": "0.1.0-beta.4",
     "private": false,
     "description": "",
@@ -44,13 +44,25 @@
         "build": "tsc && vite build"
     },
     "peerDependencies": {
-        "@univerjs/core": "*",
+        "@univerjs/core": "workspace:*",
+        "@univerjs/data-validation": "workspace:*",
+        "@univerjs/design": "workspace:*",
+        "@univerjs/sheets": "workspace:*",
+        "@univerjs/ui": "workspace:*",
         "@wendellhu/redi": "^0.13.0",
+        "clsx": ">=2.0.0",
+        "react": ">=16.9.0",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/core": "*",
+        "@univerjs/core": "workspace:*",
+        "@univerjs/data-validation": "workspace:*",
+        "@univerjs/design": "workspace:*",
+        "@univerjs/icons": "^0.1.26",
+        "@univerjs/ui": "workspace:*",
         "@wendellhu/redi": "^0.13.0",
+        "clsx": "^2.1.0",
+        "react": "^18.2.0",
         "rxjs": "^7.8.1"
     },
     "devDependencies": {
@@ -70,7 +82,10 @@
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "@univerjs/uniscript": "workspace:*",
+        "@vitejs/plugin-react": "^4.2.1",
         "@vitest/coverage-istanbul": "^1.2.1",
+        "happy-dom": "^13.0.0",
+        "less": "^4.2.0",
         "typescript": "^5.3.3",
         "vite": "^5.0.11",
         "vite-plugin-dts": "^3.7.1",

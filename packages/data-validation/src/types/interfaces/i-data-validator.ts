@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { DataValidationOperator, IDataValidationRule } from '@univerjs/core';
+import type { CellValue, DataValidationOperator, DataValidationStatus, IDataValidationRule, Nullable } from '@univerjs/core';
 
 export interface IFormulaInputProps {
     value?: string;
@@ -26,11 +26,17 @@ export interface IDataValidator {
      * validator type
      */
     id: string;
+    /**
+     * title of validator
+     */
     title: string;
     /**
      * supported operators
      */
     operators: DataValidationOperator[];
+    /**
+     * default error text, generator from current rule
+     */
     defaultErrorText: (rule: IDataValidationRule) => string;
     /**
      * custom formula input,
@@ -41,4 +47,11 @@ export interface IDataValidator {
      * validator effect scopes: sheet/doc/slide
      */
     scopes: string[] | string;
+    /**
+     * validator function
+     * @param data current data
+     * @param rule current rule
+     * @returns isValid
+     */
+    validator: (data: Nullable<CellValue>, rule: IDataValidationRule) => DataValidationStatus;
 }

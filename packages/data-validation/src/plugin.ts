@@ -14,12 +14,45 @@
  * limitations under the License.
  */
 
-import { Plugin } from '@univerjs/core';
-import type { Injector } from '@wendellhu/redi';
+import { ICommandService, Plugin } from '@univerjs/core';
+import type { Dependency } from '@wendellhu/redi';
+import { Inject, Injector } from '@wendellhu/redi';
+import { DataValidatorRegistryService } from './services/data-validator-registry.service';
+import { IDataValidatorService } from './services/data-validator.service';
+import { DataValidationModel } from './models/data-validation-model';
+import { DataValidationPanelService } from './services/data-validation-panel';
+import { CloseValidationPanelOperation, OpenValidationPanelOperation, ToggleValidationPanelOperation } from './commands/operations/data-validation.operation';
+
+const PLUGIN_NAME = 'data-validation';
 
 export class DataValidationPlugin extends Plugin {
-    protected _injector: Injector;
-    constructor(params: any) {
-        super(params);
+    constructor(
+        @Inject(Injector) protected _injector: Injector,
+        @ICommandService private _commandService: ICommandService
+    ) {
+        super(PLUGIN_NAME);
+    }
+
+    override onStarting(injector: Injector): void {
+        ([
+            // model
+            [DataValidationModel],
+            // service
+            [DataValidatorRegistryService],
+            [IDataValidatorService],
+            [DataValidationPanelService],
+        ] as Dependency[]).forEach(
+            (d) => {
+                injector.add(d);
+            }
+        );
+
+        [
+            CloseValidationPanelOperation,
+            OpenValidationPanelOperation,
+            ToggleValidationPanelOperation,
+        ].forEach((command) => {
+            this._commandService.registerCommand(command);
+        });
     }
 }

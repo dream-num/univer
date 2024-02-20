@@ -18,6 +18,7 @@ import type { Nullable } from '../../shared/types';
 import { CellValueType } from '../enum/text-style';
 import type { IDocumentData } from './i-document-data';
 import type { IStyleData } from './i-style-data';
+import type { ICellValidationData } from './i-cell-validation-data';
 
 /**
  * Cell value type
@@ -48,6 +49,7 @@ export interface ICellData {
 export interface ICellDataForSheetInterceptor extends ICellData {
     interceptorStyle?: Nullable<IStyleData>;
     isInArrayFormulaRange?: Nullable<boolean>;
+    dataValidation?: Nullable<ICellValidationData>;
 }
 
 export function isICellData(value: any): value is ICellData {

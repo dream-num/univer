@@ -20,14 +20,15 @@ import type { DataValidationImeMode } from '../enum/data-validation-ime-mode';
 import type { DataValidationErrorStyle } from '../enum/data-validation-error-style';
 import type { IRange } from './i-range';
 
-export interface IDataValidationRule {
-    uid: string;
-    /**
-     * effective range,
-     * using any to fit different range type on sheet or doc
-     */
-    range: any;
+export interface IDataValidationRuleBase {
+    type: DataValidationType;
     allowBlank?: boolean;
+    formula1?: string;
+    formula2?: string;
+    operator: DataValidationOperator;
+}
+
+export interface IDataValidationRuleOptions {
     error?: string;
     errorStyle?: DataValidationErrorStyle;
     errorTitle?: string;
@@ -37,12 +38,13 @@ export interface IDataValidationRule {
     showDropDown?: boolean;
     showErrorMessage?: boolean;
     showInputMessage?: boolean;
-    type: DataValidationType;
-    formula1?: string;
-    formula2?: string;
-    operator: DataValidationOperator;
+}
+
+export interface IDataValidationRule extends IDataValidationRuleBase, IDataValidationRuleOptions {
+    uid: string;
+    ranges: any;
 }
 
 export interface ISheetDataValidationRule extends IDataValidationRule {
-    range: IRange[];
+    ranges: IRange[];
 }

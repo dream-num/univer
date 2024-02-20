@@ -129,5 +129,4 @@ export * from './slides/domain';
 export * from './types/const';
 export * from './types/enum';
 export * from './types/interfaces';
-
 installShims();

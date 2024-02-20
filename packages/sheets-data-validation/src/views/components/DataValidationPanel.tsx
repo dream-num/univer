@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-import type { ISheetDataValidationRule } from '../types/interfaces';
-import { DataValidationManager } from '../shared/data-validation-manager';
+import React from 'react';
 
-export class SheetDataValidationManager extends DataValidationManager<ISheetDataValidationRule> {
-
-}
+export const DataValidationPanel = () => {
+    return (
+        <div>
+            DataValidationPanel
+        </div>
+    );
+};

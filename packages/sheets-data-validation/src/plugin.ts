@@ -14,4 +14,15 @@
  * limitations under the License.
  */
 
-export class BaseValidator {}
+import { Plugin } from '@univerjs/core';
+import { Inject, Injector } from '@wendellhu/redi';
+
+const PLUGIN_NAME = 'sheets-data-validation';
+
+export class UniverSheetsDataValidationPlugin extends Plugin {
+    constructor(
+        @Inject(Injector) protected _injector: Injector
+    ) {
+        super(PLUGIN_NAME);
+    }
+}

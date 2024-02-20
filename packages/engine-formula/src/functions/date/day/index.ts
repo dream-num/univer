@@ -27,41 +27,41 @@ export class Day extends BaseFunction {
             return new ErrorValueObject(ErrorType.NA);
         }
 
-        if (serialNumber.isError()) {
-            return serialNumber;
-        }
-
         if (serialNumber.isArray()) {
             return serialNumber.map((serialNumberObject) => {
-                if (serialNumberObject.isError()) {
-                    return serialNumberObject;
-                }
-
-                if (serialNumberObject.isString() || serialNumberObject.isNull()) {
-                    return new ErrorValueObject(ErrorType.VALUE);
-                }
-
-                const dateSerial = +serialNumberObject.getValue();
-
-                if (dateSerial < 0) {
-                    return new ErrorValueObject(ErrorType.NUM);
-                }
-
-                // Excel serial 0 is 1900-01-00
-                // Google Sheets serial 0 is 1899-12-30
-                if (dateSerial === 0) {
-                    return new NumberValueObject(0);
-                }
-
-                const date = excelSerialToDate(dateSerial);
-
-                const month = date.getDate();
-                const valueObject = new NumberValueObject(month);
-
-                return valueObject;
+                return this._handleSingleObject(serialNumberObject);
             });
         }
 
-        return new NumberValueObject(excelSerialToDate(+serialNumber.getValue()).getDate());
+        return this._handleSingleObject(serialNumber);
+    }
+
+    private _handleSingleObject(serialNumberObject: BaseValueObject) {
+        if (serialNumberObject.isError()) {
+            return serialNumberObject;
+        }
+
+        if (serialNumberObject.isString()) {
+            return new ErrorValueObject(ErrorType.VALUE);
+        }
+
+        const dateSerial = +serialNumberObject.getValue();
+
+        if (dateSerial < 0) {
+            return new ErrorValueObject(ErrorType.NUM);
+        }
+
+        // Excel serial 0 is 1900-01-00
+        // Google Sheets serial 0 is 1899-12-30
+        if (dateSerial === 0) {
+            return new NumberValueObject(0);
+        }
+
+        const date = excelSerialToDate(dateSerial);
+
+        const month = date.getDate();
+        const valueObject = new NumberValueObject(month);
+
+        return valueObject;
     }
 }

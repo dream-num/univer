@@ -106,7 +106,7 @@ export default {
         },
     },
     COLUMN: {
-        description: 'Returns the column number of a reference',
+        description: 'Returns the column number of the given cell reference.',
         abstract: 'Returns the column number of a reference',
         links: [
             {
@@ -115,8 +115,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            reference: { name: 'reference', detail: 'The cell or range of cells for which you want to return the column number.' },
         },
     },
     COLUMNS: {

@@ -155,17 +155,10 @@ export const FUNCTION_LIST_LOOKUP: IFunctionInfo[] = [
         abstract: 'formula.functionList.COLUMN.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.COLUMN.functionParameter.number1.name',
-                detail: 'formula.functionList.COLUMN.functionParameter.number1.detail',
+                name: 'formula.functionList.COLUMN.functionParameter.reference.name',
+                detail: 'formula.functionList.COLUMN.functionParameter.reference.detail',
                 example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-            {
-                name: 'formula.functionList.COLUMN.functionParameter.number2.name',
-                detail: 'formula.functionList.COLUMN.functionParameter.number2.detail',
-                example: 'A1:A20',
-                require: 1,
+                require: 0,
                 repeat: 0,
             },
         ],

@@ -95,7 +95,7 @@ export default {
         },
     },
     COLUMN: {
-        description: 'セル参照の列番号を返します。',
+        description: '指定された セル参照の列番号を返します。',
         abstract: 'セル参照の列番号を返します。',
         links: [
             {
@@ -104,8 +104,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            reference: { name: '範囲', detail: '列番号を調べるセルまたは範囲を指定します。' },
         },
     },
     COLUMNS: {

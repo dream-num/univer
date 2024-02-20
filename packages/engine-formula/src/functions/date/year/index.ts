@@ -27,41 +27,41 @@ export class Year extends BaseFunction {
             return new ErrorValueObject(ErrorType.NA);
         }
 
-        if (serialNumber.isError()) {
-            return serialNumber;
-        }
-
         if (serialNumber.isArray()) {
-            return serialNumber.map((serialNumberObject, rowIndex, columnIndex) => {
-                if (serialNumberObject.isError()) {
-                    return serialNumberObject;
-                }
-
-                if (serialNumberObject.isString()) {
-                    return new ErrorValueObject(ErrorType.VALUE);
-                }
-
-                const dateSerial = +serialNumberObject.getValue();
-
-                if (dateSerial < 0) {
-                    return new ErrorValueObject(ErrorType.NUM);
-                }
-
-                // Excel serial 0 is 1900-01-00
-                // Google Sheets serial 0 is 1899-12-30
-                if (dateSerial === 0) {
-                    return new NumberValueObject(1900);
-                }
-
-                const date = excelSerialToDate(dateSerial);
-
-                const year = date.getUTCFullYear();
-                const valueObject = new NumberValueObject(year);
-
-                return valueObject;
+            return serialNumber.map((serialNumberObject) => {
+                return this._handleSingleObject(serialNumberObject);
             });
         }
 
-        return new NumberValueObject(excelSerialToDate(+serialNumber.getValue()).getUTCFullYear());
+        return this._handleSingleObject(serialNumber);
+    }
+
+    private _handleSingleObject(serialNumberObject: BaseValueObject) {
+        if (serialNumberObject.isError()) {
+            return serialNumberObject;
+        }
+
+        if (serialNumberObject.isString()) {
+            return new ErrorValueObject(ErrorType.VALUE);
+        }
+
+        const dateSerial = +serialNumberObject.getValue();
+
+        if (dateSerial < 0) {
+            return new ErrorValueObject(ErrorType.NUM);
+        }
+
+        // Excel serial 0 is 1900-01-00
+        // Google Sheets serial 0 is 1899-12-30
+        if (dateSerial === 0) {
+            return new NumberValueObject(1900);
+        }
+
+        const date = excelSerialToDate(dateSerial);
+
+        const year = date.getUTCFullYear();
+        const valueObject = new NumberValueObject(year);
+
+        return valueObject;
     }
 }

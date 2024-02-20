@@ -96,7 +96,7 @@ export default {
         },
     },
     COLUMN: {
-        description: '返回引用的列号',
+        description: '返回给定单元格引用的列号。',
         abstract: '返回引用的列号',
         links: [
             {
@@ -105,8 +105,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            reference: { name: '引用', detail: '要返回其列号的单元格或单元格范围。' },
         },
     },
     COLUMNS: {
@@ -345,7 +344,7 @@ export default {
         },
     },
     ROW: {
-        description: '返回引用的行号。',
+        description: '返回给定单元格引用的行号。',
         abstract: '返回引用的行号',
         links: [
             {

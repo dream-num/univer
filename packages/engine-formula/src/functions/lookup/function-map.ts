@@ -15,6 +15,7 @@
  */
 
 import { Address } from './address';
+import { Column } from './column';
 import { FUNCTION_NAMES_LOOKUP } from './function-names';
 import { Hlookup } from './hlookup';
 import { Indirect } from './indirect';
@@ -28,6 +29,7 @@ import { Xmatch } from './xmatch';
 
 export const functionLookup = [
     [Address, FUNCTION_NAMES_LOOKUP.ADDRESS],
+    [Column, FUNCTION_NAMES_LOOKUP.COLUMN],
     [Indirect, FUNCTION_NAMES_LOOKUP.INDIRECT],
     [Offset, FUNCTION_NAMES_LOOKUP.OFFSET],
     [Row, FUNCTION_NAMES_LOOKUP.ROW],

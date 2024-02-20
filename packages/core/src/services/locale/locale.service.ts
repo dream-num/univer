@@ -47,6 +47,29 @@ export class LocaleService extends Disposable {
         this._locales = Tools.deepMerge(this._locales ?? {}, locales);
     }
 
+    /**
+     * Translate a key to the current locale
+     * @param {string} key the key to translate
+     * @param {string[]} args optional arguments to replace in the translated string
+     * @returns {string} the translated string
+     * @example
+     * const locales = {
+     *   [LocaleType.EN_US]: {
+     *     foo: {
+     *       bar: 'Hello'
+     *    }
+     * }
+     * t('foo.bar') => 'Hello'
+     *
+     * @example
+     * const locales = {
+     *   [LocaleType.EN_US]: {
+     *     foo: {
+     *       bar: 'Hello {0}'
+     *    }
+     * }
+     * t('foo.bar', 'World') => 'Hello World'
+     */
     t = (key: string, ...args: string[]): string => {
         if (!this._locales) throw new Error('Locale not initialized');
 
@@ -66,12 +89,10 @@ export class LocaleService extends Disposable {
             return null;
         }
 
-        // 使用点分隔符拆分key
         const keys = key.split('.');
         const resolvedValue = resolveKeyPath(this._locales[this._currentLocale], keys);
 
         if (typeof resolvedValue === 'string') {
-            // 如果找到的是字符串，进行插值
             let result = resolvedValue;
             args.forEach((arg, index) => {
                 result = result.replace(`{${index}}`, arg);

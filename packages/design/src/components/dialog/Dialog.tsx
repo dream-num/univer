@@ -60,6 +60,12 @@ export interface IDialogProps {
     closeIcon?: React.ReactNode;
 
     /**
+     * Whether the dialog should be destroyed on close.
+     * @default false
+     */
+    destroyOnClose?: boolean;
+
+    /**
      * The footer of the dialog.
      */
     footer?: React.ReactNode;
@@ -79,6 +85,7 @@ export function Dialog(props: IDialogProps) {
         width,
         draggable = false,
         closeIcon = <CloseSingle />,
+        destroyOnClose = false,
         footer,
         onClose,
     } = props;
@@ -124,10 +131,11 @@ export function Dialog(props: IDialogProps) {
             title={TitleIfDraggable}
             modalRender={modalRender}
             closeIcon={closeIcon}
+            destroyOnClose={destroyOnClose}
             footer={footer}
-            onClose={onClose}
             mask={!draggable}
             style={style}
+            onClose={onClose}
         >
             {children}
         </RcDialog>

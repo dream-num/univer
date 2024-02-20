@@ -170,15 +170,8 @@ export const FUNCTION_LIST_LOOKUP: IFunctionInfo[] = [
         abstract: 'formula.functionList.COLUMNS.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.COLUMNS.functionParameter.number1.name',
-                detail: 'formula.functionList.COLUMNS.functionParameter.number1.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-            {
-                name: 'formula.functionList.COLUMNS.functionParameter.number2.name',
-                detail: 'formula.functionList.COLUMNS.functionParameter.number2.detail',
+                name: 'formula.functionList.COLUMNS.functionParameter.array.name',
+                detail: 'formula.functionList.COLUMNS.functionParameter.array.detail',
                 example: 'A1:A20',
                 require: 1,
                 repeat: 0,
@@ -564,15 +557,8 @@ export const FUNCTION_LIST_LOOKUP: IFunctionInfo[] = [
         abstract: 'formula.functionList.ROWS.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.ROWS.functionParameter.number1.name',
-                detail: 'formula.functionList.ROWS.functionParameter.number1.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-            {
-                name: 'formula.functionList.ROWS.functionParameter.number2.name',
-                detail: 'formula.functionList.ROWS.functionParameter.number2.detail',
+                name: 'formula.functionList.ROWS.functionParameter.array.name',
+                detail: 'formula.functionList.ROWS.functionParameter.array.detail',
                 example: 'A1:A20',
                 require: 1,
                 repeat: 0,

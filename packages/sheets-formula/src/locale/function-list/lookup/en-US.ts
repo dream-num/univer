@@ -119,7 +119,7 @@ export default {
         },
     },
     COLUMNS: {
-        description: 'Returns the number of columns in a reference',
+        description: 'Returns the number of columns in an array or reference.',
         abstract: 'Returns the number of columns in a reference',
         links: [
             {
@@ -128,8 +128,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: 'Array', detail: 'An array or array formula, or a reference to a range of cells for which you want the number of columns.' },
         },
     },
     DROP: {
@@ -370,7 +369,7 @@ export default {
         },
     },
     ROWS: {
-        description: 'Returns the number of rows in a reference',
+        description: 'Returns the number of rows in an array or reference.',
         abstract: 'Returns the number of rows in a reference',
         links: [
             {
@@ -379,8 +378,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: 'Array', detail: 'An array, an array formula, or a reference to a range of cells for which you want the number of rows.' },
         },
     },
     RTD: {

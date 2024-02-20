@@ -109,7 +109,7 @@ export default {
         },
     },
     COLUMNS: {
-        description: '返回引用中包含的列数',
+        description: '返回数组或引用的列数。',
         abstract: '返回引用中包含的列数',
         links: [
             {
@@ -118,8 +118,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '数组', detail: '要计算列数的数组、数组公式或是对单元格区域的引用。' },
         },
     },
     DROP: {
@@ -357,7 +356,7 @@ export default {
         },
     },
     ROWS: {
-        description: '返回引用中的行数',
+        description: '返回数组或引用的行数。',
         abstract: '返回引用中的行数',
         links: [
             {
@@ -366,8 +365,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '数组', detail: '需要得到其行数的数组、数组公式或对单元格区域的引用。' },
         },
     },
     RTD: {

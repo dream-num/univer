@@ -29,7 +29,8 @@ import { createFunctionTestBed } from '../../../__tests__/create-function-test-b
 import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
 import { Row } from '..';
 import type { BaseValueObject, ErrorValueObject } from '../../../../engine/value-object/base-value-object';
-import type { ArrayValueObject } from '../../../..';
+import type { ArrayValueObject } from '../../../../engine/value-object/array-value-object';
+import { ErrorType } from '../../../../basics/error-type';
 
 describe('Test row', () => {
     let get: Injector['get'];
@@ -110,14 +111,41 @@ describe('Test row', () => {
 
             expect((result as ArrayValueObject).toValue()).toStrictEqual([[5], [6], [7], [8], [9], [10]]);
         });
-        it('Illegal parameters', async () => {
+        it('Text parameters', async () => {
             const lexerNode = lexer.treeBuilder('=ROW("A5")');
 
             const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
 
             const result = await interpreter.executeAsync(astNode as BaseAstNode);
 
-            expect((result as ErrorValueObject).isError()).toBeTruthy();
+            expect((result as ErrorValueObject).getValue()).toBe(ErrorType.NA);
+        });
+        it('Boolean params TRUE', async () => {
+            const lexerNode = lexer.treeBuilder('=ROW(TRUE)');
+
+            const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
+
+            const result = await interpreter.executeAsync(astNode as BaseAstNode);
+
+            expect((result as ErrorValueObject).getValue()).toBe(ErrorType.NA);
+        });
+        it('Boolean params FALSE', async () => {
+            const lexerNode = lexer.treeBuilder('=ROW(FALSE)');
+
+            const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
+
+            const result = await interpreter.executeAsync(astNode as BaseAstNode);
+
+            expect((result as ErrorValueObject).getValue()).toBe(ErrorType.NA);
+        });
+        it('Number params', async () => {
+            const lexerNode = lexer.treeBuilder('=ROW(11)');
+
+            const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
+
+            const result = await interpreter.executeAsync(astNode as BaseAstNode);
+
+            expect((result as ErrorValueObject).getValue()).toBe(ErrorType.NA);
         });
     });
 });

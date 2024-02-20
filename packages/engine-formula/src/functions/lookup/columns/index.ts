@@ -15,46 +15,34 @@
  */
 
 import { ErrorType } from '../../../basics/error-type';
-import { ArrayValueObject } from '../../../engine/value-object/array-value-object';
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import type { BaseValueObject, IArrayValueObject } from '../../../engine/value-object/base-value-object';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
-export class Row extends BaseFunction {
+export class Columns extends BaseFunction {
     override calculate(
         reference?: BaseValueObject
     ) {
         if (reference == null) {
-            return new NumberValueObject(this.row + 1);
+            return new ErrorValueObject(ErrorType.NA);
         }
 
         if (reference.isError()) {
             return reference;
         }
 
+        if (reference.isString() || reference.isNumber() || reference.isBoolean()) {
+            return new NumberValueObject(1);
+        }
+
         if (!reference.isArray()) {
             return new ErrorValueObject(ErrorType.NA);
         }
 
-        const row = (reference as ArrayValueObject).getCurrentRow();
-        const rowCount = (reference as ArrayValueObject).getRowCount();
+        const columnCount = (reference as ArrayValueObject).getColumnCount();
 
-        const calculateValueList = [];
-        for (let i = 0; i < rowCount; i++) {
-            calculateValueList.push([new NumberValueObject(row + i + 1)]);
-        }
-
-        const arrayValueObjectData: IArrayValueObject = {
-            calculateValueList,
-            rowCount,
-            columnCount: 1,
-            unitId: this.unitId || '',
-            sheetId: this.subUnitId || '',
-            row: this.row,
-            column: this.column,
-        };
-
-        return new ArrayValueObject(arrayValueObjectData);
+        return new NumberValueObject(columnCount);
     }
 }

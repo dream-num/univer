@@ -108,7 +108,7 @@ export default {
         },
     },
     COLUMNS: {
-        description: 'セル参照の列数を返します。',
+        description: '配列またはセル参照の列数を返します。',
         abstract: 'セル参照の列数を返します。',
         links: [
             {
@@ -117,8 +117,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '配列', detail: 'An array or array formula, or a reference to a range of cells for which you want the num列数を計算する配列、配列数式、またはセル範囲の参照を指定します。' },
         },
     },
     DROP: {
@@ -359,7 +358,7 @@ export default {
         },
     },
     ROWS: {
-        description: 'セル参照の行数を返します。',
+        description: 'セル範囲または配列の行数を返します。',
         abstract: 'セル参照の行数を返します。',
         links: [
             {
@@ -368,8 +367,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '配列', detail: '行数を計算する配列、配列数式、またはセル範囲の参照を指定します。' },
         },
     },
     RTD: {

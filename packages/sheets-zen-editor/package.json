@@ -11,7 +11,7 @@
         "./*": "./src/*"
     },
     "main": "./lib/cjs/index.js",
-    "module": "./lib/esm/index.js",
+    "module": "./lib/es/index.js",
     "types": "./lib/types/index.d.ts",
     "publishConfig": {
         "access": "public",

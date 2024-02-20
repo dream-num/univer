@@ -65,11 +65,11 @@
         "@univerjs/icons": "^0.1.28",
         "localforage": "^1.10.0",
         "rc-notification": "^5.3.0",
-        "rc-util": "^5.38.1"
+        "rc-util": "^5.38.2"
     },
     "devDependencies": {
         "@testing-library/react": "^14.2.1",
-        "@types/react": "^18.2.56",
+        "@types/react": "^18.2.57",
         "@types/react-dom": "^18.2.19",
         "@types/react-transition-group": "^4.4.10",
         "@univerjs/core": "workspace:*",

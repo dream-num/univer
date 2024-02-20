@@ -11,7 +11,7 @@
         "./*": "./src/*"
     },
     "main": "./lib/cjs/index.js",
-    "module": "./lib/esm/index.js",
+    "module": "./lib/es/index.js",
     "types": "./lib/types/index.d.ts",
     "publishConfig": {
         "access": "public",
@@ -60,7 +60,7 @@
         "@univerjs/icons": "^0.1.28"
     },
     "devDependencies": {
-        "@types/react": "^18.2.56",
+        "@types/react": "^18.2.57",
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/shared": "workspace:*",

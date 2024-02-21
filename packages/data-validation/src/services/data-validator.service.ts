@@ -24,12 +24,12 @@ export interface IRulePosition {
 }
 
 export interface IDataValidatorProvider {
-    validator(text: Nullable<CellValue>, rulePos: IRulePosition): DataValidationStatus;
+    validator(text: Nullable<CellValue>, rulePos: IRulePosition): boolean;
 }
 
 export interface IDataValidatorService {
     setValidatorProvider(provider: IDataValidatorProvider): void;
-    validator(text: Nullable<CellValue>, rulePos: IRulePosition): DataValidationStatus;
+    validator(text: Nullable<CellValue>, rulePos: IRulePosition): boolean;
 }
 
 export const IDataValidatorService = createIdentifier('data-validation.validator.service');

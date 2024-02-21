@@ -14,15 +14,18 @@
  * limitations under the License.
  */
 
-import { Disposable } from '@univerjs/core';
+import { LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
 import { DataValidationPanelName } from '@univerjs/data-validation';
-import { ComponentManager } from '@univerjs/ui';
+import { ComponentManager, IMenuService } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
 import { DataValidationPanel } from '../views/components';
+import { DataValidationMenu } from './dv.menu';
 
-export class DataValidationRenderController extends Disposable {
+@OnLifecycle(LifecycleStages.Rendered, DataValidationRenderController)
+export class DataValidationRenderController extends RxDisposable {
     constructor(
-        @Inject(ComponentManager) private _componentManager: ComponentManager
+        @Inject(ComponentManager) private _componentManager: ComponentManager,
+        @IMenuService private _menuService: IMenuService
     ) {
         super();
         this._init();
@@ -33,6 +36,11 @@ export class DataValidationRenderController extends Disposable {
             this._componentManager.register(
                 DataValidationPanelName,
                 DataValidationPanel
+            )
+        );
+        this.disposeWithMe(
+            this._menuService.addMenuItem(
+                DataValidationMenu
             )
         );
     }

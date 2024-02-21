@@ -16,21 +16,21 @@
 
 import { toDisposable } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
-import type { IDataValidator } from '../types';
+import type { BaseDataValidator } from '../validators/base-data-validator';
 
 /**
  * Register data validator
  */
 export class DataValidatorRegistryService {
-    private _validatorByScopes = new Map<string, Array<IDataValidator>>();
+    private _validatorByScopes = new Map<string, Array<BaseDataValidator>>();
 
-    private _validatorMap = new Map<string, IDataValidator>();
+    private _validatorMap = new Map<string, BaseDataValidator>();
 
     private _validatorsChange$ = new BehaviorSubject<void>(undefined);
 
     validatorsChange$ = this._validatorsChange$.asObservable();
 
-    private _addValidatorToScope(validator: IDataValidator, scope: string) {
+    private _addValidatorToScope(validator: BaseDataValidator, scope: string) {
         if (!this._validatorByScopes.has(scope)) {
             this._validatorByScopes.set(scope, []);
         }
@@ -42,7 +42,7 @@ export class DataValidatorRegistryService {
         validators.push(validator);
     }
 
-    private _removeValidatorFromScope(validator: IDataValidator, scope: string) {
+    private _removeValidatorFromScope(validator: BaseDataValidator, scope: string) {
         const validators = this._validatorByScopes.get(scope);
         if (!validators) {
             return;
@@ -54,7 +54,7 @@ export class DataValidatorRegistryService {
         }
     }
 
-    register(validator: IDataValidator) {
+    register(validator: BaseDataValidator) {
         this._validatorMap.set(validator.id, validator);
 
         if (Array.isArray(validator.scopes)) {

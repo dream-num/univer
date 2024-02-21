@@ -30,7 +30,7 @@ import { UniverSheetsPlugin } from '@univerjs/sheets';
 import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import { UniverUIPlugin } from '@univerjs/ui';
-import { SheetDataValidationPlugin } from '../src';
+import { UniverSheetsDataValidationPlugin } from '../src';
 
 const univer = new Univer({
     theme: defaultTheme,
@@ -60,6 +60,6 @@ univer.registerPlugin(UniverSheetsPlugin, {
 univer.registerPlugin(UniverSheetsUIPlugin);
 univer.registerPlugin(UniverSheetsFormulaPlugin);
 
-univer.registerPlugin(SheetDataValidationPlugin);
+univer.registerPlugin(UniverSheetsDataValidationPlugin);
 
 univer.createUniverSheet({});

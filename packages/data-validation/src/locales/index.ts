@@ -14,6 +14,5 @@
  * limitations under the License.
  */
 
-export * from './i-data-validator-operator-config';
-export * from './i-formula-input';
-export * from './i-update-rule-payload';
+export { enUS } from './enUS';
+export { zhCN } from './zhCN';

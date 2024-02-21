@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import type { ISheetDataValidationRule } from '@univerjs/core/types/interfaces/index.js';
+import type { IRange, ISheetDataValidationRule } from '@univerjs/core/types/interfaces/index.js';
 import { DataValidationManager } from '@univerjs/data-validation/models/data-validation-manager.js';
 import { ObjectMatrix } from '@univerjs/core/shared/index.js';
 import { queryObjectMatrix } from '@univerjs/core/shared/object-matrix-query.js';
 import { Range } from '@univerjs/core/sheets/range.js';
 import type { IUpdateRulePayload } from '@univerjs/data-validation/types/interfaces/i-update-rule-payload.js';
+import { UpdateRuleType } from '@univerjs/data-validation';
 
 export class SheetDataValidationManager extends DataValidationManager<ISheetDataValidationRule> {
     private _ruleMatrix = new ObjectMatrix<string>();
@@ -36,8 +37,8 @@ export class SheetDataValidationManager extends DataValidationManager<ISheetData
         });
     }
 
-    private _removeMatrixRule(rule: ISheetDataValidationRule) {
-        rule.ranges.forEach((range) => {
+    private _resetMatrixRanges(ranges: IRange[]) {
+        ranges.forEach((range) => {
             Range.foreach(range, (row, col) => {
                 this._ruleMatrix.setValue(row, col, '');
             });
@@ -69,11 +70,13 @@ export class SheetDataValidationManager extends DataValidationManager<ISheetData
 
     override updateRule(ruleId: string, payload: IUpdateRulePayload) {
         const oldRule = this.getRuleById(ruleId);
-        if (oldRule) {
-            this._removeMatrixRule(oldRule);
-        }
-        // this._appendMatrixRule(rule);
         const rule = super.updateRule(ruleId, payload);
+        if (payload.type === UpdateRuleType.RANGE) {
+            if (oldRule) {
+                this._resetMatrixRanges(oldRule.ranges);
+            }
+            this._appendMatrixRule(rule);
+        }
         this._updateRuleRanges();
         return rule;
     }
@@ -81,7 +84,7 @@ export class SheetDataValidationManager extends DataValidationManager<ISheetData
     override removeRule(ruleId: string): void {
         const oldRule = this.getRuleById(ruleId);
         if (oldRule) {
-            this._removeMatrixRule(oldRule);
+            this._resetMatrixRanges(oldRule.ranges);
         }
         super.removeRule(ruleId);
     }

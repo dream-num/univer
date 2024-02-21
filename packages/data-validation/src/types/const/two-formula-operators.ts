@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
-export * from './i-data-validator-operator-config';
-export * from './i-formula-input';
-export * from './i-update-rule-payload';
+import { DataValidationOperator } from '@univerjs/core';
+
+export const TWO_FORMULA_OPERATOR_COUNT: DataValidationOperator[] = [
+    DataValidationOperator.BETWEEN,
+    DataValidationOperator.NOT_BETWEEN,
+];

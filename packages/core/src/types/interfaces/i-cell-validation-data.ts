@@ -18,5 +18,5 @@ import type { DataValidationStatus } from '../enum/data-validation-status';
 
 export interface ICellValidationData {
     ruleId: string;
-    validStatus: DataValidationStatus;
+    validStatus: boolean;
 }

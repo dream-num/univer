@@ -65,7 +65,7 @@ export interface IRemoveAllDataValidationMutationParams {
     subUnitId: string;
 }
 
-export const RemoveAllDataValidationMutationMutation: ICommand<IRemoveAllDataValidationMutationParams> = {
+export const RemoveAllDataValidationMutation: ICommand<IRemoveAllDataValidationMutationParams> = {
     type: CommandType.MUTATION,
     id: 'data-validation.mutation.removeAll',
     handler(accessor, params) {

@@ -15,11 +15,33 @@
  */
 
 import React from 'react';
+import { useDependency } from '@wendellhu/redi/react-bindings';
+import { IUniverInstanceService } from '@univerjs/core';
+import { DataValidationModel } from '@univerjs/data-validation';
+import { Button } from '@univerjs/design';
+import { DataValidationDetail } from './DataValidationDetail';
 
 export const DataValidationPanel = () => {
+    const univerInstanceService = useDependency(IUniverInstanceService);
+    const dataValidationModel = useDependency(DataValidationModel);
+
+    const workbook = univerInstanceService.getCurrentUniverSheetInstance();
+    const worksheet = workbook.getActiveSheet();
+
+    const rules = dataValidationModel.getRules(workbook.getUnitId(), worksheet.getSheetId());
+
     return (
         <div>
             DataValidationPanel
+            {rules.map((rule) => <DataValidationDetail rule={rule} key={rule.uid} />)}
+            <div>
+                <Button type="primary">
+                    Remove All
+                </Button>
+                <Button>
+                    Add Rule
+                </Button>
+            </div>
         </div>
     );
 };

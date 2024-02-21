@@ -14,6 +14,14 @@
  * limitations under the License.
  */
 
-export * from './i-data-validator-operator-config';
-export * from './i-formula-input';
-export * from './i-update-rule-payload';
+import type { FormulaInputType } from '../types/interfaces/i-formula-input';
+import { BaseFormulaInput } from './base-formula-input';
+
+export const BASE_FORMULA_INPUT_NAME = 'data-validation.formula-input';
+
+export const FORMULA_INPUTS: [string, FormulaInputType][] = [
+    [
+        BASE_FORMULA_INPUT_NAME,
+        BaseFormulaInput,
+    ],
+];

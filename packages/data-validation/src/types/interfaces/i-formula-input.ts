@@ -14,6 +14,15 @@
  * limitations under the License.
  */
 
-export * from './i-data-validator-operator-config';
-export * from './i-formula-input';
-export * from './i-update-rule-payload';
+export interface IFormulaValue {
+    formula1?: string;
+    formula2?: string;
+}
+
+export interface IFormulaInputProps {
+    formulaCount: 1 | 2;
+    value?: IFormulaValue;
+    onChange?: (value?: IFormulaValue) => void;
+}
+
+export type FormulaInputType = React.ComponentType<IFormulaInputProps>;

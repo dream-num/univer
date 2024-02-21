@@ -15,7 +15,7 @@
  */
 
 import type { IDocumentData, IWorkbookData } from '@univerjs/core';
-import { BooleanNumber, LocaleType } from '@univerjs/core';
+import { BooleanNumber, DataValidationOperator, DataValidationType, LocaleType } from '@univerjs/core';
 
 import { PAGE5_RICHTEXT_1 } from '../../slides/rich-text/page5-richtext1';
 
@@ -13849,6 +13849,18 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
             },
             selections: ['A1'],
             rightToLeft: 0,
+            dataValidation: [{
+                uid: 'xxx-1',
+                type: DataValidationType.DECIMAL,
+                ranges: [{
+                    startRow: 0,
+                    endRow: 5,
+                    startColumn: 0,
+                    endColumn: 5,
+                }],
+                operator: DataValidationOperator.GREATER_THAN,
+                formula1: '111',
+            }],
         },
         'sheet-0010': {
             name: 'sheet-0010',

@@ -18,14 +18,17 @@ import { ICommandService, Plugin } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { DataValidatorRegistryService } from './services/data-validator-registry.service';
-import { IDataValidatorService } from './services/data-validator.service';
+import { DataValidatorService, IDataValidatorService } from './services/data-validator.service';
 import { DataValidationModel } from './models/data-validation-model';
 import { DataValidationPanelService } from './services/data-validation-panel';
 import { CloseValidationPanelOperation, OpenValidationPanelOperation, ToggleValidationPanelOperation } from './commands/operations/data-validation.operation';
+import { DataValidatorController } from './controllers/validator.controller';
+import { AddDataValidationCommand, RemoveAllDataValidationCommand, UpdateDataValidationCommand } from './commands/commands/data-validation.command';
+import { AddDataValidationMutation, RemoveAllDataValidationMutation, ReplaceDataValidationMutation, UpdateDataValidationMutation } from './commands/mutations/data-validation.mutation';
 
 const PLUGIN_NAME = 'data-validation';
 
-export class DataValidationPlugin extends Plugin {
+export class UniverDataValidationPlugin extends Plugin {
     constructor(
         @Inject(Injector) protected _injector: Injector,
         @ICommandService private _commandService: ICommandService
@@ -37,10 +40,14 @@ export class DataValidationPlugin extends Plugin {
         ([
             // model
             [DataValidationModel],
+
             // service
             [DataValidatorRegistryService],
-            [IDataValidatorService],
+            [IDataValidatorService, { useClass: DataValidatorService }],
             [DataValidationPanelService],
+
+            // controller
+            [DataValidatorController],
         ] as Dependency[]).forEach(
             (d) => {
                 injector.add(d);
@@ -48,9 +55,19 @@ export class DataValidationPlugin extends Plugin {
         );
 
         [
+            // command
+            AddDataValidationCommand,
+            RemoveAllDataValidationCommand,
+            UpdateDataValidationCommand,
+            RemoveAllDataValidationMutation,
+            // operation
             CloseValidationPanelOperation,
             OpenValidationPanelOperation,
             ToggleValidationPanelOperation,
+            // mutation
+            AddDataValidationMutation,
+            UpdateDataValidationMutation,
+            ReplaceDataValidationMutation,
         ].forEach((command) => {
             this._commandService.registerCommand(command);
         });

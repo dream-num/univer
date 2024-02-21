@@ -14,6 +14,18 @@
  * limitations under the License.
  */
 
-export * from './i-data-validator-operator-config';
-export * from './i-formula-input';
-export * from './i-update-rule-payload';
+import type { ISheetDataValidationRule } from '@univerjs/core';
+import React from 'react';
+
+export interface IDataValidationDetailProps {
+    rule: ISheetDataValidationRule;
+}
+
+export const DataValidationDetail = (props: IDataValidationDetailProps) => {
+    const { rule } = props;
+    return (
+        <div>
+            {rule.uid}
+        </div>
+    );
+};

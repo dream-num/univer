@@ -14,6 +14,12 @@
  * limitations under the License.
  */
 
-export * from './i-data-validator-operator-config';
-export * from './i-formula-input';
-export * from './i-update-rule-payload';
+import { OpenValidationPanelOperation } from '@univerjs/data-validation';
+import { type IMenuItem, MenuItemType, MenuPosition } from '@univerjs/ui';
+
+export const DataValidationMenu: IMenuItem = {
+    id: OpenValidationPanelOperation.id,
+    type: MenuItemType.BUTTON,
+    positions: [MenuPosition.CONTEXT_MENU],
+    title: 'data-validation.menu',
+};

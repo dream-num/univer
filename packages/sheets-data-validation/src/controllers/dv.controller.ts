@@ -14,24 +14,23 @@
  * limitations under the License.
  */
 
-import type { CellValue, DataValidationStatus, Nullable } from '@univerjs/core';
-import { Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import type { CellValue, Nullable } from '@univerjs/core';
+import { IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
 import type { IDataValidatorProvider, IRulePosition } from '@univerjs/data-validation';
 import { DataValidationModel, DataValidatorRegistryService, IDataValidatorService } from '@univerjs/data-validation';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { Inject, Injector } from '@wendellhu/redi';
 import { SheetDataValidationManager } from '../models/sheet-data-validation-manager';
 
+@OnLifecycle(LifecycleStages.Rendered, SheetsDataValidatorProvider)
 class SheetsDataValidatorProvider implements IDataValidatorProvider {
     constructor(
         @Inject(DataValidatorRegistryService) private _dataValidatorRegistryService: DataValidatorRegistryService,
         @Inject(DataValidationModel) private _dataValidationModel: DataValidationModel
-    ) {
-
-    }
+    ) {}
 
     // TODO: validator result cache
-    validator(text: Nullable<CellValue>, rulePos: IRulePosition): DataValidationStatus {
+    validator(text: Nullable<CellValue>, rulePos: IRulePosition): boolean {
         const { unitId, subUnitId, ruleId } = rulePos;
         const rule = this._dataValidationModel.getRuleById(unitId, subUnitId, ruleId);
         if (!rule) {
@@ -47,8 +46,8 @@ class SheetsDataValidatorProvider implements IDataValidatorProvider {
     }
 }
 
-@OnLifecycle(LifecycleStages.Ready, DataValidationController)
-export class DataValidationController extends Disposable {
+@OnLifecycle(LifecycleStages.Rendered, DataValidationController)
+export class DataValidationController extends RxDisposable {
     private _currentManager: Nullable<SheetDataValidationManager>;
 
     constructor(
@@ -57,7 +56,6 @@ export class DataValidationController extends Disposable {
         @IUniverInstanceService private _univerInstanceService: IUniverInstanceService,
         @Inject(DataValidationModel) private _dataValidationModel: DataValidationModel,
         @Inject(Injector) private _injector: Injector
-
     ) {
         super();
         this._init();

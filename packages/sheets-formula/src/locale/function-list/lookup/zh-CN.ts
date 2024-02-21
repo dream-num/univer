@@ -262,7 +262,7 @@ export default {
         },
     },
     INDEX: {
-        description: '使用索引从引用或数组中选择值',
+        description: '返回指定的行与列交叉处的单元格引用。 如果引用由不连续的选定区域组成，可以选择某一选定区域。',
         abstract: '使用索引从引用或数组中选择值',
         links: [
             {
@@ -271,12 +271,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            reference: { name: '引用', detail: '对一个或多个单元格区域的引用。\n如果为引用输入一个不连续的区域，必须将其用括号括起来。\n如果引用中的每个区域均只包含一行（或一列），则 row_num（或 column_num）为可选参数。 例如，对于单行的引用，可以使用函数 INDEX(reference,,column_num)。\n如果数组有多行和多列，但只使用 row_num 或 column_num，函数 INDEX 返回数组中的整行或整列，且返回值也为数组。' },
+            rowNum: { name: '行号', detail: '引用中某行的行号，函数从该行返回一个引用。' },
+            columnNum: { name: '列号', detail: '引用中某列的列标，函数从该列返回一个引用。' },
+            areaNum: { name: '区域编号', detail: '选择要返回 row_num 和 column_num 的交叉点的引用区域。 选择或输入的第一个区域的编号为 1，第二个的编号为 2，依此类推。 如果省略 area_num，则 INDEX 使用区域 1。  此处列出的区域必须全部位于一张工作表。  如果指定的区域不位于同一个工作表，将导致 #VALUE!。 错误。  如果需要使用的范围彼此位于不同工作表，建议使用函数 INDEX 的数组形式，并使用其他函数来计算构成数组的范围。  例如，可以使用 CHOOSE 函数计算将使用的范围。' },
         },
     },
     INDIRECT: {
-        description: '返回由文本值指定的引用',
+        description: '返回由文本字符串指定的引用。 此函数立即对引用进行计算，并显示其内容。',
         abstract: '返回由文本值指定的引用',
         links: [
             {
@@ -285,8 +287,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            refText: { name: '引用文本', detail: '对包含 A1 样式引用、R1C1 样式引用、定义为引用的名称或作为文本字符串引用的单元格的引用的引用。 如果ref_text不是有效的单元格引用，INDIRECT 将返回 #REF！ 。\n如果ref_text引用的单元格区域超出了行限制 1,048,576 或列限制 16,384 (XFD) ，INDIRECT 将返回 #REF！ 错误。' },
+            a1: { name: '引用类型', detail: '一个逻辑值，用于指定包含在单元格 ref_text 中的引用的类型。\n如果 a1 为 TRUE 或省略，ref_text 被解释为 A1-样式的引用。\n如果 a1 为 FALSE，则将 ref_text 解释为 R1C1 样式的引用。' },
         },
     },
     LOOKUP: {

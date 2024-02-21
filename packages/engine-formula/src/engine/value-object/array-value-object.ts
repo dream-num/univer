@@ -1375,17 +1375,13 @@ export class ArrayValueObject extends BaseValueObject {
 
                     if (rowValuePositions != null) {
                         rowValuePositions.forEach((rowPositions, rowValue) => {
-                            let currentValue: Nullable<BaseValueObject>;
+                            let currentValue: Nullable<BaseValueObject> = new NullValueObject(0); // handle blank cell
                             if (typeof rowValue === 'string') {
                                 currentValue = new StringValueObject(rowValue);
                             } else if (typeof rowValue === 'number') {
                                 currentValue = new NumberValueObject(rowValue);
                             } else if (typeof rowValue === 'boolean') {
                                 currentValue = new BooleanValueObject(rowValue);
-                            }
-
-                            if (currentValue == null) {
-                                return true;
                             }
 
                             const matchResult = currentValue.compare(valueObject, operator as compareToken);

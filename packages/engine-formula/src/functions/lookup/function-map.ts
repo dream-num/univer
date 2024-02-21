@@ -28,11 +28,13 @@ import { Rows } from './rows';
 import { Vlookup } from './vlookup';
 import { Xlookup } from './xlookup';
 import { Xmatch } from './xmatch';
+import { Index } from './index';
 
 export const functionLookup = [
     [Address, FUNCTION_NAMES_LOOKUP.ADDRESS],
     [Column, FUNCTION_NAMES_LOOKUP.COLUMN],
     [Columns, FUNCTION_NAMES_LOOKUP.COLUMNS],
+    [Index, FUNCTION_NAMES_LOOKUP.INDEX],
     [Indirect, FUNCTION_NAMES_LOOKUP.INDIRECT],
     [Offset, FUNCTION_NAMES_LOOKUP.OFFSET],
     [Row, FUNCTION_NAMES_LOOKUP.ROW],

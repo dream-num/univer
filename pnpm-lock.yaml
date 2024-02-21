@@ -115,7 +115,7 @@ importers:
         version: 4.2.1(vite@5.1.3)
       '@vitest/coverage-istanbul':
         specifier: ^1.3.0
-        version: 1.3.0(vitest@1.3.0)
+        version: 1.3.0(vitest@1.3.1)
       happy-dom:
         specifier: ^13.3.8
         version: 13.3.8
@@ -126,8 +126,8 @@ importers:
         specifier: ^3.7.2
         version: 3.7.2(@types/node@20.11.19)(typescript@5.3.3)(vite@5.1.3)
       vitest:
-        specifier: ^1.3.0
-        version: 1.3.0(@types/node@20.11.19)(happy-dom@13.3.8)
+        specifier: ^1.3.1
+        version: 1.3.1(@types/node@20.11.19)(happy-dom@13.3.8)
 
   examples:
     dependencies:
@@ -272,8 +272,8 @@ importers:
         specifier: ^5.1.3
         version: 5.1.3(@types/node@20.11.19)(less@4.2.0)
       vitest:
-        specifier: ^1.3.0
-        version: 1.3.0(@types/node@20.11.19)(happy-dom@13.3.8)
+        specifier: ^1.3.1
+        version: 1.3.1(@types/node@20.11.19)(happy-dom@13.3.8)
 
   packages/design:
     dependencies:
@@ -354,8 +354,8 @@ importers:
         specifier: ^5.1.3
         version: 5.1.3(@types/node@20.11.19)(less@4.2.0)
       vitest:
-        specifier: ^1.3.0
-        version: 1.3.0(@types/node@20.11.19)(less@4.2.0)
+        specifier: ^1.3.1
+        version: 1.3.1(@types/node@20.11.19)(less@4.2.0)
 
   packages/docs:
     devDependencies:
@@ -368,9 +368,6 @@ importers:
       '@univerjs/shared':
         specifier: workspace:*
         version: link:../../common/shared
-      '@univerjs/sheets':
-        specifier: workspace:*
-        version: link:../sheets
       '@wendellhu/redi':
         specifier: ^0.13.0
         version: 0.13.0
@@ -387,8 +384,8 @@ importers:
         specifier: ^5.1.3
         version: 5.1.3(@types/node@20.11.19)(less@4.2.0)
       vitest:
-        specifier: ^1.3.0
-        version: 1.3.0(@types/node@20.11.19)(less@4.2.0)
+        specifier: ^1.3.1
+        version: 1.3.1(@types/node@20.11.19)(less@4.2.0)
 
   packages/docs-ui:
     devDependencies:
@@ -432,8 +429,8 @@ importers:
         specifier: ^5.1.3
         version: 5.1.3(@types/node@20.11.19)(less@4.2.0)
       vitest:
-        specifier: ^1.3.0
-        version: 1.3.0(@types/node@20.11.19)(less@4.2.0)
+        specifier: ^1.3.1
+        version: 1.3.1(@types/node@20.11.19)(less@4.2.0)
 
   packages/engine-formula:
     dependencies:
@@ -466,8 +463,8 @@ importers:
         specifier: ^5.1.3
         version: 5.1.3(@types/node@20.11.19)(less@4.2.0)
       vitest:
-        specifier: ^1.3.0
-        version: 1.3.0(@types/node@20.11.19)(less@4.2.0)
+        specifier: ^1.3.1
+        version: 1.3.1(@types/node@20.11.19)(less@4.2.0)
 
   packages/engine-numfmt:
     dependencies:
@@ -475,9 +472,6 @@ importers:
         specifier: ^2.5.2
         version: 2.5.2
     devDependencies:
-      '@univerjs/core':
-        specifier: workspace:*
-        version: link:../core
       '@univerjs/shared':
         specifier: workspace:*
         version: link:../../common/shared
@@ -488,8 +482,8 @@ importers:
         specifier: ^5.1.3
         version: 5.1.3(@types/node@20.11.19)(less@4.2.0)
       vitest:
-        specifier: ^1.3.0
-        version: 1.3.0(@types/node@20.11.19)(happy-dom@13.3.8)
+        specifier: ^1.3.1
+        version: 1.3.1(@types/node@20.11.19)(happy-dom@13.3.8)
 
   packages/engine-render:
     dependencies:
@@ -522,8 +516,8 @@ importers:
         specifier: ^5.1.3
         version: 5.1.3(@types/node@20.11.19)(less@4.2.0)
       vitest:
-        specifier: ^1.3.0
-        version: 1.3.0(@types/node@20.11.19)(less@4.2.0)
+        specifier: ^1.3.1
+        version: 1.3.1(@types/node@20.11.19)(less@4.2.0)
 
   packages/facade:
     devDependencies:
@@ -561,8 +555,8 @@ importers:
         specifier: ^5.1.3
         version: 5.1.3(@types/node@20.11.19)(less@4.2.0)
       vitest:
-        specifier: ^1.3.0
-        version: 1.3.0(@types/node@20.11.19)(happy-dom@13.3.8)
+        specifier: ^1.3.1
+        version: 1.3.1(@types/node@20.11.19)(happy-dom@13.3.8)
 
   packages/find-replace:
     dependencies:
@@ -601,8 +595,8 @@ importers:
         specifier: ^5.1.3
         version: 5.1.3(@types/node@20.11.19)(less@4.2.0)
       vitest:
-        specifier: ^1.3.0
-        version: 1.3.0(@types/node@20.11.19)(happy-dom@13.3.8)
+        specifier: ^1.3.1
+        version: 1.3.1(@types/node@20.11.19)(happy-dom@13.3.8)
 
   packages/network:
     devDependencies:
@@ -625,8 +619,8 @@ importers:
         specifier: ^5.1.3
         version: 5.1.3(@types/node@20.11.19)(less@4.2.0)
       vitest:
-        specifier: ^1.3.0
-        version: 1.3.0(@types/node@20.11.19)(happy-dom@13.3.8)
+        specifier: ^1.3.1
+        version: 1.3.1(@types/node@20.11.19)(happy-dom@13.3.8)
 
   packages/rpc:
     devDependencies:
@@ -649,8 +643,8 @@ importers:
         specifier: ^5.1.3
         version: 5.1.3(@types/node@20.11.19)(less@4.2.0)
       vitest:
-        specifier: ^1.3.0
-        version: 1.3.0(@types/node@20.11.19)(happy-dom@13.3.8)
+        specifier: ^1.3.1
+        version: 1.3.1(@types/node@20.11.19)(happy-dom@13.3.8)
 
   packages/sheets:
     devDependencies:
@@ -682,20 +676,14 @@ importers:
         specifier: ^5.1.3
         version: 5.1.3(@types/node@20.11.19)(less@4.2.0)
       vitest:
-        specifier: ^1.3.0
-        version: 1.3.0(@types/node@20.11.19)(less@4.2.0)
+        specifier: ^1.3.1
+        version: 1.3.1(@types/node@20.11.19)(less@4.2.0)
 
   packages/sheets-find-replace:
     devDependencies:
-      '@types/react':
-        specifier: ^18.2.57
-        version: 18.2.57
       '@univerjs/core':
         specifier: workspace:*
         version: link:../core
-      '@univerjs/design':
-        specifier: workspace:*
-        version: link:../design
       '@univerjs/engine-render':
         specifier: workspace:*
         version: link:../engine-render
@@ -711,18 +699,9 @@ importers:
       '@univerjs/sheets-ui':
         specifier: workspace:*
         version: link:../sheets-ui
-      '@univerjs/ui':
-        specifier: workspace:*
-        version: link:../ui
       '@wendellhu/redi':
         specifier: ^0.13.0
         version: 0.13.0
-      less:
-        specifier: ^4.2.0
-        version: 4.2.0
-      react:
-        specifier: ^18.2.0
-        version: 18.2.0
       typescript:
         specifier: ^5.3.3
         version: 5.3.3
@@ -730,8 +709,8 @@ importers:
         specifier: ^5.1.3
         version: 5.1.3(@types/node@20.11.19)(less@4.2.0)
       vitest:
-        specifier: ^1.3.0
-        version: 1.3.0(@types/node@20.11.19)(less@4.2.0)
+        specifier: ^1.3.1
+        version: 1.3.1(@types/node@20.11.19)(happy-dom@13.3.8)
 
   packages/sheets-formula:
     dependencies:
@@ -794,8 +773,8 @@ importers:
         specifier: ^5.1.3
         version: 5.1.3(@types/node@20.11.19)(less@4.2.0)
       vitest:
-        specifier: ^1.3.0
-        version: 1.3.0(@types/node@20.11.19)(less@4.2.0)
+        specifier: ^1.3.1
+        version: 1.3.1(@types/node@20.11.19)(less@4.2.0)
 
   packages/sheets-numfmt:
     dependencies:
@@ -852,8 +831,8 @@ importers:
         specifier: ^5.1.3
         version: 5.1.3(@types/node@20.11.19)(less@4.2.0)
       vitest:
-        specifier: ^1.3.0
-        version: 1.3.0(@types/node@20.11.19)(less@4.2.0)
+        specifier: ^1.3.1
+        version: 1.3.1(@types/node@20.11.19)(less@4.2.0)
 
   packages/sheets-ui:
     dependencies:
@@ -913,8 +892,8 @@ importers:
         specifier: ^5.1.3
         version: 5.1.3(@types/node@20.11.19)(less@4.2.0)
       vitest:
-        specifier: ^1.3.0
-        version: 1.3.0(@types/node@20.11.19)(less@4.2.0)
+        specifier: ^1.3.1
+        version: 1.3.1(@types/node@20.11.19)(less@4.2.0)
 
   packages/sheets-zen-editor:
     dependencies:
@@ -937,9 +916,6 @@ importers:
       '@univerjs/shared':
         specifier: workspace:*
         version: link:../../common/shared
-      '@univerjs/sheets':
-        specifier: workspace:*
-        version: link:../sheets
       '@univerjs/sheets-ui':
         specifier: workspace:*
         version: link:../sheets-ui
@@ -968,8 +944,8 @@ importers:
         specifier: ^5.1.3
         version: 5.1.3(@types/node@20.11.19)(less@4.2.0)
       vitest:
-        specifier: ^1.3.0
-        version: 1.3.0(@types/node@20.11.19)(less@4.2.0)
+        specifier: ^1.3.1
+        version: 1.3.1(@types/node@20.11.19)(less@4.2.0)
 
   packages/slides:
     dependencies:
@@ -999,8 +975,8 @@ importers:
         specifier: ^5.1.3
         version: 5.1.3(@types/node@20.11.19)(less@4.2.0)
       vitest:
-        specifier: ^1.3.0
-        version: 1.3.0(@types/node@20.11.19)(less@4.2.0)
+        specifier: ^1.3.1
+        version: 1.3.1(@types/node@20.11.19)(less@4.2.0)
 
   packages/slides-ui:
     devDependencies:
@@ -1041,8 +1017,8 @@ importers:
         specifier: ^5.1.3
         version: 5.1.3(@types/node@20.11.19)(less@4.2.0)
       vitest:
-        specifier: ^1.3.0
-        version: 1.3.0(@types/node@20.11.19)(less@4.2.0)
+        specifier: ^1.3.1
+        version: 1.3.1(@types/node@20.11.19)(less@4.2.0)
 
   packages/ui:
     dependencies:
@@ -1108,8 +1084,8 @@ importers:
         specifier: ^5.1.3
         version: 5.1.3(@types/node@20.11.19)(less@4.2.0)
       vitest:
-        specifier: ^1.3.0
-        version: 1.3.0(@types/node@20.11.19)(less@4.2.0)
+        specifier: ^1.3.1
+        version: 1.3.1(@types/node@20.11.19)(less@4.2.0)
 
   packages/uniscript:
     dependencies:
@@ -1135,9 +1111,6 @@ importers:
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
-      '@univerjs/sheets-ui':
-        specifier: workspace:*
-        version: link:../sheets-ui
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui
@@ -1160,8 +1133,8 @@ importers:
         specifier: ^5.1.3
         version: 5.1.3(@types/node@20.11.19)(less@4.2.0)
       vitest:
-        specifier: ^1.3.0
-        version: 1.3.0(@types/node@20.11.19)(less@4.2.0)
+        specifier: ^1.3.1
+        version: 1.3.1(@types/node@20.11.19)(less@4.2.0)
 
 packages:
 
@@ -5995,7 +5968,7 @@ packages:
     transitivePeerDependencies:
       - supports-color
 
-  /@vitest/coverage-istanbul@1.3.0(vitest@1.3.0):
+  /@vitest/coverage-istanbul@1.3.0(vitest@1.3.1):
     resolution: {integrity: sha512-Kvj05eR2LJRmYgV+83I6WSHSS7JP3ayeon3c1YN1Tb2Z2U/VHMJNuq1hdC2lF/wC+WRA/MZ0BZUMVP8LfDClJQ==}
     peerDependencies:
       vitest: 1.3.0
@@ -6009,39 +5982,39 @@ packages:
       magicast: 0.3.3
       picocolors: 1.0.0
       test-exclude: 6.0.0
-      vitest: 1.3.0(@types/node@20.11.19)(happy-dom@13.3.8)
+      vitest: 1.3.1(@types/node@20.11.19)(happy-dom@13.3.8)
     transitivePeerDependencies:
       - supports-color
     dev: false
 
-  /@vitest/expect@1.3.0:
-    resolution: {integrity: sha512-7bWt0vBTZj08B+Ikv70AnLRicohYwFgzNjFqo9SxxqHHxSlUJGSXmCRORhOnRMisiUryKMdvsi1n27Bc6jL9DQ==}
+  /@vitest/expect@1.3.1:
+    resolution: {integrity: sha512-xofQFwIzfdmLLlHa6ag0dPV8YsnKOCP1KdAeVVh34vSjN2dcUiXYCD9htu/9eM7t8Xln4v03U9HLxLpPlsXdZw==}
     dependencies:
-      '@vitest/spy': 1.3.0
-      '@vitest/utils': 1.3.0
+      '@vitest/spy': 1.3.1
+      '@vitest/utils': 1.3.1
       chai: 4.4.1
 
-  /@vitest/runner@1.3.0:
-    resolution: {integrity: sha512-1Jb15Vo/Oy7mwZ5bXi7zbgszsdIBNjc4IqP8Jpr/8RdBC4nF1CTzIAn2dxYvpF1nGSseeL39lfLQ2uvs5u1Y9A==}
+  /@vitest/runner@1.3.1:
+    resolution: {integrity: sha512-5FzF9c3jG/z5bgCnjr8j9LNq/9OxV2uEBAITOXfoe3rdZJTdO7jzThth7FXv/6b+kdY65tpRQB7WaKhNZwX+Kg==}
     dependencies:
-      '@vitest/utils': 1.3.0
+      '@vitest/utils': 1.3.1
       p-limit: 5.0.0
       pathe: 1.1.2
 
-  /@vitest/snapshot@1.3.0:
-    resolution: {integrity: sha512-swmktcviVVPYx9U4SEQXLV6AEY51Y6bZ14jA2yo6TgMxQ3h+ZYiO0YhAHGJNp0ohCFbPAis1R9kK0cvN6lDPQA==}
+  /@vitest/snapshot@1.3.1:
+    resolution: {integrity: sha512-EF++BZbt6RZmOlE3SuTPu/NfwBF6q4ABS37HHXzs2LUVPBLx2QoY/K0fKpRChSo8eLiuxcbCVfqKgx/dplCDuQ==}
     dependencies:
       magic-string: 0.30.7
       pathe: 1.1.2
       pretty-format: 29.7.0
 
-  /@vitest/spy@1.3.0:
-    resolution: {integrity: sha512-AkCU0ThZunMvblDpPKgjIi025UxR8V7MZ/g/EwmAGpjIujLVV2X6rGYGmxE2D4FJbAy0/ijdROHMWa2M/6JVMw==}
+  /@vitest/spy@1.3.1:
+    resolution: {integrity: sha512-xAcW+S099ylC9VLU7eZfdT9myV67Nor9w9zhf0mGCYJSO+zM2839tOeROTdikOi/8Qeusffvxb/MyBSOja1Uig==}
     dependencies:
       tinyspy: 2.2.1
 
-  /@vitest/utils@1.3.0:
-    resolution: {integrity: sha512-/LibEY/fkaXQufi4GDlQZhikQsPO2entBKtfuyIpr1jV4DpaeasqkeHjhdOhU24vSHshcSuEyVlWdzvv2XmYCw==}
+  /@vitest/utils@1.3.1:
+    resolution: {integrity: sha512-d3Waie/299qqRyHTm2DjADeTaNdNSVsnwHPWrs20JMpjh6eiVq7ggggweO8rc4arhf6rRkWuHKwvxGvejUXZZQ==}
     dependencies:
       diff-sequences: 29.6.3
       estree-walker: 3.0.3
@@ -14100,8 +14073,8 @@ packages:
     engines: {node: '>= 0.8'}
     dev: true
 
-  /vite-node@1.3.0(@types/node@20.11.19)(less@4.2.0):
-    resolution: {integrity: sha512-D/oiDVBw75XMnjAXne/4feCkCEwcbr2SU1bjAhCcfI5Bq3VoOHji8/wCPAfUkDIeohJ5nSZ39fNxM3dNZ6OBOA==}
+  /vite-node@1.3.1(@types/node@20.11.19)(less@4.2.0):
+    resolution: {integrity: sha512-azbRrqRxlWTJEVbzInZCTchx0X69M/XPTCz4H+TLvlTcR/xH/3hkRqhOakT41fMJCMzXTu4UvegkZiEoJAWvng==}
     engines: {node: ^18.0.0 || >=20.0.0}
     hasBin: true
     dependencies:
@@ -14216,15 +14189,15 @@ packages:
     optionalDependencies:
       fsevents: 2.3.3
 
-  /vitest@1.3.0(@types/node@20.11.19)(happy-dom@13.3.8):
-    resolution: {integrity: sha512-V9qb276J1jjSx9xb75T2VoYXdO1UKi+qfflY7V7w93jzX7oA/+RtYE6TcifxksxsZvygSSMwu2Uw6di7yqDMwg==}
+  /vitest@1.3.1(@types/node@20.11.19)(happy-dom@13.3.8):
+    resolution: {integrity: sha512-/1QJqXs8YbCrfv/GPQ05wAZf2eakUPLPa18vkJAKE7RXOKfVHqMZZ1WlTjiwl6Gcn65M5vpNUB6EFLnEdRdEXQ==}
     engines: {node: ^18.0.0 || >=20.0.0}
     hasBin: true
     peerDependencies:
       '@edge-runtime/vm': '*'
       '@types/node': ^18.0.0 || >=20.0.0
-      '@vitest/browser': 1.3.0
-      '@vitest/ui': 1.3.0
+      '@vitest/browser': 1.3.1
+      '@vitest/ui': 1.3.1
       happy-dom: '*'
       jsdom: '*'
     peerDependenciesMeta:
@@ -14242,11 +14215,11 @@ packages:
         optional: true
     dependencies:
       '@types/node': 20.11.19
-      '@vitest/expect': 1.3.0
-      '@vitest/runner': 1.3.0
-      '@vitest/snapshot': 1.3.0
-      '@vitest/spy': 1.3.0
-      '@vitest/utils': 1.3.0
+      '@vitest/expect': 1.3.1
+      '@vitest/runner': 1.3.1
+      '@vitest/snapshot': 1.3.1
+      '@vitest/spy': 1.3.1
+      '@vitest/utils': 1.3.1
       acorn-walk: 8.3.2
       chai: 4.4.1
       debug: 4.3.4
@@ -14261,7 +14234,7 @@ packages:
       tinybench: 2.6.0
       tinypool: 0.8.2
       vite: 5.1.3(@types/node@20.11.19)(less@4.2.0)
-      vite-node: 1.3.0(@types/node@20.11.19)(less@4.2.0)
+      vite-node: 1.3.1(@types/node@20.11.19)(less@4.2.0)
       why-is-node-running: 2.2.2
     transitivePeerDependencies:
       - less
@@ -14272,15 +14245,15 @@ packages:
       - supports-color
       - terser
 
-  /vitest@1.3.0(@types/node@20.11.19)(less@4.2.0):
-    resolution: {integrity: sha512-V9qb276J1jjSx9xb75T2VoYXdO1UKi+qfflY7V7w93jzX7oA/+RtYE6TcifxksxsZvygSSMwu2Uw6di7yqDMwg==}
+  /vitest@1.3.1(@types/node@20.11.19)(less@4.2.0):
+    resolution: {integrity: sha512-/1QJqXs8YbCrfv/GPQ05wAZf2eakUPLPa18vkJAKE7RXOKfVHqMZZ1WlTjiwl6Gcn65M5vpNUB6EFLnEdRdEXQ==}
     engines: {node: ^18.0.0 || >=20.0.0}
     hasBin: true
     peerDependencies:
       '@edge-runtime/vm': '*'
       '@types/node': ^18.0.0 || >=20.0.0
-      '@vitest/browser': 1.3.0
-      '@vitest/ui': 1.3.0
+      '@vitest/browser': 1.3.1
+      '@vitest/ui': 1.3.1
       happy-dom: '*'
       jsdom: '*'
     peerDependenciesMeta:
@@ -14298,11 +14271,11 @@ packages:
         optional: true
     dependencies:
       '@types/node': 20.11.19
-      '@vitest/expect': 1.3.0
-      '@vitest/runner': 1.3.0
-      '@vitest/snapshot': 1.3.0
-      '@vitest/spy': 1.3.0
-      '@vitest/utils': 1.3.0
+      '@vitest/expect': 1.3.1
+      '@vitest/runner': 1.3.1
+      '@vitest/snapshot': 1.3.1
+      '@vitest/spy': 1.3.1
+      '@vitest/utils': 1.3.1
       acorn-walk: 8.3.2
       chai: 4.4.1
       debug: 4.3.4
@@ -14316,7 +14289,7 @@ packages:
       tinybench: 2.6.0
       tinypool: 0.8.2
       vite: 5.1.3(@types/node@20.11.19)(less@4.2.0)
-      vite-node: 1.3.0(@types/node@20.11.19)(less@4.2.0)
+      vite-node: 1.3.1(@types/node@20.11.19)(less@4.2.0)
       why-is-node-running: 2.2.2
     transitivePeerDependencies:
       - less

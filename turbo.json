@@ -3,7 +3,9 @@
     "extends": ["//"],
     "pipeline": {
         "test": {},
-        "coverage": {},
+        "coverage": {
+            "cache": false
+        },
         "build": {},
         "build:demo": {},
         "dev:demo": {

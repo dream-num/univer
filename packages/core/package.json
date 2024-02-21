@@ -58,7 +58,7 @@
     },
     "dependencies": {
         "dayjs": "^1.11.10",
-        "nanoid": "5.0.5",
+        "nanoid": "5.0.6",
         "numeral": "^2.0.6"
     },
     "devDependencies": {
@@ -68,6 +68,6 @@
         "rxjs": "^7.8.1",
         "typescript": "^5.3.3",
         "vite": "^5.1.3",
-        "vitest": "^1.3.0"
+        "vitest": "^1.3.1"
     }
 }

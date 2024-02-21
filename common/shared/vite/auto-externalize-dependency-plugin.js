@@ -38,11 +38,6 @@ exports.autoExternalizeDependency = function autoExternalizeDependency() {
                 globals[source] = convertLibNameFromPackageName(source);
 
                 return { id: source, external: true };
-            } else if (source.includes('monaco-editor')) {
-                externals.add('monaco-editor');
-                globals['monaco-editor'] = externalMap['monaco-editor'];
-
-                return { id: source, external: true };
             }
 
             return null;

@@ -27,7 +27,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 st: 0,
                 ed: 4,
                 ts: {
-                    fs: 24,
+                    fs: 20,
                     ff: 'Microsoft YaHei',
                     cl: {
                         rgb: 'rgb(255, 255, 255)',
@@ -42,7 +42,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 st: 5,
                 ed: 9,
                 ts: {
-                    fs: 18,
+                    fs: 16,
                     ff: 'Microsoft YaHei',
                     cl: {
                         rgb: 'rgb(30, 30, 30)',
@@ -54,7 +54,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 st: 9,
                 ed: 13,
                 ts: {
-                    fs: 18,
+                    fs: 16,
                     ff: 'Microsoft YaHei',
                     cl: {
                         rgb: 'rgb(30, 30, 30)',
@@ -66,7 +66,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 st: 13,
                 ed: 3057,
                 ts: {
-                    fs: 14,
+                    fs: 12,
                     ff: 'Microsoft YaHei',
                     cl: {
                         rgb: 'rgb(30, 30, 30)',

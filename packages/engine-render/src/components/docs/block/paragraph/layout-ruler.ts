@@ -271,6 +271,14 @@ function _lineOperator(
     if (!columnInfo) return;
 
     const column = columnInfo!.column;
+
+    // If the page width < marginLeft + marginRight, will trigger infinity loop, so return it first.
+    // The best solution is to do data checks and data repairs, and pass the correct data to the render layer.
+    if (column.width <= 0) {
+        console.error('The column width is less than 0, need to adjust page width to make it great than 0');
+        return;
+    }
+
     const line = getLastLineByColumn(column);
 
     const ascent = Math.max(...spanGroup.map((span) => span.bBox.ba));

@@ -35,6 +35,7 @@ export {
     getSheetObject,
     getTransformCoord,
 } from './controllers/utils/component-tools';
+export type { IEditorBridgeServiceParam } from './services/editor-bridge.service';
 export { enUS, zhCN } from './locale';
 export { AutoFillService, IAutoFillService } from './services/auto-fill/auto-fill.service';
 export { getAutoFillRepeatRange } from './services/auto-fill/tools';

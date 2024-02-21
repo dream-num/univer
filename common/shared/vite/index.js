@@ -20,22 +20,8 @@ const { resolve } = require('node:path');
 const { defineConfig, mergeConfig } = require('vitest/config');
 const { default: dts } = require('vite-plugin-dts');
 const react = require('@vitejs/plugin-react');
-
-/**
- * Convert package name to library name
- * @examples `@univerjs/core` -> `UniverCore`
- * @examples `@univerjs/foo-bar-baz` -> `UniverFooBarBaz`
- * @examples `@univerjs-foo/bar` -> `UniverBar`
- * @param {*} name package name
- * @returns {string} library name
- */
-function convertLibNameFromPackageName(name) {
-    return name
-        .replace(/^@univerjs(?:-[^/]+)?\//, 'univer-')
-        .split('-')
-        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-        .join('');
-};
+const { autoExternalizeDependency } = require('./auto-externalize-dependency-plugin');
+const { convertLibNameFromPackageName } = require('./utils');
 
 /**
  * IFeatures
@@ -70,6 +56,7 @@ function createViteConfig(overrideConfig, /** @type {IOptions} */ options) {
             },
         },
         plugins: [
+            autoExternalizeDependency(),
             dts({
                 entryRoot: 'src',
                 outDir: 'lib/types',

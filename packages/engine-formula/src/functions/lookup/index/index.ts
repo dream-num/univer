@@ -23,7 +23,7 @@ import { BaseFunction } from '../../base-function';
 
 export class Index extends BaseFunction {
     override calculate(reference: BaseValueObject, rowNum: BaseValueObject, columnNum?: BaseValueObject, areaNum?: BaseValueObject) {
-        if (reference == null || rowNum == null) {
+        if (reference == null) {
             return new ErrorValueObject(ErrorType.NA);
         }
 
@@ -31,7 +31,7 @@ export class Index extends BaseFunction {
             return reference;
         }
 
-        if (rowNum.isError()) {
+        if (rowNum?.isError()) {
             return rowNum;
         }
 
@@ -47,8 +47,19 @@ export class Index extends BaseFunction {
             return new ErrorValueObject(ErrorType.REF);
         }
 
-        rowNum = rowNum ?? new NumberValueObject(0);
-        columnNum = columnNum ?? new NumberValueObject(0);
+        const referenceRowCount = (reference as ArrayValueObject).getRowCount();
+        const referenceColumnCount = (reference as ArrayValueObject).getColumnCount();
+
+        // When there is only one row, the rowNum is considered to be the column number.
+        // =INDEX(A6:B6,2) equals =INDEX(A6:B6,1,2)
+        if (referenceRowCount === 1 && referenceColumnCount > 1 && columnNum == null) {
+            columnNum = rowNum ?? new NumberValueObject(0);
+            rowNum = new NumberValueObject(0);
+        } else {
+            rowNum = rowNum ?? new NumberValueObject(0);
+            columnNum = columnNum ?? new NumberValueObject(0);
+        }
+
         areaNum = areaNum ?? new NumberValueObject(1);
 
         // get max row length
@@ -78,16 +89,30 @@ export class Index extends BaseFunction {
                 const columnNumValue = columnNumArray.get(rowIndex, columnIndex);
                 const areaNumValue = areaNumArray.get(rowIndex, columnIndex);
 
-                return this._calculateSingleCell(reference as ArrayValueObject, rowNumValue, columnNumValue, areaNumValue);
+                const result = this._calculateSingleCell(reference as ArrayValueObject, rowNumValue, columnNumValue, areaNumValue);
+
+                if (result.isArray()) {
+                    return (result as ArrayValueObject).getFirstCell();
+                }
+
+                return result;
             });
         }
     }
 
     private _calculateSingleCell(reference: ArrayValueObject, rowNum: BaseValueObject, columnNum: BaseValueObject, areaNum: BaseValueObject) {
+        if (rowNum.isError()) {
+            return rowNum;
+        }
+
         const rowNumberValue = this._getNumberValue(rowNum);
 
         if (rowNumberValue === undefined || rowNumberValue < 0) {
             return new ErrorValueObject(ErrorType.VALUE);
+        }
+
+        if (columnNum.isError()) {
+            return columnNum;
         }
 
         const columnNumberValue = this._getNumberValue(columnNum);
@@ -97,7 +122,11 @@ export class Index extends BaseFunction {
         }
 
         // TODO areaNum
-        const areaNumberValue = this._getNumberValue(areaNum);
+        if (areaNum.isError()) {
+            return areaNum;
+        }
+
+        const areaNumberValue = this._getAreaNumberValue(areaNum);
 
         if (areaNumberValue === undefined || areaNumberValue < 1) {
             return new ErrorValueObject(ErrorType.VALUE);
@@ -109,7 +138,7 @@ export class Index extends BaseFunction {
         const result = reference.slice(rowParam, columnParam);
 
         if (!result) {
-            return new ErrorValueObject(ErrorType.VALUE);
+            return new ErrorValueObject(ErrorType.REF);
         }
 
         return result;
@@ -130,7 +159,30 @@ export class Index extends BaseFunction {
         } else if (numberValueObject.isString()) {
             return;
         } else if (numberValueObject.isNumber()) {
-            logicValue = numberValueObject.getValue() as number;
+            logicValue = Math.floor(numberValueObject.getValue() as number);
+        } else if (numberValueObject.isNull()) {
+            logicValue = 0;
+        }
+
+        return logicValue;
+    }
+
+    private _getAreaNumberValue(numberValueObject?: BaseValueObject) {
+        if (numberValueObject == null) {
+            return 1;
+        }
+
+        let logicValue = 0;
+
+        if (numberValueObject.isBoolean()) {
+            const logicV = numberValueObject.getValue() as boolean;
+            if (logicV === true) {
+                logicValue = 1;
+            }
+        } else if (numberValueObject.isString()) {
+            return;
+        } else if (numberValueObject.isNumber()) {
+            logicValue = Math.floor(numberValueObject.getValue() as number);
         } else if (numberValueObject.isNull()) {
             logicValue = 0;
         }

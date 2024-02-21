@@ -29,8 +29,10 @@ import { IFunctionService } from '../../../../services/function.service';
 import { IFormulaRuntimeService } from '../../../../services/runtime.service';
 import { createFunctionTestBed } from '../../../__tests__/create-function-test-bed';
 import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
+import type { BaseValueObject, ErrorValueObject } from '../../../../engine/value-object/base-value-object';
+import type { ArrayValueObject } from '../../../../engine/value-object/array-value-object';
 import { Index } from '..';
-import type { ArrayValueObject } from '../../../..';
+import { ErrorType } from '../../../../basics/error-type';
 
 const getTestWorkbookData = (): IWorkbookData => {
     return {
@@ -97,11 +99,9 @@ const getTestWorkbookData = (): IWorkbookData => {
                         },
                         1: {
                             v: '100',
-                            t: CellValueType.STRING,
                         },
                         2: {
                             v: '2.34',
-                            t: CellValueType.STRING,
                         },
                         3: {
                             v: 'test',
@@ -146,7 +146,7 @@ describe('Test index', () => {
     let lexer: Lexer;
     let astTreeBuilder: AstTreeBuilder;
     let interpreter: Interpreter;
-    let calculate: (formula: string) => Promise<(string | number | boolean | null)[][]>;
+    let calculate: (formula: string) => Promise<(string | number | boolean | null)[][] | string | number | boolean>;
 
     beforeEach(() => {
         const testBed = createFunctionTestBed(getTestWorkbookData());
@@ -199,23 +199,524 @@ describe('Test index', () => {
 
             const result = await interpreter.executeAsync(astNode as BaseAstNode);
 
-            return (result as ArrayValueObject).toValue();
+            if ((result as ErrorValueObject).isError()) {
+                return (result as ErrorValueObject).getValue();
+            } else if ((result as ArrayValueObject).isArray()) {
+                return (result as ArrayValueObject).toValue();
+            }
+            return (result as BaseValueObject).getValue();
         };
     });
 
     describe('One row', () => {
-        it('Row number is blank', async () => {
+        it('Column number null, different row parameters', async () => {
+            // null
+            const result = await calculate('=INDEX(A6:B6)');
+
+            expect(result).toStrictEqual([['Tom', 'Sarah']]);
+        });
+
+        it('Column number blank cell, different row parameters', async () => {
+           // null
+            let result = await calculate('=INDEX(A6:B6,)');
+
+            expect(result).toStrictEqual([['Tom', 'Sarah']]);
+
+           // blank cell
+            result = await calculate('=INDEX(A6:B6,,)');
+
+            expect(result).toStrictEqual([['Tom', 'Sarah']]);
+
+           // 0
+            result = await calculate('=INDEX(A6:B6,0,)');
+
+            expect(result).toStrictEqual([['Tom', 'Sarah']]);
+
+           // Not exceed the maximum number of rows
+            result = await calculate('=INDEX(A6:B6,1,)');
+
+            expect(result).toStrictEqual([['Tom', 'Sarah']]);
+
+           // Exceeds maximum number of rows
+            result = await calculate('=INDEX(A6:B6,2,)');
+
+            expect(result).toBe(ErrorType.REF);
+
+           // Array
+            result = await calculate('=INDEX(A6:B6,A3:F4,)');
+
+            expect(result).toStrictEqual([['Tom', ErrorType.VALUE, 'Tom', 'Tom', 'Tom', 'Tom'], ['Tom', ErrorType.REF, ErrorType.REF, ErrorType.VALUE, ErrorType.VALUE, 'Tom']]);
+        });
+
+        it('Column number 0, different row parameters', async () => {
+            // null
+            let result = await calculate('=INDEX(A6:B6,0)');
+
+            expect(result).toStrictEqual([['Tom', 'Sarah']]);
+
+            // blank cell
+            result = await calculate('=INDEX(A6:B6,,0)');
+
+            expect(result).toStrictEqual([['Tom', 'Sarah']]);
+
+            // 0
+            result = await calculate('=INDEX(A6:B6,0,0)');
+
+            expect(result).toStrictEqual([['Tom', 'Sarah']]);
+
+            // Not exceed the maximum number of rows
+            result = await calculate('=INDEX(A6:B6,1,0)');
+
+            expect(result).toStrictEqual([['Tom', 'Sarah']]);
+
+            // Exceeds maximum number of rows
+            result = await calculate('=INDEX(A6:B6,2,0)');
+
+            expect(result).toBe(ErrorType.REF);
+
+            // Array
+            result = await calculate('=INDEX(A6:B6,A3:F4,0)');
+
+            expect(result).toStrictEqual([['Tom', ErrorType.VALUE, 'Tom', 'Tom', 'Tom', 'Tom'], ['Tom', ErrorType.REF, ErrorType.REF, ErrorType.VALUE, ErrorType.VALUE, 'Tom']]);
+        });
+
+        it('Column number does not exceed the maximum number of columns, different row parameters', async () => {
+            // null
             let result = await calculate('=INDEX(A6:B6,2)');
 
             expect(result).toStrictEqual([['Sarah']]);
 
+            // blank cell
             result = await calculate('=INDEX(A6:B6,,2)');
 
             expect(result).toStrictEqual([['Sarah']]);
 
+            // 0
             result = await calculate('=INDEX(A6:B6,0,2)');
 
             expect(result).toStrictEqual([['Sarah']]);
+
+            // Not exceed the maximum number of rows
+            result = await calculate('=INDEX(A6:B6,1,2)');
+
+            expect(result).toStrictEqual([['Sarah']]);
+
+            // Exceeds maximum number of rows
+            result = await calculate('=INDEX(A6:B6,2,2)');
+
+            expect(result).toBe(ErrorType.REF);
+
+            // Array
+            result = await calculate('=INDEX(A6:B6,A3:F4,2)');
+
+            expect(result).toStrictEqual([['Sarah', ErrorType.VALUE, 'Sarah', 'Sarah', 'Sarah', 'Sarah'], ['Sarah', ErrorType.REF, ErrorType.REF, ErrorType.VALUE, ErrorType.VALUE, 'Sarah']]);
+        });
+
+        it('Column number exceeds the maximum number of columns, different row parameters', async () => {
+            // null
+            let result = await calculate('=INDEX(A6:B6,3)');
+
+            expect(result).toBe(ErrorType.REF);
+
+            // blank cell
+            result = await calculate('=INDEX(A6:B6,,3)');
+
+            expect(result).toBe(ErrorType.REF);
+
+            // 0
+            result = await calculate('=INDEX(A6:B6,0,3)');
+
+            expect(result).toBe(ErrorType.REF);
+
+            // Not exceed the maximum number of rows
+            result = await calculate('=INDEX(A6:B6,1,3)');
+
+            expect(result).toBe(ErrorType.REF);
+
+            // Exceeds maximum number of rows
+            result = await calculate('=INDEX(A6:B6,2,3)');
+
+            expect(result).toBe(ErrorType.REF);
+
+            // Array
+            result = await calculate('=INDEX(A6:B6,A3:F4,3)');
+
+            expect(result).toStrictEqual([[ErrorType.REF, ErrorType.VALUE, ErrorType.REF, ErrorType.REF, ErrorType.REF, ErrorType.REF], [ErrorType.REF, ErrorType.REF, ErrorType.REF, ErrorType.VALUE, ErrorType.VALUE, ErrorType.REF]]);
+        });
+
+        it('Column number array, different row parameters', async () => {
+            // null
+            let result = await calculate('=INDEX(A6:B6,A3:A5)');
+
+            expect(result).toStrictEqual([['Tom'], ['Tom'], ['Tom']]);
+
+            // blank cell
+            result = await calculate('=INDEX(A6:B6,,A3:A5)');
+
+            expect(result).toStrictEqual([['Tom'], ['Tom'], ['Tom']]);
+
+            // 0
+            result = await calculate('=INDEX(A6:B6,0,A3:A5)');
+
+            expect(result).toStrictEqual([['Tom'], ['Tom'], ['Tom']]);
+
+            // Not exceed the maximum number of rows
+            result = await calculate('=INDEX(A6:B6,1,A3:A5)');
+
+            expect(result).toStrictEqual([['Tom'], ['Tom'], ['Tom']]);
+
+            // Exceeds maximum number of rows
+            result = await calculate('=INDEX(A6:B6,2,A3:A5)');
+
+            expect(result).toStrictEqual([[ErrorType.REF], [ErrorType.REF], [ErrorType.REF]]);
+
+            // Array
+            result = await calculate('=INDEX(A6:B6,A3:F4,A3:A5)');
+
+            expect(result).toStrictEqual([['Tom', ErrorType.VALUE, 'Tom', 'Tom', 'Tom', 'Tom'], ['Tom', ErrorType.REF, ErrorType.REF, ErrorType.VALUE, ErrorType.VALUE, 'Tom'], [ErrorType.NA, ErrorType.NA, ErrorType.NA, ErrorType.NA, ErrorType.NA, ErrorType.NA]]);
+        });
+    });
+
+    describe('One column', () => {
+        it('Row number null, different column parameters', async () => {
+            // null
+            const result = await calculate('=INDEX(A6:A7)');
+
+            expect(result).toStrictEqual([['Tom'], ['Alex']]);
+        });
+
+        it('Row number blank cell, different column parameters', async () => {
+           // null
+            let result = await calculate('=INDEX(A6:A7,)');
+
+            expect(result).toStrictEqual([['Tom'], ['Alex']]);
+
+           // blank cell
+            result = await calculate('=INDEX(A6:A7,,)');
+
+            expect(result).toStrictEqual([['Tom'], ['Alex']]);
+
+           // 0
+            result = await calculate('=INDEX(A6:A7,,0)');
+
+            expect(result).toStrictEqual([['Tom'], ['Alex']]);
+
+           // Not exceed the maximum number of columns
+            result = await calculate('=INDEX(A6:A7,,1)');
+
+            expect(result).toStrictEqual([['Tom'], ['Alex']]);
+
+           // Exceeds maximum number of columns
+            result = await calculate('=INDEX(A6:A7,,2)');
+
+            expect(result).toBe(ErrorType.REF);
+
+           // Array
+            result = await calculate('=INDEX(A6:A7,,A3:F4)');
+
+            expect(result).toStrictEqual([['Tom', ErrorType.VALUE, 'Tom', 'Tom', 'Tom', 'Tom'], ['Tom', ErrorType.REF, ErrorType.REF, ErrorType.VALUE, ErrorType.VALUE, 'Tom']]);
+        });
+
+        it('Row number 0, different column parameters', async () => {
+            // null
+            let result = await calculate('=INDEX(A6:A7,0)');
+
+            expect(result).toStrictEqual([['Tom'], ['Alex']]);
+
+            // blank cell
+            result = await calculate('=INDEX(A6:A7,0,)');
+
+            expect(result).toStrictEqual([['Tom'], ['Alex']]);
+
+            // 0
+            result = await calculate('=INDEX(A6:A7,0,0)');
+
+            expect(result).toStrictEqual([['Tom'], ['Alex']]);
+
+            // Not exceed the maximum number of columns
+            result = await calculate('=INDEX(A6:A7,0,1)');
+
+            expect(result).toStrictEqual([['Tom'], ['Alex']]);
+
+            // Exceeds maximum number of columns
+            result = await calculate('=INDEX(A6:A7,0,2)');
+
+            expect(result).toBe(ErrorType.REF);
+
+            // Array
+            result = await calculate('=INDEX(A6:A7,0,A3:F4)');
+
+            expect(result).toStrictEqual([['Tom', ErrorType.VALUE, 'Tom', 'Tom', 'Tom', 'Tom'], ['Tom', ErrorType.REF, ErrorType.REF, ErrorType.VALUE, ErrorType.VALUE, 'Tom']]);
+        });
+
+        it('Row number does not exceed the maximum number of rows, different column parameters', async () => {
+            // null
+            let result = await calculate('=INDEX(A6:A7,2)');
+
+            expect(result).toStrictEqual([['Alex']]);
+
+            // blank cell
+            result = await calculate('=INDEX(A6:A7,2,)');
+
+            expect(result).toStrictEqual([['Alex']]);
+
+            // 0
+            result = await calculate('=INDEX(A6:A7,2,0)');
+
+            expect(result).toStrictEqual([['Alex']]);
+
+            // Not exceed the maximum number of columns
+            result = await calculate('=INDEX(A6:A7,2,1)');
+
+            expect(result).toStrictEqual([['Alex']]);
+
+            // Exceeds maximum number of columns
+            result = await calculate('=INDEX(A6:A7,2,2)');
+
+            expect(result).toBe(ErrorType.REF);
+
+            // Array
+            result = await calculate('=INDEX(A6:A7,2,A3:F4)');
+
+            expect(result).toStrictEqual([['Alex', ErrorType.VALUE, 'Alex', 'Alex', 'Alex', 'Alex'], ['Alex', ErrorType.REF, ErrorType.REF, ErrorType.VALUE, ErrorType.VALUE, 'Alex']]);
+        });
+
+        it('Row number exceeds the maximum number of rows, different column parameters', async () => {
+            // null
+            let result = await calculate('=INDEX(A6:A7,3)');
+
+            expect(result).toBe(ErrorType.REF);
+
+            // blank cell
+            result = await calculate('=INDEX(A6:A7,3,)');
+
+            expect(result).toBe(ErrorType.REF);
+
+            // 0
+            result = await calculate('=INDEX(A6:A7,3,0)');
+
+            expect(result).toBe(ErrorType.REF);
+
+            // Not exceed the maximum number of columns
+            result = await calculate('=INDEX(A6:A7,3,1)');
+
+            expect(result).toBe(ErrorType.REF);
+
+            // Exceeds maximum number of columns
+            result = await calculate('=INDEX(A6:A7,3,2)');
+
+            expect(result).toBe(ErrorType.REF);
+
+            // Array
+            result = await calculate('=INDEX(A6:A7,3,A3:F4)');
+
+            expect(result).toStrictEqual([[ErrorType.REF, ErrorType.VALUE, ErrorType.REF, ErrorType.REF, ErrorType.REF, ErrorType.REF], [ErrorType.REF, ErrorType.REF, ErrorType.REF, ErrorType.VALUE, ErrorType.VALUE, ErrorType.REF]]);
+        });
+
+        it('Row number array, different column parameters', async () => {
+            // null
+            let result = await calculate('=INDEX(A6:A7,A3:A5)');
+
+            expect(result).toStrictEqual([['Tom'], ['Tom'], ['Tom']]);
+
+            // blank cell
+            result = await calculate('=INDEX(A6:A7,A3:A5,)');
+
+            expect(result).toStrictEqual([['Tom'], ['Tom'], ['Tom']]);
+
+            // 0
+            result = await calculate('=INDEX(A6:A7,A3:A5,0)');
+
+            expect(result).toStrictEqual([['Tom'], ['Tom'], ['Tom']]);
+
+            // Not exceed the maximum number of columns
+            result = await calculate('=INDEX(A6:A7,A3:A5,1)');
+
+            expect(result).toStrictEqual([['Tom'], ['Tom'], ['Tom']]);
+
+            // Exceeds maximum number of columns
+            result = await calculate('=INDEX(A6:A7,A3:A5,2)');
+
+            expect(result).toStrictEqual([[ErrorType.REF], [ErrorType.REF], [ErrorType.REF]]);
+
+            // Array
+            result = await calculate('=INDEX(A6:A7,A3:A5,A3:F4)');
+
+            expect(result).toStrictEqual([['Tom', ErrorType.VALUE, 'Tom', 'Tom', 'Tom', 'Tom'], ['Tom', ErrorType.REF, ErrorType.REF, ErrorType.VALUE, ErrorType.VALUE, 'Tom'], [ErrorType.NA, ErrorType.NA, ErrorType.NA, ErrorType.NA, ErrorType.NA, ErrorType.NA]]);
+        });
+    });
+
+    describe('Multi rows and columns', () => {
+        it('Row number null, different column parameters', async () => {
+            // null
+            const result = await calculate('=INDEX(A6:B7)');
+
+            // reference Google Sheets
+            expect(result).toStrictEqual([['Tom', 'Sarah'], ['Alex', 'Mickey']]);
+        });
+
+        it('Row number blank cell, different column parameters', async () => {
+           // null
+            let result = await calculate('=INDEX(A6:B7,)');
+
+            // reference Google Sheets
+            expect(result).toStrictEqual([['Tom', 'Sarah'], ['Alex', 'Mickey']]);
+
+           // blank cell
+            result = await calculate('=INDEX(A6:B7,,)');
+
+            expect(result).toStrictEqual([['Tom', 'Sarah'], ['Alex', 'Mickey']]);
+
+           // 0
+            result = await calculate('=INDEX(A6:B7,,0)');
+
+            expect(result).toStrictEqual([['Tom', 'Sarah'], ['Alex', 'Mickey']]);
+
+           // Not exceed the maximum number of columns
+            result = await calculate('=INDEX(A6:B7,,1)');
+
+            expect(result).toStrictEqual([['Tom'], ['Alex']]);
+
+           // Exceeds maximum number of columns
+            result = await calculate('=INDEX(A6:B7,,3)');
+
+            expect(result).toBe(ErrorType.REF);
+
+           // Array
+            result = await calculate('=INDEX(A6:B7,,A3:F4)');
+
+            expect(result).toStrictEqual([['Tom', ErrorType.VALUE, 'Tom', 'Tom', 'Tom', 'Tom'], ['Tom', ErrorType.REF, 'Sarah', ErrorType.VALUE, ErrorType.VALUE, 'Tom']]);
+        });
+
+        it('Row number 0, different column parameters', async () => {
+            // null
+            let result = await calculate('=INDEX(A6:B7,0)');
+
+            // reference Google Sheets
+            expect(result).toStrictEqual([['Tom', 'Sarah'], ['Alex', 'Mickey']]);
+
+            // blank cell
+            result = await calculate('=INDEX(A6:B7,0,)');
+
+            expect(result).toStrictEqual([['Tom', 'Sarah'], ['Alex', 'Mickey']]);
+
+            // 0
+            result = await calculate('=INDEX(A6:B7,0,0)');
+
+            expect(result).toStrictEqual([['Tom', 'Sarah'], ['Alex', 'Mickey']]);
+
+            // Not exceed the maximum number of columns
+            result = await calculate('=INDEX(A6:B7,0,1)');
+
+            expect(result).toStrictEqual([['Tom'], ['Alex']]);
+
+            // Exceeds maximum number of columns
+            result = await calculate('=INDEX(A6:B7,0,3)');
+
+            expect(result).toBe(ErrorType.REF);
+
+            // Array
+            result = await calculate('=INDEX(A6:B7,0,A3:F4)');
+
+            expect(result).toStrictEqual([['Tom', ErrorType.VALUE, 'Tom', 'Tom', 'Tom', 'Tom'], ['Tom', ErrorType.REF, 'Sarah', ErrorType.VALUE, ErrorType.VALUE, 'Tom']]);
+        });
+
+        it('Row number does not exceed the maximum number of rows, different column parameters', async () => {
+            // null
+            let result = await calculate('=INDEX(A6:B7,2)');
+
+            // reference Google Sheets
+            expect(result).toStrictEqual([['Alex', 'Mickey']]);
+
+            // blank cell
+            result = await calculate('=INDEX(A6:B7,2,)');
+
+            expect(result).toStrictEqual([['Alex', 'Mickey']]);
+
+            // 0
+            result = await calculate('=INDEX(A6:B7,2,0)');
+
+            expect(result).toStrictEqual([['Alex', 'Mickey']]);
+
+            // Not exceed the maximum number of columns
+            result = await calculate('=INDEX(A6:B7,2,1)');
+
+            expect(result).toStrictEqual([['Alex']]);
+
+            // Exceeds maximum number of columns
+            result = await calculate('=INDEX(A6:B7,2,3)');
+
+            expect(result).toBe(ErrorType.REF);
+
+            // Array
+            result = await calculate('=INDEX(A6:B7,2,A3:F4)');
+
+            expect(result).toStrictEqual([['Alex', ErrorType.VALUE, 'Alex', 'Alex', 'Alex', 'Alex'], ['Alex', ErrorType.REF, 'Mickey', ErrorType.VALUE, ErrorType.VALUE, 'Alex']]);
+        });
+
+        it('Row number exceeds the maximum number of rows, different column parameters', async () => {
+            // null
+            let result = await calculate('=INDEX(A6:B7,3)');
+
+            expect(result).toBe(ErrorType.REF);
+
+            // blank cell
+            result = await calculate('=INDEX(A6:B7,3,)');
+
+            expect(result).toBe(ErrorType.REF);
+
+            // 0
+            result = await calculate('=INDEX(A6:B7,3,0)');
+
+            expect(result).toBe(ErrorType.REF);
+
+            // Not exceed the maximum number of columns
+            result = await calculate('=INDEX(A6:B7,3,1)');
+
+            expect(result).toBe(ErrorType.REF);
+
+            // Exceeds maximum number of columns
+            result = await calculate('=INDEX(A6:B7,3,3)');
+
+            expect(result).toBe(ErrorType.REF);
+
+            // Array
+            result = await calculate('=INDEX(A6:B7,3,A3:F4)');
+
+            expect(result).toStrictEqual([[ErrorType.REF, ErrorType.VALUE, ErrorType.REF, ErrorType.REF, ErrorType.REF, ErrorType.REF], [ErrorType.REF, ErrorType.REF, ErrorType.REF, ErrorType.VALUE, ErrorType.VALUE, ErrorType.REF]]);
+        });
+
+        it('Row number array, different column parameters', async () => {
+            // null
+            let result = await calculate('=INDEX(A6:B7,A3:A5)');
+
+            // reference Google Sheets
+            expect(result).toStrictEqual([['Tom'], ['Tom'], ['Tom']]);
+
+            // blank cell
+            result = await calculate('=INDEX(A6:B7,A3:A5,)');
+
+            expect(result).toStrictEqual([['Tom'], ['Tom'], ['Tom']]);
+
+            // 0
+            result = await calculate('=INDEX(A6:B7,A3:A5,0)');
+
+            expect(result).toStrictEqual([['Tom'], ['Tom'], ['Tom']]);
+
+            // Not exceed the maximum number of columns
+            result = await calculate('=INDEX(A6:B7,A3:A5,1)');
+
+            expect(result).toStrictEqual([['Tom'], ['Tom'], ['Tom']]);
+
+            // Exceeds maximum number of columns
+            result = await calculate('=INDEX(A6:B7,A3:A5,3)');
+
+            expect(result).toStrictEqual([[ErrorType.REF], [ErrorType.REF], [ErrorType.REF]]);
+
+            // Array
+            result = await calculate('=INDEX(A6:B7,A3:A5,A3:F4)');
+
+            expect(result).toStrictEqual([['Tom', ErrorType.VALUE, 'Tom', 'Tom', 'Tom', 'Tom'], ['Tom', ErrorType.REF, 'Sarah', ErrorType.VALUE, ErrorType.VALUE, 'Tom'], [ErrorType.NA, ErrorType.NA, ErrorType.NA, ErrorType.NA, ErrorType.NA, ErrorType.NA]]);
         });
     });
     // supports array string

@@ -70,8 +70,9 @@ export class ConditionalFormatService extends Disposable {
     public composeStyle(unitId: string, subUnitId: string, row: number, col: number) {
         const cell = this._conditionalFormatViewModel.getCellCf(unitId, subUnitId, row, col);
         if (cell) {
-            // 高优先的要放在后面应用,覆盖前面的结果
-            const ruleList = cell.cfList.reverse().map((item) => this._conditionalFormatRuleModel.getRule(unitId, subUnitId, item.cfId)!).filter((rule) => !!rule);
+            // High priority should be applied at the back, overwriting the previous results.
+            // reverse is a side-effect function that changes the original array.
+            const ruleList = cell.cfList.map((item) => this._conditionalFormatRuleModel.getRule(unitId, subUnitId, item.cfId)!).filter((rule) => !!rule).reverse();
             const endIndex = ruleList.findIndex((rule) => rule?.stopIfTrue);
             if (endIndex > -1) {
                 ruleList.splice(endIndex + 1);

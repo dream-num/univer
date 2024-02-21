@@ -9,6 +9,7 @@ exports.autoExternalizeDependency = function autoExternalizeDependency() {
         '@wendellhu/redi': '@wendellhu/redi',
         '@wendellhu/redi/react-bindings': '@wendellhu/redi/react-bindings',
         clsx: 'clsx',
+        'lodash/debounce': 'lodash.debounce',
         'monaco-editor': 'monaco',
         react: 'React',
         'react-dom': 'ReactDOM',

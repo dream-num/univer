@@ -37,6 +37,8 @@ import { setConditionalRuleMutation } from './commands/mutations/setConditionalR
 import { ConditionalFormatCopyPasteController } from './controllers/cf.copy-paste.controller';
 import { ConditionalFormatAutoFillController } from './controllers/cf.auto-fill.controller';
 import { ConditionalFormatSheetController } from './controllers/cf.sheet.controller';
+import { ConditionalFormatMenuController } from './controllers/cf.menu.controller';
+import { OpenConditionalFormatOperator } from './commands/operations/open-conditional-format-panel';
 
 export class SheetsConditionalFormatPlugin extends Plugin {
     static override type = PluginType.Sheet;
@@ -49,6 +51,7 @@ export class SheetsConditionalFormatPlugin extends Plugin {
         addTextCfCommand,
         addTimePeriodCfCommand,
         addUniqueValuesCfCommand,
+        OpenConditionalFormatOperator,
     ];
 
     static mutationList = [addConditionalRuleMutation, deleteConditionalRuleMutation, setConditionalRuleMutation];
@@ -70,6 +73,7 @@ export class SheetsConditionalFormatPlugin extends Plugin {
         this._injector.add([ConditionalFormatCopyPasteController]);
         this._injector.add([ConditionalFormatAutoFillController]);
         this._injector.add([ConditionalFormatSheetController]);
+        this._injector.add([ConditionalFormatMenuController]);
     }
 
     _initCommand() {
@@ -79,7 +83,5 @@ export class SheetsConditionalFormatPlugin extends Plugin {
         SheetsConditionalFormatPlugin.mutationList.forEach((m) => {
             this._commandService.registerCommand(m);
         });
-            // test
-        (window as any).commandService = this._commandService;
     }
 }

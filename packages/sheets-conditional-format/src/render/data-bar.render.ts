@@ -24,6 +24,8 @@ export const dataBarUKey = 'sheet-conditional-rule-data-bar';
 const EXTENSION_Z_INDEX = 35;
 
 export class DataBar extends SheetExtension {
+    private _paddingRightAndLeft = 2;
+    private _paddingTopAndBottom = 2;
     override uKey = dataBarUKey;
 
     override zIndex = EXTENSION_Z_INDEX;
@@ -61,14 +63,12 @@ export class DataBar extends SheetExtension {
                 }
                 const borderWidth = endX - startX;
                 const borderHeight = endY - startY;
-                const paddingRightAndLeft = 2;
-                const paddingTopAndBottom = 2;
-                const width = borderWidth - paddingRightAndLeft * 2;
-                const height = borderHeight - paddingTopAndBottom * 2;
+                const width = borderWidth - this._paddingRightAndLeft * 2;
+                const height = borderHeight - this._paddingTopAndBottom * 2;
                 if (value > 0) {
                     const dataBarWidth = width * (1 - startPoint / 100) * value / 100;
-                    const x0 = startX + paddingRightAndLeft + (startPoint / 100) * width;
-                    const y0 = startY + paddingTopAndBottom;
+                    const x0 = startX + this._paddingRightAndLeft + (startPoint / 100) * width;
+                    const y0 = startY + this._paddingTopAndBottom;
                     if (isGradient) {
                         const gradient = ctx.createLinearGradient(x0, y0, x0 + dataBarWidth, y0);
                         gradient.addColorStop(0, color);
@@ -81,8 +81,8 @@ export class DataBar extends SheetExtension {
                     this._drawRectWithRoundedCorner(ctx, x0, y0, dataBarWidth, height, false, true, true, false);
                 } else {
                     const dataBarWidth = width * startPoint / 100 * Math.abs(value) / 100;
-                    const x0 = startX + paddingRightAndLeft + (startPoint / 100) * width - dataBarWidth;
-                    const y0 = startY + paddingTopAndBottom;
+                    const x0 = startX + this._paddingRightAndLeft + (startPoint / 100) * width - dataBarWidth;
+                    const y0 = startY + this._paddingTopAndBottom;
                     if (isGradient) {
                         const gradient = ctx.createLinearGradient(x0, y0, x0 + dataBarWidth, y0);
                         gradient.addColorStop(0, 'rgb(255 255 255)');

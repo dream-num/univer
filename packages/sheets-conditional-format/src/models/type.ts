@@ -14,18 +14,14 @@
  * limitations under the License.
  */
 
-import type { BooleanNumber, IRange } from '@univerjs/core';
+import type { BooleanNumber, IRange, IStyleBase } from '@univerjs/core';
 import type { NumberOperator, RuleType, SubRuleType, TextOperator, TimePeriodOperator, ValueType } from '../base/const';
 
 export interface IBaseCfRule {
     type: string;
 }
 export interface IHighlightCell extends IBaseCfRule {
-    style: {
-        bl?: BooleanNumber; //bold
-        it?: BooleanNumber; //italic
-        fs?: number; // fontSize
-    };
+    style: IStyleBase;
     type: RuleType.highlightCell; // cellIs
     subType: SubRuleType;
 }
@@ -52,14 +48,12 @@ export interface IRankHighlightCell extends IHighlightCell {
 export interface ITextHighlightCell extends IHighlightCell {
     subType: SubRuleType.text;
     operator: TextOperator;
-    value: string;
+    value?: string;
 }
 
 export interface ITimePeriodHighlightCell extends IHighlightCell {
     subType: SubRuleType.timePeriod;
     operator: TimePeriodOperator;
-    value: number;
-
 }
 export type INumberHighlightCell = ({
     subType: SubRuleType.number;
@@ -68,7 +62,7 @@ export type INumberHighlightCell = ({
 } & IHighlightCell) | ({
     subType: SubRuleType.number;
     operator: NumberOperator.equal | NumberOperator.notEqual | NumberOperator.greaterThan | NumberOperator.greaterThanOrEqual | NumberOperator.lessThanOrEqual | NumberOperator.lessThan;
-    value: number;
+    value?: number;
 } & IHighlightCell);
 
 export interface IAverageHighlightCell extends IHighlightCell {

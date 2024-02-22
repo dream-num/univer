@@ -17,4 +17,5 @@
 export enum DataValidationStatus {
     VALID,
     INVALID,
+    VALIDATING,
 }

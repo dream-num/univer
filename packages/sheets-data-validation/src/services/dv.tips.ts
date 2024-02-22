@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-import type { DataValidationStatus } from '../enum/data-validation-status';
+export class SheetDataValidationTipsService {
 
-export interface ICellValidationData {
-    ruleId: string;
-    validStatus: DataValidationStatus;
 }

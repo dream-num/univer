@@ -23,7 +23,12 @@ export class DataValidationManager<T extends IDataValidationRule> {
 
     private _dataValidationMap = new Map<string, T>();
 
-    constructor(dataValidations: T[] | undefined) {
+    readonly unitId: string;
+    readonly subUnitId: string;
+
+    constructor(unitId: string, subUnitId: string, dataValidations: T[] | undefined) {
+        this.unitId = unitId;
+        this.subUnitId = subUnitId;
         if (!dataValidations) {
             return;
         }

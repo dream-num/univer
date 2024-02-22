@@ -58,27 +58,27 @@ export abstract class BaseDataValidator {
         return false;
     }
 
-    abstract validatorIsEqual(cellValue: CellValue, rule: IDataValidationRule): boolean;
+    abstract validatorIsEqual(cellValue: CellValue, rule: IDataValidationRule): Promise<boolean>;
 
-    abstract validatorIsNotEqual(cellValue: CellValue, rule: IDataValidationRule): boolean;
+    abstract validatorIsNotEqual(cellValue: CellValue, rule: IDataValidationRule): Promise<boolean>;
 
-    abstract validatorIsBetween(cellValue: CellValue, rule: IDataValidationRule): boolean;
+    abstract validatorIsBetween(cellValue: CellValue, rule: IDataValidationRule): Promise<boolean>;
 
-    abstract validatorIsNotBetween(cellValue: CellValue, rule: IDataValidationRule): boolean;
+    abstract validatorIsNotBetween(cellValue: CellValue, rule: IDataValidationRule): Promise<boolean>;
 
-    abstract validatorIsGreaterThan(cellValue: CellValue, rule: IDataValidationRule): boolean;
+    abstract validatorIsGreaterThan(cellValue: CellValue, rule: IDataValidationRule): Promise<boolean>;
 
-    abstract validatorIsGreaterThanOrEqual(cellValue: CellValue, rule: IDataValidationRule): boolean;
+    abstract validatorIsGreaterThanOrEqual(cellValue: CellValue, rule: IDataValidationRule): Promise<boolean>;
 
-    abstract validatorIsLessThan(cellValue: CellValue, rule: IDataValidationRule): boolean;
+    abstract validatorIsLessThan(cellValue: CellValue, rule: IDataValidationRule): Promise<boolean>;
 
-    abstract validatorIsLessThanOrEqual(cellValue: CellValue, rule: IDataValidationRule): boolean;
+    abstract validatorIsLessThanOrEqual(cellValue: CellValue, rule: IDataValidationRule): Promise<boolean>;
 
-    validator(cellValue: Nullable<CellValue>, rule: IDataValidationRule): boolean {
+    validator(cellValue: Nullable<CellValue>, rule: IDataValidationRule): Promise<boolean> {
         const isEmpty = this.isEmptyCellValue(cellValue);
         const { allowBlank = true } = rule;
         if (isEmpty) {
-            return allowBlank;
+            return Promise.resolve(allowBlank);
         }
 
         switch (rule.operator) {

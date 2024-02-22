@@ -14,62 +14,43 @@
  * limitations under the License.
  */
 
-import type { CellValue, Nullable } from '@univerjs/core';
 import { IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
-import type { IDataValidatorProvider, IRulePosition } from '@univerjs/data-validation';
-import { DataValidationModel, DataValidatorRegistryService, IDataValidatorService } from '@univerjs/data-validation';
+import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { Inject, Injector } from '@wendellhu/redi';
 import { SheetDataValidationManager } from '../models/sheet-data-validation-manager';
-
-@OnLifecycle(LifecycleStages.Rendered, SheetsDataValidatorProvider)
-class SheetsDataValidatorProvider implements IDataValidatorProvider {
-    constructor(
-        @Inject(DataValidatorRegistryService) private _dataValidatorRegistryService: DataValidatorRegistryService,
-        @Inject(DataValidationModel) private _dataValidationModel: DataValidationModel
-    ) {}
-
-    // TODO: validator result cache
-    validator(text: Nullable<CellValue>, rulePos: IRulePosition): boolean {
-        const { unitId, subUnitId, ruleId } = rulePos;
-        const rule = this._dataValidationModel.getRuleById(unitId, subUnitId, ruleId);
-        if (!rule) {
-            throw new Error(`Data validation rule does not exist, ruleId: ${ruleId}.`);
-        }
-
-        const validator = this._dataValidatorRegistryService.getValidatorItem(rule.type);
-        if (!validator) {
-            throw new Error(`Data validator was not found, type: ${rule.type}`);
-        }
-
-        return validator.validator(text, rule);
-    }
-}
+import { SheetDataValidationService } from '../services/dv.service';
 
 @OnLifecycle(LifecycleStages.Rendered, DataValidationController)
 export class DataValidationController extends RxDisposable {
-    private _currentManager: Nullable<SheetDataValidationManager>;
-
     constructor(
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
-        @IDataValidatorService private _dataValidatorService: IDataValidatorService,
         @IUniverInstanceService private _univerInstanceService: IUniverInstanceService,
         @Inject(DataValidationModel) private _dataValidationModel: DataValidationModel,
-        @Inject(Injector) private _injector: Injector
+        @Inject(SheetDataValidationService) private _sheetDataValidationService: SheetDataValidationService,
+        @Inject(DataValidatorRegistryService) private _dataValidatorRegistryService: DataValidatorRegistryService
     ) {
         super();
         this._init();
     }
 
     private _init() {
-        this._initDataValidationProvider();
+        this._initInstanceChange();
         this._initDataValidationDataSource();
         this._initViewModelIntercept();
     }
 
-    private _initDataValidationProvider() {
-        const provider = this._injector.createInstance(SheetsDataValidatorProvider);
-        this._dataValidatorService.setValidatorProvider(provider);
+    private _initInstanceChange() {
+        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
+        this.disposeWithMe(
+            workbook.activeSheet$.subscribe((worksheet) => {
+                if (worksheet) {
+                    const unitId = workbook.getUnitId();
+                    const subUnitId = worksheet.getSheetId();
+                    this._sheetDataValidationService.switchCurrent(unitId, subUnitId);
+                }
+            })
+        );
     }
 
     private _createSheetDataValidationManager(unitId: string, subUnitId: string) {
@@ -84,7 +65,9 @@ export class DataValidationController extends RxDisposable {
         }
 
         const rules = worksheet.getSnapshot().dataValidation;
-        return new SheetDataValidationManager(rules);
+        return new SheetDataValidationManager(unitId, subUnitId, rules,
+            this._dataValidatorRegistryService
+        );
     }
 
     private _initDataValidationDataSource() {
@@ -97,14 +80,26 @@ export class DataValidationController extends RxDisposable {
                 INTERCEPTOR_POINT.CELL_CONTENT,
                 {
                     handler: (cell, pos, next) => {
-                        const ruleId = this._currentManager?.getRuleIdByLocation(pos.row, pos.col);
-                        const { unitId, subUnitId } = pos;
+                        const validationManager = this._sheetDataValidationService.currentDataValidationManager;
+                        const { manager } = validationManager!;
+
+                        if (!validationManager) {
+                            return next(cell);
+                        }
+                        const { row, col } = pos;
+                        const ruleId = manager.getRuleIdByLocation(row, col);
+                        const rule = manager.getRuleById(ruleId);
+
+                        if (!rule) {
+                            return next(cell);
+                        }
+
                         return next({
                             ...cell,
                             dataValidation: ruleId
                                 ? {
                                     ruleId,
-                                    validStatus: this._dataValidatorService.validator(cell?.v, { ruleId, unitId, subUnitId }),
+                                    validStatus: manager.validatorCell(cell?.v, rule, pos),
                                 }
                                 : undefined,
                         });

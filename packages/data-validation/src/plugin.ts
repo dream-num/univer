@@ -18,7 +18,6 @@ import { ICommandService, Plugin } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { DataValidatorRegistryService } from './services/data-validator-registry.service';
-import { DataValidatorService, IDataValidatorService } from './services/data-validator.service';
 import { DataValidationModel } from './models/data-validation-model';
 import { DataValidationPanelService } from './services/data-validation-panel';
 import { CloseValidationPanelOperation, OpenValidationPanelOperation, ToggleValidationPanelOperation } from './commands/operations/data-validation.operation';
@@ -43,7 +42,6 @@ export class UniverDataValidationPlugin extends Plugin {
 
             // service
             [DataValidatorRegistryService],
-            [IDataValidatorService, { useClass: DataValidatorService }],
             [DataValidationPanelService],
 
             // controller

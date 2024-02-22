@@ -15,7 +15,6 @@
  */
 
 export { UniverDataValidationPlugin } from './plugin';
-export { type IDataValidatorProvider, DataValidatorService, IDataValidatorService, type IRulePosition } from './services/data-validator.service';
 export { DataValidatorRegistryService } from './services/data-validator-registry.service';
 export { DataValidationModel } from './models/data-validation-model';
 export {

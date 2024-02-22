@@ -14,19 +14,42 @@
  * limitations under the License.
  */
 
-import type { IRange, ISheetDataValidationRule } from '@univerjs/core/types/interfaces/index.js';
+import type { CellValue, IRange, ISheetDataValidationRule } from '@univerjs/core/types/interfaces/index.js';
 import { DataValidationManager } from '@univerjs/data-validation/models/data-validation-manager.js';
+import type { Nullable } from '@univerjs/core/shared/index.js';
 import { ObjectMatrix } from '@univerjs/core/shared/index.js';
 import { queryObjectMatrix } from '@univerjs/core/shared/object-matrix-query.js';
 import { Range } from '@univerjs/core/sheets/range.js';
 import type { IUpdateRulePayload } from '@univerjs/data-validation/types/interfaces/i-update-rule-payload.js';
+import type { DataValidatorRegistryService } from '@univerjs/data-validation';
 import { UpdateRuleType } from '@univerjs/data-validation';
+import { DataValidationStatus } from '@univerjs/core';
+import type { ISheetLocation } from '@univerjs/sheets';
 
+// TODO. calc relative cells
+// 1. parse formula
+// 2. get cell link map
 export class SheetDataValidationManager extends DataValidationManager<ISheetDataValidationRule> {
+    /**
+     * save cell's ruleId
+     */
     private _ruleMatrix = new ObjectMatrix<string>();
+    /**
+     * Save cell's validator result
+     */
+    private _validatorResult = new ObjectMatrix<Nullable<[Nullable<CellValue>, DataValidationStatus]>>();
+    /**
+     * Save cell's relative cell, computed from formula
+     */
+    private _relativeCells = new ObjectMatrix<[number, number][]>();
 
-    constructor(rules: ISheetDataValidationRule[]) {
-        super(rules);
+    constructor(
+        unitId: string,
+        subUnitId: string,
+        rules: ISheetDataValidationRule[],
+        private _dataValidatorRegistryService: DataValidatorRegistryService
+    ) {
+        super(unitId, subUnitId, rules);
         rules.forEach((rule) => {
             const ruleId = rule.uid;
             rule.ranges.forEach((range) => {
@@ -37,12 +60,17 @@ export class SheetDataValidationManager extends DataValidationManager<ISheetData
         });
     }
 
-    private _resetMatrixRanges(ranges: IRange[]) {
+    private _resetMatrixRanges(ranges: IRange[], isDelete = false) {
         ranges.forEach((range) => {
             Range.foreach(range, (row, col) => {
                 this._ruleMatrix.setValue(row, col, '');
             });
         });
+        if (isDelete) {
+            this.deleteCacheByRanges(ranges);
+        } else {
+            this.markCacheDirtyByRanges(ranges);
+        }
     }
 
     private _appendMatrixRule(rule: ISheetDataValidationRule) {
@@ -52,6 +80,7 @@ export class SheetDataValidationManager extends DataValidationManager<ISheetData
                 this._ruleMatrix.setValue(row, col, ruleId);
             });
         });
+        this.markCacheDirtyByRanges(rule.ranges);
     }
 
     private _updateRuleRanges() {
@@ -84,7 +113,7 @@ export class SheetDataValidationManager extends DataValidationManager<ISheetData
     override removeRule(ruleId: string): void {
         const oldRule = this.getRuleById(ruleId);
         if (oldRule) {
-            this._resetMatrixRanges(oldRule.ranges);
+            this._resetMatrixRanges(oldRule.ranges, true);
         }
         super.removeRule(ruleId);
     }
@@ -96,5 +125,42 @@ export class SheetDataValidationManager extends DataValidationManager<ISheetData
 
     getRuleIdByLocation(row: number, col: number) {
         return this._ruleMatrix.getValue(row, col);
+    }
+
+    validatorCell(cellValue: Nullable<CellValue>, rule: ISheetDataValidationRule, pos: ISheetLocation): DataValidationStatus {
+        const { col, row } = pos;
+        const validator = this._dataValidatorRegistryService.getValidatorItem(rule.type);
+        if (validator) {
+            const current = this._validatorResult.getValue(row, col);
+            if (!current || current[0] !== cellValue) {
+                this._validatorResult.setValue(row, col, [cellValue, DataValidationStatus.VALIDATING]);
+                validator.validator(cellValue, rule).then((status) => {
+                    this._validatorResult.setValue(row, col, [
+                        cellValue,
+                        status ? DataValidationStatus.VALID : DataValidationStatus.INVALID,
+                    ]);
+                });
+                return DataValidationStatus.VALIDATING;
+            }
+            return current[1];
+        } else {
+            return DataValidationStatus.VALID;
+        }
+    }
+
+    markCacheDirtyByRanges(ranges: IRange[]) {
+        ranges.forEach((range) => {
+            Range.foreach(range, (row, col) => {
+                this._validatorResult.setValue(row, col, undefined);
+            });
+        });
+    }
+
+    deleteCacheByRanges(ranges: IRange[]) {
+        ranges.forEach((range) => {
+            Range.foreach(range, (row, col) => {
+                this._validatorResult.realDeleteValue(row, col);
+            });
+        });
     }
 }

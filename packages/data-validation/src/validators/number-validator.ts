@@ -19,6 +19,7 @@ import type { CellValue, IDataValidationRule, Nullable } from '@univerjs/core';
 import { BASE_FORMULA_INPUT_NAME } from '../views/formula-input';
 import { BaseDataValidator } from './base-data-validator';
 
+// TODO support formula
 export class NumberValidator extends BaseDataValidator {
     id: string = DataValidationType.DECIMAL;
     title: string = 'dataValidation.type.number';
@@ -37,21 +38,21 @@ export class NumberValidator extends BaseDataValidator {
     scopes: string | string[] = ['sheet'];
     formulaInput: string = BASE_FORMULA_INPUT_NAME;
 
-    validatorIsEqual(cellValue: CellValue, rule: IDataValidationRule): boolean {
+    async validatorIsEqual(cellValue: CellValue, rule: IDataValidationRule) {
         if (!rule.formula1) {
             return true;
         }
         return +cellValue === +rule.formula1;
     }
 
-    validatorIsNotEqual(cellValue: CellValue, rule: IDataValidationRule): boolean {
+    async validatorIsNotEqual(cellValue: CellValue, rule: IDataValidationRule) {
         if (!rule.formula1) {
             return true;
         }
         return +cellValue !== +rule.formula1;
     }
 
-    validatorIsBetween(cellValue: CellValue, rule: IDataValidationRule): boolean {
+    async validatorIsBetween(cellValue: CellValue, rule: IDataValidationRule) {
         if (!rule.formula1 || !rule.formula2) {
             return true;
         }
@@ -63,7 +64,7 @@ export class NumberValidator extends BaseDataValidator {
         return value >= start && value <= end;
     }
 
-    validatorIsNotBetween(cellValue: CellValue, rule: IDataValidationRule): boolean {
+    async validatorIsNotBetween(cellValue: CellValue, rule: IDataValidationRule) {
         if (!rule.formula1 || !rule.formula2) {
             return true;
         }
@@ -75,28 +76,28 @@ export class NumberValidator extends BaseDataValidator {
         return value < start && value > end;
     }
 
-    validatorIsGreaterThan(cellValue: CellValue, rule: IDataValidationRule): boolean {
+    async validatorIsGreaterThan(cellValue: CellValue, rule: IDataValidationRule) {
         if (!rule.formula1) {
             return true;
         }
         return +cellValue > +rule.formula1;
     }
 
-    validatorIsGreaterThanOrEqual(cellValue: CellValue, rule: IDataValidationRule): boolean {
+    async validatorIsGreaterThanOrEqual(cellValue: CellValue, rule: IDataValidationRule) {
         if (!rule.formula1) {
             return true;
         }
         return +cellValue >= +rule.formula1;
     }
 
-    validatorIsLessThan(cellValue: CellValue, rule: IDataValidationRule): boolean {
+    async validatorIsLessThan(cellValue: CellValue, rule: IDataValidationRule) {
         if (!rule.formula1) {
             return true;
         }
         return +cellValue < +rule.formula1;
     }
 
-    validatorIsLessThanOrEqual(cellValue: CellValue, rule: IDataValidationRule): boolean {
+    async validatorIsLessThanOrEqual(cellValue: CellValue, rule: IDataValidationRule) {
         if (!rule.formula1) {
             return true;
         }

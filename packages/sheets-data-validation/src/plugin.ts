@@ -18,6 +18,7 @@ import { Plugin } from '@univerjs/core';
 import { type Dependency, Inject, Injector } from '@wendellhu/redi';
 import { DataValidationRenderController } from './controllers/dv-render.controller';
 import { DataValidationController } from './controllers/dv.controller';
+import { SheetDataValidationService } from './services/dv.service';
 
 const PLUGIN_NAME = 'sheets-data-validation';
 
@@ -29,7 +30,13 @@ export class UniverSheetsDataValidationPlugin extends Plugin {
     }
 
     override onStarting(injector: Injector) {
-        injector.add([DataValidationController]);
-        injector.add([DataValidationRenderController]);
+        ([
+            [SheetDataValidationService],
+            // controller
+            [DataValidationController],
+            [DataValidationRenderController],
+        ] as Dependency[]).forEach((dep) => {
+            injector.add(dep);
+        });
     }
 }

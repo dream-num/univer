@@ -88,6 +88,9 @@ export class SheetDataValidationManager extends DataValidationManager<ISheetData
         rules.forEach((rule) => {
             const newRanges = queryObjectMatrix(this._ruleMatrix, (ruleId) => ruleId === rule.uid);
             rule.ranges = newRanges;
+            if (newRanges.length === 0) {
+                super.removeRule(rule.uid);
+            }
         });
     }
 

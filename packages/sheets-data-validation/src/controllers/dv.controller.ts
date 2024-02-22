@@ -35,13 +35,14 @@ export class DataValidationController extends RxDisposable {
     }
 
     private _init() {
-        this._initInstanceChange();
         this._initDataValidationDataSource();
+        this._initInstanceChange();
         this._initViewModelIntercept();
     }
 
     private _initInstanceChange() {
         const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
+        this._sheetDataValidationService.switchCurrent(workbook.getUnitId(), workbook.getActiveSheet().getSheetId());
         this.disposeWithMe(
             workbook.activeSheet$.subscribe((worksheet) => {
                 if (worksheet) {

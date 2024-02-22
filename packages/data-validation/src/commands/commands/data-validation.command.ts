@@ -14,13 +14,39 @@
  * limitations under the License.
  */
 
-import { CommandType, type ICommand } from '@univerjs/core';
+import { CommandType, ICommandService, Tools } from '@univerjs/core';
+import type { ICommand, IDataValidationRule, IRange } from '@univerjs/core';
+import type { IAddDataValidationMutationParams } from '../..';
+import { AddDataValidationMutation, RemoveAllDataValidationMutation } from '../..';
+
+export interface IAddDataValidationCommandParams {
+    unitId: string;
+    subUnitId: string;
+    rule: Omit<IDataValidationRule, 'uid' | 'ranges'> & {
+        range: IRange;
+    };
+}
 
 // TODO: redo & undo
-export const AddDataValidationCommand: ICommand = {
+export const AddDataValidationCommand: ICommand<IAddDataValidationCommandParams> = {
     type: CommandType.COMMAND,
     id: 'data-validation.command.addRule',
     handler(accessor, params) {
+        if (!params) {
+            return false;
+        }
+
+        const commandService = accessor.get(ICommandService);
+        const uid = Tools.generateRandomId(6);
+        const mutationParams: IAddDataValidationMutationParams = {
+            ...params,
+            rule: {
+                uid,
+                ...params.rule,
+                ranges: [params.rule.range],
+            },
+        };
+        commandService.executeCommand(AddDataValidationMutation.id, mutationParams);
         return true;
     },
 };
@@ -33,6 +59,8 @@ export const RemoveDataValidationCommand: ICommand<IRemoveDataValidationCommandP
     type: CommandType.COMMAND,
     id: 'data-validation.command.removeRule',
     handler(accessor, params) {
+        const commandService = accessor.get(ICommandService);
+
         return true;
     },
 };
@@ -49,14 +77,17 @@ export const UpdateDataValidationCommand: ICommand<IRemoveDataValidationCommandP
     },
 };
 
-export interface IRemoveAllDataValidationCommand {
-
+export interface IRemoveAllDataValidationCommandParams {
+    unitId: string;
+    subUnitId: string;
 }
 
-export const RemoveAllDataValidationCommand: ICommand<IRemoveAllDataValidationCommand> = {
+export const RemoveAllDataValidationCommand: ICommand<IRemoveAllDataValidationCommandParams> = {
     type: CommandType.COMMAND,
     id: 'data-validation.command.removeAll',
     handler(accessor, params) {
+        const commandService = accessor.get(ICommandService);
+        commandService.executeCommand(RemoveAllDataValidationMutation.id, params);
         return true;
     },
 };

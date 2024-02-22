@@ -85,7 +85,7 @@ function resetMatrix<T>(matrix: Nullable<T>[][], range: IRange) {
 }
 
 export function queryObjectMatrix<T>(matrix: ObjectMatrix<T>, match: (value: T) => boolean) {
-    const arrayMatrix = matrix.toArray();
+    const arrayMatrix = matrix.toFullArray();
     const results: IRange[] = [];
     while (true) {
         const rectangle = maximalRectangle(arrayMatrix, match);

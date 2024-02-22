@@ -84,7 +84,6 @@ univer.registerPlugin(UniverSheetsFindPlugin);
 
 // data validation
 univer.registerPlugin(UniverDataValidationPlugin);
-console.log('===UniverSheetsDataValidationPlugin', UniverSheetsDataValidationPlugin);
 univer.registerPlugin(UniverSheetsDataValidationPlugin);
 
 // create univer sheet instance

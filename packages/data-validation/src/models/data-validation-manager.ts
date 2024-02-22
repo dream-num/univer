@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
-import type { IDataValidationRule } from '@univerjs/core';
+import { type IDataValidationRule, Tools } from '@univerjs/core';
+import { Subject } from 'rxjs';
 import type { IUpdateRulePayload } from '../types/interfaces/i-update-rule-payload';
 import { UpdateRuleType } from '..';
 
 export class DataValidationManager<T extends IDataValidationRule> {
     private _dataValidations: T[];
-
     private _dataValidationMap = new Map<string, T>();
+    private _dataValidations$ = new Subject<T[]>();
 
     readonly unitId: string;
     readonly subUnitId: string;
+    readonly dataValidations$ = this._dataValidations$.asObservable();
 
     constructor(unitId: string, subUnitId: string, dataValidations: T[] | undefined) {
         this.unitId = unitId;
@@ -34,6 +36,11 @@ export class DataValidationManager<T extends IDataValidationRule> {
         }
 
         this._insertRules(dataValidations);
+        this._notice();
+    }
+
+    private _notice() {
+        this._dataValidations$.next(this._dataValidations);
     }
 
     private _insertRules(dataValidations: T[]) {
@@ -50,12 +57,14 @@ export class DataValidationManager<T extends IDataValidationRule> {
     addRule(rule: T) {
         this._dataValidations.push(rule);
         this._dataValidationMap.set(rule.uid, rule);
+        this._notice();
     }
 
     removeRule(ruleId: string) {
         const index = this._dataValidations.findIndex((item) => item.uid === ruleId);
         this._dataValidations.splice(index, 1);
         this._dataValidationMap.delete(ruleId);
+        this._notice();
     }
 
     updateRule(ruleId: string, payload: IUpdateRulePayload) {
@@ -83,17 +92,24 @@ export class DataValidationManager<T extends IDataValidationRule> {
                 break;
         }
 
+        this._notice();
         return rule;
     }
 
-    removeAll() {
+    _removeAll() {
         this._dataValidations.splice(0, this._dataValidations.length);
         this._dataValidationMap.clear();
     }
 
+    removeAll() {
+        this._removeAll();
+        this._notice();
+    }
+
     replaceAll(rules: T[]) {
-        this.removeAll();
+        this._removeAll();
         this._insertRules(rules);
+        this._notice();
     }
 
     getDataValidations() {

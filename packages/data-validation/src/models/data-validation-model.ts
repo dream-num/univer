@@ -61,7 +61,7 @@ export class DataValidationModel<T extends IDataValidationRule = IDataValidation
         const manager = this.getOrCreateManager(unitId, subUnitId);
         manager.addRule(rule);
         this._ruleChange$.next({
-            rule,
+            rule: rule as any,
             type: 'add',
             unitId,
             subUnitId,

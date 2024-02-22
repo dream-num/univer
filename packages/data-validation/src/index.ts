@@ -32,9 +32,10 @@ export {
 } from './commands/commands/data-validation.command';
 
 export type {
-    IRemoveAllDataValidationCommand,
+    IRemoveAllDataValidationCommandParams,
     IRemoveDataValidationCommandParams,
     IUpdateDataValidationCommand,
+    IAddDataValidationCommandParams,
 } from './commands/commands/data-validation.command';
 
 export {

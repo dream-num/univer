@@ -30,7 +30,7 @@ export const OpenValidationPanelOperation: ICommand = {
         sidebarService.open({
             header: { title: 'data-validation-panel.title' },
             children: { label: DataValidationPanelName },
-            width: 600,
+            width: 400,
         });
         return true;
     },

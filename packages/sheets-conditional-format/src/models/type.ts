@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { BooleanNumber, IRange, IStyleBase } from '@univerjs/core';
+import type { IRange, IStyleBase } from '@univerjs/core';
 import type { NumberOperator, RuleType, SubRuleType, TextOperator, TimePeriodOperator, ValueType } from '../base/const';
 
 export interface IBaseCfRule {
@@ -89,9 +89,9 @@ export interface IColorScale extends IBaseCfRule {
 export type IConditionalFormatRuleConfig = IColorScale | IDataBar | IUniqueValuesHighlightCell |
 IDuplicateValuesHighlightCell | IRankHighlightCell | ITextHighlightCell |
 ITimePeriodHighlightCell | INumberHighlightCell | IAverageHighlightCell;
-export interface IConditionFormatRule {
+export interface IConditionFormatRule<C = IConditionalFormatRuleConfig> {
     ranges: IRange [];
     cfId: string;
     stopIfTrue: boolean;
-    rule: IConditionalFormatRuleConfig;
+    rule: C;
 }

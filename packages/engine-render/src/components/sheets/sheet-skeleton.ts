@@ -1055,13 +1055,6 @@ export class SpreadsheetSkeleton extends Skeleton {
         if (cell.f && formulaFirst) {
             documentModel = this._getDocumentDataByStyle(cell.f.toString(), {}, {});
         } else if (cell.p) {
-            // const { a: angle = 0, v: isVertical = BooleanNumber.FALSE } = textRotation;
-            // let centerAngle = 0;
-            // let vertexAngle = angle;
-            // if (isVertical === BooleanNumber.TRUE) {
-            //     centerAngle = VERTICAL_ROTATE_ANGLE;
-            //     vertexAngle = VERTICAL_ROTATE_ANGLE;
-            // }
             const { centerAngle, vertexAngle } = convertTextRotation(textRotation);
             documentModel = this._updateConfigAndGetDocumentModel(
                 isDeepClone ? Tools.deepClone(cell.p) : cell.p,

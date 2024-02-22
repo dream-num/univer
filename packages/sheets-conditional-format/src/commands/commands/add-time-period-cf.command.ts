@@ -31,7 +31,6 @@ interface IAddTimePeriodCf {
     stopIfTrue?: boolean;
     style: ITimePeriodHighlightCell['style'];
     operator: ITimePeriodHighlightCell['operator'];
-    value: number;
 
 }
 export const addTimePeriodCfCommand: ICommand<IAddTimePeriodCf> = {
@@ -41,7 +40,7 @@ export const addTimePeriodCfCommand: ICommand<IAddTimePeriodCf> = {
         if (!params) {
             return false;
         }
-        const { ranges, style, stopIfTrue, operator, value } = params;
+        const { ranges, style, stopIfTrue, operator } = params;
         const conditionalFormatRuleModel = accessor.get(ConditionalFormatRuleModel);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
@@ -51,14 +50,13 @@ export const addTimePeriodCfCommand: ICommand<IAddTimePeriodCf> = {
         const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();
         const cfId = conditionalFormatRuleModel.createCfId(unitId, subUnitId);
-        const rule: IConditionFormatRule = { ranges, cfId, stopIfTrue: !!stopIfTrue,
-                                             rule: {
-                                                 type: RuleType.highlightCell,
-                                                 subType: SubRuleType.timePeriod,
-                                                 operator,
-                                                 style,
-                                                 value,
-                                             } };
+        const rule: IConditionFormatRule<ITimePeriodHighlightCell> = { ranges, cfId, stopIfTrue: !!stopIfTrue,
+                                                                       rule: {
+                                                                           type: RuleType.highlightCell,
+                                                                           subType: SubRuleType.timePeriod,
+                                                                           operator,
+                                                                           style,
+                                                                       } };
         commandService.executeCommand(addConditionalRuleMutation.id, { unitId, subUnitId, rule } as IAddConditionalRuleMutationParams);
 
         return true;

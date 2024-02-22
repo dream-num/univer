@@ -21,15 +21,15 @@ import { ConditionalFormatService } from './services/conditional-format.service'
 import { ConditionalFormatRuleModel } from './models/conditional-format-rule-model';
 import { ConditionalFormatViewModel } from './models/conditional-format-view-model';
 import { RenderController } from './controllers/cf.render.controller';
-import { addAverageCfCommand } from './commands/commands/addAverageCf.command';
-import { addColorScaleConditionalRuleCommand } from './commands/commands/addColorScaleCf.command';
-import { addDataBarConditionalRuleCommand } from './commands/commands/addDataBarCf.command';
-import { addDuplicateValuesCfCommand } from './commands/commands/addDuplicateValuesCf.command';
-import { addNumberCfCommand } from './commands/commands/addNumberCf.command';
-import { addRankCfCommand } from './commands/commands/addRankCf.command';
-import { addTextCfCommand } from './commands/commands/addTextCf.command';
-import { addTimePeriodCfCommand } from './commands/commands/addTimePeriodCf.command';
-import { addUniqueValuesCfCommand } from './commands/commands/addUniqueValuesCf.command';
+import { addAverageCfCommand } from './commands/commands/add-average-cf.command';
+import { addColorScaleConditionalRuleCommand } from './commands/commands/add-color-scale-cf.command';
+import { addDataBarConditionalRuleCommand } from './commands/commands/add-data-bar-cf.command';
+import { addDuplicateValuesCfCommand } from './commands/commands/add-duplicate-values-cf.command';
+import { addNumberCfCommand } from './commands/commands/add-number-cf.command';
+import { addRankCfCommand } from './commands/commands/add-rank-cf.command';
+import { addTextCfCommand } from './commands/commands/add-text-cf.command';
+import { addTimePeriodCfCommand } from './commands/commands/add-time-period-cf.command';
+import { addUniqueValuesCfCommand } from './commands/commands/add-unique-values-cf.command';
 import { addConditionalRuleMutation } from './commands/mutations/addConditionalRule.mutation';
 import { deleteConditionalRuleMutation } from './commands/mutations/deleteConditionalRule.mutation';
 import { RefRangeController } from './controllers/cf.ref-range.controller';
@@ -39,6 +39,11 @@ import { ConditionalFormatAutoFillController } from './controllers/cf.auto-fill.
 import { ConditionalFormatSheetController } from './controllers/cf.sheet.controller';
 import { ConditionalFormatMenuController } from './controllers/cf.menu.controller';
 import { OpenConditionalFormatOperator } from './commands/operations/open-conditional-format-panel';
+import { deleteCfCommand } from './commands/commands/delete-cf.command';
+import { setCfCommand } from './commands/commands/set-cf.command';
+import { moveCfCommand } from './commands/commands/move-cf.command';
+import { addCfCommand } from './commands/commands/add-cf.command';
+import { moveConditionalRuleMutation } from './commands/mutations/move-conditional-rule.mutation';
 
 export class SheetsConditionalFormatPlugin extends Plugin {
     static override type = PluginType.Sheet;
@@ -52,9 +57,13 @@ export class SheetsConditionalFormatPlugin extends Plugin {
         addTimePeriodCfCommand,
         addUniqueValuesCfCommand,
         OpenConditionalFormatOperator,
+        deleteCfCommand,
+        setCfCommand,
+        moveCfCommand,
+        addCfCommand,
     ];
 
-    static mutationList = [addConditionalRuleMutation, deleteConditionalRuleMutation, setConditionalRuleMutation];
+    static mutationList = [addConditionalRuleMutation, deleteConditionalRuleMutation, setConditionalRuleMutation, moveConditionalRuleMutation];
     constructor(
         _config: unknown,
         @Inject(Injector) override readonly _injector: Injector,

@@ -166,7 +166,7 @@ export const RuleEdit = (props: IRuleEditProps) => {
             <div>
                 <Select key="style" value={ruleType} options={options} onChange={(e) => ruleTypeSet(e)} />
             </div>
-            <StyleEditor interceptorManager={interceptorManager} rule={props.rule?.rule} onChange={onStyleChange} />
+            <StyleEditor interceptorManager={interceptorManager} rule={props.rule?.rule as any} onChange={onStyleChange} />
             <div>
                 <Button size="small" onClick={handleSubmit}> 确认</Button>
                 <Button size="small" onClick={handleCancel}>取消</Button>

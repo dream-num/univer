@@ -14,15 +14,6 @@
  * limitations under the License.
  */
 
-import { createInterceptorKey } from '@univerjs/core';
-import type { InterceptorManager } from '@univerjs/core';
-import type { IConditionalFormatRuleConfig } from '../../../models/type';
-
-export const beforeSubmit = createInterceptorKey<boolean, null>('beforeSubmit');
-export const submit = createInterceptorKey<any, null>('submit');
-
-export interface IStyleEditorProps<S = any, R = IConditionalFormatRuleConfig> {
-    onChange: (style: S) => void;
-    rule?: R;
-    interceptorManager: InterceptorManager<{ beforeSubmit: typeof beforeSubmit; submit: typeof submit }>;
+export type MakePropertyOptional<T, K extends keyof T> = {
+    [P in keyof T]: P extends K ? T[P] | undefined : T[P];
 };

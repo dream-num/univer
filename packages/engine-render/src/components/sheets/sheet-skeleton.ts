@@ -70,6 +70,7 @@ import { columnIterator } from '../docs/common/tools';
 import { DocumentSkeleton } from '../docs/doc-skeleton';
 import { DocumentViewModel } from '../docs/view-model/document-view-model';
 import { Skeleton } from '../skeleton';
+import { convertTextRotation, VERTICAL_ROTATE_ANGLE } from '../../basics/text-rotation';
 import type { BorderCache, IFontCacheItem, IStylesCache } from './interfaces';
 
 /**
@@ -177,8 +178,6 @@ export interface IDocumentLayoutObject {
     paddingData: IPaddingData;
     fill?: Nullable<string>;
 }
-
-const VERTICAL_ROTATE_ANGLE = 90;
 
 const DEFAULT_PADDING_DATA = {
     t: 0,
@@ -1056,13 +1055,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         if (cell.f && formulaFirst) {
             documentModel = this._getDocumentDataByStyle(cell.f.toString(), {}, {});
         } else if (cell.p) {
-            const { a: angle = 0, v: isVertical = BooleanNumber.FALSE } = textRotation;
-            let centerAngle = 0;
-            let vertexAngle = angle;
-            if (isVertical === BooleanNumber.TRUE) {
-                centerAngle = VERTICAL_ROTATE_ANGLE;
-                vertexAngle = VERTICAL_ROTATE_ANGLE;
-            }
+            const { centerAngle, vertexAngle } = convertTextRotation(textRotation);
             documentModel = this._updateConfigAndGetDocumentModel(
                 isDeepClone ? Tools.deepClone(cell.p) : cell.p,
                 horizontalAlign,

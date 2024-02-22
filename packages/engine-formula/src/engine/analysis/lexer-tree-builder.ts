@@ -588,7 +588,7 @@ export class LexerTreeBuilder extends Disposable {
                             break;
                         }
 
-                        if (charPriority > lastSymbolPriority) {
+                        if (charPriority >= lastSymbolPriority) {
                             baseStack.push(symbolStack.pop()!);
                         } else {
                             break;

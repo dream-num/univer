@@ -139,6 +139,11 @@ describe('lexer nodeMaker test', () => {
                 '{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"sum","st":0,"ed":2,"children":[{"token":"P_1","st":0,"ed":2,"children":["#REF! "," 5 ","+"]},{"token":"P_1","st":11,"ed":13,"children":[" #REF!"]}]}]}'
             );
         });
+
+        it('minus test', () => {
+            const node = lexerTreeBuilder.treeBuilder('=2-1-1-1-1') as LexerNode;
+            expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":["2","1","-","1","-","1","-","1","-"]}');
+        });
     });
 
     describe('checkIfAddBracket', () => {

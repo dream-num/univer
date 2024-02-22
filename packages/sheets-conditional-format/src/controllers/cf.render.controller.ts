@@ -24,6 +24,7 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 
 import { ConditionalFormatService } from '../services/conditional-format.service';
 import { ConditionalFormatViewModel } from '../models/conditional-format-view-model';
+import { ConditionalFormatRuleModel } from '../models/conditional-format-rule-model';
 import { DataBar, dataBarUKey } from '../render/data-bar.render';
 import type { IDataBarCellData } from '../render/type';
 
@@ -35,6 +36,7 @@ export class RenderController extends Disposable {
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
         @Inject(IRenderManagerService) private _renderManagerService: IRenderManagerService,
         @Inject(ConditionalFormatViewModel) private _conditionalFormatViewModel: ConditionalFormatViewModel,
+        @Inject(ConditionalFormatRuleModel) private _conditionalFormatRuleModel: ConditionalFormatRuleModel,
         @Inject(SheetSkeletonManagerService) private _sheetSkeletonManagerService: SheetSkeletonManagerService) {
         super();
         this._initViewModelInterceptor();
@@ -68,6 +70,13 @@ export class RenderController extends Disposable {
             const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
             const worksheet = workbook.getActiveSheet();
             return v.filter((item) => item.unitId === workbook.getUnitId() && item.subUnitId === worksheet.getSheetId()).length > 0;
+        })).subscribe(markDirtySkeleton));
+
+        // Sort and delete does not mark dirty.
+        this.disposeWithMe(this._conditionalFormatRuleModel.$ruleChange.pipe(bufferTime(16), filter((v) => {
+            const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
+            const worksheet = workbook.getActiveSheet();
+            return v.filter((item) => ['sort', 'delete'].includes(item.type) && item.unitId === workbook.getUnitId() && item.subUnitId === worksheet.getSheetId()).length > 0;
         })).subscribe(markDirtySkeleton));
 
         // Once the calculation is complete, a view update is triggered

@@ -152,19 +152,49 @@ const getOperatorOptions = (type: SubRuleType.number | SubRuleType.text | SubRul
         }
     }
 };
-export const HighlightCellStyleEditor = (props: IStyleEditorProps) => {
+export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, ITextHighlightCell | INumberHighlightCell | ITimePeriodHighlightCell>) => {
     const { interceptorManager, onChange } = props;
-    const rule = props.rule?.type === RuleType.highlightCell ? props.rule : undefined as IHighlightCell | undefined;
-    const [subType, subTypeSet] = useState<SubRuleType.number | SubRuleType.text | SubRuleType.timePeriod>(SubRuleType.text);
+    const rule = props.rule?.type === RuleType.highlightCell ? props.rule : undefined;
+    const [subType, subTypeSet] = useState<SubRuleType.number | SubRuleType.text | SubRuleType.timePeriod>(() => {
+        const defaultV = SubRuleType.text;
+        if (!rule) {
+            return defaultV;
+        }
+        return rule.subType || defaultV;
+    });
 
     const typeOptions = [createOptionItem(SubRuleType.text), createOptionItem(SubRuleType.number), createOptionItem(SubRuleType.timePeriod)];
     const operatorOptions = useMemo(() => getOperatorOptions(subType), [subType]);
 
     const [operator, operatorSet] = useState<IResult['operator']>(() => {
-        return operatorOptions[0].value as IResult['operator'];
+        const defaultV = operatorOptions[0].value as IResult['operator'];
+        if (!rule) {
+            return defaultV;
+        }
+        return rule.operator || defaultV;
     });
 
-    const [value, valueSet] = useState<IValue>(0);
+    const [value, valueSet] = useState<IValue>(() => {
+        const defaultV = '';
+        if (!rule) {
+            return defaultV;
+        }
+        switch (rule.subType) {
+            case SubRuleType.text:{
+                if ([TextOperator.beginsWith, TextOperator.containsText, TextOperator.endWith, TextOperator.equal, TextOperator.notContainsText, TextOperator.notEqual].includes(rule.operator)) {
+                    return rule.value || defaultV;
+                }
+                break;
+            }
+            case SubRuleType.number:{
+                if ([NumberOperator.between, NumberOperator.notBetween].includes(rule.operator)) {
+                    return rule.value || [0, 0];
+                }
+                return rule.value || 0;
+            }
+        }
+        return defaultV;
+    });
 
     const [style, styleSet] = useState<IHighlightCell['style']>({});
     const getResult = useMemo(() => (option: { subType?: string;operator?: string;value?: IValue;style?: IHighlightCell['style'] }) => {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IMutation } from '@univerjs/core';
+import type { IMutation, IMutationInfo } from '@univerjs/core';
 import {
     CommandType,
     Tools,
@@ -23,6 +23,8 @@ import type { IAccessor } from '@wendellhu/redi';
 import { ConditionalFormatRuleModel } from '../../models/conditional-format-rule-model';
 import type { IAddConditionalRuleMutationParams } from './addConditionalRule.mutation';
 import { addConditionalRuleMutation } from './addConditionalRule.mutation';
+import type { IMoveConditionalRuleMutationParams } from './move-conditional-rule.mutation';
+import { moveConditionalRuleMutation } from './move-conditional-rule.mutation';
 
 export interface IDeleteConditionalRuleMutationParams {
     unitId: string;
@@ -33,9 +35,19 @@ export const deleteConditionalRuleMutationUndoFactory = (accessor: IAccessor, pa
     const conditionalFormatRuleModel = accessor.get(ConditionalFormatRuleModel);
     const { unitId, subUnitId, cfId } = param;
     const rule = conditionalFormatRuleModel.getRule(unitId, subUnitId, cfId);
+    const ruleList = conditionalFormatRuleModel.getSubunitRules(unitId, subUnitId);
     if (rule) {
-        return [{ id: addConditionalRuleMutation.id,
-                  params: { unitId, subUnitId, rule: Tools.deepClone(rule) } as IAddConditionalRuleMutationParams }];
+        const index = ruleList!.findIndex((rule) => rule.cfId === cfId);
+        const nextRule = ruleList![index - 1];
+        const result: IMutationInfo[] = [{ id: addConditionalRuleMutation.id,
+                                           params: { unitId, subUnitId, rule: Tools.deepClone(rule) } as IAddConditionalRuleMutationParams },
+        ];
+        if (nextRule && index !== 0) {
+            result.push({ id: moveConditionalRuleMutation.id, params: {
+                unitId, subUnitId, cfId, targetCfId: nextRule.cfId,
+            } as IMoveConditionalRuleMutationParams });
+        }
+        return result;
     }
     return [];
 };

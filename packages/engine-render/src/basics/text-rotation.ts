@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-export * from './cell-data';
-export * from './const';
-export * from './document-node-tools';
-export * from './draw';
-export * from './font-cache';
-export * from './i-document-skeleton-cached';
-export * from './i-events';
-export * from './interfaces';
-export * from './path2';
-export * from './performance-monitor';
-export * from './range';
-export * from './scroll-xy';
-export * from './tools';
-export * from './transform';
-export * from './vector2';
-export * from './text-rotation';
+import { BooleanNumber, type ITextRotation } from '@univerjs/core';
+
+export const VERTICAL_ROTATE_ANGLE = 90;
+
+export function convertTextRotation(textRotation: ITextRotation) {
+    const { a: angle = 0, v: isVertical = BooleanNumber.FALSE } = textRotation;
+    let centerAngle = 0;
+    let vertexAngle = angle;
+    if (isVertical === BooleanNumber.TRUE) {
+        centerAngle = VERTICAL_ROTATE_ANGLE;
+        vertexAngle = VERTICAL_ROTATE_ANGLE;
+    }
+
+    return { centerAngle, vertexAngle };
+}

@@ -26,7 +26,7 @@ import {
     toDisposable,
 } from '@univerjs/core';
 import type { Engine, IDocumentLayoutObject, Scene } from '@univerjs/engine-render';
-import { DeviceInputEventType, fixLineWidthByScale, getCanvasOffsetByEngine } from '@univerjs/engine-render';
+import { convertTextRotation, DeviceInputEventType, fixLineWidthByScale, getCanvasOffsetByEngine } from '@univerjs/engine-render';
 import type { ISheetLocation } from '@univerjs/sheets';
 import type { KeyCode } from '@univerjs/ui';
 import type { IDisposable } from '@wendellhu/redi';
@@ -232,7 +232,16 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         let documentLayoutObject = cell && skeleton.getCellDocumentModelWithFormula(cell);
 
         if (!documentLayoutObject || documentLayoutObject.documentModel == null) {
-            documentLayoutObject = skeleton.getBlankCellDocumentModel(cell);
+            const blankModel = skeleton.getBlankCellDocumentModel(cell);
+
+            if (documentLayoutObject != null) {
+                const { verticalAlign, horizontalAlign, wrapStrategy, textRotation, fill } = documentLayoutObject;
+                const { centerAngle, vertexAngle } = convertTextRotation(textRotation);
+                blankModel.documentModel!.documentStyle.renderConfig = {
+                    verticalAlign, horizontalAlign, wrapStrategy, background: { rgb: fill }, centerAngle, vertexAngle,
+                };
+            }
+            documentLayoutObject = blankModel;
         }
 
         documentLayoutObject.documentModel?.setZoomRatio(Math.max(scaleX, scaleY));

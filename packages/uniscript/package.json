@@ -5,6 +5,18 @@
     "description": "UI component library for building exceptional Univer.",
     "author": "DreamNum <developer@univer.ai>",
     "license": "Apache-2.0",
+    "funding": {
+        "type": "opencollective",
+        "url": "https://opencollective.com/univer"
+    },
+    "homepage": "https://univer.ai",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/dream-num/univer"
+    },
+    "bugs": {
+        "url": "https://github.com/dream-num/univer/issues"
+    },
     "keywords": [],
     "sideEffects": [
         "**/*.css"
@@ -75,7 +87,7 @@
         "monaco-editor": "0.46.0",
         "rxjs": "^7.8.1",
         "typescript": "^5.3.3",
-        "vite": "^5.1.3",
+        "vite": "^5.1.4",
         "vitest": "^1.3.1"
     }
 }

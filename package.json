@@ -6,8 +6,21 @@
     "packageManager": "pnpm@8.6.2",
     "author": "DreamNum Inc. <developer@univer.ai>",
     "license": "Apache-2.0",
+    "funding": {
+        "type": "opencollective",
+        "url": "https://opencollective.com/univer"
+    },
+    "homepage": "https://univer.ai",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/dream-num/univer"
+    },
+    "bugs": {
+        "url": "https://github.com/dream-num/univer/issues"
+    },
     "engines": {
-        "node": ">=18.0.0"
+        "node": ">=18.0.0",
+        "pnpm": ">=8.5.0"
     },
     "scripts": {
         "prepare": "husky install",

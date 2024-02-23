@@ -188,7 +188,7 @@ jobs:
                   data: >
                       {
                           "type": "release",
-                          "version": "v${{ github.ref_name }}",
+                          "version": "${{ github.ref_name }}",
                           "workflow": {
                               "id": "${{ github.run_id }}"
                           },

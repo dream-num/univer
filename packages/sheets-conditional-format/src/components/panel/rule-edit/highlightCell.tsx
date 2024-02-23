@@ -24,12 +24,15 @@ import { NumberOperator,
     TextOperator,
     TimePeriodOperator } from '../../../base/const';
 import type {
+    IConditionalFormatRuleConfig,
     IHighlightCell,
     INumberHighlightCell,
     ITextHighlightCell,
     ITimePeriodHighlightCell } from '../../../models/type';
 import { ConditionalStyleEditor } from '../../conditional-style-editor';
+import { Preview } from '../../preview';
 import type { IStyleEditorProps } from './type';
+import styles from './index.module.less';
 
 const createOptionItem = (text: string, localeService: LocaleService) => ({ label: localeService.t(`sheet.cf.operator.${text}`), value: text });
 type IValue = number | string | [number, number];
@@ -58,8 +61,8 @@ const HighlightCellInput = (props: { type: IResult['subType'];
                 break;
             }
             case SubRuleType.number:{
-                if ([NumberOperator.equal, NumberOperator.greaterThan,
-                    NumberOperator.greaterThanOrEqual,
+                if ([NumberOperator.equal, NumberOperator.notEqual,
+                    NumberOperator.greaterThan, NumberOperator.greaterThanOrEqual,
                     NumberOperator.lessThan, NumberOperator.lessThanOrEqual,
                 ].includes(operator as NumberOperator)) {
                     onChange(inputNumberValue);
@@ -86,8 +89,8 @@ const HighlightCellInput = (props: { type: IResult['subType'];
             break;
         }
         case SubRuleType.number:{
-            if ([NumberOperator.equal, NumberOperator.greaterThan,
-                NumberOperator.greaterThanOrEqual,
+            if ([NumberOperator.equal, NumberOperator.notEqual,
+                NumberOperator.greaterThan, NumberOperator.greaterThanOrEqual,
                 NumberOperator.lessThan, NumberOperator.lessThanOrEqual,
             ].includes(operator as NumberOperator)) {
                 const _onChange = (value: number | null) => {
@@ -227,8 +230,8 @@ export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, ITextHigh
                 break;
             }
             case SubRuleType.number:{
-                if ([NumberOperator.equal, NumberOperator.greaterThan,
-                    NumberOperator.greaterThanOrEqual,
+                if ([NumberOperator.equal, NumberOperator.notEqual,
+                    NumberOperator.greaterThan, NumberOperator.greaterThanOrEqual,
                     NumberOperator.lessThan, NumberOperator.lessThanOrEqual,
                 ].includes(operator as NumberOperator)) {
                     return {
@@ -301,6 +304,9 @@ export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, ITextHigh
             <Select onChange={onTypeChange} value={subType} options={typeOptions} />
             <Select onChange={onOperatorChange} value={operator} options={operatorOptions} />
             <HighlightCellInput key={inputRenderKey} value={value} interceptorManager={interceptorManager} type={subType} operator={operator} rule={rule} onChange={onInputChange} />
+            <div className={styles.cfPreviewWrap}>
+                <Preview rule={getResult({}) as IConditionalFormatRuleConfig} />
+            </div>
             <ConditionalStyleEditor
                 style={rule?.style}
                 onChange={(v) => {

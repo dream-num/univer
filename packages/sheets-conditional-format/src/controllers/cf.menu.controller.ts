@@ -41,7 +41,7 @@ export class ConditionalFormatMenuController extends Disposable {
         // eslint-disable-next-line no-console
         console.log('openPanel', rule);
         const props = {
-            header: { title: this._localeService.t('sheet.condition.format.title') },
+            header: { title: this._localeService.t('sheet.cf.title') },
             children: {
                 label: CF_PANEL_KEY,
                 rule,

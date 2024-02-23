@@ -7,7 +7,12 @@
         align-items: center;
         border-radius: var(--border-radius-base);
         padding-left: 20px;
-
+        .rule-describe {
+            max-width: 100%;
+            min-width: 0px;
+            overflow: hidden;
+            flex-shrink: 1;
+        }
         &:hover {
             background-color: rgb(var(--grey-100));
         }

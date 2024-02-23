@@ -21,6 +21,7 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import cl from 'clsx';
 import { ColorPicker } from '../color-picker';
 import type { IHighlightCell } from '../../models/type';
+import { DEFAULT_BG_COLOR, DEFAULT_FONT_COLOR } from '../../base/const';
 import styles from './index.module.less';
 
 interface IConditionalStyleEditorProps {
@@ -64,14 +65,14 @@ export const ConditionalStyleEditor = (props: IConditionalStyleEditorProps) => {
         return style.st.s;
     });
     const [fontColor, fontColorSet] = useState(() => {
-        const defaultV = '#000000';
+        const defaultV = DEFAULT_FONT_COLOR;
         if (!style?.cl?.rgb) {
             return defaultV;
         }
         return style.cl.rgb;
     });
     const [bgColor, bgColorSet] = useState(() => {
-        const defaultV = '#fff';
+        const defaultV = DEFAULT_BG_COLOR;
         if (!style?.bg?.rgb) {
             return defaultV;
         }

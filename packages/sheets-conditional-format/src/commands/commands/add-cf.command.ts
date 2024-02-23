@@ -27,13 +27,13 @@ import type { MakePropertyOptional } from '../../utils/type';
 import { addConditionalRuleMutation, addConditionalRuleMutationUndoFactory } from '../mutations/addConditionalRule.mutation';
 import { ConditionalFormatRuleModel } from '../../models/conditional-format-rule-model';
 
-export interface IAddCfCommand {
+export interface IAddCfCommandParams {
     unitId?: string;
     subUnitId?: string;
     rule: MakePropertyOptional<IConditionFormatRule, 'cfId'>;
 };
 
-export const addCfCommand: ICommand<IAddCfCommand> = {
+export const addCfCommand: ICommand<IAddCfCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.add-conditional-rule',
     handler(accessor, params) {

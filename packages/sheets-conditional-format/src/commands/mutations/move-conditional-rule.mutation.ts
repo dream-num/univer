@@ -15,6 +15,8 @@
  */
 
 import type { IMutation } from '@univerjs/core';
+import type { IAccessor } from '@wendellhu/redi';
+
 import {
     CommandType,
 } from '@univerjs/core';
@@ -40,9 +42,19 @@ export const moveConditionalRuleMutation: IMutation<IMoveConditionalRuleMutation
         return true;
     },
 };
-export const moveConditionalRuleMutationUndoFactory = (param: IMoveConditionalRuleMutationParams) => {
-    const { unitId, subUnitId, cfId, targetCfId } = param;
+export const moveConditionalRuleMutationUndoFactory = (accessor: IAccessor, param: IMoveConditionalRuleMutationParams) => {
+    const { unitId, subUnitId, cfId } = param;
+    const conditionalFormatRuleModel = accessor.get(ConditionalFormatRuleModel);
+    const ruleList = conditionalFormatRuleModel.getSubunitRules(unitId, subUnitId);
+    if (!ruleList) {
+        return [];
+    }
+    const index = ruleList.findIndex((rule) => rule.cfId === cfId);
+    const preTargetRule = ruleList[index - 1];
+    if (!preTargetRule) {
+        return [];
+    }
     return [{ id: moveConditionalRuleMutation.id,
-              params: { unitId, subUnitId, targetCfId: cfId, cfId: targetCfId } as IMoveConditionalRuleMutationParams },
+              params: { unitId, subUnitId, cfId, targetCfId: preTargetRule.cfId } as IMoveConditionalRuleMutationParams },
     ];
 };

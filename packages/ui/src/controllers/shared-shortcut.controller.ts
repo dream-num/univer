@@ -35,7 +35,6 @@ export const CopyShortcutItem: IShortcutItem = {
     description: 'shortcut.copy',
     group: '1_common-edit',
     binding: KeyCode.C | MetaKeys.CTRL_COMMAND,
-    // preconditions: supportClipboardAPI,
 };
 
 export const CutShortcutItem: IShortcutItem = {
@@ -43,10 +42,20 @@ export const CutShortcutItem: IShortcutItem = {
     description: 'shortcut.cut',
     group: '1_common-edit',
     binding: KeyCode.X | MetaKeys.CTRL_COMMAND,
-    // preconditions: supportClipboardAPI,
 };
 
-// For compability issues, paste from the shortcut should always go with the native paste event,
+/**
+ * This shortcut item is just for displaying shortcut info, do not use it.
+ */
+export const OnlyDisplayPasteShortcutItem: IShortcutItem = {
+    id: PasteCommand.id,
+    description: 'shortcut.paste',
+    group: '1_common-edit',
+    binding: KeyCode.V | MetaKeys.CTRL_COMMAND,
+    preconditions: () => false,
+};
+
+// For compatibility issues, paste from the shortcut should always go with the native paste event,
 // see #1404.
 // export const PasteShortcutItem: IShortcutItem = {
 //     id: PasteCommand.id,
@@ -107,7 +116,7 @@ export class SharedController extends Disposable {
 
     private _registerShortcuts(): void {
         const shortcutItems = [UndoShortcutItem, RedoShortcutItem];
-        shortcutItems.push(CutShortcutItem, CopyShortcutItem);
+        shortcutItems.push(CutShortcutItem, CopyShortcutItem, OnlyDisplayPasteShortcutItem);
 
         shortcutItems.forEach((shortcut) => this.disposeWithMe(this._shortcutService.registerShortcut(shortcut)));
     }

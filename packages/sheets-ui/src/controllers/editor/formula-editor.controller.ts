@@ -82,15 +82,10 @@ export class FormulaEditorController extends RxDisposable {
         this._listenFoldBtnClick();
 
         this._renderManagerService.currentRender$.pipe(takeUntil(this.dispose$)).subscribe((unitId) => {
-            if (unitId !== DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
-                return;
-            }
-
-            if (!this._loadedMap.has(unitId)) {
-                this._initialMain(unitId);
-                this._loadedMap.add(unitId);
-            }
+            this._create(unitId);
         });
+
+        this._create(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
 
         this._textSelectionManagerService.textSelection$.pipe(takeUntil(this.dispose$)).subscribe((param) => {
             if (param == null) {
@@ -103,6 +98,17 @@ export class FormulaEditorController extends RxDisposable {
                 this._undoRedoService.clearUndoRedo(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
             }
         });
+    }
+
+    private _create(unitId: Nullable<string>) {
+        if (unitId !== DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
+            return;
+        }
+
+        if (!this._loadedMap.has(unitId)) {
+            this._initialMain(unitId);
+            this._loadedMap.add(unitId);
+        }
     }
 
     private _listenFxBtnClick() {

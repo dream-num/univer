@@ -16,6 +16,7 @@
 
 import type { ICommand } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
+import { TEST_EDITOR_CONTAINER_COMPONENT } from '@univerjs/docs-ui';
 import { ISidebarService } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 
@@ -33,7 +34,7 @@ export const SidebarOperation: ICommand = {
             case 'open':
                 sidebarService.open({
                     header: { title: 'debugger.sidebar.title' },
-                    children: { title: 'Sidebar Content' },
+                    children: { title: 'Sidebar Content', label: TEST_EDITOR_CONTAINER_COMPONENT },
                     footer: { title: 'Sidebar Footer' },
                 });
                 break;

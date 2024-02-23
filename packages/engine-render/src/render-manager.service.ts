@@ -36,7 +36,6 @@ export interface IRenderManagerService {
     addItem(unitId: string, item: IRender): void;
     removeItem(unitId: string): void;
     setCurrent(unitId: string): void;
-    getCurrent(): Nullable<IRender>;
     getRenderById(unitId: string): Nullable<IRender>;
     getRenderAll(): Map<string, IRender>;
     defaultEngine: Engine;
@@ -158,10 +157,6 @@ export class RenderManagerService implements IRenderManagerService {
         this._currentUnitId = unitId;
 
         this._currentRender$.next(unitId);
-    }
-
-    getCurrent(): Nullable<IRender> {
-        return this.getRenderById(this._currentUnitId);
     }
 
     getRenderById(unitId: string): Nullable<IRender> {

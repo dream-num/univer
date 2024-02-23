@@ -27,6 +27,8 @@ import {
     FontFamilyItem,
 } from '../components/font-family';
 import { FONT_SIZE_COMPONENT, FontSize } from '../components/font-size';
+import { TestEditorContainer } from '../components/test-editor/TestTextEditor';
+import { TEST_EDITOR_CONTAINER_COMPONENT } from '../components/test-editor/component-name';
 import {
     BoldMenuItemFactory,
     BulletListMenuItemFactory,
@@ -63,6 +65,7 @@ export class DocUIController extends Disposable {
         this.disposeWithMe(componentManager.register(FONT_FAMILY_COMPONENT, FontFamily));
         this.disposeWithMe(componentManager.register(FONT_FAMILY_ITEM_COMPONENT, FontFamilyItem));
         this.disposeWithMe(componentManager.register(FONT_SIZE_COMPONENT, FontSize));
+        this.disposeWithMe(componentManager.register(TEST_EDITOR_CONTAINER_COMPONENT, TestEditorContainer));
     }
 
     private _initMenus(): void {

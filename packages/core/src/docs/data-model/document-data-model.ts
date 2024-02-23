@@ -46,6 +46,8 @@ interface IDrawingUpdateConfig {
 class DocumentDataModelSimple {
     snapshot: IDocumentData;
 
+    private _isEditorModel = false;
+
     constructor(snapshot: Partial<IDocumentData>) {
         this.snapshot = { ...DEFAULT_DOC, ...snapshot };
     }
@@ -183,6 +185,19 @@ class DocumentDataModelSimple {
         } else {
             this.snapshot.settings.zoomRatio = 1;
         }
+    }
+
+    enableEditorModel() {
+        this._isEditorModel = true;
+    }
+
+    disableEditorModel() {
+        this._isEditorModel = false;
+    }
+
+    // const excludeUnitList = [DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY];
+    isEditorModel() {
+        return this._isEditorModel;
     }
 }
 

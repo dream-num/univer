@@ -17,8 +17,6 @@
 import type { ICommandInfo } from '@univerjs/core';
 import {
     Disposable,
-    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
-    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     ICommandService,
     IUniverInstanceService,
     LifecycleStages,
@@ -75,6 +73,11 @@ export class ZoomController extends Disposable {
 
             const { unitId } = param;
 
+            const documentDataModel = this._currentUniverService.getUniverDocInstance(unitId);
+            if (documentDataModel == null) {
+                return;
+            }
+
             const currentRender = this._renderManagerService.getRenderById(unitId);
 
             if (currentRender == null) {
@@ -82,8 +85,7 @@ export class ZoomController extends Disposable {
             }
 
             if (
-                this._initializedRender.has(unitId) ||
-                [DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY].includes(unitId)
+                this._initializedRender.has(unitId) || documentDataModel.isEditorModel()
             ) {
                 return;
             }

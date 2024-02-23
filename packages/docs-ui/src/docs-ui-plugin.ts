@@ -15,8 +15,6 @@
  */
 
 import {
-    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
-    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     ILogService,
     IUniverInstanceService,
     LocaleService,
@@ -49,6 +47,7 @@ import { zhCN } from './locale';
 import { BreakLineShortcut, DeleteLeftShortcut, DeleteRightShortcut } from './shortcuts/core-editing.shortcut';
 import { DocClipboardService, IDocClipboardService } from './services/clipboard/clipboard.service';
 import { DocClipboardController } from './controllers/clipboard.controller';
+import { DocEditorBridgeController } from './controllers/doc-editor-bridge.controller';
 
 export class UniverDocsUIPlugin extends Plugin {
     static override type = PluginType.Doc;
@@ -100,6 +99,7 @@ export class UniverDocsUIPlugin extends Plugin {
         const dependencies: Dependency[] = [
             [DocUIController],
             [DocClipboardController],
+            [DocEditorBridgeController],
             [
                 // controllers
                 AppUIController,
@@ -125,9 +125,9 @@ export class UniverDocsUIPlugin extends Plugin {
 
         try {
             const doc = currentService.getCurrentUniverDocInstance();
-            const id = doc.getUnitId();
+            // const id = doc.getUnitId();
 
-            if (id !== DOCS_NORMAL_EDITOR_UNIT_ID_KEY && id !== DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
+            if (!doc.isEditorModel()) {
                 currentService.focusUniverInstance(doc.getUnitId());
             }
         } catch (err) {

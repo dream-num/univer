@@ -14,16 +14,4 @@
  * limitations under the License.
  */
 
-import React from 'react';
-
-import { HelpFunction } from './prompt/help-function/HelpFunction';
-import { SearchFunction } from './prompt/search-function/SearchFunction';
-
-export function RenderFormulaPromptContent() {
-    return (
-        <>
-            <SearchFunction />
-            <HelpFunction />
-        </>
-    );
-}
+export const TEST_EDITOR_CONTAINER_COMPONENT = 'TestEditorContainer';

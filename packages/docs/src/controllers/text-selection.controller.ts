@@ -51,25 +51,11 @@ export class TextSelectionController extends Disposable {
     ) {
         super();
 
-        this._renderManagerService.currentRender$.subscribe((unitId) => {
-            if (unitId == null) {
-                return;
-            }
-
-            if (this._currentUniverService.getUniverDocInstance(unitId) == null) {
-                return;
-            }
-
-            if (!this._loadedMap.has(unitId)) {
-                this._initialMain(unitId);
-                this._loadedMap.add(unitId);
-            }
-        });
-
         this._initialize();
     }
 
     private _initialize() {
+        this._init();
         this._skeletonListener();
         this._commandExecutedListener();
     }
@@ -87,6 +73,31 @@ export class TextSelectionController extends Disposable {
             mainComponent.onDblclickObserver.remove(this._dblClickObserver);
             mainComponent.onTripleClickObserver.remove(this._tripleClickObserver);
         });
+    }
+
+    private _init() {
+        this._renderManagerService.currentRender$.subscribe((unitId) => {
+            this._create(unitId);
+        });
+
+        this._renderManagerService.getRenderAll().forEach((_, unitId) => {
+            this._create(unitId);
+        });
+    }
+
+    private _create(unitId: Nullable<string>) {
+        if (unitId == null) {
+            return;
+        }
+
+        if (this._currentUniverService.getUniverDocInstance(unitId) == null) {
+            return;
+        }
+
+        if (!this._loadedMap.has(unitId)) {
+            this._initialMain(unitId);
+            this._loadedMap.add(unitId);
+        }
     }
 
     private _initialMain(unitId: string) {

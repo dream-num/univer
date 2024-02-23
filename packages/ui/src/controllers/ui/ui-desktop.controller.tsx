@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Disposable, LifecycleService, LifecycleStages, toDisposable } from '@univerjs/core';
+import { Disposable, IUniverInstanceService, LifecycleService, LifecycleStages, toDisposable } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
@@ -82,7 +82,9 @@ export class DesktopUIController extends Disposable implements IDesktopUIControl
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(LifecycleService) private readonly _lifecycleService: LifecycleService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @ILayoutService private readonly _layoutService: ILayoutService
+        @IFocusService private readonly _focusService: IFocusService,
+        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
+        @Optional(LayoutService) private readonly _layoutService?: LayoutService
     ) {
         super();
     }
@@ -104,7 +106,8 @@ export class DesktopUIController extends Disposable implements IDesktopUIControl
     }
 
     private _initializeEngine(element: HTMLElement) {
-        const engine = this._renderManagerService.getCurrent()!.engine;
+        const unitId = this._currentUniverService.getCurrentUniverSheetInstance().getUnitId();
+        const engine = this._renderManagerService.getRenderById(unitId)!.engine;
         engine.setContainer(element);
     }
 

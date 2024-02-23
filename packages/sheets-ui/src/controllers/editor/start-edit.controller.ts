@@ -72,6 +72,8 @@ const EDITOR_INPUT_SELF_EXTEND_GAP = 5;
 
 const EDITOR_BORDER_SIZE = 2;
 
+const excludeUnitList = [DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY];
+
 interface ICanvasOffset {
     left: number;
     top: number;
@@ -134,7 +136,7 @@ export class StartEditController extends Disposable {
                         const param = this._editorBridgeService.getEditCellState();
                         const unitId = this._editorBridgeService.getCurrentEditorId();
 
-                        if (param == null || unitId == null) {
+                        if (param == null || unitId == null || !excludeUnitList.includes(unitId)) {
                             return;
                         }
 
@@ -598,8 +600,9 @@ export class StartEditController extends Disposable {
         this._textSelectionRenderManager.onInputBefore$.subscribe((config) => {
             const isFocusFormulaEditor = this._contextService.getContextValue(FOCUSING_FORMULA_EDITOR);
             const isFocusSheets = this._contextService.getContextValue(FOCUSING_SHEET);
+            const unitId = this._currentUniverService.getCurrentUniverDocInstance().getUnitId();
 
-            if (isFocusSheets && !isFocusFormulaEditor) {
+            if (isFocusSheets && !isFocusFormulaEditor && excludeUnitList.includes(unitId)) {
                 this._showEditorByKeyboard(config);
             }
         });
@@ -622,8 +625,6 @@ export class StartEditController extends Disposable {
     // Listen to document edits to refresh the size of the editor.
     private _commandExecutedListener() {
         const updateCommandList = [RichTextEditingMutation.id, SetEditorResizeOperation.id];
-
-        const excludeUnitList = [DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY];
 
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {

@@ -16,8 +16,6 @@
 
 import {
     Disposable,
-    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
-    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
@@ -53,7 +51,8 @@ export class PageRenderController extends Disposable {
                 return;
             }
 
-            if (this._currentUniverService.getUniverDocInstance(unitId) == null) {
+            const documentDataModel = this._currentUniverService.getUniverDocInstance(unitId);
+            if (documentDataModel == null) {
                 return;
             }
 
@@ -70,7 +69,7 @@ export class PageRenderController extends Disposable {
             const pageSize = docsComponent.getSkeleton()?.getPageSize();
 
             docsComponent.onPageRenderObservable.add((config: IPageRenderConfig) => {
-                if ([DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY].includes(unitId)) {
+                if (documentDataModel.isEditorModel()) {
                     return;
                 }
 

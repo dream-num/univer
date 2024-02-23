@@ -17,3 +17,4 @@
 export * from './basics';
 export * from './docs-ui-plugin';
 export { enUS, zhCN } from './locale';
+export { TEST_EDITOR_CONTAINER_COMPONENT } from './components/test-editor/component-name';

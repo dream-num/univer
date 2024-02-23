@@ -18,8 +18,6 @@ import type { ICommandInfo, IFloatingObjectManagerParam } from '@univerjs/core';
 import {
     DEFAULT_DOCUMENT_SUB_COMPONENT_ID,
     Disposable,
-    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
-    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     ICommandService,
     IFloatingObjectManagerService,
     IUniverInstanceService,
@@ -136,8 +134,6 @@ export class FloatingObjectController extends Disposable {
     private _commandExecutedListener() {
         const updateCommandList = [RichTextEditingMutation.id, SetDocZoomRatioOperation.id];
 
-        const excludeUnitList = [DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY];
-
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (updateCommandList.includes(command.id)) {
@@ -158,11 +154,13 @@ export class FloatingObjectController extends Disposable {
 
                     const currentRender = this._renderManagerService.getRenderById(unitId);
 
-                    if (currentRender == null) {
+                    const documentDataModel = this._currentUniverService.getUniverDocInstance(unitId);
+
+                    if (currentRender == null || documentDataModel == null) {
                         return;
                     }
 
-                    if (excludeUnitList.includes(unitId)) {
+                    if (documentDataModel.isEditorModel()) {
                         currentRender.mainComponent?.makeDirty();
                         return;
                     }

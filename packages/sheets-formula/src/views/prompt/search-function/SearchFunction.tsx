@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { Direction, FOCUSING_FORMULA_EDITOR, IContextService } from '@univerjs/core';
+import { Direction, IUniverInstanceService } from '@univerjs/core';
 import { Popup } from '@univerjs/design';
-import { ICellEditorManagerService, IFormulaEditorManagerService } from '@univerjs/sheets-ui';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useRef, useState } from 'react';
 
+import { IEditorService } from '@univerjs/ui';
 import type { ISearchItem } from '../../../services/description.service';
 import type { INavigateParam, ISearchFunctionOperationParams } from '../../../services/prompt.service';
 import { IFormulaPromptService } from '../../../services/prompt.service';
@@ -33,9 +33,8 @@ export function SearchFunction() {
     const [searchText, setSearchText] = useState<string>('');
     const ulRef = useRef<HTMLUListElement>(null);
     const promptService = useDependency(IFormulaPromptService);
-    const cellEditorManagerService = useDependency(ICellEditorManagerService);
-    const formulaEditorManagerService = useDependency(IFormulaEditorManagerService);
-    const contextService = useDependency(IContextService);
+    const univerInstanceService = useDependency(IUniverInstanceService);
+    const editorService = useDependency(IEditorService);
 
     useEffect(() => {
         // TODO@Dushusir: How to get updated values in subscribe callback better
@@ -48,11 +47,9 @@ export function SearchFunction() {
                 return;
             }
 
-            const isFocusFormulaEditor = contextService.getContextValue(FOCUSING_FORMULA_EDITOR);
+            // const isFocusFormulaEditor = contextService.getContextValue(FOCUSING_FORMULA_EDITOR);
 
-            const position = isFocusFormulaEditor
-                ? formulaEditorManagerService.getPosition()
-                : cellEditorManagerService.getRect();
+            const position = getPosition();
 
             if (position == null) {
                 return;
@@ -97,6 +94,16 @@ export function SearchFunction() {
             subscribeAccept?.unsubscribe();
         };
     }, []);
+
+    function getPosition() {
+        const documentDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        if (!documentDataModel.isEditorModel()) {
+            return;
+        }
+        const editorUnitId = documentDataModel.getUnitId();
+        const editor = editorService.getEditor(editorUnitId);
+        return editor?.editorDom.getBoundingClientRect();
+    }
 
     function handleLiMouseEnter(index: number) {
         setActive(index);

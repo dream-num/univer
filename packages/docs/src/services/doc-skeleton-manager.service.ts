@@ -19,7 +19,7 @@ import { LocaleService, RxDisposable } from '@univerjs/core';
 import type { DocumentViewModel } from '@univerjs/engine-render';
 import { DocumentSkeleton } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
-import { BehaviorSubject, takeUntil } from 'rxjs';
+import { BehaviorSubject, Subject, takeUntil } from 'rxjs';
 
 import type { IDocumentViewModelManagerParam } from './doc-view-model-manager.service';
 import { DocViewModelManagerService } from './doc-view-model-manager.service';
@@ -38,11 +38,11 @@ export class DocSkeletonManagerService extends RxDisposable {
 
     private _docSkeletonMap: Map<string, IDocSkeletonManagerParam> = new Map();
 
-    private readonly _currentSkeleton$ = new BehaviorSubject<Nullable<IDocSkeletonManagerParam>>(null);
+    private readonly _currentSkeleton$ = new Subject<Nullable<IDocSkeletonManagerParam>>();
     readonly currentSkeleton$ = this._currentSkeleton$.asObservable();
 
     // CurrentSkeletonBefore for pre-triggered logic during registration
-    private readonly _currentSkeletonBefore$ = new BehaviorSubject<Nullable<IDocSkeletonManagerParam>>(null);
+    private readonly _currentSkeletonBefore$ = new Subject<Nullable<IDocSkeletonManagerParam>>();
 
     readonly currentSkeletonBefore$ = this._currentSkeletonBefore$.asObservable();
 
@@ -55,6 +55,16 @@ export class DocSkeletonManagerService extends RxDisposable {
     }
 
     private _initialize() {
+        this._init();
+    }
+
+    override dispose(): void {
+        this._currentSkeletonBefore$.complete();
+        this._currentSkeleton$.complete();
+        this._docSkeletonMap.clear();
+    }
+
+    private _init() {
         this._docViewModelManagerService.currentDocViewModel$
             .pipe(takeUntil(this.dispose$))
             .subscribe((docViewModel) => {
@@ -64,16 +74,22 @@ export class DocSkeletonManagerService extends RxDisposable {
 
                 this._setCurrent(docViewModel);
             });
-    }
 
-    override dispose(): void {
-        this._currentSkeletonBefore$.complete();
-        this._currentSkeleton$.complete();
-        this._docSkeletonMap.clear();
+        this._docViewModelManagerService.getAllModel().forEach((docViewModel) => {
+            if (docViewModel == null) {
+                return;
+            }
+
+            this._setCurrent(docViewModel);
+        });
     }
 
     getCurrent(): Nullable<IDocSkeletonManagerParam> {
         return this.getSkeletonByUnitId(this._currentSkeletonUnitId);
+    }
+
+    getAllSkeleton(): Map<string, IDocSkeletonManagerParam> {
+        return this._docSkeletonMap;
     }
 
     makeDirtyCurrent(state: boolean = true) {

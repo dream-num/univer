@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import type { IDocumentData } from '@univerjs/core';
+import { DEFAULT_EMPTY_DOCUMENT_VALUE, DOCS_NORMAL_EDITOR_UNIT_ID_KEY } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useRef, useState } from 'react';
-import { switchMap } from 'rxjs/operators';
 
+import { IEditorService, TextEditor } from '@univerjs/ui';
 import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';
 import styles from './index.module.less';
 
@@ -43,63 +43,60 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
         ...EDITOR_DEFAULT_POSITION,
     });
 
-    const editorRef = useRef<HTMLDivElement>(null);
-
-    const renderManagerService: IRenderManagerService = useDependency(IRenderManagerService);
     const cellEditorManagerService: ICellEditorManagerService = useDependency(ICellEditorManagerService);
 
+    const editorService: IEditorService = useDependency(IEditorService);
+
+    const snapshot: IDocumentData = {
+        id: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+        body: {
+            dataStream: `${DEFAULT_EMPTY_DOCUMENT_VALUE}`,
+            textRuns: [],
+            paragraphs: [
+                {
+                    startIndex: 0,
+                },
+            ],
+        },
+        documentStyle: {},
+    };
+
     useEffect(() => {
-        const editor = editorRef.current;
-        if (!editor) {
-            return;
-        }
+        cellEditorManagerService.state$.subscribe((param) => {
+            if (param == null) {
+                return;
+            }
 
-        const renderSubscription = renderManagerService.currentRender$
-            .pipe(
-                switchMap(() => {
-                    const engine = renderManagerService.getRenderById(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)?.engine;
-                    engine?.setContainer(editor);
+            const {
+                startX = HIDDEN_EDITOR_POSITION,
+                startY = HIDDEN_EDITOR_POSITION,
+                endX = 0,
+                endY = 0,
+                show = false,
+            } = param;
 
-                    return cellEditorManagerService.state$;
-                })
-            )
-            .subscribe((param) => {
-                if (param == null) {
+            if (!show) {
+                setState({
+                    ...EDITOR_DEFAULT_POSITION,
+                });
+            } else {
+                setState({
+                    width: endX - startX,
+                    height: endY - startY,
+                    left: startX,
+                    top: startY,
+                });
+
+                const editor = editorService.getEditor(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)?.editorDom;
+
+                if (editor == null) {
                     return;
                 }
 
-                const {
-                    startX = HIDDEN_EDITOR_POSITION,
-                    startY = HIDDEN_EDITOR_POSITION,
-                    endX = 0,
-                    endY = 0,
-                    show = false,
-                } = param;
-
-                if (!show) {
-                    setState({
-                        ...EDITOR_DEFAULT_POSITION,
-                    });
-                } else {
-                    setState({
-                        width: endX - startX,
-                        height: endY - startY,
-                        left: startX,
-                        top: startY,
-                    });
-
-                    // update editor's rect
-                    const editor = editorRef.current;
-                    if (!editor) return;
-
-                    const { left, top, width, height } = editor.getBoundingClientRect();
-                    cellEditorManagerService.setRect({ left, top, width, height });
-                }
-            });
-
-        return () => {
-            renderSubscription.unsubscribe();
-        };
+                const { left, top, width, height } = editor.getBoundingClientRect();
+                cellEditorManagerService.setRect({ left, top, width, height });
+            }
+        });
     }, []); // Empty dependency array means this effect runs once on mount and clean up on unmount
 
     useEffect(() => {
@@ -116,7 +113,7 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
                 height: state.height,
             }}
         >
-            <div className={styles.editorInput} ref={editorRef} />
+            <TextEditor id={DOCS_NORMAL_EDITOR_UNIT_ID_KEY} className={styles.editorInput} snapshot={snapshot} cancelDefaultResizeListener={true} />
         </div>
     );
 };

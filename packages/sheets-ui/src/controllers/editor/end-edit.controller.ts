@@ -20,6 +20,7 @@ import {
     Direction,
     Disposable,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
+    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     EDITOR_ACTIVATED,
     FOCUSING_EDITOR_BUT_HIDDEN,
     FOCUSING_EDITOR_INPUT_FORMULA,
@@ -71,6 +72,8 @@ enum CursorChange {
     StartEditor,
     CursorChange,
 }
+
+const unitIds = [DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY];
 
 @OnLifecycle(LifecycleStages.Steady, EndEditController)
 export class EndEditController extends Disposable {
@@ -259,7 +262,7 @@ export class EndEditController extends Disposable {
             show: param.visible,
         });
         const editorUnitId = this._editorBridgeService.getCurrentEditorId();
-        if (editorUnitId == null) {
+        if (editorUnitId == null || !unitIds.includes(editorUnitId)) {
             return;
         }
         this._undoRedoService.clearUndoRedo(editorUnitId);

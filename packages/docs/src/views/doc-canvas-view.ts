@@ -16,7 +16,6 @@
 
 import type { DocumentDataModel, EventState, Nullable } from '@univerjs/core';
 import {
-    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     IConfigService,
     IUniverInstanceService,
     LifecycleStages,
@@ -60,24 +59,36 @@ export class DocCanvasView extends RxDisposable {
     }
 
     private _initialize() {
-        this._currentUniverService.currentDoc$.pipe(takeUntil(this.dispose$)).subscribe((documentModel) => {
-            if (documentModel == null) {
-                return;
-            }
-
-            this._currentDocumentModel = documentModel;
-
-            const unitId = documentModel.getUnitId();
-
-            if (!this._loadedMap.has(unitId)) {
-                this._addNewRender();
-                this._loadedMap.add(unitId);
-            }
-        });
+        this._init();
     }
 
     override dispose(): void {
         this._fps$.complete();
+    }
+
+    private _init() {
+        this._currentUniverService.currentDoc$.pipe(takeUntil(this.dispose$)).subscribe((documentModel) => {
+            this._create(documentModel);
+        });
+
+        this._currentUniverService.getAllUniverDocsInstance().forEach((documentModel) => {
+            this._create(documentModel);
+        });
+    }
+
+    private _create(documentModel: Nullable<DocumentDataModel>) {
+        if (documentModel == null) {
+            return;
+        }
+
+        this._currentDocumentModel = documentModel;
+
+        const unitId = documentModel.getUnitId();
+
+        if (!this._loadedMap.has(unitId)) {
+            this._addNewRender();
+            this._loadedMap.add(unitId);
+        }
     }
 
     private _addNewRender() {
@@ -147,8 +158,8 @@ export class DocCanvasView extends RxDisposable {
         });
 
         const hasScroll = this._configService.getConfig('hasScroll') as Nullable<boolean>;
-        // TODO: @JOCS, do not show scroll bar when initialize formula editor, any better way?
-        if (hasScroll !== false && unitId !== DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
+
+        if (hasScroll !== false) {
             new ScrollBar(viewMain);
         }
 

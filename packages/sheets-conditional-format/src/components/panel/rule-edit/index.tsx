@@ -23,8 +23,11 @@ import { RangeSelector } from '@univerjs/sheets-ui';
 import type { IConditionFormatRule } from '../../../models/type';
 import { ConditionalFormatRuleModel } from '../../../models/conditional-format-rule-model';
 import { RuleType, SubRuleType } from '../../../base/const';
-import { addConditionalRuleMutation } from '../../../commands/mutations/addConditionalRule.mutation';
-import { setConditionalRuleMutation } from '../../../commands/mutations/setConditionalRule.mutation';
+import type { IAddCfCommandParams } from '../../../commands/commands/add-cf.command';
+import { addCfCommand } from '../../../commands/commands/add-cf.command';
+import type { ISetCfCommandParams } from '../../../commands/commands/set-cf.command';
+import { setCfCommand } from '../../../commands/commands/set-cf.command';
+
 import type { IStyleEditorProps } from './type';
 import { beforeSubmit, submit } from './type';
 import { ColorScaleStyleEditor } from './colorScale';
@@ -144,12 +147,12 @@ export const RuleEdit = (props: IRuleEditProps) => {
                 let rule = {} as IConditionFormatRule;
                 if (props.rule && props.rule.cfId) {
                     rule = { ...props.rule, ranges, rule: result };
-                    commandService.executeCommand(setConditionalRuleMutation.id, { unitId, subUnitId, rule });
+                    commandService.executeCommand(setCfCommand.id, { unitId, subUnitId, rule } as ISetCfCommandParams);
                     props.onCancel();
                 } else {
                     const cfId = conditionalFormatRuleModel.createCfId(unitId, subUnitId);
                     rule = { cfId, ranges, rule: result, stopIfTrue: false };
-                    commandService.executeCommand(addConditionalRuleMutation.id, { unitId, subUnitId, rule });
+                    commandService.executeCommand(addCfCommand.id, { unitId, subUnitId, rule } as IAddCfCommandParams);
                     props.onCancel();
                 }
             }

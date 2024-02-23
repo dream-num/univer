@@ -25,7 +25,7 @@ import type { IConditionFormatRule } from '../../models/type';
 import type { ISetConditionalRuleMutationParams } from '../mutations/setConditionalRule.mutation';
 import { setConditionalRuleMutation, setConditionalRuleMutationUndoFactory } from '../mutations/setConditionalRule.mutation';
 
-interface ISetCfCommandParams {
+export interface ISetCfCommandParams {
     unitId?: string;
     subUnitId?: string;
     rule: IConditionFormatRule;

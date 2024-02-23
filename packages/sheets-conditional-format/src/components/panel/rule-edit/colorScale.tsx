@@ -15,13 +15,15 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
+import { useDependency } from '@wendellhu/redi/react-bindings';
+import { LocaleService } from '@univerjs/core';
 import { InputNumber, Select } from '@univerjs/design';
 import { RuleType, ValueType } from '../../../base/const';
 import { ColorPicker } from '../../color-picker';
 import type { IColorScale } from '../../../models/type';
 import type { IStyleEditorProps } from './type';
 
-const createOptionItem = (text: string) => ({ label: text, value: text });
+const createOptionItem = (text: string, localeService: LocaleService) => ({ label: localeService.t(`sheet.cf.valueType.${text}`), value: text });
 
 const TextInput = (props: { type: string;value: number;onChange: (v: number) => void }) => {
     const { type } = props;
@@ -40,11 +42,13 @@ const TextInput = (props: { type: string;value: number;onChange: (v: number) => 
 };
 export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
     const { interceptorManager } = props;
+    const localeService = useDependency(LocaleService);
+
     const rule = props.rule?.type === RuleType.colorScale ? props.rule : undefined as IColorScale | undefined;
-    const commonOptions = [createOptionItem(ValueType.num), createOptionItem(ValueType.percent), createOptionItem(ValueType.percentile)];
-    const minOptions = [createOptionItem(ValueType.min), ...commonOptions];
-    const medianOptions = [createOptionItem('none'), ...commonOptions];
-    const maxOptions = [createOptionItem(ValueType.max), ...commonOptions];
+    const commonOptions = [createOptionItem(ValueType.num, localeService), createOptionItem(ValueType.percent, localeService), createOptionItem(ValueType.percentile, localeService)];
+    const minOptions = [createOptionItem(ValueType.min, localeService), ...commonOptions];
+    const medianOptions = [createOptionItem('none', localeService), ...commonOptions];
+    const maxOptions = [createOptionItem(ValueType.max, localeService), ...commonOptions];
 
     const [minType, minTypeSet] = useState(() => {
         const defaultV = ValueType.min;
@@ -175,8 +179,8 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
     return (
         <div>
 
-            <div>样式设置</div>
-            <div>最小值</div>
+            <div>{localeService.t('sheet.cf.panel.styleRule')}</div>
+            <div>{localeService.t('sheet.cf.valueType.min')}</div>
             <Select
                 options={minOptions}
                 value={minType}
@@ -203,7 +207,7 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
                     handleChange({ minType, medianType, maxType, minValue, medianValue, maxValue, minColor: v, medianColor, maxColor });
                 }}
             />
-            <div>中间值</div>
+            <div>{localeService.t('sheet.cf.panel.medianValue')}</div>
             <Select
                 options={medianOptions}
                 value={medianType}
@@ -230,7 +234,7 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
                     handleChange({ minType, medianType, maxType, minValue, medianValue, maxValue, minColor, medianColor: v, maxColor });
                 }}
             />
-            <div>最大值</div>
+            <div>{localeService.t('sheet.cf.valueType.max')}</div>
             <Select
                 options={maxOptions}
                 value={maxType}

@@ -16,6 +16,8 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { Input, InputNumber, Select } from '@univerjs/design';
+import { useDependency } from '@wendellhu/redi/react-bindings';
+import { LocaleService } from '@univerjs/core';
 import { NumberOperator,
     RuleType,
     SubRuleType,
@@ -29,7 +31,7 @@ import type {
 import { ConditionalStyleEditor } from '../../conditional-style-editor';
 import type { IStyleEditorProps } from './type';
 
-const createOptionItem = (text: string) => ({ label: text, value: text });
+const createOptionItem = (text: string, localeService: LocaleService) => ({ label: localeService.t(`sheet.cf.operator.${text}`), value: text });
 type IValue = number | string | [number, number];
 type IResult = Pick<ITextHighlightCell | INumberHighlightCell | ITimePeriodHighlightCell, 'operator' | 'subType'> & { value?: IValue };
 
@@ -49,7 +51,7 @@ const HighlightCellInput = (props: { type: IResult['subType'];
         switch (type) {
             case SubRuleType.text:{
                 if ([TextOperator.beginsWith, TextOperator.containsText,
-                    TextOperator.equal, TextOperator.endWith,
+                    TextOperator.equal, TextOperator.endsWith,
                     TextOperator.notEqual].includes(operator as TextOperator)) {
                     onChange(inputTextValue);
                 }
@@ -73,7 +75,7 @@ const HighlightCellInput = (props: { type: IResult['subType'];
     switch (type) {
         case SubRuleType.text:{
             if ([TextOperator.beginsWith, TextOperator.containsText,
-                TextOperator.equal, TextOperator.endWith,
+                TextOperator.equal, TextOperator.endsWith,
                 TextOperator.notEqual].includes(operator as TextOperator)) {
                 const _onChange = (value: string) => {
                     inputTextValueSet(value);
@@ -116,44 +118,46 @@ const HighlightCellInput = (props: { type: IResult['subType'];
     }
     return null;
 };
-const getOperatorOptions = (type: SubRuleType.number | SubRuleType.text | SubRuleType.timePeriod) => {
+const getOperatorOptions = (type: SubRuleType.number | SubRuleType.text | SubRuleType.timePeriod, localeService: LocaleService) => {
     switch (type) {
         case SubRuleType.text:{
             return [
-                createOptionItem(TextOperator.containsBlanks),
-                createOptionItem(TextOperator.beginsWith),
-                createOptionItem(TextOperator.containsText),
-                createOptionItem(TextOperator.endWith),
-                createOptionItem(TextOperator.equal),
-                createOptionItem(TextOperator.notEqual),
-                createOptionItem(TextOperator.notContainsText),
-                createOptionItem(TextOperator.notContainsBlanks)];
+                createOptionItem(TextOperator.containsBlanks, localeService),
+                createOptionItem(TextOperator.beginsWith, localeService),
+                createOptionItem(TextOperator.containsText, localeService),
+                createOptionItem(TextOperator.endsWith, localeService),
+                createOptionItem(TextOperator.equal, localeService),
+                createOptionItem(TextOperator.notEqual, localeService),
+                createOptionItem(TextOperator.notContainsText, localeService),
+                createOptionItem(TextOperator.notContainsBlanks, localeService)];
         }
         case SubRuleType.number:{
-            return [createOptionItem(NumberOperator.between),
-                createOptionItem(NumberOperator.equal),
-                createOptionItem(NumberOperator.greaterThan),
-                createOptionItem(NumberOperator.greaterThanOrEqual),
-                createOptionItem(NumberOperator.lessThan),
-                createOptionItem(NumberOperator.lessThanOrEqual),
-                createOptionItem(NumberOperator.notEqual),
-                createOptionItem(NumberOperator.notBetween)];
+            return [createOptionItem(NumberOperator.between, localeService),
+                createOptionItem(NumberOperator.equal, localeService),
+                createOptionItem(NumberOperator.greaterThan, localeService),
+                createOptionItem(NumberOperator.greaterThanOrEqual, localeService),
+                createOptionItem(NumberOperator.lessThan, localeService),
+                createOptionItem(NumberOperator.lessThanOrEqual, localeService),
+                createOptionItem(NumberOperator.notEqual, localeService),
+                createOptionItem(NumberOperator.notBetween, localeService)];
         }
         case SubRuleType.timePeriod:{
-            return [createOptionItem(TimePeriodOperator.last7Days),
-                createOptionItem(TimePeriodOperator.lastMonth),
-                createOptionItem(TimePeriodOperator.lastWeek),
-                createOptionItem(TimePeriodOperator.nextMonth),
-                createOptionItem(TimePeriodOperator.nextWeek),
-                createOptionItem(TimePeriodOperator.thisMonth),
-                createOptionItem(TimePeriodOperator.thisWeek),
-                createOptionItem(TimePeriodOperator.tomorrow),
-                createOptionItem(TimePeriodOperator.yesterday)];
+            return [createOptionItem(TimePeriodOperator.last7Days, localeService),
+                createOptionItem(TimePeriodOperator.lastMonth, localeService),
+                createOptionItem(TimePeriodOperator.lastWeek, localeService),
+                createOptionItem(TimePeriodOperator.nextMonth, localeService),
+                createOptionItem(TimePeriodOperator.nextWeek, localeService),
+                createOptionItem(TimePeriodOperator.thisMonth, localeService),
+                createOptionItem(TimePeriodOperator.thisWeek, localeService),
+                createOptionItem(TimePeriodOperator.tomorrow, localeService),
+                createOptionItem(TimePeriodOperator.yesterday, localeService)];
         }
     }
 };
 export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, ITextHighlightCell | INumberHighlightCell | ITimePeriodHighlightCell>) => {
     const { interceptorManager, onChange } = props;
+    const localeService = useDependency(LocaleService);
+
     const rule = props.rule?.type === RuleType.highlightCell ? props.rule : undefined;
     const [subType, subTypeSet] = useState<SubRuleType.number | SubRuleType.text | SubRuleType.timePeriod>(() => {
         const defaultV = SubRuleType.text;
@@ -163,8 +167,17 @@ export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, ITextHigh
         return rule.subType || defaultV;
     });
 
-    const typeOptions = [createOptionItem(SubRuleType.text), createOptionItem(SubRuleType.number), createOptionItem(SubRuleType.timePeriod)];
-    const operatorOptions = useMemo(() => getOperatorOptions(subType), [subType]);
+    const typeOptions = [{
+        value: SubRuleType.text,
+        label: localeService.t('sheet.cf.subRuleType.text'),
+    }, {
+        value: SubRuleType.number,
+        label: localeService.t('sheet.cf.subRuleType.number'),
+    }, {
+        value: SubRuleType.timePeriod,
+        label: localeService.t('sheet.cf.subRuleType.timePeriod'),
+    }];
+    const operatorOptions = useMemo(() => getOperatorOptions(subType, localeService), [subType]);
 
     const [operator, operatorSet] = useState<IResult['operator']>(() => {
         const defaultV = operatorOptions[0].value as IResult['operator'];
@@ -181,7 +194,7 @@ export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, ITextHigh
         }
         switch (rule.subType) {
             case SubRuleType.text:{
-                if ([TextOperator.beginsWith, TextOperator.containsText, TextOperator.endWith, TextOperator.equal, TextOperator.notContainsText, TextOperator.notEqual].includes(rule.operator)) {
+                if ([TextOperator.beginsWith, TextOperator.containsText, TextOperator.endsWith, TextOperator.equal, TextOperator.notContainsText, TextOperator.notEqual].includes(rule.operator)) {
                     return rule.value || defaultV;
                 }
                 break;
@@ -201,7 +214,7 @@ export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, ITextHigh
         switch (option.subType || subType) {
             case SubRuleType.text:{
                 if ([TextOperator.beginsWith, TextOperator.containsText,
-                    TextOperator.equal, TextOperator.endWith,
+                    TextOperator.equal, TextOperator.endsWith,
                     TextOperator.notEqual].includes(operator as TextOperator)) {
                     return {
                         type: RuleType.highlightCell,
@@ -263,7 +276,7 @@ export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, ITextHigh
 
     const onTypeChange = (v: string) => {
         const _subType = v as typeof subType;
-        const _operator = getOperatorOptions(_subType)[0].value as typeof operator;
+        const _operator = getOperatorOptions(_subType, localeService)[0].value as typeof operator;
         subTypeSet(_subType);
         operatorSet(_operator);
         onChange(getResult({ subType: _subType, operator: _operator }));

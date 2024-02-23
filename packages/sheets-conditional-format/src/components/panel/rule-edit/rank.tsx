@@ -15,6 +15,8 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import { useDependency } from '@wendellhu/redi/react-bindings';
+import { LocaleService } from '@univerjs/core';
 import { Checkbox, InputNumber, Select } from '@univerjs/design';
 import { NumberOperator, RuleType, SubRuleType } from '../../../base/const';
 import { ConditionalStyleEditor } from '../../conditional-style-editor';
@@ -23,9 +25,11 @@ import type { IStyleEditorProps } from './type';
 
 export const RankStyleEditor = (props: IStyleEditorProps) => {
     const { onChange, interceptorManager } = props;
+    const localeService = useDependency(LocaleService);
+
     const rule = props.rule?.type === RuleType.highlightCell ? props.rule : undefined as IRankHighlightCell | IAverageHighlightCell | undefined;
-    const options = [{ label: '最前', value: 'isNotBottom' }, { label: '最后', value: 'isBottom' },
-        { label: '高于平均值', value: 'greaterThanAverage' }, { label: '低于平均值', value: 'lessThanAverage' }];
+    const options = [{ label: localeService.t('sheet.cf.panel.isNotBottom'), value: 'isNotBottom' }, { label: localeService.t('sheet.cf.panel.isBottom'), value: 'isBottom' },
+        { label: localeService.t('sheet.cf.panel.greaterThanAverage'), value: 'greaterThanAverage' }, { label: localeService.t('sheet.cf.panel.lessThanAverage'), value: 'lessThanAverage' }];
 
     const [type, typeSet] = useState(() => {
         const defaultV = options[0].value;
@@ -136,7 +140,7 @@ export const RankStyleEditor = (props: IStyleEditorProps) => {
     };
     return (
         <div>
-            <div>样式规则</div>
+            <div>{localeService.t('sheet.cf.panel.styleRule')}</div>
             <Select
                 value={type}
                 options={options}

@@ -44,6 +44,7 @@ export class ConditionalFormatMenuController extends Disposable {
             header: { title: this._localeService.t('sheet.condition.format.title') },
             children: {
                 label: CF_PANEL_KEY,
+                rule,
             },
         };
         this._sidebarService.open(props);

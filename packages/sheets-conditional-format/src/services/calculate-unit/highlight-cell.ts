@@ -104,27 +104,27 @@ export const highlightCellCalculateUnit = {
                             return !(v >= start && v <= end);
                         }
                         case NumberOperator.equal:{
-                            const condition = subRuleConfig.value;
+                            const condition = subRuleConfig.value || 0;
                             return isFloatsEqual(condition, v);
                         }
                         case NumberOperator.notEqual:{
-                            const condition = subRuleConfig.value;
+                            const condition = subRuleConfig.value || 0;
                             return !isFloatsEqual(condition, v);
                         }
                         case NumberOperator.greaterThan:{
-                            const condition = subRuleConfig.value;
+                            const condition = subRuleConfig.value || 0;
                             return v > condition;
                         }
                         case NumberOperator.greaterThanOrEqual:{
-                            const condition = subRuleConfig.value;
+                            const condition = subRuleConfig.value || 0;
                             return v >= condition;
                         }
                         case NumberOperator.lessThan:{
-                            const condition = subRuleConfig.value;
+                            const condition = subRuleConfig.value || 0;
                             return v < condition;
                         }
                         case NumberOperator.lessThanOrEqual:{
-                            const condition = subRuleConfig.value;
+                            const condition = subRuleConfig.value || 0;
                             return v <= condition;
                         }
                         default:{
@@ -135,7 +135,7 @@ export const highlightCellCalculateUnit = {
                 case SubRuleType.text:{
                     const subRuleConfig = ruleConfig as ITextHighlightCell;
                     const v = String(value);
-                    const condition = subRuleConfig.value;
+                    const condition = subRuleConfig.value || '';
                     switch (subRuleConfig.operator) {
                         case TextOperator.beginsWith:{
                             return v.startsWith(condition);
@@ -159,7 +159,7 @@ export const highlightCellCalculateUnit = {
                         case TextOperator.notContainsText:{
                             return v.indexOf(condition) === -1;
                         }
-                        case TextOperator.endWith:{
+                        case TextOperator.endsWith:{
                             return v.endsWith(condition);
                         }
                         case TextOperator.equal:{

@@ -17,22 +17,22 @@
 import type { ComponentManager, IMenuSelectorItem } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 import { MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
+import { LocaleService } from '@univerjs/core';
 import { OpenConditionalFormatOperator } from '../commands/operations/open-conditional-format-panel';
 
 export const FactoryManageConditionalFormatRule = (componentManager: ComponentManager) => {
     return (_accessor: IAccessor) => {
+        const localeService = _accessor.get(LocaleService);
         return {
             id: OpenConditionalFormatOperator.id,
             type: MenuItemType.SELECTOR,
             group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
             positions: [MenuPosition.TOOLBAR_START],
-            label: 'cf',
-            tooltip: 'cf',
+            icon: 'CancelFreezeSingle',
+            tooltip: localeService.t('sheet.cf.title'),
             selections: [{
-                label: '打开cf管理面板',
-                value: '123',
-            }, {
-                label: '2',
+                label: localeService.t('sheet.cf.menu.openPanel'),
+                value: 1,
             }],
         } as IMenuSelectorItem;
     };

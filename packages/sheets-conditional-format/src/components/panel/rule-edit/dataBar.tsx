@@ -14,16 +14,20 @@
  * limitations under the License.
  */
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { InputNumber, Radio, RadioGroup, Select } from '@univerjs/design';
+import { useDependency } from '@wendellhu/redi/react-bindings';
+import { LocaleService } from '@univerjs/core';
 import { RuleType, ValueType } from '../../../base/const';
-import type { IDataBar, IValueConfig } from '../../../models/type';
+import type { IValueConfig } from '../../../models/type';
 import { ColorPicker } from '../../color-picker';
 import type { IStyleEditorProps } from './type';
 
-const createOptionItem = (text: string) => ({ label: text, value: text });
+const createOptionItem = (text: ValueType, localeService: LocaleService) => ({ label: localeService.t(`sheet.cf.valueType.${text}`), value: text });
 export const DataBarStyleEditor = (props: IStyleEditorProps) => {
     const { interceptorManager } = props;
+    const localeService = useDependency(LocaleService);
+
     const rule = props.rule?.type === RuleType.dataBar ? props.rule : undefined;
     const [isGradient, isGradientSet] = useState(() => {
         const defaultV = '0';
@@ -46,8 +50,8 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
         }
         return rule.config.nativeColor || defaultV;
     });
-    const minOptions = [createOptionItem(ValueType.min), createOptionItem(ValueType.num), createOptionItem(ValueType.percent), createOptionItem(ValueType.percentile)];
-    const maxOptions = [createOptionItem(ValueType.max), createOptionItem(ValueType.num), createOptionItem(ValueType.percent), createOptionItem(ValueType.percentile)];
+    const minOptions = [createOptionItem(ValueType.min, localeService), createOptionItem(ValueType.num, localeService), createOptionItem(ValueType.percent, localeService), createOptionItem(ValueType.percentile, localeService)];
+    const maxOptions = [createOptionItem(ValueType.max, localeService), createOptionItem(ValueType.num, localeService), createOptionItem(ValueType.percent, localeService), createOptionItem(ValueType.percentile, localeService)];
     const [minValueType, minValueTypeSet] = useState<ValueType>(() => {
         const defaultV = minOptions[0].value as ValueType;
         if (!rule) {
@@ -132,9 +136,9 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
 
     return (
         <div>
-            样式设置
+            {localeService.t('sheet.cf.panel.styleRule')}
             <div>
-                填充方式
+                {localeService.t('sheet.cf.panel.fillType')}
                 <RadioGroup
                     value={isGradient}
                     onChange={(v) => {
@@ -142,20 +146,24 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                         _handleChange({ isGradient: v as string, minValue, minValueType, maxValue, maxValueType, positiveColor, nativeColor });
                     }}
                 >
-                    <Radio value="0">纯色</Radio>
-                    <Radio value="1">渐变</Radio>
+                    <Radio value="0">
+                        {localeService.t('sheet.cf.panel.pureColor')}
+                    </Radio>
+                    <Radio value="1">
+                        {localeService.t('sheet.cf.panel.gradient')}
+                    </Radio>
                 </RadioGroup>
             </div>
             <div>
-                <div>颜色配置</div>
+                <div>{localeService.t('sheet.cf.panel.colorSet')}</div>
 
-                <div>负值</div>
+                <div>{localeService.t('sheet.cf.panel.native')}</div>
                 <ColorPicker
                     color={nativeColor}
                     onChange={handleNativeColorChange}
                 />
 
-                <div>正值</div>
+                <div>{localeService.t('sheet.cf.panel.positive')}</div>
                 <ColorPicker
                     color={positiveColor}
                     onChange={handlePositiveColorChange}
@@ -163,7 +171,7 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
 
             </div>
             <div>
-                <div>最小值</div>
+                <div>{localeService.t('sheet.cf.valueType.min')}</div>
                 <div>
                     <Select
                         options={minOptions}
@@ -183,7 +191,7 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                         />
                     )}
                 </div>
-                <div>最大值</div>
+                <div>{localeService.t('sheet.cf.valueType.max')}</div>
                 <div>
                     <Select
                         options={maxOptions}

@@ -15,7 +15,7 @@
  */
 
 import React, { useMemo, useRef, useState } from 'react';
-import { ICommandService, InterceptorManager, IUniverInstanceService } from '@univerjs/core';
+import { ICommandService, InterceptorManager, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { Button, Select } from '@univerjs/design';
 import { SelectionManagerService } from '@univerjs/sheets';
@@ -39,16 +39,17 @@ interface IRuleEditProps {
 }
 
 export const RuleEdit = (props: IRuleEditProps) => {
+    const localeService = useDependency(LocaleService);
     const selectionManagerService = useDependency(SelectionManagerService);
     const commandService = useDependency(ICommandService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const conditionalFormatRuleModel = useDependency(ConditionalFormatRuleModel);
 
     const options = [
-        { label: '突出显示单元格', value: '1' },
-        { label: '最前/最后/平均值', value: '2' },
-        { label: '数据条', value: '3' },
-        { label: '色阶', value: '4' }];
+        { label: localeService.t('sheet.cf.ruleType.highlightCell'), value: '1' },
+        { label: localeService.t('sheet.cf.panel.rankAndAverage'), value: '2' },
+        { label: localeService.t('sheet.cf.ruleType.dataBar'), value: '3' },
+        { label: localeService.t('sheet.cf.ruleType.colorScale'), value: '4' }];
 
     const [ruleType, ruleTypeSet] = useState(() => {
         const type = props.rule?.rule.type;
@@ -158,18 +159,18 @@ export const RuleEdit = (props: IRuleEditProps) => {
     };
     return (
         <div>
-            <div>应用范围</div>
+            <div>{localeService.t('sheet.cf.panel.range')}</div>
             <div>
                 <RangeSelector onActive={onRangeSelectorActive} onChange={onRangeSelectorChange} />
             </div>
-            <div>样式类型</div>
+            <div>{localeService.t('sheet.cf.panel.styleType')}</div>
             <div>
                 <Select key="style" value={ruleType} options={options} onChange={(e) => ruleTypeSet(e)} />
             </div>
             <StyleEditor interceptorManager={interceptorManager} rule={props.rule?.rule as any} onChange={onStyleChange} />
             <div>
-                <Button size="small" onClick={handleSubmit}> 确认</Button>
-                <Button size="small" onClick={handleCancel}>取消</Button>
+                <Button size="small" onClick={handleSubmit}>{localeService.t('sheet.cf.panel.submit')}</Button>
+                <Button size="small" onClick={handleCancel}>{localeService.t('sheet.cf.panel.cancel')}</Button>
             </div>
         </div>
     );

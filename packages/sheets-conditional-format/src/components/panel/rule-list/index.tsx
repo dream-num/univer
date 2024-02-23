@@ -16,8 +16,10 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Select } from '@univerjs/design';
+
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import { ICommandService, IUniverInstanceService, Rectangle } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, LocaleService, Rectangle } from '@univerjs/core';
+
 import { SelectionManagerService } from '@univerjs/sheets';
 import { serializeRange } from '@univerjs/engine-formula';
 import { DeleteSingle, MoreFunctionSingle } from '@univerjs/icons';
@@ -29,6 +31,7 @@ import { moveCfCommand } from '../../../commands/commands/move-cf.command';
 import { ConditionalFormatRuleModel } from '../../../models/conditional-format-rule-model';
 import panelStyle from '../index.module.less';
 import type { IConditionFormatRule } from '../../../models/type';
+import { RuleType, SubRuleType } from '../../../base/const';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 
@@ -37,12 +40,66 @@ import styles from './index.module.less';
 interface IRuleListProps {
     onClick: (rule: IConditionFormatRule) => void;
 };
+const getRuleDescribe = (rule: IConditionFormatRule, localeService: LocaleService) => {
+    const ruleConfig = rule.rule;
+    switch (ruleConfig.type) {
+        case RuleType.colorScale:{
+            return localeService.t('sheet.cf.ruleType.colorScale');
+        }
+        case RuleType.dataBar:{
+            return localeService.t('sheet.cf.ruleType.dataBar');
+        }
+        case RuleType.highlightCell:{
+            switch (ruleConfig.subType) {
+                case SubRuleType.average:{
+                    const operator = ruleConfig.operator;
+                    return localeService.t(`sheet.cf.preview.describe.${operator}`, localeService.t('sheet.cf.subRuleType.average'));
+                }
+                case SubRuleType.duplicateValues:{
+                    return localeService.t('sheet.cf.subRuleType.duplicateValues');
+                }
+                case SubRuleType.uniqueValues:{
+                    return localeService.t('sheet.cf.subRuleType.uniqueValues');
+                }
+                case SubRuleType.number:{
+                    const operator = ruleConfig.operator;
+                    return localeService.t(`sheet.cf.preview.describe.${operator}`, ...Array.isArray(ruleConfig.value) ? (ruleConfig.value.map((e) => String(e))) : [String(ruleConfig.value || '')]);
+                }
+                case SubRuleType.text:{
+                    const operator = ruleConfig.operator;
+                    return localeService.t(`sheet.cf.preview.describe.${operator}`, ruleConfig.value || '');
+                }
+
+                case SubRuleType.timePeriod:{
+                    const operator = ruleConfig.operator;
+                    return localeService.t(`sheet.cf.preview.describe.${operator}`);
+                }
+                case SubRuleType.rank:{
+                    if (ruleConfig.isPercent) {
+                        if (ruleConfig.isBottom) {
+                            return localeService.t('sheet.cf.preview.describe.bottomNPercent', String(ruleConfig.value));
+                        } else {
+                            return localeService.t('sheet.cf.preview.describe.topNPercent', String(ruleConfig.value));
+                        }
+                    } else {
+                        if (ruleConfig.isBottom) {
+                            return localeService.t('sheet.cf.preview.describe.bottomN', String(ruleConfig.value));
+                        } else {
+                            return localeService.t('sheet.cf.preview.describe.topN', String(ruleConfig.value));
+                        }
+                    }
+                }
+            }
+        }
+    }
+};
 export const RuleList = (props: IRuleListProps) => {
     const { onClick } = props;
     const conditionalFormatRuleModel = useDependency(ConditionalFormatRuleModel);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const selectionManagerService = useDependency(SelectionManagerService);
     const commandService = useDependency(ICommandService);
+    const localeService = useDependency(LocaleService);
 
     const workbook = univerInstanceService.getCurrentUniverSheetInstance();
     const unitId = workbook.getUnitId();
@@ -137,10 +194,10 @@ export const RuleList = (props: IRuleListProps) => {
                                                     <MoreFunctionSingle />
                                                 </div>
                                                 <div>
-                                                    <div>rule描述</div>
+                                                    <div>{getRuleDescribe(rule, localeService)}</div>
                                                     <div>{rule.ranges.map((range) => serializeRange(range)).join(',')}</div>
                                                 </div>
-                                                <div className={styles.preview}>预览 </div>
+                                                <div className={styles.preview}>预览</div>
                                                 <div
                                                     className={styles.deleteItem}
                                                     onClick={(e) => {

@@ -17,7 +17,7 @@
 export const SHEET_CONDITION_FORMAT_PLUGIN = 'SHEET_CONDITION_FORMAT_PLUGIN';
 export enum TextOperator {
     beginsWith = 'beginsWith',
-    endWith = 'endWith',
+    endsWith = 'endsWith',
     containsText = 'containsText',
     notContainsText = 'notContainsText',
     equal = 'equal',

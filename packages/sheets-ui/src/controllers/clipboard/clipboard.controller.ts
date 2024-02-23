@@ -114,21 +114,19 @@ export class SheetClipboardController extends RxDisposable {
 
         this._init();
 
-        if (!this._clipboardInterfaceService.supportClipboard) {
-            this._textSelectionRenderManager?.onPaste$.pipe(takeUntil(this.dispose$)).subscribe((config) => {
-                if (!whenSheetEditorFocused(this._contextService)) {
-                    return;
-                }
+        this._textSelectionRenderManager?.onPaste$.pipe(takeUntil(this.dispose$)).subscribe((config) => {
+            if (!whenSheetEditorFocused(this._contextService)) {
+                return;
+            }
 
-                // editor's value should not change and avoid triggering input event
-                config!.event.preventDefault();
+            // editor's value should not change and avoid triggering input event
+            config!.event.preventDefault();
 
-                const clipboardEvent = config!.event as ClipboardEvent;
-                const htmlContent = clipboardEvent.clipboardData?.getData('text/html');
-                const textContent = clipboardEvent.clipboardData?.getData('text/plain');
-                this._sheetClipboardService.legacyPaste(htmlContent, textContent);
-            });
-        }
+            const clipboardEvent = config!.event as ClipboardEvent;
+            const htmlContent = clipboardEvent.clipboardData?.getData('text/html');
+            const textContent = clipboardEvent.clipboardData?.getData('text/plain');
+            this._sheetClipboardService.legacyPaste(htmlContent, textContent);
+        });
     }
 
     private _init() {

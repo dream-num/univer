@@ -15,7 +15,7 @@
  */
 
 import type { ICommand, IMultiCommand } from '@univerjs/core';
-import { CommandType, ICommandService, ILogService } from '@univerjs/core';
+import { CommandType, ICommandService } from '@univerjs/core';
 import { CopyCommand, CutCommand, IClipboardInterfaceService, PasteCommand } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 
@@ -62,31 +62,17 @@ export const SheetPasteCommand: IMultiCommand = {
     priority: SHEET_CLIPBOARD_PRIORITY,
     preconditions: whenSheetFocused,
     handler: async (accessor: IAccessor, params: ISheetPasteParams) => {
-        const logService = accessor.get(ILogService);
+        // const messageService = accessor.get(IMessageService);
 
-        // use cell editor to get ClipboardData first
-        // if that doesn't work, use the browser's clipboard API
-        // this clipboard API would ask user for permission, so we may need to notify user (and retry perhaps)
-        logService.debug('[SheetPasteCommand]', 'the focusing element is', document.activeElement);
+        // TODO: @yuhongz: check if there is excel content in the clipboard, if so
+        // ask users to use shortcuts instead.
 
-        const result = document.execCommand('paste');
-        if (!result) {
-            logService.debug(
-                '[SheetPasteCommand]',
-                'failed to execute paste command on the activeElement, trying to use clipboard API.'
-            );
+        const clipboardInterfaceService = accessor.get(IClipboardInterfaceService);
+        const clipboardItems = await clipboardInterfaceService.read();
+        const sheetClipboardService = accessor.get(ISheetClipboardService);
 
-            const clipboardInterfaceService = accessor.get(IClipboardInterfaceService);
-            const clipboardItems = await clipboardInterfaceService.read();
-            const sheetClipboardService = accessor.get(ISheetClipboardService);
-
-            // logService.debug('[SheetPasteCommand]: clipboard data is', clipboardItems);
-
-            if (clipboardItems.length !== 0) {
-                return sheetClipboardService.paste(clipboardItems[0], params?.value);
-            }
-
-            return false;
+        if (clipboardItems.length !== 0) {
+            return sheetClipboardService.paste(clipboardItems[0], params?.value);
         }
 
         return false;

@@ -23,7 +23,6 @@ import { KeyCode, MetaKeys } from '../services/shortcut/keycode';
 import type { IShortcutItem } from '../services/shortcut/shortcut.service';
 import { IShortcutService } from '../services/shortcut/shortcut.service';
 import { IClipboardInterfaceService } from '../services/clipboard/clipboard-interface.service';
-import { supportClipboardAPI } from '../services/clipboard/clipboard-utils';
 import { SetEditorResizeOperation } from '../commands/operations/editor/set-editor-resize.operation';
 import { RedoMenuItemFactory, UndoMenuItemFactory } from './menus/menus';
 
@@ -47,13 +46,15 @@ export const CutShortcutItem: IShortcutItem = {
     // preconditions: supportClipboardAPI,
 };
 
-export const PasteShortcutItem: IShortcutItem = {
-    id: PasteCommand.id,
-    description: 'shortcut.paste',
-    group: '1_common-edit',
-    binding: KeyCode.V | MetaKeys.CTRL_COMMAND,
-    preconditions: supportClipboardAPI,
-};
+// For compability issues, paste from the shortcut should always go with the native paste event,
+// see #1404.
+// export const PasteShortcutItem: IShortcutItem = {
+//     id: PasteCommand.id,
+//     description: 'shortcut.paste',
+//     group: '1_common-edit',
+//     binding: KeyCode.V | MetaKeys.CTRL_COMMAND,
+//     preconditions: supportClipboardAPI,
+// };
 
 export const UndoShortcutItem: IShortcutItem = {
     id: UndoCommand.id,
@@ -106,7 +107,7 @@ export class SharedController extends Disposable {
 
     private _registerShortcuts(): void {
         const shortcutItems = [UndoShortcutItem, RedoShortcutItem];
-        shortcutItems.push(CutShortcutItem, CopyShortcutItem, PasteShortcutItem);
+        shortcutItems.push(CutShortcutItem, CopyShortcutItem);
 
         shortcutItems.forEach((shortcut) => this.disposeWithMe(this._shortcutService.registerShortcut(shortcut)));
     }

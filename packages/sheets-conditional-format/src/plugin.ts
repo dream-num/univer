@@ -38,6 +38,8 @@ import { ConditionalFormatCopyPasteController } from './controllers/cf.copy-past
 import { ConditionalFormatAutoFillController } from './controllers/cf.auto-fill.controller';
 import { ConditionalFormatSheetController } from './controllers/cf.sheet.controller';
 import { ConditionalFormatMenuController } from './controllers/cf.menu.controller';
+import { ConditionalFormatI18nController } from './controllers/cf.i18n.controller';
+
 import { OpenConditionalFormatOperator } from './commands/operations/open-conditional-format-panel';
 import { deleteCfCommand } from './commands/commands/delete-cf.command';
 import { setCfCommand } from './commands/commands/set-cf.command';
@@ -83,6 +85,7 @@ export class SheetsConditionalFormatPlugin extends Plugin {
         this._injector.add([ConditionalFormatAutoFillController]);
         this._injector.add([ConditionalFormatSheetController]);
         this._injector.add([ConditionalFormatMenuController]);
+        this._injector.add([ConditionalFormatI18nController]);
     }
 
     _initCommand() {

@@ -74,3 +74,6 @@ export enum ValueType {
 
     formula = 'formula',
 }
+
+export const DEFAULT_BG_COLOR = '#fff';
+export const DEFAULT_FONT_COLOR = '#000000';

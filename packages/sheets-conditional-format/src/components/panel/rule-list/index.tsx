@@ -34,7 +34,7 @@ import type { IConditionFormatRule } from '../../../models/type';
 import { RuleType, SubRuleType } from '../../../base/const';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
-
+import { Preview } from '../../preview';
 import styles from './index.module.less';
 
 interface IRuleListProps {
@@ -193,11 +193,11 @@ export const RuleList = (props: IRuleListProps) => {
                                                 >
                                                     <MoreFunctionSingle />
                                                 </div>
-                                                <div>
+                                                <div className={styles.ruleDescribe}>
                                                     <div>{getRuleDescribe(rule, localeService)}</div>
                                                     <div>{rule.ranges.map((range) => serializeRange(range)).join(',')}</div>
                                                 </div>
-                                                <div className={styles.preview}>预览</div>
+                                                <div className={styles.preview}><Preview rule={rule.rule} /></div>
                                                 <div
                                                     className={styles.deleteItem}
                                                     onClick={(e) => {

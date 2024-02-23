@@ -25,13 +25,13 @@ import { ConditionalFormatRuleModel } from '../../../models/conditional-format-r
 import { RuleType, SubRuleType } from '../../../base/const';
 import { addConditionalRuleMutation } from '../../../commands/mutations/addConditionalRule.mutation';
 import { setConditionalRuleMutation } from '../../../commands/mutations/setConditionalRule.mutation';
-
 import type { IStyleEditorProps } from './type';
 import { beforeSubmit, submit } from './type';
 import { ColorScaleStyleEditor } from './colorScale';
 import { DataBarStyleEditor } from './dataBar';
 import { RankStyleEditor } from './rank';
 import { HighlightCellStyleEditor } from './highlightCell';
+import styles from './index.module.less';
 
 interface IRuleEditProps {
     rule?: IConditionFormatRule;
@@ -145,6 +145,7 @@ export const RuleEdit = (props: IRuleEditProps) => {
                 if (props.rule && props.rule.cfId) {
                     rule = { ...props.rule, ranges, rule: result };
                     commandService.executeCommand(setConditionalRuleMutation.id, { unitId, subUnitId, rule });
+                    props.onCancel();
                 } else {
                     const cfId = conditionalFormatRuleModel.createCfId(unitId, subUnitId);
                     rule = { cfId, ranges, rule: result, stopIfTrue: false };
@@ -158,7 +159,7 @@ export const RuleEdit = (props: IRuleEditProps) => {
         props.onCancel();
     };
     return (
-        <div>
+        <div className={styles.cfRuleStyleEditor}>
             <div>{localeService.t('sheet.cf.panel.range')}</div>
             <div>
                 <RangeSelector onActive={onRangeSelectorActive} onChange={onRangeSelectorChange} />

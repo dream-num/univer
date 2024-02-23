@@ -46,7 +46,7 @@ export const moveCfCommand: ICommand<IMoveCfCommand> = {
         const unitId = params.unitId ?? workbook.getUnitId();
         const subUnitId = params.subUnitId ?? worksheet.getSheetId();
         const config: IMoveConditionalRuleMutationParams = { unitId, subUnitId, cfId, targetCfId };
-        const undos = moveConditionalRuleMutationUndoFactory(config);
+        const undos = moveConditionalRuleMutationUndoFactory(accessor, config);
         const result = commandService.syncExecuteCommand(moveConditionalRuleMutation.id, config);
         if (result) {
             undoRedoService.pushUndoRedo({

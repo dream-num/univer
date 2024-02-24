@@ -16,14 +16,14 @@
 
 import type { IOperation } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
-import type { ITextSelectionStyle, TextRange } from '@univerjs/engine-render';
+import type { ITextRangeWithStyle, ITextSelectionStyle } from '@univerjs/engine-render';
 
 export interface ISetTextSelectionsOperationParams {
     unitId: string;
     subUnitId: string;
     segmentId: string;
     style: ITextSelectionStyle;
-    ranges: TextRange[];
+    ranges: ITextRangeWithStyle[];
 }
 
 export const SetTextSelectionsOperation: IOperation<ISetTextSelectionsOperationParams> = {
@@ -32,7 +32,7 @@ export const SetTextSelectionsOperation: IOperation<ISetTextSelectionsOperationP
     type: CommandType.OPERATION,
 
     handler: (accessor, prams) => {
-        // for live share only.
+        // for live share and share cursor.
         return true;
     },
 };

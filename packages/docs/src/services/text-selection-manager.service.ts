@@ -57,6 +57,7 @@ export function serializeTextRange(textRange: TextRange): ITextRangeWithStyle {
         startOffset: startOffset!,
         endOffset: endOffset!,
         collapsed,
+        isActive: textRange.isActive(),
     };
 }
 

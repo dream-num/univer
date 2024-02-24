@@ -20,9 +20,17 @@ import { BASE_FORMULA_INPUT_NAME } from '../views/formula-input';
 import { BaseDataValidator } from './base-data-validator';
 
 // TODO support formula
-export class NumberValidator extends BaseDataValidator {
+export class NumberValidator extends BaseDataValidator<number> {
+    isValidType(cellValue: CellValue, _rule: IDataValidationRule): boolean {
+        return !Number.isNaN(+cellValue);
+    }
+
+    transform(cellValue: CellValue, _rule: IDataValidationRule): number {
+        return +cellValue;
+    }
+
     id: string = DataValidationType.DECIMAL;
-    title: string = 'dataValidation.type.number';
+    title: string = this.localeService.t('dataValidation.type.number');
 
     operators: DataValidationOperator[] = [
         DataValidationOperator.BETWEEN,
@@ -38,21 +46,21 @@ export class NumberValidator extends BaseDataValidator {
     scopes: string | string[] = ['sheet'];
     formulaInput: string = BASE_FORMULA_INPUT_NAME;
 
-    async validatorIsEqual(cellValue: CellValue, rule: IDataValidationRule) {
+    async validatorIsEqual(cellValue: number, rule: IDataValidationRule) {
         if (!rule.formula1) {
             return true;
         }
-        return +cellValue === +rule.formula1;
+        return cellValue === +rule.formula1;
     }
 
-    async validatorIsNotEqual(cellValue: CellValue, rule: IDataValidationRule) {
+    async validatorIsNotEqual(cellValue: number, rule: IDataValidationRule) {
         if (!rule.formula1) {
             return true;
         }
-        return +cellValue !== +rule.formula1;
+        return cellValue !== +rule.formula1;
     }
 
-    async validatorIsBetween(cellValue: CellValue, rule: IDataValidationRule) {
+    async validatorIsBetween(cellValue: number, rule: IDataValidationRule) {
         if (!rule.formula1 || !rule.formula2) {
             return true;
         }
@@ -60,11 +68,10 @@ export class NumberValidator extends BaseDataValidator {
         const formula2 = +rule.formula2;
         const start = Math.min(formula1, formula2);
         const end = Math.max(formula1, formula2);
-        const value = +cellValue;
-        return value >= start && value <= end;
+        return cellValue >= start && cellValue <= end;
     }
 
-    async validatorIsNotBetween(cellValue: CellValue, rule: IDataValidationRule) {
+    async validatorIsNotBetween(cellValue: number, rule: IDataValidationRule) {
         if (!rule.formula1 || !rule.formula2) {
             return true;
         }
@@ -72,35 +79,34 @@ export class NumberValidator extends BaseDataValidator {
         const formula2 = +rule.formula2;
         const start = Math.min(formula1, formula2);
         const end = Math.max(formula1, formula2);
-        const value = +cellValue;
-        return value < start && value > end;
+        return cellValue < start && cellValue > end;
     }
 
-    async validatorIsGreaterThan(cellValue: CellValue, rule: IDataValidationRule) {
+    async validatorIsGreaterThan(cellValue: number, rule: IDataValidationRule) {
         if (!rule.formula1) {
             return true;
         }
-        return +cellValue > +rule.formula1;
+        return cellValue > +rule.formula1;
     }
 
-    async validatorIsGreaterThanOrEqual(cellValue: CellValue, rule: IDataValidationRule) {
+    async validatorIsGreaterThanOrEqual(cellValue: number, rule: IDataValidationRule) {
         if (!rule.formula1) {
             return true;
         }
-        return +cellValue >= +rule.formula1;
+        return cellValue >= +rule.formula1;
     }
 
-    async validatorIsLessThan(cellValue: CellValue, rule: IDataValidationRule) {
+    async validatorIsLessThan(cellValue: number, rule: IDataValidationRule) {
         if (!rule.formula1) {
             return true;
         }
-        return +cellValue < +rule.formula1;
+        return cellValue < +rule.formula1;
     }
 
-    async validatorIsLessThanOrEqual(cellValue: CellValue, rule: IDataValidationRule) {
+    async validatorIsLessThanOrEqual(cellValue: number, rule: IDataValidationRule) {
         if (!rule.formula1) {
             return true;
         }
-        return +cellValue <= +rule.formula1;
+        return cellValue <= +rule.formula1;
     }
 }

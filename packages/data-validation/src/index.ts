@@ -15,7 +15,7 @@
  */
 
 export { UniverDataValidationPlugin } from './plugin';
-export { DataValidatorRegistryService } from './services/data-validator-registry.service';
+export { DataValidatorRegistryService, DataValidatorRegistryScope } from './services/data-validator-registry.service';
 export { DataValidationModel } from './models/data-validation-model';
 export {
     OpenValidationPanelOperation,
@@ -34,7 +34,7 @@ export {
 export type {
     IRemoveAllDataValidationCommandParams,
     IRemoveDataValidationCommandParams,
-    IUpdateDataValidationCommand,
+    IUpdateDataValidationCommandParams,
     IAddDataValidationCommandParams,
 } from './commands/commands/data-validation.command';
 

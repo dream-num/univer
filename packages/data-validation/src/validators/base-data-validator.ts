@@ -18,10 +18,21 @@ import type { CellValue, IDataValidationRule, IDataValidationRuleBase, LocaleSer
 import { DataValidationOperator } from '@univerjs/core';
 import { OperatorTextMap } from '../types/const/operator-text-map';
 
-const FORMULA1 = 'FORMULA1';
-const FORMULA2 = 'FORMULA2';
+const FORMULA1 = '{FORMULA1}';
+const FORMULA2 = '{FORMULA2}';
 
-export abstract class BaseDataValidator {
+const operatorNameMap: Record<DataValidationOperator, string> = {
+    [DataValidationOperator.BETWEEN]: 'dataValidation.operators.between',
+    [DataValidationOperator.EQUAL]: 'dataValidation.operators.equal',
+    [DataValidationOperator.GREATER_THAN]: 'dataValidation.operators.greaterThan',
+    [DataValidationOperator.GREATER_THAN_OR_EQUAL]: 'dataValidation.operators.greaterThanOrEqual',
+    [DataValidationOperator.LESS_THAN]: 'dataValidation.operators.lessThan',
+    [DataValidationOperator.LESS_THAN_OR_EQUAL]: 'dataValidation.operators.lessThanOrEqual',
+    [DataValidationOperator.NOT_BETWEEN]: 'dataValidation.operators.notBetween',
+    [DataValidationOperator.NOT_EQUAL]: 'dataValidation.operators.notEqual',
+};
+
+export abstract class BaseDataValidator<DataType = CellValue> {
     abstract id: string;
     abstract title: string;
     abstract operators: DataValidationOperator[];
@@ -31,12 +42,16 @@ export abstract class BaseDataValidator {
     abstract formulaInput: string;
 
     constructor(
-        private _localeService: LocaleService
+        readonly localeService: LocaleService
     ) { }
+
+    get operatorNames() {
+        return this.operators.map((operator) => this.localeService.t(operatorNameMap[operator]));
+    }
 
     generateOperatorText(rule: IDataValidationRuleBase) {
         const operatorTextTemp = OperatorTextMap[rule.operator];
-        const operatorText = this._localeService.t(operatorTextTemp).replace(FORMULA1, rule.formula1 ?? '').replace(FORMULA2, rule.formula2 ?? '');
+        const operatorText = this.localeService.t(operatorTextTemp).replace(FORMULA1, rule.formula1 ?? '').replace(FORMULA2, rule.formula2 ?? '');
         return operatorText;
     }
 
@@ -58,21 +73,25 @@ export abstract class BaseDataValidator {
         return false;
     }
 
-    abstract validatorIsEqual(cellValue: CellValue, rule: IDataValidationRule): Promise<boolean>;
+    abstract isValidType(cellValue: CellValue, rule: IDataValidationRule): boolean;
 
-    abstract validatorIsNotEqual(cellValue: CellValue, rule: IDataValidationRule): Promise<boolean>;
+    abstract transform(cellValue: CellValue, rule: IDataValidationRule): DataType;
 
-    abstract validatorIsBetween(cellValue: CellValue, rule: IDataValidationRule): Promise<boolean>;
+    abstract validatorIsEqual(cellValue: DataType, rule: IDataValidationRule): Promise<boolean>;
 
-    abstract validatorIsNotBetween(cellValue: CellValue, rule: IDataValidationRule): Promise<boolean>;
+    abstract validatorIsNotEqual(cellValue: DataType, rule: IDataValidationRule): Promise<boolean>;
 
-    abstract validatorIsGreaterThan(cellValue: CellValue, rule: IDataValidationRule): Promise<boolean>;
+    abstract validatorIsBetween(cellValue: DataType, rule: IDataValidationRule): Promise<boolean>;
 
-    abstract validatorIsGreaterThanOrEqual(cellValue: CellValue, rule: IDataValidationRule): Promise<boolean>;
+    abstract validatorIsNotBetween(cellValue: DataType, rule: IDataValidationRule): Promise<boolean>;
 
-    abstract validatorIsLessThan(cellValue: CellValue, rule: IDataValidationRule): Promise<boolean>;
+    abstract validatorIsGreaterThan(cellValue: DataType, rule: IDataValidationRule): Promise<boolean>;
 
-    abstract validatorIsLessThanOrEqual(cellValue: CellValue, rule: IDataValidationRule): Promise<boolean>;
+    abstract validatorIsGreaterThanOrEqual(cellValue: DataType, rule: IDataValidationRule): Promise<boolean>;
+
+    abstract validatorIsLessThan(cellValue: DataType, rule: IDataValidationRule): Promise<boolean>;
+
+    abstract validatorIsLessThanOrEqual(cellValue: DataType, rule: IDataValidationRule): Promise<boolean>;
 
     validator(cellValue: Nullable<CellValue>, rule: IDataValidationRule): Promise<boolean> {
         const isEmpty = this.isEmptyCellValue(cellValue);
@@ -81,23 +100,29 @@ export abstract class BaseDataValidator {
             return Promise.resolve(allowBlank);
         }
 
+        if (!this.isValidType(cellValue, rule)) {
+            return Promise.resolve(false);
+        }
+
+        const transformedCell = this.transform(cellValue, rule);
+
         switch (rule.operator) {
             case DataValidationOperator.BETWEEN:
-                return this.validatorIsBetween(cellValue, rule);
+                return this.validatorIsBetween(transformedCell, rule);
             case DataValidationOperator.EQUAL:
-                return this.validatorIsEqual(cellValue, rule);
+                return this.validatorIsEqual(transformedCell, rule);
             case DataValidationOperator.GREATER_THAN:
-                return this.validatorIsGreaterThan(cellValue, rule);
+                return this.validatorIsGreaterThan(transformedCell, rule);
             case DataValidationOperator.GREATER_THAN_OR_EQUAL:
-                return this.validatorIsGreaterThanOrEqual(cellValue, rule);
+                return this.validatorIsGreaterThanOrEqual(transformedCell, rule);
             case DataValidationOperator.LESS_THAN:
-                return this.validatorIsLessThan(cellValue, rule);
+                return this.validatorIsLessThan(transformedCell, rule);
             case DataValidationOperator.LESS_THAN_OR_EQUAL:
-                return this.validatorIsLessThanOrEqual(cellValue, rule);
+                return this.validatorIsLessThanOrEqual(transformedCell, rule);
             case DataValidationOperator.NOT_BETWEEN:
-                return this.validatorIsNotBetween(cellValue, rule);
+                return this.validatorIsNotBetween(transformedCell, rule);
             case DataValidationOperator.NOT_EQUAL:
-                return this.validatorIsNotEqual(cellValue, rule);
+                return this.validatorIsNotEqual(transformedCell, rule);
             default:
                 throw new Error('Unknown operator.');
         }

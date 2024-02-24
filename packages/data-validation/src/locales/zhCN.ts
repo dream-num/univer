@@ -14,4 +14,31 @@
  * limitations under the License.
  */
 
-export const zhCN = {};
+export const zhCN = {
+    dataValidation: {
+        title: '',
+        type: {
+            number: 'number',
+        },
+        operators: {
+            between: 'is between {FORMULA1} and {FORMULA2}',
+            greaterThan: 'is greater than {FORMULA1}',
+            greaterThanOrEqual: 'is greater than or equal to {FORMULA1}',
+            lessThan: 'is less than {FORMULA1}',
+            lessThanOrEqual: 'is less than or equal to {FORMULA1}',
+            equal: 'is equal to {FORMULA1}',
+            notEqual: 'is not equal to {FORMULA1}',
+            notBetween: 'is not between {FORMULA1} and {FORMULA2}',
+        },
+        dateOperators: {
+            between: 'is between {FORMULA1} and {FORMULA2}',
+            greaterThan: 'is after {FORMULA1}',
+            greaterThanOrEqual: 'is on or after {FORMULA1}',
+            lessThan: 'is before {FORMULA1}',
+            lessThanOrEqual: 'is on or before {FORMULA1}',
+            equal: 'is {FORMULA1}',
+            notEqual: 'is not {FORMULA1}',
+            notBetween: 'is not between {FORMULA1}',
+        },
+    },
+};

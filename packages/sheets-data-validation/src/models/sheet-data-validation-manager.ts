@@ -83,7 +83,7 @@ export class SheetDataValidationManager extends DataValidationManager<ISheetData
         this.markCacheDirtyByRanges(rule.ranges);
     }
 
-    private _updateRuleRanges() {
+    private _refreshRuleRanges() {
         const rules = this.getDataValidations();
         rules.forEach((rule) => {
             const newRanges = queryObjectMatrix(this._ruleMatrix, (ruleId) => ruleId === rule.uid);
@@ -94,22 +94,49 @@ export class SheetDataValidationManager extends DataValidationManager<ISheetData
         });
     }
 
+    private _updateRuleRange(ruleId: string, oldRanges: IRange[], newRanges: IRange[]) {
+        const tempRuleId = `${ruleId}$`;
+        oldRanges.forEach((range) => {
+            Range.foreach(range, (row, col) => {
+                this._ruleMatrix.setValue(row, col, tempRuleId);
+            });
+        });
+
+        newRanges.forEach((range) => {
+            Range.foreach(range, (row, col) => {
+                const oldValue = this._ruleMatrix.getValue(row, col);
+                this._ruleMatrix.setValue(row, col, ruleId);
+                if (oldValue !== tempRuleId) {
+                    // add: mark dirty
+                    this._validatorResult.setValue(row, col, undefined);
+                }
+            });
+        });
+
+        oldRanges.forEach((range) => {
+            Range.foreach(range, (row, col) => {
+                const value = this._ruleMatrix.getValue(row, col);
+                if (value === tempRuleId) {
+                    // delete: mark dirty
+                    this._validatorResult.setValue(row, col, undefined);
+                }
+            });
+        });
+    }
+
     override addRule(newRule: ISheetDataValidationRule): void {
         this._appendMatrixRule(newRule);
         super.addRule(newRule);
-        this._updateRuleRanges();
+        this._refreshRuleRanges();
     }
 
     override updateRule(ruleId: string, payload: IUpdateRulePayload) {
         const oldRule = this.getRuleById(ruleId);
         const rule = super.updateRule(ruleId, payload);
         if (payload.type === UpdateRuleType.RANGE) {
-            if (oldRule) {
-                this._resetMatrixRanges(oldRule.ranges);
-            }
-            this._appendMatrixRule(rule);
+            this._updateRuleRange(ruleId, oldRule?.ranges ?? [], payload.payload);
         }
-        this._updateRuleRanges();
+        this._refreshRuleRanges();
         return rule;
     }
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ICommandService, Plugin } from '@univerjs/core';
+import { ICommandService, LocaleService, Plugin } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { DataValidatorRegistryService } from './services/data-validator-registry.service';
@@ -22,15 +22,17 @@ import { DataValidationModel } from './models/data-validation-model';
 import { DataValidationPanelService } from './services/data-validation-panel';
 import { CloseValidationPanelOperation, OpenValidationPanelOperation, ToggleValidationPanelOperation } from './commands/operations/data-validation.operation';
 import { DataValidatorController } from './controllers/validator.controller';
-import { AddDataValidationCommand, RemoveAllDataValidationCommand, UpdateDataValidationCommand } from './commands/commands/data-validation.command';
+import { AddDataValidationCommand, RemoveAllDataValidationCommand, RemoveDataValidationCommand, UpdateDataValidationCommand } from './commands/commands/data-validation.command';
 import { AddDataValidationMutation, RemoveAllDataValidationMutation, RemoveDataValidationMutation, ReplaceDataValidationMutation, UpdateDataValidationMutation } from './commands/mutations/data-validation.mutation';
+import { enUS, zhCN } from './locales';
 
 const PLUGIN_NAME = 'data-validation';
 
 export class UniverDataValidationPlugin extends Plugin {
     constructor(
         @Inject(Injector) protected _injector: Injector,
-        @ICommandService private _commandService: ICommandService
+        @ICommandService private _commandService: ICommandService,
+        @Inject(LocaleService) private _localeService: LocaleService
     ) {
         super(PLUGIN_NAME);
     }
@@ -57,10 +59,13 @@ export class UniverDataValidationPlugin extends Plugin {
             AddDataValidationCommand,
             RemoveAllDataValidationCommand,
             UpdateDataValidationCommand,
+            RemoveDataValidationCommand,
+
             // operation
             CloseValidationPanelOperation,
             OpenValidationPanelOperation,
             ToggleValidationPanelOperation,
+
             // mutation
             AddDataValidationMutation,
             UpdateDataValidationMutation,
@@ -69,6 +74,11 @@ export class UniverDataValidationPlugin extends Plugin {
             RemoveDataValidationMutation,
         ].forEach((command) => {
             this._commandService.registerCommand(command);
+        });
+
+        this._localeService.load({
+            zhCN,
+            enUS,
         });
     }
 }

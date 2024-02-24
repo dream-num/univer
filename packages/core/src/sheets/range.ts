@@ -47,8 +47,8 @@ export interface IRangeDependencies {
     getStyles(): Readonly<Styles>;
 }
 
-function isAllFormatInTextRuns(key: keyof IStyleBase, body: IDocumentBody): BooleanNumber {
-    const { textRuns = [], paragraphs = [], sectionBreaks = [] } = body;
+export function isAllFormatInTextRuns(key: keyof IStyleBase, body: IDocumentBody): BooleanNumber {
+    const { textRuns = [] } = body;
 
     let len = 0;
 
@@ -84,7 +84,9 @@ function isAllFormatInTextRuns(key: keyof IStyleBase, body: IDocumentBody): Bool
     }
 
     // Ensure textRuns cover all content.
-    return body.dataStream.length - paragraphs.length - sectionBreaks.length === len ? BooleanNumber.TRUE : BooleanNumber.FALSE;
+    const index = body.dataStream.indexOf('\r\n');
+
+    return index === len ? BooleanNumber.TRUE : BooleanNumber.FALSE;
 }
 
 /**
@@ -459,13 +461,13 @@ export class Range {
                 : FontItalic.NORMAL;
         }
 
-        return this.getFontStyles()[0][0];
+        return this._getFontStyles()[0][0];
     }
 
     /**
      * Returns the font styles of the cells in the range.
      */
-    private getFontStyles(): FontItalic[][] {
+    private _getFontStyles(): FontItalic[][] {
         return this._getStyles('it') as FontItalic[][];
     }
 

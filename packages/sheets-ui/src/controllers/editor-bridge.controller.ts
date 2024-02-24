@@ -184,7 +184,7 @@ export class EditorBridgeController extends RxDisposable {
         if (this._editorBridgeService.isForceKeepVisible()) {
             return;
         }
-        this._editorService.blur();
+        this._editorService.changeEditor();
         this._hideEditor();
     }
 

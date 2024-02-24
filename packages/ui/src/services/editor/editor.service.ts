@@ -21,7 +21,7 @@ import { createIdentifier } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
 import { Subject } from 'rxjs';
 import type { IRender, Scene } from '@univerjs/engine-render';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { IRenderManagerService, UNIVER_GLOBAL_DEFAULT_FONT_SIZE } from '@univerjs/engine-render';
 
 export interface IEditorStateParam extends Partial<IPosition> {
     visible?: boolean;
@@ -60,7 +60,7 @@ export interface IEditorService {
 
     inputFormula$: Observable<string>;
 
-    inputFormula(formulaString: string): void;
+    setFormula(formulaString: string): void;
 
     resize$: Observable<string>;
 
@@ -80,9 +80,9 @@ export interface IEditorService {
 
     isSheetEditor(editorUnitId: string): boolean;
 
-    blur$: Observable<unknown>;
+    changeEditor$: Observable<unknown>;
 
-    blur(): void;
+    changeEditor(): void;
 }
 
 export class EditorService extends Disposable implements IEditorService, IDisposable {
@@ -104,9 +104,13 @@ export class EditorService extends Disposable implements IEditorService, IDispos
 
     readonly resize$ = this._resize$.asObservable();
 
-    private readonly _blur$ = new Subject<unknown>();
+    private readonly _changeEditor$ = new Subject<unknown>();
 
-    readonly blur$ = this._blur$.asObservable();
+    readonly changeEditor$ = this._changeEditor$.asObservable();
+
+    private readonly _valueChange$ = new Subject<string>();
+
+    readonly valueChange$ = this._valueChange$.asObservable();
 
     constructor(
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
@@ -124,18 +128,34 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         return !!(editor && editor.isSheetEditor);
     }
 
-    blur() {
+    changeEditor() {
         const documentDataModel = this._currentUniverService.getCurrentUniverDocInstance();
         const editorUnitId = documentDataModel.getUnitId();
         if (!this.isEditor(editorUnitId) || this.isSheetEditor(editorUnitId)) {
             return;
         }
         // const editor = this._editors.get(editorUnitId);
-        this._blur$.next(null);
+        this._changeEditor$.next(null);
     }
 
-    inputFormula(formulaString: string) {
+    setFormula(formulaString: string) {
         this._inputFormula$.next(formulaString);
+    }
+
+    setValue() {
+
+    }
+
+    getValue() {
+
+    }
+
+    setRichValue() {
+
+    }
+
+    getRichValue() {
+
     }
 
     dispose(): void {
@@ -212,7 +232,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         // Delete scroll bar
         (render.mainComponent?.getScene() as Scene)?.getViewports()?.[0].getScrollBar()?.dispose();
 
-        // this._updateCanvasStyle(editorUnitId);
+        this._updateCanvasStyle(editorUnitId);
 
         this._verticalAlign(editorUnitId);
     }
@@ -257,6 +277,24 @@ export class EditorService extends Disposable implements IEditorService, IDispos
 
         const editor = this.getEditor(id);
         const documentDataModel = editor?.documentDataModel;
+
+        if (editor == null || documentDataModel == null || editor.isSingle === false) {
+            return;
+        }
+
+        let fontSize = UNIVER_GLOBAL_DEFAULT_FONT_SIZE;
+
+        if (editor.canvasStyle?.fontSize) {
+            fontSize = editor.canvasStyle.fontSize;
+        }
+
+        const { height } = editor.editorDom.getBoundingClientRect();
+
+        const top = (height - (fontSize * 4 / 3)) / 2 - 2;
+
+        documentDataModel.updateDocumentDataMargin({
+            t: top < 0 ? 0 : top,
+        });
     }
 
     private _updateCanvasStyle(id: string) {

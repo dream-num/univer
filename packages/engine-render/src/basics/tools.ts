@@ -252,13 +252,17 @@ export function fixLineWidthByScale(num: number, scale: number) {
     return Math.round(num * scale) / scale;
 }
 
+export const UNIVER_GLOBAL_DEFAULT_FONT_SIZE = 11;
+
+export const UNIVER_GLOBAL_DEFAULT_FONT_FAMILY = 'Arial';
+
 export function getFontStyleString(textStyle?: IStyleBase, localeService?: LocaleService) {
     // 获取字体配置
 
     // TODO: @jikkai @DR-Univer should read default font from configuration, not from locale service
-    const defaultFont = 'Arial';
+    const defaultFont = UNIVER_GLOBAL_DEFAULT_FONT_FAMILY;
 
-    const defaultFontSize = 11;
+    const defaultFontSize = UNIVER_GLOBAL_DEFAULT_FONT_SIZE;
 
     if (!textStyle) {
         const fontString = `${defaultFontSize}pt  ${defaultFont}`;

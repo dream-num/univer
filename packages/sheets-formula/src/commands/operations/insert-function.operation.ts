@@ -155,7 +155,7 @@ export const InsertFunctionOperation: ICommand = {
             // TODO@DR-Univer: Maybe setTimeout can be removed
             setTimeout(() => {
                 // edit cell
-                editorService.inputFormula(`=${value}(${editFormulaRangeString}`);
+                editorService.setFormula(`=${value}(${editFormulaRangeString}`);
             }, 0);
         }
 

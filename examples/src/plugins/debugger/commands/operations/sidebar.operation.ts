@@ -43,7 +43,7 @@ export const SidebarOperation: ICommand = {
                     onClose: () => {
                         editorService.setOperationSheetUnitId(null);
                         editorService.setOperationSheetUnitId(null);
-                        editorService.blur();
+                        editorService.changeEditor();
                         sidebarService.close();
                     },
                 });
@@ -53,7 +53,7 @@ export const SidebarOperation: ICommand = {
             default:
                 editorService.setOperationSheetUnitId(null);
                 editorService.setOperationSheetUnitId(null);
-                editorService.blur();
+                editorService.changeEditor();
                 sidebarService.close();
                 break;
         }

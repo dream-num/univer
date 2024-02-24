@@ -47,7 +47,7 @@ export function MoreFunctions() {
 
     function handleConfirm() {
         // TODO@Dushusir: save function  `=${functionInfo?.functionName}(${params.join(',')})`
-        editorService.inputFormula(`=${functionInfo?.functionName}(`);
+        editorService.setFormula(`=${functionInfo?.functionName}(`);
     }
 
     return (

@@ -43,7 +43,7 @@ export class ValueNodeFactory extends BaseAstNodeFactory {
     }
 
     _checkValueNode(token: string) {
-        if (isNaN(Number(token))) {
+        if (Number.isNaN(Number(token))) {
             const tokenTrim = token.trim();
             const startToken = tokenTrim.charAt(0);
             const endToken = tokenTrim.charAt(tokenTrim.length - 1);
@@ -58,8 +58,10 @@ export class ValueNodeFactory extends BaseAstNodeFactory {
             if (startToken === '{' && endToken === '}') {
                 return this.create(tokenTrim);
             }
-            if (tokenTrim === BooleanValue.TRUE || tokenTrim === BooleanValue.FALSE) {
-                return this.create(tokenTrim);
+
+            const tokenTrimUpper = tokenTrim.toUpperCase();
+            if (tokenTrimUpper === BooleanValue.TRUE || tokenTrimUpper === BooleanValue.FALSE) {
+                return this.create(tokenTrimUpper);
             }
         } else {
             return this.create(token);

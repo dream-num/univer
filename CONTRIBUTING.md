@@ -99,10 +99,9 @@ By adopting these practices, you can enhance collaboration and facilitate a bett
 
 To ensure code quality and consistency, please adhere to the following guidelines:
 
--   Use kebab-case for both file names and folder names. If the file contains a React component, it should be in capital camelCase.
--   Folder names should be in plural format, e.g. `SheetTab.tsx`.
+-   Use kebab-case for both file names and folder names. If the file contains a React component, it should be in PascalCase, e.g. `SheetTab.tsx`.
+-   Folder names should be in plural format.
 -   Interfaces should be named starting with a capital "I".
--   Resolve all ESLint issues that are identified in the code.
 -   Do use conventional type names including .service, .controller, .menu, .command, .mutation, and .operation. Invent additional type names if you must but take care not to create too many.
 
 ### Submitting pull requests
@@ -155,6 +154,10 @@ With the help of vscode and its rich ecosystem, you could directly debug unit te
 -   Do not expose properties or methods those are not necessary to be exposed.
 -   Group related methods or properties together. Do not always use blank lines to separate them.
 -   Keep your concepts consistent by naming your variables consistently.
+
+References:
+
+* [Make your code readable](https://www.notonlycode.org/make-your-code-readable/)
 
 ### New Package
 

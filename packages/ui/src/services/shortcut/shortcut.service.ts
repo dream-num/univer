@@ -28,8 +28,10 @@ import { KeyCodeToChar, MetaKeys } from './keycode';
 export interface IShortcutItem<P extends object = object> {
     /** This should reuse the corresponding command's id. */
     id: string;
+    /** Description of the shortcut. */
     description?: string;
 
+    /** If two shortcuts have the same binding, the one with higher priority would be check first. */
     priority?: number;
     /** A callback that will be triggered to examine if the shortcut should be invoked. */
     preconditions?: (contextService: IContextService) => boolean;

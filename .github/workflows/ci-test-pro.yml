@@ -1,0 +1,84 @@
+name: 🔫 CI Test (pro version)
+
+on:
+    workflow_run:
+        workflows:
+            - 📦 Build
+        types: [completed]
+
+permissions:
+    contents: read
+    pull-requests: write
+
+jobs:
+    setup:
+        if: ${{ github.event.workflow_run.conclusion == 'success' }}
+        runs-on: ubuntu-latest
+
+        outputs:
+            id: ${{ steps.pr.outputs.value }}
+            ref: ${{ steps.ref.outputs.value }}
+            repo: ${{ steps.repo.outputs.value }}
+
+        steps:
+            # Get PR id from artifact
+            - name: download pr artifact
+              uses: dawidd6/action-download-artifact@v2
+              with:
+                  workflow: ${{ github.event.workflow_run.workflow_id }}
+                  run_id: ${{ github.event.workflow_run.id }}
+                  name: pr-id
+
+            - name: get PR id
+              id: pr
+              run: echo "value=$(<pr-id.txt)" >> $GITHUB_OUTPUT
+
+            # Get PR ref from artifact
+            - name: download pr artifact
+              uses: dawidd6/action-download-artifact@v2
+              with:
+                  workflow: ${{ github.event.workflow_run.workflow_id }}
+                  run_id: ${{ github.event.workflow_run.id }}
+                  name: pr-ref
+
+            - name: get PR ref
+              id: ref
+              run: echo "value=$(<pr-ref.txt)" >> $GITHUB_OUTPUT
+
+            # Get PR repo from artifact
+            - name: download pr artifact
+              uses: dawidd6/action-download-artifact@v2
+              with:
+                  workflow: ${{ github.event.workflow_run.workflow_id }}
+                  run_id: ${{ github.event.workflow_run.id }}
+                  name: pr-repo
+
+            - name: get PR repo
+              id: repo
+              run: echo "value=$(<pr-repo.txt)" >> $GITHUB_OUTPUT
+
+    test-pro:
+        runs-on: ubuntu-latest
+        needs: [setup]
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+              with:
+                  repository: dream-num/univer-pro
+                  token: ${{ secrets.GH_TOKEN }}
+                  submodules: true
+
+            - name: Setup Node.js
+              uses: ./.github/actions/setup-node
+
+            - name: Update submodules (univer)
+              run: |
+                  cd submodules/univer
+                  git checkout dev
+                  git pull
+                  cd ../../
+                  pnpm i
+
+            - name: 🩺 Run test
+              run: pnpm coverage

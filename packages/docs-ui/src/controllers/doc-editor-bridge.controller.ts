@@ -14,29 +14,32 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
-import { IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import type { ICommandInfo, Nullable } from '@univerjs/core';
+import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
 import { IRenderManagerService, ScrollBar } from '@univerjs/engine-render';
-import { DocSkeletonManagerService, VIEWPORT_KEY } from '@univerjs/docs';
-import { IEditorService } from '@univerjs/ui';
+import type { IRichTextEditingMutationParams } from '@univerjs/docs';
+import { DocSkeletonManagerService, RichTextEditingMutation, VIEWPORT_KEY } from '@univerjs/docs';
+import { IEditorService, SetEditorResizeOperation } from '@univerjs/ui';
 
 @OnLifecycle(LifecycleStages.Rendered, DocEditorBridgeController)
-export class DocEditorBridgeController {
+export class DocEditorBridgeController extends Disposable {
     private _initialEditors = new Set<string>();
 
     constructor(
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
-        @IEditorService private readonly _editorService: IEditorService
+        @IEditorService private readonly _editorService: IEditorService,
+        @ICommandService private readonly _commandService: ICommandService
     ) {
+        super();
         this._initialize();
     }
 
     private _initialize() {
         this._editorService.resize$.subscribe((unitId: string) => {
-            this._create(unitId);
+            this._resize(unitId);
         });
 
         this._editorService.getAllEditor().forEach((editor) => {
@@ -45,11 +48,13 @@ export class DocEditorBridgeController {
                 return;
             }
             this._initialEditors.add(unitId);
-            this._create(unitId);
+            this._resize(unitId);
         });
+
+        this._commandExecutedListener();
     }
 
-    private _create(unitId: Nullable<string>) {
+    private _resize(unitId: Nullable<string>) {
         if (unitId == null) {
             return;
         }
@@ -68,13 +73,15 @@ export class DocEditorBridgeController {
             return;
         }
 
-        const { marginTop = 0, marginBottom = 0 } = editorDataModel.getSnapshot().documentStyle;
+        const { marginTop = 0, marginBottom = 0, marginLeft = 0, marginRight = 0 } = editorDataModel.getSnapshot().documentStyle;
 
         const { scene, mainComponent } = editor.render;
 
-        let { actualHeight } = skeleton.getActualSize();
+        let { actualHeight, actualWidth } = skeleton.getActualSize();
 
         actualHeight += marginTop + marginBottom;
+
+        actualWidth += marginLeft + marginRight;
 
         const { width, height } = editor.editorDom.getBoundingClientRect();
 
@@ -82,23 +89,63 @@ export class DocEditorBridgeController {
 
         let scrollBar = viewportMain?.getScrollBar() as Nullable<ScrollBar>;
 
+        const contentWidth = Math.max(actualWidth, width);
+
+        const contentHeight = Math.max(actualHeight, height);
+
         scene.transformByState({
-            width,
-            height: actualHeight,
+            width: contentWidth,
+            height: contentHeight,
         });
 
-        mainComponent?.resize(width, actualHeight);
+        mainComponent?.resize(contentWidth, contentHeight);
 
-        if (actualHeight > height) {
-            if (scrollBar == null) {
-                viewportMain && new ScrollBar(viewportMain, { enableHorizontal: false, barSize: 8 });
+        if (editor.isSingle === false) {
+            if (actualHeight > height) {
+                if (scrollBar == null) {
+                    viewportMain && new ScrollBar(viewportMain, { enableHorizontal: false, barSize: 8 });
+                } else {
+                    viewportMain?.resetSizeAndScrollBar();
+                }
             } else {
-                viewportMain?.resetSizeAndScrollBar();
+                scrollBar = null;
+                viewportMain?.scrollTo({ x: 0, y: 0 });
+                viewportMain?.getScrollBar()?.dispose();
             }
         } else {
-            scrollBar = null;
-            viewportMain?.scrollTo({ x: 0, y: 0 });
-            viewportMain?.getScrollBar()?.dispose();
+            if (actualWidth > width) {
+                if (scrollBar == null) {
+                    viewportMain && new ScrollBar(viewportMain, { barSize: 8, enableVertical: false });
+                } else {
+                    viewportMain?.resetSizeAndScrollBar();
+                }
+            } else {
+                scrollBar = null;
+                viewportMain?.scrollTo({ x: 0, y: 0 });
+                viewportMain?.getScrollBar()?.dispose();
+            }
         }
+    }
+
+    /**
+     * Listen to document edits to refresh the size of the normula editor.
+     */
+    private _commandExecutedListener() {
+        const updateCommandList = [RichTextEditingMutation.id, SetEditorResizeOperation.id];
+
+        this.disposeWithMe(
+            this._commandService.onCommandExecuted((command: ICommandInfo) => {
+                if (updateCommandList.includes(command.id)) {
+                    const params = command.params as IRichTextEditingMutationParams;
+                    const { unitId } = params;
+
+                    if (this._editorService.isSheetEditor(unitId)) {
+                        return;
+                    }
+
+                    this._resize(unitId);
+                }
+            })
+        );
     }
 }

@@ -22,6 +22,7 @@ import {
 } from '@univerjs/core';
 import type { Documents, IPageRenderConfig } from '@univerjs/engine-render';
 import { IRenderManagerService, Rect } from '@univerjs/engine-render';
+import { IEditorService } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
 
 const PAGE_STROKE_COLOR = 'rgba(198, 198, 198, 1)';
@@ -32,7 +33,7 @@ const PAGE_FILL_COLOR = 'rgba(255, 255, 255, 1)';
 export class PageRenderController extends Disposable {
     constructor(
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @Inject(IUniverInstanceService) private readonly _currentUniverService: IUniverInstanceService
+        @IEditorService private readonly _editorService: IEditorService
     ) {
         super();
 
@@ -51,11 +52,6 @@ export class PageRenderController extends Disposable {
                 return;
             }
 
-            const documentDataModel = this._currentUniverService.getUniverDocInstance(unitId);
-            if (documentDataModel == null) {
-                return;
-            }
-
             const currentRender = this._renderManagerService.getRenderById(unitId);
 
             if (currentRender == null) {
@@ -69,7 +65,7 @@ export class PageRenderController extends Disposable {
             const pageSize = docsComponent.getSkeleton()?.getPageSize();
 
             docsComponent.onPageRenderObservable.add((config: IPageRenderConfig) => {
-                if (documentDataModel.isEditorModel()) {
+                if (this._editorService.isEditor(unitId)) {
                     return;
                 }
 

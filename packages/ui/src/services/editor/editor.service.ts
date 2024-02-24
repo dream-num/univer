@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IDocumentData, IPosition, ISelectionCell, ITextRun, Nullable } from '@univerjs/core';
-import { DEFAULT_EMPTY_DOCUMENT_VALUE, Disposable, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, EDITOR_ACTIVATED, FOCUSING_DOC, FOCUSING_EDITOR_BUT_HIDDEN, FOCUSING_EDITOR_INPUT_FORMULA, FOCUSING_FORMULA_EDITOR, FOCUSING_SHEET, HorizontalAlign, IContextService, IUniverInstanceService, Tools, VerticalAlign } from '@univerjs/core';
+import type { DocumentDataModel, IDocumentData, IDocumentStyle, IPosition, Nullable } from '@univerjs/core';
+import { DEFAULT_EMPTY_DOCUMENT_VALUE, Disposable, EDITOR_ACTIVATED, FOCUSING_DOC, FOCUSING_EDITOR_BUT_HIDDEN, FOCUSING_EDITOR_INPUT_FORMULA, FOCUSING_FORMULA_EDITOR, FOCUSING_SHEET, HorizontalAlign, IContextService, IUniverInstanceService, Tools, VerticalAlign } from '@univerjs/core';
 import type { IDisposable } from '@wendellhu/redi';
 import { createIdentifier } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
@@ -27,14 +27,19 @@ export interface IEditorStateParam extends Partial<IPosition> {
     visible?: boolean;
 }
 
+export interface IEditorCanvasStyle {
+    fontSize?: number;
+}
+
 export interface IEditorConfigParam {
     editorUnitId: string;
 
     initialSnapshot?: IDocumentData;
     cancelDefaultResizeListener?: boolean;
+    canvasStyle?: IEditorCanvasStyle;
+    isSingle?: boolean;
+    isSheetEditor: boolean;
 }
-
-const sheetEditorList = [DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY];
 
 export interface IEditorSetParam extends IEditorConfigParam, IEditorStateParam {
     render: IRender;
@@ -70,6 +75,14 @@ export interface IEditorService {
     setOperationSheetSubUnitId(sheetId: Nullable<string>): void;
 
     getOperationSheetSubUnitId(): Nullable<string>;
+
+    isEditor(editorUnitId: string): boolean;
+
+    isSheetEditor(editorUnitId: string): boolean;
+
+    blur$: Observable<unknown>;
+
+    blur(): void;
 }
 
 export class EditorService extends Disposable implements IEditorService, IDisposable {
@@ -91,39 +104,34 @@ export class EditorService extends Disposable implements IEditorService, IDispos
 
     readonly resize$ = this._resize$.asObservable();
 
+    private readonly _blur$ = new Subject<unknown>();
+
+    readonly blur$ = this._blur$.asObservable();
+
     constructor(
-        @IContextService private readonly _contextService: IContextService,
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         super();
+    }
 
-        this.disposeWithMe(
-            this._currentUniverService.currentDoc$.subscribe((documentDataModel) => {
-                if (documentDataModel == null) {
-                    return;
-                }
-                if (!documentDataModel.isEditorModel()) {
-                    return;
-                }
+    isEditor(editorUnitId: string) {
+        return this._editors.has(editorUnitId);
+    }
 
-                const editorId = documentDataModel.getUnitId();
+    isSheetEditor(editorUnitId: string) {
+        const editor = this._editors.get(editorUnitId);
+        return !!(editor && editor.isSheetEditor);
+    }
 
-                if (sheetEditorList.includes(editorId)) {
-                    this._contextService.setContextValue(FOCUSING_DOC, false);
-                    this._contextService.setContextValue(FOCUSING_FORMULA_EDITOR, true);
-                    this._contextService.setContextValue(FOCUSING_SHEET, true);
-                } else {
-                    this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, false);
-                    this._contextService.setContextValue(EDITOR_ACTIVATED, false);
-                    this._contextService.setContextValue(FOCUSING_EDITOR_BUT_HIDDEN, false);
-                    this._contextService.setContextValue(FOCUSING_FORMULA_EDITOR, false);
-
-                    this._contextService.setContextValue(FOCUSING_SHEET, false);
-                    this._contextService.setContextValue(FOCUSING_DOC, true);
-                }
-            })
-        );
+    blur() {
+        const documentDataModel = this._currentUniverService.getCurrentUniverDocInstance();
+        const editorUnitId = documentDataModel.getUnitId();
+        if (!this.isEditor(editorUnitId) || this.isSheetEditor(editorUnitId)) {
+            return;
+        }
+        // const editor = this._editors.get(editorUnitId);
+        this._blur$.next(null);
     }
 
     inputFormula(formulaString: string) {
@@ -143,15 +151,15 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         return this._editors;
     }
 
-    resize(id: string) {
-        const editor = this.getEditor(id);
+    resize(unitId: string) {
+        const editor = this.getEditor(unitId);
         if (editor == null) {
             return;
         }
 
-        const { editorUnitId } = editor;
+        this._verticalAlign(unitId);
 
-        this._resize$.next(editorUnitId);
+        this._resize$.next(unitId);
     }
 
     setState(param: IEditorStateParam, id: string) {
@@ -187,7 +195,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
     }
 
     register(config: IEditorConfigParam, container: HTMLDivElement) {
-        const { initialSnapshot, editorUnitId } = config;
+        const { initialSnapshot, editorUnitId, isSheetEditor, canvasStyle = {}, isSingle = true } = config;
 
         const documentDataModel = this._currentUniverService.createDoc(initialSnapshot || this._getBlank(editorUnitId));
 
@@ -199,12 +207,14 @@ export class EditorService extends Disposable implements IEditorService, IDispos
 
         render.engine.setContainer(container);
 
-        documentDataModel.enableEditorModel();
-
-        this._editors.set(editorUnitId, { ...config, render, documentDataModel, editorDom: container });
+        this._editors.set(editorUnitId, { ...config, isSheetEditor, render, documentDataModel, editorDom: container, canvasStyle, isSingle });
 
         // Delete scroll bar
         (render.mainComponent?.getScene() as Scene)?.getViewports()?.[0].getScrollBar()?.dispose();
+
+        // this._updateCanvasStyle(editorUnitId);
+
+        this._verticalAlign(editorUnitId);
     }
 
     unRegister(editorUnitId: string) {
@@ -238,6 +248,39 @@ export class EditorService extends Disposable implements IEditorService, IDispos
                 marginTop: 2,
             },
         } as IDocumentData;
+    }
+
+    private _verticalAlign(id: string) {
+        if (this.isSheetEditor(id)) {
+            return;
+        }
+
+        const editor = this.getEditor(id);
+        const documentDataModel = editor?.documentDataModel;
+    }
+
+    private _updateCanvasStyle(id: string) {
+        if (this.isSheetEditor(id)) {
+            return;
+        }
+
+        const editor = this.getEditor(id);
+        const documentDataModel = editor?.documentDataModel;
+        if (documentDataModel == null) {
+            return;
+        }
+
+        const documentStyle: IDocumentStyle = {};
+
+        if (editor?.canvasStyle?.fontSize) {
+            if (documentStyle.textStyle == null) {
+                documentStyle.textStyle = {};
+            }
+
+            documentStyle.textStyle.fs = editor.canvasStyle.fontSize;
+        }
+
+        documentDataModel.updateDocumentStyle(documentStyle);
     }
 }
 

@@ -151,7 +151,15 @@ export function FormulaBar() {
                 </div>
 
                 <div className={styles.formulaInput}>
-                    <TextEditor id={DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY} resizeCallBack={resizeCallBack} cancelDefaultResizeListener={true} onContextMenu={(e) => e.preventDefault()} className={styles.formulaContent} snapshot={INITIAL_SNAPSHOT} />
+                    <TextEditor
+                        id={DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY}
+                        isSheetEditor={true}
+                        resizeCallBack={resizeCallBack}
+                        cancelDefaultResizeListener={true}
+                        onContextMenu={(e) => e.preventDefault()}
+                        className={styles.formulaContent}
+                        snapshot={INITIAL_SNAPSHOT}
+                    />
                     <div className={styles.arrowContainer} onClick={handleArrowClick}>
                         {arrowDirection === ArrowDirection.Down
                             ? (

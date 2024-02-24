@@ -15,7 +15,7 @@
  */
 
 import type { ICommandInfo, IExecutionOptions, Nullable } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
+import { FOCUSING_DOC, FOCUSING_SHEET, ICommandService, IContextService, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
 import { DeviceInputEventType, IRenderManagerService, ITextSelectionRenderManager } from '@univerjs/engine-render';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import {
@@ -26,7 +26,7 @@ import {
 } from '@univerjs/sheets';
 import { Inject, Injector, Quantity } from '@wendellhu/redi';
 import { merge, takeUntil } from 'rxjs';
-import { ILayoutService } from '@univerjs/ui';
+import { IEditorService, ILayoutService } from '@univerjs/ui';
 
 import { SetZoomRatioCommand } from '../commands/commands/set-zoom-ratio.command';
 import { SetActivateCellEditOperation } from '../commands/operations/activate-cell-edit.operation';
@@ -45,6 +45,8 @@ export class EditorBridgeController extends RxDisposable {
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
         @ILayoutService private readonly _layoutService: ILayoutService,
+        @IEditorService private readonly _editorService: IEditorService,
+        @IContextService private readonly _contextService: IContextService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService
     ) {
         super();
@@ -59,6 +61,7 @@ export class EditorBridgeController extends RxDisposable {
     private _initialize() {
         this._initSelectionChangeListener();
         this._initialEventListener();
+        this._initialChangeEditorListener();
     }
 
     private _initSelectionChangeListener() {
@@ -141,6 +144,38 @@ export class EditorBridgeController extends RxDisposable {
         spreadsheetRowHeader.onPointerDownObserver.add(this._keepVisibleHideEditor.bind(this));
     }
 
+    private _initialChangeEditorListener() {
+        this.disposeWithMe(
+            this._currentUniverService.currentDoc$.subscribe((documentDataModel) => {
+                if (documentDataModel == null) {
+                    return;
+                }
+
+                const editorId = documentDataModel.getUnitId();
+
+                if (!this._editorService.isEditor(editorId)) {
+                    return;
+                }
+
+                if (this._editorService.isSheetEditor(editorId)) {
+                    this._contextService.setContextValue(FOCUSING_DOC, false);
+                    // this._contextService.setContextValue(FOCUSING_FORMULA_EDITOR, true);
+                    this._contextService.setContextValue(FOCUSING_SHEET, true);
+                } else {
+                    // this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, false);
+                    // this._contextService.setContextValue(EDITOR_ACTIVATED, false);
+                    // this._contextService.setContextValue(FOCUSING_EDITOR_BUT_HIDDEN, false);
+                    // this._contextService.setContextValue(FOCUSING_FORMULA_EDITOR, false);
+
+                    this._contextService.setContextValue(FOCUSING_SHEET, false);
+                    this._contextService.setContextValue(FOCUSING_DOC, true);
+
+                    this._hideEditor();
+                }
+            })
+        );
+    }
+
     /**
      * In the activated state of formula editing,
      * prohibit closing the editor according to the state to facilitate generating selection reference text.
@@ -149,6 +184,7 @@ export class EditorBridgeController extends RxDisposable {
         if (this._editorBridgeService.isForceKeepVisible()) {
             return;
         }
+        this._editorService.blur();
         this._hideEditor();
     }
 

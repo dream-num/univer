@@ -23,17 +23,12 @@ import {
     OnLifecycle,
     toDisposable,
 } from '@univerjs/core';
+import type { IDocObjectParam } from '@univerjs/docs';
+import { DocSkeletonManagerService, getDocObject, SetDocZoomRatioCommand, SetDocZoomRatioOperation, TextSelectionManagerService, VIEWPORT_KEY } from '@univerjs/docs';
 import type { IWheelEvent } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { IEditorService } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
-
-import type { IDocObjectParam } from '../basics/component-tools';
-import { getDocObject } from '../basics/component-tools';
-import { VIEWPORT_KEY } from '../basics/docs-view-key';
-import { SetDocZoomRatioCommand } from '../commands/commands/set-doc-zoom-ratio.command';
-import { SetDocZoomRatioOperation } from '../commands/operations/set-doc-zoom-ratio.operation';
-import { DocSkeletonManagerService } from '../services/doc-skeleton-manager.service';
-import { TextSelectionManagerService } from '../services/text-selection-manager.service';
 
 interface ISetDocMutationParams {
     unitId: string;
@@ -48,7 +43,8 @@ export class ZoomController extends Disposable {
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService
+        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
+        @IEditorService private readonly _editorService: IEditorService
     ) {
         super();
 
@@ -73,11 +69,6 @@ export class ZoomController extends Disposable {
 
             const { unitId } = param;
 
-            const documentDataModel = this._currentUniverService.getUniverDocInstance(unitId);
-            if (documentDataModel == null) {
-                return;
-            }
-
             const currentRender = this._renderManagerService.getRenderById(unitId);
 
             if (currentRender == null) {
@@ -85,7 +76,7 @@ export class ZoomController extends Disposable {
             }
 
             if (
-                this._initializedRender.has(unitId) || documentDataModel.isEditorModel()
+                this._initializedRender.has(unitId) || this._editorService.isEditor(unitId)
             ) {
                 return;
             }

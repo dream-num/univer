@@ -15,9 +15,9 @@
  */
 
 import type { ICommand } from '@univerjs/core';
-import { CommandType } from '@univerjs/core';
+import { CommandType, IUniverInstanceService } from '@univerjs/core';
 import { TEST_EDITOR_CONTAINER_COMPONENT } from '@univerjs/docs-ui';
-import { ISidebarService } from '@univerjs/ui';
+import { IEditorService, ISidebarService } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 
 export interface IUIComponentCommandParams {
@@ -29,18 +29,31 @@ export const SidebarOperation: ICommand = {
     type: CommandType.COMMAND,
     handler: async (accessor: IAccessor, params: IUIComponentCommandParams) => {
         const sidebarService = accessor.get(ISidebarService);
-
+        const editorService = accessor.get(IEditorService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const unit = univerInstanceService.getCurrentUniverSheetInstance();
         switch (params.value) {
             case 'open':
+                editorService.setOperationSheetUnitId(unit.getUnitId());
+                editorService.setOperationSheetUnitId(unit.getActiveSheet().getSheetId());
                 sidebarService.open({
                     header: { title: 'debugger.sidebar.title' },
                     children: { title: 'Sidebar Content', label: TEST_EDITOR_CONTAINER_COMPONENT },
                     footer: { title: 'Sidebar Footer' },
+                    onClose: () => {
+                        editorService.setOperationSheetUnitId(null);
+                        editorService.setOperationSheetUnitId(null);
+                        editorService.blur();
+                        sidebarService.close();
+                    },
                 });
                 break;
 
             case 'close':
             default:
+                editorService.setOperationSheetUnitId(null);
+                editorService.setOperationSheetUnitId(null);
+                editorService.blur();
                 sidebarService.close();
                 break;
         }

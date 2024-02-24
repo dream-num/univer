@@ -24,14 +24,12 @@ import {
     LifecycleStages,
     OnLifecycle,
 } from '@univerjs/core';
+import type { IRichTextEditingMutationParams } from '@univerjs/docs';
+import { DocSkeletonManagerService, RichTextEditingMutation, SetDocZoomRatioOperation } from '@univerjs/docs';
 import type { Documents, DocumentSkeleton, IRender } from '@univerjs/engine-render';
 import { IRenderManagerService, Liquid } from '@univerjs/engine-render';
+import { IEditorService } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
-
-import type { IRichTextEditingMutationParams } from '../commands/mutations/core-editing.mutation';
-import { RichTextEditingMutation } from '../commands/mutations/core-editing.mutation';
-import { SetDocZoomRatioOperation } from '../commands/operations/set-doc-zoom-ratio.operation';
-import { DocSkeletonManagerService } from '../services/doc-skeleton-manager.service';
 
 @OnLifecycle(LifecycleStages.Steady, FloatingObjectController)
 export class FloatingObjectController extends Disposable {
@@ -44,7 +42,8 @@ export class FloatingObjectController extends Disposable {
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ICommandService private readonly _commandService: ICommandService,
-        @IFloatingObjectManagerService private readonly _floatingObjectManagerService: IFloatingObjectManagerService
+        @IFloatingObjectManagerService private readonly _floatingObjectManagerService: IFloatingObjectManagerService,
+        @IEditorService private readonly _editorService: IEditorService
     ) {
         super();
 
@@ -154,13 +153,11 @@ export class FloatingObjectController extends Disposable {
 
                     const currentRender = this._renderManagerService.getRenderById(unitId);
 
-                    const documentDataModel = this._currentUniverService.getUniverDocInstance(unitId);
-
-                    if (currentRender == null || documentDataModel == null) {
+                    if (currentRender == null) {
                         return;
                     }
 
-                    if (documentDataModel.isEditorModel()) {
+                    if (this._editorService.isEditor(unitId)) {
                         currentRender.mainComponent?.makeDirty();
                         return;
                     }

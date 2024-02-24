@@ -22,19 +22,11 @@ import {
     OnLifecycle,
     RxDisposable,
 } from '@univerjs/core';
+import { DOCS_COMPONENT_DEFAULT_Z_INDEX, DOCS_COMPONENT_HEADER_LAYER_INDEX, DOCS_COMPONENT_MAIN_LAYER_INDEX, DOCS_VIEW_KEY, DocViewModelManagerService, VIEWPORT_KEY } from '@univerjs/docs';
 import type { IRender, IWheelEvent, RenderManagerService, Scene } from '@univerjs/engine-render';
 import { Documents, EVENT_TYPE, IRenderManagerService, Layer, ScrollBar, Viewport } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
 import { BehaviorSubject, takeUntil } from 'rxjs';
-
-import {
-    DOCS_COMPONENT_DEFAULT_Z_INDEX,
-    DOCS_COMPONENT_HEADER_LAYER_INDEX,
-    DOCS_COMPONENT_MAIN_LAYER_INDEX,
-    DOCS_VIEW_KEY,
-    VIEWPORT_KEY,
-} from '../basics/docs-view-key';
-import { DocViewModelManagerService } from '../services/doc-view-model-manager.service';
 
 @OnLifecycle(LifecycleStages.Ready, DocCanvasView)
 export class DocCanvasView extends RxDisposable {

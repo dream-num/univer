@@ -47,8 +47,8 @@ import { MoveRangeMutation, SetRangeValuesMutation } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 import { takeUntil } from 'rxjs';
 
+import { SetEditorResizeOperation } from '@univerjs/ui';
 import { getEditorObject } from '../../basics/editor/get-editor-object';
-import { SetEditorResizeOperation } from '../../commands/operations/set-editor-resize.operation';
 import { IFormulaEditorManagerService } from '../../services/editor/formula-editor-manager.service';
 import type { IEditorBridgeServiceParam } from '../../services/editor-bridge.service';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';

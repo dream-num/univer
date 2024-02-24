@@ -219,7 +219,7 @@ function isLineBlank(line?: IDocumentSkeletonLine) {
     return true;
 }
 
-// 重新计算图文混排的布局，每一个TR或者同层级处理函数都要调用这个方法
+// 重新计算图文混排的布局，每一个 TR 或者同层级处理函数都要调用这个方法
 export function reCalculateLineDivide() {}
 
 export function getNumberUnitValue(unitValue: number | INumberUnit, benchMark: number) {
@@ -235,7 +235,7 @@ export function getNumberUnitValue(unitValue: number | INumberUnit, benchMark: n
     return unitValue;
 }
 
-// 返回charSpaceApply，选择网格还是字体来计算一个tab的长度，一个tab代表1字符长度
+// 返回 charSpaceApply，选择网格还是字体来计算一个 tab 的长度，一个 tab 代表 1 字符长度
 export function getCharSpaceApply(
     charSpace: number = 0,
     defaultTabStop: number,
@@ -245,10 +245,10 @@ export function getCharSpaceApply(
     let charSpaceApply = 1;
 
     if (validationGrid(gridType, snapToGrid)) {
-        // 启用了char网格的情况下，defaultTabStop的参照物是charSpace
+        // 启用了 char 网格的情况下，defaultTabStop 的参照物是 charSpace
         charSpaceApply = charSpace;
     }
-    charSpaceApply *= defaultTabStop; // 乘以defaultTabStop设置的数值
+    charSpaceApply *= defaultTabStop; // 乘以 defaultTabStop 设置的数值
 
     return charSpaceApply;
 }
@@ -697,7 +697,8 @@ export function getFontCreateConfig(
 ) {
     const { startIndex } = paragraphNode;
     const textRun = bodyModel.getTextRun(index + startIndex) || { ts: {}, st: 0, ed: 0 };
-    const { ts: textStyle = {}, st, ed } = textRun;
+    const { st, ed } = textRun;
+    let { ts: textStyle = {} } = textRun;
     const cache = fontCreateConfigCache.getValue(st, ed);
     if (cache) {
         return cache;
@@ -718,6 +719,8 @@ export function getFontCreateConfig(
     } = sectionBreakConfig;
 
     const { snapToGrid = BooleanNumber.TRUE } = paragraphStyle;
+
+    textStyle = { ...documentTextStyle, ...textStyle };
 
     const fontStyle = getFontStyleString(textStyle, localeService);
 

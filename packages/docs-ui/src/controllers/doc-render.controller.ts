@@ -26,10 +26,9 @@ import { IRenderManagerService, PageLayoutType } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
 import { takeUntil } from 'rxjs';
 
-import type { IRichTextEditingMutationParams } from '../commands/mutations/core-editing.mutation';
-import { RichTextEditingMutation } from '../commands/mutations/core-editing.mutation';
-import type { IDocSkeletonManagerParam } from '../services/doc-skeleton-manager.service';
-import { DocSkeletonManagerService } from '../services/doc-skeleton-manager.service';
+import { IEditorService } from '@univerjs/ui';
+import type { IDocSkeletonManagerParam, IRichTextEditingMutationParams } from '@univerjs/docs';
+import { DocSkeletonManagerService, RichTextEditingMutation } from '@univerjs/docs';
 
 @OnLifecycle(LifecycleStages.Rendered, DocRenderController)
 export class DocRenderController extends RxDisposable {
@@ -39,7 +38,7 @@ export class DocRenderController extends RxDisposable {
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ICommandService private readonly _commandService: ICommandService,
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService
+        @IEditorService private readonly _editorService: IEditorService
     ) {
         super();
 
@@ -99,9 +98,7 @@ export class DocRenderController extends RxDisposable {
 
         const pages = skeleton.getSkeletonData()?.pages;
 
-        const documentDataModel = this._currentUniverService.getUniverDocInstance(unitId);
-
-        if (pages == null || documentDataModel == null) {
+        if (pages == null) {
             return;
         }
 
@@ -134,7 +131,7 @@ export class DocRenderController extends RxDisposable {
 
         docsComponent.resize(width, height);
 
-        if (!documentDataModel.isEditorModel()) {
+        if (!this._editorService.isEditor(unitId)) {
             scene.resize(width, height);
         }
     }
@@ -158,15 +155,13 @@ export class DocRenderController extends RxDisposable {
 
                     const currentRender = this._renderManagerService.getRenderById(unitId);
 
-                    const documentDataModel = this._currentUniverService.getUniverDocInstance(unitId);
-
-                    if (currentRender == null || documentDataModel == null) {
+                    if (currentRender == null) {
                         return;
                     }
 
                     skeleton.calculate();
 
-                    if (documentDataModel.isEditorModel()) {
+                    if (this._editorService.isEditor(unitId)) {
                         currentRender.mainComponent?.makeDirty();
 
                         return;

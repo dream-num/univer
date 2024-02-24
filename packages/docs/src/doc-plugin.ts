@@ -50,20 +50,15 @@ import { MoveCursorOperation, MoveSelectionOperation } from './commands/operatio
 import { SelectAllOperation } from './commands/operations/select-all.operation';
 import { SetDocZoomRatioOperation } from './commands/operations/set-doc-zoom-ratio.operation';
 import { SetTextSelectionsOperation } from './commands/operations/text-selection.operation';
-import { DocRenderController } from './controllers/doc-render.controller';
-import { FloatingObjectController } from './controllers/floating-object.controller';
 import { IMEInputController } from './controllers/ime-input.controller';
 import { InlineFormatController } from './controllers/inline-format.controller';
 import { MoveCursorController } from './controllers/move-cursor.controller';
 import { NormalInputController } from './controllers/normal-input.controller';
-import { PageRenderController } from './controllers/page-render.controller';
 import { TextSelectionController } from './controllers/text-selection.controller';
-import { ZoomController } from './controllers/zoom.controller';
 import { DocSkeletonManagerService } from './services/doc-skeleton-manager.service';
 import { DocViewModelManagerService } from './services/doc-view-model-manager.service';
 import { IMEInputManagerService } from './services/ime-input-manager.service';
 import { TextSelectionManagerService } from './services/text-selection-manager.service';
-import { DocCanvasView } from './views/doc-canvas-view';
 import { DocStateChangeManagerService } from './services/doc-state-change-manager.service';
 
 export interface IUniverDocsConfig {
@@ -145,13 +140,6 @@ export class UniverDocsPlugin extends Plugin {
     private _initializeDependencies(docInjector: Injector) {
         (
             [
-                // [
-                //     CanvasView,
-                //     { useFactory: () => docInjector.createInstance(CanvasView, this._config.standalone ?? true) },
-                // ], // FIXME: CanvasView shouldn't be a dependency of UniverDocs. Because it maybe created dynamically.
-                //views
-                [DocCanvasView],
-
                 // services
                 [DocSkeletonManagerService],
                 [DocViewModelManagerService],
@@ -166,15 +154,11 @@ export class UniverDocsPlugin extends Plugin {
                 [TextSelectionManagerService],
 
                 // controllers
-                [DocRenderController],
-                [PageRenderController],
                 [TextSelectionController],
                 [NormalInputController],
                 [IMEInputController],
                 [InlineFormatController],
                 [MoveCursorController],
-                [ZoomController],
-                [FloatingObjectController],
             ] as Dependency[]
         ).forEach((d) => docInjector.add(d));
     }

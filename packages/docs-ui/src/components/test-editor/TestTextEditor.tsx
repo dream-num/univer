@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React from 'react';
 
 import { TextEditor } from '@univerjs/ui';
 
@@ -42,13 +42,13 @@ export const TestEditorContainer = () => {
         <div
             style={containerStyle}
         >
-            <TextEditor id="test-editor-1" style={editorStyle} />
+            <TextEditor id="test-editor-1" style={editorStyle} canvasStyle={{ fontSize: 20 }} />
             <br></br>
-            <TextEditor id="test-editor-2" style={editorStyle} />
+            <TextEditor id="test-editor-2" style={editorStyle} canvasStyle={{ fontSize: 12 }} />
             <br></br>
-            <TextEditor id="test-editor-3" style={editorStyle} />
+            <TextEditor id="test-editor-3" style={editorStyle} canvasStyle={{ fontSize: 16 }} />
             <br></br>
-            <TextEditor id="test-editor-4" style={editorStyle} />
+            <TextEditor id="test-editor-4" style={editorStyle} canvasStyle={{ fontSize: 18 }} />
         </div>
     );
 };

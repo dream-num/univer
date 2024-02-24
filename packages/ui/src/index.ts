@@ -80,3 +80,5 @@ export { type IConfirmPartMethodOptions } from './views/components/confirm-part/
 export { IEditorService, EditorService } from './services/editor/editor.service';
 
 export { TextEditor } from './components/editor/TextEditor';
+
+export { SetEditorResizeOperation } from './commands/operations/editor/set-editor-resize.operation';

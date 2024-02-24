@@ -17,17 +17,20 @@
 import type { IDocumentData, Nullable } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useRef } from 'react';
+import type { IEditorCanvasStyle } from '../../services/editor/editor.service';
 import { IEditorService } from '../../services/editor/editor.service';
 
 type MyComponentProps = React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>;
 
-const excludeProps = ['snapshot', 'resizeCallBack', 'cancelDefaultResizeListener'];
+const excludeProps = ['snapshot', 'resizeCallBack', 'cancelDefaultResizeListener', 'isSheetEditor', 'canvasStyle'];
 
 export interface ITextEditorProps {
     id: string;
     snapshot?: IDocumentData;
     resizeCallBack?: (editor: Nullable<HTMLDivElement>) => void;
     cancelDefaultResizeListener?: boolean;
+    isSheetEditor?: boolean;
+    canvasStyle?: IEditorCanvasStyle;
 }
 
 /**
@@ -36,7 +39,7 @@ export interface ITextEditorProps {
  * @returns
  */
 export function TextEditor(props: ITextEditorProps & MyComponentProps): JSX.Element | null {
-    const { id, snapshot, resizeCallBack, cancelDefaultResizeListener } = props;
+    const { id, snapshot, resizeCallBack, cancelDefaultResizeListener, isSheetEditor = false, canvasStyle = {} } = props;
 
     const editorService = useDependency(IEditorService);
 
@@ -58,7 +61,7 @@ export function TextEditor(props: ITextEditorProps & MyComponentProps): JSX.Elem
 
         resizeObserver.observe(editor);
 
-        editorService.register({ editorUnitId: id, initialSnapshot: snapshot, cancelDefaultResizeListener }, editor);
+        editorService.register({ editorUnitId: id, initialSnapshot: snapshot, cancelDefaultResizeListener, isSheetEditor, canvasStyle, isSingle: true }, editor);
 
         // Clean up on unmount
         return () => {

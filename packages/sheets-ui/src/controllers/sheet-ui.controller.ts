@@ -81,7 +81,6 @@ import {
 } from '../commands/operations/cell-edit.operation';
 import { RenameSheetOperation } from '../commands/operations/rename-sheet.operation';
 import { SetScrollOperation } from '../commands/operations/scroll.operation';
-import { SetEditorResizeOperation } from '../commands/operations/set-editor-resize.operation';
 import { SetFormatPainterOperation } from '../commands/operations/set-format-painter.operation';
 import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
 import { BorderPanel } from '../components/border-panel/BorderPanel';
@@ -268,7 +267,6 @@ export class SheetUIController extends Disposable {
             ScrollCommand,
             SelectAllCommand,
             SetActivateCellEditOperation,
-            SetEditorResizeOperation,
             SetBoldCommand,
             SetCellEditVisibleArrowOperation,
             SetCellEditVisibleOperation,

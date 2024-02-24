@@ -15,7 +15,7 @@
  */
 
 import { IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, UniverInstanceType } from '@univerjs/core';
-import { DocCanvasView } from '@univerjs/docs';
+import { DocCanvasView } from '@univerjs/docs-ui';
 import { SheetCanvasView } from '@univerjs/sheets-ui';
 import { Inject, Injector } from '@wendellhu/redi';
 import { interval, takeUntil, throttle } from 'rxjs';

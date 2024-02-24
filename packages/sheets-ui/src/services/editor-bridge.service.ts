@@ -248,8 +248,6 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
 
         documentLayoutObject.documentModel?.setZoomRatio(Math.max(scaleX, scaleY));
 
-        documentLayoutObject.documentModel?.enableEditorModel();
-
         if (cell?.isInArrayFormulaRange === true) {
             const body = documentLayoutObject.documentModel?.getBody();
             if (body) {

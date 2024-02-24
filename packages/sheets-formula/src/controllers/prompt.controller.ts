@@ -83,10 +83,9 @@ import {
     ISelectionRenderService,
     JumpOver,
     MoveSelectionCommand,
-    SetEditorResizeOperation,
     SheetSkeletonManagerService,
 } from '@univerjs/sheets-ui';
-import { IContextMenuService, IEditorService, KeyCode, MetaKeys } from '@univerjs/ui';
+import { IContextMenuService, IEditorService, KeyCode, MetaKeys, SetEditorResizeOperation } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
 
 import type { ISelectEditorFormulaOperationParam } from '../commands/operations/editor-formula.operation';
@@ -147,6 +146,10 @@ export class PromptController extends Disposable {
     private _inputPanelState: InputPanelState = InputPanelState.InitialState;
 
     private _userCursorMove: boolean = false;
+
+    private _previousEditorUnitId: Nullable<string>;
+
+    private _executeBlurSetTimeout: number | NodeJS.Timeout = -1;
 
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
@@ -219,6 +222,8 @@ export class PromptController extends Disposable {
         this._userMouseListener();
 
         this._inputFormulaListener();
+
+        this._initialChangeEditor();
     }
 
     private _initialFormulaTheme() {
@@ -254,15 +259,13 @@ export class PromptController extends Disposable {
                     }
 
                     if (
-                        (sheetEditorUnitIds.includes(params.unitId) && this._editorBridgeService.isVisible().visible === false) ||
+                        (this._editorService.isSheetEditor(params.unitId) && this._editorBridgeService.isVisible().visible === false) ||
                         this._formulaPromptService.isSelectionMoving()
                     ) {
                         return;
                     }
 
-                    const documentDataModel = this._currentUniverService.getUniverDocInstance(params.unitId);
-
-                    if (documentDataModel == null || !documentDataModel.isEditorModel()) {
+                    if (!this._editorService.isEditor(params.unitId)) {
                         return;
                     }
 
@@ -294,93 +297,130 @@ export class PromptController extends Disposable {
 
     private _initialEditorInputChange() {
         this.disposeWithMe(
-            toDisposable(
-                this._textSelectionRenderManager.onInputBefore$.subscribe((param) => {
-                    this._previousSequenceNodes = null;
-                    this._previousInsertRefStringIndex = null;
+            this._textSelectionRenderManager.onInputBefore$.subscribe((param) => {
+                this._previousSequenceNodes = null;
+                this._previousInsertRefStringIndex = null;
 
-                    this._selectionRenderService.enableSkipRemainLast();
+                this._selectionRenderService.enableSkipRemainLast();
 
-                    const e = param?.event as KeyboardEvent;
-                    if (e == null) {
-                        return;
-                    }
-                    if (
-                        ![KeyCode.ARROW_DOWN, KeyCode.ARROW_UP, KeyCode.ARROW_LEFT, KeyCode.ARROW_RIGHT].includes(
-                            e.which
-                        )
-                    ) {
-                        if (this._arrowMoveActionState !== ArrowMoveAction.moveCursor) {
-                            this._arrowMoveActionState = ArrowMoveAction.moveRefReady;
-                        }
-                        this._inputPanelState = InputPanelState.keyNormal;
-                    } else {
-                        this._inputPanelState = InputPanelState.keyArrow;
+                const e = param?.event as KeyboardEvent;
+
+                if (e == null) {
+                    return;
+                }
+
+                if (
+                    ![KeyCode.ARROW_DOWN, KeyCode.ARROW_UP, KeyCode.ARROW_LEFT, KeyCode.ARROW_RIGHT].includes(
+                        e.which
+                    )
+                ) {
+                    if (this._arrowMoveActionState !== ArrowMoveAction.moveCursor) {
+                        this._arrowMoveActionState = ArrowMoveAction.moveRefReady;
                     }
 
-                    if (e.which !== KeyCode.F4) {
-                        this._userCursorMove = false;
-                    }
-                })
-            )
+                    this._inputPanelState = InputPanelState.keyNormal;
+                } else {
+                    this._inputPanelState = InputPanelState.keyArrow;
+                }
+
+                if (e.which !== KeyCode.F4) {
+                    this._userCursorMove = false;
+                }
+            })
         );
     }
 
     private _initialExitEditor() {
         this.disposeWithMe(
-            toDisposable(
-                this._editorBridgeService.afterVisible$.subscribe((visibleParam) => {
-                    if (visibleParam.visible === true) {
-                        const { unitId, sheetId } = this._getCurrentUnitIdAndSheetId();
+            this._editorBridgeService.afterVisible$.subscribe((visibleParam) => {
+                if (visibleParam.visible === true) {
+                    const { unitId, sheetId } = this._getCurrentUnitIdAndSheetId();
 
-                        if (this._editorService.getOperationSheetUnitId() == null) {
-                            this._editorService.setOperationSheetUnitId(unitId);
-                        }
-
-                        if (this._editorService.getOperationSheetSubUnitId() == null) {
-                            this._editorService.setOperationSheetSubUnitId(sheetId);
-                        }
-
-                        return;
+                    if (this._editorService.getOperationSheetUnitId() == null) {
+                        this._editorService.setOperationSheetUnitId(unitId);
                     }
 
-                    /**
-                     * Switching the selection of PluginName causes a refresh.
-                     * Here, a delay is added to prevent the loss of content when pressing enter.
-                     */
-
-                    const current = this._selectionManagerService.getCurrent();
-
-                    this._insertSelections = [];
-
-                    if (current?.pluginName === NORMAL_SELECTION_PLUGIN_NAME) {
-                        this._disableForceKeepVisible();
-                        /**
-                         * In the standard selection mode, the pivot table and page fields of the formula selection need to be cleared.
-                         */
-                        this._editorService.setOperationSheetUnitId(null);
-
-                        this._editorService.setOperationSheetSubUnitId(null);
-                        return;
+                    if (this._editorService.getOperationSheetSubUnitId() == null) {
+                        this._editorService.setOperationSheetSubUnitId(sheetId);
                     }
 
-                    this._selectionManagerService.clear();
-                    this._selectionManagerService.changePlugin(NORMAL_SELECTION_PLUGIN_NAME);
+                    return;
+                }
 
-                    this._updateEditorModel('\r\n', []);
-
-                    this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, false);
-
-                    this._disableForceKeepVisible();
-
-                    this._selectionRenderService.resetStyle();
-
-                    this._resetTemp();
-
-                    this._hideFunctionPanel();
-                })
-            )
+                this._changeEditor();
+            })
         );
+    }
+
+    private _initialChangeEditor() {
+        this.disposeWithMe(
+            this._currentUniverService.currentDoc$.subscribe((documentDataModel) => {
+                if (documentDataModel == null) {
+                    return;
+                }
+
+                const editorId = documentDataModel.getUnitId();
+
+                if (!this._editorService.isEditor(editorId) || this._previousEditorUnitId === editorId) {
+                    return;
+                }
+
+                if (!this._editorService.isSheetEditor(editorId)) {
+                    this._changeEditor(editorId);
+                    this._previousEditorUnitId = editorId;
+                }
+            })
+        );
+
+        this.disposeWithMe(
+            this._editorService.blur$.subscribe(() => {
+                this._changeEditor();
+            })
+        );
+    }
+
+    private _changeEditor(editorId: Nullable<string>) {
+        /**
+         * Switching the selection of PluginName causes a refresh.
+         * Here, a delay is added to prevent the loss of content when pressing enter.
+         */
+        const current = this._selectionManagerService.getCurrent();
+
+        this._insertSelections = [];
+
+        if (current?.pluginName === NORMAL_SELECTION_PLUGIN_NAME) {
+            this._disableForceKeepVisible();
+            /**
+             * In the standard selection mode, the pivot table and page fields of the formula selection need to be cleared.
+             */
+
+            const { unitId, sheetId } = this._getCurrentUnitIdAndSheetId();
+
+            this._editorService.setOperationSheetUnitId(unitId);
+
+            this._editorService.setOperationSheetSubUnitId(sheetId);
+
+            return;
+        }
+
+        this._selectionManagerService.clear();
+
+        if (editorId && this._editorService.isSheetEditor(editorId)) {
+            this._selectionManagerService.changePlugin(NORMAL_SELECTION_PLUGIN_NAME);
+            this._updateEditorModel('\r\n', []);
+        } else {
+            this._selectionManagerService.changePluginNoRefresh(NORMAL_SELECTION_PLUGIN_NAME);
+        }
+
+        this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, false);
+
+        this._disableForceKeepVisible();
+
+        this._selectionRenderService.resetStyle();
+
+        this._resetTemp();
+
+        this._hideFunctionPanel();
     }
 
     private _initialRefSelectionUpdateEvent() {
@@ -748,7 +788,7 @@ export class PromptController extends Disposable {
 
         const unitId = currentDocumentDataModel.getUnitId();
 
-        if (currentDocumentDataModel.isEditorModel() && !sheetEditorUnitIds.includes(unitId)) {
+        if (this._editorService.isEditor(unitId) && !this._editorService.isSheetEditor(unitId)) {
             return [unitId];
         }
 
@@ -1158,7 +1198,7 @@ export class PromptController extends Disposable {
      * @param sequenceNodes
      * @param textSelectionOffset
      */
-    private async _syncToEditor(
+    private _syncToEditor(
         sequenceNodes: Array<string | ISequenceNode>,
         textSelectionOffset: number,
         canUndo: boolean = true
@@ -1181,7 +1221,7 @@ export class PromptController extends Disposable {
 
         const editorUnitId = this._currentUniverService.getCurrentUniverDocInstance().getUnitId();
 
-        await this._fitEditorSize();
+        this._fitEditorSize();
 
         if (canUndo) {
             this._commandService.executeCommand(ReplaceContentCommand.id, {
@@ -1222,14 +1262,14 @@ export class PromptController extends Disposable {
         this._setRemainCapture();
     }
 
-    private async _fitEditorSize() {
+    private _fitEditorSize() {
         const currentDocumentDataModel = this._currentUniverService.getCurrentUniverDocInstance();
         const editorUnitId = currentDocumentDataModel.getUnitId();
-        if (currentDocumentDataModel.isEditorModel() && !sheetEditorUnitIds.includes(editorUnitId)) {
+        if (this._editorService.isEditor(editorUnitId) && !this._editorService.isSheetEditor(editorUnitId)) {
             return;
         }
 
-        await this._commandService.syncExecuteCommand(SetEditorResizeOperation.id, {
+        this._commandService.executeCommand(SetEditorResizeOperation.id, {
             unitId: editorUnitId,
         });
     }
@@ -1242,11 +1282,11 @@ export class PromptController extends Disposable {
     private _updateEditorModel(dataStream: string, textRuns: ITextRun[]) {
         const documentDataModel = this._currentUniverService.getCurrentUniverDocInstance();
 
-        if (!documentDataModel.isEditorModel()) {
+        const editorUnitId = documentDataModel.getUnitId();
+
+        if (!this._editorService.isEditor(editorUnitId)) {
             return;
         }
-
-        const editorUnitId = documentDataModel.getUnitId();
 
         const docViewModel = this._docViewModelManagerService.getViewModel(editorUnitId);
 

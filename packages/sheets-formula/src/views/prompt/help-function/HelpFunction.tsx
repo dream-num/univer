@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import { FOCUSING_FORMULA_EDITOR, IContextService, IUniverInstanceService, LocaleService } from '@univerjs/core';
+import { IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { Popup } from '@univerjs/design';
 import type { IFunctionInfo, IFunctionParam } from '@univerjs/engine-formula';
 import { CloseSingle, DetailsSingle, MoreSingle } from '@univerjs/icons';
-import { ICellEditorManagerService, IFormulaEditorManagerService } from '@univerjs/sheets-ui';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 
@@ -77,10 +76,13 @@ export function HelpFunction() {
 
     function getPosition() {
         const documentDataModel = univerInstanceService.getCurrentUniverDocInstance();
-        if (!documentDataModel.isEditorModel()) {
+
+        const editorUnitId = documentDataModel.getUnitId();
+
+        if (!editorService.isEditor(editorUnitId)) {
             return;
         }
-        const editorUnitId = documentDataModel.getUnitId();
+
         const editor = editorService.getEditor(editorUnitId);
         return editor?.editorDom.getBoundingClientRect();
     }

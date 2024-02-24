@@ -131,6 +131,8 @@ export interface ITextSelectionRenderManager {
     readonly onCompositionend$: Observable<Nullable<IEditorInputConfig>>;
     readonly onSelectionStart$: Observable<Nullable<INodePosition>>;
     readonly onPaste$: Observable<Nullable<IEditorInputConfig>>;
+    readonly onFocus$: Observable<Nullable<IEditorInputConfig>>;
+    readonly onBlur$: Observable<Nullable<IEditorInputConfig>>;
     readonly textSelectionInner$: Observable<Nullable<ITextSelectionInnerParam>>;
 
     __getEditorContainer(): HTMLElement;
@@ -205,6 +207,12 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
     private readonly _textSelectionInner$ = new BehaviorSubject<Nullable<ITextSelectionInnerParam>>(null);
     readonly textSelectionInner$ = this._textSelectionInner$.asObservable();
+
+    private readonly _onFocus$ = new Subject<Nullable<IEditorInputConfig>>();
+    readonly onFocus$ = this._onFocus$.asObservable();
+
+    private readonly _onBlur$ = new Subject<Nullable<IEditorInputConfig>>();
+    readonly onBlur$ = this._onBlur$.asObservable();
 
     private _container!: HTMLDivElement;
 
@@ -1045,6 +1053,18 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         this._input.addEventListener('paste', (e) => {
             this._eventHandle(e, (config) => {
                 this._onPaste$.next(config);
+            });
+        });
+
+        this._input.addEventListener('focus', (e) => {
+            this._eventHandle(e, (config) => {
+                this._onFocus$.next(config);
+            });
+        });
+
+        this._input.addEventListener('blur', (e) => {
+            this._eventHandle(e, (config) => {
+                this._onBlur$.next(config);
             });
         });
     }

@@ -97,11 +97,15 @@ export function SearchFunction() {
 
     function getPosition() {
         const documentDataModel = univerInstanceService.getCurrentUniverDocInstance();
-        if (!documentDataModel.isEditorModel()) {
+
+        const editorUnitId = documentDataModel.getUnitId();
+
+        if (!editorService.isEditor(editorUnitId)) {
             return;
         }
-        const editorUnitId = documentDataModel.getUnitId();
+
         const editor = editorService.getEditor(editorUnitId);
+
         return editor?.editorDom.getBoundingClientRect();
     }
 

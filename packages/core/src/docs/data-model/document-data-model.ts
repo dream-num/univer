@@ -23,6 +23,7 @@ import type {
     IDocumentBody,
     IDocumentData,
     IDocumentRenderConfig,
+    IDocumentStyle,
 } from '../../types/interfaces/i-document-data';
 import type { IPaddingData } from '../../types/interfaces/i-style-data';
 import { updateAttributeByDelete } from './apply-utils/delete-apply';
@@ -45,8 +46,6 @@ interface IDrawingUpdateConfig {
 
 class DocumentDataModelSimple {
     snapshot: IDocumentData;
-
-    private _isEditorModel = false;
 
     constructor(snapshot: Partial<IDocumentData>) {
         this.snapshot = { ...DEFAULT_DOC, ...snapshot };
@@ -109,6 +108,17 @@ class DocumentDataModelSimple {
         } else {
             documentStyle.renderConfig = {
                 ...documentStyle.renderConfig,
+                ...config,
+            };
+        }
+    }
+
+    updateDocumentStyle(config: IDocumentStyle) {
+        if (this.snapshot.documentStyle == null) {
+            this.snapshot.documentStyle = config;
+        } else {
+            this.snapshot.documentStyle = {
+                ...this.snapshot.documentStyle,
                 ...config,
             };
         }
@@ -185,19 +195,6 @@ class DocumentDataModelSimple {
         } else {
             this.snapshot.settings.zoomRatio = 1;
         }
-    }
-
-    enableEditorModel() {
-        this._isEditorModel = true;
-    }
-
-    disableEditorModel() {
-        this._isEditorModel = false;
-    }
-
-    // const excludeUnitList = [DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY];
-    isEditorModel() {
-        return this._isEditorModel;
     }
 }
 

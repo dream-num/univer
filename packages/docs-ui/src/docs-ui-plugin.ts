@@ -25,7 +25,8 @@ import {
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { IShortcutService } from '@univerjs/ui';
+import { IEditorService, IShortcutService } from '@univerjs/ui';
+
 import {
     MoveCursorDownShortcut,
     MoveCursorLeftShortcut,
@@ -48,6 +49,11 @@ import { BreakLineShortcut, DeleteLeftShortcut, DeleteRightShortcut } from './sh
 import { DocClipboardService, IDocClipboardService } from './services/clipboard/clipboard.service';
 import { DocClipboardController } from './controllers/clipboard.controller';
 import { DocEditorBridgeController } from './controllers/doc-editor-bridge.controller';
+import { DocRenderController } from './controllers/doc-render.controller';
+import { DocCanvasView } from './views/doc-canvas-view';
+import { FloatingObjectController } from './controllers/floating-object.controller';
+import { PageRenderController } from './controllers/page-render.controller';
+import { ZoomController } from './controllers/zoom.controller';
 
 export class UniverDocsUIPlugin extends Plugin {
     static override type = PluginType.Doc;
@@ -97,9 +103,17 @@ export class UniverDocsUIPlugin extends Plugin {
 
     private _initDependencies(injector: Injector) {
         const dependencies: Dependency[] = [
+            // Render views
+            [DocCanvasView],
+
+            // Controller
             [DocUIController],
             [DocClipboardController],
             [DocEditorBridgeController],
+            [DocRenderController],
+            [FloatingObjectController],
+            [PageRenderController],
+            [ZoomController],
             [
                 // controllers
                 AppUIController,
@@ -122,12 +136,11 @@ export class UniverDocsUIPlugin extends Plugin {
 
     private _markDocAsFocused() {
         const currentService = this._injector.get(IUniverInstanceService);
-
+        const editorService = this._injector.get(IEditorService);
         try {
             const doc = currentService.getCurrentUniverDocInstance();
-            // const id = doc.getUnitId();
-
-            if (!doc.isEditorModel()) {
+            const id = doc.getUnitId();
+            if (!editorService.isEditor(id)) {
                 currentService.focusUniverInstance(doc.getUnitId());
             }
         } catch (err) {

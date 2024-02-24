@@ -77,6 +77,6 @@ export { UniverUIPlugin } from './ui-plugin';
 export * from './utils';
 export { type IConfirmPartMethodOptions } from './views/components/confirm-part/interface';
 
-export { IEditorService } from './services/editor/editor.service';
+export { IEditorService, EditorService } from './services/editor/editor.service';
 
 export { TextEditor } from './components/editor/TextEditor';

@@ -57,7 +57,7 @@ const DEFAULT_SCENE_SIZE = { width: 1500, height: 1000 };
 const SCENE_NAMESPACE = '_UNIVER_SCENE_';
 
 export class RenderManagerService implements IRenderManagerService {
-    private _defaultEngine = new Engine();
+    private _defaultEngine!: Engine;
 
     private _currentUnitId: string = '';
 
@@ -68,6 +68,9 @@ export class RenderManagerService implements IRenderManagerService {
     readonly currentRender$ = this._currentRender$.asObservable();
 
     get defaultEngine() {
+        if (!this._defaultEngine) {
+            this._defaultEngine = new Engine();
+        }
         return this._defaultEngine;
     }
 

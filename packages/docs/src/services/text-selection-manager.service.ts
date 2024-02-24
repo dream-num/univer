@@ -53,12 +53,17 @@ type ITextSelectionInfo = Map<string, Map<string, ITextSelectionInnerParam>>;
 export function serializeTextRange(textRange: TextRange): ITextRangeWithStyle {
     const { startOffset, endOffset, collapsed } = textRange;
 
-    return {
+    const serializedTextRange: ITextRangeWithStyle = {
         startOffset: startOffset!,
         endOffset: endOffset!,
         collapsed,
-        isActive: textRange.isActive(),
     };
+
+    if (typeof textRange.isActive === 'function') {
+        serializedTextRange.isActive = textRange.isActive();
+    }
+
+    return serializedTextRange;
 }
 
 /**

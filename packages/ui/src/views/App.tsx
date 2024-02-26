@@ -95,7 +95,10 @@ export function App(props: IUniverAppProps) {
 
     return (
         <ConfigProvider locale={locale} mountContainer={portalContainer}>
-            <div className={styles.appLayout}>
+            {/* IMPORTANT! This `tabIndex` should not be moved. This attribute allows the element to catch
+            all focus event and the layout service would listen to focus changed to this element
+            and refocus the input element. */}
+            <div className={styles.appLayout} tabIndex={-1}>
                 {/* header */}
                 {props.toolbar && (
                     <header className={styles.appContainerHeader}>

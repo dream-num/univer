@@ -22,7 +22,7 @@ import {
     OnLifecycle,
     RxDisposable,
 } from '@univerjs/core';
-import { DOCS_COMPONENT_DEFAULT_Z_INDEX, DOCS_COMPONENT_HEADER_LAYER_INDEX, DOCS_COMPONENT_MAIN_LAYER_INDEX, DOCS_VIEW_KEY, DocSkeletonManagerService, DocViewModelManagerService, VIEWPORT_KEY } from '@univerjs/docs';
+import { DOCS_COMPONENT_DEFAULT_Z_INDEX, DOCS_COMPONENT_HEADER_LAYER_INDEX, DOCS_COMPONENT_MAIN_LAYER_INDEX, DOCS_VIEW_KEY, VIEWPORT_KEY } from '@univerjs/docs';
 import type { IRender, IWheelEvent, RenderManagerService, Scene } from '@univerjs/engine-render';
 import { Documents, EVENT_TYPE, IRenderManagerService, Layer, ScrollBar, Viewport } from '@univerjs/engine-render';
 import { BehaviorSubject, takeUntil } from 'rxjs';

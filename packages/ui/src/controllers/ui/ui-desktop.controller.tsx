@@ -82,9 +82,8 @@ export class DesktopUIController extends Disposable implements IDesktopUIControl
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(LifecycleService) private readonly _lifecycleService: LifecycleService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @IFocusService private readonly _focusService: IFocusService,
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
-        @Optional(LayoutService) private readonly _layoutService?: LayoutService
+        @ILayoutService private readonly _layoutService: ILayoutService,
+        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService
     ) {
         super();
     }
@@ -106,8 +105,9 @@ export class DesktopUIController extends Disposable implements IDesktopUIControl
     }
 
     private _initializeEngine(element: HTMLElement) {
-        const engine = this._renderManagerService.getFirst()?.engine;
-        engine?.setContainer(element);
+        const unitId = this._currentUniverService.getCurrentUniverSheetInstance().getUnitId();
+        const engine = this._renderManagerService.getRenderById(unitId)!.engine;
+        engine.setContainer(element);
     }
 
     registerComponent(part: DesktopUIPart, component: () => React.ComponentType): IDisposable {

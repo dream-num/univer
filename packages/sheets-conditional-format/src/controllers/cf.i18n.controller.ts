@@ -17,6 +17,7 @@
 import { Disposable, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
+import type { ReactNode } from 'react';
 import { zhCN } from '../locale';
 
 @OnLifecycle(LifecycleStages.Rendered, ConditionalFormatI18nController)
@@ -28,5 +29,43 @@ export class ConditionalFormatI18nController extends Disposable {
 
     private _initLocal = () => {
         this._localeService.load({ zhCN });
+    };
+
+    public tWithReactNode(key: string, ...args: (ReactNode | string)[]) {
+        const locale = this._localeService.getLocales();
+        const keys = key.split('.');
+        const resolvedValue = locale && this._localeService.resolveKeyPath(locale, keys);
+        if (typeof resolvedValue === 'string') {
+            const result: (string | ReactNode)[] = [];
+            this._findReplaceIndex(resolvedValue).forEach((item, index, list) => {
+                const preItem = list[index - 1] || { startIndex: 0, endIndex: -1 };
+                if (preItem.endIndex + 1 < item.startIndex) {
+                    const text = resolvedValue.slice(preItem.endIndex + 1, item.startIndex);
+                    text && result.push(text);
+                }
+                args[item.key] && result.push(args[item.key]);
+                if (index === list.length - 1) {
+                    const text = resolvedValue.slice(item.endIndex + 1);
+                    text && result.push(text);
+                }
+            });
+            return result;
+        }
+        return [];
+    }
+
+    private _findReplaceIndex = (text: string) => {
+        const reg = /\{([^}]+)?\}/g;
+        const result: { startIndex: number;key: number;endIndex: number }[] = [];
+        let currentValue = reg.exec(text);
+        while (currentValue) {
+            result.push({
+                startIndex: currentValue.index,
+                key: Number(currentValue[1]),
+                endIndex: currentValue.index + currentValue[0].length - 1,
+            });
+            currentValue = reg.exec(text);
+        }
+        return result;
     };
 }

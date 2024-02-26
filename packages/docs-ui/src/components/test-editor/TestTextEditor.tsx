@@ -42,11 +42,11 @@ export const TestEditorContainer = () => {
         <div
             style={containerStyle}
         >
-            <TextEditor id="test-editor-1" style={editorStyle} canvasStyle={{ fontSize: 20 }} value="我在马路边！！" />
+            <TextEditor id="test-editor-1" style={editorStyle} canvasStyle={{ fontSize: 10 }} value="I found one cent on the roadside." />
             <br></br>
             <TextEditor id="test-editor-2" style={editorStyle} canvasStyle={{ fontSize: 12 }} />
             <br></br>
-            <TextEditor id="test-editor-3" style={editorStyle} canvasStyle={{ fontSize: 16 }} />
+            <TextEditor id="test-editor-3" style={editorStyle} canvasStyle={{ fontSize: 14 }} />
             <br></br>
             <TextEditor id="test-editor-4" style={editorStyle} canvasStyle={{ fontSize: 18 }} />
         </div>

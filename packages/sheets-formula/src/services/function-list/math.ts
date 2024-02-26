@@ -1097,16 +1097,16 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
         abstract: 'formula.functionList.POWER.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.POWER.functionParameter.number1.name',
-                detail: 'formula.functionList.POWER.functionParameter.number1.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.POWER.functionParameter.number.name',
+                detail: 'formula.functionList.POWER.functionParameter.number.detail',
+                example: '5',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'formula.functionList.POWER.functionParameter.number2.name',
-                detail: 'formula.functionList.POWER.functionParameter.number2.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.POWER.functionParameter.power.name',
+                detail: 'formula.functionList.POWER.functionParameter.power.detail',
+                example: '2',
                 require: 1,
                 repeat: 0,
             },

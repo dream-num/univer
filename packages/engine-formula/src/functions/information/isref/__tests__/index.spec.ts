@@ -28,11 +28,10 @@ import { IFormulaCurrentConfigService } from '../../../../services/current-data.
 import { IFunctionService } from '../../../../services/function.service';
 import { IFormulaRuntimeService } from '../../../../services/runtime.service';
 import { createFunctionTestBed } from '../../../__tests__/create-function-test-bed';
-import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
+import { FUNCTION_NAMES_INFORMATION } from '../../function-names';
 import type { BaseValueObject, ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import type { ArrayValueObject } from '../../../../engine/value-object/array-value-object';
-import { Index } from '..';
-import { ErrorType } from '../../../../basics/error-type';
+import { Isref } from '..';
 
 const getTestWorkbookData = (): IWorkbookData => {
     return {
@@ -141,7 +140,7 @@ const getTestWorkbookData = (): IWorkbookData => {
         styles: {},
     };
 };
-describe('Test index', () => {
+describe('Test isref function', () => {
     let get: Injector['get'];
     let lexer: Lexer;
     let astTreeBuilder: AstTreeBuilder;
@@ -189,7 +188,7 @@ describe('Test index', () => {
         );
 
         functionService.registerExecutors(
-            new Index(FUNCTION_NAMES_LOOKUP.INDEX)
+            new Isref(FUNCTION_NAMES_INFORMATION.ISREF)
         );
 
         calculate = async (formula: string) => {
@@ -208,14 +207,42 @@ describe('Test index', () => {
         };
     });
 
-    describe('One row', () => {
-        it('Column number null,test', async () => {
-            // null
-            const result = await calculate('=INDEX(A6:A7,A3:A5,A3:F4)');
+    describe('Isref', () => {
+        it('value reference single cell', async () => {
+            const result = await calculate('=ISREF(A1)');
 
-            expect(result).toStrictEqual([['Tom', ErrorType.VALUE, 'Tom', 'Tom', 'Tom', 'Tom'], ['Tom', ErrorType.REF, ErrorType.REF, ErrorType.VALUE, ErrorType.VALUE, 'Tom'], [ErrorType.NA, ErrorType.NA, ErrorType.NA, ErrorType.NA, ErrorType.NA, ErrorType.NA]]);
+            expect(result).toBe(true);
+        });
+
+        it('value reference range', async () => {
+            const result = await calculate('=ISREF(A6:B6)');
+
+            expect(result).toBe(true);
+        });
+
+        it('value reference wrong cell', async () => {
+            const result = await calculate('=ISREF(XYZ1)');
+
+            expect(result).toBe(false);
+        });
+
+        it('value reference text', async () => {
+            const result = await calculate('=ISREF("A1")');
+
+            expect(result).toBe(false);
+        });
+
+        it('value reference logical', async () => {
+            const result = await calculate('=ISREF(TRUE)');
+
+            expect(result).toBe(false);
+        });
+
+        it('value reference number', async () => {
+            const result = await calculate('=ISREF(1)');
+
+            expect(result).toBe(false);
         });
     });
-
     // supports array string
 });

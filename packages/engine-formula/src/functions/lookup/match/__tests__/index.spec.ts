@@ -22,7 +22,7 @@ import {
 } from '../../../../engine/value-object/primitive-object';
 import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
 import { Match } from '..';
-import { ErrorType } from '../../../..';
+import { ErrorType } from '../../../../basics/error-type';
 
 describe('Test match', () => {
     const textFunction = new Match(FUNCTION_NAMES_LOOKUP.MATCH);

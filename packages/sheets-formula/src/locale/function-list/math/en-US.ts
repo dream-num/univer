@@ -715,7 +715,7 @@ export default {
         },
     },
     POWER: {
-        description: 'Returns the result of a number raised to a power',
+        description: 'Returns the result of a number raised to a power.',
         abstract: 'Returns the result of a number raised to a power',
         links: [
             {
@@ -724,8 +724,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The base number. It can be any real number.' },
+            power: { name: 'power', detail: 'The exponent to which the base number is raised.' },
         },
     },
     PRODUCT: {

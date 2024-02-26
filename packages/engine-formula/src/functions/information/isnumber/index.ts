@@ -20,25 +20,17 @@ import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-ob
 import { BooleanValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
-export class Iserr extends BaseFunction {
+export class Isnumber extends BaseFunction {
     override calculate(value: BaseValueObject) {
         if (value == null) {
             return new ErrorValueObject(ErrorType.NA);
         }
 
-        if (value.getValue() === ErrorType.NA) {
-            return new BooleanValueObject(false);
-        }
-
-        if (value.isError()) {
+        if (value.isNumber()) {
             return new BooleanValueObject(true);
         } else if (value.isArray()) {
             return (value as ArrayValueObject).mapValue((valueObject) => {
-                if (valueObject.getValue() === ErrorType.NA) {
-                    return new BooleanValueObject(false);
-                }
-
-                if (valueObject.isError()) {
+                if (valueObject.isNumber()) {
                     return new BooleanValueObject(true);
                 }
 

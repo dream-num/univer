@@ -714,7 +714,7 @@ export default {
         },
     },
     POWER: {
-        description: '返回数的乘幂',
+        description: '返回数字乘幂的结果。',
         abstract: '返回数的乘幂',
         links: [
             {
@@ -723,8 +723,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '基数', detail: ' 基数。 可为任意实数。' },
+            power: { name: '指数', detail: '基数乘幂运算的指数。' },
         },
     },
     PRODUCT: {

@@ -15,24 +15,16 @@
  */
 
 import { ErrorType } from '../../../basics/error-type';
-import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
-import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
+import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
 
-export class Power extends BaseFunction {
-    override calculate(number: BaseValueObject, power: BaseValueObject) {
-        if (number == null || power == null) {
+export class Isref extends BaseFunction {
+    override calculate(value: BaseValueObject) {
+        if (value == null) {
             return new ErrorValueObject(ErrorType.NA);
         }
 
-        if (number.isError()) {
-            return number;
-        }
-
-        if (power.isError()) {
-            return power;
-        }
-
-        return number.pow(power);
+        // Determine it in the _isrefCompatibility method
+        return value;
     }
 }

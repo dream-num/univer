@@ -20,7 +20,7 @@ import { FUNCTION_NAMES_DATE } from '../../function-names';
 import { DateFunction } from '..';
 import { NumberValueObject } from '../../../../engine/value-object/primitive-object';
 import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
-import { ErrorType } from '../../../..';
+import { ErrorType } from '../../../../basics/error-type';
 
 describe('Test date function', () => {
     const textFunction = new DateFunction(FUNCTION_NAMES_DATE.DATE);

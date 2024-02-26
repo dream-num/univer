@@ -724,8 +724,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'べき乗の底を指定します。 数値には任意の実数を指定することができます。' },
+            power: { name: 'power', detail: ' 数値を底とするべき乗の指数を指定します。' },
         },
     },
     PRODUCT: {
@@ -738,8 +738,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数値', detail: 'first' },
+            number2: { name: '指数', detail: 'second' },
         },
     },
     QUOTIENT: {

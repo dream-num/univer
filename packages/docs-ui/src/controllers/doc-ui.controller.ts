@@ -16,7 +16,7 @@
 
 import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import type { IDesktopUIController, IMenuItemFactory } from '@univerjs/ui';
-import { ComponentManager, IEditorService, IMenuService, IShortcutService, IUIController } from '@univerjs/ui';
+import { ComponentManager, IEditorService, IMenuService, IUIController } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { connectInjector } from '@wendellhu/redi/react-bindings';

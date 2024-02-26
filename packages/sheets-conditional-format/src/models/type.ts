@@ -95,3 +95,5 @@ export interface IConditionFormatRule<C = IConditionalFormatRuleConfig> {
     stopIfTrue: boolean;
     rule: C;
 }
+export type IRuleModel = Map<string, Map<string, IConditionFormatRule[]>>;
+export type IRuleModelJson = Record<string, Record<string, IConditionFormatRule[]>>;

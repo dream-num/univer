@@ -34,13 +34,13 @@ import { Inject, Injector } from '@wendellhu/redi';
 import { Range } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { ConditionalFormatService } from '../services/conditional-format.service';
-import type { IConditionFormatRule } from './type';
+import type { IConditionFormatRule, IRuleModel } from './type';
 import { ConditionalFormatViewModel } from './conditional-format-view-model';
 
 type RuleOperatorType = 'delete' | 'set' | 'add' | 'sort';
 export class ConditionalFormatRuleModel {
    //  Map<unitID ,<sheetId ,IConditionFormatRule[]>>
-    private _model: Map<string, Map<string, IConditionFormatRule[]>> = new Map();
+    private _model: IRuleModel = new Map();
     private _ruleChange$ = new Subject<{ rule: IConditionFormatRule;unitId: string;subUnitId: string; type: RuleOperatorType }>();
     $ruleChange = this._ruleChange$.asObservable();
 
@@ -71,6 +71,11 @@ export class ConditionalFormatRuleModel {
             return list.find((item) => item.cfId === cfId);
         }
         return null;
+    }
+
+    getUnitRules(unitId: string) {
+        const map = this._model.get(unitId);
+        return map || null;
     }
 
     getSubunitRules(unitId: string, subUnitId: string) {

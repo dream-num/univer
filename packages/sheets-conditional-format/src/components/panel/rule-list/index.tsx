@@ -36,6 +36,7 @@ import { RuleType, SubRuleType } from '../../../base/const';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 import { Preview } from '../../preview';
+import { ConditionalFormatI18nController } from '../../../controllers/cf.i18n.controller';
 import styles from './index.module.less';
 
 interface IRuleListProps {
@@ -102,6 +103,7 @@ export const RuleList = (props: IRuleListProps) => {
     const selectionManagerService = useDependency(SelectionManagerService);
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
+    const conditionalFormatI18nController = useDependency(ConditionalFormatI18nController);
 
     const workbook = univerInstanceService.getCurrentUniverSheetInstance();
     const unitId = workbook.getUnitId();
@@ -111,7 +113,10 @@ export const RuleList = (props: IRuleListProps) => {
     const [fetchRuleListId, fetchRuleListIdSet] = useState(0);
     const [layoutWidth, layoutWidthSet] = useState(defaultWidth);
     const layoutContainerRef = useRef<HTMLDivElement>(null);
-    const selectOption = [{ label: '整张工作表', value: '2' }, { label: '所选择单元格', value: '1' }];
+    const selectOption = [
+        { label: localeService.t('sheet.cf.panel.workSheet'), value: '2' },
+        { label: localeService.t('sheet.cf.panel.selectedRange'), value: '1' },
+    ];
     const ruleList = useMemo(() => {
         const ruleList = conditionalFormatRuleModel.getSubunitRules(unitId, subUnitId);
         if (!ruleList || !ruleList.length) {
@@ -202,11 +207,9 @@ export const RuleList = (props: IRuleListProps) => {
         <>
             <div className={styles.cfRuleList}>
                 <div>
-                    管理
-                    <span className={panelStyle.select}>
+                    {conditionalFormatI18nController.tWithReactNode('sheet.cf.panel.managerRuleSelect', <span className={panelStyle.select}>
                         <Select options={selectOption} value={selectValue} onChange={(v) => { selectValueSet(v); }} />
-                    </span>
-                    的规则
+                    </span>).map((ele, index) => <span key={index}>{ele}</span>)}
                 </div>
                 <div ref={layoutContainerRef} className={styles.gridLayoutWrap}>
                     { layoutWidth

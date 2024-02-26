@@ -630,7 +630,7 @@ export default {
         },
     },
     MOD: {
-        description: '返回除法的余数',
+        description: '返回两数相除的余数。 结果的符号与除数相同。',
         abstract: '返回除法的余数',
         links: [
             {
@@ -639,8 +639,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '要计算余数的被除数' },
+            divisor: { name: '除数', detail: '除数' },
         },
     },
     MROUND: {

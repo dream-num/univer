@@ -965,16 +965,16 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
         abstract: 'formula.functionList.MOD.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.MOD.functionParameter.number1.name',
-                detail: 'formula.functionList.MOD.functionParameter.number1.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.MOD.functionParameter.number.name',
+                detail: 'formula.functionList.MOD.functionParameter.number.detail',
+                example: '3',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'formula.functionList.MOD.functionParameter.number2.name',
-                detail: 'formula.functionList.MOD.functionParameter.number2.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.MOD.functionParameter.divisor.name',
+                detail: 'formula.functionList.MOD.functionParameter.divisor.detail',
+                example: '2',
                 require: 1,
                 repeat: 0,
             },

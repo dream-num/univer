@@ -631,7 +631,7 @@ export default {
         },
     },
     MOD: {
-        description: '数値を除算したときの剰余を返します。',
+        description: '数値を除数で割ったときの剰余を返します。 戻り値は除数と同じ符号になります。',
         abstract: '数値を除算したときの剰余を返します。',
         links: [
             {
@@ -640,8 +640,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '除算の分子となる数値を指定します。' },
+            divisor: { name: '除数', detail: '除算の分母となる数値を指定します。' },
         },
     },
     MROUND: {

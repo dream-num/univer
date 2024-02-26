@@ -631,7 +631,7 @@ export default {
         },
     },
     MOD: {
-        description: 'Returns the remainder from division',
+        description: 'Returns the remainder after number is divided by divisor. The result has the same sign as divisor.',
         abstract: 'Returns the remainder from division',
         links: [
             {
@@ -640,8 +640,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The number for which you want to find the remainder.' },
+            divisor: { name: 'divisor', detail: 'The number by which you want to divide number' },
         },
     },
     MROUND: {

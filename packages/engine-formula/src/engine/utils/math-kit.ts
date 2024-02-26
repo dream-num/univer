@@ -46,6 +46,17 @@ export function ceil(base: number, precision: number): number {
     return Math.ceil(multiply(base, factor)) / factor;
 }
 
+export function mod(base: number, divisor: number): number {
+    const bigNumber = new Big(base);
+    const bigDivisor = new Big(divisor);
+
+    const quotient = Math.floor(base / divisor);
+
+    const result = bigNumber.minus(bigDivisor.times(quotient));
+
+    return result.toNumber();
+}
+
 export function pow(base: number, exponent: number): number {
     return base ** exponent;
 }

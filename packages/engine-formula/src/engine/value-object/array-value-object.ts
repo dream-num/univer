@@ -32,6 +32,7 @@ enum BatchOperatorType {
     PLUS,
     MULTIPLY,
     DIVIDED,
+    MOD,
     COMPARE,
     CONCATENATE_FRONT,
     CONCATENATE_BACK,
@@ -862,6 +863,19 @@ export class ArrayValueObject extends BaseValueObject {
         return this._batchOperator(valueObject, BatchOperatorType.DIVIDED);
     }
 
+    override mod(valueObject: BaseValueObject): BaseValueObject {
+        return this._batchOperator(valueObject, BatchOperatorType.MOD);
+    }
+
+    override modInverse(valueObject: BaseValueObject): BaseValueObject {
+        return this.map((currentValue) => {
+            if (currentValue.isError()) {
+                return currentValue;
+            }
+            return valueObject.mod(currentValue);
+        });
+    }
+
     override compare(valueObject: BaseValueObject, operator: compareToken): BaseValueObject {
         return this._batchOperator(valueObject, BatchOperatorType.COMPARE, operator);
     }
@@ -1446,6 +1460,9 @@ export class ArrayValueObject extends BaseValueObject {
                         case BatchOperatorType.DIVIDED:
                             result[r][column] = currentValue.divided(valueObject);
                             break;
+                        case BatchOperatorType.MOD:
+                            result[r][column] = currentValue.mod(valueObject);
+                            break;
                         case BatchOperatorType.COMPARE:
                             if (!operator) {
                                 result[r][column] = new ErrorValueObject(ErrorType.VALUE);
@@ -1593,6 +1610,9 @@ export class ArrayValueObject extends BaseValueObject {
                                 break;
                             case BatchOperatorType.DIVIDED:
                                 rowList[c] = currentValue.divided(opValue);
+                                break;
+                            case BatchOperatorType.MOD:
+                                rowList[c] = currentValue.mod(opValue);
                                 break;
                             case BatchOperatorType.COMPARE:
                                 if (!operator) {

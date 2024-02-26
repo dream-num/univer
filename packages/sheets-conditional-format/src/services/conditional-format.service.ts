@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IRange, Worksheet } from '@univerjs/core';
-import { createInterceptorKey, Disposable, ICommandService, InterceptorManager, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, Rectangle, Tools } from '@univerjs/core';
+import type { IRange, Workbook, Worksheet } from '@univerjs/core';
+import { createInterceptorKey, Disposable, ICommandService, InterceptorManager, IResourceManagerService, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, Rectangle, toDisposable, Tools } from '@univerjs/core';
 import type { IInsertColMutationParams, IMoveColumnsMutationParams, IMoveRangeMutationParams, IMoveRowsMutationParams, IRemoveRowsMutationParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { InsertColMutation, InsertRowMutation, MoveColsMutation, MoveRangeMutation, MoveRowsMutation, RemoveColMutation, RemoveRowMutation, SetRangeValuesMutation } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
@@ -23,8 +23,8 @@ import { Subject } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { ConditionalFormatRuleModel } from '../models/conditional-format-rule-model';
 import { ConditionalFormatViewModel } from '../models/conditional-format-view-model';
-import { RuleType } from '../base/const';
-import type { IConditionFormatRule, IHighlightCell } from '../models/type';
+import { RuleType, SHEET_CONDITION_FORMAT_PLUGIN } from '../base/const';
+import type { IConditionFormatRule, IHighlightCell, IRuleModelJson } from '../models/type';
 import type { IDataBarRenderParams } from '../render/type';
 import { getCellValue, isNullable } from './calculate-unit/utils';
 import { dataBarCellCalculateUnit } from './calculate-unit/data-bar';
@@ -38,6 +38,7 @@ interface ICalculationUnit< R = ObjectMatrix<any>> {
     type: IConditionFormatRule['rule']['type'];
     handle(rule: IConditionFormatRule, worksheet: Worksheet): R;
 };
+
 interface ComputeCache { status: ComputeStatus };
 
 const beforeUpdateRuleResult = createInterceptorKey< { subUnitId: string; unitId: string; cfId: string }>('conditional-format-before-update-rule-result');
@@ -56,12 +57,15 @@ export class ConditionalFormatService extends Disposable {
     constructor(@Inject(ConditionalFormatRuleModel) private _conditionalFormatRuleModel: ConditionalFormatRuleModel,
         @Inject(ConditionalFormatViewModel) private _conditionalFormatViewModel: ConditionalFormatViewModel,
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
+        @Inject(IResourceManagerService) private _resourceManagerService: IResourceManagerService,
+
         @Inject(ICommandService) private _commandService: ICommandService
     ) {
         super();
         this._initCellChange();
         this._initCacheManager();
         this._initRemoteCalculate();
+        this._initSnapshot();
         this._registerCalculationUnit(dataBarCellCalculateUnit);
         this._registerCalculationUnit(colorScaleCellCalculateUnit);
         this._registerCalculationUnit(highlightCellCalculateUnit);
@@ -101,6 +105,58 @@ export class ConditionalFormatService extends Disposable {
             return result;
         }
         return null;
+    }
+
+    private _initSnapshot() {
+        const toJson = (unitID: string) => {
+            const map = this._conditionalFormatRuleModel.getUnitRules(unitID);
+            const resultMap: IRuleModelJson[keyof IRuleModelJson] = {};
+            if (map) {
+                map.forEach((v, key) => {
+                    resultMap[key] = v;
+                });
+                return JSON.stringify(resultMap);
+            }
+            return '';
+        };
+        const parseJson = (json: string): IRuleModelJson[keyof IRuleModelJson] => {
+            if (!json) {
+                return {};
+            }
+            try {
+                return JSON.parse(json);
+            } catch (err) {
+                return {};
+            }
+        };
+        const handleWorkbookAdd = (workbook: Workbook) => {
+            const unitID = workbook.getUnitId();
+            this.disposeWithMe(
+                this._resourceManagerService.registerPluginResource<IRuleModelJson[keyof IRuleModelJson]>(unitID, SHEET_CONDITION_FORMAT_PLUGIN, {
+                    toJson: (unitID) => toJson(unitID),
+                    parseJson: (json) => parseJson(json),
+                    onChange: (unitID, value) => {
+                        Object.keys(value).forEach((subunitId) => {
+                            const ruleList = value[subunitId];
+                            ruleList.forEach((rule) => {
+                                this._conditionalFormatRuleModel.addRule(unitID, subunitId, rule);
+                            });
+                        });
+                    },
+                })
+            );
+        };
+        this.disposeWithMe(toDisposable(this._univerInstanceService.sheetAdded$.subscribe(handleWorkbookAdd)));
+        this.disposeWithMe(
+            toDisposable(
+                this._univerInstanceService.sheetDisposed$.subscribe((workbook) => {
+                    const unitID = workbook.getUnitId();
+                    this._resourceManagerService.disposePluginResource(unitID, SHEET_CONDITION_FORMAT_PLUGIN);
+                })
+            )
+        );
+        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
+        handleWorkbookAdd(workbook);
     }
 
     private _registerCalculationUnit(unit: ICalculationUnit) {

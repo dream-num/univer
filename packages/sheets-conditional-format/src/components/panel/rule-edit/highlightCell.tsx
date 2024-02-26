@@ -86,7 +86,7 @@ const HighlightCellInput = (props: { type: IResult['subType'];
                     onChange(value);
                 };
                 return (
-                    <div className={`${stylesBase.mTSm}`}>
+                    <div className={`${stylesBase.mTSm} ${stylesBase.mLXxs}`}>
                         <Input value={inputTextValue} onChange={_onChange} />
                     </div>
                 );
@@ -103,7 +103,7 @@ const HighlightCellInput = (props: { type: IResult['subType'];
                     onChange(value || 0);
                 };
                 return (
-                    <div className={`${stylesBase.mTSm}`}>
+                    <div className={`${stylesBase.mTSm} ${stylesBase.mLXxs}`}>
                         <InputNumber value={inputNumberValue} onChange={_onChange} />
 
                     </div>
@@ -121,7 +121,7 @@ const HighlightCellInput = (props: { type: IResult['subType'];
                     onChange(value);
                 };
                 return (
-                    <div className={`${stylesBase.mTSm} ${stylesBase.labelContainer}`}>
+                    <div className={`${stylesBase.mTSm} ${stylesBase.labelContainer} ${stylesBase.mLXxs}`}>
                         <InputNumber className={stylesBase.inputWidth} value={inputNumberMin} onChange={onChangeMin} />
                         <InputNumber className={`${stylesBase.inputWidth} ${stylesBase.mLSm}`} value={inputNumberMax} onChange={onChangeMax} />
                     </div>
@@ -317,11 +317,12 @@ export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, ITextHigh
             <Select className={`${stylesBase.mTSm}`} onChange={onTypeChange} value={subType} options={typeOptions} />
             <Select className={`${stylesBase.mTSm}`} onChange={onOperatorChange} value={operator} options={operatorOptions} />
             <HighlightCellInput key={inputRenderKey} value={value} interceptorManager={interceptorManager} type={subType} operator={operator} rule={rule} onChange={onInputChange} />
-            <div className={styles.cfPreviewWrap}>
+            <div className={`${styles.cfPreviewWrap} ${stylesBase.mLXxs}`}>
                 <Preview rule={getResult({}) as IConditionalFormatRuleConfig} />
             </div>
             <ConditionalStyleEditor
                 style={rule?.style}
+                className={`${stylesBase.mLXxs}`}
                 onChange={(v) => {
                     styleSet(v);
                     onChange(getResult({ style: v }));

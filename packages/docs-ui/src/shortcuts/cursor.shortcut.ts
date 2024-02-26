@@ -14,16 +14,12 @@
  * limitations under the License.
  */
 
-import type { IContextService } from '@univerjs/core';
 import { Direction, EDITOR_ACTIVATED, FOCUSING_DOC, FOCUSING_UNIVER_EDITOR } from '@univerjs/core';
 import type { IShortcutItem } from '@univerjs/ui';
 import { KeyCode, MetaKeys } from '@univerjs/ui';
 
 import { MoveCursorOperation, MoveSelectionOperation, SelectAllOperation } from '@univerjs/docs';
-
-export function whenDocAndEditorFocused(contextService: IContextService): boolean {
-    return contextService.getContextValue(FOCUSING_DOC) && contextService.getContextValue(FOCUSING_UNIVER_EDITOR);
-}
+import { whenDocAndEditorFocused } from './utils';
 
 export const MoveCursorUpShortcut: IShortcutItem = {
     id: MoveCursorOperation.id,

@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-import type { IRange, Workbook, Worksheet } from '@univerjs/core';
+import type { IMutationInfo, IRange, Workbook, Worksheet } from '@univerjs/core';
 import { createInterceptorKey, Disposable, ICommandService, InterceptorManager, IResourceManagerService, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, Rectangle, toDisposable, Tools } from '@univerjs/core';
-import type { IInsertColMutationParams, IMoveColumnsMutationParams, IMoveRangeMutationParams, IMoveRowsMutationParams, IRemoveRowsMutationParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import { InsertColMutation, InsertRowMutation, MoveColsMutation, MoveRangeMutation, MoveRowsMutation, RemoveColMutation, RemoveRowMutation, SetRangeValuesMutation } from '@univerjs/sheets';
-import { Inject } from '@wendellhu/redi';
+import type { IInsertColMutationParams, IMoveColumnsMutationParams, IMoveRangeMutationParams, IMoveRowsMutationParams, IRemoveRowsMutationParams, IRemoveSheetCommandParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
+import { InsertColMutation, InsertRowMutation, MoveColsMutation, MoveRangeMutation, MoveRowsMutation, RemoveColMutation, RemoveRowMutation, RemoveSheetCommand, SetRangeValuesMutation, SheetInterceptorService } from '@univerjs/sheets';
+import { Inject, Injector } from '@wendellhu/redi';
 import { Subject } from 'rxjs';
 import { filter } from 'rxjs/operators';
+import type { IDeleteConditionalRuleMutationParams } from '../commands/mutations/deleteConditionalRule.mutation';
+import { deleteConditionalRuleMutation, deleteConditionalRuleMutationUndoFactory } from '../commands/mutations/deleteConditionalRule.mutation';
 import { ConditionalFormatRuleModel } from '../models/conditional-format-rule-model';
 import { ConditionalFormatViewModel } from '../models/conditional-format-view-model';
 import { RuleType, SHEET_CONDITION_FORMAT_PLUGIN } from '../base/const';
@@ -39,13 +41,13 @@ interface ICalculationUnit< R = ObjectMatrix<any>> {
     handle(rule: IConditionFormatRule, worksheet: Worksheet): R;
 };
 
-interface ComputeCache { status: ComputeStatus };
+interface IComputeCache { status: ComputeStatus };
 
 const beforeUpdateRuleResult = createInterceptorKey< { subUnitId: string; unitId: string; cfId: string }>('conditional-format-before-update-rule-result');
 @OnLifecycle(LifecycleStages.Rendered, ConditionalFormatService)
 export class ConditionalFormatService extends Disposable {
-    // <unitId,<subUnitId,<cfId,ComputeCache>>>
-    private _ruleCacheMap: Map<string, Map<string, Map<string, ComputeCache>>> = new Map();
+    // <unitId,<subUnitId,<cfId,IComputeCache>>>
+    private _ruleCacheMap: Map<string, Map<string, Map<string, IComputeCache>>> = new Map();
 
     private _ruleComputeStatus$: Subject<{ status: ComputeStatus;result?: ObjectMatrix<any>;unitId: string; subUnitId: string; cfId: string }> = new Subject();
     public ruleComputeStatus$ = this._ruleComputeStatus$.asObservable();
@@ -55,10 +57,11 @@ export class ConditionalFormatService extends Disposable {
     private _calculationUnitMap: Map<IConditionFormatRule['rule']['type'], ICalculationUnit> = new Map();
 
     constructor(@Inject(ConditionalFormatRuleModel) private _conditionalFormatRuleModel: ConditionalFormatRuleModel,
+        @Inject(Injector) private _injector: Injector,
         @Inject(ConditionalFormatViewModel) private _conditionalFormatViewModel: ConditionalFormatViewModel,
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
         @Inject(IResourceManagerService) private _resourceManagerService: IResourceManagerService,
-
+        @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
         @Inject(ICommandService) private _commandService: ICommandService
     ) {
         super();
@@ -66,6 +69,7 @@ export class ConditionalFormatService extends Disposable {
         this._initCacheManager();
         this._initRemoteCalculate();
         this._initSnapshot();
+        this._initSheetChange();
         this._registerCalculationUnit(dataBarCellCalculateUnit);
         this._registerCalculationUnit(colorScaleCellCalculateUnit);
         this._registerCalculationUnit(highlightCellCalculateUnit);
@@ -159,6 +163,44 @@ export class ConditionalFormatService extends Disposable {
         handleWorkbookAdd(workbook);
     }
 
+    private _initSheetChange() {
+        this.disposeWithMe(
+            this._sheetInterceptorService.interceptCommand({
+                getMutations: (commandInfo) => {
+                    if (commandInfo.id === RemoveSheetCommand.id) {
+                        const params = commandInfo.params as IRemoveSheetCommandParams;
+                        const unitId = params.unitId || getUnitId(this._univerInstanceService);
+                        const subUnitId = params.subUnitId || getSubUnitId(this._univerInstanceService);
+                        const ruleList = this._conditionalFormatRuleModel.getSubunitRules(unitId, subUnitId);
+                        if (!ruleList) {
+                            return { redos: [], undos: [] };
+                        }
+
+                        const redos: IMutationInfo[] = [];
+                        const undos: IMutationInfo[] = [];
+
+                        ruleList.forEach((item) => {
+                            const params: IDeleteConditionalRuleMutationParams = {
+                                unitId, subUnitId,
+                                cfId: item.cfId,
+                            };
+                            redos.push({
+                                id: deleteConditionalRuleMutation.id, params,
+                            });
+                            undos.push(...deleteConditionalRuleMutationUndoFactory(this._injector, params));
+                        });
+
+                        return {
+                            redos,
+                            undos,
+                        };
+                    }
+                    return { redos: [], undos: [] };
+                },
+            })
+        );
+    }
+
     private _registerCalculationUnit(unit: ICalculationUnit) {
         this._calculationUnitMap.set(unit.type, unit);
     }
@@ -167,7 +209,7 @@ export class ConditionalFormatService extends Disposable {
         return this._ruleCacheMap.get(unitId)?.get(subUnitId)?.get(cfId);
     }
 
-    private _setComputedCache(unitId: string, subUnitId: string, cfId: string, value: ComputeCache) {
+    private _setComputedCache(unitId: string, subUnitId: string, cfId: string, value: IComputeCache) {
         let unitMap = this._ruleCacheMap.get(unitId);
         if (!unitMap) {
             unitMap = new Map();
@@ -316,7 +358,7 @@ export class ConditionalFormatService extends Disposable {
 
     private _initRemoteCalculate() {
         this.disposeWithMe(this._ruleComputeStatus$.subscribe(({ status, subUnitId, unitId, cfId, result }) => {
-            const cache = this._getComputedCache(unitId, subUnitId, cfId) || {} as ComputeCache;
+            const cache = this._getComputedCache(unitId, subUnitId, cfId) || {} as IComputeCache;
             cache.status = status;
             this._setComputedCache(unitId, subUnitId, cfId, cache);
             if (status === 'end' && result) {
@@ -350,3 +392,6 @@ export class ConditionalFormatService extends Disposable {
         this._ruleComputeStatus$.next({ status: 'end', unitId, subUnitId, cfId: rule.cfId, result });
     }
 }
+
+const getUnitId = (u: IUniverInstanceService) => u.getCurrentUniverSheetInstance().getUnitId();
+const getSubUnitId = (u: IUniverInstanceService) => u.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();

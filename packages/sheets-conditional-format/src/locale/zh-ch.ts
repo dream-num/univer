@@ -22,7 +22,7 @@ export default {
                 openPanel: '查看条件格式',
             },
             panel: {
-                createRule: '新建一个条件格式',
+                createRule: '+ 添加新的规则',
                 range: '应用范围',
                 styleType: '样式类型',
                 submit: '确认',

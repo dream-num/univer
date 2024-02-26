@@ -151,11 +151,21 @@ export class BaseValueObject extends ObjectClassType {
         return new ErrorValueObject(ErrorType.NAME);
     }
 
+    /**
+     * return every value in the array after the callback function, excluding the error value
+     * @param callbackFn
+     * @returns
+     */
     map(callbackFn: callbackMapFnType): BaseValueObject {
         /** abstract */
         return new ErrorValueObject(ErrorType.NAME);
     }
 
+    /**
+     * return every value in the array after the callback function
+     * @param callbackFn
+     * @returns
+     */
     mapValue(callbackFn: callbackMapFnType): BaseValueObject {
         /** abstract */
         return new ErrorValueObject(ErrorType.NAME);

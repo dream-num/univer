@@ -128,7 +128,7 @@ export default {
             },
         ],
         functionParameter: {
-            array: { name: 'Array', detail: 'An array or array formula, or a reference to a range of cells for which you want the number of columns.' },
+            array: { name: 'array', detail: 'An array or array formula, or a reference to a range of cells for which you want the number of columns.' },
         },
     },
     DROP: {
@@ -350,11 +350,11 @@ export default {
             },
         ],
         functionParameter: {
-            reference: { name: 'Reference', detail: 'The reference from which you want to base the offset. Reference must refer to a cell or range of adjacent cells; otherwise, OFFSET returns the #VALUE! error value.' },
-            rows: { name: 'Rows', detail: 'The number of rows, up or down, that you want the upper-left cell to refer to. Using 5 as the rows argument specifies that the upper-left cell in the reference is five rows below reference. Rows can be positive (which means below the starting reference) or negative (which means above the starting reference).' },
-            cols: { name: 'Columns', detail: 'The number of columns, to the left or right, that you want the upper-left cell of the result to refer to. Using 5 as the cols argument specifies that the upper-left cell in the reference is five columns to the right of reference. Cols can be positive (which means to the right of the starting reference) or negative (which means to the left of the starting reference).' },
-            height: { name: 'Height', detail: 'The height, in number of rows, that you want the returned reference to be. Height must be a positive number.' },
-            width: { name: 'Width', detail: 'The width, in number of columns, that you want the returned reference to be. Width must be a positive number.' },
+            reference: { name: 'reference', detail: 'The reference from which you want to base the offset. Reference must refer to a cell or range of adjacent cells; otherwise, OFFSET returns the #VALUE! error value.' },
+            rows: { name: 'rows', detail: 'The number of rows, up or down, that you want the upper-left cell to refer to. Using 5 as the rows argument specifies that the upper-left cell in the reference is five rows below reference. Rows can be positive (which means below the starting reference) or negative (which means above the starting reference).' },
+            cols: { name: 'columns', detail: 'The number of columns, to the left or right, that you want the upper-left cell of the result to refer to. Using 5 as the cols argument specifies that the upper-left cell in the reference is five columns to the right of reference. Cols can be positive (which means to the right of the starting reference) or negative (which means to the left of the starting reference).' },
+            height: { name: 'height', detail: 'The height, in number of rows, that you want the returned reference to be. Height must be a positive number.' },
+            width: { name: 'width', detail: 'The width, in number of columns, that you want the returned reference to be. Width must be a positive number.' },
         },
     },
     ROW: {
@@ -380,7 +380,7 @@ export default {
             },
         ],
         functionParameter: {
-            array: { name: 'Array', detail: 'An array, an array formula, or a reference to a range of cells for which you want the number of rows.' },
+            array: { name: 'array', detail: 'An array, an array formula, or a reference to a range of cells for which you want the number of rows.' },
         },
     },
     RTD: {

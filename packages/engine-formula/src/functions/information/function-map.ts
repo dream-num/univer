@@ -16,7 +16,11 @@
 
 import { FUNCTION_NAMES_INFORMATION } from './function-names';
 import { Isblank } from './isblank';
+import { Iserr } from './iserr';
+import { Iserror } from './iserror';
 
 export const functionInformation = [
     [Isblank, FUNCTION_NAMES_INFORMATION.ISBLANK],
+    [Iserror, FUNCTION_NAMES_INFORMATION.ISERROR],
+    [Iserr, FUNCTION_NAMES_INFORMATION.ISERR],
 ];

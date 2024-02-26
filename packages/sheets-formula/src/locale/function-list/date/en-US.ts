@@ -68,7 +68,7 @@ export default {
             },
         ],
         functionParameter: {
-            serialNumber: { name: 'Serial Number', detail: 'The date of the day you are trying to find. Dates should be entered by using the DATE function, or as results of other formulas or functions. For example, use DATE(2008,5,23) for the 23rd day of May, 2008.' },
+            serialNumber: { name: 'serial_number', detail: 'The date of the day you are trying to find. Dates should be entered by using the DATE function, or as results of other formulas or functions. For example, use DATE(2008,5,23) for the 23rd day of May, 2008.' },
         },
     },
     DAYS: {
@@ -109,8 +109,8 @@ export default {
             },
         ],
         functionParameter: {
-            startDate: { name: 'Start Date', detail: 'A date that represents the start date. Dates should be entered by using the DATE function, or as results of other formulas or functions. For example, use DATE(2008,5,23) for the 23rd day of May, 2008. Problems can occur if dates are entered as text.' },
-            months: { name: 'Months', detail: 'The number of months before or after start_date. A positive value for months yields a future date; a negative value yields a past date.' },
+            startDate: { name: 'start_date', detail: 'A date that represents the start date. Dates should be entered by using the DATE function, or as results of other formulas or functions. For example, use DATE(2008,5,23) for the 23rd day of May, 2008. Problems can occur if dates are entered as text.' },
+            months: { name: 'months', detail: 'The number of months before or after start_date. A positive value for months yields a future date; a negative value yields a past date.' },
         },
     },
     EOMONTH: {
@@ -179,7 +179,7 @@ export default {
             },
         ],
         functionParameter: {
-            serialNumber: { name: 'Serial Number', detail: 'Required. The date of the month you are trying to find. Dates should be entered by using the DATE function, or as results of other formulas or functions. For example, use DATE(2008,5,23) for the 23rd day of May, 2008.' },
+            serialNumber: { name: 'serial_number', detail: 'Required. The date of the month you are trying to find. Dates should be entered by using the DATE function, or as results of other formulas or functions. For example, use DATE(2008,5,23) for the 23rd day of May, 2008.' },
         },
     },
     NETWORKDAYS: {
@@ -344,7 +344,7 @@ export default {
             },
         ],
         functionParameter: {
-            serialNumber: { name: 'Serial Number', detail: 'The date of the year you want to find. Dates should be entered by using the DATE function, or as results of other formulas or functions. For example, use DATE(2008,5,23) for the 23rd day of May, 2008. Problems can occur if dates are entered as text.' },
+            serialNumber: { name: 'serial_number', detail: 'The date of the year you want to find. Dates should be entered by using the DATE function, or as results of other formulas or functions. For example, use DATE(2008,5,23) for the 23rd day of May, 2008. Problems can occur if dates are entered as text.' },
         },
     },
     YEARFRAC: {

@@ -940,6 +940,8 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         this.deactivate();
 
         this._interactTextRange(activeRangeInstance);
+
+        this._scene?.getEngine()?.setRemainCapture();
     }
 
     private _attachScrollEvent(viewport: Nullable<Viewport>) {

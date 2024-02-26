@@ -1201,6 +1201,7 @@ export class PromptController extends Disposable {
     private _syncToEditor(
         sequenceNodes: Array<string | ISequenceNode>,
         textSelectionOffset: number,
+        editorUnitId?: string,
         canUndo: boolean = true
     ) {
         const dataStream = generateStringWithSequence(sequenceNodes);
@@ -1219,7 +1220,9 @@ export class PromptController extends Disposable {
 
         this._currentInsertRefStringIndex = textSelectionOffset;
 
-        const editorUnitId = this._currentUniverService.getCurrentUniverDocInstance().getUnitId();
+        if (editorUnitId == null) {
+            editorUnitId = this._currentUniverService.getCurrentUniverDocInstance().getUnitId();
+        }
 
         this._fitEditorSize();
 
@@ -1769,7 +1772,9 @@ export class PromptController extends Disposable {
     private _inputFormulaListener() {
         this.disposeWithMe(
             toDisposable(
-                this._editorService.inputFormula$.subscribe((formulaString) => {
+                this._editorService.inputFormula$.subscribe((param) => {
+                    const { formulaString, editorUnitId } = param;
+
                     if (formulaString.substring(0, 1) !== compareToken.EQUALS) {
                         return;
                     }
@@ -1786,7 +1791,7 @@ export class PromptController extends Disposable {
 
                     this._formulaPromptService.setSequenceNodes(lastSequenceNodes);
 
-                    this._syncToEditor(lastSequenceNodes, formulaString.length - 1);
+                    this._syncToEditor(lastSequenceNodes, formulaString.length - 1, editorUnitId);
                 })
             )
         );

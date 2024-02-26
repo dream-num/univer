@@ -22,13 +22,12 @@ import {
     OnLifecycle,
     RxDisposable,
 } from '@univerjs/core';
-import { DOCS_COMPONENT_DEFAULT_Z_INDEX, DOCS_COMPONENT_HEADER_LAYER_INDEX, DOCS_COMPONENT_MAIN_LAYER_INDEX, DOCS_VIEW_KEY, DocViewModelManagerService, VIEWPORT_KEY } from '@univerjs/docs';
+import { DOCS_COMPONENT_DEFAULT_Z_INDEX, DOCS_COMPONENT_HEADER_LAYER_INDEX, DOCS_COMPONENT_MAIN_LAYER_INDEX, DOCS_VIEW_KEY, DocSkeletonManagerService, DocViewModelManagerService, VIEWPORT_KEY } from '@univerjs/docs';
 import type { IRender, IWheelEvent, RenderManagerService, Scene } from '@univerjs/engine-render';
 import { Documents, EVENT_TYPE, IRenderManagerService, Layer, ScrollBar, Viewport } from '@univerjs/engine-render';
-import { Inject } from '@wendellhu/redi';
 import { BehaviorSubject, takeUntil } from 'rxjs';
 
-@OnLifecycle(LifecycleStages.Ready, DocCanvasView)
+@OnLifecycle(LifecycleStages.Starting, DocCanvasView)
 export class DocCanvasView extends RxDisposable {
     private _scene!: Scene;
 
@@ -43,39 +42,42 @@ export class DocCanvasView extends RxDisposable {
     constructor(
         @IRenderManagerService private readonly _renderManagerService: RenderManagerService,
         @IConfigService private readonly _configService: IConfigService,
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
-        @Inject(DocViewModelManagerService) private readonly _docViewModelManagerService: DocViewModelManagerService
+        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService
     ) {
         super();
         this._initialize();
     }
 
     private _initialize() {
-        this._init();
+        this._renderManagerService.createRender$.pipe(takeUntil(this.dispose$)).subscribe((unitId) => {
+            this._create(unitId);
+        });
+
+        this._currentUniverService.currentDoc$.pipe(takeUntil(this.dispose$)).subscribe((documentModel) => {
+            this._create(documentModel?.getUnitId());
+        });
+
+        this._currentUniverService.getAllUniverDocsInstance().forEach((documentModel) => {
+            this._create(documentModel.getUnitId());
+        });
     }
 
     override dispose(): void {
         this._fps$.complete();
     }
 
-    private _init() {
-        this._currentUniverService.currentDoc$.pipe(takeUntil(this.dispose$)).subscribe((documentModel) => {
-            this._create(documentModel);
-        });
-
-        this._currentUniverService.getAllUniverDocsInstance().forEach((documentModel) => {
-            this._create(documentModel);
-        });
-    }
-
-    private _create(documentModel: Nullable<DocumentDataModel>) {
-        if (documentModel == null) {
+    private _create(unitId: Nullable<string>) {
+        if (unitId == null) {
             return;
         }
 
-        this._currentDocumentModel = documentModel;
+        const model = this._currentUniverService.getUniverDocInstance(unitId);
 
-        const unitId = documentModel.getUnitId();
+        if (model == null) {
+            return;
+        }
+
+        this._currentDocumentModel = model;
 
         if (!this._loadedMap.has(unitId)) {
             this._addNewRender();

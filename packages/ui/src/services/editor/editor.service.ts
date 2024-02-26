@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IDocumentData, IDocumentStyle, IPosition, Nullable } from '@univerjs/core';
-import { DEFAULT_EMPTY_DOCUMENT_VALUE, Disposable, EDITOR_ACTIVATED, FOCUSING_DOC, FOCUSING_EDITOR_BUT_HIDDEN, FOCUSING_EDITOR_INPUT_FORMULA, FOCUSING_FORMULA_EDITOR, FOCUSING_SHEET, HorizontalAlign, IContextService, IUniverInstanceService, Tools, VerticalAlign } from '@univerjs/core';
+import type { DocumentDataModel, IDocumentBody, IDocumentData, IDocumentStyle, IPosition, Nullable } from '@univerjs/core';
+import { DEFAULT_EMPTY_DOCUMENT_VALUE, Disposable, HorizontalAlign, IUniverInstanceService, VerticalAlign } from '@univerjs/core';
 import type { IDisposable } from '@wendellhu/redi';
 import { createIdentifier } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
@@ -47,6 +47,16 @@ export interface IEditorSetParam extends IEditorConfigParam, IEditorStateParam {
     editorDom: HTMLDivElement;
 }
 
+export interface IEditorSetValueParam {
+    editorUnitId: string;
+    body: IDocumentBody;
+}
+
+export interface IEditorInputFormulaParam {
+    editorUnitId: string;
+    formulaString: string;
+}
+
 export interface IEditorService {
     getEditor(id?: string): Readonly<Nullable<IEditorSetParam>>;
 
@@ -58,7 +68,7 @@ export interface IEditorService {
 
     isVisible(id: string): Nullable<boolean>;
 
-    inputFormula$: Observable<string>;
+    inputFormula$: Observable<IEditorInputFormulaParam>;
 
     setFormula(formulaString: string): void;
 
@@ -83,6 +93,14 @@ export interface IEditorService {
     changeEditor$: Observable<unknown>;
 
     changeEditor(): void;
+
+    setValue$: Observable<IEditorSetValueParam>;
+
+    valueChange$: Observable<IEditorSetParam>;
+
+    setValue(val: string, editorUnitId?: string): void;
+
+    setRichValue(body: IDocumentBody, editorUnitId?: string): void;
 }
 
 export class EditorService extends Disposable implements IEditorService, IDisposable {
@@ -96,7 +114,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
 
     private _currentSheetSubUnitId: Nullable<string>;
 
-    private readonly _inputFormula$ = new Subject<string>();
+    private readonly _inputFormula$ = new Subject<IEditorInputFormulaParam>();
 
     readonly inputFormula$ = this._inputFormula$.asObservable();
 
@@ -108,7 +126,11 @@ export class EditorService extends Disposable implements IEditorService, IDispos
 
     readonly changeEditor$ = this._changeEditor$.asObservable();
 
-    private readonly _valueChange$ = new Subject<string>();
+    private readonly _setValue$ = new Subject<IEditorSetValueParam>();
+
+    readonly setValue$ = this._setValue$.asObservable();
+
+    private readonly _valueChange$ = new Subject<IEditorSetParam>();
 
     readonly valueChange$ = this._valueChange$.asObservable();
 
@@ -138,24 +160,49 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         this._changeEditor$.next(null);
     }
 
-    setFormula(formulaString: string) {
-        this._inputFormula$.next(formulaString);
+    setFormula(formulaString: string, editorUnitId?: string) {
+        if (editorUnitId == null) {
+            editorUnitId = this._getCurrentEditorUnitId();
+        }
+        this._inputFormula$.next({ formulaString, editorUnitId });
     }
 
-    setValue() {
+    setValue(val: string, editorUnitId?: string) {
+        if (editorUnitId == null) {
+            editorUnitId = this._getCurrentEditorUnitId();
+        }
 
+        if (val.substring(0, 1) === '=') {
+            this.setFormula(val, editorUnitId);
+        } else {
+            this._setValue$.next({ body: {
+                dataStream: val,
+            }, editorUnitId });
+        }
+
+        this._refreshValueChange(editorUnitId);
     }
 
-    getValue() {
+    getValue(id?: string) {
+        const editor = this.getEditor(id);
 
+        return editor?.documentDataModel.getBody()?.dataStream || '';
     }
 
-    setRichValue() {
+    setRichValue(body: IDocumentBody, editorUnitId?: string) {
+        if (editorUnitId == null) {
+            editorUnitId = this._getCurrentEditorUnitId();
+        }
 
+        this._setValue$.next({ body, editorUnitId });
+
+        this._refreshValueChange(editorUnitId);
     }
 
-    getRichValue() {
+    getRichValue(id?: string) {
+        const editor = this.getEditor(id);
 
+        return editor?.documentDataModel.getBody();
     }
 
     dispose(): void {
@@ -163,7 +210,10 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         this._editors.clear();
     }
 
-    getEditor(id: string): Readonly<Nullable<IEditorSetParam>> {
+    getEditor(id?: string): Readonly<Nullable<IEditorSetParam>> {
+        if (id == null) {
+            id = this._getCurrentEditorUnitId();
+        }
         return this._editors.get(id);
     }
 
@@ -219,10 +269,11 @@ export class EditorService extends Disposable implements IEditorService, IDispos
 
         const documentDataModel = this._currentUniverService.createDoc(initialSnapshot || this._getBlank(editorUnitId));
 
-        const render = this._renderManagerService.getRenderById(editorUnitId);
+        let render = this._renderManagerService.getRenderById(editorUnitId);
 
         if (render == null) {
-            throw new Error('An error occurred while creating the editor render.');
+            this._renderManagerService.create(editorUnitId);
+            render = this._renderManagerService.getRenderById(editorUnitId)!;
         }
 
         render.engine.setContainer(container);
@@ -241,6 +292,20 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         this._editors.delete(editorUnitId);
 
         this._currentUniverService.disposeDocument(editorUnitId);
+    }
+
+    private _refreshValueChange(editorId: string) {
+        const editor = this.getEditor(editorId);
+        if (editor == null) {
+            return;
+        }
+
+        this._valueChange$.next(editor);
+    }
+
+    private _getCurrentEditorUnitId() {
+        const current = this._currentUniverService.getCurrentUniverDocInstance();
+        return current.getUnitId();
     }
 
     private _refresh(param: IEditorStateParam): void {

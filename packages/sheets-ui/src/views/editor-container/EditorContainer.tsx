@@ -17,7 +17,7 @@
 import type { IDocumentData } from '@univerjs/core';
 import { DEFAULT_EMPTY_DOCUMENT_VALUE, DOCS_NORMAL_EDITOR_UNIT_ID_KEY } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { IEditorService, TextEditor } from '@univerjs/ui';
 import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';

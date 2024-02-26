@@ -31,6 +31,7 @@ export interface ITextEditorProps {
     cancelDefaultResizeListener?: boolean;
     isSheetEditor?: boolean;
     canvasStyle?: IEditorCanvasStyle;
+    value?: string;
 }
 
 /**
@@ -39,7 +40,7 @@ export interface ITextEditorProps {
  * @returns
  */
 export function TextEditor(props: ITextEditorProps & MyComponentProps): JSX.Element | null {
-    const { id, snapshot, resizeCallBack, cancelDefaultResizeListener, isSheetEditor = false, canvasStyle = {} } = props;
+    const { id, snapshot, resizeCallBack, cancelDefaultResizeListener, isSheetEditor = false, canvasStyle = {}, value } = props;
 
     const editorService = useDependency(IEditorService);
 
@@ -68,6 +69,13 @@ export function TextEditor(props: ITextEditorProps & MyComponentProps): JSX.Elem
             resizeObserver.unobserve(editor);
         };
     }, []);
+
+    useEffect(() => {
+        if (value == null) {
+            return;
+        }
+        editorService.setValue(value, id);
+    }, [value]);
 
     const propsNew = Object.fromEntries(
         Object.entries(props).filter(([key]) => !excludeProps.includes(key))

@@ -44,7 +44,6 @@ export const SidebarOperation: ICommand = {
                         editorService.setOperationSheetUnitId(null);
                         editorService.setOperationSheetUnitId(null);
                         editorService.changeEditor();
-                        sidebarService.close();
                     },
                 });
                 break;

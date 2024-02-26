@@ -21,7 +21,6 @@ import { IEditorService, ISidebarService } from '@univerjs/ui';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useState } from 'react';
 
-import { IFormulaPromptService } from '../../services/prompt.service';
 import styles from './index.module.less';
 import { InputParams } from './input-params/InputParams';
 import { SelectFunction } from './select-function/SelectFunction';

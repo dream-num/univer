@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, Nullable } from '@univerjs/core';
+import type { ICommandInfo, IDocumentBody, Nullable } from '@univerjs/core';
 import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
-import { IRenderManagerService, ScrollBar } from '@univerjs/engine-render';
+import { ScrollBar } from '@univerjs/engine-render';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import { DocSkeletonManagerService, RichTextEditingMutation, VIEWPORT_KEY } from '@univerjs/docs';
+import { CoverContentCommand, DocSkeletonManagerService, ReplaceContentCommand, RichTextEditingMutation, SelectAllOperation, TextSelectionManagerService, VIEWPORT_KEY } from '@univerjs/docs';
 import { IEditorService, SetEditorResizeOperation } from '@univerjs/ui';
 
 @OnLifecycle(LifecycleStages.Rendered, DocEditorBridgeController)
@@ -31,7 +31,8 @@ export class DocEditorBridgeController extends Disposable {
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @IEditorService private readonly _editorService: IEditorService,
-        @ICommandService private readonly _commandService: ICommandService
+        @ICommandService private readonly _commandService: ICommandService,
+        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService
     ) {
         super();
         this._initialize();
@@ -52,6 +53,8 @@ export class DocEditorBridgeController extends Disposable {
         });
 
         this._commandExecutedListener();
+
+        this._initialSetValue();
     }
 
     private _resize(unitId: Nullable<string>) {
@@ -125,6 +128,16 @@ export class DocEditorBridgeController extends Disposable {
                 viewportMain?.getScrollBar()?.dispose();
             }
         }
+    }
+
+    private _initialSetValue() {
+        this._editorService.setValue$.subscribe((param) => {
+            this._commandService.executeCommand(CoverContentCommand.id, {
+                unitId: param.editorUnitId,
+                body: param.body,
+                segmentId: null,
+            });
+        });
     }
 
     /**

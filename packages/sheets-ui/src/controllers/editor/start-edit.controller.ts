@@ -55,7 +55,6 @@ import {
 } from '@univerjs/engine-render';
 import { IEditorService, KeyCode, SetEditorResizeOperation } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
-import type { Subscription } from 'rxjs';
 
 import { getEditorObject } from '../../basics/editor/get-editor-object';
 import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';

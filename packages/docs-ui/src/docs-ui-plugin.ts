@@ -103,9 +103,6 @@ export class UniverDocsUIPlugin extends Plugin {
 
     private _initDependencies(injector: Injector) {
         const dependencies: Dependency[] = [
-            // Render views
-            [DocCanvasView],
-
             // Controller
             [DocUIController],
             [DocClipboardController],
@@ -127,6 +124,9 @@ export class UniverDocsUIPlugin extends Plugin {
                     useClass: DocClipboardService,
                 },
             ],
+
+            // Render views
+            [DocCanvasView],
         ];
 
         dependencies.forEach((d) => {

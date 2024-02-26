@@ -22,7 +22,6 @@ import {
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
-    toDisposable,
 } from '@univerjs/core';
 import type { Rect, Spreadsheet, SpreadsheetColumnHeader, SpreadsheetRowHeader } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';

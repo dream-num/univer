@@ -106,9 +106,8 @@ export class DesktopUIController extends Disposable implements IDesktopUIControl
     }
 
     private _initializeEngine(element: HTMLElement) {
-        const unitId = this._currentUniverService.getCurrentUniverSheetInstance().getUnitId();
-        const engine = this._renderManagerService.getRenderById(unitId)!.engine;
-        engine.setContainer(element);
+        const engine = this._renderManagerService.getFirst()?.engine;
+        engine?.setContainer(element);
     }
 
     registerComponent(part: DesktopUIPart, component: () => React.ComponentType): IDisposable {

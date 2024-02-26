@@ -130,7 +130,7 @@ export class ZoomController extends Disposable {
     private _skeletonListener() {
         this.disposeWithMe(
             toDisposable(
-                this._docSkeletonManagerService.currentSkeletonBefore$.subscribe((param) => {
+                this._docSkeletonManagerService.currentSkeleton$.subscribe((param) => {
                     if (param == null) {
                         return;
                     }

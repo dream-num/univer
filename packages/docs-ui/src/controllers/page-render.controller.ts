@@ -23,7 +23,6 @@ import {
 import type { Documents, IPageRenderConfig } from '@univerjs/engine-render';
 import { IRenderManagerService, Rect } from '@univerjs/engine-render';
 import { IEditorService } from '@univerjs/ui';
-import { Inject } from '@wendellhu/redi';
 
 const PAGE_STROKE_COLOR = 'rgba(198, 198, 198, 1)';
 
@@ -33,7 +32,8 @@ const PAGE_FILL_COLOR = 'rgba(255, 255, 255, 1)';
 export class PageRenderController extends Disposable {
     constructor(
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @IEditorService private readonly _editorService: IEditorService
+        @IEditorService private readonly _editorService: IEditorService,
+        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService
     ) {
         super();
 
@@ -53,6 +53,10 @@ export class PageRenderController extends Disposable {
             }
 
             const currentRender = this._renderManagerService.getRenderById(unitId);
+
+            if (this._editorService.isEditor(unitId) || this._currentUniverService.getUniverDocInstance(unitId) == null) {
+                return;
+            }
 
             if (currentRender == null) {
                 return;

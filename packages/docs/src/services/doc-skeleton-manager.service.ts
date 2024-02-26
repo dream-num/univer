@@ -19,7 +19,7 @@ import { LocaleService, RxDisposable } from '@univerjs/core';
 import type { DocumentViewModel } from '@univerjs/engine-render';
 import { DocumentSkeleton } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
-import { BehaviorSubject, Subject, takeUntil } from 'rxjs';
+import { BehaviorSubject, takeUntil } from 'rxjs';
 
 import type { IDocumentViewModelManagerParam } from './doc-view-model-manager.service';
 import { DocViewModelManagerService } from './doc-view-model-manager.service';
@@ -38,11 +38,11 @@ export class DocSkeletonManagerService extends RxDisposable {
 
     private _docSkeletonMap: Map<string, IDocSkeletonManagerParam> = new Map();
 
-    private readonly _currentSkeleton$ = new Subject<Nullable<IDocSkeletonManagerParam>>();
+    private readonly _currentSkeleton$ = new BehaviorSubject<Nullable<IDocSkeletonManagerParam>>(null);
     readonly currentSkeleton$ = this._currentSkeleton$.asObservable();
 
     // CurrentSkeletonBefore for pre-triggered logic during registration
-    private readonly _currentSkeletonBefore$ = new Subject<Nullable<IDocSkeletonManagerParam>>();
+    private readonly _currentSkeletonBefore$ = new BehaviorSubject<Nullable<IDocSkeletonManagerParam>>(null);
 
     readonly currentSkeletonBefore$ = this._currentSkeletonBefore$.asObservable();
 

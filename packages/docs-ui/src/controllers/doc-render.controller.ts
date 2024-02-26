@@ -17,7 +17,6 @@
 import type { ICommandInfo, Nullable } from '@univerjs/core';
 import {
     ICommandService,
-    IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
     RxDisposable } from '@univerjs/core';
@@ -51,20 +50,6 @@ export class DocRenderController extends RxDisposable {
         this._docSkeletonManagerService.currentSkeletonBefore$.pipe(takeUntil(this.dispose$)).subscribe((param) => {
             this._create(param);
         });
-
-        this._docSkeletonManagerService.getAllSkeleton().forEach((param) => {
-            if (param == null) {
-                return;
-            }
-
-            const { unitId } = param;
-
-            if (this._docRenderMap.has(unitId)) {
-                return;
-            }
-
-            this._create(param);
-        });
     }
 
     private _create(param: Nullable<IDocSkeletonManagerParam>) {
@@ -74,12 +59,11 @@ export class DocRenderController extends RxDisposable {
 
         const { skeleton: documentSkeleton, unitId } = param;
 
-        this._docRenderMap.add(unitId);
-
-        const currentRender = this._renderManagerService.getRenderById(unitId);
+        let currentRender = this._renderManagerService.getRenderById(unitId);
 
         if (currentRender == null) {
-            return;
+            this._renderManagerService.create(unitId);
+            currentRender = this._renderManagerService.getRenderById(unitId)!;
         }
 
         const { mainComponent } = currentRender;

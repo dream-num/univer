@@ -29,6 +29,7 @@ import { SceneViewer } from './scene-viewer';
 
 export interface IRenderManagerService {
     currentRender$: Observable<Nullable<string>>;
+    createRender$: Observable<Nullable<string>>;
     dispose(): void;
     // createRenderWithNewEngine(unitId: string): IRenderManagerService;
     createRenderWithParent(unitId: string, parentUnitId: string): IRender;
@@ -39,6 +40,9 @@ export interface IRenderManagerService {
     getRenderById(unitId: string): Nullable<IRender>;
     getRenderAll(): Map<string, IRender>;
     defaultEngine: Engine;
+    create(unitId: Nullable<string>): void;
+    getCurrent(): Nullable<IRender>;
+    getFirst(): Nullable<IRender>;
 }
 
 export type RenderComponentType = SheetComponent | DocComponent | Slide | BaseObject;
@@ -66,6 +70,10 @@ export class RenderManagerService implements IRenderManagerService {
     private readonly _currentRender$ = new BehaviorSubject<Nullable<string>>(this._currentUnitId);
 
     readonly currentRender$ = this._currentRender$.asObservable();
+
+    private readonly _createRender$ = new BehaviorSubject<Nullable<string>>(this._currentUnitId);
+
+    readonly createRender$ = this._createRender$.asObservable();
 
     get defaultEngine() {
         if (!this._defaultEngine) {
@@ -102,6 +110,10 @@ export class RenderManagerService implements IRenderManagerService {
         scene.addObject(sv);
 
         return current;
+    }
+
+    create(unitId: Nullable<string>) {
+        this._createRender$.next(unitId);
     }
 
     createRender(unitId: string): IRender {
@@ -160,6 +172,14 @@ export class RenderManagerService implements IRenderManagerService {
         this._currentUnitId = unitId;
 
         this._currentRender$.next(unitId);
+    }
+
+    getCurrent() {
+        return this._renderMap.get(this._currentUnitId);
+    }
+
+    getFirst() {
+        return [...this.getRenderAll().values()][0];
     }
 
     getRenderById(unitId: string): Nullable<IRender> {

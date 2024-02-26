@@ -244,6 +244,10 @@ export class LexerTreeBuilder extends Disposable {
         let parent = lexerNode.getParent();
         let bracketCount = 0;
 
+        if (current[1] === matchToken.OPEN_BRACKET) {
+            bracketCount++;
+        }
+
         /**
          * Perform an upward search on the syntax tree to see how many layers the function is nested.
          * For each layer passed, subtract the estimated number of right brackets,
@@ -584,7 +588,7 @@ export class LexerTreeBuilder extends Disposable {
                             break;
                         }
 
-                        if (charPriority > lastSymbolPriority) {
+                        if (charPriority >= lastSymbolPriority) {
                             baseStack.push(symbolStack.pop()!);
                         } else {
                             break;

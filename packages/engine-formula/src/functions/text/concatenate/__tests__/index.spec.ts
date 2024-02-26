@@ -109,7 +109,7 @@ describe('Test concatenate function', () => {
             const text1 = new ArrayValueObject({
                 calculateValueList: transformToValueObject([
                     ['a', 'd'],
-                    ['b', 'e'],
+                    [0, null],
                 ]),
                 rowCount: 2,
                 columnCount: 2,
@@ -121,7 +121,7 @@ describe('Test concatenate function', () => {
             const text2 = new ArrayValueObject({
                 calculateValueList: transformToValueObject([
                     [1, 2, 3],
-                    [2, 3, 4],
+                    [0, null, 4],
                     [3, 4, 5],
                 ]),
                 rowCount: 3,
@@ -132,7 +132,7 @@ describe('Test concatenate function', () => {
                 column: 0,
             });
             const result = textFunction.calculate(text1, text2);
-            expect(transformToValue(result.getArrayValue())).toStrictEqual([['a1', 'd2', '#N/A'], ['b2', 'e3', '#N/A'], ['#N/A', '#N/A', '#N/A']]);
+            expect(transformToValue(result.getArrayValue())).toStrictEqual([['a1', 'd2', '#N/A'], ['00', '', '#N/A'], ['#N/A', '#N/A', '#N/A']]);
         });
     });
 });

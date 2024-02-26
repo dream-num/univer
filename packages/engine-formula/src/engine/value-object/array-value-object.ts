@@ -657,10 +657,10 @@ export class ArrayValueObject extends BaseValueObject {
             return this._binarySearch(valueObject, stringArray, stringPosition, searchType);
         }
 
-        let result = this._binarySearch(valueObject, numberArray, numberPosition, searchType);
-        if (result == null) {
-            result = this._binarySearch(valueObject, stringArray, stringPosition, searchType);
-        }
+        const result = this._binarySearch(valueObject, numberArray, numberPosition, searchType);
+        // if (result == null) {
+        //     result = this._binarySearch(valueObject, stringArray, stringPosition, searchType);
+        // }
         return result;
 
         // const stringMatrix = stringArray.getArrayValue();

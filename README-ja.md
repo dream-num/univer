@@ -41,14 +41,14 @@ Univer は、スプレッドシート、ドキュメント、スライドを含�
 
 Univer の機能のハイライト:
 
--   📈 Univer はスプレッドシートに対応しています。今後は文書やスライドにも対応する予定です。
--   🌌 拡張性の高いアーキテクチャ設計。
-    -   🔌 プラグインアーキテクチャにより、ドキュメントの機能をオンデマンドで組み合わせることができ、サードパーティのプラグインをサポートし、カスタマイズ開発を容易にします。
-    -   💄 開発者が一貫したユーザー体験を提供できるよう、コンポーネント・ライブラリとアイコンを提供する。
--   ⚡ ハイパフォーマンス。
-    -   ✏️ Canvas をベースとした、統一された効率的なレンダリングエンジンと数式エンジン。
-    -   🧮 ハイパフォーマンスフォーミュラエンジン、Web Worker をサポート。
--   🌍 国際化サポート。
+- 📈 Univer はスプレッドシートに対応しています。今後は文書やスライドにも対応する予定です。
+- 🌌 拡張性の高いアーキテクチャ設計。
+  - 🔌 プラグインアーキテクチャにより、ドキュメントの機能をオンデマンドで組み合わせることができ、サードパーティのプラグインをサポートし、カスタマイズ開発を容易にします。
+  - 💄 開発者が一貫したユーザー体験を提供できるよう、コンポーネント・ライブラリとアイコンを提供する。
+- ⚡ ハイパフォーマンス。
+  - ✏️ Canvas をベースとした、統一された効率的なレンダリングエンジンと数式エンジン。
+  - 🧮 ハイパフォーマンスフォーミュラエンジン、Web Worker をサポート。
+- 🌍 国際化サポート。
 
 ## 使用方法
 
@@ -86,19 +86,41 @@ Univer を npm パッケージとしてインポートすることをお勧め�
 
 Univer にコードをコントリビュートしたい方は、コントリビュートガイドもご参照ください。開発環境のセットアップからプルリクエストの提出までの手順を説明しています。
 
+## サポート
+
+Univer プロジェクトの成長と開発は、バッカーやスポンサーのサポートに依存しています。プロジェクトをサポートしていただける方は、スポンサーになることを検討していただければ幸いです。[Open Collective](https://opencollective.com/univer) からスポンサーになることができます。
+
+スポンサーの皆様、ありがとうございます。スペースの制限のため、一部のスポンサーのみをここに掲載しています。ランキングは特にありません。
+
+<a href="https://opencollective.com/univer/sponsor/0/website" target="_blank"><img src="https://opencollective.com/univer/sponsor/0/avatar.svg"></a>
+<a href="https://opencollective.com/univer/sponsor/1/website" target="_blank"><img src="https://opencollective.com/univer/sponsor/1/avatar.svg"></a>
+<a href="https://opencollective.com/univer/sponsor/2/website" target="_blank"><img src="https://opencollective.com/univer/sponsor/2/avatar.svg"></a>
+<a href="https://opencollective.com/univer/sponsor/3/website" target="_blank"><img src="https://opencollective.com/univer/sponsor/3/avatar.svg"></a>
+<a href="https://opencollective.com/univer/sponsor/4/website" target="_blank"><img src="https://opencollective.com/univer/sponsor/4/avatar.svg"></a>
+<a href="https://opencollective.com/univer/sponsor/5/website" target="_blank"><img src="https://opencollective.com/univer/sponsor/5/avatar.svg"></a>
+<a href="https://opencollective.com/univer/sponsor/6/website" target="_blank"><img src="https://opencollective.com/univer/sponsor/6/avatar.svg"></a>
+
+<a href="https://opencollective.com/univer/backer/0/website" target="_blank"><img src="https://opencollective.com/univer/backer/0/avatar.svg"></a>
+<a href="https://opencollective.com/univer/backer/1/website" target="_blank"><img src="https://opencollective.com/univer/backer/1/avatar.svg"></a>
+<a href="https://opencollective.com/univer/backer/2/website" target="_blank"><img src="https://opencollective.com/univer/backer/2/avatar.svg"></a>
+<a href="https://opencollective.com/univer/backer/3/website" target="_blank"><img src="https://opencollective.com/univer/backer/3/avatar.svg"></a>
+<a href="https://opencollective.com/univer/backer/4/website" target="_blank"><img src="https://opencollective.com/univer/backer/4/avatar.svg"></a>
+<a href="https://opencollective.com/univer/backer/5/website" target="_blank"><img src="https://opencollective.com/univer/backer/5/avatar.svg"></a>
+<a href="https://opencollective.com/univer/backer/6/website" target="_blank"><img src="https://opencollective.com/univer/backer/6/avatar.svg"></a>
+
 ## Stargazers
 
 [![Stargazers repo roster for @dream-num/univer](https://bytecrank.com/nastyox/reporoster/php/stargazersSVG.php?user=dream-num&repo=univer)](https://github.com/dream-num/univer/stargazers)
 
 ## リンク
 
--   [ドキュメント](https://univer.ai/ja-jp/guides/introduction/)
--   [Online Playground](https://univer.ai/playground/)
--   [公式 Website](https://univer.ai)
+- [ドキュメント](https://univer.ai/ja-jp/guides/introduction/)
+- [Online Playground](https://univer.ai/playground/)
+- [公式 Website](https://univer.ai)
 
 ### コミュニティ
 
--   [Discord コミュニティ](https://discord.gg/z3NKNT6D2f)
+- [Discord コミュニティ](https://discord.gg/z3NKNT6D2f)
 
 ## ライセンス
 

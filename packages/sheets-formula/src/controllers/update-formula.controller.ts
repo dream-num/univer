@@ -50,6 +50,7 @@ import {
     serializeRangeToRefString,
     SetArrayFormulaDataMutation,
     SetFormulaDataMutation,
+    SetNumfmtFormulaDataMutation,
 } from '@univerjs/engine-formula';
 import type {
     IDeleteRangeMoveLeftCommandParams,
@@ -253,6 +254,7 @@ export class UpdateFormulaController extends Disposable {
         this._formulaDataModel.updateFormulaData(unitId, sheetId, cellValue);
         this._formulaDataModel.updateArrayFormulaCellData(unitId, sheetId, cellValue);
         this._formulaDataModel.updateArrayFormulaRange(unitId, sheetId, cellValue);
+        this._formulaDataModel.updateNumfmtData(unitId, sheetId, cellValue);
 
         this._commandService.executeCommand(
             SetFormulaDataMutation.id,
@@ -273,6 +275,16 @@ export class UpdateFormulaController extends Disposable {
             {
                 onlyLocal: true,
                 remove: true, // remove array formula range shape
+            }
+        );
+
+        this._commandService.executeCommand(
+            SetNumfmtFormulaDataMutation.id,
+            {
+                numfmtItemMap: this._formulaDataModel.getNumfmtItemMap(),
+            },
+            {
+                onlyLocal: true,
             }
         );
     }
@@ -378,6 +390,7 @@ export class UpdateFormulaController extends Disposable {
         if (result) {
             const { unitSheetNameMap } = this._formulaDataModel.getCalculateData();
             let oldFormulaData = this._formulaDataModel.getFormulaData();
+            const oldNumfmtItemMap = this._formulaDataModel.getNumfmtItemMap();
 
             // change formula reference
             const { newFormulaData: formulaData, refRanges } = this._getFormulaReferenceMoveInfo(
@@ -436,6 +449,12 @@ export class UpdateFormulaController extends Disposable {
                 formulaData: this._formulaDataModel.getFormulaData(),
             });
 
+            // offset numfmtItemMap
+            const offsetNumfmtItemMap = offsetFormula(oldNumfmtItemMap, command, unitId, sheetId, selections);
+            this._commandService.executeCommand(SetNumfmtFormulaDataMutation.id, {
+                numfmtItemMap: offsetNumfmtItemMap,
+            });
+
             return this._getUpdateFormulaMutations(oldFormulaData, offsetFormulaData);
         }
 
@@ -468,8 +487,8 @@ export class UpdateFormulaController extends Disposable {
         if (!params) return null;
 
         const {
-            fromRange: { startRow: fromRow },
-            toRange: { startRow: toRow },
+            fromRange: { startRow: fromStartRow, endRow: fromEndRow },
+            toRange: { startRow: toStartRow, endRow: toEndRow },
         } = params;
 
         const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
@@ -478,16 +497,16 @@ export class UpdateFormulaController extends Disposable {
         const sheetId = worksheet.getSheetId();
 
         const from = {
-            startRow: fromRow,
+            startRow: fromStartRow,
             startColumn: 0,
-            endRow: fromRow,
+            endRow: fromEndRow,
             endColumn: worksheet.getColumnCount() - 1,
             rangeType: RANGE_TYPE.ROW,
         };
         const to = {
-            startRow: toRow,
+            startRow: toStartRow,
             startColumn: 0,
-            endRow: toRow,
+            endRow: toEndRow,
             endColumn: worksheet.getColumnCount() - 1,
             rangeType: RANGE_TYPE.ROW,
         };
@@ -506,8 +525,8 @@ export class UpdateFormulaController extends Disposable {
         if (!params) return null;
 
         const {
-            fromRange: { startColumn: fromCol },
-            toRange: { startColumn: toCol },
+            fromRange: { startColumn: fromStartCol, endColumn: fromEndCol },
+            toRange: { startColumn: toStartCol, endColumn: toEndCol },
         } = params;
 
         const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
@@ -517,16 +536,16 @@ export class UpdateFormulaController extends Disposable {
 
         const from = {
             startRow: 0,
-            startColumn: fromCol,
+            startColumn: fromStartCol,
             endRow: worksheet.getRowCount() - 1,
-            endColumn: fromCol,
+            endColumn: fromEndCol,
             rangeType: RANGE_TYPE.COLUMN,
         };
         const to = {
             startRow: 0,
-            startColumn: toCol,
+            startColumn: toStartCol,
             endRow: worksheet.getRowCount() - 1,
-            endColumn: toCol,
+            endColumn: toEndCol,
             rangeType: RANGE_TYPE.COLUMN,
         };
 
@@ -1365,6 +1384,7 @@ export class UpdateFormulaController extends Disposable {
             startColumn: fromStartColumn,
             endRow: fromEndRow,
             endColumn: fromEndColumn,
+            rangeType: fromRangeType = RANGE_TYPE.NORMAL,
         } = from;
 
         const { startRow: toStartRow, startColumn: toStartColumn, endRow: toEndRow, endColumn: toEndColumn } = to;
@@ -1394,6 +1414,8 @@ export class UpdateFormulaController extends Disposable {
                 } else if (endRow >= originEndRow && toStartRow <= originEndRow) {
                     newRange.startRow = fromEndRow + 1;
                     newRange.endRow = endRow;
+                } else if (toStartRow > originEndRow) {
+                    newRange.endRow -= fromEndRow + 1 - originStartRow;
                 } else {
                     return;
                 }
@@ -1409,6 +1431,8 @@ export class UpdateFormulaController extends Disposable {
                 } else if (startRow <= originStartRow && toEndRow >= originStartRow) {
                     newRange.endRow = fromStartRow + 1;
                     newRange.startRow = startRow;
+                } else if (toEndRow < originStartRow) {
+                    newRange.startRow += originEndRow - fromStartRow + 1;
                 } else {
                     return;
                 }
@@ -1424,6 +1448,8 @@ export class UpdateFormulaController extends Disposable {
                 } else if (endColumn >= originEndColumn && toStartColumn <= originEndColumn) {
                     newRange.startColumn = fromEndColumn + 1;
                     newRange.endColumn = endColumn;
+                } else if (toStartColumn > originEndColumn) {
+                    newRange.endColumn -= fromEndColumn + 1 - originStartColumn;
                 } else {
                     return;
                 }
@@ -1439,6 +1465,8 @@ export class UpdateFormulaController extends Disposable {
                 } else if (startColumn <= originStartColumn && toEndColumn >= originStartColumn) {
                     newRange.endColumn = fromStartColumn + 1;
                     newRange.startColumn = startColumn;
+                } else if (toEndColumn < originStartColumn) {
+                    newRange.startColumn += originEndColumn - fromStartColumn + 1;
                 } else {
                     return;
                 }
@@ -1450,6 +1478,18 @@ export class UpdateFormulaController extends Disposable {
             newRange.startColumn = startColumn;
             newRange.endRow = endRow;
             newRange.endColumn = endColumn;
+        } else if (fromStartColumn <= originStartColumn && fromEndColumn >= originEndColumn) {
+            if (toStartRow > originEndRow) {
+                newRange.endRow -= fromEndRow - fromStartRow + 1;
+            } else if (toEndRow < originStartRow) {
+                newRange.startRow += fromEndRow - fromStartRow + 1;
+            }
+        } else if (fromStartRow <= originStartRow && fromEndRow >= originEndRow) {
+            if (toStartColumn > originEndColumn) {
+                newRange.endColumn -= fromEndColumn - fromStartColumn + 1;
+            } else if (toEndColumn < originStartColumn) {
+                newRange.startColumn += fromEndColumn - fromStartColumn + 1;
+            }
         } else if (
             ((toStartColumn <= remainEndColumn + 1 && toEndColumn >= originEndColumn) ||
                 (toStartColumn <= originStartColumn && toEndColumn >= remainStartColumn - 1)) &&
@@ -1474,8 +1514,6 @@ export class UpdateFormulaController extends Disposable {
 
         return newRange;
     }
-
-    private _getInsertNewRange() {}
 
     private _getCurrentSheetInfo() {
         const workbook = this._currentUniverService.getCurrentUniverSheetInstance();

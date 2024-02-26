@@ -36,9 +36,8 @@ import {
     VIEWPORT_KEY,
 } from '@univerjs/docs';
 import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
-import { getEditorObject } from '@univerjs/sheets-ui';
-import type { IEditorBridgeServiceParam } from '@univerjs/sheets-ui/services/editor-bridge.service.js';
-import { IEditorBridgeService } from '@univerjs/sheets-ui/services/editor-bridge.service.js';
+import { getEditorObject, IEditorBridgeService } from '@univerjs/sheets-ui';
+import type { IEditorBridgeServiceParam } from '@univerjs/sheets-ui';
 import { IZenZoneService } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
 import { takeUntil } from 'rxjs';

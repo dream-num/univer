@@ -25,8 +25,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            year: { name: 'year', detail: 'The value of the year argument can include one to four digits. Excel interprets the year argument according to the date system your computer is using. By default, Univer uses the 1900 date system, which means the first date is January 1, 1900.' },
+            month: { name: 'month', detail: 'A positive or negative integer representing the month of the year from 1 to 12 (January to December).' },
+            day: { name: 'day', detail: 'A positive or negative integer representing the day of the month from 1 to 31.' },
         },
     },
     DATEDIF: {
@@ -58,7 +59,7 @@ export default {
         },
     },
     DAY: {
-        description: 'Converts a serial number to a day of the month',
+        description: 'Returns the day of a date, represented by a serial number. The day is given as an integer ranging from 1 to 31.',
         abstract: 'Converts a serial number to a day of the month',
         links: [
             {
@@ -67,8 +68,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            serialNumber: { name: 'Serial Number', detail: 'The date of the day you are trying to find. Dates should be entered by using the DATE function, or as results of other formulas or functions. For example, use DATE(2008,5,23) for the 23rd day of May, 2008.' },
         },
     },
     DAYS: {
@@ -100,7 +100,7 @@ export default {
         },
     },
     EDATE: {
-        description: 'Returns the serial number of the date that is the indicated number of months before or after the start date',
+        description: 'Returns the serial number that represents the date that is the indicated number of months before or after a specified date (the start_date). Use EDATE to calculate maturity dates or due dates that fall on the same day of the month as the date of issue.',
         abstract: 'Returns the serial number of the date that is the indicated number of months before or after the start date',
         links: [
             {
@@ -109,8 +109,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            startDate: { name: 'Start Date', detail: 'A date that represents the start date. Dates should be entered by using the DATE function, or as results of other formulas or functions. For example, use DATE(2008,5,23) for the 23rd day of May, 2008. Problems can occur if dates are entered as text.' },
+            months: { name: 'Months', detail: 'The number of months before or after start_date. A positive value for months yields a future date; a negative value yields a past date.' },
         },
     },
     EOMONTH: {
@@ -170,7 +170,7 @@ export default {
         },
     },
     MONTH: {
-        description: 'Converts a serial number to a month',
+        description: 'Returns the month of a date represented by a serial number. The month is given as an integer, ranging from 1 (January) to 12 (December).',
         abstract: 'Converts a serial number to a month',
         links: [
             {
@@ -179,8 +179,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            serialNumber: { name: 'Serial Number', detail: 'Required. The date of the month you are trying to find. Dates should be entered by using the DATE function, or as results of other formulas or functions. For example, use DATE(2008,5,23) for the 23rd day of May, 2008.' },
         },
     },
     NETWORKDAYS: {
@@ -277,8 +276,6 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
         },
     },
     WEEKDAY: {
@@ -338,7 +335,7 @@ export default {
         },
     },
     YEAR: {
-        description: 'Converts a serial number to a year',
+        description: 'Returns the year corresponding to a date. The year is returned as an integer in the range 1900-9999.',
         abstract: 'Converts a serial number to a year',
         links: [
             {
@@ -347,8 +344,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            serialNumber: { name: 'Serial Number', detail: 'The date of the year you want to find. Dates should be entered by using the DATE function, or as results of other formulas or functions. For example, use DATE(2008,5,23) for the 23rd day of May, 2008. Problems can occur if dates are entered as text.' },
         },
     },
     YEARFRAC: {

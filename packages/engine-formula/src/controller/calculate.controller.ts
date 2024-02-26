@@ -15,10 +15,10 @@
  */
 
 import type { ICommandInfo, IUnitRange } from '@univerjs/core';
-import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle, Tools } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
-import type { IDirtyUnitFeatureMap, IDirtyUnitSheetNameMap, IFormulaData } from '../basics/common';
+import type { IDirtyUnitFeatureMap, IDirtyUnitSheetNameMap, IFormulaData, INumfmtItemMap } from '../basics/common';
 import type { ISetArrayFormulaDataMutationParams } from '../commands/mutations/set-array-formula-data.mutation';
 import { SetArrayFormulaDataMutation } from '../commands/mutations/set-array-formula-data.mutation';
 import type { ISetFormulaCalculationStartMutation } from '../commands/mutations/set-formula-calculation.mutation';
@@ -34,6 +34,7 @@ import { FormulaDataModel } from '../models/formula-data.model';
 import { CalculateFormulaService } from '../services/calculate-formula.service';
 import type { IAllRuntimeData } from '../services/runtime.service';
 import { FormulaExecutedStateType } from '../services/runtime.service';
+import { SetNumfmtFormulaDataMutation } from '../commands/mutations/set-numfmt-formula-data.mutation';
 
 @OnLifecycle(LifecycleStages.Ready, CalculateController)
 export class CalculateController extends Disposable {
@@ -69,9 +70,9 @@ export class CalculateController extends Disposable {
                     if (params.forceCalculation === true) {
                         this._calculate(true);
                     } else {
-                        const { dirtyRanges, dirtyNameMap, dirtyUnitFeatureMap } = params;
+                        const { dirtyRanges, dirtyNameMap, dirtyUnitFeatureMap, numfmtItemMap } = params;
 
-                        this._calculate(false, dirtyRanges, dirtyNameMap, dirtyUnitFeatureMap);
+                        this._calculate(false, dirtyRanges, dirtyNameMap, dirtyUnitFeatureMap, numfmtItemMap);
                     }
                 } else if (command.id === SetArrayFormulaDataMutation.id) {
                     const params = command.params as ISetArrayFormulaDataMutationParams;
@@ -92,7 +93,8 @@ export class CalculateController extends Disposable {
         forceCalculate: boolean = false,
         dirtyRanges: IUnitRange[] = [],
         dirtyNameMap: IDirtyUnitSheetNameMap = {},
-        dirtyUnitFeatureMap: IDirtyUnitFeatureMap = {}
+        dirtyUnitFeatureMap: IDirtyUnitFeatureMap = {},
+        numfmtItemMap: INumfmtItemMap = {}
     ) {
         if (
             dirtyRanges.length === 0 &&
@@ -116,6 +118,7 @@ export class CalculateController extends Disposable {
             dirtyRanges,
             dirtyNameMap,
             dirtyUnitFeatureMap,
+            numfmtItemMap,
         });
     }
 
@@ -186,7 +189,7 @@ export class CalculateController extends Disposable {
     }
 
     private async _applyFormula(data: IAllRuntimeData) {
-        const { unitData, unitOtherData, arrayFormulaRange, arrayFormulaCellData, clearArrayFormulaCellData } = data;
+        const { unitData, unitOtherData, arrayFormulaRange, arrayFormulaCellData, clearArrayFormulaCellData, numfmtItemMap } = data;
 
         if (!unitData) {
             console.error('No sheetData from Formula Engine!');
@@ -208,6 +211,19 @@ export class CalculateController extends Disposable {
                 {
                     arrayFormulaRange: this._formulaDataModel.getArrayFormulaRange(),
                     arrayFormulaCellData: this._formulaDataModel.getArrayFormulaCellData(),
+                },
+                {
+                    onlyLocal: true,
+                }
+            );
+        }
+
+        // Synchronous to the main thread
+        if (!Tools.isEmptyObject(numfmtItemMap)) {
+            this._commandService.executeCommand(
+                SetNumfmtFormulaDataMutation.id,
+                {
+                    numfmtItemMap,
                 },
                 {
                     onlyLocal: true,

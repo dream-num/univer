@@ -1,0 +1,25 @@
+{
+    "git": {
+        "commitMessage": "chore(release): release v${version}",
+        "tagName": "v${version}"
+    },
+    "npm": false,
+    "github": {
+        "release": true
+    },
+    "plugins": {
+        "@release-it/conventional-changelog": {
+            "preset": "angular",
+            "infile": "CHANGELOG.md",
+            "ignoreRecommendedBump": true
+        },
+
+        "@release-it-plugins/workspaces": {
+            "publish": false,
+            "workspaces": [
+                "common/*",
+                "packages/*"
+            ]
+        }
+    }
+}

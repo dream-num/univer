@@ -18,7 +18,7 @@ import type { ICellData, IStyleData, Nullable } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService } from '@univerjs/core';
 import { SetRangeValuesCommand, SetRangeValuesMutation, SetStyleCommand } from '@univerjs/sheets';
 import type { Injector } from '@wendellhu/redi';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { FUniver } from '../facade';
 import { createTestBed } from './create-test-bed';
@@ -74,6 +74,29 @@ describe('Test FUniver', () => {
                 return styles.getStyleByCell(value);
             }
         };
+    });
+
+    it('Function onBeforeCommandExecute', () => {
+        const callback = vi.fn();
+        univerAPI.onBeforeCommandExecute(callback);
+
+        univerAPI.executeCommand(SetRangeValuesCommand.id, {
+            subUnitId: 'sheet1',
+            unitId: 'test',
+            range: {
+                startRow: 1,
+                startColumn: 1,
+                endRow: 2,
+                endColumn: 2,
+            },
+
+            value: [
+                [{ v: 1 }, { v: 2 }],
+                [{ v: 3 }, { v: 4 }],
+            ],
+        });
+
+        expect(callback).toHaveBeenCalled();
     });
 
     it('Function executeCommand', () => {

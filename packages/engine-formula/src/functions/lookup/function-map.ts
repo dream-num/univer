@@ -19,9 +19,11 @@ import { FUNCTION_NAMES_LOOKUP } from './function-names';
 import { Hlookup } from './hlookup';
 import { Indirect } from './indirect';
 import { Lookup } from './lookup';
+import { Match } from './match';
 import { Offset } from './offset';
 import { Vlookup } from './vlookup';
 import { Xlookup } from './xlookup';
+import { Xmatch } from './xmatch';
 
 export const functionLookup = [
     [Address, FUNCTION_NAMES_LOOKUP.ADDRESS],
@@ -29,6 +31,8 @@ export const functionLookup = [
     [Offset, FUNCTION_NAMES_LOOKUP.OFFSET],
     [Vlookup, FUNCTION_NAMES_LOOKUP.VLOOKUP],
     [Lookup, FUNCTION_NAMES_LOOKUP.LOOKUP],
+    [Match, FUNCTION_NAMES_LOOKUP.MATCH],
     [Hlookup, FUNCTION_NAMES_LOOKUP.HLOOKUP],
     [Xlookup, FUNCTION_NAMES_LOOKUP.XLOOKUP],
+    [Xmatch, FUNCTION_NAMES_LOOKUP.XMATCH],
 ];

@@ -31,7 +31,7 @@ export interface IDocSkeletonManagerParam {
 }
 
 /**
- * This service is for worksheet build sheet skeleton.
+ * This service is for document build and manage doc skeletons.
  */
 export class DocSkeletonManagerService extends RxDisposable {
     private _currentSkeletonUnitId: string = '';

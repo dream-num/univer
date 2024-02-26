@@ -25,8 +25,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            year: { name: '年', detail: 'year 引数の値 には 、1 ~ 4 桁の数字を指定できます。 Excel は、コンピューター が使用 している日付システムに応じて年の引数を解釈します。 既定では、Univer では 1900 年の日付システムが使用されます。つまり、最初の日付は 1900 年 1 月 1 日です。' },
+            month: { name: '月', detail: '1 ~ 12 (1 月から 12 月) の月を表す正または負の整数です。' },
+            day: { name: '日', detail: '1 ~ 31 の月の日を表す正または負の整数です。' },
         },
     },
     DATEDIF: {
@@ -58,7 +59,7 @@ export default {
         },
     },
     DAY: {
-        description: 'シリアル値を日付に変換します。',
+        description: 'シリアル番号で表された、日付の日情報を返します。日情報は 1 ～ 31 の範囲内の整数で示されます。',
         abstract: 'シリアル値を日付に変換します。',
         links: [
             {
@@ -67,8 +68,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            serialNumber: { name: 'シリアル値', detail: '検索する日付を指定します。 日付は、DATE 関数を使って入力するか、他の数式または他の関数の結果を指定します。 たとえば、2008 年 5 月 23 日を入力する場合は、DATE(2008,5,23) を使用します。' },
         },
     },
     DAYS: {
@@ -100,7 +100,7 @@ export default {
         },
     },
     EDATE: {
-        description: '開始日から起算して、指定した月数だけ前または後の日付に対応するシリアル値を返します。',
+        description: '開始日から起算して、指定された月数だけ前または後の日付に対応するシリアル値を返します。 この関数を使用すると、伝票の発行日と同じ日に当たる支払日や満期日の日付を計算することができます。',
         abstract: '開始日から起算して、指定した月数だけ前または後の日付に対応するシリアル値を返します。',
         links: [
             {
@@ -109,8 +109,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            startDate: { name: '開始日', detail: '起算日を表す日付を指定します。 日付は、DATE 関数を使って入力するか、他の数式または他の関数の結果を指定します。 たとえば、2008 年 5 月 23 日を入力する場合は、DATE(2008,5,23) を使用します。 日付を文字列として入力した場合、エラーが発生することがあります。' },
+            months: { name: '月', detail: '開始日から起算した月数を指定します。 "月" に正の数を指定すると起算日より後の日付を返し、負の数を指定すると起算日より前の日付を返します。' },
         },
     },
     EOMONTH: {
@@ -179,8 +179,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            serialNumber: { name: 'シリアル値', detail: '検索する月の日付を指定します。 日付は、DATE 関数を使って入力するか、他の数式または他の関数の結果として指定します。 たとえば、2008 年 5 月 23 日を入力する場合は、DATE(2008,5,23) を使用します。' },
         },
     },
     NETWORKDAYS: {
@@ -277,8 +276,6 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
         },
     },
     WEEKDAY: {
@@ -338,7 +335,7 @@ export default {
         },
     },
     YEAR: {
-        description: 'シリアル値を年に変換します。',
+        description: '日付に対応する年を返します。 戻り値は、1900 (年) ～ 9999 (年) の範囲の整数となります。',
         abstract: 'シリアル値を年に変換します。',
         links: [
             {
@@ -347,8 +344,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            serialNumber: { name: 'シリアル値', detail: '検索する年の日付を指定します。 日付は、DATE 関数を使って入力するか、他の数式または他の関数の結果として指定します。 たとえば、2008 年 5 月 23 日を入力する場合は、DATE(2008,5,23) を使用します。 日付を文字列として入力した場合、エラーが発生することがあります。' },
         },
     },
     YEARFRAC: {

@@ -16,7 +16,7 @@
 
 export default {
     DATE: {
-        description: '返回特定日期的序列号',
+        description: '采用三个单独的值并将它们合并为一个日期。',
         abstract: '返回特定日期的序列号',
         links: [
             {
@@ -25,8 +25,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            year: { name: '年', detail: '可以包含 1 到 4 位数字。 Excel 根据计算机使用的日期系统解释 year 参数。 默认情况下，Univer 使用 1900 日期系统，这意味着第一个日期是 1900 年 1 月 1 日。' },
+            month: { name: '月', detail: '一个正整数或负整数，表示一年中从 1 月至 12 月（一月到十二月）的各个月。' },
+            day: { name: '日', detail: '一个正整数或负整数，表示一月中从 1 日到 31 日的各天。' },
         },
     },
     DATEDIF: {
@@ -58,7 +59,7 @@ export default {
         },
     },
     DAY: {
-        description: '将序列号转换为月份日期',
+        description: '返回以序列数表示的某日期的天数。天数是介于 1 到 31 之间的整数。',
         abstract: '将序列号转换为月份日期',
         links: [
             {
@@ -67,8 +68,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            serialNumber: { name: '日期序列号', detail: '要查找的日期。 应使用 DATE 函数输入日期，或者将日期作为其他公式或函数的结果输入。 例如，使用函数 DATE(2008,5,23) 输入 2008 年 5 月 23 日。' },
         },
     },
     DAYS: {
@@ -100,7 +100,7 @@ export default {
         },
     },
     EDATE: {
-        description: '返回用于表示开始日期之前或之后月数的日期的序列号',
+        description: '返回表示某个日期的序列号，该日期与指定日期 (start_date) 相隔（之前或之后）指示的月份数。 使用函数 EDATE 可以计算与发行日处于一月中同一天的到期日的日期。',
         abstract: '返回用于表示开始日期之前或之后月数的日期的序列号',
         links: [
             {
@@ -109,8 +109,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            startDate: { name: '开始日期', detail: '一个代表开始日期的日期。 应使用 DATE 函数输入日期，或者将日期作为其他公式或函数的结果输入。 例如，使用函数 DATE(2008,5,23) 输入 2008 年 5 月 23 日。' },
+            months: { name: '月份', detail: 'Start Date 之前或之后的月份数。 Months 为正值将生成未来日期；为负值将生成过去日期。' },
         },
     },
     EOMONTH: {
@@ -170,7 +170,7 @@ export default {
         },
     },
     MONTH: {
-        description: '将序列号转换为月',
+        description: '返回日期（以序列数表示）中的月份。 月份是介于 1（一月）到 12（十二月）之间的整数。',
         abstract: '将序列号转换为月',
         links: [
             {
@@ -179,8 +179,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            serialNumber: { name: '日期序列号', detail: '要查找的月份的日期。 应使用 DATE 函数输入日期，或者将日期作为其他公式或函数的结果输入。 例如，使用函数 DATE(2008,5,23) 输入 2008 年 5 月 23 日。' },
         },
     },
     NETWORKDAYS: {
@@ -277,8 +276,6 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
         },
     },
     WEEKDAY: {
@@ -338,7 +335,7 @@ export default {
         },
     },
     YEAR: {
-        description: '将序列号转换为年',
+        description: '返回对应于某个日期的年份。 Year 作为 1900 - 9999 之间的整数返回。',
         abstract: '将序列号转换为年',
         links: [
             {
@@ -347,8 +344,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            serialNumber: { name: '日期序列号', detail: '要查找的年份的日期。 应使用 DATE 函数输入日期，或者将日期作为其他公式或函数的结果输入。 例如，使用函数 DATE(2008,5,23) 输入 2008 年 5 月 23 日。 如果日期以文本形式输入，则会出现问题。' },
         },
     },
     YEARFRAC: {

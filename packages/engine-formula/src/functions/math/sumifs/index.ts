@@ -24,6 +24,14 @@ import { BaseFunction } from '../../base-function';
 
 export class Sumifs extends BaseFunction {
     override calculate(sumRange: BaseValueObject, ...variants: BaseValueObject[]) {
+        if (sumRange == null) {
+            return new ErrorValueObject(ErrorType.NA);
+        }
+
+        if (variants.length < 2) {
+            return new ErrorValueObject(ErrorType.NA);
+        }
+
         if (sumRange.isError()) {
             return new ErrorValueObject(ErrorType.NA);
         }

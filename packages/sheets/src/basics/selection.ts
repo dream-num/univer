@@ -72,6 +72,12 @@ export interface ISelectionStyle {
      * The dashed line of the selection border. Here, the dashed line is a numerical value, different from the canvas dashed line setting. It is implemented internally as [0, strokeDash]. Setting it to 8 will look more aesthetically pleasing.
      */
     strokeDash?: number;
+
+    /**
+     * Enable 'marching ants' animation
+     */
+    isAnimationDash?: boolean;
+
     /**
      * The fill color inside the selection. It needs to have a level of transparency, otherwise content in the covered area of the selection will be obscured.
      */

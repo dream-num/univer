@@ -22,7 +22,7 @@ jobs:
               uses: ./.github/actions/setup-node
 
             - name: 🩺 Run test
-              run: pnpm run coverage
+              run: pnpm coverage
 
             # TODO: cross fork PR will not trigger this action
             - name: 🧬 Report coverage

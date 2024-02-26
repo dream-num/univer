@@ -38,7 +38,7 @@ describe('Test iferror function', () => {
             const value = new ErrorValueObject(ErrorType.NA);
             const valueIfError = new StringValueObject('error');
             const result = textFunction.calculate(value, valueIfError);
-            expect(result.getValue()).toBe('error');
+            expect(result.getValue()).toBe(ErrorType.NA);
         });
 
         it('Value is array', () => {

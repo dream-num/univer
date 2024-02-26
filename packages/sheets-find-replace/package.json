@@ -1,14 +1,23 @@
 {
     "name": "@univerjs/sheets-find-replace",
-    "version": "0.1.0-beta.4",
+    "version": "0.1.0-beta.5",
     "private": true,
     "description": "UniverSheet find replace plugin",
     "author": "DreamNum <developer@univer.ai>",
     "license": "Apache-2.0",
+    "funding": {
+        "type": "opencollective",
+        "url": "https://opencollective.com/univer"
+    },
+    "homepage": "https://univer.ai",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/dream-num/univer"
+    },
+    "bugs": {
+        "url": "https://github.com/dream-num/univer/issues"
+    },
     "keywords": [],
-    "sideEffects": [
-        "**/*.css"
-    ],
     "exports": {
         ".": "./src/index.ts",
         "./*": "./src/*"
@@ -53,31 +62,22 @@
     },
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
-        "@univerjs/design": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/find-replace": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
-        "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": "^0.13.0",
-        "react": ">=16.9.0"
+        "@wendellhu/redi": "^0.13.0"
     },
-    "dependencies": {},
     "devDependencies": {
-        "@types/react": "^18.2.53",
         "@univerjs/core": "workspace:*",
-        "@univerjs/design": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/find-replace": "workspace:*",
         "@univerjs/shared": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
-        "@univerjs/ui": "workspace:*",
         "@wendellhu/redi": "^0.13.0",
-        "less": "^4.2.0",
-        "react": "^18.2.0",
         "typescript": "^5.3.3",
-        "vite": "^5.0.12",
-        "vitest": "^1.2.1"
+        "vite": "^5.1.4",
+        "vitest": "^1.3.1"
     }
 }

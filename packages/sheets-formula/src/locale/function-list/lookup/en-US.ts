@@ -326,7 +326,7 @@ export default {
         },
     },
     MATCH: {
-        description: 'Looks up values in a reference or array',
+        description: 'The MATCH function searches for a specified item in a range of cells, and then returns the relative position of that item in the range. For example, if the range A1:A3 contains the values 5, 25, and 38, then the formula =MATCH(25,A1:A3,0) returns the number 2, because 25 is the second item in the range.',
         abstract: 'Looks up values in a reference or array',
         links: [
             {
@@ -335,8 +335,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            lookupValue: { name: 'lookup_value', detail: 'The value that you want to match in lookup_array. For example, when you look up someone\'s number in a telephone book, you are using the person\'s name as the lookup value, but the telephone number is the value you want. The lookup_value argument can be a value (number, text, or logical value) or a cell reference to a number, text, or logical value.' },
+            lookupArray: { name: 'lookup_array', detail: 'The range of cells being searched.' },
+            matchType: { name: 'match_type', detail: 'The number -1, 0, or 1. The match_type argument specifies how Excel matches lookup_value with values in lookup_array. The default value for this argument is 1.' },
         },
     },
     OFFSET: {
@@ -597,8 +598,8 @@ export default {
         },
     },
     XMATCH: {
-        description: 'Returns the&nbsp;relative&nbsp;position of an item in an array or range of cells.&nbsp;',
-        abstract: 'Returns the&nbsp;relative&nbsp;position of an item in an array or range of cells.&nbsp;',
+        description: 'Searches for a specified item in an array or range of cells, and then returns the item\'s relative position.',
+        abstract: 'Returns the&nbsp;relative&nbsp;position of an item in an array or range of cells.',
         links: [
             {
                 title: 'Instruction',
@@ -606,8 +607,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            lookupValue: { name: 'lookup_value', detail: 'The lookup value' },
+            lookupArray: { name: 'lookup_array', detail: 'The array or range to search' },
+            matchMode: { name: 'match_mode', detail: 'Specify the match type:\n0 - Exact match (default)\n-1 - Exact match or next smallest item\n1 - Exact match or next largest item\n2 - A wildcard match where *, ?, and ~ have special meaning.' },
+            searchMode: { name: 'search_mode', detail: 'Specify the search type:\n1 - Search first-to-last (default)\n-1 - Search last-to-first (reverse search).\n2 - Perform a binary search that relies on lookup_array being sorted in ascending order. If not sorted, invalid results will be returned.\n-2 - Perform a binary search that relies on lookup_array being sorted in descending order. If not sorted, invalid results will be returned.' },
         },
     },
 };

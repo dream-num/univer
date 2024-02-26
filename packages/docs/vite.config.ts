@@ -1,28 +1,7 @@
 import createViteConfig from '@univerjs/shared/vite';
 import pkg from './package.json';
 
-export default ({ mode }) => createViteConfig({
-    build: {
-        rollupOptions: {
-            external: [
-                '@univerjs/core',
-                '@univerjs/engine-render',
-                '@univerjs/sheets',
-                '@wendellhu/redi',
-                'rxjs',
-            ],
-            output: {
-                globals: {
-                    '@univerjs/core': 'UniverCore',
-                    '@univerjs/engine-render': 'UniverEngineRender',
-                    '@univerjs/sheets': 'UniverSheets',
-                    '@wendellhu/redi': '@wendellhu/redi',
-                    rxjs: 'rxjs',
-                },
-            },
-        },
-    },
-}, {
+export default ({ mode }) => createViteConfig({}, {
     mode,
     pkg,
     features: {

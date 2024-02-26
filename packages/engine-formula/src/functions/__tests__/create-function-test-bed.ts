@@ -54,92 +54,94 @@ import { IOtherFormulaManagerService, OtherFormulaManagerService } from '../../s
 import { FormulaRuntimeService, IFormulaRuntimeService } from '../../services/runtime.service';
 import { ISuperTableService, SuperTableService } from '../../services/super-table.service';
 
-const TEST_WORKBOOK_DATA: IWorkbookData = {
-    id: 'test',
-    appVersion: '3.0.0-alpha',
-    sheets: {
-        sheet1: {
-            id: 'sheet1',
-            cellData: {
-                0: {
+const getTestWorkbookData = (): IWorkbookData => {
+    return {
+        id: 'test',
+        appVersion: '3.0.0-alpha',
+        sheets: {
+            sheet1: {
+                id: 'sheet1',
+                cellData: {
                     0: {
-                        v: 1,
-                        t: CellValueType.NUMBER,
+                        0: {
+                            v: 1,
+                            t: CellValueType.NUMBER,
+                        },
+                        1: {
+                            v: 2,
+                            t: CellValueType.NUMBER,
+                        },
                     },
                     1: {
-                        v: 2,
-                        t: CellValueType.NUMBER,
-                    },
-                },
-                1: {
-                    0: {
-                        v: 3,
-                        t: CellValueType.NUMBER,
-                    },
-                    1: {
-                        v: 4,
-                        t: CellValueType.NUMBER,
+                        0: {
+                            v: 3,
+                            t: CellValueType.NUMBER,
+                        },
+                        1: {
+                            v: 4,
+                            t: CellValueType.NUMBER,
+                        },
+                        2: {
+                            v: 'B2',
+                            t: CellValueType.STRING,
+                        },
+                        3: {
+                            v: 'R2C2',
+                            t: CellValueType.STRING,
+                        },
                     },
                     2: {
-                        v: 'B2',
-                        t: CellValueType.STRING,
+                        0: {
+                            v: 1,
+                            t: CellValueType.NUMBER,
+                        },
+                        1: {
+                            v: ' ',
+                            t: CellValueType.STRING,
+                        },
+                        2: {
+                            v: 1.23,
+                            t: CellValueType.NUMBER,
+                        },
+                        3: {
+                            v: true,
+                            t: CellValueType.BOOLEAN,
+                        },
+                        4: {
+                            v: false,
+                            t: CellValueType.BOOLEAN,
+                        },
                     },
                     3: {
-                        v: 'R2C2',
-                        t: CellValueType.STRING,
-                    },
-                },
-                2: {
-                    0: {
-                        v: 1,
-                        t: CellValueType.NUMBER,
-                    },
-                    1: {
-                        v: ' ',
-                        t: CellValueType.STRING,
-                    },
-                    2: {
-                        v: 1.23,
-                        t: CellValueType.NUMBER,
-                    },
-                    3: {
-                        v: true,
-                        t: CellValueType.BOOLEAN,
-                    },
-                    4: {
-                        v: false,
-                        t: CellValueType.BOOLEAN,
-                    },
-                },
-                3: {
-                    0: {
-                        v: 0,
-                        t: CellValueType.NUMBER,
-                    },
-                    1: {
-                        v: '100',
-                        t: CellValueType.STRING,
-                    },
-                    2: {
-                        v: '2.34',
-                        t: CellValueType.STRING,
-                    },
-                    3: {
-                        v: 'test',
-                        t: CellValueType.STRING,
-                    },
-                    4: {
-                        v: -3,
-                        t: CellValueType.NUMBER,
+                        0: {
+                            v: 0,
+                            t: CellValueType.NUMBER,
+                        },
+                        1: {
+                            v: '100',
+                            t: CellValueType.STRING,
+                        },
+                        2: {
+                            v: '2.34',
+                            t: CellValueType.STRING,
+                        },
+                        3: {
+                            v: 'test',
+                            t: CellValueType.STRING,
+                        },
+                        4: {
+                            v: -3,
+                            t: CellValueType.NUMBER,
+                        },
                     },
                 },
             },
         },
-    },
-    locale: LocaleType.ZH_CN,
-    name: '',
-    sheetOrder: [],
-    styles: {},
+        locale: LocaleType.ZH_CN,
+        name: '',
+        sheetOrder: [],
+        styles: {},
+    };
 };
 export function createFunctionTestBed(workbookConfig?: IWorkbookData, dependencies?: Dependency[]) {
     const univer = new Univer();
@@ -204,7 +206,7 @@ export function createFunctionTestBed(workbookConfig?: IWorkbookData, dependenci
     }
 
     univer.registerPlugin(TestSpyPlugin);
-    const sheet = univer.createUniverSheet(workbookConfig || TEST_WORKBOOK_DATA);
+    const sheet = univer.createUniverSheet(workbookConfig || getTestWorkbookData());
 
     if (get === undefined) {
         throw new Error('[TestPlugin]: not hooked on!');

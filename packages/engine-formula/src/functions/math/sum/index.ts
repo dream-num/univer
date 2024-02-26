@@ -21,6 +21,10 @@ import { BaseFunction } from '../../base-function';
 
 export class Sum extends BaseFunction {
     override calculate(...variants: BaseValueObject[]) {
+        if (variants.length === 0) {
+            return new ErrorValueObject(ErrorType.NA);
+        }
+
         let accumulatorAll: BaseValueObject = new NumberValueObject(0);
         for (let i = 0; i < variants.length; i++) {
             let variant = variants[i];

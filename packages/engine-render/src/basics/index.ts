@@ -29,3 +29,4 @@ export * from './scroll-xy';
 export * from './tools';
 export * from './transform';
 export * from './vector2';
+export * from './text-rotation';

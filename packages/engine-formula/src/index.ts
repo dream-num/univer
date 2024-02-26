@@ -26,6 +26,7 @@ export type {
     ISheetData,
     IUnitData,
     IUnitSheetNameMap,
+    INumfmtItemMap,
 } from './basics/common';
 export { isInDirtyRange } from './basics/dirty';
 export { ErrorType } from './basics/error-type';
@@ -134,3 +135,5 @@ export { IFunctionService } from './services/function.service';
 export { type IOtherFormulaManagerService, OtherFormulaManagerService } from './services/other-formula-manager.service';
 export { FormulaExecuteStageType, type IExecutionInProgressParams } from './services/runtime.service';
 export { FormulaExecutedStateType, type IAllRuntimeData } from './services/runtime.service';
+export { SetNumfmtFormulaDataMutation } from './commands/mutations/set-numfmt-formula-data.mutation';
+export type { ISetNumfmtFormulaDataMutationParams } from './commands/mutations/set-numfmt-formula-data.mutation';

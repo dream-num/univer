@@ -258,52 +258,45 @@ function getReverseFormatValueInSelection(
         } else if (ed <= startOffset!) {
             ti++;
         } else {
-            if (ts?.[key] == null) {
-                if (/bl|it/.test(key)) {
-                    return BooleanNumber.TRUE;
-                }
+            if (/bl|it/.test(key)) {
+                return ts?.[key] === BooleanNumber.TRUE ? BooleanNumber.FALSE : BooleanNumber.TRUE;
+            }
 
-                if (/ul|st/.test(key)) {
-                    return {
+            if (/ul|st/.test(key)) {
+                return isTextDecoration(ts?.[key]) && (ts?.[key] as ITextDecoration).s === BooleanNumber.TRUE
+                    ? {
+                        s: BooleanNumber.FALSE,
+                    }
+                    : {
                         s: BooleanNumber.TRUE,
                     };
-                }
+            }
 
-                if (/va/.test(key)) {
-                    return preCommandId === SetInlineFormatSubscriptCommand.id
-                        ? BaselineOffset.SUBSCRIPT
+            if (/va/.test(key)) {
+                if (preCommandId === SetInlineFormatSubscriptCommand.id) {
+                    return ts?.[key] === BaselineOffset.SUBSCRIPT
+                        ? BaselineOffset.NORMAL
+                        : BaselineOffset.SUBSCRIPT;
+                } else {
+                    return ts?.[key] === BaselineOffset.SUPERSCRIPT
+                        ? BaselineOffset.NORMAL
                         : BaselineOffset.SUPERSCRIPT;
                 }
-            }
-
-            // Add second ?. in just use fix TS checker.
-            if (isTextDecoration(ts?.[key]) && (ts?.[key] as ITextDecoration).s === BooleanNumber.FALSE) {
-                return {
-                    s: BooleanNumber.TRUE,
-                };
-            }
-
-            if (preCommandId === SetInlineFormatSubscriptCommand.id && ts?.[key] !== BaselineOffset.SUBSCRIPT) {
-                return BaselineOffset.SUBSCRIPT;
-            }
-
-            if (preCommandId === SetInlineFormatSuperscriptCommand.id && ts?.[key] !== BaselineOffset.SUPERSCRIPT) {
-                return BaselineOffset.SUPERSCRIPT;
-            }
-
-            if (ts?.[key] === BooleanNumber.FALSE) {
-                return BooleanNumber.TRUE;
             }
 
             ti++;
         }
     }
 
-    return /bl|it/.test(key)
-        ? BooleanNumber.FALSE
-        : /ul|st/.test(key)
-            ? {
-                s: BooleanNumber.FALSE,
-            }
-            : BaselineOffset.NORMAL;
+    if (/bl|it/.test(key)) {
+        return BooleanNumber.TRUE;
+    } else if (/ul|st/.test(key)) {
+        return {
+            s: BooleanNumber.TRUE,
+        };
+    } else {
+        return preCommandId === SetInlineFormatSubscriptCommand.id
+            ? BaselineOffset.SUBSCRIPT
+            : BaselineOffset.SUPERSCRIPT;
+    }
 }

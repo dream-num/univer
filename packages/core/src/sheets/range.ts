@@ -22,13 +22,13 @@ import { BooleanNumber, FontItalic, FontWeight } from '../types/enum';
 import type {
     IBorderData,
     ICellData,
+    IDocumentBody,
     IDocumentData,
     IRange,
     IStyleBase,
     IStyleData,
     ITextDecoration,
     ITextRotation,
-    ITextRun,
 } from '../types/interfaces';
 import type { Styles } from './styles';
 import type { Worksheet } from './worksheet';
@@ -47,9 +47,13 @@ export interface IRangeDependencies {
     getStyles(): Readonly<Styles>;
 }
 
-function isAllFormatInTextRuns(key: keyof IStyleBase, textRuns: ITextRun[]): BooleanNumber {
+export function isAllFormatInTextRuns(key: keyof IStyleBase, body: IDocumentBody): BooleanNumber {
+    const { textRuns = [] } = body;
+
+    let len = 0;
+
     for (const textRun of textRuns) {
-        const { ts = {} } = textRun;
+        const { ts = {}, st, ed } = textRun;
 
         if (ts[key] == null) {
             return BooleanNumber.FALSE;
@@ -75,9 +79,14 @@ function isAllFormatInTextRuns(key: keyof IStyleBase, textRuns: ITextRun[]): Boo
             default:
                 throw new Error(`unknown style key: ${key} in IStyleBase`);
         }
+
+        len += ed - st;
     }
 
-    return BooleanNumber.TRUE;
+    // Ensure textRuns cover all content.
+    const index = body.dataStream.indexOf('\r\n');
+
+    return index === len ? BooleanNumber.TRUE : BooleanNumber.FALSE;
 }
 
 /**
@@ -361,8 +370,8 @@ export class Range {
     getUnderline(): ITextDecoration {
         const { p } = this.getValue() ?? {};
 
-        if (p && Array.isArray(p.body?.textRuns)) {
-            return isAllFormatInTextRuns('ul', p.body?.textRuns!) === BooleanNumber.TRUE
+        if (p && Array.isArray(p.body?.textRuns) && p.body.textRuns.length > 0) {
+            return isAllFormatInTextRuns('ul', p.body) === BooleanNumber.TRUE
                 ? {
                     s: BooleanNumber.TRUE,
                 }
@@ -394,8 +403,8 @@ export class Range {
     getStrikeThrough(): ITextDecoration {
         const { p } = this.getValue() ?? {};
 
-        if (p && Array.isArray(p.body?.textRuns)) {
-            return isAllFormatInTextRuns('st', p.body?.textRuns!) === BooleanNumber.TRUE
+        if (p && Array.isArray(p.body?.textRuns) && p.body.textRuns.length > 0) {
+            return isAllFormatInTextRuns('st', p.body) === BooleanNumber.TRUE
                 ? {
                     s: BooleanNumber.TRUE,
                 }
@@ -446,19 +455,19 @@ export class Range {
     getFontStyle(): FontItalic {
         const { p } = this.getValue() ?? {};
 
-        if (p && Array.isArray(p.body?.textRuns)) {
-            return isAllFormatInTextRuns('it', p.body?.textRuns!) === BooleanNumber.TRUE
+        if (p && Array.isArray(p.body?.textRuns) && p.body.textRuns.length > 0) {
+            return isAllFormatInTextRuns('it', p.body) === BooleanNumber.TRUE
                 ? FontItalic.ITALIC
                 : FontItalic.NORMAL;
         }
 
-        return this.getFontStyles()[0][0];
+        return this._getFontStyles()[0][0];
     }
 
     /**
      * Returns the font styles of the cells in the range.
      */
-    private getFontStyles(): FontItalic[][] {
+    private _getFontStyles(): FontItalic[][] {
         return this._getStyles('it') as FontItalic[][];
     }
 
@@ -471,19 +480,19 @@ export class Range {
     getFontWeight(): FontWeight {
         const { p } = this.getValue() ?? {};
 
-        if (p && Array.isArray(p.body?.textRuns)) {
-            return isAllFormatInTextRuns('bl', p.body?.textRuns!) === BooleanNumber.TRUE
+        if (p && Array.isArray(p.body?.textRuns) && p.body.textRuns.length > 0) {
+            return isAllFormatInTextRuns('bl', p.body) === BooleanNumber.TRUE
                 ? FontWeight.BOLD
                 : FontWeight.NORMAL;
         }
 
-        return this.getFontWeights()[0][0];
+        return this._getFontWeights()[0][0];
     }
 
     /**
      * Returns the font weights of the cells in the range.
      */
-    private getFontWeights(): FontWeight[][] {
+    private _getFontWeights(): FontWeight[][] {
         return this._getStyles('bl') as FontWeight[][];
     }
 

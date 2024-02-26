@@ -239,12 +239,12 @@ export class StartEditController extends Disposable {
             documentDataModel.updateDocumentDataMargin(paddingData);
         } else {
             // Set the top margin under vertical alignment.
-            let offsetTop = paddingData.t || 0;
+            let offsetTop = (editorHeight - actualHeight) || 0;
 
             if (verticalAlign === VerticalAlign.MIDDLE) {
                 offsetTop = (editorHeight - actualHeight) / 2;
-            } else if (verticalAlign === VerticalAlign.BOTTOM) {
-                offsetTop = editorHeight - actualHeight;
+            } else if (verticalAlign === VerticalAlign.TOP) {
+                offsetTop = paddingData.t || 0;
             }
 
             offsetTop /= scaleY;

@@ -31,14 +31,28 @@ export class Address extends BaseFunction {
         a1?: BaseValueObject,
         sheetText?: BaseValueObject
     ) {
-        if (
-            rowNumber.isError() ||
-            columnNumber.isError() ||
-            (absNumber && absNumber.isError()) ||
-            (a1 && a1.isError()) ||
-            (sheetText && sheetText.isError())
-        ) {
-            return new ErrorValueObject(ErrorType.VALUE);
+        if (rowNumber == null || columnNumber == null) {
+            return new ErrorValueObject(ErrorType.NA);
+        }
+
+        if (rowNumber.isError()) {
+            return rowNumber;
+        }
+
+        if (columnNumber.isError()) {
+            return columnNumber;
+        }
+
+        if (absNumber?.isError()) {
+            return absNumber;
+        }
+
+        if (a1?.isError()) {
+            return a1;
+        }
+
+        if (sheetText?.isError()) {
+            return sheetText;
         }
 
         const row = Number(rowNumber.getValue()) - 1;

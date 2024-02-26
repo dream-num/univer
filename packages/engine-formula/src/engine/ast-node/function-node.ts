@@ -66,6 +66,9 @@ export class FunctionNode extends BaseAstNode {
         const variants: BaseValueObject[] = [];
         const children = this.getChildren();
         const childrenCount = children.length;
+
+        this._compatibility();
+
         for (let i = 0; i < childrenCount; i++) {
             const object = children[i].getValue();
             if (object == null) {
@@ -96,6 +99,9 @@ export class FunctionNode extends BaseAstNode {
         const variants: BaseValueObject[] = [];
         const children = this.getChildren();
         const childrenCount = children.length;
+
+        this._compatibility();
+
         for (let i = 0; i < childrenCount; i++) {
             const object = children[i].getValue();
             if (object == null) {
@@ -113,6 +119,59 @@ export class FunctionNode extends BaseAstNode {
         this._setRefData(resultVariant);
 
         this.setValue(resultVariant as FunctionVariantType);
+    }
+
+     /**
+      * Compatibility handling for special functions.
+      */
+    private _compatibility() {
+        this._lookupCompatibility();
+    }
+
+    /**
+     * The LOOKUP function follows the following rules when dealing with vectors of different sizes:
+     *    If the lookup_vector is larger than the result_vector,
+     *    the LOOKUP function will ignore the extra portion of the lookup_vector and only use the portion of the result_vector that is the same size as the lookup_vector for lookup and returning results.
+     *    If the lookup_vector is smaller than the result_vector,
+     *    the LOOKUP function will continue using the last value of the result_vector for lookup and returning results after the last value of the lookup_vector.
+     */
+    private _lookupCompatibility() {
+        const children = this.getChildren();
+        const childrenCount = children.length;
+
+        if (this._functionExecutor.name !== 'LOOKUP' || childrenCount !== 3) {
+            return;
+        }
+
+        const lookupVectorOrArray = children[1].getValue();
+
+        const resultVector = children[2].getValue();
+
+        if (!lookupVectorOrArray?.isReferenceObject() && !resultVector?.isReferenceObject()) {
+            return;
+        }
+
+        const lookupVectorOrArrayRange = (lookupVectorOrArray as BaseReferenceObject).getRangeData();
+
+        const resultVectorRange = (resultVector as BaseReferenceObject).getRangeData();
+
+        const { startRow, startColumn, endRow, endColumn } = lookupVectorOrArrayRange;
+
+        const lookupCountRow = endRow - startRow + 1;
+        const lookupCountColumn = endColumn - startColumn + 1;
+
+        const { startRow: reStartRow, startColumn: reStartColumn, endRow: reEndRow, endColumn: reEndColumn } = resultVectorRange;
+
+        const resultCountRow = reEndRow - reStartRow + 1;
+        const resultCountColumn = reEndColumn - reStartColumn + 1;
+
+        if (lookupCountRow !== resultCountRow) {
+            resultVectorRange.endRow += lookupCountRow - resultCountRow;
+        }
+
+        if (lookupCountColumn !== resultCountColumn) {
+            resultVectorRange.endColumn += lookupCountColumn - resultCountColumn;
+        }
     }
 
     private _calculate(variants: BaseValueObject[]) {

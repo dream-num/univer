@@ -35,6 +35,8 @@ export {
     getSheetObject,
     getTransformCoord,
 } from './controllers/utils/component-tools';
+export { whenSheetEditorFocused } from './controllers/shortcuts/utils';
+export type { IEditorBridgeServiceParam } from './services/editor-bridge.service';
 export { enUS, zhCN } from './locale';
 export { AutoFillService, IAutoFillService } from './services/auto-fill/auto-fill.service';
 export { getAutoFillRepeatRange } from './services/auto-fill/tools';

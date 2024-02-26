@@ -15,10 +15,11 @@
  */
 
 import type { ICommandInfo } from '@univerjs/core';
-import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { CellValueType, Disposable, ICommandService, LifecycleStages, OnLifecycle, ThemeService } from '@univerjs/core';
 import type { ISetArrayFormulaDataMutationParams } from '@univerjs/engine-formula';
 import { FormulaDataModel, SetArrayFormulaDataMutation } from '@univerjs/engine-formula';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
+import { getPatternPreview } from '@univerjs/sheets-numfmt';
 import { Inject } from '@wendellhu/redi';
 
 @OnLifecycle(LifecycleStages.Ready, ArrayFormulaDisplayController)
@@ -26,7 +27,8 @@ export class ArrayFormulaDisplayController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
-        @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel
+        @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel,
+        @Inject(ThemeService) private readonly _themeService: ThemeService
     ) {
         super();
 
@@ -76,6 +78,37 @@ export class ArrayFormulaDisplayController extends Disposable {
 
                     if (cellRange != null && cellRange.startRow === row && cellRange.startColumn === col) {
                         return next(cell);
+                    }
+
+                    const numfmtItemMap = this._formulaDataModel.getNumfmtItemMap();
+                    const numfmtItem = numfmtItemMap[unitId]?.[subUnitId]?.[row]?.[col];
+
+                    if (numfmtItem) {
+                        const value = cellData?.v;
+                        const type = cellData?.t;
+
+                        if (value == null || type !== CellValueType.NUMBER) {
+                            return next(cell);
+                        }
+
+                        const info = getPatternPreview(numfmtItem, value as number);
+
+                        if (info.color) {
+                            const colorMap = this._themeService.getCurrentTheme();
+                            const color = colorMap[`${info.color}500`];
+                            return {
+                                ...cell,
+                                v: info.result,
+                                t: CellValueType.STRING,
+                                s: { cl: { rgb: color } },
+                            };
+                        }
+
+                        return {
+                            ...cell,
+                            v: info.result,
+                            t: CellValueType.STRING,
+                        };
                     }
 
                     return next({ ...cell, ...cellData });

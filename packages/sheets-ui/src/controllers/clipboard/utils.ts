@@ -15,12 +15,13 @@
  */
 
 import type { ICellData, IDocumentBody, IMutationInfo, IParagraph, IRange, Nullable } from '@univerjs/core';
-import { IUniverInstanceService, ObjectMatrix, Range, Rectangle } from '@univerjs/core';
+import { IUniverInstanceService, ObjectMatrix, Range, Rectangle, Tools } from '@univerjs/core';
 import type {
     IAddWorksheetMergeMutationParams,
     IMoveRangeMutationParams,
     IRemoveWorksheetMergeMutationParams,
     ISetRangeValuesMutationParams,
+    ISetSelectionsOperationParams,
 } from '@univerjs/sheets';
 import {
     AddMergeUndoMutationFactory,
@@ -124,13 +125,13 @@ export function getMoveRangeMutations(
             const toCellMatrix = toWorksheet.getCellMatrix();
 
             Range.foreach(fromRange, (row, col) => {
-                fromCellValue.setValue(row, col, fromCellMatrix.getValue(row, col));
+                fromCellValue.setValue(row, col, Tools.deepClone(fromCellMatrix.getValue(row, col)));
                 newFromCellValue.setValue(row, col, null);
             });
             const toCellValue = new ObjectMatrix<Nullable<ICellData>>();
 
             Range.foreach(toRange, (row, col) => {
-                toCellValue.setValue(row, col, toCellMatrix.getValue(row, col));
+                toCellValue.setValue(row, col, Tools.deepClone(toCellMatrix.getValue(row, col)));
             });
 
             const newToCellValue = new ObjectMatrix<Nullable<ICellData>>();
@@ -251,10 +252,10 @@ export function getMoveRangeMutations(
                     id: SetSelectionsOperation.id,
                     params: {
                         unitId,
-                        sheetId: toSubUnitId,
+                        subUnitId: toSubUnitId,
                         pluginName: NORMAL_SELECTION_PLUGIN_NAME,
                         selections: [{ range: toRange }],
-                    },
+                    } as ISetSelectionsOperationParams,
                 },
             ];
             undos = [

@@ -17,7 +17,7 @@
 import type { IWorkbookData } from '@univerjs/core';
 import { ILogService, IUniverInstanceService, LocaleType, LogLevel, Plugin, PluginType, Univer } from '@univerjs/core';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
-import { SelectionManagerService } from '@univerjs/sheets';
+import { SelectionManagerService, SheetInterceptorService } from '@univerjs/sheets';
 import {
     BrowserClipboardService,
     DesktopMessageService,
@@ -298,6 +298,20 @@ const cellData = {
             s: '3UpAbI',
         },
     },
+    24: {
+        0: {
+            v: 'A25',
+            s: '3UpAbI',
+        },
+        1: {
+            v: 'B25',
+            s: '3UpAbI',
+        },
+        2: {
+            v: 'C25',
+            s: '3UpAbI',
+        },
+    },
 };
 
 const styles = {
@@ -518,6 +532,7 @@ export function clipboardTestBed(workbookConfig?: IWorkbookData, dependencies?: 
             // Because SheetClipboardController is initialized in the rendered life cycle, here we need to initialize it manually
             const sheetClipboardController = injector.createInstance(SheetClipboardController);
             injector.add([SheetClipboardController, { useValue: sheetClipboardController }]);
+            injector.add([SheetInterceptorService]);
 
             dependencies?.forEach((d) => injector.add(d));
         }

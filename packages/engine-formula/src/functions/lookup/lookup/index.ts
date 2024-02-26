@@ -16,11 +16,11 @@
 
 import type { Nullable } from '@univerjs/core';
 
-import type { ArrayValueObject } from '../../..';
 import { ErrorType } from '../../../basics/error-type';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 
 export class Lookup extends BaseFunction {
     override calculate(
@@ -28,6 +28,10 @@ export class Lookup extends BaseFunction {
         lookupVectorOrArray: ArrayValueObject,
         resultVector?: BaseValueObject
     ) {
+        if (lookupValue == null || lookupVectorOrArray == null) {
+            return new ErrorValueObject(ErrorType.NA);
+        }
+
         if (lookupValue.isError()) {
             return lookupValue;
         }

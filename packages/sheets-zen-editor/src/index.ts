@@ -15,3 +15,4 @@
  */
 
 export * from './plugin';
+export { enUS, zhCN } from './locale';

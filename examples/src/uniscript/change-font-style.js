@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const activeSheet = univerAPI.getCurrentSheet().getActiveSheet();
+const activeSheet = univerAPI.getActiveWorkbook().getActiveSheet();
 
 // Set A1:B2 to bold
 activeSheet.getRange(0, 0, 2, 2).setFontWeight('bold');

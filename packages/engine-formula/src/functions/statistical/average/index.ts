@@ -14,12 +14,17 @@
  * limitations under the License.
  */
 
-import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { ErrorType } from '../../../basics/error-type';
+import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class Average extends BaseFunction {
     override calculate(...variants: BaseValueObject[]) {
+        if (variants.length === 0) {
+            return new ErrorValueObject(ErrorType.NA);
+        }
+
         let accumulatorSum: BaseValueObject = new NumberValueObject(0);
         let accumulatorCount: BaseValueObject = new NumberValueObject(0);
         for (let i = 0; i < variants.length; i++) {

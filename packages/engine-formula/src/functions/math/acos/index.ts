@@ -15,20 +15,20 @@
  */
 
 import { ErrorType } from '../../../basics/error-type';
-import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
 
 export class Acos extends BaseFunction {
-    override calculate(variant: FunctionVariantType) {
-        if (variant.isError()) {
-            return new ErrorValueObject(ErrorType.VALUE);
+    override calculate(variant: BaseValueObject) {
+        if (variant == null) {
+            return new ErrorValueObject(ErrorType.NA);
         }
 
-        if (variant.isReferenceObject()) {
-            variant = (variant as BaseReferenceObject).toArrayValueObject();
+        if (variant.isError()) {
+            return variant;
         }
-        return (variant as BaseValueObject).acos();
+
+        return variant.acos();
     }
 }

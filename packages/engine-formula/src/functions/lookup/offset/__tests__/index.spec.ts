@@ -57,6 +57,7 @@ describe('Test offset', () => {
             formulaData: {},
             arrayFormulaCellData: {},
             forceCalculate: false,
+            numfmtItemMap: {},
             dirtyRanges: [],
             dirtyNameMap: {},
             dirtyUnitFeatureMap: {},

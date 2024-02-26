@@ -130,6 +130,10 @@ function translateDataStreamToHtml(body: IDocumentBody, withParagraphInfo: boole
         }
     }
 
+    if (cursorIndex < dataStream.length) {
+        spanList.push(dataStream.slice(cursorIndex, dataStream.length));
+    }
+
     return paragraphList.join('') + spanList.join('');
 }
 

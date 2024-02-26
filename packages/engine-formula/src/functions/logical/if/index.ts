@@ -23,8 +23,16 @@ import { BaseFunction } from '../../base-function';
 
 export class If extends BaseFunction {
     override calculate(logicalTest: BaseValueObject, valueIfTrue: BaseValueObject, valueIfFalse: BaseValueObject = new BooleanValueObject(false)) {
-        if (logicalTest.isError() || valueIfTrue.isError()) {
+        if (logicalTest == null || valueIfTrue == null) {
             return new ErrorValueObject(ErrorType.NA);
+        }
+
+        if (logicalTest.isError()) {
+            return logicalTest;
+        }
+
+        if (valueIfTrue.isError()) {
+            return valueIfTrue;
         }
 
         // get single value object

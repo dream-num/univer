@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommand, ICommandInfo, ITextRange } from '@univerjs/core';
+import type { ICommand, ICommandInfo } from '@univerjs/core';
 import { CommandType, ICommandService, TextX, TextXActionType } from '@univerjs/core';
 import type { ITextRangeWithStyle } from '@univerjs/engine-render';
 
@@ -27,10 +27,8 @@ export interface IIMEInputCommandParams {
     unitId: string;
     newText: string;
     oldTextLen: number;
-    range: ITextRange;
-    textRanges: ITextRangeWithStyle[];
+    isCompositionStart: boolean;
     isCompositionEnd: boolean;
-    segmentId?: string;
 }
 
 export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
@@ -39,9 +37,26 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
     type: CommandType.COMMAND,
 
     handler: async (accessor, params: IIMEInputCommandParams) => {
-        const { unitId, newText, oldTextLen, range, segmentId, textRanges, isCompositionEnd } = params;
+        const { unitId, newText, oldTextLen, isCompositionEnd, isCompositionStart } = params;
         const commandService = accessor.get(ICommandService);
         const imeInputManagerService = accessor.get(IMEInputManagerService);
+        const previousActiveRange = imeInputManagerService.getActiveRange();
+
+        if (previousActiveRange == null) {
+            return false;
+        }
+
+        const { startOffset, style, segmentId } = previousActiveRange;
+        const len = newText.length;
+
+        const textRanges: ITextRangeWithStyle[] = [
+            {
+                startOffset: startOffset + len,
+                endOffset: startOffset + len,
+                collapsed: true,
+                style,
+            },
+        ];
 
         const doMutation: ICommandInfo<IRichTextEditingMutationParams> = {
             id: RichTextEditingMutation.id,
@@ -54,14 +69,14 @@ export const IMEInputCommand: ICommand<IIMEInputCommandParams> = {
 
         const textX = new TextX();
 
-        if (range.collapsed) {
+        if (!previousActiveRange.collapsed && isCompositionStart) {
+            textX.push(...getRetainAndDeleteFromReplace(previousActiveRange, segmentId));
+        } else {
             textX.push({
                 t: TextXActionType.RETAIN,
-                len: range.startOffset,
+                len: startOffset,
                 segmentId,
             });
-        } else {
-            textX.push(...getRetainAndDeleteFromReplace(range, segmentId));
         }
 
         if (oldTextLen > 0) {

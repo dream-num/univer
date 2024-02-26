@@ -18,7 +18,7 @@ import type { ICellData, IRange, Nullable } from '@univerjs/core';
 import { CellValueType, isNullCell } from '@univerjs/core';
 
 import { FormulaAstLRU } from '../../basics/cache-lru';
-import type { IRuntimeUnitDataType, IUnitData, IUnitSheetNameMap } from '../../basics/common';
+import type { INumfmtItemMap, IRuntimeUnitDataType, IUnitData, IUnitSheetNameMap } from '../../basics/common';
 import { ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
 import { ObjectClassType } from '../../basics/object-class-type';
 import { ArrayValueObject, ValueObjectFactory } from '../value-object/array-value-object';
@@ -65,6 +65,8 @@ export class BaseReferenceObject extends ObjectClassType {
     private _runtimeArrayFormulaCellData: IRuntimeUnitDataType = {};
 
     private _runtimeFeatureCellData: { [featureId: string]: IRuntimeUnitDataType } = {};
+
+    private _numfmtItemData: INumfmtItemMap = {};
 
     private _refOffsetX = 0;
 
@@ -144,6 +146,9 @@ export class BaseReferenceObject extends ObjectClassType {
             return callback(new ErrorValueObject(ErrorType.VALUE), startRow, startColumn);
         }
 
+        const unitId = this._forcedUnitId || this._defaultUnitId;
+        const sheetId = this._forcedSheetId || this._defaultSheetId;
+
         for (let r = startRow; r <= endRow; r++) {
             for (let c = startColumn; c <= endColumn; c++) {
                 if (r < 0 || c < 0) {
@@ -158,6 +163,9 @@ export class BaseReferenceObject extends ObjectClassType {
                 }
 
                 const resultObjectValue = this.getCellValueObject(cell);
+
+                const pattern = this._numfmtItemData[unitId]?.[sheetId]?.[r]?.[c];
+                pattern && resultObjectValue.setPattern(pattern);
 
                 result = callback(resultObjectValue, r, c);
 
@@ -176,7 +184,15 @@ export class BaseReferenceObject extends ObjectClassType {
             return new NumberValueObject(0, true);
         }
 
-        return this.getCellValueObject(cell);
+        const cellValueObject = this.getCellValueObject(cell);
+
+        // Set numfmt pattern
+        const unitId = this._forcedUnitId || this._defaultUnitId;
+        const sheetId = this._forcedSheetId || this._defaultSheetId;
+        const numfmtItem = this._numfmtItemData[unitId]?.[sheetId]?.[startRow]?.[startColumn];
+        numfmtItem && cellValueObject.setPattern(numfmtItem);
+
+        return cellValueObject;
     }
 
     getRangeData() {
@@ -287,6 +303,14 @@ export class BaseReferenceObject extends ObjectClassType {
 
     setRuntimeFeatureCellData(unitData: { [featureId: string]: IRuntimeUnitDataType }) {
         this._runtimeFeatureCellData = unitData;
+    }
+
+    getNumfmtItemData() {
+        return this._numfmtItemData;
+    }
+
+    setNumfmtItemData(numfmtItemData: INumfmtItemMap) {
+        this._numfmtItemData = numfmtItemData;
     }
 
     getRowCount() {

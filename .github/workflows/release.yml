@@ -1,11 +1,12 @@
 name: 🍰 Release
 
 on:
-    workflow_dispatch:
-        inputs:
-            release_version:
-                description: Release version
-                required: true
+    push:
+        tags:
+            - 'v*.*.*'
+            - 'v*.*.*-alpha.*'
+            - 'v*.*.*-beta.*'
+            - 'v*.*.*-rc.*'
 
 concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
@@ -22,13 +23,6 @@ jobs:
             release_type: ${{ steps.release-type.outputs.value }}
 
         steps:
-            - name: Validate release version
-              run: |
-                  if [[ ! ${{ github.event.inputs.release_version }} =~ ^[0-9]+\.[0-9]+\.[0-9]+(-(rc|beta|alpha)\.[0-9]+)?$ ]]; then
-                      echo "Invalid release version: ${{ github.event.inputs.release_version }}"
-                      exit 1
-                  fi
-
             - name: Checkout
               uses: actions/checkout@v4
               with:
@@ -37,32 +31,14 @@ jobs:
             - name: Setup Node.js
               uses: ./.github/actions/setup-node
 
-            - name: 🔏 Set all monorepo's package version
-              run: |
-                  node -e "const fs = require('fs'); const package = JSON.parse(fs.readFileSync('./package.json')); package.version = '${{ github.event.inputs.release_version }}'; fs.writeFileSync('./package.json', JSON.stringify(package, null, 4) + '\n');"
-                  for package in $(ls common); do
-                      node -e "const fs = require('fs'); const package = JSON.parse(fs.readFileSync('./common/$package/package.json')); package.version = '${{ github.event.inputs.release_version }}'; fs.writeFileSync('./common/$package/package.json', JSON.stringify(package, null, 4) + '\n');"
-                  done
-                  for package in $(ls packages); do
-                      node -e "const fs = require('fs'); const package = JSON.parse(fs.readFileSync('./packages/$package/package.json')); package.version = '${{ github.event.inputs.release_version }}'; fs.writeFileSync('./packages/$package/package.json', JSON.stringify(package, null, 4) + '\n');"
-                  done
-
-            - name: 📝 Commit and push changes
-              run: |
-                  git config --global user.email "actions@github.com"
-                  git config --global user.name "GitHub Actions"
-                  git add -A
-                  git commit -m "chore(release): v${{ github.event.inputs.release_version }}" || exit 0
-                  git push
-                  git tag -a v${{ github.event.inputs.release_version }} -m "v${{ github.event.inputs.release_version }}"
-                  git push origin v${{ github.event.inputs.release_version }}
-
             - name: 🚚 Get release type
               id: release-type
               run: |
-                  if [[ ${{ github.event.inputs.release_version }} =~ -(alpha)\. ]]; then
+                  if [[ ${{ github.ref_name }} =~ -(alpha|beta|rc)\. ]]; then
                       extracted_type="${BASH_REMATCH[1]}"
                       echo "value=$extracted_type" >> $GITHUB_OUTPUT
+                  else
+                      echo "value=stable" >> $GITHUB_OUTPUT
                   fi
 
     release-npm:
@@ -74,7 +50,7 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v4
               with:
-                  ref: v${{ github.event.inputs.release_version }}
+                  ref: ${{ github.ref_name }}
 
             - name: Install pnpm
               uses: pnpm/action-setup@v2
@@ -93,15 +69,13 @@ jobs:
                   pnpm install
                   pnpm run build
 
-            - name: 🐙 Publish (alpha)
-              if: ${{ needs.prepare.outputs.release_type == 'alpha' }}
-              run: pnpm publish --access public --tag ${{ needs.prepare.outputs.release_type }} -r
-              env:
-                  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-            - name: 🐙 Publish (beta, rc, stable)
-              if: ${{ needs.prepare.outputs.release_type != 'alpha' }}
-              run: pnpm publish --access public -r
+            - name: 🐙 Publish
+              run: |
+                  if [[ ${{ needs.prepare.outputs.release_type }} == "alpha" ]]; then
+                      pnpm publish --access public --tag ${{ needs.prepare.outputs.release_type }} -r --no-git-checks
+                  else
+                      pnpm publish --access public -r --no-git-checks
+                  fi
               env:
                   NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
@@ -114,7 +88,7 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v4
               with:
-                  ref: v${{ github.event.inputs.release_version }}
+                  ref: ${{ github.ref_name }}
 
             - name: Install pnpm
               uses: pnpm/action-setup@v2
@@ -134,15 +108,13 @@ jobs:
                   pnpm install
                   pnpm run build
 
-            - name: 🐙 Publish (alpha)
-              if: ${{ needs.prepare.outputs.release_type == 'alpha' }}
-              run: pnpm publish --access public --tag ${{ needs.prepare.outputs.release_type }} -r
-              env:
-                  NODE_AUTH_TOKEN: ${{ secrets.VERDACCIO_TOKEN }}
-
-            - name: 🐙 Publish (beta, rc, stable)
-              if: ${{ needs.prepare.outputs.release_type != 'alpha' }}
-              run: pnpm publish --access public -r
+            - name: 🐙 Publish
+              run: |
+                  if [[ ${{ needs.prepare.outputs.release_type }} == "alpha" ]]; then
+                      pnpm publish --access public --tag ${{ needs.prepare.outputs.release_type }} -r --no-git-checks
+                  else
+                      pnpm publish --access public -r --no-git-checks
+                  fi
               env:
                   NODE_AUTH_TOKEN: ${{ secrets.VERDACCIO_TOKEN }}
 
@@ -216,7 +188,7 @@ jobs:
                   data: >
                       {
                           "type": "release",
-                          "version": "v${{ github.event.inputs.release_version }}",
+                          "version": "${{ github.ref_name }}",
                           "workflow": {
                               "id": "${{ github.run_id }}"
                           },

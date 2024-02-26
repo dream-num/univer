@@ -24,16 +24,23 @@ export const FUNCTION_LIST_DATE: IFunctionInfo[] = [
         abstract: 'formula.functionList.DATE.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.DATE.functionParameter.number1.name',
-                detail: 'formula.functionList.DATE.functionParameter.number1.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.DATE.functionParameter.year.name',
+                detail: 'formula.functionList.DATE.functionParameter.year.detail',
+                example: '2024',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'formula.functionList.DATE.functionParameter.number2.name',
-                detail: 'formula.functionList.DATE.functionParameter.number2.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.DATE.functionParameter.month.name',
+                detail: 'formula.functionList.DATE.functionParameter.month.detail',
+                example: '1',
+                require: 1,
+                repeat: 0,
+            },
+            {
+                name: 'formula.functionList.DATE.functionParameter.day.name',
+                detail: 'formula.functionList.DATE.functionParameter.day.detail',
+                example: '1',
                 require: 1,
                 repeat: 0,
             },
@@ -90,15 +97,8 @@ export const FUNCTION_LIST_DATE: IFunctionInfo[] = [
         abstract: 'formula.functionList.DAY.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.DAY.functionParameter.number1.name',
-                detail: 'formula.functionList.DAY.functionParameter.number1.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-            {
-                name: 'formula.functionList.DAY.functionParameter.number2.name',
-                detail: 'formula.functionList.DAY.functionParameter.number2.detail',
+                name: 'formula.functionList.DAY.functionParameter.serialNumber.name',
+                detail: 'formula.functionList.DAY.functionParameter.serialNumber.detail',
                 example: 'A1:A20',
                 require: 1,
                 repeat: 0,
@@ -156,16 +156,16 @@ export const FUNCTION_LIST_DATE: IFunctionInfo[] = [
         abstract: 'formula.functionList.EDATE.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.EDATE.functionParameter.number1.name',
-                detail: 'formula.functionList.EDATE.functionParameter.number1.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.EDATE.functionParameter.startDate.name',
+                detail: 'formula.functionList.EDATE.functionParameter.startDate.detail',
+                example: 'A1',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'formula.functionList.EDATE.functionParameter.number2.name',
-                detail: 'formula.functionList.EDATE.functionParameter.number2.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.EDATE.functionParameter.months.name',
+                detail: 'formula.functionList.EDATE.functionParameter.months.detail',
+                example: '1',
                 require: 1,
                 repeat: 0,
             },
@@ -266,15 +266,8 @@ export const FUNCTION_LIST_DATE: IFunctionInfo[] = [
         abstract: 'formula.functionList.MONTH.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.MONTH.functionParameter.number1.name',
-                detail: 'formula.functionList.MONTH.functionParameter.number1.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-            {
-                name: 'formula.functionList.MONTH.functionParameter.number2.name',
-                detail: 'formula.functionList.MONTH.functionParameter.number2.detail',
+                name: 'formula.functionList.MONTH.functionParameter.serialNumber.name',
+                detail: 'formula.functionList.MONTH.functionParameter.serialNumber.detail',
                 example: 'A1:A20',
                 require: 1,
                 repeat: 0,
@@ -419,20 +412,6 @@ export const FUNCTION_LIST_DATE: IFunctionInfo[] = [
         description: 'formula.functionList.TODAY.description',
         abstract: 'formula.functionList.TODAY.abstract',
         functionParameter: [
-            {
-                name: 'formula.functionList.TODAY.functionParameter.number1.name',
-                detail: 'formula.functionList.TODAY.functionParameter.number1.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-            {
-                name: 'formula.functionList.TODAY.functionParameter.number2.name',
-                detail: 'formula.functionList.TODAY.functionParameter.number2.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
         ],
     },
     {
@@ -530,15 +509,8 @@ export const FUNCTION_LIST_DATE: IFunctionInfo[] = [
         abstract: 'formula.functionList.YEAR.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.YEAR.functionParameter.number1.name',
-                detail: 'formula.functionList.YEAR.functionParameter.number1.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-            {
-                name: 'formula.functionList.YEAR.functionParameter.number2.name',
-                detail: 'formula.functionList.YEAR.functionParameter.number2.detail',
+                name: 'formula.functionList.YEAR.functionParameter.serialNumber.name',
+                detail: 'formula.functionList.YEAR.functionParameter.serialNumber.detail',
                 example: 'A1:A20',
                 require: 1,
                 repeat: 0,

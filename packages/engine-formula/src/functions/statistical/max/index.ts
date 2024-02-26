@@ -14,12 +14,17 @@
  * limitations under the License.
  */
 
-import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { ErrorType } from '../../../basics/error-type';
+import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class Max extends BaseFunction {
     override calculate(...variants: BaseValueObject[]) {
+        if (variants.length === 0) {
+            return new ErrorValueObject(ErrorType.NA);
+        }
+
         let accumulatorAll: BaseValueObject = new NumberValueObject(Number.NEGATIVE_INFINITY);
         for (let i = 0; i < variants.length; i++) {
             let variant = variants[i];

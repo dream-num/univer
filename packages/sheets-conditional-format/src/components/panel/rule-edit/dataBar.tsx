@@ -147,7 +147,7 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                     {localeService.t('sheet.cf.panel.fillType')}
                 </div>
 
-                <div className={stylesBase.mTSm}>
+                <div className={`${stylesBase.mTSm} ${stylesBase.mLXxs}`}>
                     <RadioGroup
                         value={isGradient}
                         onChange={(v) => {
@@ -166,7 +166,7 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
             </div>
             <div>
                 <div className={stylesBase.label}>{localeService.t('sheet.cf.panel.colorSet')}</div>
-                <div className={`${stylesBase.labelContainer} ${stylesBase.mTSm}`}>
+                <div className={`${stylesBase.labelContainer} ${stylesBase.mTSm} ${stylesBase.mLXxs}`}>
                     <div className={`${stylesBase.labelContainer}`}>
                         <div className={`${styles.text}`}>{localeService.t('sheet.cf.panel.native')}</div>
                         <ColorPicker

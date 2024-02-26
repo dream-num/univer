@@ -173,9 +173,9 @@ export const RuleEdit = (props: IRuleEditProps) => {
                 <Select value={ruleType} options={options} onChange={(e) => ruleTypeSet(e)} />
             </div>
             <StyleEditor interceptorManager={interceptorManager} rule={props.rule?.rule as any} onChange={onStyleChange} />
-            <div className={styleBase.mTBase}>
-                <Button size="small" onClick={handleSubmit}>{localeService.t('sheet.cf.panel.submit')}</Button>
-                <Button className={styleBase.mLSm} size="small" onClick={handleCancel}>{localeService.t('sheet.cf.panel.cancel')}</Button>
+            <div className={`${styleBase.mTBase} ${styles.btnList}`}>
+                <Button size="small" onClick={handleCancel}>{localeService.t('sheet.cf.panel.cancel')}</Button>
+                <Button className={styleBase.mLSm} size="small" type="primary" onClick={handleSubmit}>{localeService.t('sheet.cf.panel.submit')}</Button>
             </div>
         </div>
     );

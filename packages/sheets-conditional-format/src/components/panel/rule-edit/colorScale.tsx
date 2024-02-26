@@ -234,15 +234,18 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
                         }}
                     />
                 )}
-                <ColorPicker
-                    className={styles.mLXxs}
-                    disable={medianType === 'none'}
-                    color={medianColor}
-                    onChange={(v) => {
-                        medianColorSet(v);
-                        handleChange({ minType, medianType, maxType, minValue, medianValue, maxValue, minColor, medianColor: v, maxColor });
-                    }}
-                />
+                {medianType === 'none' && (
+                    <ColorPicker
+                        className={styles.mLXxs}
+                        disable={medianType === 'none'}
+                        color={medianColor}
+                        onChange={(v) => {
+                            medianColorSet(v);
+                            handleChange({ minType, medianType, maxType, minValue, medianValue, maxValue, minColor, medianColor: v, maxColor });
+                        }}
+                    />
+                )}
+
             </div>
             <div className={styles.label}>{localeService.t('sheet.cf.valueType.max')}</div>
             <div className={`${styles.labelContainer} ${styles.mTSm}`}>

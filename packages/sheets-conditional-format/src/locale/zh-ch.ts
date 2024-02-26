@@ -40,6 +40,9 @@ export default {
                 colorSet: '颜色设置',
                 positive: '正值',
                 native: '负值',
+                workSheet: '整张工作表',
+                selectedRange: '所选单元格',
+                managerRuleSelect: '管理 {0} 的规则',
             },
             preview: {
                 describe: {

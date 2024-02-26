@@ -31,6 +31,7 @@ import type {
     ITimePeriodHighlightCell } from '../../../models/type';
 import { ConditionalStyleEditor } from '../../conditional-style-editor';
 import { Preview } from '../../preview';
+import stylesBase from '../index.module.less';
 import type { IStyleEditorProps } from './type';
 import styles from './index.module.less';
 
@@ -53,9 +54,9 @@ const HighlightCellInput = (props: { type: IResult['subType'];
     useEffect(() => {
         switch (type) {
             case SubRuleType.text:{
-                if ([TextOperator.beginsWith, TextOperator.containsText,
-                    TextOperator.equal, TextOperator.endsWith,
-                    TextOperator.notEqual].includes(operator as TextOperator)) {
+                if ([TextOperator.beginsWith, TextOperator.endsWith,
+                    TextOperator.containsText, TextOperator.notContainsText,
+                    TextOperator.equal, TextOperator.notEqual].includes(operator as TextOperator)) {
                     onChange(inputTextValue);
                 }
                 break;
@@ -77,14 +78,18 @@ const HighlightCellInput = (props: { type: IResult['subType'];
 
     switch (type) {
         case SubRuleType.text:{
-            if ([TextOperator.beginsWith, TextOperator.containsText,
-                TextOperator.equal, TextOperator.endsWith,
-                TextOperator.notEqual].includes(operator as TextOperator)) {
+            if ([TextOperator.beginsWith, TextOperator.endsWith,
+                TextOperator.containsText, TextOperator.notContainsText,
+                TextOperator.equal, TextOperator.notEqual].includes(operator as TextOperator)) {
                 const _onChange = (value: string) => {
                     inputTextValueSet(value);
                     onChange(value);
                 };
-                return <Input value={inputTextValue} onChange={_onChange} />;
+                return (
+                    <div className={`${stylesBase.mTSm}`}>
+                        <Input value={inputTextValue} onChange={_onChange} />
+                    </div>
+                );
             }
             break;
         }
@@ -97,7 +102,12 @@ const HighlightCellInput = (props: { type: IResult['subType'];
                     inputNumberValueSet(value || 0);
                     onChange(value || 0);
                 };
-                return <InputNumber value={inputNumberValue} onChange={_onChange} />;
+                return (
+                    <div className={`${stylesBase.mTSm}`}>
+                        <InputNumber value={inputNumberValue} onChange={_onChange} />
+
+                    </div>
+                );
             }
             if ([NumberOperator.between, NumberOperator.notBetween].includes(operator as NumberOperator)) {
                 const onChangeMin = (_value: number | null) => {
@@ -111,10 +121,10 @@ const HighlightCellInput = (props: { type: IResult['subType'];
                     onChange(value);
                 };
                 return (
-                    <>
-                        <InputNumber value={inputNumberMin} onChange={onChangeMin} />
-                        <InputNumber value={inputNumberMax} onChange={onChangeMax} />
-                    </>
+                    <div className={`${stylesBase.mTSm} ${stylesBase.labelContainer}`}>
+                        <InputNumber className={stylesBase.inputWidth} value={inputNumberMin} onChange={onChangeMin} />
+                        <InputNumber className={`${stylesBase.inputWidth} ${stylesBase.mLSm}`} value={inputNumberMax} onChange={onChangeMax} />
+                    </div>
                 );
             }
         }
@@ -125,24 +135,27 @@ const getOperatorOptions = (type: SubRuleType.number | SubRuleType.text | SubRul
     switch (type) {
         case SubRuleType.text:{
             return [
-                createOptionItem(TextOperator.containsBlanks, localeService),
-                createOptionItem(TextOperator.beginsWith, localeService),
+                createOptionItem(TextOperator.notContainsText, localeService),
                 createOptionItem(TextOperator.containsText, localeService),
-                createOptionItem(TextOperator.endsWith, localeService),
                 createOptionItem(TextOperator.equal, localeService),
                 createOptionItem(TextOperator.notEqual, localeService),
-                createOptionItem(TextOperator.notContainsText, localeService),
+                createOptionItem(TextOperator.beginsWith, localeService),
+                createOptionItem(TextOperator.endsWith, localeService),
+                createOptionItem(TextOperator.containsBlanks, localeService),
                 createOptionItem(TextOperator.notContainsBlanks, localeService)];
         }
         case SubRuleType.number:{
-            return [createOptionItem(NumberOperator.between, localeService),
-                createOptionItem(NumberOperator.equal, localeService),
+            return [
                 createOptionItem(NumberOperator.greaterThan, localeService),
-                createOptionItem(NumberOperator.greaterThanOrEqual, localeService),
                 createOptionItem(NumberOperator.lessThan, localeService),
+                createOptionItem(NumberOperator.greaterThanOrEqual, localeService),
                 createOptionItem(NumberOperator.lessThanOrEqual, localeService),
+                createOptionItem(NumberOperator.equal, localeService),
                 createOptionItem(NumberOperator.notEqual, localeService),
-                createOptionItem(NumberOperator.notBetween, localeService)];
+                createOptionItem(NumberOperator.between, localeService),
+                createOptionItem(NumberOperator.notBetween, localeService),
+
+            ];
         }
         case SubRuleType.timePeriod:{
             return [createOptionItem(TimePeriodOperator.last7Days, localeService),
@@ -216,9 +229,9 @@ export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, ITextHigh
     const getResult = useMemo(() => (option: { subType?: string;operator?: string;value?: IValue;style?: IHighlightCell['style'] }) => {
         switch (option.subType || subType) {
             case SubRuleType.text:{
-                if ([TextOperator.beginsWith, TextOperator.containsText,
-                    TextOperator.equal, TextOperator.endsWith,
-                    TextOperator.notEqual].includes(operator as TextOperator)) {
+                if ([TextOperator.beginsWith, TextOperator.endsWith,
+                    TextOperator.containsText, TextOperator.notContainsText,
+                    TextOperator.equal, TextOperator.notEqual].includes(operator as TextOperator)) {
                     return {
                         type: RuleType.highlightCell,
                         subType: option.subType ?? subType,
@@ -300,9 +313,9 @@ export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, ITextHigh
 
     return (
         <div>
-            <div>符合以下条件时</div>
-            <Select onChange={onTypeChange} value={subType} options={typeOptions} />
-            <Select onChange={onOperatorChange} value={operator} options={operatorOptions} />
+            <div className={`${stylesBase.title} ${stylesBase.mTBase}`}>{localeService.t('sheet.cf.panel.styleRule')}</div>
+            <Select className={`${stylesBase.mTSm}`} onChange={onTypeChange} value={subType} options={typeOptions} />
+            <Select className={`${stylesBase.mTSm}`} onChange={onOperatorChange} value={operator} options={operatorOptions} />
             <HighlightCellInput key={inputRenderKey} value={value} interceptorManager={interceptorManager} type={subType} operator={operator} rule={rule} onChange={onInputChange} />
             <div className={styles.cfPreviewWrap}>
                 <Preview rule={getResult({}) as IConditionalFormatRuleConfig} />

@@ -21,6 +21,8 @@ import { LocaleService } from '@univerjs/core';
 import { RuleType, ValueType } from '../../../base/const';
 import type { IValueConfig } from '../../../models/type';
 import { ColorPicker } from '../../color-picker';
+import stylesBase from '../index.module.less';
+import styles from './index.module.less';
 import type { IStyleEditorProps } from './type';
 
 const createOptionItem = (text: ValueType, localeService: LocaleService) => ({ label: localeService.t(`sheet.cf.valueType.${text}`), value: text });
@@ -136,44 +138,57 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
 
     return (
         <div>
-            {localeService.t('sheet.cf.panel.styleRule')}
+            <div className={stylesBase.title}>
+                {localeService.t('sheet.cf.panel.styleRule')}
+            </div>
+
             <div>
-                {localeService.t('sheet.cf.panel.fillType')}
-                <RadioGroup
-                    value={isGradient}
-                    onChange={(v) => {
-                        isGradientSet(v as string);
-                        _handleChange({ isGradient: v as string, minValue, minValueType, maxValue, maxValueType, positiveColor, nativeColor });
-                    }}
-                >
-                    <Radio value="0">
-                        {localeService.t('sheet.cf.panel.pureColor')}
-                    </Radio>
-                    <Radio value="1">
-                        {localeService.t('sheet.cf.panel.gradient')}
-                    </Radio>
-                </RadioGroup>
+                <div className={stylesBase.label}>
+                    {localeService.t('sheet.cf.panel.fillType')}
+                </div>
+
+                <div className={stylesBase.mTSm}>
+                    <RadioGroup
+                        value={isGradient}
+                        onChange={(v) => {
+                            isGradientSet(v as string);
+                            _handleChange({ isGradient: v as string, minValue, minValueType, maxValue, maxValueType, positiveColor, nativeColor });
+                        }}
+                    >
+                        <Radio value="0">
+                            {localeService.t('sheet.cf.panel.pureColor')}
+                        </Radio>
+                        <Radio value="1">
+                            {localeService.t('sheet.cf.panel.gradient')}
+                        </Radio>
+                    </RadioGroup>
+                </div>
             </div>
             <div>
-                <div>{localeService.t('sheet.cf.panel.colorSet')}</div>
-
-                <div>{localeService.t('sheet.cf.panel.native')}</div>
-                <ColorPicker
-                    color={nativeColor}
-                    onChange={handleNativeColorChange}
-                />
-
-                <div>{localeService.t('sheet.cf.panel.positive')}</div>
-                <ColorPicker
-                    color={positiveColor}
-                    onChange={handlePositiveColorChange}
-                />
+                <div className={stylesBase.label}>{localeService.t('sheet.cf.panel.colorSet')}</div>
+                <div className={`${stylesBase.labelContainer} ${stylesBase.mTSm}`}>
+                    <div className={`${stylesBase.labelContainer}`}>
+                        <div className={`${styles.text}`}>{localeService.t('sheet.cf.panel.native')}</div>
+                        <ColorPicker
+                            color={nativeColor}
+                            onChange={handleNativeColorChange}
+                        />
+                    </div>
+                    <div className={`${stylesBase.labelContainer} ${stylesBase.mLSm} `}>
+                        <div className={`${styles.text} `}>{localeService.t('sheet.cf.panel.positive')}</div>
+                        <ColorPicker
+                            color={positiveColor}
+                            onChange={handlePositiveColorChange}
+                        />
+                    </div>
+                </div>
 
             </div>
             <div>
-                <div>{localeService.t('sheet.cf.valueType.min')}</div>
-                <div>
+                <div className={stylesBase.label}>{localeService.t('sheet.cf.valueType.min')}</div>
+                <div className={`${stylesBase.mTSm} ${stylesBase.labelContainer}`}>
                     <Select
+                        className={stylesBase.inputWidth}
                         options={minOptions}
                         value={minValueType}
                         onChange={(v) => {
@@ -183,6 +198,7 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                     />
                     {isShowInput(minValueType) && (
                         <InputNumber
+                            className={stylesBase.mLSm}
                             value={minValue}
                             onChange={(v) => {
                                 minValueSet(v || 0);
@@ -191,9 +207,10 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                         />
                     )}
                 </div>
-                <div>{localeService.t('sheet.cf.valueType.max')}</div>
-                <div>
+                <div className={stylesBase.label}>{localeService.t('sheet.cf.valueType.max')}</div>
+                <div className={`${stylesBase.mTSm} ${stylesBase.labelContainer}`}>
                     <Select
+                        className={stylesBase.inputWidth}
                         options={maxOptions}
                         value={maxValueType}
                         onChange={(v) => {
@@ -203,6 +220,7 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                     />
                     {isShowInput(maxValueType) && (
                         <InputNumber
+                            className={stylesBase.mLSm}
                             value={maxValue}
                             onChange={(v) => {
                                 maxValueSet(v || 0);

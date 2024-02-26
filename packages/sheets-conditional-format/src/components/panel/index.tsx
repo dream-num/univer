@@ -49,7 +49,9 @@ export const ConditionFormatPanel = (props: IConditionFormatPanelProps) => {
                     <>
                         <RuleList onClick={handleRuleClick} />
                         <div onClick={createCfRule} className={styles.createRule}>
-                            {localeService.t('sheet.cf.panel.createRule')}
+                            <div className={styles.button}>
+                                {localeService.t('sheet.cf.panel.createRule')}
+                            </div>
                         </div>
                     </>
                 )}

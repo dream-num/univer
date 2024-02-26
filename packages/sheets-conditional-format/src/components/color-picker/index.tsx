@@ -27,10 +27,11 @@ interface IColorPickerProps {
     onChange: (color: string) => void;
     disable?: boolean;
     iconId?: string;
+    className?: string;
 };
 
 export const ColorPicker = (props: IColorPickerProps) => {
-    const { color, onChange, disable = false, iconId = 'PaintBucket' } = props;
+    const { color, onChange, disable = false, iconId = 'PaintBucket', className } = props;
     const componentManager = useDependency(ComponentManager);
 
     const colorKit = useMemo(() => new ColorKit(color), [color]);
@@ -39,16 +40,16 @@ export const ColorPicker = (props: IColorPickerProps) => {
     return Icon && (!disable
         ? (
             <Dropdown overlay={(
-                <div className={styles.cfColorPicker}>
+                <div className={`${styles.cfColorPicker} `}>
                     <OriginColorPicker color={color} onChange={onChange} />
                 </div>
             )}
             >
-                <span className={styles.cfColorPickerIcon}>
+                <span className={`${styles.cfColorPickerIcon} ${className}`}>
                     <Icon extend={{ colorChannel1: colorKit.isValid ? color : 'rgb(var(--primary-color))' }} />
                 </span>
 
             </Dropdown>
         )
-        : <Icon extend={{ colorChannel1: colorKit.isValid ? color : 'rgb(var(--primary-color))' }} />);
+        : <Icon className={className} extend={{ colorChannel1: colorKit.isValid ? color : 'rgb(var(--primary-color))' }} />);
 };

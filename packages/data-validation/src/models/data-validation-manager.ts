@@ -17,7 +17,7 @@
 import { type IDataValidationRule, Tools } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import type { IUpdateRulePayload } from '../types/interfaces/i-update-rule-payload';
-import { UpdateRuleType } from '..';
+import { UpdateRuleType } from '../types';
 
 export class DataValidationManager<T extends IDataValidationRule> {
     private _dataValidations: T[];

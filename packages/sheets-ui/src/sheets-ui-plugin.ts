@@ -64,6 +64,8 @@ import { SheetSkeletonManagerService } from './services/sheet-skeleton-manager.s
 import { ShortcutExperienceService } from './services/shortcut-experience.service';
 import { IStatusBarService, StatusBarService } from './services/status-bar.service';
 import { SheetCanvasView } from './views/sheet-canvas-view';
+import { HoverController } from './controllers/hover.controller';
+import { HoverManagerService } from './services/hover-manager.service';
 
 export class UniverSheetsUIPlugin extends Plugin {
     static override type = PluginType.Sheet;
@@ -106,6 +108,7 @@ export class UniverSheetsUIPlugin extends Plugin {
                 ],
                 [IStatusBarService, { useClass: StatusBarService }],
                 [IMarkSelectionService, { useClass: MarkSelectionService }],
+                [HoverManagerService],
 
                 // controllers
                 [ActiveWorksheetController],
@@ -134,6 +137,7 @@ export class UniverSheetsUIPlugin extends Plugin {
                 [StatusBarController],
                 [EditingController],
                 [MarkSelectionController],
+                [HoverController],
             ] as Dependency[]
         ).forEach((d) => injector.add(d));
     }

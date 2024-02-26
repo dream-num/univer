@@ -86,6 +86,7 @@ export function whenFormulaEditorActivated(contextService: IContextService) {
 export function whenEditorDidNotInputFormulaActivated(contextService: IContextService) {
     return (
         contextService.getContextValue(FOCUSING_SHEET) &&
+        contextService.getContextValue(FOCUSING_UNIVER_EDITOR) &&
         contextService.getContextValue(EDITOR_ACTIVATED) &&
         !contextService.getContextValue(FOCUSING_EDITOR_INPUT_FORMULA)
     );

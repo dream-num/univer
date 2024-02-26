@@ -14,16 +14,21 @@
  * limitations under the License.
  */
 
-import { Direction, EDITOR_ACTIVATED, FOCUSING_DOC } from '@univerjs/core';
+import type { IContextService } from '@univerjs/core';
+import { Direction, EDITOR_ACTIVATED, FOCUSING_DOC, FOCUSING_UNIVER_EDITOR } from '@univerjs/core';
 import type { IShortcutItem } from '@univerjs/ui';
 import { KeyCode, MetaKeys } from '@univerjs/ui';
 
 import { MoveCursorOperation, MoveSelectionOperation, SelectAllOperation } from '@univerjs/docs';
 
+export function whenDocAndEditorFocused(contextService: IContextService): boolean {
+    return contextService.getContextValue(FOCUSING_DOC) && contextService.getContextValue(FOCUSING_UNIVER_EDITOR);
+}
+
 export const MoveCursorUpShortcut: IShortcutItem = {
     id: MoveCursorOperation.id,
     binding: KeyCode.ARROW_UP,
-    preconditions: (contextService) => contextService.getContextValue(FOCUSING_DOC),
+    preconditions: whenDocAndEditorFocused,
     staticParameters: {
         direction: Direction.UP,
     },
@@ -32,7 +37,7 @@ export const MoveCursorUpShortcut: IShortcutItem = {
 export const MoveCursorDownShortcut: IShortcutItem = {
     id: MoveCursorOperation.id,
     binding: KeyCode.ARROW_DOWN,
-    preconditions: (contextService) => contextService.getContextValue(FOCUSING_DOC),
+    preconditions: whenDocAndEditorFocused,
     staticParameters: {
         direction: Direction.DOWN,
     },
@@ -41,7 +46,7 @@ export const MoveCursorDownShortcut: IShortcutItem = {
 export const MoveCursorLeftShortcut: IShortcutItem = {
     id: MoveCursorOperation.id,
     binding: KeyCode.ARROW_LEFT,
-    preconditions: (contextService) => contextService.getContextValue(FOCUSING_DOC),
+    preconditions: whenDocAndEditorFocused,
     staticParameters: {
         direction: Direction.LEFT,
     },
@@ -50,7 +55,7 @@ export const MoveCursorLeftShortcut: IShortcutItem = {
 export const MoveCursorRightShortcut: IShortcutItem = {
     id: MoveCursorOperation.id,
     binding: KeyCode.ARROW_RIGHT,
-    preconditions: (contextService) => contextService.getContextValue(FOCUSING_DOC),
+    preconditions: whenDocAndEditorFocused,
     staticParameters: {
         direction: Direction.RIGHT,
     },
@@ -59,7 +64,7 @@ export const MoveCursorRightShortcut: IShortcutItem = {
 export const MoveSelectionUpShortcut: IShortcutItem = {
     id: MoveSelectionOperation.id,
     binding: KeyCode.ARROW_UP | MetaKeys.SHIFT,
-    preconditions: (contextService) => contextService.getContextValue(FOCUSING_DOC),
+    preconditions: whenDocAndEditorFocused,
     staticParameters: {
         direction: Direction.UP,
     },
@@ -68,7 +73,7 @@ export const MoveSelectionUpShortcut: IShortcutItem = {
 export const MoveSelectionDownShortcut: IShortcutItem = {
     id: MoveSelectionOperation.id,
     binding: KeyCode.ARROW_DOWN | MetaKeys.SHIFT,
-    preconditions: (contextService) => contextService.getContextValue(FOCUSING_DOC),
+    preconditions: whenDocAndEditorFocused,
     staticParameters: {
         direction: Direction.DOWN,
     },
@@ -77,7 +82,7 @@ export const MoveSelectionDownShortcut: IShortcutItem = {
 export const MoveSelectionLeftShortcut: IShortcutItem = {
     id: MoveSelectionOperation.id,
     binding: KeyCode.ARROW_LEFT | MetaKeys.SHIFT,
-    preconditions: (contextService) => contextService.getContextValue(FOCUSING_DOC),
+    preconditions: whenDocAndEditorFocused,
     staticParameters: {
         direction: Direction.LEFT,
     },
@@ -86,7 +91,7 @@ export const MoveSelectionLeftShortcut: IShortcutItem = {
 export const MoveSelectionRightShortcut: IShortcutItem = {
     id: MoveSelectionOperation.id,
     binding: KeyCode.ARROW_RIGHT | MetaKeys.SHIFT,
-    preconditions: (contextService) => contextService.getContextValue(FOCUSING_DOC),
+    preconditions: whenDocAndEditorFocused,
     staticParameters: {
         direction: Direction.RIGHT,
     },
@@ -96,5 +101,5 @@ export const SelectAllShortcut: IShortcutItem = {
     id: SelectAllOperation.id,
     binding: KeyCode.A | MetaKeys.CTRL_COMMAND,
     preconditions: (contextService) =>
-        contextService.getContextValue(FOCUSING_DOC) || contextService.getContextValue(EDITOR_ACTIVATED),
+        contextService.getContextValue(FOCUSING_UNIVER_EDITOR) && (contextService.getContextValue(FOCUSING_DOC) || contextService.getContextValue(EDITOR_ACTIVATED)),
 };

@@ -24,6 +24,7 @@ import { SelectionManagerService } from '@univerjs/sheets';
 import { serializeRange } from '@univerjs/engine-formula';
 import { DeleteSingle, MoreFunctionSingle } from '@univerjs/icons';
 import GridLayout from 'react-grid-layout';
+import { debounceTime, Observable } from 'rxjs';
 import type { IDeleteCfCommandParams } from '../../../commands/commands/delete-cf.command';
 import { deleteCfCommand } from '../../../commands/commands/delete-cf.command';
 import type { IMoveCfCommand } from '../../../commands/commands/move-cf.command';
@@ -93,6 +94,7 @@ const getRuleDescribe = (rule: IConditionFormatRule, localeService: LocaleServic
         }
     }
 };
+let defaultWidth = 0;
 export const RuleList = (props: IRuleListProps) => {
     const { onClick } = props;
     const conditionalFormatRuleModel = useDependency(ConditionalFormatRuleModel);
@@ -107,7 +109,7 @@ export const RuleList = (props: IRuleListProps) => {
     const subUnitId = worksheet.getSheetId();
     const [selectValue, selectValueSet] = useState('2');
     const [fetchRuleListId, fetchRuleListIdSet] = useState(0);
-    const [layoutWidth, layoutWidthSet] = useState(0);
+    const [layoutWidth, layoutWidthSet] = useState(defaultWidth);
     const layoutContainerRef = useRef<HTMLDivElement>(null);
     const selectOption = [{ label: '整张工作表', value: '2' }, { label: '所选择单元格', value: '1' }];
     const ruleList = useMemo(() => {
@@ -139,9 +141,44 @@ export const RuleList = (props: IRuleListProps) => {
     }, [conditionalFormatRuleModel]);
 
     useEffect(() => {
-        // 8 is padding-left
-        layoutWidthSet(Math.max(0, (layoutContainerRef.current?.getBoundingClientRect().width || 0) - 8));
-    }, [selectValue, fetchRuleListId]);
+        // Because univer-sidebar contains animations, accurate width values can not be obtained in real time。
+        // Also set a global width as the default width to avoid a gap before the first calculation.
+        const getWidth = () => {
+            // 8 is padding-left
+            const width = Math.max(0, (layoutContainerRef.current?.getBoundingClientRect().width || 0) - 8);
+            defaultWidth = width;
+            return width;
+        };
+        const observer = new Observable((subscribe) => {
+            const targetElement = document.querySelector('.univer-sidebar');
+            if (targetElement) {
+                let time = setTimeout(() => {
+                    subscribe.next();
+                }, 150);
+                const clearTime = () => {
+                    time && clearTimeout(time);
+                    time = null as any;
+                };
+                const handle: any = (e: TransitionEvent) => {
+                    if (e.propertyName === 'width') {
+                        clearTime();
+                        subscribe.next();
+                    }
+                };
+                targetElement.addEventListener('transitionend', handle);
+                return () => {
+                    clearTime();
+                    targetElement.removeEventListener('transitionend', handle);
+                };
+            }
+        });
+        const subscription = observer.pipe(debounceTime(16)).subscribe(() => {
+            layoutWidthSet(getWidth());
+        });
+        return () => {
+            subscription.unsubscribe();
+        };
+    }, []);
 
     const handleDelete = (rule: IConditionFormatRule) => {
         const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();

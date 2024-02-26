@@ -20,7 +20,10 @@ import { LocaleService } from '@univerjs/core';
 import { Checkbox, InputNumber, Select } from '@univerjs/design';
 import { NumberOperator, RuleType, SubRuleType } from '../../../base/const';
 import { ConditionalStyleEditor } from '../../conditional-style-editor';
-import type { IAverageHighlightCell, IHighlightCell, IRankHighlightCell } from '../../../models/type';
+import type { IAverageHighlightCell, IConditionalFormatRuleConfig, IHighlightCell, IRankHighlightCell } from '../../../models/type';
+import stylesBase from '../index.module.less';
+import { Preview } from '../../preview';
+import styles from './index.module.less';
 import type { IStyleEditorProps } from './type';
 
 export const RankStyleEditor = (props: IStyleEditorProps) => {
@@ -140,8 +143,9 @@ export const RankStyleEditor = (props: IStyleEditorProps) => {
     };
     return (
         <div>
-            <div>{localeService.t('sheet.cf.panel.styleRule')}</div>
+            <div className={`${stylesBase.title} ${stylesBase.mTBase}`}>{localeService.t('sheet.cf.panel.styleRule')}</div>
             <Select
+                className={stylesBase.mTSm}
                 value={type}
                 options={options}
                 onChange={(v) => {
@@ -150,7 +154,7 @@ export const RankStyleEditor = (props: IStyleEditorProps) => {
                 }}
             />
             {['isNotBottom', 'isBottom'].includes(type) && (
-                <div>
+                <div className={`${stylesBase.labelContainer} ${stylesBase.mTSm}`}>
                     <InputNumber
                         value={value}
                         onChange={(v) => {
@@ -159,18 +163,26 @@ export const RankStyleEditor = (props: IStyleEditorProps) => {
                             _onChange({ type, isPercent, value, style });
                         }}
                     />
-                    <Checkbox
-                        checked={isPercent}
-                        value={undefined as any}
-                        onChange={(v) => {
-                            isPercentSet(!!v);
-                            _onChange({ type, isPercent: !!v, value, style });
-                        }}
-                    />
+                    <div className={`${stylesBase.mLSm} ${stylesBase.labelContainer} ${styles.text}`}>
+                        <Checkbox
+                            checked={isPercent}
+                            value={undefined as any}
+                            onChange={(v) => {
+                                isPercentSet(!!v);
+                                _onChange({ type, isPercent: !!v, value, style });
+                            }}
+                        />
+                        百分比
+                    </div>
+
                 </div>
             )}
+            <div className={styles.cfPreviewWrap}>
+                <Preview rule={getResult({ type, isPercent, value, style }) as IConditionalFormatRuleConfig} />
+            </div>
             <ConditionalStyleEditor
                 style={rule?.style}
+                className={stylesBase.mTSm}
                 onChange={(v) => {
                     styleSet(v);
                     _onChange({ type, isPercent, value, style: v });

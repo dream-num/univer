@@ -25,6 +25,7 @@ import { DEFAULT_BG_COLOR, DEFAULT_FONT_COLOR } from '../../base/const';
 import styles from './index.module.less';
 
 interface IConditionalStyleEditorProps {
+    className?: string;
     style?: IHighlightCell['style'];
     onChange: (style: IHighlightCell['style']) => void;
 };
@@ -34,7 +35,7 @@ const getAnotherBooleanNumber = (v: BooleanNumber) => {
 };
 const getBooleanFromNumber = (v: BooleanNumber) => v !== BooleanNumber.FALSE;
 export const ConditionalStyleEditor = (props: IConditionalStyleEditorProps) => {
-    const { style, onChange } = props;
+    const { style, onChange, className } = props;
     const componentManager = useDependency(ComponentManager);
     const [isBold, isBoldSet] = useState(() => {
         const defaultV = BooleanNumber.FALSE;
@@ -88,7 +89,7 @@ export const ConditionalStyleEditor = (props: IConditionalStyleEditorProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isBold, isItalic, isUnderline, isStrikethrough, fontColor, bgColor]);
     return (
-        <div className={styles.cfStyleEdit}>
+        <div className={`${styles.cfStyleEdit} ${className}`}>
             { BoldSingleIcon && (
                 <div className={cl({ [styles.isActive]: getBooleanFromNumber(isBold) }, styles.buttonItem)} onClick={() => isBoldSet(getAnotherBooleanNumber(isBold))}>
                     <BoldSingleIcon />

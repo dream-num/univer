@@ -28,6 +28,7 @@ import { addCfCommand } from '../../../commands/commands/add-cf.command';
 import type { ISetCfCommandParams } from '../../../commands/commands/set-cf.command';
 import { setCfCommand } from '../../../commands/commands/set-cf.command';
 
+import styleBase from '../index.module.less';
 import type { IStyleEditorProps } from './type';
 import { beforeSubmit, submit } from './type';
 import { ColorScaleStyleEditor } from './colorScale';
@@ -163,18 +164,18 @@ export const RuleEdit = (props: IRuleEditProps) => {
     };
     return (
         <div className={styles.cfRuleStyleEditor}>
-            <div>{localeService.t('sheet.cf.panel.range')}</div>
-            <div>
+            <div className={styleBase.title}>{localeService.t('sheet.cf.panel.range')}</div>
+            <div className={styleBase.mTBase}>
                 <RangeSelector onActive={onRangeSelectorActive} onChange={onRangeSelectorChange} />
             </div>
-            <div>{localeService.t('sheet.cf.panel.styleType')}</div>
-            <div>
-                <Select key="style" value={ruleType} options={options} onChange={(e) => ruleTypeSet(e)} />
+            <div className={styleBase.title}>{localeService.t('sheet.cf.panel.styleType')}</div>
+            <div className={styleBase.mTBase}>
+                <Select value={ruleType} options={options} onChange={(e) => ruleTypeSet(e)} />
             </div>
             <StyleEditor interceptorManager={interceptorManager} rule={props.rule?.rule as any} onChange={onStyleChange} />
-            <div>
+            <div className={styleBase.mTBase}>
                 <Button size="small" onClick={handleSubmit}>{localeService.t('sheet.cf.panel.submit')}</Button>
-                <Button size="small" onClick={handleCancel}>{localeService.t('sheet.cf.panel.cancel')}</Button>
+                <Button className={styleBase.mLSm} size="small" onClick={handleCancel}>{localeService.t('sheet.cf.panel.cancel')}</Button>
             </div>
         </div>
     );

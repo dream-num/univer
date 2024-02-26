@@ -74,25 +74,8 @@ export class LocaleService extends Disposable {
     t = (key: string, ...args: string[]): string => {
         if (!this._locales) throw new Error('Locale not initialized');
 
-        function resolveKeyPath(obj: ILanguagePack, keys: string[]): LanguageValue | null {
-            const currentKey = keys.shift();
-
-            if (currentKey && obj && currentKey in obj) {
-                const nextObj = (obj as ILanguagePack)[currentKey];
-
-                if (keys.length > 0 && (typeof nextObj === 'object' || Array.isArray(nextObj))) {
-                    return resolveKeyPath(nextObj as ILanguagePack, keys);
-                } else {
-                    return nextObj;
-                }
-            }
-
-            return null;
-        }
-
         const keys = key.split('.');
-        const resolvedValue = resolveKeyPath(this._locales[this._currentLocale], keys);
-
+        const resolvedValue = this.resolveKeyPath(this._locales[this._currentLocale], keys);
         if (typeof resolvedValue === 'string') {
             let result = resolvedValue;
             args.forEach((arg, index) => {
@@ -115,5 +98,21 @@ export class LocaleService extends Disposable {
 
     getCurrentLocale() {
         return this._currentLocale;
+    }
+
+    public resolveKeyPath(obj: ILanguagePack | ILanguagePack[], keys: string[]): string | ILanguagePack | ILanguagePack[] | null {
+        const currentKey = keys.shift();
+
+        if (currentKey && obj && currentKey in obj) {
+            const nextObj = (obj as ILanguagePack)[currentKey];
+
+            if (keys.length > 0 && (typeof nextObj === 'object' || Array.isArray(nextObj))) {
+                return this.resolveKeyPath(nextObj as ILanguagePack, keys);
+            } else {
+                return nextObj;
+            }
+        }
+
+        return null;
     }
 }

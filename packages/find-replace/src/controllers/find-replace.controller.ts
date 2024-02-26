@@ -23,7 +23,7 @@ import {
     RxDisposable,
 } from '@univerjs/core';
 import { SearchSingle16 } from '@univerjs/icons';
-import { ComponentManager, IDialogService, IFocusService, IMenuService, IShortcutService } from '@univerjs/ui';
+import { ComponentManager, IDialogService, ILayoutService, IMenuService, IShortcutService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 import { takeUntil } from 'rxjs';
 
@@ -58,7 +58,7 @@ export class FindReplaceController extends RxDisposable {
         @IFindReplaceService private readonly _findReplaceService: IFindReplaceService,
         @IDialogService private readonly _dialogService: IDialogService,
         @IContextService private readonly _contextService: IContextService,
-        @IFocusService private readonly _focusService: IFocusService,
+        @ILayoutService private readonly _layoutService: ILayoutService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
         @Inject(Injector) private readonly _injector: Injector
@@ -129,8 +129,7 @@ export class FindReplaceController extends RxDisposable {
     private _closePanel(): void {
         this._dialogService.close(FIND_REPLACE_DIALOG_ID);
         this._contextService.setContextValue(FIND_REPLACE_ACTIVATED, false);
-        this._focusService.forceFocus();
-
+        this._layoutService.focus();
         this._findReplaceService.end();
     }
 }

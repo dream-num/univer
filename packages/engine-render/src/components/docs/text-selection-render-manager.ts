@@ -154,12 +154,11 @@ export interface ITextSelectionRenderManager {
     sync(): void;
 
     activate(x: number, y: number): void;
-
-    focus(): void;
-
-    blur(): void;
-
     deactivate(): void;
+
+    hasFocus(): boolean;
+    focus(): void;
+    blur(): void;
 
     changeRuntime(docSkeleton: DocumentSkeleton, scene: Scene, document: Documents): void;
 
@@ -319,6 +318,10 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         this.focus();
 
         // requestAnimationFrame(() => this.focus());
+    }
+
+    hasFocus(): boolean {
+        return document.activeElement === this._input;
     }
 
     focus(): void {

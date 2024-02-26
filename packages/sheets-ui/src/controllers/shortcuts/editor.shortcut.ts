@@ -119,7 +119,8 @@ export const EditorBreakLineShortcut: IShortcutItem = {
 
 export const EditorDeleteLeftShortcut: IShortcutItem = {
     id: DeleteLeftCommand.id,
-    preconditions: (contextService) => whenEditorActivated(contextService) || whenFormulaEditorFocused(contextService),
+    preconditions: (contextService) =>
+        whenEditorActivated(contextService) || whenFormulaEditorFocused(contextService),
     binding: KeyCode.BACKSPACE,
 };
 

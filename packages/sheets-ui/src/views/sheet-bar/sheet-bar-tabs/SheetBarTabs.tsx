@@ -17,7 +17,6 @@
 import type { ICommandInfo } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { Dropdown } from '@univerjs/design';
-import { ITextSelectionRenderManager } from '@univerjs/engine-render';
 import {
     InsertSheetMutation,
     RemoveSheetMutation,
@@ -120,14 +119,6 @@ export function SheetBarTabs() {
                             onVisibleChange(true);
                         }
                     });
-
-                // The 'onChangeTab' event occurs during the 'pointerDown' event.
-                // The triggering time is too early.
-                // Settimeout is required to delay resetting the focus.
-                setTimeout(() => {
-                    const textSelectionRenderManager = injector.get(ITextSelectionRenderManager);
-                    textSelectionRenderManager.focus();
-                }, 0);
             },
             onScroll: (state: IScrollState) => {
                 sheetBarService.setScroll(state);

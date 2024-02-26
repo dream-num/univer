@@ -16,7 +16,7 @@
 
 import type { ICommandInfo, IExecutionOptions, Nullable } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
-import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
+import { DeviceInputEventType, IRenderManagerService, ITextSelectionRenderManager } from '@univerjs/engine-render';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import {
     COMMAND_LISTENER_SKELETON_CHANGE,
@@ -24,8 +24,9 @@ import {
     SelectionManagerService,
     SetWorksheetActiveOperation,
 } from '@univerjs/sheets';
-import { Inject } from '@wendellhu/redi';
+import { Inject, Injector, Quantity } from '@wendellhu/redi';
 import { merge, takeUntil } from 'rxjs';
+import { ILayoutService } from '@univerjs/ui';
 
 import { SetZoomRatioCommand } from '../commands/commands/set-zoom-ratio.command';
 import { SetActivateCellEditOperation } from '../commands/operations/activate-cell-edit.operation';
@@ -37,11 +38,13 @@ import { getSheetObject } from './utils/component-tools';
 @OnLifecycle(LifecycleStages.Rendered, EditorBridgeController)
 export class EditorBridgeController extends RxDisposable {
     constructor(
+        @Inject(Injector) private readonly _injector: Injector,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
+        @ILayoutService private readonly _layoutService: ILayoutService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService
     ) {
         super();
@@ -76,8 +79,12 @@ export class EditorBridgeController extends RxDisposable {
             return;
         }
 
-        const currentSkeleton = this._sheetSkeletonManagerService.getCurrent();
+        const textSelectionRenderManager = this._injector.get(ITextSelectionRenderManager, Quantity.OPTIONAL);
+        if (!this._layoutService.checkCanvasIsFocused() && textSelectionRenderManager && !textSelectionRenderManager!.hasFocus()) {
+            return;
+        }
 
+        const currentSkeleton = this._sheetSkeletonManagerService.getCurrent();
         if (currentSkeleton == null) {
             return;
         }
@@ -92,15 +99,12 @@ export class EditorBridgeController extends RxDisposable {
         }
 
         const sheetObject = this._getSheetObject();
-
         if (sheetObject == null) {
             return;
         }
 
         const { unitId, sheetId } = currentSkeleton;
-
         const { scene, engine } = sheetObject;
-
         this._commandService.executeCommand(SetActivateCellEditOperation.id, {
             scene,
             engine,

@@ -16,7 +16,7 @@
 
 import { LocaleService } from '@univerjs/core';
 import { Button, FormLayout, Input, InputWithSlot, Pager, Select, useObservable } from '@univerjs/design';
-import { LayoutService } from '@univerjs/ui';
+import { ILayoutService } from '@univerjs/ui';
 import type { IDisposable } from '@wendellhu/redi';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react';
@@ -29,7 +29,7 @@ const FIND_THROTTLE_TIME = 500;
 export function FindReplaceDialog() {
     const findReplaceService = useDependency(IFindReplaceService);
     const localeService = useDependency(LocaleService);
-    const layoutService = useDependency(LayoutService);
+    const layoutService = useDependency(ILayoutService);
 
     const [findString, setFindString] = useState<string>('');
     const [replaceString, setReplaceString] = useState<string>('');
@@ -65,7 +65,7 @@ export function FindReplaceDialog() {
     useEffect(() => {
         let disposable: IDisposable | undefined;
         if (dialogContainerRef.current) {
-            disposable = layoutService.registerContainer(dialogContainerRef.current);
+            disposable = layoutService.registerContainerElement(dialogContainerRef.current);
         }
 
         return () => disposable?.dispose();

@@ -95,7 +95,12 @@ export function App(props: IUniverAppProps) {
 
     return (
         <ConfigProvider locale={locale} mountContainer={portalContainer}>
-            <div className={styles.appLayout}>
+            {/**
+              * IMPORTANT! This `tabIndex` should not be moved. This attribute allows the element to catch
+              * all focusin event merged from its descendants. The DesktopLayoutService would listen to focusin events
+              * bubbled to this element and refocus the input element.
+              */}
+            <div className={styles.appLayout} tabIndex={-1}>
                 {/* header */}
                 {props.toolbar && (
                     <header className={styles.appContainerHeader}>

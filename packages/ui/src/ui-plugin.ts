@@ -36,8 +36,7 @@ import { DesktopConfirmService } from './services/confirm/desktop-confirm.servic
 import { DesktopContextMenuService, IContextMenuService } from './services/contextmenu/contextmenu.service';
 import { DesktopDialogService } from './services/dialog/desktop-dialog.service';
 import { IDialogService } from './services/dialog/dialog.service';
-import { DesktopFocusService, IFocusService } from './services/focus/focus.service';
-import { LayoutService } from './services/layout/layout.service';
+import { DesktopLayoutService, ILayoutService } from './services/layout/layout.service';
 import { DesktopLocalStorageService } from './services/local-storage/local-storage.service';
 import { DesktopMenuService, IMenuService } from './services/menu/menu.service';
 import { DesktopMessageService } from './services/message/desktop-message.service';
@@ -96,7 +95,7 @@ export class UniverUIPlugin extends Plugin {
 
             // services
             [ShortcutPanelService],
-            [LayoutService],
+            [ILayoutService, { useClass: DesktopLayoutService }],
             [IShortcutService, { useClass: DesktopShortcutService }],
             [IPlatformService, { useClass: DesktopPlatformService }],
             [IMenuService, { useClass: DesktopMenuService }],
@@ -113,7 +112,6 @@ export class UniverUIPlugin extends Plugin {
             [IBeforeCloseService, { useClass: DesktopBeforeCloseService }],
 
             // controllers
-            [IFocusService, { useClass: DesktopFocusService }],
             [IUIController, { useClass: DesktopUIController }],
             [SharedController],
             [ErrorController],

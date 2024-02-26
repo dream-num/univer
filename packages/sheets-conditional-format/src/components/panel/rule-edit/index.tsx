@@ -165,7 +165,7 @@ export const RuleEdit = (props: IRuleEditProps) => {
     return (
         <div className={styles.cfRuleStyleEditor}>
             <div className={styleBase.title}>{localeService.t('sheet.cf.panel.range')}</div>
-            <div className={styleBase.mTBase}>
+            <div className={`${styleBase.mTBase} ${styleBase.mLXxs}`}>
                 <RangeSelector onActive={onRangeSelectorActive} onChange={onRangeSelectorChange} />
             </div>
             <div className={styleBase.title}>{localeService.t('sheet.cf.panel.styleType')}</div>

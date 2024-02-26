@@ -196,8 +196,9 @@ export const highlightCellCalculateUnit = {
                             return v >= start && v <= end;
                         }
                         case TimePeriodOperator.nextMonth:{
-                            const start = dayjs().valueOf();
-                            const end = dayjs().add(1, 'month').valueOf();
+                            const nextMonth = dayjs().add(1, 'month');
+                            const start = nextMonth.startOf('month').valueOf();
+                            const end = nextMonth.endOf('month').valueOf();
                             return v >= start && v <= end;
                         }
                         case TimePeriodOperator.nextWeek:{

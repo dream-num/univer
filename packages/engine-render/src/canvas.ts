@@ -76,6 +76,7 @@ export class Canvas {
         this._canvasEle.style.position = 'absolute';
         this._canvasEle.style.top = '0';
         this._canvasEle.style.left = '0';
+        this._canvasEle.style.zIndex = '10';
 
         // support focus
         this._canvasEle.tabIndex = 1;

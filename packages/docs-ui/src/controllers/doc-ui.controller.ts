@@ -16,9 +16,10 @@
 
 import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import type { IDesktopUIController, IMenuItemFactory } from '@univerjs/ui';
-import { ComponentManager, IMenuService, IShortcutService, IUIController } from '@univerjs/ui';
+import { ComponentManager, IEditorService, IMenuService, IShortcutService, IUIController } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 
+import { connectInjector } from '@wendellhu/redi/react-bindings';
 import { COLOR_PICKER_COMPONENT, ColorPicker } from '../components/color-picker';
 import {
     FONT_FAMILY_COMPONENT,
@@ -29,6 +30,7 @@ import {
 import { FONT_SIZE_COMPONENT, FontSize } from '../components/font-size';
 import { TestEditorContainer } from '../components/test-editor/TestTextEditor';
 import { TEST_EDITOR_CONTAINER_COMPONENT } from '../components/test-editor/component-name';
+import { DocBackground } from '../views/doc-background/DocBackground';
 import {
     BoldMenuItemFactory,
     BulletListMenuItemFactory,
@@ -50,7 +52,7 @@ export class DocUIController extends Disposable {
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
         @ICommandService private readonly _commandService: ICommandService,
-        @IShortcutService private readonly _shortcutService: IShortcutService,
+        @IEditorService private readonly _editorService: IEditorService,
         @IMenuService private readonly _menuService: IMenuService,
         @IUIController private readonly _uiController: IDesktopUIController
     ) {
@@ -92,5 +94,17 @@ export class DocUIController extends Disposable {
     private _init(): void {
         this._initCustomComponents();
         this._initMenus();
+        this._initDocBackground();
+    }
+
+    private _initDocBackground() {
+        const standAlone = [...this._editorService.getAllEditor().values()].some((editor) => {
+            return editor.isSheetEditor === true;
+        });
+        if (!standAlone) {
+            this.disposeWithMe(
+                this._uiController.registerContentComponent(() => connectInjector(DocBackground, this._injector))
+            );
+        }
     }
 }

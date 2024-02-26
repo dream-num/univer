@@ -21,7 +21,7 @@ import type { Observable } from 'rxjs';
 import { Subject } from 'rxjs';
 
 import { fromDocumentEvent } from '../../common/lifecycle';
-import { LayoutService } from '../layout/layout.service';
+import { DesktopLayoutService } from '../layout/layout.service';
 import { IPlatformService } from '../platform/platform.service';
 import { KeyCodeToChar, MetaKeys } from './keycode';
 
@@ -83,7 +83,7 @@ export class DesktopShortcutService extends Disposable implements IShortcutServi
         @ICommandService private readonly _commandService: ICommandService,
         @IPlatformService private readonly _platformService: IPlatformService,
         @IContextService private readonly _contextService: IContextService,
-        @Optional(LayoutService) private readonly _layoutService?: LayoutService
+        @Optional(DesktopLayoutService) private readonly _layoutService?: DesktopLayoutService
     ) {
         super();
 
@@ -188,7 +188,7 @@ export class DesktopShortcutService extends Disposable implements IShortcutServi
 
         if (
             this._layoutService &&
-            !this._layoutService.checkElementInCurrentApplicationScope(e.target as HTMLElement)
+            !this._layoutService.checkElementInCurrentContainers(e.target as HTMLElement)
         ) {
             return;
         }

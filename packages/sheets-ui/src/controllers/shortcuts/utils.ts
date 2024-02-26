@@ -54,7 +54,7 @@ export function whenSheetEditorActivated(contextService: IContextService) {
 }
 
 export function whenEditorActivated(contextService: IContextService) {
-    return contextService.getContextValue(EDITOR_ACTIVATED);
+    return contextService.getContextValue(FOCUSING_UNIVER_EDITOR) && contextService.getContextValue(EDITOR_ACTIVATED);
 }
 
 /**

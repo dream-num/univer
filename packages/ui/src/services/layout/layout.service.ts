@@ -14,26 +14,159 @@
  * limitations under the License.
  */
 
-import { remove, toDisposable } from '@univerjs/core';
-import type { IDisposable } from '@wendellhu/redi';
+import type { ContextService, Nullable } from '@univerjs/core';
+import { Disposable, DocumentDataModel, FOCUSING_UNIVER_EDITOR, IContextService, ILogService, IUniverInstanceService, LifecycleStages, OnLifecycle, remove, Slide, toDisposable, UniverInstanceType, Workbook } from '@univerjs/core';
+import { createIdentifier, type IDisposable } from '@wendellhu/redi';
+import { fromEvent } from 'rxjs';
+
+type FocusHandlerFn = (unitId: string) => void;
+
+export const FOCUSING_UNIVER = 'FOCUSING_UNIVER';
+
+export interface ILayoutService {
+    readonly isFocused: boolean;
+
+    /** Re-focus the currently focused Univer business instance. */
+    focus(): void;
+
+    /** Register a focus handler to focus on certain type of Univer unit. */
+    registerFocusHandler(type: UniverInstanceType, handler: FocusHandlerFn): IDisposable;
+    /** Register the root container element. */
+    registerRootContainerElement(container: HTMLElement): IDisposable;
+    /** Register a canvas element. */
+    registerCanvasElement(container: HTMLCanvasElement): IDisposable;
+    /** Register an element as a container, especially floating components like Dialogs and Notifications. */
+    registerContainerElement(container: HTMLElement): IDisposable;
+
+    checkElementInCurrentContainers(element: HTMLElement): boolean;
+    checkCanvasIsFocused(): boolean;
+}
+export const ILayoutService = createIdentifier<ILayoutService>('ui.layout-service');
 
 /**
  * This service is responsible for storing layout information of the current
- * Univer application instance
+ * Univer application instance.
  */
-export class LayoutService {
-    private _containers: HTMLElement[] = [];
+@OnLifecycle(LifecycleStages.Ready, ILayoutService)
+export class DesktopLayoutService extends Disposable implements ILayoutService {
+    private _rootContainerElement: Nullable<HTMLElement> = null;
+    private _isFocused = false;
 
-    registerContainer(container: HTMLElement): IDisposable {
-        if (this._containers.indexOf(container) === -1) {
-            this._containers.push(container);
-            return toDisposable(() => remove(this._containers, container));
+    get isFocused(): boolean {
+        return this._isFocused;
+    }
+
+    private readonly _focusHandlers = new Map<UniverInstanceType, FocusHandlerFn>();
+
+    private _canvasContainers: HTMLCanvasElement[] = [];
+    private _allContainers: HTMLElement[] = [];
+
+    constructor(
+        @IContextService private readonly _contextService: ContextService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @ILogService private readonly _logService: ILogService
+    ) {
+        super();
+
+        this._initUniverFocusListener();
+        this._initEditorStatus();
+    }
+
+    focus(): void {
+        const currentFocused = this._univerInstanceService.getFocusedUniverInstance();
+        if (!currentFocused) {
+            return;
+        }
+
+        let handler: Nullable<FocusHandlerFn>;
+        if (currentFocused instanceof Workbook) {
+            handler = this._focusHandlers.get(UniverInstanceType.SHEET);
+        } else if (currentFocused instanceof DocumentDataModel) {
+            handler = this._focusHandlers.get(UniverInstanceType.DOC);
+        } else if (currentFocused instanceof Slide) {
+            handler = this._focusHandlers.get(UniverInstanceType.SLIDE);
+        }
+
+        if (!handler) {
+            throw new Error('[DesktopLayoutService]: handler is not registered!');
+        }
+
+        handler(currentFocused.getUnitId());
+    }
+
+    registerFocusHandler(type: UniverInstanceType, handler: FocusHandlerFn): IDisposable {
+        if (this._focusHandlers.has(type)) {
+            throw new Error(`[DesktopLayoutService]: handler of type ${type} bas been registered!`);
+        }
+
+        this._focusHandlers.set(type, handler);
+        return toDisposable(() => this._focusHandlers.delete(type));
+    }
+
+    registerCanvasElement(container: HTMLCanvasElement): IDisposable {
+        if (this._canvasContainers.indexOf(container) === -1) {
+            this._canvasContainers.push(container);
+            return toDisposable(() => remove(this._canvasContainers, container));
+        }
+
+        throw new Error('[DesktopLayoutService]: canvas container already registered!');
+    }
+
+    registerRootContainerElement(container: HTMLElement): IDisposable {
+        if (this._rootContainerElement) {
+            throw new Error('[DesktopLayoutService]: root container already registered!');
+        }
+
+        this._rootContainerElement = container;
+        const dis = this.registerContainerElement(container);
+
+        return toDisposable(() => {
+            this._rootContainerElement = null;
+            dis.dispose();
+        });
+    }
+
+    registerContainerElement(container: HTMLElement): IDisposable {
+        if (this._allContainers.indexOf(container) === -1) {
+            this._allContainers.push(container);
+            return toDisposable(() => remove(this._allContainers, container));
         }
 
         throw new Error('[LayoutService]: container already registered!');
     }
 
-    checkElementInCurrentApplicationScope(element: HTMLElement): boolean {
-        return this._containers.some((container) => container.contains(element));
+    checkElementInCurrentContainers(element: HTMLElement): boolean {
+        return this._allContainers.some((container) => container.contains(element));
     }
+
+    checkCanvasIsFocused(): boolean {
+        return this._canvasContainers.some((canvas) => canvas === document.activeElement || canvas.contains(document.activeElement));
+    }
+
+    private _initUniverFocusListener(): void {
+        this.disposeWithMe(
+            fromEvent(window, 'focusin').subscribe((event) => {
+                const target = event.target;
+                if (target && this.checkElementInCurrentContainers(event.target as HTMLElement)) {
+                    this._isFocused = true;
+                } else {
+                    this._isFocused = false;
+                }
+
+                this._contextService.setContextValue(FOCUSING_UNIVER, this._isFocused);
+                this._contextService.setContextValue(FOCUSING_UNIVER_EDITOR, getFocusingUniverEditorStatus());
+            })
+        );
+    }
+
+    private _initEditorStatus(): void {
+        this._contextService.setContextValue(
+            FOCUSING_UNIVER_EDITOR,
+            getFocusingUniverEditorStatus()
+        );
+    }
+}
+
+function getFocusingUniverEditorStatus(): boolean {
+    return !!document.activeElement?.classList.contains('univer-editor');
 }

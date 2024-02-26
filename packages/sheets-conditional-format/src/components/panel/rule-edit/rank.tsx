@@ -154,7 +154,7 @@ export const RankStyleEditor = (props: IStyleEditorProps) => {
                 }}
             />
             {['isNotBottom', 'isBottom'].includes(type) && (
-                <div className={`${stylesBase.labelContainer} ${stylesBase.mTSm}`}>
+                <div className={`${stylesBase.labelContainer} ${stylesBase.mTSm} ${stylesBase.mLXxs}`}>
                     <InputNumber
                         value={value}
                         onChange={(v) => {
@@ -177,12 +177,12 @@ export const RankStyleEditor = (props: IStyleEditorProps) => {
 
                 </div>
             )}
-            <div className={styles.cfPreviewWrap}>
+            <div className={`${styles.cfPreviewWrap} ${stylesBase.mLXxs}`}>
                 <Preview rule={getResult({ type, isPercent, value, style }) as IConditionalFormatRuleConfig} />
             </div>
             <ConditionalStyleEditor
                 style={rule?.style}
-                className={stylesBase.mTSm}
+                className={`${stylesBase.mTSm} ${stylesBase.mLXxs}`}
                 onChange={(v) => {
                     styleSet(v);
                     _onChange({ type, isPercent, value, style: v });

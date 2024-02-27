@@ -332,8 +332,9 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
                             return node;
                         })
                         : sequenceNodes;
-                    const formulaString = transformSequenceNodes && generateStringWithSequence(transformSequenceNodes);
+                    let formulaString = transformSequenceNodes && generateStringWithSequence(transformSequenceNodes);
                     if (formulaString) {
+                        formulaString = `=${formulaString}`;
                         conditionalFormatFormulaService.registerFormula(unitId, subUnitId, rule.cfId, formulaString);
                         const formulaItem = conditionalFormatFormulaService.getFormulaResult(unitId, subUnitId, formulaString);
                         if (formulaItem && formulaItem.status === FormulaResultStatus.SUCCESS) {

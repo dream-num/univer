@@ -62,6 +62,8 @@ export enum SubRuleType {
     timePeriod = 'timePeriod',
     number = 'number',
     average = 'average',
+    formula = 'formula',
+
 }
 
 export enum ValueType {

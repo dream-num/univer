@@ -45,6 +45,7 @@ import { setCfCommand } from './commands/commands/set-cf.command';
 import { moveCfCommand } from './commands/commands/move-cf.command';
 import { addCfCommand } from './commands/commands/add-cf.command';
 import { moveConditionalRuleMutation } from './commands/mutations/move-conditional-rule.mutation';
+import { ConditionalFormatFormulaService } from './services/conditional-format-formula.service';
 
 export class SheetsConditionalFormatPlugin extends Plugin {
     static override type = PluginType.Sheet;
@@ -84,6 +85,7 @@ export class SheetsConditionalFormatPlugin extends Plugin {
         this._injector.add([ConditionalFormatAutoFillController]);
         this._injector.add([ConditionalFormatMenuController]);
         this._injector.add([ConditionalFormatI18nController]);
+        this._injector.add([ConditionalFormatFormulaService]);
     }
 
     _initCommand() {

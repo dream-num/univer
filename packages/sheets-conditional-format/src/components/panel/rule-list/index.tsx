@@ -91,6 +91,9 @@ const getRuleDescribe = (rule: IConditionFormatRule, localeService: LocaleServic
                         }
                     }
                 }
+                case SubRuleType.formula:{
+                    return '自定义公式';
+                }
             }
         }
     }

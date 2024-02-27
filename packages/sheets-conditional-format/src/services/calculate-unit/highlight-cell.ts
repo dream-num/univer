@@ -14,17 +14,20 @@
  * limitations under the License.
  */
 
-import type { Worksheet } from '@univerjs/core';
-import { CellValueType, ObjectMatrix, Range } from '@univerjs/core';
+import { CellValueType, ObjectMatrix, Range, Rectangle, Tools } from '@univerjs/core';
 import dayjs from 'dayjs';
+import { deserializeRangeWithSheet, generateStringWithSequence, LexerTreeBuilder, sequenceNodeType, serializeRange } from '@univerjs/engine-formula';
 import { NumberOperator, RuleType, SubRuleType, TextOperator, TimePeriodOperator } from '../../base/const';
-import type { IAverageHighlightCell, IConditionFormatRule, IHighlightCell, INumberHighlightCell, IRankHighlightCell, ITextHighlightCell, ITimePeriodHighlightCell } from '../../models/type';
+import type { IAverageHighlightCell, IConditionFormatRule, IFormulaHighlightCell, IHighlightCell, INumberHighlightCell, IRankHighlightCell, ITextHighlightCell, ITimePeriodHighlightCell } from '../../models/type';
+import { ConditionalFormatFormulaService, FormulaResultStatus } from '../conditional-format-formula.service';
 import { getCellValue, isFloatsEqual, isNullable, serialTimeToTimestamp } from './utils';
+import type { ICalculateUnit } from './type';
 
-export const highlightCellCalculateUnit = {
+export const highlightCellCalculateUnit: ICalculateUnit = {
     type: RuleType.highlightCell,
-    handle: (rule: IConditionFormatRule, worksheet: Worksheet) => {
+    handle: async (rule: IConditionFormatRule, context) => {
         const ruleConfig = rule.rule as IHighlightCell;
+        const { worksheet } = context;
         const getCache = () => {
             switch (ruleConfig.subType) {
                 case SubRuleType.average:{
@@ -78,6 +81,19 @@ export const highlightCellCalculateUnit = {
                         return { rank: allValue[allValue.length - targetIndex] };
                     } else {
                         return { rank: allValue[Math.max(targetIndex - 1, 0)] };
+                    }
+                }
+                case SubRuleType.formula:{
+                    const subRuleConfig = ruleConfig as IFormulaHighlightCell;
+                    const lexerTreeBuilder = context.accessor.get(LexerTreeBuilder);
+                    const formulaString = subRuleConfig.value;
+                    const sequenceNodes = lexerTreeBuilder.sequenceNodesBuilder(formulaString);
+                    if (!sequenceNodes) {
+                        return {
+                            sequenceNodes: null,
+                        };
+                    } else {
+                        return { sequenceNodes };
                     }
                 }
             }
@@ -291,6 +307,40 @@ export const highlightCellCalculateUnit = {
                     }
                     const uniqueCache = cache!.count!;
                     return uniqueCache.get(value) !== 1;
+                }
+                case SubRuleType.formula:{
+                    if (!cache?.sequenceNodes) {
+                        return false;
+                    }
+                    const { unitId, subUnitId } = context;
+                    const conditionalFormatFormulaService = context.accessor.get(ConditionalFormatFormulaService);
+
+                    const getRangeFromCell = (row: number, col: number) => ({ startRow: row, endRow: row, startColumn: col, endColumn: col });
+                    const originRange = getRangeFromCell(rule.ranges[0].startRow, rule.ranges[0].startColumn);
+                    const relativeRange = Rectangle.getRelativeRange(getRangeFromCell(row, col), originRange);
+                    const sequenceNodes = Tools.deepClone(cache.sequenceNodes);
+                    const transformSequenceNodes = Array.isArray(sequenceNodes)
+                        ? sequenceNodes.map((node) => {
+                            if (typeof node === 'object' && node.nodeType === sequenceNodeType.REFERENCE) {
+                                const gridRangeName = deserializeRangeWithSheet(node.token);
+                                const newRange = Rectangle.getPositionRange(relativeRange, gridRangeName.range);
+                                const newToken = serializeRange(newRange);
+                                return {
+                                    ...node, token: newToken,
+                                };
+                            }
+                            return node;
+                        })
+                        : sequenceNodes;
+                    const formulaString = transformSequenceNodes && generateStringWithSequence(transformSequenceNodes);
+                    if (formulaString) {
+                        conditionalFormatFormulaService.registerFormula(unitId, subUnitId, rule.cfId, formulaString);
+                        const formulaItem = conditionalFormatFormulaService.getFormulaResult(unitId, subUnitId, formulaString);
+                        if (formulaItem && formulaItem.status === FormulaResultStatus.SUCCESS) {
+                            return !!formulaItem.result;
+                        }
+                    }
+                    return false;
                 }
             }
         };

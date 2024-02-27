@@ -995,7 +995,7 @@ export default {
         },
     },
     SUBTOTAL: {
-        description: 'Returns a subtotal in a list or database',
+        description: 'Returns a subtotal in a list or database.',
         abstract: 'Returns a subtotal in a list or database',
         links: [
             {
@@ -1004,8 +1004,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            functionNum: { name: 'function_num', detail: 'The number 1-11 or 101-111 that specifies the function to use for the subtotal. 1-11 includes manually-hidden rows, while 101-111 excludes them; filtered-out cells are always excluded.' },
+            ref1: { name: 'ref1', detail: 'The first named range or reference for which you want the subtotal.' },
+            ref2: { name: 'ref2', detail: 'Named ranges or references 2 to 254 for which you want the subtotal.' },
         },
     },
     SUM: {

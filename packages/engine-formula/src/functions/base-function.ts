@@ -33,6 +33,16 @@ export class BaseFunction extends Disposable {
     private _row: number = -1;
     private _column: number = -1;
 
+    /**
+     * Whether the function needs to expand the parameters
+     */
+    needsExpandParams: boolean = false;
+
+    /**
+     * Whether the function needs to pass in reference object
+     */
+    needsReferenceObject: boolean = false;
+
     constructor(private _name: IFunctionNames) {
         super();
     }

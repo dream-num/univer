@@ -996,7 +996,7 @@ export default {
         },
     },
     SUBTOTAL: {
-        description: '返回列表或数据库中的分类汇总',
+        description: '返回列表或数据库中的分类汇总。',
         abstract: '返回列表或数据库中的分类汇总',
         links: [
             {
@@ -1005,8 +1005,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            functionNum: { name: '函数编号', detail: '数字 1-11 或 101-111，用于指定要为分类汇总使用的函数。 如果使用 1-11，将包括手动隐藏的行，如果使用 101-111，则排除手动隐藏的行；始终排除已筛选掉的单元格。' },
+            ref1: { name: '引用1', detail: '要对其进行分类汇总计算的第一个命名区域或引用。' },
+            ref2: { name: '引用2', detail: '要对其进行分类汇总计算的第 2 个至第 254 个命名区域或引用。' },
         },
     },
     SUM: {

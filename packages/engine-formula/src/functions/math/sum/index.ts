@@ -37,15 +37,15 @@ export class Sum extends BaseFunction {
                 return new ErrorValueObject(ErrorType.VALUE);
             }
 
-            if (accumulatorAll.isError()) {
-                return accumulatorAll;
-            }
-
             if (variant.isArray()) {
                 variant = variant.sum();
             }
 
             accumulatorAll = accumulatorAll.plus(variant);
+
+            if (accumulatorAll.isError()) {
+                return accumulatorAll;
+            }
         }
 
         return accumulatorAll;

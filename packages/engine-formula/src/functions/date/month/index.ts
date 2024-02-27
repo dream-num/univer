@@ -28,9 +28,7 @@ export class Month extends BaseFunction {
         }
 
         if (serialNumber.isArray()) {
-            return serialNumber.map((serialNumberObject) => {
-                return this._handleSingleObject(serialNumberObject);
-            });
+            return serialNumber.map((serialNumberObject) => this._handleSingleObject(serialNumberObject));
         }
 
         return this._handleSingleObject(serialNumber);

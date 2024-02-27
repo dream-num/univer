@@ -35,7 +35,6 @@ import type {
 } from '../reference-object/base-reference-object';
 import { ArrayValueObject, transformToValueObject, ValueObjectFactory } from '../value-object/array-value-object';
 import type { BaseValueObject } from '../value-object/base-value-object';
-import { BooleanValueObject } from '../value-object/primitive-object';
 import { BaseAstNode, ErrorNode } from './base-ast-node';
 import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './base-ast-node-factory';
 import { NODE_ORDER_MAP, NodeType } from './node-type';
@@ -105,10 +104,14 @@ export class FunctionNode extends BaseAstNode {
 
         for (let i = 0; i < childrenCount; i++) {
             const object = children[i].getValue();
+
             if (object == null) {
                 continue;
             }
-            if (object.isReferenceObject()) {
+
+            // In the SUBTOTAL function, we need to get rowData information, we can only use ReferenceObject
+            if (object.isReferenceObject() && !this._functionExecutor.needsReferenceObject) {
+                // Array converted from reference object needs to be marked
                 variants.push((object as BaseReferenceObject).toArrayValueObject());
             } else {
                 variants.push(object as BaseValueObject);
@@ -127,7 +130,6 @@ export class FunctionNode extends BaseAstNode {
       */
     private _compatibility() {
         this._lookupCompatibility();
-        this._isrefCompatibility();
     }
 
     /**
@@ -141,7 +143,7 @@ export class FunctionNode extends BaseAstNode {
         const children = this.getChildren();
         const childrenCount = children.length;
 
-        if (this._functionExecutor.name !== 'LOOKUP' || childrenCount !== 3) {
+        if (!this._functionExecutor.needsExpandParams || childrenCount !== 3) {
             return;
         }
 
@@ -174,28 +176,6 @@ export class FunctionNode extends BaseAstNode {
         if (lookupCountColumn !== resultCountColumn) {
             resultVectorRange.endColumn += lookupCountColumn - resultCountColumn;
         }
-    }
-
-    /**
-     * The ISREF function needs to determine whether it is a reference object, but the reference information cannot be obtained inside the function, so after the determination is made here, the result is directly stored in children.
-     */
-    private _isrefCompatibility() {
-        const children = this.getChildren();
-        const childrenCount = children.length;
-
-        if (this._functionExecutor.name !== 'ISREF' || childrenCount !== 1) {
-            return;
-        }
-
-        const value = children[0].getValue();
-
-        if (!value) {
-            return;
-        }
-
-        const isRef = value.isReferenceObject();
-
-        children[0].setValue(new BooleanValueObject(isRef));
     }
 
     private _calculate(variants: BaseValueObject[]) {

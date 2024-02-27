@@ -1004,8 +1004,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            functionNum: { name: '集計方法', detail: '番号 1 ~ 11 または 101 ~ 111 を集計に使用する関数として指定します。 1 ~ 11 には手動で非表示にした行が含まれるのに対して、101 ~ 111 ではそれらを除外します。つまり、フィルター処理されたセルは常に除外されます。' },
+            ref1: { name: '範囲 1', detail: '集計する最初の名前付き範囲または参照を指定します。' },
+            ref2: { name: '範囲 2', detail: '集計する名前付き範囲または参照を 2 ～ 254 個まで指定します。' },
         },
     },
     SUM: {

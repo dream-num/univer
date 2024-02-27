@@ -55,6 +55,11 @@ export interface ITimePeriodHighlightCell extends IHighlightCell {
     subType: SubRuleType.timePeriod;
     operator: TimePeriodOperator;
 }
+
+export interface IFormulaHighlightCell extends IHighlightCell {
+    subType: SubRuleType.formula;
+    value: string;
+}
 export type INumberHighlightCell = ({
     subType: SubRuleType.number;
     operator: NumberOperator.between | NumberOperator.notBetween;
@@ -88,7 +93,7 @@ export interface IColorScale extends IBaseCfRule {
 
 export type IConditionalFormatRuleConfig = IColorScale | IDataBar | IUniqueValuesHighlightCell |
 IDuplicateValuesHighlightCell | IRankHighlightCell | ITextHighlightCell |
-ITimePeriodHighlightCell | INumberHighlightCell | IAverageHighlightCell;
+ITimePeriodHighlightCell | INumberHighlightCell | IAverageHighlightCell | IFormulaHighlightCell;
 export interface IConditionFormatRule<C = IConditionalFormatRuleConfig> {
     ranges: IRange [];
     cfId: string;

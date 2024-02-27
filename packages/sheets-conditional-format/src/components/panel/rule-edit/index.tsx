@@ -35,6 +35,7 @@ import { ColorScaleStyleEditor } from './colorScale';
 import { DataBarStyleEditor } from './dataBar';
 import { RankStyleEditor } from './rank';
 import { HighlightCellStyleEditor } from './highlightCell';
+import { FormulaStyleEditor } from './formula';
 import styles from './index.module.less';
 
 interface IRuleEditProps {
@@ -53,7 +54,8 @@ export const RuleEdit = (props: IRuleEditProps) => {
         { label: localeService.t('sheet.cf.ruleType.highlightCell'), value: '1' },
         { label: localeService.t('sheet.cf.panel.rankAndAverage'), value: '2' },
         { label: localeService.t('sheet.cf.ruleType.dataBar'), value: '3' },
-        { label: localeService.t('sheet.cf.ruleType.colorScale'), value: '4' }];
+        { label: localeService.t('sheet.cf.ruleType.colorScale'), value: '4' },
+        { label: localeService.t('sheet.cf.ruleType.formula'), value: '5' }];
 
     const [ruleType, ruleTypeSet] = useState(() => {
         const type = props.rule?.rule.type;
@@ -116,6 +118,9 @@ export const RuleEdit = (props: IRuleEditProps) => {
             }
             case '4':{
                 return ColorScaleStyleEditor;
+            }
+            case '5':{
+                return FormulaStyleEditor;
             }
             default :{
                 return HighlightCellStyleEditor;

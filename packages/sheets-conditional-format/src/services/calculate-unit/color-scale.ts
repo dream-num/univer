@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { Worksheet } from '@univerjs/core';
 import { ColorKit, ObjectMatrix, Range } from '@univerjs/core';
 import { RuleType } from '../../base/const';
 import type { IColorScale, IConditionFormatRule } from '../../models/type';
 import { getCellValue, getValueByType, isNullable } from './utils';
+import type { ICalculateUnit } from './type';
 
 interface IRgbColor {
     b: number;
@@ -38,10 +38,11 @@ const handleRgbA = (rgb: IRgbColor): Required<IRgbColor> => {
     }
 };
 export type IColorScaleRenderParams = string;
-export const colorScaleCellCalculateUnit = {
+export const colorScaleCellCalculateUnit: ICalculateUnit = {
     type: RuleType.colorScale,
-    handle: (rule: IConditionFormatRule, worksheet: Worksheet) => {
+    handle: async (rule: IConditionFormatRule, context) => {
         const ruleConfig = rule.rule as IColorScale;
+        const { worksheet } = context;
         const matrix = new ObjectMatrix< number>();
         rule.ranges.forEach((range) => {
             Range.foreach(range, (row, col) => {

@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-import type { Worksheet } from '@univerjs/core';
 import { ObjectMatrix, Range } from '@univerjs/core';
 import { RuleType } from '../../base/const';
 import type { IDataBarRenderParams } from '../../render/type';
 import type { IConditionFormatRule, IDataBar } from '../../models/type';
 import { getCellValue, getValueByType, isNullable } from './utils';
+import type { ICalculateUnit } from './type';
 
-export const dataBarCellCalculateUnit = {
+export const dataBarCellCalculateUnit: ICalculateUnit = {
     type: RuleType.dataBar,
-    handle: (rule: IConditionFormatRule, worksheet: Worksheet) => {
+    handle: async (rule: IConditionFormatRule, context) => {
         const ruleConfig = rule.rule as IDataBar;
+        const { worksheet } = context;
         const matrix = new ObjectMatrix< number>();
         rule.ranges.forEach((range) => {
             Range.foreach(range, (row, col) => {

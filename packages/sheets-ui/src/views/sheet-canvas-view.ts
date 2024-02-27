@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Workbook, Worksheet } from '@univerjs/core';
+import type { Nullable, Workbook, Worksheet } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
 import type { IRender, IWheelEvent, Scene } from '@univerjs/engine-render';
 import {
@@ -65,23 +65,39 @@ export class SheetCanvasView extends RxDisposable {
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService
     ) {
         super();
-        this._currentUniverService.currentSheet$.subscribe((workbook) => {
-            if (workbook == null) {
-                return;
-                // throw new Error('workbook is null');
-            }
+        this._initialize();
+    }
 
-            const unitId = workbook.getUnitId();
-            if (!this._loadedMap.has(unitId)) {
-                this._currentWorkbook = workbook;
-                this._addNewRender();
-                this._loadedMap.add(unitId);
-            }
-        });
+    private _initialize() {
+        this._init();
     }
 
     override dispose(): void {
         this._fps$.complete();
+    }
+
+    private _init() {
+        this._currentUniverService.currentSheet$.subscribe((workbook) => {
+            this._create(workbook);
+        });
+
+        this._currentUniverService.getAllUniverSheetsInstance().forEach((workbook) => {
+            this._create(workbook);
+        });
+    }
+
+    private _create(workbook: Nullable<Workbook>) {
+        if (workbook == null) {
+            return;
+            // throw new Error('workbook is null');
+        }
+
+        const unitId = workbook.getUnitId();
+        if (!this._loadedMap.has(unitId)) {
+            this._currentWorkbook = workbook;
+            this._addNewRender();
+            this._loadedMap.add(unitId);
+        }
     }
 
     private _addNewRender() {

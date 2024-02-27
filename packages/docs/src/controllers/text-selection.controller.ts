@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, Nullable, Observer } from '@univerjs/core';
-import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import type { ICommandInfo, Nullable } from '@univerjs/core';
+import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle, toDisposable } from '@univerjs/core';
 import type { Documents, IMouseEvent, IPointerEvent } from '@univerjs/engine-render';
 import { CURSOR_TYPE, IRenderManagerService, ITextSelectionRenderManager } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
@@ -28,16 +28,6 @@ import { TextSelectionManagerService } from '../services/text-selection-manager.
 
 @OnLifecycle(LifecycleStages.Rendered, TextSelectionController)
 export class TextSelectionController extends Disposable {
-    private _moveInObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
-
-    private _moveOutObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
-
-    private _downObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
-
-    private _dblClickObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
-
-    private _tripleClickObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
-
     private _loadedMap = new Set();
 
     constructor(
@@ -51,42 +41,40 @@ export class TextSelectionController extends Disposable {
     ) {
         super();
 
-        this._renderManagerService.currentRender$.subscribe((unitId) => {
-            if (unitId == null) {
-                return;
-            }
-
-            if (this._currentUniverService.getUniverDocInstance(unitId) == null) {
-                return;
-            }
-
-            if (!this._loadedMap.has(unitId)) {
-                this._initialMain(unitId);
-                this._loadedMap.add(unitId);
-            }
-        });
-
         this._initialize();
     }
 
     private _initialize() {
+        this._init();
         this._skeletonListener();
         this._commandExecutedListener();
     }
 
-    override dispose(): void {
-        this._renderManagerService.getRenderAll().forEach((docObject) => {
-            const { mainComponent } = docObject;
-            if (mainComponent == null) {
-                return;
-            }
+    private _init() {
+        this.disposeWithMe(
+            this._renderManagerService.currentRender$.subscribe((unitId) => {
+                this._create(unitId);
+            })
+        );
 
-            mainComponent.onPointerEnterObserver.remove(this._moveInObserver);
-            mainComponent.onPointerLeaveObserver.remove(this._moveOutObserver);
-            mainComponent.onPointerDownObserver.remove(this._downObserver);
-            mainComponent.onDblclickObserver.remove(this._dblClickObserver);
-            mainComponent.onTripleClickObserver.remove(this._tripleClickObserver);
+        this._renderManagerService.getRenderAll().forEach((_, unitId) => {
+            this._create(unitId);
         });
+    }
+
+    private _create(unitId: Nullable<string>) {
+        if (unitId == null) {
+            return;
+        }
+
+        if (this._currentUniverService.getUniverDocInstance(unitId) == null) {
+            return;
+        }
+
+        if (!this._loadedMap.has(unitId)) {
+            this._initialMain(unitId);
+            this._loadedMap.add(unitId);
+        }
     }
 
     private _initialMain(unitId: string) {
@@ -96,37 +84,56 @@ export class TextSelectionController extends Disposable {
         }
 
         const { document, scene } = docObject;
+        this.disposeWithMe(
+            toDisposable(
+                document.onPointerEnterObserver.add(() => {
+                    document.cursor = CURSOR_TYPE.TEXT;
+                })
+            )
+        );
 
-        this._moveInObserver = document.onPointerEnterObserver.add(() => {
-            document.cursor = CURSOR_TYPE.TEXT;
-        });
+        this.disposeWithMe(
+            toDisposable(
+                document.onPointerLeaveObserver.add(() => {
+                    document.cursor = CURSOR_TYPE.DEFAULT;
+                    scene.resetCursor();
+                })
+            )
+        );
 
-        this._moveOutObserver = document.onPointerLeaveObserver.add(() => {
-            document.cursor = CURSOR_TYPE.DEFAULT;
-            scene.resetCursor();
-        });
+        this.disposeWithMe(
+            toDisposable(
+                document?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+                    const currentDocInstance = this._currentUniverService.getCurrentUniverDocInstance();
 
-        this._downObserver = document?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
-            const currentDocInstance = this._currentUniverService.getCurrentUniverDocInstance();
+                    if (currentDocInstance.getUnitId() !== unitId) {
+                        this._currentUniverService.setCurrentUniverDocInstance(unitId);
+                    }
 
-            if (currentDocInstance.getUnitId() !== unitId) {
-                this._currentUniverService.setCurrentUniverDocInstance(unitId);
-            }
+                    this._textSelectionRenderManager.eventTrigger(evt);
 
-            this._textSelectionRenderManager.eventTrigger(evt);
+                    if (evt.button !== 2) {
+                        state.stopPropagation();
+                    }
+                })
+            )
+        );
 
-            if (evt.button !== 2) {
-                state.stopPropagation();
-            }
-        });
+        this.disposeWithMe(
+            toDisposable(
+                document?.onDblclickObserver.add((evt: IPointerEvent | IMouseEvent) => {
+                    this._textSelectionRenderManager.handleDblClick(evt);
+                })
+            )
+        );
 
-        this._dblClickObserver = document?.onDblclickObserver.add((evt: IPointerEvent | IMouseEvent) => {
-            this._textSelectionRenderManager.handleDblClick(evt);
-        });
-
-        this._tripleClickObserver = document?.onTripleClickObserver.add((evt: IPointerEvent | IMouseEvent) => {
-            this._textSelectionRenderManager.handleTripleClick(evt);
-        });
+        this.disposeWithMe(
+            toDisposable(
+                document?.onTripleClickObserver.add((evt: IPointerEvent | IMouseEvent) => {
+                    this._textSelectionRenderManager.handleTripleClick(evt);
+                })
+            )
+        );
     }
 
     private _commandExecutedListener() {
@@ -152,27 +159,29 @@ export class TextSelectionController extends Disposable {
 
     private _skeletonListener() {
         // Change text selection runtime(skeleton, scene) and update text selection manager current selection.
-        this._docSkeletonManagerService.currentSkeleton$.subscribe((param) => {
-            if (param == null) {
-                return;
-            }
-            const { unitId, skeleton } = param;
+        this.disposeWithMe(
+            this._docSkeletonManagerService.currentSkeleton$.subscribe((param) => {
+                if (param == null) {
+                    return;
+                }
+                const { unitId, skeleton } = param;
 
-            const currentRender = this._renderManagerService.getRenderById(unitId);
+                const currentRender = this._renderManagerService.getRenderById(unitId);
 
-            if (currentRender == null) {
-                return;
-            }
+                if (currentRender == null) {
+                    return;
+                }
 
-            const { scene, mainComponent } = currentRender;
+                const { scene, mainComponent } = currentRender;
 
-            this._textSelectionRenderManager.changeRuntime(skeleton, scene, mainComponent as Documents);
+                this._textSelectionRenderManager.changeRuntime(skeleton, scene, mainComponent as Documents);
 
-            this._textSelectionManagerService.setCurrentSelectionNotRefresh({
-                unitId,
-                subUnitId: '',
-            });
-        });
+                this._textSelectionManagerService.setCurrentSelectionNotRefresh({
+                    unitId,
+                    subUnitId: '',
+                });
+            })
+        );
     }
 
     private _getDocObjectById(unitId: string) {

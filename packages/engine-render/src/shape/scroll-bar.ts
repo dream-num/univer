@@ -370,6 +370,7 @@ export class ScrollBar extends BaseScrollBar {
                 y: e.offsetY - this._lastY,
             });
             this._lastY = e.offsetY;
+            mainScene.getEngine()?.setRemainCapture();
         });
         this._verticalPointerUpObserver = mainScene.onPointerUpObserver.add((evt: unknown, state: EventState) => {
             const e = evt as IPointerEvent | IMouseEvent;
@@ -449,6 +450,7 @@ export class ScrollBar extends BaseScrollBar {
                 x: e.offsetX - this._lastX,
             });
             this._lastX = e.offsetX;
+            mainScene.getEngine()?.setRemainCapture();
         });
         this._horizonPointerUpObserver = mainScene.onPointerUpObserver.add((evt: unknown, state: EventState) => {
             const e = evt as IPointerEvent | IMouseEvent;

@@ -23,6 +23,7 @@ import type {
     IDocumentBody,
     IDocumentData,
     IDocumentRenderConfig,
+    IDocumentStyle,
 } from '../../types/interfaces/i-document-data';
 import type { IPaddingData } from '../../types/interfaces/i-style-data';
 import { updateAttributeByDelete } from './apply-utils/delete-apply';
@@ -107,6 +108,17 @@ class DocumentDataModelSimple {
         } else {
             documentStyle.renderConfig = {
                 ...documentStyle.renderConfig,
+                ...config,
+            };
+        }
+    }
+
+    updateDocumentStyle(config: IDocumentStyle) {
+        if (this.snapshot.documentStyle == null) {
+            this.snapshot.documentStyle = config;
+        } else {
+            this.snapshot.documentStyle = {
+                ...this.snapshot.documentStyle,
                 ...config,
             };
         }

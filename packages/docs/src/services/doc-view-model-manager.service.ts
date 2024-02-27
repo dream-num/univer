@@ -40,15 +40,7 @@ export class DocViewModelManagerService extends RxDisposable {
     }
 
     private _initialize() {
-        this._currentUniverService.currentDoc$.pipe(takeUntil(this.dispose$)).subscribe((documentModel) => {
-            if (documentModel == null) {
-                return;
-            }
-
-            const unitId = documentModel.getUnitId();
-            // Build the view model and notify the skeleton manager to create the skeleton.
-            this._setCurrent(unitId);
-        });
+        this._init();
     }
 
     override dispose(): void {
@@ -56,8 +48,32 @@ export class DocViewModelManagerService extends RxDisposable {
         this._docViewModelMap.clear();
     }
 
+    private _init() {
+        this._currentUniverService.currentDoc$.pipe(takeUntil(this.dispose$)).subscribe((documentModel) => {
+            this._create(documentModel);
+        });
+
+        this._currentUniverService.getAllUniverDocsInstance().forEach((documentModel) => {
+            this._create(documentModel);
+        });
+    }
+
+    private _create(documentModel: Nullable<DocumentDataModel>) {
+        if (documentModel == null) {
+            return;
+        }
+
+        const unitId = documentModel.getUnitId();
+        // Build the view model and notify the skeleton manager to create the skeleton.
+        this._setCurrent(unitId);
+    }
+
     getCurrent() {
         return this._docViewModelMap.get(this._currentViewModelUnitId);
+    }
+
+    getAllModel() {
+        return this._docViewModelMap;
     }
 
     getViewModel(unitId: string) {

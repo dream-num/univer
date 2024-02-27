@@ -17,11 +17,10 @@
 import { LocaleService } from '@univerjs/core';
 import { Button } from '@univerjs/design';
 import type { IFunctionInfo } from '@univerjs/engine-formula';
-import { ISidebarService } from '@univerjs/ui';
+import { IEditorService, ISidebarService } from '@univerjs/ui';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useState } from 'react';
 
-import { IFormulaInputService } from '../../services/formula-input.service';
 import styles from './index.module.less';
 import { InputParams } from './input-params/InputParams';
 import { SelectFunction } from './select-function/SelectFunction';
@@ -34,7 +33,7 @@ export function MoreFunctions() {
 
     const localeService = useDependency(LocaleService);
     const sidebarService = useDependency(ISidebarService);
-    const formulaInputService = useDependency(IFormulaInputService);
+    const editorService = useDependency(IEditorService);
 
     function handleClickNextPrev() {
         if (selectFunction) {
@@ -47,7 +46,7 @@ export function MoreFunctions() {
 
     function handleConfirm() {
         // TODO@Dushusir: save function  `=${functionInfo?.functionName}(${params.join(',')})`
-        formulaInputService.inputFormula(`=${functionInfo?.functionName}(`);
+        editorService.setFormula(`=${functionInfo?.functionName}(`);
     }
 
     return (

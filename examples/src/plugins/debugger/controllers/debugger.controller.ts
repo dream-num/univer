@@ -15,7 +15,7 @@
  */
 
 import { Disposable, ICommandService, ISnapshotPersistenceService, IUniverInstanceService } from '@univerjs/core';
-import { IMenuService } from '@univerjs/ui';
+import { ComponentManager, IMenuService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { ExportController, LocalSnapshotService, RecordController } from '../../local-save';
@@ -28,6 +28,8 @@ import { SaveSnapshotOptions } from '../commands/operations/save-snapshot.operat
 import { SetEditable } from '../commands/operations/set.editable.operation';
 import { SidebarOperation } from '../commands/operations/sidebar.operation';
 import { ThemeOperation } from '../commands/operations/theme.operation';
+import { TestEditorContainer } from '../views/test-editor/TestTextEditor';
+import { TEST_EDITOR_CONTAINER_COMPONENT } from '../views/test-editor/component-name';
 import {
     ConfirmMenuItemFactory,
     DialogMenuItemFactory,
@@ -45,10 +47,13 @@ export class DebuggerController extends Disposable {
         @Inject(Injector) private readonly _injector: Injector,
         @IMenuService private readonly _menuService: IMenuService,
         @ICommandService private readonly _commandService: ICommandService,
-        @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService
+        @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
+        @Inject(ComponentManager) private readonly _componentManager: ComponentManager
     ) {
         super();
         this._initializeContextMenu();
+
+        this._initCustomComponents();
 
         [
             LocaleOperation,
@@ -81,5 +86,10 @@ export class DebuggerController extends Disposable {
         ].forEach((factory) => {
             this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory)));
         });
+    }
+
+    private _initCustomComponents(): void {
+        const componentManager = this._componentManager;
+        this.disposeWithMe(componentManager.register(TEST_EDITOR_CONTAINER_COMPONENT, TestEditorContainer));
     }
 }

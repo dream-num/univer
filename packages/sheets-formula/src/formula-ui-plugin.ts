@@ -25,7 +25,6 @@ import { ArrayFormulaDisplayController } from './controllers/array-formula-displ
 import { FormulaAutoFillController } from './controllers/formula-auto-fill.controller';
 import { FormulaClipboardController } from './controllers/formula-clipboard.controller';
 import { FormulaEditorShowController } from './controllers/formula-editor-show.controller';
-import { FormulaInputController } from './controllers/formula-input.controller';
 import { FormulaUIController } from './controllers/formula-ui.controller';
 import { PromptController } from './controllers/prompt.controller';
 import { TriggerCalculationController } from './controllers/trigger-calculation.controller';
@@ -37,7 +36,6 @@ import {
     FormulaCustomFunctionService,
     IFormulaCustomFunctionService,
 } from './services/formula-custom-function.service';
-import { FormulaInputService, IFormulaInputService } from './services/formula-input.service';
 import { FormulaPromptService, IFormulaPromptService } from './services/prompt.service';
 import { IRegisterFunctionService, RegisterFunctionService } from './services/register-function.service';
 import { NumfmtFormulaDisplayController } from './controllers/numfmt-formula-display.controller';
@@ -69,7 +67,6 @@ export class UniverSheetsFormulaPlugin extends Plugin {
         const dependencies: Dependency[] = [
             // services
             [IFormulaPromptService, { useClass: FormulaPromptService }],
-            [IFormulaInputService, { useClass: FormulaInputService }],
             [
                 IDescriptionService,
                 {
@@ -83,7 +80,6 @@ export class UniverSheetsFormulaPlugin extends Plugin {
             // controllers
             [FormulaUIController],
             [PromptController],
-            [FormulaInputController],
             [FormulaAutoFillController],
             [FormulaClipboardController],
             [ArrayFormulaDisplayController],

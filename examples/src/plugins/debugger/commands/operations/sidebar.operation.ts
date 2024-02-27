@@ -15,9 +15,10 @@
  */
 
 import type { ICommand } from '@univerjs/core';
-import { CommandType } from '@univerjs/core';
-import { ISidebarService } from '@univerjs/ui';
+import { CommandType, IUniverInstanceService } from '@univerjs/core';
+import { IEditorService, ISidebarService } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
+import { TEST_EDITOR_CONTAINER_COMPONENT } from '../../views/test-editor/component-name';
 
 export interface IUIComponentCommandParams {
     value: string;
@@ -28,18 +29,30 @@ export const SidebarOperation: ICommand = {
     type: CommandType.COMMAND,
     handler: async (accessor: IAccessor, params: IUIComponentCommandParams) => {
         const sidebarService = accessor.get(ISidebarService);
-
+        const editorService = accessor.get(IEditorService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const unit = univerInstanceService.getCurrentUniverSheetInstance();
         switch (params.value) {
             case 'open':
+                editorService.setOperationSheetUnitId(unit.getUnitId());
+                editorService.setOperationSheetSubUnitId(unit.getActiveSheet().getSheetId());
                 sidebarService.open({
                     header: { title: 'debugger.sidebar.title' },
-                    children: { title: 'Sidebar Content' },
+                    children: { title: 'Sidebar Content', label: TEST_EDITOR_CONTAINER_COMPONENT },
                     footer: { title: 'Sidebar Footer' },
+                    onClose: () => {
+                        editorService.setOperationSheetUnitId(null);
+                        editorService.setOperationSheetSubUnitId(null);
+                        editorService.changeEditorFocus();
+                    },
                 });
                 break;
 
             case 'close':
             default:
+                editorService.setOperationSheetUnitId(null);
+                editorService.setOperationSheetSubUnitId(null);
+                editorService.changeEditorFocus();
                 sidebarService.close();
                 break;
         }

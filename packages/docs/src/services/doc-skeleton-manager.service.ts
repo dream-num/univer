@@ -55,6 +55,16 @@ export class DocSkeletonManagerService extends RxDisposable {
     }
 
     private _initialize() {
+        this._init();
+    }
+
+    override dispose(): void {
+        this._currentSkeletonBefore$.complete();
+        this._currentSkeleton$.complete();
+        this._docSkeletonMap.clear();
+    }
+
+    private _init() {
         this._docViewModelManagerService.currentDocViewModel$
             .pipe(takeUntil(this.dispose$))
             .subscribe((docViewModel) => {
@@ -64,16 +74,22 @@ export class DocSkeletonManagerService extends RxDisposable {
 
                 this._setCurrent(docViewModel);
             });
-    }
 
-    override dispose(): void {
-        this._currentSkeletonBefore$.complete();
-        this._currentSkeleton$.complete();
-        this._docSkeletonMap.clear();
+        this._docViewModelManagerService.getAllModel().forEach((docViewModel) => {
+            if (docViewModel == null) {
+                return;
+            }
+
+            this._setCurrent(docViewModel);
+        });
     }
 
     getCurrent(): Nullable<IDocSkeletonManagerParam> {
         return this.getSkeletonByUnitId(this._currentSkeletonUnitId);
+    }
+
+    getAllSkeleton(): Map<string, IDocSkeletonManagerParam> {
+        return this._docSkeletonMap;
     }
 
     makeDirtyCurrent(state: boolean = true) {

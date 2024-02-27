@@ -18,8 +18,6 @@ import type { ICommandInfo, IDocumentBody, IDocumentData, IPosition, ITextRotati
 import {
     DEFAULT_EMPTY_DOCUMENT_VALUE,
     Disposable,
-    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
-    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     EDITOR_ACTIVATED,
     FOCUSING_EDITOR_BUT_HIDDEN,
     FOCUSING_FORMULA_EDITOR,
@@ -55,13 +53,11 @@ import {
     Rect,
     ScrollBar,
 } from '@univerjs/engine-render';
-import { KeyCode } from '@univerjs/ui';
+import { IEditorService, KeyCode, SetEditorResizeOperation } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
-import type { Subscription } from 'rxjs';
 
 import { getEditorObject } from '../../basics/editor/get-editor-object';
 import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
-import { SetEditorResizeOperation } from '../../commands/operations/set-editor-resize.operation';
 import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import styles from '../../views/sheet-container/index.module.less';
@@ -79,10 +75,6 @@ interface ICanvasOffset {
 
 @OnLifecycle(LifecycleStages.Steady, StartEditController)
 export class StartEditController extends Disposable {
-    private _onInputSubscription: Nullable<Subscription>;
-
-    private _onInputActivateSubscription: Nullable<Subscription>;
-
     private _editorVisiblePrevious = false;
 
     constructor(
@@ -96,7 +88,8 @@ export class StartEditController extends Disposable {
         @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
         @ICommandService private readonly _commandService: ICommandService,
-        @Inject(LocaleService) protected readonly _localService: LocaleService
+        @Inject(LocaleService) protected readonly _localService: LocaleService,
+        @IEditorService private readonly _editorService: IEditorService
     ) {
         super();
 
@@ -106,9 +99,7 @@ export class StartEditController extends Disposable {
     }
 
     override dispose(): void {
-        this._onInputSubscription?.unsubscribe();
 
-        this._onInputActivateSubscription?.unsubscribe();
     }
 
     private _initialize() {
@@ -134,7 +125,7 @@ export class StartEditController extends Disposable {
                         const param = this._editorBridgeService.getEditCellState();
                         const unitId = this._editorBridgeService.getCurrentEditorId();
 
-                        if (param == null || unitId == null) {
+                        if (param == null || unitId == null || !this._editorService.isSheetEditor(unitId)) {
                             return;
                         }
 
@@ -154,50 +145,54 @@ export class StartEditController extends Disposable {
     }
 
     private _initialCursorSync() {
-        this._cellEditorManagerService.focus$.subscribe(() => {
-            this._textSelectionRenderManager.sync();
-        });
+        this.disposeWithMe(
+            this._cellEditorManagerService.focus$.subscribe(() => {
+                this._textSelectionRenderManager.sync();
+            })
+        );
     }
 
     private _initialEditFocusListener() {
-        this._onInputSubscription = this._editorBridgeService.currentEditCellState$.subscribe((editCellState) => {
-            if (editCellState == null || this._editorBridgeService.isForceKeepVisible()) {
-                return;
-            }
+        this.disposeWithMe(
+            this._editorBridgeService.currentEditCellState$.subscribe((editCellState) => {
+                if (editCellState == null || this._editorBridgeService.isForceKeepVisible()) {
+                    return;
+                }
 
-            const { position, documentLayoutObject, scaleX, editorUnitId } = editCellState;
+                const { position, documentLayoutObject, scaleX, editorUnitId } = editCellState;
 
-            const editorObject = this._getEditorObject();
+                const editorObject = this._getEditorObject();
 
-            if (editorObject == null) {
-                return;
-            }
+                if (editorObject == null) {
+                    return;
+                }
 
-            const { startX, endX } = position;
+                const { startX, endX } = position;
 
-            const { textRotation, wrapStrategy, documentModel } = documentLayoutObject;
+                const { textRotation, wrapStrategy, documentModel } = documentLayoutObject;
 
-            const { a: angle } = textRotation as ITextRotation;
+                const { a: angle } = textRotation as ITextRotation;
 
-            documentModel!.updateDocumentId(editorUnitId);
+                documentModel!.updateDocumentId(editorUnitId);
 
-            if (wrapStrategy === WrapStrategy.WRAP && angle === 0) {
-                documentModel!.updateDocumentDataPageSize((endX - startX) / scaleX);
-            }
+                if (wrapStrategy === WrapStrategy.WRAP && angle === 0) {
+                    documentModel!.updateDocumentDataPageSize((endX - startX) / scaleX);
+                }
 
-            this._currentUniverService.changeDoc(editorUnitId, documentModel!);
+                this._currentUniverService.changeDoc(editorUnitId, documentModel!);
 
-            this._contextService.setContextValue(FOCUSING_EDITOR_BUT_HIDDEN, true);
+                this._contextService.setContextValue(FOCUSING_EDITOR_BUT_HIDDEN, true);
 
-            this._textSelectionManagerService.replaceTextRanges([
-                {
-                    startOffset: 0,
-                    endOffset: 0,
-                },
-            ]);
+                this._textSelectionManagerService.replaceTextRanges([
+                    {
+                        startOffset: 0,
+                        endOffset: 0,
+                    },
+                ]);
 
-            this._textSelectionRenderManager.activate(HIDDEN_EDITOR_POSITION, HIDDEN_EDITOR_POSITION);
-        });
+                this._textSelectionRenderManager.activate(HIDDEN_EDITOR_POSITION, HIDDEN_EDITOR_POSITION);
+            })
+        );
     }
 
     private _fitTextSize(
@@ -455,102 +450,104 @@ export class StartEditController extends Disposable {
 
     // You can double-click on the cell or input content by keyboard to put the cell into the edit state.
     private _initialStartEdit() {
-        this._onInputActivateSubscription = this._editorBridgeService.visible$.subscribe((param) => {
-            const { visible, eventType, keycode } = param;
+        this.disposeWithMe(
+            this._editorBridgeService.visible$.subscribe((param) => {
+                const { visible, eventType, keycode } = param;
 
-            if (visible === this._editorVisiblePrevious) {
-                return;
-            }
-
-            this._editorVisiblePrevious = visible;
-
-            if (visible === false) {
-                return;
-            }
-
-            const editCellState = this._editorBridgeService.getEditCellState();
-
-            if (editCellState == null) {
-                return;
-            }
-
-            const {
-                position,
-                documentLayoutObject,
-                canvasOffset,
-                scaleX,
-                scaleY,
-                editorUnitId,
-                unitId,
-                isInArrayFormulaRange = false,
-            } = editCellState;
-
-            const editorObject = this._getEditorObject();
-
-            if (editorObject == null) {
-                return;
-            }
-
-            const { document, scene } = editorObject;
-
-            this._contextService.setContextValue(EDITOR_ACTIVATED, true);
-
-            const { documentModel: documentDataModel } = documentLayoutObject;
-
-            const docParam = this._docSkeletonManagerService.getSkeletonByUnitId(editorUnitId);
-
-            if (docParam == null || documentDataModel == null) {
-                return;
-            }
-
-            const { skeleton } = docParam;
-
-            this._fitTextSize(position, canvasOffset, skeleton, documentLayoutObject, scaleX, scaleY);
-
-            // move selection
-            if (
-                eventType === DeviceInputEventType.Keyboard ||
-                (eventType === DeviceInputEventType.Dblclick && isInArrayFormulaRange)
-            ) {
-                const snapshot = Tools.deepClone(documentDataModel.snapshot) as IDocumentData;
-                const documentViewModel = this._docViewModelManagerService.getCurrent()?.docViewModel!;
-                this._resetBodyStyle(snapshot.body!);
-
-                documentDataModel.reset(snapshot);
-                documentViewModel.reset(documentDataModel);
-
-                document.makeDirty();
-
-                // @JOCS, Why calculate here?
-                if (keycode === KeyCode.BACKSPACE || eventType === DeviceInputEventType.Dblclick) {
-                    skeleton.calculate();
-                    this._editorBridgeService.changeEditorDirty(true);
+                if (visible === this._editorVisiblePrevious) {
+                    return;
                 }
 
-                this._textSelectionManagerService.replaceTextRanges([
-                    {
-                        startOffset: 0,
-                        endOffset: 0,
-                    },
-                ]);
-            } else if (eventType === DeviceInputEventType.Dblclick) {
-                // TODO: @JOCS, Get the position close to the cursor after clicking on the cell.
-                const cursor = documentDataModel.getBody()!.dataStream.length - 2 || 0;
+                this._editorVisiblePrevious = visible;
 
-                scene.getViewport(VIEWPORT_KEY.VIEW_MAIN)?.scrollTo({
-                    y: Number.POSITIVE_INFINITY,
-                });
+                if (visible === false) {
+                    return;
+                }
 
-                this._textSelectionManagerService.replaceTextRanges([
-                    {
-                        startOffset: cursor,
-                        endOffset: cursor,
-                    },
-                ]);
-            }
+                const editCellState = this._editorBridgeService.getEditCellState();
 
-            this._renderManagerService.getRenderById(unitId)?.scene.resetCursor();
-        });
+                if (editCellState == null) {
+                    return;
+                }
+
+                const {
+                    position,
+                    documentLayoutObject,
+                    canvasOffset,
+                    scaleX,
+                    scaleY,
+                    editorUnitId,
+                    unitId,
+                    isInArrayFormulaRange = false,
+                } = editCellState;
+
+                const editorObject = this._getEditorObject();
+
+                if (editorObject == null) {
+                    return;
+                }
+
+                const { document, scene } = editorObject;
+
+                this._contextService.setContextValue(EDITOR_ACTIVATED, true);
+
+                const { documentModel: documentDataModel } = documentLayoutObject;
+
+                const docParam = this._docSkeletonManagerService.getSkeletonByUnitId(editorUnitId);
+
+                if (docParam == null || documentDataModel == null) {
+                    return;
+                }
+
+                const { skeleton } = docParam;
+
+                this._fitTextSize(position, canvasOffset, skeleton, documentLayoutObject, scaleX, scaleY);
+
+                // move selection
+                if (
+                    eventType === DeviceInputEventType.Keyboard ||
+                (eventType === DeviceInputEventType.Dblclick && isInArrayFormulaRange)
+                ) {
+                    const snapshot = Tools.deepClone(documentDataModel.snapshot) as IDocumentData;
+                    const documentViewModel = this._docViewModelManagerService.getCurrent()?.docViewModel!;
+                    this._resetBodyStyle(snapshot.body!);
+
+                    documentDataModel.reset(snapshot);
+                    documentViewModel.reset(documentDataModel);
+
+                    document.makeDirty();
+
+                    // @JOCS, Why calculate here?
+                    if (keycode === KeyCode.BACKSPACE || eventType === DeviceInputEventType.Dblclick) {
+                        skeleton.calculate();
+                        this._editorBridgeService.changeEditorDirty(true);
+                    }
+
+                    this._textSelectionManagerService.replaceTextRanges([
+                        {
+                            startOffset: 0,
+                            endOffset: 0,
+                        },
+                    ]);
+                } else if (eventType === DeviceInputEventType.Dblclick) {
+                    // TODO: @JOCS, Get the position close to the cursor after clicking on the cell.
+                    const cursor = documentDataModel.getBody()!.dataStream.length - 2 || 0;
+
+                    scene.getViewport(VIEWPORT_KEY.VIEW_MAIN)?.scrollTo({
+                        y: Number.POSITIVE_INFINITY,
+                    });
+
+                    this._textSelectionManagerService.replaceTextRanges([
+                        {
+                            startOffset: cursor,
+                            endOffset: cursor,
+                        },
+                    ]);
+                }
+
+                this._renderManagerService.getRenderById(unitId)?.scene.resetCursor();
+            })
+        );
     }
 
     private _resetBodyStyle(body: IDocumentBody) {
@@ -595,14 +592,17 @@ export class StartEditController extends Disposable {
     }
 
     private _initialKeyboardListener() {
-        this._textSelectionRenderManager.onInputBefore$.subscribe((config) => {
-            const isFocusFormulaEditor = this._contextService.getContextValue(FOCUSING_FORMULA_EDITOR);
-            const isFocusSheets = this._contextService.getContextValue(FOCUSING_SHEET);
+        this.disposeWithMe(
+            this._textSelectionRenderManager.onInputBefore$.subscribe((config) => {
+                const isFocusFormulaEditor = this._contextService.getContextValue(FOCUSING_FORMULA_EDITOR);
+                const isFocusSheets = this._contextService.getContextValue(FOCUSING_SHEET);
+                const unitId = this._currentUniverService.getCurrentUniverDocInstance().getUnitId();
 
-            if (isFocusSheets && !isFocusFormulaEditor) {
-                this._showEditorByKeyboard(config);
-            }
-        });
+                if (isFocusSheets && !isFocusFormulaEditor && this._editorService.isSheetEditor(unitId)) {
+                    this._showEditorByKeyboard(config);
+                }
+            })
+        );
     }
 
     private _showEditorByKeyboard(config: Nullable<IEditorInputConfig>) {
@@ -619,17 +619,22 @@ export class StartEditController extends Disposable {
         });
     }
 
-    // Listen to document edits to refresh the size of the editor.
+    /**
+     * Listen to document edits to refresh the size of the sheet editor, not for normal editor.
+     */
     private _commandExecutedListener() {
         const updateCommandList = [RichTextEditingMutation.id, SetEditorResizeOperation.id];
-
-        const excludeUnitList = [DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY];
 
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (updateCommandList.includes(command.id)) {
                     const params = command.params as IRichTextEditingMutationParams;
                     const { unitId: commandUnitId } = params;
+
+                    if (!this._editorService.isSheetEditor(commandUnitId)) {
+                        return;
+                    }
+
                     const unitId = this._editorBridgeService.getCurrentEditorId();
 
                     if (unitId == null) {
@@ -641,10 +646,6 @@ export class StartEditController extends Disposable {
                     const skeleton = this._docSkeletonManagerService.getSkeletonByUnitId(unitId)?.skeleton;
 
                     if (skeleton == null) {
-                        return;
-                    }
-
-                    if (!excludeUnitList.includes(commandUnitId)) {
                         return;
                     }
 

@@ -74,7 +74,7 @@ export class StatusBarController extends Disposable {
                     if (selections) {
                         clearTimeout(this._calculateTimeout);
                         this._calculateTimeout = setTimeout(() => {
-                            const primary = selections[selections.length - 1].primary;
+                            const primary = selections[selections.length - 1]?.primary;
                             this._calculateSelection(
                                 selections.map((selection) => selection.range),
                                 primary
@@ -93,7 +93,7 @@ export class StatusBarController extends Disposable {
                             return;
                         }
                         if (selections) {
-                            const primary = selections[selections.length - 1].primary;
+                            const primary = selections[selections.length - 1]?.primary;
                             this._calculateSelection(
                                 selections.map((selection) => selection.range),
                                 primary

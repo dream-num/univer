@@ -16,14 +16,13 @@
 
 import React from 'react';
 
-import { HelpFunction } from './prompt/help-function/HelpFunction';
-import { SearchFunction } from './prompt/search-function/SearchFunction';
+import styles from './index.module.less';
 
-export function RenderFormulaPromptContent() {
+/**
+ * Doc standalone background
+ */
+export const DocBackground = () => {
     return (
-        <>
-            <SearchFunction />
-            <HelpFunction />
-        </>
+        <div className={styles.docsUiCanvasBackground}></div>
     );
-}
+};

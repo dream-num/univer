@@ -16,28 +16,18 @@
 
 import type { DocumentDataModel, EventState, Nullable } from '@univerjs/core';
 import {
-    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     IConfigService,
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
     RxDisposable,
 } from '@univerjs/core';
+import { DOCS_COMPONENT_DEFAULT_Z_INDEX, DOCS_COMPONENT_HEADER_LAYER_INDEX, DOCS_COMPONENT_MAIN_LAYER_INDEX, DOCS_VIEW_KEY, VIEWPORT_KEY } from '@univerjs/docs';
 import type { IRender, IWheelEvent, RenderManagerService, Scene } from '@univerjs/engine-render';
 import { Documents, EVENT_TYPE, IRenderManagerService, Layer, ScrollBar, Viewport } from '@univerjs/engine-render';
-import { Inject } from '@wendellhu/redi';
 import { BehaviorSubject, takeUntil } from 'rxjs';
 
-import {
-    DOCS_COMPONENT_DEFAULT_Z_INDEX,
-    DOCS_COMPONENT_HEADER_LAYER_INDEX,
-    DOCS_COMPONENT_MAIN_LAYER_INDEX,
-    DOCS_VIEW_KEY,
-    VIEWPORT_KEY,
-} from '../basics/docs-view-key';
-import { DocViewModelManagerService } from '../services/doc-view-model-manager.service';
-
-@OnLifecycle(LifecycleStages.Ready, DocCanvasView)
+@OnLifecycle(LifecycleStages.Starting, DocCanvasView)
 export class DocCanvasView extends RxDisposable {
     private _scene!: Scene;
 
@@ -52,32 +42,47 @@ export class DocCanvasView extends RxDisposable {
     constructor(
         @IRenderManagerService private readonly _renderManagerService: RenderManagerService,
         @IConfigService private readonly _configService: IConfigService,
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
-        @Inject(DocViewModelManagerService) private readonly _docViewModelManagerService: DocViewModelManagerService
+        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService
     ) {
         super();
         this._initialize();
     }
 
     private _initialize() {
+        this._renderManagerService.createRender$.pipe(takeUntil(this.dispose$)).subscribe((unitId) => {
+            this._create(unitId);
+        });
+
         this._currentUniverService.currentDoc$.pipe(takeUntil(this.dispose$)).subscribe((documentModel) => {
-            if (documentModel == null) {
-                return;
-            }
+            this._create(documentModel?.getUnitId());
+        });
 
-            this._currentDocumentModel = documentModel;
-
-            const unitId = documentModel.getUnitId();
-
-            if (!this._loadedMap.has(unitId)) {
-                this._addNewRender();
-                this._loadedMap.add(unitId);
-            }
+        this._currentUniverService.getAllUniverDocsInstance().forEach((documentModel) => {
+            this._create(documentModel.getUnitId());
         });
     }
 
     override dispose(): void {
         this._fps$.complete();
+    }
+
+    private _create(unitId: Nullable<string>) {
+        if (unitId == null) {
+            return;
+        }
+
+        const model = this._currentUniverService.getUniverDocInstance(unitId);
+
+        if (model == null) {
+            return;
+        }
+
+        this._currentDocumentModel = model;
+
+        if (!this._loadedMap.has(unitId)) {
+            this._addNewRender();
+            this._loadedMap.add(unitId);
+        }
     }
 
     private _addNewRender() {
@@ -147,8 +152,8 @@ export class DocCanvasView extends RxDisposable {
         });
 
         const hasScroll = this._configService.getConfig('hasScroll') as Nullable<boolean>;
-        // TODO: @JOCS, do not show scroll bar when initialize formula editor, any better way?
-        if (hasScroll !== false && unitId !== DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
+
+        if (hasScroll !== false) {
             new ScrollBar(viewMain);
         }
 

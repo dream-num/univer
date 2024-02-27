@@ -18,7 +18,7 @@ import type { Nullable, Observer } from '@univerjs/core';
 import { DataStreamTreeTokenType, ILogService, RxDisposable } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, fromEvent, Subject } from 'rxjs';
 
 import { CURSOR_TYPE } from '../../basics/const';
 import type { IDocumentSkeletonSpan } from '../../basics/i-document-skeleton-cached';
@@ -131,6 +131,8 @@ export interface ITextSelectionRenderManager {
     readonly onCompositionend$: Observable<Nullable<IEditorInputConfig>>;
     readonly onSelectionStart$: Observable<Nullable<INodePosition>>;
     readonly onPaste$: Observable<Nullable<IEditorInputConfig>>;
+    readonly onFocus$: Observable<Nullable<IEditorInputConfig>>;
+    readonly onBlur$: Observable<Nullable<IEditorInputConfig>>;
     readonly textSelectionInner$: Observable<Nullable<ITextSelectionInnerParam>>;
 
     __getEditorContainer(): HTMLElement;
@@ -205,6 +207,12 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
     private readonly _textSelectionInner$ = new BehaviorSubject<Nullable<ITextSelectionInnerParam>>(null);
     readonly textSelectionInner$ = this._textSelectionInner$.asObservable();
+
+    private readonly _onFocus$ = new Subject<Nullable<IEditorInputConfig>>();
+    readonly onFocus$ = this._onFocus$.asObservable();
+
+    private readonly _onBlur$ = new Subject<Nullable<IEditorInputConfig>>();
+    readonly onBlur$ = this._onBlur$.asObservable();
 
     private _container!: HTMLDivElement;
 
@@ -932,6 +940,8 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         this.deactivate();
 
         this._interactTextRange(activeRangeInstance);
+
+        this._scene?.getEngine()?.setRemainCapture();
     }
 
     private _attachScrollEvent(viewport: Nullable<Viewport>) {
@@ -998,55 +1008,83 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
     // FIXME: listeners here are not correctly disposed
     private _initInputEvents() {
-        this._input.addEventListener('keydown', (e) => {
-            if (this._isIMEInputApply) {
-                return;
-            }
+        this.disposeWithMe(
+            fromEvent(this._input, 'keydown').subscribe((e) => {
+                if (this._isIMEInputApply) {
+                    return;
+                }
 
-            this._eventHandle(e, (config) => {
-                this._onKeydown$.next(config);
-            });
-        });
+                this._eventHandle(e, (config) => {
+                    this._onKeydown$.next(config);
+                });
+            })
+        );
 
-        this._input.addEventListener('input', (e) => {
-            if (this._isIMEInputApply) {
-                return;
-            }
+        this.disposeWithMe(
+            fromEvent(this._input, 'input').subscribe((e) => {
+                if (this._isIMEInputApply) {
+                    return;
+                }
 
-            this._eventHandle(e, (config) => {
-                this._onInputBefore$.next(config);
-                this._onInput$.next(config);
-            });
-        });
+                this._eventHandle(e, (config) => {
+                    this._onInputBefore$.next(config);
+                    this._onInput$.next(config);
+                });
+            })
+        );
 
-        this._input.addEventListener('compositionstart', (e) => {
-            this._isIMEInputApply = true;
+        this.disposeWithMe(
+            fromEvent(this._input, 'compositionstart').subscribe((e) => {
+                this._isIMEInputApply = true;
 
-            this._eventHandle(e, (config) => {
-                this._onCompositionstart$.next(config);
-            });
-        });
+                this._eventHandle(e, (config) => {
+                    this._onCompositionstart$.next(config);
+                });
+            })
+        );
 
-        this._input.addEventListener('compositionend', (e) => {
-            this._isIMEInputApply = false;
+        this.disposeWithMe(
+            fromEvent(this._input, 'compositionend').subscribe((e) => {
+                this._isIMEInputApply = false;
 
-            this._eventHandle(e, (config) => {
-                this._onCompositionend$.next(config);
-            });
-        });
+                this._eventHandle(e, (config) => {
+                    this._onCompositionend$.next(config);
+                });
+            })
+        );
 
-        this._input.addEventListener('compositionupdate', (e) => {
-            this._eventHandle(e, (config) => {
-                this._onInputBefore$.next(config);
-                this._onCompositionupdate$.next(config);
-            });
-        });
+        this.disposeWithMe(
+            fromEvent(this._input, 'compositionupdate').subscribe((e) => {
+                this._eventHandle(e, (config) => {
+                    this._onInputBefore$.next(config);
+                    this._onCompositionupdate$.next(config);
+                });
+            })
+        );
 
-        this._input.addEventListener('paste', (e) => {
-            this._eventHandle(e, (config) => {
-                this._onPaste$.next(config);
-            });
-        });
+        this.disposeWithMe(
+            fromEvent(this._input, 'paste').subscribe((e) => {
+                this._eventHandle(e, (config) => {
+                    this._onPaste$.next(config);
+                });
+            })
+        );
+
+        this.disposeWithMe(
+            fromEvent(this._input, 'focus').subscribe((e) => {
+                this._eventHandle(e, (config) => {
+                    this._onFocus$.next(config);
+                });
+            })
+        );
+
+        this.disposeWithMe(
+            fromEvent(this._input, 'blur').subscribe((e) => {
+                this._eventHandle(e, (config) => {
+                    this._onBlur$.next(config);
+                });
+            })
+        );
     }
 
     private _eventHandle(e: Event | CompositionEvent | KeyboardEvent, func: (config: IEditorInputConfig) => void) {

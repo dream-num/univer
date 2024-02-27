@@ -20,8 +20,9 @@ import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { SelectionManagerService } from '@univerjs/sheets';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
-
-import { FormulaInputService, IFormulaInputService } from '../../../services/formula-input.service';
+import { EditorService, IEditorService } from '@univerjs/ui';
+import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
+import { FormulaPromptService, IFormulaPromptService } from '../../../services/prompt.service';
 
 const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
     id: 'test',
@@ -68,7 +69,9 @@ export function createCommandTestBed(workbookConfig?: IWorkbookData, dependencie
         override onStarting(injector: Injector): void {
             injector.add([SelectionManagerService]);
             injector.add([LexerTreeBuilder]);
-            injector.add([IFormulaInputService, { useClass: FormulaInputService }]);
+            injector.add([IFormulaPromptService, { useClass: FormulaPromptService }]);
+            injector.add([IEditorService, { useClass: EditorService }]);
+            injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
 
             dependencies?.forEach((d) => injector.add(d));
         }

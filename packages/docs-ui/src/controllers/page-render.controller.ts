@@ -16,15 +16,13 @@
 
 import {
     Disposable,
-    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
-    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
 } from '@univerjs/core';
 import type { Documents, IPageRenderConfig } from '@univerjs/engine-render';
 import { IRenderManagerService, Rect } from '@univerjs/engine-render';
-import { Inject } from '@wendellhu/redi';
+import { IEditorService } from '@univerjs/ui';
 
 const PAGE_STROKE_COLOR = 'rgba(198, 198, 198, 1)';
 
@@ -34,7 +32,8 @@ const PAGE_FILL_COLOR = 'rgba(255, 255, 255, 1)';
 export class PageRenderController extends Disposable {
     constructor(
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @Inject(IUniverInstanceService) private readonly _currentUniverService: IUniverInstanceService
+        @IEditorService private readonly _editorService: IEditorService,
+        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService
     ) {
         super();
 
@@ -53,11 +52,11 @@ export class PageRenderController extends Disposable {
                 return;
             }
 
-            if (this._currentUniverService.getUniverDocInstance(unitId) == null) {
+            const currentRender = this._renderManagerService.getRenderById(unitId);
+
+            if (this._editorService.isEditor(unitId) || this._currentUniverService.getUniverDocInstance(unitId) == null) {
                 return;
             }
-
-            const currentRender = this._renderManagerService.getRenderById(unitId);
 
             if (currentRender == null) {
                 return;
@@ -70,7 +69,7 @@ export class PageRenderController extends Disposable {
             const pageSize = docsComponent.getSkeleton()?.getPageSize();
 
             docsComponent.onPageRenderObservable.add((config: IPageRenderConfig) => {
-                if ([DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY].includes(unitId)) {
+                if (this._editorService.isEditor(unitId)) {
                     return;
                 }
 

@@ -93,6 +93,10 @@ export interface IDirtyUnitFeatureMap {
     [unitId: string]: Nullable<{ [sheetId: string]: { [featureId: string]: boolean } }>;
 }
 
+export interface IDirtyUnitOtherFormulaMap {
+    [unitId: string]: Nullable<{ [sheetId: string]: { [formulaId: string]: boolean } }>;
+}
+
 export interface IArrayFormulaRangeType {
     [unitId: string]: Nullable<{ [sheetId: string]: IObjectMatrixPrimitiveType<IRange> }>;
 }
@@ -154,6 +158,7 @@ export interface IFormulaDatasetConfig {
     dirtyRanges: IUnitRange[];
     dirtyNameMap: IDirtyUnitSheetNameMap;
     dirtyUnitFeatureMap: IDirtyUnitFeatureMap;
+    dirtyUnitOtherFormulaMap: IDirtyUnitOtherFormulaMap;
     numfmtItemMap: INumfmtItemMap;
     excludedCell?: IUnitExcludedCell;
     allUnitData?: IUnitData;

@@ -20,7 +20,7 @@ import { Inject } from '@wendellhu/redi';
 
 import { ITextSelectionRenderManager, ScrollBar } from '@univerjs/engine-render';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
-import { CoverContentCommand, DocSkeletonManagerService, RichTextEditingMutation, TextSelectionManagerService, VIEWPORT_KEY } from '@univerjs/docs';
+import { CoverContentCommand, DocSkeletonManagerService, RichTextEditingMutation, VIEWPORT_KEY } from '@univerjs/docs';
 import { IEditorService, SetEditorResizeOperation } from '@univerjs/ui';
 
 @OnLifecycle(LifecycleStages.Rendered, DocEditorBridgeController)

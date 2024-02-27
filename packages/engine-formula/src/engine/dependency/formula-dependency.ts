@@ -530,6 +530,18 @@ export class FormulaDependencyGenerator extends Disposable {
             }
         }
 
+        /**
+         * Specify a specific other formula for flagging a functionality as dirty.
+         */
+        const formulaId = tree.formulaId;
+        if (formulaId != null) {
+            const otherFormulaMap = this._currentConfigService.getDirtyUnitOtherFormulaMap();
+            const state = otherFormulaMap?.[unitId]?.[subUnitId]?.[formulaId];
+            if (state != null) {
+                return true;
+            }
+        }
+
         const excludedCell = this._currentConfigService.getExcludedRange()?.[unitId]?.[subUnitId];
 
         /**

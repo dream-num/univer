@@ -33,13 +33,9 @@ import { dataBarCellCalculateUnit } from './calculate-unit/data-bar';
 import { highlightCellCalculateUnit } from './calculate-unit/highlight-cell';
 import type { IColorScaleRenderParams } from './calculate-unit/color-scale';
 import { colorScaleCellCalculateUnit } from './calculate-unit/color-scale';
+import type { ICalculateUnit, IContext } from './calculate-unit/type';
 
 type ComputeStatus = 'computing' | 'end' | 'error';
-
-interface ICalculationUnit< R = ObjectMatrix<any>> {
-    type: IConditionFormatRule['rule']['type'];
-    handle(rule: IConditionFormatRule, worksheet: Worksheet): R;
-};
 
 interface IComputeCache { status: ComputeStatus };
 
@@ -54,7 +50,7 @@ export class ConditionalFormatService extends Disposable {
 
     public interceptorManager = new InterceptorManager({ beforeUpdateRuleResult });
 
-    private _calculationUnitMap: Map<IConditionFormatRule['rule']['type'], ICalculationUnit> = new Map();
+    private _calculationUnitMap: Map<IConditionFormatRule['rule']['type'], ICalculateUnit> = new Map();
 
     constructor(@Inject(ConditionalFormatRuleModel) private _conditionalFormatRuleModel: ConditionalFormatRuleModel,
         @Inject(Injector) private _injector: Injector,
@@ -201,7 +197,7 @@ export class ConditionalFormatService extends Disposable {
         );
     }
 
-    private _registerCalculationUnit(unit: ICalculationUnit) {
+    private _registerCalculationUnit(unit: ICalculateUnit) {
         this._calculationUnitMap.set(unit.type, unit);
     }
 
@@ -388,7 +384,8 @@ export class ConditionalFormatService extends Disposable {
         if (!unit || !worksheet) {
             return;
         }
-        const result = await unit.handle(rule, worksheet);
+        const context: IContext = { unitId, subUnitId, accessor: this._injector, workbook: workbook!, worksheet };
+        const result = await unit.handle(rule, context);
         this._ruleComputeStatus$.next({ status: 'end', unitId, subUnitId, cfId: rule.cfId, result });
     }
 }

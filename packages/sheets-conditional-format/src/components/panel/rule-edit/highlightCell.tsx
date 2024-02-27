@@ -131,7 +131,7 @@ const HighlightCellInput = (props: { type: IResult['subType'];
     }
     return null;
 };
-const getOperatorOptions = (type: SubRuleType.number | SubRuleType.text | SubRuleType.timePeriod, localeService: LocaleService) => {
+const getOperatorOptions = (type: SubRuleType.number | SubRuleType.text | SubRuleType.timePeriod | SubRuleType.formula, localeService: LocaleService) => {
     switch (type) {
         case SubRuleType.text:{
             return [
@@ -195,8 +195,8 @@ export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, ITextHigh
     }];
     const operatorOptions = useMemo(() => getOperatorOptions(subType, localeService), [subType]);
 
-    const [operator, operatorSet] = useState<IResult['operator']>(() => {
-        const defaultV = operatorOptions[0].value as IResult['operator'];
+    const [operator, operatorSet] = useState<IResult['operator'] | undefined>(() => {
+        const defaultV = operatorOptions ? operatorOptions[0].value as IResult['operator'] : undefined;
         if (!rule) {
             return defaultV;
         }
@@ -292,7 +292,8 @@ export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, ITextHigh
 
     const onTypeChange = (v: string) => {
         const _subType = v as typeof subType;
-        const _operator = getOperatorOptions(_subType, localeService)[0].value as typeof operator;
+        const operatorList = getOperatorOptions(_subType, localeService);
+        const _operator = operatorList && operatorList[0].value as typeof operator;
         subTypeSet(_subType);
         operatorSet(_operator);
         onChange(getResult({ subType: _subType, operator: _operator }));

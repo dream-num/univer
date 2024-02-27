@@ -373,7 +373,7 @@ export class PromptController extends Disposable {
         );
 
         this.disposeWithMe(
-            this._editorService.changeEditor$.subscribe(() => {
+            this._editorService.changeEditorFocus$.subscribe(() => {
                 this._changeEditor();
             })
         );

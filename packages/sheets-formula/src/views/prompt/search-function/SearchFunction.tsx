@@ -106,7 +106,7 @@ export function SearchFunction() {
 
         const editor = editorService.getEditor(editorUnitId);
 
-        return editor?.editorDom.getBoundingClientRect();
+        return editor?.getBoundingClientRect();
     }
 
     function handleLiMouseEnter(index: number) {

@@ -16,9 +16,9 @@
 
 import type { ICommand } from '@univerjs/core';
 import { CommandType, IUniverInstanceService } from '@univerjs/core';
-import { TEST_EDITOR_CONTAINER_COMPONENT } from '@univerjs/docs-ui';
 import { IEditorService, ISidebarService } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
+import { TEST_EDITOR_CONTAINER_COMPONENT } from '../../views/test-editor/component-name';
 
 export interface IUIComponentCommandParams {
     value: string;
@@ -35,15 +35,15 @@ export const SidebarOperation: ICommand = {
         switch (params.value) {
             case 'open':
                 editorService.setOperationSheetUnitId(unit.getUnitId());
-                editorService.setOperationSheetUnitId(unit.getActiveSheet().getSheetId());
+                editorService.setOperationSheetSubUnitId(unit.getActiveSheet().getSheetId());
                 sidebarService.open({
                     header: { title: 'debugger.sidebar.title' },
                     children: { title: 'Sidebar Content', label: TEST_EDITOR_CONTAINER_COMPONENT },
                     footer: { title: 'Sidebar Footer' },
                     onClose: () => {
                         editorService.setOperationSheetUnitId(null);
-                        editorService.setOperationSheetUnitId(null);
-                        editorService.changeEditor();
+                        editorService.setOperationSheetSubUnitId(null);
+                        editorService.changeEditorFocus();
                     },
                 });
                 break;
@@ -51,8 +51,8 @@ export const SidebarOperation: ICommand = {
             case 'close':
             default:
                 editorService.setOperationSheetUnitId(null);
-                editorService.setOperationSheetUnitId(null);
-                editorService.changeEditor();
+                editorService.setOperationSheetSubUnitId(null);
+                editorService.changeEditorFocus();
                 sidebarService.close();
                 break;
         }

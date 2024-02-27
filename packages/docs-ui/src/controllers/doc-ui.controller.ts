@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import type { IDesktopUIController, IMenuItemFactory } from '@univerjs/ui';
 import { ComponentManager, IEditorService, IMenuService, IUIController } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
@@ -28,8 +28,6 @@ import {
     FontFamilyItem,
 } from '../components/font-family';
 import { FONT_SIZE_COMPONENT, FontSize } from '../components/font-size';
-import { TestEditorContainer } from '../components/test-editor/TestTextEditor';
-import { TEST_EDITOR_CONTAINER_COMPONENT } from '../components/test-editor/component-name';
 import { DocBackground } from '../views/doc-background/DocBackground';
 import {
     BoldMenuItemFactory,
@@ -51,10 +49,10 @@ export class DocUIController extends Disposable {
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
-        @ICommandService private readonly _commandService: ICommandService,
         @IEditorService private readonly _editorService: IEditorService,
         @IMenuService private readonly _menuService: IMenuService,
-        @IUIController private readonly _uiController: IDesktopUIController
+        @IUIController private readonly _uiController: IDesktopUIController,
+        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService
     ) {
         super();
 
@@ -67,7 +65,6 @@ export class DocUIController extends Disposable {
         this.disposeWithMe(componentManager.register(FONT_FAMILY_COMPONENT, FontFamily));
         this.disposeWithMe(componentManager.register(FONT_FAMILY_ITEM_COMPONENT, FontFamilyItem));
         this.disposeWithMe(componentManager.register(FONT_SIZE_COMPONENT, FontSize));
-        this.disposeWithMe(componentManager.register(TEST_EDITOR_CONTAINER_COMPONENT, TestEditorContainer));
     }
 
     private _initMenus(): void {
@@ -98,10 +95,12 @@ export class DocUIController extends Disposable {
     }
 
     private _initDocBackground() {
-        const standAlone = [...this._editorService.getAllEditor().values()].some((editor) => {
-            return editor.isSheetEditor === true;
-        });
-        if (!standAlone) {
+        const firstDocUnitId = this._currentUniverService.getAllUniverDocsInstance()[0].getUnitId();
+        if (firstDocUnitId == null) {
+            return;
+        }
+        const embedded = this._editorService.isEditor(firstDocUnitId);
+        if (!embedded) {
             this.disposeWithMe(
                 this._uiController.registerContentComponent(() => connectInjector(DocBackground, this._injector))
             );

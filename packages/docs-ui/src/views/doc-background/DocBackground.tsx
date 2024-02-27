@@ -16,21 +16,13 @@
 
 import React from 'react';
 
-const backgroundStyle: React.CSSProperties = {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
-    background: 'rgb(233,238,242)',
-    zIndex: 1,
-    userSelect: 'none',
-    pointerEvents: 'none',
-};
+import styles from './index.module.less';
 
 /**
  * Doc standalone background
  */
 export const DocBackground = () => {
     return (
-        <div style={backgroundStyle}></div>
+        <div className={styles.docsUiCanvasBackground}></div>
     );
 };

@@ -133,7 +133,7 @@ export function getNextDivide(curLine: IDocumentSkeletonLine, curDivide: IDocume
 }
 
 export function getLastRemainingDivide(curLine: IDocumentSkeletonLine) {
-    // 除了divide之外，其他元素不会提前create
+    // Except for divide, the other elements will not be created in advance.
     if (!curLine) {
         return;
     }
@@ -219,9 +219,6 @@ function isLineBlank(line?: IDocumentSkeletonLine) {
     return true;
 }
 
-// 重新计算图文混排的布局，每一个 TR 或者同层级处理函数都要调用这个方法
-export function reCalculateLineDivide() {}
-
 export function getNumberUnitValue(unitValue: number | INumberUnit, benchMark: number) {
     if (unitValue instanceof Object) {
         const { v: value, u: unit } = unitValue;
@@ -235,7 +232,7 @@ export function getNumberUnitValue(unitValue: number | INumberUnit, benchMark: n
     return unitValue;
 }
 
-// 返回 charSpaceApply，选择网格还是字体来计算一个 tab 的长度，一个 tab 代表 1 字符长度
+// Return charSpaceApply, choose between grid or font to calculate the length of a tab, where one tab represents a length of 1 character.
 export function getCharSpaceApply(
     charSpace: number = 0,
     defaultTabStop: number,
@@ -245,10 +242,10 @@ export function getCharSpaceApply(
     let charSpaceApply = 1;
 
     if (validationGrid(gridType, snapToGrid)) {
-        // 启用了 char 网格的情况下，defaultTabStop 的参照物是 charSpace
+        // When the character grid is enabled, the reference for defaultTabStop is charSpace.
         charSpaceApply = charSpace;
     }
-    charSpaceApply *= defaultTabStop; // 乘以 defaultTabStop 设置的数值
+    charSpaceApply *= defaultTabStop; // Multiply it by the value set for defaultTabStop.
 
     return charSpaceApply;
 }
@@ -347,7 +344,7 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
                             maxLineAsc = Math.max(maxLineAsc, ba);
 
                             if (i === divideLength - 1) {
-                                // 宽度为Infinity时，最后一个divide也是Infinity，需要计算一个实际宽度。
+                                // When the width is set to Infinity, the last divide should also be Infinity, and an actual width needs to be calculated.
                                 actualWidth += span.width;
                             }
                         }

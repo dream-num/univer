@@ -18,7 +18,7 @@ import type { ICommandInfo, Nullable } from '@univerjs/core';
 import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
-import { ScrollBar } from '@univerjs/engine-render';
+import { ITextSelectionRenderManager, ScrollBar } from '@univerjs/engine-render';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { CoverContentCommand, DocSkeletonManagerService, RichTextEditingMutation, TextSelectionManagerService, VIEWPORT_KEY } from '@univerjs/docs';
 import { IEditorService, SetEditorResizeOperation } from '@univerjs/ui';
@@ -32,7 +32,8 @@ export class DocEditorBridgeController extends Disposable {
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @IEditorService private readonly _editorService: IEditorService,
         @ICommandService private readonly _commandService: ICommandService,
-        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService
+        @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager
+
     ) {
         super();
         this._initialize();
@@ -55,6 +56,10 @@ export class DocEditorBridgeController extends Disposable {
         this._commandExecutedListener();
 
         this._initialSetValue();
+
+        this._initialBlur();
+
+        this._initialFocus();
     }
 
     private _resize(unitId: Nullable<string>) {
@@ -86,7 +91,7 @@ export class DocEditorBridgeController extends Disposable {
 
         actualWidth += marginLeft + marginRight;
 
-        const { width, height } = editor.editorDom.getBoundingClientRect();
+        const { width, height } = editor.getBoundingClientRect();
 
         const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
 
@@ -137,6 +142,21 @@ export class DocEditorBridgeController extends Disposable {
                 body: param.body,
                 segmentId: null,
             });
+        });
+    }
+
+    private _initialBlur() {
+        this._editorService.blur$.subscribe(() => {
+            this._textSelectionRenderManager.removeAllTextRanges();
+
+            this._textSelectionRenderManager.blur();
+        });
+    }
+
+    private _initialFocus() {
+        this._editorService.focus$.subscribe((textRange) => {
+            this._textSelectionRenderManager.removeAllTextRanges();
+            this._textSelectionRenderManager.addTextRanges([textRange]);
         });
     }
 

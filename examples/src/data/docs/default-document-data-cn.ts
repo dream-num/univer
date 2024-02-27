@@ -16,6 +16,7 @@
 
 import type { IDocumentData } from '@univerjs/core';
 import { BooleanNumber } from '@univerjs/core';
+import { ptToPixel } from '@univerjs/engine-render';
 
 export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
     id: 'default-document-id',
@@ -591,13 +592,13 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
     },
     documentStyle: {
         pageSize: {
-            width: 595 * 4 / 3,
-            height: 842 * 4 / 3,
+            width: ptToPixel(595),
+            height: ptToPixel(842),
         },
-        marginTop: 50 * 4 / 3,
-        marginBottom: 50 * 4 / 3,
-        marginRight: 40 * 4 / 3,
-        marginLeft: 40 * 4 / 3,
+        marginTop: ptToPixel(50),
+        marginBottom: ptToPixel(50),
+        marginRight: ptToPixel(40),
+        marginLeft: ptToPixel(40),
         renderConfig: {
             vertexAngle: 0,
             centerAngle: 0,

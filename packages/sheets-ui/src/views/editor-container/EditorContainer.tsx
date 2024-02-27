@@ -87,13 +87,14 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
                     top: startY,
                 });
 
-                const editor = editorService.getEditor(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)?.editorDom;
+                const editor = editorService.getEditor(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
 
                 if (editor == null) {
                     return;
                 }
 
                 const { left, top, width, height } = editor.getBoundingClientRect();
+
                 cellEditorManagerService.setRect({ left, top, width, height });
             }
         });

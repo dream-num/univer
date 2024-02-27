@@ -84,7 +84,7 @@ export function HelpFunction() {
         }
 
         const editor = editorService.getEditor(editorUnitId);
-        return editor?.editorDom.getBoundingClientRect();
+        return editor?.getBoundingClientRect();
     }
 
     function handleSwitchActive(paramIndex: number) {

@@ -15,12 +15,12 @@
  */
 
 import type { DocumentDataModel, IDocumentBody, IDocumentData, IDocumentStyle, IPosition, Nullable } from '@univerjs/core';
-import { DEFAULT_EMPTY_DOCUMENT_VALUE, Disposable, HorizontalAlign, IUniverInstanceService, VerticalAlign } from '@univerjs/core';
+import { DEFAULT_EMPTY_DOCUMENT_VALUE, Disposable, HorizontalAlign, IUniverInstanceService, toDisposable, VerticalAlign } from '@univerjs/core';
 import type { IDisposable } from '@wendellhu/redi';
 import { createIdentifier } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
 import { Subject } from 'rxjs';
-import type { IRender, Scene } from '@univerjs/engine-render';
+import type { IRender, ISuccinctTextRangeParam, Scene } from '@univerjs/engine-render';
 import { IRenderManagerService, UNIVER_GLOBAL_DEFAULT_FONT_SIZE } from '@univerjs/engine-render';
 
 export interface IEditorStateParam extends Partial<IPosition> {
@@ -57,12 +57,102 @@ export interface IEditorInputFormulaParam {
     formulaString: string;
 }
 
+class Editor {
+    constructor(private _param: IEditorSetParam) {
+
+    }
+
+    get editorUnitId() {
+        return this._param.editorUnitId;
+    }
+
+    get cancelDefaultResizeListener() {
+        return this._param.cancelDefaultResizeListener;
+    }
+
+    get render() {
+        return this._param.render;
+    }
+
+    get isSingle() {
+        return this._param.isSingle;
+    }
+
+    getBoundingClientRect() {
+        return this._param.editorDom.getBoundingClientRect();
+    }
+
+    isVisible() {
+        return this._param.visible;
+    }
+
+    isSheetEditor() {
+        return this._param.isSheetEditor === true;
+    }
+
+    getValue() {
+        return this._param.documentDataModel.getBody()?.dataStream || '';
+    }
+
+    getBody() {
+        return this._param.documentDataModel.getBody();
+    }
+
+    update(param: IEditorStateParam) {
+        this._param = {
+            ...this._param,
+            ...param,
+        };
+    }
+
+    verticalAlign() {
+        const documentDataModel = this._param?.documentDataModel;
+
+        if (documentDataModel == null || this._param.isSingle === false) {
+            return;
+        }
+
+        let fontSize = UNIVER_GLOBAL_DEFAULT_FONT_SIZE;
+
+        if (this._param.canvasStyle?.fontSize) {
+            fontSize = this._param.canvasStyle.fontSize;
+        }
+
+        const { height } = this._param.editorDom.getBoundingClientRect();
+
+        const top = (height - (fontSize * 4 / 3)) / 2 - 2;
+
+        documentDataModel.updateDocumentDataMargin({
+            t: top < 0 ? 0 : top,
+        });
+    }
+
+    updateCanvasStyle() {
+        const documentDataModel = this._param.documentDataModel;
+        if (documentDataModel == null) {
+            return;
+        }
+
+        const documentStyle: IDocumentStyle = {};
+
+        if (this._param.canvasStyle?.fontSize) {
+            if (documentStyle.textStyle == null) {
+                documentStyle.textStyle = {};
+            }
+
+            documentStyle.textStyle.fs = this._param.canvasStyle.fontSize;
+        }
+
+        documentDataModel.updateDocumentStyle(documentStyle);
+    }
+}
+
 export interface IEditorService {
-    getEditor(id?: string): Readonly<Nullable<IEditorSetParam>>;
+    getEditor(id?: string): Readonly<Nullable<Editor>>;
 
     setState(param: IEditorStateParam, id: string): void;
 
-    register(config: IEditorConfigParam, container: HTMLDivElement): void;
+    register(config: IEditorConfigParam, container: HTMLDivElement): IDisposable;
 
     unRegister(editorUnitId: string): void;
 
@@ -76,7 +166,7 @@ export interface IEditorService {
 
     resize(id: string): void;
 
-    getAllEditor(): Map<string, IEditorSetParam>;
+    getAllEditor(): Map<string, Editor>;
 
     setOperationSheetUnitId(unitId: Nullable<string>): void;
 
@@ -90,21 +180,31 @@ export interface IEditorService {
 
     isSheetEditor(editorUnitId: string): boolean;
 
-    changeEditor$: Observable<unknown>;
+    changeEditorFocus$: Observable<unknown>;
 
-    changeEditor(): void;
+    changeEditorFocus(): void;
+
+    blur$: Observable<unknown>;
+
+    blur(): void;
+
+    focus$: Observable<ISuccinctTextRangeParam>;
+
+    focus(editorUnitId?: string): void;
 
     setValue$: Observable<IEditorSetValueParam>;
 
-    valueChange$: Observable<IEditorSetParam>;
+    valueChange$: Observable<Readonly<Editor>>;
 
     setValue(val: string, editorUnitId?: string): void;
 
     setRichValue(body: IDocumentBody, editorUnitId?: string): void;
+
+    getFirstEditor(): Editor;
 }
 
 export class EditorService extends Disposable implements IEditorService, IDisposable {
-    private _editors = new Map<string, IEditorSetParam>();
+    private _editors = new Map<string, Editor>();
 
     private readonly _state$ = new Subject<Nullable<IEditorStateParam>>();
 
@@ -122,15 +222,23 @@ export class EditorService extends Disposable implements IEditorService, IDispos
 
     readonly resize$ = this._resize$.asObservable();
 
-    private readonly _changeEditor$ = new Subject<unknown>();
+    private readonly _changeEditorFocus$ = new Subject<unknown>();
 
-    readonly changeEditor$ = this._changeEditor$.asObservable();
+    readonly changeEditorFocus$ = this._changeEditorFocus$.asObservable();
+
+    private readonly _blur$ = new Subject();
+
+    readonly blur$ = this._blur$.asObservable();
+
+    private readonly _focus$ = new Subject<ISuccinctTextRangeParam>();
+
+    readonly focus$ = this._focus$.asObservable();
 
     private readonly _setValue$ = new Subject<IEditorSetValueParam>();
 
     readonly setValue$ = this._setValue$.asObservable();
 
-    private readonly _valueChange$ = new Subject<IEditorSetParam>();
+    private readonly _valueChange$ = new Subject<Readonly<Editor>>();
 
     readonly valueChange$ = this._valueChange$.asObservable();
 
@@ -147,17 +255,45 @@ export class EditorService extends Disposable implements IEditorService, IDispos
 
     isSheetEditor(editorUnitId: string) {
         const editor = this._editors.get(editorUnitId);
-        return !!(editor && editor.isSheetEditor);
+        return !!(editor && editor.isSheetEditor());
     }
 
-    changeEditor() {
+    changeEditorFocus() {
         const documentDataModel = this._currentUniverService.getCurrentUniverDocInstance();
         const editorUnitId = documentDataModel.getUnitId();
         if (!this.isEditor(editorUnitId) || this.isSheetEditor(editorUnitId)) {
             return;
         }
         // const editor = this._editors.get(editorUnitId);
-        this._changeEditor$.next(null);
+        this._changeEditorFocus$.next(null);
+
+        this.blur();
+    }
+
+    blur() {
+        this._blur$.next(null);
+    }
+
+    focus(editorUnitId?: string) {
+        if (editorUnitId == null) {
+            const documentDataModel = this._currentUniverService.getCurrentUniverDocInstance();
+            editorUnitId = documentDataModel.getUnitId();
+        }
+
+        const editor = this.getEditor(editorUnitId);
+
+        if (editor == null) {
+            return;
+        }
+
+        this._currentUniverService.setCurrentUniverDocInstance(editorUnitId);
+
+        const valueCount = editor.getValue().length;
+
+        this._focus$.next({
+            startOffset: valueCount - 2,
+            endOffset: valueCount - 2,
+        });
     }
 
     setFormula(formulaString: string, editorUnitId?: string) {
@@ -186,7 +322,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
     getValue(id?: string) {
         const editor = this.getEditor(id);
 
-        return editor?.documentDataModel.getBody()?.dataStream || '';
+        return editor?.getValue();
     }
 
     setRichValue(body: IDocumentBody, editorUnitId?: string) {
@@ -202,7 +338,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
     getRichValue(id?: string) {
         const editor = this.getEditor(id);
 
-        return editor?.documentDataModel.getBody();
+        return editor?.getBody();
     }
 
     dispose(): void {
@@ -210,7 +346,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         this._editors.clear();
     }
 
-    getEditor(id?: string): Readonly<Nullable<IEditorSetParam>> {
+    getEditor(id?: string): Readonly<Nullable<Editor>> {
         if (id == null) {
             id = this._getCurrentEditorUnitId();
         }
@@ -221,13 +357,17 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         return this._editors;
     }
 
+    getFirstEditor() {
+        return [...this.getAllEditor().values()][0];
+    }
+
     resize(unitId: string) {
         const editor = this.getEditor(unitId);
         if (editor == null) {
             return;
         }
 
-        this._verticalAlign(unitId);
+        editor.verticalAlign();
 
         this._resize$.next(unitId);
     }
@@ -235,17 +375,14 @@ export class EditorService extends Disposable implements IEditorService, IDispos
     setState(param: IEditorStateParam, id: string) {
         const editor = this._editors.get(id);
         if (editor) {
-            this._editors.set(id, {
-                ...editor,
-                ...param,
-            });
+            editor.update(param);
         }
 
         this._refresh(param);
     }
 
     isVisible(id: string) {
-        return this.getEditor(id)?.visible;
+        return this.getEditor(id)?.isVisible();
     }
 
     setOperationSheetUnitId(unitId: Nullable<string>) {
@@ -264,7 +401,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         return this._currentSheetSubUnitId;
     }
 
-    register(config: IEditorConfigParam, container: HTMLDivElement) {
+    register(config: IEditorConfigParam, container: HTMLDivElement): IDisposable {
         const { initialSnapshot, editorUnitId, isSheetEditor, canvasStyle = {}, isSingle = true } = config;
 
         const documentDataModel = this._currentUniverService.createDoc(initialSnapshot || this._getBlank(editorUnitId));
@@ -278,14 +415,21 @@ export class EditorService extends Disposable implements IEditorService, IDispos
 
         render.engine.setContainer(container);
 
-        this._editors.set(editorUnitId, { ...config, isSheetEditor, render, documentDataModel, editorDom: container, canvasStyle, isSingle });
+        const editor = new Editor({ ...config, isSheetEditor, render, documentDataModel, editorDom: container, canvasStyle, isSingle });
+
+        this._editors.set(editorUnitId, editor);
 
         // Delete scroll bar
         (render.mainComponent?.getScene() as Scene)?.getViewports()?.[0].getScrollBar()?.dispose();
 
-        this._updateCanvasStyle(editorUnitId);
+        if (!editor.isSheetEditor()) {
+            editor.verticalAlign();
+            editor.updateCanvasStyle();
+        }
 
-        this._verticalAlign(editorUnitId);
+        return toDisposable(() => {
+            this.unRegister(editorUnitId);
+        });
     }
 
     unRegister(editorUnitId: string) {
@@ -333,57 +477,6 @@ export class EditorService extends Disposable implements IEditorService, IDispos
                 marginTop: 2,
             },
         } as IDocumentData;
-    }
-
-    private _verticalAlign(id: string) {
-        if (this.isSheetEditor(id)) {
-            return;
-        }
-
-        const editor = this.getEditor(id);
-        const documentDataModel = editor?.documentDataModel;
-
-        if (editor == null || documentDataModel == null || editor.isSingle === false) {
-            return;
-        }
-
-        let fontSize = UNIVER_GLOBAL_DEFAULT_FONT_SIZE;
-
-        if (editor.canvasStyle?.fontSize) {
-            fontSize = editor.canvasStyle.fontSize;
-        }
-
-        const { height } = editor.editorDom.getBoundingClientRect();
-
-        const top = (height - (fontSize * 4 / 3)) / 2 - 2;
-
-        documentDataModel.updateDocumentDataMargin({
-            t: top < 0 ? 0 : top,
-        });
-    }
-
-    private _updateCanvasStyle(id: string) {
-        if (this.isSheetEditor(id)) {
-            return;
-        }
-
-        const editor = this.getEditor(id);
-        const documentDataModel = editor?.documentDataModel;
-        if (documentDataModel == null) {
-            return;
-        }
-
-        const documentStyle: IDocumentStyle = {};
-
-        if (editor?.canvasStyle?.fontSize) {
-            if (documentStyle.textStyle == null) {
-                documentStyle.textStyle = {};
-            }
-
-            documentStyle.textStyle.fs = editor.canvasStyle.fontSize;
-        }
-
-        documentDataModel.updateDocumentStyle(documentStyle);
     }
 }
 

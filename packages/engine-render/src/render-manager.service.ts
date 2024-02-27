@@ -68,11 +68,9 @@ export class RenderManagerService implements IRenderManagerService {
     private _renderMap: Map<string, IRender> = new Map();
 
     private readonly _currentRender$ = new BehaviorSubject<Nullable<string>>(this._currentUnitId);
-
     readonly currentRender$ = this._currentRender$.asObservable();
 
     private readonly _createRender$ = new BehaviorSubject<Nullable<string>>(this._currentUnitId);
-
     readonly createRender$ = this._createRender$.asObservable();
 
     get defaultEngine() {

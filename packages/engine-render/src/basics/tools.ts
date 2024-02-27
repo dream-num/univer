@@ -711,3 +711,16 @@ export function getSizeForDom(dom: HTMLElement) {
         height: pxToNum(height),
     };
 }
+
+/**
+ *1 pixel * 0.75 = 1 pt
+ */
+const PX_TO_PT_RATIO = 0.75;
+
+export function ptToPixel(pt: number) {
+    return pt / PX_TO_PT_RATIO;
+}
+
+export function pixelToPt(px: number) {
+    return px * PX_TO_PT_RATIO;
+}

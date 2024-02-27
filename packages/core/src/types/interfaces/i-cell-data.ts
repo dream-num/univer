@@ -46,10 +46,23 @@ export interface ICellData {
     si?: Nullable<string>; // formula id
 }
 
+export interface ICellMarksStyle {
+    color: string;
+    size: number;
+}
+
+export interface ICellMarks {
+    tl?: ICellMarksStyle;
+    tr?: ICellMarksStyle;
+    bl?: ICellMarksStyle;
+    br?: ICellMarksStyle;
+}
+
 export interface ICellDataForSheetInterceptor extends ICellData {
     interceptorStyle?: Nullable<IStyleData>;
     isInArrayFormulaRange?: Nullable<boolean>;
     dataValidation?: Nullable<ICellValidationData>;
+    markers?: ICellMarks;
 }
 
 export function isICellData(value: any): value is ICellData {

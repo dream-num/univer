@@ -17,6 +17,7 @@
 import { Subject } from 'rxjs';
 import { Inject } from '@wendellhu/redi';
 import type { Nullable } from '@univerjs/core';
+import type { IBoundRectNoAngle } from '@univerjs/engine-render';
 import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
 
 export enum CellAlertType {
@@ -29,8 +30,7 @@ export interface ICellAlert {
     type: CellAlertType;
     title: React.ReactNode;
     message: React.ReactNode;
-    offsetX: number;
-    offsetY: number;
+    bound: IBoundRectNoAngle;
 }
 
 export class CellAlertManagerService {
@@ -43,13 +43,7 @@ export class CellAlertManagerService {
     ) {}
 
     showAlert(alert: ICellAlert) {
-        const { offsetX, offsetY } = alert;
-
-        this._currentAlert$.next({
-            ...alert,
-            offsetX,
-            offsetY,
-        });
+        this._currentAlert$.next(alert);
     }
 
     clearAlert() {

@@ -29,8 +29,8 @@ export function CellAlert() {
 
     const style: React.CSSProperties = {
         position: 'absolute',
-        top: currentCell.offsetY,
-        left: currentCell.offsetX,
+        top: currentCell.bound.top,
+        left: currentCell.bound.right,
     };
 
     return (

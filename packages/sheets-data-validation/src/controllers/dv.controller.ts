@@ -14,12 +14,19 @@
  * limitations under the License.
  */
 
-import { IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
+import { DataValidationStatus, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
 import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
-import { Inject, Injector } from '@wendellhu/redi';
+import { Inject } from '@wendellhu/redi';
 import { SheetDataValidationManager } from '../models/sheet-data-validation-manager';
 import { SheetDataValidationService } from '../services/dv.service';
+
+const INVALID_MARK = {
+    tr: {
+        size: 6,
+        color: 'red',
+    },
+};
 
 @OnLifecycle(LifecycleStages.Rendered, DataValidationController)
 export class DataValidationController extends RxDisposable {
@@ -95,11 +102,17 @@ export class DataValidationController extends RxDisposable {
                             return next(cell);
                         }
 
+                        const validStatus = manager.validatorCell(cell?.v, rule, pos);
+
                         return next({
                             ...cell,
                             dataValidation: {
                                 ruleId,
-                                validStatus: manager.validatorCell(cell?.v, rule, pos),
+                                validStatus,
+                            },
+                            markers: {
+                                ...cell?.markers,
+                                ...validStatus === DataValidationStatus.INVALID ? INVALID_MARK : null,
                             },
                         });
                     },

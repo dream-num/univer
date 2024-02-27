@@ -135,7 +135,6 @@ export class Spreadsheet extends SheetComponent {
             ? bounds?.diffBounds.map((bound) => spreadsheetSkeleton.getRowColumnSegmentByViewBound(bound))
             : undefined;
         const extensions = this.getExtensionsByOrder();
-
         for (const extension of extensions) {
             extension.draw(ctx, parentScale, spreadsheetSkeleton, diffRanges);
         }

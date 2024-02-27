@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export default {
+const locale = {
     spreadsheetLabel: '插件',
     spreadsheetRightLabel: '更多 Sheets',
 
@@ -485,3 +485,5 @@ export default {
     'sheet-view': '浏览表格',
     'sheet-edit': '编辑表格',
 };
+
+export default locale;

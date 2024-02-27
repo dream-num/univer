@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type zhCN from './zh-CN';
+
+const locale: typeof zhCN = {
     spreadsheetLabel: 'Spreadsheet',
     spreadsheetRightLabel: 'more Sheets',
 
@@ -79,7 +81,7 @@ export default {
         sum: 'SUM',
         autoSum: 'Auto SUM',
         moreFunction: 'More functions',
-        conditionalFormat: 'Conditional format',
+        conditionalalFormat: 'Conditional format',
         comment: 'Comment',
         pivotTable: 'Pivot Table',
         chart: 'Chart',
@@ -196,143 +198,6 @@ export default {
         bottom: 'bottom',
     },
 
-    dateFmtList: [
-        {
-            name: '1930-08-05',
-            value: 'yyyy-MM-dd',
-        },
-        {
-            name: '1930/8/5',
-            value: 'yyyy/MM/dd',
-        },
-        {
-            name: '08-05',
-            value: 'MM-dd',
-        },
-        {
-            name: '8-5',
-            value: 'M-d',
-        },
-        {
-            name: '13:30:30',
-            value: 'h:mm:ss',
-        },
-        {
-            name: '13:30',
-            value: 'h:mm',
-        },
-        {
-            name: 'PM 01:30',
-            value: 'AM/PM hh:mm',
-        },
-        {
-            name: 'PM 1:30',
-            value: 'AM/PM h:mm',
-        },
-        {
-            name: 'PM 1:30:30',
-            value: 'AM/PM h:mm:ss',
-        },
-        {
-            name: '08-05 PM 01:30',
-            value: 'MM-dd AM/PM hh:mm',
-        },
-    ],
-    numFmtList: [
-        {
-            name: '1235',
-            value: '0',
-        },
-        {
-            name: '1234.56',
-            value: '0.00',
-        },
-        {
-            name: '1,235',
-            value: '#,##0',
-        },
-        {
-            name: '1,234.56',
-            value: '#,##0.00',
-        },
-        {
-            name: '1,235',
-            value: '#,##0_);(#,##0)',
-        },
-        {
-            name: '1,235',
-            value: '#,##0_);[Red](#,##0)',
-        },
-        {
-            name: '1,234.56',
-            value: '#,##0.00_);(#,##0.00)',
-        },
-        {
-            name: '1,234.56',
-            value: '#,##0.00_);[Red](#,##0.00)',
-        },
-        {
-            name: '$1,235',
-            value: '$#,##0_);($#,##0)',
-        },
-        {
-            name: '$1,235',
-            value: '$#,##0_);[Red]($#,##0)',
-        },
-        {
-            name: '$1,234.56',
-            value: '$#,##0.00_);($#,##0.00)',
-        },
-        {
-            name: '$1,234.56',
-            value: '$#,##0.00_);[Red]($#,##0.00)',
-        },
-        {
-            name: '1234.56',
-            value: '@',
-        },
-        {
-            name: '123456%',
-            value: '0%',
-        },
-        {
-            name: '123456.00%',
-            value: '0.00%',
-        },
-        {
-            name: '1.23E+03',
-            value: '0.00E+00',
-        },
-        {
-            name: '1.2E+3',
-            value: '##0.0E+0',
-        },
-        {
-            name: '1234 5/9',
-            value: '# ?/?',
-        },
-        {
-            name: '1234 14/25',
-            value: '# ??/??',
-        },
-        {
-            name: '$ 1,235',
-            value: '_($* #,##0_);_(...($* "-"_);_(@_)',
-        },
-        {
-            name: '1,235',
-            value: '_(* #,##0_);_(*..._(* "-"_);_(@_)',
-        },
-        {
-            name: '$ 1,234.56',
-            // "value": '_($* #,##0.00_)...* "-"??_);_(@_)'
-            value: '_($* #,##0.00_);_(...($* "-"_);_(@_)',
-        },
-        {
-            name: '1,234.56',
-            value: '_(* #,##0.00_);...* "-"??_);_(@_)',
-        },
-    ],
     button: {
         confirm: 'OK',
         cancel: 'Cancel',
@@ -548,7 +413,7 @@ export default {
         addLast: 'more rows at bottom',
         backTop: 'Back to the top',
         // eslint-disable-next-line no-template-curly-in-string
-        pageInfo: 'Total ${total}，${totalPage} page，current ${currentPage}',
+        pageInfo: 'Total ${total}, ${totalPage} page, current ${currentPage}',
         nextPage: 'Next',
 
         tipInputNumber: 'Please enter the number',
@@ -557,7 +422,7 @@ export default {
         tipRowHeightLimit: 'Row height must be between 0 ~ 545',
         tipColumnWidthLimit: 'The column width must be between 0 ~ 2038',
         // eslint-disable-next-line no-template-curly-in-string
-        pageInfoFull: 'Total ${total}，${totalPage} page，All data displayed',
+        pageInfoFull: 'Total ${total}, ${totalPage} page, All data displayed',
         problem: 'There was a problem',
     },
     clipboard: {
@@ -625,3 +490,5 @@ export default {
     'sheet-view': 'Sheet View',
     'sheet-edit': 'Sheet Edit',
 };
+
+export default locale;

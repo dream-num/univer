@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type zhCN from './zh-CN';
+
+const locale: typeof zhCN = {
     uiToolbar: {
         start: 'Start',
         insert: 'Insert',
@@ -60,3 +62,5 @@ export default {
         },
     },
 };
+
+export default locale;

@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type zhCN from './zh-CN';
+
+const locale: typeof zhCN = {
     sheet: {
         numfmt: {
             title: '数据格式',
@@ -49,3 +51,5 @@ export default {
         },
     },
 };
+
+export default locale;

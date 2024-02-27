@@ -14,9 +14,13 @@
  * limitations under the License.
  */
 
-export default {
+import type zhCN from './zh-CN';
+
+const locale: typeof zhCN = {
     sheets: {
         sheetCopy: '(Copy)',
         sheet: 'Sheet',
     },
 };
+
+export default locale;

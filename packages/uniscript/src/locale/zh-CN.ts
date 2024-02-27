@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export default {
+const locale = {
     'script-panel': {
         title: 'Uniscript',
         tooltip: {
@@ -31,3 +31,5 @@ export default {
         },
     },
 };
+
+export default locale;

@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import type enUS from './en-US';
-
-const locale: typeof enUS = {
+const locale = {
     univer: {
         'find-replace': {
             dialog: {

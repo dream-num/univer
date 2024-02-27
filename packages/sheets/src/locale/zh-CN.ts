@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-export default {
+const locale = {
     sheets: {
         sheetCopy: '（副本）',
         sheet: '工作表',
     },
 };
+
+export default locale;

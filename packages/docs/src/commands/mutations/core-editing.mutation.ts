@@ -76,7 +76,13 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
         }
 
         if (actions.length === 0) {
-            throw new Error('Mutation\'s length should great than 0 when call RichTextEditingMutation');
+            // The actions' length maybe 0 when the mutation is from collaborative editing.
+            // The return result will not be used.
+            return {
+                unitId,
+                actions: [],
+                textRanges: serializedSelections,
+            };
         }
 
         // Step 1: Update Doc Data Model.

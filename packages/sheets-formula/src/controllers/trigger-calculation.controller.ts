@@ -272,7 +272,7 @@ export class TriggerCalculationController extends Disposable {
                     switch (state) {
                         case FormulaExecutedStateType.NOT_EXECUTED:
                             result = 'No tasks are being executed anymore';
-                            this._waitingCommandQueue.unshift(...this._executingCommandQueue);
+                            // this._waitingCommandQueue.unshift(...this._executingCommandQueue);
                             this._executingCommandQueue = [];
                             break;
                         case FormulaExecutedStateType.STOP_EXECUTION:

@@ -28,7 +28,7 @@ export class DataBar extends SheetExtension {
     private _paddingTopAndBottom = 2;
     override uKey = dataBarUKey;
 
-    override zIndex = EXTENSION_Z_INDEX;
+    override Z_INDEX = EXTENSION_Z_INDEX;
     _radius = 1;
     override draw(
         ctx: UniverRenderingContext,

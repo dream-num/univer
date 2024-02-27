@@ -20,6 +20,7 @@ import { createIdentifier } from '@wendellhu/redi';
 
 import type {
     IDirtyUnitFeatureMap,
+    IDirtyUnitOtherFormulaMap,
     IDirtyUnitSheetNameMap,
     IFormulaData,
     IFormulaDatasetConfig,
@@ -86,6 +87,8 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
 
     private _dirtyUnitFeatureMap: IDirtyUnitFeatureMap = {};
 
+    private _dirtyUnitOtherFormulaMap: IDirtyUnitOtherFormulaMap = {};
+
     private _excludedCell: Nullable<IUnitExcludedCell>;
 
     private _sheetIdToNameMap: IUnitSheetIdToNameMap = {};
@@ -105,6 +108,7 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         this._dirtyUnitFeatureMap = {};
         this._excludedCell = {};
         this._sheetIdToNameMap = {};
+        this._dirtyUnitOtherFormulaMap = {};
     }
 
     getExcludedRange() {
@@ -180,6 +184,8 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         this._numfmtItemMap = config.numfmtItemMap;
 
         this._dirtyUnitFeatureMap = config.dirtyUnitFeatureMap;
+
+        this._dirtyUnitOtherFormulaMap = config.dirtyUnitOtherFormulaMap;
 
         this._excludedCell = config.excludedCell;
 

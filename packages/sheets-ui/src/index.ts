@@ -67,3 +67,6 @@ export type { ISheetSkeletonManagerParam } from './services/sheet-skeleton-manag
 export { SheetSkeletonManagerService } from './services/sheet-skeleton-manager.service';
 export { UniverSheetsUIPlugin } from './sheets-ui-plugin';
 export { SheetCanvasView } from './views/sheet-canvas-view';
+export { HoverManagerService } from './services/hover-manager.service';
+export { CellAlertManagerService, CellAlertType, type ICellAlert, type ICellAlertParam } from './services/cell-alert-manager.service';
+export { HoverController } from './controllers/hover.controller';

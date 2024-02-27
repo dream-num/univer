@@ -14,12 +14,21 @@
  * limitations under the License.
  */
 
-import type { CellAlertType } from '..';
+import { Disposable, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { CELL_ALERT_KEY, ComponentManager } from '@univerjs/ui';
+import { Inject } from '@wendellhu/redi';
+import { CellAlert } from '../views/cell-alert';
 
-export interface ICellAlert {
-    type: CellAlertType;
-    title: React.ReactNode;
-    message: React.ReactNode;
-    row: number;
-    col: number;
+@OnLifecycle(LifecycleStages.Starting, CellAlertController)
+export class CellAlertController extends Disposable {
+    constructor(
+        @Inject(ComponentManager) private _componentManager: ComponentManager
+    ) {
+        super();
+        this._initComponent();
+    }
+
+    private _initComponent() {
+        this._componentManager.register(CELL_ALERT_KEY, CellAlert);
+    }
 }

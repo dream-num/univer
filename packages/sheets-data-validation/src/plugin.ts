@@ -19,6 +19,7 @@ import { type Dependency, Inject, Injector } from '@wendellhu/redi';
 import { DataValidationRenderController } from './controllers/dv-render.controller';
 import { DataValidationController } from './controllers/dv.controller';
 import { SheetDataValidationService } from './services/dv.service';
+import { DataValidationAlertController } from './controllers/dv-alert.controller';
 
 const PLUGIN_NAME = 'sheets-data-validation';
 
@@ -35,6 +36,7 @@ export class UniverSheetsDataValidationPlugin extends Plugin {
             // controller
             [DataValidationController],
             [DataValidationRenderController],
+            [DataValidationAlertController],
         ] as Dependency[]).forEach((dep) => {
             injector.add(dep);
         });

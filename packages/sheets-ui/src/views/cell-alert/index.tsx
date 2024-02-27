@@ -16,7 +16,8 @@
 
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { useObservable } from '@univerjs/design';
-import { CellAlertManagerService } from '../services/cell-alert-manager.service';
+import React from 'react';
+import { CellAlertManagerService } from '../../services/cell-alert-manager.service';
 
 export function CellAlert() {
     const cellAlertService = useDependency(CellAlertManagerService);
@@ -26,5 +27,16 @@ export function CellAlert() {
         return null;
     }
 
-    return null;
+    const style: React.CSSProperties = {
+        position: 'absolute',
+        top: currentCell.offsetY,
+        left: currentCell.offsetX,
+    };
+
+    return (
+        <div style={style}>
+            <div>{currentCell.title}</div>
+            <div>{currentCell.message}</div>
+        </div>
+    );
 }

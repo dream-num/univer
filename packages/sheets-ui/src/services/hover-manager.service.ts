@@ -23,14 +23,21 @@ import { IRenderManagerService, Vector2 } from '@univerjs/engine-render';
 import { ScrollManagerService } from './scroll-manager.service';
 import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
 
+export interface IHoverCellPosition extends ISheetLocation {
+    offsetX: number;
+    offsetY: number;
+}
+
 export class HoverManagerService {
-    private _currentCell$ = new Subject<Nullable<ISheetLocation>>();
+    private _currentCell$ = new Subject<Nullable<IHoverCellPosition>>();
     currentCell$ = this._currentCell$.asObservable().pipe(distinctUntilChanged((
         (pre, aft) => (
             pre?.unitId === aft?.unitId
             && pre?.subUnitId === aft?.subUnitId
             && pre?.row === aft?.row
             && pre?.col === aft?.col
+            && pre?.offsetX === aft?.offsetX
+            && pre?.offsetY === aft?.offsetY
         )
     )));
 
@@ -73,10 +80,11 @@ export class HoverManagerService {
         }
 
         const { scaleX, scaleY } = scene.getAncestorScale();
-        const cellPos = skeleton.getCellPositionByOffset(offsetX, offsetY, scaleX, scaleY, {
+        const scrollXY = {
             x: activeViewport.actualScrollX,
             y: activeViewport.actualScrollY,
-        });
+        };
+        const cellPos = skeleton.getCellPositionByOffset(offsetX, offsetY, scaleX, scaleY, scrollXY);
 
         const mergeCell = skeleton.mergeData.find((range) => {
             const { startColumn, startRow, endColumn, endRow } = range;
@@ -92,7 +100,21 @@ export class HoverManagerService {
             col: mergeCell ? mergeCell.startColumn : cellPos.column,
         };
 
-        this._currentCell$.next(params);
+        let anchorCell = cellPos;
+
+        if (mergeCell) {
+            anchorCell = {
+                row: mergeCell.startRow,
+                column: mergeCell.endColumn,
+            };
+        }
+
+        const anchorPos = {
+            offsetX: skeleton.getTransformOffsetX((skeleton.getOffsetByPositionX(anchorCell.column)), scaleX, scrollXY) + skeleton.rowHeaderWidthAndMarginLeft,
+            offsetY: skeleton.getTransformOffsetY((skeleton.getOffsetByPositionY(anchorCell.row - 1)), scaleY, scrollXY) + skeleton.columnHeaderHeightAndMarginTop,
+        };
+
+        this._currentCell$.next({ ...params, ...anchorPos });
     }
 
     onMouseMove(offsetX: number, offsetY: number) {

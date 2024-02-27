@@ -20,9 +20,10 @@ import { ConfigProvider, defaultTheme, themeInstance } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import type { ComponentType } from 'react';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-
 import type { IWorkbenchOptions } from '../controllers/ui/ui.controller';
 import { IMessageService } from '../services/message/message.service';
+import { ComponentManager } from '../common';
+import { CELL_ALERT_KEY } from './constant';
 import styles from './app.module.less';
 import { ComponentContainer } from './components/ComponentContainer';
 import { Toolbar } from './components/doc-bars/Toolbar';
@@ -43,9 +44,10 @@ export function App(props: IUniverAppProps) {
     const localeService = useDependency(LocaleService);
     const themeService = useDependency(ThemeService);
     const messageService = useDependency(IMessageService);
-
+    const componentManager = useDependency(ComponentManager);
     const contentRef = useRef<HTMLDivElement>(null);
 
+    const CellAlert = componentManager.get(CELL_ALERT_KEY);
     const {
         mountContainer,
         headerComponents,
@@ -117,6 +119,7 @@ export function App(props: IUniverAppProps) {
                                 data-range-selector
                                 onContextMenu={(e) => e.preventDefault()}
                             >
+                                {CellAlert && <CellAlert />}
                                 <ComponentContainer components={contentComponents} />
                             </section>
                         </section>
@@ -134,6 +137,7 @@ export function App(props: IUniverAppProps) {
                     )}
 
                     <ZenZone />
+
                 </section>
             </div>
 

@@ -66,6 +66,8 @@ import { IStatusBarService, StatusBarService } from './services/status-bar.servi
 import { SheetCanvasView } from './views/sheet-canvas-view';
 import { HoverController } from './controllers/hover.controller';
 import { HoverManagerService } from './services/hover-manager.service';
+import { CellAlertManagerService } from './services/cell-alert-manager.service';
+import { CellAlertController } from './controllers/cell-alert.controller';
 
 export class UniverSheetsUIPlugin extends Plugin {
     static override type = PluginType.Sheet;
@@ -109,6 +111,7 @@ export class UniverSheetsUIPlugin extends Plugin {
                 [IStatusBarService, { useClass: StatusBarService }],
                 [IMarkSelectionService, { useClass: MarkSelectionService }],
                 [HoverManagerService],
+                [CellAlertManagerService],
 
                 // controllers
                 [ActiveWorksheetController],
@@ -138,6 +141,7 @@ export class UniverSheetsUIPlugin extends Plugin {
                 [EditingController],
                 [MarkSelectionController],
                 [HoverController],
+                [CellAlertController],
             ] as Dependency[]
         ).forEach((d) => injector.add(d));
     }

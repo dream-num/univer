@@ -77,3 +77,4 @@ export { IZenZoneService } from './services/zen-zone/zen-zone.service';
 export { UniverUIPlugin } from './ui-plugin';
 export * from './utils';
 export { type IConfirmPartMethodOptions } from './views/components/confirm-part/interface';
+export { CELL_ALERT_KEY } from './views/constant';

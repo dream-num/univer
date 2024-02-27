@@ -60,7 +60,7 @@ export abstract class BaseDataValidator<DataType = CellValue> {
         return `${this.title} ${operatorText}`;
     }
 
-    generateRuleWarningMessage(rule: IDataValidationRuleBase) {
+    generateRuleErrorMessage(rule: IDataValidationRuleBase) {
         const operatorText = this.generateOperatorText(rule);
         return `${this.title} ${operatorText}`;
     }

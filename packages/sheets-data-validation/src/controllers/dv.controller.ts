@@ -97,12 +97,10 @@ export class DataValidationController extends RxDisposable {
 
                         return next({
                             ...cell,
-                            dataValidation: ruleId
-                                ? {
-                                    ruleId,
-                                    validStatus: manager.validatorCell(cell?.v, rule, pos),
-                                }
-                                : undefined,
+                            dataValidation: {
+                                ruleId,
+                                validStatus: manager.validatorCell(cell?.v, rule, pos),
+                            },
                         });
                     },
                 }

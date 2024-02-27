@@ -178,6 +178,23 @@ export class SheetDataValidationManager extends DataValidationManager<ISheetData
         }
     }
 
+    getRuleErrorMsg(ruleId: string) {
+        const rule = this.getRuleById(ruleId);
+        if (!rule) {
+            return '';
+        }
+        const validator = this._dataValidatorRegistryService.getValidatorItem(rule.type);
+        if (rule.error) {
+            return rule.error;
+        }
+
+        if (validator) {
+            return validator.generateRuleErrorMessage(rule);
+        }
+
+        return '';
+    }
+
     markCacheDirtyByRanges(ranges: IRange[]) {
         ranges.forEach((range) => {
             Range.foreach(range, (row, col) => {

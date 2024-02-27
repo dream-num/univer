@@ -14,5 +14,4 @@
  * limitations under the License.
  */
 
-export * from './enum';
-export * from './interface';
+export const CELL_ALERT_KEY = 'cellAlertComponent';

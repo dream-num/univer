@@ -64,10 +64,6 @@ export function TextEditor(props: ITextEditorProps & MyComponentProps): JSX.Elem
 
         editorService.register({ editorUnitId: id, initialSnapshot: snapshot, cancelDefaultResizeListener, isSheetEditor, canvasStyle, isSingle: true }, editor);
 
-        setTimeout(() => {
-            editorService.focus(id);
-        }, 2000);
-
         // Clean up on unmount
         return () => {
             resizeObserver.unobserve(editor);

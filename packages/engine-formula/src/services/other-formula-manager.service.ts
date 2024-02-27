@@ -74,11 +74,11 @@ export class OtherFormulaManagerService extends Disposable implements IOtherForm
 
     register(insertParam: IOtherFormulaManagerInsertParam) {
         const { unitId, subUnitId, formulaId, item } = insertParam;
-        if (this._otherFormulaData[unitId]) {
+        if (!this._otherFormulaData[unitId]) {
             this._otherFormulaData[unitId] = {};
         }
 
-        if (this._otherFormulaData[unitId]![subUnitId]) {
+        if (!this._otherFormulaData[unitId]![subUnitId]) {
             this._otherFormulaData[unitId]![subUnitId] = {};
         }
 

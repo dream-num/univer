@@ -74,7 +74,7 @@ export interface IRuntimeUnitDataPrimitiveType {
 }
 
 export interface IRuntimeOtherUnitDataType {
-    [unitId: string]: Nullable<{ [sheetId: string]: Nullable<{ [formulaId: string]: ICellData }> }>;
+    [unitId: string]: Nullable<{ [sheetId: string]: Nullable<{ [formulaId: string]: Nullable<ICellData>[][] }> }>;
 }
 
 export interface IUnitSheetNameMap {

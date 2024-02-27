@@ -130,7 +130,7 @@ export {
 } from './services/feature-calculation-manager.service';
 export { FunctionService } from './services/function.service';
 export { IFunctionService } from './services/function.service';
-export { type IOtherFormulaManagerService, OtherFormulaManagerService } from './services/other-formula-manager.service';
+export { IOtherFormulaManagerService, OtherFormulaManagerService } from './services/other-formula-manager.service';
 export { FormulaExecuteStageType, type IExecutionInProgressParams } from './services/runtime.service';
 export { FormulaExecutedStateType, type IAllRuntimeData } from './services/runtime.service';
 export { SetNumfmtFormulaDataMutation } from './commands/mutations/set-numfmt-formula-data.mutation';

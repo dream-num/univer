@@ -448,8 +448,6 @@ export class EditorService extends Disposable implements IEditorService, IDispos
 
         editor.documentDataModel.dispose();
 
-        super.dispose();
-
         this._editors.delete(editorUnitId);
 
         this._currentUniverService.disposeDocument(editorUnitId);

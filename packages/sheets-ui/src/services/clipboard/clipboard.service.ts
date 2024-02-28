@@ -33,7 +33,7 @@ import {
     SelectionManagerService,
     SetSelectionsOperation,
 } from '@univerjs/sheets';
-import { HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, PLAIN_TEXT_CLIPBOARD_MIME_TYPE } from '@univerjs/ui';
+import { HTML_CLIPBOARD_MIME_TYPE, IClipboardInterfaceService, INotificationService, IPlatformService, PLAIN_TEXT_CLIPBOARD_MIME_TYPE } from '@univerjs/ui';
 import type { IDisposable } from '@wendellhu/redi';
 import { createIdentifier, Inject } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
@@ -53,6 +53,7 @@ import type {
 } from './type';
 import { COPY_TYPE } from './type';
 import { USMToHtmlService } from './usm-to-html/convertor';
+import { clipboardItemIsFromExcel } from './utils';
 
 export const PREDEFINED_HOOK_NAME = {
     DEFAULT_COPY: 'default-copy',
@@ -102,7 +103,9 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         @IUndoRedoService private readonly _undoRedoService: IUndoRedoService,
         @ICommandService private readonly _commandService: ICommandService,
         @IMarkSelectionService private readonly _markSelectionService: IMarkSelectionService,
-        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService
+        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
+        @INotificationService private readonly _notificationService: INotificationService,
+        @IPlatformService private readonly _platformService: IPlatformService
     ) {
         super();
         this._htmlToUSM = new HtmlToUSMService({
@@ -177,8 +180,16 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
                 : '';
 
         if (html) {
-            // Firstly see if the html content is in good format.
-            // In another word, if it is copied from any spreadsheet apps (including Univer itself).
+            // Firstly see if the html content is from Excel
+            if (this._platformService.isWindows && (await clipboardItemIsFromExcel(html))) {
+                this._notificationService.show({
+                    type: 'warning',
+                    title: '粘贴提示',
+                    content: '无法粘贴内容，请试试快捷键 Ctrl+V 。',
+                });
+                return false;
+            }
+
             return this._pasteHTML(html, pasteType);
         }
 

@@ -46,6 +46,7 @@ import { moveCfCommand } from './commands/commands/move-cf.command';
 import { addCfCommand } from './commands/commands/add-cf.command';
 import { moveConditionalRuleMutation } from './commands/mutations/move-conditional-rule.mutation';
 import { ConditionalFormatFormulaService } from './services/conditional-format-formula.service';
+import { conditionalFormatFormulaMarkDirty } from './commands/mutations/formula-mark-dirty.mutation';
 
 export class SheetsConditionalFormatPlugin extends Plugin {
     static override type = PluginType.Sheet;
@@ -65,7 +66,7 @@ export class SheetsConditionalFormatPlugin extends Plugin {
         addCfCommand,
     ];
 
-    static mutationList = [addConditionalRuleMutation, deleteConditionalRuleMutation, setConditionalRuleMutation, moveConditionalRuleMutation];
+    static mutationList = [addConditionalRuleMutation, deleteConditionalRuleMutation, setConditionalRuleMutation, moveConditionalRuleMutation, conditionalFormatFormulaMarkDirty];
     constructor(
         _config: unknown,
         @Inject(Injector) override readonly _injector: Injector,

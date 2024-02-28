@@ -17,7 +17,10 @@
 import { Disposable, ICommandService } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 import type { ISetFormulaCalculationResultMutation } from '@univerjs/engine-formula';
+import { IActiveDirtyManagerService } from '@univerjs/sheets-formula';
 import { SetFormulaCalculationResultMutation, SetOtherFormulaMutation } from '@univerjs/engine-formula';
+import type { IConditionalFormatFormulaMarkDirtyParams } from '../commands/mutations/formula-mark-dirty.mutation';
+import { conditionalFormatFormulaMarkDirty } from '../commands/mutations/formula-mark-dirty.mutation';
 
 interface IFormulaItem {
     formulaText: string;cfId: string;result?: boolean;status: 'end' | 'error' | 'wait';count: number;
@@ -33,8 +36,8 @@ export class ConditionalFormatFormulaService extends Disposable {
     private _cfMap: Map<string, Map<string, Map<string, Set<string>>>> = new Map();
 
     constructor(
-        @Inject(ICommandService) private _commandService: ICommandService
-
+        @Inject(ICommandService) private _commandService: ICommandService,
+        @Inject(IActiveDirtyManagerService) private _activeDirtyManagerService: IActiveDirtyManagerService
     ) {
         super();
         this._initFormulaCalculationResultChange();
@@ -75,9 +78,17 @@ export class ConditionalFormatFormulaService extends Disposable {
                 console.log('SetFormulaCalculationResultMutation', params);
             }
         });
+        this._activeDirtyManagerService.register(conditionalFormatFormulaMarkDirty.id,
+            { commandId: conditionalFormatFormulaMarkDirty.id,
+              getDirtyData(commandInfo) {
+                  const params = commandInfo.params as IConditionalFormatFormulaMarkDirtyParams;
+                  return {
+                      dirtyUnitOtherFormulaMap: { [params.unitId]: { [params.subUnitId]: { [params.formulaId]: true } } },
+                  };
+              } });
     }
 
-    getSubunitMap(unitId: string, subUnitId: string) {
+    getSubunitFormulaMap(unitId: string, subUnitId: string) {
         return this._formulaMap.get(unitId)?.get(subUnitId);
     }
 
@@ -99,6 +110,8 @@ export class ConditionalFormatFormulaService extends Disposable {
         const formulaId = this._createFormulaId(unitId, subUnitId, formulaText);
         subUnitFormulaMap.set(formulaText, { formulaText, cfId, status: 'wait', count: 1 });
         this._commandService.executeCommand(SetOtherFormulaMutation.id, { item: { f: formulaText }, unitId, subUnitId, formulaId });
+        this._commandService.executeCommand(conditionalFormatFormulaMarkDirty.id,
+            { unitId, subUnitId, formulaId } as IConditionalFormatFormulaMarkDirtyParams);
     }
 
     public removeFormula(unitId: string, subUnitId: string, cfId: string, formulaText?: string) {
@@ -129,7 +142,7 @@ export class ConditionalFormatFormulaService extends Disposable {
     }
 
     public getFormulaResult(unitId: string, subUnitId: string, formulaText: string) {
-        const map = this.getSubunitMap(unitId, subUnitId);
+        const map = this.getSubunitFormulaMap(unitId, subUnitId);
         if (!map) {
             return { status: FormulaResultStatus.NOT_REGISTER };
         }

@@ -22,6 +22,7 @@ export {
     FormulaCustomFunctionService,
     IFormulaCustomFunctionService,
 } from './services/formula-custom-function.service';
+export { IActiveDirtyManagerService, type IDirtyConversionManagerParams } from './services/active-dirty-manager.service';
 export type { IRegisterFunctionParams, IUnregisterFunctionParams } from './services/register-function.service';
 export { RegisterFunctionService } from './services/register-function.service';
 export { IRegisterFunctionService } from './services/register-function.service';

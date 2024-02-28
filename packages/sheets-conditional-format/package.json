@@ -67,6 +67,7 @@
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/icons": "^0.1.26",
         "@univerjs/sheets": "workspace:*",
+        "@univerjs/sheets-formula": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "clsx": "^2.1.0",
         "dayjs": "^1.11.10",
@@ -75,6 +76,7 @@
         "react-resizable": "^3.0.5",
         "rxjs": "^7.8.1"
     },
+
     "devDependencies": {
         "@univerjs/shared": "workspace:*",
         "@vitejs/plugin-react": "^4.2.1",

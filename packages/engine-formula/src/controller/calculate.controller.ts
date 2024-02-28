@@ -102,6 +102,7 @@ export class CalculateController extends Disposable {
             dirtyRanges.length === 0 &&
             Object.keys(dirtyNameMap).length === 0 &&
             Object.keys(dirtyUnitFeatureMap).length === 0 &&
+            Object.keys(dirtyUnitOtherFormulaMap).length === 0 &&
             forceCalculate === false
         ) {
             return;

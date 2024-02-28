@@ -86,7 +86,7 @@ export class InputManager extends Disposable {
         this._scene = scene;
     }
 
-    // 处理事件，比如 mouseleave,mouseenter 的触发。
+    // Handle events such as triggering mouseleave and mouseenter.
     mouseLeaveEnterHandler(evt: IMouseEvent) {
         const o = this._currentObject;
         if (o === null || o === undefined) {

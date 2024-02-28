@@ -15,7 +15,7 @@
  */
 
 import type { Nullable, Workbook, Worksheet } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, toDisposable } from '@univerjs/core';
 import type { IRender, IWheelEvent, Scene } from '@univerjs/engine-render';
 import {
     IRenderManagerService,
@@ -47,10 +47,6 @@ export class SheetCanvasView extends RxDisposable {
     private _scene!: Scene;
 
     private _currentWorkbook!: Workbook;
-
-    private _loadedMap = new Set();
-
-    private _isLoadedEditor = false;
 
     private readonly _fps$ = new BehaviorSubject<string>('');
 
@@ -93,10 +89,9 @@ export class SheetCanvasView extends RxDisposable {
         }
 
         const unitId = workbook.getUnitId();
-        if (!this._loadedMap.has(unitId)) {
+        if (!this._renderManagerService.has(unitId)) {
             this._currentWorkbook = workbook;
             this._addNewRender();
-            this._loadedMap.add(unitId);
         }
     }
 
@@ -261,88 +256,92 @@ export class SheetCanvasView extends RxDisposable {
         });
 
         // mouse scroll
-        scene.onMouseWheelObserver.add((evt: IWheelEvent, state) => {
-            if (evt.ctrlKey) {
-                return;
-            }
-
-            let offsetX = 0;
-            let offsetY = 0;
-
-            const isLimitedStore = viewMain.limitedScroll();
-            if (evt.inputIndex === PointerInput.MouseWheelX) {
-                const deltaFactor = Math.abs(evt.deltaX);
-                // let magicNumber = deltaFactor < 40 ? 2 : deltaFactor < 80 ? 3 : 4;
-                const scrollNum = deltaFactor;
-
-                if (evt.deltaX > 0) {
-                    offsetX = scrollNum;
-                } else {
-                    offsetX = -scrollNum;
-                }
-                this._commandService.executeCommand(SetScrollRelativeCommand.id, { offsetX });
-
-                // 临界点时执行浏览器行为
-                if (scene.getParent().classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
-                    if (!isLimitedStore?.isLimitedX) {
-                        state.stopPropagation();
+        this.disposeWithMe(
+            toDisposable(
+                scene.onMouseWheelObserver.add((evt: IWheelEvent, state) => {
+                    if (evt.ctrlKey) {
+                        return;
                     }
-                } else if (viewMain.isWheelPreventDefaultX) {
-                    evt.preventDefault();
-                } else if (!isLimitedStore?.isLimitedX) {
-                    evt.preventDefault();
-                }
-            }
-            if (evt.inputIndex === PointerInput.MouseWheelY) {
-                const deltaFactor = Math.abs(evt.deltaY);
-                // let magicNumber = deltaFactor < 40 ? 2 : deltaFactor < 80 ? 3 : 4;
-                let scrollNum = deltaFactor;
-                if (evt.shiftKey) {
-                    scrollNum *= 3;
-                    if (evt.deltaY > 0) {
-                        offsetX = scrollNum;
-                    } else {
-                        offsetX = -scrollNum;
-                    }
-                    this._commandService.executeCommand(SetScrollRelativeCommand.id, { offsetX });
 
-                    // 临界点时执行浏览器行为
-                    if (scene.getParent().classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
-                        if (!isLimitedStore?.isLimitedX) {
-                            state.stopPropagation();
+                    let offsetX = 0;
+                    let offsetY = 0;
+
+                    const isLimitedStore = viewMain.limitedScroll();
+                    if (evt.inputIndex === PointerInput.MouseWheelX) {
+                        const deltaFactor = Math.abs(evt.deltaX);
+                        // let magicNumber = deltaFactor < 40 ? 2 : deltaFactor < 80 ? 3 : 4;
+                        const scrollNum = deltaFactor;
+
+                        if (evt.deltaX > 0) {
+                            offsetX = scrollNum;
+                        } else {
+                            offsetX = -scrollNum;
                         }
-                    } else if (viewMain.isWheelPreventDefaultX) {
-                        evt.preventDefault();
-                    } else if (!isLimitedStore?.isLimitedX) {
-                        evt.preventDefault();
-                    }
-                } else {
-                    if (evt.deltaY > 0) {
-                        offsetY = scrollNum;
-                    } else {
-                        offsetY = -scrollNum;
-                    }
-                    this._commandService.executeCommand(SetScrollRelativeCommand.id, { offsetY });
+                        this._commandService.executeCommand(SetScrollRelativeCommand.id, { offsetX });
 
-                    // 临界点时执行浏览器行为
-                    if (scene.getParent().classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
-                        if (!isLimitedStore?.isLimitedY) {
-                            state.stopPropagation();
+                        // 临界点时执行浏览器行为
+                        if (scene.getParent().classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
+                            if (!isLimitedStore?.isLimitedX) {
+                                state.stopPropagation();
+                            }
+                        } else if (viewMain.isWheelPreventDefaultX) {
+                            evt.preventDefault();
+                        } else if (!isLimitedStore?.isLimitedX) {
+                            evt.preventDefault();
                         }
-                    } else if (viewMain.isWheelPreventDefaultY) {
-                        evt.preventDefault();
-                    } else if (!isLimitedStore?.isLimitedY) {
-                        evt.preventDefault();
                     }
-                }
-            }
-            if (evt.inputIndex === PointerInput.MouseWheelZ) {
-                // TODO
-                // ...
-            }
+                    if (evt.inputIndex === PointerInput.MouseWheelY) {
+                        const deltaFactor = Math.abs(evt.deltaY);
+                        // let magicNumber = deltaFactor < 40 ? 2 : deltaFactor < 80 ? 3 : 4;
+                        let scrollNum = deltaFactor;
+                        if (evt.shiftKey) {
+                            scrollNum *= 3;
+                            if (evt.deltaY > 0) {
+                                offsetX = scrollNum;
+                            } else {
+                                offsetX = -scrollNum;
+                            }
+                            this._commandService.executeCommand(SetScrollRelativeCommand.id, { offsetX });
 
-            this._scene.makeDirty(true);
-        });
+                            // 临界点时执行浏览器行为
+                            if (scene.getParent().classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
+                                if (!isLimitedStore?.isLimitedX) {
+                                    state.stopPropagation();
+                                }
+                            } else if (viewMain.isWheelPreventDefaultX) {
+                                evt.preventDefault();
+                            } else if (!isLimitedStore?.isLimitedX) {
+                                evt.preventDefault();
+                            }
+                        } else {
+                            if (evt.deltaY > 0) {
+                                offsetY = scrollNum;
+                            } else {
+                                offsetY = -scrollNum;
+                            }
+                            this._commandService.executeCommand(SetScrollRelativeCommand.id, { offsetY });
+
+                            // 临界点时执行浏览器行为
+                            if (scene.getParent().classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
+                                if (!isLimitedStore?.isLimitedY) {
+                                    state.stopPropagation();
+                                }
+                            } else if (viewMain.isWheelPreventDefaultY) {
+                                evt.preventDefault();
+                            } else if (!isLimitedStore?.isLimitedY) {
+                                evt.preventDefault();
+                            }
+                        }
+                    }
+                    if (evt.inputIndex === PointerInput.MouseWheelZ) {
+                        // TODO
+                        // ...
+                    }
+
+                    this._scene.makeDirty(true);
+                })
+            )
+        );
 
         // create a scroll bar
         new ScrollBar(viewMain);

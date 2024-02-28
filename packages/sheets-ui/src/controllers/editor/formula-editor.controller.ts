@@ -41,6 +41,7 @@ import {
     TextSelectionManagerService,
     VIEWPORT_KEY,
 } from '@univerjs/docs';
+import type { RenderComponentType } from '@univerjs/engine-render';
 import { DeviceInputEventType, IRenderManagerService, ScrollBar } from '@univerjs/engine-render';
 import type { IMoveRangeMutationParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { MoveRangeMutation, SetRangeValuesMutation } from '@univerjs/sheets';
@@ -55,7 +56,7 @@ import { IEditorBridgeService } from '../../services/editor-bridge.service';
 
 @OnLifecycle(LifecycleStages.Steady, FormulaEditorController)
 export class FormulaEditorController extends RxDisposable {
-    private _loadedMap: Set<string> = new Set();
+    private _loadedMap: Set<RenderComponentType> = new Set();
 
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
@@ -105,9 +106,20 @@ export class FormulaEditorController extends RxDisposable {
             return;
         }
 
-        if (!this._loadedMap.has(unitId)) {
+        const formulaEditorDocObject = this._renderManagerService.getRenderById(unitId);
+        if (formulaEditorDocObject == null) {
+            return;
+        }
+
+        const { mainComponent: documentComponent } = formulaEditorDocObject;
+
+        if (documentComponent == null) {
+            return;
+        }
+
+        if (!this._loadedMap.has(documentComponent)) {
             this._initialMain(unitId);
-            this._loadedMap.add(unitId);
+            this._loadedMap.add(documentComponent);
         }
     }
 

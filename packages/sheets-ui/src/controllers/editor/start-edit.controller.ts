@@ -99,7 +99,7 @@ export class StartEditController extends Disposable {
     }
 
     override dispose(): void {
-
+        super.dispose();
     }
 
     private _initialize() {

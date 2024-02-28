@@ -15,7 +15,7 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { sortRules } from '@univerjs/core';
+import { Disposable, sortRules, toDisposable } from '@univerjs/core';
 
 import { BaseObject } from './base-object';
 import { RENDER_CLASS_TYPE } from './basics/const';
@@ -23,7 +23,7 @@ import { Canvas } from './canvas';
 import type { UniverRenderingContext } from './context';
 import type { ThinScene } from './thin-scene';
 
-export class Layer {
+export class Layer extends Disposable {
     private _objects: BaseObject[] = [];
 
     private _cacheCanvas: Nullable<Canvas>;
@@ -36,6 +36,8 @@ export class Layer {
         private _zIndex: number = 1,
         private _allowCache: boolean = false
     ) {
+        super();
+
         this.addObjects(objects);
 
         if (this._allowCache) {
@@ -203,9 +205,13 @@ export class Layer {
 
     private _initialCacheCanvas() {
         this._cacheCanvas = new Canvas();
-        this._scene.getEngine().onTransformChangeObservable.add(() => {
-            this._resizeCacheCanvas();
-        });
+        this.disposeWithMe(
+            toDisposable(
+                this._scene.getEngine().onTransformChangeObservable.add(() => {
+                    this._resizeCacheCanvas();
+                })
+            )
+        );
     }
 
     private _draw(mainCtx: UniverRenderingContext, isMaxLayer: boolean) {
@@ -232,6 +238,8 @@ export class Layer {
     }
 
     dispose() {
+        super.dispose();
+
         this.getObjects().forEach((o) => {
             o.dispose();
         });

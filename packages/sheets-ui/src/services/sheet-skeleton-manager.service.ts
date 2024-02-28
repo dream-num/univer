@@ -43,6 +43,10 @@ export interface ISheetSkeletonManagerSearch {
  * so it is managed uniformly through the service.
  */
 export class SheetSkeletonManagerService implements IDisposable {
+    private _debounceSkeleton: NodeJS.Timeout | number = -1;
+
+    private _preSearch: Nullable<ISheetSkeletonManagerSearch>;
+
     private _currentSkeleton: ISheetSkeletonManagerSearch = {
         unitId: '',
         sheetId: '',
@@ -76,6 +80,34 @@ export class SheetSkeletonManagerService implements IDisposable {
     }
 
     setCurrent(searchParam: ISheetSkeletonManagerSearch): Nullable<ISheetSkeletonManagerParam> {
+        // clearTimeout(this._debounceSkeleton);
+        // this._debounceSkeleton = setTimeout(() => {
+        //     if(this._compareSearch(searchParam, this._preSearch)){
+        //         this._preSearch = null;
+        //         return;
+        //     }
+        //     this._setCurrent(searchParam);
+        //     this._preSearch = null;
+        // }, 0);
+
+        // if(this._preSearch==null){
+        this._setCurrent(searchParam);
+        this._preSearch = searchParam;
+        // }
+    }
+
+    private _compareSearch(param1: Nullable<ISheetSkeletonManagerSearch>, param2: Nullable<ISheetSkeletonManagerSearch>) {
+        if (param1 == null || param2 == null) {
+            return false;
+        }
+
+        if (param1.commandId === param2.commandId && param1.sheetId === param2.sheetId && param1.unitId === param2.unitId) {
+            return true;
+        }
+        return false;
+    }
+
+    private _setCurrent(searchParam: ISheetSkeletonManagerSearch): Nullable<ISheetSkeletonManagerParam> {
         const param = this._getCurrentBySearch(searchParam);
         if (param != null) {
             this._reCalculate(param);
@@ -107,8 +139,6 @@ export class SheetSkeletonManagerService implements IDisposable {
         this._currentSkeletonBefore$.next(nextParam);
 
         this._currentSkeleton$.next(nextParam);
-
-        return this.getCurrent();
     }
 
     reCalculate() {

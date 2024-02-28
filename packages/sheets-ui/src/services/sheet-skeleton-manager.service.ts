@@ -43,10 +43,6 @@ export interface ISheetSkeletonManagerSearch {
  * so it is managed uniformly through the service.
  */
 export class SheetSkeletonManagerService implements IDisposable {
-    private _debounceSkeleton: NodeJS.Timeout | number = -1;
-
-    private _preSearch: Nullable<ISheetSkeletonManagerSearch>;
-
     private _currentSkeleton: ISheetSkeletonManagerSearch = {
         unitId: '',
         sheetId: '',
@@ -80,20 +76,7 @@ export class SheetSkeletonManagerService implements IDisposable {
     }
 
     setCurrent(searchParam: ISheetSkeletonManagerSearch): Nullable<ISheetSkeletonManagerParam> {
-        // clearTimeout(this._debounceSkeleton);
-        // this._debounceSkeleton = setTimeout(() => {
-        //     if(this._compareSearch(searchParam, this._preSearch)){
-        //         this._preSearch = null;
-        //         return;
-        //     }
-        //     this._setCurrent(searchParam);
-        //     this._preSearch = null;
-        // }, 0);
-
-        // if(this._preSearch==null){
         this._setCurrent(searchParam);
-        this._preSearch = searchParam;
-        // }
     }
 
     private _compareSearch(param1: Nullable<ISheetSkeletonManagerSearch>, param2: Nullable<ISheetSkeletonManagerSearch>) {

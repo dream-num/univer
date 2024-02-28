@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import type { IConditionFormatRule, ITextHighlightCell } from '../models/type';
+
 export const SHEET_CONDITION_FORMAT_PLUGIN = 'SHEET_CONDITION_FORMAT_PLUGIN';
 export enum TextOperator {
     beginsWith = 'beginsWith',
@@ -79,3 +81,10 @@ export enum ValueType {
 
 export const DEFAULT_BG_COLOR = '#fff';
 export const DEFAULT_FONT_COLOR = '#000000';
+
+export const createDefaultRule = () => ({
+    cfId: undefined as unknown as string,
+    ranges: [],
+    stopIfTrue: false,
+    rule: { type: RuleType.highlightCell, subType: SubRuleType.text, operator: TextOperator.notContainsBlanks } as ITextHighlightCell,
+} as IConditionFormatRule);

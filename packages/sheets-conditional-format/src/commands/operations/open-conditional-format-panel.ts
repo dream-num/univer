@@ -17,16 +17,23 @@
 import type { ICommand } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
-import type { IConditionFormatRule } from '../../models/type';
 import { ConditionalFormatMenuController } from '../../controllers/cf.menu.controller';
+import { createDefaultRule } from '../../base/const';
 
-interface IOpenConditionalFormatOperatorParams { rule: IConditionFormatRule };
+interface IOpenConditionalFormatOperatorParams {
+    value: number;
+}
 export const OpenConditionalFormatOperator: ICommand = {
     id: 'sheet.operation.open.conditional.format.panel',
     type: CommandType.OPERATION,
     handler: (accessor: IAccessor, params: IOpenConditionalFormatOperatorParams) => {
         const conditionalFormatMenuController = accessor.get(ConditionalFormatMenuController);
-        conditionalFormatMenuController.openPanel(params.rule);
+        if (params.value === 1) {
+            conditionalFormatMenuController.openPanel();
+        } else if (params.value === 2) {
+            // create cf rule
+            conditionalFormatMenuController.openPanel(createDefaultRule());
+        }
         return true;
     },
 };

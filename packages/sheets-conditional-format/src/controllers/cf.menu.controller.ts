@@ -37,7 +37,7 @@ export class ConditionalFormatMenuController extends Disposable {
         this._initPanel();
     }
 
-    openPanel(rule: IConditionFormatRule) {
+    openPanel(rule?: IConditionFormatRule) {
         // eslint-disable-next-line no-console
         console.log('openPanel', rule);
         const props = {

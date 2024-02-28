@@ -19,7 +19,8 @@ export default {
         cf: {
             title: '条件格式',
             menu: {
-                openPanel: '查看条件格式',
+                manageConditionalFormat: '管理条件格式',
+                createConditionalFormat: '新建条件格式',
             },
             panel: {
                 createRule: '+ 添加新的规则',
@@ -108,6 +109,7 @@ export default {
                 highlightCell: '突出显示单元格',
                 dataBar: '数据条',
                 colorScale: '色阶',
+                formula: '自定义公式',
             },
             subRuleType: {
                 uniqueValues: '唯一值',

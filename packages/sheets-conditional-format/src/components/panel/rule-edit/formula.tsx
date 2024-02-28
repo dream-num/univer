@@ -18,7 +18,7 @@ import React, { useEffect, useState } from 'react';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { LocaleService } from '@univerjs/core';
 import { Input } from '@univerjs/design';
-import { NumberOperator, RuleType, SubRuleType } from '../../../base/const';
+import { RuleType, SubRuleType } from '../../../base/const';
 import { ConditionalStyleEditor } from '../../conditional-style-editor';
 import type { IAverageHighlightCell, IConditionalFormatRuleConfig, IHighlightCell, IRankHighlightCell } from '../../../models/type';
 import stylesBase from '../index.module.less';
@@ -33,7 +33,12 @@ export const FormulaStyleEditor = (props: IStyleEditorProps) => {
     const rule = props.rule?.type === RuleType.highlightCell ? props.rule : undefined as IRankHighlightCell | IAverageHighlightCell | undefined;
 
     const [style, styleSet] = useState<IHighlightCell['style']>({});
-    const [formula, formulaSet] = useState('');
+    const [formula, formulaSet] = useState(() => {
+        if (rule?.subType === SubRuleType.formula) {
+            return rule.value;
+        }
+        return '';
+    });
 
     const getResult = (config: {
         style: IHighlightCell['style'];
@@ -62,13 +67,16 @@ export const FormulaStyleEditor = (props: IStyleEditorProps) => {
     return (
         <div>
             <div className={`${stylesBase.title} ${stylesBase.mTBase}`}>{localeService.t('sheet.cf.panel.styleRule')}</div>
-            <Input
-                value={formula}
-                onChange={(v) => {
-                    formulaSet(v);
-                    _onChange({ style, formula: v });
-                }}
-            />
+            <div className={`${stylesBase.mTSm} ${stylesBase.mLXxs}`}>
+                <Input
+                    value={formula}
+                    onChange={(v) => {
+                        formulaSet(v);
+                        _onChange({ style, formula: v });
+                    }}
+                />
+            </div>
+
             <div className={`${styles.cfPreviewWrap} ${stylesBase.mLXxs}`}>
                 <Preview rule={getResult({ style, formula }) as IConditionalFormatRuleConfig} />
             </div>

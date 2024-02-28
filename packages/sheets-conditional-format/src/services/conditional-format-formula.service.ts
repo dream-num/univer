@@ -15,7 +15,7 @@
  */
 
 import type { ICellData, Nullable } from '@univerjs/core';
-import { createInterceptorKey, Disposable, ICommandService, RefAlias, Tools } from '@univerjs/core';
+import { Disposable, ICommandService, RefAlias, Tools } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 import type { ISetFormulaCalculationResultMutation } from '@univerjs/engine-formula';
 import { IActiveDirtyManagerService } from '@univerjs/sheets-formula';
@@ -65,18 +65,18 @@ export class ConditionalFormatFormulaService extends Disposable {
     }
 
     private _initRuleChange() {
-        this._conditionalFormatRuleModel.$ruleChange.subscribe((option) => {
+        this.disposeWithMe(this._conditionalFormatRuleModel.$ruleChange.subscribe((option) => {
             const { unitId, subUnitId, rule } = option;
             if (option.type === 'delete') {
                 this._removeFormulaByCfId(unitId, subUnitId, rule.cfId);
             }
              // @gggpound: todo clear cache when set rule
-        });
+        }));
     }
 
     private _initFormulaCalculationResultChange() {
         // Gets the result of the formula calculation and caches it
-        this._commandService.onCommandExecuted((commandInfo) => {
+        this.disposeWithMe(this._commandService.onCommandExecuted((commandInfo) => {
             if (commandInfo.id === SetFormulaCalculationResultMutation.id) {
                 const params = commandInfo.params as ISetFormulaCalculationResultMutation;
                 for (const unitId in params.unitOtherData) {
@@ -87,9 +87,9 @@ export class ConditionalFormatFormulaService extends Disposable {
                         }
                         const cfIdSet = new Set<string>();
                         for (const formulaId in params.unitOtherData[unitId]![subUnitId]) {
-                            const value = getResultFromFormula(params.unitOtherData[unitId]![subUnitId]![formulaId]);
                             const item = map.getValue(formulaId);
                             if (item) {
+                                const value = getResultFromFormula(params.unitOtherData[unitId]![subUnitId]![formulaId]);
                                 item.result = !!value;
                                 item.status = FormulaResultStatus.SUCCESS;
                                 cfIdSet.add(item.cfId);
@@ -102,7 +102,7 @@ export class ConditionalFormatFormulaService extends Disposable {
                     }
                 }
             }
-        });
+        }));
 
         // Register formula with Dirty Logic
         this._activeDirtyManagerService.register(conditionalFormatFormulaMarkDirty.id,
@@ -115,7 +115,7 @@ export class ConditionalFormatFormulaService extends Disposable {
               } });
 
         // Sum up formulas that need to be marked dirty
-        this.formulaChange$.pipe(bufferTime(16), filter((list) => !!list.length), map((list) => {
+        this.disposeWithMe(this.formulaChange$.pipe(bufferTime(16), filter((list) => !!list.length), map((list) => {
             return list.reduce((result, cur) => {
                 const { unitId, subUnitId, formulaId } = cur;
                 if (!result[unitId]) {
@@ -130,7 +130,7 @@ export class ConditionalFormatFormulaService extends Disposable {
         })).subscribe((obj) => {
             this._commandService.executeCommand(conditionalFormatFormulaMarkDirty.id,
                 obj as IConditionalFormatFormulaMarkDirtyParams);
-        });
+        }));
     }
 
     private _ensureSubunitFormulaMap(unitId: string, subUnitId: string) {

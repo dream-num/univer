@@ -15,7 +15,7 @@
  */
 
 import type { IRange } from '../types/interfaces/i-range';
-import { RANGE_TYPE } from '../types/interfaces/i-range';
+import { AbsoluteRefType, RANGE_TYPE } from '../types/interfaces/i-range';
 import type { Nullable } from './types';
 
 /**
@@ -193,13 +193,14 @@ export class Rectangle {
             endColumn: range.endColumn - range.startColumn,
         }) as IRange;
 
-    static getPositionRange = (relativeRange: IRange, originRange: IRange) =>
-        ({
-            startRow: relativeRange.startRow + originRange.startRow,
-            endRow: relativeRange.endRow + relativeRange.startRow + originRange.startRow,
-            startColumn: relativeRange.startColumn + originRange.startColumn,
-            endColumn: relativeRange.endColumn + relativeRange.startColumn + originRange.startColumn,
+    static getPositionRange = (relativeRange: IRange, originRange: IRange) => {
+        return ({
+            startRow: [AbsoluteRefType.ROW, AbsoluteRefType.ALL].includes(originRange.startAbsoluteRefType || 0) ? originRange.startRow : relativeRange.startRow + originRange.startRow,
+            endRow: [AbsoluteRefType.ROW, AbsoluteRefType.ALL].includes(originRange.endAbsoluteRefType || 0) ? originRange.endRow : relativeRange.endRow + relativeRange.startRow + originRange.startRow,
+            startColumn: [AbsoluteRefType.COLUMN, AbsoluteRefType.ALL].includes(originRange.startAbsoluteRefType || 0) ? originRange.startColumn : relativeRange.startColumn + originRange.startColumn,
+            endColumn: [AbsoluteRefType.COLUMN, AbsoluteRefType.ALL].includes(originRange.endAbsoluteRefType || 0) ? originRange.endColumn : relativeRange.endColumn + relativeRange.startColumn + originRange.startColumn,
         }) as IRange;
+    };
 
     static moveHorizontal = (range: IRange, step: number = 0, length: number = 0): IRange => ({
         ...range,

@@ -148,7 +148,7 @@ export class DesktopLayoutService extends Disposable implements ILayoutService {
             fromEvent(window, 'focusin').subscribe((event) => {
                 const target = event.target as HTMLElement;
                 if (target.classList.contains('univer-app-layout')) {
-                    Promise.resolve().then(() => this.focus());
+                    queueMicrotask(() => this.focus());
                     return;
                 }
 

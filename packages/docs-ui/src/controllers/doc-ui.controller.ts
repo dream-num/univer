@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import { Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import type { IDesktopUIController, IMenuItemFactory } from '@univerjs/ui';
-import { ComponentManager, IEditorService, IMenuService, IUIController } from '@univerjs/ui';
+import { ComponentManager, IEditorService, ILayoutService, IMenuService, IUIController } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { connectInjector } from '@wendellhu/redi/react-bindings';
+import { ITextSelectionRenderManager } from '@univerjs/engine-render';
 import { COLOR_PICKER_COMPONENT, ColorPicker } from '../components/color-picker';
 import {
     FONT_FAMILY_COMPONENT,
@@ -49,6 +50,7 @@ export class DocUIController extends Disposable {
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
+        @ILayoutService private readonly _layoutService: ILayoutService,
         @IEditorService private readonly _editorService: IEditorService,
         @IMenuService private readonly _menuService: IMenuService,
         @IUIController private readonly _uiController: IDesktopUIController,
@@ -99,11 +101,21 @@ export class DocUIController extends Disposable {
         if (firstDocUnitId == null) {
             return;
         }
+
         const embedded = this._editorService.isEditor(firstDocUnitId);
         if (!embedded) {
             this.disposeWithMe(
                 this._uiController.registerContentComponent(() => connectInjector(DocBackground, this._injector))
             );
         }
+    }
+
+    private _initFocusHandler(): void {
+        this.disposeWithMe(
+            this._layoutService.registerFocusHandler(UniverInstanceType.DOC, () => {
+                const textSelectionManagerService = this._injector.get(ITextSelectionRenderManager);
+                textSelectionManagerService.focus();
+            })
+        );
     }
 }

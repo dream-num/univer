@@ -97,7 +97,7 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
 
         // Step 3: Update cursor & selection.
         // Make sure update cursor & selection after doc skeleton is calculated.
-        if (!noNeedSetTextRange && textRanges) {
+        if (!noNeedSetTextRange && textRanges && trigger != null) {
             queueMicrotask(() => {
                 textSelectionManagerService.replaceTextRanges(textRanges);
             });

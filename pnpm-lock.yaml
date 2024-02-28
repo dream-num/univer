@@ -961,6 +961,9 @@ importers:
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
+      '@univerjs/sheets-formula':
+        specifier: workspace:*
+        version: link:../sheets-formula
       '@univerjs/sheets-ui':
         specifier: workspace:*
         version: link:../sheets-ui

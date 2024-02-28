@@ -66,14 +66,14 @@ export const ConditionalStyleEditor = (props: IConditionalStyleEditorProps) => {
         return style.st.s;
     });
     const [fontColor, fontColorSet] = useState(() => {
-        const defaultV = DEFAULT_FONT_COLOR;
+        const defaultV = undefined;
         if (!style?.cl?.rgb) {
             return defaultV;
         }
         return style.cl.rgb;
     });
     const [bgColor, bgColorSet] = useState(() => {
-        const defaultV = DEFAULT_BG_COLOR;
+        const defaultV = undefined;
         if (!style?.bg?.rgb) {
             return defaultV;
         }
@@ -110,8 +110,8 @@ export const ConditionalStyleEditor = (props: IConditionalStyleEditorProps) => {
                     <StrikethroughSingle />
                 </div>
             )}
-            <ColorPicker color={fontColor} onChange={fontColorSet} iconId="FontColor" />
-            <ColorPicker color={bgColor} onChange={bgColorSet} iconId="PaintBucket" />
+            <ColorPicker color={fontColor || DEFAULT_FONT_COLOR} onChange={fontColorSet} iconId="FontColor" />
+            <ColorPicker color={bgColor || DEFAULT_BG_COLOR} onChange={bgColorSet} iconId="PaintBucket" />
         </div>
     );
 };

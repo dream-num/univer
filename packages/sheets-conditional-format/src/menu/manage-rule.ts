@@ -31,8 +31,11 @@ export const FactoryManageConditionalFormatRule = (componentManager: ComponentMa
             icon: 'CancelFreezeSingle',
             tooltip: localeService.t('sheet.cf.title'),
             selections: [{
-                label: localeService.t('sheet.cf.menu.openPanel'),
+                label: localeService.t('sheet.cf.menu.manageConditionalFormat'),
                 value: 1,
+            }, {
+                label: localeService.t('sheet.cf.menu.createConditionalFormat'),
+                value: 2,
             }],
         } as IMenuSelectorItem;
     };

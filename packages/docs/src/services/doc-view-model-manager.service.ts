@@ -28,7 +28,6 @@ export interface IDocumentViewModelManagerParam {
  * The view model manager is used to manage Doc view model. has a one-to-one correspondence with the doc skeleton.
  */
 export class DocViewModelManagerService extends RxDisposable {
-    private _currentViewModelUnitId: string = '';
     private _docViewModelMap: Map<string, IDocumentViewModelManagerParam> = new Map();
 
     private readonly _currentDocViewModel$ = new BehaviorSubject<Nullable<IDocumentViewModelManagerParam>>(null);
@@ -56,6 +55,10 @@ export class DocViewModelManagerService extends RxDisposable {
         this._currentUniverService.getAllUniverDocsInstance().forEach((documentModel) => {
             this._create(documentModel);
         });
+
+        this._currentUniverService.docDisposed$.pipe(takeUntil(this.dispose$)).subscribe((documentModel) => {
+            this._docViewModelMap.delete(documentModel.getUnitId());
+        });
     }
 
     private _create(documentModel: Nullable<DocumentDataModel>) {
@@ -66,10 +69,6 @@ export class DocViewModelManagerService extends RxDisposable {
         const unitId = documentModel.getUnitId();
         // Build the view model and notify the skeleton manager to create the skeleton.
         this._setCurrent(unitId);
-    }
-
-    getCurrent() {
-        return this._docViewModelMap.get(this._currentViewModelUnitId);
     }
 
     getAllModel() {
@@ -111,9 +110,7 @@ export class DocViewModelManagerService extends RxDisposable {
             docViewModel.reset(documentDataModel);
         }
 
-        this._currentViewModelUnitId = unitId;
-
-        this._currentDocViewModel$.next(this.getCurrent());
+        this._currentDocViewModel$.next(this._docViewModelMap.get(unitId));
     }
 
     private _buildDocViewModel(documentDataModel: DocumentDataModel) {

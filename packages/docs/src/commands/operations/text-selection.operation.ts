@@ -33,7 +33,7 @@ export const SetTextSelectionsOperation: IOperation<ISetTextSelectionsOperationP
 
     type: CommandType.OPERATION,
 
-    handler: () => {
+    handler: (_, __) => {
         // for menu highlight use and share cursor.
         return true;
     },

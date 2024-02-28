@@ -37,8 +37,13 @@ export interface IEditorConfigParam {
     initialSnapshot?: IDocumentData;
     cancelDefaultResizeListener?: boolean;
     canvasStyle?: IEditorCanvasStyle;
-    isSingle?: boolean;
     isSheetEditor: boolean;
+
+    isSingle: boolean;
+    isReadonly: boolean;
+    onlyInputFormula: boolean;
+    onlyInputRange: boolean;
+
 }
 
 export interface IEditorSetParam extends IEditorConfigParam, IEditorStateParam {
@@ -407,7 +412,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
     }
 
     register(config: IEditorConfigParam, container: HTMLDivElement): IDisposable {
-        const { initialSnapshot, editorUnitId, isSheetEditor, canvasStyle = {}, isSingle = true } = config;
+        const { initialSnapshot, editorUnitId, canvasStyle = {} } = config;
 
         const documentDataModel = this._currentUniverService.createDoc(initialSnapshot || this._getBlank(editorUnitId));
 
@@ -420,7 +425,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
 
         render.engine.setContainer(container);
 
-        const editor = new Editor({ ...config, isSheetEditor, render, documentDataModel, editorDom: container, canvasStyle, isSingle });
+        const editor = new Editor({ ...config, render, documentDataModel, editorDom: container, canvasStyle });
 
         this._editors.set(editorUnitId, editor);
 

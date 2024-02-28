@@ -159,6 +159,7 @@ export function FormulaBar() {
                         onContextMenu={(e) => e.preventDefault()}
                         className={styles.formulaContent}
                         snapshot={INITIAL_SNAPSHOT}
+                        isSingle={false}
                     />
                     <div className={styles.arrowContainer} onClick={handleArrowClick}>
                         {arrowDirection === ArrowDirection.Down

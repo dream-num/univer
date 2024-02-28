@@ -78,6 +78,7 @@ export class HoverManagerService {
         }
 
         const { scaleX, scaleY } = scene.getAncestorScale();
+
         const scrollXY = {
             x: activeViewport.actualScrollX,
             y: activeViewport.actualScrollY,
@@ -112,10 +113,10 @@ export class HoverManagerService {
         }
 
         const bound: IBoundRectNoAngle = {
-            left: skeleton.getTransformOffsetX((skeleton.getOffsetByPositionX(anchorCell.startColumn - 1)), scaleX, scrollXY) + skeleton.rowHeaderWidthAndMarginLeft,
-            right: skeleton.getTransformOffsetX((skeleton.getOffsetByPositionX(anchorCell.endColumn)), scaleX, scrollXY) + skeleton.rowHeaderWidthAndMarginLeft,
-            top: skeleton.getTransformOffsetY((skeleton.getOffsetByPositionY(anchorCell.startRow - 1)), scaleY, scrollXY) + skeleton.columnHeaderHeightAndMarginTop,
-            bottom: skeleton.getTransformOffsetY((skeleton.getOffsetByPositionY(anchorCell.endRow)), scaleY, scrollXY) + skeleton.columnHeaderHeightAndMarginTop,
+            left: (skeleton.getOffsetByPositionX(anchorCell.startColumn - 1) - scrollXY.x) * scaleX,
+            right: (skeleton.getOffsetByPositionX(anchorCell.endColumn) - scrollXY.x) * scaleX,
+            top: (skeleton.getOffsetByPositionY(anchorCell.startRow - 1) - scrollXY.y) * scaleY,
+            bottom: (skeleton.getOffsetByPositionY(anchorCell.endRow) - scrollXY.y) * scaleY,
         };
 
         this._currentCell$.next({

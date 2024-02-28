@@ -23,7 +23,7 @@ import { SheetDataValidationService } from '../services/dv.service';
 
 const INVALID_MARK = {
     tr: {
-        size: 6,
+        size: 8,
         color: 'red',
     },
 };

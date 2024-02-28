@@ -17,10 +17,7 @@
 import type { IMutation } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
 
-export interface IConditionalFormatFormulaMarkDirtyParams {
-    unitId: string; subUnitId: string;
-    formulaId: string;
-};
+export interface IConditionalFormatFormulaMarkDirtyParams { [unitId: string]: { [sunUnitId: string]: { [formulaId: string]: boolean } } }
 export const conditionalFormatFormulaMarkDirty: IMutation<IConditionalFormatFormulaMarkDirtyParams> = {
     type: CommandType.MUTATION,
     id: 'sheet.mutation.conditional-format-formula-mark-dirty',

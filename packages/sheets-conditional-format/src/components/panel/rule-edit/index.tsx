@@ -78,6 +78,9 @@ export const RuleEdit = (props: IRuleEditProps) => {
                     case SubRuleType.rank:{
                         return '2';
                     }
+                    case SubRuleType.formula:{
+                        return '5';
+                    }
                 }
                 break;
             }

@@ -43,7 +43,7 @@ export const SelectAllOperation: ICommand<ISelectAllOperationParams> = {
             },
         ];
 
-        textSelectionManagerService.replaceTextRanges(textRanges);
+        textSelectionManagerService.replaceTextRanges(textRanges, false);
 
         return true;
     },

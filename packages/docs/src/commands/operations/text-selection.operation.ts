@@ -22,6 +22,8 @@ export interface ISetTextSelectionsOperationParams {
     unitId: string;
     subUnitId: string;
     segmentId: string;
+    // Whether it occurs at the same time as text editing.
+    isEditing: boolean;
     style: ITextSelectionStyle;
     ranges: ITextRangeWithStyle[];
 }
@@ -31,8 +33,8 @@ export const SetTextSelectionsOperation: IOperation<ISetTextSelectionsOperationP
 
     type: CommandType.OPERATION,
 
-    handler: (accessor, prams) => {
-        // for live share and share cursor.
+    handler: () => {
+        // for menu highlight use and share cursor.
         return true;
     },
 };

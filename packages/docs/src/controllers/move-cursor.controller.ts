@@ -122,7 +122,7 @@ export class MoveCursorController extends Disposable {
                     endOffset: direction === Direction.LEFT || direction === Direction.UP ? min : max,
                     style,
                 },
-            ]);
+            ], false);
 
             return;
         }
@@ -151,7 +151,7 @@ export class MoveCursorController extends Disposable {
                     endOffset: focusOffset,
                     style,
                 },
-            ]);
+            ], false);
         } else {
             const focusSpan = skeleton.findNodeByCharIndex(focusOffset);
 
@@ -172,7 +172,7 @@ export class MoveCursorController extends Disposable {
                         endOffset: newFocusOffset,
                         style,
                     },
-                ]);
+                ], false);
 
                 return;
             }
@@ -189,7 +189,7 @@ export class MoveCursorController extends Disposable {
                     endOffset: newActiveRange.endOffset,
                     style,
                 },
-            ]);
+            ], false);
         }
     }
 
@@ -241,7 +241,7 @@ export class MoveCursorController extends Disposable {
                     endOffset: cursor,
                     style,
                 },
-            ]);
+            ], false);
         } else {
             const startNode = skeleton.findNodeByCharIndex(startOffset);
             const endNode = skeleton.findNodeByCharIndex(endOffset);
@@ -273,7 +273,7 @@ export class MoveCursorController extends Disposable {
                         endOffset: cursor,
                         style,
                     },
-                ]);
+                ], false);
                 return;
             }
 
@@ -288,7 +288,7 @@ export class MoveCursorController extends Disposable {
                     ...newActiveRange,
                     style,
                 },
-            ]);
+            ], false);
         }
     }
 

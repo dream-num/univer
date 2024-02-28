@@ -108,6 +108,7 @@ interface IAddTextRangesConfig {
 export interface ITextSelectionInnerParam {
     textRanges: TextRange[];
     segmentId: string;
+    isEditing: boolean;
     style: ITextSelectionStyle;
 }
 
@@ -151,7 +152,7 @@ export interface ITextSelectionRenderManager {
 
     removeAllTextRanges(): void;
 
-    addTextRanges(ranges: ISuccinctTextRangeParam[], config?: IAddTextRangesConfig): void;
+    addTextRanges(ranges: ISuccinctTextRangeParam[], isEditing?: boolean): void;
 
     sync(): void;
 
@@ -290,7 +291,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         this._isSelectionEnabled = false;
     }
 
-    addTextRanges(ranges: ISuccinctTextRangeParam[]) {
+    addTextRanges(ranges: ISuccinctTextRangeParam[], isEditing = true) {
         const { _scene: scene, _docSkeleton: docSkeleton } = this;
 
         for (const range of ranges) {
@@ -303,6 +304,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             textRanges: this._getAllTextRanges(),
             segmentId: this._currentSegmentId,
             style: this._selectionStyle,
+            isEditing,
         });
 
         this._updateDomCursorPositionAndSize();
@@ -389,8 +391,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             return;
         }
 
-        // Firefox do not support Segmenter, so you need a Segmenter polyfill if you want use it in Firefox.
-        // TODO: @JOCS write this in DOCS or README when we publish the package.
+        // Firefox do not support Segmenter in an old version, so you need a Segmenter polyfill if you want use it in Firefox.
         if (Intl.Segmenter == null) {
             return;
         }
@@ -518,10 +519,10 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
                 return;
             }
 
-            this._moving(moveOffsetX, moveOffsetY, scrollTimer);
+            this._moving(moveOffsetX, moveOffsetY);
 
             scrollTimer.scrolling(moveOffsetX, moveOffsetY, () => {
-                this._moving(moveOffsetX, moveOffsetY, scrollTimer);
+                this._moving(moveOffsetX, moveOffsetY);
             });
 
             preMoveOffsetX = moveOffsetX;
@@ -538,6 +539,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
                 textRanges: this._getAllTextRanges(),
                 segmentId: this._currentSegmentId,
                 style: this._selectionStyle,
+                isEditing: false,
             });
 
             scrollTimer.dispose();
@@ -914,7 +916,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         this.activate(canvasLeft, canvasTop);
     }
 
-    private _moving(moveOffsetX: number, moveOffsetY: number, scrollTimer: ScrollTimer) {
+    private _moving(moveOffsetX: number, moveOffsetY: number) {
         if (this._docSkeleton == null) {
             return;
         }

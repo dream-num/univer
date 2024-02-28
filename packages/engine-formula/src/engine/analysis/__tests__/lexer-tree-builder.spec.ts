@@ -149,6 +149,11 @@ describe('lexer nodeMaker test', () => {
             const node = lexerTreeBuilder.treeBuilder('= ( 2019-09-09 ) ') as LexerNode;
             expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":["  2019","09","-","09 ","-"]}');
         });
+
+        it('sheet range', () => {
+            const node = lexerTreeBuilder.treeBuilder('=SUM(SUM(Sheet5:Sheet6!A1:B10) + 100, 1)') as LexerNode;
+            expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"SUM","st":0,"ed":2,"children":[{"token":"P_1","st":0,"ed":2,"children":[{"token":"SUM","st":4,"ed":6,"children":[{"token":"P_1","st":4,"ed":6,"children":[{"token":":","st":-1,"ed":-1,"children":[{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"Sheet5","st":-1,"ed":-1,"children":[]}]},{"token":"P_1","st":-1,"ed":-1,"children":[{"token":":","st":-1,"ed":-1,"children":[{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"Sheet6!A1","st":-1,"ed":-1,"children":[]}]},{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"B10","st":-1,"ed":-1,"children":[]}]}]}]}]}]}]}," 100"," +"]},{"token":"P_1","st":32,"ed":34,"children":[" 1"]}]}]}');
+        });
     });
 
     describe('checkIfAddBracket', () => {

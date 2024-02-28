@@ -32,8 +32,11 @@ export interface ITextEditorProps {
     isSheetEditor?: boolean;
     canvasStyle?: IEditorCanvasStyle;
     value?: string;
-    readonly?: boolean;
+
     isSingle?: boolean;
+    isReadonly?: boolean;
+    onlyInputFormula?: boolean;
+    onlyInputRange?: boolean;
 }
 
 /**
@@ -41,7 +44,11 @@ export interface ITextEditorProps {
  * @param props
  */
 export function TextEditor(props: ITextEditorProps & MyComponentProps): JSX.Element | null {
-    const { id, snapshot, resizeCallBack, cancelDefaultResizeListener, isSheetEditor = false, canvasStyle = {}, value } = props;
+    const {
+        id, snapshot, resizeCallBack, cancelDefaultResizeListener,
+        isSheetEditor = false, canvasStyle = {}, value,
+        isSingle = true, isReadonly = false, onlyInputFormula = false, onlyInputRange = false,
+    } = props;
 
     const editorService = useDependency(IEditorService);
 
@@ -63,7 +70,15 @@ export function TextEditor(props: ITextEditorProps & MyComponentProps): JSX.Elem
 
         resizeObserver.observe(editor);
 
-        editorService.register({ editorUnitId: id, initialSnapshot: snapshot, cancelDefaultResizeListener, isSheetEditor, canvasStyle, isSingle: true }, editor);
+        editorService.register({
+            editorUnitId: id,
+            initialSnapshot: snapshot,
+            cancelDefaultResizeListener,
+            isSheetEditor,
+            canvasStyle,
+            isSingle, isReadonly, onlyInputFormula, onlyInputRange,
+        },
+        editor);
 
         // Clean up on unmount
         return () => {

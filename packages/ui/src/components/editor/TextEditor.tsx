@@ -32,12 +32,13 @@ export interface ITextEditorProps {
     isSheetEditor?: boolean;
     canvasStyle?: IEditorCanvasStyle;
     value?: string;
+    readonly?: boolean;
+    isSingle?: boolean;
 }
 
 /**
  * The component to render toolbar item label and menu item label.
  * @param props
- * @returns
  */
 export function TextEditor(props: ITextEditorProps & MyComponentProps): JSX.Element | null {
     const { id, snapshot, resizeCallBack, cancelDefaultResizeListener, isSheetEditor = false, canvasStyle = {}, value } = props;

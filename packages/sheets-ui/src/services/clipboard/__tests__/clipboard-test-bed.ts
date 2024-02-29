@@ -21,8 +21,10 @@ import { SelectionManagerService, SheetInterceptorService } from '@univerjs/shee
 import {
     BrowserClipboardService,
     DesktopMessageService,
+    DesktopNotificationService,
     IClipboardInterfaceService,
     IMessageService,
+    INotificationService,
 } from '@univerjs/ui';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
@@ -533,6 +535,7 @@ export function clipboardTestBed(workbookConfig?: IWorkbookData, dependencies?: 
             const sheetClipboardController = injector.createInstance(SheetClipboardController);
             injector.add([SheetClipboardController, { useValue: sheetClipboardController }]);
             injector.add([SheetInterceptorService]);
+            injector.add([INotificationService, { useClass: DesktopNotificationService }]); ;
 
             dependencies?.forEach((d) => injector.add(d));
         }

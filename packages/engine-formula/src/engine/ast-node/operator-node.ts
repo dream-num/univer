@@ -26,7 +26,7 @@ import { IFunctionService } from '../../services/function.service';
 import { LexerNode } from '../analysis/lexer-node';
 import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
 import { type BaseValueObject, ErrorValueObject } from '../value-object/base-value-object';
-import { NullValueObject, NumberValueObject } from '../value-object/primitive-object';
+import { NullValueObject } from '../value-object/primitive-object';
 import { BaseAstNode, ErrorNode } from './base-ast-node';
 import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './base-ast-node-factory';
 import { NODE_ORDER_MAP, NodeType } from './node-type';

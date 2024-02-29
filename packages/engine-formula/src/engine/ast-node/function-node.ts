@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { AstNodePromiseType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
-import { prefixToken } from '../../basics/token';
 import type { BaseFunction } from '../../functions/base-function';
-import { FUNCTION_NAMES_META } from '../../functions/meta/function-names';
 import { IFormulaCurrentConfigService } from '../../services/current-data.service';
 import { IFunctionService } from '../../services/function.service';
 import { IFormulaRuntimeService } from '../../services/runtime.service';
@@ -39,7 +36,6 @@ import { prefixHandler } from '../utils/prefixHandler';
 import { BaseAstNode, ErrorNode } from './base-ast-node';
 import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './base-ast-node-factory';
 import { NODE_ORDER_MAP, NodeType } from './node-type';
-import { PrefixNode } from './prefix-node';
 
 export class FunctionNode extends BaseAstNode {
     constructor(

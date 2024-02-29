@@ -30,7 +30,6 @@ import { IFormulaCurrentConfigService } from '../../services/current-data.servic
 import { IDefinedNamesService } from '../../services/defined-names.service';
 import { IFormulaRuntimeService } from '../../services/runtime.service';
 import { ISuperTableService } from '../../services/super-table.service';
-import { Lexer } from '../analysis/lexer';
 import { LexerNode } from '../analysis/lexer-node';
 import type { BaseReferenceObject } from '../reference-object/base-reference-object';
 import { CellReferenceObject } from '../reference-object/cell-reference-object';

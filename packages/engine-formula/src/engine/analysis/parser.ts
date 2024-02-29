@@ -43,7 +43,6 @@ import { SuffixNodeFactory } from '../ast-node/suffix-node';
 import { UnionNodeFactory } from '../ast-node/union-node';
 import { ValueNodeFactory } from '../ast-node/value-node';
 import { isChildRunTimeParameter, isFirstChildParameter } from '../utils/function-definition';
-import { operatorToken } from '../../basics/token';
 import { getAstNodeTopParent } from '../utils/ast-node-tool';
 import { LexerNode } from './lexer-node';
 

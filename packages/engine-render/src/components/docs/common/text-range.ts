@@ -45,6 +45,8 @@ const ID_LENGTH = 6;
 const BLINK_ON = 500;
 const BLINK_OFF = 500;
 
+export const TEXT_RANGE_LAYER_INDEX = 1;
+
 export function cursorConvertToTextRange(
     scene: Scene,
     range: ISuccinctTextRangeParam,
@@ -322,7 +324,7 @@ export class TextRange {
 
         this._rangeShape = polygon;
 
-        this._scene.addObject(polygon, 2);
+        this._scene.addObject(polygon, TEXT_RANGE_LAYER_INDEX);
     }
 
     private _getAnchorBounding(pointsGroup: IPoint[][]) {
@@ -364,7 +366,7 @@ export class TextRange {
 
         this._anchorShape = anchor;
 
-        this._scene.addObject(anchor, 2);
+        this._scene.addObject(anchor, TEXT_RANGE_LAYER_INDEX);
     }
 
     private _setCursorList(cursorList: ITextRange[]) {

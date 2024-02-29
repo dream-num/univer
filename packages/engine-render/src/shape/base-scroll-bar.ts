@@ -158,7 +158,7 @@ export class BaseScrollBar extends Disposable {
         return null;
     }
 
-    dispose() {
+    override dispose() {
         this.horizonBarRect?.dispose();
         this.horizonThumbRect?.dispose();
         this.verticalBarRect?.dispose();

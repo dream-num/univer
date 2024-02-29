@@ -25,7 +25,7 @@ import { ZenEditorMenuItemFactory } from '../views/menu';
 import { ZEN_EDITOR_COMPONENT, ZenEditor } from '../views/zen-editor';
 import { ZenEditorCancelShortcut, ZenEditorConfirmShortcut } from './shortcuts/zen-editor.shortcut';
 
-@OnLifecycle(LifecycleStages.Ready, ZenEditorUIController)
+@OnLifecycle(LifecycleStages.Rendered, ZenEditorUIController)
 export class ZenEditorUIController extends Disposable {
     constructor(
         @Inject(Injector) private readonly _injector: Injector,

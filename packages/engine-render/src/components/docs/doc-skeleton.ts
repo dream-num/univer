@@ -504,9 +504,7 @@ export class DocumentSkeleton extends Skeleton {
             gridType = GridType.LINES, // gridType
             paragraphLineGapDefault = 0,
             defaultTabStop = 10.5,
-            textStyle = {
-                fs: 14,
-            },
+            textStyle = {},
             renderConfig: global_renderConfig = {
                 horizontalAlign: HorizontalAlign.UNSPECIFIED,
                 verticalAlign: VerticalAlign.UNSPECIFIED,
@@ -680,7 +678,7 @@ export class DocumentSkeleton extends Skeleton {
         }
     }
 
-    // 一页存在多个section的情况，仅在SectionType.CONTINUOUS的情况下出现
+    // 一页存在多个 section 的情况，仅在 SectionType.CONTINUOUS 的情况下出现
     private _addNewSectionByContinuous(
         curSkeletonPage: IDocumentSkeletonPage,
         columnProperties: ISectionColumnProperties[],

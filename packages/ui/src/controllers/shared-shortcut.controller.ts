@@ -24,6 +24,7 @@ import type { IShortcutItem } from '../services/shortcut/shortcut.service';
 import { IShortcutService } from '../services/shortcut/shortcut.service';
 import { IClipboardInterfaceService } from '../services/clipboard/clipboard-interface.service';
 import { supportClipboardAPI } from '../services/clipboard/clipboard-utils';
+import { SetEditorResizeOperation } from '../commands/operations/editor/set-editor-resize.operation';
 import { RedoMenuItemFactory, UndoMenuItemFactory } from './menus/menus';
 
 // Not that the clipboard shortcut items would only be invoked when the browser fully supports clipboard API.
@@ -98,7 +99,7 @@ export class SharedController extends Disposable {
     }
 
     private _registerCommands(): void {
-        [CutCommand, CopyCommand, PasteCommand].forEach((command) =>
+        [CutCommand, CopyCommand, PasteCommand, SetEditorResizeOperation].forEach((command) =>
             this.disposeWithMe(this._commandService.registerMultipleCommand(command))
         );
     }

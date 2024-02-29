@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export default {
+const locale = {
     toolbar: {
         undo: '撤销',
         redo: '重做',
@@ -35,3 +35,5 @@ export default {
         unorder: '无序列表',
     },
 };
+
+export default locale;

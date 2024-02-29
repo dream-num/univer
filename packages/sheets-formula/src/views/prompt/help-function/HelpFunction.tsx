@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import { FOCUSING_FORMULA_EDITOR, IContextService, LocaleService } from '@univerjs/core';
+import { IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { Popup } from '@univerjs/design';
 import type { IFunctionInfo, IFunctionParam } from '@univerjs/engine-formula';
 import { CloseSingle, DetailsSingle, MoreSingle } from '@univerjs/icons';
-import { ICellEditorManagerService, IFormulaEditorManagerService } from '@univerjs/sheets-ui';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 
+import { IEditorService } from '@univerjs/ui';
 import type { IHelpFunctionOperationParams } from '../../../services/prompt.service';
 import { IFormulaPromptService } from '../../../services/prompt.service';
 import styles from './index.module.less';
@@ -35,12 +35,12 @@ export function HelpFunction() {
     const [decoratorPosition, setDecoratorPosition] = useState({ left: 0, top: 0 });
     const [functionInfo, setFunctionInfo] = useState<IFunctionInfo | null>(null);
     const promptService = useDependency(IFormulaPromptService);
-    const cellEditorManagerService = useDependency(ICellEditorManagerService);
     const localeService = useDependency(LocaleService);
-    const formulaEditorManagerService = useDependency(IFormulaEditorManagerService);
-    const contextService = useDependency(IContextService);
     const required = localeService.t('formula.prompt.required');
     const optional = localeService.t('formula.prompt.optional');
+
+    const univerInstanceService = useDependency(IUniverInstanceService);
+    const editorService = useDependency(IEditorService);
 
     useEffect(() => {
         const subscription = promptService.help$.subscribe((params: IHelpFunctionOperationParams) => {
@@ -50,11 +50,7 @@ export function HelpFunction() {
                 return;
             }
 
-            const isFocusFormulaEditor = contextService.getContextValue(FOCUSING_FORMULA_EDITOR);
-
-            const position = isFocusFormulaEditor
-                ? formulaEditorManagerService.getPosition()
-                : cellEditorManagerService.getRect();
+            const position = getPosition();
 
             if (position == null) {
                 return;
@@ -77,6 +73,19 @@ export function HelpFunction() {
             subscription?.unsubscribe();
         };
     }, []);
+
+    function getPosition() {
+        const documentDataModel = univerInstanceService.getCurrentUniverDocInstance();
+
+        const editorUnitId = documentDataModel.getUnitId();
+
+        if (!editorService.isEditor(editorUnitId)) {
+            return;
+        }
+
+        const editor = editorService.getEditor(editorUnitId);
+        return editor?.getBoundingClientRect();
+    }
 
     function handleSwitchActive(paramIndex: number) {
         setParamIndex(paramIndex);

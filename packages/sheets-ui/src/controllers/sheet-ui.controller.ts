@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { Disposable, ICommandService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import {
     SetBoldCommand,
     SetFontFamilyCommand,
@@ -24,10 +24,11 @@ import {
     SetUnderlineCommand,
 } from '@univerjs/sheets';
 import type { IDesktopUIController, IMenuItemFactory } from '@univerjs/ui';
-import { ComponentManager, IMenuService, IShortcutService, IUIController } from '@univerjs/ui';
+import { ComponentManager, ILayoutService, IMenuService, IShortcutService, IUIController } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 import { connectInjector } from '@wendellhu/redi/react-bindings';
 
+import { ITextSelectionRenderManager } from '@univerjs/engine-render';
 import {
     AddWorksheetMergeAllCommand,
     AddWorksheetMergeCommand,
@@ -80,7 +81,6 @@ import {
 } from '../commands/operations/cell-edit.operation';
 import { RenameSheetOperation } from '../commands/operations/rename-sheet.operation';
 import { SetScrollOperation } from '../commands/operations/scroll.operation';
-import { SetEditorResizeOperation } from '../commands/operations/set-editor-resize.operation';
 import { SetFormatPainterOperation } from '../commands/operations/set-format-painter.operation';
 import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
 import { BorderPanel } from '../components/border-panel/BorderPanel';
@@ -230,7 +230,8 @@ export class SheetUIController extends Disposable {
         @ICommandService private readonly _commandService: ICommandService,
         @IShortcutService private readonly _shortcutService: IShortcutService,
         @IMenuService private readonly _menuService: IMenuService,
-        @IUIController private readonly _uiController: IDesktopUIController
+        @IUIController private readonly _uiController: IDesktopUIController,
+        @ILayoutService private readonly _layoutService: ILayoutService
     ) {
         super();
 
@@ -266,7 +267,6 @@ export class SheetUIController extends Disposable {
             ScrollCommand,
             SelectAllCommand,
             SetActivateCellEditOperation,
-            SetEditorResizeOperation,
             SetBoldCommand,
             SetCellEditVisibleArrowOperation,
             SetCellEditVisibleOperation,
@@ -464,5 +464,16 @@ export class SheetUIController extends Disposable {
         this._initMenus();
         this._initShortcuts();
         this._initWorkbenchParts();
+        this._initFocusHandler();
+    }
+
+    private _initFocusHandler(): void {
+        this.disposeWithMe(
+            this._layoutService.registerFocusHandler(UniverInstanceType.SHEET, (_unitId: string) => {
+                // DEBT: `_unitId` is not used hence we cannot support Univer mode now
+                const textSelectionManagerService = this._injector.get(ITextSelectionRenderManager);
+                textSelectionManagerService.focus();
+            })
+        );
     }
 }

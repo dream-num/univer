@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export default {
+const locale = {
     sheet: {
         numfmt: {
             title: '数据格式',
@@ -49,3 +49,5 @@ export default {
         },
     },
 };
+
+export default locale;

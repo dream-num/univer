@@ -15,7 +15,7 @@
  */
 
 import type { EventState, IKeyValue, Nullable, Observer } from '@univerjs/core';
-import { Observable } from '@univerjs/core';
+import { Disposable, Observable } from '@univerjs/core';
 
 import type { BaseObject } from './base-object';
 import type { EVENT_TYPE } from './basics/const';
@@ -26,7 +26,7 @@ import { Transform } from './basics/transform';
 import type { IViewportBound, Vector2 } from './basics/vector2';
 import type { UniverRenderingContext } from './context';
 
-export abstract class ThinScene {
+export abstract class ThinScene extends Disposable {
     onTransformChangeObservable = new Observable<ITransformChangeState>();
 
     onPointerDownObserver = new Observable<IPointerEvent | IMouseEvent>();
@@ -66,6 +66,7 @@ export abstract class ThinScene {
     private _evented = true;
 
     constructor(sceneKey: string) {
+        super();
         this._sceneKey = sceneKey;
     }
 
@@ -185,7 +186,9 @@ export abstract class ThinScene {
 
     getParent(): any {}
 
-    dispose() {}
+    override dispose() {
+        super.dispose();
+    }
 
     getObject(oKey: string): Nullable<BaseObject> {}
 

@@ -17,7 +17,7 @@
 import { Disposable, LifecycleService, LifecycleStages, toDisposable } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { IDisposable } from '@wendellhu/redi';
-import { Inject, Injector, Optional } from '@wendellhu/redi';
+import { Inject, Injector } from '@wendellhu/redi';
 import { connectInjector } from '@wendellhu/redi/react-bindings';
 import { render as createRoot, unmount } from 'rc-util/lib/React/render';
 import type { ComponentType } from 'react';
@@ -25,8 +25,7 @@ import React from 'react';
 import type { Observable } from 'rxjs';
 import { Subject } from 'rxjs';
 
-import { IFocusService } from '../../services/focus/focus.service';
-import { LayoutService } from '../../services/layout/layout.service';
+import { ILayoutService } from '../../services/layout/layout.service';
 import { App } from '../../views/App';
 import type { IWorkbenchOptions } from './ui.controller';
 import { IUIController } from './ui.controller';
@@ -83,8 +82,7 @@ export class DesktopUIController extends Disposable implements IDesktopUIControl
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(LifecycleService) private readonly _lifecycleService: LifecycleService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @IFocusService private readonly _focusService: IFocusService,
-        @Optional(LayoutService) private readonly _layoutService?: LayoutService
+        @ILayoutService private readonly _layoutService: ILayoutService
     ) {
         super();
     }
@@ -94,10 +92,10 @@ export class DesktopUIController extends Disposable implements IDesktopUIControl
             bootStrap(this._injector, options, (canvasElement, containerElement) => {
                 this._initializeEngine(canvasElement);
                 this._lifecycleService.stage = LifecycleStages.Rendered;
-                this._focusService.setContainerElement(containerElement);
 
                 if (this._layoutService) {
-                    this.disposeWithMe(this._layoutService.registerContainer(containerElement));
+                    this.disposeWithMe(this._layoutService.registerRootContainerElement(containerElement));
+                    this.disposeWithMe(this._layoutService.registerCanvasElement(canvasElement as HTMLCanvasElement));
                 }
 
                 setTimeout(() => (this._lifecycleService.stage = LifecycleStages.Steady), STEADY_TIMEOUT);
@@ -106,8 +104,8 @@ export class DesktopUIController extends Disposable implements IDesktopUIControl
     }
 
     private _initializeEngine(element: HTMLElement) {
-        const engine = this._renderManagerService.getCurrent()!.engine;
-        engine.setContainer(element);
+        const engine = this._renderManagerService.getFirst()?.engine;
+        engine?.setContainer(element);
     }
 
     registerComponent(part: DesktopUIPart, component: () => React.ComponentType): IDisposable {

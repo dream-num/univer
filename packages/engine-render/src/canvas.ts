@@ -76,16 +76,23 @@ export class Canvas {
         this._canvasEle.style.position = 'absolute';
         this._canvasEle.style.top = '0';
         this._canvasEle.style.left = '0';
+        this._canvasEle.style.zIndex = '8';
 
         // support focus
         this._canvasEle.tabIndex = 1;
         this._canvasEle.style.touchAction = 'none';
         this._canvasEle.style.outline = '0';
 
+        const context = this._canvasEle.getContext('2d');
+
+        if (context == null) {
+            throw new Error('context is not support');
+        }
+
         if (props.mode === CanvasRenderMode.Printing) {
-            this._context = new UniverPrintingContext(this._canvasEle?.getContext('2d')!);
+            this._context = new UniverPrintingContext(context);
         } else {
-            this._context = new UniverRenderingContext(this._canvasEle?.getContext('2d')!);
+            this._context = new UniverRenderingContext(context);
         }
 
         this.setSize(props.width, props.height, props.pixelRatio);

@@ -321,8 +321,6 @@ export class ZenEditorController extends RxDisposable {
 
         const editCommandList = [RichTextEditingMutation.id];
 
-        // const INCLUDE_LIST = [DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY];
-
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (editCommandList.includes(command.id)) {
@@ -336,6 +334,8 @@ export class ZenEditorController extends RxDisposable {
                         const dataStream = docBody?.dataStream;
                         const paragraphs = docBody?.paragraphs;
                         const textRuns = docBody?.textRuns;
+
+                        this._editorBridgeService.changeEditorDirty(true);
 
                         if (dataStream == null || paragraphs == null) {
                             return;

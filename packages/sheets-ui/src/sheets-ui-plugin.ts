@@ -28,7 +28,6 @@ import { SheetContextMenuController } from './controllers/contextmenu/contextmen
 import { EditingController } from './controllers/editor/editing.controller';
 import { EndEditController } from './controllers/editor/end-edit.controller';
 import { FormulaEditorController } from './controllers/editor/formula-editor.controller';
-import { InitializeEditorController } from './controllers/editor/initialize-editor.controller';
 import { StartEditController } from './controllers/editor/start-edit.controller';
 import { EditorBridgeController } from './controllers/editor-bridge.controller';
 import { FormatPainterController } from './controllers/format-painter/format-painter.controller';
@@ -126,7 +125,7 @@ export class UniverSheetsUIPlugin extends Plugin {
                 [HeaderMoveController],
                 [HeaderResizeController],
                 [HeaderUnhideController],
-                [InitializeEditorController],
+                // [InitializeEditorController],
                 [MoveRangeController],
                 [ScrollController],
                 [SelectionController],

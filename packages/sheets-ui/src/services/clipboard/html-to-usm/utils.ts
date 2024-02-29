@@ -16,6 +16,7 @@
 
 import type { IParagraph, IParagraphStyle, Nullable } from '@univerjs/core';
 import { DataStreamTreeTokenType, Tools } from '@univerjs/core';
+import { ptToPixel } from '@univerjs/engine-render';
 
 export default function parseToDom(rawHtml: string) {
     const parser = new DOMParser();
@@ -57,13 +58,6 @@ export function getParagraphStyle(el: HTMLElement): Nullable<IParagraphStyle> {
     }
 
     return Object.getOwnPropertyNames(paragraphStyle).length ? paragraphStyle : null;
-}
-
-export function ptToPixel(pt: number) {
-    // 1 pixel * 0.75 = 1 pt
-    const PX_TO_PT_RATIO = 0.75;
-
-    return pt / PX_TO_PT_RATIO;
 }
 
 export function generateParagraphs(dataStream: string, prevParagraph?: IParagraph): IParagraph[] {

@@ -17,25 +17,18 @@
 import type { ICommandInfo } from '@univerjs/core';
 import {
     Disposable,
-    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
-    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     ICommandService,
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
     toDisposable,
 } from '@univerjs/core';
+import type { IDocObjectParam } from '@univerjs/docs';
+import { DocSkeletonManagerService, getDocObject, SetDocZoomRatioCommand, SetDocZoomRatioOperation, TextSelectionManagerService, VIEWPORT_KEY } from '@univerjs/docs';
 import type { IWheelEvent } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { IEditorService } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
-
-import type { IDocObjectParam } from '../basics/component-tools';
-import { getDocObject } from '../basics/component-tools';
-import { VIEWPORT_KEY } from '../basics/docs-view-key';
-import { SetDocZoomRatioCommand } from '../commands/commands/set-doc-zoom-ratio.command';
-import { SetDocZoomRatioOperation } from '../commands/operations/set-doc-zoom-ratio.operation';
-import { DocSkeletonManagerService } from '../services/doc-skeleton-manager.service';
-import { TextSelectionManagerService } from '../services/text-selection-manager.service';
 
 interface ISetDocMutationParams {
     unitId: string;
@@ -50,7 +43,8 @@ export class ZoomController extends Disposable {
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService
+        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
+        @IEditorService private readonly _editorService: IEditorService
     ) {
         super();
 
@@ -82,8 +76,7 @@ export class ZoomController extends Disposable {
             }
 
             if (
-                this._initializedRender.has(unitId) ||
-                [DOCS_NORMAL_EDITOR_UNIT_ID_KEY, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY].includes(unitId)
+                this._initializedRender.has(unitId) || this._editorService.isEditor(unitId)
             ) {
                 return;
             }
@@ -137,7 +130,7 @@ export class ZoomController extends Disposable {
     private _skeletonListener() {
         this.disposeWithMe(
             toDisposable(
-                this._docSkeletonManagerService.currentSkeletonBefore$.subscribe((param) => {
+                this._docSkeletonManagerService.currentSkeleton$.subscribe((param) => {
                     if (param == null) {
                         return;
                     }

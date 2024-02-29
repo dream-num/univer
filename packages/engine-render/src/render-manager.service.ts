@@ -29,6 +29,7 @@ import { SceneViewer } from './scene-viewer';
 
 export interface IRenderManagerService {
     currentRender$: Observable<Nullable<string>>;
+    createRender$: Observable<Nullable<string>>;
     dispose(): void;
     // createRenderWithNewEngine(unitId: string): IRenderManagerService;
     createRenderWithParent(unitId: string, parentUnitId: string): IRender;
@@ -36,10 +37,13 @@ export interface IRenderManagerService {
     addItem(unitId: string, item: IRender): void;
     removeItem(unitId: string): void;
     setCurrent(unitId: string): void;
-    getCurrent(): Nullable<IRender>;
     getRenderById(unitId: string): Nullable<IRender>;
     getRenderAll(): Map<string, IRender>;
     defaultEngine: Engine;
+    create(unitId: Nullable<string>): void;
+    getCurrent(): Nullable<IRender>;
+    getFirst(): Nullable<IRender>;
+    has(unitId: string): boolean;
 }
 
 export type RenderComponentType = SheetComponent | DocComponent | Slide | BaseObject;
@@ -58,17 +62,22 @@ const DEFAULT_SCENE_SIZE = { width: 1500, height: 1000 };
 const SCENE_NAMESPACE = '_UNIVER_SCENE_';
 
 export class RenderManagerService implements IRenderManagerService {
-    private _defaultEngine = new Engine();
+    private _defaultEngine!: Engine;
 
     private _currentUnitId: string = '';
 
     private _renderMap: Map<string, IRender> = new Map();
 
     private readonly _currentRender$ = new BehaviorSubject<Nullable<string>>(this._currentUnitId);
-
     readonly currentRender$ = this._currentRender$.asObservable();
 
+    private readonly _createRender$ = new BehaviorSubject<Nullable<string>>(this._currentUnitId);
+    readonly createRender$ = this._createRender$.asObservable();
+
     get defaultEngine() {
+        if (!this._defaultEngine) {
+            this._defaultEngine = new Engine();
+        }
         return this._defaultEngine;
     }
 
@@ -100,6 +109,10 @@ export class RenderManagerService implements IRenderManagerService {
         scene.addObject(sv);
 
         return current;
+    }
+
+    create(unitId: Nullable<string>) {
+        this._createRender$.next(unitId);
     }
 
     createRender(unitId: string): IRender {
@@ -154,14 +167,22 @@ export class RenderManagerService implements IRenderManagerService {
         this._renderMap.delete(unitId);
     }
 
+    has(unitId: string) {
+        return this._renderMap.has(unitId);
+    }
+
     setCurrent(unitId: string) {
         this._currentUnitId = unitId;
 
         this._currentRender$.next(unitId);
     }
 
-    getCurrent(): Nullable<IRender> {
-        return this.getRenderById(this._currentUnitId);
+    getCurrent() {
+        return this._renderMap.get(this._currentUnitId);
+    }
+
+    getFirst() {
+        return [...this.getRenderAll().values()][0];
     }
 
     getRenderById(unitId: string): Nullable<IRender> {

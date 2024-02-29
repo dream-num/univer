@@ -34,7 +34,7 @@ import {
 } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
 
-import { IFormulaInputService } from '../../services/formula-input.service';
+import { IEditorService } from '@univerjs/ui';
 import type { IInsertFunction } from '../commands/insert-function.command';
 import { InsertFunctionCommand } from '../commands/insert-function.command';
 
@@ -50,7 +50,7 @@ export const InsertFunctionOperation: ICommand = {
     type: CommandType.OPERATION,
     handler: async (accessor: IAccessor, params: IInsertFunctionOperationParams) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
-        const formulaInputService = accessor.get(IFormulaInputService);
+        const editorService = accessor.get(IEditorService);
         const currentSelections = selectionManagerService.getSelections();
         if (!currentSelections || !currentSelections.length) {
             return false;
@@ -155,7 +155,7 @@ export const InsertFunctionOperation: ICommand = {
             // TODO@DR-Univer: Maybe setTimeout can be removed
             setTimeout(() => {
                 // edit cell
-                formulaInputService.inputFormula(`=${value}(${editFormulaRangeString}`);
+                editorService.setFormula(`=${value}(${editFormulaRangeString}`);
             }, 0);
         }
 

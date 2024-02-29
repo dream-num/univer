@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export default {
+const locale = {
     uiToolbar: {
         start: '开始',
         insert: '插入',
@@ -60,3 +60,5 @@ export default {
         },
     },
 };
+
+export default locale;

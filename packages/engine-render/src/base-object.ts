@@ -685,6 +685,7 @@ export abstract class BaseObject {
     }
 
     dispose() {
+        this.onTransformChangeObservable.clear();
         this.onPointerDownObserver.clear();
         this.onPointerMoveObserver.clear();
         this.onPointerUpObserver.clear();
@@ -702,6 +703,8 @@ export abstract class BaseObject {
         this.onDisposeObserver.notifyObservers(this);
 
         this._makeDirtyMix();
+
+        this.onDisposeObserver.clear();
     }
 
     toJson() {

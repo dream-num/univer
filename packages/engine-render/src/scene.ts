@@ -15,7 +15,7 @@
  */
 
 import type { IKeyValue, Nullable } from '@univerjs/core';
-import { sortRules, sortRulesByDesc } from '@univerjs/core';
+import { sortRules, sortRulesByDesc, toDisposable } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
 
 import type { BaseObject } from './base-object';
@@ -84,9 +84,14 @@ export class Scene extends ThinScene {
             const parent = this._parent as SceneViewer;
             parent.addSubScene(this);
         }
-        this._parent?.onTransformChangeObservable.add((change: ITransformChangeState) => {
-            this._setTransForm();
-        });
+
+        this.disposeWithMe(
+            toDisposable(
+                this._parent?.onTransformChangeObservable.add((change: ITransformChangeState) => {
+                    this._setTransForm();
+                })
+            )
+        );
     }
 
     get ancestorScaleX() {
@@ -667,6 +672,7 @@ export class Scene extends ThinScene {
         this.clearLayer();
         this.clearViewports();
         this.detachControl();
+        this.onTransformChangeObservable?.clear();
         this._transformer?.dispose();
         this.onPointerDownObserver.clear();
         this.onPointerMoveObserver.clear();
@@ -678,6 +684,7 @@ export class Scene extends ThinScene {
         this.onMouseWheelObserver.clear();
         this.onKeyDownObservable.clear();
         this.onKeyUpObservable.clear();
+        super.dispose();
     }
 
     // Determine the only object selected

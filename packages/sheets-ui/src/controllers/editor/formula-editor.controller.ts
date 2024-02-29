@@ -41,21 +41,22 @@ import {
     TextSelectionManagerService,
     VIEWPORT_KEY,
 } from '@univerjs/docs';
+import type { RenderComponentType } from '@univerjs/engine-render';
 import { DeviceInputEventType, IRenderManagerService, ScrollBar } from '@univerjs/engine-render';
 import type { IMoveRangeMutationParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { MoveRangeMutation, SetRangeValuesMutation } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 import { takeUntil } from 'rxjs';
 
+import { SetEditorResizeOperation } from '@univerjs/ui';
 import { getEditorObject } from '../../basics/editor/get-editor-object';
-import { SetEditorResizeOperation } from '../../commands/operations/set-editor-resize.operation';
 import { IFormulaEditorManagerService } from '../../services/editor/formula-editor-manager.service';
 import type { IEditorBridgeServiceParam } from '../../services/editor-bridge.service';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 
 @OnLifecycle(LifecycleStages.Steady, FormulaEditorController)
 export class FormulaEditorController extends RxDisposable {
-    private _loadedMap: Set<string> = new Set();
+    private _loadedMap = new WeakSet<RenderComponentType>();
 
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
@@ -82,15 +83,10 @@ export class FormulaEditorController extends RxDisposable {
         this._listenFoldBtnClick();
 
         this._renderManagerService.currentRender$.pipe(takeUntil(this.dispose$)).subscribe((unitId) => {
-            if (unitId !== DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
-                return;
-            }
-
-            if (!this._loadedMap.has(unitId)) {
-                this._initialMain(unitId);
-                this._loadedMap.add(unitId);
-            }
+            this._create(unitId);
         });
+
+        this._create(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
 
         this._textSelectionManagerService.textSelection$.pipe(takeUntil(this.dispose$)).subscribe((param) => {
             if (param == null) {
@@ -103,6 +99,28 @@ export class FormulaEditorController extends RxDisposable {
                 this._undoRedoService.clearUndoRedo(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
             }
         });
+    }
+
+    private _create(unitId: Nullable<string>) {
+        if (unitId !== DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
+            return;
+        }
+
+        const formulaEditorDocObject = this._renderManagerService.getRenderById(unitId);
+        if (formulaEditorDocObject == null) {
+            return;
+        }
+
+        const { mainComponent: documentComponent } = formulaEditorDocObject;
+
+        if (documentComponent == null) {
+            return;
+        }
+
+        if (!this._loadedMap.has(documentComponent)) {
+            this._initialMain(unitId);
+            this._loadedMap.add(documentComponent);
+        }
     }
 
     private _listenFxBtnClick() {

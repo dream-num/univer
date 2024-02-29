@@ -15,8 +15,6 @@
  */
 
 import {
-    DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
-    DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     ILogService,
     IUniverInstanceService,
     LocaleService,
@@ -27,7 +25,8 @@ import {
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { IShortcutService } from '@univerjs/ui';
+import { IEditorService, IShortcutService } from '@univerjs/ui';
+
 import {
     MoveCursorDownShortcut,
     MoveCursorLeftShortcut,
@@ -49,6 +48,12 @@ import { zhCN } from './locale';
 import { BreakLineShortcut, DeleteLeftShortcut, DeleteRightShortcut } from './shortcuts/core-editing.shortcut';
 import { DocClipboardService, IDocClipboardService } from './services/clipboard/clipboard.service';
 import { DocClipboardController } from './controllers/clipboard.controller';
+import { DocEditorBridgeController } from './controllers/doc-editor-bridge.controller';
+import { DocRenderController } from './controllers/doc-render.controller';
+import { DocCanvasView } from './views/doc-canvas-view';
+import { FloatingObjectController } from './controllers/floating-object.controller';
+import { PageRenderController } from './controllers/page-render.controller';
+import { ZoomController } from './controllers/zoom.controller';
 
 export class UniverDocsUIPlugin extends Plugin {
     static override type = PluginType.Doc;
@@ -98,8 +103,14 @@ export class UniverDocsUIPlugin extends Plugin {
 
     private _initDependencies(injector: Injector) {
         const dependencies: Dependency[] = [
+            // Controller
             [DocUIController],
             [DocClipboardController],
+            [DocEditorBridgeController],
+            [DocRenderController],
+            [FloatingObjectController],
+            [PageRenderController],
+            [ZoomController],
             [
                 // controllers
                 AppUIController,
@@ -113,6 +124,9 @@ export class UniverDocsUIPlugin extends Plugin {
                     useClass: DocClipboardService,
                 },
             ],
+
+            // Render views
+            [DocCanvasView],
         ];
 
         dependencies.forEach((d) => {
@@ -122,12 +136,11 @@ export class UniverDocsUIPlugin extends Plugin {
 
     private _markDocAsFocused() {
         const currentService = this._injector.get(IUniverInstanceService);
-
+        const editorService = this._injector.get(IEditorService);
         try {
             const doc = currentService.getCurrentUniverDocInstance();
             const id = doc.getUnitId();
-
-            if (id !== DOCS_NORMAL_EDITOR_UNIT_ID_KEY && id !== DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
+            if (!editorService.isEditor(id)) {
                 currentService.focusUniverInstance(doc.getUnitId());
             }
         } catch (err) {

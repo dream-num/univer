@@ -30,10 +30,11 @@ import {
     SetRangeValuesMutation,
     SetSelectionsOperation,
 } from '@univerjs/sheets';
-import { DesktopPlatformService, DesktopShortcutService, IPlatformService, IShortcutService } from '@univerjs/ui';
+import { DesktopPlatformService, DesktopShortcutService, EditorService, IEditorService, IPlatformService, IShortcutService } from '@univerjs/ui';
 import type { Injector } from '@wendellhu/redi';
 import { beforeEach, describe, expect, it } from 'vitest';
 
+import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { AutoFillController } from '../../../controllers/auto-fill.controller';
 import { AutoFillService, IAutoFillService } from '../../../services/auto-fill/auto-fill.service';
 import { APPLY_TYPE } from '../../../services/auto-fill/type';
@@ -79,11 +80,11 @@ const TEST_WORKBOOK_DATA = {
                 // Extend Number
                 2: {
                     0: {
-                        v: '第1',
+                        v: '第 1',
                         t: CellValueType.STRING,
                     },
                     1: {
-                        v: '第2',
+                        v: '第 2',
                         t: CellValueType.STRING,
                     },
                 },
@@ -142,11 +143,11 @@ const TEST_WORKBOOK_DATA = {
                         t: CellValueType.NUMBER,
                     },
                     2: {
-                        v: '第1',
+                        v: '第 1',
                         t: CellValueType.STRING,
                     },
                     3: {
-                        v: '第2',
+                        v: '第 2',
                         t: CellValueType.STRING,
                     },
                 },
@@ -267,6 +268,8 @@ describe('Test auto fill rules in controller', () => {
             [IShortcutService, { useClass: DesktopShortcutService }],
             [IPlatformService, { useClass: DesktopPlatformService }],
             [IEditorBridgeService, { useClass: EditorBridgeService }],
+            [IEditorService, { useClass: EditorService }],
+            [IRenderManagerService, { useClass: RenderManagerService }],
             [SheetSkeletonManagerService],
             [AutoFillController],
         ]);
@@ -370,8 +373,8 @@ describe('Test auto fill rules in controller', () => {
                         endColumn: 3,
                     }
                 );
-                expect(workbook.getSheetBySheetId('sheet1')?.getCell(2, 2)?.v).toBe('第3');
-                expect(workbook.getSheetBySheetId('sheet1')?.getCell(2, 3)?.v).toBe('第4');
+                expect(workbook.getSheetBySheetId('sheet1')?.getCell(2, 2)?.v).toBe('第 3');
+                expect(workbook.getSheetBySheetId('sheet1')?.getCell(2, 3)?.v).toBe('第 4');
             });
         });
 
@@ -493,8 +496,8 @@ describe('Test auto fill rules in controller', () => {
                 );
                 expect(workbook.getSheetBySheetId('sheet1')?.getCell(7, 4)?.v).toBe(3);
                 expect(workbook.getSheetBySheetId('sheet1')?.getCell(7, 5)?.v).toBe(4);
-                expect(workbook.getSheetBySheetId('sheet1')?.getCell(7, 6)?.v).toBe('第3');
-                expect(workbook.getSheetBySheetId('sheet1')?.getCell(7, 7)?.v).toBe('第4');
+                expect(workbook.getSheetBySheetId('sheet1')?.getCell(7, 6)?.v).toBe('第 3');
+                expect(workbook.getSheetBySheetId('sheet1')?.getCell(7, 7)?.v).toBe('第 4');
 
                 // undo redo
                 await commandService.executeCommand(UndoCommand.id);
@@ -506,8 +509,8 @@ describe('Test auto fill rules in controller', () => {
                 await commandService.executeCommand(RedoCommand.id);
                 expect(workbook.getSheetBySheetId('sheet1')?.getCell(7, 4)?.v).toBe(3);
                 expect(workbook.getSheetBySheetId('sheet1')?.getCell(7, 5)?.v).toBe(4);
-                expect(workbook.getSheetBySheetId('sheet1')?.getCell(7, 6)?.v).toBe('第3');
-                expect(workbook.getSheetBySheetId('sheet1')?.getCell(7, 7)?.v).toBe('第4');
+                expect(workbook.getSheetBySheetId('sheet1')?.getCell(7, 6)?.v).toBe('第 3');
+                expect(workbook.getSheetBySheetId('sheet1')?.getCell(7, 7)?.v).toBe('第 4');
             });
         });
     });

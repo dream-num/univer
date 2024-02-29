@@ -102,11 +102,23 @@ export class Documents extends DocComponent {
     }
 
     setConfig(config?: IDocumentsConfig) {
-        this.pageMarginLeft = config?.pageMarginLeft || 17;
+        if (config?.pageMarginLeft != null) {
+            this.pageMarginLeft = config?.pageMarginLeft;
+        } else {
+            this.pageMarginLeft = 17;
+        }
 
-        this.pageMarginTop = config?.pageMarginTop || 14;
+        if (config?.pageMarginTop != null) {
+            this.pageMarginTop = config?.pageMarginTop;
+        } else {
+            this.pageMarginTop = 14;
+        }
 
-        this.pageLayoutType = config?.pageLayoutType || PageLayoutType.VERTICAL;
+        if (config?.pageLayoutType != null) {
+            this.pageLayoutType = config?.pageLayoutType;
+        } else {
+            this.pageLayoutType = PageLayoutType.VERTICAL;
+        }
     }
 
     getOffsetConfig(): IDocumentOffsetConfig {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
+import { Disposable, type Nullable } from '@univerjs/core';
 
 import type { Vector2 } from '../basics/vector2';
 import type { UniverRenderingContext } from '../context';
@@ -38,7 +38,7 @@ export interface IScrollBarProps {
     mainScene?: ThinScene;
 }
 
-export class BaseScrollBar {
+export class BaseScrollBar extends Disposable {
     enableHorizontal: boolean = true;
 
     enableVertical: boolean = true;
@@ -158,7 +158,7 @@ export class BaseScrollBar {
         return null;
     }
 
-    dispose() {
+    override dispose() {
         this.horizonBarRect?.dispose();
         this.horizonThumbRect?.dispose();
         this.verticalBarRect?.dispose();

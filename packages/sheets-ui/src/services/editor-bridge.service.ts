@@ -28,6 +28,7 @@ import {
 import type { Engine, IDocumentLayoutObject, Scene } from '@univerjs/engine-render';
 import { convertTextRotation, DeviceInputEventType, fixLineWidthByScale, getCanvasOffsetByEngine } from '@univerjs/engine-render';
 import type { ISheetLocation } from '@univerjs/sheets';
+import { IEditorService } from '@univerjs/ui';
 import type { KeyCode } from '@univerjs/ui';
 import type { IDisposable } from '@wendellhu/redi';
 import { createIdentifier, Inject } from '@wendellhu/redi';
@@ -123,7 +124,8 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
         @Inject(ThemeService) private readonly _themeService: ThemeService,
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService
+        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
+        @IEditorService private readonly _editorService: IEditorService
     ) {
         super();
 
@@ -262,6 +264,10 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
                 ];
             }
         }
+
+        this._editorService.setOperationSheetUnitId(unitId);
+
+        this._editorService.setOperationSheetSubUnitId(sheetId);
 
         return {
             position: {

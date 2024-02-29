@@ -153,6 +153,7 @@ export class FreezeController extends Disposable {
 
     override dispose(): void {
         super.dispose();
+        this._clearFreeze();
     }
 
     private _initialize() {

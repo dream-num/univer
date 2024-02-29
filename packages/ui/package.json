@@ -86,6 +86,7 @@
         "@types/react-transition-group": "^4.4.10",
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
+        "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/shared": "workspace:*",
         "@wendellhu/redi": "^0.13.0",

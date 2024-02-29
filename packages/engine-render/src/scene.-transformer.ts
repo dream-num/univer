@@ -15,7 +15,7 @@
  */
 
 import type { IKeyValue, Nullable, Observer } from '@univerjs/core';
-import { Observable } from '@univerjs/core';
+import { Disposable, Observable, toDisposable } from '@univerjs/core';
 
 import type { BaseObject } from './base-object';
 import { CURSOR_TYPE } from './basics/const';
@@ -56,7 +56,7 @@ const TransformerManagerTypeArray: TransformerManagerType[] = [
     TransformerManagerType.RESIZE_RB,
 ];
 
-interface transformState {
+interface ITransformState {
     left?: number;
     top?: number;
     width?: number;
@@ -117,7 +117,7 @@ export interface ITransformerConfig {
  * primitives and shapes. Transforming tool is not changing `width` and `height` properties of nodes
  * when you resize them. Instead it changes `scaleX` and `scaleY` properties.
  */
-export class Transformer implements ITransformerConfig {
+export class Transformer extends Disposable implements ITransformerConfig {
     hoverEnabled = false;
 
     hoverEnterFunc: Nullable<(e: IPointerEvent | IMouseEvent) => void>;
@@ -211,6 +211,7 @@ export class Transformer implements ITransformerConfig {
         private _scene: ThinScene,
         config?: ITransformerConfig
     ) {
+        super();
         this._initialProps(config);
     }
 
@@ -232,62 +233,73 @@ export class Transformer implements ITransformerConfig {
             this.hoverLeaveFunc && applyObject.onPointerLeaveObserver.add(this.hoverLeaveFunc);
         }
 
-        applyObject.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
-            const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
-            this._startOffsetX = evtOffsetX;
-            this._startOffsetY = evtOffsetY;
+        this.disposeWithMe(
+            toDisposable(
+                applyObject.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+                    const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
+                    this._startOffsetX = evtOffsetX;
+                    this._startOffsetY = evtOffsetY;
 
-            const scene = this._getTopScene();
+                    const scene = this._getTopScene();
 
-            if (!scene) {
-                return;
-            }
+                    if (!scene) {
+                        return;
+                    }
 
-            this._addCancelObserver(scene);
+                    this._addCancelObserver(scene);
 
-            scene.disableEvent();
+                    scene.disableEvent();
 
-            const scrollTimer = ScrollTimer.create(scene);
-            scrollTimer.startScroll(evtOffsetX, evtOffsetY);
+                    const scrollTimer = ScrollTimer.create(scene);
+                    scrollTimer.startScroll(evtOffsetX, evtOffsetY);
 
-            const { scrollX, scrollY } = getCurrentScrollXY(scrollTimer);
+                    const { scrollX, scrollY } = getCurrentScrollXY(scrollTimer);
 
-            this._viewportScrollX = scrollX;
-            this._viewportScrollY = scrollY;
+                    this._viewportScrollX = scrollX;
+                    this._viewportScrollY = scrollY;
 
-            this._updateActiveObjectList(applyObject, evt);
+                    this._updateActiveObjectList(applyObject, evt);
 
-            this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
-                const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
-                this._moving(moveOffsetX, moveOffsetY, scrollTimer);
-                this._hideControl();
-                scrollTimer.scrolling(moveOffsetX, moveOffsetY, () => {
-                    this._moving(moveOffsetX, moveOffsetY, scrollTimer);
-                });
-            });
+                    this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
+                        const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
+                        this._moving(moveOffsetX, moveOffsetY, scrollTimer);
+                        this._hideControl();
+                        scrollTimer.scrolling(moveOffsetX, moveOffsetY, () => {
+                            this._moving(moveOffsetX, moveOffsetY, scrollTimer);
+                        });
+                    });
 
-            this._upObserver = scene.onPointerUpObserver.add((upEvt: IPointerEvent | IMouseEvent) => {
-                scene.onPointerMoveObserver.remove(this._moveObserver);
-                scene.onPointerUpObserver.remove(this._upObserver);
-                scene.enableEvent();
-                this._updateControl();
-                scrollTimer.dispose();
+                    this._upObserver = scene.onPointerUpObserver.add(() => {
+                        scene.onPointerMoveObserver.remove(this._moveObserver);
+                        scene.onPointerUpObserver.remove(this._upObserver);
+                        scene.enableEvent();
+                        this._updateControl();
+                        scrollTimer.dispose();
 
-                this.onChangeEndObservable.notifyObservers({
-                    objects: this._selectedObjectMap,
-                    type: MoveObserverType.MOVE_END,
-                });
-            });
+                        this.onChangeEndObservable.notifyObservers({
+                            objects: this._selectedObjectMap,
+                            type: MoveObserverType.MOVE_END,
+                        });
+                    });
 
-            state.stopPropagation();
-        });
+                    state.stopPropagation();
+                })
+            )
+        );
 
         return applyObject;
     }
 
-    dispose() {
+    override dispose() {
+        this._moveObserver?.dispose();
+        this._upObserver?.dispose();
+
+        this._cancelFocusObserver?.dispose();
+
         this._moveObserver = null;
         this._upObserver = null;
+        this._cancelFocusObserver = null;
+
         this._transformerControlMap.forEach((control) => {
             control.dispose();
         });
@@ -363,7 +375,7 @@ export class Transformer implements ITransformerConfig {
         this._selectedObjectMap.forEach((moveObject) => {
             // console.log(moveLeft + moveObject.width, moveTop + moveObject.height);
             const { left, top, width, height } = moveObject;
-            const state: transformState = {};
+            const state: ITransformState = {};
 
             switch (type) {
                 case TransformerManagerType.RESIZE_LT:
@@ -418,84 +430,92 @@ export class Transformer implements ITransformerConfig {
     }
 
     private _attachEventToAnchor(anchor: Rect, type = TransformerManagerType.RESIZE_LT) {
-        anchor.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
-            const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
-            this._startOffsetX = evtOffsetX;
-            this._startOffsetY = evtOffsetY;
+        this.disposeWithMe(
+            toDisposable(
+                anchor.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+                    const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
+                    this._startOffsetX = evtOffsetX;
+                    this._startOffsetY = evtOffsetY;
 
-            const scene = this._getTopScene();
+                    const scene = this._getTopScene();
 
-            if (scene == null) {
-                return;
-            }
+                    if (scene == null) {
+                        return;
+                    }
 
-            scene.disableEvent();
+                    scene.disableEvent();
 
-            const scrollTimer = ScrollTimer.create(scene);
-            scrollTimer.startScroll(evtOffsetX, evtOffsetY);
+                    const scrollTimer = ScrollTimer.create(scene);
+                    scrollTimer.startScroll(evtOffsetX, evtOffsetY);
 
-            const { scrollX, scrollY } = getCurrentScrollXY(scrollTimer);
+                    const { scrollX, scrollY } = getCurrentScrollXY(scrollTimer);
 
-            this._viewportScrollX = scrollX;
-            this._viewportScrollY = scrollY;
+                    this._viewportScrollX = scrollX;
+                    this._viewportScrollY = scrollY;
 
-            const cursor = this._getRotateAnchorCursor(type);
+                    const cursor = this._getRotateAnchorCursor(type);
 
-            this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
-                const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
-                this._anchorMoving(type, moveOffsetX, moveOffsetY, scrollTimer);
-                scrollTimer.scrolling(moveOffsetX, moveOffsetY, () => {
-                    this._anchorMoving(type, moveOffsetX, moveOffsetY, scrollTimer);
-                });
-                scene.setCursor(cursor);
-            });
+                    this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
+                        const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
+                        this._anchorMoving(type, moveOffsetX, moveOffsetY, scrollTimer);
+                        scrollTimer.scrolling(moveOffsetX, moveOffsetY, () => {
+                            this._anchorMoving(type, moveOffsetX, moveOffsetY, scrollTimer);
+                        });
+                        scene.setCursor(cursor);
+                    });
 
-            this._upObserver = scene.onPointerUpObserver.add((upEvt: IPointerEvent | IMouseEvent) => {
-                scene.onPointerMoveObserver.remove(this._moveObserver);
-                scene.onPointerUpObserver.remove(this._upObserver);
-                scene.enableEvent();
-                scene.resetCursor();
-                scrollTimer.dispose();
+                    this._upObserver = scene.onPointerUpObserver.add(() => {
+                        scene.onPointerMoveObserver.remove(this._moveObserver);
+                        scene.onPointerUpObserver.remove(this._upObserver);
+                        scene.enableEvent();
+                        scene.resetCursor();
+                        scrollTimer.dispose();
 
-                this.onChangeEndObservable.notifyObservers({
-                    objects: this._selectedObjectMap,
-                    type: MoveObserverType.MOVE_END,
-                });
-            });
+                        this.onChangeEndObservable.notifyObservers({
+                            objects: this._selectedObjectMap,
+                            type: MoveObserverType.MOVE_END,
+                        });
+                    });
 
-            state.stopPropagation();
-        });
+                    state.stopPropagation();
+                })
+            )
+        );
     }
 
     private _attachEventToRotate(rotateControl: Rect) {
-        rotateControl.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
-            const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
-            this._startOffsetX = evtOffsetX;
-            this._startOffsetY = evtOffsetY;
+        this.disposeWithMe(
+            toDisposable(
+                rotateControl.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+                    const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
+                    this._startOffsetX = evtOffsetX;
+                    this._startOffsetY = evtOffsetY;
 
-            const scene = this._getTopScene();
+                    const scene = this._getTopScene();
 
-            if (scene == null) {
-                return;
-            }
+                    if (scene == null) {
+                        return;
+                    }
 
-            scene.disableEvent();
+                    scene.disableEvent();
 
-            this._viewportScrollX = scrollX;
-            this._viewportScrollY = scrollY;
+                    this._viewportScrollX = scrollX;
+                    this._viewportScrollY = scrollY;
 
-            this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
-                const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
-            });
+                    // this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
+                    //     const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
+                    // });
 
-            this._upObserver = scene.onPointerUpObserver.add((upEvt: IPointerEvent | IMouseEvent) => {
-                scene.onPointerMoveObserver.remove(this._moveObserver);
-                scene.onPointerUpObserver.remove(this._upObserver);
-                scene.enableEvent();
-            });
+                    this._upObserver = scene.onPointerUpObserver.add(() => {
+                        scene.onPointerMoveObserver.remove(this._moveObserver);
+                        scene.onPointerUpObserver.remove(this._upObserver);
+                        scene.enableEvent();
+                    });
 
-            state.stopPropagation();
-        });
+                    state.stopPropagation();
+                })
+            )
+        );
     }
 
     private _getOutlinePosition(width: number, height: number, scaleX: number, scaleY: number) {
@@ -700,13 +720,21 @@ export class Transformer implements ITransformerConfig {
     }
 
     private _attachHover(o: BaseObject, cursorIn: CURSOR_TYPE, cursorOut: CURSOR_TYPE) {
-        o.onPointerEnterObserver.add(() => {
-            o.cursor = cursorIn;
-        });
+        this.disposeWithMe(
+            toDisposable(
+                o.onPointerEnterObserver.add(() => {
+                    o.cursor = cursorIn;
+                })
+            )
+        );
 
-        o.onPointerLeaveObserver.add(() => {
-            o.cursor = cursorOut;
-        });
+        this.disposeWithMe(
+            toDisposable(
+                o.onPointerLeaveObserver.add(() => {
+                    o.cursor = cursorOut;
+                })
+            )
+        );
     }
 
     private _clearControl() {
@@ -851,7 +879,7 @@ export class Transformer implements ITransformerConfig {
 
     private _addCancelObserver(scene: ThinScene) {
         scene.onPointerDownObserver.remove(this._cancelFocusObserver);
-        this._cancelFocusObserver = scene.onPointerDownObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
+        this._cancelFocusObserver = scene.onPointerDownObserver.add(() => {
             this._selectedObjectMap.clear();
             this._clearControl();
             scene.onPointerDownObserver.remove(this._cancelFocusObserver);

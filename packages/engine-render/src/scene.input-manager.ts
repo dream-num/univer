@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Nullable, Observer } from '@univerjs/core';
+import { Disposable, type Nullable, type Observer, toDisposable } from '@univerjs/core';
 
 import type { BaseObject } from './base-object';
 import { RENDER_CLASS_TYPE } from './basics/const';
@@ -24,7 +24,7 @@ import { Vector2 } from './basics/vector2';
 import type { ThinScene } from './thin-scene';
 import type { Viewport } from './viewport';
 
-export class InputManager {
+export class InputManager extends Disposable {
     /** The distance in pixel that you have to move to prevent some events */
     static DragMovementThreshold = 2; // in pixels
 
@@ -82,10 +82,11 @@ export class InputManager {
     private _currentObject: Nullable<BaseObject | ThinScene>;
 
     constructor(scene: ThinScene) {
+        super();
         this._scene = scene;
     }
 
-    // 处理事件，比如mouseleave,mouseenter的触发。
+    // Handle events such as triggering mouseleave and mouseenter.
     mouseLeaveEnterHandler(evt: IMouseEvent) {
         const o = this._currentObject;
         if (o === null || o === undefined) {
@@ -294,6 +295,12 @@ export class InputManager {
                 }
             }
         });
+
+        this.disposeWithMe(
+            toDisposable(
+                this._onInputObserver
+            )
+        );
 
         this._alreadyAttached = true;
     }

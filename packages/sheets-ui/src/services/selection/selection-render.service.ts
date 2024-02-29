@@ -478,6 +478,11 @@ export class SelectionRenderService implements ISelectionRenderService {
 
     reset() {
         this._clearSelectionControls();
+
+        this._moveObserver?.dispose();
+        this._upObserver?.dispose();
+        this._downObserver?.dispose();
+
         this._moveObserver = null;
         this._upObserver = null;
         this._downObserver = null;

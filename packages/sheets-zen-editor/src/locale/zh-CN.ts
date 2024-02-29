@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export default {
+const locale = {
     shortcut: {
         sheet: {
             'zen-edit-cancel': '取消编辑(禅模式状态)',
@@ -22,3 +22,5 @@ export default {
         },
     },
 };
+
+export default locale;

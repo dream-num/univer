@@ -77,7 +77,6 @@ import type { BorderCache, IFontCacheItem, IStylesCache } from './interfaces';
  * Obtain the height and width of a cell's text, taking into account scenarios with rotated text.
  * @param documentSkeleton Data of the document's ViewModel
  * @param angleInDegree The rotation angle of an Excel cell, it's **degree**
- * @returns
  */
 export function getDocsSkeletonPageSize(documentSkeleton: DocumentSkeleton, angleInDegree: number = 0) {
     const skeletonData = documentSkeleton?.getSkeletonData();
@@ -306,11 +305,6 @@ export class SpreadsheetSkeleton extends Skeleton {
 
     /**
      * @deprecated
-     * @param config
-     * @param cellData
-     * @param styles
-     * @param LocaleService
-     * @returns
      */
     static create(
         worksheet: Worksheet | undefined,
@@ -324,7 +318,6 @@ export class SpreadsheetSkeleton extends Skeleton {
 
     /**
      * @deprecated should never expose a property that is provided by another module!
-     * @returns
      */
     getWorksheetConfig() {
         return this._config;
@@ -332,7 +325,6 @@ export class SpreadsheetSkeleton extends Skeleton {
 
     /**
      * @deprecated should never expose a property that is provided by another module!
-     * @returns
      */
     getCellData() {
         return this._cellData;
@@ -340,7 +332,6 @@ export class SpreadsheetSkeleton extends Skeleton {
 
     /**
      * @deprecated should never expose a property that is provided by another module!
-     * @returns
      */
     getsStyles() {
         return this._styles;
@@ -739,7 +730,9 @@ export class SpreadsheetSkeleton extends Skeleton {
      * @param offsetY HTML coordinate system, mouse position y.
      * @param scaleX render scene scale x-axis, scene.getAncestorScale
      * @param scaleY render scene scale y-axis, scene.getAncestorScale
-     * @param scrollXY  render viewport scroll {x, y}, scene.getScrollXYByRelativeCoords, scene.getScrollXY
+     * @param scrollXY render viewport scroll {x, y}, scene.getScrollXYByRelativeCoords, scene.getScrollXY
+     * @param scrollXY.x
+     * @param scrollXY.y
      * @returns Selection data with coordinates
      */
     calculateCellIndexByPosition(
@@ -761,6 +754,8 @@ export class SpreadsheetSkeleton extends Skeleton {
      * @param scaleX render scene scale x-axis, scene.getAncestorScale
      * @param scaleY render scene scale y-axis, scene.getAncestorScale
      * @param scrollXY  render viewport scroll {x, y}, scene.getScrollXYByRelativeCoords, scene.getScrollXY
+     * @param scrollXY.x
+     * @param scrollXY.y
      * @returns Hit cell coordinates
      */
     getCellPositionByOffset(
@@ -819,7 +814,8 @@ export class SpreadsheetSkeleton extends Skeleton {
      * @param offsetY scaled offset y
      * @param scaleY scale y
      * @param scrollXY
-     * @returns
+     * @param scrollXY.x
+     * @param scrollXY.y
      */
     getRowPositionByOffsetY(offsetY: number, scaleY: number, scrollXY: { x: number; y: number }) {
         const { rowHeightAccumulation } = this;
@@ -900,8 +896,6 @@ export class SpreadsheetSkeleton extends Skeleton {
      * Return cell information corresponding to the current coordinates, including the merged cell object.
      * @param row Specified Row Coordinate
      * @param column Specified Column Coordinate
-     * @param scaleX render scene scale x-axis, current Horizontal Scale, scene.getAncestorScale
-     * @param scaleY render scene scale y-axis, current Vertical Scale, scene.getAncestorScale
      */
     getCellByIndex(row: number, column: number): ISelectionCellWithCoord {
         const {
@@ -1051,13 +1045,17 @@ export class SpreadsheetSkeleton extends Skeleton {
         const textRotation: ITextRotation = ignoreTextRotation
             ? { a: 0, v: BooleanNumber.FALSE }
             : cellOtherConfig.textRotation || { a: 0, v: BooleanNumber.FALSE };
-        const horizontalAlign: HorizontalAlign = cellOtherConfig.horizontalAlign || HorizontalAlign.UNSPECIFIED;
+        let horizontalAlign: HorizontalAlign = cellOtherConfig.horizontalAlign || HorizontalAlign.UNSPECIFIED;
         const verticalAlign: VerticalAlign = cellOtherConfig.verticalAlign || VerticalAlign.UNSPECIFIED;
         const wrapStrategy: WrapStrategy = cellOtherConfig.wrapStrategy || WrapStrategy.UNSPECIFIED;
         const paddingData: IPaddingData = cellOtherConfig.paddingData || DEFAULT_PADDING_DATA;
 
         if (cell.f && formulaFirst) {
-            documentModel = this._getDocumentDataByStyle(cell.f.toString(), {}, {});
+            /**
+             * The formula does not detect horizontal alignment and rotation.
+             */
+            documentModel = this._getDocumentDataByStyle(cell.f.toString(), {}, { verticalAlign });
+            horizontalAlign = HorizontalAlign.UNSPECIFIED;
         } else if (cell.p) {
             const { centerAngle, vertexAngle } = convertTextRotation(textRotation);
             documentModel = this._updateConfigAndGetDocumentModel(
@@ -1241,7 +1239,7 @@ export class SpreadsheetSkeleton extends Skeleton {
      *
      * @param rowHeightAccumulation Row layout information
      * @param columnWidthAccumulation Column layout information
-     * @param bounds The range of the visible area of the canvas
+     * @param viewBound The range of the visible area of the canvas
      * @returns The range cell index of the canvas visible area
      */
     protected _getBounding(
@@ -1859,7 +1857,6 @@ export class SpreadsheetSkeleton extends Skeleton {
      * Cache the merged cells on the current screen to improve computational performance.
      * @param mergeData all marge data
      * @param rowColumnSegment current screen range, include row and column
-     * @returns
      */
     private _getMergeCells(mergeData: IRange[], rowColumnSegment?: IRowColumnSegment) {
         // const rowColumnSegment = this._rowColumnSegment;

@@ -18,6 +18,7 @@
         "strictPropertyInitialization": false,
         "noFallthroughCasesInSwitch": true,
         "noEmit": true,
+        "noImplicitOverride": true,
         "isolatedModules": true,
         "skipLibCheck": true
     }

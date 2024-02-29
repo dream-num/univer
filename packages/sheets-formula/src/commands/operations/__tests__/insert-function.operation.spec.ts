@@ -21,6 +21,7 @@ import {
     SelectionManagerService,
     SetRangeValuesCommand,
     SetRangeValuesMutation,
+    SetSelectionsOperation,
 } from '@univerjs/sheets';
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -50,6 +51,7 @@ describe('Test insert function operation', () => {
         commandService.registerCommand(InsertFunctionCommand);
         commandService.registerCommand(SetRangeValuesCommand);
         commandService.registerCommand(SetRangeValuesMutation);
+        commandService.registerCommand(SetSelectionsOperation);
     });
 
     afterEach(() => {

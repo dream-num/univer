@@ -47,8 +47,7 @@ export {
 } from './services/contextmenu/contextmenu.service';
 export { DesktopDialogService } from './services/dialog/desktop-dialog.service';
 export { IDialogService } from './services/dialog/dialog.service';
-export { IFocusService } from './services/focus/focus.service';
-export { LayoutService } from './services/layout/layout.service';
+export { ILayoutService } from './services/layout/layout.service';
 export {
     type ICustomComponentProps,
     type IDisplayMenuItem,
@@ -78,3 +77,9 @@ export { UniverUIPlugin } from './ui-plugin';
 export * from './utils';
 export { type IConfirmPartMethodOptions } from './views/components/confirm-part/interface';
 export { CELL_ALERT_KEY } from './views/constant';
+
+export { IEditorService, EditorService } from './services/editor/editor.service';
+
+export { TextEditor } from './components/editor/TextEditor';
+
+export { SetEditorResizeOperation } from './commands/operations/editor/set-editor-resize.operation';

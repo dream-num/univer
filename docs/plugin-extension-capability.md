@@ -42,7 +42,7 @@ Provides basic operations and UI capabilities:
   * Rendering custom content at specified locations
 * Copy and paste (IClipboardService)
   * Supplementing clipboard content when copying to the clipboard, supplementing or modifying mutations when pasting from the clipboard
-* Focus management (IFocusService)
+* Focus management (ILayoutService)
 
 ## base-render
 

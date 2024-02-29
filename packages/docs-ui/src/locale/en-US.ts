@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type zhCN from './zh-CN';
+
+const locale: typeof zhCN = {
     toolbar: {
         undo: 'Undo',
         redo: 'Redo',
@@ -25,6 +27,7 @@ export default {
         strikethrough: 'Strikethrough',
         subscript: 'Subscript',
         superscript: 'Superscript',
+        underline: 'Underline',
         textColor: {
             main: 'Text color',
             right: 'Choose color',
@@ -34,3 +37,5 @@ export default {
         unorder: 'Unordered list',
     },
 };
+
+export default locale;

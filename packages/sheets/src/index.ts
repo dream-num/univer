@@ -217,7 +217,10 @@ export type { ISetRangeValuesMutationParams } from './commands/mutations/set-ran
 export { SetRangeValuesMutation } from './commands/mutations/set-range-values.mutation';
 export { SetRangeValuesUndoMutationFactory } from './commands/mutations/set-range-values.mutation';
 export { type ISetRangeValuesRangeMutationParams } from './commands/mutations/set-range-values.mutation';
-export { SetRowHiddenMutation, SetRowVisibleMutation } from './commands/mutations/set-row-visible.mutation';
+export {
+    type ISetRowHiddenMutationParams,
+    type ISetRowVisibleMutationParams,
+    SetRowHiddenMutation, SetRowVisibleMutation } from './commands/mutations/set-row-visible.mutation';
 export { SetTabColorMutation } from './commands/mutations/set-tab-color.mutation';
 export { type ISetTabColorMutationParams } from './commands/mutations/set-tab-color.mutation';
 export {

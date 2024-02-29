@@ -29,7 +29,7 @@ import { ConditionalFormatRuleModel } from '../models/conditional-format-rule-mo
 
 // eslint-disable-next-line ts/consistent-type-definitions
 type IFormulaItem = {
-    formulaText: string;cfId: string;result?: boolean;status: FormulaResultStatus;count: number;formulaId: string;
+    formulaText: string;cfId: string;result?: boolean | number | string;status: FormulaResultStatus;count: number;formulaId: string;
 };
 export enum FormulaResultStatus {
     NOT_REGISTER = 1,
@@ -40,7 +40,7 @@ export enum FormulaResultStatus {
 
 const getResultFromFormula = (formulaResult: Nullable<ICellData>[][]) => {
     const v = formulaResult && formulaResult[0] && formulaResult[0][0];
-    return v ? !!v.v : false;
+    return v ? v.v : false;
 };
 
 export class ConditionalFormatFormulaService extends Disposable {
@@ -90,7 +90,7 @@ export class ConditionalFormatFormulaService extends Disposable {
                             const item = map.getValue(formulaId);
                             if (item) {
                                 const value = getResultFromFormula(params.unitOtherData[unitId]![subUnitId]![formulaId]);
-                                item.result = !!value;
+                                item.result = value!;
                                 item.status = FormulaResultStatus.SUCCESS;
                                 cfIdSet.add(item.cfId);
                             }

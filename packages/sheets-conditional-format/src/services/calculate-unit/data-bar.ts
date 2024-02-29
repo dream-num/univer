@@ -15,11 +15,15 @@
  */
 
 import { ObjectMatrix, Range } from '@univerjs/core';
-import { RuleType } from '../../base/const';
+import { RuleType, ValueType } from '../../base/const';
 import type { IDataBarRenderParams } from '../../render/type';
 import type { IConditionFormatRule, IDataBar } from '../../models/type';
-import { getCellValue, getValueByType, isNullable } from './utils';
+import { FormulaResultStatus } from '../conditional-format-formula.service';
+import { getCacheStyleMatrix, getCellValue, getValueByType, isNullable } from './utils';
 import type { ICalculateUnit } from './type';
+
+const EMPTY_STYLE = {} as IDataBarRenderParams;
+Object.freeze(EMPTY_STYLE);
 
 export const dataBarCellCalculateUnit: ICalculateUnit = {
     type: RuleType.dataBar,
@@ -27,6 +31,7 @@ export const dataBarCellCalculateUnit: ICalculateUnit = {
         const ruleConfig = rule.rule as IDataBar;
         const { worksheet } = context;
         const matrix = new ObjectMatrix< number>();
+
         rule.ranges.forEach((range) => {
             Range.foreach(range, (row, col) => {
                 const cell = worksheet?.getCellRaw(row, col);
@@ -37,12 +42,48 @@ export const dataBarCellCalculateUnit: ICalculateUnit = {
                 }
             });
         });
-        const min = getValueByType(ruleConfig.config.min, matrix)!;
-        const max = getValueByType(ruleConfig.config.max, matrix)!;
+
+        let min = getValueByType(ruleConfig.config.min, matrix, { ...context, cfId: rule.cfId }) as number;
+        let max = getValueByType(ruleConfig.config.max, matrix, { ...context, cfId: rule.cfId }) as number;
+
+         // If the formula triggers the calculation, wait for the result,
+         // and use the previous style cache until the result comes out。
+        if (ruleConfig.config.min.type === ValueType.formula) {
+            const _min = min as unknown as { result: any;status: FormulaResultStatus };
+            if (_min.status === FormulaResultStatus.WAIT) {
+                return getCacheStyleMatrix(context.unitId, context.subUnitId, rule, context);
+            } else if (_min.status === FormulaResultStatus.SUCCESS) {
+                const v = Number(_min.result);
+                min = Number.isNaN(v) ? 0 : v;
+            } else {
+                return matrix;
+            }
+        }
+        if (ruleConfig.config.max.type === ValueType.formula) {
+            const _max = max as unknown as { result: any;status: FormulaResultStatus };
+            if (_max.status === FormulaResultStatus.WAIT) {
+                return getCacheStyleMatrix(context.unitId, context.subUnitId, rule, context);
+            } else if (_max.status === FormulaResultStatus.SUCCESS) {
+                const v = Number(_max.result);
+                max = Number.isNaN(v) ? 0 : v;
+            } else {
+                return matrix;
+            }
+        }
+
         const isGradient = ruleConfig.config.isGradient;
+
         const computeResult = new ObjectMatrix<IDataBarRenderParams >();
+        rule.ranges.forEach((range) => {
+            Range.foreach(range, (row, col) => {
+                computeResult.setValue(row, col, EMPTY_STYLE);
+            });
+        });
+
+        const getSafeValue = (v: number) => Math.max(Math.min(100, v), 0);
+
         if (min === max || max < min) {
-            // todo nothing,i don't know how it work.
+            // do nothing,don't know how it work.
         } else if (min < 0 && max <= 0) {
             const length = max - min;
             const startPoint = 100;
@@ -50,7 +91,7 @@ export const dataBarCellCalculateUnit: ICalculateUnit = {
                 if (value > max) {
                     return;
                 }
-                const v = (max - value) / length * 100;
+                const v = getSafeValue((max - value) / length * 100);
                 computeResult.setValue(row, col, { color: ruleConfig.config.nativeColor, startPoint, value: -v, isGradient });
             });
         } else if (min < 0 && max > 0) {
@@ -61,10 +102,10 @@ export const dataBarCellCalculateUnit: ICalculateUnit = {
                     return;
                 }
                 if (value > 0) {
-                    const v = Math.min(value / max, 1) * 100;
+                    const v = getSafeValue(Math.min(value / max, 1) * 100);
                     computeResult.setValue(row, col, { color: ruleConfig.config.positiveColor, startPoint, value: v, isGradient });
                 } else {
-                    const v = Math.min(Math.abs(value) / Math.abs(min), 1) * 100;
+                    const v = getSafeValue(Math.min(Math.abs(value) / Math.abs(min), 1) * 100);
                     computeResult.setValue(row, col, { color: ruleConfig.config.nativeColor, startPoint, value: -v, isGradient });
                 }
             });
@@ -75,18 +116,10 @@ export const dataBarCellCalculateUnit: ICalculateUnit = {
                 if (value < min) {
                     return;
                 }
-                const v = (1 - (max - value) / length) * 100;
+                const v = getSafeValue((1 - (max - value) / length) * 100);
                 computeResult.setValue(row, col, { color: ruleConfig.config.positiveColor, startPoint, value: v, isGradient });
             });
         }
-        const emptyStyle = {} as IDataBarRenderParams;
-        rule.ranges.forEach((range) => {
-            Range.foreach(range, (row, col) => {
-                if (!computeResult.getValue(row, col)) {
-                    computeResult.setValue(row, col, emptyStyle);
-                }
-            });
-        });
         return computeResult;
     },
 

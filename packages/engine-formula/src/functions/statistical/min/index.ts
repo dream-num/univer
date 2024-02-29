@@ -34,8 +34,16 @@ export class Min extends BaseFunction {
                 return variant as ErrorValueObject;
             }
 
+            if (variant.isString()) {
+                return new ErrorValueObject(ErrorType.VALUE);
+            }
+
             if (variant.isArray()) {
                 variant = variant.min();
+            }
+
+            if (variant.isError()) {
+                return variant as ErrorValueObject;
             }
 
             if (variant.isNull()) {
@@ -43,26 +51,27 @@ export class Min extends BaseFunction {
             }
 
             accumulatorAll = this._validator(accumulatorAll, variant as BaseValueObject);
-
-            // if (variant.isReferenceObject() || (variant.isValueObject() && (variant as BaseValueObject).isArray())) {
-            //     (variant as BaseReferenceObject | ArrayValueObject).iterator((valueObject, row, column) => {
-            //         if (!valueObject.isError() && !(valueObject as BaseValueObject).isString()) {
-            //             accumulatorAll = this._validator(accumulatorAll, valueObject as BaseValueObject);
-            //         }
-            //     });
-            // } else if (!(variant as BaseValueObject).isString()) {
-            //     accumulatorAll = this._validator(accumulatorAll, variant as BaseValueObject);
-            // }
         }
 
         return accumulatorAll;
     }
 
     private _validator(accumulatorAll: BaseValueObject, valueObject: BaseValueObject) {
+        valueObject = valueObject.isBoolean() ? this._convertTonNumber(valueObject) : valueObject;
+
         const validator = accumulatorAll.isGreaterThan(valueObject);
         if (validator.getValue()) {
             accumulatorAll = valueObject;
         }
         return accumulatorAll;
+    }
+
+    private _convertTonNumber(valueObject: BaseValueObject) {
+        const currentValue = valueObject.getValue();
+        let result = 0;
+        if (currentValue) {
+            result = 1;
+        }
+        return new NumberValueObject(result, true);
     }
 }

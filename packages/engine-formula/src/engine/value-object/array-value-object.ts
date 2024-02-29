@@ -754,7 +754,8 @@ export class ArrayValueObject extends BaseValueObject {
                 return false; // break
             }
 
-            if (valueObject.isString() || valueObject.isNull()) {
+            // ignore boolean value in array, but not ignore in normal value object
+            if (valueObject.isString() || valueObject.isNull() || valueObject.isBoolean()) {
                 return true; // continue
             }
 
@@ -781,7 +782,8 @@ export class ArrayValueObject extends BaseValueObject {
                 return false; // break
             }
 
-            if (valueObject.isString() || valueObject.isNull()) {
+            // ignore boolean value in array, but not ignore in normal value object
+            if (valueObject.isString() || valueObject.isNull() || valueObject.isBoolean()) {
                 return true; // continue
             }
 

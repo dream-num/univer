@@ -16,7 +16,7 @@
 
 import { Average } from './average';
 import { Count } from './count';
-import { CountA } from './counta';
+import { Counta } from './counta';
 import { FUNCTION_NAMES_STATISTICAL } from './function-names';
 import { Max } from './max';
 import { Min } from './min';
@@ -27,5 +27,5 @@ export const functionStatistical = [
     [Max, FUNCTION_NAMES_STATISTICAL.MAX],
     [Min, FUNCTION_NAMES_STATISTICAL.MIN],
     [Min, FUNCTION_NAMES_STATISTICAL.MIN],
-    [CountA, FUNCTION_NAMES_STATISTICAL.COUNTA],
+    [Counta, FUNCTION_NAMES_STATISTICAL.COUNTA],
 ];

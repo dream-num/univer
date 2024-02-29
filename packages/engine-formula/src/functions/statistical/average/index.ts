@@ -34,17 +34,21 @@ export class Average extends BaseFunction {
                 return variant;
             }
 
-            if (accumulatorSum.isError()) {
-                return accumulatorSum;
+            if (variant.isString()) {
+                return new ErrorValueObject(ErrorType.VALUE);
             }
 
             if (variant.isArray()) {
                 accumulatorSum = accumulatorSum.plus(variant.sum());
-                accumulatorCount = accumulatorCount.plus(variant.count());
-            } else {
-                if (!variant.isNull()) {
-                    accumulatorCount = accumulatorCount.plus(new NumberValueObject(1));
+
+                if (accumulatorSum.isError()) {
+                    return accumulatorSum;
                 }
+
+                accumulatorCount = accumulatorCount.plus(variant.count());
+            } else if (!variant.isNull()) {
+                accumulatorSum = accumulatorSum.plus(new NumberValueObject(variant.getValue()));
+                accumulatorCount = accumulatorCount.plus(new NumberValueObject(1));
             }
         }
 

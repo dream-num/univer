@@ -19,7 +19,7 @@ import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-ob
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
-export class CountA extends BaseFunction {
+export class Counta extends BaseFunction {
     override calculate(...variants: BaseValueObject[]) {
         if (variants.length === 0) {
             return new ErrorValueObject(ErrorType.NA);

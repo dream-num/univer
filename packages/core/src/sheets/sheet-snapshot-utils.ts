@@ -78,6 +78,7 @@ export function mergeWorksheetSnapshotWithDefault(snapshot: Partial<IWorksheetDa
         },
         selections: ['A1'],
         rightToLeft: BooleanNumber.FALSE,
+        dataValidation: [],
     };
 
     // Merge the user's snapshot with the default snapshot.

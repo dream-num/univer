@@ -31,6 +31,12 @@ export function CellAlert() {
         position: 'absolute',
         top: currentCell.bound.top,
         left: currentCell.bound.right,
+        padding: 8,
+        borderRadius: 4,
+        background: '#fff',
+        border: '1px solid #ccc',
+        zIndex: 100,
+        fontSize: 12,
     };
 
     return (

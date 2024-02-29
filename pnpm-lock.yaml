@@ -289,6 +289,9 @@ importers:
       '@wendellhu/redi':
         specifier: ^0.13.0
         version: 0.13.0
+      dayjs:
+        specifier: ^1.11.10
+        version: 1.11.10
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -1011,70 +1014,6 @@ importers:
         version: 5.1.4(@types/node@20.11.19)(less@4.2.0)
       vitest:
         specifier: ^1.3.1
-        version: 1.3.1(@types/node@20.11.19)(less@4.2.0)
-
-  packages/sheets-tooltip:
-    dependencies:
-      '@univerjs/icons':
-        specifier: ^0.1.28
-        version: 0.1.28(react-dom@18.2.0)(react@18.2.0)
-    devDependencies:
-      '@types/react':
-        specifier: ^18.2.53
-        version: 18.2.57
-      '@univerjs/core':
-        specifier: workspace:*
-        version: link:../core
-      '@univerjs/design':
-        specifier: workspace:*
-        version: link:../design
-      '@univerjs/docs':
-        specifier: workspace:*
-        version: link:../docs
-      '@univerjs/engine-formula':
-        specifier: workspace:*
-        version: link:../engine-formula
-      '@univerjs/engine-numfmt':
-        specifier: workspace:*
-        version: link:../engine-numfmt
-      '@univerjs/engine-render':
-        specifier: workspace:*
-        version: link:../engine-render
-      '@univerjs/shared':
-        specifier: workspace:*
-        version: link:../../common/shared
-      '@univerjs/sheets':
-        specifier: workspace:*
-        version: link:../sheets
-      '@univerjs/sheets-ui':
-        specifier: workspace:*
-        version: link:../sheets-ui
-      '@univerjs/ui':
-        specifier: workspace:*
-        version: link:../ui
-      '@wendellhu/redi':
-        specifier: ^0.13.0
-        version: 0.13.0
-      clsx:
-        specifier: ^2.1.0
-        version: 2.1.0
-      less:
-        specifier: ^4.2.0
-        version: 4.2.0
-      react:
-        specifier: ^18.2.0
-        version: 18.2.0
-      rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
-      typescript:
-        specifier: ^5.3.3
-        version: 5.3.3
-      vite:
-        specifier: ^5.0.12
-        version: 5.1.4(@types/node@20.11.19)(less@4.2.0)
-      vitest:
-        specifier: ^1.2.1
         version: 1.3.1(@types/node@20.11.19)(less@4.2.0)
 
   packages/sheets-ui:

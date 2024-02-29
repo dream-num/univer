@@ -37,7 +37,7 @@ export class DataValidationAlertController extends Disposable {
             if (cellPos) {
                 const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
                 const worksheet = workbook.getActiveSheet();
-                const manager = this._sheetDataValidationService.currentDataValidationManager?.manager;
+                const manager = this._sheetDataValidationService.currentManager?.manager;
                 const cellData = worksheet.getCell(cellPos.row, cellPos.col);
 
                 if (cellData?.dataValidation?.validStatus === DataValidationStatus.INVALID) {

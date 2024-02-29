@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import type { CellValue, IDataValidationRule, IDataValidationRuleBase, LocaleService, Nullable } from '@univerjs/core';
-import { DataValidationOperator } from '@univerjs/core';
+import type { CellValue, IDataValidationRule, IDataValidationRuleBase, Nullable } from '@univerjs/core';
+import { DataValidationOperator, LocaleService, Tools } from '@univerjs/core';
+import { Inject } from '@wendellhu/redi';
 import { OperatorTextMap } from '../types/const/operator-text-map';
 
 const FORMULA1 = '{FORMULA1}';
@@ -42,7 +43,7 @@ export abstract class BaseDataValidator<DataType = CellValue> {
     abstract formulaInput: string;
 
     constructor(
-        readonly localeService: LocaleService
+        @Inject(LocaleService) readonly localeService: LocaleService
     ) { }
 
     get operatorNames() {
@@ -50,6 +51,9 @@ export abstract class BaseDataValidator<DataType = CellValue> {
     }
 
     generateOperatorText(rule: IDataValidationRuleBase) {
+        if (!rule.operator) {
+            return '';
+        }
         const operatorTextTemp = OperatorTextMap[rule.operator];
         const operatorText = this.localeService.t(operatorTextTemp).replace(FORMULA1, rule.formula1 ?? '').replace(FORMULA2, rule.formula2 ?? '');
         return operatorText;
@@ -102,6 +106,10 @@ export abstract class BaseDataValidator<DataType = CellValue> {
 
         if (!this.isValidType(cellValue, rule)) {
             return Promise.resolve(false);
+        }
+
+        if (!Tools.isDefine(rule.operator)) {
+            return Promise.resolve(true);
         }
 
         const transformedCell = this.transform(cellValue, rule);

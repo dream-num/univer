@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ICommandService, IUniverInstanceService } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import type { DataValidationType, IDataValidationRuleBase, IRange, ISheetDataValidationRule } from '@univerjs/core';
 import type { IUpdateDataValidationCommandParams } from '@univerjs/data-validation';
 import { DataValidatorRegistryScope, DataValidatorRegistryService, RemoveDataValidationCommand, UpdateDataValidationCommand, UpdateRuleType } from '@univerjs/data-validation';
@@ -46,7 +46,9 @@ export function DataValidationDetail(props: IDataValidationDetailProps) {
     const validator = validatorService.getValidatorItem(rule.type);
     const componentManager = useDependency(ComponentManager);
     const commandService = useDependency(ICommandService);
+    const localeService = useDependency(LocaleService);
     const [localRule, setLocalRule] = useState(rule);
+
     const rules = validatorService.getValidatorsByScope(DataValidatorRegistryScope.SHEET);
     if (!validator) {
         return null;
@@ -129,7 +131,7 @@ export function DataValidationDetail(props: IDataValidationDetailProps) {
             <div>type</div>
             <Select
                 options={rules?.map((rule) => ({
-                    label: rule.title,
+                    label: localeService.t(rule.title),
                     value: rule.id,
                 }))}
                 value={rule.type}

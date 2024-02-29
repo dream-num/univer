@@ -15,7 +15,7 @@
  */
 
 import { DataValidationOperator, DataValidationType } from '@univerjs/core';
-import type { CellValue, IDataValidationRule, Nullable } from '@univerjs/core';
+import type { CellValue, IDataValidationRule, IDataValidationRuleBase, Nullable } from '@univerjs/core';
 import { BASE_FORMULA_INPUT_NAME } from '../views/formula-input';
 import { BaseDataValidator } from './base-data-validator';
 
@@ -30,7 +30,7 @@ export class NumberValidator extends BaseDataValidator<number> {
     }
 
     id: string = DataValidationType.DECIMAL;
-    title: string = this.localeService.t('dataValidation.type.number');
+    title: string = this.localeService.t('dataValidation.number.title');
 
     operators: DataValidationOperator[] = [
         DataValidationOperator.BETWEEN,
@@ -45,6 +45,7 @@ export class NumberValidator extends BaseDataValidator<number> {
 
     scopes: string | string[] = ['sheet'];
     formulaInput: string = BASE_FORMULA_INPUT_NAME;
+    dropDownInput?: string;
 
     async validatorIsEqual(cellValue: number, rule: IDataValidationRule) {
         if (!rule.formula1) {

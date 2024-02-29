@@ -27,31 +27,35 @@ export interface ICurrentDataValidationManager {
 }
 
 export class SheetDataValidationService {
-    private _currentDataValidationManager: Nullable<ICurrentDataValidationManager>;
+    private _currentManager: Nullable<ICurrentDataValidationManager>;
 
-    private _currentDataValidationManager$ = new Subject<ICurrentDataValidationManager>();
+    private _currentManager$ = new Subject<ICurrentDataValidationManager>();
 
-    get currentDataValidationManager() {
-        return this._currentDataValidationManager;
+    get currentManager() {
+        return this._currentManager;
     }
 
-    currentDataValidationManager$ = this._currentDataValidationManager$.asObservable();
+    currentManager$ = this._currentManager$.asObservable();
 
     constructor(
         @Inject(DataValidationModel) private _dataValidationModel: DataValidationModel
-    ) {}
+    ) { }
 
     private _getOrCreateManager(unitId: string, subUnitId: string) {
         return this._dataValidationModel.getOrCreateManager(unitId, subUnitId) as SheetDataValidationManager;
     }
 
     switchCurrent(unitId: string, subUnitId: string) {
+        if (unitId === this.currentManager?.unitId && subUnitId === this._currentManager?.subUnitId) {
+            return;
+        }
+
         const manager = this._getOrCreateManager(unitId, subUnitId) as SheetDataValidationManager;
-        this._currentDataValidationManager = {
+        this._currentManager = {
             manager,
             unitId,
             subUnitId,
         };
-        this._currentDataValidationManager$.next(this._currentDataValidationManager);
+        this._currentManager$.next(this._currentManager);
     }
 }

@@ -16,17 +16,22 @@
 
 import { Disposable, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
 import { ComponentManager } from '@univerjs/ui';
-import { Inject } from '@wendellhu/redi';
+import { Inject, Injector } from '@wendellhu/redi';
 import { FORMULA_INPUTS } from '../views/formula-input';
 import { NumberValidator } from '../validators/number-validator';
 import { DataValidatorRegistryService } from '../services/data-validator-registry.service';
+import { ListValidator } from '../validators/list-validator';
+import { TextLengthValidator } from '../validators/text-length-validator';
+import { DateValidator } from '../validators/date-validator';
+import type { BaseDataValidator } from '../validators/base-data-validator';
 
 @OnLifecycle(LifecycleStages.Ready, DataValidatorController)
 export class DataValidatorController extends Disposable {
     constructor(
         @Inject(ComponentManager) private _componentManager: ComponentManager,
         @Inject(LocaleService) private _localeService: LocaleService,
-        @Inject(DataValidatorRegistryService) private _dataValidatorRegistryService: DataValidatorRegistryService
+        @Inject(DataValidatorRegistryService) private _dataValidatorRegistryService: DataValidatorRegistryService,
+        @Inject(Injector) private _injector: Injector
     ) {
         super();
         this._initFormulaInputComponent();
@@ -34,8 +39,13 @@ export class DataValidatorController extends Disposable {
     }
 
     private _registerValidators() {
-        [NumberValidator].forEach((Validator) => {
-            const validator = new Validator(this._localeService);
+        ([
+            ListValidator,
+            NumberValidator,
+            TextLengthValidator,
+            DateValidator,
+        ]).forEach((Validator) => {
+            const validator = this._injector.createInstance(Validator);
             this.disposeWithMe(
                 this._dataValidatorRegistryService.register(validator)
             );

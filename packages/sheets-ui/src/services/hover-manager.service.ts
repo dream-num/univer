@@ -21,6 +21,7 @@ import { Inject } from '@wendellhu/redi';
 import { distinctUntilChanged, Subject } from 'rxjs';
 import type { IBoundRectNoAngle } from '@univerjs/engine-render';
 import { IRenderManagerService, Vector2 } from '@univerjs/engine-render';
+import { ISelectionRenderService } from '..';
 import { ScrollManagerService } from './scroll-manager.service';
 import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
 
@@ -42,10 +43,11 @@ export class HoverManagerService {
     private _lastPosition: Nullable<{ offsetX: number; offsetY: number }> = null;
 
     constructor(
-        @IUniverInstanceService private _univerInstanceService: IUniverInstanceService,
-        @Inject(ScrollManagerService) private _scrollManagerService: ScrollManagerService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @Inject(ScrollManagerService) private readonly _scrollManagerService: ScrollManagerService,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService
     ) { }
 
     private _calcActiveCell() {

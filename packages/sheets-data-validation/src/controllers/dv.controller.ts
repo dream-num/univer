@@ -73,7 +73,10 @@ export class DataValidationController extends RxDisposable {
         }
 
         const rules = worksheet.getSnapshot().dataValidation;
-        return new SheetDataValidationManager(unitId, subUnitId, rules,
+        return new SheetDataValidationManager(
+            unitId,
+            subUnitId,
+            rules,
             this._dataValidatorRegistryService
         );
     }
@@ -88,10 +91,14 @@ export class DataValidationController extends RxDisposable {
                 INTERCEPTOR_POINT.CELL_CONTENT,
                 {
                     handler: (cell, pos, next) => {
-                        const validationManager = this._sheetDataValidationService.currentDataValidationManager;
-                        const { manager } = validationManager!;
+                        const validationManager = this._sheetDataValidationService.currentManager;
+                        const { unitId, subUnitId } = validationManager || {};
+                        if (unitId !== pos.unitId || subUnitId !== pos.subUnitId) {
+                            this._sheetDataValidationService.switchCurrent(pos.unitId, pos.subUnitId);
+                        }
 
-                        if (!validationManager) {
+                        const manager = this._sheetDataValidationService.currentManager?.manager;
+                        if (!manager) {
                             return next(cell);
                         }
                         const { row, col } = pos;

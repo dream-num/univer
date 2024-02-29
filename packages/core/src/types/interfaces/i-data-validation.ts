@@ -25,7 +25,7 @@ export interface IDataValidationRuleBase {
     allowBlank?: boolean;
     formula1?: string;
     formula2?: string;
-    operator: DataValidationOperator;
+    operator?: DataValidationOperator;
 }
 
 export interface IDataValidationRuleOptions {

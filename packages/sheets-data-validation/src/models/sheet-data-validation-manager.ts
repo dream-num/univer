@@ -46,11 +46,11 @@ export class SheetDataValidationManager extends DataValidationManager<ISheetData
     constructor(
         unitId: string,
         subUnitId: string,
-        rules: ISheetDataValidationRule[],
+        rules: ISheetDataValidationRule[] | undefined,
         private _dataValidatorRegistryService: DataValidatorRegistryService
     ) {
         super(unitId, subUnitId, rules);
-        rules.forEach((rule) => {
+        rules?.forEach((rule) => {
             const ruleId = rule.uid;
             rule.ranges.forEach((range) => {
                 Range.foreach(range, (row, col) => {

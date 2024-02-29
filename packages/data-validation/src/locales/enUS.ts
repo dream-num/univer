@@ -17,9 +17,6 @@
 export const enUS = {
     dataValidation: {
         title: '',
-        type: {
-            number: '',
-        },
         operators: {
             between: 'is between {FORMULA1} and {FORMULA2}',
             greaterThan: 'is greater than {FORMULA1}',
@@ -30,15 +27,31 @@ export const enUS = {
             notEqual: 'is not equal to {FORMULA1}',
             notBetween: 'is not between {FORMULA1} and {FORMULA2}',
         },
-        dateOperators: {
-            between: 'is between {FORMULA1} and {FORMULA2}',
-            greaterThan: 'is after {FORMULA1}',
-            greaterThanOrEqual: 'is on or after {FORMULA1}',
-            lessThan: 'is before {FORMULA1}',
-            lessThanOrEqual: 'is on or before {FORMULA1}',
-            equal: 'is {FORMULA1}',
-            notEqual: 'is not {FORMULA1}',
-            notBetween: 'is not between {FORMULA1}',
+        date: {
+            title: 'Date',
+            operators: {
+                between: 'is between {FORMULA1} and {FORMULA2}',
+                greaterThan: 'is after {FORMULA1}',
+                greaterThanOrEqual: 'is on or after {FORMULA1}',
+                lessThan: 'is before {FORMULA1}',
+                lessThanOrEqual: 'is on or before {FORMULA1}',
+                equal: 'is {FORMULA1}',
+                notEqual: 'is not {FORMULA1}',
+                notBetween: 'is not between {FORMULA1}',
+            },
         },
+        list: {
+            title: 'Dropdown',
+            name: 'Value contains one from range',
+            error: 'Input must fall within specified range',
+            emptyError: 'Please enter a value',
+        },
+        textLength: {
+            title: 'Text length',
+        },
+        number: {
+            title: '',
+        },
+
     },
 };

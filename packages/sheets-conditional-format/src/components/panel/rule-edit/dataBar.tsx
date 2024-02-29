@@ -15,7 +15,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { InputNumber, Radio, RadioGroup, Select } from '@univerjs/design';
+import { Input, InputNumber, Radio, RadioGroup, Select } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { LocaleService } from '@univerjs/core';
 import { RuleType, ValueType } from '../../../base/const';
@@ -26,6 +26,32 @@ import styles from './index.module.less';
 import type { IStyleEditorProps } from './type';
 
 const createOptionItem = (text: ValueType, localeService: LocaleService) => ({ label: localeService.t(`sheet.cf.valueType.${text}`), value: text });
+
+const InputText = (props: { className: string; type: ValueType;value: string | number;onChange: (v: string | number) => void }) => {
+    const { onChange, className, value, type } = props;
+    if (type === ValueType.formula) {
+        const v = String(props.value).startsWith('=') ? String(props.value) || '' : '=';
+        return (
+            <div className={className} style={{ display: 'flex', alignItems: 'center' }}>
+                <Input
+                    value={v}
+                    onChange={(v) => {
+                        onChange(v || '');
+                    }}
+                />
+            </div>
+        );
+    }
+    return (
+        <InputNumber
+            className={className}
+            value={Number(value) || 0}
+            onChange={(v) => {
+                onChange(v || 0);
+            }}
+        />
+    );
+};
 export const DataBarStyleEditor = (props: IStyleEditorProps) => {
     const { interceptorManager } = props;
     const localeService = useDependency(LocaleService);
@@ -52,8 +78,9 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
         }
         return rule.config.nativeColor || defaultV;
     });
-    const minOptions = [createOptionItem(ValueType.min, localeService), createOptionItem(ValueType.num, localeService), createOptionItem(ValueType.percent, localeService), createOptionItem(ValueType.percentile, localeService)];
-    const maxOptions = [createOptionItem(ValueType.max, localeService), createOptionItem(ValueType.num, localeService), createOptionItem(ValueType.percent, localeService), createOptionItem(ValueType.percentile, localeService)];
+    const commonOptions = [createOptionItem(ValueType.num, localeService), createOptionItem(ValueType.percent, localeService), createOptionItem(ValueType.percentile, localeService), createOptionItem(ValueType.formula, localeService)];
+    const minOptions = [createOptionItem(ValueType.min, localeService), ...commonOptions];
+    const maxOptions = [createOptionItem(ValueType.max, localeService), ...commonOptions];
     const [minValueType, minValueTypeSet] = useState<ValueType>(() => {
         const defaultV = minOptions[0].value as ValueType;
         if (!rule) {
@@ -73,20 +100,28 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
         if (!rule) {
             return defaultV;
         }
-        return rule.config.min.value || defaultV;
+        const value = rule.config.min;
+        if (value.type === ValueType.formula) {
+            return value.value || '=';
+        }
+        return value.value || defaultV;
     });
     const [maxValue, maxValueSet] = useState(() => {
         const defaultV = 100;
         if (!rule) {
             return defaultV;
         }
-        return rule.config.max.value || defaultV;
+        const value = rule.config.max;
+        if (value.type === ValueType.formula) {
+            return value.value || '=';
+        }
+        return value.value || defaultV;
     });
 
     const getResult = (option: { minValueType: ValueType ;
-                                 minValue: number;
+                                 minValue: number | string;
                                  maxValueType: ValueType ;
-                                 maxValue: number;
+                                 maxValue: number | string;
                                  isGradient: string;
                                  positiveColor: string;
                                  nativeColor: string; }) => {
@@ -113,9 +148,9 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
     }, [isGradient, minValue, minValueType, maxValue, maxValueType, positiveColor, nativeColor, interceptorManager]);
 
     const _handleChange = (option: { minValueType: ValueType ;
-                                     minValue: number;
+                                     minValue: number | string;
                                      maxValueType: ValueType ;
-                                     maxValue: number;
+                                     maxValue: number | string;
                                      isGradient: string;
                                      positiveColor: string;
                                      nativeColor: string; }) => {
@@ -133,7 +168,7 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
     };
 
     const isShowInput = (type: string) => {
-        return [ValueType.num, ValueType.percent, ValueType.percentile].includes(type as ValueType);
+        return commonOptions.map((item) => item.value).includes(type as ValueType);
     };
 
     return (
@@ -197,7 +232,8 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                         }}
                     />
                     {isShowInput(minValueType) && (
-                        <InputNumber
+                        <InputText
+                            type={minValueType}
                             className={stylesBase.mLSm}
                             value={minValue}
                             onChange={(v) => {
@@ -219,7 +255,8 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                         }}
                     />
                     {isShowInput(maxValueType) && (
-                        <InputNumber
+                        <InputText
+                            type={maxValueType}
                             className={stylesBase.mLSm}
                             value={maxValue}
                             onChange={(v) => {

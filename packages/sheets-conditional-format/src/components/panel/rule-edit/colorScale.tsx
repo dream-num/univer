@@ -17,7 +17,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { LocaleService } from '@univerjs/core';
-import { InputNumber, Select } from '@univerjs/design';
+import { Input, InputNumber, Select } from '@univerjs/design';
 import { RuleType, ValueType } from '../../../base/const';
 import { ColorPicker } from '../../color-picker';
 import type { IColorScale } from '../../../models/type';
@@ -26,7 +26,7 @@ import type { IStyleEditorProps } from './type';
 
 const createOptionItem = (text: string, localeService: LocaleService) => ({ label: localeService.t(`sheet.cf.valueType.${text}`), value: text });
 
-const TextInput = (props: { type: string;value: number;onChange: (v: number) => void; className: string }) => {
+const TextInput = (props: { type: ValueType | 'none';value: number | string;onChange: (v: number | string) => void; className: string }) => {
     const { type, className } = props;
     const config = useMemo(() => {
         if ([ValueType.max, ValueType.min, 'none'].includes(type as ValueType)) {
@@ -39,14 +39,23 @@ const TextInput = (props: { type: string;value: number;onChange: (v: number) => 
         }
         return {};
     }, [type]);
-    return <InputNumber className={className} value={props.value} onChange={(v) => props.onChange(v || 0)} {...config} />;
+    if (type === ValueType.formula) {
+        const v = String(props.value).startsWith('=') ? String(props.value) || '' : '=';
+        return (
+            <div className={className} style={{ display: 'flex', alignItems: 'center' }}>
+                <Input value={v} onChange={(v) => props.onChange(v || '')} {...config} />
+            </div>
+        );
+    } else {
+        return <InputNumber className={className} value={Number(props.value) || 0} onChange={(v) => props.onChange(v || 0)} {...config} />;
+    }
 };
 export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
     const { interceptorManager } = props;
     const localeService = useDependency(LocaleService);
 
     const rule = props.rule?.type === RuleType.colorScale ? props.rule : undefined as IColorScale | undefined;
-    const commonOptions = [createOptionItem(ValueType.num, localeService), createOptionItem(ValueType.percent, localeService), createOptionItem(ValueType.percentile, localeService)];
+    const commonOptions = [createOptionItem(ValueType.num, localeService), createOptionItem(ValueType.percent, localeService), createOptionItem(ValueType.percentile, localeService), createOptionItem(ValueType.formula, localeService)];
     const minOptions = [createOptionItem(ValueType.min, localeService), ...commonOptions];
     const medianOptions = [createOptionItem('none', localeService), ...commonOptions];
     const maxOptions = [createOptionItem(ValueType.max, localeService), ...commonOptions];
@@ -81,7 +90,8 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
         if (!rule) {
             return defaultV;
         }
-        return rule.config[0].value.value || defaultV;
+        const valueConfig = rule.config[0];
+        return valueConfig.value.value || defaultV;
     });
     const [medianValue, medianValueSet] = useState(() => {
         const defaultV = 10;
@@ -130,9 +140,9 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
         minType: typeof minType;
         medianType: typeof medianType;
         maxType: typeof maxType;
-        minValue: number;
-        medianValue: number;
-        maxValue: number;
+        minValue: number | string;
+        medianValue: number | string;
+        maxValue: number | string;
         minColor: string;
         medianColor: string;
         maxColor: string;
@@ -167,9 +177,9 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
         minType: typeof minType;
         medianType: typeof medianType;
         maxType: typeof maxType;
-        minValue: number;
-        medianValue: number;
-        maxValue: number;
+        minValue: number | string;
+        medianValue: number | string;
+        maxValue: number | string;
         minColor: string;
         medianColor: string;
         maxColor: string;

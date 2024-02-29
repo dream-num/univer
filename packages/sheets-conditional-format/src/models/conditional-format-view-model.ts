@@ -30,7 +30,6 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
 import { ObjectMatrix, Range } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import type { IDataBarRenderParams } from '../render/type';
@@ -38,8 +37,7 @@ import type { IColorScaleRenderParams } from '../services/calculate-unit/color-s
 import type { IConditionFormatRule, IHighlightCell } from './type';
 
 interface ICellItem {
-    cfList: { cfId: string; ruleCache?: Nullable<IHighlightCell['style'] | IDataBarRenderParams | IColorScaleRenderParams>;isDirty: boolean }[];
-    composeCache?: any;
+    cfList: { cfId: string; ruleCache?: IHighlightCell['style'] | IDataBarRenderParams | IColorScaleRenderParams;isDirty: boolean }[];
 }
 
 export class ConditionalFormatViewModel {

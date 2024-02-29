@@ -14,9 +14,13 @@
  * limitations under the License.
  */
 
-import type { ICellData, ObjectMatrix } from '@univerjs/core';
-import type { IValueConfig } from '../../models/type';
+import type { ICellData } from '@univerjs/core';
+import { ObjectMatrix, Range } from '@univerjs/core';
+import type { IConditionFormatRule, IValueConfig } from '../../models/type';
 import { ValueType } from '../../base/const';
+import { ConditionalFormatFormulaService } from '../conditional-format-formula.service';
+import { ConditionalFormatViewModel } from '../../models/conditional-format-view-model';
+import type { IContext } from './type';
 
 export function isFloatsEqual(a: number, b: number) {
     return Math.abs(a - b) < Number.EPSILON;
@@ -80,7 +84,7 @@ export const serialTimeToTimestamp = (value: number) => {
     dt.setUTCHours(hh, mm, ss);
     return dt.getTime();
 };
-export const getValueByType = (value: IValueConfig, matrix: ObjectMatrix< number>) => {
+export const getValueByType = (value: IValueConfig, matrix: ObjectMatrix< number>, context: IContext & { cfId: string }) => {
     switch (value.type) {
         case ValueType.max:{
             let max = 0;
@@ -118,12 +122,13 @@ export const getValueByType = (value: IValueConfig, matrix: ObjectMatrix< number
                     min = value;
                 }
             });
+
             const length = (max || 0) - (min || 0);
-            return (length * (value.value || 0) / 100) + (min || 0);
+            return (length * (Number(value.value) || 0) / 100) + (min || 0);
         }
         case ValueType.percentile:{
             const list = matrix.toNativeArray().sort((a, b) => a - b);
-            const index = (list.length - 1) * (value.value || 0) / 100;
+            const index = (list.length - 1) * (Number(value.value) || 0) / 100;
             const intIndex = Math.floor(index);
             const decimalIndex = index - intIndex;
             const result = list[intIndex] + (list[Math.min(intIndex + 1, list.length - 1)] - list[intIndex]) * decimalIndex;
@@ -131,10 +136,32 @@ export const getValueByType = (value: IValueConfig, matrix: ObjectMatrix< number
         }
 
         case ValueType.formula:{
-            return value.value;
+            const { accessor, unitId, subUnitId, cfId } = context;
+            const formulaText = String(value.value);
+            const conditionalFormatFormulaService = accessor.get(ConditionalFormatFormulaService);
+            conditionalFormatFormulaService.registerFormula(unitId, subUnitId, cfId, formulaText);
+            const result = conditionalFormatFormulaService.getFormulaResult(unitId, subUnitId, formulaText);
+            return result;
         }
         case ValueType.num:{
-            return value.value;
+            const v = Number(value.value);
+            return Number.isNaN(v) ? 0 : v;
         }
     }
+};
+
+export const getCacheStyleMatrix = <S = any>(unitId: string, subUnitId: string, rule: IConditionFormatRule, context: IContext) => {
+    const { accessor } = context;
+    const conditionalFormatViewModel = accessor.get(ConditionalFormatViewModel);
+    const matrix = new ObjectMatrix<S>();
+    rule.ranges.forEach((range) => {
+        Range.foreach(range, (row, col) => {
+            const cellCfItem = conditionalFormatViewModel.getCellCf(unitId, subUnitId, row, col);
+            if (cellCfItem) {
+                const item = cellCfItem.cfList.find((item) => item.cfId === rule.cfId);
+                item?.ruleCache && matrix.setValue(row, col, item.ruleCache as any);
+            }
+        });
+    });
+    return matrix;
 };

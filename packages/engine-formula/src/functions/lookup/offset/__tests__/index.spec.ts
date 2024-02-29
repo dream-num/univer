@@ -61,6 +61,7 @@ describe('Test offset', () => {
             dirtyRanges: [],
             dirtyNameMap: {},
             dirtyUnitFeatureMap: {},
+            dirtyUnitOtherFormulaMap: {},
             excludedCell: {},
             allUnitData: {
                 [testBed.unitId]: testBed.sheetData,

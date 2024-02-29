@@ -279,7 +279,7 @@ export class SelectionShape extends Disposable {
         return this._scene;
     }
 
-    dispose() {
+    override dispose() {
         this._leftControl?.dispose();
         this._rightControl?.dispose();
         this._topControl?.dispose();

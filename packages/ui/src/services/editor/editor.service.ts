@@ -345,7 +345,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         return editor?.getBody();
     }
 
-    dispose(): void {
+    override dispose(): void {
         this._state$.complete();
         this._editors.clear();
         super.dispose();

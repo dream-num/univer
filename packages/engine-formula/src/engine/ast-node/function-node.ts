@@ -35,6 +35,7 @@ import type {
 } from '../reference-object/base-reference-object';
 import { ArrayValueObject, transformToValueObject, ValueObjectFactory } from '../value-object/array-value-object';
 import type { BaseValueObject } from '../value-object/base-value-object';
+import { prefixHandler } from '../utils/prefixHandler';
 import { BaseAstNode, ErrorNode } from './base-ast-node';
 import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './base-ast-node-factory';
 import { NODE_ORDER_MAP, NodeType } from './node-type';
@@ -270,29 +271,8 @@ export class FunctionNodeFactory extends BaseAstNodeFactory {
             return;
         }
         const token = param.getToken();
-        let tokenTrim = token.trim().toUpperCase();
-        let minusPrefixNode: Nullable<PrefixNode>;
-        let atPrefixNode: Nullable<PrefixNode>;
-        const prefix = tokenTrim.slice(0, 2);
-        let sliceLength = 0;
-        if (new RegExp(prefixToken.MINUS, 'g').test(prefix)) {
-            const functionExecutor = this._functionService.getExecutor(FUNCTION_NAMES_META.MINUS);
-            minusPrefixNode = new PrefixNode(this._injector, prefixToken.MINUS, functionExecutor);
-            sliceLength++;
-        }
 
-        if (new RegExp(prefixToken.AT, 'g').test(prefix)) {
-            atPrefixNode = new PrefixNode(this._injector, prefixToken.AT);
-            if (minusPrefixNode) {
-                // minusPrefixNode.addChildren(atPrefixNode);
-                atPrefixNode.setParent(minusPrefixNode);
-            }
-            sliceLength++;
-        }
-
-        if (sliceLength > 0) {
-            tokenTrim = tokenTrim.slice(sliceLength);
-        }
+        const { tokenTrim, minusPrefixNode, atPrefixNode } = prefixHandler(token.trim().toUpperCase(), this._functionService, this._injector);
 
         if (this._functionService.hasExecutor(tokenTrim)) {
             const functionNode = this.create(tokenTrim);

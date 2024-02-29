@@ -258,6 +258,8 @@ export class FormulaPromptService implements IFormulaPromptService, IDisposable 
      */
     getCurrentSequenceNodeIndex(strIndex: number) {
         let nodeIndex = 0;
+        const firstNode = this._sequenceNodes[0];
+
         for (let i = 0, len = this._sequenceNodes.length; i < len; i++) {
             const node = this._sequenceNodes[i];
 
@@ -270,6 +272,13 @@ export class FormulaPromptService implements IFormulaPromptService, IDisposable 
             }
 
             if (strIndex <= nodeIndex) {
+                /**
+                 * =((A1 ，fix https://github.com/dream-num/univer/issues/1387
+                 */
+                if (typeof firstNode === 'string') {
+                    return i + 1;
+                }
+
                 return i;
             }
         }

@@ -17,6 +17,7 @@
 import type { IAccessor } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
+import type { Nullable } from '@univerjs/core';
 import { ErrorType } from '../../basics/error-type';
 import {
     $SUPER_TABLE_COLUMN_REGEX,
@@ -37,6 +38,8 @@ import { ColumnReferenceObject } from '../reference-object/column-reference-obje
 import { RowReferenceObject } from '../reference-object/row-reference-object';
 import { TableReferenceObject } from '../reference-object/table-reference-object';
 import { ErrorValueObject } from '../value-object/base-value-object';
+import { prefixHandler } from '../utils/prefixHandler';
+import { IFunctionService } from '../../services/function.service';
 import { BaseAstNode } from './base-ast-node';
 import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './base-ast-node-factory';
 import { NODE_ORDER_MAP, NodeType } from './node-type';
@@ -94,7 +97,7 @@ export class ReferenceNodeFactory extends BaseAstNodeFactory {
         @IDefinedNamesService private readonly _definedNamesService: IDefinedNamesService,
         @ISuperTableService private readonly _superTableService: ISuperTableService,
         @IFormulaRuntimeService private readonly _formulaRuntimeService: IFormulaRuntimeService,
-        @Inject(Lexer) private readonly _lexer: Lexer,
+        @IFunctionService private readonly _functionService: IFunctionService,
         @Inject(Injector) private readonly _injector: Injector
     ) {
         super();
@@ -106,11 +109,11 @@ export class ReferenceNodeFactory extends BaseAstNodeFactory {
 
     override checkAndCreateNodeType(param: LexerNode | string) {
         let isLexerNode = false;
-        let tokenTrim: string;
+        let tokenTrimPre: string;
         let isPrepareMerge = false;
         if (param instanceof LexerNode) {
             isLexerNode = true;
-            tokenTrim = param.getToken().trim();
+            tokenTrimPre = param.getToken().trim();
 
             /**
              * If this node is a reference to a range,
@@ -120,7 +123,7 @@ export class ReferenceNodeFactory extends BaseAstNodeFactory {
                 isPrepareMerge = true;
             }
         } else {
-            tokenTrim = param.trim();
+            tokenTrimPre = param.trim();
         }
 
         // const tokenTrim = param.trim();
@@ -128,41 +131,49 @@ export class ReferenceNodeFactory extends BaseAstNodeFactory {
         //     return true;
         // }
 
+        const { tokenTrim, minusPrefixNode, atPrefixNode } = prefixHandler(tokenTrimPre.toUpperCase(), this._functionService, this._injector);
+
         if (!isLexerNode && tokenTrim.charAt(0) === '"' && tokenTrim.charAt(tokenTrim.length - 1) === '"') {
             return;
         }
 
+        let node: Nullable<ReferenceNode>;
         if (new RegExp(REFERENCE_SINGLE_RANGE_REGEX).test(tokenTrim)) {
-            return new ReferenceNode(this._injector, tokenTrim, new CellReferenceObject(tokenTrim), isPrepareMerge);
-        }
+            node = new ReferenceNode(this._injector, tokenTrim, new CellReferenceObject(tokenTrim), isPrepareMerge);
+        } else if (isLexerNode && new RegExp(REFERENCE_REGEX_SINGLE_ROW).test(tokenTrim)) {
+            node = new ReferenceNode(this._injector, tokenTrim, new RowReferenceObject(tokenTrim), isPrepareMerge);
+        } else if (isLexerNode && new RegExp(REFERENCE_REGEX_SINGLE_COLUMN).test(tokenTrim)) {
+            node = new ReferenceNode(this._injector, tokenTrim, new ColumnReferenceObject(tokenTrim), isPrepareMerge);
+        } else {
+            const unitId = this._formulaRuntimeService.currentUnitId;
+            // parserDataLoader.get
 
-        if (isLexerNode && new RegExp(REFERENCE_REGEX_SINGLE_ROW).test(tokenTrim)) {
-            return new ReferenceNode(this._injector, tokenTrim, new RowReferenceObject(tokenTrim), isPrepareMerge);
-        }
-
-        if (isLexerNode && new RegExp(REFERENCE_REGEX_SINGLE_COLUMN).test(tokenTrim)) {
-            return new ReferenceNode(this._injector, tokenTrim, new ColumnReferenceObject(tokenTrim), isPrepareMerge);
-        }
-
-        const unitId = this._formulaRuntimeService.currentUnitId;
-        // parserDataLoader.get
-
-        const tableMap = this._superTableService.getTableMap(unitId);
-        const $regex = new RegExp($SUPER_TABLE_COLUMN_REGEX, 'g');
-        const tableName = tokenTrim.replace($regex, '');
-        if (!isLexerNode && tableMap?.has(tableName)) {
-            const columnResult = $regex.exec(tokenTrim);
-            let columnDataString = '';
-            if (columnResult) {
-                columnDataString = columnResult[0];
+            const tableMap = this._superTableService.getTableMap(unitId);
+            const $regex = new RegExp($SUPER_TABLE_COLUMN_REGEX, 'g');
+            const tableName = tokenTrim.replace($regex, '');
+            if (!isLexerNode && tableMap?.has(tableName)) {
+                const columnResult = $regex.exec(tokenTrim);
+                let columnDataString = '';
+                if (columnResult) {
+                    columnDataString = columnResult[0];
+                }
+                const tableData = tableMap.get(tableName)!;
+                const tableOption = this._superTableService.getTableOptionMap();
+                node = new ReferenceNode(
+                    this._injector,
+                    tokenTrim,
+                    new TableReferenceObject(tokenTrim, tableData, columnDataString, tableOption)
+                );
             }
-            const tableData = tableMap.get(tableName)!;
-            const tableOption = this._superTableService.getTableOptionMap();
-            return new ReferenceNode(
-                this._injector,
-                tokenTrim,
-                new TableReferenceObject(tokenTrim, tableData, columnDataString, tableOption)
-            );
+        }
+
+        if (node) {
+            if (atPrefixNode) {
+                node.setParent(atPrefixNode);
+            } else if (minusPrefixNode) {
+                node.setParent(minusPrefixNode);
+            }
+            return node;
         }
     }
 }

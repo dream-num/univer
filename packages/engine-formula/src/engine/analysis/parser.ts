@@ -43,6 +43,8 @@ import { SuffixNodeFactory } from '../ast-node/suffix-node';
 import { UnionNodeFactory } from '../ast-node/union-node';
 import { ValueNodeFactory } from '../ast-node/value-node';
 import { isChildRunTimeParameter, isFirstChildParameter } from '../utils/function-definition';
+import { operatorToken } from '../../basics/token';
+import { getAstNodeTopParent } from '../utils/ast-node-tool';
 import { LexerNode } from './lexer-node';
 
 export class AstTreeBuilder extends Disposable {
@@ -173,15 +175,6 @@ export class AstTreeBuilder extends Disposable {
         return newLambdaNode;
     }
 
-    private _getTopParent(node: BaseAstNode) {
-        let parent: Nullable<BaseAstNode> = node;
-        while (parent?.getParent()) {
-            parent = parent.getParent();
-            // console.log(parent);
-        }
-        return parent;
-    }
-
     private _parse(lexerNode: LexerNode, parent: BaseAstNode): Nullable<BaseAstNode> {
         const children = lexerNode.getChildren();
         const childrenCount = children.length;
@@ -277,7 +270,7 @@ export class AstTreeBuilder extends Disposable {
                 return ErrorNode.create(ErrorType.NAME);
             }
 
-            astNode = this._getTopParent(astNode);
+            astNode = getAstNodeTopParent(astNode);
             if (astNode == null) {
                 return;
             }
@@ -297,18 +290,13 @@ export class AstTreeBuilder extends Disposable {
                 case NodeType.OPERATOR: {
                     const parameterNode1 = calculateStack.pop();
                     const parameterNode2 = calculateStack.pop();
+
                     if (parameterNode2) {
                         parameterNode2.setParent(astNode);
-                    } else {
-                        // console.log('error4', currentAstNode, lexerNode, children, i);
-                        return ErrorNode.create(ErrorType.ERROR);
                     }
 
                     if (parameterNode1) {
                         parameterNode1.setParent(astNode);
-                    } else {
-                        // console.log('error5', currentAstNode, lexerNode, children, i);
-                        return ErrorNode.create(ErrorType.ERROR);
                     }
 
                     calculateStack.push(astNode);

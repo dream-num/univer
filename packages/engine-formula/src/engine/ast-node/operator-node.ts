@@ -25,7 +25,8 @@ import { FUNCTION_NAMES_TEXT } from '../../functions/text/function-names';
 import { IFunctionService } from '../../services/function.service';
 import { LexerNode } from '../analysis/lexer-node';
 import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
-import type { BaseValueObject } from '../value-object/base-value-object';
+import { type BaseValueObject, ErrorValueObject } from '../value-object/base-value-object';
+import { NullValueObject, NumberValueObject } from '../value-object/primitive-object';
 import { BaseAstNode, ErrorNode } from './base-ast-node';
 import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './base-ast-node-factory';
 import { NODE_ORDER_MAP, NodeType } from './node-type';
@@ -47,10 +48,22 @@ export class OperatorNode extends BaseAstNode {
         if (this._functionExecutor.name === FUNCTION_NAMES_META.COMPARE) {
             (this._functionExecutor as Compare).setCompareType(this.getToken() as compareToken);
         }
-        let object1 = children[0].getValue();
-        let object2 = children[1].getValue();
-        if (object1 == null || object2 == null) {
-            throw new Error('object1 or object2 is null');
+        let object1 = children[0]?.getValue();
+        let object2 = children[1]?.getValue();
+
+        const token = this.getToken();
+
+        if ((object1 == null || object2 == null) && token !== operatorToken.MINUS && token !== operatorToken.PLUS) {
+            this.setValue(new ErrorValueObject(ErrorType.VALUE));
+            return;
+        }
+
+        if (object1 == null) {
+            object1 = new NullValueObject(0);
+        }
+
+        if (object2 == null) {
+            object2 = new NullValueObject(0);
         }
 
         if (object1.isReferenceObject()) {

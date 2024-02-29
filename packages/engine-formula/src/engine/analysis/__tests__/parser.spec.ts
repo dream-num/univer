@@ -31,6 +31,8 @@ import type { BaseValueObject } from '../../value-object/base-value-object';
 import { Lexer } from '../lexer';
 import type { LexerNode } from '../lexer-node';
 import { AstTreeBuilder } from '../parser';
+import type { ArrayValueObject } from '../../value-object/array-value-object';
+import { Minus } from '../../../functions/meta/minus';
 import { createCommandTestBed } from './create-command-test-bed';
 
 describe('Test indirect', () => {
@@ -79,7 +81,7 @@ describe('Test indirect', () => {
             testBed.unitId
         );
 
-        functionService.registerExecutors(new Sum(FUNCTION_NAMES_MATH.SUM), new Plus(FUNCTION_NAMES_META.PLUS));
+        functionService.registerExecutors(new Sum(FUNCTION_NAMES_MATH.SUM), new Plus(FUNCTION_NAMES_META.PLUS), new Minus(FUNCTION_NAMES_META.MINUS));
     });
 
     describe('normal', () => {
@@ -101,6 +103,66 @@ describe('Test indirect', () => {
             const result = interpreter.execute(astNode as BaseAstNode);
 
             expect((result as BaseValueObject).getValue()).toStrictEqual(ErrorType.NAME);
+        });
+
+        it('Minus Minus one', async () => {
+            const lexerNode = lexer.treeBuilder('=--1');
+
+            const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
+
+            const result = interpreter.execute(astNode as BaseAstNode);
+
+            expect((result as BaseValueObject).getValue()).toStrictEqual(1);
+        });
+
+        it('Minus Minus Minus one', async () => {
+            const lexerNode = lexer.treeBuilder('=---1');
+
+            const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
+
+            const result = interpreter.execute(astNode as BaseAstNode);
+
+            expect((result as BaseValueObject).getValue()).toStrictEqual(-1);
+        });
+
+        it('Plus Plus Plus Plus Plus Plus one', async () => {
+            const lexerNode = lexer.treeBuilder('=++++++1');
+
+            const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
+
+            const result = interpreter.execute(astNode as BaseAstNode);
+
+            expect((result as BaseValueObject).getValue()).toStrictEqual(1);
+        });
+
+        it('Plus Plus Plus ref', async () => {
+            const lexerNode = lexer.treeBuilder('=+++++++A1');
+
+            const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
+
+            const result = interpreter.execute(astNode as BaseAstNode);
+
+            expect((result as ArrayValueObject).getFirstCell().getValue()).toStrictEqual(1);
+        });
+
+        it('Minus Minus Minus ref', async () => {
+            const lexerNode = lexer.treeBuilder('=---A1');
+
+            const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
+
+            const result = interpreter.execute(astNode as BaseAstNode);
+
+            expect((result as ArrayValueObject).getFirstCell().getValue()).toStrictEqual(-1);
+        });
+
+        it('Minus Minus Minus Minus sum', async () => {
+            const lexerNode = lexer.treeBuilder('=----sum(A1:A2)');
+
+            const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
+
+            const result = interpreter.execute(astNode as BaseAstNode);
+
+            expect((result as BaseValueObject).getValue()).toStrictEqual(4);
         });
     });
 });

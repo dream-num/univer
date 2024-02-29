@@ -213,7 +213,6 @@ export class LexerTreeBuilder extends Disposable {
     /**
      * Estimate the number of right brackets that need to be automatically added to the end of the formula.
      * @param formulaString
-     * @returns
      */
     checkIfAddBracket(formulaString: string) {
         let lastBracketCount = 0;
@@ -312,7 +311,7 @@ export class LexerTreeBuilder extends Disposable {
 
             const preItem = sequenceArray[i - 1];
 
-            const { segment, currentString, cur } = item;
+            const { segment, currentString } = item;
 
             if (currentString === matchToken.DOUBLE_QUOTATION) {
                 maybeString = true;
@@ -325,11 +324,11 @@ export class LexerTreeBuilder extends Disposable {
 
             let preSegment = preItem?.segment || '';
 
-            const startIndex = i - preSegment.length;
+            let startIndex = i - preSegment.length;
 
             let endIndex = i - 1;
 
-            const deleteEndIndex = i - 1;
+            let deleteEndIndex = i - 1;
 
             if (i === len - 1 && this._isLastMergeString(currentString)) {
                 preSegment += currentString;
@@ -359,6 +358,17 @@ export class LexerTreeBuilder extends Disposable {
                     deleteEndIndex
                 );
             } else if (new RegExp(REFERENCE_SINGLE_RANGE_REGEX).test(preSegmentNotPrefixToken)) {
+                /**
+                 * =-A1  Separate the negative sign from the ref string.
+                 */
+                if (preSegmentNotPrefixToken.length !== preSegmentTrim.length) {
+                    const minusCount = preSegmentTrim.length - preSegmentNotPrefixToken.length;
+                    deleteEndIndex += minusCount;
+                    startIndex += minusCount;
+
+                    preSegment = this._replacePrefixString(preSegment);
+                }
+
                 this._pushSequenceNode(
                     sequenceNodes,
                     {

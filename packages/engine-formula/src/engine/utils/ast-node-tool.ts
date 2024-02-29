@@ -14,19 +14,14 @@
  * limitations under the License.
  */
 
-import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
-import { BaseFunction } from '../../base-function';
+import type { Nullable } from '@univerjs/core';
+import type { BaseAstNode } from '../ast-node/base-ast-node';
 
-export class Minus extends BaseFunction {
-    override calculate(variant1: BaseValueObject, variant2: BaseValueObject) {
-        if (variant1.isError()) {
-            return variant1;
-        }
-
-        if (variant2.isError()) {
-            return variant2;
-        }
-
-        return variant1.minus(variant2);
+export function getAstNodeTopParent(node: BaseAstNode) {
+    let parent: Nullable<BaseAstNode> = node;
+    while (parent?.getParent()) {
+        parent = parent.getParent();
+        // console.log(parent);
     }
+    return parent;
 }

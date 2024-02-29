@@ -28,7 +28,7 @@ export interface IHighlightCell extends IBaseCfRule {
 
 export interface IValueConfig {
     type: ValueType;
-    value?: number;
+    value?: number | string;
 }
 
 export interface IUniqueValuesHighlightCell extends IHighlightCell {

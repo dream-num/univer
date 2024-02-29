@@ -20,14 +20,19 @@ import { deserializeRangeWithSheet, generateStringWithSequence, LexerTreeBuilder
 import { NumberOperator, RuleType, SubRuleType, TextOperator, TimePeriodOperator } from '../../base/const';
 import type { IAverageHighlightCell, IConditionFormatRule, IFormulaHighlightCell, IHighlightCell, INumberHighlightCell, IRankHighlightCell, ITextHighlightCell, ITimePeriodHighlightCell } from '../../models/type';
 import { ConditionalFormatFormulaService, FormulaResultStatus } from '../conditional-format-formula.service';
+import { ConditionalFormatViewModel } from '../../models/conditional-format-view-model';
 import { getCellValue, isFloatsEqual, isNullable, serialTimeToTimestamp } from './utils';
 import type { ICalculateUnit } from './type';
+
+const EMPTY_STYLE = {};
+Object.freeze(EMPTY_STYLE);
 
 export const highlightCellCalculateUnit: ICalculateUnit = {
     type: RuleType.highlightCell,
     handle: async (rule: IConditionFormatRule, context) => {
         const ruleConfig = rule.rule as IHighlightCell;
         const { worksheet } = context;
+
         const getCache = () => {
             switch (ruleConfig.subType) {
                 case SubRuleType.average:{
@@ -314,6 +319,7 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
                     }
                     const { unitId, subUnitId } = context;
                     const conditionalFormatFormulaService = context.accessor.get(ConditionalFormatFormulaService);
+                    const conditionalFormatViewModel = context.accessor.get(ConditionalFormatViewModel);
 
                     const getRangeFromCell = (row: number, col: number) => ({ startRow: row, endRow: row, startColumn: col, endColumn: col });
                     const originRange = getRangeFromCell(rule.ranges[0].startRow, rule.ranges[0].startColumn);
@@ -339,6 +345,17 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
                         const formulaItem = conditionalFormatFormulaService.getFormulaResult(unitId, subUnitId, formulaString);
                         if (formulaItem && formulaItem.status === FormulaResultStatus.SUCCESS) {
                             return !!formulaItem.result;
+                        } else {
+                            // If the formula triggers the calculation, wait for the result,
+                            // and use the previous style cache until the result comes out
+                            const currentValue = conditionalFormatViewModel.getCellCf(unitId, subUnitId, row, col);
+                            if (currentValue) {
+                                const cache = currentValue.cfList.find((item) => item.cfId === rule.cfId);
+                                if (cache) {
+                                    return cache.ruleCache !== EMPTY_STYLE;
+                                }
+                                return false;
+                            }
                         }
                     }
                     return false;
@@ -346,14 +363,13 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
             }
         };
         const computeResult = new ObjectMatrix();
-        const emptyStyle = {};
         rule.ranges.forEach((range) => {
             Range.foreach(range, (row, col) => {
                 if (check(row, col)) {
                     computeResult.setValue(row, col, ruleConfig.style);
                 } else {
                     // Returns an empty property indicating that it has been processed.
-                    computeResult.setValue(row, col, emptyStyle);
+                    computeResult.setValue(row, col, EMPTY_STYLE);
                 }
             });
         });

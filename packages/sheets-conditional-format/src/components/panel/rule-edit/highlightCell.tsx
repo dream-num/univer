@@ -40,7 +40,7 @@ type IValue = number | string | [number, number];
 type IResult = Pick<ITextHighlightCell | INumberHighlightCell | ITimePeriodHighlightCell, 'operator' | 'subType'> & { value?: IValue };
 
 const HighlightCellInput = (props: { type: IResult['subType'];
-                                     operator: IResult['operator'];
+                                     operator?: IResult['operator'];
                                      interceptorManager: IStyleEditorProps['interceptorManager'];
                                      rule?: IHighlightCell;
                                      value: IValue;
@@ -316,7 +316,7 @@ export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, ITextHigh
         <div>
             <div className={`${stylesBase.title} ${stylesBase.mTBase}`}>{localeService.t('sheet.cf.panel.styleRule')}</div>
             <Select className={`${stylesBase.mTSm}`} onChange={onTypeChange} value={subType} options={typeOptions} />
-            <Select className={`${stylesBase.mTSm}`} onChange={onOperatorChange} value={operator} options={operatorOptions} />
+            <Select className={`${stylesBase.mTSm}`} onChange={onOperatorChange} value={operator || ''} options={operatorOptions} />
             <HighlightCellInput key={inputRenderKey} value={value} interceptorManager={interceptorManager} type={subType} operator={operator} rule={rule} onChange={onInputChange} />
             <div className={`${styles.cfPreviewWrap} ${stylesBase.mLXxs}`}>
                 <Preview rule={getResult({}) as IConditionalFormatRuleConfig} />

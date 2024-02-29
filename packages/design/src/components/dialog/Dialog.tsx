@@ -17,6 +17,7 @@
 import { CloseSingle } from '@univerjs/icons';
 import RcDialog from 'rc-dialog';
 import React, { useContext, useState } from 'react';
+import type { DraggableData, DraggableEventHandler } from 'react-draggable';
 import Draggable from 'react-draggable';
 
 import { ConfigContext } from '../config-provider/ConfigProvider';
@@ -66,6 +67,12 @@ export interface IDialogProps {
     destroyOnClose?: boolean;
 
     /**
+     * Whether the dialog should preserve its position on destroy.
+     * @default false
+     */
+    preservePositionOnDestroy?: boolean;
+
+    /**
      * The footer of the dialog.
      */
     footer?: React.ReactNode;
@@ -86,10 +93,12 @@ export function Dialog(props: IDialogProps) {
         draggable = false,
         closeIcon = <CloseSingle />,
         destroyOnClose = false,
+        preservePositionOnDestroy = false,
         footer,
         onClose,
     } = props;
     const [dragDisabled, setDragDisabled] = useState(false);
+    const [positionOffset, setPositionOffset] = useState({ x: 0, y: 0 });
 
     const { mountContainer } = useContext(ConfigContext);
 
@@ -118,8 +127,21 @@ export function Dialog(props: IDialogProps) {
             title
         );
 
-    const modalRender = (modal: React.ReactNode) =>
-        draggable ? <Draggable disabled={dragDisabled}>{modal}</Draggable> : modal;
+    const modalRender = (modal: React.ReactNode) => {
+        function handleStop(_event: MouseEvent, data: DraggableData) {
+            if (preservePositionOnDestroy) {
+                setPositionOffset({ x: data.x, y: data.y });
+            }
+        }
+
+        return draggable
+            ? (
+                <Draggable disabled={dragDisabled} defaultPosition={positionOffset} onStop={handleStop as DraggableEventHandler}>
+                    {modal}
+                </Draggable>
+            )
+            : modal;
+    };
 
     return (
         <RcDialog

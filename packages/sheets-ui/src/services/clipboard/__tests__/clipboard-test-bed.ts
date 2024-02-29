@@ -21,12 +21,12 @@ import { SelectionManagerService, SheetInterceptorService } from '@univerjs/shee
 import {
     BrowserClipboardService,
     DesktopMessageService,
-    DesktopNotificationService,
     IClipboardInterfaceService,
     IMessageService,
     INotificationService,
+    IPlatformService,
 } from '@univerjs/ui';
-import type { Dependency } from '@wendellhu/redi';
+import type { Dependency, IDisposable } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { SheetClipboardController } from '../../../controllers/clipboard/clipboard.controller';
@@ -496,6 +496,20 @@ export class testMarkSelectionService {
     }
 }
 
+export class testNotificationService {
+    show(): IDisposable {
+        return {
+            dispose: () => {},
+        };
+    }
+}
+
+export class testPlatformService {
+    isWindows: false;
+    isMac: true;
+    isLinux: false;
+}
+
 export function clipboardTestBed(workbookConfig?: IWorkbookData, dependencies?: Dependency[]) {
     const univer = new Univer();
 
@@ -531,11 +545,12 @@ export function clipboardTestBed(workbookConfig?: IWorkbookData, dependencies?: 
             ]);
             injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
             injector.add([ISelectionRenderService, { useClass: SelectionRenderService }]);
+            injector.add([INotificationService, { useClass: testNotificationService }]); ;
+            injector.add([IPlatformService, { useClass: testPlatformService }]);
             // Because SheetClipboardController is initialized in the rendered life cycle, here we need to initialize it manually
             const sheetClipboardController = injector.createInstance(SheetClipboardController);
             injector.add([SheetClipboardController, { useValue: sheetClipboardController }]);
             injector.add([SheetInterceptorService]);
-            injector.add([INotificationService, { useClass: DesktopNotificationService }]); ;
 
             dependencies?.forEach((d) => injector.add(d));
         }

@@ -237,7 +237,7 @@ export class Layer extends Disposable {
         this._objects = [];
     }
 
-    dispose() {
+    override dispose() {
         super.dispose();
 
         this.getObjects().forEach((o) => {

@@ -335,6 +335,8 @@ export class ZenEditorController extends RxDisposable {
                         const paragraphs = docBody?.paragraphs;
                         const textRuns = docBody?.textRuns;
 
+                        this._editorBridgeService.changeEditorDirty(true);
+
                         if (dataStream == null || paragraphs == null) {
                             return;
                         }

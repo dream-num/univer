@@ -56,7 +56,7 @@ const TransformerManagerTypeArray: TransformerManagerType[] = [
     TransformerManagerType.RESIZE_RB,
 ];
 
-interface transformState {
+interface ITransformState {
     left?: number;
     top?: number;
     width?: number;
@@ -269,7 +269,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
                         });
                     });
 
-                    this._upObserver = scene.onPointerUpObserver.add((upEvt: IPointerEvent | IMouseEvent) => {
+                    this._upObserver = scene.onPointerUpObserver.add(() => {
                         scene.onPointerMoveObserver.remove(this._moveObserver);
                         scene.onPointerUpObserver.remove(this._upObserver);
                         scene.enableEvent();
@@ -290,7 +290,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
         return applyObject;
     }
 
-    dispose() {
+    override dispose() {
         this._moveObserver?.dispose();
         this._upObserver?.dispose();
 
@@ -375,7 +375,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
         this._selectedObjectMap.forEach((moveObject) => {
             // console.log(moveLeft + moveObject.width, moveTop + moveObject.height);
             const { left, top, width, height } = moveObject;
-            const state: transformState = {};
+            const state: ITransformState = {};
 
             switch (type) {
                 case TransformerManagerType.RESIZE_LT:
@@ -464,7 +464,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
                         scene.setCursor(cursor);
                     });
 
-                    this._upObserver = scene.onPointerUpObserver.add((upEvt: IPointerEvent | IMouseEvent) => {
+                    this._upObserver = scene.onPointerUpObserver.add(() => {
                         scene.onPointerMoveObserver.remove(this._moveObserver);
                         scene.onPointerUpObserver.remove(this._upObserver);
                         scene.enableEvent();
@@ -502,11 +502,11 @@ export class Transformer extends Disposable implements ITransformerConfig {
                     this._viewportScrollX = scrollX;
                     this._viewportScrollY = scrollY;
 
-                    this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
-                        const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
-                    });
+                    // this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
+                    //     const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
+                    // });
 
-                    this._upObserver = scene.onPointerUpObserver.add((upEvt: IPointerEvent | IMouseEvent) => {
+                    this._upObserver = scene.onPointerUpObserver.add(() => {
                         scene.onPointerMoveObserver.remove(this._moveObserver);
                         scene.onPointerUpObserver.remove(this._upObserver);
                         scene.enableEvent();
@@ -879,7 +879,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
     private _addCancelObserver(scene: ThinScene) {
         scene.onPointerDownObserver.remove(this._cancelFocusObserver);
-        this._cancelFocusObserver = scene.onPointerDownObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
+        this._cancelFocusObserver = scene.onPointerDownObserver.add(() => {
             this._selectedObjectMap.clear();
             this._clearControl();
             scene.onPointerDownObserver.remove(this._cancelFocusObserver);

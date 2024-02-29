@@ -186,7 +186,9 @@ export abstract class ThinScene extends Disposable {
 
     getParent(): any {}
 
-    dispose() {}
+    override dispose() {
+        super.dispose();
+    }
 
     getObject(oKey: string): Nullable<BaseObject> {}
 

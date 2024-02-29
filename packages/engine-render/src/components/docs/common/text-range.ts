@@ -42,6 +42,9 @@ const TEXT_ANCHOR_KEY_PREFIX = '__TestSelectionAnchor__';
 
 const ID_LENGTH = 6;
 
+const BLINK_ON = 500;
+const BLINK_OFF = 500;
+
 export function cursorConvertToTextRange(
     scene: Scene,
     range: ISuccinctTextRangeParam,
@@ -70,6 +73,8 @@ export class TextRange {
 
     private _cursorList: ITextRange[] = [];
 
+    private _anchorBlinkTimer: Nullable<ReturnType<typeof setInterval>> = null;
+
     constructor(
         private _scene: ThinScene,
         private _document: Documents,
@@ -77,7 +82,31 @@ export class TextRange {
         public anchorNodePosition?: Nullable<INodePosition>,
         public focusNodePosition?: Nullable<INodePosition>,
         public style: ITextSelectionStyle = NORMAL_TEXT_SELECTION_PLUGIN_STYLE
-    ) {}
+    ) {
+        this._anchorBlink();
+    }
+
+    private _anchorBlink() {
+        setTimeout(() => {
+            if (this._anchorShape) {
+                if (this._anchorShape.visible) {
+                    this.deactivateStatic();
+                }
+            }
+        }, BLINK_ON);
+
+        this._anchorBlinkTimer = setInterval(() => {
+            if (this._anchorShape) {
+                if (this._anchorShape.visible) {
+                    this.activeStatic();
+
+                    setTimeout(() => {
+                        this.deactivateStatic();
+                    }, BLINK_ON);
+                }
+            }
+        }, BLINK_OFF + BLINK_ON);
+    }
 
     // The start position of the range
     get startOffset() {
@@ -186,6 +215,11 @@ export class TextRange {
         this._rangeShape = null;
         this._anchorShape?.dispose();
         this._anchorShape = null;
+
+        if (this._anchorBlinkTimer) {
+            clearInterval(this._anchorBlinkTimer);
+            this._anchorBlinkTimer = null;
+        }
     }
 
     isIntersection(compareRange: TextRange) {
@@ -324,7 +358,7 @@ export class TextRange {
             top: top + docsTop,
             height,
             strokeWidth: this.style?.strokeWidth || 1,
-            stroke: this.style?.stroke || getColor(COLORS.black, 0),
+            stroke: this.style?.strokeActive || getColor(COLORS.black, 1),
             evented: false,
         });
 

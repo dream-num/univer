@@ -28,7 +28,7 @@ import { TextSelectionManagerService } from '../services/text-selection-manager.
 
 @OnLifecycle(LifecycleStages.Rendered, TextSelectionController)
 export class TextSelectionController extends Disposable {
-    private _loadedMap = new Set<RenderComponentType>();
+    private _loadedMap = new WeakSet<RenderComponentType>();
 
     constructor(
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,

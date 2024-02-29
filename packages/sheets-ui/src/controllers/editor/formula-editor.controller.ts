@@ -56,7 +56,7 @@ import { IEditorBridgeService } from '../../services/editor-bridge.service';
 
 @OnLifecycle(LifecycleStages.Steady, FormulaEditorController)
 export class FormulaEditorController extends RxDisposable {
-    private _loadedMap: Set<RenderComponentType> = new Set();
+    private _loadedMap = new WeakSet<RenderComponentType>();
 
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,

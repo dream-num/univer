@@ -76,6 +76,21 @@ export class SheetSkeletonManagerService implements IDisposable {
     }
 
     setCurrent(searchParam: ISheetSkeletonManagerSearch): Nullable<ISheetSkeletonManagerParam> {
+        this._setCurrent(searchParam);
+    }
+
+    private _compareSearch(param1: Nullable<ISheetSkeletonManagerSearch>, param2: Nullable<ISheetSkeletonManagerSearch>) {
+        if (param1 == null || param2 == null) {
+            return false;
+        }
+
+        if (param1.commandId === param2.commandId && param1.sheetId === param2.sheetId && param1.unitId === param2.unitId) {
+            return true;
+        }
+        return false;
+    }
+
+    private _setCurrent(searchParam: ISheetSkeletonManagerSearch): Nullable<ISheetSkeletonManagerParam> {
         const param = this._getCurrentBySearch(searchParam);
         if (param != null) {
             this._reCalculate(param);
@@ -107,8 +122,6 @@ export class SheetSkeletonManagerService implements IDisposable {
         this._currentSkeletonBefore$.next(nextParam);
 
         this._currentSkeleton$.next(nextParam);
-
-        return this.getCurrent();
     }
 
     reCalculate() {

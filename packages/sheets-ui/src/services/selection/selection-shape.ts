@@ -15,7 +15,7 @@
  */
 
 import type { IRangeWithCoord, ISelectionCellWithCoord, Nullable, ThemeService } from '@univerjs/core';
-import { ColorKit, RANGE_TYPE } from '@univerjs/core';
+import { ColorKit, Disposable, RANGE_TYPE, toDisposable } from '@univerjs/core';
 import type { Scene } from '@univerjs/engine-render';
 import { cancelRequestFrame, DEFAULT_SELECTION_LAYER_INDEX, FIX_ONE_PIXEL_BLUR_OFFSET, Group, Rect, requestNewFrame, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
 import type { ISelectionStyle, ISelectionWidgetConfig, ISelectionWithCoordAndStyle } from '@univerjs/sheets';
@@ -68,7 +68,7 @@ const SELECTION_TITLE_HIGHLIGHT_ALPHA = 0.3;
 /**
  * The main selection canvas component
  */
-export class SelectionShape {
+export class SelectionShape extends Disposable {
     private _leftControl!: Rect;
     private _rightControl!: Rect;
     private _topControl!: Rect;
@@ -137,6 +137,7 @@ export class SelectionShape {
         private _isHeaderHighlight: boolean = true,
         private readonly _themeService: ThemeService
     ) {
+        super();
         this._initialize();
     }
 
@@ -306,6 +307,9 @@ export class SelectionShape {
         this._bottomLeftWidget?.dispose();
         this._bottomCenterWidget?.dispose();
         this._bottomRightWidget?.dispose();
+
+        super.dispose();
+
         this._dispose$.next(this);
         this._dispose$.complete();
     }
@@ -610,15 +614,20 @@ export class SelectionShape {
         this._selectionShape.zIndex = zIndex;
 
         const scene = this.getScene();
+
         scene.addObject(this._selectionShape, SHEET_COMPONENT_SELECTION_LAYER_INDEX);
 
-        scene.onTransformChangeObservable.add((state) => {
-            if (state.type !== TRANSFORM_CHANGE_OBSERVABLE_TYPE.scale) {
-                return;
-            }
+        this.disposeWithMe(
+            toDisposable(
+                scene.onTransformChangeObservable.add((state) => {
+                    if (state.type !== TRANSFORM_CHANGE_OBSERVABLE_TYPE.scale) {
+                        return;
+                    }
 
-            this._updateControl(this._currentStyle, this._rowHeaderWidth, this._columnHeaderHeight);
-        });
+                    this._updateControl(this._currentStyle, this._rowHeaderWidth, this._columnHeaderHeight);
+                })
+            )
+        );
 
         this._initialTitle();
     }

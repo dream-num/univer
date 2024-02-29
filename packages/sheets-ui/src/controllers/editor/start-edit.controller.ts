@@ -99,7 +99,7 @@ export class StartEditController extends Disposable {
     }
 
     override dispose(): void {
-
+        super.dispose();
     }
 
     private _initialize() {
@@ -509,7 +509,12 @@ export class StartEditController extends Disposable {
                 (eventType === DeviceInputEventType.Dblclick && isInArrayFormulaRange)
                 ) {
                     const snapshot = Tools.deepClone(documentDataModel.snapshot) as IDocumentData;
-                    const documentViewModel = this._docViewModelManagerService.getCurrent()?.docViewModel!;
+                    const documentViewModel = this._docViewModelManagerService.getViewModel(editorUnitId);
+
+                    if (documentViewModel == null) {
+                        return;
+                    }
+
                     this._resetBodyStyle(snapshot.body!);
 
                     documentDataModel.reset(snapshot);

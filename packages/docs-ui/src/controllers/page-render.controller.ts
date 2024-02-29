@@ -19,6 +19,7 @@ import {
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
+    toDisposable,
 } from '@univerjs/core';
 import type { Documents, IPageRenderConfig } from '@univerjs/engine-render';
 import { IRenderManagerService, Rect } from '@univerjs/engine-render';
@@ -68,28 +69,32 @@ export class PageRenderController extends Disposable {
 
             const pageSize = docsComponent.getSkeleton()?.getPageSize();
 
-            docsComponent.onPageRenderObservable.add((config: IPageRenderConfig) => {
-                if (this._editorService.isEditor(unitId)) {
-                    return;
-                }
+            this.disposeWithMe(
+                toDisposable(
+                    docsComponent.onPageRenderObservable.add((config: IPageRenderConfig) => {
+                        if (this._editorService.isEditor(unitId)) {
+                            return;
+                        }
 
-                // Draw page borders
-                const { page, pageLeft, pageTop, ctx } = config;
-                const { width, pageWidth, height, pageHeight } = page;
+                        // Draw page borders
+                        const { page, pageLeft, pageTop, ctx } = config;
+                        const { width, pageWidth, height, pageHeight } = page;
 
-                ctx.save();
+                        ctx.save();
 
-                ctx.translate(pageLeft - 0.5, pageTop - 0.5);
-                Rect.drawWith(ctx, {
-                    width: pageSize?.width ?? pageWidth ?? width,
-                    height: pageSize?.height ?? pageHeight ?? height,
-                    strokeWidth: 1,
-                    stroke: PAGE_STROKE_COLOR,
-                    fill: PAGE_FILL_COLOR,
-                    zIndex: 3,
-                });
-                ctx.restore();
-            });
+                        ctx.translate(pageLeft - 0.5, pageTop - 0.5);
+                        Rect.drawWith(ctx, {
+                            width: pageSize?.width ?? pageWidth ?? width,
+                            height: pageSize?.height ?? pageHeight ?? height,
+                            strokeWidth: 1,
+                            stroke: PAGE_STROKE_COLOR,
+                            fill: PAGE_FILL_COLOR,
+                            zIndex: 3,
+                        });
+                        ctx.restore();
+                    })
+                )
+            );
         });
     }
 

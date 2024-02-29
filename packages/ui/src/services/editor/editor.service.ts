@@ -62,6 +62,10 @@ class Editor {
 
     }
 
+    get documentDataModel() {
+        return this._param.documentDataModel;
+    }
+
     get editorUnitId() {
         return this._param.editorUnitId;
     }
@@ -344,6 +348,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
     dispose(): void {
         this._state$.complete();
         this._editors.clear();
+        super.dispose();
     }
 
     getEditor(id?: string): Readonly<Nullable<Editor>> {
@@ -433,6 +438,16 @@ export class EditorService extends Disposable implements IEditorService, IDispos
     }
 
     unRegister(editorUnitId: string) {
+        const editor = this._editors.get(editorUnitId);
+
+        if (editor == null) {
+            return;
+        }
+
+        this._renderManagerService.removeItem(editorUnitId);
+
+        editor.documentDataModel.dispose();
+
         this._editors.delete(editorUnitId);
 
         this._currentUniverService.disposeDocument(editorUnitId);

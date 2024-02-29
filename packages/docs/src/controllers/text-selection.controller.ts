@@ -16,7 +16,7 @@
 
 import type { ICommandInfo, Nullable } from '@univerjs/core';
 import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle, toDisposable } from '@univerjs/core';
-import type { Documents, IMouseEvent, IPointerEvent } from '@univerjs/engine-render';
+import type { Documents, IMouseEvent, IPointerEvent, RenderComponentType } from '@univerjs/engine-render';
 import { CURSOR_TYPE, IRenderManagerService, ITextSelectionRenderManager } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
 
@@ -28,7 +28,7 @@ import { TextSelectionManagerService } from '../services/text-selection-manager.
 
 @OnLifecycle(LifecycleStages.Rendered, TextSelectionController)
 export class TextSelectionController extends Disposable {
-    private _loadedMap = new Set();
+    private _loadedMap = new WeakSet<RenderComponentType>();
 
     constructor(
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
@@ -71,9 +71,14 @@ export class TextSelectionController extends Disposable {
             return;
         }
 
-        if (!this._loadedMap.has(unitId)) {
+        const docObject = this._getDocObjectById(unitId);
+        if (docObject == null || docObject.document == null) {
+            return;
+        }
+
+        if (!this._loadedMap.has(docObject.document)) {
             this._initialMain(unitId);
-            this._loadedMap.add(unitId);
+            this._loadedMap.add(docObject.document);
         }
     }
 

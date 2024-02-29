@@ -43,6 +43,7 @@ export interface IRenderManagerService {
     create(unitId: Nullable<string>): void;
     getCurrent(): Nullable<IRender>;
     getFirst(): Nullable<IRender>;
+    has(unitId: string): boolean;
 }
 
 export type RenderComponentType = SheetComponent | DocComponent | Slide | BaseObject;
@@ -164,6 +165,10 @@ export class RenderManagerService implements IRenderManagerService {
             this._disposeItem(item);
         }
         this._renderMap.delete(unitId);
+    }
+
+    has(unitId: string) {
+        return this._renderMap.has(unitId);
     }
 
     setCurrent(unitId: string) {

@@ -31,6 +31,7 @@ import {
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
+    toDisposable,
     Tools,
 } from '@univerjs/core';
 import { MoveCursorOperation, MoveSelectionOperation } from '@univerjs/docs';
@@ -109,6 +110,8 @@ export class EndEditController extends Disposable {
 
         const { document: documentComponent } = editorObject;
         documentComponent.onPointerDownObserver.remove(this._cursorChangeObservers);
+
+        super.dispose();
     }
 
     private _initialize() {
@@ -316,11 +319,15 @@ export class EndEditController extends Disposable {
 
         const { document: documentComponent } = editorObject;
 
-        this._cursorChangeObservers = documentComponent.onPointerDownObserver.add(() => {
-            if (this._isCursorChange === CursorChange.StartEditor) {
-                this._isCursorChange = CursorChange.CursorChange;
-            }
-        });
+        this.disposeWithMe(
+            toDisposable(
+                documentComponent.onPointerDownObserver.add(() => {
+                    if (this._isCursorChange === CursorChange.StartEditor) {
+                        this._isCursorChange = CursorChange.CursorChange;
+                    }
+                })
+            )
+        );
     }
 
     private _commandExecutedListener() {

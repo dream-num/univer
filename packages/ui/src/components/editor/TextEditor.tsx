@@ -67,6 +67,8 @@ export function TextEditor(props: ITextEditorProps & MyComponentProps): JSX.Elem
         // Clean up on unmount
         return () => {
             resizeObserver.unobserve(editor);
+
+            editorService.unRegister(id);
         };
     }, []);
 

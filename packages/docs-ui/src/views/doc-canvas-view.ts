@@ -33,8 +33,6 @@ export class DocCanvasView extends RxDisposable {
 
     private _currentDocumentModel!: DocumentDataModel;
 
-    private _loadedMap = new Set();
-
     private readonly _fps$ = new BehaviorSubject<string>('');
 
     readonly fps$ = this._fps$.asObservable();
@@ -79,9 +77,8 @@ export class DocCanvasView extends RxDisposable {
 
         this._currentDocumentModel = model;
 
-        if (!this._loadedMap.has(unitId)) {
+        if (!this._renderManagerService.has(unitId)) {
             this._addNewRender();
-            this._loadedMap.add(unitId);
         }
     }
 

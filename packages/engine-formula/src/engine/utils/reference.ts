@@ -154,7 +154,6 @@ export function serializeRange(range: IRange): string {
  * Serialize an `IRange` and a sheetID into a string.
  * @param sheetName
  * @param range
- * @returns
  */
 export function serializeRangeWithSheet(sheetName: string, range: IRange): string {
     if (needsQuoting(sheetName)) {
@@ -168,7 +167,6 @@ export function serializeRangeWithSheet(sheetName: string, range: IRange): strin
  * @param unit unitId or unitName
  * @param sheetName
  * @param range
- * @returns
  */
 export function serializeRangeWithSpreadsheet(unit: string, sheetName: string, range: IRange): string {
     if (needsQuoting(unit) || needsQuoting(sheetName)) {
@@ -273,9 +271,9 @@ export function deserializeRangeWithSheet(refString: string): IGridRangeName {
     const endColumn = endGrid.column;
 
     let rangeType = RANGE_TYPE.NORMAL;
-    if (isNaN(startRow) && isNaN(endRow)) {
+    if (Number.isNaN(startRow) && Number.isNaN(endRow)) {
         rangeType = RANGE_TYPE.COLUMN;
-    } else if (isNaN(startColumn) && isNaN(endColumn)) {
+    } else if (Number.isNaN(startColumn) && Number.isNaN(endColumn)) {
         rangeType = RANGE_TYPE.ROW;
     }
 

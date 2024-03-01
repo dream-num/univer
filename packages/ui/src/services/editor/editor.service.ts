@@ -17,11 +17,12 @@
 import type { DocumentDataModel, IDocumentBody, IDocumentData, IDocumentStyle, IPosition, Nullable } from '@univerjs/core';
 import { DEFAULT_EMPTY_DOCUMENT_VALUE, Disposable, HorizontalAlign, IUniverInstanceService, toDisposable, VerticalAlign } from '@univerjs/core';
 import type { IDisposable } from '@wendellhu/redi';
-import { createIdentifier } from '@wendellhu/redi';
+import { createIdentifier, Inject } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
 import { Subject } from 'rxjs';
 import type { IRender, ISuccinctTextRangeParam, Scene } from '@univerjs/engine-render';
 import { IRenderManagerService, UNIVER_GLOBAL_DEFAULT_FONT_SIZE } from '@univerjs/engine-render';
+import { isReferenceString, LexerTreeBuilder, operatorToken } from '@univerjs/engine-formula';
 
 export interface IEditorStateParam extends Partial<IPosition> {
     visible?: boolean;
@@ -63,6 +64,10 @@ export interface IEditorInputFormulaParam {
 }
 
 class Editor {
+    private _focus = false;
+
+    private _valueLegality = true;
+
     constructor(private _param: IEditorSetParam) {
 
     }
@@ -83,8 +88,36 @@ class Editor {
         return this._param.render;
     }
 
-    get isSingle() {
-        return this._param.isSingle;
+    isValueLegality() {
+        return this._valueLegality === true;
+    }
+
+    setValueLegality(state = true) {
+        this._valueLegality = state;
+    }
+
+    isFocus() {
+        return this._focus;
+    }
+
+    setFocus(state = false) {
+        this._focus = state;
+    }
+
+    isSingle() {
+        return this._param.isSingle === true || this.onlyInputFormula() || this.onlyInputFormula();
+    }
+
+    isReadOnly() {
+        return this._param.isReadonly === true;
+    }
+
+    onlyInputFormula() {
+        return this._param.onlyInputFormula === true;
+    }
+
+    onlyInputRange() {
+        return this._param.onlyInputRange === true;
     }
 
     getBoundingClientRect() {
@@ -117,7 +150,14 @@ class Editor {
     verticalAlign() {
         const documentDataModel = this._param?.documentDataModel;
 
-        if (documentDataModel == null || this._param.isSingle === false) {
+        if (documentDataModel == null) {
+            return;
+        }
+
+        const { width, height } = this._param.editorDom.getBoundingClientRect();
+
+        if (!this.isSingle()) {
+            documentDataModel.updateDocumentDataPageSize(width, undefined);
             return;
         }
 
@@ -127,13 +167,13 @@ class Editor {
             fontSize = this._param.canvasStyle.fontSize;
         }
 
-        const { height } = this._param.editorDom.getBoundingClientRect();
-
         const top = (height - (fontSize * 4 / 3)) / 2 - 2;
 
         documentDataModel.updateDocumentDataMargin({
             t: top < 0 ? 0 : top,
         });
+
+        documentDataModel.updateDocumentDataPageSize(undefined, undefined);
     }
 
     updateCanvasStyle() {
@@ -210,6 +250,14 @@ export interface IEditorService {
     setRichValue(body: IDocumentBody, editorUnitId?: string): void;
 
     getFirstEditor(): Editor;
+
+    focusStyle$: Observable<string>;
+
+    focusStyle(editorUnitId: string): void;
+
+    refreshValueChange(editorId: string): void;
+
+    checkValueLegality(editorId: string): boolean;
 }
 
 export class EditorService extends Disposable implements IEditorService, IDisposable {
@@ -251,9 +299,14 @@ export class EditorService extends Disposable implements IEditorService, IDispos
 
     readonly valueChange$ = this._valueChange$.asObservable();
 
+    private readonly _focusStyle$ = new Subject<string>();
+
+    readonly focusStyle$ = this._focusStyle$.asObservable();
+
     constructor(
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder
     ) {
         super();
     }
@@ -277,6 +330,21 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         this._changeEditorFocus$.next(null);
 
         this.blur();
+    }
+
+    focusStyle(editorUnitId: string) {
+        const editor = this.getEditor(editorUnitId);
+        if (!editor) {
+            return false;
+        }
+
+        this.getAllEditor().forEach((editor) => {
+            editor.setFocus(false);
+        });
+
+        editor.setFocus(true);
+
+        this._focusStyle$.next(editorUnitId);
     }
 
     blur() {
@@ -456,6 +524,45 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         this._editors.delete(editorUnitId);
 
         this._currentUniverService.disposeDocument(editorUnitId);
+    }
+
+    refreshValueChange(editorUnitId: string) {
+        this._refreshValueChange(editorUnitId);
+    }
+
+    checkValueLegality(editorUnitId: string) {
+        const editor = this._editors.get(editorUnitId);
+
+        if (editor == null) {
+            return true;
+        }
+
+        let value = editor.getValue();
+
+        editor.setValueLegality();
+
+        value = value.replace(/\r\n/g, '').replace(/\n/g, '').replace(/\n/g, '');
+
+        if (value.length === 0) {
+            return true;
+        }
+
+        if (editor.onlyInputFormula()) {
+            if (value.substring(0, 1) !== operatorToken.EQUALS) {
+                editor.setValueLegality(false);
+                return false;
+            }
+            const bracketCount = this._lexerTreeBuilder.checkIfAddBracket(value);
+            editor.setValueLegality(bracketCount === 0);
+        } else if (editor.onlyInputRange()) {
+            const valueArray = value.split(',');
+            const result = valueArray.every((refString) => {
+                return isReferenceString(refString.trim());
+            });
+            editor.setValueLegality(result);
+        }
+
+        return editor.isValueLegality();
     }
 
     private _refreshValueChange(editorId: string) {

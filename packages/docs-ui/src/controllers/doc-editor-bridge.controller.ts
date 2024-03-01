@@ -60,6 +60,8 @@ export class DocEditorBridgeController extends Disposable {
         this._initialBlur();
 
         this._initialFocus();
+
+        this._initialValueChange();
     }
 
     private _resize(unitId: Nullable<string>) {
@@ -108,7 +110,7 @@ export class DocEditorBridgeController extends Disposable {
 
         mainComponent?.resize(contentWidth, contentHeight);
 
-        if (editor.isSingle === false) {
+        if (!editor.isSingle()) {
             if (actualHeight > height) {
                 if (scrollBar == null) {
                     viewportMain && new ScrollBar(viewportMain, { enableHorizontal: false, barSize: 8 });
@@ -158,6 +160,26 @@ export class DocEditorBridgeController extends Disposable {
             this._textSelectionRenderManager.removeAllTextRanges();
             this._textSelectionRenderManager.addTextRanges([textRange]);
         });
+    }
+
+    private _initialValueChange() {
+        this._textSelectionRenderManager.onCompositionupdate$.subscribe(this._valueChange.bind(this));
+        this._textSelectionRenderManager.onInput$.subscribe(this._valueChange.bind(this));
+    }
+
+    private _valueChange() {
+        const unitId = this._currentUniverService.getCurrentUniverDocInstance().getUnitId();
+        if (unitId == null) {
+            return;
+        }
+
+        const editor = this._editorService.getEditor(unitId);
+
+        if (editor == null || editor.isSheetEditor()) {
+            return;
+        }
+
+        this._editorService.refreshValueChange(unitId);
     }
 
     /**

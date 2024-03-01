@@ -27,10 +27,7 @@ const containerStyle: React.CSSProperties = {
 };
 
 const editorStyle: React.CSSProperties = {
-    position: 'relative',
     width: '100%',
-    height: '40px',
-    border: '1px solid #000',
 };
 
 /**
@@ -42,13 +39,13 @@ export const TestEditorContainer = () => {
         <div
             style={containerStyle}
         >
-            <TextEditor id="test-editor-1" style={editorStyle} canvasStyle={{ fontSize: 10 }} value="I found one cent on the roadside." />
+            <TextEditor id="test-editor-1" isReadonly={true} style={editorStyle} canvasStyle={{ fontSize: 10 }} value="I found one cent on the roadside." />
             <br></br>
-            <TextEditor id="test-editor-2" style={editorStyle} canvasStyle={{ fontSize: 12 }} />
+            <TextEditor id="test-editor-2" onlyInputFormula={true} style={editorStyle} canvasStyle={{ fontSize: 10 }} />
             <br></br>
-            <TextEditor id="test-editor-3" style={editorStyle} canvasStyle={{ fontSize: 14 }} />
+            <TextEditor id="test-editor-3" onlyInputRange={true} style={editorStyle} canvasStyle={{ fontSize: 10 }} />
             <br></br>
-            <TextEditor id="test-editor-4" style={editorStyle} canvasStyle={{ fontSize: 18 }} />
+            <TextEditor id="test-editor-4" isSingle={false} style={{ ...editorStyle, height: '140px' }} canvasStyle={{ fontSize: 14 }} />
         </div>
     );
 };

@@ -20,11 +20,12 @@ import type { Documents, IMouseEvent, IPointerEvent, RenderComponentType } from 
 import { CURSOR_TYPE, IRenderManagerService, ITextSelectionRenderManager } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
 
-import { getDocObjectById } from '../basics/component-tools';
-import type { ISetDocZoomRatioOperationParams } from '../commands/operations/set-doc-zoom-ratio.operation';
-import { SetDocZoomRatioOperation } from '../commands/operations/set-doc-zoom-ratio.operation';
-import { DocSkeletonManagerService } from '../services/doc-skeleton-manager.service';
-import { TextSelectionManagerService } from '../services/text-selection-manager.service';
+import { IEditorService } from '@univerjs/ui';
+import { getDocObjectById } from '../../../docs/src/basics/component-tools';
+import type { ISetDocZoomRatioOperationParams } from '../../../docs/src/commands/operations/set-doc-zoom-ratio.operation';
+import { SetDocZoomRatioOperation } from '../../../docs/src/commands/operations/set-doc-zoom-ratio.operation';
+import { DocSkeletonManagerService } from '../../../docs/src/services/doc-skeleton-manager.service';
+import { TextSelectionManagerService } from '../../../docs/src/services/text-selection-manager.service';
 
 @OnLifecycle(LifecycleStages.Rendered, TextSelectionController)
 export class TextSelectionController extends Disposable {
@@ -37,7 +38,8 @@ export class TextSelectionController extends Disposable {
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ITextSelectionRenderManager
         private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
-        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService
+        @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
+        @IEditorService private readonly _editorService: IEditorService
     ) {
         super();
 
@@ -92,6 +94,9 @@ export class TextSelectionController extends Disposable {
         this.disposeWithMe(
             toDisposable(
                 document.onPointerEnterObserver.add(() => {
+                    if (this._isEditorReadOnly(unitId)) {
+                        return;
+                    }
                     document.cursor = CURSOR_TYPE.TEXT;
                 })
             )
@@ -109,6 +114,10 @@ export class TextSelectionController extends Disposable {
         this.disposeWithMe(
             toDisposable(
                 document?.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+                    if (this._isEditorReadOnly(unitId)) {
+                        return;
+                    }
+
                     const currentDocInstance = this._currentUniverService.getCurrentUniverDocInstance();
 
                     if (currentDocInstance.getUnitId() !== unitId) {
@@ -116,6 +125,8 @@ export class TextSelectionController extends Disposable {
                     }
 
                     this._textSelectionRenderManager.eventTrigger(evt);
+
+                    this._setEditorFocus(unitId);
 
                     if (evt.button !== 2) {
                         state.stopPropagation();
@@ -139,6 +150,19 @@ export class TextSelectionController extends Disposable {
                 })
             )
         );
+    }
+
+    private _isEditorReadOnly(unitId: string) {
+        const editor = this._editorService.getEditor(unitId);
+        if (!editor) {
+            return false;
+        }
+
+        return editor.isReadOnly();
+    }
+
+    private _setEditorFocus(unitId: string) {
+        this._editorService.focusStyle(unitId);
     }
 
     private _commandExecutedListener() {

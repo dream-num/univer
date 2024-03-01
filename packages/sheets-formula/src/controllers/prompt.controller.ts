@@ -258,14 +258,16 @@ export class PromptController extends Disposable {
                         return;
                     }
 
-                    if (
-                        (this._editorService.isSheetEditor(params.unitId) && this._editorBridgeService.isVisible().visible === false) ||
-                        this._formulaPromptService.isSelectionMoving()
-                    ) {
+                    const editor = this._editorService.getEditor(params.unitId);
+
+                    if (!editor) {
                         return;
                     }
 
-                    if (!this._editorService.isEditor(params.unitId)) {
+                    if (
+                        (editor.isSheetEditor() && this._editorBridgeService.isVisible().visible === false) ||
+                        this._formulaPromptService.isSelectionMoving()
+                    ) {
                         return;
                     }
 

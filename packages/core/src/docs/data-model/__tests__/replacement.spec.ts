@@ -204,4 +204,10 @@ describe('test case in replaceInDocumentBody utils', () => {
 
         expect(replaceInDocumentBody(documentBody, '月色', '')).toEqual(expectedBody);
     });
+
+    it('Should return the origin body when the query is empty', () => {
+        const documentBody = getTestDocumentBody();
+
+        expect(replaceInDocumentBody(documentBody, '', 'Jocs')).toEqual(documentBody);
+    });
 });

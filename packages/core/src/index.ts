@@ -38,6 +38,7 @@ export {
 export { ActionIterator } from './docs/data-model/text-x/action-iterator';
 export { getBodySlice, composeBody } from './docs/data-model/text-x/utils';
 export { TextX } from './docs/data-model/text-x/text-x';
+export { replaceInDocumentBody } from './docs/data-model/replacement';
 export * from './observer';
 export { Plugin, PluginType } from './plugin/plugin';
 export {

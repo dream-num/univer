@@ -18,8 +18,8 @@ import { ColorKit, ObjectMatrix, Range } from '@univerjs/core';
 import { isObject } from '@univerjs/engine-render';
 import { RuleType } from '../../base/const';
 import type { IColorScale, IConditionFormatRule } from '../../models/type';
-import { FormulaResultStatus } from '../conditional-format-formula.service';
-import { getCacheStyleMatrix, getCellValue, getValueByType, isNullable } from './utils';
+import { ConditionalFormatFormulaService, FormulaResultStatus } from '../conditional-format-formula.service';
+import { getCellValue, getValueByType, isNullable } from './utils';
 import type { ICalculateUnit } from './type';
 
 interface IRgbColor {
@@ -43,6 +43,7 @@ export const colorScaleCellCalculateUnit: ICalculateUnit = {
     type: RuleType.colorScale,
     handle: async (rule: IConditionFormatRule, context) => {
         const ruleConfig = rule.rule as IColorScale;
+        const conditionalFormatFormulaService = context.accessor.get(ConditionalFormatFormulaService);
         const { worksheet } = context;
         const matrix = new ObjectMatrix< number>();
         rule.ranges.forEach((range) => {
@@ -55,6 +56,15 @@ export const colorScaleCellCalculateUnit: ICalculateUnit = {
                 }
             });
         });
+
+        const emptyStyle = '';
+        const computeResult = new ObjectMatrix< string >();
+        rule.ranges.forEach((range) => {
+            Range.foreach(range, (row, col) => {
+                computeResult.setValue(row, col, emptyStyle);
+            });
+        });
+
         const _colorList = [...ruleConfig.config].sort((a, b) => a.index - b.index).map((config) => {
             return {
                 value: getValueByType(config.value, matrix, { ...context, cfId: rule.cfId }), color: new ColorKit(config.color),
@@ -64,13 +74,13 @@ export const colorScaleCellCalculateUnit: ICalculateUnit = {
          // and use the previous style cache until the result comes out
         const isFormulaWithoutSuccess = _colorList.some((item) => isObject(item.value) ? item.value.status !== FormulaResultStatus.SUCCESS : false);
         if (isFormulaWithoutSuccess) {
-            return getCacheStyleMatrix(context.unitId, context.subUnitId, rule, context);
+            return conditionalFormatFormulaService.getCache(context.unitId, context.subUnitId, rule.cfId) ?? computeResult;
         }
+
         const colorList = _colorList.map((item) => {
             return { ...item, value: isObject(item.value) ? Number(item.value.result) ?? 0 : item.value ?? 0 };
         });
 
-        // 如果存在相等或者后者大于前者的情况,报错。
         const isNotValid = colorList.some((item, index) => {
             if (index + 1 < colorList.length) {
                 const next = colorList[index + 1];
@@ -86,13 +96,6 @@ export const colorScaleCellCalculateUnit: ICalculateUnit = {
             }
             return false;
         }) || colorList.length <= 1;
-        const emptyStyle = '';
-        const computeResult = new ObjectMatrix< string >();
-        rule.ranges.forEach((range) => {
-            Range.foreach(range, (row, col) => {
-                computeResult.setValue(row, col, emptyStyle);
-            });
-        });
         if (isNotValid) {
             return computeResult;
         }

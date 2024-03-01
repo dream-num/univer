@@ -20,7 +20,6 @@ import { deserializeRangeWithSheet, generateStringWithSequence, LexerTreeBuilder
 import { NumberOperator, RuleType, SubRuleType, TextOperator, TimePeriodOperator } from '../../base/const';
 import type { IAverageHighlightCell, IConditionFormatRule, IFormulaHighlightCell, IHighlightCell, INumberHighlightCell, IRankHighlightCell, ITextHighlightCell, ITimePeriodHighlightCell } from '../../models/type';
 import { ConditionalFormatFormulaService, FormulaResultStatus } from '../conditional-format-formula.service';
-import { ConditionalFormatViewModel } from '../../models/conditional-format-view-model';
 import { getCellValue, isFloatsEqual, isNullable, serialTimeToTimestamp } from './utils';
 import type { ICalculateUnit } from './type';
 
@@ -207,8 +206,9 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
                             return v >= start && v <= end;
                         }
                         case TimePeriodOperator.lastMonth:{
-                            const start = dayjs().subtract(1, 'month').valueOf();
-                            const end = dayjs().valueOf();
+                            const preMonth = dayjs().subtract(1, 'month');
+                            const start = preMonth.startOf('month').valueOf();
+                            const end = preMonth.endOf('month').valueOf();
                             return v >= start && v <= end;
                         }
                         case TimePeriodOperator.lastWeek:{
@@ -223,8 +223,10 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
                             return v >= start && v <= end;
                         }
                         case TimePeriodOperator.nextWeek:{
-                            const start = dayjs().valueOf();
-                            const end = dayjs().add(1, 'week').valueOf();
+                            const week = dayjs();
+                            const nextWeek = week.add(1, 'week');
+                            const start = nextWeek.startOf('week').valueOf();
+                            const end = nextWeek.endOf('week').valueOf();
                             return v >= start && v <= end;
                         }
                         case TimePeriodOperator.thisMonth:{
@@ -319,7 +321,6 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
                     }
                     const { unitId, subUnitId } = context;
                     const conditionalFormatFormulaService = context.accessor.get(ConditionalFormatFormulaService);
-                    const conditionalFormatViewModel = context.accessor.get(ConditionalFormatViewModel);
 
                     const getRangeFromCell = (row: number, col: number) => ({ startRow: row, endRow: row, startColumn: col, endColumn: col });
                     const originRange = getRangeFromCell(rule.ranges[0].startRow, rule.ranges[0].startColumn);
@@ -343,19 +344,14 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
                         formulaString = `=${formulaString}`;
                         conditionalFormatFormulaService.registerFormula(unitId, subUnitId, rule.cfId, formulaString);
                         const formulaItem = conditionalFormatFormulaService.getFormulaResult(unitId, subUnitId, formulaString);
+                        const cache = conditionalFormatFormulaService.getCache(unitId, subUnitId, rule.cfId);
                         if (formulaItem && formulaItem.status === FormulaResultStatus.SUCCESS) {
                             return !!formulaItem.result;
                         } else {
                             // If the formula triggers the calculation, wait for the result,
                             // and use the previous style cache until the result comes out
-                            const currentValue = conditionalFormatViewModel.getCellCf(unitId, subUnitId, row, col);
-                            if (currentValue) {
-                                const cache = currentValue.cfList.find((item) => item.cfId === rule.cfId);
-                                if (cache) {
-                                    return cache.ruleCache !== EMPTY_STYLE;
-                                }
-                                return false;
-                            }
+                            const style = cache?.getValue(row, col);
+                            return style && style !== EMPTY_STYLE;
                         }
                     }
                     return false;

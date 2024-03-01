@@ -96,15 +96,6 @@ export const RuleEdit = (props: IRuleEditProps) => {
     const result = useRef < Parameters<IStyleEditorProps['onChange']>>();
     const interceptorManager = useMemo(() => {
         const _interceptorManager = new InterceptorManager({ beforeSubmit, submit });
-        // 默认返回 true
-        _interceptorManager.intercept(_interceptorManager.getInterceptPoints().beforeSubmit, {
-            priority: -1,
-            handler: (v) => v,
-        });
-        _interceptorManager.intercept(_interceptorManager.getInterceptPoints().submit, {
-            priority: -1,
-            handler: (v) => null,
-        });
         return _interceptorManager;
     }, []);
 

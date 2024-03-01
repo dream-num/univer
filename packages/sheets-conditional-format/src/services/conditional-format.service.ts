@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IMutationInfo, IRange, Workbook, Worksheet } from '@univerjs/core';
+import type { IMutationInfo, IRange, Workbook } from '@univerjs/core';
 import { createInterceptorKey, Disposable, ICommandService, InterceptorManager, IResourceManagerService, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, Rectangle, toDisposable, Tools } from '@univerjs/core';
 import type { IInsertColMutationParams, IMoveColumnsMutationParams, IMoveRangeMutationParams, IMoveRowsMutationParams, IRemoveRowsMutationParams, IRemoveSheetCommandParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { InsertColMutation, InsertRowMutation, MoveColsMutation, MoveRangeMutation, MoveRowsMutation, RemoveColMutation, RemoveRowMutation, RemoveSheetCommand, SetRangeValuesMutation, SheetInterceptorService } from '@univerjs/sheets';
@@ -31,7 +31,6 @@ import type { IDataBarRenderParams } from '../render/type';
 import { getCellValue, isNullable } from './calculate-unit/utils';
 import { dataBarCellCalculateUnit } from './calculate-unit/data-bar';
 import { highlightCellCalculateUnit } from './calculate-unit/highlight-cell';
-import type { IColorScaleRenderParams } from './calculate-unit/color-scale';
 import { colorScaleCellCalculateUnit } from './calculate-unit/color-scale';
 import type { ICalculateUnit, IContext } from './calculate-unit/type';
 
@@ -90,9 +89,9 @@ export class ConditionalFormatService extends Disposable {
                 if (type === RuleType.highlightCell) {
                     ruleCacheItem!.ruleCache && Tools.deepMerge(pre, { style: ruleCacheItem!.ruleCache });
                 } else if (type === RuleType.colorScale) {
-                    const ruleCache = ruleCacheItem?.ruleCache as IColorScaleRenderParams;
+                    const ruleCache = ruleCacheItem?.ruleCache as string;
                     if (ruleCache && ruleCache !== '') {
-                        pre.colorScale = ruleCache;
+                        pre.style = { ...(pre.style ?? {}), bg: { rgb: ruleCache } };
                     }
                 } else if (type === RuleType.dataBar) {
                     const ruleCache = ruleCacheItem?.ruleCache as IDataBarRenderParams;
@@ -101,7 +100,7 @@ export class ConditionalFormatService extends Disposable {
                     }
                 }
                 return pre;
-            }, {} as { style?: IHighlightCell['style'] } & { dataBar?: IDataBarRenderParams } & { colorScale?: IColorScaleRenderParams });
+            }, {} as { style?: IHighlightCell['style'] } & { dataBar?: IDataBarRenderParams });
             return result;
         }
         return null;

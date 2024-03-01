@@ -77,6 +77,8 @@ export abstract class BaseDataValidator<DataType = CellValue> {
         return false;
     }
 
+    abstract validatorFormula(rule: IDataValidationRuleBase): boolean;
+
     abstract isValidType(cellValue: CellValue, rule: IDataValidationRule): boolean;
 
     abstract transform(cellValue: CellValue, rule: IDataValidationRule): DataType;

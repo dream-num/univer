@@ -120,7 +120,6 @@ export class HoverManagerService {
             top: (skeleton.getOffsetByPositionY(anchorCell.startRow - 1) - scrollXY.y) * scaleY,
             bottom: (skeleton.getOffsetByPositionY(anchorCell.endRow) - scrollXY.y) * scaleY,
         };
-
         this._currentCell$.next({
             ...params,
             bound,

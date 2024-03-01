@@ -15,7 +15,7 @@
  */
 
 import { ICommandService, IUniverInstanceService, LocaleService } from '@univerjs/core';
-import type { DataValidationType, IDataValidationRuleBase, IRange, ISheetDataValidationRule } from '@univerjs/core';
+import type { DataValidationOperator, DataValidationType, IDataValidationRuleBase, IRange, ISheetDataValidationRule } from '@univerjs/core';
 import type { IUpdateDataValidationCommandParams } from '@univerjs/data-validation';
 import { DataValidatorRegistryScope, DataValidatorRegistryService, RemoveDataValidationCommand, UpdateDataValidationCommand, UpdateRuleType } from '@univerjs/data-validation';
 import { TWO_FORMULA_OPERATOR_COUNT } from '@univerjs/data-validation/types/const/two-formula-operators.js';
@@ -23,6 +23,7 @@ import { Button, Select } from '@univerjs/design';
 import { ComponentManager } from '@univerjs/ui';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useState } from 'react';
+import { UpdateDataValidationTypeCommand } from '../../commands/commands/data-validation.command';
 
 export interface IDataValidationDetailProps {
     rule: ISheetDataValidationRule;
@@ -43,13 +44,13 @@ export function DataValidationDetail(props: IDataValidationDetailProps) {
     const unitId = workbook.getUnitId();
     const subUnitId = worksheet.getSheetId();
     const validatorService = useDependency(DataValidatorRegistryService);
-    const validator = validatorService.getValidatorItem(rule.type);
     const componentManager = useDependency(ComponentManager);
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
     const [localRule, setLocalRule] = useState(rule);
+    const validator = validatorService.getValidatorItem(localRule.type);
 
-    const rules = validatorService.getValidatorsByScope(DataValidatorRegistryScope.SHEET);
+    const validators = validatorService.getValidatorsByScope(DataValidatorRegistryScope.SHEET);
     if (!validator) {
         return null;
     }
@@ -111,10 +112,25 @@ export function DataValidationDetail(props: IDataValidationDetailProps) {
         allowBlank: rule.allowBlank,
     };
 
-    const handleChange = (newType: string) => {
+    const handleChangeType = (newType: string) => {
+        const validator = validatorService.getValidatorItem(newType);
+        if (!validator) {
+            return;
+        }
+
+        const operators = validator.operators;
+
         setLocalRule({
             ...localRule,
             type: newType as DataValidationType,
+            operator: operators[0],
+        });
+
+        commandService.executeCommand(UpdateDataValidationTypeCommand.id, {
+            unitId,
+            subUnitId,
+            ruleId: localRule.uid,
+            type: newType,
         });
     };
 
@@ -130,12 +146,12 @@ export function DataValidationDetail(props: IDataValidationDetailProps) {
             ))}
             <div>type</div>
             <Select
-                options={rules?.map((rule) => ({
-                    label: localeService.t(rule.title),
-                    value: rule.id,
+                options={validators?.map((validator) => ({
+                    label: localeService.t(validator.title),
+                    value: validator.id,
                 }))}
-                value={rule.type}
-                onChange={handleChange}
+                value={localRule.type}
+                onChange={handleChangeType}
             />
             <div>operator</div>
             <Select
@@ -147,7 +163,7 @@ export function DataValidationDetail(props: IDataValidationDetailProps) {
                 onChange={(operator) => {
                     handleUpdateRuleSetting({
                         ...baseRule,
-                        operator: +operator,
+                        operator: operator as DataValidationOperator,
                     });
                 }}
             />

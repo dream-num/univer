@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-import { LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
-import { DataValidationPanelName } from '@univerjs/data-validation';
+import { IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
+import { DataValidationModel, DataValidationPanelName } from '@univerjs/data-validation';
 import { ComponentManager, IMenuService } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
+import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import type { Spreadsheet } from '@univerjs/engine-render';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { DataValidationPanel } from '../views/components';
 import { DataValidationMenu } from './dv.menu';
 
@@ -25,7 +28,11 @@ import { DataValidationMenu } from './dv.menu';
 export class DataValidationRenderController extends RxDisposable {
     constructor(
         @Inject(ComponentManager) private _componentManager: ComponentManager,
-        @IMenuService private _menuService: IMenuService
+        @IMenuService private _menuService: IMenuService,
+        @Inject(DataValidationModel) private readonly _dataValidationModel: DataValidationModel,
+        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
         this._init();
@@ -43,5 +50,32 @@ export class DataValidationRenderController extends RxDisposable {
                 DataValidationMenu
             )
         );
+
+        this._initSkeletonChange();
+    }
+
+    private _initSkeletonChange() {
+        const markSkeletonDirty = () => {
+            const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
+            const unitId = workbook.getUnitId();
+            const subUnitId = workbook.getActiveSheet().getSheetId();
+            const skeleton = this._sheetSkeletonManagerService.getOrCreateSkeleton({ unitId, sheetId: subUnitId });
+            const currentRender = this._renderManagerService.getRenderById(unitId);
+
+            skeleton?.makeDirty(true);
+            skeleton?.calculate();
+
+            if (currentRender) {
+                (currentRender.mainComponent as Spreadsheet).makeForceDirty();
+            }
+        };
+
+        this.disposeWithMe(this._dataValidationModel.ruleChange$.subscribe(() => {
+            markSkeletonDirty();
+        }));
+
+        this.disposeWithMe(this._dataValidationModel.validStatusChange$.subscribe(() => {
+            markSkeletonDirty();
+        }));
     }
 }

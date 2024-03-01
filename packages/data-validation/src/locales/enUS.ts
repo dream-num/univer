@@ -50,8 +50,7 @@ export const enUS = {
             title: 'Text length',
         },
         number: {
-            title: '',
+            title: 'number',
         },
-
     },
 };

@@ -15,7 +15,7 @@
  */
 
 import { CommandType, ICommandService } from '@univerjs/core';
-import type { ICommand, IDataValidationRule, IRange } from '@univerjs/core';
+import type { DataValidationType, ICommand, IDataValidationRule, IRange } from '@univerjs/core';
 import type { IAddDataValidationMutationParams } from '../..';
 import type { IUpdateRulePayload } from '../../types/interfaces/i-update-rule-payload';
 import { AddDataValidationMutation, RemoveAllDataValidationMutation, RemoveDataValidationMutation, UpdateDataValidationMutation } from '../mutations/data-validation.mutation';
@@ -90,6 +90,13 @@ export const UpdateDataValidationCommand: ICommand<IUpdateDataValidationCommandP
         return true;
     },
 };
+
+export interface IUpdateDataValidationTypeCommandParams {
+    unitId: string;
+    subUnitId: string;
+    ruleId: string;
+    type: DataValidationType;
+}
 
 export interface IRemoveAllDataValidationCommandParams {
     unitId: string;

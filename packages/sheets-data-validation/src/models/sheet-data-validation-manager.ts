@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { CellValue, IRange, ISheetDataValidationRule } from '@univerjs/core/types/interfaces/index.js';
+import type { CellValue, IDataValidationRule, IRange, ISheetDataValidationRule } from '@univerjs/core/types/interfaces/index.js';
 import { DataValidationManager } from '@univerjs/data-validation/models/data-validation-manager.js';
 import type { Nullable } from '@univerjs/core/shared/index.js';
 import { ObjectMatrix } from '@univerjs/core/shared/index.js';
@@ -47,7 +47,7 @@ export class SheetDataValidationManager extends DataValidationManager<ISheetData
         unitId: string,
         subUnitId: string,
         rules: ISheetDataValidationRule[] | undefined,
-        private _dataValidatorRegistryService: DataValidatorRegistryService
+        private readonly _dataValidatorRegistryService: DataValidatorRegistryService
     ) {
         super(unitId, subUnitId, rules);
         rules?.forEach((rule) => {
@@ -135,6 +135,8 @@ export class SheetDataValidationManager extends DataValidationManager<ISheetData
         const rule = super.updateRule(ruleId, payload);
         if (payload.type === UpdateRuleType.RANGE) {
             this._updateRuleRange(ruleId, oldRule?.ranges ?? [], payload.payload);
+        } else {
+            this.markCacheDirtyByRanges(oldRule?.ranges ?? []);
         }
         this._refreshRuleRanges();
         return rule;
@@ -157,7 +159,7 @@ export class SheetDataValidationManager extends DataValidationManager<ISheetData
         return this._ruleMatrix.getValue(row, col);
     }
 
-    validatorCell(cellValue: Nullable<CellValue>, rule: ISheetDataValidationRule, pos: ISheetLocation): DataValidationStatus {
+    override validator(cellValue: Nullable<CellValue>, rule: ISheetDataValidationRule, pos: ISheetLocation, onCompete: (status: DataValidationStatus) => void): DataValidationStatus {
         const { col, row } = pos;
         const validator = this._dataValidatorRegistryService.getValidatorItem(rule.type);
         if (validator) {
@@ -165,10 +167,12 @@ export class SheetDataValidationManager extends DataValidationManager<ISheetData
             if (!current || current[0] !== cellValue) {
                 this._validatorResult.setValue(row, col, [cellValue, DataValidationStatus.VALIDATING]);
                 validator.validator(cellValue, rule).then((status) => {
+                    const realStatus = status ? DataValidationStatus.VALID : DataValidationStatus.INVALID;
                     this._validatorResult.setValue(row, col, [
                         cellValue,
-                        status ? DataValidationStatus.VALID : DataValidationStatus.INVALID,
+                        realStatus,
                     ]);
+                    onCompete(realStatus);
                 });
                 return DataValidationStatus.VALIDATING;
             }

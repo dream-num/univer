@@ -14,18 +14,20 @@
  * limitations under the License.
  */
 
-import { Plugin } from '@univerjs/core';
+import { ICommandService, Plugin } from '@univerjs/core';
 import { type Dependency, Inject, Injector } from '@wendellhu/redi';
 import { DataValidationRenderController } from './controllers/dv-render.controller';
 import { DataValidationController } from './controllers/dv.controller';
 import { SheetDataValidationService } from './services/dv.service';
 import { DataValidationAlertController } from './controllers/dv-alert.controller';
+import { UpdateDataValidationTypeCommand } from './commands/commands/data-validation.command';
 
 const PLUGIN_NAME = 'sheets-data-validation';
 
 export class UniverSheetsDataValidationPlugin extends Plugin {
     constructor(
-        @Inject(Injector) protected _injector: Injector
+        @Inject(Injector) protected _injector: Injector,
+        @ICommandService private readonly _commandService: ICommandService
     ) {
         super(PLUGIN_NAME);
     }
@@ -39,6 +41,10 @@ export class UniverSheetsDataValidationPlugin extends Plugin {
             [DataValidationAlertController],
         ] as Dependency[]).forEach((dep) => {
             injector.add(dep);
+        });
+
+        [UpdateDataValidationTypeCommand].forEach((command) => {
+            this._commandService.registerCommand(command);
         });
     }
 }

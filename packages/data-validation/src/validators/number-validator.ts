@@ -14,21 +14,14 @@
  * limitations under the License.
  */
 
-import { DataValidationOperator, DataValidationType } from '@univerjs/core';
+import { DataValidationOperator, DataValidationType, Tools } from '@univerjs/core';
 import type { CellValue, IDataValidationRule, IDataValidationRuleBase, Nullable } from '@univerjs/core';
 import { BASE_FORMULA_INPUT_NAME } from '../views/formula-input';
+import { TWO_FORMULA_OPERATOR_COUNT } from '../types/const/two-formula-operators';
 import { BaseDataValidator } from './base-data-validator';
 
 // TODO support formula
 export class NumberValidator extends BaseDataValidator<number> {
-    isValidType(cellValue: CellValue, _rule: IDataValidationRule): boolean {
-        return !Number.isNaN(+cellValue);
-    }
-
-    transform(cellValue: CellValue, _rule: IDataValidationRule): number {
-        return +cellValue;
-    }
-
     id: string = DataValidationType.DECIMAL;
     title: string = this.localeService.t('dataValidation.number.title');
 
@@ -46,6 +39,28 @@ export class NumberValidator extends BaseDataValidator<number> {
     scopes: string | string[] = ['sheet'];
     formulaInput: string = BASE_FORMULA_INPUT_NAME;
     dropDownInput?: string;
+
+    isValidType(cellValue: CellValue, _rule: IDataValidationRule): boolean {
+        return !Number.isNaN(+cellValue);
+    }
+
+    transform(cellValue: CellValue, _rule: IDataValidationRule): number {
+        return +cellValue;
+    }
+
+    override validatorFormula(rule: IDataValidationRuleBase): boolean {
+        const operator = rule.operator;
+        if (!operator) {
+            return false;
+        }
+
+        const isTwoFormula = TWO_FORMULA_OPERATOR_COUNT.includes(operator);
+        if (isTwoFormula) {
+            return Tools.isDefine(rule.formula1) && !Number.isNaN(+rule.formula1) && Tools.isDefine(rule.formula2) && !Number.isNaN(+rule.formula2);
+        }
+
+        return Tools.isDefine(rule.formula1) && !Number.isNaN(+rule.formula1);
+    }
 
     async validatorIsEqual(cellValue: number, rule: IDataValidationRule) {
         if (!rule.formula1) {

@@ -15,12 +15,12 @@
  */
 
 export enum DataValidationOperator {
-    BETWEEN,
-    EQUAL,
-    GREATER_THAN,
-    GREATER_THAN_OR_EQUAL,
-    LESS_THAN,
-    LESS_THAN_OR_EQUAL,
-    NOT_BETWEEN,
-    NOT_EQUAL,
+    BETWEEN = 'between',
+    EQUAL = 'equal',
+    GREATER_THAN = 'greaterThan',
+    GREATER_THAN_OR_EQUAL = 'greaterThanOrEqual',
+    LESS_THAN = 'lessThan',
+    LESS_THAN_OR_EQUAL = 'lessThanOrEqual',
+    NOT_BETWEEN = 'notBetween',
+    NOT_EQUAL = 'notEqual',
 }

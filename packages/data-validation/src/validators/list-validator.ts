@@ -28,10 +28,14 @@ export class ListValidator extends BaseDataValidator {
     formulaInput: string = BASE_FORMULA_INPUT_NAME;
 
     constructor(
-        @Inject(LocaleService) readonly localeService: LocaleService,
+        @Inject(LocaleService) override readonly localeService: LocaleService,
         @IUniverInstanceService readonly univerInstanceService: IUniverInstanceService
     ) {
         super(localeService);
+    }
+
+    override validatorFormula(rule: IDataValidationRuleBase): boolean {
+        return !Tools.isBlank(rule.formula1);
     }
 
     isValidType(cellValue: CellValue, _rule: IDataValidationRule): boolean {

@@ -50,7 +50,7 @@ export const zhCN = {
             title: 'Text length',
         },
         number: {
-            title: 'Number',
+            title: 'number',
         },
 
     },

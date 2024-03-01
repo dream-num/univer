@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-import { type CellValue, DataValidationOperator, DataValidationType, type IDataValidationRule, Tools } from '@univerjs/core';
+import { DataValidationOperator, DataValidationType, Tools } from '@univerjs/core';
+import type { CellValue, IDataValidationRule, IDataValidationRuleBase } from '@univerjs/core';
 import { BASE_FORMULA_INPUT_NAME } from '../views/formula-input';
+import { TWO_FORMULA_OPERATOR_COUNT } from '../types/const/two-formula-operators';
 import { BaseDataValidator } from './base-data-validator';
 
 export class TextLengthValidator extends BaseDataValidator<number> {
@@ -35,6 +37,20 @@ export class TextLengthValidator extends BaseDataValidator<number> {
 
     scopes: string | string[] = ['sheet'];
     formulaInput: string = BASE_FORMULA_INPUT_NAME;
+
+    override validatorFormula(rule: IDataValidationRuleBase): boolean {
+        const operator = rule.operator;
+        if (!operator) {
+            return false;
+        }
+
+        const isTwoFormula = TWO_FORMULA_OPERATOR_COUNT.includes(operator);
+        if (isTwoFormula) {
+            return Tools.isDefine(rule.formula1) && !Number.isNaN(+rule.formula1) && Tools.isDefine(rule.formula2) && !Number.isNaN(+rule.formula2);
+        }
+
+        return Tools.isDefine(rule.formula1) && !Number.isNaN(+rule.formula1);
+    }
 
     isValidType(cellValue: CellValue, _rule: IDataValidationRule): boolean {
         return typeof cellValue === 'string' || typeof cellValue === 'number';

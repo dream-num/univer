@@ -58,4 +58,8 @@ export class SheetDataValidationService {
         };
         this._currentManager$.next(this._currentManager);
     }
+
+    get(unitId: string, subUnitId: string) {
+        return this._getOrCreateManager(unitId, subUnitId);
+    }
 }

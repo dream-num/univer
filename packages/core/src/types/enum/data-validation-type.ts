@@ -15,12 +15,21 @@
  */
 
 export enum DataValidationType {
+    /**
+     * custom formula
+     */
     CUSTOM = 'custom',
-    DATE = 'date',
-    DECIMAL = 'decimal',
     LIST = 'list',
     NONE = 'none',
     TEXT_LENGTH = 'textLength',
+    DATE = 'date',
     TIME = 'time',
+    /**
+     * integer
+     */
     WHOLE = 'whole',
+    /**
+     * decimal number
+     */
+    DECIMAL = 'decimal',
 }

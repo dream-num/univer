@@ -18,6 +18,8 @@ import { DataValidationStatus, IUniverInstanceService, LifecycleStages, OnLifecy
 import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
+import type { Spreadsheet } from '@univerjs/engine-render';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetDataValidationManager } from '../models/sheet-data-validation-manager';
 import { SheetDataValidationService } from '../services/dv.service';
 
@@ -31,11 +33,12 @@ const INVALID_MARK = {
 @OnLifecycle(LifecycleStages.Rendered, DataValidationController)
 export class DataValidationController extends RxDisposable {
     constructor(
-        @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
-        @IUniverInstanceService private _univerInstanceService: IUniverInstanceService,
-        @Inject(DataValidationModel) private _dataValidationModel: DataValidationModel,
-        @Inject(SheetDataValidationService) private _sheetDataValidationService: SheetDataValidationService,
-        @Inject(DataValidatorRegistryService) private _dataValidatorRegistryService: DataValidatorRegistryService
+        @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @Inject(DataValidationModel) private readonly _dataValidationModel: DataValidationModel,
+        @Inject(SheetDataValidationService) private readonly _sheetDataValidationService: SheetDataValidationService,
+        @Inject(DataValidatorRegistryService) private readonly _dataValidatorRegistryService: DataValidatorRegistryService,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         super();
         this._init();
@@ -108,9 +111,7 @@ export class DataValidationController extends RxDisposable {
                         if (!rule) {
                             return next(cell);
                         }
-
-                        const validStatus = manager.validatorCell(cell?.v, rule, pos);
-
+                        const validStatus = this._dataValidationModel.validator(cell?.v, rule, pos);
                         return next({
                             ...cell,
                             dataValidation: {

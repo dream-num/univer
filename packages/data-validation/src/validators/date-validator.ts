@@ -51,6 +51,20 @@ export class DateValidator extends BaseDataValidator<Dayjs> {
         return false;
     }
 
+    override validatorFormula(rule: IDataValidationRuleBase): boolean {
+        const operator = rule.operator;
+        if (!operator) {
+            return false;
+        }
+
+        const isTwoFormula = TWO_FORMULA_OPERATOR_COUNT.includes(operator);
+        if (isTwoFormula) {
+            return Tools.isDefine(rule.formula1) && !Number.isNaN(+rule.formula1) && Tools.isDefine(rule.formula2) && !Number.isNaN(+rule.formula2);
+        }
+
+        return Tools.isDefine(rule.formula1) && !Number.isNaN(+rule.formula1);
+    }
+
     transform(cellValue: CellValue, _rule: IDataValidationRule): Dayjs {
         return dayjs(cellValue as string);
     }

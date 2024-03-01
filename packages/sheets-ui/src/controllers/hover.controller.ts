@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Disposable, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
@@ -24,7 +24,8 @@ import { HoverManagerService } from '../services/hover-manager.service';
 export class HoverController extends Disposable {
     constructor(
         @IRenderManagerService private _renderManagerService: IRenderManagerService,
-        @Inject(HoverManagerService) private _hoverManagerService: HoverManagerService
+        @Inject(HoverManagerService) private _hoverManagerService: HoverManagerService,
+        @IUniverInstanceService private _univerInstanceService: IUniverInstanceService
     ) {
         super();
 
@@ -36,14 +37,14 @@ export class HoverController extends Disposable {
     }
 
     private _initPointerEvent() {
-        const currentRender = this._renderManagerService.getCurrent();
-
+        const currentRender = this._renderManagerService.getRenderById(
+            this._univerInstanceService.getCurrentUniverSheetInstance().getUnitId()
+        );
         if (!currentRender) {
             return;
         }
 
         const { scene } = currentRender;
-
         const observer = scene.onPointerMoveObserver.add((evt) => {
             this._hoverManagerService.onMouseMove(evt.offsetX, evt.offsetY);
         });

@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { type IDataValidationRule, Tools } from '@univerjs/core';
+import type { CellValue, IDataValidationRule, Nullable } from '@univerjs/core';
+import { DataValidationStatus } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import type { IUpdateRulePayload } from '../types/interfaces/i-update-rule-payload';
 import { UpdateRuleType } from '../types';
@@ -118,5 +119,9 @@ export class DataValidationManager<T extends IDataValidationRule> {
 
     toJSON() {
         return this._dataValidations;
+    }
+
+    validator(_content: Nullable<CellValue>, _rule: IDataValidationRule, _pos: any, _onCompele: (status: DataValidationStatus) => void) {
+        return DataValidationStatus.VALID;
     }
 }

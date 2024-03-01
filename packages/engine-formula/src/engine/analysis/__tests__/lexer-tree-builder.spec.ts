@@ -162,6 +162,11 @@ describe('lexer nodeMaker test', () => {
             const node = lexerTreeBuilder.treeBuilder('= ------A1 ') as LexerNode;
             expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":[" -","-","-","-","-","A1 ","-"]}');
         });
+
+        it('scientific notation', () => {
+            const node = lexerTreeBuilder.treeBuilder('=3e+1+1') as LexerNode;
+            expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":["3e+1","1","+"]}');
+        });
     });
 
     describe('checkIfAddBracket', () => {

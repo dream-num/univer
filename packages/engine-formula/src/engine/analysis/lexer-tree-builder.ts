@@ -1253,6 +1253,20 @@ export class LexerTreeBuilder extends Disposable {
                         cur++;
                         continue;
                     }
+                } else if (this._segment.length > 0 && formulaStringArray[cur - 1] && formulaStringArray[cur - 1].toUpperCase() === 'E' && (currentString === operatorToken.MINUS || currentString === operatorToken.PLUS)) {
+                    this._pushSegment(currentString);
+
+                    if (!(isZeroAdded && cur === 0)) {
+                        sequenceArray?.push({
+                            segment: this._segment,
+                            currentString,
+                            cur,
+                            currentLexerNode: this._currentLexerNode,
+                        });
+                    }
+
+                    cur++;
+                    continue;
                 } else if (this._segment.length > 0 && trimSegment === '') {
                     trimSegment = this._segment;
                 } else {

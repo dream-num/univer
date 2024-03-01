@@ -423,7 +423,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
                 },
             ];
 
-            this.addTextRanges(textRanges);
+            this.addTextRanges(textRanges, false);
         }
     }
 
@@ -456,7 +456,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             },
         ];
 
-        this.addTextRanges(textRanges);
+        this.addTextRanges(textRanges, false);
     }
 
     // Handle pointer down.

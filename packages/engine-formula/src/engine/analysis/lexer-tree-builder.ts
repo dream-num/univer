@@ -914,6 +914,13 @@ export class LexerTreeBuilder extends Disposable {
         if (formulaString.substring(0, 1) === operatorToken.EQUALS) {
             formulaString = formulaString.substring(1);
         }
+
+        let isZeroAdded = false;
+        if (formulaString.substring(0, 1) === operatorToken.MINUS) {
+            formulaString = `0${formulaString}`;
+            isZeroAdded = true;
+        }
+
         const formulaStringArray = formulaString.split('');
         const formulaStringArrayCount = formulaStringArray.length;
         let cur = 0;
@@ -1228,18 +1235,21 @@ export class LexerTreeBuilder extends Disposable {
             ) {
                 let trimSegment = this._segment.trim();
 
-                if (currentString === operatorToken.MINUS && trimSegment === '') {
+                if (currentString === operatorToken.MINUS && (trimSegment === '')) {
                     // negative number
                     const prevString = this._findPreviousToken(formulaStringArray, cur - 1) || '';
                     if (this._negativeCondition(prevString)) {
                         this._pushSegment(operatorToken.MINUS);
 
-                        sequenceArray?.push({
-                            segment: this._segment,
-                            currentString,
-                            cur,
-                            currentLexerNode: this._currentLexerNode,
-                        });
+                        if (!(isZeroAdded && cur === 0)) {
+                            sequenceArray?.push({
+                                segment: this._segment,
+                                currentString,
+                                cur,
+                                currentLexerNode: this._currentLexerNode,
+                            });
+                        }
+
                         cur++;
                         continue;
                     }
@@ -1266,12 +1276,14 @@ export class LexerTreeBuilder extends Disposable {
                 this._pushSegment(currentString);
             }
 
-            sequenceArray?.push({
-                segment: this._segment,
-                currentString,
-                cur,
-                currentLexerNode: this._currentLexerNode,
-            });
+            if (!(isZeroAdded && cur === 0)) {
+                sequenceArray?.push({
+                    segment: this._segment,
+                    currentString,
+                    cur,
+                    currentLexerNode: this._currentLexerNode,
+                });
+            }
             cur++;
         }
 

@@ -17,7 +17,7 @@
 import { Disposable, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { CELL_ALERT_KEY, ComponentManager } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
-import { CellAlert } from '../views/cell-alert';
+import { CellAlert } from '../views/cell-alert/CellAlertPopup';
 
 @OnLifecycle(LifecycleStages.Starting, CellAlertController)
 export class CellAlertController extends Disposable {

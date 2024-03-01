@@ -22,6 +22,8 @@ export interface IDropdownParam {
     componentKey: string;
     location: ISheetLocation;
     position: IPosition;
+    width: number;
+    height: number;
 }
 
 export class DropdownManagerService {

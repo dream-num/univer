@@ -14,29 +14,29 @@
  * limitations under the License.
  */
 
-import type { IRange, Nullable } from '@univerjs/core';
+import type { IPosition, IRange, Nullable } from '@univerjs/core';
 import { IUniverInstanceService, Range } from '@univerjs/core';
 import type { ISheetLocation } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 import { distinctUntilChanged, Subject } from 'rxjs';
-import type { IBoundRectNoAngle } from '@univerjs/engine-render';
 import { IRenderManagerService, Vector2 } from '@univerjs/engine-render';
 import { ISelectionRenderService } from '..';
 import { ScrollManagerService } from './scroll-manager.service';
 import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
 
-export interface IHoverCellPosition extends ISheetLocation {
-    bound: IBoundRectNoAngle;
+export interface IHoverCellPosition {
+    position: IPosition;
+    location: ISheetLocation;
 }
 
 export class HoverManagerService {
     private _currentCell$ = new Subject<Nullable<IHoverCellPosition>>();
     currentCell$ = this._currentCell$.asObservable().pipe(distinctUntilChanged((
         (pre, aft) => (
-            pre?.unitId === aft?.unitId
-            && pre?.subUnitId === aft?.subUnitId
-            && pre?.row === aft?.row
-            && pre?.col === aft?.col
+            pre?.location?.unitId === aft?.location?.unitId
+            && pre?.location?.subUnitId === aft?.location?.subUnitId
+            && pre?.location?.row === aft?.location?.row
+            && pre?.location?.col === aft?.location?.col
         )
     )));
 
@@ -114,15 +114,16 @@ export class HoverManagerService {
             };
         }
 
-        const bound: IBoundRectNoAngle = {
-            left: (skeleton.getOffsetByPositionX(anchorCell.startColumn - 1) - scrollXY.x) * scaleX,
-            right: (skeleton.getOffsetByPositionX(anchorCell.endColumn) - scrollXY.x) * scaleX,
-            top: (skeleton.getOffsetByPositionY(anchorCell.startRow - 1) - scrollXY.y) * scaleY,
-            bottom: (skeleton.getOffsetByPositionY(anchorCell.endRow) - scrollXY.y) * scaleY,
+        const position: IPosition = {
+            startX: (skeleton.getOffsetByPositionX(anchorCell.startColumn - 1) - scrollXY.x) * scaleX,
+            endX: (skeleton.getOffsetByPositionX(anchorCell.endColumn) - scrollXY.x) * scaleX,
+            startY: (skeleton.getOffsetByPositionY(anchorCell.startRow - 1) - scrollXY.y) * scaleY,
+            endY: (skeleton.getOffsetByPositionY(anchorCell.endRow) - scrollXY.y) * scaleY,
         };
+
         this._currentCell$.next({
-            ...params,
-            bound,
+            location: params,
+            position,
         });
     }
 

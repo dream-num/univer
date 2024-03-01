@@ -38,14 +38,17 @@ export class DataValidationAlertController extends Disposable {
                 const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
                 const worksheet = workbook.getActiveSheet();
                 const manager = this._sheetDataValidationService.currentManager?.manager;
-                const cellData = worksheet.getCell(cellPos.row, cellPos.col);
+                const cellData = worksheet.getCell(cellPos.location.row, cellPos.location.col);
 
                 if (cellData?.dataValidation?.validStatus === DataValidationStatus.INVALID) {
                     this._cellAlertManagerService.showAlert({
                         type: CellAlertType.ERROR,
                         title: 'invalid:',
                         message: manager?.getRuleErrorMsg(cellData.dataValidation.ruleId),
-                        bound: cellPos.bound,
+                        position: cellPos.position,
+                        location: cellPos.location,
+                        width: 200,
+                        height: 74,
                     });
                     return;
                 }

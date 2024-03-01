@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import { ErrorType, ErrorValueObject } from '../..';
+import { ErrorType } from '../../basics/error-type';
 import { DEFAULT_TOKEN_TYPE_ROOT } from '../../basics/token-type';
 import { LexerNode } from '../analysis/lexer-node';
+import { ErrorValueObject } from '../value-object/base-value-object';
 import { BaseAstNode } from './base-ast-node';
 import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './base-ast-node-factory';
 import { NODE_ORDER_MAP, NodeType } from './node-type';

@@ -436,7 +436,7 @@ export default {
         },
     },
     STDEVP: {
-        description: 'Calculates standard deviation based on the entire population',
+        description: 'Calculates standard deviation based on the entire population given as arguments.',
         abstract: 'Calculates standard deviation based on the entire population',
         links: [
             {
@@ -445,8 +445,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: 'number1', detail: 'The first number argument corresponding to a population.' },
+            number2: { name: 'number2', detail: 'Number arguments 2 to 255 corresponding to a population. You can also use a single array or a reference to an array instead of arguments separated by commas.' },
         },
     },
     TDIST: {

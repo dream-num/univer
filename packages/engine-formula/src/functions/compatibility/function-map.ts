@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
+import { StdevP } from '../statistical/stdev-p';
+import { StdevS } from '../statistical/stdev-s';
 import { VarP } from '../statistical/var-p';
 import { VarS } from '../statistical/var-s';
 import { FUNCTION_NAMES_COMPATIBILITY } from './function-names';
-import { Stdev } from './stdev';
 
 export const functionCompatibility = [
-    [Stdev, FUNCTION_NAMES_COMPATIBILITY.STDEV],
+    [StdevS, FUNCTION_NAMES_COMPATIBILITY.STDEV],
+    [StdevP, FUNCTION_NAMES_COMPATIBILITY.STDEVP],
     [VarS, FUNCTION_NAMES_COMPATIBILITY.VAR],
     [VarP, FUNCTION_NAMES_COMPATIBILITY.VARP],
 ];

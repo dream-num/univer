@@ -16,45 +16,49 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { FUNCTION_NAMES_COMPATIBILITY } from '../../function-names';
-import { Stdev } from '..';
+import { FUNCTION_NAMES_STATISTICAL } from '../../function-names';
+import { Stdeva } from '..';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorType } from '../../../../basics/error-type';
 import { ErrorValueObject } from '../../../..';
 
-describe('Test stdev function', () => {
-    const textFunction = new Stdev(FUNCTION_NAMES_COMPATIBILITY.STDEV);
+describe('Test stdeva function', () => {
+    const textFunction = new Stdeva(FUNCTION_NAMES_STATISTICAL.STDEVA);
 
-    describe('Stdev', () => {
+    describe('Stdeva', () => {
         it('Var1 is number, var2 is number', () => {
             const var1 = new NumberValueObject(1);
             const var2 = new NumberValueObject(2);
             const result = textFunction.calculate(var1, var2);
-            expect(result.getValue()).toBe(2);
+            expect(result.getValue()).toBe(0.7071067811865476);
         });
         it('Var1 is number, var2 is string', () => {
             const var1 = new NumberValueObject(1);
-            const var2 = new StringValueObject('test');
-            const result = textFunction.calculate(var1, var2);
+            let var2 = new StringValueObject('test');
+            let result = textFunction.calculate(var1, var2);
             expect(result.getValue()).toBe(ErrorType.VALUE);
+
+            var2 = new StringValueObject('2');
+            result = textFunction.calculate(var1, var2);
+            expect(result.getValue()).toBe(0.7071067811865476);
         });
         it('Var1 is number, var2 is boolean', () => {
             const var1 = new NumberValueObject(2);
 
             let var2 = new BooleanValueObject(true);
             let result = textFunction.calculate(var1, var2);
-            expect(result.getValue()).toBe(2);
+            expect(result.getValue()).toBe(0.7071067811865476);
 
             var2 = new BooleanValueObject(false);
             result = textFunction.calculate(var1, var2);
-            expect(result.getValue()).toBe(0);
+            expect(result.getValue()).toBe(1.4142135623730951);
         });
         it('Var1 is number, var2 is null', () => {
             const var1 = new NumberValueObject(1);
             const var2 = new NullValueObject(0);
             const result = textFunction.calculate(var1, var2);
-            expect(result.getValue()).toBe(1);
+            expect(result.getValue()).toBe(ErrorType.DIV_BY_ZERO);
         });
         it('Var1 is number, var2 is error', () => {
             const var1 = new NumberValueObject(1);
@@ -96,7 +100,7 @@ describe('Test stdev function', () => {
                 column: 0,
             });
             const result = textFunction.calculate(var1, var2);
-            expect(result.getValue()).toBe(-1726.92);
+            expect(result.getValue()).toBe(30.04647742173025);
         });
     });
 });

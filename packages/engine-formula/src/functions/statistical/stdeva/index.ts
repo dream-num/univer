@@ -19,18 +19,18 @@ import type { BaseValueObject } from '../../../engine/value-object/base-value-ob
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
 
-export class VarP extends BaseFunction {
+export class Stdeva extends BaseFunction {
     override calculate(...variants: BaseValueObject[]) {
         if (variants.length === 0) {
             return new ErrorValueObject(ErrorType.NA);
         }
 
-        const flattenArray = this.flattenArray(variants);
+        const flattenArray = this.flattenArray(variants, false);
 
         if (flattenArray.isError()) {
             return flattenArray;
         }
 
-        return flattenArray.var();
+        return flattenArray.std(1);
     }
 }

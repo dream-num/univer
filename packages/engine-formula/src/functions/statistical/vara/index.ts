@@ -14,15 +14,10 @@
  * limitations under the License.
  */
 
-import { isRealNum, type Nullable } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
-import { createNewArray } from '../../../engine/utils/array-object';
-import { convertTonNumber } from '../../../engine/utils/object-covert';
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
-import { NumberValueObject } from '../../..';
 
 export class Vara extends BaseFunction {
     override calculate(...variants: BaseValueObject[]) {
@@ -30,70 +25,12 @@ export class Vara extends BaseFunction {
             return new ErrorValueObject(ErrorType.NA);
         }
 
-        const flattenValues: BaseValueObject[][] = [];
-        flattenValues[0] = [];
+        const flattenArray = this.flattenArray(variants, false);
 
-        for (let i = 0; i < variants.length; i++) {
-            let variant = variants[i];
-
-            if (variant.isError()) {
-                return variant;
-            }
-
-            if (variant.isString()) {
-                const value = variant.getValue();
-                const isStringNumber = isRealNum(value);
-
-                if (!isStringNumber) {
-                    return new ErrorValueObject(ErrorType.VALUE);
-                }
-
-                variant = new NumberValueObject(value);
-            }
-
-            if (variant.isBoolean()) {
-                variant = convertTonNumber(variant);
-            }
-
-            if (variant.isArray()) {
-                let errorValue: Nullable<BaseValueObject>;
-
-                (variant as ArrayValueObject).iterator((valueObject) => {
-                    if (valueObject == null || valueObject.isNull()) {
-                        return true;
-                    }
-
-                    // Including logical values
-                    if (valueObject.isBoolean()) {
-                        valueObject = convertTonNumber(valueObject);
-                    }
-
-                    // Including number string
-                    if (valueObject.isString()) {
-                        const value = Number(valueObject.getValue());
-
-                        // Non-text numbers also need to be counted to the sample size
-                        valueObject = new NumberValueObject(isNaN(value) ? 0 : value);
-                    }
-
-                    if (valueObject.isError()) {
-                        errorValue = valueObject;
-                        return false;
-                    }
-
-                    flattenValues[0].push(valueObject);
-                });
-
-                if (errorValue?.isError()) {
-                    return errorValue;
-                }
-            } else if (!variant.isNull()) {
-                flattenValues[0].push(variant);
-            }
+        if (flattenArray.isError()) {
+            return flattenArray;
         }
 
-        const newArray = createNewArray(flattenValues, 1, flattenValues[0].length);
-
-        return newArray.var(1);
+        return flattenArray.var(1);
     }
 }

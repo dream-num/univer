@@ -15,39 +15,22 @@
  */
 
 import { ErrorType } from '../../../basics/error-type';
-import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import { NumberValueObject } from '../../../engine/value-object/primitive-object';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
 
-export class Stdev extends BaseFunction {
+export class StdevS extends BaseFunction {
     override calculate(...variants: BaseValueObject[]) {
         if (variants.length === 0) {
             return new ErrorValueObject(ErrorType.NA);
         }
 
-        let accumulatorAll: BaseValueObject = new NumberValueObject(0);
-        for (let i = 0; i < variants.length; i++) {
-            let variant = variants[i];
+        const flattenArray = this.flattenArray(variants);
 
-            if (variant.isError()) {
-                return variant;
-            }
-
-            if (variant.isString()) {
-                return new ErrorValueObject(ErrorType.VALUE);
-            }
-
-            if (variant.isArray()) {
-                variant = variant.std();
-            }
-
-            accumulatorAll = accumulatorAll.plus(variant);
-
-            if (accumulatorAll.isError()) {
-                return accumulatorAll;
-            }
+        if (flattenArray.isError()) {
+            return flattenArray;
         }
 
-        return accumulatorAll;
+        return flattenArray.std(1);
     }
 }

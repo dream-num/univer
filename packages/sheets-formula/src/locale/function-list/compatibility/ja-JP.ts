@@ -436,7 +436,7 @@ export default {
         },
     },
     STDEVP: {
-        description: '引数を母集団全体と見なし、母集団の標準偏差を返します。',
+        description: '引数を母集団全体であると見なして、母集団の標準偏差を計算します。',
         abstract: '引数を母集団全体と見なし、母集団の標準偏差を返します。',
         links: [
             {
@@ -445,8 +445,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数値 1', detail: '母集団に対応する最初の数値引数を指定します。' },
+            number2: { name: '数値 2', detail: '母集団に対応する引数 2 ~ 255 を数える。 また、半角のカンマ (,) で区切られた引数の代わりに、単一配列や、配列への参照を指定することもできます。' },
         },
     },
     TDIST: {

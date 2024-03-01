@@ -1335,7 +1335,7 @@ export default {
         },
     },
     STDEV_P: {
-        description: 'Calculates standard deviation based on the entire population',
+        description: 'Calculates standard deviation based on the entire population given as arguments (ignores logical values and text).',
         abstract: 'Calculates standard deviation based on the entire population',
         links: [
             {
@@ -1344,12 +1344,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: 'number1', detail: 'The first number argument corresponding to a population.' },
+            number2: { name: 'number2', detail: 'Number arguments 2 to 254 corresponding to a population. You can also use a single array or a reference to an array instead of arguments separated by commas.' },
         },
     },
     STDEV_S: {
-        description: 'Estimates standard deviation based on a sample',
+        description: 'Estimates standard deviation based on a sample (ignores logical values and text in the sample).',
         abstract: 'Estimates standard deviation based on a sample',
         links: [
             {
@@ -1358,12 +1358,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: 'number1', detail: 'The first number argument corresponding to a sample of a population. You can also use a single array or a reference to an array instead of arguments separated by commas.' },
+            number2: { name: 'number2', detail: 'Number arguments 2 to 254 corresponding to a sample of a population. You can also use a single array or a reference to an array instead of arguments separated by commas.' },
         },
     },
     STDEVA: {
-        description: 'Estimates standard deviation based on a sample, including numbers, text, and logical values',
+        description: 'Estimates standard deviation based on a sample, including numbers, text, and logical values.',
         abstract: 'Estimates standard deviation based on a sample, including numbers, text, and logical values',
         links: [
             {
@@ -1372,12 +1372,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value1: { name: 'value1', detail: 'The first value argument corresponding to a sample of a population. You can also use a single array or a reference to an array instead of arguments separated by commas.' },
+            value2: { name: 'value2', detail: 'Value arguments 2 to 254 corresponding to a sample of a population. You can also use a single array or a reference to an array instead of arguments separated by commas.' },
         },
     },
     STDEVPA: {
-        description: 'Calculates standard deviation based on the entire population, including numbers, text, and logical values',
+        description: 'Calculates standard deviation based on the entire population given as arguments, including text and logical values.',
         abstract: 'Calculates standard deviation based on the entire population, including numbers, text, and logical values',
         links: [
             {
@@ -1386,8 +1386,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value1: { name: 'value1', detail: 'The first value argument corresponding to a population.' },
+            value2: { name: 'value2', detail: 'Value arguments 2 to 254 corresponding to a population. You can also use a single array or a reference to an array instead of arguments separated by commas.' },
         },
     },
     STEYX: {

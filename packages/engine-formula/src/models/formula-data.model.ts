@@ -315,6 +315,8 @@ export class FormulaDataModel extends Disposable {
                     cellData: new ObjectMatrix(sheetConfig.cellData),
                     rowCount: sheetConfig.rowCount,
                     columnCount: sheetConfig.columnCount,
+                    rowData: sheetConfig.rowData,
+                    columnData: sheetConfig.columnData,
                 };
                 sheetNameMap[sheet.getName()] = sheet.getSheetId();
             }

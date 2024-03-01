@@ -1104,8 +1104,8 @@ export class ArrayValueObject extends BaseValueObject {
      * ┌──────────────┬────────────────────────────────┬───────────────────┐
      * │ Function     │ Ignore logical values and text │ Type              │
      * ├──────────────┼────────────────────────────────┼───────────────────┤
-     * │ VAR (VAR.S)  │ TRUE                           │ sample            │
-     * │ VARP (VAR.P) │ TRUE                           │ entire population │
+     * │ VAR.S (VAR)  │ TRUE                           │ sample            │
+     * │ VAR.P (VARP) │ TRUE                           │ entire population │
      * │ VARA         │ FALSE                          │ sample            │
      * │ VARPA        │ FALSE                          │ entire population │
      * └──────────────┴────────────────────────────────┴───────────────────┘
@@ -1138,7 +1138,7 @@ export class ArrayValueObject extends BaseValueObject {
             squaredDifferences[0].push(baseValueObject);
         });
 
-        const { _rowCount, _columnCount, _unitId, _sheetId, _currentRow, _currentColumn } = this;
+        const { _unitId, _sheetId, _currentRow, _currentColumn } = this;
 
         const squaredDifferencesArrayObject = new ArrayValueObject({
             calculateValueList: squaredDifferences,
@@ -1154,15 +1154,15 @@ export class ArrayValueObject extends BaseValueObject {
     }
 
     /**
-     * STDEV.P: ddof=0, ignore strings and booleans
-     * STDEV.S: ddof=1, ignore strings and booleans
+     * STDEV.P (STDEVP): ddof=0, ignore strings and booleans
+     * STDEV.S (STDEV): ddof=1, ignore strings and booleans
      *
      * STDEVPA: ddof=0,
      * STDEVA: ddof=1,
      * @returns
      */
-    override std(): BaseValueObject {
-        const variance = this.var();
+    override std(ddof: number = 0): BaseValueObject {
+        const variance = this.var(ddof);
 
         if (variance.isError()) {
             return variance;

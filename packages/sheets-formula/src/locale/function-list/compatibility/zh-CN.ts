@@ -436,7 +436,7 @@ export default {
         },
     },
     STDEVP: {
-        description: '基于整个样本总体计算标准偏差',
+        description: '根据作为参数给定的整个总体计算标准偏差。',
         abstract: '基于整个样本总体计算标准偏差',
         links: [
             {
@@ -445,8 +445,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数值 1', detail: '对应于总体的第一个数值参数。' },
+            number2: { name: '数值 2', detail: '对应于总体的 2 到 255 个数值参数。 也可以用单一数组或对某个数组的引用来代替用逗号分隔的参数。' },
         },
     },
     TDIST: {

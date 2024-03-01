@@ -15,7 +15,7 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { Disposable } from '@univerjs/core';
+import { Disposable, isRealNum } from '@univerjs/core';
 
 import { ErrorType } from '../basics/error-type';
 import type { IFunctionNames } from '../basics/function';
@@ -25,7 +25,9 @@ import type { ArrayBinarySearchType } from '../engine/utils/compare';
 import { ArrayOrderSearchType } from '../engine/utils/compare';
 import type { ArrayValueObject } from '../engine/value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject } from '../engine/value-object/base-value-object';
-import type { PrimitiveValueType } from '../engine/value-object/primitive-object';
+import { NumberValueObject, type PrimitiveValueType } from '../engine/value-object/primitive-object';
+import { convertTonNumber } from '../engine/utils/object-covert';
+import { createNewArray } from '../engine/utils/array-object';
 
 export class BaseFunction extends Disposable {
     private _unitId: Nullable<string>;
@@ -389,5 +391,81 @@ export class BaseFunction extends Disposable {
             return resultArray.slice([position.row, position.row + 1]);
         }
         return resultArray.slice(undefined, [position.column, position.column + 1]);
+    }
+
+    flattenArray(variants: BaseValueObject[], ignoreLogicalValuesAndText: boolean = true): ArrayValueObject | BaseValueObject {
+        const flattenValues: BaseValueObject[][] = [];
+        flattenValues[0] = [];
+
+        for (let i = 0; i < variants.length; i++) {
+            let variant = variants[i];
+
+            if (variant.isError()) {
+                return variant;
+            }
+
+            if (variant.isString()) {
+                const value = variant.getValue();
+                const isStringNumber = isRealNum(value);
+
+                if (!isStringNumber) {
+                    return new ErrorValueObject(ErrorType.VALUE);
+                }
+
+                variant = new NumberValueObject(value);
+            }
+
+            if (variant.isBoolean()) {
+                variant = convertTonNumber(variant);
+            }
+
+            if (variant.isArray()) {
+                let errorValue: Nullable<BaseValueObject>;
+
+                (variant as ArrayValueObject).iterator((valueObject) => {
+                    if (valueObject == null || valueObject.isNull()) {
+                        return true;
+                    }
+
+                    if (ignoreLogicalValuesAndText && (valueObject.isString() || valueObject.isBoolean())) {
+                        return true;
+                    }
+
+                    valueObject = this._includingLogicalValuesAndText(valueObject);
+
+                    if (valueObject.isError()) {
+                        errorValue = valueObject;
+                        return false;
+                    }
+
+                    flattenValues[0].push(valueObject);
+                });
+
+                if (errorValue?.isError()) {
+                    return errorValue;
+                }
+            } else if (!variant.isNull()) {
+                flattenValues[0].push(variant);
+            }
+        }
+
+        return createNewArray(flattenValues, 1, flattenValues[0].length);
+    }
+
+    private _includingLogicalValuesAndText(valueObject: BaseValueObject) {
+        // Including logical values
+        if (valueObject.isBoolean()) {
+            valueObject = convertTonNumber(valueObject);
+        }
+
+        // Including number string
+        if (valueObject.isString()) {
+            const value = Number(valueObject.getValue());
+
+            // Non-text numbers also need to be counted to the sample size
+            valueObject = new NumberValueObject(isNaN(value) ? 0 : value);
+        }
+
+        return valueObject;
     }
 }

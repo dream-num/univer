@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import type { IObjectArrayPrimitiveType, IRowData } from '@univerjs/core';
+import type { IObjectArrayPrimitiveType, IRowData, Nullable } from '@univerjs/core';
 import { BooleanNumber } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
 import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
+import { createNewArray } from '../../../engine/utils/array-object';
 
 enum FunctionNum {
     AVERAGE = 1,
@@ -177,23 +177,53 @@ export class Subtotal extends BaseFunction {
     }
 
     private _average(ignoreHidden: boolean, ...refs: FunctionVariantType[]) {
-        return new ErrorValueObject(ErrorType.VALUE);
+        const flattenArray = this._flattenRefArray(ignoreHidden, ...refs);
+
+        if (flattenArray.isError()) {
+            return flattenArray;
+        }
+
+        return flattenArray.mean();
     }
 
     private _count(ignoreHidden: boolean, ...refs: FunctionVariantType[]) {
-        return new ErrorValueObject(ErrorType.VALUE);
+        const flattenArray = this._flattenRefArray(ignoreHidden, ...refs);
+
+        if (flattenArray.isError()) {
+            return flattenArray;
+        }
+
+        return flattenArray.count();
     }
 
     private _counta(ignoreHidden: boolean, ...refs: FunctionVariantType[]) {
-        return new ErrorValueObject(ErrorType.VALUE);
+        const flattenArray = this._flattenRefArray(ignoreHidden, ...refs);
+
+        if (flattenArray.isError()) {
+            return flattenArray;
+        }
+
+        return flattenArray.countA();
     }
 
     private _max(ignoreHidden: boolean, ...refs: FunctionVariantType[]) {
-        return new ErrorValueObject(ErrorType.VALUE);
+        const flattenArray = this._flattenRefArray(ignoreHidden, ...refs);
+
+        if (flattenArray.isError()) {
+            return flattenArray;
+        }
+
+        return flattenArray.max();
     }
 
     private _min(ignoreHidden: boolean, ...refs: FunctionVariantType[]) {
-        return new ErrorValueObject(ErrorType.VALUE);
+        const flattenArray = this._flattenRefArray(ignoreHidden, ...refs);
+
+        if (flattenArray.isError()) {
+            return flattenArray;
+        }
+
+        return flattenArray.min();
     }
 
     private _product(ignoreHidden: boolean, ...refs: FunctionVariantType[]) {
@@ -201,58 +231,33 @@ export class Subtotal extends BaseFunction {
     }
 
     private _stdev(ignoreHidden: boolean, ...refs: FunctionVariantType[]) {
-        return new ErrorValueObject(ErrorType.VALUE);
+        const flattenArray = this._flattenRefArray(ignoreHidden, ...refs);
+
+        if (flattenArray.isError()) {
+            return flattenArray;
+        }
+
+        return flattenArray.std(1);
     }
 
     private _stdevp(ignoreHidden: boolean, ...refs: FunctionVariantType[]) {
-        return new ErrorValueObject(ErrorType.VALUE);
+        const flattenArray = this._flattenRefArray(ignoreHidden, ...refs);
+
+        if (flattenArray.isError()) {
+            return flattenArray;
+        }
+
+        return flattenArray.std();
     }
 
     private _sum(ignoreHidden: boolean, ...refs: FunctionVariantType[]) {
-        let accumulatorRefs: BaseValueObject = new NumberValueObject(0);
+        const flattenArray = this._flattenRefArray(ignoreHidden, ...refs);
 
-        for (let i = 0; i < refs.length; i++) {
-            const variant = refs[i];
-
-            if (variant.isError()) {
-                return variant;
-            }
-
-            if (!variant.isReferenceObject()) {
-                return new ErrorValueObject(ErrorType.VALUE);
-            }
-
-            const rowData = (variant as BaseReferenceObject).getRowData();
-
-            // Keeping in sync with the sum algorithm in ArrayValueObject
-            let accumulatorRef: BaseValueObject = new NumberValueObject(0);
-            (variant as BaseReferenceObject).iterator((valueObject, rowIndex, columnIndex) => {
-                if (ignoreHidden && this._isRowHidden(rowData, rowIndex)) {
-                    return true; // continue
-                }
-
-                 // 'test', ' ',  blank cell, TRUE and FALSE are ignored
-                if (valueObject == null || valueObject.isString() || valueObject.isBoolean() || valueObject.isNull()) {
-                    return true; // continue
-                }
-
-                if (valueObject.isError()) {
-                    accumulatorRef = valueObject;
-                    return false; // break
-                }
-                accumulatorRef = (accumulatorRef as NumberValueObject).plus(
-                    valueObject as BaseValueObject
-                ) as BaseValueObject;
-            });
-
-            accumulatorRefs = accumulatorRefs.plus(accumulatorRef);
-
-            if (accumulatorRefs.isError()) {
-                return accumulatorRefs;
-            }
+        if (flattenArray.isError()) {
+            return flattenArray;
         }
 
-        return accumulatorRefs;
+        return flattenArray.sum();
     }
 
     private _isRowHidden(rowData: IObjectArrayPrimitiveType<Partial<IRowData>>, rowIndex: number
@@ -266,10 +271,67 @@ export class Subtotal extends BaseFunction {
     }
 
     private _var(ignoreHidden: boolean, ...refs: FunctionVariantType[]) {
-        return new ErrorValueObject(ErrorType.VALUE);
+        const flattenArray = this._flattenRefArray(ignoreHidden, ...refs);
+
+        if (flattenArray.isError()) {
+            return flattenArray;
+        }
+
+        return flattenArray.var(1);
     }
 
     private _varp(ignoreHidden: boolean, ...refs: FunctionVariantType[]) {
-        return new ErrorValueObject(ErrorType.VALUE);
+        const flattenArray = this._flattenRefArray(ignoreHidden, ...refs);
+
+        if (flattenArray.isError()) {
+            return flattenArray;
+        }
+
+        return flattenArray.var();
+    }
+
+    private _flattenRefArray(ignoreHidden: boolean, ...variants: FunctionVariantType[]) {
+        const flattenValues: BaseValueObject[][] = [];
+        flattenValues[0] = [];
+
+        for (let i = 0; i < variants.length; i++) {
+            const variant = variants[i];
+
+            if (variant.isError()) {
+                return variant as ErrorValueObject;
+            }
+
+            if (!variant.isReferenceObject()) {
+                return new ErrorValueObject(ErrorType.VALUE);
+            }
+
+            const rowData = (variant as BaseReferenceObject).getRowData();
+
+            let errorValue: Nullable<BaseValueObject>;
+
+            (variant as BaseReferenceObject).iterator((valueObject, rowIndex) => {
+                if (ignoreHidden && this._isRowHidden(rowData, rowIndex)) {
+                    return true; // continue
+                }
+
+                 // 'test', ' ',  blank cell, TRUE and FALSE are ignored
+                if (valueObject == null || valueObject.isNull() || valueObject.isString() || valueObject.isBoolean()) {
+                    return true;
+                }
+
+                if (valueObject.isError()) {
+                    errorValue = valueObject;
+                    return false; // break
+                }
+
+                flattenValues[0].push(valueObject);
+            });
+
+            if (errorValue?.isError()) {
+                return errorValue;
+            }
+        }
+
+        return createNewArray(flattenValues, 1, flattenValues[0].length);
     }
 }

@@ -1335,7 +1335,7 @@ export default {
         },
     },
     STDEV_P: {
-        description: '基于整个样本总体计算标准偏差',
+        description: '计算基于以参数形式给出的整个样本总体的标准偏差（忽略逻辑值和文本）。',
         abstract: '基于整个样本总体计算标准偏差',
         links: [
             {
@@ -1344,12 +1344,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数值 1', detail: '对应于总体的第一个数值参数。' },
+            number2: { name: '数值 2', detail: '对应于总体的 2 到 254 个数值参数。 也可以用单一数组或对某个数组的引用来代替用逗号分隔的参数。' },
         },
     },
     STDEV_S: {
-        description: '基于样本估算标准偏差',
+        description: '基于样本估算标准偏差（忽略样本中的逻辑值和文本）。',
         abstract: '基于样本估算标准偏差',
         links: [
             {
@@ -1358,12 +1358,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数值 1', detail: '对应于总体样本的第一个数值参数。 也可以用单一数组或对某个数组的引用来代替用逗号分隔的参数。' },
+            number2: { name: '数值 2', detail: '对应于总体样本的 2 到 254 个数值参数。 也可以用单一数组或对某个数组的引用来代替用逗号分隔的参数。' },
         },
     },
     STDEVA: {
-        description: '基于样本（包括数字、文本和逻辑值）估算标准偏差',
+        description: '基于样本（包括数字、文本和逻辑值）估算标准偏差。',
         abstract: '基于样本（包括数字、文本和逻辑值）估算标准偏差',
         links: [
             {
@@ -1372,12 +1372,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value1: { name: '值 1', detail: '对应于总体样本的第一个值参数。 也可以用单一数组或对某个数组的引用来代替用逗号分隔的参数。' },
+            value2: { name: '值 2', detail: '对应于总体样本的 2 到 254 个值参数。 也可以用单一数组或对某个数组的引用来代替用逗号分隔的参数。' },
         },
     },
     STDEVPA: {
-        description: '基于样本总体（包括数字、文本和逻辑值）计算标准偏差',
+        description: '根据作为参数（包括文字和逻辑值）给定的整个总体计算标准偏差。',
         abstract: '基于样本总体（包括数字、文本和逻辑值）计算标准偏差',
         links: [
             {
@@ -1386,8 +1386,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value1: { name: '值 1', detail: '对应于总体的第一个值参数。' },
+            value2: { name: '值 2', detail: '对应于总体的 2 到 254 个值参数。 也可以用单一数组或对某个数组的引用来代替用逗号分隔的参数。' },
         },
     },
     STEYX: {

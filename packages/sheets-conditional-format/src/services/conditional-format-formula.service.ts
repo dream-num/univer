@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-import type { ICellData, Nullable } from '@univerjs/core';
-import { Disposable, ICommandService, RefAlias, Tools } from '@univerjs/core';
-import { Inject } from '@wendellhu/redi';
+import type { ICellData, Nullable, ObjectMatrix } from '@univerjs/core';
+import { Disposable, ICommandService, RefAlias, toDisposable, Tools } from '@univerjs/core';
+import { Inject, Injector } from '@wendellhu/redi';
 import type { ISetFormulaCalculationResultMutation } from '@univerjs/engine-formula';
 import { IActiveDirtyManagerService } from '@univerjs/sheets-formula';
-import { SetFormulaCalculationResultMutation, SetOtherFormulaMutation } from '@univerjs/engine-formula';
+import { RemoveOtherFormulaMutation, SetFormulaCalculationResultMutation, SetOtherFormulaMutation } from '@univerjs/engine-formula';
 import { Subject } from 'rxjs';
 import { bufferTime, filter, map } from 'rxjs/operators';
 import type { IConditionalFormatFormulaMarkDirtyParams } from '../commands/mutations/formula-mark-dirty.mutation';
 import { conditionalFormatFormulaMarkDirty } from '../commands/mutations/formula-mark-dirty.mutation';
 import { ConditionalFormatViewModel } from '../models/conditional-format-view-model';
 import { ConditionalFormatRuleModel } from '../models/conditional-format-rule-model';
+import { ConditionalFormatService } from './conditional-format.service';
 
 // eslint-disable-next-line ts/consistent-type-definitions
 type IFormulaItem = {
@@ -42,9 +43,12 @@ const getResultFromFormula = (formulaResult: Nullable<ICellData>[][]) => {
     const v = formulaResult && formulaResult[0] && formulaResult[0][0];
     return v ? v.v : false;
 };
-
+// TODO: @Gggpound
+// It may be possible later to abstract a service that manages the results of an asynchronous calculation to handle the use of the last calculation before waiting for the result to return.
 export class ConditionalFormatFormulaService extends Disposable {
     private _formulaMap: Map<string, Map<string, RefAlias<IFormulaItem, 'formulaId' | 'formulaText'>>> = new Map();
+
+    private _cache: Map<string, Map<string, Map<string, ObjectMatrix<unknown>>>> = new Map();
 
     private _formulaChange$ = new Subject<{
         unitId: string; subUnitId: string; cfId: string; formulaText: string;formulaId: string;
@@ -54,6 +58,7 @@ export class ConditionalFormatFormulaService extends Disposable {
 
     constructor(
         @Inject(ICommandService) private _commandService: ICommandService,
+        @Inject(Injector) private _injector: Injector,
         @Inject(IActiveDirtyManagerService) private _activeDirtyManagerService: IActiveDirtyManagerService,
         @Inject(ConditionalFormatViewModel) private _conditionalFormatViewModel: ConditionalFormatViewModel,
         @Inject(ConditionalFormatRuleModel) private _conditionalFormatRuleModel: ConditionalFormatRuleModel
@@ -62,6 +67,28 @@ export class ConditionalFormatFormulaService extends Disposable {
         super();
         this._initFormulaCalculationResultChange();
         this._initRuleChange();
+        this._initCache();
+        this.disposeWithMe(toDisposable(() => {
+            this._cache.clear();
+            this._formulaMap.clear();
+        }));
+    }
+
+    private _initCache() {
+        const _conditionalFormatService = this._injector.get(ConditionalFormatService);
+        this.disposeWithMe(_conditionalFormatService.ruleComputeStatus$.subscribe((option) => {
+            const { unitId, subUnitId, status, result, cfId } = option;
+            if (status === 'end' && result) {
+                const cacheMap = this._ensureCacheMap(unitId, subUnitId);
+                cacheMap.set(cfId, result);
+            }
+        }));
+        this.disposeWithMe(this._conditionalFormatRuleModel.$ruleChange.subscribe((option) => {
+            if (option.type === 'delete') {
+                const { unitId, subUnitId, rule } = option;
+                this._deleteCache(unitId, subUnitId, rule.cfId);
+            }
+        }));
     }
 
     private _initRuleChange() {
@@ -147,6 +174,39 @@ export class ConditionalFormatFormulaService extends Disposable {
         return subUnitMap;
     }
 
+    private _ensureCacheMap(unitId: string, subUnitId: string) {
+        let unitMap = this._cache.get(unitId);
+        if (!unitMap) {
+            unitMap = new Map<string, Map<string, ObjectMatrix<any>>>();
+            this._cache.set(unitId, unitMap);
+        }
+        let subUnitMap = unitMap.get(subUnitId);
+        if (!subUnitMap) {
+            subUnitMap = new Map();
+            unitMap.set(subUnitId, subUnitMap);
+        }
+        return subUnitMap;
+    }
+
+    private _deleteCache(unitId: string, subUnitId: string, cfId?: string) {
+        const unitCache = this._cache.get(unitId);
+        if (unitCache) {
+            const subUnitCache = unitCache.get(subUnitId);
+            if (subUnitCache) {
+                if (cfId) {
+                    subUnitCache.delete(cfId);
+                } else {
+                    subUnitCache.clear();
+                }
+            }
+        }
+    }
+
+    public getCache(unitId: string, subUnitId: string, cfId: string) {
+        const map = this._ensureCacheMap(unitId, subUnitId);
+        return map.get(cfId);
+    }
+
     public getSubUnitFormulaMap(unitId: string, subUnitId: string) {
         return this._formulaMap.get(unitId)?.get(subUnitId);
     }
@@ -175,6 +235,7 @@ export class ConditionalFormatFormulaService extends Disposable {
                 formulaItem.count--;
                 if (formulaItem.count <= 0) {
                     subUnitFormulaMap.deleteValue(formulaText);
+                    this._commandService.executeCommand(RemoveOtherFormulaMutation.id, { unitId, subUnitId, formulaId: formulaItem.formulaId });
                 }
             }
         };

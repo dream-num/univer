@@ -1068,13 +1068,13 @@ export class ArrayValueObject extends BaseValueObject {
         });
     }
 
-    override mean(): BaseValueObject {
+    override mean(ddof: number = 0): BaseValueObject {
         const sum = this.sum();
 
         // Like sum, ignore strings and booleans
         const count = this.count();
 
-        return sum.divided(count);
+        return sum.divided(ddof === 0 ? count : count.minusBy(1));
     }
 
     override median(): BaseValueObject {
@@ -1100,20 +1100,31 @@ export class ArrayValueObject extends BaseValueObject {
         return allValue.get(0, (count - 1) / 2);
     }
 
-    // TODO ddof, ignore strings and booleans
-    override var(): BaseValueObject {
+    /**
+     * ┌──────────────┬────────────────────────────────┬───────────────────┐
+     * │ Function     │ Ignore logical values and text │ Type              │
+     * ├──────────────┼────────────────────────────────┼───────────────────┤
+     * │ VAR (VAR.S)  │ TRUE                           │ sample            │
+     * │ VARP (VAR.P) │ TRUE                           │ entire population │
+     * │ VARA         │ FALSE                          │ sample            │
+     * │ VARPA        │ FALSE                          │ entire population │
+     * └──────────────┴────────────────────────────────┴───────────────────┘
+     *
+     * for VARPA and VARA, strings and FALSE are counted as 0, TRUE is counted as 1
+     * for VAR.S/VAR, or VAR.P/VARP, strings,TRUE and FALSE are ignored
+     * Since sum ignores strings and booleans, they are ignored here too, and VAR.S and VAR.P are used more
+     *
+     * VAR.S assumes that its arguments are a sample of the population, like numpy.var(data, ddof=1)
+     * VAR.P assumes that its arguments are the entire population, like numpy.var(data, ddof=0)
+     * numpy.var uses ddof=0 (Delta Degrees of Freedom) by default, so we use ddof=0 here
+     *
+     */
+    override var(ddof: number = 0): BaseValueObject {
         const mean = this.mean();
 
         // let isError = null;
         const squaredDifferences: BaseValueObject[][] = [[]];
         this.iterator((valueObject: Nullable<BaseValueObject>) => {
-            // for VARPA and VARA, strings and FALSE are counted as 0, TRUE is counted as 1
-            // for VAR.S/VAR, or VAR.P/VARP, strings,TRUE and FALSE are ignored
-            // Since sum ignores strings and booleans, they are ignored here too, and VAR.S and VAR.P are used more
-
-            // VAR.S assumes that its arguments are a sample of the population, like numpy.var(data, ddof=1)
-            // VAR.P assumes that its arguments are the entire population, like numpy.var(data, ddof=0)
-            // numpy.var uses ddof=0 by default, so we use ddof=0 here
             if (valueObject == null || valueObject.isError() || valueObject.isString() || valueObject.isBoolean() || valueObject.isNull()) {
                 return;
             }
@@ -1139,7 +1150,7 @@ export class ArrayValueObject extends BaseValueObject {
             column: _currentColumn,
         });
 
-        return squaredDifferencesArrayObject.mean();
+        return squaredDifferencesArrayObject.mean(ddof);
     }
 
     /**

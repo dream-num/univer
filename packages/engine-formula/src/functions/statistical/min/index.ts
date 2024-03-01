@@ -15,6 +15,7 @@
  */
 
 import { ErrorType } from '../../../basics/error-type';
+import { convertTonNumber } from '../../../engine/utils/object-covert';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
@@ -38,12 +39,16 @@ export class Min extends BaseFunction {
                 return new ErrorValueObject(ErrorType.VALUE);
             }
 
-            if (variant.isArray()) {
-                variant = variant.min();
+            if (variant.isBoolean()) {
+                variant = convertTonNumber(variant);
             }
 
-            if (variant.isError()) {
-                return variant as ErrorValueObject;
+            if (variant.isArray()) {
+                variant = variant.min();
+
+                if (variant.isError()) {
+                    return variant as ErrorValueObject;
+                }
             }
 
             if (variant.isNull()) {
@@ -57,21 +62,10 @@ export class Min extends BaseFunction {
     }
 
     private _validator(accumulatorAll: BaseValueObject, valueObject: BaseValueObject) {
-        valueObject = valueObject.isBoolean() ? this._convertTonNumber(valueObject) : valueObject;
-
         const validator = accumulatorAll.isGreaterThan(valueObject);
         if (validator.getValue()) {
             accumulatorAll = valueObject;
         }
         return accumulatorAll;
-    }
-
-    private _convertTonNumber(valueObject: BaseValueObject) {
-        const currentValue = valueObject.getValue();
-        let result = 0;
-        if (currentValue) {
-            result = 1;
-        }
-        return new NumberValueObject(result, true);
     }
 }

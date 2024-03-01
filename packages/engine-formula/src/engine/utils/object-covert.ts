@@ -14,22 +14,14 @@
  * limitations under the License.
  */
 
-/**
- * Determine whether it is a pure number, "12" and "12e+3" are both true
- * @param val The number or string to be judged
- * @returns Result
- */
-export function isRealNum(val: string | number | boolean) {
-    if (val === null || val.toString().replace(/\s/g, '') === '') {
-        return false;
-    }
+import type { BaseValueObject } from '../value-object/base-value-object';
+import { NumberValueObject } from '../value-object/primitive-object';
 
-    if (typeof val === 'boolean') {
-        return false;
+export function convertTonNumber(valueObject: BaseValueObject) {
+    const currentValue = valueObject.getValue();
+    let result = 0;
+    if (currentValue) {
+        result = 1;
     }
-
-    if (!isNaN(val as number)) {
-        return true;
-    }
-    return false;
+    return new NumberValueObject(result, true);
 }

@@ -21,6 +21,7 @@ import { Acot } from './acot';
 import { FUNCTION_NAMES_MATH } from './function-names';
 import { Mod } from './mod';
 import { Power } from './power';
+import { Product } from './product';
 import { Subtotal } from './subtotal';
 import { Sum } from './sum';
 import { Sumif } from './sumif';
@@ -37,4 +38,5 @@ export const functionMath = [
     [Sumif, FUNCTION_NAMES_MATH.SUMIF],
     [Sumifs, FUNCTION_NAMES_MATH.SUMIFS],
     [Power, FUNCTION_NAMES_MATH.POWER],
+    [Product, FUNCTION_NAMES_MATH.PRODUCT],
 ];

@@ -422,7 +422,7 @@ export default {
         },
     },
     STDEV: {
-        description: '基于样本估算标准偏差',
+        description: '根据样本估计标准偏差。 标准偏差可以测量值在平均值（中值）附近分布的范围大小。',
         abstract: '基于样本估算标准偏差',
         links: [
             {
@@ -431,8 +431,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数值 1', detail: '对应于总体样本的第一个数值参数。' },
+            number2: { name: '数值 2', detail: '对应于总体样本的 2 到 255 个数值参数。 也可以用单一数组或对某个数组的引用来代替用逗号分隔的参数。' },
         },
     },
     STDEVP: {
@@ -492,7 +492,7 @@ export default {
         },
     },
     VAR: {
-        description: '基于样本估算方差',
+        description: '计算基于给定样本的方差。',
         abstract: '基于样本估算方差',
         links: [
             {
@@ -501,12 +501,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数值 1', detail: '对应于总体样本的第一个数值参数。' },
+            number2: { name: '数值 2', detail: '应于总体样本的 2 到 255 个数值参数。' },
         },
     },
     VARP: {
-        description: '计算基于样本总体的方差',
+        description: '计算基于样本总体的方差。',
         abstract: '计算基于样本总体的方差',
         links: [
             {
@@ -515,8 +515,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数值 1', detail: '对应于总体的第一个数值参数。' },
+            number2: { name: '数值 2', detail: '对应于总体的 2 到 255 个数值参数。' },
         },
     },
     WEIBULL: {

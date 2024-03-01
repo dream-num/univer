@@ -15,18 +15,17 @@
  */
 
 import { ErrorType } from '../../../basics/error-type';
-import { convertTonNumber } from '../../../engine/utils/object-covert';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
-export class Max extends BaseFunction {
+export class Stdev extends BaseFunction {
     override calculate(...variants: BaseValueObject[]) {
         if (variants.length === 0) {
             return new ErrorValueObject(ErrorType.NA);
         }
 
-        let accumulatorAll: BaseValueObject = new NumberValueObject(Number.NEGATIVE_INFINITY);
+        let accumulatorAll: BaseValueObject = new NumberValueObject(0);
         for (let i = 0; i < variants.length; i++) {
             let variant = variants[i];
 
@@ -38,33 +37,17 @@ export class Max extends BaseFunction {
                 return new ErrorValueObject(ErrorType.VALUE);
             }
 
-            if (variant.isBoolean()) {
-                variant = convertTonNumber(variant);
-            }
-
             if (variant.isArray()) {
-                variant = variant.max();
-
-                if (variant.isError()) {
-                    return variant as ErrorValueObject;
-                }
+                variant = variant.std();
             }
 
-            if (variant.isNull()) {
-                continue;
+            accumulatorAll = accumulatorAll.plus(variant);
+
+            if (accumulatorAll.isError()) {
+                return accumulatorAll;
             }
-
-            accumulatorAll = this._validator(accumulatorAll, variant as BaseValueObject);
         }
 
-        return accumulatorAll;
-    }
-
-    private _validator(accumulatorAll: BaseValueObject, valueObject: BaseValueObject) {
-        const validator = accumulatorAll.isLessThan(valueObject);
-        if (validator.getValue()) {
-            accumulatorAll = valueObject;
-        }
         return accumulatorAll;
     }
 }

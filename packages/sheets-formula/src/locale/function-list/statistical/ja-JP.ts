@@ -1486,7 +1486,7 @@ export default {
         },
     },
     VAR_P: {
-        description: '引数を母集団全体と見なし、母集団の分散 (標本分散) を返します。',
+        description: '引数を母集団全体と見なし、母集団の分散 (標本分散) を返します (母集団内の論理値と文字列は無視します)。',
         abstract: '引数を母集団全体と見なし、母集団の分散 (標本分散) を返します。',
         links: [
             {
@@ -1495,12 +1495,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数値 1', detail: '母集団に対応する最初の数値引数を指定します。' },
+            number2: { name: '数値 2', detail: '母集団に対応する数値引数 2 ~ 254。' },
         },
     },
     VAR_S: {
-        description: '標本に基づいて母集団の分散の推定値 (不偏分散) を返します。',
+        description: '引数を正規母集団の標本と見なし、標本に基づいて母集団の分散の推定値 (不偏分散) を返します (標本内の論理値と文字列は無視します)。',
         abstract: '標本に基づいて母集団の分散の推定値 (不偏分散) を返します。',
         links: [
             {
@@ -1509,8 +1509,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数値 1', detail: '母集団の標本に対応する最初の数値引数を指定します。' },
+            number2: { name: '数値 2', detail: '母集団のサンプルに対応する引数 2 ~ 254 を数値化します。' },
         },
     },
     VARA: {
@@ -1523,8 +1523,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value1: { name: '値 1', detail: '母集団の標本に対応する最初の値引数を指定します。' },
+            value2: { name: '値 2', detail: '母集団のサンプルに対応する引数 2 ~ 254 を値化します。' },
         },
     },
     VARPA: {
@@ -1537,8 +1537,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value1: { name: '値 1', detail: '母集団に対応する最初の値引数を指定します。' },
+            value2: { name: '値 2', detail: '母集団に対応する値引数 2 ~ 254。' },
         },
     },
     WEIBULL_DIST: {

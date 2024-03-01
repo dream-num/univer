@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
+import type { ArrayValueObject } from '../../..';
 import { ErrorType } from '../../../basics/error-type';
-import { convertTonNumber } from '../../../engine/utils/object-covert';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
-export class Max extends BaseFunction {
+export class Product extends BaseFunction {
     override calculate(...variants: BaseValueObject[]) {
         if (variants.length === 0) {
             return new ErrorValueObject(ErrorType.NA);
         }
 
-        let accumulatorAll: BaseValueObject = new NumberValueObject(Number.NEGATIVE_INFINITY);
+        let accumulatorAll: BaseValueObject = new NumberValueObject(1);
         for (let i = 0; i < variants.length; i++) {
             let variant = variants[i];
 
@@ -38,12 +38,8 @@ export class Max extends BaseFunction {
                 return new ErrorValueObject(ErrorType.VALUE);
             }
 
-            if (variant.isBoolean()) {
-                variant = convertTonNumber(variant);
-            }
-
             if (variant.isArray()) {
-                variant = variant.max();
+                variant = this._multiplyArray(variant as ArrayValueObject);
 
                 if (variant.isError()) {
                     return variant as ErrorValueObject;
@@ -54,17 +50,34 @@ export class Max extends BaseFunction {
                 continue;
             }
 
-            accumulatorAll = this._validator(accumulatorAll, variant as BaseValueObject);
+            accumulatorAll = accumulatorAll.multiply(variant);
+
+            if (accumulatorAll.isError()) {
+                return accumulatorAll;
+            }
         }
 
         return accumulatorAll;
     }
 
-    private _validator(accumulatorAll: BaseValueObject, valueObject: BaseValueObject) {
-        const validator = accumulatorAll.isLessThan(valueObject);
-        if (validator.getValue()) {
-            accumulatorAll = valueObject;
-        }
-        return accumulatorAll;
+    private _multiplyArray(array: ArrayValueObject) {
+        let result: BaseValueObject = new NumberValueObject(1);
+        array.iterator((valueObject) => {
+            // 'test', ' ',  blank cell, TRUE and FALSE are ignored
+            if (valueObject == null || valueObject.isString() || valueObject.isBoolean() || valueObject.isNull()) {
+                return true; // continue
+            }
+
+            if (valueObject.isError()) {
+                result = valueObject;
+                return false; // break
+            }
+
+            result = (result as NumberValueObject).multiply(
+                valueObject as BaseValueObject
+            ) as BaseValueObject;
+        });
+
+        return result;
     }
 }

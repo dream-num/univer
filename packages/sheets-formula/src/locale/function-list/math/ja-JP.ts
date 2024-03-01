@@ -729,7 +729,7 @@ export default {
         },
     },
     PRODUCT: {
-        description: '引数リストの積を返します。',
+        description: 'は、引数として指定されたすべての数値を乗算し、製品を返します。',
         abstract: '引数リストの積を返します。',
         links: [
             {
@@ -738,8 +738,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: '数値', detail: 'first' },
-            number2: { name: '指数', detail: 'second' },
+            number1: { name: '数値 1', detail: ' 積を計算する最初の数値または範囲を指定します。' },
+            number2: { name: '数値 2', detail: '積を計算する 2 番目以降の数値または範囲を指定します (引数は 1 ～ 255 個まで指定できます)。' },
         },
     },
     QUOTIENT: {

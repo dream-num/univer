@@ -1517,7 +1517,7 @@ export default {
         },
     },
     VAR_P: {
-        description: '计算基于样本总体的方差',
+        description: '计算基于整个样本总体的方差（忽略样本总体中的逻辑值和文本）。',
         abstract: '计算基于样本总体的方差',
         links: [
             {
@@ -1526,12 +1526,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数值 1', detail: '对应于总体的第一个数值参数。' },
+            number2: { name: '数值 2', detail: '对应于总体的 2 到 254 个数值参数。' },
         },
     },
     VAR_S: {
-        description: '基于样本估算方差',
+        description: '估算基于样本的方差（忽略样本中的逻辑值和文本）。',
         abstract: '基于样本估算方差',
         links: [
             {
@@ -1540,8 +1540,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数值 1', detail: '对应于总体样本的第一个数值参数。' },
+            number2: { name: '数值 2', detail: '对应于总体样本的 2 到 254 个数值参数。' },
         },
     },
     VARA: {
@@ -1554,8 +1554,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value1: { name: '值 1', detail: '对应于总体样本的第一个值参数。' },
+            value2: { name: '值 2', detail: '对应于总体样本的 2 到 254 个值参数' },
         },
     },
     VARPA: {
@@ -1568,8 +1568,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value1: { name: '值 1', detail: '对应于总体的第一个值参数。' },
+            value2: { name: '值 2', detail: '对应于总体的 2 到 254 个值参数' },
         },
     },
     WEIBULL_DIST: {

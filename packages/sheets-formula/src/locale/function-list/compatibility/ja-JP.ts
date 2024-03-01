@@ -422,7 +422,7 @@ export default {
         },
     },
     STDEV: {
-        description: '引数を正規母集団の標本と見なし、標本に基づいて母集団の標準偏差の推定値を返します。',
+        description: '標本に基づいて標準偏差の推定値を計算します。 標準偏差とは、統計的な対象となる値がその平均からどれだけ広い範囲に分布しているかを計測したものです。',
         abstract: '引数を正規母集団の標本と見なし、標本に基づいて母集団の標準偏差の推定値を返します。',
         links: [
             {
@@ -431,8 +431,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: 'number1', detail: '母集団の標本に対応する最初の数値引数を指定します。' },
+            number2: { name: 'number2', detail: '母集団のサンプルに対応する引数 2 から 255 の数値。 また、半角のカンマ (,) で区切られた引数の代わりに、単一配列や、配列への参照を指定することもできます。' },
         },
     },
     STDEVP: {
@@ -501,8 +501,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数値 1', detail: '母集団の標本に対応する最初の数値引数を指定します。' },
+            number2: { name: '数値 2', detail: '母集団のサンプルに対応する引数 2 から 255 の数値。' },
         },
     },
     VARP: {
@@ -515,8 +515,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数値 1', detail: '母集団に対応する最初の数値引数を指定します。' },
+            number2: { name: '数値 2', detail: '母集団に対応する引数 2 ~ 255 を数える。' },
         },
     },
     WEIBULL: {

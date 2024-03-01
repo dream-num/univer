@@ -1517,7 +1517,7 @@ export default {
         },
     },
     VAR_P: {
-        description: 'Calculates variance based on the entire population',
+        description: 'Calculates variance based on the entire population (ignores logical values and text in the population).',
         abstract: 'Calculates variance based on the entire population',
         links: [
             {
@@ -1526,12 +1526,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: 'number1', detail: 'The first number argument corresponding to a population.' },
+            number2: { name: 'number2', detail: 'Number arguments 2 to 254 corresponding to a population.' },
         },
     },
     VAR_S: {
-        description: 'Estimates variance based on a sample',
+        description: 'Estimates variance based on a sample (ignores logical values and text in the sample).',
         abstract: 'Estimates variance based on a sample',
         links: [
             {
@@ -1540,8 +1540,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: 'number1', detail: 'The first number argument corresponding to a sample of a population.' },
+            number2: { name: 'number2', detail: 'Number arguments 2 to 254 corresponding to a sample of a population.' },
         },
     },
     VARA: {
@@ -1554,8 +1554,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value1: { name: 'value1', detail: 'The value number argument corresponding to a sample of a population.' },
+            value2: { name: 'value2', detail: 'Value arguments 2 to 254 corresponding to a sample of a population.' },
         },
     },
     VARPA: {
@@ -1568,8 +1568,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value1: { name: 'value1', detail: 'The first value argument corresponding to a population.' },
+            value2: { name: 'value2', detail: 'Value arguments 2 to 254 corresponding to a population.' },
         },
     },
     WEIBULL_DIST: {

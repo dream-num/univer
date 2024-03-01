@@ -422,7 +422,7 @@ export default {
         },
     },
     STDEV: {
-        description: 'Estimates standard deviation based on a sample',
+        description: 'Estimates standard deviation based on a sample. The standard deviation is a measure of how widely values are dispersed from the average value (the mean).',
         abstract: 'Estimates standard deviation based on a sample',
         links: [
             {
@@ -431,8 +431,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: 'number1', detail: 'The first number argument corresponding to a sample of a population.' },
+            number2: { name: 'number2', detail: 'Number arguments 2 to 255 corresponding to a sample of a population. You can also use a single array or a reference to an array instead of arguments separated by commas.' },
         },
     },
     STDEVP: {
@@ -492,7 +492,7 @@ export default {
         },
     },
     VAR: {
-        description: 'Estimates variance based on a sample',
+        description: 'Estimates variance based on a sample.',
         abstract: 'Estimates variance based on a sample',
         links: [
             {
@@ -501,12 +501,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: 'number1', detail: 'The first number argument corresponding to a sample of a population.' },
+            number2: { name: 'number2', detail: 'Number arguments 2 to 255 corresponding to a sample of a population.' },
         },
     },
     VARP: {
-        description: 'Calculates variance based on the entire population',
+        description: 'Calculates variance based on the entire population.',
         abstract: 'Calculates variance based on the entire population',
         links: [
             {
@@ -515,8 +515,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: 'number1', detail: 'The first number argument corresponding to a population.' },
+            number2: { name: 'number2', detail: 'Number arguments 2 to 255 corresponding to a population.' },
         },
     },
     WEIBULL: {

@@ -729,7 +729,7 @@ export default {
         },
     },
     PRODUCT: {
-        description: 'Multiplies its arguments',
+        description: 'Multiplies all the numbers given as arguments and returns the product.',
         abstract: 'Multiplies its arguments',
         links: [
             {
@@ -738,8 +738,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: 'number1', detail: 'The first number or range that you want to multiply.' },
+            number2: { name: 'number2', detail: 'Additional numbers or ranges that you want to multiply, up to a maximum of 255 arguments.' },
         },
     },
     QUOTIENT: {

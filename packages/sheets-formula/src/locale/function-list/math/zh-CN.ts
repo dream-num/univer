@@ -728,7 +728,7 @@ export default {
         },
     },
     PRODUCT: {
-        description: '将其参数相乘',
+        description: '将作为参数提供的所有数字相乘，并返回乘积。',
         abstract: '将其参数相乘',
         links: [
             {
@@ -737,8 +737,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数值 1', detail: '要相乘的第一个数字或范围。' },
+            number2: { name: '数值 2', detail: '要相乘的其他数字或单元格区域，最多可以使用 255 个参数。' },
         },
     },
     QUOTIENT: {

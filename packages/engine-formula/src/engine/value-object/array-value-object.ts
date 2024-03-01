@@ -125,12 +125,7 @@ export class ArrayValueObject extends BaseValueObject {
     }>;
 
     constructor(rawValue: string | IArrayValueObject) {
-        if (typeof rawValue === 'string') {
-            super(rawValue as string);
-        } else {
-            const rawString = fromObjectToString(rawValue as IArrayValueObject);
-            super(rawString);
-        }
+        super(typeof rawValue === 'string' ? rawValue as string : fromObjectToString(rawValue as IArrayValueObject));
 
         this._values = this._formatValue(rawValue);
     }

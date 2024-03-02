@@ -300,7 +300,9 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
         this._updateInputPosition();
 
-        this._scrollToSelection();
+        if (isEditing) {
+            this._scrollToSelection();
+        }
     }
 
     // Sync canvas selection to dom selection.

@@ -350,11 +350,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
 
         editor.setFocus(true);
 
-        if (editor.isSingle()) {
-            this._contextService.setContextValue(FOCUSING_UNIVER_EDITOR_SINGLE_MODE, true);
-        } else {
-            this._contextService.setContextValue(FOCUSING_UNIVER_EDITOR_SINGLE_MODE, false);
-        }
+        this._contextService.setContextValue(FOCUSING_UNIVER_EDITOR_SINGLE_MODE, editor.isSingle());
 
         this._focusStyle$.next(editorUnitId);
     }

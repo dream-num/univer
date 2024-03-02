@@ -18,7 +18,7 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import clsx from 'clsx';
 import React, { useEffect, useState } from 'react';
 
-import { Debounce } from '@univerjs/core';
+import { debounce } from '@univerjs/core';
 import { IStatusBarService } from '../../services/status-bar.service';
 import type { IStatisticItem } from './CopyableStatisticItem';
 import { CopyableStatisticItem } from './CopyableStatisticItem';
@@ -69,7 +69,7 @@ export const StatusBar = () => {
         };
     }, [statusBarService]);
 
-    const handleResize = Debounce(() => {
+    const handleResize = debounce(() => {
         const newSingleState = window.innerWidth < SINGLE_MODE_WIDTH;
         if (isSingle !== newSingleState) {
             setIsSingle(newSingleState);

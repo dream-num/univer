@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-type DebounceFn<T extends (...args: any[]) => any> = (this: ThisParameterType<T>, ...args: Parameters<T>) => void;
+type debounceFn<T extends (...args: any[]) => any> = (this: ThisParameterType<T>, ...args: Parameters<T>) => void;
 
-export function Debounce<T extends (...args: any[]) => any>(func: T, wait: number): DebounceFn<T> {
+export function debounce<T extends (...args: any[]) => any>(func: T, wait: number): debounceFn<T> {
     let timeout: NodeJS.Timeout | null;
 
     return function (this: ThisParameterType<T>, ...args: Parameters<T>) {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Debounce, type IDocumentData, LocaleService, type Nullable } from '@univerjs/core';
+import { debounce, type IDocumentData, LocaleService, type Nullable } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useRef, useState } from 'react';
 import { Popup } from '@univerjs/design';
@@ -138,7 +138,7 @@ export function TextEditor(props: ITextEditorProps & MyComponentProps): JSX.Elem
                 return;
             }
 
-            Debounce(() => {
+            debounce(() => {
                 const unitId = editor.editorUnitId;
                 const isLegality = editorService.checkValueLegality(unitId);
                 setValidationVisible(!isLegality);

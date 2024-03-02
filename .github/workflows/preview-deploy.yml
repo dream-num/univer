@@ -114,7 +114,7 @@ jobs:
 
             #  ================= Deploy Demo =================
             - name: 📦 Build demo
-              run: pnpm run build:demo
+              run: pnpm build:demo
 
             - name: Copy demo to workspace
               run: |
@@ -159,7 +159,7 @@ jobs:
 
             # ================= Deploy Storybook =================
             - name: 📦 Build storybook
-              run: pnpm run build:storybook
+              run: pnpm storybook:build
 
             - name: 🚀 Deploy to Vercel (storybook)
               uses: amondnet/vercel-action@v25

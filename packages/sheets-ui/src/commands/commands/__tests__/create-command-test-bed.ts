@@ -96,8 +96,8 @@ export function createCommandTestBed(workbookConfig?: IWorkbookData, dependencie
             injector.add([SelectionManagerService]);
             injector.add([BorderStyleManagerService]);
             injector.add([SheetInterceptorService]);
-            injector.add([SheetInterceptorService]);
             injector.add([LexerTreeBuilder]);
+
             dependencies?.forEach((d) => injector.add(d));
         }
     }

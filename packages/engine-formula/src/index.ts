@@ -60,7 +60,7 @@ export {
     type ISetFormulaDataMutationParams,
     SetFormulaDataMutation,
 } from './commands/mutations/set-formula-data.mutation';
-export { RemoveOtherFormulaMutation, SetOtherFormulaMutation } from './commands/mutations/set-other-formula.mutation';
+export { RemoveOtherFormulaMutation, SetOtherFormulaMutation, type ISetOtherFormulaMutationParams, type IRemoveOtherFormulaMutationParams } from './commands/mutations/set-other-formula.mutation';
 export {
     RemoveSuperTableMutation,
     SetSuperTableMutation,

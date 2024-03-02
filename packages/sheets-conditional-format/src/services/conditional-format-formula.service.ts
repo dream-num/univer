@@ -17,9 +17,10 @@
 import type { ICellData, Nullable, ObjectMatrix } from '@univerjs/core';
 import { Disposable, ICommandService, RefAlias, toDisposable, Tools } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
-import type { ISetFormulaCalculationResultMutation } from '@univerjs/engine-formula';
+import type { IRemoveOtherFormulaMutationParams, ISetFormulaCalculationResultMutation, ISetOtherFormulaMutationParams } from '@univerjs/engine-formula';
 import { IActiveDirtyManagerService } from '@univerjs/sheets-formula';
-import { RemoveOtherFormulaMutation, SetFormulaCalculationResultMutation, SetOtherFormulaMutation } from '@univerjs/engine-formula';
+import { RemoveOtherFormulaMutation, SetFormulaCalculationResultMutation,
+    SetOtherFormulaMutation } from '@univerjs/engine-formula';
 import { Subject } from 'rxjs';
 import { bufferTime, filter, map } from 'rxjs/operators';
 import type { IConditionalFormatFormulaMarkDirtyParams } from '../commands/mutations/formula-mark-dirty.mutation';
@@ -142,22 +143,30 @@ export class ConditionalFormatFormulaService extends Disposable {
               } });
 
         // Sum up formulas that need to be marked dirty
-        this.disposeWithMe(this.formulaChange$.pipe(bufferTime(16), filter((list) => !!list.length), map((list) => {
+        this.formulaChange$.pipe(bufferTime(16), filter((list) => !!list.length), map((list) => {
             return list.reduce((result, cur) => {
-                const { unitId, subUnitId, formulaId } = cur;
+                const { unitId, subUnitId, formulaId, formulaText } = cur;
                 if (!result[unitId]) {
                     result[unitId] = {};
                 }
                 if (!result[unitId][subUnitId]) {
                     result[unitId][subUnitId] = {};
                 }
-                result[unitId][subUnitId][formulaId] = true;
+                result[unitId][subUnitId][formulaId] = { f: formulaText };
                 return result;
-            }, {} as { [unitId: string]: { [sunUnitId: string]: { [formulaId: string]: true } } });
-        })).subscribe((obj) => {
-            this._commandService.executeCommand(conditionalFormatFormulaMarkDirty.id,
-                obj as IConditionalFormatFormulaMarkDirtyParams);
-        }));
+            }, {} as { [unitId: string]: { [sunUnitId: string]: { [formulaId: string]: { f: string } } } });
+        })).subscribe((result) => {
+            for (const unitId in result) {
+                for (const subUnitId in result[unitId]) {
+                    const value = result[unitId][subUnitId];
+                    const config: ISetOtherFormulaMutationParams = { unitId, subUnitId, formulaMap: value };
+                    this._commandService.executeCommand(SetOtherFormulaMutation.id, config).then(() => {
+                        this._commandService.executeCommand(conditionalFormatFormulaMarkDirty.id,
+                            { [unitId]: { [subUnitId]: value } } as unknown as IConditionalFormatFormulaMarkDirtyParams);
+                    });
+                }
+            }
+        });
     }
 
     private _ensureSubunitFormulaMap(unitId: string, subUnitId: string) {
@@ -222,8 +231,6 @@ export class ConditionalFormatFormulaService extends Disposable {
         }
         const formulaId = this._createFormulaId(unitId, subUnitId);
         subUnitFormulaMap.addValue({ formulaId, formulaText, cfId, status: FormulaResultStatus.WAIT, count: 1 });
-        const config = { item: { f: formulaText }, unitId, subUnitId, formulaId };
-        this._commandService.executeCommand(SetOtherFormulaMutation.id, config);
         this._formulaChange$.next({ unitId, cfId, subUnitId, formulaText, formulaId });
     }
 
@@ -235,13 +242,15 @@ export class ConditionalFormatFormulaService extends Disposable {
                 formulaItem.count--;
                 if (formulaItem.count <= 0) {
                     subUnitFormulaMap.deleteValue(formulaText);
-                    this._commandService.executeCommand(RemoveOtherFormulaMutation.id, { unitId, subUnitId, formulaId: formulaItem.formulaId });
                 }
             }
         };
-        subUnitFormulaMap.getValues().filter((item) => item.cfId === cfId).forEach((item) => {
+        const values = subUnitFormulaMap.getValues().filter((item) => item.cfId === cfId);
+        values.forEach((item) => {
             reduceCount(item.formulaText);
         });
+        const formulaIdList = values.map((item) => item.formulaId);
+        this._commandService.executeCommand(RemoveOtherFormulaMutation.id, { unitId, subUnitId, formulaIdList } as IRemoveOtherFormulaMutationParams);
     }
 
     public getFormulaResult(unitId: string, subUnitId: string, formulaText: string) {

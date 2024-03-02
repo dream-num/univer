@@ -37,7 +37,7 @@ export const FormulaStyleEditor = (props: IStyleEditorProps) => {
         if (rule?.subType === SubRuleType.formula) {
             return rule.value;
         }
-        return '';
+        return '=';
     });
 
     const getResult = (config: {

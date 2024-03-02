@@ -42,6 +42,8 @@ export interface IOtherFormulaManagerService {
     register(insertParam: IOtherFormulaManagerInsertParam): void;
 
     getOtherFormulaData(): IOtherFormulaData;
+
+    batchRegister(formulaData: IOtherFormulaData): void;
 }
 
 /**

@@ -21,6 +21,9 @@ export default {
             menu: {
                 manageConditionalFormat: '管理条件格式',
                 createConditionalFormat: '新建条件格式',
+                clearRangeRules: '清除所选区域的规则',
+                clearWorkSheetRules: '清除整个工作表的规则',
+
             },
             panel: {
                 createRule: '+ 添加新的规则',

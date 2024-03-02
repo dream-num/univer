@@ -16,6 +16,7 @@
 
 import type { IWorkbookData } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, LocaleType, Plugin, PluginType, Univer } from '@univerjs/core';
+import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import {
     INumfmtService,
     NumfmtService,
@@ -69,7 +70,7 @@ export const createTestBed = (dependencies?: Dependency[]) => {
             injector.add([INumfmtService, { useClass: NumfmtService }]);
             injector.add([SheetInterceptorService]);
             injector.add([SheetSkeletonManagerService]);
-
+            injector.add([LexerTreeBuilder]);
             dependencies?.forEach((d) => injector.add(d));
         }
 

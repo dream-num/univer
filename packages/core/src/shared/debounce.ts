@@ -14,17 +14,20 @@
  * limitations under the License.
  */
 
-export const FOCUSING_SHEET = 'FOCUSING_SHEET';
-export const FOCUSING_DOC = 'FOCUSING_DOC';
-export const FOCUSING_SLIDE = 'FOCUSING_SLIDE';
+type debounceFn<T extends (...args: any[]) => any> = (this: ThisParameterType<T>, ...args: Parameters<T>) => void;
 
-/** @deprecated */
-export const FOCUSING_EDITOR_BUT_HIDDEN = 'FOCUSING_EDITOR_BUT_HIDDEN';
+export function debounce<T extends (...args: any[]) => any>(func: T, wait: number): debounceFn<T> {
+    let timeout: NodeJS.Timeout | null;
 
-export const EDITOR_ACTIVATED = 'EDITOR_ACTIVATED';
-export const FOCUSING_EDITOR_INPUT_FORMULA = 'FOCUSING_EDITOR_INPUT_FORMULA';
-export const FOCUSING_FORMULA_EDITOR = 'FOCUSING_FORMULA_EDITOR';
+    return function (this: ThisParameterType<T>, ...args: Parameters<T>) {
+        const context = this;
 
-export const FOCUSING_UNIVER_EDITOR = 'FOCUSING_UNIVER_EDITOR';
+        const later = function () {
+            timeout = null;
+            func.apply(context, args);
+        };
 
-export const FOCUSING_UNIVER_EDITOR_SINGLE_MODE = 'FOCUSING_UNIVER_EDITOR_SINGLE_MODE';
+        clearTimeout(timeout as NodeJS.Timeout);
+        timeout = setTimeout(later, wait);
+    };
+}

@@ -34,8 +34,7 @@ export { FunctionType, type IFunctionInfo, type IFunctionParam } from './basics/
 export { type IFunctionNames } from './basics/function';
 export { includeFormulaLexerToken, isFormulaLexerToken, normalizeSheetName } from './basics/match-token';
 export { convertUnitDataToRuntime } from './basics/runtime';
-export { matchToken } from './basics/token';
-export { compareToken } from './basics/token';
+export { matchToken, compareToken, operatorToken } from './basics/token';
 export { RegisterFunctionMutation } from './commands/mutations/register-function.mutation';
 export {
     type ISetArrayFormulaDataMutationParams,
@@ -81,7 +80,6 @@ export {
     serializeRangeToRefString,
     serializeRangeWithSheet,
     serializeRangeWithSpreadsheet,
-    UNIT_NAME_REGEX,
 } from './engine/utils/reference';
 export { generateStringWithSequence, type ISequenceNode, sequenceNodeType } from './engine/utils/sequence';
 export { ArrayValueObject, ValueObjectFactory } from './engine/value-object/array-value-object';
@@ -137,3 +135,4 @@ export { FormulaExecuteStageType, type IExecutionInProgressParams } from './serv
 export { FormulaExecutedStateType, type IAllRuntimeData } from './services/runtime.service';
 export { SetNumfmtFormulaDataMutation } from './commands/mutations/set-numfmt-formula-data.mutation';
 export type { ISetNumfmtFormulaDataMutationParams } from './commands/mutations/set-numfmt-formula-data.mutation';
+export { isReferenceString } from './basics/regex';

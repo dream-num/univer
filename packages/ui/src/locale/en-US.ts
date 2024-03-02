@@ -61,6 +61,10 @@ const locale: typeof zhCN = {
             content: 'Please allow Univer to access your clipboard.',
         },
     },
+    textEditor: {
+        formulaError: 'Please enter a valid formula, such as =SUM(A1)',
+        rangeError: 'Please enter a valid range, such as A1:B10',
+    },
 };
 
 export default locale;

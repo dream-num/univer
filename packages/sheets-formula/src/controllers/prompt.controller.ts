@@ -258,22 +258,20 @@ export class PromptController extends Disposable {
                         return;
                     }
 
+                    const editor = this._editorService.getEditor(params.unitId);
+
+                    if (!editor || editor.onlyInputContent()) {
+                        return;
+                    }
+
                     if (
-                        (this._editorService.isSheetEditor(params.unitId) && this._editorBridgeService.isVisible().visible === false) ||
+                        (editor.isSheetEditor() && this._editorBridgeService.isVisible().visible === false) ||
                         this._formulaPromptService.isSelectionMoving()
                     ) {
                         return;
                     }
 
-                    if (!this._editorService.isEditor(params.unitId)) {
-                        return;
-                    }
-
-                    const currentBody = this._getCurrentBody();
-
-                    const dataStream = currentBody?.dataStream || '';
-
-                    this._contextSwitch(dataStream);
+                    this._contextSwitch();
 
                     this._changeKeepVisibleHideState();
 
@@ -288,6 +286,11 @@ export class PromptController extends Disposable {
                     // if (this._isLockedOnSelectionInsertRefString) {
                     //     return;
                     // }
+
+                    if (editor.onlyInputRange()) {
+                        return;
+                    }
+
                     // TODO@Dushusir: use real text info
                     this._changeFunctionPanelState();
                 })
@@ -635,11 +638,13 @@ export class PromptController extends Disposable {
             return;
         }
 
-        const currentBody = this._getCurrentBody();
+        // const currentBody = this._getCurrentBody();
 
-        const dataStream = currentBody?.dataStream || '';
+        // const dataStream = currentBody?.dataStream || '';
 
-        const functionAndParameter = this._lexerTreeBuilder.getFunctionAndParameter(dataStream, startOffset - 1);
+        const config = this._getCurrentBodyDataStreamAndOffset();
+
+        const functionAndParameter = this._lexerTreeBuilder.getFunctionAndParameter(config?.dataStream || '', startOffset - 1 + (config?.offset || 0));
 
         if (functionAndParameter == null) {
             this._hideFunctionPanel();
@@ -740,15 +745,15 @@ export class PromptController extends Disposable {
 
         const { startOffset } = activeRange;
 
-        const body = this._getCurrentBody();
+        const config = this._getCurrentBodyDataStreamAndOffset();
 
-        if (body == null || startOffset == null) {
+        if (config == null || startOffset == null) {
             return;
         }
 
-        const dataStream = body.dataStream;
+        const dataStream = config.dataStream;
 
-        return dataStream[startOffset - 1];
+        return dataStream[startOffset - 1 + config.offset];
     }
 
     /**
@@ -770,9 +775,29 @@ export class PromptController extends Disposable {
         }
     }
 
-    private _getCurrentBody() {
+    // private _getCurrentBody() {
+    //     const documentModel = this._currentUniverService.getCurrentUniverDocInstance();
+    //     return documentModel?.snapshot?.body;
+    // }
+
+    private _getCurrentBodyDataStreamAndOffset() {
         const documentModel = this._currentUniverService.getCurrentUniverDocInstance();
-        return documentModel?.snapshot?.body;
+
+        if (!documentModel?.snapshot?.body) {
+            return;
+        }
+
+        const unitId = documentModel.getUnitId();
+
+        const editor = this._editorService.getEditor(unitId);
+
+        const dataStream = documentModel.snapshot.body.dataStream;
+
+        if (!editor || !editor.onlyInputRange()) {
+            return { dataStream, offset: 0 };
+        }
+
+        return { dataStream: compareToken.EQUALS + dataStream, offset: 1 };
     }
 
     private _getFormulaAndCellEditorBody(unitIds: string[]) {
@@ -801,12 +826,14 @@ export class PromptController extends Disposable {
      * otherwise, close the formula panel.
      * @param currentInputValue The text content entered by the user in the editor.
      */
-    private _contextSwitch(currentInputValue: string) {
-        if (isFormulaString(currentInputValue)) {
+    private _contextSwitch() {
+        const config = this._getCurrentBodyDataStreamAndOffset();
+
+        if (config && isFormulaString(config.dataStream)) {
             this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, true);
 
             const lastSequenceNodes =
-                this._lexerTreeBuilder.sequenceNodesBuilder(currentInputValue.replace(/\r/g, '').replace(/\n/g, '')) ||
+                this._lexerTreeBuilder.sequenceNodesBuilder(config.dataStream.replace(/\r/g, '').replace(/\n/g, '')) ||
                 [];
 
             this._formulaPromptService.setSequenceNodes(lastSequenceNodes);
@@ -819,20 +846,22 @@ export class PromptController extends Disposable {
 
             const { startOffset } = activeRange;
 
-            this._currentInsertRefStringIndex = startOffset - 1;
-        } else {
-            this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, false);
+            this._currentInsertRefStringIndex = startOffset - 1 + config.offset;
 
-            this._formulaPromptService.disableLockedSelectionChange();
+            return;
+        }
 
-            this._formulaPromptService.disableLockedSelectionInsert();
+        this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, false);
+
+        this._formulaPromptService.disableLockedSelectionChange();
+
+        this._formulaPromptService.disableLockedSelectionInsert();
 
             // this._lastSequenceNodes = [];
 
-            this._formulaPromptService.clearSequenceNodes();
+        this._formulaPromptService.clearSequenceNodes();
 
-            this._hideFunctionPanel();
-        }
+        this._hideFunctionPanel();
     }
 
     private _getContextState() {
@@ -910,6 +939,8 @@ export class PromptController extends Disposable {
         const refSelections: IRefSelection[] = [];
         let refColorIndex = 0;
 
+        const offset = this._getCurrentBodyDataStreamAndOffset()?.offset || 0;
+
         for (let i = 0, len = sequenceNodes.length; i < len; i++) {
             const node = sequenceNodes[i];
             if (typeof node === 'string') {
@@ -939,8 +970,8 @@ export class PromptController extends Disposable {
 
             if (themeColor && themeColor.length > 0) {
                 textRuns.push({
-                    st: startIndex + 1,
-                    ed: endIndex + 2,
+                    st: startIndex + 1 - offset,
+                    ed: endIndex + 2 - offset,
                     ts: {
                         cl: {
                             rgb: themeColor,
@@ -1226,17 +1257,26 @@ export class PromptController extends Disposable {
 
         this._fitEditorSize();
 
+        const editor = this._editorService.getEditor(editorUnitId);
+
+        let formulaString = dataStream;
+        let offset = 1;
+        if (!editor || !editor.onlyInputRange()) {
+            formulaString = `${compareToken.EQUALS}${dataStream}`;
+            offset = 0;
+        }
+
         if (canUndo) {
             this._commandService.executeCommand(ReplaceContentCommand.id, {
                 unitId: editorUnitId,
                 body: {
-                    dataStream: `=${dataStream}`,
+                    dataStream: formulaString,
                     textRuns,
                 },
                 textRanges: [
                     {
-                        startOffset: textSelectionOffset + 1,
-                        endOffset: textSelectionOffset + 1,
+                        startOffset: textSelectionOffset + 1 - offset,
+                        endOffset: textSelectionOffset + 1 - offset,
                         collapsed,
                         style,
                     },
@@ -1244,11 +1284,11 @@ export class PromptController extends Disposable {
                 segmentId: null,
             });
         } else {
-            this._updateEditorModel(`=${dataStream}\r\n`, textRuns);
+            this._updateEditorModel(`${formulaString}\r\n`, textRuns);
             this._textSelectionManagerService.replaceTextRanges([
                 {
-                    startOffset: textSelectionOffset + 1,
-                    endOffset: textSelectionOffset + 1,
+                    startOffset: textSelectionOffset + 1 - offset,
+                    endOffset: textSelectionOffset + 1 - offset,
                     style,
                 },
             ]);

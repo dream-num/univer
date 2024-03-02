@@ -40,9 +40,11 @@ export class DocEditorBridgeController extends Disposable {
     }
 
     private _initialize() {
-        this._editorService.resize$.subscribe((unitId: string) => {
-            this._resize(unitId);
-        });
+        this.disposeWithMe(
+            this._editorService.resize$.subscribe((unitId: string) => {
+                this._resize(unitId);
+            })
+        );
 
         this._editorService.getAllEditor().forEach((editor) => {
             const unitId = editor.editorUnitId;
@@ -60,6 +62,8 @@ export class DocEditorBridgeController extends Disposable {
         this._initialBlur();
 
         this._initialFocus();
+
+        this._initialValueChange();
     }
 
     private _resize(unitId: Nullable<string>) {
@@ -108,7 +112,7 @@ export class DocEditorBridgeController extends Disposable {
 
         mainComponent?.resize(contentWidth, contentHeight);
 
-        if (editor.isSingle === false) {
+        if (!editor.isSingle()) {
             if (actualHeight > height) {
                 if (scrollBar == null) {
                     viewportMain && new ScrollBar(viewportMain, { enableHorizontal: false, barSize: 8 });
@@ -136,28 +140,64 @@ export class DocEditorBridgeController extends Disposable {
     }
 
     private _initialSetValue() {
-        this._editorService.setValue$.subscribe((param) => {
-            this._commandService.executeCommand(CoverContentCommand.id, {
-                unitId: param.editorUnitId,
-                body: param.body,
-                segmentId: null,
-            });
-        });
+        this.disposeWithMe(
+            this._editorService.setValue$.subscribe((param) => {
+                this._commandService.executeCommand(CoverContentCommand.id, {
+                    unitId: param.editorUnitId,
+                    body: param.body,
+                    segmentId: null,
+                });
+            })
+        );
     }
 
     private _initialBlur() {
-        this._editorService.blur$.subscribe(() => {
-            this._textSelectionRenderManager.removeAllTextRanges();
+        this.disposeWithMe(
+            this._editorService.blur$.subscribe(() => {
+                this._textSelectionRenderManager.removeAllTextRanges();
 
-            this._textSelectionRenderManager.blur();
-        });
+                this._textSelectionRenderManager.blur();
+            })
+        );
     }
 
     private _initialFocus() {
-        this._editorService.focus$.subscribe((textRange) => {
-            this._textSelectionRenderManager.removeAllTextRanges();
-            this._textSelectionRenderManager.addTextRanges([textRange]);
-        });
+        this.disposeWithMe(
+            this._editorService.focus$.subscribe((textRange) => {
+                this._textSelectionRenderManager.removeAllTextRanges();
+                this._textSelectionRenderManager.addTextRanges([textRange]);
+            })
+        );
+    }
+
+    private _initialValueChange() {
+        this.disposeWithMe(
+            this._textSelectionRenderManager.onCompositionupdate$.subscribe(this._valueChange.bind(this))
+        );
+        this.disposeWithMe(
+            this._textSelectionRenderManager.onInput$.subscribe(this._valueChange.bind(this))
+        );
+        this.disposeWithMe(
+            this._textSelectionRenderManager.onKeydown$.subscribe(this._valueChange.bind(this))
+        );
+        this.disposeWithMe(
+            this._textSelectionRenderManager.onPaste$.subscribe(this._valueChange.bind(this))
+        );
+    }
+
+    private _valueChange() {
+        const unitId = this._currentUniverService.getCurrentUniverDocInstance().getUnitId();
+        if (unitId == null) {
+            return;
+        }
+
+        const editor = this._editorService.getEditor(unitId);
+
+        if (editor == null || editor.isSheetEditor()) {
+            return;
+        }
+
+        this._editorService.refreshValueChange(unitId);
     }
 
     /**
@@ -177,6 +217,8 @@ export class DocEditorBridgeController extends Disposable {
                     }
 
                     this._resize(unitId);
+
+                    this._valueChange();
                 }
             })
         );

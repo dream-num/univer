@@ -22,6 +22,7 @@ import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { UniverUIPlugin } from '@univerjs/ui';
 
+import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { DEFAULT_DOCUMENT_DATA_CN } from '../data';
 import { DebuggerPlugin } from '../plugins/debugger';
 import { locales } from './locales';
@@ -44,6 +45,7 @@ const univer = new Univer({
 
 // core plugins
 univer.registerPlugin(UniverRenderEnginePlugin);
+univer.registerPlugin(UniverFormulaEnginePlugin);
 univer.registerPlugin(DebuggerPlugin);
 univer.registerPlugin(UniverUIPlugin, {
     container: 'app',

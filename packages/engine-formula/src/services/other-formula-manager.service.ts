@@ -18,7 +18,7 @@ import type { Nullable } from '@univerjs/core';
 import { Disposable } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
 
-import type { IFormulaDataItem, IOtherFormulaData } from '../basics/common';
+import type { IDirtyUnitOtherFormulaMap, IFormulaDataItem, IOtherFormulaData } from '../basics/common';
 
 export interface IOtherFormulaManagerSearchParam {
     unitId: string;
@@ -44,6 +44,8 @@ export interface IOtherFormulaManagerService {
     getOtherFormulaData(): IOtherFormulaData;
 
     batchRegister(formulaData: IOtherFormulaData): void;
+
+    batchRemove(formulaData: IDirtyUnitOtherFormulaMap): void;
 }
 
 /**
@@ -109,6 +111,28 @@ export class OtherFormulaManagerService extends Disposable implements IOtherForm
                         subUnitId,
                         formulaId,
                         item,
+                    });
+                });
+            });
+        });
+    }
+
+    batchRemove(formulaData: IDirtyUnitOtherFormulaMap) {
+        Object.keys(formulaData).forEach((unitId) => {
+            const subUnits = formulaData[unitId];
+            if (subUnits == null) {
+                return true;
+            }
+            Object.keys(subUnits).forEach((subUnitId) => {
+                const subUnit = subUnits[subUnitId];
+                if (subUnit == null) {
+                    return true;
+                }
+                Object.keys(subUnit).forEach((formulaId) => {
+                    this.remove({
+                        unitId,
+                        subUnitId,
+                        formulaId,
                     });
                 });
             });

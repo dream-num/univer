@@ -177,4 +177,21 @@ describe('lexer nodeMaker test', () => {
             expect(lexerTreeBuilder.checkIfAddBracket('=sum(sum(sum(sum(')).toStrictEqual(4);
         });
     });
+
+    describe('sequenceNodesBuilder', () => {
+        it('workbook ref build', () => {
+            expect(lexerTreeBuilder.sequenceNodesBuilder('=[workbook-01]工作表11!G14:M20')).toStrictEqual([
+                {
+                    endIndex: 25,
+                    nodeType: 4,
+                    startIndex: 0,
+                    token: '[workbook-01]工作表11!G14:M20',
+                },
+            ]);
+        });
+
+        it('special workbook ref build', () => {
+            expect(lexerTreeBuilder.sequenceNodesBuilder('=\'[workbook-01]工作表11\'!G14:M20,\'[workbook-01]工作表11\'!K27:N32')).toStrictEqual(1);
+        });
+    });
 });

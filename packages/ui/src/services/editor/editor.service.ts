@@ -15,7 +15,7 @@
  */
 
 import type { DocumentDataModel, IDocumentBody, IDocumentData, IDocumentStyle, IPosition, Nullable } from '@univerjs/core';
-import { DEFAULT_EMPTY_DOCUMENT_VALUE, Disposable, HorizontalAlign, IUniverInstanceService, toDisposable, VerticalAlign } from '@univerjs/core';
+import { DEFAULT_EMPTY_DOCUMENT_VALUE, Disposable, FOCUSING_UNIVER_EDITOR_SINGLE_MODE, HorizontalAlign, IContextService, IUniverInstanceService, toDisposable, VerticalAlign } from '@univerjs/core';
 import type { IDisposable } from '@wendellhu/redi';
 import { createIdentifier, Inject } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
@@ -44,6 +44,7 @@ export interface IEditorConfigParam {
     isReadonly: boolean;
     onlyInputFormula: boolean;
     onlyInputRange: boolean;
+    onlyInputContent: boolean;
 
 }
 
@@ -110,6 +111,10 @@ class Editor {
 
     isReadOnly() {
         return this._param.isReadonly === true;
+    }
+
+    onlyInputContent() {
+        return this._param.onlyInputContent === true;
     }
 
     onlyInputFormula() {
@@ -306,7 +311,8 @@ export class EditorService extends Disposable implements IEditorService, IDispos
     constructor(
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder
+        @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder,
+        @IContextService private readonly _contextService: IContextService
     ) {
         super();
     }
@@ -343,6 +349,12 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         });
 
         editor.setFocus(true);
+
+        if (editor.isSingle()) {
+            this._contextService.setContextValue(FOCUSING_UNIVER_EDITOR_SINGLE_MODE, true);
+        } else {
+            this._contextService.setContextValue(FOCUSING_UNIVER_EDITOR_SINGLE_MODE, false);
+        }
 
         this._focusStyle$.next(editorUnitId);
     }
@@ -600,8 +612,9 @@ export class EditorService extends Disposable implements IEditorService, IDispos
                     verticalAlign: VerticalAlign.TOP,
                     horizontalAlign: HorizontalAlign.LEFT,
                 },
-                marginLeft: 2,
+                marginLeft: 6,
                 marginTop: 2,
+                marginRight: 6,
             },
         } as IDocumentData;
     }

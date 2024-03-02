@@ -165,6 +165,8 @@ export class DocEditorBridgeController extends Disposable {
     private _initialValueChange() {
         this._textSelectionRenderManager.onCompositionupdate$.subscribe(this._valueChange.bind(this));
         this._textSelectionRenderManager.onInput$.subscribe(this._valueChange.bind(this));
+        this._textSelectionRenderManager.onKeydown$.subscribe(this._valueChange.bind(this));
+        this._textSelectionRenderManager.onPaste$.subscribe(this._valueChange.bind(this));
     }
 
     private _valueChange() {
@@ -199,6 +201,8 @@ export class DocEditorBridgeController extends Disposable {
                     }
 
                     this._resize(unitId);
+
+                    this._valueChange();
                 }
             })
         );

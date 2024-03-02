@@ -35,6 +35,7 @@ const excludeProps = new Set([
     'onlyInputFormula',
     'onlyInputRange',
     'value',
+    'onlyInputContent',
 ]);
 
 export interface ITextEditorProps {
@@ -53,6 +54,7 @@ export interface ITextEditorProps {
     isReadonly?: boolean;
     onlyInputFormula?: boolean;
     onlyInputRange?: boolean;
+    onlyInputContent?: boolean;
 }
 
 /**
@@ -72,6 +74,7 @@ export function TextEditor(props: ITextEditorProps & MyComponentProps): JSX.Elem
         isReadonly = false,
         onlyInputFormula = false,
         onlyInputRange = false,
+        onlyInputContent = false,
     } = props;
 
     const editorService = useDependency(IEditorService);
@@ -110,7 +113,11 @@ export function TextEditor(props: ITextEditorProps & MyComponentProps): JSX.Elem
             cancelDefaultResizeListener,
             isSheetEditor,
             canvasStyle,
-            isSingle, isReadonly, onlyInputFormula, onlyInputRange,
+            isSingle,
+            isReadonly,
+            onlyInputFormula,
+            onlyInputRange,
+            onlyInputContent,
         },
         editor);
 

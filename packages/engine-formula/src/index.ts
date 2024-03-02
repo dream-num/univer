@@ -80,7 +80,6 @@ export {
     serializeRangeToRefString,
     serializeRangeWithSheet,
     serializeRangeWithSpreadsheet,
-    UNIT_NAME_REGEX,
 } from './engine/utils/reference';
 export { generateStringWithSequence, type ISequenceNode, sequenceNodeType } from './engine/utils/sequence';
 export { ArrayValueObject, ValueObjectFactory } from './engine/value-object/array-value-object';

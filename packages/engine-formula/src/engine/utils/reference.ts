@@ -18,10 +18,7 @@ import type { IRange } from '@univerjs/core';
 import { AbsoluteRefType, RANGE_TYPE, Tools } from '@univerjs/core';
 
 import { includeFormulaLexerToken } from '../../basics/match-token';
-
-// export const UNIT_NAME_REGEX = '\'?\\[((?![\\/?:"<>|*\\\\]).)*?\\]';
-// export const UNIT_NAME_REGEX = '\\[((?![\\/?:"<>|*\\\\]).)*?\\]';
-export const UNIT_NAME_REGEX = '\\[([^\\[\\]\\/?:"<>|*\\\\]+)\\]'; // '[Book-1.xlsx]Sheet1'!$A$4 gets [Book-1.xlsx] as unitId
+import { UNIT_NAME_REGEX } from '../../basics/regex';
 
 const $ROW_REGEX = /[^0-9]/g;
 const $COLUMN_REGEX = /[^A-Za-z]/g;

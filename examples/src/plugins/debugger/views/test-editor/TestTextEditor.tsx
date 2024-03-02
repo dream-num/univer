@@ -45,7 +45,7 @@ export const TestEditorContainer = () => {
             <br></br>
             <TextEditor id="test-editor-3" onlyInputRange={true} style={editorStyle} canvasStyle={{ fontSize: 10 }} />
             <br></br>
-            <TextEditor id="test-editor-4" isSingle={false} style={{ ...editorStyle, height: '140px' }} canvasStyle={{ fontSize: 14 }} />
+            <TextEditor id="test-editor-4" isSingle={false} onlyInputContent={true} style={{ ...editorStyle, height: '140px' }} canvasStyle={{ fontSize: 14 }} />
         </div>
     );
 };

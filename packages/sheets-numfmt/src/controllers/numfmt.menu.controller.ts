@@ -18,7 +18,7 @@ import { Disposable, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { ComponentManager, IMenuService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { AddDecimalMenuItem, CurrencyMenuItem, FactoryOtherMenuItem, SubtractDecimalMenuItem } from '../menu/menu';
+import { AddDecimalMenuItem, CurrencyMenuItem, FactoryOtherMenuItem, PercentMenuItem, SubtractDecimalMenuItem } from '../menu/menu';
 
 @OnLifecycle(LifecycleStages.Rendered, NumfmtMenuController)
 export class NumfmtMenuController extends Disposable {
@@ -32,7 +32,7 @@ export class NumfmtMenuController extends Disposable {
     }
 
     private _initMenu() {
-        [AddDecimalMenuItem, SubtractDecimalMenuItem, CurrencyMenuItem, FactoryOtherMenuItem]
+        [PercentMenuItem, AddDecimalMenuItem, SubtractDecimalMenuItem, CurrencyMenuItem, FactoryOtherMenuItem]
             .map((factory) => factory(this._componentManager))
             .forEach((configFactory) => {
                 this.disposeWithMe(this._menuService.addMenuItem(configFactory(this._injector)));

@@ -19,7 +19,7 @@ import { CommandType, ICommandService, IUniverInstanceService, Range } from '@un
 import { INumfmtService, SelectionManagerService } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
 
-import { getDecimalFromPattern, isPatternEqualWithoutDecimal, setPatternDecimal } from '../../utils/decimal';
+import { getDecimalFromPattern, setPatternDecimal } from '../../utils/decimal';
 import type { ISetNumfmtCommandParams } from './set-numfmt.command';
 import { SetNumfmtCommand } from './set-numfmt.command';
 
@@ -54,17 +54,17 @@ export const SubtractDecimalCommand: ICommand = {
         });
         const decimals = maxDecimals - 1;
 
-        const pattern = setPatternDecimal(`0${decimals > 0 ? '.0' : '.'}`, decimals);
+        const defaultPattern = setPatternDecimal(`0${decimals > 0 ? '.0' : '.'}`, decimals);
         const values: ISetNumfmtCommandParams['values'] = [];
 
         selections.forEach((selection) => {
             Range.foreach(selection.range, (row, col) => {
                 const numfmtValue = numfmtService.getValue(unitId, subUnitId, row, col);
-                if (!numfmtValue || isPatternEqualWithoutDecimal(numfmtValue.pattern, '0.0')) {
+                if (!numfmtValue) {
                     values.push({
                         row,
                         col,
-                        pattern,
+                        pattern: defaultPattern,
                     });
                 } else {
                     const decimals = getDecimalFromPattern(numfmtValue.pattern);

@@ -15,7 +15,7 @@
  */
 
 import { ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
-import { AddDigitsSingle, MoreDownSingle, ReduceDigitsSingle, RmbSingle } from '@univerjs/icons';
+import { AddDigitsSingle, MoreDownSingle, PercentSingle, ReduceDigitsSingle, RmbSingle } from '@univerjs/icons';
 import {
     getCurrentSheetDisabled$,
     INumfmtService,
@@ -36,6 +36,7 @@ import { SubtractDecimalCommand } from '../commands/commands/subtract-decimal.co
 import { OpenNumfmtPanelOperator } from '../commands/operations/open.numfmt.panel.operation';
 import { MoreNumfmtType, Options } from '../components/more-numfmt-type/MoreNumfmtType';
 import { isPatternEqualWithoutDecimal } from '../utils/decimal';
+import { SetPercentCommand } from '../commands/commands/set-percent.command';
 
 export const CurrencyMenuItem = (componentManager: ComponentManager) => {
     const iconKey = 'icon-rmbSingle';
@@ -80,6 +81,22 @@ export const SubtractDecimalMenuItem = (componentManager: ComponentManager) => {
         id: SubtractDecimalCommand.id,
         title: 'sheet.numfmt.subtractDecimal',
         tooltip: 'sheet.numfmt.subtractDecimal',
+        type: MenuItemType.BUTTON,
+        group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
+        positions: [MenuPosition.TOOLBAR_START],
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
+        disabled$: getCurrentSheetDisabled$(accessor),
+    });
+};
+
+export const PercentMenuItem = (componentManager: ComponentManager) => {
+    const iconKey = 'icon-PercentSingle';
+    componentManager.register(iconKey, PercentSingle);
+    return (accessor: IAccessor) => ({
+        icon: iconKey,
+        id: SetPercentCommand.id,
+        title: 'sheet.numfmt.percent',
+        tooltip: 'sheet.numfmt.percent',
         type: MenuItemType.BUTTON,
         group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
         positions: [MenuPosition.TOOLBAR_START],

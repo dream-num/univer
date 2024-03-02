@@ -299,8 +299,6 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         });
 
         this._updateInputPosition();
-
-        this._scrollToSelection();
     }
 
     // Sync canvas selection to dom selection.
@@ -753,50 +751,6 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
     private _getCanvasOffset() {
         const engine = this._scene?.getEngine() as Engine;
         return getCanvasOffsetByEngine(engine);
-    }
-
-    // Let the selection show on the current screen.
-    private _scrollToSelection() {
-        const activeRangeInstance = this._getActiveRangeInstance();
-        const anchor = activeRangeInstance?.getAnchor();
-
-        if (!anchor || (anchor && !anchor.visible) || this._activeViewport == null) {
-            return;
-        }
-
-        // const { scaleX, scaleY } = this._scene?.getAncestorScale() || { scaleX: 1, scaleY: 1 };
-
-        const { left, top, height, width } = anchor;
-
-        // left *= scaleX;
-
-        // top *= scaleY;
-
-        const {
-            left: boundLeft,
-            top: boundTop,
-            right: boundRight,
-            bottom: boundBottom,
-        } = this._activeViewport.getBounding().viewBound;
-        const constantOffsetWidth = width;
-        const constantOffsetHeight = height;
-        let offsetY = 0;
-        let offsetX = 0;
-
-        if (top < boundTop) {
-            offsetY = top - boundTop;
-        } else if (top > boundBottom - constantOffsetHeight) {
-            offsetY = top - boundBottom + constantOffsetHeight;
-        }
-
-        if (left < boundLeft) {
-            offsetX = left - boundLeft;
-        } else if (left > boundRight - constantOffsetWidth) {
-            offsetX = left - boundRight + constantOffsetWidth;
-        }
-
-        const config = this._activeViewport.getBarScroll(offsetX, offsetY);
-        this._activeViewport.scrollBy(config);
     }
 
     private _updateInputPosition() {

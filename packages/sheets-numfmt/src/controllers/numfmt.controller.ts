@@ -59,6 +59,7 @@ import { OpenNumfmtPanelOperator } from '../commands/operations/open.numfmt.pane
 import type { ISheetNumfmtPanelProps } from '../components/index';
 import { SheetNumfmtPanel } from '../components/index';
 import { getPatternPreview, getPatternType } from '../utils/pattern';
+import { SetPercentCommand } from '../commands/commands/set-percent.command';
 import type { INumfmtController } from './type';
 
 @OnLifecycle(LifecycleStages.Rendered, NumfmtController)
@@ -171,6 +172,7 @@ export class NumfmtController extends Disposable implements INumfmtController {
             AddDecimalCommand,
             SubtractDecimalCommand,
             SetCurrencyCommand,
+            SetPercentCommand,
             OpenNumfmtPanelOperator,
             CloseNumfmtPanelOperator,
             SetNumfmtCommand,

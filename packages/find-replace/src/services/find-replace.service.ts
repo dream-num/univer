@@ -105,6 +105,80 @@ export interface IFindQuery {
 }
 
 /**
+ * This class stores find replace options state. These state are stored
+ * here instead of the React component so we can change state from
+ * operations.
+ */
+export class FindReplaceState {
+    private readonly _stateUpdates$ = new Subject<Partial<IFindReplaceState>>();
+    readonly stateUpdates$: Observable<Partial<IFindReplaceState>> = this._stateUpdates$.asObservable();
+
+    private readonly _state$ = new BehaviorSubject<IFindReplaceState>(createInitFindReplaceState());
+    readonly state$ = this._state$.asObservable();
+    get state(): IFindReplaceState {
+        return this._state$.getValue();
+    }
+
+    // TODO@wzhudev: put all state properties here
+    private _findString: string = '';
+    private _revealed = false;
+    private _replaceRevealed = false;
+    private _matchesPosition = 0;
+    private _matchesCount = 0;
+
+    get findString(): string {
+        return this._findString;
+    }
+
+    changeState(changes: Partial<IFindReplaceState>): void {
+        let changed = false;
+        const changedState: Partial<IFindReplaceState> = {};
+
+        if (typeof changes.findString !== 'undefined' && changes.findString !== this._findString) {
+            this._findString = changes.findString;
+            changedState.findString = this._findString;
+            changed = true;
+        }
+
+        if (typeof changes.revealed !== 'undefined' && changes.revealed !== this._revealed) {
+            this._revealed = changes.revealed;
+            changedState.revealed = changes.revealed;
+            changed = true;
+        }
+
+        if (typeof changes.replaceRevealed !== 'undefined' && changes.replaceRevealed !== this._replaceRevealed) {
+            this._replaceRevealed = changes.replaceRevealed;
+            changedState.replaceRevealed = changes.replaceRevealed;
+            changed = true;
+        }
+
+        if (typeof changes.matchesCount !== 'undefined' && changes.matchesCount !== this._matchesCount) {
+            this._matchesCount = changes.matchesCount;
+            changedState.matchesCount = changes.matchesCount;
+            changed = true;
+        }
+
+        if (typeof changes.matchesPosition !== 'undefined' && changes.matchesPosition !== this._matchesPosition) {
+            this._matchesPosition = changes.matchesPosition;
+            changedState.matchesPosition = changes.matchesPosition;
+            changed = true;
+            // TODO@wzhudev: maybe we should recalc matches position according to the current selections position
+        }
+
+        if (changed) {
+            this._stateUpdates$.next(changedState);
+            this._state$.next({
+                findString: this._findString,
+                revealed: this._revealed,
+                replaceRevealed: this._replaceRevealed,
+                matchesCount: this._matchesCount,
+                matchesPosition: this._matchesPosition,
+            });
+        }
+    }
+}
+
+/**
  * This class stores find replace results and provides methods to perform replace or something.
  */
 export class FindReplaceModel extends Disposable {
@@ -266,80 +340,6 @@ function createInitFindReplaceState(): IFindReplaceState {
         matchesPosition: 0,
         matchesCount: 0,
     };
-}
-
-/**
- * This class stores find replace options state. These state are stored
- * here instead of the React component so we can change state from
- * operations.
- */
-export class FindReplaceState {
-    private readonly _stateUpdates$ = new Subject<Partial<IFindReplaceState>>();
-    readonly stateUpdates$: Observable<Partial<IFindReplaceState>> = this._stateUpdates$.asObservable();
-
-    private readonly _state$ = new BehaviorSubject<IFindReplaceState>(createInitFindReplaceState());
-    readonly state$ = this._state$.asObservable();
-    get state(): IFindReplaceState {
-        return this._state$.getValue();
-    }
-
-    // TODO@wzhudev: put all state properties here
-    private _findString: string = '';
-    private _revealed = false;
-    private _replaceRevealed = false;
-    private _matchesPosition = 0;
-    private _matchesCount = 0;
-
-    get findString(): string {
-        return this._findString;
-    }
-
-    changeState(changes: Partial<IFindReplaceState>): void {
-        let changed = false;
-        const changedState: Partial<IFindReplaceState> = {};
-
-        if (typeof changes.findString !== 'undefined' && changes.findString !== this._findString) {
-            this._findString = changes.findString;
-            changedState.findString = this._findString;
-            changed = true;
-        }
-
-        if (typeof changes.revealed !== 'undefined' && changes.revealed !== this._revealed) {
-            this._revealed = changes.revealed;
-            changedState.revealed = changes.revealed;
-            changed = true;
-        }
-
-        if (typeof changes.replaceRevealed !== 'undefined' && changes.replaceRevealed !== this._replaceRevealed) {
-            this._replaceRevealed = changes.replaceRevealed;
-            changedState.replaceRevealed = changes.replaceRevealed;
-            changed = true;
-        }
-
-        if (typeof changes.matchesCount !== 'undefined' && changes.matchesCount !== this._matchesCount) {
-            this._matchesCount = changes.matchesCount;
-            changedState.matchesCount = changes.matchesCount;
-            changed = true;
-        }
-
-        if (typeof changes.matchesPosition !== 'undefined' && changes.matchesPosition !== this._matchesPosition) {
-            this._matchesPosition = changes.matchesPosition;
-            changedState.matchesPosition = changes.matchesPosition;
-            changed = true;
-            // TODO@wzhudev: maybe we should recalc matches position according to the current selections position
-        }
-
-        if (changed) {
-            this._stateUpdates$.next(changedState);
-            this._state$.next({
-                findString: this._findString,
-                revealed: this._revealed,
-                replaceRevealed: this._replaceRevealed,
-                matchesCount: this._matchesCount,
-                matchesPosition: this._matchesPosition,
-            });
-        }
-    }
 }
 
 // Since Univer' Find&Replace features works in a plugin manner,

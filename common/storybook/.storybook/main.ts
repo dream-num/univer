@@ -15,7 +15,9 @@
  */
 
 import { resolve } from 'node:path';
+import { existsSync, readdirSync } from 'node:fs';
 import type { StorybookConfig } from '@storybook/react-webpack5';
+import type { StoriesEntry } from '@storybook/types';
 
 import TsconfigPathsPlugin from 'tsconfig-paths-webpack-plugin';
 
@@ -25,28 +27,32 @@ const tsconfigPathsPlugin = new TsconfigPathsPlugin({
 });
 
 const config: StorybookConfig = {
-    stories: [
-        {
-            directory: '../../../packages/design/src',
-            files: '**/*.stories.@(js|jsx|mjs|ts|tsx)',
-            titlePrefix: 'Design',
-        },
-        {
-            directory: '../../../packages/ui/src',
-            files: '**/*.stories.@(js|jsx|mjs|ts|tsx)',
-            titlePrefix: 'Base UI',
-        },
-        {
-            directory: '../../../packages/sheets-numfmt/src',
-            files: '**/*.stories.@(js|jsx|mjs|ts|tsx)',
-            titlePrefix: 'Numfmt',
-        },
-        {
-            directory: '../../../packages/find-replace/src',
-            files: '**/*.stories.@(js|jsx|mjs|ts|tsx)',
-            titlePrefix: 'Find & Replace',
-        },
-    ],
+    stories: async (): Promise<StoriesEntry[]> => {
+        const rootPaths = ['../../../packages'];
+        const isSubmodules = __dirname.includes('submodules');
+        if (isSubmodules) {
+            rootPaths.push('../../../../../packages');
+        }
+
+        const stories: StoriesEntry[] = [];
+        rootPaths.forEach((rootPath) => {
+            const rootDir = resolve(__dirname, rootPath);
+            if (existsSync(rootDir)) {
+                readdirSync(rootDir).forEach((pkg) => {
+                    const pkgDir = resolve(rootDir, pkg);
+                    if (existsSync(pkgDir)) {
+                        stories.push({
+                            directory: `${rootPath}/${pkg}/src`,
+                            files: '**/*.stories.@(js|jsx|mjs|ts|tsx)',
+                            titlePrefix: pkg,
+                        });
+                    }
+                });
+            }
+        });
+
+        return stories;
+    },
     addons: [
         '@storybook/addon-links',
         '@storybook/addon-essentials',

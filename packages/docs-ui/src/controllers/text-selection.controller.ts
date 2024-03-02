@@ -162,6 +162,15 @@ export class TextSelectionController extends Disposable {
     }
 
     private _setEditorFocus(unitId: string) {
+        /**
+         * The object for selecting data in the editor is set to the current sheet.
+         */
+        const sheetInstances = this._currentUniverService.getAllUniverSheetsInstance();
+        if (sheetInstances.length > 0) {
+            const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+            this._editorService.setOperationSheetUnitId(workbook.getUnitId());
+            // this._editorService.setOperationSheetSubUnitId(workbook.getActiveSheet().getSheetId());
+        }
         this._editorService.focusStyle(unitId);
     }
 

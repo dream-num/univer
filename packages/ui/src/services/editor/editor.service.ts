@@ -222,10 +222,18 @@ export interface IEditorService {
 
     getAllEditor(): Map<string, Editor>;
 
+    /**
+     * The sheet currently being operated on will determine
+     * whether to include unitId information in the ref.
+     */
     setOperationSheetUnitId(unitId: Nullable<string>): void;
 
     getOperationSheetUnitId(): Nullable<string>;
 
+     /**
+      * The sub-table within the sheet currently being operated on
+      * will determine whether to include subUnitId information in the ref.
+      */
     setOperationSheetSubUnitId(sheetId: Nullable<string>): void;
 
     getOperationSheetSubUnitId(): Nullable<string>;

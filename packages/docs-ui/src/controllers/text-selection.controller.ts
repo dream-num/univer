@@ -21,11 +21,8 @@ import { CURSOR_TYPE, IRenderManagerService, ITextSelectionRenderManager } from 
 import { Inject } from '@wendellhu/redi';
 
 import { IEditorService } from '@univerjs/ui';
-import { getDocObjectById } from '../../../docs/src/basics/component-tools';
-import type { ISetDocZoomRatioOperationParams } from '../../../docs/src/commands/operations/set-doc-zoom-ratio.operation';
-import { SetDocZoomRatioOperation } from '../../../docs/src/commands/operations/set-doc-zoom-ratio.operation';
-import { DocSkeletonManagerService } from '../../../docs/src/services/doc-skeleton-manager.service';
-import { TextSelectionManagerService } from '../../../docs/src/services/text-selection-manager.service';
+import type { ISetDocZoomRatioOperationParams } from '@univerjs/docs';
+import { DocSkeletonManagerService, getDocObjectById, SetDocZoomRatioOperation, TextSelectionManagerService } from '@univerjs/docs';
 
 @OnLifecycle(LifecycleStages.Rendered, TextSelectionController)
 export class TextSelectionController extends Disposable {

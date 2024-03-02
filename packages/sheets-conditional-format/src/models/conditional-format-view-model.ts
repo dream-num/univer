@@ -33,11 +33,10 @@
 import { ObjectMatrix, Range } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import type { IDataBarRenderParams } from '../render/type';
-import type { IColorScaleRenderParams } from '../services/calculate-unit/color-scale';
 import type { IConditionFormatRule, IHighlightCell } from './type';
 
 interface ICellItem {
-    cfList: { cfId: string; ruleCache?: IHighlightCell['style'] | IDataBarRenderParams | IColorScaleRenderParams;isDirty: boolean }[];
+    cfList: { cfId: string; ruleCache?: IHighlightCell['style'] | IDataBarRenderParams ;isDirty: boolean }[];
 }
 
 export class ConditionalFormatViewModel {

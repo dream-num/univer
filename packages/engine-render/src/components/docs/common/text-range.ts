@@ -65,6 +65,23 @@ export function cursorConvertToTextRange(
     return textRange;
 }
 
+export function getAnchorBounding(pointsGroup: IPoint[][]) {
+    const points = pointsGroup[0];
+    const startPoint = points[0];
+    const endPoint = points[2];
+
+    const { x: startX, y: startY } = startPoint;
+
+    const { x: endX, y: endY } = endPoint;
+
+    return {
+        left: startX,
+        top: startY,
+        width: endX - startX,
+        height: endY - startY,
+    };
+}
+
 export class TextRange {
     // Identifies whether the range is the current one, most of which is the last range.
     private _current = false;
@@ -327,25 +344,8 @@ export class TextRange {
         this._scene.addObject(polygon, TEXT_RANGE_LAYER_INDEX);
     }
 
-    private _getAnchorBounding(pointsGroup: IPoint[][]) {
-        const points = pointsGroup[0];
-        const startPoint = points[0];
-        const endPoint = points[2];
-
-        const { x: startX, y: startY } = startPoint;
-
-        const { x: endX, y: endY } = endPoint;
-
-        return {
-            left: startX,
-            top: startY,
-            width: endX - startX,
-            height: endY - startY,
-        };
-    }
-
     private _createOrUpdateAnchor(pointsGroup: IPoint[][], docsLeft: number, docsTop: number) {
-        const bounding = this._getAnchorBounding(pointsGroup);
+        const bounding = getAnchorBounding(pointsGroup);
         const { left, top, height } = bounding;
 
         if (this._anchorShape) {

@@ -211,7 +211,6 @@ export class EditorService extends Disposable implements IEditorService, IDispos
     private _editors = new Map<string, Editor>();
 
     private readonly _state$ = new Subject<Nullable<IEditorStateParam>>();
-
     readonly state$ = this._state$.asObservable();
 
     private _currentSheetUnitId: Nullable<string>;
@@ -219,31 +218,24 @@ export class EditorService extends Disposable implements IEditorService, IDispos
     private _currentSheetSubUnitId: Nullable<string>;
 
     private readonly _inputFormula$ = new Subject<IEditorInputFormulaParam>();
-
     readonly inputFormula$ = this._inputFormula$.asObservable();
 
     private readonly _resize$ = new Subject<string>();
-
     readonly resize$ = this._resize$.asObservable();
 
     private readonly _changeEditorFocus$ = new Subject<unknown>();
-
     readonly changeEditorFocus$ = this._changeEditorFocus$.asObservable();
 
     private readonly _blur$ = new Subject();
-
     readonly blur$ = this._blur$.asObservable();
 
     private readonly _focus$ = new Subject<ISuccinctTextRangeParam>();
-
     readonly focus$ = this._focus$.asObservable();
 
     private readonly _setValue$ = new Subject<IEditorSetValueParam>();
-
     readonly setValue$ = this._setValue$.asObservable();
 
     private readonly _valueChange$ = new Subject<Readonly<Editor>>();
-
     readonly valueChange$ = this._valueChange$.asObservable();
 
     constructor(

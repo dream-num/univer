@@ -18,9 +18,12 @@ import type { ComponentManager, IMenuSelectorItem } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 import { MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
 import { LocaleService } from '@univerjs/core';
-import { OpenConditionalFormatOperator } from '../commands/operations/open-conditional-format-panel';
+import { Conditions } from '@univerjs/icons';
+import { OpenConditionalFormatOperator, OPERATION } from '../commands/operations/open-conditional-format-panel';
 
 export const FactoryManageConditionalFormatRule = (componentManager: ComponentManager) => {
+    const key = 'conditional-format-menu-icon';
+    componentManager.register(key, Conditions);
     return (_accessor: IAccessor) => {
         const localeService = _accessor.get(LocaleService);
         return {
@@ -28,15 +31,44 @@ export const FactoryManageConditionalFormatRule = (componentManager: ComponentMa
             type: MenuItemType.SELECTOR,
             group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
             positions: [MenuPosition.TOOLBAR_START],
-            icon: 'CancelFreezeSingle',
+            icon: key,
             tooltip: localeService.t('sheet.cf.title'),
-            selections: [{
-                label: localeService.t('sheet.cf.menu.manageConditionalFormat'),
-                value: 1,
-            }, {
-                label: localeService.t('sheet.cf.menu.createConditionalFormat'),
-                value: 2,
-            }],
+            selections: [
+                {
+                    label: localeService.t('sheet.cf.ruleType.highlightCell'),
+                    value: OPERATION.highlightCell,
+                },
+                {
+                    label: localeService.t('sheet.cf.panel.rankAndAverage'),
+                    value: OPERATION.rank,
+                },
+                {
+                    label: localeService.t('sheet.cf.ruleType.formula'),
+                    value: OPERATION.formula,
+                },
+                {
+                    label: localeService.t('sheet.cf.ruleType.colorScale'),
+                    value: OPERATION.colorScale,
+                },
+                {
+                    label: localeService.t('sheet.cf.ruleType.dataBar'),
+                    value: OPERATION.dataBar,
+                },
+                {
+                    label: localeService.t('sheet.cf.menu.manageConditionalFormat'),
+                    value: OPERATION.viewRule,
+                }, {
+                    label: localeService.t('sheet.cf.menu.createConditionalFormat'),
+                    value: OPERATION.createRule,
+                },
+                {
+                    label: localeService.t('sheet.cf.menu.clearRangeRules'),
+                    value: OPERATION.clearRangeRules,
+                },
+                {
+                    label: localeService.t('sheet.cf.menu.clearWorkSheetRules'),
+                    value: OPERATION.clearWorkSheetRules,
+                }],
         } as IMenuSelectorItem;
     };
 };

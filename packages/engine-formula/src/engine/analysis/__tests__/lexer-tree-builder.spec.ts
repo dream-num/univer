@@ -191,7 +191,21 @@ describe('lexer nodeMaker test', () => {
         });
 
         it('special workbook ref build', () => {
-            expect(lexerTreeBuilder.sequenceNodesBuilder('=\'[workbook-01]工作表11\'!G14:M20,\'[workbook-01]工作表11\'!K27:N32')).toStrictEqual(1);
+            expect(lexerTreeBuilder.sequenceNodesBuilder('=\'[workbook-01]工作表11\'!G14:M20,\'[workbook-01]工作表11\'!K27:N32')).toStrictEqual([
+                {
+                    endIndex: 27,
+                    nodeType: 4,
+                    startIndex: 0,
+                    token: "'[workbook-01]工作表11'!G14:M20",
+                },
+                ',',
+                {
+                    endIndex: 56,
+                    nodeType: 4,
+                    startIndex: 29,
+                    token: "'[workbook-01]工作表11'!K27:N32",
+                },
+            ]);
         });
     });
 });

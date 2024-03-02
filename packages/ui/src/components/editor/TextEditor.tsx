@@ -55,13 +55,19 @@ export interface ITextEditorProps {
     onlyInputFormula?: boolean;
     onlyInputRange?: boolean;
     onlyInputContent?: boolean;
+
+    onChange?: (value: Nullable<string>) => void;
+
+    onFocus?: (state: boolean) => void;
+
+    onValid?: (state: boolean) => void;
 }
 
 /**
  * The component to render toolbar item label and menu item label.
  * @param props
  */
-export function TextEditor(props: ITextEditorProps & MyComponentProps): JSX.Element | null {
+export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onChange' | 'onFocus'>): JSX.Element | null {
     const {
         id,
         snapshot,
@@ -75,6 +81,12 @@ export function TextEditor(props: ITextEditorProps & MyComponentProps): JSX.Elem
         onlyInputFormula = false,
         onlyInputRange = false,
         onlyInputContent = false,
+
+        onChange,
+
+        onFocus,
+
+        onValid,
     } = props;
 
     const editorService = useDependency(IEditorService);
@@ -122,11 +134,12 @@ export function TextEditor(props: ITextEditorProps & MyComponentProps): JSX.Elem
         editor);
 
         const focusStyleSubscription = editorService.focusStyle$.subscribe((unitId: string) => {
+            let state = false;
             if (unitId === id) {
-                setActive(true);
-            } else {
-                setActive(false);
+                state = true;
             }
+            setActive(state);
+            onFocus && onFocus(state);
         });
 
         const valueChangeSubscription = editorService.valueChange$.subscribe((editor) => {
@@ -151,7 +164,11 @@ export function TextEditor(props: ITextEditorProps & MyComponentProps): JSX.Elem
                 } else {
                     setValidationContent(localeService.t('textEditor.rangeError'));
                 }
-            }, 100)();
+
+                onValid && onValid(isLegality);
+
+                onChange && onChange(editorService.getValue(id));
+            }, 10)();
         });
 
         // Clean up on unmount

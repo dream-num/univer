@@ -82,3 +82,5 @@ export { IEditorService, EditorService } from './services/editor/editor.service'
 export { TextEditor } from './components/editor/TextEditor';
 
 export { SetEditorResizeOperation } from './commands/operations/editor/set-editor-resize.operation';
+
+export { RangeSelector } from './components/range-selector/RangeSelector';

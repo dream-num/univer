@@ -271,6 +271,10 @@ export interface IEditorService {
     refreshValueChange(editorId: string): void;
 
     checkValueLegality(editorId: string): boolean;
+
+    getValue(id: string): Nullable<string>;
+
+    getRichValue(id: string): Nullable<IDocumentBody>;
 }
 
 export class EditorService extends Disposable implements IEditorService, IDisposable {
@@ -404,10 +408,12 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         this._refreshValueChange(editorUnitId);
     }
 
-    getValue(id?: string) {
+    getValue(id: string) {
         const editor = this.getEditor(id);
-
-        return editor?.getValue();
+        if (editor == null) {
+            return;
+        }
+        return editor.getValue();
     }
 
     setRichValue(body: IDocumentBody, editorUnitId?: string) {
@@ -420,10 +426,12 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         this._refreshValueChange(editorUnitId);
     }
 
-    getRichValue(id?: string) {
+    getRichValue(id: string) {
         const editor = this.getEditor(id);
-
-        return editor?.getBody();
+        if (editor == null) {
+            return;
+        }
+        return editor.getBody();
     }
 
     override dispose(): void {

@@ -16,7 +16,7 @@
 
 import React from 'react';
 
-import { TextEditor } from '@univerjs/ui';
+import { RangeSelector, TextEditor } from '@univerjs/ui';
 
 const containerStyle: React.CSSProperties = {
     position: 'absolute',
@@ -46,6 +46,8 @@ export const TestEditorContainer = () => {
             <TextEditor id="test-editor-3" onlyInputRange={true} style={editorStyle} canvasStyle={{ fontSize: 10 }} />
             <br></br>
             <TextEditor id="test-editor-4" isSingle={false} onlyInputContent={true} style={{ ...editorStyle, height: '140px' }} canvasStyle={{ fontSize: 14 }} />
+            <br></br>
+            <RangeSelector id="test-rangeSelector-1" />
         </div>
     );
 };

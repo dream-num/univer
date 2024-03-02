@@ -63,6 +63,13 @@ const locale = {
         formulaError: '请输入合法的公式，例如=SUM(A1)',
         rangeError: '请输入合法的范围，例如 A1:B10',
     },
+    rangeSelector: {
+        title: '选择一个数据范围',
+        addAnotherRange: '添加新范围',
+        buttonTooltip: '选择数据范围',
+        confirm: '确认',
+        cancel: '取消',
+    },
 };
 
 export default locale;

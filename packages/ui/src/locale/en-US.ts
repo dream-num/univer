@@ -65,6 +65,13 @@ const locale: typeof zhCN = {
         formulaError: 'Please enter a valid formula, such as =SUM(A1)',
         rangeError: 'Please enter a valid range, such as A1:B10',
     },
+    rangeSelector: {
+        title: 'Select a data range',
+        addAnotherRange: 'Add another range',
+        buttonTooltip: 'Select data range',
+        confirm: 'Ok',
+        cancel: 'Cancel',
+    },
 };
 
 export default locale;

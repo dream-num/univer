@@ -65,7 +65,7 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
         if (!rule) {
             return defaultV;
         }
-        return rule.config[0].value.type;
+        return rule.config[0]?.value.type || defaultV;
     });
     const [medianType, medianTypeSet] = useState<ValueType | 'none'>(() => {
         const defaultV = 'none';
@@ -75,14 +75,14 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
         if (rule.config.length !== 3) {
             return defaultV;
         }
-        return rule.config[1].value.type;
+        return rule.config[1]?.value.type || defaultV;
     });
     const [maxType, maxTypeSet] = useState(() => {
         const defaultV = ValueType.max;
         if (!rule) {
             return defaultV;
         }
-        return rule.config[rule.config.length - 1].value.type;
+        return rule.config[rule.config.length - 1]?.value.type || defaultV;
     });
 
     const [minValue, minValueSet] = useState(() => {
@@ -91,7 +91,7 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
             return defaultV;
         }
         const valueConfig = rule.config[0];
-        return valueConfig.value.value || defaultV;
+        return valueConfig?.value.value || defaultV;
     });
     const [medianValue, medianValueSet] = useState(() => {
         const defaultV = 10;
@@ -101,14 +101,14 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
         if (rule.config.length !== 3) {
             return defaultV;
         }
-        return rule.config[1].value.value || defaultV;
+        return rule.config[1]?.value.value || defaultV;
     });
     const [maxValue, maxValueSet] = useState(() => {
         const defaultV = 10;
         if (!rule) {
             return defaultV;
         }
-        return rule.config[rule.config.length - 1].value.value || defaultV;
+        return rule.config[rule.config.length - 1]?.value.value || defaultV;
     });
 
     const [minColor, minColorSet] = useState(() => {
@@ -116,7 +116,7 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
         if (!rule) {
             return defaultV;
         }
-        return rule.config[0].color || defaultV;
+        return rule.config[0]?.color || defaultV;
     });
     const [medianColor, medianColorSet] = useState(() => {
         const defaultV = '#fff';
@@ -126,14 +126,14 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
         if (rule.config.length !== 3) {
             return defaultV;
         }
-        return rule.config[1].color || defaultV;
+        return rule.config[1]?.color || defaultV;
     });
     const [maxColor, maxColorSet] = useState(() => {
         const defaultV = '#0000ff';
         if (!rule) {
             return defaultV;
         }
-        return rule.config[rule.config.length - 1].color || defaultV;
+        return rule.config[rule.config.length - 1]?.color || defaultV;
     });
 
     const getResult = useMemo(() => (option: {
@@ -244,10 +244,9 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
                         }}
                     />
                 )}
-                {medianType === 'none' && (
+                {medianType !== 'none' && (
                     <ColorPicker
                         className={styles.mLXxs}
-                        disable={medianType === 'none'}
                         color={medianColor}
                         onChange={(v) => {
                             medianColorSet(v);

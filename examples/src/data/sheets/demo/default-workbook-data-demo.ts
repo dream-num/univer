@@ -73,13 +73,18 @@ const richTextDemo1: IDocumentData = {
             },
             {
                 st: 3,
-                ed: 9,
+                ed: 10,
                 ts: {
                     cl: {
-                        rgb: 'rgb(255,0,0)',
+                        rgb: 'rgb(255, 0, 0)',
                     },
                     fs: 20,
                 },
+            },
+        ],
+        paragraphs: [
+            {
+                startIndex: 10,
             },
         ],
     },

@@ -130,5 +130,8 @@ export * from './slides/domain';
 export * from './types/const';
 export * from './types/enum';
 export * from './types/interfaces';
+export { UniverInstanceService } from './services/instance/instance.service';
+export { LifecycleInitializerService } from './services/lifecycle/lifecycle.service';
+export { ConfigService } from './services/config/config.service';
 
 installShims();

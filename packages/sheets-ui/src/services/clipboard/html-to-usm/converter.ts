@@ -239,15 +239,29 @@ export class HtmlToUSMService {
                 if (className) {
                     const dom = this.htmlElement.contentDocument?.getElementsByClassName(className)?.[0];
                     if (dom) {
-                        const { fontSize, fontFamily, border, verticalAlign } = window.getComputedStyle(dom!, null);
+                        const computedStyle = window.getComputedStyle(dom!, null);
+
+                        const { fontSize, fontFamily, border, borderLeft, borderRight, borderTop, borderBottom, verticalAlign } = computedStyle;
                         if (fontSize) {
-                            styleString += `;font-size: ${fontSize}`;
+                            styleString += `;font-size: ${Number.parseInt(fontSize) * 0.75}pt`;
                         }
                         if (fontFamily) {
                             styleString += `;font-family: ${fontFamily}`;
                         }
                         if (border) {
                             styleString += `;border: ${border}`;
+                        }
+                        if (borderLeft) {
+                            styleString += `;border-left: ${borderLeft}`;
+                        }
+                        if (borderRight) {
+                            styleString += `;border-right: ${borderRight}`;
+                        }
+                        if (borderTop) {
+                            styleString += `;border-top: ${borderTop}`;
+                        }
+                        if (borderBottom) {
+                            styleString += `;border-bottom: ${borderBottom}`;
                         }
                         if (verticalAlign) {
                             styleString += `;vertical-align: ${verticalAlign}`;

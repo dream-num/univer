@@ -577,7 +577,7 @@ export interface ITextStyle extends IStyleBase {
 
 export interface IIndentStart {
     indentFirstLine?: INumberUnit | number; // indentFirstLine，17.3.1.12 ind (Paragraph Indentation)
-    hanging?: INumberUnit | number; // hanging，悬挂，除第一行意外的首字偏移
+    hanging?: INumberUnit | number; // hanging，悬挂，除第一行以外的首字偏移
     indentStart?: INumberUnit | number; // indentStart
     tabStops?: ITabStop[]; // tabStops
 }

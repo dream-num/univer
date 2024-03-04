@@ -39,7 +39,6 @@ import {
     shrinkToNextGapRange,
 } from './utils/selection-utils';
 
-// TODO@wzhudev: we also need to handle when the current selection is the whole spreadsheet, whole rows or whole columns
 // TODO@DR-UNIVER: moveStepPage and moveStepEnd implement
 
 export enum JumpOver {
@@ -92,7 +91,6 @@ export const MoveSelectionCommand: ICommand<IMoveSelectionCommandParams> = {
 
         // If there are changes to the selection, clear the start position saved by the tab.
         // This function works in conjunction with the enter and tab shortcuts.
-        // TODO@wzhudev: this should be removed to sheets-ui, listening command execution
         accessor.get(ShortcutExperienceService).remove({
             unitId: workbook.getUnitId(),
             sheetId: worksheet.getSheetId(),
@@ -282,9 +280,7 @@ export const ExpandSelectionCommand: ICommand<IExpandSelectionCommandParams> = {
     id: 'sheet.command.expand-selection',
     type: CommandType.COMMAND,
     handler: async (accessor, params) => {
-        if (!params) {
-            return false;
-        }
+        if (!params) return false;
 
         const target = getSheetCommandTarget(accessor.get(IUniverInstanceService));
         if (!target) return false;
@@ -292,16 +288,12 @@ export const ExpandSelectionCommand: ICommand<IExpandSelectionCommandParams> = {
         const { worksheet, unitId, subUnitId } = target;
 
         const selection = accessor.get(SelectionManagerService).getLast();
-        if (!selection) {
-            return false;
-        }
-
+        if (!selection) return false;
 
         const { range: startRange, primary } = selection;
         const { jumpOver, direction } = params;
 
         const isShrink = checkIfShrink(selection, direction, worksheet);
-
         const destRange = !isShrink
             ? jumpOver === JumpOver.moveGap
                 ? expandToNextGapRange(startRange, direction, worksheet)
@@ -309,7 +301,6 @@ export const ExpandSelectionCommand: ICommand<IExpandSelectionCommandParams> = {
             : jumpOver === JumpOver.moveGap
                 ? shrinkToNextGapRange(
                     startRange,
-                    // TODO: should fix on SelectionManagerService's side
                     { ...Rectangle.clone(primary), rangeType: RANGE_TYPE.NORMAL },
                     direction,
                     worksheet

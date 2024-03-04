@@ -42,7 +42,6 @@ const SingleCanvasPopup = ({ popup, children }: { popup: IPopup; children?: Reac
             onClickOutside={popup.onClickOutside}
             excludeOutside={popup.excludeOutside}
         >
-
             {children}
         </RectPopup>
     );
@@ -50,7 +49,7 @@ const SingleCanvasPopup = ({ popup, children }: { popup: IPopup; children?: Reac
 
 export function CanvasPopup() {
     const popupService = useDependency(ICanvasPopupService);
-    const popups = useObservable(popupService.popups$, popupService.popups);
+    const popups = useObservable(popupService.popups$, undefined, true);
     const componentManager = useDependency(ComponentManager);
 
     return popups.map((item) => {

@@ -43,7 +43,7 @@ export {
     transformCellDataToSelectionData,
 } from './basics/selection';
 export { getSheetCommandTarget, getSheetCommandTargetWorkbook, getSheetMutationTarget } from './commands/commands/utils/target-util';
-export { alignToMergedCellsBorders, getCellAtRowCol, setEndForRange } from './commands/commands/utils/selection-utils';
+export { alignToMergedCellsBorders, getCellAtRowCol, setEndForRange, isSingleCellSelection } from './commands/commands/utils/selection-utils';
 export { MAX_CELL_PER_SHEET_KEY } from './controllers/config/config';
 export { BorderStyleManagerService, type IBorderInfo } from './services/border-style-manager.service';
 export { getCurrentSheetDisabled$, SheetEditablePermission, SheetPermissionService } from './services/permission';

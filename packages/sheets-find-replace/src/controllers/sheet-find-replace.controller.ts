@@ -358,13 +358,16 @@ export class SheetFindModel extends FindModel {
         const results: ISheetCellMatch[] = [];
         const subUnitId = worksheet.getSheetId();
 
-        const iter = (query.findDirection === FindDirection.COLUMN ? worksheet.iterateByColumn : worksheet.iterateByRow).bind(worksheet)(range);
-        while (true) {
-            const { done, value } = iter.next();
-            if (done) break;
+        const iter = (query.findDirection === FindDirection.COLUMN
+            ? worksheet.iterateByColumn
+            : worksheet.iterateByRow
+        ).bind(worksheet)(range);
 
+        for (const value of iter) {
             const { row, col, colSpan, rowSpan, value: cellData } = value;
-            if (dedupeFn?.(row, col)) continue;
+            if (dedupeFn?.(row, col) || !cellData) {
+                continue;
+            };
 
             const { hit, replaceable, isFormula } = hitCell(worksheet, row, col, query, cellData);
             if (hit) {
@@ -475,7 +478,7 @@ export class SheetFindModel extends FindModel {
             const { startX, startY } = startPosition;
             const { endX, endY } = endPosition;
 
-            const rowHidden = !worksheet.getRowVisible(startRow);
+            const rowHidden = !worksheet.getRowRawVisible(startRow);
             const columnHidden = !worksheet.getColVisible(startColumn);
 
             const inHiddenRange = rowHidden || columnHidden;

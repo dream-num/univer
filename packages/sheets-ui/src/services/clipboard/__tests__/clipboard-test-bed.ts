@@ -511,7 +511,7 @@ export class testPlatformService {
     isLinux: boolean = false;
 }
 
-export function clipboardTestBed(workbookConfig?: IWorkbookData, dependencies?: Dependency[]) {
+export function clipboardTestBed(workbookData?: IWorkbookData, dependencies?: Dependency[]) {
     const univer = new Univer();
     const injector = univer.__getInjector();
     const get = injector.get.bind(injector);
@@ -565,7 +565,7 @@ export function clipboardTestBed(workbookConfig?: IWorkbookData, dependencies?: 
     }
 
     univer.registerPlugin(TestPlugin);
-    const sheet = univer.createUniverSheet(workbookConfig || TEST_WORKBOOK_DATA_DEMO);
+    const sheet = univer.createUniverSheet(workbookData || TEST_WORKBOOK_DATA_DEMO);
 
     const univerInstanceService = get(IUniverInstanceService);
     univerInstanceService.focusUnit('test');

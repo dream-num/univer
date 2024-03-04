@@ -16,7 +16,7 @@
 
 import { Disposable, LifecycleStages, OnLifecycle, Range, Rectangle } from '@univerjs/core';
 import type { IAutoFillLocation, ISheetAutoFillHook } from '@univerjs/sheets-ui';
-import { APPLY_TYPE, getAutoFillRepeatRange, IAutoFillService } from '@univerjs/sheets-ui';
+import { APPLY_TYPE, getAutoFillRepeatRange, IAutoFillService, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
 import { Inject } from '@wendellhu/redi';
 import { DataValidationModel } from '@univerjs/data-validation';
 import { DATA_VALIDATION_PLUGIN_NAME } from '../common/const';
@@ -40,12 +40,15 @@ export class DataValidationAutoFillController extends Disposable {
             const { source: sourceRange, target: targetRange, unitId, subUnitId } = location;
             const manager = this._dataValidationModel.ensureManager(unitId, subUnitId) as SheetDataValidationManager;
             const ruleMatrixCopy = manager.getRuleObjectMatrix().clone();
-            const sourceStartCell = {
-                row: sourceRange.startRow,
-                col: sourceRange.startColumn,
-            };
 
-            const repeats = getAutoFillRepeatRange(sourceRange, targetRange);
+            const virtualRange = virtualizeDiscreteRanges([sourceRange, targetRange]);
+            const [vSourceRange, vTargetRange] = virtualRange.ranges;
+            const { mapFunc } = virtualRange;
+            const sourceStartCell = {
+                row: vSourceRange.startRow,
+                col: vSourceRange.startColumn,
+            };
+            const repeats = getAutoFillRepeatRange(vSourceRange, vTargetRange);
             repeats.forEach((repeat) => {
                 const targetStartCell = repeat.repeatStartCell;
                 const relativeRange = repeat.relativeRange;
@@ -71,7 +74,8 @@ export class DataValidationAutoFillController extends Disposable {
                         },
                         sourceRange
                     );
-                    const ruleId = manager.getRuleIdByLocation(sourcePositionRange.startRow, sourcePositionRange.startColumn);
+                    const { row: sourceRow, col: sourceCol } = mapFunc(sourcePositionRange.startRow, sourcePositionRange.startColumn);
+                    const ruleId = manager.getRuleIdByLocation(sourceRow, sourceCol);
                     if (ruleId) {
                         const targetPositionRange = Rectangle.getPositionRange(
                             {
@@ -82,7 +86,9 @@ export class DataValidationAutoFillController extends Disposable {
                             },
                             targetRange
                         );
-                        ruleMatrixCopy.setValue(targetPositionRange.startRow, targetPositionRange.startColumn, ruleId);
+                        const { row: targetRow, col: targetCol } = mapFunc(targetPositionRange.startRow, targetPositionRange.startColumn);
+
+                        ruleMatrixCopy.setValue(targetRow, targetCol, ruleId);
                     }
                 });
             });

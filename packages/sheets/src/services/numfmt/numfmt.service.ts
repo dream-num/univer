@@ -17,22 +17,22 @@
 import type { IRange } from '@univerjs/core';
 import {
     Disposable,
-    ICommandService,
     ILogService,
     IResourceManagerService,
     IUniverInstanceService,
     Range,
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
+import { Subject } from 'rxjs';
+import { UniverType } from '@univerjs/protocol';
 
 import type { INumfmtService } from './type';
 
 export class NumfmtService extends Disposable implements INumfmtService {
     constructor(
-        @Inject(ICommandService) private _commandService: ICommandService,
-        @Inject(IResourceManagerService) private _resourceManagerService: IResourceManagerService,
-        @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
-        @Inject(ILogService) private _logService: ILogService
+        @IResourceManagerService private _resourceManagerService: IResourceManagerService,
+        @IUniverInstanceService private _univerInstanceService: IUniverInstanceService,
+        @ILogService private _logService: ILogService
     ) {
         super();
     }

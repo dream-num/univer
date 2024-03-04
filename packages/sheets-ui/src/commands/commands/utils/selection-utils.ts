@@ -31,6 +31,8 @@ export interface IExpandParams {
     down?: boolean;
 }
 
+// TODO@wzhudev: methods in this file should use `worksheet.getCell()` instead of using raw data
+
 export function findNextRange(
     startRange: IRange,
     direction: Direction,
@@ -432,7 +434,7 @@ export function expandToContinuousRange(startRange: IRange, directions: IExpandP
             // we should check if there are value in the upper row of contents, if it does
             // we should update the `destRange` and set `changed` to true
             matrixFromLastRow.forValue((row, col, value) => {
-                if (value.v) {
+                if (cellHasValue(value)) {
                     destRange.startRow = Math.min(row, destRange.startRow);
                     destRange.startColumn = Math.min(col, destRange.startColumn);
                     destRange.endColumn = Math.max(col, destRange.endColumn);
@@ -451,7 +453,7 @@ export function expandToContinuousRange(startRange: IRange, directions: IExpandP
             );
 
             matrixFromLastRow.forValue((row, col, value) => {
-                if (value.v) {
+                if (cellHasValue(value)) {
                     destRange.endRow = Math.max(
                         row + (value.rowSpan !== undefined ? value.rowSpan - 1 : 0),
                         destRange.endRow
@@ -473,7 +475,7 @@ export function expandToContinuousRange(startRange: IRange, directions: IExpandP
             );
 
             matrixFromLastCol.forValue((row, col, value) => {
-                if (value.v) {
+                if (cellHasValue(value)) {
                     destRange.startColumn = Math.min(col, destRange.startColumn);
                     destRange.startRow = Math.min(row, destRange.startRow);
                     destRange.endRow = Math.max(row, destRange.endRow);
@@ -492,7 +494,7 @@ export function expandToContinuousRange(startRange: IRange, directions: IExpandP
             );
 
             matrixFromLastCol.forValue((row, col, value) => {
-                if (value.v) {
+                if (cellHasValue(value)) {
                     destRange.endColumn = Math.max(
                         col + (value.colSpan !== undefined ? value.colSpan - 1 : 0),
                         destRange.endColumn
@@ -576,7 +578,7 @@ function rangeHasValue(
     let hasValue = false;
 
     const matrix = worksheet.getMatrixWithMergedCells(row, col, rowEnd, colEnd).forValue((_, __, value) => {
-        if (value.v) {
+        if (cellHasValue(value)) {
             hasValue = true;
             return false; // stop looping
         }
@@ -741,4 +743,8 @@ export function getMergeableSelectionsByType(type: MergeType, selections: Nullab
     }
 
     return selections;
+}
+
+function cellHasValue(cell: ICellData): boolean {
+    return cell.v !== undefined || cell.p !== undefined;
 }

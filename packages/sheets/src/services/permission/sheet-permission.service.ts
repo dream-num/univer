@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { PermissionService, Workbook } from '@univerjs/core';
+import type { Workbook } from '@univerjs/core';
 import {
     DisposableCollection,
     IPermissionService,
@@ -31,9 +31,6 @@ import { Inject } from '@wendellhu/redi';
 import { takeUntil } from 'rxjs/operators';
 
 import { of } from 'rxjs';
-import { SetRangeValuesCommand } from '../../commands/commands/set-range-values.command';
-import { INTERCEPTOR_POINT } from '../sheet-interceptor/interceptor-const';
-import { SheetInterceptorService } from '../sheet-interceptor/sheet-interceptor.service';
 import { SheetEditablePermission } from './permission-point';
 
 @OnLifecycle(LifecycleStages.Ready, SheetPermissionService)
@@ -41,13 +38,12 @@ export class SheetPermissionService extends RxDisposable {
     private _disposableByUnit = new Map<string, IDisposable>();
 
     constructor(
-        @Inject(IPermissionService) private _permissionService: PermissionService,
-        @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
-        @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService
+        @Inject(IPermissionService) private _permissionService: IPermissionService,
+        @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService
     ) {
         super();
+
         this._init();
-        this._interceptCommandPermission();
     }
 
     private _init() {
@@ -64,7 +60,6 @@ export class SheetPermissionService extends RxDisposable {
     }
 
     private _interceptWorkbook(workbook: Workbook): void {
-        const disposableCollection = new DisposableCollection();
         const unitId = workbook.getUnitId();
         workbook.getSheets().forEach((worksheet) => {
             const subUnitId = worksheet.getSheetId();
@@ -72,49 +67,27 @@ export class SheetPermissionService extends RxDisposable {
             this._permissionService.addPermissionPoint(workbook.getUnitId(), sheetPermission);
         });
 
-        disposableCollection.add(toDisposable(
-            workbook.sheetCreated$.subscribe((worksheet) => {
-                const subUnitId = worksheet.getSheetId();
-                const sheetPermission = new SheetEditablePermission(unitId, subUnitId);
-                this._permissionService.addPermissionPoint(workbook.getUnitId(), sheetPermission);
-            })
-        ));
-
-        disposableCollection.add(toDisposable(
-            workbook.sheetDisposed$.subscribe((worksheet) => {
-                const subUnitId = worksheet.getSheetId();
-                const sheetPermission = new SheetEditablePermission(unitId, subUnitId);
-                this._permissionService.deletePermissionPoint(workbook.getUnitId(), sheetPermission.id);
-            })
-        ));
-
-        this._disposableByUnit.set(unitId, disposableCollection);
-    }
-
-    private _interceptCommandPermission() {
         this.disposeWithMe(
-            this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.PERMISSION, {
-                priority: 99,
-                handler: (_value, commandInfo, next) => {
-                    const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
-                    const sheet = workbook?.getActiveSheet();
-                    const unitId = workbook?.getUnitId();
-                    const sheetId = sheet?.getSheetId();
-                    if (!unitId || !sheetId) {
-                        return false;
-                    }
-                    switch (commandInfo.id) {
-                        case SetRangeValuesCommand.id: {
-                            return this.getSheetEditable(unitId, sheetId);
-                        }
-                    }
-                    return next();
-                },
-            })
+            toDisposable(
+                workbook.sheetCreated$.subscribe((worksheet) => {
+                    const subUnitId = worksheet.getSheetId();
+                    const sheetPermission = new SheetEditablePermission(unitId, subUnitId);
+                    this._permissionService.addPermissionPoint(workbook.getUnitId(), sheetPermission);
+                })
+            )
+        );
+
+        this.disposeWithMe(
+            toDisposable(
+                workbook.sheetDisposed$.subscribe((worksheet) => {
+                    const subUnitId = worksheet.getSheetId();
+                    const sheetPermission = new SheetEditablePermission(unitId, subUnitId);
+                    this._permissionService.deletePermissionPoint(workbook.getUnitId(), sheetPermission.id);
+                })
+            )
         );
     }
 
-    // TODO@Gggpound: should get by unitId instead of the current one
     getEditable$(unitId?: string, sheetId?: string) {
         return of({ value: true, status: PermissionStatus.INIT });
 

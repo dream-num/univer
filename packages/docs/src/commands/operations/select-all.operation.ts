@@ -23,9 +23,7 @@ interface ISelectAllOperationParams { }
 
 export const SelectAllOperation: ICommand<ISelectAllOperationParams> = {
     id: 'doc.operation.select-all',
-
     type: CommandType.COMMAND,
-
     handler: async (accessor) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
@@ -34,10 +32,7 @@ export const SelectAllOperation: ICommand<ISelectAllOperationParams> = {
         if (!currentDoc) return false;
 
         const prevBody = currentDoc.getSnapshot().body;
-
-        if (prevBody == null) {
-            return false;
-        }
+        if (prevBody == null) return false;
 
         const textRanges = [
             {
@@ -47,7 +42,6 @@ export const SelectAllOperation: ICommand<ISelectAllOperationParams> = {
         ];
 
         textSelectionManagerService.replaceTextRanges(textRanges, false);
-
         return true;
     },
 };

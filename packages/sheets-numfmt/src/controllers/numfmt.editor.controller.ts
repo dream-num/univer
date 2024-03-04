@@ -18,6 +18,7 @@ import type { IRange, Nullable, Workbook } from '@univerjs/core';
 import {
     CellValueType,
     Disposable,
+    isNumeric,
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,

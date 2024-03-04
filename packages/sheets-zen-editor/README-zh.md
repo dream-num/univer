@@ -3,18 +3,18 @@
 [![npm version](https://img.shields.io/npm/v/@univerjs/sheets-zen-editor)](https://npmjs.org/packages/@univerjs/sheets-zen-editor)
 [![license](https://img.shields.io/npm/l/@univerjs/sheets-zen-editor)](https://img.shields.io/npm/l/@univerjs/sheets-zen-editor)
 
-## Introduction
+## 简介
 
-`@univerjs/sheets-zen-mode-editor` enhances the immersive editing experience for cells in sheets.
+`@univerjs/sheets-zen-editor` 为 sheets 的每个 cell 提供了沉浸式编辑的体验。
 
-## Usage
+## 使用指南
 
-### Installation
+### 安装
 
 ```shell
-# Using npm
+# 使用 npm
 npm install @univerjs/sheets-zen-editor
 
-# Using pnpm
+# 使用 pnpm
 pnpm add @univerjs/sheets-zen-editor
 ```

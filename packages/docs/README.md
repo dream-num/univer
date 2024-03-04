@@ -5,12 +5,22 @@
 
 ## Introduction
 
-> Core library for Univer Docs.
+`@univerjs/docs` package provides the fundamental operations for rich text models, including the following capabilities:
+
+* Logic for selection areas
+* Commands/mutations for altering rich text data
+* Canvas rendering for document presentation
+
+Additionally, `@univerjs/docs` offers support for editors in other domains, such as cell editors for spreadsheets and formula editors, among others.
 
 ## Usage
 
 ### Installation
 
 ```shell
-npm i @univerjs/docs
+# Using npm
+npm install @univerjs/docs
+
+# Using pnpm
+pnpm add @univerjs/docs
 ```

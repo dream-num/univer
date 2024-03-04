@@ -3,18 +3,18 @@
 [![npm version](https://img.shields.io/npm/v/@univerjs/slides)](https://npmjs.org/package/@univerjs/slides)
 [![license](https://img.shields.io/npm/l/@univerjs/slides)](https://img.shields.io/npm/l/@univerjs/slides)
 
-## Introduction
+## 简介
 
 TODO: Not written yet.
 
-## Usage
+## 使用指南
 
-### Installation
+### 安装
 
 ```shell
-# Using npm
+# 使用 npm
 npm install @univerjs/slides
 
-# Using pnpm
+# 使用 pnpm
 pnpm add @univerjs/slides
 ```

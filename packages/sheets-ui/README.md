@@ -5,12 +5,22 @@
 
 ## Introduction
 
-> UI plugin for Univer Sheets.
+The `@univerjs/sheets-ui` library provides the user interface (UI) for sheets, including:
+
+* Keyboard shortcuts and menu items for basic sheet functions
+* Copy-paste service, allowing customization of copy-paste behavior for specific features via the provided methods
+* Autofill service, enabling customization of autofill behavior for specific features via the provided methods
+* Cell editor and formula editor
+* Rendering spreadsheets in canvas
 
 ## Usage
 
 ### Installation
 
 ```shell
-npm i @univerjs/sheets-ui
+# Using npm
+npm install @univerjs/sheets-ui
+
+# Using pnpm
+pnpm add @univerjs/sheets-ui
 ```

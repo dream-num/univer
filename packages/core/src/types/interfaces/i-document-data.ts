@@ -19,7 +19,7 @@ import type { BooleanNumber, HorizontalAlign, LocaleType, TextDirection, Vertica
 import type { IExtraModelData } from './i-extra-model-data';
 import type { IColorStyle, IStyleBase } from './i-style-data';
 
-// 注意：所有的尺寸单位，若无特殊说明，都是指pt，1 pt = 1 / 72 in
+// Attention: all dimensional units, unless otherwise stated, refer to pt，1 pt = 1 / 72 in
 /**
  * Properties of document
  */
@@ -88,7 +88,7 @@ export interface IDocStyles {
 
 /**
  * Properties of document body
- * 三种更新类型，范围叠加、范围互斥、占位符
+ * Contain three update types: range overlay, range mutual exclusion, and placeholder
  * \v COLUMN_BREAK
  * \f PAGE_BREAK
  * \0 DOCS_END
@@ -119,11 +119,11 @@ export interface IDocumentBody {
 
     paragraphs?: IParagraph[]; // paragraph
     sectionBreaks?: ISectionBreak[]; // SectionBreak https://support.microsoft.com/en-us/office/insert-a-section-break-eef20fd8-e38c-4ba6-a027-e503bdf8375c
-    customBlocks?: ICustomBlock[]; // customBlock 用户通过插件自定义的block
+    customBlocks?: ICustomBlock[]; // customBlock user-defined block through plug-in
     tables?: ITable[]; // Table
-    // tableOfContents?: { [index: number]: ITableOfContent }; // tableOfContents 目录
-    // links?: { [index: number]: IHyperlink }; // links 超链接
-    customRanges?: ICustomRange[]; // plugin注册，实现针对stream的特殊逻辑，超链接，field，structured document tags， bookmark，comment
+    // tableOfContents?: { [index: number]: ITableOfContent }; // tableOfContents
+    // links?: { [index: number]: IHyperlink }; // links
+    customRanges?: ICustomRange[]; // plugin register，implement special logic for streams， hyperlink, field，structured document tags， bookmark，comment
 }
 
 export interface IDocStyle {
@@ -169,7 +169,7 @@ export interface IListData {
  * Contains properties describing the look and feel of a list bullet at a given level of nesting.
  */
 export interface INestingLevel extends IIndentStart {
-    bulletAlignment: BulletAlignment; // 有序列表支持
+    bulletAlignment: BulletAlignment; // ordered list support
 
     // The glyph format contains one or more placeholders, and these placeholder are replaced with the appropriate values depending on the glyphType or glyphSymbol. The placeholders follow the pattern %[nestingLevel]. Furthermore, placeholders can have prefixes and suffixes. Thus, the glyph format follows the pattern <prefix>%[nestingLevel]<suffix>. Note that the prefix and suffix are optional and can be arbitrary strings.
     //  <prefix>%[nestingLevel]<suffix>
@@ -178,8 +178,8 @@ export interface INestingLevel extends IIndentStart {
     startNumber: number;
 
     // Union field glyph_kind can be only one of the following:
-    glyphType?: GlyphType | string; // 有序列表 string是为了支持自定义规则 https://developers.google.com/docs/api/reference/rest/v1/documents#glyphtype， ms numFmt: GlyphType | string
-    glyphSymbol?: string; // 无序列表的标志
+    glyphType?: GlyphType | string; // ordered list string is to support custom rules https://developers.google.com/docs/api/reference/rest/v1/documents#glyphtype， ms numFmt: GlyphType | string
+    glyphSymbol?: string; // the tag of the unordered list
     // End of list of possible types for union field glyph_kind.
 }
 
@@ -228,8 +228,8 @@ export enum BulletAlignment {
 //     paragraph?: IParagraph; // paragraph
 //     table?: ITable; // table
 //     sectionBreak?: ISectionBreak; // SectionBreak https://support.microsoft.com/en-us/office/insert-a-section-break-eef20fd8-e38c-4ba6-a027-e503bdf8375c
-//     tableOfContents?: IDocumentBody; // tableOfContents 目录
-//     customBlock?: ICustomBlock; // customBlock 用户通过插件自定义的block
+//     tableOfContents?: IDocumentBody; // tableOfContents
+//     customBlock?: ICustomBlock; // customBlock user-defined block through plug-in
 // }
 
 export interface IMargin {
@@ -257,7 +257,7 @@ export interface ITextRun {
     ed: number;
     sId?: string; // styleID
     ts?: ITextStyle; // textStyle
-    // tab?: BooleanNumber; // 是否tab，默认为false
+    // tab?: BooleanNumber; // if tab，default is false
 }
 
 export interface ICustomRange {
@@ -325,9 +325,9 @@ export interface IDocumentLayout {
     linePitch?: number; // linePitch
     gridType?: GridType; // gridType
 
-    defaultTabStop?: number; // 17.15.1.25 defaultTabStop (Distance Between Automatic Tab Stops)   默认0.5 in  = 36pt，导出的情况下这个值还要转换为默认字号
+    defaultTabStop?: number; // 17.15.1.25 defaultTabStop (Distance Between Automatic Tab Stops)   0.5 in  = 36pt，this value should be converted to the default font size when exporting
     characterSpacingControl?: characterSpacingControlType; // characterSpacingControl 17.18.7 ST_CharacterSpacing (Character-Level Whitespace Compression Settings)，default compressPunctuation
-    paragraphLineGapDefault?: number; // paragraphLineGapDefault 默认行间距
+    paragraphLineGapDefault?: number; // paragraphLineGapDefault default line spacing
     spaceWidthEastAsian?: BooleanNumber; // add space between east asian and English
 }
 
@@ -340,7 +340,7 @@ export enum GridType {
 }
 
 export interface IDocumentStyle extends IDocStyleBase, IDocumentLayout, IHeaderAndFooterBase {
-    textStyle?: ITextStyle; // 文字默认样式
+    textStyle?: ITextStyle; // default style for text
 }
 
 /**
@@ -577,7 +577,7 @@ export interface ITextStyle extends IStyleBase {
 
 export interface IIndentStart {
     indentFirstLine?: INumberUnit | number; // indentFirstLine，17.3.1.12 ind (Paragraph Indentation)
-    hanging?: INumberUnit | number; // hanging，悬挂，除第一行意外的首字偏移
+    hanging?: INumberUnit | number; // hanging，offset of first word except first line
     indentStart?: INumberUnit | number; // indentStart
     tabStops?: ITabStop[]; // tabStops
 }
@@ -785,8 +785,8 @@ export enum FontStyleType {
 }
 
 export interface INumberUnit {
-    v: number; // value 值
-    u: NumberUnitType; // unit 单位
+    v: number; // value
+    u: NumberUnitType; // unit
 }
 
 export interface ObjectPositionH {

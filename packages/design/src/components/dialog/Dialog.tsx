@@ -61,6 +61,11 @@ export interface IDialogProps {
     closeIcon?: React.ReactNode;
 
     /**
+     * The default position of the dialog.
+     */
+    defaultPosition?: { x: number; y: number };
+
+    /**
      * Whether the dialog should be destroyed on close.
      * @default false
      */
@@ -92,13 +97,14 @@ export function Dialog(props: IDialogProps) {
         width,
         draggable = false,
         closeIcon = <CloseSingle />,
+        defaultPosition,
         destroyOnClose = false,
         preservePositionOnDestroy = false,
         footer,
         onClose,
     } = props;
     const [dragDisabled, setDragDisabled] = useState(false);
-    const [positionOffset, setPositionOffset] = useState({ x: 0, y: 0 });
+    const [positionOffset, setPositionOffset] = useState<{ x: number; y: number } | null>(null);
 
     const { mountContainer } = useContext(ConfigContext);
 
@@ -134,9 +140,15 @@ export function Dialog(props: IDialogProps) {
             }
         }
 
+        const position = positionOffset || defaultPosition || { x: 0, y: 0 };
+
         return draggable
             ? (
-                <Draggable disabled={dragDisabled} defaultPosition={positionOffset} onStop={handleStop as DraggableEventHandler}>
+                <Draggable
+                    disabled={dragDisabled}
+                    defaultPosition={position}
+                    onStop={handleStop as DraggableEventHandler}
+                >
                     {modal}
                 </Draggable>
             )

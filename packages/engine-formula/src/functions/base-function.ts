@@ -419,6 +419,10 @@ export class BaseFunction extends Disposable {
                 variant = convertTonNumber(variant);
             }
 
+            if (variant.isNull()) {
+                variant = new NumberValueObject(0);
+            }
+
             if (variant.isArray()) {
                 let errorValue: Nullable<BaseValueObject>;
 
@@ -444,7 +448,7 @@ export class BaseFunction extends Disposable {
                 if (errorValue?.isError()) {
                     return errorValue;
                 }
-            } else if (!variant.isNull()) {
+            } else {
                 flattenValues[0].push(variant);
             }
         }

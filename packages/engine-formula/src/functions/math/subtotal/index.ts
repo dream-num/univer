@@ -21,6 +21,8 @@ import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/r
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
 import { createNewArray } from '../../../engine/utils/array-object';
+import { NumberValueObject } from '../../../engine/value-object/primitive-object';
+import type { ArrayValueObject } from '../../..';
 
 enum FunctionNum {
     AVERAGE = 1,
@@ -53,7 +55,7 @@ enum FunctionNumIgnoreHidden {
 export class Subtotal extends BaseFunction {
     override needsReferenceObject = true;
 
-    override calculate(functionNum: BaseValueObject, ...refs: FunctionVariantType[]) {
+    override calculate(functionNum: FunctionVariantType, ...refs: FunctionVariantType[]) {
         if (functionNum == null) {
             return new ErrorValueObject(ErrorType.NA);
         }
@@ -66,17 +68,27 @@ export class Subtotal extends BaseFunction {
             return new ErrorValueObject(ErrorType.NA);
         }
 
-        if (functionNum.isArray()) {
-            return functionNum.map((value) => this._handleSingleObject(
-                value,
-                ...refs
-            ));
+        if (functionNum.isReferenceObject()) {
+            const result: BaseValueObject[][] = [];
+
+            (functionNum as BaseReferenceObject).iterator((valueObject, rowIndex, columnIndex) => {
+                if (result[rowIndex] == null) {
+                    result[rowIndex] = [];
+                }
+
+                result[rowIndex][columnIndex] = this._handleSingleObject(
+                    valueObject,
+                    ...refs
+                );
+            });
+
+            return createNewArray(result, result.length, result[0].length);
         }
 
-        return this._handleSingleObject(functionNum, ...refs);
+        return this._handleSingleObject(functionNum as BaseValueObject, ...refs);
     }
 
-    private _handleSingleObject(functionNum: BaseValueObject, ...refs: FunctionVariantType[]) {
+    private _handleSingleObject(functionNum: Nullable<BaseValueObject>, ...refs: FunctionVariantType[]) {
         const indexNum = this._getIndexNumValue(functionNum);
         let result;
 
@@ -158,9 +170,9 @@ export class Subtotal extends BaseFunction {
         return result as BaseValueObject;
     }
 
-    private _getIndexNumValue(indexNum: BaseValueObject) {
+    private _getIndexNumValue(indexNum: Nullable<BaseValueObject>) {
         // null, true, false, 0 , 1, '  1',
-        const indexNumValue = Number(indexNum.getValue());
+        const indexNumValue = indexNum ? Number(indexNum.getValue()) : 0;
 
         if (isNaN(indexNumValue)) {
             return new ErrorValueObject(ErrorType.VALUE);
@@ -197,13 +209,30 @@ export class Subtotal extends BaseFunction {
     }
 
     private _counta(ignoreHidden: boolean, ...refs: FunctionVariantType[]) {
-        const flattenArray = this._flattenRefArray(ignoreHidden, ...refs);
+        let accumulatorAll: BaseValueObject = new NumberValueObject(0);
+        for (let i = 0; i < refs.length; i++) {
+            const variant = refs[i];
 
-        if (flattenArray.isError()) {
-            return flattenArray;
+            if (!variant.isReferenceObject()) {
+                return new ErrorValueObject(ErrorType.VALUE);
+            }
+
+            const rowData = (variant as BaseReferenceObject).getRowData();
+
+            (variant as BaseReferenceObject).iterator((valueObject, rowIndex) => {
+                if (ignoreHidden && this._isRowHidden(rowData, rowIndex)) {
+                    return true;
+                }
+
+                if (valueObject == null || valueObject.isNull()) {
+                    return true;
+                }
+
+                accumulatorAll = accumulatorAll.plusBy(1);
+            });
         }
 
-        return flattenArray.countA();
+        return accumulatorAll;
     }
 
     private _max(ignoreHidden: boolean, ...refs: FunctionVariantType[]) {
@@ -211,6 +240,10 @@ export class Subtotal extends BaseFunction {
 
         if (flattenArray.isError()) {
             return flattenArray;
+        }
+
+        if (this._isBlankArrayObject(flattenArray)) {
+            return new NumberValueObject(0);
         }
 
         return flattenArray.max();
@@ -223,11 +256,32 @@ export class Subtotal extends BaseFunction {
             return flattenArray;
         }
 
+        if (this._isBlankArrayObject(flattenArray)) {
+            return new NumberValueObject(0);
+        }
+
         return flattenArray.min();
     }
 
     private _product(ignoreHidden: boolean, ...refs: FunctionVariantType[]) {
-        return new ErrorValueObject(ErrorType.VALUE);
+        const flattenArray = this._flattenRefArray(ignoreHidden, ...refs);
+
+        if (flattenArray.isError()) {
+            return flattenArray;
+        }
+
+        if (this._isBlankArrayObject(flattenArray)) {
+            return new NumberValueObject(0);
+        }
+
+        let result: NumberValueObject = new NumberValueObject(1);
+        (flattenArray as ArrayValueObject).iterator((valueObject) => {
+            result = result.multiply(
+                valueObject as BaseValueObject
+            ) as NumberValueObject;
+        });
+
+        return result;
     }
 
     private _stdev(ignoreHidden: boolean, ...refs: FunctionVariantType[]) {
@@ -235,6 +289,10 @@ export class Subtotal extends BaseFunction {
 
         if (flattenArray.isError()) {
             return flattenArray;
+        }
+
+        if (this._isBlankArrayObject(flattenArray)) {
+            return new ErrorValueObject(ErrorType.DIV_BY_ZERO);
         }
 
         return flattenArray.std(1);
@@ -245,6 +303,10 @@ export class Subtotal extends BaseFunction {
 
         if (flattenArray.isError()) {
             return flattenArray;
+        }
+
+        if (this._isBlankArrayObject(flattenArray)) {
+            return new ErrorValueObject(ErrorType.DIV_BY_ZERO);
         }
 
         return flattenArray.std();
@@ -260,21 +322,15 @@ export class Subtotal extends BaseFunction {
         return flattenArray.sum();
     }
 
-    private _isRowHidden(rowData: IObjectArrayPrimitiveType<Partial<IRowData>>, rowIndex: number
-    ) {
-        const row = rowData[rowIndex];
-        if (!row) {
-            return false;
-        }
-
-        return row.hd === BooleanNumber.TRUE;
-    }
-
     private _var(ignoreHidden: boolean, ...refs: FunctionVariantType[]) {
         const flattenArray = this._flattenRefArray(ignoreHidden, ...refs);
 
         if (flattenArray.isError()) {
             return flattenArray;
+        }
+
+        if (this._isBlankArrayObject(flattenArray)) {
+            return new ErrorValueObject(ErrorType.DIV_BY_ZERO);
         }
 
         return flattenArray.var(1);
@@ -285,6 +341,10 @@ export class Subtotal extends BaseFunction {
 
         if (flattenArray.isError()) {
             return flattenArray;
+        }
+
+        if (this._isBlankArrayObject(flattenArray)) {
+            return new ErrorValueObject(ErrorType.DIV_BY_ZERO);
         }
 
         return flattenArray.var();
@@ -314,7 +374,7 @@ export class Subtotal extends BaseFunction {
                     return true; // continue
                 }
 
-                 // 'test', ' ',  blank cell, TRUE and FALSE are ignored
+                // 'test', ' ',  blank cell, TRUE and FALSE are ignored
                 if (valueObject == null || valueObject.isNull() || valueObject.isString() || valueObject.isBoolean()) {
                     return true;
                 }
@@ -333,5 +393,19 @@ export class Subtotal extends BaseFunction {
         }
 
         return createNewArray(flattenValues, 1, flattenValues[0].length);
+    }
+
+    private _isRowHidden(rowData: IObjectArrayPrimitiveType<Partial<IRowData>>, rowIndex: number
+    ) {
+        const row = rowData[rowIndex];
+        if (!row) {
+            return false;
+        }
+
+        return row.hd === BooleanNumber.TRUE;
+    }
+
+    private _isBlankArrayObject(arrayObject: BaseValueObject) {
+        return arrayObject.getArrayValue()[0].length === 0;
     }
 }

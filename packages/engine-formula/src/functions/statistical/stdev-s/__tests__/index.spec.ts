@@ -58,6 +58,16 @@ describe('Test stdev.s function', () => {
             const var1 = new NumberValueObject(1);
             const var2 = new NullValueObject(0);
             const result = textFunction.calculate(var1, var2);
+            expect(result.getValue()).toBeCloseTo(0.707106781, 7);
+        });
+        it('Var1 is zero', () => {
+            const var1 = new NumberValueObject(0);
+            const result = textFunction.calculate(var1);
+            expect(result.getValue()).toBe(ErrorType.DIV_BY_ZERO);
+        });
+        it('Var1 is null', () => {
+            const var1 = new NullValueObject(0);
+            const result = textFunction.calculate(var1);
             expect(result.getValue()).toBe(ErrorType.DIV_BY_ZERO);
         });
         it('Var1 is number, var2 is error', () => {

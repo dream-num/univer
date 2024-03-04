@@ -58,7 +58,7 @@ describe('Test var.s function', () => {
             const var1 = new NumberValueObject(1);
             const var2 = new NullValueObject(0);
             const result = textFunction.calculate(var1, var2);
-            expect(result.getValue()).toBe(ErrorType.DIV_BY_ZERO);
+            expect(result.getValue()).toBe(0.5);
         });
         it('Var1 is number, var2 is error', () => {
             const var1 = new NumberValueObject(1);

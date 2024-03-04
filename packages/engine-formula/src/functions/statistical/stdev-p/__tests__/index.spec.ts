@@ -58,6 +58,16 @@ describe('Test stdev.p function', () => {
             const var1 = new NumberValueObject(1);
             const var2 = new NullValueObject(0);
             const result = textFunction.calculate(var1, var2);
+            expect(result.getValue()).toBe(0.5);
+        });
+        it('Var1 is zero', () => {
+            const var1 = new NumberValueObject(0);
+            const result = textFunction.calculate(var1);
+            expect(result.getValue()).toBe(0);
+        });
+        it('Var1 is null', () => {
+            const var1 = new NullValueObject(0);
+            const result = textFunction.calculate(var1);
             expect(result.getValue()).toBe(0);
         });
         it('Var1 is number, var2 is error', () => {

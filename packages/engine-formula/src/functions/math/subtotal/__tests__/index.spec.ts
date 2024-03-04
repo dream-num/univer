@@ -18,7 +18,7 @@ import type { Injector } from '@wendellhu/redi';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import type { IWorkbookData } from '@univerjs/core';
-import { CellValueType, LocaleType } from '@univerjs/core';
+import { BooleanNumber, CellValueType, LocaleType } from '@univerjs/core';
 import { Lexer } from '../../../../engine/analysis/lexer';
 import type { LexerNode } from '../../../../engine/analysis/lexer-node';
 import { AstTreeBuilder } from '../../../../engine/analysis/parser';
@@ -115,6 +115,11 @@ const getTestWorkbookData = (): IWorkbookData => {
                             v: -3,
                             t: CellValueType.NUMBER,
                         },
+                    },
+                },
+                rowData: {
+                    3: {
+                        hd: BooleanNumber.TRUE,
                     },
                 },
             },
@@ -214,14 +219,46 @@ describe('Test subtotal', () => {
             // boolean false
             result = await calculate('=SUBTOTAL(5,false)');
             expect(result).toBe(ErrorType.VALUE);
+        });
+
+        it('FunctionNum is normal number, refs is error or blank cell', async () => {
+            // error
+            let result = await calculate('=SUBTOTAL(7,C1)');
+            expect(result).toBe(ErrorType.NAME);
 
             // null
-            result = await calculate('=SUBTOTAL(6,D1)');
-            expect(result).toBe(ErrorType.VALUE);
+            result = await calculate('=SUBTOTAL(1,D1)');
+            expect(result).toBe(ErrorType.DIV_BY_ZERO);
 
-            // error
-            result = await calculate('=SUBTOTAL(7,C1)');
-            expect(result).toBe(ErrorType.VALUE);
+            result = await calculate('=SUBTOTAL(2,D1)');
+            expect(result).toBe(0);
+
+            result = await calculate('=SUBTOTAL(3,D1)');
+            expect(result).toBe(0);
+
+            result = await calculate('=SUBTOTAL(4,D1)');
+            expect(result).toBe(0);
+
+            result = await calculate('=SUBTOTAL(5,D1)');
+            expect(result).toBe(0);
+
+            result = await calculate('=SUBTOTAL(6,D1)');
+            expect(result).toBe(0);
+
+            result = await calculate('=SUBTOTAL(7,D1)');
+            expect(result).toBe(ErrorType.DIV_BY_ZERO);
+
+            result = await calculate('=SUBTOTAL(8,D1)');
+            expect(result).toBe(ErrorType.DIV_BY_ZERO);
+
+            result = await calculate('=SUBTOTAL(9,D1)');
+            expect(result).toBe(0);
+
+            result = await calculate('=SUBTOTAL(10,D1)');
+            expect(result).toBe(ErrorType.DIV_BY_ZERO);
+
+            result = await calculate('=SUBTOTAL(11,D1)');
+            expect(result).toBe(ErrorType.DIV_BY_ZERO);
         });
 
         it('FunctionNum is normal number, ref1 is array, ref2 is array includes error', async () => {
@@ -230,10 +267,93 @@ describe('Test subtotal', () => {
         });
     });
 
-    describe('Subtotal sum', () => {
-        it('Var1 is array, var2 is array', async () => {
+    describe('Subtotal every function, function number is single number', () => {
+        it('Average, Var1 is array, var2 is array', async () => {
+            const result = await calculate('=SUBTOTAL(1,A1:B2,A3:F4)');
+            expect(result).toBe(11.157);
+        });
+        it('Count, Var1 is array, var2 is array', async () => {
+            const result = await calculate('=SUBTOTAL(2,A1:B2,A3:F4)');
+            expect(result).toBe(10);
+        });
+        it('Counta, Var1 is array, var2 is array', async () => {
+            const result = await calculate('=SUBTOTAL(3,A1:B2,A3:F4)');
+            expect(result).toBe(14);
+        });
+        it('Max, Var1 is array, var2 is array', async () => {
+            const result = await calculate('=SUBTOTAL(4,A1:B2,A3:F4)');
+            expect(result).toBe(100);
+        });
+        it('Min, Var1 is array, var2 is array', async () => {
+            const result = await calculate('=SUBTOTAL(5,A1:B2,A3:F4)');
+            expect(result).toBe(-3);
+        });
+        it('Product, Var1 is array, var2 is array', async () => {
+            const result = await calculate('=SUBTOTAL(6,A1:B2,A3:F4)');
+            expect(typeof result === 'number' && Math.abs(result)).toBe(0);
+        });
+        it('Stdev.s, Var1 is array, var2 is array', async () => {
+            const result = await calculate('=SUBTOTAL(7,A1:B2,A3:F4)');
+            expect(result).toBe(31.27335040502625);
+        });
+        it('Stdev.p, Var1 is array, var2 is array', async () => {
+            const result = await calculate('=SUBTOTAL(8,A1:B2,A3:F4)');
+            expect(result).toBe(29.668505203329676);
+        });
+        it('sum, Var1 is array, var2 is array', async () => {
             const result = await calculate('=SUBTOTAL(9,A1:B2,A3:F4)');
             expect(result).toBe(111.57);
+        });
+        it('Var.s, Var1 is array, var2 is array', async () => {
+            const result = await calculate('=SUBTOTAL(10,A1:B2,A3:F4)');
+            expect(result).toBeCloseTo(978.0224456, 7);
+        });
+        it('Var.p, Var1 is array, var2 is array', async () => {
+            const result = await calculate('=SUBTOTAL(11,A1:B2,A3:F4)');
+            expect(result).toBe(880.220201);
+        });
+    });
+
+    describe('Subtotal every function, function number is array', () => {
+        it('Function num is array, var1 is array, var2 is array', async () => {
+            const result = await calculate('=SUBTOTAL(A1:B2,A1:B2,A3:F4)');
+            expect(result).toStrictEqual([[11.157, 10], [14, 100]]);
+        });
+    });
+    describe('Subtotal every function, including hidden row', () => {
+        it('Function num is normal number, var1 is array', async () => {
+            let result = await calculate('=SUBTOTAL(101,A3:F4)');
+            expect(result).toBe(1.115);
+
+            result = await calculate('=SUBTOTAL(102,A3:F4)');
+            expect(result).toBe(2);
+
+            result = await calculate('=SUBTOTAL(103,A3:F4)');
+            expect(result).toBe(5);
+
+            result = await calculate('=SUBTOTAL(104,A3:F4)');
+            expect(result).toBe(1.23);
+
+            result = await calculate('=SUBTOTAL(105,A3:F4)');
+            expect(result).toBe(1);
+
+            result = await calculate('=SUBTOTAL(106,A3:F4)');
+            expect(result).toBe(1.23);
+
+            result = await calculate('=SUBTOTAL(107,A3:F4)');
+            expect(result).toBeCloseTo(0.16263456, 7);
+
+            result = await calculate('=SUBTOTAL(108,A3:F4)');
+            expect(result).toBe(0.115);
+
+            result = await calculate('=SUBTOTAL(109,A3:F4)');
+            expect(result).toBe(2.23);
+
+            result = await calculate('=SUBTOTAL(110,A3:F4)');
+            expect(result).toBe(0.02645);
+
+            result = await calculate('=SUBTOTAL(111,A3:F4)');
+            expect(result).toBe(0.013225);
         });
     });
 });

@@ -33,6 +33,7 @@ export class Sum extends BaseFunction {
                 return variant;
             }
 
+            // TODO @Dushusir: =SUM(1,"2")
             if (variant.isString()) {
                 return new ErrorValueObject(ErrorType.VALUE);
             }

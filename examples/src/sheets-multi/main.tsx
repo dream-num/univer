@@ -20,6 +20,7 @@ import './index.css';
 import { LocaleType, LogLevel, Tools, Univer } from '@univerjs/core';
 import { defaultTheme } from '@univerjs/design';
 import { UniverDocsPlugin } from '@univerjs/docs';
+import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
@@ -27,13 +28,11 @@ import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
 import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import { UniverUIPlugin } from '@univerjs/ui';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Mosaic, MosaicWindow } from 'react-mosaic-component';
 
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data';
-
-const univers: Univer[] = [];
 
 function factory(id: string) {
     return function createUniverOnContainer() {
@@ -43,9 +42,6 @@ function factory(id: string) {
             logLevel: LogLevel.VERBOSE,
         });
 
-        univer.registerPlugin(UniverDocsPlugin, {
-            hasScroll: false,
-        });
         univer.registerPlugin(UniverRenderEnginePlugin);
         univer.registerPlugin(UniverUIPlugin, {
             container: id,
@@ -53,6 +49,10 @@ function factory(id: string) {
             toolbar: true,
             footer: true,
         });
+        univer.registerPlugin(UniverDocsPlugin, {
+            hasScroll: false,
+        });
+        univer.registerPlugin(UniverDocsUIPlugin);
 
         // sheets plugin
         univer.registerPlugin(UniverSheetsPlugin);
@@ -65,8 +65,6 @@ function factory(id: string) {
 
         // create univer sheet instance
         univer.createUniverSheet(Tools.deepClone(DEFAULT_WORKBOOK_DATA_DEMO));
-
-        univers.push(univer);
     };
 }
 
@@ -78,29 +76,36 @@ const TITLE_MAP: Record<ViewId, string> = {
 
 export type ViewId = 'a' | 'b' | 'c';
 
-export const App = (
-    <Mosaic<ViewId>
-        renderTile={(id, path) => (
-            <MosaicWindow<ViewId> path={path} title={TITLE_MAP[id]} toolbarControls={<div />}>
-                <div id={`app-${id}`} style={{ height: '100%' }}>
-                    {TITLE_MAP[id]}
-                </div>
-            </MosaicWindow>
-        )}
-        initialValue={{
-            direction: 'row',
-            first: 'a',
-            second: {
-                direction: 'column',
-                first: 'b',
-                second: 'c',
-            },
-        }}
-    />
-);
+export function App() {
+    useEffect(() => {
+        factory('app-a')();
+        factory('app-b')();
+        factory('app-c')();
+    }, []);
 
-createRoot(document.getElementById('container')!).render(App);
-
-factory('app-a')();
-factory('app-b')();
-factory('app-c')();
+    return (
+        <Mosaic<ViewId>
+            renderTile={(id, path) => (
+                <MosaicWindow<ViewId>
+                    path={path}
+                    title={TITLE_MAP[id]}
+                    toolbarControls={<div />}
+                >
+                    <div id={`app-${id}`} style={{ height: '100%' }}>
+                        {TITLE_MAP[id]}
+                    </div>
+                </MosaicWindow>
+            )}
+            initialValue={{
+                direction: 'row',
+                first: 'a',
+                second: {
+                    direction: 'column',
+                    first: 'b',
+                    second: 'c',
+                },
+            }}
+        />
+    );
+};
+createRoot(document.getElementById('container')!).render(<App />);

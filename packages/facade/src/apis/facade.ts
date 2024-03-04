@@ -176,10 +176,10 @@ export class FUniver {
     registerSheetRowHeaderExtension(unitId: string, ...extensions: SheetExtension[]): IDisposable {
         const sheetComponent = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.ROW) as SheetComponent;
 
-        sheetComponent.register(...extensions);
+        const registerDisposable = sheetComponent.register(...extensions);
 
         return toDisposable(() => {
-            sheetComponent.unRegister(...extensions.map((ext) => ext.uKey));
+            registerDisposable.dispose();
             sheetComponent.makeDirty(true);
         });
     }
@@ -191,10 +191,10 @@ export class FUniver {
      */
     registerSheetColumnHeaderExtension(unitId: string, ...extensions: SheetExtension[]): IDisposable {
         const sheetComponent = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.COLUMN) as SheetComponent;
-        sheetComponent.register(...extensions);
+        const registerDisposable = sheetComponent.register(...extensions);
 
         return toDisposable(() => {
-            sheetComponent.unRegister(...extensions.map((ext) => ext.uKey));
+            registerDisposable.dispose();
             sheetComponent.makeDirty(true);
         });
     }
@@ -206,10 +206,10 @@ export class FUniver {
      */
     registerSheetMainExtension(unitId: string, ...extensions: SheetExtension[]): IDisposable {
         const sheetComponent = this._getSheetRenderComponent(unitId, SHEET_VIEW_KEY.MAIN) as SheetComponent;
-        sheetComponent.register(...extensions);
+        const registerDisposable = sheetComponent.register(...extensions);
 
         return toDisposable(() => {
-            sheetComponent.unRegister(...extensions.map((ext) => ext.uKey));
+            registerDisposable.dispose();
             sheetComponent.makeDirty(true);
         });
     }

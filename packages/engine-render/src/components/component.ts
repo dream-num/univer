@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { sortRules } from '@univerjs/core';
+import { DisposableCollection, sortRules, toDisposable } from '@univerjs/core';
 
 import { BaseObject } from '../base-object';
 import type { IViewportBound } from '../basics/vector2';
@@ -29,16 +29,19 @@ export class RenderComponent<T, U, V> extends BaseObject {
     }
 
     register(...extensions: Array<ComponentExtension<T, U, V>>) {
+        const disposableCollection = new DisposableCollection();
         for (const extension of extensions) {
             extension.parent = this;
             this._extensions.set(extension.uKey, extension);
-        }
-    }
 
-    unRegister(...uKeys: string[]) {
-        for (const uKey of uKeys) {
-            this._extensions.delete(uKey);
+            disposableCollection.add(
+                toDisposable(() => {
+                    this._extensions.delete(extension.uKey);
+                })
+            );
         }
+
+        return disposableCollection;
     }
 
     getExtensionsByOrder() {

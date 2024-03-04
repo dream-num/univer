@@ -41,7 +41,10 @@ import {
     DeleteCellShiftUp,
     DeleteColumn,
     DeleteRow,
+    DirectExportSingle,
     DownBorder,
+    ExportSingle,
+    FolderSingle,
     FontColor,
     FontSizeIncreaseSingle,
     FontSizeReduceSingleSingle,
@@ -100,9 +103,6 @@ import {
     VerticalCenterSingle,
     VerticalIntegrationSingle,
     VerticalTextSingle,
-    DirectExportSingle,
-    FolderSingle,
-    ExportSingle,
 } from '@univerjs/icons';
 import type { IDisposable } from '@wendellhu/redi';
 

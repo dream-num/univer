@@ -3,18 +3,18 @@
 [![npm version](https://img.shields.io/npm/v/@univerjs/network)](https://npmjs.org/package/@univerjs/network)
 [![license](https://img.shields.io/npm/l/@univerjs/network)](https://img.shields.io/npm/l/@univerjs/network)
 
-## Introduction
+## 简介
 
-The `@univerjs/network` library provides basic network service capabilities, primarily for use in collaborative editing scenarios.
+`@univerjs/network` 提供了基础的网络服务能力，主要用于协同编辑场景。
 
-## Usage
+## 使用指南
 
-### Installation
+### 安装
 
 ```shell
-# Using npm
+# 使用 npm
 npm install @univerjs/network
 
-# Using pnpm
+# 使用 pnpm
 pnpm add @univerjs/network
 ```

@@ -5,16 +5,16 @@
 
 ## 简介
 
-The `@univerjs/engine-formula` is a formula engine that provides fundamental capabilities for formula computation, including but not limited to: formula string parsing, formula calculation, and formula dependency analysis.
+`@univerjs/engine-formula` 是一个公式引擎，它提供了一套公式计算的基础能力。包括公式字符串解析，公式计算，公式依赖分析等。
 
-## Usage
+## 使用指南
 
-### Installation
+### 安装
 
 ```shell
-# Using npm
+# 使用 npm
 npm install @univerjs/engine-numfmt
 
-# Using pnpm
+# 使用 pnpm
 pnpm add @univerjs/engine-numfmt
 ```

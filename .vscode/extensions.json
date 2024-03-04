@@ -8,7 +8,6 @@
         "streetsidesoftware.code-spell-checker",
         "tldraw-org.tldraw-vscode",
         "kingwl.vscode-vitest-runner",
-        "usernamehw.errorlens",
-        "hoodiecollin.es6-string-typescript"
+        "usernamehw.errorlens"
     ]
 }

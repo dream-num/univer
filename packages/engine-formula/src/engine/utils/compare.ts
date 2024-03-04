@@ -95,5 +95,4 @@ export function compareWithWildcard(currentValue: string, value: string, operato
 
 export function escapeRegExp(str: string) {
     return str.replace(/[.+^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
-    // return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
 }

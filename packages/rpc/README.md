@@ -5,16 +5,18 @@
 
 ## Introduction
 
-> Univer RPC provides RPC framework for Univer.
+When handling some time-intensive tasks, such as formula computation, Univer can offload them to a location outside of the main thread, such as a Web Worker thread. The `@univerjs/rpc` library provides an RPC mechanism that simplifies communication between the main thread and other threads.
+
+For more information, see the [Architecture of Web Worker](https://univer.ai/en-us/guides/architecture/web-worker/).
 
 ## Usage
 
 ### Installation
 
 ```shell
-npm i @univerjs/rpc
+# Using npm
+npm install @univerjs/rpc
+
+# Using pnpm
+pnpm add @univerjs/rpc
 ```
-
-### API
-
-Check [Univer](https://github.com/dream-num/univer/)

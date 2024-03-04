@@ -30,6 +30,7 @@ import { BorderStyleManagerService, SelectionManagerService, SheetInterceptorSer
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
+import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import enUS from '../../../locale/en-US';
 
 const getTestWorkbookDataDemo = (): IWorkbookData => {
@@ -95,6 +96,7 @@ export function createCommandTestBed(workbookConfig?: IWorkbookData, dependencie
             injector.add([SelectionManagerService]);
             injector.add([BorderStyleManagerService]);
             injector.add([SheetInterceptorService]);
+            injector.add([LexerTreeBuilder]);
 
             dependencies?.forEach((d) => injector.add(d));
         }

@@ -38,6 +38,7 @@ export {
 export { ActionIterator } from './docs/data-model/text-x/action-iterator';
 export { getBodySlice, composeBody } from './docs/data-model/text-x/utils';
 export { TextX } from './docs/data-model/text-x/text-x';
+export { replaceInDocumentBody } from './docs/data-model/replacement';
 export * from './observer';
 export { Plugin, PluginType } from './plugin/plugin';
 export {
@@ -129,5 +130,8 @@ export * from './slides/domain';
 export * from './types/const';
 export * from './types/enum';
 export * from './types/interfaces';
+export { UniverInstanceService } from './services/instance/instance.service';
+export { LifecycleInitializerService } from './services/lifecycle/lifecycle.service';
+export { ConfigService } from './services/config/config.service';
 
 installShims();

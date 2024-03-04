@@ -5,12 +5,16 @@
 
 ## Introduction
 
-> Find plugin for Univer Sheets.
+TODO: Not written yet.
 
 ## Usage
 
 ### Installation
 
 ```shell
-npm i @univerjs/sheets-find
+# Using npm
+npm install @univerjs/sheets-find
+
+# Using pnpm
+pnpm add @univerjs/sheets-find
 ```

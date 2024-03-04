@@ -15,11 +15,15 @@
  */
 
 import type { Meta } from '@storybook/react';
-import { LocaleService } from '@univerjs/core';
-import { Injector } from '@wendellhu/redi';
+import type { Dependency } from '@wendellhu/redi';
 import { RediContext } from '@wendellhu/redi/react-bindings';
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 
+import { DesktopLayoutService, ILayoutService } from '@univerjs/ui';
+import { LocaleService, LocaleType } from '@univerjs/core';
+import { FindReplaceService, IFindReplaceService } from '../../services/find-replace.service';
+import { FindReplaceController } from '../../controllers/find-replace.controller';
+import { enUS, zhCN } from '../../locale';
 import { FindReplaceDialog } from './Dialog';
 
 const meta: Meta = {
@@ -33,12 +37,21 @@ const meta: Meta = {
 export default meta;
 
 function FindDialogDemo() {
-    const [inject] = useState(() => {
-        const injector = new Injector();
-        // injector.add([IFindReplaceService]);
-        injector.add([LocaleService]);
+    const { injector } = useContext(RediContext);
 
-        injector.get(LocaleService).load({});
+    const [inject] = useState(() => {
+        const deps: Dependency[] = [
+            [IFindReplaceService, { useClass: FindReplaceService }],
+            [ILayoutService, { useClass: DesktopLayoutService }],
+            [FindReplaceController],
+        ];
+
+        injector?.get(LocaleService).load({
+            [LocaleType.EN_US]: enUS,
+            [LocaleType.ZH_CN]: zhCN,
+        });
+
+        deps.forEach((dependency) => injector?.add(dependency));
 
         return injector;
     });
@@ -57,12 +70,21 @@ export const FindDialog = {
 };
 
 function ReplaceDialogDemo() {
-    const [inject] = useState(() => {
-        const injector = new Injector();
-        // injector.add([IFindReplaceService]);
-        injector.add([LocaleService]);
+    const { injector } = useContext(RediContext);
 
-        injector.get(LocaleService).load({});
+    const [inject] = useState(() => {
+        const deps: Dependency[] = [
+            [IFindReplaceService, { useClass: FindReplaceService }],
+            [ILayoutService, { useClass: DesktopLayoutService }],
+            [FindReplaceController],
+        ];
+
+        injector?.get(LocaleService).load({
+            [LocaleType.EN_US]: enUS,
+            [LocaleType.ZH_CN]: zhCN,
+        });
+
+        deps.forEach((dependency) => injector?.add(dependency));
 
         return injector;
     });

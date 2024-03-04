@@ -59,6 +59,10 @@ const locale = {
             content: '请允许 Univer 访问您的剪贴板。',
         },
     },
+    textEditor: {
+        formulaError: '请输入合法的公式，例如=SUM(A1)',
+        rangeError: '请输入合法的范围，例如 A1:B10',
+    },
 };
 
 export default locale;

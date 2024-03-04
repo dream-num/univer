@@ -15,7 +15,7 @@
  */
 
 export type { IDocObjectParam } from './basics/component-tools';
-export { getDocObject } from './basics/component-tools';
+export { getDocObject, getDocObjectById } from './basics/component-tools';
 export * from './basics/docs-view-key';
 export { BreakLineCommand } from './commands/commands/break-line.command';
 export {
@@ -60,5 +60,5 @@ export { DocStateChangeManagerService, type IDocStateChangeParams } from './serv
 export { IMEInputManagerService } from './services/ime-input-manager.service';
 export { SelectAllOperation } from './commands/operations/select-all.operation';
 export { CutContentCommand, InnerPasteCommand } from './commands/commands/clipboard.inner.command';
-export { SetDocZoomRatioOperation } from './commands/operations/set-doc-zoom-ratio.operation';
+export { SetDocZoomRatioOperation, type ISetDocZoomRatioOperationParams } from './commands/operations/set-doc-zoom-ratio.operation';
 export { SetDocZoomRatioCommand } from './commands/commands/set-doc-zoom-ratio.command';

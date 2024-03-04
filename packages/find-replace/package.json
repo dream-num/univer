@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/find-replace",
-    "version": "0.1.0-beta.5",
+    "version": "0.1.1",
     "private": false,
     "description": "",
     "author": "DreamNum <developer@univer.ai>",
@@ -63,14 +63,14 @@
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
-        "@univerjs/icons": "^0.1.28",
+        "@univerjs/icons": "^0.1.30",
         "@univerjs/ui": "workspace:*",
         "@wendellhu/redi": "^0.13.0",
         "react": "^18.2.0",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/icons": "^0.1.28"
+        "@univerjs/icons": "^0.1.30"
     },
     "devDependencies": {
         "@types/react": "^18.2.57",

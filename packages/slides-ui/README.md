@@ -5,12 +5,16 @@
 
 ## Introduction
 
-> UI plugin for Univer Slides.
+TODO: Not written yet.
 
 ## Usage
 
 ### Installation
 
 ```shell
-npm i @univerjs/slides-ui
+# Using npm
+npm install @univerjs/slides-ui
+
+# Using pnpm
+pnpm add @univerjs/slides-ui
 ```

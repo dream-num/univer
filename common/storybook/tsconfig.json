@@ -1,0 +1,23 @@
+{
+    "extends": "@univerjs/shared/tsconfigs/base",
+    "compilerOptions": {
+        "target": "ESNext",
+        "jsx": "react",
+        "lib": ["ESNext", "dom", "dom.iterable"],
+        "useDefineForClassFields": false,
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "baseUrl": ".",
+        "rootDir": ".",
+        "module": "esnext",
+        "moduleResolution": "bundler",
+        "allowJs": true,
+        "declaration": false,
+        "importHelpers": true,
+        "allowSyntheticDefaultImports": true
+    },
+    "include": [
+        ".storybook/**/*"
+    ],
+    "exclude": ["src/**/*.spec.ts", "src/**/*.test.ts"]
+}

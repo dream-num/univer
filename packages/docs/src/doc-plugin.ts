@@ -54,7 +54,6 @@ import { IMEInputController } from './controllers/ime-input.controller';
 import { InlineFormatController } from './controllers/inline-format.controller';
 import { MoveCursorController } from './controllers/move-cursor.controller';
 import { NormalInputController } from './controllers/normal-input.controller';
-import { TextSelectionController } from './controllers/text-selection.controller';
 import { DocSkeletonManagerService } from './services/doc-skeleton-manager.service';
 import { DocViewModelManagerService } from './services/doc-view-model-manager.service';
 import { IMEInputManagerService } from './services/ime-input-manager.service';
@@ -154,7 +153,6 @@ export class UniverDocsPlugin extends Plugin {
                 [TextSelectionManagerService],
 
                 // controllers
-                [TextSelectionController],
                 [NormalInputController],
                 [IMEInputController],
                 [InlineFormatController],

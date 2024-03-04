@@ -344,7 +344,7 @@ export default {
             },
         ],
         functionParameter: {
-            serialNumber: { name: '日期序列号', detail: '要查找的年份的日期。 应使用 DATE 函数输入日期，或者将日期作为其他公式或函数的结果输入。 例如，使用函数 DATE(2008,5,23) 输入 2008 年 5 月 23 日。 如果日期以文本形式输入，则会出现问题。' },
+            serialNumber: { name: '日期序列号', detail: '要查找的年份的日期。 应使用 DATE 函数输入日期，或者将日期作为其他公式或函数的结果输入。 例如，使用函数 DATE(2008,5,23) 输入 2008 年 5 月 23 日。' },
         },
     },
     YEARFRAC: {

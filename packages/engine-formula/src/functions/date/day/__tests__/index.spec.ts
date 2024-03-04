@@ -18,7 +18,7 @@ import { describe, expect, it } from 'vitest';
 
 import { FUNCTION_NAMES_DATE } from '../../function-names';
 import { Day } from '..';
-import { NumberValueObject } from '../../../../engine/value-object/primitive-object';
+import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 
 describe('Test day function', () => {
@@ -27,6 +27,12 @@ describe('Test day function', () => {
     describe('Day', () => {
         it('Serial number is normal', () => {
             const serialNumber = new NumberValueObject(43832);
+            const result = textFunction.calculate(serialNumber);
+            expect(result.getValue()).toStrictEqual(2);
+        });
+
+        it('Serial number is date string', () => {
+            const serialNumber = new StringValueObject('2020-01-02');
             const result = textFunction.calculate(serialNumber);
             expect(result.getValue()).toStrictEqual(2);
         });

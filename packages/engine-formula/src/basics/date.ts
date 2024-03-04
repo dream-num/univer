@@ -73,3 +73,38 @@ export function formatDateDefault(date: Date): string {
     // Concatenate year, month, and day with '/' as separator to form yyyy/mm/dd format
     return `${year}/${month}/${day}`;
 }
+
+/**
+ * Validate date string
+ *
+ * TODO @Dushusir: Internationalization and more format support, can be reused when editing and saving cells, like "2020年1月1日"
+ * @param dateStr
+ * @returns
+ */
+export function isValidDateStr(dateStr: string): boolean {
+    // Regular expression to validate date format
+    const regex = /^\d{4}[-/](0?[1-9]|1[012])[-/](0?[1-9]|[12][0-9]|3[01])$/;
+
+    // Check if the date format is correct
+    if (!regex.test(dateStr)) {
+        return false;
+    }
+    // Convert date string to local time format
+    const normalizedDateStr = dateStr.replace(/-/g, '/').replace(/T.+/, '');
+    const dateWithTime = new Date(`${normalizedDateStr}`);
+
+    // Check if the date is valid
+    if (Number.isNaN(dateWithTime.getTime())) {
+        return false;
+    }
+
+    // Convert the parsed date back to the same format as the original date string for comparison
+    const year = dateWithTime.getFullYear();
+    const month = (dateWithTime.getMonth() + 1).toString().padStart(2, '0');
+    const day = dateWithTime.getDate().toString().padStart(2, '0');
+    const reconstructedDateStr = `${year}-${month}-${day}`;
+
+    const dateStrPad = dateStr.replace(/\//g, '-').split('-').map((v) => v.padStart(2, '0')).join('-');
+
+    return dateStrPad === reconstructedDateStr;
+}

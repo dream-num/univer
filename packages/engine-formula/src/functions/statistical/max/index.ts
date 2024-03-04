@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { isRealNum } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
 import { convertTonNumber } from '../../../engine/utils/object-covert';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
@@ -35,7 +36,14 @@ export class Max extends BaseFunction {
             }
 
             if (variant.isString()) {
-                return new ErrorValueObject(ErrorType.VALUE);
+                const value = variant.getValue();
+                const isStringNumber = isRealNum(value);
+
+                if (!isStringNumber) {
+                    return new ErrorValueObject(ErrorType.VALUE);
+                }
+
+                variant = new NumberValueObject(value);
             }
 
             if (variant.isBoolean()) {

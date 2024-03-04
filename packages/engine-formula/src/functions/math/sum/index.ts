@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { isRealNum } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
@@ -33,9 +34,15 @@ export class Sum extends BaseFunction {
                 return variant;
             }
 
-            // TODO @Dushusir: =SUM(1,"2")
             if (variant.isString()) {
-                return new ErrorValueObject(ErrorType.VALUE);
+                const value = variant.getValue();
+                const isStringNumber = isRealNum(value);
+
+                if (!isStringNumber) {
+                    return new ErrorValueObject(ErrorType.VALUE);
+                }
+
+                variant = new NumberValueObject(value);
             }
 
             if (variant.isArray()) {

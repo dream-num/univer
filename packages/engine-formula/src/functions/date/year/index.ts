@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { excelSerialToDate } from '../../../basics/date';
+import { excelSerialToDate, isValidDateStr } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
@@ -39,23 +39,30 @@ export class Year extends BaseFunction {
             return serialNumberObject;
         }
 
+        let date: Date;
+        const dateValue = serialNumberObject.getValue();
+
         if (serialNumberObject.isString()) {
-            return new ErrorValueObject(ErrorType.VALUE);
+            if (!isValidDateStr(`${dateValue}`)) {
+                return new ErrorValueObject(ErrorType.VALUE);
+            }
+
+            date = new Date(`${dateValue}`);
+        } else {
+            const dateSerial = +dateValue;
+
+            if (dateSerial < 0) {
+                return new ErrorValueObject(ErrorType.NUM);
+            }
+
+            // Excel serial 0 is 1900-01-00
+            // Google Sheets serial 0 is 1899-12-30
+            if (dateSerial === 0) {
+                return new NumberValueObject(1900);
+            }
+
+            date = excelSerialToDate(dateSerial);
         }
-
-        const dateSerial = +serialNumberObject.getValue();
-
-        if (dateSerial < 0) {
-            return new ErrorValueObject(ErrorType.NUM);
-        }
-
-        // Excel serial 0 is 1900-01-00
-        // Google Sheets serial 0 is 1899-12-30
-        if (dateSerial === 0) {
-            return new NumberValueObject(1900);
-        }
-
-        const date = excelSerialToDate(dateSerial);
 
         const year = date.getUTCFullYear();
         const valueObject = new NumberValueObject(year);

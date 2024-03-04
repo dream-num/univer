@@ -40,7 +40,7 @@ export class Hlookup extends BaseFunction {
         }
 
         if (!tableArray.isArray()) {
-            return new ErrorValueObject(ErrorType.VALUE);
+            return new ErrorValueObject(ErrorType.NA);
         }
 
         if (rowIndexNum.isError()) {
@@ -68,7 +68,7 @@ export class Hlookup extends BaseFunction {
         const resultArray = (tableArray as ArrayValueObject).slice([rowIndexNumValue - 1, rowIndexNumValue]);
 
         if (searchArray == null || resultArray == null) {
-            return new ErrorValueObject(ErrorType.VALUE);
+            return new ErrorValueObject(ErrorType.REF);
         }
 
         if (lookupValue.isArray()) {

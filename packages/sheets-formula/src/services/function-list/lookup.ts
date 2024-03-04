@@ -54,7 +54,7 @@ export const FUNCTION_LIST_LOOKUP: IFunctionInfo[] = [
             {
                 name: 'formula.functionList.ADDRESS.functionParameter.sheet_text.name',
                 detail: 'formula.functionList.ADDRESS.functionParameter.sheet_text.detail',
-                example: 'Sheet2',
+                example: '"Sheet2"',
                 require: 0,
                 repeat: 0,
             },

@@ -27,7 +27,7 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
             {
                 name: 'formula.functionList.ABS.functionParameter.number.name',
                 detail: 'formula.functionList.ABS.functionParameter.number.detail',
-                example: 'A1:A20',
+                example: '-2',
                 require: 1,
                 repeat: 0,
             },
@@ -42,7 +42,7 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
             {
                 name: 'formula.functionList.ACOS.functionParameter.number.name',
                 detail: 'formula.functionList.ACOS.functionParameter.number.detail',
-                example: 'A1:A20',
+                example: '0',
                 require: 1,
                 repeat: 0,
             },
@@ -57,7 +57,7 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
             {
                 name: 'formula.functionList.ACOSH.functionParameter.number.name',
                 detail: 'formula.functionList.ACOSH.functionParameter.number.detail',
-                example: 'A1:A20',
+                example: '2',
                 require: 1,
                 repeat: 0,
             },
@@ -72,7 +72,7 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
             {
                 name: 'formula.functionList.ACOT.functionParameter.number.name',
                 detail: 'formula.functionList.ACOT.functionParameter.number.detail',
-                example: 'A1:A20',
+                example: '0',
                 require: 1,
                 repeat: 0,
             },
@@ -1599,7 +1599,7 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
             {
                 name: 'formula.functionList.SUMIF.functionParameter.criteria.name',
                 detail: 'formula.functionList.SUMIF.functionParameter.criteria.detail',
-                example: '>5',
+                example: '">5"',
                 require: 1,
                 repeat: 0,
             },
@@ -1635,7 +1635,7 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
             {
                 name: 'formula.functionList.SUMIFS.functionParameter.criteria1.name',
                 detail: 'formula.functionList.SUMIFS.functionParameter.criteria1.detail',
-                example: '>10',
+                example: '">10"',
                 require: 1,
                 repeat: 0,
             },
@@ -1649,7 +1649,7 @@ export const FUNCTION_LIST_MATH: IFunctionInfo[] = [
             {
                 name: 'formula.functionList.SUMIFS.functionParameter.criteria2.name',
                 detail: 'formula.functionList.SUMIFS.functionParameter.criteria2.detail',
-                example: '<100',
+                example: '"<100"',
                 require: 0,
                 repeat: 1,
             },

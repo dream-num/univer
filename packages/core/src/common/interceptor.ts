@@ -28,9 +28,9 @@ export interface IInterceptor<M, C> {
     handler: InterceptorHandler<M, C>;
 }
 
-export const createInterceptorKey = <T = any, C = any>(key: string) => {
+export function createInterceptorKey<T, C>(key: string): IInterceptor<T, C> {
     const symbol = `sheet_interceptor_${key}`;
-    return symbol as unknown as IInterceptor<T, C>;
+    return symbol as unknown as IInterceptor<T, C>; // FIXME: priority and handler is completely missing?
 };
 
 export type IComposeInterceptors<T = any, C = any> = (

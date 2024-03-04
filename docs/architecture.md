@@ -72,7 +72,7 @@ You can export the identifier of these modules in the index.ts file of each plug
 Plugins have the following four lifecycles
 
 ```ts
-export const enum LifecycleStages {
+export enum LifecycleStages {
     Starting,
     Ready,
     Rendered,
@@ -177,7 +177,7 @@ export interface ICommandService {
 There are three types of commands in total:
 
 ```ts
-export const enum CommandType {
+export enum CommandType {
     /** Command could generate some operations or mutations. */
     COMMAND = 0,
     /** An operation that do not require conflict resolve.  */

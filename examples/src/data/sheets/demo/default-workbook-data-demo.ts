@@ -13919,6 +13919,10 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                 10: {},
                 11: {},
             },
+            autoFilter: {
+                ref: { startRow: 0, endRow: 4, startColumn: 0, endColumn: 4 },
+                cachedFilteredOut: [1, 3, 4],
+            },
             freeze: {
                 xSplit: 0,
                 ySplit: 0,

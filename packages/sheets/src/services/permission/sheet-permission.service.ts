@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { PermissionService } from '@univerjs/core';
 import {
     Disposable,
     getTypeFromPermissionItemList,
@@ -28,21 +27,17 @@ import {
 import { Inject } from '@wendellhu/redi';
 import { map } from 'rxjs/operators';
 
-import { SetRangeValuesCommand } from '../../commands/commands/set-range-values.command';
-import { INTERCEPTOR_POINT } from '../sheet-interceptor/interceptor-const';
-import { SheetInterceptorService } from '../sheet-interceptor/sheet-interceptor.service';
 import { SheetEditablePermission } from './permission-point';
 
 @OnLifecycle(LifecycleStages.Ready, SheetPermissionService)
 export class SheetPermissionService extends Disposable {
     constructor(
-        @Inject(IPermissionService) private _permissionService: PermissionService,
-        @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
-        @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService
+        @Inject(IPermissionService) private _permissionService: IPermissionService,
+        @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService
     ) {
         super();
+
         this._init();
-        this._interceptCommandPermission();
     }
 
     private _init() {
@@ -53,6 +48,7 @@ export class SheetPermissionService extends Disposable {
             const sheetPermission = new SheetEditablePermission(unitId, subUnitId);
             this._permissionService.addPermissionPoint(workbook.getUnitId(), sheetPermission);
         });
+
         this.disposeWithMe(
             toDisposable(
                 workbook.sheetCreated$.subscribe((worksheet) => {
@@ -62,6 +58,7 @@ export class SheetPermissionService extends Disposable {
                 })
             )
         );
+
         this.disposeWithMe(
             toDisposable(
                 workbook.sheetDisposed$.subscribe((worksheet) => {
@@ -70,29 +67,6 @@ export class SheetPermissionService extends Disposable {
                     this._permissionService.deletePermissionPoint(workbook.getUnitId(), sheetPermission.id);
                 })
             )
-        );
-    }
-
-    private _interceptCommandPermission() {
-        this.disposeWithMe(
-            this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.PERMISSION, {
-                priority: 99,
-                handler: (_value, commandInfo, next) => {
-                    const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
-                    const sheet = workbook?.getActiveSheet();
-                    const unitId = workbook?.getUnitId();
-                    const sheetId = sheet?.getSheetId();
-                    if (!unitId || !sheetId) {
-                        return false;
-                    }
-                    switch (commandInfo.id) {
-                        case SetRangeValuesCommand.id: {
-                            return this.getSheetEditable(unitId, sheetId);
-                        }
-                    }
-                    return next();
-                },
-            })
         );
     }
 

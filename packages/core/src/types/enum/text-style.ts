@@ -123,8 +123,8 @@ export enum BaselineOffset {
  * General Boolean Enum
  */
 export enum BooleanNumber {
-    FALSE,
-    TRUE,
+    FALSE = 0,
+    TRUE = 1,
 }
 
 /**

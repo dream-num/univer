@@ -101,6 +101,7 @@ describe('Test set range values commands', () => {
     afterEach(() => {
         univer.dispose();
     });
+
     describe('set range values', () => {
         describe('correct situations', () => {
             it('will set range values when there is a selected range', async () => {

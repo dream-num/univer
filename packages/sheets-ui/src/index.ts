@@ -19,6 +19,7 @@ export { getEditorObject } from './basics/editor/get-editor-object';
 export { AutoFillCommand } from './commands/commands/auto-fill.command';
 export { SheetPasteCommand } from './commands/commands/clipboard.command';
 export { SheetCopyCommand } from './commands/commands/clipboard.command';
+export { expandToContinuousRange } from './commands/commands/utils/selection-utils';
 export { ExpandSelectionCommand, JumpOver, MoveSelectionCommand } from './commands/commands/set-selection.command';
 export { SetCellEditVisibleArrowOperation, SetCellEditVisibleOperation } from './commands/operations/cell-edit.operation';
 export { SetScrollOperation } from './commands/operations/scroll.operation';

@@ -24,3 +24,11 @@ export interface ISheetLocation {
     row: number;
     col: number;
 }
+
+export interface ISheetRowLocation {
+    workbook: Workbook;
+    worksheet: Worksheet;
+    unitId: string;
+    subUnitId: string;
+    row: number;
+}

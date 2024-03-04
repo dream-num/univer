@@ -38,7 +38,6 @@ import {
     shrinkToNextGapRange,
 } from './utils/selection-utils';
 
-// TODO@wzhudev: we also need to handle when the current selection is the whole spreadsheet, whole rows or whole columns
 // TODO@DR-UNIVER: moveStepPage and moveStepEnd implement
 
 export enum JumpOver {
@@ -89,7 +88,6 @@ export const MoveSelectionCommand: ICommand<IMoveSelectionCommandParams> = {
 
         // If there are changes to the selection, clear the start position saved by the tab.
         // This function works in conjunction with the enter and tab shortcuts.
-        // TODO@wzhudev: this should be removed to sheets-ui, listening command execution
         accessor.get(ShortcutExperienceService).remove({
             unitId: workbook.getUnitId(),
             sheetId: worksheet.getSheetId(),
@@ -296,7 +294,6 @@ export const ExpandSelectionCommand: ICommand<IExpandSelectionCommandParams> = {
             : jumpOver === JumpOver.moveGap
                 ? shrinkToNextGapRange(
                     startRange,
-                    // TODO: should fix on SelectionManagerService's side
                     { ...Rectangle.clone(primary), rangeType: RANGE_TYPE.NORMAL },
                     direction,
                     currentWorksheet

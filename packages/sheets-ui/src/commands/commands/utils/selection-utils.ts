@@ -31,6 +31,8 @@ export interface IExpandParams {
     down?: boolean;
 }
 
+// TODO@wzhudev: methods in this file should use `worksheet.getCell()` instead of using raw data
+
 export function findNextRange(
     startRange: IRange,
     direction: Direction,

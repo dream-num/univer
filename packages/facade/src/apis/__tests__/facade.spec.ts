@@ -37,6 +37,7 @@ describe('Test FUniver', () => {
         endRow: number,
         endColumn: number
     ) => Nullable<ICellData>;
+
     let getStyleByPosition: (
         startRow: number,
         startColumn: number,

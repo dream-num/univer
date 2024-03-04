@@ -18,7 +18,6 @@ export * from './auto-fill-series';
 export * from './border-style-types';
 export * from './color-type';
 export * from './common-hide-types';
-export * from './condition-type';
 export * from './copy-paste-type';
 export * from './developer-metadata-visibility';
 export * from './dimension';

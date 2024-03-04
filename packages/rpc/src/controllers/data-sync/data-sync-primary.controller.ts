@@ -96,7 +96,7 @@ export class DataSyncPrimaryController extends RxDisposable {
             // Mutations executed on the main thread should be synced to the worker thread.
             this._commandService.onCommandExecuted((commandInfo, options) => {
                 const { type, params } = commandInfo;
-                const unitID = (params as any)?.unitId || ''; // TODO@wzhudev: use a universal way to get unitId
+                const unitID = (params as any)?.unitId || '';
                 if (
                     // only sync mutations to the worker thread
                     type === CommandType.MUTATION &&

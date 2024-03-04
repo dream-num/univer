@@ -18,6 +18,7 @@ import { installShims } from './common/shims';
 
 export * from './basics';
 export { dedupe, remove, rotate, groupBy } from './common/array';
+export { mergeSets } from './common/set';
 export {
     DEFAULT_EMPTY_DOCUMENT_VALUE,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
@@ -103,10 +104,21 @@ export * from './shared';
 export { fromCallback } from './shared/rxjs';
 
 // #region sheet
+
 export type { IComposeInterceptors, IInterceptor, InterceptorHandler } from './common/interceptor';
 export { composeInterceptors, createInterceptorKey, InterceptorManager } from './common/interceptor';
-export { normalizeTextRuns } from './docs/data-model/apply-utils/common';
 export type { PluginCtor } from './plugin/plugin';
+export { normalizeTextRuns } from './docs/data-model/apply-utils/common';
+export * from './slides/domain';
+export * from './types/const';
+export * from './types/enum';
+export * from './types/interfaces';
+export { UniverInstanceService } from './services/instance/instance.service';
+export { LifecycleInitializerService } from './services/lifecycle/lifecycle.service';
+export { ConfigService } from './services/config/config.service';
+
+// #region sheet
+
 export { Range } from './sheets/range';
 export { Styles } from './sheets/styles';
 export {
@@ -126,14 +138,10 @@ export {
 } from './sheets/sheet-snapshot-utils';
 export { SheetViewModel } from './sheets/view-model';
 export { getWorksheetUID, Workbook } from './sheets/workbook';
-export { Worksheet, extractPureTextFromCell } from './sheets/worksheet';
 export * from './slides/domain';
 export * from './types/const';
 export * from './types/enum';
 export * from './types/interfaces';
-export { UniverInstanceService } from './services/instance/instance.service';
-export { LifecycleInitializerService } from './services/lifecycle/lifecycle.service';
-export { ConfigService } from './services/config/config.service';
 export { ISnapshotServerService } from './services/snapshot/snapshot-server.service';
 export {
     transformSnapshotToWorkbookData,
@@ -150,5 +158,10 @@ export { getSheetBlocksFromSnapshot } from './services/snapshot/snapshot-transfo
 
 export { isBlackColor, isWhiteColor } from './shared/color/color-kit';
 export { cellToRange } from './shared/common';
+export { Worksheet, extractPureTextFromCell } from './sheets/worksheet';
+export type { IAutoFilter, IFilterColumn, ICustomFilters, ICustomFilter } from './types/interfaces/i-filter';
+export { CustomFilterOperator } from './types/interfaces/i-filter';
+
+// #endregion
 
 installShims();

@@ -35,8 +35,8 @@ export class UniverSheet extends PluginHolder implements IDisposable {
         super();
     }
 
-    createSheet(workbookConfig: Partial<IWorkbookData>): Workbook {
-        const workbook = this._injector.createInstance(Workbook, workbookConfig);
+    createSheet(workbookData: Partial<IWorkbookData>): Workbook {
+        const workbook = this._injector.createInstance(Workbook, workbookData);
         return workbook;
     }
 }

@@ -18,7 +18,6 @@ import type { ICellData, ICommand, IObjectMatrixPrimitiveType, IRange } from '@u
 import {
     BooleanNumber,
     CommandType,
-    Dimension,
     Direction,
     ICommandService,
     IUndoRedoService,
@@ -30,7 +29,6 @@ import type { IAccessor } from '@wendellhu/redi';
 
 import type {
     IInsertColMutationParams,
-    IInsertRangeMutationParams,
     IInsertRowMutationParams,
     IRemoveColMutationParams,
     IRemoveRowsMutationParams,
@@ -63,10 +61,11 @@ export interface IInsertRowCommandParams {
     cellValue?: IObjectMatrixPrimitiveType<ICellData>;
 }
 export const InsertRowCommandId = 'sheet.command.insert-row';
+
 /**
- * @internal
- *
  * this command and its interface should not be exported from index.ts
+ *
+ * @internal
  */
 export const InsertRowCommand: ICommand = {
     type: CommandType.COMMAND,
@@ -251,7 +250,7 @@ export const InsertColCommand: ICommand<IInsertColCommandParams> = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
-        const { range, direction, subUnitId, unitId, cellValue } = params;
+        const { range, direction, subUnitId, unitId } = params;
         const { startColumn, endColumn } = params.range;
         const workbook = univerInstanceService.getUniverSheetInstance(params.unitId)!;
         const worksheet = workbook.getSheetBySheetId(params.subUnitId)!;
@@ -273,13 +272,6 @@ export const InsertColCommand: ICommand<IInsertColCommandParams> = {
             insertColParams
         );
 
-        const insertRangeMutationParams: IInsertRangeMutationParams = {
-            unitId: params.unitId,
-            subUnitId: params.subUnitId,
-            range: params.range,
-            shiftDimension: Dimension.COLUMNS,
-            cellValue,
-        };
         const intercepted = sheetInterceptorService.onCommandExecute({
             id: InsertColCommand.id,
             params,

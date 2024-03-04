@@ -28,22 +28,27 @@ export interface IWorkbookData extends IExtraModelData {
      * unit id
      */
     id: string;
+
     /**
      * Revision of this spreadsheet. Would be used in collaborated editing. Starts from one.
      */
     rev?: number;
+
     /**
      * Name of the spreadsheet.
      */
     name: string;
+
     /**
      * Version of Univer model definition.
      */
     appVersion: string;
+
     locale: LocaleType;
 
     /** Style reference. */
     styles: IKeyType<Nullable<IStyleData>>;
+
     sheetOrder: string[]; // sheet id order list ['xxxx-sheet3', 'xxxx-sheet1','xxxx-sheet2']
     sheets: { [sheetId: string]: Partial<IWorksheetData> };
 

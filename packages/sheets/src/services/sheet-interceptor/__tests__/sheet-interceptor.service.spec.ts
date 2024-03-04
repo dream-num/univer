@@ -39,12 +39,24 @@ describe('Test SheetInterceptorService', () => {
     afterEach(() => univer.dispose());
 
     function getCell(row: number, col: number): Nullable<ICellData> {
-        const cus = get(IUniverInstanceService);
-        const sheet = cus.getCurrentUniverSheetInstance().getActiveSheet()!;
+        const univerInstanceService = get(IUniverInstanceService);
+        const sheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet()!;
         return sheet.getCell(row, col);
     }
 
-    describe('Test intercept getting cell content', () => {
+    function getRowFiltered(row: number): boolean {
+        const univerInstanceService = get(IUniverInstanceService);
+        const sheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet()!;
+        return sheet.getRowFiltered(row);
+    }
+
+    function getRowVisible(row: number): boolean {
+        const univerInstanceService = get(IUniverInstanceService);
+        const sheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet()!;
+        return sheet.getRowVisible(row);
+    }
+
+    describe('Test intercepting getting cell content', () => {
         it('should intercept cells and merge result if next is called', () => {
             get(SheetInterceptorService).intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
                 priority: 100,
@@ -75,6 +87,39 @@ describe('Test SheetInterceptorService', () => {
 
             expect(getCell(0, 0)).toEqual({ v: 'intercepted' });
             expect(getCell(0, 1)).toEqual({ v: 'A2' });
+        });
+    });
+
+    describe('Test intercepting getting row filtered', () => {
+        it('should return not filtered when no interceptor is registered', () => {
+            expect(getRowFiltered(1)).toBeFalsy();
+        });
+
+        it('should return filtered according to the interceptor when it is registed', () => {
+            let realFiltered = false;
+
+            get(SheetInterceptorService).intercept(INTERCEPTOR_POINT.ROW_FILTERED, {
+                handler(filtered, location, next) {
+                    if (filtered) {
+                        return true;
+                    }
+
+                    if (realFiltered && location.row === 1) {
+                        return true;
+                    }
+
+                    return next();
+                },
+            });
+
+            expect(getRowFiltered(1)).toBeFalsy();
+            expect(getRowVisible(1)).toBeTruthy();
+
+            realFiltered = true;
+            expect(getRowFiltered(1)).toBeTruthy();
+            expect(getRowVisible(1)).toBeFalsy();
+            expect(getRowFiltered(2)).toBeFalsy();
+            expect(getRowVisible(2)).toBeTruthy();
         });
     });
 
@@ -153,17 +198,4 @@ describe('Test SheetInterceptorService', () => {
             expect(result).toBe('zero');
         });
     });
-
-    // it('Test SheetInterceptorService', () => {
-    //     it('getLastRowWithContent', () => {
-    //         const univerInstanceService = get(IUniverInstanceService);
-    //         const sheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet()!;
-    //         expect(sheet.getLastRowWithContent()).toBe(3);
-    //     });
-    //     it('getLastColumnWithContent', () => {
-    //         const univerInstanceService = get(IUniverInstanceService);
-    //         const sheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet()!;
-    //         expect(sheet.getLastColumnWithContent()).toBe(3);
-    //     });
-    // });
 });

@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, IUniverInstanceService, ThemeService, Tools } from '@univerjs/core';
+import { Disposable, IUniverInstanceService, ThemeService, Tools } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
-import { SelectionManagerService } from '@univerjs/sheets';
 import { createIdentifier, Inject } from '@wendellhu/redi';
 
 import { ISelectionRenderService } from '../selection/selection-render.service';
@@ -51,10 +50,8 @@ export class MarkSelectionService extends Disposable implements IMarkSelectionSe
         @IUniverInstanceService private readonly _currentService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
-        @ICommandService private readonly _commandService: ICommandService,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
-        @Inject(ThemeService) private readonly _themeService: ThemeService,
-        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService
+        @Inject(ThemeService) private readonly _themeService: ThemeService
     ) {
         super();
     }

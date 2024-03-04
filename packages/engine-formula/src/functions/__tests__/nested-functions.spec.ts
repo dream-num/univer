@@ -19,8 +19,6 @@ import { beforeEach, describe, expect, it } from 'vitest';
 
 import type { IWorkbookData } from '@univerjs/core';
 import { LocaleType } from '@univerjs/core';
-import type { ArrayValueObject, BaseValueObject, LexerNode } from '../..';
-import { FUNCTION_NAMES_DATE, FUNCTION_NAMES_LOGICAL, FUNCTION_NAMES_LOOKUP, FUNCTION_NAMES_MATH, FUNCTION_NAMES_STATISTICAL, FUNCTION_NAMES_TEXT, IFunctionService } from '../..';
 import { Lexer } from '../../engine/analysis/lexer';
 import { AstTreeBuilder } from '../../engine/analysis/parser';
 import type { BaseAstNode } from '../../engine/ast-node/base-ast-node';
@@ -41,6 +39,16 @@ import { Plus } from '../meta/plus';
 import { FUNCTION_NAMES_META } from '../meta/function-names';
 import { Minus } from '../meta/minus';
 import { Concatenate } from '../text/concatenate';
+import { FUNCTION_NAMES_LOGICAL } from '../logical/function-names';
+import { FUNCTION_NAMES_MATH } from '../math/function-names';
+import { FUNCTION_NAMES_LOOKUP } from '../lookup/function-names';
+import { FUNCTION_NAMES_STATISTICAL } from '../statistical/function-names';
+import { FUNCTION_NAMES_DATE } from '../date/function-names';
+import { FUNCTION_NAMES_TEXT } from '../text/function-names';
+import { IFunctionService } from '../../services/function.service';
+import type { ArrayValueObject } from '../../engine/value-object/array-value-object';
+import type { LexerNode } from '../../engine/analysis/lexer-node';
+import type { BaseValueObject } from '../../engine/value-object/base-value-object';
 import { createFunctionTestBed } from './create-function-test-bed';
 
 const getFunctionsTestWorkbookData = (): IWorkbookData => {

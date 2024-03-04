@@ -139,6 +139,11 @@ function setNull(value: Nullable<ICellData>) {
     return value;
 }
 
+/**
+ * TODO@Dushusir: Excel can display numbers with up to about 15 digits of precision. When the user inputs more than 15 digits, interception is required, but there are unknown performance risks.
+
+   Intercept 15-digit number reference function truncateNumber
+ */
 export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, boolean> = {
     id: 'sheet.mutation.set-range-values',
     type: CommandType.MUTATION,

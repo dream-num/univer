@@ -321,6 +321,14 @@ export class BaseReferenceObject extends ObjectClassType {
         return this.getCurrentActiveSheetData().columnCount;
     }
 
+    getRowData() {
+        return this.getCurrentActiveSheetData().rowData;
+    }
+
+    getColumnData() {
+        return this.getCurrentActiveSheetData().columnData;
+    }
+
     isCell() {
         return false;
     }

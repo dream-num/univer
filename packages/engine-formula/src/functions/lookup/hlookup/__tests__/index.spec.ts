@@ -69,7 +69,7 @@ describe('Test hlookup', () => {
                 new NumberValueObject(3),
                 new NumberValueObject(0)
             ) as BaseValueObject;
-            expect(resultObject.getValue().toString()).toBe(ErrorType.VALUE);
+            expect(resultObject.getValue().toString()).toBe(ErrorType.REF);
         });
 
         it('Not match', async () => {
@@ -122,7 +122,7 @@ describe('Test hlookup', () => {
                 arrayValueObject1.clone(),
                 new NumberValueObject(3)
             ) as BaseValueObject;
-            expect(resultObject.getValue().toString()).toBe(ErrorType.VALUE);
+            expect(resultObject.getValue().toString()).toBe(ErrorType.REF);
         });
 
         it('Approximate not match', async () => {
@@ -152,6 +152,16 @@ describe('Test hlookup', () => {
                 new NumberValueObject(2)
             ) as BaseValueObject;
             expect(resultObject.getValue().toString()).toBe('Third');
+        });
+    });
+    describe('Error', () => {
+        it('TableArray is number', () => {
+            const result = textFunction.calculate(
+                new NumberValueObject(1),
+                new NumberValueObject(1),
+                new NumberValueObject(1)
+            );
+            expect(result.getValue()).toBe(ErrorType.NA);
         });
     });
 });

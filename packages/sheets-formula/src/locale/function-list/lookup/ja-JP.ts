@@ -95,7 +95,7 @@ export default {
         },
     },
     COLUMN: {
-        description: 'セル参照の列番号を返します。',
+        description: '指定された セル参照の列番号を返します。',
         abstract: 'セル参照の列番号を返します。',
         links: [
             {
@@ -104,12 +104,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            reference: { name: '範囲', detail: '列番号を調べるセルまたは範囲を指定します。' },
         },
     },
     COLUMNS: {
-        description: 'セル参照の列数を返します。',
+        description: '配列またはセル参照の列数を返します。',
         abstract: 'セル参照の列数を返します。',
         links: [
             {
@@ -118,8 +117,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '配列', detail: 'An array or array formula, or a reference to a range of cells for which you want the num列数を計算する配列、配列数式、またはセル範囲の参照を指定します。' },
         },
     },
     DROP: {
@@ -263,7 +261,7 @@ export default {
         },
     },
     INDEX: {
-        description: 'セル参照または配列から、指定された位置の値を返します。',
+        description: '指定された行と列が交差する位置にあるセルの参照を返します。 隣接しない複数のセル範囲を指定した場合、その中から任意の領域を選択できます。',
         abstract: 'セル参照または配列から、指定された位置の値を返します。',
         links: [
             {
@@ -272,12 +270,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            reference: { name: '参照', detail: '1 つまたは複数のセルの参照を指定します。\n隣接しない範囲を参照として入力する場合は、参照をかっこで囲みます。\n参照の中の各領域に行または列が 1 つしか含まれていない場合は、行番号または列番号の引数はそれぞれ省略することができます。 たとえば、範囲が 1 行のみである場合は、INDEX(範囲,列番号) と指定できます。\n配列が複数行および複数列で構成され、行番号または列番号のどちらか一方しか指定されていない場合、配列の中にある行または列全体の配列が返されます。' },
+            rowNum: { name: '行番号', detail: '範囲の中にあり、セル参照を返すセルの行位置を数値で返します。' },
+            columnNum: { name: '列番号', detail: '範囲の中にあり、セル参照を返すセルの列位置を数値で返します。' },
+            areaNum: { name: '領域番号', detail: '行番号と列番号の共通部分を返す参照の範囲を選択します。 最初に選択または入力された領域の領域番号が 1 となり、以下、2 番目の領域は 2 というように続きます。 領域番号を省略すると、INDEX は 1 の領域を使用します。  ここで表示される領域はすべて 1 つのシート上に置かれている必要があります。  他の領域と同じシート上に存在しない領域を指定した場合、#VALUE! エラーが発生します。  相互に異なるシート上に置かれている範囲を使用する必要がある場合は、INDEX 関数の配列形式を使用し、別の関数を使用して配列を形成する範囲を計算することをお勧めします。  たとえば、CHOOSE 関数を使用して、どの範囲が使用されるかを計算することができます。' },
         },
     },
     INDIRECT: {
-        description: '参照文字列によって指定されるセルに入力されている文字列を介して、間接的にセルを指定します。',
+        description: '指定される文字列への参照を返します。 セル参照はすぐに計算され、結果としてセルの内容が表示されます。',
         abstract: '参照文字列によって指定されるセルに入力されている文字列を介して、間接的にセルを指定します。',
         links: [
             {
@@ -286,8 +286,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            refText: { name: '参照文字列', detail: ' A1 形式、R1C1 形式の参照、参照として定義されている名前が入力されているセルへの参照、または文字列としてのセルへの参照を指定します。 参照文字列に適切なセル参照を指定していない場合、エラー値 #REF! が返されます。\n参照文字列で行数の上限 1,048,576 または列数の上限 16,384 (XFD) 範囲外を参照している場合、 INDIRECT は、エラー値 #REF! を返します 。' },
+            a1: { name: '参照形式', detail: '参照文字列で指定されたセルに含まれるセル参照の種類を、論理値で指定します。\n参照形式に TRUE を指定するか省略すると、参照文字列には A1 形式のセル参照が入力されていると見なされます。\n参照形式に FALSE を指定すると、参照文字列には R1C1 形式のセル参照が入力されていると見なされます。' },
         },
     },
     LOOKUP: {
@@ -347,7 +347,7 @@ export default {
         },
     },
     ROW: {
-        description: 'セル参照の行番号を返します。',
+        description: '引数として指定された配列の行番号を返します。',
         abstract: 'セル参照の行番号を返します。',
         links: [
             {
@@ -356,12 +356,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            reference: { name: '範囲', detail: '行番号を調べるセルまたはセル範囲の参照を指定します。' },
         },
     },
     ROWS: {
-        description: 'セル参照の行数を返します。',
+        description: 'セル範囲または配列の行数を返します。',
         abstract: 'セル参照の行数を返します。',
         links: [
             {
@@ -370,8 +369,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: '配列', detail: '行数を計算する配列、配列数式、またはセル範囲の参照を指定します。' },
         },
     },
     RTD: {

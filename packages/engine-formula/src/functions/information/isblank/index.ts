@@ -29,7 +29,7 @@ export class Isblank extends BaseFunction {
         if (value.isNull()) {
             return new BooleanValueObject(true);
         } else if (value.isArray()) {
-            return (value as ArrayValueObject).map((valueObject) => {
+            return (value as ArrayValueObject).mapValue((valueObject) => {
                 if (valueObject.isNull()) {
                     return new BooleanValueObject(true);
                 }

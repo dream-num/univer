@@ -630,7 +630,7 @@ export default {
         },
     },
     MOD: {
-        description: '返回除法的余数',
+        description: '返回两数相除的余数。 结果的符号与除数相同。',
         abstract: '返回除法的余数',
         links: [
             {
@@ -639,8 +639,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数值', detail: '要计算余数的被除数' },
+            divisor: { name: '除数', detail: '除数' },
         },
     },
     MROUND: {
@@ -714,7 +714,7 @@ export default {
         },
     },
     POWER: {
-        description: '返回数的乘幂',
+        description: '返回数字乘幂的结果。',
         abstract: '返回数的乘幂',
         links: [
             {
@@ -723,12 +723,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '基数', detail: ' 基数。 可为任意实数。' },
+            power: { name: '指数', detail: '基数乘幂运算的指数。' },
         },
     },
     PRODUCT: {
-        description: '将其参数相乘',
+        description: '将作为参数提供的所有数字相乘，并返回乘积。',
         abstract: '将其参数相乘',
         links: [
             {
@@ -737,8 +737,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数值 1', detail: '要相乘的第一个数字或范围。' },
+            number2: { name: '数值 2', detail: '要相乘的其他数字或单元格区域，最多可以使用 255 个参数。' },
         },
     },
     QUOTIENT: {
@@ -996,7 +996,7 @@ export default {
         },
     },
     SUBTOTAL: {
-        description: '返回列表或数据库中的分类汇总',
+        description: '返回列表或数据库中的分类汇总。',
         abstract: '返回列表或数据库中的分类汇总',
         links: [
             {
@@ -1005,8 +1005,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            functionNum: { name: '函数编号', detail: '数字 1-11 或 101-111，用于指定要为分类汇总使用的函数。 如果使用 1-11，将包括手动隐藏的行，如果使用 101-111，则排除手动隐藏的行；始终排除已筛选掉的单元格。' },
+            ref1: { name: '引用1', detail: '要对其进行分类汇总计算的第一个命名区域或引用。' },
+            ref2: { name: '引用2', detail: '要对其进行分类汇总计算的第 2 个至第 254 个命名区域或引用。' },
         },
     },
     SUM: {

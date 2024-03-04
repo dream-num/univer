@@ -132,6 +132,8 @@ export class StatusBarController extends Disposable {
                     cellData: new ObjectMatrix(sheetConfig.cellData),
                     rowCount: sheetConfig.rowCount,
                     columnCount: sheetConfig.columnCount,
+                    rowData: sheetConfig.rowData,
+                    columnData: sheetConfig.columnData,
                 };
             });
         if (selections?.length) {

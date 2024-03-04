@@ -229,6 +229,8 @@ export function createCommandTestBed(workbookConfig?: IWorkbookData, dependencie
             cellData: new ObjectMatrix(sheetConfig.cellData),
             rowCount: sheetConfig.rowCount,
             columnCount: sheetConfig.columnCount,
+            rowData: sheetConfig.rowData,
+            columnData: sheetConfig.columnData,
         };
     });
 

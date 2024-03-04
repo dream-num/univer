@@ -87,6 +87,8 @@ export class EditingController extends RxDisposable {
                     cellData: new ObjectMatrix(sheetConfig.cellData),
                     rowCount: sheetConfig.rowCount,
                     columnCount: sheetConfig.columnCount,
+                    rowData: sheetConfig.rowData,
+                    columnData: sheetConfig.columnData,
                 };
             });
 

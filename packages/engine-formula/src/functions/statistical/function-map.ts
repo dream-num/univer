@@ -16,10 +16,18 @@
 
 import { Average } from './average';
 import { Count } from './count';
-import { CountA } from './counta';
+import { Counta } from './counta';
 import { FUNCTION_NAMES_STATISTICAL } from './function-names';
 import { Max } from './max';
 import { Min } from './min';
+import { StdevP } from './stdev-p';
+import { StdevS } from './stdev-s';
+import { Stdeva } from './stdeva';
+import { Stdevpa } from './stdevpa';
+import { VarP } from './var-p';
+import { VarS } from './var-s';
+import { Vara } from './vara';
+import { Varpa } from './varpa';
 
 export const functionStatistical = [
     [Average, FUNCTION_NAMES_STATISTICAL.AVERAGE],
@@ -27,5 +35,13 @@ export const functionStatistical = [
     [Max, FUNCTION_NAMES_STATISTICAL.MAX],
     [Min, FUNCTION_NAMES_STATISTICAL.MIN],
     [Min, FUNCTION_NAMES_STATISTICAL.MIN],
-    [CountA, FUNCTION_NAMES_STATISTICAL.COUNTA],
+    [Counta, FUNCTION_NAMES_STATISTICAL.COUNTA],
+    [StdevP, FUNCTION_NAMES_STATISTICAL.STDEV_P],
+    [StdevS, FUNCTION_NAMES_STATISTICAL.STDEV_S],
+    [Stdeva, FUNCTION_NAMES_STATISTICAL.STDEVA],
+    [Stdevpa, FUNCTION_NAMES_STATISTICAL.STDEVPA],
+    [VarP, FUNCTION_NAMES_STATISTICAL.VAR_P],
+    [VarS, FUNCTION_NAMES_STATISTICAL.VAR_S],
+    [Vara, FUNCTION_NAMES_STATISTICAL.VARA],
+    [Varpa, FUNCTION_NAMES_STATISTICAL.VARPA],
 ];

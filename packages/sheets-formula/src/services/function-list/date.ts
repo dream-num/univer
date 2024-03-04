@@ -99,7 +99,7 @@ export const FUNCTION_LIST_DATE: IFunctionInfo[] = [
             {
                 name: 'formula.functionList.DAY.functionParameter.serialNumber.name',
                 detail: 'formula.functionList.DAY.functionParameter.serialNumber.detail',
-                example: 'A1:A20',
+                example: '"1969-7-20"',
                 require: 1,
                 repeat: 0,
             },
@@ -268,7 +268,7 @@ export const FUNCTION_LIST_DATE: IFunctionInfo[] = [
             {
                 name: 'formula.functionList.MONTH.functionParameter.serialNumber.name',
                 detail: 'formula.functionList.MONTH.functionParameter.serialNumber.detail',
-                example: 'A1:A20',
+                example: '"1969-7-20"',
                 require: 1,
                 repeat: 0,
             },
@@ -511,7 +511,7 @@ export const FUNCTION_LIST_DATE: IFunctionInfo[] = [
             {
                 name: 'formula.functionList.YEAR.functionParameter.serialNumber.name',
                 detail: 'formula.functionList.YEAR.functionParameter.serialNumber.detail',
-                example: 'A1:A20',
+                example: '"1969-7-20"',
                 require: 1,
                 repeat: 0,
             },

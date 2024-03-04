@@ -17,8 +17,11 @@
 import type {
     BooleanNumber,
     ICellData,
+    IColumnData,
+    IObjectArrayPrimitiveType,
     IObjectMatrixPrimitiveType,
     IRange,
+    IRowData,
     IUnitRange,
     Nullable,
     ObjectMatrix,
@@ -46,6 +49,8 @@ export interface ISheetItem {
     cellData: ObjectMatrix<ICellData>;
     rowCount: number;
     columnCount: number;
+    rowData: IObjectArrayPrimitiveType<Partial<IRowData>>;
+    columnData: IObjectArrayPrimitiveType<Partial<IColumnData>>;
 }
 
 export interface ISheetData {

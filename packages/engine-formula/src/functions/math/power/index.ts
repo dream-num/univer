@@ -15,12 +15,24 @@
  */
 
 import { ErrorType } from '../../../basics/error-type';
-import type { FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
 
 export class Power extends BaseFunction {
-    override calculate(numberVar: FunctionVariantType, powerVar: FunctionVariantType) {
-        return new ErrorValueObject(ErrorType.VALUE);
+    override calculate(number: BaseValueObject, power: BaseValueObject) {
+        if (number == null || power == null) {
+            return new ErrorValueObject(ErrorType.NA);
+        }
+
+        if (number.isError()) {
+            return number;
+        }
+
+        if (power.isError()) {
+            return power;
+        }
+
+        return number.pow(power);
     }
 }

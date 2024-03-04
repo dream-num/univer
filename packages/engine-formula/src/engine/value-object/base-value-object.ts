@@ -151,11 +151,26 @@ export class BaseValueObject extends ObjectClassType {
         return new ErrorValueObject(ErrorType.NAME);
     }
 
+    mod(valueObject: BaseValueObject): BaseValueObject {
+        /** abstract */
+        return new ErrorValueObject(ErrorType.VALUE);
+    }
+
+    /**
+     * return every value in the array after the callback function, excluding the error value
+     * @param callbackFn
+     * @returns
+     */
     map(callbackFn: callbackMapFnType): BaseValueObject {
         /** abstract */
         return new ErrorValueObject(ErrorType.NAME);
     }
 
+    /**
+     * return every value in the array after the callback function
+     * @param callbackFn
+     * @returns
+     */
     mapValue(callbackFn: callbackMapFnType): BaseValueObject {
         /** abstract */
         return new ErrorValueObject(ErrorType.NAME);
@@ -222,6 +237,11 @@ export class BaseValueObject extends ObjectClassType {
     dividedBy(value: string | number | boolean): BaseValueObject {
         /** abstract */
         return new ErrorValueObject(ErrorType.NAME);
+    }
+
+    modInverse(valueObject: BaseValueObject): BaseValueObject {
+        /** abstract */
+        return new ErrorValueObject(ErrorType.VALUE);
     }
 
     compareBy(value: string | number | boolean, operator: compareToken): BaseValueObject {

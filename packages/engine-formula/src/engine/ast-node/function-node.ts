@@ -104,10 +104,14 @@ export class FunctionNode extends BaseAstNode {
 
         for (let i = 0; i < childrenCount; i++) {
             const object = children[i].getValue();
+
             if (object == null) {
                 continue;
             }
-            if (object.isReferenceObject()) {
+
+            // In the SUBTOTAL function, we need to get rowData information, we can only use ReferenceObject
+            if (object.isReferenceObject() && !this._functionExecutor.needsReferenceObject) {
+                // Array converted from reference object needs to be marked
                 variants.push((object as BaseReferenceObject).toArrayValueObject());
             } else {
                 variants.push(object as BaseValueObject);
@@ -139,7 +143,7 @@ export class FunctionNode extends BaseAstNode {
         const children = this.getChildren();
         const childrenCount = children.length;
 
-        if (this._functionExecutor.name !== 'LOOKUP' || childrenCount !== 3) {
+        if (!this._functionExecutor.needsExpandParams || childrenCount !== 3) {
             return;
         }
 

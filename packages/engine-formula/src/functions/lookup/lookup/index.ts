@@ -23,6 +23,8 @@ import { BaseFunction } from '../../base-function';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 
 export class Lookup extends BaseFunction {
+    override needsExpandParams = true;
+
     override calculate(
         lookupValue: BaseValueObject,
         lookupVectorOrArray: ArrayValueObject,

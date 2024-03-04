@@ -631,7 +631,7 @@ export default {
         },
     },
     MOD: {
-        description: '数値を除算したときの剰余を返します。',
+        description: '数値を除数で割ったときの剰余を返します。 戻り値は除数と同じ符号になります。',
         abstract: '数値を除算したときの剰余を返します。',
         links: [
             {
@@ -640,8 +640,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: '数値', detail: '除算の分子となる数値を指定します。' },
+            divisor: { name: '除数', detail: '除算の分母となる数値を指定します。' },
         },
     },
     MROUND: {
@@ -724,12 +724,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'べき乗の底を指定します。 数値には任意の実数を指定することができます。' },
+            power: { name: 'power', detail: ' 数値を底とするべき乗の指数を指定します。' },
         },
     },
     PRODUCT: {
-        description: '引数リストの積を返します。',
+        description: 'は、引数として指定されたすべての数値を乗算し、製品を返します。',
         abstract: '引数リストの積を返します。',
         links: [
             {
@@ -738,8 +738,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: '数値 1', detail: ' 積を計算する最初の数値または範囲を指定します。' },
+            number2: { name: '数値 2', detail: '積を計算する 2 番目以降の数値または範囲を指定します (引数は 1 ～ 255 個まで指定できます)。' },
         },
     },
     QUOTIENT: {
@@ -1004,8 +1004,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            functionNum: { name: '集計方法', detail: '番号 1 ~ 11 または 101 ~ 111 を集計に使用する関数として指定します。 1 ~ 11 には手動で非表示にした行が含まれるのに対して、101 ~ 111 ではそれらを除外します。つまり、フィルター処理されたセルは常に除外されます。' },
+            ref1: { name: '範囲 1', detail: '集計する最初の名前付き範囲または参照を指定します。' },
+            ref2: { name: '範囲 2', detail: '集計する名前付き範囲または参照を 2 ～ 254 個まで指定します。' },
         },
     },
     SUM: {

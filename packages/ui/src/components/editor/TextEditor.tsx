@@ -36,6 +36,9 @@ const excludeProps = new Set([
     'onlyInputRange',
     'value',
     'onlyInputContent',
+    'onChange',
+    'onFocus',
+    'onValid',
 ]);
 
 export interface ITextEditorProps {
@@ -133,7 +136,7 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
         },
         editor);
 
-        const focusStyleSubscription = editorService.focusStyle$.subscribe((unitId: string) => {
+        const focusStyleSubscription = editorService.focusStyle$.subscribe((unitId: Nullable<string>) => {
             let state = false;
             if (unitId === id) {
                 state = true;

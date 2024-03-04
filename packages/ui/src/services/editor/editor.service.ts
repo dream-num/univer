@@ -264,9 +264,9 @@ export interface IEditorService {
 
     getFirstEditor(): Editor;
 
-    focusStyle$: Observable<string>;
+    focusStyle$: Observable<Nullable<string>>;
 
-    focusStyle(editorUnitId: string): void;
+    focusStyle(editorUnitId: Nullable<string>): void;
 
     refreshValueChange(editorId: string): void;
 
@@ -308,7 +308,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
     private readonly _valueChange$ = new Subject<Readonly<Editor>>();
     readonly valueChange$ = this._valueChange$.asObservable();
 
-    private readonly _focusStyle$ = new Subject<string>();
+    private readonly _focusStyle$ = new Subject<Nullable<string>>();
 
     readonly focusStyle$ = this._focusStyle$.asObservable();
 
@@ -348,10 +348,6 @@ export class EditorService extends Disposable implements IEditorService, IDispos
             return false;
         }
 
-        this.getAllEditor().forEach((editor) => {
-            editor.setFocus(false);
-        });
-
         editor.setFocus(true);
 
         this._contextService.setContextValue(FOCUSING_UNIVER_EDITOR_SINGLE_MODE, editor.isSingle());
@@ -360,6 +356,10 @@ export class EditorService extends Disposable implements IEditorService, IDispos
     }
 
     blur() {
+        this.getAllEditor().forEach((editor) => {
+            editor.setFocus(false);
+        });
+        this._focusStyle$.next();
         this._blur$.next(null);
     }
 

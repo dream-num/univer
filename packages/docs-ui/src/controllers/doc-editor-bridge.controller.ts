@@ -159,6 +159,23 @@ export class DocEditorBridgeController extends Disposable {
                 this._textSelectionRenderManager.blur();
             })
         );
+
+        this.disposeWithMe(
+            this._textSelectionRenderManager.onBlur$.subscribe(() => {
+                const unitId = this._currentUniverService.getCurrentUniverDocInstance().getUnitId();
+                if (unitId == null) {
+                    return;
+                }
+
+                const editor = this._editorService.getEditor(unitId);
+
+                if (editor == null || editor.isSheetEditor()) {
+                    return;
+                }
+
+                this._editorService.blur();
+            })
+        );
     }
 
     private _initialFocus() {

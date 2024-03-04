@@ -121,9 +121,15 @@ export class TextSelectionController extends Disposable {
                         this._currentUniverService.setCurrentUniverDocInstance(unitId);
                     }
 
-                    this._textSelectionRenderManager.eventTrigger(evt);
+                    if (this._editorService.getEditor(unitId)) {
+                        setTimeout(() => {
+                            this._textSelectionRenderManager.eventTrigger(evt);
 
-                    this._setEditorFocus(unitId);
+                            this._setEditorFocus(unitId);
+                        }, 0);
+                    } else {
+                        this._textSelectionRenderManager.eventTrigger(evt);
+                    }
 
                     if (evt.button !== 2) {
                         state.stopPropagation();
@@ -168,6 +174,7 @@ export class TextSelectionController extends Disposable {
             this._editorService.setOperationSheetUnitId(workbook.getUnitId());
             // this._editorService.setOperationSheetSubUnitId(workbook.getActiveSheet().getSheetId());
         }
+
         this._editorService.focusStyle(unitId);
     }
 

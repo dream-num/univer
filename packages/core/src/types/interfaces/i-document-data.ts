@@ -115,7 +115,7 @@ export interface IDocStyles {
 export interface IDocumentBody {
     dataStream: string;
 
-    textRuns?: ITextRun[]; // textRun 样式，交互
+    textRuns?: ITextRun[]; // textRun style，interaction
 
     paragraphs?: IParagraph[]; // paragraph
     sectionBreaks?: ISectionBreak[]; // SectionBreak https://support.microsoft.com/en-us/office/insert-a-section-break-eef20fd8-e38c-4ba6-a027-e503bdf8375c

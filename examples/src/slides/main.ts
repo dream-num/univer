@@ -28,7 +28,6 @@ const univer = new Univer({
     locale: LocaleType.ZH_CN,
     theme: greenTheme,
 });
-// try to do
 
 // base-render
 univer.registerPlugin(UniverRenderEnginePlugin);

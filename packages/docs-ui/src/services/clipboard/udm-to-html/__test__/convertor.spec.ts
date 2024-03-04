@@ -47,6 +47,6 @@ describe('test case in html and udm convert', () => {
 
         const html = convertor.convert(bodyList);
 
-        expect(html).toBe('=SUM(<span style="color: #9e6de3">F15:G18</span>)');
+        expect(html).toBe('<p class="UniverNormal" >=SUM(<span style="color: #9e6de3">F15:G18</span>)</p>');
     });
 });

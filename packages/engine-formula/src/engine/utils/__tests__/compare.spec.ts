@@ -37,6 +37,9 @@ describe('Test compare', () => {
         expect(isMatchWildcard('test*', 'test~*')).toBe(true);
         expect(isMatchWildcard('test', 'test~?')).toBe(false);
         expect(isMatchWildcard('test?', 'test~?')).toBe(true);
+
+        expect(isMatchWildcard('[test]', '[test*]')).toBe(true);
+        expect(isMatchWildcard('te', '[test*]')).toBe(false);
     });
 
     it('Function replaceWildcard', () => {
@@ -45,6 +48,8 @@ describe('Test compare', () => {
         expect(replaceWildcard('test~*')).toBe('test*');
         expect(replaceWildcard('test~?')).toBe('test?');
         expect(replaceWildcard('test~~*')).toBe('test~*');
+
+        expect(replaceWildcard('[test*]')).toBe('[test ]');
     });
 
     it('Function compareWithWildcard', () => {

@@ -100,6 +100,9 @@ import {
     VerticalCenterSingle,
     VerticalIntegrationSingle,
     VerticalTextSingle,
+    DirectExportSingle,
+    FolderSingle,
+    ExportSingle,
 } from '@univerjs/icons';
 import type { IDisposable } from '@wendellhu/redi';
 
@@ -199,6 +202,9 @@ export class ComponentManager {
             LeftTridiagonalSingle,
             SlashSingle,
             RightDoubleDiagonalSingle,
+            DirectExportSingle,
+            FolderSingle,
+            ExportSingle,
         };
 
         for (const k in iconList) {

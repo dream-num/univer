@@ -36,6 +36,8 @@ export const DialogOperation: ICommand = {
                 children: { title: 'Draggable Dialog Content' },
                 title: { title: 'Draggable Dialog' },
                 draggable: true,
+                destroyOnClose: true,
+                preservePositionOnDestroy: true,
                 width: 350,
                 onClose() {
                     dialogService.close('draggable');

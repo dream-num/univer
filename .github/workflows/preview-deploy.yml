@@ -145,7 +145,7 @@ jobs:
         needs: [setup]
 
         outputs:
-            preview-url: ${{ steps.vercel-storybook.outputs.preview-url }}
+            preview-url: ${{ steps.vercel-storybook-dev.outputs.preview-url == '' && steps.vercel-storybook.outputs.preview-url || steps.vercel-storybook-dev.outputs.preview-url }}
 
         steps:
             - name: Checkout

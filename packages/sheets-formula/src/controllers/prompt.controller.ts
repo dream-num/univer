@@ -55,6 +55,7 @@ import {
     getAbsoluteRefTypeWitString,
     isFormulaLexerToken,
     LexerTreeBuilder,
+    matchRefDrawToken,
     matchToken,
     normalizeSheetName,
     sequenceNodeType,
@@ -85,7 +86,7 @@ import {
     MoveSelectionCommand,
     SheetSkeletonManagerService,
 } from '@univerjs/sheets-ui';
-import { IContextMenuService, IEditorService, KeyCode, MetaKeys, SetEditorResizeOperation } from '@univerjs/ui';
+import { IContextMenuService, IEditorService, ILayoutService, KeyCode, MetaKeys, SetEditorResizeOperation } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
 
 import type { ISelectEditorFormulaOperationParam } from '../commands/operations/editor-formula.operation';
@@ -350,7 +351,7 @@ export class PromptController extends Disposable {
                     return;
                 }
 
-                this._changeEditor();
+                this._closeRangePrompt();
             })
         );
     }
@@ -369,20 +370,20 @@ export class PromptController extends Disposable {
                 }
 
                 if (!this._editorService.isSheetEditor(editorId)) {
-                    this._changeEditor(editorId);
+                    this._closeRangePrompt(editorId);
                     this._previousEditorUnitId = editorId;
                 }
             })
         );
 
         this.disposeWithMe(
-            this._editorService.changeEditorFocus$.subscribe(() => {
-                this._changeEditor();
+            this._editorService.closeRangePrompt$.subscribe(() => {
+                this._closeRangePrompt();
             })
         );
     }
 
-    private _changeEditor(editorId: Nullable<string>) {
+    private _closeRangePrompt(editorId: Nullable<string>) {
         /**
          * Switching the selection of PluginName causes a refresh.
          * Here, a delay is added to prevent the loss of content when pressing enter.
@@ -700,7 +701,7 @@ export class PromptController extends Disposable {
             return;
         }
 
-        if (this._matchRefDrawToken(char)) {
+        if (matchRefDrawToken(char)) {
             this._editorBridgeService.enableForceKeepVisible();
 
             this._contextMenuService.disable();
@@ -715,21 +716,6 @@ export class PromptController extends Disposable {
         } else {
             this._disableForceKeepVisible();
         }
-    }
-
-    /**
-     * Determine whether the character is a token keyword for the formula engine.
-     * @param char
-     */
-    private _matchRefDrawToken(char: string) {
-        return (
-            (isFormulaLexerToken(char) &&
-                char !== matchToken.CLOSE_BRACES &&
-                char !== matchToken.CLOSE_BRACKET &&
-                char !== matchToken.SINGLE_QUOTATION &&
-                char !== matchToken.DOUBLE_QUOTATION) ||
-            char === ' '
-        );
     }
 
     /**
@@ -1416,7 +1402,7 @@ export class PromptController extends Disposable {
 
             this._previousInsertRefStringIndex = this._currentInsertRefStringIndex;
 
-            if (!this._matchRefDrawToken(char)) {
+            if (!matchRefDrawToken(char)) {
                 this._formulaPromptService.insertSequenceString(this._currentInsertRefStringIndex, matchToken.COMMA);
 
                 insertNodes = this._formulaPromptService.getSequenceNodes();

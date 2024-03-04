@@ -14,36 +14,132 @@
  * limitations under the License.
  */
 
-import { LocaleService } from '@univerjs/core';
-import { Button, Dialog, FormLayout, Input, Tooltip } from '@univerjs/design';
-import { CloseSingle, SelectRangeSingle } from '@univerjs/icons';
+import type { IRange, IUnitRange, Nullable } from '@univerjs/core';
+import { IUniverInstanceService, LocaleService } from '@univerjs/core';
+import { Button, Dialog, Input, Tooltip } from '@univerjs/design';
+import { CloseSingle, DeleteSingle, SelectRangeSingle } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useRef, useState } from 'react';
 
+import { deserializeRangeWithSheet, isReferenceString, serializeRange } from '@univerjs/engine-formula';
 import { TextEditor } from '../editor/TextEditor';
+import { IEditorService } from '../../services/editor/editor.service';
+import { IRangeSelectorService } from '../../services/range-selector/range-selector.service';
 import styles from './index.module.less';
 
 export interface IRangeSelectorProps {
     id: string;
     value?: string;
-    onChange?: (range: string) => void;
+    onChange?: (ranges: IUnitRange[]) => void;
 }
 
 export function RangeSelector(props: IRangeSelectorProps) {
     const { onChange, id, value = '' } = props;
 
+    const [rangeDataList, setRangeDataList] = useState<string[]>(['']);
+
+    const addNewItem = (newValue: string) => {
+        setRangeDataList((prevRangeDataList) => [...prevRangeDataList, newValue]);
+    };
+
+    const removeItem = (indexToRemove: number) => {
+        setRangeDataList((prevRangeDataList) =>
+            prevRangeDataList.filter((_, index) => index !== indexToRemove)
+        );
+    };
+
+    const changeItem = (indexToChange: number, newValue: string) => {
+        setRangeDataList((prevRangeDataList) =>
+            prevRangeDataList.map((item, index) =>
+                index === indexToChange ? newValue : item
+            )
+        );
+    };
+
+    const changeLastItem = (newValue: string) => {
+        setRangeDataList((prevRangeDataList) => {
+            const newList = [...prevRangeDataList];
+            if (newList.length > 0) {
+                newList[newList.length - 1] = newValue;
+            }
+            return newList;
+        });
+    };
+
+    const editorService = useDependency(IEditorService);
+
+    const rangeSelectorService = useDependency(IRangeSelectorService);
+
+    const currentUniverService = useDependency(IUniverInstanceService);
+
     const [selectorVisible, setSelectorVisible] = useState(false);
+
     const localeService = useDependency(LocaleService);
 
     const [active, setActive] = useState(false);
 
     const [valid, setValid] = useState(true);
 
-    function handleToggleVisible() {
-        setSelectorVisible(!selectorVisible);
+    const [rangeValue, setRangeValue] = useState(value);
+
+    const selectorRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const selector = selectorRef.current;
+
+        if (!selector) {
+            return;
+        }
+
+        const resizeObserver = new ResizeObserver(() => {
+            editorService.resize(id);
+        });
+        resizeObserver.observe(selector);
+
+        let prevRangesCount = 1;
+        const valueChangeSubscription = rangeSelectorService.selectionChange$.subscribe((ranges: IRange[]) => {
+            if (ranges.length === 0) {
+                prevRangesCount = 0;
+                return;
+            }
+
+            const addItemCount = ranges.length - prevRangesCount;
+
+            prevRangesCount = ranges.length;
+
+            if (addItemCount < 0) {
+                return;
+            }
+
+            const lastRange = ranges[ranges.length - 1];
+            if (addItemCount >= 1) {
+                addNewItem(serializeRange(lastRange));
+            } else {
+                changeLastItem(serializeRange(lastRange));
+            }
+        });
+
+        // Clean up on unmount
+        return () => {
+            valueChangeSubscription.unsubscribe();
+            resizeObserver.unobserve(selector);
+        };
+    }, []);
+
+    function handleCloseModal() {
+        setSelectorVisible(false);
+        rangeSelectorService.setCurrentSelectorId(null);
     }
 
-    function handleClick() {
+    function handleOpenModal() {
+        if (valid) {
+            setRangeDataList(rangeValue.split(','));
+        } else {
+            setRangeDataList(['']);
+        }
+
+        rangeSelectorService.setCurrentSelectorId(id);
+
         setSelectorVisible(true);
     }
 
@@ -56,8 +152,44 @@ export function RangeSelector(props: IRangeSelectorProps) {
     }
 
     function handleConform() {
-        console.warn('save');
-        handleToggleVisible();
+        let result = '';
+        const list = rangeDataList.filter((rangeRef) => {
+            return isReferenceString(rangeRef.trim());
+        });
+        if (list.length === 1) {
+            const rangeRef = list[0];
+            if (isReferenceString(rangeRef.trim())) {
+                result = rangeRef.trim();
+            }
+        } else {
+            result = list.join(',');
+        }
+
+        editorService.setValue(result, id);
+
+        handleCloseModal();
+    }
+
+    function handleAddRange() {
+        addNewItem('');
+    }
+
+    function getSheetIdByName(name: string) {
+        return currentUniverService.getCurrentUniverSheetInstance().getSheetBySheetName(name) || '';
+    }
+
+    function handleTextValueChange(value: Nullable<string>) {
+        setRangeValue(value || '');
+
+        const ranges = rangeValue.split(',').map((ref) => {
+            const unitRange = deserializeRangeWithSheet(ref);
+            return {
+                unitId: unitRange.unitId,
+                sheetId: getSheetIdByName(unitRange.sheetName),
+                range: unitRange.range,
+            } as IUnitRange;
+        });
+        onChange && onChange(ranges);
     }
 
     let sClassName = styles.rangeSelector;
@@ -69,36 +201,46 @@ export function RangeSelector(props: IRangeSelectorProps) {
 
     return (
         <>
-            <div className={sClassName}>
-                <TextEditor onValid={onValid} onFocus={onFocus} id={id} onlyInputRange={true} canvasStyle={{ fontSize: 10 }} className={styles.rangeSelectorEditor} />
+            <div className={sClassName} ref={selectorRef}>
+                <TextEditor onValid={onValid} onFocus={onFocus} onChange={handleTextValueChange} id={id} onlyInputRange={true} canvasStyle={{ fontSize: 10 }} className={styles.rangeSelectorEditor} />
                 <Tooltip title={localeService.t('rangeSelector.buttonTooltip')} placement="bottom">
-                    <button className={styles.rangeSelectorIcon} onClick={handleClick}>
+                    <button className={styles.rangeSelectorIcon} onClick={handleOpenModal}>
                         <SelectRangeSingle />
                     </button>
                 </Tooltip>
             </div>
 
             <Dialog
-                width="360px"
+                width="300px"
                 visible={selectorVisible}
                 title={localeService.t('rangeSelector.title')}
                 draggable
                 closeIcon={<CloseSingle />}
                 footer={(
                     <footer>
-                        <Button onClick={handleToggleVisible}>{localeService.t('rangeSelector.cancel')}</Button>
-&nbsp;&nbsp;
-                        <Button onClick={handleConform} type="primary">{localeService.t('rangeSelector.confirm')}</Button>
+                        <Button size="small" onClick={handleCloseModal}>{localeService.t('rangeSelector.cancel')}</Button>
+                        <Button style={{ marginLeft: 10 }} size="small" onClick={handleConform} type="primary">{localeService.t('rangeSelector.confirm')}</Button>
                     </footer>
                 )}
-                onClose={handleToggleVisible}
+                onClose={handleCloseModal}
             >
-                <FormLayout>
-                    <Input />
-                </FormLayout>
-                <FormLayout>
-                    <Button onClick={handleToggleVisible}>{localeService.t('rangeSelector.addAnotherRange')}</Button>
-                </FormLayout>
+                <div className={styles.rangeSelectorModal}>
+                    {rangeDataList.map((item, index) => (
+                        <div key={index} className={styles.rangeSelectorModalContainer}>
+                            <div style={{ display: rangeDataList.length === 1 ? '220px' : '200px' }} className={styles.rangeSelectorModalContainerInput}>
+                                <Input size="small" value={item} onChange={(value) => changeItem(index, value)} />
+                            </div>
+                            <div style={{ display: rangeDataList.length === 1 ? 'none' : 'inline-block' }} className={styles.rangeSelectorModalContainerButton}>
+                                <DeleteSingle onClick={() => removeItem(index)} />
+                            </div>
+                        </div>
+                    ))}
+
+                    <div className={styles.rangeSelectorModalAdd}>
+                        <Button size="small" onClick={handleAddRange}>{localeService.t('rangeSelector.addAnotherRange')}</Button>
+                    </div>
+                </div>
+
             </Dialog>
         </>
     );

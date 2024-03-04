@@ -39,6 +39,8 @@
         height: @icon-size;
         padding: 0;
 
+        margin-right: 4px;
+
         font-size: var(--font-size-lg);
         color: rgb(var(--text-color));
 
@@ -71,5 +73,48 @@
         .range-selector-icon {
             color: rgb(var(--error-color));
         }
+    }
+}
+
+.range-selector-modal {
+    position: relative;
+
+    max-height: 500px;
+
+    width: 260px;
+
+    overflow: hidden;
+
+    overflow-y: auto;
+
+    &-container {
+        display: flex;
+        flex-direction: row;
+        // justify-content: center;
+        align-items: center;
+        width: 230px;
+        margin-bottom: 10px;
+
+        &-input {
+            display: inline-block;
+            width: 200px;
+        }
+
+        &-button {
+            display: inline-block;
+            text-align: center;
+            width: 30px;
+
+            &:hover {
+                cursor: pointer;
+                color: rgb(var(--primary-color));
+            }
+        }
+    }
+
+    &--add {
+        position: relative;
+        width: 300px;
+        margin-top: 5px;
     }
 }

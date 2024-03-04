@@ -15,14 +15,14 @@
  */
 
 import type { DocumentDataModel, IDocumentBody, IDocumentData, IDocumentStyle, IPosition, Nullable } from '@univerjs/core';
-import { DEFAULT_EMPTY_DOCUMENT_VALUE, Disposable, FOCUSING_UNIVER_EDITOR_SINGLE_MODE, HorizontalAlign, IContextService, IUniverInstanceService, toDisposable, VerticalAlign } from '@univerjs/core';
+import { DEFAULT_EMPTY_DOCUMENT_VALUE, Disposable, FOCUSING_EDITOR_INPUT_FORMULA, FOCUSING_UNIVER_EDITOR_SINGLE_MODE, HorizontalAlign, IContextService, IUniverInstanceService, toDisposable, VerticalAlign } from '@univerjs/core';
 import type { IDisposable } from '@wendellhu/redi';
 import { createIdentifier, Inject } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
-import { Subject } from 'rxjs';
+import { fromEvent, Subject } from 'rxjs';
 import type { IRender, ISuccinctTextRangeParam, Scene } from '@univerjs/engine-render';
 import { IRenderManagerService, UNIVER_GLOBAL_DEFAULT_FONT_SIZE } from '@univerjs/engine-render';
-import { isReferenceString, LexerTreeBuilder, operatorToken } from '@univerjs/engine-formula';
+import { isReferenceString, LexerTreeBuilder, matchRefDrawToken, operatorToken } from '@univerjs/engine-formula';
 
 export interface IEditorStateParam extends Partial<IPosition> {
     visible?: boolean;
@@ -138,7 +138,8 @@ class Editor {
     }
 
     getValue() {
-        return this._param.documentDataModel.getBody()?.dataStream || '';
+        const value = this._param.documentDataModel.getBody()?.dataStream || '';
+        return value.replace(/\r\n/g, '').replace(/\n/g, '').replace(/\n/g, '');
     }
 
     getBody() {
@@ -208,8 +209,6 @@ export interface IEditorService {
 
     register(config: IEditorConfigParam, container: HTMLDivElement): IDisposable;
 
-    unRegister(editorUnitId: string): void;
-
     isVisible(id: string): Nullable<boolean>;
 
     inputFormula$: Observable<IEditorInputFormulaParam>;
@@ -242,9 +241,9 @@ export interface IEditorService {
 
     isSheetEditor(editorUnitId: string): boolean;
 
-    changeEditorFocus$: Observable<unknown>;
+    closeRangePrompt$: Observable<unknown>;
 
-    changeEditorFocus(): void;
+    closeRangePrompt(): void;
 
     blur$: Observable<unknown>;
 
@@ -275,6 +274,10 @@ export interface IEditorService {
     getValue(id: string): Nullable<string>;
 
     getRichValue(id: string): Nullable<IDocumentBody>;
+
+    changeSpreadsheetFocusState(state: boolean): void;
+
+    getSpreadsheetFocusState(): boolean;
 }
 
 export class EditorService extends Disposable implements IEditorService, IDisposable {
@@ -293,8 +296,8 @@ export class EditorService extends Disposable implements IEditorService, IDispos
     private readonly _resize$ = new Subject<string>();
     readonly resize$ = this._resize$.asObservable();
 
-    private readonly _changeEditorFocus$ = new Subject<unknown>();
-    readonly changeEditorFocus$ = this._changeEditorFocus$.asObservable();
+    private readonly _closeRangePrompt$ = new Subject<unknown>();
+    readonly closeRangePrompt$ = this._closeRangePrompt$.asObservable();
 
     private readonly _blur$ = new Subject();
     readonly blur$ = this._blur$.asObservable();
@@ -311,6 +314,8 @@ export class EditorService extends Disposable implements IEditorService, IDispos
     private readonly _focusStyle$ = new Subject<Nullable<string>>();
 
     readonly focusStyle$ = this._focusStyle$.asObservable();
+
+    private _spreadsheetFocusState: boolean = false;
 
     constructor(
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
@@ -330,16 +335,23 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         return !!(editor && editor.isSheetEditor());
     }
 
-    changeEditorFocus() {
+    closeRangePrompt() {
         const documentDataModel = this._currentUniverService.getCurrentUniverDocInstance();
         const editorUnitId = documentDataModel.getUnitId();
         if (!this.isEditor(editorUnitId) || this.isSheetEditor(editorUnitId)) {
             return;
         }
         // const editor = this._editors.get(editorUnitId);
-        this._changeEditorFocus$.next(null);
 
         this.blur();
+    }
+
+    changeSpreadsheetFocusState(state: boolean) {
+        this._spreadsheetFocusState = state;
+    }
+
+    getSpreadsheetFocusState() {
+        return this._spreadsheetFocusState;
     }
 
     focusStyle(editorUnitId: string) {
@@ -356,6 +368,14 @@ export class EditorService extends Disposable implements IEditorService, IDispos
     }
 
     blur() {
+        const documentDataModel = this._currentUniverService.getCurrentUniverDocInstance();
+        const editorUnitId = documentDataModel.getUnitId();
+        const value = this.getEditor(editorUnitId)?.getValue() || '';
+
+        if (!this._spreadsheetFocusState) {
+            this._closeRangePrompt$.next(null);
+        }
+
         this.getAllEditor().forEach((editor) => {
             editor.setFocus(false);
         });
@@ -406,6 +426,8 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         }
 
         this._refreshValueChange(editorUnitId);
+
+        this.resize(editorUnitId);
     }
 
     getValue(id: string) {
@@ -522,11 +544,11 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         }
 
         return toDisposable(() => {
-            this.unRegister(editorUnitId);
+            this._unRegister(editorUnitId);
         });
     }
 
-    unRegister(editorUnitId: string) {
+    private _unRegister(editorUnitId: string) {
         const editor = this._editors.get(editorUnitId);
 
         if (editor == null) {

@@ -122,7 +122,7 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
 
         resizeObserver.observe(editor);
 
-        editorService.register({
+        const registerSubscription = editorService.register({
             editorUnitId: id,
             initialSnapshot: snapshot,
             cancelDefaultResizeListener,
@@ -178,7 +178,7 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
         return () => {
             resizeObserver.unobserve(editor);
 
-            editorService.unRegister(id);
+            registerSubscription.dispose();
 
             focusStyleSubscription?.unsubscribe();
 

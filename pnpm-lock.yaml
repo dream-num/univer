@@ -576,6 +576,9 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../core
+      '@univerjs/docs':
+        specifier: workspace:*
+        version: link:../docs
       '@univerjs/engine-formula':
         specifier: workspace:*
         version: link:../engine-formula
@@ -4478,7 +4481,7 @@ packages:
       resolve-from: 5.0.0
       semver: 7.6.0
       tempy: 1.0.1
-      tiny-invariant: 1.3.1
+      tiny-invariant: 1.3.3
       ts-dedent: 2.2.0
       util: 0.12.5
     transitivePeerDependencies:

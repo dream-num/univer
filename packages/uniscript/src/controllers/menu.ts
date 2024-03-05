@@ -28,7 +28,7 @@ export function UniscriptMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         icon: 'CodeSingle',
         type: MenuItemType.BUTTON,
         positions: [MenuPosition.TOOLBAR_START],
-        // FIXME@wendellhu: hidden$ and disabled$ are not correctly in doc
+        // FIXME hidden$ and disabled$ are not correctly in doc
         // hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
         // disabled$: getCurrentSheetDisabled$(accessor),
     };

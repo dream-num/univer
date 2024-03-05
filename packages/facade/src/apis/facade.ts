@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { CommandListener, IExecutionOptions, IWorkbookData } from '@univerjs/core';
+import type { CommandListener, IDocumentData, IExecutionOptions, IWorkbookData } from '@univerjs/core';
 import {
     BorderStyleTypes,
     ICommandService,
@@ -25,11 +25,12 @@ import {
 } from '@univerjs/core';
 import { ISocketService, WebSocketService } from '@univerjs/network';
 import type { IRegisterFunctionParams, IUnregisterFunctionParams } from '@univerjs/sheets-formula';
-import { IRegisterFunctionService } from '@univerjs/sheets-formula';
+import { IRegisterFunctionService, RegisterFunctionService } from '@univerjs/sheets-formula';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject, Injector, Quantity } from '@wendellhu/redi';
 
-import { FWorkbook } from './sheet/f-workbook';
+import { FWorkbook } from './sheets/f-workbook';
+import { FDocument } from './docs/f-document';
 
 export class FUniver {
     /**
@@ -53,7 +54,7 @@ export class FUniver {
         @Inject(Injector) private readonly _injector: Injector,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
-        @IRegisterFunctionService private readonly _registerFunctionService: IRegisterFunctionService,
+        // @IRegisterFunctionService private readonly _registerFunctionService: IRegisterFunctionService,
         @ISocketService private readonly _ws: ISocketService
     ) {}
 
@@ -65,6 +66,16 @@ export class FUniver {
     createUniverSheet(data: Partial<IWorkbookData>): FWorkbook {
         const workbook = this._univerInstanceService.createSheet(data);
         return this._injector.createInstance(FWorkbook, workbook);
+    }
+
+    /**
+     * Create a new document and get the API handler of that document.
+     * @param data the snapshot of the document.
+     * @returns Document API instance.
+     */
+    createUniverDoc(data: Partial<IDocumentData>): FDocument {
+        const document = this._univerInstanceService.createDoc(data);
+        return this._injector.createInstance(FDocument, document);
     }
 
     /**
@@ -82,6 +93,20 @@ export class FUniver {
     }
 
     /**
+     * Get the document API handler by the document id.
+     * @param id the document id.
+     * @returns Document API instance.
+     */
+    getUniverDoc(id: string): FDocument | null {
+        const document = this._univerInstanceService.getUniverDocInstance(id);
+        if (!document) {
+            return null;
+        }
+
+        return this._injector.createInstance(FDocument, document);
+    }
+
+    /**
      * Get the currently focused Univer spreadsheet.
      * @returns the currently focused Univer spreadsheet.
      */
@@ -95,19 +120,48 @@ export class FUniver {
     }
 
     /**
+     * Get the currently focused Univer document.
+     * @returns the currently focused Univer document.
+     */
+    getActiveDocument(): FDocument | null {
+        const document = this._univerInstanceService.getCurrentUniverDocInstance();
+        if (!document) {
+            return null;
+        }
+
+        return this._injector.createInstance(FDocument, document);
+    }
+
+    /**
      * Register a function to the spreadsheet.
      * @param config
      */
     registerFunction(config: IRegisterFunctionParams) {
-        this._registerFunctionService.registerFunctions(config);
+        let registerFunctionService = this._injector.get(IRegisterFunctionService);
+
+        if (!registerFunctionService) {
+            this._injector.add([IRegisterFunctionService, { useClass: RegisterFunctionService }]);
+            registerFunctionService = this._injector.get(IRegisterFunctionService);
+        }
+
+        registerFunctionService.registerFunctions(config);
     }
 
     /**
      * Unregister a function from the spreadsheet.
+     *
+     * TODO@Dushusir: remove unregister,use IDisposable
      * @param config
      */
     unregisterFunction(config: IUnregisterFunctionParams) {
-        this._registerFunctionService.unregisterFunctions(config);
+        let registerFunctionService = this._injector.get(IRegisterFunctionService);
+
+        if (!registerFunctionService) {
+            this._injector.add([IRegisterFunctionService, { useClass: RegisterFunctionService }]);
+            registerFunctionService = this._injector.get(IRegisterFunctionService);
+        }
+
+        registerFunctionService.unregisterFunctions(config);
     }
 
     // #region

@@ -25,7 +25,6 @@ import { UniverUniscriptPlugin } from '@univerjs/uniscript';
 
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
-import { FUniver } from '@univerjs/facade';
 import { DEFAULT_DOCUMENT_DATA_CN } from '../data';
 
 // univer
@@ -65,8 +64,6 @@ univer.registerPlugin(UniverUniscriptPlugin, {
 
 // create univer doc instance
 univer.createUniverDoc(DEFAULT_DOCUMENT_DATA_CN);
-
-const univerAPI = FUniver.newAPI(univer);
 
 declare global {
     interface Window {

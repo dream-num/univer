@@ -29,7 +29,7 @@ import {
 } from '@univerjs/core';
 import type { TextRange } from '@univerjs/engine-render';
 
-import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
+import { serializeTextRange, TextSelectionManagerService } from '../../services/text-selection-manager.service';
 import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../mutations/core-editing.mutation';
 
@@ -171,7 +171,7 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
             params: {
                 unitId,
                 actions: [],
-                textRanges: selections,
+                textRanges: selections.map(serializeTextRange),
             },
         };
 

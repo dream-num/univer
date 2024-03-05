@@ -26,6 +26,7 @@ import type {
     IObjectMatrixPrimitiveType,
     IRange,
     IStyleData,
+    ITextRun,
     ITextStyle,
     Nullable,
 } from '@univerjs/core';
@@ -377,24 +378,75 @@ export function mergeStyle(
  * @param newStyle
  */
 export function mergeRichTextStyle(p: IDocumentData, newStyle: Nullable<IStyleData>) {
-    p.body?.textRuns?.forEach((textRun) => {
-        if (!textRun.ts) {
-            textRun.ts = {};
+    if (p.body == null) {
+        return;
+    }
+
+    if (!Array.isArray(p.body.textRuns)) {
+        p.body.textRuns = [];
+    }
+
+    let index = 0;
+    const newTextRuns = [];
+
+    for (const textRun of p.body.textRuns) {
+        const { st, ed, ts = {} } = textRun;
+
+        if (index !== st) {
+            const tr: ITextRun = {
+                st: index,
+                ed: st,
+            };
+
+            const merge = mergeStyle({}, newStyle, true);
+
+            // then remove null
+            merge && Tools.removeNull(merge);
+
+            if (!Tools.isEmptyObject(merge)) {
+                tr.ts = merge!;
+            }
+
+            newTextRuns.push(tr);
+        } else {
+            const merge = mergeStyle(ts, newStyle, true);
+
+            // then remove null
+            merge && Tools.removeNull(merge);
+
+            if (Tools.isEmptyObject(merge)) {
+                delete textRun.ts;
+            } else {
+                textRun.ts = merge as ITextStyle;
+            }
+
+            newTextRuns.push(textRun);
         }
 
-        const oldStyle = textRun.ts || {};
+        index = ed;
+    }
 
-        const merge = mergeStyle(oldStyle as Nullable<IStyleData>, newStyle, true);
+    const endIndex = p.body.dataStream.endsWith('\r\n') ? p.body.dataStream.length - 2 : p.body.dataStream.length;
+
+    if (index !== endIndex) {
+        const tr: ITextRun = {
+            st: index,
+            ed: endIndex,
+        };
+
+        const merge = mergeStyle({}, newStyle, true);
 
         // then remove null
         merge && Tools.removeNull(merge);
 
-        if (Tools.isEmptyObject(merge)) {
-            delete textRun.ts;
-        } else {
-            textRun.ts = merge as ITextStyle;
+        if (!Tools.isEmptyObject(merge)) {
+            tr.ts = merge!;
         }
-    });
+
+        newTextRuns.push(tr);
+    }
+
+    p.body.textRuns = newTextRuns;
 }
 
 function isNumeric(str: string) {

@@ -31,10 +31,13 @@ export interface IRangeSelectorProps {
     id: string;
     value?: string;
     onChange?: (ranges: IUnitRange[]) => void;
+
+    openForSheetUnitId?: Nullable<string>;
+    openForSheetSubUnitId?: Nullable<string>;
 }
 
 export function RangeSelector(props: IRangeSelectorProps) {
-    const { onChange, id, value = '' } = props;
+    const { onChange, id, value = '', openForSheetUnitId, openForSheetSubUnitId } = props;
 
     const [rangeDataList, setRangeDataList] = useState<string[]>(['']);
 
@@ -202,7 +205,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
     return (
         <>
             <div className={sClassName} ref={selectorRef}>
-                <TextEditor onValid={onValid} onFocus={onFocus} onChange={handleTextValueChange} id={id} onlyInputRange={true} canvasStyle={{ fontSize: 10 }} className={styles.rangeSelectorEditor} />
+                <TextEditor openForSheetUnitId={openForSheetUnitId} openForSheetSubUnitId={openForSheetSubUnitId} onValid={onValid} onFocus={onFocus} onChange={handleTextValueChange} id={id} onlyInputRange={true} canvasStyle={{ fontSize: 10 }} className={styles.rangeSelectorEditor} />
                 <Tooltip title={localeService.t('rangeSelector.buttonTooltip')} placement="bottom">
                     <button className={styles.rangeSelectorIcon} onClick={handleOpenModal}>
                         <SelectRangeSingle />

@@ -142,7 +142,11 @@ export class Engine extends ThinEngine<Scene> {
      * preventing the events from becoming ineffective once the mouse leaves the host.
      */
     override setRemainCapture() {
-        this._canvasEle.setPointerCapture(this._remainCapture);
+        try {
+            this._canvasEle.setPointerCapture(this._remainCapture);
+        } catch {
+            console.warn('no capture');
+        }
     }
 
     getPixelRatio() {

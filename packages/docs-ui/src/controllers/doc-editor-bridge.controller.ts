@@ -189,10 +189,23 @@ export class DocEditorBridgeController extends Disposable {
         );
 
         this.disposeWithMe(
-            fromEvent(window, 'mousedown').subscribe(() => {
+            fromEvent(window, 'mousedown').subscribe((event) => {
+                const target = event.target as HTMLElement;
+                const hasSearch = target.classList[0];
+                if (hasSearch?.indexOf('univer-formula-search') > -1 || hasSearch?.indexOf('univer-formula-help') > -1 || hasSearch?.indexOf('formula-help-decorator') || hasSearch?.indexOf('univer-formula-help-param')) {
+                    this._editorService.changeSpreadsheetFocusState(true);
+                    event.stopPropagation();
+                    return;
+                }
                 this._editorService.changeSpreadsheetFocusState(false);
             })
         );
+
+        // this.disposeWithMe(
+        //     fromEvent(window, 'mousedown').subscribe(() => {
+        //         this._editorService.changeSpreadsheetFocusState(false);
+        //     })
+        // );
 
         const currentUniverSheet = this._currentUniverService.getAllUniverSheetsInstance();
         currentUniverSheet.forEach((unit) => {

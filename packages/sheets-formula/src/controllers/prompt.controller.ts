@@ -186,14 +186,6 @@ export class PromptController extends Disposable {
 
         this._previousInsertRefStringIndex = null;
 
-        // this._currentUnitId = null;
-
-        // this._currentSheetId = null;
-
-        this._editorService.setOperationSheetUnitId(null);
-
-        this._editorService.setOperationSheetSubUnitId(null);
-
         this._isSelectionMovingRefSelections = [];
 
         this._previousRangesCount = 0;
@@ -338,16 +330,6 @@ export class PromptController extends Disposable {
         this.disposeWithMe(
             this._editorBridgeService.afterVisible$.subscribe((visibleParam) => {
                 if (visibleParam.visible === true) {
-                    const { unitId, sheetId } = this._getCurrentUnitIdAndSheetId();
-
-                    if (this._editorService.getOperationSheetUnitId() == null) {
-                        this._editorService.setOperationSheetUnitId(unitId);
-                    }
-
-                    if (this._editorService.getOperationSheetSubUnitId() == null) {
-                        this._editorService.setOperationSheetSubUnitId(sheetId);
-                    }
-
                     return;
                 }
 
@@ -378,7 +360,9 @@ export class PromptController extends Disposable {
 
         this.disposeWithMe(
             this._editorService.closeRangePrompt$.subscribe(() => {
-                this._closeRangePrompt();
+                if (!this._editorService.getSpreadsheetFocusState() || !this._formulaPromptService.isLockedSelectionInsert()) {
+                    this._closeRangePrompt();
+                }
             })
         );
     }
@@ -394,16 +378,6 @@ export class PromptController extends Disposable {
 
         if (current?.pluginName === NORMAL_SELECTION_PLUGIN_NAME) {
             this._disableForceKeepVisible();
-            /**
-             * In the standard selection mode, the pivot table and page fields of the formula selection need to be cleared.
-             */
-
-            const { unitId, sheetId } = this._getCurrentUnitIdAndSheetId();
-
-            this._editorService.setOperationSheetUnitId(unitId);
-
-            this._editorService.setOperationSheetSubUnitId(sheetId);
-
             return;
         }
 
@@ -492,7 +466,12 @@ export class PromptController extends Disposable {
             return;
         }
 
-        if (!this._formulaPromptService.isLockedSelectionInsert()) {
+        /**
+         * selectionChangingState
+         * If the selection range in the editor is not restricted by being locked,
+         * it is considered a user experience optimization.
+         */
+        if (this._editorService.selectionChangingState() && !this._formulaPromptService.isLockedSelectionInsert()) {
             return;
         }
 
@@ -1143,6 +1122,23 @@ export class PromptController extends Disposable {
         };
     }
 
+    private _getOpenForCurrentSheet() {
+        const documentDataModel = this._currentUniverService.getCurrentUniverDocInstance();
+        const editorUnitId = documentDataModel.getUnitId();
+        const editor = this._editorService.getEditor(editorUnitId);
+        if (editor == null) {
+            return {
+                openUnitId: null,
+                openSheetId: null,
+            };
+        }
+
+        return {
+            openUnitId: editor.getOpenForSheetUnitId(),
+            openSheetId: editor.getOpenForSheetSubUnitId(),
+        };
+    }
+
     /**
      * Convert the selection range to a ref string for the formula engine, such as A1:B1
      * @param currentSelection
@@ -1153,13 +1149,15 @@ export class PromptController extends Disposable {
         let refUnitId = '';
         let refSheetName = '';
 
-        if (unitId === this._editorService.getOperationSheetUnitId()) {
+        const { openUnitId, openSheetId } = this._getOpenForCurrentSheet();
+
+        if (unitId === openUnitId) {
             refUnitId = '';
         } else {
             refUnitId = unitId;
         }
 
-        if (sheetId === this._editorService.getOperationSheetSubUnitId()) {
+        if (sheetId === openSheetId) {
             refSheetName = '';
         } else {
             refSheetName = this._getSheetNameById(unitId, sheetId);

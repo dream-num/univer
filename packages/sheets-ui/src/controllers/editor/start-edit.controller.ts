@@ -461,6 +461,7 @@ export class StartEditController extends Disposable {
                 this._editorVisiblePrevious = visible;
 
                 if (visible === false) {
+                    this._setOpenForCurrent(null, null);
                     return;
                 }
 
@@ -478,6 +479,7 @@ export class StartEditController extends Disposable {
                     scaleY,
                     editorUnitId,
                     unitId,
+                    sheetId,
                     isInArrayFormulaRange = false,
                 } = editCellState;
 
@@ -486,6 +488,8 @@ export class StartEditController extends Disposable {
                 if (editorObject == null) {
                     return;
                 }
+
+                this._setOpenForCurrent(unitId, sheetId);
 
                 const { document, scene } = editorObject;
 
@@ -665,6 +669,18 @@ export class StartEditController extends Disposable {
                 }
             })
         );
+    }
+
+    private _setOpenForCurrent(unitId: Nullable<string>, sheetId: Nullable<string>) {
+        const sheetEditors = this._editorService.getAllEditor();
+        for (const [id, sheetEditor] of sheetEditors) {
+            if (!sheetEditor.isSheetEditor()) {
+                continue;
+            }
+
+            sheetEditor.setOpenForSheetUnitId(unitId);
+            sheetEditor.setOpenForSheetSubUnitId(sheetId);
+        }
     }
 
     private _getEditorObject() {

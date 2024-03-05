@@ -36,6 +36,8 @@ const excludeProps = new Set([
     'onlyInputRange',
     'value',
     'onlyInputContent',
+    'openForSheetUnitId',
+    'openForSheetSubUnitId',
     'onChange',
     'onFocus',
     'onValid',
@@ -58,6 +60,9 @@ export interface ITextEditorProps {
     onlyInputFormula?: boolean;
     onlyInputRange?: boolean;
     onlyInputContent?: boolean;
+
+    openForSheetUnitId?: Nullable<string>;
+    openForSheetSubUnitId?: Nullable<string>;
 
     onChange?: (value: Nullable<string>) => void;
 
@@ -84,6 +89,9 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
         onlyInputFormula = false,
         onlyInputRange = false,
         onlyInputContent = false,
+
+        openForSheetUnitId,
+        openForSheetSubUnitId,
 
         onChange,
 
@@ -133,6 +141,8 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
             onlyInputFormula,
             onlyInputRange,
             onlyInputContent,
+            openForSheetUnitId,
+            openForSheetSubUnitId,
         },
         editor);
 

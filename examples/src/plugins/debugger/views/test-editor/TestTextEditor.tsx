@@ -17,6 +17,8 @@
 import React from 'react';
 
 import { RangeSelector, TextEditor } from '@univerjs/ui';
+import { IUniverInstanceService } from '@univerjs/core';
+import { useDependency } from '@wendellhu/redi/react-bindings';
 
 const containerStyle: React.CSSProperties = {
     position: 'absolute',
@@ -35,19 +37,29 @@ const editorStyle: React.CSSProperties = {
  * @returns
  */
 export const TestEditorContainer = () => {
+    const univerInstanceService = useDependency(IUniverInstanceService);
+    const workbook = univerInstanceService.getCurrentUniverSheetInstance();
+    if (workbook == null) {
+        return;
+    }
+
+    const unitId = workbook.getUnitId();
+
+    const sheetId = workbook.getActiveSheet().getSheetId();
+
     return (
         <div
             style={containerStyle}
         >
-            <TextEditor id="test-editor-1" isReadonly={true} style={editorStyle} canvasStyle={{ fontSize: 10 }} value="I found one cent on the roadside." />
+            <TextEditor id="test-editor-1" openForSheetUnitId={unitId} openForSheetSubUnitId={sheetId} isReadonly={true} style={editorStyle} canvasStyle={{ fontSize: 10 }} value="I found one cent on the roadside." />
             <br></br>
-            <TextEditor id="test-editor-2" onlyInputFormula={true} style={editorStyle} canvasStyle={{ fontSize: 10 }} />
+            <TextEditor id="test-editor-2" openForSheetUnitId={unitId} openForSheetSubUnitId={sheetId} onlyInputFormula={true} style={editorStyle} canvasStyle={{ fontSize: 10 }} />
             <br></br>
-            <TextEditor id="test-editor-3" onlyInputRange={true} style={editorStyle} canvasStyle={{ fontSize: 10 }} />
+            <TextEditor id="test-editor-3" openForSheetUnitId={unitId} openForSheetSubUnitId={sheetId} onlyInputRange={true} style={editorStyle} canvasStyle={{ fontSize: 10 }} />
             <br></br>
-            <TextEditor id="test-editor-4" isSingle={false} onlyInputContent={true} style={{ ...editorStyle, height: '140px' }} canvasStyle={{ fontSize: 14 }} />
+            <TextEditor id="test-editor-4" openForSheetUnitId={unitId} openForSheetSubUnitId={sheetId} isSingle={false} onlyInputContent={true} style={{ ...editorStyle, height: '140px' }} canvasStyle={{ fontSize: 14 }} />
             <br></br>
-            <RangeSelector id="test-rangeSelector-1" />
+            <RangeSelector id="test-rangeSelector-1" openForSheetUnitId={unitId} openForSheetSubUnitId={sheetId} />
         </div>
     );
 };

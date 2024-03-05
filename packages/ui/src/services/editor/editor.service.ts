@@ -46,6 +46,9 @@ export interface IEditorConfigParam {
     onlyInputRange: boolean;
     onlyInputContent: boolean;
 
+    openForSheetUnitId: Nullable<string>;
+    openForSheetSubUnitId: Nullable<string>;
+
 }
 
 export interface IEditorSetParam extends IEditorConfigParam, IEditorStateParam {
@@ -69,8 +72,13 @@ class Editor {
 
     private _valueLegality = true;
 
-    constructor(private _param: IEditorSetParam) {
+    private _openForSheetUnitId: Nullable<string>;
 
+    private _openForSheetSubUnitId: Nullable<string>;
+
+    constructor(private _param: IEditorSetParam) {
+        this._openForSheetUnitId = this._param.openForSheetUnitId;
+        this._openForSheetSubUnitId = this._param.openForSheetSubUnitId;
     }
 
     get documentDataModel() {
@@ -87,6 +95,22 @@ class Editor {
 
     get render() {
         return this._param.render;
+    }
+
+    setOpenForSheetUnitId(unitId: Nullable<string>) {
+        this._openForSheetUnitId = unitId;
+    }
+
+    getOpenForSheetUnitId() {
+        return this._openForSheetUnitId;
+    }
+
+    setOpenForSheetSubUnitId(subUnitId: Nullable<string>) {
+        this._openForSheetSubUnitId = subUnitId;
+    }
+
+    getOpenForSheetSubUnitId() {
+        return this._openForSheetSubUnitId;
     }
 
     isValueLegality() {
@@ -278,6 +302,8 @@ export interface IEditorService {
     changeSpreadsheetFocusState(state: boolean): void;
 
     getSpreadsheetFocusState(): boolean;
+
+    selectionChangingState(): boolean;
 }
 
 export class EditorService extends Disposable implements IEditorService, IDisposable {
@@ -341,7 +367,8 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         if (!this.isEditor(editorUnitId) || this.isSheetEditor(editorUnitId)) {
             return;
         }
-        // const editor = this._editors.get(editorUnitId);
+
+        this.changeSpreadsheetFocusState(false);
 
         this.blur();
     }
@@ -367,11 +394,15 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         this._focusStyle$.next(editorUnitId);
     }
 
-    blur() {
+    selectionChangingState() {
         const documentDataModel = this._currentUniverService.getCurrentUniverDocInstance();
         const editorUnitId = documentDataModel.getUnitId();
-        const value = this.getEditor(editorUnitId)?.getValue() || '';
+        const editor = this.getEditor(editorUnitId);
 
+        return !this.getSpreadsheetFocusState() || !editor || editor.isSheetEditor();
+    }
+
+    blur() {
         if (!this._spreadsheetFocusState) {
             this._closeRangePrompt$.next(null);
         }

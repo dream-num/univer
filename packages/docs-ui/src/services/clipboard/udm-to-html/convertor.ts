@@ -17,7 +17,7 @@
 import type { IDocumentBody, ITextRun } from '@univerjs/core';
 import { BaselineOffset, BooleanNumber, Tools } from '@univerjs/core';
 
-function covertTextRunToHtml(dataStream: string, textRun: ITextRun): string {
+export function covertTextRunToHtml(dataStream: string, textRun: ITextRun): string {
     const { st: start, ed, ts = {} } = textRun;
     const { ff, fs, it, bl, ul, st, ol, bg, cl, va } = ts;
 
@@ -76,10 +76,10 @@ function covertTextRunToHtml(dataStream: string, textRun: ITextRun): string {
         style.push(`background: ${bg.rgb}`);
     }
 
-    return style.length ? `<span style="${style.join(';')}">${html}</span>` : html;
+    return style.length ? `<span style="${style.join('; ')};">${html}</span>` : html;
 }
 
-function getBodySliceHtml(body: IDocumentBody, startIndex: number, endIndex: number) {
+export function getBodySliceHtml(body: IDocumentBody, startIndex: number, endIndex: number) {
     const { dataStream, textRuns = [] } = body;
     let cursorIndex = startIndex;
     const spanList: string[] = [];
@@ -113,7 +113,7 @@ function getBodySliceHtml(body: IDocumentBody, startIndex: number, endIndex: num
     return spanList.join('');
 }
 
-function convertBodyToHtml(body: IDocumentBody, withParagraphInfo: boolean = true): string {
+export function convertBodyToHtml(body: IDocumentBody, withParagraphInfo: boolean = true): string {
     if (withParagraphInfo && body.paragraphs?.length) {
         const { dataStream, paragraphs = [] } = body;
         let result = '';

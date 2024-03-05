@@ -13860,7 +13860,29 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                 }],
                 operator: DataValidationOperator.GREATER_THAN,
                 formula1: '111',
-            }],
+            },
+            {
+                uid: 'xxx-2',
+                type: DataValidationType.CHECKBOX,
+                ranges: [{
+                    startRow: 6,
+                    endRow: 10,
+                    startColumn: 0,
+                    endColumn: 5,
+                }],
+            },
+            {
+                uid: 'xxx-3',
+                type: DataValidationType.LIST,
+                ranges: [{
+                    startRow: 11,
+                    endRow: 15,
+                    startColumn: 0,
+                    endColumn: 5,
+                }],
+                formula1: '1,2,3,4',
+            },
+            ],
         },
         'sheet-0010': {
             name: 'sheet-0010',

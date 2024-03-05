@@ -21,6 +21,7 @@ import { Inject } from '@wendellhu/redi';
 import { distinctUntilChanged, Subject } from 'rxjs';
 import { IRenderManagerService, Vector2 } from '@univerjs/engine-render';
 import { ISelectionRenderService } from '..';
+import { getCellIndexByOffsetWithMerge } from '../common/utils';
 import { ScrollManagerService } from './scroll-manager.service';
 import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
 
@@ -70,12 +71,41 @@ export class HoverManagerService {
 
         const { skeleton, sheetId, unitId } = skeletonParam;
 
+        const cellIndex = getCellIndexByOffsetWithMerge(offsetX, offsetY, scene, skeleton);
+
+        if (!cellIndex) {
+            this._currentCell$.next(null);
+            return;
+        }
+        const { row, col, mergeCell, actualCol, actualRow } = cellIndex;
+
+        const params: ISheetLocation = {
+            unitId,
+            subUnitId: sheetId,
+            workbook,
+            worksheet,
+            row: actualRow,
+            col: actualCol,
+        };
+
+        let anchorCell: IRange;
+
+        if (mergeCell) {
+            anchorCell = mergeCell;
+        } else {
+            anchorCell = {
+                startRow: row,
+                endRow: row,
+                startColumn: col,
+                endColumn: col,
+            };
+        }
+
         const activeViewport = scene.getActiveViewportByCoord(
             Vector2.FromArray([offsetX, offsetY])
         );
 
         if (!activeViewport) {
-            this._currentCell$.next(null);
             return;
         }
 
@@ -85,34 +115,6 @@ export class HoverManagerService {
             x: activeViewport.actualScrollX,
             y: activeViewport.actualScrollY,
         };
-        const cellPos = skeleton.getCellPositionByOffset(offsetX, offsetY, scaleX, scaleY, scrollXY);
-
-        const mergeCell = skeleton.mergeData.find((range) => {
-            const { startColumn, startRow, endColumn, endRow } = range;
-            return cellPos.row >= startRow && cellPos.column >= startColumn && cellPos.row <= endRow && cellPos.column <= endColumn;
-        });
-
-        const params: ISheetLocation = {
-            unitId,
-            subUnitId: sheetId,
-            workbook,
-            worksheet,
-            row: mergeCell ? mergeCell.startRow : cellPos.row,
-            col: mergeCell ? mergeCell.startColumn : cellPos.column,
-        };
-
-        let anchorCell: IRange;
-
-        if (mergeCell) {
-            anchorCell = mergeCell;
-        } else {
-            anchorCell = {
-                startRow: cellPos.row,
-                endRow: cellPos.row,
-                startColumn: cellPos.column,
-                endColumn: cellPos.column,
-            };
-        }
 
         const position: IPosition = {
             startX: (skeleton.getOffsetByPositionX(anchorCell.startColumn - 1) - scrollXY.x) * scaleX,

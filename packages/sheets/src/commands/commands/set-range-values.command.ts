@@ -64,7 +64,6 @@ export const SetRangeValuesCommand: ICommand = {
             unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId(),
             subUnitId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId(),
         } = params;
-
         const currentSelections = range ? [range] : selectionManagerService.getSelectionRanges();
         if (!currentSelections || !currentSelections.length) {
             return false;

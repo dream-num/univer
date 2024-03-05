@@ -19,9 +19,9 @@ import React from 'react';
 import type { IFormulaInputProps } from '../types/interfaces/i-formula-input';
 
 export const BaseFormulaInput = (props: IFormulaInputProps) => {
-    const { formulaCount, value, onChange } = props;
+    const { isTwoFormula = false, value, onChange } = props;
 
-    if (formulaCount === 2) {
+    if (isTwoFormula) {
         return (
             <>
                 <Input
@@ -39,7 +39,7 @@ export const BaseFormulaInput = (props: IFormulaInputProps) => {
                 </div>
                 <Input
                     placeholder="Value or formula"
-                    value={value?.formula1}
+                    value={value?.formula2}
                     onChange={(newValue) => {
                         onChange?.({
                             ...value,

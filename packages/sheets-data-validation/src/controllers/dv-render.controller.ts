@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-import { IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
-import { DataValidationModel, DataValidationPanelName } from '@univerjs/data-validation';
+import { DisposableCollection, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
+import { DataValidationModel, DataValidationPanelName, DataValidatorRegistryService } from '@univerjs/data-validation';
 import { ComponentManager, IMenuService } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
-import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { DropdownManagerService, EditorBridgeService, IEditorBridgeService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import type { Spreadsheet } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { DataValidationPanel } from '../views/components';
+import { getCellIndexByOffsetWithMerge } from '@univerjs/sheets-ui/common/utils.js';
+import { DataValidationPanel, LIST_DROPDOWN_KEY, ListDropDown } from '../views';
+import { DATA_VALIDATION_U_KEY, DataValidationExtension } from '../render/data-validation.render';
 import { DataValidationMenu } from './dv.menu';
 
 @OnLifecycle(LifecycleStages.Rendered, DataValidationRenderController)
@@ -32,26 +34,150 @@ export class DataValidationRenderController extends RxDisposable {
         @Inject(DataValidationModel) private readonly _dataValidationModel: DataValidationModel,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @Inject(DataValidatorRegistryService) private readonly _dataValidatorRegistryService: DataValidatorRegistryService,
+        @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
+        @Inject(DropdownManagerService) private readonly _dropdownManagerService: DropdownManagerService
     ) {
         super();
         this._init();
     }
 
     private _init() {
-        this.disposeWithMe(
-            this._componentManager.register(
-                DataValidationPanelName,
-                DataValidationPanel
-            )
-        );
-        this.disposeWithMe(
-            this._menuService.addMenuItem(
-                DataValidationMenu
-            )
-        );
-
+        this._initComponents();
+        this._initMenu();
         this._initSkeletonChange();
+        this._initEventBinding();
+        this._initDropdown();
+    }
+
+    private _initMenu() {
+        [DataValidationMenu].forEach((menu) => {
+            this.disposeWithMe(
+                this._menuService.addMenuItem(
+                    menu
+                )
+            );
+        });
+    }
+
+    private _initComponents() {
+        ([
+            [
+                DataValidationPanelName,
+                DataValidationPanel,
+            ],
+            [
+                LIST_DROPDOWN_KEY,
+                ListDropDown,
+            ],
+        ] as const).forEach(([key, component]) => {
+            this.disposeWithMe(this._componentManager.register(
+                key,
+                component
+            ));
+        });
+    }
+
+    private _initEventBinding() {
+        const disposableCollection = new DisposableCollection();
+
+        this._univerInstanceService.currentSheet$.subscribe((workbook) => {
+            if (workbook) {
+                const currentRender = this._renderManagerService.getRenderById(workbook.getUnitId());
+                if (currentRender && currentRender.mainComponent) {
+                    disposableCollection.dispose();
+
+                    const spreadsheet = currentRender.mainComponent as Spreadsheet;
+                    const disposable = spreadsheet.onPointerDownObserver.add((evt) => {
+                        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+                        const cellIndex = getCellIndexByOffsetWithMerge(evt.offsetX, evt.offsetY, currentRender.scene, skeleton!);
+                        const worksheet = workbook.getActiveSheet();
+
+                        if (!cellIndex || !skeleton) {
+                            return;
+                        }
+
+                        const cellInfo = worksheet.getCell(cellIndex.actualRow, cellIndex.actualCol);
+                        if (!cellInfo) {
+                            return;
+                        }
+
+                        const rule = cellInfo.dataValidation?.rule;
+                        if (!rule) {
+                            return;
+                        }
+
+                        const validator = this._dataValidatorRegistryService.getValidatorItem(rule.type);
+                        if (!validator) {
+                            return;
+                        }
+                        const render = validator.canvasRender;
+
+                        if (!render) {
+                            return;
+                        }
+
+                        const info = {
+                            cellInfo: skeleton.getCellByIndex(cellIndex.actualRow, cellIndex.actualCol),
+                            value: cellInfo.v,
+                            style: skeleton.getsStyles().getStyleByCell(cellInfo),
+                            rule,
+                        };
+
+                        const isHit = render.isHit(evt, info);
+                        if (isHit) {
+                            render.onClick(info);
+                        }
+                    });
+
+                    disposable && disposableCollection.add(disposable);
+                }
+            }
+        });
+    }
+
+    private _initDropdown() {
+        this.disposeWithMe(this._editorBridgeService.currentEditCellState$.subscribe((state) => {
+            if (!state) {
+                this._dropdownManagerService.hideDropdown();
+            } else {
+                const { unitId, sheetId, row, column } = state;
+                const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
+                if (!workbook) {
+                    return;
+                }
+                const worksheet = workbook.getSheetBySheetId(sheetId);
+                if (!worksheet) {
+                    return;
+                }
+
+                const cell = worksheet.getCell(row, column);
+                const rule = cell?.dataValidation?.rule;
+                if (!rule) {
+                    return;
+                }
+                const validator = this._dataValidatorRegistryService.getValidatorItem(rule.type);
+                if (!validator || !validator.dropdown) {
+                    return;
+                }
+
+                this._dropdownManagerService.showDropdown({
+                    position: state.position,
+                    location: {
+                        workbook,
+                        worksheet,
+                        row,
+                        col: column,
+                        unitId,
+                        subUnitId: sheetId,
+                    },
+                    componentKey: validator.dropdown,
+                    width: 200,
+                    height: 200,
+                });
+            }
+        }));
     }
 
     private _initSkeletonChange() {

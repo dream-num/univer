@@ -14,23 +14,9 @@
  * limitations under the License.
  */
 
-export enum DataValidationType {
-    /**
-     * custom formula
-     */
-    CUSTOM = 'custom',
-    LIST = 'list',
-    NONE = 'none',
-    TEXT_LENGTH = 'textLength',
-    DATE = 'date',
-    TIME = 'time',
-    /**
-     * integer
-     */
-    WHOLE = 'whole',
-    /**
-     * decimal number
-     */
-    DECIMAL = 'decimal',
-    CHECKBOX = 'checkbox',
+import { ListValidator } from '@univerjs/data-validation';
+import { LIST_DROPDOWN_KEY } from '../views';
+
+export class SheetListValidator extends ListValidator {
+    override dropdown: string | undefined = LIST_DROPDOWN_KEY;
 }

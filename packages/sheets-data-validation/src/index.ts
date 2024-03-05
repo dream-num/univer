@@ -16,3 +16,4 @@
 
 export { UniverSheetsDataValidationPlugin } from './plugin';
 // export {} from './'
+export { DataValidationExtension } from './render/data-validation.render';

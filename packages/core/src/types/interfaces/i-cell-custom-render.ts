@@ -14,23 +14,19 @@
  * limitations under the License.
  */
 
-export enum DataValidationType {
-    /**
-     * custom formula
-     */
-    CUSTOM = 'custom',
-    LIST = 'list',
-    NONE = 'none',
-    TEXT_LENGTH = 'textLength',
-    DATE = 'date',
-    TIME = 'time',
-    /**
-     * integer
-     */
-    WHOLE = 'whole',
-    /**
-     * decimal number
-     */
-    DECIMAL = 'decimal',
-    CHECKBOX = 'checkbox',
+import type { Nullable } from '../../shared';
+import type { CellValue } from './i-cell-data';
+import type { IDataValidationRule } from './i-data-validation';
+import type { ISelectionCellWithCoord } from './i-selection-data';
+import type { IStyleData } from './i-style-data';
+
+export interface ICellRenderInfo {
+    value: Nullable<CellValue>;
+    style: Nullable<IStyleData>;
+    cellInfo: ISelectionCellWithCoord;
+    rule: IDataValidationRule;
+}
+
+export interface ICellCustomRender {
+    drawWith(ctx: CanvasRenderingContext2D, info: ICellRenderInfo): void;
 }

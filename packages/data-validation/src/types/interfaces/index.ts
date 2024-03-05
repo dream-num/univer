@@ -17,3 +17,5 @@
 export * from './i-data-validator-operator-config';
 export * from './i-formula-input';
 export * from './i-update-rule-payload';
+export * from './i-data-validation-render';
+export * from './i-data-validation-drop-down';

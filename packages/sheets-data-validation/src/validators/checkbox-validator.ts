@@ -14,23 +14,10 @@
  * limitations under the License.
  */
 
-export enum DataValidationType {
-    /**
-     * custom formula
-     */
-    CUSTOM = 'custom',
-    LIST = 'list',
-    NONE = 'none',
-    TEXT_LENGTH = 'textLength',
-    DATE = 'date',
-    TIME = 'time',
-    /**
-     * integer
-     */
-    WHOLE = 'whole',
-    /**
-     * decimal number
-     */
-    DECIMAL = 'decimal',
-    CHECKBOX = 'checkbox',
+import { CheckboxValidator } from '@univerjs/data-validation';
+import { CheckboxRender } from '../widgets/checkbox-widget';
+
+export class SheetCheckboxValidator extends CheckboxValidator {
+    override skipDefaultFontRender = true;
+    override canvasRender = this.injector.createInstance(CheckboxRender);
 }

@@ -20,7 +20,7 @@ export interface IFormulaValue {
 }
 
 export interface IFormulaInputProps {
-    formulaCount: 1 | 2;
+    isTwoFormula?: boolean;
     value?: IFormulaValue;
     onChange?: (value?: IFormulaValue) => void;
 }

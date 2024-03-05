@@ -31,6 +31,8 @@ const calcAnchorStyle = (position: IPosition, width: number, height: number, con
         position: 'absolute',
         ...verticalStyle,
         ...horizontalStyle,
+        zIndex: 100,
+        background: '#fff',
     };
 };
 
@@ -55,10 +57,11 @@ export function CellDropdown() {
     const canvasHeight = currentRender.engine.height;
 
     const style = calcAnchorStyle(position, width, height, canvasWidth, canvasHeight);
+    const key = `${location.unitId}-${location.subUnitId}-${location.row}-${location.col}`;
 
     return (
         <div style={style}>
-            <Component width={width} height={height} location={location} position={position} />
+            <Component key={key} width={width} height={height} location={location} position={position} />
         </div>
     );
 }

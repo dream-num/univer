@@ -15,3 +15,5 @@
  */
 
 export const CELL_ALERT_KEY = 'cellAlertComponent';
+
+export const DROP_DOWN_KEY = 'dropdownComponent';

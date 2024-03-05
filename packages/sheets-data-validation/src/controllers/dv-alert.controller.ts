@@ -15,24 +15,29 @@
  */
 
 import { DataValidationStatus, Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import { CellAlertManagerService, CellAlertType, HoverManagerService } from '@univerjs/sheets-ui';
+import { CellAlertManagerService, CellAlertType, DropdownManagerService, HoverManagerService, IEditorBridgeService } from '@univerjs/sheets-ui';
 import { Inject } from '@wendellhu/redi';
 import { SheetDataValidationService } from '../services/dv.service';
 
 @OnLifecycle(LifecycleStages.Rendered, DataValidationAlertController)
 export class DataValidationAlertController extends Disposable {
     constructor(
-        @Inject(HoverManagerService) private _hoverManagerService: HoverManagerService,
-        @Inject(CellAlertManagerService) private _cellAlertManagerService: CellAlertManagerService,
-        @IUniverInstanceService private _univerInstanceService: IUniverInstanceService,
-        @Inject(SheetDataValidationService) private _sheetDataValidationService: SheetDataValidationService
+        @Inject(HoverManagerService) private readonly _hoverManagerService: HoverManagerService,
+        @Inject(CellAlertManagerService) private readonly _cellAlertManagerService: CellAlertManagerService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @Inject(SheetDataValidationService) private readonly _sheetDataValidationService: SheetDataValidationService,
+        @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
+        @Inject(DropdownManagerService) private readonly _dropdownManagerService: DropdownManagerService
     ) {
         super();
-
         this._init();
     }
 
     private _init() {
+        this._initCellAlertPopup();
+    }
+
+    private _initCellAlertPopup() {
         this.disposeWithMe(this._hoverManagerService.currentCell$.subscribe((cellPos) => {
             if (cellPos) {
                 const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
@@ -55,6 +60,14 @@ export class DataValidationAlertController extends Disposable {
             }
 
             this._cellAlertManagerService.clearAlert();
+        }));
+    }
+
+    private _initCellDropdown() {
+        this.disposeWithMe(this._editorBridgeService.currentEditCellState$.subscribe((state) => {
+            // this._dropdownManagerService.showDropdown({
+
+            // });
         }));
     }
 }

@@ -16,8 +16,9 @@
 
 import type { CellValue, IDataValidationRule, IDataValidationRuleBase, Nullable } from '@univerjs/core';
 import { DataValidationOperator, LocaleService, Tools } from '@univerjs/core';
-import { Inject } from '@wendellhu/redi';
+import { Inject, Injector } from '@wendellhu/redi';
 import { OperatorTextMap } from '../types/const/operator-text-map';
+import type { IDataValidationRender } from '../types/interfaces';
 
 const FORMULA1 = '{FORMULA1}';
 const FORMULA2 = '{FORMULA2}';
@@ -35,15 +36,24 @@ const operatorNameMap: Record<DataValidationOperator, string> = {
 
 export abstract class BaseDataValidator<DataType = CellValue> {
     abstract id: string;
+
     abstract title: string;
+
     abstract operators: DataValidationOperator[];
 
     abstract scopes: string[] | string;
 
     abstract formulaInput: string;
 
+    skipDefaultFontRender = false;
+
+    canvasRender: Nullable<IDataValidationRender> = null;
+
+    dropdown: string | undefined = undefined;
+
     constructor(
-        @Inject(LocaleService) readonly localeService: LocaleService
+        @Inject(LocaleService) readonly localeService: LocaleService,
+        @Inject(Injector) readonly injector: Injector
     ) { }
 
     get operatorNames() {

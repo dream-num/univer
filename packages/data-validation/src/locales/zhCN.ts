@@ -52,6 +52,9 @@ export const zhCN = {
         number: {
             title: 'number',
         },
+        checkbox: {
+            title: 'checkbox',
+        },
 
     },
 };

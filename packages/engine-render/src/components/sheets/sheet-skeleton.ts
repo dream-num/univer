@@ -428,6 +428,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         return results;
     }
 
+    // TODO: auto height
     private _calculateRowAutoHeight(rowNum: number): number {
         const { columnCount, columnData, mergeData, defaultRowHeight } = this._config;
         const data = columnData;

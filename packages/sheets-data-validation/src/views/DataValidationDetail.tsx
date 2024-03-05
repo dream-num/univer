@@ -23,7 +23,7 @@ import { Button, Select } from '@univerjs/design';
 import { ComponentManager } from '@univerjs/ui';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useState } from 'react';
-import { UpdateDataValidationTypeCommand } from '../../commands/commands/data-validation.command';
+import { UpdateDataValidationTypeCommand } from '../commands/commands/data-validation.command';
 
 export interface IDataValidationDetailProps {
     rule: ISheetDataValidationRule;
@@ -56,6 +56,7 @@ export function DataValidationDetail(props: IDataValidationDetailProps) {
     }
     const operators = validator.operators;
     const operatorNames = validator.operatorNames;
+    const isTwoFormula = localRule.operator ? TWO_FORMULA_OPERATOR_COUNT.includes(localRule.operator) : false;
 
     const handleUpdateRuleRanges = (ranges: IRange[]) => {
         setLocalRule({
@@ -105,11 +106,11 @@ export function DataValidationDetail(props: IDataValidationDetailProps) {
     };
 
     const baseRule = {
-        type: rule.type,
-        operator: rule.operator,
-        formula1: rule.formula1,
-        formula2: rule.formula2,
-        allowBlank: rule.allowBlank,
+        type: localRule.type,
+        operator: localRule.operator,
+        formula1: localRule.formula1,
+        formula2: localRule.formula2,
+        allowBlank: localRule.allowBlank,
     };
 
     const handleChangeType = (newType: string) => {
@@ -154,23 +155,28 @@ export function DataValidationDetail(props: IDataValidationDetailProps) {
                 onChange={handleChangeType}
             />
             <div>operator</div>
-            <Select
-                options={operators.map((op, i) => ({
-                    value: `${op}`,
-                    label: operatorNames[i],
-                }))}
-                value={`${rule.operator}`}
-                onChange={(operator) => {
-                    handleUpdateRuleSetting({
-                        ...baseRule,
-                        operator: operator as DataValidationOperator,
-                    });
-                }}
-            />
+            {operators?.length
+                ? (
+                    <Select
+                        options={operators.map((op, i) => ({
+                            value: `${op}`,
+                            label: operatorNames[i],
+                        }))}
+                        value={`${localRule.operator}`}
+                        onChange={(operator) => {
+                            handleUpdateRuleSetting({
+                                ...baseRule,
+                                operator: operator as DataValidationOperator,
+                            });
+                        }}
+                    />
+                )
+                : null}
             <div>formula</div>
             {FormulaInput
                 ? (
                     <FormulaInput
+                        isTwoFormula={isTwoFormula}
                         value={{
                             formula1: rule.formula1,
                             formula2: rule.formula2,

@@ -92,7 +92,6 @@ export class Spreadsheet extends SheetComponent {
         }
 
         this._initialDefaultExtension();
-
         this.makeDirty(true);
     }
 
@@ -158,6 +157,10 @@ export class Spreadsheet extends SheetComponent {
         if (!spreadsheetSkeleton) {
             return;
         }
+
+        // this.onPointerDownObserver.add((evt) => {
+        //     evt.offsetX;
+        // });
         const { rowHeightAccumulation, columnWidthAccumulation, rowHeaderWidth, columnHeaderHeight } =
             spreadsheetSkeleton;
 

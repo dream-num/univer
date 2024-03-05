@@ -15,13 +15,15 @@
  */
 
 import { DataValidationStatus, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
-import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
+import type { ListValidator } from '@univerjs/data-validation';
+import { DataValidationModel, DataValidatorRegistryService, DateValidator, NumberValidator, TextLengthValidator } from '@univerjs/data-validation';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
-import { Inject } from '@wendellhu/redi';
-import type { Spreadsheet } from '@univerjs/engine-render';
+import { Inject, Injector } from '@wendellhu/redi';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetDataValidationManager } from '../models/sheet-data-validation-manager';
 import { SheetDataValidationService } from '../services/dv.service';
+import { SheetCheckboxValidator } from '../validators/checkbox-validator';
+import { SheetListValidator } from '../validators/list-validator';
 
 const INVALID_MARK = {
     tr: {
@@ -38,7 +40,8 @@ export class DataValidationController extends RxDisposable {
         @Inject(DataValidationModel) private readonly _dataValidationModel: DataValidationModel,
         @Inject(SheetDataValidationService) private readonly _sheetDataValidationService: SheetDataValidationService,
         @Inject(DataValidatorRegistryService) private readonly _dataValidatorRegistryService: DataValidatorRegistryService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @Inject(Injector) private readonly _injector: Injector
     ) {
         super();
         this._init();
@@ -46,8 +49,29 @@ export class DataValidationController extends RxDisposable {
 
     private _init() {
         this._initDataValidationDataSource();
+        this._registerValidators();
         this._initInstanceChange();
         this._initViewModelIntercept();
+    }
+
+    private _registerValidators() {
+        ([
+            SheetListValidator,
+            NumberValidator,
+            TextLengthValidator,
+            DateValidator,
+            SheetCheckboxValidator,
+        ]).forEach((Validator) => {
+            const validator = this._injector.createInstance(Validator as typeof ListValidator);
+            this.disposeWithMe(
+                this._dataValidatorRegistryService.register(validator)
+            );
+            this.disposeWithMe({
+                dispose: () => {
+                    this._injector.delete(Validator as typeof ListValidator);
+                },
+            });
+        });
     }
 
     private _initInstanceChange() {
@@ -112,11 +136,16 @@ export class DataValidationController extends RxDisposable {
                             return next(cell);
                         }
                         const validStatus = this._dataValidationModel.validator(cell?.v, rule, pos);
+                        const validator = this._dataValidatorRegistryService.getValidatorItem(rule.type);
+
                         return next({
                             ...cell,
                             dataValidation: {
                                 ruleId,
                                 validStatus,
+                                rule,
+                                customRender: validator?.canvasRender,
+                                skipDefaultFontRender: validator?.skipDefaultFontRender,
                             },
                             markers: {
                                 ...cell?.markers,

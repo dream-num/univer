@@ -24,6 +24,7 @@ import { ListValidator } from '../validators/list-validator';
 import { TextLengthValidator } from '../validators/text-length-validator';
 import { DateValidator } from '../validators/date-validator';
 import type { BaseDataValidator } from '../validators/base-data-validator';
+import { CheckboxValidator } from '../validators/checkbox-validator';
 
 @OnLifecycle(LifecycleStages.Ready, DataValidatorController)
 export class DataValidatorController extends Disposable {
@@ -35,21 +36,6 @@ export class DataValidatorController extends Disposable {
     ) {
         super();
         this._initFormulaInputComponent();
-        this._registerValidators();
-    }
-
-    private _registerValidators() {
-        ([
-            ListValidator,
-            NumberValidator,
-            TextLengthValidator,
-            DateValidator,
-        ]).forEach((Validator) => {
-            const validator = this._injector.createInstance(Validator);
-            this.disposeWithMe(
-                this._dataValidatorRegistryService.register(validator)
-            );
-        });
     }
 
     private _initFormulaInputComponent() {

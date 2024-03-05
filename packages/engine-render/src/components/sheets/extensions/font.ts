@@ -56,7 +56,7 @@ export class Font extends SheetExtension {
         spreadsheetSkeleton: SpreadsheetSkeleton,
         diffRanges?: IRange[]
     ) {
-        const { stylesCache, dataMergeCache, overflowCache } = spreadsheetSkeleton;
+        const { stylesCache, dataMergeCache, overflowCache, worksheet } = spreadsheetSkeleton;
         const { font: fontList } = stylesCache;
         if (!spreadsheetSkeleton) {
             return;
@@ -69,7 +69,8 @@ export class Font extends SheetExtension {
             !rowHeightAccumulation ||
             !columnWidthAccumulation ||
             columnTotalWidth === undefined ||
-            rowTotalHeight === undefined
+            rowTotalHeight === undefined ||
+            !worksheet
         ) {
             return;
         }
@@ -82,6 +83,12 @@ export class Font extends SheetExtension {
                 const fontObjectArray = fontList[fontFormat];
 
                 fontObjectArray.forValue((rowIndex, columnIndex, docsConfig) => {
+                    const cellData = worksheet.getCell(rowIndex, columnIndex);
+
+                    if (cellData?.dataValidation?.skipDefaultFontRender) {
+                        return;
+                    }
+
                     const cellInfo = this.getCellIndex(
                         rowIndex,
                         columnIndex,
@@ -214,7 +221,6 @@ export class Font extends SheetExtension {
         if (documents == null) {
             throw new Error('documents is null');
         }
-
         const { documentSkeleton, angle, wrapStrategy } = docsConfig;
         const cellWidth = endX - startX;
         const cellHeight = endY - startY;

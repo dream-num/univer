@@ -16,7 +16,7 @@
 
 import { CommandType, ICommandService } from '@univerjs/core';
 import type { DataValidationType, ICommand, IDataValidationRule, IRange } from '@univerjs/core';
-import type { IAddDataValidationMutationParams } from '../..';
+import { DataValidatorRegistryService, type IAddDataValidationMutationParams, UpdateRuleType } from '../..';
 import type { IUpdateRulePayload } from '../../types/interfaces/i-update-rule-payload';
 import { AddDataValidationMutation, RemoveAllDataValidationMutation, RemoveDataValidationMutation, UpdateDataValidationMutation } from '../mutations/data-validation.mutation';
 
@@ -83,6 +83,18 @@ export const UpdateDataValidationCommand: ICommand<IUpdateDataValidationCommandP
     handler(accessor, params) {
         if (!params) {
             return false;
+        }
+        const dataValidatorRegistryService = accessor.get(DataValidatorRegistryService);
+        const { payload } = params;
+        if (payload.type === UpdateRuleType.SETTING) {
+            const validator = dataValidatorRegistryService.getValidatorItem(payload.payload.type);
+            if (!validator) {
+                return false;
+            }
+
+            if (!validator.validatorFormula(payload.payload)) {
+                return false;
+            }
         }
 
         const commandService = accessor.get(ICommandService);

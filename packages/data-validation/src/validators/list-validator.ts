@@ -20,6 +20,9 @@ import { Inject } from '@wendellhu/redi';
 import { BASE_FORMULA_INPUT_NAME } from '../views/formula-input';
 import { BaseDataValidator } from './base-data-validator';
 
+export const LIST_MULTIPLE_FORMULA = 'TRUE';
+
+// TODO: cache
 export class ListValidator extends BaseDataValidator {
     id: string = DataValidationType.LIST;
     title: string = 'dataValidation.list.title';
@@ -27,19 +30,33 @@ export class ListValidator extends BaseDataValidator {
     scopes: string | string[] = ['sheet'];
     formulaInput: string = BASE_FORMULA_INPUT_NAME;
 
-    constructor(
-        @Inject(LocaleService) override readonly localeService: LocaleService,
-        @IUniverInstanceService readonly univerInstanceService: IUniverInstanceService
-    ) {
-        super(localeService);
-    }
-
     override validatorFormula(rule: IDataValidationRuleBase): boolean {
         return !Tools.isBlank(rule.formula1);
     }
 
-    isValidType(cellValue: CellValue, _rule: IDataValidationRule): boolean {
-        return typeof cellValue === 'string' || typeof cellValue === 'number';
+    private _isMultiple(rule: IDataValidationRule) {
+        return rule.formula2 === LIST_MULTIPLE_FORMULA;
+    }
+
+    private _parseList(rule: IDataValidationRule) {
+        return rule.formula1?.split(',') ?? [];
+    }
+
+    // TODO cache
+    private _parseCellValue(cellValue: CellValue, rule: IDataValidationRule) {
+        const cellString = cellValue.toString();
+        if (this._isMultiple(rule)) {
+            // TODO. full
+            return cellString.split(',');
+        } else {
+            return [cellString];
+        }
+    }
+
+    isValidType(cellValue: CellValue, rule: IDataValidationRule): boolean {
+        const selected = this._parseCellValue(cellValue, rule);
+        const list = this._parseList(rule);
+        return selected.every((i) => list.includes(i));
     }
 
     override generateRuleName() {

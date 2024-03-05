@@ -14,23 +14,16 @@
  * limitations under the License.
  */
 
-export enum DataValidationType {
-    /**
-     * custom formula
-     */
-    CUSTOM = 'custom',
-    LIST = 'list',
-    NONE = 'none',
-    TEXT_LENGTH = 'textLength',
-    DATE = 'date',
-    TIME = 'time',
-    /**
-     * integer
-     */
-    WHOLE = 'whole',
-    /**
-     * decimal number
-     */
-    DECIMAL = 'decimal',
-    CHECKBOX = 'checkbox',
+import type { CellValue, IDataValidationRule, Nullable } from '@univerjs/core';
+import type { BaseDataValidator } from '../..';
+
+export interface IDataValidationDropdownProps {
+    top: number;
+    left: number;
+    width: number;
+    height: number;
+    unitId: string;
+    subUnitId: string;
+    row: number;
+    col: number;
 }

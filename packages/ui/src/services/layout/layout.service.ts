@@ -87,11 +87,9 @@ export class DesktopLayoutService extends Disposable implements ILayoutService {
             handler = this._focusHandlers.get(UniverInstanceType.SLIDE);
         }
 
-        if (!handler) {
-            throw new Error('[DesktopLayoutService]: handler is not registered!');
+        if (handler) {
+            handler(currentFocused.getUnitId());
         }
-
-        handler(currentFocused.getUnitId());
     }
 
     registerFocusHandler(type: UniverInstanceType, handler: FocusHandlerFn): IDisposable {

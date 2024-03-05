@@ -84,15 +84,6 @@ export function createTestBed(documentConfig?: IDocumentData, dependencies?: Dep
             injector.add([DocStateChangeManagerService]);
             injector.add([IMEInputManagerService]);
             injector.add([ITextSelectionRenderManager, { useClass: TextSelectionRenderManager }]);
-            // injector.add([
-            //     IDescriptionService,
-            //     {
-            //         useFactory: () => this._injector.createInstance(DescriptionService, undefined),
-            //     },
-            // ]);
-            // injector.add([IFunctionService, { useClass: FunctionService }]);
-            // injector.add([IFormulaCustomFunctionService, { useClass: FormulaCustomFunctionService }]);
-            // injector.add([ISocketService, { useClass: WebSocketService }]);
 
             dependencies?.forEach((d) => injector.add(d));
         }

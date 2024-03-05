@@ -54,7 +54,6 @@ export class FUniver {
         @Inject(Injector) private readonly _injector: Injector,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
-        // @IRegisterFunctionService private readonly _registerFunctionService: IRegisterFunctionService,
         @ISocketService private readonly _ws: ISocketService
     ) {}
 

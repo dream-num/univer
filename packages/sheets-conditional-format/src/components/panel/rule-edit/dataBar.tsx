@@ -62,21 +62,21 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
         if (!rule) {
             return defaultV;
         }
-        return rule.config.isGradient ? '1' : '0';
+        return rule.config?.isGradient ? '1' : '0';
     });
     const [positiveColor, positiveColorSet] = useState(() => {
         const defaultV = '#ff0000';
         if (!rule) {
             return defaultV;
         }
-        return rule.config.positiveColor || defaultV;
+        return rule.config?.positiveColor || defaultV;
     });
     const [nativeColor, nativeColorSet] = useState(() => {
         const defaultV = '#0000ff';
         if (!rule) {
             return defaultV;
         }
-        return rule.config.nativeColor || defaultV;
+        return rule.config?.nativeColor || defaultV;
     });
     const commonOptions = [createOptionItem(ValueType.num, localeService), createOptionItem(ValueType.percent, localeService), createOptionItem(ValueType.percentile, localeService), createOptionItem(ValueType.formula, localeService)];
     const minOptions = [createOptionItem(ValueType.min, localeService), ...commonOptions];
@@ -86,21 +86,21 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
         if (!rule) {
             return defaultV;
         }
-        return rule.config.min.type || defaultV;
+        return rule.config?.min.type || defaultV;
     });
     const [maxValueType, maxValueTypeSet] = useState<ValueType>(() => {
         const defaultV = maxOptions[0].value as ValueType;
         if (!rule) {
             return defaultV;
         }
-        return rule.config.max.type || defaultV;
+        return rule.config?.max.type || defaultV;
     });
     const [minValue, minValueSet] = useState(() => {
         const defaultV = 0;
         if (!rule) {
             return defaultV;
         }
-        const value = rule.config.min;
+        const value = rule.config?.min || {};
         if (value.type === ValueType.formula) {
             return value.value || '=';
         }
@@ -111,7 +111,7 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
         if (!rule) {
             return defaultV;
         }
-        const value = rule.config.max;
+        const value = rule.config?.max || {};
         if (value.type === ValueType.formula) {
             return value.value || '=';
         }

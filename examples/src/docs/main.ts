@@ -52,9 +52,7 @@ univer.registerPlugin(UniverUIPlugin, {
     header: true,
     toolbar: true,
 });
-univer.registerPlugin(UniverDocsPlugin, {
-    standalone: true,
-});
+univer.registerPlugin(UniverDocsPlugin);
 univer.registerPlugin(UniverDocsUIPlugin, {
     container: 'univerdoc',
     layout: {

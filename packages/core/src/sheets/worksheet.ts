@@ -544,7 +544,7 @@ export class Worksheet {
      *
      * Performance intensive.
      */
-    iterateByRow(range: IRange): Iterator<Readonly<ICell>> {
+    iterateByRow(range: IRange): Iterator<Readonly<ICell>, Readonly<ICell>> {
         const { startRow, startColumn, endRow, endColumn } = range;
 
         // eslint-disable-next-line ts/no-this-alias
@@ -598,7 +598,7 @@ export class Worksheet {
      *
      * Performance intensive.
      */
-    iterateByColumn(range: IRange): Iterator<ICell> {
+    iterateByColumn(range: IRange): Iterator<Readonly<ICell>, Readonly<ICell>> {
         const { startRow, startColumn, endRow, endColumn } = range;
 
         // eslint-disable-next-line ts/no-this-alias

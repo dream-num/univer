@@ -53,7 +53,6 @@ import {
     deserializeRangeWithSheet,
     generateStringWithSequence,
     getAbsoluteRefTypeWitString,
-    isFormulaLexerToken,
     LexerTreeBuilder,
     matchRefDrawToken,
     matchToken,
@@ -86,7 +85,7 @@ import {
     MoveSelectionCommand,
     SheetSkeletonManagerService,
 } from '@univerjs/sheets-ui';
-import { IContextMenuService, IEditorService, ILayoutService, KeyCode, MetaKeys, SetEditorResizeOperation } from '@univerjs/ui';
+import { IContextMenuService, IEditorService, KeyCode, MetaKeys, SetEditorResizeOperation } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
 
 import type { ISelectEditorFormulaOperationParam } from '../commands/operations/editor-formula.operation';

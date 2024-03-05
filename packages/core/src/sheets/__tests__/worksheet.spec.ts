@@ -102,19 +102,19 @@ describe('Test worksheet', () => {
 
             const value1 = iterator1.next();
             expect(value1.done).toBeFalsy();
-            expect(value1.value).toEqual({ v: 'A1' });
+            expect(value1.value.value).toEqual({ v: 'A1' });
 
             const value2 = iterator1.next();
             expect(value2.done).toBeFalsy();
-            expect(value2.value).toEqual({ v: 'B1:C1' });
+            expect(value2.value.value).toEqual({ v: 'B1:C1' });
 
             const value3 = iterator1.next();
             expect(value3.done).toBeFalsy();
-            expect(value3.value).toEqual({ v: 'B2' });
+            expect(value3.value.value).toEqual({ v: 'B2' });
 
             const value4 = iterator1.next();
             expect(value4.done).toBeFalsy();
-            expect(value4.value).toEqual({ v: 'C2' });
+            expect(value4.value.value).toEqual({ v: 'C2' });
 
             const value5 = iterator1.next();
             expect(value5.done).toBeTruthy();
@@ -186,23 +186,23 @@ describe('Test worksheet', () => {
 
             const value1 = iterator1.next();
             expect(value1.done).toBeFalsy();
-            expect(value1.value).toEqual({ v: 'A1:B2' });
+            expect(value1.value.value).toEqual({ v: 'A1:B2' });
 
             const value2 = iterator1.next();
             expect(value2.done).toBeFalsy();
-            expect(value2.value).toEqual({ v: 'A3' });
+            expect(value2.value.value).toEqual({ v: 'A3' });
 
             const value3 = iterator1.next();
             expect(value3.done).toBeFalsy();
-            expect(value3.value).toEqual({ v: 'B3' });
+            expect(value3.value.value).toEqual({ v: 'B3' });
 
             const value4 = iterator1.next();
             expect(value4.done).toBeFalsy();
-            expect(value4.value).toEqual({ v: 'C1' });
+            expect(value4.value.value).toEqual({ v: 'C1' });
 
             const value5 = iterator1.next();
             expect(value5.done).toBeFalsy();
-            expect(value5.value).toEqual({ v: 'C2' });
+            expect(value5.value.value).toEqual({ v: 'C2' });
 
             const value6 = iterator1.next();
             expect(value6.done).toBeTruthy();

@@ -67,10 +67,10 @@ export const iconSetCalculateUnit: ICalculateUnit = {
                 const item = splitValue[index];
                 const start = { ...item };
                 const end = { ...item };
-                const iconType = ruleConfig.config[index].iconType;
+                const { iconId, iconType } = ruleConfig.config[index];
                 if (index === 0) {
                     if (compareWithNumber(item, value)) {
-                        computeResult.setValue(row, col, { iconId: `${index}`, iconType, isShowValue });
+                        computeResult.setValue(row, col, { iconId, iconType, isShowValue });
                         return;
                     }
                 } else {
@@ -79,7 +79,7 @@ export const iconSetCalculateUnit: ICalculateUnit = {
                     end.value = pre.value;
                 }
                 if (compareWithNumber(start, value) && compareWithNumber(end, value)) {
-                    computeResult.setValue(row, col, { iconId: `${index}`, iconType, isShowValue });
+                    computeResult.setValue(row, col, { iconId, iconType, isShowValue });
                     return;
                 }
             }

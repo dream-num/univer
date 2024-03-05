@@ -88,13 +88,13 @@ export class ConditionalFormatIcon extends SheetExtension {
     private _init() {
         for (const type in iconMap) {
             const list = iconMap[type as IIconType];
-            list.forEach((item) => {
-                const key = this._createKey(type as IIconType, item.id);
+            list.forEach((base64, index) => {
+                const key = this._createKey(type as IIconType, String(index));
                 const image = new Image();
                 image.onload = () => {
                     this._imageMap.set(key, image);
                 };
-                image.src = item.image;
+                image.src = base64;
             });
         }
     }

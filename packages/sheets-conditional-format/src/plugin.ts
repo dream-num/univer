@@ -75,6 +75,7 @@ export class SheetsConditionalFormatPlugin extends Plugin {
     ) {
         super(SHEET_CONDITION_FORMAT_PLUGIN);
         this._initCommand();
+        window.ttt = this._commandService;
     }
 
     override onStarting(): void {

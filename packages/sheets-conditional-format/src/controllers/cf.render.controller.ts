@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { Inject } from '@wendellhu/redi';
@@ -26,13 +26,14 @@ import { ConditionalFormatService } from '../services/conditional-format.service
 import { ConditionalFormatViewModel } from '../models/conditional-format-view-model';
 import { ConditionalFormatRuleModel } from '../models/conditional-format-rule-model';
 import { DataBar, dataBarUKey } from '../render/data-bar.render';
-import type { IDataBarCellData } from '../render/type';
+
+import { ConditionalFormatIcon, IconUKey } from '../render/icon.render';
+import type { IConditionalFormatCellData } from '../render/type';
 
 @OnLifecycle(LifecycleStages.Rendered, RenderController)
 export class RenderController extends Disposable {
     constructor(@Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
         @Inject(ConditionalFormatService) private _conditionalFormatService: ConditionalFormatService,
-        @Inject(ICommandService) private _commandService: ICommandService,
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
         @Inject(IRenderManagerService) private _renderManagerService: IRenderManagerService,
         @Inject(ConditionalFormatViewModel) private _conditionalFormatViewModel: ConditionalFormatViewModel,
@@ -41,21 +42,29 @@ export class RenderController extends Disposable {
         super();
         this._initViewModelInterceptor();
         this._initSkeleton();
-        this._initRenderDataBar();
+        this._initRender();
     }
 
-    _initRenderDataBar() {
-        this._renderManagerService.currentRender$.subscribe((renderId) => {
-            const workbook = renderId && this._univerInstanceService.getUniverSheetInstance(renderId);
-            const render = workbook && this._renderManagerService.getRenderById(renderId);
-            if (render) {
-                const spreadsheetRender = render.mainComponent as Spreadsheet;
-                if (!spreadsheetRender.getExtensionByKey(dataBarUKey)) {
-                    const renderDataBar = new DataBar();
-                    spreadsheetRender.register(renderDataBar);
-                }
+    _initRender() {
+        const list: [string, new () => any][] = [[dataBarUKey, DataBar], [IconUKey, ConditionalFormatIcon]];
+        const register = (renderId: string) => {
+            const render = renderId && this._renderManagerService.getRenderById(renderId);
+            const spreadsheetRender = render && render.mainComponent as Spreadsheet;
+            if (spreadsheetRender) {
+                list.forEach(([key, Instance]) => {
+                    if (!spreadsheetRender.getExtensionByKey(key)) {
+                        spreadsheetRender.register(new Instance());
+                    }
+                });
             }
-        });
+        };
+        this.disposeWithMe(this._renderManagerService.currentRender$.subscribe((renderId) => {
+            renderId && register(renderId);
+        }));
+        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
+        if (workbook) {
+            register(workbook.getUnitId());
+        }
     }
 
     _initSkeleton() {
@@ -89,7 +98,7 @@ export class RenderController extends Disposable {
     }
 
     _initViewModelInterceptor() {
-        this.disposeWithMe(this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, { priority: 99, handler: (cell, context, next) => {
+        this.disposeWithMe(this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, { handler: (cell, context, next) => {
             const result = this._conditionalFormatService.composeStyle(context.unitId, context.subUnitId, context.row, context.col);
             if (!result) {
                 return next(cell);
@@ -97,12 +106,19 @@ export class RenderController extends Disposable {
             const styleMap = context.workbook.getStyles();
             const defaultStyle = (typeof cell?.s === 'string' ? styleMap.get(cell?.s) : cell?.s) || {};
             const s = { ...defaultStyle };
-            const cloneCell = { ...cell, s } as IDataBarCellData;
+            const cloneCell = { ...cell, s } as IConditionalFormatCellData;
             if (result.style) {
                 Object.assign(s, result.style);
             }
-            if (result.dataBar && result.dataBar.color) {
+            if (result.dataBar) {
                 cloneCell.dataBar = result.dataBar;
+            }
+            if (result.iconSet) {
+                cloneCell.iconSet = result.iconSet;
+                if (!result.iconSet.isShowValue) {
+                    cloneCell._originV = cloneCell.v;
+                    cloneCell.v = '';
+                }
             }
 
             return next(cloneCell);

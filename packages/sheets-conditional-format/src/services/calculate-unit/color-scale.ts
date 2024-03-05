@@ -39,6 +39,9 @@ const handleRgbA = (rgb: IRgbColor): Required<IRgbColor> => {
         return { ...rgb, a: 1 };
     }
 };
+
+const emptyStyle = '';
+
 export const colorScaleCellCalculateUnit: ICalculateUnit = {
     type: RuleType.colorScale,
     handle: async (rule: IConditionFormatRule, context) => {
@@ -57,7 +60,6 @@ export const colorScaleCellCalculateUnit: ICalculateUnit = {
             });
         });
 
-        const emptyStyle = '';
         const computeResult = new ObjectMatrix< string >();
         rule.ranges.forEach((range) => {
             Range.foreach(range, (row, col) => {

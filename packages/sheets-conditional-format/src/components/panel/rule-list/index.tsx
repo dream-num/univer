@@ -51,6 +51,9 @@ const getRuleDescribe = (rule: IConditionFormatRule, localeService: LocaleServic
         case RuleType.dataBar:{
             return localeService.t('sheet.cf.ruleType.dataBar');
         }
+        case RuleType.iconSet:{
+            return localeService.t('sheet.cf.ruleType.iconSet');
+        }
         case RuleType.highlightCell:{
             switch (ruleConfig.subType) {
                 case SubRuleType.average:{

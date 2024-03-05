@@ -16,6 +16,7 @@
 
 import type { IRange, IStyleBase } from '@univerjs/core';
 import type { NumberOperator, RuleType, SubRuleType, TextOperator, TimePeriodOperator, ValueType } from '../base/const';
+import type { IIconType } from './icon-map';
 
 export interface IBaseCfRule {
     type: string;
@@ -91,9 +92,15 @@ export interface IColorScale extends IBaseCfRule {
     config: { index: number; color: string; value: IValueConfig }[];
 }
 
+export interface IIconSet extends IBaseCfRule {
+    type: RuleType.iconSet;
+    isShowValue: boolean;
+    config: { operator: NumberOperator;value: IValueConfig;iconType: IIconType; iconId: string }[];
+}
+
 export type IConditionalFormatRuleConfig = IColorScale | IDataBar | IUniqueValuesHighlightCell |
 IDuplicateValuesHighlightCell | IRankHighlightCell | ITextHighlightCell |
-ITimePeriodHighlightCell | INumberHighlightCell | IAverageHighlightCell | IFormulaHighlightCell;
+ITimePeriodHighlightCell | INumberHighlightCell | IAverageHighlightCell | IFormulaHighlightCell | IIconSet;
 export interface IConditionFormatRule<C = IConditionalFormatRuleConfig> {
     ranges: IRange [];
     cfId: string;

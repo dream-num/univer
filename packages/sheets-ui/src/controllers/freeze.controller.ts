@@ -29,6 +29,8 @@ import {
 import type { IMouseEvent, IPointerEvent, IScrollObserverParam, Viewport } from '@univerjs/engine-render';
 import { CURSOR_TYPE, IRenderManagerService, Rect, TRANSFORM_CHANGE_OBSERVABLE_TYPE, Vector2 } from '@univerjs/engine-render';
 import type {
+    IInsertColCommandParams,
+    IInsertRowCommandParams,
     IMoveColsCommandParams,
     IMoveRowsCommandParams,
     IRemoveRowColCommandParams,
@@ -39,8 +41,10 @@ import type {
     ISetWorksheetRowHeightMutationParams,
 } from '@univerjs/sheets';
 import {
+    InsertColCommand,
     InsertRangeMoveDownCommand,
     InsertRangeMoveRightCommand,
+    InsertRowCommand,
     MoveColsCommand,
     MoveRowsCommand,
     RemoveColCommand,
@@ -153,7 +157,6 @@ export class FreezeController extends Disposable {
 
     override dispose(): void {
         super.dispose();
-        this._clearFreeze();
     }
 
     private _initialize() {
@@ -1162,6 +1165,36 @@ export class FreezeController extends Disposable {
                             redos: [{ id: SetFrozenMutation.id, params: redoMutationParams }],
                         };
                     };
+
+                    if (command.id === InsertRowCommand.id) {
+                        const params = command.params as IInsertRowCommandParams;
+                        const range = params.range;
+                        const insertCount = range.endRow - range.startRow + 1;
+                        if (range.startRow <= freeze.startRow) {
+                            const newFreeze: IFreeze = {
+                                ...freeze,
+                                startRow: Math.max(1, freeze.startRow + insertCount),
+                                ySplit: Math.max(1, freeze.ySplit + insertCount),
+                            };
+
+                            return createFreezeMutationAndRefresh(newFreeze);
+                        }
+                    }
+
+                    if (command.id === InsertColCommand.id) {
+                        const params = command.params as IInsertColCommandParams;
+                        const range = params.range;
+                        const insertCount = range.endColumn - range.startColumn + 1;
+                        if (range.startColumn <= freeze.startColumn) {
+                            const newFreeze: IFreeze = {
+                                ...freeze,
+                                startColumn: Math.max(1, freeze.startColumn + insertCount),
+                                xSplit: Math.max(1, freeze.xSplit + insertCount),
+                            };
+
+                            return createFreezeMutationAndRefresh(newFreeze);
+                        }
+                    }
 
                     if (command.id === MoveColsCommand.id) {
                         const selections = this._selectionManagerService.getSelections();

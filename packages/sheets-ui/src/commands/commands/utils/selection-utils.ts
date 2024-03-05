@@ -18,6 +18,12 @@ import type { ICellData, IRange, ISelection, ISelectionCell, Nullable, ObjectMat
 import { Direction, getReverseDirection, RANGE_TYPE, Rectangle } from '@univerjs/core';
 import { alignToMergedCellsBorders } from '@univerjs/sheets';
 
+export enum MergeType {
+    MergeAll = 'mergeAll',
+    MergeVertical = 'mergeVertical',
+    MergeHorizontal = 'mergeHorizontal',
+}
+
 export interface IExpandParams {
     left?: boolean;
     right?: boolean;
@@ -707,4 +713,32 @@ export function isAllColumnsCovered(allColumnRanges: IRange[], ranges: IRange[])
         }
         return true;
     });
+}
+
+export function getMergeableSelectionsByType(type: MergeType, selections: Nullable<IRange[]>): Nullable<IRange[]> {
+    if (!selections) return null;
+    if (type === MergeType.MergeAll) {
+        return selections.filter((selection) => {
+            if (selection.startRow === selection.endRow && selection.startColumn === selection.endColumn) {
+                return false;
+            }
+            return true;
+        });
+    } else if (type === MergeType.MergeVertical) {
+        return selections.filter((selection) => {
+            if (selection.startRow === selection.endRow) {
+                return false;
+            }
+            return true;
+        });
+    } else if (type === MergeType.MergeHorizontal) {
+        return selections.filter((selection) => {
+            if (selection.startColumn === selection.endColumn) {
+                return false;
+            }
+            return true;
+        });
+    }
+
+    return selections;
 }

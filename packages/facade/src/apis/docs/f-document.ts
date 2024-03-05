@@ -60,7 +60,7 @@ export class FDocument {
      * Adds the specified text to the end of this text region.
      * @param text
      */
-    appendText(text: string): void {
+    appendText(text: string): Promise<boolean> {
         const unitId = this.id;
 
         const { body } = this.getSnapshot();
@@ -89,7 +89,7 @@ export class FDocument {
             },
         ];
 
-        this._commandService.executeCommand(InsertCommand.id, {
+        return this._commandService.executeCommand(InsertCommand.id, {
             unitId,
             body: {
                 dataStream: text,

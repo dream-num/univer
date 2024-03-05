@@ -16,15 +16,15 @@
 
 import { describe, expect, it } from 'vitest';
 import { BooleanNumber } from '@univerjs/core';
-import { covertTextRunToHtml, UDMToHtmlService } from '../convertor';
+import { convertBodyToHtml, covertTextRunToHtml, getBodySliceHtml, UDMToHtmlService } from '../convertor';
 
 function getTestBody() {
     return {
-        dataStream: '荷塘月色\r作者：朱自清\r\n',
+        dataStream: '荷塘月色\r作者：朱自清',
         textRuns: [
             {
-                st: 0,
-                ed: 4,
+                st: 1,
+                ed: 3,
                 ts: {
                     fs: 24,
                     ff: 'Microsoft YaHei',
@@ -32,18 +32,6 @@ function getTestBody() {
                         rgb: 'rgb(0, 0, 0)',
                     },
                     bl: BooleanNumber.TRUE,
-                },
-            },
-            {
-                st: 5,
-                ed: 11,
-                ts: {
-                    fs: 18,
-                    ff: 'Microsoft YaHei',
-                    cl: {
-                        rgb: 'rgb(30, 30, 30)',
-                    },
-                    bl: BooleanNumber.FALSE,
                 },
             },
         ],
@@ -63,11 +51,6 @@ function getTestBody() {
                     lineSpacing: 2,
                     spaceBelow: 0,
                 },
-            },
-        ],
-        sectionBreaks: [
-            {
-                startIndex: 12,
             },
         ],
     };
@@ -108,8 +91,31 @@ describe('test case in html and udm convert', () => {
 
     it('Should convert textRun to Html', () => {
         const documentBody = getTestBody();
-        const expectedHtml = '<span style="font-family: Microsoft YaHei; color: rgb(0, 0, 0); font-size: 24pt;"><strong>荷塘月色</strong></span>';
+        const expectedHtml = '<span style="font-family: Microsoft YaHei; color: rgb(0, 0, 0); font-size: 24pt;"><strong>塘月</strong></span>';
 
         expect(covertTextRunToHtml(documentBody.dataStream, documentBody.textRuns[0])).toBe(expectedHtml);
+    });
+
+    it('Should get getBodySliceHtml', () => {
+        const documentBody = getTestBody();
+        let startIndex = 1;
+        let endIndex = 3;
+
+        let expectedHtml = '<span style="font-family: Microsoft YaHei; color: rgb(0, 0, 0); font-size: 24pt;"><strong>塘月</strong></span>';
+
+        expect(getBodySliceHtml(documentBody, startIndex, endIndex)).toEqual(expectedHtml);
+
+        startIndex = 0;
+        endIndex = 4;
+
+        expectedHtml = '荷<span style="font-family: Microsoft YaHei; color: rgb(0, 0, 0); font-size: 24pt;"><strong>塘月</strong></span>色';
+        expect(getBodySliceHtml(documentBody, startIndex, endIndex)).toEqual(expectedHtml);
+    });
+
+    it('Should convert document body To Html(convertBodyToHtml)', () => {
+        const documentBody = getTestBody();
+        const expectedHtml = '<p class="UniverNormal" style="margin-top: 10px; margin-bottom: 0px;">荷<span style="font-family: Microsoft YaHei; color: rgb(0, 0, 0); font-size: 24pt;"><strong>塘月</strong></span>色</p><p class="UniverNormal" style="margin-top: 10px; margin-bottom: 0px;">作者：朱自清</p>';
+
+        expect(convertBodyToHtml(documentBody)).toEqual(expectedHtml);
     });
 });

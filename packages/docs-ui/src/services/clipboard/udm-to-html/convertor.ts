@@ -117,7 +117,7 @@ export function convertBodyToHtml(body: IDocumentBody, withParagraphInfo: boolea
     if (withParagraphInfo && body.paragraphs?.length) {
         const { dataStream, paragraphs = [] } = body;
         let result = '';
-        let cursorIndex = 0;
+        let cursorIndex = -1;
         for (const paragraph of paragraphs) {
             const { startIndex, paragraphStyle = {} } = paragraph;
             const { spaceAbove, spaceBelow } = paragraphStyle;
@@ -141,11 +141,11 @@ export function convertBodyToHtml(body: IDocumentBody, withParagraphInfo: boolea
 
             if (startIndex > cursorIndex + 1) {
                 result += `<p class="UniverNormal" ${
-                    style.length ? `style="${style.join(';')}"` : ''
-                }>${getBodySliceHtml(body, cursorIndex, startIndex)}</p>`;
+                    style.length ? `style="${style.join('; ')};"` : ''
+                }>${getBodySliceHtml(body, cursorIndex + 1, startIndex)}</p>`;
             } else {
                 result += `<p class="UniverNormal" ${
-                    style.length ? `style="${style.join(';')}"` : ''
+                    style.length ? `style="${style.join('; ')};"` : ''
                 }></p>`;
             }
 

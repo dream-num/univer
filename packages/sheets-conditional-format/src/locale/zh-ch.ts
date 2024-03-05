@@ -113,6 +113,7 @@ export default {
                 dataBar: '数据条',
                 colorScale: '色阶',
                 formula: '自定义公式',
+                iconSet: '图标集',
             },
             subRuleType: {
                 uniqueValues: '唯一值',

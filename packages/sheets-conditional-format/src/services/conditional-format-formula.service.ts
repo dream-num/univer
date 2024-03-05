@@ -270,9 +270,7 @@ export class ConditionalFormatFormulaService extends Disposable {
             return { status: FormulaResultStatus.WAIT };
         }
 
-        if (item.status === FormulaResultStatus.ERROR) {
-            return { status: FormulaResultStatus.ERROR };
-        }
+        return { status: FormulaResultStatus.ERROR };
     }
 
     _createFormulaId(unitId: string, subUnitId: string) {

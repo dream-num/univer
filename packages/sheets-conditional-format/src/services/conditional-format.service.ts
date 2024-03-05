@@ -27,12 +27,14 @@ import { ConditionalFormatRuleModel } from '../models/conditional-format-rule-mo
 import { ConditionalFormatViewModel } from '../models/conditional-format-view-model';
 import { RuleType, SHEET_CONDITION_FORMAT_PLUGIN } from '../base/const';
 import type { IConditionFormatRule, IHighlightCell, IRuleModelJson } from '../models/type';
-import type { IDataBarRenderParams } from '../render/type';
+import type { IDataBarCellData, IDataBarRenderParams, IIconSetCellData, IIconSetRenderParams } from '../render/type';
 import { getCellValue, isNullable } from './calculate-unit/utils';
 import { dataBarCellCalculateUnit } from './calculate-unit/data-bar';
 import { highlightCellCalculateUnit } from './calculate-unit/highlight-cell';
 import { colorScaleCellCalculateUnit } from './calculate-unit/color-scale';
+import { iconSetCalculateUnit } from './calculate-unit/icon-set';
 import type { ICalculateUnit, IContext } from './calculate-unit/type';
+import { EMPTY_STYLE } from './calculate-unit/type';
 
 type ComputeStatus = 'computing' | 'end' | 'error';
 
@@ -68,6 +70,7 @@ export class ConditionalFormatService extends Disposable {
         this._registerCalculationUnit(dataBarCellCalculateUnit);
         this._registerCalculationUnit(colorScaleCellCalculateUnit);
         this._registerCalculationUnit(highlightCellCalculateUnit);
+        this._registerCalculationUnit(iconSetCalculateUnit);
     }
 
     public composeStyle(unitId: string, subUnitId: string, row: number, col: number) {
@@ -90,17 +93,22 @@ export class ConditionalFormatService extends Disposable {
                     ruleCacheItem!.ruleCache && Tools.deepMerge(pre, { style: ruleCacheItem!.ruleCache });
                 } else if (type === RuleType.colorScale) {
                     const ruleCache = ruleCacheItem?.ruleCache as string;
-                    if (ruleCache && ruleCache !== '') {
+                    if (ruleCache) {
                         pre.style = { ...(pre.style ?? {}), bg: { rgb: ruleCache } };
                     }
                 } else if (type === RuleType.dataBar) {
                     const ruleCache = ruleCacheItem?.ruleCache as IDataBarRenderParams;
-                    if (ruleCache && Object.keys(ruleCache).length > 0) {
+                    if (ruleCache && ruleCache !== EMPTY_STYLE) {
                         pre.dataBar = ruleCache;
+                    }
+                } else if (type === RuleType.iconSet) {
+                    const ruleCache = ruleCacheItem?.ruleCache as IIconSetRenderParams;
+                    if (ruleCache && ruleCache !== EMPTY_STYLE) {
+                        pre.iconSet = ruleCache;
                     }
                 }
                 return pre;
-            }, {} as { style?: IHighlightCell['style'] } & { dataBar?: IDataBarRenderParams });
+            }, {} as { style?: IHighlightCell['style'] } & IDataBarCellData & IIconSetCellData);
             return result;
         }
         return null;

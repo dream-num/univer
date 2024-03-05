@@ -30,3 +30,6 @@ export interface ICalculateUnit<R = any> {
     type: RuleType;
     handle: (rule: IConditionFormatRule, context: IContext) => Promise<ObjectMatrix<R>>;
 }
+
+export const EMPTY_STYLE = {} as unknown;
+Object.freeze(EMPTY_STYLE);

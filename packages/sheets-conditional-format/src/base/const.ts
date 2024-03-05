@@ -55,6 +55,7 @@ export enum RuleType {
     highlightCell = 'highlightCell',
     dataBar = 'dataBar',
     colorScale = 'colorScale',
+    iconSet = 'iconSet',
 }
 export enum SubRuleType {
     uniqueValues = 'uniqueValues',

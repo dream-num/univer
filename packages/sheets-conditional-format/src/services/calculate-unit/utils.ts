@@ -17,8 +17,8 @@
 import type { ICellData } from '@univerjs/core';
 import { ObjectMatrix, Range } from '@univerjs/core';
 import type { IConditionFormatRule, IValueConfig } from '../../models/type';
-import { ValueType } from '../../base/const';
-import { ConditionalFormatFormulaService } from '../conditional-format-formula.service';
+import { NumberOperator, ValueType } from '../../base/const';
+import { ConditionalFormatFormulaService, FormulaResultStatus } from '../conditional-format-formula.service';
 import { ConditionalFormatViewModel } from '../../models/conditional-format-view-model';
 import type { IContext } from './type';
 
@@ -93,7 +93,10 @@ export const getValueByType = (value: IValueConfig, matrix: ObjectMatrix< number
                     max = value;
                 }
             });
-            return max;
+            return {
+                status: FormulaResultStatus.SUCCESS,
+                result: max,
+            };
         }
         case ValueType.min:{
             let min: number | undefined;
@@ -105,7 +108,10 @@ export const getValueByType = (value: IValueConfig, matrix: ObjectMatrix< number
                     min = value;
                 }
             });
-            return min;
+            return {
+                status: FormulaResultStatus.SUCCESS,
+                result: min,
+            };
         }
         case ValueType.percent:{
             let max: number | undefined;
@@ -124,7 +130,10 @@ export const getValueByType = (value: IValueConfig, matrix: ObjectMatrix< number
             });
 
             const length = (max || 0) - (min || 0);
-            return (length * (Number(value.value) || 0) / 100) + (min || 0);
+            return {
+                status: FormulaResultStatus.SUCCESS,
+                result: (length * (Number(value.value) || 0) / 100) + (min || 0),
+            };
         }
         case ValueType.percentile:{
             const list = matrix.toNativeArray().sort((a, b) => a - b);
@@ -132,7 +141,10 @@ export const getValueByType = (value: IValueConfig, matrix: ObjectMatrix< number
             const intIndex = Math.floor(index);
             const decimalIndex = index - intIndex;
             const result = list[intIndex] + (list[Math.min(intIndex + 1, list.length - 1)] - list[intIndex]) * decimalIndex;
-            return result;
+            return {
+                status: FormulaResultStatus.SUCCESS,
+                result,
+            };
         }
 
         case ValueType.formula:{
@@ -145,7 +157,10 @@ export const getValueByType = (value: IValueConfig, matrix: ObjectMatrix< number
         }
         case ValueType.num:{
             const v = Number(value.value);
-            return Number.isNaN(v) ? 0 : v;
+            return {
+                status: FormulaResultStatus.SUCCESS,
+                result: Number.isNaN(v) ? 0 : v,
+            };
         }
     }
 };
@@ -164,4 +179,60 @@ export const getCacheStyleMatrix = <S = any>(unitId: string, subUnitId: string, 
         });
     });
     return matrix;
+};
+export const compareWithNumber = (config: { operator: NumberOperator;value: number | [number, number] }, v: number) => {
+    switch (config.operator) {
+        case NumberOperator.between:{
+            const [start, end] = config.value as [number, number];
+            return v >= start && v <= end;
+        }
+        case NumberOperator.notBetween:{
+            const [start, end] = config.value as [number, number];
+            return !(v >= start && v <= end);
+        }
+        case NumberOperator.equal:{
+            const condition = (config.value || 0) as number;
+            return isFloatsEqual(condition, v);
+        }
+        case NumberOperator.notEqual:{
+            const condition = (config.value || 0) as number;
+            return !isFloatsEqual(condition, v);
+        }
+        case NumberOperator.greaterThan:{
+            const condition = (config.value || 0) as number;
+            return v > condition;
+        }
+        case NumberOperator.greaterThanOrEqual:{
+            const condition = (config.value || 0) as number;
+            return v >= condition;
+        }
+        case NumberOperator.lessThan:{
+            const condition = (config.value || 0) as number;
+            return v < condition;
+        }
+        case NumberOperator.lessThanOrEqual:{
+            const condition = (config.value || 0) as number;
+            return v <= condition;
+        }
+        default:{
+            return false;
+        }
+    }
+};
+export const getOppositeOperator = (operator: NumberOperator) => {
+    switch (operator) {
+        case NumberOperator.greaterThan:{
+            return NumberOperator.lessThanOrEqual;
+        }
+        case NumberOperator.greaterThanOrEqual:{
+            return NumberOperator.lessThan;
+        }
+        case NumberOperator.lessThan:{
+            return NumberOperator.greaterThanOrEqual;
+        }
+        case NumberOperator.lessThanOrEqual:{
+            return NumberOperator.greaterThan;
+        }
+    }
+    return operator;
 };

@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
+import type { IStyleBase } from '@univerjs/core';
 import { CellValueType, ObjectMatrix, Range, Rectangle, Tools } from '@univerjs/core';
 import dayjs from 'dayjs';
 import { deserializeRangeWithSheet, generateStringWithSequence, LexerTreeBuilder, sequenceNodeType, serializeRange } from '@univerjs/engine-formula';
 import { NumberOperator, RuleType, SubRuleType, TextOperator, TimePeriodOperator } from '../../base/const';
 import type { IAverageHighlightCell, IConditionFormatRule, IFormulaHighlightCell, IHighlightCell, INumberHighlightCell, IRankHighlightCell, ITextHighlightCell, ITimePeriodHighlightCell } from '../../models/type';
 import { ConditionalFormatFormulaService, FormulaResultStatus } from '../conditional-format-formula.service';
-import { getCellValue, isFloatsEqual, isNullable, serialTimeToTimestamp } from './utils';
+import { compareWithNumber, getCellValue, isFloatsEqual, isNullable, serialTimeToTimestamp } from './utils';
 import type { ICalculateUnit } from './type';
-
-const EMPTY_STYLE = {};
-Object.freeze(EMPTY_STYLE);
+import { EMPTY_STYLE } from './type';
 
 export const highlightCellCalculateUnit: ICalculateUnit = {
     type: RuleType.highlightCell,
@@ -113,44 +112,7 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
                         return false;
                     }
                     const subRuleConfig = ruleConfig as INumberHighlightCell;
-
-                    switch (subRuleConfig.operator) {
-                        case NumberOperator.between:{
-                            const [start, end] = subRuleConfig.value;
-                            return v >= start && v <= end;
-                        }
-                        case NumberOperator.notBetween:{
-                            const [start, end] = subRuleConfig.value;
-                            return !(v >= start && v <= end);
-                        }
-                        case NumberOperator.equal:{
-                            const condition = subRuleConfig.value || 0;
-                            return isFloatsEqual(condition, v);
-                        }
-                        case NumberOperator.notEqual:{
-                            const condition = subRuleConfig.value || 0;
-                            return !isFloatsEqual(condition, v);
-                        }
-                        case NumberOperator.greaterThan:{
-                            const condition = subRuleConfig.value || 0;
-                            return v > condition;
-                        }
-                        case NumberOperator.greaterThanOrEqual:{
-                            const condition = subRuleConfig.value || 0;
-                            return v >= condition;
-                        }
-                        case NumberOperator.lessThan:{
-                            const condition = subRuleConfig.value || 0;
-                            return v < condition;
-                        }
-                        case NumberOperator.lessThanOrEqual:{
-                            const condition = subRuleConfig.value || 0;
-                            return v <= condition;
-                        }
-                        default:{
-                            return false;
-                        }
-                    }
+                    return compareWithNumber({ operator: subRuleConfig.operator, value: subRuleConfig.value || 0 }, v);
                 }
                 case SubRuleType.text:{
                     const subRuleConfig = ruleConfig as ITextHighlightCell;
@@ -358,14 +320,14 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
                 }
             }
         };
-        const computeResult = new ObjectMatrix();
+        const computeResult = new ObjectMatrix<IStyleBase>();
         rule.ranges.forEach((range) => {
             Range.foreach(range, (row, col) => {
                 if (check(row, col)) {
                     computeResult.setValue(row, col, ruleConfig.style);
                 } else {
                     // Returns an empty property indicating that it has been processed.
-                    computeResult.setValue(row, col, EMPTY_STYLE);
+                    computeResult.setValue(row, col, EMPTY_STYLE as IStyleBase);
                 }
             });
         });

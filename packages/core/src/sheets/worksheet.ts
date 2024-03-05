@@ -537,5 +537,126 @@ export class Worksheet {
 
     // #region iterators
 
+    // NOTE: performance intensive. Should keep an eye on methods in this region.
+
+    /**
+     * Iterate a range row by row.
+     *
+     * Performance intensive.
+     */
+    iterateByRow(range: IRange): Iterator<Readonly<ICell>> {
+        const { startRow, startColumn, endRow, endColumn } = range;
+
+        // eslint-disable-next-line ts/no-this-alias
+        const worksheet = this;
+
+        let rowIndex = startRow;
+        let columnIndex = startColumn;
+
+        return {
+            next(): IteratorResult<Readonly<ICell>> {
+                while (true) {
+                    if (columnIndex > endColumn) {
+                        rowIndex += 1;
+                        columnIndex = startColumn;
+                    }
+
+                    if (rowIndex > endRow) {
+                        return { done: true, value: undefined };
+                    }
+
+                    // search for the next cell that is not non-top-left cell of a merged cell
+                    const cellValue = worksheet.getCell(rowIndex, columnIndex);
+                    const mergedCell = worksheet.getMergedCell(rowIndex, columnIndex);
+                    if (
+                        mergedCell &&
+                        (!cellValue || rowIndex !== mergedCell.startRow || columnIndex !== mergedCell.startColumn)
+                    ) {
+                        columnIndex = mergedCell.endColumn + 1;
+                        // continue searching
+                    } else if (!cellValue) {
+                        columnIndex += 1;
+                        // continue searching
+                    } else {
+                        const value: ICell = { row: rowIndex, col: columnIndex, value: cellValue };
+                        if (mergedCell) {
+                            value.colSpan = mergedCell.endColumn - mergedCell.startColumn + 1;
+                            value.rowSpan = mergedCell.endRow - mergedCell.startRow + 1;
+                        }
+
+                        // we still need to move to the next position by leave searching to the next time `next` get called
+                        columnIndex += 1;
+                        return { done: false, value };
+                    }
+                }
+            },
+        };
+    }
+
+    /**
+     * Iterate a range column by column. This is pretty similar to `iterateByRow` but with different order.
+     *
+     * Performance intensive.
+     */
+    iterateByColumn(range: IRange): Iterator<ICell> {
+        const { startRow, startColumn, endRow, endColumn } = range;
+
+        // eslint-disable-next-line ts/no-this-alias
+        const worksheet = this;
+
+        let rowIndex = startRow;
+        let columnIndex = startColumn;
+
+        return {
+            next(): IteratorResult<Readonly<ICell>> {
+                while (true) {
+                    if (rowIndex > endRow) {
+                        columnIndex += 1;
+                        rowIndex = startRow;
+                    }
+
+                    if (columnIndex > endColumn) {
+                        return { done: true, value: undefined };
+                    }
+
+                    // search for the next cell that is not non-top-left cell of a merged cell
+                    const cellValue = worksheet.getCell(rowIndex, columnIndex);
+                    const mergedCell = worksheet.getMergedCell(rowIndex, columnIndex);
+                    if (
+                        mergedCell &&
+                        (!cellValue || rowIndex !== mergedCell.startRow || columnIndex !== mergedCell.startColumn)
+                    ) {
+                        rowIndex = mergedCell.endRow + 1;
+                        // continue searching
+                    } else if (!cellValue) {
+                        rowIndex += 1;
+                        // continue searching
+                    } else {
+                        const value: ICell = { row: rowIndex, col: columnIndex, value: cellValue };
+                        if (mergedCell) {
+                            value.colSpan = mergedCell.endColumn - mergedCell.startColumn + 1;
+                            value.rowSpan = mergedCell.endRow - mergedCell.startRow + 1;
+                        }
+
+                        // we still need to move to the next position by leave searching to the next time `next` get called
+                        rowIndex += 1;
+                        return { done: false, value };
+                    }
+                }
+            },
+        };
+    }
+
     // #endregion
+}
+
+/**
+ * A cell info including its span (if it is the top-left cell of a merged cell).
+ */
+export interface ICell {
+    row: number;
+    col: number;
+    rowSpan?: number;
+    colSpan?: number;
+    value: ICellData;
 }

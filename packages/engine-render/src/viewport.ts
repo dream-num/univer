@@ -445,6 +445,8 @@ export class Viewport {
                 x /= scaleX;
             } else if (this.actualScrollX !== undefined) {
                 x = this.actualScrollX;
+            } else {
+                x = 0;
             }
 
             if (this._scrollBar.ratioScrollY !== 0) {
@@ -453,6 +455,8 @@ export class Viewport {
                 y /= scaleY;
             } else if (this.actualScrollY !== undefined) {
                 y = this.actualScrollY;
+            } else {
+                y = 0;
             }
 
             // console.log(y, this._scrollBar.miniThumbRatioY);
@@ -461,10 +465,14 @@ export class Viewport {
         } else {
             if (this.actualScrollX !== undefined) {
                 x = this.actualScrollX;
+            } else {
+                x = 0;
             }
 
             if (this.actualScrollY !== undefined) {
                 y = this.actualScrollY;
+            } else {
+                y = 0;
             }
         }
 

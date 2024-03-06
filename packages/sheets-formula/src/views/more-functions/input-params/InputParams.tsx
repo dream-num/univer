@@ -15,7 +15,6 @@
  */
 
 import type { IFunctionInfo, IFunctionParam } from '@univerjs/engine-formula';
-import { RangeSelector } from '@univerjs/sheets-ui';
 import React, { useState } from 'react';
 
 import { FunctionHelp } from '../function-help/FunctionHelp';
@@ -61,10 +60,10 @@ export function InputParams(props: IInputParamsProps) {
                         <div className={styles.formulaInputParamsListItemName}>{item.name}</div>
 
                         <div className={styles.formulaInputParamsListItemSelector}>
-                            <RangeSelector
+                            {/* <RangeSelector
                                 onChange={(range: string) => handleChange(range, i)}
                                 onActive={() => handleActive(i)}
-                            />
+                            /> */}
                         </div>
                     </div>
                 ))}

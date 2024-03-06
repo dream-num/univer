@@ -200,17 +200,17 @@ interface IHelpProps {
 const Help = (props: IHelpProps) => {
     const { prefix, value, active, onClick } = props;
     return (
-        <div>
-            <span>
+        <div className={styles.formulaHelpParam}>
+            <span className={styles.formulaHelpParamPrefix}>
                 {prefix}
                 (
             </span>
             {value &&
                 value.map((item: IFunctionParam, i: number) => (
                     // TODO@Dushusir: more params needs to be active
-                    <span key={i}>
+                    <span key={i} className={styles.formulaHelpParamItem}>
                         <span
-                            className={active === i ? styles.formulaHelpFunctionActive : ''}
+                            className={active === i ? styles.formulaHelpFunctionActive : styles.formulaHelpParamActive}
                             onClick={() => onClick(i)}
                         >
                             {item.repeat ? `[${item.name},...]` : item.name}

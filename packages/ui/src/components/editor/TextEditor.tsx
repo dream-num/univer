@@ -36,32 +36,52 @@ const excludeProps = new Set([
     'onlyInputRange',
     'value',
     'onlyInputContent',
+    'openForSheetUnitId',
+    'openForSheetSubUnitId',
+    'onChange',
+    'onFocus',
+    'onValid',
 ]);
 
 export interface ITextEditorProps {
-    id: string;
-    className?: string;
+    id: string; // unitId
+    className?: string; // Parent class name.
 
-    snapshot?: IDocumentData;
-    resizeCallBack?: (editor: Nullable<HTMLDivElement>) => void;
-    cancelDefaultResizeListener?: boolean;
-    isSheetEditor?: boolean;
-    canvasStyle?: IEditorCanvasStyle;
+    snapshot?: IDocumentData; // The default initialization snapshot for the editor can be simply replaced with the value attribute, for cellEditor and formulaBar
 
-    value?: string;
+    resizeCallBack?: (editor: Nullable<HTMLDivElement>) => void; // Container scale callback.
 
-    isSingle?: boolean;
-    isReadonly?: boolean;
-    onlyInputFormula?: boolean;
-    onlyInputRange?: boolean;
-    onlyInputContent?: boolean;
+    cancelDefaultResizeListener?: boolean; // Disable the default container scaling listener, for cellEditor and formulaBar
+
+    isSheetEditor?: boolean; // Specify whether the editor is bound to a sheet. Currently, there are cellEditor and formulaBar.
+
+    canvasStyle?: IEditorCanvasStyle; // Setting the style of the editor is similar to setting the drawing style of a canvas, and therefore, it should be distinguished from the CSS 'style'. At present, it only supports the 'fontsize' attribute.
+
+    value?: string; // default values.
+
+    isSingle?: boolean; // Set whether the editor allows multiline input, default is true, equivalent to input; false is equivalent to textarea.
+    isReadonly?: boolean; // Set the editor to read-only state.
+
+    onlyInputFormula?: boolean; // Only input formula string
+    onlyInputRange?: boolean; // Only input ref range
+    onlyInputContent?: boolean; // Only plain content can be entered, turning off formula and range input highlighting.
+
+    openForSheetUnitId?: Nullable<string>; //  Configuring which workbook the selector defaults to opening in determines whether the ref includes a [unitId] prefix.
+    openForSheetSubUnitId?: Nullable<string>; // Configuring the default worksheet where the selector opens determines whether the ref includes a [unitId]sheet1 prefix.
+
+    onChange?: (value: Nullable<string>) => void; // Callback for changes in the selector value.
+
+    onFocus?: (state: boolean) => void; // Callback for editor focus.
+
+    onValid?: (state: boolean) => void; // Editor input value validation, currently effective only under onlyRange and onlyFormula conditions.
+
 }
 
 /**
  * The component to render toolbar item label and menu item label.
  * @param props
  */
-export function TextEditor(props: ITextEditorProps & MyComponentProps): JSX.Element | null {
+export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onChange' | 'onFocus'>): JSX.Element | null {
     const {
         id,
         snapshot,
@@ -75,6 +95,15 @@ export function TextEditor(props: ITextEditorProps & MyComponentProps): JSX.Elem
         onlyInputFormula = false,
         onlyInputRange = false,
         onlyInputContent = false,
+
+        openForSheetUnitId,
+        openForSheetSubUnitId,
+
+        onChange,
+
+        onFocus,
+
+        onValid,
     } = props;
 
     const editorService = useDependency(IEditorService);
@@ -107,7 +136,7 @@ export function TextEditor(props: ITextEditorProps & MyComponentProps): JSX.Elem
 
         resizeObserver.observe(editor);
 
-        editorService.register({
+        const registerSubscription = editorService.register({
             editorUnitId: id,
             initialSnapshot: snapshot,
             cancelDefaultResizeListener,
@@ -118,15 +147,18 @@ export function TextEditor(props: ITextEditorProps & MyComponentProps): JSX.Elem
             onlyInputFormula,
             onlyInputRange,
             onlyInputContent,
+            openForSheetUnitId,
+            openForSheetSubUnitId,
         },
         editor);
 
-        const focusStyleSubscription = editorService.focusStyle$.subscribe((unitId: string) => {
+        const focusStyleSubscription = editorService.focusStyle$.subscribe((unitId: Nullable<string>) => {
+            let state = false;
             if (unitId === id) {
-                setActive(true);
-            } else {
-                setActive(false);
+                state = true;
             }
+            setActive(state);
+            onFocus && onFocus(state);
         });
 
         const valueChangeSubscription = editorService.valueChange$.subscribe((editor) => {
@@ -151,14 +183,18 @@ export function TextEditor(props: ITextEditorProps & MyComponentProps): JSX.Elem
                 } else {
                     setValidationContent(localeService.t('textEditor.rangeError'));
                 }
-            }, 100)();
+
+                onValid && onValid(isLegality);
+
+                onChange && onChange(editorService.getValue(id));
+            }, 10)();
         });
 
         // Clean up on unmount
         return () => {
             resizeObserver.unobserve(editor);
 
-            editorService.unRegister(id);
+            registerSubscription.dispose();
 
             focusStyleSubscription?.unsubscribe();
 

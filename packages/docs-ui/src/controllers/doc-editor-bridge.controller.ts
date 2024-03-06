@@ -18,10 +18,11 @@ import type { ICommandInfo, Nullable } from '@univerjs/core';
 import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
-import { ITextSelectionRenderManager, ScrollBar } from '@univerjs/engine-render';
+import { IRenderManagerService, ITextSelectionRenderManager, ScrollBar } from '@univerjs/engine-render';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { CoverContentCommand, DocSkeletonManagerService, RichTextEditingMutation, VIEWPORT_KEY } from '@univerjs/docs';
 import { IEditorService, SetEditorResizeOperation } from '@univerjs/ui';
+import { fromEvent } from 'rxjs';
 
 @OnLifecycle(LifecycleStages.Rendered, DocEditorBridgeController)
 export class DocEditorBridgeController extends Disposable {
@@ -32,7 +33,8 @@ export class DocEditorBridgeController extends Disposable {
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @IEditorService private readonly _editorService: IEditorService,
         @ICommandService private readonly _commandService: ICommandService,
-        @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager
+        @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
 
     ) {
         super();
@@ -159,6 +161,23 @@ export class DocEditorBridgeController extends Disposable {
                 this._textSelectionRenderManager.blur();
             })
         );
+
+        this.disposeWithMe(
+            this._textSelectionRenderManager.onBlur$.subscribe(() => {
+                const unitId = this._currentUniverService.getCurrentUniverDocInstance().getUnitId();
+                if (unitId == null) {
+                    return;
+                }
+
+                const editor = this._editorService.getEditor(unitId);
+
+                if (editor == null || editor.isSheetEditor()) {
+                    return;
+                }
+
+                this._editorService.blur();
+            })
+        );
     }
 
     private _initialFocus() {
@@ -168,6 +187,39 @@ export class DocEditorBridgeController extends Disposable {
                 this._textSelectionRenderManager.addTextRanges([textRange]);
             })
         );
+
+        this.disposeWithMe(
+            fromEvent(window, 'mousedown').subscribe((event) => {
+                const target = event.target as HTMLElement;
+                const hasSearch = target.classList[0];
+                if (hasSearch?.indexOf('univer-formula-search') > -1 || hasSearch?.indexOf('univer-formula-help') > -1 || hasSearch?.indexOf('formula-help-decorator') || hasSearch?.indexOf('univer-formula-help-param')) {
+                    this._editorService.changeSpreadsheetFocusState(true);
+                    event.stopPropagation();
+                    return;
+                }
+                this._editorService.changeSpreadsheetFocusState(false);
+            })
+        );
+
+        // this.disposeWithMe(
+        //     fromEvent(window, 'mousedown').subscribe(() => {
+        //         this._editorService.changeSpreadsheetFocusState(false);
+        //     })
+        // );
+
+        const currentUniverSheet = this._currentUniverService.getAllUniverSheetsInstance();
+        currentUniverSheet.forEach((unit) => {
+            const unitId = unit.getUnitId();
+            const render = this._renderManagerService.getRenderById(unitId);
+            const canvasEle = render?.engine.getCanvas().getCanvasEle();
+            if (canvasEle == null) {
+                return;
+            }
+            fromEvent(canvasEle, 'mousedown').subscribe((evt) => {
+                this._editorService.changeSpreadsheetFocusState(true);
+                evt.stopPropagation();
+            });
+        });
     }
 
     private _initialValueChange() {

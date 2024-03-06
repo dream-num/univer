@@ -87,10 +87,17 @@ export class BaseScrollBar extends Disposable {
         ) {
             return 1;
         }
-        return (
+
+        const ratio = (
             ((this.horizontalThumbWidth - this.horizontalMinusMiniThumb) * this.miniThumbRatioX) /
             this.horizontalBarWidth
         );
+
+        if (Number.isNaN(ratio)) {
+            return 1;
+        } else {
+            return ratio;
+        }
     }
 
     get ratioScrollY(): number {
@@ -101,9 +108,15 @@ export class BaseScrollBar extends Disposable {
         ) {
             return 1;
         }
-        return (
+        const ratio = (
             ((this.verticalThumbHeight - this.verticalMinusMiniThumb) * this.miniThumbRatioY) / this.verticalBarHeight
         );
+
+        if (Number.isNaN(ratio)) {
+            return 1;
+        } else {
+            return ratio;
+        }
     }
 
     get miniThumbRatioX() {

@@ -136,3 +136,4 @@ export { FormulaExecutedStateType, type IAllRuntimeData } from './services/runti
 export { SetNumfmtFormulaDataMutation } from './commands/mutations/set-numfmt-formula-data.mutation';
 export type { ISetNumfmtFormulaDataMutationParams } from './commands/mutations/set-numfmt-formula-data.mutation';
 export { isReferenceString } from './basics/regex';
+export { matchRefDrawToken } from './basics/match-token';

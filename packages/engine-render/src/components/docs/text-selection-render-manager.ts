@@ -214,9 +214,11 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
     private _input!: HTMLDivElement;
 
-    private _moveObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
+    private _moveObservers: Nullable<Observer<IPointerEvent | IMouseEvent>>[] = [];
 
-    private _upObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
+    private _upObservers: Nullable<Observer<IPointerEvent | IMouseEvent>>[] = [];
+
+    private _scrollTimers: ScrollTimer[] = [];
 
     private _viewportScrollX: number = 0;
 
@@ -479,6 +481,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         scene.disableEvent();
 
         const scrollTimer = ScrollTimer.create(scene);
+        this._scrollTimers.push(scrollTimer);
         scrollTimer.startScroll(evtOffsetX, evtOffsetY);
 
         const { scrollX, scrollY } = getCurrentScrollXY(scrollTimer);
@@ -492,7 +495,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
         let preMoveOffsetY = evtOffsetY;
 
-        this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
+        this._moveObservers.push(scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
             const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
             scene.setCursor(CURSOR_TYPE.TEXT);
 
@@ -508,11 +511,23 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
             preMoveOffsetX = moveOffsetX;
             preMoveOffsetY = moveOffsetY;
-        });
+        }));
 
-        this._upObserver = scene.onPointerUpObserver.add(() => {
-            scene.onPointerMoveObserver.remove(this._moveObserver);
-            scene.onPointerUpObserver.remove(this._upObserver);
+        this._upObservers.push(scene.onPointerUpObserver.add(() => {
+            // scene.onPointerMoveObserver.remove(this._moveObserver);
+            // scene.onPointerUpObserver.remove(this._upObserver);
+
+            this._moveObservers.forEach((obs) => {
+                obs?.dispose();
+            });
+
+            this._upObservers.forEach((obs) => {
+                obs?.dispose();
+            });
+
+            this._moveObservers = [];
+
+            this._upObservers = [];
 
             scene.enableEvent();
 
@@ -523,9 +538,14 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
                 isEditing: false,
             });
 
-            scrollTimer.dispose();
+            this._scrollTimers.forEach((timer) => {
+                timer?.dispose();
+            });
+
+            this._scrollTimers = [];
+
             this._updateInputPosition();
-        });
+        }));
     }
 
     removeAllTextRanges() {

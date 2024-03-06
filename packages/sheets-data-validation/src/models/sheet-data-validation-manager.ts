@@ -29,6 +29,7 @@ import type { ISheetLocation } from '@univerjs/sheets';
 // TODO. calc relative cells
 // 1. parse formula
 // 2. get cell link map
+// TODO: optimize code
 export class SheetDataValidationManager extends DataValidationManager<ISheetDataValidationRule> {
     /**
      * save cell's ruleId
@@ -155,6 +156,25 @@ export class SheetDataValidationManager extends DataValidationManager<ISheetData
         this._ruleMatrix = new ObjectMatrix<string>();
     }
 
+    // TODO: diff rule
+    override replaceAll(rules: ISheetDataValidationRule[]): void {
+        this._ruleMatrix = new ObjectMatrix();
+        this._validatorResult = new ObjectMatrix();
+        rules.forEach((rule) => {
+            this._appendMatrixRule(rule);
+        });
+        super.replaceAll(rules);
+        this._refreshRuleRanges();
+    }
+
+    updateRangesByMatrix(matrix: ObjectMatrix<string>) {
+        this._ruleMatrix.merge(matrix);
+        matrix.forValue((row, col) => {
+            // clear validator cache
+            this._validatorResult.setValue(row, col, undefined);
+        });
+    }
+
     getRuleIdByLocation(row: number, col: number) {
         return this._ruleMatrix.getValue(row, col);
     }
@@ -213,5 +233,9 @@ export class SheetDataValidationManager extends DataValidationManager<ISheetData
                 this._validatorResult.realDeleteValue(row, col);
             });
         });
+    }
+
+    getRuleObjectMatrix() {
+        return this._ruleMatrix;
     }
 }

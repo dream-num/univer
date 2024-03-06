@@ -14,11 +14,15 @@
  * limitations under the License.
  */
 
-import { CommandType, ICommandService } from '@univerjs/core';
-import type { DataValidationType, ICommand, IDataValidationRule, IRange } from '@univerjs/core';
-import { DataValidatorRegistryService, type IAddDataValidationMutationParams, UpdateRuleType } from '../..';
+import { CommandType, ICommandService, IUndoRedoService } from '@univerjs/core';
+import type { ICommand, IDataValidationRule, IDataValidationRuleBase, IDataValidationRuleOptions, IMutationInfo, IRange } from '@univerjs/core';
 import type { IUpdateRulePayload } from '../../types/interfaces/i-update-rule-payload';
-import { AddDataValidationMutation, RemoveAllDataValidationMutation, RemoveDataValidationMutation, UpdateDataValidationMutation } from '../mutations/data-validation.mutation';
+import type { IAddDataValidationMutationParams, IReplaceDataValidationMutationParams, IUpdateDataValidationMutationParams } from '../mutations/data-validation.mutation';
+import { AddDataValidationMutation, RemoveAllDataValidationMutation, RemoveDataValidationMutation, ReplaceDataValidationMutation, UpdateDataValidationMutation } from '../mutations/data-validation.mutation';
+import { UpdateRuleType } from '../../types';
+import { DataValidatorRegistryService } from '../../services/data-validator-registry.service';
+import { DataValidationModel } from '../../models/data-validation-model';
+import { getRuleOptions, getRuleSetting } from '../../common/util';
 
 export interface IAddDataValidationCommandParams {
     unitId: string;
@@ -26,9 +30,9 @@ export interface IAddDataValidationCommandParams {
     rule: Omit<IDataValidationRule, 'ranges'> & {
         range: IRange;
     };
+    index?: number;
 }
 
-// TODO: redo & undo
 export const AddDataValidationCommand: ICommand<IAddDataValidationCommandParams> = {
     type: CommandType.COMMAND,
     id: 'data-validation.command.addRule',
@@ -36,8 +40,9 @@ export const AddDataValidationCommand: ICommand<IAddDataValidationCommandParams>
         if (!params) {
             return false;
         }
-
+        const { rule, unitId, subUnitId } = params;
         const commandService = accessor.get(ICommandService);
+        const undoRedoService = accessor.get(IUndoRedoService);
         const mutationParams: IAddDataValidationMutationParams = {
             ...params,
             rule: {
@@ -45,6 +50,25 @@ export const AddDataValidationCommand: ICommand<IAddDataValidationCommandParams>
                 ranges: [params.rule.range],
             },
         };
+        const redoMutations: IMutationInfo[] = [{
+            id: AddDataValidationMutation.id,
+            params: mutationParams,
+        }];
+
+        const undoMutations: IMutationInfo[] = [{
+            id: RemoveDataValidationMutation.id,
+            params: {
+                unitId,
+                subUnitId,
+                ruleId: rule.uid,
+            },
+        }];
+        undoRedoService.pushUndoRedo({
+            unitID: unitId,
+            redoMutations,
+            undoMutations,
+        });
+
         await commandService.executeCommand(AddDataValidationMutation.id, mutationParams);
         return true;
     },
@@ -63,52 +87,174 @@ export const RemoveDataValidationCommand: ICommand<IRemoveDataValidationCommandP
         if (!params) {
             return false;
         }
+        const { unitId, subUnitId, ruleId } = params;
         const commandService = accessor.get(ICommandService);
+        const undoRedoService = accessor.get(IUndoRedoService);
+        const dataValidationModel = accessor.get(DataValidationModel);
+
+        const redoMutations: IMutationInfo[] = [{
+            id: RemoveDataValidationMutation.id,
+            params,
+        }];
+        const undoMutations: IMutationInfo[] = [{
+            id: AddDataValidationMutation.id,
+            params: {
+                unitId,
+                subUnitId,
+                rule: {
+                    ...dataValidationModel.getRuleById(unitId, subUnitId, ruleId),
+                },
+                index: dataValidationModel.getRuleIndex(unitId, subUnitId, ruleId),
+            } as IAddDataValidationMutationParams,
+        }];
+
+        undoRedoService.pushUndoRedo({
+            undoMutations,
+            redoMutations,
+            unitID: params.unitId,
+        });
 
         commandService.executeCommand(RemoveDataValidationMutation.id, params);
         return true;
     },
 };
 
-export interface IUpdateDataValidationCommandParams {
-    payload: IUpdateRulePayload;
+export interface IUpdateDataValidationOptionsCommandParams {
     unitId: string;
     subUnitId: string;
     ruleId: string;
+    options: IDataValidationRuleOptions;
 }
 
-export const UpdateDataValidationCommand: ICommand<IUpdateDataValidationCommandParams> = {
+export const UpdateDataValidationOptionsCommand: ICommand<IUpdateDataValidationOptionsCommandParams> = {
     type: CommandType.COMMAND,
-    id: 'data-validation.command.updateRule',
+    id: 'data-validation.command.updateDataValidationSetting',
     handler(accessor, params) {
         if (!params) {
             return false;
         }
-        const dataValidatorRegistryService = accessor.get(DataValidatorRegistryService);
-        const { payload } = params;
-        if (payload.type === UpdateRuleType.SETTING) {
-            const validator = dataValidatorRegistryService.getValidatorItem(payload.payload.type);
-            if (!validator) {
-                return false;
-            }
+        const commandService = accessor.get(ICommandService);
+        const redoUndoService = accessor.get(IUndoRedoService);
+        const dataValidationModel = accessor.get(DataValidationModel);
 
-            if (!validator.validatorFormula(payload.payload)) {
-                return false;
-            }
+        const { unitId, subUnitId, ruleId, options } = params;
+
+        const rule = dataValidationModel.getRuleById(unitId, subUnitId, ruleId);
+        if (!rule) {
+            return false;
         }
 
-        const commandService = accessor.get(ICommandService);
-        commandService.executeCommand(UpdateDataValidationMutation.id, params);
+        const mutationParams: IUpdateDataValidationMutationParams = {
+            unitId,
+            subUnitId,
+            ruleId,
+            payload: {
+                type: UpdateRuleType.OPTIONS,
+                payload: options,
+            },
+        };
+
+        const redoMutations: IMutationInfo[] = [{
+            id: UpdateDataValidationMutation.id,
+            params: mutationParams,
+        }];
+        const undoMutationParams: IUpdateDataValidationMutationParams = {
+            unitId,
+            subUnitId,
+            ruleId,
+            payload: {
+                type: UpdateRuleType.OPTIONS,
+                payload: getRuleOptions(rule),
+            },
+        };
+        const undoMutations: IMutationInfo[] = [{
+            id: UpdateDataValidationMutation.id,
+            params: undoMutationParams,
+        }];
+
+        redoUndoService.pushUndoRedo({
+            unitID: unitId,
+            redoMutations,
+            undoMutations,
+        });
+
+        commandService.executeCommand(UpdateDataValidationMutation.id, mutationParams);
         return true;
     },
 };
 
-export interface IUpdateDataValidationTypeCommandParams {
+export interface IUpdateDataValidationSettingCommandParams {
     unitId: string;
     subUnitId: string;
     ruleId: string;
-    type: DataValidationType;
+    setting: IDataValidationRuleBase;
 }
+
+export const UpdateDataValidationSettingCommand: ICommand<IUpdateDataValidationSettingCommandParams> = {
+    type: CommandType.COMMAND,
+    id: 'data-validation.command.updateDataValidationOptions',
+    handler(accessor, params) {
+        if (!params) {
+            return false;
+        }
+        const commandService = accessor.get(ICommandService);
+        const redoUndoService = accessor.get(IUndoRedoService);
+        const dataValidationModel = accessor.get(DataValidationModel);
+        const dataValidatorRegistryService = accessor.get(DataValidatorRegistryService);
+
+        const { unitId, subUnitId, ruleId, setting } = params;
+        const validator = dataValidatorRegistryService.getValidatorItem(setting.type);
+        if (!validator) {
+            return false;
+        }
+
+        if (!validator.validatorFormula(setting)) {
+            return false;
+        }
+
+        const rule = dataValidationModel.getRuleById(unitId, subUnitId, ruleId);
+        if (!rule) {
+            return false;
+        }
+
+        const mutationParams: IUpdateDataValidationMutationParams = {
+            unitId,
+            subUnitId,
+            ruleId,
+            payload: {
+                type: UpdateRuleType.SETTING,
+                payload: setting,
+            },
+        };
+
+        const redoMutations: IMutationInfo[] = [{
+            id: UpdateDataValidationMutation.id,
+            params: mutationParams,
+        }];
+        const undoMutationParams: IUpdateDataValidationMutationParams = {
+            unitId,
+            subUnitId,
+            ruleId,
+            payload: {
+                type: UpdateRuleType.SETTING,
+                payload: getRuleSetting(rule),
+            },
+        };
+        const undoMutations: IMutationInfo[] = [{
+            id: UpdateDataValidationMutation.id,
+            params: undoMutationParams,
+        }];
+
+        redoUndoService.pushUndoRedo({
+            unitID: unitId,
+            redoMutations,
+            undoMutations,
+        });
+
+        commandService.executeCommand(UpdateDataValidationMutation.id, mutationParams);
+        return true;
+    },
+};
 
 export interface IRemoveAllDataValidationCommandParams {
     unitId: string;
@@ -119,7 +265,34 @@ export const RemoveAllDataValidationCommand: ICommand<IRemoveAllDataValidationCo
     type: CommandType.COMMAND,
     id: 'data-validation.command.removeAll',
     handler(accessor, params) {
+        if (!params) {
+            return false;
+        }
+        const { unitId, subUnitId } = params;
         const commandService = accessor.get(ICommandService);
+        const dataValidationModel = accessor.get(DataValidationModel);
+        const undoRedoService = accessor.get(IUndoRedoService);
+        const currentRules = [...dataValidationModel.getRules(unitId, subUnitId)];
+
+        const redoMutations: IMutationInfo[] = [{
+            id: RemoveAllDataValidationMutation.id,
+            params,
+        }];
+        const undoMutations: IMutationInfo[] = [{
+            id: ReplaceDataValidationMutation.id,
+            params: {
+                unitId,
+                subUnitId,
+                rules: currentRules,
+            } as IReplaceDataValidationMutationParams,
+        }];
+
+        undoRedoService.pushUndoRedo({
+            redoMutations,
+            undoMutations,
+            unitID: unitId,
+        });
+
         commandService.executeCommand(RemoveAllDataValidationMutation.id, params);
         return true;
     },

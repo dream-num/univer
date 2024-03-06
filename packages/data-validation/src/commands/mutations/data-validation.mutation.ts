@@ -23,6 +23,7 @@ export interface IAddDataValidationMutationParams {
     unitId: string;
     subUnitId: string;
     rule: IDataValidationRule;
+    index?: number;
 }
 
 export const AddDataValidationMutation: ICommand<IAddDataValidationMutationParams> = {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DataValidationStatus, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
+import { DataValidationStatus, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
 import type { ListValidator } from '@univerjs/data-validation';
 import { DataValidationModel, DataValidatorRegistryService, DateValidator, NumberValidator, TextLengthValidator } from '@univerjs/data-validation';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
@@ -41,7 +41,8 @@ export class DataValidationController extends RxDisposable {
         @Inject(SheetDataValidationService) private readonly _sheetDataValidationService: SheetDataValidationService,
         @Inject(DataValidatorRegistryService) private readonly _dataValidatorRegistryService: DataValidatorRegistryService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @Inject(Injector) private readonly _injector: Injector
+        @Inject(Injector) private readonly _injector: Injector,
+        @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
         this._init();
@@ -156,5 +157,9 @@ export class DataValidationController extends RxDisposable {
                 }
             )
         );
+    }
+
+    private _initCommandIntercept() {
+        // this._commandService.
     }
 }

@@ -138,7 +138,13 @@ export class DataValidationRenderController extends RxDisposable {
     }
 
     private _initDropdown() {
-        this.disposeWithMe(this._editorBridgeService.currentEditCellState$.subscribe((state) => {
+        this.disposeWithMe(this._editorBridgeService.visible$.subscribe((visible) => {
+            if (!visible.visible) {
+                this._dropdownManagerService.hideDropdown();
+                return;
+            }
+
+            const state = this._editorBridgeService.getEditCellState();
             if (!state) {
                 this._dropdownManagerService.hideDropdown();
             } else {
@@ -155,10 +161,12 @@ export class DataValidationRenderController extends RxDisposable {
                 const cell = worksheet.getCell(row, column);
                 const rule = cell?.dataValidation?.rule;
                 if (!rule) {
+                    this._dropdownManagerService.hideDropdown();
                     return;
                 }
                 const validator = this._dataValidatorRegistryService.getValidatorItem(rule.type);
                 if (!validator || !validator.dropdown) {
+                    this._dropdownManagerService.hideDropdown();
                     return;
                 }
 

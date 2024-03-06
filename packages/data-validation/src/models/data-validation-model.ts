@@ -67,9 +67,9 @@ export class DataValidationModel<T extends IDataValidationRule = IDataValidation
         return manager;
     }
 
-    addRule(unitId: string, subUnitId: string, rule: T) {
+    addRule(unitId: string, subUnitId: string, rule: T, index?: number) {
         const manager = this.getOrCreateManager(unitId, subUnitId);
-        manager.addRule(rule);
+        manager.addRule(rule, index);
         this._ruleChange$.next({
             rule: rule as any,
             type: 'add',
@@ -104,6 +104,11 @@ export class DataValidationModel<T extends IDataValidationRule = IDataValidation
     getRuleById(unitId: string, subUnitId: string, ruleId: string) {
         const manager = this.getOrCreateManager(unitId, subUnitId);
         return manager.getRuleById(ruleId);
+    }
+
+    getRuleIndex(unitId: string, subUnitId: string, ruleId: string) {
+        const manager = this.getOrCreateManager(unitId, subUnitId);
+        return manager.getRuleIndex(ruleId);
     }
 
     removeAll(unitId: string, subUnitId: string) {

@@ -14,5 +14,4 @@
  * limitations under the License.
  */
 
-export { default as enUS } from './enUS';
-export { default as zhCN } from './zhCN';
+export { getRuleOptions, getRuleSetting } from './util';

@@ -55,8 +55,17 @@ export class DataValidationManager<T extends IDataValidationRule> {
         return this._dataValidationMap.get(id);
     }
 
-    addRule(rule: T) {
-        this._dataValidations.push(rule);
+    getRuleIndex(id: string) {
+        return this._dataValidations.findIndex((rule) => rule.uid === id);
+    }
+
+    addRule(rule: T, index?: number) {
+        if (typeof index === 'number' && index < this._dataValidations.length) {
+            this._dataValidations.splice(index, 0, rule);
+        } else {
+            this._dataValidations.push(rule);
+        }
+
         this._dataValidationMap.set(rule.uid, rule);
         this._notice();
     }

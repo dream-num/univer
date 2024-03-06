@@ -20,7 +20,7 @@ import { DataValidationRenderController } from './controllers/dv-render.controll
 import { DataValidationController } from './controllers/dv.controller';
 import { SheetDataValidationService } from './services/dv.service';
 import { DataValidationAlertController } from './controllers/dv-alert.controller';
-import { UpdateDataValidationTypeCommand } from './commands/commands/data-validation.command';
+import { AddSheetDataValidationCommand, UpdateSheetDataValidationRangeCommand } from './commands/commands/data-validation.command';
 
 const PLUGIN_NAME = 'sheets-data-validation';
 
@@ -43,7 +43,10 @@ export class UniverSheetsDataValidationPlugin extends Plugin {
             injector.add(dep);
         });
 
-        [UpdateDataValidationTypeCommand].forEach((command) => {
+        [
+            AddSheetDataValidationCommand,
+            UpdateSheetDataValidationRangeCommand,
+        ].forEach((command) => {
             this._commandService.registerCommand(command);
         });
     }

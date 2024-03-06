@@ -17,7 +17,7 @@
 import type { CellValue, IDataValidationRule, IDataValidationRuleBase, Nullable } from '@univerjs/core';
 import { DataValidationOperator, LocaleService, Tools } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
-import { OperatorTextMap } from '../types/const/operator-text-map';
+import { OperatorErrorTitleMap, OperatorTextMap, OperatorTitleMap } from '../types/const/operator-text-map';
 import type { IDataValidationRender } from '../types/interfaces';
 
 const FORMULA1 = '{FORMULA1}';
@@ -60,23 +60,22 @@ export abstract class BaseDataValidator<DataType = CellValue> {
         return this.operators.map((operator) => this.localeService.t(operatorNameMap[operator]));
     }
 
-    generateOperatorText(rule: IDataValidationRuleBase) {
-        if (!rule.operator) {
-            return '';
-        }
-        const operatorTextTemp = OperatorTextMap[rule.operator];
-        const operatorText = this.localeService.t(operatorTextTemp).replace(FORMULA1, rule.formula1 ?? '').replace(FORMULA2, rule.formula2 ?? '');
-        return operatorText;
-    }
-
     generateRuleName(rule: IDataValidationRuleBase): string {
-        const operatorText = this.generateOperatorText(rule);
-        return `${this.title} ${operatorText}`;
+        if (!rule.operator) {
+            return this.title;
+        }
+
+        const ruleName = this.localeService.t(OperatorTitleMap[rule.operator]).replace(FORMULA1, rule.formula1 ?? '').replace(FORMULA2, rule.formula2 ?? '');
+        return `${this.title} ${ruleName}`;
     }
 
     generateRuleErrorMessage(rule: IDataValidationRuleBase) {
-        const operatorText = this.generateOperatorText(rule);
-        return `${this.title} ${operatorText}`;
+        if (!rule.operator) {
+            return this.title;
+        }
+
+        const errorMsg = this.localeService.t(OperatorErrorTitleMap[rule.operator]).replace(FORMULA1, rule.formula1 ?? '').replace(FORMULA2, rule.formula2 ?? '');
+        return `${errorMsg}`;
     }
 
     isEmptyCellValue(cellValue: Nullable<CellValue>): cellValue is null | undefined | void {

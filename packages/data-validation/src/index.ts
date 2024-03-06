@@ -27,15 +27,17 @@ export {
 export {
     AddDataValidationCommand,
     RemoveDataValidationCommand,
-    UpdateDataValidationCommand,
     RemoveAllDataValidationCommand,
+    UpdateDataValidationOptionsCommand,
+    UpdateDataValidationSettingCommand,
 } from './commands/commands/data-validation.command';
 
 export type {
     IRemoveAllDataValidationCommandParams,
     IRemoveDataValidationCommandParams,
-    IUpdateDataValidationCommandParams,
     IAddDataValidationCommandParams,
+    IUpdateDataValidationOptionsCommandParams,
+    IUpdateDataValidationSettingCommandParams,
 } from './commands/commands/data-validation.command';
 
 export {

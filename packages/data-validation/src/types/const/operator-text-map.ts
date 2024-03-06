@@ -26,3 +26,25 @@ export const OperatorTextMap: Record<DataValidationOperator, string> = {
     [DataValidationOperator.NOT_BETWEEN]: 'dataValidation.operators.notBetween',
     [DataValidationOperator.NOT_EQUAL]: 'dataValidation.operators.notEqual',
 };
+
+export const OperatorTitleMap: Record<DataValidationOperator, string> = {
+    [DataValidationOperator.BETWEEN]: 'dataValidation.ruleName.between',
+    [DataValidationOperator.EQUAL]: 'dataValidation.ruleName.equal',
+    [DataValidationOperator.GREATER_THAN]: 'dataValidation.ruleName.greaterThan',
+    [DataValidationOperator.GREATER_THAN_OR_EQUAL]: 'dataValidation.ruleName.greaterThanOrEqual',
+    [DataValidationOperator.LESS_THAN]: 'dataValidation.ruleName.lessThan',
+    [DataValidationOperator.LESS_THAN_OR_EQUAL]: 'dataValidation.ruleName.lessThanOrEqual',
+    [DataValidationOperator.NOT_BETWEEN]: 'dataValidation.ruleName.notBetween',
+    [DataValidationOperator.NOT_EQUAL]: 'dataValidation.ruleName.notEqual',
+};
+
+export const OperatorErrorTitleMap: Record<DataValidationOperator, string> = {
+    [DataValidationOperator.BETWEEN]: 'dataValidation.errorMsg.between',
+    [DataValidationOperator.EQUAL]: 'dataValidation.errorMsg.equal',
+    [DataValidationOperator.GREATER_THAN]: 'dataValidation.errorMsg.greaterThan',
+    [DataValidationOperator.GREATER_THAN_OR_EQUAL]: 'dataValidation.errorMsg.greaterThanOrEqual',
+    [DataValidationOperator.LESS_THAN]: 'dataValidation.errorMsg.lessThan',
+    [DataValidationOperator.LESS_THAN_OR_EQUAL]: 'dataValidation.errorMsg.lessThanOrEqual',
+    [DataValidationOperator.NOT_BETWEEN]: 'dataValidation.errorMsg.notBetween',
+    [DataValidationOperator.NOT_EQUAL]: 'dataValidation.errorMsg.notEqual',
+};

@@ -42,6 +42,9 @@ export class DropdownManagerService {
     }
 
     hideDropdown() {
+        if (!this._activeDropdown) {
+            return;
+        }
         this._activeDropdown = null;
         this._activeDropdown$.next(null);
     }

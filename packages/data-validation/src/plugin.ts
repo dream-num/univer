@@ -22,7 +22,7 @@ import { DataValidationModel } from './models/data-validation-model';
 import { DataValidationPanelService } from './services/data-validation-panel';
 import { CloseValidationPanelOperation, OpenValidationPanelOperation, ToggleValidationPanelOperation } from './commands/operations/data-validation.operation';
 import { DataValidatorController } from './controllers/validator.controller';
-import { AddDataValidationCommand, RemoveAllDataValidationCommand, RemoveDataValidationCommand, UpdateDataValidationCommand } from './commands/commands/data-validation.command';
+import { AddDataValidationCommand, RemoveAllDataValidationCommand, RemoveDataValidationCommand, UpdateDataValidationOptionsCommand, UpdateDataValidationSettingCommand } from './commands/commands/data-validation.command';
 import { AddDataValidationMutation, RemoveAllDataValidationMutation, RemoveDataValidationMutation, ReplaceDataValidationMutation, UpdateDataValidationMutation } from './commands/mutations/data-validation.mutation';
 import { enUS, zhCN } from './locales';
 
@@ -58,7 +58,8 @@ export class UniverDataValidationPlugin extends Plugin {
             // command
             AddDataValidationCommand,
             RemoveAllDataValidationCommand,
-            UpdateDataValidationCommand,
+            UpdateDataValidationOptionsCommand,
+            UpdateDataValidationSettingCommand,
             RemoveDataValidationCommand,
 
             // operation

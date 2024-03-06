@@ -18,10 +18,10 @@ import React, { useEffect, useState } from 'react';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import type { ISheetDataValidationRule } from '@univerjs/core';
 import { DataValidationOperator, DataValidationType, ICommandService, IUniverInstanceService, Tools } from '@univerjs/core';
-import type { IAddDataValidationCommandParams } from '@univerjs/data-validation';
-import { AddDataValidationCommand, DataValidationModel, RemoveAllDataValidationCommand } from '@univerjs/data-validation';
+import { DataValidationModel, RemoveAllDataValidationCommand } from '@univerjs/data-validation';
 import { Button } from '@univerjs/design';
 import { SelectionManagerService } from '@univerjs/sheets';
+import { AddSheetDataValidationCommand, type IAddSheetDataValidationCommandParams } from '..';
 import { DataValidationItem } from './DataValidationItem';
 
 export interface IDataValidationListProps {
@@ -59,18 +59,15 @@ export const DataValidationList = (props: IDataValidationListProps) => {
             type: DataValidationType.DECIMAL,
             operator: DataValidationOperator.EQUAL,
             formula1: '100',
-            range: currentRanges ? currentRanges[0] : { startColumn: 0, endColumn: 0, startRow: 0, endRow: 0 },
+            ranges: currentRanges ?? [{ startColumn: 0, endColumn: 0, startRow: 0, endRow: 0 }],
         };
-        const params: IAddDataValidationCommandParams = {
+        const params: IAddSheetDataValidationCommandParams = {
             unitId,
             subUnitId,
             rule,
         };
-        await commandService.executeCommand(AddDataValidationCommand.id, params);
-        onActive({
-            ...rule,
-            ranges: [rule.range],
-        });
+        await commandService.executeCommand(AddSheetDataValidationCommand.id, params);
+        onActive(rule);
     };
 
     const handleRemoveAll = () => {

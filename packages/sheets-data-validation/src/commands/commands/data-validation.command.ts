@@ -14,69 +14,163 @@
  * limitations under the License.
  */
 
-import { CommandType, ICommandService } from '@univerjs/core';
-import type { DataValidationType, ICommand, IDataValidationRuleBase } from '@univerjs/core';
-import type { IUpdateDataValidationCommandParams } from '@univerjs/data-validation';
-import { DataValidatorRegistryService, UpdateDataValidationCommand, UpdateRuleType } from '@univerjs/data-validation';
-import { SheetDataValidationService } from '../../services/dv.service';
+import { CommandType, ICommandService, IUndoRedoService, ObjectMatrix, Range } from '@univerjs/core';
+import type { ICommand, IMutationInfo, IRange, ISheetDataValidationRule } from '@univerjs/core';
+import type { IAddDataValidationMutationParams, IUpdateDataValidationMutationParams } from '@univerjs/data-validation';
+import { AddDataValidationMutation, DataValidationModel, RemoveDataValidationMutation, UpdateDataValidationMutation, UpdateRuleType } from '@univerjs/data-validation';
+import type { SheetDataValidationManager } from '../../models/sheet-data-validation-manager';
+import { UpdateDataValidationRangeByMatrixMutation } from '../mutations/data-validation.mutation';
 
-export interface IUpdateSheetDataValidationTypeCommandParams {
+export interface IUpdateSheetDataValidationRangeCommandParams {
     unitId: string;
     subUnitId: string;
     ruleId: string;
-    type: DataValidationType;
+    ranges: IRange[];
 }
 
-export const UpdateDataValidationTypeCommand: ICommand<IUpdateSheetDataValidationTypeCommandParams> = {
-    id: 'sheets-data-validation.command.updateRuleType',
+export const UpdateSheetDataValidationRangeCommand: ICommand<IUpdateSheetDataValidationRangeCommandParams> = {
     type: CommandType.COMMAND,
+    id: 'sheets.command.updateDataValidationRuleRange',
     handler(accessor, params) {
         if (!params) {
             return false;
         }
-        const { unitId, subUnitId, ruleId, type } = params;
-        const dataValidationService = accessor.get(SheetDataValidationService);
-        const validatorService = accessor.get(DataValidatorRegistryService);
+        const { unitId, subUnitId, ranges, ruleId } = params;
+        const dataValidationModel = accessor.get(DataValidationModel);
         const commandService = accessor.get(ICommandService);
-        const manager = dataValidationService.get(unitId, subUnitId);
-        const validator = validatorService.getValidatorItem(type);
+        const undoRedoService = accessor.get(IUndoRedoService);
+        const manager = dataValidationModel.getOrCreateManager(unitId, subUnitId) as SheetDataValidationManager;
         const currentRule = manager.getRuleById(ruleId);
-
-        if (!currentRule || !validator) {
+        if (!currentRule) {
             return false;
         }
+        const oldRanges = currentRule.ranges;
+        const matrix = manager.getRuleObjectMatrix();
+        const overlapMatrix = new ObjectMatrix<string>();
 
-        const oldValidator = validatorService.getValidatorItem(currentRule.type);
-        if (!oldValidator) {
-            return false;
-        }
+        ranges.forEach((range) => {
+            Range.foreach(range, (row, col) => {
+                const currentValue = matrix.getValue(row, col);
+                if (currentValue !== ruleId) {
+                    overlapMatrix.setValue(row, col, currentValue ?? '');
+                }
+            });
+        });
 
-        const operator = validator.operators[0];
-
-        // invalid formula, skip update
-        if (validator.validatorFormula({
-            type,
-            operator,
-            formula1: currentRule.formula1,
-            formula2: currentRule.formula2,
-        })) {
-            return false;
-        }
-
-         // need't to change operator
-        const updateParams: IUpdateDataValidationCommandParams = {
+        const mutationParams: IUpdateDataValidationMutationParams = {
             unitId,
             subUnitId,
             ruleId,
             payload: {
-                type: UpdateRuleType.SETTING,
-                payload: {
-                    type,
-                    operator,
-                },
+                type: UpdateRuleType.RANGE,
+                payload: ranges,
             },
         };
-        commandService.executeCommand(UpdateDataValidationCommand.id, updateParams);
+
+        const redoMutations: IMutationInfo[] = [{
+            id: UpdateDataValidationMutation.id,
+            params: mutationParams,
+        }];
+
+        const undoMutations: IMutationInfo[] = [
+            {
+                id: UpdateDataValidationMutation.id,
+                params: {
+                    ...mutationParams,
+                    payload: {
+                        type: UpdateRuleType.RANGE,
+                        payload: oldRanges,
+                    },
+                },
+            }, {
+                id: UpdateDataValidationRangeByMatrixMutation.id,
+                params: {
+                    unitId,
+                    subUnitId,
+                    ranges: overlapMatrix,
+                },
+            },
+        ];
+
+        undoRedoService.pushUndoRedo({
+            undoMutations,
+            redoMutations,
+            unitID: unitId,
+        });
+
+        commandService.executeCommand(UpdateDataValidationMutation.id, mutationParams);
+        return true;
+    },
+};
+
+export interface IAddSheetDataValidationCommandParams {
+    unitId: string;
+    subUnitId: string;
+    rule: ISheetDataValidationRule;
+}
+
+export const AddSheetDataValidationCommand: ICommand<IAddSheetDataValidationCommandParams> = {
+    type: CommandType.COMMAND,
+    id: 'sheets.command.addDataValidation',
+    handler(accessor, params) {
+        if (!params) {
+            return false;
+        }
+        const { unitId, subUnitId, rule } = params;
+        const dataValidationModel = accessor.get(DataValidationModel);
+        const commandService = accessor.get(ICommandService);
+        const undoRedoService = accessor.get(IUndoRedoService);
+        const manager = dataValidationModel.getOrCreateManager(unitId, subUnitId) as SheetDataValidationManager;
+
+        const matrix = manager.getRuleObjectMatrix();
+        const overlapMatrix = new ObjectMatrix<string>();
+        const ruleId = rule.uid;
+
+        rule.ranges.forEach((range) => {
+            Range.foreach(range, (row, col) => {
+                const currentValue = matrix.getValue(row, col);
+                if (currentValue !== ruleId) {
+                    overlapMatrix.setValue(row, col, currentValue ?? '');
+                }
+            });
+        });
+
+        const redoParams: IAddDataValidationMutationParams = {
+            unitId,
+            subUnitId,
+            rule,
+        };
+
+        const redoMutations: IMutationInfo[] = [{
+            id: AddDataValidationMutation.id,
+            params: redoParams,
+        }];
+
+        const undoMutations: IMutationInfo[] = [
+            {
+                id: RemoveDataValidationMutation.id,
+                params: {
+                    unitId,
+                    subUnitId,
+                    ruleId: rule.uid,
+                },
+            },
+            {
+                id: UpdateDataValidationRangeByMatrixMutation.id,
+                params: {
+                    unitId,
+                    subUnitId,
+                    ranges: overlapMatrix,
+                },
+            },
+        ];
+
+        undoRedoService.pushUndoRedo({
+            unitID: unitId,
+            redoMutations,
+            undoMutations,
+        });
+        commandService.executeCommand(AddDataValidationMutation.id, redoParams);
         return true;
     },
 };

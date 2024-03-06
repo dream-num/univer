@@ -41,6 +41,11 @@ export class DataValidationExtension extends SheetExtension {
                     return;
                 }
 
+                // current cell is hidden
+                if (!worksheet.getColVisible(col) || !worksheet.getRowVisible(row)) {
+                    return;
+                }
+
                 ctx.save();
                 cellData.dataValidation.customRender.drawWith(ctx, {
                     cellInfo,

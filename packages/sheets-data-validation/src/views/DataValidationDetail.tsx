@@ -16,25 +16,22 @@
 
 import { ICommandService, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import type { DataValidationOperator, DataValidationType, IDataValidationRuleBase, IRange, ISheetDataValidationRule } from '@univerjs/core';
-import type { IUpdateDataValidationCommandParams } from '@univerjs/data-validation';
-import { DataValidatorRegistryScope, DataValidatorRegistryService, RemoveDataValidationCommand, UpdateDataValidationCommand, UpdateRuleType } from '@univerjs/data-validation';
+import type { IUpdateDataValidationSettingCommandParams } from '@univerjs/data-validation';
+import { DataValidatorRegistryScope, DataValidatorRegistryService, RemoveDataValidationCommand, UpdateDataValidationSettingCommand } from '@univerjs/data-validation';
 import { TWO_FORMULA_OPERATOR_COUNT } from '@univerjs/data-validation/types/const/two-formula-operators.js';
 import { Button, Select } from '@univerjs/design';
-import { ComponentManager } from '@univerjs/ui';
+import { ComponentManager, RangeSelector } from '@univerjs/ui';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useState } from 'react';
-import { UpdateDataValidationTypeCommand } from '../commands/commands/data-validation.command';
+import { serializeRange } from '@univerjs/engine-formula';
+import { getRuleSetting } from '@univerjs/data-validation/common/util.js';
+import type { IUpdateSheetDataValidationRangeCommandParams } from '../commands/commands/data-validation.command';
+import { UpdateSheetDataValidationRangeCommand } from '../commands/commands/data-validation.command';
 
 export interface IDataValidationDetailProps {
     rule: ISheetDataValidationRule;
     onClose: () => void;
 }
-
-const stringifyRange = (range: IRange) => {
-    const { startRow, startColumn, endColumn, endRow } = range;
-
-    return `[${startRow},${startColumn}][${endRow},${endColumn}]`;
-};
 
 export function DataValidationDetail(props: IDataValidationDetailProps) {
     const { rule, onClose } = props;
@@ -64,17 +61,14 @@ export function DataValidationDetail(props: IDataValidationDetailProps) {
             ranges,
         });
 
-        const params: IUpdateDataValidationCommandParams = {
+        const params: IUpdateSheetDataValidationRangeCommandParams = {
             unitId,
             subUnitId,
             ruleId: rule.uid,
-            payload: {
-                type: UpdateRuleType.RANGE,
-                payload: ranges,
-            },
+            ranges,
         };
 
-        commandService.executeCommand(UpdateDataValidationCommand.id, params);
+        commandService.executeCommand(UpdateSheetDataValidationRangeCommand.id, params);
     };
 
     const handleUpdateRuleSetting = (setting: IDataValidationRuleBase) => {
@@ -83,17 +77,14 @@ export function DataValidationDetail(props: IDataValidationDetailProps) {
             ...setting,
         });
 
-        const params: IUpdateDataValidationCommandParams = {
+        const params: IUpdateDataValidationSettingCommandParams = {
             unitId,
             subUnitId,
             ruleId: rule.uid,
-            payload: {
-                type: UpdateRuleType.SETTING,
-                payload: setting,
-            },
+            setting,
         };
 
-        commandService.executeCommand(UpdateDataValidationCommand.id, params);
+        commandService.executeCommand(UpdateDataValidationSettingCommand.id, params);
     };
 
     const handleDelete = async () => {
@@ -121,30 +112,38 @@ export function DataValidationDetail(props: IDataValidationDetailProps) {
 
         const operators = validator.operators;
 
-        setLocalRule({
+        const newRule = {
             ...localRule,
             type: newType as DataValidationType,
             operator: operators[0],
-        });
+        };
 
-        commandService.executeCommand(UpdateDataValidationTypeCommand.id, {
+        setLocalRule(newRule);
+
+        commandService.executeCommand(UpdateDataValidationSettingCommand.id, {
             unitId,
             subUnitId,
             ruleId: localRule.uid,
-            type: newType,
+            setting: getRuleSetting(newRule),
         });
     };
 
     const FormulaInput = componentManager.get(validator.formulaInput);
 
+    const rangeStr = rule.ranges.map((range) => serializeRange(range)).join(',');
+
     return (
         <div>
             <div>Range</div>
-            {rule.ranges.map((range, i) => (
-                <div key={i}>
-                    {stringifyRange(range)}
-                </div>
-            ))}
+            <RangeSelector
+                value={rangeStr}
+                id="data-validation-detail"
+                openForSheetUnitId={unitId}
+                openForSheetSubUnitId={subUnitId}
+                onChange={(newRange) => {
+                    handleUpdateRuleRanges(newRange.map((i) => i.range));
+                }}
+            />
             <div>type</div>
             <Select
                 options={validators?.map((validator) => ({

@@ -29,11 +29,11 @@ import styles from './index.module.less';
 
 export interface IRangeSelectorProps {
     id: string;
-    value?: string;
-    onChange?: (ranges: IUnitRange[]) => void;
+    value?: string; // default values.
+    onChange?: (ranges: IUnitRange[]) => void; // Callback for changes in the selector value.
 
-    openForSheetUnitId?: Nullable<string>;
-    openForSheetSubUnitId?: Nullable<string>;
+    openForSheetUnitId?: Nullable<string>; //  Configuring which workbook the selector defaults to opening in determines whether the ref includes a [unitId] prefix.
+    openForSheetSubUnitId?: Nullable<string>; // Configuring the default worksheet where the selector opens determines whether the ref includes a [unitId]sheet1 prefix.
 }
 
 export function RangeSelector(props: IRangeSelectorProps) {

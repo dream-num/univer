@@ -44,31 +44,37 @@ const excludeProps = new Set([
 ]);
 
 export interface ITextEditorProps {
-    id: string;
-    className?: string;
+    id: string; // unitId
+    className?: string; // Parent class name.
 
-    snapshot?: IDocumentData;
-    resizeCallBack?: (editor: Nullable<HTMLDivElement>) => void;
-    cancelDefaultResizeListener?: boolean;
-    isSheetEditor?: boolean;
-    canvasStyle?: IEditorCanvasStyle;
+    snapshot?: IDocumentData; // The default initialization snapshot for the editor can be simply replaced with the value attribute, for cellEditor and formulaBar
 
-    value?: string;
+    resizeCallBack?: (editor: Nullable<HTMLDivElement>) => void; // Container scale callback.
 
-    isSingle?: boolean;
-    isReadonly?: boolean;
-    onlyInputFormula?: boolean;
-    onlyInputRange?: boolean;
-    onlyInputContent?: boolean;
+    cancelDefaultResizeListener?: boolean; // Disable the default container scaling listener, for cellEditor and formulaBar
 
-    openForSheetUnitId?: Nullable<string>;
-    openForSheetSubUnitId?: Nullable<string>;
+    isSheetEditor?: boolean; // Specify whether the editor is bound to a sheet. Currently, there are cellEditor and formulaBar.
 
-    onChange?: (value: Nullable<string>) => void;
+    canvasStyle?: IEditorCanvasStyle; // Setting the style of the editor is similar to setting the drawing style of a canvas, and therefore, it should be distinguished from the CSS 'style'. At present, it only supports the 'fontsize' attribute.
 
-    onFocus?: (state: boolean) => void;
+    value?: string; // default values.
 
-    onValid?: (state: boolean) => void;
+    isSingle?: boolean; // Set whether the editor allows multiline input, default is true, equivalent to input; false is equivalent to textarea.
+    isReadonly?: boolean; // Set the editor to read-only state.
+
+    onlyInputFormula?: boolean; // Only input formula string
+    onlyInputRange?: boolean; // Only input ref range
+    onlyInputContent?: boolean; // Only plain content can be entered, turning off formula and range input highlighting.
+
+    openForSheetUnitId?: Nullable<string>; //  Configuring which workbook the selector defaults to opening in determines whether the ref includes a [unitId] prefix.
+    openForSheetSubUnitId?: Nullable<string>; // Configuring the default worksheet where the selector opens determines whether the ref includes a [unitId]sheet1 prefix.
+
+    onChange?: (value: Nullable<string>) => void; // Callback for changes in the selector value.
+
+    onFocus?: (state: boolean) => void; // Callback for editor focus.
+
+    onValid?: (state: boolean) => void; // Editor input value validation, currently effective only under onlyRange and onlyFormula conditions.
+
 }
 
 /**

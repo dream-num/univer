@@ -14,24 +14,31 @@
  * limitations under the License.
  */
 
-import PickerZhCN from 'rc-picker/lib/locale/zh_CN';
-import dajsZhCN from 'dayjs/locale/zh';
-import type { ILocale } from './interface';
+import type { Meta } from '@storybook/react';
+import React, { useState } from 'react';
 
-const locale: ILocale = {
-    design: {
-        Confirm: {
-            cancel: '取消',
-            confirm: '确定',
-        },
-        Slider: {
-            resetTo: '恢复至',
-        },
-        Picker: {
-            ...dajsZhCN,
-            ...PickerZhCN,
-        },
+import Dayjs from 'dayjs';
+import { DatePicker } from './DatePicker';
+
+const meta: Meta<typeof DatePicker> = {
+    title: 'Components / DatePicker',
+    component: DatePicker,
+    parameters: {
+        layout: 'centered',
     },
+    tags: ['autodocs'],
 };
 
-export default locale;
+export default meta;
+
+export const DatePickerBasic = {
+    render() {
+        const [value, setValue] = useState<Dayjs.Dayjs>(Dayjs());
+
+        return (
+            <>
+                <DatePicker value={value} onChange={setValue} />
+            </>
+        );
+    },
+};

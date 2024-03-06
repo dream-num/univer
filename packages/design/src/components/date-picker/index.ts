@@ -14,24 +14,4 @@
  * limitations under the License.
  */
 
-import PickerZhCN from 'rc-picker/lib/locale/zh_CN';
-import dajsZhCN from 'dayjs/locale/zh';
-import type { ILocale } from './interface';
-
-const locale: ILocale = {
-    design: {
-        Confirm: {
-            cancel: '取消',
-            confirm: '确定',
-        },
-        Slider: {
-            resetTo: '恢复至',
-        },
-        Picker: {
-            ...dajsZhCN,
-            ...PickerZhCN,
-        },
-    },
-};
-
-export default locale;
+export { DatePicker, type IDatePickerProps } from './DatePicker';

@@ -298,7 +298,7 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
             const index = this._docs.indexOf(doc);
             this._docs.splice(index, 1);
             this._docDisposed$.next(doc);
-            this.focusUniverInstance(null);
+            // this.focusUniverInstance(null);
             return true;
         }
 
@@ -307,7 +307,7 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
             const index = this._sheets.indexOf(sheet);
             this._sheets.splice(index, 1);
             this._sheetDisposed$.next(sheet);
-            this.focusUniverInstance(null);
+            // this.focusUniverInstance(null);
             return true;
         }
 
@@ -316,7 +316,7 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
             const index = this._slides.indexOf(slide);
             this._slides.splice(index, 1);
             this._slideDisposed$.next(slide);
-            this.focusUniverInstance(null);
+            // this.focusUniverInstance(null);
             return true;
         }
 

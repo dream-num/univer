@@ -5,7 +5,7 @@
 
 ## Introduction
 
-> UI plugin for Univer.
+`@univerjs/ui` defines basic UI services and provides a set of desktop Workbench implementations based on React.
 
 ## Usage
 

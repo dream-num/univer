@@ -585,6 +585,9 @@ export class LexerTreeBuilder extends Disposable {
                 }
 
                 if (OPERATOR_TOKEN_SET.has(char)) {
+                    if (char === operatorToken.PLUS && this._deletePlusForPreNode(children[i - 1])) {
+                        continue;
+                    }
                     while (symbolStack.length > 0) {
                         const lastSymbol = symbolStack[symbolStack.length - 1]?.trim();
                         if (!lastSymbol || lastSymbol === matchToken.OPEN_BRACKET) {
@@ -633,6 +636,21 @@ export class LexerTreeBuilder extends Disposable {
             baseStack.push(symbolStack.pop()!);
         }
         lexerNode.setChildren(baseStack);
+    }
+
+    private _deletePlusForPreNode(preNode: Nullable<string | LexerNode>) {
+        if (preNode == null) {
+            return true;
+        }
+
+        if (!(preNode instanceof LexerNode)) {
+            const preChar = preNode.trim();
+            if (OPERATOR_TOKEN_SET.has(preChar) || preChar === matchToken.OPEN_BRACKET) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private _resetCurrentLexerNode() {

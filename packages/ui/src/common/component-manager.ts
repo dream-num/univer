@@ -41,7 +41,10 @@ import {
     DeleteCellShiftUp,
     DeleteColumn,
     DeleteRow,
+    DirectExportSingle,
     DownBorder,
+    ExportSingle,
+    FolderSingle,
     FontColor,
     FontSizeIncreaseSingle,
     FontSizeReduceSingleSingle,
@@ -199,6 +202,9 @@ export class ComponentManager {
             LeftTridiagonalSingle,
             SlashSingle,
             RightDoubleDiagonalSingle,
+            DirectExportSingle,
+            FolderSingle,
+            ExportSingle,
         };
 
         for (const k in iconList) {

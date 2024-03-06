@@ -15,7 +15,7 @@
  */
 
 import type { IWorkbookData } from '@univerjs/core';
-import { ILogService, IUniverInstanceService, LocaleType, LogLevel, Plugin, PluginType, Univer } from '@univerjs/core';
+import { ILogService, IUniverInstanceService, LocaleService, LocaleType, LogLevel, Plugin, PluginType, Univer } from '@univerjs/core';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { SelectionManagerService, SheetInterceptorService } from '@univerjs/sheets';
 import {
@@ -34,7 +34,6 @@ import { IMarkSelectionService } from '../../mark-selection/mark-selection.servi
 import { ISelectionRenderService, SelectionRenderService } from '../../selection/selection-render.service';
 import { SheetSkeletonManagerService } from '../../sheet-skeleton-manager.service';
 import { ISheetClipboardService, SheetClipboardService } from '../clipboard.service';
-import { LocaleService } from '../../../../../core/lib/types';
 
 const cellData = {
     0: {

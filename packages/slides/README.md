@@ -5,12 +5,16 @@
 
 ## Introduction
 
-> Core library for Univer Slides.
+TODO: Not written yet.
 
 ## Usage
 
 ### Installation
 
 ```shell
-npm i @univerjs/slides
+# Using npm
+npm install @univerjs/slides
+
+# Using pnpm
+pnpm add @univerjs/slides
 ```

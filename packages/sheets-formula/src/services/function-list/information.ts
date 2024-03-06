@@ -92,7 +92,7 @@ export const FUNCTION_LIST_INFORMATION: IFunctionInfo[] = [
             {
                 name: 'formula.functionList.ISBLANK.functionParameter.value.name',
                 detail: 'formula.functionList.ISBLANK.functionParameter.value.detail',
-                example: 'A1:A20',
+                example: 'A1',
                 require: 1,
                 repeat: 0,
             },
@@ -105,16 +105,9 @@ export const FUNCTION_LIST_INFORMATION: IFunctionInfo[] = [
         abstract: 'formula.functionList.ISERR.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.ISERR.functionParameter.number1.name',
-                detail: 'formula.functionList.ISERR.functionParameter.number1.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-            {
-                name: 'formula.functionList.ISERR.functionParameter.number2.name',
-                detail: 'formula.functionList.ISERR.functionParameter.number2.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.ISERR.functionParameter.value.name',
+                detail: 'formula.functionList.ISERR.functionParameter.value.detail',
+                example: 'A1',
                 require: 1,
                 repeat: 0,
             },
@@ -127,16 +120,9 @@ export const FUNCTION_LIST_INFORMATION: IFunctionInfo[] = [
         abstract: 'formula.functionList.ISERROR.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.ISERROR.functionParameter.number1.name',
-                detail: 'formula.functionList.ISERROR.functionParameter.number1.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-            {
-                name: 'formula.functionList.ISERROR.functionParameter.number2.name',
-                detail: 'formula.functionList.ISERROR.functionParameter.number2.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.ISERROR.functionParameter.value.name',
+                detail: 'formula.functionList.ISERROR.functionParameter.value.detail',
+                example: 'A1',
                 require: 1,
                 repeat: 0,
             },
@@ -193,16 +179,9 @@ export const FUNCTION_LIST_INFORMATION: IFunctionInfo[] = [
         abstract: 'formula.functionList.ISLOGICAL.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.ISLOGICAL.functionParameter.number1.name',
-                detail: 'formula.functionList.ISLOGICAL.functionParameter.number1.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-            {
-                name: 'formula.functionList.ISLOGICAL.functionParameter.number2.name',
-                detail: 'formula.functionList.ISLOGICAL.functionParameter.number2.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.ISLOGICAL.functionParameter.value.name',
+                detail: 'formula.functionList.ISLOGICAL.functionParameter.value.detail',
+                example: 'A1',
                 require: 1,
                 repeat: 0,
             },
@@ -215,16 +194,9 @@ export const FUNCTION_LIST_INFORMATION: IFunctionInfo[] = [
         abstract: 'formula.functionList.ISNA.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.ISNA.functionParameter.number1.name',
-                detail: 'formula.functionList.ISNA.functionParameter.number1.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-            {
-                name: 'formula.functionList.ISNA.functionParameter.number2.name',
-                detail: 'formula.functionList.ISNA.functionParameter.number2.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.ISNA.functionParameter.value.name',
+                detail: 'formula.functionList.ISNA.functionParameter.value.detail',
+                example: 'A1',
                 require: 1,
                 repeat: 0,
             },
@@ -237,16 +209,9 @@ export const FUNCTION_LIST_INFORMATION: IFunctionInfo[] = [
         abstract: 'formula.functionList.ISNONTEXT.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.ISNONTEXT.functionParameter.number1.name',
-                detail: 'formula.functionList.ISNONTEXT.functionParameter.number1.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-            {
-                name: 'formula.functionList.ISNONTEXT.functionParameter.number2.name',
-                detail: 'formula.functionList.ISNONTEXT.functionParameter.number2.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.ISNONTEXT.functionParameter.value.name',
+                detail: 'formula.functionList.ISNONTEXT.functionParameter.value.detail',
+                example: 'A1',
                 require: 1,
                 repeat: 0,
             },
@@ -259,16 +224,9 @@ export const FUNCTION_LIST_INFORMATION: IFunctionInfo[] = [
         abstract: 'formula.functionList.ISNUMBER.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.ISNUMBER.functionParameter.number1.name',
-                detail: 'formula.functionList.ISNUMBER.functionParameter.number1.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-            {
-                name: 'formula.functionList.ISNUMBER.functionParameter.number2.name',
-                detail: 'formula.functionList.ISNUMBER.functionParameter.number2.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.ISNUMBER.functionParameter.value.name',
+                detail: 'formula.functionList.ISNUMBER.functionParameter.value.detail',
+                example: 'A1',
                 require: 1,
                 repeat: 0,
             },
@@ -325,16 +283,9 @@ export const FUNCTION_LIST_INFORMATION: IFunctionInfo[] = [
         abstract: 'formula.functionList.ISREF.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.ISREF.functionParameter.number1.name',
-                detail: 'formula.functionList.ISREF.functionParameter.number1.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-            {
-                name: 'formula.functionList.ISREF.functionParameter.number2.name',
-                detail: 'formula.functionList.ISREF.functionParameter.number2.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.ISREF.functionParameter.value.name',
+                detail: 'formula.functionList.ISREF.functionParameter.value.detail',
+                example: 'A1',
                 require: 1,
                 repeat: 0,
             },
@@ -347,16 +298,9 @@ export const FUNCTION_LIST_INFORMATION: IFunctionInfo[] = [
         abstract: 'formula.functionList.ISTEXT.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.ISTEXT.functionParameter.number1.name',
-                detail: 'formula.functionList.ISTEXT.functionParameter.number1.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-            {
-                name: 'formula.functionList.ISTEXT.functionParameter.number2.name',
-                detail: 'formula.functionList.ISTEXT.functionParameter.number2.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.ISTEXT.functionParameter.value.name',
+                detail: 'formula.functionList.ISTEXT.functionParameter.value.detail',
+                example: 'A1',
                 require: 1,
                 repeat: 0,
             },

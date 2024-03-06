@@ -5,12 +5,16 @@
 
 ## Introduction
 
-> Zen Editor plugin for Univer Sheets. This plugin allows you to edit your sheets in a zen mode.
+`@univerjs/sheets-zen-mode-editor` enhances the immersive editing experience for cells in sheets.
 
 ## Usage
 
 ### Installation
 
 ```shell
-npm i @univerjs/sheets-zen-editor
+# Using npm
+npm install @univerjs/sheets-zen-editor
+
+# Using pnpm
+pnpm add @univerjs/sheets-zen-editor
 ```

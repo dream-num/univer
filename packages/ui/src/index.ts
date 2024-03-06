@@ -47,7 +47,7 @@ export {
 } from './services/contextmenu/contextmenu.service';
 export { DesktopDialogService } from './services/dialog/desktop-dialog.service';
 export { IDialogService } from './services/dialog/dialog.service';
-export { ILayoutService } from './services/layout/layout.service';
+export { ILayoutService, DesktopLayoutService } from './services/layout/layout.service';
 export {
     type ICustomComponentProps,
     type IDisplayMenuItem,
@@ -83,3 +83,7 @@ export { IEditorService, EditorService } from './services/editor/editor.service'
 export { TextEditor } from './components/editor/TextEditor';
 
 export { SetEditorResizeOperation } from './commands/operations/editor/set-editor-resize.operation';
+
+export { RangeSelector } from './components/range-selector/RangeSelector';
+
+export { IRangeSelectorService } from './services/range-selector/range-selector.service';

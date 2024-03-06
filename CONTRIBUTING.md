@@ -122,7 +122,7 @@ If you are adding a new feature, please make sure to update the documentation ac
 We use Storybook to develop and test components in isolation. It is a great tool to develop UI components in isolation, which can improve component reuse, testability, and development efficiency. You can use the following command to start Storybook:
 
 ```shell
-pnpm storybook
+pnpm storybook:dev
 ```
 
 When a new pull request is submitted, a Storybook deployment will be automatically generated. You can view the Storybook deployment by clicking the "Preview" link in the "View Storybook" section.

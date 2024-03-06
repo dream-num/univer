@@ -63,15 +63,11 @@ export class Match extends BaseFunction {
         }
 
         if (lookupValue.isArray()) {
-            return lookupValue.map((value) => {
-                const result = this._handleSingleObject(
-                    value,
-                    lookupArray,
-                    matchTypeValue
-                );
-
-                return result;
-            });
+            return lookupValue.map((value) => this._handleSingleObject(
+                value,
+                lookupArray,
+                matchTypeValue
+            ));
         }
 
         return this._handleSingleObject(

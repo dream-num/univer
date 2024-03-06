@@ -106,7 +106,7 @@ export default {
         },
     },
     COLUMN: {
-        description: 'Returns the column number of a reference',
+        description: 'Returns the column number of the given cell reference.',
         abstract: 'Returns the column number of a reference',
         links: [
             {
@@ -115,12 +115,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            reference: { name: 'reference', detail: 'The cell or range of cells for which you want to return the column number.' },
         },
     },
     COLUMNS: {
-        description: 'Returns the number of columns in a reference',
+        description: 'Returns the number of columns in an array or reference.',
         abstract: 'Returns the number of columns in a reference',
         links: [
             {
@@ -129,8 +128,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: 'array', detail: 'An array or array formula, or a reference to a range of cells for which you want the number of columns.' },
         },
     },
     DROP: {
@@ -274,7 +272,7 @@ export default {
         },
     },
     INDEX: {
-        description: 'Uses an index to choose a value from a reference or array',
+        description: 'Returns the reference of the cell at the intersection of a particular row and column. If the reference is made up of non-adjacent selections, you can pick the selection to look in.',
         abstract: 'Uses an index to choose a value from a reference or array',
         links: [
             {
@@ -283,12 +281,14 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            reference: { name: 'reference', detail: 'A reference to one or more cell ranges.\nIf you are entering a non-adjacent range for the reference, enclose reference in parentheses.\nIf each area in reference contains only one row or column, the row_num or column_num argument, respectively, is optional. For example, for a single row reference, use INDEX(reference,,column_num).\nIf array has more than one row and more than one column, and only row_num or column_num is used, INDEX returns an array of the entire row or column in array.' },
+            rowNum: { name: 'row_num', detail: 'The number of the row in reference from which to return a reference.' },
+            columnNum: { name: 'column_num', detail: 'The number of the column in reference from which to return a reference.' },
+            areaNum: { name: 'area_num', detail: 'Selects a range in reference from which to return the intersection of row_num and column_num. The first area selected or entered is numbered 1, the second is 2, and so on. If area_num is omitted, INDEX uses area 1.  The areas listed here must all be located on one sheet.  If you specify areas that are not on the same sheet as each other, it will cause a #VALUE! error.  If you need to use ranges that are located on different sheets from each other, it is recommended that you use the array form of the INDEX function, and use another function to calculate the range that makes up the array.  For example, you could use the CHOOSE function to calculate which range will be used.' },
         },
     },
     INDIRECT: {
-        description: 'Returns a reference indicated by a text value',
+        description: 'Returns the reference specified by a text string. References are immediately evaluated to display their contents.',
         abstract: 'Returns a reference indicated by a text value',
         links: [
             {
@@ -297,8 +297,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            refText: { name: 'ref_text', detail: 'A reference to a cell that contains an A1-style reference, an R1C1-style reference, a name defined as a reference, or a reference to a cell as a text string. If ref_text is not a valid cell reference, INDIRECT returns the #REF! error value.\nIf ref_text refers to a cell range outside the row limit of 1,048,576 or the column limit of 16,384 (XFD), INDIRECT returns a #REF! error.' },
+            a1: { name: 'a1', detail: 'A logical value that specifies what type of reference is contained in the cell ref_text.\nIf a1 is TRUE or omitted, ref_text is interpreted as an A1-style reference.\nIf a1 is FALSE, ref_text is interpreted as an R1C1-style reference.' },
         },
     },
     LOOKUP: {
@@ -350,11 +350,11 @@ export default {
             },
         ],
         functionParameter: {
-            reference: { name: 'Reference', detail: 'The reference from which you want to base the offset. Reference must refer to a cell or range of adjacent cells; otherwise, OFFSET returns the #VALUE! error value.' },
-            rows: { name: 'Rows', detail: 'The number of rows, up or down, that you want the upper-left cell to refer to. Using 5 as the rows argument specifies that the upper-left cell in the reference is five rows below reference. Rows can be positive (which means below the starting reference) or negative (which means above the starting reference).' },
-            cols: { name: 'Columns', detail: 'The number of columns, to the left or right, that you want the upper-left cell of the result to refer to. Using 5 as the cols argument specifies that the upper-left cell in the reference is five columns to the right of reference. Cols can be positive (which means to the right of the starting reference) or negative (which means to the left of the starting reference).' },
-            height: { name: 'Height', detail: 'The height, in number of rows, that you want the returned reference to be. Height must be a positive number.' },
-            width: { name: 'Width', detail: 'The width, in number of columns, that you want the returned reference to be. Width must be a positive number.' },
+            reference: { name: 'reference', detail: 'The reference from which you want to base the offset. Reference must refer to a cell or range of adjacent cells; otherwise, OFFSET returns the #VALUE! error value.' },
+            rows: { name: 'rows', detail: 'The number of rows, up or down, that you want the upper-left cell to refer to. Using 5 as the rows argument specifies that the upper-left cell in the reference is five rows below reference. Rows can be positive (which means below the starting reference) or negative (which means above the starting reference).' },
+            cols: { name: 'columns', detail: 'The number of columns, to the left or right, that you want the upper-left cell of the result to refer to. Using 5 as the cols argument specifies that the upper-left cell in the reference is five columns to the right of reference. Cols can be positive (which means to the right of the starting reference) or negative (which means to the left of the starting reference).' },
+            height: { name: 'height', detail: 'The height, in number of rows, that you want the returned reference to be. Height must be a positive number.' },
+            width: { name: 'width', detail: 'The width, in number of columns, that you want the returned reference to be. Width must be a positive number.' },
         },
     },
     ROW: {
@@ -367,12 +367,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            reference: { name: 'reference', detail: 'The cell or range of cells for which you want the row number.' },
         },
     },
     ROWS: {
-        description: 'Returns the number of rows in a reference',
+        description: 'Returns the number of rows in an array or reference.',
         abstract: 'Returns the number of rows in a reference',
         links: [
             {
@@ -381,8 +380,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            array: { name: 'array', detail: 'An array, an array formula, or a reference to a range of cells for which you want the number of rows.' },
         },
     },
     RTD: {

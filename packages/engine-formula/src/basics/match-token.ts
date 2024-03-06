@@ -44,3 +44,18 @@ export function normalizeSheetName(sheetName: string) {
     }
     return sheetName;
 }
+
+/**
+ * Determine whether the character is a token keyword for the formula engine.
+ * @param char
+ */
+export function matchRefDrawToken(char: string) {
+    return (
+        (isFormulaLexerToken(char) &&
+                char !== matchToken.CLOSE_BRACES &&
+                char !== matchToken.CLOSE_BRACKET &&
+                char !== matchToken.SINGLE_QUOTATION &&
+                char !== matchToken.DOUBLE_QUOTATION) ||
+            char === ' '
+    );
+}

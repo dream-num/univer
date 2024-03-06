@@ -32,6 +32,7 @@ enum BatchOperatorType {
     PLUS,
     MULTIPLY,
     DIVIDED,
+    MOD,
     COMPARE,
     CONCATENATE_FRONT,
     CONCATENATE_BACK,
@@ -125,12 +126,7 @@ export class ArrayValueObject extends BaseValueObject {
     }>;
 
     constructor(rawValue: string | IArrayValueObject) {
-        if (typeof rawValue === 'string') {
-            super(rawValue as string);
-        } else {
-            const rawString = fromObjectToString(rawValue as IArrayValueObject);
-            super(rawString);
-        }
+        super(typeof rawValue === 'string' ? rawValue as string : fromObjectToString(rawValue as IArrayValueObject));
 
         this._values = this._formatValue(rawValue);
     }
@@ -758,7 +754,8 @@ export class ArrayValueObject extends BaseValueObject {
                 return false; // break
             }
 
-            if (valueObject.isString() || valueObject.isNull()) {
+            // ignore boolean value in array, but not ignore in normal value object
+            if (valueObject.isString() || valueObject.isNull() || valueObject.isBoolean()) {
                 return true; // continue
             }
 
@@ -785,7 +782,8 @@ export class ArrayValueObject extends BaseValueObject {
                 return false; // break
             }
 
-            if (valueObject.isString() || valueObject.isNull()) {
+            // ignore boolean value in array, but not ignore in normal value object
+            if (valueObject.isString() || valueObject.isNull() || valueObject.isBoolean()) {
                 return true; // continue
             }
 
@@ -865,6 +863,19 @@ export class ArrayValueObject extends BaseValueObject {
 
     override divided(valueObject: BaseValueObject): BaseValueObject {
         return this._batchOperator(valueObject, BatchOperatorType.DIVIDED);
+    }
+
+    override mod(valueObject: BaseValueObject): BaseValueObject {
+        return this._batchOperator(valueObject, BatchOperatorType.MOD);
+    }
+
+    override modInverse(valueObject: BaseValueObject): BaseValueObject {
+        return this.map((currentValue) => {
+            if (currentValue.isError()) {
+                return currentValue;
+            }
+            return valueObject.mod(currentValue);
+        });
     }
 
     override compare(valueObject: BaseValueObject, operator: compareToken): BaseValueObject {
@@ -1057,13 +1068,13 @@ export class ArrayValueObject extends BaseValueObject {
         });
     }
 
-    override mean(): BaseValueObject {
+    override mean(ddof: number = 0): BaseValueObject {
         const sum = this.sum();
 
         // Like sum, ignore strings and booleans
         const count = this.count();
 
-        return sum.divided(count);
+        return sum.divided(ddof === 0 ? count : count.minusBy(1));
     }
 
     override median(): BaseValueObject {
@@ -1089,20 +1100,31 @@ export class ArrayValueObject extends BaseValueObject {
         return allValue.get(0, (count - 1) / 2);
     }
 
-    // TODO ddof, ignore strings and booleans
-    override var(): BaseValueObject {
+    /**
+     * ┌──────────────┬────────────────────────────────┬───────────────────┐
+     * │ Function     │ Ignore logical values and text │ Type              │
+     * ├──────────────┼────────────────────────────────┼───────────────────┤
+     * │ VAR.S (VAR)  │ TRUE                           │ sample            │
+     * │ VAR.P (VARP) │ TRUE                           │ entire population │
+     * │ VARA         │ FALSE                          │ sample            │
+     * │ VARPA        │ FALSE                          │ entire population │
+     * └──────────────┴────────────────────────────────┴───────────────────┘
+     *
+     * for VARPA and VARA, strings and FALSE are counted as 0, TRUE is counted as 1
+     * for VAR.S/VAR, or VAR.P/VARP, strings,TRUE and FALSE are ignored
+     * Since sum ignores strings and booleans, they are ignored here too, and VAR.S and VAR.P are used more
+     *
+     * VAR.S assumes that its arguments are a sample of the population, like numpy.var(data, ddof=1)
+     * VAR.P assumes that its arguments are the entire population, like numpy.var(data, ddof=0)
+     * numpy.var uses ddof=0 (Delta Degrees of Freedom) by default, so we use ddof=0 here
+     *
+     */
+    override var(ddof: number = 0): BaseValueObject {
         const mean = this.mean();
 
         // let isError = null;
         const squaredDifferences: BaseValueObject[][] = [[]];
         this.iterator((valueObject: Nullable<BaseValueObject>) => {
-            // for VARPA and VARA, strings and FALSE are counted as 0, TRUE is counted as 1
-            // for VAR.S/VAR, or VAR.P/VARP, strings,TRUE and FALSE are ignored
-            // Since sum ignores strings and booleans, they are ignored here too, and VAR.S and VAR.P are used more
-
-            // VAR.S assumes that its arguments are a sample of the population, like numpy.var(data, ddof=1)
-            // VAR.P assumes that its arguments are the entire population, like numpy.var(data, ddof=0)
-            // numpy.var uses ddof=0 by default, so we use ddof=0 here
             if (valueObject == null || valueObject.isError() || valueObject.isString() || valueObject.isBoolean() || valueObject.isNull()) {
                 return;
             }
@@ -1116,7 +1138,7 @@ export class ArrayValueObject extends BaseValueObject {
             squaredDifferences[0].push(baseValueObject);
         });
 
-        const { _rowCount, _columnCount, _unitId, _sheetId, _currentRow, _currentColumn } = this;
+        const { _unitId, _sheetId, _currentRow, _currentColumn } = this;
 
         const squaredDifferencesArrayObject = new ArrayValueObject({
             calculateValueList: squaredDifferences,
@@ -1128,19 +1150,19 @@ export class ArrayValueObject extends BaseValueObject {
             column: _currentColumn,
         });
 
-        return squaredDifferencesArrayObject.mean();
+        return squaredDifferencesArrayObject.mean(ddof);
     }
 
     /**
-     * STDEV.P: ddof=0, ignore strings and booleans
-     * STDEV.S: ddof=1, ignore strings and booleans
+     * STDEV.P (STDEVP): ddof=0, ignore strings and booleans
+     * STDEV.S (STDEV): ddof=1, ignore strings and booleans
      *
      * STDEVPA: ddof=0,
      * STDEVA: ddof=1,
      * @returns
      */
-    override std(): BaseValueObject {
-        const variance = this.var();
+    override std(ddof: number = 0): BaseValueObject {
+        const variance = this.var(ddof);
 
         if (variance.isError()) {
             return variance;
@@ -1380,17 +1402,13 @@ export class ArrayValueObject extends BaseValueObject {
 
                     if (rowValuePositions != null) {
                         rowValuePositions.forEach((rowPositions, rowValue) => {
-                            let currentValue: Nullable<BaseValueObject>;
+                            let currentValue: Nullable<BaseValueObject> = new NullValueObject(0); // handle blank cell
                             if (typeof rowValue === 'string') {
                                 currentValue = new StringValueObject(rowValue);
                             } else if (typeof rowValue === 'number') {
                                 currentValue = new NumberValueObject(rowValue);
                             } else if (typeof rowValue === 'boolean') {
                                 currentValue = new BooleanValueObject(rowValue);
-                            }
-
-                            if (currentValue == null) {
-                                return true;
                             }
 
                             const matchResult = currentValue.compare(valueObject, operator as compareToken);
@@ -1454,6 +1472,9 @@ export class ArrayValueObject extends BaseValueObject {
                             break;
                         case BatchOperatorType.DIVIDED:
                             result[r][column] = currentValue.divided(valueObject);
+                            break;
+                        case BatchOperatorType.MOD:
+                            result[r][column] = currentValue.mod(valueObject);
                             break;
                         case BatchOperatorType.COMPARE:
                             if (!operator) {
@@ -1602,6 +1623,9 @@ export class ArrayValueObject extends BaseValueObject {
                                 break;
                             case BatchOperatorType.DIVIDED:
                                 rowList[c] = currentValue.divided(opValue);
+                                break;
+                            case BatchOperatorType.MOD:
+                                rowList[c] = currentValue.mod(opValue);
                                 break;
                             case BatchOperatorType.COMPARE:
                                 if (!operator) {

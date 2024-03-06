@@ -5,12 +5,16 @@
 
 ## Introduction
 
-> This plugin provides network services to other modules of Univer.
+The `@univerjs/network` library provides basic network service capabilities, primarily for use in collaborative editing scenarios.
 
 ## Usage
 
 ### Installation
 
 ```shell
-npm i @univerjs/network
+# Using npm
+npm install @univerjs/network
+
+# Using pnpm
+pnpm add @univerjs/network
 ```

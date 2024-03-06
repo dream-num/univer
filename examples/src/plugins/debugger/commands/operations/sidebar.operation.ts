@@ -43,7 +43,7 @@ export const SidebarOperation: ICommand = {
                     onClose: () => {
                         editorService.setOperationSheetUnitId(null);
                         editorService.setOperationSheetSubUnitId(null);
-                        editorService.changeEditorFocus();
+                        editorService.closeRangePrompt();
                     },
                 });
                 break;
@@ -52,7 +52,7 @@ export const SidebarOperation: ICommand = {
             default:
                 editorService.setOperationSheetUnitId(null);
                 editorService.setOperationSheetSubUnitId(null);
-                editorService.changeEditorFocus();
+                editorService.closeRangePrompt();
                 sidebarService.close();
                 break;
         }

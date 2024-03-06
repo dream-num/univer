@@ -5,12 +5,16 @@
 
 ## Introduction
 
-> TODO: Introduction
+TODO: Not yet written.
 
 ## Usage
 
 ### Installation
 
 ```shell
-npm i @univerjs/find-replace
+# Using npm
+npm install @univerjs/find-replace
+
+# Using pnpm
+pnpm add @univerjs/find-replace
 ```

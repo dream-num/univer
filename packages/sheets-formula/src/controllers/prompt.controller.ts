@@ -53,8 +53,8 @@ import {
     deserializeRangeWithSheet,
     generateStringWithSequence,
     getAbsoluteRefTypeWitString,
-    isFormulaLexerToken,
     LexerTreeBuilder,
+    matchRefDrawToken,
     matchToken,
     normalizeSheetName,
     sequenceNodeType,
@@ -185,14 +185,6 @@ export class PromptController extends Disposable {
 
         this._previousInsertRefStringIndex = null;
 
-        // this._currentUnitId = null;
-
-        // this._currentSheetId = null;
-
-        this._editorService.setOperationSheetUnitId(null);
-
-        this._editorService.setOperationSheetSubUnitId(null);
-
         this._isSelectionMovingRefSelections = [];
 
         this._previousRangesCount = 0;
@@ -258,22 +250,20 @@ export class PromptController extends Disposable {
                         return;
                     }
 
+                    const editor = this._editorService.getEditor(params.unitId);
+
+                    if (!editor || editor.onlyInputContent()) {
+                        return;
+                    }
+
                     if (
-                        (this._editorService.isSheetEditor(params.unitId) && this._editorBridgeService.isVisible().visible === false) ||
+                        (editor.isSheetEditor() && this._editorBridgeService.isVisible().visible === false) ||
                         this._formulaPromptService.isSelectionMoving()
                     ) {
                         return;
                     }
 
-                    if (!this._editorService.isEditor(params.unitId)) {
-                        return;
-                    }
-
-                    const currentBody = this._getCurrentBody();
-
-                    const dataStream = currentBody?.dataStream || '';
-
-                    this._contextSwitch(dataStream);
+                    this._contextSwitch();
 
                     this._changeKeepVisibleHideState();
 
@@ -288,6 +278,11 @@ export class PromptController extends Disposable {
                     // if (this._isLockedOnSelectionInsertRefString) {
                     //     return;
                     // }
+
+                    if (editor.onlyInputRange()) {
+                        return;
+                    }
+
                     // TODO@Dushusir: use real text info
                     this._changeFunctionPanelState();
                 })
@@ -334,20 +329,10 @@ export class PromptController extends Disposable {
         this.disposeWithMe(
             this._editorBridgeService.afterVisible$.subscribe((visibleParam) => {
                 if (visibleParam.visible === true) {
-                    const { unitId, sheetId } = this._getCurrentUnitIdAndSheetId();
-
-                    if (this._editorService.getOperationSheetUnitId() == null) {
-                        this._editorService.setOperationSheetUnitId(unitId);
-                    }
-
-                    if (this._editorService.getOperationSheetSubUnitId() == null) {
-                        this._editorService.setOperationSheetSubUnitId(sheetId);
-                    }
-
                     return;
                 }
 
-                this._changeEditor();
+                this._closeRangePrompt();
             })
         );
     }
@@ -366,20 +351,22 @@ export class PromptController extends Disposable {
                 }
 
                 if (!this._editorService.isSheetEditor(editorId)) {
-                    this._changeEditor(editorId);
+                    this._closeRangePrompt(editorId);
                     this._previousEditorUnitId = editorId;
                 }
             })
         );
 
         this.disposeWithMe(
-            this._editorService.changeEditorFocus$.subscribe(() => {
-                this._changeEditor();
+            this._editorService.closeRangePrompt$.subscribe(() => {
+                if (!this._editorService.getSpreadsheetFocusState() || !this._formulaPromptService.isLockedSelectionInsert()) {
+                    this._closeRangePrompt();
+                }
             })
         );
     }
 
-    private _changeEditor(editorId: Nullable<string>) {
+    private _closeRangePrompt(editorId: Nullable<string>) {
         /**
          * Switching the selection of PluginName causes a refresh.
          * Here, a delay is added to prevent the loss of content when pressing enter.
@@ -390,16 +377,6 @@ export class PromptController extends Disposable {
 
         if (current?.pluginName === NORMAL_SELECTION_PLUGIN_NAME) {
             this._disableForceKeepVisible();
-            /**
-             * In the standard selection mode, the pivot table and page fields of the formula selection need to be cleared.
-             */
-
-            const { unitId, sheetId } = this._getCurrentUnitIdAndSheetId();
-
-            this._editorService.setOperationSheetUnitId(unitId);
-
-            this._editorService.setOperationSheetSubUnitId(sheetId);
-
             return;
         }
 
@@ -488,7 +465,12 @@ export class PromptController extends Disposable {
             return;
         }
 
-        if (!this._formulaPromptService.isLockedSelectionInsert()) {
+        /**
+         * selectionChangingState
+         * If the selection range in the editor is not restricted by being locked,
+         * it is considered a user experience optimization.
+         */
+        if (this._editorService.selectionChangingState() && !this._formulaPromptService.isLockedSelectionInsert()) {
             return;
         }
 
@@ -635,11 +617,13 @@ export class PromptController extends Disposable {
             return;
         }
 
-        const currentBody = this._getCurrentBody();
+        // const currentBody = this._getCurrentBody();
 
-        const dataStream = currentBody?.dataStream || '';
+        // const dataStream = currentBody?.dataStream || '';
 
-        const functionAndParameter = this._lexerTreeBuilder.getFunctionAndParameter(dataStream, startOffset - 1);
+        const config = this._getCurrentBodyDataStreamAndOffset();
+
+        const functionAndParameter = this._lexerTreeBuilder.getFunctionAndParameter(config?.dataStream || '', startOffset - 1 + (config?.offset || 0));
 
         if (functionAndParameter == null) {
             this._hideFunctionPanel();
@@ -695,7 +679,7 @@ export class PromptController extends Disposable {
             return;
         }
 
-        if (this._matchRefDrawToken(char)) {
+        if (matchRefDrawToken(char)) {
             this._editorBridgeService.enableForceKeepVisible();
 
             this._contextMenuService.disable();
@@ -713,21 +697,6 @@ export class PromptController extends Disposable {
     }
 
     /**
-     * Determine whether the character is a token keyword for the formula engine.
-     * @param char
-     */
-    private _matchRefDrawToken(char: string) {
-        return (
-            (isFormulaLexerToken(char) &&
-                char !== matchToken.CLOSE_BRACES &&
-                char !== matchToken.CLOSE_BRACKET &&
-                char !== matchToken.SINGLE_QUOTATION &&
-                char !== matchToken.DOUBLE_QUOTATION) ||
-            char === ' '
-        );
-    }
-
-    /**
      *
      * @returns Return the character under the current cursor in the editor.
      */
@@ -740,15 +709,15 @@ export class PromptController extends Disposable {
 
         const { startOffset } = activeRange;
 
-        const body = this._getCurrentBody();
+        const config = this._getCurrentBodyDataStreamAndOffset();
 
-        if (body == null || startOffset == null) {
+        if (config == null || startOffset == null) {
             return;
         }
 
-        const dataStream = body.dataStream;
+        const dataStream = config.dataStream;
 
-        return dataStream[startOffset - 1];
+        return dataStream[startOffset - 1 + config.offset];
     }
 
     /**
@@ -770,9 +739,29 @@ export class PromptController extends Disposable {
         }
     }
 
-    private _getCurrentBody() {
+    // private _getCurrentBody() {
+    //     const documentModel = this._currentUniverService.getCurrentUniverDocInstance();
+    //     return documentModel?.snapshot?.body;
+    // }
+
+    private _getCurrentBodyDataStreamAndOffset() {
         const documentModel = this._currentUniverService.getCurrentUniverDocInstance();
-        return documentModel?.snapshot?.body;
+
+        if (!documentModel?.snapshot?.body) {
+            return;
+        }
+
+        const unitId = documentModel.getUnitId();
+
+        const editor = this._editorService.getEditor(unitId);
+
+        const dataStream = documentModel.snapshot.body.dataStream;
+
+        if (!editor || !editor.onlyInputRange()) {
+            return { dataStream, offset: 0 };
+        }
+
+        return { dataStream: compareToken.EQUALS + dataStream, offset: 1 };
     }
 
     private _getFormulaAndCellEditorBody(unitIds: string[]) {
@@ -801,12 +790,14 @@ export class PromptController extends Disposable {
      * otherwise, close the formula panel.
      * @param currentInputValue The text content entered by the user in the editor.
      */
-    private _contextSwitch(currentInputValue: string) {
-        if (isFormulaString(currentInputValue)) {
+    private _contextSwitch() {
+        const config = this._getCurrentBodyDataStreamAndOffset();
+
+        if (config && isFormulaString(config.dataStream)) {
             this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, true);
 
             const lastSequenceNodes =
-                this._lexerTreeBuilder.sequenceNodesBuilder(currentInputValue.replace(/\r/g, '').replace(/\n/g, '')) ||
+                this._lexerTreeBuilder.sequenceNodesBuilder(config.dataStream.replace(/\r/g, '').replace(/\n/g, '')) ||
                 [];
 
             this._formulaPromptService.setSequenceNodes(lastSequenceNodes);
@@ -819,20 +810,22 @@ export class PromptController extends Disposable {
 
             const { startOffset } = activeRange;
 
-            this._currentInsertRefStringIndex = startOffset - 1;
-        } else {
-            this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, false);
+            this._currentInsertRefStringIndex = startOffset - 1 + config.offset;
 
-            this._formulaPromptService.disableLockedSelectionChange();
+            return;
+        }
 
-            this._formulaPromptService.disableLockedSelectionInsert();
+        this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, false);
+
+        this._formulaPromptService.disableLockedSelectionChange();
+
+        this._formulaPromptService.disableLockedSelectionInsert();
 
             // this._lastSequenceNodes = [];
 
-            this._formulaPromptService.clearSequenceNodes();
+        this._formulaPromptService.clearSequenceNodes();
 
-            this._hideFunctionPanel();
-        }
+        this._hideFunctionPanel();
     }
 
     private _getContextState() {
@@ -910,6 +903,8 @@ export class PromptController extends Disposable {
         const refSelections: IRefSelection[] = [];
         let refColorIndex = 0;
 
+        const offset = this._getCurrentBodyDataStreamAndOffset()?.offset || 0;
+
         for (let i = 0, len = sequenceNodes.length; i < len; i++) {
             const node = sequenceNodes[i];
             if (typeof node === 'string') {
@@ -939,8 +934,8 @@ export class PromptController extends Disposable {
 
             if (themeColor && themeColor.length > 0) {
                 textRuns.push({
-                    st: startIndex + 1,
-                    ed: endIndex + 2,
+                    st: startIndex + 1 - offset,
+                    ed: endIndex + 2 - offset,
                     ts: {
                         cl: {
                             rgb: themeColor,
@@ -1126,6 +1121,23 @@ export class PromptController extends Disposable {
         };
     }
 
+    private _getOpenForCurrentSheet() {
+        const documentDataModel = this._currentUniverService.getCurrentUniverDocInstance();
+        const editorUnitId = documentDataModel.getUnitId();
+        const editor = this._editorService.getEditor(editorUnitId);
+        if (editor == null) {
+            return {
+                openUnitId: null,
+                openSheetId: null,
+            };
+        }
+
+        return {
+            openUnitId: editor.getOpenForSheetUnitId(),
+            openSheetId: editor.getOpenForSheetSubUnitId(),
+        };
+    }
+
     /**
      * Convert the selection range to a ref string for the formula engine, such as A1:B1
      * @param currentSelection
@@ -1136,13 +1148,15 @@ export class PromptController extends Disposable {
         let refUnitId = '';
         let refSheetName = '';
 
-        if (unitId === this._editorService.getOperationSheetUnitId()) {
+        const { openUnitId, openSheetId } = this._getOpenForCurrentSheet();
+
+        if (unitId === openUnitId) {
             refUnitId = '';
         } else {
             refUnitId = unitId;
         }
 
-        if (sheetId === this._editorService.getOperationSheetSubUnitId()) {
+        if (sheetId === openSheetId) {
             refSheetName = '';
         } else {
             refSheetName = this._getSheetNameById(unitId, sheetId);
@@ -1226,17 +1240,26 @@ export class PromptController extends Disposable {
 
         this._fitEditorSize();
 
+        const editor = this._editorService.getEditor(editorUnitId);
+
+        let formulaString = dataStream;
+        let offset = 1;
+        if (!editor || !editor.onlyInputRange()) {
+            formulaString = `${compareToken.EQUALS}${dataStream}`;
+            offset = 0;
+        }
+
         if (canUndo) {
             this._commandService.executeCommand(ReplaceContentCommand.id, {
                 unitId: editorUnitId,
                 body: {
-                    dataStream: `=${dataStream}`,
+                    dataStream: formulaString,
                     textRuns,
                 },
                 textRanges: [
                     {
-                        startOffset: textSelectionOffset + 1,
-                        endOffset: textSelectionOffset + 1,
+                        startOffset: textSelectionOffset + 1 - offset,
+                        endOffset: textSelectionOffset + 1 - offset,
                         collapsed,
                         style,
                     },
@@ -1244,11 +1267,11 @@ export class PromptController extends Disposable {
                 segmentId: null,
             });
         } else {
-            this._updateEditorModel(`=${dataStream}\r\n`, textRuns);
+            this._updateEditorModel(`${formulaString}\r\n`, textRuns);
             this._textSelectionManagerService.replaceTextRanges([
                 {
-                    startOffset: textSelectionOffset + 1,
-                    endOffset: textSelectionOffset + 1,
+                    startOffset: textSelectionOffset + 1 - offset,
+                    endOffset: textSelectionOffset + 1 - offset,
                     style,
                 },
             ]);
@@ -1376,7 +1399,7 @@ export class PromptController extends Disposable {
 
             this._previousInsertRefStringIndex = this._currentInsertRefStringIndex;
 
-            if (!this._matchRefDrawToken(char)) {
+            if (!matchRefDrawToken(char)) {
                 this._formulaPromptService.insertSequenceString(this._currentInsertRefStringIndex, matchToken.COMMA);
 
                 insertNodes = this._formulaPromptService.getSequenceNodes();

@@ -81,7 +81,7 @@ export class TextX {
 
     private _actions: TextXAction[] = [];
 
-    insert(len: number, body: IDocumentBody, segmentId: string): this {
+    insert(len: number, body: IDocumentBody, segmentId = ''): this {
         const insertAction: IInsertAction = {
             t: TextXActionType.INSERT,
             body,
@@ -95,7 +95,7 @@ export class TextX {
         return this;
     }
 
-    retain(len: number, segmentId: string, body?: IDocumentBody, coverType?: UpdateDocsAttributeType): this {
+    retain(len: number, segmentId = '', body?: IDocumentBody, coverType?: UpdateDocsAttributeType): this {
         const retainAction: IRetainAction = {
             t: TextXActionType.RETAIN,
             len,
@@ -115,7 +115,7 @@ export class TextX {
         return this;
     }
 
-    delete(len: number, segmentId: string): this {
+    delete(len: number, segmentId = ''): this {
         const deleteAction: IDeleteAction = {
             t: TextXActionType.DELETE,
             len,

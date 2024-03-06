@@ -275,7 +275,9 @@ export class FormulaDataModel extends Disposable {
         // load formula data from workbook config data
 
         const unitFile = this._currentUniverService.getAllUniverSheetsInstance();
-
+        if (unitFile.length === 0) {
+            return;
+        }
         const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
         const unitId = workbook.getUnitId();
         this._formulaData[unitId] = {};
@@ -313,6 +315,8 @@ export class FormulaDataModel extends Disposable {
                     cellData: new ObjectMatrix(sheetConfig.cellData),
                     rowCount: sheetConfig.rowCount,
                     columnCount: sheetConfig.columnCount,
+                    rowData: sheetConfig.rowData,
+                    columnData: sheetConfig.columnData,
                 };
                 sheetNameMap[sheet.getName()] = sheet.getSheetId();
             }

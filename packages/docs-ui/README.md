@@ -5,12 +5,20 @@
 
 ## Introduction
 
-> UI plugin for Univer Docs.
+`@univerjs/docs-ui` package provides the User Interface for Docs.
+
+:::info
+`@univerjs/docs-ui` is still in the experimental phase. It is not recommended for use in production environments. You can learn about the iteration plans on the [roadmap](/guides/roadmap).
+:::
 
 ## Usage
 
 ### Installation
 
 ```shell
-npm i @univerjs/docs-ui
+# Using npm
+npm install @univerjs/docs-ui
+
+# Using pnpm
+pnpm add @univerjs/docs-ui
 ```

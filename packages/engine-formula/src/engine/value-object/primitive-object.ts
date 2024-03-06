@@ -21,7 +21,7 @@ import { BooleanValue, ConcatenateType } from '../../basics/common';
 import { ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
 import { compareToken } from '../../basics/token';
 import { compareWithWildcard, isWildcard } from '../utils/compare';
-import { ceil, floor, pow, round } from '../utils/math-kit';
+import { ceil, floor, mod, pow, round } from '../utils/math-kit';
 import { BaseValueObject, ErrorValueObject } from './base-value-object';
 
 export type PrimitiveValueType = string | boolean | number | null;
@@ -45,6 +45,10 @@ export class NullValueObject extends BaseValueObject {
 
     override divided(valueObject: BaseValueObject): BaseValueObject {
         return new NumberValueObject(0, true).divided(valueObject);
+    }
+
+    override mod(valueObject: BaseValueObject): BaseValueObject {
+        return new NumberValueObject(0, true).mod(valueObject);
     }
 
     override compare(valueObject: BaseValueObject, operator: compareToken): BaseValueObject {
@@ -251,6 +255,10 @@ export class BooleanValueObject extends BaseValueObject {
         return this._convertTonNumber().divided(valueObject);
     }
 
+    override mod(valueObject: BaseValueObject): BaseValueObject {
+        return this._convertTonNumber().mod(valueObject);
+    }
+
     override compare(valueObject: BaseValueObject, operator: compareToken): BaseValueObject {
         return this._convertTonNumber().compare(valueObject, operator);
     }
@@ -455,6 +463,51 @@ export class NumberValueObject extends BaseValueObject {
         object.setPattern(this.getPattern() || valueObject.getPattern());
 
         return object;
+    }
+
+    override mod(valueObject: BaseValueObject): BaseValueObject {
+        if (valueObject.isArray()) {
+            return valueObject.modInverse(this);
+        }
+
+        const currentValue = this.getValue();
+        const value = valueObject.getValue();
+
+        if (valueObject.isNull()) {
+            return new ErrorValueObject(ErrorType.DIV_BY_ZERO);
+        }
+
+        if (typeof value === 'string') {
+            return new ErrorValueObject(ErrorType.VALUE);
+        }
+        if (typeof value === 'number') {
+            if (value === 0) {
+                return new ErrorValueObject(ErrorType.DIV_BY_ZERO);
+            }
+
+            if (!Number.isFinite(currentValue) || !Number.isFinite(value)) {
+                return new ErrorValueObject(ErrorType.NUM);
+            }
+
+            const result = mod(currentValue, value);
+
+            if (!Number.isFinite(result)) {
+                return new ErrorValueObject(ErrorType.NUM);
+            }
+
+            return new NumberValueObject(result);
+        }
+        if (typeof value === 'boolean') {
+            const booleanValue = value ? 1 : 0;
+
+            if (booleanValue === 0) {
+                return new ErrorValueObject(ErrorType.DIV_BY_ZERO);
+            }
+
+            return new NumberValueObject(mod(currentValue, booleanValue));
+        }
+
+        return this;
     }
 
     override concatenateFront(valueObject: BaseValueObject): BaseValueObject {

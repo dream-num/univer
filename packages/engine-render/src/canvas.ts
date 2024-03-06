@@ -78,6 +78,8 @@ export class Canvas {
         this._canvasEle.style.left = '0';
         this._canvasEle.style.zIndex = '8';
 
+        this._canvasEle.className = 'univer-render-canvas';
+
         // support focus
         this._canvasEle.tabIndex = 1;
         this._canvasEle.style.touchAction = 'none';

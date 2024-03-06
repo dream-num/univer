@@ -72,9 +72,7 @@ export class Vlookup extends BaseFunction {
         }
 
         if (lookupValue.isArray()) {
-            return lookupValue.map((value) => {
-                return this._handleSingleObject(value, searchArray, resultArray, rangeLookupValue);
-            });
+            return lookupValue.map((value) => this._handleSingleObject(value, searchArray, resultArray, rangeLookupValue));
         }
 
         return this._handleSingleObject(lookupValue, searchArray, resultArray, rangeLookupValue);

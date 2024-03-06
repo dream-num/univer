@@ -83,6 +83,11 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
 
     async copy(): Promise<boolean> {
         const documentBodyList = this._getDocumentBodyInRanges();
+
+        if (documentBodyList.length === 0) {
+            return false;
+        }
+
         try {
             this._setClipboardData(documentBodyList);
         } catch (e) {

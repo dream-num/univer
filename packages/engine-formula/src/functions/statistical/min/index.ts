@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
+import { isRealNum } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
+import { convertTonNumber } from '../../../engine/utils/object-covert';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
@@ -34,8 +36,27 @@ export class Min extends BaseFunction {
                 return variant as ErrorValueObject;
             }
 
+            if (variant.isString()) {
+                const value = variant.getValue();
+                const isStringNumber = isRealNum(value);
+
+                if (!isStringNumber) {
+                    return new ErrorValueObject(ErrorType.VALUE);
+                }
+
+                variant = new NumberValueObject(value);
+            }
+
+            if (variant.isBoolean()) {
+                variant = convertTonNumber(variant);
+            }
+
             if (variant.isArray()) {
                 variant = variant.min();
+
+                if (variant.isError()) {
+                    return variant as ErrorValueObject;
+                }
             }
 
             if (variant.isNull()) {
@@ -43,16 +64,6 @@ export class Min extends BaseFunction {
             }
 
             accumulatorAll = this._validator(accumulatorAll, variant as BaseValueObject);
-
-            // if (variant.isReferenceObject() || (variant.isValueObject() && (variant as BaseValueObject).isArray())) {
-            //     (variant as BaseReferenceObject | ArrayValueObject).iterator((valueObject, row, column) => {
-            //         if (!valueObject.isError() && !(valueObject as BaseValueObject).isString()) {
-            //             accumulatorAll = this._validator(accumulatorAll, valueObject as BaseValueObject);
-            //         }
-            //     });
-            // } else if (!(variant as BaseValueObject).isString()) {
-            //     accumulatorAll = this._validator(accumulatorAll, variant as BaseValueObject);
-            // }
         }
 
         return accumulatorAll;

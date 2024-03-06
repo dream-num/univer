@@ -15,7 +15,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { excelDateSerial, excelSerialToDate, formatDateDefault } from '../date';
+import { excelDateSerial, excelSerialToDate, formatDateDefault, isValidDateStr } from '../date';
 
 describe('Test date', () => {
     it('Function excelDateSerial', () => {
@@ -31,5 +31,11 @@ describe('Test date', () => {
         expect(formatDateDefault(excelSerialToDate(61))).toBe('1900/03/01');
         expect(formatDateDefault(excelSerialToDate(367))).toBe('1901/01/01');
         expect(formatDateDefault(excelSerialToDate(45324))).toBe('2024/02/02');
+    });
+    it('Function isValidDateStr', () => {
+        expect(isValidDateStr('2020-1-1')).toBeTruthy();
+        expect(isValidDateStr('2020/1/31')).toBeTruthy();
+        expect(isValidDateStr('2020-2-31')).toBeFalsy();
+        expect(isValidDateStr('2020/001/31')).toBeFalsy();
     });
 });

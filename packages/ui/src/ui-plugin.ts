@@ -51,6 +51,7 @@ import { ISidebarService } from './services/sidebar/sidebar.service';
 import { DesktopZenZoneService } from './services/zen-zone/desktop-zen-zone.service';
 import { IZenZoneService } from './services/zen-zone/zen-zone.service';
 import { EditorService, IEditorService } from './services/editor/editor.service';
+import { IRangeSelectorService, RangeSelectorService } from './services/range-selector/range-selector.service';
 
 const PLUGIN_NAME = 'ui';
 
@@ -112,6 +113,7 @@ export class UniverUIPlugin extends Plugin {
             [ILocalStorageService, { useClass: DesktopLocalStorageService, lazy: true }],
             [IBeforeCloseService, { useClass: DesktopBeforeCloseService }],
             [IEditorService, { useClass: EditorService }],
+            [IRangeSelectorService, { useClass: RangeSelectorService }],
 
             // controllers
             [IUIController, { useClass: DesktopUIController }],

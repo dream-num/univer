@@ -114,7 +114,7 @@ jobs:
 
             #  ================= Deploy Demo =================
             - name: 📦 Build demo
-              run: pnpm run build:demo
+              run: pnpm build:demo
 
             - name: Copy demo to workspace
               run: |
@@ -124,7 +124,7 @@ jobs:
             - name: 🚀 Deploy to Vercel (demo)
               uses: amondnet/vercel-action@v25
               if: ${{ needs.setup.outputs.ref == '' }}
-              id: vercel-demo-dev
+              id: vercel-demo
               with:
                   vercel-token: ${{ secrets.VERCEL_TOKEN }}
                   vercel-org-id: ${{ secrets.ORG_ID }}
@@ -134,7 +134,7 @@ jobs:
             - name: 🚀 Deploy to Vercel (demo)
               uses: amondnet/vercel-action@v25
               if: ${{ needs.setup.outputs.ref != '' }}
-              id: vercel-demo
+              id: vercel-demo-dev
               with:
                   vercel-token: ${{ secrets.VERCEL_TOKEN }}
                   vercel-org-id: ${{ secrets.ORG_ID }}
@@ -145,7 +145,7 @@ jobs:
         needs: [setup]
 
         outputs:
-            preview-url: ${{ steps.vercel-storybook.outputs.preview-url }}
+            preview-url: ${{ steps.vercel-storybook-dev.outputs.preview-url == '' && steps.vercel-storybook.outputs.preview-url || steps.vercel-storybook-dev.outputs.preview-url }}
 
         steps:
             - name: Checkout
@@ -159,11 +159,22 @@ jobs:
 
             # ================= Deploy Storybook =================
             - name: 📦 Build storybook
-              run: pnpm run build:storybook
+              run: pnpm storybook:build
+
+            - name: 🚀 Deploy to Vercel (demo)
+              uses: amondnet/vercel-action@v25
+              if: ${{ needs.setup.outputs.ref == '' }}
+              id: vercel-storybook
+              with:
+                  vercel-token: ${{ secrets.VERCEL_TOKEN }}
+                  vercel-org-id: ${{ secrets.ORG_ID }}
+                  vercel-project-id: ${{ secrets.PROJECT_ID_STORYBOOK}}
+                  vercel-args: --prod
 
             - name: 🚀 Deploy to Vercel (storybook)
               uses: amondnet/vercel-action@v25
-              id: vercel-storybook
+              if: ${{ needs.setup.outputs.ref != '' }}
+              id: vercel-storybook-dev
               with:
                   vercel-token: ${{ secrets.VERCEL_TOKEN }}
                   vercel-org-id: ${{ secrets.ORG_ID }}

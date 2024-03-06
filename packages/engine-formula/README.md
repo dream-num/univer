@@ -5,12 +5,16 @@
 
 ## Introduction
 
-> This plugin provides formula services to other modules of Univer.
+The `@univerjs/engine-formula` is a formula engine that provides fundamental capabilities for formula computation, including but not limited to: formula string parsing, formula calculation, and formula dependency analysis.
 
 ## Usage
 
 ### Installation
 
 ```shell
-npm i @univerjs/engine-formula
+# Using npm
+npm install @univerjs/engine-formula
+
+# Using pnpm
+pnpm add @univerjs/engine-formula
 ```

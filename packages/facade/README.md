@@ -5,14 +5,18 @@
 
 ## Introduction
 
-Facade works as a API layer over all other Univer packages (expect for Uniscript) so that you can use Univer without knowing the details of the architecture.
+In Univer, in addition to using the low-level APIs, you can also use the Facade API provided by `@univerjs/facade`, which is a higher-level abstraction of the low-level APIs, making it easier to use.
 
-Though Facade may suites for most of the use cases, you may find it more powerful and easier to extend Univer by using the packages directly.
+You can learn how to use the Facade API by reading [this document](https://univer.ai/en-us/guides/facade/).
 
 ## Usage
 
 ### Installation
 
 ```shell
-npm i @univerjs/facade
+# Using npm
+npm install @univerjs/facade
+
+# Using pnpm
+pnpm add @univerjs/facade
 ```

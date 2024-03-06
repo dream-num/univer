@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { isRealNum } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
@@ -36,10 +37,15 @@ export class Count extends BaseFunction {
             if (variant.isArray()) {
                 variant = variant.count();
                 accumulatorAll = accumulatorAll.plus(variant as BaseValueObject);
-            } else {
-                if (!variant.isNull() && !variant.isString()) {
+            } else if (variant.isString()) {
+                const value = variant.getValue();
+                const isStringNumber = isRealNum(value);
+
+                if (isStringNumber) {
                     accumulatorAll = accumulatorAll.plus(new NumberValueObject(1));
                 }
+            } else if (!variant.isNull()) {
+                accumulatorAll = accumulatorAll.plus(new NumberValueObject(1));
             }
         }
 

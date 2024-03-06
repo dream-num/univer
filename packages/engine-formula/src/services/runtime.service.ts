@@ -645,7 +645,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
                 };
             }
             // String "00"
-            if (vo.isString() && isRealNum(v as string)) {
+            if (vo.isString() && isRealNum(v)) {
                 return {
                     v,
                     t: CellValueType.FORCE_STRING,

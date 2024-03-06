@@ -24,7 +24,6 @@ export { SetCellEditVisibleArrowOperation } from './commands/operations/cell-edi
 export { SetScrollOperation } from './commands/operations/scroll.operation';
 export { SetZoomRatioOperation } from './commands/operations/set-zoom-ratio.operation';
 export { VIEWPORT_KEY } from './common/keys';
-export { RangeSelector } from './components/range-selector/RangeSelector';
 export { AutoFillController } from './controllers/auto-fill.controller';
 export { PASTE_SPECIAL_MENU_ID } from './controllers/menu/menu';
 export { whenFormulaEditorActivated } from './controllers/shortcuts/utils';

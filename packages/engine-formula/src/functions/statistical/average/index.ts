@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { isRealNum } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
@@ -28,23 +29,34 @@ export class Average extends BaseFunction {
         let accumulatorSum: BaseValueObject = new NumberValueObject(0);
         let accumulatorCount: BaseValueObject = new NumberValueObject(0);
         for (let i = 0; i < variants.length; i++) {
-            const variant = variants[i];
+            let variant = variants[i];
 
             if (variant.isError()) {
                 return variant;
             }
 
-            if (accumulatorSum.isError()) {
-                return accumulatorSum;
+            if (variant.isString()) {
+                const value = variant.getValue();
+                const isStringNumber = isRealNum(value);
+
+                if (!isStringNumber) {
+                    return new ErrorValueObject(ErrorType.VALUE);
+                }
+
+                variant = new NumberValueObject(value);
             }
 
             if (variant.isArray()) {
                 accumulatorSum = accumulatorSum.plus(variant.sum());
-                accumulatorCount = accumulatorCount.plus(variant.count());
-            } else {
-                if (!variant.isNull()) {
-                    accumulatorCount = accumulatorCount.plus(new NumberValueObject(1));
+
+                if (accumulatorSum.isError()) {
+                    return accumulatorSum;
                 }
+
+                accumulatorCount = accumulatorCount.plus(variant.count());
+            } else if (!variant.isNull()) {
+                accumulatorSum = accumulatorSum.plus(new NumberValueObject(variant.getValue()));
+                accumulatorCount = accumulatorCount.plus(new NumberValueObject(1));
             }
         }
 

@@ -18,10 +18,11 @@ import type { ICommandInfo, Nullable } from '@univerjs/core';
 import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
-import { ITextSelectionRenderManager, ScrollBar } from '@univerjs/engine-render';
+import { IRenderManagerService, ITextSelectionRenderManager, ScrollBar } from '@univerjs/engine-render';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { CoverContentCommand, DocSkeletonManagerService, RichTextEditingMutation, VIEWPORT_KEY } from '@univerjs/docs';
 import { IEditorService, SetEditorResizeOperation } from '@univerjs/ui';
+import { fromEvent } from 'rxjs';
 
 @OnLifecycle(LifecycleStages.Rendered, DocEditorBridgeController)
 export class DocEditorBridgeController extends Disposable {
@@ -32,7 +33,8 @@ export class DocEditorBridgeController extends Disposable {
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @IEditorService private readonly _editorService: IEditorService,
         @ICommandService private readonly _commandService: ICommandService,
-        @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager
+        @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
 
     ) {
         super();
@@ -40,9 +42,11 @@ export class DocEditorBridgeController extends Disposable {
     }
 
     private _initialize() {
-        this._editorService.resize$.subscribe((unitId: string) => {
-            this._resize(unitId);
-        });
+        this.disposeWithMe(
+            this._editorService.resize$.subscribe((unitId: string) => {
+                this._resize(unitId);
+            })
+        );
 
         this._editorService.getAllEditor().forEach((editor) => {
             const unitId = editor.editorUnitId;
@@ -60,6 +64,8 @@ export class DocEditorBridgeController extends Disposable {
         this._initialBlur();
 
         this._initialFocus();
+
+        this._initialValueChange();
     }
 
     private _resize(unitId: Nullable<string>) {
@@ -108,7 +114,7 @@ export class DocEditorBridgeController extends Disposable {
 
         mainComponent?.resize(contentWidth, contentHeight);
 
-        if (editor.isSingle === false) {
+        if (!editor.isSingle()) {
             if (actualHeight > height) {
                 if (scrollBar == null) {
                     viewportMain && new ScrollBar(viewportMain, { enableHorizontal: false, barSize: 8 });
@@ -136,28 +142,114 @@ export class DocEditorBridgeController extends Disposable {
     }
 
     private _initialSetValue() {
-        this._editorService.setValue$.subscribe((param) => {
-            this._commandService.executeCommand(CoverContentCommand.id, {
-                unitId: param.editorUnitId,
-                body: param.body,
-                segmentId: null,
+        this.disposeWithMe(
+            this._editorService.setValue$.subscribe((param) => {
+                this._commandService.executeCommand(CoverContentCommand.id, {
+                    unitId: param.editorUnitId,
+                    body: param.body,
+                    segmentId: null,
+                });
+            })
+        );
+    }
+
+    private _initialBlur() {
+        this.disposeWithMe(
+            this._editorService.blur$.subscribe(() => {
+                this._textSelectionRenderManager.removeAllTextRanges();
+
+                this._textSelectionRenderManager.blur();
+            })
+        );
+
+        this.disposeWithMe(
+            this._textSelectionRenderManager.onBlur$.subscribe(() => {
+                const unitId = this._currentUniverService.getCurrentUniverDocInstance().getUnitId();
+                if (unitId == null) {
+                    return;
+                }
+
+                const editor = this._editorService.getEditor(unitId);
+
+                if (editor == null || editor.isSheetEditor()) {
+                    return;
+                }
+
+                this._editorService.blur();
+            })
+        );
+    }
+
+    private _initialFocus() {
+        this.disposeWithMe(
+            this._editorService.focus$.subscribe((textRange) => {
+                this._textSelectionRenderManager.removeAllTextRanges();
+                this._textSelectionRenderManager.addTextRanges([textRange]);
+            })
+        );
+
+        this.disposeWithMe(
+            fromEvent(window, 'mousedown').subscribe((event) => {
+                const target = event.target as HTMLElement;
+                const hasSearch = target.classList[0];
+                if (hasSearch?.indexOf('univer-formula-search') > -1 || hasSearch?.indexOf('univer-formula-help') > -1 || hasSearch?.indexOf('formula-help-decorator') || hasSearch?.indexOf('univer-formula-help-param')) {
+                    this._editorService.changeSpreadsheetFocusState(true);
+                    event.stopPropagation();
+                    return;
+                }
+                this._editorService.changeSpreadsheetFocusState(false);
+            })
+        );
+
+        // this.disposeWithMe(
+        //     fromEvent(window, 'mousedown').subscribe(() => {
+        //         this._editorService.changeSpreadsheetFocusState(false);
+        //     })
+        // );
+
+        const currentUniverSheet = this._currentUniverService.getAllUniverSheetsInstance();
+        currentUniverSheet.forEach((unit) => {
+            const unitId = unit.getUnitId();
+            const render = this._renderManagerService.getRenderById(unitId);
+            const canvasEle = render?.engine.getCanvas().getCanvasEle();
+            if (canvasEle == null) {
+                return;
+            }
+            fromEvent(canvasEle, 'mousedown').subscribe((evt) => {
+                this._editorService.changeSpreadsheetFocusState(true);
+                evt.stopPropagation();
             });
         });
     }
 
-    private _initialBlur() {
-        this._editorService.blur$.subscribe(() => {
-            this._textSelectionRenderManager.removeAllTextRanges();
-
-            this._textSelectionRenderManager.blur();
-        });
+    private _initialValueChange() {
+        this.disposeWithMe(
+            this._textSelectionRenderManager.onCompositionupdate$.subscribe(this._valueChange.bind(this))
+        );
+        this.disposeWithMe(
+            this._textSelectionRenderManager.onInput$.subscribe(this._valueChange.bind(this))
+        );
+        this.disposeWithMe(
+            this._textSelectionRenderManager.onKeydown$.subscribe(this._valueChange.bind(this))
+        );
+        this.disposeWithMe(
+            this._textSelectionRenderManager.onPaste$.subscribe(this._valueChange.bind(this))
+        );
     }
 
-    private _initialFocus() {
-        this._editorService.focus$.subscribe((textRange) => {
-            this._textSelectionRenderManager.removeAllTextRanges();
-            this._textSelectionRenderManager.addTextRanges([textRange]);
-        });
+    private _valueChange() {
+        const unitId = this._currentUniverService.getCurrentUniverDocInstance().getUnitId();
+        if (unitId == null) {
+            return;
+        }
+
+        const editor = this._editorService.getEditor(unitId);
+
+        if (editor == null || editor.isSheetEditor()) {
+            return;
+        }
+
+        this._editorService.refreshValueChange(unitId);
     }
 
     /**
@@ -177,6 +269,8 @@ export class DocEditorBridgeController extends Disposable {
                     }
 
                     this._resize(unitId);
+
+                    this._valueChange();
                 }
             })
         );

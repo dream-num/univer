@@ -108,6 +108,11 @@ describe('Test add worksheet merge commands', () => {
                         primary: null,
                         style: null,
                     },
+                    {
+                        range: { startRow: 10, startColumn: 10, endColumn: 10, endRow: 10, rangeType: RANGE_TYPE.NORMAL },
+                        primary: null,
+                        style: null,
+                    },
                 ]);
 
                 function getMerge(): IRange[] | undefined {
@@ -154,6 +159,11 @@ describe('Test add worksheet merge commands', () => {
                         primary: null,
                         style: null,
                     },
+                    {
+                        range: { startRow: 10, startColumn: 10, endColumn: 15, endRow: 10, rangeType: RANGE_TYPE.NORMAL },
+                        primary: null,
+                        style: null,
+                    },
                 ]);
 
                 function getMerge(): IRange[] | undefined {
@@ -195,6 +205,11 @@ describe('Test add worksheet merge commands', () => {
                 selectionManager.add([
                     {
                         range: { startRow: 0, startColumn: 0, endColumn: 5, endRow: 5, rangeType: RANGE_TYPE.NORMAL },
+                        primary: null,
+                        style: null,
+                    },
+                    {
+                        range: { startRow: 10, startColumn: 10, endColumn: 10, endRow: 15, rangeType: RANGE_TYPE.NORMAL },
                         primary: null,
                         style: null,
                     },

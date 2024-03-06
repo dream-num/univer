@@ -103,7 +103,7 @@ describe('arrayValueObject test', () => {
             });
             expect(originValueObject.count()?.getValue()).toBe(6);
         });
-        it('CountA', () => {
+        it('Counta', () => {
             const originValueObject = new ArrayValueObject({
                 calculateValueList: transformToValueObject([
                     [1, ' ', 1.23, true, false],

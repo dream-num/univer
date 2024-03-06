@@ -631,7 +631,7 @@ export default {
         },
     },
     MOD: {
-        description: 'Returns the remainder from division',
+        description: 'Returns the remainder after number is divided by divisor. The result has the same sign as divisor.',
         abstract: 'Returns the remainder from division',
         links: [
             {
@@ -640,8 +640,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The number for which you want to find the remainder.' },
+            divisor: { name: 'divisor', detail: 'The number by which you want to divide number' },
         },
     },
     MROUND: {
@@ -715,7 +715,7 @@ export default {
         },
     },
     POWER: {
-        description: 'Returns the result of a number raised to a power',
+        description: 'Returns the result of a number raised to a power.',
         abstract: 'Returns the result of a number raised to a power',
         links: [
             {
@@ -724,12 +724,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number: { name: 'number', detail: 'The base number. It can be any real number.' },
+            power: { name: 'power', detail: 'The exponent to which the base number is raised.' },
         },
     },
     PRODUCT: {
-        description: 'Multiplies its arguments',
+        description: 'Multiplies all the numbers given as arguments and returns the product.',
         abstract: 'Multiplies its arguments',
         links: [
             {
@@ -738,8 +738,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            number1: { name: 'number1', detail: 'The first number or range that you want to multiply.' },
+            number2: { name: 'number2', detail: 'Additional numbers or ranges that you want to multiply, up to a maximum of 255 arguments.' },
         },
     },
     QUOTIENT: {
@@ -995,7 +995,7 @@ export default {
         },
     },
     SUBTOTAL: {
-        description: 'Returns a subtotal in a list or database',
+        description: 'Returns a subtotal in a list or database.',
         abstract: 'Returns a subtotal in a list or database',
         links: [
             {
@@ -1004,8 +1004,9 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            functionNum: { name: 'function_num', detail: 'The number 1-11 or 101-111 that specifies the function to use for the subtotal. 1-11 includes manually-hidden rows, while 101-111 excludes them; filtered-out cells are always excluded.' },
+            ref1: { name: 'ref1', detail: 'The first named range or reference for which you want the subtotal.' },
+            ref2: { name: 'ref2', detail: 'Named ranges or references 2 to 254 for which you want the subtotal.' },
         },
     },
     SUM: {
@@ -1039,15 +1040,15 @@ export default {
         ],
         functionParameter: {
             range: {
-                name: 'Range',
+                name: 'range',
                 detail: 'The range of cells that you want evaluated by criteria.',
             },
             criteria: {
-                name: 'Criteria',
+                name: 'criteria',
                 detail: 'The criteria in the form of a number, expression, a cell reference, text, or a function that defines which cells will be added. Wildcard characters can be included - a question mark (?) to match any single character, an asterisk (*) to match any sequence of characters. If you want to find an actual question mark or asterisk, type a tilde (~) preceding the character.',
             },
             sumRange: {
-                name: 'Sum Range',
+                name: 'sum_range',
                 detail: 'The actual cells to add, if you want to add cells other than those specified in the range argument. If the sum_range argument is omitted, Excel adds the cells that are specified in the range argument (the same cells to which the criteria is applied).',
             },
         },
@@ -1062,11 +1063,11 @@ export default {
             },
         ],
         functionParameter: {
-            sumRange: { name: 'Sum Range', detail: 'The range of cells to sum.' },
-            criteriaRange1: { name: 'Criteria Range 1', detail: 'The range that is tested using Criteria 1. Criteria Range 1 and Criteria 1 set up a search pair whereby a range is searched for specific criteria. Once items in the range are found, their corresponding values in Sum Range are added.' },
-            criteria1: { name: 'Criteria 1', detail: 'The criteria that defines which cells in Criteria Range 1 will be added. For example, criteria can be entered as 32, ">32", B4, "apples", or "32".' },
-            criteriaRange2: { name: 'Criteria Range 2', detail: 'Additional ranges. You can enter up to 127 range pairs.' },
-            criteria2: { name: 'Criteria 2', detail: 'Additional associated criteria. You can enter up to 127 criteria pairs.' },
+            sumRange: { name: 'sum_range', detail: 'The range of cells to sum.' },
+            criteriaRange1: { name: 'criteria_range1 ', detail: 'The range that is tested using criteria1. criteria_range1 and criteria1 set up a search pair whereby a range is searched for specific criteria. Once items in the range are found, their corresponding values in sum_range are added.' },
+            criteria1: { name: 'criteria1', detail: 'The criteria that defines which cells in criteria_range1 will be added. For example, criteria can be entered as 32, ">32", B4, "apples", or "32".' },
+            criteriaRange2: { name: 'criteriaRange2', detail: 'Additional ranges. You can enter up to 127 range pairs.' },
+            criteria2: { name: 'criteria2', detail: 'Additional associated criteria. You can enter up to 127 criteria pairs.' },
         },
     },
     SUMPRODUCT: {

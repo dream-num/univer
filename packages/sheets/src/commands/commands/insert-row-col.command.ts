@@ -117,8 +117,8 @@ export const InsertRowCommand: ICommand = {
         if (result.result) {
             undoRedoService.pushUndoRedo({
                 unitID: params.unitId,
-                undoMutations: [{ id: RemoveRowMutation.id, params: undoRowInsertionParams }, ...intercepted.redos],
-                redoMutations: [...intercepted.undos, { id: InsertRowMutation.id, params: insertRowParams }],
+                undoMutations: [...intercepted.undos, { id: RemoveRowMutation.id, params: undoRowInsertionParams }],
+                redoMutations: [{ id: InsertRowMutation.id, params: insertRowParams }, ...intercepted.redos],
             });
 
             return true;

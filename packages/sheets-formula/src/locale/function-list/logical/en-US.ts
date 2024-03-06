@@ -25,8 +25,8 @@ export default {
             },
         ],
         functionParameter: {
-            logical1: { name: 'Logical 1', detail: 'The first condition that you want to test that can evaluate to either TRUE or FALSE.' },
-            logical2: { name: 'Logical 2', detail: 'Additional conditions that you want to test that can evaluate to either TRUE or FALSE, up to a maximum of 255 conditions.' },
+            logical1: { name: 'logical1', detail: 'The first condition that you want to test that can evaluate to either TRUE or FALSE.' },
+            logical2: { name: 'logical2', detail: 'Additional conditions that you want to test that can evaluate to either TRUE or FALSE, up to a maximum of 255 conditions.' },
         },
     },
     BYCOL: {
@@ -81,13 +81,13 @@ export default {
             },
         ],
         functionParameter: {
-            logicalTest: { name: 'Logical test', detail: 'The condition you want to test.' },
+            logicalTest: { name: 'logical_test', detail: 'The condition you want to test.' },
             valueIfTrue: {
-                name: 'Value if true',
+                name: 'value_if_true',
                 detail: 'The value that you want returned if the result of logical_test is TRUE.',
             },
             valueIfFalse: {
-                name: 'Value if false',
+                name: 'value_if_false',
                 detail: 'The value that you want returned if the result of logical_test is FALSE.',
             },
         },
@@ -102,8 +102,8 @@ export default {
             },
         ],
         functionParameter: {
-            value: { name: 'Value', detail: 'The argument that is checked for an error.' },
-            valueIfError: { name: 'Value if error', detail: 'The value to return if the formula evaluates to an error. The following error types are evaluated: #N/A, #VALUE!, #REF!, #DIV/0!, #NUM!, #NAME?, or #NULL!.' },
+            value: { name: 'value', detail: 'The argument that is checked for an error.' },
+            valueIfError: { name: 'value_if_error', detail: 'The value to return if the formula evaluates to an error. The following error types are evaluated: #N/A, #VALUE!, #REF!, #DIV/0!, #NUM!, #NAME?, or #NULL!.' },
         },
     },
     IFNA: {

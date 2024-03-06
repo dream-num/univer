@@ -529,7 +529,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             defaultColumnWidth
         );
 
-        this._rowHeaderWidth = rowHeader.hidden !== BooleanNumber.TRUE ? rowHeader.width : 0;
+        this._rowHeaderWidth = rowHeader.hidden !== BooleanNumber.TRUE ? this._dynamicallyUpdateRowHeaderWidth(rowHeader) : 0;
         this._columnHeaderHeight = columnHeader.hidden !== BooleanNumber.TRUE ? columnHeader.height : 0;
 
         this._rowTotalHeight = rowTotalHeight;
@@ -543,10 +543,11 @@ export class SpreadsheetSkeleton extends Skeleton {
         return this;
     }
 
-    // updateDataMerge() {
-    //     const { mergeData } = this._config;
-    //     this._dataMergeCacheAll = mergeData && this._getMergeCells(mergeData);
-    // }
+    private _dynamicallyUpdateRowHeaderWidth(rowHeader: { width: number }): number {
+        const SIZE_BY_EACH_CHARACTER = 8;
+        const widthByComputation = (`${this._worksheet?.getRowCount()}`.length * SIZE_BY_EACH_CHARACTER);
+        return Math.max(rowHeader.width, widthByComputation);
+    }
 
     getRowColumnSegment(bounds?: IViewportBound) {
         return this._getBounding(this._rowHeightAccumulation, this._columnWidthAccumulation, bounds?.viewBound);

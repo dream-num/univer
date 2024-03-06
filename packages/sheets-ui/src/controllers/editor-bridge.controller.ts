@@ -26,7 +26,7 @@ import {
 } from '@univerjs/sheets';
 import { Inject, Injector, Quantity } from '@wendellhu/redi';
 import { merge, takeUntil } from 'rxjs';
-import { IEditorService, ILayoutService } from '@univerjs/ui';
+import { IEditorService, ILayoutService, IRangeSelectorService } from '@univerjs/ui';
 
 import { SetZoomRatioCommand } from '../commands/commands/set-zoom-ratio.command';
 import { SetActivateCellEditOperation } from '../commands/operations/activate-cell-edit.operation';
@@ -47,7 +47,8 @@ export class EditorBridgeController extends RxDisposable {
         @ILayoutService private readonly _layoutService: ILayoutService,
         @IEditorService private readonly _editorService: IEditorService,
         @IContextService private readonly _contextService: IContextService,
-        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService
+        @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
+        @IRangeSelectorService private readonly _rangeSelectorService: IRangeSelectorService
     ) {
         super();
 
@@ -62,6 +63,7 @@ export class EditorBridgeController extends RxDisposable {
         this._initSelectionChangeListener();
         this._initialEventListener();
         this._initialChangeEditorListener();
+        this._initialRangeSelector();
     }
 
     private _initSelectionChangeListener() {
@@ -184,7 +186,6 @@ export class EditorBridgeController extends RxDisposable {
         if (this._editorBridgeService.isForceKeepVisible()) {
             return;
         }
-        this._editorService.changeEditorFocus();
         this._hideEditor();
     }
 
@@ -212,6 +213,22 @@ export class EditorBridgeController extends RxDisposable {
         setTimeout(() => {
             this._selectionManagerService.makeDirty(true);
         }, 0);
+    }
+
+    private _initialRangeSelector() {
+        this.disposeWithMe(
+            this._selectionManagerService.selectionMoving$.subscribe((selectionWithStyle: Nullable<ISelectionWithStyle[]>) => {
+                if (!selectionWithStyle) {
+                    return;
+                }
+
+                const ranges = selectionWithStyle.map((value: ISelectionWithStyle) => {
+                    return value.range;
+                });
+
+                this._rangeSelectorService.selectionChange(ranges);
+            })
+        );
     }
 
     private _getSheetObject() {

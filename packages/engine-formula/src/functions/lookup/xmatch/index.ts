@@ -77,16 +77,12 @@ export class Xmatch extends BaseFunction {
         }
 
         if (lookupValue.isArray()) {
-            return lookupValue.map((value) => {
-                const result = this._handleSingleObject(
-                    value,
-                    lookupArray,
-                    matchModeValue,
-                    searchModeValue
-                );
-
-                return result;
-            });
+            return lookupValue.map((value) => this._handleSingleObject(
+                value,
+                lookupArray,
+                matchModeValue,
+                searchModeValue
+            ));
         }
 
         return this._handleSingleObject(

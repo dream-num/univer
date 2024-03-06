@@ -54,6 +54,8 @@ import { DocCanvasView } from './views/doc-canvas-view';
 import { FloatingObjectController } from './controllers/floating-object.controller';
 import { PageRenderController } from './controllers/page-render.controller';
 import { ZoomController } from './controllers/zoom.controller';
+import { TextSelectionController } from './controllers/text-selection.controller';
+import { BackScrollController } from './controllers/back-scroll.controller';
 
 export class UniverDocsUIPlugin extends Plugin {
     static override type = PluginType.Doc;
@@ -111,6 +113,8 @@ export class UniverDocsUIPlugin extends Plugin {
             [FloatingObjectController],
             [PageRenderController],
             [ZoomController],
+            [TextSelectionController],
+            [BackScrollController],
             [
                 // controllers
                 AppUIController,

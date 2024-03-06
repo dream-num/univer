@@ -46,9 +46,36 @@ export const DialogBasic = {
                 <Dialog
                     visible={visible}
                     title="hello world"
-                    draggable
                     closeIcon={<CloseSingle />}
                     footer={<footer>footer</footer>}
+                    onClose={handleToggleVisible}
+                >
+                    xxxx
+                </Dialog>
+            </>
+        );
+    },
+};
+
+export const DialogDraggable = {
+    render() {
+        const [visible, setVisible] = useState(false);
+
+        function handleToggleVisible() {
+            setVisible(!visible);
+        }
+
+        return (
+            <>
+                <Button onClick={handleToggleVisible}>open dialog</Button>
+                <Dialog
+                    visible={visible}
+                    title="hello world"
+                    closeIcon={<CloseSingle />}
+                    draggable
+                    destroyOnClose
+                    preservePositionOnDestroy
+                    defaultPosition={{ x: 100, y: 100 }}
                     onClose={handleToggleVisible}
                 >
                     xxxx

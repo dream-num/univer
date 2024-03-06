@@ -188,7 +188,7 @@ export default {
         links: [
             {
                 title: '指導',
-                url: 'https://support.microsoft.com/ja-jp/office/is-%E9%96%A2%E6%95%B0-0f2d7971-6019-40a0-a171-f2d869135665',
+                url: 'https://support.microsoft.com/ja-jp/office/isodd-%E9%96%A2%E6%95%B0-1208a56d-4f10-4f44-a5fc-648cafd6c07a',
             },
         ],
         functionParameter: {

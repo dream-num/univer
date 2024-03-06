@@ -19,7 +19,7 @@
  * @param val The number or string to be judged
  * @returns Result
  */
-export function isRealNum(val: string | number) {
+export function isRealNum(val: string | number | boolean) {
     if (val === null || val.toString().replace(/\s/g, '') === '') {
         return false;
     }

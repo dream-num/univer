@@ -34,7 +34,6 @@ import type {
 } from '../../basics/range';
 import { NORMAL_TEXT_SELECTION_PLUGIN_STYLE } from '../../basics/range';
 import { getCurrentScrollXY } from '../../basics/scroll-xy';
-import { checkStyle, injectStyle } from '../../basics/tools';
 import { Vector2 } from '../../basics/vector2';
 import type { Engine } from '../../engine';
 import type { Scene } from '../../scene';
@@ -42,7 +41,7 @@ import { ScrollTimer } from '../../scroll-timer';
 import type { IScrollObserverParam, Viewport } from '../../viewport';
 import { cursorConvertToTextRange, TextRange } from './common/text-range';
 import type { DocumentSkeleton } from './doc-skeleton';
-import type { Documents, IDocumentOffsetConfig } from './document';
+import type { Documents } from './document';
 
 export function getCanvasOffsetByEngine(engine: Nullable<Engine>) {
     const canvas = engine?.getCanvasElement();
@@ -97,12 +96,6 @@ function getParagraphInfoBySpan(node: IDocumentSkeletonSpan) {
         content,
         nodeIndex,
     };
-}
-
-interface IAddTextRangesConfig {
-    scene: Scene;
-    skeleton: DocumentSkeleton;
-    documentOffsetConfig: IDocumentOffsetConfig;
 }
 
 export interface ITextSelectionInnerParam {
@@ -221,11 +214,11 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
     private _input!: HTMLDivElement;
 
-    private _cursor!: HTMLDivElement;
+    private _moveObservers: Nullable<Observer<IPointerEvent | IMouseEvent>>[] = [];
 
-    private _moveObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
+    private _upObservers: Nullable<Observer<IPointerEvent | IMouseEvent>>[] = [];
 
-    private _upObserver: Nullable<Observer<IPointerEvent | IMouseEvent>>;
+    private _scrollTimers: ScrollTimer[] = [];
 
     private _viewportScrollX: number = 0;
 
@@ -307,14 +300,12 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             isEditing,
         });
 
-        this._updateDomCursorPositionAndSize();
-
-        this._scrollToSelection();
+        this._updateInputPosition();
     }
 
     // Sync canvas selection to dom selection.
     sync() {
-        this._updateDomCursorPositionAndSize();
+        this._updateInputPosition();
     }
 
     activate(x: number, y: number) {
@@ -322,12 +313,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         this._container.style.top = `${y}px`;
         this._container.style.zIndex = '1000';
 
-        this._cursor.style.animation = 'univer_cursor_blinkStyle 1s steps(1) infinite';
-        this._cursor.style.display = 'revert';
-
         this.focus();
-
-        // requestAnimationFrame(() => this.focus());
     }
 
     hasFocus(): boolean {
@@ -346,9 +332,6 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
     deactivate() {
         this._container.style.left = '0px';
         this._container.style.top = '0px';
-
-        this._cursor.style.animation = '';
-        this._cursor.style.display = 'none';
     }
 
     changeRuntime(docSkeleton: DocumentSkeleton, scene: Scene, document: Documents) {
@@ -423,7 +406,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
                 },
             ];
 
-            this.addTextRanges(textRanges);
+            this.addTextRanges(textRanges, false);
         }
     }
 
@@ -456,7 +439,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             },
         ];
 
-        this.addTextRanges(textRanges);
+        this.addTextRanges(textRanges, false);
     }
 
     // Handle pointer down.
@@ -498,6 +481,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         scene.disableEvent();
 
         const scrollTimer = ScrollTimer.create(scene);
+        this._scrollTimers.push(scrollTimer);
         scrollTimer.startScroll(evtOffsetX, evtOffsetY);
 
         const { scrollX, scrollY } = getCurrentScrollXY(scrollTimer);
@@ -511,7 +495,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
         let preMoveOffsetY = evtOffsetY;
 
-        this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
+        this._moveObservers.push(scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
             const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
             scene.setCursor(CURSOR_TYPE.TEXT);
 
@@ -527,11 +511,23 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
             preMoveOffsetX = moveOffsetX;
             preMoveOffsetY = moveOffsetY;
-        });
+        }));
 
-        this._upObserver = scene.onPointerUpObserver.add(() => {
-            scene.onPointerMoveObserver.remove(this._moveObserver);
-            scene.onPointerUpObserver.remove(this._upObserver);
+        this._upObservers.push(scene.onPointerUpObserver.add(() => {
+            // scene.onPointerMoveObserver.remove(this._moveObserver);
+            // scene.onPointerUpObserver.remove(this._upObserver);
+
+            this._moveObservers.forEach((obs) => {
+                obs?.dispose();
+            });
+
+            this._upObservers.forEach((obs) => {
+                obs?.dispose();
+            });
+
+            this._moveObservers = [];
+
+            this._upObservers = [];
 
             scene.enableEvent();
 
@@ -542,9 +538,14 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
                 isEditing: false,
             });
 
-            scrollTimer.dispose();
-            this._updateDomCursorPositionAndSize();
-        });
+            this._scrollTimers.forEach((timer) => {
+                timer?.dispose();
+            });
+
+            this._scrollTimers = [];
+
+            this._updateInputPosition();
+        }));
     }
 
     removeAllTextRanges() {
@@ -612,19 +613,15 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
         const inputParent = document.createElement('div');
         const inputDom = document.createElement('div');
-        const cursorDom = document.createElement('div');
 
         inputParent.appendChild(inputDom);
         container.appendChild(inputParent);
-        container.appendChild(cursorDom);
 
         this._container = container;
         this._inputParent = inputParent;
         this._input = inputDom;
-        this._cursor = cursorDom;
 
         this._initInput();
-        this._initDOMCursor();
         this._initInputEvents();
 
         document.body.appendChild(container);
@@ -653,74 +650,6 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             white-space: pre-wrap;
             user-select: text;
         `;
-    }
-
-    private _initDOMCursor() {
-        this._cursor.style.cssText = `
-            visibility: visible;
-            position: absolute;
-            background: #000;
-            left: 0;
-            top: 0;
-            width: 1px;
-            height: 20px;
-            opacity: 0;
-            z-index: 0;
-            pointer-events: none;
-            display: none
-        `;
-
-        if (!checkStyle('keyframes univer_cursor_blinkStyle')) {
-            const styles = [
-                `
-                @-webkit-keyframes univer_cursor_blinkStyle {
-                    0% {
-                        opacity: 1;
-                    }
-
-                    13% {
-                        opacity: 0;
-                    }
-
-                    50% {
-                        opacity: 0;
-                    }
-
-                    63% {
-                        opacity: 1;
-                    }
-
-                    100% {
-                        opacity: 1;
-                    }
-                }
-            `,
-                `
-                @keyframes univer_cursor_blinkStyle {
-                    0% {
-                        opacity: 1;
-                    }
-
-                    13% {
-                        opacity: 0;
-                    }
-
-                    50% {
-                        opacity: 0;
-                    }
-
-                    63% {
-                        opacity: 1;
-                    }
-
-                    100% {
-                        opacity: 1;
-                    }
-                }
-            `,
-            ];
-            injectStyle(styles);
-        }
     }
 
     private _getNodePosition(node: Nullable<INodeInfo>) {
@@ -844,51 +773,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         return getCanvasOffsetByEngine(engine);
     }
 
-    // Let the selection show on the current screen.
-    private _scrollToSelection() {
-        const activeRangeInstance = this._getActiveRangeInstance();
-        const anchor = activeRangeInstance?.getAnchor();
-
-        if (!anchor || (anchor && !anchor.visible) || this._activeViewport == null) {
-            return;
-        }
-
-        // const { scaleX, scaleY } = this._scene?.getAncestorScale() || { scaleX: 1, scaleY: 1 };
-
-        const { left, top, height, width } = anchor;
-
-        // left *= scaleX;
-
-        // top *= scaleY;
-
-        const {
-            left: boundLeft,
-            top: boundTop,
-            right: boundRight,
-            bottom: boundBottom,
-        } = this._activeViewport.getBounding().viewBound;
-        const constantOffsetWidth = width;
-        const constantOffsetHeight = height;
-        let offsetY = 0;
-        let offsetX = 0;
-
-        if (top < boundTop) {
-            offsetY = top - boundTop;
-        } else if (top > boundBottom - constantOffsetHeight) {
-            offsetY = top - boundBottom + constantOffsetHeight;
-        }
-
-        if (left < boundLeft) {
-            offsetX = left - boundLeft;
-        } else if (left > boundRight - constantOffsetWidth) {
-            offsetX = left - boundRight + constantOffsetWidth;
-        }
-
-        const config = this._activeViewport.getBarScroll(offsetX, offsetY);
-        this._activeViewport.scrollBy(config);
-    }
-
-    private _updateDomCursorPositionAndSize() {
+    private _updateInputPosition() {
         const activeRangeInstance = this._getActiveRangeInstance();
         const anchor = activeRangeInstance?.getAnchor();
 
@@ -897,15 +782,11 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             return;
         }
 
-        const { height, left, top } = anchor;
+        const { left, top } = anchor;
 
         const absoluteCoord = this._activeViewport.getAbsoluteVector(Vector2.FromArray([left, top]));
 
-        const { scaleY } = this._scene?.getAncestorScale() || { scaleX: 1, scaleY: 1 };
-
         const { x, y } = absoluteCoord;
-
-        this._cursor.style.height = `${height * scaleY}px`;
 
         let { left: canvasLeft, top: canvasTop } = this._getCanvasOffset();
 
@@ -966,8 +847,6 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             const activeRangeInstance = this._getActiveRangeInstance();
 
             activeRangeInstance?.activeStatic();
-
-            this._cursor.style.display = 'none';
         });
 
         const scrollStop = viewport.onScrollStopObserver.add((param: IScrollObserverParam) => {
@@ -995,11 +874,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
                 }
             }
 
-            this._updateDomCursorPositionAndSize();
-
-            activeRangeInstance?.deactivateStatic();
-
-            this._cursor.style.display = 'revert';
+            this._updateInputPosition();
         });
 
         this._viewPortObserverMap.set(key, {

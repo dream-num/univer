@@ -428,8 +428,8 @@ const locale = {
             exceedMaxCells: '粘贴区域超出最大单元格数',
         },
         shortCutNotify: {
-            title: '粘贴提示',
-            useShortCutInstead: '无法粘贴内容，请试试快捷键 Ctrl+V 。',
+            title: '请使用快捷键粘贴',
+            useShortCutInstead: '检测到 Excel 内容，请使用快捷键粘贴',
         },
     },
     statusbar: {

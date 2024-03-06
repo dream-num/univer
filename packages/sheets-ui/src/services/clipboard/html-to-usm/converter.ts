@@ -81,13 +81,24 @@ export class HtmlToUSMService {
 
     private afterProcessRules: IAfterProcessRule[] = [];
 
+    private htmlElement: HTMLIFrameElement;
+
     private getCurrentSkeleton: () => Nullable<ISheetSkeletonManagerParam>;
 
     constructor(props: IHtmlToUSMServiceProps) {
         this.getCurrentSkeleton = props.getCurrentSkeleton;
+        this.htmlElement = document.createElement('iframe');
+        document.body.appendChild(this.htmlElement);
     }
 
     convert(html: string): IUniverSheetCopyDataModel {
+        if (this.htmlElement.contentDocument) {
+            this.htmlElement.contentDocument.open();
+            this.htmlElement.contentDocument.write(html);
+            this.htmlElement.contentDocument.close();
+        }
+        html = html.replace(/<!--[\s\S]*?-->/g, '');
+
         const pastePlugin = HtmlToUSMService.pluginList.find((plugin) => plugin.checkPasteType(html));
         if (pastePlugin) {
             this.styleRules = [...pastePlugin.stylesRules];
@@ -221,8 +232,43 @@ export class HtmlToUSMService {
         const { rowProperties, rowCount, cellMatrix: parsedCellMatrix } = parseTableRows(html);
         parsedCellMatrix &&
             parsedCellMatrix.forValue((row, col, value) => {
+                let styleString = value.properties?.style;
                 // TODO@Dushusir Temporarily use handleStringToStyle. After all replication and paste function is completed, fix the handleStringToStyle method
-                const style = handleStringToStyle(undefined, value.properties?.style);
+
+                const className = value.properties?.class;
+                if (className) {
+                    const dom = this.htmlElement.contentDocument?.getElementsByClassName(className)?.[0];
+                    if (dom) {
+                        const computedStyle = window.getComputedStyle(dom!, null);
+
+                        const { fontSize, fontFamily, border, borderLeft, borderRight, borderTop, borderBottom, verticalAlign } = computedStyle;
+                        if (fontSize) {
+                            styleString += `;font-size: ${Number.parseInt(fontSize) * 0.75}pt`;
+                        }
+                        if (fontFamily) {
+                            styleString += `;font-family: ${fontFamily}`;
+                        }
+                        if (border) {
+                            styleString += `;border: ${border}`;
+                        }
+                        if (borderLeft) {
+                            styleString += `;border-left: ${borderLeft}`;
+                        }
+                        if (borderRight) {
+                            styleString += `;border-right: ${borderRight}`;
+                        }
+                        if (borderTop) {
+                            styleString += `;border-top: ${borderTop}`;
+                        }
+                        if (borderBottom) {
+                            styleString += `;border-bottom: ${borderBottom}`;
+                        }
+                        if (verticalAlign) {
+                            styleString += `;vertical-align: ${verticalAlign}`;
+                        }
+                    }
+                }
+                const style = handleStringToStyle(undefined, styleString);
 
                 if (/\r|\n/.test(value.content)) {
                     const body = generateBody(value.content);
@@ -436,13 +482,16 @@ function parseProperties(propertyStr: string): IClipboardPropertyItem {
         return {};
     }
 
-    const PROPERTY_REGEX = /([\w-]+)="([^"]*)"/gi;
-    const propertyMatches = propertyStr.matchAll(PROPERTY_REGEX);
     const property: IClipboardPropertyItem = {};
-    Array.from(propertyMatches).forEach((m) => {
-        const [_, key, val] = m;
-        property[key] = val;
-    });
+    const PROPERTY_REGEX = /([\w-]+)\s*=\s*(?:(['"])([^'"]*)\2|(\S+))/g;
+
+    let match;
+
+    while ((match = PROPERTY_REGEX.exec(propertyStr)) !== null) {
+        const [, attributeName, , attributeValue1, attributeValue2] = match;
+        const attributeValue = attributeValue1 !== undefined ? attributeValue1 : attributeValue2;
+        property[attributeName] = attributeValue;
+    }
 
     return property;
 }

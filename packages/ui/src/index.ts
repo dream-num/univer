@@ -22,7 +22,6 @@ export { useObservable } from './components/hooks/observable';
 export {
     CopyShortcutItem,
     CutShortcutItem,
-    PasteShortcutItem,
     RedoShortcutItem,
     SharedController,
     UndoShortcutItem,

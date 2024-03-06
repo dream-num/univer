@@ -69,7 +69,7 @@ const locale: typeof zhCN = {
         title: 'Select a data range',
         addAnotherRange: 'Add another range',
         buttonTooltip: 'Select data range',
-        confirm: 'Ok',
+        confirm: 'Confirm',
         cancel: 'Cancel',
     },
 };

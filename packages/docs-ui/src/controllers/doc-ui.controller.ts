@@ -94,6 +94,7 @@ export class DocUIController extends Disposable {
         this._initCustomComponents();
         this._initMenus();
         this._initDocBackground();
+        this._initFocusHandler();
     }
 
     private _initDocBackground() {

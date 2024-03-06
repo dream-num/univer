@@ -8,6 +8,8 @@
 // @time-panel-padding-top: 90px;
 @time-panel-padding-top: 0;
 
+@cell-size: 24px;
+
 .placeholder(@color: @input-placeholder-color) {
     // Firefox
     &::-moz-placeholder {
@@ -25,6 +27,11 @@
 
 .@{prefix-cls} {
     position: relative;
+    width: 200px;
+    height: 32px;
+    border: 1px solid rgb(var(--border-color));
+    border-radius: 4px;
+    box-sizing: border-box;
     display: inline-flex;
 
     &-rtl {
@@ -32,7 +39,7 @@
     }
 
     &-focused {
-        border: 1px solid blue;
+        // border: 1px solid rgb(var(--primary-color));
     }
     &-invalid {
         box-shadow: 0 0 2px red;
@@ -40,8 +47,6 @@
     &-panel {
         display: inline-block;
         vertical-align: top;
-        background: @background-color;
-        border: 1px solid #666;
 
         &-focused {
             border-color: blue;
@@ -50,6 +55,19 @@
         &-rtl {
             direction: rtl;
         }
+    }
+
+    &-suffix-icon {
+        position: absolute;
+        top: 50%;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        align-items: center;
+        padding: 0 8px;
+        color: rgb(var(--text-color-secondary));
+        transform: translateY(-50%);
+        cursor: pointer;
     }
 
     // ===================== Shared Panel =====================
@@ -70,19 +88,54 @@
 
     // Header
     &-header {
+        margin-bottom: var(--margin-base);
         display: flex;
+        align-items: center;
 
         > * {
             flex: none;
         }
 
         &-view {
+            height: 16px;
             flex: auto;
-            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: var(--margin-xs);
 
             > button {
                 padding: 0;
                 border: 0;
+                background-color: transparent;
+                cursor: pointer;
+            }
+        }
+
+        .btn () {
+            width: 16px;
+            height: 16px;
+            padding: 0;
+            line-height: 16px;
+            font-size: var(--font-size-lg);
+            border: none;
+            background-color: transparent;
+            cursor: pointer;
+        }
+
+        &-super {
+            &-prev,
+            &-next {
+                &-btn {
+                    .btn();
+                }
+            }
+        }
+
+        &-prev,
+        &-next {
+            &-btn {
+                .btn();
             }
         }
     }
@@ -99,23 +152,17 @@
             display: inline-block;
             box-sizing: border-box;
             width: 100%;
-            height: 20px;
+            height: @cell-size;
             margin: 0;
             padding: 0;
             font-size: 12px;
-            line-height: 20px;
+            line-height: @cell-size;
             background: transparent;
             border: 0;
-            border: none;
+            border-radius: var(--border-radius-base);
             outline: none;
             cursor: pointer;
-            transition:
-                background 0.3s,
-                border 0.3s;
-
-            &:hover {
-                background: fade(blue, 30%);
-            }
+            transition: background 0.3s;
         }
 
         &-in-view {
@@ -127,7 +174,7 @@
         }
 
         &-hover > &-inner {
-            background: orange;
+            background: rgb(var(--bg-color));
         }
 
         &-range-hover-start,
@@ -156,12 +203,15 @@
         }
 
         &-today > &-inner {
-            border: 1px solid blue;
+            border: 1px solid rgb(var(--primary-color));
         }
         &-range-start > &-inner,
         &-range-end > &-inner,
         &-selected > &-inner {
-            background: fade(blue, 20%);
+            // TODO:
+            // background: fade(blue, 20%);
+            color: #fff;
+            background: rgb(var(--primary-color));
         }
     }
 
@@ -176,9 +226,20 @@
         }
     }
 
+    &-now {
+        padding-top: var(--padding-base);
+
+        &-btn {
+            font-size: var(--font-size-xs);
+            color: rgb(var(--primary-color));
+            cursor: pointer;
+        }
+    }
+
     &-footer,
     &-picker-footer {
-        background: green;
+        margin-top: var(--margin-sm);
+        border-top: 1px solid rgb(var(--border-color));
     }
 
     &-ranges {
@@ -188,7 +249,8 @@
         list-style: none;
 
         > li {
-            display: inline-block;
+            text-align: center;
+            display: block;
         }
     }
 
@@ -196,11 +258,32 @@
         float: right;
     }
 
+    &-decade-panel {
+        .@{prefix-cls}-content {
+            tbody {
+                display: grid;
+                gap: 20px;
+            }
+        }
+
+        .@{prefix-cls}-cell-inner {
+            width: 78px;
+            height: 24px;
+        }
+    }
+
     // ================== Year & Month Panel ==================
     &-year-panel,
     &-month-panel {
+        .@{prefix-cls}-content {
+            tbody {
+                display: grid;
+                gap: 20px;
+            }
+        }
         .@{prefix-cls}-cell-inner {
-            width: 80px;
+            width: 48px;
+            height: 24px;
         }
     }
 
@@ -237,7 +320,7 @@
 
         .@{prefix-cls}-cell,
         .@{prefix-cls}-cell-inner {
-            width: 20px;
+            width: @cell-size;
         }
 
         .@{prefix-cls}-cell-week {
@@ -255,7 +338,9 @@
     // ====================== Date Panel ======================
     &-date-panel {
         .@{prefix-cls}-cell-inner {
-            width: 20px;
+            width: @cell-size;
+            height: @cell-size;
+            font-size: var(--font-size-xs);
         }
     }
 
@@ -288,7 +373,7 @@
 
         &-column-title {
             font-size: 14px;
-            line-height: 20px;
+            line-height: @cell-size;
         }
 
         &-column {
@@ -332,11 +417,11 @@
                 .@{prefix-cls}-time-panel-cell-inner {
                     display: block;
                     width: 100%;
-                    height: 20px;
+                    height: @cell-size;
                     margin: 0;
                     // padding: 0 0 0 12px;
                     color: #333;
-                    line-height: 20px;
+                    line-height: @cell-size;
                     text-align: center;
 
                     .@{prefix-cls}-panel-rtl & {
@@ -392,7 +477,14 @@
 
         > input {
             width: 100%;
+            padding-left: 12px;
+            border: none;
+            border-radius: var(--border-radius-base);
+            box-sizing: border-box;
             .placeholder();
+            &:focus {
+                outline: none;
+            }
         }
 
         &-placeholder {
@@ -404,8 +496,8 @@
 
     &-clear {
         position: absolute;
-        top: 0;
-        right: 4px;
+        top: 7px;
+        right: 8px;
         cursor: pointer;
 
         .@{prefix-cls}-rtl & {
@@ -413,15 +505,32 @@
             left: 4px;
         }
 
-        &-btn::after {
-            content: '×';
+        &-btn {
+            width: 16px;
+            height: 16px;
+            text-align: center;
+            line-height: 16px;
+            background-color: rgb(var(--grey-500));
+            border-radius: 50%;
+            display: block;
+
+            &::before {
+                content: '×';
+                position: absolute;
+                top: -1px;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                color: white;
+                font-size: 16px;
+                line-height: 16px;
+            }
         }
     }
 
     // ======================= Dropdown =======================
     &-dropdown {
         position: absolute;
-        box-shadow: 0 0 1px red;
         pointer-events: none;
 
         &-range {
@@ -533,9 +642,15 @@
     }
 
     &-panel-layout {
+        padding: var(--padding-lg);
+        background: rgb(var(--bg-color-secondary));
+        border: 1px solid rgb(var(--border-color));
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--box-shadow-base);
         display: flex;
         flex-wrap: nowrap;
         align-items: stretch;
+        overflow: hidden;
     }
 
     // ========================================================

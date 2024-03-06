@@ -16,7 +16,7 @@
 
 import React from 'react';
 import type { Preview } from '@storybook/react';
-import { defaultTheme, greenTheme, themeInstance } from '@univerjs/design';
+import { ConfigProvider, defaultTheme, enUS, greenTheme, themeInstance, zhCN } from '@univerjs/design';
 import {
     CommandService,
     ConfigService,
@@ -110,13 +110,15 @@ const preview: Preview = {
             [ILocalStorageService, { useClass: DesktopLocalStorageService, lazy: true }],
         ]);
 
-        injector.get(LocaleService).load({});
         injector.get(LocaleService).setLocale(context.globals.i18n);
         themeInstance.setTheme(document.body, themes[context.globals.theme]);
+        const designLocale = context.globals.i18n === LocaleType.ZH_CN ? zhCN : enUS;
 
         return (
             <RediContext.Provider value={{ injector }}>
-                <Story />
+                <ConfigProvider locale={designLocale} mountContainer={document.body}>
+                    <Story />
+                </ConfigProvider>
             </RediContext.Provider>
         );
     }],

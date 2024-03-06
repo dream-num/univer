@@ -14,25 +14,45 @@
  * limitations under the License.
  */
 
-import React from 'react';
+import React, { useContext } from 'react';
 import RcPicker from 'rc-picker';
 import generateConfig from 'rc-picker/lib/generate/dayjs';
-import zhCN from 'rc-picker/lib/locale/zh_CN';
+import { CalendarSingle } from '@univerjs/icons';
+import type { Dayjs } from 'dayjs';
+import { ConfigContext } from '../config-provider/ConfigProvider';
 import styles from './index.module.less';
 
 export interface IDatePickerProps {
+    /**
+     * The value of the date picker.
+     */
+    value: Dayjs;
+
+    /**
+     * Callback when the value of the date picker changes.
+     */
+    onChange: (date: Dayjs, dateString: string) => void;
 }
 
 export function DatePicker(props: IDatePickerProps) {
+    const { value, onChange } = props;
+
+    const { locale } = useContext(ConfigContext);
+
+    function handleChange(date: Dayjs | Dayjs[], dateString: string | string[]) {
+        if (!Array.isArray(date) && !Array.isArray(dateString)) {
+            onChange(date, dateString);
+        }
+    }
+
     return (
-        <section>
-            {/* <RcPicker {...props} value={new Date()} /> */}
-            <RcPicker
-                prefixCls={styles.datePicker}
-                generateConfig={generateConfig}
-                locale={zhCN}
-                suffixIcon="SUFFIX"
-            />
-        </section>
+        <RcPicker<Dayjs>
+            value={value}
+            prefixCls={styles.datePicker}
+            generateConfig={generateConfig}
+            locale={locale.design.Picker}
+            suffixIcon={<CalendarSingle className={styles.datePickerSuffixIcon} />}
+            onChange={handleChange}
+        />
     );
 }

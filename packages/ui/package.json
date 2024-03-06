@@ -74,15 +74,15 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/icons": "^0.1.30",
+        "@univerjs/icons": "^0.1.39",
         "localforage": "^1.10.0",
         "rc-notification": "^5.3.0",
         "rc-util": "^5.38.2"
     },
     "devDependencies": {
         "@testing-library/react": "^14.2.1",
-        "@types/react": "^18.2.57",
-        "@types/react-dom": "^18.2.19",
+        "@types/react": "^18.2.63",
+        "@types/react-dom": "^18.2.20",
         "@types/react-transition-group": "^4.4.10",
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",

@@ -40,6 +40,7 @@ import { BehaviorSubject } from 'rxjs';
 
 import { IMarkSelectionService } from '../mark-selection/mark-selection.service';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
+import { LocaleService } from '../../../../core/lib/types';
 import { CopyContentCache, extractId, genId } from './copy-content-cache';
 import { HtmlToUSMService } from './html-to-usm/converter';
 import PastePluginLark from './html-to-usm/paste-plugins/plugin-lark';
@@ -105,7 +106,8 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         @IMarkSelectionService private readonly _markSelectionService: IMarkSelectionService,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @INotificationService private readonly _notificationService: INotificationService,
-        @IPlatformService private readonly _platformService: IPlatformService
+        @IPlatformService private readonly _platformService: IPlatformService,
+        @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
         super();
         this._htmlToUSM = new HtmlToUSMService({
@@ -184,8 +186,8 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             if (this._platformService.isWindows && (await clipboardItemIsFromExcel(html))) {
                 this._notificationService.show({
                     type: 'warning',
-                    title: '粘贴提示',
-                    content: '无法粘贴内容，请试试快捷键 Ctrl+V 。',
+                    title: this._localeService.t('clipboard.shortCutNotify.title'),
+                    content: this._localeService.t('clipboard.shortCutNotify.useShortCutInstead'),
                 });
                 return false;
             }

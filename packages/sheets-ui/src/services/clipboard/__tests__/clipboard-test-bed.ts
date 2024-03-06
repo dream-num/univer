@@ -34,6 +34,7 @@ import { IMarkSelectionService } from '../../mark-selection/mark-selection.servi
 import { ISelectionRenderService, SelectionRenderService } from '../../selection/selection-render.service';
 import { SheetSkeletonManagerService } from '../../sheet-skeleton-manager.service';
 import { ISheetClipboardService, SheetClipboardService } from '../clipboard.service';
+import { LocaleService } from '../../../../../core/lib/types';
 
 const cellData = {
     0: {
@@ -551,6 +552,7 @@ export function clipboardTestBed(workbookConfig?: IWorkbookData, dependencies?: 
             const sheetClipboardController = injector.createInstance(SheetClipboardController);
             injector.add([SheetClipboardController, { useValue: sheetClipboardController }]);
             injector.add([SheetInterceptorService]);
+            injector.add([LocaleService]);
 
             dependencies?.forEach((d) => injector.add(d));
         }

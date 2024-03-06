@@ -429,6 +429,10 @@ const locale: typeof zhCN = {
         paste: {
             exceedMaxCells: 'The number of cells pasted exceeds the maximum number of cells',
         },
+        shortCutNotify: {
+            title: 'Paste reminder',
+            useShortCutInstead: 'Unable to paste content, please try using keyboard shortcut Ctrl+V.',
+        },
     },
     statusbar: {
         sum: 'Sum',

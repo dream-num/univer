@@ -21,6 +21,7 @@ import {
     ILogService,
     IUndoRedoService,
     IUniverInstanceService,
+    LocaleService,
     ObjectMatrix,
     Rectangle,
     toDisposable,
@@ -40,7 +41,6 @@ import { BehaviorSubject } from 'rxjs';
 
 import { IMarkSelectionService } from '../mark-selection/mark-selection.service';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
-import { LocaleService } from '../../../../core/lib/types';
 import { CopyContentCache, extractId, genId } from './copy-content-cache';
 import { HtmlToUSMService } from './html-to-usm/converter';
 import PastePluginLark from './html-to-usm/paste-plugins/plugin-lark';

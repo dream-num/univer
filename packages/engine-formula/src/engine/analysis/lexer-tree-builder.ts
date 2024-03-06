@@ -27,6 +27,7 @@ import {
     OPERATOR_TOKEN_SET,
     operatorToken,
     prefixToken,
+    SPACE_TOKEN,
     SUFFIX_TOKEN_SET,
     suffixToken,
 } from '../../basics/token';
@@ -491,7 +492,20 @@ export class LexerTreeBuilder extends Disposable {
     }
 
     private _replacePrefixString(token: string) {
-        return token.replace(new RegExp(prefixToken.AT, 'g'), '').replace(new RegExp(prefixToken.MINUS, 'g'), '');
+        const tokenArray = [];
+        let isNotPreFix = false;
+        for (let i = 0, len = token.length; i < len; i++) {
+            const char = token[i];
+            if (char === SPACE_TOKEN && !isNotPreFix) {
+                tokenArray.push(char);
+            } else if (!isNotPreFix && (char === prefixToken.AT || char === prefixToken.MINUS)) {
+                continue;
+            } else {
+                tokenArray.push(char);
+                isNotPreFix = true;
+            }
+        }
+        return tokenArray.join('');
     }
 
     nodeMakerTest(formulaString: string) {

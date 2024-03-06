@@ -32,12 +32,14 @@ export interface IRangeSelectorProps {
     value?: string; // default values.
     onChange?: (ranges: IUnitRange[]) => void; // Callback for changes in the selector value.
 
+    isSingleChoice?: boolean; // Whether to restrict to only selecting a single region/area/district.
+
     openForSheetUnitId?: Nullable<string>; //  Configuring which workbook the selector defaults to opening in determines whether the ref includes a [unitId] prefix.
     openForSheetSubUnitId?: Nullable<string>; // Configuring the default worksheet where the selector opens determines whether the ref includes a [unitId]sheet1 prefix.
 }
 
 export function RangeSelector(props: IRangeSelectorProps) {
-    const { onChange, id, value = '', openForSheetUnitId, openForSheetSubUnitId } = props;
+    const { onChange, id, value = '', isSingleChoice = false, openForSheetUnitId, openForSheetSubUnitId } = props;
 
     const [rangeDataList, setRangeDataList] = useState<string[]>(['']);
 
@@ -115,7 +117,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
             }
 
             const lastRange = ranges[ranges.length - 1];
-            if (addItemCount >= 1) {
+            if (addItemCount >= 1 && !isSingleChoice) {
                 addNewItem(serializeRange(lastRange));
             } else {
                 changeLastItem(serializeRange(lastRange));
@@ -205,7 +207,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
     return (
         <>
             <div className={sClassName} ref={selectorRef}>
-                <TextEditor openForSheetUnitId={openForSheetUnitId} openForSheetSubUnitId={openForSheetSubUnitId} onValid={onValid} onFocus={onFocus} onChange={handleTextValueChange} id={id} onlyInputRange={true} canvasStyle={{ fontSize: 10 }} className={styles.rangeSelectorEditor} />
+                <TextEditor isSingleChoice={isSingleChoice} openForSheetUnitId={openForSheetUnitId} openForSheetSubUnitId={openForSheetSubUnitId} onValid={onValid} onFocus={onFocus} onChange={handleTextValueChange} id={id} onlyInputRange={true} canvasStyle={{ fontSize: 10 }} className={styles.rangeSelectorEditor} />
                 <Tooltip title={localeService.t('rangeSelector.buttonTooltip')} placement="bottom">
                     <button className={styles.rangeSelectorIcon} onClick={handleOpenModal}>
                         <SelectRangeSingle />
@@ -239,7 +241,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
                         </div>
                     ))}
 
-                    <div className={styles.rangeSelectorModalAdd}>
+                    <div style={{ display: isSingleChoice ? 'none' : 'unset' }} className={styles.rangeSelectorModalAdd}>
                         <Button size="small" onClick={handleAddRange}>{localeService.t('rangeSelector.addAnotherRange')}</Button>
                     </div>
                 </div>

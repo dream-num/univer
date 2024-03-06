@@ -90,6 +90,9 @@ export interface ISelectionRenderService {
     reset(): void;
 
     refreshSelectionMoveStart(): void;
+
+    enableSingleSelection(): void;
+    disableSingleSelection(): void;
 }
 
 /**
@@ -163,6 +166,8 @@ export class SelectionRenderService implements ISelectionRenderService {
     private _isRemainLastEnable: boolean = true;
 
     private _isSkipRemainLastEnable: boolean = false;
+
+    private _isSingleSelection: boolean = false; // Multiple selections are prohibited
 
     private readonly _selectionMoveEnd$ = new BehaviorSubject<ISelectionWithCoordAndStyle[]>([]);
 
@@ -250,6 +255,14 @@ export class SelectionRenderService implements ISelectionRenderService {
         this._isSkipRemainLastEnable = false;
     }
 
+    enableSingleSelection() {
+        this._isSingleSelection = true;
+    }
+
+    disableSingleSelection() {
+        this._isSingleSelection = false;
+    }
+
     getViewPort() {
         return this._activeViewport;
     }
@@ -258,7 +271,6 @@ export class SelectionRenderService implements ISelectionRenderService {
      * add a selection
      * @param selectionRange
      * @param curCellRange
-     * @returns
      */
     addControlToCurrentByRangeData(data: ISelectionWithCoordAndStyle) {
         const currentControls = this.getCurrentControls();
@@ -598,11 +610,11 @@ export class SelectionRenderService implements ISelectionRenderService {
 
         // In addition to pressing the ctrl or shift key, we must clear the previous selection
         if (
-            curControls.length > 0 &&
+            (curControls.length > 0 &&
             !evt.ctrlKey &&
             !evt.shiftKey &&
             !this._isShowPreviousEnable &&
-            !this._isRemainLastEnable
+            !this._isRemainLastEnable) || (curControls.length > 0 && this._isSingleSelection && !evt.shiftKey)
         ) {
             for (const control of curControls) {
                 control.dispose();
@@ -682,7 +694,7 @@ export class SelectionRenderService implements ISelectionRenderService {
             selectionControl &&
             !evt.ctrlKey &&
             !evt.shiftKey &&
-            !this._isSkipRemainLastEnable
+            !this._isSkipRemainLastEnable && !this._isSingleSelection
         ) {
             /**
              * Supports the formula ref text selection feature,
@@ -978,9 +990,6 @@ export class SelectionRenderService implements ISelectionRenderService {
 
     /**
      * When mousedown and mouseup need to go to the coordination and undo stack, when mousemove does not need to go to the coordination and undo stack
-     * @param moveEvt
-     * @param selectionControl
-     * @returns
      */
     private _moving(
         moveOffsetX: number,

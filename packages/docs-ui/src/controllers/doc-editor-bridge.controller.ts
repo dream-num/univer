@@ -87,6 +87,8 @@ export class DocEditorBridgeController extends Disposable {
             return;
         }
 
+        skeleton.calculate();
+
         const { marginTop = 0, marginBottom = 0, marginLeft = 0, marginRight = 0 } = editorDataModel.getSnapshot().documentStyle;
 
         const { scene, mainComponent } = editor.render;
@@ -192,7 +194,7 @@ export class DocEditorBridgeController extends Disposable {
             fromEvent(window, 'mousedown').subscribe((event) => {
                 const target = event.target as HTMLElement;
                 const hasSearch = target.classList[0];
-                if (hasSearch?.indexOf('univer-formula-search') > -1 || hasSearch?.indexOf('univer-formula-help') > -1 || hasSearch?.indexOf('formula-help-decorator') || hasSearch?.indexOf('univer-formula-help-param')) {
+                if (hasSearch?.indexOf('univer-formula-search') > -1 || hasSearch?.indexOf('univer-formula-help') > -1 || hasSearch?.indexOf('formula-help-decorator') > -1 || hasSearch?.indexOf('univer-formula-help-param') > -1) {
                     this._editorService.changeSpreadsheetFocusState(true);
                     event.stopPropagation();
                     return;

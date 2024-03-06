@@ -1218,7 +1218,7 @@ export class PromptController extends Disposable {
         editorUnitId?: string,
         canUndo: boolean = true
     ) {
-        const dataStream = generateStringWithSequence(sequenceNodes);
+        let dataStream = generateStringWithSequence(sequenceNodes);
 
         const { textRuns, refSelections } = this._buildTextRuns(sequenceNodes);
 
@@ -1242,8 +1242,13 @@ export class PromptController extends Disposable {
 
         const editor = this._editorService.getEditor(editorUnitId);
 
+        if (editor?.isSingleChoice()) {
+            dataStream = dataStream.split(',')[0];
+        }
+
         let formulaString = dataStream;
         let offset = 1;
+
         if (!editor || !editor.onlyInputRange()) {
             formulaString = `${compareToken.EQUALS}${dataStream}`;
             offset = 0;
@@ -1817,6 +1822,16 @@ export class PromptController extends Disposable {
                     this._syncToEditor(lastSequenceNodes, formulaString.length - 1, editorUnitId);
                 })
             )
+        );
+
+        this.disposeWithMe(
+            this._editorService.singleSelection$.subscribe((state) => {
+                if (state === true) {
+                    this._selectionRenderService.enableSingleSelection();
+                } else {
+                    this._selectionRenderService.disableSingleSelection();
+                }
+            })
         );
     }
 

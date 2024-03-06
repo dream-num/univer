@@ -36,6 +36,7 @@ const excludeProps = new Set([
     'onlyInputRange',
     'value',
     'onlyInputContent',
+    'isSingleChoice',
     'openForSheetUnitId',
     'openForSheetSubUnitId',
     'onChange',
@@ -66,6 +67,8 @@ export interface ITextEditorProps {
     onlyInputRange?: boolean; // Only input ref range
     onlyInputContent?: boolean; // Only plain content can be entered, turning off formula and range input highlighting.
 
+    isSingleChoice?: boolean; // Whether to restrict to only selecting a single region/area/district.
+
     openForSheetUnitId?: Nullable<string>; //  Configuring which workbook the selector defaults to opening in determines whether the ref includes a [unitId] prefix.
     openForSheetSubUnitId?: Nullable<string>; // Configuring the default worksheet where the selector opens determines whether the ref includes a [unitId]sheet1 prefix.
 
@@ -95,6 +98,8 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
         onlyInputFormula = false,
         onlyInputRange = false,
         onlyInputContent = false,
+
+        isSingleChoice = false,
 
         openForSheetUnitId,
         openForSheetSubUnitId,
@@ -144,6 +149,7 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
             canvasStyle,
             isSingle,
             isReadonly,
+            isSingleChoice,
             onlyInputFormula,
             onlyInputRange,
             onlyInputContent,

@@ -114,7 +114,7 @@ describe('test case in html and udm convert', () => {
 
     it('Should convert document body To Html(convertBodyToHtml)', () => {
         const documentBody = getTestBody();
-        const expectedHtml = '<p class="UniverNormal" style="margin-top: 10px; margin-bottom: 0px;">荷<span style="font-family: Microsoft YaHei; color: rgb(0, 0, 0); font-size: 24pt;"><strong>塘月</strong></span>色</p><p class="UniverNormal" style="margin-top: 10px; margin-bottom: 0px;">作者：朱自清</p>';
+        const expectedHtml = '<p class="UniverNormal" style="margin-top: 10px; margin-bottom: 0px; line-height: 2;">荷<span style="font-family: Microsoft YaHei; color: rgb(0, 0, 0); font-size: 24pt;"><strong>塘月</strong></span>色</p><p class="UniverNormal" style="margin-top: 10px; margin-bottom: 0px; line-height: 2;">作者：朱自清</p>';
 
         expect(convertBodyToHtml(documentBody)).toEqual(expectedHtml);
     });

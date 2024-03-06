@@ -69,7 +69,7 @@ export interface IEditorInputFormulaParam {
     formulaString: string;
 }
 
-class Editor {
+export class Editor {
     private _focus = false;
 
     private _valueLegality = true;

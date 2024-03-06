@@ -18,7 +18,7 @@ import { debounce, type IDocumentData, LocaleService, type Nullable } from '@uni
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useRef, useState } from 'react';
 import { Popup } from '@univerjs/design';
-import type { IEditorCanvasStyle } from '../../services/editor/editor.service';
+import type { Editor, IEditorCanvasStyle } from '../../services/editor/editor.service';
 import { IEditorService } from '../../services/editor/editor.service';
 import styles from './index.module.less';
 
@@ -167,6 +167,25 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
             onFocus && onFocus(state);
         });
 
+        const valueChange = debounce((editor: Readonly<Editor>) => {
+            const unitId = editor.editorUnitId;
+            const isLegality = editorService.checkValueLegality(unitId);
+            setValidationVisible(!isLegality);
+            const rect = editor.getBoundingClientRect();
+
+            setValidationOffset([rect.left, rect.top - 16]);
+
+            if (editor.onlyInputFormula()) {
+                setValidationContent(localeService.t('textEditor.formulaError'));
+            } else {
+                setValidationContent(localeService.t('textEditor.rangeError'));
+            }
+
+            onValid && onValid(isLegality);
+
+            onChange && onChange(editorService.getValue(id));
+        }, 10);
+
         const valueChangeSubscription = editorService.valueChange$.subscribe((editor) => {
             if (!editor.onlyInputFormula() && !editor.onlyInputRange()) {
                 return;
@@ -176,24 +195,7 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
                 return;
             }
 
-            debounce(() => {
-                const unitId = editor.editorUnitId;
-                const isLegality = editorService.checkValueLegality(unitId);
-                setValidationVisible(!isLegality);
-                const rect = editor.getBoundingClientRect();
-
-                setValidationOffset([rect.left, rect.top - 16]);
-
-                if (editor.onlyInputFormula()) {
-                    setValidationContent(localeService.t('textEditor.formulaError'));
-                } else {
-                    setValidationContent(localeService.t('textEditor.rangeError'));
-                }
-
-                onValid && onValid(isLegality);
-
-                onChange && onChange(editorService.getValue(id));
-            }, 10)();
+            valueChange(editor);
         });
 
         // Clean up on unmount

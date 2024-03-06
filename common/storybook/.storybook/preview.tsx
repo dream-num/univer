@@ -28,6 +28,7 @@ import {
     IConfigService,
     IContextService,
     IFloatingObjectManagerService,
+    ILocalStorageService,
     ILogService,
     IPermissionService,
     IResourceManagerService,
@@ -46,6 +47,7 @@ import {
 } from '@univerjs/core';
 import { Injector } from '@wendellhu/redi';
 import { RediContext } from '@wendellhu/redi/react-bindings';
+import { DesktopLocalStorageService } from '@univerjs/ui';
 
 export const themes: Record<string, Record<string, string>> = {
     default: defaultTheme,
@@ -103,6 +105,9 @@ const preview: Preview = {
             [IContextService, { useClass: ContextService }],
             [IFloatingObjectManagerService, { useClass: FloatingObjectManagerService, lazy: true }],
             [IResourceManagerService, { useClass: ResourceManagerService, lazy: true }],
+
+            // services
+            [ILocalStorageService, { useClass: DesktopLocalStorageService, lazy: true }],
         ]);
 
         injector.get(LocaleService).load({});

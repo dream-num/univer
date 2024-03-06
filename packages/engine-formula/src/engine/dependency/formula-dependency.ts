@@ -20,7 +20,8 @@ import { Inject } from '@wendellhu/redi';
 
 import { FormulaAstLRU } from '../../basics/cache-lru';
 import type { IDirtyUnitSheetNameMap, IFormulaData, IOtherFormulaData, IUnitData } from '../../basics/common';
-import { ErrorType } from '../../basics/error-type';
+import type { ErrorType } from '../../basics/error-type';
+import { ERROR_TYPE_SET } from '../../basics/error-type';
 import { prefixToken, suffixToken } from '../../basics/token';
 import { IFormulaCurrentConfigService } from '../../services/current-data.service';
 import { IFeatureCalculationManagerService } from '../../services/feature-calculation-manager.service';
@@ -313,7 +314,7 @@ export class FormulaDependencyGenerator extends Disposable {
 
         const lexerNode = this._lexer.treeBuilder(formulaString);
 
-        if ((lexerNode as ErrorType) in ErrorType) {
+        if (ERROR_TYPE_SET.has(lexerNode as ErrorType)) {
             return ErrorNode.create(lexerNode as ErrorType);
         }
 

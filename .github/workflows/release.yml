@@ -100,13 +100,18 @@ jobs:
               uses: actions/setup-node@v4
               with:
                   node-version: 18
-                  registry-url: ${{ secrets.VERDACCIO_URL }}
-                  scope: '@univerjs'
 
             - name: 🚚 Install dependencies and build
               run: |
                   pnpm install
                   pnpm run build
+
+            - name: Install Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 18
+                  registry-url: ${{ secrets.VERDACCIO_URL }}
+                  scope: '@univerjs'
 
             - name: 🐙 Publish
               run: |

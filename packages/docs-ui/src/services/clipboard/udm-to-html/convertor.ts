@@ -120,7 +120,7 @@ export function convertBodyToHtml(body: IDocumentBody, withParagraphInfo: boolea
         let cursorIndex = -1;
         for (const paragraph of paragraphs) {
             const { startIndex, paragraphStyle = {} } = paragraph;
-            const { spaceAbove, spaceBelow } = paragraphStyle;
+            const { spaceAbove, spaceBelow, lineSpacing } = paragraphStyle;
             const style = [];
 
             if (spaceAbove != null) {
@@ -137,6 +137,10 @@ export function convertBodyToHtml(body: IDocumentBody, withParagraphInfo: boolea
                 } else {
                     style.push(`margin-bottom: ${spaceBelow.v}px`);
                 }
+            }
+
+            if (lineSpacing != null) {
+                style.push(`line-height: ${lineSpacing}`);
             }
 
             if (startIndex > cursorIndex + 1) {

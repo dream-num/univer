@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-export type { FontLine, FontStyle, FontWeight } from './apis/sheet/f-range';
+export type { FontLine, FontStyle, FontWeight } from './apis/sheets/f-range';
 export { FUniver } from './apis/facade';
-export { FRange } from './apis/sheet/f-range';
-export { FSelection } from './apis/sheet/f-selection';
-export { FWorkbook } from './apis/sheet/f-workbook';
-export { FWorksheet } from './apis/sheet/f-worksheet';
+export { FRange } from './apis/sheets/f-range';
+export { FSelection } from './apis/sheets/f-selection';
+export { FWorkbook } from './apis/sheets/f-workbook';
+export { FWorksheet } from './apis/sheets/f-worksheet';

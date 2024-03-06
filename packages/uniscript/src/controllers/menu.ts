@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-import { UniverInstanceType } from '@univerjs/core';
-import { getCurrentSheetDisabled$ } from '@univerjs/sheets';
 import type { IMenuButtonItem } from '@univerjs/ui';
-import { getMenuHiddenObservable, MenuItemType, MenuPosition } from '@univerjs/ui';
+import { MenuItemType, MenuPosition } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 
 import { ToggleScriptPanelOperation } from '../commands/operations/panel.operation';
@@ -30,7 +28,8 @@ export function UniscriptMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         icon: 'CodeSingle',
         type: MenuItemType.BUTTON,
         positions: [MenuPosition.TOOLBAR_START],
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
-        disabled$: getCurrentSheetDisabled$(accessor),
+        // FIXME hidden$ and disabled$ are not correctly in doc
+        // hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
+        // disabled$: getCurrentSheetDisabled$(accessor),
     };
 }

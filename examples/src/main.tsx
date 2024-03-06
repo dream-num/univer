@@ -51,12 +51,17 @@ function Examples() {
                 {' '}
             </a>
             <a className={styles.btn} href="./sheets-multi/">
-                <span> Univer Multi Instance</span>
+                <span> Univer Sheets Multi Instance</span>
                 <div className={styles.btnBg}>→</div>
                 {' '}
             </a>
-            <a className={styles.btn} href="./uniscript/">
-                <span> Uniscript</span>
+            <a className={styles.btn} href="./sheets-uniscript/">
+                <span> Univer Sheets Uniscript</span>
+                <div className={styles.btnBg}>→</div>
+                {' '}
+            </a>
+            <a className={styles.btn} href="./docs-uniscript/">
+                <span> Univer Docs Uniscript</span>
                 <div className={styles.btnBg}>→</div>
                 {' '}
             </a>

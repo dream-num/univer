@@ -19,6 +19,7 @@ import React from 'react';
 import { RangeSelector, TextEditor } from '@univerjs/ui';
 import { IUniverInstanceService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
+import { Input } from '@univerjs/design';
 
 const containerStyle: React.CSSProperties = {
     position: 'absolute',
@@ -60,6 +61,10 @@ export const TestEditorContainer = () => {
             <TextEditor id="test-editor-4" openForSheetUnitId={unitId} openForSheetSubUnitId={sheetId} isSingle={false} onlyInputContent={true} style={{ ...editorStyle, height: '140px' }} canvasStyle={{ fontSize: 14 }} />
             <br></br>
             <RangeSelector id="test-rangeSelector-1" openForSheetUnitId={unitId} openForSheetSubUnitId={sheetId} />
+            <br></br>
+            <RangeSelector id="test-rangeSelector-2" isSingleChoice={true} openForSheetUnitId={unitId} openForSheetSubUnitId={sheetId} />
+            <br></br>
+            <Input allowClear />
         </div>
     );
 };

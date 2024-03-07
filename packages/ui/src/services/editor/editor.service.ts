@@ -46,6 +46,8 @@ export interface IEditorConfigParam {
     onlyInputRange: boolean;
     onlyInputContent: boolean;
 
+    isSingleChoice: boolean;
+
     openForSheetUnitId: Nullable<string>;
     openForSheetSubUnitId: Nullable<string>;
 
@@ -67,7 +69,7 @@ export interface IEditorInputFormulaParam {
     formulaString: string;
 }
 
-class Editor {
+export class Editor {
     private _focus = false;
 
     private _valueLegality = true;
@@ -95,6 +97,10 @@ class Editor {
 
     get render() {
         return this._param.render;
+    }
+
+    isSingleChoice() {
+        return this._param.isSingleChoice;
     }
 
     setOpenForSheetUnitId(unitId: Nullable<string>) {
@@ -240,7 +246,6 @@ export interface IEditorService {
     setFormula(formulaString: string): void;
 
     resize$: Observable<string>;
-
     resize(id: string): void;
 
     getAllEditor(): Map<string, Editor>;
@@ -250,15 +255,12 @@ export interface IEditorService {
      * whether to include unitId information in the ref.
      */
     setOperationSheetUnitId(unitId: Nullable<string>): void;
-
     getOperationSheetUnitId(): Nullable<string>;
-
      /**
       * The sub-table within the sheet currently being operated on
       * will determine whether to include subUnitId information in the ref.
       */
     setOperationSheetSubUnitId(sheetId: Nullable<string>): void;
-
     getOperationSheetSubUnitId(): Nullable<string>;
 
     isEditor(editorUnitId: string): boolean;
@@ -266,19 +268,15 @@ export interface IEditorService {
     isSheetEditor(editorUnitId: string): boolean;
 
     closeRangePrompt$: Observable<unknown>;
-
     closeRangePrompt(): void;
 
     blur$: Observable<unknown>;
-
     blur(): void;
 
     focus$: Observable<ISuccinctTextRangeParam>;
-
     focus(editorUnitId?: string): void;
 
     setValue$: Observable<IEditorSetValueParam>;
-
     valueChange$: Observable<Readonly<Editor>>;
 
     setValue(val: string, editorUnitId?: string): void;
@@ -288,7 +286,6 @@ export interface IEditorService {
     getFirstEditor(): Editor;
 
     focusStyle$: Observable<Nullable<string>>;
-
     focusStyle(editorUnitId: Nullable<string>): void;
 
     refreshValueChange(editorId: string): void;
@@ -304,6 +301,9 @@ export interface IEditorService {
     getSpreadsheetFocusState(): boolean;
 
     selectionChangingState(): boolean;
+
+    singleSelection$: Observable<boolean>;
+    singleSelection(state: boolean): void;
 }
 
 export class EditorService extends Disposable implements IEditorService, IDisposable {
@@ -338,8 +338,10 @@ export class EditorService extends Disposable implements IEditorService, IDispos
     readonly valueChange$ = this._valueChange$.asObservable();
 
     private readonly _focusStyle$ = new Subject<Nullable<string>>();
-
     readonly focusStyle$ = this._focusStyle$.asObservable();
+
+    private readonly _singleSelection$ = new Subject<boolean>();
+    readonly singleSelection$ = this._singleSelection$.asObservable();
 
     private _spreadsheetFocusState: boolean = false;
 
@@ -391,7 +393,15 @@ export class EditorService extends Disposable implements IEditorService, IDispos
 
         this._contextService.setContextValue(FOCUSING_UNIVER_EDITOR_SINGLE_MODE, editor.isSingle());
 
+        if (!this._spreadsheetFocusState) {
+            this.singleSelection(editor.isSingleChoice());
+        }
+
         this._focusStyle$.next(editorUnitId);
+    }
+
+    singleSelection(state: boolean) {
+        this._singleSelection$.next(state);
     }
 
     selectionChangingState() {
@@ -405,11 +415,13 @@ export class EditorService extends Disposable implements IEditorService, IDispos
     blur() {
         if (!this._spreadsheetFocusState) {
             this._closeRangePrompt$.next(null);
+            this.singleSelection(false);
         }
 
         this.getAllEditor().forEach((editor) => {
             editor.setFocus(false);
         });
+
         this._focusStyle$.next();
         this._blur$.next(null);
     }
@@ -429,6 +441,8 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         this._currentUniverService.setCurrentUniverDocInstance(editorUnitId);
 
         const valueCount = editor.getValue().length;
+
+        this.focusStyle(editorUnitId);
 
         this._focus$.next({
             startOffset: valueCount - 2,
@@ -593,6 +607,16 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         this._editors.delete(editorUnitId);
 
         this._currentUniverService.disposeDocument(editorUnitId);
+
+        /**
+         * Compatible with the editor in the sheet scenario,
+         * it is necessary to refocus back to the current sheet when unloading.
+         */
+        const sheets = this._currentUniverService.getAllUniverSheetsInstance();
+        if (sheets.length > 0) {
+            const current = this._currentUniverService.getCurrentUniverSheetInstance();
+            this._currentUniverService.focusUniverInstance(current.getUnitId());
+        }
     }
 
     refreshValueChange(editorUnitId: string) {
@@ -625,6 +649,10 @@ export class EditorService extends Disposable implements IEditorService, IDispos
             editor.setValueLegality(bracketCount === 0);
         } else if (editor.onlyInputRange()) {
             const valueArray = value.split(',');
+            if (editor.isSingleChoice() && valueArray.length > 1) {
+                editor.setValueLegality(false);
+                return false;
+            }
             const result = valueArray.every((refString) => {
                 return isReferenceString(refString.trim());
             });

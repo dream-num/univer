@@ -18,7 +18,7 @@ import { debounce, type IDocumentData, LocaleService, type Nullable } from '@uni
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useRef, useState } from 'react';
 import { Popup } from '@univerjs/design';
-import type { IEditorCanvasStyle } from '../../services/editor/editor.service';
+import type { Editor, IEditorCanvasStyle } from '../../services/editor/editor.service';
 import { IEditorService } from '../../services/editor/editor.service';
 import styles from './index.module.less';
 
@@ -36,6 +36,7 @@ const excludeProps = new Set([
     'onlyInputRange',
     'value',
     'onlyInputContent',
+    'isSingleChoice',
     'openForSheetUnitId',
     'openForSheetSubUnitId',
     'onChange',
@@ -66,6 +67,8 @@ export interface ITextEditorProps {
     onlyInputRange?: boolean; // Only input ref range
     onlyInputContent?: boolean; // Only plain content can be entered, turning off formula and range input highlighting.
 
+    isSingleChoice?: boolean; // Whether to restrict to only selecting a single region/area/district.
+
     openForSheetUnitId?: Nullable<string>; //  Configuring which workbook the selector defaults to opening in determines whether the ref includes a [unitId] prefix.
     openForSheetSubUnitId?: Nullable<string>; // Configuring the default worksheet where the selector opens determines whether the ref includes a [unitId]sheet1 prefix.
 
@@ -95,6 +98,8 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
         onlyInputFormula = false,
         onlyInputRange = false,
         onlyInputContent = false,
+
+        isSingleChoice = false,
 
         openForSheetUnitId,
         openForSheetSubUnitId,
@@ -144,6 +149,7 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
             canvasStyle,
             isSingle,
             isReadonly,
+            isSingleChoice,
             onlyInputFormula,
             onlyInputRange,
             onlyInputContent,
@@ -161,6 +167,25 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
             onFocus && onFocus(state);
         });
 
+        const valueChange = debounce((editor: Readonly<Editor>) => {
+            const unitId = editor.editorUnitId;
+            const isLegality = editorService.checkValueLegality(unitId);
+            setValidationVisible(!isLegality);
+            const rect = editor.getBoundingClientRect();
+
+            setValidationOffset([rect.left, rect.top - 16]);
+
+            if (editor.onlyInputFormula()) {
+                setValidationContent(localeService.t('textEditor.formulaError'));
+            } else {
+                setValidationContent(localeService.t('textEditor.rangeError'));
+            }
+
+            onValid && onValid(isLegality);
+
+            onChange && onChange(editorService.getValue(id));
+        }, 10);
+
         const valueChangeSubscription = editorService.valueChange$.subscribe((editor) => {
             if (!editor.onlyInputFormula() && !editor.onlyInputRange()) {
                 return;
@@ -170,24 +195,7 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
                 return;
             }
 
-            debounce(() => {
-                const unitId = editor.editorUnitId;
-                const isLegality = editorService.checkValueLegality(unitId);
-                setValidationVisible(!isLegality);
-                const rect = editor.getBoundingClientRect();
-
-                setValidationOffset([rect.left, rect.top - 16]);
-
-                if (editor.onlyInputFormula()) {
-                    setValidationContent(localeService.t('textEditor.formulaError'));
-                } else {
-                    setValidationContent(localeService.t('textEditor.rangeError'));
-                }
-
-                onValid && onValid(isLegality);
-
-                onChange && onChange(editorService.getValue(id));
-            }, 10)();
+            valueChange(editor);
         });
 
         // Clean up on unmount

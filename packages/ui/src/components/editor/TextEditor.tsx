@@ -215,6 +215,17 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
     }, []);
 
     useEffect(() => {
+        const editor = editorService.getEditor(id);
+        if (editor == null) {
+            return;
+        }
+
+        editor.update({
+            isReadonly, isSingle, isSingleChoice, onlyInputContent, onlyInputFormula, onlyInputRange, openForSheetSubUnitId, openForSheetUnitId,
+        });
+    }, [isReadonly, isSingle, isSingleChoice, onlyInputContent, onlyInputFormula, onlyInputRange, openForSheetSubUnitId, openForSheetUnitId]);
+
+    useEffect(() => {
         if (value == null) {
             return;
         }

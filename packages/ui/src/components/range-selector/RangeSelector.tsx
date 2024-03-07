@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IRange, IUnitRange, Nullable } from '@univerjs/core';
+import type { IUnitRange, Nullable } from '@univerjs/core';
 import { IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { Button, Dialog, Input, Tooltip } from '@univerjs/design';
 import { CloseSingle, DeleteSingle, SelectRangeSingle } from '@univerjs/icons';

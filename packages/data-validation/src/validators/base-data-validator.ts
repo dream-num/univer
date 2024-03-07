@@ -88,7 +88,7 @@ export abstract class BaseDataValidator<DataType = CellValue> {
 
     abstract validatorFormula(rule: IDataValidationRuleBase): boolean;
 
-    abstract isValidType(cellValue: CellValue, rule: IDataValidationRule): boolean;
+    abstract isValidType(cellValue: CellValue, rule: IDataValidationRule): boolean | Promise<boolean>;
 
     abstract transform(cellValue: CellValue, rule: IDataValidationRule): DataType;
 
@@ -108,19 +108,19 @@ export abstract class BaseDataValidator<DataType = CellValue> {
 
     abstract validatorIsLessThanOrEqual(cellValue: DataType, rule: IDataValidationRule): Promise<boolean>;
 
-    validator(cellValue: Nullable<CellValue>, rule: IDataValidationRule): Promise<boolean> {
+    async validator(cellValue: Nullable<CellValue>, rule: IDataValidationRule): Promise<boolean> {
         const isEmpty = this.isEmptyCellValue(cellValue);
         const { allowBlank = true } = rule;
         if (isEmpty) {
-            return Promise.resolve(allowBlank);
+            return allowBlank;
         }
 
-        if (!this.isValidType(cellValue, rule)) {
-            return Promise.resolve(false);
+        if (await !this.isValidType(cellValue, rule)) {
+            return false;
         }
 
         if (!Tools.isDefine(rule.operator)) {
-            return Promise.resolve(true);
+            return true;
         }
 
         const transformedCell = this.transform(cellValue, rule);

@@ -96,6 +96,9 @@ export default {
         checkbox: {
             title: 'checkbox',
         },
-
+        custom: {
+            title: 'Custom formula is',
+            error: 'This cell\'s contents violate its validation rule',
+        },
     },
 };

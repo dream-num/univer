@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import { DataValidationType, IUniverInstanceService, LocaleService, Tools } from '@univerjs/core';
+import { DataValidationType, Tools } from '@univerjs/core';
 import type { CellValue, DataValidationOperator, IDataValidationRule, IDataValidationRuleBase } from '@univerjs/core';
-import { Inject } from '@wendellhu/redi';
 import { BASE_FORMULA_INPUT_NAME } from '../views/formula-input';
 import { BaseDataValidator } from './base-data-validator';
 

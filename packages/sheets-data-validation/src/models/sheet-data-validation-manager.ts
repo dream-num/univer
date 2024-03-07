@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { CellValue, IDataValidationRule, IRange, ISheetDataValidationRule } from '@univerjs/core/types/interfaces/index.js';
+import type { CellValue, IRange, ISheetDataValidationRule } from '@univerjs/core/types/interfaces/index.js';
 import { DataValidationManager } from '@univerjs/data-validation/models/data-validation-manager.js';
 import type { Nullable } from '@univerjs/core/shared/index.js';
 import { ObjectMatrix } from '@univerjs/core/shared/index.js';

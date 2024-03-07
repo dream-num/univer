@@ -5,5 +5,5 @@
         "outDir": "lib/types"
     },
     "references": [{ "path": "./tsconfig.node.json" }],
-    "include": ["src", "../sheets-data-validation/src/views/ListDropdown.tsx"]
+    "include": ["src", "../sheets-data-validation/src/views/ListDropdown.tsx", "../sheets-data-validation/src/validators/custom-validator.ts"]
 }

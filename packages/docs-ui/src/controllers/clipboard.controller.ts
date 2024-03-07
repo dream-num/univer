@@ -51,18 +51,16 @@ export class DocClipboardController extends RxDisposable {
     }
 
     private _initLegacyPasteCommand(): void {
-        if (!this._clipboardInterfaceService.supportClipboard) {
-            this._textSelectionRenderManager?.onPaste$.pipe(takeUntil(this.dispose$)).subscribe((config) => {
-                if (!whenDocOrEditor(this._contextService)) {
-                    return;
-                }
+        this._textSelectionRenderManager?.onPaste$.pipe(takeUntil(this.dispose$)).subscribe((config) => {
+            if (!whenDocOrEditor(this._contextService)) {
+                return;
+            }
 
-                config!.event.preventDefault();
-                const clipboardEvent = config!.event as ClipboardEvent;
-                const htmlContent = clipboardEvent.clipboardData?.getData('text/html');
-                const textContent = clipboardEvent.clipboardData?.getData('text/plain');
-                this._docClipboardService.legacyPaste(htmlContent, textContent);
-            });
-        }
+            config!.event.preventDefault();
+            const clipboardEvent = config!.event as ClipboardEvent;
+            const htmlContent = clipboardEvent.clipboardData?.getData('text/html');
+            const textContent = clipboardEvent.clipboardData?.getData('text/plain');
+            this._docClipboardService.legacyPaste(htmlContent, textContent);
+        });
     }
 }

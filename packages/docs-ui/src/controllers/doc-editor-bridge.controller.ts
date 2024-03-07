@@ -15,7 +15,7 @@
  */
 
 import type { ICommandInfo, Nullable } from '@univerjs/core';
-import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { checkForSubstrings, Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
 import { IRenderManagerService, ITextSelectionRenderManager, ScrollBar } from '@univerjs/engine-render';
@@ -86,6 +86,8 @@ export class DocEditorBridgeController extends Disposable {
         if (editor == null || editor.render == null || skeleton == null || editorDataModel == null) {
             return;
         }
+
+        skeleton.calculate();
 
         const { marginTop = 0, marginBottom = 0, marginLeft = 0, marginRight = 0 } = editorDataModel.getSnapshot().documentStyle;
 
@@ -188,11 +190,19 @@ export class DocEditorBridgeController extends Disposable {
             })
         );
 
+        const focusExcepts = [
+            'univer-formula-search',
+            'univer-formula-help',
+            'formula-help-decorator',
+            'univer-formula-help-param',
+        ];
+
         this.disposeWithMe(
             fromEvent(window, 'mousedown').subscribe((event) => {
                 const target = event.target as HTMLElement;
-                const hasSearch = target.classList[0];
-                if (hasSearch?.indexOf('univer-formula-search') > -1 || hasSearch?.indexOf('univer-formula-help') > -1 || hasSearch?.indexOf('formula-help-decorator') || hasSearch?.indexOf('univer-formula-help-param')) {
+                const hasSearch = target.classList[0] || '';
+
+                if (checkForSubstrings(hasSearch, focusExcepts)) {
                     this._editorService.changeSpreadsheetFocusState(true);
                     event.stopPropagation();
                     return;

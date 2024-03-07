@@ -111,6 +111,7 @@ export function Dialog(props: IDialogProps) {
     const TitleIfDraggable = draggable
         ? (
             <div
+                className={styles.dialogTitleContent}
                 style={{
                     width: '100%',
                     cursor: 'pointer',
@@ -130,7 +131,7 @@ export function Dialog(props: IDialogProps) {
             </div>
         )
         : (
-            title
+            <div className={styles.dialogTitleContent}>title</div>
         );
 
     const modalRender = (modal: React.ReactNode) => {

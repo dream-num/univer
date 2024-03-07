@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
+export type LanguageValue = string | string[] | ILanguagePack | ILanguagePack[] | boolean;
+
 export interface ILanguagePack {
-    [key: string]: string | ILanguagePack | ILanguagePack[];
+    [key: string]: LanguageValue;
 }
 
 export interface ILocales {

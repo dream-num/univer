@@ -24,7 +24,7 @@ export class Minus extends BaseFunction {
         }
 
         if (variant2.isError()) {
-            return variant1;
+            return variant2;
         }
 
         return variant1.minus(variant2);

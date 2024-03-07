@@ -23,6 +23,7 @@ export { ColorPicker, type IColorPickerProps } from './components/color-picker';
 export { ConfigContext, ConfigProvider, type IConfigProviderProps } from './components/config-provider';
 export { Confirm, type IConfirmProps } from './components/confirm';
 export { Container, type IContainerProps } from './components/container';
+export { DatePicker, type IDatePickerProps } from './components/date-picker';
 export { Dialog, type IDialogProps } from './components/dialog';
 export { Dropdown, type IDropdownProps } from './components/dropdown';
 export { FormLayout, type IFormLayoutProps } from './components/form-layout';

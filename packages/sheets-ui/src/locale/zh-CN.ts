@@ -427,6 +427,10 @@ const locale = {
         paste: {
             exceedMaxCells: '粘贴区域超出最大单元格数',
         },
+        shortCutNotify: {
+            title: '请使用快捷键粘贴',
+            useShortCutInstead: '检测到 Excel 内容，请使用快捷键粘贴',
+        },
     },
     statusbar: {
         sum: '求和',

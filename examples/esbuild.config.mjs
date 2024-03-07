@@ -7,6 +7,7 @@ import cleanPlugin from 'esbuild-plugin-clean';
 import copyPlugin from 'esbuild-plugin-copy';
 import stylePlugin from 'esbuild-style-plugin';
 import minimist from 'minimist';
+import vue from 'esbuild-plugin-vue3';
 
 const nodeModules = path.resolve(process.cwd(), './node_modules');
 
@@ -60,6 +61,7 @@ const ctx = await esbuild[args.watch ? 'context' : 'build']({
                 },
             },
         }),
+        vue(),
     ],
     entryPoints: [
         // homepage
@@ -72,14 +74,18 @@ const ctx = await esbuild[args.watch ? 'context' : 'build']({
         // sheets-multi
         './src/sheets-multi/main.tsx',
 
+        // sheets-uniscript
+        './src/sheets-uniscript/main.ts',
+
         // docs
         './src/docs/main.ts',
+
+        // docs-uniscript
+        './src/docs-uniscript/main.ts',
 
         // slides
         './src/slides/main.ts',
 
-        // uniscript
-        './src/uniscript/main.ts',
     ],
     outdir: './local',
 

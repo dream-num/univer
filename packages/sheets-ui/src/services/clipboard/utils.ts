@@ -90,3 +90,12 @@ export const getRepeatRange = (sourceRange: IRange, targetRang: IRange, isStrict
     }
     return repeatList;
 };
+
+export async function clipboardItemIsFromExcel(html: string): Promise<boolean> {
+    if (html) {
+        const regex = /<td[^>]*class=".*?xl.*?"[^>]*>.*?<\/td>/;
+        return regex.test(html);
+    }
+
+    return false;
+}

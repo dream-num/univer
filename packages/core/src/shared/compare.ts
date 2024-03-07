@@ -46,3 +46,7 @@ export function isSameStyleTextRun(tr1: ITextRun, tr2: ITextRun) {
 
     return deepCompare(ts1, ts2);
 }
+
+export function checkForSubstrings(searchString: string, substrings: string[]): boolean {
+    return substrings.some((substring) => searchString.indexOf(substring) > -1);
+}

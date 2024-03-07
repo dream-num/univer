@@ -26,4 +26,4 @@ export {
     type SocketBodyType,
     WebSocketService,
 } from './services/web-socket/web-socket.service';
-export { type IRequestParams } from './services/http/http.service';
+export type { IRequestParams, IPostRequestParams } from './services/http/http.service';

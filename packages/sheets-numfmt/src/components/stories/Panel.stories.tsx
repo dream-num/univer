@@ -15,14 +15,16 @@
  */
 
 import type { Meta, StoryObj } from '@storybook/react';
-import { LocaleService, ThemeService } from '@univerjs/core';
+import { LocaleService, LocaleType, ThemeService } from '@univerjs/core';
+import type { Dependency } from '@wendellhu/redi';
 import { Injector } from '@wendellhu/redi';
-import { connectInjector } from '@wendellhu/redi/react-bindings';
-import React, { useMemo } from 'react';
+import { connectInjector, RediContext } from '@wendellhu/redi/react-bindings';
+import React, { useContext, useMemo, useState } from 'react';
 
-import { zhCN } from '../../locale';
+import { enUS, zhCN } from '../../locale';
 import type { ISheetNumfmtPanelProps } from '../index';
 import { SheetNumfmtPanel } from '../index';
+import { UserHabitController } from '../../controllers/user-habit.controller';
 
 const Index = (props: any) => {
     const inject = useMemo(() => new Injector([[LocaleService], [ThemeService]]), []);
@@ -37,7 +39,6 @@ const Index = (props: any) => {
 };
 const meta: Meta = {
     title: 'numfmt',
-    component: Index,
     parameters: {
         layout: 'centered',
     },
@@ -46,10 +47,33 @@ const meta: Meta = {
 export default meta;
 
 export const Test: StoryObj<ISheetNumfmtPanelProps> = {
-    args: {
-        value: { defaultPattern: '', defaultValue: 123123, row: 2, col: 3 },
-        onChange(pattern) {
-            // console.log(pattern);
-        },
+
+    render() {
+        const { injector } = useContext(RediContext);
+
+        const [inject] = useState(() => {
+            const deps: Dependency[] = [
+                [UserHabitController],
+            ];
+
+            injector?.get(LocaleService).load({
+                [LocaleType.EN_US]: enUS,
+                [LocaleType.ZH_CN]: zhCN,
+            });
+
+            deps.forEach((dependency) => injector?.add(dependency));
+
+            return injector;
+        });
+
+        return (
+            <RediContext.Provider value={{ injector: inject }}>
+                <SheetNumfmtPanel
+                    value={{ defaultPattern: '', defaultValue: 123123, row: 2, col: 3 }}
+                    onChange={(pattern) => {
+                    }}
+                />
+            </RediContext.Provider>
+        );
     },
 };

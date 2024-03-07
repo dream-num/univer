@@ -25,10 +25,12 @@ import { copyContentCache, extractId, genId } from './copy-content-cache';
 import { HtmlToUDMService } from './html-to-udm/converter';
 import PastePluginLark from './html-to-udm/paste-plugins/plugin-lark';
 import PastePluginWord from './html-to-udm/paste-plugins/plugin-word';
+import PastePluginUniver from './html-to-udm/paste-plugins/plugin-univer';
 import { UDMToHtmlService } from './udm-to-html/convertor';
 
 HtmlToUDMService.use(PastePluginWord);
 HtmlToUDMService.use(PastePluginLark);
+HtmlToUDMService.use(PastePluginUniver);
 
 function generateBody(text: string): IDocumentBody {
     // Convert all \n to \r, because we use \r to indicate paragraph break.
@@ -104,6 +106,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
 
     async paste(items: ClipboardItem[]): Promise<boolean> {
         const body = await this._generateBodyFromClipboardItems(items);
+
         return this._paste(body);
     }
 

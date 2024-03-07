@@ -31,7 +31,7 @@ export class Compare extends BaseFunction {
         }
 
         if (variant2.isError()) {
-            return variant1;
+            return variant2;
         }
 
         return variant1.compare(variant2, this._compareType);

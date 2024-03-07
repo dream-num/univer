@@ -65,10 +65,15 @@ export function CustomLabel(props: ICustomLabelProps): JSX.Element | null {
 
     if (icon) {
         const Icon = componentManager.get(realIcon ?? '');
-        Icon &&
+
+        if (Icon) {
             nodes.push(
-                <Icon key={index++} extend={{ colorChannel1: isValid ? realValue : 'rgb(var(--primary-color))' }} />
+                <Icon
+                    key={index++}
+                    extend={{ colorChannel1: isValid ? realValue : 'rgb(var(--primary-color))' }}
+                />
             );
+        }
     }
     if (label) {
         const isStringLabel = typeof label === 'string';

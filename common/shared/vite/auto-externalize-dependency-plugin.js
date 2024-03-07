@@ -15,6 +15,7 @@ exports.autoExternalizeDependency = function autoExternalizeDependency() {
         'react-dom': 'ReactDOM',
         rxjs: 'rxjs',
         'rxjs/operators': 'rxjs.operators',
+        vue: 'Vue',
     };
 
     return {

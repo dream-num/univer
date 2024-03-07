@@ -18,7 +18,7 @@ import { debounce, type IDocumentData, LocaleService, type Nullable } from '@uni
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useRef, useState } from 'react';
 import { Popup } from '@univerjs/design';
-import type { IEditorCanvasStyle } from '../../services/editor/editor.service';
+import type { Editor, IEditorCanvasStyle } from '../../services/editor/editor.service';
 import { IEditorService } from '../../services/editor/editor.service';
 import styles from './index.module.less';
 
@@ -36,10 +36,11 @@ const excludeProps = new Set([
     'onlyInputRange',
     'value',
     'onlyInputContent',
+    'isSingleChoice',
     'openForSheetUnitId',
     'openForSheetSubUnitId',
     'onChange',
-    'onFocus',
+    'onActive',
     'onValid',
 ]);
 
@@ -66,12 +67,14 @@ export interface ITextEditorProps {
     onlyInputRange?: boolean; // Only input ref range
     onlyInputContent?: boolean; // Only plain content can be entered, turning off formula and range input highlighting.
 
+    isSingleChoice?: boolean; // Whether to restrict to only selecting a single region/area/district.
+
     openForSheetUnitId?: Nullable<string>; //  Configuring which workbook the selector defaults to opening in determines whether the ref includes a [unitId] prefix.
     openForSheetSubUnitId?: Nullable<string>; // Configuring the default worksheet where the selector opens determines whether the ref includes a [unitId]sheet1 prefix.
 
     onChange?: (value: Nullable<string>) => void; // Callback for changes in the selector value.
 
-    onFocus?: (state: boolean) => void; // Callback for editor focus.
+    onActive?: (state: boolean) => void; // Callback for editor active.
 
     onValid?: (state: boolean) => void; // Editor input value validation, currently effective only under onlyRange and onlyFormula conditions.
 
@@ -81,7 +84,7 @@ export interface ITextEditorProps {
  * The component to render toolbar item label and menu item label.
  * @param props
  */
-export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onChange' | 'onFocus'>): JSX.Element | null {
+export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onChange' | 'onActive'>): JSX.Element | null {
     const {
         id,
         snapshot,
@@ -96,12 +99,14 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
         onlyInputRange = false,
         onlyInputContent = false,
 
+        isSingleChoice = false,
+
         openForSheetUnitId,
         openForSheetSubUnitId,
 
         onChange,
 
-        onFocus,
+        onActive,
 
         onValid,
     } = props;
@@ -144,6 +149,7 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
             canvasStyle,
             isSingle,
             isReadonly,
+            isSingleChoice,
             onlyInputFormula,
             onlyInputRange,
             onlyInputContent,
@@ -152,14 +158,37 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
         },
         editor);
 
+        const activeChange = debounce((state: boolean) => {
+            setActive(state);
+            onActive && onActive(state);
+        }, 30);
+
         const focusStyleSubscription = editorService.focusStyle$.subscribe((unitId: Nullable<string>) => {
             let state = false;
             if (unitId === id) {
                 state = true;
             }
-            setActive(state);
-            onFocus && onFocus(state);
+            activeChange(state);
         });
+
+        const valueChange = debounce((editor: Readonly<Editor>) => {
+            const unitId = editor.editorUnitId;
+            const isLegality = editorService.checkValueLegality(unitId);
+            setValidationVisible(!isLegality);
+            const rect = editor.getBoundingClientRect();
+
+            setValidationOffset([rect.left, rect.top - 16]);
+
+            if (editor.onlyInputFormula()) {
+                setValidationContent(localeService.t('textEditor.formulaError'));
+            } else {
+                setValidationContent(localeService.t('textEditor.rangeError'));
+            }
+
+            onValid && onValid(isLegality);
+
+            onChange && onChange(editorService.getValue(id));
+        }, 30);
 
         const valueChangeSubscription = editorService.valueChange$.subscribe((editor) => {
             if (!editor.onlyInputFormula() && !editor.onlyInputRange()) {
@@ -170,24 +199,7 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
                 return;
             }
 
-            debounce(() => {
-                const unitId = editor.editorUnitId;
-                const isLegality = editorService.checkValueLegality(unitId);
-                setValidationVisible(!isLegality);
-                const rect = editor.getBoundingClientRect();
-
-                setValidationOffset([rect.left, rect.top - 16]);
-
-                if (editor.onlyInputFormula()) {
-                    setValidationContent(localeService.t('textEditor.formulaError'));
-                } else {
-                    setValidationContent(localeService.t('textEditor.rangeError'));
-                }
-
-                onValid && onValid(isLegality);
-
-                onChange && onChange(editorService.getValue(id));
-            }, 10)();
+            valueChange(editor);
         });
 
         // Clean up on unmount

@@ -40,7 +40,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
             },
             {
-                st: 5,
+                st: 6,
                 ed: 9,
                 ts: {
                     fs: 16,
@@ -53,7 +53,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
             },
             {
                 st: 9,
-                ed: 13,
+                ed: 12,
                 ts: {
                     fs: 16,
                     ff: 'Microsoft YaHei',
@@ -64,7 +64,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
             },
             {
-                st: 13,
+                st: 14,
                 ed: 3057,
                 ts: {
                     fs: 12,

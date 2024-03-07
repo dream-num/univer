@@ -22,7 +22,6 @@ export { useObservable } from './components/hooks/observable';
 export {
     CopyShortcutItem,
     CutShortcutItem,
-    PasteShortcutItem,
     RedoShortcutItem,
     SharedController,
     UndoShortcutItem,
@@ -87,3 +86,4 @@ export { SetEditorResizeOperation } from './commands/operations/editor/set-edito
 export { RangeSelector } from './components/range-selector/RangeSelector';
 
 export { IRangeSelectorService } from './services/range-selector/range-selector.service';
+export { DesktopLocalStorageService } from './services/local-storage/local-storage.service';

@@ -25,7 +25,7 @@ export class Divided extends BaseFunction {
         }
 
         if (variant2.isError()) {
-            return variant1;
+            return variant2;
         }
 
         if (!variant2.isArray() && variant2.getValue() === 0) {

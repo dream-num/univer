@@ -14,27 +14,31 @@
  * limitations under the License.
  */
 
-import type { IRange, Nullable } from '@univerjs/core';
+import type { IUnitRange, Nullable } from '@univerjs/core';
 import { Disposable } from '@univerjs/core';
 import type { IDisposable } from '@wendellhu/redi';
 import { createIdentifier } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
 import { Subject } from 'rxjs';
 
+export interface IRangeSelectorRange extends IUnitRange {
+    sheetName: string;
+}
+
 export interface IRangeSelectorService {
-    selectionChange$: Observable<IRange[]>;
+    selectionChange$: Observable<IRangeSelectorRange[]>;
 
     setCurrentSelectorId(id: Nullable<string>): void;
 
     getCurrentSelectorId(): Nullable<string>;
 
-    selectionChange(ranges: IRange[]): void;
+    selectionChange(ranges: IRangeSelectorRange[]): void;
 }
 
 export class RangeSelectorService extends Disposable implements IRangeSelectorService, IDisposable {
     private _currentSelectorId: Nullable<string>;
 
-    private readonly _selectionChange$ = new Subject<IRange[]>();
+    private readonly _selectionChange$ = new Subject<IRangeSelectorRange[]>();
 
     readonly selectionChange$ = this._selectionChange$.asObservable();
 
@@ -46,7 +50,7 @@ export class RangeSelectorService extends Disposable implements IRangeSelectorSe
         return this._currentSelectorId;
     }
 
-    selectionChange(range: IRange[]) {
+    selectionChange(range: IRangeSelectorRange[]) {
         if (!this._currentSelectorId) {
             return;
         }

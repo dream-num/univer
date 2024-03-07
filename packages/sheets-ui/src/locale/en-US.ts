@@ -429,6 +429,10 @@ const locale: typeof zhCN = {
         paste: {
             exceedMaxCells: 'The number of cells pasted exceeds the maximum number of cells',
         },
+        shortCutNotify: {
+            title: 'Kindly paste using keyboard shortcuts.',
+            useShortCutInstead: 'Detected Excel content. Use keyboard shortcut to paste.',
+        },
     },
     statusbar: {
         sum: 'Sum',

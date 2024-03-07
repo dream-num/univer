@@ -17,7 +17,7 @@
 import { Subject } from 'rxjs';
 
 import { Disposable, toDisposable } from '../../shared/lifecycle';
-import type { ILanguagePack, ILocales } from '../../shared/locale';
+import type { ILanguagePack, ILocales, LanguageValue } from '../../shared/locale';
 import { Tools } from '../../shared/tools';
 import { LocaleType } from '../../types/enum/locale-type';
 
@@ -73,7 +73,7 @@ export class LocaleService extends Disposable {
     t = (key: string, ...args: string[]): string => {
         if (!this._locales) throw new Error('Locale not initialized');
 
-        function resolveKeyPath(obj: ILanguagePack | ILanguagePack[], keys: string[]): string | ILanguagePack | ILanguagePack[] | null {
+        function resolveKeyPath(obj: ILanguagePack, keys: string[]): LanguageValue | null {
             const currentKey = keys.shift();
 
             if (currentKey && obj && currentKey in obj) {

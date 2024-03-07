@@ -41,7 +41,10 @@ import {
     DeleteCellShiftUp,
     DeleteColumn,
     DeleteRow,
+    DirectExportSingle,
     DownBorder,
+    ExportSingle,
+    FolderSingle,
     FontColor,
     FontSizeIncreaseSingle,
     FontSizeReduceSingleSingle,
@@ -102,13 +105,29 @@ import {
     VerticalTextSingle,
 } from '@univerjs/icons';
 import type { IDisposable } from '@wendellhu/redi';
+import type { defineComponent } from 'vue';
 
-export interface ICustomComponent {
-    name: string;
-    props?: any;
+import type React from 'react';
+import { cloneElement, createElement, useEffect, useRef } from 'react';
+
+type ComponentFramework = 'vue3' | 'react';
+
+interface IComponentOptions {
+    framework?: ComponentFramework;
 }
 
-export type ComponentList = Map<string, React.ForwardRefExoticComponent<any>>;
+export interface IVue3Component {
+    framework: 'vue3';
+    component: ReturnType<typeof defineComponent>;
+}
+export interface IReactComponent {
+    framework: 'react';
+    component: React.ForwardRefExoticComponent<any>;
+};
+
+export type ComponentType = React.ForwardRefExoticComponent<any> | ReturnType<typeof defineComponent>;
+
+export type ComponentList = Map<string, IVue3Component | IReactComponent>;
 
 export class ComponentManager {
     private _components: ComponentList = new Map();
@@ -199,6 +218,9 @@ export class ComponentManager {
             LeftTridiagonalSingle,
             SlashSingle,
             RightDoubleDiagonalSingle,
+            DirectExportSingle,
+            FolderSingle,
+            ExportSingle,
         };
 
         for (const k in iconList) {
@@ -206,20 +228,69 @@ export class ComponentManager {
         }
     }
 
-    register(name: string, component: any): IDisposable {
+    register(name: string, component: ComponentType, options?: IComponentOptions): IDisposable {
+        const { framework = 'react' } = options || {};
+
         if (this._components.has(name)) {
             console.warn(`Component ${name} already exists.`);
         }
 
-        this._components.set(name, component);
+        this._components.set(name, {
+            framework,
+            component,
+        });
+
         return toDisposable(() => this._components.delete(name));
     }
 
     get(name: string) {
-        return this._components.get(name);
+        if (!name) return;
+
+        const value = this._components.get(name);
+
+        if (value?.framework === 'react') {
+            return value.component;
+        } else if (value?.framework === 'vue3') {
+            // TODO: slot support
+            return (props: any) => cloneElement(
+                createElement(VueComponentWrapper, {
+                    component: value.component,
+                    props: {
+                        ...props,
+                    },
+                })
+            );
+        } else {
+            // throw new Error(`ComponentManager: Component ${name} not found.`);
+        }
     }
 
     delete(name: string) {
         this._components.delete(name);
     }
+}
+
+async function renderVue3Component(VueComponent: ReturnType<typeof defineComponent>, element: HTMLElement, args: Record<string, any>) {
+    const { h, render } = await import('vue');
+
+    const vnode = h(VueComponent, args);
+
+    const container = document.createElement('div');
+
+    document.body.appendChild(container);
+
+    render(vnode, element);
+}
+
+export function VueComponentWrapper(options: { component: ReturnType<typeof defineComponent>; props: Record<string, any> }) {
+    const domRef = useRef(null);
+    const { component, props } = options;
+
+    useEffect(() => {
+        if (!domRef.current) return;
+
+        renderVue3Component(component, domRef.current, props);
+    }, [props]);
+
+    return createElement('div', { ref: domRef });
 }

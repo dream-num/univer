@@ -335,6 +335,9 @@ export class ZenEditorController extends RxDisposable {
                         const paragraphs = docBody?.paragraphs;
                         const textRuns = docBody?.textRuns;
 
+                        /**
+                         * Fix the issue where content cannot be saved in the doc under Zen mode.
+                         */
                         this._editorBridgeService.changeEditorDirty(true);
 
                         if (dataStream == null || paragraphs == null) {

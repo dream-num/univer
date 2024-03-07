@@ -15,9 +15,9 @@
  */
 
 import type { IDocumentBody, ITextRun } from '@univerjs/core';
-import { BaselineOffset, BooleanNumber } from '@univerjs/core';
+import { BaselineOffset, BooleanNumber, Tools } from '@univerjs/core';
 
-function covertTextRunToHtml(dataStream: string, textRun: ITextRun): string {
+export function covertTextRunToHtml(dataStream: string, textRun: ITextRun): string {
     const { st: start, ed, ts = {} } = textRun;
     const { ff, fs, it, bl, ul, st, ol, bg, cl, va } = ts;
 
@@ -63,7 +63,7 @@ function covertTextRunToHtml(dataStream: string, textRun: ITextRun): string {
 
     // font size
     if (fs) {
-        style.push(`font-size: ${fs}px`);
+        style.push(`font-size: ${fs}pt`);
     }
 
     // overline
@@ -76,65 +76,94 @@ function covertTextRunToHtml(dataStream: string, textRun: ITextRun): string {
         style.push(`background: ${bg.rgb}`);
     }
 
-    return style.length ? `<span style="${style.join(';')}">${html}</span>` : html;
+    return style.length ? `<span style="${style.join('; ')};">${html}</span>` : html;
 }
 
-function translateDataStreamToHtml(body: IDocumentBody, withParagraphInfo: boolean = true): string {
-    const { dataStream, textRuns = [], paragraphs = [] } = body;
-    let cursorIndex = 0;
+export function getBodySliceHtml(body: IDocumentBody, startIndex: number, endIndex: number) {
+    const { dataStream, textRuns = [] } = body;
+    let cursorIndex = startIndex;
     const spanList: string[] = [];
-    const paragraphList: string[] = [];
 
     for (const textRun of textRuns) {
         const { st, ed } = textRun;
-        if (st !== cursorIndex) {
-            spanList.push(dataStream.slice(cursorIndex, st));
-        }
+        if (Tools.hasIntersectionBetweenTwoRanges(startIndex, endIndex, st, ed)) {
+            if (st > cursorIndex) {
+                spanList.push(dataStream.slice(cursorIndex, st));
 
-        spanList.push(covertTextRunToHtml(dataStream, textRun));
-
-        cursorIndex = ed;
-
-        if (withParagraphInfo) {
-            for (const paragraph of paragraphs) {
-                const { startIndex, paragraphStyle = {} } = paragraph;
-
-                if (startIndex >= st && startIndex <= ed) {
-                    const { spaceAbove, spaceBelow } = paragraphStyle;
-                    const style: string[] = [];
-
-                    if (spaceAbove != null) {
-                        if (typeof spaceAbove === 'number') {
-                            style.push(`margin-top: ${spaceAbove}px`);
-                        } else {
-                            style.push(`margin-top: ${spaceAbove.v}px`);
-                        }
-                    }
-
-                    if (spaceBelow != null) {
-                        if (typeof spaceBelow === 'number') {
-                            style.push(`margin-bottom: ${spaceBelow}px`);
-                        } else {
-                            style.push(`margin-bottom: ${spaceBelow.v}px`);
-                        }
-                    }
-
-                    paragraphList.push(
-                        `<p className="UniverNormal" ${
-                            style.length ? `style="${style.join(';')}"` : ''
-                        }>${spanList.join('')}</p>`
-                    );
-                    spanList.length = 0;
-                }
+                spanList.push(covertTextRunToHtml(dataStream, {
+                    ...textRun,
+                    ed: Math.min(ed, endIndex),
+                }));
+            } else {
+                spanList.push(covertTextRunToHtml(dataStream, {
+                    ...textRun,
+                    st: cursorIndex,
+                    ed: Math.min(ed, endIndex),
+                }));
             }
         }
+
+        cursorIndex = Math.max(startIndex, Math.min(ed, endIndex));
     }
 
-    if (cursorIndex < dataStream.length) {
-        spanList.push(dataStream.slice(cursorIndex, dataStream.length));
+    if (cursorIndex !== endIndex) {
+        spanList.push(dataStream.slice(cursorIndex, endIndex));
     }
 
-    return paragraphList.join('') + spanList.join('');
+    return spanList.join('');
+}
+
+export function convertBodyToHtml(body: IDocumentBody, withParagraphInfo: boolean = true): string {
+    if (withParagraphInfo && body.paragraphs?.length) {
+        const { dataStream, paragraphs = [] } = body;
+        let result = '';
+        let cursorIndex = -1;
+        for (const paragraph of paragraphs) {
+            const { startIndex, paragraphStyle = {} } = paragraph;
+            const { spaceAbove, spaceBelow, lineSpacing } = paragraphStyle;
+            const style = [];
+
+            if (spaceAbove != null) {
+                if (typeof spaceAbove === 'number') {
+                    style.push(`margin-top: ${spaceAbove}px`);
+                } else {
+                    style.push(`margin-top: ${spaceAbove.v}px`);
+                }
+            }
+
+            if (spaceBelow != null) {
+                if (typeof spaceBelow === 'number') {
+                    style.push(`margin-bottom: ${spaceBelow}px`);
+                } else {
+                    style.push(`margin-bottom: ${spaceBelow.v}px`);
+                }
+            }
+
+            if (lineSpacing != null) {
+                style.push(`line-height: ${lineSpacing}`);
+            }
+
+            if (startIndex > cursorIndex + 1) {
+                result += `<p class="UniverNormal" ${
+                    style.length ? `style="${style.join('; ')};"` : ''
+                }>${getBodySliceHtml(body, cursorIndex + 1, startIndex)}</p>`;
+            } else {
+                result += `<p class="UniverNormal" ${
+                    style.length ? `style="${style.join('; ')};"` : ''
+                }></p>`;
+            }
+
+            cursorIndex = startIndex;
+        }
+
+        if (cursorIndex !== dataStream.length) {
+            result += getBodySliceHtml(body, cursorIndex, dataStream.length);
+        }
+
+        return result;
+    } else {
+        return getBodySliceHtml(body, 0, body.dataStream.length);
+    }
 }
 
 export class UDMToHtmlService {
@@ -147,14 +176,14 @@ export class UDMToHtmlService {
         // otherwise, the paragraph information will be discarded and a paragraph
         // will be generated for each body
         if (bodyList.length === 1) {
-            return translateDataStreamToHtml(bodyList[0]);
+            return convertBodyToHtml(bodyList[0]);
         }
 
         let html = '';
 
         for (const body of bodyList) {
             html += '<p className="UniverNormal">';
-            html += translateDataStreamToHtml(body, false);
+            html += convertBodyToHtml(body, false);
             html += '</p>';
         }
 

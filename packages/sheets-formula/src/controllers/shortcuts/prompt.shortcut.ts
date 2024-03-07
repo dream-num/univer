@@ -22,6 +22,7 @@ import { KeyCode, MetaKeys } from '@univerjs/ui';
 import { SelectEditorFormulaOperation } from '../../commands/operations/editor-formula.operation';
 import { ReferenceAbsoluteOperation } from '../../commands/operations/reference-absolute.operation';
 import { META_KEY_CTRL_AND_SHIFT } from '../../common/prompt';
+import { whenEditorStandalone } from '../utils/utils';
 
 export const PROMPT_SELECTION_KEYCODE_ARROW_LIST = [
     KeyCode.ARROW_DOWN,
@@ -104,3 +105,20 @@ export const ChangeRefToAbsoluteShortcut: IShortcutItem = {
     binding: KeyCode.F4,
     preconditions: (contextService) => whenFormulaEditorActivated(contextService),
 };
+
+export function singleEditorPromptSelectionShortcutItem() {
+    const shortcutList: IShortcutItem[] = [];
+    for (const keycode of [KeyCode.ENTER, KeyCode.TAB, KeyCode.ARROW_DOWN, KeyCode.ARROW_UP]) {
+        shortcutList.push({
+            id: SelectEditorFormulaOperation.id,
+            binding: keycode,
+            preconditions: (contextService) => whenEditorStandalone(contextService),
+            staticParameters: {
+                eventType: DeviceInputEventType.Keyboard,
+                keycode,
+                isSingleEditor: true,
+            },
+        });
+    }
+    return shortcutList;
+}

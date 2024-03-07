@@ -17,7 +17,7 @@
 import React, { useContext } from 'react';
 import { RangePicker } from 'rc-picker';
 import generateConfig from 'rc-picker/lib/generate/dayjs';
-import { CalendarSingle, GuideSingle, NextSingle } from '@univerjs/icons';
+import { CalendarSingle, GuideSingle } from '@univerjs/icons';
 import type { Dayjs } from 'dayjs';
 import type { NoUndefinedRangeValueType } from 'rc-picker/lib/PickerInput/RangePicker';
 import { ConfigContext } from '../config-provider/ConfigProvider';

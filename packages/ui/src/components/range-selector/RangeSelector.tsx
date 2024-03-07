@@ -34,13 +34,13 @@ export interface IRangeSelectorProps {
     onActive?: (state: boolean) => void; // Callback for editor active.
     onValid?: (state: boolean) => void; // input value validation
     isSingleChoice?: boolean; // Whether to restrict to only selecting a single region/area/district.
-
+    isReadonly?: boolean; // Set the selector to read-only state.
     openForSheetUnitId?: Nullable<string>; //  Configuring which workbook the selector defaults to opening in determines whether the ref includes a [unitId] prefix.
     openForSheetSubUnitId?: Nullable<string>; // Configuring the default worksheet where the selector opens determines whether the ref includes a [unitId]sheet1 prefix.
 }
 
 export function RangeSelector(props: IRangeSelectorProps) {
-    const { onChange, id, value = '', onActive, onValid, isSingleChoice = false, openForSheetUnitId, openForSheetSubUnitId } = props;
+    const { onChange, id, value = '', onActive, onValid, isSingleChoice = false, openForSheetUnitId, openForSheetSubUnitId, isReadonly = false } = props;
 
     const [rangeDataList, setRangeDataList] = useState<string[]>(['']);
 
@@ -94,6 +94,14 @@ export function RangeSelector(props: IRangeSelectorProps) {
 
     const currentInputIndexRef = useRef<number>(-1);
 
+    const openForSheetUnitIdRef = useRef<Nullable<string>>(openForSheetUnitId);
+
+    const openForSheetSubUnitIdRef = useRef<Nullable<string>>(openForSheetSubUnitId);
+
+    const isSingleChoiceRef = useRef<Nullable<boolean>>(isSingleChoice);
+
+    const isReadonlyRef = useRef<Nullable<boolean>>(isReadonly);
+
     useEffect(() => {
         const selector = selectorRef.current;
 
@@ -129,15 +137,15 @@ export function RangeSelector(props: IRangeSelectorProps) {
 
             let rangeRef: string = '';
 
-            if (lastRange.unitId === openForSheetUnitId && lastRange.sheetId === openForSheetSubUnitId) {
+            if (lastRange.unitId === openForSheetUnitIdRef.current && lastRange.sheetId === openForSheetSubUnitIdRef.current) {
                 rangeRef = serializeRange(lastRange.range);
-            } else if (lastRange.unitId === openForSheetUnitId) {
+            } else if (lastRange.unitId === openForSheetUnitIdRef.current) {
                 rangeRef = serializeRangeWithSheet(lastRange.sheetName, lastRange.range);
             } else {
                 rangeRef = serializeRangeWithSpreadsheet(lastRange.unitId, lastRange.sheetName, lastRange.range);
             }
 
-            if (addItemCount >= 1 && !isSingleChoice) {
+            if (addItemCount >= 1 && !isSingleChoiceRef.current) {
                 addNewItem(rangeRef);
                 setCurrentInputIndex(-1);
             } else {
@@ -157,6 +165,13 @@ export function RangeSelector(props: IRangeSelectorProps) {
     }, []);
 
     useEffect(() => {
+        openForSheetUnitIdRef.current = openForSheetUnitId;
+        openForSheetSubUnitIdRef.current = openForSheetSubUnitId;
+        isSingleChoiceRef.current = isSingleChoice;
+        isReadonlyRef.current = isReadonly;
+    }, [openForSheetUnitId, openForSheetSubUnitId, isSingleChoice, isReadonly]);
+
+    useEffect(() => {
         currentInputIndexRef.current = currentInputIndex;
     }, [currentInputIndex]);
 
@@ -166,6 +181,10 @@ export function RangeSelector(props: IRangeSelectorProps) {
     }
 
     function handleOpenModal() {
+        if (isReadonlyRef.current === true) {
+            return;
+        }
+
         if (valid) {
             setRangeDataList(rangeValue.split(','));
         } else {
@@ -190,6 +209,11 @@ export function RangeSelector(props: IRangeSelectorProps) {
     }
 
     function handleConform() {
+        if (isReadonlyRef.current === true) {
+            handleCloseModal();
+            return;
+        }
+
         let result = '';
         const list = rangeDataList.filter((rangeRef) => {
             return isReferenceString(rangeRef.trim());
@@ -241,7 +265,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
     return (
         <>
             <div className={sClassName} ref={selectorRef}>
-                <TextEditor isSingleChoice={isSingleChoice} openForSheetUnitId={openForSheetUnitId} openForSheetSubUnitId={openForSheetSubUnitId} onValid={onEditorValid} onActive={onEditorActive} onChange={handleTextValueChange} id={id} onlyInputRange={true} canvasStyle={{ fontSize: 10 }} className={styles.rangeSelectorEditor} />
+                <TextEditor isReadonly={isReadonly} isSingleChoice={isSingleChoice} openForSheetUnitId={openForSheetUnitId} openForSheetSubUnitId={openForSheetSubUnitId} onValid={onEditorValid} onActive={onEditorActive} onChange={handleTextValueChange} id={id} onlyInputRange={true} canvasStyle={{ fontSize: 10 }} className={styles.rangeSelectorEditor} />
                 <Tooltip title={localeService.t('rangeSelector.buttonTooltip')} placement="bottom">
                     <button className={styles.rangeSelectorIcon} onClick={handleOpenModal}>
                         <SelectRangeSingle />

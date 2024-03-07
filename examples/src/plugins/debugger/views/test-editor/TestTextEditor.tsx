@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 
 import { RangeSelector, TextEditor } from '@univerjs/ui';
 import { IUniverInstanceService } from '@univerjs/core';
@@ -48,23 +48,27 @@ export const TestEditorContainer = () => {
 
     const sheetId = workbook.getActiveSheet().getSheetId();
 
+    const [readonly, setReadonly] = useState(false);
+
     return (
         <div
             style={containerStyle}
         >
-            <TextEditor id="test-editor-1" openForSheetUnitId={unitId} openForSheetSubUnitId={sheetId} isReadonly={true} style={editorStyle} canvasStyle={{ fontSize: 10 }} value="I found one cent on the roadside." />
+            <TextEditor id="test-editor-1" openForSheetUnitId={unitId} openForSheetSubUnitId={sheetId} isReadonly={readonly} style={editorStyle} canvasStyle={{ fontSize: 10 }} value="I found one cent on the roadside." />
             <br></br>
-            <TextEditor id="test-editor-2" openForSheetUnitId={unitId} openForSheetSubUnitId={sheetId} onlyInputFormula={true} style={editorStyle} canvasStyle={{ fontSize: 10 }} />
+            <TextEditor id="test-editor-2" openForSheetUnitId={unitId} openForSheetSubUnitId={sheetId} isReadonly={readonly} onlyInputFormula={true} style={editorStyle} canvasStyle={{ fontSize: 10 }} />
             <br></br>
-            <TextEditor id="test-editor-3" openForSheetUnitId={unitId} openForSheetSubUnitId={sheetId} onlyInputRange={true} style={editorStyle} canvasStyle={{ fontSize: 10 }} />
+            <TextEditor id="test-editor-3" openForSheetUnitId={unitId} openForSheetSubUnitId={sheetId} isReadonly={readonly} onlyInputRange={true} style={editorStyle} canvasStyle={{ fontSize: 10 }} />
             <br></br>
-            <TextEditor id="test-editor-4" openForSheetUnitId={unitId} openForSheetSubUnitId={sheetId} isSingle={false} onlyInputContent={true} style={{ ...editorStyle, height: '140px' }} canvasStyle={{ fontSize: 14 }} />
+            <TextEditor id="test-editor-4" openForSheetUnitId={unitId} openForSheetSubUnitId={sheetId} isReadonly={readonly} isSingle={false} onlyInputContent={true} style={{ ...editorStyle, height: '140px' }} canvasStyle={{ fontSize: 14 }} />
             <br></br>
-            <RangeSelector id="test-rangeSelector-1" openForSheetUnitId={unitId} openForSheetSubUnitId={sheetId} />
+            <RangeSelector id="test-rangeSelector-1" openForSheetUnitId={unitId} isReadonly={readonly} openForSheetSubUnitId={sheetId} />
             <br></br>
-            <RangeSelector id="test-rangeSelector-2" isSingleChoice={true} openForSheetUnitId={unitId} openForSheetSubUnitId={sheetId} />
+            <RangeSelector id="test-rangeSelector-2" isSingleChoice={true} isReadonly={readonly} openForSheetUnitId={unitId} openForSheetSubUnitId={sheetId} />
             <br></br>
             <Input allowClear />
+            <br></br>
+            <button onClick={() => setReadonly(!readonly)}>{readonly === true ? 'enable' : 'disable'}</button>
         </div>
     );
 };

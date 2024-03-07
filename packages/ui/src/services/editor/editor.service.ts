@@ -176,7 +176,7 @@ export class Editor {
         return this._param.documentDataModel.getBody();
     }
 
-    update(param: IEditorStateParam) {
+    update(param: Partial<IEditorSetParam>) {
         this._param = {
             ...this._param,
             ...param,
@@ -234,8 +234,6 @@ export class Editor {
 
 export interface IEditorService {
     getEditor(id?: string): Readonly<Nullable<Editor>>;
-
-    setState(param: IEditorStateParam, id: string): void;
 
     register(config: IEditorConfigParam, container: HTMLDivElement): IDisposable;
 
@@ -550,15 +548,6 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         editor.verticalAlign();
 
         this._resize$.next(unitId);
-    }
-
-    setState(param: IEditorStateParam, id: string) {
-        const editor = this._editors.get(id);
-        if (editor) {
-            editor.update(param);
-        }
-
-        this._refresh(param);
     }
 
     isVisible(id: string) {

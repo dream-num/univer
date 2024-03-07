@@ -7,6 +7,7 @@ import cleanPlugin from 'esbuild-plugin-clean';
 import copyPlugin from 'esbuild-plugin-copy';
 import stylePlugin from 'esbuild-style-plugin';
 import minimist from 'minimist';
+import vue from 'esbuild-plugin-vue3';
 
 const nodeModules = path.resolve(process.cwd(), './node_modules');
 
@@ -60,6 +61,7 @@ const ctx = await esbuild[args.watch ? 'context' : 'build']({
                 },
             },
         }),
+        vue(),
     ],
     entryPoints: [
         // homepage

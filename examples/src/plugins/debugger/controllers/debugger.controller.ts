@@ -30,6 +30,10 @@ import { SidebarOperation } from '../commands/operations/sidebar.operation';
 import { ThemeOperation } from '../commands/operations/theme.operation';
 import { TestEditorContainer } from '../views/test-editor/TestTextEditor';
 import { TEST_EDITOR_CONTAINER_COMPONENT } from '../views/test-editor/component-name';
+
+// @ts-ignore
+import VueI18nIcon from '../components/VueI18nIcon.vue';
+
 import {
     ConfirmMenuItemFactory,
     DialogMenuItemFactory,
@@ -91,5 +95,8 @@ export class DebuggerController extends Disposable {
     private _initCustomComponents(): void {
         const componentManager = this._componentManager;
         this.disposeWithMe(componentManager.register(TEST_EDITOR_CONTAINER_COMPONENT, TestEditorContainer));
+        this.disposeWithMe(componentManager.register('VueI18nIcon', VueI18nIcon, {
+            framework: 'vue3',
+        }));
     }
 }

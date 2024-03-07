@@ -33,7 +33,7 @@ import { ThemeOperation } from '../commands/operations/theme.operation';
 export function LocaleMenuItemFactory(accessor: IAccessor): IMenuSelectorItem {
     return {
         id: LocaleOperation.id,
-        title: 'i18n',
+        icon: 'VueI18nIcon',
         tooltip: 'i18n',
         type: MenuItemType.SELECTOR,
         positions: [MenuPosition.TOOLBAR_OTHERS],

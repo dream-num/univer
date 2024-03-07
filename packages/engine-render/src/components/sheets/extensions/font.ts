@@ -152,7 +152,7 @@ export class Font extends SheetExtension {
                     if (overflowRectangle) {
                         const { startColumn, startRow, endColumn, endRow } = overflowRectangle;
                         if (startColumn === endColumn && startColumn === columnIndex) {
-                            ctx.rect(
+                            ctx.rectByPrecision(
                                 startX + 1 / scale,
                                 startY + 1 / scale,
                                 cellWidth - 2 / scale,
@@ -202,7 +202,7 @@ export class Font extends SheetExtension {
                             }
                         }
                     } else {
-                        ctx.rect(startX + 1 / scale, startY + 1 / scale, cellWidth - 2 / scale, cellHeight - 2 / scale);
+                        ctx.rectByPrecision(startX + 1 / scale, startY + 1 / scale, cellWidth - 2 / scale, cellHeight - 2 / scale);
                         ctx.clip();
                         ctx.clearRectForTexture(
                             startX + 1 / scale,
@@ -292,7 +292,7 @@ export class Font extends SheetExtension {
         const startX = columnWidthAccumulation[startColumn - 1] || 0;
         const endX = columnWidthAccumulation[endColumn] || columnWidthAccumulation[columnWidthAccumulation.length - 1];
 
-        ctx.rect(startX, startY, endX - startX, endY - startY);
+        ctx.rectByPrecision(startX, startY, endX - startX, endY - startY);
         ctx.clip();
         ctx.clearRectForTexture(startX, startY, endX - startX, endY - startY);
     }

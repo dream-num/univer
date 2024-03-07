@@ -84,8 +84,8 @@ export function drawLineByBorderType(ctx: UniverRenderingContext, type: BORDER_T
 
     // ctx.clearRect(drawStartX - 1, drawStartY - 1, drawEndX - drawStartX + 2, drawEndY - drawStartY + 2);
     ctx.beginPath();
-    ctx.moveTo(drawStartX, drawStartY);
-    ctx.lineTo(drawEndX, drawEndY);
+    ctx.moveToByPrecision(drawStartX, drawStartY);
+    ctx.lineToByPrecision(drawEndX, drawEndY);
     ctx.stroke();
 }
 
@@ -129,8 +129,8 @@ export function drawDiagonalLineByBorderType(ctx: UniverRenderingContext, type: 
 
     // ctx.clearRect(drawStartX - 1, drawStartY - 1, drawEndX - drawStartX + 2, drawEndY - drawStartY + 2);
     ctx.beginPath();
-    ctx.moveTo(drawStartX, drawStartY);
-    ctx.lineTo(drawEndX, drawEndY);
+    ctx.moveToByPrecision(drawStartX, drawStartY);
+    ctx.lineToByPrecision(drawEndX, drawEndY);
     ctx.stroke();
 }
 

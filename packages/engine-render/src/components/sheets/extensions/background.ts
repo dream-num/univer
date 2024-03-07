@@ -112,10 +112,10 @@ export class Background extends SheetExtension {
                         endX = mergeInfo.endX;
                     }
 
-                    ctx.moveTo(startX, startY);
-                    ctx.lineTo(startX, endY);
-                    ctx.lineTo(endX, endY);
-                    ctx.lineTo(endX, startY);
+                    ctx.moveToByPrecision(startX, startY);
+                    ctx.lineToByPrecision(startX, endY);
+                    ctx.lineToByPrecision(endX, endY);
+                    ctx.lineToByPrecision(endX, startY);
                 });
                 ctx.closePath();
                 ctx.fill();

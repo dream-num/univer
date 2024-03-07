@@ -1649,13 +1649,18 @@ export class PromptController extends Disposable {
                     this._changeRefString();
                 } else if (updateCommandList.includes(command.id)) {
                     const params = command.params as ISelectEditorFormulaOperationParam;
-                    const { keycode, metaKey } = params;
+                    const { keycode, metaKey, isSingleEditor = false } = params;
 
                     if (keycode === KeyCode.ENTER) {
                         if (this._formulaPromptService.isSearching()) {
                             this._formulaPromptService.accept(true);
                             return;
                         }
+
+                        if (isSingleEditor === true) {
+                            return;
+                        }
+
                         this._editorBridgeService.changeVisible({
                             visible: false,
                             eventType: DeviceInputEventType.Keyboard,
@@ -1671,6 +1676,11 @@ export class PromptController extends Disposable {
                             this._formulaPromptService.accept(true);
                             return;
                         }
+
+                        if (isSingleEditor === true) {
+                            return;
+                        }
+
                         this._editorBridgeService.changeVisible({
                             visible: false,
                             eventType: DeviceInputEventType.Keyboard,
@@ -1691,6 +1701,10 @@ export class PromptController extends Disposable {
                             this._formulaPromptService.navigate({ direction: Direction.UP });
                             return;
                         }
+                    }
+
+                    if (isSingleEditor === true) {
+                        return;
                     }
 
                     if (this._arrowMoveActionState === ArrowMoveAction.moveCursor) {

@@ -38,6 +38,7 @@ import {
     promptSelectionShortcutItemCtrl,
     promptSelectionShortcutItemCtrlAndShift,
     promptSelectionShortcutItemShift,
+    singleEditorPromptSelectionShortcutItem,
 } from './shortcuts/prompt.shortcut';
 
 @OnLifecycle(LifecycleStages.Ready, FormulaUIController)
@@ -89,6 +90,7 @@ export class FormulaUIController extends Disposable {
             ...promptSelectionShortcutItemShift(),
             ...promptSelectionShortcutItemCtrl(),
             ...promptSelectionShortcutItemCtrlAndShift(),
+            ...singleEditorPromptSelectionShortcutItem(),
             ChangeRefToAbsoluteShortcut,
         ].forEach((item) => {
             this.disposeWithMe(this._shortcutService.registerShortcut(item));

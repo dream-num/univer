@@ -107,7 +107,8 @@ import {
 import type { IDisposable } from '@wendellhu/redi';
 import type { defineComponent } from 'vue';
 
-import React, { createElement, useEffect, useRef } from 'react';
+import type React from 'react';
+import { cloneElement, createElement, useEffect, useRef } from 'react';
 
 type ComponentFramework = 'vue3' | 'react';
 
@@ -251,8 +252,8 @@ export class ComponentManager {
             return value.component;
         } else if (value?.framework === 'vue3') {
             // TODO: slot support
-            return (props: any) => React.cloneElement(
-                React.createElement(VueComponentWrapper, {
+            return (props: any) => cloneElement(
+                createElement(VueComponentWrapper, {
                     component: value.component,
                     props: {
                         ...props,
@@ -291,5 +292,5 @@ export function VueComponentWrapper(options: { component: ReturnType<typeof defi
         renderVue3Component(component, domRef.current, props);
     }, [props]);
 
-    return React.createElement('div', { ref: domRef });
+    return createElement('div', { ref: domRef });
 }

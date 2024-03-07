@@ -31,23 +31,45 @@ const UNIQUE_KEY = 'DefaultFontExtension';
 const EXTENSION_Z_INDEX = 30;
 
 export class Font extends SheetExtension {
+    private _fontOffset = new ObjectMatrix<number>();
+
+    private _fontHidden = new ObjectMatrix<boolean>();
+
     override uKey = UNIQUE_KEY;
 
     override Z_INDEX = EXTENSION_Z_INDEX;
-
-    changeFontColor: ObjectMatrix<IColorStyle> = new ObjectMatrix();
-
-    get spreadsheet() {
-        return this.parent as Spreadsheet;
-    }
 
     getDocuments() {
         const parent = this.parent as SheetComponent;
         return parent?.getDocuments();
     }
 
-    setChangeFontColor(r: number, c: number, color: IColorStyle) {
-        this.changeFontColor.setValue(r, c, color);
+    clearFontOffset() {
+        this._fontOffset.reset();
+    }
+
+    setFontOffset(r: number, c: number, offset: number) {
+        this._fontOffset.setValue(r, c, offset);
+    }
+
+    getFontOffset(r: number, c: number) {
+        return this._fontOffset.getValue(r, c);
+    }
+
+    clearFontHidden() {
+        this._fontHidden.reset();
+    }
+
+    setFontHidden(r: number, c: number, state: boolean) {
+        this._fontHidden.setValue(r, c, state);
+    }
+
+    getFontHidden(r: number, c: number) {
+        return this._fontHidden.getValue(r, c);
+    }
+
+    get spreadsheet() {
+        return this.parent as Spreadsheet;
     }
 
     override draw(
@@ -92,6 +114,10 @@ export class Font extends SheetExtension {
                     let { startY, endY, startX, endX } = cellInfo;
                     const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
 
+                    if (this.getFontHidden(rowIndex, columnIndex) === true) {
+                        return true;
+                    }
+
                     if (isMerged) {
                         return true;
                     }
@@ -124,7 +150,7 @@ export class Font extends SheetExtension {
                     const cellHeight = endY - startY;
 
                     const overflowRectangle = overflowCache.getValue(rowIndex, columnIndex);
-                    const { horizontalAlign } = docsConfig;
+                    const { horizontalAlign, angle } = docsConfig;
 
                     ctx.save();
                     ctx.beginPath();
@@ -189,6 +215,11 @@ export class Font extends SheetExtension {
                             cellWidth - 2 / scale,
                             cellHeight - 2 / scale
                         );
+                    }
+
+                    if (angle === 0 && this.getFontOffset(rowIndex, columnIndex) != null) {
+                        const offset = this.getFontOffset(rowIndex, columnIndex);
+                        startX = startX + offset;
                     }
 
                     ctx.translate(startX, startY);

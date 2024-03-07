@@ -210,7 +210,24 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem>, ref: 
                         </div>
                     </Dropdown>
                 )
-                : <></>;
+                : (
+                    <div className={`${styles.toolbarItemSelect} ${disabled ? styles.toolbarItemSelectDisabled : ''}`}>
+                        <CustomLabel
+                            icon={iconToDisplay}
+                            title={title!}
+                            value={value}
+                            label={label}
+                            onChange={handleChange}
+                        />
+                        <div
+                            className={`${styles.toolbarItemSelectArrow} ${
+                                disabled ? styles.toolbarItemSelectArrowDisabled : ''
+                            }`}
+                        >
+                            <MoreDownSingle />
+                        </div>
+                    </div>
+                );
     }
 
     function renderButtonType() {

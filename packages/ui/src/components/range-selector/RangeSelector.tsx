@@ -31,7 +31,8 @@ export interface IRangeSelectorProps {
     id: string;
     value?: string; // default values.
     onChange?: (ranges: IUnitRange[]) => void; // Callback for changes in the selector value.
-
+    onActive?: (state: boolean) => void; // Callback for editor active.
+    onValid?: (state: boolean) => void; // input value validation
     isSingleChoice?: boolean; // Whether to restrict to only selecting a single region/area/district.
 
     openForSheetUnitId?: Nullable<string>; //  Configuring which workbook the selector defaults to opening in determines whether the ref includes a [unitId] prefix.
@@ -39,7 +40,7 @@ export interface IRangeSelectorProps {
 }
 
 export function RangeSelector(props: IRangeSelectorProps) {
-    const { onChange, id, value = '', isSingleChoice = false, openForSheetUnitId, openForSheetSubUnitId } = props;
+    const { onChange, id, value = '', onActive, onValid, isSingleChoice = false, openForSheetUnitId, openForSheetSubUnitId } = props;
 
     const [rangeDataList, setRangeDataList] = useState<string[]>(['']);
 
@@ -87,7 +88,11 @@ export function RangeSelector(props: IRangeSelectorProps) {
 
     const [rangeValue, setRangeValue] = useState(value);
 
+    const [currentInputIndex, setCurrentInputIndex] = useState<number>(-1);
+
     const selectorRef = useRef<HTMLDivElement>(null);
+
+    const currentInputIndexRef = useRef<number>(-1);
 
     useEffect(() => {
         const selector = selectorRef.current;
@@ -117,10 +122,16 @@ export function RangeSelector(props: IRangeSelectorProps) {
             }
 
             const lastRange = ranges[ranges.length - 1];
+            const rangeRef = serializeRange(lastRange);
             if (addItemCount >= 1 && !isSingleChoice) {
-                addNewItem(serializeRange(lastRange));
+                addNewItem(rangeRef);
+                setCurrentInputIndex(-1);
             } else {
-                changeLastItem(serializeRange(lastRange));
+                if (currentInputIndexRef.current === -1) {
+                    changeLastItem(rangeRef);
+                } else {
+                    changeItem(currentInputIndexRef.current, rangeRef);
+                }
             }
         });
 
@@ -130,6 +141,10 @@ export function RangeSelector(props: IRangeSelectorProps) {
             resizeObserver.unobserve(selector);
         };
     }, []);
+
+    useEffect(() => {
+        currentInputIndexRef.current = currentInputIndex;
+    }, [currentInputIndex]);
 
     function handleCloseModal() {
         setSelectorVisible(false);
@@ -148,12 +163,14 @@ export function RangeSelector(props: IRangeSelectorProps) {
         setSelectorVisible(true);
     }
 
-    function onFocus(state: boolean) {
+    function onEditorActive(state: boolean) {
         setActive(state);
+        onActive && onActive(state);
     }
 
-    function onValid(state: boolean) {
+    function onEditorValid(state: boolean) {
         setValid(state);
+        onValid && onValid(state);
     }
 
     function handleConform() {
@@ -177,6 +194,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
 
     function handleAddRange() {
         addNewItem('');
+        setCurrentInputIndex(-1);
     }
 
     function getSheetIdByName(name: string) {
@@ -207,7 +225,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
     return (
         <>
             <div className={sClassName} ref={selectorRef}>
-                <TextEditor isSingleChoice={isSingleChoice} openForSheetUnitId={openForSheetUnitId} openForSheetSubUnitId={openForSheetSubUnitId} onValid={onValid} onFocus={onFocus} onChange={handleTextValueChange} id={id} onlyInputRange={true} canvasStyle={{ fontSize: 10 }} className={styles.rangeSelectorEditor} />
+                <TextEditor isSingleChoice={isSingleChoice} openForSheetUnitId={openForSheetUnitId} openForSheetSubUnitId={openForSheetSubUnitId} onValid={onEditorValid} onActive={onEditorActive} onChange={handleTextValueChange} id={id} onlyInputRange={true} canvasStyle={{ fontSize: 10 }} className={styles.rangeSelectorEditor} />
                 <Tooltip title={localeService.t('rangeSelector.buttonTooltip')} placement="bottom">
                     <button className={styles.rangeSelectorIcon} onClick={handleOpenModal}>
                         <SelectRangeSingle />
@@ -233,7 +251,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
                     {rangeDataList.map((item, index) => (
                         <div key={index} className={styles.rangeSelectorModalContainer}>
                             <div style={{ display: rangeDataList.length === 1 ? '220px' : '200px' }} className={styles.rangeSelectorModalContainerInput}>
-                                <Input size="small" value={item} onChange={(value) => changeItem(index, value)} />
+                                <Input key={`input${index}`} onClick={() => setCurrentInputIndex(index)} size="small" value={item} onChange={(value) => changeItem(index, value)} />
                             </div>
                             <div style={{ display: rangeDataList.length === 1 ? 'none' : 'inline-block' }} className={styles.rangeSelectorModalContainerButton}>
                                 <DeleteSingle onClick={() => removeItem(index)} />

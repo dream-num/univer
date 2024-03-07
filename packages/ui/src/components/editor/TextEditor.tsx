@@ -40,7 +40,7 @@ const excludeProps = new Set([
     'openForSheetUnitId',
     'openForSheetSubUnitId',
     'onChange',
-    'onFocus',
+    'onActive',
     'onValid',
 ]);
 
@@ -74,7 +74,7 @@ export interface ITextEditorProps {
 
     onChange?: (value: Nullable<string>) => void; // Callback for changes in the selector value.
 
-    onFocus?: (state: boolean) => void; // Callback for editor focus.
+    onActive?: (state: boolean) => void; // Callback for editor active.
 
     onValid?: (state: boolean) => void; // Editor input value validation, currently effective only under onlyRange and onlyFormula conditions.
 
@@ -84,7 +84,7 @@ export interface ITextEditorProps {
  * The component to render toolbar item label and menu item label.
  * @param props
  */
-export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onChange' | 'onFocus'>): JSX.Element | null {
+export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onChange' | 'onActive'>): JSX.Element | null {
     const {
         id,
         snapshot,
@@ -106,7 +106,7 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
 
         onChange,
 
-        onFocus,
+        onActive,
 
         onValid,
     } = props;
@@ -158,13 +158,17 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
         },
         editor);
 
+        const activeChange = debounce((state: boolean) => {
+            setActive(state);
+            onActive && onActive(state);
+        }, 10);
+
         const focusStyleSubscription = editorService.focusStyle$.subscribe((unitId: Nullable<string>) => {
             let state = false;
             if (unitId === id) {
                 state = true;
             }
-            setActive(state);
-            onFocus && onFocus(state);
+            activeChange(state);
         });
 
         const valueChange = debounce((editor: Readonly<Editor>) => {

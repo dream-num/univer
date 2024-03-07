@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IColorStyle, IRange, IScale } from '@univerjs/core';
+import type { IRange, IScale } from '@univerjs/core';
 import { HorizontalAlign, ObjectMatrix, WrapStrategy } from '@univerjs/core';
 
 import type { UniverRenderingContext } from '../../../context';
@@ -23,7 +23,6 @@ import { SpreadsheetExtensionRegistry } from '../../extension';
 import type { IFontCacheItem } from '../interfaces';
 import type { SheetComponent } from '../sheet-component';
 import { getDocsSkeletonPageSize, type SpreadsheetSkeleton } from '../sheet-skeleton';
-import type { Spreadsheet } from '../spreadsheet';
 import { SheetExtension } from './sheet-extension';
 
 const UNIQUE_KEY = 'DefaultFontExtension';
@@ -66,10 +65,6 @@ export class Font extends SheetExtension {
 
     getFontHidden(r: number, c: number) {
         return this._fontHidden.getValue(r, c);
-    }
-
-    get spreadsheet() {
-        return this.parent as Spreadsheet;
     }
 
     override draw(

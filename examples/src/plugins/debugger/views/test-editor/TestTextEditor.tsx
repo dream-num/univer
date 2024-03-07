@@ -64,7 +64,7 @@ export const TestEditorContainer = () => {
             <br></br>
             <RangeSelector id="test-rangeSelector-1" openForSheetUnitId={unitId} isReadonly={readonly} openForSheetSubUnitId={sheetId} />
             <br></br>
-            <RangeSelector id="test-rangeSelector-2" isSingleChoice={true} isReadonly={readonly} openForSheetUnitId={unitId} openForSheetSubUnitId={sheetId} />
+            <RangeSelector value="I am a wolf man" id="test-rangeSelector-2" isSingleChoice={true} isReadonly={readonly} openForSheetUnitId={unitId} openForSheetSubUnitId={sheetId} />
             <br></br>
             <Input allowClear />
             <br></br>

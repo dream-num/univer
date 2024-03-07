@@ -603,6 +603,10 @@ export class LexerTreeBuilder extends Disposable {
                     if (char === operatorToken.PLUS && this._deletePlusForPreNode(children[i - 1])) {
                         continue;
                     }
+                    // =-(2)+*9
+                    if (char !== operatorToken.PLUS && char !== operatorToken.MINUS && this._deletePlusForPreNode(children[i - 1])) {
+                        continue;
+                    }
                     while (symbolStack.length > 0) {
                         const lastSymbol = symbolStack[symbolStack.length - 1]?.trim();
                         if (!lastSymbol || lastSymbol === matchToken.OPEN_BRACKET) {
@@ -1303,12 +1307,6 @@ export class LexerTreeBuilder extends Disposable {
                 } else if (this._segment.length > 0 && trimSegment === '') {
                     trimSegment = this._segment;
                 } else {
-                     // =*9 is error and =-(+2)+2 pass
-                    const prevString = this._findPreviousToken(formulaStringArray, cur - 1) || '';
-                    if (this._negativeCondition(prevString) && prevString !== operatorToken.MINUS && currentString !== operatorToken.MINUS && currentString !== operatorToken.PLUS) {
-                        return ErrorType.VALUE;
-                    }
-
                     this._pushNodeToChildren(this._segment);
                     trimSegment = '';
                 }

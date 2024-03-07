@@ -273,9 +273,9 @@ export class FormulaPromptService implements IFormulaPromptService, IDisposable 
 
             if (strIndex <= nodeIndex) {
                 /**
-                 * =((A1 ，fix https://github.com/dream-num/univer/issues/1387
+                 * =((|A1 and =|**，fix https://github.com/dream-num/univer/issues/1387
                  */
-                if (typeof firstNode === 'string') {
+                if (typeof firstNode === 'string' && strIndex !== 0) {
                     return i + 1;
                 }
 

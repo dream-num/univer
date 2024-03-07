@@ -177,7 +177,7 @@ describe('lexer nodeMaker test', () => {
 
         it('plus token error', () => {
             const node = lexerTreeBuilder.treeBuilder('=-(2)+*9') as LexerNode;
-            expect(node).toStrictEqual('#VALUE!');
+            expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":["0","2","-","9","+"]}');
         });
     });
 

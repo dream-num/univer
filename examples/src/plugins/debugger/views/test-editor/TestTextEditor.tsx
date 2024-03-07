@@ -48,13 +48,13 @@ export const TestEditorContainer = () => {
 
     const sheetId = workbook.getActiveSheet().getSheetId();
 
-    function onActive(state: boolean) {
-        console.warn('active:', state);
-    }
-
-    function onValid(state: boolean) {
-        console.warn('valid:', state);
-    }
+    // function onActive(state: boolean) {
+    //     console.warn('active:', state);
+    // }
+    // onActive={onActive} onValid={onValid}
+    // function onValid(state: boolean) {
+    //     console.warn('valid:', state);
+    // }
 
     return (
         <div
@@ -70,7 +70,7 @@ export const TestEditorContainer = () => {
             <br></br>
             <RangeSelector id="test-rangeSelector-1" openForSheetUnitId={unitId} openForSheetSubUnitId={sheetId} />
             <br></br>
-            <RangeSelector id="test-rangeSelector-2" onActive={onActive} onValid={onValid} isSingleChoice={true} openForSheetUnitId={unitId} openForSheetSubUnitId={sheetId} />
+            <RangeSelector id="test-rangeSelector-2" isSingleChoice={true} openForSheetUnitId={unitId} openForSheetSubUnitId={sheetId} />
             <br></br>
             <Input allowClear />
         </div>

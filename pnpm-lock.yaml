@@ -274,9 +274,6 @@ importers:
       '@univerjs/shared':
         specifier: workspace:*
         version: link:../common/shared
-      '@vue/compiler-sfc':
-        specifier: ^3.4.21
-        version: 3.4.21
       esbuild:
         specifier: ^0.20.1
         version: 0.20.1

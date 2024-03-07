@@ -11,9 +11,9 @@ const progress = [
 
 ];
 const star = [
-    ['starEmpty', '@univerjs/icons-svg/binary/start-page/star-empty.svg', { black: '#FFBD37', '#E5E5E5': '#FFBD37' }],
-    ['starIncomplete', '@univerjs/icons-svg/binary/start-page/star-incomplete.svg', { black: '#FFBD37', '#E5E5E5': '#FFBD37' }],
-    ['starFull', '@univerjs/icons-svg/binary/start-page/star-full.svg', { black: '#FFBD37', '#E5E5E5': '#FFBD37' }],
+    ['starEmpty', '@univerjs/icons-svg/binary/start-page/star-empty.svg', { black: '#FFBD37', '#E5E5E5': '#fff' }],
+    ['starIncomplete', '@univerjs/icons-svg/binary/start-page/star-incomplete.svg', { black: '#FFBD37', '#E5E5E5': '#fff' }],
+    ['starFull', '@univerjs/icons-svg/binary/start-page/star-full.svg', { black: '#FFBD37', '#E5E5E5': '#fff' }],
 ];
 const feeling = [
     ['guffaw', '@univerjs/icons-svg/binary/start-page/guffaw.svg', { black: '#8F5F00', '#E5E5E5': '#FFBD37' }],
@@ -47,7 +47,7 @@ const arrow = [
 const shape = [
     ['cross', '@univerjs/icons-svg/single/start-page/cross-single.svg', { black: '#FFBD37' }],
     ['up', '@univerjs/icons-svg/single/start-page/up-single.svg', { black: '#59D01E' }],
-    ['down', '@univerjs/icons-svg/single/global-functionality/dropdown-single.svg', { black: '#FE4B4B' }],
+    ['down', '@univerjs/icons-svg/single/start-page/down-single.svg', { black: '#FE4B4B' }],
 ];
 
 async function replaceFillAndConvertToBase64(filePath, replaceMap) {

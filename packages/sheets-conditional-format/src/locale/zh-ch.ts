@@ -25,6 +25,22 @@ export default {
                 clearWorkSheetRules: '清除整个工作表的规则',
 
             },
+            iconSet: {
+                rule: '规则',
+                icon: '图标',
+                type: '类型',
+                value: '值',
+                reverseIconOrder: '反转图标次序',
+                and: '且',
+                when: '当值',
+                onlyShowIcon: '仅显示图标',
+            },
+            symbol: {
+                greaterThan: '>',
+                greaterThanOrEqual: '>=',
+                lessThan: '<',
+                lessThanOrEqual: '<=',
+            },
             panel: {
                 createRule: '+ 添加新的规则',
                 range: '应用范围',
@@ -125,7 +141,7 @@ export default {
                 average: '平均值',
             },
             valueType: {
-                num: '数字',
+                num: '数值',
                 min: '最小值',
                 max: '最大值',
                 percent: '百分比',

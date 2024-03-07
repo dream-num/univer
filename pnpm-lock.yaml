@@ -26,9 +26,8 @@ importers:
         version: 2.8.0(@vue/compiler-sfc@3.4.21)(eslint-plugin-format@0.1.0)(eslint-plugin-react-hooks@4.6.0)(eslint-plugin-react-refresh@0.4.5)(eslint-plugin-react@7.34.0)(eslint@8.57.0)(typescript@5.4.2)
 =======
         specifier: ^2.6.4
-<<<<<<< HEAD
-<<<<<<< HEAD
         version: 2.6.4(@vue/compiler-sfc@3.4.21)(eslint-plugin-format@0.1.0)(eslint-plugin-react-hooks@4.6.0)(eslint-plugin-react-refresh@0.4.5)(eslint-plugin-react@7.33.2)(eslint@8.57.0)(typescript@5.3.3)
+<<<<<<< HEAD
 =======
 <<<<<<< HEAD
         version: 2.6.4(@vue/compiler-sfc@3.4.19)(eslint-plugin-format@0.1.0)(eslint-plugin-react-hooks@4.6.0)(eslint-plugin-react-refresh@0.4.5)(eslint-plugin-react@7.33.2)(eslint@8.57.0)(typescript@5.3.3)
@@ -52,9 +51,20 @@ importers:
         version: 2.6.4(@vue/compiler-sfc@3.4.15)(eslint-plugin-format@0.1.0)(eslint-plugin-react-hooks@4.6.0)(eslint-plugin-react-refresh@0.4.5)(eslint-plugin-react@7.33.2)(eslint@8.57.0)(typescript@5.3.3)
 >>>>>>> 44acb57f1 (fix(cf): support batch creation and deletion formulas are supported)
 >>>>>>> 8a5392e3f (fix(cf): support batch creation and deletion formulas are supported)
+<<<<<<< HEAD
 >>>>>>> 7303d9b88 (fix(cf): support batch creation and deletion formulas are supported)
+<<<<<<< HEAD
 >>>>>>> 862d6230e (fix(cf): support batch creation and deletion formulas are supported)
+<<<<<<< HEAD
 >>>>>>> 7a80c19e0 (fix(cf): support batch creation and deletion formulas are supported)
+=======
+=======
+=======
+=======
+>>>>>>> 7c96e1e70 (feat(cf): support icon set panel)
+>>>>>>> 888b73535 (feat(cf): support icon set panel)
+>>>>>>> 13f3722d3 (feat(cf): support icon set panel)
+>>>>>>> b99151464 (feat(cf): support icon set panel)
       '@commitlint/cli':
         specifier: ^19.2.1
         version: 19.2.1(@types/node@20.11.30)(typescript@5.4.3)
@@ -1440,6 +1450,12 @@ importers:
 
   packages/sheets-conditional-format:
     dependencies:
+      '@types/lodash.get':
+        specifier: ^4.4.9
+        version: 4.4.9
+      '@types/lodash.set':
+        specifier: ^4.3.9
+        version: 4.3.9
       '@types/react-grid-layout':
         specifier: ^1.3.5
         version: 1.3.5
@@ -1479,6 +1495,12 @@ importers:
       dayjs:
         specifier: ^1.11.10
         version: 1.11.10
+      lodash.get:
+        specifier: ^4.4.2
+        version: 4.4.2
+      lodash.set:
+        specifier: ^4.3.2
+        version: 4.3.2
       react:
         specifier: ^18.2.0
         version: 18.2.0
@@ -2833,11 +2855,10 @@ importers:
 =======
 >>>>>>> 8a5392e3f (fix(cf): support batch creation and deletion formulas are supported)
         version: 1.3.1(@types/node@20.11.24)(less@4.2.0)
-<<<<<<< HEAD
-<<<<<<< HEAD
       vue:
         specifier: ^3.4.21
         version: 3.4.21(typescript@5.3.3)
+<<<<<<< HEAD
 =======
 =======
         version: 1.3.1(@types/node@20.11.19)(less@4.2.0)
@@ -2907,7 +2928,12 @@ importers:
 =======
 >>>>>>> 44acb57f1 (fix(cf): support batch creation and deletion formulas are supported)
 >>>>>>> 8a5392e3f (fix(cf): support batch creation and deletion formulas are supported)
+<<<<<<< HEAD
 >>>>>>> 7a80c19e0 (fix(cf): support batch creation and deletion formulas are supported)
+=======
+=======
+>>>>>>> 7c96e1e70 (feat(cf): support icon set panel)
+>>>>>>> b99151464 (feat(cf): support icon set panel)
 
   packages/uniscript:
     dependencies:
@@ -3081,23 +3107,30 @@ packages:
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
   /@antfu/eslint-config@2.11.0(@vue/compiler-sfc@3.4.21)(eslint-plugin-format@0.1.0)(eslint-plugin-react-hooks@4.6.0)(eslint-plugin-react-refresh@0.4.6)(eslint-plugin-react@7.34.1)(eslint@8.57.0)(typescript@5.4.3):
     resolution: {integrity: sha512-9xeY3FIGtnOVlVKn5HraLrA+7sMrFFJkk5yLZPV7QGTyu45x1GtoPs2j+z+tHsyPEblEnPmfcVn/KbiA1N8NLw==}
 =======
 =======
 >>>>>>> 7a80c19e0 (fix(cf): support batch creation and deletion formulas are supported)
+=======
+>>>>>>> b99151464 (feat(cf): support icon set panel)
 <<<<<<< HEAD
   /@antfu/eslint-config@2.8.3(@vue/compiler-sfc@3.4.21)(eslint-plugin-format@0.1.0)(eslint-plugin-react-hooks@4.6.0)(eslint-plugin-react-refresh@0.4.6)(eslint-plugin-react@7.34.1)(eslint@8.57.0)(typescript@5.4.2):
     resolution: {integrity: sha512-M3l7KwDrtAaF90km8D0G0bhkEDl2/V4yh/Qi08uiFHoMAEzbqwF73HRIJxJgL1YwRcyUnJy7yEUkA04cI1GFEQ==}
 =======
 =======
 >>>>>>> 862d6230e (fix(cf): support batch creation and deletion formulas are supported)
+=======
+>>>>>>> 13f3722d3 (feat(cf): support icon set panel)
 <<<<<<< HEAD
   /@antfu/eslint-config@2.8.2(@vue/compiler-sfc@3.4.21)(eslint-plugin-format@0.1.0)(eslint-plugin-react-hooks@4.6.0)(eslint-plugin-react-refresh@0.4.6)(eslint-plugin-react@7.34.0)(eslint@8.57.0)(typescript@5.4.2):
     resolution: {integrity: sha512-lmB7C0DE1dMwp9b+kRWCF/EP3Wc18DUeT+STuX9OskOherX3P/eQ5PxmOslBVZalD9/mbft0s257mQL+LxJ37A==}
 =======
 =======
 >>>>>>> 7303d9b88 (fix(cf): support batch creation and deletion formulas are supported)
+=======
+>>>>>>> 888b73535 (feat(cf): support icon set panel)
 <<<<<<< HEAD
   /@antfu/eslint-config@2.8.0(@vue/compiler-sfc@3.4.21)(eslint-plugin-format@0.1.0)(eslint-plugin-react-hooks@4.6.0)(eslint-plugin-react-refresh@0.4.5)(eslint-plugin-react@7.34.0)(eslint@8.57.0)(typescript@5.4.2):
     resolution: {integrity: sha512-5qdNKqJ6qWev17ulCikrYs6/AvLFKaOOdUAfuKPwpv0XFwzJWMnjOqoVpoExpMr9G5iIKjzU168gO30Jab/uNA==}
@@ -3105,17 +3138,9 @@ packages:
 =======
 >>>>>>> 8a5392e3f (fix(cf): support batch creation and deletion formulas are supported)
 <<<<<<< HEAD
+=======
+>>>>>>> 7c96e1e70 (feat(cf): support icon set panel)
   /@antfu/eslint-config@2.6.4(@vue/compiler-sfc@3.4.21)(eslint-plugin-format@0.1.0)(eslint-plugin-react-hooks@4.6.0)(eslint-plugin-react-refresh@0.4.5)(eslint-plugin-react@7.33.2)(eslint@8.57.0)(typescript@5.3.3):
-=======
-<<<<<<< HEAD
-  /@antfu/eslint-config@2.6.4(@vue/compiler-sfc@3.4.19)(eslint-plugin-format@0.1.0)(eslint-plugin-react-hooks@4.6.0)(eslint-plugin-react-refresh@0.4.5)(eslint-plugin-react@7.33.2)(eslint@8.57.0)(typescript@5.3.3):
-=======
-  /@antfu/eslint-config@2.6.4(@vue/compiler-sfc@3.4.15)(eslint-plugin-format@0.1.0)(eslint-plugin-react-hooks@4.6.0)(eslint-plugin-react-refresh@0.4.5)(eslint-plugin-react@7.33.2)(eslint@8.56.0)(typescript@5.3.3):
->>>>>>> 7e3c5a4ce (feat(cf): add package config)
->>>>>>> 494030bf7 (feat(cf): add package config)
-=======
-  /@antfu/eslint-config@2.6.4(@vue/compiler-sfc@3.4.15)(eslint-plugin-format@0.1.0)(eslint-plugin-react-hooks@4.6.0)(eslint-plugin-react-refresh@0.4.5)(eslint-plugin-react@7.33.2)(eslint@8.57.0)(typescript@5.3.3):
->>>>>>> 44acb57f1 (fix(cf): support batch creation and deletion formulas are supported)
     resolution: {integrity: sha512-dMD/QC5KWS1OltdpKLhfZM7W7y7zils85opk8d4lyNr7yn0OFjZs7eMYtcC6DrrN2kQ1JrFvBM7uB0QdWn5PUQ==}
 >>>>>>> bf8b8fab3 (feat(cf): add package config)
 >>>>>>> 8f18559e2 (feat(cf): add package config)
@@ -3278,9 +3303,8 @@ packages:
 >>>>>>> 8a5392e3f (fix(cf): support batch creation and deletion formulas are supported)
 >>>>>>> 7303d9b88 (fix(cf): support batch creation and deletion formulas are supported)
       eslint-plugin-yml: 1.12.2(eslint@8.57.0)
-<<<<<<< HEAD
-<<<<<<< HEAD
       eslint-processor-vue-blocks: 0.1.1(@vue/compiler-sfc@3.4.21)(eslint@8.57.0)
+<<<<<<< HEAD
 <<<<<<< HEAD
       globals: 14.0.0
 =======
@@ -3318,6 +3342,8 @@ packages:
 =======
       eslint-processor-vue-blocks: 0.1.1(@vue/compiler-sfc@3.4.15)(eslint@8.57.0)
 >>>>>>> 44acb57f1 (fix(cf): support batch creation and deletion formulas are supported)
+=======
+>>>>>>> 7c96e1e70 (feat(cf): support icon set panel)
       globals: 13.24.0
 >>>>>>> bf8b8fab3 (feat(cf): add package config)
 >>>>>>> 5ba508aa9 (feat(cf): add package config)
@@ -4678,6 +4704,7 @@ packages:
     engines: {node: '>=6.9.0'}
     dependencies:
       regenerator-runtime: 0.14.0
+    dev: false
 
   /@babel/runtime@7.23.9:
     resolution: {integrity: sha512-0CX6F+BI2s9dkUqr08KFrAIZgNFj75rdBU/DjCyYLIaV/quFjkk6T+EJ2LkZHyZTbEV4L5p97mNkUsHl2wLFAw==}
@@ -6158,6 +6185,7 @@ packages:
     dependencies:
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
       '@types/mdx': 2.0.11
 <<<<<<< HEAD
       '@types/react': 18.2.72
@@ -6197,9 +6225,22 @@ packages:
       '@types/react': 18.2.61
 >>>>>>> 44acb57f1 (fix(cf): support batch creation and deletion formulas are supported)
 >>>>>>> 41db36db3 (fix(cf): support batch creation and deletion formulas are supported)
+<<<<<<< HEAD
 >>>>>>> 7303d9b88 (fix(cf): support batch creation and deletion formulas are supported)
+<<<<<<< HEAD
 >>>>>>> 862d6230e (fix(cf): support batch creation and deletion formulas are supported)
+<<<<<<< HEAD
 >>>>>>> 7a80c19e0 (fix(cf): support batch creation and deletion formulas are supported)
+=======
+=======
+=======
+=======
+      '@types/mdx': 2.0.10
+      '@types/react': 18.2.63
+>>>>>>> 78c8b3767 (feat(cf): support icon set panel)
+>>>>>>> 888b73535 (feat(cf): support icon set panel)
+>>>>>>> 13f3722d3 (feat(cf): support icon set panel)
+>>>>>>> b99151464 (feat(cf): support icon set panel)
       react: 18.2.0
     dev: false
 
@@ -6470,20 +6511,27 @@ packages:
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
   /@radix-ui/react-slot@1.0.2(@types/react@18.2.72)(react@18.2.0):
 =======
 =======
 >>>>>>> 7a80c19e0 (fix(cf): support batch creation and deletion formulas are supported)
+=======
+>>>>>>> b99151464 (feat(cf): support icon set panel)
 <<<<<<< HEAD
   /@radix-ui/react-slot@1.0.2(@types/react@18.2.67)(react@18.2.0):
 =======
 =======
 >>>>>>> 862d6230e (fix(cf): support batch creation and deletion formulas are supported)
+=======
+>>>>>>> 13f3722d3 (feat(cf): support icon set panel)
 <<<<<<< HEAD
   /@radix-ui/react-slot@1.0.2(@types/react@18.2.66)(react@18.2.0):
 =======
 =======
 >>>>>>> 7303d9b88 (fix(cf): support batch creation and deletion formulas are supported)
+=======
+>>>>>>> 888b73535 (feat(cf): support icon set panel)
 <<<<<<< HEAD
   /@radix-ui/react-slot@1.0.2(@types/react@18.2.64)(react@18.2.0):
 =======
@@ -6774,9 +6822,21 @@ packages:
   /@radix-ui/react-slot@1.0.2(@types/react@18.2.61)(react@18.2.0):
 >>>>>>> 44acb57f1 (fix(cf): support batch creation and deletion formulas are supported)
 >>>>>>> 41db36db3 (fix(cf): support batch creation and deletion formulas are supported)
+<<<<<<< HEAD
 >>>>>>> 7303d9b88 (fix(cf): support batch creation and deletion formulas are supported)
+<<<<<<< HEAD
 >>>>>>> 862d6230e (fix(cf): support batch creation and deletion formulas are supported)
+<<<<<<< HEAD
 >>>>>>> 7a80c19e0 (fix(cf): support batch creation and deletion formulas are supported)
+=======
+=======
+=======
+=======
+  /@radix-ui/react-slot@1.0.2(@types/react@18.2.63)(react@18.2.0):
+>>>>>>> 78c8b3767 (feat(cf): support icon set panel)
+>>>>>>> 888b73535 (feat(cf): support icon set panel)
+>>>>>>> 13f3722d3 (feat(cf): support icon set panel)
+>>>>>>> b99151464 (feat(cf): support icon set panel)
     resolution: {integrity: sha512-YeTpuq4deV+6DusvVUW4ivBgnkHwECUu0BiN43L5UCDFgdhsRUWAghhTF5MbvNTPzmiFOx90asDSUjWuCNapwg==}
     peerDependencies:
       '@types/react': '*'
@@ -6800,6 +6860,7 @@ packages:
       '@babel/runtime': 7.23.9
       '@ctrl/tinycolor': 3.6.1
 <<<<<<< HEAD
+<<<<<<< HEAD
       classnames: 2.5.1
 <<<<<<< HEAD
       rc-util: 5.39.1(react-dom@18.2.0)(react@18.2.0)
@@ -6810,6 +6871,10 @@ packages:
       rc-util: 5.38.2(react-dom@18.2.0)(react@18.2.0)
 >>>>>>> 494030bf7 (feat(cf): add package config)
 >>>>>>> 8f18559e2 (feat(cf): add package config)
+=======
+      classnames: 2.3.2
+      rc-util: 5.39.0(react-dom@18.2.0)(react@18.2.0)
+>>>>>>> 888b73535 (feat(cf): support icon set panel)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
     dev: false
@@ -6830,6 +6895,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.23.9
 <<<<<<< HEAD
+<<<<<<< HEAD
       classnames: 2.5.1
 <<<<<<< HEAD
       rc-util: 5.39.1(react-dom@18.2.0)(react@18.2.0)
@@ -6840,6 +6906,10 @@ packages:
       rc-util: 5.38.2(react-dom@18.2.0)(react@18.2.0)
 >>>>>>> 494030bf7 (feat(cf): add package config)
 >>>>>>> 36779fdf7 (feat(cf): add package config)
+=======
+      classnames: 2.3.2
+      rc-util: 5.39.0(react-dom@18.2.0)(react@18.2.0)
+>>>>>>> 78c8b3767 (feat(cf): support icon set panel)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
     dev: false
@@ -7231,6 +7301,7 @@ packages:
     resolution: {integrity: sha512-m0Y7qGAMnNPLEOEgzW/SBm8GX0xabJBaRN+aYijO6UKTln7F6oXXVve+xPC0Y4s6Gc9HZFdJY8WXZr1YSGEUVA==}
     dependencies:
 <<<<<<< HEAD
+<<<<<<< HEAD
       '@babel/core': 7.23.9
 <<<<<<< HEAD
       '@mdx-js/react': 3.0.1(@types/react@18.2.72)(react@18.2.0)
@@ -7311,6 +7382,11 @@ packages:
       '@storybook/blocks': 8.0.0-rc.1(@types/react@18.2.61)(react-dom@18.2.0)(react@18.2.0)
 >>>>>>> 44acb57f1 (fix(cf): support batch creation and deletion formulas are supported)
 >>>>>>> 41db36db3 (fix(cf): support batch creation and deletion formulas are supported)
+=======
+      '@babel/core': 7.23.5
+      '@mdx-js/react': 3.0.1(@types/react@18.2.63)(react@18.2.0)
+      '@storybook/blocks': 8.0.0-rc.1(@types/react@18.2.63)(react-dom@18.2.0)(react@18.2.0)
+>>>>>>> 78c8b3767 (feat(cf): support icon set panel)
       '@storybook/client-logger': 8.0.0-rc.1
       '@storybook/components': 8.0.0-rc.1(@types/react@18.2.64)(react-dom@18.2.0)(react@18.2.0)
       '@storybook/csf-plugin': 8.0.0-rc.1
@@ -8114,9 +8190,9 @@ packages:
 >>>>>>> 5ba508aa9 (feat(cf): add package config)
     dependencies:
       '@babel/generator': 7.23.6
-      '@babel/parser': 7.23.9
-      '@babel/traverse': 7.23.9
-      '@babel/types': 7.23.9
+      '@babel/parser': 7.24.0
+      '@babel/traverse': 7.24.0
+      '@babel/types': 7.24.0
       '@storybook/csf': 0.1.2
       '@storybook/types': 8.0.4
       fs-extra: 11.2.0
@@ -8235,6 +8311,7 @@ packages:
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
   /@storybook/node-logger@8.0.0-rc.3:
     resolution: {integrity: sha512-8VkQSMdU9/NwqQWRibG6hlI/MIq3qJ+qMx4TekTHvPXjJbbW+tRvGsFbyqQSFonZmg25XgUIp2wLc46CS/CEvw==}
 =======
@@ -8244,13 +8321,12 @@ packages:
   /@storybook/node-logger@8.0.0-rc.2:
     resolution: {integrity: sha512-jL2bF9BkD9kNELlt5zW1fTB6OI3Ue47ob8j6AtgeB32FW1idheycRzzGCNgZTVBhcKsdSIIg5D49cTadpjJHbQ==}
 >>>>>>> 36779fdf7 (feat(cf): add package config)
+=======
+  /@storybook/node-logger@8.0.0-rc.3:
+    resolution: {integrity: sha512-8VkQSMdU9/NwqQWRibG6hlI/MIq3qJ+qMx4TekTHvPXjJbbW+tRvGsFbyqQSFonZmg25XgUIp2wLc46CS/CEvw==}
+>>>>>>> 78c8b3767 (feat(cf): support icon set panel)
     dev: false
 
-=======
-<<<<<<< HEAD
->>>>>>> 494030bf7 (feat(cf): add package config)
-=======
->>>>>>> 44acb57f1 (fix(cf): support batch creation and deletion formulas are supported)
   /@storybook/preset-react-webpack@8.0.0-rc.1(@swc/core@1.4.2)(esbuild@0.18.20)(react-dom@18.2.0)(react@18.2.0)(typescript@5.3.3):
     resolution: {integrity: sha512-LbxngVsSAAKjMd4AtYROiLyaJ8tk22EuOIEPQ5r+dpcv92nTWLc7NHe83LrWAvxKizb0G1+T5QLLK7ZOjSKvKA==}
 >>>>>>> bf8b8fab3 (feat(cf): add package config)
@@ -8646,10 +8722,14 @@ packages:
       file-system-cache: 2.3.0
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 >>>>>>> bf8b8fab3 (feat(cf): add package config)
 =======
 <<<<<<< HEAD
 >>>>>>> 8a5392e3f (fix(cf): support batch creation and deletion formulas are supported)
+=======
+<<<<<<< HEAD
+>>>>>>> 7c96e1e70 (feat(cf): support icon set panel)
   /@storybook/types@8.0.0-rc.3:
     resolution: {integrity: sha512-rV6Vj84WcD+Xea9c0LdVTAzRvDWHTFIbDiT4R4+yNppy9q5NZGTiWprdGNtOiDVCGsT6kpvafBzKYXPtLiCJ+Q==}
 =======
@@ -8657,11 +8737,16 @@ packages:
   /@storybook/types@8.0.0-rc.2:
     resolution: {integrity: sha512-xzj7l/54hPMLLxT3CyBJhCNSpfPNpyxsStNEb9zTSZXTu4xxRTPy09oJ1psSpJeMcG71bTAo6ElPxMVvBENP4w==}
 >>>>>>> 41db36db3 (fix(cf): support batch creation and deletion formulas are supported)
+=======
+  /@storybook/types@8.0.0-rc.3:
+    resolution: {integrity: sha512-rV6Vj84WcD+Xea9c0LdVTAzRvDWHTFIbDiT4R4+yNppy9q5NZGTiWprdGNtOiDVCGsT6kpvafBzKYXPtLiCJ+Q==}
+>>>>>>> 78c8b3767 (feat(cf): support icon set panel)
     dependencies:
       '@storybook/channels': 8.0.0-rc.3
       '@types/express': 4.17.21
       file-system-cache: 2.3.0
 
+<<<<<<< HEAD
 <<<<<<< HEAD
   /@stylistic/eslint-plugin-js@1.6.3(eslint@8.57.0):
     resolution: {integrity: sha512-ckdz51oHxD2FaxgY2piJWJVJiwgp8Uu96s+as2yB3RMwavn3nHBrpliVukXY9S/DmMicPRB2+H8nBk23GDG+qA==}
@@ -8671,8 +8756,9 @@ packages:
 =======
   /@stylistic/eslint-plugin-js@1.5.4(eslint@8.56.0):
 =======
+=======
+>>>>>>> 7c96e1e70 (feat(cf): support icon set panel)
   /@stylistic/eslint-plugin-js@1.5.4(eslint@8.57.0):
->>>>>>> 44acb57f1 (fix(cf): support batch creation and deletion formulas are supported)
     resolution: {integrity: sha512-3ctWb3NvJNV1MsrZN91cYp2EGInLPSoZKphXIbIRx/zjZxKwLDr9z4LMOWtqjq14li/OgqUUcMq5pj8fgbLoTw==}
 <<<<<<< HEAD
 >>>>>>> 7e3c5a4ce (feat(cf): add package config)
@@ -9069,7 +9155,7 @@ packages:
     engines: {node: '>=14'}
     dependencies:
       '@babel/code-frame': 7.23.4
-      '@babel/runtime': 7.23.4
+      '@babel/runtime': 7.23.9
       '@types/aria-query': 5.0.4
       aria-query: 5.1.3
       chalk: 4.1.2
@@ -9140,6 +9226,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.23.9
 <<<<<<< HEAD
+<<<<<<< HEAD
       '@testing-library/dom': 9.3.4
 <<<<<<< HEAD
       '@types/react-dom': 18.2.22
@@ -9150,6 +9237,10 @@ packages:
       '@types/react-dom': 18.2.19
 >>>>>>> 494030bf7 (feat(cf): add package config)
 >>>>>>> 8f18559e2 (feat(cf): add package config)
+=======
+      '@testing-library/dom': 9.3.3
+      '@types/react-dom': 18.2.20
+>>>>>>> 888b73535 (feat(cf): support icon set panel)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
     dev: true
@@ -9367,6 +9458,18 @@ packages:
     resolution: {integrity: sha512-PecSzorDGdabF57OBeQO/xFbAkYWo88g4Xvnsx7LRwqLC17I7OoKtA3bQB9uXkY6UkMWCOsA8HSVpaoitscdXw==}
     dev: true
 
+  /@types/lodash.get@4.4.9:
+    resolution: {integrity: sha512-J5dvW98sxmGnamqf+/aLP87PYXyrha9xIgc2ZlHl6OHMFR2Ejdxep50QfU0abO1+CH6+ugx+8wEUN1toImAinA==}
+    dependencies:
+      '@types/lodash': 4.14.202
+    dev: false
+
+  /@types/lodash.set@4.3.9:
+    resolution: {integrity: sha512-KOxyNkZpbaggVmqbpr82N2tDVTx05/3/j0f50Es1prxrWB0XYf9p3QNxqcbWb7P1Q9wlvsUSlCFnwlPCIJ46PQ==}
+    dependencies:
+      '@types/lodash': 4.14.202
+    dev: false
+
   /@types/lodash@4.14.202:
     resolution: {integrity: sha512-OvlIYQK9tNneDlS0VN54LLd5uiPCBOp7gS5Z0f1mjoJYBrtStzgmJBxONW3U6OZqdtNzZPmn9BS/7WI7BFFcFQ==}
     dev: false
@@ -9434,7 +9537,7 @@ packages:
   /@types/react-grid-layout@1.3.5:
     resolution: {integrity: sha512-WH/po1gcEcoR6y857yAnPGug+ZhkF4PaTUxgAbwfeSH/QOgVSakKHBXoPGad/sEznmkiaK3pqHk+etdWisoeBQ==}
     dependencies:
-      '@types/react': 18.2.57
+      '@types/react': 18.2.63
     dev: false
 
   /@types/react-transition-group@4.4.10:
@@ -9462,13 +9565,8 @@ packages:
     dependencies:
       '@types/prop-types': 15.7.11
       '@types/scheduler': 0.16.8
-<<<<<<< HEAD
-<<<<<<< HEAD
-      csstype: 3.1.3
-    dev: true
-=======
       csstype: 3.1.2
->>>>>>> 494030bf7 (feat(cf): add package config)
+    dev: true
 
 >>>>>>> bf8b8fab3 (feat(cf): add package config)
   /@types/react@18.2.64:
@@ -9478,10 +9576,13 @@ packages:
 >>>>>>> 5ba508aa9 (feat(cf): add package config)
     dependencies:
       '@types/prop-types': 15.7.11
+<<<<<<< HEAD
       csstype: 3.1.3
 =======
+=======
+      '@types/scheduler': 0.16.8
+>>>>>>> b99151464 (feat(cf): support icon set panel)
       csstype: 3.1.2
->>>>>>> 44acb57f1 (fix(cf): support batch creation and deletion formulas are supported)
 
   /@types/resolve@1.20.6:
     resolution: {integrity: sha512-A4STmOXPhMUtHH+S6ymgE2GiBSMqf4oTvcQZMcHzokuTLVYzXTB8ttjcgxOVaAp2lGwEdzZ0J+cRbbeevQj1UQ==}
@@ -10332,6 +10433,7 @@ packages:
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
   /@univerjs/icons@0.1.42(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-fHJKMGXGKK6W0E7xguXtHTTwR2P679sMMjh8JMHHobZzBCKoUuN3UBDRa8TJRyLWiY26jbe5xtJOhRD2sQyXKg==}
 =======
@@ -10341,6 +10443,8 @@ packages:
 >>>>>>> 6e625965d (feat(cf): reuse the last result before waiting for the result of the calculation)
 =======
 >>>>>>> a8ce1276a (feat(cf): support pre build icon base64)
+=======
+>>>>>>> 85e29dad6 (feat(cf): support icon set panel)
 <<<<<<< HEAD
   /@univerjs/icons@0.1.41(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-dis8kFEcahXVZGrCu9A70N6kqpt64q8bZy55Cs6k43g9nJcZkodU875uaF2JyMgVe7gIKUd+aCpHVru0SXrXQA==}
@@ -10351,6 +10455,8 @@ packages:
 >>>>>>> e20a0ae6a (feat(cf): reuse the last result before waiting for the result of the calculation)
 =======
 >>>>>>> 3b72f150f (feat(cf): support pre build icon base64)
+=======
+>>>>>>> 888b73535 (feat(cf): support icon set panel)
 <<<<<<< HEAD
   /@univerjs/icons@0.1.40(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-XsMlxOmTYAyV3H2RHZTJieLRTkO76/X/QgcjL9n0XrWOuIyCkGAOsyTIMtqOMOvQdd0TwYqX8ZBPwxwNvhLqrw==}
@@ -10369,10 +10475,13 @@ packages:
 >>>>>>> ff83f954d (feat(cf): conditional format support ref range)
 <<<<<<< HEAD
 =======
+=======
+>>>>>>> 78c8b3767 (feat(cf): support icon set panel)
   /@univerjs/icons-svg@0.1.33:
     resolution: {integrity: sha512-0004a2voyXpXaqBvHQUzt/s1in8JylCs1l5/WwyQiikjopQlo+sEFEzSIuELZCuiv0SiqxBgcqrMumrPLXEIZA==}
     dev: false
 
+<<<<<<< HEAD
 >>>>>>> 6d04d9263 (feat(cf): support pre build icon base64)
   /@univerjs/icons@0.1.30(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-TdI4MuVH6zkbeLXllrkVemilQ+MnTm7PJLwaQQXyuwl+YSuoe4m5S5nc6iE/CXzx7Zp5Nyhv1rsXetpXWcgEpA==}
@@ -10507,6 +10616,8 @@ packages:
 =======
 >>>>>>> 41db36db3 (fix(cf): support batch creation and deletion formulas are supported)
 =======
+=======
+>>>>>>> 78c8b3767 (feat(cf): support icon set panel)
   /@univerjs/icons@0.1.33(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-RCRoDv2W+gjzwDL6KwXc0cmjvHaWQwCvz2W6thxSV6oeNAQco3m3pZMHrW4PMiHtJV/1r3X3cGPvkVJsXvxelw==}
     peerDependencies:
@@ -10517,7 +10628,20 @@ packages:
       react-dom: 18.2.0(react@18.2.0)
     dev: false
 
+<<<<<<< HEAD
 >>>>>>> d3f0607aa (feat(cf): support pre build icon base64)
+=======
+  /@univerjs/icons@0.1.39(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-LlvMLjF18VM1KKLybMpCEnetnyvQgb5ZvJA0HeWRnTNO8HFXlEpCJmXpAIajNGL+PjtZU4LTj3tMf/2C6prn/w==}
+    peerDependencies:
+      react: '*'
+      react-dom: '*'
+    dependencies:
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+    dev: false
+
+>>>>>>> 78c8b3767 (feat(cf): support icon set panel)
   /@vitejs/plugin-react@4.2.1(vite@5.0.12):
     resolution: {integrity: sha512-oojO9IDc4nCUUi8qIR11KoQm0XFFLIwsRBwHRR4d/88IWghn1y6ckz/bJ8GHDCsYEJee8mDzqtJxh15/cisJNQ==}
     engines: {node: ^14.18.0 || >=16.0.0}
@@ -10771,6 +10895,7 @@ packages:
       path-browserify: 1.0.1
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   /@vue/compiler-core@3.4.19:
     resolution: {integrity: sha512-gj81785z0JNzRcU0Mq98E56e4ltO1yf8k5PQ+tV/7YHnbZkrM0fyFyuttnN8ngJZjbpofWE/m4qjKBiLl8Ju4w==}
     dependencies:
@@ -10790,16 +10915,18 @@ packages:
       '@babel/parser': 7.23.9
       '@vue/shared': 3.4.21
 =======
+=======
+>>>>>>> 888b73535 (feat(cf): support icon set panel)
   /@vue/compiler-core@3.4.15:
     resolution: {integrity: sha512-XcJQVOaxTKCnth1vCxEChteGuwG6wqnUHxAm1DO3gCz0+uXKaJNx8/digSz4dLALCy8n2lKq24jSUs8segoqIw==}
     dependencies:
       '@babel/parser': 7.23.6
       '@vue/shared': 3.4.15
->>>>>>> 494030bf7 (feat(cf): add package config)
       entities: 4.5.0
       estree-walker: 2.0.2
       source-map-js: 1.0.2
 
+<<<<<<< HEAD
 <<<<<<< HEAD
   /@vue/compiler-dom@3.4.19:
     resolution: {integrity: sha512-vm6+cogWrshjqEHTzIDCp72DKtea8Ry/QVpQRYoyTIg9k7QZDX6D8+HGURjtmatfgM8xgCFtJJaOlCaRYRK3QA==}
@@ -10811,6 +10938,23 @@ packages:
 =======
 <<<<<<< HEAD
 >>>>>>> 8f18559e2 (feat(cf): add package config)
+=======
+  /@vue/compiler-core@3.4.21:
+    resolution: {integrity: sha512-MjXawxZf2SbZszLPYxaFCjxfibYrzr3eYbKxwpLR9EQN+oaziSu3qKVbwBERj1IFIB8OLUewxB5m/BFzi613og==}
+    dependencies:
+      '@babel/parser': 7.24.0
+      '@vue/shared': 3.4.21
+      entities: 4.5.0
+      estree-walker: 2.0.2
+      source-map-js: 1.0.2
+
+  /@vue/compiler-dom@3.4.15:
+    resolution: {integrity: sha512-wox0aasVV74zoXyblarOM3AZQz/Z+OunYcIHe1OsGclCHt8RsRm04DObjefaI82u6XDzv+qGWZ24tIsRAIi5MQ==}
+    dependencies:
+      '@vue/compiler-core': 3.4.15
+      '@vue/shared': 3.4.15
+
+>>>>>>> 888b73535 (feat(cf): support icon set panel)
   /@vue/compiler-dom@3.4.21:
     resolution: {integrity: sha512-IZC6FKowtT1sl0CR5DpXSiEB5ayw75oT2bma1BEhV7RRR1+cfwLrxc2Z8Zq/RGFzJ8w5r9QtCOvTjQgdn0IKmA==}
     dependencies:
@@ -10820,46 +10964,21 @@ packages:
   /@vue/compiler-sfc@3.4.21:
     resolution: {integrity: sha512-me7epoTxYlY+2CUM7hy9PCDdpMPfIwrOvAXud2Upk10g4YLv9UBW7kL798TvMeDhPthkZ0CONNrK2GoeI1ODiQ==}
     dependencies:
-      '@babel/parser': 7.23.9
+      '@babel/parser': 7.24.0
       '@vue/compiler-core': 3.4.21
       '@vue/compiler-dom': 3.4.21
       '@vue/compiler-ssr': 3.4.21
       '@vue/shared': 3.4.21
-=======
-  /@vue/compiler-dom@3.4.15:
-    resolution: {integrity: sha512-wox0aasVV74zoXyblarOM3AZQz/Z+OunYcIHe1OsGclCHt8RsRm04DObjefaI82u6XDzv+qGWZ24tIsRAIi5MQ==}
-    dependencies:
-      '@vue/compiler-core': 3.4.15
-      '@vue/shared': 3.4.15
-
-  /@vue/compiler-sfc@3.4.15:
-    resolution: {integrity: sha512-LCn5M6QpkpFsh3GQvs2mJUOAlBQcCco8D60Bcqmf3O3w5a+KWS5GvYbrrJBkgvL1BDnTp+e8q0lXCLgHhKguBA==}
-    dependencies:
-      '@babel/parser': 7.24.0
-      '@vue/compiler-core': 3.4.15
-      '@vue/compiler-dom': 3.4.15
-      '@vue/compiler-ssr': 3.4.15
-      '@vue/shared': 3.4.15
->>>>>>> 494030bf7 (feat(cf): add package config)
       estree-walker: 2.0.2
-      magic-string: 0.30.5
+      magic-string: 0.30.8
       postcss: 8.4.35
       source-map-js: 1.0.2
 
-<<<<<<< HEAD
   /@vue/compiler-ssr@3.4.21:
     resolution: {integrity: sha512-M5+9nI2lPpAsgXOGQobnIueVqc9sisBFexh5yMIMRAPYLa7+5wEJs8iqOZc1WAa9WQbx9GR2twgznU8LTIiZ4Q==}
     dependencies:
       '@vue/compiler-dom': 3.4.21
       '@vue/shared': 3.4.21
-=======
-  /@vue/compiler-ssr@3.4.15:
-    resolution: {integrity: sha512-1jdeQyiGznr8gjFDadVmOJqZiLNSsMa5ZgqavkPZ8O2wjHv0tVuAEsw5hTdUoUW4232vpBbL/wJhzVW/JwY1Uw==}
-    dependencies:
-      '@vue/compiler-dom': 3.4.15
-      '@vue/shared': 3.4.15
-    dev: true
->>>>>>> 494030bf7 (feat(cf): add package config)
 
   /@vue/language-core@1.8.27(typescript@5.4.3):
     resolution: {integrity: sha512-L8Kc27VdQserNaCUNiSFdDl9LWT24ly8Hpwf1ECy3aFb9m6bDhBGQYOujDm21N7EW3moKIOKEanQwe1q5BK+mA==}
@@ -10872,6 +10991,7 @@ packages:
       '@volar/language-core': 1.11.1
       '@volar/source-map': 1.11.1
 <<<<<<< HEAD
+<<<<<<< HEAD
       '@vue/compiler-dom': 3.4.19
       '@vue/shared': 3.4.19
 =======
@@ -10883,6 +11003,10 @@ packages:
       '@vue/shared': 3.4.15
 >>>>>>> 494030bf7 (feat(cf): add package config)
 >>>>>>> 8f18559e2 (feat(cf): add package config)
+=======
+      '@vue/compiler-dom': 3.4.15
+      '@vue/shared': 3.4.15
+>>>>>>> 888b73535 (feat(cf): support icon set panel)
       computeds: 0.0.1
       minimatch: 9.0.3
       muggle-string: 0.3.1
@@ -10905,7 +11029,6 @@ packages:
 >>>>>>> bf8b8fab3 (feat(cf): add package config)
       vue-template-compiler: 2.7.15
 
-<<<<<<< HEAD
   /@vue/reactivity@3.4.21:
     resolution: {integrity: sha512-UhenImdc0L0/4ahGCyEzc/pZNwVgcglGy9HVzJ1Bq2Mm9qXOpP8RyNTjookw/gOCUlXSEtuZ2fUg5nrHcoqJcw==}
     dependencies:
@@ -10933,6 +11056,7 @@ packages:
       '@vue/shared': 3.4.21
       vue: 3.4.21(typescript@5.4.3)
 
+<<<<<<< HEAD
   /@vue/shared@3.4.19:
     resolution: {integrity: sha512-/KliRRHMF6LoiThEy+4c1Z4KB/gbPrGjWwJR+crg2otgrf/egKzRaCPvJ51S5oetgsgXLfc4Rm5ZgrKHZrtMSw==}
     dev: false
@@ -10940,9 +11064,13 @@ packages:
   /@vue/shared@3.4.21:
     resolution: {integrity: sha512-PuJe7vDIi6VYSinuEbUIQgMIRZGgM8e4R+G+/dQTk0X1NEdvgvvgv7m+rfmDH1gZzyA1OjjoWskvHlfRNfQf3g==}
 =======
+=======
+>>>>>>> 888b73535 (feat(cf): support icon set panel)
   /@vue/shared@3.4.15:
     resolution: {integrity: sha512-KzfPTxVaWfB+eGcGdbSf4CWdaXcGDqckoeXUh7SB3fZdEtzPCK2Vq9B/lRRL3yutax/LWITz+SwvgyOxz5V75g==}
->>>>>>> 494030bf7 (feat(cf): add package config)
+
+  /@vue/shared@3.4.21:
+    resolution: {integrity: sha512-PuJe7vDIi6VYSinuEbUIQgMIRZGgM8e4R+G+/dQTk0X1NEdvgvvgv7m+rfmDH1gZzyA1OjjoWskvHlfRNfQf3g==}
 
   /@webassemblyjs/ast@1.11.6:
     resolution: {integrity: sha512-IN1xI7PwOvLPgjcf180gC1bqn3q/QaOCwYUahIOhbYUu8KA/3tw2RT/T0Gidi1l7Hhj5D/INhJxiICObqpMu4Q==}
@@ -12411,6 +12539,9 @@ packages:
   /csstype@3.1.2:
     resolution: {integrity: sha512-I7K1Uu0MBPzaFKg4nI5Q7Vs2t+3gWWW648spaF+Rg7pI9ds18Ugn+lvg4SHczUdKlHI5LWBXyqfS8+DufyBsgQ==}
 >>>>>>> 36779fdf7 (feat(cf): add package config)
+
+  /csstype@3.1.3:
+    resolution: {integrity: sha512-M1uQkMl8rQK/szD0LNhtqxIPLpimGm8sOBwU7lLnCpSbTyY3yeU1Vc7l4KT5zT4s/yOxHH5O7tIuuLOCnLADRw==}
 
   /dargs@8.1.0:
     resolution: {integrity: sha512-wAV9QHOsNbwnWdNW2FYvE1P56wtgSbM+3SZcdGiWQILwVjACCXDCI3Ai8QlCjMDB8YK5zySiXZYBiwGmNY3lnw==}
@@ -14172,36 +14303,13 @@ packages:
       - supports-color
     dev: true
 
-<<<<<<< HEAD
-<<<<<<< HEAD
   /eslint-processor-vue-blocks@0.1.1(@vue/compiler-sfc@3.4.21)(eslint@8.57.0):
-=======
-<<<<<<< HEAD
-  /eslint-processor-vue-blocks@0.1.1(@vue/compiler-sfc@3.4.19)(eslint@8.57.0):
-=======
-  /eslint-processor-vue-blocks@0.1.1(@vue/compiler-sfc@3.4.15)(eslint@8.56.0):
->>>>>>> 7e3c5a4ce (feat(cf): add package config)
->>>>>>> 494030bf7 (feat(cf): add package config)
-=======
-  /eslint-processor-vue-blocks@0.1.1(@vue/compiler-sfc@3.4.15)(eslint@8.57.0):
->>>>>>> 44acb57f1 (fix(cf): support batch creation and deletion formulas are supported)
     resolution: {integrity: sha512-9+dU5lU881log570oBwpelaJmOfOzSniben7IWEDRYQPPWwlvaV7NhOtsTuUWDqpYT+dtKKWPsgz4OkOi+aZnA==}
     peerDependencies:
       '@vue/compiler-sfc': ^3.3.0
       eslint: ^8.50.0
     dependencies:
-<<<<<<< HEAD
-<<<<<<< HEAD
       '@vue/compiler-sfc': 3.4.21
-=======
-<<<<<<< HEAD
-      '@vue/compiler-sfc': 3.4.19
->>>>>>> 494030bf7 (feat(cf): add package config)
-      eslint: 8.57.0
-=======
-=======
->>>>>>> 44acb57f1 (fix(cf): support batch creation and deletion formulas are supported)
-      '@vue/compiler-sfc': 3.4.15
       eslint: 8.57.0
     dev: true
 
@@ -16326,6 +16434,10 @@ packages:
     resolution: {integrity: sha512-GK3g5RPZWTRSeLSpgP8Xhra+pnjBC56q9FZYe1d5RN3TJ35dbkGy3YqBSMbyCrlbi+CM9Z3Jk5yTL7RCsqboyQ==}
     dev: true
 
+  /lodash.set@4.3.2:
+    resolution: {integrity: sha512-4hNPN5jlm/N/HLMCO43v8BXKq9Z7QdAGc/VGrRD61w8gN9g/6jF9A4L1pbUgBLCffi0w9VsXfTOij5x8iTyFvg==}
+    dev: false
+
   /lodash.snakecase@4.1.1:
     resolution: {integrity: sha512-QZ1d4xoBHYUeuouhEq3lk3Uq7ldgyFXGBhg04+oRLnIz8o9T65Eh+8YdroUwn846zchkA9yDsDl5CVVaV2nqYw==}
     dev: true
@@ -16438,6 +16550,12 @@ packages:
 
   /magic-string@0.30.5:
     resolution: {integrity: sha512-7xlpfBaQaP/T6Vh8MO/EqXSW5En6INHEvEXQiuff7Gku0PWjU3uf6w/j9o7O+SpB5fOAkrI5HeoNgwjEO0pFsA==}
+    engines: {node: '>=12'}
+    dependencies:
+      '@jridgewell/sourcemap-codec': 1.4.15
+
+  /magic-string@0.30.8:
+    resolution: {integrity: sha512-ISQTe55T2ao7XtlAStud6qwYPZjE4GK1S/BeVPus4jrq6JuOnQ00YKQC581RWhR122W7msZV263KzVeLoqidyQ==}
     engines: {node: '>=12'}
     dependencies:
       '@jridgewell/sourcemap-codec': 1.4.15
@@ -17762,7 +17880,7 @@ packages:
       react: '>=16.9.0'
       react-dom: '>=16.9.0'
     dependencies:
-      '@babel/runtime': 7.23.4
+      '@babel/runtime': 7.23.9
       '@rc-component/portal': 1.1.2(react-dom@18.2.0)(react@18.2.0)
       classnames: 2.3.2
       rc-motion: 2.9.0(react-dom@18.2.0)(react@18.2.0)
@@ -17785,14 +17903,14 @@ packages:
 =======
       '@babel/runtime': 7.23.4
       '@rc-component/trigger': 1.18.3(react-dom@18.2.0)(react@18.2.0)
-<<<<<<< HEAD
-      classnames: 2.5.1
-      rc-util: 5.39.0(react-dom@18.2.0)(react@18.2.0)
-=======
       classnames: 2.3.2
+<<<<<<< HEAD
       rc-util: 5.38.2(react-dom@18.2.0)(react@18.2.0)
 >>>>>>> 494030bf7 (feat(cf): add package config)
 >>>>>>> 8f18559e2 (feat(cf): add package config)
+=======
+      rc-util: 5.39.0(react-dom@18.2.0)(react@18.2.0)
+>>>>>>> 888b73535 (feat(cf): support icon set panel)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
     dev: false
@@ -17824,6 +17942,7 @@ packages:
       react-dom: '>=16.0.0'
     dependencies:
 <<<<<<< HEAD
+<<<<<<< HEAD
       '@babel/runtime': 7.23.9
       classnames: 2.5.1
 <<<<<<< HEAD
@@ -17836,6 +17955,11 @@ packages:
       rc-util: 5.38.2(react-dom@18.2.0)(react@18.2.0)
 >>>>>>> 494030bf7 (feat(cf): add package config)
 >>>>>>> 8f18559e2 (feat(cf): add package config)
+=======
+      '@babel/runtime': 7.23.4
+      classnames: 2.3.2
+      rc-util: 5.39.0(react-dom@18.2.0)(react@18.2.0)
+>>>>>>> 888b73535 (feat(cf): support icon set panel)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
     dev: false
@@ -17870,6 +17994,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.23.9
 <<<<<<< HEAD
+<<<<<<< HEAD
       classnames: 2.5.1
 <<<<<<< HEAD
       rc-util: 5.39.1(react-dom@18.2.0)(react@18.2.0)
@@ -17880,6 +18005,10 @@ packages:
       rc-util: 5.38.2(react-dom@18.2.0)(react@18.2.0)
 >>>>>>> 494030bf7 (feat(cf): add package config)
 >>>>>>> 36779fdf7 (feat(cf): add package config)
+=======
+      classnames: 2.3.2
+      rc-util: 5.39.0(react-dom@18.2.0)(react@18.2.0)
+>>>>>>> 78c8b3767 (feat(cf): support icon set panel)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
     dev: false
@@ -17934,8 +18063,13 @@ packages:
         optional: true
     dependencies:
       '@babel/runtime': 7.23.9
+<<<<<<< HEAD
       '@rc-component/trigger': 2.0.0(react-dom@18.2.0)(react@18.2.0)
       classnames: 2.5.1
+=======
+      '@rc-component/trigger': 1.18.3(react-dom@18.2.0)(react@18.2.0)
+      classnames: 2.3.2
+>>>>>>> 888b73535 (feat(cf): support icon set panel)
       dayjs: 1.11.10
       rc-overflow: 1.3.2(react-dom@18.2.0)(react@18.2.0)
       rc-resize-observer: 1.4.0(react-dom@18.2.0)(react@18.2.0)
@@ -17952,6 +18086,7 @@ packages:
     dependencies:
       '@babel/runtime': 7.23.9
 <<<<<<< HEAD
+<<<<<<< HEAD
       classnames: 2.5.1
 <<<<<<< HEAD
       rc-util: 5.39.1(react-dom@18.2.0)(react@18.2.0)
@@ -17962,6 +18097,10 @@ packages:
       rc-util: 5.38.2(react-dom@18.2.0)(react@18.2.0)
 >>>>>>> 494030bf7 (feat(cf): add package config)
 >>>>>>> 36779fdf7 (feat(cf): add package config)
+=======
+      classnames: 2.3.2
+      rc-util: 5.39.0(react-dom@18.2.0)(react@18.2.0)
+>>>>>>> 78c8b3767 (feat(cf): support icon set panel)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
       resize-observer-polyfill: 1.5.1
@@ -17989,6 +18128,7 @@ packages:
       react-dom: '*'
     dependencies:
 <<<<<<< HEAD
+<<<<<<< HEAD
       '@babel/runtime': 7.23.9
       '@rc-component/trigger': 2.0.0(react-dom@18.2.0)(react@18.2.0)
       classnames: 2.5.1
@@ -17997,18 +18137,22 @@ packages:
       rc-util: 5.39.1(react-dom@18.2.0)(react@18.2.0)
 =======
       '@babel/runtime': 7.23.4
+=======
+      '@babel/runtime': 7.23.9
+>>>>>>> 888b73535 (feat(cf): support icon set panel)
       '@rc-component/trigger': 1.18.3(react-dom@18.2.0)(react@18.2.0)
       classnames: 2.3.2
       rc-motion: 2.9.0(react-dom@18.2.0)(react@18.2.0)
       rc-overflow: 1.3.2(react-dom@18.2.0)(react@18.2.0)
-<<<<<<< HEAD
       rc-util: 5.39.0(react-dom@18.2.0)(react@18.2.0)
+<<<<<<< HEAD
 >>>>>>> 8f18559e2 (feat(cf): add package config)
       rc-virtual-list: 3.11.4(react-dom@18.2.0)(react@18.2.0)
 =======
       rc-util: 5.38.2(react-dom@18.2.0)(react@18.2.0)
+=======
+>>>>>>> 888b73535 (feat(cf): support icon set panel)
       rc-virtual-list: 3.11.3(react-dom@18.2.0)(react@18.2.0)
->>>>>>> 494030bf7 (feat(cf): add package config)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
     dev: false
@@ -18047,11 +18191,17 @@ packages:
     dev: false
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 >>>>>>> 8f18559e2 (feat(cf): add package config)
+=======
+<<<<<<< HEAD
+>>>>>>> 888b73535 (feat(cf): support icon set panel)
   /rc-util@5.39.1(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-OW/ERynNDgNr4y0oiFmtes3rbEamXw7GHGbkbNd9iRr7kgT03T6fT0b9WpJ3mbxKhyOcAHnGcIoh5u/cjrC2OQ==}
 =======
 <<<<<<< HEAD
+=======
+>>>>>>> 78c8b3767 (feat(cf): support icon set panel)
   /rc-util@5.39.0(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-fEVbkOApBUK/lg+NTkfC3fw336EhgRy531ly2QvZj8G+21OjPEzb9TtH/zfKDL2BuQqbGh8J5zXeFyfcELXOlQ==}
 >>>>>>> 36779fdf7 (feat(cf): add package config)
@@ -18065,12 +18215,8 @@ packages:
       react-is: 18.2.0
     dev: false
 
-  /rc-virtual-list@3.11.4(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-NbBi0fvyIu26gP69nQBiWgUMTPX3mr4FcuBQiVqagU0BnuX8WQkiivnMs105JROeuUIFczLrlgUhLQwTWV1XDA==}
-=======
   /rc-virtual-list@3.11.3(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-tu5UtrMk/AXonHwHxUogdXAWynaXsrx1i6dsgg+lOo/KJSF8oBAcprh1z5J3xgnPJD5hXxTL58F8s8onokdt0Q==}
->>>>>>> 494030bf7 (feat(cf): add package config)
     engines: {node: '>=8.x'}
     peerDependencies:
       react: '*'
@@ -18437,7 +18583,7 @@ packages:
   /redux@4.2.1:
     resolution: {integrity: sha512-LAUYz4lc+Do8/g7aeRa8JkyDErK6ekstQaqWQrNRW//MY1TvCEpMtpTWvlQ+FPbWCx+Xixu/6SHt5N0HR+SB4w==}
     dependencies:
-      '@babel/runtime': 7.23.4
+      '@babel/runtime': 7.23.9
     dev: false
 
   /reflect.getprototypeof@1.0.4:
@@ -19583,13 +19729,13 @@ packages:
     dev: false
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 >>>>>>> 8f18559e2 (feat(cf): add package config)
+=======
+>>>>>>> 888b73535 (feat(cf): support icon set panel)
   /tiny-invariant@1.3.3:
     resolution: {integrity: sha512-+FbBPE1o9QAYvviau/qC5SE3caw21q3xkvWKBtja5vgqOWIHHJ3ioaq1VPfn/Szqctz2bU/oYeKd9/z5BL+PVg==}
 
-  /tinybench@2.6.0:
-    resolution: {integrity: sha512-N8hW3PG/3aOoZAN5V/NSAEDz0ZixDSSt5b/a05iqtpgfLWMSVuCo7w0k2vVvEjdrIoeGqZzweX2WlyioNIHchA==}
-=======
   /tinybench@2.5.1:
     resolution: {integrity: sha512-65NKvSuAVDP/n4CqH+a9w2kTlLReS9vhsAP06MWx+/89nMinJyB2icyl58RIcqCmIggpojIGeuJGhjU1aGMBSg==}
 
@@ -19597,7 +19743,6 @@ packages:
     resolution: {integrity: sha512-zBTCK0cCgRROxvs9c0CGK838sPkeokNGdQVUUwHAbynHFlmyJYj825f/oRs528HaIJ97lo0pLIlDUzwN+IorWg==}
     engines: {node: '>=14.0.0'}
     dev: true
->>>>>>> 494030bf7 (feat(cf): add package config)
 
   /tinypool@0.8.2:
     resolution: {integrity: sha512-SUszKYe5wgsxnNOVlBYO6IC+8VGWdVGZWAqUxp3UErNBtptZvWbwyUOyzNL59zigz2rCA92QiL3wvG+JDSdJdQ==}

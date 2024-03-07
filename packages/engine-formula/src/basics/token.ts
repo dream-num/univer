@@ -88,3 +88,5 @@ export enum prefixToken {
     AT = '@',
     MINUS = '-',
 }
+
+export const SPACE_TOKEN = ' ';

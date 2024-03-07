@@ -2,6 +2,7 @@
     "extends": "@univerjs/shared/tsconfigs/base",
     "compilerOptions": {
         "types": ["esbuild-style-plugin"],
+        "allowArbitraryExtensions": true,
         "outDir": "local"
     },
     "include": ["src"]

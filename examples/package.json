@@ -36,7 +36,8 @@
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
         "react-mosaic-component": "^6.1.0",
-        "rxjs": "^7.8.1"
+        "rxjs": "^7.8.1",
+        "vue": "^3.4.21"
     },
     "devDependencies": {
         "@types/react": "^18.2.63",
@@ -45,6 +46,7 @@
         "esbuild": "^0.20.1",
         "esbuild-plugin-clean": "^1.0.1",
         "esbuild-plugin-copy": "^2.1.1",
+        "esbuild-plugin-vue3": "^0.4.2",
         "esbuild-style-plugin": "^1.6.3",
         "less": "^4.2.0",
         "minimist": "^1.2.8",

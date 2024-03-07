@@ -37,6 +37,7 @@ import { RankStyleEditor } from './rank';
 import { HighlightCellStyleEditor } from './highlightCell';
 import { FormulaStyleEditor } from './formula';
 import styles from './index.module.less';
+import { IconSet } from './iconSet';
 
 interface IRuleEditProps {
     rule?: IConditionFormatRule;
@@ -55,7 +56,8 @@ export const RuleEdit = (props: IRuleEditProps) => {
         { label: localeService.t('sheet.cf.panel.rankAndAverage'), value: '2' },
         { label: localeService.t('sheet.cf.ruleType.dataBar'), value: '3' },
         { label: localeService.t('sheet.cf.ruleType.colorScale'), value: '4' },
-        { label: localeService.t('sheet.cf.ruleType.formula'), value: '5' }];
+        { label: localeService.t('sheet.cf.ruleType.formula'), value: '5' },
+        { label: localeService.t('sheet.cf.ruleType.iconSet'), value: '6' }];
 
     const [ruleType, ruleTypeSet] = useState(() => {
         const type = props.rule?.rule.type;
@@ -90,6 +92,9 @@ export const RuleEdit = (props: IRuleEditProps) => {
             case RuleType.colorScale:{
                 return '4';
             }
+            case RuleType.iconSet:{
+                return '6';
+            }
         }
         return defaultType;
     });
@@ -116,14 +121,17 @@ export const RuleEdit = (props: IRuleEditProps) => {
             case '5':{
                 return FormulaStyleEditor;
             }
+            case '6':{
+                return IconSet;
+            }
             default :{
                 return HighlightCellStyleEditor;
             }
         }
     }, [ruleType]);
 
-    const onStyleChange = (config: Parameters<IStyleEditorProps['onChange']>) => {
-        result.current = config;
+    const onStyleChange = (config: unknown) => {
+        result.current = config as Parameters<IStyleEditorProps['onChange']>;
     };
 
     const onRangeSelectorActive = (isActive: boolean) => {

@@ -32,7 +32,7 @@ export interface IRangeSelectorProps {
     value?: string; // default values.
     onChange?: (ranges: IUnitRange[]) => void; // Callback for changes in the selector value.
     onActive?: (state: boolean) => void; // Callback for editor active.
-    onValid?: (state: boolean) => void;
+    onValid?: (state: boolean) => void; // input value validation
     isSingleChoice?: boolean; // Whether to restrict to only selecting a single region/area/district.
 
     openForSheetUnitId?: Nullable<string>; //  Configuring which workbook the selector defaults to opening in determines whether the ref includes a [unitId] prefix.

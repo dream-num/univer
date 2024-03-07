@@ -252,13 +252,23 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
         h: number,
         radii?: number | DOMPointInit | Array<number | DOMPointInit>
     ): void {
+        this._context.roundRect(x, y, w, h, radii);
+    }
+
+    roundRectByPrecision(
+        x: number,
+        y: number,
+        w: number,
+        h: number,
+        radii?: number | DOMPointInit | Array<number | DOMPointInit>
+    ): void {
         const { scaleX, scaleY } = this._getScale();
         x = fixLineWidthByScale(x, scaleX);
         y = fixLineWidthByScale(y, scaleY);
         w = fixLineWidthByScale(w, scaleX);
         h = fixLineWidthByScale(h, scaleY);
 
-        this._context.roundRect(x, y, w, h, radii);
+        this.roundRect(x, y, w, h, radii);
     }
 
     getTransform() {
@@ -288,11 +298,19 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
      * @method
      */
     arc(x: number, y: number, radius: number, startAngle: number, endAngle: number, counterClockwise?: boolean) {
+        this._context.arc(x, y, radius, startAngle, endAngle, counterClockwise);
+    }
+
+    /**
+     * arc function.
+     * @method
+     */
+    arcByPrecision(x: number, y: number, radius: number, startAngle: number, endAngle: number, counterClockwise?: boolean) {
         const { scaleX, scaleY } = this._getScale();
         x = fixLineWidthByScale(x, scaleX);
         y = fixLineWidthByScale(y, scaleY);
 
-        this._context.arc(x, y, radius, startAngle, endAngle, counterClockwise);
+        this.arc(x, y, radius, startAngle, endAngle, counterClockwise);
     }
 
     /**
@@ -301,13 +319,22 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
      *
      */
     arcTo(x1: number, y1: number, x2: number, y2: number, radius: number) {
+        this._context.arcTo(x1, y1, x2, y2, radius);
+    }
+
+    /**
+     * arcTo function.
+     * @method
+     *
+     */
+    arcToByPrecision(x1: number, y1: number, x2: number, y2: number, radius: number) {
         const { scaleX, scaleY } = this._getScale();
         x1 = fixLineWidthByScale(x1, scaleX);
         y1 = fixLineWidthByScale(y1, scaleY);
         x2 = fixLineWidthByScale(x2, scaleX);
         y2 = fixLineWidthByScale(y2, scaleY);
 
-        this._context.arcTo(x1, y1, x2, y2, radius);
+        this.arcTo(x1, y1, x2, y2, radius);
     }
 
     /**
@@ -323,6 +350,14 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
      * @method
      */
     bezierCurveTo(cp1x: number, cp1y: number, cp2x: number, cp2y: number, x: number, y: number) {
+        this._context.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y);
+    }
+
+     /**
+      * bezierCurveTo function precision.
+      * @method
+      */
+    bezierCurveToByPrecision(cp1x: number, cp1y: number, cp2x: number, cp2y: number, x: number, y: number) {
         const { scaleX, scaleY } = this._getScale();
         x = fixLineWidthByScale(x, scaleX);
         y = fixLineWidthByScale(y, scaleY);
@@ -331,7 +366,7 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
         cp2x = fixLineWidthByScale(cp2x, scaleX);
         cp2y = fixLineWidthByScale(cp2y, scaleY);
 
-        this._context.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y);
+        this.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y);
     }
 
     /**
@@ -339,13 +374,21 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
      * @method
      */
     clearRect(x: number, y: number, width: number, height: number) {
+        this._context.clearRect(x, y, width, height);
+    }
+
+    /**
+     * clearRect function.
+     * @method
+     */
+    clearRectByPrecision(x: number, y: number, width: number, height: number) {
         const { scaleX, scaleY } = this._getScale();
         x = fixLineWidthByScale(x, scaleX);
         y = fixLineWidthByScale(y, scaleY);
         width = fixLineWidthByScale(width, scaleX);
         height = fixLineWidthByScale(height, scaleY);
 
-        this._context.clearRect(x, y, width, height);
+        this.clearRect(x, y, width, height);
     }
 
     /**
@@ -512,13 +555,21 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
      * @method
      */
     fillRect(x: number, y: number, width: number, height: number) {
+        this._context.fillRect(x, y, width, height);
+    }
+
+     /**
+      * fillRect function precision.
+      * @method
+      */
+    fillRectByPrecision(x: number, y: number, width: number, height: number) {
         const { scaleX, scaleY } = this._getScale();
         x = fixLineWidthByScale(x, scaleX);
         y = fixLineWidthByScale(y, scaleY);
         width = fixLineWidthByScale(width, scaleX);
         height = fixLineWidthByScale(height, scaleY);
 
-        this._context.fillRect(x, y, width, height);
+        this.fillRect(x, y, width, height);
     }
 
     /**
@@ -526,13 +577,21 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
      * @method
      */
     strokeRect(x: number, y: number, width: number, height: number) {
+        this._context.strokeRect(x, y, width, height);
+    }
+
+    /**
+     * strokeRect function precision.
+     * @method
+     */
+    strokeRectPrecision(x: number, y: number, width: number, height: number) {
         const { scaleX, scaleY } = this._getScale();
         x = fixLineWidthByScale(x, scaleX);
         y = fixLineWidthByScale(y, scaleY);
         width = fixLineWidthByScale(width, scaleX);
         height = fixLineWidthByScale(height, scaleY);
 
-        this._context.strokeRect(x, y, width, height);
+        this.strokeRect(x, y, width, height);
     }
 
     /**
@@ -592,11 +651,19 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
      * @method
      */
     lineTo(x: number, y: number) {
+        this._context.lineTo(x, y);
+    }
+
+    /**
+     * lineTo function precision.
+     * @method
+     */
+    lineToByPrecision(x: number, y: number) {
         const { scaleX, scaleY } = this._getScale();
         x = fixLineWidthByScale(x, scaleX);
         y = fixLineWidthByScale(y, scaleY);
 
-        this._context.lineTo(x, y);
+        this.lineTo(x, y);
     }
 
     /**
@@ -604,11 +671,19 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
      * @method
      */
     moveTo(x: number, y: number) {
+        this._context.moveTo(x, y);
+    }
+
+    /**
+     * moveTo function precision.
+     * @method
+     */
+    moveToByPrecision(x: number, y: number) {
         const { scaleX, scaleY } = this._getScale();
         x = fixLineWidthByScale(x, scaleX);
         y = fixLineWidthByScale(y, scaleY);
 
-        this._context.moveTo(x, y);
+        this.moveTo(x, y);
     }
 
     /**
@@ -616,13 +691,21 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
      * @method
      */
     rect(x: number, y: number, width: number, height: number) {
+        this._context.rect(x, y, width, height);
+    }
+
+    /**
+     * rect function.
+     * @method
+     */
+    rectByPrecision(x: number, y: number, width: number, height: number) {
         const { scaleX, scaleY } = this._getScale();
         x = fixLineWidthByScale(x, scaleX);
         y = fixLineWidthByScale(y, scaleY);
         width = fixLineWidthByScale(width, scaleX);
         height = fixLineWidthByScale(height, scaleY);
 
-        this._context.rect(x, y, width, height);
+        this.rect(x, y, width, height);
     }
 
     /**
@@ -732,6 +815,14 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
      * @method
      */
     strokeText(text: string, x: number, y: number, maxWidth?: number) {
+        this._context.strokeText(text, x, y, maxWidth);
+    }
+
+    /**
+     * strokeText function precision.
+     * @method
+     */
+    strokeTextByPrecision(text: string, x: number, y: number, maxWidth?: number) {
         const { scaleX, scaleY } = this._getScale();
         x = fixLineWidthByScale(x, scaleX);
         y = fixLineWidthByScale(y, scaleY);
@@ -739,7 +830,7 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
         if (maxWidth) {
             maxWidth = fixLineWidthByScale(maxWidth, scaleX);
         }
-        this._context.strokeText(text, x, y, maxWidth);
+        this.strokeText(text, x, y, maxWidth);
     }
 
     /**
@@ -776,7 +867,7 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
     }
 
     clearRectForTexture(x: number, y: number, width: number, height: number) {
-        this.clearRect(x, y, width, height);
+        this.clearRectByPrecision(x, y, width, height);
     }
 
     setGlobalCompositeOperation(val: GlobalCompositeOperation) {

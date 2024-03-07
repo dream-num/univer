@@ -161,7 +161,7 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
         const activeChange = debounce((state: boolean) => {
             setActive(state);
             onActive && onActive(state);
-        }, 10);
+        }, 30);
 
         const focusStyleSubscription = editorService.focusStyle$.subscribe((unitId: Nullable<string>) => {
             let state = false;
@@ -188,7 +188,7 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
             onValid && onValid(isLegality);
 
             onChange && onChange(editorService.getValue(id));
-        }, 10);
+        }, 30);
 
         const valueChangeSubscription = editorService.valueChange$.subscribe((editor) => {
             if (!editor.onlyInputFormula() && !editor.onlyInputRange()) {

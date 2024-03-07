@@ -217,18 +217,36 @@ export class EditorBridgeController extends RxDisposable {
 
     private _initialRangeSelector() {
         this.disposeWithMe(
-            this._selectionManagerService.selectionMoving$.subscribe((selectionWithStyle: Nullable<ISelectionWithStyle[]>) => {
-                if (!selectionWithStyle) {
-                    return;
-                }
-
-                const ranges = selectionWithStyle.map((value: ISelectionWithStyle) => {
-                    return value.range;
-                });
-
-                this._rangeSelectorService.selectionChange(ranges);
-            })
+            this._selectionManagerService.selectionMoving$.subscribe(this._rangeSelector.bind(this))
         );
+
+        this.disposeWithMe(
+            this._selectionManagerService.selectionMoveStart$.subscribe(this._rangeSelector.bind(this))
+        );
+    }
+
+    private _rangeSelector(selectionWithStyle: Nullable<ISelectionWithStyle[]>) {
+        if (!selectionWithStyle) {
+            return;
+        }
+
+        const { unitId, sheetId, sheetName } = this._getCurrentUnitIdAndSheetId();
+
+        const ranges = selectionWithStyle.map((value: ISelectionWithStyle) => {
+            return { range: value.range, unitId, sheetId, sheetName };
+        });
+
+        this._rangeSelectorService.selectionChange(ranges);
+    }
+
+    private _getCurrentUnitIdAndSheetId() {
+        const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+        const worksheet = workbook.getActiveSheet();
+        return {
+            unitId: workbook.getUnitId(),
+            sheetId: worksheet.getSheetId(),
+            sheetName: worksheet.getName(),
+        };
     }
 
     private _getSheetObject() {

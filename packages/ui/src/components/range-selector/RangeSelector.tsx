@@ -87,7 +87,11 @@ export function RangeSelector(props: IRangeSelectorProps) {
 
     const [rangeValue, setRangeValue] = useState(value);
 
+    const [currentInputIndex, setCurrentInputIndex] = useState<Nullable<number>>(null);
+
     const selectorRef = useRef<HTMLDivElement>(null);
+
+    const currentInputIndexRef = useRef<Nullable<number>>(null);
 
     useEffect(() => {
         const selector = selectorRef.current;
@@ -117,10 +121,16 @@ export function RangeSelector(props: IRangeSelectorProps) {
             }
 
             const lastRange = ranges[ranges.length - 1];
+            const rangeRef = serializeRange(lastRange);
             if (addItemCount >= 1 && !isSingleChoice) {
-                addNewItem(serializeRange(lastRange));
+                addNewItem(rangeRef);
+                setCurrentInputIndex(null);
             } else {
-                changeLastItem(serializeRange(lastRange));
+                if (currentInputIndexRef.current == null) {
+                    changeLastItem(rangeRef);
+                } else {
+                    changeItem(currentInputIndexRef.current, rangeRef);
+                }
             }
         });
 
@@ -130,6 +140,10 @@ export function RangeSelector(props: IRangeSelectorProps) {
             resizeObserver.unobserve(selector);
         };
     }, []);
+
+    useEffect(() => {
+        currentInputIndexRef.current = currentInputIndex;
+    }, [currentInputIndex]);
 
     function handleCloseModal() {
         setSelectorVisible(false);
@@ -177,6 +191,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
 
     function handleAddRange() {
         addNewItem('');
+        setCurrentInputIndex(null);
     }
 
     function getSheetIdByName(name: string) {
@@ -233,7 +248,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
                     {rangeDataList.map((item, index) => (
                         <div key={index} className={styles.rangeSelectorModalContainer}>
                             <div style={{ display: rangeDataList.length === 1 ? '220px' : '200px' }} className={styles.rangeSelectorModalContainerInput}>
-                                <Input size="small" value={item} onChange={(value) => changeItem(index, value)} />
+                                <Input key={`input${index}`} onClick={() => setCurrentInputIndex(index)} size="small" value={item} onChange={(value) => changeItem(index, value)} />
                             </div>
                             <div style={{ display: rangeDataList.length === 1 ? 'none' : 'inline-block' }} className={styles.rangeSelectorModalContainerButton}>
                                 <DeleteSingle onClick={() => removeItem(index)} />

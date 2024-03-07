@@ -71,7 +71,7 @@
     "dependencies": {
         "@rc-component/color-picker": "^1.5.2",
         "@rc-component/trigger": "^1.18.3",
-        "@univerjs/icons": "^0.1.39",
+        "@univerjs/icons": "^0.1.40",
         "dayjs": ">=1.11.10",
         "rc-dialog": "^9.4.0",
         "rc-dropdown": "^4.1.0",

@@ -65,6 +65,7 @@ export const OpenConditionalFormatOperator: ICommand = {
                     rule: {
                         type: RuleType.highlightCell,
                         subType: SubRuleType.formula,
+                        value: '=',
                     },
                 } as IConditionFormatRule<IFormulaHighlightCell>;
                 conditionalFormatMenuController.openPanel(rule);

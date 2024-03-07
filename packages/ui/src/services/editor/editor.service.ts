@@ -304,10 +304,15 @@ export interface IEditorService {
 
     singleSelection$: Observable<boolean>;
     singleSelection(state: boolean): void;
+
+    setFocusId(id: Nullable<string>): void;
+    getFocusId(): Nullable<string>;
 }
 
 export class EditorService extends Disposable implements IEditorService, IDisposable {
     private _editors = new Map<string, Editor>();
+
+    private _focusEditorUnitId: Nullable<string>;
 
     private readonly _state$ = new Subject<Nullable<IEditorStateParam>>();
     readonly state$ = this._state$.asObservable();
@@ -354,6 +359,14 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         super();
     }
 
+    setFocusId(id: Nullable<string>) {
+        this._focusEditorUnitId = id;
+    }
+
+    getFocusId() {
+        return this._focusEditorUnitId;
+    }
+
     isEditor(editorUnitId: string) {
         return this._editors.has(editorUnitId);
     }
@@ -398,6 +411,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         }
 
         this._focusStyle$.next(editorUnitId);
+        this.setFocusId(editorUnitId);
     }
 
     singleSelection(state: boolean) {
@@ -405,8 +419,11 @@ export class EditorService extends Disposable implements IEditorService, IDispos
     }
 
     selectionChangingState() {
-        const documentDataModel = this._currentUniverService.getCurrentUniverDocInstance();
-        const editorUnitId = documentDataModel.getUnitId();
+        // const documentDataModel = this._currentUniverService.getCurrentUniverDocInstance();
+        const editorUnitId = this.getFocusId();
+        if (editorUnitId == null) {
+            return true;
+        }
         const editor = this.getEditor(editorUnitId);
 
         return !this.getSpreadsheetFocusState() || !editor || editor.isSheetEditor();
@@ -416,6 +433,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         if (!this._spreadsheetFocusState) {
             this._closeRangePrompt$.next(null);
             this.singleSelection(false);
+            this.setFocusId(null);
         }
 
         this.getAllEditor().forEach((editor) => {
@@ -423,6 +441,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         });
 
         this._focusStyle$.next();
+
         this._blur$.next(null);
     }
 

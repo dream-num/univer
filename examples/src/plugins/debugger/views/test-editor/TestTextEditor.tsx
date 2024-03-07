@@ -48,14 +48,6 @@ export const TestEditorContainer = () => {
 
     const sheetId = workbook.getActiveSheet().getSheetId();
 
-    // function onActive(state: boolean) {
-    //     console.warn('active:', state);
-    // }
-    // onActive={onActive} onValid={onValid}
-    // function onValid(state: boolean) {
-    //     console.warn('valid:', state);
-    // }
-
     return (
         <div
             style={containerStyle}

@@ -17,6 +17,7 @@
 import type { ICommand } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
+import { SelectionManagerService } from '@univerjs/sheets';
 import { ConditionalFormatMenuController } from '../../controllers/cf.menu.controller';
 import { createDefaultRule, RuleType, SubRuleType } from '../../base/const';
 import type { IColorScale, IConditionFormatRule, IDataBar, IFormulaHighlightCell, IRankHighlightCell } from '../../models/type';
@@ -42,15 +43,19 @@ export const OpenConditionalFormatOperator: ICommand = {
     type: CommandType.OPERATION,
     handler: (accessor: IAccessor, params: IOpenConditionalFormatOperatorParams) => {
         const conditionalFormatMenuController = accessor.get(ConditionalFormatMenuController);
+        const selectionManagerService = accessor.get(SelectionManagerService);
+        const ranges = selectionManagerService.getSelectionRanges() || [];
+
         const type = params.value;
         switch (type) {
             case OPERATION.highlightCell:{
-                conditionalFormatMenuController.openPanel(createDefaultRule());
+                conditionalFormatMenuController.openPanel({ ...createDefaultRule(), ranges });
                 break;
             }
             case OPERATION.rank:{
                 const rule = {
                     ...createDefaultRule,
+                    ranges,
                     rule: {
                         type: RuleType.highlightCell,
                         subType: SubRuleType.rank,
@@ -62,6 +67,7 @@ export const OpenConditionalFormatOperator: ICommand = {
             case OPERATION.formula:{
                 const rule = {
                     ...createDefaultRule,
+                    ranges,
                     rule: {
                         type: RuleType.highlightCell,
                         subType: SubRuleType.formula,
@@ -74,6 +80,7 @@ export const OpenConditionalFormatOperator: ICommand = {
             case OPERATION.colorScale:{
                 const rule = {
                     ...createDefaultRule,
+                    ranges,
                     rule: {
                         type: RuleType.colorScale,
                         config: [],
@@ -85,6 +92,7 @@ export const OpenConditionalFormatOperator: ICommand = {
             case OPERATION.dataBar:{
                 const rule = {
                     ...createDefaultRule,
+                    ranges,
                     rule: {
                         type: RuleType.dataBar,
                     },
@@ -100,7 +108,7 @@ export const OpenConditionalFormatOperator: ICommand = {
                 break;
             }
             case OPERATION.createRule:{
-                conditionalFormatMenuController.openPanel(createDefaultRule());
+                conditionalFormatMenuController.openPanel({ ...createDefaultRule(), ranges });
                 break;
             }
             case OPERATION.clearRangeRules:{

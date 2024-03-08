@@ -15,14 +15,16 @@
  */
 
 import React, { useMemo, useRef, useState } from 'react';
+import type { IRange, IUnitRange } from '@univerjs/core';
 import { ICommandService, InterceptorManager, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
+import { serializeRangeToRefString } from '@univerjs/engine-formula';
 import { Button, Select } from '@univerjs/design';
-import { SelectionManagerService } from '@univerjs/sheets';
-import { RangeSelector } from '@univerjs/sheets-ui';
+
+import { RangeSelector } from '@univerjs/ui';
 import type { IConditionFormatRule } from '../../../models/type';
 import { ConditionalFormatRuleModel } from '../../../models/conditional-format-rule-model';
-import { RuleType, SubRuleType } from '../../../base/const';
+import { RuleType, SHEET_CONDITION_FORMAT_PLUGIN, SubRuleType } from '../../../base/const';
 import type { IAddCfCommandParams } from '../../../commands/commands/add-cf.command';
 import { addCfCommand } from '../../../commands/commands/add-cf.command';
 import type { ISetCfCommandParams } from '../../../commands/commands/set-cf.command';
@@ -46,10 +48,22 @@ interface IRuleEditProps {
 
 export const RuleEdit = (props: IRuleEditProps) => {
     const localeService = useDependency(LocaleService);
-    const selectionManagerService = useDependency(SelectionManagerService);
     const commandService = useDependency(ICommandService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const conditionalFormatRuleModel = useDependency(ConditionalFormatRuleModel);
+    const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+    const subUnitId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
+    const workbook = univerInstanceService.getUniverSheetInstance(unitId);
+    const sheet = workbook?.getSheetBySheetId(subUnitId);
+
+    const rangeResult = useRef<IRange[]>([]);
+    const rangeString = useMemo(() => {
+        const ranges = props.rule?.ranges?.length ? props.rule?.ranges : [];
+        if (ranges.length && sheet) {
+            return ranges.map((range) => serializeRangeToRefString({ range, sheetName: sheet.getName(), unitId })).join(',');
+        }
+        return '';
+    }, [props.rule?.ranges]);
 
     const options = [
         { label: localeService.t('sheet.cf.ruleType.highlightCell'), value: '1' },
@@ -134,24 +148,21 @@ export const RuleEdit = (props: IRuleEditProps) => {
         result.current = config as Parameters<IStyleEditorProps['onChange']>;
     };
 
-    const onRangeSelectorActive = (isActive: boolean) => {
-    };
-    const onRangeSelectorChange = (range: string) => {
+    const onRangeSelectorChange = (ranges: IUnitRange[]) => {
+        rangeResult.current = ranges.map((r) => r.range);
     };
 
     const handleSubmit = () => {
         const beforeSubmitResult = interceptorManager.fetchThroughInterceptors(interceptorManager.getInterceptPoints().beforeSubmit)(true, null);
         const getRanges = () => {
-            const selections = selectionManagerService.getSelections();
-            return selections && selections.map((selection) => selection.range);
+            const ranges = rangeResult.current;
+            return ranges;
         };
 
         if (beforeSubmitResult) {
             const result = interceptorManager.fetchThroughInterceptors(interceptorManager.getInterceptPoints().submit)(null, null);
             const ranges = getRanges();
-            const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-            const subUnitId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
-            if (result && ranges) {
+            if (result && ranges.length) {
                 let rule = {} as IConditionFormatRule;
                 if (props.rule && props.rule.cfId) {
                     rule = { ...props.rule, ranges, rule: result };
@@ -173,7 +184,7 @@ export const RuleEdit = (props: IRuleEditProps) => {
         <div className={styles.cfRuleStyleEditor}>
             <div className={styleBase.title}>{localeService.t('sheet.cf.panel.range')}</div>
             <div className={`${styleBase.mTBase} ${styleBase.mLXxs}`}>
-                <RangeSelector onActive={onRangeSelectorActive} onChange={onRangeSelectorChange} />
+                <RangeSelector value={rangeString} id={SHEET_CONDITION_FORMAT_PLUGIN} onChange={onRangeSelectorChange} />
             </div>
             <div className={styleBase.title}>{localeService.t('sheet.cf.panel.styleType')}</div>
             <div className={styleBase.mTBase}>

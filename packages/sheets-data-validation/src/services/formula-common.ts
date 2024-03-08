@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import type { ICellData, Nullable } from '@univerjs/core';
+
 export enum FormulaResultStatus {
     NOT_REGISTER = 1,
     SUCCESS,
@@ -22,8 +24,9 @@ export enum FormulaResultStatus {
 }
 
 export interface IDataValidationFormulaResult {
-    result?: boolean | number | string;
+    result?: Nullable<ICellData>[][];
     status: FormulaResultStatus;
+    ruleId: string;
 }
 
 export interface IFormulaInfo {

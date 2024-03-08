@@ -18,7 +18,8 @@
 // remove rule -> delete formula by range -> remove formula
 // update rule ranges -> reset rule ranges
 // update rule formula
-import { CommandType, type ICommand, type IRange, type ISheetDataValidationRule, type ObjectMatrix } from '@univerjs/core';
+import type { ICommand, IMutation, IRange, ISheetDataValidationRule, ObjectMatrix } from '@univerjs/core';
+import { CommandType } from '@univerjs/core';
 import { DataValidationFormulaService } from '../../services/dv-formula.service';
 
 export interface ISetDataValidationFormulaByRangeMutationParams {
@@ -89,7 +90,7 @@ export interface IUpdateDataValidationFormulaRangeMutationParams {
 }
 
 export const UpdateDataValidationFormulaRangeMutation: ICommand<IUpdateDataValidationFormulaRangeMutationParams> = {
-    id: 'sheet-data-validation.mutation.update-formula-range',
+    id: 'sheet.mutation.update-data-validation-formula-range',
     type: CommandType.MUTATION,
     async handler(accessor, params) {
         if (!params) {
@@ -110,7 +111,7 @@ export interface IUpdateDataValidationFormulaTextMutationParams {
 }
 
 export const UpdateDataValidationFormulaTextMutation: ICommand<IUpdateDataValidationFormulaTextMutationParams> = {
-    id: 'sheet-data-validation.mutation.update-formula-text',
+    id: 'sheet.mutation.update-data-validation-formula-text',
     type: CommandType.MUTATION,
     async handler(accessor, params) {
         if (!params) {
@@ -118,6 +119,15 @@ export const UpdateDataValidationFormulaTextMutation: ICommand<IUpdateDataValida
         }
 
         const { unitId, subUnitId, ranges } = params;
+        return true;
+    },
+};
+
+export interface IDataValidationFormulaMarkDirtyParams { [unitId: string]: { [sunUnitId: string]: { [formulaId: string]: boolean } } }
+export const DataValidationFormulaMarkDirty: IMutation<IDataValidationFormulaMarkDirtyParams> = {
+    type: CommandType.MUTATION,
+    id: 'sheet.mutation.data-validation-formula-mark-dirty',
+    handler() {
         return true;
     },
 };

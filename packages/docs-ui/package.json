@@ -69,7 +69,7 @@
         "@wendellhu/redi": "^0.13.0"
     },
     "devDependencies": {
-        "@types/react": "^18.2.63",
+        "@types/react": "^18.2.64",
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/docs": "workspace:*",

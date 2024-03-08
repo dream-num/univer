@@ -40,7 +40,7 @@
         "vue": "^3.4.21"
     },
     "devDependencies": {
-        "@types/react": "^18.2.63",
+        "@types/react": "^18.2.64",
         "@types/react-dom": "^18.2.20",
         "@univerjs/shared": "workspace:*",
         "esbuild": "^0.20.1",

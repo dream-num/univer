@@ -72,7 +72,7 @@
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": "^0.13.0",
+        "@wendellhu/redi": "0.13.0",
         "clsx": ">=2.0.0",
         "react": ">=16.9.0",
         "rxjs": ">=7.0.0"
@@ -81,7 +81,7 @@
         "@univerjs/icons": "^0.1.40"
     },
     "devDependencies": {
-        "@types/react": "^18.2.63",
+        "@types/react": "^18.2.64",
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/docs": "workspace:*",

@@ -1,3 +1,5 @@
+const process = require('node:process');
+const { writeFileSync } = require('node:fs');
 const { convertLibNameFromPackageName } = require('./utils');
 
 exports.autoExternalizeDependency = function autoExternalizeDependency() {
@@ -6,16 +8,56 @@ exports.autoExternalizeDependency = function autoExternalizeDependency() {
     let hasCss = false;
 
     const externalMap = {
-        '@wendellhu/redi': '@wendellhu/redi',
-        '@wendellhu/redi/react-bindings': '@wendellhu/redi/react-bindings',
-        clsx: 'clsx',
-        'lodash/debounce': 'lodash.debounce',
-        'monaco-editor': 'monaco',
-        react: 'React',
-        'react-dom': 'ReactDOM',
-        rxjs: 'rxjs',
-        'rxjs/operators': 'rxjs.operators',
-        vue: 'Vue',
+        '@wendellhu/redi': {
+            global: '@wendellhu/redi',
+            name: '@wendellhu/redi',
+            version: '0.13.0',
+        },
+        '@wendellhu/redi/react-bindings': {
+            global: '@wendellhu/redi/react-bindings',
+            name: '@wendellhu/redi',
+            version: '@wendellhu/redi',
+        },
+        clsx: {
+            global: 'clsx',
+            name: 'clsx',
+            version: '>=2.0.0',
+        },
+        'lodash/debounce': {
+            global: 'lodash.debounce',
+            name: 'lodash',
+            version: '>=4.0.0',
+        },
+        'monaco-editor': {
+            global: 'monaco',
+            name: 'monaco-editor',
+            version: '>=0.44.0',
+        },
+        react: {
+            global: 'React',
+            name: 'react',
+            version: '>=16.9.0',
+        },
+        'react-dom': {
+            global: 'ReactDOM',
+            name: 'react-dom',
+            version: '>=16.9.0',
+        },
+        rxjs: {
+            global: 'rxjs',
+            name: 'rxjs',
+            version: '>=7.0.0',
+        },
+        'rxjs/operators': {
+            global: 'rxjs.operators',
+            name: 'rxjs',
+            version: 'rxjs',
+        },
+        vue: {
+            global: 'Vue',
+            name: 'vue',
+            version: '>=3.0.0',
+        },
     };
 
     return {
@@ -30,10 +72,14 @@ exports.autoExternalizeDependency = function autoExternalizeDependency() {
 
             if (source in externalMap) {
                 externals.add(source);
-                globals[source] = externalMap[source];
+                globals[source] = externalMap[source].global;
 
                 return { id: source, external: true };
-            } else if (source.startsWith('@univerjs') && source !== '@univerjs/icons') {
+            } else if (source.startsWith('@univerjs')) {
+                if (source === '@univerjs/icons') {
+                    return null;
+                }
+
                 externals.add(source);
 
                 globals[source] = convertLibNameFromPackageName(source);
@@ -55,8 +101,30 @@ exports.autoExternalizeDependency = function autoExternalizeDependency() {
         },
 
         generateBundle() {
-            // console.log('Auto-detected external modules:', Array.from(externals));
-            // console.log('Auto-detected globals:', globals);
+            // read package.json
+            const pkg = require(`${process.cwd()}/package.json`);
+            const peerDependencies = {};
+
+            Array.from(externals)
+                .sort()
+                .forEach((ext) => {
+                    const { version, name } = externalMap[ext] ?? {};
+
+                    if (version) {
+                        if (version !== name) {
+                            peerDependencies[ext] = version;
+                        }
+                    } else {
+                        peerDependencies[ext] = 'workspace:*';
+                    }
+                });
+
+            pkg.peerDependencies = peerDependencies;
+
+            writeFileSync(
+                `${process.cwd()}/package.json`,
+                `${JSON.stringify(pkg, null, 4)}\n`
+            );
         },
     };
 };

@@ -16,9 +16,9 @@
 
 import React, { useEffect, useState } from 'react';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import { LocaleService } from '@univerjs/core';
-import { Input } from '@univerjs/design';
-import { RuleType, SubRuleType } from '../../../base/const';
+import { IUniverInstanceService, LocaleService } from '@univerjs/core';
+import { TextEditor } from '@univerjs/ui';
+import { RuleType, SHEET_CONDITION_FORMAT_PLUGIN, SubRuleType } from '../../../base/const';
 import { ConditionalStyleEditor } from '../../conditional-style-editor';
 import type { IAverageHighlightCell, IConditionalFormatRuleConfig, IHighlightCell, IRankHighlightCell } from '../../../models/type';
 import stylesBase from '../index.module.less';
@@ -29,6 +29,9 @@ import type { IStyleEditorProps } from './type';
 export const FormulaStyleEditor = (props: IStyleEditorProps) => {
     const { onChange, interceptorManager } = props;
     const localeService = useDependency(LocaleService);
+    const univerInstanceService = useDependency(IUniverInstanceService);
+    const workbook = univerInstanceService.getCurrentUniverSheetInstance();
+    const worksheet = workbook.getActiveSheet();
 
     const rule = props.rule?.type === RuleType.highlightCell ? props.rule : undefined as IRankHighlightCell | IAverageHighlightCell | undefined;
 
@@ -68,11 +71,17 @@ export const FormulaStyleEditor = (props: IStyleEditorProps) => {
         <div>
             <div className={`${stylesBase.title} ${stylesBase.mTBase}`}>{localeService.t('sheet.cf.panel.styleRule')}</div>
             <div className={`${stylesBase.mTSm} ${stylesBase.mLXxs}`}>
-                <Input
+                <TextEditor
+                    id={`${SHEET_CONDITION_FORMAT_PLUGIN}_formula`}
+                    openForSheetSubUnitId={worksheet.getSheetId()}
+                    openForSheetUnitId={workbook.getUnitId()}
                     value={formula}
-                    onChange={(v) => {
-                        formulaSet(v);
-                        _onChange({ style, formula: v });
+                    canvasStyle={{ fontSize: 10 }}
+                    onlyInputFormula={true}
+                    onChange={(v = '') => {
+                        const formula = v || '';
+                        formulaSet(formula);
+                        _onChange({ style, formula });
                     }}
                 />
             </div>

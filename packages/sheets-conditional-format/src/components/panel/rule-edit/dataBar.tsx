@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import React, { useEffect, useState } from 'react';
-import { Input, InputNumber, Radio, RadioGroup, Select } from '@univerjs/design';
+import React, { useEffect, useRef, useState } from 'react';
+import { InputNumber, Radio, RadioGroup, Select } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { LocaleService } from '@univerjs/core';
-import { RuleType, ValueType } from '../../../base/const';
+import { TextEditor } from '@univerjs/ui';
+import { RuleType, SHEET_CONDITION_FORMAT_PLUGIN, ValueType } from '../../../base/const';
 import type { IValueConfig } from '../../../models/type';
 import { ColorPicker } from '../../color-picker';
 import stylesBase from '../index.module.less';
@@ -27,19 +28,23 @@ import type { IStyleEditorProps } from './type';
 
 const createOptionItem = (text: ValueType, localeService: LocaleService) => ({ label: localeService.t(`sheet.cf.valueType.${text}`), value: text });
 
-const InputText = (props: { className: string; type: ValueType;value: string | number;onChange: (v: string | number) => void }) => {
-    const { onChange, className, value, type } = props;
+const InputText = (props: { id: string; className: string; type: ValueType;value: string | number;onChange: (v: string | number) => void }) => {
+    const { onChange, className, value, type, id } = props;
+    const _value = useRef(value);
     if (type === ValueType.formula) {
-        const v = String(props.value).startsWith('=') ? String(props.value) || '' : '=';
+        const v = String(_value.current).startsWith('=') ? String(_value.current) || '' : '=';
         return (
-            <div className={className} style={{ display: 'flex', alignItems: 'center' }}>
-                <Input
-                    value={v}
-                    onChange={(v) => {
-                        onChange(v || '');
-                    }}
-                />
-            </div>
+            <TextEditor
+                id={`${SHEET_CONDITION_FORMAT_PLUGIN}_data_bar_${id}`}
+                value={v}
+                style={{ maxWidth: '50%' }}
+                canvasStyle={{ fontSize: 10 }}
+                onlyInputFormula={true}
+                onChange={(v = '') => {
+                    const formula = v || '';
+                    onChange(formula);
+                }}
+            />
         );
     }
     return (
@@ -233,6 +238,7 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                     />
                     {isShowInput(minValueType) && (
                         <InputText
+                            id="min"
                             type={minValueType}
                             className={stylesBase.mLSm}
                             value={minValue}
@@ -256,6 +262,7 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                     />
                     {isShowInput(maxValueType) && (
                         <InputText
+                            id="max"
                             type={maxValueType}
                             className={stylesBase.mLSm}
                             value={maxValue}

@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { LocaleService } from '@univerjs/core';
-import { Input, InputNumber, Select } from '@univerjs/design';
-import { RuleType, ValueType } from '../../../base/const';
+import { InputNumber, Select } from '@univerjs/design';
+import { TextEditor } from '@univerjs/ui';
+import { RuleType, SHEET_CONDITION_FORMAT_PLUGIN, ValueType } from '../../../base/const';
 import { ColorPicker } from '../../color-picker';
 import type { IColorScale } from '../../../models/type';
 import styles from '../index.module.less';
@@ -26,8 +27,10 @@ import type { IStyleEditorProps } from './type';
 
 const createOptionItem = (text: string, localeService: LocaleService) => ({ label: localeService.t(`sheet.cf.valueType.${text}`), value: text });
 
-const TextInput = (props: { type: ValueType | 'none';value: number | string;onChange: (v: number | string) => void; className: string }) => {
-    const { type, className } = props;
+const TextInput = (props: { id: string; type: ValueType | 'none';value: number | string;onChange: (v: number | string) => void; className: string }) => {
+    const { type, className, onChange, id, value } = props;
+    const _value = useRef(value);
+
     const config = useMemo(() => {
         if ([ValueType.max, ValueType.min, 'none'].includes(type as ValueType)) {
             return { disabled: true };
@@ -40,11 +43,19 @@ const TextInput = (props: { type: ValueType | 'none';value: number | string;onCh
         return {};
     }, [type]);
     if (type === ValueType.formula) {
-        const v = String(props.value).startsWith('=') ? String(props.value) || '' : '=';
+        const v = String(_value.current).startsWith('=') ? String(_value.current) || '' : '=';
         return (
-            <div className={className} style={{ display: 'flex', alignItems: 'center' }}>
-                <Input value={v} onChange={(v) => props.onChange(v || '')} {...config} />
-            </div>
+            <TextEditor
+                id={`${SHEET_CONDITION_FORMAT_PLUGIN}_colo_scale_${id}`}
+                value={v}
+                style={{ maxWidth: '50%' }}
+                canvasStyle={{ fontSize: 10 }}
+                onlyInputFormula={true}
+                onChange={(v = '') => {
+                    const formula = v || '';
+                    onChange(formula);
+                }}
+            />
         );
     } else {
         return <InputNumber className={className} value={Number(props.value) || 0} onChange={(v) => props.onChange(v || 0)} {...config} />;
@@ -203,6 +214,7 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
                 />
                 {isShowInput(minType) && (
                     <TextInput
+                        id="min"
                         className={`${styles.inputWidth} ${styles.mLXxs}`}
                         value={minValue}
                         type={minType}
@@ -235,6 +247,7 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
                 />
                 {isShowInput(medianType as ValueType) && (
                     <TextInput
+                        id="median"
                         className={`${styles.inputWidth} ${styles.mLXxs}`}
                         value={medianValue}
                         type={medianType}
@@ -269,6 +282,7 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
                 />
                 {isShowInput(maxType) && (
                     <TextInput
+                        id="max"
                         className={`${styles.inputWidth} ${styles.mLXxs}`}
                         value={maxValue}
                         type={maxType}

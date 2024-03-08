@@ -191,7 +191,7 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
         }, 30);
 
         const valueChangeSubscription = editorService.valueChange$.subscribe((editor) => {
-            if (!editor.onlyInputFormula() && !editor.onlyInputRange()) {
+            if (editor.isSheetEditor()) {
                 return;
             }
 

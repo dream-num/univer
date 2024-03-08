@@ -23,10 +23,15 @@ exports.autoExternalizeDependency = function autoExternalizeDependency() {
             name: 'clsx',
             version: '>=2.0.0',
         },
+        lodash: {
+            global: 'lodash',
+            name: 'lodash',
+            version: '>=4.0.0',
+        },
         'lodash/debounce': {
             global: 'lodash.debounce',
             name: 'lodash',
-            version: '>=4.0.0',
+            version: 'lodash',
         },
         'monaco-editor': {
             global: 'monaco',
@@ -113,6 +118,10 @@ exports.autoExternalizeDependency = function autoExternalizeDependency() {
                     if (version) {
                         if (version !== name) {
                             peerDependencies[ext] = version;
+                        } else {
+                            if (!peerDependencies[version]) {
+                                peerDependencies[name] = externalMap[version].version;
+                            }
                         }
                     } else {
                         peerDependencies[ext] = 'workspace:*';

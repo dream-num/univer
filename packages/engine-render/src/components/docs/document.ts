@@ -235,8 +235,8 @@ export class Documents extends DocComponent {
                 renderConfig = {},
             } = page;
             const {
-                verticalAlign = VerticalAlign.TOP,
-                horizontalAlign = HorizontalAlign.LEFT,
+                verticalAlign = VerticalAlign.UNSPECIFIED,
+                horizontalAlign = HorizontalAlign.UNSPECIFIED,
                 centerAngle: centerAngleDeg = 0,
                 vertexAngle: vertexAngleDeg = 0,
                 wrapStrategy = WrapStrategy.UNSPECIFIED,
@@ -247,7 +247,8 @@ export class Documents extends DocComponent {
                 actualWidth,
                 pagePaddingLeft,
                 pagePaddingRight,
-                horizontalAlign
+                horizontalAlign,
+                vertexAngleDeg
             );
 
             const verticalOffsetNoAngle = this._verticalHandler(
@@ -310,7 +311,8 @@ export class Documents extends DocComponent {
                             exceedWidthFix,
                             pagePaddingLeft,
                             pagePaddingRight,
-                            horizontalAlign
+                            horizontalAlign,
+                            vertexAngle
                         );
 
                         const verticalOffset = this._verticalHandler(
@@ -454,7 +456,8 @@ export class Documents extends DocComponent {
         pageWidth: number,
         pagePaddingLeft: number,
         pagePaddingRight: number,
-        horizontalAlign: HorizontalAlign
+        horizontalAlign: HorizontalAlign,
+        angle: number = 0
     ) {
         let offsetLeft = 0;
         if (horizontalAlign === HorizontalAlign.CENTER) {
@@ -462,7 +465,15 @@ export class Documents extends DocComponent {
         } else if (horizontalAlign === HorizontalAlign.RIGHT) {
             offsetLeft = this.width - pageWidth - pagePaddingRight;
         } else {
-            offsetLeft = pagePaddingLeft;
+            /**
+             * In Excel, if horizontal alignment is not specified,
+             * rotated text aligns to the right when rotated downwards and aligns to the left when rotated upwards.
+             */
+            if (horizontalAlign === HorizontalAlign.UNSPECIFIED && angle > 0) {
+                offsetLeft = this.width - pageWidth - pagePaddingRight;
+            } else {
+                offsetLeft = pagePaddingLeft;
+            }
         }
 
         return offsetLeft;

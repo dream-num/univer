@@ -133,5 +133,16 @@ export * from './types/interfaces';
 export { UniverInstanceService } from './services/instance/instance.service';
 export { LifecycleInitializerService } from './services/lifecycle/lifecycle.service';
 export { ConfigService } from './services/config/config.service';
+export { ISnapshotServerService } from './services/snapshot/snapshot-server.service';
+export {
+    transformSnapshotToWorkbookData,
+    transformWorkbookDataToSnapshot,
+    transformDocumentDataToSnapshot,
+    transformSnapshotToDocumentData,
+    generateTemporarySnap,
+} from './services/snapshot/snapshot-transform';
+export { textEncoder } from './services/snapshot/snapshot-utils';
+export { type ILogContext } from './services/log/context';
+export { b64DecodeUnicode, b64EncodeUnicode } from './shared/coder';
 
 installShims();

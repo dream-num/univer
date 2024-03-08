@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { nanoid } from 'nanoid';
+import { customAlphabet, nanoid } from 'nanoid';
 
 import type { Class, IKeyValue } from './types';
 
@@ -165,7 +165,10 @@ export class Tools {
         return 'Unknown browser';
     }
 
-    static generateRandomId(n: number = 21): string {
+    static generateRandomId(n: number = 21, alphabet?: string): string {
+        if (alphabet) {
+            return customAlphabet(alphabet, n)();
+        }
         return nanoid(n);
     }
 

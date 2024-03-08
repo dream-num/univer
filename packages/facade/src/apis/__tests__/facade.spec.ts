@@ -20,8 +20,12 @@ import { SetRangeValuesCommand, SetRangeValuesMutation, SetStyleCommand } from '
 import type { Injector } from '@wendellhu/redi';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import type { RenderComponentType, SheetComponent } from '@univerjs/engine-render';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import { SHEET_VIEW_KEY } from '@univerjs/sheets-ui';
 import type { FUniver } from '../facade';
 import { createTestBed } from './create-test-bed';
+import { COLUMN_UNIQUE_KEY, ColumnHeaderCustomExtension, MAIN_UNIQUE_KEY, MainCustomExtension, ROW_UNIQUE_KEY, RowHeaderCustomExtension } from './utils/sheet-extension-util';
 
 describe('Test FUniver', () => {
     let get: Injector['get'];
@@ -39,6 +43,7 @@ describe('Test FUniver', () => {
         endRow: number,
         endColumn: number
     ) => Nullable<IStyleData>;
+    let getSheetRenderComponent: (unitId: string, viewKey: SHEET_VIEW_KEY) => Nullable<RenderComponentType>;
 
     beforeEach(() => {
         const testBed = createTestBed();
@@ -73,6 +78,24 @@ describe('Test FUniver', () => {
             if (value && styles) {
                 return styles.getStyleByCell(value);
             }
+        };
+
+        getSheetRenderComponent = (unitId: string, viewKey: SHEET_VIEW_KEY): Nullable<RenderComponentType> => {
+            const render = get(IRenderManagerService).getRenderById(unitId);
+
+            if (!render) {
+                throw new Error('Render not found');
+            }
+
+            const { components } = render;
+
+            const renderComponent = components.get(viewKey);
+
+            if (!renderComponent) {
+                throw new Error('Render component not found');
+            }
+
+            return renderComponent;
         };
     });
 
@@ -136,5 +159,53 @@ describe('Test FUniver', () => {
 
     it('Function createSocket', () => {
         expect(() => univerAPI.createSocket('URL')).toThrowError();
+    });
+
+    it('Function registerSheetRowHeaderExtension and unregisterSheetRowHeaderExtension', () => {
+        const rowHeader = univerAPI.registerSheetRowHeaderExtension('test', new RowHeaderCustomExtension());
+
+        const sheetComponent = getSheetRenderComponent('test', SHEET_VIEW_KEY.ROW) as SheetComponent;
+
+        let rowHeaderExtension = sheetComponent.getExtensionByKey(ROW_UNIQUE_KEY);
+
+        expect(rowHeaderExtension).toBeDefined();
+
+        rowHeader.dispose();
+
+        rowHeaderExtension = sheetComponent.getExtensionByKey(ROW_UNIQUE_KEY);
+
+        expect(rowHeaderExtension).toBeUndefined();
+    });
+
+    it('Function registerSheetColumnHeaderExtension and unregisterSheetColumnHeaderExtension', () => {
+        const columnHeader = univerAPI.registerSheetColumnHeaderExtension('test', new ColumnHeaderCustomExtension());
+
+        const sheetComponent = getSheetRenderComponent('test', SHEET_VIEW_KEY.COLUMN) as SheetComponent;
+
+        let columnHeaderExtension = sheetComponent.getExtensionByKey(COLUMN_UNIQUE_KEY);
+
+        expect(columnHeaderExtension).toBeDefined();
+
+        columnHeader.dispose();
+
+        columnHeaderExtension = sheetComponent.getExtensionByKey(COLUMN_UNIQUE_KEY);
+
+        expect(columnHeaderExtension).toBeUndefined();
+    });
+
+    it('Function registerSheetMainExtension and unregisterSheetMainExtension', () => {
+        const main = univerAPI.registerSheetMainExtension('test', new MainCustomExtension());
+
+        const sheetComponent = getSheetRenderComponent('test', SHEET_VIEW_KEY.MAIN) as SheetComponent;
+
+        let mainExtension = sheetComponent.getExtensionByKey(MAIN_UNIQUE_KEY);
+
+        expect(mainExtension).toBeDefined();
+
+        main.dispose();
+
+        mainExtension = sheetComponent.getExtensionByKey(MAIN_UNIQUE_KEY);
+
+        expect(mainExtension).toBeUndefined();
     });
 });

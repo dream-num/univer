@@ -33,7 +33,7 @@ import { Inject, Injector } from '@wendellhu/redi';
 
 import { DocStateChangeManagerService, DocViewModelManagerService, IMEInputManagerService, TextSelectionManagerService } from '@univerjs/docs';
 
-import { ITextSelectionRenderManager, TextSelectionRenderManager } from '@univerjs/engine-render';
+import { IRenderManagerService, ITextSelectionRenderManager, RenderManagerService, TextSelectionRenderManager } from '@univerjs/engine-render';
 import { FUniver } from '../../facade';
 
 function getTestDocumentDataDemo(): IDocumentData {
@@ -79,6 +79,7 @@ export function createTestBed(documentConfig?: IDocumentData, dependencies?: Dep
         }
 
         override onStarting(injector: Injector): void {
+            injector.add([IRenderManagerService, { useClass: RenderManagerService }]);
             injector.add([TextSelectionManagerService]);
             injector.add([DocViewModelManagerService]);
             injector.add([DocStateChangeManagerService]);

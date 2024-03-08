@@ -242,7 +242,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
         <>
             <div className={sClassName} ref={selectorRef}>
                 <TextEditor
-                    value={rangeValue}
+                    value={value}
                     isSingleChoice={isSingleChoice}
                     openForSheetUnitId={openForSheetUnitId}
                     openForSheetSubUnitId={openForSheetSubUnitId}

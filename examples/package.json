@@ -22,6 +22,7 @@
         "@univerjs/icons": "^0.1.39",
         "@univerjs/rpc": "workspace:*",
         "@univerjs/sheets": "workspace:*",
+        "@univerjs/sheets-conditional-format": "workspace:*",
         "@univerjs/sheets-data-validation": "workspace:*",
         "@univerjs/sheets-find-replace": "workspace:*",
         "@univerjs/sheets-formula": "workspace:*",

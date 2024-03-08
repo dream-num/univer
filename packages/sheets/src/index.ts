@@ -54,7 +54,7 @@ export {
 
 // #region commands
 
-export { rangeMerge } from './basics/rangeMerge';
+export { rangeMerge, createTopMatrixFromRanges, createTopMatrixFromMatrix, findAllRectangle } from './basics/rangeMerge';
 export { ClearSelectionAllCommand } from './commands/commands/clear-selection-all.command';
 export { ClearSelectionContentCommand } from './commands/commands/clear-selection-content.command';
 export { ClearSelectionFormatCommand } from './commands/commands/clear-selection-format.command';

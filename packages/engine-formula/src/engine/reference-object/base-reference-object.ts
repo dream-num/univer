@@ -109,19 +109,19 @@ export class BaseReferenceObject extends ObjectClassType {
         let startColumn = this._rangeData.startColumn + this._refOffsetX;
         let endColumn = this._rangeData.endColumn + this._refOffsetX;
 
-        if (isNaN(startRow)) {
+        if (Number.isNaN(startRow)) {
             startRow = 0;
         }
 
-        if (isNaN(startColumn)) {
+        if (Number.isNaN(startColumn)) {
             startColumn = 0;
         }
 
-        if (isNaN(endRow)) {
+        if (Number.isNaN(endRow)) {
             endRow = this.getRowCount() - 1;
         }
 
-        if (isNaN(endColumn)) {
+        if (Number.isNaN(endColumn)) {
             endColumn = this.getColumnCount() - 1;
         }
 

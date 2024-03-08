@@ -70,7 +70,7 @@ export interface IRuntimeUnitDataType {
 }
 
 export interface IRuntimeOtherUnitDataType {
-    [unitId: string]: Nullable<{ [sheetId: string]: Nullable<{ [formulaId: string]: ICellData }> }>;
+    [unitId: string]: Nullable<{ [sheetId: string]: Nullable<{ [formulaId: string]: Nullable<ICellData>[][] }> }>;
 }
 
 export interface IUnitSheetNameMap {
@@ -83,6 +83,10 @@ export interface IDirtyUnitSheetNameMap {
 
 export interface IDirtyUnitFeatureMap {
     [unitId: string]: Nullable<{ [sheetId: string]: { [featureId: string]: boolean } }>;
+}
+
+export interface IDirtyUnitOtherFormulaMap {
+    [unitId: string]: Nullable<{ [sheetId: string]: { [formulaId: string]: boolean } }>;
 }
 
 export interface IArrayFormulaRangeType {
@@ -148,6 +152,7 @@ export interface IFormulaDatasetConfig {
     dirtyRanges: IUnitRange[];
     dirtyNameMap: IDirtyUnitSheetNameMap;
     dirtyUnitFeatureMap: IDirtyUnitFeatureMap;
+    dirtyUnitOtherFormulaMap: IDirtyUnitOtherFormulaMap;
     numfmtItemMap: INumfmtItemMap;
     excludedCell?: IUnitExcludedCell;
     allUnitData?: IUnitData;

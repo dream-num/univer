@@ -62,7 +62,7 @@ describe('test ObjectMatrix', () => {
             2: { 1: '111', 2: '121', 3: '313' },
         });
     });
-    it('test moveMatrixArray', () => {
+    it('test moveMatrixArray2', () => {
         const primitiveObject = getPrimitiveObj();
         moveMatrixArray(2, 1, 0, primitiveObject);
         expect(primitiveObject).toStrictEqual({

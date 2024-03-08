@@ -17,7 +17,7 @@
 import type { IRange } from '@univerjs/core';
 import { ObjectMatrix, Range } from '@univerjs/core';
 
-const createTopMatrix = (ranges: IRange[]) => {
+export const createTopMatrixFromRanges = (ranges: IRange[]) => {
     const matrix = new ObjectMatrix<number>();
     ranges.forEach((range) => {
         Range.foreach(range, (row, col) => {
@@ -31,6 +31,16 @@ const createTopMatrix = (ranges: IRange[]) => {
         }
     });
     return matrix;
+};
+export const createTopMatrixFromMatrix = (matrix: ObjectMatrix<1>) => {
+    const _matrix = matrix as ObjectMatrix<number>;
+    _matrix.forValue((row, col) => {
+        const theLastRowValue = matrix.getValue(row - 1, col);
+        if (theLastRowValue) {
+            _matrix.setValue(row, col, theLastRowValue + 1);
+        }
+    });
+    return _matrix;
 };
 const findMaximalRectangle = (topMatrix: ObjectMatrix<number>) => {
     const res: {
@@ -92,7 +102,7 @@ const filterLeftMatrix = (topMatrix: ObjectMatrix<number>, range: IRange) => {
     return topMatrix;
 };
 
-const findAllRectangle = (topMatrix: ObjectMatrix<number>) => {
+export const findAllRectangle = (topMatrix: ObjectMatrix<number>) => {
     const resultList = [];
     let result = findMaximalRectangle(topMatrix);
     while (result.area > 0) {
@@ -113,6 +123,6 @@ const findAllRectangle = (topMatrix: ObjectMatrix<number>) => {
  * @returns {IRange[]}
  */
 export const rangeMerge = (ranges: IRange[]) => {
-    const topMatrix = createTopMatrix(ranges);
+    const topMatrix = createTopMatrixFromRanges(ranges);
     return findAllRectangle(topMatrix);
 };

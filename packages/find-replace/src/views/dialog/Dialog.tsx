@@ -15,8 +15,8 @@
  */
 
 import { LocaleService } from '@univerjs/core';
-import { Button, FormLayout, Input, InputWithSlot, Pager, Select, useObservable } from '@univerjs/design';
-import { ILayoutService } from '@univerjs/ui';
+import { Button, FormLayout, Input, InputWithSlot, Pager, Select } from '@univerjs/design';
+import { ILayoutService, useObservable } from '@univerjs/ui';
 import type { IDisposable } from '@wendellhu/redi';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react';

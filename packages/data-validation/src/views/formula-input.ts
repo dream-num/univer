@@ -16,12 +16,18 @@
 
 import type { FormulaInputType } from '../types/interfaces/i-formula-input';
 import { BaseFormulaInput } from './base-formula-input';
+import { ListFormulaInput } from './list-formula-input';
 
 export const BASE_FORMULA_INPUT_NAME = 'data-validation.formula-input';
+export const LIST_FORMULA_INPUT_NAME = 'data-validation.list-formula-input';
 
 export const FORMULA_INPUTS: [string, FormulaInputType][] = [
     [
         BASE_FORMULA_INPUT_NAME,
         BaseFormulaInput,
+    ],
+    [
+        LIST_FORMULA_INPUT_NAME,
+        ListFormulaInput,
     ],
 ];

@@ -13887,7 +13887,17 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                 }],
                 formula1: '1,2,3,4',
             },
-            ],
+            {
+                uid: 'xxx-4',
+                type: DataValidationType.CUSTOM,
+                ranges: [{
+                    startRow: 16,
+                    endRow: 20,
+                    startColumn: 0,
+                    endColumn: 5,
+                }],
+                formula1: '=ISBLANK(A17)',
+            }],
         },
         'sheet-0010': {
             name: 'sheet-0010',

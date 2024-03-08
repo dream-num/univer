@@ -16,7 +16,7 @@
 
 import { DataValidationType, Tools } from '@univerjs/core';
 import type { CellValue, DataValidationOperator, IDataValidationRule, IDataValidationRuleBase } from '@univerjs/core';
-import { BASE_FORMULA_INPUT_NAME } from '../views/formula-input';
+import { BASE_FORMULA_INPUT_NAME, LIST_FORMULA_INPUT_NAME } from '../views/formula-input';
 import { BaseDataValidator } from './base-data-validator';
 
 export const LIST_MULTIPLE_FORMULA = 'TRUE';
@@ -27,7 +27,7 @@ export class ListValidator extends BaseDataValidator {
     title: string = 'dataValidation.list.title';
     operators: DataValidationOperator[] = [];
     scopes: string | string[] = ['sheet'];
-    formulaInput: string = BASE_FORMULA_INPUT_NAME;
+    formulaInput: string = LIST_FORMULA_INPUT_NAME;
 
     override validatorFormula(rule: IDataValidationRuleBase): boolean {
         return !Tools.isBlank(rule.formula1);

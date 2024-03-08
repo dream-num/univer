@@ -16,13 +16,14 @@
 
 import { type CellValue, type DataValidationOperator, DataValidationType, type IDataValidationRule, type IDataValidationRuleBase, isFormulaString } from '@univerjs/core';
 import { BaseDataValidator } from '@univerjs/data-validation/validators/base-data-validator.js';
+import { CUSTOM_FORMULA_INPUT_NAME } from '../views/formula-input';
 
 export class CustomFormulaValidator extends BaseDataValidator {
     override id: string = DataValidationType.CUSTOM;
-    override title: string;
-    override operators: DataValidationOperator[];
-    override scopes: string | string[];
-    override formulaInput: string;
+    override title: string = 'dataValidation.custom.title';
+    override operators: DataValidationOperator[] = [];
+    override scopes: string | string[] = ['sheet'];
+    override formulaInput: string = CUSTOM_FORMULA_INPUT_NAME;
 
     override validatorFormula(rule: IDataValidationRuleBase): boolean {
         return isFormulaString(rule.formula1);

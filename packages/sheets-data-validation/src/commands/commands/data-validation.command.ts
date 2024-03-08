@@ -31,7 +31,7 @@ export interface IUpdateSheetDataValidationRangeCommandParams {
 export const UpdateSheetDataValidationRangeCommand: ICommand<IUpdateSheetDataValidationRangeCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheets.command.updateDataValidationRuleRange',
-    handler(accessor, params) {
+    async  handler(accessor, params) {
         if (!params) {
             return false;
         }
@@ -46,13 +46,15 @@ export const UpdateSheetDataValidationRangeCommand: ICommand<IUpdateSheetDataVal
         }
         const oldRanges = currentRule.ranges;
         const matrix = manager.getRuleObjectMatrix();
-        const overlapMatrix = new ObjectMatrix<string>();
+        const undoMatrix = new ObjectMatrix<string>();
+        const redoMatrix = new ObjectMatrix<string>();
 
         ranges.forEach((range) => {
             Range.foreach(range, (row, col) => {
                 const currentValue = matrix.getValue(row, col);
                 if (currentValue !== ruleId) {
-                    overlapMatrix.setValue(row, col, currentValue ?? '');
+                    undoMatrix.setValue(row, col, currentValue ?? '');
+                    redoMatrix.setValue(row, col, '');
                 }
             });
         });
@@ -67,10 +69,20 @@ export const UpdateSheetDataValidationRangeCommand: ICommand<IUpdateSheetDataVal
             },
         };
 
-        const redoMutations: IMutationInfo[] = [{
-            id: UpdateDataValidationMutation.id,
-            params: mutationParams,
-        }];
+        const redoMutations: IMutationInfo[] = [
+            {
+                id: UpdateDataValidationRangeByMatrixMutation.id,
+                params: {
+                    unitId,
+                    subUnitId,
+                    ranges: redoMatrix,
+                },
+            },
+            {
+                id: UpdateDataValidationMutation.id,
+                params: mutationParams,
+            },
+        ];
 
         const undoMutations: IMutationInfo[] = [
             {
@@ -87,7 +99,7 @@ export const UpdateSheetDataValidationRangeCommand: ICommand<IUpdateSheetDataVal
                 params: {
                     unitId,
                     subUnitId,
-                    ranges: overlapMatrix,
+                    ranges: undoMatrix,
                 },
             },
         ];
@@ -98,7 +110,12 @@ export const UpdateSheetDataValidationRangeCommand: ICommand<IUpdateSheetDataVal
             unitID: unitId,
         });
 
-        commandService.executeCommand(UpdateDataValidationMutation.id, mutationParams);
+        await commandService.executeCommand(UpdateDataValidationRangeByMatrixMutation.id, {
+            unitId,
+            subUnitId,
+            ranges: redoMatrix,
+        });
+        await commandService.executeCommand(UpdateDataValidationMutation.id, mutationParams);
         return true;
     },
 };
@@ -112,7 +129,7 @@ export interface IAddSheetDataValidationCommandParams {
 export const AddSheetDataValidationCommand: ICommand<IAddSheetDataValidationCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheets.command.addDataValidation',
-    handler(accessor, params) {
+    async handler(accessor, params) {
         if (!params) {
             return false;
         }
@@ -123,14 +140,16 @@ export const AddSheetDataValidationCommand: ICommand<IAddSheetDataValidationComm
         const manager = dataValidationModel.getOrCreateManager(unitId, subUnitId) as SheetDataValidationManager;
 
         const matrix = manager.getRuleObjectMatrix();
-        const overlapMatrix = new ObjectMatrix<string>();
+        const undoMatrix = new ObjectMatrix<string>();
+        const redoMatrix = new ObjectMatrix<string>();
         const ruleId = rule.uid;
 
         rule.ranges.forEach((range) => {
             Range.foreach(range, (row, col) => {
                 const currentValue = matrix.getValue(row, col);
                 if (currentValue !== ruleId) {
-                    overlapMatrix.setValue(row, col, currentValue ?? '');
+                    undoMatrix.setValue(row, col, currentValue ?? '');
+                    redoMatrix.setValue(row, col, '');
                 }
             });
         });
@@ -141,10 +160,19 @@ export const AddSheetDataValidationCommand: ICommand<IAddSheetDataValidationComm
             rule,
         };
 
-        const redoMutations: IMutationInfo[] = [{
-            id: AddDataValidationMutation.id,
-            params: redoParams,
-        }];
+        const redoMutations: IMutationInfo[] = [
+            {
+                id: UpdateDataValidationRangeByMatrixMutation.id,
+                params: {
+                    unitId,
+                    subUnitId,
+                    ranges: redoMatrix,
+                },
+            },
+            {
+                id: AddDataValidationMutation.id,
+                params: redoParams,
+            }];
 
         const undoMutations: IMutationInfo[] = [
             {
@@ -160,7 +188,7 @@ export const AddSheetDataValidationCommand: ICommand<IAddSheetDataValidationComm
                 params: {
                     unitId,
                     subUnitId,
-                    ranges: overlapMatrix,
+                    ranges: undoMatrix,
                 },
             },
         ];
@@ -170,7 +198,13 @@ export const AddSheetDataValidationCommand: ICommand<IAddSheetDataValidationComm
             redoMutations,
             undoMutations,
         });
-        commandService.executeCommand(AddDataValidationMutation.id, redoParams);
+
+        await commandService.executeCommand(UpdateDataValidationRangeByMatrixMutation.id, {
+            unitId,
+            subUnitId,
+            ranges: redoMatrix,
+        });
+        await commandService.executeCommand(AddDataValidationMutation.id, redoParams);
         return true;
     },
 };

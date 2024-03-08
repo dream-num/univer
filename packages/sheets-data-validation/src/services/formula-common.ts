@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
-export interface IFormulaValue {
-    formula1?: string;
-    formula2?: string;
+export enum FormulaResultStatus {
+    NOT_REGISTER = 1,
+    SUCCESS,
+    WAIT,
+    ERROR,
 }
 
-export interface IFormulaInputProps {
-    isTwoFormula?: boolean;
-    value?: IFormulaValue;
-    onChange?: (value?: IFormulaValue) => void;
-    unitId: string;
-    subUnitId: string;
+export interface IDataValidationFormulaResult {
+    result?: boolean | number | string;
+    status: FormulaResultStatus;
 }
 
-export type FormulaInputType = React.ComponentType<IFormulaInputProps>;
+export interface IFormulaInfo {
+    id: string;
+    text: string;
+}

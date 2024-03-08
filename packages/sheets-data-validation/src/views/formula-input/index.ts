@@ -14,17 +14,12 @@
  * limitations under the License.
  */
 
-export interface IFormulaValue {
-    formula1?: string;
-    formula2?: string;
-}
+import type { FormulaInputType } from '@univerjs/data-validation';
+import { CustomFormulaInput } from './custom-formula-input';
 
-export interface IFormulaInputProps {
-    isTwoFormula?: boolean;
-    value?: IFormulaValue;
-    onChange?: (value?: IFormulaValue) => void;
-    unitId: string;
-    subUnitId: string;
-}
+export const CUSTOM_FORMULA_INPUT_NAME = 'data-validation.custom-formula-input';
 
-export type FormulaInputType = React.ComponentType<IFormulaInputProps>;
+export const FORMULA_INPUTS: [string, FormulaInputType][] = [[
+    CUSTOM_FORMULA_INPUT_NAME,
+    CustomFormulaInput,
+]];

@@ -24,6 +24,7 @@ import { SheetDataValidationManager } from '../models/sheet-data-validation-mana
 import { SheetDataValidationService } from '../services/dv.service';
 import { SheetCheckboxValidator } from '../validators/checkbox-validator';
 import { SheetListValidator } from '../validators/list-validator';
+import { CustomFormulaValidator } from '../validators/custom-validator';
 
 const INVALID_MARK = {
     tr: {
@@ -62,6 +63,7 @@ export class DataValidationController extends RxDisposable {
             TextLengthValidator,
             DateValidator,
             SheetCheckboxValidator,
+            CustomFormulaValidator,
         ]).forEach((Validator) => {
             const validator = this._injector.createInstance(Validator as typeof ListValidator);
             this.disposeWithMe(

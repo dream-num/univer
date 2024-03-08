@@ -18,12 +18,12 @@ import { DisposableCollection, IUniverInstanceService, LifecycleStages, OnLifecy
 import { DataValidationModel, DataValidationPanelName, DataValidatorRegistryService } from '@univerjs/data-validation';
 import { ComponentManager, IMenuService } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
-import { DropdownManagerService, EditorBridgeService, IEditorBridgeService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { DropdownManagerService, IEditorBridgeService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import type { Spreadsheet } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { getCellIndexByOffsetWithMerge } from '@univerjs/sheets-ui/common/utils.js';
 import { DataValidationPanel, LIST_DROPDOWN_KEY, ListDropDown } from '../views';
-import { DATA_VALIDATION_U_KEY, DataValidationExtension } from '../render/data-validation.render';
+import { FORMULA_INPUTS } from '../views/formula-input';
 import { DataValidationMenu } from './dv.menu';
 
 @OnLifecycle(LifecycleStages.Rendered, DataValidationRenderController)
@@ -71,6 +71,7 @@ export class DataValidationRenderController extends RxDisposable {
                 LIST_DROPDOWN_KEY,
                 ListDropDown,
             ],
+            ...FORMULA_INPUTS,
         ] as const).forEach(([key, component]) => {
             this.disposeWithMe(this._componentManager.register(
                 key,

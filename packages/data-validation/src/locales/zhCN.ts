@@ -86,6 +86,8 @@ export default {
             name: 'Value contains one from range',
             error: 'Input must fall within specified range',
             emptyError: 'Please enter a value',
+            strPlaceholder: '请输入选项，选项间通过“回车换行”或“英文逗号(,)”隔开',
+            refPlaceholder: '引用单元格内容作为选项,如:\'Sheet1\'!A100',
         },
         textLength: {
             title: 'Text length',

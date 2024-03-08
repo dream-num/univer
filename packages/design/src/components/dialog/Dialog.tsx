@@ -16,8 +16,8 @@
 
 import { CloseSingle } from '@univerjs/icons';
 import RcDialog from 'rc-dialog';
-import React, { useContext, useState } from 'react';
-import type { DraggableData, DraggableEventHandler } from 'react-draggable';
+import React, { useContext, useRef, useState } from 'react';
+import type { DraggableData, DraggableEvent, DraggableEventHandler } from 'react-draggable';
 import Draggable from 'react-draggable';
 
 import { ConfigContext } from '../config-provider/ConfigProvider';
@@ -135,6 +135,9 @@ export function Dialog(props: IDialogProps) {
         );
 
     const modalRender = (modal: React.ReactNode) => {
+        const [bounds, setBounds] = useState({ left: 0, top: 0, bottom: 0, right: 0 });
+        const draggleRef = useRef<HTMLDivElement>(null);
+
         function handleStop(_event: MouseEvent, data: DraggableData) {
             if (preservePositionOnDestroy) {
                 setPositionOffset({ x: data.x, y: data.y });
@@ -143,14 +146,31 @@ export function Dialog(props: IDialogProps) {
 
         const position = positionOffset || defaultPosition || { x: 0, y: 0 };
 
+        const onStart = (_event: DraggableEvent, uiData: DraggableData) => {
+            const { clientWidth, clientHeight } = window.document.documentElement;
+            const targetRect = draggleRef.current?.getBoundingClientRect();
+            if (!targetRect) {
+                return;
+            }
+            setBounds({
+                left: -targetRect.left + uiData.x,
+                right: clientWidth - (targetRect.right - uiData.x),
+                top: -targetRect.top + uiData.y,
+                bottom: clientHeight - (targetRect.bottom - uiData.y),
+            });
+        };
+
         return draggable
             ? (
                 <Draggable
                     disabled={dragDisabled}
                     defaultPosition={position}
+                    bounds={bounds}
+                    nodeRef={draggleRef}
+                    onStart={(event, uiData) => onStart(event, uiData)}
                     onStop={handleStop as DraggableEventHandler}
                 >
-                    {modal}
+                    <div ref={draggleRef}>{modal}</div>
                 </Draggable>
             )
             : modal;

@@ -16,6 +16,7 @@
 
 import { DisposableCollection, sortRules, toDisposable } from '@univerjs/core';
 
+import type { IDisposable } from '@wendellhu/redi';
 import { BaseObject } from '../base-object';
 import type { IViewportBound } from '../basics/vector2';
 import type { UniverRenderingContext } from '../context';
@@ -28,7 +29,7 @@ export class RenderComponent<T, U, V> extends BaseObject {
         return this._extensions;
     }
 
-    register(...extensions: Array<ComponentExtension<T, U, V>>) {
+    register(...extensions: Array<ComponentExtension<T, U, V>>): IDisposable {
         const disposableCollection = new DisposableCollection();
         for (const extension of extensions) {
             extension.parent = this;

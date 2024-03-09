@@ -523,7 +523,7 @@ export class StartEditController extends Disposable {
                         return;
                     }
 
-                    this._resetBodyStyle(snapshot.body!);
+                    this._resetBodyStyle(snapshot.body!, !!isInArrayFormulaRange);
 
                     documentDataModel.reset(snapshot);
                     documentViewModel.reset(documentDataModel);
@@ -563,11 +563,11 @@ export class StartEditController extends Disposable {
         );
     }
 
-    private _resetBodyStyle(body: IDocumentBody) {
+    private _resetBodyStyle(body: IDocumentBody, removeStyle = false) {
         body.dataStream = DEFAULT_EMPTY_DOCUMENT_VALUE;
 
         if (body.textRuns != null) {
-            if (body.textRuns.length === 1) {
+            if (body.textRuns.length === 1 && !removeStyle) {
                 body.textRuns[0].st = 0;
                 body.textRuns[0].ed = 1;
             } else {

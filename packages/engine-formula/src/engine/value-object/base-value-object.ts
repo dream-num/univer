@@ -71,6 +71,10 @@ export class BaseValueObject extends ObjectClassType {
         /** abstract */
     }
 
+    isCube() {
+        return false;
+    }
+
     isArray() {
         return false;
     }

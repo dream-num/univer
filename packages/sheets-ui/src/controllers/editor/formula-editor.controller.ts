@@ -284,7 +284,7 @@ export class FormulaEditorController extends RxDisposable {
 
         if (
             param.isInArrayFormulaRange === true &&
-            (this._editorBridgeService.isVisible().eventType === DeviceInputEventType.Dblclick)
+            this._editorBridgeService.isVisible().eventType === DeviceInputEventType.Dblclick
         ) {
             dataStream = '\r\n';
             paragraphs = [

@@ -303,8 +303,12 @@ export class StartEditController extends Disposable {
         // Scaling is handled by the renderer, so the skeleton only accepts the original width and height, which need to be divided by the magnification factor.
         documentDataModel?.updateDocumentDataPageSize(editorWidth / scaleX);
 
+        /**
+         * Do not rely on cell layout logic, depend on the document's internal alignment logic.
+         */
         documentDataModel?.updateDocumentRenderConfig({
             horizontalAlign: HorizontalAlign.UNSPECIFIED,
+            cellValueType: undefined,
         });
 
         return {

@@ -235,8 +235,8 @@ export class Documents extends DocComponent {
                 renderConfig = {},
             } = page;
             const {
-                verticalAlign = VerticalAlign.UNSPECIFIED,
-                horizontalAlign = HorizontalAlign.UNSPECIFIED,
+                verticalAlign = VerticalAlign.TOP, // Do not make changes, otherwise the document will not render.
+                horizontalAlign = HorizontalAlign.LEFT, // Do not make changes, otherwise the document will not render.
                 centerAngle: centerAngleDeg = 0,
                 vertexAngle: vertexAngleDeg = 0,
                 wrapStrategy = WrapStrategy.UNSPECIFIED,

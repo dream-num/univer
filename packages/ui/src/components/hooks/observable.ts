@@ -36,18 +36,18 @@ function showArrayNotEqual(arr1: unknown[], arr2: unknown[]): boolean {
     return arr1.some((value, index) => value !== arr2[index]);
 }
 
-export function useObservable<T>(observable: ObservableOrFn<T>, shouldHaveSyncValue: true): T;
+export function useObservable<T>(observable: Observable<T>, defaultValue?: T): T | undefined;
 export function useObservable<T>(observable: Observable<T>, defaultValue?: T, shouldHaveSyncValue?: true): T;
 export function useObservable<T>(
     observable: ObservableOrFn<T>,
-    shouldHaveSyncValue?: false,
     defaultValue?: T,
+    shouldHaveSyncValue?: false,
     deps?: any[]
 ): T | undefined;
 export function useObservable<T>(
     observable: ObservableOrFn<T>,
-    shouldHaveSyncValue?: boolean,
     defaultValue?: T,
+    shouldHaveSyncValue?: boolean,
     deps?: any[]
 ): T | undefined {
     const observableRef = useRef<Observable<T> | null>(null);

@@ -76,17 +76,15 @@ export class IMEInputController extends Disposable {
                 return;
             }
 
+            this._resetIME();
+
             const { activeRange } = config;
 
             if (activeRange == null) {
                 return;
             }
 
-            this._imeInputManagerService.clearUndoRedoMutationParamsCache();
-
             this._imeInputManagerService.setActiveRange(Tools.deepClone(activeRange));
-
-            this._isCompositionStart = true;
         });
     }
 

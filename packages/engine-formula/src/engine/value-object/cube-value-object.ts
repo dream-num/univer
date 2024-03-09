@@ -59,4 +59,28 @@ export class CubeValueObjectObject extends BaseValueObject {
         });
         return result;
     }
+
+    override count() {
+        const count = new NumberValueObject(0);
+        this._values.forEach((arr) => {
+            count.plus(arr.count());
+        });
+        return count;
+    }
+
+    override countA() {
+        const count = new NumberValueObject(0);
+        this._values.forEach((arr) => {
+            count.plus(arr.countA());
+        });
+        return count;
+    }
+
+    override countBlank() {
+        const count = new NumberValueObject(0);
+        this._values.forEach((arr) => {
+            count.plus(arr.countBlank());
+        });
+        return count;
+    }
 }

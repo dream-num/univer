@@ -1144,8 +1144,9 @@ export class LexerTreeBuilder extends Disposable {
                     // this.setCurrentLexerNode(subLexerNode);
                     this._newAndPushCurrentLexerNode(DEFAULT_TOKEN_TYPE_PARAMETER, cur);
                 } else {
-                    // return ErrorType.VALUE;
-
+                    /**
+                     * support cubeValueObject for =INDEX((A6:B6,C6:D7),1,1,2)
+                     */
                     const cubeNode = new LexerNode();
                     cubeNode.setToken(DEFAULT_TOKEN_CUBE_FUNCTION_NAME);
                     const cubeParamNode = new LexerNode();

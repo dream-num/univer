@@ -13841,7 +13841,17 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
             defaultColumnWidth: 73,
             defaultRowHeight: 19,
             mergeData: [],
-            rowData: {},
+            rowData: {
+                14: {
+                    hd: 1,
+                },
+                15: {
+                    hd: 1,
+                },
+                16: {
+                    hd: 1,
+                },
+            },
             columnData: {},
             showGridlines: 1,
             rowHeader: {

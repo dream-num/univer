@@ -17,7 +17,7 @@
 import './extensions';
 
 import type { Nullable, Observer } from '@univerjs/core';
-import { HorizontalAlign, Observable, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import { CellValueType, HorizontalAlign, Observable, VerticalAlign, WrapStrategy } from '@univerjs/core';
 
 import { calculateRectRotate, getRotateOffsetAndFarthestHypotenuse } from '../../basics/draw';
 import type { IDocumentSkeletonCached, IDocumentSkeletonPage } from '../../basics/i-document-skeleton-cached';
@@ -235,11 +235,12 @@ export class Documents extends DocComponent {
                 renderConfig = {},
             } = page;
             const {
-                verticalAlign = VerticalAlign.UNSPECIFIED,
-                horizontalAlign = HorizontalAlign.UNSPECIFIED,
+                verticalAlign = VerticalAlign.TOP, // Do not make changes, otherwise the document will not render.
+                horizontalAlign = HorizontalAlign.LEFT, // Do not make changes, otherwise the document will not render.
                 centerAngle: centerAngleDeg = 0,
                 vertexAngle: vertexAngleDeg = 0,
                 wrapStrategy = WrapStrategy.UNSPECIFIED,
+                cellValueType,
                 // isRotateNonEastAsian = BooleanNumber.FALSE,
             } = renderConfig;
 
@@ -248,7 +249,8 @@ export class Documents extends DocComponent {
                 pagePaddingLeft,
                 pagePaddingRight,
                 horizontalAlign,
-                vertexAngleDeg
+                vertexAngleDeg,
+                cellValueType
             );
 
             const verticalOffsetNoAngle = this._verticalHandler(
@@ -457,7 +459,8 @@ export class Documents extends DocComponent {
         pagePaddingLeft: number,
         pagePaddingRight: number,
         horizontalAlign: HorizontalAlign,
-        angle: number = 0
+        angle: number = 0,
+        cellValueType: Nullable<CellValueType>
     ) {
         let offsetLeft = 0;
         if (horizontalAlign === HorizontalAlign.CENTER) {
@@ -469,8 +472,24 @@ export class Documents extends DocComponent {
              * In Excel, if horizontal alignment is not specified,
              * rotated text aligns to the right when rotated downwards and aligns to the left when rotated upwards.
              */
-            if (horizontalAlign === HorizontalAlign.UNSPECIFIED && angle > 0) {
-                offsetLeft = this.width - pageWidth - pagePaddingRight;
+            if (horizontalAlign === HorizontalAlign.UNSPECIFIED) {
+                if (angle > 0) {
+                    return this.width - pageWidth - pagePaddingRight;
+                }
+
+                /**
+                 * sheet cell type, In a spreadsheet cell, without any alignment settings applied,
+                 * text should be left-aligned,
+                 * numbers should be right-aligned,
+                 * and Boolean values should be center-aligned.
+                 */
+                if (cellValueType === CellValueType.NUMBER) {
+                    offsetLeft = this.width - pageWidth - pagePaddingRight;
+                } else if (cellValueType === CellValueType.BOOLEAN) {
+                    offsetLeft = (this.width - pageWidth) / 2;
+                } else {
+                    offsetLeft = pagePaddingLeft;
+                }
             } else {
                 offsetLeft = pagePaddingLeft;
             }

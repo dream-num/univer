@@ -158,6 +158,8 @@ interface ICellOtherConfig {
      * padding
      */
     paddingData?: IPaddingData;
+
+    cellValueType?: CellValueType;
 }
 
 interface IRowColumnSegment {
@@ -1073,6 +1075,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             documentModel = this._getDocumentDataByStyle(cell.v.toString(), textStyle, {
                 ...cellOtherConfig,
                 textRotation,
+                cellValueType: cell.t!,
             });
         }
 
@@ -1731,6 +1734,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             horizontalAlign = HorizontalAlign.UNSPECIFIED,
             verticalAlign = VerticalAlign.UNSPECIFIED,
             wrapStrategy = WrapStrategy.UNSPECIFIED,
+            cellValueType,
         } = config;
 
         const { a: angle = 0, v: isVertical = BooleanNumber.FALSE } = textRotation;
@@ -1777,6 +1781,7 @@ export class SpreadsheetSkeleton extends Skeleton {
                     centerAngle,
                     vertexAngle,
                     wrapStrategy,
+                    cellValueType,
                 },
             },
         };

@@ -15,7 +15,7 @@
  */
 
 import type { ISize } from '../../services/floating-object/floating-object-interfaces';
-import type { BooleanNumber, HorizontalAlign, LocaleType, TextDirection, VerticalAlign, WrapStrategy } from '../enum';
+import type { BooleanNumber, CellValueType, HorizontalAlign, LocaleType, TextDirection, VerticalAlign, WrapStrategy } from '../enum';
 import type { IExtraModelData } from './i-extra-model-data';
 import type { IColorStyle, IStyleBase } from './i-style-data';
 
@@ -364,7 +364,8 @@ export interface IDocumentRenderConfig {
     horizontalAlign?: HorizontalAlign; // HorizontalAlignment, only valid for pages, word does not have this arrangement, used for secondary calculations
     isRotateNonEastAsian?: BooleanNumber; // Word is not rotate non-eastAsian
     background?: IColorStyle; // background
-    wrapStrategy?: WrapStrategy;
+    wrapStrategy?: WrapStrategy; // wrap to the next line, for sheet cell
+    cellValueType?: CellValueType; // sheet cell type, In a spreadsheet cell, without any alignment settings applied, text should be left-aligned, numbers should be right-aligned, and Boolean values should be center-aligned.
 }
 
 export interface ISectionBreakBase {

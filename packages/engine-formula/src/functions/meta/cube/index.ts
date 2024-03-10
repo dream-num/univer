@@ -19,7 +19,7 @@ import type { BaseValueObject } from '../../../engine/value-object/base-value-ob
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
-import { CubeValueObjectObject } from '../../../engine/value-object/cube-value-object';
+import { CubeValueObject } from '../../../engine/value-object/cube-value-object';
 
 export class Cube extends BaseFunction {
     override calculate(...variants: BaseValueObject[]) {
@@ -43,6 +43,6 @@ export class Cube extends BaseFunction {
             values.push(variant as ArrayValueObject);
         }
 
-        return new CubeValueObjectObject(values);
+        return new CubeValueObject(values);
     }
 }

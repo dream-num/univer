@@ -18,7 +18,7 @@ import type { ArrayValueObject } from './array-value-object';
 import { BaseValueObject } from './base-value-object';
 import { NumberValueObject } from './primitive-object';
 
-export class CubeValueObjectObject extends BaseValueObject {
+export class CubeValueObject extends BaseValueObject {
     override isCube() {
         return true;
     }

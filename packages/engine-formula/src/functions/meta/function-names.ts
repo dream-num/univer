@@ -21,4 +21,5 @@ export enum FUNCTION_NAMES_META {
     MULTIPLY = 'MULTIPLY',
     PLUS = 'PLUS',
     UNION = 'UNION',
+    CUBE = 'CUBE',
 }

@@ -27,6 +27,8 @@ export interface IDataValidationFormulaResult {
     result?: Nullable<ICellData>[][];
     status: FormulaResultStatus;
     ruleId: string;
+    formulaId: string;
+    callbacks: Set<(value: Nullable<ICellData>[][]) => void>;
 }
 
 export interface IFormulaInfo {

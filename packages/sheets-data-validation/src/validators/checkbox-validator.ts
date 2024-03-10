@@ -14,10 +14,68 @@
  * limitations under the License.
  */
 
-import { CheckboxValidator } from '@univerjs/data-validation';
+import { DataValidationType, Tools } from '@univerjs/core';
+import type { CellValue, DataValidationOperator, IDataValidationRuleBase, IDataValidationRuleInfo, IStyleData, Nullable } from '@univerjs/core';
+import { BaseDataValidator } from '@univerjs/data-validation';
 import { CheckboxRender } from '../widgets/checkbox-widget';
 
-export class SheetCheckboxValidator extends CheckboxValidator {
+export const CHECKBOX_FORMULA_1 = 'TRUE';
+export const CHECKBOX_FORMULA_2 = 'FALSE';
+
+export class CheckboxValidator extends BaseDataValidator {
+    override id: string = DataValidationType.CHECKBOX;
+    override title: string = 'dataValidation.checkbox.title';
+    override operators: DataValidationOperator[] = [];
+    override scopes: string | string[] = ['sheet'];
+    override formulaInput: string;
     override skipDefaultFontRender = true;
+
     override canvasRender = this.injector.createInstance(CheckboxRender);
+
+    override validatorFormula(rule: IDataValidationRuleBase): boolean {
+        const { formula1 = CHECKBOX_FORMULA_1, formula2 = CHECKBOX_FORMULA_2 } = rule;
+        return typeof formula1 === 'string' && formula2 === 'string';
+    }
+
+    override isValidType(cellValue: CellValue, info: IDataValidationRuleInfo): boolean {
+        const { rule } = info;
+        const { formula1 = CHECKBOX_FORMULA_1, formula2 = CHECKBOX_FORMULA_2 } = rule;
+        return !Tools.isDefine(cellValue) || cellValue === formula1 || cellValue === formula2;
+    }
+
+    override transform(cellValue: CellValue, rule: IDataValidationRuleInfo): CellValue {
+        throw new Error('Method not implemented.');
+    }
+
+    override validatorIsEqual(cellValue: CellValue, rule: IDataValidationRuleInfo): Promise<boolean> {
+        throw new Error('Method not implemented.');
+    }
+
+    override validatorIsNotEqual(cellValue: CellValue, rule: IDataValidationRuleInfo): Promise<boolean> {
+        throw new Error('Method not implemented.');
+    }
+
+    override validatorIsBetween(cellValue: CellValue, rule: IDataValidationRuleInfo): Promise<boolean> {
+        throw new Error('Method not implemented.');
+    }
+
+    override validatorIsNotBetween(cellValue: CellValue, rule: IDataValidationRuleInfo): Promise<boolean> {
+        throw new Error('Method not implemented.');
+    }
+
+    override validatorIsGreaterThan(cellValue: CellValue, rule: IDataValidationRuleInfo): Promise<boolean> {
+        throw new Error('Method not implemented.');
+    }
+
+    override validatorIsGreaterThanOrEqual(cellValue: CellValue, rule: IDataValidationRuleInfo): Promise<boolean> {
+        throw new Error('Method not implemented.');
+    }
+
+    override validatorIsLessThan(cellValue: CellValue, rule: IDataValidationRuleInfo): Promise<boolean> {
+        throw new Error('Method not implemented.');
+    }
+
+    override validatorIsLessThanOrEqual(cellValue: CellValue, rule: IDataValidationRuleInfo): Promise<boolean> {
+        throw new Error('Method not implemented.');
+    }
 }

@@ -20,7 +20,7 @@ import type { IUpdateRulePayload } from '../types/interfaces/i-update-rule-paylo
 import type { DataValidationManager } from './data-validation-manager';
 
 type ManagerCreator<T extends IDataValidationRule> = (unitId: string, subUnitId: string) => DataValidationManager<T>;
-type RuleChangeType = 'update' | 'add' | 'remove' | 'removeAll' | 'replaceAll';
+type RuleChangeType = 'update' | 'add' | 'remove';
 
 export interface IRuleChange<T extends IDataValidationRule> {
     rule?: T;
@@ -109,26 +109,6 @@ export class DataValidationModel<T extends IDataValidationRule = IDataValidation
     getRuleIndex(unitId: string, subUnitId: string, ruleId: string) {
         const manager = this.getOrCreateManager(unitId, subUnitId);
         return manager.getRuleIndex(ruleId);
-    }
-
-    removeAll(unitId: string, subUnitId: string) {
-        const manager = this.getOrCreateManager(unitId, subUnitId);
-        manager.removeAll();
-        this._ruleChange$.next({
-            type: 'removeAll',
-            unitId,
-            subUnitId,
-        });
-    }
-
-    replaceAll(unitId: string, subUnitId: string, rules: T[]) {
-        const manager = this.getOrCreateManager(unitId, subUnitId);
-        manager.replaceAll(rules);
-        this._ruleChange$.next({
-            type: 'replaceAll',
-            unitId,
-            subUnitId,
-        });
     }
 
     getRules(unitId: string, subUnitId: string) {

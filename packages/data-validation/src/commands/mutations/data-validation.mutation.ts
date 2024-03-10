@@ -22,7 +22,7 @@ import type { IUpdateRulePayload } from '../../types/interfaces/i-update-rule-pa
 export interface IAddDataValidationMutationParams {
     unitId: string;
     subUnitId: string;
-    rule: IDataValidationRule;
+    rule: IDataValidationRule | IDataValidationRule[];
     index?: number;
 }
 
@@ -33,9 +33,16 @@ export const AddDataValidationMutation: ICommand<IAddDataValidationMutationParam
         if (!params) {
             return false;
         }
-        const { unitId, subUnitId, rule } = params;
+        const { unitId, subUnitId, rule, index } = params;
         const dataValidationModel = accessor.get(DataValidationModel);
-        dataValidationModel.addRule(unitId, subUnitId, rule);
+        if (Array.isArray(rule)) {
+            rule.forEach((ruleItem) => {
+                dataValidationModel.addRule(unitId, subUnitId, ruleItem, index);
+            });
+        } else {
+            dataValidationModel.addRule(unitId, subUnitId, rule!, index);
+        }
+
         return true;
     },
 };
@@ -43,7 +50,7 @@ export const AddDataValidationMutation: ICommand<IAddDataValidationMutationParam
 export interface IRemoveDataValidationMutationParams {
     unitId: string;
     subUnitId: string;
-    ruleId: string;
+    ruleId: string | string[];
 }
 
 export const RemoveDataValidationMutation: ICommand<IRemoveDataValidationMutationParams> = {
@@ -56,47 +63,14 @@ export const RemoveDataValidationMutation: ICommand<IRemoveDataValidationMutatio
 
         const { unitId, subUnitId, ruleId } = params;
         const dataValidationModel = accessor.get(DataValidationModel);
-        dataValidationModel.removeRule(unitId, subUnitId, ruleId);
-        return true;
-    },
-};
-
-export interface IRemoveAllDataValidationMutationParams {
-    unitId: string;
-    subUnitId: string;
-}
-
-export const RemoveAllDataValidationMutation: ICommand<IRemoveAllDataValidationMutationParams> = {
-    type: CommandType.MUTATION,
-    id: 'data-validation.mutation.removeAll',
-    handler(accessor, params) {
-        if (!params) {
-            return false;
-        }
-        const { unitId, subUnitId } = params;
-        const dataValidationModel = accessor.get(DataValidationModel);
-        dataValidationModel.removeAll(unitId, subUnitId);
-        return true;
-    },
-};
-
-export interface IReplaceDataValidationMutationParams {
-    unitId: string;
-    subUnitId: string;
-    rules: IDataValidationRule[];
-}
-
-export const ReplaceDataValidationMutation: ICommand<IReplaceDataValidationMutationParams> = {
-    type: CommandType.MUTATION,
-    id: 'data-validation.mutation.replace',
-    handler(accessor, params) {
-        if (!params) {
-            return false;
+        if (Array.isArray(ruleId)) {
+            ruleId.forEach((item) => {
+                dataValidationModel.removeRule(unitId, subUnitId, item);
+            });
+        } else {
+            dataValidationModel.removeRule(unitId, subUnitId, ruleId);
         }
 
-        const { unitId, subUnitId, rules } = params;
-        const dataValidationModel = accessor.get(DataValidationModel);
-        dataValidationModel.replaceAll(unitId, subUnitId, rules);
         return true;
     },
 };

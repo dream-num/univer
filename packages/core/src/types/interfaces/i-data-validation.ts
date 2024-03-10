@@ -48,3 +48,9 @@ export interface IDataValidationRule extends IDataValidationRuleBase, IDataValid
 export interface ISheetDataValidationRule extends IDataValidationRule {
     ranges: IRange[];
 }
+
+export interface IDataValidationRuleInfo {
+    rule: IDataValidationRule;
+    unitId: string;
+    subUnitId: string;
+}

@@ -15,24 +15,19 @@
  */
 
 import type { FormulaInputType } from '@univerjs/data-validation';
-import { CustomFormulaInput } from './custom-formula-input';
 import { BaseFormulaInput } from './base-formula-input';
 import { ListFormulaInput } from './list-formula-input';
 
-export const CUSTOM_FORMULA_INPUT_NAME = 'data-validation.custom-formula-input';
 export const BASE_FORMULA_INPUT_NAME = 'data-validation.formula-input';
 export const LIST_FORMULA_INPUT_NAME = 'data-validation.list-formula-input';
 
-export const FORMULA_INPUTS: [string, FormulaInputType][] = [[
-    CUSTOM_FORMULA_INPUT_NAME,
-    CustomFormulaInput,
-],
-[
-    BASE_FORMULA_INPUT_NAME,
-    BaseFormulaInput,
-],
-[
-    LIST_FORMULA_INPUT_NAME,
-    ListFormulaInput,
-],
+export const FORMULA_INPUTS: [string, FormulaInputType][] = [
+    [
+        BASE_FORMULA_INPUT_NAME,
+        BaseFormulaInput,
+    ],
+    [
+        LIST_FORMULA_INPUT_NAME,
+        ListFormulaInput,
+    ],
 ];

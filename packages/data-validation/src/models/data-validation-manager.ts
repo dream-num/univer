@@ -78,11 +78,14 @@ export class DataValidationManager<T extends IDataValidationRule> {
     }
 
     updateRule(ruleId: string, payload: IUpdateRulePayload) {
-        const rule = this._dataValidationMap.get(ruleId);
+        const oldRule = this._dataValidationMap.get(ruleId);
+        const index = this._dataValidations.findIndex((rule) => ruleId === rule.uid);
 
-        if (!rule) {
+        if (!oldRule) {
             throw new Error(`Data validation rule is not found, ruleId: ${ruleId}.`);
         }
+
+        const rule = { ...oldRule };
 
         switch (payload.type) {
             case UpdateRuleType.RANGE: {
@@ -102,24 +105,10 @@ export class DataValidationManager<T extends IDataValidationRule> {
                 break;
         }
 
+        this._dataValidations[index] = rule;
+        this._dataValidationMap.set(ruleId, rule);
         this._notice();
         return rule;
-    }
-
-    _removeAll() {
-        this._dataValidations.splice(0, this._dataValidations.length);
-        this._dataValidationMap.clear();
-    }
-
-    removeAll() {
-        this._removeAll();
-        this._notice();
-    }
-
-    replaceAll(rules: T[]) {
-        this._removeAll();
-        this._insertRules(rules);
-        this._notice();
     }
 
     getDataValidations() {

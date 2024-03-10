@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
+import type { Nullable } from '@univerjs/core';
 import { Disposable, ICommandService, Tools } from '@univerjs/core';
 import type { IRemoveOtherFormulaMutationParams, ISetFormulaCalculationResultMutation, ISetOtherFormulaMutationParams } from '@univerjs/engine-formula';
 import { RemoveOtherFormulaMutation, SetFormulaCalculationResultMutation, SetOtherFormulaMutation } from '@univerjs/engine-formula';
 import { IActiveDirtyManagerService } from '@univerjs/sheets-formula';
 import { bufferTime, filter, map, Subject } from 'rxjs';
-import { Inject } from '@wendellhu/redi';
 import type { IDataValidationFormulaMarkDirtyParams } from '../commands/mutations/formula.mutation';
 import { DataValidationFormulaMarkDirty } from '../commands/mutations/formula.mutation';
 import { FormulaResultStatus, type IDataValidationFormulaResult } from './formula-common';
@@ -35,8 +35,7 @@ export class RegisterOtherFormulaService extends Disposable {
 
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
-        @IActiveDirtyManagerService private _activeDirtyManagerService: IActiveDirtyManagerService,
-        @Inject(RegisterOtherFormulaService) private _registerOtherFormulaService: RegisterOtherFormulaService
+        @IActiveDirtyManagerService private _activeDirtyManagerService: IActiveDirtyManagerService
     ) {
         super();
         this._initFormulaRegister();
@@ -122,6 +121,10 @@ export class RegisterOtherFormulaService extends Disposable {
                                 const item = cacheMap.get(formulaId)!;
                                 item.result = current;
                                 item.status = FormulaResultStatus.SUCCESS;
+                                item.callbacks.forEach((callback) => {
+                                    callback(current);
+                                });
+                                item.callbacks.clear();
                                 subUnitResults.push(item);
                             }
                         }
@@ -140,8 +143,16 @@ export class RegisterOtherFormulaService extends Disposable {
             result: undefined,
             status: FormulaResultStatus.WAIT,
             ruleId,
+            formulaId,
+            callbacks: new Set(),
         });
-        this._formulaChange$.next({ unitId, ruleId, subUnitId, formulaText, formulaId });
+        this._formulaChange$.next({
+            unitId,
+            ruleId,
+            subUnitId,
+            formulaText,
+            formulaId,
+        });
         return formulaId;
     }
 
@@ -154,5 +165,28 @@ export class RegisterOtherFormulaService extends Disposable {
         this._commandService.executeCommand(RemoveOtherFormulaMutation.id, params);
         const cacheMap = this._ensureCacheMap(unitId, subUnitId);
         formulaIdList.forEach((id) => cacheMap.delete(id));
+    }
+
+    getFormulaValue(unitId: string, subUnitId: string, formulaId: string): Promise<Nullable<IDataValidationFormulaResult>> {
+        const cacheMap = this._ensureCacheMap(unitId, subUnitId);
+        const item = cacheMap.get(formulaId);
+        if (!item) {
+            return Promise.resolve(null);
+        }
+
+        if (item.status === FormulaResultStatus.SUCCESS || FormulaResultStatus.ERROR) {
+            return Promise.resolve(item);
+        }
+
+        return new Promise((resolve) => {
+            item.callbacks.add(() => {
+                resolve(cacheMap.get(formulaId));
+            });
+        });
+    }
+
+    getFormulaValueSync(unitId: string, subUnitId: string, formulaId: string): Nullable<IDataValidationFormulaResult> {
+        const cacheMap = this._ensureCacheMap(unitId, subUnitId);
+        return cacheMap.get(formulaId);
     }
 }

@@ -21,6 +21,9 @@ import { DataValidationController } from './controllers/dv.controller';
 import { SheetDataValidationService } from './services/dv.service';
 import { DataValidationAlertController } from './controllers/dv-alert.controller';
 import { AddSheetDataValidationCommand, UpdateSheetDataValidationRangeCommand } from './commands/commands/data-validation.command';
+import { DataValidationCacheService } from './services/dv-cache.service';
+import { DataValidationFormulaService } from './services/dv-formula.service';
+import { DataValidationCustomFormulaService } from './services/dv-custom-formula.service';
 
 const PLUGIN_NAME = 'sheets-data-validation';
 
@@ -35,6 +38,9 @@ export class UniverSheetsDataValidationPlugin extends Plugin {
     override onStarting(injector: Injector) {
         ([
             [SheetDataValidationService],
+            [DataValidationCacheService],
+            [DataValidationFormulaService],
+            [DataValidationCustomFormulaService],
             // controller
             [DataValidationController],
             [DataValidationRenderController],

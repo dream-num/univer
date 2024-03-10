@@ -15,16 +15,14 @@
  */
 
 import { DataValidationStatus, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
-import type { ListValidator } from '@univerjs/data-validation';
-import { DataValidationModel, DataValidatorRegistryService, DateValidator, NumberValidator, TextLengthValidator } from '@univerjs/data-validation';
+import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { Inject, Injector } from '@wendellhu/redi';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetDataValidationManager } from '../models/sheet-data-validation-manager';
 import { SheetDataValidationService } from '../services/dv.service';
-import { SheetCheckboxValidator } from '../validators/checkbox-validator';
-import { SheetListValidator } from '../validators/list-validator';
 import { CustomFormulaValidator } from '../validators/custom-validator';
+import { DateValidator, ListValidator, NumberValidator, TextLengthValidator } from '../validators';
 
 const INVALID_MARK = {
     tr: {
@@ -58,12 +56,11 @@ export class DataValidationController extends RxDisposable {
 
     private _registerValidators() {
         ([
-            SheetListValidator,
             NumberValidator,
             TextLengthValidator,
             DateValidator,
-            SheetCheckboxValidator,
             CustomFormulaValidator,
+            ListValidator,
         ]).forEach((Validator) => {
             const validator = this._injector.createInstance(Validator as typeof ListValidator);
             this.disposeWithMe(
@@ -107,7 +104,7 @@ export class DataValidationController extends RxDisposable {
             unitId,
             subUnitId,
             rules,
-            this._dataValidatorRegistryService
+            this._injector
         );
     }
 

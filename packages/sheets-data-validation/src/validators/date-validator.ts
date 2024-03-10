@@ -15,12 +15,12 @@
  */
 
 import { DataValidationOperator, DataValidationType, Tools } from '@univerjs/core';
-import type { CellValue, IDataValidationRule, IDataValidationRuleBase } from '@univerjs/core';
+import type { CellValue, IDataValidationRuleBase, IDataValidationRuleInfo } from '@univerjs/core';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
+import { BaseDataValidator } from '@univerjs/data-validation';
 import { BASE_FORMULA_INPUT_NAME } from '../views/formula-input';
 import { TWO_FORMULA_OPERATOR_COUNT } from '../types/const/two-formula-operators';
-import { BaseDataValidator } from './base-data-validator';
 
 const isValidDateString = (date: string) => {
     return dayjs(date).isValid();
@@ -43,7 +43,7 @@ export class DateValidator extends BaseDataValidator<Dayjs> {
     scopes: string | string[] = ['sheet'];
     formulaInput: string = BASE_FORMULA_INPUT_NAME;
 
-    isValidType(cellValue: CellValue, _rule: IDataValidationRule): boolean {
+    isValidType(cellValue: CellValue, _info: IDataValidationRuleInfo): boolean {
         if (typeof cellValue === 'string') {
             return dayjs(cellValue).isValid();
         }
@@ -65,11 +65,12 @@ export class DateValidator extends BaseDataValidator<Dayjs> {
         return Tools.isDefine(rule.formula1) && !Number.isNaN(+rule.formula1);
     }
 
-    transform(cellValue: CellValue, _rule: IDataValidationRule): Dayjs {
+    transform(cellValue: CellValue, _info: IDataValidationRuleInfo): Dayjs {
         return dayjs(cellValue as string);
     }
 
-    async validatorIsEqual(cellValue: Dayjs, rule: IDataValidationRule): Promise<boolean> {
+    async validatorIsEqual(cellValue: Dayjs, info: IDataValidationRuleInfo): Promise<boolean> {
+        const { rule } = info;
         if (!rule.formula1) {
             return false;
         }
@@ -77,7 +78,8 @@ export class DateValidator extends BaseDataValidator<Dayjs> {
         return cellValue.isSame(rule.formula1);
     }
 
-    async validatorIsNotEqual(cellValue: Dayjs, rule: IDataValidationRule): Promise<boolean> {
+    async validatorIsNotEqual(cellValue: Dayjs, info: IDataValidationRuleInfo): Promise<boolean> {
+        const { rule } = info;
         if (!rule.formula1) {
             return false;
         }
@@ -85,7 +87,8 @@ export class DateValidator extends BaseDataValidator<Dayjs> {
         return !cellValue.isSame(rule.formula1);
     }
 
-    async validatorIsBetween(cellValue: Dayjs, rule: IDataValidationRule): Promise<boolean> {
+    async validatorIsBetween(cellValue: Dayjs, info: IDataValidationRuleInfo): Promise<boolean> {
+        const { rule } = info;
         if (!rule.formula1 || !rule.formula2) {
             return false;
         }
@@ -97,7 +100,8 @@ export class DateValidator extends BaseDataValidator<Dayjs> {
         return (cellValue.isAfter(min) || cellValue.isSame(min)) && (cellValue.isBefore(max) || cellValue.isSame(max));
     }
 
-    async validatorIsNotBetween(cellValue: Dayjs, rule: IDataValidationRule): Promise<boolean> {
+    async validatorIsNotBetween(cellValue: Dayjs, info: IDataValidationRuleInfo): Promise<boolean> {
+        const { rule } = info;
         if (!rule.formula1 || !rule.formula2) {
             return false;
         }
@@ -109,7 +113,8 @@ export class DateValidator extends BaseDataValidator<Dayjs> {
         return cellValue.isBefore(min) || cellValue.isAfter(max);
     }
 
-    async validatorIsGreaterThan(cellValue: Dayjs, rule: IDataValidationRule): Promise<boolean> {
+    async validatorIsGreaterThan(cellValue: Dayjs, info: IDataValidationRuleInfo): Promise<boolean> {
+        const { rule } = info;
         if (!rule.formula1) {
             return false;
         }
@@ -117,7 +122,8 @@ export class DateValidator extends BaseDataValidator<Dayjs> {
         return cellValue.isAfter(rule.formula1);
     }
 
-    async validatorIsGreaterThanOrEqual(cellValue: Dayjs, rule: IDataValidationRule): Promise<boolean> {
+    async validatorIsGreaterThanOrEqual(cellValue: Dayjs, info: IDataValidationRuleInfo): Promise<boolean> {
+        const { rule } = info;
         if (!rule.formula1) {
             return false;
         }
@@ -125,7 +131,8 @@ export class DateValidator extends BaseDataValidator<Dayjs> {
         return cellValue.isAfter(rule.formula1) || cellValue.isSame(rule.formula1);
     }
 
-    async validatorIsLessThan(cellValue: Dayjs, rule: IDataValidationRule): Promise<boolean> {
+    async validatorIsLessThan(cellValue: Dayjs, info: IDataValidationRuleInfo): Promise<boolean> {
+        const { rule } = info;
         if (!rule.formula1) {
             return false;
         }
@@ -133,7 +140,8 @@ export class DateValidator extends BaseDataValidator<Dayjs> {
         return cellValue.isBefore(rule.formula1);
     }
 
-    async validatorIsLessThanOrEqual(cellValue: Dayjs, rule: IDataValidationRule): Promise<boolean> {
+    async validatorIsLessThanOrEqual(cellValue: Dayjs, info: IDataValidationRuleInfo): Promise<boolean> {
+        const { rule } = info;
         if (!rule.formula1) {
             return false;
         }

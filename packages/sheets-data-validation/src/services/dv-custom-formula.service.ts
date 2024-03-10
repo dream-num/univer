@@ -15,74 +15,133 @@
  */
 
 import type { IRange, ISheetDataValidationRule } from '@univerjs/core';
-import { Disposable, ICommandService, ObjectMatrix, Range, Rectangle, Tools } from '@univerjs/core';
-import type { IAddDataValidationMutationParams, IRemoveDataValidationMutationParams, IUpdateDataValidationMutationParams } from '@univerjs/data-validation';
-import { AddDataValidationMutation, DataValidationModel, RemoveAllDataValidationMutation, RemoveDataValidationCommand, RemoveDataValidationMutation, UpdateDataValidationMutation, UpdateRuleType } from '@univerjs/data-validation';
-import type { ISetFormulaCalculationResultMutation, ISetOtherFormulaMutationParams } from '@univerjs/engine-formula';
-import { deserializeRangeWithSheet, generateStringWithSequence, LexerTreeBuilder, RemoveOtherFormulaMutation, sequenceNodeType, serializeRange, SetFormulaCalculationResultMutation, SetOtherFormulaMutation } from '@univerjs/engine-formula';
+import { DataValidationType, Disposable, isFormulaString, IUniverInstanceService, ObjectMatrix, Range } from '@univerjs/core';
+import { isFormulaTransformable, LexerTreeBuilder, transformFormula } from '@univerjs/engine-formula';
 import { Inject } from '@wendellhu/redi';
-import type { IOtherFormulaManagerInsertParam, IOtherFormulaManagerSearchParam } from '@univerjs/engine-formula/services/other-formula-manager.service.js';
-import { Subject } from 'rxjs';
-import { FormulaResultStatus, type IDataValidationFormulaResult } from './formula-common';
+import { DataValidationModel } from '@univerjs/data-validation';
 import { RegisterOtherFormulaService } from './register-formula.service';
+import { DataValidationCacheService } from './dv-cache.service';
 
 interface IDataValidationFormula {
     ruleId: string;
-    originFormulaText: string;
     formulaText: string;
     formulaId: string;
+    temp?: boolean;
 }
+
+interface IFormulaData {
+    formula: string;
+    originRow: number;
+    originCol: number;
+    isTransformable: boolean;
+    formulaId?: string;
+}
+
+interface ICellData {
+    row: number;
+    column: number;
+}
+
+type RuleId = string;
+type UnitId = string;
+type SubUnitId = string;
+type FormulaId = string;
 
 //
 export class DataValidationCustomFormulaService extends Disposable {
-    private _formulaMap: Map<string, Map<string, ObjectMatrix<IDataValidationFormula>>> = new Map();
+    private _formulaMap: Map<UnitId, Map<SubUnitId, ObjectMatrix<IDataValidationFormula>>> = new Map();
     /**
      * Map of origin formula of rule
      */
-    private _ruleFormulaMap: Map<string, Map<string, Map<string, string>>> = new Map();
+    private _ruleFormulaMap: Map<UnitId, Map<SubUnitId, Map<RuleId, IFormulaData>>> = new Map();
+
+    /**
+     * reflect of formulaId to cell, only store transformable formula
+     */
+    private _formulaCellMap: Map<UnitId, Map<SubUnitId, Map<FormulaId, ICellData>>> = new Map();
 
     constructor(
-        @ICommandService private readonly _commandService: ICommandService,
-        @Inject(DataValidationModel) private readonly _dataValidationModel: DataValidationModel,
         @Inject(RegisterOtherFormulaService) private _registerOtherFormulaService: RegisterOtherFormulaService,
-        @Inject(LexerTreeBuilder) private _lexerTreeBuilder: LexerTreeBuilder
+        @Inject(LexerTreeBuilder) private _lexerTreeBuilder: LexerTreeBuilder,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @Inject(DataValidationModel) private readonly _dataValidationModel: DataValidationModel,
+        @Inject(DataValidationCacheService) private readonly _dataValidationCacheService: DataValidationCacheService
     ) {
         super();
+
+        this._initFormulaResultHandler();
     }
 
-    private _makeRuleDirty() {}
+    private _initFormulaResultHandler() {
+        this.disposeWithMe(this._registerOtherFormulaService.formulaResult$.subscribe((resultMap) => {
+            for (const unitId in resultMap) {
+                const unitMap = resultMap[unitId];
+                for (const subUnitId in unitMap) {
+                    const results = unitMap[subUnitId];
+                    const { formulaCellMap, ruleFormulaMap } = this._ensureMaps(unitId, subUnitId);
+                    const manager = this._dataValidationModel.getOrCreateManager(unitId, subUnitId);
+                    results.forEach((result) => {
+                        const ruleInfo = ruleFormulaMap.get(result.ruleId);
+                        const cellInfo = formulaCellMap.get(result.formulaId);
+                        const rule = manager.getRuleById(result.ruleId);
 
-    private _ensureFormulaMap(unitId: string, subUnitId: string) {
-        let unitMap = this._formulaMap.get(unitId);
+                        if (rule && ruleInfo && !ruleInfo.isTransformable) {
+                            this._dataValidationCacheService.markRangeDirty(unitId, subUnitId, rule.ranges);
+                        }
 
-        if (!unitMap) {
-            unitMap = new Map<string, ObjectMatrix<IDataValidationFormula>>();
-            this._formulaMap.set(unitId, unitMap);
-        }
-
-        let subUnitMap = unitMap.get(subUnitId);
-        if (!subUnitMap) {
-            // TODO: load from snapshot
-            subUnitMap = new ObjectMatrix<IDataValidationFormula>();
-        }
-        return subUnitMap;
+                        if (cellInfo) {
+                            this._dataValidationCacheService.markCellDirty(unitId, subUnitId, cellInfo.row, cellInfo.column);
+                        }
+                    });
+                }
+            }
+        }));
     }
 
-    private _ensureRuleFormulaMap(unitId: string, subUnitId: string) {
-        let unitMap = this._ruleFormulaMap.get(unitId);
+    private _ensureMaps(unitId: string, subUnitId: string) {
+        let formulaUnitMap = this._formulaMap.get(unitId);
+        let ruleFormulaUnitMap = this._ruleFormulaMap.get(unitId);
+        let formulaCellUnitMap = this._formulaCellMap.get(unitId);
 
-        if (!unitMap) {
-            unitMap = new Map();
-            this._ruleFormulaMap.set(unitId, unitMap);
+        if (!formulaUnitMap || !ruleFormulaUnitMap || !formulaCellUnitMap) {
+            formulaUnitMap = new Map<string, ObjectMatrix<IDataValidationFormula>>();
+            ruleFormulaUnitMap = new Map();
+            formulaCellUnitMap = new Map();
+            this._formulaMap.set(unitId, formulaUnitMap);
+            this._ruleFormulaMap.set(unitId, ruleFormulaUnitMap);
+            this._formulaCellMap.set(unitId, formulaCellUnitMap);
         }
 
-        let subUnitMap = unitMap.get(subUnitId);
+        let formulaMap = formulaUnitMap.get(subUnitId);
+        let ruleFormulaMap = ruleFormulaUnitMap.get(subUnitId);
+        let formulaCellMap = formulaCellUnitMap.get(subUnitId);
 
-        if (!subUnitMap) {
-            subUnitMap = new Map();
+        if (!formulaMap || !ruleFormulaMap || !formulaCellMap) {
+            formulaMap = new ObjectMatrix<IDataValidationFormula>();
+            formulaUnitMap.set(subUnitId, formulaMap);
+
+            ruleFormulaMap = new Map();
+            ruleFormulaUnitMap.set(subUnitId, ruleFormulaMap);
+
+            formulaCellMap = new Map();
+            formulaCellUnitMap.set(subUnitId, formulaCellMap);
+
+            const worksheet = this._univerInstanceService.getUniverSheetInstance(unitId)?.getSheetBySheetId(subUnitId);
+            const rules = worksheet?.getSnapshot().dataValidation;
+            if (rules) {
+                rules.forEach((rule) => {
+                    if (rule.type === DataValidationType.CUSTOM) {
+                        this.addRule(unitId, subUnitId, rule);
+                    }
+                });
+            }
         }
 
-        return subUnitMap;
+        return {
+            formulaMap,
+            ruleFormulaMap,
+            formulaCellMap,
+        };
     };
 
     private _registerFormula(unitId: string, subUnitId: string, ruleId: string, formulaString: string) {
@@ -90,78 +149,172 @@ export class DataValidationCustomFormulaService extends Disposable {
     };
 
     deleteByRuleId(unitId: string, subUnitId: string, ruleId: string) {
-        const formulaMap = this._ensureFormulaMap(unitId, subUnitId);
+        const { formulaMap, formulaCellMap } = this._ensureMaps(unitId, subUnitId);
+        const rule = this._dataValidationModel.getRuleById(unitId, subUnitId, ruleId) as ISheetDataValidationRule;
         const formulaIdList = new Set<string>();
 
-        formulaMap.forValue((row, col, value) => {
-            if (value.ruleId === ruleId) {
-                const { formulaId } = value;
-                formulaMap.realDeleteValue(row, col);
-                formulaIdList.add(formulaId);
-            }
+        if (!rule) {
+            return;
+        }
+
+        rule.ranges.forEach((range) => {
+            Range.foreach(range, (row, col) => {
+                const value = formulaMap.getValue(row, col);
+                if (value && value.ruleId === ruleId) {
+                    const { formulaId } = value;
+                    formulaMap.realDeleteValue(row, col);
+                    formulaIdList.add(formulaId);
+                    formulaCellMap.delete(formulaId);
+                }
+            });
         });
 
         this._registerOtherFormulaService.deleteFormula(unitId, subUnitId, Array.from(formulaIdList.values()));
     }
 
-    addRule(unitId: string, subUnitId: string, rule: ISheetDataValidationRule) {
-        const { ranges, formula1, uid: ruleId } = rule;
-        const formulaMap = this._ensureFormulaMap(unitId, subUnitId);
-        const ruleFormulaMap = this._ensureRuleFormulaMap(unitId, subUnitId);
+    private _addFormulaByRange(unitId: string, subUnitId: string, ruleId: string, formula: string, ranges: IRange[]) {
+        const { formulaMap, ruleFormulaMap, formulaCellMap } = this._ensureMaps(unitId, subUnitId);
 
-        if (!formula1) {
-            return;
+        const isTransformable = isFormulaTransformable(
+            this._lexerTreeBuilder,
+            formula
+        );
+
+        const originRow = ranges[0].startRow;
+        const originCol = ranges[0].startColumn;
+        if (isTransformable) {
+            ranges.forEach((range) => {
+                Range.foreach(range, (row, column) => {
+                    const relativeFormula = transformFormula(
+                        this._lexerTreeBuilder,
+                        formula,
+                        originRow,
+                        originCol,
+                        row,
+                        column
+                    );
+                    const formulaId = this._registerFormula(unitId, subUnitId, ruleId, relativeFormula);
+                    formulaMap.setValue(row, column, {
+                        formulaId,
+                        formulaText: relativeFormula,
+                        ruleId,
+                    });
+                    formulaCellMap.set(formulaId, { row, column });
+                });
+            });
+        } else {
+            const formulaId = this._registerFormula(unitId, subUnitId, ruleId, formula);
+            ranges.forEach((range) => {
+                Range.foreach(range, (row, col) => {
+                    formulaMap.setValue(row, col, {
+                        formulaId,
+                        formulaText: formula,
+                        ruleId,
+                    });
+                });
+            });
         }
 
-        const originSequenceNodes = this._lexerTreeBuilder.sequenceNodesBuilder(formula1);
-        const formulaId = this._registerFormula(unitId, subUnitId, ruleId, formula1);
-        const getRangeFromCell = (row: number, col: number) => ({ startRow: row, endRow: row, startColumn: col, endColumn: col });
-        const originRange = getRangeFromCell(rule.ranges[0].startRow, rule.ranges[0].startColumn);
+        ruleFormulaMap.set(ruleId, {
+            formula,
+            originCol,
+            originRow,
+            isTransformable,
+        });
+    }
 
-        ranges.forEach((range) => {
+    addRule(unitId: string, subUnitId: string, rule: ISheetDataValidationRule) {
+        const { ranges, formula1, uid: ruleId, type } = rule;
+        if (type !== DataValidationType.CUSTOM || !formula1 || !isFormulaString(formula1)) {
+            return;
+        }
+        this._addFormulaByRange(unitId, subUnitId, ruleId, formula1, ranges);
+    }
+
+    updateRuleRanges(unitId: string, subUnitId: string, ruleId: string, oldRanges: IRange[], newRanges: IRange[]) {
+        const { formulaMap, ruleFormulaMap, formulaCellMap } = this._ensureMaps(unitId, subUnitId);
+        const { formula, originCol, originRow, isTransformable, formulaId } = ruleFormulaMap.get(ruleId)!;
+        const deleteFormulaIdList = new Set<string>();
+
+        oldRanges.forEach((range) => {
             Range.foreach(range, (row, col) => {
-                const relativeRange = Rectangle.getRelativeRange(getRangeFromCell(row, col), originRange);
-                const sequenceNodes = Tools.deepClone(originSequenceNodes);
-                const transformSequenceNodes = Array.isArray(sequenceNodes)
-                    ? sequenceNodes.map((node) => {
-                        if (typeof node === 'object' && node.nodeType === sequenceNodeType.REFERENCE) {
-                            const gridRangeName = deserializeRangeWithSheet(node.token);
-                            const newRange = Rectangle.getPositionRange(relativeRange, gridRangeName.range);
-                            const newToken = serializeRange(newRange);
-                            return {
-                                ...node, token: newToken,
-                            };
-                        }
-                        return node;
-                    })
-                    : sequenceNodes;
-                let formulaString = transformSequenceNodes && generateStringWithSequence(transformSequenceNodes);
-                if (formulaString) {
-                    formulaString = `=${formulaString}`;
-                    const item: IDataValidationFormula = {
-                        ruleId,
-                        formulaId,
-                        formulaText: formulaString,
-                        originFormulaText: formula1,
-                    };
-                    formulaMap.setValue(row, col, item);
-                    this._registerFormula(unitId, subUnitId, ruleId, formulaString);
+                const value = formulaMap.getValue(row, col);
+                if (value && value.ruleId === ruleId) {
+                    value.temp = true;
                 }
             });
         });
-        ruleFormulaMap.set(ruleId, formula1);
+
+        newRanges.forEach((range) => {
+            Range.foreach(range, (row, col) => {
+                const oldValue = formulaMap.getValue(row, col);
+                if (oldValue.ruleId !== ruleId) {
+                    const oldRuleFormula = ruleFormulaMap.get(oldValue.ruleId);
+                    if (oldRuleFormula?.isTransformable) {
+                        deleteFormulaIdList.add(oldValue.formulaId);
+                    }
+
+                    if (isTransformable) {
+                        const relativeText = transformFormula(this._lexerTreeBuilder, formula, originRow, originCol, row, col);
+                        const formulaId = this._registerFormula(unitId, subUnitId, ruleId, relativeText);
+                        formulaMap.setValue(row, col, {
+                            formulaText: relativeText,
+                            ruleId,
+                            formulaId,
+                        });
+                        formulaCellMap.set(formulaId, { row, column: col });
+                    } else {
+                        formulaMap.setValue(row, col, {
+                            formulaText: formula,
+                            ruleId,
+                            formulaId: formulaId!,
+                        });
+                    }
+                } else {
+                    oldValue.temp = false;
+                }
+            });
+        });
+
+        oldRanges.forEach((range) => {
+            Range.foreach(range, (row, col) => {
+                const value = formulaMap.getValue(row, col);
+                if (value && value.ruleId === ruleId && value.temp === true) {
+                    formulaMap.realDeleteValue(row, col);
+                    if (isTransformable) {
+                        deleteFormulaIdList.add(value.formulaId);
+                    }
+                }
+            });
+        });
+
+        deleteFormulaIdList.forEach((formulaId) => {
+            formulaCellMap.delete(formulaId);
+        });
+
+        this._registerOtherFormulaService.deleteFormula(unitId, subUnitId, Array.from(deleteFormulaIdList.values()));
     }
 
-    updateRuleRanges(unitId: string, subUnitId: string, ruleId: string) {}
+    updateRuleFormula(unitId: string, subUnitId: string, ruleId: string, ranges: IRange[], formula: string) {
+        const { ruleFormulaMap } = this._ensureMaps(unitId, subUnitId);
+        const current = ruleFormulaMap.get(ruleId);
+        if (!current) {
+            return;
+        }
+        const { formula: oldFormula } = current;
 
-    setByObjectMatrix(unitId: string, subUnitId: string, matrix: ObjectMatrix<string>) {
-        const formulaMap = this._ensureFormulaMap(unitId, subUnitId);
-        const ruleFormulaMap = this._ensureRuleFormulaMap(unitId, subUnitId);
+        if (oldFormula !== formula) {
+            this._addFormulaByRange(unitId, subUnitId, ruleId, formula, ranges);
+        }
+    }
 
-        const lexerMap = new Map<string, >();
+    getCellFormulaValue(unitId: string, subUnitId: string, row: number, col: number) {
+        const { formulaMap } = this._ensureMaps(unitId, subUnitId);
+        const current = formulaMap.getValue(row, col);
+        if (!current) {
+            return Promise.resolve(undefined);
+        }
 
-        matrix.forValue((row, col, value) => {
-
-        });
+        return this._registerOtherFormulaService.getFormulaValue(unitId, subUnitId, current.formulaId);
     }
 }

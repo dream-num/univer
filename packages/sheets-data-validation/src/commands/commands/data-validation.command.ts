@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-import { CommandType, ICommandService, IUndoRedoService, ObjectMatrix, Range } from '@univerjs/core';
+import { CommandType, ICommandService, IUndoRedoService } from '@univerjs/core';
 import type { ICommand, IMutationInfo, IRange, ISheetDataValidationRule } from '@univerjs/core';
 import type { IAddDataValidationMutationParams, IUpdateDataValidationMutationParams } from '@univerjs/data-validation';
 import { AddDataValidationMutation, DataValidationModel, RemoveDataValidationMutation, UpdateDataValidationMutation, UpdateRuleType } from '@univerjs/data-validation';
 import type { SheetDataValidationManager } from '../../models/sheet-data-validation-manager';
-import { UpdateDataValidationRangeByMatrixMutation } from '../mutations/data-validation.mutation';
 
 export interface IUpdateSheetDataValidationRangeCommandParams {
     unitId: string;
@@ -45,19 +44,9 @@ export const UpdateSheetDataValidationRangeCommand: ICommand<IUpdateSheetDataVal
             return false;
         }
         const oldRanges = currentRule.ranges;
-        const matrix = manager.getRuleObjectMatrix();
-        const undoMatrix = new ObjectMatrix<string>();
-        const redoMatrix = new ObjectMatrix<string>();
-
-        ranges.forEach((range) => {
-            Range.foreach(range, (row, col) => {
-                const currentValue = matrix.getValue(row, col);
-                if (currentValue !== ruleId) {
-                    undoMatrix.setValue(row, col, currentValue ?? '');
-                    redoMatrix.setValue(row, col, '');
-                }
-            });
-        });
+        const matrix = manager.getRuleObjectMatrix().clone();
+        matrix.updateRange(ruleId, oldRanges, ranges);
+        const diffs = matrix.diff(manager.getDataValidations());
 
         const mutationParams: IUpdateDataValidationMutationParams = {
             unitId,
@@ -69,22 +58,71 @@ export const UpdateSheetDataValidationRangeCommand: ICommand<IUpdateSheetDataVal
             },
         };
 
-        const redoMutations: IMutationInfo[] = [
-            {
-                id: UpdateDataValidationRangeByMatrixMutation.id,
-                params: {
-                    unitId,
-                    subUnitId,
-                    ranges: redoMatrix,
-                },
-            },
+        const redoMutations: IMutationInfo[] = [];
+
+        const undoMutations: IMutationInfo[] = [];
+
+        diffs.forEach((diff) => {
+            switch (diff.type) {
+                case 'delete':
+                    redoMutations.push({
+                        id: RemoveDataValidationMutation.id,
+                        params: {
+                            unitId,
+                            subUnitId,
+                            ruleId: diff.rule.uid,
+                        },
+                    });
+                    undoMutations.unshift({
+                        id: AddDataValidationMutation.id,
+                        params: {
+                            unitId,
+                            subUnitId,
+                            rule: diff.rule,
+                            index: diff.index,
+                        },
+                    });
+                    break;
+                case 'update': {
+                    redoMutations.push({
+                        id: UpdateDataValidationMutation.id,
+                        params: {
+                            unitId,
+                            subUnitId,
+                            ruleId: diff.ruleId,
+                            payload: {
+                                type: UpdateRuleType.RANGE,
+                                payload: diff.newRanges,
+                            },
+                        } as IUpdateDataValidationMutationParams,
+                    });
+                    undoMutations.unshift({
+                        id: UpdateDataValidationMutation.id,
+                        params: {
+                            unitId,
+                            subUnitId,
+                            ruleId,
+                            payload: {
+                                type: UpdateRuleType.RANGE,
+                                payload: diff.oldRanges,
+                            },
+                        } as IUpdateDataValidationMutationParams,
+                    });
+                    break;
+                }
+                default:
+                    break;
+            }
+        });
+
+        redoMutations.push(
             {
                 id: UpdateDataValidationMutation.id,
                 params: mutationParams,
-            },
-        ];
+            }
+        );
 
-        const undoMutations: IMutationInfo[] = [
+        undoMutations.unshift(
             {
                 id: UpdateDataValidationMutation.id,
                 params: {
@@ -94,15 +132,8 @@ export const UpdateSheetDataValidationRangeCommand: ICommand<IUpdateSheetDataVal
                         payload: oldRanges,
                     },
                 },
-            }, {
-                id: UpdateDataValidationRangeByMatrixMutation.id,
-                params: {
-                    unitId,
-                    subUnitId,
-                    ranges: undoMatrix,
-                },
-            },
-        ];
+            }
+        );
 
         undoRedoService.pushUndoRedo({
             undoMutations,
@@ -110,12 +141,10 @@ export const UpdateSheetDataValidationRangeCommand: ICommand<IUpdateSheetDataVal
             unitID: unitId,
         });
 
-        await commandService.executeCommand(UpdateDataValidationRangeByMatrixMutation.id, {
-            unitId,
-            subUnitId,
-            ranges: redoMatrix,
+        redoMutations.forEach((commandInfo) => {
+            commandService.executeCommand(commandInfo.id, commandInfo.params);
         });
-        await commandService.executeCommand(UpdateDataValidationMutation.id, mutationParams);
+
         return true;
     },
 };
@@ -139,59 +168,86 @@ export const AddSheetDataValidationCommand: ICommand<IAddSheetDataValidationComm
         const undoRedoService = accessor.get(IUndoRedoService);
         const manager = dataValidationModel.getOrCreateManager(unitId, subUnitId) as SheetDataValidationManager;
 
-        const matrix = manager.getRuleObjectMatrix();
-        const undoMatrix = new ObjectMatrix<string>();
-        const redoMatrix = new ObjectMatrix<string>();
-        const ruleId = rule.uid;
+        const matrix = manager.getRuleObjectMatrix().clone();
+        matrix.addRule(rule);
+        const diffs = matrix.diff(manager.getDataValidations());
 
-        rule.ranges.forEach((range) => {
-            Range.foreach(range, (row, col) => {
-                const currentValue = matrix.getValue(row, col);
-                if (currentValue !== ruleId) {
-                    undoMatrix.setValue(row, col, currentValue ?? '');
-                    redoMatrix.setValue(row, col, '');
-                }
-            });
-        });
-
-        const redoParams: IAddDataValidationMutationParams = {
+        const mutationParams: IAddDataValidationMutationParams = {
             unitId,
             subUnitId,
             rule,
         };
 
-        const redoMutations: IMutationInfo[] = [
-            {
-                id: UpdateDataValidationRangeByMatrixMutation.id,
-                params: {
-                    unitId,
-                    subUnitId,
-                    ranges: redoMatrix,
-                },
-            },
-            {
-                id: AddDataValidationMutation.id,
-                params: redoParams,
-            }];
+        const redoMutations: IMutationInfo[] = [];
 
-        const undoMutations: IMutationInfo[] = [
-            {
-                id: RemoveDataValidationMutation.id,
-                params: {
-                    unitId,
-                    subUnitId,
-                    ruleId: rule.uid,
-                },
+        const undoMutations: IMutationInfo[] = [];
+
+        diffs.forEach((diff) => {
+            switch (diff.type) {
+                case 'delete':
+                    redoMutations.push({
+                        id: RemoveDataValidationMutation.id,
+                        params: {
+                            unitId,
+                            subUnitId,
+                            ruleId: diff.rule.uid,
+                        },
+                    });
+                    undoMutations.unshift({
+                        id: AddDataValidationMutation.id,
+                        params: {
+                            unitId,
+                            subUnitId,
+                            rule: diff.rule,
+                            index: diff.index,
+                        },
+                    });
+                    break;
+                case 'update': {
+                    redoMutations.push({
+                        id: UpdateDataValidationMutation.id,
+                        params: {
+                            unitId,
+                            subUnitId,
+                            ruleId: diff.ruleId,
+                            payload: {
+                                type: UpdateRuleType.RANGE,
+                                payload: diff.newRanges,
+                            },
+                        } as IUpdateDataValidationMutationParams,
+                    });
+                    undoMutations.unshift({
+                        id: UpdateDataValidationMutation.id,
+                        params: {
+                            unitId,
+                            subUnitId,
+                            ruleId: diff.ruleId,
+                            payload: {
+                                type: UpdateRuleType.RANGE,
+                                payload: diff.oldRanges,
+                            },
+                        } as IUpdateDataValidationMutationParams,
+                    });
+                    break;
+                }
+                default:
+                    break;
+            }
+        });
+
+        redoMutations.push({
+            id: AddDataValidationMutation.id,
+            params: mutationParams,
+        });
+
+        undoMutations.unshift({
+            id: RemoveDataValidationMutation.id,
+            params: {
+                unitId,
+                subUnitId,
+                ruleId: rule.uid,
             },
-            {
-                id: UpdateDataValidationRangeByMatrixMutation.id,
-                params: {
-                    unitId,
-                    subUnitId,
-                    ranges: undoMatrix,
-                },
-            },
-        ];
+        });
 
         undoRedoService.pushUndoRedo({
             unitID: unitId,
@@ -199,12 +255,10 @@ export const AddSheetDataValidationCommand: ICommand<IAddSheetDataValidationComm
             undoMutations,
         });
 
-        await commandService.executeCommand(UpdateDataValidationRangeByMatrixMutation.id, {
-            unitId,
-            subUnitId,
-            ranges: redoMatrix,
+        redoMutations.forEach((commandInfo) => {
+            commandService.executeCommand(commandInfo.id, commandInfo.params);
         });
-        await commandService.executeCommand(AddDataValidationMutation.id, redoParams);
+
         return true;
     },
 };

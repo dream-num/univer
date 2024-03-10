@@ -14,15 +14,9 @@
  * limitations under the License.
  */
 
-import type { IMutation } from '@univerjs/core';
-import { CommandType } from '@univerjs/core';
+import { DataValidationOperator } from '@univerjs/core';
 
-export interface IDataValidationFormulaMarkDirtyParams { [unitId: string]: { [sunUnitId: string]: { [formulaId: string]: boolean } } }
-
-export const DataValidationFormulaMarkDirty: IMutation<IDataValidationFormulaMarkDirtyParams> = {
-    type: CommandType.MUTATION,
-    id: 'sheet.mutation.data-validation-formula-mark-dirty',
-    handler() {
-        return true;
-    },
-};
+export const TWO_FORMULA_OPERATOR_COUNT: DataValidationOperator[] = [
+    DataValidationOperator.BETWEEN,
+    DataValidationOperator.NOT_BETWEEN,
+];

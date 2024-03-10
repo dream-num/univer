@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { type CellValue, type DataValidationOperator, DataValidationType, type IDataValidationRule, type IDataValidationRuleBase, isFormulaString } from '@univerjs/core';
+import { DataValidationType, isFormulaString } from '@univerjs/core';
+import type { CellValue, DataValidationOperator, IDataValidationRuleBase, IDataValidationRuleInfo } from '@univerjs/core';
 import { BaseDataValidator } from '@univerjs/data-validation/validators/base-data-validator.js';
 import { CUSTOM_FORMULA_INPUT_NAME } from '../views/formula-input';
 
@@ -29,43 +30,43 @@ export class CustomFormulaValidator extends BaseDataValidator {
         return isFormulaString(rule.formula1);
     }
 
-    override isValidType(cellValue: CellValue, rule: IDataValidationRule): boolean {
+    override isValidType(cellValue: CellValue, rule: IDataValidationRuleInfo): boolean {
         throw new Error('Method not implemented.');
     }
 
-    override transform(cellValue: CellValue, rule: IDataValidationRule): CellValue {
+    override transform(cellValue: CellValue, rule: IDataValidationRuleInfo): CellValue {
         throw new Error('Method not implemented.');
     }
 
-    override async validatorIsEqual(_cellValue: CellValue, _rule: IDataValidationRule): Promise<boolean> {
+    override async validatorIsEqual(_cellValue: CellValue, _rule: IDataValidationRuleInfo): Promise<boolean> {
         return true;
     }
 
-    override async validatorIsNotEqual(_cellValue: CellValue, _rule: IDataValidationRule): Promise<boolean> {
+    override async validatorIsNotEqual(_cellValue: CellValue, _rule: IDataValidationRuleInfo): Promise<boolean> {
         return true;
     }
 
-    override async validatorIsBetween(_cellValue: CellValue, _rule: IDataValidationRule): Promise<boolean> {
+    override async validatorIsBetween(_cellValue: CellValue, _rule: IDataValidationRuleInfo): Promise<boolean> {
         return true;
     }
 
-    override async validatorIsNotBetween(_cellValue: CellValue, _rule: IDataValidationRule): Promise<boolean> {
+    override async validatorIsNotBetween(_cellValue: CellValue, _rule: IDataValidationRuleInfo): Promise<boolean> {
         return true;
     }
 
-    override async validatorIsGreaterThan(_cellValue: CellValue, _rule: IDataValidationRule): Promise<boolean> {
+    override async validatorIsGreaterThan(_cellValue: CellValue, _rule: IDataValidationRuleInfo): Promise<boolean> {
         return true;
     }
 
-    override async validatorIsGreaterThanOrEqual(_cellValue: CellValue, _rule: IDataValidationRule): Promise<boolean> {
+    override async validatorIsGreaterThanOrEqual(_cellValue: CellValue, _rule: IDataValidationRuleInfo): Promise<boolean> {
         return true;
     }
 
-    override async validatorIsLessThan(_cellValue: CellValue, _rule: IDataValidationRule): Promise<boolean> {
+    override async validatorIsLessThan(_cellValue: CellValue, _rule: IDataValidationRuleInfo): Promise<boolean> {
         return true;
     }
 
-    override async validatorIsLessThanOrEqual(_cellValue: CellValue, _rule: IDataValidationRule): Promise<boolean> {
+    override async validatorIsLessThanOrEqual(_cellValue: CellValue, _rule: IDataValidationRuleInfo): Promise<boolean> {
         return true;
     }
 }

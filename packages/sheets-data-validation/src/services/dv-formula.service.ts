@@ -14,26 +14,51 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, isFormulaString } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
+import { DataValidationType, Disposable, isFormulaString, IUniverInstanceService } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
+import { DataValidationModel } from '@univerjs/data-validation';
 import type { IDataValidationFormulaResult, IFormulaInfo } from './formula-common';
 import { RegisterOtherFormulaService } from './register-formula.service';
+import { DataValidationCacheService } from './dv-cache.service';
 
-// 作为值的formula
-// 只需要和rule进行绑定即可
+type RuleId = string;
+type UnitId = string;
+type SubUnitId = string;
+
 export class DataValidationFormulaService extends Disposable {
-    private _formulaRuleMap: Map<string, Map<string, Map<string, [IFormulaInfo | undefined, IFormulaInfo | undefined]>>> = new Map();
-    private _formulaCacheMap: Map<string, Map<string, Map<string, IDataValidationFormulaResult>>> = new Map();
+    private _formulaRuleMap: Map<UnitId, Map<SubUnitId, Map<RuleId, [IFormulaInfo | undefined, IFormulaInfo | undefined]>>> = new Map();
 
     constructor(
-        @ICommandService private readonly _commandService: ICommandService,
-        @Inject(RegisterOtherFormulaService) private _registerOtherFormulaService: RegisterOtherFormulaService
+        @Inject(RegisterOtherFormulaService) private _registerOtherFormulaService: RegisterOtherFormulaService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @Inject(DataValidationCacheService) private readonly _dataValidationCacheService: DataValidationCacheService,
+        @Inject(DataValidationModel) private readonly _dataValidationModel: DataValidationModel
     ) {
         super();
+        this._initFormulaResultHandler();
     }
 
-    // TODO
-    private _makeRuleDirty(ruleId: string) {}
+    private _initFormulaResultHandler() {
+        this.disposeWithMe(this._registerOtherFormulaService.formulaResult$.subscribe((resultMap) => {
+            for (const unitId in resultMap) {
+                const unitMap = resultMap[unitId];
+                for (const subUnitId in unitMap) {
+                    const results = unitMap[subUnitId];
+                    const formulaMap = this._ensureRuleFormulaMap(unitId, subUnitId);
+                    const manager = this._dataValidationModel.getOrCreateManager(unitId, subUnitId);
+                    results.forEach((result) => {
+                        if (formulaMap.get(result.ruleId)) {
+                            const rule = manager.getRuleById(result.ruleId);
+                            if (rule) {
+                                this._dataValidationCacheService.markRangeDirty(unitId, subUnitId, rule.ranges);
+                            }
+                        };
+                    });
+                }
+            }
+        }));
+    }
 
     private _ensureRuleFormulaMap(unitId: string, subUnitId: string) {
         let unitMap = this._formulaRuleMap.get(unitId);
@@ -47,6 +72,16 @@ export class DataValidationFormulaService extends Disposable {
 
         if (!subUnitMap) {
             subUnitMap = new Map();
+            unitMap.set(subUnitId, subUnitMap);
+            const worksheet = this._univerInstanceService.getUniverSheetInstance(unitId)?.getSheetBySheetId(subUnitId);
+            const rules = worksheet?.getSnapshot().dataValidation;
+            if (rules) {
+                rules.forEach((rule) => {
+                    if (rule.type !== DataValidationType.CUSTOM) {
+                        this.addRule(unitId, subUnitId, rule.uid, rule.formula1, rule.formula2);
+                    }
+                });
+            }
         }
 
         return subUnitMap;
@@ -117,5 +152,40 @@ export class DataValidationFormulaService extends Disposable {
                 item[1] = undefined;
             };
         }
+    }
+
+    getRuleFormulaResult(unitId: string, subUnitId: string, ruleId: string): Promise<Nullable<Nullable<IDataValidationFormulaResult>[]>> {
+        const ruleFormulaMap = this._ensureRuleFormulaMap(unitId, subUnitId);
+
+        const formulaInfo = ruleFormulaMap.get(ruleId);
+        if (!formulaInfo) {
+            return Promise.resolve(null);
+        }
+
+        return Promise.all(formulaInfo.map((i) => {
+            if (i) {
+                return this._registerOtherFormulaService.getFormulaValue(unitId, subUnitId, i.id);
+            }
+
+            return Promise.resolve(undefined);
+        }));
+    }
+
+    getRuleFormulaResultSync(unitId: string, subUnitId: string, ruleId: string) {
+        const ruleFormulaMap = this._ensureRuleFormulaMap(unitId, subUnitId);
+
+        const formulaInfo = ruleFormulaMap.get(ruleId);
+
+        if (!formulaInfo) {
+            return undefined;
+        }
+
+        return formulaInfo.map((i) => {
+            if (i) {
+                return this._registerOtherFormulaService.getFormulaValueSync(unitId, subUnitId, i.id);
+            }
+
+            return undefined;
+        });
     }
 }

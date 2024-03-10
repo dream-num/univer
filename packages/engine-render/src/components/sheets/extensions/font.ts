@@ -218,7 +218,7 @@ export class Font extends SheetExtension {
                     }
 
                     ctx.translate(startX, startY);
-                    this._renderDocuments(ctx, docsConfig, startX, startY, endX, endY, rowIndex, columnIndex);
+                    this._renderDocuments(ctx, docsConfig, startX, startY, endX, endY, rowIndex, columnIndex, overflowCache);
                     ctx.restore();
                 });
             });
@@ -233,7 +233,8 @@ export class Font extends SheetExtension {
         endX: number,
         endY: number,
         row: number,
-        column: number
+        column: number,
+        overflowCache: ObjectMatrix<IRange>
     ) {
         const documents = this.getDocuments() as Documents;
 
@@ -254,18 +255,20 @@ export class Font extends SheetExtension {
 
         // Use fix https://github.com/dream-num/univer/issues/927, Set the actual width of the content to the page width of the document,
         // so that the divide will be aligned when the skeleton is calculated.
+        const overflowRectangle = overflowCache.getValue(row, column);
+        if (!(wrapStrategy === WrapStrategy.WRAP && !overflowRectangle && angle === 0)) {
+            const contentSize = getDocsSkeletonPageSize(documentSkeleton);
+            const documentStyle = documentSkeleton.getViewModel().getDataModel().getSnapshot().documentStyle;
+            if (contentSize && documentStyle) {
+                const { width } = contentSize;
+                const { marginRight = 0, marginLeft = 0 } = documentStyle;
 
-        const contentSize = getDocsSkeletonPageSize(documentSkeleton);
-        const documentStyle = documentSkeleton.getViewModel().getDataModel().getSnapshot().documentStyle;
-        if (contentSize && documentStyle) {
-            const { width } = contentSize;
-            const { marginRight = 0, marginLeft = 0 } = documentStyle;
-
-            documentSkeleton
-                .getViewModel()
-                .getDataModel()
-                .updateDocumentDataPageSize(width + marginLeft + marginRight);
-            documentSkeleton.calculate();
+                documentSkeleton
+                    .getViewModel()
+                    .getDataModel()
+                    .updateDocumentDataPageSize(width + marginLeft + marginRight);
+                documentSkeleton.calculate();
+            }
         }
 
         documentSkeleton.makeDirty(false);

@@ -24,10 +24,13 @@ import type { IIconSetCellData } from './type';
 
 export const IconUKey = 'sheet-conditional-rule-icon';
 const EXTENSION_Z_INDEX = 35;
+export const DEFAULT_WIDTH = 15;
+export const DEFAULT_PADDING = 2;
 
 export class ConditionalFormatIcon extends SheetExtension {
-    private _paddingRightAndLeft = 2;
-    private _paddingTopAndBottom = 2;
+    private _paddingRightAndLeft = DEFAULT_PADDING;
+
+    private _width = DEFAULT_WIDTH;
 
     private _imageMap: Map<string, HTMLImageElement> = new Map();
     override uKey = IconUKey;
@@ -76,10 +79,12 @@ export class ConditionalFormatIcon extends SheetExtension {
                 }
                 const borderWidth = endX - startX;
                 const borderHeight = endY - startY;
-                const width = Math.max(Math.min(borderWidth - this._paddingRightAndLeft * 2, borderHeight - this._paddingTopAndBottom * 2, 24), 0);
+                if (this._width > borderHeight || this._width > borderWidth + this._paddingRightAndLeft * 2) {
+                    return;
+                }
                 // Highly centered processing
-                const y = (borderHeight - width) / 2 + startY;
-                width && ctx.drawImage(icon, startX + this._paddingRightAndLeft, y, width, width);
+                const y = (borderHeight - this._width) / 2 + startY;
+                ctx.drawImage(icon, startX + this._paddingRightAndLeft, y, this._width, this._width);
             }
         });
         ctx.restore();

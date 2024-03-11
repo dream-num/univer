@@ -19,7 +19,7 @@ import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { Inject } from '@wendellhu/redi';
 import { bufferTime, filter } from 'rxjs/operators';
-import type { Spreadsheet } from '@univerjs/engine-render';
+import type { ISheetFontRenderExtension, Spreadsheet } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 
 import { ConditionalFormatService } from '../services/conditional-format.service';
@@ -27,7 +27,7 @@ import { ConditionalFormatViewModel } from '../models/conditional-format-view-mo
 import { ConditionalFormatRuleModel } from '../models/conditional-format-rule-model';
 import { DataBar, dataBarUKey } from '../render/data-bar.render';
 
-import { ConditionalFormatIcon, IconUKey } from '../render/icon.render';
+import { ConditionalFormatIcon, DEFAULT_PADDING, DEFAULT_WIDTH, IconUKey } from '../render/icon.render';
 import type { IConditionalFormatCellData } from '../render/type';
 
 @OnLifecycle(LifecycleStages.Rendered, RenderController)
@@ -106,7 +106,7 @@ export class RenderController extends Disposable {
             const styleMap = context.workbook.getStyles();
             const defaultStyle = (typeof cell?.s === 'string' ? styleMap.get(cell?.s) : cell?.s) || {};
             const s = { ...defaultStyle };
-            const cloneCell = { ...cell, s } as IConditionalFormatCellData;
+            const cloneCell = { ...cell, s } as IConditionalFormatCellData & ISheetFontRenderExtension;
             if (result.style) {
                 Object.assign(s, result.style);
             }
@@ -115,9 +115,14 @@ export class RenderController extends Disposable {
             }
             if (result.iconSet) {
                 cloneCell.iconSet = result.iconSet;
+                if (!cloneCell.fontRenderExtension) {
+                    cloneCell.fontRenderExtension = {};
+                }
+
+                cloneCell.fontRenderExtension.leftOffset = DEFAULT_PADDING + DEFAULT_WIDTH;
+
                 if (!result.iconSet.isShowValue) {
-                    cloneCell._originV = cloneCell.v;
-                    cloneCell.v = '';
+                    cloneCell.fontRenderExtension.isSkip = true;
                 }
             }
 

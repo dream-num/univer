@@ -18,12 +18,10 @@ import {
     Disposable,
     LifecycleStages,
     OnLifecycle,
-    toDisposable,
 } from '@univerjs/core';
 
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { Inject } from '@wendellhu/redi';
-import type { IIconSetCellData } from '../render/type';
 
 @OnLifecycle(LifecycleStages.Rendered, ConditionalFormatEditorController)
 export class ConditionalFormatEditorController extends Disposable {
@@ -31,25 +29,5 @@ export class ConditionalFormatEditorController extends Disposable {
         @Inject(IEditorBridgeService) private _editorBridgeService: IEditorBridgeService
     ) {
         super();
-        this._initInterceptorEditorStart();
-    }
-
-    private _initInterceptorEditorStart() {
-        this.disposeWithMe(
-            toDisposable(
-                this._editorBridgeService.interceptor.intercept(
-                    this._editorBridgeService.interceptor.getInterceptPoints().BEFORE_CELL_EDIT,
-                    {
-                        handler: (value, _context, next) => {
-                            const cellData = value as IIconSetCellData;
-                            if (cellData && cellData.v === '' && cellData._originV !== undefined) {
-                                return next({ ...cellData, v: cellData._originV });
-                            }
-                            return next(value);
-                        },
-                    }
-                )
-            )
-        );
     }
 }

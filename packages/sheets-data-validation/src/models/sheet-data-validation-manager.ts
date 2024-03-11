@@ -29,6 +29,7 @@ import type { IDataValidationResCache } from '../services/dv-cache.service';
 import { DataValidationCacheService } from '../services/dv-cache.service';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
 import { DataValidationCustomFormulaService } from '../services/dv-custom-formula.service';
+import { DataValidationRefRangeController } from '../controllers/dv-ref-range.controller';
 
 export type RangeMutation = {
     type: 'update';
@@ -152,6 +153,7 @@ export class SheetDataValidationManager extends DataValidationManager<ISheetData
     private _dataValidationFormulaService: DataValidationFormulaService;
     private _dataValidationCustomFormulaService: DataValidationCustomFormulaService;
     private _cache: ObjectMatrix<Nullable<IDataValidationResCache>>;
+    private _dataValidationRefRangeController: DataValidationRefRangeController;
 
     constructor(
         unitId: string,
@@ -164,7 +166,7 @@ export class SheetDataValidationManager extends DataValidationManager<ISheetData
         this._dataValidationCacheService = this._injector.get(DataValidationCacheService);
         this._dataValidationFormulaService = this._injector.get(DataValidationFormulaService);
         this._dataValidationCustomFormulaService = this._injector.get(DataValidationCustomFormulaService);
-
+        this._dataValidationRefRangeController = this._injector.get(DataValidationRefRangeController);
         this._cache = this._dataValidationCacheService.ensureCache(unitId, subUnitId);
 
         const matrix = new ObjectMatrix<string>();
@@ -175,6 +177,10 @@ export class SheetDataValidationManager extends DataValidationManager<ISheetData
                     matrix.setValue(row, col, ruleId);
                 });
             });
+        });
+
+        rules?.forEach((rule) => {
+            this._dataValidationRefRangeController.register(unitId, subUnitId, rule);
         });
         this._ruleMatrix = new RuleMatrix(matrix);
     }

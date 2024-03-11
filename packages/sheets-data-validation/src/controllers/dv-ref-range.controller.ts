@@ -29,6 +29,8 @@ import { isRangesEqual } from '../utils/isRangesEqual';
 
 @OnLifecycle(LifecycleStages.Rendered, DataValidationRefRangeController)
 export class DataValidationRefRangeController extends Disposable {
+    private _disposableMap: Map<string, () => void> = new Map();
+
     constructor(
         @Inject(DataValidationModel) private _dataValidationModel: DataValidationModel,
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
@@ -39,59 +41,61 @@ export class DataValidationRefRangeController extends Disposable {
         this._initRefRange();
     }
 
-    private _initRefRange() {
-        const disposableMap: Map<string, () => void> = new Map();
-        const getIdWithUnitId = (unitID: string, subUnitId: string, ruleId: string) => `${unitID}_${subUnitId}_${ruleId}`;
-        const register = (unitId: string, subUnitId: string, rule: ISheetDataValidationRule) => {
-            const handleRangeChange = (commandInfo: EffectRefRangeParams) => {
-                const oldRanges = [...rule.ranges];
-                const resultRanges = oldRanges.map((range) => {
-                    return handleDefaultRangeChangeWithEffectRefCommands(range, commandInfo) as IRange;
-                }).filter((range) => !!range);
-                const isEqual = isRangesEqual(resultRanges, oldRanges);
-                if (isEqual) {
-                    return { redos: [], undos: [] };
-                }
-                if (resultRanges.length) {
-                    const redoParams: IUpdateDataValidationMutationParams = {
+    private _getIdWithUnitId(unitID: string, subUnitId: string, ruleId: string) {
+        return `${unitID}_${subUnitId}_${ruleId}`;
+    }
+
+    register(unitId: string, subUnitId: string, rule: ISheetDataValidationRule) {
+        const handleRangeChange = (commandInfo: EffectRefRangeParams) => {
+            const oldRanges = [...rule.ranges];
+            const resultRanges = oldRanges.map((range) => {
+                return handleDefaultRangeChangeWithEffectRefCommands(range, commandInfo) as IRange;
+            }).filter((range) => !!range);
+            const isEqual = isRangesEqual(resultRanges, oldRanges);
+            if (isEqual) {
+                return { redos: [], undos: [] };
+            }
+            if (resultRanges.length) {
+                const redoParams: IUpdateDataValidationMutationParams = {
+                    unitId,
+                    subUnitId,
+                    ruleId: rule.uid,
+                    payload: {
+                        type: UpdateRuleType.RANGE,
+                        payload: resultRanges,
+                    },
+                };
+                // in ref-range case, there won't be any overlap about rule ranges
+                const redos = [{ id: UpdateDataValidationMutation.id, params: redoParams }];
+                const undos = [{
+                    id: UpdateDataValidationMutation.id,
+                    params: {
                         unitId,
                         subUnitId,
                         ruleId: rule.uid,
                         payload: {
                             type: UpdateRuleType.RANGE,
-                            payload: resultRanges,
+                            payload: oldRanges,
                         },
-                    };
-                    // in ref-range case, there won't be any overlap about rule ranges
-                    const redos = [{ id: UpdateDataValidationMutation.id, params: redoParams }];
-                    const undos = [{
-                        id: UpdateDataValidationMutation.id,
-                        params: {
-                            unitId,
-                            subUnitId,
-                            ruleId: rule.uid,
-                            payload: {
-                                type: UpdateRuleType.RANGE,
-                                payload: oldRanges,
-                            },
-                        },
-                    }];
-                    return { redos, undos };
-                } else {
-                    const redoParams: IRemoveDataValidationMutationParams = { unitId, subUnitId, ruleId: rule.uid };
-                    const redos = [{ id: RemoveDataValidationMutation.id, params: redoParams }];
-                    const undos = removeDataValidationUndoFactory(this._injector, redoParams);
-                    return { redos, undos };
-                }
-            };
-            const disposeList: (() => void)[] = [];
-            rule.ranges.forEach((range) => {
-                const disposable = this._refRangeService.registerRefRange(range, handleRangeChange);
-                disposeList.push(() => disposable.dispose());
-            });
-            disposableMap.set(getIdWithUnitId(unitId, subUnitId, rule.uid), () => disposeList.forEach((dispose) => dispose()));
+                    },
+                }];
+                return { redos, undos };
+            } else {
+                const redoParams: IRemoveDataValidationMutationParams = { unitId, subUnitId, ruleId: rule.uid };
+                const redos = [{ id: RemoveDataValidationMutation.id, params: redoParams }];
+                const undos = removeDataValidationUndoFactory(this._injector, redoParams);
+                return { redos, undos };
+            }
         };
+        const disposeList: (() => void)[] = [];
+        rule.ranges.forEach((range) => {
+            const disposable = this._refRangeService.registerRefRange(range, handleRangeChange);
+            disposeList.push(() => disposable.dispose());
+        });
+        this._disposableMap.set(this._getIdWithUnitId(unitId, subUnitId, rule.uid), () => disposeList.forEach((dispose) => dispose()));
+    };
 
+    private _initRefRange() {
         this.disposeWithMe(
             merge(
                 this._sheetSkeletonManagerService.currentSkeleton$.pipe(
@@ -122,28 +126,28 @@ export class DataValidationRefRangeController extends Disposable {
                                 }
                                 switch (option.type) {
                                     case 'add':{
-                                        register(option.unitId, option.subUnitId, option.rule!);
+                                        this.register(option.unitId, option.subUnitId, option.rule!);
                                         break;
                                     }
                                     case 'remove':{
-                                        const dispose = disposableMap.get(getIdWithUnitId(unitId, subUnitId, rule!.uid));
+                                        const dispose = this._disposableMap.get(this._getIdWithUnitId(unitId, subUnitId, rule!.uid));
                                         dispose && dispose();
                                         break;
                                     }
                                     case 'update':{
-                                        const dispose = disposableMap.get(getIdWithUnitId(unitId, subUnitId, rule!.uid));
+                                        const dispose = this._disposableMap.get(this._getIdWithUnitId(unitId, subUnitId, rule!.uid));
                                         dispose && dispose();
-                                        register(option.unitId, option.subUnitId, option.rule!);
+                                        this.register(option.unitId, option.subUnitId, option.rule!);
                                     }
                                 }
                             })));
                 }));
 
         this.disposeWithMe(toDisposable(() => {
-            disposableMap.forEach((item) => {
+            this._disposableMap.forEach((item) => {
                 item();
             });
-            disposableMap.clear();
+            this._disposableMap.clear();
         }));
     }
 }

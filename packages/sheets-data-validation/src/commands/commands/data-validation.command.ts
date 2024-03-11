@@ -38,7 +38,7 @@ export const UpdateSheetDataValidationRangeCommand: ICommand<IUpdateSheetDataVal
         const dataValidationModel = accessor.get(DataValidationModel);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
-        const manager = dataValidationModel.getOrCreateManager(unitId, subUnitId) as SheetDataValidationManager;
+        const manager = dataValidationModel.ensureManager(unitId, subUnitId) as SheetDataValidationManager;
         const currentRule = manager.getRuleById(ruleId);
         if (!currentRule) {
             return false;
@@ -166,7 +166,7 @@ export const AddSheetDataValidationCommand: ICommand<IAddSheetDataValidationComm
         const dataValidationModel = accessor.get(DataValidationModel);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
-        const manager = dataValidationModel.getOrCreateManager(unitId, subUnitId) as SheetDataValidationManager;
+        const manager = dataValidationModel.ensureManager(unitId, subUnitId) as SheetDataValidationManager;
 
         const matrix = manager.getRuleObjectMatrix().clone();
         matrix.addRule(rule);

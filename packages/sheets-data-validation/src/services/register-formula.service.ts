@@ -54,6 +54,7 @@ export class RegisterOtherFormulaService extends Disposable {
 
         if (!subUnitMap) {
             subUnitMap = new Map();
+            unitMap.set(subUnitId, subUnitMap);
         }
 
         return subUnitMap;
@@ -104,6 +105,7 @@ export class RegisterOtherFormulaService extends Disposable {
         this.disposeWithMe(this._commandService.onCommandExecuted((commandInfo) => {
             if (commandInfo.id === SetFormulaCalculationResultMutation.id) {
                 const params = commandInfo.params as ISetFormulaCalculationResultMutation;
+
                 const { unitOtherData } = params;
                 const results: Record<string, Record<string, IDataValidationFormulaResult[]>> = {};
                 for (const unitId in unitOtherData) {

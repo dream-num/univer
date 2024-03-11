@@ -45,6 +45,10 @@ export class DataValidationRefRangeController extends Disposable {
         return `${unitID}_${subUnitId}_${ruleId}`;
     }
 
+    registerFormula(unit: string, subUnitId: string, rule: ISheetDataValidationRule) {
+
+    }
+
     register(unitId: string, subUnitId: string, rule: ISheetDataValidationRule) {
         const handleRangeChange = (commandInfo: EffectRefRangeParams) => {
             const oldRanges = [...rule.ranges];
@@ -55,6 +59,7 @@ export class DataValidationRefRangeController extends Disposable {
             if (isEqual) {
                 return { redos: [], undos: [] };
             }
+
             if (resultRanges.length) {
                 const redoParams: IUpdateDataValidationMutationParams = {
                     unitId,

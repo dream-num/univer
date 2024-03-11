@@ -177,8 +177,8 @@ export function DataValidationDetail(props: IDataValidationDetailProps) {
                     <FormulaInput
                         isTwoFormula={isTwoFormula}
                         value={{
-                            formula1: rule.formula1,
-                            formula2: rule.formula2,
+                            formula1: localRule.formula1,
+                            formula2: localRule.formula2,
                         }}
                         onChange={(value: any) => {
                             handleUpdateRuleSetting({

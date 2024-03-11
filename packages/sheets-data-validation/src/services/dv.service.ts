@@ -41,8 +41,8 @@ export class SheetDataValidationService {
         @Inject(DataValidationModel) private _dataValidationModel: DataValidationModel
     ) { }
 
-    private _getOrCreateManager(unitId: string, subUnitId: string) {
-        return this._dataValidationModel.getOrCreateManager(unitId, subUnitId) as SheetDataValidationManager;
+    private _ensureManager(unitId: string, subUnitId: string) {
+        return this._dataValidationModel.ensureManager(unitId, subUnitId) as SheetDataValidationManager;
     }
 
     switchCurrent(unitId: string, subUnitId: string) {
@@ -50,7 +50,7 @@ export class SheetDataValidationService {
             return;
         }
 
-        const manager = this._getOrCreateManager(unitId, subUnitId) as SheetDataValidationManager;
+        const manager = this._ensureManager(unitId, subUnitId);
         this._currentManager = {
             manager,
             unitId,
@@ -60,6 +60,6 @@ export class SheetDataValidationService {
     }
 
     get(unitId: string, subUnitId: string) {
-        return this._getOrCreateManager(unitId, subUnitId);
+        return this._ensureManager(unitId, subUnitId);
     }
 }

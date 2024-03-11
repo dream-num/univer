@@ -52,7 +52,7 @@ export class DataValidationModel<T extends IDataValidationRule = IDataValidation
         this._managerCreator = creator;
     }
 
-    getOrCreateManager(unitId: string, subUnitId: string) {
+    ensureManager(unitId: string, subUnitId: string) {
         if (!this._model.has(unitId)) {
             this._model.set(unitId, new Map());
         }
@@ -68,7 +68,7 @@ export class DataValidationModel<T extends IDataValidationRule = IDataValidation
     }
 
     addRule(unitId: string, subUnitId: string, rule: T, index?: number) {
-        const manager = this.getOrCreateManager(unitId, subUnitId);
+        const manager = this.ensureManager(unitId, subUnitId);
         manager.addRule(rule, index);
         this._ruleChange$.next({
             rule: rule as any,
@@ -79,7 +79,7 @@ export class DataValidationModel<T extends IDataValidationRule = IDataValidation
     }
 
     updateRule(unitId: string, subUnitId: string, ruleId: string, payload: IUpdateRulePayload) {
-        const manager = this.getOrCreateManager(unitId, subUnitId);
+        const manager = this.ensureManager(unitId, subUnitId);
         const rule = manager.updateRule(ruleId, payload);
         this._ruleChange$.next({
             rule,
@@ -90,7 +90,7 @@ export class DataValidationModel<T extends IDataValidationRule = IDataValidation
     }
 
     removeRule(unitId: string, subUnitId: string, ruleId: string) {
-        const manager = this.getOrCreateManager(unitId, subUnitId);
+        const manager = this.ensureManager(unitId, subUnitId);
         const oldRule = manager.getRuleById(ruleId);
         manager.removeRule(ruleId);
         this._ruleChange$.next({
@@ -102,23 +102,23 @@ export class DataValidationModel<T extends IDataValidationRule = IDataValidation
     }
 
     getRuleById(unitId: string, subUnitId: string, ruleId: string) {
-        const manager = this.getOrCreateManager(unitId, subUnitId);
+        const manager = this.ensureManager(unitId, subUnitId);
         return manager.getRuleById(ruleId);
     }
 
     getRuleIndex(unitId: string, subUnitId: string, ruleId: string) {
-        const manager = this.getOrCreateManager(unitId, subUnitId);
+        const manager = this.ensureManager(unitId, subUnitId);
         return manager.getRuleIndex(ruleId);
     }
 
     getRules(unitId: string, subUnitId: string) {
-        const manager = this.getOrCreateManager(unitId, subUnitId);
+        const manager = this.ensureManager(unitId, subUnitId);
         return manager.getDataValidations();
     }
 
     validator(content: Nullable<CellValue>, rule: T, pos: any) {
         const { unitId, subUnitId } = pos;
-        const manager = this.getOrCreateManager(unitId, subUnitId);
+        const manager = this.ensureManager(unitId, subUnitId);
         return manager.validator(content, rule, pos, (status: DataValidationStatus) => {
             this._validStatusChange$.next({
                 unitId,

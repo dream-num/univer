@@ -72,10 +72,12 @@ export class NumberValidator extends BaseDataValidator<number> {
         const formulaInfo = await this._formulaService.getRuleFormulaResult(unitId, subUnitId, rule.uid);
         const { formula1, formula2 } = rule;
 
-        return {
+        const info = {
             formula1: this._parseNumber(isFormulaString(formula1) ? formulaInfo?.[0]?.result?.[0]?.[0]?.v : formula1),
             formula2: this._parseNumber(isFormulaString(formula2) ? formulaInfo?.[1]?.result?.[0]?.[0]?.v : formula2),
         };
+
+        return info;
     }
 
     override validatorFormula(rule: IDataValidationRuleBase): boolean {

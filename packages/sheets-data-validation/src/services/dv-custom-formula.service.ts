@@ -79,7 +79,7 @@ export class DataValidationCustomFormulaService extends Disposable {
                 for (const subUnitId in unitMap) {
                     const results = unitMap[subUnitId];
                     const { formulaCellMap, ruleFormulaMap } = this._ensureMaps(unitId, subUnitId);
-                    const manager = this._dataValidationModel.getOrCreateManager(unitId, subUnitId);
+                    const manager = this._dataValidationModel.ensureManager(unitId, subUnitId);
                     results.forEach((result) => {
                         const ruleInfo = ruleFormulaMap.get(result.ruleId);
                         const cellInfo = formulaCellMap.get(result.formulaId);

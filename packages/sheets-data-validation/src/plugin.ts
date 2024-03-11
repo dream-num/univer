@@ -26,6 +26,7 @@ import { DataValidationFormulaService } from './services/dv-formula.service';
 import { DataValidationCustomFormulaService } from './services/dv-custom-formula.service';
 import { RegisterOtherFormulaService } from './services/register-formula.service';
 import { DataValidationRefRangeController } from './controllers/dv-ref-range.controller';
+import { DataValidationFormulaMarkDirty } from './commands/mutations/formula.mutation';
 
 const PLUGIN_NAME = 'sheets-data-validation';
 
@@ -56,6 +57,7 @@ export class UniverSheetsDataValidationPlugin extends Plugin {
         [
             AddSheetDataValidationCommand,
             UpdateSheetDataValidationRangeCommand,
+            DataValidationFormulaMarkDirty,
         ].forEach((command) => {
             this._commandService.registerCommand(command);
         });

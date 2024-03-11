@@ -38,7 +38,7 @@ export const DataValidationList = (props: IDataValidationListProps) => {
     const worksheet = workbook.getActiveSheet();
     const unitId = workbook.getUnitId();
     const subUnitId = worksheet.getSheetId();
-    const manager = dataValidationModel.getOrCreateManager(unitId, subUnitId);
+    const manager = dataValidationModel.ensureManager(unitId, subUnitId);
     const [rules, setRules] = useState<ISheetDataValidationRule[]>(manager.getDataValidations());
 
     useEffect(() => {

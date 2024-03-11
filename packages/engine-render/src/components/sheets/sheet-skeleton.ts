@@ -298,6 +298,10 @@ export class SpreadsheetSkeleton extends Skeleton {
         return this.columnHeaderHeight + this._marginTop;
     }
 
+    get worksheet() {
+        return this._worksheet;
+    }
+
     // get dataMergeCacheAll() {
     //     return this._dataMergeCacheAll;
     // }

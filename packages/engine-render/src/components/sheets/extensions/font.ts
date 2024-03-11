@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IRange, IScale } from '@univerjs/core';
-import { HorizontalAlign, ObjectMatrix, WrapStrategy } from '@univerjs/core';
+import type { ICellData, IRange, IScale, ObjectMatrix } from '@univerjs/core';
+import { HorizontalAlign, WrapStrategy } from '@univerjs/core';
 
 import type { UniverRenderingContext } from '../../../context';
 import type { Documents } from '../../docs/document';
@@ -28,12 +28,16 @@ import { SheetExtension } from './sheet-extension';
 const UNIQUE_KEY = 'DefaultFontExtension';
 
 const EXTENSION_Z_INDEX = 30;
-
+export interface ISheetFontRenderExtension {
+    fontRenderExtension?: {
+        leftOffset?: number;
+        rightOffset?: number;
+        topOffset?: number;
+        downOffset?: number;
+        isSkip?: boolean;
+    };
+};
 export class Font extends SheetExtension {
-    private _fontOffset = new ObjectMatrix<number>();
-
-    private _fontHidden = new ObjectMatrix<boolean>();
-
     override uKey = UNIQUE_KEY;
 
     override Z_INDEX = EXTENSION_Z_INDEX;
@@ -43,39 +47,15 @@ export class Font extends SheetExtension {
         return parent?.getDocuments();
     }
 
-    clearFontOffset() {
-        this._fontOffset.reset();
-    }
-
-    setFontOffset(r: number, c: number, offset: number) {
-        this._fontOffset.setValue(r, c, offset);
-    }
-
-    getFontOffset(r: number, c: number) {
-        return this._fontOffset.getValue(r, c);
-    }
-
-    clearFontHidden() {
-        this._fontHidden.reset();
-    }
-
-    setFontHidden(r: number, c: number, state: boolean) {
-        this._fontHidden.setValue(r, c, state);
-    }
-
-    getFontHidden(r: number, c: number) {
-        return this._fontHidden.getValue(r, c);
-    }
-
     override draw(
         ctx: UniverRenderingContext,
         parentScale: IScale,
         spreadsheetSkeleton: SpreadsheetSkeleton,
         diffRanges?: IRange[]
     ) {
-        const { stylesCache, dataMergeCache, overflowCache } = spreadsheetSkeleton;
+        const { stylesCache, dataMergeCache, overflowCache, worksheet } = spreadsheetSkeleton;
         const { font: fontList } = stylesCache;
-        if (!spreadsheetSkeleton) {
+        if (!spreadsheetSkeleton || !worksheet) {
             return;
         }
 
@@ -109,10 +89,6 @@ export class Font extends SheetExtension {
                     let { startY, endY, startX, endX } = cellInfo;
                     const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
 
-                    if (this.getFontHidden(rowIndex, columnIndex) === true) {
-                        return true;
-                    }
-
                     if (isMerged) {
                         return true;
                     }
@@ -140,6 +116,11 @@ export class Font extends SheetExtension {
                     // ) {
                     //     return true;
                     // }
+
+                    const cellData = worksheet.getCell(rowIndex, columnIndex) as ICellData & ISheetFontRenderExtension;
+                    if (cellData.fontRenderExtension?.isSkip) {
+                        return true;
+                    }
 
                     const cellWidth = endX - startX;
                     const cellHeight = endY - startY;
@@ -212,9 +193,11 @@ export class Font extends SheetExtension {
                         );
                     }
 
-                    if (angle === 0 && this.getFontOffset(rowIndex, columnIndex) != null) {
-                        const offset = this.getFontOffset(rowIndex, columnIndex);
-                        startX = startX + offset;
+                    if (angle === 0) {
+                        const rightOffset = cellData.fontRenderExtension?.rightOffset ?? 0;
+                        const leftOffset = cellData.fontRenderExtension?.leftOffset ?? 0;
+                        startX = startX + leftOffset;
+                        endX = endX - rightOffset;
                     }
 
                     ctx.translate(startX, startY);

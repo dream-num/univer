@@ -15,7 +15,7 @@
  */
 
 import { DataValidationOperator, DataValidationType, Tools } from '@univerjs/core';
-import type { CellValue, IDataValidationRule, IDataValidationRuleBase, IDataValidationRuleInfo } from '@univerjs/core';
+import type { CellValue, IDataValidationRule, IDataValidationRuleBase } from '@univerjs/core';
 import { BaseDataValidator } from '@univerjs/data-validation';
 import { BASE_FORMULA_INPUT_NAME } from '../views/formula-input';
 import { TWO_FORMULA_OPERATOR_COUNT } from '../types/const/two-formula-operators';
@@ -52,15 +52,15 @@ export class TextLengthValidator extends BaseDataValidator<number> {
         return Tools.isDefine(rule.formula1) && !Number.isNaN(+rule.formula1);
     }
 
-    isValidType(cellValue: CellValue, _info: IDataValidationRuleInfo): boolean {
+    isValidType(cellValue: CellValue, _info: IDataValidationRule): boolean {
         return typeof cellValue === 'string' || typeof cellValue === 'number';
     }
 
-    transform(cellValue: CellValue, _info: IDataValidationRuleInfo): number {
+    transform(cellValue: CellValue, _info: IDataValidationRule): number {
         return cellValue.toString().length;
     }
 
-    async validatorIsEqual(cellValue: number, info: IDataValidationRuleInfo): Promise<boolean> {
+    async validatorIsEqual(cellValue: number, info: IDataValidationRule): Promise<boolean> {
         const { rule } = info;
         if (!Tools.isDefine(rule.formula1)) {
             return false;
@@ -69,7 +69,7 @@ export class TextLengthValidator extends BaseDataValidator<number> {
         return cellValue === +rule.formula1;
     }
 
-    async validatorIsNotEqual(cellValue: number, info: IDataValidationRuleInfo): Promise<boolean> {
+    async validatorIsNotEqual(cellValue: number, info: IDataValidationRule): Promise<boolean> {
         const { rule } = info;
         if (!Tools.isDefine(rule.formula1)) {
             return false;
@@ -78,7 +78,7 @@ export class TextLengthValidator extends BaseDataValidator<number> {
         return cellValue !== +rule.formula1;
     }
 
-    async validatorIsBetween(cellValue: number, info: IDataValidationRuleInfo): Promise<boolean> {
+    async validatorIsBetween(cellValue: number, info: IDataValidationRule): Promise<boolean> {
         const { rule } = info;
         if (!Tools.isDefine(rule.formula1) || !Tools.isDefine(rule.formula2)) {
             return false;
@@ -90,7 +90,7 @@ export class TextLengthValidator extends BaseDataValidator<number> {
         return cellValue >= min && cellValue <= max;
     }
 
-    async validatorIsNotBetween(cellValue: number, info: IDataValidationRuleInfo): Promise<boolean> {
+    async validatorIsNotBetween(cellValue: number, info: IDataValidationRule): Promise<boolean> {
         const { rule } = info;
         if (!Tools.isDefine(rule.formula1) || !Tools.isDefine(rule.formula2)) {
             return false;
@@ -102,7 +102,7 @@ export class TextLengthValidator extends BaseDataValidator<number> {
         return cellValue >= min && cellValue <= max;
     }
 
-    async validatorIsGreaterThan(cellValue: number, info: IDataValidationRuleInfo): Promise<boolean> {
+    async validatorIsGreaterThan(cellValue: number, info: IDataValidationRule): Promise<boolean> {
         const { rule } = info;
         if (!Tools.isDefine(rule.formula1)) {
             return false;
@@ -111,7 +111,7 @@ export class TextLengthValidator extends BaseDataValidator<number> {
         return cellValue > +rule.formula1;
     }
 
-    async validatorIsGreaterThanOrEqual(cellValue: number, info: IDataValidationRuleInfo): Promise<boolean> {
+    async validatorIsGreaterThanOrEqual(cellValue: number, info: IDataValidationRule): Promise<boolean> {
         const { rule } = info;
         if (!Tools.isDefine(rule.formula1)) {
             return false;
@@ -120,7 +120,7 @@ export class TextLengthValidator extends BaseDataValidator<number> {
         return cellValue >= +rule.formula1;
     }
 
-    async validatorIsLessThan(cellValue: number, info: IDataValidationRuleInfo): Promise<boolean> {
+    async validatorIsLessThan(cellValue: number, info: IDataValidationRule): Promise<boolean> {
         const { rule } = info;
         if (!Tools.isDefine(rule.formula1)) {
             return false;
@@ -129,7 +129,7 @@ export class TextLengthValidator extends BaseDataValidator<number> {
         return cellValue < +rule.formula1;
     }
 
-    async validatorIsLessThanOrEqual(cellValue: number, info: IDataValidationRuleInfo): Promise<boolean> {
+    async validatorIsLessThanOrEqual(cellValue: number, info: IDataValidationRule): Promise<boolean> {
         const { rule } = info;
         if (!Tools.isDefine(rule.formula1)) {
             return false;

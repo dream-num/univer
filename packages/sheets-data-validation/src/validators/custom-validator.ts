@@ -15,9 +15,11 @@
  */
 
 import { DataValidationType, isFormulaString } from '@univerjs/core';
-import type { CellValue, DataValidationOperator, IDataValidationRuleBase, IDataValidationRuleInfo } from '@univerjs/core';
+import type { CellValue, DataValidationOperator, IDataValidationRule, IDataValidationRuleBase } from '@univerjs/core';
+import type { IFormulaResult, IValidatorCellInfo } from '@univerjs/data-validation/validators/base-data-validator.js';
 import { BaseDataValidator } from '@univerjs/data-validation/validators/base-data-validator.js';
 import { CUSTOM_FORMULA_INPUT_NAME } from '../views/formula-input';
+import { DataValidationCustomFormulaService } from '../services/dv-custom-formula.service';
 
 export class CustomFormulaValidator extends BaseDataValidator {
     override id: string = DataValidationType.CUSTOM;
@@ -26,47 +28,23 @@ export class CustomFormulaValidator extends BaseDataValidator {
     override scopes: string | string[] = ['sheet'];
     override formulaInput: string = CUSTOM_FORMULA_INPUT_NAME;
 
+    private _customFormulaService = this.injector.get(DataValidationCustomFormulaService);
+
     override validatorFormula(rule: IDataValidationRuleBase): boolean {
         return isFormulaString(rule.formula1);
     }
 
-    override isValidType(cellValue: CellValue, rule: IDataValidationRuleInfo): boolean {
-        throw new Error('Method not implemented.');
+    override async parseFormula(_rule: IDataValidationRule, _unitId: string, _subUnitId: string): Promise<IFormulaResult> {
+        return {
+            formula1: undefined,
+            formula2: undefined,
+        };
     }
 
-    override transform(cellValue: CellValue, rule: IDataValidationRuleInfo): CellValue {
-        throw new Error('Method not implemented.');
-    }
+    override async isValidType(cellInfo: IValidatorCellInfo<CellValue>, _formula: IFormulaResult, _rule: IDataValidationRule): Promise<boolean> {
+        const { column, row, unitId, subUnitId } = cellInfo;
+        const result = await this._customFormulaService.getCellFormulaValue(unitId, subUnitId, row, column);
 
-    override async validatorIsEqual(_cellValue: CellValue, _rule: IDataValidationRuleInfo): Promise<boolean> {
-        return true;
-    }
-
-    override async validatorIsNotEqual(_cellValue: CellValue, _rule: IDataValidationRuleInfo): Promise<boolean> {
-        return true;
-    }
-
-    override async validatorIsBetween(_cellValue: CellValue, _rule: IDataValidationRuleInfo): Promise<boolean> {
-        return true;
-    }
-
-    override async validatorIsNotBetween(_cellValue: CellValue, _rule: IDataValidationRuleInfo): Promise<boolean> {
-        return true;
-    }
-
-    override async validatorIsGreaterThan(_cellValue: CellValue, _rule: IDataValidationRuleInfo): Promise<boolean> {
-        return true;
-    }
-
-    override async validatorIsGreaterThanOrEqual(_cellValue: CellValue, _rule: IDataValidationRuleInfo): Promise<boolean> {
-        return true;
-    }
-
-    override async validatorIsLessThan(_cellValue: CellValue, _rule: IDataValidationRuleInfo): Promise<boolean> {
-        return true;
-    }
-
-    override async validatorIsLessThanOrEqual(_cellValue: CellValue, _rule: IDataValidationRuleInfo): Promise<boolean> {
-        return true;
+        return Boolean(result?.result?.[0]?.[0]);
     }
 }

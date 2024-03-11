@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { CellValue, IDataValidationRuleBase, IDataValidationRuleInfo, Nullable } from '@univerjs/core';
+import type { CellValue, ICellData, IDataValidationRule, IDataValidationRuleBase, Nullable } from '@univerjs/core';
 import { DataValidationOperator, LocaleService, Tools } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 import { OperatorErrorTitleMap, OperatorTitleMap } from '../types/const/operator-text-map';
@@ -33,6 +33,19 @@ const operatorNameMap: Record<DataValidationOperator, string> = {
     [DataValidationOperator.NOT_BETWEEN]: 'dataValidation.operators.notBetween',
     [DataValidationOperator.NOT_EQUAL]: 'dataValidation.operators.notEqual',
 };
+
+export interface IValidatorCellInfo<DataType = CellValue> {
+    value: Nullable<DataType>;
+    row: number;
+    column: number;
+    unitId: string;
+    subUnitId: string;
+}
+
+export interface IFormulaResult {
+    formula1: any;
+    formula2: any;
+}
 
 export abstract class BaseDataValidator<DataType = CellValue> {
     abstract id: string;
@@ -86,63 +99,87 @@ export abstract class BaseDataValidator<DataType = CellValue> {
         return false;
     }
 
+    abstract parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): Promise<IFormulaResult>;
+
     abstract validatorFormula(rule: IDataValidationRuleBase): boolean;
 
-    abstract isValidType(cellValue: CellValue, rule: IDataValidationRuleInfo): boolean | Promise<boolean>;
+    async isValidType(cellInfo: IValidatorCellInfo, formula: IFormulaResult, rule: IDataValidationRule): Promise<boolean> {
+        return true;
+    };
 
-    abstract transform(cellValue: CellValue, rule: IDataValidationRuleInfo): DataType;
+    transform(cellInfo: IValidatorCellInfo, formula: IFormulaResult, rule: IDataValidationRule): IValidatorCellInfo<DataType> {
+        return cellInfo as IValidatorCellInfo<DataType>;
+    };
 
-    abstract validatorIsEqual(cellValue: DataType, rule: IDataValidationRuleInfo): Promise<boolean>;
+    async validatorIsEqual(cellInfo: IValidatorCellInfo<DataType>, formula: IFormulaResult, rule: IDataValidationRule): Promise<boolean> {
+        return true;
+    };
 
-    abstract validatorIsNotEqual(cellValue: DataType, rule: IDataValidationRuleInfo): Promise<boolean>;
+    async validatorIsNotEqual(cellInfo: IValidatorCellInfo<DataType>, formula: IFormulaResult, rule: IDataValidationRule): Promise<boolean> {
+        return true;
+    };
 
-    abstract validatorIsBetween(cellValue: DataType, rule: IDataValidationRuleInfo): Promise<boolean>;
+    async validatorIsBetween(cellInfo: IValidatorCellInfo<DataType>, formula: IFormulaResult, rule: IDataValidationRule): Promise<boolean> {
+        return true;
+    };
 
-    abstract validatorIsNotBetween(cellValue: DataType, rule: IDataValidationRuleInfo): Promise<boolean>;
+    async validatorIsNotBetween(cellInfo: IValidatorCellInfo<DataType>, formula: IFormulaResult, rule: IDataValidationRule): Promise<boolean> {
+        return true;
+    };
 
-    abstract validatorIsGreaterThan(cellValue: DataType, rule: IDataValidationRuleInfo): Promise<boolean>;
+    async validatorIsGreaterThan(cellInfo: IValidatorCellInfo<DataType>, formula: IFormulaResult, rule: IDataValidationRule): Promise<boolean> {
+        return true;
+    };
 
-    abstract validatorIsGreaterThanOrEqual(cellValue: DataType, rule: IDataValidationRuleInfo): Promise<boolean>;
+    async validatorIsGreaterThanOrEqual(cellInfo: IValidatorCellInfo<DataType>, formula: IFormulaResult, rule: IDataValidationRule): Promise<boolean> {
+        return true;
+    };
 
-    abstract validatorIsLessThan(cellValue: DataType, rule: IDataValidationRuleInfo): Promise<boolean>;
+    async validatorIsLessThan(cellInfo: IValidatorCellInfo<DataType>, formula: IFormulaResult, rule: IDataValidationRule): Promise<boolean> {
+        return true;
+    };
 
-    abstract validatorIsLessThanOrEqual(cellValue: DataType, rule: IDataValidationRuleInfo): Promise<boolean>;
+    async validatorIsLessThanOrEqual(cellInfo: IValidatorCellInfo<DataType>, formula: IFormulaResult, rule: IDataValidationRule): Promise<boolean> {
+        return true;
+    };
 
-    async validator(cellValue: Nullable<CellValue>, info: IDataValidationRuleInfo): Promise<boolean> {
-        const { rule } = info;
+    async validator(cellInfo: IValidatorCellInfo, rule: IDataValidationRule): Promise<boolean> {
+        const { value: cellValue, unitId, subUnitId } = cellInfo;
         const isEmpty = this.isEmptyCellValue(cellValue);
-        const { allowBlank = true } = rule;
+        const { allowBlank = true, operator } = rule;
         if (isEmpty) {
             return allowBlank;
         }
 
-        if (await !this.isValidType(cellValue, info)) {
+        const formulaInfo = await this.parseFormula(rule, unitId, subUnitId);
+
+        if (await !this.isValidType(cellInfo, formulaInfo, rule)) {
             return false;
         }
 
-        if (!Tools.isDefine(rule.operator)) {
+        if (!Tools.isDefine(operator)) {
             return true;
         }
 
-        const transformedCell = this.transform(cellValue, info);
+        const transformedCell = this.transform(cellInfo, formulaInfo, rule);
 
-        switch (rule.operator) {
+        switch (operator) {
             case DataValidationOperator.BETWEEN:
-                return this.validatorIsBetween(transformedCell, info);
+                return this.validatorIsBetween(transformedCell, formulaInfo, rule);
             case DataValidationOperator.EQUAL:
-                return this.validatorIsEqual(transformedCell, info);
+                return this.validatorIsEqual(transformedCell, formulaInfo, rule);
             case DataValidationOperator.GREATER_THAN:
-                return this.validatorIsGreaterThan(transformedCell, info);
+                return this.validatorIsGreaterThan(transformedCell, formulaInfo, rule);
             case DataValidationOperator.GREATER_THAN_OR_EQUAL:
-                return this.validatorIsGreaterThanOrEqual(transformedCell, info);
+                return this.validatorIsGreaterThanOrEqual(transformedCell, formulaInfo, rule);
             case DataValidationOperator.LESS_THAN:
-                return this.validatorIsLessThan(transformedCell, info);
+                return this.validatorIsLessThan(transformedCell, formulaInfo, rule);
             case DataValidationOperator.LESS_THAN_OR_EQUAL:
-                return this.validatorIsLessThanOrEqual(transformedCell, info);
+                return this.validatorIsLessThanOrEqual(transformedCell, formulaInfo, rule);
             case DataValidationOperator.NOT_BETWEEN:
-                return this.validatorIsNotBetween(transformedCell, info);
+                return this.validatorIsNotBetween(transformedCell, formulaInfo, rule);
             case DataValidationOperator.NOT_EQUAL:
-                return this.validatorIsNotEqual(transformedCell, info);
+                return this.validatorIsNotEqual(transformedCell, formulaInfo, rule);
             default:
                 throw new Error('Unknown operator.');
         }

@@ -15,7 +15,7 @@
  */
 
 import { DataValidationOperator, DataValidationType, isFormulaString, Tools } from '@univerjs/core';
-import type { CellValue, IDataValidationRuleBase, IDataValidationRuleInfo, Nullable } from '@univerjs/core';
+import type { CellValue, IDataValidationRule, IDataValidationRuleBase, Nullable } from '@univerjs/core';
 import { BaseDataValidator } from '@univerjs/data-validation';
 import { BASE_FORMULA_INPUT_NAME } from '../views/formula-input';
 import { TWO_FORMULA_OPERATOR_COUNT } from '../types/const/two-formula-operators';
@@ -46,11 +46,11 @@ export class NumberValidator extends BaseDataValidator<number> {
         return isFormulaString(formula) || !Number.isNaN(+formula);
     }
 
-    isValidType(cellValue: CellValue, _info: IDataValidationRuleInfo): boolean {
+    isValidType(cellValue: CellValue, _info: IDataValidationRule): boolean {
         return !Number.isNaN(+cellValue);
     }
 
-    transform(cellValue: CellValue, _info: IDataValidationRuleInfo): number {
+    transform(cellValue: CellValue, _info: IDataValidationRule): number {
         return +cellValue;
     }
 
@@ -62,7 +62,7 @@ export class NumberValidator extends BaseDataValidator<number> {
         return +formula;
     }
 
-    private async _parseFormula(info: IDataValidationRuleInfo) {
+    private async _parseFormula(info: IDataValidationRule) {
         const { rule, unitId, subUnitId } = info;
         const formulaInfo = await this._formulaService.getRuleFormulaResult(unitId, subUnitId, rule.uid);
         const { formula1, formula2 } = rule;
@@ -87,7 +87,7 @@ export class NumberValidator extends BaseDataValidator<number> {
         return Tools.isDefine(rule.formula1) && this._isFormulaOrNumber(rule.formula1);
     }
 
-    async validatorIsEqual(cellValue: number, info: IDataValidationRuleInfo) {
+    async validatorIsEqual(cellValue: number, info: IDataValidationRule) {
         const { formula1 } = await this._parseFormula(info);
         if (!Number.isNaN(formula1)) {
             return true;
@@ -96,7 +96,7 @@ export class NumberValidator extends BaseDataValidator<number> {
         return cellValue === formula1;
     }
 
-    async validatorIsNotEqual(cellValue: number, info: IDataValidationRuleInfo) {
+    async validatorIsNotEqual(cellValue: number, info: IDataValidationRule) {
         const { formula1 } = await this._parseFormula(info);
         if (!Number.isNaN(formula1)) {
             return true;
@@ -105,7 +105,7 @@ export class NumberValidator extends BaseDataValidator<number> {
         return cellValue !== formula1;
     }
 
-    async validatorIsBetween(cellValue: number, info: IDataValidationRuleInfo) {
+    async validatorIsBetween(cellValue: number, info: IDataValidationRule) {
         const { formula1, formula2 } = await this._parseFormula(info);
         if (!Number.isNaN(formula1) || Number.isNaN(formula2)) {
             return true;
@@ -116,7 +116,7 @@ export class NumberValidator extends BaseDataValidator<number> {
         return cellValue >= start && cellValue <= end;
     }
 
-    async validatorIsNotBetween(cellValue: number, info: IDataValidationRuleInfo) {
+    async validatorIsNotBetween(cellValue: number, info: IDataValidationRule) {
         const { formula1, formula2 } = await this._parseFormula(info);
         if (!Number.isNaN(formula1) || Number.isNaN(formula2)) {
             return true;
@@ -127,7 +127,7 @@ export class NumberValidator extends BaseDataValidator<number> {
         return cellValue < start && cellValue > end;
     }
 
-    async validatorIsGreaterThan(cellValue: number, info: IDataValidationRuleInfo) {
+    async validatorIsGreaterThan(cellValue: number, info: IDataValidationRule) {
         const { formula1 } = await this._parseFormula(info);
         if (!Number.isNaN(formula1)) {
             return true;
@@ -135,7 +135,7 @@ export class NumberValidator extends BaseDataValidator<number> {
         return cellValue > formula1;
     }
 
-    async validatorIsGreaterThanOrEqual(cellValue: number, info: IDataValidationRuleInfo) {
+    async validatorIsGreaterThanOrEqual(cellValue: number, info: IDataValidationRule) {
         const { formula1 } = await this._parseFormula(info);
         if (!Number.isNaN(formula1)) {
             return true;
@@ -143,7 +143,7 @@ export class NumberValidator extends BaseDataValidator<number> {
         return cellValue >= formula1;
     }
 
-    async validatorIsLessThan(cellValue: number, info: IDataValidationRuleInfo) {
+    async validatorIsLessThan(cellValue: number, info: IDataValidationRule) {
         const { formula1 } = await this._parseFormula(info);
         if (!Number.isNaN(formula1)) {
             return true;
@@ -151,7 +151,7 @@ export class NumberValidator extends BaseDataValidator<number> {
         return cellValue < formula1;
     }
 
-    async validatorIsLessThanOrEqual(cellValue: number, info: IDataValidationRuleInfo) {
+    async validatorIsLessThanOrEqual(cellValue: number, info: IDataValidationRule) {
         const { formula1 } = await this._parseFormula(info);
         if (!Number.isNaN(formula1)) {
             return true;

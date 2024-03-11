@@ -33,26 +33,22 @@ export {
 } from './commands/commands/data-validation.command';
 
 export type {
-    IRemoveAllDataValidationCommandParams,
     IRemoveDataValidationCommandParams,
     IAddDataValidationCommandParams,
     IUpdateDataValidationOptionsCommandParams,
     IUpdateDataValidationSettingCommandParams,
+    IRemoveAllDataValidationCommandParams,
 } from './commands/commands/data-validation.command';
 
 export {
     AddDataValidationMutation,
-    RemoveAllDataValidationMutation,
     RemoveDataValidationMutation,
-    ReplaceDataValidationMutation,
     UpdateDataValidationMutation,
 } from './commands/mutations/data-validation.mutation';
 
 export type {
     IAddDataValidationMutationParams,
-    IRemoveAllDataValidationMutationParams,
     IRemoveDataValidationMutationParams,
-    IReplaceDataValidationMutationParams,
     IUpdateDataValidationMutationParams,
 } from './commands/mutations/data-validation.mutation';
 

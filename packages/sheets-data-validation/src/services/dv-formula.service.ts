@@ -154,21 +154,19 @@ export class DataValidationFormulaService extends Disposable {
         }
     }
 
-    getRuleFormulaResult(unitId: string, subUnitId: string, ruleId: string): Promise<Nullable<Nullable<IDataValidationFormulaResult>[]>> {
+    getRuleFormulaResult(unitId: string, subUnitId: string, ruleId: string): Promise<Nullable<[Nullable<IDataValidationFormulaResult>, Nullable<IDataValidationFormulaResult>]>> {
         const ruleFormulaMap = this._ensureRuleFormulaMap(unitId, subUnitId);
 
         const formulaInfo = ruleFormulaMap.get(ruleId);
         if (!formulaInfo) {
             return Promise.resolve(null);
         }
+        const getResult = async (info: IFormulaInfo | undefined) => info && this._registerOtherFormulaService.getFormulaValue(unitId, subUnitId, info.id);
 
-        return Promise.all(formulaInfo.map((i) => {
-            if (i) {
-                return this._registerOtherFormulaService.getFormulaValue(unitId, subUnitId, i.id);
-            }
-
-            return Promise.resolve(undefined);
-        }));
+        return Promise.all([
+            getResult(formulaInfo[0]),
+            getResult(formulaInfo[1]),
+        ]);
     }
 
     getRuleFormulaResultSync(unitId: string, subUnitId: string, ruleId: string) {

@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import { DataValidationType, Tools } from '@univerjs/core';
-import type { CellValue, DataValidationOperator, IDataValidationRuleBase, IDataValidationRuleInfo, IStyleData, Nullable } from '@univerjs/core';
+import { DataValidationType, isFormulaString, Tools } from '@univerjs/core';
+import type { CellValue, DataValidationOperator, IDataValidationRule, IDataValidationRuleBase, IStyleData, Nullable } from '@univerjs/core';
 import { BaseDataValidator } from '@univerjs/data-validation';
+import type { IFormulaResult, IValidatorCellInfo } from '@univerjs/data-validation/validators/base-data-validator.js';
 import { CheckboxRender } from '../widgets/checkbox-widget';
+import { DataValidationFormulaService } from '../services/dv-formula.service';
 
 export const CHECKBOX_FORMULA_1 = 'TRUE';
 export const CHECKBOX_FORMULA_2 = 'FALSE';
@@ -32,50 +34,29 @@ export class CheckboxValidator extends BaseDataValidator {
 
     override canvasRender = this.injector.createInstance(CheckboxRender);
 
+    private _formulaService = this.injector.get(DataValidationFormulaService);
+
     override validatorFormula(rule: IDataValidationRuleBase): boolean {
         const { formula1 = CHECKBOX_FORMULA_1, formula2 = CHECKBOX_FORMULA_2 } = rule;
         return typeof formula1 === 'string' && formula2 === 'string';
     }
 
-    override isValidType(cellValue: CellValue, info: IDataValidationRuleInfo): boolean {
-        const { rule } = info;
+    override async parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): Promise<IFormulaResult> {
         const { formula1 = CHECKBOX_FORMULA_1, formula2 = CHECKBOX_FORMULA_2 } = rule;
-        return !Tools.isDefine(cellValue) || cellValue === formula1 || cellValue === formula2;
+        const results = await this._formulaService.getRuleFormulaResult(unitId, subUnitId, rule.uid);
+        return {
+            formula1: isFormulaString(formula1) ? results?.[0]?.result?.[0]?.[0] : formula1,
+            formula2: isFormulaString(formula2) ? results?.[1]?.result?.[0]?.[0] : formula2,
+        };
     }
 
-    override transform(cellValue: CellValue, rule: IDataValidationRuleInfo): CellValue {
-        throw new Error('Method not implemented.');
-    }
+    override async isValidType(cellInfo: IValidatorCellInfo<CellValue>, formula: IFormulaResult, rule: IDataValidationRule): Promise<boolean> {
+        const { value, unitId, subUnitId } = cellInfo;
+        const { formula1, formula2 } = await this.parseFormula(rule, unitId, subUnitId);
+        if (!formula1 || !formula2) {
+            return true;
+        }
 
-    override validatorIsEqual(cellValue: CellValue, rule: IDataValidationRuleInfo): Promise<boolean> {
-        throw new Error('Method not implemented.');
-    }
-
-    override validatorIsNotEqual(cellValue: CellValue, rule: IDataValidationRuleInfo): Promise<boolean> {
-        throw new Error('Method not implemented.');
-    }
-
-    override validatorIsBetween(cellValue: CellValue, rule: IDataValidationRuleInfo): Promise<boolean> {
-        throw new Error('Method not implemented.');
-    }
-
-    override validatorIsNotBetween(cellValue: CellValue, rule: IDataValidationRuleInfo): Promise<boolean> {
-        throw new Error('Method not implemented.');
-    }
-
-    override validatorIsGreaterThan(cellValue: CellValue, rule: IDataValidationRuleInfo): Promise<boolean> {
-        throw new Error('Method not implemented.');
-    }
-
-    override validatorIsGreaterThanOrEqual(cellValue: CellValue, rule: IDataValidationRuleInfo): Promise<boolean> {
-        throw new Error('Method not implemented.');
-    }
-
-    override validatorIsLessThan(cellValue: CellValue, rule: IDataValidationRuleInfo): Promise<boolean> {
-        throw new Error('Method not implemented.');
-    }
-
-    override validatorIsLessThanOrEqual(cellValue: CellValue, rule: IDataValidationRuleInfo): Promise<boolean> {
-        throw new Error('Method not implemented.');
+        return !Tools.isDefine(value) && (value === formula1 || value === formula2);
     }
 }

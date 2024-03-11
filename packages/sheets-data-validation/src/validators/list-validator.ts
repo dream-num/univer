@@ -15,7 +15,7 @@
  */
 
 import { DataValidationType, Tools } from '@univerjs/core';
-import type { CellValue, DataValidationOperator, IDataValidationRule, IDataValidationRuleBase, IDataValidationRuleInfo } from '@univerjs/core';
+import type { CellValue, DataValidationOperator, IDataValidationRule, IDataValidationRuleBase } from '@univerjs/core';
 import { BaseDataValidator } from '@univerjs/data-validation';
 import { LIST_FORMULA_INPUT_NAME } from '../views/formula-input';
 import { LIST_DROPDOWN_KEY } from '../views';
@@ -55,7 +55,7 @@ export class ListValidator extends BaseDataValidator {
         }
     }
 
-    isValidType(cellValue: CellValue, info: IDataValidationRuleInfo): boolean {
+    isValidType(cellValue: CellValue, info: IDataValidationRule): boolean {
         const { rule } = info;
         const selected = this._parseCellValue(cellValue, rule);
         const list = this._parseList(rule);
@@ -70,39 +70,39 @@ export class ListValidator extends BaseDataValidator {
         return this.localeService.t('dataValidation.list.error');
     }
 
-    transform(cellValue: CellValue, _rule: IDataValidationRuleInfo): CellValue {
+    transform(cellValue: CellValue, _rule: IDataValidationRule): CellValue {
         throw new Error('Method not implemented.');
     }
 
-    async validatorIsEqual(cellValue: CellValue, rule: IDataValidationRuleInfo): Promise<boolean> {
+    async validatorIsEqual(cellValue: CellValue, rule: IDataValidationRule): Promise<boolean> {
         throw new Error('Method not implemented.');
     }
 
-    async validatorIsNotEqual(cellValue: CellValue, rule: IDataValidationRuleInfo): Promise<boolean> {
+    async validatorIsNotEqual(cellValue: CellValue, rule: IDataValidationRule): Promise<boolean> {
         throw new Error('Method not implemented.');
     }
 
-    async validatorIsBetween(cellValue: CellValue, rule: IDataValidationRuleInfo): Promise<boolean> {
+    async validatorIsBetween(cellValue: CellValue, rule: IDataValidationRule): Promise<boolean> {
         throw new Error('Method not implemented.');
     }
 
-    async validatorIsNotBetween(cellValue: CellValue, rule: IDataValidationRuleInfo): Promise<boolean> {
+    async validatorIsNotBetween(cellValue: CellValue, rule: IDataValidationRule): Promise<boolean> {
         throw new Error('Method not implemented.');
     }
 
-    async validatorIsGreaterThan(cellValue: CellValue, rule: IDataValidationRuleInfo): Promise<boolean> {
+    async validatorIsGreaterThan(cellValue: CellValue, rule: IDataValidationRule): Promise<boolean> {
         throw new Error('Method not implemented.');
     }
 
-    async validatorIsGreaterThanOrEqual(cellValue: CellValue, rule: IDataValidationRuleInfo): Promise<boolean> {
+    async validatorIsGreaterThanOrEqual(cellValue: CellValue, rule: IDataValidationRule): Promise<boolean> {
         throw new Error('Method not implemented.');
     }
 
-    async validatorIsLessThan(cellValue: CellValue, rule: IDataValidationRuleInfo): Promise<boolean> {
+    async validatorIsLessThan(cellValue: CellValue, rule: IDataValidationRule): Promise<boolean> {
         throw new Error('Method not implemented.');
     }
 
-    async validatorIsLessThanOrEqual(cellValue: CellValue, rule: IDataValidationRuleInfo): Promise<boolean> {
+    async validatorIsLessThanOrEqual(cellValue: CellValue, rule: IDataValidationRule): Promise<boolean> {
         throw new Error('Method not implemented.');
     }
 }

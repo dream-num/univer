@@ -233,7 +233,12 @@ export class DataValidationCustomFormulaService extends Disposable {
 
     updateRuleRanges(unitId: string, subUnitId: string, ruleId: string, oldRanges: IRange[], newRanges: IRange[]) {
         const { formulaMap, ruleFormulaMap, formulaCellMap } = this._ensureMaps(unitId, subUnitId);
-        const { formula, originCol, originRow, isTransformable, formulaId } = ruleFormulaMap.get(ruleId)!;
+        const info = ruleFormulaMap.get(ruleId);
+        // isn't custom formula type
+        if (!info) {
+            return;
+        }
+        const { formula, originCol, originRow, isTransformable, formulaId } = info;
         const deleteFormulaIdList = new Set<string>();
 
         oldRanges.forEach((range) => {

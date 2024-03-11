@@ -15,7 +15,8 @@
  */
 
 import { CommandType, ICommandService, IUndoRedoService } from '@univerjs/core';
-import type { ICommand, IDataValidationRule, IDataValidationRuleBase, IDataValidationRuleOptions, IMutationInfo, IRange } from '@univerjs/core';
+import type { ICommand, IDataValidationRule, IDataValidationRuleBase, IDataValidationRuleOptions, IMutationInfo, IRange, ISheetDataValidationRule } from '@univerjs/core';
+import type { Injector } from '@wendellhu/redi';
 import type { IAddDataValidationMutationParams, IRemoveDataValidationMutationParams, IUpdateDataValidationMutationParams } from '../mutations/data-validation.mutation';
 import { AddDataValidationMutation, RemoveDataValidationMutation, UpdateDataValidationMutation } from '../mutations/data-validation.mutation';
 import { UpdateRuleType } from '../../types';
@@ -78,6 +79,36 @@ export interface IRemoveDataValidationCommandParams {
     unitId: string;
     subUnitId: string;
 }
+
+export const removeDataValidationUndoFactory = (accessor: Injector, redoParams: IRemoveDataValidationMutationParams) => {
+    const dataValidationModel = accessor.get(DataValidationModel);
+    const { unitId, subUnitId, ruleId } = redoParams;
+    if (Array.isArray(ruleId)) {
+        const rules = ruleId.map((id) => dataValidationModel.getRuleById(unitId, subUnitId, id)).filter(Boolean) as ISheetDataValidationRule[];
+        return [{
+            id: AddDataValidationMutation.id,
+            params: {
+                unitId,
+                subUnitId,
+                rule: rules,
+            } as IAddDataValidationMutationParams,
+        }];
+    }
+
+    const undoMutations: IMutationInfo[] = [{
+        id: AddDataValidationMutation.id,
+        params: {
+            unitId,
+            subUnitId,
+            rule: {
+                ...dataValidationModel.getRuleById(unitId, subUnitId, ruleId),
+            },
+            index: dataValidationModel.getRuleIndex(unitId, subUnitId, ruleId),
+        } as IAddDataValidationMutationParams,
+    }];
+
+    return undoMutations;
+};
 
 export const RemoveDataValidationCommand: ICommand<IRemoveDataValidationCommandParams> = {
     type: CommandType.COMMAND,

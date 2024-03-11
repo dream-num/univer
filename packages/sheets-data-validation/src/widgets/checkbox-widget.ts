@@ -19,8 +19,9 @@ import { Checkbox, fixLineWidthByScale, Transform } from '@univerjs/engine-rende
 import { ICommandService } from '@univerjs/core';
 import type { ICellRenderInfo, ISelectionCellWithCoord, IStyleData, Nullable } from '@univerjs/core';
 import { SetRangeValuesCommand } from '@univerjs/sheets';
-import { CHECKBOX_FORMULA_1, CHECKBOX_FORMULA_2, type IDataValidationRender } from '@univerjs/data-validation';
+import type { IDataValidationRender } from '@univerjs/data-validation';
 import type { ISetRangeValuesCommandParams } from '../../../sheets/lib/types';
+import { CHECKBOX_FORMULA_1, CHECKBOX_FORMULA_2 } from '../validators/checkbox-validator';
 
 export class CheckboxRender implements IDataValidationRender {
     private _calc(cellInfo: ISelectionCellWithCoord, style: Nullable<IStyleData>) {

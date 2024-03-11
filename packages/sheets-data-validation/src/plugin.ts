@@ -24,6 +24,7 @@ import { AddSheetDataValidationCommand, UpdateSheetDataValidationRangeCommand } 
 import { DataValidationCacheService } from './services/dv-cache.service';
 import { DataValidationFormulaService } from './services/dv-formula.service';
 import { DataValidationCustomFormulaService } from './services/dv-custom-formula.service';
+import { RegisterOtherFormulaService } from './services/register-formula.service';
 
 const PLUGIN_NAME = 'sheets-data-validation';
 
@@ -41,6 +42,7 @@ export class UniverSheetsDataValidationPlugin extends Plugin {
             [DataValidationCacheService],
             [DataValidationFormulaService],
             [DataValidationCustomFormulaService],
+            [RegisterOtherFormulaService],
             // controller
             [DataValidationController],
             [DataValidationRenderController],

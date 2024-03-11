@@ -15,3 +15,4 @@
  */
 
 export { BaseDataValidator } from './base-data-validator';
+export type { IFormulaResult, IValidatorCellInfo } from './base-data-validator';

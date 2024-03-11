@@ -15,15 +15,13 @@
  */
 
 import { ICommandService } from '@univerjs/core';
-import { LIST_MULTIPLE_FORMULA } from '@univerjs/data-validation/validators/list-validator.js';
 import { SelectList } from '@univerjs/design';
 import type { ISetRangeValuesCommandParams } from '@univerjs/sheets';
 import { SetRangeValuesCommand } from '@univerjs/sheets';
 import type { IDropdownParam } from '@univerjs/sheets-ui';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useState } from 'react';
-
-export const LIST_DROPDOWN_KEY = 'data-validation.list.dropdown';
+import { LIST_MULTIPLE_FORMULA } from '../validators/list-validator';
 
 export function ListDropDown(props: IDropdownParam) {
     const { location } = props;

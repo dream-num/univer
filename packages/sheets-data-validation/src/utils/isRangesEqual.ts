@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export { UniverSheetsDataValidationPlugin } from './plugin';
-export { DataValidationExtension } from './render/data-validation.render';
-export { AddSheetDataValidationCommand, UpdateSheetDataValidationRangeCommand } from './commands/commands/data-validation.command';
-export type { IAddSheetDataValidationCommandParams, IUpdateSheetDataValidationRangeCommandParams } from './commands/commands/data-validation.command';
+import type { IRange } from '@univerjs/core';
+import { Rectangle } from '@univerjs/core';
+
+export const isRangesEqual = (oldRanges: IRange[], ranges: IRange[]) => {
+    return ranges.length === oldRanges.length && !oldRanges.some((oldRange) => ranges.some((range) => !Rectangle.equals(range, oldRange)));
+};

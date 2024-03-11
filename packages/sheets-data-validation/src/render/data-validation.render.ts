@@ -32,6 +32,7 @@ export class DataValidationExtension extends SheetExtension {
         if (!worksheet) {
             return;
         }
+        const subUnitId = worksheet.getSheetId();
 
         Range.foreach(rowColumnSegment, (row, col) => {
             const cellData = worksheet.getCell(row, col);
@@ -52,6 +53,10 @@ export class DataValidationExtension extends SheetExtension {
                     value: cellData.v,
                     style: skeleton.getsStyles().getStyleByCell(cellData),
                     rule: cellData.dataValidation.rule,
+                    unitId: '',
+                    subUnitId,
+                    row,
+                    col,
                 });
                 ctx.restore();
             }

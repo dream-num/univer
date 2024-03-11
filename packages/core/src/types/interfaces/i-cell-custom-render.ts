@@ -25,6 +25,10 @@ export interface ICellRenderInfo {
     style: Nullable<IStyleData>;
     cellInfo: ISelectionCellWithCoord;
     rule: IDataValidationRule;
+    unitId: string;
+    subUnitId: string;
+    row: number;
+    col: number;
 }
 
 export interface ICellCustomRender {

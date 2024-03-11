@@ -14,17 +14,32 @@
  * limitations under the License.
  */
 
-import { DataValidationOperator, DataValidationType, Tools } from '@univerjs/core';
-import type { CellValue, IDataValidationRule, IDataValidationRuleBase } from '@univerjs/core';
+import { DataValidationOperator, DataValidationType, isFormulaString, Tools } from '@univerjs/core';
+import type { CellValue, IDataValidationRule, IDataValidationRuleBase, Nullable } from '@univerjs/core';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
-import type { IValidatorCellInfo } from '@univerjs/data-validation';
+import type { IFormulaResult, IValidatorCellInfo } from '@univerjs/data-validation';
 import { BaseDataValidator } from '@univerjs/data-validation';
 import { BASE_FORMULA_INPUT_NAME } from '../views/formula-input';
 import { TWO_FORMULA_OPERATOR_COUNT } from '../types/const/two-formula-operators';
+import { serialTimeToTimestamp } from '../utils/date';
+import { DataValidationFormulaService } from '../services/dv-formula.service';
+import { getFormulaResult } from '../utils/formula';
 
 const isValidDateString = (date: string) => {
     return dayjs(date).isValid();
+};
+
+const transformDate = (value: Nullable<CellValue>) => {
+    if (value === undefined || value === null || typeof value === 'boolean') {
+        return undefined;
+    }
+
+    if (typeof value === 'number') {
+        return dayjs(serialTimeToTimestamp(value));
+    }
+
+    return dayjs(value);
 };
 
 export class DateValidator extends BaseDataValidator<Dayjs> {
@@ -43,6 +58,18 @@ export class DateValidator extends BaseDataValidator<Dayjs> {
 
     scopes: string | string[] = ['sheet'];
     formulaInput: string = BASE_FORMULA_INPUT_NAME;
+
+    private _formulaService = this.injector.get(DataValidationFormulaService);
+
+    override async parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): Promise<IFormulaResult<Dayjs | undefined>> {
+        const results = await this._formulaService.getRuleFormulaResult(unitId, subUnitId, rule.uid);
+        const { formula1, formula2 } = rule;
+
+        return {
+            formula1: transformDate(isFormulaString(formula1) ? getFormulaResult(results?.[0]?.result) : formula1),
+            formula2: transformDate(isFormulaString(formula2) ? getFormulaResult(results?.[1]?.result) : formula2),
+        };
+    }
 
     override async isValidType(info: IValidatorCellInfo): Promise<boolean> {
         const { value } = info;
@@ -67,88 +94,100 @@ export class DateValidator extends BaseDataValidator<Dayjs> {
         return Tools.isDefine(rule.formula1) && !Number.isNaN(+rule.formula1);
     }
 
-    transform(cellValue: IValidatorCellInfo, _info: IDataValidationRule): Dayjs {
-        return dayjs(cellValue as string);
+    override transform(cellInfo: IValidatorCellInfo<CellValue>, _formula: IFormulaResult, _rule: IDataValidationRule): IValidatorCellInfo<Dayjs> {
+        const { value } = cellInfo;
+
+        return {
+            ...cellInfo,
+            value: transformDate(value)!,
+        };
     }
 
-    async validatorIsEqual(cellValue: IValidatorCellInfo<Dayjs>, info: IDataValidationRule): Promise<boolean> {
-        const { rule } = info;
-        if (!rule.formula1) {
+    override async validatorIsEqual(info: IValidatorCellInfo<Dayjs>, formula: IFormulaResult<Dayjs | undefined>, _rule: IDataValidationRule): Promise<boolean> {
+        const { value } = info;
+        const { formula1 } = formula;
+        if (!formula1) {
+            return true;
+        }
+
+        return value.isSame(formula1);
+    }
+
+    override async validatorIsNotEqual(info: IValidatorCellInfo<Dayjs>, formula: IFormulaResult<Dayjs | undefined>): Promise<boolean> {
+        const { value } = info;
+        const { formula1 } = formula;
+        if (!formula1) {
+            return true;
+        }
+
+        return !value.isSame(formula1);
+    }
+
+    override async validatorIsBetween(info: IValidatorCellInfo<Dayjs>, formula: IFormulaResult<Dayjs | undefined>): Promise<boolean> {
+        const { value: cellValue } = info;
+        const { formula1: date1, formula2: date2 } = formula;
+        if (!date1 || !date2) {
             return false;
         }
 
-        return cellValue.isSame(rule.formula1);
-    }
-
-    async validatorIsNotEqual(cellValue: IValidatorCellInfo<Dayjs>, info: IDataValidationRule): Promise<boolean> {
-        const { rule } = info;
-        if (!rule.formula1) {
-            return false;
-        }
-
-        return !cellValue.isSame(rule.formula1);
-    }
-
-    async validatorIsBetween(cellValue: IValidatorCellInfo<Dayjs>, info: IDataValidationRule): Promise<boolean> {
-        const { rule } = info;
-        if (!rule.formula1 || !rule.formula2) {
-            return false;
-        }
-
-        const date1 = dayjs(rule.formula1);
-        const date2 = dayjs(rule.formula2);
         const min = date1.isAfter(date2) ? date1 : date2;
         const max = min === date1 ? date2 : date1;
         return (cellValue.isAfter(min) || cellValue.isSame(min)) && (cellValue.isBefore(max) || cellValue.isSame(max));
     }
 
-    async validatorIsNotBetween(cellValue: IValidatorCellInfo<Dayjs>, info: IDataValidationRule): Promise<boolean> {
-        const { rule } = info;
-        if (!rule.formula1 || !rule.formula2) {
+    override async validatorIsNotBetween(info: IValidatorCellInfo<Dayjs>, formula: IFormulaResult<Dayjs | undefined>): Promise<boolean> {
+        const { value: cellValue } = info;
+        const { formula1: date1, formula2: date2 } = formula;
+        if (!date1 || !date2) {
             return false;
         }
-
-        const date1 = dayjs(rule.formula1);
-        const date2 = dayjs(rule.formula2);
         const min = date1.isAfter(date2) ? date1 : date2;
         const max = min === date1 ? date2 : date1;
         return cellValue.isBefore(min) || cellValue.isAfter(max);
     }
 
-    async validatorIsGreaterThan(cellValue: IValidatorCellInfo<Dayjs>, info: IDataValidationRule): Promise<boolean> {
-        const { rule } = info;
-        if (!rule.formula1) {
-            return false;
+    override async validatorIsGreaterThan(info: IValidatorCellInfo<Dayjs>, formula: IFormulaResult<Dayjs | undefined>): Promise<boolean> {
+        const { value } = info;
+
+        const { formula1 } = formula;
+        if (!formula1) {
+            return true;
         }
 
-        return cellValue.isAfter(rule.formula1);
+        return value.isAfter(formula1);
     }
 
-    async validatorIsGreaterThanOrEqual(cellValue: IValidatorCellInfo<Dayjs>, info: IDataValidationRule): Promise<boolean> {
-        const { rule } = info;
-        if (!rule.formula1) {
-            return false;
+    override async validatorIsGreaterThanOrEqual(info: IValidatorCellInfo<Dayjs>, formula: IFormulaResult<Dayjs | undefined>): Promise<boolean> {
+        const { value: cellValue } = info;
+
+        const { formula1 } = formula;
+        if (!formula1) {
+            return true;
         }
 
-        return cellValue.isAfter(rule.formula1) || cellValue.isSame(rule.formula1);
+        return cellValue.isAfter(formula1) || cellValue.isSame(formula1);
     }
 
-    async validatorIsLessThan(cellValue: IValidatorCellInfo<Dayjs>, info: IDataValidationRule): Promise<boolean> {
-        const { rule } = info;
-        if (!rule.formula1) {
-            return false;
+    override async validatorIsLessThan(info: IValidatorCellInfo<Dayjs>, formula: IFormulaResult<Dayjs | undefined>): Promise<boolean> {
+        const { value: cellValue } = info;
+
+        const { formula1 } = formula;
+        if (!formula1) {
+            return true;
         }
 
-        return cellValue.isBefore(rule.formula1);
+        return cellValue.isBefore(formula1) || cellValue.isSame(formula1);
     }
 
-    async validatorIsLessThanOrEqual(cellValue: IValidatorCellInfo<Dayjs>, info: IDataValidationRule): Promise<boolean> {
-        const { rule } = info;
-        if (!rule.formula1) {
-            return false;
+    override async validatorIsLessThanOrEqual(info: IValidatorCellInfo<Dayjs>, formula: IFormulaResult<Dayjs | undefined>): Promise<boolean> {
+        const { value: cellValue } = info;
+
+        const { formula1 } = formula;
+        if (!formula1) {
+            return true;
         }
 
-        return cellValue.isBefore(rule.formula1) || cellValue.isSame(rule.formula1);
+        return cellValue.isBefore(formula1) || cellValue.isSame(formula1);
     }
 
     validatorFormulaValue(rule: IDataValidationRuleBase): string | undefined {

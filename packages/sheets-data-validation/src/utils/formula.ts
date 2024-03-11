@@ -14,18 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICellCustomRender, ICellRenderInfo } from '@univerjs/core';
-import type { IMouseEvent, IPointerEvent, UniverRenderingContext2D } from '@univerjs/engine-render';
+import type { ICellData, Nullable } from '@univerjs/core';
 
-export interface ICommonLocation {
-    unitId: string;
-    subUnitId: string;
-    row: number;
-    col: number;
-}
-
-export interface IDataValidationRender extends ICellCustomRender {
-    drawWith(ctx: UniverRenderingContext2D, info: ICellRenderInfo): void;
-    isHit(evt: IPointerEvent | IMouseEvent, info: ICellRenderInfo): boolean;
-    onClick: (cellInfo: ICellRenderInfo) => void;
+export function getFormulaResult(result: Nullable<Nullable<ICellData>[][]>) {
+    return result?.[0]?.[0]?.v;
 }

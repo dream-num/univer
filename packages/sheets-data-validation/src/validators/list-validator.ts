@@ -14,13 +14,29 @@
  * limitations under the License.
  */
 
-import { DataValidationType, Tools } from '@univerjs/core';
-import type { CellValue, DataValidationOperator, IDataValidationRule, IDataValidationRuleBase } from '@univerjs/core';
+import { DataValidationType, isFormulaString, Tools } from '@univerjs/core';
+import type { CellValue, DataValidationOperator, ICellData, IDataValidationRule, IDataValidationRuleBase, Nullable } from '@univerjs/core';
+import type { IFormulaResult, IValidatorCellInfo } from '@univerjs/data-validation';
 import { BaseDataValidator } from '@univerjs/data-validation';
 import { LIST_FORMULA_INPUT_NAME } from '../views/formula-input';
 import { LIST_DROPDOWN_KEY } from '../views';
+import { DataValidationFormulaService } from '../services/dv-formula.service';
 
 export const LIST_MULTIPLE_FORMULA = 'TRUE';
+
+export const getListFormulaResult = (result: Nullable<Nullable<ICellData>[][]>) => {
+    const valueSet = new Set<string>();
+
+    result?.forEach((sub) => {
+        sub.forEach((cell) => {
+            if (cell?.v) {
+                valueSet.add(`${cell.v}`);
+            }
+        });
+    });
+
+    return Array.from(valueSet.values());
+};
 
 // TODO: cache
 export class ListValidator extends BaseDataValidator {
@@ -30,6 +46,8 @@ export class ListValidator extends BaseDataValidator {
     scopes: string | string[] = ['sheet'];
     formulaInput: string = LIST_FORMULA_INPUT_NAME;
 
+    private _formulaService = this.injector.get(DataValidationFormulaService);
+
     override dropdown: string | undefined = LIST_DROPDOWN_KEY;
 
     override validatorFormula(rule: IDataValidationRuleBase): boolean {
@@ -38,10 +56,6 @@ export class ListValidator extends BaseDataValidator {
 
     private _isMultiple(rule: IDataValidationRule) {
         return rule.formula2 === LIST_MULTIPLE_FORMULA;
-    }
-
-    private _parseList(rule: IDataValidationRule) {
-        return rule.formula1?.split(',') ?? [];
     }
 
     // TODO cache
@@ -55,11 +69,20 @@ export class ListValidator extends BaseDataValidator {
         }
     }
 
-    isValidType(cellValue: CellValue, info: IDataValidationRule): boolean {
-        const { rule } = info;
-        const selected = this._parseCellValue(cellValue, rule);
-        const list = this._parseList(rule);
-        return selected.every((i) => list.includes(i));
+    override async parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): Promise<IFormulaResult<string[] | undefined>> {
+        const { formula1 } = rule;
+        const results = await this._formulaService.getRuleFormulaResult(unitId, subUnitId, rule.uid);
+        return {
+            formula1: isFormulaString(formula1) ? getListFormulaResult(results?.[0]?.result) : formula1?.split(','),
+            formula2: undefined,
+        };
+    }
+
+    override async isValidType(cellInfo: IValidatorCellInfo<Nullable<CellValue>>, formula: IFormulaResult<any>, rule: IDataValidationRule): Promise<boolean> {
+        const { value } = cellInfo;
+        const { formula1 } = formula;
+        const selected = this._parseCellValue(value!, rule);
+        return selected.every((i) => formula1.includes(i));
     }
 
     override generateRuleName() {
@@ -68,41 +91,5 @@ export class ListValidator extends BaseDataValidator {
 
     override generateRuleErrorMessage(): string {
         return this.localeService.t('dataValidation.list.error');
-    }
-
-    transform(cellValue: CellValue, _rule: IDataValidationRule): CellValue {
-        throw new Error('Method not implemented.');
-    }
-
-    async validatorIsEqual(cellValue: CellValue, rule: IDataValidationRule): Promise<boolean> {
-        throw new Error('Method not implemented.');
-    }
-
-    async validatorIsNotEqual(cellValue: CellValue, rule: IDataValidationRule): Promise<boolean> {
-        throw new Error('Method not implemented.');
-    }
-
-    async validatorIsBetween(cellValue: CellValue, rule: IDataValidationRule): Promise<boolean> {
-        throw new Error('Method not implemented.');
-    }
-
-    async validatorIsNotBetween(cellValue: CellValue, rule: IDataValidationRule): Promise<boolean> {
-        throw new Error('Method not implemented.');
-    }
-
-    async validatorIsGreaterThan(cellValue: CellValue, rule: IDataValidationRule): Promise<boolean> {
-        throw new Error('Method not implemented.');
-    }
-
-    async validatorIsGreaterThanOrEqual(cellValue: CellValue, rule: IDataValidationRule): Promise<boolean> {
-        throw new Error('Method not implemented.');
-    }
-
-    async validatorIsLessThan(cellValue: CellValue, rule: IDataValidationRule): Promise<boolean> {
-        throw new Error('Method not implemented.');
-    }
-
-    async validatorIsLessThanOrEqual(cellValue: CellValue, rule: IDataValidationRule): Promise<boolean> {
-        throw new Error('Method not implemented.');
     }
 }

@@ -222,7 +222,7 @@ export class SheetDataValidationManager extends DataValidationManager<ISheetData
     }
 
     override validator(cellValue: Nullable<CellValue>, rule: ISheetDataValidationRule, pos: ISheetLocation, onCompete: (status: DataValidationStatus) => void): DataValidationStatus {
-        const { col, row } = pos;
+        const { col, row, unitId, subUnitId } = pos;
         const ruleId = rule.uid;
         const validator = this._dataValidatorRegistryService.getValidatorItem(rule.type);
         if (validator) {
@@ -233,7 +233,7 @@ export class SheetDataValidationManager extends DataValidationManager<ISheetData
                     status: DataValidationStatus.VALIDATING,
                     ruleId,
                 });
-                validator.validator(cellValue, { rule, unitId: this.unitId, subUnitId: this.subUnitId }).then((status) => {
+                validator.validator({ value: cellValue, unitId, subUnitId, row, column: col }, rule).then((status) => {
                     const realStatus = status ? DataValidationStatus.VALID : DataValidationStatus.INVALID;
                     this._cache.setValue(row, col, {
                         value: cellValue,

@@ -22,19 +22,12 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetDataValidationManager } from '../models/sheet-data-validation-manager';
 import { SheetDataValidationService } from '../services/dv.service';
 import { CustomFormulaValidator } from '../validators/custom-validator';
-import { DateValidator, ListValidator, NumberValidator, TextLengthValidator } from '../validators';
-
-const INVALID_MARK = {
-    tr: {
-        size: 8,
-        color: 'red',
-    },
-};
+import { CheckboxValidator, DateValidator, ListValidator, NumberValidator, TextLengthValidator } from '../validators';
 
 @OnLifecycle(LifecycleStages.Rendered, DataValidationController)
 export class DataValidationController extends RxDisposable {
     constructor(
-        @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
+
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(DataValidationModel) private readonly _dataValidationModel: DataValidationModel,
         @Inject(SheetDataValidationService) private readonly _sheetDataValidationService: SheetDataValidationService,
@@ -51,7 +44,6 @@ export class DataValidationController extends RxDisposable {
         this._initDataValidationDataSource();
         this._registerValidators();
         this._initInstanceChange();
-        this._initViewModelIntercept();
     }
 
     private _registerValidators() {
@@ -61,6 +53,7 @@ export class DataValidationController extends RxDisposable {
             DateValidator,
             CustomFormulaValidator,
             ListValidator,
+            CheckboxValidator,
         ]).forEach((Validator) => {
             const validator = this._injector.createInstance(Validator as typeof ListValidator);
             this.disposeWithMe(
@@ -110,55 +103,5 @@ export class DataValidationController extends RxDisposable {
 
     private _initDataValidationDataSource() {
         this._dataValidationModel.setManagerCreator(this._createSheetDataValidationManager.bind(this));
-    }
-
-    private _initViewModelIntercept() {
-        this.disposeWithMe(
-            this._sheetInterceptorService.intercept(
-                INTERCEPTOR_POINT.CELL_CONTENT,
-                {
-                    handler: (cell, pos, next) => {
-                        const validationManager = this._sheetDataValidationService.currentManager;
-                        const { unitId, subUnitId } = validationManager || {};
-                        if (unitId !== pos.unitId || subUnitId !== pos.subUnitId) {
-                            this._sheetDataValidationService.switchCurrent(pos.unitId, pos.subUnitId);
-                        }
-
-                        const manager = this._sheetDataValidationService.currentManager?.manager;
-                        if (!manager) {
-                            return next(cell);
-                        }
-                        const { row, col } = pos;
-                        const ruleId = manager.getRuleIdByLocation(row, col);
-                        const rule = manager.getRuleById(ruleId);
-
-                        if (!rule) {
-                            return next(cell);
-                        }
-                        const validStatus = this._dataValidationModel.validator(cell?.v, rule, pos);
-                        const validator = this._dataValidatorRegistryService.getValidatorItem(rule.type);
-
-                        return next({
-                            ...cell,
-                            dataValidation: {
-                                ruleId,
-                                validStatus,
-                                rule,
-                                customRender: validator?.canvasRender,
-                                skipDefaultFontRender: validator?.skipDefaultFontRender,
-                            },
-                            markers: {
-                                ...cell?.markers,
-                                ...validStatus === DataValidationStatus.INVALID ? INVALID_MARK : null,
-                            },
-                        });
-                    },
-                }
-            )
-        );
-    }
-
-    private _initCommandIntercept() {
-        // this._commandService.
     }
 }

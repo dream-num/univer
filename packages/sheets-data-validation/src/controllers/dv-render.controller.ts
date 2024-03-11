@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DisposableCollection, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
+import { DataValidationStatus, DataValidationType, DisposableCollection, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
 import { DataValidationModel, DataValidationPanelName, DataValidatorRegistryService } from '@univerjs/data-validation';
 import { ComponentManager, IMenuService } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
@@ -22,9 +22,19 @@ import { DropdownManagerService, IEditorBridgeService, SheetSkeletonManagerServi
 import type { Spreadsheet } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { getCellIndexByOffsetWithMerge } from '@univerjs/sheets-ui/common/utils.js';
+import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { DataValidationPanel, LIST_DROPDOWN_KEY, ListDropDown } from '../views';
 import { FORMULA_INPUTS } from '../views/formula-input';
+import { SheetDataValidationService } from '../services/dv.service';
+import { getCellValueOrigin } from '../utils/getCellDataOrigin';
 import { DataValidationMenu } from './dv.menu';
+
+const INVALID_MARK = {
+    tr: {
+        size: 8,
+        color: 'red',
+    },
+};
 
 @OnLifecycle(LifecycleStages.Rendered, DataValidationRenderController)
 export class DataValidationRenderController extends RxDisposable {
@@ -37,7 +47,9 @@ export class DataValidationRenderController extends RxDisposable {
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(DataValidatorRegistryService) private readonly _dataValidatorRegistryService: DataValidatorRegistryService,
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
-        @Inject(DropdownManagerService) private readonly _dropdownManagerService: DropdownManagerService
+        @Inject(DropdownManagerService) private readonly _dropdownManagerService: DropdownManagerService,
+        @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
+        @Inject(SheetDataValidationService) private readonly _sheetDataValidationService: SheetDataValidationService
     ) {
         super();
         this._init();
@@ -49,6 +61,7 @@ export class DataValidationRenderController extends RxDisposable {
         this._initSkeletonChange();
         this._initEventBinding();
         this._initDropdown();
+        this._initViewModelIntercept();
     }
 
     private _initMenu() {
@@ -85,6 +98,8 @@ export class DataValidationRenderController extends RxDisposable {
 
         this._univerInstanceService.currentSheet$.subscribe((workbook) => {
             if (workbook) {
+                const unitId = workbook.getUnitId();
+                const subUnitId = workbook.getActiveSheet().getSheetId();
                 const currentRender = this._renderManagerService.getRenderById(workbook.getUnitId());
                 if (currentRender && currentRender.mainComponent) {
                     disposableCollection.dispose();
@@ -118,12 +133,18 @@ export class DataValidationRenderController extends RxDisposable {
                         if (!render) {
                             return;
                         }
+                        const row = cellIndex.actualRow;
+                        const col = cellIndex.actualCol;
 
                         const info = {
                             cellInfo: skeleton.getCellByIndex(cellIndex.actualRow, cellIndex.actualCol),
                             value: cellInfo.v,
                             style: skeleton.getsStyles().getStyleByCell(cellInfo),
                             rule,
+                            unitId,
+                            subUnitId,
+                            row,
+                            col,
                         };
 
                         const isHit = render.isHit(evt, info);
@@ -212,5 +233,52 @@ export class DataValidationRenderController extends RxDisposable {
         this.disposeWithMe(this._dataValidationModel.validStatusChange$.subscribe(() => {
             markSkeletonDirty();
         }));
+    }
+
+    private _initViewModelIntercept() {
+        this.disposeWithMe(
+            this._sheetInterceptorService.intercept(
+                INTERCEPTOR_POINT.CELL_CONTENT,
+                {
+                    handler: (cell, pos, next) => {
+                        const validationManager = this._sheetDataValidationService.currentManager;
+                        const { unitId, subUnitId } = validationManager || {};
+                        if (unitId !== pos.unitId || subUnitId !== pos.subUnitId) {
+                            this._sheetDataValidationService.switchCurrent(pos.unitId, pos.subUnitId);
+                        }
+
+                        const manager = this._sheetDataValidationService.currentManager?.manager;
+                        if (!manager) {
+                            return next(cell);
+                        }
+                        const { row, col } = pos;
+                        const ruleId = manager.getRuleIdByLocation(row, col);
+                        const rule = manager.getRuleById(ruleId);
+
+                        if (!rule) {
+                            return next(cell);
+                        }
+
+                        const validStatus = this._dataValidationModel.validator(getCellValueOrigin(cell), rule, pos);
+                        const validator = this._dataValidatorRegistryService.getValidatorItem(rule.type);
+
+                        return next({
+                            ...cell,
+                            dataValidation: {
+                                ruleId,
+                                validStatus,
+                                rule,
+                                customRender: validator?.canvasRender,
+                                skipDefaultFontRender: validator?.skipDefaultFontRender,
+                            },
+                            markers: {
+                                ...cell?.markers,
+                                ...validStatus === DataValidationStatus.INVALID ? INVALID_MARK : null,
+                            },
+                        });
+                    },
+                }
+            )
+        );
     }
 }

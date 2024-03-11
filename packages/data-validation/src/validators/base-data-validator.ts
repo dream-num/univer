@@ -34,17 +34,17 @@ const operatorNameMap: Record<DataValidationOperator, string> = {
     [DataValidationOperator.NOT_EQUAL]: 'dataValidation.operators.notEqual',
 };
 
-export interface IValidatorCellInfo<DataType = CellValue> {
-    value: Nullable<DataType>;
+export interface IValidatorCellInfo<DataType = Nullable<CellValue>> {
+    value: DataType;
     row: number;
     column: number;
     unitId: string;
     subUnitId: string;
 }
 
-export interface IFormulaResult {
-    formula1: any;
-    formula2: any;
+export interface IFormulaResult<T = any> {
+    formula1: T;
+    formula2: T;
 }
 
 export abstract class BaseDataValidator<DataType = CellValue> {
@@ -153,7 +153,7 @@ export abstract class BaseDataValidator<DataType = CellValue> {
 
         const formulaInfo = await this.parseFormula(rule, unitId, subUnitId);
 
-        if (await !this.isValidType(cellInfo, formulaInfo, rule)) {
+        if (!(await this.isValidType(cellInfo, formulaInfo, rule))) {
             return false;
         }
 

@@ -16,12 +16,15 @@
 
 import type { IPointerEvent, UniverRenderingContext2D, Vector2 } from '@univerjs/engine-render';
 import { Checkbox, fixLineWidthByScale, Transform } from '@univerjs/engine-render';
-import { ICommandService } from '@univerjs/core';
-import type { ICellRenderInfo, ISelectionCellWithCoord, IStyleData, Nullable } from '@univerjs/core';
+import { ICommandService, isFormulaString } from '@univerjs/core';
+import type { ICellRenderInfo, IDataValidationRule, ISelectionCellWithCoord, IStyleData, Nullable } from '@univerjs/core';
 import { SetRangeValuesCommand } from '@univerjs/sheets';
-import type { IDataValidationRender } from '@univerjs/data-validation';
+import type { IDataValidationRender, IFormulaResult } from '@univerjs/data-validation';
+import { Inject } from '@wendellhu/redi';
 import type { ISetRangeValuesCommandParams } from '../../../sheets/lib/types';
-import { CHECKBOX_FORMULA_1, CHECKBOX_FORMULA_2 } from '../validators/checkbox-validator';
+import { CHECKBOX_FORMULA_1, CHECKBOX_FORMULA_2, CheckboxValidator } from '../validators/checkbox-validator';
+import { DataValidationFormulaService } from '../services/dv-formula.service';
+import { getFormulaResult } from '../utils/formula';
 
 export class CheckboxRender implements IDataValidationRender {
     private _calc(cellInfo: ISelectionCellWithCoord, style: Nullable<IStyleData>) {
@@ -34,8 +37,18 @@ export class CheckboxRender implements IDataValidationRender {
     }
 
     constructor(
-        @ICommandService private readonly _commandService: ICommandService
+        @ICommandService private readonly _commandService: ICommandService,
+        @Inject(DataValidationFormulaService) private readonly _formulaService: DataValidationFormulaService
     ) {}
+
+    private async _parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): Promise<IFormulaResult> {
+        const { formula1 = CHECKBOX_FORMULA_1, formula2 = CHECKBOX_FORMULA_2 } = rule;
+        const results = await this._formulaService.getRuleFormulaResult(unitId, subUnitId, rule.uid);
+        return {
+            formula1: isFormulaString(formula1) ? getFormulaResult(results?.[0]?.result) : formula1,
+            formula2: isFormulaString(formula2) ? getFormulaResult(results?.[1]?.result) : formula2,
+        };
+    }
 
     drawWith(ctx: UniverRenderingContext2D, info: ICellRenderInfo): void {
         const { value, cellInfo, style, rule } = info;
@@ -88,9 +101,9 @@ export class CheckboxRender implements IDataValidationRender {
         return false;
     }
 
-    onClick(info: ICellRenderInfo) {
-        const { value, cellInfo, rule } = info;
-        const { formula1 = CHECKBOX_FORMULA_1, formula2 = CHECKBOX_FORMULA_2 } = rule;
+    async onClick(info: ICellRenderInfo) {
+        const { value, cellInfo, rule, unitId, subUnitId } = info;
+        const { formula1, formula2 } = await this._parseFormula(rule, unitId, subUnitId);
 
         const params: ISetRangeValuesCommandParams = {
             range: {

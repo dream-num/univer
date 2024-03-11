@@ -18,13 +18,7 @@ import { Disposable, LifecycleStages, LocaleService, OnLifecycle } from '@univer
 import { ComponentManager } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 import { FORMULA_INPUTS } from '../views/formula-input';
-import { NumberValidator } from '../validators/number-validator';
 import { DataValidatorRegistryService } from '../services/data-validator-registry.service';
-import { ListValidator } from '../validators/list-validator';
-import { TextLengthValidator } from '../validators/text-length-validator';
-import { DateValidator } from '../validators/date-validator';
-import type { BaseDataValidator } from '../validators/base-data-validator';
-import { CheckboxValidator } from '../validators/checkbox-validator';
 
 @OnLifecycle(LifecycleStages.Ready, DataValidatorController)
 export class DataValidatorController extends Disposable {

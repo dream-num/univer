@@ -20,6 +20,7 @@ import { BaseDataValidator } from '@univerjs/data-validation';
 import type { IFormulaResult, IValidatorCellInfo } from '@univerjs/data-validation/validators/base-data-validator.js';
 import { CheckboxRender } from '../widgets/checkbox-widget';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
+import { getFormulaResult } from '../utils/formula';
 
 export const CHECKBOX_FORMULA_1 = 'TRUE';
 export const CHECKBOX_FORMULA_2 = 'FALSE';
@@ -45,8 +46,8 @@ export class CheckboxValidator extends BaseDataValidator {
         const { formula1 = CHECKBOX_FORMULA_1, formula2 = CHECKBOX_FORMULA_2 } = rule;
         const results = await this._formulaService.getRuleFormulaResult(unitId, subUnitId, rule.uid);
         return {
-            formula1: isFormulaString(formula1) ? results?.[0]?.result?.[0]?.[0] : formula1,
-            formula2: isFormulaString(formula2) ? results?.[1]?.result?.[0]?.[0] : formula2,
+            formula1: isFormulaString(formula1) ? getFormulaResult(results?.[0]?.result) : formula1,
+            formula2: isFormulaString(formula2) ? getFormulaResult(results?.[1]?.result) : formula2,
         };
     }
 
@@ -57,6 +58,6 @@ export class CheckboxValidator extends BaseDataValidator {
             return true;
         }
 
-        return !Tools.isDefine(value) && (value === formula1 || value === formula2);
+        return Tools.isDefine(value) && (value === formula1 || value === formula2);
     }
 }

@@ -204,13 +204,22 @@ export class Workbook extends Disposable {
      */
     getActiveSheet(): Worksheet {
         const currentActive = this.getRawActiveSheet();
-        if (!currentActive) {
-            const worksheet = this._worksheets.get(this._snapshot.sheetOrder[0])!;
-            this.setActiveSheet(worksheet);
-            return worksheet;
+        if (currentActive) {
+            return currentActive;
         }
 
-        return currentActive;
+        const sheetOrder = this._snapshot.sheetOrder;
+        for (let i = 0, len = sheetOrder.length; i < len; i++) {
+            const worksheet = this._worksheets.get(sheetOrder[i]);
+            if (worksheet && worksheet.isSheetHidden() !== BooleanNumber.TRUE) {
+                this.setActiveSheet(worksheet);
+                return worksheet;
+            }
+        }
+
+        const worksheet = this._worksheets.get(sheetOrder[0])!;
+        this.setActiveSheet(worksheet);
+        return worksheet;
     }
 
     setActiveSheet(worksheet: Nullable<Worksheet>): void {

@@ -13811,6 +13811,62 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                 },
             },
         },
+        uJSelZ11: {
+            bd: {
+                r: {
+                    s: 1,
+                    cl: {
+                        rgb: 'rgb(0,0,0)',
+                    },
+                },
+                b: {
+                    cl: {
+                        rgb: 'rgb(0,0,0)',
+                    },
+                    s: 1,
+                },
+                t: {
+                    cl: {
+                        rgb: 'rgb(0,0,0)',
+                    },
+                    s: 1,
+                },
+                l: {
+                    cl: {
+                        rgb: 'rgb(0,0,0)',
+                    },
+                    s: 1,
+                },
+            },
+        },
+        uJSelZ22: {
+            bd: {
+                r: {
+                    s: 1,
+                    cl: {
+                        rgb: 'rgb(255,255,255)',
+                    },
+                },
+                b: {
+                    cl: {
+                        rgb: 'rgb(255,255,255)',
+                    },
+                    s: 1,
+                },
+                t: {
+                    cl: {
+                        rgb: 'rgb(255,255,255)',
+                    },
+                    s: 1,
+                },
+                l: {
+                    cl: {
+                        rgb: 'rgb(255,255,255)',
+                    },
+                    s: 1,
+                },
+            },
+        },
     },
     appVersion: '3.0.0-alpha',
     sheets: {
@@ -13827,6 +13883,34 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                     0: {
                         s: '1',
                         v: 'A Schedule of Items',
+                    },
+                },
+                5: {
+                    5: {
+                        s: 'uJSelZ11',
+                    },
+                    6: {
+                        s: 'uJSelZ11',
+                    },
+                    7: {
+                        s: 'uJSelZ11',
+                    },
+                    8: {
+                        s: 'uJSelZ11',
+                    },
+                },
+                6: {
+                    5: {
+                        s: 'uJSelZ22',
+                    },
+                    6: {
+                        s: 'uJSelZ22',
+                    },
+                    7: {
+                        s: 'uJSelZ22',
+                    },
+                    8: {
+                        s: 'uJSelZ22',
                     },
                 },
             },

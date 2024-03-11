@@ -45,6 +45,7 @@ import {
     HorizontalAlign,
     isEmptyCell,
     isNullCell,
+    isWhiteColor,
     ObjectMatrix,
     searchArray,
     Tools,
@@ -1800,6 +1801,24 @@ export class SpreadsheetSkeleton extends Skeleton {
 
         if (!borderCache.getValue(r, c)) {
             borderCache.setValue(r, c, { [type]: {} });
+        }
+
+        /**
+         * https://github.com/dream-num/univer-pro/issues/344
+         * Compatible with Excel's border rendering.
+         * When the top border of a cell and the bottom border of the cell above it (r-1) overlap,
+         * if the top border of cell r is white, then the rendering is ignored.
+         */
+        if (type === BORDER_TYPE.TOP) {
+            const borderBottom = borderCache.getValue(r - 1, c)?.[BORDER_TYPE.BOTTOM];
+            if (borderBottom && isWhiteColor(rgb)) {
+                return true;
+            }
+        } else if (type === BORDER_TYPE.LEFT) {
+            const borderRight = borderCache.getValue(r, c - 1)?.[BORDER_TYPE.RIGHT];
+            if (borderRight && isWhiteColor(rgb)) {
+                return true;
+            }
         }
 
         borderCache.getValue(r, c)![type] = {

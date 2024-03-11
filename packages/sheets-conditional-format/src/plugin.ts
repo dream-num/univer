@@ -39,6 +39,8 @@ import { ConditionalFormatAutoFillController } from './controllers/cf.auto-fill.
 import { ConditionalFormatMenuController } from './controllers/cf.menu.controller';
 import { ConditionalFormatI18nController } from './controllers/cf.i18n.controller';
 
+import { clearRangeCfCommand } from './commands/commands/clear-range-cf.command';
+import { clearWorksheetCfCommand } from './commands/commands/clear-worksheet-cf.command';
 import { OpenConditionalFormatOperator } from './commands/operations/open-conditional-format-panel';
 import { deleteCfCommand } from './commands/commands/delete-cf.command';
 import { setCfCommand } from './commands/commands/set-cf.command';
@@ -65,6 +67,8 @@ export class SheetsConditionalFormatPlugin extends Plugin {
         setCfCommand,
         moveCfCommand,
         addCfCommand,
+        clearRangeCfCommand,
+        clearWorksheetCfCommand,
     ];
 
     static mutationList = [addConditionalRuleMutation, deleteConditionalRuleMutation, setConditionalRuleMutation, moveConditionalRuleMutation, conditionalFormatFormulaMarkDirty];

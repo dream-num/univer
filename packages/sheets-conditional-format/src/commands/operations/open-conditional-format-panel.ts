@@ -15,12 +15,15 @@
  */
 
 import type { ICommand } from '@univerjs/core';
-import { CommandType } from '@univerjs/core';
+import { CommandType, ICommandService } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 import { SelectionManagerService } from '@univerjs/sheets';
 import { ConditionalFormatMenuController } from '../../controllers/cf.menu.controller';
 import { createDefaultRule, RuleType, SubRuleType } from '../../base/const';
 import type { IColorScale, IConditionFormatRule, IDataBar, IFormulaHighlightCell, IRankHighlightCell } from '../../models/type';
+import type { IClearRangeCfParams } from '../commands/clear-range-cf.command';
+import { clearRangeCfCommand } from '../commands/clear-range-cf.command';
+import { clearWorksheetCfCommand } from '../commands/clear-worksheet-cf.command';
 
 interface IOpenConditionalFormatOperatorParams {
     value: number;
@@ -44,6 +47,8 @@ export const OpenConditionalFormatOperator: ICommand = {
     handler: (accessor: IAccessor, params: IOpenConditionalFormatOperatorParams) => {
         const conditionalFormatMenuController = accessor.get(ConditionalFormatMenuController);
         const selectionManagerService = accessor.get(SelectionManagerService);
+        const commandService = accessor.get(ICommandService);
+
         const ranges = selectionManagerService.getSelectionRanges() || [];
 
         const type = params.value;
@@ -112,9 +117,12 @@ export const OpenConditionalFormatOperator: ICommand = {
                 break;
             }
             case OPERATION.clearRangeRules:{
+                commandService.executeCommand(clearRangeCfCommand.id, { ranges } as IClearRangeCfParams);
+
                 break;
             }
             case OPERATION.clearWorkSheetRules:{
+                commandService.executeCommand(clearWorksheetCfCommand.id);
                 break;
             }
         }

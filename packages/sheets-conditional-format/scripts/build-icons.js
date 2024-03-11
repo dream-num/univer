@@ -71,16 +71,21 @@ async function replaceFillAndConvertToBase64(filePath, replaceMap) {
 }
 const runTask = async () => {
     const base64EncodedSVGs = {};
-    const obj = { feedback, star, progress, signal, feedback, feeling, arrow, shape };
+    const obj = { feedback, star, progress, signal, feeling, arrow, shape };
     for (const iconType in obj) {
         const list = obj[iconType];
         const map = {};
         base64EncodedSVGs[iconType] = map;
-        for (let index = 0; index < list.length; index++) {
-            const [key, path, replaceMap] = list[index];
+        for (const element of list) {
+            const [key, path, replaceMap] = element;
             const base64 = await replaceFillAndConvertToBase64(`./node_modules/${path}`, replaceMap);
             map[key] = `data:image/png;base64,${base64}`;
         }
+    }
+    try {
+        await fs.stat('./src/assets');
+    } catch (err) {
+        await fs.mkdir('./src/assets');
     }
 
     fs.writeFile('./src/assets/icon-map.json', JSON.stringify(base64EncodedSVGs, null, 4), 'utf8');

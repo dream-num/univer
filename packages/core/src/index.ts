@@ -145,4 +145,6 @@ export { textEncoder } from './services/snapshot/snapshot-utils';
 export { type ILogContext } from './services/log/context';
 export { b64DecodeUnicode, b64EncodeUnicode } from './shared/coder';
 
+export { isBlackColor, isWhiteColor } from './shared/color/color-kit';
+
 installShims();

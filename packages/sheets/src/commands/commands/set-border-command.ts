@@ -290,19 +290,25 @@ export const SetBorderCommand: ICommand = {
         }
 
         if (top) {
-            //setBorderStyle(topRangeOut, { b: null });
+            /**
+             * https://github.com/dream-num/univer-pro/issues/344
+             * Compatible with Excel's border rendering.
+             * When the top border of a cell and the bottom border of the cell above it (r-1) overlap,
+             * if the top border of cell r is white, then the rendering is ignored.
+             */
+            setBorderStyle(topRangeOut, { b: null });
             setBorderStyle(topRange, { t: Tools.deepClone(border) }, true);
         }
         if (bottom) {
-            //setBorderStyle(bottomRangeOut, { t: null });
+            setBorderStyle(bottomRangeOut, { t: null });
             setBorderStyle(bottomRange, { b: Tools.deepClone(border) }, true);
         }
         if (left) {
-            //setBorderStyle(leftRangeOut, { r: null });
+            setBorderStyle(leftRangeOut, { r: null });
             setBorderStyle(leftRange, { l: Tools.deepClone(border) }, true);
         }
         if (right) {
-            //setBorderStyle(rightRangeOut, { l: null });
+            setBorderStyle(rightRangeOut, { l: null });
             setBorderStyle(rightRange, { r: Tools.deepClone(border) }, true);
         }
 

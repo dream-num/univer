@@ -1546,10 +1546,13 @@ importers:
         specifier: ^1.3.1
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         version: 1.3.1(@types/node@20.11.27)(less@4.2.0)
 =======
 =======
 >>>>>>> 7303d9b88 (fix(cf): support batch creation and deletion formulas are supported)
+=======
+>>>>>>> e6892defb (fix(cf): error when folder does not exist)
 <<<<<<< HEAD
         version: 1.3.1(@types/node@20.11.25)(jsdom@24.0.0)
 =======
@@ -1641,8 +1644,17 @@ importers:
         version: 1.3.1(@types/node@20.11.24)(happy-dom@13.3.8)
 >>>>>>> 41db36db3 (fix(cf): support batch creation and deletion formulas are supported)
 >>>>>>> 8a5392e3f (fix(cf): support batch creation and deletion formulas are supported)
+<<<<<<< HEAD
 >>>>>>> 7303d9b88 (fix(cf): support batch creation and deletion formulas are supported)
+<<<<<<< HEAD
 >>>>>>> 862d6230e (fix(cf): support batch creation and deletion formulas are supported)
+=======
+=======
+=======
+        version: 1.3.1(@types/node@20.11.24)(jsdom@24.0.0)
+>>>>>>> e09a2cd0a (fix(cf): error when folder does not exist)
+>>>>>>> e6892defb (fix(cf): error when folder does not exist)
+>>>>>>> 87bafa3ca (fix(cf): error when folder does not exist)
 
   packages/sheets-formula:
     dependencies:
@@ -5425,8 +5437,6 @@ packages:
     resolution: {integrity: sha512-cEee/Z+I12mZcFJshKcCqC8tuX5hG3s+d+9nZ3LabqKF1vKdF41B92pJVCBggjAGORAeOzyyDDKrZwIkLffeOQ==}
     dev: false
 
-<<<<<<< HEAD
-<<<<<<< HEAD
   /@grpc/grpc-js@1.10.1:
     resolution: {integrity: sha512-55ONqFytZExfOIjF1RjXPcVmT/jJqFzbbDqxK9jmRV4nxiYWtL9hENSW1Jfx0SdZfrvoqd44YJ/GJTqfRrawSQ==}
     engines: {node: ^8.13.0 || >=10.10.0}
@@ -5448,43 +5458,6 @@ packages:
 
   /@humanwhocodes/config-array@0.11.14:
     resolution: {integrity: sha512-3T8LkOmg45BV5FICb15QQMsyUSWrQ8AygVfC7ZG32zOalnqrilm018ZVCw0eapXux8FtA33q8PSRSstjee3jSg==}
-=======
-  /@floating-ui/core@1.5.0:
-    resolution: {integrity: sha512-kK1h4m36DQ0UHGj5Ah4db7R0rHemTqqO0QLvUqi1/mUUp3LuAWbWxdxSIf/XsnH9VS6rRVPLJCncjRzUvyCLXg==}
-    dependencies:
-      '@floating-ui/utils': 0.1.6
-    dev: true
-
-  /@floating-ui/dom@1.5.3:
-    resolution: {integrity: sha512-ClAbQnEqJAKCJOEbbLo5IUlZHkNszqhuxS4fHAVxRPXPya6Ysf2G8KypnYcOTpx6I8xcgF9bbHb6g/2KpbV8qA==}
-    dependencies:
-      '@floating-ui/core': 1.5.0
-      '@floating-ui/utils': 0.1.6
-    dev: true
-
-  /@floating-ui/react-dom@2.0.4(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-CF8k2rgKeh/49UrnIBs4BdxPUV6vize/Db1d/YbCLyp9GiVZ0BEwf5AiDSxJRCr6yOkGqTFHtmrULxkEfYZ7dQ==}
-    peerDependencies:
-      react: '>=16.8.0'
-      react-dom: '>=16.8.0'
-    dependencies:
-      '@floating-ui/dom': 1.5.3
-      react: 18.2.0
-      react-dom: 18.2.0(react@18.2.0)
-    dev: true
-
-  /@floating-ui/utils@0.1.6:
-    resolution: {integrity: sha512-OfX7E2oUDYxtBvsuS4e/jSn4Q9Qb6DzgeYtsAdkPZ47znpoNsMgZw0+tVijiv3uGNR6dgNlty6r9rzIzHjtd/A==}
-    dev: true
->>>>>>> 7e3c5a4ce (feat(cf): add package config)
-
-  /@humanwhocodes/config-array@0.11.13:
-    resolution: {integrity: sha512-JSBDMiDKSzQVngfRjOdFXgFfklaXI4K9nLF49Auh21lmBWRLIK3+xTErTWD4KU54pb6coM6ESE7Awz/FNU3zgQ==}
->>>>>>> 36779fdf7 (feat(cf): add package config)
-=======
-  /@humanwhocodes/config-array@0.11.14:
-    resolution: {integrity: sha512-3T8LkOmg45BV5FICb15QQMsyUSWrQ8AygVfC7ZG32zOalnqrilm018ZVCw0eapXux8FtA33q8PSRSstjee3jSg==}
->>>>>>> 41db36db3 (fix(cf): support batch creation and deletion formulas are supported)
     engines: {node: '>=10.10.0'}
     dependencies:
       '@humanwhocodes/object-schema': 2.0.2
@@ -5816,6 +5789,7 @@ packages:
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
       '@types/mdx': 2.0.11
 <<<<<<< HEAD
       '@types/react': 18.2.67
@@ -5860,7 +5834,14 @@ packages:
       '@types/react': 18.2.63
 >>>>>>> 78c8b3767 (feat(cf): support icon set panel)
 >>>>>>> 888b73535 (feat(cf): support icon set panel)
+<<<<<<< HEAD
 >>>>>>> 13f3722d3 (feat(cf): support icon set panel)
+=======
+=======
+      '@types/mdx': 2.0.10
+      '@types/react': 18.2.64
+>>>>>>> e6892defb (fix(cf): error when folder does not exist)
+>>>>>>> 87bafa3ca (fix(cf): error when folder does not exist)
       react: 18.2.0
     dev: false
 
@@ -6132,12 +6113,15 @@ packages:
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
   /@radix-ui/react-slot@1.0.2(@types/react@18.2.67)(react@18.2.0):
 =======
 =======
 >>>>>>> 862d6230e (fix(cf): support batch creation and deletion formulas are supported)
 =======
 >>>>>>> 13f3722d3 (feat(cf): support icon set panel)
+=======
+>>>>>>> 87bafa3ca (fix(cf): error when folder does not exist)
 <<<<<<< HEAD
   /@radix-ui/react-slot@1.0.2(@types/react@18.2.66)(react@18.2.0):
 =======
@@ -6442,7 +6426,13 @@ packages:
   /@radix-ui/react-slot@1.0.2(@types/react@18.2.63)(react@18.2.0):
 >>>>>>> 78c8b3767 (feat(cf): support icon set panel)
 >>>>>>> 888b73535 (feat(cf): support icon set panel)
+<<<<<<< HEAD
 >>>>>>> 13f3722d3 (feat(cf): support icon set panel)
+=======
+=======
+  /@radix-ui/react-slot@1.0.2(@types/react@18.2.64)(react@18.2.0):
+>>>>>>> e6892defb (fix(cf): error when folder does not exist)
+>>>>>>> 87bafa3ca (fix(cf): error when folder does not exist)
     resolution: {integrity: sha512-YeTpuq4deV+6DusvVUW4ivBgnkHwECUu0BiN43L5UCDFgdhsRUWAghhTF5MbvNTPzmiFOx90asDSUjWuCNapwg==}
     peerDependencies:
       '@types/react': '*'
@@ -6500,22 +6490,8 @@ packages:
       react-dom: '>=16.9.0'
     dependencies:
       '@babel/runtime': 7.23.9
-<<<<<<< HEAD
-<<<<<<< HEAD
-      classnames: 2.5.1
-<<<<<<< HEAD
+      classnames: 2.3.2
       rc-util: 5.39.1(react-dom@18.2.0)(react@18.2.0)
-=======
-      rc-util: 5.39.0(react-dom@18.2.0)(react@18.2.0)
-=======
-      classnames: 2.3.2
-      rc-util: 5.38.2(react-dom@18.2.0)(react@18.2.0)
->>>>>>> 494030bf7 (feat(cf): add package config)
->>>>>>> 36779fdf7 (feat(cf): add package config)
-=======
-      classnames: 2.3.2
-      rc-util: 5.39.0(react-dom@18.2.0)(react@18.2.0)
->>>>>>> 78c8b3767 (feat(cf): support icon set panel)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
     dev: false
@@ -6784,6 +6760,7 @@ packages:
     dependencies:
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
       '@babel/core': 7.23.9
 <<<<<<< HEAD
       '@mdx-js/react': 3.0.1(@types/react@18.2.67)(react@18.2.0)
@@ -6802,6 +6779,9 @@ packages:
       '@storybook/csf-tools': 8.0.0
 =======
 <<<<<<< HEAD
+=======
+      '@babel/core': 7.23.5
+>>>>>>> e6892defb (fix(cf): error when folder does not exist)
       '@mdx-js/react': 3.0.1(@types/react@18.2.64)(react@18.2.0)
 <<<<<<< HEAD
       '@storybook/blocks': 8.0.0-rc.3(@types/react@18.2.64)(react-dom@18.2.0)(react@18.2.0)
@@ -6838,20 +6818,6 @@ packages:
 <<<<<<< HEAD
 =======
       '@storybook/blocks': 8.0.0-rc.1(@types/react@18.2.64)(react-dom@18.2.0)(react@18.2.0)
-=======
-      '@mdx-js/react': 3.0.1(@types/react@18.2.63)(react@18.2.0)
-      '@storybook/blocks': 8.0.0-rc.1(@types/react@18.2.63)(react-dom@18.2.0)(react@18.2.0)
-=======
-      '@babel/core': 7.23.5
-      '@mdx-js/react': 3.0.1(@types/react@18.2.61)(react@18.2.0)
-      '@storybook/blocks': 8.0.0-rc.1(@types/react@18.2.61)(react-dom@18.2.0)(react@18.2.0)
->>>>>>> 44acb57f1 (fix(cf): support batch creation and deletion formulas are supported)
->>>>>>> 41db36db3 (fix(cf): support batch creation and deletion formulas are supported)
-=======
-      '@babel/core': 7.23.5
-      '@mdx-js/react': 3.0.1(@types/react@18.2.63)(react@18.2.0)
-      '@storybook/blocks': 8.0.0-rc.1(@types/react@18.2.63)(react-dom@18.2.0)(react@18.2.0)
->>>>>>> 78c8b3767 (feat(cf): support icon set panel)
       '@storybook/client-logger': 8.0.0-rc.1
       '@storybook/components': 8.0.0-rc.1(@types/react@18.2.64)(react-dom@18.2.0)(react@18.2.0)
       '@storybook/csf-plugin': 8.0.0-rc.1
@@ -7699,22 +7665,8 @@ packages:
   /@storybook/node-logger@8.0.0-rc.1:
     resolution: {integrity: sha512-WFIK9NRclmSepPsTmVOcxzVGv/yyjAckiL3Z/iV2idwP4Qj/TT/FGFGAPs7oGSiQfgP80FMifDFN6tcZ0awpYQ==}
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
   /@storybook/node-logger@8.0.0-rc.3:
     resolution: {integrity: sha512-8VkQSMdU9/NwqQWRibG6hlI/MIq3qJ+qMx4TekTHvPXjJbbW+tRvGsFbyqQSFonZmg25XgUIp2wLc46CS/CEvw==}
-=======
-=======
->>>>>>> 41db36db3 (fix(cf): support batch creation and deletion formulas are supported)
-<<<<<<< HEAD
-  /@storybook/node-logger@8.0.0-rc.2:
-    resolution: {integrity: sha512-jL2bF9BkD9kNELlt5zW1fTB6OI3Ue47ob8j6AtgeB32FW1idheycRzzGCNgZTVBhcKsdSIIg5D49cTadpjJHbQ==}
->>>>>>> 36779fdf7 (feat(cf): add package config)
-=======
-  /@storybook/node-logger@8.0.0-rc.3:
-    resolution: {integrity: sha512-8VkQSMdU9/NwqQWRibG6hlI/MIq3qJ+qMx4TekTHvPXjJbbW+tRvGsFbyqQSFonZmg25XgUIp2wLc46CS/CEvw==}
->>>>>>> 78c8b3767 (feat(cf): support icon set panel)
     dev: false
 
   /@storybook/preset-react-webpack@8.0.0-rc.1(@swc/core@1.4.2)(esbuild@0.18.20)(react-dom@18.2.0)(react@18.2.0)(typescript@5.3.3):
@@ -8075,6 +8027,7 @@ packages:
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 >>>>>>> bf8b8fab3 (feat(cf): add package config)
 =======
 <<<<<<< HEAD
@@ -8082,17 +8035,10 @@ packages:
 =======
 <<<<<<< HEAD
 >>>>>>> 7c96e1e70 (feat(cf): support icon set panel)
+=======
+>>>>>>> e09a2cd0a (fix(cf): error when folder does not exist)
   /@storybook/types@8.0.0-rc.3:
     resolution: {integrity: sha512-rV6Vj84WcD+Xea9c0LdVTAzRvDWHTFIbDiT4R4+yNppy9q5NZGTiWprdGNtOiDVCGsT6kpvafBzKYXPtLiCJ+Q==}
-=======
-<<<<<<< HEAD
-  /@storybook/types@8.0.0-rc.2:
-    resolution: {integrity: sha512-xzj7l/54hPMLLxT3CyBJhCNSpfPNpyxsStNEb9zTSZXTu4xxRTPy09oJ1psSpJeMcG71bTAo6ElPxMVvBENP4w==}
->>>>>>> 41db36db3 (fix(cf): support batch creation and deletion formulas are supported)
-=======
-  /@storybook/types@8.0.0-rc.3:
-    resolution: {integrity: sha512-rV6Vj84WcD+Xea9c0LdVTAzRvDWHTFIbDiT4R4+yNppy9q5NZGTiWprdGNtOiDVCGsT6kpvafBzKYXPtLiCJ+Q==}
->>>>>>> 78c8b3767 (feat(cf): support icon set panel)
     dependencies:
       '@storybook/channels': 8.0.0-rc.3
       '@types/express': 4.17.21
@@ -8818,7 +8764,7 @@ packages:
   /@types/react-grid-layout@1.3.5:
     resolution: {integrity: sha512-WH/po1gcEcoR6y857yAnPGug+ZhkF4PaTUxgAbwfeSH/QOgVSakKHBXoPGad/sEznmkiaK3pqHk+etdWisoeBQ==}
     dependencies:
-      '@types/react': 18.2.63
+      '@types/react': 18.2.64
     dev: false
 
   /@types/react-transition-group@4.4.10:
@@ -8853,7 +8799,7 @@ packages:
     dependencies:
       '@types/prop-types': 15.7.11
       '@types/scheduler': 0.16.8
-      csstype: 3.1.2
+      csstype: 3.1.3
 
   /@types/resolve@1.20.6:
     resolution: {integrity: sha512-A4STmOXPhMUtHH+S6ymgE2GiBSMqf4oTvcQZMcHzokuTLVYzXTB8ttjcgxOVaAp2lGwEdzZ0J+cRbbeevQj1UQ==}
@@ -9523,6 +9469,7 @@ packages:
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
   /@univerjs/icons@0.1.41(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-dis8kFEcahXVZGrCu9A70N6kqpt64q8bZy55Cs6k43g9nJcZkodU875uaF2JyMgVe7gIKUd+aCpHVru0SXrXQA==}
 =======
@@ -9554,23 +9501,14 @@ packages:
 =======
 =======
 >>>>>>> 78c8b3767 (feat(cf): support icon set panel)
+=======
+>>>>>>> e6892defb (fix(cf): error when folder does not exist)
   /@univerjs/icons-svg@0.1.33:
     resolution: {integrity: sha512-0004a2voyXpXaqBvHQUzt/s1in8JylCs1l5/WwyQiikjopQlo+sEFEzSIuELZCuiv0SiqxBgcqrMumrPLXEIZA==}
     dev: false
 
-<<<<<<< HEAD
->>>>>>> 6d04d9263 (feat(cf): support pre build icon base64)
-  /@univerjs/icons@0.1.30(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-TdI4MuVH6zkbeLXllrkVemilQ+MnTm7PJLwaQQXyuwl+YSuoe4m5S5nc6iE/CXzx7Zp5Nyhv1rsXetpXWcgEpA==}
-=======
-<<<<<<< HEAD
-  /@univerjs/icons@0.1.28(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-EMPdWp3gA0t/GPcUxOEWlKIXqlbgRbcVMC/i0z1IT3sDCOJ+lVq7ONe/rbpx4pupU9A6XvqTl73XbRV7O2bbhw==}
-=======
-=======
->>>>>>> e851c3f81 (feat(cf): conditional format support ref range)
-  /@univerjs/icons@0.1.26(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-tQZ+t24QsvjeR+8RvSzPzuHMuv+xcwAFW73uQ9mn6NE1QxIyFGMrXQzt8vDxnYbsP2HOIXnkOoCfBEJhfF+YAQ==}
+  /@univerjs/icons@0.1.33(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-RCRoDv2W+gjzwDL6KwXc0cmjvHaWQwCvz2W6thxSV6oeNAQco3m3pZMHrW4PMiHtJV/1r3X3cGPvkVJsXvxelw==}
     peerDependencies:
       react: '*'
       react-dom: '*'
@@ -9579,6 +9517,7 @@ packages:
       react-dom: 18.2.0(react@18.2.0)
     dev: false
 
+<<<<<<< HEAD
 <<<<<<< HEAD
   /@univerjs/icons@0.1.27(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-1mcnDgcmWxWW4O7TG+1OoqrPnExk6M9vqXfRdxQqm213lABfuBKcqz7BX/WjOnlzaimOzsgtPmUgEDdU2S5lJg==}
@@ -9610,6 +9549,10 @@ packages:
 >>>>>>> 2b43a393f (feat(cf): reuse the last result before waiting for the result of the calculation)
 >>>>>>> 8b754ffc1 (feat(cf): reuse the last result before waiting for the result of the calculation)
 >>>>>>> e20a0ae6a (feat(cf): reuse the last result before waiting for the result of the calculation)
+=======
+  /@univerjs/icons@0.1.40(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-XsMlxOmTYAyV3H2RHZTJieLRTkO76/X/QgcjL9n0XrWOuIyCkGAOsyTIMtqOMOvQdd0TwYqX8ZBPwxwNvhLqrw==}
+>>>>>>> e6892defb (fix(cf): error when folder does not exist)
     peerDependencies:
       react: '*'
       react-dom: '*'
@@ -9618,9 +9561,6 @@ packages:
       react-dom: 18.2.0(react@18.2.0)
     dev: false
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
   /@univerjs/protocol@0.1.0(@grpc/grpc-js@1.10.1)(rxjs@7.8.1):
     resolution: {integrity: sha512-tta0qKO39tR+TkfYXGecmKvihCYS55Jc2YAX176IDsFGQxWUzsqx9Y+ait+qDflSJALj6ocoNf7g81xUfz6DNA==}
     engines: {node: '>=16.0.0', npm: '>=8.0.0'}
@@ -9633,8 +9573,11 @@ packages:
     dev: true
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   /@vitejs/plugin-react@4.2.1(vite@5.1.6):
 =======
+=======
+>>>>>>> e6892defb (fix(cf): error when folder does not exist)
 <<<<<<< HEAD
   /@vitejs/plugin-react@4.2.1(vite@5.1.5):
 =======
@@ -9703,6 +9646,8 @@ packages:
     dev: false
 
 >>>>>>> 78c8b3767 (feat(cf): support icon set panel)
+=======
+>>>>>>> e09a2cd0a (fix(cf): error when folder does not exist)
   /@vitejs/plugin-react@4.2.1(vite@5.0.12):
     resolution: {integrity: sha512-oojO9IDc4nCUUi8qIR11KoQm0XFFLIwsRBwHRR4d/88IWghn1y6ckz/bJ8GHDCsYEJee8mDzqtJxh15/cisJNQ==}
     engines: {node: ^14.18.0 || >=16.0.0}
@@ -9719,11 +9664,6 @@ packages:
       - supports-color
     dev: true
 
-<<<<<<< HEAD
->>>>>>> 7e3c5a4ce (feat(cf): add package config)
->>>>>>> 36779fdf7 (feat(cf): add package config)
-=======
->>>>>>> 41db36db3 (fix(cf): support batch creation and deletion formulas are supported)
   /@vitejs/plugin-react@4.2.1(vite@5.1.4):
 >>>>>>> bf8b8fab3 (feat(cf): add package config)
     resolution: {integrity: sha512-oojO9IDc4nCUUi8qIR11KoQm0XFFLIwsRBwHRR4d/88IWghn1y6ckz/bJ8GHDCsYEJee8mDzqtJxh15/cisJNQ==}
@@ -10620,27 +10560,10 @@ packages:
       has-symbols: 1.0.3
     dev: true
 
-<<<<<<< HEAD
-<<<<<<< HEAD
   /asynckit@0.4.0:
     resolution: {integrity: sha512-Oei9OH4tRh0YqU3GxhX79dM/mwVgvbZJaSNaRk+bshkj0S5cfHcgYakreBjrHwatXKbz+IoIdYLxrKim2MjW0Q==}
     dev: true
 
-=======
-<<<<<<< HEAD
->>>>>>> 36779fdf7 (feat(cf): add package config)
-  /available-typed-arrays@1.0.7:
-    resolution: {integrity: sha512-wvUjBtSGN7+7SjNpq/9M2Tg350UZD3q62IFZLbRAR1bSMlCo1ZaeW+BJ+D090e4hIIZLBcTDWe4Mh4jvUDajzQ==}
-    engines: {node: '>= 0.4'}
-    dependencies:
-      possible-typed-array-names: 1.0.0
-=======
-  /asynckit@0.4.0:
-    resolution: {integrity: sha512-Oei9OH4tRh0YqU3GxhX79dM/mwVgvbZJaSNaRk+bshkj0S5cfHcgYakreBjrHwatXKbz+IoIdYLxrKim2MjW0Q==}
-    dev: true
-
-=======
->>>>>>> 41db36db3 (fix(cf): support batch creation and deletion formulas are supported)
   /available-typed-arrays@1.0.5:
     resolution: {integrity: sha512-DMD0KiN46eipeziST1LPP/STfDU0sufISXmjSgvVsoU2tqxctQeASejWcfNtxYKqETM1UxQ8sp2OrSBWpHY6sw==}
     engines: {node: '>= 0.4'}
@@ -11563,7 +11486,6 @@ packages:
     engines: {node: '>=4'}
     hasBin: true
 
-<<<<<<< HEAD
   /cssfontparser@1.2.1:
     resolution: {integrity: sha512-6tun4LoZnj7VN6YeegOVb67KBX/7JJsqvj+pv3ZA7F878/eN33AbGa5b/S/wXxS/tcp8nc40xRUrsPlxIyNUPg==}
     dev: true
@@ -11575,12 +11497,8 @@ packages:
       rrweb-cssom: 0.6.0
     dev: true
 
-  /csstype@3.1.3:
-    resolution: {integrity: sha512-M1uQkMl8rQK/szD0LNhtqxIPLpimGm8sOBwU7lLnCpSbTyY3yeU1Vc7l4KT5zT4s/yOxHH5O7tIuuLOCnLADRw==}
-=======
   /csstype@3.1.2:
     resolution: {integrity: sha512-I7K1Uu0MBPzaFKg4nI5Q7Vs2t+3gWWW648spaF+Rg7pI9ds18Ugn+lvg4SHczUdKlHI5LWBXyqfS8+DufyBsgQ==}
->>>>>>> 36779fdf7 (feat(cf): add package config)
 
   /csstype@3.1.3:
     resolution: {integrity: sha512-M1uQkMl8rQK/szD0LNhtqxIPLpimGm8sOBwU7lLnCpSbTyY3yeU1Vc7l4KT5zT4s/yOxHH5O7tIuuLOCnLADRw==}
@@ -15726,21 +15644,16 @@ packages:
   /monaco-editor@0.47.0:
     resolution: {integrity: sha512-VabVvHvQ9QmMwXu4du008ZDuyLnHs9j7ThVFsiJoXSOQk18+LF89N4ADzPbFenm0W4V2bGHnFBztIRQTgBfxzw==}
 
-<<<<<<< HEAD
   /moo-color@1.0.3:
     resolution: {integrity: sha512-i/+ZKXMDf6aqYtBhuOcej71YSlbjT3wCO/4H1j8rPvxDJEifdwgg5MaFyu6iYAT8GBZJg2z0dkgK4YMzvURALQ==}
     dependencies:
       color-name: 1.1.4
-=======
+    dev: true
+
   /mri@1.2.0:
     resolution: {integrity: sha512-tzzskb3bG8LvYGFF/mDTpq3jpI6Q9wc3LEmBaghu+DdCssd1FakN7Bc0hVNmEyGq1bq3RgfkCb3cmQLpNPOroA==}
     engines: {node: '>=4'}
-<<<<<<< HEAD
->>>>>>> 36779fdf7 (feat(cf): add package config)
-    dev: true
-=======
     dev: false
->>>>>>> 41db36db3 (fix(cf): support batch creation and deletion formulas are supported)
 
   /ms@2.0.0:
     resolution: {integrity: sha512-Tpp60P6IUJDTuOq/5Z8cdskzJujfwqfOTkrwIwj7IRISpnkJnT6SyJ4PCPnGMoFjC9ddhal5KVIYtAt97ix05A==}
@@ -15916,30 +15829,10 @@ packages:
     resolution: {integrity: sha512-VXrB2bpU9Xa0oCHq8IsqE2CcUx5OLupLC3oryFT4DB9e/xe+OnUzBndhXfNHUzxFE4DYI3Sx4OtzS1Sdaf7tEw==}
     dev: false
 
-<<<<<<< HEAD
-<<<<<<< HEAD
   /nwsapi@2.2.7:
     resolution: {integrity: sha512-ub5E4+FBPKwAZx0UwIQOjYWGHTEq5sPqHQNRN8Z9e4A7u3Tj1weLJsL59yH9vmvqEtBHaOmT6cYQKIZOxp35FQ==}
     dev: true
 
-=======
-<<<<<<< HEAD
->>>>>>> 36779fdf7 (feat(cf): add package config)
-  /nypm@0.3.6:
-    resolution: {integrity: sha512-2CATJh3pd6CyNfU5VZM7qSwFu0ieyabkEdnogE30Obn1czrmOYiZ8DOZLe1yBdLKWoyD3Mcy2maUs+0MR3yVjQ==}
-    engines: {node: ^14.16.0 || >=16.10.0}
-    hasBin: true
-    dependencies:
-      citty: 0.1.6
-      execa: 8.0.1
-      pathe: 1.1.2
-      ufo: 1.4.0
-    dev: false
-
-=======
->>>>>>> 7e3c5a4ce (feat(cf): add package config)
-=======
->>>>>>> 41db36db3 (fix(cf): support batch creation and deletion formulas are supported)
   /object-assign@4.1.1:
     resolution: {integrity: sha512-rJgTQnkUnH1sFw8yT6VSU3zD3sWmu6sZhIseY8VX+GRu3P6F7Fu+JNDoXfklElbLJSnc3FUQHVe4cU5hj+BcUg==}
     engines: {node: '>=0.10.0'}
@@ -16930,22 +16823,8 @@ packages:
       react-dom: '>=16.9.0'
     dependencies:
       '@babel/runtime': 7.23.9
-<<<<<<< HEAD
-<<<<<<< HEAD
-      classnames: 2.5.1
-<<<<<<< HEAD
+      classnames: 2.3.2
       rc-util: 5.39.1(react-dom@18.2.0)(react@18.2.0)
-=======
-      rc-util: 5.39.0(react-dom@18.2.0)(react@18.2.0)
-=======
-      classnames: 2.3.2
-      rc-util: 5.38.2(react-dom@18.2.0)(react@18.2.0)
->>>>>>> 494030bf7 (feat(cf): add package config)
->>>>>>> 36779fdf7 (feat(cf): add package config)
-=======
-      classnames: 2.3.2
-      rc-util: 5.39.0(react-dom@18.2.0)(react@18.2.0)
->>>>>>> 78c8b3767 (feat(cf): support icon set panel)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
     dev: false
@@ -16957,7 +16836,7 @@ packages:
       react: '>=16.9.0'
       react-dom: '>=16.9.0'
     dependencies:
-      '@babel/runtime': 7.23.4
+      '@babel/runtime': 7.23.9
       classnames: 2.3.2
       rc-motion: 2.9.0(react-dom@18.2.0)(react@18.2.0)
       rc-util: 5.39.1(react-dom@18.2.0)(react@18.2.0)
@@ -17022,22 +16901,8 @@ packages:
       react-dom: '>=16.9.0'
     dependencies:
       '@babel/runtime': 7.23.9
-<<<<<<< HEAD
-<<<<<<< HEAD
-      classnames: 2.5.1
-<<<<<<< HEAD
+      classnames: 2.3.2
       rc-util: 5.39.1(react-dom@18.2.0)(react@18.2.0)
-=======
-      rc-util: 5.39.0(react-dom@18.2.0)(react@18.2.0)
-=======
-      classnames: 2.3.2
-      rc-util: 5.38.2(react-dom@18.2.0)(react@18.2.0)
->>>>>>> 494030bf7 (feat(cf): add package config)
->>>>>>> 36779fdf7 (feat(cf): add package config)
-=======
-      classnames: 2.3.2
-      rc-util: 5.39.0(react-dom@18.2.0)(react@18.2.0)
->>>>>>> 78c8b3767 (feat(cf): support icon set panel)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
       resize-observer-polyfill: 1.5.1
@@ -17129,19 +16994,15 @@ packages:
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 >>>>>>> 8f18559e2 (feat(cf): add package config)
 =======
 <<<<<<< HEAD
 >>>>>>> 888b73535 (feat(cf): support icon set panel)
+=======
+>>>>>>> e6892defb (fix(cf): error when folder does not exist)
   /rc-util@5.39.1(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-OW/ERynNDgNr4y0oiFmtes3rbEamXw7GHGbkbNd9iRr7kgT03T6fT0b9WpJ3mbxKhyOcAHnGcIoh5u/cjrC2OQ==}
-=======
-<<<<<<< HEAD
-=======
->>>>>>> 78c8b3767 (feat(cf): support icon set panel)
-  /rc-util@5.39.0(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-fEVbkOApBUK/lg+NTkfC3fw336EhgRy531ly2QvZj8G+21OjPEzb9TtH/zfKDL2BuQqbGh8J5zXeFyfcELXOlQ==}
->>>>>>> 36779fdf7 (feat(cf): add package config)
     peerDependencies:
       react: '>=16.9.0'
       react-dom: '>=16.9.0'
@@ -18693,7 +18554,6 @@ packages:
   /tr46@0.0.3:
     resolution: {integrity: sha512-N3WMsuqV66lT30CrXNbEjx4GEwlow3v6rr4mCcv6prnfwhS01rkgyFdjPNBYd9br7LpXV1+Emh01fHnq2Gdgrw==}
 
-<<<<<<< HEAD
   /tr46@5.0.0:
     resolution: {integrity: sha512-tk2G5R2KRwBd+ZN0zaEXpmzdKyOYksXwywulIX95MBODjSzMIuQnQ3m8JxgbhnL1LeVo7lqQKsYa1O3Htl7K5g==}
     engines: {node: '>=18'}
@@ -18701,14 +18561,16 @@ packages:
       punycode: 2.3.1
     dev: true
 
+<<<<<<< HEAD
   /ts-api-utils@1.2.1(typescript@5.4.2):
     resolution: {integrity: sha512-RIYA36cJn2WiH9Hy77hdF9r7oEwxAtB/TS9/S4Qd90Ap4z5FSiin5zEiTL44OII1Y3IIlEvxwxFUVgrHSZ/UpA==}
     engines: {node: '>=16'}
 =======
+=======
+>>>>>>> e09a2cd0a (fix(cf): error when folder does not exist)
   /ts-api-utils@1.0.3(typescript@5.3.3):
     resolution: {integrity: sha512-wNMeqtMz5NtwpT/UZGY5alT+VoKdSsOOP/kqHFcUW1P/VRhH2wJ48+DN2WwUliNbQ976ETwDL0Ifd2VVvgonvg==}
     engines: {node: '>=16.13.0'}
->>>>>>> 36779fdf7 (feat(cf): add package config)
     peerDependencies:
       typescript: '>=4.2.0'
     dependencies:
@@ -19121,8 +18983,6 @@ packages:
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
     dev: true
 
-<<<<<<< HEAD
-<<<<<<< HEAD
   /url-parse@1.5.10:
     resolution: {integrity: sha512-WypcfiRhfeUP9vvF0j6rw0J3hrWrw6iZv3+22h6iRMJ/8z1Tj6XfLP4DsUix5MhMPnXpiHDoKyoZ/bdCkwBCiQ==}
     dependencies:
@@ -19130,11 +18990,6 @@ packages:
       requires-port: 1.0.0
     dev: true
 
-=======
-<<<<<<< HEAD
->>>>>>> 36779fdf7 (feat(cf): add package config)
-=======
->>>>>>> 41db36db3 (fix(cf): support batch creation and deletion formulas are supported)
   /url@0.11.3:
     resolution: {integrity: sha512-6hxOLGfZASQK/cijlZnZJTq8OXAkt/3YGfQX45vvMYXpZoo8NdWZcY73K108Jf759lS1Bv/8wXnHDTSz17dSRw==}
     dependencies:
@@ -19485,6 +19340,7 @@ packages:
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
   /vitest-canvas-mock@0.3.3(vitest@1.4.0):
 =======
 =======
@@ -19494,6 +19350,8 @@ packages:
 =======
 >>>>>>> 862d6230e (fix(cf): support batch creation and deletion formulas are supported)
 <<<<<<< HEAD
+=======
+>>>>>>> 87bafa3ca (fix(cf): error when folder does not exist)
   /vitest-canvas-mock@0.3.3(vitest@1.3.1):
 >>>>>>> 7dd667995 (chore(cf): format code)
     resolution: {integrity: sha512-3P968tYBpqYyzzOaVtqnmYjqbe13576/fkjbDEJSfQAkHtC5/UjuRHOhFEN/ZV5HVZIkaROBUWgazDKJ+Ibw+Q==}
@@ -19505,12 +19363,17 @@ packages:
     dev: true
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   /vitest@1.4.0(@types/node@20.11.29)(happy-dom@13.3.8):
     resolution: {integrity: sha512-gujzn0g7fmwf83/WzrDTnncZt2UiXP41mHuFYFrdwaLRVQ6JYQEiME2IfEjU3vcFL3VKa75XhI3lFgn+hfVsQw==}
 =======
+=======
+>>>>>>> 87bafa3ca (fix(cf): error when folder does not exist)
 <<<<<<< HEAD
   /vitest@1.3.1(@types/node@20.11.27)(happy-dom@13.3.8):
 =======
+=======
+>>>>>>> e6892defb (fix(cf): error when folder does not exist)
 <<<<<<< HEAD
   /vitest@1.3.1(@types/node@20.11.25)(happy-dom@13.3.8):
 =======
@@ -19545,8 +19408,9 @@ packages:
   /vitest@1.2.1(@types/node@20.11.19)(happy-dom@13.2.1)(less@4.2.0):
 >>>>>>> 7e3c5a4ce (feat(cf): add package config)
 =======
+=======
+>>>>>>> e09a2cd0a (fix(cf): error when folder does not exist)
   /vitest@1.2.1(@types/node@20.11.24)(happy-dom@13.2.1)(less@4.2.0):
->>>>>>> 41db36db3 (fix(cf): support batch creation and deletion formulas are supported)
     resolution: {integrity: sha512-TRph8N8rnSDa5M2wKWJCMnztCZS9cDcgVTQ6tsTFTG/odHJ4l5yNVqvbeDJYJRZ6is3uxaEpFs8LL6QM+YFSdA==}
     engines: {node: ^18.0.0 || >=20.0.0}
     hasBin: true
@@ -19704,17 +19568,17 @@ packages:
       '@vitest/spy': 1.4.0
       '@vitest/utils': 1.4.0
       acorn-walk: 8.3.2
-      chai: 4.4.1
+      chai: 4.3.10
       debug: 4.3.4
       execa: 8.0.1
       jsdom: 24.0.0
       local-pkg: 0.5.0
-      magic-string: 0.30.7
-      pathe: 1.1.2
+      magic-string: 0.30.5
+      pathe: 1.1.1
       picocolors: 1.0.0
-      std-env: 3.7.0
+      std-env: 3.5.0
       strip-literal: 2.0.0
-      tinybench: 2.6.0
+      tinybench: 2.5.1
       tinypool: 0.8.2
       vite: 5.1.6(@types/node@20.11.29)(less@4.2.0)
       vite-node: 1.4.0(@types/node@20.11.29)(less@4.2.0)
@@ -20044,7 +19908,6 @@ packages:
   /whatwg-mimetype@3.0.0:
     resolution: {integrity: sha512-nt+N2dzIutVRxARx1nghPKGv1xHikU7HKdfafKkLNLindmPU/ch3U31NOCGGA/dmPcmb1VlofO0vnKAcsm0o/Q==}
     engines: {node: '>=12'}
-    dev: false
 
   /whatwg-mimetype@4.0.0:
     resolution: {integrity: sha512-QaKxh0eNIi2mE9p2vEdzfagOKHCcj1pJ56EEHGQOVxp8r9/iszLUUV7v89x9O1p/T+NlTM5W7jW6+cz4Fq1YVg==}
@@ -20211,6 +20074,20 @@ packages:
         optional: true
       utf-8-validate:
         optional: true
+    dev: false
+
+  /ws@8.16.0:
+    resolution: {integrity: sha512-HS0c//TP7Ina87TfiPUz1rQzMhHrl/SG2guqRcTOIUYD2q8uhUdNHZYJUaQ8aTGPzCh+c6oawMKW35nFl1dxyQ==}
+    engines: {node: '>=10.0.0'}
+    peerDependencies:
+      bufferutil: ^4.0.1
+      utf-8-validate: '>=5.0.2'
+    peerDependenciesMeta:
+      bufferutil:
+        optional: true
+      utf-8-validate:
+        optional: true
+    dev: true
 
   /xdg-basedir@5.1.0:
     resolution: {integrity: sha512-GCPAHLvrIH13+c0SuacwvRYj2SxJXQ4kaVTT5xgL3kPrz56XxkF21IGhjSE1+W0aw7gpBWRGXLCPnPby6lSpmQ==}

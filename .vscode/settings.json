@@ -1,4 +1,6 @@
 {
+    "typescript.tsdk": "node_modules/typescript/lib",
+
     "javascript.preferences.importModuleSpecifier": "relative",
     "typescript.preferences.importModuleSpecifier": "relative",
     "commentTranslate.targetLanguage": "zh-CN",

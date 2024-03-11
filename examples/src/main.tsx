@@ -16,6 +16,7 @@
 
 import React from 'react';
 import { createRoot } from 'react-dom/client';
+import pkg from '../../package.json';
 
 import styles from './styles.module.less';
 
@@ -33,38 +34,44 @@ console.table({
 });
 
 function Examples() {
+    const demos = [{
+        title: '📊 Sheets',
+        href: './sheets/',
+    }, {
+        title: '📝 Docs',
+        href: './docs/',
+    }, {
+        title: '📽️ Slides',
+        href: './slides/',
+    }, {
+        title: '🗂️ Sheets Multi Instance',
+        href: './sheets-multi/',
+    }, {
+        title: '📄 Sheets Uniscript',
+        href: './sheets-uniscript/',
+    }, {
+        title: '📚 Docs Uniscript',
+        href: './docs-uniscript/',
+    }];
+
     return (
         <section className={styles.examples}>
-            <a className={styles.btn} href="./sheets/">
-                <span> Univer Sheets</span>
-                <div className={styles.btnBg}>→</div>
-                {' '}
-            </a>
-            <a className={styles.btn} href="./docs/">
-                <span> Univer Docs</span>
-                <div className={styles.btnBg}>→</div>
-                {' '}
-            </a>
-            <a className={styles.btn} href="./slides/">
-                <span> Univer Slides</span>
-                <div className={styles.btnBg}>→</div>
-                {' '}
-            </a>
-            <a className={styles.btn} href="./sheets-multi/">
-                <span> Univer Sheets Multi Instance</span>
-                <div className={styles.btnBg}>→</div>
-                {' '}
-            </a>
-            <a className={styles.btn} href="./sheets-uniscript/">
-                <span> Univer Sheets Uniscript</span>
-                <div className={styles.btnBg}>→</div>
-                {' '}
-            </a>
-            <a className={styles.btn} href="./docs-uniscript/">
-                <span> Univer Docs Uniscript</span>
-                <div className={styles.btnBg}>→</div>
-                {' '}
-            </a>
+            <header className={styles.header}>
+                <img className={styles.logo} src="/favicon.svg" alt="Univer" draggable={false} />
+                <h1 className={styles.title}>
+                    <span>Univer</span>
+                    <sup>{pkg.version}</sup>
+                </h1>
+            </header>
+
+            <section className={styles.list}>
+                {demos.map((demo) => (
+                    <a key={demo.title} className={styles.btn} href={demo.href}>
+                        <span className={styles.text}>{demo.title}</span>
+                        <span className={styles.shimmer} />
+                    </a>
+                ))}
+            </section>
         </section>
     );
 }

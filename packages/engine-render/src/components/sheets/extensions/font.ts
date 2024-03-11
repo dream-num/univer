@@ -122,15 +122,32 @@ export class Font extends SheetExtension {
                         return true;
                     }
 
-                    const cellWidth = endX - startX;
-                    const cellHeight = endY - startY;
-
                     const overflowRectangle = overflowCache.getValue(rowIndex, columnIndex);
                     const { horizontalAlign, angle } = docsConfig;
 
                     ctx.save();
                     ctx.beginPath();
-                    if (overflowRectangle) {
+
+                    const rightOffset = cellData.fontRenderExtension?.rightOffset ?? 0;
+                    const leftOffset = cellData.fontRenderExtension?.leftOffset ?? 0;
+                    let isOverflow = true;
+
+                    if (angle === 0) {
+                        startX = startX + leftOffset;
+                        endX = endX - rightOffset;
+
+                        if (rightOffset !== 0 || leftOffset !== 0) {
+                            isOverflow = false;
+                        }
+                    }
+
+                    const cellWidth = endX - startX;
+                    const cellHeight = endY - startY;
+
+                    /**
+                     * In scenarios with offsets, there is no need to respond to text overflow.
+                     */
+                    if (overflowRectangle && isOverflow) {
                         const { startColumn, startRow, endColumn, endRow } = overflowRectangle;
                         if (startColumn === endColumn && startColumn === columnIndex) {
                             ctx.rectByPrecision(
@@ -191,13 +208,6 @@ export class Font extends SheetExtension {
                             cellWidth - 2 / scale,
                             cellHeight - 2 / scale
                         );
-                    }
-
-                    if (angle === 0) {
-                        const rightOffset = cellData.fontRenderExtension?.rightOffset ?? 0;
-                        const leftOffset = cellData.fontRenderExtension?.leftOffset ?? 0;
-                        startX = startX + leftOffset;
-                        endX = endX - rightOffset;
                     }
 
                     ctx.translate(startX, startY);

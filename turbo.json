@@ -2,9 +2,7 @@
     "$schema": "https://turbo.build/schema.json",
     "extends": ["//"],
     "pipeline": {
-        "test": {
-            "cache": false
-        },
+        "test": {},
         "coverage": {
             "cache": false
         },

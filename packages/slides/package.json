@@ -66,8 +66,8 @@
         "@univerjs/shared": "workspace:*",
         "@wendellhu/redi": "^0.13.0",
         "less": "^4.2.0",
-        "typescript": "^5.4.2",
-        "vite": "^5.1.5",
+        "typescript": "^5.3.3",
+        "vite": "^5.1.4",
         "vitest": "^1.3.1"
     }
 }

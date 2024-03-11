@@ -16,15 +16,15 @@
         "build": "storybook build"
     },
     "dependencies": {
-        "@chromatic-com/storybook": "^1.2.12",
-        "@storybook/addon-essentials": "8.0.0-rc.3",
-        "@storybook/addon-interactions": "8.0.0-rc.3",
-        "@storybook/addon-links": "8.0.0-rc.3",
+        "@chromatic-com/storybook": "^1.2.1",
+        "@storybook/addon-essentials": "8.0.0-rc.1",
+        "@storybook/addon-interactions": "8.0.0-rc.1",
+        "@storybook/addon-links": "8.0.0-rc.1",
         "@storybook/addon-styling-webpack": "^0.0.6",
         "@storybook/addon-webpack5-compiler-swc": "^1.0.1",
-        "@storybook/blocks": "8.0.0-rc.3",
-        "@storybook/react": "8.0.0-rc.3",
-        "@storybook/react-webpack5": "8.0.0-rc.3",
+        "@storybook/blocks": "8.0.0-rc.1",
+        "@storybook/react": "8.0.0-rc.1",
+        "@storybook/react-webpack5": "8.0.0-rc.1",
         "@storybook/types": "^7.6.17",
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
@@ -32,11 +32,11 @@
         "@wendellhu/redi": "^0.13.0",
         "css-loader": "^6.10.0",
         "less-loader": "^12.2.0",
-        "storybook": "8.0.0-rc.3",
+        "storybook": "8.0.0-rc.1",
         "storybook-addon-swc": "^1.2.0",
         "style-loader": "^3.3.4",
         "tsconfig-paths-webpack-plugin": "^4.1.0",
-        "typescript": "^5.4.2"
+        "typescript": "^5.3.3"
     },
     "devDependencies": {
         "@univerjs/shared": "workspace:*"

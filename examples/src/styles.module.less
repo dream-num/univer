@@ -1,90 +1,65 @@
+@height: 40px;
+
 .examples {
+    display: flex;
+    gap: 36px;
+    align-items: center;
+    justify-content: center;
+
     height: 100%;
-    display: flex;
-    font-family:
-        Inter,
-        -apple-system,
-        BlinkMacSystemFont,
-        'PingFang SC',
-        'Hiragino Sans GB',
-        'noto sans',
-        'Microsoft YaHei',
-        'Helvetica Neue',
-        Helvetica,
-        Arial,
-        sans-serif;
+}
+
+.btn {
+    position: relative;
+
+    overflow: hidden;
+    gap: 8px;
+
+    height: @height;
+    padding-right: 8px;
+    padding-left: @height + 6px;
+
+    font-size: 20px;
+    line-height: @height;
+    text-decoration: none;
+
+    border-radius: @height;
+
     -webkit-font-smoothing: antialiased;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 24px;
-}
 
-.header {
-    display: flex;
-    align-items: center;
-
-    .logo {
-        width: 96px;
+    > span {
+        position: relative;
+        z-index: 1;
+        color: #313131;
     }
 
-    .title {
-        color: #272e3b;
-
-        span {
-            font-size: 36px;
-            background-image: linear-gradient(
-                121deg,
-                #0048ff 18.89%,
-                #0c81ed 39.58%,
-                #029dce 59.87%,
-                #00bbb0 74.37%,
-                #00c5a8 79.64%
-            );
-            background-clip: text;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+    &:hover {
+        > span {
+            color: #fff;
         }
 
-        sup {
-            position: relative;
-            top: -4px;
-            left: 8px;
-            padding: 2px 8px;
-            color: #6b7785;
-            font-size: 12px;
-            font-weight: normal;
-            border: 1px solid currentColor;
-            border-radius: 12px;
+        .btn-bg {
+            width: 100%;
         }
     }
-}
 
-.list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 24px;
-    justify-content: center;
+    &-bg {
+        position: absolute;
+        top: 0;
+        left: 0;
 
-    .btn {
-        --scale: 1;
-        --background: #0492ed;
-        padding: 10px 24px;
-        text-decoration: none;
+        box-sizing: border-box;
+        width: 40px;
+        height: 40px;
+        padding-left: 10px;
+
+        line-height: @height;
         color: #fff;
-        font-weight: 500;
-        background: var(--background);
-        border-radius: 8px;
-        box-shadow: 0 4px 8px rgba(0, 9, 61, 0.2);
-        transform: scale(var(--scale));
-        transition: all 0.3s;
+        text-align: left;
 
-        &:hover {
-            --scale: 1.05;
-            --background: #00b197;
-        }
+        background-color: #313131;
+        border-radius: 40px;
 
-        .title {
-        }
+        transition: width 0.15s ease-in-out;
     }
 }

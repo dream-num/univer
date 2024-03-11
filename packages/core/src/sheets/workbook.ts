@@ -208,6 +208,9 @@ export class Workbook extends Disposable {
             return currentActive;
         }
 
+        /**
+         * If the first sheet is hidden, we should set the first unhidden sheet to be active.
+         */
         const sheetOrder = this._snapshot.sheetOrder;
         for (let i = 0, len = sheetOrder.length; i < len; i++) {
             const worksheet = this._worksheets.get(sheetOrder[i]);

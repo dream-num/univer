@@ -63,16 +63,13 @@
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/docs": "workspace:*",
-        "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/network": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-formula": "workspace:*",
         "@univerjs/sheets-numfmt": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
-        "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": "^0.13.0",
-        "rxjs": ">=7.0.0"
+        "@wendellhu/redi": "0.13.0"
     },
     "devDependencies": {
         "@univerjs/core": "workspace:*",
@@ -89,8 +86,8 @@
         "@wendellhu/redi": "^0.13.0",
         "jsdom": "^24.0.0",
         "rxjs": "^7.8.1",
-        "typescript": "^5.3.3",
-        "vite": "^5.1.4",
+        "typescript": "^5.4.2",
+        "vite": "^5.1.5",
         "vitest": "^1.3.1",
         "vitest-canvas-mock": "^0.3.3"
     }

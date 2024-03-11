@@ -41,22 +41,22 @@
         "release:rc": "release-it prerelease --preRelease=rc"
     },
     "devDependencies": {
-        "@antfu/eslint-config": "^2.6.4",
+        "@antfu/eslint-config": "^2.8.0",
         "@commitlint/cli": "^19.0.3",
         "@commitlint/config-conventional": "^19.0.3",
         "@playwright/test": "^1.42.1",
         "@release-it-plugins/workspaces": "^4.2.0",
         "@release-it/conventional-changelog": "^8.0.1",
-        "@storybook/react": "8.0.0-rc.1",
-        "@types/node": "^20.11.24",
-        "@types/react": "^18.2.61",
+        "@storybook/react": "8.0.0-rc.3",
+        "@types/node": "^20.11.25",
+        "@types/react": "^18.2.64",
         "@univerjs/design": "workspace:*",
         "@univerjs/shared": "workspace:*",
         "@vitejs/plugin-react": "^4.2.1",
         "eslint": "^8.57.0",
         "eslint-plugin-format": "^0.1.0",
         "eslint-plugin-header": "^3.1.1",
-        "eslint-plugin-react": "^7.33.2",
+        "eslint-plugin-react": "^7.34.0",
         "eslint-plugin-react-hooks": "^4.6.0",
         "eslint-plugin-react-refresh": "^0.4.5",
         "husky": "^9.0.11",
@@ -64,8 +64,8 @@
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
         "release-it": "^17.1.1",
-        "turbo": "^1.12.4",
-        "typescript": "^5.3.3"
+        "turbo": "^1.12.5",
+        "typescript": "^5.4.2"
     },
     "lint-staged": {
         "*": "eslint --fix"

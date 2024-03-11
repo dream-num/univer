@@ -64,7 +64,7 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@wendellhu/redi": "^0.13.0",
+        "@wendellhu/redi": "0.13.0",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {},
@@ -76,8 +76,8 @@
         "@wendellhu/redi": "^0.13.0",
         "less": "^4.2.0",
         "rxjs": "^7.8.1",
-        "typescript": "^5.3.3",
-        "vite": "^5.1.4",
+        "typescript": "^5.4.2",
+        "vite": "^5.1.5",
         "vitest": "^1.3.1"
     }
 }

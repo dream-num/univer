@@ -505,9 +505,9 @@ export class testNotificationService {
 }
 
 export class testPlatformService {
-    isWindows: false;
-    isMac: true;
-    isLinux: false;
+    isWindows: boolean = false;
+    isMac: boolean = true;
+    isLinux: boolean = false;
 }
 
 export function clipboardTestBed(workbookConfig?: IWorkbookData, dependencies?: Dependency[]) {

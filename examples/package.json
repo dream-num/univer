@@ -50,6 +50,6 @@
         "esbuild-style-plugin": "^1.6.3",
         "less": "^4.2.0",
         "minimist": "^1.2.8",
-        "typescript": "^5.3.3"
+        "typescript": "^5.4.2"
     }
 }

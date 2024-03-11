@@ -18,6 +18,7 @@ import { describe, expect, it } from 'vitest';
 
 import type { LexerNode } from '../lexer-node';
 import { LexerTreeBuilder } from '../lexer-tree-builder';
+import { ErrorType } from '../../../basics/error-type';
 
 describe('lexer nodeMaker test', () => {
     const lexerTreeBuilder = new LexerTreeBuilder();
@@ -175,11 +176,6 @@ describe('lexer nodeMaker test', () => {
             expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":["0","2","-","2","+"]}');
         });
 
-        it('plus token error', () => {
-            const node = lexerTreeBuilder.treeBuilder('=-(2)+*9') as LexerNode;
-            expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":["0","2","-","9","+"]}');
-        });
-
         it('ref:ref parser', () => {
             const node = lexerTreeBuilder.treeBuilder('=SUM(A6:B6:C6:D7,1,1,2)') as LexerNode;
             expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"SUM","st":0,"ed":2,"children":[{"token":"P_1","st":0,"ed":2,"children":[{"token":":","st":-1,"ed":-1,"children":[{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"A6","st":-1,"ed":-1,"children":[]}]},{"token":"P_1","st":-1,"ed":-1,"children":[{"token":":","st":-1,"ed":-1,"children":[{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"B6","st":-1,"ed":-1,"children":[]}]},{"token":"P_1","st":-1,"ed":-1,"children":[{"token":":","st":-1,"ed":-1,"children":[{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"C6","st":-1,"ed":-1,"children":[]}]},{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"D7","st":-1,"ed":-1,"children":[]}]}]}]}]}]}]}]},{"token":"P_1","st":12,"ed":14,"children":["1"]},{"token":"P_1","st":14,"ed":16,"children":["1"]},{"token":"P_1","st":16,"ed":18,"children":["2"]}]}]}');
@@ -188,6 +184,28 @@ describe('lexer nodeMaker test', () => {
         it('cube parser', () => {
             const node = lexerTreeBuilder.treeBuilder('=INDEX((A6:B6,C6:D7),1,1,2)') as LexerNode;
             expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"INDEX","st":0,"ed":4,"children":[{"token":"P_1","st":2,"ed":4,"children":[{"token":"CUBE","st":-1,"ed":-1,"children":[{"token":"P_1","st":-1,"ed":-1,"children":[{"token":":","st":-1,"ed":-1,"children":[{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"A6","st":-1,"ed":-1,"children":[]}]},{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"B6","st":-1,"ed":-1,"children":[]}]}]}]},{"token":"P_1","st":9,"ed":11,"children":[{"token":":","st":-1,"ed":-1,"children":[{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"C6","st":-1,"ed":-1,"children":[]}]},{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"D7","st":-1,"ed":-1,"children":[]}]}]}]}]}]},{"token":"P_1","st":16,"ed":18,"children":["1"]},{"token":"P_1","st":18,"ed":20,"children":["1"]},{"token":"P_1","st":20,"ed":22,"children":["2"]}]}]}');
+        });
+    });
+
+    describe('check error', () => {
+        it('plus token error', () => {
+            const node = lexerTreeBuilder.treeBuilder('=-(2)+*9') as LexerNode;
+            expect(node).toStrictEqual(ErrorType.VALUE);
+        });
+
+        it('blank in bracket', () => {
+            const node = lexerTreeBuilder.treeBuilder('=()+9') as LexerNode;
+            expect(node).toStrictEqual(ErrorType.VALUE);
+        });
+
+        it('plus null value', () => {
+            const node = lexerTreeBuilder.treeBuilder('=1+(1*)') as LexerNode;
+            expect(node).toStrictEqual(ErrorType.VALUE);
+        });
+
+        it('open bracket number', () => {
+            const node = lexerTreeBuilder.treeBuilder('=(1+3)9') as LexerNode;
+            expect(node).toStrictEqual(ErrorType.VALUE);
         });
     });
 

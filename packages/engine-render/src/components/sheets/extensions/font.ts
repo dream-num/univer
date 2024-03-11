@@ -130,9 +130,15 @@ export class Font extends SheetExtension {
 
                     const rightOffset = cellData.fontRenderExtension?.rightOffset ?? 0;
                     const leftOffset = cellData.fontRenderExtension?.leftOffset ?? 0;
+                    let isOverflow = true;
+
                     if (angle === 0) {
                         startX = startX + leftOffset;
                         endX = endX - rightOffset;
+
+                        if (rightOffset !== 0 || leftOffset !== 0) {
+                            isOverflow = false;
+                        }
                     }
 
                     const cellWidth = endX - startX;
@@ -141,7 +147,7 @@ export class Font extends SheetExtension {
                     /**
                      * In scenarios with offsets, there is no need to respond to text overflow.
                      */
-                    if (overflowRectangle && rightOffset === 0 && leftOffset === 0) {
+                    if (overflowRectangle && isOverflow) {
                         const { startColumn, startRow, endColumn, endRow } = overflowRectangle;
                         if (startColumn === endColumn && startColumn === columnIndex) {
                             ctx.rectByPrecision(

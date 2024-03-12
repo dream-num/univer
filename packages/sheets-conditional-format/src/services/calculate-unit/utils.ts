@@ -15,7 +15,7 @@
  */
 
 import type { ICellData } from '@univerjs/core';
-import { ObjectMatrix, Range } from '@univerjs/core';
+import { ColorKit, ObjectMatrix, Range } from '@univerjs/core';
 import type { IConditionFormatRule, IValueConfig } from '../../models/type';
 import { NumberOperator, ValueType } from '../../base/const';
 import { ConditionalFormatFormulaService, FormulaResultStatus } from '../conditional-format-formula.service';
@@ -235,4 +235,41 @@ export const getOppositeOperator = (operator: NumberOperator) => {
         }
     }
     return operator;
+};
+
+export const getColorScaleFromValue = (colorList: { color: ColorKit;value: number }[], value: number) => {
+    interface IRgbColor {
+        b: number; g: number;r: number;a?: number;
+    }
+    const prefixRgba = (rgb: IRgbColor): Required<IRgbColor> => {
+        if (rgb.a !== undefined) {
+            return rgb as Required<IRgbColor>;
+        } else {
+            return { ...rgb, a: 1 };
+        }
+    };
+    const index = colorList.findIndex((item) => item.value >= value);
+    const preIndex = index - 1;
+    if (index === 0) {
+        return colorList[0].color.toRgbString();
+    } else if (preIndex >= 0) {
+        const minItem = colorList[preIndex];
+        const maxItem = colorList[index];
+
+        if (minItem.color.isValid && maxItem.color.isValid) {
+            const minRgb = prefixRgba(minItem.color.toRgb());
+            const maxRgb = prefixRgba(maxItem.color.toRgb());
+            const length = maxItem.value - minItem.value;
+            const v = (value - minItem.value) / length;
+            const rgbResult = ['r', 'g', 'b', 'a'].reduce((obj, key) => {
+                const minV = minRgb[key as unknown as keyof IRgbColor];
+                obj[key as unknown as keyof IRgbColor] = (maxRgb[key as unknown as keyof IRgbColor] - minV) * v + minV;
+                return obj;
+            }, {} as IRgbColor);
+            const result = new ColorKit(rgbResult).toRgbString();
+            return result;
+        }
+    } else {
+        return colorList[colorList.length - 1].color.toRgbString();
+    }
 };

@@ -19,29 +19,10 @@ import { isObject } from '@univerjs/engine-render';
 import { RuleType } from '../../base/const';
 import type { IColorScale, IConditionFormatRule } from '../../models/type';
 import { ConditionalFormatFormulaService, FormulaResultStatus } from '../conditional-format-formula.service';
-import { getCellValue, getValueByType, isNullable } from './utils';
+import { getCellValue, getColorScaleFromValue, getValueByType, isNullable } from './utils';
 import type { ICalculateUnit } from './type';
 
-interface IRgbColor {
-    b: number;
-
-    g: number;
-
-    r: number;
-
-    a?: number;
-}
-
-const handleRgbA = (rgb: IRgbColor): Required<IRgbColor> => {
-    if (rgb.a !== undefined) {
-        return rgb as Required<IRgbColor>;
-    } else {
-        return { ...rgb, a: 1 };
-    }
-};
-
 const emptyStyle = '';
-
 export const colorScaleCellCalculateUnit: ICalculateUnit = {
     type: RuleType.colorScale,
     handle: async (rule: IConditionFormatRule, context) => {
@@ -103,30 +84,8 @@ export const colorScaleCellCalculateUnit: ICalculateUnit = {
         }
 
         matrix.forValue((row, col, value) => {
-            const index = colorList.findIndex((item) => item.value >= value);
-            const preIndex = index - 1;
-            if (index === 0) {
-                computeResult.setValue(row, col, colorList[0].color.toRgbString());
-            } else if (preIndex >= 0) {
-                const minItem = colorList[preIndex];
-                const maxItem = colorList[index];
-
-                if (minItem.color.isValid && maxItem.color.isValid) {
-                    const minRgb = handleRgbA(minItem.color.toRgb());
-                    const maxRgb = handleRgbA(maxItem.color.toRgb());
-                    const length = maxItem.value - minItem.value;
-                    const v = (value - minItem.value) / length;
-                    const rgbResult = ['r', 'g', 'b', 'a'].reduce((obj, key) => {
-                        const minV = minRgb[key as unknown as keyof IRgbColor];
-                        obj[key as unknown as keyof IRgbColor] = (maxRgb[key as unknown as keyof IRgbColor] - minV) * v + minV;
-                        return obj;
-                    }, {} as IRgbColor);
-                    const result = new ColorKit(rgbResult).toRgbString();
-                    computeResult.setValue(row, col, result);
-                }
-            } else {
-                computeResult.setValue(row, col, colorList[colorList.length - 1].color.toRgbString());
-            }
+            const color = getColorScaleFromValue(colorList, value);
+            color && computeResult.setValue(row, col, color);
         });
         return computeResult;
     },

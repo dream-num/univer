@@ -24,7 +24,7 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 
 import { LocaleService, Tools } from '@univerjs/core';
 import type { IIconType } from '../../../models/icon-map';
-import { iconMap } from '../../../models/icon-map';
+import { iconGroup, iconMap } from '../../../models/icon-map';
 import type { IIconSet } from '../../../models/type';
 import { NumberOperator, RuleType, ValueType } from '../../../base/const';
 import { getOppositeOperator } from '../../../services/calculate-unit/utils';
@@ -43,28 +43,27 @@ const IconGroupList = (props: {
     onClick: (iconType: IIconType) => void;
     iconType?: IIconType;
 }) => {
-    const list = useMemo(() => {
-        const result: { title: IIconType; options: string[] }[] = [];
-        for (const key in iconMap) {
-            const value = iconMap[key as IIconType];
-            result.push({
-                title: key as IIconType,
-                options: value,
-            });
-        }
-        return result;
-    }, []);
+    const localeService = useDependency(LocaleService);
 
     const handleClick = (iconType: IIconType) => {
         props.onClick(iconType);
     };
     return (
         <div className={styles.iconGroupList}>
-            {list.map((item, index) => {
+            {iconGroup.map((group, index) => {
                 return (
-                    <div key={index}>
-                        {/* <div className={stylesBase.label}>{item.title}</div> */}
-                        <div className={styles.item} onClick={() => { handleClick(item.title); }}>{item.options.map((base64, index) => <img className={styles.icon} key={index} src={base64}></img>)}</div>
+                    <div key={index} className={styles.group}>
+                        <div className={styles.title}>{localeService.t(group.title)}</div>
+                        <div className={styles.itemContent}>
+                            {group.group.map((groupItem) => {
+                                return (
+                                    <div className={styles.item} key={groupItem.name} onClick={() => { handleClick(groupItem.name); }}>
+                                        {groupItem.list.map((base64, index) => <img className={styles.icon} key={index} src={base64}></img>)}
+                                    </div>
+                                );
+                            })}
+                        </div>
+
                     </div>
                 );
             })}

@@ -84,7 +84,7 @@ export class CellCustomRenderController extends Disposable {
                             col,
                         };
 
-                        const activeRender = sortedRenders.find((render) => render.isHit?.(info));
+                        const activeRender = sortedRenders.find((render) => render.isHit?.(evt, info));
                         if (!activeRender) {
                             return;
                         }

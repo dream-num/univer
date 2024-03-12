@@ -80,12 +80,6 @@ export class Font extends SheetExtension {
                 const fontObjectArray = fontList[fontFormat];
 
                 fontObjectArray.forValue((rowIndex, columnIndex, docsConfig) => {
-                    const cellData = worksheet.getCell(rowIndex, columnIndex);
-
-                    if (cellData?.dataValidation?.skipDefaultFontRender) {
-                        return;
-                    }
-
                     const cellInfo = this.getCellIndex(
                         rowIndex,
                         columnIndex,

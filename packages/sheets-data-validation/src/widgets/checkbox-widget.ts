@@ -25,6 +25,7 @@ import type { ISetRangeValuesCommandParams } from '../../../sheets/lib/types';
 import { CHECKBOX_FORMULA_1, CHECKBOX_FORMULA_2, CheckboxValidator } from '../validators/checkbox-validator';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
 import { getFormulaResult } from '../utils/formula';
+import { getCellValueOrigin } from '../utils/getCellDataOrigin';
 
 export class CheckboxRender implements ICellCustomRender {
     private _calc(cellInfo: ISelectionCellWithCoord, style: Nullable<IStyleData>) {
@@ -51,11 +52,15 @@ export class CheckboxRender implements ICellCustomRender {
     }
 
     drawWith(ctx: UniverRenderingContext2D, info: ICellRenderContext): void {
-        const { value, cellInfo, style, rule, data } = info;
-
+        const { style, data, primaryWithCoord } = info;
+        const value = getCellValueOrigin(data);
+        const rule = data.dataValidation?.rule;
+        if (!rule) {
+            return;
+        }
         const { formula1 = CHECKBOX_FORMULA_1 } = rule;
 
-        const layout = this._calc(cellInfo, style);
+        const layout = this._calc(primaryWithCoord, style);
         const { a: scaleX, d: scaleY } = ctx.getTransform();
         const left = fixLineWidthByScale(layout.left, scaleX);
         const top = fixLineWidthByScale(layout.top, scaleY);
@@ -79,8 +84,8 @@ export class CheckboxRender implements ICellCustomRender {
 
         Checkbox.drawWith(ctx, {
             checked: value === formula1,
-            left: cellInfo.startX,
-            top: cellInfo.startY,
+            left: primaryWithCoord.startX,
+            top: primaryWithCoord.startY,
             width: (style?.fs ?? 10) * 1.6,
             fill: style?.cl?.rgb ?? '#000',
         });
@@ -88,8 +93,8 @@ export class CheckboxRender implements ICellCustomRender {
         ctx.restore();
     }
 
-    isHit(evt: IPointerEvent, info: ICellRenderContext): boolean {
-        const layout = this._calc(info.cellInfo, info.style);
+    isHit(evt: PointerEvent | MouseEvent, info: ICellRenderContext): boolean {
+        const layout = this._calc(info.primaryWithCoord, info.style);
         const startY = layout.top;
         const endY = layout.top + layout.height;
         const startX = layout.left;
@@ -103,15 +108,20 @@ export class CheckboxRender implements ICellCustomRender {
     }
 
     async onPointerDown(info: ICellRenderContext) {
-        const { value, cellInfo, rule, unitId, subUnitId } = info;
-        const { formula1, formula2 } = await this._parseFormula(rule, unitId, subUnitId);
+        const { primaryWithCoord, unitId, subUnitId, data } = info;
+        const value = getCellValueOrigin(data);
+        const rule = data.dataValidation?.rule;
+        if (!rule) {
+            return;
+        }
+        const { formula1, formula2 } = await this._parseFormula(rule, unitId!, subUnitId);
 
         const params: ISetRangeValuesCommandParams = {
             range: {
-                startColumn: cellInfo.actualColumn,
-                endColumn: cellInfo.actualColumn,
-                startRow: cellInfo.actualRow,
-                endRow: cellInfo.actualRow,
+                startColumn: primaryWithCoord.actualColumn,
+                endColumn: primaryWithCoord.actualColumn,
+                startRow: primaryWithCoord.actualRow,
+                endRow: primaryWithCoord.actualRow,
             },
             value: {
                 v: value === formula1 ? formula2 : formula1,

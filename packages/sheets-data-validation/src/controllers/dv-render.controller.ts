@@ -200,7 +200,6 @@ export class DataValidationRenderController extends RxDisposable {
                                 ruleId,
                                 validStatus,
                                 rule,
-                                skipDefaultFontRender: validator?.skipDefaultFontRender,
                             },
                             markers: {
                                 ...cell?.markers,
@@ -210,7 +209,9 @@ export class DataValidationRenderController extends RxDisposable {
                                 ...(cell?.customRender ?? []),
                                 ...(validator?.canvasRender ? [validator.canvasRender] : []),
                             ],
-
+                            fontRenderExtension: {
+                                isSkip: validator?.skipDefaultFontRender,
+                            },
                         });
                     },
                 }

@@ -15,7 +15,7 @@
  */
 
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import { useObservable } from '@univerjs/design';
+import { useObservable } from '@univerjs/ui';
 import React from 'react';
 import type { IPosition } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';

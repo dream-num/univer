@@ -15,13 +15,10 @@
  */
 
 import type { DataValidationStatus } from '../enum/data-validation-status';
-import type { Nullable } from '../../shared';
-import type { ICellCustomRender } from './i-cell-custom-render';
-import type { IDataValidationRule } from '.';
+import type { IDataValidationRule } from './i-data-validation';
 
 export interface ICellValidationData {
     ruleId: string;
     validStatus: DataValidationStatus;
     rule: IDataValidationRule;
-    skipDefaultFontRender?: boolean;
 }

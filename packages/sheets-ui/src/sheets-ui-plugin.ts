@@ -63,6 +63,7 @@ import { SheetSkeletonManagerService } from './services/sheet-skeleton-manager.s
 import { ShortcutExperienceService } from './services/shortcut-experience.service';
 import { IStatusBarService, StatusBarService } from './services/status-bar.service';
 import { SheetCanvasView } from './views/sheet-canvas-view';
+import { CellCustomRenderController } from './controllers/cell-custom-render.controller';
 
 export class UniverSheetsUIPlugin extends Plugin {
     static override type = PluginType.Sheet;
@@ -133,6 +134,7 @@ export class UniverSheetsUIPlugin extends Plugin {
                 [StatusBarController],
                 [EditingController],
                 [MarkSelectionController],
+                [CellCustomRenderController],
             ] as Dependency[]
         ).forEach((d) => injector.add(d));
     }

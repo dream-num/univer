@@ -15,7 +15,7 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { Disposable, DisposableCollection, IUniverInstanceService, sortRules } from '@univerjs/core';
+import { Disposable, DisposableCollection, IUniverInstanceService, LifecycleStages, OnLifecycle, sortRules } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, Spreadsheet } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
@@ -23,6 +23,7 @@ import type { ICellCustomRender, ICellRenderContext } from '@univerjs/core/types
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 import { getCellIndexByOffsetWithMerge } from '../common/utils';
 
+@OnLifecycle(LifecycleStages.Ready, CellCustomRenderController)
 export class CellCustomRenderController extends Disposable {
     private _enterActiveRender: Nullable<{
         render: ICellCustomRender;

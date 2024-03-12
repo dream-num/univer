@@ -210,59 +210,59 @@ export const RuleList = (props: IRuleListProps) => {
     };
     const layout = ruleList.map((rule, index) => ({ i: rule.cfId, x: 0, w: 12, y: index, h: 1, isResizable: false }));
     return (
-        <>
-            <div className={styles.cfRuleList}>
-                <div>
-                    {conditionalFormatI18nController.tWithReactNode('sheet.cf.panel.managerRuleSelect', <span className={panelStyle.select}>
+        <div className={styles.cfRuleList}>
+            <div>
+                {conditionalFormatI18nController.tWithReactNode('sheet.cf.panel.managerRuleSelect',
+                    <span className={panelStyle.select}>
                         <Select options={selectOption} value={selectValue} onChange={(v) => { selectValueSet(v); }} />
-                    </span>).map((ele, index) => <span key={index}>{ele}</span>)}
-                </div>
-                <div ref={layoutContainerRef} className={styles.gridLayoutWrap}>
-                    { layoutWidth
-                        ? (
-                            <GridLayout
-                                onDragStop={handleDragStop}
-                                layout={layout}
-                                cols={12}
-                                rowHeight={42}
-                                width={layoutWidth}
-                                margin={[0, 10]}
-                                draggableHandle=".draggableHandle"
-                            >
-                                { ruleList.map((rule) => {
-                                    return (
-                                        <div key={`${rule.cfId}`} className={styles.reactGridItem}>
-                                            <div className={styles.ruleItem} onClick={() => onClick(rule)}>
-                                                <div
-                                                    className={`${styles.draggableHandle} draggableHandle`}
-                                                    onClick={(e) => e.stopPropagation()}
-                                                >
-                                                    <MoreFunctionSingle />
-                                                </div>
-                                                <div className={styles.ruleDescribe}>
-                                                    <div>{getRuleDescribe(rule, localeService)}</div>
-                                                    <div>{rule.ranges.map((range) => serializeRange(range)).join(',')}</div>
-                                                </div>
-                                                <div className={styles.preview}><Preview rule={rule.rule} /></div>
-                                                <div
-                                                    className={styles.deleteItem}
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        handleDelete(rule);
-                                                    }}
-                                                >
-                                                    <DeleteSingle />
-                                                </div>
+                    </span>)
+                    .map((ele, index) => <span key={index}>{ele}</span>)}
+            </div>
+            <div ref={layoutContainerRef} className={styles.gridLayoutWrap}>
+                { layoutWidth
+                    ? (
+                        <GridLayout
+                            onDragStop={handleDragStop}
+                            layout={layout}
+                            cols={12}
+                            rowHeight={42}
+                            width={layoutWidth}
+                            margin={[0, 10]}
+                            draggableHandle=".draggableHandle"
+                        >
+                            { ruleList.map((rule) => {
+                                return (
+                                    <div key={`${rule.cfId}`} className={styles.reactGridItem}>
+                                        <div className={styles.ruleItem} onClick={() => onClick(rule)}>
+                                            <div
+                                                className={`${styles.draggableHandle} draggableHandle`}
+                                                onClick={(e) => e.stopPropagation()}
+                                            >
+                                                <MoreFunctionSingle />
+                                            </div>
+                                            <div className={styles.ruleDescribe}>
+                                                <div>{getRuleDescribe(rule, localeService)}</div>
+                                                <div>{rule.ranges.map((range) => serializeRange(range)).join(',')}</div>
+                                            </div>
+                                            <div className={styles.preview}><Preview rule={rule.rule} /></div>
+                                            <div
+                                                className={styles.deleteItem}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDelete(rule);
+                                                }}
+                                            >
+                                                <DeleteSingle />
                                             </div>
                                         </div>
-                                    );
-                                })}
-                            </GridLayout>
-                        )
-                        : null}
+                                    </div>
+                                );
+                            })}
+                        </GridLayout>
+                    )
+                    : null}
 
-                </div>
             </div>
-        </>
+        </div>
     );
 };

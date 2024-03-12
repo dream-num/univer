@@ -267,7 +267,7 @@ export const SetBorderCommand: ICommand = {
 
                 let bdStyle = defaultStyle;
 
-                if (rectangle) {
+                if (rectangle && (defaultStyle.bc_tr || defaultStyle.ml_tr || defaultStyle.bl_tr || defaultStyle.tl_mr || defaultStyle.tl_bc || defaultStyle.tl_br)) {
                     if (reserve) {
                         const style = Tools.deepClone(
                             mr.getValue(rectangle.startRow, rectangle.startColumn)?.s

@@ -307,7 +307,7 @@ export abstract class Shape<T> extends BaseObject {
 
     private static _setStrokeStyles(ctx: UniverRenderingContext, props: IShapeProps) {
         const { strokeWidth, strokeLineCap, strokeDashOffset, strokeLineJoin, strokeMiterLimit, stroke } = props;
-        ctx.setLineWidthNative(strokeWidth!);
+        ctx.lineWidth = strokeWidth!;
         ctx.lineCap = strokeLineCap!;
         ctx.lineDashOffset = strokeDashOffset!;
         ctx.lineJoin = strokeLineJoin!;

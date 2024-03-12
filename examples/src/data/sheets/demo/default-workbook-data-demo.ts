@@ -13898,6 +13898,9 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                     8: {
                         s: 'uJSelZ11',
                     },
+                    9: {
+                        s: 'uJSelZ22',
+                    },
                 },
                 6: {
                     5: {
@@ -13913,6 +13916,8 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                         s: 'uJSelZ22',
                     },
                 },
+                10: {},
+                11: {},
             },
             freeze: {
                 xSplit: 0,

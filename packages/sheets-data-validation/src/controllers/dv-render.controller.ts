@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-import { DataValidationStatus, DataValidationType, DisposableCollection, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
+import { DataValidationStatus, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
 import { DataValidationModel, DataValidationPanelName, DataValidatorRegistryService } from '@univerjs/data-validation';
 import { ComponentManager, IMenuService } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
 import { DropdownManagerService, IEditorBridgeService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import type { Spreadsheet } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { getCellIndexByOffsetWithMerge } from '@univerjs/sheets-ui/common/utils.js';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { DataValidationPanel, LIST_DROPDOWN_KEY, ListDropDown } from '../views';
 import { FORMULA_INPUTS } from '../views/formula-input';
@@ -59,7 +58,6 @@ export class DataValidationRenderController extends RxDisposable {
         this._initComponents();
         this._initMenu();
         this._initSkeletonChange();
-        this._initEventBinding();
         this._initDropdown();
         this._initViewModelIntercept();
     }
@@ -90,72 +88,6 @@ export class DataValidationRenderController extends RxDisposable {
                 key,
                 component
             ));
-        });
-    }
-
-    private _initEventBinding() {
-        const disposableCollection = new DisposableCollection();
-
-        this._univerInstanceService.currentSheet$.subscribe((workbook) => {
-            if (workbook) {
-                const unitId = workbook.getUnitId();
-                const subUnitId = workbook.getActiveSheet().getSheetId();
-                const currentRender = this._renderManagerService.getRenderById(workbook.getUnitId());
-                if (currentRender && currentRender.mainComponent) {
-                    disposableCollection.dispose();
-
-                    const spreadsheet = currentRender.mainComponent as Spreadsheet;
-                    const disposable = spreadsheet.onPointerDownObserver.add((evt) => {
-                        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
-                        const cellIndex = getCellIndexByOffsetWithMerge(evt.offsetX, evt.offsetY, currentRender.scene, skeleton!);
-                        const worksheet = workbook.getActiveSheet();
-
-                        if (!cellIndex || !skeleton) {
-                            return;
-                        }
-
-                        const cellInfo = worksheet.getCell(cellIndex.actualRow, cellIndex.actualCol);
-                        if (!cellInfo) {
-                            return;
-                        }
-
-                        const rule = cellInfo.dataValidation?.rule;
-                        if (!rule) {
-                            return;
-                        }
-
-                        const validator = this._dataValidatorRegistryService.getValidatorItem(rule.type);
-                        if (!validator) {
-                            return;
-                        }
-                        const render = validator.canvasRender;
-
-                        if (!render) {
-                            return;
-                        }
-                        const row = cellIndex.actualRow;
-                        const col = cellIndex.actualCol;
-
-                        const info = {
-                            cellInfo: skeleton.getCellByIndex(cellIndex.actualRow, cellIndex.actualCol),
-                            value: cellInfo.v,
-                            style: skeleton.getsStyles().getStyleByCell(cellInfo),
-                            rule,
-                            unitId,
-                            subUnitId,
-                            row,
-                            col,
-                        };
-
-                        const isHit = render.isHit(evt, info);
-                        if (isHit) {
-                            render.onClick(info);
-                        }
-                    });
-
-                    disposable && disposableCollection.add(disposable);
-                }
-            }
         });
     }
 
@@ -268,13 +200,17 @@ export class DataValidationRenderController extends RxDisposable {
                                 ruleId,
                                 validStatus,
                                 rule,
-                                customRender: validator?.canvasRender,
                                 skipDefaultFontRender: validator?.skipDefaultFontRender,
                             },
                             markers: {
                                 ...cell?.markers,
                                 ...validStatus === DataValidationStatus.INVALID ? INVALID_MARK : null,
                             },
+                            customRender: [
+                                ...(cell?.customRender ?? []),
+                                ...(validator?.canvasRender ? [validator.canvasRender] : []),
+                            ],
+
                         });
                     },
                 }

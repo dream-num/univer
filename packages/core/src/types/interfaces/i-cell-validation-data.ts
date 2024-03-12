@@ -23,6 +23,5 @@ export interface ICellValidationData {
     ruleId: string;
     validStatus: DataValidationStatus;
     rule: IDataValidationRule;
-    customRender: Nullable<ICellCustomRender>;
     skipDefaultFontRender?: boolean;
 }

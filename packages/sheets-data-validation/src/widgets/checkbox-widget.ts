@@ -17,16 +17,16 @@
 import type { IPointerEvent, UniverRenderingContext2D, Vector2 } from '@univerjs/engine-render';
 import { Checkbox, fixLineWidthByScale, Transform } from '@univerjs/engine-render';
 import { ICommandService, isFormulaString } from '@univerjs/core';
-import type { ICellRenderInfo, IDataValidationRule, ISelectionCellWithCoord, IStyleData, Nullable } from '@univerjs/core';
+import type { ICellCustomRender, ICellRenderContext, IDataValidationRule, ISelectionCellWithCoord, IStyleData, Nullable } from '@univerjs/core';
 import { SetRangeValuesCommand } from '@univerjs/sheets';
-import type { IDataValidationRender, IFormulaResult } from '@univerjs/data-validation';
+import type { IFormulaResult } from '@univerjs/data-validation';
 import { Inject } from '@wendellhu/redi';
 import type { ISetRangeValuesCommandParams } from '../../../sheets/lib/types';
 import { CHECKBOX_FORMULA_1, CHECKBOX_FORMULA_2, CheckboxValidator } from '../validators/checkbox-validator';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
 import { getFormulaResult } from '../utils/formula';
 
-export class CheckboxRender implements IDataValidationRender {
+export class CheckboxRender implements ICellCustomRender {
     private _calc(cellInfo: ISelectionCellWithCoord, style: Nullable<IStyleData>) {
         return {
             left: cellInfo.startX,
@@ -50,8 +50,9 @@ export class CheckboxRender implements IDataValidationRender {
         };
     }
 
-    drawWith(ctx: UniverRenderingContext2D, info: ICellRenderInfo): void {
-        const { value, cellInfo, style, rule } = info;
+    drawWith(ctx: UniverRenderingContext2D, info: ICellRenderContext): void {
+        const { value, cellInfo, style, rule, data } = info;
+
         const { formula1 = CHECKBOX_FORMULA_1 } = rule;
 
         const layout = this._calc(cellInfo, style);
@@ -87,7 +88,7 @@ export class CheckboxRender implements IDataValidationRender {
         ctx.restore();
     }
 
-    isHit(evt: IPointerEvent, info: ICellRenderInfo): boolean {
+    isHit(evt: IPointerEvent, info: ICellRenderContext): boolean {
         const layout = this._calc(info.cellInfo, info.style);
         const startY = layout.top;
         const endY = layout.top + layout.height;
@@ -101,7 +102,7 @@ export class CheckboxRender implements IDataValidationRender {
         return false;
     }
 
-    async onClick(info: ICellRenderInfo) {
+    async onPointerDown(info: ICellRenderContext) {
         const { value, cellInfo, rule, unitId, subUnitId } = info;
         const { formula1, formula2 } = await this._parseFormula(rule, unitId, subUnitId);
 

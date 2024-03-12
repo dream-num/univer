@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import type { CellValue, ICellData, IDataValidationRule, IDataValidationRuleBase, Nullable } from '@univerjs/core';
+import type { CellValue, ICellCustomRender, IDataValidationRule, IDataValidationRuleBase, Nullable } from '@univerjs/core';
 import { DataValidationOperator, LocaleService, Tools } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 import { OperatorErrorTitleMap, OperatorTitleMap } from '../types/const/operator-text-map';
-import type { IDataValidationRender } from '../types/interfaces';
 
 const FORMULA1 = '{FORMULA1}';
 const FORMULA2 = '{FORMULA2}';
@@ -60,7 +59,7 @@ export abstract class BaseDataValidator<DataType = CellValue> {
 
     skipDefaultFontRender = false;
 
-    canvasRender: Nullable<IDataValidationRender> = null;
+    canvasRender: Nullable<ICellCustomRender> = null;
 
     dropdown: string | undefined = undefined;
 

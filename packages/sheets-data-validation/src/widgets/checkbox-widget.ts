@@ -94,13 +94,13 @@ export class CheckboxRender implements ICellCustomRender {
         ctx.restore();
     }
 
-    isHit(evt: PointerEvent | MouseEvent, info: ICellRenderContext): boolean {
+    isHit(evt: { x: number;y: number }, info: ICellRenderContext): boolean {
         const layout = this._calc(info.primaryWithCoord, info.style);
         const startY = layout.top;
         const endY = layout.top + layout.height;
         const startX = layout.left;
         const endX = layout.left + layout.width;
-        const { offsetX, offsetY } = evt;
+        const { x: offsetX, y: offsetY } = evt;
         if (offsetX <= endX && offsetX >= startX && offsetY <= endY && offsetY >= startY) {
             return true;
         }

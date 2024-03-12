@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IPointerEvent, UniverRenderingContext2D, Vector2 } from '@univerjs/engine-render';
+import type { UniverRenderingContext2D } from '@univerjs/engine-render';
 import { Checkbox, fixLineWidthByScale, Transform } from '@univerjs/engine-render';
 import { ICommandService, isFormulaString } from '@univerjs/core';
 import type { ICellCustomRender, ICellRenderContext, IDataValidationRule, ISelectionCellWithCoord, IStyleData, Nullable } from '@univerjs/core';
@@ -22,7 +22,7 @@ import { SetRangeValuesCommand } from '@univerjs/sheets';
 import type { IFormulaResult } from '@univerjs/data-validation';
 import { Inject } from '@wendellhu/redi';
 import type { ISetRangeValuesCommandParams } from '../../../sheets/lib/types';
-import { CHECKBOX_FORMULA_1, CHECKBOX_FORMULA_2, CheckboxValidator } from '../validators/checkbox-validator';
+import { CHECKBOX_FORMULA_1, CHECKBOX_FORMULA_2 } from '../validators/checkbox-validator';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
 import { getFormulaResult } from '../utils/formula';
 import { getCellValueOrigin } from '../utils/getCellDataOrigin';
@@ -58,6 +58,7 @@ export class CheckboxRender implements ICellCustomRender {
         if (!rule) {
             return;
         }
+
         const { formula1 = CHECKBOX_FORMULA_1 } = rule;
 
         const layout = this._calc(primaryWithCoord, style);

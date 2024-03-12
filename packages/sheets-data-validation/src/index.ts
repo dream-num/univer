@@ -15,6 +15,5 @@
  */
 
 export { UniverSheetsDataValidationPlugin } from './plugin';
-export { DataValidationExtension } from './render/data-validation.render';
 export { AddSheetDataValidationCommand, UpdateSheetDataValidationRangeCommand } from './commands/commands/data-validation.command';
 export type { IAddSheetDataValidationCommandParams, IUpdateSheetDataValidationRangeCommandParams } from './commands/commands/data-validation.command';

@@ -210,6 +210,7 @@ export class DataValidationRenderController extends RxDisposable {
                                 ...(validator?.canvasRender ? [validator.canvasRender] : []),
                             ],
                             fontRenderExtension: {
+                                ...cell?.fontRenderExtension,
                                 isSkip: validator?.skipDefaultFontRender,
                             },
                         });

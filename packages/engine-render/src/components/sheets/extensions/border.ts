@@ -76,21 +76,9 @@ export class Border extends SheetExtension {
                 dataMergeCache
             );
 
-            let { startY, endY, startX, endX } = cellInfo;
-            const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
+            const { startY, endY, startX, endX } = cellInfo;
 
-            if (isMerged) {
-                return true;
-            }
-
-            if (isMergedMainCell) {
-                startY = mergeInfo.startY;
-                endY = mergeInfo.endY;
-                startX = mergeInfo.startX;
-                endX = mergeInfo.endX;
-            }
-
-            if (!this.isRenderDiffRangesByRow(mergeInfo.startRow, mergeInfo.endRow, diffRanges)) {
+            if (!this.isRenderDiffRangesByRow(rowIndex, columnIndex, diffRanges)) {
                 return true;
             }
 

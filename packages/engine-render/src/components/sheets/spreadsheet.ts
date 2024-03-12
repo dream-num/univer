@@ -535,37 +535,38 @@ export class Spreadsheet extends SheetComponent {
         ctx.stroke();
         ctx.closePath();
 
-        border?.forValue((rowIndex, columnIndex, borderCaches) => {
-            if (!borderCaches) {
-                return true;
-            }
+        // border?.forValue((rowIndex, columnIndex, borderCaches) => {
+        //     if (!borderCaches) {
+        //         return true;
+        //     }
 
-            const cellInfo = spreadsheetSkeleton.getCellByIndexWithNoHeader(rowIndex, columnIndex);
+        //     const cellInfo = spreadsheetSkeleton.getCellByIndexWithNoHeader(rowIndex, columnIndex);
 
-            let { startY, endY, startX, endX } = cellInfo;
-            const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
+        //     let { startY, endY, startX, endX } = cellInfo;
+        //     const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
 
-            if (isMerged) {
-                return true;
-            }
+        //     if (isMerged) {
+        //         return true;
+        //     }
 
-            if (isMergedMainCell) {
-                startY = mergeInfo.startY;
-                endY = mergeInfo.endY;
-                startX = mergeInfo.startX;
-                endX = mergeInfo.endX;
-            }
+        //     if (isMergedMainCell) {
+        //         startY = mergeInfo.startY;
+        //         endY = mergeInfo.endY;
+        //         startX = mergeInfo.startX;
+        //         endX = mergeInfo.endX;
+        //     }
 
-            if (!(mergeInfo.startRow >= rowStart && mergeInfo.endRow <= rowEnd)) {
-                return true;
-            }
+        //     if (!(mergeInfo.startRow >= rowStart && mergeInfo.endRow <= rowEnd)) {
+        //         return true;
+        //     }
 
-            for (const key in borderCaches) {
-                const { type } = borderCaches[key] as BorderCacheItem;
+        //     for (const key in borderCaches) {
+        //         const { type } = borderCaches[key] as BorderCacheItem;
 
-                clearLineByBorderType(ctx, type, { startX, startY, endX, endY });
-            }
-        });
+        //         clearLineByBorderType(ctx, type, { startX, startY, endX, endY });
+        //     }
+        // });
+
         // Clearing the dashed line issue caused by overlaid auxiliary lines and strokes
 
         ctx.closePath();

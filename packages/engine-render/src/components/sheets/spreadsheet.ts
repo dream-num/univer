@@ -40,7 +40,6 @@ import type { Font } from './extensions/font';
 // import type { BorderCacheItem } from './interfaces';
 import { SheetComponent } from './sheet-component';
 import type { SpreadsheetSkeleton } from './sheet-skeleton';
-import type { BorderCacheItem } from './interfaces';
 
 const OBJECT_KEY = '__SHEET_EXTENSION_FONT_DOCUMENT_INSTANCE__';
 
@@ -490,7 +489,7 @@ export class Spreadsheet extends SheetComponent {
         ctx.save();
 
         ctx.beginPath();
-        ctx.lineWidth = 1;
+        ctx.setLineWidthByPrecision(1);
 
         ctx.strokeStyle = getColor([212, 212, 212]);
 
@@ -607,7 +606,7 @@ export class Spreadsheet extends SheetComponent {
 
             // After ClearRect, the lines will become thinner, and the lines will be repaired below.
             ctx.beginPath();
-            ctx.moveTo(startX, startY);
+            ctx.moveToByPrecision(startX, startY);
             ctx.lineToByPrecision(endX, startY);
             ctx.lineToByPrecision(endX, endY);
             ctx.lineToByPrecision(startX, endY);

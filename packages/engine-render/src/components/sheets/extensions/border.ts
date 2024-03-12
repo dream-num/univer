@@ -94,7 +94,7 @@ export class Border extends SheetExtension {
 
                 if (style !== preStyle) {
                     setLineType(ctx, style);
-                    ctx.lineWidth = getLineWidth(style);
+                    ctx.setLineWidthByPrecision(getLineWidth(style));
                     preStyle = style;
                 }
 

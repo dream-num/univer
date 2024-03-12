@@ -16,6 +16,8 @@
 
 import type { ICellData, IMutationInfo, IRange, Nullable, Worksheet } from '@univerjs/core';
 import { ObjectMatrix } from '@univerjs/core';
+import type { Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
+import { Vector2 } from '@univerjs/engine-render';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
@@ -88,4 +90,38 @@ export function getClearContentMutationParamForRange(
     });
 
     return redoMatrix;
+}
+
+export function getCellIndexByOffsetWithMerge(offsetX: number, offsetY: number, scene: Scene, skeleton: SpreadsheetSkeleton) {
+    const activeViewport = scene.getActiveViewportByCoord(
+        Vector2.FromArray([offsetX, offsetY])
+    );
+
+    if (!activeViewport) {
+        return;
+    }
+
+    const { scaleX, scaleY } = scene.getAncestorScale();
+
+    const scrollXY = {
+        x: activeViewport.actualScrollX,
+        y: activeViewport.actualScrollY,
+    };
+
+    const cellPos = skeleton.getCellPositionByOffset(offsetX, offsetY, scaleX, scaleY, scrollXY);
+
+    const mergeCell = skeleton.mergeData.find((range) => {
+        const { startColumn, startRow, endColumn, endRow } = range;
+        return cellPos.row >= startRow && cellPos.column >= startColumn && cellPos.row <= endRow && cellPos.column <= endColumn;
+    });
+
+    const params = {
+        actualRow: mergeCell ? mergeCell.startRow : cellPos.row,
+        actualCol: mergeCell ? mergeCell.startColumn : cellPos.column,
+        mergeCell,
+        row: cellPos.row,
+        col: cellPos.column,
+    };
+
+    return params;
 }

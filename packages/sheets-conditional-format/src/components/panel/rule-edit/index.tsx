@@ -18,7 +18,7 @@ import React, { useMemo, useRef, useState } from 'react';
 import type { IRange, IUnitRange } from '@univerjs/core';
 import { ICommandService, InterceptorManager, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import { serializeRangeToRefString } from '@univerjs/engine-formula';
+import { serializeRange } from '@univerjs/engine-formula';
 import { Button, Select } from '@univerjs/design';
 
 import { RangeSelector } from '@univerjs/ui';
@@ -60,7 +60,7 @@ export const RuleEdit = (props: IRuleEditProps) => {
     const rangeString = useMemo(() => {
         const ranges = props.rule?.ranges?.length ? props.rule?.ranges : [];
         if (ranges.length && sheet) {
-            return ranges.map((range) => serializeRangeToRefString({ range, sheetName: sheet.getName(), unitId })).join(',');
+            return ranges.map((range) => serializeRange(range)).join(',');
         }
         return '';
     }, [props.rule?.ranges]);
@@ -184,7 +184,7 @@ export const RuleEdit = (props: IRuleEditProps) => {
         <div className={styles.cfRuleStyleEditor}>
             <div className={styleBase.title}>{localeService.t('sheet.cf.panel.range')}</div>
             <div className={`${styleBase.mTBase} ${styleBase.mLXxs}`}>
-                <RangeSelector value={rangeString} id={SHEET_CONDITION_FORMAT_PLUGIN} onChange={onRangeSelectorChange} />
+                <RangeSelector openForSheetSubUnitId={subUnitId} openForSheetUnitId={unitId} value={rangeString} id={SHEET_CONDITION_FORMAT_PLUGIN} onChange={onRangeSelectorChange} />
             </div>
             <div className={styleBase.title}>{localeService.t('sheet.cf.panel.styleType')}</div>
             <div className={styleBase.mTBase}>

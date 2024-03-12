@@ -17,7 +17,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { InputNumber, Radio, RadioGroup, Select } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import { LocaleService } from '@univerjs/core';
+import { IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { TextEditor } from '@univerjs/ui';
 import { RuleType, SHEET_CONDITION_FORMAT_PLUGIN, ValueType } from '../../../base/const';
 import type { IValueConfig } from '../../../models/type';
@@ -30,6 +30,9 @@ const createOptionItem = (text: ValueType, localeService: LocaleService) => ({ l
 
 const InputText = (props: { id: string; className: string; type: ValueType;value: string | number;onChange: (v: string | number) => void }) => {
     const { onChange, className, value, type, id } = props;
+    const univerInstanceService = useDependency(IUniverInstanceService);
+    const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+    const subUnitId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
     const _value = useRef(value);
     if (type === ValueType.formula) {
         const v = String(_value.current).startsWith('=') ? String(_value.current) || '' : '=';
@@ -37,6 +40,8 @@ const InputText = (props: { id: string; className: string; type: ValueType;value
             <TextEditor
                 id={`${SHEET_CONDITION_FORMAT_PLUGIN}_data_bar_${id}`}
                 value={v}
+                openForSheetSubUnitId={subUnitId}
+                openForSheetUnitId={unitId}
                 style={{ maxWidth: '50%' }}
                 canvasStyle={{ fontSize: 10 }}
                 onlyInputFormula={true}

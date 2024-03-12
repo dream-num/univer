@@ -92,8 +92,8 @@ export function spliceArray<T>(
             const item = array[i];
             if (item !== undefined) {
                 array[i + diff] = array[i];
-                delete array[i];
             }
+            delete array[i];
         }
     }
 

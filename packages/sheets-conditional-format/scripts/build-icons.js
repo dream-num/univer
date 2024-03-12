@@ -35,6 +35,11 @@ const feedback = [
     ['warn', '@univerjs/icons-svg/binary/start-page/warn.svg', { black: '#FFBD37', '#E5E5E5': '#FFFFFF' }],
     ['correct', '@univerjs/icons-svg/binary/start-page/correct.svg', { black: '#59D01E', '#E5E5E5': '#FFFFFF' }],
 ];
+const feedbac2 = [
+    ['mistake2', '@univerjs/icons-svg/single/start-page/mistake-single.svg', { black: '#FE4B4B' }],
+    ['warn2', '@univerjs/icons-svg/single/start-page/warn-single.svg', { black: '#FFBD37' }],
+    ['correct2', '@univerjs/icons-svg/single/start-page/correct-single.svg', { black: '#59D01E' }],
+];
 
 const arrow = [
     ['redDown', '@univerjs/icons-svg/single/start-page/arrow-down-single.svg', { black: '#FE4B4B' }],
@@ -48,6 +53,17 @@ const shape = [
     ['cross', '@univerjs/icons-svg/single/start-page/cross-single.svg', { black: '#FFBD37' }],
     ['up', '@univerjs/icons-svg/single/start-page/up-single.svg', { black: '#59D01E' }],
     ['down', '@univerjs/icons-svg/single/start-page/down-single.svg', { black: '#FE4B4B' }],
+
+    ['rhomboid-red', '@univerjs/icons-svg/single/start-page/rhomboid-single.svg', { black: '#FE4B4B' }],
+    ['rhomboid-gold', '@univerjs/icons-svg/single/start-page/rhomboid-single.svg', { black: '#FFBD37' }],
+    ['roundness-greed', '@univerjs/icons-svg/single/start-page/roundness-single.svg', { black: '#59D01E' }],
+    ['roundness-gold', '@univerjs/icons-svg/single/start-page/roundness-single.svg', { black: '#FFBD37' }],
+    ['roundness-red', '@univerjs/icons-svg/single/start-page/roundness-single.svg', { black: '#FE4B4B' }],
+    ['roundness-pink', '@univerjs/icons-svg/single/start-page/roundness-single.svg', { black: '#FB9D9D' }],
+    ['roundness-gray', '@univerjs/icons-svg/single/start-page/roundness-single.svg', { black: '#999999' }],
+    ['roundness-black', '@univerjs/icons-svg/single/start-page/roundness-single.svg'],
+    ['triangle-gold', '@univerjs/icons-svg/single/start-page/triangle-single.svg', { black: '#FFBD37' }],
+
 ];
 
 async function replaceFillAndConvertToBase64(filePath, replaceMap) {
@@ -71,7 +87,7 @@ async function replaceFillAndConvertToBase64(filePath, replaceMap) {
 }
 const runTask = async () => {
     const base64EncodedSVGs = {};
-    const obj = { feedback, star, progress, signal, feeling, arrow, shape };
+    const obj = { feedback, star, progress, signal, feeling, arrow, shape, feedbac2 };
     for (const iconType in obj) {
         const list = obj[iconType];
         const map = {};

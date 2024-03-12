@@ -19,14 +19,23 @@ import ICON_MAP from '../assets/icon-map.json';
 export type IIconItem = string;
 
 // Please run  postinstall,if  ICON_MAP is not build.
+const objToArr = (o: Record<string, unknown>) => {
+    const list = [];
+    for (const kye in o) {
+        const v = o[kye];
+        list.push(v);
+    }
+    return list;
+};
 export const iconMap = {
-    feedback: [ICON_MAP.feedback.mistake, ICON_MAP.feedback.warn, ICON_MAP.feedback.correct],
-    star: [ICON_MAP.star.starEmpty, ICON_MAP.star.starIncomplete, ICON_MAP.star.starFull],
-    feeling: [ICON_MAP.feeling.impatient, ICON_MAP.feeling.dissatisfied, ICON_MAP.feeling.noninductive, ICON_MAP.feeling.smile, ICON_MAP.feeling.guffaw],
-    progress: [ICON_MAP.progress.progress0, ICON_MAP.progress.progress25, ICON_MAP.progress.progress50, ICON_MAP.progress.progress75, ICON_MAP.progress.progress100],
-    signal: [ICON_MAP.signal.signal0, ICON_MAP.signal.signal25, ICON_MAP.signal.signal50, ICON_MAP.signal.signal75, ICON_MAP.signal.signal100],
-    arrow: [ICON_MAP.arrow.goldRight, ICON_MAP.arrow.goldRightAndDown, ICON_MAP.arrow.goldRightAndUp, ICON_MAP.arrow.greenUp, ICON_MAP.arrow.redDown],
-    shape: [ICON_MAP.shape.cross, ICON_MAP.shape.down, ICON_MAP.shape.up],
+    feedback: objToArr(ICON_MAP.feedback),
+    feedback2: objToArr(ICON_MAP.feedbac2),
+    star: objToArr(ICON_MAP.star),
+    feeling: objToArr(ICON_MAP.feeling),
+    progress: objToArr(ICON_MAP.progress),
+    signal: objToArr(ICON_MAP.signal),
+    arrow: objToArr(ICON_MAP.arrow),
+    shape: objToArr(ICON_MAP.shape),
 };
 export type IIconType = keyof typeof iconMap;
 

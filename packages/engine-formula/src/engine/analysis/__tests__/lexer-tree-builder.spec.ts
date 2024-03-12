@@ -179,6 +179,16 @@ describe('lexer nodeMaker test', () => {
             const node = lexerTreeBuilder.treeBuilder('=-(2)+*9') as LexerNode;
             expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":["0","2","-","9","+"]}');
         });
+
+        it('ref:ref parser', () => {
+            const node = lexerTreeBuilder.treeBuilder('=SUM(A6:B6:C6:D7,1,1,2)') as LexerNode;
+            expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"SUM","st":0,"ed":2,"children":[{"token":"P_1","st":0,"ed":2,"children":[{"token":":","st":-1,"ed":-1,"children":[{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"A6","st":-1,"ed":-1,"children":[]}]},{"token":"P_1","st":-1,"ed":-1,"children":[{"token":":","st":-1,"ed":-1,"children":[{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"B6","st":-1,"ed":-1,"children":[]}]},{"token":"P_1","st":-1,"ed":-1,"children":[{"token":":","st":-1,"ed":-1,"children":[{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"C6","st":-1,"ed":-1,"children":[]}]},{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"D7","st":-1,"ed":-1,"children":[]}]}]}]}]}]}]}]},{"token":"P_1","st":12,"ed":14,"children":["1"]},{"token":"P_1","st":14,"ed":16,"children":["1"]},{"token":"P_1","st":16,"ed":18,"children":["2"]}]}]}');
+        });
+
+        it('cube parser', () => {
+            const node = lexerTreeBuilder.treeBuilder('=INDEX((A6:B6,C6:D7),1,1,2)') as LexerNode;
+            expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"INDEX","st":0,"ed":4,"children":[{"token":"P_1","st":2,"ed":4,"children":[{"token":"CUBE","st":-1,"ed":-1,"children":[{"token":"P_1","st":-1,"ed":-1,"children":[{"token":":","st":-1,"ed":-1,"children":[{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"A6","st":-1,"ed":-1,"children":[]}]},{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"B6","st":-1,"ed":-1,"children":[]}]}]}]},{"token":"P_1","st":9,"ed":11,"children":[{"token":":","st":-1,"ed":-1,"children":[{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"C6","st":-1,"ed":-1,"children":[]}]},{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"D7","st":-1,"ed":-1,"children":[]}]}]}]}]}]},{"token":"P_1","st":16,"ed":18,"children":["1"]},{"token":"P_1","st":18,"ed":20,"children":["1"]},{"token":"P_1","st":20,"ed":22,"children":["2"]}]}]}');
+        });
     });
 
     describe('checkIfAddBracket', () => {
@@ -230,6 +240,55 @@ describe('lexer nodeMaker test', () => {
                     startIndex: 29,
                     token: "'[workbook-01]工作表11'!K27:N32",
                 },
+            ]);
+        });
+
+        it('cube', () => {
+            expect(lexerTreeBuilder.sequenceNodesBuilder('=INDEX((A6:B6,C6:D7),1,1,2)')).toStrictEqual([
+                {
+                    endIndex: 4,
+                    nodeType: 3,
+                    startIndex: 0,
+                    token: 'INDEX',
+                },
+                '(',
+                '(',
+                {
+                    endIndex: 11,
+                    nodeType: 4,
+                    startIndex: 7,
+                    token: 'A6:B6',
+                },
+                ',',
+                {
+                    endIndex: 17,
+                    nodeType: 4,
+                    startIndex: 13,
+                    token: 'C6:D7',
+                },
+                ')',
+                ',',
+                {
+                    endIndex: 20,
+                    nodeType: 1,
+                    startIndex: 20,
+                    token: '1',
+                },
+                ',',
+                {
+                    endIndex: 22,
+                    nodeType: 1,
+                    startIndex: 22,
+                    token: '1',
+                },
+                ',',
+                {
+                    endIndex: 24,
+                    nodeType: 1,
+                    startIndex: 24,
+                    token: '2',
+                },
+                ')',
             ]);
         });
     });

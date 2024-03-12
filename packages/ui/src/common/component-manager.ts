@@ -271,15 +271,18 @@ export class ComponentManager {
 }
 
 async function renderVue3Component(VueComponent: ReturnType<typeof defineComponent>, element: HTMLElement, args: Record<string, any>) {
-    const { h, render } = await import('vue');
+    try {
+        const { h, render } = await import('vue');
 
-    const vnode = h(VueComponent, args);
+        const vnode = h(VueComponent, args);
 
-    const container = document.createElement('div');
+        const container = document.createElement('div');
 
-    document.body.appendChild(container);
+        document.body.appendChild(container);
 
-    render(vnode, element);
+        render(vnode, element);
+    } catch (error) {
+    }
 }
 
 export function VueComponentWrapper(options: { component: ReturnType<typeof defineComponent>; props: Record<string, any> }) {

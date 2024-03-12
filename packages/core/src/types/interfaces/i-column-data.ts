@@ -23,9 +23,9 @@ export interface IColumnData {
     /**
      * width
      */
-    w: number;
+    w?: number;
     /**
      * hidden
      */
-    hd: BooleanNumber;
+    hd?: BooleanNumber;
 }

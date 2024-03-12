@@ -16,7 +16,8 @@
 
 import type { ICellData, IMutationInfo, IRange, Nullable, Worksheet } from '@univerjs/core';
 import { ObjectMatrix } from '@univerjs/core';
-import { type Scene, type SpreadsheetSkeleton, Vector2 } from '@univerjs/engine-render';
+import type { Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
+import { Vector2 } from '@univerjs/engine-render';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';

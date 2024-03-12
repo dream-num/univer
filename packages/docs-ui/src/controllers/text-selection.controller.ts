@@ -149,6 +149,9 @@ export class TextSelectionController extends Disposable {
         this.disposeWithMe(
             toDisposable(
                 document?.onDblclickObserver.add((evt: IPointerEvent | IMouseEvent) => {
+                    if (this._isEditorReadOnly(unitId)) {
+                        return;
+                    }
                     this._textSelectionRenderManager.handleDblClick(evt);
                 })
             )
@@ -157,6 +160,9 @@ export class TextSelectionController extends Disposable {
         this.disposeWithMe(
             toDisposable(
                 document?.onTripleClickObserver.add((evt: IPointerEvent | IMouseEvent) => {
+                    if (this._isEditorReadOnly(unitId)) {
+                        return;
+                    }
                     this._textSelectionRenderManager.handleTripleClick(evt);
                 })
             )

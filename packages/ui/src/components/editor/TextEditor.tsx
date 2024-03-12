@@ -191,7 +191,7 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
         }, 30);
 
         const valueChangeSubscription = editorService.valueChange$.subscribe((editor) => {
-            if (!editor.onlyInputFormula() && !editor.onlyInputRange()) {
+            if (editor.isSheetEditor()) {
                 return;
             }
 
@@ -213,6 +213,17 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
             valueChangeSubscription?.unsubscribe();
         };
     }, []);
+
+    useEffect(() => {
+        const editor = editorService.getEditor(id);
+        if (editor == null) {
+            return;
+        }
+
+        editor.update({
+            isReadonly, isSingle, isSingleChoice, onlyInputContent, onlyInputFormula, onlyInputRange, openForSheetSubUnitId, openForSheetUnitId,
+        });
+    }, [isReadonly, isSingle, isSingleChoice, onlyInputContent, onlyInputFormula, onlyInputRange, openForSheetSubUnitId, openForSheetUnitId]);
 
     useEffect(() => {
         if (value == null) {

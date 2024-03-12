@@ -25,6 +25,7 @@ export interface ISelectEditorFormulaOperationParam {
     eventType: DeviceInputEventType;
     keycode?: KeyCode;
     metaKey?: MetaKeys | typeof META_KEY_CTRL_AND_SHIFT;
+    isSingleEditor?: boolean;
 }
 
 export const SelectEditorFormulaOperation: IOperation<ISelectEditorFormulaOperationParam> = {

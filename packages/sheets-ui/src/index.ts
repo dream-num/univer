@@ -25,6 +25,7 @@ export { SetScrollOperation } from './commands/operations/scroll.operation';
 export { SetZoomRatioOperation } from './commands/operations/set-zoom-ratio.operation';
 export { VIEWPORT_KEY } from './common/keys';
 export { AutoFillController } from './controllers/auto-fill.controller';
+export { CellCustomRenderController } from './controllers/cell-custom-render.controller';
 export { PASTE_SPECIAL_MENU_ID } from './controllers/menu/menu';
 export { whenFormulaEditorActivated } from './controllers/shortcuts/utils';
 export {
@@ -69,3 +70,4 @@ export { HoverManagerService } from './services/hover-manager.service';
 export { CellAlertManagerService, CellAlertType, type ICellAlert } from './services/cell-alert-manager.service';
 export { HoverController } from './controllers/hover.controller';
 export { DropdownManagerService, type IDropdownParam } from './services/dropdown-manager.service';
+export { SHEET_VIEW_KEY } from './common/keys';

@@ -298,7 +298,7 @@ export class Spreadsheet extends SheetComponent {
                             const { left: diffLeft, right: diffRight, bottom: diffBottom, top: diffTop } = diffBound;
                             ctx.save();
                             ctx.beginPath();
-                            ctx.rect(
+                            ctx.rectByPrecision(
                                 diffLeft - rowHeaderWidth - FIX_ONE_PIXEL_BLUR_OFFSET,
                                 diffTop - columnHeaderHeight - FIX_ONE_PIXEL_BLUR_OFFSET,
                                 diffRight - diffLeft + rowHeaderWidth + FIX_ONE_PIXEL_BLUR_OFFSET * 2,
@@ -511,27 +511,27 @@ export class Spreadsheet extends SheetComponent {
 
         ctx.translateWithPrecisionRatio(FIX_ONE_PIXEL_BLUR_OFFSET, FIX_ONE_PIXEL_BLUR_OFFSET);
 
-        ctx.moveTo(startX, startY);
-        ctx.lineTo(endX, startY);
+        ctx.moveToByPrecision(startX, startY);
+        ctx.lineToByPrecision(endX, startY);
 
         for (let r = 0; r <= rowEnd; r++) {
             if (r < 0 || r > rowHeightAccumulationLength - 1) {
                 continue;
             }
             const rowEndPosition = rowHeightAccumulation[r];
-            ctx.moveTo(startX, rowEndPosition);
-            ctx.lineTo(endX, rowEndPosition);
+            ctx.moveToByPrecision(startX, rowEndPosition);
+            ctx.lineToByPrecision(endX, rowEndPosition);
         }
 
-        ctx.moveTo(startX, startY);
-        ctx.lineTo(startX, endY);
+        ctx.moveToByPrecision(startX, startY);
+        ctx.lineToByPrecision(startX, endY);
         for (let c = 0; c <= endColumn; c++) {
             if (c < 0 || c > columnWidthAccumulationLength - 1) {
                 continue;
             }
             const columnEndPosition = columnWidthAccumulation[c];
-            ctx.moveTo(columnEndPosition, startY);
-            ctx.lineTo(columnEndPosition, endY);
+            ctx.moveToByPrecision(columnEndPosition, startY);
+            ctx.lineToByPrecision(columnEndPosition, endY);
         }
         // console.log('xx2', scaleX, scaleY, columnTotalWidth, rowTotalHeight, rowHeightAccumulation, columnWidthAccumulation);
         ctx.stroke();
@@ -604,15 +604,15 @@ export class Spreadsheet extends SheetComponent {
             const endX =
                 columnWidthAccumulation[endColumn] || columnWidthAccumulation[columnWidthAccumulation.length - 1];
 
-            ctx.clearRect(startX, startY, endX - startX, endY - startY);
+            ctx.clearRectByPrecision(startX, startY, endX - startX, endY - startY);
 
             // After ClearRect, the lines will become thinner, and the lines will be repaired below.
             ctx.beginPath();
             ctx.moveTo(startX, startY);
-            ctx.lineTo(endX, startY);
-            ctx.lineTo(endX, endY);
-            ctx.lineTo(startX, endY);
-            ctx.lineTo(startX, startY);
+            ctx.lineToByPrecision(endX, startY);
+            ctx.lineToByPrecision(endX, endY);
+            ctx.lineToByPrecision(startX, endY);
+            ctx.lineToByPrecision(startX, startY);
             ctx.stroke();
             ctx.closePath();
         }

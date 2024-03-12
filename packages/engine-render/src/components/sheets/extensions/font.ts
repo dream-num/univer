@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IRange, IScale } from '@univerjs/core';
-import { HorizontalAlign, ObjectMatrix, WrapStrategy } from '@univerjs/core';
+import type { ICellData, IRange, IScale, ObjectMatrix } from '@univerjs/core';
+import { HorizontalAlign, WrapStrategy } from '@univerjs/core';
 
 import type { UniverRenderingContext } from '../../../context';
 import type { Documents } from '../../docs/document';
@@ -28,12 +28,16 @@ import { SheetExtension } from './sheet-extension';
 const UNIQUE_KEY = 'DefaultFontExtension';
 
 const EXTENSION_Z_INDEX = 30;
-
+export interface ISheetFontRenderExtension {
+    fontRenderExtension?: {
+        leftOffset?: number;
+        rightOffset?: number;
+        topOffset?: number;
+        downOffset?: number;
+        isSkip?: boolean;
+    };
+};
 export class Font extends SheetExtension {
-    private _fontOffset = new ObjectMatrix<number>();
-
-    private _fontHidden = new ObjectMatrix<boolean>();
-
     override uKey = UNIQUE_KEY;
 
     override Z_INDEX = EXTENSION_Z_INDEX;
@@ -41,30 +45,6 @@ export class Font extends SheetExtension {
     getDocuments() {
         const parent = this.parent as SheetComponent;
         return parent?.getDocuments();
-    }
-
-    clearFontOffset() {
-        this._fontOffset.reset();
-    }
-
-    setFontOffset(r: number, c: number, offset: number) {
-        this._fontOffset.setValue(r, c, offset);
-    }
-
-    getFontOffset(r: number, c: number) {
-        return this._fontOffset.getValue(r, c);
-    }
-
-    clearFontHidden() {
-        this._fontHidden.reset();
-    }
-
-    setFontHidden(r: number, c: number, state: boolean) {
-        this._fontHidden.setValue(r, c, state);
-    }
-
-    getFontHidden(r: number, c: number) {
-        return this._fontHidden.getValue(r, c);
     }
 
     override draw(
@@ -75,7 +55,7 @@ export class Font extends SheetExtension {
     ) {
         const { stylesCache, dataMergeCache, overflowCache, worksheet } = spreadsheetSkeleton;
         const { font: fontList } = stylesCache;
-        if (!spreadsheetSkeleton) {
+        if (!spreadsheetSkeleton || !worksheet) {
             return;
         }
 
@@ -116,10 +96,6 @@ export class Font extends SheetExtension {
                     let { startY, endY, startX, endX } = cellInfo;
                     const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
 
-                    if (this.getFontHidden(rowIndex, columnIndex) === true) {
-                        return true;
-                    }
-
                     if (isMerged) {
                         return true;
                     }
@@ -148,18 +124,40 @@ export class Font extends SheetExtension {
                     //     return true;
                     // }
 
-                    const cellWidth = endX - startX;
-                    const cellHeight = endY - startY;
+                    const cellData = worksheet.getCell(rowIndex, columnIndex) as ICellData & ISheetFontRenderExtension;
+                    if (cellData.fontRenderExtension?.isSkip) {
+                        return true;
+                    }
 
                     const overflowRectangle = overflowCache.getValue(rowIndex, columnIndex);
                     const { horizontalAlign, angle } = docsConfig;
 
                     ctx.save();
                     ctx.beginPath();
-                    if (overflowRectangle) {
+
+                    const rightOffset = cellData.fontRenderExtension?.rightOffset ?? 0;
+                    const leftOffset = cellData.fontRenderExtension?.leftOffset ?? 0;
+                    let isOverflow = true;
+
+                    if (angle === 0) {
+                        startX = startX + leftOffset;
+                        endX = endX - rightOffset;
+
+                        if (rightOffset !== 0 || leftOffset !== 0) {
+                            isOverflow = false;
+                        }
+                    }
+
+                    const cellWidth = endX - startX;
+                    const cellHeight = endY - startY;
+
+                    /**
+                     * In scenarios with offsets, there is no need to respond to text overflow.
+                     */
+                    if (overflowRectangle && isOverflow) {
                         const { startColumn, startRow, endColumn, endRow } = overflowRectangle;
                         if (startColumn === endColumn && startColumn === columnIndex) {
-                            ctx.rect(
+                            ctx.rectByPrecision(
                                 startX + 1 / scale,
                                 startY + 1 / scale,
                                 cellWidth - 2 / scale,
@@ -209,7 +207,7 @@ export class Font extends SheetExtension {
                             }
                         }
                     } else {
-                        ctx.rect(startX + 1 / scale, startY + 1 / scale, cellWidth - 2 / scale, cellHeight - 2 / scale);
+                        ctx.rectByPrecision(startX + 1 / scale, startY + 1 / scale, cellWidth - 2 / scale, cellHeight - 2 / scale);
                         ctx.clip();
                         ctx.clearRectForTexture(
                             startX + 1 / scale,
@@ -219,13 +217,8 @@ export class Font extends SheetExtension {
                         );
                     }
 
-                    if (angle === 0 && this.getFontOffset(rowIndex, columnIndex) != null) {
-                        const offset = this.getFontOffset(rowIndex, columnIndex);
-                        startX = startX + offset;
-                    }
-
                     ctx.translate(startX, startY);
-                    this._renderDocuments(ctx, docsConfig, startX, startY, endX, endY, rowIndex, columnIndex);
+                    this._renderDocuments(ctx, docsConfig, startX, startY, endX, endY, rowIndex, columnIndex, overflowCache);
                     ctx.restore();
                 });
             });
@@ -240,7 +233,8 @@ export class Font extends SheetExtension {
         endX: number,
         endY: number,
         row: number,
-        column: number
+        column: number,
+        overflowCache: ObjectMatrix<IRange>
     ) {
         const documents = this.getDocuments() as Documents;
 
@@ -260,7 +254,8 @@ export class Font extends SheetExtension {
 
         // Use fix https://github.com/dream-num/univer/issues/927, Set the actual width of the content to the page width of the document,
         // so that the divide will be aligned when the skeleton is calculated.
-        if (wrapStrategy !== WrapStrategy.WRAP) {
+        const overflowRectangle = overflowCache.getValue(row, column);
+        if (!(wrapStrategy === WrapStrategy.WRAP && !overflowRectangle && angle === 0)) {
             const contentSize = getDocsSkeletonPageSize(documentSkeleton);
             const documentStyle = documentSkeleton.getViewModel().getDataModel().getSnapshot().documentStyle;
             if (contentSize && documentStyle) {
@@ -298,7 +293,7 @@ export class Font extends SheetExtension {
         const startX = columnWidthAccumulation[startColumn - 1] || 0;
         const endX = columnWidthAccumulation[endColumn] || columnWidthAccumulation[columnWidthAccumulation.length - 1];
 
-        ctx.rect(startX, startY, endX - startX, endY - startY);
+        ctx.rectByPrecision(startX, startY, endX - startX, endY - startY);
         ctx.clip();
         ctx.clearRectForTexture(startX, startY, endX - startX, endY - startY);
     }

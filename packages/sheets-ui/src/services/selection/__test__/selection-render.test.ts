@@ -43,6 +43,8 @@ const mockEvent: IMouseEvent = {
     buttons: 1,
     clientX: 150,
     clientY: 200,
+    layerX: 0,
+    layerY: 0,
     ctrlKey: false,
     metaKey: false,
     movementX: 0,

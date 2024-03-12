@@ -21,7 +21,8 @@ import {
     IContextService,
     IUniverInstanceService,
 } from '@univerjs/core';
-import { Slider, useObservable } from '@univerjs/design';
+import { useObservable } from '@univerjs/ui';
+import { Slider } from '@univerjs/design';
 import { SetWorksheetActivateCommand } from '@univerjs/sheets';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
@@ -51,8 +52,8 @@ export function ZoomSlider() {
                 map(([editorFocus, editorActivated]) => editorFocus && !editorActivated),
                 debounceTime(DISABLE_DEBOUNCE_TIME)
             ),
-        false,
         true,
+        false,
         [FOCUSING_UNIVER_EDITOR]
     );
     const disabled = !sheetEditorFocused;

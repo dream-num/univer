@@ -52,7 +52,7 @@ export class RowHeaderLayout extends SheetExtension {
         const scale = this._getScale(parentScale);
 
         ctx.fillStyle = getColor([248, 249, 250])!;
-        ctx.fillRect(0, 0, rowHeaderWidth, rowTotalHeight);
+        ctx.fillRectByPrecision(0, 0, rowHeaderWidth, rowTotalHeight);
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillStyle = getColor([0, 0, 0])!;
@@ -74,8 +74,8 @@ export class RowHeaderLayout extends SheetExtension {
                 // Skip hidden rows
                 continue;
             }
-            ctx.moveTo(0, rowEndPosition);
-            ctx.lineTo(rowHeaderWidth, rowEndPosition);
+            ctx.moveToByPrecision(0, rowEndPosition);
+            ctx.lineToByPrecision(rowHeaderWidth, rowEndPosition);
 
             const middleCellPos = preRowPosition + (rowEndPosition - preRowPosition) / 2;
             ctx.fillText(`${r + 1}`, rowHeaderWidth / 2, middleCellPos + MIDDLE_CELL_POS_MAGIC_NUMBER); // Magic number 1, because the vertical alignment appears to be off by 1 pixel.
@@ -86,8 +86,8 @@ export class RowHeaderLayout extends SheetExtension {
         // painting line bottom border
         const rowHeaderWidthFix = rowHeaderWidth - 0.5 / scale;
 
-        ctx.moveTo(rowHeaderWidthFix, 0);
-        ctx.lineTo(rowHeaderWidthFix, rowTotalHeight);
+        ctx.moveToByPrecision(rowHeaderWidthFix, 0);
+        ctx.lineToByPrecision(rowHeaderWidthFix, rowTotalHeight);
         ctx.stroke();
     }
 }

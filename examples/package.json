@@ -19,7 +19,7 @@
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/facade": "workspace:*",
         "@univerjs/find-replace": "workspace:*",
-        "@univerjs/icons": "^0.1.39",
+        "@univerjs/icons": "^0.1.40",
         "@univerjs/rpc": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-conditional-format": "workspace:*",
@@ -43,7 +43,7 @@
         "vue": "^3.4.21"
     },
     "devDependencies": {
-        "@types/react": "^18.2.63",
+        "@types/react": "^18.2.64",
         "@types/react-dom": "^18.2.20",
         "@univerjs/shared": "workspace:*",
         "esbuild": "^0.20.1",
@@ -53,6 +53,6 @@
         "esbuild-style-plugin": "^1.6.3",
         "less": "^4.2.0",
         "minimist": "^1.2.8",
-        "typescript": "^5.3.3"
+        "typescript": "^5.4.2"
     }
 }

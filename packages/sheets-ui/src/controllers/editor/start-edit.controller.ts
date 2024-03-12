@@ -303,8 +303,12 @@ export class StartEditController extends Disposable {
         // Scaling is handled by the renderer, so the skeleton only accepts the original width and height, which need to be divided by the magnification factor.
         documentDataModel?.updateDocumentDataPageSize(editorWidth / scaleX);
 
+        /**
+         * Do not rely on cell layout logic, depend on the document's internal alignment logic.
+         */
         documentDataModel?.updateDocumentRenderConfig({
             horizontalAlign: HorizontalAlign.UNSPECIFIED,
+            cellValueType: undefined,
         });
 
         return {
@@ -519,7 +523,7 @@ export class StartEditController extends Disposable {
                         return;
                     }
 
-                    this._resetBodyStyle(snapshot.body!);
+                    this._resetBodyStyle(snapshot.body!, !!isInArrayFormulaRange);
 
                     documentDataModel.reset(snapshot);
                     documentViewModel.reset(documentDataModel);
@@ -559,11 +563,11 @@ export class StartEditController extends Disposable {
         );
     }
 
-    private _resetBodyStyle(body: IDocumentBody) {
+    private _resetBodyStyle(body: IDocumentBody, removeStyle = false) {
         body.dataStream = DEFAULT_EMPTY_DOCUMENT_VALUE;
 
         if (body.textRuns != null) {
-            if (body.textRuns.length === 1) {
+            if (body.textRuns.length === 1 && !removeStyle) {
                 body.textRuns[0].st = 0;
                 body.textRuns[0].ed = 1;
             } else {

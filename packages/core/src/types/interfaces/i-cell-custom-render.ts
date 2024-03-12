@@ -15,22 +15,25 @@
  */
 
 import type { Nullable } from '../../shared';
-import type { CellValue } from './i-cell-data';
-import type { IDataValidationRule } from './i-data-validation';
 import type { ISelectionCellWithCoord } from './i-selection-data';
 import type { IStyleData } from './i-style-data';
+import type { ICellData } from './i-cell-data';
 
-export interface ICellRenderInfo {
-    value: Nullable<CellValue>;
+export interface ICellRenderContext {
+    data: ICellData;
     style: Nullable<IStyleData>;
-    cellInfo: ISelectionCellWithCoord;
-    rule: IDataValidationRule;
-    unitId: string;
+    primaryWithCoord: ISelectionCellWithCoord;
+    unitId?: string;
     subUnitId: string;
     row: number;
     col: number;
 }
 
 export interface ICellCustomRender {
-    drawWith(ctx: CanvasRenderingContext2D, info: ICellRenderInfo): void;
+    drawWith(ctx: CanvasRenderingContext2D, info: ICellRenderContext): void;
+    zIndex?: number;
+    isHit?: (info: ICellRenderContext) => boolean;
+    onPointerDown?: (info: ICellRenderContext) => void;
+    onPointerEnter?: (info: ICellRenderContext) => void;
+    onPointerLeave?: (info: ICellRenderContext) => void;
 }

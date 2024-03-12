@@ -32,6 +32,7 @@ import {
     suffixToken,
 } from '../../basics/token';
 import {
+    DEFAULT_TOKEN_CUBE_FUNCTION_NAME,
     DEFAULT_TOKEN_LAMBDA_FUNCTION_NAME,
     DEFAULT_TOKEN_TYPE_LAMBDA_PARAMETER,
     DEFAULT_TOKEN_TYPE_PARAMETER,
@@ -701,6 +702,11 @@ export class LexerTreeBuilder extends Disposable {
         return bracketState[bracketState.length - 1];
     }
 
+    private _changeCurrentBracket(type: bracketType) {
+        const bracketState = this._bracketState;
+        bracketState[bracketState.length - 1] = type;
+    }
+
     private _openBraces() {
         this._bracesState += 1;
     }
@@ -1138,7 +1144,35 @@ export class LexerTreeBuilder extends Disposable {
                     // this.setCurrentLexerNode(subLexerNode);
                     this._newAndPushCurrentLexerNode(DEFAULT_TOKEN_TYPE_PARAMETER, cur);
                 } else {
-                    return ErrorType.VALUE;
+                    /**
+                     * support cubeValueObject for =INDEX((A6:B6,C6:D7),1,1,2)
+                     */
+                    const cubeNode = new LexerNode();
+                    cubeNode.setToken(DEFAULT_TOKEN_CUBE_FUNCTION_NAME);
+                    const cubeParamNode = new LexerNode();
+                    cubeParamNode.setToken(DEFAULT_TOKEN_TYPE_PARAMETER);
+                    cubeParamNode.changeToParent(cubeNode);
+
+                    const colonNode = this._currentLexerNode.getParent();
+
+                    if (colonNode && colonNode.getToken() === matchToken.COLON) {
+                        const colonNodeParent = colonNode.getParent();
+                        if (!colonNodeParent) {
+                            return ErrorType.VALUE;
+                        }
+
+                        colonNode.changeToParent(cubeParamNode);
+                        colonNodeParent.setChildren([]);
+                        cubeNode.changeToParent(colonNodeParent);
+                    } else {
+                        return ErrorType.VALUE;
+                    }
+
+                    this._changeCurrentBracket(bracketType.FUNCTION);
+                    this._pushNodeToChildren(this._segment);
+                    this._resetSegment();
+                    this._currentLexerNode = cubeNode;
+                    this._newAndPushCurrentLexerNode(DEFAULT_TOKEN_TYPE_PARAMETER, cur);
                 }
             } else if (
                 currentString === matchToken.COLON &&

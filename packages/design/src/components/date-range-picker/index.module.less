@@ -1,0 +1,691 @@
+@prefix-cls: date-range-picker;
+
+@background-color: rgb(var(--bg-color-secondary));
+
+@input-placeholder-color: hsv(0, 0, 75%);
+
+@time-panel-padding-total: 180px;
+// @time-panel-padding-top: 90px;
+@time-panel-padding-top: 0;
+
+@cell-size: 24px;
+
+.placeholder(@color: @input-placeholder-color) {
+    // Firefox
+    &::-moz-placeholder {
+        opacity: 1; // Override Firefox's unusual default opacity; see https://github.com/twbs/bootstrap/pull/11526
+    }
+
+    &::placeholder {
+        color: @color;
+    }
+
+    &:placeholder-shown {
+        text-overflow: ellipsis;
+    }
+}
+
+.@{prefix-cls} {
+    position: relative;
+    width: 280px;
+    height: 32px;
+    border: 1px solid rgb(var(--border-color));
+    border-radius: 4px;
+    box-sizing: border-box;
+    display: inline-flex;
+
+    &-rtl {
+        direction: rtl;
+    }
+
+    &-focused {
+        // border: 1px solid rgb(var(--primary-color));
+    }
+    &-invalid {
+        box-shadow: 0 0 2px red;
+    }
+    &-panel {
+        display: inline-block;
+        vertical-align: top;
+
+        &-focused {
+            border-color: blue;
+        }
+
+        &-rtl {
+            direction: rtl;
+        }
+    }
+
+    &-suffix-icon {
+        position: absolute;
+        top: 50%;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        align-items: center;
+        padding: 0 8px;
+        color: rgb(var(--text-color-secondary));
+        transform: translateY(-50%);
+        cursor: pointer;
+    }
+
+    // ===================== Shared Panel =====================
+    &-decade-panel,
+    &-year-panel,
+    &-month-panel,
+    &-week-panel,
+    &-date-panel,
+    &-time-panel {
+        display: flex;
+        flex-direction: column;
+
+        table {
+            text-align: center;
+            border-collapse: collapse;
+        }
+    }
+
+    // Header
+    &-header {
+        margin-bottom: var(--margin-base);
+        display: flex;
+        align-items: center;
+
+        > * {
+            flex: none;
+        }
+
+        &-view {
+            height: 16px;
+            flex: auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: var(--margin-xs);
+
+            > button {
+                padding: 0;
+                border: 0;
+                background-color: transparent;
+                cursor: pointer;
+            }
+        }
+
+        .btn () {
+            width: 16px;
+            height: 16px;
+            padding: 0;
+            line-height: 16px;
+            font-size: var(--font-size-lg);
+            border: none;
+            background-color: transparent;
+            cursor: pointer;
+        }
+
+        &-super {
+            &-prev,
+            &-next {
+                &-btn {
+                    .btn();
+                }
+            }
+        }
+
+        &-prev,
+        &-next {
+            &-btn {
+                .btn();
+            }
+        }
+    }
+
+    // Content
+    &-cell {
+        color: #aaa;
+
+        &-disabled {
+            opacity: 0.2;
+        }
+
+        &-inner {
+            display: inline-block;
+            box-sizing: border-box;
+            width: 100%;
+            height: @cell-size;
+            margin: 0;
+            padding: 0;
+            font-size: 12px;
+            line-height: @cell-size;
+            background: transparent;
+            border: 0;
+            border-radius: var(--border-radius-base);
+            outline: none;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        &-in-view {
+            color: #333;
+        }
+
+        &-in-range > &-inner {
+            background: fade(blue, 5%);
+        }
+
+        &-hover > &-inner {
+            background: rgb(var(--bg-color));
+        }
+
+        &-range-hover-start,
+        &-range-hover-end,
+        &-range-hover {
+            position: relative;
+            &::after {
+                position: absolute;
+                top: 3px;
+                right: 0;
+                bottom: 0;
+                left: 0;
+                border: 1px solid green;
+                border-right: 0;
+                border-left: 0;
+                content: '';
+                pointer-events: none;
+            }
+        }
+
+        &-range-hover-start::after {
+            border-left: 1px solid green !important;
+        }
+        &-range-hover-end::after {
+            border-right: 1px solid green !important;
+        }
+
+        &-today > &-inner {
+            border: 1px solid rgb(var(--primary-color));
+        }
+        &-range-start > &-inner,
+        &-range-end > &-inner,
+        &-selected > &-inner {
+            // TODO:
+            // background: fade(blue, 20%);
+            color: #fff;
+            background: rgb(var(--primary-color));
+        }
+    }
+
+    // Preset
+    &-presets {
+        background: #ccccff;
+
+        ul {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+    }
+
+    &-now {
+        padding-top: var(--padding-base);
+
+        &-btn {
+            font-size: var(--font-size-xs);
+            color: rgb(var(--primary-color));
+            cursor: pointer;
+        }
+    }
+
+    &-footer,
+    &-picker-footer {
+        margin-top: var(--margin-sm);
+        border-top: 1px solid rgb(var(--border-color));
+    }
+
+    &-ranges {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        list-style: none;
+
+        > li {
+            text-align: center;
+            display: block;
+        }
+    }
+
+    &-ok {
+        float: right;
+    }
+
+    &-decade-panel {
+        .@{prefix-cls}-content {
+            tbody {
+                display: grid;
+                gap: 20px;
+            }
+        }
+
+        .@{prefix-cls}-cell-inner {
+            width: 78px;
+            height: 24px;
+        }
+    }
+
+    // ================== Year & Month Panel ==================
+    &-year-panel,
+    &-month-panel {
+        .@{prefix-cls}-content {
+            tbody {
+                display: grid;
+                gap: 20px;
+            }
+        }
+        .@{prefix-cls}-cell-inner {
+            width: 48px;
+            height: 24px;
+        }
+    }
+
+    // ====================== Week Panel ======================
+    &-week-panel {
+        &-row {
+            &:hover {
+                .@{prefix-cls}-cell {
+                    background: red;
+                }
+            }
+
+            &-selected {
+                .@{prefix-cls}-cell {
+                    background: rgba(0, 0, 255, 0.3);
+                }
+            }
+
+            &-range {
+                &-hover {
+                    .@{prefix-cls}-cell {
+                        background: rgba(0, 255, 0, 0.1);
+                    }
+                }
+
+                &-start,
+                &-end {
+                    .@{prefix-cls}-cell {
+                        background: rgba(0, 255, 0, 0.3);
+                    }
+                }
+            }
+        }
+
+        .@{prefix-cls}-cell,
+        .@{prefix-cls}-cell-inner {
+            width: @cell-size;
+        }
+
+        .@{prefix-cls}-cell-week {
+            color: #999;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .@{prefix-cls}-cell:hover > .@{prefix-cls}-cell-inner,
+        .@{prefix-cls}-cell-selected > .@{prefix-cls}-cell-inner {
+            background: transparent;
+        }
+    }
+
+    // ====================== Date Panel ======================
+    &-date-panel {
+        .@{prefix-cls}-cell-inner {
+            width: @cell-size;
+            height: @cell-size;
+            font-size: var(--font-size-xs);
+        }
+    }
+
+    // ====================== Time Panel ======================
+    &-time-panel {
+        width: auto;
+
+        .@{prefix-cls}-content {
+            position: relative;
+            display: flex;
+            max-height: 200px;
+
+            // &::after {
+            //   position: absolute;
+            //   top: @time-panel-padding-top;
+            //   right: -5px;
+            //   left: -5px;
+            //   height: 20px;
+            //   background: rgba(255, 0, 0, 0.05);
+            //   content: '';
+            //   pointer-events: none;
+            // }
+        }
+
+        // &-column-holder {
+        //   display: flex;
+        //   flex-direction: column;
+        //   text-align: center;
+        // }
+
+        &-column-title {
+            font-size: 14px;
+            line-height: @cell-size;
+        }
+
+        &-column {
+            flex: auto;
+            width: 50px;
+            margin: 0;
+            // padding: 0 0 180px 0;
+            padding: @time-panel-padding-top 0
+                (@time-panel-padding-total - @time-panel-padding-top);
+            overflow-x: hidden;
+            overflow-y: hidden;
+            font-size: 12px;
+            text-align: left;
+            list-style: none;
+            transition: background 0.3s;
+
+            &-active {
+                background: rgba(0, 0, 255, 0.1);
+            }
+
+            &:hover {
+                overflow-y: auto;
+            }
+
+            > li {
+                width: 50px;
+                margin: 0;
+                padding: 0;
+                cursor: pointer;
+
+                &.@{prefix-cls}-time-panel-cell {
+                    &-disabled {
+                        opacity: 0.5;
+                    }
+
+                    &-selected {
+                        background: rgba(0, 0, 255, 0.5);
+                    }
+                }
+
+                .@{prefix-cls}-time-panel-cell-inner {
+                    display: block;
+                    width: 100%;
+                    height: @cell-size;
+                    margin: 0;
+                    // padding: 0 0 0 12px;
+                    color: #333;
+                    line-height: @cell-size;
+                    text-align: center;
+
+                    .@{prefix-cls}-panel-rtl & {
+                        padding: 0 12px 0 0;
+                        text-align: right;
+                    }
+                }
+            }
+        }
+    }
+
+    // ====================== Date Time =======================
+    &-datetime-panel {
+        display: flex;
+
+        .@{prefix-cls}-time-panel {
+            border-left: 1px solid #999;
+        }
+
+        .@{prefix-cls}-date-panel,
+        .@{prefix-cls}-time-panel {
+            transition: opacity 0.3s;
+        }
+
+        // Keyboard
+        &-active {
+            .@{prefix-cls}-date-panel,
+            .@{prefix-cls}-time-panel {
+                opacity: 0.3;
+
+                &-active {
+                    opacity: 1;
+                }
+            }
+        }
+    }
+
+    // ======================== Input =========================
+    &-input {
+        position: relative;
+        display: inline-flex;
+        width: 100%;
+
+        .@{prefix-cls}-rtl & {
+            text-align: right;
+        }
+
+        &-active {
+            > input {
+                background: rgba(0, 0, 255, 0.05);
+            }
+        }
+
+        > input {
+            width: 100%;
+            padding-left: 12px;
+            border: none;
+            border-radius: var(--border-radius-base);
+            box-sizing: border-box;
+            .placeholder();
+            &:focus {
+                outline: none;
+            }
+        }
+
+        &-placeholder {
+            > input {
+                color: @input-placeholder-color;
+            }
+        }
+    }
+
+    &-clear {
+        position: absolute;
+        top: 7px;
+        right: 8px;
+        cursor: pointer;
+
+        .@{prefix-cls}-rtl & {
+            right: auto;
+            left: 4px;
+        }
+
+        &-btn {
+            width: 16px;
+            height: 16px;
+            text-align: center;
+            line-height: 16px;
+            background-color: rgb(var(--grey-500));
+            border-radius: 50%;
+            display: block;
+
+            &::before {
+                content: '×';
+                position: absolute;
+                top: -1px;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                color: white;
+                font-size: 16px;
+                line-height: 16px;
+            }
+        }
+    }
+
+    // ======================= Dropdown =======================
+    &-dropdown {
+        position: absolute;
+        pointer-events: none;
+
+        &-range {
+            padding: 10px 0;
+        }
+
+        &-hidden {
+            display: none;
+        }
+
+        // Panel
+        @arrow-size: 10px;
+
+        &-placement-topLeft,
+        &-placement-topRight {
+            .@{prefix-cls}-range-arrow {
+                bottom: @arrow-size / 2 + 1px;
+                transform: rotate(135deg);
+            }
+        }
+        &-placement-bottomLeft,
+        &-placement-bottomright {
+            .@{prefix-cls}-range-arrow {
+                top: (@arrow-size / 2 + 1px);
+                transform: rotate(-45deg);
+            }
+        }
+
+        .@{prefix-cls}-range-arrow {
+            position: absolute;
+            left: @arrow-size;
+            z-index: 1;
+            width: @arrow-size;
+            height: @arrow-size;
+            margin-left: 10px;
+            transition: all 0.3s;
+
+            .@{prefix-cls}-dropdown-rtl& {
+                right: @arrow-size;
+                left: auto;
+                margin-right: 10px;
+                margin-left: 0;
+            }
+
+            &::before,
+            &::after {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                box-sizing: border-box;
+                transform: translate(-50%, -50%);
+                content: '';
+
+                .@{prefix-cls}-dropdown-rtl& {
+                    right: 50%;
+                    left: auto;
+                    transform: translate(50%, -50%);
+                }
+            }
+
+            &::before {
+                width: @arrow-size;
+                height: @arrow-size;
+                border: (@arrow-size / 2) solid blue;
+                border-color: blue blue transparent transparent;
+            }
+            &::after {
+                width: @arrow-size - 2px;
+                height: @arrow-size - 2px;
+                border: (@arrow-size - 2px) / 2 solid blue;
+                border-color: @background-color @background-color transparent
+                    transparent;
+            }
+        }
+    }
+
+    // ========================================================
+    // =                     Range Picker                     =
+    // ========================================================
+    &-range {
+        position: relative;
+        display: inline-flex;
+
+        &-wrapper {
+            display: flex;
+        }
+
+        .@{prefix-cls}-active-bar {
+            bottom: 0;
+            height: 3px;
+            background: rgb(var(--primary-color));
+            opacity: 0;
+            transition: all 0.3s;
+            pointer-events: none;
+        }
+
+        &.@{prefix-cls}-focused {
+            .@{prefix-cls}-active-bar {
+                opacity: 1;
+            }
+        }
+
+        &-separator {
+            height: 100%;
+            color: rgb(var(--text-color-tertiary));
+            display: inline-flex;
+            align-items: center;
+        }
+    }
+
+    &-panel-container {
+        display: inline-block;
+        vertical-align: top;
+        transition: margin 0.3s;
+        pointer-events: all;
+    }
+
+    &-panel-layout {
+        padding: var(--padding-lg);
+        background: rgb(var(--bg-color-secondary));
+        border: 1px solid rgb(var(--border-color));
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--box-shadow-base);
+        display: flex;
+        flex-wrap: nowrap;
+        align-items: stretch;
+        overflow: hidden;
+    }
+
+    // ========================================================
+    // =                       Overflow                       =
+    // ========================================================
+    &-selector {
+        width: 100%;
+    }
+
+    &-selection-overflow {
+        display: flex;
+        flex-wrap: wrap;
+        box-sizing: border-box;
+        width: 100%;
+        border: 1px solid green;
+
+        &-item {
+            flex: none;
+            max-width: 100%;
+        }
+    }
+
+    &-selection-item {
+        border: 1px solid blue;
+    }
+
+    &-multiple-input {
+        width: 10px;
+        opacity: 0.1;
+    }
+}

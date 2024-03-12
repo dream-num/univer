@@ -79,13 +79,6 @@ export class HeaderUnhideController extends RxDisposable {
             return;
         }
 
-        // Try to render the unhide button for the current worksheet.
-        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
-        const worksheet = workbook.getActiveSheet();
-        if (worksheet) {
-            this._initForWorksheet(workbook, worksheet);
-        }
-
         // Re-render when sheet skeleton changes.
         this._sheetSkeletonManagerService.currentSkeleton$
             .pipe(takeUntil(this.dispose$), startWith(undefined), pairwise())

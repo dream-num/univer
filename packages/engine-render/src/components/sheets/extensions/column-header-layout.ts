@@ -55,7 +55,7 @@ export class ColumnHeaderLayout extends SheetExtension {
 
         // painting background
         ctx.fillStyle = getColor([248, 249, 250])!;
-        ctx.fillRect(0, 0, columnTotalWidth, columnHeaderHeight);
+        ctx.fillRectByPrecision(0, 0, columnTotalWidth, columnHeaderHeight);
 
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
@@ -76,13 +76,13 @@ export class ColumnHeaderLayout extends SheetExtension {
 
             const columnEndPosition = columnWidthAccumulation[c];
             if (preColumnPosition === columnEndPosition) {
-                // Skip hidden rows
+                // Skip hidden columns
                 continue;
             }
 
             // painting line border
-            ctx.moveTo(columnEndPosition, 0);
-            ctx.lineTo(columnEndPosition, columnHeaderHeight);
+            ctx.moveToByPrecision(columnEndPosition, 0);
+            ctx.lineToByPrecision(columnEndPosition, columnHeaderHeight);
 
             // painting column header text
             const middleCellPos = preColumnPosition + (columnEndPosition - preColumnPosition) / 2;
@@ -92,8 +92,8 @@ export class ColumnHeaderLayout extends SheetExtension {
 
         // painting line bottom border
         const columnHeaderHeightFix = columnHeaderHeight - 0.5 / scale;
-        ctx.moveTo(0, columnHeaderHeightFix);
-        ctx.lineTo(columnTotalWidth, columnHeaderHeightFix);
+        ctx.moveToByPrecision(0, columnHeaderHeightFix);
+        ctx.lineToByPrecision(columnTotalWidth, columnHeaderHeightFix);
         ctx.stroke();
     }
 }

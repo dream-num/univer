@@ -854,3 +854,64 @@ const rgb2Hsv: (color: IRgbColor) => IHsvColor = (color) => {
 const isUndefinedOrNull = (value: unknown): value is null | undefined => value == null;
 
 const isObject = (value: unknown): value is object => !isUndefinedOrNull(value) && typeof value === 'object';
+
+export function isBlackColor(color: string): boolean {
+    // Regular expressions match different color formats.
+    const hexRegex = /^#(?:[0]{3}|[0]{6})\b/;
+    const rgbRegex = /^rgb\s*\(\s*0+\s*,\s*0+\s*,\s*0+\s*\)$/;
+    const rgbaRegex = /^rgba\s*\(\s*0+\s*,\s*0+\s*,\s*0+\s*,\s*(1|1\.0*|0?\.\d+)\)$/;
+    const hslRegex = /^hsl\s*\(\s*0*\s*,\s*0%*\s*,\s*0%*\s*\)$/;
+    const hslaRegex = /^hsla\s*\(\s*0*\s*,\s*0%*\s*,\s*0%*\s*,\s*(1|1\.0*|0?\.\d+)\)$/;
+
+    if (hexRegex.test(color)) {
+        return true;
+    }
+    if (rgbRegex.test(color)) {
+        return true;
+    }
+
+    if (rgbaRegex.test(color)) {
+        return true;
+    }
+
+    if (hslRegex.test(color)) {
+        return true;
+    }
+
+    if (hslaRegex.test(color)) {
+        return true;
+    }
+
+    return false;
+}
+
+export function isWhiteColor(color: string): boolean {
+    // Regular expressions match different color formats.
+    const hexRegex = /^#(?:[Ff]{3}|[Ff]{6})\b/;
+    const rgbRegex = /^rgb\s*\(\s*255\s*,\s*255\s*,\s*255\s*\)$/;
+    const rgbaRegex = /^rgba\s*\(\s*255\s*,\s*255\s*,\s*255\s*,\s*(1|1\.0*|0?\.\d+)\)$/;
+    const hslRegex = /^hsl\s*\(\s*0*\s*,\s*0%*\s*,\s*100%*\s*\)$/;
+    const hslaRegex = /^hsla\s*\(\s*0*\s*,\s*0%*\s*,\s*100%*\s*,\s*(1|1\.0*|0?\.\d+)\)$/;
+
+    if (hexRegex.test(color)) {
+        return true;
+    }
+
+    if (rgbRegex.test(color)) {
+        return true;
+    }
+
+    if (rgbaRegex.test(color)) {
+        return true;
+    }
+
+    if (hslRegex.test(color)) {
+        return true;
+    }
+
+    if (hslaRegex.test(color)) {
+        return true;
+    }
+
+    return false;
+}

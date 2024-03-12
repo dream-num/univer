@@ -131,8 +131,8 @@ export class Line extends docExtension {
                 alignOffset
             );
 
-            ctx.moveTo(start.x, start.y);
-            ctx.lineTo(end.x, end.y);
+            ctx.moveToByPrecision(start.x, start.y);
+            ctx.lineToByPrecision(end.x, end.y);
             ctx.stroke();
 
             ctx.restore();

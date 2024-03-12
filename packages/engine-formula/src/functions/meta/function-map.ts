@@ -15,6 +15,7 @@
  */
 
 import { Compare } from './compare';
+import { Cube } from './cube';
 import { Divided } from './divided';
 import { FUNCTION_NAMES_META } from './function-names';
 import { Minus } from './minus';
@@ -27,4 +28,5 @@ export const functionMeta = [
     [Minus, FUNCTION_NAMES_META.MINUS],
     [Multiply, FUNCTION_NAMES_META.MULTIPLY],
     [Plus, FUNCTION_NAMES_META.PLUS],
+    [Cube, FUNCTION_NAMES_META.CUBE],
 ];

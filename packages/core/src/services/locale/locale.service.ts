@@ -111,4 +111,8 @@ export class LocaleService extends Disposable {
     getLocales() {
         return this._locales?.[this._currentLocale];
     }
+
+    getCurrentLocale() {
+        return this._currentLocale;
+    }
 }

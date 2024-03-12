@@ -17,12 +17,12 @@
 import type { CellValue, IRange, ISheetDataValidationRule } from '@univerjs/core/types/interfaces/index.js';
 import { DataValidationManager } from '@univerjs/data-validation/models/data-validation-manager.js';
 import type { Nullable } from '@univerjs/core/shared/index.js';
-import { ObjectMatrix } from '@univerjs/core/shared/index.js';
+import { ObjectMatrix, Rectangle } from '@univerjs/core/shared/index.js';
 import { queryObjectMatrix } from '@univerjs/core/shared/object-matrix-query.js';
 import { Range } from '@univerjs/core/sheets/range.js';
 import type { IUpdateRulePayload } from '@univerjs/data-validation/types/interfaces/i-update-rule-payload.js';
 import { DataValidatorRegistryService, UpdateRuleType } from '@univerjs/data-validation';
-import { DataValidationStatus } from '@univerjs/core';
+import { DataValidationStatus, DataValidationType } from '@univerjs/core';
 import type { ISheetLocation } from '@univerjs/sheets';
 import type { Injector } from '@wendellhu/redi';
 import type { IDataValidationResCache } from '../services/dv-cache.service';
@@ -30,6 +30,7 @@ import { DataValidationCacheService } from '../services/dv-cache.service';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
 import { DataValidationCustomFormulaService } from '../services/dv-custom-formula.service';
 import { DataValidationRefRangeController } from '../controllers/dv-ref-range.controller';
+import type { IUpdateRuleFormulaPayload } from '../types';
 
 export type RangeMutation = {
     type: 'update';
@@ -40,13 +41,6 @@ export type RangeMutation = {
     type: 'delete';
     rule: ISheetDataValidationRule;
     index: number;
-};
-
-const isRangeEqual = (range1: IRange, range2: IRange) => {
-    return range1.startColumn === range2.startColumn
-            && range1.endColumn === range2.endColumn
-            && range1.startRow === range2.startRow
-            && range1.endRow === range2.endRow;
 };
 
 export class RuleMatrix {
@@ -112,7 +106,7 @@ export class RuleMatrix {
             const newRanges = queryObjectMatrix(this.value, (ruleId) => ruleId === rule.uid);
             const oldRanges = rule.ranges;
 
-            if (newRanges.length !== oldRanges.length || newRanges.some((range, i) => !isRangeEqual(range, oldRanges[i]))) {
+            if (newRanges.length !== oldRanges.length || newRanges.some((range, i) => !Rectangle.equals(range, oldRanges[i]))) {
                 mutations.push({
                     type: 'update',
                     ruleId: rule.uid,
@@ -212,6 +206,39 @@ export class SheetDataValidationManager extends DataValidationManager<ISheetData
             }
         }
         return rule;
+    }
+
+    updateRuleFormulaText(ruleId: string, payload: IUpdateRuleFormulaPayload) {
+        const rule = this.getRuleById(ruleId);
+        if (!rule) {
+            return;
+        }
+        const { uid, formula1, formula2, type } = rule;
+        const targetFormula1 = payload.type === 'formula1' ? payload.formulaString : formula1;
+        const targetFormula2 = payload.type === 'formula2' ? payload.formulaString : formula2;
+
+        if (type === DataValidationType.CUSTOM) {
+            if (payload.type === 'formula1') {
+                this._dataValidationCustomFormulaService.updateRuleFormulaSilent(this.unitId, this.subUnitId, uid, payload.formulaString);
+            }
+        } else {
+            this._dataValidationFormulaService.updateRuleFormulaTextSilent(
+                this.unitId,
+                this.subUnitId,
+                uid,
+                targetFormula1,
+                targetFormula2
+            );
+        }
+
+        super.updateRule(uid, {
+            type: UpdateRuleType.SETTING,
+            payload: {
+                type,
+                formula1: targetFormula1,
+                formula2: targetFormula2,
+            },
+        });
     }
 
     override removeRule(ruleId: string): void {

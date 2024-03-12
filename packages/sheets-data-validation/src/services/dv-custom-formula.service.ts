@@ -24,7 +24,7 @@ import { DataValidationCacheService } from './dv-cache.service';
 
 interface IDataValidationFormula {
     ruleId: string;
-    formulaText: string;
+    // formulaText: string;
     formulaId: string;
     temp?: boolean;
 }
@@ -196,7 +196,7 @@ export class DataValidationCustomFormulaService extends Disposable {
                     const formulaId = this._registerFormula(unitId, subUnitId, ruleId, relativeFormula);
                     formulaMap.setValue(row, column, {
                         formulaId,
-                        formulaText: relativeFormula,
+                        // formulaText: relativeFormula,
                         ruleId,
                     });
                     formulaCellMap.set(formulaId, { row, column });
@@ -208,7 +208,7 @@ export class DataValidationCustomFormulaService extends Disposable {
                 Range.foreach(range, (row, col) => {
                     formulaMap.setValue(row, col, {
                         formulaId,
-                        formulaText: formula,
+                        // formulaText: formula,
                         ruleId,
                     });
                 });
@@ -263,14 +263,14 @@ export class DataValidationCustomFormulaService extends Disposable {
                         const relativeText = transformFormula(this._lexerTreeBuilder, formula, originRow, originCol, row, col);
                         const formulaId = this._registerFormula(unitId, subUnitId, ruleId, relativeText);
                         formulaMap.setValue(row, col, {
-                            formulaText: relativeText,
+                            // formulaText: relativeText,
                             ruleId,
                             formulaId,
                         });
                         formulaCellMap.set(formulaId, { row, column: col });
                     } else {
                         formulaMap.setValue(row, col, {
-                            formulaText: formula,
+                            // formulaText: formula,
                             ruleId,
                             formulaId: formulaId!,
                         });
@@ -310,6 +310,22 @@ export class DataValidationCustomFormulaService extends Disposable {
 
         if (oldFormula !== formula) {
             this._addFormulaByRange(unitId, subUnitId, ruleId, formula, ranges);
+        }
+    }
+
+    /**
+     * Just update formula text, need't to recreate new formula and delete old formula.
+     * Only triggered by formula ref-range update.
+     */
+    updateRuleFormulaSilent(unitId: string, subUnitId: string, ruleId: string, formula: string) {
+        const { ruleFormulaMap } = this._ensureMaps(unitId, subUnitId);
+        const current = ruleFormulaMap.get(ruleId);
+        if (!current) {
+            return;
+        }
+        const { formula: oldFormula } = current;
+        if (oldFormula !== formula) {
+            current.formula = formula;
         }
     }
 

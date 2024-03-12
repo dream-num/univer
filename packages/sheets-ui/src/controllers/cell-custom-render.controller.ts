@@ -17,7 +17,7 @@
 import type { Nullable } from '@univerjs/core';
 import { Disposable, DisposableCollection, IUniverInstanceService, LifecycleStages, OnLifecycle, sortRules } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, Spreadsheet } from '@univerjs/engine-render';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { IRenderManagerService, Vector2 } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
 import type { ICellCustomRender, ICellRenderContext } from '@univerjs/core/types/interfaces/i-cell-custom-render.js';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
@@ -52,9 +52,39 @@ export class CellCustomRenderController extends Disposable {
 
                     const spreadsheet = currentRender.mainComponent as Spreadsheet;
                     const getActiveRender = (evt: IPointerEvent | IMouseEvent) => {
-                        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
-                        const cellIndex = getCellIndexByOffsetWithMerge(evt.offsetX, evt.offsetY, currentRender.scene, skeleton!);
+                        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton!;
+                        const { offsetX, offsetY } = evt;
+                        const scene = currentRender.scene;
                         const worksheet = workbook.getActiveSheet();
+                        const activeViewport = scene.getActiveViewportByCoord(
+                            Vector2.FromArray([offsetX, offsetY])
+                        );
+
+                        if (!activeViewport) {
+                            return;
+                        }
+
+                        const { scaleX, scaleY } = scene.getAncestorScale();
+
+                        const scrollXY = {
+                            x: activeViewport.actualScrollX,
+                            y: activeViewport.actualScrollY,
+                        };
+
+                        const cellPos = skeleton.getCellPositionByOffset(offsetX, offsetY, scaleX, scaleY, scrollXY);
+
+                        const mergeCell = skeleton.mergeData.find((range) => {
+                            const { startColumn, startRow, endColumn, endRow } = range;
+                            return cellPos.row >= startRow && cellPos.column >= startColumn && cellPos.row <= endRow && cellPos.column <= endColumn;
+                        });
+
+                        const cellIndex = {
+                            actualRow: mergeCell ? mergeCell.startRow : cellPos.row,
+                            actualCol: mergeCell ? mergeCell.startColumn : cellPos.column,
+                            mergeCell,
+                            row: cellPos.row,
+                            col: cellPos.column,
+                        };
 
                         if (!cellIndex || !skeleton) {
                             return;
@@ -84,7 +114,12 @@ export class CellCustomRenderController extends Disposable {
                             col,
                         };
 
-                        const activeRender = sortedRenders.find((render) => render.isHit?.(evt, info));
+                        const position = {
+                            x: scrollXY.x + offsetX,
+                            y: scrollXY.y + offsetY,
+                        };
+
+                        const activeRender = sortedRenders.find((render) => render.isHit?.(position, info));
                         if (!activeRender) {
                             return;
                         }

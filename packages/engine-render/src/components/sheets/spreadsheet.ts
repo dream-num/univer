@@ -32,7 +32,6 @@ import type { SceneViewer } from '../../scene-viewer';
 import type { Viewport } from '../../viewport';
 import { Documents } from '../docs/document';
 import { SpreadsheetExtensionRegistry } from '../extension';
-import { clearLineByBorderType } from '../../basics/draw';
 import type { Background } from './extensions/background';
 import type { Border } from './extensions/border';
 import type { Font } from './extensions/font';

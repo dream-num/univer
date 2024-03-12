@@ -21,3 +21,4 @@ export * from './font';
 export * from './row-header-layout';
 export * from './sheet-extension';
 export * from './marker';
+export * from './custom';

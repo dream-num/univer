@@ -26,6 +26,10 @@ export default {
 
             },
             iconSet: {
+                direction: '方向',
+                shape: '形状',
+                mark: '标记',
+                rank: '等级',
                 rule: '规则',
                 icon: '图标',
                 type: '类型',

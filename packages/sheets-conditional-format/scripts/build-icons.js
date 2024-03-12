@@ -35,18 +35,29 @@ const feedback = [
     ['warn', '@univerjs/icons-svg/binary/start-page/warn.svg', { black: '#FFBD37', '#E5E5E5': '#FFFFFF' }],
     ['correct', '@univerjs/icons-svg/binary/start-page/correct.svg', { black: '#59D01E', '#E5E5E5': '#FFFFFF' }],
 ];
-const feedbac2 = [
+const feedback2 = [
     ['mistake2', '@univerjs/icons-svg/single/start-page/mistake-single.svg', { black: '#FE4B4B' }],
     ['warn2', '@univerjs/icons-svg/single/start-page/warn-single.svg', { black: '#FFBD37' }],
     ['correct2', '@univerjs/icons-svg/single/start-page/correct-single.svg', { black: '#59D01E' }],
 ];
 
 const arrow = [
-    ['redDown', '@univerjs/icons-svg/single/start-page/arrow-down-single.svg', { black: '#FE4B4B' }],
-    ['goldRight', '@univerjs/icons-svg/single/start-page/arrow-righe-single.svg', { black: '#FFBD37' }],
-    ['greenUp', '@univerjs/icons-svg/single/start-page/arrow-up-single.svg', { black: '#59D01E' }],
-    ['goldRightAndDown', '@univerjs/icons-svg/single/start-page/arrow-tilt-down-single.svg', { black: '#FFBD37' }],
-    ['goldRightAndUp', '@univerjs/icons-svg/single/start-page/arrow-tilt-up-single.svg', { black: '#FFBD37' }],
+    ['down-red', '@univerjs/icons-svg/single/start-page/arrow-down-single.svg', { black: '#FE4B4B' }],
+    ['right-gold', '@univerjs/icons-svg/single/start-page/arrow-righe-single.svg', { black: '#FFBD37' }],
+    ['up-green', '@univerjs/icons-svg/single/start-page/arrow-up-single.svg', { black: '#59D01E' }],
+    ['rightAndDown-gold', '@univerjs/icons-svg/single/start-page/arrow-tilt-down-single.svg', { black: '#FFBD37' }],
+    ['rightAndUp-gold', '@univerjs/icons-svg/single/start-page/arrow-tilt-up-single.svg', { black: '#FFBD37' }],
+
+    ['down-gray', '@univerjs/icons-svg/single/start-page/arrow-down-single.svg', { black: '#999999' }],
+    ['right-gray', '@univerjs/icons-svg/single/start-page/arrow-righe-single.svg', { black: '#999999' }],
+    ['up-gray', '@univerjs/icons-svg/single/start-page/arrow-up-single.svg', { black: '#999999' }],
+    ['rightAndDown-gray', '@univerjs/icons-svg/single/start-page/arrow-tilt-down-single.svg', { black: '#999999' }],
+    ['rightAndUp-gray', '@univerjs/icons-svg/single/start-page/arrow-tilt-up-single.svg', { black: '#999999' }],
+];
+const flag = [
+    ['flag-green', '@univerjs/icons-svg/single/start-page/flag-single.svg', { black: '#59D01E' }],
+    ['flag-gold', '@univerjs/icons-svg/single/start-page/flag-single.svg', { black: '#FFBD37' }],
+    ['flag-red', '@univerjs/icons-svg/single/start-page/flag-single.svg', { black: '#FE4B4B' }],
 ];
 
 const shape = [
@@ -63,6 +74,19 @@ const shape = [
     ['roundness-gray', '@univerjs/icons-svg/single/start-page/roundness-single.svg', { black: '#999999' }],
     ['roundness-black', '@univerjs/icons-svg/single/start-page/roundness-single.svg'],
     ['triangle-gold', '@univerjs/icons-svg/single/start-page/triangle-single.svg', { black: '#FFBD37' }],
+
+    ['indicate-greed', '@univerjs/icons-svg/binary/start-page/indicate.svg', { '#E5E5E5': '#59D01E' }],
+    ['indicate-gold', '@univerjs/icons-svg/binary/start-page/indicate.svg', { '#E5E5E5': '#FFBD37' }],
+    ['indicate-red', '@univerjs/icons-svg/binary/start-page/indicate.svg', { '#E5E5E5': '#FE4B4B' }],
+
+];
+
+const cell = [
+    ['cell-0', '@univerjs/icons-svg/binary/start-page/cell-0.svg', { white: '#0493EE', black: '#0493EE' }],
+    ['cell-25', '@univerjs/icons-svg/binary/start-page/cell-25.svg', { white: '#0493EE', black: '#0493EE' }],
+    ['cell-50', '@univerjs/icons-svg/binary/start-page/cell-50.svg', { white: '#0493EE', black: '#0493EE' }],
+    ['cell-75', '@univerjs/icons-svg/binary/start-page/cell-75.svg', { white: '#0493EE', black: '#0493EE' }],
+    ['cell-100', '@univerjs/icons-svg/binary/start-page/cell-100.svg', { white: '#0493EE', black: '#0493EE' }],
 
 ];
 
@@ -87,7 +111,7 @@ async function replaceFillAndConvertToBase64(filePath, replaceMap) {
 }
 const runTask = async () => {
     const base64EncodedSVGs = {};
-    const obj = { feedback, star, progress, signal, feeling, arrow, shape, feedbac2 };
+    const obj = { feedback, star, progress, signal, feeling, arrow, shape, feedback2, flag, cell };
     for (const iconType in obj) {
         const list = obj[iconType];
         const map = {};

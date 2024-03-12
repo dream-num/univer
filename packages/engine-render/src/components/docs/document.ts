@@ -314,7 +314,7 @@ export class Documents extends DocComponent {
                             pagePaddingLeft,
                             pagePaddingRight,
                             horizontalAlign,
-                            vertexAngle
+                            vertexAngleDeg
                         );
 
                         const verticalOffset = this._verticalHandler(
@@ -473,7 +473,10 @@ export class Documents extends DocComponent {
              * rotated text aligns to the right when rotated downwards and aligns to the left when rotated upwards.
              */
             if (horizontalAlign === HorizontalAlign.UNSPECIFIED) {
-                if (angle > 0) {
+                /**
+                 * https://github.com/dream-num/univer-pro/issues/334
+                 */
+                if ((angle > 0 && angle !== 90) || angle === -90) {
                     return this.width - pageWidth - pagePaddingRight;
                 }
 

@@ -131,7 +131,7 @@ export function Dialog(props: IDialogProps) {
             </div>
         )
         : (
-            <div className={styles.dialogTitleContent}>title</div>
+            <div className={styles.dialogTitleContent}>{title}</div>
         );
 
     const modalRender = (modal: React.ReactNode) => {

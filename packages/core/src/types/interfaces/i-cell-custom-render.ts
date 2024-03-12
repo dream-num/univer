@@ -17,10 +17,10 @@
 import type { Nullable } from '../../shared';
 import type { ISelectionCellWithCoord } from './i-selection-data';
 import type { IStyleData } from './i-style-data';
-import type { ICellData } from './i-cell-data';
+import type { ICellDataForSheetInterceptor } from './i-cell-data';
 
 export interface ICellRenderContext {
-    data: ICellData;
+    data: ICellDataForSheetInterceptor;
     style: Nullable<IStyleData>;
     primaryWithCoord: ISelectionCellWithCoord;
     unitId?: string;
@@ -32,7 +32,7 @@ export interface ICellRenderContext {
 export interface ICellCustomRender {
     drawWith(ctx: CanvasRenderingContext2D, info: ICellRenderContext): void;
     zIndex?: number;
-    isHit?: (info: ICellRenderContext) => boolean;
+    isHit?: (evt: PointerEvent | MouseEvent, info: ICellRenderContext) => boolean;
     onPointerDown?: (info: ICellRenderContext) => void;
     onPointerEnter?: (info: ICellRenderContext) => void;
     onPointerLeave?: (info: ICellRenderContext) => void;

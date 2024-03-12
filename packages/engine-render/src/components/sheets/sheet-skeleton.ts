@@ -1633,14 +1633,14 @@ export class SpreadsheetSkeleton extends Skeleton {
                 this._setBorderProps(r, c, BORDER_TYPE.BOTTOM, style, cache);
                 this._setBorderProps(r, c, BORDER_TYPE.LEFT, style, cache);
                 this._setBorderProps(r, c, BORDER_TYPE.RIGHT, style, cache);
-
-                this._setBorderProps(r, c, BORDER_TYPE.TL_BR, style, cache);
-                this._setBorderProps(r, c, BORDER_TYPE.TL_BC, style, cache);
-                this._setBorderProps(r, c, BORDER_TYPE.TL_MR, style, cache);
-                this._setBorderProps(r, c, BORDER_TYPE.BL_TR, style, cache);
-                this._setBorderProps(r, c, BORDER_TYPE.ML_TR, style, cache);
-                this._setBorderProps(r, c, BORDER_TYPE.BC_TR, style, cache);
             }
+
+            this._setBorderProps(r, c, BORDER_TYPE.TL_BR, style, cache);
+            this._setBorderProps(r, c, BORDER_TYPE.TL_BC, style, cache);
+            this._setBorderProps(r, c, BORDER_TYPE.TL_MR, style, cache);
+            this._setBorderProps(r, c, BORDER_TYPE.BL_TR, style, cache);
+            this._setBorderProps(r, c, BORDER_TYPE.ML_TR, style, cache);
+            this._setBorderProps(r, c, BORDER_TYPE.BC_TR, style, cache);
         }
 
         if (needsRendering === true) {

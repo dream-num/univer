@@ -263,29 +263,29 @@ export const SetBorderCommand: ICommand = {
         function setBorderStyle(range: IRange, defaultStyle: IBorderData, reserve?: boolean) {
             if (range.startRow < 0 || range.startColumn < 0) return;
             forEach(range, (row, column) => {
-                // const rectangle = hasMerge(row, column);
+                const rectangle = hasMerge(row, column);
 
                 let bdStyle = defaultStyle;
 
-                // if (rectangle) {
-                //     if (reserve) {
-                //         const style = Tools.deepClone(
-                //             mr.getValue(rectangle.startRow, rectangle.startColumn)?.s
-                //         ) as IStyleData;
-                //         bdStyle = style?.bd ? Object.assign(style.bd, defaultStyle) : defaultStyle;
-                //     }
-                //     mr.setValue(rectangle.startRow, rectangle.startColumn, {
-                //         s: {
-                //             bd: bdStyle,
-                //         },
-                //     });
-                // } else {
-                if (reserve) {
-                    const style = Tools.deepClone(mr.getValue(row, column)?.s) as IStyleData;
-                    bdStyle = style?.bd ? Object.assign(style.bd, defaultStyle) : defaultStyle;
+                if (rectangle && (defaultStyle.bc_tr || defaultStyle.ml_tr || defaultStyle.bl_tr || defaultStyle.tl_mr || defaultStyle.tl_bc || defaultStyle.tl_br)) {
+                    if (reserve) {
+                        const style = Tools.deepClone(
+                            mr.getValue(rectangle.startRow, rectangle.startColumn)?.s
+                        ) as IStyleData;
+                        bdStyle = style?.bd ? Object.assign(style.bd, defaultStyle) : defaultStyle;
+                    }
+                    mr.setValue(rectangle.startRow, rectangle.startColumn, {
+                        s: {
+                            bd: bdStyle,
+                        },
+                    });
+                } else {
+                    if (reserve) {
+                        const style = Tools.deepClone(mr.getValue(row, column)?.s) as IStyleData;
+                        bdStyle = style?.bd ? Object.assign(style.bd, defaultStyle) : defaultStyle;
+                    }
+                    mr.setValue(row, column, { s: { bd: bdStyle } });
                 }
-                mr.setValue(row, column, { s: { bd: bdStyle } });
-                // }
             });
         }
 

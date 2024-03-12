@@ -76,9 +76,10 @@ export class Border extends SheetExtension {
                 dataMergeCache
             );
 
-            const { startY, endY, startX, endX } = cellInfo;
+            const { startY: cellStartY, endY: cellEndY, startX: cellStartX, endX: cellEndX } = cellInfo;
+            const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
 
-            if (!this.isRenderDiffRangesByRow(rowIndex, columnIndex, diffRanges)) {
+            if (!this.isRenderDiffRangesByRow(mergeInfo.startRow, mergeInfo.endRow, diffRanges)) {
                 return true;
             }
 
@@ -91,6 +92,24 @@ export class Border extends SheetExtension {
 
             for (const key in borderCaches) {
                 const { type, style, color } = borderCaches[key] as BorderCacheItem;
+
+                let startY = cellStartY;
+                let endY = cellEndY;
+                let startX = cellStartX;
+                let endX = cellEndX;
+
+                if (type !== BORDER_TYPE.TOP && type !== BORDER_TYPE.BOTTOM && type !== BORDER_TYPE.LEFT && type !== BORDER_TYPE.RIGHT) {
+                    if (isMerged) {
+                        return true;
+                    }
+
+                    if (isMergedMainCell) {
+                        startY = mergeInfo.startY;
+                        endY = mergeInfo.endY;
+                        startX = mergeInfo.startX;
+                        endX = mergeInfo.endX;
+                    }
+                }
 
                 if (style !== preStyle) {
                     setLineType(ctx, style);

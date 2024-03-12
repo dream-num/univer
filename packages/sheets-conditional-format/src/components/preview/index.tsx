@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import React from 'react';
-import { BooleanNumber } from '@univerjs/core';
+import React, { useMemo } from 'react';
+import { BooleanNumber, ColorKit } from '@univerjs/core';
 import type { IConditionalFormatRuleConfig } from '../../models/type';
 import { DEFAULT_BG_COLOR, DEFAULT_FONT_COLOR, RuleType } from '../../base/const';
+import { getColorScaleFromValue } from '../../services/calculate-unit/utils';
+import { iconMap } from '../../models/icon-map';
 import styles from './index.module.less';
 
 export const Preview = (props: { rule?: IConditionalFormatRuleConfig }) => {
@@ -25,10 +27,54 @@ export const Preview = (props: { rule?: IConditionalFormatRuleConfig }) => {
     if (!rule) {
         return null;
     }
+    const colorList = useMemo(() => {
+        if (rule.type === RuleType.colorScale) {
+            const config = rule.config.map((c, index) => ({ color: new ColorKit(c.color), value: index }));
+            const maxValue = config.length - 1;
+            const valueList = new Array(5).fill('').map((_v, index, arr) => index * maxValue / (arr.length - 1));
+            return valueList.map((value) => getColorScaleFromValue(config, value));
+        }
+        return null;
+    }, [rule]);
+    const iconSet = useMemo(() => {
+        if (rule.type === RuleType.iconSet) {
+            return rule.config.map((item) => {
+                const iconList = iconMap[item.iconType];
+                return iconList && iconList[Number(item.iconId)];
+            }).filter((icon) => !!icon);
+        }
+    }, [rule]);
     switch (rule.type) {
         case RuleType.dataBar:
+        {
+            const { isGradient } = rule.config;
+            const commonStyle = { width: '50%', height: '100%' };
+            const positiveColor = isGradient ? `linear-gradient(to right, ${rule.config.positiveColor}, rgb(255 255 255))` : rule.config.positiveColor;
+            const nativeColor = isGradient ? `linear-gradient(to right,  rgb(255 255 255),${rule.config.nativeColor})` : rule.config.nativeColor;
+            return (
+                <div className={styles.cfPreview}>
+                    <div style={{ ...commonStyle, background: nativeColor, border: `1px solid ${rule.config.nativeColor}` }}></div>
+                    <div style={{ ...commonStyle, background: positiveColor, border: `1px solid ${rule.config.positiveColor}` }}></div>
+                </div>
+            );
+        }
+
         case RuleType.colorScale:{
-            return null;
+            return colorList && (
+                <div className={styles.cfPreview}>
+                    {colorList.map((item, index) => (
+                        <div key={index} style={{ width: `${100 / colorList.length}%`, height: '100%', background: item }}>
+                        </div>
+                    ))}
+                </div>
+            );
+        }
+        case RuleType.iconSet:{
+            return iconSet && (
+                <div className={styles.cfPreview}>
+                    {iconSet.map((base64, index) => <img style={{ height: '100%' }} key={index} src={base64} />)}
+                </div>
+            );
         }
         case RuleType.highlightCell:{
             const { ul, st, it, bl, bg, cl } = rule.style;
@@ -36,8 +82,8 @@ export const Preview = (props: { rule?: IConditionalFormatRuleConfig }) => {
             const isStrikethrough = st?.s === BooleanNumber.TRUE;
             const isItalic = it === BooleanNumber.TRUE;
             const isBold = bl === BooleanNumber.TRUE;
-            const bgColor = bg?.rgb || DEFAULT_BG_COLOR;
-            const fontColor = cl?.rgb || DEFAULT_FONT_COLOR;
+            const bgColor = bg?.rgb ?? DEFAULT_BG_COLOR;
+            const fontColor = cl?.rgb ?? DEFAULT_FONT_COLOR;
             const style = { fontWeight: isBold ? 'bold' : undefined,
                             fontStyle: isItalic ? 'italic' : undefined,
                             textDecoration: `${isUnderline ? 'underline' : ''} ${isStrikethrough ? 'line-through' : ''}`.replace(/^ /, '') || undefined,

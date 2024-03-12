@@ -53,14 +53,15 @@ export const RuleEdit = (props: IRuleEditProps) => {
     const conditionalFormatRuleModel = useDependency(ConditionalFormatRuleModel);
     const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
     const subUnitId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
-    const workbook = univerInstanceService.getUniverSheetInstance(unitId);
-    const sheet = workbook?.getSheetBySheetId(subUnitId);
 
     const rangeResult = useRef<IRange[]>([]);
     const rangeString = useMemo(() => {
         const ranges = props.rule?.ranges?.length ? props.rule?.ranges : [];
-        if (ranges.length && sheet) {
-            return ranges.map((range) => serializeRange(range)).join(',');
+        if (ranges.length) {
+            return ranges.map((range) => {
+                const v = serializeRange(range);
+                return v === 'NaN' ? '' : v;
+            }).filter((r) => !!r).join(',');
         }
         return '';
     }, [props.rule?.ranges]);
@@ -156,7 +157,8 @@ export const RuleEdit = (props: IRuleEditProps) => {
         const beforeSubmitResult = interceptorManager.fetchThroughInterceptors(interceptorManager.getInterceptPoints().beforeSubmit)(true, null);
         const getRanges = () => {
             const ranges = rangeResult.current;
-            return ranges;
+            const isError = ranges.some((range) => Number.isNaN(range.startRow) || Number.isNaN(range.startColumn));
+            return isError ? [] : ranges;
         };
 
         if (beforeSubmitResult) {

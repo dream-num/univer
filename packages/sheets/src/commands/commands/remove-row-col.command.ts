@@ -39,6 +39,7 @@ import {
     RemoveRowMutation,
     RemoveRowsUndoMutationFactory,
 } from '../mutations/remove-row-col.mutation';
+import { type ISetRangeValuesMutationParams, SetRangeValuesMutation } from '../mutations/set-range-values.mutation';
 import { followSelectionOperation } from './utils/selection-utils';
 
 export interface IRemoveRowColCommandParams {
@@ -82,6 +83,13 @@ export const RemoveRowCommand: ICommand = {
             unitId,
             subUnitId,
             range,
+        };
+
+        const removedRows = worksheet.getCellMatrix().getSlice(range.startRow, range.endRow, 0, worksheet.getColumnCount() - 1);
+        const undoSetRangeValuesParams: ISetRangeValuesMutationParams = {
+            unitId,
+            subUnitId,
+            cellValue: removedRows.getMatrix(),
         };
         const undoRemoveRowsParams: IInsertRowMutationParams = RemoveRowsUndoMutationFactory(
             removeRowsParams,
@@ -155,6 +163,12 @@ export const RemoveColCommand: ICommand = {
         };
         const undoRemoveColParams: IInsertColMutationParams = RemoveColMutationFactory(accessor, removeColParams);
 
+        const removedCols = worksheet.getCellMatrix().getSlice(0, worksheet.getRowCount() - 1, range.startColumn, range.endColumn);
+        const undoSetRangeValuesParams: ISetRangeValuesMutationParams = {
+            unitId,
+            subUnitId,
+            cellValue: removedCols.getMatrix(),
+        };
         const intercepted = sheetInterceptorService.onCommandExecute({
             id: RemoveColCommand.id,
             params: { range } as IRemoveRowColCommandParams,

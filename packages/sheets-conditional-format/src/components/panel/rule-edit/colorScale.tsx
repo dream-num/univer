@@ -16,7 +16,7 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import { LocaleService } from '@univerjs/core';
+import { IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { InputNumber, Select } from '@univerjs/design';
 import { TextEditor } from '@univerjs/ui';
 import { RuleType, SHEET_CONDITION_FORMAT_PLUGIN, ValueType } from '../../../base/const';
@@ -29,6 +29,9 @@ const createOptionItem = (text: string, localeService: LocaleService) => ({ labe
 
 const TextInput = (props: { id: string; type: ValueType | 'none';value: number | string;onChange: (v: number | string) => void; className: string }) => {
     const { type, className, onChange, id, value } = props;
+    const univerInstanceService = useDependency(IUniverInstanceService);
+    const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+    const subUnitId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
     const _value = useRef(value);
 
     const config = useMemo(() => {
@@ -46,6 +49,8 @@ const TextInput = (props: { id: string; type: ValueType | 'none';value: number |
         const v = String(_value.current).startsWith('=') ? String(_value.current) || '' : '=';
         return (
             <TextEditor
+                openForSheetSubUnitId={subUnitId}
+                openForSheetUnitId={unitId}
                 id={`${SHEET_CONDITION_FORMAT_PLUGIN}_colo_scale_${id}`}
                 value={v}
                 style={{ maxWidth: '50%' }}

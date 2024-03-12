@@ -122,13 +122,13 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
     }
 
     set lineWidth(val: number) {
+        this._context.lineWidth = val;
+    }
+
+    setLineWidthByPrecision(val: number) {
         const { scaleX, scaleY } = this._getScale();
 
         this._context.lineWidth = val / Math.max(scaleX, scaleY);
-    }
-
-    setLineWidthNative(val: number) {
-        this._context.lineWidth = val;
     }
 
     // miterLimit: number;

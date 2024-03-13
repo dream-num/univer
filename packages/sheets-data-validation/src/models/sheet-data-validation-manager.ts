@@ -189,7 +189,7 @@ export class SheetDataValidationManager extends DataValidationManager<ISheetData
 
     override updateRule(ruleId: string, payload: IUpdateRulePayload) {
         const oldRule = this.getRuleById(ruleId);
-        const rule = super.updateRule(ruleId, payload);
+
         if (!oldRule) {
             throw new Error(`Rule not found! id: ${ruleId}`);
         }
@@ -205,7 +205,8 @@ export class SheetDataValidationManager extends DataValidationManager<ISheetData
                 this._dataValidationCustomFormulaService.updateRuleFormula(this.unitId, this.subUnitId, ruleId, oldRule.ranges, payload.payload.formula1!);
             }
         }
-        return rule;
+
+        return super.updateRule(ruleId, payload);
     }
 
     updateRuleFormulaText(ruleId: string, payload: IUpdateDataValidationFormulaPayload) {
@@ -231,7 +232,7 @@ export class SheetDataValidationManager extends DataValidationManager<ISheetData
             );
         }
 
-        super.updateRule(uid, {
+        return super.updateRule(uid, {
             type: UpdateRuleType.SETTING,
             payload: {
                 type,

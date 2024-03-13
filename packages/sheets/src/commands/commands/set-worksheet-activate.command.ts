@@ -26,6 +26,9 @@ export interface ISetWorksheetActivateCommandParams {
     subUnitId?: string;
 }
 
+/** We should delay this command to execute, after focus moves to the correct element. */
+const SET_WORKSHEET_ACTIVE_DELAY = 4;
+
 export const SetWorksheetActivateCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-worksheet-activate',
@@ -41,9 +44,15 @@ export const SetWorksheetActivateCommand: ICommand = {
             subUnitId = params.subUnitId ?? subUnitId;
         }
 
-        return commandService.syncExecuteCommand(SetWorksheetActiveOperation.id, {
-            unitId,
-            subUnitId,
-        } as ISetWorksheetActiveOperationParams, options);
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                const result = commandService.syncExecuteCommand(SetWorksheetActiveOperation.id, {
+                    unitId,
+                    subUnitId,
+                } as ISetWorksheetActiveOperationParams, options);
+
+                resolve(result);
+            }, SET_WORKSHEET_ACTIVE_DELAY);
+        });
     },
 };

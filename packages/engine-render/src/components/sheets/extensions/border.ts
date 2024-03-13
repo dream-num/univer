@@ -63,6 +63,8 @@ export class Border extends SheetExtension {
 
         ctx.translateWithPrecisionRatio(FIX_ONE_PIXEL_BLUR_OFFSET, FIX_ONE_PIXEL_BLUR_OFFSET);
 
+        const precisionScale = this._getScale(ctx.getScale());
+
         border?.forValue((rowIndex, columnIndex, borderCaches) => {
             if (!borderCaches) {
                 return true;
@@ -111,9 +113,11 @@ export class Border extends SheetExtension {
                     }
                 }
 
+                const lineWidth = getLineWidth(style);
+
                 if (style !== preStyle) {
                     setLineType(ctx, style);
-                    ctx.setLineWidthByPrecision(getLineWidth(style));
+                    ctx.setLineWidthByPrecision(lineWidth);
                     preStyle = style;
                 }
 
@@ -133,7 +137,7 @@ export class Border extends SheetExtension {
                     continue;
                 }
 
-                drawLineByBorderType(ctx, type, {
+                drawLineByBorderType(ctx, type, (lineWidth - 1) / 2 / precisionScale, {
                     startX,
                     startY,
                     endX,

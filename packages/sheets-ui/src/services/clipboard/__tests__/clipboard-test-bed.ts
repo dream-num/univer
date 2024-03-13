@@ -551,10 +551,6 @@ export function clipboardTestBed(workbookConfig?: IWorkbookData, dependencies?: 
 
             dependencies?.forEach((d) => injector.add(d));
         }
-
-        override onDestroy(): void {
-            get = undefined;
-        }
     }
 
     univer.registerPlugin(TestPlugin);

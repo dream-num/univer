@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { CommandType, ICommandService, IUndoRedoService } from '@univerjs/core';
+import { CommandType, ICommandService, IUndoRedoService, sequenceExecuteAsync } from '@univerjs/core';
 import type { ICommand, IMutationInfo, IRange, ISheetDataValidationRule } from '@univerjs/core';
 import type { IAddDataValidationMutationParams, IUpdateDataValidationMutationParams } from '@univerjs/data-validation';
 import { AddDataValidationMutation, DataValidationModel, RemoveDataValidationMutation, UpdateDataValidationMutation, UpdateRuleType } from '@univerjs/data-validation';
@@ -141,10 +141,7 @@ export const UpdateSheetDataValidationRangeCommand: ICommand<IUpdateSheetDataVal
             unitID: unitId,
         });
 
-        redoMutations.forEach((commandInfo) => {
-            commandService.executeCommand(commandInfo.id, commandInfo.params);
-        });
-
+        await sequenceExecuteAsync(redoMutations, commandService);
         return true;
     },
 };
@@ -255,10 +252,7 @@ export const AddSheetDataValidationCommand: ICommand<IAddSheetDataValidationComm
             undoMutations,
         });
 
-        redoMutations.forEach((commandInfo) => {
-            commandService.executeCommand(commandInfo.id, commandInfo.params);
-        });
-
+        await sequenceExecuteAsync(redoMutations, commandService);
         return true;
     },
 };

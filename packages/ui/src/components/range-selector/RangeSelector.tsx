@@ -250,6 +250,10 @@ export function RangeSelector(props: IRangeSelectorProps) {
     function handleTextValueChange(value: Nullable<string>) {
         setRangeValue(value || '');
 
+        if (value === '') {
+            return;
+        }
+
         const ranges = value?.split(',').map((ref) => {
             const unitRange = deserializeRangeWithSheet(ref);
             return {

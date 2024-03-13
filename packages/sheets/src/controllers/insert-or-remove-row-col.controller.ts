@@ -81,7 +81,7 @@ export class InsertOrRemoveRowColController extends Disposable {
                         }
                     }
 
-                    if (startRow !== endRow && startColumn !== endColumn) {
+                    if (!(merge.startRow === merge.endRow && merge.startColumn === merge.endColumn)) {
                         adjustedMergedCells.push({ startRow, endRow, startColumn, endColumn, rangeType });
                     }
                 });

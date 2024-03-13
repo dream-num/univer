@@ -52,7 +52,6 @@ export class MoveRowsColsController extends Disposable {
 
                 const adjustedMergedCells: IRange[] = [];
                 mergeData.forEach((merge) => {
-                // 这里需要用start来判断 往前移动的时候 因为要做transform
                     let { startRow, endRow, startColumn, endColumn, rangeType } = merge;
 
                     if (!Rectangle.intersects(merge, sourceRange)) {
@@ -60,7 +59,7 @@ export class MoveRowsColsController extends Disposable {
                             if (sourceStart < startRow && targetStart > endRow) {
                                 startRow -= moveLength;
                                 endRow -= moveLength;
-                            } else if (sourceStart > endRow && targetStart < startRow) {
+                            } else if (sourceStart > endRow && targetStart <= startRow) {
                                 startRow += moveLength;
                                 endRow += moveLength;
                             }
@@ -68,14 +67,14 @@ export class MoveRowsColsController extends Disposable {
                             if (sourceStart < startColumn && targetStart > endColumn) {
                                 startColumn -= moveLength;
                                 endColumn -= moveLength;
-                            } else if (sourceStart > endColumn && targetStart < startColumn) {
+                            } else if (sourceStart > endColumn && targetStart <= startColumn) {
                                 startColumn += moveLength;
                                 endColumn += moveLength;
                             }
                         }
                     }
 
-                    if (startRow !== endRow && startColumn !== endColumn) {
+                    if (!(merge.startRow === merge.endRow && merge.startColumn === merge.endColumn)) {
                         adjustedMergedCells.push({ startRow, endRow, startColumn, endColumn, rangeType });
                     }
                 });

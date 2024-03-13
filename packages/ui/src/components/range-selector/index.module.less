@@ -1,6 +1,6 @@
 @padding-top-bottom: 6px;
 @height: 32px;
-@width: 218px;
+@width: 220px;
 @icon-size: 24px;
 
 .range-selector {
@@ -59,19 +59,39 @@
         }
     }
 
+    &:hover {
+        border-color: rgb(var(--hyacinth-500));
+    }
+
     &-active {
-        border-color: rgb(var(--primary-color));
+        border-color: rgb(var(--hyacinth-500));
 
         .range-selector-icon {
-            color: rgb(var(--primary-color));
+            color: rgb(var(--hyacinth-500));
         }
     }
 
     &-error {
-        border-color: rgb(var(--error-color));
+        border-color: rgb(var(--red-400));
 
         .range-selector-icon {
-            color: rgb(var(--error-color));
+            color: rgb(var(--red-400));
+        }
+
+        &:hover {
+            border-color: rgb(var(--red-400));
+        }
+    }
+
+    &-disabled {
+        border-color: rgb(var(--grey-100));
+
+        .range-selector-icon {
+            color: rgb(var(--grey-100));
+        }
+
+        &:hover {
+            border-color: rgb(var(--grey-100));
         }
     }
 }
@@ -80,8 +100,6 @@
     position: relative;
 
     max-height: 500px;
-
-    width: 260px;
 
     overflow: hidden;
 
@@ -92,29 +110,46 @@
         flex-direction: row;
         // justify-content: center;
         align-items: center;
-        width: 230px;
+
         margin-bottom: 10px;
 
         &-input {
             display: inline-block;
-            width: 200px;
+            width: 280px;
+
+            &-active {
+                border-color: rgb(var(--hyacinth-500));
+            }
         }
 
         &-button {
             display: inline-block;
             text-align: center;
-            width: 30px;
+            width: 28px;
 
             &:hover {
                 cursor: pointer;
-                color: rgb(var(--primary-color));
+                color: rgb(var(--hyacinth-500));
             }
         }
     }
 
-    &--add {
+    &-add {
         position: relative;
         width: 300px;
         margin-top: 5px;
+        text-align: left;
+        color: rgb(var(--hyacinth-500));
+        font-size: var(--font-size-xs);
+        &-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            &:hover {
+                cursor: pointer;
+                background-color: rgb(var(--hyacinth-500), 0.05);
+            }
+        }
     }
 }

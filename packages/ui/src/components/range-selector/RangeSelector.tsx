@@ -185,21 +185,19 @@ export function RangeSelector(props: IRangeSelectorProps) {
             return;
         }
 
-        if (rangeValue.length > 0) {
-            if (valid) {
-                setRangeDataList(rangeValue.split(','));
-            } else {
-                setRangeDataList(['']);
-            }
-        }
-
         editorService.closeRangePrompt();
 
         rangeSelectorService.setCurrentSelectorId(id);
 
         setSelectorVisible(true);
 
-        if (rangeValue.length === 0) {
+        if (rangeValue.length > 0) {
+            if (valid) {
+                setRangeDataList(rangeValue.split(','));
+            } else {
+                setRangeDataList(['']);
+            }
+        } else {
             rangeSelectorService.openSelector();
         }
     }

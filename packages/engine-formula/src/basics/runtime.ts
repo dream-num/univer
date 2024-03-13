@@ -16,7 +16,7 @@
 
 import { ObjectMatrix } from '@univerjs/core';
 
-import type { IArrayFormulaUnitCellType, IRuntimeUnitDataType } from './common';
+import type { IArrayFormulaUnitCellType, IRuntimeUnitDataPrimitiveType, IRuntimeUnitDataType } from './common';
 
 export function convertUnitDataToRuntime(unitData: IArrayFormulaUnitCellType) {
     const arrayFormulaCellData: IRuntimeUnitDataType = {};
@@ -39,4 +39,27 @@ export function convertUnitDataToRuntime(unitData: IArrayFormulaUnitCellType) {
     });
 
     return arrayFormulaCellData;
+}
+
+export function convertRuntimeToUnitData(unitData: IRuntimeUnitDataType) {
+    const unitPrimitiveData: IRuntimeUnitDataPrimitiveType = {};
+    Object.keys(unitData).forEach((unitId) => {
+        const sheetData = unitData[unitId];
+
+        if (sheetData == null) {
+            return true;
+        }
+
+        if (unitPrimitiveData[unitId] == null) {
+            unitPrimitiveData[unitId] = {};
+        }
+
+        Object.keys(sheetData).forEach((sheetId) => {
+            const cellData = sheetData[sheetId];
+
+            unitPrimitiveData[unitId]![sheetId] = cellData.getData();
+        });
+    });
+
+    return unitPrimitiveData;
 }

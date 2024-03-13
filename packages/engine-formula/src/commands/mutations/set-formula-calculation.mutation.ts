@@ -22,7 +22,7 @@ import type {
     IDirtyUnitSheetNameMap,
     INumfmtItemMap,
     IRuntimeOtherUnitDataType,
-    IRuntimeUnitDataType,
+    IRuntimeUnitDataPrimitiveType,
 } from '../../basics/common';
 import type { FormulaExecutedStateType, IExecutionInProgressParams } from '../../services/runtime.service';
 
@@ -64,7 +64,7 @@ export const SetFormulaCalculationNotificationMutation: IMutation<ISetFormulaCal
 };
 
 export interface ISetFormulaCalculationResultMutation {
-    unitData: IRuntimeUnitDataType;
+    unitData: IRuntimeUnitDataPrimitiveType;
     unitOtherData: IRuntimeOtherUnitDataType;
 }
 

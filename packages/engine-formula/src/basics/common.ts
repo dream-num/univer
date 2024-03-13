@@ -69,6 +69,10 @@ export interface IRuntimeUnitDataType {
     [unitId: string]: Nullable<{ [sheetId: string]: ObjectMatrix<Nullable<ICellData>> }>;
 }
 
+export interface IRuntimeUnitDataPrimitiveType {
+    [unitId: string]: Nullable<{ [sheetId: string]: IObjectMatrixPrimitiveType<Nullable<ICellData>> }>;
+}
+
 export interface IRuntimeOtherUnitDataType {
     [unitId: string]: Nullable<{ [sheetId: string]: Nullable<{ [formulaId: string]: ICellData }> }>;
 }

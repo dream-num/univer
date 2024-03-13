@@ -230,9 +230,9 @@ describe('test "hitCell" method', () => {
                     replaceRevealed: false,
                 };
 
-                // If only the result matches, the formula is not replaceable
+                // If search by formula, when the formula string failed to match, the cell should not be hit.
                 const result1 = hitCell(worksheet, 0, 0, query, TEST_WORKBOOK_DATA.sheets.sheet1.cellData![0][0]);
-                expect(result1.hit).toBeTruthy();
+                expect(result1.hit).toBeFalsy();
                 expect(result1.replaceable).toBeFalsy();
 
                 const result2 = hitCell(worksheet, 0, 1, query, TEST_WORKBOOK_DATA.sheets.sheet1.cellData![0][1]);

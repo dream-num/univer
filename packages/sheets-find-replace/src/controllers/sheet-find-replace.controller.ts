@@ -965,6 +965,10 @@ export function hitCell(worksheet: Worksheet, row: number, col: number, query: I
                 VALUE_PASSING_OBJECT.replaceable = true;
                 return VALUE_PASSING_OBJECT;
             }
+
+            VALUE_PASSING_OBJECT.hit = false;
+            VALUE_PASSING_OBJECT.replaceable = false;
+            return VALUE_PASSING_OBJECT;
         }
 
         // Otherwise, no matter it matches the result value, it should be unreplaceable.
@@ -978,7 +982,7 @@ export function hitCell(worksheet: Worksheet, row: number, col: number, query: I
         return VALUE_PASSING_OBJECT;
     }
 
-    // if the cell does not match, we should not check the raw data
+    // If the cell does not match, we should not check the raw data.
     VALUE_PASSING_OBJECT.isFormula = false;
     if (!matchCellData(cellData, query)) {
         VALUE_PASSING_OBJECT.hit = false;

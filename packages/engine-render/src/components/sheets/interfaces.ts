@@ -42,7 +42,8 @@ export interface IFontCacheItem {
     // marginBottom?: number;
     // marginRight?: number;
     // marginLeft?: number;
-    angle?: number;
+    vertexAngle?: number; // Text rotation offset based on the top-left corner.
+    centerAngle?: number; // Text rotation based on the center point.
     verticalAlign: VerticalAlign;
     horizontalAlign: HorizontalAlign;
     wrapStrategy: WrapStrategy;

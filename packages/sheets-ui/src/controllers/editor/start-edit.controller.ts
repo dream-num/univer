@@ -45,6 +45,7 @@ import {
 } from '@univerjs/docs';
 import type { DocumentSkeleton, IDocumentLayoutObject, IEditorInputConfig, Scene } from '@univerjs/engine-render';
 import {
+    convertTextRotation,
     DeviceInputEventType,
     FIX_ONE_PIXEL_BLUR_OFFSET,
     fixLineWidthByScale,
@@ -171,7 +172,7 @@ export class StartEditController extends Disposable {
 
                 const { textRotation, wrapStrategy, documentModel } = documentLayoutObject;
 
-                const { a: angle } = textRotation as ITextRotation;
+                const { vertexAngle: angle } = convertTextRotation(textRotation);
 
                 documentModel!.updateDocumentId(editorUnitId);
 
@@ -276,7 +277,7 @@ export class StartEditController extends Disposable {
 
         const documentDataModel = documentLayoutObject.documentModel;
 
-        const { a: angle } = textRotation as ITextRotation;
+        const { vertexAngle: angle } = convertTextRotation(textRotation);
 
         const clientWidth = document.body.clientWidth;
 

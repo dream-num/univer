@@ -47,6 +47,7 @@ import {
 } from '../insert-row-col.command';
 import type { IRemoveRowColCommandParams } from '../remove-row-col.command';
 import { RemoveColCommand, RemoveRowCommand } from '../remove-row-col.command';
+import { InsertOrRemoveRowColController } from '../../../controllers/insert-or-remove-row-col.controller';
 import { createCommandTestBed } from './create-command-test-bed';
 
 describe('Test insert and remove rows cols commands', () => {
@@ -59,6 +60,8 @@ describe('Test insert and remove rows cols commands', () => {
         univer = testBed.univer;
         get = testBed.get;
         get(MergeCellController);
+        get(InsertOrRemoveRowColController);
+
         commandService = get(ICommandService);
 
         [
@@ -390,5 +393,6 @@ function createInsertRowColTestBed() {
     return createCommandTestBed(Tools.deepClone(TEST_ROW_COL_INSERTION_DEMO), [
         [MergeCellController],
         [RefRangeService],
+        [InsertOrRemoveRowColController],
     ]);
 }

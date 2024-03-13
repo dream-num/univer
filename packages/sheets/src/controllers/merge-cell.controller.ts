@@ -287,6 +287,9 @@ export class MergeCellController extends Disposable {
                 result && addParams.ranges.push(result);
             }
         });
+        if (removeParams.ranges.length === 0) {
+            return this._handleNull();
+        }
         const removeUndo = RemoveMergeUndoMutationFactory(this._injector, removeParams);
         const addUndo = AddMergeUndoMutationFactory(this._injector, addParams);
         return {
@@ -330,6 +333,9 @@ export class MergeCellController extends Disposable {
                 result && addParams.ranges.push(result);
             }
         });
+        if (removeParams.ranges.length === 0) {
+            return this._handleNull();
+        }
         const removeUndo = RemoveMergeUndoMutationFactory(this._injector, removeParams);
         const addUndo = AddMergeUndoMutationFactory(this._injector, addParams);
         return {

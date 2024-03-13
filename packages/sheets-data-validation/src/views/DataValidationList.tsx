@@ -22,7 +22,7 @@ import { DataValidationModel, RemoveAllDataValidationCommand } from '@univerjs/d
 import { Button } from '@univerjs/design';
 import { SelectionManagerService } from '@univerjs/sheets';
 import { AddSheetDataValidationCommand, type IAddSheetDataValidationCommandParams } from '..';
-import { DataValidationItem } from './DataValidationItem';
+import { DataValidationItem } from './item';
 
 export interface IDataValidationListProps {
     onActive: (rule: ISheetDataValidationRule) => void;
@@ -85,7 +85,7 @@ export const DataValidationList = (props: IDataValidationListProps) => {
                     key={rule.uid}
                 />
             ))}
-            <div>
+            <div style={{ marginTop: 20 }}>
                 <Button type="primary" onClick={handleRemoveAll}>
                     Remove All
                 </Button>

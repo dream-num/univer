@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ICommandService, LocaleService, Plugin } from '@univerjs/core';
+import { ICommandService, Plugin } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { DataValidatorRegistryService } from './services/data-validator-registry.service';
@@ -24,15 +24,13 @@ import { CloseValidationPanelOperation, OpenValidationPanelOperation, ToggleVali
 import { DataValidatorController } from './controllers/validator.controller';
 import { AddDataValidationCommand, RemoveAllDataValidationCommand, RemoveDataValidationCommand, UpdateDataValidationOptionsCommand, UpdateDataValidationSettingCommand } from './commands/commands/data-validation.command';
 import { AddDataValidationMutation, RemoveDataValidationMutation, UpdateDataValidationMutation } from './commands/mutations/data-validation.mutation';
-import { enUS, zhCN } from './locales';
 
 const PLUGIN_NAME = 'data-validation';
 
 export class UniverDataValidationPlugin extends Plugin {
     constructor(
         @Inject(Injector) protected _injector: Injector,
-        @ICommandService private _commandService: ICommandService,
-        @Inject(LocaleService) private _localeService: LocaleService
+        @ICommandService private _commandService: ICommandService
     ) {
         super(PLUGIN_NAME);
     }
@@ -73,11 +71,6 @@ export class UniverDataValidationPlugin extends Plugin {
             RemoveDataValidationMutation,
         ].forEach((command) => {
             this._commandService.registerCommand(command);
-        });
-
-        this._localeService.load({
-            zhCN,
-            enUS,
         });
     }
 }

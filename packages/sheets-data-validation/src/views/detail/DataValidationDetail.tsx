@@ -25,8 +25,8 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useState } from 'react';
 import { serializeRange } from '@univerjs/engine-formula';
 import { getRuleSetting } from '@univerjs/data-validation/common/util.js';
-import type { IUpdateSheetDataValidationRangeCommandParams } from '../commands/commands/data-validation.command';
-import { UpdateSheetDataValidationRangeCommand } from '../commands/commands/data-validation.command';
+import type { IUpdateSheetDataValidationRangeCommandParams } from '../../commands/commands/data-validation.command';
+import { UpdateSheetDataValidationRangeCommand } from '../../commands/commands/data-validation.command';
 
 export interface IDataValidationDetailProps {
     rule: ISheetDataValidationRule;

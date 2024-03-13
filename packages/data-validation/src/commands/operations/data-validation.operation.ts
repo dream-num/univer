@@ -28,9 +28,9 @@ export const OpenValidationPanelOperation: ICommand = {
         const sidebarService = accessor.get(ISidebarService);
         dataValidationPanelService.open();
         sidebarService.open({
-            header: { title: 'data-validation-panel.title' },
+            header: { title: 'dataValidation.panel.title' },
             children: { label: DataValidationPanelName },
-            width: 400,
+            width: 312,
         });
         return true;
     },

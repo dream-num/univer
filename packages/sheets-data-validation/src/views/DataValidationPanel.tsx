@@ -16,7 +16,7 @@
 
 import React, { useState } from 'react';
 import type { ISheetDataValidationRule } from '@univerjs/core';
-import { DataValidationDetail } from './DataValidationDetail';
+import { DataValidationDetail } from './detail/DataValidationDetail';
 import { DataValidationList } from './DataValidationList';
 
 export const DataValidationPanel = () => {

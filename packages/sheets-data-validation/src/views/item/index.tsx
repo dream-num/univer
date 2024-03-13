@@ -19,6 +19,8 @@ import { DataValidatorRegistryService, RemoveDataValidationCommand } from '@univ
 import { Button } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React from 'react';
+import { serializeRange } from '@univerjs/engine-formula';
+import styles from './index.module.less';
 
 export interface IDataValidationDetailProps {
     rule: ISheetDataValidationRule;
@@ -42,16 +44,16 @@ export const DataValidationItem = (props: IDataValidationDetailProps) => {
     };
 
     return (
-        <div onClick={onClick} style={{ padding: 4, marginBottom: 4, border: '1px solid #ccc' }}>
-            <div>
-                {rule.type}
-                :
-                {rule.uid}
-            </div>
-            <div>
+        <div
+            className={styles.container}
+            onClick={onClick}
+        >
+            <div className={styles.title}>
                 {validator?.generateRuleName(rule)}
             </div>
-            <Button size="small" onClick={handleDelete}>删除</Button>
+            <div className={styles.content}>
+                {rule.ranges.map((range) => serializeRange(range)).join(',')}
+            </div>
         </div>
     );
 };

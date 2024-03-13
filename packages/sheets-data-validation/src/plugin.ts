@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ICommandService, Plugin } from '@univerjs/core';
+import { ICommandService, LocaleService, Plugin } from '@univerjs/core';
 import { type Dependency, Inject, Injector } from '@wendellhu/redi';
 import { DataValidationRenderController } from './controllers/dv-render.controller';
 import { DataValidationController } from './controllers/dv.controller';
@@ -27,13 +27,15 @@ import { DataValidationCustomFormulaService } from './services/dv-custom-formula
 import { RegisterOtherFormulaService } from './services/register-formula.service';
 import { DataValidationRefRangeController } from './controllers/dv-ref-range.controller';
 import { DataValidationFormulaMarkDirty } from './commands/mutations/formula.mutation';
+import { enUS, zhCN } from './locales';
 
 const PLUGIN_NAME = 'sheets-data-validation';
 
 export class UniverSheetsDataValidationPlugin extends Plugin {
     constructor(
         @Inject(Injector) protected _injector: Injector,
-        @ICommandService private readonly _commandService: ICommandService
+        @ICommandService private readonly _commandService: ICommandService,
+        @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
         super(PLUGIN_NAME);
     }
@@ -60,6 +62,11 @@ export class UniverSheetsDataValidationPlugin extends Plugin {
             DataValidationFormulaMarkDirty,
         ].forEach((command) => {
             this._commandService.registerCommand(command);
+        });
+
+        this._localeService.load({
+            zhCN,
+            enUS,
         });
     }
 }

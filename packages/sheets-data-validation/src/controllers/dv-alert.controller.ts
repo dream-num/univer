@@ -62,12 +62,4 @@ export class DataValidationAlertController extends Disposable {
             this._cellAlertManagerService.clearAlert();
         }));
     }
-
-    private _initCellDropdown() {
-        this.disposeWithMe(this._editorBridgeService.currentEditCellState$.subscribe((state) => {
-            // this._dropdownManagerService.showDropdown({
-
-            // });
-        }));
-    }
 }

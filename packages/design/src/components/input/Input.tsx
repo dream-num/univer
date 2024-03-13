@@ -22,7 +22,16 @@ import React from 'react';
 import styles from './index.module.less';
 
 export interface IInputProps {
+    /**
+     * Whether the input is autoFocus
+     * @default false
+     */
     autoFocus?: boolean;
+
+    /**
+     * The input class name
+     */
+    className?: string;
 
     /**
      * The input affix wrapper style
@@ -85,7 +94,9 @@ export interface IInputProps {
 export function Input(props: IInputProps) {
     const {
         affixWrapperStyle,
+        autoFocus = false,
         type = 'text',
+        className,
         placeholder,
         value,
         size = 'middle',
@@ -94,7 +105,6 @@ export function Input(props: IInputProps) {
         onClick,
         onKeyDown,
         onChange,
-        autoFocus,
     } = props;
 
     function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -102,7 +112,7 @@ export function Input(props: IInputProps) {
         onChange?.(value);
     }
 
-    const _className = clsx({
+    const _className = clsx(className, {
         [styles.inputAffixWrapperMini]: size === 'mini',
         [styles.inputAffixWrapperSmall]: size === 'small',
         [styles.inputAffixWrapperMiddle]: size === 'middle',

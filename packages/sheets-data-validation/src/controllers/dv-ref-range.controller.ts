@@ -27,8 +27,6 @@ import { DataValidationModel, RemoveDataValidationMutation, UpdateDataValidation
 import { removeDataValidationUndoFactory } from '@univerjs/data-validation/commands/commands/data-validation.command.js';
 import { FormulaRefRangeService } from '@univerjs/sheets-formula';
 import { isRangesEqual } from '../utils/isRangesEqual';
-import type { IUpdateDataValidationFormulaSilentMutationParams } from '../commands/mutations/formula.mutation';
-import { UpdateDataValidationFormulaSilentMutation } from '../commands/mutations/formula.mutation';
 import { DataValidationCustomFormulaService } from '../services/dv-custom-formula.service';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
 
@@ -67,33 +65,43 @@ export class DataValidationRefRangeController extends Disposable {
             if (!oldFormula || oldFormula === formulaString) {
                 return { redos: [], undos: [] };
             }
-            const redoParams: IUpdateDataValidationFormulaSilentMutationParams = {
+            const redoParams: IUpdateDataValidationMutationParams = {
                 unitId,
                 subUnitId,
                 ruleId: rule.uid,
                 payload: {
-                    type,
-                    formulaString,
+                    type: UpdateRuleType.SETTING,
+                    payload: {
+                        type: oldRule.type,
+                        formula1: oldRule.formula1,
+                        formula2: oldRule.formula2,
+                        [type]: formulaString,
+                    },
                 },
             };
-            const undoParams: IUpdateDataValidationFormulaSilentMutationParams = {
+            const undoParams: IUpdateDataValidationMutationParams = {
                 unitId,
                 subUnitId,
                 ruleId: rule.uid,
                 payload: {
-                    type,
-                    formulaString: oldFormula,
+                    type: UpdateRuleType.SETTING,
+                    payload: {
+                        type: oldRule.type,
+                        formula1: oldRule.formula1,
+                        formula2: oldRule.formula2,
+                        [type]: formulaString,
+                    },
                 },
             };
             const redos = [
                 {
-                    id: UpdateDataValidationFormulaSilentMutation.id,
+                    id: UpdateDataValidationMutation.id,
                     params: redoParams,
                 },
             ];
             const undos = [
                 {
-                    id: UpdateDataValidationFormulaSilentMutation.id,
+                    id: UpdateDataValidationMutation.id,
                     params: undoParams,
                 },
             ];

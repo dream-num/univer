@@ -154,27 +154,6 @@ export class DataValidationFormulaService extends Disposable {
         }
     }
 
-    /**
-     * Just update formula text, need't to recreate new formula and delete old formula.
-     * Only triggered by formula ref-range update.
-     */
-    updateRuleFormulaTextSilent(unitId: string, subUnitId: string, ruleId: string, formula1: string | undefined, formula2: string | undefined) {
-        const formulaRuleMap = this._ensureRuleFormulaMap(unitId, subUnitId);
-        const item = formulaRuleMap.get(ruleId);
-        if (!item) {
-            return;
-        }
-
-        const [oldFormula1, oldFormula2] = item;
-        if (oldFormula1 && oldFormula1.text !== formula1) {
-            oldFormula1.text = formula1!;
-        }
-
-        if (oldFormula2 && oldFormula2.text !== formula2) {
-            oldFormula2.text = formula2!;
-        }
-    }
-
     getRuleFormulaResult(unitId: string, subUnitId: string, ruleId: string): Promise<Nullable<[Nullable<IDataValidationFormulaResult>, Nullable<IDataValidationFormulaResult>]>> {
         const ruleFormulaMap = this._ensureRuleFormulaMap(unitId, subUnitId);
 

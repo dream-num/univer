@@ -34,7 +34,7 @@ interface IFormulaData {
     originRow: number;
     originCol: number;
     isTransformable: boolean;
-    formulaId: string;
+    formulaId?: string;
 }
 
 interface ICellData {
@@ -158,7 +158,7 @@ export class DataValidationCustomFormulaService extends Disposable {
             return;
         }
 
-        formulaIdList.add(formulaInfo.formulaId);
+        // formulaIdList.add(formulaInfo.formulaId);
         ruleFormulaMap.delete(ruleId);
 
         rule.ranges.forEach((range) => {
@@ -186,8 +186,8 @@ export class DataValidationCustomFormulaService extends Disposable {
 
         const originRow = ranges[0].startRow;
         const originCol = ranges[0].startColumn;
-        const originFormulaId = this._registerFormula(unitId, subUnitId, ruleId, formula);
 
+        let originFormulaId: string | undefined;
         if (isTransformable) {
             ranges.forEach((range) => {
                 Range.foreach(range, (row, column) => {
@@ -209,10 +209,11 @@ export class DataValidationCustomFormulaService extends Disposable {
                 });
             });
         } else {
+            originFormulaId = this._registerFormula(unitId, subUnitId, ruleId, formula);
             ranges.forEach((range) => {
                 Range.foreach(range, (row, col) => {
                     formulaMap.setValue(row, col, {
-                        formulaId: originFormulaId,
+                        formulaId: originFormulaId!,
                         // formulaText: formula,
                         ruleId,
                     });
@@ -316,22 +317,6 @@ export class DataValidationCustomFormulaService extends Disposable {
 
         if (oldFormula !== formula) {
             this._addFormulaByRange(unitId, subUnitId, ruleId, formula, ranges);
-        }
-    }
-
-    /**
-     * Just update formula text, need't to recreate new formula and delete old formula.
-     * Only triggered by formula ref-range update.
-     */
-    updateRuleFormulaSilent(unitId: string, subUnitId: string, ruleId: string, formula: string) {
-        const { ruleFormulaMap } = this._ensureMaps(unitId, subUnitId);
-        const current = ruleFormulaMap.get(ruleId);
-        if (!current) {
-            return;
-        }
-        const { formula: oldFormula } = current;
-        if (oldFormula !== formula) {
-            current.formula = formula;
         }
     }
 

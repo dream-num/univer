@@ -22,7 +22,7 @@ import { queryObjectMatrix } from '@univerjs/core/shared/object-matrix-query.js'
 import { Range } from '@univerjs/core/sheets/range.js';
 import type { IUpdateRulePayload } from '@univerjs/data-validation/types/interfaces/i-update-rule-payload.js';
 import { DataValidatorRegistryService, UpdateRuleType } from '@univerjs/data-validation';
-import { DataValidationStatus, DataValidationType } from '@univerjs/core';
+import { DataValidationStatus } from '@univerjs/core';
 import type { ISheetLocation } from '@univerjs/sheets';
 import type { Injector } from '@wendellhu/redi';
 import type { IDataValidationResCache } from '../services/dv-cache.service';
@@ -30,7 +30,6 @@ import { DataValidationCacheService } from '../services/dv-cache.service';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
 import { DataValidationCustomFormulaService } from '../services/dv-custom-formula.service';
 import { DataValidationRefRangeController } from '../controllers/dv-ref-range.controller';
-import type { IUpdateDataValidationFormulaPayload } from '../types';
 
 export type RangeMutation = {
     type: 'update';
@@ -207,38 +206,6 @@ export class SheetDataValidationManager extends DataValidationManager<ISheetData
         }
 
         return super.updateRule(ruleId, payload);
-    }
-
-    updateRuleFormulaText(ruleId: string, payload: IUpdateDataValidationFormulaPayload) {
-        const rule = this.getRuleById(ruleId);
-        if (!rule) {
-            return;
-        }
-        const { uid, formula1, formula2, type } = rule;
-        const targetFormula1 = payload.type === 'formula1' ? payload.formulaString : formula1;
-        const targetFormula2 = payload.type === 'formula2' ? payload.formulaString : formula2;
-        if (type === DataValidationType.CUSTOM) {
-            if (payload.type === 'formula1') {
-                this._dataValidationCustomFormulaService.updateRuleFormulaSilent(this.unitId, this.subUnitId, uid, payload.formulaString);
-            }
-        } else {
-            this._dataValidationFormulaService.updateRuleFormulaTextSilent(
-                this.unitId,
-                this.subUnitId,
-                uid,
-                targetFormula1,
-                targetFormula2
-            );
-        }
-
-        return super.updateRule(uid, {
-            type: UpdateRuleType.SETTING,
-            payload: {
-                type,
-                formula1: targetFormula1,
-                formula2: targetFormula2,
-            },
-        });
     }
 
     override removeRule(ruleId: string): void {

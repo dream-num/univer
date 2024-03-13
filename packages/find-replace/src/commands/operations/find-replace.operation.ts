@@ -39,8 +39,10 @@ export const OpenReplaceDialogOperation: IOperation = {
     type: CommandType.OPERATION,
     handler: (accessor) => {
         const findReplaceService = accessor.get(IFindReplaceService);
-        if (!findReplaceService.replaceRevealed) {
+        if (!findReplaceService.revealed) {
             findReplaceService.start(true);
+        } else if (!findReplaceService.replaceRevealed) {
+            findReplaceService.revealReplace();
         } else {
             findReplaceService.focusFindInput();
         }

@@ -27,6 +27,7 @@ import { fromEvent } from 'rxjs';
 import { FindBy, FindDirection, FindScope, IFindReplaceService } from '../../services/find-replace.service';
 import { FIND_REPLACE_DIALOG_FOCUS, FIND_REPLACE_INPUT_FOCUS } from '../../services/context-keys';
 import { ReplaceAllMatchesCommand, ReplaceCurrentMatchCommand } from '../../commands/command/replace.command';
+import { OpenReplaceDialogOperation } from '../../commands/operations/find-replace.operation';
 import { SearchInput } from './SearchInput';
 
 import styles from './FindReplaceDialog.module.less';
@@ -59,11 +60,14 @@ function useFindInputFocus(findReplaceService: IFindReplaceService, ref: Forward
 export const FindDialog = forwardRef(function FindDialogImpl(_props, ref) {
     const localeService = useDependency(LocaleService);
     const findReplaceService = useDependency(IFindReplaceService);
+    const commandService = useDependency(ICommandService);
 
     const state = useObservable(findReplaceService.state$, undefined, true);
     const { findCompleted, findString, matchesCount, matchesPosition } = state;
 
-    const revealReplace = useCallback(() => findReplaceService.revealReplace(), [findReplaceService]);
+    const revealReplace = useCallback(() => {
+        commandService.executeCommand(OpenReplaceDialogOperation.id);
+    }, [commandService]);
 
     const onFindStringChange = useCallback((findString: string) => findReplaceService.changeFindString(findString), [findReplaceService]);
 

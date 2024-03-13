@@ -86,7 +86,7 @@ const HighlightCellInput = (props: { type: IResult['subType'];
                     onChange(value);
                 };
                 return (
-                    <div className={`${stylesBase.mTSm} ${stylesBase.mLXxs}`}>
+                    <div className={`${stylesBase.mTSm}`}>
                         <Input value={inputTextValue} onChange={_onChange} />
                     </div>
                 );
@@ -103,7 +103,7 @@ const HighlightCellInput = (props: { type: IResult['subType'];
                     onChange(value || 0);
                 };
                 return (
-                    <div className={`${stylesBase.mTSm} ${stylesBase.mLXxs}`}>
+                    <div className={`${stylesBase.mTSm}`}>
                         <InputNumber value={inputNumberValue} onChange={_onChange} />
 
                     </div>
@@ -121,7 +121,7 @@ const HighlightCellInput = (props: { type: IResult['subType'];
                     onChange(value);
                 };
                 return (
-                    <div className={`${stylesBase.mTSm} ${stylesBase.labelContainer} ${stylesBase.mLXxs}`}>
+                    <div className={`${stylesBase.mTSm} ${stylesBase.labelContainer} `}>
                         <InputNumber className={stylesBase.inputWidth} value={inputNumberMin} onChange={onChangeMin} />
                         <InputNumber className={`${stylesBase.inputWidth} ${stylesBase.mLSm}`} value={inputNumberMax} onChange={onChangeMax} />
                     </div>
@@ -315,10 +315,10 @@ export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, ITextHigh
     return (
         <div>
             <div className={`${stylesBase.title} ${stylesBase.mTBase}`}>{localeService.t('sheet.cf.panel.styleRule')}</div>
-            <Select className={`${stylesBase.mTSm}`} onChange={onTypeChange} value={subType} options={typeOptions} />
-            <Select className={`${stylesBase.mTSm}`} onChange={onOperatorChange} value={operator || ''} options={operatorOptions} />
+            <Select className={`${stylesBase.mTSm} ${styles.width100}`} onChange={onTypeChange} value={subType} options={typeOptions} />
+            <Select className={`${stylesBase.mTSm} ${styles.width100}`} onChange={onOperatorChange} value={operator || ''} options={operatorOptions} />
             <HighlightCellInput key={inputRenderKey} value={value} interceptorManager={interceptorManager} type={subType} operator={operator} rule={rule} onChange={onInputChange} />
-            <div className={`${styles.cfPreviewWrap} ${stylesBase.mLXxs}`}>
+            <div className={`${styles.cfPreviewWrap}`}>
                 <Preview rule={getResult({}) as IConditionalFormatRuleConfig} />
             </div>
             <ConditionalStyleEditor

@@ -21,8 +21,10 @@ import { InputNumber, Select } from '@univerjs/design';
 import { TextEditor } from '@univerjs/ui';
 import { RuleType, SHEET_CONDITION_FORMAT_PLUGIN, ValueType } from '../../../base/const';
 import { ColorPicker } from '../../color-picker';
-import type { IColorScale } from '../../../models/type';
-import styles from '../index.module.less';
+import type { IColorScale, IConditionalFormatRuleConfig } from '../../../models/type';
+import stylesBase from '../index.module.less';
+import { Preview } from '../../preview';
+import styles from './index.module.less';
 import type { IStyleEditorProps } from './type';
 
 const createOptionItem = (text: string, localeService: LocaleService) => ({ label: localeService.t(`sheet.cf.valueType.${text}`), value: text });
@@ -33,7 +35,9 @@ const TextInput = (props: { id: string; type: ValueType | 'none';value: number |
     const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
     const subUnitId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
     const _value = useRef(value);
-
+    const formulaInitValue = useMemo(() => {
+        return String(value).startsWith('=') ? String(value) : '=';
+    }, [value]);
     const config = useMemo(() => {
         if ([ValueType.max, ValueType.min, 'none'].includes(type as ValueType)) {
             return { disabled: true };
@@ -52,8 +56,8 @@ const TextInput = (props: { id: string; type: ValueType | 'none';value: number |
                 openForSheetSubUnitId={subUnitId}
                 openForSheetUnitId={unitId}
                 id={`${SHEET_CONDITION_FORMAT_PLUGIN}_colo_scale_${id}`}
-                value={v}
-                style={{ maxWidth: '50%' }}
+                value={formulaInitValue}
+                style={{ maxWidth: '50%', marginLeft: 4 }}
                 canvasStyle={{ fontSize: 10 }}
                 onlyInputFormula={true}
                 onChange={(v = '') => {
@@ -110,7 +114,7 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
         return valueConfig?.value.value || defaultV;
     });
     const [medianValue, medianValueSet] = useState(() => {
-        const defaultV = 10;
+        const defaultV = 50;
         if (!rule) {
             return defaultV;
         }
@@ -120,7 +124,7 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
         return rule.config[1]?.value.value || defaultV;
     });
     const [maxValue, maxValueSet] = useState(() => {
-        const defaultV = 10;
+        const defaultV = 90;
         if (!rule) {
             return defaultV;
         }
@@ -202,14 +206,16 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
     }) => {
         props.onChange(getResult(option));
     };
-    const isShowInput = (type: ValueType) => commonOptions.map((item) => item.value).includes(type);
     return (
         <div>
-            <div className={styles.title}>{localeService.t('sheet.cf.panel.styleRule')}</div>
-            <div className={styles.label}>{localeService.t('sheet.cf.valueType.min')}</div>
-            <div className={`${styles.labelContainer} ${styles.mTSm}`}>
+            <div className={stylesBase.title}>{localeService.t('sheet.cf.panel.styleRule')}</div>
+            <div className={`${styles.cfPreviewWrap}`}>
+                <Preview rule={getResult({ minType, medianType, maxType, minValue, medianValue, maxValue, minColor, medianColor, maxColor }) as IConditionalFormatRuleConfig} />
+            </div>
+            <div className={stylesBase.label}>{localeService.t('sheet.cf.valueType.min')}</div>
+            <div className={`${stylesBase.labelContainer} ${stylesBase.mTSm}`}>
                 <Select
-                    className={styles.inputWidth}
+                    className={stylesBase.inputWidth}
                     options={minOptions}
                     value={minType}
                     onChange={(v) => {
@@ -217,21 +223,18 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
                         handleChange({ minType: v as ValueType, medianType, maxType, minValue, medianValue, maxValue, minColor, medianColor, maxColor });
                     }}
                 />
-                {isShowInput(minType) && (
-                    <TextInput
-                        id="min"
-                        className={`${styles.inputWidth} ${styles.mLXxs}`}
-                        value={minValue}
-                        type={minType}
-                        onChange={(v) => {
-                            minValueSet(v);
-                            handleChange({ minType, medianType, maxType, minValue: v, medianValue, maxValue, minColor, medianColor, maxColor });
-                        }}
-                    />
-                )}
-
+                <TextInput
+                    id="min"
+                    className={`${stylesBase.inputWidth} ${stylesBase.mLXxs}`}
+                    value={minValue}
+                    type={minType}
+                    onChange={(v) => {
+                        minValueSet(v);
+                        handleChange({ minType, medianType, maxType, minValue: v, medianValue, maxValue, minColor, medianColor, maxColor });
+                    }}
+                />
                 <ColorPicker
-                    className={styles.mLXxs}
+                    className={stylesBase.mLXxs}
                     color={minColor}
                     onChange={(v) => {
                         minColorSet(v);
@@ -239,10 +242,10 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
                     }}
                 />
             </div>
-            <div className={styles.label}>{localeService.t('sheet.cf.panel.medianValue')}</div>
-            <div className={`${styles.labelContainer} ${styles.mTSm}`}>
+            <div className={stylesBase.label}>{localeService.t('sheet.cf.panel.medianValue')}</div>
+            <div className={`${stylesBase.labelContainer} ${stylesBase.mTSm}`}>
                 <Select
-                    className={styles.inputWidth}
+                    className={stylesBase.inputWidth}
                     options={medianOptions}
                     value={medianType}
                     onChange={(v) => {
@@ -250,21 +253,20 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
                         handleChange({ minType, medianType: v as ValueType, maxType, minValue, medianValue, maxValue, minColor, medianColor, maxColor });
                     }}
                 />
-                {isShowInput(medianType as ValueType) && (
-                    <TextInput
-                        id="median"
-                        className={`${styles.inputWidth} ${styles.mLXxs}`}
-                        value={medianValue}
-                        type={medianType}
-                        onChange={(v) => {
-                            medianValueSet(v);
-                            handleChange({ minType, medianType, maxType, minValue, medianValue: v, maxValue, minColor, medianColor, maxColor });
-                        }}
-                    />
-                )}
+
+                <TextInput
+                    id="median"
+                    className={`${stylesBase.inputWidth} ${stylesBase.mLXxs}`}
+                    value={medianValue}
+                    type={medianType}
+                    onChange={(v) => {
+                        medianValueSet(v);
+                        handleChange({ minType, medianType, maxType, minValue, medianValue: v, maxValue, minColor, medianColor, maxColor });
+                    }}
+                />
                 {medianType !== 'none' && (
                     <ColorPicker
-                        className={styles.mLXxs}
+                        className={stylesBase.mLXxs}
                         color={medianColor}
                         onChange={(v) => {
                             medianColorSet(v);
@@ -274,10 +276,10 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
                 )}
 
             </div>
-            <div className={styles.label}>{localeService.t('sheet.cf.valueType.max')}</div>
-            <div className={`${styles.labelContainer} ${styles.mTSm}`}>
+            <div className={stylesBase.label}>{localeService.t('sheet.cf.valueType.max')}</div>
+            <div className={`${stylesBase.labelContainer} ${stylesBase.mTSm}`}>
                 <Select
-                    className={styles.inputWidth}
+                    className={stylesBase.inputWidth}
                     options={maxOptions}
                     value={maxType}
                     onChange={(v) => {
@@ -285,20 +287,18 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
                         handleChange({ minType, medianType, maxType: v as ValueType, minValue, medianValue, maxValue, minColor, medianColor, maxColor });
                     }}
                 />
-                {isShowInput(maxType) && (
-                    <TextInput
-                        id="max"
-                        className={`${styles.inputWidth} ${styles.mLXxs}`}
-                        value={maxValue}
-                        type={maxType}
-                        onChange={(v) => {
-                            maxValueSet(v);
-                            handleChange({ minType, medianType, maxType, minValue, medianValue, maxValue: v, minColor, medianColor, maxColor });
-                        }}
-                    />
-                )}
+                <TextInput
+                    id="max"
+                    className={`${stylesBase.inputWidth} ${stylesBase.mLXxs}`}
+                    value={maxValue}
+                    type={maxType}
+                    onChange={(v) => {
+                        maxValueSet(v);
+                        handleChange({ minType, medianType, maxType, minValue, medianValue, maxValue: v, minColor, medianColor, maxColor });
+                    }}
+                />
                 <ColorPicker
-                    className={styles.mLXxs}
+                    className={stylesBase.mLXxs}
                     color={maxColor}
                     onChange={(v) => {
                         maxColorSet(v);

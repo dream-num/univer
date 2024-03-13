@@ -66,10 +66,10 @@ export const RuleEdit = (props: IRuleEditProps) => {
         if (!ranges?.length) {
             return '';
         }
-            return ranges.map((range) => {
-                const v = serializeRange(range);
-                return v === 'NaN' ? '' : v;
-            }).filter((r) => !!r).join(',');
+        return ranges.map((range) => {
+            const v = serializeRange(range);
+            return v === 'NaN' ? '' : v;
+        }).filter((r) => !!r).join(',');
     }, [props.rule]);
 
     const options = [
@@ -191,12 +191,12 @@ export const RuleEdit = (props: IRuleEditProps) => {
     return (
         <div className={styles.cfRuleStyleEditor}>
             <div className={styleBase.title}>{localeService.t('sheet.cf.panel.range')}</div>
-            <div className={`${styleBase.mTBase} ${styleBase.mLXxs}`}>
+            <div className={`${styleBase.mTBase}`}>
                 <RangeSelector openForSheetSubUnitId={subUnitId} openForSheetUnitId={unitId} value={rangeString} id={SHEET_CONDITION_FORMAT_PLUGIN} onChange={onRangeSelectorChange} />
             </div>
             <div className={styleBase.title}>{localeService.t('sheet.cf.panel.styleType')}</div>
             <div className={styleBase.mTBase}>
-                <Select value={ruleType} options={options} onChange={(e) => ruleTypeSet(e)} />
+                <Select className={styles.width100} value={ruleType} options={options} onChange={(e) => ruleTypeSet(e)} />
             </div>
             <StyleEditor interceptorManager={interceptorManager} rule={props.rule?.rule as any} onChange={onStyleChange} />
             <div className={`${styleBase.mTBase} ${styles.btnList}`}>

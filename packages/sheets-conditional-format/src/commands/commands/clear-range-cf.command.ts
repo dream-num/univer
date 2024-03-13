@@ -26,7 +26,8 @@ import {
     Range,
     sequenceExecute,
 } from '@univerjs/core';
-import { createTopMatrixFromMatrix, findAllRectangle } from '@univerjs/sheets';
+import { createTopMatrixFromMatrix, findAllRectangle, SelectionManagerService } from '@univerjs/sheets';
+
 import { ConditionalFormatRuleModel } from '../../models/conditional-format-rule-model';
 import type { IConditionFormatRule } from '../../models/type';
 import type { ISetConditionalRuleMutationParams } from '../mutations/setConditionalRule.mutation';
@@ -35,7 +36,7 @@ import type { IDeleteConditionalRuleMutationParams } from '../mutations/deleteCo
 import { deleteConditionalRuleMutation, deleteConditionalRuleMutationUndoFactory } from '../mutations/deleteConditionalRule.mutation';
 
 export interface IClearRangeCfParams {
-    ranges: IRange[];
+    ranges?: IRange[];
     unitId?: string;
     subUnitId?: string;
 }
@@ -46,18 +47,19 @@ export const clearRangeCfCommand: ICommand<IClearRangeCfParams> = {
         if (!params) {
             return false;
         }
-        const { ranges } = params;
         const conditionalFormatRuleModel = accessor.get(ConditionalFormatRuleModel);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
         const workbook = univerInstanceService.getCurrentUniverSheetInstance();
         const undoRedoService = accessor.get(IUndoRedoService);
+        const selectionManagerService = accessor.get(SelectionManagerService);
 
         const worksheet = workbook.getActiveSheet();
         const unitId = params.unitId ?? workbook.getUnitId();
         const subUnitId = params.subUnitId ?? worksheet.getSheetId();
+        const ranges = selectionManagerService.getSelections()?.map((selection) => selection.range) || [];
         const allRuleList = conditionalFormatRuleModel.getSubunitRules(unitId, subUnitId);
-        if (!allRuleList?.length) {
+        if (!allRuleList?.length || !ranges.length) {
             return false;
         }
 

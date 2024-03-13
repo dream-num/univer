@@ -145,7 +145,7 @@ export const RankStyleEditor = (props: IStyleEditorProps) => {
         <div>
             <div className={`${stylesBase.title} ${stylesBase.mTBase}`}>{localeService.t('sheet.cf.panel.styleRule')}</div>
             <Select
-                className={stylesBase.mTSm}
+                className={`${styles.width100} ${stylesBase.mTSm}`}
                 value={type}
                 options={options}
                 onChange={(v) => {
@@ -154,7 +154,7 @@ export const RankStyleEditor = (props: IStyleEditorProps) => {
                 }}
             />
             {['isNotBottom', 'isBottom'].includes(type) && (
-                <div className={`${stylesBase.labelContainer} ${stylesBase.mTSm} ${stylesBase.mLXxs}`}>
+                <div className={`${stylesBase.labelContainer} ${stylesBase.mTSm}`}>
                     <InputNumber
                         value={value}
                         onChange={(v) => {
@@ -177,12 +177,12 @@ export const RankStyleEditor = (props: IStyleEditorProps) => {
 
                 </div>
             )}
-            <div className={`${styles.cfPreviewWrap} ${stylesBase.mLXxs}`}>
+            <div className={`${styles.cfPreviewWrap} `}>
                 <Preview rule={getResult({ type, isPercent, value, style }) as IConditionalFormatRuleConfig} />
             </div>
             <ConditionalStyleEditor
                 style={rule?.style}
-                className={`${stylesBase.mTSm} ${stylesBase.mLXxs}`}
+                className={`${stylesBase.mTSm} `}
                 onChange={(v) => {
                     styleSet(v);
                     _onChange({ type, isPercent, value, style: v });

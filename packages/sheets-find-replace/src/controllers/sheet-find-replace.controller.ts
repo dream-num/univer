@@ -466,7 +466,8 @@ export class SheetFindModel extends FindModel {
 
         const searchBackgroundColor = this._themeService.getCurrentTheme().gold400;
         const color = new ColorKit(searchBackgroundColor).toRgb();
-        const activeSheetId = this._workbook.getActiveSheet().getSheetId();
+        const worksheet = this._workbook.getActiveSheet();
+        const activeSheetId = worksheet.getSheetId();
         const highlightShapes = matches.filter((match) => match.range.subUnitId === activeSheetId).map((find, index) => {
             const { startColumn, startRow, endColumn, endRow } = find.range.range;
             const startPosition = getCoordByCell(startRow, startColumn, scene, skeleton);
@@ -474,18 +475,16 @@ export class SheetFindModel extends FindModel {
             const { startX, startY } = startPosition;
             const { endX, endY } = endPosition;
 
-            const width = endX - startX;
-            const height = endY - startY; // if it is in the hidden area, should display at least 2 pixel
-            const inHiddenRows = height === 0;
-            const inHiddenColumns = width === 0;
-            const inHiddenRange = inHiddenRows || inHiddenColumns;
+            const inHiddenRange = endY === startY || endX === startX;
+            const width = Math.max(2, (endX - startX));
+            const height = Math.max(2, (endY - startY));
 
             const props: ISheetFindReplaceHighlightShapeProps = {
                 left: startX,
                 top: startY,
                 color,
-                width: Math.max(width, 2),
-                height: Math.max(height, 2),
+                width,
+                height,
                 evented: false,
                 inHiddenRange,
             };

@@ -477,10 +477,18 @@ export function getCellPositionByIndex(
     const startColumn = column - 1;
 
     const startY = rowHeightAccumulation[startRow] || 0;
-    const endY = rowHeightAccumulation[row] || rowHeightAccumulation[rowHeightAccumulation.length - 1];
+    let endY = rowHeightAccumulation[row];
+
+    if (endY == null) {
+        endY = rowHeightAccumulation[rowHeightAccumulation.length - 1];
+    }
 
     const startX = columnWidthAccumulation[startColumn] || 0;
-    const endX = columnWidthAccumulation[column] || columnWidthAccumulation[columnWidthAccumulation.length - 1];
+    let endX = columnWidthAccumulation[column];
+
+    if (endX == null) {
+        endX = columnWidthAccumulation[columnWidthAccumulation.length - 1];
+    }
 
     return {
         startY,

@@ -51,13 +51,13 @@ const TEST_WORKBOOK_DATA: IWorkbookData = {
 };
 export function createCommandTestBed(workbookConfig?: IWorkbookData, dependencies?: Dependency[]) {
     const univer = new Univer();
-
-    let get: Injector['get'] | undefined;
+    const injector = univer.__getInjector();
+    const get = injector.get.bind(injector);
 
     /**
      * This plugin hooks into Sheet's DI system to expose API to test scripts
      */
-    class TestSpyPlugin extends Plugin {
+    class TestPlugin extends Plugin {
         static override type = PluginType.Sheet;
 
         constructor(
@@ -65,9 +65,6 @@ export function createCommandTestBed(workbookConfig?: IWorkbookData, dependencie
             @Inject(Injector) override readonly _injector: Injector
         ) {
             super('test-plugin');
-
-            this._injector = _injector;
-            get = this._injector.get.bind(this._injector);
         }
 
         override onStarting(injector: Injector): void {
@@ -80,13 +77,9 @@ export function createCommandTestBed(workbookConfig?: IWorkbookData, dependencie
 
             dependencies?.forEach((d) => injector.add(d));
         }
-
-        override onDestroy(): void {
-            get = undefined;
-        }
     }
 
-    univer.registerPlugin(TestSpyPlugin);
+    univer.registerPlugin(TestPlugin);
     const sheet = univer.createUniverSheet(workbookConfig || TEST_WORKBOOK_DATA);
 
     if (get === undefined) {

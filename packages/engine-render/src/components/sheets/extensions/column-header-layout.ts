@@ -61,7 +61,7 @@ export class ColumnHeaderLayout extends SheetExtension {
         ctx.textBaseline = 'middle';
         ctx.fillStyle = getColor([0, 0, 0])!;
         ctx.beginPath();
-        ctx.lineWidth = 1;
+        ctx.setLineWidthByPrecision(1);
 
         ctx.translateWithPrecisionRatio(FIX_ONE_PIXEL_BLUR_OFFSET, FIX_ONE_PIXEL_BLUR_OFFSET);
 

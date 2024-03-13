@@ -32,7 +32,6 @@ import type { SceneViewer } from '../../scene-viewer';
 import type { Viewport } from '../../viewport';
 import { Documents } from '../docs/document';
 import { SpreadsheetExtensionRegistry } from '../extension';
-import { clearLineByBorderType } from '../../basics/draw';
 import type { Background } from './extensions/background';
 import type { Border } from './extensions/border';
 import type { Font } from './extensions/font';
@@ -40,7 +39,6 @@ import type { Font } from './extensions/font';
 // import type { BorderCacheItem } from './interfaces';
 import { SheetComponent } from './sheet-component';
 import type { SpreadsheetSkeleton } from './sheet-skeleton';
-import type { BorderCacheItem } from './interfaces';
 
 const OBJECT_KEY = '__SHEET_EXTENSION_FONT_DOCUMENT_INSTANCE__';
 
@@ -490,7 +488,7 @@ export class Spreadsheet extends SheetComponent {
         ctx.save();
 
         ctx.beginPath();
-        ctx.lineWidth = 1;
+        ctx.setLineWidthByPrecision(1);
 
         ctx.strokeStyle = getColor([212, 212, 212]);
 
@@ -535,37 +533,38 @@ export class Spreadsheet extends SheetComponent {
         ctx.stroke();
         ctx.closePath();
 
-        border?.forValue((rowIndex, columnIndex, borderCaches) => {
-            if (!borderCaches) {
-                return true;
-            }
+        // border?.forValue((rowIndex, columnIndex, borderCaches) => {
+        //     if (!borderCaches) {
+        //         return true;
+        //     }
 
-            const cellInfo = spreadsheetSkeleton.getCellByIndexWithNoHeader(rowIndex, columnIndex);
+        //     const cellInfo = spreadsheetSkeleton.getCellByIndexWithNoHeader(rowIndex, columnIndex);
 
-            let { startY, endY, startX, endX } = cellInfo;
-            const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
+        //     let { startY, endY, startX, endX } = cellInfo;
+        //     const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
 
-            if (isMerged) {
-                return true;
-            }
+        //     if (isMerged) {
+        //         return true;
+        //     }
 
-            if (isMergedMainCell) {
-                startY = mergeInfo.startY;
-                endY = mergeInfo.endY;
-                startX = mergeInfo.startX;
-                endX = mergeInfo.endX;
-            }
+        //     if (isMergedMainCell) {
+        //         startY = mergeInfo.startY;
+        //         endY = mergeInfo.endY;
+        //         startX = mergeInfo.startX;
+        //         endX = mergeInfo.endX;
+        //     }
 
-            if (!(mergeInfo.startRow >= rowStart && mergeInfo.endRow <= rowEnd)) {
-                return true;
-            }
+        //     if (!(mergeInfo.startRow >= rowStart && mergeInfo.endRow <= rowEnd)) {
+        //         return true;
+        //     }
 
-            for (const key in borderCaches) {
-                const { type } = borderCaches[key] as BorderCacheItem;
+        //     for (const key in borderCaches) {
+        //         const { type } = borderCaches[key] as BorderCacheItem;
 
-                clearLineByBorderType(ctx, type, { startX, startY, endX, endY });
-            }
-        });
+        //         clearLineByBorderType(ctx, type, { startX, startY, endX, endY });
+        //     }
+        // });
+
         // Clearing the dashed line issue caused by overlaid auxiliary lines and strokes
 
         ctx.closePath();
@@ -606,7 +605,7 @@ export class Spreadsheet extends SheetComponent {
 
             // After ClearRect, the lines will become thinner, and the lines will be repaired below.
             ctx.beginPath();
-            ctx.moveTo(startX, startY);
+            ctx.moveToByPrecision(startX, startY);
             ctx.lineToByPrecision(endX, startY);
             ctx.lineToByPrecision(endX, endY);
             ctx.lineToByPrecision(startX, endY);

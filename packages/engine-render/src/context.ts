@@ -274,6 +274,10 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
         };
     }
 
+    getScale() {
+        return this._getScale();
+    }
+
     getContextAttributes(): CanvasRenderingContext2DSettings {
         return this._context.getContextAttributes();
     }

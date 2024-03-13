@@ -317,10 +317,10 @@ export class FindReplaceModel extends Disposable {
                 const newMatches = this._matches = allMatches.flat();
                 if (newMatches.length) {
                     const index = this._moveToInitialMatch(this._findModels, newMatches, true);
-                    this._state.changeState({ matchesCount: newMatches.length, matchesPosition: index + 1, findCompleted: false });
+                    this._state.changeState({ matchesCount: newMatches.length, matchesPosition: index + 1 });
                     this.replaceables$.next(newMatches.filter((m) => m.replaceable) as IReplaceableMatch[]);
                 } else {
-                    this._state.changeState({ matchesCount: 0, matchesPosition: 0, findCompleted: false });
+                    this._state.changeState({ matchesCount: 0, matchesPosition: 0 });
                     this.replaceables$.next([]);
                 }
             });

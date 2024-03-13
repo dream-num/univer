@@ -19,6 +19,7 @@ import { ColorKit } from '@univerjs/core';
 import { ComponentManager } from '@univerjs/ui';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useMemo } from 'react';
+import { MoreDownSingle } from '@univerjs/icons';
 
 import styles from './index.module.less';
 
@@ -28,10 +29,11 @@ interface IColorPickerProps {
     disable?: boolean;
     iconId?: string;
     className?: string;
+    isNeedDropdownIcon?: boolean;
 };
 
 export const ColorPicker = (props: IColorPickerProps) => {
-    const { color, onChange, disable = false, iconId = 'PaintBucket', className } = props;
+    const { color, onChange, disable = false, iconId = 'PaintBucket', className, isNeedDropdownIcon = true } = props;
     const componentManager = useDependency(ComponentManager);
 
     const colorKit = useMemo(() => new ColorKit(color), [color]);
@@ -47,6 +49,7 @@ export const ColorPicker = (props: IColorPickerProps) => {
             >
                 <span className={`${styles.cfColorPickerIcon} ${className}`}>
                     <Icon extend={{ colorChannel1: colorKit.isValid ? color : 'rgb(var(--primary-color))' }} />
+                    {isNeedDropdownIcon && <MoreDownSingle className={styles.iconDropdown} />}
                 </span>
 
             </Dropdown>

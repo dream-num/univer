@@ -104,8 +104,9 @@ const IconItemList = (props: { onClick: (iconType: IIconType, iconId: string) =>
 const IconSetRuleEdit = (props: {
     configList: IIconSet['config'];
     onChange: (keys: string[], value: unknown) => void;
+    errorList?: string[];
 }) => {
-    const { onChange, configList } = props;
+    const { onChange, configList, errorList = [] } = props;
     const localeService = useDependency(LocaleService);
 
     const options = [{ label: localeService.t(`sheet.cf.symbol.${NumberOperator.greaterThan}`), value: NumberOperator.greaterThan },
@@ -128,6 +129,7 @@ const IconSetRuleEdit = (props: {
     };
     const render = useMemo(() => {
         return configList.map((item, index) => {
+            const error = errorList[index];
             const icon = iconMap[item.iconType][Number(item.iconId)];
             const isEnd = index === configList.length - 1;
             const isFirst = index === 0;
@@ -147,16 +149,18 @@ const IconSetRuleEdit = (props: {
 
                         <div className={`${styles.width45}`}>
                             <>
-                                {localeService.t('sheet.cf.iconSet.rule')}
-                                {!isFirst && (
-                                    <span>
+                                {!isFirst && !isEnd && localeService.t('sheet.cf.iconSet.rule')}
+                                {!isFirst && !isEnd && (
+                                    <span className={styles.stress}>
+                                        {' '}
                                         (
+                                        {' '}
                                         {localeService.t('sheet.cf.iconSet.when')}
                                         {' '}
                                         {localeService.t(`sheet.cf.symbol.${getOppositeOperator(preItem.operator)}`)}
                                         {' '}
                                         {preItem.value.value}
-                                        {isEnd ? '' : localeService.t('sheet.cf.iconSet.and')}
+                                        {isEnd ? '' : ` ${localeService.t('sheet.cf.iconSet.and')} `}
                                         )
                                     </span>
                                 )}
@@ -180,7 +184,20 @@ const IconSetRuleEdit = (props: {
                         {!isEnd
                             ? <Select className={`${stylesBase.mL0} ${styles.width45} ${stylesBase.mR0}`} options={options} value={item.operator} onChange={(v) => { handleOperatorChange(v as NumberOperator, index); }} />
                             : (
-                                <div className={`${stylesBase.label} ${styles.width45}`}>
+                                <div className={`${styles.width45} ${stylesBase.label}`} style={{ marginTop: 0 }}>
+                                    {localeService.t('sheet.cf.iconSet.rule')}
+                                    <span className={styles.stress}>
+                                        {' '}
+                                        (
+                                        {' '}
+                                        {localeService.t('sheet.cf.iconSet.when')}
+                                        {' '}
+                                        {localeService.t(`sheet.cf.symbol.${getOppositeOperator(preItem.operator)}`)}
+                                        {' '}
+                                        {preItem.value.value}
+                                        {isEnd ? '' : ` ${localeService.t('sheet.cf.iconSet.and')} `}
+                                        )
+                                    </span>
                                 </div>
                             )}
                     </div>
@@ -189,17 +206,19 @@ const IconSetRuleEdit = (props: {
                             <>
                                 <div className={`${stylesBase.mTSm} ${stylesBase.label} ${styles.flex}`}>
                                     <div className={`${styles.width45}`}>
-                                        {' '}
                                         {localeService.t('sheet.cf.iconSet.type')}
                                     </div>
                                     <div className={`${styles.width45}`}>
-                                        {' '}
                                         {localeService.t('sheet.cf.iconSet.value')}
                                     </div>
                                 </div>
                                 <div className={`${stylesBase.mTSm} ${styles.flex}`}>
                                     <Select className={`${styles.width45} ${stylesBase.mL0}`} options={valueTypeOptions} value={item.value.type} onChange={(v) => { handleValueTypeChange(v as NumberOperator, index); }} />
-                                    <InputNumber className={`${stylesBase.mL0} ${styles.width45}`} value={Number(item.value.value)} onChange={(v) => handleValueValueChange(v as number, index)} />
+                                    <div className={`${stylesBase.mL0} ${styles.width45}`}>
+                                        <InputNumber value={Number(item.value.value)} onChange={(v) => handleValueValueChange(v as number, index)} />
+                                        {/* <div> error </div> */}
+                                    </div>
+
                                 </div>
                             </>
                         )
@@ -208,7 +227,7 @@ const IconSetRuleEdit = (props: {
                 </div>
             );
         });
-    }, [configList]);
+    }, [configList, errorList]);
     return render;
 };
 export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
@@ -265,11 +284,21 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
             configListSet([...configList]);
         }
     };
+    const checkResult = 2;
 
     useEffect(() => {
         const dispose = interceptorManager.intercept(interceptorManager.getInterceptPoints().submit, { handler() {
             const result: IIconSet = { type: RuleType.iconSet, isShowValue, config: configList } as IIconSet;
             return result;
+        } });
+        return () => {
+            dispose();
+        };
+    }, [isShowValue, configList, interceptorManager]);
+
+    useEffect(() => {
+        const dispose = interceptorManager.intercept(interceptorManager.getInterceptPoints().beforeSubmit, { handler() {
+            return true;
         } });
         return () => {
             dispose();

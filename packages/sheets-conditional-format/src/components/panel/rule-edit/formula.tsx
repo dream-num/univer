@@ -70,7 +70,7 @@ export const FormulaStyleEditor = (props: IStyleEditorProps) => {
     return (
         <div>
             <div className={`${stylesBase.title} ${stylesBase.mTBase}`}>{localeService.t('sheet.cf.panel.styleRule')}</div>
-            <div className={`${stylesBase.mTSm} ${stylesBase.mLXxs}`}>
+            <div className={`${stylesBase.mTSm}`}>
                 <TextEditor
                     id={`${SHEET_CONDITION_FORMAT_PLUGIN}_formula`}
                     openForSheetSubUnitId={worksheet.getSheetId()}
@@ -86,12 +86,12 @@ export const FormulaStyleEditor = (props: IStyleEditorProps) => {
                 />
             </div>
 
-            <div className={`${styles.cfPreviewWrap} ${stylesBase.mLXxs}`}>
+            <div className={`${styles.cfPreviewWrap} `}>
                 <Preview rule={getResult({ style, formula }) as IConditionalFormatRuleConfig} />
             </div>
             <ConditionalStyleEditor
                 style={rule?.style}
-                className={`${stylesBase.mTSm} ${stylesBase.mLXxs}`}
+                className={`${stylesBase.mTSm} `}
                 onChange={(v) => {
                     styleSet(v);
                     _onChange({ style: v, formula });

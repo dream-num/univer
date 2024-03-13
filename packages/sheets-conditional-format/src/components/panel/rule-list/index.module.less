@@ -1,18 +1,61 @@
 .cf-rule-list {
+    .rule-selector {
+        color: rgb(var(--text-color-secondary));
+        font-size: 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        .select {
+            color: rgb(var(--text-color));
+            width: 126px;
+        }
+        .btn-list {
+            font-size: 16px;
+            color: black;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            .gap {
+                margin-left: 8px;
+            }
+            .icon {
+                cursor: pointer;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                border-radius: 4px 4px 4px 4px;
+                padding: 4px;
+
+                &:hover {
+                    background: rgb(var(--grey-300));
+                }
+            }
+        }
+    }
     .rule-item {
-        padding-right: 35px;
+        padding: 8px 32px 8px 20px;
         display: flex;
         justify-content: space-between;
         position: relative;
         align-items: center;
         border-radius: var(--border-radius-base);
-        padding-left: 20px;
         .rule-describe {
             max-width: 100%;
             min-width: 0px;
             overflow: hidden;
             flex-shrink: 1;
             font-size: var(--font-size-sm);
+            line-height: 21px;
+            .rule-type {
+                font-size: 14px;
+                line-height: 22px;
+                color: #1e222b;
+            }
+            .rule-range {
+                font-size: 12px;
+                line-height: 22px;
+                color: #7a7a7a;
+            }
         }
         &:hover {
             background-color: rgb(var(--grey-100));
@@ -46,7 +89,7 @@
             cursor: pointer;
             border-radius: var(--border-radius-base);
             position: absolute;
-            right: 0px;
+            right: 4px;
             width: 24px;
             height: 24px;
             &:hover {

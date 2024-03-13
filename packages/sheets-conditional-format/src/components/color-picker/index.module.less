@@ -10,9 +10,16 @@
 }
 .cf-color-picker-icon {
     cursor: pointer;
-    padding: 2px 4px 0px 4px;
+    padding: 4px;
+    display: flex;
+    align-items: center;
     &:hover {
         background: rgb(var(--bg-color-hover));
         border-radius: var(--border-radius-base);
+    }
+    .icon-dropdown {
+        font-size: 8px;
+        color: rgb(var(--text-color-secondary));
+        margin-left: 6px;
     }
 }

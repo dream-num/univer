@@ -15,8 +15,6 @@
  */
 
 import React, { useState } from 'react';
-import { LocaleService } from '@univerjs/core';
-import { useDependency } from '@wendellhu/redi/react-bindings';
 import type { IConditionFormatRule } from '../../models/type';
 import styles from './index.module.less';
 import { RuleList } from './rule-list';
@@ -25,7 +23,6 @@ import { RuleEdit } from './rule-edit';
 interface IConditionFormatPanelProps { rule?: IConditionFormatRule };
 
 export const ConditionFormatPanel = (props: IConditionFormatPanelProps) => {
-    const localeService = useDependency(LocaleService);
     const [currentEditRule, currentEditRuleSet] = useState<IConditionFormatRule | undefined>(props.rule);
     const [isShowRuleEditor, isShowRuleEditorSet] = useState(!!props.rule);
     const createCfRule = () => {
@@ -46,14 +43,7 @@ export const ConditionFormatPanel = (props: IConditionFormatPanelProps) => {
                     <RuleEdit onCancel={handleCancel} rule={currentEditRule} />
                 )
                 : (
-                    <>
-                        <RuleList onClick={handleRuleClick} />
-                        <div onClick={createCfRule} className={styles.createRule}>
-                            <div className={styles.button}>
-                                {localeService.t('sheet.cf.panel.createRule')}
-                            </div>
-                        </div>
-                    </>
+                    <RuleList onClick={handleRuleClick} onCreate={createCfRule} />
                 )}
 
         </div>

@@ -15,14 +15,14 @@
  */
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Select } from '@univerjs/design';
+import { Select, Tooltip } from '@univerjs/design';
 
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { ICommandService, IUniverInstanceService, LocaleService, Rectangle } from '@univerjs/core';
 
 import { SelectionManagerService } from '@univerjs/sheets';
 import { serializeRange } from '@univerjs/engine-formula';
-import { DeleteSingle, MoreFunctionSingle } from '@univerjs/icons';
+import { DeleteSingle, IncreaseSingle, MoreFunctionSingle } from '@univerjs/icons';
 import GridLayout from 'react-grid-layout';
 import { debounceTime, Observable } from 'rxjs';
 import type { IDeleteCfCommandParams } from '../../../commands/commands/delete-cf.command';
@@ -30,17 +30,19 @@ import { deleteCfCommand } from '../../../commands/commands/delete-cf.command';
 import type { IMoveCfCommand } from '../../../commands/commands/move-cf.command';
 import { moveCfCommand } from '../../../commands/commands/move-cf.command';
 import { ConditionalFormatRuleModel } from '../../../models/conditional-format-rule-model';
-import panelStyle from '../index.module.less';
 import type { IConditionFormatRule } from '../../../models/type';
 import { RuleType, SubRuleType } from '../../../base/const';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 import { Preview } from '../../preview';
 import { ConditionalFormatI18nController } from '../../../controllers/cf.i18n.controller';
+import { clearWorksheetCfCommand } from '../../../commands/commands/clear-worksheet-cf.command';
+
 import styles from './index.module.less';
 
 interface IRuleListProps {
     onClick: (rule: IConditionFormatRule) => void;
+    onCreate: () => void;
 };
 const getRuleDescribe = (rule: IConditionFormatRule, localeService: LocaleService) => {
     const ruleConfig = rule.rule;
@@ -209,14 +211,42 @@ export const RuleList = (props: IRuleListProps) => {
         commandService.executeCommand(moveCfCommand.id, { unitId, subUnitId, cfId, targetCfId } as IMoveCfCommand);
     };
     const layout = ruleList.map((rule, index) => ({ i: rule.cfId, x: 0, w: 12, y: index, h: 1, isResizable: false }));
+    const handleCreate = () => {
+        props.onCreate();
+    };
+    const handleClear = () => {
+        if (selectValue === '2') {
+            commandService.executeCommand(clearWorksheetCfCommand.id);
+        } else if (selectValue === '1') {
+            const list = ruleList.map((rule) => ({ unitId, subUnitId, cfId: rule.cfId }));
+            list.forEach((config) => {
+                commandService.executeCommand(deleteCfCommand.id, config);
+            });
+        }
+    };
     return (
         <div className={styles.cfRuleList}>
-            <div>
-                {conditionalFormatI18nController.tWithReactNode('sheet.cf.panel.managerRuleSelect',
-                    <span className={panelStyle.select}>
-                        <Select options={selectOption} value={selectValue} onChange={(v) => { selectValueSet(v); }} />
-                    </span>)
-                    .map((ele, index) => <span key={index}>{ele}</span>)}
+            <div className={styles.ruleSelector}>
+                <div>
+                    {conditionalFormatI18nController.tWithReactNode('sheet.cf.panel.managerRuleSelect',
+                        <Select className={styles.select} options={selectOption} value={selectValue} onChange={(v) => { selectValueSet(v); }} />
+                    )
+                        .map((ele, index) => <span key={index}>{ele}</span>)}
+                </div>
+                <div className={styles.btnList}>
+                    <Tooltip title="新增规则" placement="bottom">
+                        <div className={`${styles.icon}`} onClick={handleCreate}>
+                            <IncreaseSingle />
+                        </div>
+                    </Tooltip>
+                    <Tooltip title="清空所有规则" placement="bottom">
+                        <div className={`${styles.gap} ${styles.icon}`} onClick={handleClear}>
+                            <DeleteSingle />
+                        </div>
+                    </Tooltip>
+
+                </div>
+
             </div>
             <div ref={layoutContainerRef} className={styles.gridLayoutWrap}>
                 { layoutWidth
@@ -241,8 +271,8 @@ export const RuleList = (props: IRuleListProps) => {
                                                 <MoreFunctionSingle />
                                             </div>
                                             <div className={styles.ruleDescribe}>
-                                                <div>{getRuleDescribe(rule, localeService)}</div>
-                                                <div>{rule.ranges.map((range) => serializeRange(range)).join(',')}</div>
+                                                <div className={styles.ruleType}>{getRuleDescribe(rule, localeService)}</div>
+                                                <div className={styles.ruleRange}>{rule.ranges.map((range) => serializeRange(range)).join(',')}</div>
                                             </div>
                                             <div className={styles.preview}><Preview rule={rule.rule} /></div>
                                             <div

@@ -23,12 +23,15 @@ import {
     LocaleService,
     OnLifecycle,
     RxDisposable,
-    UniverInstanceType,
 } from '@univerjs/core';
 import { SearchSingle16 } from '@univerjs/icons';
-import type { IMenuButtonItem } from '@univerjs/ui';
-import { ComponentManager, getMenuHiddenObservable, IDialogService, ILayoutService, IMenuService, IShortcutService, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
-import type { IAccessor } from '@wendellhu/redi';
+import {
+    ComponentManager,
+    IDialogService,
+    ILayoutService,
+    IMenuService,
+    IShortcutService,
+} from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 import { takeUntil } from 'rxjs';
 
@@ -48,20 +51,9 @@ import {
     OpenFindDialogShortcutItem,
     OpenReplaceDialogShortcutItem,
 } from './find-replace.shortcut';
+import { FindReplaceMenuItemFactory } from './find-replace.menu';
 
 const FIND_REPLACE_DIALOG_ID = 'DESKTOP_FIND_REPLACE_DIALOG';
-
-export function FindReplaceMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
-    return {
-        id: OpenFindDialogOperation.id,
-        icon: 'SearchIcon',
-        tooltip: 'find-replace.toolbar',
-        group: MenuGroup.TOOLBAR_OTHERS,
-        type: MenuItemType.BUTTON,
-        positions: [MenuPosition.TOOLBAR_START],
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
-    };
-}
 
 const FIND_REPLACE_PANEL_WIDTH = 350;
 const FIND_REPLACE_PANEL_RIGHT_PADDING = 20;

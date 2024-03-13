@@ -217,7 +217,6 @@ export class SheetDataValidationManager extends DataValidationManager<ISheetData
         const { uid, formula1, formula2, type } = rule;
         const targetFormula1 = payload.type === 'formula1' ? payload.formulaString : formula1;
         const targetFormula2 = payload.type === 'formula2' ? payload.formulaString : formula2;
-
         if (type === DataValidationType.CUSTOM) {
             if (payload.type === 'formula1') {
                 this._dataValidationCustomFormulaService.updateRuleFormulaSilent(this.unitId, this.subUnitId, uid, payload.formulaString);

@@ -59,7 +59,11 @@ export class DataValidationRefRangeController extends Disposable {
         const id = this._getIdWithUnitId(unitId, subUnitId, ruleId);
         const disposeSet = this._disposableMap.get(id) ?? new Set();
         const handleFormulaChange = (type: 'formula1' | 'formula2', formulaString: string) => {
-            const oldFormula = rule[type];
+            const oldRule = this._dataValidationModel.getRuleById(unitId, subUnitId, ruleId);
+            if (!oldRule) {
+                return { redos: [], undos: [] };
+            }
+            const oldFormula = oldRule[type];
             if (!oldFormula || oldFormula === formulaString) {
                 return { redos: [], undos: [] };
             }
@@ -103,7 +107,7 @@ export class DataValidationRefRangeController extends Disposable {
                     currentFormula.formula,
                     (newFormulaString) => handleFormulaChange('formula1', newFormulaString)
                 );
-                disposeSet.add(disposable.dispose);
+                disposeSet.add(() => disposable.dispose());
             }
         }
 
@@ -116,7 +120,7 @@ export class DataValidationRefRangeController extends Disposable {
                         formula1.text,
                         (newFormulaString) => handleFormulaChange('formula1', newFormulaString)
                     );
-                    disposeSet.add(disposable.dispose);
+                    disposeSet.add(() => disposable.dispose());
                 }
 
                 if (formula2) {
@@ -124,7 +128,7 @@ export class DataValidationRefRangeController extends Disposable {
                         formula2.text,
                         (newFormulaString) => handleFormulaChange('formula1', newFormulaString)
                     );
-                    disposeSet.add(disposable.dispose);
+                    disposeSet.add(() => disposable.dispose());
                 }
             }
         }

@@ -36,7 +36,7 @@ interface ISubFormRef {
     selectHasFocus(): boolean;
 }
 
-function useFindInputFocus(findReplaceService: IFindReplaceService, ref: ForwardedRef<unknown>): void {
+function useFindInputFocus(findReplaceService: IFindReplaceService, ref: ForwardedRef<unknown>) {
     const focus = useCallback(() => {
         (document.querySelector('.univer-find-input input') as Nullable<HTMLInputElement>)?.focus();
     }, []);
@@ -52,6 +52,8 @@ function useFindInputFocus(findReplaceService: IFindReplaceService, ref: Forward
         const subscription = findReplaceService.focusSignal$.subscribe(() => focus());
         return () => subscription.unsubscribe();
     }, [findReplaceService, focus]);
+
+    return { focus, selectHasFocus };
 }
 
 export const FindDialog = forwardRef(function FindDialogImpl(_props, ref) {
@@ -124,6 +126,8 @@ export const ReplaceDialog = forwardRef(function ReplaceDIalogImpl(_props, ref) 
         [findReplaceService]
     );
 
+    const { focus } = useFindInputFocus(findReplaceService, ref);
+
     const onClickFindButton = useCallback(() => {
         if (findString === inputtingFindString) {
             findReplaceService.moveToNextMatch();
@@ -133,7 +137,10 @@ export const ReplaceDialog = forwardRef(function ReplaceDIalogImpl(_props, ref) 
         }
     }, [findString, inputtingFindString, findReplaceService]);
     const onClickReplaceButton = useCallback(() => commandService.executeCommand(ReplaceCurrentMatchCommand.id), [commandService]);
-    const onClickReplaceAllButton = useCallback(() => commandService.executeCommand(ReplaceAllMatchesCommand.id), [commandService]);
+    const onClickReplaceAllButton = useCallback(async () => {
+        await commandService.executeCommand(ReplaceAllMatchesCommand.id);
+        focus();
+    }, [commandService]);
 
     const onChangeFindDirection = useCallback((findDirection: string) => {
         findReplaceService.changeFindDirection(findDirection as FindDirection);
@@ -148,7 +155,6 @@ export const ReplaceDialog = forwardRef(function ReplaceDIalogImpl(_props, ref) 
     const findScopeOptions = useFindScopeOptions(localeService);
     const findDirectionOptions = useFindDirectionOptions(localeService);
     const findByOptions = useFindByOptions(localeService);
-    useFindInputFocus(findReplaceService, ref);
 
     useEffect(() => {
         const shouldDisplayNoMatchInfo = findCompleted && matchesCount === 0;

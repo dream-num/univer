@@ -34,7 +34,7 @@ import { DataValidationFormulaService } from '../services/dv-formula.service';
 
 @OnLifecycle(LifecycleStages.Rendered, DataValidationRefRangeController)
 export class DataValidationRefRangeController extends Disposable {
-    private _disposableMap: Map<string, () => void> = new Map();
+    private _disposableMap: Map<string, Set<() => void>> = new Map();
 
     constructor(
         @Inject(DataValidationModel) private _dataValidationModel: DataValidationModel,
@@ -56,6 +56,8 @@ export class DataValidationRefRangeController extends Disposable {
 
     registerFormula(unitId: string, subUnitId: string, rule: ISheetDataValidationRule) {
         const ruleId = rule.uid;
+        const id = this._getIdWithUnitId(unitId, subUnitId, ruleId);
+        const disposeSet = this._disposableMap.get(id) ?? new Set();
         const handleFormulaChange = (type: 'formula1' | 'formula2', formulaString: string) => {
             const oldFormula = rule[type];
             if (!oldFormula || oldFormula === formulaString) {
@@ -97,11 +99,33 @@ export class DataValidationRefRangeController extends Disposable {
         if (rule.type === DataValidationType.CUSTOM) {
             const currentFormula = this._dataValidationCustomFormulaService.getRuleFormulaInfo(unitId, subUnitId, ruleId);
             if (currentFormula) {
-                this._formulaRefRangeService.registerFormula(
-                    currentFormula.formulaId,
+                const disposable = this._formulaRefRangeService.registerFormula(
                     currentFormula.formula,
-                    (newFormulaString) => handleFormulaChange('formula1', newFormulaString.formulaString)
+                    (newFormulaString) => handleFormulaChange('formula1', newFormulaString)
                 );
+                disposeSet.add(disposable.dispose);
+            }
+        }
+
+        if (rule.type !== DataValidationType.CUSTOM) {
+            const currentFormula = this._dataValidationFormulaService.getRuleFormulaInfo(unitId, subUnitId, ruleId);
+            if (currentFormula) {
+                const [formula1, formula2] = currentFormula;
+                if (formula1) {
+                    const disposable = this._formulaRefRangeService.registerFormula(
+                        formula1.text,
+                        (newFormulaString) => handleFormulaChange('formula1', newFormulaString)
+                    );
+                    disposeSet.add(disposable.dispose);
+                }
+
+                if (formula2) {
+                    const disposable = this._formulaRefRangeService.registerFormula(
+                        formula2.text,
+                        (newFormulaString) => handleFormulaChange('formula1', newFormulaString)
+                    );
+                    disposeSet.add(disposable.dispose);
+                }
             }
         }
     }
@@ -154,7 +178,11 @@ export class DataValidationRefRangeController extends Disposable {
             const disposable = this._refRangeService.registerRefRange(range, handleRangeChange);
             disposeList.push(() => disposable.dispose());
         });
-        this._disposableMap.set(this._getIdWithUnitId(unitId, subUnitId, rule.uid), () => disposeList.forEach((dispose) => dispose()));
+
+        const id = this._getIdWithUnitId(unitId, subUnitId, rule.uid);
+        const current = this._disposableMap.get(id) ?? new Set();
+        current.add(() => disposeList.forEach((dispose) => dispose()));
+        this._disposableMap.set(id, current);
     };
 
     private _initRefRange() {
@@ -189,17 +217,19 @@ export class DataValidationRefRangeController extends Disposable {
                                 switch (option.type) {
                                     case 'add': {
                                         this.register(option.unitId, option.subUnitId, option.rule!);
+                                        this.registerFormula(option.unitId, option.subUnitId, option.rule!);
                                         break;
                                     }
                                     case 'remove': {
-                                        const dispose = this._disposableMap.get(this._getIdWithUnitId(unitId, subUnitId, rule!.uid));
-                                        dispose && dispose();
+                                        const disposeSet = this._disposableMap.get(this._getIdWithUnitId(unitId, subUnitId, rule!.uid));
+                                        disposeSet && disposeSet.forEach((dispose) => dispose());
                                         break;
                                     }
                                     case 'update': {
-                                        const dispose = this._disposableMap.get(this._getIdWithUnitId(unitId, subUnitId, rule!.uid));
-                                        dispose && dispose();
+                                        const disposeSet = this._disposableMap.get(this._getIdWithUnitId(unitId, subUnitId, rule!.uid));
+                                        disposeSet && disposeSet.forEach((dispose) => dispose());
                                         this.register(option.unitId, option.subUnitId, option.rule!);
+                                        this.registerFormula(option.unitId, option.subUnitId, option.rule!);
                                     }
                                 }
                             })));
@@ -207,7 +237,7 @@ export class DataValidationRefRangeController extends Disposable {
 
         this.disposeWithMe(toDisposable(() => {
             this._disposableMap.forEach((item) => {
-                item();
+                item.forEach((dispose) => dispose());
             });
             this._disposableMap.clear();
         }));

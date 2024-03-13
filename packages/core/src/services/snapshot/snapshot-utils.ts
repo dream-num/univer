@@ -16,7 +16,7 @@
 
 import type { ISheetBlock } from '@univerjs/protocol';
 
-import { b64DecodeUnicode } from '../../shared/coder';
+import { b64DecodeUnicode, b64EncodeUnicode } from '../../shared/coder';
 import type { IWorksheetData } from '../../types/interfaces/i-worksheet-data';
 import { Tools } from '../../shared/tools';
 import type { IWorkbookData } from '../../types/interfaces/i-workbook-data';
@@ -24,6 +24,7 @@ import type { IDocumentData } from '../../types/interfaces/i-document-data';
 import type { ICellData } from '../../types/interfaces/i-cell-data';
 import type { IObjectMatrixPrimitiveType } from '../../shared/object-matrix';
 import { ObjectMatrix } from '../../shared/object-matrix';
+import { SnapshotMetaType } from '../../types/interfaces/snapshot';
 
 // Some properties are stored in the meta fields or are in sheet blocks.
 // They can be found in `packages/collaboration/src/services/snapshot/snapshot-utils.ts`.
@@ -56,6 +57,7 @@ export function encodeWorkbookOtherMetas(workbook: IWorkbookData): Uint8Array {
     delete cloned.name;
     delete cloned.sheetOrder;
     delete cloned.sheets;
+    delete cloned.resources;
     const meta = textEncoder.encode(JSON.stringify(cloned));
     return meta;
 }
@@ -128,4 +130,28 @@ export function splitCellDataToBlocks(
 function serializeCellDataSlice(slice: ObjectMatrix<ICellData>): Uint8Array {
     const data = slice.getData();
     return textEncoder.encode(JSON.stringify(data));
+}
+
+export function encodeMetaToBuffer<T>(meta: Uint8Array | string | T): Uint8Array {
+    if (typeof meta === 'string') {
+        return textEncoder.encode(b64DecodeUnicode(meta));
+    }
+
+    if (meta instanceof Uint8Array) {
+        return meta;
+    }
+
+    return textEncoder.encode(JSON.stringify(meta));
+}
+
+export function decodeMetaFromBuffer<T>(buffer: Uint8Array, snapshotMetaType: SnapshotMetaType): Uint8Array | string | T {
+    if (snapshotMetaType === SnapshotMetaType.STRING) {
+        return b64EncodeUnicode(textDecoder.decode(buffer));
+    }
+
+    if (snapshotMetaType === SnapshotMetaType.BUFFER) {
+        return buffer;
+    }
+
+    return JSON.parse(textDecoder.decode(buffer));
 }

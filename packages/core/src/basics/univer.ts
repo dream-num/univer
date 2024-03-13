@@ -42,6 +42,8 @@ import type { Workbook } from '../sheets/workbook';
 import type { Slide } from '../slides/domain/slide-model';
 import type { LocaleType } from '../types/enum/locale-type';
 import type { IDocumentData, ISlideData, IUniverData, IWorkbookData } from '../types/interfaces';
+import type { ISnapshotSheetBlockObject } from '../types/interfaces/snapshot';
+import { transformSnapshotObjectToWorkbookData } from '../services/snapshot/snapshot-transform';
 import { PluginHolder } from './plugin-holder';
 import { UniverDoc } from './univer-doc';
 import { UniverSheet } from './univer-sheet';
@@ -101,7 +103,7 @@ export class Univer extends PluginHolder {
     /**
      * Create a univer sheet instance with internal dependency injection.
      */
-    createUniverSheet(config: Partial<IWorkbookData>): Workbook {
+    createUniverSheetByConfig(config: Partial<IWorkbookData>): Workbook {
         let workbook: Workbook;
         const addSheet = () => {
             workbook = this._univerSheet!.createSheet(config);
@@ -126,6 +128,21 @@ export class Univer extends PluginHolder {
         }
 
         return workbook!;
+    }
+
+    /**
+     * Create a univer sheet instance with snapshot and sheet blocks.
+     * @param snapshot
+     * @param sheetBlocks
+     * @returns
+     */
+    createUniverSheet(snapshotSheetBlock: ISnapshotSheetBlockObject): Workbook {
+        const { snapshot, sheetBlocks } = snapshotSheetBlock;
+        const workbookData = transformSnapshotObjectToWorkbookData(snapshot, sheetBlocks);
+
+        if (!workbookData) throw new Error('Invalid snapshot data');
+
+        return this.createUniverSheetByConfig(workbookData);
     }
 
     createUniverDoc(config: Partial<IDocumentData>): DocumentDataModel {
@@ -191,7 +208,7 @@ export class Univer extends PluginHolder {
                         new UniverInstanceService(
                             {
                                 createUniverDoc: (data) => this.createUniverDoc(data),
-                                createUniverSheet: (data) => this.createUniverSheet(data),
+                                createUniverSheetByConfig: (data) => this.createUniverSheetByConfig(data),
                                 createUniverSlide: (data) => this.createUniverSlide(data),
                             },
                             contextService

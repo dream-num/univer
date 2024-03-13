@@ -149,4 +149,6 @@ export { getSheetBlocksFromSnapshot } from './services/snapshot/snapshot-transfo
 
 export { isBlackColor, isWhiteColor } from './shared/color/color-kit';
 
+export type { ISnapshotSheetBlockObject } from './types/interfaces/snapshot';
+
 installShims();

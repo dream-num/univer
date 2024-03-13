@@ -15,7 +15,7 @@
  */
 
 import { Button, Checkbox, FormDualColumnLayout, FormLayout, Input, MessageType, Select } from '@univerjs/design';
-import { ILayoutService, IMessageService, useActiveWorkbook, useActiveWorksheet, useObservable } from '@univerjs/ui';
+import { ILayoutService, IMessageService, useObservable } from '@univerjs/ui';
 import type { Nullable } from '@univerjs/core';
 import { ICommandService, IContextService, LocaleService } from '@univerjs/core';
 import type { IDisposable } from '@wendellhu/redi';
@@ -113,12 +113,7 @@ export const ReplaceDialog = forwardRef(function ReplaceDIalogImpl(_props, ref) 
 
     const findDisabled = inputtingFindString.length === 0;
     const replaceDisabled = matchesCount === 0 || !currentMatch?.replaceable;
-    const replaceAllDisabled = !findCompleted || replaceables.length === 0;
-
-    const activeWorkbook = useActiveWorkbook();
-    const activeWorksheet = useActiveWorksheet();
-    const activeWorkbookId = activeWorkbook?.getUnitId();
-    const activeWorkSheetId = activeWorksheet?.getSheetId();
+    const replaceAllDisabled = replaceables.length === 0;
 
     const onFindStringChange = useCallback(
         (newValue: string) => findReplaceService.changeInputtingFindString(newValue),

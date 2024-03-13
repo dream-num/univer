@@ -22,6 +22,7 @@ import { serializeRange } from '@univerjs/engine-formula';
 import { Button, Select } from '@univerjs/design';
 
 import { RangeSelector } from '@univerjs/ui';
+import { SelectionManagerService } from '@univerjs/sheets';
 import type { IConditionFormatRule } from '../../../models/type';
 import { ConditionalFormatRuleModel } from '../../../models/conditional-format-rule-model';
 import { RuleType, SHEET_CONDITION_FORMAT_PLUGIN, SubRuleType } from '../../../base/const';
@@ -51,20 +52,25 @@ export const RuleEdit = (props: IRuleEditProps) => {
     const commandService = useDependency(ICommandService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const conditionalFormatRuleModel = useDependency(ConditionalFormatRuleModel);
+    const selectionManagerService = useDependency(SelectionManagerService);
+
     const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
     const subUnitId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
 
     const rangeResult = useRef<IRange[]>([]);
     const rangeString = useMemo(() => {
-        const ranges = props.rule?.ranges?.length ? props.rule?.ranges : [];
-        if (ranges.length) {
+        let ranges = props.rule?.ranges;
+        if (!ranges?.length) {
+            ranges = selectionManagerService.getSelectionRanges() ?? [];
+        }
+        if (!ranges?.length) {
+            return '';
+        }
             return ranges.map((range) => {
                 const v = serializeRange(range);
                 return v === 'NaN' ? '' : v;
             }).filter((r) => !!r).join(',');
-        }
-        return '';
-    }, [props.rule?.ranges]);
+    }, [props.rule]);
 
     const options = [
         { label: localeService.t('sheet.cf.ruleType.highlightCell'), value: '1' },

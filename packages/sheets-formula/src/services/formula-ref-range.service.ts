@@ -24,12 +24,7 @@ import { Inject } from '@wendellhu/redi';
 
 export type FormulaChangeMap = Record<string, Record<string, Record<string, string>>>;
 
-export interface IEffectFormulaParams {
-    formulaId: string;
-    formulaString: string;
-}
-
-export type FormulaChangeCallback = (params: IEffectFormulaParams) => {
+export type FormulaChangeCallback = (formulaString: string) => {
     redos: IMutationInfo[];
     undos: IMutationInfo[];
 };
@@ -43,7 +38,7 @@ export class FormulaRefRangeService extends Disposable {
         super();
     }
 
-    registerFormula(formulaId: string, formula: string, callback: FormulaChangeCallback): IDisposable {
+    registerFormula(formula: string, callback: FormulaChangeCallback): IDisposable {
         const rangeMap = new Map<string, { unitId: string; subUnitId: string; range: IRange; sheetName: string }>();
         const sequenceNodes = this._lexerTreeBuilder.sequenceNodesBuilder(formula);
         const disposableCollection = new DisposableCollection();
@@ -81,10 +76,7 @@ export class FormulaRefRangeService extends Disposable {
             });
             const newFormulaString = transformSequenceNodes && generateStringWithSequence(transformSequenceNodes);
 
-            return callback({
-                formulaId,
-                formulaString: `=${newFormulaString}`,
-            });
+            return callback(`=${newFormulaString}`);
         };
         sequenceNodes?.forEach((node) => {
             if (typeof node === 'object' && node.nodeType === sequenceNodeType.REFERENCE) {

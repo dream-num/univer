@@ -101,8 +101,6 @@ export class SheetFindModel extends FindModel {
     private _matchesByWorksheet = new Map<string, ISheetCellMatch[]>();
     /** Hold all matches in the currently searching scope. */
     private _matches: ISheetCellMatch[] = [];
-    /** `length` of _matches. */
-    private _matchesCount = 0;
     /** Position of the current focused ISheetCellMatch, starting from 1. */
     private _matchesPosition = 0;
 
@@ -113,6 +111,7 @@ export class SheetFindModel extends FindModel {
     /** This properties holds the query params during this searching session. */
     private _query: Nullable<IFindQuery> = null;
 
+    private get _matchesCount(): number { return this._matches.length; }
     get unitId(): string { return this._workbook.getUnitId(); }
     get matchesCount(): number { return this._matchesCount; }
     get matchesPosition(): number { return this._matchesPosition; }
@@ -300,7 +299,6 @@ export class SheetFindModel extends FindModel {
                 : this._findInWorksheet(currentWorksheet, query, unitId);
 
             this._matches = newComplete.results;
-            this._matchesCount = newComplete.results.length;
             this._matchesPosition = this._tryRestoreLastMatchesPosition(lastMatch, this._matches);
 
             if (firstSearch) {
@@ -791,6 +789,10 @@ export class SheetFindModel extends FindModel {
     }
 
     async replaceAll(replaceString: string): Promise<IReplaceAllResult> {
+        if (this._matchesCount === 0 || !this._query) {
+            return { success: 0, failure: 0 };
+        }
+
         const unitId = this._workbook.getUnitId();
 
         const { findString, caseSensitive, findBy } = this._query!;
@@ -817,6 +819,10 @@ export class SheetFindModel extends FindModel {
                 value: matrix.getMatrix(),
             });
         });
+
+        if (!replacements) {
+            return { success: 0, failure: 0 };
+        }
 
         return this._commandService.executeCommand(SheetReplaceCommand.id, {
             unitId,

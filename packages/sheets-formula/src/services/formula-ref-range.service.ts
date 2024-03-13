@@ -75,15 +75,14 @@ export class FormulaRefRangeService extends Disposable {
                 ;
             });
             const newFormulaString = transformSequenceNodes && generateStringWithSequence(transformSequenceNodes);
-
             return callback(`=${newFormulaString}`);
         };
         sequenceNodes?.forEach((node) => {
             if (typeof node === 'object' && node.nodeType === sequenceNodeType.REFERENCE) {
                 const gridRangeName = deserializeRangeWithSheet(node.token);
                 const { range, unitId, sheetName } = gridRangeName;
-                const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
-                const worksheet = workbook?.getSheetBySheetName(sheetName);
+                const workbook = unitId ? this._univerInstanceService.getUniverSheetInstance(unitId) : this._univerInstanceService.getCurrentUniverSheetInstance();
+                const worksheet = sheetName ? workbook?.getSheetBySheetName(sheetName) : workbook?.getActiveSheet();
                 if (!worksheet) {
                     return;
                 }

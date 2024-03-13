@@ -27,20 +27,23 @@ export interface IRangeSelectorRange extends IUnitRange {
 
 export interface IRangeSelectorService {
     selectionChange$: Observable<IRangeSelectorRange[]>;
+    selectionChange(ranges: IRangeSelectorRange[]): void;
 
     setCurrentSelectorId(id: Nullable<string>): void;
-
     getCurrentSelectorId(): Nullable<string>;
 
-    selectionChange(ranges: IRangeSelectorRange[]): void;
+    openSelector$: Observable<unknown>;
+    openSelector(): void;
 }
 
 export class RangeSelectorService extends Disposable implements IRangeSelectorService, IDisposable {
     private _currentSelectorId: Nullable<string>;
 
     private readonly _selectionChange$ = new Subject<IRangeSelectorRange[]>();
-
     readonly selectionChange$ = this._selectionChange$.asObservable();
+
+    private readonly _openSelector$ = new Subject();
+    readonly openSelector$ = this._openSelector$.asObservable();
 
     setCurrentSelectorId(id: Nullable<string>) {
         this._currentSelectorId = id;
@@ -55,6 +58,10 @@ export class RangeSelectorService extends Disposable implements IRangeSelectorSe
             return;
         }
         this._selectionChange$.next(range);
+    }
+
+    openSelector() {
+        this._openSelector$.next(null);
     }
 }
 

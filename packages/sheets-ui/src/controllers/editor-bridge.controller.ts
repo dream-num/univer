@@ -223,6 +223,26 @@ export class EditorBridgeController extends RxDisposable {
         this.disposeWithMe(
             this._selectionManagerService.selectionMoveStart$.subscribe(this._rangeSelector.bind(this))
         );
+
+        /**
+         * pro/issues/388
+         * When the range selector is opened,
+         * the current selection needs to be synchronized to the range selector.
+         */
+        this.disposeWithMe(
+            this._rangeSelectorService.openSelector$.subscribe(() => {
+                const selectionWithStyle = this._selectionManagerService.getSelections();
+                const { unitId, sheetId, sheetName } = this._getCurrentUnitIdAndSheetId();
+
+                const ranges = selectionWithStyle?.map((value: ISelectionWithStyle) => {
+                    return { range: value.range, unitId, sheetId, sheetName };
+                });
+
+                if (ranges) {
+                    this._rangeSelectorService.selectionChange(ranges);
+                }
+            })
+        );
     }
 
     private _rangeSelector(selectionWithStyle: Nullable<ISelectionWithStyle[]>) {

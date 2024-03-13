@@ -185,17 +185,21 @@ export function RangeSelector(props: IRangeSelectorProps) {
             return;
         }
 
-        if (valid) {
-            setRangeDataList(rangeValue.split(','));
-        } else {
-            setRangeDataList(['']);
-        }
-
         editorService.closeRangePrompt();
 
         rangeSelectorService.setCurrentSelectorId(id);
 
         setSelectorVisible(true);
+
+        if (rangeValue.length > 0) {
+            if (valid) {
+                setRangeDataList(rangeValue.split(','));
+            } else {
+                setRangeDataList(['']);
+            }
+        } else {
+            rangeSelectorService.openSelector();
+        }
     }
 
     function onEditorActive(state: boolean) {
@@ -243,6 +247,10 @@ export function RangeSelector(props: IRangeSelectorProps) {
 
     function handleTextValueChange(value: Nullable<string>) {
         setRangeValue(value || '');
+
+        if (value === '') {
+            return;
+        }
 
         const ranges = value?.split(',').map((ref) => {
             const unitRange = deserializeRangeWithSheet(ref);

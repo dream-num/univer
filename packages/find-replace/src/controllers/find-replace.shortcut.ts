@@ -86,7 +86,7 @@ export const GoToNextFindMatchShortcutItem: IShortcutItem = {
     group: FIND_REPLACE_SHORTCUT_GROUP,
     priority: 1000,
     preconditions(contextService) {
-        return whenFindReplaceInputFocused(contextService);
+        return whenFindReplaceInputFocused(contextService) && whenFindReplaceDialogFocused(contextService);
     },
 };
 
@@ -97,6 +97,6 @@ export const GoToPreviousFindMatchShortcutItem: IShortcutItem = {
     group: FIND_REPLACE_SHORTCUT_GROUP,
     priority: 1000,
     preconditions(contextService) {
-        return whenFindReplaceInputFocused(contextService);
+        return whenFindReplaceInputFocused(contextService) && whenFindReplaceDialogFocused(contextService);
     },
 };

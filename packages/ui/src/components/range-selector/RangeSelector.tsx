@@ -185,10 +185,12 @@ export function RangeSelector(props: IRangeSelectorProps) {
             return;
         }
 
-        if (valid) {
-            setRangeDataList(rangeValue.split(','));
-        } else {
-            setRangeDataList(['']);
+        if (rangeValue.length > 0) {
+            if (valid) {
+                setRangeDataList(rangeValue.split(','));
+            } else {
+                setRangeDataList(['']);
+            }
         }
 
         editorService.closeRangePrompt();
@@ -196,6 +198,10 @@ export function RangeSelector(props: IRangeSelectorProps) {
         rangeSelectorService.setCurrentSelectorId(id);
 
         setSelectorVisible(true);
+
+        if (rangeValue.length === 0) {
+            rangeSelectorService.openSelector();
+        }
     }
 
     function onEditorActive(state: boolean) {

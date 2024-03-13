@@ -1803,7 +1803,7 @@ export class SpreadsheetSkeleton extends Skeleton {
     }
 
     /**
-     * https://github.com/dream-num/univer-pro/issues/344
+     * pro/issues/344
      * In Excel, for the border rendering of merged cells to take effect, the outermost cells need to have the same border style.
      */
     private _setMergeBorderProps(type: BORDER_TYPE, cache: IStylesCache, mergeRange: IRange) {
@@ -1906,7 +1906,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         }
 
         /**
-         * https://github.com/dream-num/univer-pro/issues/344
+         * pro/issues/344
          * Compatible with Excel's border rendering.
          * When the top border of a cell and the bottom border of the cell above it (r-1) overlap,
          * if the top border of cell r is white, then the rendering is ignored.

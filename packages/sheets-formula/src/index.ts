@@ -26,3 +26,4 @@ export { IActiveDirtyManagerService, type IDirtyConversionManagerParams } from '
 export type { IRegisterFunctionParams, IUnregisterFunctionParams } from './services/register-function.service';
 export { RegisterFunctionService } from './services/register-function.service';
 export { IRegisterFunctionService } from './services/register-function.service';
+export { FormulaRefRangeService } from './services/formula-ref-range.service';

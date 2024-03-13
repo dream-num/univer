@@ -16,6 +16,9 @@
 
 import type { IMutation } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
+import { DataValidationModel } from '@univerjs/data-validation';
+import type { IUpdateDataValidationFormulaPayload } from '../../types';
+import type { SheetDataValidationManager } from '../../models/sheet-data-validation-manager';
 
 export interface IDataValidationFormulaMarkDirtyParams { [unitId: string]: { [sunUnitId: string]: { [formulaId: string]: boolean } } }
 
@@ -23,6 +26,29 @@ export const DataValidationFormulaMarkDirty: IMutation<IDataValidationFormulaMar
     type: CommandType.MUTATION,
     id: 'sheet.mutation.data-validation-formula-mark-dirty',
     handler() {
+        return true;
+    },
+};
+
+export interface IUpdateDataValidationFormulaSilentMutationParams {
+    unitId: string;
+    subUnitId: string;
+    ruleId: string;
+    payload: IUpdateDataValidationFormulaPayload;
+}
+
+export const UpdateDataValidationFormulaSilentMutation: IMutation<IUpdateDataValidationFormulaSilentMutationParams> = {
+    type: CommandType.MUTATION,
+    id: 'sheet.mutation.update-data-validation-formula-silent',
+    handler(accessor, params) {
+        if (!params) {
+            return false;
+        }
+        const { unitId, subUnitId, payload, ruleId } = params;
+        const dataValidationModel = accessor.get(DataValidationModel);
+        const manager = dataValidationModel.ensureManager(unitId, subUnitId) as SheetDataValidationManager;
+
+        manager.updateRuleFormulaText(ruleId, payload);
         return true;
     },
 };

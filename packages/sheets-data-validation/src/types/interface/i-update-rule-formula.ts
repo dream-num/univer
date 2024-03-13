@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export interface IUpdateRuleFormulaPayload {
+export interface IUpdateDataValidationFormulaPayload {
     type: 'formula1' | 'formula2';
     formulaString: string;
 }

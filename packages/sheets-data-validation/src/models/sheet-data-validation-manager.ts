@@ -30,7 +30,7 @@ import { DataValidationCacheService } from '../services/dv-cache.service';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
 import { DataValidationCustomFormulaService } from '../services/dv-custom-formula.service';
 import { DataValidationRefRangeController } from '../controllers/dv-ref-range.controller';
-import type { IUpdateRuleFormulaPayload } from '../types';
+import type { IUpdateDataValidationFormulaPayload } from '../types';
 
 export type RangeMutation = {
     type: 'update';
@@ -208,7 +208,7 @@ export class SheetDataValidationManager extends DataValidationManager<ISheetData
         return rule;
     }
 
-    updateRuleFormulaText(ruleId: string, payload: IUpdateRuleFormulaPayload) {
+    updateRuleFormulaText(ruleId: string, payload: IUpdateDataValidationFormulaPayload) {
         const rule = this.getRuleById(ruleId);
         if (!rule) {
             return;

@@ -207,4 +207,9 @@ export class DataValidationFormulaService extends Disposable {
             return undefined;
         });
     }
+
+    getRuleFormulaInfo(unitId: string, subUnitId: string, ruleId: string) {
+        const ruleFormulaMap = this._ensureRuleFormulaMap(unitId, subUnitId);
+        return ruleFormulaMap.get(ruleId);
+    }
 }

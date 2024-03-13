@@ -34,7 +34,7 @@ interface IFormulaData {
     originRow: number;
     originCol: number;
     isTransformable: boolean;
-    formulaId?: string;
+    formulaId: string;
 }
 
 interface ICellData {
@@ -149,13 +149,17 @@ export class DataValidationCustomFormulaService extends Disposable {
     };
 
     deleteByRuleId(unitId: string, subUnitId: string, ruleId: string) {
-        const { formulaMap, formulaCellMap } = this._ensureMaps(unitId, subUnitId);
+        const { formulaMap, formulaCellMap, ruleFormulaMap } = this._ensureMaps(unitId, subUnitId);
         const rule = this._dataValidationModel.getRuleById(unitId, subUnitId, ruleId) as ISheetDataValidationRule;
         const formulaIdList = new Set<string>();
+        const formulaInfo = ruleFormulaMap.get(ruleId);
 
-        if (!rule) {
+        if (!rule || !formulaInfo) {
             return;
         }
+
+        formulaIdList.add(formulaInfo.formulaId);
+        ruleFormulaMap.delete(ruleId);
 
         rule.ranges.forEach((range) => {
             Range.foreach(range, (row, col) => {
@@ -182,6 +186,8 @@ export class DataValidationCustomFormulaService extends Disposable {
 
         const originRow = ranges[0].startRow;
         const originCol = ranges[0].startColumn;
+        const originFormulaId = this._registerFormula(unitId, subUnitId, ruleId, formula);
+
         if (isTransformable) {
             ranges.forEach((range) => {
                 Range.foreach(range, (row, column) => {
@@ -203,11 +209,10 @@ export class DataValidationCustomFormulaService extends Disposable {
                 });
             });
         } else {
-            const formulaId = this._registerFormula(unitId, subUnitId, ruleId, formula);
             ranges.forEach((range) => {
                 Range.foreach(range, (row, col) => {
                     formulaMap.setValue(row, col, {
-                        formulaId,
+                        formulaId: originFormulaId,
                         // formulaText: formula,
                         ruleId,
                     });
@@ -220,6 +225,7 @@ export class DataValidationCustomFormulaService extends Disposable {
             originCol,
             originRow,
             isTransformable,
+            formulaId: originFormulaId,
         });
     }
 
@@ -337,5 +343,11 @@ export class DataValidationCustomFormulaService extends Disposable {
         }
 
         return this._registerOtherFormulaService.getFormulaValue(unitId, subUnitId, current.formulaId);
+    }
+
+    getRuleFormulaInfo(unitId: string, subUnitId: string, ruleId: string) {
+        const { ruleFormulaMap } = this._ensureMaps(unitId, subUnitId);
+
+        return ruleFormulaMap.get(ruleId);
     }
 }

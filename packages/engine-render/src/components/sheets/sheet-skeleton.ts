@@ -15,6 +15,7 @@
  */
 
 import type {
+    BorderStyleTypes,
     IBorderStyleData,
     ICellData,
     IColumnData,
@@ -1522,7 +1523,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         }
 
         for (const data of dataMergeCache) {
-            this._setCellCache(data.startRow, data.startColumn, false);
+            this._setCellCache(data.startRow, data.startColumn, false, data);
         }
 
         for (let r = startRow; r <= endRow; r++) {
@@ -1575,7 +1576,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         }
     }
 
-    private _setCellCache(r: number, c: number, skipBackgroundAndBorder: boolean) {
+    private _setCellCache(r: number, c: number, skipBackgroundAndBorder: boolean, mergeRange?: IRange) {
         const needsRendering = this._renderedCellCache.getValue(r, c);
 
         if (r === -1 || c === -1) {
@@ -1623,10 +1624,17 @@ export class SpreadsheetSkeleton extends Skeleton {
         }
 
         if (!skipBackgroundAndBorder && style && style.bd) {
-            this._setBorderProps(r, c, BORDER_TYPE.TOP, style, cache);
-            this._setBorderProps(r, c, BORDER_TYPE.BOTTOM, style, cache);
-            this._setBorderProps(r, c, BORDER_TYPE.LEFT, style, cache);
-            this._setBorderProps(r, c, BORDER_TYPE.RIGHT, style, cache);
+            if (mergeRange) {
+                this._setMergeBorderProps(BORDER_TYPE.TOP, cache, mergeRange);
+                this._setMergeBorderProps(BORDER_TYPE.BOTTOM, cache, mergeRange);
+                this._setMergeBorderProps(BORDER_TYPE.LEFT, cache, mergeRange);
+                this._setMergeBorderProps(BORDER_TYPE.RIGHT, cache, mergeRange);
+            } else if (!this.intersectMergeRange(r, c)) {
+                this._setBorderProps(r, c, BORDER_TYPE.TOP, style, cache);
+                this._setBorderProps(r, c, BORDER_TYPE.BOTTOM, style, cache);
+                this._setBorderProps(r, c, BORDER_TYPE.LEFT, style, cache);
+                this._setBorderProps(r, c, BORDER_TYPE.RIGHT, style, cache);
+            }
 
             this._setBorderProps(r, c, BORDER_TYPE.TL_BR, style, cache);
             this._setBorderProps(r, c, BORDER_TYPE.TL_BC, style, cache);
@@ -1793,6 +1801,96 @@ export class SpreadsheetSkeleton extends Skeleton {
         };
 
         return new DocumentDataModel(documentData);
+    }
+
+    /**
+     * https://github.com/dream-num/univer-pro/issues/344
+     * In Excel, for the border rendering of merged cells to take effect, the outermost cells need to have the same border style.
+     */
+    private _setMergeBorderProps(type: BORDER_TYPE, cache: IStylesCache, mergeRange: IRange) {
+        if (!this._worksheet || !cache.border) {
+            return;
+        }
+
+        const borders: Array<{ style: BorderStyleTypes; color: string; r: number; c: number }> = [];
+        let isAddBorders = true;
+
+        let forStart = mergeRange.startRow;
+        let forEnd = mergeRange.endRow;
+
+        let row = mergeRange.startRow;
+
+        let column = mergeRange.startColumn;
+
+        if (type === BORDER_TYPE.TOP) {
+            row = mergeRange.startRow;
+            forStart = mergeRange.startColumn;
+            forEnd = mergeRange.endColumn;
+        } else if (type === BORDER_TYPE.BOTTOM) {
+            row = mergeRange.endRow;
+            forStart = mergeRange.startColumn;
+            forEnd = mergeRange.endColumn;
+        } else if (type === BORDER_TYPE.LEFT) {
+            column = mergeRange.startColumn;
+            forStart = mergeRange.startRow;
+            forEnd = mergeRange.endRow;
+        } else if (type === BORDER_TYPE.RIGHT) {
+            column = mergeRange.endColumn;
+            forStart = mergeRange.startRow;
+            forEnd = mergeRange.endRow;
+        }
+
+        for (let i = forStart; i <= forEnd; i++) {
+            if (type === BORDER_TYPE.TOP) {
+                column = i;
+            } else if (type === BORDER_TYPE.BOTTOM) {
+                column = i;
+            } else if (type === BORDER_TYPE.LEFT) {
+                row = i;
+            } else if (type === BORDER_TYPE.RIGHT) {
+                row = i;
+            }
+
+            const cell = this._worksheet.getCell(row, column);
+            if (!cell) {
+                isAddBorders = false;
+                break;
+            }
+
+            const style = this._styles.getStyleByCell(cell);
+
+            if (!style) {
+                isAddBorders = false;
+                break;
+            }
+
+            const props: Nullable<IBorderStyleData> = style.bd?.[type];
+            if (props) {
+                const rgb = getColorStyle(props.cl) || COLOR_BLACK_RGB;
+                borders.push({
+                    r: row,
+                    c: column,
+                    style: props.s,
+                    color: rgb,
+                });
+            } else {
+                isAddBorders = false;
+            }
+        }
+
+        if (isAddBorders) {
+            borders.forEach((border) => {
+                const { r, c, style, color } = border;
+                if (!cache.border!.getValue(r, c)) {
+                    cache.border!.setValue(r, c, {});
+                }
+                cache.border!.getValue(r, c)![type] = {
+                    type,
+                    style,
+                    color,
+                };
+            });
+        }
     }
 
     private _setBorderProps(r: number, c: number, type: BORDER_TYPE, style: IStyleData, cache: IStylesCache) {

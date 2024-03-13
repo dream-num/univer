@@ -95,19 +95,7 @@ export class LocaleService extends Disposable {
         return this._locales?.[this._currentLocale];
     }
 
-    public resolveKeyPath(obj: ILanguagePack | ILanguagePack[], keys: string[]): string | ILanguagePack | ILanguagePack[] | null {
-        const currentKey = keys.shift();
-
-        if (currentKey && obj && currentKey in obj) {
-            const nextObj = (obj as ILanguagePack)[currentKey];
-
-            if (keys.length > 0 && (typeof nextObj === 'object' || Array.isArray(nextObj))) {
-                return this.resolveKeyPath(nextObj as ILanguagePack, keys);
-            } else {
-                return nextObj;
-            }
-        }
-
-        return null;
+    getCurrentLocale() {
+        return this._currentLocale;
     }
 }

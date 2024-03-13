@@ -72,7 +72,7 @@ export class Border extends docExtension {
 
             if (style !== this._preBorderStyle) {
                 setLineType(ctx, style);
-                ctx.lineWidth = getLineWidth(style);
+                ctx.setLineWidthByPrecision(getLineWidth(style));
                 this._preBorderStyle = style;
             }
 

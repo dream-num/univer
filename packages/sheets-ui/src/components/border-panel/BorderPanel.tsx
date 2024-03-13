@@ -17,7 +17,7 @@
 import { BorderStyleTypes } from '@univerjs/core';
 import { ColorPicker, Dropdown, Menu, MenuItem } from '@univerjs/design';
 import { MoreDownSingle, PaintBucket } from '@univerjs/icons';
-import type { IBorderInfo } from '@univerjs/sheets';
+import { BorderStyleManagerService, type IBorderInfo } from '@univerjs/sheets';
 import { ComponentManager } from '@univerjs/ui';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React from 'react';
@@ -75,6 +75,8 @@ const BORDER_SIZE_CHILDREN = [
 
 export function BorderPanel(props: IBorderPanelProps) {
     const componentManager = useDependency(ComponentManager);
+    const borderStyleManagerService = useDependency(BorderStyleManagerService);
+
     const { onChange, value } = props;
 
     function handleClick(v: string | number, type: keyof IBorderInfo) {
@@ -100,8 +102,11 @@ export function BorderPanel(props: IBorderPanelProps) {
                 {BORDER_LINE_CHILDREN.map((item) => (
                     <div
                         key={item.value}
-                        className={styles.uiPluginSheetsBorderPanelPositionItem}
-                        onClick={() => handleClick(item.value, 'type')}
+                        className={borderStyleManagerService.getBorderInfo().type === item.value ? (`${styles.uiPluginSheetsBorderPanelPositionItemActive} ${styles.uiPluginSheetsBorderPanelPositionItem}`) : styles.uiPluginSheetsBorderPanelPositionItem}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            handleClick(item.value, 'type');
+                        }}
                     >
                         {renderIcon(item.icon)}
                     </div>

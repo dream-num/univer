@@ -35,6 +35,7 @@ import { CalculateFormulaService } from '../services/calculate-formula.service';
 import type { IAllRuntimeData } from '../services/runtime.service';
 import { FormulaExecutedStateType } from '../services/runtime.service';
 import { SetNumfmtFormulaDataMutation } from '../commands/mutations/set-numfmt-formula-data.mutation';
+import { convertRuntimeToUnitData } from '../basics/runtime';
 
 @OnLifecycle(LifecycleStages.Ready, CalculateController)
 export class CalculateController extends Disposable {
@@ -234,7 +235,7 @@ export class CalculateController extends Disposable {
         this._commandService.executeCommand(
             SetFormulaCalculationResultMutation.id,
             {
-                unitData,
+                unitData: convertRuntimeToUnitData(unitData),
                 unitOtherData,
             },
             {

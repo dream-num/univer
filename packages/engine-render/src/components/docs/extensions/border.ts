@@ -53,7 +53,9 @@ export class Border extends docExtension {
         if (!borderData) {
             return;
         }
-        const scale = this._getScale(parentScale);
+
+        const precisionScale = this._getScale(ctx.getScale());
+
         const borderCache = this._createBorderCache(borderData);
 
         ctx.save();
@@ -70,9 +72,11 @@ export class Border extends docExtension {
             const { s: style, cl: colorStyle } = borderCacheValue;
             const color = getColorStyle(colorStyle) || COLOR_BLACK_RGB;
 
+            const lineWidth = getLineWidth(style);
+
             if (style !== this._preBorderStyle) {
                 setLineType(ctx, style);
-                ctx.setLineWidthByPrecision(getLineWidth(style));
+                ctx.setLineWidthByPrecision(lineWidth);
                 this._preBorderStyle = style;
             }
 
@@ -81,7 +85,7 @@ export class Border extends docExtension {
                 this._preBorderColor = color;
             }
 
-            drawLineByBorderType(ctx, type as BORDER_TYPE, {
+            drawLineByBorderType(ctx, type as BORDER_TYPE, (lineWidth - 1) / 2 / precisionScale, {
                 startX: spanStartPoint.x,
                 startY: spanStartPoint.y,
                 endX: spanStartPoint.x + spanWidth,

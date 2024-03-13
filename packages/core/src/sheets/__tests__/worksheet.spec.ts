@@ -19,12 +19,12 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { Univer } from '../../basics/univer';
 import type { IWorkbookData } from '../../types/interfaces/i-workbook-data';
 import { LocaleType } from '../../types/enum/locale-type';
-import type { Worksheet } from '../worksheet';
+import { extractPureTextFromCell, type Worksheet } from '../worksheet';
 import { type IRange, RANGE_TYPE } from '../../types/interfaces/i-range';
 import { DisposableCollection } from '../../shared/lifecycle';
 import { createCoreTestBed } from './create-core-test-bed';
 
-describe('Test worksheet', () => {
+describe('test worksheet', () => {
     let univer: Univer;
     let worksheet: Worksheet;
     let caseDisposable: DisposableCollection;
@@ -40,7 +40,7 @@ describe('Test worksheet', () => {
         caseDisposable.dispose();
     });
 
-    describe('Test "worksheet.iterateByRow"', () => {
+    describe('test "worksheet.iterateByRow"', () => {
         const TEST_WORKBOOK_DATA_WITH_MERGED_CELL: IWorkbookData = {
             id: 'test',
             appVersion: '3.0.0-alpha',
@@ -85,7 +85,7 @@ describe('Test worksheet', () => {
             caseDisposable = new DisposableCollection();
         });
 
-        it('Should "iteratorByRow" work with merged cells', () => {
+        it('should "iteratorByRow" work with merged cells', () => {
             // This interceptor just returns the raw cell data.
             worksheet.__interceptViewModel((viewModel) => {
                 const cellInterceptorDisposable = viewModel.registerCellContentInterceptor({
@@ -122,7 +122,7 @@ describe('Test worksheet', () => {
         });
     });
 
-    describe('Test "worksheet.iterateByColumn"', () => {
+    describe('test "worksheet.iterateByColumn"', () => {
         const TEST_WORKBOOK_DATA_WITH_MERGED_CELL: IWorkbookData = {
             id: 'test',
             appVersion: '3.0.0-alpha',
@@ -169,7 +169,7 @@ describe('Test worksheet', () => {
             caseDisposable = new DisposableCollection();
         });
 
-        it('Should "iterateByColumn" work with merged cells', () => {
+        it('should "iterateByColumn" work with merged cells', () => {
             // This interceptor just returns the raw cell data.
             worksheet.__interceptViewModel((viewModel) => {
                 const cellInterceptorDisposable = viewModel.registerCellContentInterceptor({
@@ -208,5 +208,49 @@ describe('Test worksheet', () => {
             expect(value6.done).toBeTruthy();
             expect(value6.value).toBeUndefined();
         });
+    });
+});
+
+describe('test "extractPureTextFromCell"', () => {
+    it('should extract from rich text', () => {
+        expect(extractPureTextFromCell({
+            p: {
+                id: 'd',
+                body: {
+                    dataStream: 'Some rich\ntext.',
+                    textRuns: [
+                        {
+                            st: 0,
+                            ed: 5,
+                            ts: {
+                                cl: {
+                                    rgb: 'rgb(92,92,92)',
+                                },
+                            },
+                        },
+                    ],
+                },
+                documentStyle: {
+                    pageSize: {
+                        width: Number.POSITIVE_INFINITY,
+                        height: Number.POSITIVE_INFINITY,
+                    },
+                    marginTop: 0,
+                    marginBottom: 0,
+                    marginRight: 2,
+                    marginLeft: 2,
+                },
+            },
+        })).toBe('Some rich\ntext.');
+    });
+
+    it('should extract from formula and plain text', () => {
+        expect(extractPureTextFromCell({ v: 6, f: '=SUM(3, 3)' })).toBe('6');
+    });
+
+    it('should support number and boolean values', () => {
+        expect(extractPureTextFromCell({ v: false })).toBe('FALSE');
+        expect(extractPureTextFromCell({ v: true })).toBe('TRUE');
+        expect(extractPureTextFromCell({ v: 1 })).toBe('1');
     });
 });

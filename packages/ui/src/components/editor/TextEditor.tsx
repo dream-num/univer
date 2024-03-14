@@ -129,12 +129,6 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
 
     const [active, setActive] = useState(false);
 
-    const onChangeRef = useRef<Nullable<((value: Nullable<string>) => void)>>(onChange);
-
-    const onActiveRef = useRef<Nullable<((state: boolean) => void)>>(onActive);
-
-    const onValidRef = useRef<Nullable<((state: boolean) => void)>>(onValid);
-
     useEffect(() => {
         const editor = editorRef.current;
 
@@ -170,7 +164,7 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
 
         const activeChange = debounce((state: boolean) => {
             setActive(state);
-            onActiveRef.current && onActiveRef.current(state);
+            onActive && onActive(state);
         }, 30);
 
         const focusStyleSubscription = editorService.focusStyle$.subscribe((unitId: Nullable<string>) => {
@@ -195,9 +189,9 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
                 setValidationContent(localeService.t('textEditor.rangeError'));
             }
 
-            onValidRef.current && onValidRef.current(isLegality);
+            onValid && onValid(isLegality);
 
-            onChangeRef.current && onChangeRef.current(editorService.getValue(id));
+            onChange && onChange(editorService.getValue(id));
         }, 30);
 
         const valueChangeSubscription = editorService.valueChange$.subscribe((editor) => {

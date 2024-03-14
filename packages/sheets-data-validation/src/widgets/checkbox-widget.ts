@@ -16,7 +16,7 @@
 
 import type { UniverRenderingContext2D } from '@univerjs/engine-render';
 import { Checkbox, fixLineWidthByScale, Transform } from '@univerjs/engine-render';
-import { ICommandService, isFormulaString } from '@univerjs/core';
+import { HorizontalAlign, ICommandService, isFormulaString, VerticalAlign } from '@univerjs/core';
 import type { ICellCustomRender, ICellRenderContext, IDataValidationRule, ISelectionCellWithCoord, IStyleData, Nullable } from '@univerjs/core';
 import { SetRangeValuesCommand } from '@univerjs/sheets';
 import type { IFormulaResult } from '@univerjs/data-validation';
@@ -29,9 +29,40 @@ import { getCellValueOrigin } from '../utils/getCellDataOrigin';
 
 export class CheckboxRender implements ICellCustomRender {
     private _calc(cellInfo: ISelectionCellWithCoord, style: Nullable<IStyleData>) {
+        const { vt, ht } = style || {};
+        const width = cellInfo.endX - cellInfo.startX;
+        const height = cellInfo.endY - cellInfo.startY;
+        const size = (style?.fs ?? 10) * 1.6;
+        let widgetLeft = 0;
+        let widgetTop = 0;
+        switch (vt) {
+            case VerticalAlign.TOP:
+                widgetTop = 0;
+                break;
+            case VerticalAlign.BOTTOM:
+                widgetTop = 0 + (height - size);
+                break;
+            default:
+                widgetTop = 0 + (height - size) / 2;
+                break;
+        }
+
+        switch (ht) {
+            case HorizontalAlign.LEFT:
+                widgetLeft = 0;
+                break;
+            case HorizontalAlign.RIGHT:
+                widgetLeft = 0 + (width - size);
+                break;
+
+            default:
+                widgetLeft = 0 + (width - size) / 2;
+                break;
+        }
+
         return {
-            left: cellInfo.startX,
-            top: cellInfo.startY,
+            left: cellInfo.startX + widgetLeft,
+            top: cellInfo.startY + widgetTop,
             width: (style?.fs ?? 10) * 1.6,
             height: (style?.fs ?? 10) * 1.6,
         };
@@ -82,13 +113,13 @@ export class CheckboxRender implements ICellCustomRender {
         ctx.save();
 
         ctx.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
+        const size = (style?.fs ?? 10) * 1.6;
 
         Checkbox.drawWith(ctx, {
             checked: value === formula1,
-            left: primaryWithCoord.startX,
-            top: primaryWithCoord.startY,
-            width: (style?.fs ?? 10) * 1.6,
-            fill: style?.cl?.rgb ?? '#000',
+            width: size,
+            height: size,
+            fill: style?.cl?.rgb ?? '#BCBCBC',
         });
 
         ctx.restore();

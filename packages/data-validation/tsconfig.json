@@ -5,5 +5,5 @@
         "outDir": "lib/types"
     },
     "references": [{ "path": "./tsconfig.node.json" }],
-    "include": ["src", "../sheets-data-validation/src/views/ListDropdown.tsx", "../sheets-data-validation/src/validators/custom-validator.ts", "../sheets-data-validation/src/views/formula-input/custom-formula-input.tsx"]
+    "include": ["src", "../sheets-data-validation/src/views/list-dropdown/index.tsx", "../sheets-data-validation/src/validators/custom-validator.ts", "../sheets-data-validation/src/views/formula-input/custom-formula-input.tsx"]
 }

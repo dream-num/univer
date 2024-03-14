@@ -21,7 +21,7 @@ import { SetRangeValuesCommand } from '@univerjs/sheets';
 import type { IDropdownParam } from '@univerjs/sheets-ui';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useState } from 'react';
-import { LIST_MULTIPLE_FORMULA } from '../validators/list-validator';
+import { LIST_MULTIPLE_FORMULA } from '../../validators/list-validator';
 
 export function ListDropDown(props: IDropdownParam) {
     const { location } = props;
@@ -46,14 +46,6 @@ export function ListDropDown(props: IDropdownParam) {
     const cellStr = localValue || `${cellData.v}`;
 
     const value = multiple ? (cellStr).split(',') : cellStr;
-
-    // const style: React.CSSProperties = {
-    //     position: 'absolute',
-    //     top,
-    //     left,
-    //     width,
-    //     height,
-    // };
 
     return (
         <SelectList

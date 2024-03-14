@@ -15,5 +15,5 @@
  */
 
 export { DataValidationPanel } from './panel';
-export { ListDropDown } from './ListDropdown';
+export { ListDropDown } from './list-dropdown';
 export const LIST_DROPDOWN_KEY = 'data-validation.list.dropdown';

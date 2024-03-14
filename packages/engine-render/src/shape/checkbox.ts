@@ -52,20 +52,22 @@ export class Checkbox extends Shape<ICheckboxProps> {
         if (checked) {
             Rect.drawWith(ctx, {
                 ...extProps,
-                radius: 0,
+                radius: 2,
                 width: width - 2,
                 height: height - 2,
                 fill,
                 stroke: fill,
+                strokeWidth: 2,
 
             });
         } else {
             Rect.drawWith(ctx, {
                 ...extProps,
-                radius: 0,
+                radius: 2,
                 width: width - 2,
                 height: height - 2,
                 stroke: fill,
+                strokeWidth: 1,
             });
         }
 

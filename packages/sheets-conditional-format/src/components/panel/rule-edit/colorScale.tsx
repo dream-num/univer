@@ -50,7 +50,6 @@ const TextInput = (props: { id: string; type: ValueType | 'none';value: number |
         return {};
     }, [type]);
     if (type === ValueType.formula) {
-        const v = String(_value.current).startsWith('=') ? String(_value.current) || '' : '=';
         return (
             <TextEditor
                 openForSheetSubUnitId={subUnitId}

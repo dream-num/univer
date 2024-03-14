@@ -32,6 +32,24 @@ import stylesBase from '../index.module.less';
 import type { IStyleEditorProps } from './type';
 import styles from './index.module.less';
 
+const TextInput = (props: { value: number;onChange: (v: number) => void; error?: string }) => {
+    const className = useMemo(() => {
+        if (props.error) {
+            return styles.errorInput;
+        }
+        return '';
+    }, [props.error]);
+    return (
+        <div>
+            <InputNumber className={className} value={props.value} onChange={(v) => props.onChange(v ?? 0)} />
+            {props.error && (
+                <div className={styles.errorText}>
+                    {props.error}
+                </div>
+            )}
+        </div>
+    );
+};
 const createDefaultConfigItem = (iconType: IIconType, index: number, list: unknown[]): IIconSet['config'][number] => ({
     operator: NumberOperator.greaterThan,
     value: { type: ValueType.num, value: (list.length - 1 - index) * 10 },
@@ -104,9 +122,9 @@ const IconItemList = (props: { onClick: (iconType: IIconType, iconId: string) =>
 const IconSetRuleEdit = (props: {
     configList: IIconSet['config'];
     onChange: (keys: string[], value: unknown) => void;
-    errorList?: string[];
+    errorMap?: Record<string, string>;
 }) => {
-    const { onChange, configList, errorList = [] } = props;
+    const { onChange, configList, errorMap = {} } = props;
     const localeService = useDependency(LocaleService);
 
     const options = [{ label: localeService.t(`sheet.cf.symbol.${NumberOperator.greaterThan}`), value: NumberOperator.greaterThan },
@@ -129,7 +147,7 @@ const IconSetRuleEdit = (props: {
     };
     const render = useMemo(() => {
         return configList.map((item, index) => {
-            const error = errorList[index];
+            const error = errorMap[index];
             const icon = iconMap[item.iconType][Number(item.iconId)];
             const isEnd = index === configList.length - 1;
             const isFirst = index === 0;
@@ -215,8 +233,7 @@ const IconSetRuleEdit = (props: {
                                 <div className={`${stylesBase.mTSm} ${styles.flex}`}>
                                     <Select className={`${styles.width45} ${stylesBase.mL0}`} options={valueTypeOptions} value={item.value.type} onChange={(v) => { handleValueTypeChange(v as NumberOperator, index); }} />
                                     <div className={`${stylesBase.mL0} ${styles.width45}`}>
-                                        <InputNumber value={Number(item.value.value)} onChange={(v) => handleValueValueChange(v as number, index)} />
-                                        {/* <div> error </div> */}
+                                        <TextInput error={error} value={Number(item.value.value)} onChange={(v) => handleValueValueChange(v, index)} />
                                     </div>
 
                                 </div>
@@ -227,14 +244,14 @@ const IconSetRuleEdit = (props: {
                 </div>
             );
         });
-    }, [configList, errorList]);
+    }, [configList, errorMap]);
     return render;
 };
 export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
     const { interceptorManager } = props;
     const rule = props.rule?.type === RuleType.iconSet ? props.rule : undefined;
     const localeService = useDependency(LocaleService);
-
+    const [errorMap, errorMapSet] = useState<Record<string, string>>({});
     const [currentIconType, currentIconTypeSet] = useState<IIconType>(() => {
         if (rule) {
             const type = rule.config[0].iconType;
@@ -251,7 +268,17 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
             return Tools.deepClone(rule?.config);
         }
         const list = iconMap[currentIconType];
-        return new Array(list.length).fill('').map((_e, index, list) => createDefaultConfigItem(currentIconType, index, list));
+        return new Array(list.length).fill('').map((_e, index, list) => {
+            if (index === list.length - 1) {
+                // The last condition is actually the complement of the above conditions,
+                // packages/sheets-conditional-format/src/services/calculate-unit/icon-set.ts
+                return { operator: NumberOperator.lessThanOrEqual,
+                         value: { type: ValueType.num, value: Number.MAX_SAFE_INTEGER },
+                         iconType: currentIconType,
+                         iconId: String(index) };
+            }
+            return createDefaultConfigItem(currentIconType, index, list);
+        });
     });
 
     const [isShowValue, isShowValueSet] = useState(() => {
@@ -282,9 +309,43 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
         if (oldV !== v) {
             set(configList, keys, v);
             configListSet([...configList]);
+            errorMapSet(checkResult(configList));
         }
     };
-    const checkResult = 2;
+    const checkResult = (_configList: typeof configList) => {
+        const isTypeSame = _configList.reduce((pre, cur) => {
+            if (pre.preType && !pre.result) {
+                return pre;
+            }
+            if (pre.preType) {
+                return {
+                    result: pre.preType === cur.value.type,
+                    preType: cur.value.type,
+                };
+            } else {
+                return {
+                    result: true,
+                    preType: cur.value.type,
+                };
+            }
+        }, { result: true, preType: '' }).result;
+        if (isTypeSame && [ValueType.num, ValueType.percent, ValueType.percentile].includes(_configList[0].value.type)) {
+            const valueList = _configList.map((config) => config.value.value ?? 0);
+            const result: Record<string, string> = {};
+            valueList.forEach((value, index) => {
+                const preIndex = index - 1;
+                if (preIndex < 0) {
+                    return;
+                }
+                const preValue = valueList[preIndex];
+                if (value >= preValue) {
+                    result[index] = `该值必须小于 ${preValue}`;
+                }
+            });
+            return result;
+        }
+        return {};
+    };
 
     useEffect(() => {
         const dispose = interceptorManager.intercept(interceptorManager.getInterceptPoints().submit, { handler() {
@@ -298,12 +359,13 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
 
     useEffect(() => {
         const dispose = interceptorManager.intercept(interceptorManager.getInterceptPoints().beforeSubmit, { handler() {
-            return true;
+            const keys = Object.keys(errorMap);
+            return keys.length === 0;
         } });
         return () => {
             dispose();
         };
-    }, [isShowValue, configList, interceptorManager]);
+    }, [isShowValue, configList, interceptorManager, errorMap]);
 
     const reverseIcon = () => {
         const iconList = configList.map((item) => ({ ...item }));
@@ -337,7 +399,7 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
                     {localeService.t('sheet.cf.iconSet.onlyShowIcon')}
                 </div>
             </div>
-            <IconSetRuleEdit onChange={handleChange} configList={configList} />
+            <IconSetRuleEdit errorMap={errorMap} onChange={handleChange} configList={configList} />
         </div>
     );
 };

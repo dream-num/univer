@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { InputNumber, Radio, RadioGroup, Select } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { IUniverInstanceService, LocaleService } from '@univerjs/core';
@@ -35,6 +35,15 @@ const InputText = (props: { disabled?: boolean; id: string; className: string; t
     const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
     const subUnitId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
     const _value = useRef(value);
+    const config = useMemo(() => {
+        if ([ValueType.percentile, ValueType.percent].includes(type)) {
+            return {
+                max: 100,
+                min: 0,
+            };
+        }
+        return {};
+    }, [type]);
     if (type === ValueType.formula) {
         const v = String(_value.current).startsWith('=') ? String(_value.current) || '' : '=';
         return (
@@ -61,6 +70,7 @@ const InputText = (props: { disabled?: boolean; id: string; className: string; t
             onChange={(v) => {
                 onChange(v || 0);
             }}
+            {...config}
         />
     );
 };

@@ -115,8 +115,8 @@ export class CellCustomRenderController extends Disposable {
                         };
 
                         const position = {
-                            x: (scrollXY.x + offsetX) / scaleX,
-                            y: (scrollXY.y + offsetY) / scaleY,
+                            x: scrollXY.x + (offsetX / scaleX),
+                            y: scrollXY.y + (offsetY / scaleY),
                         };
 
                         const activeRender = sortedRenders.find((render) => render.isHit?.(position, info));

@@ -202,10 +202,6 @@ export function createCommandTestBed(workbookConfig?: IWorkbookData, dependencie
     univer.registerPlugin(TestPlugin);
     const sheet = univer.createUniverSheet(workbookConfig || TEST_WORKBOOK_DATA);
 
-    if (get === undefined) {
-        throw new Error('[TestPlugin]: not hooked on!');
-    }
-
     const univerInstanceService = get(IUniverInstanceService);
     univerInstanceService.focusUniverInstance('test');
 

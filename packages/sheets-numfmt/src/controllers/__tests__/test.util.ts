@@ -76,10 +76,6 @@ export const createTestBed = (dependencies?: Dependency[]) => {
     const workbookJson = TEST_WORKBOOK_DATA_DEMO();
     const sheet = univer.createUniverSheet(workbookJson);
 
-    if (get === undefined) {
-        throw new Error('[TestPlugin]: not hooked on!');
-    }
-
     const univerInstanceService = injector.get(IUniverInstanceService);
     const commandService = injector.get(ICommandService);
     commandService.registerCommand(RemoveNumfmtMutation);

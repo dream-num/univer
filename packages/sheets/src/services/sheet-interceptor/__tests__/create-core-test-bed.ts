@@ -66,10 +66,6 @@ export function createCoreTestBed(workbookConfig?: IWorkbookData, dependencies?:
     univer.registerPlugin(TestPlugin);
     const sheet = univer.createUniverSheet(workbookConfig || TEST_WORKBOOK_DATA);
 
-    if (get === undefined) {
-        throw new Error('[TestPlugin]: not hooked on!');
-    }
-
     const univerInstanceService = get(IUniverInstanceService);
     univerInstanceService.focusUniverInstance('test');
 

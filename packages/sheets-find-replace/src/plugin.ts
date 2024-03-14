@@ -24,7 +24,7 @@ export interface IFindPluginConfig {}
 
 const NAME = 'UNIVER_SHEETS_FIND_REPLACE_PLUGIN';
 
-export class UniverSheetsFindPlugin extends Plugin {
+export class UniverSheetsFindReplacePlugin extends Plugin {
     static override type = PluginType.Sheet;
 
     constructor(

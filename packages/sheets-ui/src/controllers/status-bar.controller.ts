@@ -39,7 +39,6 @@ import {
 } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
-import { debounceTime } from 'rxjs';
 import type { IStatusBarServiceStatus } from '../services/status-bar.service';
 import { IStatusBarService } from '../services/status-bar.service';
 

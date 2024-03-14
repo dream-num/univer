@@ -164,5 +164,15 @@ describe('Test indirect', () => {
 
             expect((result as BaseValueObject).getValue()).toStrictEqual(4);
         });
+
+        it('Cross tab sum', async () => {
+            const lexerNode = lexer.treeBuilder('=----sum(Tool!A1:A2)');
+
+            const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
+
+            const result = interpreter.execute(astNode as BaseAstNode);
+
+            expect((result as BaseValueObject).getValue()).toStrictEqual(4);
+        });
     });
 });

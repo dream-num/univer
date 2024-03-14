@@ -130,7 +130,7 @@ export class ReferenceNodeFactory extends BaseAstNodeFactory {
         //     return true;
         // }
 
-        const { tokenTrim, minusPrefixNode, atPrefixNode } = prefixHandler(tokenTrimPre.toUpperCase(), this._functionService, this._injector);
+        const { tokenTrim, minusPrefixNode, atPrefixNode } = prefixHandler(tokenTrimPre, this._functionService, this._injector);
 
         if (!isLexerNode && tokenTrim.charAt(0) === '"' && tokenTrim.charAt(tokenTrim.length - 1) === '"') {
             return;

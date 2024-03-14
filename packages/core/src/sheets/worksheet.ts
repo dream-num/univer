@@ -660,3 +660,15 @@ export interface ICell {
     colSpan?: number;
     value: ICellData;
 }
+
+/**
+ * Get pure text in a cell.
+ * @param cell
+ * @returns pure text in this cell
+ */
+export function extractPureTextFromCell(cell: ICellData): Nullable<string> {
+    const rawValue = cell?.p?.body?.dataStream ?? cell?.v;
+    if (typeof rawValue === 'number') return `${rawValue}`;
+    if (typeof rawValue === 'boolean') return rawValue ? 'TRUE' : 'FALSE';
+    return rawValue;
+}

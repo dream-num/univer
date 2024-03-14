@@ -65,8 +65,9 @@ const locale = {
     },
     rangeSelector: {
         title: '选择一个数据范围',
-        addAnotherRange: '添加新范围',
+        addAnotherRange: '添加范围',
         buttonTooltip: '选择数据范围',
+        placeHolder: '框选范围或输入',
         confirm: '确认',
         cancel: '取消',
     },

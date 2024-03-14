@@ -42,6 +42,7 @@ const excludeProps = new Set([
     'onChange',
     'onActive',
     'onValid',
+    'placeholder',
 ]);
 
 export interface ITextEditorProps {
@@ -78,6 +79,7 @@ export interface ITextEditorProps {
 
     onValid?: (state: boolean) => void; // Editor input value validation, currently effective only under onlyRange and onlyFormula conditions.
 
+    placeholder?: string; // Placeholder text.
 }
 
 /**
@@ -109,6 +111,8 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
         onActive,
 
         onValid,
+
+        placeholder = '',
     } = props;
 
     const editorService = useDependency(IEditorService);
@@ -232,6 +236,19 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
         editorService.setValue(value, id);
     }, [value]);
 
+    function hasValue() {
+        const value = editorService.getValue(id);
+        if (value == null) {
+            return false;
+        }
+
+        if (value === '') {
+            return false;
+        }
+
+        return true;
+    }
+
     const propsNew = Object.fromEntries(
         Object.entries(props).filter(([key]) => !excludeProps.has(key))
     );
@@ -243,17 +260,21 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
 
     let borderStyle = '';
 
-    if (active && props.className == null) {
-        if (validationVisible) {
+    if (props.className == null) {
+        if (isReadonly) {
+            borderStyle = ` ${styles.textEditorContainerDisabled}`;
+        } else if (validationVisible) {
             borderStyle = ` ${styles.textEditorContainerError}`;
-        } else {
+        } else if (active) {
             borderStyle = ` ${styles.textEditorContainerActive}`;
         }
     }
 
     return (
         <>
-            <div {...propsNew} className={className + borderStyle} ref={editorRef}></div>
+            <div {...propsNew} className={className + borderStyle} ref={editorRef}>
+                <div style={{ display: hasValue() ? 'none' : 'unset' }} className={styles.textEditorContainerPlaceholder}>{placeholder}</div>
+            </div>
             <Popup visible={validationVisible} offset={validationOffset}>
                 <div className={styles.textEditorValidationError}>{validationContent}</div>
             </Popup>

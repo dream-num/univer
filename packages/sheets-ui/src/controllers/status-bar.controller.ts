@@ -84,24 +84,6 @@ export class StatusBarController extends Disposable {
                 })
             )
         );
-        // this.disposeWithMe(
-        //     toDisposable(
-        //         this._selectionManagerService.selectionMoveEnd$
-        //             .pipe(debounceTime(100))
-        //             .subscribe((selections) => {
-        //                 if (this._selectionManagerService.getCurrent()?.pluginName !== NORMAL_SELECTION_PLUGIN_NAME) {
-        //                     return;
-        //                 }
-        //                 if (selections) {
-        //                     const primary = selections[selections.length - 1]?.primary;
-        //                     this._calculateSelection(
-        //                         selections.map((selection) => selection.range),
-        //                         primary
-        //                     );
-        //                 }
-        //             })
-        //     )
-        // );
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (command.id === SetRangeValuesMutation.id) {

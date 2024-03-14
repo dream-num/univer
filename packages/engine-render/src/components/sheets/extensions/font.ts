@@ -23,6 +23,7 @@ import { SpreadsheetExtensionRegistry } from '../../extension';
 import type { IFontCacheItem } from '../interfaces';
 import type { SheetComponent } from '../sheet-component';
 import { getDocsSkeletonPageSize, type SpreadsheetSkeleton } from '../sheet-skeleton';
+import { VERTICAL_ROTATE_ANGLE } from '../../../basics/text-rotation';
 import { SheetExtension } from './sheet-extension';
 
 const UNIQUE_KEY = 'DefaultFontExtension';
@@ -123,7 +124,20 @@ export class Font extends SheetExtension {
                     }
 
                     const overflowRectangle = overflowCache.getValue(rowIndex, columnIndex);
-                    const { horizontalAlign, angle } = docsConfig;
+                    const { horizontalAlign, vertexAngle = 0, centerAngle = 0 } = docsConfig;
+
+                    /**
+                     * https://github.com/dream-num/univer-pro/issues/334
+                     * When horizontal alignment is not set, the default alignment for rotation angles varies to accommodate overflow scenarios.
+                     */
+                    let horizontalAlignOverFlow = horizontalAlign;
+                    if (horizontalAlign === HorizontalAlign.UNSPECIFIED) {
+                        if (centerAngle === VERTICAL_ROTATE_ANGLE && vertexAngle === VERTICAL_ROTATE_ANGLE) {
+                            horizontalAlignOverFlow = HorizontalAlign.CENTER;
+                        } else if ((vertexAngle > 0 && vertexAngle !== VERTICAL_ROTATE_ANGLE) || vertexAngle === -VERTICAL_ROTATE_ANGLE) {
+                            horizontalAlignOverFlow = HorizontalAlign.RIGHT;
+                        }
+                    }
 
                     ctx.save();
                     ctx.beginPath();
@@ -132,7 +146,7 @@ export class Font extends SheetExtension {
                     const leftOffset = cellData.fontRenderExtension?.leftOffset ?? 0;
                     let isOverflow = true;
 
-                    if (angle === 0) {
+                    if (vertexAngle === 0) {
                         startX = startX + leftOffset;
                         endX = endX - rightOffset;
 
@@ -164,7 +178,7 @@ export class Font extends SheetExtension {
                                 cellHeight - 2 / scale
                             );
                         } else {
-                            if (horizontalAlign === HorizontalAlign.CENTER) {
+                            if (horizontalAlignOverFlow === HorizontalAlign.CENTER) {
                                 this._clipRectangle(
                                     ctx,
                                     startRow,
@@ -175,7 +189,7 @@ export class Font extends SheetExtension {
                                     rowHeightAccumulation,
                                     columnWidthAccumulation
                                 );
-                            } else if (horizontalAlign === HorizontalAlign.RIGHT) {
+                            } else if (horizontalAlignOverFlow === HorizontalAlign.RIGHT) {
                                 this._clipRectangle(
                                     ctx,
                                     startRow,
@@ -235,11 +249,11 @@ export class Font extends SheetExtension {
             throw new Error('documents is null');
         }
 
-        const { documentSkeleton, angle, wrapStrategy } = docsConfig;
+        const { documentSkeleton, vertexAngle = 0, wrapStrategy } = docsConfig;
         const cellWidth = endX - startX;
         const cellHeight = endY - startY;
 
-        if (wrapStrategy === WrapStrategy.WRAP && angle === 0) {
+        if (wrapStrategy === WrapStrategy.WRAP && vertexAngle === 0) {
             documentSkeleton.getViewModel().getDataModel().updateDocumentDataPageSize(cellWidth);
             documentSkeleton.calculate();
         } else {
@@ -249,7 +263,7 @@ export class Font extends SheetExtension {
         // Use fix https://github.com/dream-num/univer/issues/927, Set the actual width of the content to the page width of the document,
         // so that the divide will be aligned when the skeleton is calculated.
         const overflowRectangle = overflowCache.getValue(row, column);
-        if (!(wrapStrategy === WrapStrategy.WRAP && !overflowRectangle && angle === 0)) {
+        if (!(wrapStrategy === WrapStrategy.WRAP && !overflowRectangle && vertexAngle === 0)) {
             const contentSize = getDocsSkeletonPageSize(documentSkeleton);
             const documentStyle = documentSkeleton.getViewModel().getDataModel().getSnapshot().documentStyle;
             if (contentSize && documentStyle) {

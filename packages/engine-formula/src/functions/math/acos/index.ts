@@ -25,8 +25,12 @@ export class Acos extends BaseFunction {
             return ErrorValueObject.create(ErrorType.NA);
         }
 
+        if (variant.isString()) {
+            variant = this.getStringNumberValueObject(variant);
+        }
+
         if (variant.isError()) {
-            return variant;
+            return new ErrorValueObject(ErrorType.VALUE);
         }
 
         return variant.acos();

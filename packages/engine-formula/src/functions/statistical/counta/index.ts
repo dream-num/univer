@@ -37,10 +37,8 @@ export class Counta extends BaseFunction {
             if (variant.isArray()) {
                 variant = variant.countA();
                 accumulatorAll = accumulatorAll.plus(variant);
-            } else {
-                if (!variant.isNull()) {
-                    accumulatorAll = accumulatorAll.plus(NumberValueObject.create(1));
-                }
+            } else if (!variant.isNull()) {
+                accumulatorAll = accumulatorAll.plus(NumberValueObject.create(1));
             }
         }
 

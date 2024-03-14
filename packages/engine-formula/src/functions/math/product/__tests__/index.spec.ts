@@ -33,6 +33,12 @@ describe('Test product function', () => {
             const result = textFunction.calculate(var1, var2);
             expect(result.getValue()).toBe(2);
         });
+        it('Var1 is string number, var2 is string number', () => {
+            const var1 = new NumberValueObject('1');
+            const var2 = new NumberValueObject('2');
+            const result = textFunction.calculate(var1, var2);
+            expect(result.getValue()).toBe(2);
+        });
         it('Var1 is number, var2 is string', () => {
             const var1 = NumberValueObject.create(1);
             const var2 = StringValueObject.create('test');

@@ -25,8 +25,16 @@ export class Power extends BaseFunction {
             return ErrorValueObject.create(ErrorType.NA);
         }
 
+        if (number.isString()) {
+            number = this.getStringNumberValueObject(number);
+        }
+
         if (number.isError()) {
             return number;
+        }
+
+        if (power.isString()) {
+            power = this.getStringNumberValueObject(power);
         }
 
         if (power.isError()) {

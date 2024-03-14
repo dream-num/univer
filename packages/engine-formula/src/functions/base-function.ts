@@ -386,6 +386,17 @@ export class BaseFunction extends Disposable {
         return resultArray.slice(undefined, [position.column, position.column + 1]);
     }
 
+    getStringNumberValueObject(variant: BaseValueObject) {
+        const value = variant.getValue();
+        const isStringNumber = isRealNum(value);
+
+        if (!isStringNumber) {
+            return new ErrorValueObject(ErrorType.VALUE);
+        }
+
+        return createNumberValueObjectByRawValue(value);
+    }
+
     flattenArray(variants: BaseValueObject[], ignoreLogicalValuesAndText: boolean = true): ArrayValueObject | BaseValueObject {
         const flattenValues: BaseValueObject[][] = [];
         flattenValues[0] = [];
@@ -393,16 +404,8 @@ export class BaseFunction extends Disposable {
         for (let i = 0; i < variants.length; i++) {
             let variant = variants[i];
 
-            if (variant.isString()) {
+            if (variant.isString() || variant.isBoolean() || variant.isNull()) {
                 variant = variant.convertToNumberObjectValue();
-            }
-
-            if (variant.isBoolean()) {
-                variant = convertTonNumber(variant);
-            }
-
-            if (variant.isNull()) {
-                variant = NumberValueObject.create(0);
             }
 
             if (variant.isError()) {

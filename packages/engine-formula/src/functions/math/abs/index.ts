@@ -25,6 +25,10 @@ export class Abs extends BaseFunction {
             return ErrorValueObject.create(ErrorType.NA);
         }
 
+        if (variant.isString()) {
+            variant = this.getStringNumberValueObject(variant);
+        }
+
         if (variant.isError()) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }

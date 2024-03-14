@@ -494,23 +494,21 @@ export class Spreadsheet extends SheetComponent {
 
         const columnWidthAccumulationLength = columnWidthAccumulation.length;
         const rowHeightAccumulationLength = rowHeightAccumulation.length;
-
-        const rowStart = this._allowCache ? startRow : 0;
-        const rowEnd = this._allowCache ? endRow : rowHeightAccumulationLength - 1;
-        const columnEnd = this._allowCache ? endColumn : columnWidthAccumulationLength - 1;
-        const columnStart = this._allowCache ? startColumn : 0;
+        const EXTRA_BOUND = 0.1;
+        const rowStart = Math.floor(startRow * (1 - EXTRA_BOUND));
+        const rowEnd = Math.min(Math.ceil(endRow * (1 + EXTRA_BOUND)), rowHeightAccumulationLength - 1);
+        const columnEnd = Math.min(Math.ceil(endColumn * (1 + EXTRA_BOUND)), columnWidthAccumulationLength - 1);
+        const columnStart = Math.floor(startColumn * (1 - EXTRA_BOUND));
 
         const startX = columnWidthAccumulation[columnStart - 1] || 0;
         const startY = rowHeightAccumulation[rowStart - 1] || 0;
         const endX = columnWidthAccumulation[columnEnd];
         const endY = rowHeightAccumulation[rowEnd];
-
         ctx.translateWithPrecisionRatio(FIX_ONE_PIXEL_BLUR_OFFSET, FIX_ONE_PIXEL_BLUR_OFFSET);
-
         ctx.moveToByPrecision(startX, startY);
         ctx.lineToByPrecision(endX, startY);
 
-        for (let r = 0; r <= rowEnd; r++) {
+        for (let r = rowStart; r <= rowEnd; r++) {
             if (r < 0 || r > rowHeightAccumulationLength - 1) {
                 continue;
             }
@@ -521,7 +519,7 @@ export class Spreadsheet extends SheetComponent {
 
         ctx.moveToByPrecision(startX, startY);
         ctx.lineToByPrecision(startX, endY);
-        for (let c = 0; c <= endColumn; c++) {
+        for (let c = columnStart; c <= columnEnd; c++) {
             if (c < 0 || c > columnWidthAccumulationLength - 1) {
                 continue;
             }

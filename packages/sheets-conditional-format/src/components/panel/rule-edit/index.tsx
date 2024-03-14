@@ -192,7 +192,7 @@ export const RuleEdit = (props: IRuleEditProps) => {
         <div className={styles.cfRuleStyleEditor}>
             <div className={styleBase.title}>{localeService.t('sheet.cf.panel.range')}</div>
             <div className={`${styleBase.mTBase}`}>
-                <RangeSelector openForSheetSubUnitId={subUnitId} openForSheetUnitId={unitId} value={rangeString} id={`${SHEET_CONDITION_FORMAT_PLUGIN}_rangeSelector`} onChange={onRangeSelectorChange} />
+                <RangeSelector placeholder="选择范围或者输入值" width={'100%' as unknown as number} openForSheetSubUnitId={subUnitId} openForSheetUnitId={unitId} value={rangeString} id={`${SHEET_CONDITION_FORMAT_PLUGIN}_rangeSelector`} onChange={onRangeSelectorChange} />
             </div>
             <div className={styleBase.title}>{localeService.t('sheet.cf.panel.styleType')}</div>
             <div className={styleBase.mTBase}>

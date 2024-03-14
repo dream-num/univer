@@ -50,10 +50,9 @@ const TEST_WORKBOOK_DATA_DEMO: () => IWorkbookData = () => ({
 export const createTestBed = (dependencies?: Dependency[]) => {
     const univer = new Univer();
     const injector = univer.__getInjector();
+    const get = injector.get.bind(injector);
 
-    let get: Injector['get'] | undefined;
-
-    class TestSpyPlugin extends Plugin {
+    class TestPlugin extends Plugin {
         static override type = PluginType.Sheet;
 
         constructor(
@@ -61,9 +60,6 @@ export const createTestBed = (dependencies?: Dependency[]) => {
             @Inject(Injector) override readonly _injector: Injector
         ) {
             super('test-plugin');
-
-            this._injector = _injector;
-            get = this._injector.get.bind(this._injector);
         }
 
         override onStarting(injector: Injector): void {
@@ -73,13 +69,9 @@ export const createTestBed = (dependencies?: Dependency[]) => {
             injector.add([LexerTreeBuilder]);
             dependencies?.forEach((d) => injector.add(d));
         }
-
-        override onDestroy(): void {
-            get = undefined;
-        }
     }
 
-    univer.registerPlugin(TestSpyPlugin);
+    univer.registerPlugin(TestPlugin);
 
     const workbookJson = TEST_WORKBOOK_DATA_DEMO();
     const sheet = univer.createUniverSheet(workbookJson);

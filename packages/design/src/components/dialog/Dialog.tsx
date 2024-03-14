@@ -152,6 +152,7 @@ export function Dialog(props: IDialogProps) {
             if (!targetRect) {
                 return;
             }
+
             setBounds({
                 left: -targetRect.left + uiData.x,
                 right: clientWidth - (targetRect.right - uiData.x),

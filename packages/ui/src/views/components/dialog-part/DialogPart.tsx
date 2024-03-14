@@ -37,7 +37,7 @@ export function DialogPart() {
         return () => {
             subscription.unsubscribe();
         };
-    }, []);
+    }, [dialogService]);
 
     const attrs = dialogOptions.map((options) => {
         const { children, title, closeIcon, footer, ...restProps } = options;

@@ -574,7 +574,11 @@ export class LexerTreeBuilder extends Disposable {
         }
 
         if (transformSuffix) {
-            this._suffixExpressionHandler(this._currentLexerNode);
+            const isValid = this._suffixExpressionHandler(this._currentLexerNode);
+
+            if (!isValid) {
+                return ErrorType.VALUE;
+            }
 
             FormulaLexerNodeCache.set(formulaString, this._currentLexerNode);
         }
@@ -585,7 +589,7 @@ export class LexerTreeBuilder extends Disposable {
     private _suffixExpressionHandler(lexerNode: LexerNode) {
         const children = lexerNode.getChildren();
         if (!children) {
-            return;
+            return false;
         }
         const childrenCount = children.length;
 
@@ -604,9 +608,9 @@ export class LexerTreeBuilder extends Disposable {
                     if (char === operatorToken.PLUS && this._deletePlusForPreNode(children[i - 1])) {
                         continue;
                     }
-                    // =-(2)+*9
+                    // =-(2)+*9, return error
                     if (char !== operatorToken.PLUS && char !== operatorToken.MINUS && this._deletePlusForPreNode(children[i - 1])) {
-                        continue;
+                        return false;
                     }
                     while (symbolStack.length > 0) {
                         const lastSymbol = symbolStack[symbolStack.length - 1]?.trim();
@@ -631,6 +635,16 @@ export class LexerTreeBuilder extends Disposable {
                 } else if (char === matchToken.OPEN_BRACKET) {
                     symbolStack.push(node as string);
                 } else if (char === matchToken.CLOSE_BRACKET) {
+                    // =()+9, return error
+                    if (this._checkOpenBracket(children[i - 1])) {
+                        return false;
+                    }
+
+                    // =1+(1*)
+                    if (this._checkOperator(children[i - 1])) {
+                        return false;
+                    }
+
                     while (symbolStack.length > 0) {
                         const lastSymbol = symbolStack[symbolStack.length - 1]?.trim();
                         if (!lastSymbol) {
@@ -645,6 +659,10 @@ export class LexerTreeBuilder extends Disposable {
                         baseStack.push(symbolStack.pop()!);
                     }
                 } else {
+                     // =(1+3)9, return error
+                    if (this._checkCloseBracket(children[i - 1])) {
+                        return false;
+                    }
                     baseStack.push(node as string);
                 }
             } else {
@@ -653,9 +671,35 @@ export class LexerTreeBuilder extends Disposable {
             }
         }
         while (symbolStack.length > 0) {
-            baseStack.push(symbolStack.pop()!);
+            const symbol = symbolStack.pop()!;
+            if (symbol === matchToken.OPEN_BRACKET || symbol === matchToken.CLOSE_BRACKET) {
+                return false;
+            }
+            baseStack.push(symbol);
         }
         lexerNode.setChildren(baseStack);
+
+        return true;
+    }
+
+    private _checkCloseBracket(node: Nullable<string | LexerNode>) {
+        return node === matchToken.CLOSE_BRACKET;
+    }
+
+    private _checkOpenBracket(node: Nullable<string | LexerNode>) {
+        return node === matchToken.OPEN_BRACKET;
+    }
+
+    private _checkOperator(node: Nullable<string | LexerNode>) {
+        if (node == null) {
+            return false;
+        }
+
+        if (node instanceof LexerNode) {
+            return false;
+        }
+
+        return OPERATOR_TOKEN_SET.has(node);
     }
 
     private _deletePlusForPreNode(preNode: Nullable<string | LexerNode>) {

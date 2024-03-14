@@ -463,12 +463,7 @@ export class SpreadsheetSkeleton extends Skeleton {
 
             const documentViewModel = new DocumentViewModel(documentModel);
 
-            let { a: angle } = textRotation as ITextRotation;
-            const { v: isVertical = BooleanNumber.FALSE } = textRotation as ITextRotation;
-
-            if (isVertical === BooleanNumber.TRUE) {
-                angle = VERTICAL_ROTATE_ANGLE;
-            }
+            const { vertexAngle: angle } = convertTextRotation(textRotation);
 
             const colWidth = data[i]?.w;
             if (typeof colWidth === 'number' && wrapStrategy === WrapStrategy.WRAP) {
@@ -1143,11 +1138,24 @@ export class SpreadsheetSkeleton extends Skeleton {
      */
     private _calculateOverflowCell(row: number, column: number, docsConfig: IFontCacheItem) {
         // wrap and angle handler
-        const { documentSkeleton, angle = 0, horizontalAlign, wrapStrategy } = docsConfig;
+        const { documentSkeleton, vertexAngle = 0, centerAngle = 0, horizontalAlign, wrapStrategy } = docsConfig;
 
         const cell = this.getCellData().getValue(row, column);
 
         const { t: cellValueType = CellValueType.STRING } = cell || {};
+
+        let horizontalAlignPos = horizontalAlign;
+        /**
+         * https://github.com/dream-num/univer-pro/issues/334
+         * When horizontal alignment is not set, the default alignment for rotation angles varies to accommodate overflow scenarios.
+         */
+        if (horizontalAlign === HorizontalAlign.UNSPECIFIED) {
+            if (centerAngle === VERTICAL_ROTATE_ANGLE && vertexAngle === VERTICAL_ROTATE_ANGLE) {
+                horizontalAlignPos = HorizontalAlign.CENTER;
+            } else if ((vertexAngle > 0 && vertexAngle !== VERTICAL_ROTATE_ANGLE) || vertexAngle === -VERTICAL_ROTATE_ANGLE) {
+                horizontalAlignPos = HorizontalAlign.RIGHT;
+            }
+        }
 
         /**
          * Numerical and Boolean values are not displayed with overflow.
@@ -1163,13 +1171,13 @@ export class SpreadsheetSkeleton extends Skeleton {
                 return true;
             }
 
-            let contentSize = getDocsSkeletonPageSize(documentSkeleton, angle);
+            let contentSize = getDocsSkeletonPageSize(documentSkeleton, vertexAngle);
 
             if (!contentSize) {
                 return true;
             }
 
-            if (angle !== 0) {
+            if (vertexAngle !== 0) {
                 const { startY, endY, startX, endX } = getCellByIndex(
                     row,
                     column,
@@ -1182,7 +1190,7 @@ export class SpreadsheetSkeleton extends Skeleton {
 
                 if (contentSize.height > cellHeight) {
                     contentSize = {
-                        width: cellHeight / Math.tan(Math.abs(angle)) + cellWidth,
+                        width: cellHeight / Math.tan(Math.abs(vertexAngle)) + cellWidth,
                         height: cellHeight,
                     };
                     // if (angle > 0) {
@@ -1193,7 +1201,7 @@ export class SpreadsheetSkeleton extends Skeleton {
                 }
             }
 
-            const position = this.getOverflowPosition(contentSize, horizontalAlign, row, column, this.getColumnCount());
+            const position = this.getOverflowPosition(contentSize, horizontalAlignPos, row, column, this.getColumnCount());
 
             const { startColumn, endColumn } = position;
 
@@ -1202,7 +1210,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             }
 
             this.appendToOverflowCache(row, column, startColumn, endColumn);
-        } else if (wrapStrategy === WrapStrategy.WRAP && angle !== 0) {
+        } else if (wrapStrategy === WrapStrategy.WRAP && vertexAngle !== 0) {
             // Merged cells do not support overflow.
             if (this.intersectMergeRange(row, column)) {
                 return true;
@@ -1219,7 +1227,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             const cellHeight = endY - startY;
             documentSkeleton.getViewModel().getDataModel().updateDocumentDataPageSize(cellHeight);
             documentSkeleton.calculate();
-            const contentSize = getDocsSkeletonPageSize(documentSkeleton, angle);
+            const contentSize = getDocsSkeletonPageSize(documentSkeleton, vertexAngle);
 
             if (!contentSize) {
                 return true;
@@ -1227,7 +1235,7 @@ export class SpreadsheetSkeleton extends Skeleton {
 
             const { startColumn, endColumn } = this.getOverflowPosition(
                 contentSize,
-                horizontalAlign,
+                horizontalAlignPos,
                 row,
                 column,
                 this.getColumnCount()
@@ -1672,20 +1680,16 @@ export class SpreadsheetSkeleton extends Skeleton {
 
         const fontCache = cache.font![fontString];
 
-        let { a: angle } = textRotation as ITextRotation;
-
-        const { v: isVertical = BooleanNumber.FALSE } = textRotation as ITextRotation;
-        if (isVertical === BooleanNumber.TRUE) {
-            angle = VERTICAL_ROTATE_ANGLE;
-        }
+        const { vertexAngle, centerAngle } = convertTextRotation(textRotation);
 
         if (documentViewModel) {
             const documentSkeleton = DocumentSkeleton.create(documentViewModel, this._localService);
             documentSkeleton.calculate();
 
-            const config = {
+            const config: IFontCacheItem = {
                 documentSkeleton,
-                angle,
+                vertexAngle,
+                centerAngle,
                 verticalAlign,
                 horizontalAlign,
                 wrapStrategy,
@@ -1737,7 +1741,7 @@ export class SpreadsheetSkeleton extends Skeleton {
     private _getDocumentDataByStyle(content: string, textStyle: ITextStyle, config: ICellOtherConfig) {
         const contentLength = content.length;
         const {
-            textRotation = { a: 0, v: BooleanNumber.FALSE },
+            textRotation,
             paddingData = {
                 t: 2,
                 r: 2,
@@ -1750,15 +1754,10 @@ export class SpreadsheetSkeleton extends Skeleton {
             cellValueType,
         } = config;
 
-        const { a: angle = 0, v: isVertical = BooleanNumber.FALSE } = textRotation;
         const { t: marginTop, r: marginRight, b: marginBottom, l: marginLeft } = paddingData || {};
 
-        let centerAngle = 0;
-        let vertexAngle = angle;
-        if (isVertical === BooleanNumber.TRUE) {
-            centerAngle = VERTICAL_ROTATE_ANGLE;
-            vertexAngle = VERTICAL_ROTATE_ANGLE;
-        }
+        const { vertexAngle, centerAngle } = convertTextRotation(textRotation);
+
         const documentData: IDocumentData = {
             id: 'd',
             body: {

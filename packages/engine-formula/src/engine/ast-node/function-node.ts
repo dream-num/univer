@@ -268,14 +268,16 @@ export class FunctionNodeFactory extends BaseAstNodeFactory {
         }
         const token = param.getToken();
 
-        const { tokenTrim, minusPrefixNode, atPrefixNode } = prefixHandler(token.trim().toUpperCase(), this._functionService, this._injector);
+        const { tokenTrim, minusPrefixNode, atPrefixNode } = prefixHandler(token.trim(), this._functionService, this._injector);
 
         if (!Number.isNaN(Number(tokenTrim))) {
             return ErrorNode.create(ErrorType.VALUE);
         }
 
-        if (this._functionService.hasExecutor(tokenTrim)) {
-            const functionNode = this.create(tokenTrim);
+        const tokenTrimUpper = tokenTrim.toUpperCase();
+
+        if (this._functionService.hasExecutor(tokenTrimUpper)) {
+            const functionNode = this.create(tokenTrimUpper);
             if (atPrefixNode) {
                 functionNode.setParent(atPrefixNode);
                 // return atPrefixNode;

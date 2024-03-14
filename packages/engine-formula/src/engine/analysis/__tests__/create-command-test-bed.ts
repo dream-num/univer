@@ -63,6 +63,85 @@ const TEST_WORKBOOK_DATA: IWorkbookData = {
     sheets: {
         sheet1: {
             id: 'sheet1',
+            name: 'Main',
+            cellData: {
+                0: {
+                    0: {
+                        v: 1,
+                        t: CellValueType.NUMBER,
+                    },
+                    1: {
+                        v: 2,
+                        t: CellValueType.NUMBER,
+                    },
+                },
+                1: {
+                    0: {
+                        v: 3,
+                        t: CellValueType.NUMBER,
+                    },
+                    1: {
+                        v: 4,
+                        t: CellValueType.NUMBER,
+                    },
+                    2: {
+                        v: 'B2',
+                        t: CellValueType.STRING,
+                    },
+                    3: {
+                        v: 'R2C2',
+                        t: CellValueType.STRING,
+                    },
+                },
+                2: {
+                    0: {
+                        v: 1,
+                        t: CellValueType.NUMBER,
+                    },
+                    1: {
+                        v: ' ',
+                        t: CellValueType.STRING,
+                    },
+                    2: {
+                        v: 1.23,
+                        t: CellValueType.NUMBER,
+                    },
+                    3: {
+                        v: true,
+                        t: CellValueType.BOOLEAN,
+                    },
+                    4: {
+                        v: false,
+                        t: CellValueType.BOOLEAN,
+                    },
+                },
+                3: {
+                    0: {
+                        v: 0,
+                        t: CellValueType.NUMBER,
+                    },
+                    1: {
+                        v: '100',
+                        t: CellValueType.STRING,
+                    },
+                    2: {
+                        v: '2.34',
+                        t: CellValueType.STRING,
+                    },
+                    3: {
+                        v: 'test',
+                        t: CellValueType.STRING,
+                    },
+                    4: {
+                        v: -3,
+                        t: CellValueType.NUMBER,
+                    },
+                },
+            },
+        },
+        sheet2: {
+            id: 'sheet2',
+            name: 'Tool',
             cellData: {
                 0: {
                     0: {

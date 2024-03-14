@@ -22,7 +22,7 @@ import React from 'react';
 
 import styles from './index.module.less';
 
-export interface IInputProps {
+export interface IInputProps extends Pick<InputProps, 'onFocus' | 'onBlur'> {
     /**
      * Whether the input is autoFocus
      * @default false

@@ -1,20 +1,30 @@
-# @univerjs/sheets-find
+# @univerjs/sheets-find-replace
 
-[![npm version](https://img.shields.io/npm/v/@univerjs/sheets-find)](https://npmjs.org/package/@univerjs/sheets-find)
-[![license](https://img.shields.io/npm/l/@univerjs/sheets-find)](https://img.shields.io/npm/l/@univerjs/sheets-find)
+[![npm version](https://img.shields.io/npm/v/@univerjs/sheets-find-replace)](https://npmjs.org/package/@univerjs/sheets-find-replace)
+[![license](https://img.shields.io/npm/l/@univerjs/sheets-find-replace)](https://img.shields.io/npm/l/@univerjs/sheets-find-replace)
 
 ## Introduction
 
-TODO: Not written yet.
+This package provides the feature to find and replace text in spreadsheets.
 
 ## Usage
+
+You should use this plugin with the `@univerjs/find-replace` package.
+
+```ts
+import { UniverFindReplacePlugin } from '@univerjs/find-replace';
+import { UniverSheetsFindReplacePlugin } from '@univerjs/sheets-find-replace';
+
+univer.registerPlugin(UniverFindReplacePlugin);
+univer.registerPlugin(UniverSheetsFindReplacePlugin);
+```
 
 ### Installation
 
 ```shell
 # Using npm
-npm install @univerjs/sheets-find
+npm install @univerjs/sheets-find-replace
 
 # Using pnpm
-pnpm add @univerjs/sheets-find
+pnpm add @univerjs/sheets-find-replace
 ```

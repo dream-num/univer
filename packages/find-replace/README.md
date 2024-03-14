@@ -5,9 +5,15 @@
 
 ## Introduction
 
-TODO: Not yet written.
+This package provides the basic ability to support find and replace. With other plugins, such as `@univerjs/sheets-find-replace`, you can find and replace text in different types of files at the same time.
 
 ## Usage
+
+```ts
+import { UniverFindReplacePlugin } from '@univerjs/find-replace';
+
+univer.registerPlugin(UniverFindReplacePlugin);
+```
 
 ### Installation
 

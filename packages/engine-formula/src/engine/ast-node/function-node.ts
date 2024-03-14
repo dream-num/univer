@@ -270,6 +270,10 @@ export class FunctionNodeFactory extends BaseAstNodeFactory {
 
         const { tokenTrim, minusPrefixNode, atPrefixNode } = prefixHandler(token.trim().toUpperCase(), this._functionService, this._injector);
 
+        if (!Number.isNaN(Number(tokenTrim))) {
+            return ErrorNode.create(ErrorType.VALUE);
+        }
+
         if (this._functionService.hasExecutor(tokenTrim)) {
             const functionNode = this.create(tokenTrim);
             if (atPrefixNode) {

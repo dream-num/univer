@@ -54,19 +54,19 @@ export const TestEditorContainer = () => {
         <div
             style={containerStyle}
         >
-            <TextEditor id="test-editor-1" openForSheetUnitId={unitId} openForSheetSubUnitId={sheetId} isReadonly={readonly} style={editorStyle} canvasStyle={{ fontSize: 10 }} value="I found one cent on the roadside." />
+            <TextEditor id="test-editor-1" placeholder="please input value" openForSheetUnitId={unitId} openForSheetSubUnitId={sheetId} isReadonly={readonly} style={editorStyle} canvasStyle={{ fontSize: 10 }} value="I found one cent on the roadside." />
             <br></br>
-            <TextEditor id="test-editor-2" openForSheetUnitId={unitId} openForSheetSubUnitId={sheetId} isReadonly={readonly} onlyInputFormula={true} style={editorStyle} canvasStyle={{ fontSize: 10 }} />
+            <TextEditor id="test-editor-2" placeholder="please input value" openForSheetUnitId={unitId} openForSheetSubUnitId={sheetId} isReadonly={readonly} onlyInputFormula={true} style={editorStyle} canvasStyle={{ fontSize: 10 }} />
             <br></br>
-            <TextEditor id="test-editor-3" openForSheetUnitId={unitId} openForSheetSubUnitId={sheetId} isReadonly={readonly} onlyInputRange={true} style={editorStyle} canvasStyle={{ fontSize: 10 }} />
+            <TextEditor id="test-editor-3" placeholder="please input value" openForSheetUnitId={unitId} openForSheetSubUnitId={sheetId} isReadonly={readonly} onlyInputRange={true} style={editorStyle} canvasStyle={{ fontSize: 10 }} />
             <br></br>
-            <TextEditor id="test-editor-4" openForSheetUnitId={unitId} openForSheetSubUnitId={sheetId} isReadonly={readonly} isSingle={false} onlyInputContent={true} style={{ ...editorStyle, height: '140px' }} canvasStyle={{ fontSize: 14 }} />
+            <TextEditor id="test-editor-4" placeholder="please input value" openForSheetUnitId={unitId} openForSheetSubUnitId={sheetId} isReadonly={readonly} isSingle={false} onlyInputContent={true} style={{ ...editorStyle, height: '140px' }} canvasStyle={{ fontSize: 14 }} />
             <br></br>
-            <RangeSelector id="test-rangeSelector-1" openForSheetUnitId={unitId} isReadonly={readonly} openForSheetSubUnitId={sheetId} />
+            <RangeSelector placeholder="please input value" id="test-rangeSelector-1" width={280} openForSheetUnitId={unitId} isReadonly={readonly} openForSheetSubUnitId={sheetId} />
             <br></br>
-            <RangeSelector value="I am a wolf man" id="test-rangeSelector-2" isSingleChoice={true} isReadonly={readonly} openForSheetUnitId={unitId} openForSheetSubUnitId={sheetId} />
+            <RangeSelector placeholder="please input value" value="I am a wolf man" id="test-rangeSelector-2" isSingleChoice={true} isReadonly={readonly} openForSheetUnitId={unitId} openForSheetSubUnitId={sheetId} />
             <br></br>
-            <Input allowClear />
+            <Input placeholder="please input value" allowClear />
             <br></br>
             <button onClick={() => setReadonly(!readonly)}>{readonly === true ? 'enable' : 'disable'}</button>
         </div>

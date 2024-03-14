@@ -71,7 +71,7 @@ univer.registerPlugin(UniverUniscriptPlugin, {
 });
 
 // create univer sheet instance
-univer.createUniverSheet(UNISCRIT_WORKBOOK_DATA_DEMO);
+univer.createUniverSheetByConfig(UNISCRIT_WORKBOOK_DATA_DEMO);
 
 declare global {
     interface Window {

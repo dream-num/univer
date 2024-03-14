@@ -82,7 +82,7 @@ export const createTestBed = (dependencies?: Dependency[]) => {
     univer.registerPlugin(TestSpyPlugin);
 
     const workbookJson = TEST_WORKBOOK_DATA_DEMO();
-    const sheet = univer.createUniverSheet(workbookJson);
+    const sheet = univer.createUniverSheetByConfig(workbookJson);
 
     if (get === undefined) {
         throw new Error('[TestPlugin]: not hooked on!');

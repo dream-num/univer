@@ -37,7 +37,7 @@ export const enum UniverInstanceType {
 
 export interface IUniverHandler {
     createUniverDoc(data: Partial<IDocumentData>): DocumentDataModel;
-    createUniverSheet(data: Partial<IWorkbookData>): Workbook;
+    createUniverSheetByConfig(data: Partial<IWorkbookData>): Workbook;
     createUniverSlide(data: Partial<ISlideData>): Slide;
 }
 
@@ -152,7 +152,7 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
     }
 
     createSheet(data: Partial<IWorkbookData>): Workbook {
-        return this._handler.createUniverSheet(data);
+        return this._handler.createUniverSheetByConfig(data);
     }
 
     createSlide(data: Partial<ISlideData>): Slide {

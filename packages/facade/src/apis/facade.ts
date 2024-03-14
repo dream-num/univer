@@ -67,7 +67,7 @@ export class FUniver {
      * @param data the snapshot of the spreadsheet.
      * @returns Spreadsheet API instance.
      */
-    createUniverSheet(data: Partial<IWorkbookData>): FWorkbook {
+    createUniverSheetByConfig(data: Partial<IWorkbookData>): FWorkbook {
         const workbook = this._univerInstanceService.createSheet(data);
         return this._injector.createInstance(FWorkbook, workbook);
     }

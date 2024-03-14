@@ -64,7 +64,7 @@ function factory(id: string) {
         univer.registerPlugin(UniverSheetsFormulaPlugin);
 
         // create univer sheet instance
-        univer.createUniverSheet(Tools.deepClone(DEFAULT_WORKBOOK_DATA_DEMO));
+        univer.createUniverSheetByConfig(Tools.deepClone(DEFAULT_WORKBOOK_DATA_DEMO));
     };
 }
 

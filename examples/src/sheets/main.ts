@@ -81,7 +81,7 @@ univer.registerPlugin(UniverFindReplacePlugin);
 univer.registerPlugin(UniverSheetsFindPlugin);
 
 // create univer sheet instance
-univer.createUniverSheet(DEFAULT_WORKBOOK_DATA_DEMO);
+univer.createUniverSheetByConfig(DEFAULT_WORKBOOK_DATA_DEMO);
 
 declare global {
     interface Window {

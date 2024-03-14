@@ -206,7 +206,7 @@ export function createFunctionTestBed(workbookConfig?: IWorkbookData, dependenci
     }
 
     univer.registerPlugin(TestSpyPlugin);
-    const sheet = univer.createUniverSheet(workbookConfig || getTestWorkbookData());
+    const sheet = univer.createUniverSheetByConfig(workbookConfig || getTestWorkbookData());
 
     if (get === undefined) {
         throw new Error('[TestPlugin]: not hooked on!');

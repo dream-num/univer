@@ -17,6 +17,8 @@
 import type { IDocumentMeta, IGetSheetBlockRequest, ISheetBlock, ISheetBlockMeta, ISnapshot, IWorkbookMeta, IWorksheetMeta } from '@univerjs/protocol';
 import { ErrorCode, isError, UniverType } from '@univerjs/protocol';
 
+import type { WorksheetMeta } from '@univerjs/protocol/lib/types/ts/univer/workbook.js';
+import type { Nullable } from 'vitest';
 import type { ILogContext } from '../log/context';
 import type { IWorkbookData } from '../../types/interfaces/i-workbook-data';
 import { SheetTypes } from '../../types/enum/sheet-types';
@@ -24,16 +26,20 @@ import type { IWorksheetData } from '../../types/interfaces/i-worksheet-data';
 import type { ICellData } from '../../types/interfaces/i-cell-data';
 import { LocaleType } from '../../types/enum/locale-type';
 import type { IDocumentData } from '../../types/interfaces/i-document-data';
+import type { ISheetBlockObject, ISnapshotObject, IWorksheetMetaObject } from '../../types/interfaces/snapshot';
+import { SnapshotMetaType } from '../../types/interfaces/snapshot';
 import {
     decodeDocOriginalMeta,
+    decodeMetaFromBuffer,
     decodePartOfCellData,
     decodeWorksheetOtherMetas,
     encodeDocOriginalMeta,
+    encodeMetaToBuffer,
     encodeWorkbookOtherMetas,
     encodeWorksheetOtherMetas,
     splitCellDataToBlocks,
 } from './snapshot-utils';
-import type { ISnapshotServerService } from './snapshot-server.service';
+import { ClientSnapshotServerService, type ISnapshotServerService } from './snapshot-server.service';
 
 export async function generateTemporarySnap(
     context: ILogContext,
@@ -46,7 +52,7 @@ export async function generateTemporarySnap(
     }> {
     const blockMeta: { [key: string]: ISheetBlockMeta } = {};
 
-        // Deal with worksheets and their blocks.
+    // Deal with worksheets and their blocks.
     const sheetMetas: { [key: string]: IWorksheetMeta } = {};
     const blocksSaveSuccess = await Promise.all(
         Object.entries(workbook.sheets).map(async ([sheetID, worksheet]) => {
@@ -61,7 +67,7 @@ export async function generateTemporarySnap(
 
             sheetMetas[sheetID] = sheetMeta;
 
-                // Trigger RPC and store the result in sheetBlocks.
+            // Trigger RPC and store the result in sheetBlocks.
             if (worksheet.cellData) {
                 const sheetBlocks = splitCellDataToBlocks(worksheet.cellData, worksheet.rowCount!);
                 const responses = await Promise.all(
@@ -391,4 +397,154 @@ export async function getSheetBlocksFromSnapshot(snapshot: ISnapshot, snapshotSe
 
     await Promise.all(promises);
     return blocks;
+}
+
+/**
+ * The originalMeta value in the JSON data transmitted from the backend is in string format and needs to be converted to Uint8Array first to fully comply with the ISnapshot format.
+ * @param snapshot
+ * @returns
+ */
+export function transformSnapshotObjectMetaToBuffer(snapshot: Partial<ISnapshotObject>): Nullable<ISnapshot> {
+    const workbook = snapshot.workbook;
+    if (!workbook) return null;
+
+    const sheets: {
+        [key: string]: WorksheetMeta;
+    } = {};
+
+    if (workbook.sheets) {
+        // Loop through sheets and convert originalMeta
+        Object.keys(workbook.sheets).forEach((sheetKey) => {
+            const sheet = workbook.sheets && workbook.sheets[sheetKey];
+
+            if (!sheet) return;
+
+            // Set the converted Uint8Array to originalMeta
+            sheets[sheetKey] = {
+                ...sheet,
+                type: sheet.type || 0,
+                id: sheet.id || '',
+                name: sheet.name || '',
+                rowCount: sheet.rowCount || 0,
+                columnCount: sheet.columnCount || 0,
+                originalMeta: encodeMetaToBuffer(sheet.originalMeta || ''),
+            };
+        });
+    }
+
+    const rev = snapshot.rev || workbook.rev || 0;
+    const unitID = snapshot.unitID || workbook.unitID || '';
+
+    return {
+        ...snapshot,
+        unitID,
+        type: snapshot.type || 0,
+        rev,
+        doc: snapshot.doc || undefined,
+        workbook: {
+            ...workbook,
+            unitID,
+            rev,
+            creator: workbook.creator || '',
+            name: workbook.name || '',
+            sheetOrder: workbook.sheetOrder || [],
+            resources: workbook.resources || [],
+            blockMeta: workbook.blockMeta || {},
+            originalMeta: encodeMetaToBuffer(workbook.originalMeta || ''),
+            sheets,
+        },
+    };
+}
+
+export function transformSheetBlockObjectMetaToBuffer(sheetBlocks: ISheetBlockObject): ISheetBlock[] {
+    const sheetBlockArray: ISheetBlock[] = [];
+    Object.keys(sheetBlocks).forEach((blockKey) => {
+        const block = sheetBlocks[blockKey];
+        sheetBlockArray.push({
+            ...block,
+            id: block.id || '',
+            startRow: block.startRow || 0,
+            endRow: block.endRow || 0,
+            data: encodeMetaToBuffer(block.data || ''),
+        });
+    });
+    return sheetBlockArray;
+}
+
+export function transformSnapshotObjectToWorkbookData(snapshot: Partial<ISnapshotObject>, sheetBlocks: ISheetBlockObject): Nullable<IWorkbookData> {
+    const snapshotData = transformSnapshotObjectMetaToBuffer(snapshot);
+    if (!snapshotData) return null;
+
+    const blocks = transformSheetBlockObjectMetaToBuffer(sheetBlocks);
+
+    return transformSnapshotToWorkbookData(snapshotData, blocks);
+}
+
+/**
+ * Convert the Uint8Array in the snapshot to a string for easy transmission to the backend
+ * @param snapshot
+ * @returns
+ */
+export function transformSnapshotMetaToObject(snapshot: ISnapshot, snapshotMetaType: SnapshotMetaType): Nullable<ISnapshotObject> {
+    const workbook = snapshot.workbook;
+    if (!workbook) return null;
+
+    const sheets: {
+        [key: string]: Partial<IWorksheetMetaObject>;
+    } = {};
+
+    if (workbook.sheets) {
+        // Loop through sheets and convert originalMeta
+        Object.keys(workbook.sheets).forEach((sheetKey) => {
+            const sheet = workbook.sheets[sheetKey];
+            sheets[sheetKey] = {
+                ...sheet,
+                originalMeta: decodeMetaFromBuffer(sheet.originalMeta, snapshotMetaType),
+            };
+        });
+    }
+
+    return {
+        ...snapshot,
+        workbook: {
+            ...workbook,
+            originalMeta: decodeMetaFromBuffer(workbook.originalMeta, snapshotMetaType),
+            sheets,
+        },
+    };
+}
+
+export function transformSheetBlockMetaToObject(sheetBlocks: ISheetBlock[], snapshotMetaType: SnapshotMetaType): ISheetBlockObject {
+    const sheetBlockObject: ISheetBlockObject = {};
+    sheetBlocks.forEach((block) => {
+        sheetBlockObject[block.id] = {
+            ...block,
+            data: decodeMetaFromBuffer(block.data, snapshotMetaType),
+        };
+    });
+    return sheetBlockObject;
+}
+
+export async function transformWorkbookDataToSnapshotObject(workbookData: IWorkbookData, snapshotMetaType: SnapshotMetaType = SnapshotMetaType.BUFFER): Promise<{ snapshot: ISnapshotObject; sheetBlocks: ISheetBlockObject }> {
+    const context: ILogContext = {
+        metadata: undefined,
+    };
+
+    const unitID = workbookData.id;
+    const rev = workbookData.rev ?? 0;
+
+    const snapshotService: ISnapshotServerService = new ClientSnapshotServerService();
+
+    const { snapshot } = await transformWorkbookDataToSnapshot(context, workbookData, unitID, rev, snapshotService);
+
+    const sheetBlocks = await getSheetBlocksFromSnapshot(snapshot, snapshotService);
+
+    const snapshotObject = transformSnapshotMetaToObject(snapshot, snapshotMetaType);
+
+    if (!snapshotObject) throw new Error('Failed to transform snapshot to object');
+
+    return {
+        snapshot: snapshotObject,
+        sheetBlocks: transformSheetBlockMetaToObject(sheetBlocks, snapshotMetaType),
+    };
 }

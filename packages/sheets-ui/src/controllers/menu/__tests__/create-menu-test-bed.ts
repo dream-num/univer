@@ -75,7 +75,7 @@ export function createMenuTestBed() {
     }
 
     univer.registerPlugin(TestPlugin);
-    const sheet = univer.createUniverSheet(TEST_WORKBOOK_DATA_DEMO);
+    const sheet = univer.createUniverSheetByConfig(TEST_WORKBOOK_DATA_DEMO);
 
     if (!get) {
         throw new Error('[TestPlugin]: not hooked on!');

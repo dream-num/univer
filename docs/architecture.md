@@ -51,7 +51,7 @@ univer.registerPlugin(sheetsPlugin);
 univer.registerPlugin(UniverSheetsUI);
 univer.registerPlugin(FormulaPlugin);
 
-// call univer.createUniverSheet() to create a spreadsheet
+// call univer.createUniverSheetByConfig() to create a spreadsheet
 ```
 
 The design based on plugins enables Univer to meet various operating environments (PC browser / Node / mobile terminal), different functional requirements, different configuration requirements, secondary development, third-party plugins and other needs.

@@ -106,11 +106,7 @@ export function Input(props: IInputProps) {
         onClick,
         onKeyDown,
         onChange,
-<<<<<<< HEAD
-=======
-        autoFocus,
         ...rest
->>>>>>> 3fbf3696c (feat(sheet): support find replace)
     } = props;
 
     function handleChange(e: React.ChangeEvent<HTMLInputElement>) {

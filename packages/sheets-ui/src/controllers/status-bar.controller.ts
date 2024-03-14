@@ -84,24 +84,24 @@ export class StatusBarController extends Disposable {
                 })
             )
         );
-        this.disposeWithMe(
-            toDisposable(
-                this._selectionManagerService.selectionMoveEnd$
-                    .pipe(debounceTime(100))
-                    .subscribe((selections) => {
-                        if (this._selectionManagerService.getCurrent()?.pluginName !== NORMAL_SELECTION_PLUGIN_NAME) {
-                            return;
-                        }
-                        if (selections) {
-                            const primary = selections[selections.length - 1]?.primary;
-                            this._calculateSelection(
-                                selections.map((selection) => selection.range),
-                                primary
-                            );
-                        }
-                    })
-            )
-        );
+        // this.disposeWithMe(
+        //     toDisposable(
+        //         this._selectionManagerService.selectionMoveEnd$
+        //             .pipe(debounceTime(100))
+        //             .subscribe((selections) => {
+        //                 if (this._selectionManagerService.getCurrent()?.pluginName !== NORMAL_SELECTION_PLUGIN_NAME) {
+        //                     return;
+        //                 }
+        //                 if (selections) {
+        //                     const primary = selections[selections.length - 1]?.primary;
+        //                     this._calculateSelection(
+        //                         selections.map((selection) => selection.range),
+        //                         primary
+        //                     );
+        //                 }
+        //             })
+        //     )
+        // );
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (command.id === SetRangeValuesMutation.id) {
@@ -147,14 +147,17 @@ export class StatusBarController extends Disposable {
             });
 
             const functions = this._statusBarService.getFunctions();
+
+            const arrayValue = refs.map((ref) => {
+                return ref.toArrayValueObject(false);
+            });
+
             const calcResult = functions.map((f) => {
                 const executor = this._functionService.getExecutor(f.func);
                 if (!executor) {
                     return undefined;
                 }
-                const arrayValue = refs.map((ref) => {
-                    return ref.toArrayValueObject(false);
-                });
+
                 const res = executor?.calculate(...arrayValue) as BaseValueObject;
                 const value = res?.getValue();
                 if (!value) {

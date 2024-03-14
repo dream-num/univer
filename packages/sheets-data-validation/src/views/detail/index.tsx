@@ -15,11 +15,11 @@
  */
 
 import { ICommandService, IUniverInstanceService, LocaleService } from '@univerjs/core';
-import type { DataValidationOperator, DataValidationType, IDataValidationRuleBase, IRange, ISheetDataValidationRule } from '@univerjs/core';
+import type { DataValidationOperator, DataValidationType, IDataValidationRuleBase, IDataValidationRuleOptions, IRange, ISheetDataValidationRule } from '@univerjs/core';
 import type { IUpdateDataValidationSettingCommandParams } from '@univerjs/data-validation';
-import { DataValidatorRegistryScope, DataValidatorRegistryService, RemoveDataValidationCommand, UpdateDataValidationSettingCommand } from '@univerjs/data-validation';
+import { DataValidatorRegistryScope, DataValidatorRegistryService, RemoveDataValidationCommand, UpdateDataValidationOptionsCommand, UpdateDataValidationSettingCommand } from '@univerjs/data-validation';
 import { TWO_FORMULA_OPERATOR_COUNT } from '@univerjs/data-validation/types/const/two-formula-operators.js';
-import { Button, Select } from '@univerjs/design';
+import { Button, FormLayout, Select } from '@univerjs/design';
 import { ComponentManager, RangeSelector } from '@univerjs/ui';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useState } from 'react';
@@ -27,6 +27,8 @@ import { serializeRange } from '@univerjs/engine-formula';
 import { getRuleSetting } from '@univerjs/data-validation/common/util.js';
 import type { IUpdateSheetDataValidationRangeCommandParams } from '../../commands/commands/data-validation.command';
 import { UpdateSheetDataValidationRangeCommand } from '../../commands/commands/data-validation.command';
+import { DataValidationOptions } from '../options';
+import styles from './index.module.less';
 
 export interface IDataValidationDetailProps {
     rule: ISheetDataValidationRule;
@@ -129,49 +131,79 @@ export function DataValidationDetail(props: IDataValidationDetailProps) {
     };
 
     const FormulaInput = componentManager.get(validator.formulaInput);
-
     const rangeStr = rule.ranges.map((range) => serializeRange(range)).join(',');
+
+    const options: IDataValidationRuleOptions = {
+        showInputMessage: localRule.showInputMessage,
+        errorStyle: localRule.errorStyle,
+    };
+
+    const handleUpdateRuleOptions = (newOptions: IDataValidationRuleOptions) => {
+        setLocalRule({
+            ...localRule,
+            ...newOptions,
+        });
+
+        commandService.executeCommand(UpdateDataValidationOptionsCommand.id, {
+            unitId,
+            subUnitId,
+            ruleId: rule.uid,
+            options: newOptions,
+        });
+    };
 
     return (
         <div>
-            <div>Range</div>
-            <RangeSelector
-                value={rangeStr}
-                id="data-validation-detail"
-                openForSheetUnitId={unitId}
-                openForSheetSubUnitId={subUnitId}
-                onChange={(newRange) => {
-                    handleUpdateRuleRanges(newRange.map((i) => i.range));
-                }}
-            />
-            <div>type</div>
-            <Select
-                options={validators?.map((validator) => ({
-                    label: localeService.t(validator.title),
-                    value: validator.id,
-                }))}
-                value={localRule.type}
-                onChange={handleChangeType}
-            />
-            <div>operator</div>
+
+            <FormLayout
+                label={localeService.t('dataValidation.panel.range')}
+            >
+                <RangeSelector
+                    className={styles.dataValidationDetailFormItem}
+                    value={rangeStr}
+                    id="data-validation-detail"
+                    openForSheetUnitId={unitId}
+                    openForSheetSubUnitId={subUnitId}
+                    onChange={(newRange) => {
+                        handleUpdateRuleRanges(newRange.map((i) => i.range));
+                    }}
+                />
+            </FormLayout>
+            <FormLayout
+                label={localeService.t('dataValidation.panel.type')}
+            >
+                <Select
+                    options={validators?.map((validator) => ({
+                        label: localeService.t(validator.title),
+                        value: validator.id,
+                    }))}
+                    value={localRule.type}
+                    onChange={handleChangeType}
+                    className={styles.dataValidationDetailFormItem}
+                />
+            </FormLayout>
             {operators?.length
                 ? (
-                    <Select
-                        options={operators.map((op, i) => ({
-                            value: `${op}`,
-                            label: operatorNames[i],
-                        }))}
-                        value={`${localRule.operator}`}
-                        onChange={(operator) => {
-                            handleUpdateRuleSetting({
-                                ...baseRule,
-                                operator: operator as DataValidationOperator,
-                            });
-                        }}
-                    />
+                    <FormLayout
+                        label={localeService.t('dataValidation.panel.operator')}
+                    >
+                        <Select
+                            options={operators.map((op, i) => ({
+                                value: `${op}`,
+                                label: operatorNames[i],
+                            }))}
+                            value={`${localRule.operator}`}
+                            onChange={(operator) => {
+                                handleUpdateRuleSetting({
+                                    ...baseRule,
+                                    operator: operator as DataValidationOperator,
+                                });
+                            }}
+                            className={styles.dataValidationDetailFormItem}
+                        />
+                    </FormLayout>
                 )
                 : null}
-            <div>formula</div>
             {FormulaInput
                 ? (
                     <FormulaInput
@@ -189,14 +221,13 @@ export function DataValidationDetail(props: IDataValidationDetailProps) {
                     />
                 )
                 : null}
-
-            <div>advance options</div>
-            <div>
-                <Button onClick={handleDelete}>
-                    Remove Rule
+            <DataValidationOptions value={options} onChange={handleUpdateRuleOptions} />
+            <div className={styles.dataValidationDetailButtons}>
+                <Button className={styles.dataValidationDetailButton} onClick={handleDelete}>
+                    {localeService.t('dataValidation.panel.removeRule')}
                 </Button>
-                <Button type="primary" onClick={onClose}>
-                    Done
+                <Button className={styles.dataValidationDetailButton} type="primary" onClick={onClose}>
+                    {localeService.t('dataValidation.panel.done')}
                 </Button>
             </div>
         </div>

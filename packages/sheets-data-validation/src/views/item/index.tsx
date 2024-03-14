@@ -16,10 +16,10 @@
 
 import { ICommandService, type ISheetDataValidationRule } from '@univerjs/core';
 import { DataValidatorRegistryService, RemoveDataValidationCommand } from '@univerjs/data-validation';
-import { Button } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React from 'react';
 import { serializeRange } from '@univerjs/engine-formula';
+import { DeleteSingle } from '@univerjs/icons';
 import styles from './index.module.less';
 
 export interface IDataValidationDetailProps {
@@ -34,7 +34,7 @@ export const DataValidationItem = (props: IDataValidationDetailProps) => {
     const validatorRegistry = useDependency(DataValidatorRegistryService);
     const commandService = useDependency(ICommandService);
     const validator = validatorRegistry.getValidatorItem(rule.type);
-    const handleDelete = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    const handleDelete = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
         commandService.executeCommand(RemoveDataValidationCommand.id, {
             ruleId: rule.uid,
             unitId,
@@ -45,14 +45,17 @@ export const DataValidationItem = (props: IDataValidationDetailProps) => {
 
     return (
         <div
-            className={styles.container}
+            className={styles.dataValidationItemContainer}
             onClick={onClick}
         >
-            <div className={styles.title}>
+            <div className={styles.dataValidationItemTitle}>
                 {validator?.generateRuleName(rule)}
             </div>
-            <div className={styles.content}>
+            <div className={styles.dataValidationItemContent}>
                 {rule.ranges.map((range) => serializeRange(range)).join(',')}
+            </div>
+            <div className={styles.dataValidationItemIcon} onClick={handleDelete}>
+                <DeleteSingle />
             </div>
         </div>
     );

@@ -17,12 +17,13 @@
 import React, { useEffect, useState } from 'react';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import type { ISheetDataValidationRule } from '@univerjs/core';
-import { DataValidationOperator, DataValidationType, ICommandService, IUniverInstanceService, Tools } from '@univerjs/core';
+import { DataValidationOperator, DataValidationType, ICommandService, IUniverInstanceService, LocaleService, Tools } from '@univerjs/core';
 import { DataValidationModel, RemoveAllDataValidationCommand } from '@univerjs/data-validation';
 import { Button } from '@univerjs/design';
 import { SelectionManagerService } from '@univerjs/sheets';
-import { AddSheetDataValidationCommand, type IAddSheetDataValidationCommandParams } from '..';
-import { DataValidationItem } from './item';
+import { AddSheetDataValidationCommand, type IAddSheetDataValidationCommandParams } from '../..';
+import { DataValidationItem } from '../item';
+import styles from './index.module.less';
 
 export interface IDataValidationListProps {
     onActive: (rule: ISheetDataValidationRule) => void;
@@ -39,6 +40,7 @@ export const DataValidationList = (props: IDataValidationListProps) => {
     const unitId = workbook.getUnitId();
     const subUnitId = worksheet.getSheetId();
     const manager = dataValidationModel.ensureManager(unitId, subUnitId);
+    const localeService = useDependency(LocaleService);
     const [rules, setRules] = useState<ISheetDataValidationRule[]>(manager.getDataValidations());
 
     useEffect(() => {
@@ -85,12 +87,12 @@ export const DataValidationList = (props: IDataValidationListProps) => {
                     key={rule.uid}
                 />
             ))}
-            <div style={{ marginTop: 20 }}>
-                <Button type="primary" onClick={handleRemoveAll}>
-                    Remove All
+            <div className={styles.dataValidationListButtons}>
+                <Button className={styles.dataValidationListButton} onClick={handleRemoveAll}>
+                    {localeService.t('dataValidation.panel.removeAll')}
                 </Button>
-                <Button onClick={handleAddRule}>
-                    Add Rule
+                <Button className={styles.dataValidationListButton} type="primary" onClick={handleAddRule}>
+                    {localeService.t('dataValidation.panel.add')}
                 </Button>
             </div>
         </div>

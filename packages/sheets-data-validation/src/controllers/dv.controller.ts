@@ -22,7 +22,8 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetDataValidationManager } from '../models/sheet-data-validation-manager';
 import { SheetDataValidationService } from '../services/dv.service';
 import { CustomFormulaValidator } from '../validators/custom-validator';
-import { CheckboxValidator, DateValidator, ListValidator, NumberValidator, TextLengthValidator } from '../validators';
+import { CheckboxValidator, DateValidator, DecimalValidator, ListValidator, TextLengthValidator } from '../validators';
+import { WholeValidator } from '../validators/whole-validator';
 
 @OnLifecycle(LifecycleStages.Rendered, DataValidationController)
 export class DataValidationController extends RxDisposable {
@@ -48,12 +49,13 @@ export class DataValidationController extends RxDisposable {
 
     private _registerValidators() {
         ([
-            NumberValidator,
+            DecimalValidator,
+            WholeValidator,
             TextLengthValidator,
             DateValidator,
-            CustomFormulaValidator,
             ListValidator,
             CheckboxValidator,
+            CustomFormulaValidator,
         ]).forEach((Validator) => {
             const validator = this._injector.createInstance(Validator as typeof ListValidator);
             this.disposeWithMe(

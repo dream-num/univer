@@ -25,7 +25,7 @@ export enum DataValidationType {
     DATE = 'date',
     TIME = 'time',
     /**
-     * integer
+     * integer number
      */
     WHOLE = 'whole',
     /**

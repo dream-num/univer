@@ -15,49 +15,62 @@
  */
 
 import type { IFormulaInputProps } from '@univerjs/data-validation';
-import { Input } from '@univerjs/design';
+import { FormLayout, Input } from '@univerjs/design';
 import React from 'react';
+import { useDependency } from '@wendellhu/redi/react-bindings';
+import { LocaleService } from '@univerjs/core';
+import styles from './index.module.less';
 
 export const BaseFormulaInput = (props: IFormulaInputProps) => {
     const { isTwoFormula = false, value, onChange } = props;
+    const localeService = useDependency(LocaleService);
 
     if (isTwoFormula) {
         return (
             <>
-                <Input
-                    placeholder="Value or formula"
-                    value={value?.formula1}
-                    onChange={(newValue) => {
-                        onChange?.({
-                            ...value,
-                            formula1: newValue,
-                        });
-                    }}
-                />
-                <div>
-                    and
+                <FormLayout>
+                    <Input
+                        className={styles.dataValidationFormula}
+                        placeholder={localeService.t('dataValidation.panel.formulaPlaceholder')}
+                        value={value?.formula1}
+                        onChange={(newValue) => {
+                            onChange?.({
+                                ...value,
+                                formula1: newValue,
+                            });
+                        }}
+                    />
+                </FormLayout>
+                <div className={styles.dataValidationFormulaAnd}>
+                    {localeService.t('dataValidation.panel.formulaAnd')}
                 </div>
-                <Input
-                    placeholder="Value or formula"
-                    value={value?.formula2}
-                    onChange={(newValue) => {
-                        onChange?.({
-                            ...value,
-                            formula2: newValue,
-                        });
-                    }}
-                />
+                <FormLayout>
+                    <Input
+                        className={styles.dataValidationFormula}
+                        placeholder={localeService.t('dataValidation.panel.formulaPlaceholder')}
+                        value={value?.formula2}
+                        onChange={(newValue) => {
+                            onChange?.({
+                                ...value,
+                                formula2: newValue,
+                            });
+                        }}
+                    />
+                </FormLayout>
             </>
         );
     }
 
     return (
-        <Input
-            placeholder="Value or formula"
-            value={value?.formula1}
-            onChange={(newValue) => {
-                onChange?.({ formula1: newValue });
-            }}
-        />
+        <FormLayout>
+            <Input
+                className={styles.dataValidationFormula}
+                placeholder={localeService.t('dataValidation.panel.formulaPlaceholder')}
+                value={value?.formula1}
+                onChange={(newValue) => {
+                    onChange?.({ formula1: newValue });
+                }}
+            />
+        </FormLayout>
     );
 };

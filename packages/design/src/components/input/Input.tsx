@@ -80,6 +80,8 @@ export interface IInputProps {
      * @param value
      */
     onChange?: (value: string) => void;
+
+    className?: string;
 }
 
 export function Input(props: IInputProps) {
@@ -95,6 +97,7 @@ export function Input(props: IInputProps) {
         onKeyDown,
         onChange,
         autoFocus,
+        className,
     } = props;
 
     function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -107,7 +110,7 @@ export function Input(props: IInputProps) {
         [styles.inputAffixWrapperSmall]: size === 'small',
         [styles.inputAffixWrapperMiddle]: size === 'middle',
         [styles.inputAffixWrapperLarge]: size === 'large',
-    });
+    }, className);
 
     return (
         <RcInput

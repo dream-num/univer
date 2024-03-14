@@ -22,11 +22,11 @@ import { BASE_FORMULA_INPUT_NAME } from '../views/formula-input';
 import { TWO_FORMULA_OPERATOR_COUNT } from '../types/const/two-formula-operators';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
 
-export class NumberValidator extends BaseDataValidator<number> {
+export class DecimalValidator extends BaseDataValidator<number> {
     private _formulaService = this.injector.get(DataValidationFormulaService);
 
     id: string = DataValidationType.DECIMAL;
-    title: string = this.localeService.t('dataValidation.number.title');
+    title: string = this.localeService.t('dataValidation.decimal.title');
 
     operators: DataValidationOperator[] = [
         DataValidationOperator.BETWEEN,

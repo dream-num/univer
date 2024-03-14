@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-export { DataValidationPanel } from './DataValidationPanel';
+export { DataValidationPanel } from './panel';
 export { ListDropDown } from './ListDropdown';
 export const LIST_DROPDOWN_KEY = 'data-validation.list.dropdown';

@@ -17,5 +17,5 @@
 export { CheckboxValidator, CHECKBOX_FORMULA_1, CHECKBOX_FORMULA_2 } from './checkbox-validator';
 export { DateValidator } from './date-validator';
 export { ListValidator } from './list-validator';
-export { NumberValidator } from './number-validator';
+export { DecimalValidator } from './decimal-validator';
 export { TextLengthValidator } from './text-length-validator';

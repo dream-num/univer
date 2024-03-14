@@ -16,8 +16,8 @@
 
 import React, { useState } from 'react';
 import type { ISheetDataValidationRule } from '@univerjs/core';
-import { DataValidationDetail } from './detail/DataValidationDetail';
-import { DataValidationList } from './DataValidationList';
+import { DataValidationDetail } from '../detail';
+import { DataValidationList } from '../list';
 
 export const DataValidationPanel = () => {
     const [activeRule, setActiveRule] = useState<ISheetDataValidationRule>();

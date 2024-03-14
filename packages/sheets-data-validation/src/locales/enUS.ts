@@ -16,7 +16,11 @@
 
 export default {
     dataValidation: {
-        title: '',
+        panel: {
+            title: '管理数据验证',
+            removeAll: '全部删除',
+            add: '新建规则',
+        },
         operators: {
             between: 'between',
             greaterThan: 'greater than',

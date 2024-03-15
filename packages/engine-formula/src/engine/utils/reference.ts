@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IRange } from '@univerjs/core';
+import type { IRange, IUnitRangeName } from '@univerjs/core';
 import { AbsoluteRefType, RANGE_TYPE, Tools } from '@univerjs/core';
 
 import { includeFormulaLexerToken } from '../../basics/match-token';
@@ -22,12 +22,6 @@ import { UNIT_NAME_REGEX } from '../../basics/regex';
 
 const $ROW_REGEX = /[^0-9]/g;
 const $COLUMN_REGEX = /[^A-Za-z]/g;
-
-export interface IGridRangeName {
-    unitId: string;
-    sheetName: string;
-    range: IRange;
-}
 
 export interface IAbsoluteRefTypeForRange {
     startAbsoluteRefType: AbsoluteRefType;
@@ -169,10 +163,11 @@ export function serializeRangeWithSpreadsheet(unit: string, sheetName: string, r
     if (needsQuoting(unit) || needsQuoting(sheetName)) {
         return `'[${unit}]${sheetName}'!${serializeRange(range)}`;
     }
+
     return `[${unit}]${sheetName}!${serializeRange(range)}`;
 }
 
-export function serializeRangeToRefString(gridRangeName: IGridRangeName) {
+export function serializeRangeToRefString(gridRangeName: IUnitRangeName) {
     const { unitId, sheetName, range } = gridRangeName;
 
     if (unitId != null && unitId.length > 0 && sheetName != null && sheetName.length > 0) {
@@ -229,7 +224,7 @@ export function handleRefStringInfo(refString: string) {
     };
 }
 
-export function deserializeRangeWithSheet(refString: string): IGridRangeName {
+export function deserializeRangeWithSheet(refString: string): IUnitRangeName {
     const { refBody, sheetName, unitId } = handleRefStringInfo(refString);
 
     const colonIndex = refBody.indexOf(':');

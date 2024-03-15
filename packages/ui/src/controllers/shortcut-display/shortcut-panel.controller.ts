@@ -24,7 +24,17 @@ import {
 import { ComponentManager } from '../../common/component-manager';
 import { IMenuService } from '../../services/menu/menu.service';
 import { ShortcutPanel } from '../../views/components/shortcut-panel/ShortcutPanel';
+import type { IShortcutItem } from '../../services/shortcut/shortcut.service';
+import { IShortcutService } from '../../services/shortcut/shortcut.service';
+import { KeyCode, MetaKeys } from '../../services/shortcut/keycode';
 import { ShortcutPanelMenuItemFactory } from './menu';
+
+const ToggleShortcutPanelShortcut: IShortcutItem = {
+    id: ToggleShortcutPanelOperation.id,
+    binding: MetaKeys.CTRL_COMMAND | KeyCode.BACK_SLASH,
+    description: 'shortcut.shortcut-panel',
+    group: '10_global-shortcut',
+};
 
 /**
  * This controller add a side panel to the application to display the shortcuts.
@@ -32,17 +42,22 @@ import { ShortcutPanelMenuItemFactory } from './menu';
 @OnLifecycle(LifecycleStages.Steady, ShortcutPanelController)
 export class ShortcutPanelController extends Disposable {
     constructor(
-        @Inject(Injector) private readonly _injector: Injector,
+    @Inject(Injector) injector: Injector,
+        @Inject(ComponentManager) componentManager: ComponentManager,
+        @IShortcutService shortcutService: IShortcutService,
         @IMenuService menuService: IMenuService,
-        @ICommandService commandService: ICommandService,
-        @Inject(ComponentManager) componentManager: ComponentManager
+        @ICommandService commandService: ICommandService
     ) {
         super();
 
-        // Register the menu item.
-        this.disposeWithMe(menuService.addMenuItem(this._injector.invoke(ShortcutPanelMenuItemFactory)));
-        // Register the panel.
+        // register the menu item
+        this.disposeWithMe(menuService.addMenuItem(injector.invoke(ShortcutPanelMenuItemFactory)));
+
+        // register the panel
         this.disposeWithMe(componentManager.register(ShortcutPanelComponentName, ShortcutPanel));
         this.disposeWithMe(commandService.registerCommand(ToggleShortcutPanelOperation));
+
+        // register the shortcut
+        this.disposeWithMe(shortcutService.registerShortcut(ToggleShortcutPanelShortcut));
     }
 }

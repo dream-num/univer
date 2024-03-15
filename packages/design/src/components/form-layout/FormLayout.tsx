@@ -15,6 +15,7 @@
  */
 
 import clsx from 'clsx';
+import type { PropsWithChildren } from 'react';
 import React from 'react';
 
 import styles from './index.module.less';
@@ -32,9 +33,23 @@ export const FormLayout = (props: IFormLayoutProps) => {
     const { label, desc, children, style, className } = props;
     return (
         <div className={clsx(styles.formLayout, className)} style={style}>
-            <div className={styles.formLayoutLabel}>{label}</div>
-            {desc ? <div className={styles.formLayoutDesc}>{desc}</div> : null}
+            {label && <div className={styles.formLayoutLabel}>{label}</div>}
+            {desc && <div className={styles.formLayoutDesc}>{desc}</div>}
             <div className={styles.formLayoutContent}>{children}</div>
+        </div>
+    );
+};
+
+export type IFormDualColumnLayoutProps = PropsWithChildren;
+
+/**
+ * A dual columns layout component for the form.
+ * @param props props of the component
+ */
+export const FormDualColumnLayout = (props: IFormDualColumnLayoutProps) => {
+    return (
+        <div className={styles.formDualColumnLayout}>
+            {props.children}
         </div>
     );
 };

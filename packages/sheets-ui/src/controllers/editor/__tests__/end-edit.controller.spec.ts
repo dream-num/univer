@@ -15,7 +15,7 @@
  */
 
 import type { IDocumentData, Univer, Workbook } from '@univerjs/core';
-import { LocaleService } from '@univerjs/core';
+import { IContextService, LocaleService } from '@univerjs/core';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { Injector } from '@wendellhu/redi';
@@ -74,6 +74,7 @@ describe('Test EndEditController', () => {
     let workbook: Workbook;
     let get: Injector['get'];
     let localeService: LocaleService;
+    let contextService: IContextService;
     let lexerTreeBuilder: LexerTreeBuilder;
     let spreadsheetSkeleton: SpreadsheetSkeleton;
 
@@ -85,6 +86,7 @@ describe('Test EndEditController', () => {
         get = testBed.get;
 
         localeService = get(LocaleService);
+        contextService = get(IContextService);
         lexerTreeBuilder = new LexerTreeBuilder();
 
         const worksheet = workbook.getActiveSheet();
@@ -94,7 +96,8 @@ describe('Test EndEditController', () => {
             config,
             worksheet.getCellMatrix(),
             workbook.getStyles(),
-            localeService
+            localeService,
+            contextService
         );
     });
 

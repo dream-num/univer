@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import type { IRange } from '@univerjs/core';
+import { type IRange, Rectangle, type Worksheet } from '@univerjs/core';
+import type { ISelectionWithStyle } from '@univerjs/sheets';
 
 export function isSamePosition(range1: IRange, range2: IRange): boolean {
     return range1.startRow === range2.startRow && range1.startColumn === range2.startColumn;
@@ -64,4 +65,16 @@ export function isBeforePositionWithColumnPriority(range1: IRange, range2: IRang
         range1.startColumn > range2.startColumn ||
         (range1.startColumn === range2.startColumn && range1.startRow >= range2.startRow)
     );
+}
+
+export function isSelectionSingleCell(selection: ISelectionWithStyle, worksheet: Worksheet): boolean {
+    const { range } = selection;
+    const { startRow, startColumn } = range;
+    const hasMergedCell = worksheet.getMergedCell(startRow, startColumn);
+
+    if (hasMergedCell) {
+        return Rectangle.equals(range, hasMergedCell);
+    } else {
+        return range.endRow === range.startRow && range.endColumn === range.startColumn;
+    }
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommand } from '@univerjs/core';
+import type { ICommand, IExecutionOptions } from '@univerjs/core';
 import { CommandType, ICommandService, IUniverInstanceService } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
@@ -26,11 +26,13 @@ export interface ISetWorksheetActivateCommandParams {
     subUnitId?: string;
 }
 
+/** We should delay this command to execute, after focus moves to the correct element. */
+const SET_WORKSHEET_ACTIVE_DELAY = 4;
+
 export const SetWorksheetActivateCommand: ICommand = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-worksheet-activate',
-
-    handler: (accessor: IAccessor, params?: ISetWorksheetActivateCommandParams) => {
+    handler: (accessor: IAccessor, params?: ISetWorksheetActivateCommandParams, options?: IExecutionOptions) => {
         const commandService = accessor.get(ICommandService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
@@ -42,11 +44,15 @@ export const SetWorksheetActivateCommand: ICommand = {
             subUnitId = params.subUnitId ?? subUnitId;
         }
 
-        const redoMutationParams: ISetWorksheetActiveOperationParams = {
-            unitId,
-            subUnitId,
-        };
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                const result = commandService.syncExecuteCommand(SetWorksheetActiveOperation.id, {
+                    unitId,
+                    subUnitId,
+                } as ISetWorksheetActiveOperationParams, options);
 
-        return commandService.syncExecuteCommand(SetWorksheetActiveOperation.id, redoMutationParams);
+                resolve(result);
+            }, SET_WORKSHEET_ACTIVE_DELAY);
+        });
     },
 };

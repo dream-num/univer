@@ -14,7 +14,14 @@
  * limitations under the License.
  */
 
+export const FIND_REPLACE_INPUT_FOCUS = 'FIND_REPLACE_INPUT_FOCUS';
+
 /**
- * If find replace feature is activated.
+ * If find replace panel is focused.
  */
-export const FIND_REPLACE_ACTIVATED = 'FIND_REPLACE_ACTIVATED';
+export const FIND_REPLACE_DIALOG_FOCUS = 'FIND_REPLACE_DIALOG_FOCUS';
+
+/**
+ * If the find replace feature is activated and the replace is revealed.
+ */
+export const FIND_REPLACE_REPLACE_REVEALED = 'FIND_REPLACE_REPLACE_REVEALED';

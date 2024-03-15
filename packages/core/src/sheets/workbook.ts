@@ -169,6 +169,10 @@ export class Workbook extends Disposable {
         return this._snapshot.parentRenderUnitId;
     }
 
+    getSheetOrders(): Readonly<string[]> {
+        return this._snapshot.sheetOrder;
+    }
+
     getWorksheets(): Map<string, Worksheet> {
         return this._worksheets;
     }

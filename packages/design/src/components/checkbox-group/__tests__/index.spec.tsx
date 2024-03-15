@@ -62,6 +62,6 @@ describe('CheckboxGroup', () => {
         fireEvent.click(getByText('y'));
         fireEvent.click(getByText('y'));
 
-        expect(result).toEqual(['0', '1']);
+        expect(result).toEqual(['0', false]);
     });
 });

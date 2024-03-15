@@ -17,7 +17,7 @@
 import { installShims } from './common/shims';
 
 export * from './basics';
-export { dedupe, remove } from './common/array';
+export { dedupe, remove, rotate, groupBy } from './common/array';
 export {
     DEFAULT_EMPTY_DOCUMENT_VALUE,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
@@ -100,6 +100,7 @@ export {
     UndoCommandId,
 } from './services/undoredo/undoredo.service';
 export * from './shared';
+export { fromCallback } from './shared/rxjs';
 
 // #region sheet
 export type { IComposeInterceptors, IInterceptor, InterceptorHandler } from './common/interceptor';

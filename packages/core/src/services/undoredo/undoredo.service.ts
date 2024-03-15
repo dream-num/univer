@@ -26,8 +26,7 @@ import { CommandType, ICommandService, sequenceExecute } from '../command/comman
 import { EDITOR_ACTIVATED, FOCUSING_FORMULA_EDITOR, FOCUSING_SHEET } from '../context/context';
 import { IContextService } from '../context/context.service';
 import { IUniverInstanceService } from '../instance/instance.service';
-
-// TODO: an undo redo element may be merge-able to another undo redo element
+import type { Nullable } from '../../common/type-utils';
 
 export interface IUndoRedoItem {
     /** unitID maps to unitId for UniverSheet / UniverDoc / UniverSlide */
@@ -35,9 +34,6 @@ export interface IUndoRedoItem {
 
     undoMutations: IMutationInfo[];
     redoMutations: IMutationInfo[];
-
-    undo?(mutations: IMutationInfo[]): Promise<boolean> | boolean;
-    redo?(mutations: IMutationInfo[]): Promise<boolean> | boolean;
 }
 
 export interface IUndoRedoService {
@@ -45,13 +41,28 @@ export interface IUndoRedoService {
 
     pushUndoRedo(item: IUndoRedoItem): void;
 
-    pitchTopUndoElement(): IUndoRedoItem | null;
-    pitchTopRedoElement(): IUndoRedoItem | null;
+    /** Pitch the top redo element of the currently focused Univer document instance. */
+    pitchTopUndoElement(): Nullable<IUndoRedoItem>;
+    /** Pitch the top undo element of the currently focused Univer document instance. */
+    pitchTopRedoElement(): Nullable<IUndoRedoItem>;
 
     popUndoToRedo(): void;
     popRedoToUndo(): void;
 
     clearUndoRedo(unitID: string): void;
+
+    /**
+     * Batch undo redo elements into a single `IUndoRedoItem` util the returned `IDisposable` is called.
+     *
+     * @deprecated This is a temporary solution. We are going to refactor the undo redo service shortly.
+     * @returns a disposable to cancel batching undo redo elements
+     */
+    __tempBatchingUndoRedo(unitId: string): IDisposable;
+}
+
+enum BatchingStatus {
+    WAITING,
+    CREATED,
 }
 
 export interface IUndoRedoCommandInfos {
@@ -69,7 +80,7 @@ export interface IUndoRedoStatus {
 const STACK_CAPACITY = 20;
 
 abstract class MultiImplementationCommand implements IDisposable {
-    dispose(): void {}
+    dispose(): void { }
 
     async dispatchToHandlers(): Promise<boolean> {
         return false;
@@ -92,9 +103,7 @@ export const UndoCommand = new (class extends MultiImplementationCommand impleme
         }
 
         const commandService = accessor.get(ICommandService);
-        const result = element.undo
-            ? await element.undo(element.undoMutations)
-            : sequenceExecute(element.undoMutations, commandService);
+        const result = sequenceExecute(element.undoMutations, commandService);
         if (result) {
             undoRedoService.popUndoToRedo();
 
@@ -118,9 +127,7 @@ export const RedoCommand = new (class extends MultiImplementationCommand impleme
         }
 
         const commandService = accessor.get(ICommandService);
-        const result = element.redo
-            ? await element.redo(element.redoMutations)
-            : sequenceExecute(element.redoMutations, commandService);
+        const result = sequenceExecute(element.redoMutations, commandService);
         if (result) {
             undoRedoService.popRedoToUndo();
 
@@ -138,8 +145,11 @@ export class LocalUndoRedoService extends Disposable implements IUndoRedoService
     readonly undoRedoStatus$: Observable<IUndoRedoStatus>;
     protected readonly _undoRedoStatus$ = new BehaviorSubject<{ undos: number; redos: number }>({ undos: 0, redos: 0 });
 
+    // Undo and redo stacks are per unit.
     protected readonly _undoStacks = new Map<string, IUndoRedoItem[]>();
     protected readonly _redoStacks = new Map<string, IUndoRedoItem[]>();
+
+    private _batchingStatus = new Map<string, BatchingStatus>();
 
     constructor(
         @IUniverInstanceService protected readonly _univerInstanceService: IUniverInstanceService,
@@ -152,6 +162,7 @@ export class LocalUndoRedoService extends Disposable implements IUndoRedoService
 
         this.disposeWithMe(this._commandService.registerCommand(UndoCommand));
         this.disposeWithMe(this._commandService.registerCommand(RedoCommand));
+
         this.disposeWithMe(toDisposable(() => this._undoRedoStatus$.complete()));
         this.disposeWithMe(toDisposable(this._univerInstanceService.focused$.subscribe(() => this._updateStatus())));
     }
@@ -165,11 +176,25 @@ export class LocalUndoRedoService extends Disposable implements IUndoRedoService
         // redo stack should be cleared when pushing an undo
         redoStack.length = 0;
 
-        // TODO: undo redo stack should have a maximum capacity, maybe we should get the config from IConfigService?
-        undoStack.push(item);
+        // should try to append first and then
+        if (this._batchingStatus.has(item.unitID)) {
+            const batchingStatus = this._batchingStatus.get(item.unitID)!;
+            const lastItem = this._pitchUndoElement(item.unitID);
+            if (batchingStatus === BatchingStatus.WAITING || !lastItem) {
+                appendNewItem(item);
+                this._batchingStatus.set(item.unitID, BatchingStatus.CREATED);
+            } else {
+                this._tryBatchingElements(lastItem, item);
+            }
+        } else {
+            appendNewItem(item);
+        }
 
-        if (undoStack.length > STACK_CAPACITY) {
-            undoStack.splice(0, 1);
+        function appendNewItem(item: IUndoRedoItem) {
+            undoStack.push(item);
+            if (undoStack.length > STACK_CAPACITY) {
+                undoStack.splice(0, 1);
+            }
         }
 
         this._updateStatus();
@@ -189,23 +214,24 @@ export class LocalUndoRedoService extends Disposable implements IUndoRedoService
         this._updateStatus();
     }
 
-    pitchTopUndoElement(): IUndoRedoItem | null {
-        const undoStack = this._getUndoStackForFocused();
-
-        if (undoStack.length) {
-            return undoStack[undoStack.length - 1];
-        }
-
-        return null;
+    pitchTopUndoElement(): Nullable<IUndoRedoItem> {
+        const unitID = this._getFocusedUniverInstanceId();
+        return this._pitchUndoElement(unitID);
     }
 
-    pitchTopRedoElement(): IUndoRedoItem | null {
-        const redoStack = this._getRedoStackForFocused();
-        if (redoStack.length) {
-            return redoStack[redoStack.length - 1];
-        }
+    pitchTopRedoElement(): Nullable<IUndoRedoItem> {
+        const unitID = this._getFocusedUniverInstanceId();
+        return this._pitchRedoElement(unitID);
+    }
 
-        return null;
+    private _pitchUndoElement(unitId: string): Nullable<IUndoRedoItem> {
+        const stack = this._getUndoStack(unitId);
+        return stack?.length ? stack[stack.length - 1] : null;
+    }
+
+    private _pitchRedoElement(unitId: string): Nullable<IUndoRedoItem> {
+        const stack = this._getRedoStack(unitId);
+        return stack?.length ? stack[stack.length - 1] : null;
     }
 
     popUndoToRedo(): void {
@@ -226,6 +252,15 @@ export class LocalUndoRedoService extends Disposable implements IUndoRedoService
             undoStack.push(element);
             this._updateStatus();
         }
+    }
+
+    __tempBatchingUndoRedo(unitId: string): IDisposable {
+        if (this._batchingStatus.has(unitId)) {
+            throw new Error('[LocalUndoRedoService]: cannot batching undo redo twice at the same time!');
+        }
+
+        this._batchingStatus.set(unitId, BatchingStatus.WAITING);
+        return toDisposable(() => this._batchingStatus.delete(unitId));
     }
 
     protected _updateStatus(): void {
@@ -281,6 +316,12 @@ export class LocalUndoRedoService extends Disposable implements IUndoRedoService
         }
 
         return this._getRedoStack(unitID, true);
+    }
+
+    private _tryBatchingElements(item: IUndoRedoItem, newItem: IUndoRedoItem): void {
+        // this could be not that easy in other sitatuations than Find & Replace
+        item.redoMutations.push(...newItem.redoMutations);
+        item.undoMutations.push(...newItem.undoMutations);
     }
 
     private _getFocusedUniverInstanceId() {

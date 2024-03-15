@@ -18,7 +18,7 @@ import type { Nullable, Workbook, Worksheet } from '@univerjs/core';
 import { IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { IDisposable } from '@wendellhu/redi';
-import { Inject } from '@wendellhu/redi';
+import { Inject, Injector } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
 
 export interface ISheetSkeletonManagerParam {
@@ -62,6 +62,7 @@ export class SheetSkeletonManagerService implements IDisposable {
 
     constructor(
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
+        @Inject(Injector) private readonly _injector: Injector,
         @Inject(LocaleService) private readonly _localeService: LocaleService
     ) { }
 
@@ -159,13 +160,12 @@ export class SheetSkeletonManagerService implements IDisposable {
         }
 
         const workbook = this._currentUniverService.getUniverSheetInstance(searchParam.unitId);
-
         const worksheet = workbook?.getSheetBySheetId(searchParam.sheetId);
         if (!worksheet || !workbook) {
             return;
         }
-        const newSkeleton = this._buildSkeleton(worksheet, workbook);
 
+        const newSkeleton = this._buildSkeleton(worksheet, workbook);
         this._sheetSkeletonParam.push({
             unitId: searchParam.unitId,
             sheetId: searchParam.sheetId,
@@ -190,12 +190,12 @@ export class SheetSkeletonManagerService implements IDisposable {
 
     private _buildSkeleton(worksheet: Worksheet, workbook: Workbook) {
         const config = worksheet.getConfig();
-        const spreadsheetSkeleton = SpreadsheetSkeleton.create(
+        const spreadsheetSkeleton = this._injector.createInstance(
+            SpreadsheetSkeleton,
             worksheet,
             config,
             worksheet.getCellMatrix(),
-            workbook.getStyles(),
-            this._localeService
+            workbook.getStyles()
         );
 
         return spreadsheetSkeleton;

@@ -1,7 +1,7 @@
 {
     "name": "@univerjs/sheets-find-replace",
     "version": "0.1.2",
-    "private": true,
+    "private": false,
     "description": "UniverSheet find replace plugin",
     "author": "DreamNum <developer@univer.ai>",
     "license": "Apache-2.0",
@@ -62,20 +62,28 @@
     },
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
+        "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/find-replace": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
-        "@wendellhu/redi": "0.13.0"
+        "@univerjs/ui": "workspace:*",
+        "@wendellhu/redi": "0.13.0",
+        "react": ">=16.9.0",
+        "rxjs": ">=7.0.0"
     },
     "devDependencies": {
         "@univerjs/core": "workspace:*",
+        "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/find-replace": "workspace:*",
         "@univerjs/shared": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@wendellhu/redi": "^0.13.0",
+        "less": "^4.2.0",
+        "react": "^18.2.0",
+        "rxjs": ">=7.0.0",
         "typescript": "^5.4.2",
         "vite": "^5.1.5",
         "vitest": "^1.3.1"

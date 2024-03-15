@@ -5,9 +5,15 @@
 
 ## 简介
 
-TODO: Not yet written.
+该包提供了支持查找和替换功能的基本能力。配合其他插件，例如 `@univerjs/sheets-find-replace`，可以同时在不同类型的文件中查找和替换文本。
 
 ## 使用指南
+
+```ts
+import { UniverFindReplacePlugin } from '@univerjs/find-replace';
+
+univer.registerPlugin(UniverFindReplacePlugin);
+```
 
 ### 安装
 

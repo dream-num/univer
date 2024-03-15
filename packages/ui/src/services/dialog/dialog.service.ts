@@ -20,7 +20,7 @@ import type { Subject } from 'rxjs';
 
 import type { IDialogPartMethodOptions } from '../../views/components/dialog-part/interface';
 
-export const IDialogService = createIdentifier<IDialogService>('univer.dialog-service');
+export const IDialogService = createIdentifier<IDialogService>('univer.ui.dialog-service');
 export interface IDialogService {
     open(params: IDialogPartMethodOptions): IDisposable;
     close(id: string): void;

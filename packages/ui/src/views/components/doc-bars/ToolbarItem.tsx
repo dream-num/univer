@@ -109,7 +109,7 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem>, ref: 
 
     const { selections } = props as IDisplayMenuItem<IMenuSelectorItem>;
 
-    const options = selections as IValueOption[];
+    const options = isObservable(selections) ? useObservable(selections) : selections as IValueOption[];
     let iconToDisplay = icon;
     if (isObservable(icon)) {
         iconToDisplay = useObservable(icon, undefined, true);

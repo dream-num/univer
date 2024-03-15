@@ -136,7 +136,7 @@ function MenuOptionsWrapper(props: IBaseMenuProps) {
             });
 
             return (
-                <DesignMenuItem key={key} eventKey={key} className={_className} onClick={handleClick}>
+                <DesignMenuItem disabled={option.disabled} key={key} eventKey={key} className={_className} onClick={handleClick}>
                     <span
                         className={clsx(styles.menuItemContent, {
                             [styles.menuItemSelectable]: !(

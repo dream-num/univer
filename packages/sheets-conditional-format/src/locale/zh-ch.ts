@@ -25,6 +25,10 @@ export default {
                 clearWorkSheetRules: '清除整个工作表的规则',
 
             },
+            form: {
+                lessThan: '该值必须小于 {0}',
+                rangeSelector: '选择范围或者输入值',
+            },
             iconSet: {
                 direction: '方向',
                 shape: '形状',
@@ -46,7 +50,8 @@ export default {
                 lessThanOrEqual: '<=',
             },
             panel: {
-                createRule: '+ 添加新的规则',
+                createRule: '新增规则',
+                clear: '清空所有规则',
                 range: '应用范围',
                 styleType: '样式类型',
                 submit: '确认',

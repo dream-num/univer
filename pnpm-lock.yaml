@@ -1662,14 +1662,14 @@ importers:
         specifier: ^0.33.2
         version: 0.33.2
       typescript:
-        specifier: ^5.3.3
-        version: 5.3.3
+        specifier: ^5.4.2
+        version: 5.4.2
       vite:
         specifier: ^5.0.12
         version: 5.0.12(@types/node@20.11.27)(less@4.2.0)
       vite-plugin-dts:
         specifier: ^3.7.1
-        version: 3.7.2(@types/node@20.11.27)(typescript@5.3.3)(vite@5.0.12)
+        version: 3.7.2(@types/node@20.11.27)(typescript@5.4.2)(vite@5.0.12)
       vite-plugin-externals:
         specifier: ^0.6.2
         version: 0.6.2(vite@5.0.12)
@@ -11219,6 +11219,7 @@ packages:
       '@vue/shared': 3.4.21
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   /@vue/language-core@1.8.27(typescript@5.4.3):
 =======
   /@vue/language-core@1.8.27(typescript@5.3.3):
@@ -11241,6 +11242,8 @@ packages:
       vue-template-compiler: 2.7.15
     dev: true
 
+=======
+>>>>>>> 689218427 (fix(cf): add i18n)
   /@vue/language-core@1.8.27(typescript@5.4.2):
 >>>>>>> 766eac180 (feat(cf): support clear conditional format)
     resolution: {integrity: sha512-L8Kc27VdQserNaCUNiSFdDl9LWT24ly8Hpwf1ECy3aFb9m6bDhBGQYOujDm21N7EW3moKIOKEanQwe1q5BK+mA==}
@@ -11279,7 +11282,6 @@ packages:
       typescript: 5.4.2
 >>>>>>> 766eac180 (feat(cf): support clear conditional format)
       vue-template-compiler: 2.7.15
-    dev: false
 
   /@vue/reactivity@3.4.21:
     resolution: {integrity: sha512-UhenImdc0L0/4ahGCyEzc/pZNwVgcglGy9HVzJ1Bq2Mm9qXOpP8RyNTjookw/gOCUlXSEtuZ2fUg5nrHcoqJcw==}
@@ -20880,7 +20882,7 @@ packages:
       - supports-color
       - terser
 
-  /vite-plugin-dts@3.7.2(@types/node@20.11.27)(typescript@5.3.3)(vite@5.0.12):
+  /vite-plugin-dts@3.7.2(@types/node@20.11.27)(typescript@5.4.2)(vite@5.0.12):
     resolution: {integrity: sha512-kg//1nDA01b8rufJf4TsvYN8LMkdwv0oBYpiQi6nRwpHyue+wTlhrBiqgipdFpMnW1oOYv6ywmzE5B0vg6vSEA==}
     engines: {node: ^14.18.0 || >=16.0.0}
     peerDependencies:
@@ -20892,12 +20894,12 @@ packages:
     dependencies:
       '@microsoft/api-extractor': 7.39.0(@types/node@20.11.27)
       '@rollup/pluginutils': 5.1.0
-      '@vue/language-core': 1.8.27(typescript@5.3.3)
+      '@vue/language-core': 1.8.27(typescript@5.4.2)
       debug: 4.3.4
       kolorist: 1.8.0
-      typescript: 5.3.3
+      typescript: 5.4.2
       vite: 5.0.12(@types/node@20.11.27)(less@4.2.0)
-      vue-tsc: 1.8.27(typescript@5.3.3)
+      vue-tsc: 1.8.27(typescript@5.4.2)
     transitivePeerDependencies:
       - '@types/node'
       - rollup
@@ -21591,6 +21593,7 @@ packages:
       he: 1.2.0
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   /vue-tsc@1.8.27(typescript@5.4.3):
 =======
   /vue-tsc@1.8.27(typescript@5.3.3):
@@ -21605,6 +21608,8 @@ packages:
       typescript: 5.3.3
     dev: true
 
+=======
+>>>>>>> 689218427 (fix(cf): add i18n)
   /vue-tsc@1.8.27(typescript@5.4.2):
 >>>>>>> 766eac180 (feat(cf): support clear conditional format)
     resolution: {integrity: sha512-WesKCAZCRAbmmhuGl3+VrdWItEvfoFIPXOvUJkjULi+x+6G/Dy69yO3TBRJDr9eUlmsNAwVmxsNZxvHKzbkKdg==}
@@ -21630,8 +21635,11 @@ packages:
       semver: 7.5.4
 >>>>>>> 766eac180 (feat(cf): support clear conditional format)
       typescript: 5.4.2
+<<<<<<< HEAD
 >>>>>>> 21995e155 (fix(dev): fix dev config)
     dev: false
+=======
+>>>>>>> 689218427 (fix(cf): add i18n)
 
   /vue@3.4.21(typescript@5.4.3):
     resolution: {integrity: sha512-5hjyV/jLEIKD/jYl4cavMcnzKwjMKohureP8ejn3hhEjwhWIhWeuzL2kJAjzl/WyVsgPY56Sy4Z40C3lVshxXA==}

@@ -339,7 +339,7 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
                 }
                 const preValue = valueList[preIndex];
                 if (value >= preValue) {
-                    result[index] = `该值必须小于 ${preValue}`;
+                    result[index] = `${localeService.t('sheet.cf.form.lessThan', String(preValue))} `;
                 }
             });
             return result;

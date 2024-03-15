@@ -19,7 +19,6 @@ import { Tools } from '@univerjs/core';
 import type { UniverRenderingContext } from '../context';
 import type { IShapeProps } from './shape';
 import { Shape } from './shape';
-import { Rect } from './rect';
 
 export interface ICheckboxProps extends IShapeProps {
     checked?: boolean;

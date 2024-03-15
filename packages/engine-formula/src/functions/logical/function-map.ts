@@ -23,8 +23,8 @@ import { Makearray } from './makearray';
 
 export const functionLogical = [
     [And, FUNCTION_NAMES_LOGICAL.AND],
+    [If, FUNCTION_NAMES_LOGICAL.IF],
     [Lambda, FUNCTION_NAMES_LOGICAL.LAMBDA],
     [Makearray, FUNCTION_NAMES_LOGICAL.MAKEARRAY],
-    [If, FUNCTION_NAMES_LOGICAL.IF],
     [Iferror, FUNCTION_NAMES_LOGICAL.IFERROR],
 ];

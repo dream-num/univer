@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DEFFAULT_DATE_FORMAT, excelDateSerial, excelSerialToDate } from '../../../basics/date';
+import { DEFAULT_DATE_FORMAT, excelDateSerial, excelSerialToDate } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
@@ -88,7 +88,7 @@ export class Edate extends BaseFunction {
             const currentSerial = excelDateSerial(resultDate);
 
             const valueObject = NumberValueObject.create(currentSerial);
-            valueObject.setPattern(DEFFAULT_DATE_FORMAT);
+            valueObject.setPattern(DEFAULT_DATE_FORMAT);
 
             return valueObject;
         });

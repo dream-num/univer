@@ -215,7 +215,7 @@ export default {
         },
     },
     OR: {
-        description: 'Returns TRUE if any argument is TRUE',
+        description: 'Returns TRUE if any of its arguments evaluate to TRUE, and returns FALSE if all of its arguments evaluate to FALSE.',
         abstract: 'Returns TRUE if any argument is TRUE',
         links: [
             {
@@ -224,8 +224,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            logical1: { name: 'logical1', detail: 'The first condition that you want to test that can evaluate to either TRUE or FALSE.' },
+            logical2: { name: 'logical2', detail: 'Additional conditions that you want to test that can evaluate to either TRUE or FALSE, up to a maximum of 255 conditions.' },
         },
     },
     REDUCE: {

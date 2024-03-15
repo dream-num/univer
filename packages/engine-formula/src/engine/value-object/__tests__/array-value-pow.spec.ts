@@ -20,7 +20,7 @@ import { ArrayValueObject, transformToValueObject } from '../array-value-object'
 import { NumberValueObject } from '../primitive-object';
 
 describe('arrayValueObject pow method test', () => {
-    const originArrayValueObject = new ArrayValueObject({
+    const originArrayValueObject = ArrayValueObject.create({
         calculateValueList: transformToValueObject([
             [1, 2, 3, 4, 5],
             [6, 7, 8, 9, 10],
@@ -36,7 +36,7 @@ describe('arrayValueObject pow method test', () => {
 
     describe('pow', () => {
         it('origin nm, param nm', () => {
-            const powArrayValueObject = new ArrayValueObject({
+            const powArrayValueObject = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [2, 3, 4],
                     [1, 4, 2],
@@ -57,7 +57,7 @@ describe('arrayValueObject pow method test', () => {
         });
 
         it('origin nm, param 1m', () => {
-            const powArrayValueObject = new ArrayValueObject({
+            const powArrayValueObject = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([[2, 2, 2, 3, 3]]),
                 rowCount: 1,
                 columnCount: 5,
@@ -75,7 +75,7 @@ describe('arrayValueObject pow method test', () => {
         });
 
         it('origin nm, param n1', () => {
-            const powArrayValueObject = new ArrayValueObject({
+            const powArrayValueObject = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([[3], [2], [1]]),
                 rowCount: 3,
                 columnCount: 1,
@@ -93,7 +93,7 @@ describe('arrayValueObject pow method test', () => {
         });
 
         it('origin 1m, param nm', () => {
-            const powArrayValueObject = new ArrayValueObject({
+            const powArrayValueObject = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([[2, 2, 2, 3, 3]]),
                 rowCount: 1,
                 columnCount: 5,
@@ -111,7 +111,7 @@ describe('arrayValueObject pow method test', () => {
         });
 
         it('origin n1, param nm', () => {
-            const powArrayValueObject = new ArrayValueObject({
+            const powArrayValueObject = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([[3], [2], [1]]),
                 rowCount: 3,
                 columnCount: 1,
@@ -129,7 +129,7 @@ describe('arrayValueObject pow method test', () => {
         });
 
         it('origin nm multiple formats, param 1 number', () => {
-            const originArrayValueObject = new ArrayValueObject({
+            const originArrayValueObject = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [1, ' ', 1.23, true, false],
                     [0, '100', '2.34', 'test', -3],
@@ -141,7 +141,7 @@ describe('arrayValueObject pow method test', () => {
                 row: 0,
                 column: 0,
             });
-            const roundValueObject = new NumberValueObject(1);
+            const roundValueObject = NumberValueObject.create(1);
 
             expect((originArrayValueObject.pow(roundValueObject) as ArrayValueObject).toValue()).toStrictEqual([
                 [1, '#VALUE!', 1.23, 1, 0],
@@ -150,8 +150,8 @@ describe('arrayValueObject pow method test', () => {
         });
 
         it('origin 1 number, param nm multiple formats', () => {
-            const originValueObject = new NumberValueObject(1);
-            const roundArrayValueObject = new ArrayValueObject({
+            const originValueObject = NumberValueObject.create(1);
+            const roundArrayValueObject = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [1, ' ', 1.23, true, false],
                     [0, '100', '2.34', 'test', -3],

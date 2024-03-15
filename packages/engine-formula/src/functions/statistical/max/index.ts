@@ -20,6 +20,7 @@ import { convertTonNumber } from '../../../engine/utils/object-covert';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
+import { createNumberValueObjectByRawValue } from '../../../engine/value-object/array-value-object';
 
 export class Max extends BaseFunction {
     override calculate(...variants: BaseValueObject[]) {
@@ -27,7 +28,7 @@ export class Max extends BaseFunction {
             return new ErrorValueObject(ErrorType.NA);
         }
 
-        let accumulatorAll: BaseValueObject = new NumberValueObject(Number.NEGATIVE_INFINITY);
+        let accumulatorAll: BaseValueObject = NumberValueObject.create(Number.NEGATIVE_INFINITY);
         for (let i = 0; i < variants.length; i++) {
             let variant = variants[i];
 
@@ -43,7 +44,7 @@ export class Max extends BaseFunction {
                     return new ErrorValueObject(ErrorType.VALUE);
                 }
 
-                variant = new NumberValueObject(value);
+                variant = createNumberValueObjectByRawValue(value);
             }
 
             if (variant.isBoolean()) {

@@ -27,17 +27,17 @@ export class Isnumber extends BaseFunction {
         }
 
         if (value.isNumber()) {
-            return new BooleanValueObject(true);
+            return BooleanValueObject.create(true);
         } else if (value.isArray()) {
             return (value as ArrayValueObject).mapValue((valueObject) => {
                 if (valueObject.isNumber()) {
-                    return new BooleanValueObject(true);
+                    return BooleanValueObject.create(true);
                 }
 
-                return new BooleanValueObject(false);
+                return BooleanValueObject.create(false);
             });
         }
 
-        return new BooleanValueObject(false);
+        return BooleanValueObject.create(false);
     }
 }

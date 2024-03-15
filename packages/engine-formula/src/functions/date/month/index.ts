@@ -58,14 +58,14 @@ export class Month extends BaseFunction {
             // Excel serial 0 is 1900-01-00
             // Google Sheets serial 0 is 1899-12-30
             if (dateSerial === 0) {
-                return new NumberValueObject(1);
+                return NumberValueObject.create(1);
             }
 
             date = excelSerialToDate(dateSerial);
         }
 
         const month = date.getUTCMonth() + 1;
-        const valueObject = new NumberValueObject(month);
+        const valueObject = NumberValueObject.create(month);
 
         return valueObject;
     }

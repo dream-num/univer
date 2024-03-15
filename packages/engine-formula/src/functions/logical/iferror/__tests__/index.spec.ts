@@ -28,21 +28,21 @@ describe('Test iferror function', () => {
 
     describe('Iferror', () => {
         it('Value is normal', () => {
-            const value = new NumberValueObject(1);
-            const valueIfError = new StringValueObject('error');
+            const value = NumberValueObject.create(1);
+            const valueIfError = StringValueObject.create('error');
             const result = textFunction.calculate(value, valueIfError);
             expect(result.getValue()).toBe(1);
         });
 
         it('Value is error', () => {
             const value = new ErrorValueObject(ErrorType.NA);
-            const valueIfError = new StringValueObject('error');
+            const valueIfError = StringValueObject.create('error');
             const result = textFunction.calculate(value, valueIfError);
             expect(result.getValue()).toBe(ErrorType.NA);
         });
 
         it('Value is array', () => {
-            const value = new ArrayValueObject({
+            const value = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [1],
                     ['#N/A'],
@@ -55,7 +55,7 @@ describe('Test iferror function', () => {
                 row: 0,
                 column: 0,
             });
-            const valueIfError = new StringValueObject('error');
+            const valueIfError = StringValueObject.create('error');
             const result = textFunction.calculate(value, valueIfError);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([
                 [1],
@@ -65,7 +65,7 @@ describe('Test iferror function', () => {
         });
 
         it('Value is array and valueIfError is array', () => {
-            const value = new ArrayValueObject({
+            const value = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [1],
                     ['#N/A'],
@@ -78,7 +78,7 @@ describe('Test iferror function', () => {
                 row: 0,
                 column: 0,
             });
-            const valueIfError = new ArrayValueObject({
+            const valueIfError = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     ['a1', 'a2', 'a3'],
                 ]),

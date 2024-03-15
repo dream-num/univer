@@ -195,7 +195,7 @@ export class FunctionNode extends BaseAstNode {
             } else {
                 const arrayValues = transformToValueObject(resultVariantCustom);
 
-                resultVariant = new ArrayValueObject({
+                resultVariant = ArrayValueObject.create({
                     calculateValueList: arrayValues,
                     rowCount: arrayValues.length,
                     columnCount: arrayValues[0]?.length || 0,

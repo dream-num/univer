@@ -61,7 +61,7 @@ export class SuffixNode extends BaseAstNode {
             }
             result = this._functionExecutor!.calculate(
                 value as BaseValueObject,
-                new NumberValueObject(100)
+                NumberValueObject.create(100)
             ) as FunctionVariantType;
 
             // set number format

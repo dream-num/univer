@@ -25,12 +25,12 @@ export class Counta extends BaseFunction {
             return new ErrorValueObject(ErrorType.NA);
         }
 
-        let accumulatorAll: BaseValueObject = new NumberValueObject(0);
+        let accumulatorAll: BaseValueObject = NumberValueObject.create(0);
         for (let i = 0; i < variants.length; i++) {
             let variant = variants[i];
 
             if (variant.isError()) {
-                accumulatorAll = accumulatorAll.plus(new NumberValueObject(1));
+                accumulatorAll = accumulatorAll.plus(NumberValueObject.create(1));
                 continue;
             }
 
@@ -39,7 +39,7 @@ export class Counta extends BaseFunction {
                 accumulatorAll = accumulatorAll.plus(variant);
             } else {
                 if (!variant.isNull()) {
-                    accumulatorAll = accumulatorAll.plus(new NumberValueObject(1));
+                    accumulatorAll = accumulatorAll.plus(NumberValueObject.create(1));
                 }
             }
         }

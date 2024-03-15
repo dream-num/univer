@@ -27,17 +27,17 @@ export class Isna extends BaseFunction {
         }
 
         if (value.getValue() === ErrorType.NA) {
-            return new BooleanValueObject(true);
+            return BooleanValueObject.create(true);
         } else if (value.isArray()) {
             return (value as ArrayValueObject).mapValue((valueObject) => {
                 if (valueObject.getValue() === ErrorType.NA) {
-                    return new BooleanValueObject(true);
+                    return BooleanValueObject.create(true);
                 }
 
-                return new BooleanValueObject(false);
+                return BooleanValueObject.create(false);
             });
         }
 
-        return new BooleanValueObject(false);
+        return BooleanValueObject.create(false);
     }
 }

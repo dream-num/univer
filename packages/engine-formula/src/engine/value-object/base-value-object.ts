@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { FormulaAstLRU } from '../../basics/cache-lru';
 import { ConcatenateType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
 import { ObjectClassType } from '../../basics/object-class-type';
@@ -452,7 +453,21 @@ export class BaseValueObject extends ObjectClassType {
     }
 }
 
+const Error_CACHE_LRU_COUNT = 1000;
+
+export const ErrorValueObjectCache = new FormulaAstLRU<ErrorValueObject>(Error_CACHE_LRU_COUNT);
 export class ErrorValueObject extends BaseValueObject {
+    static create(errorType: ErrorType, errorContent: string = '') {
+        const key = `${errorType}-${errorContent}`;
+        const cached = ErrorValueObjectCache.get(key);
+        if (cached) {
+            return cached;
+        }
+        const instance = new ErrorValueObject(errorType, errorContent);
+        ErrorValueObjectCache.set(key, instance);
+        return instance;
+    }
+
     constructor(
         private _errorType: ErrorType,
         private _errorContent: string = ''

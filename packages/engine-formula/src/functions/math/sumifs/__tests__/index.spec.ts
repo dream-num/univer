@@ -26,36 +26,36 @@ describe('Test sumifs function', () => {
 
     describe('Sumifs', () => {
         it('Range and criteria', async () => {
-            const sumRange = new ArrayValueObject(/*ts*/ `{
+            const sumRange = ArrayValueObject.create(/*ts*/ `{
                 1;
                 1;
                 1
             }`);
-            const range = new ArrayValueObject(/*ts*/ `{
+            const range = ArrayValueObject.create(/*ts*/ `{
                 2;
                 3;
                 4
             }`);
 
-            const criteria = new StringValueObject('>2');
+            const criteria = StringValueObject.create('>2');
 
             const resultObject = textFunction.calculate(sumRange, range, criteria);
             expect(transformToValue(resultObject.getArrayValue())).toStrictEqual([[2]]);
         });
 
         it('Range and array criteria', async () => {
-            const sumRange = new ArrayValueObject(/*ts*/ `{
+            const sumRange = ArrayValueObject.create(/*ts*/ `{
                 1;
                 1;
                 1
             }`);
-            const range = new ArrayValueObject(/*ts*/ `{
+            const range = ArrayValueObject.create(/*ts*/ `{
                 2;
                 3;
                 4
             }`);
 
-            const criteria = new ArrayValueObject(/*ts*/ `{
+            const criteria = ArrayValueObject.create(/*ts*/ `{
                 >2;
                 >3;
                 >4
@@ -66,89 +66,89 @@ describe('Test sumifs function', () => {
         });
 
         it('2 ranges and criteria', async () => {
-            const sumRange = new ArrayValueObject(/*ts*/ `{
+            const sumRange = ArrayValueObject.create(/*ts*/ `{
                 1;
                 1;
                 1
             }`);
 
-            const range1 = new ArrayValueObject(/*ts*/ `{
+            const range1 = ArrayValueObject.create(/*ts*/ `{
                 2;
                 3;
                 4
             }`);
 
-            const criteria1 = new StringValueObject('>2');
+            const criteria1 = StringValueObject.create('>2');
 
-            const range2 = new ArrayValueObject(/*ts*/ `{
+            const range2 = ArrayValueObject.create(/*ts*/ `{
                 3;
                 4;
                 5
             }`);
 
-            const criteria2 = new StringValueObject('<5');
+            const criteria2 = StringValueObject.create('<5');
 
             const resultObject = textFunction.calculate(sumRange, range1, criteria1, range2, criteria2);
             expect(transformToValue(resultObject.getArrayValue())).toStrictEqual([[1]]);
         });
 
         it('2 ranges and criteria, 1 array criteria', async () => {
-            const sumRange = new ArrayValueObject(/*ts*/ `{
+            const sumRange = ArrayValueObject.create(/*ts*/ `{
                 1;
                 1;
                 1
             }`);
 
-            const range1 = new ArrayValueObject(/*ts*/ `{
+            const range1 = ArrayValueObject.create(/*ts*/ `{
                 2;
                 3;
                 4
             }`);
 
-            const criteria1 = new ArrayValueObject(/*ts*/ `{
+            const criteria1 = ArrayValueObject.create(/*ts*/ `{
                 >2;
                 >3;
                 >4
             }`);
 
-            const range2 = new ArrayValueObject(/*ts*/ `{
+            const range2 = ArrayValueObject.create(/*ts*/ `{
                 3;
                 4;
                 5
             }`);
 
-            const criteria2 = new NumberValueObject(5);
+            const criteria2 = NumberValueObject.create(5);
 
             const resultObject = textFunction.calculate(sumRange, range1, criteria1, range2, criteria2);
             expect(transformToValue(resultObject.getArrayValue())).toStrictEqual([[1], [1], [0]]);
         });
 
         it('2 ranges and criteria, 2 array criteria', async () => {
-            const sumRange = new ArrayValueObject(/*ts*/ `{
+            const sumRange = ArrayValueObject.create(/*ts*/ `{
                 1;
                 1;
                 1
             }`);
 
-            const range1 = new ArrayValueObject(/*ts*/ `{
+            const range1 = ArrayValueObject.create(/*ts*/ `{
                 2;
                 3;
                 4
             }`);
 
-            const criteria1 = new ArrayValueObject(/*ts*/ `{
+            const criteria1 = ArrayValueObject.create(/*ts*/ `{
                 >2;
                 >3;
                 >4
             }`);
 
-            const range2 = new ArrayValueObject(/*ts*/ `{
+            const range2 = ArrayValueObject.create(/*ts*/ `{
                 3;
                 4;
                 5
             }`);
 
-            const criteria2 = new ArrayValueObject(/*ts*/ `{
+            const criteria2 = ArrayValueObject.create(/*ts*/ `{
                 4;
                 4;
                 4;

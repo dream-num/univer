@@ -26,13 +26,13 @@ describe('Test abs function', () => {
 
     describe('Abs', () => {
         it('Value is normal', () => {
-            const value = new NumberValueObject(1);
+            const value = NumberValueObject.create(1);
             const result = textFunction.calculate(value);
             expect(result.getValue()).toBe(1);
         });
 
         it('Value is array', () => {
-            const valueArray = new ArrayValueObject({
+            const valueArray = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [1, 2],
                     [2, 3],

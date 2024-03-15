@@ -38,7 +38,7 @@ export function expandArrayValueObject(rowCount: number, columnCount: number, va
             for (let r = 0; r < rowCount; r++) {
                 const row = [];
                 for (let c = 0; c < columnCount; c++) {
-                    const v = (valueObject as ArrayValueObject).getRealValue(0, c) as BaseValueObject || (defaultValue ?? new NullValueObject(0));
+                    const v = (valueObject as ArrayValueObject).getRealValue(0, c) as BaseValueObject || (defaultValue ?? NullValueObject.create());
                     row.push(v);
                 }
                 result.push(row);
@@ -47,7 +47,7 @@ export function expandArrayValueObject(rowCount: number, columnCount: number, va
             for (let r = 0; r < rowCount; r++) {
                 const row = [];
                 for (let c = 0; c < columnCount; c++) {
-                    const v = (valueObject as ArrayValueObject).getRealValue(r, 0) as BaseValueObject || (defaultValue ?? new NullValueObject(0));
+                    const v = (valueObject as ArrayValueObject).getRealValue(r, 0) as BaseValueObject || (defaultValue ?? NullValueObject.create());
                     row.push(v);
                 }
                 result.push(row);
@@ -56,7 +56,7 @@ export function expandArrayValueObject(rowCount: number, columnCount: number, va
             for (let r = 0; r < rowCount; r++) {
                 const row = [];
                 for (let c = 0; c < columnCount; c++) {
-                    const v = (valueObject as ArrayValueObject).getRealValue(r, c) as BaseValueObject || (defaultValue ?? new NullValueObject(0));
+                    const v = (valueObject as ArrayValueObject).getRealValue(r, c) as BaseValueObject || (defaultValue ?? NullValueObject.create());
                     row.push(v);
                 }
                 result.push(row);
@@ -90,5 +90,5 @@ export function createNewArray(
         column: -1,
     };
 
-    return new ArrayValueObject(arrayValueObjectData);
+    return ArrayValueObject.create(arrayValueObjectData);
 }

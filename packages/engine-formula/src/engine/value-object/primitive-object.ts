@@ -17,201 +17,203 @@
 import Big from 'big.js';
 
 import { reverseCompareOperator } from '../../basics/calculate';
-import { BooleanValue, ConcatenateType } from '../../basics/common';
+import { ConcatenateType } from '../../basics/common';
 import { ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
 import { compareToken } from '../../basics/token';
 import { compareWithWildcard, isWildcard } from '../utils/compare';
 import { ceil, floor, mod, pow, round } from '../utils/math-kit';
+import { FormulaAstLRU } from '../../basics/cache-lru';
 import { BaseValueObject, ErrorValueObject } from './base-value-object';
 
 export type PrimitiveValueType = string | boolean | number | null;
 
 export class NullValueObject extends BaseValueObject {
+    private static _instance: NullValueObject;
+
+    static create() {
+        this._instance = this._instance || new NullValueObject(0);
+        return this._instance;
+    }
+
     override isNull(): boolean {
         return true;
     }
 
     override plus(valueObject: BaseValueObject): BaseValueObject {
-        return new NumberValueObject(0, true).plus(valueObject);
+        return NumberValueObject.create(0).plus(valueObject);
     }
 
     override minus(valueObject: BaseValueObject): BaseValueObject {
-        return new NumberValueObject(0, true).minus(valueObject);
+        return NumberValueObject.create(0).minus(valueObject);
     }
 
     override multiply(valueObject: BaseValueObject): BaseValueObject {
-        return new NumberValueObject(0, true).multiply(valueObject);
+        return NumberValueObject.create(0).multiply(valueObject);
     }
 
     override divided(valueObject: BaseValueObject): BaseValueObject {
-        return new NumberValueObject(0, true).divided(valueObject);
+        return NumberValueObject.create(0).divided(valueObject);
     }
 
     override mod(valueObject: BaseValueObject): BaseValueObject {
-        return new NumberValueObject(0, true).mod(valueObject);
+        return NumberValueObject.create(0).mod(valueObject);
     }
 
     override compare(valueObject: BaseValueObject, operator: compareToken): BaseValueObject {
         if (valueObject.isString()) {
-            return new StringValueObject('').compare(valueObject, operator);
+            return StringValueObject.create('').compare(valueObject, operator);
         }
         if (valueObject.isBoolean()) {
-            return new BooleanValueObject(false).compare(valueObject, operator);
+            return BooleanValueObject.create(false).compare(valueObject, operator);
         }
-        return new NumberValueObject(0, true).compare(valueObject, operator);
+        return NumberValueObject.create(0).compare(valueObject, operator);
     }
 
     override concatenateFront(valueObject: BaseValueObject): BaseValueObject {
         if (valueObject.isArray()) {
-            return valueObject.concatenateBack(new StringValueObject(''));
+            return valueObject.concatenateBack(StringValueObject.create(''));
         }
-        return new StringValueObject(this.concatenate(valueObject.getValue(), ConcatenateType.FRONT));
+        return StringValueObject.create(this.concatenate(valueObject.getValue(), ConcatenateType.FRONT));
     }
 
     override concatenateBack(valueObject: BaseValueObject): BaseValueObject {
         if (valueObject.isArray()) {
-            return valueObject.concatenateFront(new StringValueObject(''));
+            return valueObject.concatenateFront(StringValueObject.create(''));
         }
-        return new StringValueObject(this.concatenate(valueObject.getValue(), ConcatenateType.BACK));
+        return StringValueObject.create(this.concatenate(valueObject.getValue(), ConcatenateType.BACK));
     }
 
     override plusBy(value: string | number | boolean): BaseValueObject {
-        return new NumberValueObject(0).plusBy(value);
+        return NumberValueObject.create(0).plusBy(value);
     }
 
     override minusBy(value: string | number | boolean): BaseValueObject {
-        return new NumberValueObject(0).minusBy(value);
+        return NumberValueObject.create(0).minusBy(value);
     }
 
     override multiplyBy(value: string | number | boolean): BaseValueObject {
-        return new NumberValueObject(0).multiplyBy(value);
+        return NumberValueObject.create(0).multiplyBy(value);
     }
 
     override dividedBy(value: string | number | boolean): BaseValueObject {
-        return new NumberValueObject(0).dividedBy(value);
+        return NumberValueObject.create(0).dividedBy(value);
     }
 
     override compareBy(value: string | number | boolean, operator: compareToken): BaseValueObject {
         if (typeof value === 'string') {
-            return new StringValueObject('').compareBy(value, operator);
+            return StringValueObject.create('').compareBy(value, operator);
         }
         if (typeof value === 'boolean') {
-            return new BooleanValueObject(false).compareBy(value, operator);
+            return BooleanValueObject.create(false).compareBy(value, operator);
         }
-        return new NumberValueObject(0, true).compareBy(value, operator);
+        return NumberValueObject.create(0).compareBy(value, operator);
     }
 
     override pow(valueObject: BaseValueObject): BaseValueObject {
-        return new NumberValueObject(0, true).pow(valueObject);
+        return NumberValueObject.create(0).pow(valueObject);
     }
 
     override sqrt(): BaseValueObject {
-        return new NumberValueObject(0, true).sqrt();
+        return NumberValueObject.create(0).sqrt();
     }
 
     override cbrt(): BaseValueObject {
-        return new NumberValueObject(0, true).cbrt();
+        return NumberValueObject.create(0).cbrt();
     }
 
     override cos(): BaseValueObject {
-        return new NumberValueObject(0, true).cos();
+        return NumberValueObject.create(0).cos();
     }
 
     override acos(): BaseValueObject {
-        return new NumberValueObject(0, true).acos();
+        return NumberValueObject.create(0).acos();
     }
 
     override acosh(): BaseValueObject {
-        return new NumberValueObject(0, true).acosh();
+        return NumberValueObject.create(0).acosh();
     }
 
     override sin(): BaseValueObject {
-        return new NumberValueObject(0, true).sin();
+        return NumberValueObject.create(0).sin();
     }
 
     override asin(): BaseValueObject {
-        return new NumberValueObject(0, true).asin();
+        return NumberValueObject.create(0).asin();
     }
 
     override asinh(): BaseValueObject {
-        return new NumberValueObject(0, true).asinh();
+        return NumberValueObject.create(0).asinh();
     }
 
     override tan(): BaseValueObject {
-        return new NumberValueObject(0, true).tan();
+        return NumberValueObject.create(0).tan();
     }
 
     override tanh(): BaseValueObject {
-        return new NumberValueObject(0, true).tanh();
+        return NumberValueObject.create(0).tanh();
     }
 
     override atan(): BaseValueObject {
-        return new NumberValueObject(0, true).atan();
+        return NumberValueObject.create(0).atan();
     }
 
     override atan2(valueObject: BaseValueObject): BaseValueObject {
-        return new NumberValueObject(0, true).atan2(valueObject);
+        return NumberValueObject.create(0).atan2(valueObject);
     }
 
     override atanh(): BaseValueObject {
-        return new NumberValueObject(0, true).atanh();
+        return NumberValueObject.create(0).atanh();
     }
 
     override log(): BaseValueObject {
-        return new ErrorValueObject(ErrorType.NUM);
+        return ErrorValueObject.create(ErrorType.NUM);
     }
 
     override log10(): BaseValueObject {
-        return new ErrorValueObject(ErrorType.NUM);
+        return ErrorValueObject.create(ErrorType.NUM);
     }
 
     override exp(): BaseValueObject {
-        return new NumberValueObject(0, true).exp();
+        return NumberValueObject.create(0).exp();
     }
 
     override abs(): BaseValueObject {
-        return new NumberValueObject(0, true).abs();
+        return NumberValueObject.create(0).abs();
     }
 
     override round(valueObject: BaseValueObject): BaseValueObject {
-        return new NumberValueObject(0, true).round(valueObject);
+        return NumberValueObject.create(0).round(valueObject);
     }
 
     override floor(valueObject: BaseValueObject): BaseValueObject {
-        return new NumberValueObject(0, true).floor(valueObject);
+        return NumberValueObject.create(0).floor(valueObject);
     }
 
     override ceil(valueObject: BaseValueObject): BaseValueObject {
-        return new NumberValueObject(0, true).ceil(valueObject);
+        return NumberValueObject.create(0).ceil(valueObject);
     }
 }
 
 export class BooleanValueObject extends BaseValueObject {
     private _value: boolean = false;
 
-    constructor(rawValue: string | number | boolean, isForce = false) {
-        super(rawValue);
-        if (isForce) {
-            this._value = rawValue as boolean;
-            return;
-        }
+    private static _instanceTrue: BooleanValueObject;
 
-        if (typeof rawValue === 'boolean') {
-            this._value = rawValue;
-        } else if (typeof rawValue === 'string') {
-            const rawValueUpper = rawValue.toLocaleUpperCase();
-            if (rawValueUpper === BooleanValue.TRUE) {
-                this._value = true;
-            } else if (rawValueUpper === BooleanValue.FALSE) {
-                this._value = false;
-            }
-        } else {
-            if (rawValue === 1) {
-                this._value = true;
-            } else {
-                this._value = false;
-            }
+    private static _instanceFalse: BooleanValueObject;
+
+    static create(value: boolean) {
+        if (value) {
+            this._instanceTrue = this._instanceTrue || new BooleanValueObject(true);
+            return this._instanceTrue;
         }
+        this._instanceFalse = this._instanceFalse || new BooleanValueObject(false);
+        return this._instanceFalse;
+    }
+
+    constructor(rawValue: boolean) {
+        super(rawValue);
+
+        this._value = rawValue;
     }
 
     override getValue() {
@@ -228,15 +230,15 @@ export class BooleanValueObject extends BaseValueObject {
         if (currentValue) {
             result = 1;
         }
-        return new NumberValueObject(-result, true);
+        return NumberValueObject.create(-result);
     }
 
     override getReciprocal(): BaseValueObject {
         const currentValue = this.getValue();
         if (currentValue) {
-            return new NumberValueObject(1, true);
+            return NumberValueObject.create(1);
         }
-        return new ErrorValueObject(ErrorType.DIV_BY_ZERO);
+        return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
     }
 
     override plus(valueObject: BaseValueObject): BaseValueObject {
@@ -277,7 +279,7 @@ export class BooleanValueObject extends BaseValueObject {
         if (currentValue) {
             result = 1;
         }
-        return new NumberValueObject(result, true);
+        return NumberValueObject.create(result);
     }
 
     override pow(valueObject: BaseValueObject): BaseValueObject {
@@ -365,15 +367,28 @@ export class BooleanValueObject extends BaseValueObject {
     }
 }
 
+const NUMBER_CACHE_LRU_COUNT = 200000;
+
+export const NumberValueObjectCache = new FormulaAstLRU<NumberValueObject>(NUMBER_CACHE_LRU_COUNT);
+
 export class NumberValueObject extends BaseValueObject {
     private _value: number = 0;
 
-    constructor(rawValue: string | number | boolean, isForce = false) {
-        super(rawValue);
-        if (isForce) {
-            this._value = rawValue as number;
-            return;
+    static create(value: number, pattern: string = '') {
+        const key = `${value}-${pattern}`;
+        const cached = NumberValueObjectCache.get(key);
+        if (cached) {
+            return cached;
         }
+        const instance = new NumberValueObject(value);
+        instance.setPattern(pattern);
+        NumberValueObjectCache.set(key, instance);
+        return instance;
+    }
+
+    constructor(rawValue: number) {
+        super(rawValue);
+
         this._value = Number(rawValue);
     }
 
@@ -390,11 +405,11 @@ export class NumberValueObject extends BaseValueObject {
     }
 
     override getNegative(): BaseValueObject {
-        return new NumberValueObject(0).minus(this);
+        return NumberValueObject.create(0).minus(this);
     }
 
     override getReciprocal(): BaseValueObject {
-        return new NumberValueObject(1).divided(this);
+        return NumberValueObject.create(1).divided(this);
     }
 
     override plus(valueObject: BaseValueObject): BaseValueObject {
@@ -474,37 +489,37 @@ export class NumberValueObject extends BaseValueObject {
         const value = valueObject.getValue();
 
         if (valueObject.isNull()) {
-            return new ErrorValueObject(ErrorType.DIV_BY_ZERO);
+            return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
         }
 
         if (typeof value === 'string') {
-            return new ErrorValueObject(ErrorType.VALUE);
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
         if (typeof value === 'number') {
             if (value === 0) {
-                return new ErrorValueObject(ErrorType.DIV_BY_ZERO);
+                return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
             }
 
             if (!Number.isFinite(currentValue) || !Number.isFinite(value)) {
-                return new ErrorValueObject(ErrorType.NUM);
+                return ErrorValueObject.create(ErrorType.NUM);
             }
 
             const result = mod(currentValue, value);
 
             if (!Number.isFinite(result)) {
-                return new ErrorValueObject(ErrorType.NUM);
+                return ErrorValueObject.create(ErrorType.NUM);
             }
 
-            return new NumberValueObject(result);
+            return NumberValueObject.create(result);
         }
         if (typeof value === 'boolean') {
             const booleanValue = value ? 1 : 0;
 
             if (booleanValue === 0) {
-                return new ErrorValueObject(ErrorType.DIV_BY_ZERO);
+                return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
             }
 
-            return new NumberValueObject(mod(currentValue, booleanValue));
+            return NumberValueObject.create(mod(currentValue, booleanValue));
         }
 
         return this;
@@ -514,14 +529,14 @@ export class NumberValueObject extends BaseValueObject {
         if (valueObject.isArray()) {
             return valueObject.concatenateBack(this);
         }
-        return new StringValueObject(this.concatenate(valueObject.getValue(), ConcatenateType.FRONT));
+        return StringValueObject.create(this.concatenate(valueObject.getValue(), ConcatenateType.FRONT));
     }
 
     override concatenateBack(valueObject: BaseValueObject): BaseValueObject {
         if (valueObject.isArray()) {
             return valueObject.concatenateFront(this);
         }
-        return new StringValueObject(this.concatenate(valueObject.getValue(), ConcatenateType.BACK));
+        return StringValueObject.create(this.concatenate(valueObject.getValue(), ConcatenateType.BACK));
     }
 
     override compare(valueObject: BaseValueObject, operator: compareToken): BaseValueObject {
@@ -536,25 +551,25 @@ export class NumberValueObject extends BaseValueObject {
         if (typeof value === 'string') {
             // = 1 + #NAME? gets #NAME?, = 1 + #VALUE! gets #VALUE!
             if (ERROR_TYPE_SET.has(value as ErrorType)) {
-                return new ErrorValueObject(value as ErrorType);
+                return ErrorValueObject.create(value as ErrorType);
             }
-            return new ErrorValueObject(ErrorType.VALUE);
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
         if (typeof value === 'number') {
             if (!Number.isFinite(currentValue) || !Number.isFinite(value)) {
-                return new ErrorValueObject(ErrorType.NUM);
+                return ErrorValueObject.create(ErrorType.NUM);
             }
 
             const result = Big(currentValue).plus(value).toNumber();
 
             if (!Number.isFinite(result)) {
-                return new ErrorValueObject(ErrorType.NUM);
+                return ErrorValueObject.create(ErrorType.NUM);
             }
 
-            return new NumberValueObject(result);
+            return NumberValueObject.create(result);
         }
         if (typeof value === 'boolean') {
-            return new NumberValueObject(
+            return NumberValueObject.create(
                 Big(currentValue)
                     .plus(value ? 1 : 0)
                     .toNumber()
@@ -566,23 +581,23 @@ export class NumberValueObject extends BaseValueObject {
     override minusBy(value: string | number | boolean): BaseValueObject {
         const currentValue = this.getValue();
         if (typeof value === 'string') {
-            return new ErrorValueObject(ErrorType.VALUE);
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
         if (typeof value === 'number') {
             if (!Number.isFinite(currentValue) || !Number.isFinite(value)) {
-                return new ErrorValueObject(ErrorType.NUM);
+                return ErrorValueObject.create(ErrorType.NUM);
             }
 
             const result = Big(currentValue).minus(value).toNumber();
 
             if (!Number.isFinite(result)) {
-                return new ErrorValueObject(ErrorType.NUM);
+                return ErrorValueObject.create(ErrorType.NUM);
             }
 
-            return new NumberValueObject(result);
+            return NumberValueObject.create(result);
         }
         if (typeof value === 'boolean') {
-            return new NumberValueObject(
+            return NumberValueObject.create(
                 Big(currentValue)
                     .minus(value ? 1 : 0)
                     .toNumber()
@@ -594,22 +609,22 @@ export class NumberValueObject extends BaseValueObject {
     override multiplyBy(value: string | number | boolean): BaseValueObject {
         const currentValue = this.getValue();
         if (typeof value === 'string') {
-            return new ErrorValueObject(ErrorType.VALUE);
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
         if (typeof value === 'number') {
             if (!Number.isFinite(currentValue) || !Number.isFinite(value)) {
-                return new ErrorValueObject(ErrorType.NUM);
+                return ErrorValueObject.create(ErrorType.NUM);
             }
 
             const result = Big(currentValue).times(value).toNumber();
 
             if (!Number.isFinite(result)) {
-                return new ErrorValueObject(ErrorType.NUM);
+                return ErrorValueObject.create(ErrorType.NUM);
             }
-            return new NumberValueObject(result);
+            return NumberValueObject.create(result);
         }
         if (typeof value === 'boolean') {
-            return new NumberValueObject(
+            return NumberValueObject.create(
                 Big(currentValue)
                     .times(value ? 1 : 0)
                     .toNumber()
@@ -621,29 +636,29 @@ export class NumberValueObject extends BaseValueObject {
     override dividedBy(value: string | number | boolean): BaseValueObject {
         const currentValue = this.getValue();
         if (typeof value === 'string') {
-            return new ErrorValueObject(ErrorType.VALUE);
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
         if (typeof value === 'number') {
             if (value === 0) {
-                return new ErrorValueObject(ErrorType.DIV_BY_ZERO);
+                return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
             }
             if (!Number.isFinite(currentValue) || !Number.isFinite(value)) {
-                return new ErrorValueObject(ErrorType.NUM);
+                return ErrorValueObject.create(ErrorType.NUM);
             }
 
             const result = Big(currentValue).div(value).toNumber();
 
             if (!Number.isFinite(result)) {
-                return new ErrorValueObject(ErrorType.NUM);
+                return ErrorValueObject.create(ErrorType.NUM);
             }
 
-            return new NumberValueObject(result);
+            return NumberValueObject.create(result);
         }
         if (typeof value === 'boolean') {
             if (value === false) {
-                return new ErrorValueObject(ErrorType.DIV_BY_ZERO);
+                return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
             }
-            return new NumberValueObject(Big(currentValue).div(1).toNumber());
+            return NumberValueObject.create(Big(currentValue).div(1).toNumber());
         }
         return this;
     }
@@ -703,7 +718,7 @@ export class NumberValueObject extends BaseValueObject {
                     break;
             }
         }
-        return new BooleanValueObject(result);
+        return BooleanValueObject.create(result);
     }
 
     override pow(valueObject: BaseValueObject): BaseValueObject {
@@ -715,23 +730,23 @@ export class NumberValueObject extends BaseValueObject {
         const value = valueObject.getValue();
 
         if (typeof value === 'string') {
-            return new ErrorValueObject(ErrorType.VALUE);
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
         if (typeof value === 'number') {
             if (!Number.isFinite(currentValue) || !Number.isFinite(value)) {
-                return new ErrorValueObject(ErrorType.NUM);
+                return ErrorValueObject.create(ErrorType.NUM);
             }
 
             const result = pow(currentValue, value);
 
             if (!Number.isFinite(result)) {
-                return new ErrorValueObject(ErrorType.NUM);
+                return ErrorValueObject.create(ErrorType.NUM);
             }
 
-            return new NumberValueObject(result);
+            return NumberValueObject.create(result);
         }
         if (typeof value === 'boolean') {
-            return new NumberValueObject(pow(currentValue, value ? 1 : 0));
+            return NumberValueObject.create(pow(currentValue, value ? 1 : 0));
         }
 
         return this;
@@ -741,176 +756,176 @@ export class NumberValueObject extends BaseValueObject {
         const currentValue = this.getValue();
 
         if (!Number.isFinite(currentValue)) {
-            return new ErrorValueObject(ErrorType.NUM);
+            return ErrorValueObject.create(ErrorType.NUM);
         }
 
         const result = Big(currentValue).sqrt().toNumber();
 
         if (!Number.isFinite(result)) {
-            return new ErrorValueObject(ErrorType.NUM);
+            return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        return new NumberValueObject(result);
+        return NumberValueObject.create(result);
     }
 
     override cbrt(): BaseValueObject {
         const currentValue = this.getValue();
 
         if (!Number.isFinite(currentValue)) {
-            return new ErrorValueObject(ErrorType.NUM);
+            return ErrorValueObject.create(ErrorType.NUM);
         }
 
         const result = Math.cbrt(currentValue);
 
         if (!Number.isFinite(result)) {
-            return new ErrorValueObject(ErrorType.NUM);
+            return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        return new NumberValueObject(result);
+        return NumberValueObject.create(result);
     }
 
     override cos(): BaseValueObject {
         const currentValue = this.getValue();
 
         if (!Number.isFinite(currentValue)) {
-            return new ErrorValueObject(ErrorType.NUM);
+            return ErrorValueObject.create(ErrorType.NUM);
         }
 
         const result = Math.cos(currentValue);
 
         if (!Number.isFinite(result)) {
-            return new ErrorValueObject(ErrorType.NUM);
+            return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        return new NumberValueObject(result);
+        return NumberValueObject.create(result);
     }
 
     override acos(): BaseValueObject {
         const currentValue = this.getValue();
 
         if (!Number.isFinite(currentValue)) {
-            return new ErrorValueObject(ErrorType.NUM);
+            return ErrorValueObject.create(ErrorType.NUM);
         }
 
         const result = Math.acos(currentValue);
 
         if (Number.isNaN(result)) {
-            return new ErrorValueObject(ErrorType.NUM);
+            return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        return new NumberValueObject(result);
+        return NumberValueObject.create(result);
     }
 
     override acosh(): BaseValueObject {
         const currentValue = this.getValue();
 
         if (!Number.isFinite(currentValue)) {
-            return new ErrorValueObject(ErrorType.NUM);
+            return ErrorValueObject.create(ErrorType.NUM);
         }
 
         const result = Math.acosh(currentValue);
 
         if (Number.isNaN(result)) {
-            return new ErrorValueObject(ErrorType.NUM);
+            return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        return new NumberValueObject(result);
+        return NumberValueObject.create(result);
     }
 
     override sin(): BaseValueObject {
         const currentValue = this.getValue();
 
         if (!Number.isFinite(currentValue)) {
-            return new ErrorValueObject(ErrorType.NUM);
+            return ErrorValueObject.create(ErrorType.NUM);
         }
 
         const result = Math.sin(currentValue);
 
         if (!Number.isFinite(result)) {
-            return new ErrorValueObject(ErrorType.NUM);
+            return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        return new NumberValueObject(result);
+        return NumberValueObject.create(result);
     }
 
     override asin(): BaseValueObject {
         const currentValue = this.getValue();
 
         if (!Number.isFinite(currentValue)) {
-            return new ErrorValueObject(ErrorType.NUM);
+            return ErrorValueObject.create(ErrorType.NUM);
         }
 
         const result = Math.asin(currentValue);
 
         if (Number.isNaN(result)) {
-            return new ErrorValueObject(ErrorType.NUM);
+            return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        return new NumberValueObject(result);
+        return NumberValueObject.create(result);
     }
 
     override asinh(): BaseValueObject {
         const currentValue = this.getValue();
 
         if (!Number.isFinite(currentValue)) {
-            return new ErrorValueObject(ErrorType.NUM);
+            return ErrorValueObject.create(ErrorType.NUM);
         }
 
         const result = Math.asinh(currentValue);
 
         if (Number.isNaN(result)) {
-            return new ErrorValueObject(ErrorType.NUM);
+            return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        return new NumberValueObject(result);
+        return NumberValueObject.create(result);
     }
 
     override tan(): BaseValueObject {
         const currentValue = this.getValue();
 
         if (!Number.isFinite(currentValue)) {
-            return new ErrorValueObject(ErrorType.NUM);
+            return ErrorValueObject.create(ErrorType.NUM);
         }
 
         const result = Math.tan(currentValue);
 
         if (!Number.isFinite(result)) {
-            return new ErrorValueObject(ErrorType.NUM);
+            return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        return new NumberValueObject(result);
+        return NumberValueObject.create(result);
     }
 
     override tanh(): BaseValueObject {
         const currentValue = this.getValue();
 
         if (!Number.isFinite(currentValue)) {
-            return new ErrorValueObject(ErrorType.NUM);
+            return ErrorValueObject.create(ErrorType.NUM);
         }
 
         const result = Math.tanh(currentValue);
 
         if (!Number.isFinite(result)) {
-            return new ErrorValueObject(ErrorType.NUM);
+            return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        return new NumberValueObject(result);
+        return NumberValueObject.create(result);
     }
 
     override atan(): BaseValueObject {
         const currentValue = this.getValue();
 
         if (!Number.isFinite(currentValue)) {
-            return new ErrorValueObject(ErrorType.NUM);
+            return ErrorValueObject.create(ErrorType.NUM);
         }
 
         const result = Math.atan(currentValue);
 
         if (!Number.isFinite(result)) {
-            return new ErrorValueObject(ErrorType.NUM);
+            return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        return new NumberValueObject(result);
+        return NumberValueObject.create(result);
     }
 
     override atan2(valueObject: BaseValueObject): BaseValueObject {
@@ -922,23 +937,23 @@ export class NumberValueObject extends BaseValueObject {
         const value = valueObject.getValue();
 
         if (typeof value === 'string') {
-            return new ErrorValueObject(ErrorType.VALUE);
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
         if (typeof value === 'number') {
             if (!Number.isFinite(currentValue) || !Number.isFinite(value)) {
-                return new ErrorValueObject(ErrorType.NUM);
+                return ErrorValueObject.create(ErrorType.NUM);
             }
 
             const result = Math.atan2(currentValue, value);
 
             if (!Number.isFinite(result)) {
-                return new ErrorValueObject(ErrorType.NUM);
+                return ErrorValueObject.create(ErrorType.NUM);
             }
 
-            return new NumberValueObject(result);
+            return NumberValueObject.create(result);
         }
         if (typeof value === 'boolean') {
-            return new NumberValueObject(Math.atan2(currentValue, value ? 1 : 0));
+            return NumberValueObject.create(Math.atan2(currentValue, value ? 1 : 0));
         }
 
         return this;
@@ -948,88 +963,88 @@ export class NumberValueObject extends BaseValueObject {
         const currentValue = this.getValue();
 
         if (!Number.isFinite(currentValue)) {
-            return new ErrorValueObject(ErrorType.NUM);
+            return ErrorValueObject.create(ErrorType.NUM);
         }
 
         const result = Math.atanh(currentValue);
 
         if (!Number.isFinite(result)) {
-            return new ErrorValueObject(ErrorType.NUM);
+            return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        return new NumberValueObject(result);
+        return NumberValueObject.create(result);
     }
 
     override log(): BaseValueObject {
         const currentValue = this.getValue();
 
         if (typeof currentValue === 'number' && currentValue <= 0) {
-            return new ErrorValueObject(ErrorType.NUM);
+            return ErrorValueObject.create(ErrorType.NUM);
         }
 
         if (!Number.isFinite(currentValue)) {
-            return new ErrorValueObject(ErrorType.NUM);
+            return ErrorValueObject.create(ErrorType.NUM);
         }
 
         const result = Math.log(currentValue);
 
         if (!Number.isFinite(result)) {
-            return new ErrorValueObject(ErrorType.NUM);
+            return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        return new NumberValueObject(result);
+        return NumberValueObject.create(result);
     }
 
     override log10(): BaseValueObject {
         const currentValue = this.getValue();
 
         if (typeof currentValue === 'number' && currentValue <= 0) {
-            return new ErrorValueObject(ErrorType.NUM);
+            return ErrorValueObject.create(ErrorType.NUM);
         }
 
         if (!Number.isFinite(currentValue)) {
-            return new ErrorValueObject(ErrorType.NUM);
+            return ErrorValueObject.create(ErrorType.NUM);
         }
 
         const result = Math.log10(currentValue);
 
         if (!Number.isFinite(result)) {
-            return new ErrorValueObject(ErrorType.NUM);
+            return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        return new NumberValueObject(result);
+        return NumberValueObject.create(result);
     }
 
     override exp(): BaseValueObject {
         const currentValue = this.getValue();
 
         if (!Number.isFinite(currentValue)) {
-            return new ErrorValueObject(ErrorType.NUM);
+            return ErrorValueObject.create(ErrorType.NUM);
         }
 
         const result = Math.exp(currentValue);
 
         if (!Number.isFinite(result)) {
-            return new ErrorValueObject(ErrorType.NUM);
+            return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        return new NumberValueObject(result);
+        return NumberValueObject.create(result);
     }
 
     override abs(): BaseValueObject {
         const currentValue = this.getValue();
 
         if (!Number.isFinite(currentValue)) {
-            return new ErrorValueObject(ErrorType.NUM);
+            return ErrorValueObject.create(ErrorType.NUM);
         }
 
         const result = Math.abs(currentValue);
 
         if (!Number.isFinite(result)) {
-            return new ErrorValueObject(ErrorType.NUM);
+            return ErrorValueObject.create(ErrorType.NUM);
         }
 
-        return new NumberValueObject(result);
+        return NumberValueObject.create(result);
     }
 
     override round(valueObject: BaseValueObject): BaseValueObject {
@@ -1041,23 +1056,23 @@ export class NumberValueObject extends BaseValueObject {
         const value = valueObject.getValue();
 
         if (typeof value === 'string') {
-            return new ErrorValueObject(ErrorType.VALUE);
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
         if (typeof value === 'number') {
             if (!Number.isFinite(currentValue) || !Number.isFinite(value)) {
-                return new ErrorValueObject(ErrorType.NUM);
+                return ErrorValueObject.create(ErrorType.NUM);
             }
 
             const result = round(currentValue, value);
 
             if (!Number.isFinite(result)) {
-                return new ErrorValueObject(ErrorType.NUM);
+                return ErrorValueObject.create(ErrorType.NUM);
             }
 
-            return new NumberValueObject(result);
+            return NumberValueObject.create(result);
         }
         if (typeof value === 'boolean') {
-            return new NumberValueObject(round(currentValue, value ? 1 : 0));
+            return NumberValueObject.create(round(currentValue, value ? 1 : 0));
         }
 
         return this;
@@ -1072,23 +1087,23 @@ export class NumberValueObject extends BaseValueObject {
         const value = valueObject.getValue();
 
         if (typeof value === 'string') {
-            return new ErrorValueObject(ErrorType.VALUE);
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
         if (typeof value === 'number') {
             if (!Number.isFinite(currentValue) || !Number.isFinite(value)) {
-                return new ErrorValueObject(ErrorType.NUM);
+                return ErrorValueObject.create(ErrorType.NUM);
             }
 
             const result = floor(currentValue, value);
 
             if (!Number.isFinite(result)) {
-                return new ErrorValueObject(ErrorType.NUM);
+                return ErrorValueObject.create(ErrorType.NUM);
             }
 
-            return new NumberValueObject(result);
+            return NumberValueObject.create(result);
         }
         if (typeof value === 'boolean') {
-            return new NumberValueObject(floor(currentValue, value ? 1 : 0));
+            return NumberValueObject.create(floor(currentValue, value ? 1 : 0));
         }
 
         return this;
@@ -1103,23 +1118,23 @@ export class NumberValueObject extends BaseValueObject {
         const value = valueObject.getValue();
 
         if (typeof value === 'string') {
-            return new ErrorValueObject(ErrorType.VALUE);
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
         if (typeof value === 'number') {
             if (!Number.isFinite(currentValue) || !Number.isFinite(value)) {
-                return new ErrorValueObject(ErrorType.NUM);
+                return ErrorValueObject.create(ErrorType.NUM);
             }
 
             const result = ceil(currentValue, value);
 
             if (!Number.isFinite(result)) {
-                return new ErrorValueObject(ErrorType.NUM);
+                return ErrorValueObject.create(ErrorType.NUM);
             }
 
-            return new NumberValueObject(result);
+            return NumberValueObject.create(result);
         }
         if (typeof value === 'boolean') {
-            return new NumberValueObject(ceil(currentValue, value ? 1 : 0));
+            return NumberValueObject.create(ceil(currentValue, value ? 1 : 0));
         }
 
         return this;
@@ -1152,23 +1167,25 @@ export class NumberValueObject extends BaseValueObject {
     }
 }
 
+const STRING_CACHE_LRU_COUNT = 200000;
+
+export const StringValueObjectCache = new FormulaAstLRU<StringValueObject>(STRING_CACHE_LRU_COUNT);
 export class StringValueObject extends BaseValueObject {
     private _value: string;
 
-    constructor(rawValue: string | number | boolean, isForce = false) {
+    static create(value: string) {
+        const cached = StringValueObjectCache.get(value);
+        if (cached) {
+            return cached;
+        }
+        const instance = new StringValueObject(value);
+        StringValueObjectCache.set(value, instance);
+        return instance;
+    }
+
+    constructor(rawValue: string) {
         super(rawValue);
-        if (isForce) {
-            this._value = rawValue as string;
-            return;
-        }
-        let value = rawValue.toString();
-
-        if (value.charAt(0) === '"' && value.charAt(value.length - 1) === '"') {
-            value = value.slice(1, -1);
-            value = value.replace(/""/g, '"');
-        }
-
-        this._value = value;
+        this._value = rawValue;
     }
 
     override getValue() {
@@ -1183,14 +1200,14 @@ export class StringValueObject extends BaseValueObject {
         if (valueObject.isArray()) {
             return valueObject.concatenateBack(this);
         }
-        return new StringValueObject(this.concatenate(valueObject.getValue(), ConcatenateType.FRONT));
+        return StringValueObject.create(this.concatenate(valueObject.getValue(), ConcatenateType.FRONT));
     }
 
     override concatenateBack(valueObject: BaseValueObject): BaseValueObject {
         if (valueObject.isArray()) {
             return valueObject.concatenateFront(this);
         }
-        return new StringValueObject(this.concatenate(valueObject.getValue(), ConcatenateType.BACK));
+        return StringValueObject.create(this.concatenate(valueObject.getValue(), ConcatenateType.BACK));
     }
 
     override compare(valueObject: BaseValueObject, operator: compareToken): BaseValueObject {
@@ -1260,13 +1277,13 @@ export class StringValueObject extends BaseValueObject {
                     break;
             }
         }
-        return new BooleanValueObject(result);
+        return BooleanValueObject.create(result);
     }
 
     private _checkWildcard(value: string, operator: compareToken) {
         const currentValue = this.getValue().toLocaleLowerCase();
         const result = compareWithWildcard(currentValue, value, operator);
 
-        return new BooleanValueObject(result);
+        return BooleanValueObject.create(result);
     }
 }

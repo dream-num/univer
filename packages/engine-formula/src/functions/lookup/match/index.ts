@@ -96,7 +96,7 @@ export class Match extends BaseFunction {
 
         const resultNumber = searchArray.getRowCount() === 1 ? result.column + 1 : result.row + 1;
 
-        return new NumberValueObject(resultNumber);
+        return NumberValueObject.create(resultNumber);
     }
 
     private _getSearchModeValue(searchModeValue: number) {

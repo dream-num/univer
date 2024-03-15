@@ -26,7 +26,7 @@ export class Count extends BaseFunction {
             return new ErrorValueObject(ErrorType.NA);
         }
 
-        let accumulatorAll: BaseValueObject = new NumberValueObject(0);
+        let accumulatorAll: BaseValueObject = NumberValueObject.create(0);
         for (let i = 0; i < variants.length; i++) {
             let variant = variants[i];
 
@@ -42,10 +42,10 @@ export class Count extends BaseFunction {
                 const isStringNumber = isRealNum(value);
 
                 if (isStringNumber) {
-                    accumulatorAll = accumulatorAll.plus(new NumberValueObject(1));
+                    accumulatorAll = accumulatorAll.plus(NumberValueObject.create(1));
                 }
             } else if (!variant.isNull()) {
-                accumulatorAll = accumulatorAll.plus(new NumberValueObject(1));
+                accumulatorAll = accumulatorAll.plus(NumberValueObject.create(1));
             }
         }
 

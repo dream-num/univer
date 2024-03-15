@@ -26,21 +26,21 @@ describe('Test concatenate function', () => {
 
     describe('Concatenate', () => {
         it('Text is single cell', () => {
-            const text1 = new StringValueObject('Start ');
-            const text2 = new StringValueObject('End');
+            const text1 = StringValueObject.create('Start ');
+            const text2 = StringValueObject.create('End');
             const result = textFunction.calculate(text1, text2);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([['Start End']]);
         });
 
         it('Text is single cell with quotation marks', () => {
-            const text1 = new StringValueObject('"Hello ""World"');
+            const text1 = StringValueObject.create('"Hello ""World"');
             const result = textFunction.calculate(text1);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([['Hello "World']]);
         });
 
         it('Text1 is single cell, text2 is array', () => {
-            const text1 = new StringValueObject('a');
-            const text2 = new ArrayValueObject({
+            const text1 = StringValueObject.create('a');
+            const text2 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [1, 2, 3],
                     [2, 3, 4],
@@ -58,7 +58,7 @@ describe('Test concatenate function', () => {
         });
 
         it('Text1 is array, text2 is single cell', () => {
-            const text1 = new ArrayValueObject({
+            const text1 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [1, 2, 3],
                     [2, 3, 4],
@@ -71,13 +71,13 @@ describe('Test concatenate function', () => {
                 row: 0,
                 column: 0,
             });
-            const text2 = new StringValueObject('a');
+            const text2 = StringValueObject.create('a');
             const result = textFunction.calculate(text1, text2);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([['1a', '2a', '3a'], ['2a', '3a', '4a'], ['3a', '4a', '5a']]);
         });
 
         it('Text1 is 3*1 array, text2 is 1*3 array', () => {
-            const text1 = new ArrayValueObject({
+            const text1 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     ['a'],
                     ['b'],
@@ -90,7 +90,7 @@ describe('Test concatenate function', () => {
                 row: 0,
                 column: 0,
             });
-            const text2 = new ArrayValueObject({
+            const text2 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [1, 2, 3],
                 ]),
@@ -106,7 +106,7 @@ describe('Test concatenate function', () => {
         });
 
         it('Text1 is 2*2 array, text2 is 3*3 array', () => {
-            const text1 = new ArrayValueObject({
+            const text1 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     ['a', 'd'],
                     [0, null],
@@ -118,7 +118,7 @@ describe('Test concatenate function', () => {
                 row: 0,
                 column: 0,
             });
-            const text2 = new ArrayValueObject({
+            const text2 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [1, 2, 3],
                     [0, null, 4],

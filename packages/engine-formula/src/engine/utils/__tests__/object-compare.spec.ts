@@ -21,7 +21,7 @@ import { BooleanValueObject, NumberValueObject, StringValueObject } from '../../
 import { valueObjectCompare } from '../object-compare';
 import { compareToken } from '../../../basics/token';
 
-const range = new ArrayValueObject(/*ts*/ `{
+const range = ArrayValueObject.create(/*ts*/ `{
     Ada;
     test1;
     test12;
@@ -31,14 +31,14 @@ const range = new ArrayValueObject(/*ts*/ `{
 describe('Test object compare', () => {
     describe('Test valueObjectCompare', () => {
         it('Range and criteria', () => {
-            const rangeNumber = new ArrayValueObject(/*ts*/ `{
+            const rangeNumber = ArrayValueObject.create(/*ts*/ `{
                 1;
                 4;
                 44;
                 444
             }`);
 
-            const criteria = new StringValueObject('>40');
+            const criteria = StringValueObject.create('>40');
 
             const resultObjectValue = transformToValue(valueObjectCompare(rangeNumber, criteria).getArrayValue());
             expect(resultObjectValue).toStrictEqual([[false], [false], [true], [true]]);
@@ -76,7 +76,7 @@ describe('Test object compare', () => {
             ];
 
             criteriaList.forEach((criteriaValue, i) => {
-                const criteria = new StringValueObject(criteriaValue);
+                const criteria = StringValueObject.create(criteriaValue);
 
                 const value = transformToValue(valueObjectCompare(range, criteria).getArrayValue());
                 expect(value).toStrictEqual(result[i]);
@@ -84,8 +84,8 @@ describe('Test object compare', () => {
         });
 
         it('String and string', () => {
-            const str1 = new StringValueObject('a');
-            const str2 = new StringValueObject('中文');
+            const str1 = StringValueObject.create('a');
+            const str2 = StringValueObject.create('中文');
 
             const compareTokenList = [
                 compareToken.EQUALS,
@@ -105,8 +105,8 @@ describe('Test object compare', () => {
         });
 
         it('String and number', () => {
-            const str = new StringValueObject('a');
-            const num = new NumberValueObject(1);
+            const str = StringValueObject.create('a');
+            const num = NumberValueObject.create(1);
 
             const compareTokenList = [
                 compareToken.EQUALS,
@@ -126,8 +126,8 @@ describe('Test object compare', () => {
         });
 
         it('String and boolean', () => {
-            const str = new StringValueObject('a');
-            const bool = new BooleanValueObject(true);
+            const str = StringValueObject.create('a');
+            const bool = BooleanValueObject.create(true);
 
             const compareTokenList = [
                 compareToken.EQUALS,
@@ -147,8 +147,8 @@ describe('Test object compare', () => {
         });
 
         it('Number and string', () => {
-            const num = new NumberValueObject(1);
-            const str = new StringValueObject('a');
+            const num = NumberValueObject.create(1);
+            const str = StringValueObject.create('a');
 
             const compareTokenList = [
                 compareToken.EQUALS,
@@ -168,8 +168,8 @@ describe('Test object compare', () => {
         });
 
         it('Number and number', () => {
-            const num1 = new NumberValueObject(1);
-            const num2 = new NumberValueObject(2);
+            const num1 = NumberValueObject.create(1);
+            const num2 = NumberValueObject.create(2);
 
             const compareTokenList = [
                 compareToken.EQUALS,
@@ -189,8 +189,8 @@ describe('Test object compare', () => {
         });
 
         it('Number and boolean', () => {
-            const num = new NumberValueObject(1);
-            const bool = new BooleanValueObject(true);
+            const num = NumberValueObject.create(1);
+            const bool = BooleanValueObject.create(true);
 
             const compareTokenList = [
                 compareToken.EQUALS,

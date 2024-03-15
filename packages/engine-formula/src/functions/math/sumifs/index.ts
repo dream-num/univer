@@ -121,6 +121,6 @@ export class Sumifs extends BaseFunction {
             column: this.column,
         };
 
-        return new ArrayValueObject(arrayValueObjectData);
+        return ArrayValueObject.create(arrayValueObjectData);
     }
 }

@@ -58,14 +58,14 @@ export class Year extends BaseFunction {
             // Excel serial 0 is 1900-01-00
             // Google Sheets serial 0 is 1899-12-30
             if (dateSerial === 0) {
-                return new NumberValueObject(1900);
+                return NumberValueObject.create(1900);
             }
 
             date = excelSerialToDate(dateSerial);
         }
 
         const year = date.getUTCFullYear();
-        const valueObject = new NumberValueObject(year);
+        const valueObject = NumberValueObject.create(year);
 
         return valueObject;
     }

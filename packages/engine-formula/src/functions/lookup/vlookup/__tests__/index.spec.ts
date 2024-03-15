@@ -23,7 +23,7 @@ import { NumberValueObject } from '../../../../engine/value-object/primitive-obj
 import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
 import { Vlookup } from '..';
 
-const arrayValueObject1 = new ArrayValueObject(/*ts*/ `{
+const arrayValueObject1 = ArrayValueObject.create(/*ts*/ `{
     1, "First";
     2, "Second";
     3, "Third";
@@ -34,7 +34,7 @@ const arrayValueObject1 = new ArrayValueObject(/*ts*/ `{
     8, "Eighth"
 }`);
 
-const arrayValueObject2 = new ArrayValueObject(/*ts*/ `{
+const arrayValueObject2 = ArrayValueObject.create(/*ts*/ `{
         4, "Fourth";
         5, "Fifth";
         6, "Sixth";
@@ -45,7 +45,7 @@ const arrayValueObject2 = new ArrayValueObject(/*ts*/ `{
         3, "Third"
 }`);
 
-const matchArrayValueObject = new ArrayValueObject(/*ts*/ `{
+const matchArrayValueObject = ArrayValueObject.create(/*ts*/ `{
     1, 3;
     4, 6;
     8, 7
@@ -57,40 +57,40 @@ describe('Test vlookup', () => {
     describe('Exact match', () => {
         it('Search two', async () => {
             const resultObject = textFunction.calculate(
-                new NumberValueObject(2),
+                NumberValueObject.create(2),
                 arrayValueObject1.clone(),
-                new NumberValueObject(2),
-                new NumberValueObject(0)
+                NumberValueObject.create(2),
+                NumberValueObject.create(0)
             ) as BaseValueObject;
             expect(resultObject.getValue().toString()).toBe('Second');
         });
 
         it('Search eight', async () => {
             const resultObject = textFunction.calculate(
-                new NumberValueObject(8),
+                NumberValueObject.create(8),
                 arrayValueObject1.clone(),
-                new NumberValueObject(2),
-                new NumberValueObject(0)
+                NumberValueObject.create(2),
+                NumberValueObject.create(0)
             ) as BaseValueObject;
             expect(resultObject.getValue().toString()).toBe('Eighth');
         });
 
         it('Exceeding columns', async () => {
             const resultObject = textFunction.calculate(
-                new NumberValueObject(8),
+                NumberValueObject.create(8),
                 arrayValueObject1.clone(),
-                new NumberValueObject(3),
-                new NumberValueObject(0)
+                NumberValueObject.create(3),
+                NumberValueObject.create(0)
             ) as BaseValueObject;
             expect(resultObject.getValue().toString()).toBe(ErrorType.VALUE);
         });
 
         it('Not match', async () => {
             const resultObject = textFunction.calculate(
-                new NumberValueObject(100),
+                NumberValueObject.create(100),
                 arrayValueObject1.clone(),
-                new NumberValueObject(2),
-                new NumberValueObject(0)
+                NumberValueObject.create(2),
+                NumberValueObject.create(0)
             ) as BaseValueObject;
             expect(resultObject.getValue().toString()).toBe(ErrorType.NA);
         });
@@ -99,8 +99,8 @@ describe('Test vlookup', () => {
             const resultObject = textFunction.calculate(
                 matchArrayValueObject.clone(),
                 arrayValueObject1.clone(),
-                new NumberValueObject(2),
-                new NumberValueObject(0)
+                NumberValueObject.create(2),
+                NumberValueObject.create(0)
             ) as BaseValueObject;
             expect((resultObject as ArrayValueObject).toValue()).toStrictEqual([
                 ['First', 'Third'],
@@ -113,57 +113,57 @@ describe('Test vlookup', () => {
     describe('Approximate match', () => {
         it('Approximate search two', async () => {
             const resultObject = textFunction.calculate(
-                new NumberValueObject(2),
+                NumberValueObject.create(2),
                 arrayValueObject1.clone(),
-                new NumberValueObject(2),
-                new NumberValueObject(1)
+                NumberValueObject.create(2),
+                NumberValueObject.create(1)
             ) as BaseValueObject;
             expect(resultObject.getValue().toString()).toBe('Second');
         });
 
         it('Approximate search eight', async () => {
             const resultObject = textFunction.calculate(
-                new NumberValueObject(8),
+                NumberValueObject.create(8),
                 arrayValueObject1.clone(),
-                new NumberValueObject(2)
+                NumberValueObject.create(2)
             ) as BaseValueObject;
             expect(resultObject.getValue().toString()).toBe('Eighth');
         });
 
         it('Approximate exceeding columns', async () => {
             const resultObject = textFunction.calculate(
-                new NumberValueObject(8),
+                NumberValueObject.create(8),
                 arrayValueObject1.clone(),
-                new NumberValueObject(3)
+                NumberValueObject.create(3)
             ) as BaseValueObject;
             expect(resultObject.getValue().toString()).toBe(ErrorType.VALUE);
         });
 
         it('Approximate not match', async () => {
             const resultObject = textFunction.calculate(
-                new NumberValueObject(100),
+                NumberValueObject.create(100),
                 arrayValueObject1.clone(),
-                new NumberValueObject(2),
-                new NumberValueObject(1)
+                NumberValueObject.create(2),
+                NumberValueObject.create(1)
             ) as BaseValueObject;
             expect(resultObject.getValue().toString()).toBe('First');
         });
 
         it('Approximate not order data', async () => {
             const resultObject = textFunction.calculate(
-                new NumberValueObject(2),
+                NumberValueObject.create(2),
                 arrayValueObject2.clone(),
-                new NumberValueObject(2),
-                new NumberValueObject(1)
+                NumberValueObject.create(2),
+                NumberValueObject.create(1)
             ) as BaseValueObject;
             expect(resultObject.getValue().toString()).toBe(ErrorType.NA);
         });
 
         it('Approximate not order data match', async () => {
             const resultObject = textFunction.calculate(
-                new NumberValueObject(8),
+                NumberValueObject.create(8),
                 arrayValueObject2.clone(),
-                new NumberValueObject(2)
+                NumberValueObject.create(2)
             ) as BaseValueObject;
             expect(resultObject.getValue().toString()).toBe('Third');
         });

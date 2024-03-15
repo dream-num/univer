@@ -61,10 +61,10 @@ export function Checkbox(props: ICheckboxProps) {
         if (!onChange || disabled) return;
 
         if (typeof value !== 'undefined') {
-            onChange && onChange(value);
+            onChange?.(!value);
         } else {
             const checked = inputRef?.current?.checked!;
-            onChange && onChange(checked);
+            onChange?.(!checked);
         }
     }
 

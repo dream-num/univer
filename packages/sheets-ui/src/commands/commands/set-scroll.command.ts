@@ -14,18 +14,12 @@
  * limitations under the License.
  */
 
-import type { ICommand } from '@univerjs/core';
+import type { ICommand, IRange } from '@univerjs/core';
 import { CommandType, ICommandService, IUniverInstanceService } from '@univerjs/core';
 
 import { ScrollManagerService } from '../../services/scroll-manager.service';
 import { SetScrollOperation } from '../operations/scroll.operation';
-
-export interface IScrollCommandParams {
-    offsetX?: number;
-    offsetY?: number;
-    sheetViewStartRow?: number;
-    sheetViewStartColumn?: number;
-}
+import { ScrollController } from '../../controllers/scroll.controller';
 
 export interface ISetScrollRelativeCommandParams {
     offsetX?: number;
@@ -65,28 +59,34 @@ export const SetScrollRelativeCommand: ICommand<ISetScrollRelativeCommandParams>
     },
 };
 
+export interface IScrollCommandParams {
+    offsetX?: number;
+    offsetY?: number;
+    sheetViewStartRow?: number;
+    sheetViewStartColumn?: number;
+}
+
 /**
  * This command is used to manage the scroll position of the current view by specifying the cell index of the top left cell
  */
 export const ScrollCommand: ICommand<IScrollCommandParams> = {
     id: 'sheet.command.scroll-view',
     type: CommandType.COMMAND,
-    handler: async (accessor, params) => {
+    handler: (accessor, params) => {
         if (!params) {
             return false;
         }
+
         const univerInstanceService = accessor.get(IUniverInstanceService);
+        const scrollManagerService = accessor.get(ScrollManagerService);
 
         const currentWorkbook = univerInstanceService.getCurrentUniverSheetInstance();
         const currentWorksheet = currentWorkbook.getActiveSheet();
-        const scrollManagerService = accessor.get(ScrollManagerService);
         const currentScroll = scrollManagerService.getCurrentScroll();
 
         if (!currentWorksheet) {
             return false;
         }
-
-        const commandService = accessor.get(ICommandService);
 
         const { sheetViewStartRow, sheetViewStartColumn, offsetX, offsetY } = params;
         const {
@@ -98,7 +98,8 @@ export const ScrollCommand: ICommand<IScrollCommandParams> = {
 
         const { xSplit, ySplit } = currentWorksheet.getConfig().freeze;
 
-        return commandService.executeCommand(SetScrollOperation.id, {
+        const commandService = accessor.get(ICommandService);
+        return commandService.syncExecuteCommand(SetScrollOperation.id, {
             unitId: currentWorkbook.getUnitId(),
             sheetId: currentWorksheet.getSheetId(),
             sheetViewStartRow: sheetViewStartRow ?? (currentRow ?? 0) + ySplit,
@@ -109,10 +110,26 @@ export const ScrollCommand: ICommand<IScrollCommandParams> = {
     },
 };
 
+export interface IScrollToCellCommandParams {
+    range: IRange;
+}
+
+/**
+ * The command is used to scroll to the specific cell if the target cell is not in the viewport.
+ */
+export const ScrollToCellCommand: ICommand<IScrollToCellCommandParams> = {
+    id: 'sheet.command.scroll-to-cell',
+    type: CommandType.COMMAND,
+    handler: (accessor, params) => {
+        const scrollController = accessor.get(ScrollController);
+        return scrollController.scrollToRange(params!.range);
+    },
+};
+
 /**
  * This command is reset the scroll position of the current view to 0, 0
  */
-export const RestScrollCommand: ICommand<{}> = {
+export const ResetScrollCommand: ICommand = {
     id: 'sheet.command.scroll-view-reset',
     type: CommandType.COMMAND,
     handler: async (accessor) => {

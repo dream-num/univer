@@ -14,23 +14,17 @@
  * limitations under the License.
  */
 
-interface IRgbColor {
+export interface IRgbColor {
     b: number;
-
     g: number;
-
     r: number;
-
     a?: number;
 }
 
 interface IHslColor {
     h: number;
-
     l: number;
-
     s: number;
-
     a?: number;
 }
 

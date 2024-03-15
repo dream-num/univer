@@ -171,7 +171,7 @@ describe('Test insert and remove rows cols commands', () => {
         const currentService = get(IUniverInstanceService);
         const workbook = currentService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
-        return worksheet.getMergedCells(row, col)?.[0];
+        return worksheet.getMergedCell(row, col);
     }
 
     function getMergeData() {
@@ -266,7 +266,7 @@ describe('Test insert and remove rows cols commands', () => {
             const result = await commandService.executeCommand(RemoveRowCommand.id);
             expect(result).toBeTruthy();
             expect(getRowCount()).toBe(19);
-            expect(getMergedInfo(1, 3)).toBeUndefined(); // expect the merged cell info to be deleted
+            expect(getMergedInfo(1, 3)).toBeFalsy(); // expect the merged cell info to be deleted
 
             await commandService.executeCommand(UndoCommand.id);
             expect(getRowCount()).toBe(20);
@@ -285,7 +285,7 @@ describe('Test insert and remove rows cols commands', () => {
             const result = await commandService.executeCommand(RemoveColCommand.id);
             expect(result).toBeTruthy();
             expect(getColCount()).toBe(19);
-            expect(getMergedInfo(1, 3)).toBeUndefined(); // expect the merged cell info to be deleted
+            expect(getMergedInfo(1, 3)).toBeFalsy(); // expect the merged cell info to be deleted
             expect(getMergedInfo(1, 2)).toEqual({ startRow: 1, endRow: 1, startColumn: 1, endColumn: 2 }); // expect the merged cell to be moved left
 
             await commandService.executeCommand(UndoCommand.id);

@@ -24,7 +24,7 @@ import { LocaleService, LocaleType } from '@univerjs/core';
 import { FindReplaceService, IFindReplaceService } from '../../services/find-replace.service';
 import { FindReplaceController } from '../../controllers/find-replace.controller';
 import { enUS, zhCN } from '../../locale';
-import { FindReplaceDialog } from './Dialog';
+import { FindReplaceDialog } from './FindReplaceDialog';
 
 const meta: Meta = {
     title: 'Find Replace Dialog',

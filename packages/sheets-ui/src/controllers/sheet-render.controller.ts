@@ -19,12 +19,13 @@ import {
     CommandType,
     Disposable,
     ICommandService,
+    IContextService,
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
 } from '@univerjs/core';
-import type { Rect, Spreadsheet, SpreadsheetColumnHeader, SpreadsheetRowHeader } from '@univerjs/engine-render';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import type { Rect, SpreadsheetColumnHeader, SpreadsheetRowHeader } from '@univerjs/engine-render';
+import { IRenderManagerService, RENDER_RAW_FORMULA_KEY, Spreadsheet } from '@univerjs/engine-render';
 import {
     COMMAND_LISTENER_SKELETON_CHANGE,
     COMMAND_LISTENER_VALUE_CHANGE,
@@ -32,6 +33,7 @@ import {
 } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
+import { distinctUntilChanged } from 'rxjs';
 import { SHEET_VIEW_KEY } from '../common/keys';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
@@ -44,26 +46,23 @@ interface ISetWorksheetMutationParams {
 export class SheetRenderController extends Disposable {
     constructor(
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
+        @IContextService private readonly _contextService: IContextService,
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
 
-        this._initialize();
-
-        this._commandExecutedListener();
+        this._init();
     }
 
-    override dispose(): void {
-        super.dispose();
-    }
-
-    private _initialize() {
+    private _init() {
         this._initialRenderRefresh();
+        this._initCommandListener();
+        this._initContextListener();
     }
 
-    private _initialRenderRefresh() {
+    private _initialRenderRefresh(): void {
         this.disposeWithMe(
             this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {
                 if (param == null) {
@@ -106,7 +105,7 @@ export class SheetRenderController extends Disposable {
         );
     }
 
-    private _commandExecutedListener() {
+    private _initCommandListener(): void {
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
@@ -148,5 +147,17 @@ export class SheetRenderController extends Disposable {
                 }
             })
         );
+    }
+
+    private _initContextListener(): void {
+        this._contextService.subscribeContextValue$(RENDER_RAW_FORMULA_KEY).pipe(
+            distinctUntilChanged()
+        ).subscribe(() => {
+            this._renderManagerService.getRenderAll().forEach((renderer) => {
+                if (renderer.mainComponent instanceof Spreadsheet) {
+                    renderer.mainComponent.makeForceDirty(true);
+                }
+            });
+        });
     }
 }

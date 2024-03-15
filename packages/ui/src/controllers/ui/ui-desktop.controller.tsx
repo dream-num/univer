@@ -17,7 +17,7 @@
 import { Disposable, LifecycleService, LifecycleStages, toDisposable } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { IDisposable } from '@wendellhu/redi';
-import { Inject, Injector } from '@wendellhu/redi';
+import { Inject, Injector, Optional } from '@wendellhu/redi';
 import { connectInjector } from '@wendellhu/redi/react-bindings';
 import { render as createRoot, unmount } from 'rc-util/lib/React/render';
 import type { ComponentType } from 'react';
@@ -82,7 +82,7 @@ export class DesktopUIController extends Disposable implements IDesktopUIControl
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(LifecycleService) private readonly _lifecycleService: LifecycleService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @ILayoutService private readonly _layoutService: ILayoutService
+        @Optional(ILayoutService) private readonly _layoutService?: ILayoutService
     ) {
         super();
     }

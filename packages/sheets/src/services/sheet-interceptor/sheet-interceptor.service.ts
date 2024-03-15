@@ -152,8 +152,9 @@ export class SheetInterceptorService extends Disposable {
     private _interceptWorkbook(workbook: Workbook): void {
         const disposables = new DisposableCollection();
         const unitId = workbook.getUnitId();
-        const self = this;
 
+        // eslint-disable-next-line ts/no-this-alias
+        const self = this;
         const interceptViewModel = (worksheet: Worksheet): void => {
             const subUnitId = worksheet.getSheetId();
             worksheet.__interceptViewModel((viewModel) => {

@@ -31,7 +31,6 @@ import type {
     ITextRotation,
     ITextStyle,
     IWorksheetData,
-    LocaleService,
     Nullable,
     Styles,
     TextDirection,
@@ -44,9 +43,11 @@ import {
     DocumentDataModel,
     getColorStyle,
     HorizontalAlign,
+    IContextService,
     isEmptyCell,
     isNullCell,
     isWhiteColor,
+    LocaleService,
     ObjectMatrix,
     searchArray,
     Tools,
@@ -54,6 +55,8 @@ import {
     WrapStrategy,
 } from '@univerjs/core';
 
+import { Inject } from '@wendellhu/redi';
+import { distinctUntilChanged, startWith } from 'rxjs';
 import { BORDER_TYPE, COLOR_BLACK_RGB, MAXIMUM_ROW_HEIGHT } from '../../basics/const';
 import { getRotateOffsetAndFarthestHypotenuse } from '../../basics/draw';
 import type { IDocumentSkeletonColumn } from '../../basics/i-document-skeleton-cached';
@@ -189,17 +192,15 @@ const DEFAULT_PADDING_DATA = {
     r: 2,
 };
 
+export const RENDER_RAW_FORMULA_KEY = 'RENDER_RAW_FORMULA';
+
 export class SpreadsheetSkeleton extends Skeleton {
     private _rowHeightAccumulation: number[] = [];
-
-    private _rowTotalHeight: number = 0;
-
     private _columnWidthAccumulation: number[] = [];
 
-    private _columnTotalWidth: number = 0;
-
+    private _rowTotalHeight = 0;
+    private _columnTotalWidth = 0;
     private _rowHeaderWidth = 0;
-
     private _columnHeaderHeight = 0;
 
     private _rowColumnSegment: IRowColumnSegment = {
@@ -210,11 +211,7 @@ export class SpreadsheetSkeleton extends Skeleton {
     };
 
     private _dataMergeCache: IRange[] = [];
-
-    // private _dataMergeCacheAll: ObjectMatrix<IRange>;
-
     private _overflowCache: ObjectMatrix<IRange> = new ObjectMatrix();
-
     private _stylesCache: IStylesCache = {
         background: {},
         backgroundPositions: new ObjectMatrix<ISelectionCellWithCoord>(),
@@ -222,24 +219,28 @@ export class SpreadsheetSkeleton extends Skeleton {
         border: new ObjectMatrix<BorderCache>(),
     };
 
+    /** A matrix to store if a (row, column) position has render cache. */
     private _renderedCellCache = new ObjectMatrix<boolean>();
 
     private _showGridlines: BooleanNumber = BooleanNumber.TRUE;
 
     private _marginTop: number = 0;
-
     private _marginLeft: number = 0;
+
+    private _renderRawFormula = false;
 
     constructor(
         private _worksheet: Worksheet | undefined,
         private _config: IWorksheetData,
         private _cellData: ObjectMatrix<Nullable<ICellData>>,
         private _styles: Styles,
-        _localeService: LocaleService
+        @Inject(LocaleService) _localeService: LocaleService,
+        @IContextService private readonly _contextService: IContextService
     ) {
         super(_localeService);
 
-        this.updateLayout();
+        this._updateLayout();
+        this._initContextListener();
         // this.updateDataMerge();
     }
 
@@ -315,16 +316,10 @@ export class SpreadsheetSkeleton extends Skeleton {
         config: IWorksheetData,
         cellData: ObjectMatrix<Nullable<ICellData>>,
         styles: Styles,
-        LocaleService: LocaleService
+        localeService: LocaleService,
+        contextService: IContextService
     ) {
-        return new SpreadsheetSkeleton(worksheet, config, cellData, styles, LocaleService);
-    }
-
-    /**
-     * @deprecated should never expose a property that is provided by another module!
-     */
-    getWorksheetConfig() {
-        return this._config;
+        return new SpreadsheetSkeleton(worksheet, config, cellData, styles, localeService, contextService);
     }
 
     /**
@@ -339,6 +334,19 @@ export class SpreadsheetSkeleton extends Skeleton {
      */
     getsStyles() {
         return this._styles;
+    }
+
+    private _initContextListener() {
+        this.disposeWithMe(
+            this._contextService.subscribeContextValue$(RENDER_RAW_FORMULA_KEY).pipe(
+                startWith(false),
+                distinctUntilChanged()
+            ).subscribe((renderRaw) => {
+                this._renderRawFormula = renderRaw;
+                this._resetCache();
+                this.makeDirty(true);
+            })
+        );
     }
 
     setOverflowCache(value: ObjectMatrix<IRange>) {
@@ -358,7 +366,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             return;
         }
 
-        this.updateLayout();
+        this._updateLayout();
 
         if (!this._rowHeightAccumulation || !this._columnWidthAccumulation) {
             return;
@@ -501,10 +509,11 @@ export class SpreadsheetSkeleton extends Skeleton {
         return Math.min(height, MAXIMUM_ROW_HEIGHT);
     }
 
-    updateLayout() {
+    private _updateLayout() {
         if (!this.dirty) {
             return;
         }
+
         const {
             rowData,
             columnData,
@@ -549,6 +558,14 @@ export class SpreadsheetSkeleton extends Skeleton {
 
     getRowColumnSegment(bounds?: IViewportBound) {
         return this._getBounding(this._rowHeightAccumulation, this._columnWidthAccumulation, bounds?.viewBound);
+    }
+
+    /**
+     * @deprecated should never expose a property that is provided by another module!
+     * @returns
+     */
+    getWorksheetConfig() {
+        return this._config;
     }
 
     getRowColumnSegmentByViewBound(bound?: IBoundRectNoAngle) {
@@ -1029,7 +1046,7 @@ export class SpreadsheetSkeleton extends Skeleton {
     private _getCellDocumentModel(
         cell: Nullable<ICellData>,
         isDeepClone: boolean = false,
-        formulaFirst: boolean = false,
+        displayRawFormula: boolean = false,
         ignoreTextRotation: boolean = false
     ): Nullable<IDocumentLayoutObject> {
         const style = this._styles.getStyleByCell(cell);
@@ -1050,10 +1067,8 @@ export class SpreadsheetSkeleton extends Skeleton {
         const wrapStrategy: WrapStrategy = cellOtherConfig.wrapStrategy || WrapStrategy.UNSPECIFIED;
         const paddingData: IPaddingData = cellOtherConfig.paddingData || DEFAULT_PADDING_DATA;
 
-        if (cell.f && formulaFirst) {
-            /**
-             * The formula does not detect horizontal alignment and rotation.
-             */
+        if (cell.f && displayRawFormula) {
+            // The formula does not detect horizontal alignment and rotation.
             documentModel = this._getDocumentDataByStyle(cell.f.toString(), {}, { verticalAlign });
             horizontalAlign = HorizontalAlign.UNSPECIFIED;
         } else if (cell.p) {
@@ -1140,7 +1155,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         // wrap and angle handler
         const { documentSkeleton, vertexAngle = 0, centerAngle = 0, horizontalAlign, wrapStrategy } = docsConfig;
 
-        const cell = this.getCellData().getValue(row, column);
+        const cell = this._cellData.getValue(row, column);
 
         const { t: cellValueType = CellValueType.STRING } = cell || {};
 
@@ -1660,18 +1675,17 @@ export class SpreadsheetSkeleton extends Skeleton {
             return;
         }
 
-        const modelObject = cell && this._getCellDocumentModel(cell);
-
+        const modelObject = cell && this._getCellDocumentModel(cell, undefined, this._renderRawFormula);
         if (modelObject == null) {
             return;
         }
 
-        const { documentModel, fontString, textRotation, wrapStrategy, verticalAlign, horizontalAlign } = modelObject;
-
+        const { documentModel } = modelObject;
         if (documentModel == null) {
             return;
         }
 
+        const { fontString, textRotation, wrapStrategy, verticalAlign, horizontalAlign } = modelObject;
         const documentViewModel = new DocumentViewModel(documentModel);
 
         if (!cache.font![fontString]) {

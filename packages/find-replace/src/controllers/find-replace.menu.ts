@@ -14,21 +14,28 @@
  * limitations under the License.
  */
 
-import { UniverInstanceType } from '@univerjs/core';
+import { EDITOR_ACTIVATED, FOCUSING_SHEET, IContextService, UniverInstanceType } from '@univerjs/core';
 import type { IMenuButtonItem } from '@univerjs/ui';
 import { getMenuHiddenObservable, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
+import { combineLatest, map } from 'rxjs';
 
 import { OpenFindDialogOperation } from '../commands/operations/find-replace.operation';
 
 export function FindReplaceMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    const contextService = accessor.get(IContextService);
+
     return {
         id: OpenFindDialogOperation.id,
         icon: 'SearchIcon',
-        tooltip: 'toolbar.find-replace',
+        tooltip: 'find-replace.toolbar',
         group: MenuGroup.TOOLBAR_OTHERS,
         type: MenuItemType.BUTTON,
         positions: [MenuPosition.TOOLBAR_START],
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
+        disabled$: combineLatest([
+            contextService.subscribeContextValue$(EDITOR_ACTIVATED),
+            contextService.subscribeContextValue$(FOCUSING_SHEET),
+        ]).pipe(map(([editorActivated, focusingSheet]) => editorActivated || !focusingSheet)),
     };
 }

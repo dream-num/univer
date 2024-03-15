@@ -22,6 +22,7 @@
         "customd",
         "Datas",
         "DATEFMTLISG",
+        "Dushusir",
         "endindex",
         "esbuild",
         "evented",
@@ -30,6 +31,7 @@
         "fract",
         "gainsboro",
         "GANTT",
+        "Gggpound",
         "Gridlines",
         "Hanalei",
         "hdmx",
@@ -41,6 +43,7 @@
         "IRPC",
         "Jamo",
         "jikkai",
+        "Jocs",
         "Kaiti",
         "KANBAN",
         "kcode",
@@ -86,7 +89,8 @@
         "Xingkai",
         "Xinwei",
         "Xlookup",
-        "XMATCH"
+        "XMATCH",
+        "yuhongz"
     ],
     "vsicons.presets.angular": false,
 

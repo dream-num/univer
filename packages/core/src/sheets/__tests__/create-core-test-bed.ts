@@ -51,9 +51,8 @@ export function createCoreTestBed(workbookConfig?: IWorkbookData) {
     const get = injector.get.bind(injector);
 
     const sheet = univer.createUniverSheet(workbookConfig || TEST_WORKBOOK_DATA);
-
     const univerInstanceService = get(IUniverInstanceService);
-    univerInstanceService.focusUniverInstance('test');
+    univerInstanceService.focusUniverInstance(workbookConfig?.id ?? 'test');
 
     const logService = get(ILogService);
     logService.setLogLevel(LogLevel.SILENT);

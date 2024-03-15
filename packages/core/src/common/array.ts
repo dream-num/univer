@@ -50,3 +50,36 @@ export function findLast<T>(arr: T[], callback: (item: T, index: number) => bool
 
     return null;
 }
+
+/**
+ * Rotate an array without mutating the original array.
+ * @param arr the array to be rotated
+ * @param steps how many steps to rotate
+ * @returns the rotated array, it is another array, the original array is not mutated.
+ */
+export function rotate<T>(arr: Readonly<T[]>, steps: number): readonly T[] {
+    if (arr.length === 0) {
+        return arr;
+    }
+
+    const offset = steps % arr.length;
+    return arr.slice(offset).concat(arr.slice(0, offset));
+}
+
+export function groupBy<T>(arr: Readonly<T[]>, keyFn: (v: T) => string): Map<string, T[]> {
+    const groups = new Map<string, T[]>();
+
+    arr.forEach((element) => {
+        const key = keyFn(element);
+
+        let group = groups.get(key);
+        if (!groups.has(key)) {
+            group = [];
+            groups.set(key, group);
+        }
+
+        group!.push(element);
+    });
+
+    return groups;
+}

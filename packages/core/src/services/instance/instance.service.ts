@@ -27,9 +27,11 @@ import type { IDocumentData, ISlideData, IWorkbookData } from '../../types/inter
 import { FOCUSING_DOC, FOCUSING_SHEET, FOCUSING_SLIDE } from '../context/context';
 import { IContextService } from '../context/context.service';
 
-export const enum UniverInstanceType {
+export enum UniverInstanceType {
     UNKNOWN = 0,
+
     DOC = 1,
+
     SHEET = 2,
 
     SLIDE = 3,

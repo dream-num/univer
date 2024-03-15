@@ -14,8 +14,13 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
+import type { IWorkbookData, Worksheet } from '@univerjs/core';
+import { ILogService, IUniverInstanceService, LocaleType, LogLevel, Univer } from '@univerjs/core';
+import type { Dependency } from '@wendellhu/redi';
+import type { IFindQuery } from '@univerjs/find-replace';
+import { FindBy, FindDirection, FindScope } from '@univerjs/find-replace';
 import {
     isBeforePositionWithColumnPriority,
     isBeforePositionWithRowPriority,
@@ -23,6 +28,7 @@ import {
     isBehindPositionWithRowPriority,
     isSamePosition,
 } from '../utils';
+import { hitCell } from '../sheet-find-replace.controller';
 
 describe('Test sheet find replace utils', () => {
     it('Should "isSamePosition" work as expected', () => {
@@ -196,3 +202,125 @@ describe('Test sheet find replace utils', () => {
         ).toBeFalsy();
     });
 });
+
+describe('test "hitCell" method', () => {
+    let univer: Univer;
+    let worksheet: Worksheet;
+
+    beforeEach(() => {
+        const testBed = createTestBed();
+        univer = testBed.univer;
+        worksheet = testBed.sheet.getActiveSheet();
+    });
+
+    afterEach(() => {
+        univer.dispose();
+    });
+
+    describe('hitting formulas', () => {
+        describe('replaceable if only searching for raw formulas', () => {
+            it('should be replaceable when searching for formulas and formula string matches', () => {
+                const query: IFindQuery = {
+                    findString: '6',
+                    caseSensitive: false,
+                    findBy: FindBy.FORMULA,
+                    findDirection: FindDirection.COLUMN,
+                    findScope: FindScope.SUBUNIT,
+                    matchesTheWholeCell: false,
+                    replaceRevealed: false,
+                };
+
+                // If search by formula, when the formula string failed to match, the cell should not be hit.
+                const result1 = hitCell(worksheet, 0, 0, query, TEST_WORKBOOK_DATA.sheets.sheet1.cellData![0][0]);
+                expect(result1.hit).toBeFalsy();
+                expect(result1.replaceable).toBeFalsy();
+
+                const result2 = hitCell(worksheet, 0, 1, query, TEST_WORKBOOK_DATA.sheets.sheet1.cellData![0][1]);
+                expect(result2.hit).toBeTruthy();
+                expect(result2.replaceable).toBeTruthy();
+            });
+        });
+
+        it('formula string should support "caseSensitive" option', () => {
+            const query: IFindQuery = {
+                findString: 'sum',
+                caseSensitive: true,
+                findBy: FindBy.FORMULA,
+                findDirection: FindDirection.COLUMN,
+                findScope: FindScope.SUBUNIT,
+                matchesTheWholeCell: false,
+                replaceRevealed: false,
+            };
+
+            const result1 = hitCell(worksheet, 0, 1, query, TEST_WORKBOOK_DATA.sheets.sheet1.cellData![0][1]);
+            expect(result1.hit).toBeFalsy();
+            expect(result1.replaceable).toBeFalsy();
+
+            const result2 = hitCell(worksheet, 0, 2, query, TEST_WORKBOOK_DATA.sheets.sheet1.cellData![0][2]);
+            expect(result2.hit).toBeTruthy();
+            expect(result2.replaceable).toBeTruthy();
+
+            // If we unset 'caseSensitive' and [0][1] should match!
+            query.caseSensitive = false;
+            const result3 = hitCell(worksheet, 0, 1, query, TEST_WORKBOOK_DATA.sheets.sheet1.cellData![0][1]);
+            expect(result3.hit).toBeTruthy();
+            expect(result3.replaceable).toBeTruthy();
+        });
+    });
+});
+
+const TEST_WORKBOOK_DATA: IWorkbookData = {
+    id: 'test',
+    appVersion: '3.0.0-alpha',
+    sheets: {
+        sheet1: {
+            id: 'sheet1',
+            cellData: {
+                0: {
+                    0: {
+                        v: 6,
+                        f: '=SUM(3, 3)',
+                    },
+                    1: {
+                        v: 9,
+                        f: '=SUM(6, 3)',
+                    },
+                    2: {
+                        v: 9,
+                        f: '=sum(6, 3)', // test case sensitive
+                    },
+                    3: {
+                        v: 66,
+                    },
+                },
+            },
+            name: 'Sheet-001',
+        },
+    },
+    locale: LocaleType.ZH_CN,
+    name: '',
+    sheetOrder: [],
+    styles: {},
+};
+
+function createTestBed(dependencies?: Dependency[]) {
+    const univer = new Univer();
+
+    const injector = univer.__getInjector();
+    const get = injector.get.bind(injector);
+
+    dependencies?.forEach((d) => injector.add(d));
+
+    const sheet = univer.createUniverSheet(TEST_WORKBOOK_DATA);
+    const univerInstanceService = get(IUniverInstanceService);
+    univerInstanceService.focusUniverInstance(TEST_WORKBOOK_DATA.id);
+
+    const logService = get(ILogService);
+    logService.setLogLevel(LogLevel.SILENT);
+
+    return {
+        univer,
+        get,
+        sheet,
+    };
+}

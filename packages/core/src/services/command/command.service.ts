@@ -24,7 +24,7 @@ import type { IKeyValue } from '../../shared/types';
 import { IContextService } from '../context/context.service';
 import { ILogService } from '../log/log.service';
 
-export const enum CommandType {
+export enum CommandType {
     /** Command could generate some operations or mutations. */
     COMMAND = 0,
     /** An operation that do not require conflict resolve.  */
@@ -40,7 +40,7 @@ export interface ICommand<P extends object = object, R = boolean> {
     readonly id: string;
     readonly type: CommandType;
 
-    handler(accessor: IAccessor, params?: P): Promise<R> | R;
+    handler(accessor: IAccessor, params?: P, options?: IExecutionOptions): Promise<R> | R;
 
     /**
      * When this command is unregistered, this function would be called.
@@ -131,9 +131,9 @@ export interface IExecutionOptions {
 export type CommandListener = (commandInfo: Readonly<ICommandInfo>, options?: IExecutionOptions) => void;
 
 export interface ICommandService {
-    registerCommand(command: ICommand): IDisposable;
+    registerCommand(command: ICommand<object, unknown>): IDisposable;
 
-    registerMultipleCommand(command: ICommand): IDisposable;
+    registerMultipleCommand(command: ICommand<object, unknown>): IDisposable;
 
     executeCommand<P extends object = object, R = boolean>(
         id: string,
@@ -259,7 +259,7 @@ export class CommandService implements ICommandService {
             const stackItemDisposable = this._pushCommandExecutionStack(commandInfo);
 
             this._beforeCommandExecutionListeners.forEach((listener) => listener(commandInfo, options));
-            const result = await this._execute<P, R>(command as ICommand<P, R>, params);
+            const result = await this._execute<P, R>(command as ICommand<P, R>, params, options);
             this._commandExecutedListeners.forEach((listener) => listener(commandInfo, options));
 
             stackItemDisposable.dispose();
@@ -300,7 +300,7 @@ export class CommandService implements ICommandService {
             const stackItemDisposable = this._pushCommandExecutionStack(commandInfo);
 
             this._beforeCommandExecutionListeners.forEach((listener) => listener(commandInfo, options));
-            const result = this._syncExecute<P, R>(command as ICommand<P, R>, params);
+            const result = this._syncExecute<P, R>(command as ICommand<P, R>, params, options);
             this._commandExecutedListeners.forEach((listener) => listener(commandInfo, options));
 
             stackItemDisposable.dispose();
@@ -353,7 +353,7 @@ export class CommandService implements ICommandService {
         });
     }
 
-    private async _execute<P extends object, R = boolean>(command: ICommand<P, R>, params?: P): Promise<R> {
+    private async _execute<P extends object, R = boolean>(command: ICommand<P, R>, params?: P, options?: IExecutionOptions): Promise<R> {
         this._logService.debug(
             '[CommandService]',
             `${'|-'.repeat(Math.max(this._commandExecutingLevel, 0))}executing command "${command.id}"`
@@ -362,7 +362,7 @@ export class CommandService implements ICommandService {
         this._commandExecutingLevel++;
         let result: R | boolean;
         try {
-            result = await this._injector.invoke(command.handler, params);
+            result = await this._injector.invoke(command.handler, params, options);
             this._commandExecutingLevel--;
         } catch (e) {
             result = false;
@@ -373,7 +373,7 @@ export class CommandService implements ICommandService {
         return result;
     }
 
-    private _syncExecute<P extends object, R = boolean>(command: ICommand<P, R>, params?: P): R {
+    private _syncExecute<P extends object, R = boolean>(command: ICommand<P, R>, params?: P, options?: IExecutionOptions): R {
         this._logService.debug(
             '[CommandService]',
             `${'|-'.repeat(Math.max(0, this._commandExecutingLevel))}executing command "${command.id}".`
@@ -382,7 +382,7 @@ export class CommandService implements ICommandService {
         this._commandExecutingLevel++;
         let result: R | boolean;
         try {
-            result = this._injector.invoke(command.handler, params) as R;
+            result = this._injector.invoke(command.handler, params, options) as R;
             if (result instanceof Promise) {
                 throw new TypeError('[CommandService]: Command handler should not return a promise.');
             }

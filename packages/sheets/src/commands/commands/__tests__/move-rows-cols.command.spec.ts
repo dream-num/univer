@@ -146,7 +146,7 @@ describe('Test move rows cols', () => {
         const currentService = get(IUniverInstanceService);
         const workbook = currentService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
-        return worksheet.getMergedCells(row, col)?.[0];
+        return worksheet.getMergedCell(row, col);
     }
 
     function getRowHeight(row: number): number {

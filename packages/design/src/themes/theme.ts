@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import canUseDom from 'rc-util/lib/Dom/canUseDom';
+
 import styles from './theme-root.module.less';
 
 function convertToDashCase(input: string): string {
@@ -41,6 +43,8 @@ class Theme {
     private _themeRootName = styles.theme;
 
     constructor() {
+        if (!canUseDom()) return;
+
         const $style = document.createElement('style');
         $style.id = this._themeRootName;
         document.head.appendChild($style);

@@ -8,7 +8,7 @@ export default ({ mode }) => createViteConfig({
         deps: {
             inline: ['vitest-canvas-mock'],
         },
-    // For this config, check https://github.com/vitest-dev/vitest/issues/740
+        // For this config, check https://github.com/vitest-dev/vitest/issues/740
         threads: false,
         environmentOptions: {
             jsdom: {

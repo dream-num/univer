@@ -84,7 +84,7 @@ export function Dropdown(props: IDropdownProps) {
 
     const { mountContainer } = useContext(ConfigContext);
 
-    return (
+    return mountContainer && (
         <RcDropdown
             {...props}
             overlayClassName={className}

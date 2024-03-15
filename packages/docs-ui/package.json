@@ -71,7 +71,7 @@
         "rxjs": ">=7.0.0"
     },
     "devDependencies": {
-        "@types/react": "^18.2.64",
+        "@types/react": "^18.2.66",
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/docs": "workspace:*",
@@ -83,7 +83,7 @@
         "react": "^18.2.0",
         "rxjs": "^7.8.1",
         "typescript": "^5.4.2",
-        "vite": "^5.1.5",
+        "vite": "^5.1.6",
         "vitest": "^1.3.1"
     }
 }

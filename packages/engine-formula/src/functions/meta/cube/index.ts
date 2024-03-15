@@ -24,7 +24,7 @@ import { CubeValueObject } from '../../../engine/value-object/cube-value-object'
 export class Cube extends BaseFunction {
     override calculate(...variants: BaseValueObject[]) {
         if (variants.length === 0) {
-            return new ErrorValueObject(ErrorType.VALUE);
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         const values: ArrayValueObject[] = [];
@@ -37,7 +37,7 @@ export class Cube extends BaseFunction {
             }
 
             if (!variant.isArray()) {
-                return new ErrorValueObject(ErrorType.VALUE);
+                return ErrorValueObject.create(ErrorType.VALUE);
             }
 
             values.push(variant as ArrayValueObject);

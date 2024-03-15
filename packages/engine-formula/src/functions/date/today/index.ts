@@ -24,7 +24,7 @@ import { BaseFunction } from '../../base-function';
 export class Today extends BaseFunction {
     override calculate(value?: BaseValueObject) {
         if (value) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         const currentSerial = excelDateSerial(new Date());

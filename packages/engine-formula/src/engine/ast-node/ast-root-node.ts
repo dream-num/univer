@@ -39,7 +39,7 @@ export class AstRootNode extends BaseAstNode {
             /**
              * fix: https://github.com/dream-num/univer/issues/1415
              */
-            this.setValue(new ErrorValueObject(ErrorType.VALUE));
+            this.setValue(ErrorValueObject.create(ErrorType.VALUE));
         } else {
             this.setValue(node.getValue());
         }

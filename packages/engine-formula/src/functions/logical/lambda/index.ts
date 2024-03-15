@@ -24,6 +24,6 @@ import { BaseFunction } from '../../base-function';
  */
 export class Lambda extends BaseFunction {
     override calculate(...variants: BaseValueObject[]) {
-        return new ErrorValueObject(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 }

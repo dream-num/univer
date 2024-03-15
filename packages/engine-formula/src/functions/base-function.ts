@@ -95,7 +95,7 @@ export class BaseFunction extends Disposable {
     }
 
     calculate(...arg: BaseValueObject[]): NodeValueType {
-        return new ErrorValueObject(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     checkArrayType(variant: FunctionVariantType) {
@@ -117,7 +117,7 @@ export class BaseFunction extends Disposable {
         if (indexNum.isBoolean()) {
             const colIndexNumV = indexNum.getValue() as boolean;
             if (colIndexNumV === false) {
-                return new ErrorValueObject(ErrorType.VALUE);
+                return ErrorValueObject.create(ErrorType.VALUE);
             }
 
             return defaultValue;
@@ -125,7 +125,7 @@ export class BaseFunction extends Disposable {
         if (indexNum.isString()) {
             const colIndexNumV = Number(indexNum.getValue() as string);
             if (isNaN(colIndexNumV)) {
-                return new ErrorValueObject(ErrorType.REF);
+                return ErrorValueObject.create(ErrorType.REF);
             }
             return colIndexNumV;
         } else if (indexNum.isNumber()) {
@@ -133,7 +133,7 @@ export class BaseFunction extends Disposable {
             return colIndexNumV;
         }
 
-        return new ErrorValueObject(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     /**
@@ -220,7 +220,7 @@ export class BaseFunction extends Disposable {
         const rowOrColumn = searchArray.binarySearch(value, searchType);
 
         if (rowOrColumn == null) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         let resultValue: BaseValueObject;
@@ -232,7 +232,7 @@ export class BaseFunction extends Disposable {
         }
 
         if (resultValue.isNull()) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         return resultValue;
@@ -250,7 +250,7 @@ export class BaseFunction extends Disposable {
         }
 
         if (resultValue.isNull()) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         return resultValue;
@@ -268,7 +268,7 @@ export class BaseFunction extends Disposable {
         }
 
         if (resultValue.isNull()) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         return resultValue;
@@ -284,13 +284,13 @@ export class BaseFunction extends Disposable {
         const position = searchArray.orderSearch(value, searchType, isDesc);
 
         if (position == null) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         const resultValue = resultArray.get(position.row, position.column);
 
         if (resultValue.isNull()) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         return resultValue;
@@ -310,7 +310,7 @@ export class BaseFunction extends Disposable {
         const rowOrColumn = searchArray.binarySearch(value, searchType);
 
         if (rowOrColumn == null) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         if (axis === 0) {
@@ -337,7 +337,7 @@ export class BaseFunction extends Disposable {
         }
 
         if (position == null) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         if (axis === 0) {
@@ -364,7 +364,7 @@ export class BaseFunction extends Disposable {
         }
 
         if (position == null) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         if (axis === 0) {
@@ -384,7 +384,7 @@ export class BaseFunction extends Disposable {
         const position = searchArray.orderSearch(value, searchType, isDesc);
 
         if (position == null) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         if (axis === 0) {
@@ -409,7 +409,7 @@ export class BaseFunction extends Disposable {
                 const isStringNumber = isRealNum(value);
 
                 if (!isStringNumber) {
-                    return new ErrorValueObject(ErrorType.VALUE);
+                    return ErrorValueObject.create(ErrorType.VALUE);
                 }
 
                 variant = createNumberValueObjectByRawValue(value);

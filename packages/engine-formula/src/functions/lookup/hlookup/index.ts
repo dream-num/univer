@@ -28,7 +28,7 @@ export class Hlookup extends BaseFunction {
         rangeLookup?: BaseValueObject
     ) {
         if (lookupValue == null || tableArray == null || rowIndexNum == null) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         if (lookupValue.isError()) {
@@ -36,25 +36,25 @@ export class Hlookup extends BaseFunction {
         }
 
         if (tableArray.isError()) {
-            return new ErrorValueObject(ErrorType.REF);
+            return ErrorValueObject.create(ErrorType.REF);
         }
 
         if (!tableArray.isArray()) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         if (rowIndexNum.isError()) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         if (rangeLookup?.isError()) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         const rangeLookupValue = this.getZeroOrOneByOneDefault(rangeLookup);
 
         if (rangeLookupValue == null) {
-            return new ErrorValueObject(ErrorType.VALUE);
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         const rowIndexNumValue = this.getIndexNumValue(rowIndexNum);
@@ -68,7 +68,7 @@ export class Hlookup extends BaseFunction {
         const resultArray = (tableArray as ArrayValueObject).slice([rowIndexNumValue - 1, rowIndexNumValue]);
 
         if (searchArray == null || resultArray == null) {
-            return new ErrorValueObject(ErrorType.REF);
+            return ErrorValueObject.create(ErrorType.REF);
         }
 
         if (lookupValue.isArray()) {

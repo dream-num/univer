@@ -25,29 +25,29 @@ import { BaseFunction } from '../../base-function';
 export class Sumifs extends BaseFunction {
     override calculate(sumRange: BaseValueObject, ...variants: BaseValueObject[]) {
         if (sumRange == null) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         if (variants.length < 2) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         if (sumRange.isError()) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         if (!sumRange.isArray()) {
-            return new ErrorValueObject(ErrorType.VALUE);
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         // Range and criteria must be paired
         if (variants.length < 2 || variants.length % 2 !== 0) {
-            return new ErrorValueObject(ErrorType.VALUE);
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         // Every range must be array
         if (variants.some((variant, i) => i % 2 === 0 && !variant.isArray())) {
-            return new ErrorValueObject(ErrorType.VALUE);
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         const sumRowLength = (sumRange as ArrayValueObject).getRowCount();
@@ -79,11 +79,11 @@ export class Sumifs extends BaseFunction {
             const rangeRowLength = (range as ArrayValueObject).getRowCount();
             const rangeColumnLength = (range as ArrayValueObject).getColumnCount();
             if (rangeRowLength !== sumRowLength || rangeColumnLength !== sumColumnLength) {
-                return expandArrayValueObject(maxRowLength, maxColumnLength, new ErrorValueObject(ErrorType.NA));
+                return expandArrayValueObject(maxRowLength, maxColumnLength, ErrorValueObject.create(ErrorType.NA));
             }
 
             const criteria = variants[i + 1];
-            const criteriaArray = expandArrayValueObject(maxRowLength, maxColumnLength, criteria, new ErrorValueObject(ErrorType.NA));
+            const criteriaArray = expandArrayValueObject(maxRowLength, maxColumnLength, criteria, ErrorValueObject.create(ErrorType.NA));
 
             criteriaArray.iterator((criteriaValueObject, rowIndex, columnIndex) => {
                 if (!criteriaValueObject) {

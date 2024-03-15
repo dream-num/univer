@@ -23,7 +23,7 @@ import { BaseFunction } from '../../base-function';
 export class Isnumber extends BaseFunction {
     override calculate(value: BaseValueObject) {
         if (value == null) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         if (value.isNumber()) {

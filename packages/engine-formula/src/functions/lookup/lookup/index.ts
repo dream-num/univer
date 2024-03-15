@@ -31,7 +31,7 @@ export class Lookup extends BaseFunction {
         resultVector?: BaseValueObject
     ) {
         if (lookupValue == null || lookupVectorOrArray == null) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         if (lookupValue.isError()) {
@@ -39,11 +39,11 @@ export class Lookup extends BaseFunction {
         }
 
         if (lookupVectorOrArray.isError()) {
-            return new ErrorValueObject(ErrorType.REF);
+            return ErrorValueObject.create(ErrorType.REF);
         }
 
         if (!lookupVectorOrArray.isArray()) {
-            return new ErrorValueObject(ErrorType.VALUE);
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         if (resultVector?.isError()) {
@@ -52,7 +52,7 @@ export class Lookup extends BaseFunction {
 
         if (lookupVectorOrArray.getColumnCount() === 1 || lookupVectorOrArray.getRowCount() === 1) {
             if (resultVector != null && !resultVector.isArray()) {
-                return new ErrorValueObject(ErrorType.REF);
+                return ErrorValueObject.create(ErrorType.REF);
             }
             return this._handleVector(lookupValue, lookupVectorOrArray, resultVector as ArrayValueObject);
         }
@@ -71,7 +71,7 @@ export class Lookup extends BaseFunction {
             resultVector.getRowCount() !== lookupVector.getRowCount() ||
             resultVector.getColumnCount() !== lookupVector.getColumnCount()
         ) {
-            return new ErrorValueObject(ErrorType.REF);
+            return ErrorValueObject.create(ErrorType.REF);
         }
 
         if (lookupValue.isArray()) {
@@ -103,7 +103,7 @@ export class Lookup extends BaseFunction {
         }
 
         if (searchArray == null || resultArray == null) {
-            return new ErrorValueObject(ErrorType.VALUE);
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         if (lookupValue.isArray()) {

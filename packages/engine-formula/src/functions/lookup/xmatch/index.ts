@@ -33,7 +33,7 @@ export class Xmatch extends BaseFunction {
         searchMode?: BaseValueObject
     ) {
         if (lookupValue == null || lookupArray == null) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         if (lookupValue.isError()) {
@@ -41,11 +41,11 @@ export class Xmatch extends BaseFunction {
         }
 
         if (lookupArray.isError()) {
-            return new ErrorValueObject(ErrorType.REF);
+            return ErrorValueObject.create(ErrorType.REF);
         }
 
         if (!lookupArray.isArray()) {
-            return new ErrorValueObject(ErrorType.VALUE);
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         const rowCountLookup = lookupArray.getRowCount();
@@ -53,15 +53,15 @@ export class Xmatch extends BaseFunction {
         const columnCountLookup = lookupArray.getColumnCount();
 
         if (rowCountLookup !== 1 && columnCountLookup !== 1) {
-            return new ErrorValueObject(ErrorType.VALUE);
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         if (matchMode?.isError()) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         if (searchMode?.isError()) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         const matchModeValue = this.getIndexNumValue(matchMode || NumberValueObject.create(0));
@@ -114,7 +114,7 @@ export class Xmatch extends BaseFunction {
                 position = matchObject.getLastTruePosition();
             }
             if (position == null) {
-                return new ErrorValueObject(ErrorType.NA);
+                return ErrorValueObject.create(ErrorType.NA);
             }
 
             rowOrColumn = searchArray.getRowCount() === 1 ? position.column : position.row;
@@ -122,7 +122,7 @@ export class Xmatch extends BaseFunction {
             const position = searchArray.orderSearch(value, matchModeValue === 1 ? ArrayOrderSearchType.MAX : ArrayOrderSearchType.MIN, searchModeValue === -1);
 
             if (position == null) {
-                return new ErrorValueObject(ErrorType.NA);
+                return ErrorValueObject.create(ErrorType.NA);
             }
 
             if (position instanceof ErrorValueObject) {
@@ -142,14 +142,14 @@ export class Xmatch extends BaseFunction {
             }
 
             if (position == null) {
-                return new ErrorValueObject(ErrorType.NA);
+                return ErrorValueObject.create(ErrorType.NA);
             }
 
             rowOrColumn = searchArray.getRowCount() === 1 ? position.column : position.row;
         }
 
         if (rowOrColumn == null) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         return NumberValueObject.create(rowOrColumn + 1);

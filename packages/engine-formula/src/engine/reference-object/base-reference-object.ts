@@ -141,7 +141,7 @@ export class BaseReferenceObject extends ObjectClassType {
         const { startRow, endRow, startColumn, endColumn } = this.getRangePosition();
 
         if (this._checkIfWorksheetMiss()) {
-            return callback(new ErrorValueObject(ErrorType.VALUE), startRow, startColumn);
+            return callback(ErrorValueObject.create(ErrorType.VALUE), startRow, startColumn);
         }
 
         const unitId = this._forcedUnitId || this._defaultUnitId;
@@ -150,7 +150,7 @@ export class BaseReferenceObject extends ObjectClassType {
         for (let r = startRow; r <= endRow; r++) {
             for (let c = startColumn; c <= endColumn; c++) {
                 if (r < 0 || c < 0) {
-                    return callback(new ErrorValueObject(ErrorType.REF), r, c);
+                    return callback(ErrorValueObject.create(ErrorType.REF), r, c);
                 }
 
                 const cell = this.getCellData(r, c);
@@ -349,7 +349,7 @@ export class BaseReferenceObject extends ObjectClassType {
 
     unionBy(referenceObject: BaseReferenceObject): NodeValueType {
         /** abstract */
-        return new ErrorValueObject(ErrorType.REF);
+        return ErrorValueObject.create(ErrorType.REF);
     }
 
     unionRange(rangeData1: IRange, rangeData2: IRange): IRange {
@@ -455,7 +455,7 @@ export class BaseReferenceObject extends ObjectClassType {
         const cell = this.getCellData(row, column);
 
         if (!cell) {
-            return new ErrorValueObject(ErrorType.VALUE);
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         return this.getCellValueObject(cell);

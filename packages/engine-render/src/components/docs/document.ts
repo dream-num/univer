@@ -270,6 +270,18 @@ export class Documents extends DocComponent {
 
             const finalAngle = vertexAngle - centerAngle;
 
+            if (this._isSkipByDiffBounds(page, pageTop, pageLeft, bounds)) {
+                const { x, y } = this._drawLiquid.translatePage(
+                    page,
+                    this.pageLayoutType,
+                    this.pageMarginLeft,
+                    this.pageMarginTop
+                );
+                pageLeft += x;
+                pageTop += y;
+                continue;
+            }
+
             this.onPageRenderObservable.notifyObservers({
                 page,
                 pageLeft,
@@ -536,6 +548,34 @@ export class Documents extends DocComponent {
         DocumentsSpanAndLineExtensionRegistry.getData().forEach((extension) => {
             this.register(extension);
         });
+    }
+
+    private _isSkipByDiffBounds(page: IDocumentSkeletonPage, pageTop: number, pageLeft: number, bounds?: IViewportBound) {
+        if (bounds === null || bounds === undefined) {
+            return false;
+        }
+
+        const { pageWidth, pageHeight } = page;
+
+        const pageRight = pageLeft + pageWidth;
+
+        const pageBottom = pageTop + pageHeight;
+
+        const { left, top, right, bottom } = bounds.viewBound;
+
+        if (pageRight < left || pageBottom < top) {
+            return true;
+        }
+
+        if (pageLeft > right && pageWidth !== Number.POSITIVE_INFINITY) {
+            return true;
+        }
+
+        if (pageTop > bottom && pageHeight !== Number.POSITIVE_INFINITY) {
+            return true;
+        }
+
+        return false;
     }
 
     // private _addSkeletonChangeObserver(skeleton?: DocumentSkeleton) {

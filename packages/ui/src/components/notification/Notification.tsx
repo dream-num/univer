@@ -89,6 +89,8 @@ export const PureContent = (props: INotificationMethodOptions) => {
 export function Notification() {
     const { mountContainer } = useContext(ConfigContext);
 
+    if (!mountContainer) return <></>;
+
     const [api, contextHolder] = useNotification({
         prefixCls: styles.notification,
         maxCount: 3,

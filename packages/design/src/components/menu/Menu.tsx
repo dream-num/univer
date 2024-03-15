@@ -24,7 +24,7 @@ import styles from './index.module.less';
 export function Menu(props: MenuProps) {
     const { mountContainer } = useContext(ConfigContext);
 
-    return React.cloneElement(<RcMenu prefixCls={styles.menu} getPopupContainer={() => mountContainer} />, {
+    return mountContainer && React.cloneElement(<RcMenu prefixCls={styles.menu} getPopupContainer={() => mountContainer} />, {
         ...props,
     });
 }

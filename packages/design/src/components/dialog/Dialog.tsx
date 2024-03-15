@@ -176,7 +176,7 @@ export function Dialog(props: IDialogProps) {
             : modal;
     };
 
-    return (
+    return mountContainer && (
         <RcDialog
             width={width}
             prefixCls={styles.dialog}

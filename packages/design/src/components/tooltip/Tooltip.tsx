@@ -42,7 +42,7 @@ export const Tooltip = forwardRef((props: ITooltipProps, ref: Ref<TooltipRef>) =
 
     const { mountContainer } = useContext(ConfigContext);
 
-    return (
+    return mountContainer && (
         <RcTooltip
             visible={visible}
             ref={ref}

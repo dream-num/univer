@@ -25,7 +25,7 @@
     "scripts": {
         "prepare": "husky install",
         "pre-commit": "lint-staged",
-        "dev:demo": "turbo dev:demo",
+        "dev": "turbo dev:demo",
         "lint:types": "turbo lint:types",
         "test": "turbo test -- --passWithNoTests",
         "coverage": "turbo coverage -- --passWithNoTests",

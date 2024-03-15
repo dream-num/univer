@@ -34,7 +34,7 @@ export class Xlookup extends BaseFunction {
         searchMode?: BaseValueObject
     ) {
         if (lookupValue == null || lookupArray == null || returnArray == null) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         if (lookupValue.isError()) {
@@ -42,11 +42,11 @@ export class Xlookup extends BaseFunction {
         }
 
         if (lookupArray.isError()) {
-            return new ErrorValueObject(ErrorType.REF);
+            return ErrorValueObject.create(ErrorType.REF);
         }
 
         if (!lookupArray.isArray()) {
-            return new ErrorValueObject(ErrorType.VALUE);
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         const rowCountLookup = lookupArray.getRowCount();
@@ -54,15 +54,15 @@ export class Xlookup extends BaseFunction {
         const columnCountLookup = lookupArray.getColumnCount();
 
         if (rowCountLookup !== 1 && columnCountLookup !== 1) {
-            return new ErrorValueObject(ErrorType.VALUE);
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         if (returnArray.isError()) {
-            return new ErrorValueObject(ErrorType.REF);
+            return ErrorValueObject.create(ErrorType.REF);
         }
 
         if (!returnArray.isArray()) {
-            return new ErrorValueObject(ErrorType.VALUE);
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         const rowCountReturn = returnArray.getRowCount();
@@ -70,23 +70,23 @@ export class Xlookup extends BaseFunction {
         const columnCountReturn = returnArray.getColumnCount();
 
         if (rowCountLookup !== rowCountReturn && columnCountLookup !== columnCountReturn) {
-            return new ErrorValueObject(ErrorType.VALUE);
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         if (ifNotFound?.isError()) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         if (matchMode?.isError()) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         if (searchMode?.isError()) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         if (ifNotFound == null) {
-            ifNotFound = new ErrorValueObject(ErrorType.NA);
+            ifNotFound = ErrorValueObject.create(ErrorType.NA);
         }
 
         const matchModeValue = this.getIndexNumValue(matchMode || NumberValueObject.create(0));
@@ -111,7 +111,7 @@ export class Xlookup extends BaseFunction {
             }
 
             if (resultArray == null) {
-                return new ErrorValueObject(ErrorType.NA);
+                return ErrorValueObject.create(ErrorType.NA);
             }
 
             return lookupValue.map((value) => {
@@ -166,7 +166,7 @@ export class Xlookup extends BaseFunction {
         );
 
         if (resultArray == null) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         return resultArray;
@@ -177,14 +177,14 @@ export class Xlookup extends BaseFunction {
         //     resultArray = (returnArray as ArrayValueObject).slice(undefined, [0, 1]);
         // }
 
-        // return new ErrorValueObject(ErrorType.NA);
+        // return ErrorValueObject.create(ErrorType.NA);
 
         // const searchArray = (tableArray as ArrayValueObject).slice([0, 1]);
 
         // const resultArray = (tableArray as ArrayValueObject).slice([rowIndexNumValue - 1, rowIndexNumValue]);
 
         // if (searchArray == null || resultArray == null) {
-        //     return new ErrorValueObject(ErrorType.VALUE);
+        //     return ErrorValueObject.create(ErrorType.VALUE);
         // }
 
         // if (lookupValue.isArray()) {

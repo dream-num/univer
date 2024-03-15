@@ -75,7 +75,7 @@ export class LambdaValueObjectObject extends BaseValueObject {
     execute(...variants: BaseValueObject[]) {
         const paramCount = this._lambdaPrivacyVarKeys.length;
         if (variants.length !== paramCount) {
-            return new ErrorValueObject(ErrorType.VALUE);
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         this._setLambdaPrivacyValueMap(variants);

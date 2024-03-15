@@ -73,7 +73,7 @@ export class LambdaParameterNode extends BaseAstNode {
         if (!node) {
             const value = this.getValue();
             if (value == null || value.isError()) {
-                this.setValue(new ErrorValueObject(ErrorType.SPILL));
+                this.setValue(ErrorValueObject.create(ErrorType.SPILL));
             }
         } else {
             this.setValue(node.getValue());

@@ -25,7 +25,7 @@ import { createNumberValueObjectByRawValue } from '../../../engine/value-object/
 export class Max extends BaseFunction {
     override calculate(...variants: BaseValueObject[]) {
         if (variants.length === 0) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         let accumulatorAll: BaseValueObject = NumberValueObject.create(Number.NEGATIVE_INFINITY);
@@ -41,7 +41,7 @@ export class Max extends BaseFunction {
                 const isStringNumber = isRealNum(value);
 
                 if (!isStringNumber) {
-                    return new ErrorValueObject(ErrorType.VALUE);
+                    return ErrorValueObject.create(ErrorType.VALUE);
                 }
 
                 variant = createNumberValueObjectByRawValue(value);

@@ -34,7 +34,7 @@ describe('Test isblank function', () => {
         });
 
         it('value error', () => {
-            const value = new ErrorValueObject(ErrorType.NA);
+            const value = ErrorValueObject.create(ErrorType.NA);
             const result = textFunction.calculate(value);
             expect(result.getValue()).toBe(false);
         });

@@ -70,7 +70,7 @@ describe('Test address', () => {
 
     describe('Fault situations', () => {
         it('Value error', async () => {
-            const error = new ErrorValueObject(ErrorType.VALUE);
+            const error = ErrorValueObject.create(ErrorType.VALUE);
             const errorValue = textFunction.calculate(error, error);
             expect(errorValue.isError()).toBeTruthy();
         });

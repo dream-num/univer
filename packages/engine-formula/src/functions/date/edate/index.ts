@@ -29,7 +29,7 @@ import { BaseFunction } from '../../base-function';
 export class Edate extends BaseFunction {
     override calculate(startDate: BaseValueObject, months: BaseValueObject) {
         if (startDate == null || months == null) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         if (startDate.isError()) {
@@ -67,13 +67,13 @@ export class Edate extends BaseFunction {
             }
 
             if (startDateObject.isString() || startDateObject.isBoolean() || monthsValueObject.isString() || monthsValueObject.isBoolean()) {
-                return new ErrorValueObject(ErrorType.VALUE);
+                return ErrorValueObject.create(ErrorType.VALUE);
             }
 
             const startDateSerial = +startDateObject.getValue();
 
             if (startDateSerial < 0) {
-                return new ErrorValueObject(ErrorType.NUM);
+                return ErrorValueObject.create(ErrorType.NUM);
             }
 
             const monthsValue = Math.floor(+monthsValueObject.getValue());

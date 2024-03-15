@@ -28,7 +28,7 @@ describe('Test counta function', () => {
 
     describe('Counta', () => {
         it('Var1 is error', () => {
-            const var1 = new ErrorValueObject(ErrorType.NA);
+            const var1 = ErrorValueObject.create(ErrorType.NA);
             const result = textFunction.calculate(var1);
             expect(result.getValue()).toBe(1);
         });
@@ -69,7 +69,7 @@ describe('Test counta function', () => {
         });
         it('Var1 is number, var2 is error', () => {
             const var1 = NumberValueObject.create(1);
-            const var2 = new ErrorValueObject(ErrorType.NA);
+            const var2 = ErrorValueObject.create(ErrorType.NA);
             const result = textFunction.calculate(var1, var2);
             expect(result.getValue()).toBe(2);
         });

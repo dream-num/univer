@@ -31,7 +31,7 @@ export class Offset extends BaseFunction {
         width?: BaseValueObject
     ) {
         if (reference == null || rows == null || columns == null) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         if (reference.isError()) {
@@ -55,7 +55,7 @@ export class Offset extends BaseFunction {
         }
 
         if (!reference.isArray()) {
-            return new ErrorValueObject(ErrorType.VALUE);
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         const row = (reference as ArrayValueObject).getCurrentRow();
@@ -64,32 +64,32 @@ export class Offset extends BaseFunction {
         const columnOffset = this.getIndexNumValue(columns);
 
         if (typeof rowOffset !== 'number' || typeof columnOffset !== 'number') {
-            return new ErrorValueObject(ErrorType.VALUE);
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         const targetRow = row + rowOffset;
         const targetColumn = column + columnOffset;
 
         if (targetRow < 0 || targetColumn < 0 || targetRow > 1048576 || targetColumn > 16384) {
-            return new ErrorValueObject(ErrorType.REF);
+            return ErrorValueObject.create(ErrorType.REF);
         }
 
         const heightCount = (height && this.getIndexNumValue(height)) ?? 1;
         const widthCount = (width && this.getIndexNumValue(width)) ?? 1;
 
         if (typeof heightCount !== 'number' || typeof widthCount !== 'number') {
-            return new ErrorValueObject(ErrorType.VALUE);
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         if (heightCount === 0 || widthCount === 0) {
-            return new ErrorValueObject(ErrorType.REF);
+            return ErrorValueObject.create(ErrorType.REF);
         }
 
         const targetRowWithHeight = heightCount > 0 ? targetRow + heightCount - 1 : targetRow + heightCount + 1;
         const targetColumnWithWidth = widthCount > 0 ? targetColumn + widthCount - 1 : targetColumn + widthCount + 1;
 
         if (targetRowWithHeight < 0 || targetColumnWithWidth < 0 || targetRowWithHeight > 1048576 || targetColumnWithWidth > 16384) {
-            return new ErrorValueObject(ErrorType.REF);
+            return ErrorValueObject.create(ErrorType.REF);
         }
 
         const startRow = targetRow < targetRowWithHeight ? targetRow : targetRowWithHeight;
@@ -114,7 +114,7 @@ export class Offset extends BaseFunction {
 
     private _setDefault(object: BaseReferenceObject) {
         if (this.unitId == null || this.subUnitId == null) {
-            return new ErrorValueObject(ErrorType.REF);
+            return ErrorValueObject.create(ErrorType.REF);
         }
         object.setDefaultUnitId(this.unitId);
         object.setDefaultSheetId(this.subUnitId);

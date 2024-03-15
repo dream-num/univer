@@ -22,7 +22,7 @@ import { BaseFunction } from '../../base-function';
 export class Stdevpa extends BaseFunction {
     override calculate(...variants: BaseValueObject[]) {
         if (variants.length === 0) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         const flattenArray = this.flattenArray(variants, false);

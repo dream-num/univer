@@ -25,7 +25,7 @@ import { BaseFunction } from '../../base-function';
 export class Makearray extends BaseFunction {
     override calculate(...variants: BaseValueObject[]) {
         if (variants.length !== 3) {
-            return new ErrorValueObject(ErrorType.VALUE);
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         const row = this.getIndexNumValue(variants[0]);
@@ -41,7 +41,7 @@ export class Makearray extends BaseFunction {
         }
 
         if (!(variants[2].isValueObject() && (variants[2] as LambdaValueObjectObject).isLambda())) {
-            return new ErrorValueObject(ErrorType.VALUE);
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         const lambda = variants[2] as LambdaValueObjectObject;

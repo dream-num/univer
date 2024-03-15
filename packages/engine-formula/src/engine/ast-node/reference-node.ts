@@ -84,7 +84,7 @@ export class ReferenceNode extends BaseAstNode {
         this._referenceObject.setRefOffset(x, y);
 
         if (!this._isPrepareMerge && this._referenceObject.isExceedRange()) {
-            this.setValue(new ErrorValueObject(ErrorType.NAME));
+            this.setValue(ErrorValueObject.create(ErrorType.NAME));
         } else {
             this.setValue(this._referenceObject);
         }

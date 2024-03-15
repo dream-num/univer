@@ -128,6 +128,6 @@ const runTask = async () => {
         await fs.mkdir('./src/assets');
     }
 
-    fs.writeFile('./src/assets/icon-map.json', JSON.stringify(base64EncodedSVGs, null, 4), 'utf8');
+    fs.writeFile('./src/assets/icon-map.json', `${JSON.stringify(base64EncodedSVGs, null, 4)}\n`, 'utf8');
 };
 runTask();

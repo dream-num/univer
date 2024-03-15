@@ -100,7 +100,7 @@ const getRuleDescribe = (rule: IConditionFormatRule, localeService: LocaleServic
                     }
                 }
                 case SubRuleType.formula:{
-                    return '自定义公式';
+                    return localeService.t('sheet.cf.ruleType.formula');
                 }
             }
         }
@@ -273,12 +273,12 @@ export const RuleList = (props: IRuleListProps) => {
                         .map((ele, index) => <span key={index}>{ele}</span>)}
                 </div>
                 <div className={styles.btnList}>
-                    <Tooltip title="新增规则" placement="bottom">
+                    <Tooltip title={localeService.t('sheet.cf.panel.createRule')} placement="bottom">
                         <div className={`${styles.icon}`} onClick={handleCreate}>
                             <IncreaseSingle />
                         </div>
                     </Tooltip>
-                    <Tooltip title="清空所有规则" placement="bottom">
+                    <Tooltip title={localeService.t('sheet.cf.panel.clear')} placement="bottom">
                         <div className={`${styles.gap} ${styles.icon}`} onClick={handleClear}>
                             <DeleteSingle />
                         </div>

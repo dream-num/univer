@@ -173,7 +173,7 @@ export const RankStyleEditor = (props: IStyleEditorProps) => {
                                 _onChange({ type, isPercent: !!v, value, style });
                             }}
                         />
-                        百分比
+                        {localeService.t('sheet.cf.valueType.percent')}
                     </div>
 
                 </div>

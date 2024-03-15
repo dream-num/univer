@@ -30,7 +30,7 @@ import { BooleanNumber, DEFAULT_EMPTY_DOCUMENT_VALUE, DocumentDataModel } from '
 import { BaseObject } from '../base-object';
 import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '../basics/interfaces';
 import type { IViewportBound } from '../basics/vector2';
-import { DocumentSkeleton } from '../components/docs/doc-skeleton';
+import { DocumentSkeleton } from '../components/docs/layout/doc-skeleton';
 import { Documents } from '../components/docs/document';
 import { DocumentViewModel } from '../components/docs/view-model/document-view-model';
 import type { UniverRenderingContext } from '../context';

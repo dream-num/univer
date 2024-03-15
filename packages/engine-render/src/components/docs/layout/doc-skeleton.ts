@@ -31,17 +31,17 @@ import type {
     IDocumentSkeletonPage,
     IDocumentSkeletonSpan,
     ISkeletonResourceReference,
-} from '../../basics/i-document-skeleton-cached';
-import { LineType, PageLayoutType, SpanType } from '../../basics/i-document-skeleton-cached';
-import type { IDocsConfig, INodeInfo, INodePosition, INodeSearch, ISectionBreakConfig } from '../../basics/interfaces';
-import type { IViewportBound, Vector2 } from '../../basics/vector2';
-import { Skeleton } from '../skeleton';
+} from '../../../basics/i-document-skeleton-cached';
+import { LineType, PageLayoutType, SpanType } from '../../../basics/i-document-skeleton-cached';
+import type { IDocsConfig, INodeInfo, INodePosition, INodeSearch, ISectionBreakConfig } from '../../../basics/interfaces';
+import type { IViewportBound, Vector2 } from '../../../basics/vector2';
+import { Skeleton } from '../../skeleton';
+import { Liquid } from '../liquid';
+import type { DocumentViewModel } from '../view-model/document-view-model';
+import { getLastPage, updateBlockIndex } from './tools';
+import { createSkeletonSection } from './model/section';
 import { dealWithSections } from './block/section';
-import { Liquid } from './common/liquid';
-import { createSkeletonPage } from './common/page';
-import { createSkeletonSection } from './common/section';
-import { getLastPage, updateBlockIndex } from './common/tools';
-import type { DocumentViewModel } from './view-model/document-view-model';
+import { createSkeletonPage } from './model/page';
 
 const DEFAULT_SECTION_BREAK: ISectionBreak = {
     columnProperties: [],
@@ -79,6 +79,7 @@ export class DocumentSkeleton extends Skeleton {
         return this._docViewModel;
     }
 
+    // Layout the document.
     calculate(bounds?: IViewportBound) {
         if (!this.dirty) {
             return;
@@ -469,7 +470,7 @@ export class DocumentSkeleton extends Skeleton {
      * Split the document according to SectionBreak and perform layout calculations.
      * @returns view model: skeleton
      */
-    private _createSkeleton(bounds?: IViewportBound) {
+    private _createSkeleton(_bounds?: IViewportBound) {
         // 每一个布局
         const DEFAULT_PAGE_SIZE = { width: Number.POSITIVE_INFINITY, height: Number.POSITIVE_INFINITY };
         const viewModel = this.getViewModel();
@@ -514,8 +515,6 @@ export class DocumentSkeleton extends Skeleton {
             },
         } = documentStyle;
 
-        const skeleton = this._getNullSke();
-
         const docsConfig: IDocsConfig = {
             headerTreeMap,
             footerTreeMap,
@@ -530,6 +529,8 @@ export class DocumentSkeleton extends Skeleton {
             defaultTabStop,
             documentTextStyle: textStyle,
         };
+
+        const skeleton = this._getNullSke();
 
         const { skeHeaders, skeFooters, skeListLevel, drawingAnchor } = skeleton;
 

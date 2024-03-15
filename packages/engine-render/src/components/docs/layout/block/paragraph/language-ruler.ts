@@ -16,12 +16,12 @@
 
 import type { IParagraphStyle } from '@univerjs/core';
 
-import type { ISectionBreakConfig } from '../../../../basics/interfaces';
-import { EMOJI_REG, hasArabic, hasSpace, hasTibetan, startWithEmoji } from '../../../../basics/tools';
-import { createSkeletonLetterSpan, createSkeletonWordSpan } from '../../common/span';
-import { getFontCreateConfig } from '../../common/tools';
-import type { DataStreamTreeNode } from '../../view-model/data-stream-tree-node';
-import type { DocumentViewModel } from '../../view-model/document-view-model';
+import type { ISectionBreakConfig } from '../../../../../basics/interfaces';
+import { EMOJI_REG, hasArabic, hasSpace, hasTibetan, startWithEmoji } from '../../../../../basics/tools';
+import { createSkeletonLetterSpan, createSkeletonWordSpan } from '../../model/span';
+import { getFontCreateConfig } from '../../tools';
+import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
+import type { DocumentViewModel } from '../../../view-model/document-view-model';
 
 // Handle English word, English punctuation, number characters.
 // https://en.wikipedia.org/wiki/CJK_characters
@@ -94,7 +94,7 @@ export function emojiHandler(
     paragraphStyle: IParagraphStyle
 ) {
     const config = getFontCreateConfig(index, bodyModel, paragraphNode, sectionBreakConfig, paragraphStyle);
-    const match = charArray.match(EMOJI_REG); // NOSONAR
+    const match = charArray.match(EMOJI_REG);
 
     return {
         step: match![0].length,

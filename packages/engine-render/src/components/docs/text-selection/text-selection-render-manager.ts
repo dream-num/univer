@@ -20,28 +20,28 @@ import { createIdentifier } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, fromEvent, Subject } from 'rxjs';
 
-import { CURSOR_TYPE } from '../../basics/const';
-import type { IDocumentSkeletonSpan } from '../../basics/i-document-skeleton-cached';
-import { PageLayoutType } from '../../basics/i-document-skeleton-cached';
-import type { IMouseEvent, IPointerEvent } from '../../basics/i-events';
-import type { INodeInfo, INodePosition } from '../../basics/interfaces';
-import { getOffsetRectForDom } from '../../basics/position';
+import { CURSOR_TYPE } from '../../../basics/const';
+import type { IDocumentSkeletonSpan } from '../../../basics/i-document-skeleton-cached';
+import { PageLayoutType } from '../../../basics/i-document-skeleton-cached';
+import type { IMouseEvent, IPointerEvent } from '../../../basics/i-events';
+import type { INodeInfo, INodePosition } from '../../../basics/interfaces';
+import { getOffsetRectForDom } from '../../../basics/position';
 import type {
     ISuccinctTextRangeParam,
     ITextRangeWithStyle,
     ITextSelectionStyle,
     RANGE_DIRECTION,
-} from '../../basics/range';
-import { NORMAL_TEXT_SELECTION_PLUGIN_STYLE } from '../../basics/range';
-import { getCurrentScrollXY } from '../../basics/scroll-xy';
-import { Vector2 } from '../../basics/vector2';
-import type { Engine } from '../../engine';
-import type { Scene } from '../../scene';
-import { ScrollTimer } from '../../scroll-timer';
-import type { IScrollObserverParam, Viewport } from '../../viewport';
-import { cursorConvertToTextRange, TextRange } from './common/text-range';
-import type { DocumentSkeleton } from './doc-skeleton';
-import type { Documents } from './document';
+} from '../../../basics/range';
+import { NORMAL_TEXT_SELECTION_PLUGIN_STYLE } from '../../../basics/range';
+import { getCurrentScrollXY } from '../../../basics/scroll-xy';
+import { Vector2 } from '../../../basics/vector2';
+import type { Engine } from '../../../engine';
+import type { Scene } from '../../../scene';
+import { ScrollTimer } from '../../../scroll-timer';
+import type { IScrollObserverParam, Viewport } from '../../../viewport';
+import type { DocumentSkeleton } from '../layout/doc-skeleton';
+import type { Documents } from '../document';
+import { cursorConvertToTextRange, TextRange } from './text-range';
 
 export function getCanvasOffsetByEngine(engine: Nullable<Engine>) {
     const canvas = engine?.getCanvasElement();

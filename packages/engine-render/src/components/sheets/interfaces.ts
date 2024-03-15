@@ -24,7 +24,7 @@ import type {
 } from '@univerjs/core';
 
 import type { BORDER_TYPE } from '../../basics/const';
-import type { DocumentSkeleton } from '../docs/doc-skeleton';
+import type { DocumentSkeleton } from '../docs/layout/doc-skeleton';
 
 export interface BorderCache {
     [key: string]: BorderCacheItem | {};

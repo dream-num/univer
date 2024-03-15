@@ -23,7 +23,7 @@ import {
     PositionedObjectLayoutType,
 } from '@univerjs/core';
 
-import { hasArabic, hasCJK, hasTibetan, startWithEmoji } from '../../../../basics';
+import { hasArabic, hasCJK, hasTibetan, startWithEmoji } from '../../../../../basics';
 import type {
     IDocumentSkeletonBullet,
     IDocumentSkeletonDrawing,
@@ -31,13 +31,13 @@ import type {
     IDocumentSkeletonPage,
     IDocumentSkeletonSpan,
     ISkeletonResourceReference,
-} from '../../../../basics/i-document-skeleton-cached';
-import { BreakType } from '../../../../basics/i-document-skeleton-cached';
-import type { IParagraphConfig, ISectionBreakConfig } from '../../../../basics/interfaces';
+} from '../../../../../basics/i-document-skeleton-cached';
+import { BreakType } from '../../../../../basics/i-document-skeleton-cached';
+import type { IParagraphConfig, ISectionBreakConfig } from '../../../../../basics/interfaces';
 
-import { createSkeletonPage } from '../../common/page';
-import { setColumnFullState } from '../../common/section';
-import { createSkeletonLetterSpan, createSkeletonTabSpan } from '../../common/span';
+import { createSkeletonPage } from '../../model/page';
+import { setColumnFullState } from '../../model/section';
+import { createSkeletonLetterSpan, createSkeletonTabSpan } from '../../model/span';
 import {
     clearFontCreateConfigCache,
     getCharSpaceApply,
@@ -45,15 +45,15 @@ import {
     getLastNotFullColumnInfo,
     getSpanGroupWidth,
     lineIterator,
-} from '../../common/tools';
+} from '../../tools';
 import { LineBreaker } from '../../linebreak';
 import { tabLineBreakExtension } from '../../linebreak/extensions/tab-linebreak-extension';
-import type { DataStreamTreeNode } from '../../view-model/data-stream-tree-node';
-import type { DocumentViewModel } from '../../view-model/document-view-model';
+import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
+import type { DocumentViewModel } from '../../../view-model/document-view-model';
 import { dealWithBullet } from './bullet';
 import { dealWidthInlineDrawing } from './inline-drawing';
 import { ArabicHandler, emojiHandler, otherHandler, TibetanHandler } from './language-ruler';
-import { calculateParagraphLayout } from './layout-ruler';
+import { layoutParagraph } from './layout-ruler';
 
 export function dealWidthParagraph(
     bodyModel: DocumentViewModel,
@@ -137,9 +137,10 @@ export function dealWidthParagraph(
 
     const { horizontalAlign = HorizontalAlign.UNSPECIFIED, snapToGrid = BooleanNumber.TRUE } = paragraphStyle;
 
-    let allPages: IDocumentSkeletonPage[] = [curPage];
+    let allPages = [curPage];
 
     const customBlockCache = new Map<number, Nullable<ICustomBlock>>();
+
     for (let i = 0, len = blocks.length; i < len; i++) {
         const charIndex = blocks[i];
         const customBlock = bodyModel.getCustomBlock(charIndex);
@@ -164,6 +165,7 @@ export function dealWidthParagraph(
     // Add custom extension for linebreak.
     tabLineBreakExtension(breaker);
 
+    // eslint-disable-next-line no-cond-assign
     while ((bk = breaker.nextBreak())) {
         // get the string between the last break and this one
         const word = content.slice(last, bk.position);
@@ -177,7 +179,7 @@ export function dealWidthParagraph(
                 return;
             }
 
-            allPages = calculateParagraphLayout(
+            allPages = layoutParagraph(
                 spanGroup,
                 allPages,
                 sectionBreakConfig,
@@ -317,7 +319,8 @@ export function dealWidthParagraph(
         last = bk.position;
     }
 
-    lineIterator(allPages, (line: IDocumentSkeletonLine) => {
+    // Handle horizontal align: left\center\right\justified.
+    lineIterator(allPages, (line) => {
         horizontalAlignHandler(line, horizontalAlign);
     });
 
@@ -450,6 +453,7 @@ function horizontalAlignHandler(line: IDocumentSkeletonLine, horizontalAlign: Ho
         if (width === Number.POSITIVE_INFINITY) {
             continue;
         }
+
         if (horizontalAlign === HorizontalAlign.CENTER) {
             divide.paddingLeft = (width - spanGroupWidth) / 2;
         } else if (horizontalAlign === HorizontalAlign.RIGHT) {

@@ -68,8 +68,8 @@ import {
     mergeInfoOffset,
 } from '../../basics/tools';
 import type { IBoundRectNoAngle, IViewportBound } from '../../basics/vector2';
-import { columnIterator } from '../docs/common/tools';
-import { DocumentSkeleton } from '../docs/doc-skeleton';
+import { columnIterator } from '../docs/layout/tools';
+import { DocumentSkeleton } from '../docs/layout/doc-skeleton';
 import { DocumentViewModel } from '../docs/view-model/document-view-model';
 import { Skeleton } from '../skeleton';
 import { convertTextRotation, VERTICAL_ROTATE_ANGLE } from '../../basics/text-rotation';

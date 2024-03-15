@@ -24,7 +24,7 @@ import type { IBoundRectNoAngle, IViewportBound } from '../../basics/vector2';
 import type { UniverRenderingContext } from '../../context';
 import { RenderComponent } from '../component';
 import type { DOCS_EXTENSION_TYPE } from './doc-extension';
-import type { DocumentSkeleton } from './doc-skeleton';
+import type { DocumentSkeleton } from './layout/doc-skeleton';
 
 export class DocComponent extends RenderComponent<
     IDocumentSkeletonSpan | IDocumentSkeletonLine,

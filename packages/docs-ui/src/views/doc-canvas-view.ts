@@ -25,6 +25,7 @@ import {
 import { DOCS_COMPONENT_DEFAULT_Z_INDEX, DOCS_COMPONENT_HEADER_LAYER_INDEX, DOCS_COMPONENT_MAIN_LAYER_INDEX, DOCS_VIEW_KEY, VIEWPORT_KEY } from '@univerjs/docs';
 import type { IRender, IWheelEvent, RenderManagerService, Scene } from '@univerjs/engine-render';
 import { Documents, EVENT_TYPE, IRenderManagerService, Layer, ScrollBar, Viewport } from '@univerjs/engine-render';
+import { IEditorService } from '@univerjs/ui';
 import { BehaviorSubject, takeUntil } from 'rxjs';
 
 @OnLifecycle(LifecycleStages.Starting, DocCanvasView)
@@ -40,7 +41,8 @@ export class DocCanvasView extends RxDisposable {
     constructor(
         @IRenderManagerService private readonly _renderManagerService: RenderManagerService,
         @IConfigService private readonly _configService: IConfigService,
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService
+        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
+        @IEditorService private readonly _editorService: IEditorService
     ) {
         super();
         this._initialize();
@@ -190,6 +192,8 @@ export class DocCanvasView extends RxDisposable {
 
         scene.addObjects([documents], DOCS_COMPONENT_MAIN_LAYER_INDEX);
 
-        // scene.enableLayerCache(DOCS_COMPONENT_MAIN_LAYER_INDEX);
+        if (this._editorService.getEditor(documentModel.getUnitId()) == null) {
+            scene.enableLayerCache(DOCS_COMPONENT_MAIN_LAYER_INDEX);
+        }
     }
 }

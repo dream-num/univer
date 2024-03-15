@@ -15,7 +15,7 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { Disposable, isRealNum } from '@univerjs/core';
+import { Disposable } from '@univerjs/core';
 
 import { ErrorType } from '../basics/error-type';
 import type { IFunctionNames } from '../basics/function';
@@ -23,7 +23,7 @@ import { compareToken } from '../basics/token';
 import type { FunctionVariantType, NodeValueType } from '../engine/reference-object/base-reference-object';
 import type { ArrayBinarySearchType } from '../engine/utils/compare';
 import { ArrayOrderSearchType } from '../engine/utils/compare';
-import { type ArrayValueObject, createNumberValueObjectByRawValue } from '../engine/value-object/array-value-object';
+import type { ArrayValueObject } from '../engine/value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject } from '../engine/value-object/base-value-object';
 import { NumberValueObject, type PrimitiveValueType } from '../engine/value-object/primitive-object';
 import { convertTonNumber } from '../engine/utils/object-covert';
@@ -107,7 +107,6 @@ export class BaseFunction extends Disposable {
      * For instance, The column number (starting with 1 for the left-most column of table_array) that contains the return value.
      * https://support.microsoft.com/en-us/office/vlookup-function-0bbc8083-26fe-4963-8ab8-93a18ad188a1
      * @param indexNum
-     * @returns
      */
     getIndexNumValue(indexNum: BaseValueObject, defaultValue = 1) {
         if (indexNum.isArray()) {
@@ -124,7 +123,7 @@ export class BaseFunction extends Disposable {
         }
         if (indexNum.isString()) {
             const colIndexNumV = Number(indexNum.getValue() as string);
-            if (isNaN(colIndexNumV)) {
+            if (Number.isNaN(colIndexNumV)) {
                 return ErrorValueObject.create(ErrorType.REF);
             }
             return colIndexNumV;
@@ -147,7 +146,6 @@ export class BaseFunction extends Disposable {
      * If a1 is FALSE, ref_text is interpreted as an R1C1-style reference.
      * https://support.microsoft.com/zh-cn/office/indirect-%E5%87%BD%E6%95%B0-474b3a3a-8a26-4f44-b491-92b6306fa261
      * @param logicValueObject
-     * @returns
      */
     getZeroOrOneByOneDefault(logicValueObject?: BaseValueObject) {
         if (logicValueObject == null) {
@@ -181,7 +179,6 @@ export class BaseFunction extends Disposable {
      * A logical value that specifies 1/TRUE , 0/FALSE, -1, default 1.
      * The difference from getZeroOrOneByOneDefault is that we need to get -1
      * @param logicValueObject
-     * @returns
      */
     getMatchTypeValue(logicValueObject?: BaseValueObject) {
         if (logicValueObject == null) {
@@ -296,10 +293,6 @@ export class BaseFunction extends Disposable {
         return resultValue;
     }
 
-    /**
-     * @param axis 0 row, 1 column
-     * @returns
-     */
     binarySearchExpand(
         value: BaseValueObject,
         searchArray: ArrayValueObject,
@@ -400,19 +393,8 @@ export class BaseFunction extends Disposable {
         for (let i = 0; i < variants.length; i++) {
             let variant = variants[i];
 
-            if (variant.isError()) {
-                return variant;
-            }
-
             if (variant.isString()) {
-                const value = variant.getValue();
-                const isStringNumber = isRealNum(value);
-
-                if (!isStringNumber) {
-                    return ErrorValueObject.create(ErrorType.VALUE);
-                }
-
-                variant = createNumberValueObjectByRawValue(value);
+                variant = variant.convertToNumberObjectValue();
             }
 
             if (variant.isBoolean()) {
@@ -421,6 +403,10 @@ export class BaseFunction extends Disposable {
 
             if (variant.isNull()) {
                 variant = NumberValueObject.create(0);
+            }
+
+            if (variant.isError()) {
+                return variant;
             }
 
             if (variant.isArray()) {
@@ -467,7 +453,7 @@ export class BaseFunction extends Disposable {
             const value = Number(valueObject.getValue());
 
             // Non-text numbers also need to be counted to the sample size
-            valueObject = NumberValueObject.create(isNaN(value) ? 0 : value);
+            valueObject = NumberValueObject.create(Number.isNaN(value) ? 0 : value);
         }
 
         return valueObject;

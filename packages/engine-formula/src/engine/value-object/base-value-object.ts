@@ -451,6 +451,16 @@ export class BaseValueObject extends ObjectClassType {
         /** abstract */
         return ErrorValueObject.create(ErrorType.VALUE);
     }
+
+    convertToNumberObjectValue(): BaseValueObject {
+        /** abstract */
+        return ErrorValueObject.create(ErrorType.VALUE);
+    }
+
+    convertToBooleanObjectValue(): BaseValueObject {
+        /** abstract */
+        return ErrorValueObject.create(ErrorType.VALUE);
+    }
 }
 
 const Error_CACHE_LRU_COUNT = 1000;

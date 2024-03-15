@@ -16,9 +16,10 @@
 
 import { ErrorType } from '../../../basics/error-type';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
-import { type ArrayValueObject, createStringValueObjectByRawValue } from '../../../engine/value-object/array-value-object';
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
+import { createStringValueObjectByRawValue } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class Concatenate extends BaseFunction {

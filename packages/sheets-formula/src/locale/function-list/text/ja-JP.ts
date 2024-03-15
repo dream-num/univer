@@ -488,8 +488,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value: { name: '値', detail: 'テキストに変換する数値。' },
+            formatText: { name: '数値形式', detail: '指定された値に適用する書式を定義するテキスト文字列。' },
         },
     },
     TEXTAFTER: {

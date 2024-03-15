@@ -16,5 +16,9 @@
 
 import { Concatenate } from './concatenate';
 import { FUNCTION_NAMES_TEXT } from './function-names';
+import { Text } from './text';
 
-export const functionText = [[Concatenate, FUNCTION_NAMES_TEXT.CONCATENATE]];
+export const functionText = [
+    [Concatenate, FUNCTION_NAMES_TEXT.CONCATENATE],
+    [Text, FUNCTION_NAMES_TEXT.TEXT],
+];

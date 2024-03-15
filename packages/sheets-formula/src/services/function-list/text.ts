@@ -750,16 +750,16 @@ export const FUNCTION_LIST_TEXT: IFunctionInfo[] = [
         abstract: 'formula.functionList.TEXT.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.TEXT.functionParameter.number1.name',
-                detail: 'formula.functionList.TEXT.functionParameter.number1.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.TEXT.functionParameter.value.name',
+                detail: 'formula.functionList.TEXT.functionParameter.value.detail',
+                example: '1.23',
                 require: 1,
                 repeat: 0,
             },
             {
-                name: 'formula.functionList.TEXT.functionParameter.number2.name',
-                detail: 'formula.functionList.TEXT.functionParameter.number2.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.TEXT.functionParameter.formatText.name',
+                detail: 'formula.functionList.TEXT.functionParameter.formatText.detail',
+                example: '"$0.00"',
                 require: 1,
                 repeat: 0,
             },

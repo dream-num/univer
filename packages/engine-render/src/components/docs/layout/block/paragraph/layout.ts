@@ -176,8 +176,6 @@ export function dealWidthParagraph(
         };
 
         if (text.endsWith(DataStreamTreeTokenType.CUSTOM_BLOCK)) {
-            // Remove CUSTOM_BLOCK shapedGlyph.
-            glyphs.pop();
             let customBlock = customBlockCache.get(charIndex);
             if (customBlock == null) {
                 customBlock = bodyModel.getCustomBlock(charIndex);
@@ -196,8 +194,6 @@ export function dealWidthParagraph(
                 }
             }
         } else if (text.endsWith(DataStreamTreeTokenType.PAGE_BREAK)) {
-            // Remove PAGE_BREAK shapedGlyph.
-            glyphs.pop();
             pushPending();
             allPages.push(
                 createSkeletonPage(
@@ -209,8 +205,6 @@ export function dealWidthParagraph(
             );
             paragraphAffectSkeDrawings.clear();
         } else if (text.endsWith(DataStreamTreeTokenType.COLUMN_BREAK)) {
-            // Remove COLUMN_BREAK shapedGlyph.
-            glyphs.pop();
             pushPending();
             // 换列标识，还在同一个节内
             const lastPage = allPages[allPages.length - 1];

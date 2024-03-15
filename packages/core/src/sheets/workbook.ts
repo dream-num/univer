@@ -523,7 +523,7 @@ export class Workbook extends Disposable {
 
             worksheetSnapshot.name = this.uniqueSheetName(name);
             if (worksheetSnapshot.name !== name) {
-                this._logService.error(`The worksheet name ${name} is duplicated, we change it to ${worksheetSnapshot.name}`);
+                this._logService.debug('[Workbook]', `The worksheet name ${name} is duplicated, we changed it to ${worksheetSnapshot.name}. Please fix the problem in your snapshot.`);
             }
 
             const worksheet = new Worksheet(worksheetSnapshot, this._styles);

@@ -1227,7 +1227,7 @@ function getFontStyleAtCursor(accessor: IAccessor) {
 
     const { startOffset } = activeTextRange;
 
-    const textRun = textRuns.find(({ st, ed }) => startOffset >= st && startOffset < ed);
+    const textRun = textRuns.find(({ st, ed }) => startOffset >= st && startOffset <= ed);
 
     return textRun;
 }

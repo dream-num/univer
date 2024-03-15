@@ -68,7 +68,6 @@ export function valueObjectCompare(range: BaseValueObject, criteria: BaseValueOb
  * Find the Boolean intersection of two ArrayValueObjects
  * @param valueObject1
  * @param valueObject2
- * @returns
  */
 export function booleanObjectIntersection(valueObject1: BaseValueObject, valueObject2: BaseValueObject) {
     const maxRowLength = Math.max(valueObject1.isArray() ? (valueObject1 as ArrayValueObject).getRowCount() : 1, valueObject2.isArray() ? (valueObject2 as ArrayValueObject).getRowCount() : 1);

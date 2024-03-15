@@ -24,10 +24,8 @@ import { ObjectClassType } from '../../basics/object-class-type';
 import { ArrayValueObject, createBooleanValueObjectByRawValue, createNumberValueObjectByRawValue, createStringValueObjectByRawValue, ValueObjectFactory } from '../value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject, type IArrayValueObject } from '../value-object/base-value-object';
 import {
-    BooleanValueObject,
     NullValueObject,
     NumberValueObject,
-    StringValueObject,
 } from '../value-object/primitive-object';
 import { getCellValue } from '../utils/cell';
 

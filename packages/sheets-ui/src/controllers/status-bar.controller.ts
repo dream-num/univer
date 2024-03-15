@@ -42,7 +42,6 @@ import {
 } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
-import { debounceTime } from 'rxjs';
 import type { IStatusBarServiceStatus } from '../services/status-bar.service';
 import { IStatusBarService } from '../services/status-bar.service';
 
@@ -68,7 +67,7 @@ export class StatusBarController extends Disposable {
     }
 
     private _registerSelectionListener(): void {
-        const statisticsHandler = debounce((selections: ISelectionWithStyle[]) => {
+        const _statisticsHandler = debounce((selections: ISelectionWithStyle[]) => {
             const primary = selections[selections.length - 1]?.primary;
             this._calculateSelection(
                 selections.map((selection) => selection.range),
@@ -83,7 +82,7 @@ export class StatusBarController extends Disposable {
                         return;
                     }
                     if (selections) {
-                        statisticsHandler(selections);
+                        _statisticsHandler(selections);
                     }
                 })
             )
@@ -91,15 +90,14 @@ export class StatusBarController extends Disposable {
 
         this.disposeWithMe(
             toDisposable(
-                this._selectionManagerService.selectionMoveEnd$
-                    .subscribe((selections) => {
-                        if (this._selectionManagerService.getCurrent()?.pluginName !== NORMAL_SELECTION_PLUGIN_NAME) {
-                            return;
-                        }
-                        if (selections) {
-                            statisticsHandler(selections);
-                        }
-                    })
+                this._selectionManagerService.selectionMoveEnd$.subscribe((selections) => {
+                    if (this._selectionManagerService.getCurrent()?.pluginName !== NORMAL_SELECTION_PLUGIN_NAME) {
+                        return;
+                    }
+                    if (selections) {
+                        _statisticsHandler(selections);
+                    }
+                })
             )
         );
 
@@ -108,7 +106,7 @@ export class StatusBarController extends Disposable {
                 if (command.id === SetRangeValuesMutation.id) {
                     const selections = this._selectionManagerService.getSelections();
                     if (selections) {
-                        statisticsHandler(selections as ISelectionWithStyle[]);
+                        _statisticsHandler(selections as ISelectionWithStyle[]);
                     }
                 }
             })

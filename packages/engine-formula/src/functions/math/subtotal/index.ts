@@ -174,7 +174,7 @@ export class Subtotal extends BaseFunction {
         // null, true, false, 0 , 1, '  1',
         const indexNumValue = indexNum ? Number(indexNum.getValue()) : 0;
 
-        if (isNaN(indexNumValue)) {
+        if (Number.isNaN(indexNumValue)) {
             return new ErrorValueObject(ErrorType.VALUE);
         }
 

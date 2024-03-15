@@ -17,7 +17,7 @@
 import Big from 'big.js';
 
 import { reverseCompareOperator } from '../../basics/calculate';
-import { BooleanValue, ConcatenateType } from '../../basics/common';
+import { ConcatenateType } from '../../basics/common';
 import { ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
 import { compareToken } from '../../basics/token';
 import { compareWithWildcard, isWildcard } from '../utils/compare';

@@ -19,7 +19,7 @@ import { ErrorType } from '../../../basics/error-type';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
-import { createBooleanValueObjectByRawValue, createNumberValueObjectByRawValue, createStringValueObjectByRawValue } from '../../../engine/value-object/array-value-object';
+import { createBooleanValueObjectByRawValue, createNumberValueObjectByRawValue } from '../../../engine/value-object/array-value-object';
 
 export class Average extends BaseFunction {
     override calculate(...variants: BaseValueObject[]) {

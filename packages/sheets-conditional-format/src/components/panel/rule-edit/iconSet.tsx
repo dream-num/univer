@@ -395,7 +395,7 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
                     {localeService.t('sheet.cf.iconSet.reverseIconOrder')}
                 </div>
                 <div className={`${styles.utilItem} ${stylesBase.mLXl}`}>
-                    <Checkbox value={undefined} checked={!isShowValue} onChange={(v) => { isShowValueSet(!v); }} />
+                    <Checkbox value={undefined} checked={!isShowValue} onChange={(v) => { isShowValueSet(!!v); }} />
                     {localeService.t('sheet.cf.iconSet.onlyShowIcon')}
                 </div>
             </div>

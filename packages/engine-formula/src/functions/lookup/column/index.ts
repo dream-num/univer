@@ -34,7 +34,7 @@ export class Column extends BaseFunction {
         }
 
         if (!reference.isArray()) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         const column = (reference as ArrayValueObject).getCurrentColumn();

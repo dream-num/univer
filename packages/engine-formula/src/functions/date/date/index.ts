@@ -26,7 +26,7 @@ import { BaseFunction } from '../../base-function';
 export class DateFunction extends BaseFunction {
     override calculate(year: BaseValueObject, month: BaseValueObject, day: BaseValueObject) {
         if (year == null || month == null || day == null) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         if (year.isError()) {
@@ -76,7 +76,7 @@ export class DateFunction extends BaseFunction {
             }
 
             if (yearValueObject.isString() || monthValueObject.isString() || dayValueObject.isString()) {
-                return new ErrorValueObject(ErrorType.VALUE);
+                return ErrorValueObject.create(ErrorType.VALUE);
             }
 
             let yearValue = +yearValueObject.getValue();
@@ -84,7 +84,7 @@ export class DateFunction extends BaseFunction {
             const dayValue = +dayValueObject.getValue();
 
             if (yearValue < 0 || yearValue > 9999) {
-                return new ErrorValueObject(ErrorType.NUM);
+                return ErrorValueObject.create(ErrorType.NUM);
             }
 
             if (yearValue >= 0 && yearValue < 1899) {
@@ -96,7 +96,7 @@ export class DateFunction extends BaseFunction {
             const currentSerial = excelDateSerial(date);
 
             if (currentSerial < 0) {
-                return new ErrorValueObject(ErrorType.NUM);
+                return ErrorValueObject.create(ErrorType.NUM);
             }
 
             const valueObject = NumberValueObject.create(currentSerial);

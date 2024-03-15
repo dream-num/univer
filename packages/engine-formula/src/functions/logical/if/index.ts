@@ -24,7 +24,7 @@ import { BaseFunction } from '../../base-function';
 export class If extends BaseFunction {
     override calculate(logicalTest: BaseValueObject, valueIfTrue: BaseValueObject, valueIfFalse: BaseValueObject = BooleanValueObject.create(false)) {
         if (logicalTest == null || valueIfTrue == null) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         if (logicalTest.isError()) {
@@ -57,12 +57,12 @@ export class If extends BaseFunction {
         );
 
         const logicalTestArray = expandArrayValueObject(maxRowLength, maxColumnLength, logicalTest);
-        const valueIfTrueArray = expandArrayValueObject(maxRowLength, maxColumnLength, valueIfTrue, new ErrorValueObject(ErrorType.NA));
-        const valueIfFalseArray = expandArrayValueObject(maxRowLength, maxColumnLength, valueIfFalse, new ErrorValueObject(ErrorType.NA));
+        const valueIfTrueArray = expandArrayValueObject(maxRowLength, maxColumnLength, valueIfTrue, ErrorValueObject.create(ErrorType.NA));
+        const valueIfFalseArray = expandArrayValueObject(maxRowLength, maxColumnLength, valueIfFalse, ErrorValueObject.create(ErrorType.NA));
 
         return logicalTestArray.map((logicalTestValue, rowIndex, columnIndex) => {
             if (logicalTestValue.isNull()) {
-                return new ErrorValueObject(ErrorType.NA);
+                return ErrorValueObject.create(ErrorType.NA);
             } else {
                 const valueIfTrueValue = valueIfTrueArray.get(rowIndex, columnIndex);
                 const valueIfFalseValue = valueIfFalseArray.get(rowIndex, columnIndex);
@@ -81,7 +81,7 @@ export class If extends BaseFunction {
 
     private _calculateSingleCell(logicalTest: BaseValueObject, valueIfTrue: BaseValueObject, valueIfFalse: BaseValueObject) {
         if (logicalTest.isNull()) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         const logicalTestValue = logicalTest.getValue();
@@ -89,14 +89,14 @@ export class If extends BaseFunction {
         // true or non-zero
         if (logicalTestValue) {
             if (valueIfTrue.isNull()) {
-                return new ErrorValueObject(ErrorType.NA);
+                return ErrorValueObject.create(ErrorType.NA);
             }
 
             return valueIfTrue;
         }
 
         if (valueIfFalse.isNull()) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         return valueIfFalse;

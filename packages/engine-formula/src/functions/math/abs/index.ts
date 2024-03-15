@@ -22,11 +22,11 @@ import { BaseFunction } from '../../base-function';
 export class Abs extends BaseFunction {
     override calculate(variant: BaseValueObject) {
         if (variant == null) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         if (variant.isError()) {
-            return new ErrorValueObject(ErrorType.VALUE);
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         return variant.abs();

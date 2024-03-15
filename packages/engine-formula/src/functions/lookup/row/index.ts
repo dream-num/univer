@@ -34,7 +34,7 @@ export class Row extends BaseFunction {
         }
 
         if (!reference.isArray()) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         const row = (reference as ArrayValueObject).getCurrentRow();

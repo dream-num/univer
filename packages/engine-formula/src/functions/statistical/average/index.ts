@@ -24,7 +24,7 @@ import { createBooleanValueObjectByRawValue, createNumberValueObjectByRawValue }
 export class Average extends BaseFunction {
     override calculate(...variants: BaseValueObject[]) {
         if (variants.length === 0) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         let accumulatorSum: BaseValueObject = NumberValueObject.create(0);
@@ -41,7 +41,7 @@ export class Average extends BaseFunction {
                 const isStringNumber = isRealNum(value);
 
                 if (!isStringNumber) {
-                    return new ErrorValueObject(ErrorType.VALUE);
+                    return ErrorValueObject.create(ErrorType.VALUE);
                 }
 
                 variant = createNumberValueObjectByRawValue(value);

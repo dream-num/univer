@@ -22,7 +22,7 @@ import { BaseFunction } from '../../base-function';
 export class Counta extends BaseFunction {
     override calculate(...variants: BaseValueObject[]) {
         if (variants.length === 0) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         let accumulatorAll: BaseValueObject = NumberValueObject.create(0);

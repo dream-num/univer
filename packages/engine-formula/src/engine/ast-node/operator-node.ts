@@ -54,7 +54,7 @@ export class OperatorNode extends BaseAstNode {
         const token = this.getToken();
 
         if ((object1 == null || object2 == null) && token !== operatorToken.MINUS && token !== operatorToken.PLUS) {
-            this.setValue(new ErrorValueObject(ErrorType.VALUE));
+            this.setValue(ErrorValueObject.create(ErrorType.VALUE));
             return;
         }
 

@@ -22,7 +22,7 @@ import { BaseFunction } from '../../base-function';
 export class Power extends BaseFunction {
     override calculate(number: BaseValueObject, power: BaseValueObject) {
         if (number == null || power == null) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         if (number.isError()) {

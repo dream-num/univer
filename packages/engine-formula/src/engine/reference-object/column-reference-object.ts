@@ -42,7 +42,7 @@ export class ColumnReferenceObject extends BaseReferenceObject {
 
     override unionBy(referenceObject: BaseReferenceObject) {
         if (!referenceObject.isColumn()) {
-            return new ErrorValueObject(ErrorType.REF);
+            return ErrorValueObject.create(ErrorType.REF);
         }
 
         const columnReferenceObject = referenceObject as ColumnReferenceObject;
@@ -50,13 +50,13 @@ export class ColumnReferenceObject extends BaseReferenceObject {
             columnReferenceObject.getForcedSheetName() !== undefined &&
             columnReferenceObject.getForcedSheetName() !== ''
         ) {
-            return new ErrorValueObject(ErrorType.REF);
+            return ErrorValueObject.create(ErrorType.REF);
         }
 
         const currentRangeData = this.getRangeData();
 
         // if (currentRangeData.endColumn !== -1) {
-        //     return new ErrorValueObject(ErrorType.REF);
+        //     return ErrorValueObject.create(ErrorType.REF);
         // }
 
         const newColumn = columnReferenceObject.getRangeData().startColumn;

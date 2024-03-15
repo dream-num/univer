@@ -24,7 +24,7 @@ import { BaseFunction } from '../../base-function';
 export class Index extends BaseFunction {
     override calculate(reference: BaseValueObject, rowNum: BaseValueObject, columnNum?: BaseValueObject, areaNum?: BaseValueObject) {
         if (reference == null) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         if (reference.isError()) {
@@ -44,7 +44,7 @@ export class Index extends BaseFunction {
         }
 
         if (!reference.isArray()) {
-            return new ErrorValueObject(ErrorType.REF);
+            return ErrorValueObject.create(ErrorType.REF);
         }
 
         const referenceRowCount = (reference as ArrayValueObject).getRowCount();
@@ -81,9 +81,9 @@ export class Index extends BaseFunction {
         if (maxRowLength === 1 && maxColumnLength === 1) {
             return this._calculateSingleCell(reference as ArrayValueObject, rowNum, columnNum, areaNum);
         } else {
-            const rowNumArray = expandArrayValueObject(maxRowLength, maxColumnLength, rowNum, new ErrorValueObject(ErrorType.NA));
-            const columnNumArray = expandArrayValueObject(maxRowLength, maxColumnLength, columnNum, new ErrorValueObject(ErrorType.NA));
-            const areaNumArray = expandArrayValueObject(maxRowLength, maxColumnLength, areaNum, new ErrorValueObject(ErrorType.NA));
+            const rowNumArray = expandArrayValueObject(maxRowLength, maxColumnLength, rowNum, ErrorValueObject.create(ErrorType.NA));
+            const columnNumArray = expandArrayValueObject(maxRowLength, maxColumnLength, columnNum, ErrorValueObject.create(ErrorType.NA));
+            const areaNumArray = expandArrayValueObject(maxRowLength, maxColumnLength, areaNum, ErrorValueObject.create(ErrorType.NA));
 
             return rowNumArray.map((rowNumValue, rowIndex, columnIndex) => {
                 const columnNumValue = columnNumArray.get(rowIndex, columnIndex);
@@ -108,7 +108,7 @@ export class Index extends BaseFunction {
         const rowNumberValue = this._getNumberValue(rowNum);
 
         if (rowNumberValue === undefined || rowNumberValue < 0) {
-            return new ErrorValueObject(ErrorType.VALUE);
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         if (columnNum.isError()) {
@@ -118,7 +118,7 @@ export class Index extends BaseFunction {
         const columnNumberValue = this._getNumberValue(columnNum);
 
         if (columnNumberValue === undefined || columnNumberValue < 0) {
-            return new ErrorValueObject(ErrorType.VALUE);
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         // TODO areaNum
@@ -129,7 +129,7 @@ export class Index extends BaseFunction {
         const areaNumberValue = this._getAreaNumberValue(areaNum);
 
         if (areaNumberValue === undefined || areaNumberValue < 1) {
-            return new ErrorValueObject(ErrorType.VALUE);
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         const rowParam = rowNumberValue === 0 ? [undefined] : [rowNumberValue - 1, rowNumberValue];
@@ -138,7 +138,7 @@ export class Index extends BaseFunction {
         const result = reference.slice(rowParam, columnParam);
 
         if (!result) {
-            return new ErrorValueObject(ErrorType.REF);
+            return ErrorValueObject.create(ErrorType.REF);
         }
 
         return result;

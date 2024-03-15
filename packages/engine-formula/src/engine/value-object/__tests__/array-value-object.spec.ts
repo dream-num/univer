@@ -20,7 +20,7 @@ import { ArrayValueObject, transformToValueObject, ValueObjectFactory } from '..
 import type { BooleanValueObject, NumberValueObject } from '../primitive-object';
 
 describe('arrayValueObject test', () => {
-    const originArrayValueObject = new ArrayValueObject({
+    const originArrayValueObject = ArrayValueObject.create({
         calculateValueList: transformToValueObject([
             [1, 2, 3, 4, 5],
             [6, 7, 8, 9, 10],
@@ -89,7 +89,7 @@ describe('arrayValueObject test', () => {
 
     describe('Count', () => {
         it('Normal count', () => {
-            const originValueObject = new ArrayValueObject({
+            const originValueObject = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [1, ' ', 1.23, true, false],
                     [0, '100', '2.34', 'test', -3],
@@ -104,7 +104,7 @@ describe('arrayValueObject test', () => {
             expect(originValueObject.count()?.getValue()).toBe(6);
         });
         it('Counta', () => {
-            const originValueObject = new ArrayValueObject({
+            const originValueObject = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [1, ' ', 1.23, true, false],
                     [0, '100', '2.34', 'test', -3],
@@ -119,7 +119,7 @@ describe('arrayValueObject test', () => {
             expect(originValueObject.countA()?.getValue()).toBe(10);
         });
         it('CountBlank', () => {
-            const originValueObject = new ArrayValueObject({
+            const originValueObject = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [1, ' ', 1.23, true, false],
                     [0, '100', '2.34', 'test', -3],
@@ -137,7 +137,7 @@ describe('arrayValueObject test', () => {
 
     describe('pick', () => {
         it('normal', () => {
-            const pickArrayValueObject = new ArrayValueObject({
+            const pickArrayValueObject = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [true, false, false, true, false],
                     [true, false, true, false, false],
@@ -155,7 +155,7 @@ describe('arrayValueObject test', () => {
         });
 
         it('not boolean', () => {
-            const pickArrayValueObject = new ArrayValueObject({
+            const pickArrayValueObject = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [true, false, false, 1, false],
                     [true, false, 1, false, false],
@@ -173,7 +173,7 @@ describe('arrayValueObject test', () => {
         });
 
         it('pick and sum', () => {
-            const pickArrayValueObject = new ArrayValueObject({
+            const pickArrayValueObject = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [true, false, false, true, false],
                     [true, false, true, false, false],
@@ -202,7 +202,7 @@ describe('arrayValueObject test', () => {
         //     [0, 100, 2.34, 0, -3],
         // ]
         it('nm multiple formats', () => {
-            const originValueObject = new ArrayValueObject({
+            const originValueObject = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [1, ' ', 1.23, true, false],
                     [0, '100', '2.34', 'test', -3],
@@ -230,7 +230,7 @@ describe('arrayValueObject test', () => {
         //     [0, 100, 2.34, 0, -3],
         // ]
         it('nm multiple formats', () => {
-            const originValueObject = new ArrayValueObject({
+            const originValueObject = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [1, ' ', 1.23, true, false],
                     [0, '100', '2.34', 'test', -3],
@@ -253,7 +253,7 @@ describe('arrayValueObject test', () => {
         });
 
         it('var nm multiple formats', () => {
-            const originValueObject = new ArrayValueObject({
+            const originValueObject = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [1, ' ', 1.23, true, false],
                     [0, '100', '2.34', 'test', -3],
@@ -276,7 +276,7 @@ describe('arrayValueObject test', () => {
         });
 
         it('nm multiple formats', () => {
-            const originValueObject = new ArrayValueObject({
+            const originValueObject = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [1, ' ', 1.23, true, false],
                     [0, '100', '2.34', 'test', -3],

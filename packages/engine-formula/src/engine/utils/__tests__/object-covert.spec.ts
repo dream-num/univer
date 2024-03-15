@@ -21,7 +21,7 @@ import { BooleanValueObject } from '../../value-object/primitive-object';
 
 describe('Test object cover', () => {
     it('Function convertTonNumber', () => {
-        expect(convertTonNumber(new BooleanValueObject(true)).getValue()).toBe(1);
-        expect(convertTonNumber(new BooleanValueObject(false)).getValue()).toBe(0);
+        expect(convertTonNumber(BooleanValueObject.create(true)).getValue()).toBe(1);
+        expect(convertTonNumber(BooleanValueObject.create(false)).getValue()).toBe(0);
     });
 });

@@ -27,13 +27,13 @@ describe('Test istext function', () => {
 
     describe('Istext', () => {
         it('value text', () => {
-            const value = new StringValueObject('test');
+            const value = StringValueObject.create('test');
             const result = textFunction.calculate(value);
             expect(result.getValue()).toBe(true);
         });
 
         it('value array', () => {
-            const value = new ArrayValueObject({
+            const value = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [1, ' ', 1.23, true, false, null, ErrorType.NA, ErrorType.DIV_BY_ZERO, ErrorType.SPILL, ErrorType.NULL],
                     [0, '100', '2.34', 'test', -3, ErrorType.VALUE, ErrorType.REF, ErrorType.NUM, ErrorType.NAME, null],

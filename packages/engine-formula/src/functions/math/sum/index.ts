@@ -19,6 +19,7 @@ import { ErrorType } from '../../../basics/error-type';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
+import { createNumberValueObjectByRawValue } from '../../../engine/value-object/array-value-object';
 
 export class Sum extends BaseFunction {
     override calculate(...variants: BaseValueObject[]) {
@@ -26,7 +27,7 @@ export class Sum extends BaseFunction {
             return new ErrorValueObject(ErrorType.NA);
         }
 
-        let accumulatorAll: BaseValueObject = new NumberValueObject(0);
+        let accumulatorAll: BaseValueObject = NumberValueObject.create(0);
         for (let i = 0; i < variants.length; i++) {
             let variant = variants[i];
 
@@ -42,7 +43,7 @@ export class Sum extends BaseFunction {
                     return new ErrorValueObject(ErrorType.VALUE);
                 }
 
-                variant = new NumberValueObject(value);
+                variant = createNumberValueObjectByRawValue(value);
             }
 
             if (variant.isArray()) {

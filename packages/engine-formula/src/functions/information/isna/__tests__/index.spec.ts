@@ -33,7 +33,7 @@ describe('Test isna function', () => {
         });
 
         it('value array', () => {
-            const value = new ArrayValueObject({
+            const value = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [1, ' ', 1.23, true, false, null, ErrorType.NA, ErrorType.DIV_BY_ZERO, ErrorType.SPILL, ErrorType.NULL],
                     [0, '100', '2.34', 'test', -3, ErrorType.VALUE, ErrorType.REF, ErrorType.NUM, ErrorType.NAME, null],

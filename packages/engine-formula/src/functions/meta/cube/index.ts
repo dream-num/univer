@@ -43,6 +43,6 @@ export class Cube extends BaseFunction {
             values.push(variant as ArrayValueObject);
         }
 
-        return new CubeValueObject(values);
+        return CubeValueObject.create(values);
     }
 }

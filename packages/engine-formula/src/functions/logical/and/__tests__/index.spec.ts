@@ -26,43 +26,43 @@ describe('Test and function', () => {
 
     describe('And', () => {
         it('logical1 string', () => {
-            const logical1 = new StringValueObject('a1');
+            const logical1 = StringValueObject.create('a1');
             const result = textFunction.calculate(logical1);
             expect(result.getValue()).toBe('#VALUE!');
         });
         it('logical1 number 1', () => {
-            const logical1 = new NumberValueObject(1);
+            const logical1 = NumberValueObject.create(1);
             const result = textFunction.calculate(logical1);
             expect(result.getValue()).toBe(true);
         });
 
         it('logical1 number 0', () => {
-            const logical1 = new NumberValueObject(0);
+            const logical1 = NumberValueObject.create(0);
             const result = textFunction.calculate(logical1);
             expect(result.getValue()).toBe(false);
         });
 
         it('logical1 null', () => {
-            const logical1 = new NullValueObject(0);
+            const logical1 = NullValueObject.create();
             const result = textFunction.calculate(logical1);
             expect(result.getValue()).toBe('#VALUE!');
         });
 
         it('logical1 true', () => {
-            const logical1 = new BooleanValueObject(true);
+            const logical1 = BooleanValueObject.create(true);
             const result = textFunction.calculate(logical1);
             expect(result.getValue()).toBe(true);
         });
 
         it('logical2 false', () => {
-            const logical1 = new BooleanValueObject(true);
-            const logical2 = new BooleanValueObject(false);
+            const logical1 = BooleanValueObject.create(true);
+            const logical2 = BooleanValueObject.create(false);
             const result = textFunction.calculate(logical1, logical2);
             expect(result.getValue()).toBe(false);
         });
 
         it('logical1 is array, no logical value', () => {
-            const logical1 = new ArrayValueObject({
+            const logical1 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     ['a1'],
                     ['a2'],
@@ -79,7 +79,7 @@ describe('Test and function', () => {
         });
 
         it('logical1 is array and logical2 is array', () => {
-            const logical1 = new ArrayValueObject({
+            const logical1 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     ['a1'],
                     ['a2'],
@@ -91,7 +91,7 @@ describe('Test and function', () => {
                 row: 0,
                 column: 0,
             });
-            const logical2 = new ArrayValueObject({
+            const logical2 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [true],
                     ['a4'],
@@ -108,7 +108,7 @@ describe('Test and function', () => {
         });
 
         it('logical1 is array and logical2 is array, error value', () => {
-            const logical1 = new ArrayValueObject({
+            const logical1 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     ['a1'],
                     ['a2'],
@@ -120,7 +120,7 @@ describe('Test and function', () => {
                 row: 0,
                 column: 0,
             });
-            const logical2 = new ArrayValueObject({
+            const logical2 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [false],
                     ['#NAME?'],

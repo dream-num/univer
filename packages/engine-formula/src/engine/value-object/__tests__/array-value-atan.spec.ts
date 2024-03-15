@@ -21,7 +21,7 @@ import { ArrayValueObject, transformToValueObject } from '../array-value-object'
 describe('arrayValueObject atan method test', () => {
     describe('atan', () => {
         it('origin nm, param nm', () => {
-            const atanArrayValueObject = new ArrayValueObject({
+            const atanArrayValueObject = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [1, ' ', 1.23, true, false],
                     [0, '100', '2.34', 'test', -3],

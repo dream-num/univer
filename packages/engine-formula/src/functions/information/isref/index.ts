@@ -28,9 +28,9 @@ export class Isref extends BaseFunction {
         }
 
         if (value.isReferenceObject()) {
-            return new BooleanValueObject(true);
+            return BooleanValueObject.create(true);
         }
 
-        return new BooleanValueObject(false);
+        return BooleanValueObject.create(false);
     }
 }

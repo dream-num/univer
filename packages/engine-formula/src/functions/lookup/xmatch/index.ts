@@ -64,13 +64,13 @@ export class Xmatch extends BaseFunction {
             return new ErrorValueObject(ErrorType.NA);
         }
 
-        const matchModeValue = this.getIndexNumValue(matchMode || new NumberValueObject(0));
+        const matchModeValue = this.getIndexNumValue(matchMode || NumberValueObject.create(0));
 
         if (matchModeValue instanceof ErrorValueObject) {
             return matchModeValue;
         }
 
-        const searchModeValue = this.getIndexNumValue(searchMode || new NumberValueObject(1));
+        const searchModeValue = this.getIndexNumValue(searchMode || NumberValueObject.create(1));
 
         if (searchModeValue instanceof ErrorValueObject) {
             return searchModeValue;
@@ -152,7 +152,7 @@ export class Xmatch extends BaseFunction {
             return new ErrorValueObject(ErrorType.NA);
         }
 
-        return new NumberValueObject(rowOrColumn + 1);
+        return NumberValueObject.create(rowOrColumn + 1);
     }
 
     private _getSearchModeValue(searchModeValue: number) {

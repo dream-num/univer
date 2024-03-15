@@ -341,7 +341,7 @@ You can create a new `custom-function.ts` file to specifically place custom form
     */
     export class Customsum extends BaseFunction {
         override calculate(...variants: BaseValueObject[]) {
-            let accumulatorAll: BaseValueObject = new NumberValueObject(0);
+            let accumulatorAll: BaseValueObject = NumberValueObject.create(0);
             for (let i = 0; i < variants.length; i++) {
                 let variant = variants[i];
 
@@ -492,7 +492,7 @@ First refer to [Custom Plugin](/en-us/guides/extend/write-a-plugin/) to create a
      */
     export class Customsum extends BaseFunction {
         override calculate(...variants: BaseValueObject[]) {
-            let accumulatorAll: BaseValueObject = new NumberValueObject(0);
+            let accumulatorAll: BaseValueObject = NumberValueObject.create(0);
             for (let i = 0; i < variants.length; i++) {
                 let variant = variants[i];
 

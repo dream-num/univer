@@ -29,8 +29,8 @@ describe('Test match', () => {
 
     describe('The value of the match', () => {
         it('LookupArray asc, default matchType', async () => {
-            const lookupValue = new NumberValueObject(5);
-            const lookupArray = new ArrayValueObject({
+            const lookupValue = NumberValueObject.create(5);
+            const lookupArray = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [2, 3, 6, 7],
                 ]),
@@ -46,8 +46,8 @@ describe('Test match', () => {
             expect(resultObject.getValue()).toBe(2);
         });
         it('LookupArray asc, matchType is 1', async () => {
-            const lookupValue = new NumberValueObject(5);
-            const lookupArray = new ArrayValueObject({
+            const lookupValue = NumberValueObject.create(5);
+            const lookupArray = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [2, 3, 6, 7],
                 ]),
@@ -58,14 +58,14 @@ describe('Test match', () => {
                 row: 0,
                 column: 0,
             });
-            const matchType = new NumberValueObject(1);
+            const matchType = NumberValueObject.create(1);
 
             const resultObject = textFunction.calculate(lookupValue, lookupArray, matchType);
             expect(resultObject.getValue()).toBe(2);
         });
         it('LookupArray desc, matchType is 1', async () => {
-            const lookupValue = new NumberValueObject(5);
-            const lookupArray = new ArrayValueObject({
+            const lookupValue = NumberValueObject.create(5);
+            const lookupArray = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [7, 6, 3, 2],
                 ]),
@@ -76,7 +76,7 @@ describe('Test match', () => {
                 row: 0,
                 column: 0,
             });
-            const matchType = new NumberValueObject(1);
+            const matchType = NumberValueObject.create(1);
 
             const resultObject = textFunction.calculate(lookupValue, lookupArray, matchType);
 
@@ -85,8 +85,8 @@ describe('Test match', () => {
         });
 
         it('LookupArray asc, matchType is 0', async () => {
-            const lookupValue = new NumberValueObject(5);
-            const lookupArray = new ArrayValueObject({
+            const lookupValue = NumberValueObject.create(5);
+            const lookupArray = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [2, 3, 6, 7],
                 ]),
@@ -97,15 +97,15 @@ describe('Test match', () => {
                 row: 0,
                 column: 0,
             });
-            const matchType = new NumberValueObject(0);
+            const matchType = NumberValueObject.create(0);
 
             const resultObject = textFunction.calculate(lookupValue, lookupArray, matchType);
             expect(resultObject.getValue()).toBe(ErrorType.NA);
         });
 
         it('LookupArray asc, matchType is -1', async () => {
-            const lookupValue = new NumberValueObject(5);
-            const lookupArray = new ArrayValueObject({
+            const lookupValue = NumberValueObject.create(5);
+            const lookupArray = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [2, 3, 6, 7],
                 ]),
@@ -116,7 +116,7 @@ describe('Test match', () => {
                 row: 0,
                 column: 0,
             });
-            const matchType = new NumberValueObject(-1);
+            const matchType = NumberValueObject.create(-1);
 
             const resultObject = textFunction.calculate(lookupValue, lookupArray, matchType);
 
@@ -124,8 +124,8 @@ describe('Test match', () => {
             // expect(resultObject.getValue()).toBe(ErrorType.NA);
         });
         it('LookupArray desc, matchType is -1', async () => {
-            const lookupValue = new NumberValueObject(5);
-            const lookupArray = new ArrayValueObject({
+            const lookupValue = NumberValueObject.create(5);
+            const lookupArray = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [7, 6, 3, 2],
                 ]),
@@ -136,7 +136,7 @@ describe('Test match', () => {
                 row: 0,
                 column: 0,
             });
-            const matchType = new NumberValueObject(-1);
+            const matchType = NumberValueObject.create(-1);
 
             const resultObject = textFunction.calculate(lookupValue, lookupArray, matchType);
 

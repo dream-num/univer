@@ -59,11 +59,11 @@ export class OperatorNode extends BaseAstNode {
         }
 
         if (object1 == null) {
-            object1 = new NullValueObject(0);
+            object1 = NullValueObject.create();
         }
 
         if (object2 == null) {
-            object2 = new NullValueObject(0);
+            object2 = NullValueObject.create();
         }
 
         if (object1.isReferenceObject()) {

@@ -26,14 +26,14 @@ describe('Test edate function', () => {
 
     describe('Edate', () => {
         it('All value is normal', () => {
-            const startDate = new NumberValueObject(43831);
-            const months = new NumberValueObject(1);
+            const startDate = NumberValueObject.create(43831);
+            const months = NumberValueObject.create(1);
             const result = textFunction.calculate(startDate, months);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([[43862]]);
         });
 
         it('Start date is array', () => {
-            const startDate = new ArrayValueObject({
+            const startDate = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([[43832], [43833]]),
                 rowCount: 2,
                 columnCount: 1,
@@ -42,13 +42,13 @@ describe('Test edate function', () => {
                 row: 0,
                 column: 0,
             });
-            const months = new NumberValueObject(1);
+            const months = NumberValueObject.create(1);
             const result = textFunction.calculate(startDate, months);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([[43863], [43864]]);
         });
 
         it('Start date is array with multiple format values', () => {
-            const startDate = new ArrayValueObject({
+            const startDate = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [1, ' ', 1.23, true, false, null],
                     [0, '100', '2.34', 'test', -3, 1900],
@@ -60,14 +60,14 @@ describe('Test edate function', () => {
                 row: 0,
                 column: 0,
             });
-            const months = new NumberValueObject(1);
+            const months = NumberValueObject.create(1);
             const result = textFunction.calculate(startDate, months);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([[32, '#VALUE!', 32, '#VALUE!', '#VALUE!', 31], [31, 130, 33, '#VALUE!', '#NUM!', 1931]]);
         });
 
         it('Months is array', () => {
-            const startDate = new NumberValueObject(43831);
-            const months = new ArrayValueObject({
+            const startDate = NumberValueObject.create(43831);
+            const months = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([[1], [2]]),
                 rowCount: 2,
                 columnCount: 1,
@@ -81,8 +81,8 @@ describe('Test edate function', () => {
         });
 
         it('Months is array with multiple format values', () => {
-            const startDate = new NumberValueObject(43831);
-            const months = new ArrayValueObject({
+            const startDate = NumberValueObject.create(43831);
+            const months = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([[1, ' ', 1.23, true, false, null],
                     [0, '100', '2.34', 'test', -3, 1900]]),
                 rowCount: 2,

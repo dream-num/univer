@@ -27,17 +27,17 @@ export class Isblank extends BaseFunction {
         }
 
         if (value.isNull()) {
-            return new BooleanValueObject(true);
+            return BooleanValueObject.create(true);
         } else if (value.isArray()) {
             return (value as ArrayValueObject).mapValue((valueObject) => {
                 if (valueObject.isNull()) {
-                    return new BooleanValueObject(true);
+                    return BooleanValueObject.create(true);
                 }
 
-                return new BooleanValueObject(false);
+                return BooleanValueObject.create(false);
             });
         }
 
-        return new BooleanValueObject(false);
+        return BooleanValueObject.create(false);
     }
 }

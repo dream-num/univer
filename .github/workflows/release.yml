@@ -170,7 +170,7 @@ jobs:
 
             # ================= Deploy Storybook =================
             - name: 📦 Build storybook
-              run: pnpm run build:storybook
+              run: pnpm storybook:build
 
             - name: 🚀 Deploy to Vercel (storybook)
               uses: amondnet/vercel-action@v25

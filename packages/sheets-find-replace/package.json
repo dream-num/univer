@@ -62,14 +62,11 @@
     },
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
-        "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/find-replace": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
-        "@univerjs/ui": "workspace:*",
         "@wendellhu/redi": "0.13.0",
-        "react": ">=16.9.0",
         "rxjs": ">=7.0.0"
     },
     "devDependencies": {
@@ -83,9 +80,9 @@
         "@wendellhu/redi": "^0.13.0",
         "less": "^4.2.0",
         "react": "^18.2.0",
-        "rxjs": ">=7.0.0",
+        "rxjs": "^7.8.1",
         "typescript": "^5.4.2",
-        "vite": "^5.1.5",
+        "vite": "^5.1.6",
         "vitest": "^1.3.1"
     }
 }

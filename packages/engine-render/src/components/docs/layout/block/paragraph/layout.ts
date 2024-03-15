@@ -193,6 +193,8 @@ export function dealWidthParagraph(
                     );
                 }
             }
+            pushPending();
+            continue;
         } else if (text.endsWith(DataStreamTreeTokenType.PAGE_BREAK)) {
             pushPending();
             allPages.push(
@@ -204,6 +206,7 @@ export function dealWidthParagraph(
                 )
             );
             paragraphAffectSkeDrawings.clear();
+            continue;
         } else if (text.endsWith(DataStreamTreeTokenType.COLUMN_BREAK)) {
             pushPending();
             // 换列标识，还在同一个节内
@@ -222,6 +225,7 @@ export function dealWidthParagraph(
                     )
                 );
             }
+            continue;
         }
 
         pushPending();

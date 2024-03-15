@@ -16,7 +16,7 @@
 
 import { compareToken } from '../../basics/token';
 import type { ArrayValueObject } from '../value-object/array-value-object';
-import { ValueObjectFactory } from '../value-object/array-value-object';
+import { createBooleanValueObjectByRawValue, ValueObjectFactory } from '../value-object/array-value-object';
 import type { BaseValueObject } from '../value-object/base-value-object';
 import { BooleanValueObject } from '../value-object/primitive-object';
 import { expandArrayValueObject } from './array-object';
@@ -89,9 +89,9 @@ export function booleanObjectIntersection(valueObject1: BaseValueObject, valueOb
         }
 
         if (valueObject1?.isBoolean() && valueObject2?.isBoolean()) {
-            return new BooleanValueObject(valueObject1.getValue() && valueObject2.getValue());
+            return createBooleanValueObjectByRawValue(valueObject1.getValue() && valueObject2.getValue());
         }
 
-        return new BooleanValueObject(false);
+        return BooleanValueObject.create(false);
     });
 }

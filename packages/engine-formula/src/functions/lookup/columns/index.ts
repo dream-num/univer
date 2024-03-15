@@ -34,7 +34,7 @@ export class Columns extends BaseFunction {
         }
 
         if (reference.isString() || reference.isNumber() || reference.isBoolean()) {
-            return new NumberValueObject(1);
+            return NumberValueObject.create(1);
         }
 
         if (!reference.isArray()) {
@@ -43,6 +43,6 @@ export class Columns extends BaseFunction {
 
         const columnCount = (reference as ArrayValueObject).getColumnCount();
 
-        return new NumberValueObject(columnCount);
+        return NumberValueObject.create(columnCount);
     }
 }

@@ -22,7 +22,7 @@ import { BooleanValueObject } from '../../../engine/value-object/primitive-objec
 import { BaseFunction } from '../../base-function';
 
 export class If extends BaseFunction {
-    override calculate(logicalTest: BaseValueObject, valueIfTrue: BaseValueObject, valueIfFalse: BaseValueObject = new BooleanValueObject(false)) {
+    override calculate(logicalTest: BaseValueObject, valueIfTrue: BaseValueObject, valueIfFalse: BaseValueObject = BooleanValueObject.create(false)) {
         if (logicalTest == null || valueIfTrue == null) {
             return new ErrorValueObject(ErrorType.NA);
         }

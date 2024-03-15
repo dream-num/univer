@@ -21,6 +21,7 @@ import type { BaseValueObject } from '../../../engine/value-object/base-value-ob
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
+import { createNumberValueObjectByRawValue } from '../../../engine/value-object/array-value-object';
 
 export class Min extends BaseFunction {
     override calculate(...variants: BaseValueObject[]) {
@@ -28,7 +29,7 @@ export class Min extends BaseFunction {
             return new ErrorValueObject(ErrorType.NA);
         }
 
-        let accumulatorAll: BaseValueObject = new NumberValueObject(Number.POSITIVE_INFINITY);
+        let accumulatorAll: BaseValueObject = NumberValueObject.create(Number.POSITIVE_INFINITY);
         for (let i = 0; i < variants.length; i++) {
             let variant = variants[i];
 
@@ -44,7 +45,7 @@ export class Min extends BaseFunction {
                     return new ErrorValueObject(ErrorType.VALUE);
                 }
 
-                variant = new NumberValueObject(value);
+                variant = createNumberValueObjectByRawValue(value);
             }
 
             if (variant.isBoolean()) {

@@ -100,6 +100,10 @@ export function transformToValue(array: BaseValueObject[][] = []) {
 }
 
 export class ArrayValueObject extends BaseValueObject {
+    static create(rawValue: string | IArrayValueObject) {
+        return new ArrayValueObject(rawValue);
+    }
+
     private _values: BaseValueObject[][] = [];
 
     private _rowCount: number = -1;
@@ -210,12 +214,12 @@ export class ArrayValueObject extends BaseValueObject {
     get(row: number, column: number) {
         const rowValues = this._values[row];
         if (rowValues == null) {
-            return new NullValueObject(0);
+            return NullValueObject.create();
         }
 
         const v = rowValues[column];
         if (v == null) {
-            return new NullValueObject(0);
+            return NullValueObject.create();
         }
         return v;
     }
@@ -345,7 +349,7 @@ export class ArrayValueObject extends BaseValueObject {
         const takeArrayColumnCount = takeArray.getColumnCount();
 
         if (takeArrayRowCount !== this._rowCount || takeArrayColumnCount !== this._columnCount) {
-            return this._createNewArray([[new NullValueObject(0)]], 1, 1);
+            return this._createNewArray([[NullValueObject.create()]], 1, 1);
         }
 
         const newValue: BaseValueObject[][] = [];
@@ -723,7 +727,7 @@ export class ArrayValueObject extends BaseValueObject {
     }
 
     override sum() {
-        let accumulatorAll: BaseValueObject = new NumberValueObject(0);
+        let accumulatorAll: BaseValueObject = NumberValueObject.create(0);
         this.iterator((valueObject) => {
             // 'test', ' ',  blank cell, TRUE and FALSE are ignored
             if (valueObject == null || valueObject.isString() || valueObject.isBoolean() || valueObject.isNull()) {
@@ -743,7 +747,7 @@ export class ArrayValueObject extends BaseValueObject {
     }
 
     override max() {
-        let accumulatorAll: BaseValueObject = new NumberValueObject(Number.NEGATIVE_INFINITY);
+        let accumulatorAll: BaseValueObject = NumberValueObject.create(Number.NEGATIVE_INFINITY);
         this.iterator((valueObject) => {
             if (valueObject == null) {
                 return true; // continue
@@ -770,7 +774,7 @@ export class ArrayValueObject extends BaseValueObject {
     }
 
     override min() {
-        let accumulatorAll: BaseValueObject = new NumberValueObject(Number.POSITIVE_INFINITY);
+        let accumulatorAll: BaseValueObject = NumberValueObject.create(Number.POSITIVE_INFINITY);
 
         this.iterator((valueObject) => {
             if (valueObject == null) {
@@ -798,7 +802,7 @@ export class ArrayValueObject extends BaseValueObject {
     }
 
     override count() {
-        let accumulatorAll: BaseValueObject = new NumberValueObject(0);
+        let accumulatorAll: BaseValueObject = NumberValueObject.create(0);
         this.iterator((valueObject) => {
             // 'test', ' ',  blank cell, TRUE and FALSE are ignored
             if (valueObject == null || valueObject.isError() || valueObject.isString() || valueObject.isNull() || valueObject.isBoolean()) {
@@ -811,7 +815,7 @@ export class ArrayValueObject extends BaseValueObject {
     }
 
     override countA() {
-        let accumulatorAll: BaseValueObject = new NumberValueObject(0);
+        let accumulatorAll: BaseValueObject = NumberValueObject.create(0);
         this.iterator((valueObject) => {
             if (valueObject == null || valueObject.isNull()) {
                 return true; // continue
@@ -824,7 +828,7 @@ export class ArrayValueObject extends BaseValueObject {
     }
 
     override countBlank() {
-        let accumulatorAll: BaseValueObject = new NumberValueObject(0);
+        let accumulatorAll: BaseValueObject = NumberValueObject.create(0);
         this.iterator((valueObject) => {
             if (valueObject != null && !valueObject.isNull()) {
                 return true; // continue
@@ -837,16 +841,16 @@ export class ArrayValueObject extends BaseValueObject {
     }
 
     override getNegative(): BaseValueObject {
-        const arrayValueObject = new ArrayValueObject('{0}');
+        const arrayValueObject = ArrayValueObject.create('{0}');
         return arrayValueObject.minus(this);
     }
 
     override getReciprocal(): BaseValueObject {
-        const arrayValueObject = new ArrayValueObject('{1}');
+        const arrayValueObject = ArrayValueObject.create('{1}');
 
         return arrayValueObject.divided(this);
 
-        // return new NumberValueObject(1).divided(this);
+        // return NumberValueObject.create(1).divided(this);
     }
 
     override plus(valueObject: BaseValueObject): BaseValueObject {
@@ -1094,7 +1098,7 @@ export class ArrayValueObject extends BaseValueObject {
             const medianRight = allValue.get(0, count / 2);
             const medianLeft = allValue.get(0, count / 2 - 1);
 
-            return medianRight.plus(medianLeft).divided(new NumberValueObject(2, true));
+            return medianRight.plus(medianLeft).divided(NumberValueObject.create(2));
         }
 
         return allValue.get(0, (count - 1) / 2);
@@ -1129,7 +1133,7 @@ export class ArrayValueObject extends BaseValueObject {
                 return;
             }
 
-            const baseValueObject = valueObject.minus(mean).pow(new NumberValueObject(2, true));
+            const baseValueObject = valueObject.minus(mean).pow(NumberValueObject.create(2));
 
             if (baseValueObject.isError()) {
                 return;
@@ -1140,7 +1144,7 @@ export class ArrayValueObject extends BaseValueObject {
 
         const { _unitId, _sheetId, _currentRow, _currentColumn } = this;
 
-        const squaredDifferencesArrayObject = new ArrayValueObject({
+        const squaredDifferencesArrayObject = ArrayValueObject.create({
             calculateValueList: squaredDifferences,
             rowCount: 1,
             columnCount: squaredDifferences[0].length,
@@ -1388,9 +1392,9 @@ export class ArrayValueObject extends BaseValueObject {
                             result[r] = [];
                         }
                         if (rowPositions?.includes(r + startRow)) {
-                            result[r][column] = new BooleanValueObject(true);
+                            result[r][column] = BooleanValueObject.create(true);
                         } else {
-                            result[r][column] = new BooleanValueObject(false);
+                            result[r][column] = BooleanValueObject.create(false);
                         }
                     }
                 } else {
@@ -1402,13 +1406,13 @@ export class ArrayValueObject extends BaseValueObject {
 
                     if (rowValuePositions != null) {
                         rowValuePositions.forEach((rowPositions, rowValue) => {
-                            let currentValue: Nullable<BaseValueObject> = new NullValueObject(0); // handle blank cell
+                            let currentValue: Nullable<BaseValueObject> = NullValueObject.create(); // handle blank cell
                             if (typeof rowValue === 'string') {
-                                currentValue = new StringValueObject(rowValue);
+                                currentValue = StringValueObject.create(rowValue);
                             } else if (typeof rowValue === 'number') {
-                                currentValue = new NumberValueObject(rowValue);
+                                currentValue = NumberValueObject.create(rowValue);
                             } else if (typeof rowValue === 'boolean') {
-                                currentValue = new BooleanValueObject(rowValue);
+                                currentValue = BooleanValueObject.create(rowValue);
                             }
 
                             const matchResult = currentValue.compare(valueObject, operator as compareToken);
@@ -1418,7 +1422,7 @@ export class ArrayValueObject extends BaseValueObject {
                                         if (result[index - startRow] == null) {
                                             result[index - startRow] = [];
                                         }
-                                        result[index - startRow][column] = new BooleanValueObject(true);
+                                        result[index - startRow][column] = BooleanValueObject.create(true);
                                     }
                                 });
                             }
@@ -1430,7 +1434,7 @@ export class ArrayValueObject extends BaseValueObject {
                             }
 
                             if (result[r][column] == null) {
-                                result[r][column] = new BooleanValueObject(false);
+                                result[r][column] = BooleanValueObject.create(false);
                             }
                         }
                     } else {
@@ -1439,7 +1443,7 @@ export class ArrayValueObject extends BaseValueObject {
                                 result[r] = [];
                             }
 
-                            result[r][column] = new BooleanValueObject(false);
+                            result[r][column] = BooleanValueObject.create(false);
                         }
                     }
                 }
@@ -1764,40 +1768,83 @@ export class ArrayValueObject extends BaseValueObject {
             column,
         };
 
-        return new ArrayValueObject(arrayValueObjectData);
+        return ArrayValueObject.create(arrayValueObjectData);
     }
 }
 
 export class ValueObjectFactory {
     static create(rawValue: string | number | boolean | null) {
         if (rawValue == null) {
-            return new NullValueObject(0);
+            return NullValueObject.create();
         }
         if (typeof rawValue === 'boolean') {
-            return new BooleanValueObject(rawValue, true);
+            return BooleanValueObject.create(rawValue);
         }
         if (typeof rawValue === 'string') {
             const rawValueUpper = rawValue.toLocaleUpperCase().trim();
             if (ERROR_TYPE_SET.has(rawValueUpper as ErrorType)) {
-                return new ErrorValueObject(rawValueUpper as ErrorType);
+                return ErrorValueObject.create(rawValueUpper as ErrorType);
             }
             if (rawValueUpper === BooleanValue.TRUE || rawValueUpper === BooleanValue.FALSE) {
-                return new BooleanValueObject(rawValueUpper);
+                return createBooleanValueObjectByRawValue(rawValue);
             }
             if (isRealNum(rawValue)) {
-                return new NumberValueObject(rawValue);
+                return NumberValueObject.create(Number(rawValue));
             }
             if (new RegExp($ARRAY_VALUE_REGEX, 'g').test(rawValue.replace(/\n/g, '').replace(/\r/g, ''))) {
-                return new ArrayValueObject(rawValue.replace(/\n/g, '').replace(/\r/g, ''));
+                return ArrayValueObject.create(rawValue.replace(/\n/g, '').replace(/\r/g, ''));
             }
-            return new StringValueObject(rawValue);
+
+            return createStringValueObjectByRawValue(rawValue);
         }
         if (typeof rawValue === 'number') {
-            if (!Number.isFinite(rawValue)) {
-                return new ErrorValueObject(ErrorType.NUM);
-            }
-            return new NumberValueObject(rawValue, true);
+            return createNumberValueObjectByRawValue(rawValue);
         }
-        return new ErrorValueObject(ErrorType.NA);
+        return ErrorValueObject.create(ErrorType.NA);
     }
+}
+
+export function createBooleanValueObjectByRawValue(rawValue: string | number | boolean) {
+    if (typeof rawValue === 'boolean') {
+        return BooleanValueObject.create(rawValue);
+    }
+    let value = false;
+    if (typeof rawValue === 'string') {
+        const rawValueUpper = rawValue.toLocaleUpperCase();
+        if (rawValueUpper === BooleanValue.TRUE) {
+            value = true;
+        } else if (rawValueUpper === BooleanValue.FALSE) {
+            value = false;
+        }
+    } else {
+        if (rawValue === 1) {
+            value = true;
+        } else {
+            value = false;
+        }
+    }
+    return BooleanValueObject.create(value);
+}
+
+export function createStringValueObjectByRawValue(rawValue: string | number | boolean) {
+    let value = rawValue.toString();
+
+    if (value.charAt(0) === '"' && value.charAt(value.length - 1) === '"') {
+        value = value.slice(1, -1);
+        value = value.replace(/""/g, '"');
+    }
+
+    return StringValueObject.create(value);
+}
+
+export function createNumberValueObjectByRawValue(rawValue: string | number | boolean) {
+    if (typeof rawValue === 'number') {
+        if (!Number.isFinite(rawValue)) {
+            return new ErrorValueObject(ErrorType.NUM);
+        }
+        return NumberValueObject.create(rawValue);
+    } else if (isRealNum(rawValue)) {
+        return NumberValueObject.create(Number(rawValue));
+    }
+    return ErrorValueObject.create(ErrorType.NA);
 }

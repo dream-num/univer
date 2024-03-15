@@ -60,7 +60,7 @@ export class PrefixNode extends BaseAstNode {
 
         if (this._operatorString === prefixToken.MINUS) {
             result = this._functionExecutor!.calculate(
-                new NumberValueObject(0),
+                NumberValueObject.create(0),
                 value as BaseValueObject
             ) as FunctionVariantType;
         } else if (this._operatorString === prefixToken.AT) {

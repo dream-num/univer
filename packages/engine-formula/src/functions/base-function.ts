@@ -23,7 +23,7 @@ import { compareToken } from '../basics/token';
 import type { FunctionVariantType, NodeValueType } from '../engine/reference-object/base-reference-object';
 import type { ArrayBinarySearchType } from '../engine/utils/compare';
 import { ArrayOrderSearchType } from '../engine/utils/compare';
-import type { ArrayValueObject } from '../engine/value-object/array-value-object';
+import { type ArrayValueObject, createNumberValueObjectByRawValue } from '../engine/value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject } from '../engine/value-object/base-value-object';
 import { NumberValueObject, type PrimitiveValueType } from '../engine/value-object/primitive-object';
 import { convertTonNumber } from '../engine/utils/object-covert';
@@ -412,7 +412,7 @@ export class BaseFunction extends Disposable {
                     return new ErrorValueObject(ErrorType.VALUE);
                 }
 
-                variant = new NumberValueObject(value);
+                variant = createNumberValueObjectByRawValue(value);
             }
 
             if (variant.isBoolean()) {
@@ -420,7 +420,7 @@ export class BaseFunction extends Disposable {
             }
 
             if (variant.isNull()) {
-                variant = new NumberValueObject(0);
+                variant = NumberValueObject.create(0);
             }
 
             if (variant.isArray()) {
@@ -467,7 +467,7 @@ export class BaseFunction extends Disposable {
             const value = Number(valueObject.getValue());
 
             // Non-text numbers also need to be counted to the sample size
-            valueObject = new NumberValueObject(isNaN(value) ? 0 : value);
+            valueObject = NumberValueObject.create(isNaN(value) ? 0 : value);
         }
 
         return valueObject;

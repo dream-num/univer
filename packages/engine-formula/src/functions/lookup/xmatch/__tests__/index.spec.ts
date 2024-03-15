@@ -22,7 +22,7 @@ import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
 import { Xmatch } from '..';
 import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 
-const arrayValueObject1 = new ArrayValueObject(/*ts*/ `{
+const arrayValueObject1 = ArrayValueObject.create(/*ts*/ `{
     1, "First", 100, 89;
     2, "Second", 68, 66;
     3, "Third", 100, 75;
@@ -31,20 +31,20 @@ const arrayValueObject1 = new ArrayValueObject(/*ts*/ `{
     6, "Sixth", 96, 82
 }`);
 
-const arrayValueObject2 = new ArrayValueObject(/*ts*/ `{
+const arrayValueObject2 = ArrayValueObject.create(/*ts*/ `{
     6, "Sixth";
     1, "First";
     4, "Fourth"
 }`);
 
-const arrayValueObject3 = new ArrayValueObject(/*ts*/ `{
+const arrayValueObject3 = ArrayValueObject.create(/*ts*/ `{
     0, 500;
     101, 800;
     301, 1000;
     1000, 3000
 }`);
 
-const arrayValueObject4 = new ArrayValueObject(/*ts*/ `{
+const arrayValueObject4 = ArrayValueObject.create(/*ts*/ `{
     701, 3000;
     101, 800;
     401, 2000;
@@ -64,7 +64,7 @@ describe('Test xmatch', () => {
     describe('The value of the lookup', () => {
         it('Search single string', async () => {
             const resultObject = textFunction.calculate(
-                new StringValueObject('Second'),
+                StringValueObject.create('Second'),
                 arrayValueObject1.slice(undefined, [1, 2])!
             );
             expect(resultObject.getValue()).toBe(2);
@@ -72,7 +72,7 @@ describe('Test xmatch', () => {
 
         it('Search single string horizon', async () => {
             const resultObject = textFunction.calculate(
-                new StringValueObject('Second'),
+                StringValueObject.create('Second'),
                 arrayValueObject1.transpose().slice([1, 2])!
             );
             expect(resultObject.getValue()).toBe(2);
@@ -80,7 +80,7 @@ describe('Test xmatch', () => {
 
         it('Search single number ', async () => {
             const resultObject = textFunction.calculate(
-                new NumberValueObject(5),
+                NumberValueObject.create(5),
                 arrayValueObject1.slice(undefined, [0, 1])!
             );
             expect(resultObject.getValue()).toBe(5);
@@ -98,56 +98,56 @@ describe('Test xmatch', () => {
     describe('Approximate match test', () => {
         it('Approximate match1', async () => {
             const resultObject = textFunction.calculate(
-                new StringValueObject('s*'),
+                StringValueObject.create('s*'),
                 arrayValueObject1.slice(undefined, [1, 2])!,
-                new NumberValueObject(2)
+                NumberValueObject.create(2)
             );
             expect(resultObject.getValue()).toBe(2);
         });
 
         it('Approximate asc', async () => {
             const resultObject = textFunction.calculate(
-                new StringValueObject('???th'),
+                StringValueObject.create('???th'),
                 arrayValueObject1.slice(undefined, [1, 2])!,
-                new NumberValueObject(2)
+                NumberValueObject.create(2)
             );
             expect(resultObject.getValue()).toBe(5);
         });
 
         it('Approximate desc', async () => {
             const resultObject = textFunction.calculate(
-                new StringValueObject('???th'),
+                StringValueObject.create('???th'),
                 arrayValueObject1.slice(undefined, [1, 2])!,
-                new NumberValueObject(2),
-                new NumberValueObject(-1)
+                NumberValueObject.create(2),
+                NumberValueObject.create(-1)
             );
             expect(resultObject.getValue()).toBe(6);
         });
 
         it('match_mode is -1', async () => {
             const resultObject = textFunction.calculate(
-                new NumberValueObject(110),
+                NumberValueObject.create(110),
                 arrayValueObject3.slice(undefined, [0, 1])!,
-                new NumberValueObject(-1)
+                NumberValueObject.create(-1)
             );
             expect(resultObject.getValue()).toBe(2);
         });
 
         it('match_mode 1', async () => {
             const resultObject = textFunction.calculate(
-                new NumberValueObject(110),
+                NumberValueObject.create(110),
                 arrayValueObject3.slice(undefined, [0, 1])!,
-                new NumberValueObject(1)
+                NumberValueObject.create(1)
             );
             expect(resultObject.getValue()).toBe(3);
         });
 
         it('match_mode binary asc', async () => {
             const resultObject = textFunction.calculate(
-                new NumberValueObject(660),
+                NumberValueObject.create(660),
                 arrayValueObject4.slice(undefined, [0, 1])!,
-                new NumberValueObject(0),
-                new NumberValueObject(2)
+                NumberValueObject.create(0),
+                NumberValueObject.create(2)
             );
             // FIXME: fix this test
             // expect(resultObject.getValue()).toBe(ErrorType.NA);
@@ -155,10 +155,10 @@ describe('Test xmatch', () => {
 
         it('match_mode binary desc', async () => {
             const resultObject = textFunction.calculate(
-                new NumberValueObject(660),
+                NumberValueObject.create(660),
                 arrayValueObject4.slice(undefined, [0, 1])!,
-                new NumberValueObject(0),
-                new NumberValueObject(-2)
+                NumberValueObject.create(0),
+                NumberValueObject.create(-2)
             );
             // FIXME: fix this test
             // expect(resultObject.getValue()).toBe(ErrorType.NA);

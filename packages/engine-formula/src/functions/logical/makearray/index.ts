@@ -53,7 +53,7 @@ export class Makearray extends BaseFunction {
                 result[r] = [];
             }
             for (let c = 0; c < column; c++) {
-                const value = lambda.execute(new NumberValueObject(r + 1), new NumberValueObject(c + 1));
+                const value = lambda.execute(NumberValueObject.create(r + 1), NumberValueObject.create(c + 1));
 
                 result[r][c] = value;
             }

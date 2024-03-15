@@ -209,7 +209,7 @@ export class Subtotal extends BaseFunction {
     }
 
     private _counta(ignoreHidden: boolean, ...refs: FunctionVariantType[]) {
-        let accumulatorAll: BaseValueObject = new NumberValueObject(0);
+        let accumulatorAll: BaseValueObject = NumberValueObject.create(0);
         for (let i = 0; i < refs.length; i++) {
             const variant = refs[i];
 
@@ -243,7 +243,7 @@ export class Subtotal extends BaseFunction {
         }
 
         if (this._isBlankArrayObject(flattenArray)) {
-            return new NumberValueObject(0);
+            return NumberValueObject.create(0);
         }
 
         return flattenArray.max();
@@ -257,7 +257,7 @@ export class Subtotal extends BaseFunction {
         }
 
         if (this._isBlankArrayObject(flattenArray)) {
-            return new NumberValueObject(0);
+            return NumberValueObject.create(0);
         }
 
         return flattenArray.min();
@@ -271,10 +271,10 @@ export class Subtotal extends BaseFunction {
         }
 
         if (this._isBlankArrayObject(flattenArray)) {
-            return new NumberValueObject(0);
+            return NumberValueObject.create(0);
         }
 
-        let result: NumberValueObject = new NumberValueObject(1);
+        let result: NumberValueObject = NumberValueObject.create(1);
         (flattenArray as ArrayValueObject).iterator((valueObject) => {
             result = result.multiply(
                 valueObject as BaseValueObject

@@ -55,6 +55,6 @@ export class And extends BaseFunction {
             }
         }
 
-        return noBoolean ? new ErrorValueObject(ErrorType.VALUE) : new BooleanValueObject(result);
+        return noBoolean ? new ErrorValueObject(ErrorType.VALUE) : BooleanValueObject.create(result);
     }
 }

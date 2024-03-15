@@ -341,7 +341,7 @@ Uniscript 底层使用了 `@univerjs/facade`，你也可以直接在项目中使
     */
     export class Customsum extends BaseFunction {
         override calculate(...variants: BaseValueObject[]) {
-            let accumulatorAll: BaseValueObject = new NumberValueObject(0);
+            let accumulatorAll: BaseValueObject = NumberValueObject.create(0);
             for (let i = 0; i < variants.length; i++) {
                 let variant = variants[i];
 
@@ -492,7 +492,7 @@ Uniscript 底层使用了 `@univerjs/facade`，你也可以直接在项目中使
      */
     export class Customsum extends BaseFunction {
         override calculate(...variants: BaseValueObject[]) {
-            let accumulatorAll: BaseValueObject = new NumberValueObject(0);
+            let accumulatorAll: BaseValueObject = NumberValueObject.create(0);
             for (let i = 0; i < variants.length; i++) {
                 let variant = variants[i];
 

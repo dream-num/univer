@@ -69,7 +69,7 @@ export class LambdaNode extends BaseAstNode {
 
     override execute() {
         if (this.isEmptyParamFunction()) {
-            this.setValue(new LambdaValueObjectObject(this, this._interpreter, this._lambdaPrivacyVarKeys));
+            this.setValue(LambdaValueObjectObject.create(this, this._interpreter, this._lambdaPrivacyVarKeys));
         } else {
             const children = this.getChildren();
             const childrenCount = children.length;
@@ -79,7 +79,7 @@ export class LambdaNode extends BaseAstNode {
 
     // override async executeAsync() {
     //     if (this.isEmptyParamFunction()) {
-    //         await this.setValue(new LambdaValueObjectObject(this, this._interpreter, this._lambdaPrivacyVarKeys));
+    //         await this.setValue(LambdaValueObjectObject.create(this, this._interpreter, this._lambdaPrivacyVarKeys));
     //     } else {
     //         const children = this.getChildren();
     //         const childrenCount = children.length;

@@ -19,6 +19,7 @@ import { ErrorType } from '../../../basics/error-type';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
+import { createBooleanValueObjectByRawValue, createNumberValueObjectByRawValue, createStringValueObjectByRawValue } from '../../../engine/value-object/array-value-object';
 
 export class Average extends BaseFunction {
     override calculate(...variants: BaseValueObject[]) {
@@ -26,8 +27,8 @@ export class Average extends BaseFunction {
             return new ErrorValueObject(ErrorType.NA);
         }
 
-        let accumulatorSum: BaseValueObject = new NumberValueObject(0);
-        let accumulatorCount: BaseValueObject = new NumberValueObject(0);
+        let accumulatorSum: BaseValueObject = NumberValueObject.create(0);
+        let accumulatorCount: BaseValueObject = NumberValueObject.create(0);
         for (let i = 0; i < variants.length; i++) {
             let variant = variants[i];
 
@@ -43,7 +44,7 @@ export class Average extends BaseFunction {
                     return new ErrorValueObject(ErrorType.VALUE);
                 }
 
-                variant = new NumberValueObject(value);
+                variant = createNumberValueObjectByRawValue(value);
             }
 
             if (variant.isArray()) {
@@ -54,9 +55,12 @@ export class Average extends BaseFunction {
                 }
 
                 accumulatorCount = accumulatorCount.plus(variant.count());
+            } else if (variant.isBoolean()) {
+                accumulatorSum = accumulatorSum.plus(createBooleanValueObjectByRawValue(variant.getValue()));
+                accumulatorCount = accumulatorCount.plus(NumberValueObject.create(1));
             } else if (!variant.isNull()) {
-                accumulatorSum = accumulatorSum.plus(new NumberValueObject(variant.getValue()));
-                accumulatorCount = accumulatorCount.plus(new NumberValueObject(1));
+                accumulatorSum = accumulatorSum.plus(createNumberValueObjectByRawValue(variant.getValue()));
+                accumulatorCount = accumulatorCount.plus(NumberValueObject.create(1));
             }
         }
 

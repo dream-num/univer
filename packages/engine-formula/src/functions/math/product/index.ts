@@ -20,6 +20,7 @@ import { ErrorType } from '../../../basics/error-type';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
+import { createNumberValueObjectByRawValue } from '../../../engine/value-object/array-value-object';
 
 export class Product extends BaseFunction {
     override calculate(...variants: BaseValueObject[]) {
@@ -27,7 +28,7 @@ export class Product extends BaseFunction {
             return new ErrorValueObject(ErrorType.NA);
         }
 
-        let accumulatorAll: BaseValueObject = new NumberValueObject(1);
+        let accumulatorAll: BaseValueObject = NumberValueObject.create(1);
         for (let i = 0; i < variants.length; i++) {
             let variant = variants[i];
 
@@ -43,7 +44,7 @@ export class Product extends BaseFunction {
                     return new ErrorValueObject(ErrorType.VALUE);
                 }
 
-                variant = new NumberValueObject(value);
+                variant = createNumberValueObjectByRawValue(value);
             }
 
             if (variant.isArray()) {
@@ -69,7 +70,7 @@ export class Product extends BaseFunction {
     }
 
     private _multiplyArray(array: ArrayValueObject) {
-        let result: BaseValueObject = new NumberValueObject(1);
+        let result: BaseValueObject = NumberValueObject.create(1);
         array.iterator((valueObject) => {
             // 'test', ' ',  blank cell, TRUE and FALSE are ignored
             if (valueObject == null || valueObject.isString() || valueObject.isBoolean() || valueObject.isNull()) {

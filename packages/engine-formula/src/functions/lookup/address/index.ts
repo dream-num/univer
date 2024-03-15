@@ -79,7 +79,7 @@ export class Address extends BaseFunction {
         };
 
         const rangeString = a1 && !a1Value ? serializeRangeToR1C1(range) : serializeRange(range);
-        return new StringValueObject(sheetName !== '' ? `${sheetName}!${rangeString}` : rangeString);
+        return StringValueObject.create(sheetName !== '' ? `${sheetName}!${rangeString}` : rangeString);
     }
 }
 

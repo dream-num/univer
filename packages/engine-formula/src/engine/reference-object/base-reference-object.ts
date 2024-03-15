@@ -21,7 +21,7 @@ import { FormulaAstLRU } from '../../basics/cache-lru';
 import type { INumfmtItemMap, IRuntimeUnitDataType, IUnitData, IUnitSheetNameMap } from '../../basics/common';
 import { ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
 import { ObjectClassType } from '../../basics/object-class-type';
-import { ArrayValueObject, ValueObjectFactory } from '../value-object/array-value-object';
+import { ArrayValueObject, createBooleanValueObjectByRawValue, createNumberValueObjectByRawValue, createStringValueObjectByRawValue, ValueObjectFactory } from '../value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject, type IArrayValueObject } from '../value-object/base-value-object';
 import {
     BooleanValueObject,
@@ -181,7 +181,7 @@ export class BaseReferenceObject extends ObjectClassType {
         const cell = this.getCellData(startRow, startColumn);
 
         if (!cell) {
-            return new NumberValueObject(0, true);
+            return NumberValueObject.create(0);
         }
 
         const cellValueObject = this.getCellValueObject(cell);
@@ -367,17 +367,17 @@ export class BaseReferenceObject extends ObjectClassType {
     getCellValueObject(cell: ICellData) {
         const value = getCellValue(cell);
         if (ERROR_TYPE_SET.has(value as ErrorType)) {
-            return new ErrorValueObject(value as ErrorType);
+            return ErrorValueObject.create(value as ErrorType);
         }
 
         if (cell.t === CellValueType.NUMBER) {
-            return new NumberValueObject(value);
+            return createNumberValueObjectByRawValue(value);
         }
         if (cell.t === CellValueType.STRING || cell.t === CellValueType.FORCE_STRING) {
-            return new StringValueObject(value);
+            return createStringValueObjectByRawValue(value);
         }
         if (cell.t === CellValueType.BOOLEAN) {
-            return new BooleanValueObject(value);
+            return createBooleanValueObjectByRawValue(value);
         }
 
         return ValueObjectFactory.create(value);
@@ -490,7 +490,7 @@ export class BaseReferenceObject extends ObjectClassType {
             }
 
             if (valueObject == null) {
-                valueObject = new NullValueObject(0);
+                valueObject = NullValueObject.create();
             }
 
             arrayValueList[row][column] = valueObject;
@@ -506,7 +506,7 @@ export class BaseReferenceObject extends ObjectClassType {
             column: startColumn,
         };
 
-        const arrayValueObject = new ArrayValueObject(arrayValueObjectData);
+        const arrayValueObject = ArrayValueObject.create(arrayValueObjectData);
 
         useCache && FORMULA_REF_TO_ARRAY_CACHE.set(key, arrayValueObject);
 
@@ -539,7 +539,7 @@ export class BaseReferenceObject extends ObjectClassType {
             column: 0,
         };
 
-        return new ArrayValueObject(arrayValueObjectData);
+        return ArrayValueObject.create(arrayValueObjectData);
     }
 }
 
@@ -594,6 +594,6 @@ export class AsyncArrayObject extends ObjectClassType {
             column: 0,
         };
 
-        return new ArrayValueObject(arrayValueObjectData);
+        return ArrayValueObject.create(arrayValueObjectData);
     }
 }

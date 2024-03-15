@@ -89,13 +89,13 @@ export class Xlookup extends BaseFunction {
             ifNotFound = new ErrorValueObject(ErrorType.NA);
         }
 
-        const matchModeValue = this.getIndexNumValue(matchMode || new NumberValueObject(0));
+        const matchModeValue = this.getIndexNumValue(matchMode || NumberValueObject.create(0));
 
         if (matchModeValue instanceof ErrorValueObject) {
             return matchModeValue;
         }
 
-        const searchModeValue = this.getIndexNumValue(searchMode || new NumberValueObject(1));
+        const searchModeValue = this.getIndexNumValue(searchMode || NumberValueObject.create(1));
 
         if (searchModeValue instanceof ErrorValueObject) {
             return searchModeValue;

@@ -26,13 +26,13 @@ describe('Test acot function', () => {
 
     describe('Acot', () => {
         it('Value is normal', () => {
-            const value = new NumberValueObject(1);
+            const value = NumberValueObject.create(1);
             const result = textFunction.calculate(value);
             expect(result.getValue()).toBe(0.7853981633974483);
         });
 
         it('Value is array', () => {
-            const valueArray = new ArrayValueObject({
+            const valueArray = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [1, ' ', 1.23, true, false],
                     [0, '100', '2.34', 'test', -3],

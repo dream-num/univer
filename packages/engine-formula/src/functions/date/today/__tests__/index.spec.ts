@@ -46,7 +46,7 @@ describe('Test today function', () => {
         });
 
         it('Set a parameter', () => {
-            const result = textFunction.calculate(new NumberValueObject(1));
+            const result = textFunction.calculate(NumberValueObject.create(1));
             expect(result.getValue()).toBe(ErrorType.NA);
         });
     });

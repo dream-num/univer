@@ -33,10 +33,12 @@ export interface ITooltipProps {
     children: React.ReactElement;
 
     onVisibleChange?: (visible: boolean) => void;
+
+    style?: React.CSSProperties;
 }
 
 export const Tooltip = forwardRef((props: ITooltipProps, ref: Ref<TooltipRef>) => {
-    const { children, visible, placement = 'top', title, onVisibleChange } = props;
+    const { children, visible, placement = 'top', title, onVisibleChange, style } = props;
 
     const { mountContainer } = useContext(ConfigContext);
 
@@ -53,6 +55,7 @@ export const Tooltip = forwardRef((props: ITooltipProps, ref: Ref<TooltipRef>) =
             showArrow
             destroyTooltipOnHide
             onVisibleChange={onVisibleChange}
+            overlayStyle={style}
         >
             {children}
         </RcTooltip>

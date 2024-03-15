@@ -53,14 +53,14 @@ export class Index extends BaseFunction {
         // When there is only one row, the rowNum is considered to be the column number.
         // =INDEX(A6:B6,2) equals =INDEX(A6:B6,1,2)
         if (referenceRowCount === 1 && referenceColumnCount > 1 && columnNum == null) {
-            columnNum = rowNum ?? new NumberValueObject(0);
-            rowNum = new NumberValueObject(0);
+            columnNum = rowNum ?? NumberValueObject.create(0);
+            rowNum = NumberValueObject.create(0);
         } else {
-            rowNum = rowNum ?? new NumberValueObject(0);
-            columnNum = columnNum ?? new NumberValueObject(0);
+            rowNum = rowNum ?? NumberValueObject.create(0);
+            columnNum = columnNum ?? NumberValueObject.create(0);
         }
 
-        areaNum = areaNum ?? new NumberValueObject(1);
+        areaNum = areaNum ?? NumberValueObject.create(1);
 
         // get max row length
         const maxRowLength = Math.max(

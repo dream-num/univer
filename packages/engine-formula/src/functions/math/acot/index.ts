@@ -60,5 +60,5 @@ function acot(num: BaseValueObject) {
         return new ErrorValueObject(ErrorType.VALUE);
     }
 
-    return new NumberValueObject(result);
+    return NumberValueObject.create(result);
 }

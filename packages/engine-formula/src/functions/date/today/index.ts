@@ -28,7 +28,7 @@ export class Today extends BaseFunction {
         }
 
         const currentSerial = excelDateSerial(new Date());
-        const valueObject = new NumberValueObject(currentSerial);
+        const valueObject = NumberValueObject.create(currentSerial);
         valueObject.setPattern(DEFFAULT_DATE_FORMAT);
         return valueObject;
     }

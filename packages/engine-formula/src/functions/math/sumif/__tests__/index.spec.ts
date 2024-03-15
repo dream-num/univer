@@ -26,30 +26,30 @@ describe('Test sumif function', () => {
 
     describe('Sumif', () => {
         it('Range and criteria', async () => {
-            const range = new ArrayValueObject(/*ts*/ `{
+            const range = ArrayValueObject.create(/*ts*/ `{
                 1;
                 4;
                 44;
                 444
             }`);
 
-            const criteria = new StringValueObject('>40');
+            const criteria = StringValueObject.create('>40');
 
             const resultObject = textFunction.calculate(range, criteria);
             expect(resultObject.getValue()).toBe(488);
         });
 
         it('Sum range with wildcard asterisk', async () => {
-            const range = new ArrayValueObject(/*ts*/ `{
+            const range = ArrayValueObject.create(/*ts*/ `{
                 Ada;
                 test1;
                 test12;
                 Univer
             }`);
 
-            const criteria = new StringValueObject('test*');
+            const criteria = StringValueObject.create('test*');
 
-            const sumRange = new ArrayValueObject(/*ts*/ `{
+            const sumRange = ArrayValueObject.create(/*ts*/ `{
                 1;
                 1;
                 1;
@@ -61,14 +61,14 @@ describe('Test sumif function', () => {
         });
 
         it('ArrayValueObject range and ArrayValueObject criteria', async () => {
-            const range = new ArrayValueObject(/*ts*/ `{
+            const range = ArrayValueObject.create(/*ts*/ `{
                 1;
                 4;
                 44;
                 444
             }`);
 
-            const criteria = new ArrayValueObject(/*ts*/ `{
+            const criteria = ArrayValueObject.create(/*ts*/ `{
                 4;
                 4;
                 44;

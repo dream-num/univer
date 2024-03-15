@@ -16,6 +16,7 @@
 
 import type { ICommandInfo, IRange, ISelectionCell, Nullable } from '@univerjs/core';
 import {
+    debounce,
     Disposable,
     ICommandService,
     IUniverInstanceService,
@@ -31,6 +32,8 @@ import {
     IFunctionService,
     RangeReferenceObject,
 } from '@univerjs/engine-formula';
+import type {
+    ISelectionWithStyle } from '@univerjs/sheets';
 import {
     INumfmtService,
     NORMAL_SELECTION_PLUGIN_NAME,
@@ -39,6 +42,7 @@ import {
 } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
+import { debounceTime } from 'rxjs';
 import type { IStatusBarServiceStatus } from '../services/status-bar.service';
 import { IStatusBarService } from '../services/status-bar.service';
 
@@ -64,6 +68,14 @@ export class StatusBarController extends Disposable {
     }
 
     private _registerSelectionListener(): void {
+        const statisticsHandler = debounce((selections: ISelectionWithStyle[]) => {
+            const primary = selections[selections.length - 1]?.primary;
+            this._calculateSelection(
+                selections.map((selection) => selection.range),
+                primary
+            );
+        }, 100);
+
         this.disposeWithMe(
             toDisposable(
                 this._selectionManagerService.selectionMoving$.subscribe((selections) => {
@@ -71,27 +83,32 @@ export class StatusBarController extends Disposable {
                         return;
                     }
                     if (selections) {
-                        clearTimeout(this._calculateTimeout);
-                        this._calculateTimeout = setTimeout(() => {
-                            const primary = selections[selections.length - 1]?.primary;
-                            this._calculateSelection(
-                                selections.map((selection) => selection.range),
-                                primary
-                            );
-                        }, 100);
+                        statisticsHandler(selections);
                     }
                 })
             )
         );
+
+        this.disposeWithMe(
+            toDisposable(
+                this._selectionManagerService.selectionMoveEnd$
+                    .subscribe((selections) => {
+                        if (this._selectionManagerService.getCurrent()?.pluginName !== NORMAL_SELECTION_PLUGIN_NAME) {
+                            return;
+                        }
+                        if (selections) {
+                            statisticsHandler(selections);
+                        }
+                    })
+            )
+        );
+
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (command.id === SetRangeValuesMutation.id) {
                     const selections = this._selectionManagerService.getSelections();
                     if (selections) {
-                        clearTimeout(this._calculateTimeout);
-                        this._calculateTimeout = setTimeout(() => {
-                            this._calculateSelection(selections.map((selection) => selection.range));
-                        }, 100);
+                        statisticsHandler(selections as ISelectionWithStyle[]);
                     }
                 }
             })

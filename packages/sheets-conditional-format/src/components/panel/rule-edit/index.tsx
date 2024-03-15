@@ -47,6 +47,9 @@ interface IRuleEditProps {
     onCancel: () => void;
 }
 
+const getUnitId = (univerInstanceService: IUniverInstanceService) => univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+const getSubUnitId = (univerInstanceService: IUniverInstanceService) => univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
+
 export const RuleEdit = (props: IRuleEditProps) => {
     const localeService = useDependency(LocaleService);
     const commandService = useDependency(ICommandService);
@@ -54,8 +57,8 @@ export const RuleEdit = (props: IRuleEditProps) => {
     const conditionalFormatRuleModel = useDependency(ConditionalFormatRuleModel);
     const selectionManagerService = useDependency(SelectionManagerService);
 
-    const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-    const subUnitId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
+    const unitId = getUnitId(univerInstanceService);
+    const subUnitId = getSubUnitId(univerInstanceService);
 
     const rangeResult = useRef<IRange[]>([]);
     const rangeString = useMemo(() => {
@@ -171,6 +174,9 @@ export const RuleEdit = (props: IRuleEditProps) => {
             const result = interceptorManager.fetchThroughInterceptors(interceptorManager.getInterceptPoints().submit)(null, null);
             const ranges = getRanges();
             if (result && ranges.length) {
+                // When you switch the child table, you need to fetch it again here, instead of using the
+                const unitId = getUnitId(univerInstanceService);
+                const subUnitId = getSubUnitId(univerInstanceService);
                 let rule = {} as IConditionFormatRule;
                 if (props.rule && props.rule.cfId) {
                     rule = { ...props.rule, ranges, rule: result };

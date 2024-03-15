@@ -18,8 +18,9 @@ import { merge, Observable } from 'rxjs';
 import type { ComponentManager, IMenuSelectorItem } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 import { MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
-import { SelectionManagerService } from '@univerjs/sheets';
+import { SelectionManagerService, SetWorksheetActiveOperation } from '@univerjs/sheets';
 
+import { debounceTime } from 'rxjs/operators';
 import { ICommandService, IUniverInstanceService, LocaleService, Rectangle } from '@univerjs/core';
 import { Conditions } from '@univerjs/icons';
 import { addConditionalRuleMutation } from '../commands/mutations/addConditionalRule.mutation';
@@ -39,12 +40,12 @@ export const FactoryManageConditionalFormatRule = (componentManager: ComponentMa
         const commandService = _accessor.get(ICommandService);
         const univerInstanceService = _accessor.get(IUniverInstanceService);
         const conditionalFormatRuleModel = _accessor.get(ConditionalFormatRuleModel);
+        const commandList = [SetWorksheetActiveOperation.id, addConditionalRuleMutation.id, setConditionalRuleMutation.id, deleteConditionalRuleMutation.id, moveConditionalRuleMutation.id];
 
         const clearRangeEnable$ = new Observable<boolean>((subscriber) =>
             merge(
                 selectionManagerService.selectionMoveEnd$,
                 new Observable<null>((commandSubscribe) => {
-                    const commandList = [addConditionalRuleMutation.id, setConditionalRuleMutation.id, deleteConditionalRuleMutation.id, moveConditionalRuleMutation.id];
                     const disposable = commandService.onCommandExecuted((commandInfo) => {
                         const { id, params } = commandInfo;
                         const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
@@ -54,7 +55,7 @@ export const FactoryManageConditionalFormatRule = (componentManager: ComponentMa
                     });
                     return () => disposable.dispose();
                 })
-            ).subscribe(() => {
+            ).pipe(debounceTime(16)).subscribe(() => {
                 const ranges = selectionManagerService.getSelections()?.map((selection) => selection.range) || [];
                 const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
                 const subUnitId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
@@ -67,7 +68,6 @@ export const FactoryManageConditionalFormatRule = (componentManager: ComponentMa
             merge(
                 selectionManagerService.selectionMoveEnd$,
                 new Observable<null>((commandSubscribe) => {
-                    const commandList = [addConditionalRuleMutation.id, setConditionalRuleMutation.id, deleteConditionalRuleMutation.id, moveConditionalRuleMutation.id];
                     const disposable = commandService.onCommandExecuted((commandInfo) => {
                         const { id, params } = commandInfo;
                         const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
@@ -77,7 +77,7 @@ export const FactoryManageConditionalFormatRule = (componentManager: ComponentMa
                     });
                     return () => disposable.dispose();
                 })
-            ).subscribe(() => {
+            ).pipe(debounceTime(16)).subscribe(() => {
                 const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
                 const subUnitId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
                 const allRule = conditionalFormatRuleModel.getSubunitRules(unitId, subUnitId) || [];

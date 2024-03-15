@@ -14,22 +14,25 @@
  * limitations under the License.
  */
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Select, Tooltip } from '@univerjs/design';
 
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { ICommandService, IUniverInstanceService, LocaleService, Rectangle } from '@univerjs/core';
-
-import { SelectionManagerService } from '@univerjs/sheets';
+import { SelectionManagerService, SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { serializeRange } from '@univerjs/engine-formula';
 import { DeleteSingle, IncreaseSingle, MoreFunctionSingle } from '@univerjs/icons';
 import GridLayout from 'react-grid-layout';
-import { debounceTime, Observable } from 'rxjs';
+import { debounceTime, merge, Observable } from 'rxjs';
+import { addConditionalRuleMutation } from '../../../commands/mutations/addConditionalRule.mutation';
+import { setConditionalRuleMutation } from '../../../commands/mutations/setConditionalRule.mutation';
+import { deleteConditionalRuleMutation } from '../../../commands/mutations/deleteConditionalRule.mutation';
+import { moveConditionalRuleMutation } from '../../../commands/mutations/move-conditional-rule.mutation';
+import { ConditionalFormatRuleModel } from '../../../models/conditional-format-rule-model';
 import type { IDeleteCfCommandParams } from '../../../commands/commands/delete-cf.command';
 import { deleteCfCommand } from '../../../commands/commands/delete-cf.command';
 import type { IMoveCfCommand } from '../../../commands/commands/move-cf.command';
 import { moveCfCommand } from '../../../commands/commands/move-cf.command';
-import { ConditionalFormatRuleModel } from '../../../models/conditional-format-rule-model';
 import type { IConditionFormatRule } from '../../../models/type';
 import { RuleType, SubRuleType } from '../../../base/const';
 import 'react-grid-layout/css/styles.css';
@@ -125,7 +128,7 @@ export const RuleList = (props: IRuleListProps) => {
         { label: localeService.t('sheet.cf.panel.workSheet'), value: '2' },
         { label: localeService.t('sheet.cf.panel.selectedRange'), value: '1' },
     ];
-    const ruleList = useMemo(() => {
+    const getRuleList = () => {
         const ruleList = conditionalFormatRuleModel.getSubunitRules(unitId, subUnitId);
         if (!ruleList || !ruleList.length) {
             return [];
@@ -144,7 +147,43 @@ export const RuleList = (props: IRuleListProps) => {
             return ruleList;
         }
         return [];
-    }, [selectValue, subUnitId, fetchRuleListId, selectionManagerService, conditionalFormatRuleModel, unitId]);
+    };
+    const [ruleList, ruleListSet] = useState(getRuleList);
+
+    useEffect(() => {
+        const disposable = commandService.onCommandExecuted((commandInfo) => {
+            if (commandInfo.id === SetWorksheetActiveOperation.id) {
+                fetchRuleListIdSet(Math.random());
+            }
+        });
+        return () => disposable.dispose();
+    });
+
+    useEffect(() => {
+        ruleListSet(getRuleList);
+    }, [selectValue, fetchRuleListId]);
+
+    useEffect(() => {
+        const subscription = merge(
+            selectionManagerService.selectionMoveEnd$,
+            new Observable<null>((commandSubscribe) => {
+                const commandList = [addConditionalRuleMutation.id, setConditionalRuleMutation.id, deleteConditionalRuleMutation.id, moveConditionalRuleMutation.id];
+                const disposable = commandService.onCommandExecuted((commandInfo) => {
+                    const { id, params } = commandInfo;
+                    const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+                    if (commandList.includes(id) && (params as { unitId: string }).unitId === unitId) {
+                        commandSubscribe.next(null);
+                    }
+                });
+                return () => disposable.dispose();
+            })
+        ).subscribe(() => {
+            ruleListSet(getRuleList);
+        });
+        return () => {
+            subscription.unsubscribe();
+        };
+    }, [selectionManagerService, univerInstanceService]);
 
     useEffect(() => {
         const dispose = conditionalFormatRuleModel.$ruleChange.subscribe(() => {

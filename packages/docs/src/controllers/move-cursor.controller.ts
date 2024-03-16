@@ -25,8 +25,8 @@ import {
 } from '@univerjs/core';
 import type {
     DocumentSkeleton,
+    IDocumentSkeletonGlyph,
     IDocumentSkeletonLine,
-    IDocumentSkeletonSpan,
     INodePosition,
     INodeSearch,
 } from '@univerjs/engine-render';
@@ -294,16 +294,16 @@ export class MoveCursorController extends Disposable {
 
     private _getTopOrBottomPosition(
         docSkeleton: DocumentSkeleton,
-        span: Nullable<IDocumentSkeletonSpan>,
+        glyph: Nullable<IDocumentSkeletonGlyph>,
         direction: boolean
     ): Nullable<INodePosition> {
-        if (span == null) {
+        if (glyph == null) {
             return;
         }
 
-        const offsetLeft = this._getSpanLeftOffsetInLine(span);
+        const offsetLeft = this._getSpanLeftOffsetInLine(glyph);
 
-        const line = this._getNextOrPrevLine(span, direction);
+        const line = this._getNextOrPrevLine(glyph, direction);
 
         if (line == null) {
             return;
@@ -319,8 +319,8 @@ export class MoveCursorController extends Disposable {
         return { ...position, isBack: true };
     }
 
-    private _getSpanLeftOffsetInLine(span: IDocumentSkeletonSpan) {
-        const divide = span.parent;
+    private _getSpanLeftOffsetInLine(glyph: IDocumentSkeletonGlyph) {
+        const divide = glyph.parent;
 
         if (divide == null) {
             return Number.NEGATIVE_INFINITY;
@@ -328,7 +328,7 @@ export class MoveCursorController extends Disposable {
 
         const divideLeft = divide.left;
 
-        const { left } = span;
+        const { left } = glyph;
 
         const start = divideLeft + left;
 
@@ -337,7 +337,7 @@ export class MoveCursorController extends Disposable {
 
     private _matchPositionByLeftOffset(docSkeleton: DocumentSkeleton, line: IDocumentSkeletonLine, offsetLeft: number) {
         const nearestNode: {
-            span?: IDocumentSkeletonSpan;
+            glyph?: IDocumentSkeletonGlyph;
             distance: number;
         } = {
             distance: Number.POSITIVE_INFINITY,
@@ -346,28 +346,28 @@ export class MoveCursorController extends Disposable {
         for (const divide of line.divides) {
             const divideLeft = divide.left;
 
-            for (const span of divide.glyphGroup) {
-                const { left } = span;
+            for (const glyph of divide.glyphGroup) {
+                const { left } = glyph;
                 const leftSide = divideLeft + left;
 
                 const distance = Math.abs(offsetLeft - leftSide);
 
                 if (distance < nearestNode.distance) {
-                    nearestNode.span = span;
+                    nearestNode.glyph = glyph;
                     nearestNode.distance = distance;
                 }
             }
         }
 
-        if (nearestNode.span == null) {
+        if (nearestNode.glyph == null) {
             return;
         }
 
-        return docSkeleton.findPositionBySpan(nearestNode.span);
+        return docSkeleton.findPositionByGlyph(nearestNode.glyph);
     }
 
-    private _getNextOrPrevLine(span: IDocumentSkeletonSpan, direction: boolean) {
-        const divide = span.parent;
+    private _getNextOrPrevLine(glyph: IDocumentSkeletonGlyph, direction: boolean) {
+        const divide = glyph.parent;
         if (divide == null) {
             return;
         }

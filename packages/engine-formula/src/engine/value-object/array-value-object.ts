@@ -499,6 +499,8 @@ export class ArrayValueObject extends BaseValueObject {
                 result[result_row_index] = [];
             }
             for (let c = columnStart; c < columnStop; c += columnStep) {
+                if (!array[r] || !array[r][c]) return;
+
                 result[result_row_index][result_column_index] = array[r][c];
                 result_column_index++;
             }

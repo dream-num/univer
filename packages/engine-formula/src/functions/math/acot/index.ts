@@ -26,6 +26,10 @@ export class Acot extends BaseFunction {
             return ErrorValueObject.create(ErrorType.NA);
         }
 
+        if (variant.isString()) {
+            variant = variant.convertToNumberObjectValue();
+        }
+
         if (variant.isError()) {
             return variant;
         }

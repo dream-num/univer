@@ -28,7 +28,7 @@ jobs:
                   git checkout dev
                   git pull
                   cd ../../
-                  pnpm i
+                  pnpm install --no-frozen-lockfile
 
                   git add -A
                   git commit -m "chore(submodules): update submodules" || exit 0

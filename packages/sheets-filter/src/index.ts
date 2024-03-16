@@ -24,7 +24,7 @@ export {
     greaterThanOrEqualTo,
     lessThan,
     lessThanOrEqualTo,
-} from './models/custom-filter';
+} from './models/custom-filters';
 export { SheetsFilterService, FILTER_MUTATIONS } from './services/sheet-filter.service';
 export {
     type IReCalcSheetsFilterMutationParams,

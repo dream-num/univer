@@ -16,6 +16,7 @@
 
 import { CommandType, IContextService, type IOperation } from '@univerjs/core';
 import { SheetsFilterService } from '@univerjs/sheets-filter';
+import type { FilterBy } from '../services/sheets-filter-panel.service';
 import { SheetsFilterPanelService } from '../services/sheets-filter-panel.service';
 
 export const FILTER_PANEL_OPENED_KEY = 'FILTER_PANEL_OPENED';
@@ -68,5 +69,18 @@ export const CloseFilterPanelOperation: IOperation = {
         }
 
         return false;
+    },
+};
+
+export interface IChangeFilterByOperationParams {
+    filterBy: FilterBy;
+}
+export const ChangeFilterByOperation: IOperation<IChangeFilterByOperationParams> = {
+    id: 'sheet.operation.apply-filter',
+    type: CommandType.OPERATION,
+    handler: (accessor, params) => {
+        const { filterBy } = params!;
+        const sheetsFilterPanelService = accessor.get(SheetsFilterPanelService);
+        return sheetsFilterPanelService.changeFilterBy(filterBy);
     },
 };

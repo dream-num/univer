@@ -18,7 +18,7 @@ import { Disposable, mergeSets, Rectangle, Tools } from '@univerjs/core';
 import type { CellValue, IAutoFilter, ICustomFilter, ICustomFilters, IFilterColumn, IRange, Nullable, Worksheet } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
 import type { Observable } from 'rxjs';
-import { getCustomFilterFn } from './custom-filter';
+import { getCustomFilterFn } from './custom-filters';
 
 const EMPTY = () => new Set<number>();
 
@@ -335,7 +335,7 @@ export class FilterColumn extends Disposable {
         this._filteredOutRows = null;
     }
 
-    getColumnInfo(): Readonly<IFilterColumn> {
+    getColumnData(): Readonly<IFilterColumn> {
         return Tools.deepClone(this._criteria);
     }
 

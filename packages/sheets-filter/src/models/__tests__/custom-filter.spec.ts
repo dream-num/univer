@@ -15,7 +15,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { equals, greaterThan, greaterThanOrEqualTo, lessThan, lessThanOrEqualTo, notEquals, textMatch } from '../custom-filter';
+import { equals, greaterThan, greaterThanOrEqualTo, lessThan, lessThanOrEqualTo, notEquals, textMatch } from '../custom-filters';
 
 describe('Test custom filter functions', () => {
     describe('Test "greaterThan" operator', () => {

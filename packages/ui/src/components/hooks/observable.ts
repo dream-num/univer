@@ -89,13 +89,10 @@ export function useObservable<T>(
         throw new Error('[useObservable]: expect shouldHaveSyncValue but not getting a sync value!');
     }
 
-    const s = useState<T | undefined>(innerDefaultValue || defaultValue);
+    const s = useState<T | undefined>(innerDefaultValue ?? defaultValue);
     const value = s[0];
     setValue = s[1];
 
-    useEffect(() => {
-        return () => subscriptionRef.current?.unsubscribe();
-    }, []);
-
+    useEffect(() => () => subscriptionRef.current?.unsubscribe(), []);
     return value;
 }

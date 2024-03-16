@@ -95,9 +95,14 @@ export class SheetsFilterService extends Disposable {
     }
 
     private _updateActiveFilterModel() {
-        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
-        if (!workbook) {
-            this._activeFilterModel$.next(null);
+        let workbook: Workbook;
+        try {
+            workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
+            if (!workbook) {
+                this._activeFilterModel$.next(null);
+                return;
+            }
+        } catch (err) {
             return;
         }
 

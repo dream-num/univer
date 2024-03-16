@@ -15,7 +15,7 @@
  */
 
 export default {
-    filter: {
+    'sheets-filter': {
         toolbar: {
             'smart-toggle-filter-tooltip': 'Toggle Filter',
             'clear-filter-conditions': 'Clear Filter Conditions',
@@ -23,6 +23,34 @@ export default {
         },
         shortcut: {
             'smart-toggle-filter': 'Toggle Filter',
+        },
+        panel: {
+            'clear-filter': 'Clear Filter',
+            cancel: 'Cancel',
+            confirm: 'Confirm',
+            'by-values': 'By Values',
+            'by-conditions': 'By Conditions',
+        },
+        conditions: {
+            none: 'None',
+            empty: 'Is Empty',
+            'not-empty': 'Is Not Empty',
+            'text-contains': 'Text Contains',
+            'does-not-contain': 'Text Does Not Contain',
+            'starts-with': 'Text Starts With',
+            'ends-with': 'Text Ends With',
+            equals: 'Text Equals',
+            'greater-than': 'Greater Than',
+            'greater-than-or-equal': 'Greater Than Or Equal To',
+            'less-than': 'Less Than',
+            'less-than-or-equal': 'Less Than Or Equal To',
+            equal: 'Equal',
+            'not-equal': 'Not Equal',
+            between: 'Between',
+            'not-between': 'Not Between',
+            custom: 'Custom',
+            and: 'AND',
+            or: 'OR',
         },
     },
 };

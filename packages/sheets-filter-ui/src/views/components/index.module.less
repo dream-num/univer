@@ -1,0 +1,43 @@
+.sheets-filter-panel {
+    display: flex;
+    width: 280px;
+    height: 368px;
+    flex-direction: column;
+
+    &-header {
+        flex: 0 0 32px;
+        margin-bottom: 4px;
+    }
+
+    &-content {
+        flex-grow: 1;
+    }
+
+    &-footer {
+        margin-top: 16px;
+        flex: 0 0 32px;
+        display: inline-flex;
+        flex-wrap: nowrap;
+        overflow: hidden;
+
+        justify-content: space-between;
+
+        &-primary-buttons {
+            > .button {
+                margin-left: 12px;
+            }
+        }
+    }
+
+    .select {
+        width: 100%;
+    }
+
+    .input {
+        width: 100%;
+    }
+
+    .form-dual-column-layout {
+        margin-bottom: 8px;
+    }
+}

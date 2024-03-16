@@ -346,7 +346,7 @@ export class MoveCursorController extends Disposable {
         for (const divide of line.divides) {
             const divideLeft = divide.left;
 
-            for (const span of divide.spanGroup) {
+            for (const span of divide.glyphGroup) {
                 const { left } = span;
                 const leftSide = divideLeft + left;
 

@@ -385,17 +385,17 @@ export class Documents extends DocComponent {
 
                             for (let i = 0; i < divideLength; i++) {
                                 const divide = divides[i];
-                                const { spanGroup } = divide;
+                                const { glyphGroup } = divide;
 
                                 this._drawLiquid.translateSave();
                                 this._drawLiquid.translateDivide(divide);
 
-                                for (const span of spanGroup) {
-                                    if (!span.content || span.content.length === 0) {
+                                for (const glyph of glyphGroup) {
+                                    if (!glyph.content || glyph.content.length === 0) {
                                         continue;
                                     }
 
-                                    const { width: spanWidth, left: spanLeft, paddingLeft } = span;
+                                    const { width: spanWidth, left: spanLeft, paddingLeft } = glyph;
 
                                     const { x: translateX, y: translateY } = this._drawLiquid;
 
@@ -434,7 +434,7 @@ export class Documents extends DocComponent {
                                     for (const extension of extensions) {
                                         if (extension.type === DOCS_EXTENSION_TYPE.SPAN) {
                                             extension.extensionOffset = extensionOffset;
-                                            extension.draw(ctx, parentScale, span);
+                                            extension.draw(ctx, parentScale, glyph);
                                         }
                                     }
                                 }

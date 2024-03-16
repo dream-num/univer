@@ -17,10 +17,10 @@
 import type {
     IDocumentSkeletonColumn,
     IDocumentSkeletonDivide,
+    IDocumentSkeletonGlyph,
     IDocumentSkeletonLine,
     IDocumentSkeletonPage,
     IDocumentSkeletonSection,
-    IDocumentSkeletonSpan,
 } from '../../basics/i-document-skeleton-cached';
 import { PageLayoutType } from '../../basics/i-document-skeleton-cached';
 
@@ -206,7 +206,7 @@ export class Liquid {
         };
     }
 
-    translateSpan(span: IDocumentSkeletonSpan) {
+    translateSpan(span: IDocumentSkeletonGlyph) {
         const { left: spanLeft } = span;
         this.translate(spanLeft, 0);
 

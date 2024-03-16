@@ -65,7 +65,6 @@ export function dealWidthParagraph(
 
     // Step 3: Line Adjustment.
     // Handle horizontal align: left\center\right\justified.
-
     const { horizontalAlign = HorizontalAlign.UNSPECIFIED } = paragraphStyle;
     lineIterator(allPages, (line) => {
         horizontalAlignHandler(line, horizontalAlign);

@@ -18,7 +18,7 @@ import type { IParagraphStyle } from '@univerjs/core';
 
 import type { ISectionBreakConfig } from '../../../../../basics/interfaces';
 import { EMOJI_REG, hasArabic, hasSpace, hasTibetan, startWithEmoji } from '../../../../../basics/tools';
-import { createSkeletonLetterSpan, createSkeletonWordSpan } from '../../model/span';
+import { createSkeletonLetterGlyph, createSkeletonWordGlyph } from '../../model/glyph';
 import { getFontCreateConfig } from '../../tools';
 import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../../view-model/document-view-model';
@@ -33,7 +33,7 @@ export function otherHandler(
     sectionBreakConfig: ISectionBreakConfig,
     paragraphStyle: IParagraphStyle
 ) {
-    const spanGroup = [];
+    const glyphGroup = [];
     let step = 0;
 
     for (let i = 0; i < charArray.length; i++) {
@@ -44,15 +44,15 @@ export function otherHandler(
         }
 
         const config = getFontCreateConfig(index + i, bodyModel, paragraphNode, sectionBreakConfig, paragraphStyle);
-        const span = createSkeletonLetterSpan(newChar, config);
+        const glyph = createSkeletonLetterGlyph(newChar, config);
 
-        spanGroup.push(span);
+        glyphGroup.push(glyph);
         step++;
     }
 
     return {
         step,
-        spanGroup,
+        glyphGroup,
     };
 }
 
@@ -66,13 +66,13 @@ export function ArabicHandler(
 ) {
     // 组合阿拉伯语的词组
     const config = getFontCreateConfig(index, bodyModel, paragraphNode, sectionBreakConfig, paragraphStyle);
-    const span = [];
+    const glyph = [];
     let step = 0;
 
     for (let i = 0; i < charArray.length; i++) {
         const newChar = charArray[i];
         if (hasArabic(newChar)) {
-            span.unshift(newChar);
+            glyph.unshift(newChar);
             step++;
         } else {
             break;
@@ -81,7 +81,7 @@ export function ArabicHandler(
 
     return {
         step,
-        spanGroup: [createSkeletonLetterSpan(span.join(''), config)],
+        glyphGroup: [createSkeletonLetterGlyph(glyph.join(''), config)],
     };
 }
 
@@ -98,7 +98,7 @@ export function emojiHandler(
 
     return {
         step: match![0].length,
-        spanGroup: [createSkeletonLetterSpan(match![0], config)],
+        glyphGroup: [createSkeletonLetterGlyph(match![0], config)],
     };
 }
 
@@ -112,12 +112,12 @@ export function TibetanHandler(
 ) {
     // 组合藏语词组
     const config = getFontCreateConfig(index, bodyModel, paragraphNode, sectionBreakConfig, paragraphStyle);
-    const span = [];
+    const glyph = [];
     let step = 0;
     for (let i = 0; i < charArray.length; i++) {
         const newChar = charArray[i];
         if (hasTibetan(newChar)) {
-            span.push(newChar);
+            glyph.push(newChar);
             step++;
         } else {
             break;
@@ -126,6 +126,6 @@ export function TibetanHandler(
 
     return {
         step,
-        spanGroup: [createSkeletonWordSpan(span.join(''), config)],
+        glyphGroup: [createSkeletonWordGlyph(glyph.join(''), config)],
     };
 }

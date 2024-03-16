@@ -28,11 +28,11 @@ import {
 
 import type {
     IDocumentSkeletonCached,
+    IDocumentSkeletonGlyph,
     IDocumentSkeletonPage,
-    IDocumentSkeletonSpan,
     ISkeletonResourceReference,
 } from '../../../basics/i-document-skeleton-cached';
-import { LineType, PageLayoutType, SpanType } from '../../../basics/i-document-skeleton-cached';
+import { GlyphType, LineType, PageLayoutType } from '../../../basics/i-document-skeleton-cached';
 import type { IDocsConfig, INodeInfo, INodePosition, INodeSearch, ISectionBreakConfig } from '../../../basics/interfaces';
 import type { IViewportBound, Vector2 } from '../../../basics/vector2';
 import { Skeleton } from '../../skeleton';
@@ -118,8 +118,8 @@ export class DocumentSkeleton extends Skeleton {
                 for (const line of column.lines) {
                     let lineWidth = 0;
                     for (const divide of line.divides) {
-                        for (const span of divide.spanGroup) {
-                            lineWidth += span.width;
+                        for (const glyph of divide.glyphGroup) {
+                            lineWidth += glyph.width;
                         }
                     }
                     maxWidth = Math.max(maxWidth, lineWidth);
@@ -134,8 +134,8 @@ export class DocumentSkeleton extends Skeleton {
         return this.getViewModel().getDataModel().documentStyle.pageSize;
     }
 
-    findPositionBySpan(span: IDocumentSkeletonSpan): Nullable<INodeSearch> {
-        const divide = span.parent;
+    findPositionByGlyph(glyph: IDocumentSkeletonGlyph): Nullable<INodeSearch> {
+        const divide = glyph.parent;
 
         const line = divide?.parent;
 
@@ -151,7 +151,7 @@ export class DocumentSkeleton extends Skeleton {
             return;
         }
 
-        const spanIndex = divide.spanGroup.indexOf(span);
+        const glyphIndex = divide.glyphGroup.indexOf(glyph);
 
         const divideIndex = line.divides.indexOf(divide);
 
@@ -164,7 +164,7 @@ export class DocumentSkeleton extends Skeleton {
         const pageIndex = skeletonData.pages.indexOf(page);
 
         return {
-            span: spanIndex,
+            glyph: glyphIndex,
             divide: divideIndex,
             line: lineIndex,
             column: columnIndex,
@@ -188,10 +188,10 @@ export class DocumentSkeleton extends Skeleton {
 
         const pages = skeletonData.pages;
 
-        const { span, divide, line, column, section, page } = nodes;
+        const { glyph, divide, line, column, section, page } = nodes;
 
         return {
-            span: divide.spanGroup.indexOf(span),
+            glyph: divide.glyphGroup.indexOf(glyph),
             divide: line.divides.indexOf(divide),
             line: column.lines.indexOf(line),
             column: section.columns.indexOf(column),
@@ -201,13 +201,13 @@ export class DocumentSkeleton extends Skeleton {
         };
     }
 
-    findNodeByCharIndex(charIndex: number): Nullable<IDocumentSkeletonSpan> {
+    findNodeByCharIndex(charIndex: number): Nullable<IDocumentSkeletonGlyph> {
         const nodes = this._findNodeIterator(charIndex);
 
-        return nodes?.span;
+        return nodes?.glyph;
     }
 
-    findSpanByPosition(position: Nullable<INodePosition>) {
+    findGlyphByPosition(position: Nullable<INodePosition>) {
         if (position == null) {
             return;
         }
@@ -220,22 +220,22 @@ export class DocumentSkeleton extends Skeleton {
 
         const { divide, line, column, section, page, isBack } = position;
 
-        let { span } = position;
+        let { glyph } = position;
 
         if (isBack === true) {
-            span -= 1;
+            glyph -= 1;
         }
 
-        span = span < 0 ? 0 : span;
+        glyph = glyph < 0 ? 0 : glyph;
 
-        const spanGroup =
-            skeletonData.pages[page].sections[section].columns[column].lines[line].divides[divide].spanGroup;
+        const glyphGroup =
+            skeletonData.pages[page].sections[section].columns[column].lines[line].divides[divide].glyphGroup;
 
-        if (spanGroup[span].spanType === SpanType.LIST) {
-            return spanGroup[span + 1];
+        if (glyphGroup[glyph].glyphType === GlyphType.LIST) {
+            return glyphGroup[glyph + 1];
         }
 
-        return spanGroup[span];
+        return glyphGroup[glyph];
     }
 
     findNodeByCoord(
@@ -326,7 +326,7 @@ export class DocumentSkeleton extends Skeleton {
                             const divideLength = divides.length;
                             for (let i = 0; i < divideLength; i++) {
                                 const divide = divides[i];
-                                const { spanGroup, width: divideWidth } = divide;
+                                const { glyphGroup, width: divideWidth } = divide;
 
                                 this._findLiquid.translateSave();
                                 this._findLiquid.translateDivide(divide);
@@ -338,23 +338,23 @@ export class DocumentSkeleton extends Skeleton {
                                 //     continue;
                                 // }
 
-                                for (const span of spanGroup) {
-                                    if (!span.content || span.content.length === 0) {
+                                for (const glyph of glyphGroup) {
+                                    if (!glyph.content || glyph.content.length === 0) {
                                         continue;
                                     }
 
-                                    const { width: spanWidth, left: spanLeft } = span;
+                                    const { width: glyphWidth, left: glyphLeft } = glyph;
 
-                                    const startX_fin = startX + spanLeft;
+                                    const startX_fin = startX + glyphLeft;
 
-                                    const endX_fin = startX + spanLeft + spanWidth;
+                                    const endX_fin = startX + glyphLeft + glyphWidth;
 
                                     const distanceX = Math.abs(x - endX_fin);
 
                                     if (y >= startY_fin && y <= endY_fin) {
                                         if (x >= startX_fin && x <= endX_fin) {
                                             return {
-                                                node: span,
+                                                node: glyph,
                                                 ratioX: x / (startX_fin + endX_fin),
                                                 ratioY: y / (startY_fin + endY_fin),
                                             };
@@ -365,7 +365,7 @@ export class DocumentSkeleton extends Skeleton {
                                             nearestNodeDistanceList = [];
                                         }
                                         nearestNodeList.push({
-                                            node: span,
+                                            node: glyph,
                                             ratioX: x / (startX_fin + endX_fin),
                                             ratioY: y / (startY_fin + endY_fin),
                                         });
@@ -384,7 +384,7 @@ export class DocumentSkeleton extends Skeleton {
 
                                     if (distanceY === nearestNodeDistanceY) {
                                         nearestNodeList.push({
-                                            node: span,
+                                            node: glyph,
                                             ratioX: x / (startX_fin + endX_fin),
                                             ratioY: y / (startY_fin + endY_fin),
                                         });
@@ -763,17 +763,17 @@ export class DocumentSkeleton extends Skeleton {
 
                         for (let i = 0; i < divideLength; i++) {
                             const divide = divides[i];
-                            const { spanGroup, st, ed } = divide;
+                            const { glyphGroup, st, ed } = divide;
 
                             if (charIndex < st || charIndex > ed) {
                                 continue;
                             }
 
-                            // Some span.content's length maybe great than 1, so the charIndex is not equal to spanIndex.
+                            // Some glyph.content's length maybe great than 1, so the charIndex is not equal to glyphIndex.
                             let delta = charIndex - st;
 
-                            for (const span of spanGroup) {
-                                delta -= span.count;
+                            for (const glyph of glyphGroup) {
+                                delta -= glyph.count;
 
                                 if (delta < 0) {
                                     return {
@@ -782,7 +782,7 @@ export class DocumentSkeleton extends Skeleton {
                                         column,
                                         line,
                                         divide,
-                                        span,
+                                        glyph,
                                     };
                                 }
                             }

@@ -19,7 +19,7 @@ import { getColorStyle } from '@univerjs/core';
 
 import { BORDER_TYPE, COLOR_BLACK_RGB, FIX_ONE_PIXEL_BLUR_OFFSET } from '../../../basics/const';
 import { drawLineByBorderType, getLineWidth, setLineType } from '../../../basics/draw';
-import type { IDocumentSkeletonSpan } from '../../../basics/i-document-skeleton-cached';
+import type { IDocumentSkeletonGlyph } from '../../../basics/i-document-skeleton-cached';
 import { Vector2 } from '../../../basics/vector2';
 import type { UniverRenderingContext } from '../../../context';
 import { DocumentsSpanAndLineExtensionRegistry } from '../../extension';
@@ -36,15 +36,15 @@ export class Border extends docExtension {
 
     private _preBorderColor = '';
 
-    override draw(ctx: UniverRenderingContext, parentScale: IScale, span: IDocumentSkeletonSpan) {
-        const line = span.parent?.parent;
+    override draw(ctx: UniverRenderingContext, parentScale: IScale, glyph: IDocumentSkeletonGlyph) {
+        const line = glyph.parent?.parent;
         if (!line) {
             return;
         }
 
         const { asc: maxLineAsc = 0, lineHeight = 0 } = line;
 
-        const { ts: textStyle, left, width: spanWidth } = span;
+        const { ts: textStyle, left, width: spanWidth } = glyph;
         if (!textStyle) {
             return;
         }

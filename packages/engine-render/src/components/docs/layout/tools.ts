@@ -38,11 +38,11 @@ import { DEFAULT_DOCUMENT_FONTSIZE } from '../../../basics/const';
 import type {
     IDocumentSkeletonColumn,
     IDocumentSkeletonDivide,
+    IDocumentSkeletonGlyph,
     IDocumentSkeletonLine,
     IDocumentSkeletonPage,
-    IDocumentSkeletonSpan,
 } from '../../../basics/i-document-skeleton-cached';
-import { SpanType } from '../../../basics/i-document-skeleton-cached';
+import { GlyphType } from '../../../basics/i-document-skeleton-cached';
 import type { IParagraphConfig, ISectionBreakConfig } from '../../../basics/interfaces';
 import { getFontStyleString, isFunction } from '../../../basics/tools';
 import type { DataStreamTreeNode } from '../view-model/data-stream-tree-node';
@@ -140,18 +140,18 @@ export function getLastRemainingDivide(curLine: IDocumentSkeletonLine) {
     for (let i = 0; i < curLine.divides.length; i++) {
         const curDivide = curLine.divides[i];
         const nextDivide = curLine.divides[i + 1];
-        if (curDivide.spanGroup.length === 0) {
+        if (curDivide.glyphGroup.length === 0) {
             return curDivide;
         }
-        if (!nextDivide || nextDivide.spanGroup.length === 0) {
+        if (!nextDivide || nextDivide.glyphGroup.length === 0) {
             return curDivide;
         }
     }
 }
 
 export function getLastSpan(page: IDocumentSkeletonPage) {
-    const spanGroup = getLastNotFullDivideInfo(page)?.divide.spanGroup;
-    return spanGroup?.[spanGroup.length - 1];
+    const glyphGroup = getLastNotFullDivideInfo(page)?.divide.glyphGroup;
+    return glyphGroup?.[glyphGroup.length - 1];
 }
 
 export function isColumnFull(page: IDocumentSkeletonPage) {
@@ -203,14 +203,14 @@ function isLineBlank(line?: IDocumentSkeletonLine) {
     }
 
     for (let i = 0; i < line.divides.length; i++) {
-        const spanCount = line.divides[i].spanGroup.length;
+        const spanCount = line.divides[i].glyphGroup.length;
         if (spanCount > 1) {
             return false;
         }
         if (spanCount === 1) {
-            const lastSpan = line.divides[i].spanGroup[0];
-            const { spanType } = lastSpan;
-            if (spanType !== SpanType.TAB && spanType !== SpanType.LIST) {
+            const lastSpan = line.divides[i].glyphGroup[0];
+            const { glyphType } = lastSpan;
+            if (glyphType !== GlyphType.TAB && glyphType !== GlyphType.LIST) {
                 return false;
             }
         }
@@ -328,24 +328,24 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
 
                     for (let i = 0; i < divideLength; i++) {
                         const divide = divides[i];
-                        const { spanGroup } = divide;
+                        const { glyphGroup } = divide;
 
                         const divStartIndex = preDivideStartIndex;
                         let divEndIndex = divStartIndex;
 
-                        for (const span of spanGroup) {
-                            const increaseValue = span.spanType === SpanType.LIST ? 0 : span.count;
+                        for (const glyph of glyphGroup) {
+                            const increaseValue = glyph.glyphType === GlyphType.LIST ? 0 : glyph.count;
 
                             divEndIndex += increaseValue;
 
-                            const bBox = span.bBox;
+                            const bBox = glyph.bBox;
                             const { ba } = bBox;
 
                             maxLineAsc = Math.max(maxLineAsc, ba);
 
                             if (i === divideLength - 1) {
                                 // When the width is set to Infinity, the last divide should also be Infinity, and an actual width needs to be calculated.
-                                actualWidth += span.width;
+                                actualWidth += glyph.width;
                             }
                         }
 
@@ -358,7 +358,7 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
                             actualWidth += divide.left;
                         }
 
-                        if (spanGroup.length === 0) {
+                        if (glyphGroup.length === 0) {
                             continue;
                         }
 
@@ -408,7 +408,7 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
     }
 }
 
-export function spanIterator(pages: IDocumentSkeletonPage[], iteratorFunction: (span: IDocumentSkeletonSpan) => void) {
+export function spanIterator(pages: IDocumentSkeletonPage[], iteratorFunction: (glyph: IDocumentSkeletonGlyph) => void) {
     for (const page of pages) {
         const { sections } = page;
 
@@ -423,11 +423,11 @@ export function spanIterator(pages: IDocumentSkeletonPage[], iteratorFunction: (
                     const divideLength = divides.length;
                     for (let i = 0; i < divideLength; i++) {
                         const divide = divides[i];
-                        const { spanGroup } = divide;
+                        const { glyphGroup } = divide;
 
-                        for (const span of spanGroup) {
+                        for (const glyph of glyphGroup) {
                             if (iteratorFunction && isFunction(iteratorFunction)) {
-                                iteratorFunction(span);
+                                iteratorFunction(glyph);
                             }
                         }
                     }
@@ -651,16 +651,12 @@ export function getPositionVertical(
     }
 }
 
-// export function getPositionHorizonBySpan(positionH: ObjectPositionH, span: IDocumentSkeletonSpan) {
-//     const { relativeFrom, align, posOffset, percent } = positionH;
-// }
-
 export function getSpanGroupWidth(divide: IDocumentSkeletonDivide) {
-    const spanGroup = divide.spanGroup;
+    const glyphGroup = divide.glyphGroup;
     let width = 0;
 
-    for (const span of spanGroup) {
-        width += span.width;
+    for (const glyph of glyphGroup) {
+        width += glyph.width;
     }
 
     return width;

@@ -16,10 +16,10 @@
 
 import type { IParagraphStyle } from '@univerjs/core';
 import { BooleanNumber, DataStreamTreeTokenType, GridType } from '@univerjs/core';
-import type { IDocumentSkeletonSpan } from '../../../../../basics/i-document-skeleton-cached';
+import type { IDocumentSkeletonGlyph } from '../../../../../basics/i-document-skeleton-cached';
 import { LineBreaker } from '../../linebreak';
 import { tabLineBreakExtension } from '../../linebreak/extensions/tab-linebreak-extension';
-import { createSkeletonLetterSpan, createSkeletonTabSpan } from '../../model/span';
+import { createSkeletonLetterGlyph, createSkeletonTabSpan } from '../../model/glyph';
 import { getCharSpaceApply, getFontCreateConfig } from '../../tools';
 import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../../view-model/document-view-model';
@@ -29,7 +29,7 @@ import { ArabicHandler, emojiHandler, otherHandler, TibetanHandler } from './lan
 
 export interface IShapedText {
     text: string;
-    glyphs: IDocumentSkeletonSpan[];
+    glyphs: IDocumentSkeletonGlyph[];
 }
 
 export function shaping(
@@ -59,27 +59,27 @@ export function shaping(
         const word = content.slice(last, bk.position);
         let src = word;
         let i = last;
-        const shapedGlyphs: IDocumentSkeletonSpan[] = [];
+        const shapedGlyphs: IDocumentSkeletonGlyph[] = [];
 
         while (src.length > 0) {
             const char = src[0];
 
             if (/\s/.test(char) || hasCJK(char)) {
                 const config = getFontCreateConfig(i, bodyModel, paragraphNode, sectionBreakConfig, paragraphStyle);
-                let newSpan: IDocumentSkeletonSpan;
+                let newSpan: IDocumentSkeletonGlyph;
 
                 if (char === DataStreamTreeTokenType.TAB) {
                     const charSpaceApply = getCharSpaceApply(charSpace, defaultTabStop, gridType, snapToGrid);
                     newSpan = createSkeletonTabSpan(config, charSpaceApply);
                 } else {
-                    newSpan = createSkeletonLetterSpan(char, config);
+                    newSpan = createSkeletonLetterGlyph(char, config);
                 }
 
                 shapedGlyphs.push(newSpan);
                 i++;
                 src = src.substring(1);
             } else if (startWithEmoji(src)) {
-                const { step, spanGroup } = emojiHandler(
+                const { step, glyphGroup } = emojiHandler(
                     i,
                     src,
                     bodyModel,
@@ -87,12 +87,12 @@ export function shaping(
                     sectionBreakConfig,
                     paragraphStyle
                 );
-                shapedGlyphs.push(...spanGroup);
+                shapedGlyphs.push(...glyphGroup);
                 i += step;
 
                 src = src.substring(step);
             } else if (hasArabic(char)) {
-                const { step, spanGroup } = ArabicHandler(
+                const { step, glyphGroup } = ArabicHandler(
                     i,
                     src,
                     bodyModel,
@@ -100,12 +100,12 @@ export function shaping(
                     sectionBreakConfig,
                     paragraphStyle
                 );
-                shapedGlyphs.push(...spanGroup);
+                shapedGlyphs.push(...glyphGroup);
                 i += step;
 
                 src = src.substring(step);
             } else if (hasTibetan(char)) {
-                const { step, spanGroup } = TibetanHandler(
+                const { step, glyphGroup } = TibetanHandler(
                     i,
                     src,
                     bodyModel,
@@ -113,13 +113,13 @@ export function shaping(
                     sectionBreakConfig,
                     paragraphStyle
                 );
-                shapedGlyphs.push(...spanGroup);
+                shapedGlyphs.push(...glyphGroup);
                 i += step;
 
                 src = src.substring(step);
             } else {
                 // TODO: 处理一个单词超过 page width 情况
-                const { step, spanGroup } = otherHandler(
+                const { step, glyphGroup } = otherHandler(
                     i,
                     src,
                     bodyModel,
@@ -127,7 +127,7 @@ export function shaping(
                     sectionBreakConfig,
                     paragraphStyle
                 );
-                shapedGlyphs.push(...spanGroup);
+                shapedGlyphs.push(...glyphGroup);
                 i += step;
 
                 src = src.substring(step);

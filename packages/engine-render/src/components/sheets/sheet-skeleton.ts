@@ -41,6 +41,7 @@ import {
     CellValueType,
     DEFAULT_EMPTY_DOCUMENT_VALUE,
     DocumentDataModel,
+    extractPureTextFromCell,
     getColorStyle,
     HorizontalAlign,
     IContextService,
@@ -57,7 +58,6 @@ import {
 
 import { Inject } from '@wendellhu/redi';
 import { distinctUntilChanged, startWith } from 'rxjs';
-import { extractPureTextFromCell } from '@univerjs/core/sheets/worksheet.js';
 import { BORDER_TYPE, COLOR_BLACK_RGB, MAXIMUM_ROW_HEIGHT } from '../../basics/const';
 import { getRotateOffsetAndFarthestHypotenuse } from '../../basics/draw';
 import type { IDocumentSkeletonColumn } from '../../basics/i-document-skeleton-cached';

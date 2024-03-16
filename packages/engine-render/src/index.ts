@@ -33,7 +33,7 @@ export * from './viewport';
 
 // doc
 export { DocumentViewModel } from './components/docs/view-model/document-view-model';
-export { getAnchorBounding, TEXT_RANGE_LAYER_INDEX } from './components/docs/text-selection/text-range';
+export { getAnchorBounding, TEXT_RANGE_LAYER_INDEX, TextRange } from './components/docs/text-selection/text-range';
 export { NodePositionConvertToCursor } from './components/docs/text-selection/convert-cursor';
 export { Liquid } from './components/docs/liquid';
 export {
@@ -41,5 +41,6 @@ export {
     TextSelectionRenderManager,
     getCanvasOffsetByEngine,
 } from './components/docs/text-selection/text-selection-render-manager';
+export type { IActiveTextRange, IEditorInputConfig, ITextSelectionInnerParam } from './components/docs/text-selection/text-selection-render-manager';
 export { Documents } from './components/docs/document';
 export { DocumentSkeleton } from './components/docs/layout/doc-skeleton';

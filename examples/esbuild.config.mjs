@@ -25,6 +25,7 @@ function monacoBuildTask() {
         entryPoints: monacoEditorEntryPoints.map((entry) => `./node_modules/monaco-editor/esm/${entry}`),
         bundle: true,
         color: true,
+        target: 'chrome70',
         format: 'iife',
         outbase: './node_modules/monaco-editor/esm/',
         outdir: './local',
@@ -42,6 +43,7 @@ const ctx = await esbuild[args.watch ? 'context' : 'build']({
     loader: { '.svg': 'file', '.ttf': 'file' },
     sourcemap: args.watch,
     minify: !args.watch,
+    target: 'chrome70',
     plugins: [
         copyPlugin({
             assets: {

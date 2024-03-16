@@ -517,35 +517,45 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             // scene.onPointerMoveObserver.remove(this._moveObserver);
             // scene.onPointerUpObserver.remove(this._upObserver);
 
-            this._moveObservers.forEach((obs) => {
-                obs?.dispose();
-            });
+            this._upObserverDispose(scene);
 
-            this._upObservers.forEach((obs) => {
-                obs?.dispose();
-            });
-
-            this._moveObservers = [];
-
-            this._upObservers = [];
-
-            scene.enableEvent();
-
-            this._textSelectionInner$.next({
-                textRanges: this._getAllTextRanges(),
-                segmentId: this._currentSegmentId,
-                style: this._selectionStyle,
-                isEditing: false,
-            });
-
-            this._scrollTimers.forEach((timer) => {
-                timer?.dispose();
-            });
-
-            this._scrollTimers = [];
-
-            this._updateInputPosition();
+            setTimeout(() => {
+                if (this._moveObservers.length > 0 || this._upObservers.length > 0) {
+                    this._upObserverDispose(scene);
+                }
+            }, 0);
         }));
+    }
+
+    private _upObserverDispose(scene: Scene) {
+        this._moveObservers.forEach((obs) => {
+            obs?.dispose();
+        });
+
+        this._upObservers.forEach((obs) => {
+            obs?.dispose();
+        });
+
+        this._moveObservers = [];
+
+        this._upObservers = [];
+
+        scene.enableEvent();
+
+        this._textSelectionInner$.next({
+            textRanges: this._getAllTextRanges(),
+            segmentId: this._currentSegmentId,
+            style: this._selectionStyle,
+            isEditing: false,
+        });
+
+        this._scrollTimers.forEach((timer) => {
+            timer?.dispose();
+        });
+
+        this._scrollTimers = [];
+
+        this._updateInputPosition();
     }
 
     removeAllTextRanges() {

@@ -17,8 +17,8 @@
 import type { INumberUnit, IParagraphStyle } from '@univerjs/core';
 import { BooleanNumber, DataStreamTreeTokenType, GridType, SpacingRule } from '@univerjs/core';
 
-import { hasCJKText } from '../../../../basics';
-import { FontCache } from '../../../../basics/font-cache';
+import { hasCJKText } from '../../../../../basics';
+import { FontCache } from '../../../../../basics/font-cache';
 import type {
     IDocumentSkeletonBullet,
     IDocumentSkeletonColumn,
@@ -26,19 +26,19 @@ import type {
     IDocumentSkeletonLine,
     IDocumentSkeletonPage,
     IDocumentSkeletonSpan,
-} from '../../../../basics/i-document-skeleton-cached';
-import { LineType, SpanType } from '../../../../basics/i-document-skeleton-cached';
-import type { IParagraphConfig, ISectionBreakConfig } from '../../../../basics/interfaces';
+} from '../../../../../basics/i-document-skeleton-cached';
+import { LineType, SpanType } from '../../../../../basics/i-document-skeleton-cached';
+import type { IParagraphConfig, ISectionBreakConfig } from '../../../../../basics/interfaces';
 import {
     calculateLineTopByDrawings,
     createAndUpdateBlockAnchor,
     createSkeletonLine,
     setDivideFullState,
-} from '../../common/line';
+} from '../../model/line';
 
-import { createSkeletonPage } from '../../common/page';
-import { setColumnFullState } from '../../common/section';
-import { addSpanToDivide, createSkeletonBulletSpan, hasMixedTextLayout } from '../../common/span';
+import { createSkeletonPage } from '../../model/page';
+import { setColumnFullState } from '../../model/section';
+import { addSpanToDivide, createSkeletonBulletSpan, hasMixedTextLayout } from '../../model/span';
 import {
     getCharSpaceApply,
     getCharSpaceConfig,
@@ -52,9 +52,9 @@ import {
     getPositionHorizon,
     getPositionVertical,
     isColumnFull,
-} from '../../common/tools';
+} from '../../tools';
 
-export function calculateParagraphLayout(
+export function layoutParagraph(
     spanGroup: IDocumentSkeletonSpan[],
     pages: IDocumentSkeletonPage[],
     sectionBreakConfig: ISectionBreakConfig,

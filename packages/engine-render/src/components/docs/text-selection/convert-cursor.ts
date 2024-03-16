@@ -27,9 +27,9 @@ import type {
 import { SpanType } from '../../../basics/i-document-skeleton-cached';
 import type { INodePosition } from '../../../basics/interfaces';
 import type { IPoint } from '../../../basics/vector2';
-import type { DocumentSkeleton } from '../doc-skeleton';
+import type { DocumentSkeleton } from '../layout/doc-skeleton';
 import type { IDocumentOffsetConfig } from '../document';
-import { Liquid } from './liquid';
+import { Liquid } from '../liquid';
 
 export enum NodePositionStateType {
     NORMAL,

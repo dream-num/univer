@@ -23,10 +23,10 @@ import type {
     IDocumentSkeletonDrawingAnchor,
     IDocumentSkeletonLine,
     LineType,
-} from '../../../basics/i-document-skeleton-cached';
-import { Path2 } from '../../../basics/path2';
-import { Transform } from '../../../basics/transform';
-import { Vector2 } from '../../../basics/vector2';
+} from '../../../../basics/i-document-skeleton-cached';
+import { Path2 } from '../../../../basics/path2';
+import { Transform } from '../../../../basics/transform';
+import { Vector2 } from '../../../../basics/vector2';
 
 interface IDrawingsSplit {
     left: number;

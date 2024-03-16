@@ -26,7 +26,7 @@ import type { Scene } from '../../../scene';
 import { Rect } from '../../../shape/rect';
 import { RegularPolygon } from '../../../shape/regular-polygon';
 import type { ThinScene } from '../../../thin-scene';
-import type { DocumentSkeleton } from '../doc-skeleton';
+import type { DocumentSkeleton } from '../layout/doc-skeleton';
 import type { Documents } from '../document';
 import {
     compareNodePosition,

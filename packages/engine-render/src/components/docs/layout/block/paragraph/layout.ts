@@ -16,44 +16,35 @@
 
 import type { IBullet, ICustomBlock, IDrawing, IDrawings, Nullable } from '@univerjs/core';
 import {
-    BooleanNumber,
     DataStreamTreeTokenType,
-    GridType,
     HorizontalAlign,
     PositionedObjectLayoutType,
 } from '@univerjs/core';
 
-import { hasArabic, hasCJK, hasTibetan, startWithEmoji } from '../../../../basics';
 import type {
     IDocumentSkeletonBullet,
     IDocumentSkeletonDrawing,
     IDocumentSkeletonLine,
     IDocumentSkeletonPage,
-    IDocumentSkeletonSpan,
     ISkeletonResourceReference,
-} from '../../../../basics/i-document-skeleton-cached';
-import { BreakType } from '../../../../basics/i-document-skeleton-cached';
-import type { IParagraphConfig, ISectionBreakConfig } from '../../../../basics/interfaces';
+} from '../../../../../basics/i-document-skeleton-cached';
+import { BreakType } from '../../../../../basics/i-document-skeleton-cached';
+import type { IParagraphConfig, ISectionBreakConfig } from '../../../../../basics/interfaces';
 
-import { createSkeletonPage } from '../../common/page';
-import { setColumnFullState } from '../../common/section';
-import { createSkeletonLetterSpan, createSkeletonTabSpan } from '../../common/span';
+import { createSkeletonPage } from '../../model/page';
+import { setColumnFullState } from '../../model/section';
 import {
     clearFontCreateConfigCache,
-    getCharSpaceApply,
-    getFontCreateConfig,
     getLastNotFullColumnInfo,
     getSpanGroupWidth,
     lineIterator,
-} from '../../common/tools';
-import { LineBreaker } from '../../linebreak';
-import { tabLineBreakExtension } from '../../linebreak/extensions/tab-linebreak-extension';
-import type { DataStreamTreeNode } from '../../view-model/data-stream-tree-node';
-import type { DocumentViewModel } from '../../view-model/document-view-model';
+} from '../../tools';
+import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
+import type { DocumentViewModel } from '../../../view-model/document-view-model';
 import { dealWithBullet } from './bullet';
 import { dealWidthInlineDrawing } from './inline-drawing';
-import { ArabicHandler, emojiHandler, otherHandler, TibetanHandler } from './language-ruler';
-import { calculateParagraphLayout } from './layout-ruler';
+import { layoutParagraph } from './layout-ruler';
+import { shaping } from './shaping';
 
 export function dealWidthParagraph(
     bodyModel: DocumentViewModel,
@@ -63,17 +54,13 @@ export function dealWidthParagraph(
     skeletonResourceReference: ISkeletonResourceReference
 ): IDocumentSkeletonPage[] {
     const {
-        gridType = GridType.LINES,
-        charSpace = 0,
-        defaultTabStop = 10.5,
-
-        pageSize = {
+        pageSize: _pageSize = {
             width: Number.POSITIVE_INFINITY,
             height: Number.POSITIVE_INFINITY,
         },
 
-        marginRight = 0,
-        marginLeft = 0,
+        marginRight: _marginRight = 0,
+        marginLeft: _marginLeft = 0,
 
         lists,
         drawings = {},
@@ -135,11 +122,12 @@ export function dealWidthParagraph(
 
     paragraphConfig.bulletSkeleton = bulletSkeleton;
 
-    const { horizontalAlign = HorizontalAlign.UNSPECIFIED, snapToGrid = BooleanNumber.TRUE } = paragraphStyle;
+    const { horizontalAlign = HorizontalAlign.UNSPECIFIED } = paragraphStyle;
 
-    let allPages: IDocumentSkeletonPage[] = [curPage];
+    let allPages = [curPage];
 
     const customBlockCache = new Map<number, Nullable<ICustomBlock>>();
+
     for (let i = 0, len = blocks.length; i < len; i++) {
         const charIndex = blocks[i];
         const customBlock = bodyModel.getCustomBlock(charIndex);
@@ -157,167 +145,95 @@ export function dealWidthParagraph(
 
     clearFontCreateConfigCache();
 
-    const breaker = new LineBreaker(content);
-    let last = 0;
-    let bk;
+    // Step 1: Text Shaping.
+    const shapedTextList = shaping(
+        content,
+        bodyModel,
+        paragraphNode,
+        sectionBreakConfig,
+        paragraphStyle
+    );
 
-    // Add custom extension for linebreak.
-    tabLineBreakExtension(breaker);
-
-    while ((bk = breaker.nextBreak())) {
-        // get the string between the last break and this one
-        const word = content.slice(last, bk.position);
-        let src = word;
-        let i = last;
-        let spanGroup: IDocumentSkeletonSpan[] = [];
-        let paragraphStart = last === 0;
-
+    // Step 2: Line Breaking.
+    let paragraphStart = true;
+    let charIndex = startIndex;
+    for (const { text, glyphs } of shapedTextList) {
+        charIndex += text.length;
         const pushPending = () => {
-            if (spanGroup.length === 0) {
+            if (glyphs.length === 0) {
                 return;
             }
 
-            allPages = calculateParagraphLayout(
-                spanGroup,
+            allPages = layoutParagraph(
+                glyphs,
                 allPages,
                 sectionBreakConfig,
                 paragraphConfig,
                 paragraphStart
             );
 
-            spanGroup = [];
             paragraphStart = false;
         };
 
-        while (src.length > 0) {
-            const char = src[0];
-            const charIndex = i + startIndex;
-
-            if (/\s/.test(char) || hasCJK(char)) {
-                const config = getFontCreateConfig(i, bodyModel, paragraphNode, sectionBreakConfig, paragraphStyle);
-                let newSpan: IDocumentSkeletonSpan;
-
-                if (char === DataStreamTreeTokenType.TAB) {
-                    const charSpaceApply = getCharSpaceApply(charSpace, defaultTabStop, gridType, snapToGrid);
-                    newSpan = createSkeletonTabSpan(config, charSpaceApply);
-                } else {
-                    newSpan = createSkeletonLetterSpan(char, config);
-                }
-
-                spanGroup.push(newSpan);
-                i++;
-                src = src.substring(1);
-            } else if (startWithEmoji(src)) {
-                const { step, spanGroup: sGroup } = emojiHandler(
-                    i,
-                    src,
-                    bodyModel,
-                    paragraphNode,
-                    sectionBreakConfig,
-                    paragraphStyle
-                );
-                spanGroup.push(...sGroup);
-                i += step;
-
-                src = src.substring(step);
-            } else if (hasArabic(char)) {
-                const { step, spanGroup: sGroup } = ArabicHandler(
-                    i,
-                    src,
-                    bodyModel,
-                    paragraphNode,
-                    sectionBreakConfig,
-                    paragraphStyle
-                );
-                spanGroup.push(...sGroup);
-                i += step;
-
-                src = src.substring(step);
-            } else if (hasTibetan(char)) {
-                const { step, spanGroup: sGroup } = TibetanHandler(
-                    i,
-                    src,
-                    bodyModel,
-                    paragraphNode,
-                    sectionBreakConfig,
-                    paragraphStyle
-                );
-                spanGroup.push(...sGroup);
-                i += step;
-
-                src = src.substring(step);
-            } else {
-                // TODO: 处理一个单词超过 page width 情况
-                const { step, spanGroup: sGroup } = otherHandler(
-                    i,
-                    src,
-                    bodyModel,
-                    paragraphNode,
-                    sectionBreakConfig,
-                    paragraphStyle
-                );
-                spanGroup.push(...sGroup);
-                i += step;
-
-                src = src.substring(step);
+        if (text.endsWith(DataStreamTreeTokenType.CUSTOM_BLOCK)) {
+            let customBlock = customBlockCache.get(charIndex);
+            if (customBlock == null) {
+                customBlock = bodyModel.getCustomBlock(charIndex);
             }
+            if (customBlock != null) {
+                const blockId = customBlock.blockId;
+                const drawingOrigin = drawings[blockId];
+                if (drawingOrigin.layoutType === PositionedObjectLayoutType.INLINE) {
+                    allPages = dealWidthInlineDrawing(
+                        drawingOrigin,
+                        sectionBreakConfig,
+                        allPages,
+                        paragraphConfig,
+                        localeService
+                    );
+                }
+            }
+            pushPending();
+            continue;
+        } else if (text.endsWith(DataStreamTreeTokenType.PAGE_BREAK)) {
+            pushPending();
+            allPages.push(
+                createSkeletonPage(
+                    sectionBreakConfig,
+                    skeletonResourceReference,
+                    _getNextPageNumber(allPages[allPages.length - 1]),
+                    BreakType.PAGE
+                )
+            );
+            paragraphAffectSkeDrawings.clear();
+            continue;
+        } else if (text.endsWith(DataStreamTreeTokenType.COLUMN_BREAK)) {
+            pushPending();
+            // 换列标识，还在同一个节内
+            const lastPage = allPages[allPages.length - 1];
+            const columnInfo = getLastNotFullColumnInfo(lastPage);
 
-            if (char === DataStreamTreeTokenType.CUSTOM_BLOCK) {
-                let customBlock = customBlockCache.get(charIndex);
-                if (customBlock == null) {
-                    customBlock = bodyModel.getCustomBlock(charIndex);
-                }
-                if (customBlock != null) {
-                    const blockId = customBlock.blockId;
-                    const drawingOrigin = drawings[blockId];
-                    if (drawingOrigin.layoutType === PositionedObjectLayoutType.INLINE) {
-                        allPages = dealWidthInlineDrawing(
-                            drawingOrigin,
-                            sectionBreakConfig,
-                            allPages,
-                            paragraphConfig,
-                            localeService
-                        );
-                    }
-                }
-            } else if (char === DataStreamTreeTokenType.PAGE_BREAK) {
-                pushPending();
+            if (columnInfo && !columnInfo.isLast) {
+                setColumnFullState(columnInfo.column, true);
+            } else {
                 allPages.push(
                     createSkeletonPage(
                         sectionBreakConfig,
                         skeletonResourceReference,
-                        _getNextPageNumber(allPages[allPages.length - 1]),
-                        BreakType.PAGE
+                        _getNextPageNumber(lastPage),
+                        BreakType.COLUMN
                     )
                 );
-                paragraphAffectSkeDrawings.clear();
-            } else if (char === DataStreamTreeTokenType.COLUMN_BREAK) {
-                pushPending();
-                // 换列标识，还在同一个节内
-                const lastPage = allPages[allPages.length - 1];
-                const columnInfo = getLastNotFullColumnInfo(lastPage);
-
-                if (columnInfo && !columnInfo.isLast) {
-                    setColumnFullState(columnInfo.column, true);
-                } else {
-                    allPages.push(
-                        createSkeletonPage(
-                            sectionBreakConfig,
-                            skeletonResourceReference,
-                            _getNextPageNumber(lastPage),
-                            BreakType.COLUMN
-                        )
-                    );
-                }
             }
+            continue;
         }
 
         pushPending();
-
-        last = bk.position;
     }
 
-    lineIterator(allPages, (line: IDocumentSkeletonLine) => {
+    // Step 3: Line Adjustment.
+    // Handle horizontal align: left\center\right\justified.
+    lineIterator(allPages, (line) => {
         horizontalAlignHandler(line, horizontalAlign);
     });
 
@@ -450,6 +366,7 @@ function horizontalAlignHandler(line: IDocumentSkeletonLine, horizontalAlign: Ho
         if (width === Number.POSITIVE_INFINITY) {
             continue;
         }
+
         if (horizontalAlign === HorizontalAlign.CENTER) {
             divide.paddingLeft = (width - spanGroupWidth) / 2;
         } else if (horizontalAlign === HorizontalAlign.RIGHT) {

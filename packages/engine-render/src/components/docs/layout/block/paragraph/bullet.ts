@@ -16,9 +16,9 @@
 
 import type { IBullet, ILists, INestingLevel, ITextStyle, LocaleService, Nullable } from '@univerjs/core';
 
-import { FontCache } from '../../../../basics/font-cache';
-import type { IDocumentSkeletonBullet } from '../../../../basics/i-document-skeleton-cached';
-import { getFontStyleString } from '../../../../basics/tools';
+import { FontCache } from '../../../../../basics/font-cache';
+import type { IDocumentSkeletonBullet } from '../../../../../basics/i-document-skeleton-cached';
+import { getFontStyleString } from '../../../../../basics/tools';
 import { getBulletOrderedSymbol } from './bullet-ruler';
 
 export function dealWithBullet(

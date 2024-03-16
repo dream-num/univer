@@ -18,7 +18,6 @@ import type { ICommand, IDocumentBody, IMutationInfo, IParagraph, ITextRun } fro
 import {
     CommandType,
     ICommandService,
-    IUndoRedoService,
     IUniverInstanceService,
     TextX,
     TextXActionType,
@@ -263,7 +262,6 @@ export const MergeTwoParagraphCommand: ICommand<IMergeTwoParagraphParams> = {
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
         const currentUniverService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
-        const undoRedoService = accessor.get(IUndoRedoService);
 
         const { direction, range } = params;
 

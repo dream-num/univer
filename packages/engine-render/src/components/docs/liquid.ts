@@ -100,9 +100,9 @@ export class Liquid {
     translatePagePadding(page: IDocumentSkeletonPage) {
         const {
             marginTop: pagePaddingTop = 0,
-            marginBottom: pagePaddingBottom = 0,
+            marginBottom: _pagePaddingBottom = 0,
             marginLeft: pagePaddingLeft = 0,
-            marginRight: pagePaddingRight = 0,
+            marginRight: _pagePaddingRight = 0,
         } = page;
 
         this.translate(pagePaddingLeft, pagePaddingTop);
@@ -111,9 +111,9 @@ export class Liquid {
     restorePagePadding(page: IDocumentSkeletonPage) {
         const {
             marginTop: pagePaddingTop = 0,
-            marginBottom: pagePaddingBottom = 0,
+            marginBottom: _pagePaddingBottom = 0,
             marginLeft: pagePaddingLeft = 0,
-            marginRight: pagePaddingRight = 0,
+            marginRight: _pagePaddingRight = 0,
         } = page;
 
         this.translate(-pagePaddingLeft, -pagePaddingTop);
@@ -124,8 +124,8 @@ export class Liquid {
         type = PageLayoutType.VERTICAL,
         left = 0,
         top = 0,
-        right = 0,
-        bottom = 0
+        _right = 0,
+        _bottom = 0
     ) {
         const {
             // sections,
@@ -182,10 +182,10 @@ export class Liquid {
     translateLine(line: IDocumentSkeletonLine, isDraw = false) {
         const {
             top: lineTop,
-            marginBottom: lineMarginBottom = 0,
+            marginBottom: _lineMarginBottom = 0,
             marginTop: lineMarginTop = 0,
             paddingTop: linePaddingTop = 0,
-            paddingBottom: linePaddingBottom = 0,
+            paddingBottom: _linePaddingBottom = 0,
         } = line;
         const lineOffset = lineTop + (isDraw === true ? lineMarginTop : 0) + linePaddingTop;
         this.translate(0, lineOffset);
@@ -206,8 +206,8 @@ export class Liquid {
         };
     }
 
-    translateSpan(span: IDocumentSkeletonGlyph) {
-        const { left: spanLeft } = span;
+    translateSpan(glyph: IDocumentSkeletonGlyph) {
+        const { left: spanLeft } = glyph;
         this.translate(spanLeft, 0);
 
         return {

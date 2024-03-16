@@ -463,14 +463,14 @@ function _pageOperator(
  * 17.3.1.12 ind (Paragraph Indentation)
  */
 function __getIndentPadding(
-    span: IDocumentSkeletonGlyph,
+    glyph: IDocumentSkeletonGlyph,
     indentFirstLine: INumberUnit | number = 0,
     hanging: INumberUnit | number = 0,
     indentStart: INumberUnit | number = 0,
     indentEnd: INumberUnit | number = 0,
     charSpaceApply: number
 ) {
-    const { glyphType = GlyphType.LETTER, bBox } = span;
+    const { glyphType = GlyphType.LETTER, bBox } = glyph;
     const indentFirstLineNumber = getNumberUnitValue(indentFirstLine, charSpaceApply);
     const hangingNumber = getNumberUnitValue(hanging, charSpaceApply);
     const indentStartNumber = getNumberUnitValue(indentStart, charSpaceApply);
@@ -490,7 +490,7 @@ function __getIndentPadding(
         if (indentFirstLineNumber > 0) {
             paddingLeft += indentFirstLineNumber;
         } else if (hangingNumber > 0 && hangingNumber > fontWidth) {
-            // span.w = hangingNumber;
+            // glyph.w = hangingNumber;
             changeBulletWidth.state = true;
             changeBulletWidth.hangingNumber = hangingNumber;
         }
@@ -697,8 +697,8 @@ function __getSpanGroupWidth(glyphGroup: IDocumentSkeletonGlyph[]) {
     let width = 0;
 
     for (let i = 0; i < spanGroupLen; i++) {
-        const span = glyphGroup[i];
-        width += span.width;
+        const glyph = glyphGroup[i];
+        width += glyph.width;
     }
     return width;
 }
@@ -709,8 +709,8 @@ function __maxFontBoundingBoxBySpanGroup(glyphGroup: IDocumentSkeletonGlyph[]) {
     let maxBox;
 
     for (let i = 0; i < spanGroupLen; i++) {
-        const span = glyphGroup[i];
-        const { ba: boundingBoxAscent, bd: boundingBoxDescent } = span.bBox;
+        const glyph = glyphGroup[i];
+        const { ba: boundingBoxAscent, bd: boundingBoxDescent } = glyph.bBox;
 
         if (height < boundingBoxAscent + boundingBoxDescent) {
             maxBox = { boundingBoxAscent, boundingBoxDescent };

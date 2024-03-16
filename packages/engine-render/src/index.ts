@@ -43,4 +43,5 @@ export {
 } from './components/docs/text-selection/text-selection-render-manager';
 export type { IActiveTextRange, IEditorInputConfig, ITextSelectionInnerParam } from './components/docs/text-selection/text-selection-render-manager';
 export { Documents } from './components/docs/document';
+export type { IPageRenderConfig } from './components/docs/document';
 export { DocumentSkeleton } from './components/docs/layout/doc-skeleton';

@@ -38,6 +38,7 @@ export { type IRadioGroupProps, RadioGroup } from './components/radio-group';
 export { type IScrollbarProps, Scrollbar } from './components/scrollbar';
 export { type ISelectProps, Select } from './components/select';
 export { type ISelectListProps, SelectList } from './components/select-list';
+export { type ISegmentedProps, Segmented } from './components/segmented';
 export { type ISliderProps, Slider } from './components/slider';
 export { type ITooltipProps, Tooltip } from './components/tooltip';
 export { type ITreeNodeProps, type ITreeProps, Tree, TreeSelectionMode } from './components/tree';

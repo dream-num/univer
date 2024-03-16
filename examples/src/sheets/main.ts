@@ -80,7 +80,38 @@ univer.registerPlugin(UniverFindReplacePlugin);
 univer.registerPlugin(UniverSheetsFindReplacePlugin);
 
 // create univer sheet instance
-univer.createUniverSheet(DEFAULT_WORKBOOK_DATA_DEMO);
+univer.createUniverSheet({
+    id: 'test',
+    appVersion: '3.0.0-alpha',
+    sheets: {
+        sheet1: {
+            id: 'sheet1',
+            cellData: {
+                0: { 0: { v: 1, t: 2 }, 1: { v: 2, t: 2 }, 2: { v: 3, t: 2 }, 3: { v: 4, t: 2 }, 4: { v: 5, t: 2 }, 5: { v: 6, t: 2 }, 6: { v: 7, t: 2 } },
+                1: { 0: { v: 1, t: 2 }, 1: { v: 2, t: 2 }, 2: { v: 3, t: 2 }, 3: { v: 4, t: 2 }, 4: { v: 5, t: 2 }, 5: { v: 6, t: 2 }, 6: { v: 7, t: 2 } },
+                2: { 0: { v: 1, t: 2 }, 1: { v: 2, t: 2 }, 2: { v: 3, t: 2 }, 3: { v: 4, t: 2 }, 4: { v: 5, t: 2 }, 5: { v: 6, t: 2 }, 6: { v: 7, t: 2 } },
+                3: { 0: { v: 1, t: 2 }, 1: { v: 2, t: 2 }, 2: { v: 3, t: 2 }, 3: { v: 4, t: 2 }, 4: { v: 5, t: 2 }, 5: { v: 6, t: 2 }, 6: { v: 7, t: 2 } },
+                4: { 0: { v: 1, t: 2 }, 1: { v: 2, t: 2 }, 2: { v: 3, t: 2 }, 3: { v: 4, t: 2 }, 4: { v: 5, t: 2 }, 5: { v: 6, t: 2 }, 6: { v: 7, t: 2 } },
+                5: { 0: { v: 1, t: 2 }, 1: { v: 2, t: 2 }, 2: { v: 3, t: 2 }, 3: { v: 4, t: 2 }, 4: { v: 5, t: 2 }, 5: { v: 6, t: 2 }, 6: { v: 7, t: 2 } },
+            },
+
+        },
+    },
+    locale: LocaleType.ZH_CN,
+    name: '',
+    sheetOrder: [],
+    styles: {},
+    resources: [
+        {
+            name: 'SHEET_NUMFMT_PLUGIN',
+            data: '{"model":{},"refModel":[]}',
+        },
+        {
+            name: 'SHEET_CONDITION_FORMAT_PLUGIN',
+            data: '{"sheet1":[{"cfId":"1","ranges":[{"startRow":0,"startColumn":0,"endRow":5,"endColumn":6,"startAbsoluteRefType":0,"endAbsoluteRefType":0,"rangeType":0}],"rule":{"config":[{"color":"#ff0000","value":{"type":"min","value":10},"index":0},{"color":"#0000ff","value":{"type":"max","value":90},"index":1}],"type":"colorScale"},"stopIfTrue":false}]}',
+        },
+    ],
+});
 
 // sheet condition format
 univer.registerPlugin(SheetsConditionalFormatPlugin);

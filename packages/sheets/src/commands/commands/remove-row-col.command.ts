@@ -100,15 +100,15 @@ export const RemoveRowCommand: ICommand = {
                 { id: RemoveRowMutation.id, params: removeRowsParams },
                 intercepted.redos[1],
                 followSelectionOperation(range, workbook, worksheet),
-            ],
+            ].filter(Boolean),
             commandService
         );
 
         if (result.result) {
             accessor.get(IUndoRedoService).pushUndoRedo({
                 unitID: unitId,
-                undoMutations: [intercepted.undos[0], { id: InsertRowMutation.id, params: undoRemoveRowsParams }, intercepted.undos[1]],
-                redoMutations: [intercepted.redos[0], { id: RemoveRowMutation.id, params: removeRowsParams }, intercepted.redos[1]],
+                undoMutations: [intercepted.undos[0], { id: InsertRowMutation.id, params: undoRemoveRowsParams }, intercepted.undos[1]].filter(Boolean),
+                redoMutations: [intercepted.redos[0], { id: RemoveRowMutation.id, params: removeRowsParams }, intercepted.redos[1]].filter(Boolean),
             });
             return true;
         }
@@ -166,7 +166,7 @@ export const RemoveColCommand: ICommand = {
                 { id: RemoveColMutation.id, params: removeColParams },
                 intercepted.redos[1],
                 followSelectionOperation(range, workbook, worksheet),
-            ],
+            ].filter(Boolean),
             commandService
         );
 
@@ -177,12 +177,11 @@ export const RemoveColCommand: ICommand = {
                 undoMutations: [
                     intercepted.undos[0],
                     { id: InsertColMutation.id, params: undoRemoveColParams },
-                    intercepted.undos[1]],
+                    intercepted.undos[1]].filter(Boolean),
                 redoMutations: [
                     intercepted.redos[0],
                     { id: RemoveColMutation.id, params: removeColParams },
-                    intercepted.redos[1],
-                ],
+                    intercepted.redos[1]].filter(Boolean),
             });
 
             return true;

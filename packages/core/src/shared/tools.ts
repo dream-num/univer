@@ -16,6 +16,7 @@
 
 import { customAlphabet, nanoid } from 'nanoid';
 
+import type { IRange } from '../types/interfaces';
 import type { Class, IKeyValue } from './types';
 
 const rmsPrefix = /^-ms-/;
@@ -651,5 +652,12 @@ export class Tools {
         range2End: number
     ) {
         return range1End >= range2Start && range2End >= range1Start;
+    }
+
+    static isMergeCell(range: IRange) {
+        if (range.startColumn > range.endColumn || range.startRow > range.endRow) {
+            return false;
+        }
+        return !(range.startRow === range.endRow && range.startColumn === range.endColumn);
     }
 }

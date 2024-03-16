@@ -96,8 +96,9 @@ export const RemoveRowCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
         const result = sequenceExecute(
             [
+                intercepted.redos[0],
                 { id: RemoveRowMutation.id, params: removeRowsParams },
-                ...intercepted.redos,
+                intercepted.redos[1],
                 followSelectionOperation(range, workbook, worksheet),
             ],
             commandService
@@ -106,8 +107,8 @@ export const RemoveRowCommand: ICommand = {
         if (result.result) {
             accessor.get(IUndoRedoService).pushUndoRedo({
                 unitID: unitId,
-                undoMutations: [{ id: InsertRowMutation.id, params: undoRemoveRowsParams }, ...intercepted.undos],
-                redoMutations: [{ id: RemoveRowMutation.id, params: removeRowsParams }, ...intercepted.redos],
+                undoMutations: [intercepted.undos[0], { id: InsertRowMutation.id, params: undoRemoveRowsParams }, intercepted.undos[1]],
+                redoMutations: [intercepted.redos[0], { id: RemoveRowMutation.id, params: removeRowsParams }, intercepted.redos[1]],
             });
             return true;
         }
@@ -161,8 +162,9 @@ export const RemoveColCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
         const result = sequenceExecute(
             [
+                intercepted.redos[0],
                 { id: RemoveColMutation.id, params: removeColParams },
-                ...intercepted.redos,
+                intercepted.redos[1],
                 followSelectionOperation(range, workbook, worksheet),
             ],
             commandService
@@ -172,8 +174,15 @@ export const RemoveColCommand: ICommand = {
             const undoRedoService = accessor.get(IUndoRedoService);
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
-                undoMutations: [{ id: InsertColMutation.id, params: undoRemoveColParams }, ...intercepted.undos],
-                redoMutations: [{ id: RemoveColMutation.id, params: removeColParams }, ...intercepted.redos],
+                undoMutations: [
+                    intercepted.undos[0],
+                    { id: InsertColMutation.id, params: undoRemoveColParams },
+                    intercepted.undos[1]],
+                redoMutations: [
+                    intercepted.redos[0],
+                    { id: RemoveColMutation.id, params: removeColParams },
+                    intercepted.redos[1],
+                ],
             });
 
             return true;

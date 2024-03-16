@@ -15,7 +15,7 @@
  */
 
 import type { ICommandInfo, IRange } from '@univerjs/core';
-import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle, Rectangle } from '@univerjs/core';
+import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 import type { IInsertRowCommandParams } from '../commands/commands/insert-row-col.command';
 import { InsertColMutation, InsertRowMutation } from '../commands/mutations/insert-row-col.mutation';
@@ -55,36 +55,34 @@ export class InsertOrRemoveRowColController extends Disposable {
                 mergeData.forEach((merge) => {
                     let { startRow, endRow, startColumn, endColumn, rangeType } = merge;
 
-                    if (!Rectangle.intersects(merge, range)) {
-                        if (isAddOperation) {
-                            if (isRowOperation) {
-                                if (operationStart <= startRow) {
-                                    startRow += operationCount;
-                                    endRow += operationCount;
-                                }
-                            } else {
-                                if (operationStart <= startColumn) {
-                                    startColumn += operationCount;
-                                    endColumn += operationCount;
-                                }
+                    if (isAddOperation) {
+                        if (isRowOperation) {
+                            if (operationStart <= startRow) {
+                                startRow += operationCount;
+                                endRow += operationCount;
                             }
                         } else {
-                            if (isRowOperation) {
-                                if (operationEnd < startRow) {
-                                    startRow -= operationCount;
-                                    endRow -= operationCount;
-                                }
-                            } else {
-                                if (operationEnd < startColumn) {
-                                    startColumn -= operationCount;
-                                    endColumn -= operationCount;
-                                }
+                            if (operationStart <= startColumn) {
+                                startColumn += operationCount;
+                                endColumn += operationCount;
                             }
                         }
-
-                        if (!(merge.startRow === merge.endRow && merge.startColumn === merge.endColumn)) {
-                            adjustedMergedCells.push({ startRow, endRow, startColumn, endColumn, rangeType });
+                    } else {
+                        if (isRowOperation) {
+                            if (operationEnd < startRow) {
+                                startRow -= operationCount;
+                                endRow -= operationCount;
+                            }
+                        } else {
+                            if (operationEnd < startColumn) {
+                                startColumn -= operationCount;
+                                endColumn -= operationCount;
+                            }
                         }
+                    }
+
+                    if (!(merge.startRow === merge.endRow && merge.startColumn === merge.endColumn)) {
+                        adjustedMergedCells.push({ startRow, endRow, startColumn, endColumn, rangeType });
                     }
                 });
 

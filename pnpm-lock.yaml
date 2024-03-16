@@ -131,6 +131,9 @@ importers:
       '@storybook/blocks':
         specifier: 8.0.0
         version: 8.0.0(@types/react@18.2.66)(react-dom@18.2.0)(react@18.2.0)
+      '@storybook/icons':
+        specifier: ^1.2.9
+        version: 1.2.9(react-dom@18.2.0)(react@18.2.0)
       '@storybook/react':
         specifier: 8.0.0
         version: 8.0.0(react-dom@18.2.0)(react@18.2.0)(typescript@5.4.2)
@@ -4123,7 +4126,7 @@ packages:
       '@storybook/csf': 0.1.2
       '@storybook/docs-tools': 8.0.0
       '@storybook/global': 5.0.0
-      '@storybook/icons': 1.2.5(react-dom@18.2.0)(react@18.2.0)
+      '@storybook/icons': 1.2.9(react-dom@18.2.0)(react@18.2.0)
       '@storybook/manager-api': 8.0.0(react-dom@18.2.0)(react@18.2.0)
       '@storybook/preview-api': 8.0.0
       '@storybook/theming': 8.0.0(react-dom@18.2.0)(react@18.2.0)
@@ -4319,7 +4322,7 @@ packages:
       '@storybook/client-logger': 8.0.0
       '@storybook/csf': 0.1.2
       '@storybook/global': 5.0.0
-      '@storybook/icons': 1.2.5(react-dom@18.2.0)(react@18.2.0)
+      '@storybook/icons': 1.2.9(react-dom@18.2.0)(react@18.2.0)
       '@storybook/theming': 8.0.0(react-dom@18.2.0)(react@18.2.0)
       '@storybook/types': 8.0.0
       memoizerific: 1.11.3
@@ -4488,8 +4491,8 @@ packages:
   /@storybook/global@5.0.0:
     resolution: {integrity: sha512-FcOqPAXACP0I3oJ/ws6/rrPT9WGhu915Cg8D02a9YxLo0DE9zI+a9A5gRGvmQ09fiWPukqI8ZAEoQEdWUKMQdQ==}
 
-  /@storybook/icons@1.2.5(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-m3jnuE+zmkZy6K+cdUDzAoUuCJyl0fWCAXPCji7VZCH1TzFohyvnPqhc9JMkQpanej2TOW3wWXaplPzHghcBSg==}
+  /@storybook/icons@1.2.9(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-cOmylsz25SYXaJL/gvTk/dl3pyk7yBFRfeXTsHvTA3dfhoU/LWSq0NKL9nM7WBasJyn6XPSGnLS4RtKXLw5EUg==}
     engines: {node: '>=14.0.0'}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0

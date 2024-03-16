@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
-import { isRealNum } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
-import { convertTonNumber } from '../../../engine/utils/object-covert';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
-import { createNumberValueObjectByRawValue } from '../../../engine/value-object/array-value-object';
 
 export class Min extends BaseFunction {
     override calculate(...variants: BaseValueObject[]) {
@@ -33,31 +30,16 @@ export class Min extends BaseFunction {
         for (let i = 0; i < variants.length; i++) {
             let variant = variants[i];
 
-            if (variant.isError()) {
-                return variant as ErrorValueObject;
-            }
-
-            if (variant.isString()) {
-                const value = variant.getValue();
-                const isStringNumber = isRealNum(value);
-
-                if (!isStringNumber) {
-                    return ErrorValueObject.create(ErrorType.VALUE);
-                }
-
-                variant = createNumberValueObjectByRawValue(value);
-            }
-
-            if (variant.isBoolean()) {
-                variant = convertTonNumber(variant);
+            if (variant.isString() || variant.isBoolean()) {
+                variant = variant.convertToNumberObjectValue();
             }
 
             if (variant.isArray()) {
                 variant = variant.min();
+            }
 
-                if (variant.isError()) {
-                    return variant as ErrorValueObject;
-                }
+            if (variant.isError()) {
+                return variant as ErrorValueObject;
             }
 
             if (variant.isNull()) {

@@ -522,7 +522,7 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
                 if (this._moveObservers.length > 0 || this._upObservers.length > 0) {
                     this._upObserverDispose(scene);
                 }
-            }, 0);
+            }, 100);
         }));
     }
 

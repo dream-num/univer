@@ -41,7 +41,7 @@ type ComputeStatus = 'computing' | 'end' | 'error';
 interface IComputeCache { status: ComputeStatus };
 
 const beforeUpdateRuleResult = createInterceptorKey< { subUnitId: string; unitId: string; cfId: string }>('conditional-format-before-update-rule-result');
-@OnLifecycle(LifecycleStages.Rendered, ConditionalFormatService)
+@OnLifecycle(LifecycleStages.Starting, ConditionalFormatService)
 export class ConditionalFormatService extends Disposable {
     // <unitId,<subUnitId,<cfId,IComputeCache>>>
     private _ruleCacheMap: Map<string, Map<string, Map<string, IComputeCache>>> = new Map();

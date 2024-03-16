@@ -386,17 +386,6 @@ export class BaseFunction extends Disposable {
         return resultArray.slice(undefined, [position.column, position.column + 1]);
     }
 
-    getStringNumberValueObject(variant: BaseValueObject) {
-        const value = variant.getValue();
-        const isStringNumber = isRealNum(value);
-
-        if (!isStringNumber) {
-            return new ErrorValueObject(ErrorType.VALUE);
-        }
-
-        return createNumberValueObjectByRawValue(value);
-    }
-
     flattenArray(variants: BaseValueObject[], ignoreLogicalValuesAndText: boolean = true): ArrayValueObject | BaseValueObject {
         const flattenValues: BaseValueObject[][] = [];
         flattenValues[0] = [];

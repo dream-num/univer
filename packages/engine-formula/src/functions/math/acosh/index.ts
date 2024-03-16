@@ -26,7 +26,7 @@ export class Acosh extends BaseFunction {
         }
 
         if (variant.isString()) {
-            variant = this.getStringNumberValueObject(variant);
+            variant = variant.convertToNumberObjectValue();
         }
 
         if (variant.isError()) {

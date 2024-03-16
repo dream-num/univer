@@ -26,7 +26,7 @@ export class Power extends BaseFunction {
         }
 
         if (number.isString()) {
-            number = this.getStringNumberValueObject(number);
+            number = number.convertToNumberObjectValue();
         }
 
         if (number.isError()) {
@@ -34,7 +34,7 @@ export class Power extends BaseFunction {
         }
 
         if (power.isString()) {
-            power = this.getStringNumberValueObject(power);
+            power = power.convertToNumberObjectValue();
         }
 
         if (power.isError()) {

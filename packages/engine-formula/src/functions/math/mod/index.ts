@@ -26,7 +26,7 @@ export class Mod extends BaseFunction {
         }
 
         if (number.isString()) {
-            number = this.getStringNumberValueObject(number);
+            number = number.convertToNumberObjectValue();
         }
 
         if (number.isError()) {
@@ -34,7 +34,7 @@ export class Mod extends BaseFunction {
         }
 
         if (divisor.isString()) {
-            divisor = this.getStringNumberValueObject(divisor);
+            divisor = divisor.convertToNumberObjectValue();
         }
 
         if (divisor.isError()) {

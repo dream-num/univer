@@ -41,6 +41,7 @@ import {
     CellValueType,
     DEFAULT_EMPTY_DOCUMENT_VALUE,
     DocumentDataModel,
+    extractPureTextFromCell,
     getColorStyle,
     HorizontalAlign,
     IContextService,
@@ -1088,7 +1089,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             const textStyle = this._getFontFormat(style);
             fontString = getFontStyleString(textStyle, this._localService).fontCache;
 
-            documentModel = this._getDocumentDataByStyle(cell.v.toString(), textStyle, {
+            documentModel = this._getDocumentDataByStyle(extractPureTextFromCell(cell), textStyle, {
                 ...cellOtherConfig,
                 textRotation,
                 cellValueType: cell.t!,

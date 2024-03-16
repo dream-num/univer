@@ -126,7 +126,7 @@ export {
 } from './sheets/sheet-snapshot-utils';
 export { SheetViewModel } from './sheets/view-model';
 export { getWorksheetUID, Workbook } from './sheets/workbook';
-export { Worksheet } from './sheets/worksheet';
+export { Worksheet, extractPureTextFromCell } from './sheets/worksheet';
 export * from './slides/domain';
 export * from './types/const';
 export * from './types/enum';

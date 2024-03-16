@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import { CellValueType } from '@univerjs/protocol';
+
 import type { Nullable } from '../shared';
 import { ObjectMatrix, Rectangle, Tools } from '../shared';
 import { createRowColIter } from '../shared/row-col-iter';
@@ -634,9 +636,23 @@ export interface ICell {
  * @param cell
  * @returns pure text in this cell
  */
-export function extractPureTextFromCell(cell: ICellData): Nullable<string> {
-    const rawValue = cell?.p?.body?.dataStream ?? cell?.v;
-    if (typeof rawValue === 'number') return `${rawValue}`;
+export function extractPureTextFromCell(cell: ICellData): string {
+    const richTextValue = cell.p?.body?.dataStream;
+    if (richTextValue) return richTextValue;
+
+    const rawValue = cell.v;
+
+    if (typeof rawValue === 'string') {
+        if (cell.t === CellValueType.BOOLEAN) return rawValue.toUpperCase();
+        return rawValue;
+    };
+
+    if (typeof rawValue === 'number') {
+        if (cell.t === CellValueType.BOOLEAN) return rawValue ? 'TRUE' : 'FALSE';
+        return rawValue.toString();
+    };
+
     if (typeof rawValue === 'boolean') return rawValue ? 'TRUE' : 'FALSE';
-    return rawValue;
+
+    return '';
 }

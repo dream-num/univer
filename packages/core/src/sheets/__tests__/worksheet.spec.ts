@@ -22,6 +22,7 @@ import { LocaleType } from '../../types/enum/locale-type';
 import { extractPureTextFromCell, type Worksheet } from '../worksheet';
 import { type IRange, RANGE_TYPE } from '../../types/interfaces/i-range';
 import { DisposableCollection } from '../../shared/lifecycle';
+import { CellValueType } from '../../types/enum';
 import { createCoreTestBed } from './create-core-test-bed';
 
 describe('test worksheet', () => {
@@ -252,5 +253,12 @@ describe('test "extractPureTextFromCell"', () => {
         expect(extractPureTextFromCell({ v: false })).toBe('FALSE');
         expect(extractPureTextFromCell({ v: true })).toBe('TRUE');
         expect(extractPureTextFromCell({ v: 1 })).toBe('1');
+    });
+
+    describe('test "CellType"', () => {
+        it('should return boolean literal when cell type is boolean', () => {
+            expect(extractPureTextFromCell({ t: CellValueType.BOOLEAN, v: 1 })).toBe('TRUE');
+            expect(extractPureTextFromCell({ t: CellValueType.BOOLEAN, v: 0 })).toBe('FALSE');
+        });
     });
 });

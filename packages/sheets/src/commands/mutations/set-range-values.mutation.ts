@@ -192,7 +192,12 @@ export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, bo
 
                 // Set to null, clear content
                 if (newVal.v !== undefined) {
-                    oldVal.v = type === CellValueType.NUMBER ? Number(newVal.v) : newVal.v;
+                    oldVal.v = type === CellValueType.NUMBER
+                        ? Number(newVal.v)
+                        : type === CellValueType.BOOLEAN
+                            // if the value is a boolean, we should store it as 1 or 0
+                            ? (newVal.v!.toString()).toUpperCase() === 'TRUE' ? 1 : 0
+                            : newVal.v;
                 }
 
                 if (oldVal.v !== undefined) {

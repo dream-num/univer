@@ -19,7 +19,8 @@ import { Disposable, ICommandService, RefAlias, toDisposable, Tools } from '@uni
 import { Inject, Injector } from '@wendellhu/redi';
 import type { IRemoveOtherFormulaMutationParams, ISetFormulaCalculationResultMutation, ISetOtherFormulaMutationParams } from '@univerjs/engine-formula';
 import { IActiveDirtyManagerService } from '@univerjs/sheets-formula';
-import { RemoveOtherFormulaMutation, SetFormulaCalculationResultMutation,
+import { RemoveOtherFormulaMutation,
+    SetFormulaCalculationResultMutation,
     SetOtherFormulaMutation } from '@univerjs/engine-formula';
 import { Subject } from 'rxjs';
 import { bufferTime, filter, map } from 'rxjs/operators';

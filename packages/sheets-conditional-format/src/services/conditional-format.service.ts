@@ -53,7 +53,8 @@ export class ConditionalFormatService extends Disposable {
 
     private _calculationUnitMap: Map<IConditionFormatRule['rule']['type'], ICalculateUnit> = new Map();
 
-    constructor(@Inject(ConditionalFormatRuleModel) private _conditionalFormatRuleModel: ConditionalFormatRuleModel,
+    constructor(
+        @Inject(ConditionalFormatRuleModel) private _conditionalFormatRuleModel: ConditionalFormatRuleModel,
         @Inject(Injector) private _injector: Injector,
         @Inject(ConditionalFormatViewModel) private _conditionalFormatViewModel: ConditionalFormatViewModel,
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,

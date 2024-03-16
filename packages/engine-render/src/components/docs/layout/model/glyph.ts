@@ -26,15 +26,20 @@ import type {
 } from '../../../../basics/i-document-skeleton-cached';
 import { GlyphType } from '../../../../basics/i-document-skeleton-cached';
 import type { IFontCreateConfig } from '../../../../basics/interfaces';
-import { hasCJK, hasCJKText, hasSpace, isCjkCenterAlignedPunctuation, isCjkLeftAlignedPunctuation, isCjkRightAlignedPunctuation } from '../../../../basics/tools';
+import { hasCJK, hasCJKText, isCjkCenterAlignedPunctuation, isCjkLeftAlignedPunctuation, isCjkRightAlignedPunctuation } from '../../../../basics/tools';
 import { validationGrid } from '../tools';
 
+function isSpace(char: string) {
+    const SPACE_CHARS = [' ', '\u{00A0}', '　'];
+
+    return SPACE_CHARS.includes(char);
+}
 // Whether the glyph is justifiable.
 function isJustifiable(
     content: string
-): boolean {
+) {
     // punctuation style is not relevant here.
-    return hasSpace(content)
+    return isSpace(content)
         || hasCJKText(content)
         || isCjkLeftAlignedPunctuation(content)
         || isCjkRightAlignedPunctuation(content)
@@ -42,7 +47,7 @@ function isJustifiable(
 }
 
 function baseAdjustability(content: string, width: number): IAdjustability {
-    if (hasSpace(content)) {
+    if (isSpace(content)) {
         return {
             // The number for spaces is from Knuth-Plass' paper
             stretchability: [0, width / 2.0],

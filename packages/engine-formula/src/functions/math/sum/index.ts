@@ -33,7 +33,7 @@ export class Sum extends BaseFunction {
                 variant = variant.convertToNumberObjectValue();
             }
 
-            if (variant.isError()){
+            if (variant.isError()) {
                 return variant;
             }
 

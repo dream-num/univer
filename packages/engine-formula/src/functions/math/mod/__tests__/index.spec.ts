@@ -34,7 +34,7 @@ describe('Test mod function', () => {
         });
         it('Number is single string number, power is single string number', () => {
             const number = new StringValueObject('5');
-            const power = new NumberValueObject('2');
+            const power = new StringValueObject('2');
             const result = textFunction.calculate(number, power);
             expect(result.getValue()).toBe(1);
         });

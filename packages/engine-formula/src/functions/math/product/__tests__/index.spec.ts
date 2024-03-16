@@ -34,8 +34,8 @@ describe('Test product function', () => {
             expect(result.getValue()).toBe(2);
         });
         it('Var1 is string number, var2 is string number', () => {
-            const var1 = new NumberValueObject('1');
-            const var2 = new NumberValueObject('2');
+            const var1 = new StringValueObject('1');
+            const var2 = new StringValueObject('2');
             const result = textFunction.calculate(var1, var2);
             expect(result.getValue()).toBe(2);
         });

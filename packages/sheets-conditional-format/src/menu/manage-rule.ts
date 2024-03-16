@@ -105,6 +105,9 @@ export const FactoryManageConditionalFormatRule = (componentManager: ComponentMa
                 {
                     label: localeService.t('sheet.cf.ruleType.dataBar'),
                     value: OPERATION.dataBar,
+                }, {
+                    label: localeService.t('sheet.cf.ruleType.iconSet'),
+                    value: OPERATION.icon,
                 },
                 {
                     label: localeService.t('sheet.cf.menu.manageConditionalFormat'),

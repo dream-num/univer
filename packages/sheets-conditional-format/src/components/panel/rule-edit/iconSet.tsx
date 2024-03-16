@@ -253,18 +253,19 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
     const localeService = useDependency(LocaleService);
     const [errorMap, errorMapSet] = useState<Record<string, string>>({});
     const [currentIconType, currentIconTypeSet] = useState<IIconType>(() => {
-        if (rule) {
+        const defaultV = Object.keys(iconMap)[0] as IIconType;
+        if (rule && rule.config.length) {
             const type = rule.config[0].iconType;
             const isNotSame = rule.config.some((item) => item.iconType !== type);
             if (!isNotSame) {
                 return type;
             }
         }
-        return Object.keys(iconMap)[0] as IIconType;
+        return defaultV;
     });
 
     const [configList, configListSet] = useState(() => {
-        if (rule) {
+        if (rule && rule.config.length) {
             return Tools.deepClone(rule?.config);
         }
         const list = iconMap[currentIconType];
@@ -285,7 +286,7 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
         if (!rule) {
             return true;
         }
-        return rule.isShowValue;
+        return !!rule.isShowValue;
     });
 
     const previewIcon = useMemo(() => {

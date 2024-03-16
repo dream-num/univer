@@ -20,7 +20,7 @@ import type { IAccessor } from '@wendellhu/redi';
 import { SelectionManagerService } from '@univerjs/sheets';
 import { ConditionalFormatMenuController } from '../../controllers/cf.menu.controller';
 import { createDefaultRule, RuleType, SubRuleType } from '../../base/const';
-import type { IColorScale, IConditionFormatRule, IDataBar, IFormulaHighlightCell, IRankHighlightCell } from '../../models/type';
+import type { IColorScale, IConditionFormatRule, IDataBar, IFormulaHighlightCell, IIconSet, IRankHighlightCell } from '../../models/type';
 import type { IClearRangeCfParams } from '../commands/clear-range-cf.command';
 import { clearRangeCfCommand } from '../commands/clear-range-cf.command';
 import { clearWorksheetCfCommand } from '../commands/clear-worksheet-cf.command';
@@ -106,6 +106,16 @@ export const OpenConditionalFormatOperator: ICommand = {
                 break;
             }
             case OPERATION.icon:{
+                const rule = {
+                    ...createDefaultRule,
+                    ranges,
+                    rule: {
+                        type: RuleType.iconSet,
+                        config: [],
+                        isShowValue: true,
+                    },
+                } as unknown as IConditionFormatRule<IIconSet>;
+                conditionalFormatMenuController.openPanel(rule);
                 break;
             }
             case OPERATION.viewRule:{

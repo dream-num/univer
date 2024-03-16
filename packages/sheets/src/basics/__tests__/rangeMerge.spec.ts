@@ -17,7 +17,7 @@
 import type { IRange } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 
-import { rangeMerge } from '../rangeMerge';
+import { rangeMerge, RangeMergeUtil } from '../rangeMerge';
 
 const cellToRange = (row: number, col: number) =>
     ({ startColumn: col, endColumn: col, endRow: row, startRow: row }) as IRange;
@@ -171,31 +171,18 @@ describe('test rangeMerge', () => {
         ]);
     });
 
-    // it('performance 10 rows and 250 columns', () => {
-    //     // column sparse matrices have better performance
-    //     const now = performance.now();
-    //     rangeMerge([{ startRow: 0, endRow: 10, startColumn: 0, endColumn: 250 }]);
-    //     const end = performance.now();
-    //     const result = end - now;
-    //     console.log(result, ':ms');
-    //     expect(result).toBeLessThanOrEqual(5000); // 4002
-    // });
-
-    // it('performance 100 rows and 100 columns', () => {
-    //     const now = performance.now();
-    //     rangeMerge([{ startRow: 0, endRow: 100, startColumn: 0, endColumn: 100 }]);
-    //     const end = performance.now();
-    //     const result = end - now;
-    //     console.log(result, ':ms');
-    //     expect(result).toBeLessThanOrEqual(5000); // 4640
-    // });
-
-    // it('performance 1000 rows and 10 columns', () => {
-    //     const now = performance.now();
-    //     rangeMerge([{ startRow: 0, endRow: 1000, startColumn: 0, endColumn: 10 }]);
-    //     const end = performance.now();
-    //     const result = end - now;
-    //     console.log(result, ':ms');
-    //     expect(result).toBeLessThanOrEqual(4000); // 3483
-    // });
+    it('test rangeMergeUtil', () => {
+        const testRange: IRange[] = [cellToRange(2, 2), cellToRange(3, 2), cellToRange(4, 2)];
+        expect(new RangeMergeUtil().add(...testRange).merge()).toEqual([
+            { startColumn: 2, endColumn: 2, startRow: 2, endRow: 4 },
+        ]);
+        expect(new RangeMergeUtil().add(...testRange).subtract(cellToRange(4, 2)).merge()).toEqual([
+            { startColumn: 2, endColumn: 2, startRow: 2, endRow: 3 },
+        ]);
+        expect(new RangeMergeUtil().add(...testRange).subtract(cellToRange(3, 2)).merge()).toEqual([
+            { startColumn: 2, endColumn: 2, startRow: 2, endRow: 2 },
+            { startColumn: 2, endColumn: 2, startRow: 4, endRow: 4 },
+        ]);
+        expect(new RangeMergeUtil().add(...testRange).subtract(...testRange).merge()).toEqual([]);
+    });
 });

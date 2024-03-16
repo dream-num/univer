@@ -16,8 +16,9 @@
 
 import Big from 'big.js';
 
+import { isRealNum } from '@univerjs/core';
 import { reverseCompareOperator } from '../../basics/calculate';
-import { ConcatenateType } from '../../basics/common';
+import { BooleanValue, ConcatenateType } from '../../basics/common';
 import { ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
 import { compareToken } from '../../basics/token';
 import { compareWithWildcard, isWildcard } from '../utils/compare';
@@ -192,6 +193,14 @@ export class NullValueObject extends BaseValueObject {
     override ceil(valueObject: BaseValueObject): BaseValueObject {
         return NumberValueObject.create(0).ceil(valueObject);
     }
+
+    override convertToNumberObjectValue() {
+        return NumberValueObject.create(0);
+    }
+
+    override convertToBooleanObjectValue() {
+        return BooleanValueObject.create(false);
+    }
 }
 
 export class BooleanValueObject extends BaseValueObject {
@@ -364,6 +373,14 @@ export class BooleanValueObject extends BaseValueObject {
 
     override ceil(valueObject: BaseValueObject): BaseValueObject {
         return this._convertTonNumber().ceil(valueObject);
+    }
+
+    override convertToNumberObjectValue() {
+        return createNumberValueObjectByRawValue(this.getValue());
+    }
+
+    override convertToBooleanObjectValue() {
+        return this;
     }
 }
 
@@ -1140,6 +1157,14 @@ export class NumberValueObject extends BaseValueObject {
         return this;
     }
 
+    override convertToNumberObjectValue() {
+        return this;
+    }
+
+    override convertToBooleanObjectValue() {
+        return createBooleanValueObjectByRawValue(true);
+    }
+
     private _compareInfinity(currentValue: number, value: number, operator: compareToken) {
         let result = false;
         switch (operator) {
@@ -1280,10 +1305,69 @@ export class StringValueObject extends BaseValueObject {
         return BooleanValueObject.create(result);
     }
 
+    override convertToNumberObjectValue() {
+        return createNumberValueObjectByRawValue(this.getValue());
+    }
+
+    override convertToBooleanObjectValue() {
+        return BooleanValueObject.create(true);
+    }
+
     private _checkWildcard(value: string, operator: compareToken) {
         const currentValue = this.getValue().toLocaleLowerCase();
         const result = compareWithWildcard(currentValue, value, operator);
 
         return BooleanValueObject.create(result);
     }
+}
+
+export function createBooleanValueObjectByRawValue(rawValue: string | number | boolean) {
+    if (typeof rawValue === 'boolean') {
+        return BooleanValueObject.create(rawValue);
+    }
+    let value = false;
+    if (typeof rawValue === 'string') {
+        const rawValueUpper = rawValue.toLocaleUpperCase();
+        if (rawValueUpper === BooleanValue.TRUE) {
+            value = true;
+        } else if (rawValueUpper === BooleanValue.FALSE) {
+            value = false;
+        }
+    } else {
+        if (rawValue === 1) {
+            value = true;
+        } else {
+            value = false;
+        }
+    }
+    return BooleanValueObject.create(value);
+}
+
+export function createStringValueObjectByRawValue(rawValue: string | number | boolean) {
+    let value = rawValue.toString();
+
+    if (value.charAt(0) === '"' && value.charAt(value.length - 1) === '"') {
+        value = value.slice(1, -1);
+        value = value.replace(/""/g, '"');
+    }
+
+    return StringValueObject.create(value);
+}
+
+export function createNumberValueObjectByRawValue(rawValue: string | number | boolean) {
+    if (typeof rawValue === 'boolean') {
+        let result = 0;
+        if (rawValue) {
+            result = 1;
+        }
+        return NumberValueObject.create(result);
+    } else if (typeof rawValue === 'number') {
+        if (!Number.isFinite(rawValue)) {
+            return ErrorValueObject.create(ErrorType.NUM);
+        }
+        return NumberValueObject.create(rawValue);
+    } else if (isRealNum(rawValue)) {
+        return NumberValueObject.create(Number(rawValue));
+    }
+    return ErrorValueObject.create(ErrorType.VALUE);
 }

@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-import { isRealNum } from '@univerjs/core';
 import type { ArrayValueObject } from '../../..';
 import { ErrorType } from '../../../basics/error-type';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
-import { createNumberValueObjectByRawValue } from '../../../engine/value-object/array-value-object';
 
 export class Product extends BaseFunction {
     override calculate(...variants: BaseValueObject[]) {
@@ -32,31 +30,20 @@ export class Product extends BaseFunction {
         for (let i = 0; i < variants.length; i++) {
             let variant = variants[i];
 
-            if (variant.isError()) {
-                return variant;
+            if (variant.isNull()) {
+                continue;
             }
 
             if (variant.isString()) {
-                const value = variant.getValue();
-                const isStringNumber = isRealNum(value);
-
-                if (!isStringNumber) {
-                    return ErrorValueObject.create(ErrorType.VALUE);
-                }
-
-                variant = createNumberValueObjectByRawValue(value);
+                variant = variant.convertToNumberObjectValue();
             }
 
             if (variant.isArray()) {
                 variant = this._multiplyArray(variant as ArrayValueObject);
-
-                if (variant.isError()) {
-                    return variant as ErrorValueObject;
-                }
             }
 
-            if (variant.isNull()) {
-                continue;
+            if (variant.isError()) {
+                return variant as ErrorValueObject;
             }
 
             accumulatorAll = accumulatorAll.multiply(variant);

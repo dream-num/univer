@@ -25,7 +25,7 @@ import { compareToken } from '../../basics/token';
 import { ArrayBinarySearchType, ArrayOrderSearchType, getCompare } from '../utils/compare';
 import type { callbackMapFnType, callbackProductFnType, IArrayValueObject } from './base-value-object';
 import { BaseValueObject, ErrorValueObject } from './base-value-object';
-import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from './primitive-object';
+import { BooleanValueObject, createBooleanValueObjectByRawValue, createNumberValueObjectByRawValue, createStringValueObjectByRawValue, NullValueObject, NumberValueObject, StringValueObject } from './primitive-object';
 
 enum BatchOperatorType {
     MINUS,
@@ -1800,51 +1800,6 @@ export class ValueObjectFactory {
         if (typeof rawValue === 'number') {
             return createNumberValueObjectByRawValue(rawValue);
         }
-        return ErrorValueObject.create(ErrorType.NA);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
-}
-
-export function createBooleanValueObjectByRawValue(rawValue: string | number | boolean) {
-    if (typeof rawValue === 'boolean') {
-        return BooleanValueObject.create(rawValue);
-    }
-    let value = false;
-    if (typeof rawValue === 'string') {
-        const rawValueUpper = rawValue.toLocaleUpperCase();
-        if (rawValueUpper === BooleanValue.TRUE) {
-            value = true;
-        } else if (rawValueUpper === BooleanValue.FALSE) {
-            value = false;
-        }
-    } else {
-        if (rawValue === 1) {
-            value = true;
-        } else {
-            value = false;
-        }
-    }
-    return BooleanValueObject.create(value);
-}
-
-export function createStringValueObjectByRawValue(rawValue: string | number | boolean) {
-    let value = rawValue.toString();
-
-    if (value.charAt(0) === '"' && value.charAt(value.length - 1) === '"') {
-        value = value.slice(1, -1);
-        value = value.replace(/""/g, '"');
-    }
-
-    return StringValueObject.create(value);
-}
-
-export function createNumberValueObjectByRawValue(rawValue: string | number | boolean) {
-    if (typeof rawValue === 'number') {
-        if (!Number.isFinite(rawValue)) {
-            return ErrorValueObject.create(ErrorType.NUM);
-        }
-        return NumberValueObject.create(rawValue);
-    } else if (isRealNum(rawValue)) {
-        return NumberValueObject.create(Number(rawValue));
-    }
-    return ErrorValueObject.create(ErrorType.NA);
 }

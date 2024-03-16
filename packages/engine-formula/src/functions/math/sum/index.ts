@@ -14,12 +14,10 @@
  * limitations under the License.
  */
 
-import { isRealNum } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
-import { createNumberValueObjectByRawValue } from '../../../engine/value-object/array-value-object';
 
 export class Sum extends BaseFunction {
     override calculate(...variants: BaseValueObject[]) {
@@ -36,14 +34,7 @@ export class Sum extends BaseFunction {
             }
 
             if (variant.isString()) {
-                const value = variant.getValue();
-                const isStringNumber = isRealNum(value);
-
-                if (!isStringNumber) {
-                    return ErrorValueObject.create(ErrorType.VALUE);
-                }
-
-                variant = createNumberValueObjectByRawValue(value);
+                variant = variant.convertToNumberObjectValue();
             }
 
             if (variant.isArray()) {

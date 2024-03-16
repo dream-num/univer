@@ -16,9 +16,9 @@
 
 import { compareToken } from '../../basics/token';
 import type { ArrayValueObject } from '../value-object/array-value-object';
-import { createBooleanValueObjectByRawValue, ValueObjectFactory } from '../value-object/array-value-object';
+import { ValueObjectFactory } from '../value-object/array-value-object';
 import type { BaseValueObject } from '../value-object/base-value-object';
-import { BooleanValueObject } from '../value-object/primitive-object';
+import { BooleanValueObject, createBooleanValueObjectByRawValue } from '../value-object/primitive-object';
 import { expandArrayValueObject } from './array-object';
 
 export function findCompareToken(str: string): [compareToken, BaseValueObject] {

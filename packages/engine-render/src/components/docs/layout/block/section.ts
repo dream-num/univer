@@ -16,13 +16,12 @@
 
 import { DataStreamTreeNodeType } from '@univerjs/core';
 
-import type { IDocumentSkeletonPage, ISkeletonResourceReference } from '../../../basics/i-document-skeleton-cached';
-import type { ISectionBreakConfig } from '../../../basics/interfaces';
-import type { DataStreamTreeNode } from '../view-model/data-stream-tree-node';
-import type { DocumentViewModel } from '../view-model/document-view-model';
+import type { IDocumentSkeletonPage, ISkeletonResourceReference } from '../../../../basics/i-document-skeleton-cached';
+import type { ISectionBreakConfig } from '../../../../basics/interfaces';
+import type { DataStreamTreeNode } from '../../view-model/data-stream-tree-node';
+import type { DocumentViewModel } from '../../view-model/document-view-model';
 import { dealWithBlockError } from './block-error';
-
-import { dealWidthParagraph } from './paragraph';
+import { dealWidthParagraph } from './paragraph/layout';
 
 export function dealWithSections(
     bodyModel: DocumentViewModel,
@@ -30,7 +29,7 @@ export function dealWithSections(
     curPage: IDocumentSkeletonPage,
     sectionBreakConfig: ISectionBreakConfig,
     skeletonResourceReference: ISkeletonResourceReference,
-    preRenderedBlockIdMap?: Map<string, boolean>
+    _preRenderedBlockIdMap?: Map<string, boolean>
 ) {
     const allCurrentSkeletonPages: IDocumentSkeletonPage[] = [];
     const renderedBlockIdMap = new Map<string, boolean>();

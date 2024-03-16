@@ -22,14 +22,14 @@ import type {
     IDocumentSkeletonHeader,
     IDocumentSkeletonPage,
     ISkeletonResourceReference,
-} from '../../../basics/i-document-skeleton-cached';
-import { BreakType } from '../../../basics/i-document-skeleton-cached';
-import type { ISectionBreakConfig } from '../../../basics/interfaces';
+} from '../../../../basics/i-document-skeleton-cached';
+import { BreakType } from '../../../../basics/i-document-skeleton-cached';
+import type { ISectionBreakConfig } from '../../../../basics/interfaces';
 
 import { dealWithSections } from '../block/section';
-import type { DocumentViewModel } from '../view-model/document-view-model';
+import type { DocumentViewModel } from '../../view-model/document-view-model';
+import { updateBlockIndex } from '../tools';
 import { createSkeletonSection } from './section';
-import { updateBlockIndex } from './tools';
 
 // 新增数据结构框架
 // 判断奇数和偶数页码

@@ -31,10 +31,10 @@ import type { Scene } from '../../scene';
 import type { IExtensionConfig } from '../extension';
 import { DocumentsSpanAndLineExtensionRegistry } from '../extension';
 import { VERTICAL_ROTATE_ANGLE } from '../../basics/text-rotation';
-import { Liquid } from './common/liquid';
+import { Liquid } from './liquid';
 import { DocComponent } from './doc-component';
 import { DOCS_EXTENSION_TYPE } from './doc-extension';
-import type { DocumentSkeleton } from './doc-skeleton';
+import type { DocumentSkeleton } from './layout/doc-skeleton';
 
 interface IPageMarginLayout {
     pageMarginLeft: number;

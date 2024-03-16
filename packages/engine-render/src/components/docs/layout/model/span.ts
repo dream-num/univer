@@ -17,16 +17,16 @@
 import type { Nullable } from '@univerjs/core';
 import { BooleanNumber, BulletAlignment, DataStreamTreeTokenType as DT, GridType } from '@univerjs/core';
 
-import { FontCache } from '../../../basics/font-cache';
+import { FontCache } from '../../../../basics/font-cache';
 import type {
     IDocumentSkeletonBullet,
     IDocumentSkeletonDivide,
     IDocumentSkeletonSpan,
-} from '../../../basics/i-document-skeleton-cached';
-import { SpanType } from '../../../basics/i-document-skeleton-cached';
-import type { IFontCreateConfig } from '../../../basics/interfaces';
-import { hasCJK, hasCJKText } from '../../../basics/tools';
-import { validationGrid } from './tools';
+} from '../../../../basics/i-document-skeleton-cached';
+import { SpanType } from '../../../../basics/i-document-skeleton-cached';
+import type { IFontCreateConfig } from '../../../../basics/interfaces';
+import { hasCJK, hasCJKText } from '../../../../basics/tools';
+import { validationGrid } from '../tools';
 
 export function createSkeletonWordSpan(
     content: string,

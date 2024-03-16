@@ -371,6 +371,9 @@ importers:
       rc-picker:
         specifier: ^4.3.0
         version: 4.3.0(dayjs@1.11.10)(react-dom@18.2.0)(react@18.2.0)
+      rc-segmented:
+        specifier: ^2.3.0
+        version: 2.3.0(react-dom@18.2.0)(react@18.2.0)
       rc-select:
         specifier: ^14.13.0
         version: 14.13.0(react-dom@18.2.0)(react@18.2.0)
@@ -12137,6 +12140,20 @@ packages:
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
       resize-observer-polyfill: 1.5.1
+    dev: false
+
+  /rc-segmented@2.3.0(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-I3FtM5Smua/ESXutFfb8gJ8ZPcvFR+qUgeeGFQHBOvRiRKyAk4aBE5nfqrxXx+h8/vn60DQjOt6i4RNtrbOobg==}
+    peerDependencies:
+      react: '>=16.0.0'
+      react-dom: '>=16.0.0'
+    dependencies:
+      '@babel/runtime': 7.23.9
+      classnames: 2.5.1
+      rc-motion: 2.9.0(react-dom@18.2.0)(react@18.2.0)
+      rc-util: 5.39.1(react-dom@18.2.0)(react@18.2.0)
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
     dev: false
 
   /rc-select@14.13.0(react-dom@18.2.0)(react@18.2.0):

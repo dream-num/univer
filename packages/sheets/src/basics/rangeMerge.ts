@@ -126,3 +126,30 @@ export const rangeMerge = (ranges: IRange[]) => {
     const topMatrix = createTopMatrixFromRanges(ranges);
     return findAllRectangle(topMatrix);
 };
+
+export class RangeMergeUtil {
+    private _matrix = new ObjectMatrix<1>();
+    add(...ranges: IRange[]) {
+        ranges.forEach((range) => {
+            Range.foreach(range, (row, col) => {
+                this._matrix.setValue(row, col, 1);
+            });
+        });
+        return this;
+    }
+
+    subtract(...ranges: IRange[]) {
+        ranges.forEach((range) => {
+            Range.foreach(range, (row, col) => {
+                this._matrix.realDeleteValue(row, col);
+            });
+        });
+        return this;
+    }
+
+    merge() {
+        const topMatrix = createTopMatrixFromMatrix(this._matrix);
+        const ranges = findAllRectangle(topMatrix);
+        return ranges;
+    }
+}

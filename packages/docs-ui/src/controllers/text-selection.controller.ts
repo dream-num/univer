@@ -121,22 +121,21 @@ export class TextSelectionController extends Disposable {
                         this._currentUniverService.setCurrentUniverDocInstance(unitId);
                     }
 
-                    if (this._editorService.getEditor(unitId)) {
-                        /**
-                         * To accommodate focus switching between different editors.
-                         * Since the editor for Univer is canvas-based,
-                         * it primarily relies on focus and cannot use the focus event.
-                         * Our editor's focus monitoring is based on PointerDown.
-                         * The order of occurrence is such that PointerDown comes first.
-                         * Translate the above text into English.
-                         */
-                        setTimeout(() => {
-                            this._textSelectionRenderManager.eventTrigger(evt);
+                    this._textSelectionRenderManager.eventTrigger(evt);
 
+                    if (this._editorService.getEditor(unitId)) {
+                         /**
+                          * To accommodate focus switching between different editors.
+                          * Since the editor for Univer is canvas-based,
+                          * it primarily relies on focus and cannot use the focus event.
+                          * Our editor's focus monitoring is based on PointerDown.
+                          * The order of occurrence is such that PointerDown comes first.
+                          * Translate the above text into English.
+                          */
+                        setTimeout(() => {
                             this._setEditorFocus(unitId);
+                            this._textSelectionRenderManager.setCursorManually(evt.offsetX, evt.offsetY);
                         }, 0);
-                    } else {
-                        this._textSelectionRenderManager.eventTrigger(evt);
                     }
 
                     if (evt.button !== 2) {

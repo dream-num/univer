@@ -165,6 +165,8 @@ export interface ITextSelectionRenderManager {
     handleTripleClick(evt: IPointerEvent | IMouseEvent): void;
 
     eventTrigger(evt: IPointerEvent | IMouseEvent): void;
+
+    setCursorManually(evtOffsetX: number, evtOffsetY: number): void;
 }
 
 export interface IEditorInputConfig {
@@ -440,6 +442,26 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
         ];
 
         this.addTextRanges(textRanges, false);
+    }
+
+    setCursorManually(evtOffsetX: number, evtOffsetY: number) {
+        const startNode = this._findNodeByCoord(evtOffsetX, evtOffsetY);
+
+        const position = this._getNodePosition(startNode);
+
+        if (position == null) {
+            this._removeAllTextRanges();
+
+            return;
+        }
+
+        if (startNode?.node.streamType === DataStreamTreeTokenType.PARAGRAPH) {
+            position.isBack = true;
+        }
+
+        this._updateTextRangeAnchorPosition(position);
+
+        this._activeSelectionRefresh();
     }
 
     // Handle pointer down.

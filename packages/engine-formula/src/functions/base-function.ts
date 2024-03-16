@@ -393,16 +393,8 @@ export class BaseFunction extends Disposable {
         for (let i = 0; i < variants.length; i++) {
             let variant = variants[i];
 
-            if (variant.isString()) {
+            if (variant.isString() || variant.isBoolean() || variant.isNull()) {
                 variant = variant.convertToNumberObjectValue();
-            }
-
-            if (variant.isBoolean()) {
-                variant = convertTonNumber(variant);
-            }
-
-            if (variant.isNull()) {
-                variant = NumberValueObject.create(0);
             }
 
             if (variant.isError()) {

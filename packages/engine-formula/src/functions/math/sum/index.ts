@@ -29,12 +29,12 @@ export class Sum extends BaseFunction {
         for (let i = 0; i < variants.length; i++) {
             let variant = variants[i];
 
-            if (variant.isError()) {
-                return variant;
-            }
-
             if (variant.isString()) {
                 variant = variant.convertToNumberObjectValue();
+            }
+
+            if (variant.isError()) {
+                return variant;
             }
 
             if (variant.isArray()) {

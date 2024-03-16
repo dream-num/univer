@@ -18,7 +18,7 @@ import { describe, expect, it } from 'vitest';
 
 import { FUNCTION_NAMES_MATH } from '../../function-names';
 import { Mod } from '..';
-import { NumberValueObject } from '../../../../engine/value-object/primitive-object';
+import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorType } from '../../../../basics/error-type';
 
@@ -29,6 +29,12 @@ describe('Test mod function', () => {
         it('Number is single cell, power is single cell', () => {
             const number = NumberValueObject.create(5);
             const power = NumberValueObject.create(2);
+            const result = textFunction.calculate(number, power);
+            expect(result.getValue()).toBe(1);
+        });
+        it('Number is single string number, power is single string number', () => {
+            const number = new StringValueObject('5');
+            const power = new StringValueObject('2');
             const result = textFunction.calculate(number, power);
             expect(result.getValue()).toBe(1);
         });

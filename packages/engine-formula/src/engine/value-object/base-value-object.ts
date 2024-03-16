@@ -129,31 +129,31 @@ export class BaseValueObject extends ObjectClassType {
     }
 
     getNegative(): BaseValueObject {
-        return ErrorValueObject.create(ErrorType.NAME);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     getReciprocal(): BaseValueObject {
-        return ErrorValueObject.create(ErrorType.NAME);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     plus(valueObject: BaseValueObject): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.NAME);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     minus(valueObject: BaseValueObject): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.NAME);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     multiply(valueObject: BaseValueObject): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.NAME);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     divided(valueObject: BaseValueObject): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.NAME);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     mod(valueObject: BaseValueObject): BaseValueObject {
@@ -226,22 +226,22 @@ export class BaseValueObject extends ObjectClassType {
 
     plusBy(value: string | number | boolean): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.NAME);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     minusBy(value: string | number | boolean): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.NAME);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     multiplyBy(value: string | number | boolean): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.NAME);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     dividedBy(value: string | number | boolean): BaseValueObject {
         /** abstract */
-        return ErrorValueObject.create(ErrorType.NAME);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     modInverse(valueObject: BaseValueObject): BaseValueObject {

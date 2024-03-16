@@ -25,8 +25,16 @@ export class Mod extends BaseFunction {
             return ErrorValueObject.create(ErrorType.NA);
         }
 
+        if (number.isString()) {
+            number = number.convertToNumberObjectValue();
+        }
+
         if (number.isError()) {
             return number;
+        }
+
+        if (divisor.isString()) {
+            divisor = divisor.convertToNumberObjectValue();
         }
 
         if (divisor.isError()) {

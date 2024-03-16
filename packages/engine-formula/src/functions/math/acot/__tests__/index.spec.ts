@@ -18,7 +18,7 @@ import { describe, expect, it } from 'vitest';
 
 import { FUNCTION_NAMES_MATH } from '../../function-names';
 import { Acot } from '..';
-import { NumberValueObject } from '../../../../engine/value-object/primitive-object';
+import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 
 describe('Test acot function', () => {
@@ -27,6 +27,12 @@ describe('Test acot function', () => {
     describe('Acot', () => {
         it('Value is normal', () => {
             const value = NumberValueObject.create(1);
+            const result = textFunction.calculate(value);
+            expect(result.getValue()).toBe(0.7853981633974483);
+        });
+
+        it('Value is string number', () => {
+            const value = new StringValueObject('1');
             const result = textFunction.calculate(value);
             expect(result.getValue()).toBe(0.7853981633974483);
         });

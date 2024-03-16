@@ -23,6 +23,16 @@ export interface ICheckboxProps {
     children?: React.ReactNode;
 
     /**
+     * The class name of the checkbox group
+     */
+    className?: string;
+
+    /**
+     * The style of the checkbox group
+     */
+    style?: React.CSSProperties;
+
+    /**
      * Used for setting the currently selected value
      * @default false
      */
@@ -43,15 +53,13 @@ export interface ICheckboxProps {
      * Set the handler to handle `click` event
      */
     onChange?: (value: string | number | boolean) => void;
-
-    style?: React.CSSProperties;
 }
 
 /**
  * Checkbox Component
  */
 export function Checkbox(props: ICheckboxProps) {
-    const { children, checked, value, disabled = false, onChange, style } = props;
+    const { children, className, style, checked, value, disabled = false, onChange } = props;
 
     const inputRef = useRef<HTMLInputElement>(null);
 
@@ -61,14 +69,14 @@ export function Checkbox(props: ICheckboxProps) {
         if (!onChange || disabled) return;
 
         if (typeof value !== 'undefined') {
-            onChange?.(!value);
+            onChange?.(value);
         } else {
             const checked = inputRef?.current?.checked!;
             onChange?.(!checked);
         }
     }
 
-    const _className = clsx(styles.checkbox, {
+    const _className = clsx(className, styles.checkbox, {
         [styles.checkboxDisabled]: disabled,
     });
 

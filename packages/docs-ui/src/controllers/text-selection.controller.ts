@@ -123,6 +123,8 @@ export class TextSelectionController extends Disposable {
 
                     this._textSelectionRenderManager.eventTrigger(evt);
 
+                    const { offsetX, offsetY } = evt;
+
                     if (this._editorService.getEditor(unitId)) {
                          /**
                           * To accommodate focus switching between different editors.
@@ -134,7 +136,7 @@ export class TextSelectionController extends Disposable {
                           */
                         setTimeout(() => {
                             this._setEditorFocus(unitId);
-                            this._textSelectionRenderManager.setCursorManually(evt.offsetX, evt.offsetY);
+                            this._textSelectionRenderManager.setCursorManually(offsetX, offsetY);
                         }, 0);
                     }
 

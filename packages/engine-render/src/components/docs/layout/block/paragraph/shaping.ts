@@ -19,7 +19,7 @@ import { BooleanNumber, DataStreamTreeTokenType, GridType } from '@univerjs/core
 import type { IDocumentSkeletonGlyph } from '../../../../../basics/i-document-skeleton-cached';
 import { LineBreaker } from '../../linebreak';
 import { tabLineBreakExtension } from '../../linebreak/extensions/tab-linebreak-extension';
-import { createSkeletonLetterGlyph, createSkeletonTabSpan } from '../../model/glyph';
+import { createSkeletonLetterGlyph, createSkeletonTabGlyph } from '../../model/glyph';
 import { getCharSpaceApply, getFontCreateConfig } from '../../tools';
 import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../../view-model/document-view-model';
@@ -70,7 +70,7 @@ export function shaping(
 
                 if (char === DataStreamTreeTokenType.TAB) {
                     const charSpaceApply = getCharSpaceApply(charSpace, defaultTabStop, gridType, snapToGrid);
-                    newSpan = createSkeletonTabSpan(config, charSpaceApply);
+                    newSpan = createSkeletonTabGlyph(config, charSpaceApply);
                 } else {
                     newSpan = createSkeletonLetterGlyph(char, config);
                 }

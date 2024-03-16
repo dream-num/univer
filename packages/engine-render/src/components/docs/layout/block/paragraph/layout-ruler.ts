@@ -101,29 +101,29 @@ function _divideOperator(
     if (divideInfo) {
         const width = __getSpanGroupWidth(glyphGroup);
         const { divide } = divideInfo;
-        const lastSpan = divide?.glyphGroup?.[divide.glyphGroup.length - 1];
-        const preWidth = lastSpan?.width || 0;
-        const preLeft = lastSpan?.left || 0;
+        const lastGlyph = divide?.glyphGroup?.[divide.glyphGroup.length - 1];
+        const preWidth = lastGlyph?.width || 0;
+        const preLeft = lastGlyph?.left || 0;
 
         // Last glyph is western char and the current glyph is Chinese word or vice verse.
-        const isMixedCJKWesternTextLayout = hasMixedTextLayout(lastSpan, glyphGroup[0]);
+        const isMixedCJKWesternTextLayout = hasMixedTextLayout(lastGlyph, glyphGroup[0]);
         let wordSpaceWidth = 0;
         let preOffsetLeft = preWidth + preLeft;
 
         // Only add word space between Chinese text and Western text when processing glyph for the first time,
         // otherwise it will be added multiple times during recursion.
         if (isMixedCJKWesternTextLayout && isOutMost) {
-            const lastSpanIsCJKWord = hasCJKText(lastSpan.content!);
+            const lastSpanIsCJKWord = hasCJKText(lastGlyph.content!);
             const WORD_INNER_SPACE = '\u0020';
 
             wordSpaceWidth = FontCache.getTextSize(
                 WORD_INNER_SPACE, // word space.
-                lastSpanIsCJKWord ? glyphGroup[0].fontStyle! : lastSpan.fontStyle!
+                lastSpanIsCJKWord ? glyphGroup[0].fontStyle! : lastGlyph.fontStyle!
             ).width;
 
             preOffsetLeft += wordSpaceWidth;
 
-            lastSpan.width += wordSpaceWidth;
+            lastGlyph.width += wordSpaceWidth;
         }
 
         if (preOffsetLeft + width > divide.width) {

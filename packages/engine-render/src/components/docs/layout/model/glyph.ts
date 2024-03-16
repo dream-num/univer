@@ -19,14 +19,57 @@ import { BooleanNumber, BulletAlignment, DataStreamTreeTokenType as DT, GridType
 
 import { FontCache } from '../../../../basics/font-cache';
 import type {
+    IAdjustability,
     IDocumentSkeletonBullet,
     IDocumentSkeletonDivide,
     IDocumentSkeletonGlyph,
 } from '../../../../basics/i-document-skeleton-cached';
 import { GlyphType } from '../../../../basics/i-document-skeleton-cached';
 import type { IFontCreateConfig } from '../../../../basics/interfaces';
-import { hasCJK, hasCJKText } from '../../../../basics/tools';
+import { hasCJK, hasCJKText, hasSpace, isCjkCenterAlignedPunctuation, isCjkLeftAlignedPunctuation, isCjkRightAlignedPunctuation } from '../../../../basics/tools';
 import { validationGrid } from '../tools';
+
+// Whether the glyph is justifiable.
+function isJustifiable(
+    content: string
+): boolean {
+    // punctuation style is not relevant here.
+    return hasSpace(content)
+        || hasCJKText(content)
+        || isCjkLeftAlignedPunctuation(content)
+        || isCjkRightAlignedPunctuation(content)
+        || isCjkCenterAlignedPunctuation(content);
+}
+
+function baseAdjustability(content: string, width: number): IAdjustability {
+    if (hasSpace(content)) {
+        return {
+            // The number for spaces is from Knuth-Plass' paper
+            stretchability: [0, width / 2.0],
+            shrinkability: [0, width / 3.0],
+        };
+    } else if (isCjkLeftAlignedPunctuation(content)) {
+        return {
+            stretchability: [0, 0],
+            shrinkability: [0, width / 2.0],
+        };
+    } else if (isCjkRightAlignedPunctuation(content)) {
+        return {
+            stretchability: [0, 0],
+            shrinkability: [width / 2.0, 0],
+        };
+    } else if (isCjkCenterAlignedPunctuation(content)) {
+        return {
+            stretchability: [0, 0],
+            shrinkability: [width / 4.0, width / 4.0],
+        };
+    } else {
+        return {
+            stretchability: [0, 0],
+            shrinkability: [0, 0],
+        };
+    }
+}
 
 export function createSkeletonWordGlyph(
     content: string,
@@ -44,7 +87,7 @@ export function createSkeletonLetterGlyph(
     return _createSkeletonWordOrLetter(GlyphType.LETTER, content, config, glyphWidth);
 }
 
-export function createSkeletonTabSpan(config: IFontCreateConfig, glyphWidth?: number): IDocumentSkeletonGlyph {
+export function createSkeletonTabGlyph(config: IFontCreateConfig, glyphWidth?: number): IDocumentSkeletonGlyph {
     return _createSkeletonWordOrLetter(GlyphType.TAB, DT.TAB, config, glyphWidth);
 }
 
@@ -92,6 +135,8 @@ export function _createSkeletonWordOrLetter(
             },
             paddingLeft: 0,
             left: 0,
+            isJustifiable: false,
+            adjustability: baseAdjustability(content, 0),
             glyphType: GlyphType.PLACEHOLDER,
             streamType: content as DT,
             count: 1,
@@ -126,6 +171,8 @@ export function _createSkeletonWordOrLetter(
         left: 0,
         glyphType,
         streamType,
+        isJustifiable: isJustifiable(content),
+        adjustability: baseAdjustability(content, width),
         count: content.length,
     };
 }
@@ -172,6 +219,8 @@ export function createSkeletonBulletGlyph(
         paddingLeft: 0,
         bBox,
         left,
+        isJustifiable: isJustifiable(content),
+        adjustability: baseAdjustability(content, width),
         glyphType: GlyphType.LIST,
         streamType: DT.LETTER,
         // Deliberately set to 0 so that there is no need to count when calculating the cursor.

@@ -147,7 +147,6 @@ export class CheckboxRender implements ICellCustomRender {
             return;
         }
         const { formula1, formula2 } = await this._parseFormula(rule, unitId!, subUnitId);
-
         const params: ISetRangeValuesCommandParams = {
             range: {
                 startColumn: primaryWithCoord.actualColumn,
@@ -157,6 +156,7 @@ export class CheckboxRender implements ICellCustomRender {
             },
             value: {
                 v: value === formula1 ? formula2 : formula1,
+                p: null,
             },
         };
 

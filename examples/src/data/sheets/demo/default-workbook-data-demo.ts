@@ -13984,7 +13984,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                     startColumn: 0,
                     endColumn: 5,
                 }],
-                formula1: '1,2,3,4',
+                formula1: '1,2,3,hahaha',
             },
             {
                 uid: 'xxx-4',

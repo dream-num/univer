@@ -63,7 +63,7 @@ export class Custom extends SheetExtension {
                     col,
                 };
                 customRender.forEach((item) => {
-                    item.drawWith(ctx, renderInfo, skeleton);
+                    item.drawWith(ctx, renderInfo, skeleton, this.parent);
                 });
                 ctx.restore();
             }

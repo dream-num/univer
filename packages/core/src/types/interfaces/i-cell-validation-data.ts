@@ -21,4 +21,5 @@ export interface ICellValidationData {
     ruleId: string;
     validStatus: DataValidationStatus;
     rule: IDataValidationRule;
+    validator: any;
 }

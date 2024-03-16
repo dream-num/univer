@@ -200,6 +200,7 @@ export class DataValidationRenderController extends RxDisposable {
                                 ruleId,
                                 validStatus,
                                 rule,
+                                validator,
                             },
                             markers: {
                                 ...cell?.markers,

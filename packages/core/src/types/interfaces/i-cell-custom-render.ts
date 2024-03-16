@@ -30,7 +30,7 @@ export interface ICellRenderContext {
 }
 
 export interface ICellCustomRender {
-    drawWith(ctx: CanvasRenderingContext2D, info: ICellRenderContext, skeleton: any): void;
+    drawWith(ctx: CanvasRenderingContext2D, info: ICellRenderContext, skeleton: any, spreadsheets: any): void;
     zIndex?: number;
     isHit?: (position: { x: number;y: number }, info: ICellRenderContext) => boolean;
     onPointerDown?: (info: ICellRenderContext) => void;

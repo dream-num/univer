@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import { DataValidationType, isFormulaString, Tools } from '@univerjs/core';
-import type { CellValue, DataValidationOperator, ICellData, IDataValidationRule, IDataValidationRuleBase, Nullable } from '@univerjs/core';
+import { DataValidationType, isFormulaString, IUniverInstanceService, Tools } from '@univerjs/core';
+import type { CellValue, DataValidationOperator, ICellCustomRender, ICellData, IDataValidationRule, IDataValidationRuleBase, Nullable } from '@univerjs/core';
 import type { IFormulaResult, IValidatorCellInfo } from '@univerjs/data-validation';
 import { BaseDataValidator } from '@univerjs/data-validation';
 import { LIST_FORMULA_INPUT_NAME } from '../views/formula-input';
 import { LIST_DROPDOWN_KEY } from '../views';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
+import { DropdownWidget } from '../widgets/dropdown-widget';
 
 export const LIST_MULTIPLE_FORMULA = 'TRUE';
 
@@ -46,22 +47,26 @@ export class ListValidator extends BaseDataValidator {
     scopes: string | string[] = ['sheet'];
     formulaInput: string = LIST_FORMULA_INPUT_NAME;
 
+    override canvasRender: Nullable<ICellCustomRender> = this.injector.createInstance(DropdownWidget);
+
     private _formulaService = this.injector.get(DataValidationFormulaService);
 
     override dropdown: string | undefined = LIST_DROPDOWN_KEY;
+
+    override skipDefaultFontRender: boolean = true;
 
     override validatorFormula(rule: IDataValidationRuleBase): boolean {
         return !Tools.isBlank(rule.formula1);
     }
 
-    private _isMultiple(rule: IDataValidationRule) {
+    isMultiple(rule: IDataValidationRule) {
         return rule.formula2 === LIST_MULTIPLE_FORMULA;
     }
 
     // TODO cache
     private _parseCellValue(cellValue: CellValue, rule: IDataValidationRule) {
         const cellString = cellValue.toString();
-        if (this._isMultiple(rule)) {
+        if (this.isMultiple(rule)) {
             // TODO. full
             return cellString.split(',');
         } else {
@@ -91,5 +96,14 @@ export class ListValidator extends BaseDataValidator {
 
     override generateRuleErrorMessage(): string {
         return this.localeService.t('dataValidation.list.error');
+    }
+
+    getList(rule: IDataValidationRule, propUnitId?: string, propSubUnitId?: string) {
+        const { formula1 } = rule;
+        const univerInstanceService = this.injector.get(IUniverInstanceService);
+        const unitId = propUnitId ?? univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+        const subUnitId = propSubUnitId ?? univerInstanceService.getUniverSheetInstance(unitId)!.getActiveSheet().getSheetId();
+        const results = this._formulaService.getRuleFormulaResultSync(unitId, subUnitId, rule.uid);
+        return isFormulaString(formula1) ? getListFormulaResult(results?.[0]?.result) : formula1?.split(',').map((i) => decodeURIComponent(i));
     }
 }

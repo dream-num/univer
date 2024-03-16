@@ -432,7 +432,7 @@ export function isCjkRightAlignedPunctuation(text: string) {
 export function isCjkCenterAlignedPunctuation(text: string) {
     // U+30FB: Katakana Middle Dot
     // U+00B7: Middle Dot
-    const CENTER_ALIGNED_PUNCTUATION = ['，', '。', '．', '、', '：', '；', '\u{30FB}', '\u{00B7}'];
+    const CENTER_ALIGNED_PUNCTUATION = ['\u{30FB}', '\u{00B7}'];
 
     return CENTER_ALIGNED_PUNCTUATION.indexOf(text) > -1;
 }

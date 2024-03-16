@@ -29,13 +29,13 @@ import type { IFontCreateConfig } from '../../../../basics/interfaces';
 import { hasCJK, hasCJKText, isCjkCenterAlignedPunctuation, isCjkLeftAlignedPunctuation, isCjkRightAlignedPunctuation } from '../../../../basics/tools';
 import { validationGrid } from '../tools';
 
-function isSpace(char: string) {
+export function isSpace(char: string) {
     const SPACE_CHARS = [' ', '\u{00A0}', '　'];
 
     return SPACE_CHARS.includes(char);
 }
 // Whether the glyph is justifiable.
-function isJustifiable(
+export function isJustifiable(
     content: string
 ) {
     // punctuation style is not relevant here.
@@ -46,7 +46,7 @@ function isJustifiable(
         || isCjkCenterAlignedPunctuation(content);
 }
 
-function baseAdjustability(content: string, width: number): IAdjustability {
+export function baseAdjustability(content: string, width: number): IAdjustability {
     if (isSpace(content)) {
         return {
             // The number for spaces is from Knuth-Plass' paper

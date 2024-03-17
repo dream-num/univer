@@ -138,7 +138,6 @@ export class FormulaDependencyGenerator extends Disposable {
     /**
      * Generate nodes for the dependency tree, where each node contains all the reference data ranges included in each formula.
      * @param formulaData
-     * @returns
      */
     private async _generateTreeList(
         formulaData: IFormulaData,
@@ -284,7 +283,6 @@ export class FormulaDependencyGenerator extends Disposable {
 
     /**
      * Break down the dirty areas into ranges for subsequent matching.
-     * @returns
      */
     private _updateRangeFlatten() {
         const forceCalculate = this._currentConfigService.isForceCalculate();
@@ -428,7 +426,6 @@ export class FormulaDependencyGenerator extends Disposable {
      * Calculate the range required for collection in advance,
      * including references and location functions (such as OFFSET, INDIRECT, INDEX, etc.).
      * @param node
-     * @returns
      */
     private async _getRangeListByNode(node: BaseAstNode) {
         // ref function in offset indirect INDEX
@@ -466,7 +463,6 @@ export class FormulaDependencyGenerator extends Disposable {
     /**
      * Build a formula dependency tree based on the dependency relationships.
      * @param treeList
-     * @returns
      */
     private _getUpdateTreeListAndMakeDependency(treeList: FormulaDependencyTree[]) {
         const newTreeList: FormulaDependencyTree[] = [];
@@ -512,7 +508,6 @@ export class FormulaDependencyGenerator extends Disposable {
      * Determine whether all ranges of the current node exist within the dirty area.
      * If they are within the dirty area, return true, indicating that this node needs to be calculated.
      * @param tree
-     * @returns
      */
     private _includeTree(tree: FormulaDependencyTree) {
         const unitId = tree.unitId;
@@ -580,7 +575,6 @@ export class FormulaDependencyGenerator extends Disposable {
     /**
      * Generate the final formula calculation order array by traversing the dependency tree established via depth-first search.
      * @param treeList
-     * @returns
      */
     private _calculateRunList(treeList: FormulaDependencyTree[]) {
         let stack = treeList;
@@ -601,6 +595,9 @@ export class FormulaDependencyGenerator extends Disposable {
 
             for (let i = 0, len = tree.parents.length; i < len; i++) {
                 const parentTree = tree.parents[i];
+                if (parentTree.isAdded() || tree.isSkip()) {
+                    continue;
+                }
                 cacheStack.push(parentTree);
             }
 

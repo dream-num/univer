@@ -14,20 +14,16 @@
  * limitations under the License.
  */
 
-import { BooleanNumber, CommandService, DEFAULT_EMPTY_DOCUMENT_VALUE, DocumentDataModel, HorizontalAlign, ICommandService, LocaleService, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import { BooleanNumber, DEFAULT_EMPTY_DOCUMENT_VALUE, DocumentDataModel, ICommandService, LocaleService, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import type { ICellCustomRender, ICellRenderContext, IDocumentData, ISelectionCellWithCoord, IStyleData, Nullable } from '@univerjs/core';
-import { DeviceInputEventType, Documents, DocumentSkeleton, DocumentViewModel, fixLineWidthByScale, IRenderManagerService, Rect, RichText, type Spreadsheet, type SpreadsheetSkeleton, Transform, type UniverRenderingContext2D } from '@univerjs/engine-render';
+import { DeviceInputEventType, Documents, DocumentSkeleton, DocumentViewModel, Rect, type Spreadsheet, type SpreadsheetSkeleton, type UniverRenderingContext2D } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
-import { DataValidatorRegistryService } from '@univerjs/data-validation';
-import { SetActivateCellEditOperation } from '@univerjs/sheets-ui/commands/operations/activate-cell-edit.operation.js';
-import { SelectionManagerService } from '@univerjs/sheets';
 import { IEditorBridgeService } from '@univerjs/sheets-ui/services/editor-bridge.service.js';
-import type { type ICurrentEditCellParam, IEditorBridgeServiceVisibleParam } from '@univerjs/sheets-ui/services/editor-bridge.service.js';
+import type { IEditorBridgeServiceVisibleParam } from '@univerjs/sheets-ui/services/editor-bridge.service.js';
 import { SetCellEditVisibleOperation } from '@univerjs/sheets-ui/commands/operations/cell-edit.operation.js';
 import { getCellValueOrigin } from '../utils/getCellDataOrigin';
 import type { ListValidator } from '../validators';
 
-const PADDING_V = 1;
 const PADDING_H = 4;
 const ICON_SIZE = 6;
 const ICON_PLACE = 14;
@@ -99,58 +95,43 @@ function createDocuments(text: string, localeService: LocaleService, style?: Nul
     };
 }
 
+export interface IDropdownInfo {
+    top: number;
+    left: number;
+    width: number;
+    height: number;
+}
+
 export class DropdownWidget implements ICellCustomRender {
+    private _dropdownInfoMap: Map<string, Map<string, IDropdownInfo>> = new Map();
+
     constructor(
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @ICommandService private readonly _commandService: ICommandService,
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService
-    ) {}
+    ) { }
 
-    private _calc(cellInfo: ISelectionCellWithCoord, style: Nullable<IStyleData>) {
-        // const { vt, ht } = style || {};
-        // const width = cellInfo.endX - cellInfo.startX;
-        // const height = cellInfo.endY - cellInfo.startY;
-        // const size = (style?.fs ?? 10) * 1.6;
-        const widgetLeft = 0;
-        const widgetTop = 0;
-        // switch (vt) {
-        //     case VerticalAlign.TOP:
-        //         widgetTop = 0;
-        //         break;
-        //     case VerticalAlign.BOTTOM:
-        //         widgetTop = 0 + (height - size);
-        //         break;
-        //     default:
-        //         widgetTop = 0 + (height - size) / 2;
-        //         break;
-        // }
+    private _ensureMap(subUnitId: string) {
+        let map = this._dropdownInfoMap.get(subUnitId);
 
-        // switch (ht) {
-        //     case HorizontalAlign.LEFT:
-        //         widgetLeft = 0;
-        //         break;
-        //     case HorizontalAlign.RIGHT:
-        //         widgetLeft = 0 + (width - size);
-        //         break;
+        if (!map) {
+            map = new Map();
+            this._dropdownInfoMap.set(subUnitId, map);
+        }
+        return map;
+    }
 
-        //     default:
-        //         widgetLeft = 0 + (width - size) / 2;
-        //         break;
-        // }
-
-        return {
-            left: cellInfo.startX + widgetLeft,
-            top: cellInfo.startY + widgetTop,
-            cellWidth: cellInfo.endX - cellInfo.startX,
-            cellHeight: cellInfo.endY - cellInfo.startY,
-        };
+    private _generateKey(row: number, col: number) {
+        return `${row}.${col}`;
     }
 
     drawWith(ctx: UniverRenderingContext2D, info: ICellRenderContext, skeleton: SpreadsheetSkeleton, spreadsheets: Spreadsheet): void {
-        const { primaryWithCoord, row, col, style, data } = info;
+        const { primaryWithCoord, row, col, style, data, subUnitId } = info;
         const validation = data.dataValidation;
         const cellWidth = primaryWithCoord.endX - primaryWithCoord.startX;
         const cellHeight = primaryWithCoord.endY - primaryWithCoord.startY;
+        const map = this._ensureMap(subUnitId);
+        const key = this._generateKey(row, col);
 
         if (!validation) {
             return;
@@ -158,76 +139,91 @@ export class DropdownWidget implements ICellCustomRender {
         const { rule, validator: _validator } = validation;
         const validator = _validator as ListValidator;
 
-        const list = validator.getList(rule);
-        const isMultiple = validator.isMultiple(rule);
-        const value = isMultiple ? (`${getCellValueOrigin(data) ?? ''}`).split(',') : getCellValueOrigin(data);
+        const vt = style?.vt;
+        const value = getCellValueOrigin(data);
 
         ctx.save();
-        const layout = this._calc(primaryWithCoord, style);
-        ctx.translateWithPrecision(layout.left, layout.top);
+        ctx.translateWithPrecision(primaryWithCoord.startX, primaryWithCoord.startY);
         ctx.beginPath();
         ctx.rect(0, 0, cellWidth, cellHeight);
         ctx.clip();
 
-        if (!isMultiple) {
-            const valueStr = `${value ?? ''}`;
-            const realWidth = cellWidth - (MARGIN_H * 2) - PADDING_H - ICON_PLACE;
-            const { documentSkeleton, documents, docModel } = createDocuments(valueStr, this._localeService, style);
-            if (
-                style?.tb === WrapStrategy.WRAP
-            ) {
-                docModel.updateDocumentDataPageSize(realWidth);
-            }
-
-            documentSkeleton.calculate();
-            const layout = documentSkeleton.getActualSize();
-
-            if (!layout) {
-                return;
-            }
-            const {
-                actualWidth: fontWidth,
-                actualHeight: fontHeight,
-            } = layout;
-
-            ctx.translate(MARGIN_H, MARGIN_V);
-            Rect.drawWith(ctx, {
-                width: cellWidth - MARGIN_H * 2,
-                height: fontHeight,
-                fill: '#DCDCDC',
-                radius: 8,
-            });
-            ctx.save();
-            ctx.translateWithPrecision(PADDING_H, fontHeight);
-            ctx.beginPath();
-            ctx.rect(0, -fontHeight, realWidth, fontHeight);
-            ctx.clip();
-            documents.render(ctx);
-            ctx.restore();
-
-            ctx.translate(realWidth + PADDING_H + 4, (fontHeight - ICON_SIZE) / 2);
-            ctx.fillStyle = '#565656';
-            ctx.fill(downPath);
+        const valueStr = `${value ?? ''}`;
+        const realWidth = cellWidth - (MARGIN_H * 2) - PADDING_H - ICON_PLACE;
+        const { documentSkeleton, documents, docModel } = createDocuments(valueStr, this._localeService, style);
+        if (
+            style?.tb === WrapStrategy.WRAP
+        ) {
+            docModel.updateDocumentDataPageSize(realWidth);
         }
 
+        documentSkeleton.calculate();
+        const textLayout = documentSkeleton.getActualSize();
+
+        const {
+            actualWidth: fontWidth,
+            actualHeight: fontHeight,
+        } = textLayout;
+
+        let paddingTop = 0;
+        switch (vt) {
+            case VerticalAlign.BOTTOM:
+                paddingTop = (cellHeight - MARGIN_V - fontHeight);
+                break;
+            case VerticalAlign.MIDDLE:
+                paddingTop = (cellHeight - MARGIN_V - fontHeight) / 2;
+                break;
+
+            default:
+                paddingTop = MARGIN_V;
+                break;
+        }
+
+        ctx.translate(MARGIN_H, paddingTop);
+        const rectWidth = cellWidth - MARGIN_H * 2;
+        const rectHeight = fontHeight;
+        Rect.drawWith(ctx, {
+            width: rectWidth,
+            height: rectHeight,
+            fill: '#DCDCDC',
+            radius: 8,
+        });
+        ctx.save();
+        ctx.translateWithPrecision(PADDING_H, fontHeight);
+        ctx.beginPath();
+        ctx.rect(0, -fontHeight, realWidth, fontHeight);
+        ctx.clip();
+        documents.render(ctx);
         ctx.restore();
+        ctx.translate(realWidth + PADDING_H + 4, (fontHeight - ICON_SIZE) / 2);
+        ctx.fillStyle = '#565656';
+        ctx.fill(downPath);
+        ctx.restore();
+
+        map.set(key, {
+            left: primaryWithCoord.startX + MARGIN_H,
+            top: primaryWithCoord.startY + paddingTop,
+            width: rectWidth,
+            height: rectWidth,
+        });
     }
 
-    zIndex?: number | undefined;
     isHit(position: { x: number; y: number }, info: ICellRenderContext) {
         // const { cellHeight, cellWidth, top, left } = this._calc(info.primaryWithCoord, info.style);
-        const { data } = info;
+        const { data, subUnitId, row, col } = info;
+        const map = this._ensureMap(subUnitId);
+        const dropdownInfo = map.get(this._generateKey(row, col));
         const validation = data.dataValidation;
-        if (!validation) {
+        if (!validation || !dropdownInfo) {
             return false;
         }
+        const { top, left, width, height } = dropdownInfo;
+        const { x, y } = position;
 
-        const { rule, validator: _validator } = validation;
-        const validator = _validator as ListValidator;
-        const isMultiple = validator.isMultiple(rule);
-        if (!isMultiple) {
+        if (x >= left && x <= left + width && y >= top && y <= top + height) {
             return true;
         }
+
         return false;
     };
 
@@ -240,17 +236,15 @@ export class DropdownWidget implements ICellCustomRender {
 
         const { rule, validator: _validator } = validation;
         const validator = _validator as ListValidator;
-        const isMultiple = validator.isMultiple(rule);
-        if (!isMultiple) {
-            const params: IEditorBridgeServiceVisibleParam = {
-                visible: true,
-                eventType: DeviceInputEventType.Dblclick,
-            };
 
-            this._commandService.executeCommand(
-                SetCellEditVisibleOperation.id,
-                params
-            );
-        }
+        const params: IEditorBridgeServiceVisibleParam = {
+            visible: true,
+            eventType: DeviceInputEventType.Dblclick,
+        };
+
+        this._commandService.executeCommand(
+            SetCellEditVisibleOperation.id,
+            params
+        );
     };
 }

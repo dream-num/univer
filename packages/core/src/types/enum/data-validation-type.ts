@@ -20,6 +20,7 @@ export enum DataValidationType {
      */
     CUSTOM = 'custom',
     LIST = 'list',
+    LIST_MULTIPLE = 'listMultiple',
     NONE = 'none',
     TEXT_LENGTH = 'textLength',
     DATE = 'date',

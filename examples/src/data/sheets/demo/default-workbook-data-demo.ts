@@ -13996,7 +13996,19 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                     endColumn: 5,
                 }],
                 formula1: '=ISBLANK(A17)',
-            }],
+            },
+            {
+                uid: 'xxx-5',
+                type: DataValidationType.LIST_MULTIPLE,
+                ranges: [{
+                    startRow: 21,
+                    endRow: 21,
+                    startColumn: 0,
+                    endColumn: 0,
+                }],
+                formula1: '1,2,3,4,5,哈哈哈哈',
+            },
+            ],
         },
         'sheet-0010': {
             name: 'sheet-0010',
@@ -15191,9 +15203,11 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                 21: {
                     0: {
                         s: 'u5otPe',
+                        v: '1,2',
                     },
                     1: {
                         s: 'u5otPe',
+                        v: '1,2,3',
                     },
                     2: {
                         s: 'u5otPe',

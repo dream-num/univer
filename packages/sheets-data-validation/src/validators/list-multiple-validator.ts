@@ -22,6 +22,7 @@ import { LIST_FORMULA_INPUT_NAME } from '../views/formula-input';
 import { LIST_DROPDOWN_KEY } from '../views';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
 import { DropdownWidget } from '../widgets/dropdown-widget';
+import { DropdownMultipleWidget } from '../widgets/dropdown-multiple-widget';
 
 export const LIST_MULTIPLE_FORMULA = 'TRUE';
 
@@ -40,14 +41,14 @@ export const getListFormulaResult = (result: Nullable<Nullable<ICellData>[][]>) 
 };
 
 // TODO: cache
-export class ListValidator extends BaseDataValidator {
-    id: string = DataValidationType.LIST;
-    title: string = 'dataValidation.list.title';
+export class ListMultipleValidator extends BaseDataValidator {
+    id: string = DataValidationType.LIST_MULTIPLE;
+    title: string = 'dataValidation.listMultiple.title';
     operators: DataValidationOperator[] = [];
     scopes: string | string[] = ['sheet'];
     formulaInput: string = LIST_FORMULA_INPUT_NAME;
 
-    override canvasRender: Nullable<ICellCustomRender> = this.injector.createInstance(DropdownWidget);
+    override canvasRender: Nullable<ICellCustomRender> = this.injector.createInstance(DropdownMultipleWidget);
 
     private _formulaService = this.injector.get(DataValidationFormulaService);
 
@@ -60,9 +61,12 @@ export class ListValidator extends BaseDataValidator {
     }
 
     // TODO cache
-    private _parseCellValue(cellValue: CellValue, rule: IDataValidationRule) {
+    parseCellValue(cellValue: CellValue, rule: IDataValidationRule) {
         const cellString = cellValue.toString();
-        return [cellString];
+        if (!cellString) {
+            return [];
+        }
+        return cellString.split(',');
     }
 
     override async parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): Promise<IFormulaResult<string[] | undefined>> {
@@ -77,7 +81,7 @@ export class ListValidator extends BaseDataValidator {
     override async isValidType(cellInfo: IValidatorCellInfo<Nullable<CellValue>>, formula: IFormulaResult<any>, rule: IDataValidationRule): Promise<boolean> {
         const { value } = cellInfo;
         const { formula1 } = formula;
-        const selected = this._parseCellValue(value!, rule);
+        const selected = this.parseCellValue(value!, rule);
         return selected.every((i) => formula1.includes(i));
     }
 

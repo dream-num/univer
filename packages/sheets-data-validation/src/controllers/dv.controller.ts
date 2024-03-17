@@ -24,6 +24,7 @@ import { SheetDataValidationService } from '../services/dv.service';
 import { CustomFormulaValidator } from '../validators/custom-validator';
 import { CheckboxValidator, DateValidator, DecimalValidator, ListValidator, TextLengthValidator } from '../validators';
 import { WholeValidator } from '../validators/whole-validator';
+import { ListMultipleValidator } from '../validators/list-multiple-validator';
 
 @OnLifecycle(LifecycleStages.Rendered, DataValidationController)
 export class DataValidationController extends RxDisposable {
@@ -53,8 +54,9 @@ export class DataValidationController extends RxDisposable {
             WholeValidator,
             TextLengthValidator,
             DateValidator,
-            ListValidator,
             CheckboxValidator,
+            ListValidator,
+            ListMultipleValidator,
             CustomFormulaValidator,
         ]).forEach((Validator) => {
             const validator = this._injector.createInstance(Validator as typeof ListValidator);

@@ -19,6 +19,8 @@ import { ICommandService, IUniverInstanceService, LocaleType, Plugin, PluginType
 import {
     SheetInterceptorService,
 } from '@univerjs/sheets';
+import { IActiveDirtyManagerService } from '@univerjs/sheets-formula';
+
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { ConditionalFormatService } from '../conditional-format.service';
@@ -84,6 +86,7 @@ export const createTestBed = (dependencies?: Dependency[]) => {
             this._injector.add([ConditionalFormatFormulaService]);
             this._injector.add([ConditionalFormatRuleModel]);
             this._injector.add([ConditionalFormatViewModel]);
+            this._injector.add([IActiveDirtyManagerService, { useFactory: () => ({ register: () => {} } as any) }]);
             this._injector.get(ConditionalFormatService);
         }
     }

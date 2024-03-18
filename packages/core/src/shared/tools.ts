@@ -406,7 +406,7 @@ export class Tools {
 
     static isEmptyObject(value?: any): boolean {
         // eslint-disable-next-line no-unreachable-loop
-        for (const key in value) {
+        for (const _key in value) {
             return false;
         }
         return true;

@@ -23,7 +23,7 @@ import { BaseFunction } from '../../base-function';
 
 export class Index extends BaseFunction {
     override calculate(reference: BaseValueObject, rowNum: BaseValueObject, columnNum?: BaseValueObject, areaNum?: BaseValueObject) {
-        if (reference == null || rowNum == null) {
+        if (reference == null) {
             return ErrorValueObject.create(ErrorType.NA);
         }
 
@@ -31,7 +31,7 @@ export class Index extends BaseFunction {
             return reference;
         }
 
-        if (rowNum.isError()) {
+        if (rowNum?.isError()) {
             return rowNum;
         }
 

@@ -14,6 +14,15 @@
  * limitations under the License.
  */
 
+/**
+ * Korean in Excel does not count as two characters. Here we calculate all Chinese, Japanese and Korean characters as two characters.
+ *
+ * ā -> 1
+ * ー -> 2
+ *
+ * @param str
+ * @returns
+ */
 export function charLenByte(str: string) {
     let byteCount = 0;
 

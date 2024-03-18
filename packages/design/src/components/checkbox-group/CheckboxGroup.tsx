@@ -74,7 +74,6 @@ export function CheckboxGroup(props: ICheckboxGroupProps) {
                         key: index,
                         children: child.props.children,
                         value: child.props.value,
-                        checked: value.includes(child.props.value!),
                         disabled: disabled ?? child.props.disabled,
                         onChange: handleChange,
                     });

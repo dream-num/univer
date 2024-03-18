@@ -214,7 +214,6 @@ export const ReplaceDialog = forwardRef(function ReplaceDIalogImpl(_props, ref) 
                     <FormLayout>
                         <Checkbox
                             checked={caseSensitive}
-                            value={caseSensitive}
                             onChange={(checked) => {
                                 findReplaceService.changeCaseSensitive(checked as boolean);
                             }}
@@ -225,7 +224,6 @@ export const ReplaceDialog = forwardRef(function ReplaceDIalogImpl(_props, ref) 
                     <FormLayout>
                         <Checkbox
                             checked={matchesTheWholeCell}
-                            value={matchesTheWholeCell}
                             onChange={(checked) => {
                                 findReplaceService.changeMatchesTheWholeCell(checked as boolean);
                             }}

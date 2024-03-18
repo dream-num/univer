@@ -16,9 +16,9 @@
 
 import type { IRange, ISheetDataValidationRule } from '@univerjs/core';
 import { DataValidationType, Disposable, DisposableCollection, ICommandService, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, Range, Rectangle, toDisposable } from '@univerjs/core';
-import type { EffectRefRangeParams, ISetRangeValuesCommandParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
+import type { EffectRefRangeParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
-import { handleDefaultRangeChangeWithEffectRefCommands, RefRangeService, SetRangeValuesCommand, SetRangeValuesMutation } from '@univerjs/sheets';
+import { handleDefaultRangeChangeWithEffectRefCommands, RefRangeService, SetRangeValuesMutation } from '@univerjs/sheets';
 import { Inject, Injector } from '@wendellhu/redi';
 import { merge, Observable } from 'rxjs';
 import { distinctUntilChanged, map, switchMap } from 'rxjs/operators';
@@ -26,11 +26,10 @@ import type { IRemoveDataValidationMutationParams, IUpdateDataValidationMutation
 import { DataValidationModel, RemoveDataValidationMutation, UpdateDataValidationMutation, UpdateRuleType } from '@univerjs/data-validation';
 import { removeDataValidationUndoFactory } from '@univerjs/data-validation/commands/commands/data-validation.command.js';
 import { FormulaRefRangeService } from '@univerjs/sheets-formula';
-import { deserializeRangeWithSheet, isReferenceString, serializeRange, serializeRangeWithSheet, serializeRangeWithSpreadsheet } from '@univerjs/engine-formula';
+import { deserializeRangeWithSheet, isReferenceString, serializeRangeWithSpreadsheet } from '@univerjs/engine-formula';
 import { isRangesEqual } from '../utils/isRangesEqual';
 import { DataValidationCustomFormulaService } from '../services/dv-custom-formula.service';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
-import { getSheetRangeValueSet } from '../validators/util';
 import { DataValidationCacheService } from '../services/dv-cache.service';
 
 @OnLifecycle(LifecycleStages.Rendered, DataValidationRefRangeController)
@@ -245,7 +244,7 @@ export class DataValidationRefRangeController extends Disposable {
                     }
 
                     const newRangeStr = serializeRangeWithSpreadsheet(finalUnitId, finalSubUnitId, newRange);
-                    const oldRule = this._dataValidationModel.getRuleById(unitId, subUnitId, ruleId);
+                    const oldRule = this._dataValidationModel.getRuleById(propUnitId, propSubUnitId, ruleId);
                     if (!oldRule) {
                         return {
                             redos: [],
@@ -253,8 +252,8 @@ export class DataValidationRefRangeController extends Disposable {
                         };
                     }
                     const redoParams: IUpdateDataValidationMutationParams = {
-                        unitId,
-                        subUnitId,
+                        unitId: propUnitId,
+                        subUnitId: propSubUnitId,
                         ruleId,
                         payload: {
                             type: UpdateRuleType.SETTING,
@@ -266,8 +265,8 @@ export class DataValidationRefRangeController extends Disposable {
                         },
                     };
                     const undoParams: IUpdateDataValidationMutationParams = {
-                        unitId,
-                        subUnitId,
+                        unitId: propUnitId,
+                        subUnitId: propSubUnitId,
                         ruleId,
                         payload: {
                             type: UpdateRuleType.SETTING,

@@ -20,7 +20,7 @@ import { BooleanNumber } from '@univerjs/core';
 export const DEFAULT_DOCUMENT_DATA_SIMPLE: IDocumentData = {
     id: 'default-document-id',
     body: {
-        dataStream: '荷塘月色\r作者：朱自清\r\n',
+        dataStream: '荷塘月色\r作者，，自清\r\n',
         textRuns: [
             {
                 st: 0,

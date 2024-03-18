@@ -19,13 +19,37 @@ import { BooleanNumber, DataStreamTreeTokenType, GridType } from '@univerjs/core
 import type { IDocumentSkeletonGlyph } from '../../../../../basics/i-document-skeleton-cached';
 import { LineBreaker } from '../../linebreak';
 import { tabLineBreakExtension } from '../../linebreak/extensions/tab-linebreak-extension';
-import { createSkeletonLetterGlyph, createSkeletonTabGlyph } from '../../model/glyph';
+import { createSkeletonLetterGlyph, createSkeletonTabGlyph, glyphShrinkLeft, glyphShrinkRight } from '../../model/glyph';
 import { getCharSpaceApply, getFontCreateConfig } from '../../tools';
 import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../../view-model/document-view-model';
 import type { ISectionBreakConfig } from '../../../../../basics/interfaces';
-import { hasArabic, hasCJK, hasTibetan, startWithEmoji } from '../../../../../basics/tools';
+import { hasArabic, hasCJK, hasCJKPunctuation, hasTibetan, startWithEmoji } from '../../../../../basics/tools';
 import { ArabicHandler, emojiHandler, otherHandler, TibetanHandler } from './language-ruler';
+
+// Now we apply consecutive punctuation adjustment, specified in Chinese Layout
+// Requirements, section 3.1.6.1 Punctuation Adjustment Space, and Japanese Layout
+// Requirements, section 3.1 Line Composition Rules for Punctuation Marks
+function punctuationSpaceAdjustment(shapedGlyphs: IDocumentSkeletonGlyph[]) {
+    const len = shapedGlyphs.length;
+    for (let i = 0; i < len - 1; i++) {
+        const curGlyph = shapedGlyphs[i];
+        const nextGlyph = shapedGlyphs[i + 1];
+        const { width, content } = curGlyph;
+        const delta = width / 2;
+
+        if (
+            hasCJKPunctuation(content) &&
+            hasCJKPunctuation(nextGlyph.content) &&
+            curGlyph.adjustability.shrinkability[1] + nextGlyph.adjustability.shrinkability[0] >= delta
+        ) {
+            const leftDelta = Math.min(curGlyph.adjustability.shrinkability[1], delta);
+
+            glyphShrinkRight(curGlyph, leftDelta);
+            glyphShrinkLeft(nextGlyph, delta - leftDelta);
+        }
+    }
+}
 
 export interface IShapedText {
     text: string;
@@ -133,6 +157,9 @@ export function shaping(
                 src = src.substring(step);
             }
         }
+
+        // Continuous punctuation space adjustment.
+        punctuationSpaceAdjustment(shapedGlyphs);
 
         shapedTextList.push({
             text: word,

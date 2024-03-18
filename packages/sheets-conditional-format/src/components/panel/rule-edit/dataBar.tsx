@@ -87,14 +87,14 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
         return rule.config?.isGradient ? '1' : '0';
     });
     const [positiveColor, positiveColorSet] = useState(() => {
-        const defaultV = '#ff0000';
+        const defaultV = '#abd91a';
         if (!rule) {
             return defaultV;
         }
         return rule.config?.positiveColor || defaultV;
     });
     const [nativeColor, nativeColorSet] = useState(() => {
-        const defaultV = '#0000ff';
+        const defaultV = '#ffbe38';
         if (!rule) {
             return defaultV;
         }

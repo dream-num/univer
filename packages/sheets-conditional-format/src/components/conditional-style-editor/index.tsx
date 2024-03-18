@@ -66,14 +66,14 @@ export const ConditionalStyleEditor = (props: IConditionalStyleEditorProps) => {
         return style.st.s;
     });
     const [fontColor, fontColorSet] = useState(() => {
-        const defaultV = undefined;
+        const defaultV = '#2f56ef';
         if (!style?.cl?.rgb) {
             return defaultV;
         }
         return style.cl.rgb;
     });
     const [bgColor, bgColorSet] = useState(() => {
-        const defaultV = undefined;
+        const defaultV = '#e8ecfc';
         if (!style?.bg?.rgb) {
             return defaultV;
         }

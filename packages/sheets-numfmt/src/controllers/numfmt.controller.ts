@@ -290,6 +290,7 @@ export class NumfmtController extends Disposable implements INumfmtController {
                                 priority: 99,
                                 handler: (cell, location, next) => {
                                     const { row, col } = location;
+                                    const defaultValue = next(cell) || {};
                                     if (
                                         selectionRanges.find(
                                             (range) =>
@@ -308,26 +309,26 @@ export class NumfmtController extends Disposable implements INumfmtController {
                                             type !== CellValueType.NUMBER ||
                                             this._previewPattern === null
                                         ) {
-                                            return next(cell);
+                                            return defaultValue;
                                         }
                                         const info = getPatternPreview(this._previewPattern, value as number, this._localeService.getCurrentLocale());
                                         if (info.color) {
                                             const colorMap = this._themeService.getCurrentTheme();
                                             const color = colorMap[`${info.color}500`];
                                             return {
-                                                ...cell,
+                                                ...defaultValue,
                                                 v: info.result,
                                                 t: CellValueType.STRING,
                                                 s: { cl: { rgb: color } },
                                             };
                                         }
                                         return {
-                                            ...cell,
+                                            ...defaultValue,
                                             v: info.result,
                                             t: CellValueType.STRING,
                                         };
                                     }
-                                    return next(cell);
+                                    return defaultValue;
                                 },
                             })
                         );

@@ -29,6 +29,9 @@ import { DataValidationRefRangeController } from './controllers/dv-ref-range.con
 import { DataValidationFormulaMarkDirty } from './commands/mutations/formula.mutation';
 import { enUS, zhCN } from './locales';
 import { PLUGIN_NAME } from './common/const';
+import { DataValidationAutoFillController } from './controllers/dv-auto-fill.controller';
+import { DataValidationSheetController } from './controllers/dv-sheet.controller';
+import { DataValidationCopyPasteController } from './controllers/dv-copy-paste.controller';
 
 export class UniverSheetsDataValidationPlugin extends Plugin {
     constructor(
@@ -51,6 +54,9 @@ export class UniverSheetsDataValidationPlugin extends Plugin {
             [DataValidationRenderController],
             [DataValidationAlertController],
             [DataValidationRefRangeController],
+            [DataValidationAutoFillController],
+            [DataValidationSheetController],
+            [DataValidationCopyPasteController],
         ] as Dependency[]).forEach((dep) => {
             injector.add(dep);
         });

@@ -14,17 +14,22 @@
  * limitations under the License.
  */
 
-import type { IMutationInfo, IRange } from '@univerjs/core';
-import { Disposable, IUniverInstanceService, Range } from '@univerjs/core';
+import { Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle, Range, Rectangle } from '@univerjs/core';
 import type { ISheetAutoFillHook } from '@univerjs/sheets-ui';
 import { APPLY_TYPE, getAutoFillRepeatRange, IAutoFillService } from '@univerjs/sheets-ui';
-
+import { Inject } from '@wendellhu/redi';
+import { DataValidationModel } from '@univerjs/data-validation';
+import type { IAutoFillLocation } from '@univerjs/sheets-ui/services/auto-fill/type.js';
 import { PLUGIN_NAME } from '../common/const';
+import type { SheetDataValidationManager } from '../models/sheet-data-validation-manager';
+import { getDataValidationDiffMutations } from '../commands/commands/data-validation.command';
 
+@OnLifecycle(LifecycleStages.Ready, DataValidationAutoFillController)
 export class DataValidationAutoFillController extends Disposable {
     constructor(
         @IAutoFillService private readonly _autoFillService: IAutoFillService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @Inject(DataValidationModel) private readonly _dataValidationModel: DataValidationModel
     ) {
         super();
         this._initAutoFill();
@@ -32,44 +37,63 @@ export class DataValidationAutoFillController extends Disposable {
 
     private _initAutoFill() {
         const noopReturnFunc = () => ({ redos: [], undos: [] });
-        const loopFunc = (
-            sourceStartCell: { row: number; col: number },
-            targetStartCell: { row: number; col: number },
-            relativeRange: IRange
-        ) => {
-            const unitId = this._univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-            const subUnitId = this._univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
-            const sourceRange = {
-                startRow: sourceStartCell.row,
-                startColumn: sourceStartCell.col,
-                endColumn: sourceStartCell.col,
-                endRow: sourceStartCell.row,
-            };
-            const targetRange = {
-                startRow: targetStartCell.row,
-                startColumn: targetStartCell.col,
-                endColumn: targetStartCell.col,
-                endRow: targetStartCell.row,
-            };
 
-            return { redos: [], undos: [] };
-        };
-        const generalApplyFunc = (sourceRange: IRange, targetRange: IRange) => {
-            const totalUndos: IMutationInfo[] = [];
-            const totalRedos: IMutationInfo[] = [];
+        const generalApplyFunc = (location: IAutoFillLocation) => {
+            const { source: sourceRange, target: targetRange, unitId, subUnitId } = location;
+            const manager = this._dataValidationModel.ensureManager(unitId, subUnitId) as SheetDataValidationManager;
+            const ruleMatrixCopy = manager.getRuleObjectMatrix().clone();
             const sourceStartCell = {
                 row: sourceRange.startRow,
                 col: sourceRange.startColumn,
             };
+
             const repeats = getAutoFillRepeatRange(sourceRange, targetRange);
             repeats.forEach((repeat) => {
-                const { undos, redos } = loopFunc(sourceStartCell, repeat.repeatStartCell, repeat.relativeRange);
-                totalUndos.push(...undos);
-                totalRedos.push(...redos);
+                const targetStartCell = repeat.repeatStartCell;
+                const relativeRange = repeat.relativeRange;
+                const sourceRange = {
+                    startRow: sourceStartCell.row,
+                    startColumn: sourceStartCell.col,
+                    endColumn: sourceStartCell.col,
+                    endRow: sourceStartCell.row,
+                };
+                const targetRange = {
+                    startRow: targetStartCell.row,
+                    startColumn: targetStartCell.col,
+                    endColumn: targetStartCell.col,
+                    endRow: targetStartCell.row,
+                };
+                Range.foreach(relativeRange, (row, col) => {
+                    const sourcePositionRange = Rectangle.getPositionRange(
+                        {
+                            startRow: row,
+                            startColumn: col,
+                            endColumn: col,
+                            endRow: row,
+                        },
+                        sourceRange
+                    );
+                    const ruleId = manager.getRuleIdByLocation(sourcePositionRange.startRow, sourcePositionRange.startColumn);
+                    if (ruleId) {
+                        const targetPositionRange = Rectangle.getPositionRange(
+                            {
+                                startRow: row,
+                                startColumn: col,
+                                endColumn: col,
+                                endRow: row,
+                            },
+                            targetRange
+                        );
+                        ruleMatrixCopy.setValue(targetPositionRange.startRow, targetPositionRange.startColumn, ruleId);
+                    }
+                });
             });
+
+            const diffs = ruleMatrixCopy.diff(manager.getDataValidations());
+            const { redoMutations, undoMutations } = getDataValidationDiffMutations(unitId, subUnitId, diffs);
             return {
-                undos: [],
-                redos: [],
+                undos: redoMutations,
+                redos: undoMutations,
             };
         };
         const hook: ISheetAutoFillHook = {
@@ -80,9 +104,9 @@ export class DataValidationAutoFillController extends Disposable {
                     applyType === APPLY_TYPE.ONLY_FORMAT ||
                     applyType === APPLY_TYPE.SERIES
                 ) {
-                    const { source, target } = location;
-                    return generalApplyFunc(source, target);
+                    return generalApplyFunc(location);
                 }
+
                 return noopReturnFunc();
             },
         };

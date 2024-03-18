@@ -134,6 +134,10 @@ export class RuleMatrix {
     getValue(row: number, col: number) {
         return this.value.getValue(row, col);
     }
+
+    setValue(row: number, col: number, value: string) {
+        return this.value.setValue(row, col, value);
+    }
 }
 
 export class SheetDataValidationManager extends DataValidationManager<ISheetDataValidationRule> {
@@ -217,7 +221,7 @@ export class SheetDataValidationManager extends DataValidationManager<ISheetData
         super.removeRule(ruleId);
     }
 
-    getRuleIdByLocation(row: number, col: number) {
+    getRuleIdByLocation(row: number, col: number): string | undefined {
         return this._ruleMatrix.getValue(row, col);
     }
 

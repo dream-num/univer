@@ -15,8 +15,8 @@
  */
 
 import { beforeEach, describe, expect, it } from 'vitest';
-import type { IAverageHighlightCell, IConditionFormatRule, INumberHighlightCell, IRankHighlightCell, ITextHighlightCell } from '../../models/type';
-import { NumberOperator, RuleType, SubRuleType, TextOperator } from '../../base/const';
+import type { IAverageHighlightCell, IColorScale, IConditionFormatRule, IDataBar, INumberHighlightCell, IRankHighlightCell, ITextHighlightCell } from '../../models/type';
+import { NumberOperator, RuleType, SubRuleType, TextOperator, ValueType } from '../../base/const';
 import { EMPTY_STYLE } from '../calculate-unit/type';
 import { createTestBed } from './test.util';
 
@@ -710,8 +710,144 @@ describe('Test conditional format service', () => {
                 });
             });
         });
-        describe('Test timePeriod', () => {
-            // wait
+        // describe('Test timePeriod', () => {
+        //     // wait
+        // });
+        describe('Test dataBar', () => {
+            it('dataBar', () => {
+                const params: IConditionFormatRule<IDataBar> = {
+                    ranges: [{ startRow: 0, startColumn: 0, endRow: 5, endColumn: 6 }],
+                    cfId: testBed.getConditionalFormatRuleModel().createCfId(testBed.unitId, testBed.subUnitId),
+                    stopIfTrue: false,
+                    rule: {
+                        type: RuleType.dataBar,
+                        config: {
+                            min: { value: 2, type: ValueType.num },
+                            max: { value: 5, type: ValueType.num },
+                            isGradient: true,
+                            positiveColor: '#abd91a',
+                            nativeColor: '#ffbe38',
+                        },
+                    },
+
+                };
+                testBed.getConditionalFormatRuleModel().addRule(testBed.unitId, testBed.subUnitId, params);
+                testBed.getConditionalFormatService().composeStyle(testBed.unitId, testBed.subUnitId, 1, 0);
+                const dispose = testBed.getConditionalFormatService().ruleComputeStatus$.subscribe(() => {
+                    dispose.unsubscribe();
+                    const one = testBed.getConditionalFormatService().composeStyle(testBed.unitId, testBed.subUnitId, 1, 0);
+                    const two = testBed.getConditionalFormatService().composeStyle(testBed.unitId, testBed.subUnitId, 1, 1);
+                    const three = testBed.getConditionalFormatService().composeStyle(testBed.unitId, testBed.subUnitId, 1, 2);
+                    const four = testBed.getConditionalFormatService().composeStyle(testBed.unitId, testBed.subUnitId, 1, 3);
+                    const five = testBed.getConditionalFormatService().composeStyle(testBed.unitId, testBed.subUnitId, 1, 4);
+                    expect(one).toEqual(EMPTY_STYLE);
+                    expect(two).toEqual({
+                        dataBar: {
+                            color: '#abd91a',
+                            startPoint: 0,
+                            value: 0,
+                            isGradient: true,
+                        },
+                    });
+                    expect(three).toEqual({
+                        dataBar: {
+                            color: '#abd91a',
+                            startPoint: 0,
+                            value: 33.333333333333336,
+                            isGradient: true,
+                        },
+                    });
+
+                    expect(four).toEqual({
+                        dataBar: {
+                            color: '#abd91a',
+                            startPoint: 0,
+                            value: 66.66666666666667,
+                            isGradient: true,
+                        },
+                    });
+                    expect(five).toEqual({
+                        dataBar: {
+                            color: '#abd91a',
+                            startPoint: 0,
+                            value: 100,
+                            isGradient: true,
+                        },
+                    });
+                });
+            });
+        });
+        describe('Test colorScale', () => {
+            it('colorScale', () => {
+                const params: IConditionFormatRule<IColorScale> = {
+                    ranges: [{ startRow: 0, startColumn: 0, endRow: 5, endColumn: 6 }],
+                    cfId: testBed.getConditionalFormatRuleModel().createCfId(testBed.unitId, testBed.subUnitId),
+                    stopIfTrue: false,
+                    rule: {
+                        type: RuleType.colorScale,
+                        config: [{
+                            index: 0,
+                            color: '#d0d9fb',
+                            value: {
+                                type: ValueType.min,
+                            },
+                        },
+                        {
+                            index: 1,
+                            color: '#2e55ef',
+                            value: {
+                                type: ValueType.max,
+                            },
+                        }],
+                    },
+
+                };
+                testBed.getConditionalFormatRuleModel().addRule(testBed.unitId, testBed.subUnitId, params);
+                testBed.getConditionalFormatService().composeStyle(testBed.unitId, testBed.subUnitId, 1, 0);
+                const dispose = testBed.getConditionalFormatService().ruleComputeStatus$.subscribe(() => {
+                    dispose.unsubscribe();
+                    const one = testBed.getConditionalFormatService().composeStyle(testBed.unitId, testBed.subUnitId, 1, 0);
+                    const two = testBed.getConditionalFormatService().composeStyle(testBed.unitId, testBed.subUnitId, 1, 1);
+                    const three = testBed.getConditionalFormatService().composeStyle(testBed.unitId, testBed.subUnitId, 1, 2);
+                    const four = testBed.getConditionalFormatService().composeStyle(testBed.unitId, testBed.subUnitId, 1, 3);
+                    const five = testBed.getConditionalFormatService().composeStyle(testBed.unitId, testBed.subUnitId, 1, 4);
+                    expect(one).toEqual({
+                        style: {
+                            bg: {
+                                rgb: 'rgb(208,217,251)',
+                            },
+                        },
+                    });
+                    expect(two).toEqual({
+                        style: {
+                            bg: {
+                                rgb: 'rgb(181,195,249)',
+                            },
+                        },
+                    });
+                    expect(three).toEqual({
+                        style: {
+                            bg: {
+                                rgb: 'rgb(154,173,247)',
+                            },
+                        },
+                    });
+                    expect(four).toEqual({
+                        style: {
+                            bg: {
+                                rgb: 'rgb(127,151,245)',
+                            },
+                        },
+                    });
+                    expect(five).toEqual({
+                        style: {
+                            bg: {
+                                rgb: 'rgb(100,129,243)',
+                            },
+                        },
+                    });
+                });
+            });
         });
     });
 });

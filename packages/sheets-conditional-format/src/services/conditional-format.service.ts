@@ -28,7 +28,6 @@ import { ConditionalFormatViewModel } from '../models/conditional-format-view-mo
 import { RuleType, SHEET_CONDITION_FORMAT_PLUGIN } from '../base/const';
 import type { IConditionFormatRule, IHighlightCell, IRuleModelJson } from '../models/type';
 import type { IDataBarCellData, IDataBarRenderParams, IIconSetCellData, IIconSetRenderParams } from '../render/type';
-import { getCellValue, isNullable } from './calculate-unit/utils';
 import { dataBarCellCalculateUnit } from './calculate-unit/data-bar';
 import { highlightCellCalculateUnit } from './calculate-unit/highlight-cell';
 import { colorScaleCellCalculateUnit } from './calculate-unit/color-scale';
@@ -267,8 +266,9 @@ export class ConditionalFormatService extends Disposable {
                         const { subUnitId, unitId, cellValue } = params;
                         const cellMatrix: [number, number][] = [];
                         new ObjectMatrix(cellValue).forValue((row, col, value) => {
-                            const cell = value && getCellValue(value);
-                            if (!isNullable(cell)) {
+                            // When P and V are involved
+                            const result = value && Object.keys(value).some((key) => ['p', 'v'].includes(key));
+                            if (result) {
                                 cellMatrix.push([row, col]);
                             }
                         });

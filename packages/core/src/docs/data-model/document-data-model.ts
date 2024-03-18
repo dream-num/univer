@@ -31,6 +31,7 @@ import { updateAttributeByInsert } from './apply-utils/insert-apply';
 import { updateAttribute } from './apply-utils/update-apply';
 import { type TextXAction, TextXActionType } from './action-types';
 import { getBodySlice } from './text-x/utils';
+import { getEmptySnapshot } from './empty-snapshot';
 
 export const DEFAULT_DOC = {
     id: 'default_doc',
@@ -206,6 +207,9 @@ export class DocumentDataModel extends DocumentDataModelSimple {
     footerModelMap: Map<string, DocumentDataModel> = new Map();
 
     constructor(snapshot: Partial<IDocumentData>) {
+        if (Tools.isEmptyObject(snapshot)) {
+            snapshot = getEmptySnapshot();
+        }
         super(snapshot);
 
         const UNIT_ID_LENGTH = 6;

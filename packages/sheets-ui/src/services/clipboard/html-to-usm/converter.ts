@@ -64,6 +64,15 @@ interface IHtmlToUSMServiceProps {
     getCurrentSkeleton: () => Nullable<ISheetSkeletonManagerParam>;
 }
 
+function hideIframe(iframe: HTMLIFrameElement) {
+    iframe.style.display = 'none';
+    iframe.style.width = '0';
+    iframe.style.height = '0';
+    iframe.setAttribute('tabindex', '-1');
+    iframe.setAttribute('aria-hidden', 'true');
+    iframe.setAttribute('title', 'hidden iframe');
+}
+
 export class HtmlToUSMService {
     private static pluginList: IPasteExtension[] = [];
 
@@ -89,6 +98,7 @@ export class HtmlToUSMService {
         this.getCurrentSkeleton = props.getCurrentSkeleton;
         this.htmlElement = document.createElement('iframe');
         document.body.appendChild(this.htmlElement);
+        hideIframe(this.htmlElement);
     }
 
     convert(html: string): IUniverSheetCopyDataModel {
@@ -97,6 +107,7 @@ export class HtmlToUSMService {
             this.htmlElement.contentDocument.write(html);
             this.htmlElement.contentDocument.close();
         }
+
         html = html.replace(/<!--[\s\S]*?-->/g, '');
 
         const pastePlugin = HtmlToUSMService.pluginList.find((plugin) => plugin.checkPasteType(html));

@@ -17,7 +17,7 @@
 import type { IScale } from '@univerjs/core';
 import { getColorStyle } from '@univerjs/core';
 
-import type { IDocumentSkeletonSpan } from '../../../basics/i-document-skeleton-cached';
+import type { IDocumentSkeletonGlyph } from '../../../basics/i-document-skeleton-cached';
 import { Vector2 } from '../../../basics/vector2';
 import type { UniverRenderingContext } from '../../../context';
 import { DocumentsSpanAndLineExtensionRegistry } from '../../extension';
@@ -34,7 +34,7 @@ export class Background extends docExtension {
 
     private _preBackgroundColor = '';
 
-    override draw(ctx: UniverRenderingContext, parentScale: IScale, span: IDocumentSkeletonSpan) {
+    override draw(ctx: UniverRenderingContext, parentScale: IScale, span: IDocumentSkeletonGlyph) {
         const line = span.parent?.parent;
         if (!line) {
             return;

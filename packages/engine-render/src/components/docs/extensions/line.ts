@@ -19,7 +19,7 @@ import { BooleanNumber, getColorStyle, TextDecoration } from '@univerjs/core';
 
 import { COLOR_BLACK_RGB, DEFAULT_OFFSET_SPACING, FIX_ONE_PIXEL_BLUR_OFFSET } from '../../../basics/const';
 import { calculateRectRotate } from '../../../basics/draw';
-import type { IDocumentSkeletonSpan } from '../../../basics/i-document-skeleton-cached';
+import type { IDocumentSkeletonGlyph } from '../../../basics/i-document-skeleton-cached';
 import { degToRad, getScale } from '../../../basics/tools';
 import { Vector2 } from '../../../basics/vector2';
 import type { UniverRenderingContext } from '../../../context';
@@ -37,7 +37,7 @@ export class Line extends docExtension {
 
     private _preBackgroundColor = '';
 
-    override draw(ctx: UniverRenderingContext, parentScale: IScale, span: IDocumentSkeletonSpan) {
+    override draw(ctx: UniverRenderingContext, parentScale: IScale, span: IDocumentSkeletonGlyph) {
         const line = span.parent?.parent;
         if (!line) {
             return;
@@ -84,7 +84,7 @@ export class Line extends docExtension {
 
     private _drawLine(
         ctx: UniverRenderingContext,
-        span: IDocumentSkeletonSpan,
+        span: IDocumentSkeletonGlyph,
         line: ITextDecoration,
         startY: number,
         scale: number

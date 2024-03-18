@@ -37,8 +37,8 @@ import type {
     IDocumentSkeletonDrawingAnchor,
     IDocumentSkeletonFontStyle,
     IDocumentSkeletonFooter,
+    IDocumentSkeletonGlyph,
     IDocumentSkeletonHeader,
-    IDocumentSkeletonSpan,
 } from './i-document-skeleton-cached';
 import type { Vector2 } from './vector2';
 
@@ -157,13 +157,13 @@ export interface IFontCreateConfig {
 // }
 
 export interface INodeInfo {
-    node: IDocumentSkeletonSpan;
+    node: IDocumentSkeletonGlyph;
     ratioX: number;
     ratioY: number;
 }
 
 export interface INodeSearch {
-    span: number;
+    glyph: number;
     divide: number;
     line: number;
     column: number;

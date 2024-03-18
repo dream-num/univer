@@ -19,7 +19,7 @@ import { BaselineOffset, getColorStyle } from '@univerjs/core';
 
 import { hasCJK } from '../../../basics';
 import { COLOR_BLACK_RGB } from '../../../basics/const';
-import type { IDocumentSkeletonSpan } from '../../../basics/i-document-skeleton-cached';
+import type { IDocumentSkeletonGlyph } from '../../../basics/i-document-skeleton-cached';
 import { Vector2 } from '../../../basics/vector2';
 import type { UniverRenderingContext } from '../../../context';
 import { DocumentsSpanAndLineExtensionRegistry } from '../../extension';
@@ -38,8 +38,8 @@ export class FontAndBaseLine extends docExtension {
 
     private _preFontColor = '';
 
-    override draw(ctx: UniverRenderingContext, parentScale: IScale, span: IDocumentSkeletonSpan) {
-        const line = span.parent?.parent;
+    override draw(ctx: UniverRenderingContext, parentScale: IScale, glyph: IDocumentSkeletonGlyph) {
+        const line = glyph.parent?.parent;
         if (!line) {
             return;
         }
@@ -48,7 +48,7 @@ export class FontAndBaseLine extends docExtension {
 
         // const maxLineAsc = asc + lineMarginTop + linePaddingTop;
 
-        const { ts: textStyle, content, fontStyle, bBox } = span;
+        const { ts: textStyle, content, fontStyle, bBox } = glyph;
 
         const { spanPointWithFont = Vector2.create(0, 0) } = this.extensionOffset;
 
@@ -57,7 +57,7 @@ export class FontAndBaseLine extends docExtension {
         }
 
         if (!textStyle) {
-            this._fillText(ctx, span, spanPointWithFont);
+            this._fillText(ctx, glyph, spanPointWithFont);
             return;
         }
 
@@ -89,12 +89,12 @@ export class FontAndBaseLine extends docExtension {
         }
 
         // console.log(content, spanPointWithFont.x, spanPointWithFont.y, startX, startY);
-        this._fillText(ctx, span, spanPointWithFont);
+        this._fillText(ctx, glyph, spanPointWithFont);
     }
 
-    private _fillText(ctx: UniverRenderingContext, span: IDocumentSkeletonSpan, spanPointWithFont: Vector2) {
+    private _fillText(ctx: UniverRenderingContext, glyph: IDocumentSkeletonGlyph, spanPointWithFont: Vector2) {
         const { renderConfig, spanStartPoint, centerPoint } = this.extensionOffset;
-        const { content, width, bBox } = span;
+        const { content, width, bBox } = glyph;
         const { aba, abd } = bBox;
 
         if (content == null || spanStartPoint == null || centerPoint == null) {

@@ -28,8 +28,7 @@ import { RegisterOtherFormulaService } from './services/register-formula.service
 import { DataValidationRefRangeController } from './controllers/dv-ref-range.controller';
 import { DataValidationFormulaMarkDirty } from './commands/mutations/formula.mutation';
 import { enUS, zhCN } from './locales';
-
-const PLUGIN_NAME = 'sheets-data-validation';
+import { PLUGIN_NAME } from './common/const';
 
 export class UniverSheetsDataValidationPlugin extends Plugin {
     constructor(

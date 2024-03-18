@@ -19,7 +19,16 @@ import { useObservable } from '@univerjs/ui';
 import React from 'react';
 import type { IPosition } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { CellAlertManagerService } from '../../services/cell-alert-manager.service';
+import { ErrorSingle, WarningSingle } from '@univerjs/icons';
+import cs from 'clsx';
+import { CellAlertManagerService, CellAlertType } from '../../services/cell-alert-manager.service';
+import styles from './index.module.less';
+
+const iconMap = {
+    [CellAlertType.ERROR]: <ErrorSingle className={cs(styles.cellAlertIcon, styles.cellAlertIconError)} />,
+    [CellAlertType.INFO]: <WarningSingle className={cs(styles.cellAlertIcon, styles.cellAlertIconInfo)} />,
+    [CellAlertType.WARNING]: <WarningSingle className={cs(styles.cellAlertIcon, styles.cellAlertIconWarning)} />,
+};
 
 const calcAnchorStyle = (position: IPosition, width: number, height: number, containerWidth: number, containerHeight: number): React.CSSProperties => {
     const { startX, startY, endX, endY } = position;
@@ -45,7 +54,7 @@ export function CellAlert() {
         return null;
     }
 
-    const { position, location, width, height } = currentCell;
+    const { position, location, width, height, type } = currentCell;
 
     const currentRender = renderManagerService.getRenderById(location.unitId);
 
@@ -55,21 +64,15 @@ export function CellAlert() {
 
     const { width: canvasWidth, height: canvasHeight } = currentRender.engine;
 
-    const style: React.CSSProperties = {
-        ...calcAnchorStyle(position, width, height, canvasWidth, canvasHeight),
-        boxSizing: 'border-box',
-        padding: 8,
-        borderRadius: 4,
-        background: '#fff',
-        border: '1px solid #ccc',
-        zIndex: 100,
-        fontSize: 12,
-    };
+    const style: React.CSSProperties = calcAnchorStyle(position, width, height, canvasWidth, canvasHeight);
 
     return (
-        <div style={style}>
-            <div>{currentCell.title}</div>
-            <div>{currentCell.message}</div>
+        <div style={style} className={styles.cellAlert}>
+            <div className={styles.cellAlertTitle}>
+                {iconMap[type]}
+                {currentCell.title}
+            </div>
+            <div className={styles.cellAlertContent}>{currentCell.message}</div>
         </div>
     );
 }

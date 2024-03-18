@@ -20,6 +20,7 @@ import {
     Disposable,
     ICommandService,
     LifecycleStages,
+    LocaleService,
     ObjectMatrix,
     OnLifecycle,
     Range,
@@ -42,7 +43,8 @@ export class NumfmtCellContent extends Disposable {
         @Inject(SheetSkeletonManagerService) private _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @Inject(ICommandService) private _commandService: ICommandService,
 
-        @Inject(INumfmtService) private _numfmtService: INumfmtService
+        @Inject(INumfmtService) private _numfmtService: INumfmtService,
+        @Inject(LocaleService) private _localeService: LocaleService
     ) {
         super();
         this._initInterceptorCellContent();
@@ -74,7 +76,7 @@ export class NumfmtCellContent extends Disposable {
                         return { ...cell, ...cache.result };
                     }
 
-                    const info = getPatternPreview(numfmtValue.pattern, Number(originCellValue.v));
+                    const info = getPatternPreview(numfmtValue.pattern, Number(originCellValue.v), this._localeService.getCurrentLocale());
 
                     numfmtRes = info.result;
 

@@ -53,6 +53,8 @@ export class FeatureCalculationController extends Disposable {
 
         const subUnitId = 'sheet-0011';
 
+        const subUnitName = '工作表11';
+
         const runtimeCellData = {
             [unitId]: {
                 [subUnitId]: new ObjectMatrix({
@@ -86,6 +88,7 @@ export class FeatureCalculationController extends Disposable {
                 {
                     unitId,
                     sheetId: subUnitId,
+                    sheetName: subUnitName,
                     range: {
                         startRow: 0,
                         endRow: 3,

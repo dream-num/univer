@@ -75,7 +75,10 @@ export const RichTextEditingMutation: IMutation<IRichTextEditingMutationParams, 
             throw new Error(`DocumentDataModel or documentViewModel not found for unitId: ${unitId}`);
         }
 
-        if (actions.length === 0) {
+        // TODO: `disabled` is only used for read only demo, and will be removed in the future.
+        const disabled = !!documentDataModel.getSnapshot().disabled;
+
+        if (actions.length === 0 || disabled) {
             // The actions' length maybe 0 when the mutation is from collaborative editing.
             // The return result will not be used.
             return {

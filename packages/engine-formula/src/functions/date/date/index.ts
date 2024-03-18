@@ -20,7 +20,7 @@ import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import { NumberValueObject } from '../../../engine/value-object/primitive-object';
+import { NullValueObject, NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class DateFunction extends BaseFunction {
@@ -60,8 +60,8 @@ export class DateFunction extends BaseFunction {
         const dayArray = expandArrayValueObject(maxRowLength, maxColumnLength, day);
 
         return yearArray.map((yearValueObject, rowIndex, columnIndex) => {
-            const monthValueObject = monthArray.get(rowIndex, columnIndex);
-            const dayValueObject = dayArray.get(rowIndex, columnIndex);
+            const monthValueObject = monthArray.get(rowIndex, columnIndex) || NullValueObject.create();
+            const dayValueObject = dayArray.get(rowIndex, columnIndex) || NullValueObject.create();
 
             if (yearValueObject.isError()) {
                 return yearValueObject;

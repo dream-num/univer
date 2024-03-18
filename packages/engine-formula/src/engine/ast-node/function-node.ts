@@ -201,6 +201,7 @@ export class FunctionNode extends BaseAstNode {
                     columnCount: arrayValues[0]?.length || 0,
                     unitId: '',
                     sheetId: '',
+                    sheetName: '',
                     row: -1,
                     column: -1,
                 });

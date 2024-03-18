@@ -142,7 +142,7 @@ describe('Test indirect', () => {
 
             const result = interpreter.execute(astNode as BaseAstNode);
 
-            expect((result as ArrayValueObject).getFirstCell().getValue()).toStrictEqual(1);
+            expect((result as ArrayValueObject).getFirstCell()!.getValue()).toStrictEqual(1);
         });
 
         it('Minus Minus Minus ref', async () => {
@@ -152,7 +152,7 @@ describe('Test indirect', () => {
 
             const result = interpreter.execute(astNode as BaseAstNode);
 
-            expect((result as ArrayValueObject).getFirstCell().getValue()).toStrictEqual(-1);
+            expect((result as ArrayValueObject).getFirstCell()!.getValue()).toStrictEqual(-1);
         });
 
         it('Minus Minus Minus Minus sum', async () => {

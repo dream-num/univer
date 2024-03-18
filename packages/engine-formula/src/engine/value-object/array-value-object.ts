@@ -916,7 +916,10 @@ export class ArrayValueObject extends BaseValueObject {
     }
 
     override map(callbackFn: callbackMapFnType): BaseValueObject {
-        const wrappedCallbackFn = (currentValue: BaseValueObject, r: number, c: number) => {
+        const wrappedCallbackFn = (currentValue: Nullable<BaseValueObject>, r: number, c: number) => {
+            if (currentValue == null) {
+                return NullValueObject.create();
+            }
             if (currentValue.isError()) {
                 return currentValue as ErrorValueObject;
             } else {

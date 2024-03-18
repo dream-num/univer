@@ -42,6 +42,7 @@ describe('Test iserror function', () => {
                 columnCount: 10,
                 unitId: '',
                 sheetId: '',
+                sheetName: '',
                 row: 0,
                 column: 0,
             });

@@ -45,6 +45,7 @@ describe('Test day function', () => {
                 columnCount: 6,
                 unitId: '',
                 sheetId: '',
+                sheetName: '',
                 row: 0,
                 column: 0,
             });

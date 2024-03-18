@@ -18,9 +18,11 @@ import type { IRange, Nullable, Worksheet } from '@univerjs/core';
 import { Disposable, extractPureTextFromCell, ICommandService, IUniverInstanceService } from '@univerjs/core';
 import { SheetsFilterService } from '@univerjs/sheets-filter';
 import type { FilterColumn, FilterModel } from '@univerjs/sheets-filter';
+import type { IDisposable } from '@wendellhu/redi';
 import { createIdentifier, Inject, Injector } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, ReplaySubject } from 'rxjs';
+import { RefRangeService } from '@univerjs/sheets';
 import type { FilterOperator, IFilterConditionFormParams, IFilterConditionItem } from '../models/conditions';
 import { FilterConditionItems } from '../models/conditions';
 import type { ISetSheetsFilterCriteriaCommandParams } from '../commands/sheets-filter.command';
@@ -52,40 +54,48 @@ export interface ISheetsFilterPanelService {
 }
 export const ISheetsFilterPanelService = createIdentifier<ISheetsFilterPanelService>('sheets-filter-ui.sheets-filter-panel.service');
 
+export type FilterByModel = ByConditionsModel | ByValuesModel;
+
 /**
- * This service controls the state of the filter panel.
+ * This service controls the state of the filter panel. There should be only one instance of the filter panel
+ * at one time.
  */
 export class SheetsFilterPanelService extends Disposable {
     private readonly _filterBy$ = new BehaviorSubject<FilterBy>(FilterBy.VALUES);
     readonly filterBy$ = this._filterBy$.asObservable();
     get filterBy(): FilterBy { return this._filterBy$.getValue(); }
 
-    private readonly _filterByValues$ = new BehaviorSubject<IFilterByValueItem[]>([]);
-    readonly filterByValues$ = this._filterByValues$.asObservable();
-
-    private readonly _filterByModel$ = new ReplaySubject<Nullable<ByConditionsModel | ByValuesModel>>(1);
+    private readonly _filterByModel$ = new ReplaySubject<Nullable<FilterByModel>>(1);
     readonly filterByModel$ = this._filterByModel$.asObservable();
-    private _filterByModel: Nullable<ByConditionsModel | ByValuesModel> = null;
+    private _filterByModel: Nullable<FilterByModel> = null;
+    public get filterByModel(): Nullable<FilterByModel> { return this._filterByModel; }
 
     private _filterModel: Nullable<FilterModel> = null;
     private _col = -1;
 
+    private _filterColumnAliveListener: Nullable<IDisposable> = null;
+
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(SheetsFilterService) private _sheetsFilterService: SheetsFilterService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @Inject(RefRangeService) private readonly _refRangeService: RefRangeService
     ) {
         super();
     }
 
     override dispose(): void {
         this._filterBy$.complete();
-        this._filterByValues$.complete();
+        this._filterByModel$.complete();
     }
 
     setupCol(filterModel: FilterModel, col: number): boolean {
+        this.terminate();
+
         this._filterModel = filterModel;
         this._col = col;
+
+        // TODO@wzhudev: should setup listener so that
 
         // We use filter type that (if) has been set on the column as the default filter type.
         const filterColumn = filterModel.getFilterColumn(col);
@@ -115,7 +125,27 @@ export class SheetsFilterPanelService extends Disposable {
     }
 
     terminate(): boolean {
+        this._filterColumnAliveListener?.dispose();
+        this._filterColumnAliveListener = null;
+
+        this._filterModel = null;
+        this._col = -1;
+
         return true;
+    }
+
+    /**
+     * This method should be called when setting up on a column. It keeps
+     * use RefService to determine if the FilterColumn no longer lives.
+     */
+    private _registerColumnStatusListener(filterModel: FilterModel, col: number): void {
+        const filterRange = filterModel.getRange();
+        const columnHeaderRange: IRange = {
+            startColumn: filterRange.startColumn + col,
+            startRow: filterRange.startRow,
+            endRow: filterRange.startRow,
+            endColumn: filterRange.startColumn + col,
+        };
     }
 
     private _setupByValues(filterModel: FilterModel, col: number, filters?: string[]): boolean {
@@ -154,7 +184,6 @@ export class SheetsFilterPanelService extends Disposable {
             }
         }
 
-        this._filterByValues$.next(items);
         return true;
     }
 
@@ -212,7 +241,11 @@ export class ByConditionsModel extends Disposable {
      * Create a model with targeting filter column. If there is not a filter column, the model would be created with
      * default values.
      *
-     * @param filterColumn the target filter column
+     * @param injector
+     * @param filterModel
+     * @param col
+     * @param filterColumn
+     *
      * @returns the model to control the panel's state
      */
     static fromFilterColumn(injector: Injector, filterModel: FilterModel, col: number, filterColumn?: Nullable<FilterColumn>): ByConditionsModel {
@@ -292,7 +325,7 @@ export class ByConditionsModel extends Disposable {
         }
 
         if (typeof params.and !== 'undefined' || typeof params.operator1 !== 'undefined' || typeof params.operator2 !== 'undefined') {
-            const conditionItem = FilterConditionItems.testMappingParams(newParams as IFilterConditionFormParams);
+            const conditionItem = FilterConditionItems.testMappingParams(newParams as IFilterConditionFormParams, this.conditionItem.numOfParameters);
             this._conditionItem$.next(conditionItem);
         }
 

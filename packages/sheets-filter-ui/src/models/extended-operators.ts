@@ -46,9 +46,10 @@ export enum ExtendCustomFilterOperator {
 
     /**
      * Text equals. It is not same as CustomFilterOperator.EQUAL.
-     * Fallbacks to
      *
-     * <autoFilter ref="E9:E14" xr:uid="{1F3E5566-0CEC-43B8-BD62-A3D70C54C3B7}">
+     * When equals empty, it will be mapped to.
+     *
+     * <autoFilter>
      *   <filterColumn colId="0">
      *     <filters blank="1"/>
      *   </filterColumn>
@@ -88,7 +89,7 @@ export enum ExtendCustomFilterOperator {
      * Falls back to the following XML:
      *
      * ```xml
-     * <customFilters> <!-- no `and` means `OR` -->
+     * <customFilters> <!-- no `and="1"` means `OR` -->
      *     <customFilter operator="lessThan" val="456"/>
      *     <customFilter operator="greaterThan" val="123"/>
      * </customFilters>

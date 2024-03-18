@@ -84,12 +84,9 @@ export namespace FilterConditionItems {
         getDefaultFormParams: () => { throw new Error('[FilterConditionItems.NONE]: should not have initial form params!'); },
         testMappingParams: () => false,
 
-        mapToFilterColumn: () => ({ customFilters: undefined }),
+        mapToFilterColumn: () => ({}),
         testMappingFilterColumn: (filterColumn) => {
-            if (!filterColumn.customFilters) {
-                return { operator1: ExtendCustomFilterOperator.NONE };
-            }
-
+            if (!filterColumn.customFilters && !filterColumn.filters) return {};
             return false;
         },
     };
@@ -118,7 +115,7 @@ export namespace FilterConditionItems {
                 return false;
             }
 
-            return { val1: '' };
+            return { operator1: ExtendCustomFilterOperator.EMPTY };
         },
     };
 
@@ -144,7 +141,7 @@ export namespace FilterConditionItems {
                 return false;
             }
 
-            return { val1: ' ' };
+            return { operator1: ExtendCustomFilterOperator.NOT_EMPTY };
         },
     };
 
@@ -289,19 +286,17 @@ export namespace FilterConditionItems {
         },
 
         mapToFilterColumn: (mapParams) => ({
-            // TODO: this need to be changed
-            customFilters: { customFilters: [{ val: mapParams.val1!, operator: CustomFilterOperator.EQUAL }] },
+            customFilters: { customFilters: [{ val: mapParams.val1! }] },
         }),
         testMappingFilterColumn: (filterColumn) => {
-            // TODO@wzhudev: it starts from plain filter items!
-            // if (filterColumn.customFilters?.customFilters.length !== 1) {
-            //     return false;
-            // }
+            if (filterColumn.filters?.length === 1) {
+                return { operator1: ExtendCustomFilterOperator.EQUALS, val1: '' };
+            }
 
-            // const firstCustomFilter = filterColumn.customFilters.customFilters[0];
-            // if (firstCustomFilter.operator !== CustomFilterOperator.EQUAL) {
-            //     return false;
-            // }
+            if (filterColumn.customFilters?.customFilters.length === 1 && !filterColumn.customFilters.customFilters[0].operator) {
+                return { operator1: ExtendCustomFilterOperator.EQUALS, val1: filterColumn.customFilters.customFilters[0].val.toString() };
+            }
+
             return false;
         },
     };
@@ -506,7 +501,8 @@ export namespace FilterConditionItems {
             if (!and) return false;
 
             const operators = [operator1, operator2];
-            return operators.includes(CustomFilterOperator.GREATER_THAN_OR_EQUAL) && operators.includes(CustomFilterOperator.LESS_THAN_OR_EQUAL);
+            return operators.includes(CustomFilterOperator.GREATER_THAN_OR_EQUAL)
+                && operators.includes(CustomFilterOperator.LESS_THAN_OR_EQUAL);
         },
 
         mapToFilterColumn: (mapParams) => {
@@ -514,6 +510,7 @@ export namespace FilterConditionItems {
             const operator1IsGreater = operator1 === CustomFilterOperator.GREATER_THAN_OR_EQUAL;
             return {
                 customFilters: {
+                    and: BooleanNumber.TRUE,
                     customFilters: [
                         { val: operator1IsGreater ? val1! : val2!, operator: CustomFilterOperator.GREATER_THAN_OR_EQUAL },
                         { val: operator1IsGreater ? val2! : val1!, operator: CustomFilterOperator.LESS_THAN_OR_EQUAL },
@@ -530,6 +527,7 @@ export namespace FilterConditionItems {
             if (
                 firstCustomFilter.operator === CustomFilterOperator.GREATER_THAN_OR_EQUAL
                 && secondCustomFilter.operator === CustomFilterOperator.LESS_THAN_OR_EQUAL
+                && filterColumn.customFilters.and
             ) {
                 return {
                     and: true,
@@ -543,12 +541,13 @@ export namespace FilterConditionItems {
             if (
                 secondCustomFilter.operator === CustomFilterOperator.GREATER_THAN_OR_EQUAL
                 && firstCustomFilter.operator === CustomFilterOperator.LESS_THAN_OR_EQUAL
+                && filterColumn.customFilters.and
             ) {
                 return {
                     and: true,
-                    operator1: CustomFilterOperator.LESS_THAN_OR_EQUAL,
+                    operator1: CustomFilterOperator.GREATER_THAN_OR_EQUAL,
                     val1: secondCustomFilter.val.toString(),
-                    operator2: CustomFilterOperator.GREATER_THAN_OR_EQUAL,
+                    operator2: CustomFilterOperator.LESS_THAN_OR_EQUAL,
                     val2: firstCustomFilter.val.toLocaleString(),
                 };
             }
@@ -582,8 +581,8 @@ export namespace FilterConditionItems {
             return {
                 customFilters: {
                     customFilters: [
-                        { val: operator1IsGreater ? val1! : val2!, operator: CustomFilterOperator.LESS_THAN },
-                        { val: operator1IsGreater ? val2! : val1!, operator: CustomFilterOperator.GREATER_THAN },
+                        { val: operator1IsGreater ? val1! : val2!, operator: CustomFilterOperator.GREATER_THAN },
+                        { val: operator1IsGreater ? val2! : val1!, operator: CustomFilterOperator.LESS_THAN },
                     ],
                 },
             };
@@ -597,9 +596,9 @@ export namespace FilterConditionItems {
             if (
                 firstCustomFilter.operator === CustomFilterOperator.LESS_THAN
                 && secondCustomFilter.operator === CustomFilterOperator.GREATER_THAN
+                && !filterColumn.customFilters.and
             ) {
                 return {
-                    and: true,
                     operator1: CustomFilterOperator.LESS_THAN,
                     val1: firstCustomFilter.val.toString(),
                     operator2: CustomFilterOperator.GREATER_THAN,
@@ -610,9 +609,9 @@ export namespace FilterConditionItems {
             if (
                 secondCustomFilter.operator === CustomFilterOperator.LESS_THAN
                 && firstCustomFilter.operator === CustomFilterOperator.GREATER_THAN
+                && !filterColumn.customFilters.and
             ) {
                 return {
-                    and: true,
                     operator1: CustomFilterOperator.GREATER_THAN,
                     val1: secondCustomFilter.val.toString(),
                     operator2: CustomFilterOperator.LESS_THAN,
@@ -642,30 +641,42 @@ export namespace FilterConditionItems {
                 val2: '',
             };
         },
-        testMappingParams: () => true, // you can always map
+        testMappingParams: () => true,
 
         mapToFilterColumn: (mapParams) => {
             const { and, val1, val2, operator1, operator2 } = mapParams;
 
-            function mapOperator(operator: FilterOperator, val: string) {
+            function mapOperator(operator: FilterOperator | undefined, val: string) {
                 // eslint-disable-next-line ts/no-use-before-define
-                for (const condition of ALL_CONDITIONS.filter((condition) => condition.numOfParameters === 1)) {
+                for (const condition of ALL_CONDITIONS) {
                     if (condition.operator === operator) {
                         return condition.mapToFilterColumn({ val1: val, operator1: operator });
                     }
                 }
             }
 
-            const mappedCustomFilter1 = mapOperator(operator1!, val1!);
-            const mappedCustomFilter2 = mapOperator(operator2!, val2!);
-            if (!mappedCustomFilter1 || !mappedCustomFilter2) {
-                throw new Error('[FilterConditionItems.CUSTOM]: cannot map to filterColumn filters!');
+            const operator1IsNone = !operator1 || operator1 === FilterConditionItems.NONE.operator;
+            const operator2IsNone = !operator2 || operator2 === FilterConditionItems.NONE.operator;
+
+            if (operator1IsNone && operator2IsNone) {
+                return NONE.mapToFilterColumn({});
             }
 
+            if (operator1IsNone) {
+                return mapOperator(operator2!, val2!)!;
+            }
+
+            if (operator2IsNone) {
+                return mapOperator(operator1!, val1!)!;
+            }
+
+            const mappedCustomFilter1 = mapOperator(operator1!, val1!)!;
+            const mappedCustomFilter2 = mapOperator(operator2!, val2!)!;
             const customFilters: ICustomFilters = { customFilters: [
                 mappedCustomFilter1.customFilters!.customFilters[0],
                 mappedCustomFilter2.customFilters!.customFilters[0],
             ] };
+
             if (and) customFilters.and = BooleanNumber.TRUE;
             return { customFilters };
         },
@@ -727,8 +738,8 @@ export namespace FilterConditionItems {
         return item;
     }
 
-    export function testMappingParams(mapParams: IFilterConditionFormParams): IFilterConditionItem {
-        for (const condition of ALL_CONDITIONS) {
+    export function testMappingParams(mapParams: IFilterConditionFormParams, numOfParameters: number): IFilterConditionItem {
+        for (const condition of ALL_CONDITIONS.filter((condition) => condition.numOfParameters === numOfParameters)) {
             try {
                 if (condition.numOfParameters !== 0 && condition.testMappingParams(mapParams)) {
                     return condition;

@@ -19,8 +19,7 @@ import type { Meta } from '@storybook/react';
 import { RediContext } from '@wendellhu/redi/react-bindings';
 import type { Injector } from '@wendellhu/redi';
 import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
-import type { IWorkbookData } from '@univerjs/core';
-import { CustomFilterOperator, ICommandService, ILogService, LocaleService, LocaleType, LogLevel, Plugin, PluginType, Univer } from '@univerjs/core';
+import { ICommandService, ILogService, LocaleService, LocaleType, LogLevel, Plugin, PluginType, Univer } from '@univerjs/core';
 import { SelectionManagerService, SheetInterceptorService, SheetPermissionService } from '@univerjs/sheets';
 import { DesktopMenuService, DesktopShortcutService, IMenuService, IShortcutService } from '@univerjs/ui';
 import { SheetsFilterPanelService } from '../../services/sheets-filter-panel.service';
@@ -28,6 +27,7 @@ import { ClearSheetsFilterCriteriaCommand, ReCalcSheetsFilterConditionsCommand, 
 import type { IOpenFilterPanelOperationParams } from '../../commands/sheets-filter.operation';
 import { ChangeFilterByOperation, CloseFilterPanelOperation, OpenFilterPanelOperation } from '../../commands/sheets-filter.operation';
 import zhCN from '../../locale/zh-CN';
+import { WithCustomFiltersModelFactory } from '../../__testing__/data';
 import { FilterPanel } from './SheetsFilterPanel';
 
 const meta: Meta<typeof FilterPanel> = {
@@ -37,38 +37,6 @@ const meta: Meta<typeof FilterPanel> = {
 };
 
 export default meta;
-
-const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
-    id: 'test',
-    appVersion: '3.0.0-alpha',
-    sheets: {
-        sheet1: {
-            id: 'sheet1',
-            cellData: {
-                0: {
-                    0: {
-                        v: 'A1',
-                    },
-                },
-            },
-            autoFilter: {
-                ref: { startColumn: 0, startRow: 0, endColumn: 5, endRow: 5 },
-                filterColumns: [
-                    {
-                        colId: 0,
-                        customFilters: {
-                            customFilters: [{ val: '123', operator: CustomFilterOperator.GREATER_THAN }],
-                        },
-                    },
-                ],
-            },
-        },
-    },
-    locale: LocaleType.ZH_CN,
-    name: '',
-    sheetOrder: [],
-    styles: {},
-};
 
 function createStorybookBed() {
     const univer = new Univer();
@@ -111,7 +79,7 @@ function createStorybookBed() {
     injector.get(LocaleService).load({ zhCN });
     injector.get(ILogService).setLogLevel(LogLevel.VERBOSE);
 
-    const sheet = univer.createUniverSheet(TEST_WORKBOOK_DATA_DEMO);
+    const sheet = univer.createUniverSheet(WithCustomFiltersModelFactory());
 
     commandService.syncExecuteCommand(OpenFilterPanelOperation.id, {
         unitId: 'test',

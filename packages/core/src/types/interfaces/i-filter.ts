@@ -34,6 +34,9 @@ export interface IAutoFilter {
 export interface IFilterColumn {
     colId: number;
 
+    /**
+     * The filter value could be an empty string, which means <filters blank="1">.
+     */
     filters?: Array<string>;
     customFilters?: ICustomFilters;
 };

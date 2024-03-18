@@ -19,41 +19,89 @@ import { BooleanNumber, BulletAlignment, DataStreamTreeTokenType as DT, GridType
 
 import { FontCache } from '../../../../basics/font-cache';
 import type {
+    IAdjustability,
     IDocumentSkeletonBullet,
     IDocumentSkeletonDivide,
-    IDocumentSkeletonSpan,
+    IDocumentSkeletonGlyph,
 } from '../../../../basics/i-document-skeleton-cached';
-import { SpanType } from '../../../../basics/i-document-skeleton-cached';
+import { GlyphType } from '../../../../basics/i-document-skeleton-cached';
 import type { IFontCreateConfig } from '../../../../basics/interfaces';
-import { hasCJK, hasCJKText } from '../../../../basics/tools';
+import { hasCJK, hasCJKText, isCjkCenterAlignedPunctuation, isCjkLeftAlignedPunctuation, isCjkRightAlignedPunctuation } from '../../../../basics/tools';
 import { validationGrid } from '../tools';
 
-export function createSkeletonWordSpan(
-    content: string,
-    config: IFontCreateConfig,
-    spanWidth?: number
-): IDocumentSkeletonSpan {
-    return _createSkeletonWordOrLetter(SpanType.WORD, content, config, spanWidth);
+export function isSpace(char: string) {
+    const SPACE_CHARS = [' ', '\u{00A0}', '　'];
+
+    return SPACE_CHARS.includes(char);
+}
+// Whether the glyph is justifiable.
+export function isJustifiable(
+    content: string
+) {
+    // punctuation style is not relevant here.
+    return isSpace(content)
+        || hasCJKText(content)
+        || isCjkLeftAlignedPunctuation(content)
+        || isCjkRightAlignedPunctuation(content)
+        || isCjkCenterAlignedPunctuation(content);
 }
 
-export function createSkeletonLetterSpan(
-    content: string,
-    config: IFontCreateConfig,
-    spanWidth?: number
-): IDocumentSkeletonSpan {
-    return _createSkeletonWordOrLetter(SpanType.LETTER, content, config, spanWidth);
+export function baseAdjustability(content: string, width: number): IAdjustability {
+    if (isSpace(content)) {
+        return {
+            // The number for spaces is from Knuth-Plass' paper
+            stretchability: [0, width / 2.0],
+            shrinkability: [0, width / 3.0],
+        };
+    } else if (isCjkLeftAlignedPunctuation(content)) {
+        return {
+            stretchability: [0, 0],
+            shrinkability: [0, width / 2.0],
+        };
+    } else if (isCjkRightAlignedPunctuation(content)) {
+        return {
+            stretchability: [0, 0],
+            shrinkability: [width / 2.0, 0],
+        };
+    } else if (isCjkCenterAlignedPunctuation(content)) {
+        return {
+            stretchability: [0, 0],
+            shrinkability: [width / 4.0, width / 4.0],
+        };
+    } else {
+        return {
+            stretchability: [0, 0],
+            shrinkability: [0, 0],
+        };
+    }
 }
 
-export function createSkeletonTabSpan(config: IFontCreateConfig, spanWidth?: number): IDocumentSkeletonSpan {
-    return _createSkeletonWordOrLetter(SpanType.TAB, DT.TAB, config, spanWidth);
+export function createSkeletonWordGlyph(
+    content: string,
+    config: IFontCreateConfig,
+    glyphWidth?: number
+): IDocumentSkeletonGlyph {
+    return _createSkeletonWordOrLetter(GlyphType.WORD, content, config, glyphWidth);
+}
+
+export function createSkeletonLetterGlyph(
+    content: string,
+    config: IFontCreateConfig,
+    glyphWidth?: number
+): IDocumentSkeletonGlyph {
+    return _createSkeletonWordOrLetter(GlyphType.LETTER, content, config, glyphWidth);
+}
+
+export function createSkeletonTabGlyph(config: IFontCreateConfig, glyphWidth?: number): IDocumentSkeletonGlyph {
+    return _createSkeletonWordOrLetter(GlyphType.TAB, DT.TAB, config, glyphWidth);
 }
 
 export function _createSkeletonWordOrLetter(
-    spanType: SpanType,
+    glyphType: GlyphType,
     content: string,
     config: IFontCreateConfig,
-    spanWidth?: number
-): IDocumentSkeletonSpan {
+    glyphWidth?: number
+): IDocumentSkeletonGlyph {
     const { fontStyle, textStyle, charSpace = 1, gridType = GridType.LINES, snapToGrid = BooleanNumber.FALSE } = config;
     const skipWidthList: string[] = [
         DT.SECTION_BREAK,
@@ -92,7 +140,9 @@ export function _createSkeletonWordOrLetter(
             },
             paddingLeft: 0,
             left: 0,
-            spanType: SpanType.PLACEHOLDER,
+            isJustifiable: false,
+            adjustability: baseAdjustability(content, 0),
+            glyphType: GlyphType.PLACEHOLDER,
             streamType: content as DT,
             count: 1,
         };
@@ -104,7 +154,7 @@ export function _createSkeletonWordOrLetter(
 
     const bBox = FontCache.getTextSize(content, fontStyle);
     const { width: contentWidth = 0 } = bBox;
-    let width = spanWidth ?? contentWidth;
+    let width = glyphWidth ?? contentWidth;
     let paddingLeft = 0;
 
     if (validationGrid(gridType, snapToGrid)) {
@@ -124,17 +174,19 @@ export function _createSkeletonWordOrLetter(
         bBox,
         paddingLeft,
         left: 0,
-        spanType,
+        glyphType,
         streamType,
+        isJustifiable: isJustifiable(content),
+        adjustability: baseAdjustability(content, width),
         count: content.length,
     };
 }
 
-export function createSkeletonBulletSpan(
-    span: IDocumentSkeletonSpan,
+export function createSkeletonBulletGlyph(
+    glyph: IDocumentSkeletonGlyph,
     bulletSkeleton: IDocumentSkeletonBullet,
     charSpaceApply: number
-): IDocumentSkeletonSpan {
+): IDocumentSkeletonGlyph {
     const {
         bBox: boundingBox,
         symbol: content,
@@ -162,7 +214,7 @@ export function createSkeletonBulletSpan(
         }
     }
 
-    const bBox = _getMaxBoundingBox(span, bulletSkeleton);
+    const bBox = _getMaxBoundingBox(glyph, bulletSkeleton);
 
     return {
         content,
@@ -172,79 +224,82 @@ export function createSkeletonBulletSpan(
         paddingLeft: 0,
         bBox,
         left,
-        spanType: SpanType.LIST,
+        isJustifiable: isJustifiable(content),
+        adjustability: baseAdjustability(content, width),
+        glyphType: GlyphType.LIST,
         streamType: DT.LETTER,
         // Deliberately set to 0 so that there is no need to count when calculating the cursor.
         count: 0,
     };
 }
 
-// Set the left value of the current span based on the width of pre span and the left value of the previous span.
-export function setSpanGroupLeft(spanGroup: IDocumentSkeletonSpan[], left: number = 0) {
-    const spanGroupLen = spanGroup.length;
-    let preSpan;
+// Set the left value of the current glyph based on the width of pre glyph and the left value of the previous glyph.
+export function setGlyphGroupLeft(glyphGroup: IDocumentSkeletonGlyph[], left: number = 0) {
+    const spanGroupLen = glyphGroup.length;
+    let preGlyph;
 
     for (let i = 0; i < spanGroupLen; i++) {
-        const span = spanGroup[i];
-        span.left = preSpan ? preSpan.left + preSpan.width : left;
+        const glyph = glyphGroup[i];
+        glyph.left = preGlyph ? preGlyph.left + preGlyph.width : left;
 
-        preSpan = span;
+        preGlyph = glyph;
     }
 }
 
-export function setSpanLeft(span: IDocumentSkeletonSpan, left: number = 0) {
-    span.left = left;
+export function setGlyphLeft(glyph: IDocumentSkeletonGlyph, left: number = 0) {
+    glyph.left = left;
 }
 
-export function addSpanToDivide(
+export function addGlyphToDivide(
     divide: IDocumentSkeletonDivide,
-    spanGroup: IDocumentSkeletonSpan[],
+    glyphGroup: IDocumentSkeletonGlyph[],
     offsetLeft: number = 0
 ) {
     // const line = divide.parent;
     // if (line != null) {
-    //     const isFirstLine = line.divides[0].spanGroup[0] == null;
-    //     const firstSpan = spanGroup[0];
+    //     const isFirstLine = line.divides[0].glyphGroup[0] == null;
+    //     const firstSpan = glyphGroup[0];
     //     const firstSpanContent = firstSpan.content || ' ';
     //     if (isFirstLine && firstSpanContent === ' ') {
     //         const width = firstSpan.width;
     //         firstSpan.width = 0;
-    //         for (const span of spanGroup) {
-    //             if (span === firstSpan) {
+    //         for (const glyph of glyphGroup) {
+    //             if (glyph === firstSpan) {
     //                 continue;
     //             }
 
-    //             span.left -= width;
+    //             glyph.left -= width;
     //         }
     //     }
     // }
 
-    setSpanGroupLeft(spanGroup, offsetLeft);
+    setGlyphGroupLeft(glyphGroup, offsetLeft);
 
-    // Set span parent pointer.
-    for (const span of spanGroup) {
-        span.parent = divide;
+    // Set glyph parent pointer.
+    for (const glyph of glyphGroup) {
+        glyph.parent = divide;
     }
 
-    divide.spanGroup.push(...spanGroup);
+    divide.glyphGroup.push(...glyphGroup);
 }
 
-function _getMaxBoundingBox(span: IDocumentSkeletonSpan, bulletSkeleton: IDocumentSkeletonBullet) {
-    const { ba: spanAscent, bd: spanDescent } = span.bBox;
+function _getMaxBoundingBox(glyph: IDocumentSkeletonGlyph, bulletSkeleton: IDocumentSkeletonBullet) {
+    const { ba: spanAscent, bd: spanDescent } = glyph.bBox;
     const { ba: bulletAscent, bd: bulletDescent } = bulletSkeleton.bBox;
 
     if (spanAscent + spanDescent > bulletAscent + bulletDescent) {
-        return span.bBox;
+        return glyph.bBox;
     }
+
     return bulletSkeleton.bBox;
 }
 
-export function hasMixedTextLayout(preSpan: Nullable<IDocumentSkeletonSpan>, span: IDocumentSkeletonSpan) {
-    if (preSpan == null) {
+export function hasMixedTextLayout(preGlyph: Nullable<IDocumentSkeletonGlyph>, glyph: IDocumentSkeletonGlyph) {
+    if (preGlyph == null) {
         return false;
     }
-    const { content: preContent } = preSpan;
-    const { content: curContent } = span;
+    const { content: preContent } = preGlyph;
+    const { content: curContent } = glyph;
 
     if (preContent == null || curContent == null) {
         return false;

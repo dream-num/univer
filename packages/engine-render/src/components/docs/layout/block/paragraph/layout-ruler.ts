@@ -23,11 +23,11 @@ import type {
     IDocumentSkeletonBullet,
     IDocumentSkeletonColumn,
     IDocumentSkeletonDrawing,
+    IDocumentSkeletonGlyph,
     IDocumentSkeletonLine,
     IDocumentSkeletonPage,
-    IDocumentSkeletonSpan,
 } from '../../../../../basics/i-document-skeleton-cached';
-import { LineType, SpanType } from '../../../../../basics/i-document-skeleton-cached';
+import { GlyphType, LineType } from '../../../../../basics/i-document-skeleton-cached';
 import type { IParagraphConfig, ISectionBreakConfig } from '../../../../../basics/interfaces';
 import {
     calculateLineTopByDrawings,
@@ -38,7 +38,7 @@ import {
 
 import { createSkeletonPage } from '../../model/page';
 import { setColumnFullState } from '../../model/section';
-import { addSpanToDivide, createSkeletonBulletSpan, hasMixedTextLayout } from '../../model/span';
+import { addGlyphToDivide, createSkeletonBulletGlyph, hasMixedTextLayout } from '../../model/glyph';
 import {
     getCharSpaceApply,
     getCharSpaceConfig,
@@ -55,7 +55,7 @@ import {
 } from '../../tools';
 
 export function layoutParagraph(
-    spanGroup: IDocumentSkeletonSpan[],
+    glyphGroup: IDocumentSkeletonGlyph[],
     pages: IDocumentSkeletonPage[],
     sectionBreakConfig: ISectionBreakConfig,
     paragraphConfig: IParagraphConfig,
@@ -74,20 +74,20 @@ export function layoutParagraph(
 
             __bulletIndentHandler(paragraphStyle, bulletSkeleton, charSpaceApply);
 
-            const bulletSpan = createSkeletonBulletSpan(spanGroup[0], bulletSkeleton, charSpaceApply);
-            _lineOperator([bulletSpan, ...spanGroup], pages, sectionBreakConfig, paragraphConfig, paragraphStart);
+            const bulletSpan = createSkeletonBulletGlyph(glyphGroup[0], bulletSkeleton, charSpaceApply);
+            _lineOperator([bulletSpan, ...glyphGroup], pages, sectionBreakConfig, paragraphConfig, paragraphStart);
         } else {
-            _lineOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart);
+            _lineOperator(glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart);
         }
     } else {
-        _divideOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart);
+        _divideOperator(glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart);
     }
 
     return [...pages];
 }
 
 function _divideOperator(
-    spanGroup: IDocumentSkeletonSpan[],
+    glyphGroup: IDocumentSkeletonGlyph[],
     pages: IDocumentSkeletonPage[],
     sectionBreakConfig: ISectionBreakConfig,
     paragraphConfig: IParagraphConfig,
@@ -99,31 +99,31 @@ function _divideOperator(
     const divideInfo = getLastNotFullDivideInfo(lastPage); // 取得最新一行里内容未满的第一个 divide.
 
     if (divideInfo) {
-        const width = __getSpanGroupWidth(spanGroup);
+        const width = __getSpanGroupWidth(glyphGroup);
         const { divide } = divideInfo;
-        const lastSpan = divide?.spanGroup?.[divide.spanGroup.length - 1];
-        const preWidth = lastSpan?.width || 0;
-        const preLeft = lastSpan?.left || 0;
+        const lastGlyph = divide?.glyphGroup?.[divide.glyphGroup.length - 1];
+        const preWidth = lastGlyph?.width || 0;
+        const preLeft = lastGlyph?.left || 0;
 
-        // Last span is western char and the current span is Chinese word or vice verse.
-        const isMixedCJKWesternTextLayout = hasMixedTextLayout(lastSpan, spanGroup[0]);
+        // Last glyph is western char and the current glyph is Chinese word or vice verse.
+        const isMixedCJKWesternTextLayout = hasMixedTextLayout(lastGlyph, glyphGroup[0]);
         let wordSpaceWidth = 0;
         let preOffsetLeft = preWidth + preLeft;
 
-        // Only add word space between Chinese text and Western text when processing span for the first time,
+        // Only add word space between Chinese text and Western text when processing glyph for the first time,
         // otherwise it will be added multiple times during recursion.
         if (isMixedCJKWesternTextLayout && isOutMost) {
-            const lastSpanIsCJKWord = hasCJKText(lastSpan.content!);
+            const lastSpanIsCJKWord = hasCJKText(lastGlyph.content!);
             const WORD_INNER_SPACE = '\u0020';
 
             wordSpaceWidth = FontCache.getTextSize(
                 WORD_INNER_SPACE, // word space.
-                lastSpanIsCJKWord ? spanGroup[0].fontStyle! : lastSpan.fontStyle!
+                lastSpanIsCJKWord ? glyphGroup[0].fontStyle! : lastGlyph.fontStyle!
             ).width;
 
             preOffsetLeft += wordSpaceWidth;
 
-            lastSpan.width += wordSpaceWidth;
+            lastGlyph.width += wordSpaceWidth;
         }
 
         if (preOffsetLeft + width > divide.width) {
@@ -139,16 +139,16 @@ function _divideOperator(
             // There is a boundary case, that is, the width of the English character exceeds the width of the divide, and this character needs to be appended to the previous line.
             if (
                 divideInfo.isLast &&
-                spanGroup.length === 1 &&
-                (spanGroup[0].content === DataStreamTreeTokenType.SPACE ||
-                    spanGroup[0].content === DataStreamTreeTokenType.PARAGRAPH)
+                glyphGroup.length === 1 &&
+                (glyphGroup[0].content === DataStreamTreeTokenType.SPACE ||
+                    glyphGroup[0].content === DataStreamTreeTokenType.PARAGRAPH)
             ) {
-                addSpanToDivide(divide, spanGroup, preOffsetLeft);
-            } else if (divide?.spanGroup.length === 0) {
-                const sliceSpanGroup: IDocumentSkeletonSpan[] = [];
+                addGlyphToDivide(divide, glyphGroup, preOffsetLeft);
+            } else if (divide?.glyphGroup.length === 0) {
+                const sliceSpanGroup: IDocumentSkeletonGlyph[] = [];
 
-                while (spanGroup.length) {
-                    sliceSpanGroup.push(spanGroup.shift()!);
+                while (glyphGroup.length) {
+                    sliceSpanGroup.push(glyphGroup.shift()!);
 
                     const sliceSpanGroupWidth = __getSpanGroupWidth(sliceSpanGroup);
                     if (sliceSpanGroupWidth > divide.width) {
@@ -156,11 +156,11 @@ function _divideOperator(
                     }
                 }
 
-                addSpanToDivide(divide, sliceSpanGroup, preOffsetLeft);
+                addGlyphToDivide(divide, sliceSpanGroup, preOffsetLeft);
 
-                if (spanGroup.length) {
+                if (glyphGroup.length) {
                     _lineOperator(
-                        spanGroup,
+                        glyphGroup,
                         pages,
                         sectionBreakConfig,
                         paragraphConfig,
@@ -170,7 +170,7 @@ function _divideOperator(
                 }
             } else {
                 _lineOperator(
-                    spanGroup,
+                    glyphGroup,
                     pages,
                     sectionBreakConfig,
                     paragraphConfig,
@@ -181,7 +181,7 @@ function _divideOperator(
         } else {
             // w 不超过 divide 宽度，加入到 divide 中去
             const currentLine = divide.parent;
-            const maxBox = __maxFontBoundingBoxBySpanGroup(spanGroup);
+            const maxBox = __maxFontBoundingBoxBySpanGroup(glyphGroup);
 
             if (currentLine && maxBox && !__isNullLine(currentLine)) {
                 const { paragraphLineGapDefault, linePitch, lineSpacing, spacingRule, snapToGrid, gridType } =
@@ -208,7 +208,7 @@ function _divideOperator(
                     let newSpanGroup = [];
                     let startIndex = 1;
 
-                    if (spanGroupCachedLen > 2 && spanGroupCached[0].spanType === SpanType.LIST) {
+                    if (spanGroupCachedLen > 2 && spanGroupCached[0].glyphType === GlyphType.LIST) {
                         newSpanGroup = [spanGroupCached[0], spanGroupCached[1]];
                         startIndex = 2;
                     } else {
@@ -238,21 +238,21 @@ function _divideOperator(
                         );
                     }
 
-                    _divideOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, false);
+                    _divideOperator(glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, false);
 
                     return;
                 }
             }
 
-            addSpanToDivide(divide, spanGroup, preOffsetLeft);
+            addGlyphToDivide(divide, glyphGroup, preOffsetLeft);
         }
     } else {
-        _lineOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, defaultSpanLineHeight);
+        _lineOperator(glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, defaultSpanLineHeight);
     }
 }
 
 function _lineOperator(
-    spanGroup: IDocumentSkeletonSpan[],
+    glyphGroup: IDocumentSkeletonGlyph[],
     pages: IDocumentSkeletonPage[],
     sectionBreakConfig: ISectionBreakConfig,
     paragraphConfig: IParagraphConfig,
@@ -263,7 +263,7 @@ function _lineOperator(
     let columnInfo = getLastNotFullColumnInfo(lastPage);
     if (!columnInfo || !columnInfo.column) {
         // 如果列不存在，则做一个兜底策略，新增一页。
-        _pageOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig);
+        _pageOperator(glyphGroup, pages, sectionBreakConfig, paragraphConfig);
         lastPage = getLastPage(pages);
         columnInfo = getLastNotFullColumnInfo(lastPage);
     }
@@ -281,8 +281,8 @@ function _lineOperator(
 
     const line = getLastLineByColumn(column);
 
-    const ascent = Math.max(...spanGroup.map((span) => span.bBox.ba));
-    const descent = Math.max(...spanGroup.map((span) => span.bBox.bd));
+    const ascent = Math.max(...glyphGroup.map((glyph) => glyph.bBox.ba));
+    const descent = Math.max(...glyphGroup.map((glyph) => glyph.bBox.bd));
     const spanLineHeight = defaultSpanLineHeight || ascent + descent;
 
     const {
@@ -376,9 +376,9 @@ function _lineOperator(
 
     if (lineHeight + newLineTop > section.height && column.lines.length > 0 && lastPage.sections.length > 0) {
         // 行高超过Col高度，且列中已存在一行以上，且section大于一个；
-        // console.log('_lineOperator', { spanGroup, pages, lineHeight, newLineTop, sectionHeight: section.height, lastPage });
+        // console.log('_lineOperator', { glyphGroup, pages, lineHeight, newLineTop, sectionHeight: section.height, lastPage });
         setColumnFullState(column, true);
-        _columnOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, defaultSpanLineHeight);
+        _columnOperator(glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, defaultSpanLineHeight);
         return;
     }
 
@@ -387,7 +387,7 @@ function _lineOperator(
     const { charSpace, defaultTabStop } = getCharSpaceConfig(sectionBreakConfig, paragraphConfig);
     const charSpaceApply = getCharSpaceApply(charSpace, defaultTabStop, gridType, snapToGrid);
     const { paddingLeft, paddingRight, changeBulletWidth } = __getIndentPadding(
-        spanGroup[0],
+        glyphGroup[0],
         indentFirstLine,
         hanging,
         indentStart,
@@ -396,7 +396,7 @@ function _lineOperator(
     );
     if (changeBulletWidth.state) {
         // 为了保持__getIndentPadding的纯函数特性，把修改首行列表宽度的逻辑外置到这里
-        spanGroup[0].width = changeBulletWidth.hangingNumber;
+        glyphGroup[0].width = changeBulletWidth.hangingNumber;
     }
     const newLine = createSkeletonLine(
         paragraphIndex,
@@ -423,11 +423,11 @@ function _lineOperator(
     column.lines.push(newLine);
     newLine.parent = column;
     createAndUpdateBlockAnchor(paragraphIndex, newLine, lineTop, drawingAnchor);
-    _divideOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, true, defaultSpanLineHeight);
+    _divideOperator(glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, true, defaultSpanLineHeight);
 }
 
 function _columnOperator(
-    spanGroup: IDocumentSkeletonSpan[],
+    glyphGroup: IDocumentSkeletonGlyph[],
     pages: IDocumentSkeletonPage[],
     sectionBreakConfig: ISectionBreakConfig,
     paragraphConfig: IParagraphConfig,
@@ -438,14 +438,14 @@ function _columnOperator(
     const columnIsFull = isColumnFull(lastPage);
 
     if (columnIsFull === true) {
-        _pageOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, defaultSpanLineHeight);
+        _pageOperator(glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, defaultSpanLineHeight);
     } else {
-        _lineOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, defaultSpanLineHeight);
+        _lineOperator(glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, defaultSpanLineHeight);
     }
 }
 
 function _pageOperator(
-    spanGroup: IDocumentSkeletonSpan[],
+    glyphGroup: IDocumentSkeletonGlyph[],
     pages: IDocumentSkeletonPage[],
     sectionBreakConfig: ISectionBreakConfig,
     paragraphConfig: IParagraphConfig,
@@ -456,21 +456,21 @@ function _pageOperator(
     const { skeHeaders, skeFooters } = paragraphConfig;
 
     pages.push(createSkeletonPage(sectionBreakConfig, { skeHeaders, skeFooters }, curSkeletonPage?.pageNumber));
-    _columnOperator(spanGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, defaultSpanLineHeight);
+    _columnOperator(glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, defaultSpanLineHeight);
 }
 
 /**
  * 17.3.1.12 ind (Paragraph Indentation)
  */
 function __getIndentPadding(
-    span: IDocumentSkeletonSpan,
+    glyph: IDocumentSkeletonGlyph,
     indentFirstLine: INumberUnit | number = 0,
     hanging: INumberUnit | number = 0,
     indentStart: INumberUnit | number = 0,
     indentEnd: INumberUnit | number = 0,
     charSpaceApply: number
 ) {
-    const { spanType = SpanType.LETTER, bBox } = span;
+    const { glyphType = GlyphType.LETTER, bBox } = glyph;
     const indentFirstLineNumber = getNumberUnitValue(indentFirstLine, charSpaceApply);
     const hangingNumber = getNumberUnitValue(hanging, charSpaceApply);
     const indentStartNumber = getNumberUnitValue(indentStart, charSpaceApply);
@@ -483,14 +483,14 @@ function __getIndentPadding(
         hangingNumber: 0,
     };
 
-    if (spanType === SpanType.LIST) {
+    if (glyphType === GlyphType.LIST) {
         // 首行的处理
         const { width: fontWidth } = bBox;
 
         if (indentFirstLineNumber > 0) {
             paddingLeft += indentFirstLineNumber;
         } else if (hangingNumber > 0 && hangingNumber > fontWidth) {
-            // span.w = hangingNumber;
+            // glyph.w = hangingNumber;
             changeBulletWidth.state = true;
             changeBulletWidth.hangingNumber = hangingNumber;
         }
@@ -692,25 +692,25 @@ function __checkPageBreak(column: IDocumentSkeletonColumn) {
     return true;
 }
 
-function __getSpanGroupWidth(spanGroup: IDocumentSkeletonSpan[]) {
-    const spanGroupLen = spanGroup.length;
+function __getSpanGroupWidth(glyphGroup: IDocumentSkeletonGlyph[]) {
+    const spanGroupLen = glyphGroup.length;
     let width = 0;
 
     for (let i = 0; i < spanGroupLen; i++) {
-        const span = spanGroup[i];
-        width += span.width;
+        const glyph = glyphGroup[i];
+        width += glyph.width;
     }
     return width;
 }
 
-function __maxFontBoundingBoxBySpanGroup(spanGroup: IDocumentSkeletonSpan[]) {
-    const spanGroupLen = spanGroup.length;
+function __maxFontBoundingBoxBySpanGroup(glyphGroup: IDocumentSkeletonGlyph[]) {
+    const spanGroupLen = glyphGroup.length;
     let height = Number.NEGATIVE_INFINITY;
     let maxBox;
 
     for (let i = 0; i < spanGroupLen; i++) {
-        const span = spanGroup[i];
-        const { ba: boundingBoxAscent, bd: boundingBoxDescent } = span.bBox;
+        const glyph = glyphGroup[i];
+        const { ba: boundingBoxAscent, bd: boundingBoxDescent } = glyph.bBox;
 
         if (height < boundingBoxAscent + boundingBoxDescent) {
             maxBox = { boundingBoxAscent, boundingBoxDescent };
@@ -725,14 +725,14 @@ function __maxFontBoundingBoxBySpanGroup(spanGroup: IDocumentSkeletonSpan[]) {
 function __getSpanGroupByLine(line: IDocumentSkeletonLine) {
     const divides = line.divides;
     const dividesLen = divides.length;
-    const spanGroup = [];
+    const glyphGroup = [];
 
     for (let i = 0; i < dividesLen; i++) {
         const divide = divides[i];
-        spanGroup.push(...divide.spanGroup);
+        glyphGroup.push(...divide.glyphGroup);
     }
 
-    return spanGroup;
+    return glyphGroup;
 }
 
 function __bulletIndentHandler(
@@ -758,5 +758,5 @@ function __bulletIndentHandler(
 }
 
 function __isNullLine(line: IDocumentSkeletonLine) {
-    return !line.divides[0].spanGroup[0];
+    return !line.divides[0].glyphGroup[0];
 }

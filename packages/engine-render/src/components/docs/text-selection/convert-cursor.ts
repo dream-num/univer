@@ -19,12 +19,12 @@ import type { IPosition, ITextRange, Nullable } from '@univerjs/core';
 import type {
     IDocumentSkeletonColumn,
     IDocumentSkeletonDivide,
+    IDocumentSkeletonGlyph,
     IDocumentSkeletonLine,
     IDocumentSkeletonPage,
     IDocumentSkeletonSection,
-    IDocumentSkeletonSpan,
 } from '../../../basics/i-document-skeleton-cached';
-import { SpanType } from '../../../basics/i-document-skeleton-cached';
+import { GlyphType } from '../../../basics/i-document-skeleton-cached';
 import type { INodePosition } from '../../../basics/interfaces';
 import type { IPoint } from '../../../basics/vector2';
 import type { DocumentSkeleton } from '../layout/doc-skeleton';
@@ -43,7 +43,7 @@ export enum NodePositionType {
     column,
     line,
     divide,
-    span,
+    glyph,
 }
 
 export interface ICurrentNodePositionState {
@@ -52,7 +52,7 @@ export interface ICurrentNodePositionState {
     column: NodePositionStateType;
     line: NodePositionStateType;
     divide: NodePositionStateType;
-    span: NodePositionStateType;
+    glyph: NodePositionStateType;
 }
 
 export const NodePositionMap = {
@@ -61,7 +61,7 @@ export const NodePositionMap = {
     column: 2,
     line: 3,
     divide: 4,
-    span: 5,
+    glyph: 5,
 };
 
 export function compareNodePositionLogic(pos1: INodePosition, pos2: INodePosition) {
@@ -105,11 +105,11 @@ export function compareNodePositionLogic(pos1: INodePosition, pos2: INodePositio
         return true;
     }
 
-    if (pos1.span > pos2.span) {
+    if (pos1.glyph > pos2.glyph) {
         return false;
     }
 
-    if (pos1.span < pos2.span) {
+    if (pos1.glyph < pos2.glyph) {
         return true;
     }
 
@@ -152,7 +152,7 @@ export function getOneTextSelectionRange(rangeList: ITextRange[]): Nullable<ITex
 }
 
 function getOffsetInDivide(
-    spanGroup: IDocumentSkeletonSpan[],
+    glyphGroup: IDocumentSkeletonGlyph[],
     startSpanIndex: number,
     endSpanIndex: number,
     st: number
@@ -160,8 +160,8 @@ function getOffsetInDivide(
     let startOffset = st;
     let endOffset = st;
 
-    for (let i = 0; i < spanGroup.length; i++) {
-        const span = spanGroup[i];
+    for (let i = 0; i < glyphGroup.length; i++) {
+        const span = glyphGroup[i];
         const contentLength = span.count;
 
         if (i < startSpanIndex) {
@@ -188,7 +188,7 @@ export class NodePositionConvertToCursor {
         column: NodePositionStateType.NORMAL,
         line: NodePositionStateType.NORMAL,
         divide: NodePositionStateType.NORMAL,
-        span: NodePositionStateType.NORMAL,
+        glyph: NodePositionStateType.NORMAL,
     };
 
     private _currentEndState: ICurrentNodePositionState = {
@@ -197,7 +197,7 @@ export class NodePositionConvertToCursor {
         column: NodePositionStateType.NORMAL,
         line: NodePositionStateType.NORMAL,
         divide: NodePositionStateType.NORMAL,
-        span: NodePositionStateType.NORMAL,
+        glyph: NodePositionStateType.NORMAL,
     };
 
     constructor(
@@ -224,15 +224,15 @@ export class NodePositionConvertToCursor {
         this._selectionIterator(start, end, (start_sp, end_sp, isFirst, isLast, divide, line) => {
             const { lineHeight, marginTop, contentHeight } = line;
 
-            const { spanGroup, st } = divide;
+            const { glyphGroup, st } = divide;
 
             const { x: startX, y: startY } = this._liquid;
 
             let borderBoxPosition: IPosition;
             let contentBoxPosition: IPosition;
 
-            const firstSpan = spanGroup[start_sp];
-            const lastSpan = spanGroup[end_sp];
+            const firstSpan = glyphGroup[start_sp];
+            const lastSpan = glyphGroup[end_sp];
 
             const firstSpanLeft = firstSpan?.left || 0;
             const firstSpanWidth = firstSpan?.width || 0;
@@ -240,17 +240,17 @@ export class NodePositionConvertToCursor {
             const lastSpanLeft = lastSpan?.left || 0;
             const lastSpanWidth = lastSpan?.width || 0;
 
-            const isCurrentList = firstSpan?.spanType === SpanType.LIST;
+            const isCurrentList = firstSpan?.glyphType === GlyphType.LIST;
 
-            const { startOffset, endOffset } = getOffsetInDivide(spanGroup, start_sp, end_sp, st);
+            const { startOffset, endOffset } = getOffsetInDivide(glyphGroup, start_sp, end_sp, st);
 
-            const isStartBack = start.span === start_sp && isFirst ? start.isBack : true;
+            const isStartBack = start.glyph === start_sp && isFirst ? start.isBack : true;
 
-            const isEndBack = end.span === end_sp && isLast ? end.isBack : false;
+            const isEndBack = end.glyph === end_sp && isLast ? end.isBack : false;
 
             const collapsed = start === end;
 
-            if (start_sp === 0 && end_sp === spanGroup.length - 1) {
+            if (start_sp === 0 && end_sp === glyphGroup.length - 1) {
                 borderBoxPosition = {
                     startX: startX + firstSpanLeft + (isCurrentList ? firstSpanWidth : 0),
                     startY,
@@ -306,7 +306,7 @@ export class NodePositionConvertToCursor {
             column: NodePositionStateType.NORMAL,
             line: NodePositionStateType.NORMAL,
             divide: NodePositionStateType.NORMAL,
-            span: NodePositionStateType.NORMAL,
+            glyph: NodePositionStateType.NORMAL,
         };
 
         this._currentEndState = {
@@ -315,7 +315,7 @@ export class NodePositionConvertToCursor {
             column: NodePositionStateType.NORMAL,
             line: NodePositionStateType.NORMAL,
             divide: NodePositionStateType.NORMAL,
-            span: NodePositionStateType.NORMAL,
+            glyph: NodePositionStateType.NORMAL,
         };
     }
 
@@ -544,13 +544,13 @@ export class NodePositionConvertToCursor {
                             this._liquid.translateSave();
                             this._liquid.translateDivide(divide);
 
-                            const spanGroup = divide.spanGroup;
+                            const glyphGroup = divide.glyphGroup;
 
                             const { start_next: start_sp, end_next: end_sp } = this._getSelectionRuler(
                                 NodePositionMap.divide,
                                 startPosition,
                                 endPosition,
-                                spanGroup.length - 1,
+                                glyphGroup.length - 1,
                                 d
                             );
 

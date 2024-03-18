@@ -449,7 +449,7 @@ function _calculateDivideByDrawings(columnWidth: number, drawingSplit: IDrawings
 function __getDivideSKe(left: number, width: number): IDocumentSkeletonDivide {
     return {
         // divide 分割，为了适配插入对象、图片、表格等，图文混排
-        spanGroup: [], // spanGroup
+        glyphGroup: [], // glyphGroup
         width, // width 被分割后的总宽度
         left, // left 被对象分割后的偏移位置 | d1 | | d2 |
         paddingLeft: 0, // paddingLeft 根据horizonAlign和width计算对齐偏移
@@ -464,10 +464,10 @@ function _getLineSke(lineType: LineType, paragraphIndex: number): IDocumentSkele
         paragraphIndex,
         type: lineType,
         divides: [], // /divides 受到对象影响，把行切分为 N 部分
-        lineHeight: 0, // lineHeight =max(span.fontBoundingBoxAscent + span.fontBoundingBoxDescent, span2.....) + space
-        contentHeight: 0, // contentHeight =max(span.fontBoundingBoxAscent + span.fontBoundingBoxDescent, span2.....)
+        lineHeight: 0, // lineHeight =max(glyph.fontBoundingBoxAscent + glyph.fontBoundingBoxDescent, span2.....) + space
+        contentHeight: 0, // contentHeight =max(glyph.fontBoundingBoxAscent + glyph.fontBoundingBoxDescent, span2.....)
         top: 0, // top paragraph(spaceAbove, spaceBelow, lineSpacing*PreLineHeight)
-        asc: 0, // =max(span.textMetrics.asc) alphaBeta对齐，需要校准
+        asc: 0, // =max(glyph.textMetrics.asc) alphaBeta对齐，需要校准
         paddingTop: 0, // paddingTop 内容到顶部的距离
         paddingBottom: 0, // paddingBottom 内容到底部的距离
         marginTop: 0, // marginTop 针对段落的spaceAbove

@@ -21,7 +21,7 @@ import type { Observable } from 'rxjs';
 import { BehaviorSubject, fromEvent, Subject } from 'rxjs';
 
 import { CURSOR_TYPE } from '../../../basics/const';
-import type { IDocumentSkeletonSpan } from '../../../basics/i-document-skeleton-cached';
+import type { IDocumentSkeletonGlyph } from '../../../basics/i-document-skeleton-cached';
 import { PageLayoutType } from '../../../basics/i-document-skeleton-cached';
 import type { IMouseEvent, IPointerEvent } from '../../../basics/i-events';
 import type { INodeInfo, INodePosition } from '../../../basics/interfaces';
@@ -61,7 +61,7 @@ export function getCanvasOffsetByEngine(engine: Nullable<Engine>) {
     };
 }
 
-function getParagraphInfoBySpan(node: IDocumentSkeletonSpan) {
+function getParagraphInfoBySpan(node: IDocumentSkeletonGlyph) {
     const line = node.parent?.parent;
     const column = line?.parent;
 
@@ -77,15 +77,15 @@ function getParagraphInfoBySpan(node: IDocumentSkeletonSpan) {
 
     for (const line of lines) {
         for (const divide of line.divides) {
-            for (const span of divide.spanGroup) {
+            for (const glyph of divide.glyphGroup) {
                 if (!hasFound) {
-                    nodeIndex += span.count;
+                    nodeIndex += glyph.count;
                 }
-                if (span === node) {
+                if (glyph === node) {
                     hasFound = true;
                 }
 
-                content += span.count > 0 ? span.content : '';
+                content += glyph.count > 0 ? glyph.content : '';
             }
         }
     }
@@ -679,9 +679,9 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
             return;
         }
 
-        const { node: span, ratioX } = node;
+        const { node: glyph, ratioX } = node;
 
-        const position = this._docSkeleton?.findPositionBySpan(span);
+        const position = this._docSkeleton?.findPositionByGlyph(glyph);
 
         if (position == null) {
             return;

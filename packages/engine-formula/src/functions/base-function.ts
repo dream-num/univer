@@ -110,7 +110,7 @@ export class BaseFunction extends Disposable {
      */
     getIndexNumValue(indexNum: BaseValueObject, defaultValue = 1) {
         if (indexNum.isArray()) {
-            indexNum = (indexNum as ArrayValueObject).getFirstCell() || NullValueObject.create();
+            indexNum = (indexNum as ArrayValueObject).getFirstCell();
         }
 
         if (indexNum.isBoolean()) {
@@ -155,7 +155,7 @@ export class BaseFunction extends Disposable {
         let logicValue = 1;
 
         if (logicValueObject.isArray()) {
-            logicValueObject = (logicValueObject as ArrayValueObject).getFirstCell() || NullValueObject.create();
+            logicValueObject = (logicValueObject as ArrayValueObject).getFirstCell();
         }
 
         if (logicValueObject.isBoolean()) {
@@ -188,7 +188,7 @@ export class BaseFunction extends Disposable {
         let logicValue = 1;
 
         if (logicValueObject.isArray()) {
-            logicValueObject = (logicValueObject as ArrayValueObject).getFirstCell() || NullValueObject.create();
+            logicValueObject = (logicValueObject as ArrayValueObject).getFirstCell();
         }
 
         if (logicValueObject.isBoolean()) {
@@ -241,9 +241,9 @@ export class BaseFunction extends Disposable {
         let resultValue: BaseValueObject;
 
         if (isFirst) {
-            resultValue = resultArrayValue.getFirstCell() || NullValueObject.create();
+            resultValue = resultArrayValue.getFirstCell();
         } else {
-            resultValue = resultArrayValue.getLastCell() || NullValueObject.create();
+            resultValue = resultArrayValue.getLastCell();
         }
 
         if (resultValue.isNull()) {
@@ -259,9 +259,9 @@ export class BaseFunction extends Disposable {
         let resultValue: BaseValueObject;
 
         if (isFirst) {
-            resultValue = resultArrayValue.getFirstCell() || NullValueObject.create();
+            resultValue = resultArrayValue.getFirstCell();
         } else {
-            resultValue = resultArrayValue.getLastCell() || NullValueObject.create();
+            resultValue = resultArrayValue.getLastCell();
         }
 
         if (resultValue.isNull()) {

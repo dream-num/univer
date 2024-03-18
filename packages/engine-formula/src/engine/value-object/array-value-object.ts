@@ -248,7 +248,7 @@ export class ArrayValueObject extends BaseValueObject {
         return v;
     }
 
-    set(row: number, column: number, value: BaseValueObject) {
+    set(row: number, column: number, value: Nullable<BaseValueObject>) {
         if (row >= this._rowCount || column >= this._columnCount) {
             throw new Error('Exceeding array bounds.');
         }
@@ -340,12 +340,12 @@ export class ArrayValueObject extends BaseValueObject {
 
     getFirstCell() {
         const { startRow, startColumn } = this.getRangePosition();
-        return this.get(startRow, startColumn);
+        return this.get(startRow, startColumn) || NullValueObject.create();
     }
 
     getLastCell() {
         const { endRow, endColumn } = this.getRangePosition();
-        return this.get(endRow, endColumn);
+        return this.get(endRow, endColumn) || NullValueObject.create();
     }
 
     /**

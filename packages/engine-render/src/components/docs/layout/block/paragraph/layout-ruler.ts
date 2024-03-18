@@ -17,8 +17,6 @@
 import type { INumberUnit, IParagraphStyle } from '@univerjs/core';
 import { BooleanNumber, DataStreamTreeTokenType, GridType, SpacingRule } from '@univerjs/core';
 
-import { hasCJKText } from '../../../../../basics';
-import { FontCache } from '../../../../../basics/font-cache';
 import type {
     IDocumentSkeletonBullet,
     IDocumentSkeletonColumn,
@@ -38,7 +36,7 @@ import {
 
 import { createSkeletonPage } from '../../model/page';
 import { setColumnFullState } from '../../model/section';
-import { addGlyphToDivide, createSkeletonBulletGlyph, hasMixedTextLayout } from '../../model/glyph';
+import { addGlyphToDivide, createSkeletonBulletGlyph } from '../../model/glyph';
 import {
     getCharSpaceApply,
     getCharSpaceConfig,
@@ -92,7 +90,6 @@ function _divideOperator(
     sectionBreakConfig: ISectionBreakConfig,
     paragraphConfig: IParagraphConfig,
     paragraphStart = false,
-    isOutMost = true,
     defaultSpanLineHeight?: number
 ) {
     const lastPage = getLastPage(pages);
@@ -102,29 +99,9 @@ function _divideOperator(
         const width = __getSpanGroupWidth(glyphGroup);
         const { divide } = divideInfo;
         const lastGlyph = divide?.glyphGroup?.[divide.glyphGroup.length - 1];
-        const preWidth = lastGlyph?.width || 0;
-        const preLeft = lastGlyph?.left || 0;
-
-        // Last glyph is western char and the current glyph is Chinese word or vice verse.
-        const isMixedCJKWesternTextLayout = hasMixedTextLayout(lastGlyph, glyphGroup[0]);
-        let wordSpaceWidth = 0;
-        let preOffsetLeft = preWidth + preLeft;
-
-        // Only add word space between Chinese text and Western text when processing glyph for the first time,
-        // otherwise it will be added multiple times during recursion.
-        if (isMixedCJKWesternTextLayout && isOutMost) {
-            const lastSpanIsCJKWord = hasCJKText(lastGlyph.content!);
-            const WORD_INNER_SPACE = '\u0020';
-
-            wordSpaceWidth = FontCache.getTextSize(
-                WORD_INNER_SPACE, // word space.
-                lastSpanIsCJKWord ? glyphGroup[0].fontStyle! : lastGlyph.fontStyle!
-            ).width;
-
-            preOffsetLeft += wordSpaceWidth;
-
-            lastGlyph.width += wordSpaceWidth;
-        }
+        const lastWidth = lastGlyph?.width || 0;
+        const lastLeft = lastGlyph?.left || 0;
+        const preOffsetLeft = lastWidth + lastLeft;
 
         if (preOffsetLeft + width > divide.width) {
             // width 超过 divide 宽度
@@ -233,12 +210,11 @@ function _divideOperator(
                             pages,
                             sectionBreakConfig,
                             paragraphConfig,
-                            paragraphStart,
-                            false
+                            paragraphStart
                         );
                     }
 
-                    _divideOperator(glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, false);
+                    _divideOperator(glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart);
 
                     return;
                 }
@@ -423,7 +399,7 @@ function _lineOperator(
     column.lines.push(newLine);
     newLine.parent = column;
     createAndUpdateBlockAnchor(paragraphIndex, newLine, lineTop, drawingAnchor);
-    _divideOperator(glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, true, defaultSpanLineHeight);
+    _divideOperator(glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, defaultSpanLineHeight);
 }
 
 function _columnOperator(

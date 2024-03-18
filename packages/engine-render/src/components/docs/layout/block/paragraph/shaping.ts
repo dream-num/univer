@@ -24,7 +24,7 @@ import { getCharSpaceApply, getFontCreateConfig } from '../../tools';
 import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../../view-model/document-view-model';
 import type { ISectionBreakConfig } from '../../../../../basics/interfaces';
-import { hasArabic, hasCJK, hasCJKPunctuation, hasTibetan, startWithEmoji } from '../../../../../basics/tools';
+import { hasArabic, hasCJK, hasCJKPunctuation, hasCJKText, hasTibetan, startWithEmoji } from '../../../../../basics/tools';
 import { ArabicHandler, emojiHandler, otherHandler, TibetanHandler } from './language-ruler';
 
 // Now we apply consecutive punctuation adjustment, specified in Chinese Layout
@@ -48,6 +48,37 @@ function punctuationSpaceAdjustment(shapedGlyphs: IDocumentSkeletonGlyph[]) {
             glyphShrinkRight(curGlyph, leftDelta);
             glyphShrinkLeft(nextGlyph, delta - leftDelta);
         }
+    }
+}
+
+// Add some spacing between Han characters and western characters.
+// See Requirements for Chinese Text Layout, Section 3.2.2 Mixed Text Composition in Horizontal
+// Written Mode
+function addCJKLatinSpacing(shapedTextList: IShapedText[]) {
+    const shapedGlyphs = shapedTextList.flatMap((shapedText) => shapedText.glyphs);
+    let prevGlyph = null;
+    const len = shapedGlyphs.length;
+    const LATIN_REG = /[a-z\d]/i;
+
+    for (let i = 0; i < len; i++) {
+        const curGlyph = shapedGlyphs[i];
+        const nextGlyph = i < len - 1 ? shapedGlyphs[i + 1] : null;
+        const { width } = curGlyph;
+
+        // Case 1: CJ followed by a Latin character.
+        if (hasCJKText(curGlyph.content) && nextGlyph && LATIN_REG.test(nextGlyph.content)) {
+            curGlyph.width += width / 4;
+            curGlyph.adjustability.shrinkability[1] += width / 8;
+        }
+
+        // Case 2: Latin followed by a CJ character.
+        if (hasCJKText(curGlyph.content) && prevGlyph && LATIN_REG.test(prevGlyph.content)) {
+            curGlyph.width += width / 4;
+            curGlyph.xOffset += width / 4;
+            curGlyph.adjustability.shrinkability[0] += width / 8;
+        }
+
+        prevGlyph = curGlyph;
     }
 }
 
@@ -167,6 +198,9 @@ export function shaping(
         });
         last = bk.position;
     }
+
+    // Add some spacing between Han characters and western characters.
+    addCJKLatinSpacing(shapedTextList);
 
     return shapedTextList;
 }

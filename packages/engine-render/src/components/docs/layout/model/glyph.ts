@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
 import { BooleanNumber, BulletAlignment, DataStreamTreeTokenType as DT, GridType } from '@univerjs/core';
 
 import { FontCache } from '../../../../basics/font-cache';
@@ -138,7 +137,7 @@ export function _createSkeletonWordOrLetter(
                 spr: 0,
                 spo: 0,
             },
-            paddingLeft: 0,
+            xOffset: 0,
             left: 0,
             isJustifiable: false,
             adjustability: baseAdjustability(content, 0),
@@ -172,7 +171,7 @@ export function _createSkeletonWordOrLetter(
         fontStyle,
         width,
         bBox,
-        paddingLeft,
+        xOffset: paddingLeft,
         left: 0,
         glyphType,
         streamType,
@@ -221,7 +220,7 @@ export function createSkeletonBulletGlyph(
         ts: textStyle,
         fontStyle,
         width,
-        paddingLeft: 0,
+        xOffset: 0,
         bBox,
         left,
         isJustifiable: isJustifiable(content),
@@ -292,25 +291,6 @@ function _getMaxBoundingBox(glyph: IDocumentSkeletonGlyph, bulletSkeleton: IDocu
     }
 
     return bulletSkeleton.bBox;
-}
-
-export function hasMixedTextLayout(preGlyph: Nullable<IDocumentSkeletonGlyph>, glyph: IDocumentSkeletonGlyph) {
-    if (preGlyph == null) {
-        return false;
-    }
-    const { content: preContent } = preGlyph;
-    const { content: curContent } = glyph;
-
-    if (preContent == null || curContent == null) {
-        return false;
-    }
-
-    const ENG_NUMBERS_REG = /[a-z\d]/i;
-
-    return (
-        (ENG_NUMBERS_REG.test(preContent) && hasCJKText(curContent)) ||
-        (hasCJKText(preContent) && ENG_NUMBERS_REG.test(curContent))
-    );
 }
 
 export function glyphShrinkRight(glyph: IDocumentSkeletonGlyph, amount: number) {

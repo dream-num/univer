@@ -34,7 +34,7 @@ const calcAnchorStyle = (position: IPosition, width: number, height: number, con
     const { startX, startY, endX, endY } = position;
 
     const verticalStyle = ((startY + height) > containerHeight) ? { bottom: containerHeight - endY } : { top: startY };
-    const horizontalStyle = ((endX + width) > containerWidth) ? { right: containerWidth - startX } : { left: endX };
+    const horizontalStyle = ((endX + width) > containerWidth) ? { right: containerWidth - startX + 1 } : { left: endX + 1 };
 
     return {
         position: 'absolute',

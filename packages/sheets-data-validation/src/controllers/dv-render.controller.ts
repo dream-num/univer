@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { DataValidationStatus, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
+import type { ICellDataForSheetInterceptor } from '@univerjs/core';
+import { DataValidationStatus, DataValidationType, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, WrapStrategy } from '@univerjs/core';
 import { DataValidationModel, DataValidationPanelName, DataValidatorRegistryService } from '@univerjs/data-validation';
 import { ComponentManager, IMenuService } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
@@ -26,6 +27,8 @@ import { DataValidationPanel, LIST_DROPDOWN_KEY, ListDropDown } from '../views';
 import { FORMULA_INPUTS } from '../views/formula-input';
 import { SheetDataValidationService } from '../services/dv.service';
 import { getCellValueOrigin } from '../utils/getCellDataOrigin';
+import type { CheckboxValidator } from '../validators';
+import { DropdownWidget } from '../widgets/dropdown-widget';
 import { DataValidationMenu } from './dv.menu';
 
 const INVALID_MARK = {
@@ -185,6 +188,9 @@ export class DataValidationRenderController extends RxDisposable {
                         }
                         const { row, col } = pos;
                         const ruleId = manager.getRuleIdByLocation(row, col);
+                        if (!ruleId) {
+                            return next(cell);
+                        }
                         const rule = manager.getRuleById(ruleId);
 
                         if (!rule) {
@@ -193,9 +199,42 @@ export class DataValidationRenderController extends RxDisposable {
 
                         const validStatus = this._dataValidationModel.validator(getCellValueOrigin(cell), rule, pos);
                         const validator = this._dataValidatorRegistryService.getValidatorItem(rule.type);
+                        const cellValue = getCellValueOrigin(cell);
+
+                        let extra: ICellDataForSheetInterceptor = {};
+
+                        switch (rule.type) {
+                            case DataValidationType.CHECKBOX:
+                            {
+                                const { formula2 } = (validator as CheckboxValidator).parseFormulaSync(rule, pos.unitId, pos.subUnitId);
+                                if (!cellValue) {
+                                    extra = {
+                                        v: formula2,
+                                        p: null,
+                                        interceptorStyle: {
+                                            ...cell?.interceptorStyle,
+                                            tb: WrapStrategy.CLIP,
+                                        },
+                                    };
+                                }
+                                break;
+                            }
+                            case DataValidationType.LIST: {
+                                extra = {
+                                    interceptorStyle: {
+                                        ...cell?.interceptorStyle,
+                                        pd: DropdownWidget.padding,
+                                    },
+                                };
+                                break;
+                            }
+                            default:
+                                break;
+                        }
 
                         return next({
                             ...cell,
+                            ...extra,
                             dataValidation: {
                                 ruleId,
                                 validStatus,
@@ -214,6 +253,8 @@ export class DataValidationRenderController extends RxDisposable {
                                 ...cell?.fontRenderExtension,
                                 isSkip: validator?.skipDefaultFontRender,
                             },
+
+                            // interceptorAutoHeight
                         });
                     },
                 }

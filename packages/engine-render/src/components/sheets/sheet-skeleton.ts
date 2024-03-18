@@ -452,12 +452,17 @@ export class SpreadsheetSkeleton extends Skeleton {
                 continue;
             }
             const cell = worksheet.getCell(rowNum, i);
+            if (cell?.interceptorAutoHeight) {
+                height = Math.max(height, cell.interceptorAutoHeight);
+                continue;
+            }
+
             const modelObject = cell && this._getCellDocumentModel(cell);
             if (modelObject == null) {
                 continue;
             }
 
-            const { documentModel, textRotation, wrapStrategy } = modelObject;
+            const { documentModel, textRotation, wrapStrategy, paddingData } = modelObject;
             if (documentModel == null) {
                 continue;
             }

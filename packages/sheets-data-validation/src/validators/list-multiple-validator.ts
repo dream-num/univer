@@ -14,39 +14,25 @@
  * limitations under the License.
  */
 
-import { DataValidationType, isFormulaString, IUniverInstanceService, Tools } from '@univerjs/core';
-import type { CellValue, DataValidationOperator, ICellCustomRender, ICellData, IDataValidationRule, IDataValidationRuleBase, Nullable } from '@univerjs/core';
+import { DataValidationType, IUniverInstanceService, Tools } from '@univerjs/core';
+import type { CellValue, DataValidationOperator, ICellCustomRender, IDataValidationRule, IDataValidationRuleBase, Nullable } from '@univerjs/core';
 import type { IFormulaResult, IValidatorCellInfo } from '@univerjs/data-validation';
 import { BaseDataValidator } from '@univerjs/data-validation';
+import { deserializeRangeWithSheet, isReferenceString } from '@univerjs/engine-formula';
 import { LIST_FORMULA_INPUT_NAME } from '../views/formula-input';
 import { LIST_DROPDOWN_KEY } from '../views';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
-import { DropdownWidget } from '../widgets/dropdown-widget';
 import { DropdownMultipleWidget } from '../widgets/dropdown-multiple-widget';
+import { deserializeListOptions, getSheetRangeValueSet } from './util';
 
-export const LIST_MULTIPLE_FORMULA = 'TRUE';
-
-export const getListFormulaResult = (result: Nullable<Nullable<ICellData>[][]>) => {
-    const valueSet = new Set<string>();
-
-    result?.forEach((sub) => {
-        sub.forEach((cell) => {
-            if (cell?.v) {
-                valueSet.add(`${cell.v}`);
-            }
-        });
-    });
-
-    return Array.from(valueSet.values());
-};
-
-// TODO: cache
 export class ListMultipleValidator extends BaseDataValidator {
     id: string = DataValidationType.LIST_MULTIPLE;
     title: string = 'dataValidation.listMultiple.title';
     operators: DataValidationOperator[] = [];
     scopes: string | string[] = ['sheet'];
     formulaInput: string = LIST_FORMULA_INPUT_NAME;
+
+    private _univerInstanceService = this.injector.get(IUniverInstanceService);
 
     override canvasRender: Nullable<ICellCustomRender> = this.injector.createInstance(DropdownMultipleWidget);
 
@@ -60,7 +46,6 @@ export class ListMultipleValidator extends BaseDataValidator {
         return !Tools.isBlank(rule.formula1);
     }
 
-    // TODO cache
     parseCellValue(cellValue: CellValue, rule: IDataValidationRule) {
         const cellString = cellValue.toString();
         if (!cellString) {
@@ -70,10 +55,10 @@ export class ListMultipleValidator extends BaseDataValidator {
     }
 
     override async parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): Promise<IFormulaResult<string[] | undefined>> {
-        const { formula1 } = rule;
-        const results = await this._formulaService.getRuleFormulaResult(unitId, subUnitId, rule.uid);
+        const { formula1 = '' } = rule;
+
         return {
-            formula1: isFormulaString(formula1) ? getListFormulaResult(results?.[0]?.result) : formula1?.split(','),
+            formula1: isReferenceString(formula1) ? getSheetRangeValueSet(deserializeRangeWithSheet(formula1), this._univerInstanceService, unitId, subUnitId) : deserializeListOptions(formula1),
             formula2: undefined,
         };
     }
@@ -94,11 +79,12 @@ export class ListMultipleValidator extends BaseDataValidator {
     }
 
     getList(rule: IDataValidationRule, propUnitId?: string, propSubUnitId?: string) {
-        const { formula1 } = rule;
+        const { formula1 = '' } = rule;
         const univerInstanceService = this.injector.get(IUniverInstanceService);
-        const unitId = propUnitId ?? univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-        const subUnitId = propSubUnitId ?? univerInstanceService.getUniverSheetInstance(unitId)!.getActiveSheet().getSheetId();
-        const results = this._formulaService.getRuleFormulaResultSync(unitId, subUnitId, rule.uid);
-        return isFormulaString(formula1) ? getListFormulaResult(results?.[0]?.result) : formula1?.split(',').map((i) => decodeURIComponent(i));
+        const workbook = (propUnitId ? univerInstanceService.getUniverSheetInstance(propUnitId) : undefined) ?? univerInstanceService.getCurrentUniverSheetInstance();
+        const worksheet = (propSubUnitId ? workbook.getSheetBySheetId(propSubUnitId) : undefined) ?? workbook.getActiveSheet();
+        const unitId = workbook.getUnitId();
+        const subUnitId = worksheet.getSheetId();
+        return isReferenceString(formula1) ? getSheetRangeValueSet(deserializeRangeWithSheet(formula1), this._univerInstanceService, unitId, subUnitId) : deserializeListOptions(formula1);
     }
 }

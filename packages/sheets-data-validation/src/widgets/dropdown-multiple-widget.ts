@@ -15,7 +15,7 @@
  */
 
 import { HorizontalAlign, VerticalAlign } from '@univerjs/core';
-import type { type ICellCustomRender, type ICellRenderContext, ISelectionCellWithCoord } from '@univerjs/core';
+import type { ICellCustomRender, ICellRenderContext, IPaddingData, ISelectionCellWithCoord } from '@univerjs/core';
 import { getFontStyleString, type Spreadsheet, type SpreadsheetSkeleton, type UniverRenderingContext2D } from '@univerjs/engine-render';
 import type { ListMultipleValidator } from '../validators/list-multiple-validator';
 import { getCellValueOrigin } from '../utils/getCellDataOrigin';
@@ -87,11 +87,11 @@ export class DropdownMultipleWidget implements ICellCustomRender {
         const layout = layoutDropdowns(items, fontStyle, cellWidth, cellHeight);
         this._drawDownIcon(ctx, primaryWithCoord, cellWidth, cellHeight, vt);
         ctx.save();
-        ctx.translateWithPrecision(primaryWithCoord.startX + CELL_PADDING_H, primaryWithCoord.startY + CELL_PADDING_V);
+        ctx.translateWithPrecision(primaryWithCoord.startX, primaryWithCoord.startY);
         ctx.beginPath();
-        ctx.rect(0, 0, layout.contentWidth, layout.contentHeight);
+        ctx.rect(0, 0, cellWidth - ICON_PLACE, cellHeight);
         ctx.clip();
-
+        ctx.translateWithPrecision(CELL_PADDING_H, CELL_PADDING_V);
         let top = 0;
         switch (vt) {
             case VerticalAlign.MIDDLE:

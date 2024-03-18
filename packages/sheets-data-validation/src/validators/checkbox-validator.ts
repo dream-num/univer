@@ -51,6 +51,15 @@ export class CheckboxValidator extends BaseDataValidator {
         };
     }
 
+    parseFormulaSync(rule: IDataValidationRule, unitId: string, subUnitId: string) {
+        const { formula1 = CHECKBOX_FORMULA_1, formula2 = CHECKBOX_FORMULA_2 } = rule;
+        const results = this._formulaService.getRuleFormulaResultSync(unitId, subUnitId, rule.uid);
+        return {
+            formula1: isFormulaString(formula1) ? getFormulaResult(results?.[0]?.result) : formula1,
+            formula2: isFormulaString(formula2) ? getFormulaResult(results?.[1]?.result) : formula2,
+        };
+    }
+
     override async isValidType(cellInfo: IValidatorCellInfo<CellValue>, formula: IFormulaResult, rule: IDataValidationRule): Promise<boolean> {
         const { value, unitId, subUnitId } = cellInfo;
         const { formula1, formula2 } = await this.parseFormula(rule, unitId, subUnitId);

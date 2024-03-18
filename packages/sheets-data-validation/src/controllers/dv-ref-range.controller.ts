@@ -15,10 +15,10 @@
  */
 
 import type { IRange, ISheetDataValidationRule } from '@univerjs/core';
-import { DataValidationType, Disposable, DisposableCollection, IUniverInstanceService, LifecycleStages, OnLifecycle, toDisposable } from '@univerjs/core';
-import type { EffectRefRangeParams } from '@univerjs/sheets';
+import { DataValidationType, Disposable, DisposableCollection, ICommandService, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, Range, Rectangle, toDisposable } from '@univerjs/core';
+import type { EffectRefRangeParams, ISetRangeValuesCommandParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
-import { handleDefaultRangeChangeWithEffectRefCommands, RefRangeService } from '@univerjs/sheets';
+import { handleDefaultRangeChangeWithEffectRefCommands, RefRangeService, SetRangeValuesCommand, SetRangeValuesMutation } from '@univerjs/sheets';
 import { Inject, Injector } from '@wendellhu/redi';
 import { merge, Observable } from 'rxjs';
 import { distinctUntilChanged, map, switchMap } from 'rxjs/operators';
@@ -26,9 +26,12 @@ import type { IRemoveDataValidationMutationParams, IUpdateDataValidationMutation
 import { DataValidationModel, RemoveDataValidationMutation, UpdateDataValidationMutation, UpdateRuleType } from '@univerjs/data-validation';
 import { removeDataValidationUndoFactory } from '@univerjs/data-validation/commands/commands/data-validation.command.js';
 import { FormulaRefRangeService } from '@univerjs/sheets-formula';
+import { deserializeRangeWithSheet, isReferenceString, serializeRange, serializeRangeWithSheet, serializeRangeWithSpreadsheet } from '@univerjs/engine-formula';
 import { isRangesEqual } from '../utils/isRangesEqual';
 import { DataValidationCustomFormulaService } from '../services/dv-custom-formula.service';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
+import { getSheetRangeValueSet } from '../validators/util';
+import { DataValidationCacheService } from '../services/dv-cache.service';
 
 @OnLifecycle(LifecycleStages.Rendered, DataValidationRefRangeController)
 export class DataValidationRefRangeController extends Disposable {
@@ -42,7 +45,9 @@ export class DataValidationRefRangeController extends Disposable {
         @Inject(RefRangeService) private _refRangeService: RefRangeService,
         @Inject(DataValidationCustomFormulaService) private _dataValidationCustomFormulaService: DataValidationCustomFormulaService,
         @Inject(DataValidationFormulaService) private _dataValidationFormulaService: DataValidationFormulaService,
-        @Inject(FormulaRefRangeService) private _formulaRefRangeService: FormulaRefRangeService
+        @Inject(FormulaRefRangeService) private _formulaRefRangeService: FormulaRefRangeService,
+        @ICommandService private readonly _commandService: ICommandService,
+        @Inject(DataValidationCacheService) private readonly _dataValidationCacheService: DataValidationCacheService
     ) {
         super();
         this._initRefRange();
@@ -197,6 +202,136 @@ export class DataValidationRefRangeController extends Disposable {
         this._disposableMap.set(id, current);
     };
 
+    registerRange(propUnitId: string, propSubUnitId: string, rule: ISheetDataValidationRule) {
+        const { uid: ruleId, formula1, type } = rule;
+        if ((type !== DataValidationType.LIST && type !== DataValidationType.LIST_MULTIPLE)) {
+            return;
+        }
+
+        if (!isReferenceString(formula1 ?? '')) {
+            return;
+        }
+        const gridRange = deserializeRangeWithSheet(formula1 ?? '');
+        const id = this._getIdWithUnitId(propUnitId, propSubUnitId, ruleId);
+        const rangeUnitId = gridRange.unitId || propUnitId;
+        const workbook = this._univerInstanceService.getUniverSheetInstance(rangeUnitId) ?? this._univerInstanceService.getCurrentUniverSheetInstance();
+        const sheetId = workbook.getSheetBySheetName(gridRange.sheetName)?.getSheetId() ?? propSubUnitId;
+        const worksheet = workbook.getSheetBySheetId(sheetId) ?? workbook.getActiveSheet();
+        const disposableCollection = new DisposableCollection();
+        const range = gridRange.range;
+
+        const finalUnitId = workbook.getUnitId();
+        const finalSubUnitId = worksheet.getSheetId();
+
+        disposableCollection.add(
+            this._refRangeService.registerRefRange(
+                range,
+                (info) => {
+                    let newRange = handleDefaultRangeChangeWithEffectRefCommands(range, info);
+                    if (!newRange) {
+                        newRange = {
+                            startColumn: -1,
+                            endColumn: -1,
+                            startRow: -1,
+                            endRow: -1,
+                        };
+                    }
+
+                    if (Rectangle.equals(newRange, range)) {
+                        return {
+                            redos: [],
+                            undos: [],
+                        };
+                    }
+
+                    const newRangeStr = serializeRangeWithSpreadsheet(finalUnitId, finalSubUnitId, newRange);
+                    const oldRule = this._dataValidationModel.getRuleById(unitId, subUnitId, ruleId);
+                    if (!oldRule) {
+                        return {
+                            redos: [],
+                            undos: [],
+                        };
+                    }
+                    const redoParams: IUpdateDataValidationMutationParams = {
+                        unitId,
+                        subUnitId,
+                        ruleId,
+                        payload: {
+                            type: UpdateRuleType.SETTING,
+                            payload: {
+                                formula1: newRangeStr,
+                                formula2: oldRule.formula2,
+                                type: oldRule.type,
+                            },
+                        },
+                    };
+                    const undoParams: IUpdateDataValidationMutationParams = {
+                        unitId,
+                        subUnitId,
+                        ruleId,
+                        payload: {
+                            type: UpdateRuleType.SETTING,
+                            payload: {
+                                formula1: oldRule.formula1,
+                                formula2: oldRule.formula2,
+                                type: oldRule.type,
+                            },
+                        },
+                    };
+
+                    return {
+                        redos: [{
+                            id: UpdateDataValidationMutation.id,
+                            params: redoParams,
+                        }],
+                        undos: [{
+                            id: UpdateDataValidationMutation.id,
+                            params: undoParams,
+                        }],
+                    };
+                },
+                finalUnitId,
+                finalUnitId
+            )
+        );
+
+        disposableCollection.add(this.disposeWithMe(
+            this._commandService.onCommandExecuted((commandInfo) => {
+                if (commandInfo.id === SetRangeValuesMutation.id && commandInfo.params) {
+                    const params = commandInfo.params as ISetRangeValuesMutationParams;
+                    const {
+                        cellValue,
+                        unitId,
+                        subUnitId,
+                    } = params;
+
+                    if (unitId === finalUnitId && subUnitId === finalSubUnitId) {
+                        if (cellValue) {
+                            let marked = false;
+
+                            Range.foreach(range, (row, col) => {
+                                const rowValue = cellValue[row];
+                                if (rowValue && (col in rowValue)) {
+                                    if (marked) {
+                                        return;
+                                    }
+                                    marked = true;
+                                    this._dataValidationCacheService.markRangeDirty(unitId, subUnitId, rule.ranges);
+                                }
+                            });
+                        } else {
+                            this._dataValidationCacheService.markRangeDirty(unitId, subUnitId, rule.ranges);
+                        }
+                    }
+                }
+            })
+        ));
+
+        const current = this._disposableMap.get(id) ?? new Set();
+        current.add(() => disposableCollection.dispose());
+        this._disposableMap.set(id, current);
+    }
+
     private _initRefRange() {
         this.disposeWithMe(
             merge(
@@ -228,8 +363,10 @@ export class DataValidationRefRangeController extends Disposable {
                                 }
                                 switch (option.type) {
                                     case 'add': {
-                                        this.register(option.unitId, option.subUnitId, option.rule!);
-                                        this.registerFormula(option.unitId, option.subUnitId, option.rule!);
+                                        const rule = option.rule!;
+                                        this.register(option.unitId, option.subUnitId, rule);
+                                        this.registerFormula(option.unitId, option.subUnitId, rule);
+                                        this.registerRange(option.unitId, option.subUnitId, rule);
                                         break;
                                     }
                                     case 'remove': {
@@ -238,10 +375,12 @@ export class DataValidationRefRangeController extends Disposable {
                                         break;
                                     }
                                     case 'update': {
+                                        const rule = option.rule!;
                                         const disposeSet = this._disposableMap.get(this._getIdWithUnitId(unitId, subUnitId, rule!.uid));
                                         disposeSet && disposeSet.forEach((dispose) => dispose());
-                                        this.register(option.unitId, option.subUnitId, option.rule!);
-                                        this.registerFormula(option.unitId, option.subUnitId, option.rule!);
+                                        this.register(option.unitId, option.subUnitId, rule);
+                                        this.registerFormula(option.unitId, option.subUnitId, rule);
+                                        this.registerRange(option.unitId, option.subUnitId, rule);
                                     }
                                 }
                             })));

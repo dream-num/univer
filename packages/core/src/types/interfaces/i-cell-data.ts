@@ -65,6 +65,7 @@ export interface ICellDataForSheetInterceptor extends ICellData {
     dataValidation?: Nullable<ICellValidationData>;
     markers?: ICellMarks;
     customRender?: Nullable<ICellCustomRender[]>;
+    interceptorAutoHeight?: number;
 }
 
 export function isICellData(value: any): value is ICellData {

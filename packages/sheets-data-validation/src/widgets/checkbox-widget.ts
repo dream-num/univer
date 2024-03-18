@@ -17,7 +17,7 @@
 import type { UniverRenderingContext2D } from '@univerjs/engine-render';
 import { Checkbox, fixLineWidthByScale, Transform } from '@univerjs/engine-render';
 import { HorizontalAlign, ICommandService, isFormulaString, VerticalAlign } from '@univerjs/core';
-import type { ICellCustomRender, ICellRenderContext, IDataValidationRule, ISelectionCellWithCoord, IStyleData, Nullable } from '@univerjs/core';
+import type { ICellCustomRender, ICellDataForSheetInterceptor, ICellRenderContext, IDataValidationRule, ISelectionCellWithCoord, IStyleData, Nullable } from '@univerjs/core';
 import { SetRangeValuesCommand } from '@univerjs/sheets';
 import type { IFormulaResult } from '@univerjs/data-validation';
 import { Inject } from '@wendellhu/redi';

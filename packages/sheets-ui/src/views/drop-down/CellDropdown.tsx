@@ -24,7 +24,7 @@ import { DropdownManagerService } from '../..';
 const calcAnchorStyle = (position: IPosition, width: number, height: number, containerWidth: number, containerHeight: number): React.CSSProperties => {
     const { startX, startY, endX, endY } = position;
 
-    const verticalStyle = (endY + height) > containerHeight ? { bottom: containerHeight - startY } : { top: endY };
+    const verticalStyle = (endY + height) > containerHeight ? { bottom: containerHeight - startY + 3 } : { top: endY + 3 };
     const horizontalStyle = (startX + width) > containerWidth ? { right: containerWidth - endX } : { left: startX };
 
     return {
@@ -60,8 +60,15 @@ export function CellDropdown() {
     const key = `${location.unitId}-${location.subUnitId}-${location.row}-${location.col}`;
 
     return (
-        <div style={style}>
-            <Component key={key} width={width} height={height} location={location} position={position} />
+        <div
+            style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+            onClick={() => {
+                dropdownManagerService.hideDropdown();
+            }}
+        >
+            <div style={style} onClick={(e) => e.stopPropagation()}>
+                <Component key={key} width={width} height={height} location={location} position={position} />
+            </div>
         </div>
     );
 }

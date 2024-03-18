@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IRange, IUnitRange, Nullable } from '@univerjs/core';
+import type { IRange, Nullable } from '@univerjs/core';
 import { Disposable, LifecycleStages, ObjectMatrix, OnLifecycle } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 

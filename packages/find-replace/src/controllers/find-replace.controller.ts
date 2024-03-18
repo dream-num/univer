@@ -57,7 +57,7 @@ const FIND_REPLACE_DIALOG_ID = 'DESKTOP_FIND_REPLACE_DIALOG';
 
 const FIND_REPLACE_PANEL_WIDTH = 350;
 const FIND_REPLACE_PANEL_RIGHT_PADDING = 20;
-const FIND_REPLACE_PANEL_TOP_PADDING = 0;
+const FIND_REPLACE_PANEL_TOP_PADDING = -90;
 
 @OnLifecycle(LifecycleStages.Rendered, FindReplaceController)
 export class FindReplaceController extends RxDisposable {
@@ -136,6 +136,7 @@ export class FindReplaceController extends RxDisposable {
             children: { label: 'FindReplaceDialog' },
             destroyOnClose: true,
             defaultPosition: getFindReplaceDialogDefaultPosition(),
+            preservePositionOnDestroy: true,
             onClose: () => this.closePanel(),
         });
     }
@@ -150,7 +151,7 @@ export class FindReplaceController extends RxDisposable {
 
 function getFindReplaceDialogDefaultPosition(): { x: number; y: number } {
     const { innerWidth } = window;
-    const x = innerWidth - FIND_REPLACE_PANEL_WIDTH - FIND_REPLACE_PANEL_RIGHT_PADDING;
+    const x = (innerWidth - FIND_REPLACE_PANEL_WIDTH) / 2 - FIND_REPLACE_PANEL_RIGHT_PADDING;
     const y = FIND_REPLACE_PANEL_TOP_PADDING;
 
     return { x, y };

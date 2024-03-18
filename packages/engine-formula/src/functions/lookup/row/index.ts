@@ -51,6 +51,7 @@ export class Row extends BaseFunction {
             columnCount: 1,
             unitId: this.unitId || '',
             sheetId: this.subUnitId || '',
+            sheetName: (reference as ArrayValueObject).getSheetName() || '',
             row: this.row,
             column: this.column,
         };

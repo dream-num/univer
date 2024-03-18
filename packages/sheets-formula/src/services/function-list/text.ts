@@ -376,16 +376,9 @@ export const FUNCTION_LIST_TEXT: IFunctionInfo[] = [
         abstract: 'formula.functionList.LEN.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.LEN.functionParameter.number1.name',
-                detail: 'formula.functionList.LEN.functionParameter.number1.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-            {
-                name: 'formula.functionList.LEN.functionParameter.number2.name',
-                detail: 'formula.functionList.LEN.functionParameter.number2.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.LEN.functionParameter.text.name',
+                detail: 'formula.functionList.LEN.functionParameter.text.detail',
+                example: '"Univer"',
                 require: 1,
                 repeat: 0,
             },
@@ -398,16 +391,9 @@ export const FUNCTION_LIST_TEXT: IFunctionInfo[] = [
         abstract: 'formula.functionList.LENB.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.LENB.functionParameter.number1.name',
-                detail: 'formula.functionList.LENB.functionParameter.number1.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-            {
-                name: 'formula.functionList.LENB.functionParameter.number2.name',
-                detail: 'formula.functionList.LENB.functionParameter.number2.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.LENB.functionParameter.text.name',
+                detail: 'formula.functionList.LENB.functionParameter.text.detail',
+                example: '"Univer"',
                 require: 1,
                 repeat: 0,
             },

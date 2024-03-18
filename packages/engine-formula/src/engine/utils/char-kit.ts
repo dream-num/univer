@@ -14,15 +14,22 @@
  * limitations under the License.
  */
 
-import { Concatenate } from './concatenate';
-import { FUNCTION_NAMES_TEXT } from './function-names';
-import { Len } from './len';
-import { Lenb } from './lenb';
-import { Text } from './text';
+export function charLenByte(str: string) {
+    let byteCount = 0;
 
-export const functionText = [
-    [Concatenate, FUNCTION_NAMES_TEXT.CONCATENATE],
-    [Len, FUNCTION_NAMES_TEXT.LEN],
-    [Lenb, FUNCTION_NAMES_TEXT.LENB],
-    [Text, FUNCTION_NAMES_TEXT.TEXT],
-];
+    for (let i = 0; i < str.length; i++) {
+        const charCode = str.charCodeAt(i);
+
+        if (
+            (charCode >= 0x3040 && charCode <= 0x30FF) || // Japanese hiragana and katakana
+            (charCode >= 0x4E00 && charCode <= 0x9FFF) || // Chinese (simplified and traditional)
+            (charCode >= 0xAC00 && charCode <= 0xD7AF) // Korean language
+        ) {
+            byteCount += 2;
+        } else {
+            byteCount += 1;
+        }
+    }
+
+    return byteCount;
+}

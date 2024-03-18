@@ -249,13 +249,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: 'text', detail: '要查找其长度的文本。 空格将作为字符进行计数。' },
         },
     },
     LENB: {
-        description: '返回文本字符串中的字符个数',
-        abstract: '返回文本字符串中的字符个数',
+        description: '返回文本字符串中用于代表字符的字节数。',
+        abstract: '返回文本字符串中用于代表字符的字节数',
         links: [
             {
                 title: '教学',
@@ -263,8 +262,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: 'text', detail: ' 要查找其长度的文本。 空格将作为字符进行计数。' },
         },
     },
     LOWER: {

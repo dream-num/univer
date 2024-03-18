@@ -25,12 +25,6 @@ import { transformToValue } from '../../../../engine/value-object/array-value-ob
 describe('Test text function', () => {
     const textFunction = new Text(FUNCTION_NAMES_TEXT.TEXT);
 
-    // function getArrayValueObjectPattern(arrayValue: ArrayValueObject) {
-    //     return arrayValue.mapValue((value) => {
-    //         return value.getPattern();
-    //     })
-    // }
-
     describe('Text', () => {
         it('Text is single cell, format text is single cell', () => {
             const text1 = NumberValueObject.create(111);
@@ -40,102 +34,5 @@ describe('Test text function', () => {
             expect(transformToValue(resultArray)).toStrictEqual([[111]]);
             expect((result as ArrayValueObject).getFirstCell().getPattern()).toStrictEqual('$#,##0.00');
         });
-
-        // it('Text1 is single cell, text2 is array', () => {
-        //     const text1 = StringValueObject.create('a');
-        //     const text2 = ArrayValueObject.create({
-        //         calculateValueList: transformToValueObject([
-        //             [1, 2, 3],
-        //             [2, 3, 4],
-        //             [3, 4, 5],
-        //         ]),
-        //         rowCount: 3,
-        //         columnCount: 3,
-        //         unitId: '',
-        //         sheetId: '',
-        //         row: 0,
-        //         column: 0,
-        //     });
-        //     const result = textFunction.calculate(text1, text2);
-        //     expect(transformToValue(result.getArrayValue())).toStrictEqual([['a1', 'a2', 'a3'], ['a2', 'a3', 'a4'], ['a3', 'a4', 'a5']]);
-        // });
-
-        // it('Text1 is array, text2 is single cell', () => {
-        //     const text1 = ArrayValueObject.create({
-        //         calculateValueList: transformToValueObject([
-        //             [1, 2, 3],
-        //             [2, 3, 4],
-        //             [3, 4, 5],
-        //         ]),
-        //         rowCount: 3,
-        //         columnCount: 3,
-        //         unitId: '',
-        //         sheetId: '',
-        //         row: 0,
-        //         column: 0,
-        //     });
-        //     const text2 = StringValueObject.create('a');
-        //     const result = textFunction.calculate(text1, text2);
-        //     expect(transformToValue(result.getArrayValue())).toStrictEqual([['1a', '2a', '3a'], ['2a', '3a', '4a'], ['3a', '4a', '5a']]);
-        // });
-
-        // it('Text1 is 3*1 array, text2 is 1*3 array', () => {
-        //     const text1 = ArrayValueObject.create({
-        //         calculateValueList: transformToValueObject([
-        //             ['a'],
-        //             ['b'],
-        //             ['c'],
-        //         ]),
-        //         rowCount: 3,
-        //         columnCount: 1,
-        //         unitId: '',
-        //         sheetId: '',
-        //         row: 0,
-        //         column: 0,
-        //     });
-        //     const text2 = ArrayValueObject.create({
-        //         calculateValueList: transformToValueObject([
-        //             [1, 2, 3],
-        //         ]),
-        //         rowCount: 1,
-        //         columnCount: 3,
-        //         unitId: '',
-        //         sheetId: '',
-        //         row: 0,
-        //         column: 0,
-        //     });
-        //     const result = textFunction.calculate(text1, text2);
-        //     expect(transformToValue(result.getArrayValue())).toStrictEqual([['a1', 'a2', 'a3'], ['b1', 'b2', 'b3'], ['c1', 'c2', 'c3']]);
-        // });
-
-        // it('Text1 is 2*2 array, text2 is 3*3 array', () => {
-        //     const text1 = ArrayValueObject.create({
-        //         calculateValueList: transformToValueObject([
-        //             ['a', 'd'],
-        //             [0, null],
-        //         ]),
-        //         rowCount: 2,
-        //         columnCount: 2,
-        //         unitId: '',
-        //         sheetId: '',
-        //         row: 0,
-        //         column: 0,
-        //     });
-        //     const text2 = ArrayValueObject.create({
-        //         calculateValueList: transformToValueObject([
-        //             [1, 2, 3],
-        //             [0, null, 4],
-        //             [3, 4, 5],
-        //         ]),
-        //         rowCount: 3,
-        //         columnCount: 3,
-        //         unitId: '',
-        //         sheetId: '',
-        //         row: 0,
-        //         column: 0,
-        //     });
-        //     const result = textFunction.calculate(text1, text2);
-        //     expect(transformToValue(result.getArrayValue())).toStrictEqual([['a1', 'd2', '#N/A'], ['00', '', '#N/A'], ['#N/A', '#N/A', '#N/A']]);
-        // });
     });
 });

@@ -249,13 +249,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: 'text', detail: 'The text whose length you want to find. Spaces count as characters.' },
         },
     },
     LENB: {
-        description: 'Returns the number of characters in a text string',
-        abstract: 'Returns the number of characters in a text string',
+        description: 'Returns the number of bytes used to represent the characters in a text string.',
+        abstract: 'Returns the number of bytes used to represent the characters in a text string',
         links: [
             {
                 title: 'Instruction',
@@ -263,8 +262,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: 'text', detail: 'The text whose length you want to find. Spaces count as characters.' },
         },
     },
     LOWER: {

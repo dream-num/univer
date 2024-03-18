@@ -37,7 +37,7 @@ export interface IDocumentData extends IReferenceSource, IExtraModelData {
     settings?: IDocumentSettings;
     // The type of data depends on how the plug-in is defined
     resources?: Array<{ id?: string; name: string; data: string }>;
-
+    disabled?: boolean;
 }
 
 export interface IReferenceSource {

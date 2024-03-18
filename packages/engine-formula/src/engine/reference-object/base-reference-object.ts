@@ -83,6 +83,14 @@ export class BaseReferenceObject extends ObjectClassType {
         this._runtimeData = {};
     }
 
+    getToken() {
+        return this._token;
+    }
+
+    setToken(token: string) {
+        this._token = token;
+    }
+
     isExceedRange() {
         const { startRow, endRow, startColumn, endColumn } = this.getRangePosition();
 
@@ -110,19 +118,19 @@ export class BaseReferenceObject extends ObjectClassType {
         let startColumn = this._rangeData.startColumn + this._refOffsetX;
         let endColumn = this._rangeData.endColumn + this._refOffsetX;
 
-        if (isNaN(startRow)) {
+        if (Number.isNaN(startRow)) {
             startRow = 0;
         }
 
-        if (isNaN(startColumn)) {
+        if (Number.isNaN(startColumn)) {
             startColumn = 0;
         }
 
-        if (isNaN(endRow)) {
+        if (Number.isNaN(endRow)) {
             endRow = this.getRowCount() - 1;
         }
 
-        if (isNaN(endColumn)) {
+        if (Number.isNaN(endColumn)) {
             endColumn = this.getColumnCount() - 1;
         }
 
@@ -503,6 +511,7 @@ export class BaseReferenceObject extends ObjectClassType {
             columnCount: arrayValueList[0]?.length || 0,
             unitId: this.getUnitId(),
             sheetId: this.getSheetId(),
+            sheetName: this.getForcedSheetName(),
             row: startRow,
             column: startColumn,
         };
@@ -536,6 +545,7 @@ export class BaseReferenceObject extends ObjectClassType {
             columnCount: 0,
             unitId: this.getUnitId(),
             sheetId: this.getSheetId(),
+            sheetName: this.getForcedSheetName(),
             row: 0,
             column: 0,
         };
@@ -591,6 +601,7 @@ export class AsyncArrayObject extends ObjectClassType {
             columnCount: variants[0]?.length || 0,
             unitId: '',
             sheetId: '',
+            sheetName: '',
             row: 0,
             column: 0,
         };

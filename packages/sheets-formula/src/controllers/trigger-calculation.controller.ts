@@ -291,7 +291,7 @@ export class TriggerCalculationController extends Disposable {
                             this._executingCommandQueue = [];
                             break;
                     }
-                    // console.log(`execution result${result}`);
+                    console.warn(`execution result${result}`);
                 }
             })
         );

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { Nullable } from '@univerjs/core';
 import { FormulaAstLRU } from '../../basics/cache-lru';
 import { ConcatenateType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
@@ -22,13 +23,13 @@ import { compareToken } from '../../basics/token';
 
 export type callbackMapFnType = (currentValue: BaseValueObject, row: number, column: number) => BaseValueObject;
 
-export type callbackProductFnType = (currentValue: BaseValueObject, operationValue: BaseValueObject) => BaseValueObject;
 export interface IArrayValueObject {
-    calculateValueList: BaseValueObject[][];
+    calculateValueList: Nullable<BaseValueObject>[][];
     rowCount: number;
     columnCount: number;
     unitId: string;
     sheetId: string;
+    sheetName: string;
     row: number;
     column: number;
 }
@@ -59,7 +60,7 @@ export class BaseValueObject extends ObjectClassType {
         return 0;
     }
 
-    getArrayValue(): BaseValueObject[][] {
+    getArrayValue(): Nullable<BaseValueObject>[][] {
         /** abstract */
         return [];
     }
@@ -179,10 +180,6 @@ export class BaseValueObject extends ObjectClassType {
     mapValue(callbackFn: callbackMapFnType): BaseValueObject {
         /** abstract */
         return ErrorValueObject.create(ErrorType.NAME);
-    }
-
-    product(valueObject: BaseValueObject, callbackFn: callbackProductFnType): BaseValueObject {
-        return callbackFn(this, valueObject);
     }
 
     compare(valueObject: BaseValueObject, operator: compareToken): BaseValueObject {

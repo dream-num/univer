@@ -25,7 +25,7 @@ import type { ArrayBinarySearchType } from '../engine/utils/compare';
 import { ArrayOrderSearchType } from '../engine/utils/compare';
 import type { ArrayValueObject } from '../engine/value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject } from '../engine/value-object/base-value-object';
-import { NumberValueObject, type PrimitiveValueType } from '../engine/value-object/primitive-object';
+import { NullValueObject, NumberValueObject, type PrimitiveValueType } from '../engine/value-object/primitive-object';
 import { convertTonNumber } from '../engine/utils/object-covert';
 import { createNewArray } from '../engine/utils/array-object';
 
@@ -110,7 +110,7 @@ export class BaseFunction extends Disposable {
      */
     getIndexNumValue(indexNum: BaseValueObject, defaultValue = 1) {
         if (indexNum.isArray()) {
-            indexNum = (indexNum as ArrayValueObject).getFirstCell();
+            indexNum = (indexNum as ArrayValueObject).getFirstCell() || NullValueObject.create();
         }
 
         if (indexNum.isBoolean()) {
@@ -155,7 +155,7 @@ export class BaseFunction extends Disposable {
         let logicValue = 1;
 
         if (logicValueObject.isArray()) {
-            logicValueObject = (logicValueObject as ArrayValueObject).getFirstCell();
+            logicValueObject = (logicValueObject as ArrayValueObject).getFirstCell() || NullValueObject.create();
         }
 
         if (logicValueObject.isBoolean()) {
@@ -188,7 +188,7 @@ export class BaseFunction extends Disposable {
         let logicValue = 1;
 
         if (logicValueObject.isArray()) {
-            logicValueObject = (logicValueObject as ArrayValueObject).getFirstCell();
+            logicValueObject = (logicValueObject as ArrayValueObject).getFirstCell() || NullValueObject.create();
         }
 
         if (logicValueObject.isBoolean()) {
@@ -223,9 +223,9 @@ export class BaseFunction extends Disposable {
         let resultValue: BaseValueObject;
 
         if (resultArray.getRowCount() === 1) {
-            resultValue = resultArray.get(0, rowOrColumn);
+            resultValue = resultArray.get(0, rowOrColumn) || NullValueObject.create();
         } else {
-            resultValue = resultArray.get(rowOrColumn, 0);
+            resultValue = resultArray.get(rowOrColumn, 0) || NullValueObject.create();
         }
 
         if (resultValue.isNull()) {
@@ -241,9 +241,9 @@ export class BaseFunction extends Disposable {
         let resultValue: BaseValueObject;
 
         if (isFirst) {
-            resultValue = resultArrayValue.getFirstCell();
+            resultValue = resultArrayValue.getFirstCell() || NullValueObject.create();
         } else {
-            resultValue = resultArrayValue.getLastCell();
+            resultValue = resultArrayValue.getLastCell() || NullValueObject.create();
         }
 
         if (resultValue.isNull()) {
@@ -259,9 +259,9 @@ export class BaseFunction extends Disposable {
         let resultValue: BaseValueObject;
 
         if (isFirst) {
-            resultValue = resultArrayValue.getFirstCell();
+            resultValue = resultArrayValue.getFirstCell() || NullValueObject.create();
         } else {
-            resultValue = resultArrayValue.getLastCell();
+            resultValue = resultArrayValue.getLastCell() || NullValueObject.create();
         }
 
         if (resultValue.isNull()) {
@@ -284,7 +284,7 @@ export class BaseFunction extends Disposable {
             return ErrorValueObject.create(ErrorType.NA);
         }
 
-        const resultValue = resultArray.get(position.row, position.column);
+        const resultValue = resultArray.get(position.row, position.column) || NullValueObject.create();
 
         if (resultValue.isNull()) {
             return ErrorValueObject.create(ErrorType.NA);

@@ -19,8 +19,8 @@ import type { IRange, Nullable } from '@univerjs/core';
 import { BaseReferenceObject } from './base-reference-object';
 
 export class RangeReferenceObject extends BaseReferenceObject {
-    constructor(range: IRange, forcedSheetId?: Nullable<string>, forcedUnitId?: string) {
-        super('');
+    constructor(token: string, range: IRange, forcedSheetId?: Nullable<string>, forcedUnitId?: string) {
+        super(token);
         this.setRangeData(range);
         if (forcedSheetId) {
             this.setForcedSheetIdDirect(forcedSheetId);

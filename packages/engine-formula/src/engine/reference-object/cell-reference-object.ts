@@ -19,6 +19,7 @@ import type { IRange } from '@univerjs/core';
 import { ErrorType } from '../../basics/error-type';
 import { deserializeRangeWithSheet } from '../utils/reference';
 import { ErrorValueObject } from '../value-object/base-value-object';
+import { matchToken } from '../../basics/token';
 import { BaseReferenceObject } from './base-reference-object';
 import { RangeReferenceObject } from './range-reference-object';
 
@@ -45,9 +46,11 @@ export class CellReferenceObject extends BaseReferenceObject {
         //     return ErrorValueObject.create(ErrorType.REF);
         // }
 
+        const rightToken = cellReferenceObject.getToken();
+
         const newRangeData = this.unionRange(this.getRangeData(), cellReferenceObject.getRangeData());
 
-        return this._createRange(newRangeData);
+        return this._createRange(newRangeData, `${this.getToken()}${matchToken.COLON}${rightToken}`);
     }
 
     override unionRange(rangeData1: IRange, rangeData2: IRange) {
@@ -81,8 +84,9 @@ export class CellReferenceObject extends BaseReferenceObject {
         return range;
     }
 
-    private _createRange(newRangeData: IRange) {
+    private _createRange(newRangeData: IRange, token: string) {
         const rangeReferenceObject = new RangeReferenceObject(
+            token,
             newRangeData,
             this.getForcedSheetId(),
             this.getForcedUnitId()

@@ -133,7 +133,7 @@ export class StatusBarController extends Disposable {
                 };
             });
         if (selections?.length) {
-            const refs = selections.map((s) => new RangeReferenceObject(s, sheetId, unitId));
+            const refs = selections.map((s) => new RangeReferenceObject('', s, sheetId, unitId));
             refs.forEach((ref) => {
                 ref.setUnitData({
                     [unitId]: sheetData,

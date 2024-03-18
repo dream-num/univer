@@ -40,6 +40,7 @@ export interface ICheckboxProps {
 
     /**
      * Used for setting the currently selected value
+     * Only used when the checkbox is in a group
      */
     value?: string | number | boolean;
 
@@ -71,8 +72,8 @@ export function Checkbox(props: ICheckboxProps) {
         if (typeof value !== 'undefined') {
             onChange?.(value);
         } else {
-            const checked = inputRef?.current?.checked!;
-            onChange?.(!checked);
+            const checked = inputRef?.current?.checked ?? false;
+            onChange?.(checked);
         }
     }
 

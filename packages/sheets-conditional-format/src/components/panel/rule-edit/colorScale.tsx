@@ -131,14 +131,14 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
     });
 
     const [minColor, minColorSet] = useState(() => {
-        const defaultV = '#ff0000';
+        const defaultV = '#d0d9fb';
         if (!rule) {
             return defaultV;
         }
         return rule.config[0]?.color || defaultV;
     });
     const [medianColor, medianColorSet] = useState(() => {
-        const defaultV = '#fff';
+        const defaultV = '#7790f3';
         if (!rule) {
             return defaultV;
         }
@@ -148,7 +148,7 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
         return rule.config[1]?.color || defaultV;
     });
     const [maxColor, maxColorSet] = useState(() => {
-        const defaultV = '#0000ff';
+        const defaultV = '#2e55ef';
         if (!rule) {
             return defaultV;
         }

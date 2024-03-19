@@ -46,7 +46,6 @@ function factory(id: string) {
         univer.registerPlugin(UniverUIPlugin, {
             container: id,
             header: true,
-            toolbar: true,
             footer: true,
         });
         univer.registerPlugin(UniverDocsPlugin, {

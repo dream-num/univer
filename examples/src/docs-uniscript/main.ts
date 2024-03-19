@@ -41,7 +41,6 @@ univer.registerPlugin(UniverFormulaEnginePlugin);
 univer.registerPlugin(UniverUIPlugin, {
     container: 'app',
     header: true,
-    toolbar: true,
 });
 
 univer.registerPlugin(UniverDocsPlugin, {

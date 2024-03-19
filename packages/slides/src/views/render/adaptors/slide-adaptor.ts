@@ -134,8 +134,6 @@ export class SlideAdaptor extends ObjectAdaptor {
 
         viewMain.closeClip();
 
-        scene.addViewport(viewMain);
-
         const { pageElements, pageBackgroundFill } = page;
 
         const objects = this._ObjectProvider?.convertToRenderObjects(pageElements, mainScene);

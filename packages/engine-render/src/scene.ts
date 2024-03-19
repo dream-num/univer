@@ -142,8 +142,8 @@ export class Scene extends ThinScene {
     }
 
     override makeDirtyNoParent(state: boolean = true) {
-        this._viewports.forEach((vp) => {
-            vp.makeDirty(state);
+        this._layers.forEach((layer) => {
+            layer.makeDirty(state);
         });
         return this;
     }

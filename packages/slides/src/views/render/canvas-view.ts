@@ -361,7 +361,7 @@ export class CanvasView extends RxDisposable {
         this._slideThumbEngine.set(pageId, engine);
     }
 
-    private _createScene(pageId: string, parent: Engine | Slide, page: ISlidePage) {
+    private _createScene(pageId: string, parent: Slide, page: ISlidePage) {
         if (!this._scene || !this._ObjectProvider) return;
 
         const { width, height } = parent;
@@ -379,8 +379,6 @@ export class CanvasView extends RxDisposable {
         });
 
         viewMain.closeClip();
-
-        scene.addViewport(viewMain);
 
         const { pageElements, pageBackgroundFill } = page;
 

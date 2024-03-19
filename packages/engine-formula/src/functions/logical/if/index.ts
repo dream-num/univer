@@ -18,7 +18,7 @@ import { ErrorType } from '../../../basics/error-type';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import { BooleanValueObject } from '../../../engine/value-object/primitive-object';
+import { BooleanValueObject, NullValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class If extends BaseFunction {
@@ -64,8 +64,8 @@ export class If extends BaseFunction {
             if (logicalTestValue.isNull()) {
                 return ErrorValueObject.create(ErrorType.NA);
             } else {
-                const valueIfTrueValue = valueIfTrueArray.get(rowIndex, columnIndex);
-                const valueIfFalseValue = valueIfFalseArray.get(rowIndex, columnIndex);
+                const valueIfTrueValue = valueIfTrueArray.get(rowIndex, columnIndex) || NullValueObject.create();
+                const valueIfFalseValue = valueIfFalseArray.get(rowIndex, columnIndex) || NullValueObject.create();
 
                 return this._calculateSingleCell(logicalTestValue, valueIfTrueValue, valueIfFalseValue);
             }

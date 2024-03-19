@@ -293,18 +293,7 @@ export function getSetCellValueMutations(
     const valueMatrix = new ObjectMatrix<ICellData>();
 
     matrix.forValue((row, col, value) => {
-        valueMatrix.setValue(row + startRow, col + startColumn, {
-            v: value.v,
-        });
-        // if (value.p?.body) {
-        //     valueMatrix.setValue(row + startRow, col + startColumn, {
-        //         p: {
-        //             body: {
-        //                 dataStream: value.p.body.dataStream,
-        //             },
-        //         },
-        //     });
-        // }
+        valueMatrix.setValue(row + startRow, col + startColumn, Tools.deepClone(value));
     });
     // set cell value and style
     const setValuesMutation: ISetRangeValuesMutationParams = {

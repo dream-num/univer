@@ -100,6 +100,7 @@ export default {
                     thisWeek: '本周',
                     lastWeek: '上周',
                     nextWeek: '下周',
+                    today: '今日',
                     topN: '前{0}项',
                     bottomN: '后{0}项',
                     topNPercent: '前{0}%',
@@ -132,6 +133,7 @@ export default {
                 thisWeek: '本周',
                 lastWeek: '上周',
                 nextWeek: '下周',
+                today: '今日',
             },
             ruleType: {
                 highlightCell: '突出显示单元格',

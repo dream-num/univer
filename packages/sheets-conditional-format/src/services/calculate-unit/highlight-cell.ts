@@ -212,6 +212,11 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
                             const end = dayjs().endOf('day').subtract(1, 'day').valueOf();
                             return v >= start && v <= end;
                         }
+                        case TimePeriodOperator.today:{
+                            const start = dayjs().startOf('day').valueOf();
+                            const end = dayjs().endOf('day').valueOf();
+                            return v >= start && v <= end;
+                        }
                         default:{
                             return false;
                         }

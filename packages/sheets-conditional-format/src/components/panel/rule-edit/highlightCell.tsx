@@ -37,9 +37,9 @@ import styles from './index.module.less';
 
 const createOptionItem = (text: string, localeService: LocaleService) => ({ label: localeService.t(`sheet.cf.operator.${text}`), value: text });
 type IValue = number | string | [number, number];
-type IResult = Pick<ITextHighlightCell | INumberHighlightCell | ITimePeriodHighlightCell, 'operator' | 'subType'> & { value?: IValue };
+type IResult = (Pick< ITextHighlightCell | INumberHighlightCell | ITimePeriodHighlightCell, 'operator' | 'subType'>) & { value?: IValue };
 
-const HighlightCellInput = (props: { type: IResult['subType'];
+const HighlightCellInput = (props: { type: IResult['subType'] | SubRuleType.duplicateValues | SubRuleType.uniqueValues;
                                      operator?: IResult['operator'];
                                      interceptorManager: IStyleEditorProps['interceptorManager'];
                                      rule?: IHighlightCell;
@@ -87,7 +87,7 @@ const HighlightCellInput = (props: { type: IResult['subType'];
                 };
                 return (
                     <div className={`${stylesBase.mTSm}`}>
-                        <Input value={inputTextValue} onChange={_onChange} />
+                        <Input className={styles.width100} value={inputTextValue} onChange={_onChange} />
                     </div>
                 );
             }
@@ -104,7 +104,7 @@ const HighlightCellInput = (props: { type: IResult['subType'];
                 };
                 return (
                     <div className={`${stylesBase.mTSm}`}>
-                        <InputNumber value={inputNumberValue} onChange={_onChange} />
+                        <InputNumber className={styles.width100} value={inputNumberValue} onChange={_onChange} />
 
                     </div>
                 );
@@ -122,8 +122,8 @@ const HighlightCellInput = (props: { type: IResult['subType'];
                 };
                 return (
                     <div className={`${stylesBase.mTSm} ${stylesBase.labelContainer} `}>
-                        <InputNumber className={stylesBase.inputWidth} value={inputNumberMin} onChange={onChangeMin} />
-                        <InputNumber className={`${stylesBase.inputWidth} ${stylesBase.mLSm}`} value={inputNumberMax} onChange={onChangeMax} />
+                        <InputNumber value={inputNumberMin} onChange={onChangeMin} />
+                        <InputNumber className={`${stylesBase.mLSm}`} value={inputNumberMax} onChange={onChangeMax} />
                     </div>
                 );
             }
@@ -131,7 +131,7 @@ const HighlightCellInput = (props: { type: IResult['subType'];
     }
     return null;
 };
-const getOperatorOptions = (type: SubRuleType.number | SubRuleType.text | SubRuleType.timePeriod | SubRuleType.formula, localeService: LocaleService) => {
+const getOperatorOptions = (type: SubRuleType.duplicateValues | SubRuleType.uniqueValues | SubRuleType.number | SubRuleType.text | SubRuleType.timePeriod | SubRuleType.formula, localeService: LocaleService) => {
     switch (type) {
         case SubRuleType.text:{
             return [
@@ -175,7 +175,7 @@ export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, ITextHigh
     const localeService = useDependency(LocaleService);
 
     const rule = props.rule?.type === RuleType.highlightCell ? props.rule : undefined;
-    const [subType, subTypeSet] = useState<SubRuleType.number | SubRuleType.text | SubRuleType.timePeriod>(() => {
+    const [subType, subTypeSet] = useState<SubRuleType.number | SubRuleType.text | SubRuleType.timePeriod | SubRuleType.duplicateValues | SubRuleType.uniqueValues >(() => {
         const defaultV = SubRuleType.text;
         if (!rule) {
             return defaultV;
@@ -192,6 +192,12 @@ export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, ITextHigh
     }, {
         value: SubRuleType.timePeriod,
         label: localeService.t('sheet.cf.subRuleType.timePeriod'),
+    }, {
+        value: SubRuleType.duplicateValues,
+        label: localeService.t('sheet.cf.subRuleType.duplicateValues'),
+    }, {
+        value: SubRuleType.uniqueValues,
+        label: localeService.t('sheet.cf.subRuleType.uniqueValues'),
     }];
     const operatorOptions = useMemo(() => getOperatorOptions(subType, localeService), [subType]);
 
@@ -316,7 +322,7 @@ export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, ITextHigh
         <div>
             <div className={`${stylesBase.title} ${stylesBase.mTBase}`}>{localeService.t('sheet.cf.panel.styleRule')}</div>
             <Select className={`${stylesBase.mTSm} ${styles.width100}`} onChange={onTypeChange} value={subType} options={typeOptions} />
-            <Select className={`${stylesBase.mTSm} ${styles.width100}`} onChange={onOperatorChange} value={operator || ''} options={operatorOptions} />
+            {operatorOptions?.length && <Select className={`${stylesBase.mTSm} ${styles.width100}`} onChange={onOperatorChange} value={operator || ''} options={operatorOptions} />}
             <HighlightCellInput key={inputRenderKey} value={value} interceptorManager={interceptorManager} type={subType} operator={operator} rule={rule} onChange={onInputChange} />
             <div className={`${styles.cfPreviewWrap}`}>
                 <Preview rule={getResult({}) as IConditionalFormatRuleConfig} />

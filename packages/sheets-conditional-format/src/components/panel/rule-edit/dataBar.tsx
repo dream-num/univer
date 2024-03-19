@@ -247,7 +247,6 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                 <div className={stylesBase.label}>{localeService.t('sheet.cf.valueType.min')}</div>
                 <div className={`${stylesBase.mTSm} ${stylesBase.labelContainer}`}>
                     <Select
-                        className={stylesBase.inputWidth}
                         options={minOptions}
                         value={minValueType}
                         onChange={(v) => {
@@ -271,7 +270,6 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                 <div className={stylesBase.label}>{localeService.t('sheet.cf.valueType.max')}</div>
                 <div className={`${stylesBase.mTSm} ${stylesBase.labelContainer}`}>
                     <Select
-                        className={stylesBase.inputWidth}
                         options={maxOptions}
                         value={maxValueType}
                         onChange={(v) => {

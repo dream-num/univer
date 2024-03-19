@@ -214,7 +214,6 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
             <div className={stylesBase.label}>{localeService.t('sheet.cf.valueType.min')}</div>
             <div className={`${stylesBase.labelContainer} ${stylesBase.mTSm}`}>
                 <Select
-                    className={stylesBase.inputWidth}
                     options={minOptions}
                     value={minType}
                     onChange={(v) => {
@@ -224,7 +223,7 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
                 />
                 <TextInput
                     id="min"
-                    className={`${stylesBase.inputWidth} ${stylesBase.mLXxs}`}
+                    className={`${stylesBase.mLXxs}`}
                     value={minValue}
                     type={minType}
                     onChange={(v) => {
@@ -244,7 +243,6 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
             <div className={stylesBase.label}>{localeService.t('sheet.cf.panel.medianValue')}</div>
             <div className={`${stylesBase.labelContainer} ${stylesBase.mTSm}`}>
                 <Select
-                    className={stylesBase.inputWidth}
                     options={medianOptions}
                     value={medianType}
                     onChange={(v) => {
@@ -255,7 +253,7 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
 
                 <TextInput
                     id="median"
-                    className={`${stylesBase.inputWidth} ${stylesBase.mLXxs}`}
+                    className={` ${stylesBase.mLXxs}`}
                     value={medianValue}
                     type={medianType}
                     onChange={(v) => {
@@ -278,7 +276,6 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
             <div className={stylesBase.label}>{localeService.t('sheet.cf.valueType.max')}</div>
             <div className={`${stylesBase.labelContainer} ${stylesBase.mTSm}`}>
                 <Select
-                    className={stylesBase.inputWidth}
                     options={maxOptions}
                     value={maxType}
                     onChange={(v) => {
@@ -288,7 +285,7 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
                 />
                 <TextInput
                     id="max"
-                    className={`${stylesBase.inputWidth} ${stylesBase.mLXxs}`}
+                    className={`${stylesBase.mLXxs}`}
                     value={maxValue}
                     type={maxType}
                     onChange={(v) => {

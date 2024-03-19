@@ -123,10 +123,10 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
                             return v.startsWith(condition);
                         }
                         case TextOperator.containsBlanks:{
-                            return /\s/.test(v);
+                            return /^\s*$/.test(v);
                         }
                         case TextOperator.notContainsBlanks:{
-                            return !/\s/.test(v);
+                            return !/^\s*$/.test(v);
                         }
                         case TextOperator.containsErrors:{
                             // wait do do.

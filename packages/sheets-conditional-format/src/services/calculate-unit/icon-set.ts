@@ -20,7 +20,7 @@ import { RuleType } from '../../base/const';
 import type { IIconSetRenderParams } from '../../render/type';
 import type { IConditionFormatRule, IIconSet } from '../../models/type';
 import { ConditionalFormatFormulaService, FormulaResultStatus } from '../conditional-format-formula.service';
-import { compareWithNumber, getCellValue, getOppositeOperator, getValueByType, isNullable } from './utils';
+import { compareWithNumber, getOppositeOperator, getValueByType, isNullable } from './utils';
 import type { ICalculateUnit } from './type';
 import { EMPTY_STYLE } from './type';
 
@@ -36,7 +36,7 @@ export const iconSetCalculateUnit: ICalculateUnit = {
         rule.ranges.forEach((range) => {
             Range.foreach(range, (row, col) => {
                 const cell = worksheet?.getCellRaw(row, col);
-                const v = cell && getCellValue(cell);
+                const v = cell && cell.v;
                 if (!isNullable(v)) {
                     const _value = Number(v);
                     !Number.isNaN(_value) && matrix.setValue(row, col, _value);

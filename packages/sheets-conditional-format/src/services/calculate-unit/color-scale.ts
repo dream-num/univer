@@ -19,7 +19,7 @@ import { isObject } from '@univerjs/engine-render';
 import { RuleType } from '../../base/const';
 import type { IColorScale, IConditionFormatRule } from '../../models/type';
 import { ConditionalFormatFormulaService, FormulaResultStatus } from '../conditional-format-formula.service';
-import { getCellValue, getColorScaleFromValue, getValueByType, isNullable } from './utils';
+import { getColorScaleFromValue, getValueByType, isNullable } from './utils';
 import type { ICalculateUnit } from './type';
 
 const emptyStyle = '';
@@ -33,7 +33,7 @@ export const colorScaleCellCalculateUnit: ICalculateUnit = {
         rule.ranges.forEach((range) => {
             Range.foreach(range, (row, col) => {
                 const cell = worksheet?.getCellRaw(row, col);
-                const v = cell && getCellValue(cell);
+                const v = cell && cell.v;
                 if (!isNullable(v)) {
                     const _value = Number(v);
                     !Number.isNaN(_value) && matrix.setValue(row, col, _value);

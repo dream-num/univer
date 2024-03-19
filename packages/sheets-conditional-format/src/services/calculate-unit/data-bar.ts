@@ -19,7 +19,7 @@ import { RuleType } from '../../base/const';
 import type { IDataBarRenderParams } from '../../render/type';
 import type { IConditionFormatRule, IDataBar } from '../../models/type';
 import { ConditionalFormatFormulaService, FormulaResultStatus } from '../conditional-format-formula.service';
-import { getCellValue, getValueByType, isNullable } from './utils';
+import { getValueByType, isNullable } from './utils';
 import type { ICalculateUnit } from './type';
 import { EMPTY_STYLE } from './type';
 
@@ -35,7 +35,7 @@ export const dataBarCellCalculateUnit: ICalculateUnit = {
         rule.ranges.forEach((range) => {
             Range.foreach(range, (row, col) => {
                 const cell = worksheet?.getCellRaw(row, col);
-                const v = cell && getCellValue(cell);
+                const v = cell && cell.v;
                 if (!isNullable(v)) {
                     const _value = Number(v);
                     !Number.isNaN(_value) && matrix.setValue(row, col, _value);

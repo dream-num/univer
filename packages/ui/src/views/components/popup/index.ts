@@ -14,5 +14,4 @@
  * limitations under the License.
  */
 
-export { type IPopupProps, Popup } from './Popup';
-export { RectPopup, type IRectPopupProps } from './RectPopup';
+export { UniverPopup } from './UniverPopup';

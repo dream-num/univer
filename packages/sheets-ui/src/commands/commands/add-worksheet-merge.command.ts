@@ -22,6 +22,7 @@ import {
     IUndoRedoService,
     IUniverInstanceService,
     LocaleService,
+    Rectangle,
     sequenceExecute,
 } from '@univerjs/core';
 import type { IAddWorksheetMergeMutationParams, IRemoveWorksheetMergeMutationParams } from '@univerjs/sheets';
@@ -94,14 +95,27 @@ export const AddWorksheetMergeCommand: ICommand = {
             subUnitId,
             ranges,
         };
-        redoMutations.push({ id: RemoveWorksheetMergeMutation.id, params: removeMergeMutationParams });
+
+        const hasIntersect = worksheet.getMergeData().some((merge) => {
+            return ranges.some((range) => {
+                return Rectangle.intersects(range, merge);
+            });
+        });
+
+        if (hasIntersect) {
+            redoMutations.push({ id: RemoveWorksheetMergeMutation.id, params: removeMergeMutationParams });
+        }
+
         redoMutations.push({ id: AddWorksheetMergeMutation.id, params: addMergeMutationParams });
 
         // prepare undo mutations
         const undoRemoveMergeMutationParams = RemoveMergeUndoMutationFactory(accessor, removeMergeMutationParams);
         const undoMutationParams = AddMergeUndoMutationFactory(accessor, addMergeMutationParams);
+
         undoMutations.push({ id: RemoveWorksheetMergeMutation.id, params: undoMutationParams });
-        undoMutations.push({ id: AddWorksheetMergeMutation.id, params: undoRemoveMergeMutationParams });
+        if (hasIntersect) {
+            undoMutations.push({ id: AddWorksheetMergeMutation.id, params: undoRemoveMergeMutationParams });
+        }
 
         // add set range values mutations to undo redo mutations
         if (willClearSomeCell) {

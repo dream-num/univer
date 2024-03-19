@@ -104,18 +104,18 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
         const cache = getCache();
         const check = (row: number, col: number) => {
             const cellValue = worksheet?.getCellRaw(row, col);
-            const value = getCellValue(cellValue!);
             switch (ruleConfig.subType) {
                 case SubRuleType.number:{
-                    const v = Number(value);
-                    if (isNullable(value) || Number.isNaN(value)) {
+                    const v = cellValue && Number(cellValue.v);
+                    if (isNullable(v) || Number.isNaN(v)) {
                         return false;
                     }
                     const subRuleConfig = ruleConfig as INumberHighlightCell;
-                    return compareWithNumber({ operator: subRuleConfig.operator, value: subRuleConfig.value || 0 }, v);
+                    return compareWithNumber({ operator: subRuleConfig.operator, value: subRuleConfig.value || 0 }, v || 0);
                 }
                 case SubRuleType.text:{
                     const subRuleConfig = ruleConfig as ITextHighlightCell;
+                    const value = getCellValue(cellValue!);
                     const v = String(value);
                     const condition = subRuleConfig.value || '';
                     switch (subRuleConfig.operator) {
@@ -156,6 +156,7 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
                     }
                 }
                 case SubRuleType.timePeriod:{
+                    const value = getCellValue(cellValue!);
                     if (isNullable(value) || Number.isNaN(Number(value))) {
                         return false;
                     }
@@ -217,6 +218,7 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
                     }
                 }
                 case SubRuleType.average:{
+                    const value = cellValue && cellValue.v;
                     const v = Number(value);
                     if (isNullable(value) || Number.isNaN(v)) {
                         return false;
@@ -249,6 +251,8 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
                     }
                 }
                 case SubRuleType.rank:{
+                    const value = getCellValue(cellValue!);
+
                     const v = Number(value);
 
                     if (isNullable(value) || Number.isNaN(v)) {
@@ -264,6 +268,8 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
                     }
                 }
                 case SubRuleType.uniqueValues:{
+                    const value = getCellValue(cellValue!);
+
                     if (isNullable(value)) {
                         return false;
                     }
@@ -271,6 +277,8 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
                     return uniqueCache.get(value) === 1;
                 }
                 case SubRuleType.duplicateValues:{
+                    const value = getCellValue(cellValue!);
+
                     if (isNullable(value)) {
                         return false;
                     }

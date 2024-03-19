@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import type { IRange } from '@univerjs/core';
+import type { IMutationInfo, IRange } from '@univerjs/core';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { EffectRefRangId } from '../type';
 import {
+    adjustRangeOnMutation,
     handleDeleteRangeMoveLeft,
     handleDeleteRangeMoveLeftCommon,
     handleDeleteRangeMoveUp,
@@ -37,6 +38,10 @@ import {
     handleMoveRowsCommon,
     runRefRangeMutations,
 } from '../util';
+import { RemoveSheetMutation } from '../../../commands/mutations/remove-sheet.mutation';
+import type { IRemoveSheetMutationParams } from '../../../basics';
+import type { IMoveRowsMutationParams } from '../../../commands/mutations/move-rows-cols.mutation';
+import { MoveRowsMutation } from '../../../commands/mutations/move-rows-cols.mutation';
 
 const countRange = ([a, b, c, d]: readonly [number, number, number, number]) => (a * 1000 + b * 100 + c * 10 + d);
 
@@ -1215,6 +1220,48 @@ describe('test ref-range move', () => {
                 const result = runRefRangeMutations(operators!, targetRange);
                 expect(result).toEqual({ startRow: 5, endRow: 7, endColumn: 99, startColumn: 0 });
             });
+        });
+    });
+});
+
+describe('test different situations of adjustRangeOnMutation', () => {
+    it('should "RemoveSheetMutation" drop all range in the same worksheet', () => {
+        const range: IRange = { startRow: 0, endRow: 10, startColumn: 0, endColumn: 10 };
+        const mutation = { id: RemoveSheetMutation.id, params: {} as IRemoveSheetMutationParams };
+        const result = adjustRangeOnMutation(range, mutation);
+        expect(result).toBe(null);
+    });
+
+    describe('test move row situations', () => {
+        it('should move when the range is contained', () => {
+            const range: IRange = { startRow: 1, endRow: 1, startColumn: 1, endColumn: 1 };
+            const mutation: IMutationInfo<IMoveRowsMutationParams> = {
+                id: MoveRowsMutation.id,
+                params: {
+                    unitId: '',
+                    subUnitId: '',
+                    sourceRange: { startRow: 0, endRow: 2, startColumn: 0, endColumn: 2 },
+                    targetRange: { startRow: 7, endRow: 9, startColumn: 0, endColumn: 2 },
+                },
+            };
+            const result = adjustRangeOnMutation(range, mutation);
+            expect(result).toEqual({ startRow: 5, endRow: 5, startColumn: 1, endColumn: 1 });
+        });
+
+        it('should expand when move inside', () => {
+            // FIXME: there is some error with this use case!
+            const range: IRange = { startRow: 5, endRow: 7, startColumn: 1, endColumn: 1 };
+            const mutation: IMutationInfo<IMoveRowsMutationParams> = {
+                id: MoveRowsMutation.id,
+                params: {
+                    unitId: '',
+                    subUnitId: '',
+                    sourceRange: { startRow: 0, endRow: 2, startColumn: 0, endColumn: 2 },
+                    targetRange: { startRow: 6, endRow: 8, startColumn: 0, endColumn: 2 },
+                },
+            };
+            const result = adjustRangeOnMutation(range, mutation);
+            expect(result).toEqual({ startRow: 2, endRow: 4, startColumn: 1, endColumn: 1 });
         });
     });
 });

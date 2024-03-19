@@ -14,9 +14,19 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IRange, Nullable } from '@univerjs/core';
+import type { ICommandInfo, IMutationInfo, IRange, Nullable } from '@univerjs/core';
 import { ObjectMatrix, queryObjectMatrix, Range, RANGE_TYPE, Rectangle } from '@univerjs/core';
 
+import { type IMoveColumnsMutationParams, type IMoveRowsMutationParams, MoveColsMutation, MoveRowsMutation } from '../../commands/mutations/move-rows-cols.mutation';
+import type { IInsertColMutationParams, IInsertRowMutationParams, IRemoveColMutationParams, IRemoveRowsMutationParams, IRemoveSheetMutationParams } from '../../basics';
+import { type IMoveRangeMutationParams, MoveRangeMutation } from '../../commands/mutations/move-range.mutation';
+import { RemoveSheetMutation } from '../../commands/mutations/remove-sheet.mutation';
+import { RemoveColMutation, RemoveRowMutation } from '../../commands/mutations/remove-row-col.mutation';
+import { InsertColMutation, InsertRowMutation } from '../../commands/mutations/insert-row-col.mutation';
+import type { IRemoveRowColCommandParams } from '../../commands/commands/remove-row-col.command';
+import type { IMoveColsCommandParams, IMoveRowsCommandParams } from '../../commands/commands/move-rows-cols.command';
+import type { IInsertColCommandParams, IInsertRowCommandParams } from '../../commands/commands/insert-row-col.command';
+import type { IMoveRangeCommandParams } from '../../commands/commands/move-range.command';
 import type {
     IDeleteRangeMoveLeftCommand,
     IDeleteRangeMoveUpCommand,
@@ -633,8 +643,10 @@ export const handleDeleteRangeMoveLeft = (param: IDeleteRangeMoveLeftCommand, ta
     if (!range) {
         return [];
     }
+
     const operators: IOperator[] = [];
     const result = handleBaseRemoveRange(range, targetRange);
+
     if (!result) {
         operators.push({ type: OperatorType.Delete });
     } else {
@@ -645,6 +657,7 @@ export const handleDeleteRangeMoveLeft = (param: IDeleteRangeMoveLeftCommand, ta
             length,
         });
     }
+
     return operators;
 };
 
@@ -839,51 +852,88 @@ export const handleDefaultRangeChangeWithEffectRefCommands = (range: IRange, com
             break;
         }
     }
+
     const resultRange = runRefRangeMutations(operator, range);
     return resultRange;
 };
 
-export const handleCommonDefaultRangeChangeWithEffectRefCommands = (range: IRange, commandInfo: ICommandInfo) => {
-    let operator: IOperator[] = [];
-    switch (commandInfo.id) {
-        case EffectRefRangId.DeleteRangeMoveLeftCommandId: {
-            return handleDeleteRangeMoveLeftCommon(commandInfo as IDeleteRangeMoveLeftCommand, range);
-        }
-        case EffectRefRangId.DeleteRangeMoveUpCommandId: {
-            return handleDeleteRangeMoveUpCommon(commandInfo as IDeleteRangeMoveUpCommand, range);
-        }
-        case EffectRefRangId.InsertRangeMoveDownCommandId: {
-            return handleInsertRangeMoveDownCommon(commandInfo as IInsertRangeMoveDownCommand, range);
-        }
-        case EffectRefRangId.InsertRangeMoveRightCommandId: {
-            return handleInsertRangeMoveRightCommon(commandInfo as IInsertRangeMoveRightCommand, range);
-        }
-        case EffectRefRangId.InsertColCommandId: {
-            operator = handleInsertCol(commandInfo as IInsertColCommand, range);
-            break;
-        }
-        case EffectRefRangId.InsertRowCommandId: {
-            operator = handleInsertRow(commandInfo as IInsertRowCommand, range);
-            break;
-        }
-        case EffectRefRangId.MoveColsCommandId: {
-            return handleMoveColsCommon(commandInfo as IMoveColsCommand, range);
-        }
-        case EffectRefRangId.MoveRangeCommandId: {
-            return handleMoveRangeCommon(commandInfo as IMoveRangeCommand, range);
-        }
-        case EffectRefRangId.MoveRowsCommandId: {
-            return handleMoveRowsCommon(commandInfo as IMoveRowsCommand, range);
-        }
-        case EffectRefRangId.RemoveColCommandId: {
-            operator = handleIRemoveCol(commandInfo as IRemoveRowColCommand, range);
-            break;
-        }
-        case EffectRefRangId.RemoveRowCommandId: {
-            operator = handleIRemoveRow(commandInfo as IRemoveRowColCommand, range);
-            break;
-        }
+type MutationsAffectRange =
+    | IRemoveSheetMutationParams
+    | IMoveRowsMutationParams
+    | IMoveColumnsMutationParams
+    | IRemoveColMutationParams
+    | IRemoveColMutationParams
+    | IInsertColMutationParams
+    | IInsertRowMutationParams
+    | IMoveRangeMutationParams;
+
+/**
+ * This function should work as a pure function.
+ *
+ * @pure
+ * @param range
+ * @param mutation
+ * @returns the adjusted range
+ */
+export function adjustRangeOnMutation(range: Readonly<IRange>, mutation: IMutationInfo<MutationsAffectRange>): Nullable<IRange> {
+    // we map mutation params to corresponding
+    const { id, params } = mutation;
+    switch (id) {
+        case RemoveSheetMutation.id:
+            return null;
+        case MoveRowsMutation.id:
+            return handleDefaultRangeChangeWithEffectRefCommands(range, {
+                id: EffectRefRangId.MoveRowsCommandId,
+                params: {
+                    fromRange: (params as IMoveRowsMutationParams).sourceRange,
+                    toRange: (params as IMoveRowsMutationParams).targetRange,
+                },
+            } as ICommandInfo<IMoveRowsCommandParams>);
+        case MoveColsMutation.id:
+            return handleDefaultRangeChangeWithEffectRefCommands(range, {
+                id: EffectRefRangId.MoveColsCommandId,
+                params: {
+                    fromRange: (params as IMoveColumnsMutationParams).sourceRange,
+                    toRange: (params as IMoveColumnsMutationParams).targetRange,
+                },
+            } as ICommandInfo<IMoveColsCommandParams>);
+        case RemoveColMutation.id:
+            return handleDefaultRangeChangeWithEffectRefCommands(range, {
+                id: EffectRefRangId.RemoveColCommandId,
+                params: {
+                    range: (params as IRemoveColMutationParams).range,
+                },
+            } as ICommandInfo<IRemoveRowColCommandParams>);
+        case RemoveRowMutation.id:
+            return handleDefaultRangeChangeWithEffectRefCommands(range, {
+                id: EffectRefRangId.RemoveRowCommandId,
+                params: {
+                    range: (params as IRemoveRowsMutationParams).range,
+                },
+            } as ICommandInfo<IRemoveRowColCommandParams>);
+        case InsertRowMutation.id:
+            return handleDefaultRangeChangeWithEffectRefCommands(range, {
+                id: EffectRefRangId.InsertRowCommandId,
+                params: {
+                    range: (params as IInsertRowMutationParams).range,
+                },
+            } as ICommandInfo<IInsertRowCommandParams>);
+        case InsertColMutation.id:
+            return handleDefaultRangeChangeWithEffectRefCommands(range, {
+                id: EffectRefRangId.InsertColCommandId,
+                params: {
+                    range: (params as IInsertColMutationParams).range,
+                },
+            } as ICommandInfo<IInsertColCommandParams>);
+        case MoveRangeMutation.id:
+            return handleDefaultRangeChangeWithEffectRefCommands(range, {
+                id: EffectRefRangId.MoveRangeCommandId,
+                params: {
+                    fromRange: new ObjectMatrix((params as IMoveRangeMutationParams).from).getRange(),
+                    toRange: new ObjectMatrix((params as IMoveRangeMutationParams).to).getRange(),
+                },
+            } as ICommandInfo<IMoveRangeCommandParams>);
+        default:
+            return Rectangle.clone(range);
     }
-    const resultRange = runRefRangeMutations(operator, range);
-    return resultRange;
-};
+}

@@ -43,6 +43,12 @@ export class CellAlertManagerService {
     private _currentAlert$ = new Subject<Nullable<ICellAlert>>();
     private _currentPopupId: Nullable<string> = undefined;
 
+    private _currentAlert: Nullable<ICellAlert> = null;
+
+    get currentAlert() {
+        return this._currentAlert;
+    }
+
     currentAlert$ = this._currentAlert$.asObservable();
 
     constructor(
@@ -53,15 +59,18 @@ export class CellAlertManagerService {
     ) {}
 
     showAlert(alert: ICellAlert) {
-        const currentRender = this._renderManagerService.getCurrent();
+        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
+        const unitId = workbook.getUnitId();
+        const subUnitId = workbook.getActiveSheet().getSheetId();
+        const currentRender = this._renderManagerService.getRenderById(unitId);
         if (!currentRender) {
             return;
         }
         const { position } = alert;
-        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
-        const unitId = workbook.getUnitId();
-        const subUnitId = workbook.getActiveSheet().getSheetId();
         const bounding = currentRender.engine.getCanvasElement().getBoundingClientRect();
+        this._currentAlert = alert;
+        this._currentAlert$.next(alert);
+
         this._currentPopupId = this._popupService.addPopup({
             anchorRect: {
                 top: position.startY + bounding.top,
@@ -72,12 +81,14 @@ export class CellAlertManagerService {
             unitId,
             subUnitId,
             componentKey: CELL_ALERT_KEY,
+            direction: 'horizontal',
         });
-        this._currentAlert$.next(alert);
     }
 
     clearAlert() {
-        // this._currentPopupId && this._popupService.removePopup(this._currentPopupId);
-        // this._currentAlert$.next(null);
+        this._currentPopupId && this._popupService.removePopup(this._currentPopupId);
+        this._currentPopupId = null;
+        this._currentAlert = null;
+        this._currentAlert$.next(null);
     }
 }

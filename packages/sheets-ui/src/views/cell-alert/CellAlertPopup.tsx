@@ -30,21 +30,17 @@ const iconMap = {
 
 export function CellAlert() {
     const cellAlertService = useDependency(CellAlertManagerService);
-    const currentCell = useObservable(cellAlertService.currentAlert$);
+    const currentCell = useObservable(cellAlertService.currentAlert$, cellAlertService.currentAlert);
 
-    if (!currentCell) {
-        return null;
-    }
-
-    const { type } = currentCell;
+    const { type, title, message } = currentCell || {};
 
     return (
         <div className={styles.cellAlert}>
             <div className={styles.cellAlertTitle}>
-                {iconMap[type]}
-                {currentCell.title}
+                {type ? iconMap[type] : null}
+                {title}
             </div>
-            <div className={styles.cellAlertContent}>{currentCell.message}</div>
+            <div className={styles.cellAlertContent}>{message}</div>
         </div>
     );
 }

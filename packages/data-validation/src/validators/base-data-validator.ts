@@ -18,6 +18,7 @@ import type { CellValue, ICellCustomRender, IDataValidationRule, IDataValidation
 import { DataValidationOperator, LocaleService, Tools } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 import { OperatorErrorTitleMap, OperatorTitleMap } from '../types/const/operator-text-map';
+import type { IBaseDataValidationWidget } from './base-widget';
 
 const FORMULA1 = '{FORMULA1}';
 const FORMULA2 = '{FORMULA2}';
@@ -59,7 +60,7 @@ export abstract class BaseDataValidator<DataType = CellValue> {
 
     skipDefaultFontRender = false;
 
-    canvasRender: Nullable<ICellCustomRender> = null;
+    canvasRender: Nullable<IBaseDataValidationWidget> = null;
 
     dropdown: string | undefined = undefined;
 

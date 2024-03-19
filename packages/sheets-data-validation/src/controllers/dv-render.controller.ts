@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellDataForSheetInterceptor } from '@univerjs/core';
+import type { ICellDataForSheetInterceptor, ICellRenderContext } from '@univerjs/core';
 import { DataValidationStatus, DataValidationType, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, WrapStrategy } from '@univerjs/core';
 import { DataValidationModel, DataValidationPanelName, DataValidatorRegistryService } from '@univerjs/data-validation';
 import { ComponentManager, IMenuService } from '@univerjs/ui';
@@ -29,6 +29,7 @@ import { SheetDataValidationService } from '../services/dv.service';
 import { getCellValueOrigin } from '../utils/getCellDataOrigin';
 import type { CheckboxValidator } from '../validators';
 import { DropdownWidget } from '../widgets/dropdown-widget';
+import type { SheetDataValidationManager } from '../models/sheet-data-validation-manager';
 import { DataValidationMenu } from './dv.menu';
 
 const INVALID_MARK = {
@@ -176,17 +177,13 @@ export class DataValidationRenderController extends RxDisposable {
                 INTERCEPTOR_POINT.CELL_CONTENT,
                 {
                     handler: (cell, pos, next) => {
-                        const validationManager = this._sheetDataValidationService.currentManager;
-                        const { unitId, subUnitId } = validationManager || {};
-                        if (unitId !== pos.unitId || subUnitId !== pos.subUnitId) {
-                            this._sheetDataValidationService.switchCurrent(pos.unitId, pos.subUnitId);
-                        }
-
-                        const manager = this._sheetDataValidationService.currentManager?.manager;
-                        if (!manager) {
+                        const { row, col, unitId, subUnitId } = pos;
+                        const manager = this._dataValidationModel.ensureManager(unitId, subUnitId) as SheetDataValidationManager;
+                        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+                        if (!manager || !skeleton) {
                             return next(cell);
                         }
-                        const { row, col } = pos;
+
                         const ruleId = manager.getRuleIdByLocation(row, col);
                         if (!ruleId) {
                             return next(cell);
@@ -196,40 +193,25 @@ export class DataValidationRenderController extends RxDisposable {
                         if (!rule) {
                             return next(cell);
                         }
-
                         const validStatus = this._dataValidationModel.validator(getCellValueOrigin(cell), rule, pos);
                         const validator = this._dataValidatorRegistryService.getValidatorItem(rule.type);
                         const cellValue = getCellValueOrigin(cell);
 
                         let extra: ICellDataForSheetInterceptor = {};
 
-                        switch (rule.type) {
-                            case DataValidationType.CHECKBOX:
-                            {
-                                const { formula2 } = (validator as CheckboxValidator).parseFormulaSync(rule, pos.unitId, pos.subUnitId);
-                                if (!cellValue) {
-                                    extra = {
-                                        v: formula2,
-                                        p: null,
-                                        interceptorStyle: {
-                                            ...cell?.interceptorStyle,
-                                            tb: WrapStrategy.CLIP,
-                                        },
-                                    };
-                                }
-                                break;
-                            }
-                            case DataValidationType.LIST: {
+                        if (rule.type === DataValidationType.CHECKBOX) {
+                            const { formula2 } = (validator as CheckboxValidator).parseFormulaSync(rule, pos.unitId, pos.subUnitId);
+                            if (!cellValue) {
                                 extra = {
+                                    v: formula2,
+                                    t: 1,
+                                    p: null,
                                     interceptorStyle: {
                                         ...cell?.interceptorStyle,
-                                        pd: DropdownWidget.padding,
+                                        tb: WrapStrategy.CLIP,
                                     },
                                 };
-                                break;
                             }
-                            default:
-                                break;
                         }
 
                         return next({
@@ -249,12 +231,41 @@ export class DataValidationRenderController extends RxDisposable {
                                 ...(cell?.customRender ?? []),
                                 ...(validator?.canvasRender ? [validator.canvasRender] : []),
                             ],
+                            // @ts-ignore
                             fontRenderExtension: {
+                                // @ts-ignore
                                 ...cell?.fontRenderExtension,
                                 isSkip: validator?.skipDefaultFontRender,
                             },
 
-                            // interceptorAutoHeight
+                            interceptorStyle: {
+                                ...cell?.interceptorStyle,
+                            },
+                            get interceptorAutoHeight() {
+                                const mergeCell = skeleton.mergeData.find((range) => {
+                                    const { startColumn, startRow, endColumn, endRow } = range;
+                                    return row >= startRow && col >= startColumn && row <= endRow && col <= endColumn;
+                                });
+
+                                const info: ICellRenderContext = {
+                                    data: {
+                                        ...cell,
+                                        dataValidation: {
+                                            ruleId,
+                                            validStatus,
+                                            rule,
+                                            validator,
+                                        },
+                                    },
+                                    style: skeleton.getsStyles().getStyleByCell(cell),
+                                    primaryWithCoord: skeleton.getCellByIndex(mergeCell?.startRow ?? row, mergeCell?.startColumn ?? col),
+                                    unitId,
+                                    subUnitId,
+                                    row,
+                                    col,
+                                };
+                                return validator?.canvasRender?.calcCellAutoHeight?.(info);
+                            },
                         });
                     },
                 }

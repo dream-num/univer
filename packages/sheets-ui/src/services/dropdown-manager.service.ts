@@ -69,6 +69,10 @@ export class DropdownManagerService {
             unitId,
             subUnitId,
             componentKey: DROP_DOWN_KEY,
+            mask: true,
+            onMaskClick: () => {
+                this.hideDropdown();
+            },
         });
     }
 

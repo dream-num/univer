@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
-export { BaseDataValidator } from './base-data-validator';
-export type { IFormulaResult, IValidatorCellInfo } from './base-data-validator';
-export type { IBaseDataValidationWidget } from './base-widget';
+import type { ICellCustomRender, ICellRenderContext } from '@univerjs/core';
+
+export interface IBaseDataValidationWidget extends ICellCustomRender {
+    calcCellAutoHeight(info: ICellRenderContext): number | undefined;
+}

@@ -52,13 +52,15 @@ export class CellAlertManagerService {
     currentAlert$ = this._currentAlert$.asObservable();
 
     constructor(
-        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IPopupService private readonly _popupService: IPopupService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {}
 
     showAlert(alert: ICellAlert) {
+        this._currentPopupId && this._popupService.removePopup(this._currentPopupId);
+        this._currentPopupId = null;
+
         const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
         const unitId = workbook.getUnitId();
         const subUnitId = workbook.getActiveSheet().getSheetId();

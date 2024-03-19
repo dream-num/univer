@@ -15,12 +15,13 @@
  */
 
 import { BooleanNumber, DEFAULT_EMPTY_DOCUMENT_VALUE, DocumentDataModel, ICommandService, LocaleService, Tools, VerticalAlign, WrapStrategy } from '@univerjs/core';
-import type { ICellCustomRender, ICellRenderContext, IDocumentData, IPaddingData, ISelectionCellWithCoord, IStyleData, Nullable } from '@univerjs/core';
+import type { ICellRenderContext, IDocumentData, IPaddingData, ISelectionCellWithCoord, IStyleData, Nullable } from '@univerjs/core';
 import { DeviceInputEventType, Documents, DocumentSkeleton, DocumentViewModel, getDocsSkeletonPageSize, Rect, type Spreadsheet, type SpreadsheetSkeleton, type UniverRenderingContext2D } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
 import { IEditorBridgeService } from '@univerjs/sheets-ui/services/editor-bridge.service.js';
 import type { IEditorBridgeServiceVisibleParam } from '@univerjs/sheets-ui/services/editor-bridge.service.js';
 import { SetCellEditVisibleOperation } from '@univerjs/sheets-ui/commands/operations/cell-edit.operation.js';
+import type { IBaseDataValidationWidget } from '@univerjs/data-validation';
 import { getCellValueOrigin } from '../utils/getCellDataOrigin';
 import type { ListValidator } from '../validators';
 
@@ -102,7 +103,7 @@ export interface IDropdownInfo {
     height: number;
 }
 
-export class DropdownWidget implements ICellCustomRender {
+export class DropdownWidget implements IBaseDataValidationWidget {
     static padding: IPaddingData = {
         l: MARGIN_H + PADDING_H,
         r: ICON_PLACE + MARGIN_H,
@@ -116,6 +117,10 @@ export class DropdownWidget implements ICellCustomRender {
         @ICommandService private readonly _commandService: ICommandService,
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService
     ) { }
+
+    zIndex?: number | undefined;
+    onPointerEnter?: ((info: ICellRenderContext) => void) | undefined;
+    onPointerLeave?: ((info: ICellRenderContext) => void) | undefined;
 
     private _ensureMap(subUnitId: string) {
         let map = this._dropdownInfoMap.get(subUnitId);
@@ -133,14 +138,10 @@ export class DropdownWidget implements ICellCustomRender {
 
     drawWith(ctx: UniverRenderingContext2D, info: ICellRenderContext, skeleton: SpreadsheetSkeleton, spreadsheets: Spreadsheet): void {
         const { primaryWithCoord, row, col, style, data, subUnitId } = info;
-        const sid = data.s;
         const cellWidth = primaryWithCoord.endX - primaryWithCoord.startX;
         const cellHeight = primaryWithCoord.endY - primaryWithCoord.startY;
         const map = this._ensureMap(subUnitId);
         const key = this._generateKey(row, col);
-
-        const vt = style?.vt;
-        const value = getCellValueOrigin(data);
 
         ctx.save();
         ctx.translateWithPrecision(primaryWithCoord.startX, primaryWithCoord.startY);
@@ -148,6 +149,8 @@ export class DropdownWidget implements ICellCustomRender {
         ctx.rect(0, 0, cellWidth, cellHeight);
         ctx.clip();
 
+        const vt = style?.vt;
+        const value = getCellValueOrigin(data);
         const valueStr = `${value ?? ''}`;
         const realWidth = cellWidth - (MARGIN_H * 2) - PADDING_H - ICON_PLACE;
         const { documentSkeleton, documents, docModel } = createDocuments(valueStr, this._localeService, style);
@@ -163,7 +166,6 @@ export class DropdownWidget implements ICellCustomRender {
         const textLayout = getDocsSkeletonPageSize(documentSkeleton)!;
 
         const {
-            width: fontWidth,
             height: fontHeight,
         } = textLayout;
 
@@ -192,9 +194,9 @@ export class DropdownWidget implements ICellCustomRender {
         });
         ctx.save();
         ctx.translateWithPrecision(PADDING_H, fontHeight);
-        // ctx.beginPath();
-        // ctx.rect(0, -fontHeight, realWidth, fontHeight);
-        // ctx.clip();
+        ctx.beginPath();
+        ctx.rect(0, -fontHeight, realWidth, fontHeight);
+        ctx.clip();
         documents.render(ctx);
         ctx.restore();
         ctx.translate(realWidth + PADDING_H + 4, (fontHeight - ICON_SIZE) / 2);
@@ -208,6 +210,31 @@ export class DropdownWidget implements ICellCustomRender {
             width: rectWidth,
             height: rectWidth,
         });
+    }
+
+    calcCellAutoHeight(info: ICellRenderContext): number | undefined {
+        const { primaryWithCoord, style, data } = info;
+        const cellWidth = primaryWithCoord.endX - primaryWithCoord.startX;
+        const value = getCellValueOrigin(data);
+        const valueStr = `${value ?? ''}`;
+        const realWidth = cellWidth - (MARGIN_H * 2) - PADDING_H - ICON_PLACE;
+        const { documentSkeleton, docModel } = createDocuments(valueStr, this._localeService, style);
+        const { tb = WrapStrategy.WRAP } = style || {};
+        if (
+            tb === WrapStrategy.WRAP
+        ) {
+            docModel.updateDocumentDataPageSize(realWidth);
+        }
+
+        documentSkeleton.calculate();
+        documentSkeleton.getActualSize();
+        const textLayout = getDocsSkeletonPageSize(documentSkeleton)!;
+
+        const {
+            height: fontHeight,
+        } = textLayout;
+
+        return fontHeight + MARGIN_V * 2;
     }
 
     isHit(position: { x: number; y: number }, info: ICellRenderContext) {

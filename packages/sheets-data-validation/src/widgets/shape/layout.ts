@@ -107,5 +107,6 @@ export function layoutDropdowns(items: string[], fontStyle: IDocumentSkeletonFon
         totalHeight,
         contentWidth,
         contentHeight,
+        cellAutoHeight: totalHeight + CELL_PADDING_V * 2,
     };
 }

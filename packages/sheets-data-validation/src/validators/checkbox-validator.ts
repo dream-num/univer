@@ -22,8 +22,8 @@ import { CheckboxRender } from '../widgets/checkbox-widget';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
 import { getFormulaResult } from '../utils/formula';
 
-export const CHECKBOX_FORMULA_1 = 'TRUE';
-export const CHECKBOX_FORMULA_2 = 'FALSE';
+export const CHECKBOX_FORMULA_1 = 1;
+export const CHECKBOX_FORMULA_2 = 0;
 
 export class CheckboxValidator extends BaseDataValidator {
     override id: string = DataValidationType.CHECKBOX;

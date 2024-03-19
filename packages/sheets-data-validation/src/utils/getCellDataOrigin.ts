@@ -18,14 +18,14 @@ import { DEFAULT_EMPTY_DOCUMENT_VALUE, type ICellData, type Nullable } from '@un
 
 export function getCellValueOrigin(cell: Nullable<ICellData>) {
     if (cell === null) {
-        return 0;
+        return '';
     }
 
     if (cell?.p) {
         const body = cell?.p.body;
 
         if (body == null) {
-            return 0;
+            return '';
         }
 
         const data = body.dataStream;

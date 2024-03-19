@@ -34,7 +34,7 @@ export class ListValidator extends BaseDataValidator {
 
     private _univerInstanceService = this.injector.get(IUniverInstanceService);
 
-    override canvasRender: Nullable<ICellCustomRender> = this.injector.createInstance(DropdownWidget);
+    override canvasRender = this.injector.createInstance(DropdownWidget);
 
     private _formulaService = this.injector.get(DataValidationFormulaService);
 

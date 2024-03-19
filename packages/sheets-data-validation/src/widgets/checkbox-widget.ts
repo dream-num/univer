@@ -19,7 +19,7 @@ import { Checkbox, fixLineWidthByScale, Transform } from '@univerjs/engine-rende
 import { HorizontalAlign, ICommandService, isFormulaString, VerticalAlign } from '@univerjs/core';
 import type { ICellCustomRender, ICellDataForSheetInterceptor, ICellRenderContext, IDataValidationRule, ISelectionCellWithCoord, IStyleData, Nullable } from '@univerjs/core';
 import { SetRangeValuesCommand } from '@univerjs/sheets';
-import type { IFormulaResult } from '@univerjs/data-validation';
+import type { IBaseDataValidationWidget, IFormulaResult } from '@univerjs/data-validation';
 import { Inject } from '@wendellhu/redi';
 import type { ISetRangeValuesCommandParams } from '../../../sheets/lib/types';
 import { CHECKBOX_FORMULA_1, CHECKBOX_FORMULA_2 } from '../validators/checkbox-validator';
@@ -27,7 +27,7 @@ import { DataValidationFormulaService } from '../services/dv-formula.service';
 import { getFormulaResult } from '../utils/formula';
 import { getCellValueOrigin } from '../utils/getCellDataOrigin';
 
-export class CheckboxRender implements ICellCustomRender {
+export class CheckboxRender implements IBaseDataValidationWidget {
     private _calc(cellInfo: ISelectionCellWithCoord, style: Nullable<IStyleData>) {
         const { vt, ht } = style || {};
         const width = cellInfo.endX - cellInfo.startX;
@@ -72,6 +72,14 @@ export class CheckboxRender implements ICellCustomRender {
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(DataValidationFormulaService) private readonly _formulaService: DataValidationFormulaService
     ) {}
+
+    calcCellAutoHeight(): number | undefined {
+        return undefined;
+    }
+
+    zIndex?: number | undefined;
+    onPointerEnter?: ((info: ICellRenderContext) => void) | undefined;
+    onPointerLeave?: ((info: ICellRenderContext) => void) | undefined;
 
     private async _parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): Promise<IFormulaResult> {
         const { formula1 = CHECKBOX_FORMULA_1, formula2 = CHECKBOX_FORMULA_2 } = rule;

@@ -26,8 +26,6 @@ export interface IConfirmService {
     readonly confirmOptions$: Subject<IConfirmPartMethodOptions[]>;
 
     open(params: IConfirmPartMethodOptions): IDisposable;
-
     confirm(params: IConfirmPartMethodOptions): Promise<boolean>;
-
     close(id: string): void;
 }

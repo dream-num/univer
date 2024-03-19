@@ -28,43 +28,43 @@ describe('Test isblank function', () => {
 
     describe('Isblank', () => {
         it('value null', () => {
-            const value = new NullValueObject(0);
+            const value = NullValueObject.create();
             const result = textFunction.calculate(value);
             expect(result.getValue()).toBe(true);
         });
 
         it('value error', () => {
-            const value = new ErrorValueObject(ErrorType.NA);
+            const value = ErrorValueObject.create(ErrorType.NA);
             const result = textFunction.calculate(value);
             expect(result.getValue()).toBe(false);
         });
 
         it('value boolean', () => {
-            const value = new BooleanValueObject(true);
+            const value = BooleanValueObject.create(true);
             const result = textFunction.calculate(value);
             expect(result.getValue()).toBe(false);
         });
 
         it('value string', () => {
-            const value = new StringValueObject('a1');
+            const value = StringValueObject.create('a1');
             const result = textFunction.calculate(value);
             expect(result.getValue()).toBe(false);
         });
 
         it('value number 1', () => {
-            const value = new NumberValueObject(1);
+            const value = NumberValueObject.create(1);
             const result = textFunction.calculate(value);
             expect(result.getValue()).toBe(false);
         });
 
         it('value number 0', () => {
-            const value = new NumberValueObject(0);
+            const value = NumberValueObject.create(0);
             const result = textFunction.calculate(value);
             expect(result.getValue()).toBe(false);
         });
 
         it('value array', () => {
-            const value = new ArrayValueObject({
+            const value = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     ['a1'],
                     [null],

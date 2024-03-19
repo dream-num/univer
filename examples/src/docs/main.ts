@@ -50,7 +50,6 @@ univer.registerPlugin(DebuggerPlugin);
 univer.registerPlugin(UniverUIPlugin, {
     container: 'app',
     header: true,
-    toolbar: true,
 });
 univer.registerPlugin(UniverDocsPlugin, {
     standalone: true,

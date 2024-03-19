@@ -29,7 +29,7 @@ export class Match extends BaseFunction {
         matchType?: BaseValueObject
     ) {
         if (lookupValue == null || lookupArray == null) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         if (lookupValue.isError()) {
@@ -37,11 +37,11 @@ export class Match extends BaseFunction {
         }
 
         if (lookupArray.isError()) {
-            return new ErrorValueObject(ErrorType.REF);
+            return ErrorValueObject.create(ErrorType.REF);
         }
 
         if (!lookupArray.isArray()) {
-            return new ErrorValueObject(ErrorType.VALUE);
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         const rowCountLookup = lookupArray.getRowCount();
@@ -49,17 +49,17 @@ export class Match extends BaseFunction {
         const columnCountLookup = lookupArray.getColumnCount();
 
         if (rowCountLookup !== 1 && columnCountLookup !== 1) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         if (matchType?.isError()) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         const matchTypeValue = this.getMatchTypeValue(matchType);
 
         if (matchTypeValue == null) {
-            return new ErrorValueObject(ErrorType.VALUE);
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         if (lookupValue.isArray()) {
@@ -87,7 +87,7 @@ export class Match extends BaseFunction {
         const result = searchArray.orderSearch(value, searchType);
 
         if (result == null) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         if (result instanceof ErrorValueObject) {
@@ -96,7 +96,7 @@ export class Match extends BaseFunction {
 
         const resultNumber = searchArray.getRowCount() === 1 ? result.column + 1 : result.row + 1;
 
-        return new NumberValueObject(resultNumber);
+        return NumberValueObject.create(resultNumber);
     }
 
     private _getSearchModeValue(searchModeValue: number) {

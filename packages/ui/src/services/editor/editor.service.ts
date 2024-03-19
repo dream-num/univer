@@ -15,7 +15,7 @@
  */
 
 import type { DocumentDataModel, IDocumentBody, IDocumentData, IDocumentStyle, IPosition, Nullable } from '@univerjs/core';
-import { DEFAULT_EMPTY_DOCUMENT_VALUE, Disposable, FOCUSING_UNIVER_EDITOR_SINGLE_MODE, HorizontalAlign, IContextService, IUniverInstanceService, toDisposable, VerticalAlign } from '@univerjs/core';
+import { DEFAULT_EMPTY_DOCUMENT_VALUE, Disposable, FOCUSING_EDITOR_INPUT_FORMULA, FOCUSING_UNIVER_EDITOR_SINGLE_MODE, HorizontalAlign, IContextService, IUniverInstanceService, toDisposable, VerticalAlign } from '@univerjs/core';
 import type { IDisposable } from '@wendellhu/redi';
 import { createIdentifier, Inject } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
@@ -424,7 +424,21 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         }
         const editor = this.getEditor(editorUnitId);
 
-        return !this.getSpreadsheetFocusState() || !editor || editor.isSheetEditor();
+        if (!editor || editor.isSheetEditor()) {
+            return true;
+        }
+
+        if (editor.onlyInputRange() !== true && editor.onlyInputFormula() !== true) {
+            this.blur();
+            return true;
+        }
+
+        if (editor.onlyInputFormula() === true && this._contextService.getContextValue(FOCUSING_EDITOR_INPUT_FORMULA) !== true) {
+            this.blur();
+            return true;
+        }
+
+        return !this.getSpreadsheetFocusState();
     }
 
     blur() {

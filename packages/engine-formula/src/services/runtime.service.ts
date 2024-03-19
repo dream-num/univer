@@ -521,11 +521,11 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
                 this._checkIfArrayFormulaRangeHasData(unitId, sheetId, row, column, arrayRange) ||
                 this._checkIfArrayFormulaExceeded(rowCount, columnCount, arrayRange)
             ) {
-                const errorObject = this._objectValueToCellValue(new ErrorValueObject(ErrorType.SPILL));
+                const errorObject = this._objectValueToCellValue(ErrorValueObject.create(ErrorType.SPILL));
                 sheetData.setValue(row, column, errorObject);
                 clearArrayUnitData.setValue(row, column, errorObject);
             } else {
-                const spillError = new ErrorValueObject(ErrorType.SPILL);
+                const spillError = ErrorValueObject.create(ErrorType.SPILL);
                 objectValueRefOrArray.iterator((valueObject, rowIndex, columnIndex) => {
                     const value = this._objectValueToCellValue(valueObject);
                     if (rowIndex === startRow && columnIndex === startColumn) {

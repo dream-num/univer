@@ -16,13 +16,14 @@
 
 import numfmt from '@univerjs/engine-numfmt';
 import type { FormatType } from '@univerjs/sheets';
+import { LocaleType } from '@univerjs/core';
 
 export const getPatternType = (pattern: string): FormatType => numfmt.getInfo(pattern).type || 'unknown';
-export const getPatternPreview = (pattern: string, value: number) => {
+export const getPatternPreview = (pattern: string, value: number, _locale?: LocaleType) => {
     const info = numfmt.getInfo(pattern);
-
+    const locale = _locale === LocaleType.ZH_CN ? 'zh-CN' : 'en';
     const negInfo = info._partitions[1];
-    const result = numfmt.format(pattern, value, { locale: 'zh-CN' });
+    const result = numfmt.format(pattern, value, { locale });
     if (value < 0) {
         return {
             result,

@@ -17,7 +17,6 @@
 import './index.less';
 
 import { ICommandService, LocaleService, Range } from '@univerjs/core';
-import numfmt from '@univerjs/engine-numfmt';
 import { ITextSelectionRenderManager } from '@univerjs/engine-render';
 import type { FormatType } from '@univerjs/sheets';
 import { SelectionManagerService } from '@univerjs/sheets';
@@ -27,7 +26,7 @@ import React from 'react';
 import { MENU_OPTIONS } from '../../base/const/MENU-OPTIONS';
 import { SetNumfmtCommand } from '../../commands/commands/set-numfmt.command';
 import { OpenNumfmtPanelOperator } from '../../commands/operations/open.numfmt.panel.operation';
-import { getPatternType } from '../../utils/pattern';
+import { getPatternPreview, getPatternType } from '../../utils/pattern';
 
 export const MoreNumfmtType = (props: { value?: string }) => {
     const localeService = useDependency(LocaleService);
@@ -88,7 +87,7 @@ export const Options = () => {
                     >
                         <div>{localeService.t(item.label)}</div>
                         <div className="m-l-26">
-                            {item.pattern ? numfmt.format(item.pattern || '', defaultValue, { locale: 'zh-CN' }) : ''}
+                            {item.pattern ? getPatternPreview(item.pattern || '', defaultValue, localeService.getCurrentLocale()).result : ''}
                         </div>
                     </div>
                 );

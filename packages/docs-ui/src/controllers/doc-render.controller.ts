@@ -143,6 +143,13 @@ export class DocRenderController extends RxDisposable {
                         return;
                     }
 
+                    // TODO: `disabled` is only used for read only demo, and will be removed in the future.
+                    const disabled = !!skeleton.getViewModel().getDataModel().getSnapshot().disabled;
+
+                    if (disabled) {
+                        return;
+                    }
+
                     skeleton.calculate();
 
                     if (this._editorService.isEditor(unitId)) {

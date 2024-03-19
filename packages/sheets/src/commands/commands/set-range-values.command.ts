@@ -30,12 +30,10 @@ import type { IAccessor } from '@wendellhu/redi';
 import { SelectionManagerService } from '../../services/selection-manager.service';
 import { INTERCEPTOR_POINT } from '../../services/sheet-interceptor/interceptor-const';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
-import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
+import type { ISheetCommandSharedParams } from '../utils/interface';
 
-export interface ISetRangeValuesCommandParams {
-    subUnitId?: string;
-    unitId?: string;
+export interface ISetRangeValuesCommandParams extends Partial<ISheetCommandSharedParams> {
     range?: IRange;
 
     /**
@@ -52,7 +50,7 @@ export interface ISetRangeValuesCommandParams {
 export const SetRangeValuesCommand: ICommand = {
     id: 'sheet.command.set-range-values',
     type: CommandType.COMMAND,
-    handler: async (accessor: IAccessor, params: ISetRangeValuesCommandParams) => {
+    handler: (accessor: IAccessor, params: ISetRangeValuesCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -96,15 +94,12 @@ export const SetRangeValuesCommand: ICommand = {
             realCellValue = value as IObjectMatrixPrimitiveType<ICellData>;
         }
 
-        const setRangeValuesMutationParams: ISetRangeValuesMutationParams = {
+        const setRangeValuesMutationParams = {
             subUnitId,
             unitId,
             cellValue: realCellValue ?? cellValue.getMatrix(),
         };
-        const undoSetRangeValuesMutationParams: ISetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(
-            accessor,
-            setRangeValuesMutationParams
-        );
+        const undoSetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(accessor, setRangeValuesMutationParams);
 
         if (
             !sheetInterceptorService.fetchThroughInterceptors(INTERCEPTOR_POINT.PERMISSION)(null, {
@@ -120,13 +115,13 @@ export const SetRangeValuesCommand: ICommand = {
             setRangeValuesMutationParams
         );
 
+        // may cause performance issues
         const { undos, redos } = sheetInterceptorService.onCommandExecute({
             id: SetRangeValuesCommand.id,
             params: { ...setRangeValuesMutationParams, range: currentSelections },
         });
 
-        const result = await sequenceExecute([...redos], commandService);
-
+        const result = sequenceExecute([...redos], commandService);
         if (setValueMutationResult && result.result) {
             undoRedoService.pushUndoRedo({
                 unitID: unitId,

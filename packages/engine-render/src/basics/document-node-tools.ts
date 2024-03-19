@@ -17,23 +17,23 @@
 import type { IDocumentBody, Nullable } from '@univerjs/core';
 import { checkParagraphHasIndentByStyle, DataStreamTreeTokenType } from '@univerjs/core';
 
-import type { IDocumentSkeletonSpan } from './i-document-skeleton-cached';
-import { SpanType } from './i-document-skeleton-cached';
+import type { IDocumentSkeletonGlyph } from './i-document-skeleton-cached';
+import { GlyphType } from './i-document-skeleton-cached';
 
-export function hasListSpan(span: Nullable<IDocumentSkeletonSpan>) {
-    const divide = span?.parent;
+export function hasListGlyph(glyph: Nullable<IDocumentSkeletonGlyph>) {
+    const divide = glyph?.parent;
 
     if (divide == null) {
         return false;
     }
 
-    const spanGroup = divide.spanGroup;
+    const glyphGroup = divide.glyphGroup;
 
-    return spanGroup[0]?.spanType === SpanType.LIST;
+    return glyphGroup[0]?.glyphType === GlyphType.LIST;
 }
 
-export function isIndentBySpan(span: Nullable<IDocumentSkeletonSpan>, body?: IDocumentBody) {
-    const paragraph = getParagraphBySpan(span, body);
+export function isIndentByGlyph(glyph: Nullable<IDocumentSkeletonGlyph>, body?: IDocumentBody) {
+    const paragraph = getParagraphByGlyph(glyph, body);
     if (paragraph == null) {
         return false;
     }
@@ -46,20 +46,20 @@ export function isIndentBySpan(span: Nullable<IDocumentSkeletonSpan>, body?: IDo
     return checkParagraphHasIndentByStyle(paragraphStyle);
 }
 
-export function isLastSpan(span: Nullable<IDocumentSkeletonSpan>) {
-    const divide = span?.parent;
+export function isLastGlyph(glyph: Nullable<IDocumentSkeletonGlyph>) {
+    const divide = glyph?.parent;
 
     const line = divide?.parent;
 
-    const spanGroup = divide?.spanGroup;
+    const glyphGroup = divide?.glyphGroup;
 
     const divides = line?.divides;
 
-    if (spanGroup && span && divides && divide) {
-        const spanIndex = spanGroup.indexOf(span);
+    if (glyphGroup && glyph && divides && divide) {
+        const glyphIndex = glyphGroup.indexOf(glyph);
         const divideIndex = divides.indexOf(divide);
 
-        if (divideIndex === divides.length - 1 && spanIndex === spanGroup.length - 1) {
+        if (divideIndex === divides.length - 1 && glyphIndex === glyphGroup.length - 1) {
             return true;
         }
     }
@@ -67,24 +67,24 @@ export function isLastSpan(span: Nullable<IDocumentSkeletonSpan>) {
     return false;
 }
 
-export function isFirstSpan(span: Nullable<IDocumentSkeletonSpan>) {
-    const divide = span?.parent;
+export function isFirstGlyph(glyph: Nullable<IDocumentSkeletonGlyph>) {
+    const divide = glyph?.parent;
 
     const line = divide?.parent;
 
-    const spanGroup = divide?.spanGroup;
+    const glyphGroup = divide?.glyphGroup;
 
     const divides = line?.divides;
 
-    if (spanGroup && span && divides && divide) {
-        const spanIndex = spanGroup.indexOf(span);
+    if (glyphGroup && glyph && divides && divide) {
+        const glyphIndex = glyphGroup.indexOf(glyph);
         const divideIndex = divides.indexOf(divide);
 
-        if (divideIndex === 0 && spanIndex === 0) {
+        if (divideIndex === 0 && glyphIndex === 0) {
             return true;
         }
 
-        if (divideIndex === 0 && spanIndex === 1 && spanGroup[0].spanType === SpanType.LIST) {
+        if (divideIndex === 0 && glyphIndex === 1 && glyphGroup[0].glyphType === GlyphType.LIST) {
             return true;
         }
     }
@@ -92,8 +92,8 @@ export function isFirstSpan(span: Nullable<IDocumentSkeletonSpan>) {
     return false;
 }
 
-export function getParagraphBySpan(span: Nullable<IDocumentSkeletonSpan>, body?: IDocumentBody) {
-    const line = span?.parent?.parent;
+export function getParagraphByGlyph(glyph: Nullable<IDocumentSkeletonGlyph>, body?: IDocumentBody) {
+    const line = glyph?.parent?.parent;
     if (line == null || body == null) {
         return;
     }
@@ -110,16 +110,16 @@ export function getParagraphBySpan(span: Nullable<IDocumentSkeletonSpan>, body?:
     }
 }
 
-export function isPlaceholderOrSpace(span: Nullable<IDocumentSkeletonSpan>) {
-    if (span == null) {
+export function isPlaceholderOrSpace(glyph: Nullable<IDocumentSkeletonGlyph>) {
+    if (glyph == null) {
         return false;
     }
 
     if (
         [DataStreamTreeTokenType.PARAGRAPH, DataStreamTreeTokenType.TAB, DataStreamTreeTokenType.SECTION_BREAK].indexOf(
-            span.streamType
+            glyph.streamType
         ) !== -1 ||
-        span.content === DataStreamTreeTokenType.SPACE
+        glyph.content === DataStreamTreeTokenType.SPACE
     ) {
         return true;
     }
@@ -127,22 +127,22 @@ export function isPlaceholderOrSpace(span: Nullable<IDocumentSkeletonSpan>) {
     return false;
 }
 
-export function isSameLine(span1: Nullable<IDocumentSkeletonSpan>, span2: Nullable<IDocumentSkeletonSpan>) {
-    if (span1 == null) {
+export function isSameLine(glyph1: Nullable<IDocumentSkeletonGlyph>, glyph2: Nullable<IDocumentSkeletonGlyph>) {
+    if (glyph1 == null) {
         return false;
     }
 
-    if (span2 == null) {
+    if (glyph2 == null) {
         return false;
     }
 
-    if (span1.parent == null) {
+    if (glyph1.parent == null) {
         return false;
     }
 
-    if (span2.parent == null) {
+    if (glyph2.parent == null) {
         return false;
     }
 
-    return span1.parent.parent === span2.parent.parent;
+    return glyph1.parent.parent === glyph2.parent.parent;
 }

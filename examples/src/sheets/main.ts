@@ -24,7 +24,7 @@ import { UniverFindReplacePlugin } from '@univerjs/find-replace';
 import type { IUniverRPCMainThreadConfig } from '@univerjs/rpc';
 import { UniverRPCMainThreadPlugin } from '@univerjs/rpc';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
-import { UniverSheetsFindPlugin } from '@univerjs/sheets-find-replace';
+import { UniverSheetsFindReplacePlugin } from '@univerjs/sheets-find-replace';
 import { UniverSheetsFormulaPlugin } from '@univerjs/sheets-formula';
 import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
@@ -54,7 +54,6 @@ univer.registerPlugin(UniverRenderEnginePlugin);
 univer.registerPlugin(UniverUIPlugin, {
     container: 'app',
     header: true,
-    toolbar: true,
     footer: true,
 });
 
@@ -80,12 +79,13 @@ univer.registerPlugin(UniverRPCMainThreadPlugin, {
 
 // find replace
 univer.registerPlugin(UniverFindReplacePlugin);
-univer.registerPlugin(UniverSheetsFindPlugin);
+// univer.registerPlugin(UniverSheetsFindPlugin);
 univer.registerPlugin(SheetsConditionalFormatPlugin);
 
 // data validation
 univer.registerPlugin(UniverDataValidationPlugin);
 univer.registerPlugin(UniverSheetsDataValidationPlugin);
+univer.registerPlugin(UniverSheetsFindReplacePlugin);
 
 // create univer sheet instance
 univer.createUniverSheet(DEFAULT_WORKBOOK_DATA_DEMO);

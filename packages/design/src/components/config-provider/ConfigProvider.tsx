@@ -15,6 +15,7 @@
  */
 
 import React, { createContext } from 'react';
+import canUseDom from 'rc-util/lib/Dom/canUseDom';
 
 import type { ILocale } from '../../locale';
 import { enUS } from '../../locale';
@@ -22,12 +23,12 @@ import { enUS } from '../../locale';
 export interface IConfigProviderProps {
     children: React.ReactNode;
     locale: ILocale;
-    mountContainer: HTMLElement;
+    mountContainer: HTMLElement | null;
 }
 
 export const ConfigContext = createContext<Omit<IConfigProviderProps, 'children'>>({
     locale: enUS,
-    mountContainer: document.body,
+    mountContainer: canUseDom() ? document.body : null,
 });
 
 export function ConfigProvider(props: IConfigProviderProps) {

@@ -195,7 +195,7 @@ export class FunctionNode extends BaseAstNode {
             } else {
                 const arrayValues = transformToValueObject(resultVariantCustom);
 
-                resultVariant = new ArrayValueObject({
+                resultVariant = ArrayValueObject.create({
                     calculateValueList: arrayValues,
                     rowCount: arrayValues.length,
                     columnCount: arrayValues[0]?.length || 0,
@@ -268,10 +268,16 @@ export class FunctionNodeFactory extends BaseAstNodeFactory {
         }
         const token = param.getToken();
 
-        const { tokenTrim, minusPrefixNode, atPrefixNode } = prefixHandler(token.trim().toUpperCase(), this._functionService, this._injector);
+        const { tokenTrim, minusPrefixNode, atPrefixNode } = prefixHandler(token.trim(), this._functionService, this._injector);
 
-        if (this._functionService.hasExecutor(tokenTrim)) {
-            const functionNode = this.create(tokenTrim);
+        if (!Number.isNaN(Number(tokenTrim))) {
+            return ErrorNode.create(ErrorType.VALUE);
+        }
+
+        const tokenTrimUpper = tokenTrim.toUpperCase();
+
+        if (this._functionService.hasExecutor(tokenTrimUpper)) {
+            const functionNode = this.create(tokenTrimUpper);
             if (atPrefixNode) {
                 functionNode.setParent(atPrefixNode);
                 // return atPrefixNode;

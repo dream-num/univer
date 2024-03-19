@@ -17,7 +17,8 @@
 const locale = {
     sheet: {
         numfmt: {
-            title: '数据格式',
+            percent: '百分比',
+            title: '数字格式',
             numfmtType: '格式类型',
             cancel: '取消',
             confirm: '确认',

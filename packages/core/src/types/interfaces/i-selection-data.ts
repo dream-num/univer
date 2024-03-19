@@ -43,7 +43,14 @@ export interface ISelectionCellWithCoord extends IPosition, ISingleCell {
 }
 
 export interface ISelection {
+    /**
+     * Sheet selection range.
+     */
     range: IRange;
+
+    /**
+     * The highlighted cell in the selection range. If there are several selections, only one selection would have a primary cell.
+     */
     primary: Nullable<ISelectionCell>;
 }
 

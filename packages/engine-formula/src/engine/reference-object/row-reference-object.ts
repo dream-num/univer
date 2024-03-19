@@ -42,18 +42,18 @@ export class RowReferenceObject extends BaseReferenceObject {
 
     override unionBy(referenceObject: BaseReferenceObject) {
         if (!referenceObject.isRow()) {
-            return new ErrorValueObject(ErrorType.REF);
+            return ErrorValueObject.create(ErrorType.REF);
         }
 
         const rowReferenceObject = referenceObject as RowReferenceObject;
         if (rowReferenceObject.getForcedSheetName() !== undefined && rowReferenceObject.getForcedSheetName() !== '') {
-            return new ErrorValueObject(ErrorType.REF);
+            return ErrorValueObject.create(ErrorType.REF);
         }
 
         const currentRangeData = this.getRangeData();
 
         // if (currentRangeData.endRow !== -1) {
-        //     return new ErrorValueObject(ErrorType.REF);
+        //     return ErrorValueObject.create(ErrorType.REF);
         // }
 
         const newRow = rowReferenceObject.getRangeData().startRow;

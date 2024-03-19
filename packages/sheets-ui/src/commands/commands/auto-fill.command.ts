@@ -84,12 +84,6 @@ export const AutoClearContentCommand: ICommand = {
                 unitID: unitId,
                 undoMutations: [{ id: SetRangeValuesMutation.id, params: undoClearMutationParams }],
                 redoMutations: [{ id: SetRangeValuesMutation.id, params: clearMutationParams }],
-                undo() {
-                    return commandService.syncExecuteCommand(SetRangeValuesMutation.id, undoClearMutationParams);
-                },
-                redo() {
-                    return commandService.syncExecuteCommand(SetRangeValuesMutation.id, clearMutationParams);
-                },
             });
 
             return true;

@@ -54,32 +54,39 @@ export function getDevicePixelRatio(): number {
     return _pixelRatio;
 }
 
-export function drawLineByBorderType(ctx: UniverRenderingContext, type: BORDER_TYPE, position: IPosition) {
+/**
+ *
+ * @param ctx canvas context
+ * @param type top bottom left right
+ * @param lineWidthBuffer Solving the problem of mitered corners in the drawing of borders thicker than 2 pixels, caused by the line segments being centered.
+ * @param position border draw position
+ */
+export function drawLineByBorderType(ctx: UniverRenderingContext, type: BORDER_TYPE, lineWidthBuffer: number, position: IPosition) {
     let drawStartX = 0;
     let drawStartY = 0;
     let drawEndX = 0;
     let drawEndY = 0;
     const { startX, startY, endX, endY } = position;
     if (type === BORDER_TYPE.TOP) {
-        drawStartX = startX;
+        drawStartX = startX - lineWidthBuffer;
         drawStartY = startY;
-        drawEndX = endX;
+        drawEndX = endX + lineWidthBuffer;
         drawEndY = startY;
     } else if (type === BORDER_TYPE.BOTTOM) {
-        drawStartX = startX;
+        drawStartX = startX - lineWidthBuffer;
         drawStartY = endY;
-        drawEndX = endX;
+        drawEndX = endX - lineWidthBuffer;
         drawEndY = endY;
     } else if (type === BORDER_TYPE.LEFT) {
         drawStartX = startX;
-        drawStartY = startY;
+        drawStartY = startY - lineWidthBuffer;
         drawEndX = startX;
-        drawEndY = endY;
+        drawEndY = endY + lineWidthBuffer;
     } else if (type === BORDER_TYPE.RIGHT) {
         drawStartX = endX;
-        drawStartY = startY;
+        drawStartY = startY - lineWidthBuffer;
         drawEndX = endX;
-        drawEndY = endY;
+        drawEndY = endY + lineWidthBuffer;
     }
 
     // ctx.clearRect(drawStartX - 1, drawStartY - 1, drawEndX - drawStartX + 2, drawEndY - drawStartY + 2);

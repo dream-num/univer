@@ -70,7 +70,7 @@ export class CalculateResultApplyController extends Disposable {
                         const setRangeValuesMutation = {
                             subUnitId: sheetId,
                             unitId,
-                            cellValue: cellData.getData(),
+                            cellValue: cellData,
                         };
 
                         redoMutationsInfo.push({

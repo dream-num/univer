@@ -32,7 +32,7 @@ export class Address extends BaseFunction {
         sheetText?: BaseValueObject
     ) {
         if (rowNumber == null || columnNumber == null) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         if (rowNumber.isError()) {
@@ -59,7 +59,7 @@ export class Address extends BaseFunction {
         const column = Number(columnNumber.getValue()) - 1;
 
         if (Number.isNaN(row) || Number.isNaN(column)) {
-            return new ErrorValueObject(ErrorType.VALUE);
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         const absType = absNumber ? transformAbsoluteRefType(absNumber.getValue()) : AbsoluteRefType.ALL;
@@ -79,7 +79,7 @@ export class Address extends BaseFunction {
         };
 
         const rangeString = a1 && !a1Value ? serializeRangeToR1C1(range) : serializeRange(range);
-        return new StringValueObject(sheetName !== '' ? `${sheetName}!${rangeString}` : rangeString);
+        return StringValueObject.create(sheetName !== '' ? `${sheetName}!${rangeString}` : rangeString);
     }
 }
 

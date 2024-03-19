@@ -22,8 +22,6 @@ import { RANGE_TYPE } from '../types/interfaces';
 
 /**
  * Manage configuration information of all rows, get row height, row length, set row height, etc.
- *
- * @deprecated This class is not necessary. It increases the complexity of the code and does not bring any benefits.
  */
 export class RowManager {
     private _rowData: IObjectArrayPrimitiveType<Partial<IRowData>>;

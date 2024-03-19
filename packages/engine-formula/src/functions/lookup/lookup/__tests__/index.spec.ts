@@ -23,7 +23,7 @@ import { NumberValueObject, StringValueObject } from '../../../../engine/value-o
 import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
 import { Lookup } from '..';
 
-const arrayValueObject1 = new ArrayValueObject(/*ts*/ `{
+const arrayValueObject1 = ArrayValueObject.create(/*ts*/ `{
     1, "First";
     2, "Second";
     3, "Third";
@@ -34,7 +34,7 @@ const arrayValueObject1 = new ArrayValueObject(/*ts*/ `{
     8, "Eighth"
 }`);
 
-const arrayValueObject2 = new ArrayValueObject(/*ts*/ `{
+const arrayValueObject2 = ArrayValueObject.create(/*ts*/ `{
     1;
     2;
     3;
@@ -45,7 +45,7 @@ const arrayValueObject2 = new ArrayValueObject(/*ts*/ `{
     8
 }`);
 
-const arrayValueObject3 = new ArrayValueObject(/*ts*/ `{
+const arrayValueObject3 = ArrayValueObject.create(/*ts*/ `{
     11;
     22;
     33;
@@ -56,7 +56,7 @@ const arrayValueObject3 = new ArrayValueObject(/*ts*/ `{
     88
 }`);
 
-const matchArrayValueObject = new ArrayValueObject(/*ts*/ `{
+const matchArrayValueObject = ArrayValueObject.create(/*ts*/ `{
     1, 3;
     4, 6;
     8, 7
@@ -68,7 +68,7 @@ describe('Test vlookup', () => {
     describe('Vector', () => {
         it('Search eight', async () => {
             const resultObject = textFunction.calculate(
-                new NumberValueObject(8),
+                NumberValueObject.create(8),
                 arrayValueObject2,
                 arrayValueObject3
             ) as BaseValueObject;
@@ -77,7 +77,7 @@ describe('Test vlookup', () => {
 
         it('Exceeding columns', async () => {
             const resultObject = textFunction.calculate(
-                new NumberValueObject(11),
+                NumberValueObject.create(11),
                 arrayValueObject2,
                 arrayValueObject3
             ) as BaseValueObject;
@@ -86,7 +86,7 @@ describe('Test vlookup', () => {
 
         it('Match string', async () => {
             const resultObject = textFunction.calculate(
-                new StringValueObject('999'),
+                StringValueObject.create('999'),
                 arrayValueObject2,
                 arrayValueObject3
             ) as BaseValueObject;
@@ -96,7 +96,7 @@ describe('Test vlookup', () => {
 
     describe('Array', () => {
         it('Search two', async () => {
-            const resultObject = textFunction.calculate(new NumberValueObject(2), arrayValueObject1) as BaseValueObject;
+            const resultObject = textFunction.calculate(NumberValueObject.create(2), arrayValueObject1) as BaseValueObject;
             expect(resultObject.getValue().toString()).toBe('Second');
         });
     });

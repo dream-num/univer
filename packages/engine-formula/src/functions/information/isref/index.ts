@@ -24,13 +24,13 @@ export class Isref extends BaseFunction {
 
     override calculate(value: BaseValueObject) {
         if (value == null) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         if (value.isReferenceObject()) {
-            return new BooleanValueObject(true);
+            return BooleanValueObject.create(true);
         }
 
-        return new BooleanValueObject(false);
+        return BooleanValueObject.create(false);
     }
 }

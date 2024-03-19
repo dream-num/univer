@@ -19,13 +19,13 @@ import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import { StringValueObject } from '../../../engine/value-object/primitive-object';
+import { createStringValueObjectByRawValue } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class Concatenate extends BaseFunction {
     override calculate(...textValues: BaseValueObject[]) {
         if (textValues.length === 0) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         let maxRowLength = 0;
@@ -45,7 +45,7 @@ export class Concatenate extends BaseFunction {
         let result: BaseValueObject | null = null;
 
         for (const textValue of textValues) {
-            const textValueArray = expandArrayValueObject(maxRowLength, maxColumnLength, textValue, new ErrorValueObject(ErrorType.NA));
+            const textValueArray = expandArrayValueObject(maxRowLength, maxColumnLength, textValue, ErrorValueObject.create(ErrorType.NA));
             result = textValueArray.mapValue((textValueObject, rowIndex, columnIndex) => {
                 const resultValueObject = result && (result as ArrayValueObject).get(rowIndex, columnIndex);
 
@@ -60,12 +60,12 @@ export class Concatenate extends BaseFunction {
                 const resultValueObjectString = resultValueObject?.isNull() ? '' : resultValueObject?.getValue() ?? '';
                 const textValueObjectString = textValueObject?.isNull() ? '' : textValueObject?.getValue() ?? '';
 
-                return new StringValueObject(`${resultValueObjectString}${textValueObjectString}`);
+                return createStringValueObjectByRawValue(`${resultValueObjectString}${textValueObjectString}`);
             });
         }
 
         if (!result) {
-            return new ErrorValueObject(ErrorType.VALUE);
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         return result;

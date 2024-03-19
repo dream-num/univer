@@ -48,18 +48,18 @@ export class UnionNode extends BaseAstNode {
         if (this._operatorString === matchToken.COLON) {
             result = this._unionFunction(leftNode, rightNode) as FunctionVariantType;
         } else {
-            result = new ErrorValueObject(ErrorType.NAME);
+            result = ErrorValueObject.create(ErrorType.NAME);
         }
         this.setValue(result);
     }
 
     private _unionFunction(variant1: FunctionVariantType, variant2: FunctionVariantType) {
         if (variant1.isError() || variant2.isError()) {
-            return new ErrorValueObject(ErrorType.REF);
+            return ErrorValueObject.create(ErrorType.REF);
         }
 
         if (!variant1.isReferenceObject() || !variant2.isReferenceObject()) {
-            return new ErrorValueObject(ErrorType.REF);
+            return ErrorValueObject.create(ErrorType.REF);
         }
 
         variant1 = variant1 as BaseReferenceObject;
@@ -76,7 +76,7 @@ export class UnionNode extends BaseAstNode {
             return variant1.unionBy(variant2);
         }
 
-        return new ErrorValueObject(ErrorType.REF);
+        return ErrorValueObject.create(ErrorType.REF);
     }
 }
 

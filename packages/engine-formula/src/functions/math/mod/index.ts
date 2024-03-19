@@ -22,11 +22,19 @@ import { BaseFunction } from '../../base-function';
 export class Mod extends BaseFunction {
     override calculate(number: BaseValueObject, divisor: BaseValueObject) {
         if (number == null || divisor == null) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
+        }
+
+        if (number.isString()) {
+            number = number.convertToNumberObjectValue();
         }
 
         if (number.isError()) {
             return number;
+        }
+
+        if (divisor.isString()) {
+            divisor = divisor.convertToNumberObjectValue();
         }
 
         if (divisor.isError()) {

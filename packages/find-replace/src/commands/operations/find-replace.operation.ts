@@ -24,7 +24,12 @@ export const OpenFindDialogOperation: IOperation = {
     type: CommandType.OPERATION,
     handler: (accessor) => {
         const findReplaceService = accessor.get(IFindReplaceService);
-        findReplaceService.start();
+        if (!findReplaceService.revealed) {
+            findReplaceService.start();
+        } else {
+            findReplaceService.focusFindInput();
+        }
+
         return true;
     },
 };
@@ -34,25 +39,14 @@ export const OpenReplaceDialogOperation: IOperation = {
     type: CommandType.OPERATION,
     handler: (accessor) => {
         const findReplaceService = accessor.get(IFindReplaceService);
-        findReplaceService.start();
-        return true;
-    },
-};
+        if (!findReplaceService.revealed) {
+            findReplaceService.start(true);
+        } else if (!findReplaceService.replaceRevealed) {
+            findReplaceService.revealReplace();
+        } else {
+            findReplaceService.focusFindInput();
+        }
 
-export const ToggleReplaceDialogOperation: IOperation = {
-    id: 'ui.operation.toggle-replace-dialog',
-    type: CommandType.OPERATION,
-    handler: (accessor) => {
-        const findReplaceService = accessor.get(IFindReplaceService);
-        // findReplaceService.
-        return true;
-    },
-};
-
-export const CloseFindReplaceDialogOperation: IOperation = {
-    id: 'ui.operation.close-find-replace-dialog',
-    type: CommandType.OPERATION,
-    handler: (accessor) => {
         return true;
     },
 };

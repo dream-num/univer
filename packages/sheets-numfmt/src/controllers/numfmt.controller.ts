@@ -310,7 +310,7 @@ export class NumfmtController extends Disposable implements INumfmtController {
                                         ) {
                                             return next(cell);
                                         }
-                                        const info = getPatternPreview(this._previewPattern, value as number);
+                                        const info = getPatternPreview(this._previewPattern, value as number, this._localeService.getCurrentLocale());
                                         if (info.color) {
                                             const colorMap = this._themeService.getCurrentTheme();
                                             const color = colorMap[`${info.color}500`];

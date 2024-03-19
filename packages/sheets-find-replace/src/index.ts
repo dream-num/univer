@@ -15,4 +15,4 @@
  */
 
 export { enUS, zhCN } from './locale';
-export { UniverSheetsFindPlugin } from './plugin';
+export { UniverSheetsFindReplacePlugin } from './plugin';

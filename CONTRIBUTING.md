@@ -104,6 +104,18 @@ To ensure code quality and consistency, please adhere to the following guideline
 -   Interfaces should be named starting with a capital "I".
 -   Do use conventional type names including .service, .controller, .menu, .command, .mutation, and .operation. Invent additional type names if you must but take care not to create too many.
 
+Sometimes you need to defined a dependency injection token. Please adhere to the following naming convention:
+
+```typescript
+export const IYourServiceOrControllerName = createIdentifier<IYourServiceOrControllerName>('<package-name>.<your-service-or-controller-name>.(service|controller)');
+```
+
+For example:
+
+```typescript
+export const ILogService = createIdentifier<ILogService>('core.log.service');
+```
+
 ### Submitting pull requests
 
 Before merging a pull request, please make sure the following requirements are met:

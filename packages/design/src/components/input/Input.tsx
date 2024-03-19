@@ -16,13 +16,23 @@
 
 import { CloseSingle } from '@univerjs/icons';
 import clsx from 'clsx';
+import type { InputProps } from 'rc-input';
 import RcInput from 'rc-input';
 import React from 'react';
 
 import styles from './index.module.less';
 
-export interface IInputProps {
+export interface IInputProps extends Pick<InputProps, 'onFocus' | 'onBlur'> {
+    /**
+     * Whether the input is autoFocus
+     * @default false
+     */
     autoFocus?: boolean;
+
+    /**
+     * The input class name
+     */
+    className?: string;
 
     /**
      * The input affix wrapper style
@@ -81,13 +91,14 @@ export interface IInputProps {
      */
     onChange?: (value: string) => void;
 
-    className?: string;
 }
 
 export function Input(props: IInputProps) {
     const {
         affixWrapperStyle,
+        autoFocus = false,
         type = 'text',
+        className,
         placeholder,
         value,
         size = 'middle',
@@ -96,8 +107,7 @@ export function Input(props: IInputProps) {
         onClick,
         onKeyDown,
         onChange,
-        autoFocus,
-        className,
+        ...rest
     } = props;
 
     function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -105,7 +115,7 @@ export function Input(props: IInputProps) {
         onChange?.(value);
     }
 
-    const _className = clsx({
+    const _className = clsx(className, {
         [styles.inputAffixWrapperMini]: size === 'mini',
         [styles.inputAffixWrapperSmall]: size === 'small',
         [styles.inputAffixWrapperMiddle]: size === 'middle',
@@ -115,12 +125,8 @@ export function Input(props: IInputProps) {
     return (
         <RcInput
             prefixCls={styles.input}
-            classNames={{
-                affixWrapper: _className,
-            }}
-            styles={{
-                affixWrapper: affixWrapperStyle,
-            }}
+            classNames={{ affixWrapper: _className }}
+            styles={{ affixWrapper: affixWrapperStyle }}
             autoFocus={autoFocus}
             type={type}
             placeholder={placeholder}
@@ -129,9 +135,8 @@ export function Input(props: IInputProps) {
             onClick={onClick}
             onKeyDown={onKeyDown}
             onChange={handleChange}
-            allowClear={{
-                clearIcon: allowClear ? <CloseSingle /> : <></>,
-            }}
+            allowClear={{ clearIcon: allowClear ? <CloseSingle /> : <></> }}
+            {...rest}
         />
     );
 }

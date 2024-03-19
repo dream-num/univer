@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import { CellValueType } from '@univerjs/protocol';
+
 import type { Nullable } from '../shared';
 import { ObjectMatrix, Rectangle, Tools } from '../shared';
 import { createRowColIter } from '../shared/row-col-iter';
@@ -27,11 +29,9 @@ import type { Styles } from './styles';
 import { SheetViewModel } from './view-model';
 
 /**
- * Worksheet instance represents a single sheet in a workbook.
+ * The model of a Worksheet.
  */
 export class Worksheet {
-    protected _initialized: boolean;
-
     protected _sheetId: string;
     protected _snapshot: IWorksheetData;
     protected _cellData: ObjectMatrix<ICellData>;
@@ -49,13 +49,11 @@ export class Worksheet {
 
         const { columnData, rowData, cellData } = this._snapshot;
         this._sheetId = this._snapshot.id ?? Tools.generateRandomId(6);
-        this._initialized = false;
         this._cellData = new ObjectMatrix<ICellData>(cellData);
         this._rowManager = new RowManager(this._snapshot, rowData);
         this._columnManager = new ColumnManager(this._snapshot, columnData);
 
-        // This view model will immediately injected with hooks from SheetViewModel service as Worksheet
-        // is constructed.
+        // This view model will immediately injected with hooks from SheetViewModel service as Worksheet is constructed.
         this._viewModel = new SheetViewModel();
     }
 
@@ -212,35 +210,6 @@ export class Worksheet {
         return this._snapshot.mergeData;
     }
 
-    /**
-     * @deprecated use `getMergedCell` instead
-     * @param row
-     * @param col
-     * @returns
-     */
-    getMergedCells(row: number, col: number): Nullable<IRange[]> {
-        const _rectangleList = this._snapshot.mergeData;
-        const rectList = [];
-        for (let i = 0; i < _rectangleList.length; i++) {
-            const range = _rectangleList[i];
-            if (
-                Rectangle.intersects(
-                    {
-                        startRow: row,
-                        startColumn: col,
-                        endRow: row,
-                        endColumn: col,
-                    },
-                    range
-                )
-            ) {
-                rectList.push(range);
-            }
-        }
-
-        return rectList.length ? rectList : null;
-    }
-
     getMergedCell(row: number, col: number): Nullable<IRange> {
         const rectangleList = this._snapshot.mergeData;
         for (let i = 0; i < rectangleList.length; i++) {
@@ -281,7 +250,6 @@ export class Worksheet {
      * Notice that `ICellData` here is not after copying. In another word, the object matrix here should be
      * considered as a slice of the original worksheet data matrix.
      */
-    // PERF: we could not skip indexes with merged cells, because we have already known the merged cells' range
     getMatrixWithMergedCells(
         row: number,
         col: number,
@@ -305,6 +273,8 @@ export class Worksheet {
             }
         });
 
+        // iterate over all merged cells in the range and remove non-top-left positions
+        // from the matrix we just created
         mergedCellsInRange.forEach((mergedCell) => {
             const { startColumn, startRow, endColumn, endRow } = mergedCell;
             createRowColIter(startRow, endRow, startColumn, endColumn).forEach((row, col) => {
@@ -659,4 +629,30 @@ export interface ICell {
     rowSpan?: number;
     colSpan?: number;
     value: ICellData;
+}
+
+/**
+ * Get pure text in a cell.
+ * @param cell
+ * @returns pure text in this cell
+ */
+export function extractPureTextFromCell(cell: ICellData): string {
+    const richTextValue = cell.p?.body?.dataStream;
+    if (richTextValue) return richTextValue;
+
+    const rawValue = cell.v;
+
+    if (typeof rawValue === 'string') {
+        if (cell.t === CellValueType.BOOLEAN) return rawValue.toUpperCase();
+        return rawValue;
+    };
+
+    if (typeof rawValue === 'number') {
+        if (cell.t === CellValueType.BOOLEAN) return rawValue ? 'TRUE' : 'FALSE';
+        return rawValue.toString();
+    };
+
+    if (typeof rawValue === 'boolean') return rawValue ? 'TRUE' : 'FALSE';
+
+    return '';
 }

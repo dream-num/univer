@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { isRealNum } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
@@ -23,29 +22,25 @@ import { BaseFunction } from '../../base-function';
 export class Count extends BaseFunction {
     override calculate(...variants: BaseValueObject[]) {
         if (variants.length === 0) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
-        let accumulatorAll: BaseValueObject = new NumberValueObject(0);
+        let accumulatorAll: BaseValueObject = NumberValueObject.create(0);
         for (let i = 0; i < variants.length; i++) {
-            let variant = variants[i];
+            const variant = variants[i];
 
             if (variant.isError()) {
                 continue;
             }
 
             if (variant.isArray()) {
-                variant = variant.count();
-                accumulatorAll = accumulatorAll.plus(variant as BaseValueObject);
+                accumulatorAll = accumulatorAll.plus(variant.count());
             } else if (variant.isString()) {
-                const value = variant.getValue();
-                const isStringNumber = isRealNum(value);
-
-                if (isStringNumber) {
-                    accumulatorAll = accumulatorAll.plus(new NumberValueObject(1));
+                if (!variant.convertToNumberObjectValue().isError()) {
+                    accumulatorAll = accumulatorAll.plus(NumberValueObject.create(1));
                 }
             } else if (!variant.isNull()) {
-                accumulatorAll = accumulatorAll.plus(new NumberValueObject(1));
+                accumulatorAll = accumulatorAll.plus(NumberValueObject.create(1));
             }
         }
 

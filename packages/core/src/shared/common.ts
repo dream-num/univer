@@ -253,7 +253,7 @@ export function handleStyleToString(style: IStyleData, isCell: boolean = false) 
                 if (style.ul?.s) {
                     // If there are existing lines, add new lines
                     if (str.indexOf('text-decoration-line') > -1) {
-                        str = str.replace(/(?<=text-decoration-line:.*)\b(?=;)/g, ' underline');
+                        str = str.replace(/(text-decoration-line:\s*[^;]+)(?=;)/g, (_, p1) => `${p1} underline`);
                     } else {
                         str += 'text-decoration-line: underline; ';
                     }
@@ -271,7 +271,7 @@ export function handleStyleToString(style: IStyleData, isCell: boolean = false) 
             () => {
                 if (style.st?.s) {
                     if (str.indexOf('text-decoration-line') > -1) {
-                        str = str.replace(/(?<=text-decoration-line:.*)\b(?=;)/g, ' line-through');
+                        str = str.replace(/(text-decoration-line:\s*[^;]+)(?=;)/g, (_, p1) => `${p1} line-through`);
                     } else {
                         str += 'text-decoration-line: line-through; ';
                     }
@@ -289,7 +289,7 @@ export function handleStyleToString(style: IStyleData, isCell: boolean = false) 
             () => {
                 if (style.ol?.s) {
                     if (str.indexOf('text-decoration-line') > -1) {
-                        str = str.replace(/(?<=text-decoration-line:.*)\b(?=;)/g, ' overline');
+                        str = str.replace(/(text-decoration-line:\s*[^;]+)(?=;)/g, (_, p1) => `${p1} overline`);
                     } else {
                         str += 'text-decoration-line: overline; ';
                     }

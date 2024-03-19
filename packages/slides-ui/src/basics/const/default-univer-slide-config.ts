@@ -40,8 +40,6 @@ export const DefaultToolbarConfig = {
 };
 
 export const DefaultSlideContainerConfig = {
-    outerLeft: false,
-    outerRight: false,
     header: true,
     footer: true,
     innerLeft: false,
@@ -50,8 +48,6 @@ export const DefaultSlideContainerConfig = {
     frozenHeaderRT: false,
     frozenHeaderLM: false,
     frozenContent: false,
-    infoBar: true,
-    toolbar: true,
 };
 
 export const DefaultSlideUIConfig = {

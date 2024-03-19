@@ -17,12 +17,12 @@
 import type { IUnitRange, Nullable } from '@univerjs/core';
 import { IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { Button, Dialog, Input, Tooltip } from '@univerjs/design';
-import { CloseSingle, DeleteSingle, SelectRangeSingle } from '@univerjs/icons';
+import { CloseSingle, DeleteSingle, IncreaseSingle, SelectRangeSingle } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useRef, useState } from 'react';
 
 import { deserializeRangeWithSheet, isReferenceString, serializeRange, serializeRangeWithSheet, serializeRangeWithSpreadsheet } from '@univerjs/engine-formula';
-import cs from 'clsx';
+import clsx from 'clsx';
 import { TextEditor } from '../editor/TextEditor';
 import { IEditorService } from '../../services/editor/editor.service';
 import { IRangeSelectorService } from '../../services/range-selector/range-selector.service';
@@ -38,22 +38,14 @@ export interface IRangeSelectorProps {
     isReadonly?: boolean; // Set the selector to read-only state.
     openForSheetUnitId?: Nullable<string>; //  Configuring which workbook the selector defaults to opening in determines whether the ref includes a [unitId] prefix.
     openForSheetSubUnitId?: Nullable<string>; // Configuring the default worksheet where the selector opens determines whether the ref includes a [unitId]sheet1 prefix.
+    width?: number; // The width of the selector.
+    size?: 'mini' | 'small' | 'middle' | 'large'; // The size of the selector.
+    placeholder?: string; // Placeholder text.
     className?: string;
 }
 
 export function RangeSelector(props: IRangeSelectorProps) {
-    const {
-        onChange,
-        id,
-        value = '',
-        onActive,
-        onValid,
-        isSingleChoice = false,
-        openForSheetUnitId,
-        openForSheetSubUnitId,
-        isReadonly = false,
-        className,
-    } = props;
+    const { onChange, id, value = '', width = 220, placeholder = '', size = 'middle', onActive, onValid, isSingleChoice = false, openForSheetUnitId, openForSheetSubUnitId, isReadonly = false, className } = props;
 
     const [rangeDataList, setRangeDataList] = useState<string[]>(['']);
 
@@ -198,17 +190,21 @@ export function RangeSelector(props: IRangeSelectorProps) {
             return;
         }
 
-        if (valid) {
-            setRangeDataList(rangeValue.split(','));
-        } else {
-            setRangeDataList(['']);
-        }
-
         editorService.closeRangePrompt();
 
         rangeSelectorService.setCurrentSelectorId(id);
 
         setSelectorVisible(true);
+
+        if (rangeValue.length > 0) {
+            if (valid) {
+                setRangeDataList(rangeValue.split(','));
+            } else {
+                setRangeDataList(['']);
+            }
+        } else {
+            rangeSelectorService.openSelector();
+        }
     }
 
     function onEditorActive(state: boolean) {
@@ -257,6 +253,10 @@ export function RangeSelector(props: IRangeSelectorProps) {
     function handleTextValueChange(value: Nullable<string>) {
         setRangeValue(value || '');
 
+        if (value === '') {
+            return;
+        }
+
         const ranges = value?.split(',').map((ref) => {
             const unitRange = deserializeRangeWithSheet(ref);
             return {
@@ -269,16 +269,28 @@ export function RangeSelector(props: IRangeSelectorProps) {
     }
 
     let sClassName = styles.rangeSelector;
-    if (!valid) {
+
+    if (isReadonly) {
+        sClassName = `${styles.rangeSelector} ${styles.rangeSelectorDisabled}`;
+    } else if (!valid) {
         sClassName = `${styles.rangeSelector} ${styles.rangeSelectorError}`;
     } else if (active) {
         sClassName = `${styles.rangeSelector} ${styles.rangeSelectorActive}`;
     }
 
+    let height = 32;
+    if (size === 'mini') {
+        height = 24;
+    } else if (size === 'small') {
+        height = 28;
+    } else if (size === 'large') {
+        height = 36;
+    }
+
     return (
         <>
-            <div className={cs(sClassName, className)} ref={selectorRef}>
-                <TextEditor value={value} isReadonly={isReadonly} isSingleChoice={isSingleChoice} openForSheetUnitId={openForSheetUnitId} openForSheetSubUnitId={openForSheetSubUnitId} onValid={onEditorValid} onActive={onEditorActive} onChange={handleTextValueChange} id={id} onlyInputRange={true} canvasStyle={{ fontSize: 10 }} className={styles.rangeSelectorEditor} />
+            <div className={sClassName} ref={selectorRef} style={{ width, height }}>
+                <TextEditor placeholder={placeholder} value={value} isReadonly={isReadonly} isSingleChoice={isSingleChoice} openForSheetUnitId={openForSheetUnitId} openForSheetSubUnitId={openForSheetSubUnitId} onValid={onEditorValid} onActive={onEditorActive} onChange={handleTextValueChange} id={id} onlyInputRange={true} canvasStyle={{ fontSize: 10 }} className={styles.rangeSelectorEditor} />
                 <Tooltip title={localeService.t('rangeSelector.buttonTooltip')} placement="bottom">
                     <button className={styles.rangeSelectorIcon} onClick={handleOpenModal}>
                         <SelectRangeSingle />
@@ -287,25 +299,25 @@ export function RangeSelector(props: IRangeSelectorProps) {
             </div>
 
             <Dialog
-                width="300px"
+                width="328px"
                 visible={selectorVisible}
                 title={localeService.t('rangeSelector.title')}
                 draggable
                 closeIcon={<CloseSingle />}
                 footer={(
                     <footer>
-                        <Button size="small" onClick={handleCloseModal}>{localeService.t('rangeSelector.cancel')}</Button>
-                        <Button style={{ marginLeft: 10 }} size="small" onClick={handleConform} type="primary">{localeService.t('rangeSelector.confirm')}</Button>
+                        <Button onClick={handleCloseModal}>{localeService.t('rangeSelector.cancel')}</Button>
+                        <Button style={{ marginLeft: 10 }} onClick={handleConform} type="primary">{localeService.t('rangeSelector.confirm')}</Button>
                     </footer>
                 )}
                 onClose={handleCloseModal}
 
             >
-                <div className={styles.rangeSelectorModal}>
+                <div className={clsx(styles.rangeSelectorModal, className)}>
                     {rangeDataList.map((item, index) => (
                         <div key={index} className={styles.rangeSelectorModalContainer}>
-                            <div style={{ display: rangeDataList.length === 1 ? '220px' : '200px' }} className={styles.rangeSelectorModalContainerInput}>
-                                <Input key={`input${index}`} onClick={() => setCurrentInputIndex(index)} size="small" value={item} onChange={(value) => changeItem(index, value)} />
+                            <div style={{ width: rangeDataList.length === 1 ? '280px' : '252px' }} className={styles.rangeSelectorModalContainerInput}>
+                                <Input className={currentInputIndex === index ? styles.rangeSelectorModalContainerInputActive : ((rangeDataList.length - 1 === index && currentInputIndex === -1) ? styles.rangeSelectorModalContainerInputActive : '')} placeholder={localeService.t('rangeSelector.placeHolder')} affixWrapperStyle={{ width: '100%' }} key={`input${index}`} onClick={() => setCurrentInputIndex(index)} value={item} onChange={(value) => changeItem(index, value)} />
                             </div>
                             <div style={{ display: rangeDataList.length === 1 ? 'none' : 'inline-block' }} className={styles.rangeSelectorModalContainerButton}>
                                 <DeleteSingle onClick={() => removeItem(index)} />
@@ -314,7 +326,10 @@ export function RangeSelector(props: IRangeSelectorProps) {
                     ))}
 
                     <div style={{ display: isSingleChoice ? 'none' : 'unset' }} className={styles.rangeSelectorModalAdd}>
-                        <Button size="small" onClick={handleAddRange}>{localeService.t('rangeSelector.addAnotherRange')}</Button>
+                        <Button type="link" size="small" onClick={handleAddRange} className={styles.rangeSelectorModalAddButton}>
+                            <IncreaseSingle />
+                            <span>{localeService.t('rangeSelector.addAnotherRange')}</span>
+                        </Button>
                     </div>
                 </div>
 

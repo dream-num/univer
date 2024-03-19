@@ -60,26 +60,26 @@ export class PrefixNode extends BaseAstNode {
 
         if (this._operatorString === prefixToken.MINUS) {
             result = this._functionExecutor!.calculate(
-                new NumberValueObject(0),
+                NumberValueObject.create(0),
                 value as BaseValueObject
             ) as FunctionVariantType;
         } else if (this._operatorString === prefixToken.AT) {
             result = this._handlerAT(value);
         } else {
-            result = new ErrorValueObject(ErrorType.VALUE);
+            result = ErrorValueObject.create(ErrorType.VALUE);
         }
         this.setValue(result);
     }
 
     private _handlerAT(value: FunctionVariantType) {
         if (!value.isReferenceObject()) {
-            return new ErrorValueObject(ErrorType.VALUE);
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         const currentValue = value as BaseReferenceObject;
 
         if (currentValue.isCell()) {
-            return new ErrorValueObject(ErrorType.VALUE);
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         const runtimeService = this._accessor.get(IFormulaRuntimeService);
@@ -101,7 +101,7 @@ export class PrefixNode extends BaseAstNode {
             return currentValue.getCellByPosition();
         }
 
-        return new ErrorValueObject(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 }
 

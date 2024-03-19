@@ -29,11 +29,11 @@ import { Address } from '..';
 describe('Test address', () => {
     const textFunction = new Address(FUNCTION_NAMES_LOOKUP.ADDRESS);
     const calculate = (row: number, column: number, abs?: number, a1?: boolean, sheet?: string) => {
-        const rowNumber = new NumberValueObject(row);
-        const columnNumber = new NumberValueObject(column);
-        const absNumber = abs ? new NumberValueObject(abs) : undefined;
-        const a1Value = a1 !== undefined ? new BooleanValueObject(a1) : undefined;
-        const sheetText = sheet ? new StringValueObject(sheet) : undefined;
+        const rowNumber = NumberValueObject.create(row);
+        const columnNumber = NumberValueObject.create(column);
+        const absNumber = abs ? NumberValueObject.create(abs) : undefined;
+        const a1Value = a1 !== undefined ? BooleanValueObject.create(a1) : undefined;
+        const sheetText = sheet ? StringValueObject.create(sheet) : undefined;
         const result = textFunction.calculate(rowNumber, columnNumber, absNumber, a1Value, sheetText);
         return result.getValue();
     };
@@ -70,7 +70,7 @@ describe('Test address', () => {
 
     describe('Fault situations', () => {
         it('Value error', async () => {
-            const error = new ErrorValueObject(ErrorType.VALUE);
+            const error = ErrorValueObject.create(ErrorType.VALUE);
             const errorValue = textFunction.calculate(error, error);
             expect(errorValue.isError()).toBeTruthy();
         });

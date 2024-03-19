@@ -34,10 +34,14 @@ packages/sheets-ui/src/services/clipboard @yuhongz
 packages/sheets-ui/src/services/editor @Jocs
 packages/sheets-ui/src/services/editor-bridge.service.ts @Jocs
 
-packages/sheets-find @wzhudev
+packages/sheets-find-replace @wzhudev
+
 packages/sheets-numfmt @Gggpound
-packages/sheets-imoprt-xlsx @Gggpound
+
+packages/sheets-import-xlsx @Gggpound
+
 packages/sheets-formula @DR-Univer @Dushusir
+
 packages/sheets-zen-editor @Jocs
 
 # slides

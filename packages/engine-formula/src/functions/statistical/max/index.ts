@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-import { isRealNum } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
-import { convertTonNumber } from '../../../engine/utils/object-covert';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
@@ -24,42 +22,27 @@ import { BaseFunction } from '../../base-function';
 export class Max extends BaseFunction {
     override calculate(...variants: BaseValueObject[]) {
         if (variants.length === 0) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
-        let accumulatorAll: BaseValueObject = new NumberValueObject(Number.NEGATIVE_INFINITY);
+        let accumulatorAll: BaseValueObject = NumberValueObject.create(Number.NEGATIVE_INFINITY);
         for (let i = 0; i < variants.length; i++) {
             let variant = variants[i];
 
-            if (variant.isError()) {
-                return variant;
+            if (variant.isNull()) {
+                continue;
             }
 
-            if (variant.isString()) {
-                const value = variant.getValue();
-                const isStringNumber = isRealNum(value);
-
-                if (!isStringNumber) {
-                    return new ErrorValueObject(ErrorType.VALUE);
-                }
-
-                variant = new NumberValueObject(value);
-            }
-
-            if (variant.isBoolean()) {
-                variant = convertTonNumber(variant);
+            if (variant.isString() || variant.isBoolean()) {
+                variant = variant.convertToNumberObjectValue();
             }
 
             if (variant.isArray()) {
                 variant = variant.max();
-
-                if (variant.isError()) {
-                    return variant as ErrorValueObject;
-                }
             }
 
-            if (variant.isNull()) {
-                continue;
+            if (variant.isError()) {
+                return variant as ErrorValueObject;
             }
 
             accumulatorAll = this._validator(accumulatorAll, variant as BaseValueObject);

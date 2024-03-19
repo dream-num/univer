@@ -23,5 +23,5 @@ export function convertTonNumber(valueObject: BaseValueObject) {
     if (currentValue) {
         result = 1;
     }
-    return new NumberValueObject(result, true);
+    return NumberValueObject.create(result);
 }

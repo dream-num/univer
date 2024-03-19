@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, IRange, IWorkbookData, Nullable, Univer } from '@univerjs/core';
+import type { IRange, IWorkbookData, Nullable, Univer } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, LocaleType, Tools } from '@univerjs/core';
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -136,19 +136,13 @@ describe('Test move range commands', () => {
         });
     });
 
-    function getCellInfo(row: number, col: number): Nullable<ICellData> {
-        const currentService = get(IUniverInstanceService);
-        const workbook = currentService.getCurrentUniverSheetInstance();
-        const worksheet = workbook.getActiveSheet();
-        return worksheet.getCellMatrix().getValue(row, col);
-    }
-
     function getMergedInfo(row: number, col: number): Nullable<IRange> {
         const currentService = get(IUniverInstanceService);
         const workbook = currentService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
-        return worksheet.getMergedCells(row, col)?.[0];
+        return worksheet.getMergedCell(row, col);
     }
+
     function getMergeData() {
         const currentService = get(IUniverInstanceService);
         const workbook = currentService.getCurrentUniverSheetInstance();

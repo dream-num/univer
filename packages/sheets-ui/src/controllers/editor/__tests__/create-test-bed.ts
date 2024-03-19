@@ -47,7 +47,7 @@ export function createTestBed(workbookConfig?: IWorkbookData, dependencies?: Dep
     const univer = new Univer();
     const injector = univer.__getInjector();
 
-    class TestSpyPlugin extends Plugin {
+    class TestPlugin extends Plugin {
         static override type = PluginType.Sheet;
 
         constructor(
@@ -67,7 +67,7 @@ export function createTestBed(workbookConfig?: IWorkbookData, dependencies?: Dep
         }
     }
 
-    univer.registerPlugin(TestSpyPlugin);
+    univer.registerPlugin(TestPlugin);
     const sheet = univer.createUniverSheet(workbookConfig || getTestWorkbookDataDemo());
 
     const univerInstanceService = injector.get(IUniverInstanceService);

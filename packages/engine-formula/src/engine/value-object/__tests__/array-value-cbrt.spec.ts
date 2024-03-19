@@ -21,7 +21,7 @@ import { ArrayValueObject, transformToValueObject } from '../array-value-object'
 describe('arrayValueObject cbrt method test', () => {
     describe('cbrt', () => {
         it('origin nm, param nm', () => {
-            const cbrtArrayValueObject = new ArrayValueObject({
+            const cbrtArrayValueObject = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [8, 1, ' ', 1.23, true, false],
                     [27, 0, '100', '2.34', 'test', -3],

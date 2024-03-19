@@ -24,10 +24,11 @@ import { ObjectClassType } from '../../basics/object-class-type';
 import { ArrayValueObject, ValueObjectFactory } from '../value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject, type IArrayValueObject } from '../value-object/base-value-object';
 import {
-    BooleanValueObject,
+    createBooleanValueObjectByRawValue,
+    createNumberValueObjectByRawValue,
+    createStringValueObjectByRawValue,
     NullValueObject,
     NumberValueObject,
-    StringValueObject,
 } from '../value-object/primitive-object';
 import { getCellValue } from '../utils/cell';
 
@@ -143,7 +144,7 @@ export class BaseReferenceObject extends ObjectClassType {
         const { startRow, endRow, startColumn, endColumn } = this.getRangePosition();
 
         if (this._checkIfWorksheetMiss()) {
-            return callback(new ErrorValueObject(ErrorType.VALUE), startRow, startColumn);
+            return callback(ErrorValueObject.create(ErrorType.VALUE), startRow, startColumn);
         }
 
         const unitId = this._forcedUnitId || this._defaultUnitId;
@@ -152,7 +153,7 @@ export class BaseReferenceObject extends ObjectClassType {
         for (let r = startRow; r <= endRow; r++) {
             for (let c = startColumn; c <= endColumn; c++) {
                 if (r < 0 || c < 0) {
-                    return callback(new ErrorValueObject(ErrorType.REF), r, c);
+                    return callback(ErrorValueObject.create(ErrorType.REF), r, c);
                 }
 
                 const cell = this.getCellData(r, c);
@@ -181,7 +182,7 @@ export class BaseReferenceObject extends ObjectClassType {
         const cell = this.getCellData(startRow, startColumn);
 
         if (!cell) {
-            return new NumberValueObject(0, true);
+            return NumberValueObject.create(0);
         }
 
         const cellValueObject = this.getCellValueObject(cell);
@@ -351,7 +352,7 @@ export class BaseReferenceObject extends ObjectClassType {
 
     unionBy(referenceObject: BaseReferenceObject): NodeValueType {
         /** abstract */
-        return new ErrorValueObject(ErrorType.REF);
+        return ErrorValueObject.create(ErrorType.REF);
     }
 
     unionRange(rangeData1: IRange, rangeData2: IRange): IRange {
@@ -367,17 +368,17 @@ export class BaseReferenceObject extends ObjectClassType {
     getCellValueObject(cell: ICellData) {
         const value = getCellValue(cell);
         if (ERROR_TYPE_SET.has(value as ErrorType)) {
-            return new ErrorValueObject(value as ErrorType);
+            return ErrorValueObject.create(value as ErrorType);
         }
 
         if (cell.t === CellValueType.NUMBER) {
-            return new NumberValueObject(value);
+            return createNumberValueObjectByRawValue(value);
         }
         if (cell.t === CellValueType.STRING || cell.t === CellValueType.FORCE_STRING) {
-            return new StringValueObject(value);
+            return createStringValueObjectByRawValue(value);
         }
         if (cell.t === CellValueType.BOOLEAN) {
-            return new BooleanValueObject(value);
+            return createBooleanValueObjectByRawValue(value);
         }
 
         return ValueObjectFactory.create(value);
@@ -457,7 +458,7 @@ export class BaseReferenceObject extends ObjectClassType {
         const cell = this.getCellData(row, column);
 
         if (!cell) {
-            return new ErrorValueObject(ErrorType.VALUE);
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         return this.getCellValueObject(cell);
@@ -490,7 +491,7 @@ export class BaseReferenceObject extends ObjectClassType {
             }
 
             if (valueObject == null) {
-                valueObject = new NullValueObject(0);
+                valueObject = NullValueObject.create();
             }
 
             arrayValueList[row][column] = valueObject;
@@ -506,7 +507,7 @@ export class BaseReferenceObject extends ObjectClassType {
             column: startColumn,
         };
 
-        const arrayValueObject = new ArrayValueObject(arrayValueObjectData);
+        const arrayValueObject = ArrayValueObject.create(arrayValueObjectData);
 
         useCache && FORMULA_REF_TO_ARRAY_CACHE.set(key, arrayValueObject);
 
@@ -539,7 +540,7 @@ export class BaseReferenceObject extends ObjectClassType {
             column: 0,
         };
 
-        return new ArrayValueObject(arrayValueObjectData);
+        return ArrayValueObject.create(arrayValueObjectData);
     }
 }
 
@@ -594,6 +595,6 @@ export class AsyncArrayObject extends ObjectClassType {
             column: 0,
         };
 
-        return new ArrayValueObject(arrayValueObjectData);
+        return ArrayValueObject.create(arrayValueObjectData);
     }
 }

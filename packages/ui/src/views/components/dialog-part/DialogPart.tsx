@@ -30,14 +30,14 @@ export function DialogPart() {
 
     useEffect(() => {
         const dialog$ = dialogService.getObservableDialog();
-        const subscribtion = dialog$.subscribe((options: IDialogPartMethodOptions[]) => {
+        const subscription = dialog$.subscribe((options: IDialogPartMethodOptions[]) => {
             setDialogOptions(options);
         });
 
         return () => {
-            subscribtion.unsubscribe();
+            subscription.unsubscribe();
         };
-    }, []);
+    }, [dialogService]);
 
     const attrs = dialogOptions.map((options) => {
         const { children, title, closeIcon, footer, ...restProps } = options;

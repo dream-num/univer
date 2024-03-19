@@ -291,7 +291,7 @@ export const SetBorderCommand: ICommand = {
 
         if (top) {
             /**
-             * https://github.com/dream-num/univer-pro/issues/344
+             * pro/issues/344
              * Compatible with Excel's border rendering.
              * When the top border of a cell and the bottom border of the cell above it (r-1) overlap,
              * if the top border of cell r is white, then the rendering is ignored.

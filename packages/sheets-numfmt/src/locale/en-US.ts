@@ -19,6 +19,7 @@ import type zhCN from './zh-CN';
 const locale: typeof zhCN = {
     sheet: {
         numfmt: {
+            percent: 'Percentage',
             title: 'Number format',
             numfmtType: 'Format types',
             cancel: 'Cancel',

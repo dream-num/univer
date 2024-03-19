@@ -18,7 +18,7 @@ import { describe, expect, it } from 'vitest';
 
 import { FUNCTION_NAMES_MATH } from '../../function-names';
 import { Mod } from '..';
-import { NumberValueObject } from '../../../../engine/value-object/primitive-object';
+import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorType } from '../../../../basics/error-type';
 
@@ -27,15 +27,21 @@ describe('Test mod function', () => {
 
     describe('Mod', () => {
         it('Number is single cell, power is single cell', () => {
-            const number = new NumberValueObject(5);
-            const power = new NumberValueObject(2);
+            const number = NumberValueObject.create(5);
+            const power = NumberValueObject.create(2);
+            const result = textFunction.calculate(number, power);
+            expect(result.getValue()).toBe(1);
+        });
+        it('Number is single string number, power is single string number', () => {
+            const number = new StringValueObject('5');
+            const power = new StringValueObject('2');
             const result = textFunction.calculate(number, power);
             expect(result.getValue()).toBe(1);
         });
 
         it('Number is single cell, power is array', () => {
-            const number = new NumberValueObject(5);
-            const power = new ArrayValueObject({
+            const number = NumberValueObject.create(5);
+            const power = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [1, ' ', 1.23, true, false, null],
                     [0, '100', '2.34', 'test', -3, ErrorType.VALUE],
@@ -55,7 +61,7 @@ describe('Test mod function', () => {
         });
 
         it('Number is array, power is single cell', () => {
-            const number = new ArrayValueObject({
+            const number = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [1, ' ', 1.23, true, false, null],
                     [0, '100', '2.34', 'test', -3, ErrorType.VALUE],
@@ -67,7 +73,7 @@ describe('Test mod function', () => {
                 row: 0,
                 column: 0,
             });
-            const power = new NumberValueObject(2);
+            const power = NumberValueObject.create(2);
             const result = textFunction.calculate(number, power);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([
                 [1, ErrorType.VALUE, 1.23, 1, 0, 0],
@@ -76,7 +82,7 @@ describe('Test mod function', () => {
         });
 
         it('Number is array, power is array', () => {
-            const number = new ArrayValueObject({
+            const number = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [1, ' ', 1.23, true, false, null],
                     [0, '100', '2.34', 'test', -3, ErrorType.VALUE],
@@ -88,7 +94,7 @@ describe('Test mod function', () => {
                 row: 0,
                 column: 0,
             });
-            const power = new ArrayValueObject({
+            const power = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [1],
                     [2],

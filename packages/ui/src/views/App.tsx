@@ -41,6 +41,8 @@ export interface IUniverAppProps extends IWorkbenchOptions {
 }
 
 export function App(props: IUniverAppProps) {
+    const { header, footer } = props;
+
     const localeService = useDependency(LocaleService);
     const themeService = useDependency(ThemeService);
     const messageService = useDependency(IMessageService);
@@ -106,7 +108,7 @@ export function App(props: IUniverAppProps) {
               */}
             <div className={styles.appLayout} tabIndex={-1}>
                 {/* header */}
-                {props.toolbar && (
+                {header && (
                     <header className={styles.appContainerHeader}>
                         <Toolbar headerMenuComponents={headerMenuComponents} />
                     </header>
@@ -117,7 +119,9 @@ export function App(props: IUniverAppProps) {
                     <div className={styles.appContainerWrapper}>
                         <section className={styles.appContainerContent}>
                             <header>
-                                <ComponentContainer components={headerComponents} />
+                                {header && (
+                                    <ComponentContainer components={headerComponents} />
+                                )}
                             </header>
 
                             <section
@@ -138,7 +142,7 @@ export function App(props: IUniverAppProps) {
                     </div>
 
                     {/* footer */}
-                    {props.footer && (
+                    {footer && (
                         <footer className={styles.appFooter}>
                             <ComponentContainer components={footerComponents} />
                         </footer>

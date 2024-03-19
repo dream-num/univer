@@ -15,12 +15,23 @@
  */
 
 import React from 'react';
+import clsx from 'clsx';
 
 import type { ICheckboxProps } from '../checkbox/Checkbox';
 import styles from './index.module.less';
 
 export interface ICheckboxGroupProps {
     children: React.ReactNode[];
+
+    /**
+     * The class name of the checkbox group
+     */
+    className?: string;
+
+    /**
+     * The style of the checkbox group
+     */
+    style?: React.CSSProperties;
 
     /**
      * Define which checkbox is selected
@@ -37,15 +48,13 @@ export interface ICheckboxGroupProps {
      * The callback function triggered when switching options
      */
     onChange: (value: Array<string | number | boolean>) => void;
-
-    style?: React.CSSProperties;
 }
 
 /**
  * CheckboxGroup Component
  */
 export function CheckboxGroup(props: ICheckboxGroupProps) {
-    const { children, value, disabled, onChange, style } = props;
+    const { children, className, style, value, disabled, onChange } = props;
 
     const handleChange = (item: string | number | boolean) => {
         if (value.includes(item)) {
@@ -55,15 +64,16 @@ export function CheckboxGroup(props: ICheckboxGroupProps) {
         }
     };
 
+    const _className = clsx(className, styles.checkboxGroup);
+
     return (
-        <div className={styles.checkboxGroup} style={style}>
+        <div className={_className} style={style}>
             {React.Children.map(children, (child, index) => {
                 if (React.isValidElement<ICheckboxProps>(child)) {
                     return React.cloneElement(child, {
                         key: index,
                         children: child.props.children,
                         value: child.props.value,
-                        checked: value.includes(child.props.value!),
                         disabled: disabled ?? child.props.disabled,
                         onChange: handleChange,
                     });

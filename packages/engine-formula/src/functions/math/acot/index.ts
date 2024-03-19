@@ -23,7 +23,11 @@ import { BaseFunction } from '../../base-function';
 export class Acot extends BaseFunction {
     override calculate(variant: BaseValueObject) {
         if (variant == null) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
+        }
+
+        if (variant.isString()) {
+            variant = variant.convertToNumberObjectValue();
         }
 
         if (variant.isError()) {
@@ -51,14 +55,14 @@ function acot(num: BaseValueObject) {
     }
 
     if (!Number.isFinite(currentValue)) {
-        return new ErrorValueObject(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     const result = Math.atan(1 / Number(currentValue));
 
     if (Number.isNaN(result)) {
-        return new ErrorValueObject(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
-    return new NumberValueObject(result);
+    return NumberValueObject.create(result);
 }

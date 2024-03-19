@@ -29,6 +29,7 @@ interface IProps {
     activeSlide: (pageId: string) => void;
 }
 
+// TODO: @wzhudev: should show slide list and active slide
 export class SlideBar extends Component<{}, SlideBarState> {
     slideBarRef = createRef<HTMLDivElement>();
 

@@ -44,7 +44,6 @@ univer.registerPlugin(UniverRenderEngine);
 univer.registerPlugin(UniverUI, {
     container: 'univer-container', // where to mount the UI
     header: true,
-    toolbar: true,
     footer: true,
 });
 univer.registerPlugin(sheetsPlugin);

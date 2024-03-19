@@ -16,7 +16,6 @@
 
 import React from 'react';
 
-import type { IUniverSheetsUIConfig } from '../../basics';
 import { CountBar } from '../count-bar/CountBar';
 import { EditorContainer } from '../editor-container/EditorContainer';
 import { FormulaBar } from '../formula-bar/FormulaBar';
@@ -24,12 +23,6 @@ import { OperateContainer } from '../operate-container/OperateContainer';
 import { SheetBar } from '../sheet-bar/SheetBar';
 import { StatusBar } from '../status-bar/StatusBar';
 import styles from './index.module.less';
-
-export interface IBaseSheetContainerProps {
-    config: IUniverSheetsUIConfig;
-    changeLocale: (locale: string) => void;
-    methods?: any;
-}
 
 export function RenderSheetFooter() {
     return (
@@ -43,9 +36,7 @@ export function RenderSheetFooter() {
 
 export function RenderSheetHeader() {
     return (
-        <>
-            <FormulaBar />
-        </>
+        <FormulaBar />
     );
 }
 

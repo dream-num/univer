@@ -78,7 +78,9 @@ export class RuleMatrix {
         const tempRuleId = `${ruleId}$`;
         oldRanges.forEach((range) => {
             Range.foreach(range, (row, col) => {
-                this.value.setValue(row, col, tempRuleId);
+                if (this.value.getValue(row, col) === ruleId) {
+                    this.value.setValue(row, col, tempRuleId);
+                }
             });
         });
 

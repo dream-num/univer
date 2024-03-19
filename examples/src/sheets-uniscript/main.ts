@@ -43,7 +43,6 @@ univer.registerPlugin(UniverRenderEnginePlugin);
 univer.registerPlugin(UniverUIPlugin, {
     container: 'app',
     header: true,
-    toolbar: true,
     footer: true,
 });
 

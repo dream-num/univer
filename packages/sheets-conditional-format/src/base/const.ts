@@ -30,6 +30,7 @@ export enum TextOperator {
     notContainsErrors = 'notContainsErrors',
 }
 export enum TimePeriodOperator {
+    today = 'today',
     yesterday = 'yesterday',
     tomorrow = 'tomorrow',
     last7Days = 'last7Days',

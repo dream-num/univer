@@ -166,7 +166,8 @@ const getOperatorOptions = (type: SubRuleType.duplicateValues | SubRuleType.uniq
                 createOptionItem(TimePeriodOperator.thisMonth, localeService),
                 createOptionItem(TimePeriodOperator.thisWeek, localeService),
                 createOptionItem(TimePeriodOperator.tomorrow, localeService),
-                createOptionItem(TimePeriodOperator.yesterday, localeService)];
+                createOptionItem(TimePeriodOperator.yesterday, localeService),
+                createOptionItem(TimePeriodOperator.today, localeService)];
         }
     }
 };

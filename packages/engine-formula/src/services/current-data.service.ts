@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { get } from 'node:http';
 import type { IUnitRange, Nullable } from '@univerjs/core';
 import { Disposable, IUniverInstanceService, ObjectMatrix } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';

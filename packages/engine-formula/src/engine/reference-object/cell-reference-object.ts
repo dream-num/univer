@@ -19,7 +19,6 @@ import type { IRange } from '@univerjs/core';
 import { ErrorType } from '../../basics/error-type';
 import { deserializeRangeWithSheet } from '../utils/reference';
 import { ErrorValueObject } from '../value-object/base-value-object';
-import { matchToken } from '../../basics/token';
 import { BaseReferenceObject } from './base-reference-object';
 import { RangeReferenceObject } from './range-reference-object';
 

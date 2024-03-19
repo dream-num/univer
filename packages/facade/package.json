@@ -17,7 +17,7 @@
     "bugs": {
         "url": "https://github.com/dream-num/univer/issues"
     },
-    "keywords": [],
+    "keywords": ["univer"],
     "exports": {
         ".": "./src/index.ts",
         "./*": "./src/*"

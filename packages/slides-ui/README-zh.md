@@ -2,6 +2,7 @@
 
 [![npm version](https://img.shields.io/npm/v/@univerjs/slides-ui)](https://npmjs.org/package/@univerjs/slides-ui)
 [![license](https://img.shields.io/npm/l/@univerjs/slides-ui)](https://img.shields.io/npm/l/@univerjs/slides-ui)
+![CSS Included](https://img.shields.io/badge/CSS_Included-blue?logo=CSS3)
 
 ## 简介
 

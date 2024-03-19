@@ -2,6 +2,7 @@
 
 [![npm version](https://img.shields.io/npm/v/@univerjs/uniscript)](https://npmjs.org/package/@univerjs/uniscript)
 [![license](https://img.shields.io/npm/l/@univerjs/uniscript)](https://img.shields.io/npm/l/@univerjs/uniscript)
+![CSS Included](https://img.shields.io/badge/CSS_Included-blue?logo=CSS3)
 
 ## 简介
 

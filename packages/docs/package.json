@@ -17,7 +17,7 @@
     "bugs": {
         "url": "https://github.com/dream-num/univer/issues"
     },
-    "keywords": [],
+    "keywords": ["univer"],
     "exports": {
         ".": "./src/index.ts",
         "./*": "./src/*"
@@ -72,7 +72,6 @@
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/shared": "workspace:*",
         "@wendellhu/redi": "^0.13.0",
-        "less": "^4.2.0",
         "rxjs": "^7.8.1",
         "typescript": "^5.4.2",
         "vite": "^5.1.6",

@@ -2,6 +2,7 @@
 
 [![npm version](https://img.shields.io/npm/v/@univerjs/sheets-ui)](https://npmjs.org/package/@univerjs/sheets-ui)
 [![license](https://img.shields.io/npm/l/@univerjs/sheets-ui)](https://img.shields.io/npm/l/@univerjs/sheets-ui)
+![CSS Included](https://img.shields.io/badge/CSS_Included-blue?logo=CSS3)
 
 ## 简介
 

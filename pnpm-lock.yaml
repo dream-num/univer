@@ -360,8 +360,8 @@ importers:
         specifier: ^4.2.0
         version: 4.2.0(react-dom@18.2.0)(react@18.2.0)
       rc-input:
-        specifier: ^1.4.3
-        version: 1.4.3(react-dom@18.2.0)(react@18.2.0)
+        specifier: ^1.4.5
+        version: 1.4.5(react-dom@18.2.0)(react@18.2.0)
       rc-input-number:
         specifier: ^9.0.0
         version: 9.0.0(react-dom@18.2.0)(react@18.2.0)
@@ -441,9 +441,6 @@ importers:
       '@wendellhu/redi':
         specifier: ^0.13.0
         version: 0.13.0
-      less:
-        specifier: ^4.2.0
-        version: 4.2.0
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -455,7 +452,7 @@ importers:
         version: 5.1.6(@types/node@20.11.29)(less@4.2.0)
       vitest:
         specifier: ^1.4.0
-        version: 1.4.0(@types/node@20.11.29)(less@4.2.0)
+        version: 1.4.0(@types/node@20.11.29)(jsdom@24.0.0)
 
   packages/docs-ui:
     devDependencies:
@@ -520,9 +517,6 @@ importers:
       '@wendellhu/redi':
         specifier: ^0.13.0
         version: 0.13.0
-      less:
-        specifier: ^4.2.0
-        version: 4.2.0
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -534,7 +528,7 @@ importers:
         version: 5.1.6(@types/node@20.11.29)(less@4.2.0)
       vitest:
         specifier: ^1.4.0
-        version: 1.4.0(@types/node@20.11.29)(less@4.2.0)
+        version: 1.4.0(@types/node@20.11.29)(jsdom@24.0.0)
 
   packages/engine-numfmt:
     dependencies:
@@ -573,9 +567,6 @@ importers:
       '@wendellhu/redi':
         specifier: ^0.13.0
         version: 0.13.0
-      less:
-        specifier: ^4.2.0
-        version: 4.2.0
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -587,7 +578,7 @@ importers:
         version: 5.1.6(@types/node@20.11.29)(less@4.2.0)
       vitest:
         specifier: ^1.4.0
-        version: 1.4.0(@types/node@20.11.29)(less@4.2.0)
+        version: 1.4.0(@types/node@20.11.29)(jsdom@24.0.0)
 
   packages/facade:
     devDependencies:
@@ -757,9 +748,6 @@ importers:
       '@wendellhu/redi':
         specifier: ^0.13.0
         version: 0.13.0
-      less:
-        specifier: ^4.2.0
-        version: 4.2.0
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -771,7 +759,7 @@ importers:
         version: 5.1.6(@types/node@20.11.29)(less@4.2.0)
       vitest:
         specifier: ^1.4.0
-        version: 1.4.0(@types/node@20.11.29)(less@4.2.0)
+        version: 1.4.0(@types/node@20.11.29)(jsdom@24.0.0)
 
   packages/sheets-find-replace:
     devDependencies:
@@ -1065,9 +1053,6 @@ importers:
       '@wendellhu/redi':
         specifier: ^0.13.0
         version: 0.13.0
-      less:
-        specifier: ^4.2.0
-        version: 4.2.0
       typescript:
         specifier: ^5.4.2
         version: 5.4.2
@@ -1076,7 +1061,7 @@ importers:
         version: 5.1.6(@types/node@20.11.29)(less@4.2.0)
       vitest:
         specifier: ^1.4.0
-        version: 1.4.0(@types/node@20.11.29)(less@4.2.0)
+        version: 1.4.0(@types/node@20.11.29)(jsdom@24.0.0)
 
   packages/slides-ui:
     devDependencies:
@@ -12052,14 +12037,14 @@ packages:
       '@babel/runtime': 7.23.9
       '@rc-component/mini-decimal': 1.1.0
       classnames: 2.5.1
-      rc-input: 1.4.3(react-dom@18.2.0)(react@18.2.0)
+      rc-input: 1.4.5(react-dom@18.2.0)(react@18.2.0)
       rc-util: 5.39.1(react-dom@18.2.0)(react@18.2.0)
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
     dev: false
 
-  /rc-input@1.4.3(react-dom@18.2.0)(react@18.2.0):
-    resolution: {integrity: sha512-aHyQUAIRmTlOnvk5EcNqEpJ+XMtfMpYRAJayIlJfsvvH9cAKUWboh4egm23vgMA7E+c/qm4BZcnrDcA960GC1w==}
+  /rc-input@1.4.5(react-dom@18.2.0)(react@18.2.0):
+    resolution: {integrity: sha512-AjzykhwnwYTRSwwgCu70CGKBIAv6bP2nqnFptnNTprph/TF1BAs0Qxl91mie/BR6n827WIJB6ZjaRf9iiMwAfw==}
     peerDependencies:
       react: '>=16.0.0'
       react-dom: '>=16.0.0'

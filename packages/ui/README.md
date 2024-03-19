@@ -2,6 +2,7 @@
 
 [![npm version](https://img.shields.io/npm/v/@univerjs/ui)](https://npmjs.org/package/@univerjs/ui)
 [![license](https://img.shields.io/npm/l/@univerjs/ui)](https://img.shields.io/npm/l/@univerjs/ui)
+![CSS Included](https://img.shields.io/badge/CSS_Included-blue?logo=CSS3)
 
 ## Introduction
 
@@ -18,6 +19,8 @@ npm install @univerjs/ui
 # Using pnpm
 pnpm add @univerjs/ui
 ```
+
+This package contains CSS and has the second highest priority. Please import it after `@univerjs/design` and before any other Univer style files.
 
 ### UI service
 

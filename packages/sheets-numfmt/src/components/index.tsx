@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+// FIXME: DO NOT USE GLOBAL STYLES
 import './index.less';
 
 import { LocaleService } from '@univerjs/core';

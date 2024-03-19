@@ -17,7 +17,7 @@
     "bugs": {
         "url": "https://github.com/dream-num/univer/issues"
     },
-    "keywords": [],
+    "keywords": ["univer"],
     "sideEffects": [
         "**/*.css"
     ],
@@ -75,7 +75,7 @@
         "dayjs": ">=1.11.10",
         "rc-dialog": "^9.4.0",
         "rc-dropdown": "^4.2.0",
-        "rc-input": "^1.4.3",
+        "rc-input": "^1.4.5",
         "rc-input-number": "^9.0.0",
         "rc-menu": "^9.13.0",
         "rc-picker": "^4.3.0",

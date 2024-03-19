@@ -2,6 +2,7 @@
 
 [![npm version](https://img.shields.io/npm/v/@univerjs/docs-ui)](https://npmjs.org/package/@univerjs/docs-ui)
 [![license](https://img.shields.io/npm/l/@univerjs/docs-ui)](https://img.shields.io/npm/l/@univerjs/docs-ui)
+![CSS Included](https://img.shields.io/badge/CSS_Included-blue?logo=CSS3)
 
 ## Introduction
 

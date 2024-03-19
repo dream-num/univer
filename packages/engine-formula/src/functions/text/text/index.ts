@@ -55,7 +55,7 @@ export class Text extends BaseFunction {
                 return textValue;
             }
 
-            let formatTextValue = formatTextArray.get(rowIndex, columnIndex);
+            let formatTextValue = formatTextArray.get(rowIndex, columnIndex) || StringValueObject.create(' ');
 
             if (formatTextValue.isError()) {
                 return formatTextValue;

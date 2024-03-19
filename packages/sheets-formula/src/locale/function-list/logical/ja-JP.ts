@@ -209,7 +209,7 @@ export default {
         },
     },
     OR: {
-        description: 'いずれかの引数が TRUE のときに TRUE を返します。',
+        description: 'OR 関数は、いずれかの引数が TRUE と評価された場合は TRUE を返し、すべての引数が FALSE と評価された場合は FALSE を返します。',
         abstract: 'いずれかの引数が TRUE のときに TRUE を返します。',
         links: [
             {
@@ -218,8 +218,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            logical1: { name: '論理式 1', detail: 'TRUE または FALSE に評価できるテスト対象の 1 つ目の条件。' },
+            logical2: { name: '論理式 2', detail: '最大 255 個の条件まで、TRUE または FALSE のいずれかに評価できるテストする追加の条件。' },
         },
     },
     REDUCE: {

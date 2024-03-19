@@ -78,7 +78,6 @@ describe('Test varpa function', () => {
                 columnCount: 2,
                 unitId: '',
                 sheetId: '',
-                sheetName: '',
                 row: 0,
                 column: 0,
             });
@@ -97,7 +96,6 @@ describe('Test varpa function', () => {
                 columnCount: 6,
                 unitId: '',
                 sheetId: '',
-                sheetName: '',
                 row: 0,
                 column: 0,
             });

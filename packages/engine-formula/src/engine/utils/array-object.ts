@@ -86,7 +86,6 @@ export function createNewArray(
         columnCount,
         unitId: '',
         sheetId: '',
-        sheetName: '',
         row: -1,
         column: -1,
     };

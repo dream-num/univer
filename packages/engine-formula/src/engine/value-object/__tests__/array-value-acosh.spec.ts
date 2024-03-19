@@ -30,7 +30,6 @@ describe('arrayValueObject acosh method test', () => {
                 columnCount: 5,
                 unitId: '',
                 sheetId: '',
-                sheetName: '',
                 row: 0,
                 column: 0,
             });

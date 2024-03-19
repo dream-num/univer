@@ -86,7 +86,6 @@ describe('Test product function', () => {
                 columnCount: 2,
                 unitId: '',
                 sheetId: '',
-                sheetName: '',
                 row: 0,
                 column: 0,
             });
@@ -105,7 +104,6 @@ describe('Test product function', () => {
                 columnCount: 6,
                 unitId: '',
                 sheetId: '',
-                sheetName: '',
                 row: 0,
                 column: 0,
             });

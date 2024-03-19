@@ -106,9 +106,8 @@ export class Offset extends BaseFunction {
 
         const unitId = (reference as ArrayValueObject).getUnitId();
         const sheetId = (reference as ArrayValueObject).getSheetId();
-        const sheetName = (reference as ArrayValueObject).getSheetName();
 
-        const rangeReferenceObject = new RangeReferenceObject(sheetName, range, sheetId, unitId);
+        const rangeReferenceObject = new RangeReferenceObject(range, sheetId, unitId);
 
         return this._setDefault(rangeReferenceObject);
     }

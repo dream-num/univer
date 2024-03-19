@@ -117,7 +117,6 @@ export class Sumifs extends BaseFunction {
             columnCount: sumResults[0].length,
             unitId: this.unitId || '',
             sheetId: this.subUnitId || '',
-            sheetName: (sumRange as ArrayValueObject).getSheetName() || '',
             row: this.row,
             column: this.column,
         };

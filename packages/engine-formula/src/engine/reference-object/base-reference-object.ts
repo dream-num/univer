@@ -511,7 +511,6 @@ export class BaseReferenceObject extends ObjectClassType {
             columnCount: arrayValueList[0]?.length || 0,
             unitId: this.getUnitId(),
             sheetId: this.getSheetId(),
-            sheetName: this.getForcedSheetName(),
             row: startRow,
             column: startColumn,
         };
@@ -545,7 +544,6 @@ export class BaseReferenceObject extends ObjectClassType {
             columnCount: 0,
             unitId: this.getUnitId(),
             sheetId: this.getSheetId(),
-            sheetName: this.getForcedSheetName(),
             row: 0,
             column: 0,
         };
@@ -601,7 +599,6 @@ export class AsyncArrayObject extends ObjectClassType {
             columnCount: variants[0]?.length || 0,
             unitId: '',
             sheetId: '',
-            sheetName: '',
             row: 0,
             column: 0,
         };

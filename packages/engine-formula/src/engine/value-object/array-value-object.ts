@@ -115,8 +115,6 @@ export class ArrayValueObject extends BaseValueObject {
 
     private _sheetId: string = '';
 
-    private _sheetName: string = '';
-
     private _currentRow: number = -1;
 
     private _currentColumn: number = -1;
@@ -191,14 +189,6 @@ export class ArrayValueObject extends BaseValueObject {
 
     getSheetId() {
         return this._sheetId;
-    }
-
-    setSheetName(sheetName: string) {
-        this._sheetName = sheetName;
-    }
-
-    getSheetName() {
-        return this._sheetName;
     }
 
     getCurrentRow() {
@@ -1168,7 +1158,7 @@ export class ArrayValueObject extends BaseValueObject {
             squaredDifferences[0].push(baseValueObject);
         });
 
-        const { _unitId, _sheetId, _currentRow, _currentColumn, _sheetName } = this;
+        const { _unitId, _sheetId, _currentRow, _currentColumn } = this;
 
         const squaredDifferencesArrayObject = ArrayValueObject.create({
             calculateValueList: squaredDifferences,
@@ -1176,7 +1166,6 @@ export class ArrayValueObject extends BaseValueObject {
             columnCount: squaredDifferences[0].length,
             unitId: _unitId,
             sheetId: _sheetId,
-            sheetName: _sheetName,
             row: _currentRow,
             column: _currentColumn,
         });
@@ -1790,7 +1779,6 @@ export class ArrayValueObject extends BaseValueObject {
             columnCount,
             unitId: this.getUnitId(),
             sheetId: this.getSheetId(),
-            sheetName: this.getSheetName(),
             row,
             column,
         };

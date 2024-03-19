@@ -46,11 +46,9 @@ export class CellReferenceObject extends BaseReferenceObject {
         //     return ErrorValueObject.create(ErrorType.REF);
         // }
 
-        const rightToken = cellReferenceObject.getToken();
-
         const newRangeData = this.unionRange(this.getRangeData(), cellReferenceObject.getRangeData());
 
-        return this._createRange(newRangeData, `${this.getToken()}${matchToken.COLON}${rightToken}`);
+        return this._createRange(newRangeData);
     }
 
     override unionRange(rangeData1: IRange, rangeData2: IRange) {
@@ -84,9 +82,8 @@ export class CellReferenceObject extends BaseReferenceObject {
         return range;
     }
 
-    private _createRange(newRangeData: IRange, token: string) {
+    private _createRange(newRangeData: IRange) {
         const rangeReferenceObject = new RangeReferenceObject(
-            token,
             newRangeData,
             this.getForcedSheetId(),
             this.getForcedUnitId()

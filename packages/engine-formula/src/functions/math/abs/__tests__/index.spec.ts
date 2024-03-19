@@ -47,7 +47,6 @@ describe('Test abs function', () => {
                 columnCount: 2,
                 unitId: '',
                 sheetId: '',
-                sheetName: '',
                 row: 0,
                 column: 0,
             });

@@ -457,7 +457,9 @@ export class FormulaDependencyGenerator extends Disposable {
 
             const gridRange = value.toUnitRange();
 
-            rangeList.push({ gridRange, token: value.getToken() });
+            const token = serializeRangeToRefString({ ...gridRange, sheetName: this._currentConfigService.getSheetName(gridRange.unitId, gridRange.sheetId) });
+
+            rangeList.push({ gridRange, token });
         }
 
         for (let i = 0, len = referenceFunctionList.length; i < len; i++) {
@@ -466,7 +468,9 @@ export class FormulaDependencyGenerator extends Disposable {
 
             const gridRange = value.toUnitRange();
 
-            rangeList.push({ gridRange, token: value.getToken() });
+            const token = serializeRangeToRefString({ ...gridRange, sheetName: this._currentConfigService.getSheetName(gridRange.unitId, gridRange.sheetId) });
+
+            rangeList.push({ gridRange, token });
         }
 
         return rangeList;

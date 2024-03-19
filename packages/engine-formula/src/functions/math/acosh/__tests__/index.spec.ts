@@ -47,7 +47,6 @@ describe('Test acosh function', () => {
                 columnCount: 5,
                 unitId: '',
                 sheetId: '',
-                sheetName: '',
                 row: 0,
                 column: 0,
             });

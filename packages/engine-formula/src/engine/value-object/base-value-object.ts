@@ -29,7 +29,6 @@ export interface IArrayValueObject {
     columnCount: number;
     unitId: string;
     sheetId: string;
-    sheetName: string;
     row: number;
     column: number;
 }

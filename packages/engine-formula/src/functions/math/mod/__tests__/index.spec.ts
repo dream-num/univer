@@ -50,7 +50,6 @@ describe('Test mod function', () => {
                 columnCount: 6,
                 unitId: '',
                 sheetId: '',
-                sheetName: '',
                 row: 0,
                 column: 0,
             });
@@ -71,7 +70,6 @@ describe('Test mod function', () => {
                 columnCount: 6,
                 unitId: '',
                 sheetId: '',
-                sheetName: '',
                 row: 0,
                 column: 0,
             });
@@ -93,7 +91,6 @@ describe('Test mod function', () => {
                 columnCount: 6,
                 unitId: '',
                 sheetId: '',
-                sheetName: '',
                 row: 0,
                 column: 0,
             });
@@ -107,7 +104,6 @@ describe('Test mod function', () => {
                 columnCount: 1,
                 unitId: '',
                 sheetId: '',
-                sheetName: '',
                 row: 0,
                 column: 0,
             });

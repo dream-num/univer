@@ -65,7 +65,7 @@ export class Indirect extends BaseFunction {
 
             const { range, sheetName, unitId } = gridRange;
 
-            const rangeReferenceObject = new RangeReferenceObject(refTextV, range);
+            const rangeReferenceObject = new RangeReferenceObject(range);
 
             rangeReferenceObject.setForcedUnitIdDirect(unitId);
             rangeReferenceObject.setForcedSheetName(sheetName);
@@ -88,7 +88,7 @@ export class Indirect extends BaseFunction {
 
         const { range, sheetName, unitId } = gridRange;
 
-        const rangeReferenceObject = new RangeReferenceObject(refTextV, range);
+        const rangeReferenceObject = new RangeReferenceObject(range);
 
         rangeReferenceObject.setForcedUnitIdDirect(unitId);
         rangeReferenceObject.setForcedSheetName(sheetName);

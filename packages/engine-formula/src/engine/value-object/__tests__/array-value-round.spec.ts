@@ -30,7 +30,6 @@ describe('arrayValueObject round method test', () => {
         columnCount: 5,
         unitId: '',
         sheetId: '',
-        sheetName: '',
         row: 0,
         column: 0,
     });
@@ -46,7 +45,6 @@ describe('arrayValueObject round method test', () => {
                 columnCount: 3,
                 unitId: '',
                 sheetId: '',
-                sheetName: '',
                 row: 0,
                 column: 0,
             });
@@ -65,7 +63,6 @@ describe('arrayValueObject round method test', () => {
                 columnCount: 5,
                 unitId: '',
                 sheetId: '',
-                sheetName: '',
                 row: 0,
                 column: 0,
             });
@@ -84,7 +81,6 @@ describe('arrayValueObject round method test', () => {
                 columnCount: 1,
                 unitId: '',
                 sheetId: '',
-                sheetName: '',
                 row: 0,
                 column: 0,
             });
@@ -103,7 +99,6 @@ describe('arrayValueObject round method test', () => {
                 columnCount: 5,
                 unitId: '',
                 sheetId: '',
-                sheetName: '',
                 row: 0,
                 column: 0,
             });
@@ -117,7 +112,6 @@ describe('arrayValueObject round method test', () => {
                 columnCount: 5,
                 unitId: '',
                 sheetId: '',
-                sheetName: '',
                 row: 0,
                 column: 0,
             });
@@ -136,7 +130,6 @@ describe('arrayValueObject round method test', () => {
                 columnCount: 1,
                 unitId: '',
                 sheetId: '',
-                sheetName: '',
                 row: 0,
                 column: 0,
             });
@@ -150,7 +143,6 @@ describe('arrayValueObject round method test', () => {
                 columnCount: 5,
                 unitId: '',
                 sheetId: '',
-                sheetName: '',
                 row: 0,
                 column: 0,
             });
@@ -172,7 +164,6 @@ describe('arrayValueObject round method test', () => {
                 columnCount: 5,
                 unitId: '',
                 sheetId: '',
-                sheetName: '',
                 row: 0,
                 column: 0,
             });
@@ -196,7 +187,6 @@ describe('arrayValueObject round method test', () => {
                 columnCount: 5,
                 unitId: '',
                 sheetId: '',
-                sheetName: '',
                 row: 0,
                 column: 0,
             });

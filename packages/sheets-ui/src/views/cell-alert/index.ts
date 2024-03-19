@@ -15,3 +15,9 @@
  */
 
 export { CellAlert } from './CellAlertPopup';
+
+const CELL_ALERT_KEY = 'univer.sheet.cell-alert';
+
+export {
+    CELL_ALERT_KEY,
+};

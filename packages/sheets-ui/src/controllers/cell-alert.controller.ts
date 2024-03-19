@@ -15,11 +15,12 @@
  */
 
 import { Disposable, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import { CELL_ALERT_KEY, ComponentManager } from '@univerjs/ui';
+import { ComponentManager } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
 import { DROP_DOWN_KEY } from '@univerjs/ui/views/constant.js';
 import { CellAlert } from '../views/cell-alert/CellAlertPopup';
 import { CellDropdown } from '../views/drop-down';
+import { CELL_ALERT_KEY } from '../views/cell-alert';
 
 @OnLifecycle(LifecycleStages.Starting, CellAlertController)
 export class CellAlertController extends Disposable {

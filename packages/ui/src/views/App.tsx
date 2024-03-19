@@ -23,7 +23,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { IWorkbenchOptions } from '../controllers/ui/ui.controller';
 import { IMessageService } from '../services/message/message.service';
 import { ComponentManager } from '../common';
-import { CELL_ALERT_KEY, DROP_DOWN_KEY } from './constant';
+import { DROP_DOWN_KEY } from './constant';
 import styles from './app.module.less';
 import { ComponentContainer } from './components/ComponentContainer';
 import { Toolbar } from './components/doc-bars/Toolbar';
@@ -49,7 +49,7 @@ export function App(props: IUniverAppProps) {
     const componentManager = useDependency(ComponentManager);
     const contentRef = useRef<HTMLDivElement>(null);
 
-    const CellAlert = componentManager.get(CELL_ALERT_KEY);
+    // const CellAlert = componentManager.get(CELL_ALERT_KEY);
     const Dropdown = componentManager.get(DROP_DOWN_KEY);
 
     const {
@@ -130,7 +130,7 @@ export function App(props: IUniverAppProps) {
                                 data-range-selector
                                 onContextMenu={(e) => e.preventDefault()}
                             >
-                                {CellAlert && <CellAlert />}
+                                {/* {CellAlert && <CellAlert />} */}
                                 {Dropdown && <Dropdown />}
                                 <ComponentContainer components={contentComponents} />
                             </section>

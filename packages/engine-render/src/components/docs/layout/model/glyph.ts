@@ -254,24 +254,6 @@ export function addGlyphToDivide(
     glyphGroup: IDocumentSkeletonGlyph[],
     offsetLeft: number = 0
 ) {
-    // const line = divide.parent;
-    // if (line != null) {
-    //     const isFirstLine = line.divides[0].glyphGroup[0] == null;
-    //     const firstSpan = glyphGroup[0];
-    //     const firstSpanContent = firstSpan.content || ' ';
-    //     if (isFirstLine && firstSpanContent === ' ') {
-    //         const width = firstSpan.width;
-    //         firstSpan.width = 0;
-    //         for (const glyph of glyphGroup) {
-    //             if (glyph === firstSpan) {
-    //                 continue;
-    //             }
-
-    //             glyph.left -= width;
-    //         }
-    //     }
-    // }
-
     setGlyphGroupLeft(glyphGroup, offsetLeft);
 
     // Set glyph parent pointer.

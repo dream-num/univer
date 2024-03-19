@@ -167,7 +167,6 @@ export const RankStyleEditor = (props: IStyleEditorProps) => {
                     <div className={`${stylesBase.mLSm} ${stylesBase.labelContainer} ${styles.text}`}>
                         <Checkbox
                             checked={isPercent}
-                            value={undefined as any}
                             onChange={(v) => {
                                 isPercentSet(!!v);
                                 _onChange({ type, isPercent: !!v, value, style });

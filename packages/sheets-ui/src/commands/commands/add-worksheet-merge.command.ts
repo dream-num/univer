@@ -22,6 +22,7 @@ import {
     IUndoRedoService,
     IUniverInstanceService,
     LocaleService,
+    Rectangle,
     sequenceExecute,
 } from '@univerjs/core';
 import type { IAddWorksheetMergeMutationParams, IRemoveWorksheetMergeMutationParams } from '@univerjs/sheets';

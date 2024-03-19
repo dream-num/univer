@@ -15,3 +15,5 @@
  */
 
 export { CellDropdown } from './CellDropdown';
+const DROP_DOWN_KEY = 'sheet.ui.dropdown';
+export { DROP_DOWN_KEY };

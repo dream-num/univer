@@ -38,37 +38,24 @@ const calcAnchorStyle = (position: IPosition, width: number, height: number, con
 
 export function CellDropdown() {
     const dropdownManagerService = useDependency(DropdownManagerService);
-    const activeDropdown = useObservable(dropdownManagerService.activeDropdown$);
+    const activeDropdown = useObservable(dropdownManagerService.activeDropdown$, dropdownManagerService.activeDropdown);
     const componentManager = useDependency(ComponentManager);
-    const renderManagerService = useDependency(IRenderManagerService);
 
     if (!activeDropdown) {
         return null;
     }
+
     const { componentKey, width, height, position, location } = activeDropdown;
     const Component = componentManager.get(componentKey);
-    const currentRender = renderManagerService.getRenderById(location.unitId);
 
-    if (!Component || !currentRender) {
+    const key = `${location.unitId}-${location.subUnitId}-${location.row}-${location.col}`;
+
+    if (!Component) {
         return null;
     }
 
-    const canvasWidth = currentRender.engine.width;
-    const canvasHeight = currentRender.engine.height;
-
-    const style = calcAnchorStyle(position, width, height, canvasWidth, canvasHeight);
-    const key = `${location.unitId}-${location.subUnitId}-${location.row}-${location.col}`;
-
     return (
-        <div
-            style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
-            onClick={() => {
-                dropdownManagerService.hideDropdown();
-            }}
-        >
-            <div style={style} onClick={(e) => e.stopPropagation()}>
-                <Component key={key} width={width} height={height} location={location} position={position} />
-            </div>
-        </div>
+        <Component key={key} width={width} height={height} location={location} position={position} />
+
     );
 }

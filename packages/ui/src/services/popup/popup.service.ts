@@ -27,6 +27,7 @@ export interface IPopup {
     onMaskClick?: React.MouseEventHandler<HTMLDivElement>;
     unitId: string;
     subUnitId: string;
+    direction?: 'vertical' | 'horizontal';
 }
 
 export interface IPopupService {

@@ -35,6 +35,7 @@ export function UniverPopup() {
                 anchorRect={popup.anchorRect}
                 mask={popup.mask}
                 onMaskClick={popup.onMaskClick}
+                direction={popup.direction}
             >
 
                 {Component ? <Component /> : null}

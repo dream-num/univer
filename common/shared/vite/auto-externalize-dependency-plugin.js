@@ -106,7 +106,7 @@ exports.autoExternalizeDependency = function autoExternalizeDependency() {
         },
 
         generateBundle() {
-            // read package.json
+            // generate peerDependencies
             const pkg = require(`${process.cwd()}/package.json`);
             const peerDependencies = {};
 

@@ -26,17 +26,16 @@ import {
 } from '@univerjs/core';
 import type { IAddWorksheetMergeMutationParams, IRemoveWorksheetMergeMutationParams } from '@univerjs/sheets';
 import {
+    AddMergeRedoSelectionsOperationFactory,
     AddMergeUndoMutationFactory,
+    AddMergeUndoSelectionsOperationFactory,
     AddWorksheetMergeMutation,
     getAddMergeMutationRangeByType,
     RemoveMergeUndoMutationFactory,
-    RemoveWorksheetMergeMutation,
-    SelectionManagerService,
-} from '@univerjs/sheets';
+    RemoveWorksheetMergeMutation, SelectionManagerService } from '@univerjs/sheets';
 import { IConfirmService } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 
-import { AddMergeRedoSelectionsOperationFactory, AddMergeUndoSelectionsOperationFactory } from '@univerjs/sheets/commands/utils/handle-merge-operation.js';
 import { checkCellContentInRanges, getClearContentMutationParamsForRanges } from '../../common/utils';
 import { getMergeableSelectionsByType, MergeType } from './utils/selection-utils';
 

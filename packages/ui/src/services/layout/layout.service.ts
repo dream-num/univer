@@ -22,6 +22,7 @@ import { fromEvent } from 'rxjs';
 type FocusHandlerFn = (unitId: string) => void;
 
 export const FOCUSING_UNIVER = 'FOCUSING_UNIVER';
+const collectionOfCnForFocusableEle = ['univer-app-layout', 'univer-toolbar-btn', 'univer-menu-item', 'univer-button'];
 
 export interface ILayoutService {
     readonly isFocused: boolean;
@@ -145,7 +146,7 @@ export class DesktopLayoutService extends Disposable implements ILayoutService {
         this.disposeWithMe(
             fromEvent(window, 'focusin').subscribe((event) => {
                 const target = event.target as HTMLElement;
-                if (target.classList.contains('univer-app-layout')) {
+                if (collectionOfCnForFocusableEle.some((item) => target.classList.contains(item))) {
                     queueMicrotask(() => this.focus());
                     return;
                 }

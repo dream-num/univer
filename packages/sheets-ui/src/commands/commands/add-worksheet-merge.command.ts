@@ -36,6 +36,7 @@ import {
 import { IConfirmService } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 
+import { AddMergeRedoSelectionsOperationFactory, AddMergeUndoSelectionsOperationFactory } from '@univerjs/sheets/commands/utils/handle-merge-operation.js';
 import { checkCellContentInRanges, getClearContentMutationParamsForRanges } from '../../common/utils';
 import { getMergeableSelectionsByType, MergeType } from './utils/selection-utils';
 
@@ -109,6 +110,12 @@ export const AddWorksheetMergeCommand: ICommand = {
             redoMutations.unshift(...data.redos);
             undoMutations.push(...data.undos);
         }
+
+        const addMergeRedoSelectionsMutation = AddMergeRedoSelectionsOperationFactory(accessor, params, ranges);
+        addMergeRedoSelectionsMutation && redoMutations.push(addMergeRedoSelectionsMutation);
+
+        const addMergeUndoSelectionsMutation = AddMergeUndoSelectionsOperationFactory(accessor, params);
+        addMergeUndoSelectionsMutation && undoMutations.push(addMergeUndoSelectionsMutation);
 
         const result = sequenceExecute(redoMutations, commandService);
         if (result.result) {

@@ -70,9 +70,9 @@ export class NumfmtFormulaDisplayController extends Disposable {
 
                     const numfmtItemMap = this._formulaDataModel.getNumfmtItemMap();
                     const numfmtItem = numfmtItemMap[unitId]?.[subUnitId]?.[row]?.[col];
-
+                    const v = next(cell);
                     if (numfmtItem == null || numfmtItem === '') {
-                        return next(cell);
+                        return v;
                     }
 
                     const rawValue = location.worksheet.getCellRaw(row, col);
@@ -80,7 +80,7 @@ export class NumfmtFormulaDisplayController extends Disposable {
                     const type = rawValue?.t;
 
                     if (value == null || type !== CellValueType.NUMBER) {
-                        return next(cell);
+                        return v;
                     }
 
                     const info = getPatternPreview(numfmtItem, value as number);
@@ -89,7 +89,7 @@ export class NumfmtFormulaDisplayController extends Disposable {
                         const colorMap = this._themeService.getCurrentTheme();
                         const color = colorMap[`${info.color}500`];
                         return {
-                            ...cell,
+                            ...v,
                             v: info.result,
                             t: CellValueType.STRING,
                             s: { cl: { rgb: color } },
@@ -97,7 +97,7 @@ export class NumfmtFormulaDisplayController extends Disposable {
                     }
 
                     return {
-                        ...cell,
+                        ...v,
                         v: info.result,
                         t: CellValueType.STRING,
                     };

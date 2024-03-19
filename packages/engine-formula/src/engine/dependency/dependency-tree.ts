@@ -77,6 +77,8 @@ export class FormulaDependencyTree extends Disposable {
     private _state = FDtreeStateType.DEFAULT;
 
     override dispose(): void {
+        super.dispose();
+
         this.children.forEach((tree) => {
             tree.dispose();
         });
@@ -275,6 +277,10 @@ export class FormulaDependencyTreeCache extends Disposable {
     }
 
     size() {
+        return this._cacheItems.size;
+    }
+
+    get length() {
         return this._cacheItems.size;
     }
 

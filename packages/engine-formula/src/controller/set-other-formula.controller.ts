@@ -22,12 +22,14 @@ import {
 } from '../services/other-formula-manager.service';
 import { RemoveOtherFormulaMutation, SetOtherFormulaMutation } from '../commands/mutations/set-other-formula.mutation';
 import type { IRemoveOtherFormulaMutationParams, ISetOtherFormulaMutationParams } from '../commands/mutations/set-other-formula.mutation';
+import { IDependencyManagerService } from '../services/dependency-manager.service';
 
 @OnLifecycle(LifecycleStages.Ready, SetOtherFormulaController)
 export class SetOtherFormulaController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
-        @IOtherFormulaManagerService private readonly _otherFormulaManagerService: IOtherFormulaManagerService
+        @IOtherFormulaManagerService private readonly _otherFormulaManagerService: IOtherFormulaManagerService,
+        @IDependencyManagerService private readonly _dependencyManagerService: IDependencyManagerService
     ) {
         super();
 
@@ -57,6 +59,8 @@ export class SetOtherFormulaController extends Disposable {
                     params.formulaIdList.forEach((id) => obj[id] = true);
                     const config = { [params.unitId]: { [params.subUnitId]: obj } };
                     this._otherFormulaManagerService.batchRemove(config);
+
+                    this._dependencyManagerService.removeOtherFormulaDependency(params.unitId, params.subUnitId, params.formulaIdList);
                 }
             })
         );

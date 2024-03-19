@@ -23,13 +23,15 @@ import {
     SetFeatureCalculationMutation,
 } from '../commands/mutations/set-feature-calculation.mutation';
 import { IFeatureCalculationManagerService } from '../services/feature-calculation-manager.service';
+import { IDependencyManagerService } from '../services/dependency-manager.service';
 
 @OnLifecycle(LifecycleStages.Ready, SetFeatureCalculationController)
 export class SetFeatureCalculationController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @IFeatureCalculationManagerService
-        private readonly _featureCalculationManagerService: IFeatureCalculationManagerService
+        private readonly _featureCalculationManagerService: IFeatureCalculationManagerService,
+        @IDependencyManagerService private readonly _dependencyManagerService: IDependencyManagerService
     ) {
         super();
 
@@ -56,6 +58,7 @@ export class SetFeatureCalculationController extends Disposable {
                         return;
                     }
                     const { featureId } = params;
+                    this._dependencyManagerService.removeFeatureFormulaDependency(featureId);
                     this._featureCalculationManagerService.remove(featureId);
                 }
             })

@@ -38,6 +38,7 @@ import { Interpreter } from '../interpreter/interpreter';
 import type { BaseReferenceObject } from '../reference-object/base-reference-object';
 import type { PreCalculateNodeType } from '../utils/node-type';
 import { serializeRangeToRefString } from '../utils/reference';
+import { IDependencyManagerService } from '../../services/dependency-manager.service';
 import type { IUnitRangeWithToken } from './dependency-tree';
 import { FormulaDependencyTree, FormulaDependencyTreeCache } from './dependency-tree';
 
@@ -59,7 +60,8 @@ export class FormulaDependencyGenerator extends Disposable {
         private readonly _featureCalculationManagerService: IFeatureCalculationManagerService,
         @Inject(Interpreter) private readonly _interpreter: Interpreter,
         @Inject(AstTreeBuilder) private readonly _astTreeBuilder: AstTreeBuilder,
-        @Inject(Lexer) private readonly _lexer: Lexer
+        @Inject(Lexer) private readonly _lexer: Lexer,
+        @IDependencyManagerService private readonly _dependencyManagerService: IDependencyManagerService
     ) {
         super();
     }
@@ -173,6 +175,11 @@ export class FormulaDependencyGenerator extends Disposable {
                         return true;
                     }
                     const { f: formulaString, x, y } = formulaDataItem;
+
+                    if (this._dependencyManagerService.hasFormulaDependency(unitId, sheetId, row, column)) {
+                        return true;
+                    }
+
                     const node = this._generateAstNode(formulaString, x, y);
 
                     const FDtree = new FormulaDependencyTree();
@@ -188,6 +195,8 @@ export class FormulaDependencyGenerator extends Disposable {
 
                     FDtree.rowCount = sheetItem.rowCount;
                     FDtree.columnCount = sheetItem.columnCount;
+
+                    this._dependencyManagerService.addFormulaDependency(unitId, sheetId, row, column, FDtree);
 
                     treeList.push(FDtree);
                 });
@@ -216,6 +225,10 @@ export class FormulaDependencyGenerator extends Disposable {
                 const subFormulaDataKeys = Object.keys(subFormulaData);
 
                 for (const subFormulaDataId of subFormulaDataKeys) {
+                    if (this._dependencyManagerService.hasOtherFormulaDependency(unitId, subUnitId, subFormulaDataId)) {
+                        continue;
+                    }
+
                     const formulaDataItem = subFormulaData[subFormulaDataId];
 
                     const { f: formulaString } = formulaDataItem;
@@ -231,6 +244,8 @@ export class FormulaDependencyGenerator extends Disposable {
 
                     FDtree.formulaId = subFormulaDataId;
 
+                    this._dependencyManagerService.addOtherFormulaDependency(unitId, subUnitId, subFormulaDataId, FDtree);
+
                     treeList.push(FDtree);
                 }
             }
@@ -243,6 +258,11 @@ export class FormulaDependencyGenerator extends Disposable {
          */
         this._featureCalculationManagerService.getReferenceExecutorMap().forEach((params, featureId) => {
             const { unitId, subUnitId, dependencyRanges, getDirtyData } = params;
+
+            if (this._dependencyManagerService.hasFeatureFormulaDependency(unitId, subUnitId, featureId)) {
+                return true;
+            }
+
             const FDtree = new FormulaDependencyTree();
 
             FDtree.unitId = unitId;
@@ -258,6 +278,8 @@ export class FormulaDependencyGenerator extends Disposable {
                     token: serializeRangeToRefString({ ...range, sheetName: this._currentConfigService.getSheetName(range.unitId, range.sheetId) }),
                 };
             });
+
+            this._dependencyManagerService.addFeatureFormulaDependency(featureId, FDtree);
 
             treeList.push(FDtree);
         });
@@ -501,29 +523,31 @@ export class FormulaDependencyGenerator extends Disposable {
         const existTree = new Set<FormulaDependencyTree>();
         const forceCalculate = this._currentConfigService.isForceCalculate();
 
-        let dependencyAlgorithm = true;
+        let allTree: FormulaDependencyTree[] = [];
 
         if (dependencyTreeCache.size() > treeList.length) {
-            dependencyAlgorithm = false;
+            allTree = this._dependencyManagerService.buildDependencyTree(treeList);
+        } else {
+            allTree = this._dependencyManagerService.buildDependencyTree(dependencyTreeCache);
         }
 
-        for (let i = 0, len = treeList.length; i < len; i++) {
-            const tree = treeList[i];
+        for (let i = 0, len = allTree.length; i < len; i++) {
+            const tree = allTree[i];
 
-            if (dependencyAlgorithm) {
-                dependencyTreeCache.dependency(tree);
-            } else {
-                for (let m = 0, mLen = treeList.length; m < mLen; m++) {
-                    const treeMatch = treeList[m];
-                    if (tree === treeMatch) {
-                        continue;
-                    }
+            // if (dependencyAlgorithm) {
+            //     dependencyTreeCache.dependency(tree);
+            // } else {
+            //     for (let m = 0, mLen = treeList.length; m < mLen; m++) {
+            //         const treeMatch = treeList[m];
+            //         if (tree === treeMatch) {
+            //             continue;
+            //         }
 
-                    if (tree.dependency(treeMatch)) {
-                        tree.pushChildren(treeMatch);
-                    }
-                }
-            }
+            //         if (tree.dependency(treeMatch)) {
+            //             tree.pushChildren(treeMatch);
+            //         }
+            //     }
+            // }
 
             /**
              * forceCalculate: Mandatory calculation, adding all formulas to dependencies

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IUnitRangeWithName, Nullable } from '@univerjs/core';
+import type { IUnitRange, Nullable } from '@univerjs/core';
 import { Disposable } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
 
@@ -24,7 +24,7 @@ import type { FormulaDependencyTree } from '../engine/dependency/dependency-tree
 export interface IFeatureCalculationManagerParam {
     unitId: string;
     subUnitId: string;
-    dependencyRanges: IUnitRangeWithName[];
+    dependencyRanges: IUnitRange[];
     getDirtyData: (currentDependencyTree: FormulaDependencyTree) => {
         runtimeCellData: IRuntimeUnitDataType;
         dirtyRanges: IFeatureDirtyRangeType;

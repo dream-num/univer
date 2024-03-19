@@ -106,13 +106,6 @@ export interface IUnitRangeName {
     range: IRange;
 }
 
-export interface IUnitRangeWithName {
-    sheetId: string;
-    unitId: string;
-    sheetName: string;
-    range: IRange;
-}
-
 /**
  * Range data of Unit
  */

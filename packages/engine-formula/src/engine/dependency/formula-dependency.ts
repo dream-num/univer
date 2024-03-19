@@ -255,7 +255,7 @@ export class FormulaDependencyGenerator extends Disposable {
             FDtree.rangeList = dependencyRanges.map((range) => {
                 return {
                     gridRange: range,
-                    token: serializeRangeToRefString(range),
+                    token: serializeRangeToRefString({ ...range, sheetName: this._currentConfigService.getSheetName(range.unitId, range.sheetId) }),
                 };
             });
 

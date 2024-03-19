@@ -18,18 +18,19 @@ import type { ICommandInfo } from '@univerjs/core';
 import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 
 import {
-    type ISetFeatureCalculationMutation,
     RemoveFeatureCalculationMutation,
-    SetFeatureCalculationMutation,
 } from '../commands/mutations/set-feature-calculation.mutation';
 import { IFeatureCalculationManagerService } from '../services/feature-calculation-manager.service';
+import { IDependencyManagerService } from '../services/dependency-manager.service';
+import { RemoveOtherFormulaMutation } from '../commands/mutations/set-other-formula.mutation';
+import type { IOtherFormulaManagerSearchParam } from '../services/other-formula-manager.service';
 
-@OnLifecycle(LifecycleStages.Ready, SetFeatureCalculationController)
-export class SetFeatureCalculationController extends Disposable {
+@OnLifecycle(LifecycleStages.Ready, SetDependencyController)
+export class SetDependencyController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @IFeatureCalculationManagerService
-        private readonly _featureCalculationManagerService: IFeatureCalculationManagerService
+        @IDependencyManagerService private readonly _dependencyManagerService: IDependencyManagerService
     ) {
         super();
 
@@ -43,20 +44,20 @@ export class SetFeatureCalculationController extends Disposable {
     private _commandExecutedListener() {
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
-                if (command.id === SetFeatureCalculationMutation.id) {
-                    const params = command.params as ISetFeatureCalculationMutation;
-                    if (params == null) {
-                        return;
-                    }
-                    const { featureId, calculationParam } = params;
-                    this._featureCalculationManagerService.register(featureId, calculationParam);
-                } else if (command.id === RemoveFeatureCalculationMutation.id) {
+                if (command.id === RemoveFeatureCalculationMutation.id) {
                     const params = command.params as { featureId: string };
                     if (params == null) {
                         return;
                     }
                     const { featureId } = params;
-                    this._featureCalculationManagerService.remove(featureId);
+                    this._dependencyManagerService.removeFeatureFormulaDependency(featureId);
+                } else if (command.id === RemoveOtherFormulaMutation.id) {
+                    const params = command.params as IOtherFormulaManagerSearchParam;
+                    if (params == null) {
+                        return;
+                    }
+
+                    this._dependencyManagerService.removeOtherFormulaDependency(params.unitId, params.subUnitId, params.formulaId);
                 }
             })
         );

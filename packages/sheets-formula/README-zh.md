@@ -707,7 +707,7 @@ univer.registerPlugin(UniverSheetsCustomFunctionPlugin);
     ![office excel](./assets/office-excel-zh.png)
 
     函数描述和参数描述从 Office 函数详情页参考
-    ![sumif](./assets//img/sumif-zh.png)
+    ![sumif](./assets/sumif-zh.png)
 
     大部分的函数名称我们已经写好了基础的描述、简介、链接、参数结构，推荐您在此基础上进行修改，如果没有的函数需要自己加在末尾。
 

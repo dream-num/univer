@@ -73,7 +73,7 @@
         "@univerjs/icons": "^0.1.41"
     },
     "devDependencies": {
-        "@types/react": "^18.2.66",
+        "@types/react": "^18.2.67",
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
@@ -85,6 +85,6 @@
         "rxjs": "^7.8.1",
         "typescript": "^5.4.2",
         "vite": "^5.1.6",
-        "vitest": "^1.3.1"
+        "vitest": "^1.4.0"
     }
 }

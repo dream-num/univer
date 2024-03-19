@@ -67,7 +67,7 @@
         "react": ">=16.9.0"
     },
     "devDependencies": {
-        "@types/react": "^18.2.66",
+        "@types/react": "^18.2.67",
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
@@ -79,6 +79,6 @@
         "react": "^18.2.0",
         "typescript": "^5.4.2",
         "vite": "^5.1.6",
-        "vitest": "^1.3.1"
+        "vitest": "^1.4.0"
     }
 }

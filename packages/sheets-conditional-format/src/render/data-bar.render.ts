@@ -66,7 +66,8 @@ export class DataBar extends SheetExtension {
                 const width = borderWidth - this._paddingRightAndLeft * 2;
                 const height = borderHeight - this._paddingTopAndBottom * 2;
                 if (value > 0) {
-                    const dataBarWidth = width * (1 - startPoint / 100) * value / 100;
+                    // Width less than 1, almost invisible
+                    const dataBarWidth = Math.max(width * (1 - startPoint / 100) * value / 100, 1);
                     const x0 = startX + this._paddingRightAndLeft + (startPoint / 100) * width;
                     const y0 = startY + this._paddingTopAndBottom;
                     if (isGradient) {
@@ -80,7 +81,8 @@ export class DataBar extends SheetExtension {
 
                     this._drawRectWithRoundedCorner(ctx, x0, y0, dataBarWidth, height, false, true, true, false);
                 } else {
-                    const dataBarWidth = width * startPoint / 100 * Math.abs(value) / 100;
+                    // Width less than 1, almost invisible
+                    const dataBarWidth = Math.max(width * startPoint / 100 * Math.abs(value) / 100, 1);
                     const x0 = startX + this._paddingRightAndLeft + (startPoint / 100) * width - dataBarWidth;
                     const y0 = startY + this._paddingTopAndBottom;
                     if (isGradient) {

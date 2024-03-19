@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import type { ISlidePage } from '@univerjs/core';
-import React, { Component, createRef } from 'react';
-
+import { ICommandService, type ISlidePage, IUniverInstanceService } from '@univerjs/core';
+import React, { useCallback, useRef } from 'react';
+import { useDependency } from '@wendellhu/redi/react-bindings';
+import { useObservable } from '@univerjs/ui';
+import { ActivateSlidePageOperation } from '../../commands/operations/activate.operation';
 import styles from './index.module.less';
 
 interface SlideBarState {
@@ -29,96 +31,49 @@ interface IProps {
     activeSlide: (pageId: string) => void;
 }
 
-// TODO: @wzhudev: should show slide list and active slide
-export class SlideBar extends Component<{}, SlideBarState> {
-    slideBarRef = createRef<HTMLDivElement>();
+/**
+ * This components works as the root component of the left Sidebar of Slide.
+ */
+export function SlideSideBar() {
+    const univerInstanceService = useDependency(IUniverInstanceService);
+    const commandService = useDependency(ICommandService);
 
-    constructor(props: {}) {
-        super(props);
+    const slideBarRef = useRef<HTMLDivElement>(null);
+    const currentSlide = useObservable(univerInstanceService.currentSlide$);
+    const pages = currentSlide?.getPages();
+    const pageOrder = currentSlide?.getPageOrder();
 
-        this.state = {
-            slideList: [],
-        };
+    const isPageActivated = useCallback((page: string) => {
+        return false;
+    }, []);
+
+    const activatePage = useCallback((page: string) => {
+        commandService.syncExecuteCommand(ActivateSlidePageOperation.id, { id: page });
+    }, [commandService]);
+
+    if (!pages || !pageOrder) {
+        return null;
     }
 
-    override componentDidMount() {
-        this._init();
-    }
+    const slideList = pageOrder.map((id) => pages[id]);
 
-    isActive(pageId: string, index: number = 0) {
-        if (this.state.activePageId == null && index === 0) {
-            return styles.slideBarItemActive;
-        }
-        if (this.state.activePageId === pageId) {
-            return styles.slideBarItemActive;
-        }
-        return '';
-    }
-
-    setSlide(slideList: ISlidePage[], cb?: () => void) {
-        this.setState(
-            {
-                slideList,
-            },
-            cb
-        );
-    }
-
-    activeSlide(pageId: string, index: number) {
-        if (this.state.activePageId === pageId) {
-            return;
-        }
-
-        this.setState({
-            activePageId: pageId,
-        });
-
-        // this.props.activeSlide(pageId);
-    }
-
-    private _init(): void {
-        // TODO: should subscribe to active slide change event
-        // const univerInstanceService = this.context.injector.get(IUniverInstanceService);
-        // const model = univerInstanceService.getCurrentUniverSlideInstance();
-        // const pages = model.getPages();
-        // const pageOrder = model.getPageOrder();
-        // if (!pages || !pageOrder) {
-        //     return;
-        // }
-
-        const p: ISlidePage[] = [];
-        // pageOrder.forEach((pageKey) => {
-        //     p.push(pages[pageKey]);
-        // });
-
-        this.setState({
-            slideList: p,
-        });
-    }
-
-    override render() {
-        // const { addSlide } = this.props;
-        const { slideList } = this.state;
-        // TODO@wzhudev: manage slides in a SlideService
-
-        return (
-            <div className={styles.slideBar} ref={this.slideBarRef}>
-                <div className={styles.slideBarContent}>
-                    {slideList.map((item, index) => (
-                        <div
-                            key={index}
-                            className={`${styles.slideBarItem} ${this.isActive(item.id, index)}`}
-                            onClick={() => this.activeSlide(item.id, index)}
-                        >
-                            <span>{index + 1}</span>
-                            <div className={styles.slideBarBox} />
-                        </div>
-                    ))}
-                </div>
-                {/* <div className={styles.slideAddButton}>
+    return (
+        <div className={styles.slideBar} ref={slideBarRef}>
+            <div className={styles.slideBarContent}>
+                {slideList.map((item, index) => (
+                    <div
+                        key={index}
+                        className={`${styles.slideBarItem} ${isPageActivated(item.id)}`}
+                        onClick={() => activatePage(item.id)}
+                    >
+                        <span>{index + 1}</span>
+                        <div className={styles.slideBarBox} />
+                    </div>
+                ))}
+            </div>
+            {/* <div className={styles.slideAddButton}>
                     <Button onClick={addSlide}>+</Button>
                 </div> */}
-            </div>
-        );
-    }
+        </div>
+    );
 }

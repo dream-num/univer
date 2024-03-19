@@ -35,48 +35,23 @@ export enum DesktopUIPart {
     HEADER_MENU = 'header-menu',
     CONTENT = 'content',
     FOOTER = 'footer',
-    // SIDEBAR = 'sidebar',
+    LEFT_SIDEBAR = 'left-sidebar',
 }
 
-/**
- * IDesktopUIController
- */
 export interface IDesktopUIController extends IUIController {
     componentRegistered$: Observable<void>;
 
-    // provides multi methods for business to register workbench custom components
-    // TODO@wzhudev: in the future we may bind components to different business types
     registerComponent(part: DesktopUIPart, component: () => ComponentType): IDisposable;
-
-    getHeaderMenuComponents(): Set<() => ComponentType>;
-
-    // header bar
-    registerHeaderComponent(component: () => ComponentType): IDisposable;
-    getHeaderComponents(): Set<() => ComponentType>;
-
-    // content
-    registerContentComponent(component: () => ComponentType): IDisposable;
-    getContentComponents(): Set<() => ComponentType>;
-
-    // footer bar
-    registerFooterComponent(component: () => ComponentType): IDisposable;
-    getFooterComponents(): Set<() => ComponentType>;
-
-    // registerSidebarComponent(component: () => ComponentType): IDisposable;
-    // getSidebarComponents(): Set<() => ComponentType>;
+    getComponents(part: DesktopUIPart): Set<() => ComponentType>;
 }
 
 const STEADY_TIMEOUT = 3000;
 
 export class DesktopUIController extends Disposable implements IDesktopUIController {
-    private _headerComponents: Set<() => ComponentType> = new Set();
-    private _headerMenuComponents: Set<() => ComponentType> = new Set();
-    private _contentComponents: Set<() => ComponentType> = new Set();
-    private _footerComponents: Set<() => ComponentType> = new Set();
-    // private _sidebarComponents: Set<() => ComponentType> = new Set();
+    private _componentsByPart: Map<DesktopUIPart, Set<() => ComponentType>> = new Map();
 
-    private _componentRegistered$ = new Subject<void>();
-    componentRegistered$ = this._componentRegistered$.asObservable();
+    private readonly _componentRegistered$ = new Subject<void>();
+    readonly componentRegistered$ = this._componentRegistered$.asObservable();
 
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
@@ -103,77 +78,30 @@ export class DesktopUIController extends Disposable implements IDesktopUIControl
         );
     }
 
+    registerComponent(part: DesktopUIPart, component: () => React.ComponentType): IDisposable {
+        const components = (
+            this._componentsByPart.get(part)
+            || this._componentsByPart.set(part, new Set()).get(part)!
+        ).add(component);
+
+        this._componentRegistered$.next();
+
+        return toDisposable(() => {
+            components.delete(component);
+            if (components.size === 0) {
+                this._componentsByPart.delete(part);
+            }
+        });
+    }
+
+    getComponents(part: DesktopUIPart): Set<() => ComponentType> {
+        return new Set([...(this._componentsByPart.get(part) || new Set())]);
+    }
+
     private _initializeEngine(element: HTMLElement) {
         const engine = this._renderManagerService.getFirst()?.engine;
         engine?.setContainer(element);
     }
-
-    registerComponent(part: DesktopUIPart, component: () => React.ComponentType): IDisposable {
-        switch (part) {
-            case DesktopUIPart.HEADER:
-                return this.registerHeaderComponent(component);
-            case DesktopUIPart.CONTENT:
-                return this.registerContentComponent(component);
-            case DesktopUIPart.FOOTER:
-                return this.registerFooterComponent(component);
-            // case DesktopUIPart.SIDEBAR:
-            //     return this.registerSidebarComponent(component);
-            case DesktopUIPart.HEADER_MENU:
-                return this.registerHeaderMenuComponent(component);
-            default:
-                throw new Error(`[DesktopUIController] Unknown part type: ${part}.`);
-        }
-    }
-
-    registerHeaderMenuComponent(component: () => ComponentType): IDisposable {
-        this._headerMenuComponents.add(component);
-        this._componentRegistered$.next();
-        return toDisposable(() => this._headerMenuComponents.delete(component));
-    }
-
-    getHeaderMenuComponents(): Set<() => ComponentType> {
-        return new Set([...this._headerMenuComponents]);
-    }
-
-    registerHeaderComponent(component: () => ComponentType): IDisposable {
-        this._headerComponents.add(component);
-        this._componentRegistered$.next();
-        return toDisposable(() => this._headerComponents.delete(component));
-    }
-
-    getHeaderComponents(): Set<() => ComponentType> {
-        return new Set([...this._headerComponents]);
-    }
-
-    registerContentComponent(component: () => ComponentType): IDisposable {
-        this._contentComponents.add(component);
-        this._componentRegistered$.next();
-        return toDisposable(() => this._contentComponents.delete(component));
-    }
-
-    getContentComponents(): Set<() => ComponentType> {
-        return new Set([...this._contentComponents]);
-    }
-
-    registerFooterComponent(component: () => ComponentType): IDisposable {
-        this._footerComponents.add(component);
-        this._componentRegistered$.next();
-        return toDisposable(() => this._footerComponents.delete(component));
-    }
-
-    getFooterComponents(): Set<() => ComponentType> {
-        return new Set([...this._footerComponents]);
-    }
-
-    // registerSidebarComponent(component: () => ComponentType): IDisposable {
-    //     // this._sidebarComponents.add(component);
-    //     this._componentRegistered$.next();
-    //     return toDisposable(() => this._footerComponents.delete(component));
-    // }
-
-    // getSidebarComponents(): Set<() => React.ComponentType> {
-    //     return new Set([...this._sidebarComponents]);
-    // }
 }
 
 function bootStrap(
@@ -202,17 +130,19 @@ function bootStrap(
     const onRendered = (canvasElement: HTMLElement) => callback(canvasElement, mountContainer);
 
     function render() {
-        const headerComponents = desktopUIController.getHeaderComponents();
-        const contentComponents = desktopUIController.getContentComponents();
-        const footerComponents = desktopUIController.getFooterComponents();
-        // const sidebarComponents = desktopUIController.getSidebarComponents();
-        const headerMenuComponents = desktopUIController.getHeaderMenuComponents();
+        const headerComponents = desktopUIController.getComponents(DesktopUIPart.HEADER);
+        const contentComponents = desktopUIController.getComponents(DesktopUIPart.CONTENT);
+        const footerComponents = desktopUIController.getComponents(DesktopUIPart.FOOTER);
+        const headerMenuComponents = desktopUIController.getComponents(DesktopUIPart.HEADER_MENU);
+        const leftSidebarComponents = desktopUIController.getComponents(DesktopUIPart.LEFT_SIDEBAR);
+
         createRoot(
             <ConnectedApp
                 {...options}
                 mountContainer={mountContainer}
                 headerComponents={headerComponents}
                 headerMenuComponents={headerMenuComponents}
+                leftSidebarComponents={leftSidebarComponents}
                 contentComponents={contentComponents}
                 onRendered={onRendered}
                 footerComponents={footerComponents}

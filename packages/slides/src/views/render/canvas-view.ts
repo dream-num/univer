@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-import type { EventState, IColorStyle, ISlidePage, Nullable } from '@univerjs/core';
-import { getColorStyle, IUniverInstanceService } from '@univerjs/core';
-import type { IWheelEvent, RenderManagerService } from '@univerjs/engine-render';
+import type { EventState, IColorStyle, ISlidePage, Nullable, SlideDataModel } from '@univerjs/core';
+import { getColorStyle, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
+import type { IWheelEvent } from '@univerjs/engine-render';
 import {
     Engine,
     EVENT_TYPE,
-    IRenderingEngine,
     IRenderManagerService,
     Rect,
     Scene,
@@ -30,6 +29,7 @@ import {
 } from '@univerjs/engine-render';
 import { Inject, Injector } from '@wendellhu/redi';
 
+import { takeUntil } from 'rxjs';
 import { ObjectProvider } from './object-provider';
 
 export enum SLIDE_KEY {
@@ -37,8 +37,8 @@ export enum SLIDE_KEY {
     SCENE = '__mainScene__',
     VIEW = '__mainView__',
 }
-
-export class CanvasView {
+@OnLifecycle(LifecycleStages.Ready, CanvasView)
+export class CanvasView extends RxDisposable {
     private _scene: Scene | null = null;
 
     private _slideThumbEngine = new Map<string, Engine>();
@@ -47,16 +47,32 @@ export class CanvasView {
 
     private _ObjectProvider: ObjectProvider | null = null;
 
+    private _currentSlideModel!: SlideDataModel;
+
     private _activePageId: string = '';
 
     constructor(
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @Inject(Injector) private readonly _injector: Injector,
-        @IRenderingEngine private readonly _engine: Engine,
-        @IRenderManagerService private readonly _rms: RenderManagerService
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
+        super();
         this._initializeDependencies(this._injector);
         this._initialize();
+    }
+
+    private _initialize() {
+        this._renderManagerService.createRender$.pipe(takeUntil(this.dispose$)).subscribe((unitId) => {
+            this._create(unitId);
+        });
+
+        this._currentUniverService.currentSlide$.pipe(takeUntil(this.dispose$)).subscribe((slideModel) => {
+            this._create(slideModel?.getUnitId());
+        });
+
+        this._currentUniverService.getAllUniverSlidesInstance().forEach((slideModel) => {
+            this._create(slideModel.getUnitId());
+        });
     }
 
     getSlide() {
@@ -147,14 +163,59 @@ export class CanvasView {
         });
     }
 
-    private _initialize() {
-        const engine = this._rms.defaultEngine;
+    private _create(unitId: Nullable<string>) {
+        if (unitId == null) {
+            return;
+        }
 
-        const scene = new Scene(SLIDE_KEY.SCENE, engine, {
-            width: 2400,
-            height: 1800,
-        });
+        const model = this._currentUniverService.getUniverSlideInstance(unitId);
+
+        if (model == null) {
+            return;
+        }
+
+        this._currentSlideModel = model;
+
+        if (!this._renderManagerService.has(unitId)) {
+            this._addNewRender();
+        }
+    }
+
+    private _addNewRender() {
+        const documentModel = this._currentSlideModel;
+
+        const unitId = documentModel.getUnitId();
+
+        const container = documentModel.getContainer();
+
+        const parentRenderUnitId = documentModel.getParentRenderUnitId();
+
+        if (container != null && parentRenderUnitId != null) {
+            throw new Error('container or parentRenderUnitId can only exist one');
+        }
+
+        if (container == null && parentRenderUnitId != null) {
+            this._renderManagerService.createRenderWithParent(unitId, parentRenderUnitId);
+        } else {
+            this._renderManagerService.createRender(unitId);
+        }
+
+        const currentRender = this._renderManagerService.getRenderById(unitId);
+
+        if (currentRender == null) {
+            return;
+        }
+
+        const { scene, engine } = currentRender;
+
+        // const scene = new Scene(SLIDE_KEY.SCENE, engine, {
+        //     width: 2400,
+        //     height: 1800,
+        // });
+        scene.resize(2400, 1800);
+
         this._scene = scene;
+
         const viewMain = new Viewport(SLIDE_KEY.VIEW, scene, {
             left: 0,
             top: 0,

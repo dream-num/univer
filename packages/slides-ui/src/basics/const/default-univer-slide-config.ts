@@ -42,7 +42,7 @@ export const DefaultToolbarConfig = {
 export const DefaultSlideContainerConfig = {
     header: true,
     footer: true,
-    innerLeft: false,
+    innerLeft: true,
     innerRight: false,
     frozenHeaderLT: false,
     frozenHeaderRT: false,

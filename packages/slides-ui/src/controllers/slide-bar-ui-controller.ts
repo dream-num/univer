@@ -14,22 +14,28 @@
  * limitations under the License.
  */
 
-import type { ISlidePage } from '@univerjs/core';
-import { IUniverInstanceService } from '@univerjs/core';
+import type { ISlidePage, Nullable } from '@univerjs/core';
+import { IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
 import { CanvasView } from '@univerjs/slides';
 import { Inject } from '@wendellhu/redi';
-
+import { takeUntil } from 'rxjs';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import type { SlideBar } from '../views/slide-bar/SlideBar';
 
-export class SlideBarUIController {
+@OnLifecycle(LifecycleStages.Rendered, SlideBarUIController)
+export class SlideBarUIController extends RxDisposable {
     private _slideBar?: SlideBar;
 
     private _pages: ISlidePage[] = [];
 
+    private _slideIdSet: Set<string> = new Set();
+
     constructor(
         @Inject(CanvasView) private readonly _canvasView: CanvasView,
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService
+        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
+        super();
         this._initialize();
     }
 
@@ -80,15 +86,40 @@ export class SlideBarUIController {
     };
 
     private _initialize() {
-        this._generateModel();
+        this._renderManagerService.createRender$.pipe(takeUntil(this.dispose$)).subscribe((unitId) => {
+            this._create(unitId);
+        });
+
+        this._currentUniverService.currentSlide$.pipe(takeUntil(this.dispose$)).subscribe((slideModel) => {
+            this._create(slideModel?.getUnitId());
+        });
+
+        this._currentUniverService.getAllUniverSlidesInstance().forEach((slideModel) => {
+            this._create(slideModel.getUnitId());
+        });
     }
 
     private _getCanvasView() {
         return this._canvasView;
     }
 
-    private _generateModel() {
-        const model = this._currentUniverService.getCurrentUniverSlideInstance();
+    private _create(unitId: Nullable<string>) {
+        if (unitId == null) {
+            return;
+        }
+
+        const model = this._currentUniverService.getUniverSlideInstance(unitId);
+
+        if (model == null) {
+            return;
+        }
+
+        if (this._slideIdSet.has(unitId)) {
+            return;
+        }
+
+        this._slideIdSet.add(unitId);
+
         const pages = model.getPages();
         const pageOrder = model.getPageOrder();
         if (!pages || !pageOrder) {

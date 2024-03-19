@@ -39,7 +39,7 @@ import { IResourceManagerService } from '../services/resource-manager/type';
 import { ThemeService } from '../services/theme/theme.service';
 import { IUndoRedoService, LocalUndoRedoService } from '../services/undoredo/undoredo.service';
 import type { Workbook } from '../sheets/workbook';
-import type { Slide } from '../slides/domain/slide-model';
+import type { SlideDataModel } from '../slides/domain/slide-model';
 import type { LocaleType } from '../types/enum/locale-type';
 import type { IDocumentData, ISlideData, IUniverData, IWorkbookData } from '../types/interfaces';
 import { PluginHolder } from './plugin-holder';
@@ -155,8 +155,8 @@ export class Univer extends PluginHolder {
         return doc!;
     }
 
-    createUniverSlide(config: Partial<ISlideData>): Slide {
-        let slide: Slide;
+    createUniverSlide(config: Partial<ISlideData>): SlideDataModel {
+        let slide: SlideDataModel;
         const addSlide = () => {
             slide = this._univerSlide!.createSlide(config);
             this._univerInstanceService.addSlide(slide);

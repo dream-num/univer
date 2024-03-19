@@ -33,18 +33,17 @@ export class UniverSlidesUIPlugin extends Plugin {
 
     private _config: IUniverSlidesUIConfig;
 
-    private _componentManager?: ComponentManager;
-
     constructor(
         config: Partial<IUniverSlidesUIConfig> = {},
         @Inject(Injector) override readonly _injector: Injector,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService
+        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
+        @Inject(ComponentManager) private readonly _componentManager: ComponentManager
     ) {
         super(SLIDE_UI_PLUGIN_NAME);
         this._config = Tools.deepMerge({}, DefaultSlideUIConfig, config);
 
-        this.initializeDependencies();
+        this._initializeDependencies();
     }
 
     getConfig() {
@@ -65,10 +64,6 @@ export class UniverSlidesUIPlugin extends Plugin {
         return this._appUIController;
     }
 
-    getComponentManager() {
-        return this._componentManager;
-    }
-
     addToolButton(config: IToolbarItemProps) {
         this._appUIController!.getSlideContainerController().getToolbarController().addToolbarConfig(config);
     }
@@ -77,11 +72,9 @@ export class UniverSlidesUIPlugin extends Plugin {
         this._appUIController!.getSlideContainerController().getToolbarController().deleteToolbarConfig(name);
     }
 
-    private initializeDependencies(): void {
-        this._injector.add([ComponentManager]);
+    private _initializeDependencies(): void {
         this._injector.add([SlideUIController]);
 
-        this._componentManager = this._injector.get(ComponentManager);
         this._appUIController = this._injector.createInstance(AppUIController, this._config);
     }
 

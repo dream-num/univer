@@ -15,7 +15,7 @@
  */
 
 import type { ContextService, Nullable } from '@univerjs/core';
-import { Disposable, DocumentDataModel, FOCUSING_UNIVER_EDITOR, IContextService, ILogService, IUniverInstanceService, LifecycleStages, OnLifecycle, remove, Slide, toDisposable, UniverInstanceType, Workbook } from '@univerjs/core';
+import { Disposable, DocumentDataModel, FOCUSING_UNIVER_EDITOR, IContextService, ILogService, IUniverInstanceService, LifecycleStages, OnLifecycle, remove, SlideDataModel, toDisposable, UniverInstanceType, Workbook } from '@univerjs/core';
 import { createIdentifier, type IDisposable } from '@wendellhu/redi';
 import { fromEvent } from 'rxjs';
 
@@ -84,7 +84,7 @@ export class DesktopLayoutService extends Disposable implements ILayoutService {
             handler = this._focusHandlers.get(UniverInstanceType.SHEET);
         } else if (currentFocused instanceof DocumentDataModel) {
             handler = this._focusHandlers.get(UniverInstanceType.DOC);
-        } else if (currentFocused instanceof Slide) {
+        } else if (currentFocused instanceof SlideDataModel) {
             handler = this._focusHandlers.get(UniverInstanceType.SLIDE);
         }
 

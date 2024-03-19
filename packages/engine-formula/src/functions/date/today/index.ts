@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DEFFAULT_DATE_FORMAT, excelDateSerial } from '../../../basics/date';
+import { DEFAULT_DATE_FORMAT, excelDateSerial } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
@@ -29,7 +29,7 @@ export class Today extends BaseFunction {
 
         const currentSerial = excelDateSerial(new Date());
         const valueObject = NumberValueObject.create(currentSerial);
-        valueObject.setPattern(DEFFAULT_DATE_FORMAT);
+        valueObject.setPattern(DEFAULT_DATE_FORMAT);
         return valueObject;
     }
 }

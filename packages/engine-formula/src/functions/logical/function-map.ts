@@ -20,11 +20,13 @@ import { If } from './if';
 import { Iferror } from './iferror';
 import { Lambda } from './lambda';
 import { Makearray } from './makearray';
+import { Or } from './or';
 
 export const functionLogical = [
     [And, FUNCTION_NAMES_LOGICAL.AND],
+    [If, FUNCTION_NAMES_LOGICAL.IF],
     [Lambda, FUNCTION_NAMES_LOGICAL.LAMBDA],
     [Makearray, FUNCTION_NAMES_LOGICAL.MAKEARRAY],
-    [If, FUNCTION_NAMES_LOGICAL.IF],
+    [Or, FUNCTION_NAMES_LOGICAL.OR],
     [Iferror, FUNCTION_NAMES_LOGICAL.IFERROR],
 ];

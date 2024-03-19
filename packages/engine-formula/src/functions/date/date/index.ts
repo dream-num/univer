@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DEFFAULT_DATE_FORMAT, excelDateSerial } from '../../../basics/date';
+import { DEFAULT_DATE_FORMAT, excelDateSerial } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
@@ -100,7 +100,7 @@ export class DateFunction extends BaseFunction {
             }
 
             const valueObject = NumberValueObject.create(currentSerial);
-            valueObject.setPattern(DEFFAULT_DATE_FORMAT);
+            valueObject.setPattern(DEFAULT_DATE_FORMAT);
 
             return valueObject;
         });

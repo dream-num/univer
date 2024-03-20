@@ -18,6 +18,9 @@
         "url": "https://github.com/dream-num/univer/issues"
     },
     "keywords": ["univer"],
+    "sideEffects": [
+        "**/*.css"
+    ],
     "exports": {
         ".": "./src/index.ts",
         "./*": "./src/*"
@@ -81,6 +84,7 @@
         "@univerjs/shared": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "@wendellhu/redi": "^0.13.0",
+        "less": "^4.2.0",
         "react": "^18.2.0",
         "rxjs": "^7.8.1",
         "typescript": "^5.4.2",

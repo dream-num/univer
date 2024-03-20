@@ -126,7 +126,7 @@ export class HTTPService extends Disposable {
             params,
             withCredentials: options?.withCredentials ?? false, // default value for withCredentials is false by MDN
             responseType: options?.responseType ?? 'json',
-            body: options?.body,
+            body: (method === 'GET') ? undefined : (options as IPostRequestParams)?.body,
         });
 
         // eslint-disable-next-line ts/no-explicit-any

@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+// @ts-ignore
+import numfmt from 'numfmt';
+
 export const DEFAULT_DATE_FORMAT = 'yyyy/mm/dd;@';
 
 /**
@@ -108,3 +111,14 @@ export function isValidDateStr(dateStr: string): boolean {
 
     return dateStrPad === reconstructedDateStr;
 }
+
+/**
+ * covert date serial to date string by pattern @TODODushusir: Internationalization, reuse with numfmt
+ *
+ * @param pattern
+ * @param value
+ * @returns
+ */
+export const getDatePreview = (pattern: string, value: number) => {
+    return numfmt.format(pattern, value);
+};

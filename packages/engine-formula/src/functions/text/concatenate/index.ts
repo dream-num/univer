@@ -21,6 +21,7 @@ import type { BaseValueObject } from '../../../engine/value-object/base-value-ob
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { createStringValueObjectByRawValue } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
+import { getDatePreview } from '../../../basics/date';
 
 export class Concatenate extends BaseFunction {
     override calculate(...textValues: BaseValueObject[]) {
@@ -57,8 +58,8 @@ export class Concatenate extends BaseFunction {
                     return textValueObject;
                 }
 
-                const resultValueObjectString = resultValueObject?.isNull() ? '' : resultValueObject?.getValue() ?? '';
-                const textValueObjectString = textValueObject?.isNull() ? '' : textValueObject?.getValue() ?? '';
+                const resultValueObjectString = this._extractStringValue(resultValueObject);
+                const textValueObjectString = this._extractStringValue(textValueObject);
 
                 return createStringValueObjectByRawValue(`${resultValueObjectString}${textValueObjectString}`);
             });
@@ -69,5 +70,31 @@ export class Concatenate extends BaseFunction {
         }
 
         return result;
+    }
+
+    /**
+     * extract string value from value object
+     *
+     * @param valueObject
+     * @returns
+     */
+    private _extractStringValue(valueObject: BaseValueObject | null) {
+        if (valueObject === null || valueObject.isNull()) {
+            return '';
+        }
+
+        const value = valueObject.getValue();
+
+        if (value === null) {
+            return '';
+        }
+
+        // ="From "&TEXT(45292,"d/mm/yy") gets "From 1/01/24"
+        const pattern = valueObject.getPattern();
+        if (valueObject.isNumber() && pattern !== '') {
+            return getDatePreview(pattern, value as number);
+        }
+
+        return value;
     }
 }

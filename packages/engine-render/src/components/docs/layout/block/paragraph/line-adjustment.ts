@@ -17,8 +17,8 @@
 import { HorizontalAlign, type IParagraphStyle } from '@univerjs/core';
 import type { IDocumentSkeletonDivide, IDocumentSkeletonLine, IDocumentSkeletonPage } from '../../../../../basics/i-document-skeleton-cached';
 import { getGlyphGroupWidth, lineIterator } from '../../tools';
-import { hasCJK, hasCJKText, isCjkLeftAlignedPunctuation } from '../../../../..';
 import { glyphShrinkRight, setGlyphGroupLeft } from '../../model/glyph';
+import { hasCJK, hasCJKText, isCjkLeftAlignedPunctuation } from '../../../../../basics/tools';
 
 // How much a character should hang into the end margin.
 // For more discussion, see:

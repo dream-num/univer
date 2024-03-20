@@ -15,7 +15,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { baseAdjustability } from '../glyph';
+import { baseAdjustability, isJustifiable, isSpace } from '../glyph';
 
 describe('Glyph utils test cases', () => {
     describe('test baseAdjustability', () => {
@@ -49,6 +49,55 @@ describe('Glyph utils test cases', () => {
                 stretchability: [0, 0],
                 shrinkability: [3, 3],
             });
+        });
+    });
+
+    describe('test isJustifiable', () => {
+        it('should return true for space', () => {
+            const result = isJustifiable(' ');
+            expect(result).toBe(true);
+        });
+
+        it('should return true for Chinese', () => {
+            const result = isJustifiable('中');
+            expect(result).toBe(true);
+        });
+
+        it('should return true for CJK left aligned punctuation', () => {
+            const result = isJustifiable('，');
+            expect(result).toBe(true);
+        });
+
+        it('should return true for CJK right aligned punctuation', () => {
+            const result = isJustifiable('“');
+            expect(result).toBe(true);
+        });
+
+        it('should return true for CJK center aligned punctuation', () => {
+            const result = isJustifiable('\u{30FB}');
+            expect(result).toBe(true);
+        });
+    });
+
+    describe('test isSpace', () => {
+        it('should return true for space', () => {
+            const result = isSpace(' ');
+            expect(result).toBe(true);
+        });
+
+        it('should return true for non-breaking space', () => {
+            const result = isSpace('\u{00A0}');
+            expect(result).toBe(true);
+        });
+
+        it('should return true for full-width space', () => {
+            const result = isSpace('　');
+            expect(result).toBe(true);
+        });
+
+        it('should return false for other characters', () => {
+            const result = isSpace('a');
+            expect(result).toBe(false);
         });
     });
 });

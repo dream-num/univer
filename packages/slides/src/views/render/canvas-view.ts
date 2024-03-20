@@ -265,6 +265,8 @@ export class CanvasView extends RxDisposable {
         //     y,
         // });
 
+        // scene.addObject(new Rect('canvasTest', { left: 333, top: 333, width: 400, height: 300, fill: 'rgba(22,22,22, 1)' }));
+
         this._createSlide();
 
         this.activePage();

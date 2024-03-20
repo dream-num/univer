@@ -174,7 +174,7 @@ export class RichText extends BaseObject {
         }
 
         // Temporarily ignore the on-demand display of elements within a group：this.isInGroup
-        if (this.isRender()) {
+        if (this.isRender(bounds)) {
             const { top, left, bottom, right } = bounds!.viewBound;
 
             if (

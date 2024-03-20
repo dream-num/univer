@@ -16,10 +16,37 @@
 
 import { OpenValidationPanelOperation } from '@univerjs/data-validation';
 import { type IMenuItem, MenuItemType, MenuPosition } from '@univerjs/ui';
+import type { IAccessor } from '@wendellhu/redi';
+import { AddSheetDataValidationAndOpenCommand } from '../commands/commands/data-validation.command';
 
-export const DataValidationMenu: IMenuItem = {
-    id: OpenValidationPanelOperation.id,
-    type: MenuItemType.BUTTON,
-    positions: [MenuPosition.CONTEXT_MENU],
-    title: 'data-validation.menu',
-};
+export const DataValidationIcon = 'data-validation-single';
+
+const DATA_VALIDATION_MENU_ID = 'sheet.menu.data-validation';
+
+export function dataValidationMenuFactory(accessor: IAccessor): IMenuItem {
+    return {
+        id: DATA_VALIDATION_MENU_ID,
+        type: MenuItemType.SUBITEMS,
+        positions: [MenuPosition.TOOLBAR_START],
+        icon: DataValidationIcon,
+        tooltip: 'dataValidation.title',
+    };
+}
+
+export function openDataValidationMenuFactory(accessor: IAccessor): IMenuItem {
+    return {
+        id: OpenValidationPanelOperation.id,
+        title: 'dataValidation.panel.title',
+        type: MenuItemType.BUTTON,
+        positions: [DATA_VALIDATION_MENU_ID],
+    };
+}
+
+export function addDataValidationMenuFactory(accessor: IAccessor): IMenuItem {
+    return {
+        id: AddSheetDataValidationAndOpenCommand.id,
+        title: 'dataValidation.panel.add',
+        type: MenuItemType.BUTTON,
+        positions: [DATA_VALIDATION_MENU_ID],
+    };
+}

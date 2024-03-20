@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { CommandType, ICommandService, IUndoRedoService } from '@univerjs/core';
+import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
 import type { ICommand, IDataValidationRule, IDataValidationRuleBase, IDataValidationRuleOptions, IMutationInfo, IRange, ISheetDataValidationRule } from '@univerjs/core';
 import type { Injector } from '@wendellhu/redi';
 import type { IAddDataValidationMutationParams, IRemoveDataValidationMutationParams, IUpdateDataValidationMutationParams } from '../mutations/data-validation.mutation';
@@ -22,7 +22,8 @@ import { AddDataValidationMutation, RemoveDataValidationMutation, UpdateDataVali
 import { UpdateRuleType } from '../../types';
 import { DataValidatorRegistryService } from '../../services/data-validator-registry.service';
 import { DataValidationModel } from '../../models/data-validation-model';
-import { getRuleOptions, getRuleSetting } from '../../common/util';
+import { createDefaultNewRule, getRuleOptions, getRuleSetting } from '../../common/util';
+import { OpenValidationPanelOperation } from '../..';
 
 export interface IAddDataValidationCommandParams {
     unitId: string;

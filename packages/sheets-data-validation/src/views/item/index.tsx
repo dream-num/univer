@@ -17,7 +17,7 @@
 import { ICommandService, type ISheetDataValidationRule } from '@univerjs/core';
 import { DataValidatorRegistryService, RemoveDataValidationCommand } from '@univerjs/data-validation';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import React, { useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { serializeRange } from '@univerjs/engine-formula';
 import { DeleteSingle } from '@univerjs/icons';
 import { IMarkSelectionService } from '@univerjs/sheets-ui';
@@ -46,6 +46,16 @@ export const DataValidationItem = (props: IDataValidationDetailProps) => {
         e.stopPropagation();
     };
 
+    useEffect(() => {
+        return () => {
+            if (ids.current) {
+                ids.current?.forEach((id) => {
+                    id && markSelectionService.removeShape(id);
+                });
+            }
+        };
+    }, [markSelectionService]);
+
     return (
         <div
             className={styles.dataValidationItemContainer}
@@ -70,6 +80,7 @@ export const DataValidationItem = (props: IDataValidationDetailProps) => {
                 ids.current?.forEach((id) => {
                     id && markSelectionService.removeShape(id);
                 });
+                ids.current = undefined;
             }}
         >
             <div className={styles.dataValidationItemTitle}>

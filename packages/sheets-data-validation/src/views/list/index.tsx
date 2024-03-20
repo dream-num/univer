@@ -14,27 +14,25 @@
  * limitations under the License.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { memo, useEffect, useState } from 'react';
+import { Injector } from '@wendellhu/redi';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import type { ISheetDataValidationRule } from '@univerjs/core';
-import { DataValidationOperator, DataValidationType, ICommandService, IUniverInstanceService, LocaleService, Tools } from '@univerjs/core';
-import { DataValidationModel, RemoveAllDataValidationCommand } from '@univerjs/data-validation';
+import { ICommandService, IUniverInstanceService, LocaleService } from '@univerjs/core';
+import { createDefaultNewRule, DataValidationModel, RemoveAllDataValidationCommand } from '@univerjs/data-validation';
 import { Button } from '@univerjs/design';
-import { SelectionManagerService } from '@univerjs/sheets';
-import { AddSheetDataValidationCommand, type IAddSheetDataValidationCommandParams } from '../..';
+import { DataValidationPanelService } from '@univerjs/data-validation/services/data-validation-panel.service.js';
 import { DataValidationItem } from '../item';
+import type { IAddSheetDataValidationCommandParams } from '../../commands/commands/data-validation.command';
+import { AddSheetDataValidationCommand } from '../../commands/commands/data-validation.command';
 import styles from './index.module.less';
 
-export interface IDataValidationListProps {
-    onActive: (rule: ISheetDataValidationRule) => void;
-}
-
-export const DataValidationList = (props: IDataValidationListProps) => {
-    const { onActive } = props;
+export const DataValidationList = memo(() => {
     const univerInstanceService = useDependency(IUniverInstanceService);
     const dataValidationModel = useDependency(DataValidationModel);
     const commandService = useDependency(ICommandService);
-    const selectionManagerService = useDependency(SelectionManagerService);
+    const injector = useDependency(Injector);
+    const dataValidationPanelService = useDependency(DataValidationPanelService);
     const workbook = univerInstanceService.getCurrentUniverSheetInstance();
     const worksheet = workbook.getActiveSheet();
     const unitId = workbook.getUnitId();
@@ -54,22 +52,14 @@ export const DataValidationList = (props: IDataValidationListProps) => {
     }, [manager.dataValidations$]);
 
     const handleAddRule = async () => {
-        const currentRanges = selectionManagerService.getSelectionRanges();
-        const uid = Tools.generateRandomId(6);
-        const rule = {
-            uid,
-            type: DataValidationType.DECIMAL,
-            operator: DataValidationOperator.EQUAL,
-            formula1: '100',
-            ranges: currentRanges ?? [{ startColumn: 0, endColumn: 0, startRow: 0, endRow: 0 }],
-        };
+        const rule = createDefaultNewRule(injector);
         const params: IAddSheetDataValidationCommandParams = {
             unitId,
             subUnitId,
             rule,
         };
         await commandService.executeCommand(AddSheetDataValidationCommand.id, params);
-        onActive(rule);
+        dataValidationPanelService.setActiveRule(rule);
     };
 
     const handleRemoveAll = () => {
@@ -82,7 +72,7 @@ export const DataValidationList = (props: IDataValidationListProps) => {
                 <DataValidationItem
                     unitId={unitId}
                     subUnitId={subUnitId}
-                    onClick={() => onActive(rule)}
+                    onClick={() => dataValidationPanelService.setActiveRule(rule)}
                     rule={rule}
                     key={rule.uid}
                 />
@@ -97,4 +87,4 @@ export const DataValidationList = (props: IDataValidationListProps) => {
             </div>
         </div>
     );
-};
+});

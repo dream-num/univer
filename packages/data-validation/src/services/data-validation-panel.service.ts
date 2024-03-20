@@ -14,12 +14,22 @@
  * limitations under the License.
  */
 
+import type { IDataValidationRule, Nullable } from '@univerjs/core';
 import { Disposable } from '@univerjs/core';
 import { BehaviorSubject, distinctUntilChanged } from 'rxjs';
 
 export class DataValidationPanelService extends Disposable {
     private _open$ = new BehaviorSubject<boolean>(false);
+    private _activeRule: Nullable<IDataValidationRule> = undefined;
+    private _activeRule$ = new BehaviorSubject<Nullable<IDataValidationRule>>(undefined);
+
     open$ = this._open$.pipe(distinctUntilChanged());
+    activeRuleId$ = this._activeRule$.asObservable();
+
+    get activeRule() {
+        return this._activeRule;
+    }
+
     get isOpen(): boolean {
         return this._open$.getValue();
     }
@@ -35,5 +45,10 @@ export class DataValidationPanelService extends Disposable {
 
     close(): void {
         this._open$.next(false);
+    }
+
+    setActiveRule(rule: Nullable<IDataValidationRule>): void {
+        this._activeRule = rule;
+        this._activeRule$.next(rule);
     }
 }

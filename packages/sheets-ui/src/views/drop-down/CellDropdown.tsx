@@ -54,8 +54,18 @@ export function CellDropdown() {
         return null;
     }
 
-    return (
-        <Component key={key} width={width} height={height} location={location} position={position} />
+    const hideFn = () => {
+        dropdownManagerService.hideDropdown();
+    };
 
+    return (
+        <Component
+            key={key}
+            width={width}
+            height={height}
+            location={location}
+            position={position}
+            hideFn={hideFn}
+        />
     );
 }

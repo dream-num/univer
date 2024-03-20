@@ -15,5 +15,5 @@
  */
 
 export { UniverSheetsDataValidationPlugin } from './plugin';
-export { AddSheetDataValidationCommand, UpdateSheetDataValidationRangeCommand } from './commands/commands/data-validation.command';
+export { AddSheetDataValidationCommand, UpdateSheetDataValidationRangeCommand, AddSheetDataValidationAndOpenCommand } from './commands/commands/data-validation.command';
 export type { IAddSheetDataValidationCommandParams, IUpdateSheetDataValidationRangeCommandParams } from './commands/commands/data-validation.command';

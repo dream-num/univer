@@ -20,23 +20,20 @@ import type { IUpdateDataValidationSettingCommandParams } from '@univerjs/data-v
 import { DataValidatorRegistryScope, DataValidatorRegistryService, RemoveDataValidationCommand, UpdateDataValidationOptionsCommand, UpdateDataValidationSettingCommand } from '@univerjs/data-validation';
 import { TWO_FORMULA_OPERATOR_COUNT } from '@univerjs/data-validation/types/const/two-formula-operators.js';
 import { Button, FormLayout, Select } from '@univerjs/design';
-import { ComponentManager, RangeSelector } from '@univerjs/ui';
+import { ComponentManager, RangeSelector, useObservable } from '@univerjs/ui';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useState } from 'react';
 import { serializeRange } from '@univerjs/engine-formula';
 import { getRuleSetting } from '@univerjs/data-validation/common/util.js';
+import { DataValidationPanelService } from '@univerjs/data-validation/services/data-validation-panel.service.js';
 import type { IUpdateSheetDataValidationRangeCommandParams } from '../../commands/commands/data-validation.command';
 import { UpdateSheetDataValidationRangeCommand } from '../../commands/commands/data-validation.command';
 import { DataValidationOptions } from '../options';
 import styles from './index.module.less';
 
-export interface IDataValidationDetailProps {
-    rule: ISheetDataValidationRule;
-    onClose: () => void;
-}
-
-export function DataValidationDetail(props: IDataValidationDetailProps) {
-    const { rule, onClose } = props;
+export function DataValidationDetail() {
+    const dataValidationPanelService = useDependency(DataValidationPanelService);
+    const rule = useObservable(dataValidationPanelService.activeRuleId$, dataValidationPanelService.activeRule) as ISheetDataValidationRule;
     const univerInstanceService = useDependency(IUniverInstanceService);
     const workbook = univerInstanceService.getCurrentUniverSheetInstance();
     const worksheet = workbook.getActiveSheet();
@@ -48,6 +45,10 @@ export function DataValidationDetail(props: IDataValidationDetailProps) {
     const localeService = useDependency(LocaleService);
     const [localRule, setLocalRule] = useState(rule);
     const validator = validatorService.getValidatorItem(localRule.type);
+
+    const onClose = () => {
+        dataValidationPanelService.setActiveRule(null);
+    };
 
     const validators = validatorService.getValidatorsByScope(DataValidatorRegistryScope.SHEET);
     if (!validator) {

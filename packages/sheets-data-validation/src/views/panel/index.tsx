@@ -14,22 +14,20 @@
  * limitations under the License.
  */
 
-import React, { useState } from 'react';
-import type { ISheetDataValidationRule } from '@univerjs/core';
+import React from 'react';
+import { useDependency } from '@wendellhu/redi/react-bindings';
+import { DataValidationPanelService } from '@univerjs/data-validation/services/data-validation-panel.service.js';
+import { useObservable } from '@univerjs/ui';
 import { DataValidationDetail } from '../detail';
 import { DataValidationList } from '../list';
 
 export const DataValidationPanel = () => {
-    const [activeRule, setActiveRule] = useState<ISheetDataValidationRule>();
+    const dataValidationPanelService = useDependency(DataValidationPanelService);
+    const activeRule = useObservable(dataValidationPanelService.activeRuleId$, dataValidationPanelService.activeRule);
 
     return (
         activeRule
-            ? (
-                <DataValidationDetail
-                    rule={activeRule}
-                    onClose={() => setActiveRule(undefined)}
-                />
-            )
-            : <DataValidationList onActive={(rule) => setActiveRule(rule)} />
+            ? <DataValidationDetail />
+            : <DataValidationList />
     );
 };

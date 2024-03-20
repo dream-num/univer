@@ -27,6 +27,16 @@ export interface IDropdownParam {
     position: IPosition;
     width: number;
     height: number;
+    onHide?: () => void;
+}
+
+export interface IDropdownComponentProps {
+    componentKey: string;
+    location: ISheetLocation;
+    position: IPosition;
+    width: number;
+    height: number;
+    hideFn: () => void;
 }
 
 export class DropdownManagerService {
@@ -80,9 +90,11 @@ export class DropdownManagerService {
         if (!this._activeDropdown) {
             return;
         }
+        const activeDropdown = this._activeDropdown;
         this._currentPopupId && this._popupService.removePopup(this._currentPopupId);
         this._currentPopupId = null;
         this._activeDropdown = null;
         this._activeDropdown$.next(null);
+        activeDropdown.onHide?.();
     }
 }

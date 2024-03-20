@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import type { IDataValidationRule, IDataValidationRuleBase, IDataValidationRuleOptions } from '@univerjs/core';
+import { DataValidationOperator, DataValidationType, type IDataValidationRule, type IDataValidationRuleBase, type IDataValidationRuleOptions, Tools } from '@univerjs/core';
+import { SelectionManagerService } from '@univerjs/sheets';
+import { ISelectionRenderService } from '@univerjs/sheets-ui';
+import type { IAccessor } from '@wendellhu/redi';
 
 export function getRuleSetting(rule: IDataValidationRule): IDataValidationRuleBase {
     return {
@@ -38,4 +41,19 @@ export function getRuleOptions(rule: IDataValidationRule): IDataValidationRuleOp
         showErrorMessage: rule.showErrorMessage,
         showInputMessage: rule.showInputMessage,
     };
+}
+
+export function createDefaultNewRule(accessor: IAccessor) {
+    const selectionManagerService = accessor.get(SelectionManagerService);
+    const currentRanges = selectionManagerService.getSelectionRanges();
+    const uid = Tools.generateRandomId(6);
+    const rule = {
+        uid,
+        type: DataValidationType.DECIMAL,
+        operator: DataValidationOperator.EQUAL,
+        formula1: '100',
+        ranges: currentRanges ?? [{ startColumn: 0, endColumn: 0, startRow: 0, endRow: 0 }],
+    };
+
+    return rule;
 }

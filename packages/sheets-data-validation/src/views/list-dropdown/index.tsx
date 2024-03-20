@@ -21,6 +21,8 @@ import type { IDropdownParam } from '@univerjs/sheets-ui';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useState } from 'react';
 import { CheckMarkSingle } from '@univerjs/icons';
+import { OpenValidationPanelOperation } from '@univerjs/data-validation';
+import type { IDropdownComponentProps } from '@univerjs/sheets-ui/services/dropdown-manager.service.js';
 import type { ListMultipleValidator } from '../../validators/list-multiple-validator';
 import { deserializeListOptions, getDataValidationCellValue } from '../../validators/util';
 import styles from './index.module.less';
@@ -31,10 +33,11 @@ interface ISelectListProps {
     multiple?: boolean;
     options: { label: string;value: string; color?: string }[];
     title?: string;
+    onEdit?: () => void;
 }
 
 const SelectList = (props: ISelectListProps) => {
-    const { value, onChange, multiple, options, title } = props;
+    const { value, onChange, multiple, options, title, onEdit } = props;
     return (
         <div className={styles.dvListDropdown}>
             <div className={styles.dvListDropdownTitle}>
@@ -68,15 +71,15 @@ const SelectList = (props: ISelectListProps) => {
                 );
             })}
             <div className={styles.dvListDropdownSplit} />
-            <div className={styles.dvListDropdownEdit}>
+            <div className={styles.dvListDropdownEdit} onClick={onEdit}>
                 编辑
             </div>
         </div>
     );
 };
 
-export function ListDropDown(props: IDropdownParam) {
-    const { location } = props;
+export function ListDropDown(props: IDropdownComponentProps) {
+    const { location, hideFn } = props;
     const { worksheet, row, col, unitId, subUnitId } = location;
     const commandService = useDependency(ICommandService);
     const [localValue, setLocalValue] = useState('');
@@ -97,6 +100,13 @@ export function ListDropDown(props: IDropdownParam) {
     const list = validator.getList(rule, unitId, subUnitId);
     const cellStr = localValue || getDataValidationCellValue(cellData);
     const value = deserializeListOptions(cellStr);
+
+    const handleEdit = () => {
+        commandService.executeCommand(OpenValidationPanelOperation.id, {
+            ruleId: rule.uid,
+        });
+        hideFn();
+    };
 
     return (
         <SelectList
@@ -125,6 +135,7 @@ export function ListDropDown(props: IDropdownParam) {
                 label: str,
                 value: str,
             }))}
+            onEdit={handleEdit}
         />
     );
 }

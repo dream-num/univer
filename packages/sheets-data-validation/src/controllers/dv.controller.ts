@@ -19,12 +19,15 @@ import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/dat
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { Inject, Injector } from '@wendellhu/redi';
 import { IRenderManagerService } from '@univerjs/engine-render';
+import { DataValidationSingle } from '@univerjs/icons';
+import { ComponentManager } from '@univerjs/ui';
 import { SheetDataValidationManager } from '../models/sheet-data-validation-manager';
 import { SheetDataValidationService } from '../services/dv.service';
 import { CustomFormulaValidator } from '../validators/custom-validator';
 import { CheckboxValidator, DateValidator, DecimalValidator, ListValidator, TextLengthValidator } from '../validators';
 import { WholeValidator } from '../validators/whole-validator';
 import { ListMultipleValidator } from '../validators/list-multiple-validator';
+import { DataValidationIcon } from './dv.menu';
 
 @OnLifecycle(LifecycleStages.Rendered, DataValidationController)
 export class DataValidationController extends RxDisposable {
@@ -36,7 +39,8 @@ export class DataValidationController extends RxDisposable {
         @Inject(DataValidatorRegistryService) private readonly _dataValidatorRegistryService: DataValidatorRegistryService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(Injector) private readonly _injector: Injector,
-        @ICommandService private readonly _commandService: ICommandService
+        @ICommandService private readonly _commandService: ICommandService,
+        @Inject(ComponentManager) private readonly _componentManger: ComponentManager
     ) {
         super();
         this._init();
@@ -46,6 +50,7 @@ export class DataValidationController extends RxDisposable {
         this._initDataValidationDataSource();
         this._registerValidators();
         this._initInstanceChange();
+        this._componentManger.register(DataValidationIcon, DataValidationSingle);
     }
 
     private _registerValidators() {

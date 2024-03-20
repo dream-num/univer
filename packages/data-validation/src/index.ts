@@ -16,6 +16,7 @@
 
 export { UniverDataValidationPlugin } from './plugin';
 export { DataValidatorRegistryService, DataValidatorRegistryScope } from './services/data-validator-registry.service';
+export { DataValidationPanelService } from './services/data-validation-panel.service';
 export { DataValidationModel } from './models/data-validation-model';
 export {
     OpenValidationPanelOperation,
@@ -44,6 +45,7 @@ export {
     AddDataValidationMutation,
     RemoveDataValidationMutation,
     UpdateDataValidationMutation,
+
 } from './commands/mutations/data-validation.mutation';
 
 export type {
@@ -51,6 +53,12 @@ export type {
     IRemoveDataValidationMutationParams,
     IUpdateDataValidationMutationParams,
 } from './commands/mutations/data-validation.mutation';
+
+export {
+    createDefaultNewRule,
+    getRuleOptions,
+    getRuleSetting,
+} from './common';
 
 export * from './types';
 export * from './validators';

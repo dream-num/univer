@@ -19,7 +19,7 @@ import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { DataValidatorRegistryService } from './services/data-validator-registry.service';
 import { DataValidationModel } from './models/data-validation-model';
-import { DataValidationPanelService } from './services/data-validation-panel';
+import { DataValidationPanelService } from './services/data-validation-panel.service';
 import { CloseValidationPanelOperation, OpenValidationPanelOperation, ToggleValidationPanelOperation } from './commands/operations/data-validation.operation';
 import { DataValidatorController } from './controllers/validator.controller';
 import { AddDataValidationCommand, RemoveAllDataValidationCommand, RemoveDataValidationCommand, UpdateDataValidationOptionsCommand, UpdateDataValidationSettingCommand } from './commands/commands/data-validation.command';

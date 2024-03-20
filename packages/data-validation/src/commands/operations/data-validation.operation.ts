@@ -14,21 +14,39 @@
  * limitations under the License.
  */
 
-import { CommandType, type ICommand, ICommandService } from '@univerjs/core';
+import { CommandType, type ICommand, ICommandService, IUniverInstanceService } from '@univerjs/core';
 import { ISidebarService } from '@univerjs/ui';
-import { DataValidationPanelService } from '../../services/data-validation-panel';
+import { DataValidationPanelService } from '../../services/data-validation-panel.service';
+import { DataValidationModel } from '../..';
 
 export const DataValidationPanelName = 'DataValidationPanel';
 
-export const OpenValidationPanelOperation: ICommand = {
+export interface IOpenValidationPanelOperationParams {
+    ruleId?: string;
+    isAdd?: boolean;
+}
+
+export const OpenValidationPanelOperation: ICommand<IOpenValidationPanelOperationParams> = {
     id: 'data-validation.operation.open-validation-panel',
     type: CommandType.OPERATION,
-    handler(accessor) {
+    handler(accessor, params) {
+        if (!params) {
+            return false;
+        }
+        const { ruleId, isAdd } = params;
         const dataValidationPanelService = accessor.get(DataValidationPanelService);
+        const dataValidationModel = accessor.get(DataValidationModel);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
         const sidebarService = accessor.get(ISidebarService);
+        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
+        const worksheet = workbook.getActiveSheet();
+        const unitId = workbook.getUnitId();
+        const subUnitId = worksheet.getSheetId();
+        const rule = ruleId ? dataValidationModel.getRuleById(unitId, subUnitId, ruleId) : undefined;
         dataValidationPanelService.open();
+        dataValidationPanelService.setActiveRule(rule);
         sidebarService.open({
-            header: { title: 'dataValidation.panel.title' },
+            header: { title: isAdd ? 'dataValidation.panel.addTitle' : 'dataValidation.panel.title' },
             children: { label: DataValidationPanelName },
             width: 312,
         });

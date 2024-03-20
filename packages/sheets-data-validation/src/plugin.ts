@@ -20,7 +20,7 @@ import { DataValidationRenderController } from './controllers/dv-render.controll
 import { DataValidationController } from './controllers/dv.controller';
 import { SheetDataValidationService } from './services/dv.service';
 import { DataValidationAlertController } from './controllers/dv-alert.controller';
-import { AddSheetDataValidationCommand, UpdateSheetDataValidationRangeCommand } from './commands/commands/data-validation.command';
+import { AddSheetDataValidationAndOpenCommand, AddSheetDataValidationCommand, UpdateSheetDataValidationRangeCommand } from './commands/commands/data-validation.command';
 import { DataValidationCacheService } from './services/dv-cache.service';
 import { DataValidationFormulaService } from './services/dv-formula.service';
 import { DataValidationCustomFormulaService } from './services/dv-custom-formula.service';
@@ -63,6 +63,7 @@ export class UniverSheetsDataValidationPlugin extends Plugin {
 
         [
             AddSheetDataValidationCommand,
+            AddSheetDataValidationAndOpenCommand,
             UpdateSheetDataValidationRangeCommand,
             DataValidationFormulaMarkDirty,
         ].forEach((command) => {

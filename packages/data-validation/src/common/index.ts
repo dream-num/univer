@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export { getRuleOptions, getRuleSetting } from './util';
+export { getRuleOptions, getRuleSetting, createDefaultNewRule } from './util';

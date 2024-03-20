@@ -18,10 +18,10 @@ import type { ICellDataForSheetInterceptor, ICellRenderContext } from '@univerjs
 import { DataValidationStatus, DataValidationType, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, WrapStrategy } from '@univerjs/core';
 import { DataValidationModel, DataValidationPanelName, DataValidatorRegistryService } from '@univerjs/data-validation';
 import { ComponentManager, IMenuService } from '@univerjs/ui';
-import { Inject } from '@wendellhu/redi';
+import { Inject, Injector } from '@wendellhu/redi';
 import { DropdownManagerService, IEditorBridgeService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import type { Spreadsheet } from '@univerjs/engine-render';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { DataValidationPanel, LIST_DROPDOWN_KEY, ListDropDown } from '../views';
 import { FORMULA_INPUTS } from '../views/formula-input';
@@ -30,7 +30,7 @@ import { getCellValueOrigin } from '../utils/getCellDataOrigin';
 import type { CheckboxValidator } from '../validators';
 import { DropdownWidget } from '../widgets/dropdown-widget';
 import type { SheetDataValidationManager } from '../models/sheet-data-validation-manager';
-import { DataValidationMenu } from './dv.menu';
+import { addDataValidationMenuFactory, dataValidationMenuFactory, openDataValidationMenuFactory } from './dv.menu';
 
 const INVALID_MARK = {
     tr: {
@@ -52,7 +52,8 @@ export class DataValidationRenderController extends RxDisposable {
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
         @Inject(DropdownManagerService) private readonly _dropdownManagerService: DropdownManagerService,
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
-        @Inject(SheetDataValidationService) private readonly _sheetDataValidationService: SheetDataValidationService
+        @Inject(SheetDataValidationService) private readonly _sheetDataValidationService: SheetDataValidationService,
+        @Inject(Injector) private readonly _injector: Injector
     ) {
         super();
         this._init();
@@ -67,10 +68,14 @@ export class DataValidationRenderController extends RxDisposable {
     }
 
     private _initMenu() {
-        [DataValidationMenu].forEach((menu) => {
+        [
+            dataValidationMenuFactory,
+            openDataValidationMenuFactory,
+            addDataValidationMenuFactory,
+        ].forEach((menu) => {
             this.disposeWithMe(
                 this._menuService.addMenuItem(
-                    menu
+                    menu(this._injector)
                 )
             );
         });
@@ -141,6 +146,12 @@ export class DataValidationRenderController extends RxDisposable {
                     componentKey: validator.dropdown,
                     width: 200,
                     height: 200,
+                    onHide: () => {
+                        this._editorBridgeService.changeVisible({
+                            visible: false,
+                            eventType: DeviceInputEventType.Dblclick,
+                        });
+                    },
                 });
             }
         }));

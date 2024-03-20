@@ -16,10 +16,25 @@
 
 export default {
     dataValidation: {
+        title: 'Data validation',
         panel: {
             title: '管理数据验证',
+            addTitle: '新建数据验证',
             removeAll: '全部删除',
             add: '新建规则',
+            range: '应用范围',
+            type: '条件类型',
+            options: '高级设置',
+            operator: '数据',
+            removeRule: '删除规则',
+            done: '确认',
+            formulaPlaceholder: '请输入值或公式',
+            formulaAnd: '与',
+            invalid: '数据无效时',
+            showWarning: '显示警告',
+            rejectInput: '拒绝输入',
+            messageInfo: '文字提示',
+            showInfo: '显示所选单元格的提示文字',
         },
         operators: {
             between: 'between',

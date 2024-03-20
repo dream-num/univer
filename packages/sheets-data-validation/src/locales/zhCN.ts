@@ -16,8 +16,10 @@
 
 export default {
     dataValidation: {
+        title: '数据验证',
         panel: {
             title: '管理数据验证',
+            addTitle: '新建数据验证',
             removeAll: '全部删除',
             add: '新建规则',
             range: '应用范围',

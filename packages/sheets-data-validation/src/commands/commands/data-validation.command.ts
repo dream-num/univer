@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { CommandType, ICommandService, IUndoRedoService, sequenceExecuteAsync } from '@univerjs/core';
+import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecuteAsync } from '@univerjs/core';
 import type { ICommand, IMutationInfo, IRange, ISheetDataValidationRule } from '@univerjs/core';
 import type { IAddDataValidationMutationParams, IUpdateDataValidationMutationParams } from '@univerjs/data-validation';
-import { AddDataValidationMutation, DataValidationModel, RemoveDataValidationMutation, UpdateDataValidationMutation, UpdateRuleType } from '@univerjs/data-validation';
+import { AddDataValidationMutation, createDefaultNewRule, DataValidationModel, OpenValidationPanelOperation, RemoveDataValidationMutation, UpdateDataValidationMutation, UpdateRuleType } from '@univerjs/data-validation';
 import type { RangeMutation, SheetDataValidationManager } from '../../models/sheet-data-validation-manager';
 
 export interface IUpdateSheetDataValidationRangeCommandParams {
@@ -207,5 +207,37 @@ export const AddSheetDataValidationCommand: ICommand<IAddSheetDataValidationComm
 
         await sequenceExecuteAsync(redoMutations, commandService);
         return true;
+    },
+};
+
+export const AddSheetDataValidationAndOpenCommand: ICommand = {
+    type: CommandType.COMMAND,
+    id: 'data-validation.command.addRuleAndOpen',
+    async handler(accessor) {
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
+        const worksheet = workbook.getActiveSheet();
+        const rule = createDefaultNewRule(accessor);
+        const commandService = accessor.get(ICommandService);
+        const unitId = workbook.getUnitId();
+        const subUnitId = worksheet.getSheetId();
+
+        const addParams: IAddSheetDataValidationCommandParams = {
+            rule,
+            unitId,
+            subUnitId,
+        };
+
+        const res = await commandService.executeCommand(AddSheetDataValidationCommand.id, addParams);
+
+        if (res) {
+            commandService.executeCommand(OpenValidationPanelOperation.id, {
+                ruleId: rule.uid,
+                isAdd: true,
+            });
+
+            return true;
+        }
+        return false;
     },
 };

@@ -63,7 +63,10 @@ export const DataValidationList = memo(() => {
     };
 
     const handleRemoveAll = () => {
-        commandService.executeCommand(RemoveAllDataValidationCommand.id);
+        commandService.executeCommand(RemoveAllDataValidationCommand.id, {
+            unitId,
+            subUnitId,
+        });
     };
 
     return (

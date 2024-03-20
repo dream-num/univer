@@ -15,7 +15,7 @@
  */
 
 import { OpenValidationPanelOperation } from '@univerjs/data-validation';
-import { type IMenuItem, MenuItemType, MenuPosition } from '@univerjs/ui';
+import { type IMenuItem, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 import { AddSheetDataValidationAndOpenCommand } from '../commands/commands/data-validation.command';
 
@@ -23,17 +23,18 @@ export const DataValidationIcon = 'data-validation-single';
 
 const DATA_VALIDATION_MENU_ID = 'sheet.menu.data-validation';
 
-export function dataValidationMenuFactory(accessor: IAccessor): IMenuItem {
+export function dataValidationMenuFactory(_accessor: IAccessor): IMenuItem {
     return {
         id: DATA_VALIDATION_MENU_ID,
         type: MenuItemType.SUBITEMS,
         positions: [MenuPosition.TOOLBAR_START],
+        group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
         icon: DataValidationIcon,
         tooltip: 'dataValidation.title',
     };
 }
 
-export function openDataValidationMenuFactory(accessor: IAccessor): IMenuItem {
+export function openDataValidationMenuFactory(_accessor: IAccessor): IMenuItem {
     return {
         id: OpenValidationPanelOperation.id,
         title: 'dataValidation.panel.title',
@@ -42,7 +43,7 @@ export function openDataValidationMenuFactory(accessor: IAccessor): IMenuItem {
     };
 }
 
-export function addDataValidationMenuFactory(accessor: IAccessor): IMenuItem {
+export function addDataValidationMenuFactory(_accessor: IAccessor): IMenuItem {
     return {
         id: AddSheetDataValidationAndOpenCommand.id,
         title: 'dataValidation.panel.add',

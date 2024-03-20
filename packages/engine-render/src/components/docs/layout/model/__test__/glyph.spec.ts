@@ -15,7 +15,8 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { baseAdjustability, isJustifiable, isSpace } from '../glyph';
+import { baseAdjustability, glyphShrinkLeft, glyphShrinkRight, isJustifiable, isSpace } from '../glyph';
+import type { IDocumentSkeletonGlyph } from '../../../../../basics/i-document-skeleton-cached';
 
 describe('Glyph utils test cases', () => {
     describe('test baseAdjustability', () => {
@@ -98,6 +99,38 @@ describe('Glyph utils test cases', () => {
         it('should return false for other characters', () => {
             const result = isSpace('a');
             expect(result).toBe(false);
+        });
+    });
+
+    describe('test glyphShrinkRight', () => {
+        it('should shrink right', () => {
+            const glyph = {
+                adjustability: {
+                    shrinkability: [10, 10],
+                    stretchability: [10, 10],
+                },
+                width: 20,
+            } as IDocumentSkeletonGlyph;
+            glyphShrinkRight(glyph, 5);
+            expect(glyph.adjustability.shrinkability).toEqual([10, 5]);
+            expect(glyph.adjustability.stretchability).toEqual([10, 15]);
+            expect(glyph.width).toBe(15);
+        });
+    });
+
+    describe('test glyphShrinkLeft', () => {
+        it('should shrink left', () => {
+            const glyph = {
+                adjustability: {
+                    shrinkability: [10, 10],
+                    stretchability: [10, 10],
+                },
+                width: 20,
+            } as IDocumentSkeletonGlyph;
+            glyphShrinkLeft(glyph, 5);
+            expect(glyph.adjustability.shrinkability).toEqual([5, 10]);
+            expect(glyph.adjustability.stretchability).toEqual([15, 10]);
+            expect(glyph.width).toBe(15);
         });
     });
 });

@@ -174,9 +174,11 @@ export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, bo
                 const oldVal = cellMatrix.getValue(row, col) || {};
 
                 // NOTE: we may need to take `p` into account
-                const type = newVal.t === CellValueType.FORCE_STRING
-                    ? CellValueType.FORCE_STRING
-                    : checkCellValueType(newVal.v === undefined ? oldVal.v : newVal.v, newVal.t ?? oldVal.t);
+                const type = (newVal.t === CellValueType.FORCE_STRING)
+                    ? newVal.t
+                    : newVal.v !== undefined
+                        ? checkCellValueType(newVal.v, newVal.t)
+                        : checkCellValueType(oldVal.v, oldVal.t);
 
                 if (newVal.f !== undefined) {
                     oldVal.f = newVal.f;

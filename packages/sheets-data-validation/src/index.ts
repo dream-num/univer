@@ -15,5 +15,22 @@
  */
 
 export { UniverSheetsDataValidationPlugin } from './plugin';
-export { AddSheetDataValidationCommand, UpdateSheetDataValidationRangeCommand, AddSheetDataValidationAndOpenCommand } from './commands/commands/data-validation.command';
 export type { IAddSheetDataValidationCommandParams, IUpdateSheetDataValidationRangeCommandParams } from './commands/commands/data-validation.command';
+export { ICommandService, LocaleService, Plugin } from '@univerjs/core';
+export { type Dependency, Inject, Injector } from '@wendellhu/redi';
+export { DataValidationRenderController } from './controllers/dv-render.controller';
+export { DataValidationController } from './controllers/dv.controller';
+export { SheetDataValidationService } from './services/dv.service';
+export { DataValidationAlertController } from './controllers/dv-alert.controller';
+export { AddSheetDataValidationAndOpenCommand, AddSheetDataValidationCommand, UpdateSheetDataValidationRangeCommand } from './commands/commands/data-validation.command';
+export { DataValidationCacheService } from './services/dv-cache.service';
+export { DataValidationFormulaService } from './services/dv-formula.service';
+export { DataValidationCustomFormulaService } from './services/dv-custom-formula.service';
+export { RegisterOtherFormulaService } from './services/register-formula.service';
+export { DataValidationRefRangeController } from './controllers/dv-ref-range.controller';
+export { DataValidationFormulaMarkDirty } from './commands/mutations/formula.mutation';
+export { DATA_VALIDATION_PLUGIN_NAME } from './common/const';
+export { DataValidationAutoFillController } from './controllers/dv-auto-fill.controller';
+export { DataValidationSheetController } from './controllers/dv-sheet.controller';
+export { DataValidationCopyPasteController } from './controllers/dv-copy-paste.controller';
+export { DataValidationResourceController } from './controllers/dv-resource.controller';

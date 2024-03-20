@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
-import { DataValidationStatus, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
-import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
-import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
+import { IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
+import { DataValidatorRegistryService } from '@univerjs/data-validation';
 import { Inject, Injector } from '@wendellhu/redi';
-import { IRenderManagerService } from '@univerjs/engine-render';
 import { DataValidationSingle } from '@univerjs/icons';
 import { ComponentManager } from '@univerjs/ui';
-import { SheetDataValidationManager } from '../models/sheet-data-validation-manager';
 import { SheetDataValidationService } from '../services/dv.service';
 import { CustomFormulaValidator } from '../validators/custom-validator';
 import { CheckboxValidator, DateValidator, DecimalValidator, ListValidator, TextLengthValidator } from '../validators';
@@ -34,12 +31,9 @@ export class DataValidationController extends RxDisposable {
     constructor(
 
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(DataValidationModel) private readonly _dataValidationModel: DataValidationModel,
         @Inject(SheetDataValidationService) private readonly _sheetDataValidationService: SheetDataValidationService,
         @Inject(DataValidatorRegistryService) private readonly _dataValidatorRegistryService: DataValidatorRegistryService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(Injector) private readonly _injector: Injector,
-        @ICommandService private readonly _commandService: ICommandService,
         @Inject(ComponentManager) private readonly _componentManger: ComponentManager
     ) {
         super();
@@ -47,7 +41,6 @@ export class DataValidationController extends RxDisposable {
     }
 
     private _init() {
-        this._initDataValidationDataSource();
         this._registerValidators();
         this._initInstanceChange();
         this._componentManger.register(DataValidationIcon, DataValidationSingle);
@@ -88,29 +81,5 @@ export class DataValidationController extends RxDisposable {
                 }
             })
         );
-    }
-
-    private _createSheetDataValidationManager(unitId: string, subUnitId: string) {
-        const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
-        if (!workbook) {
-            throw new Error(`Workbook was not found, id: ${unitId}.`);
-        }
-
-        const worksheet = workbook.getSheetBySheetId(subUnitId);
-        if (!worksheet) {
-            throw new Error(`Worksheet was not found, id: ${subUnitId}.`);
-        }
-
-        const rules = worksheet.getSnapshot().dataValidation;
-        return new SheetDataValidationManager(
-            unitId,
-            subUnitId,
-            rules,
-            this._injector
-        );
-    }
-
-    private _initDataValidationDataSource() {
-        this._dataValidationModel.setManagerCreator(this._createSheetDataValidationManager.bind(this));
     }
 }

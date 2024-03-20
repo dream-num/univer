@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export const PLUGIN_NAME = 'sheets-data-validation';
+export const DATA_VALIDATION_PLUGIN_NAME = 'sheets-data-validation';

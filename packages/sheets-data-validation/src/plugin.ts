@@ -28,10 +28,11 @@ import { RegisterOtherFormulaService } from './services/register-formula.service
 import { DataValidationRefRangeController } from './controllers/dv-ref-range.controller';
 import { DataValidationFormulaMarkDirty } from './commands/mutations/formula.mutation';
 import { enUS, zhCN } from './locales';
-import { PLUGIN_NAME } from './common/const';
+import { DATA_VALIDATION_PLUGIN_NAME } from './common/const';
 import { DataValidationAutoFillController } from './controllers/dv-auto-fill.controller';
 import { DataValidationSheetController } from './controllers/dv-sheet.controller';
 import { DataValidationCopyPasteController } from './controllers/dv-copy-paste.controller';
+import { DataValidationResourceController } from './controllers/dv-resource.controller';
 
 export class UniverSheetsDataValidationPlugin extends Plugin {
     constructor(
@@ -39,7 +40,7 @@ export class UniverSheetsDataValidationPlugin extends Plugin {
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
-        super(PLUGIN_NAME);
+        super(DATA_VALIDATION_PLUGIN_NAME);
     }
 
     override onStarting(injector: Injector) {
@@ -50,6 +51,7 @@ export class UniverSheetsDataValidationPlugin extends Plugin {
             [DataValidationCustomFormulaService],
             [RegisterOtherFormulaService],
             // controller
+            [DataValidationResourceController],
             [DataValidationController],
             [DataValidationRenderController],
             [DataValidationAlertController],

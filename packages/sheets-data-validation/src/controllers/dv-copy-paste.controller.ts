@@ -20,7 +20,7 @@ import { COPY_TYPE, getRepeatRange, ISheetClipboardService, PREDEFINED_HOOK_NAME
 import { Inject } from '@wendellhu/redi';
 import { DataValidationModel } from '@univerjs/data-validation';
 import type { SheetDataValidationManager } from '../models/sheet-data-validation-manager';
-import { PLUGIN_NAME } from '../common/const';
+import { DATA_VALIDATION_PLUGIN_NAME } from '../common/const';
 import { getDataValidationDiffMutations } from '../commands/commands/data-validation.command';
 
 @OnLifecycle(LifecycleStages.Ready, DataValidationCopyPasteController)
@@ -42,7 +42,7 @@ export class DataValidationCopyPasteController extends Disposable {
 
     private _initCopyPaste() {
         this._sheetClipboardService.addClipboardHook({
-            id: PLUGIN_NAME,
+            id: DATA_VALIDATION_PLUGIN_NAME,
             onBeforeCopy: (unitId, subUnitId, range) => this._collect(unitId, subUnitId, range),
             onPasteCells: (pasteFrom, pasteTo, data, payload) => {
                 const { copyType = COPY_TYPE.COPY, pasteType } = payload;

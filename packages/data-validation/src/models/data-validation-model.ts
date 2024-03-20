@@ -128,4 +128,18 @@ export class DataValidationModel<T extends IDataValidationRule = IDataValidation
             });
         });
     }
+
+    getUnitRules(unitId: string) {
+        const unitMap = this._model.get(unitId);
+        if (!unitMap) {
+            return [];
+        }
+        const res = [] as [string, IDataValidationRule[]][];
+
+        unitMap.forEach((manager) => {
+            res.push([manager.subUnitId, manager.getDataValidations()]);
+        });
+
+        return res;
+    }
 }

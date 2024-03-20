@@ -18,7 +18,6 @@ import type { IObjectArrayPrimitiveType, IObjectMatrixPrimitiveType } from '../.
 import type { BooleanNumber } from '../enum';
 import type { ICellData } from './i-cell-data';
 import type { IColumnData } from './i-column-data';
-import type { ISheetDataValidationRule } from './i-data-validation';
 import type { IFreeze } from './i-freeze';
 import type { IRange, IRangeType } from './i-range';
 import type { IRowData } from './i-row-data';
@@ -82,6 +81,4 @@ export interface IWorksheetData {
     selections: IRangeType[];
 
     rightToLeft: BooleanNumber;
-
-    dataValidation: ISheetDataValidationRule[];
 }

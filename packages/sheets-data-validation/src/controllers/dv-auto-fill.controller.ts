@@ -20,7 +20,7 @@ import { APPLY_TYPE, getAutoFillRepeatRange, IAutoFillService } from '@univerjs/
 import { Inject } from '@wendellhu/redi';
 import { DataValidationModel } from '@univerjs/data-validation';
 import type { IAutoFillLocation } from '@univerjs/sheets-ui/services/auto-fill/type.js';
-import { PLUGIN_NAME } from '../common/const';
+import { DATA_VALIDATION_PLUGIN_NAME } from '../common/const';
 import type { SheetDataValidationManager } from '../models/sheet-data-validation-manager';
 import { getDataValidationDiffMutations } from '../commands/commands/data-validation.command';
 
@@ -97,7 +97,7 @@ export class DataValidationAutoFillController extends Disposable {
             };
         };
         const hook: ISheetAutoFillHook = {
-            id: PLUGIN_NAME,
+            id: DATA_VALIDATION_PLUGIN_NAME,
             onFillData: (location, direction, applyType) => {
                 if (
                     applyType === APPLY_TYPE.COPY ||

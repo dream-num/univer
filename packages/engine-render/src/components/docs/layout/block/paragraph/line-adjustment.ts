@@ -23,6 +23,7 @@ import { glyphShrinkRight, setGlyphGroupLeft } from '../../model/glyph';
 // How much a character should hang into the end margin.
 // For more discussion, see:
 // https://recoveringphysicist.com/21/
+// https://www.w3.org/TR/clreq/#hanging_punctuation_marks_at_line_end
 function overhang(c: string): number {
     switch (c) {
         // Dashes.

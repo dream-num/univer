@@ -15,7 +15,7 @@
  */
 
 import type { EventState, IPosition, IRange, Nullable } from '@univerjs/core';
-import { Observable, Rectangle, Tools } from '@univerjs/core';
+import { Observable, Tools } from '@univerjs/core';
 
 import type { BaseObject } from './base-object';
 import { RENDER_CLASS_TYPE } from './basics/const';

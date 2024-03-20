@@ -13934,7 +13934,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
             id: 'sheet-0011',
             tabColor: '',
             hidden: 0,
-            rowCount: 1000,
+            rowCount: 1000000,
             columnCount: 20,
             zoomRatio: 1,
             cellData: {

@@ -23,7 +23,7 @@ import { ComponentManager } from '../../../common';
 
 export function UniverPopup() {
     const popupService = useDependency(IPopupService);
-    const popups = useObservable(popupService.popups$);
+    const popups = useObservable(popupService.popups$, popupService.popups);
     const componentManager = useDependency(ComponentManager);
 
     return popups.map((item) => {

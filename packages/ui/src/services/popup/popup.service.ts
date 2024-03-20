@@ -18,7 +18,7 @@ import { Tools } from '@univerjs/core';
 import type { IBoundRectNoAngle } from '@univerjs/engine-render';
 import { createIdentifier } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 export interface IPopup {
     anchorRect: IBoundRectNoAngle;
@@ -36,6 +36,8 @@ export interface IPopupService {
     removeAll(): void;
 
     popups$: Observable<[string, IPopup][]>;
+
+    get popups(): [string, IPopup][];
 }
 
 export const IPopupService = createIdentifier<IPopupService>('univer.popup.service');
@@ -45,6 +47,10 @@ export class PopupService implements IPopupService {
     private _popups$ = new BehaviorSubject<[string, IPopup][]>([]);
 
     popups$ = this._popups$.asObservable();
+
+    get popups() {
+        return Array.from(this._popupMap.entries());
+    }
 
     private _notice() {
         this._popups$.next(Array.from(this._popupMap.entries()));

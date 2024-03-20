@@ -62,24 +62,19 @@ export const colorScaleCellCalculateUnit: ICalculateUnit = {
 
         const colorList = _colorList.map((item) => {
             return { ...item, value: isObject(item.value) ? Number(item.value.result) ?? 0 : item.value ?? 0 };
-        });
-
-        const isNotValid = colorList.some((item, index) => {
-            if (index + 1 < colorList.length) {
-                const next = colorList[index + 1];
-                if (!item.color.isValid) {
-                    return true;
-                }
-                if (isNullable(item.value) || isNullable(next.value)) {
-                    return next.value;
-                }
-                if (item.value >= next.value) {
-                    return true;
-                }
+        }).reduce((res, cur) => {
+            const pre = res[res.length - 1];
+            if (pre && cur.value <= pre.value) {
+                return res;
             }
-            return false;
-        }) || colorList.length <= 1;
-        if (isNotValid) {
+            res.push(cur);
+            return res;
+        }, [] as {
+            value: number;
+            color: ColorKit;
+        }[]);
+
+        if (colorList.length <= 1) {
             return computeResult;
         }
 

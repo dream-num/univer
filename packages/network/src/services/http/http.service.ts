@@ -31,7 +31,8 @@ import type { HTTPEvent, HTTPResponseError } from './response';
 import { HTTPResponse } from './response';
 
 export interface IRequestParams {
-    body?: any;
+    body?: unknown;
+
     /** Query params. These params would be append to the url before the request is sent. */
     params?: { [param: string]: string | number | boolean };
     headers?: { [key: string]: string | number | boolean };
@@ -40,7 +41,7 @@ export interface IRequestParams {
 }
 
 export interface IPostRequestParams extends IRequestParams {
-    body?: any;
+    body?: unknown;
 }
 
 type HTTPHandlerFn = (request: HTTPRequest) => Observable<HTTPEvent<unknown>>;
@@ -57,6 +58,7 @@ export interface IHTTPInterceptor {
 
 export class HTTPService extends Disposable {
     private _interceptors: IHTTPInterceptor[] = [];
+    // eslint-disable-next-line ts/no-explicit-any
     private _pipe: Nullable<RequestPipe<any>>;
 
     constructor(@IHTTPImplementation private readonly _http: IHTTPImplementation) {
@@ -111,6 +113,7 @@ export class HTTPService extends Disposable {
             body: options?.body,
         });
 
+        // eslint-disable-next-line ts/no-explicit-any
         const events$: Observable<HTTPEvent<any>> = of(request).pipe(
             concatMap((request) => this._runInterceptorsAndImplementation(request))
         );
@@ -125,6 +128,7 @@ export class HTTPService extends Disposable {
         throw new Error(`${(result as HTTPResponseError).error}`);
     }
 
+    // eslint-disable-next-line ts/no-explicit-any
     private _runInterceptorsAndImplementation(request: HTTPRequest): Observable<HTTPEvent<any>> {
         // In this method we first call all interceptors and finally the HTTP implementation.
         // And the HTTP response will be passed back through the interceptor chain.

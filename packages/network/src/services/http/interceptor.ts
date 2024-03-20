@@ -14,21 +14,15 @@
  * limitations under the License.
  */
 
-import { createIdentifier } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
 
-import type { HTTPRequest } from '../request';
-import type { HTTPEvent } from '../response';
+import type { IAccessor } from '@wendellhu/redi';
+import type { HTTPRequest } from './request';
+import type { HTTPEvent } from './response';
 
-/**
- * HTTP service could be implemented differently on platforms.
- */
-export interface IHTTPImplementation {
-    /**
-     * Send a request. The result would be returned in an observable for possible stream response.
-     * @param request the request to be sent
-     */
-    // eslint-disable-next-line ts/no-explicit-any
-    send(request: HTTPRequest): Observable<HTTPEvent<any>>;
-}
-export const IHTTPImplementation = createIdentifier<IHTTPImplementation>('network.http-implementation');
+export type HTTPHandlerFn = (request: HTTPRequest) => Observable<HTTPEvent<unknown>>;
+export type HTTPInterceptorFn = (request: HTTPRequest, next: HTTPHandlerFn) => Observable<HTTPEvent<unknown>>;
+export type RequestPipe<T> = (req: HTTPRequest, finalHandlerFn: HTTPHandlerFn) => Observable<HTTPEvent<T>>;
+
+// eslint-disable-next-line ts/no-explicit-any
+export type HTTPInterceptorFnFactory = (accessor: IAccessor, params?: any) => HTTPInterceptorFn;

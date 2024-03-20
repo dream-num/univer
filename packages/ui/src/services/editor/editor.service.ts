@@ -491,19 +491,16 @@ export class EditorService extends Disposable implements IEditorService, IDispos
     }
 
     setValue(val: string, editorUnitId?: string) {
-        this.setValueNoRefresh(val, editorUnitId);
-
         if (editorUnitId == null) {
             editorUnitId = this._getCurrentEditorUnitId();
         }
+
+        this.setValueNoRefresh(val, editorUnitId);
+
         this._refreshValueChange(editorUnitId);
     }
 
-    setValueNoRefresh(val: string, editorUnitId?: string) {
-        if (editorUnitId == null) {
-            editorUnitId = this._getCurrentEditorUnitId();
-        }
-
+    setValueNoRefresh(val: string, editorUnitId: string) {
         this._setValue$.next({ body: {
             dataStream: val,
         }, editorUnitId });

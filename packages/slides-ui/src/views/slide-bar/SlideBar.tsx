@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ICommandService, type ISlidePage, IUniverInstanceService } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService } from '@univerjs/core';
 import type { RefObject } from 'react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDependency } from '@wendellhu/redi/react-bindings';

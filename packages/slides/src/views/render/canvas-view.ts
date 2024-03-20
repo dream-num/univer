@@ -18,7 +18,6 @@ import type { EventState, IColorStyle, ISlidePage, Nullable, SlideDataModel } fr
 import { getColorStyle, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
 import type { IWheelEvent } from '@univerjs/engine-render';
 import {
-    Engine,
     EVENT_TYPE,
     IRenderManagerService,
     Rect,

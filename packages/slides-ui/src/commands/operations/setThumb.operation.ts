@@ -19,10 +19,6 @@ import { CommandType } from '@univerjs/core';
 import { CanvasView } from '@univerjs/slides';
 import type { IAccessor } from '@wendellhu/redi';
 
-export interface ISetSlidePageThumbOperationParams {
-    id: string;
-}
-
 export const SetSlidePageThumbOperation: IOperation = {
     id: 'slide.operation.set-slide-page-thumb',
     type: CommandType.OPERATION,

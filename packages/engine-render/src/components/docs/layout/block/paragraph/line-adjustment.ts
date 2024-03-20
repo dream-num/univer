@@ -17,8 +17,38 @@
 import { HorizontalAlign, type IParagraphStyle } from '@univerjs/core';
 import type { IDocumentSkeletonDivide, IDocumentSkeletonLine, IDocumentSkeletonPage } from '../../../../../basics/i-document-skeleton-cached';
 import { getGlyphGroupWidth, lineIterator } from '../../tools';
-import { hasCJKText } from '../../../../..';
-import { setGlyphGroupLeft } from '../../model/glyph';
+import { hasCJK, hasCJKText, isCjkLeftAlignedPunctuation } from '../../../../..';
+import { glyphShrinkRight, setGlyphGroupLeft } from '../../model/glyph';
+
+// How much a character should hang into the end margin.
+// For more discussion, see:
+// https://recoveringphysicist.com/21/
+function overhang(c: string): number {
+    switch (c) {
+        // Dashes.
+        case '–':
+        case '—': {
+            return 0.2;
+        }
+        // Punctuation.
+        case '.':
+        case ',': {
+            return 0.8;
+        }
+        case ':':
+        case ';': {
+            return 0.3;
+        }
+        // Arabic
+        case '\u{60C}':
+        case '\u{6D4}': {
+            return 0.4;
+        }
+        default: {
+            return 0;
+        }
+    }
+}
 
 function getDivideShrinkability(divide: IDocumentSkeletonDivide): number {
     const { glyphGroup } = divide;
@@ -43,6 +73,11 @@ function getDivideStretchability(divide: IDocumentSkeletonDivide): number {
         stretchability += left + right;
     }
 
+    // The last glyph should not be stretched right in justified paragraph.
+    const lastGlyph = glyphGroup[glyphGroup.length - 1];
+
+    stretchability -= lastGlyph.adjustability.stretchability[1];
+
     return stretchability;
 }
 
@@ -51,7 +86,7 @@ function getJustifiables(divide: IDocumentSkeletonDivide): number {
     const lastGlyph = divide.glyphGroup[divide.glyphGroup.length - 1];
 
     // CJK character at line end should not be adjusted.
-    if (hasCJKText(lastGlyph.content)) {
+    if (hasCJK(lastGlyph.content)) {
         return justifiables - 1;
     }
 
@@ -59,6 +94,8 @@ function getJustifiables(divide: IDocumentSkeletonDivide): number {
 }
 
 function adjustGlyphsInDivide(divide: IDocumentSkeletonDivide, justificationRatio: number, extraJustification: number) {
+    const lastGlyph = divide.glyphGroup[divide.glyphGroup.length - 1];
+
     for (const glyph of divide.glyphGroup) {
         const adjustabilityLeft = justificationRatio < 0
             ? glyph.adjustability.shrinkability[0]
@@ -72,6 +109,11 @@ function adjustGlyphsInDivide(divide: IDocumentSkeletonDivide, justificationRati
 
         if (glyph.isJustifiable) {
             justificationRight += extraJustification;
+        }
+
+        // The last glyph should not be stretched right in justified paragraph.
+        if (glyph === lastGlyph) {
+            justificationRight = 0;
         }
 
         glyph.width += justificationLeft + justificationRight;
@@ -101,6 +143,16 @@ function horizontalAlignHandler(line: IDocumentSkeletonLine, horizontalAlign: Ho
 
         if (divide.isFull) {
             let remaining = width - glyphGroupWidth;
+
+            // Handle hanging punctuation to the right.
+            // TODO: @jocs Handle hanging punctuation to the left if text dir is RTL.
+            if (divide.glyphGroup.length > 1) {
+                const lastGlyph = divide.glyphGroup[divide.glyphGroup.length - 1];
+                const amount = overhang(lastGlyph.content) * lastGlyph.width;
+
+                remaining += amount;
+            }
+
             let justificationRatio = 0;
             let extraJustification = 0;
             const shrink = getDivideShrinkability(divide);
@@ -142,9 +194,47 @@ function horizontalAlignHandler(line: IDocumentSkeletonLine, horizontalAlign: Ho
     }
 }
 
+// If the last glyph is a CJK character adjusted by [`addCJKLatinSpacing`],
+// restore the original width.
+function restoreLastCJKGlyphWidth(line: IDocumentSkeletonLine) {
+    for (const divide of line.divides) {
+        const lastGlyph = divide.glyphGroup[divide.glyphGroup.length - 1];
+
+        if (
+            divide.isFull &&
+            hasCJKText(lastGlyph.content) &&
+            lastGlyph.width - lastGlyph.xOffset > lastGlyph.bBox.width
+        ) {
+            const shrinkAmount = lastGlyph.width - lastGlyph.xOffset - lastGlyph.bBox.width;
+
+            lastGlyph.width -= shrinkAmount;
+            lastGlyph.adjustability.shrinkability[1] = 0;
+        }
+    }
+}
+
+// If the last glyph is a CJK punctuation, we want to shrink it.
+// See Requirements for Chinese Text Layout, Section 3.1.6.3
+// Compression of punctuation marks at line start or line end
+function shrinkLastCJKPunctuation(line: IDocumentSkeletonLine) {
+    for (const divide of line.divides) {
+        const lastGlyph = divide.glyphGroup[divide.glyphGroup.length - 1];
+
+        if (isCjkLeftAlignedPunctuation(lastGlyph.content)) {
+            const shrinkAmount = lastGlyph.adjustability.shrinkability[1];
+
+            glyphShrinkRight(lastGlyph, shrinkAmount);
+        }
+    }
+}
+
 export function lineAdjustment(pages: IDocumentSkeletonPage[], paragraphStyle: IParagraphStyle) {
     const { horizontalAlign = HorizontalAlign.UNSPECIFIED } = paragraphStyle;
     lineIterator(pages, (line) => {
+        // If the last glyph is a CJK punctuation, we want to shrink it.
+        shrinkLastCJKPunctuation(line);
+        // restore the original glyph width.
+        restoreLastCJKGlyphWidth(line);
         // Handle horizontal align: left\center\right\justified.
         horizontalAlignHandler(line, horizontalAlign);
     });

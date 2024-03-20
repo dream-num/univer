@@ -27,6 +27,9 @@ export default {
             },
             form: {
                 lessThan: '该值必须小于 {0}',
+                lessThanOrEqual: '该值必须小于等于 {0}',
+                greaterThan: '该值必大于 {0}',
+                greaterThanOrEqual: '该值必大于等于 {0}',
                 rangeSelector: '选择范围或者输入值',
             },
             iconSet: {

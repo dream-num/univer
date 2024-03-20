@@ -255,7 +255,7 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
 
     let className = styles.textEditorContainer;
     if (props.className != null) {
-        className = props.className;
+        className = `${className} ${props.className}`;
     }
 
     let borderStyle = '';

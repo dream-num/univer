@@ -51,8 +51,9 @@ const InputText = (props: { disabled?: boolean; id: string; className: string; t
                 id={`${SHEET_CONDITION_FORMAT_PLUGIN}_data_bar_${id}`}
                 value={v}
                 openForSheetSubUnitId={subUnitId}
+                className={className}
                 openForSheetUnitId={unitId}
-                style={{ maxWidth: '50%' }}
+                style={{ width: '47%' }}
                 canvasStyle={{ fontSize: 10 }}
                 onlyInputFormula={true}
                 onChange={(v = '') => {

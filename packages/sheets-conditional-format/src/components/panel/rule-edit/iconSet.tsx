@@ -19,7 +19,7 @@ import set from 'lodash.set';
 import get from 'lodash.get';
 import { MoreDownSingle } from '@univerjs/icons';
 
-import { Checkbox, Dropdown, InputNumber, Select } from '@univerjs/design';
+import { Checkbox, Dropdown, Input, InputNumber, Select } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 
 import { LocaleService, Tools } from '@univerjs/core';
@@ -27,26 +27,33 @@ import type { IIconType } from '../../../models/icon-map';
 import { iconGroup, iconMap } from '../../../models/icon-map';
 import type { IIconSet } from '../../../models/type';
 import { NumberOperator, RuleType, ValueType } from '../../../base/const';
-import { getOppositeOperator } from '../../../services/calculate-unit/utils';
+import { compareWithNumber, getOppositeOperator } from '../../../services/calculate-unit/utils';
 import stylesBase from '../index.module.less';
 import type { IStyleEditorProps } from './type';
 import styles from './index.module.less';
 
-const TextInput = (props: { value: number;onChange: (v: number) => void; error?: string }) => {
+const TextInput = (props: { type: ValueType; value: number;onChange: (v: number) => void; error?: string }) => {
     const className = useMemo(() => {
         if (props.error) {
             return styles.errorInput;
         }
         return '';
     }, [props.error]);
+
     return (
         <div>
-            <InputNumber className={className} value={props.value} onChange={(v) => props.onChange(v ?? 0)} />
-            {props.error && (
-                <div className={styles.errorText}>
-                    {props.error}
-                </div>
-            )}
+            {props.type !== ValueType.formula
+                ? (
+                    <>
+                        <InputNumber className={className} value={props.value} onChange={(v) => props.onChange(v ?? 0)} />
+                        {props.error && (
+                            <div className={styles.errorText}>
+                                {props.error}
+                            </div>
+                        )}
+                    </>
+                )
+                : <Input className={className} value={String(props.value).startsWith('=') ? String(props.value) : '='} />}
         </div>
     );
 };
@@ -152,6 +159,7 @@ const IconSetRuleEdit = (props: {
             const isEnd = index === configList.length - 1;
             const isFirst = index === 0;
             const preItem = configList[index - 1];
+
             const handleIconClick = (iconType: IIconType, iconId: string) => {
                 const value = { ...item, iconId, iconType } as typeof item;
                 onChange([String(index)], value);
@@ -233,7 +241,7 @@ const IconSetRuleEdit = (props: {
                                 <div className={`${stylesBase.mTSm} ${styles.flex}`}>
                                     <Select className={`${styles.width45} ${stylesBase.mL0}`} options={valueTypeOptions} value={item.value.type} onChange={(v) => { handleValueTypeChange(v as NumberOperator, index); }} />
                                     <div className={`${stylesBase.mL0} ${styles.width45}`}>
-                                        <TextInput error={error} value={Number(item.value.value)} onChange={(v) => handleValueValueChange(v, index)} />
+                                        <TextInput type={item.value.type} error={error} value={Number(item.value.value)} onChange={(v) => handleValueValueChange(v, index)} />
                                     </div>
 
                                 </div>
@@ -318,6 +326,12 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
             if (pre.preType && !pre.result) {
                 return pre;
             }
+            if (cur.value.type === ValueType.formula) {
+                return {
+                    preType: ValueType.formula,
+                    result: false,
+                };
+            }
             if (pre.preType) {
                 return {
                     result: pre.preType === cur.value.type,
@@ -331,16 +345,16 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
             }
         }, { result: true, preType: '' }).result;
         if (isTypeSame && [ValueType.num, ValueType.percent, ValueType.percentile].includes(_configList[0].value.type)) {
-            const valueList = _configList.map((config) => config.value.value ?? 0);
             const result: Record<string, string> = {};
-            valueList.forEach((value, index) => {
+            _configList.forEach((item, index) => {
                 const preIndex = index - 1;
                 if (preIndex < 0) {
                     return;
                 }
-                const preValue = valueList[preIndex];
-                if (value >= preValue) {
-                    result[index] = `${localeService.t('sheet.cf.form.lessThan', String(preValue))} `;
+                const preItem = _configList[index - 1];
+                const preOperator = getOppositeOperator(preItem.operator);
+                if (!compareWithNumber({ operator: preOperator, value: preItem.value.value as number }, item.value.value as number)) {
+                    result[index] = `${localeService.t(`sheet.cf.form.${preOperator}`, String(preItem.value.value))} `;
                 }
             });
             return result;

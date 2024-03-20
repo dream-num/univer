@@ -66,6 +66,8 @@ export interface IFormulaCurrentConfigService {
     getArrayFormulaCellData(): IRuntimeUnitDataType;
 
     getSheetName(unitId: string, sheetId: string): string;
+
+    getDirtyUnitOtherFormulaMap(): IDirtyUnitOtherFormulaMap;
 }
 
 export class FormulaCurrentConfigService extends Disposable implements IFormulaCurrentConfigService {
@@ -157,6 +159,10 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         }
 
         return this._sheetIdToNameMap[unitId]![sheetId] || '';
+    }
+
+    getDirtyUnitOtherFormulaMap() {
+        return this._dirtyUnitOtherFormulaMap;
     }
 
     load(config: IFormulaDatasetConfig) {

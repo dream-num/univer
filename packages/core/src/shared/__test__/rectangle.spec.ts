@@ -18,8 +18,8 @@ import { describe, expect, it } from 'vitest';
 
 import { Rectangle } from '../rectangle';
 
-describe('test rectangle', () => {
-    it('test subtract', () => {
+describe('test "Rectangle"', () => {
+    it('test "subtract"', () => {
         // completely covered
         const rect1 = {
             startRow: 1,

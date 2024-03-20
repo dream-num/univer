@@ -299,13 +299,13 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
 
                     const getRangeFromCell = (row: number, col: number) => ({ startRow: row, endRow: row, startColumn: col, endColumn: col });
                     const originRange = getRangeFromCell(rule.ranges[0].startRow, rule.ranges[0].startColumn);
-                    const relativeRange = Rectangle.getRelativeRange(getRangeFromCell(row, col), originRange);
                     const sequenceNodes = Tools.deepClone(cache.sequenceNodes);
                     const transformSequenceNodes = Array.isArray(sequenceNodes)
                         ? sequenceNodes.map((node) => {
                             if (typeof node === 'object' && node.nodeType === sequenceNodeType.REFERENCE) {
                                 const gridRangeName = deserializeRangeWithSheet(node.token);
-                                const newRange = Rectangle.getPositionRange(relativeRange, gridRangeName.range);
+                                const relativeRange = Rectangle.getRelativeRange(gridRangeName.range, originRange);
+                                const newRange = Rectangle.getPositionRange(relativeRange, getRangeFromCell(row, col));
                                 const newToken = serializeRange(newRange);
                                 return {
                                     ...node, token: newToken,

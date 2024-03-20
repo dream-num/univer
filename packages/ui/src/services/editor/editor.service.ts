@@ -279,6 +279,8 @@ export interface IEditorService {
 
     setValue(val: string, editorUnitId?: string): void;
 
+    setValueNoRefresh(val: string, editorUnitId?: string): void;
+
     setRichValue(body: IDocumentBody, editorUnitId?: string): void;
 
     getFirstEditor(): Editor;
@@ -489,19 +491,22 @@ export class EditorService extends Disposable implements IEditorService, IDispos
     }
 
     setValue(val: string, editorUnitId?: string) {
+        this.setValueNoRefresh(val, editorUnitId);
+
+        if (editorUnitId == null) {
+            editorUnitId = this._getCurrentEditorUnitId();
+        }
+        this._refreshValueChange(editorUnitId);
+    }
+
+    setValueNoRefresh(val: string, editorUnitId?: string) {
         if (editorUnitId == null) {
             editorUnitId = this._getCurrentEditorUnitId();
         }
 
-        if (val.substring(0, 1) === '=') {
-            this.setFormula(val, editorUnitId);
-        } else {
-            this._setValue$.next({ body: {
-                dataStream: val,
-            }, editorUnitId });
-        }
-
-        this._refreshValueChange(editorUnitId);
+        this._setValue$.next({ body: {
+            dataStream: val,
+        }, editorUnitId });
 
         this.resize(editorUnitId);
     }

@@ -174,11 +174,11 @@ export class Scene extends ThinScene {
         return this._cursor;
     }
 
-    resetCursor() {
+    override resetCursor() {
         this.setCursor(this._defaultCursor);
     }
 
-    setCursor(val: CURSOR_TYPE) {
+    override setCursor(val: CURSOR_TYPE) {
         this._cursor = val;
         const engine = this.getEngine();
         if (!engine) {

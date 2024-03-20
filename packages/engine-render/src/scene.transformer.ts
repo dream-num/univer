@@ -418,6 +418,8 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
         this._updateControlChildren();
 
+        this._getTopScene()?.makeDirtyNoParent(true);
+
         this.onChangingObservable.notifyObservers({
             objects: this._selectedObjectMap,
             moveX: moveLeft,
@@ -838,7 +840,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
     private _getTopScene() {
         const currentScene = this.getScene();
-        return currentScene.getEngine()?.activeScene;
+        return currentScene.getEngine()?.activeScene as ThinScene | null;
     }
 
     private _moving(moveOffsetX: number, moveOffsetY: number, scrollTimer: ScrollTimer) {
@@ -852,6 +854,8 @@ export class Transformer extends Disposable implements ITransformerConfig {
         this._selectedObjectMap.forEach((moveObject) => {
             moveObject.translate(moveLeft + moveObject.left, moveTop + moveObject.top);
         });
+
+        this._getTopScene()?.makeDirtyNoParent(true);
 
         this.onChangingObservable.notifyObservers({
             objects: this._selectedObjectMap,

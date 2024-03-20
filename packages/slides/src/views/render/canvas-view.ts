@@ -208,6 +208,10 @@ export class CanvasView extends RxDisposable {
 
         const { scene, engine } = currentRender;
 
+        engine.onTransformChangeObservable.addOnce(() => {
+            this.scrollToCenter();
+        });
+
         // const scene = new Scene(SLIDE_KEY.SCENE, engine, {
         //     width: 2400,
         //     height: 1800,
@@ -251,16 +255,15 @@ export class CanvasView extends RxDisposable {
         });
 
         ScrollBar.attachTo(viewMain);
-        const getCenterPositionViewPort = this._getCenterPositionViewPort();
-        if (!getCenterPositionViewPort) return;
-        const { left: viewPortLeft, top: viewPortTop } = getCenterPositionViewPort;
+        // const getCenterPositionViewPort = this._getCenterPositionViewPort();
+        // const { left: viewPortLeft = 0, top: viewPortTop = 0 } = getCenterPositionViewPort;
 
-        const { x, y } = viewMain.getBarScroll(viewPortLeft, viewPortTop);
+        // const { x, y } = viewMain.getBarScroll(viewPortLeft, viewPortTop);
 
-        viewMain.scrollTo({
-            x,
-            y,
-        });
+        // viewMain.scrollTo({
+        //     x,
+        //     y,
+        // });
 
         this._createSlide();
 
@@ -325,7 +328,7 @@ export class CanvasView extends RxDisposable {
     }
 
     private _getCenterPositionViewPort() {
-        if (!this._scene) return;
+        if (!this._scene) return { left: 0, top: 0 };
         const { width, height } = this._scene;
 
         const engine = this._scene.getEngine();

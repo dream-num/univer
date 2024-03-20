@@ -25,7 +25,7 @@ import type {
     LocaleService,
     Nullable,
 } from '@univerjs/core';
-import { BooleanNumber, DEFAULT_EMPTY_DOCUMENT_VALUE, DocumentDataModel } from '@univerjs/core';
+import { BooleanNumber, DEFAULT_EMPTY_DOCUMENT_VALUE, DocumentDataModel, HorizontalAlign, VerticalAlign } from '@univerjs/core';
 
 import { BaseObject } from '../base-object';
 import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '../basics/interfaces';
@@ -237,7 +237,7 @@ export class RichText extends BaseObject {
                             cl: this._cl,
                         },
                         st: 0,
-                        ed: contentLength - 1,
+                        ed: contentLength,
                     },
                 ],
             },
@@ -245,6 +245,10 @@ export class RichText extends BaseObject {
                 pageSize: {
                     width: Number.POSITIVE_INFINITY,
                     height: Number.POSITIVE_INFINITY,
+                },
+                renderConfig: {
+                    verticalAlign: VerticalAlign.TOP,
+                    horizontalAlign: HorizontalAlign.LEFT,
                 },
             },
         };

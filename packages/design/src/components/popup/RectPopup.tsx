@@ -42,8 +42,8 @@ export interface IRectPopupProps {
 const calcHorizontalPopupPosition = (position: IAbsolutePosition, width: number, height: number, containerWidth: number, containerHeight: number): Partial<IAbsolutePosition> => {
     const { left: startX, top: startY, right: endX, bottom: endY } = position;
 
-    const verticalStyle = ((startY + height) > containerHeight) ? { bottom: endY - height } : { top: startY };
-    const horizontalStyle = ((endX + width) > containerWidth) ? { right: containerWidth - startX + 1 } : { left: endX + 1 };
+    const verticalStyle = ((startY + height) > containerHeight) ? { top: endY - height } : { top: startY };
+    const horizontalStyle = ((endX + width) > containerWidth) ? { left: startX - width } : { left: endX };
 
     return {
         ...verticalStyle,
@@ -54,8 +54,8 @@ const calcHorizontalPopupPosition = (position: IAbsolutePosition, width: number,
 const calcVerticalPopupPosition = (position: IAbsolutePosition, width: number, height: number, containerWidth: number, containerHeight: number): Partial<IAbsolutePosition> => {
     const { left: startX, top: startY, right: endX, bottom: endY } = position;
 
-    const verticalStyle = (endY + height) > containerHeight ? { bottom: startY - height } : { top: endY };
-    const horizontalStyle = (startX + width) > containerWidth ? { right: containerWidth - endX } : { left: startX };
+    const verticalStyle = (endY + height) > containerHeight ? { top: startY - height } : { top: endY };
+    const horizontalStyle = (startX + width) > containerWidth ? { left: endX - width } : { left: startX };
 
     return {
         ...verticalStyle,

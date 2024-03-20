@@ -112,47 +112,6 @@ export class DataValidationRenderController extends RxDisposable {
                 this._dropdownManagerService.hideDropdown();
             } else {
                 const { unitId, sheetId, row, column } = state;
-                const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
-                if (!workbook) {
-                    return;
-                }
-                const worksheet = workbook.getSheetBySheetId(sheetId);
-                if (!worksheet) {
-                    return;
-                }
-
-                const cell = worksheet.getCell(row, column);
-                const rule = cell?.dataValidation?.rule;
-                if (!rule) {
-                    this._dropdownManagerService.hideDropdown();
-                    return;
-                }
-                const validator = this._dataValidatorRegistryService.getValidatorItem(rule.type);
-                if (!validator || !validator.dropdown) {
-                    this._dropdownManagerService.hideDropdown();
-                    return;
-                }
-
-                this._dropdownManagerService.showDropdown({
-                    position: state.position,
-                    location: {
-                        workbook,
-                        worksheet,
-                        row,
-                        col: column,
-                        unitId,
-                        subUnitId: sheetId,
-                    },
-                    componentKey: validator.dropdown,
-                    width: 200,
-                    height: 200,
-                    onHide: () => {
-                        this._editorBridgeService.changeVisible({
-                            visible: false,
-                            eventType: DeviceInputEventType.Dblclick,
-                        });
-                    },
-                });
             }
         }));
     }

@@ -17,7 +17,6 @@
 export { UniverSheetsDataValidationPlugin } from './plugin';
 export type { IAddSheetDataValidationCommandParams, IUpdateSheetDataValidationRangeCommandParams } from './commands/commands/data-validation.command';
 export { ICommandService, LocaleService, Plugin } from '@univerjs/core';
-export { type Dependency, Inject, Injector } from '@wendellhu/redi';
 export { DataValidationRenderController } from './controllers/dv-render.controller';
 export { DataValidationController } from './controllers/dv.controller';
 export { SheetDataValidationService } from './services/dv.service';

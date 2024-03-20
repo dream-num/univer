@@ -44,13 +44,6 @@ export class DataValidationCacheService {
         if (!cacheMatrix) {
             cacheMatrix = new ObjectMatrix();
             unitMap.set(subUnitId, cacheMatrix);
-            const worksheet = this._univerInstanceService.getUniverSheetInstance(unitId)?.getSheetBySheetId(subUnitId);
-            const rules = worksheet?.getSnapshot().dataValidation;
-            if (rules) {
-                rules.forEach((rule) => {
-                    this.addRule(unitId, subUnitId, rule);
-                });
-            }
         }
 
         return cacheMatrix;

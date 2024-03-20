@@ -32,7 +32,7 @@ export interface IHTTPRequestParams {
 
 let HTTPRequestUID = 0;
 
-export function __TEST_ONLY_RESET_REQUEST_UID_DO_NOT_USE_IN_PUBLIC() {
+export function __TEST_ONLY_RESET_REQUEST_UID_DO_NOT_USE_IN_PRODUCTION() {
     HTTPRequestUID = 0;
 }
 

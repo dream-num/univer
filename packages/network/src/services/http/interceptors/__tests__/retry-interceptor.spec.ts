@@ -23,7 +23,7 @@ import { IHTTPImplementation } from '../../implementations/implementation';
 import { HTTPResponse, HTTPResponseError } from '../../response';
 import { HTTPHeaders } from '../../headers';
 import { retryInterceptor } from '../retry-interceptor';
-import { __TEST_ONLY_RESET_REQUEST_UID_DO_NOT_USE_IN_PUBLIC } from '../../request';
+import { __TEST_ONLY_RESET_REQUEST_UID_DO_NOT_USE_IN_PRODUCTION } from '../../request';
 
 describe('test "HTTPRetryInterceptor"', () => {
     let httpService: HTTPService;
@@ -41,7 +41,7 @@ describe('test "HTTPRetryInterceptor"', () => {
     afterEach(() => {
         injector.dispose();
 
-        __TEST_ONLY_RESET_REQUEST_UID_DO_NOT_USE_IN_PUBLIC();
+        __TEST_ONLY_RESET_REQUEST_UID_DO_NOT_USE_IN_PRODUCTION();
 
         vitest.useRealTimers();
     });

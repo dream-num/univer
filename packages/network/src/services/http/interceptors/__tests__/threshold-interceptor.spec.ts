@@ -19,7 +19,7 @@ import type { Injector } from '@wendellhu/redi';
 import { HTTPService } from '../../http.service';
 import { createHTTPTestBed, type MockHTTPImplementation } from '../../__testing__/http-testing-utils';
 import { IHTTPImplementation } from '../../implementations/implementation';
-import { __TEST_ONLY_RESET_REQUEST_UID_DO_NOT_USE_IN_PUBLIC } from '../../request';
+import { __TEST_ONLY_RESET_REQUEST_UID_DO_NOT_USE_IN_PRODUCTION } from '../../request';
 import { ThresholdInterceptorFactory } from '../threshold-interceptor';
 import { HTTPHeaders } from '../../headers';
 import { HTTPResponse } from '../../response';
@@ -40,7 +40,7 @@ describe('test "HTTPThresholdInterceptor"', () => {
     afterEach(() => {
         injector.dispose();
 
-        __TEST_ONLY_RESET_REQUEST_UID_DO_NOT_USE_IN_PUBLIC();
+        __TEST_ONLY_RESET_REQUEST_UID_DO_NOT_USE_IN_PRODUCTION();
 
         vitest.useRealTimers();
     });

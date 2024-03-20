@@ -19,20 +19,25 @@ import set from 'lodash.set';
 import get from 'lodash.get';
 import { MoreDownSingle } from '@univerjs/icons';
 
-import { Checkbox, Dropdown, Input, InputNumber, Select } from '@univerjs/design';
+import { Checkbox, Dropdown, InputNumber, Select } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 
-import { LocaleService, Tools } from '@univerjs/core';
+import { IUniverInstanceService, LocaleService, Tools } from '@univerjs/core';
+import { TextEditor } from '@univerjs/ui';
 import type { IIconType } from '../../../models/icon-map';
 import { iconGroup, iconMap } from '../../../models/icon-map';
 import type { IIconSet } from '../../../models/type';
-import { NumberOperator, RuleType, ValueType } from '../../../base/const';
+import { NumberOperator, RuleType, SHEET_CONDITION_FORMAT_PLUGIN, ValueType } from '../../../base/const';
 import { compareWithNumber, getOppositeOperator } from '../../../services/calculate-unit/utils';
 import stylesBase from '../index.module.less';
 import type { IStyleEditorProps } from './type';
+
 import styles from './index.module.less';
 
-const TextInput = (props: { type: ValueType; value: number;onChange: (v: number) => void; error?: string }) => {
+const TextInput = (props: { id: string; type: ValueType; value: number;onChange: (v: number | string) => void; error?: string }) => {
+    const univerInstanceService = useDependency(IUniverInstanceService);
+    const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+    const subUnitId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
     const className = useMemo(() => {
         if (props.error) {
             return styles.errorInput;
@@ -53,7 +58,21 @@ const TextInput = (props: { type: ValueType; value: number;onChange: (v: number)
                         )}
                     </>
                 )
-                : <Input className={className} value={String(props.value).startsWith('=') ? String(props.value) : '='} />}
+                : (
+                    <TextEditor
+                        id={`${SHEET_CONDITION_FORMAT_PLUGIN}_icon_set_${props.id}`}
+                        value={String(props.value).startsWith('=') ? String(props.value) : '='}
+                        openForSheetSubUnitId={subUnitId}
+                        className={className}
+                        openForSheetUnitId={unitId}
+                        canvasStyle={{ fontSize: 10 }}
+                        onlyInputFormula={true}
+                        onChange={(v = '') => {
+                            const formula = v || '';
+                            props.onChange(formula);
+                        }}
+                    />
+                )}
         </div>
     );
 };
@@ -146,7 +165,7 @@ const IconSetRuleEdit = (props: {
     const handleOperatorChange = (operator: NumberOperator, index: number) => {
         onChange([String(index), 'operator'], operator);
     };
-    const handleValueValueChange = (v: number, index: number) => {
+    const handleValueValueChange = (v: number | string, index: number) => {
         onChange([String(index), 'value', 'value'], v);
     };
     const handleValueTypeChange = (v: string, index: number) => {
@@ -241,7 +260,7 @@ const IconSetRuleEdit = (props: {
                                 <div className={`${stylesBase.mTSm} ${styles.flex}`}>
                                     <Select className={`${styles.width45} ${stylesBase.mL0}`} options={valueTypeOptions} value={item.value.type} onChange={(v) => { handleValueTypeChange(v as NumberOperator, index); }} />
                                     <div className={`${stylesBase.mL0} ${styles.width45}`}>
-                                        <TextInput type={item.value.type} error={error} value={Number(item.value.value)} onChange={(v) => handleValueValueChange(v, index)} />
+                                        <TextInput id={String(index)} type={item.value.type} error={error} value={Number(item.value.value)} onChange={(v) => handleValueValueChange(v, index)} />
                                     </div>
 
                                 </div>

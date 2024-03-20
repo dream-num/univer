@@ -42,7 +42,7 @@ export interface IRectPopupProps {
 const calcHorizontalPopupPosition = (position: IAbsolutePosition, width: number, height: number, containerWidth: number, containerHeight: number): Partial<IAbsolutePosition> => {
     const { left: startX, top: startY, right: endX, bottom: endY } = position;
 
-    const verticalStyle = ((startY + height) > containerHeight) ? { bottom: containerHeight - endY } : { top: startY };
+    const verticalStyle = ((startY + height) > containerHeight) ? { bottom: endY - height } : { top: startY };
     const horizontalStyle = ((endX + width) > containerWidth) ? { right: containerWidth - startX + 1 } : { left: endX + 1 };
 
     return {
@@ -54,7 +54,7 @@ const calcHorizontalPopupPosition = (position: IAbsolutePosition, width: number,
 const calcVerticalPopupPosition = (position: IAbsolutePosition, width: number, height: number, containerWidth: number, containerHeight: number): Partial<IAbsolutePosition> => {
     const { left: startX, top: startY, right: endX, bottom: endY } = position;
 
-    const verticalStyle = (endY + height) > containerHeight ? { bottom: containerHeight - startY } : { top: endY };
+    const verticalStyle = (endY + height) > containerHeight ? { bottom: startY - height } : { top: endY };
     const horizontalStyle = (startX + width) > containerWidth ? { right: containerWidth - endX } : { left: startX };
 
     return {

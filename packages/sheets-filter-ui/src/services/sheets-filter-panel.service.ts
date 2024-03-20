@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import type { IRange, Nullable, Worksheet } from '@univerjs/core';
+import type { IFilterColumn, IRange, Nullable } from '@univerjs/core';
 import { Disposable, extractPureTextFromCell, ICommandService, IUniverInstanceService } from '@univerjs/core';
 import { SheetsFilterService } from '@univerjs/sheets-filter';
 import type { FilterColumn, FilterModel } from '@univerjs/sheets-filter';
 import type { IDisposable } from '@wendellhu/redi';
 import { createIdentifier, Inject, Injector } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, ReplaySubject } from 'rxjs';
+import { BehaviorSubject, combineLatest, map, merge, ReplaySubject, shareReplay, startWith, Subject, throttleTime } from 'rxjs';
 import { RefRangeService } from '@univerjs/sheets';
 import type { FilterOperator, IFilterConditionFormParams, IFilterConditionItem } from '../models/conditions';
 import { FilterConditionItems } from '../models/conditions';
@@ -36,6 +36,8 @@ export enum FilterBy {
 export interface IFilterByValueItem {
     value: string;
     checked: boolean;
+    count: number;
+    index: number;
 }
 
 export interface ISheetsFilterPanelService {
@@ -105,6 +107,7 @@ export class SheetsFilterPanelService extends Disposable {
                 return this._setupByConditions(filterModel, col);
             }
 
+            // TODO: when there's only one value filter and it's not empty, we should use FilterByCondition
             return this._setupByValues(filterModel, col);
         }
 
@@ -148,41 +151,18 @@ export class SheetsFilterPanelService extends Disposable {
         };
     }
 
-    private _setupByValues(filterModel: FilterModel, col: number, filters?: string[]): boolean {
+    private _setupByValues(filterModel: FilterModel, col: number): boolean {
         this._disposePreviousModel();
 
+        const model = ByValuesModel.fromFilterColumn(
+            this._injector,
+            filterModel,
+            col
+        );
+
+        this._filterByModel$.next(model);
+        this._filterByModel = model;
         this._filterBy$.next(FilterBy.VALUES);
-
-        const range = filterModel.getRange();
-        const column = range.startColumn + col;
-        const iterateRange: IRange = { ...range, startColumn: column, endColumn: column };
-
-        const items: IFilterByValueItem[] = [];
-
-        // we write the iteration twice to avoid the overhead of accessing the `alreadyChecked` set if there is no
-        // already checked values
-        const worksheet = this._getWorksheetForFilterModel(filterModel);
-
-        const alreadyChecked = new Set(filters);
-        const alreadySeen = new Set<string>();
-        if (alreadyChecked.size) {
-            // TODO@wzhudev: we would take merged cells into account later
-            for (const cell of worksheet.iterateByRow(iterateRange)) {
-                const value = cell?.value ? extractPureTextFromCell(cell.value) : '';
-                if (!alreadySeen.has(value)) {
-                    alreadySeen.add(value);
-                    items.push({ value, checked: alreadyChecked.has(value) });
-                }
-            }
-        } else {
-            for (const cell of worksheet.iterateByColumn(iterateRange)) {
-                const value = cell?.value ? extractPureTextFromCell(cell.value) : '';
-                if (!alreadySeen.has(value)) {
-                    alreadySeen.add(value);
-                    items.push({ value, checked: true });
-                }
-            }
-        }
 
         return true;
     }
@@ -202,16 +182,6 @@ export class SheetsFilterPanelService extends Disposable {
         this._filterBy$.next(FilterBy.CONDITIONS);
 
         return true;
-    }
-
-    private _getWorksheetForFilterModel(filterModel: FilterModel): Worksheet {
-        const { unitId, subUnitId } = filterModel;
-        const worksheet = this._univerInstanceService.getUniverSheetInstance(unitId)?.getSheetBySheetId(subUnitId);
-        if (!worksheet) {
-            throw new Error(`[SheetsFilterPanelService]: Worksheet not found for filter model with unitId: ${unitId} and subUnitId: ${subUnitId}!`);
-        }
-
-        return worksheet;
     }
 
     private _disposePreviousModel(): void {
@@ -333,9 +303,197 @@ export class ByConditionsModel extends Disposable {
     }
 }
 
+/**
+ * This model would be used to control the "Filter By Values" panel. It should be reconstructed in the following
+ * situations:
+ *
+ * 1. The target `FilterColumn` object is changed
+ * 2. User toggles "Filter By"
+ */
 export class ByValuesModel extends Disposable {
-    // TODO@yuhongz
+    /**
+     * Create a model with targeting filter column. If there is not a filter column, the model would be created with
+     * default values.
+     *
+     * @param injector
+     * @param filterModel
+     * @param col
+     *
+     * @returns the model to control the panel's state
+     */
+    static fromFilterColumn(injector: Injector, filterModel: FilterModel, col: number): ByValuesModel {
+        const univerInstanceService = injector.get(IUniverInstanceService);
+        const { unitId, subUnitId } = filterModel;
+        const workbook = univerInstanceService.getUniverSheetInstance(unitId);
+        if (!workbook) {
+            throw new Error(`[ByValuesModel]: Workbook not found for filter model with unitId: ${unitId}!`);
+        }
+
+        const worksheet = workbook?.getSheetBySheetId(subUnitId);
+        if (!worksheet) {
+            throw new Error(`[ByValuesModel]: Worksheet not found for filter model with unitId: ${unitId} and subUnitId: ${subUnitId}!`);
+        }
+
+        const range = filterModel.getRange();
+        const column = range.startColumn + col;
+        const filters = filterModel.getFilterColumn(col)?.getColumnData().filters || [];
+        const iterateRange: IRange = { ...range, startColumn: column, endColumn: column };
+
+        // we write the iteration twice to avoid the overhead of accessing the `alreadyChecked` set if there is no
+        // already checked values
+        const items: IFilterByValueItem[] = [];
+        const itemsByKey: Record<string, IFilterByValueItem> = {};
+        const alreadyChecked = new Set(filters);
+
+        // TODO@wzhudev: we would take merged cells into account later
+
+        let index = 0;
+        if (alreadyChecked.size) {
+            for (const cell of worksheet.iterateByRow(iterateRange)) {
+                const value = cell?.value ? extractPureTextFromCell(cell.value) : '';
+                if (!itemsByKey[value]) {
+                    const item: IFilterByValueItem = { value, checked: alreadyChecked.has(value), count: 1, index };
+                    itemsByKey[value] = item;
+                    items.push(item);
+                } else {
+                    itemsByKey[value].count++;
+                }
+
+                index++;
+            }
+        } else {
+            for (const cell of worksheet.iterateByColumn(iterateRange)) {
+                const value = cell?.value ? extractPureTextFromCell(cell.value) : '';
+                if (!itemsByKey[value]) {
+                    const item: IFilterByValueItem = { value, checked: false, count: 1, index };
+                    itemsByKey[value] = item;
+                    items.push(item);
+                } else {
+                    itemsByKey[value].count++;
+                }
+
+                index++;
+            }
+        }
+
+        const model = injector.createInstance(ByValuesModel, filterModel, col, items);
+        return model;
+    }
+
+    private readonly _rawFilterItems$: BehaviorSubject<IFilterByValueItem[]>;
+    readonly rawFilterItems$: Observable<IFilterByValueItem[]>;
+    get rawFilterItems(): IFilterByValueItem[] { return this._rawFilterItems$.getValue(); }
+
+    readonly filterItems$: Observable<IFilterByValueItem[]>;
+    private _filterItems: IFilterByValueItem[] = [];
+    private readonly _manuallyUpdateFilterItems$: Subject<IFilterByValueItem[]>;
+
+    get filterItems() { return this._filterItems; }
+
+    private readonly _searchString$: BehaviorSubject<string>;
+    readonly searchString$: Observable<string>;
+
+    constructor(
+        private readonly _filterModel: FilterModel,
+        // TODO@wzhudev: this may get change from outside!
+        public col: number,
+        /**
+         * Filter items would remain unchanged after we create them,
+         * though data may change after.
+         */
+        items: IFilterByValueItem[],
+        @ICommandService private readonly _commandService: ICommandService
+    ) {
+        super();
+
+        this._searchString$ = new BehaviorSubject<string>('');
+        this.searchString$ = this._searchString$.asObservable();
+
+        this._rawFilterItems$ = new BehaviorSubject<IFilterByValueItem[]>(items);
+        this.rawFilterItems$ = this._rawFilterItems$.asObservable();
+
+        this._manuallyUpdateFilterItems$ = new Subject<IFilterByValueItem[]>();
+
+        this.filterItems$ = merge(
+            combineLatest([
+                this._searchString$.pipe(
+                    throttleTime(500, undefined, { leading: true, trailing: true }),
+                    startWith(void 0)
+                ),
+                this._rawFilterItems$,
+            ]).pipe(
+                map(([searchString, items]) => {
+                    if (!searchString) return items;
+
+                    const lowerSearchString = searchString.toLowerCase();
+                    const searchKeyWords = lowerSearchString.split(/\s+/).filter((s) => !!s);
+                    return items.filter((item) => {
+                        const loweredItemValue = item.value.toLowerCase();
+                        return searchKeyWords.some((keyword) => loweredItemValue.includes(keyword));
+                    });
+                })
+            ),
+            this._manuallyUpdateFilterItems$
+        ).pipe(shareReplay(1));
+
+        this.disposeWithMe(this.filterItems$.subscribe((items) => this._filterItems = items));
+    }
+
+    override dispose(): void {
+        this._rawFilterItems$.complete();
+        this._searchString$.complete();
+    }
+
+    setSearchString(str: string): void {
+        this._searchString$.next(str);
+    }
+
+    /**
+     * Toggle a filter item.
+     */
+    onFilterCheckToggled(item: IFilterByValueItem, checked: boolean): void {
+        const items = this._filterItems.slice();
+        const changedItem = items.find((i) => i.index === item.index);
+        changedItem!.checked = checked;
+        this._manuallyUpdateFilterItems(items);
+    }
+
+    onFilterOnly(item: IFilterByValueItem) {
+        const items = this._filterItems.slice();
+        items.forEach((i) => i.checked = i.index === item.index);
+        this._manuallyUpdateFilterItems(items);
+    }
+
+    onCheckAllToggled(checked: boolean): void {
+        const items = this._filterItems.slice();
+        items.forEach((i) => i.checked = checked);
+        this._manuallyUpdateFilterItems(items);
+    }
+
+    private _manuallyUpdateFilterItems(items: IFilterByValueItem[]): void {
+        this._manuallyUpdateFilterItems$.next(items);
+    }
+
+    // expose method here to let the panel change filter items
+
+    /**
+     * Apply the filter condition to the target filter column.
+     */
     async apply(): Promise<boolean> {
-        return false;
+        if (this._disposed) {
+            return false;
+        }
+
+        const criteria: IFilterColumn = {
+            colId: this.col,
+            filters: this._filterItems.filter((item) => item.checked).map((item) => item.value),
+        };
+
+        return this._commandService.executeCommand(SetSheetsFilterCriteriaCommand.id, {
+            unitId: this._filterModel.unitId,
+            subUnitId: this._filterModel.subUnitId,
+            col: this.col,
+            criteria,
+        } as ISetSheetsFilterCriteriaCommandParams);
     }
 }

@@ -32,6 +32,9 @@ const zLocale: typeof enUS = {
             confirm: '确认',
             'by-values': '按值',
             'by-conditions': '按条件',
+            'filter-only': '仅筛选',
+            'search-placeholder': '使用空格分隔关键字',
+            'select-all': '全选',
         },
         conditions: {
             none: '无',

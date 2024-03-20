@@ -20,7 +20,7 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import { useObservable } from '@univerjs/ui';
 import { ICommandService, LocaleService } from '@univerjs/core';
 
-import type { ByConditionsModel } from '../../services/sheets-filter-panel.service';
+import type { ByConditionsModel, ByValuesModel } from '../../services/sheets-filter-panel.service';
 import { FilterBy, SheetsFilterPanelService } from '../../services/sheets-filter-panel.service';
 import { ChangeFilterByOperation, CloseFilterPanelOperation } from '../../commands/sheets-filter.operation';
 import { ClearSheetsFilterCriteriaCommand } from '../../commands/sheets-filter.command';
@@ -68,7 +68,9 @@ export function FilterPanel() {
             { filterModel
                 ? (
                     <div className={styles.sheetsFilterPanelContent}>
-                        {filterBy === FilterBy.VALUES ? <FilterByValue /> : <FilterByCondition model={filterModel as ByConditionsModel} />}
+                        {filterBy === FilterBy.VALUES
+                            ? <FilterByValue model={filterModel as ByValuesModel} />
+                            : <FilterByCondition model={filterModel as ByConditionsModel} />}
                     </div>
                 )
                 : null }

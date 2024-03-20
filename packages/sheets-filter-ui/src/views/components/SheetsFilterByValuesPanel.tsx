@@ -14,15 +14,88 @@
  * limitations under the License.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
+import { useDependency } from '@wendellhu/redi/react-bindings';
+import { LocaleService } from '@univerjs/core';
+import { useObservable } from '@univerjs/ui';
+import List from 'rc-virtual-list';
+import { Button, Checkbox, FormLayout, Input } from '@univerjs/design';
 
+import type { ByValuesModel, IFilterByValueItem } from '../../services/sheets-filter-panel.service';
 import styles from './index.module.less';
 
-export function FilterByValue() {
-    // TODO@yuhongz: implement this component
+/**
+ * Filter by values.
+ */
+export function FilterByValue(props: { model: ByValuesModel }) {
+    const { model } = props;
+
+    const localeService = useDependency(LocaleService);
+
+    const searchText = useObservable(model.searchString$, '', true);
+    const items = useObservable(model.filterItems$, undefined, true);
+    const filterOnly = localeService.t('sheets-filter.panel.filter-only');
+
+    const stat = statistics(items);
+    const allChecked = stat.checked > 0 && stat.unchecked === 0;
+    const indeterminate = stat.checked > 0 && stat.unchecked > 0;
+
+    const onFilterCheckToggled = useCallback((item: IFilterByValueItem, checked: boolean) => {
+        model.onFilterCheckToggled(item, checked);
+    }, [model]);
+    const onFilterOnlyClicked = useCallback((item: IFilterByValueItem) => {
+        model.onFilterOnly(item);
+    }, [model]);
+    const onCheckAllToggled = useCallback(() => {
+        model.onCheckAllToggled(!allChecked);
+    }, [model, allChecked]);
+    const onSearchValueChange = useCallback((str: string) => {
+        model.setSearchString(str);
+    }, [model]);
 
     return (
-        <div className={styles.sheetsFilterPanelConditionsContainer}>
+        <div className={styles.sheetsFilterPanelValuesContainer}>
+            <FormLayout>
+                <Input value={searchText} placeholder={localeService.t('sheets-filter.panel.search-placeholder')} onChange={onSearchValueChange} />
+            </FormLayout>
+            <Checkbox
+                disabled={items.length === 0}
+                checked={allChecked}
+                onChange={onCheckAllToggled}
+            >
+                <span className={styles.sheetsFilterPanelSelectAll}>{`${localeService.t('sheets-filter.panel.select-all')}`}</span>
+                <span className={styles.sheetsFilterPanelSelectAllCount}>{`(${stat.checked}/${stat.checked + stat.unchecked})`}</span>
+
+            </Checkbox>
+            <div className={styles.sheetsFilterPanelValuesList}>
+                <List style={{ paddingRight: 8 }} data={items} height={224} itemHeight={32} itemKey={(item) => `${item.value}----${item.checked}`}>
+                    {(item) => (
+                        <div className={styles.sheetsFilterPanelValuesItem}>
+                            <Checkbox checked={item.checked} onChange={() => onFilterCheckToggled(item, !item.checked)}></Checkbox>
+                            <span className={styles.sheetsFilterPanelValuesItemText}>{item.value}</span>
+                            <span className={styles.sheetsFilterPanelValuesItemCount}>{`(${item.count})`}</span>
+                            <Button className={styles.sheetsFilterPanelValuesItemExcludeButton} size="small" type="link" onClick={() => onFilterOnlyClicked(item)}>{filterOnly}</Button>
+                        </div>
+                    )}
+                </List>
+            </div>
+
+            {/* Here we should add a virtual scroll component to boost performance! */}
         </div>
     );
+}
+
+function statistics(items: IFilterByValueItem[]): { checked: number; unchecked: number } {
+    let checked = 0;
+    let unchecked = 0;
+
+    for (const item of items) {
+        if (item.checked) {
+            checked += item.count;
+        } else {
+            unchecked += item.count;
+        }
+    }
+
+    return { checked, unchecked };
 }

@@ -52,6 +52,7 @@ export function FilterByCondition(props: { model: ByConditionsModel }) {
 
     const secondaryOptions = useSecondaryOptions(localeService);
     const firstSecondaryItem = useMemo(() => operator1 ? FilterConditionItems.getItemByOperator(operator1) : null, [operator1]);
+    // TODO@wzhudev
     const secondSecondaryItem = useMemo(() => operator2 ? FilterConditionItems.getItemByOperator(operator2) : null, [operator2]);
     const onFormParamsChange = useCallback((diffParams: Partial<IFilterConditionFormParams>) => {
         model.onConditionFormChange(diffParams);

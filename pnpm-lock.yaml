@@ -805,6 +805,9 @@ importers:
       '@univerjs/icons':
         specifier: ^0.1.29
         version: 0.1.30(react-dom@18.2.0)(react@18.2.0)
+      rc-virtual-list:
+        specifier: ^3.11.4
+        version: 3.11.4(react-dom@18.2.0)(react@18.2.0)
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*

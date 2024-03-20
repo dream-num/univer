@@ -30,6 +30,9 @@ export default {
             confirm: 'Confirm',
             'by-values': 'By Values',
             'by-conditions': 'By Conditions',
+            'filter-only': 'Filter Only',
+            'search-placeholder': 'Use space to separate keywords',
+            'select-all': 'Select All',
         },
         conditions: {
             none: 'None',

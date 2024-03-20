@@ -19,15 +19,16 @@ import type { Meta } from '@storybook/react';
 import { RediContext } from '@wendellhu/redi/react-bindings';
 import type { Injector } from '@wendellhu/redi';
 import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
+import type { IWorkbookData } from '@univerjs/core';
 import { ICommandService, ILogService, LocaleService, LocaleType, LogLevel, Plugin, PluginType, Univer } from '@univerjs/core';
-import { SelectionManagerService, SheetInterceptorService, SheetPermissionService } from '@univerjs/sheets';
+import { RefRangeService, SelectionManagerService, SheetInterceptorService, SheetPermissionService } from '@univerjs/sheets';
 import { DesktopMenuService, DesktopShortcutService, IMenuService, IShortcutService } from '@univerjs/ui';
 import { SheetsFilterPanelService } from '../../services/sheets-filter-panel.service';
 import { ClearSheetsFilterCriteriaCommand, ReCalcSheetsFilterConditionsCommand, SetSheetsFilterCriteriaCommand, SmartToggleSheetsFilterCommand } from '../../commands/sheets-filter.command';
 import type { IOpenFilterPanelOperationParams } from '../../commands/sheets-filter.operation';
 import { ChangeFilterByOperation, CloseFilterPanelOperation, OpenFilterPanelOperation } from '../../commands/sheets-filter.operation';
-import zhCN from '../../locale/zh-CN';
-import { WithCustomFiltersModelFactory } from '../../__testing__/data';
+import enUS from '../../locale/en-US';
+import { WithCustomFilterModelFactory, WithValuesFilterModelFactory } from '../../__testing__/data';
 import { FilterPanel } from './SheetsFilterPanel';
 
 const meta: Meta<typeof FilterPanel> = {
@@ -38,7 +39,7 @@ const meta: Meta<typeof FilterPanel> = {
 
 export default meta;
 
-function createStorybookBed() {
+function createFilterStorybookBed(workbookData: IWorkbookData) {
     const univer = new Univer();
     const injector = univer.__getInjector();
     const get = injector.get.bind(injector);
@@ -59,6 +60,7 @@ function createStorybookBed() {
             injector.add([SheetPermissionService]);
             injector.add([SheetInterceptorService]);
             injector.add([SheetsFilterPanelService]);
+            injector.add([RefRangeService]);
 
             [
                 SmartToggleSheetsFilterCommand,
@@ -75,11 +77,14 @@ function createStorybookBed() {
     univer.registerPlugin(TestPlugin);
     univer.registerPlugin(UniverSheetsFilterPlugin);
 
-    injector.get(LocaleService).setLocale(LocaleType.ZH_CN);
-    injector.get(LocaleService).load({ zhCN });
+    injector.get(LocaleService).setLocale(LocaleType.EN_US);
+    injector.get(LocaleService).load({ enUS });
+    // injector.get(LocaleService).setLocale(LocaleType.ZH_CN);
+    // injector.get(LocaleService).load({ zhCN });
+    injector.get(ILogService).setLogLevel(LogLevel.VERBOSE);
     injector.get(ILogService).setLogLevel(LogLevel.VERBOSE);
 
-    const sheet = univer.createUniverSheet(WithCustomFiltersModelFactory());
+    const sheet = univer.createUniverSheet(workbookData);
 
     commandService.syncExecuteCommand(OpenFilterPanelOperation.id, {
         unitId: 'test',
@@ -90,13 +95,25 @@ function createStorybookBed() {
     return { univer, injector, sheet };
 }
 
-export const FilterPanelBasic = {
+export const FilterWithConditions = {
     render() {
-        const [bed] = useState(() => createStorybookBed());
+        const [bed] = useState(() => createFilterStorybookBed(WithCustomFilterModelFactory()));
         const { injector } = bed;
 
         return (
             <RediContext.Provider value={{ injector }}>
+                <FilterPanel />
+            </RediContext.Provider>
+        );
+    },
+};
+
+export const FilterWithValues = {
+    render() {
+        const [bed] = useState(() => createFilterStorybookBed(WithValuesFilterModelFactory()));
+
+        return (
+            <RediContext.Provider value={{ injector: bed.injector }}>
                 <FilterPanel />
             </RediContext.Provider>
         );

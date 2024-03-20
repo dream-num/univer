@@ -74,7 +74,7 @@ export const DEFAULT_FIRST_PAGE = {
             type: PageElementType.TEXT,
             richText: {
                 text: 'Univer slide',
-                fs: 48,
+                fs: 64 * 0.75,
                 cl: {
                     rgb: 'rgb(244,79,86)',
                 },
@@ -113,7 +113,7 @@ export const DEFAULT_FIRST_PAGE = {
             type: PageElementType.TEXT,
             richText: {
                 text: '2022',
-                fs: 36,
+                fs: 48 * 0.75,
                 cl: {
                     rgb: 'rgb(255,255,255)',
                 },
@@ -132,7 +132,7 @@ export const DEFAULT_FIRST_PAGE = {
             type: PageElementType.TEXT,
             richText: {
                 text: 'The concepts national income and national product have roughly the same value and can be used interchangeably if our interest is in their sum total which is measured as the market value of the total output of goods and services of an economy in a given period, usually a year.',
-                fs: 10.5,
+                fs: 14 * 0.75,
                 cl: {
                     rgb: 'rgb(255,255,255)',
                 },

@@ -15,7 +15,7 @@
  */
 
 import type { EventState, ICellData, IPageElement } from '@univerjs/core';
-import { IContextService, LocaleService, ObjectMatrix, PageElementType, Styles } from '@univerjs/core';
+import { IContextService, LocaleService, ObjectMatrix, PageElementType, Styles, Worksheet } from '@univerjs/core';
 import type { IScrollObserverParam, IWheelEvent } from '@univerjs/engine-render';
 import {
     EVENT_TYPE,
@@ -94,12 +94,12 @@ export class SpreadsheetAdaptor extends ObjectAdaptor {
         const { cellData } = worksheet;
 
         const cellDataMatrix = new ObjectMatrix<ICellData>(cellData);
-
+        const styleModel = new Styles(styles);
         const spreadsheetSkeleton = new SpreadsheetSkeleton(
-            undefined, // FIXME: worksheet in slide doesn't has a Worksheet object
+            new Worksheet(worksheet, styleModel), // FIXME: worksheet in slide doesn't has a Worksheet object
             worksheet,
             cellDataMatrix,
-            new Styles(styles),
+            styleModel,
             this._localeService,
             this._contextService
         );
@@ -205,15 +205,13 @@ export class SpreadsheetAdaptor extends ObjectAdaptor {
                 .updateScroll({
                     scrollX,
                     actualScrollX,
-                })
-                .makeDirty(true);
+                });
 
             viewLeft
                 .updateScroll({
                     scrollY,
                     actualScrollY,
-                })
-                .makeDirty(true);
+                });
         });
 
         scene.attachControl();

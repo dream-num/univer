@@ -29,7 +29,7 @@ export const SLIDE_WORKBOOK_DATA: IWorkbookData = {
             vt: 2,
             ht: 2,
             bl: 1,
-            fs: 14,
+            fs: 14 * 0.75,
             bg: {
                 rgb: 'rgb(105,126,146)',
             },
@@ -41,7 +41,7 @@ export const SLIDE_WORKBOOK_DATA: IWorkbookData = {
             vt: 2,
             ht: 2,
             bl: 1,
-            fs: 20,
+            fs: 20 * 0.75,
             bg: {
                 rgb: 'rgb(244,79,86)',
             },
@@ -83,7 +83,7 @@ export const SLIDE_WORKBOOK_DATA: IWorkbookData = {
             cl: {
                 rgb: 'rgb(255,255,255)',
             },
-            fs: 14,
+            fs: 14 * 0.75,
             ht: 2,
             bd: {
                 t: {
@@ -113,7 +113,7 @@ export const SLIDE_WORKBOOK_DATA: IWorkbookData = {
             },
         },
         4: {
-            fs: 12,
+            fs: 12 * 0.75,
             vt: 2,
             pd: {
                 l: 5,

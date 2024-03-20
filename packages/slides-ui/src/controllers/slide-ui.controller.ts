@@ -21,6 +21,7 @@ import { Inject, Injector } from '@wendellhu/redi';
 import { connectInjector } from '@wendellhu/redi/react-bindings';
 import { SlideSideBar } from '../views/slide-bar/SlideBar';
 import { ActivateSlidePageOperation } from '../commands/operations/activate.operation';
+import { SetSlidePageThumbOperation } from '../commands/operations/setThumb.operation';
 
 /**
  * This controller registers UI parts of slide workbench to the base-ui workbench.
@@ -41,6 +42,7 @@ export class SlideUIController extends Disposable {
     private _initCommands(): void {
         [
             ActivateSlidePageOperation,
+            SetSlidePageThumbOperation,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 

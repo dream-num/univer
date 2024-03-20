@@ -246,10 +246,6 @@ export class RichText extends BaseObject {
                     width: Number.POSITIVE_INFINITY,
                     height: Number.POSITIVE_INFINITY,
                 },
-                renderConfig: {
-                    verticalAlign: VerticalAlign.TOP,
-                    horizontalAlign: HorizontalAlign.LEFT,
-                },
             },
         };
 

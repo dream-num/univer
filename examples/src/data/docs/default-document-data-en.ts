@@ -85,7 +85,7 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                 ed: 67,
                 ts: {
                     bl: BooleanNumber.TRUE,
-                    fs: 24,
+                    fs: 24 * 0.75,
                     cl: {
                         rgb: 'rgb(0, 40, 86)',
                     },
@@ -95,7 +95,7 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                 st: 68,
                 ed: 253,
                 ts: {
-                    fs: 18,
+                    fs: 18 * 0.75,
                     cl: {
                         rgb: 'rgb(0, 40, 86)',
                     },
@@ -105,42 +105,42 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                 st: 254,
                 ed: 404,
                 ts: {
-                    fs: 16,
+                    fs: 16 * 0.75,
                 },
             },
             {
                 st: 405,
                 ed: 433,
                 ts: {
-                    fs: 16,
+                    fs: 16 * 0.75,
                 },
             },
             {
                 st: 434,
                 ed: 484,
                 ts: {
-                    fs: 16,
+                    fs: 16 * 0.75,
                 },
             },
             {
                 st: 485,
                 ed: 516,
                 ts: {
-                    fs: 16,
+                    fs: 16 * 0.75,
                 },
             },
             {
                 st: 517,
                 ed: 679,
                 ts: {
-                    fs: 16,
+                    fs: 16 * 0.75,
                 },
             },
             {
                 st: 680,
                 ed: 713,
                 ts: {
-                    fs: 16,
+                    fs: 16 * 0.75,
                     cl: {
                         rgb: 'rgb(0, 0, 211)',
                     },
@@ -151,7 +151,7 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                 st: 714,
                 ed: 771,
                 ts: {
-                    fs: 24,
+                    fs: 24 * 0.75,
                     cl: {
                         rgb: 'rgb(255,255,255)',
                     },
@@ -164,35 +164,35 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                 st: 772,
                 ed: 1244,
                 ts: {
-                    fs: 16,
+                    fs: 16 * 0.75,
                 },
             },
             {
                 st: 1246,
                 ed: 1589,
                 ts: {
-                    fs: 16,
+                    fs: 16 * 0.75,
                 },
             },
             {
                 st: 1590,
                 ed: 1986,
                 ts: {
-                    fs: 16,
+                    fs: 16 * 0.75,
                 },
             },
             {
                 st: 1987,
                 ed: 2062,
                 ts: {
-                    fs: 16,
+                    fs: 16 * 0.75,
                 },
             },
             {
                 st: 2063,
                 ed: 2086,
                 ts: {
-                    fs: 16,
+                    fs: 16 * 0.75,
                     cl: {
                         rgb: 'rgb(0, 0, 211)',
                     },
@@ -203,14 +203,14 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                 st: 2086,
                 ed: 2294,
                 ts: {
-                    fs: 16,
+                    fs: 16 * 0.75,
                 },
             },
             {
                 st: 2295,
                 ed: 2310,
                 ts: {
-                    fs: 16,
+                    fs: 16 * 0.75,
                     cl: {
                         rgb: 'rgb(0, 0, 211)',
                     },
@@ -221,14 +221,14 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                 st: 2310,
                 ed: 2438,
                 ts: {
-                    fs: 16,
+                    fs: 16 * 0.75,
                 },
             },
             {
                 st: 2439,
                 ed: 2468,
                 ts: {
-                    fs: 16,
+                    fs: 16 * 0.75,
                     cl: {
                         rgb: 'rgb(0, 0, 0)',
                     },
@@ -239,7 +239,7 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                 st: 2468,
                 ed: 2628,
                 ts: {
-                    fs: 16,
+                    fs: 16 * 0.75,
                 },
             },
         ],

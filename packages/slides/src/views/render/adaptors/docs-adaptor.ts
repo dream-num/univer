@@ -23,6 +23,7 @@ import {
     DocumentViewModel,
     EVENT_TYPE,
     Liquid,
+    PageLayoutType,
     Picture,
     Rect,
     Scene,
@@ -152,6 +153,12 @@ export class DocsAdaptor extends ObjectAdaptor {
 
         // documents.enableEditor();
 
+        const size = documentSkeleton.getActualSize();
+
+        documents.resize(size.actualWidth, size.actualHeight);
+
+        scene.resize(size.actualWidth, size.actualHeight + 200);
+
         const pageSize = documents.getSkeleton()?.getPageSize();
 
         documents.onPageRenderObservable.add((config: IPageRenderConfig) => {
@@ -182,8 +189,7 @@ export class DocsAdaptor extends ObjectAdaptor {
         const objectList: BaseObject[] = [];
         const pageMarginCache = new Map<string, { marginLeft: number; marginTop: number }>();
 
-        const cumPageLeft = 0;
-        const cumPageTop = 0;
+        this._recalculateSizeBySkeleton(documents, scene, documentSkeleton);
 
         for (let i = 0, len = pages.length; i < len; i++) {
             const page = pages[i];
@@ -251,7 +257,104 @@ export class DocsAdaptor extends ObjectAdaptor {
         });
         scene.closeTransformer();
 
+        this._calculatePagePosition(documents, scene, viewMain);
+
         return sv;
+    }
+
+    private _recalculateSizeBySkeleton(docsComponent: Documents, scene: Scene, skeleton: DocumentSkeleton) {
+        const pages = skeleton.getSkeletonData()?.pages;
+
+        if (pages == null) {
+            return;
+        }
+
+        let width = 0;
+        let height = 0;
+
+        for (let i = 0, len = pages.length; i < len; i++) {
+            const page = pages[i];
+            const { pageWidth, pageHeight } = page;
+
+            if (docsComponent.pageLayoutType === PageLayoutType.VERTICAL) {
+                height += pageHeight;
+
+                height += docsComponent.pageMarginTop;
+
+                if (i === len - 1) {
+                    height += docsComponent.pageMarginTop;
+                }
+
+                width = Math.max(width, pageWidth);
+            } else if (docsComponent.pageLayoutType === PageLayoutType.HORIZONTAL) {
+                width += pageWidth;
+
+                if (i !== len - 1) {
+                    width += docsComponent.pageMarginLeft;
+                }
+                height = Math.max(height, pageHeight);
+            }
+        }
+
+        docsComponent.resize(width, height);
+
+        scene.resize(width, height);
+    }
+
+    private _calculatePagePosition(docsComponent: Documents, scene: Scene, viewport: Viewport, zoomRatio: number = 1) {
+        const parent = scene?.getParent();
+
+        const { width: docsWidth, height: docsHeight, pageMarginLeft, pageMarginTop } = docsComponent;
+        if (parent == null || docsWidth === Number.POSITIVE_INFINITY || docsHeight === Number.POSITIVE_INFINITY) {
+            return;
+        }
+        const { width: engineWidth, height: engineHeight } = parent;
+        let docsLeft = 0;
+        let docsTop = 0;
+
+        let sceneWidth = 0;
+
+        let sceneHeight = 0;
+
+        let scrollToX = Number.POSITIVE_INFINITY;
+
+        if (engineWidth > (docsWidth + pageMarginLeft * 2) * zoomRatio) {
+            docsLeft = engineWidth / 2 - (docsWidth * zoomRatio) / 2;
+            docsLeft /= zoomRatio;
+            sceneWidth = (engineWidth - pageMarginLeft * 2) / zoomRatio;
+
+            scrollToX = 0;
+        } else {
+            docsLeft = pageMarginLeft;
+            sceneWidth = docsWidth + pageMarginLeft * 2;
+
+            scrollToX = (sceneWidth - engineWidth / zoomRatio) / 2;
+        }
+
+        if (engineHeight > docsHeight) {
+            docsTop = engineHeight / 2 - docsHeight / 2;
+            sceneHeight = (engineHeight - pageMarginTop * 2) / zoomRatio;
+        } else {
+            docsTop = pageMarginTop;
+            sceneHeight = docsHeight + pageMarginTop * 2;
+        }
+
+        // this.docsLeft = docsLeft;
+
+        // this.docsTop = docsTop;
+
+        scene.resize(sceneWidth, sceneHeight + 200);
+
+        docsComponent.translate(docsLeft, docsTop);
+
+        if (scrollToX !== Number.POSITIVE_INFINITY && viewport != null) {
+            const actualX = viewport.getBarScroll(scrollToX, 0).x;
+            viewport.scrollTo({
+                x: actualX,
+            });
+        }
+
+        return this;
     }
 }
 

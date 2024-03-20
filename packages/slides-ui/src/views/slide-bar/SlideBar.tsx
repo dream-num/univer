@@ -15,47 +15,61 @@
  */
 
 import { ICommandService, type ISlidePage, IUniverInstanceService } from '@univerjs/core';
-import React, { useCallback, useRef } from 'react';
+import type { RefObject } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { useObservable } from '@univerjs/ui';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { ActivateSlidePageOperation } from '../../commands/operations/activate.operation';
+import { SetSlidePageThumbOperation } from '../../commands/operations/setThumb.operation';
 import styles from './index.module.less';
-
-interface SlideBarState {
-    slideList: ISlidePage[];
-    activePageId?: string;
-}
-
-interface IProps {
-    addSlide: () => void;
-    activeSlide: (pageId: string) => void;
-}
 
 /**
  * This components works as the root component of the left Sidebar of Slide.
  */
+
 export function SlideSideBar() {
     const univerInstanceService = useDependency(IUniverInstanceService);
     const commandService = useDependency(ICommandService);
+    const renderManagerService = useDependency(IRenderManagerService);
 
     const slideBarRef = useRef<HTMLDivElement>(null);
     const currentSlide = useObservable(univerInstanceService.currentSlide$);
     const pages = currentSlide?.getPages();
     const pageOrder = currentSlide?.getPageOrder();
 
-    const isPageActivated = useCallback((page: string) => {
-        return false;
-    }, []);
-
-    const activatePage = useCallback((page: string) => {
-        commandService.syncExecuteCommand(ActivateSlidePageOperation.id, { id: page });
-    }, [commandService]);
-
     if (!pages || !pageOrder) {
         return null;
     }
 
     const slideList = pageOrder.map((id) => pages[id]);
+
+    const isPageActivated = useCallback((page: string) => {
+        return false;
+    }, []);
+
+    const [divRefs, setDivRefs] = useState<RefObject<HTMLDivElement>[]>([]);
+
+    useEffect(() => {
+        setDivRefs(slideList.map((_) => React.createRef()));
+    }, [slideList.length]);
+
+    useEffect(() => {
+        divRefs.forEach((ref, index) => {
+            if (ref.current) {
+                const slide = slideList[index];
+                renderManagerService.getRenderById(slide.id)?.engine.setContainer(ref.current);
+            }
+        });
+
+        if (divRefs.length > 0) {
+            commandService.syncExecuteCommand(SetSlidePageThumbOperation.id);
+        }
+    }, [divRefs]); // 依赖于divRefs数组的变化
+
+    const activatePage = useCallback((page: string) => {
+        commandService.syncExecuteCommand(ActivateSlidePageOperation.id, { id: page });
+    }, [commandService]);
 
     return (
         <div className={styles.slideBar} ref={slideBarRef}>
@@ -67,7 +81,7 @@ export function SlideSideBar() {
                         onClick={() => activatePage(item.id)}
                     >
                         <span>{index + 1}</span>
-                        <div className={styles.slideBarBox} />
+                        <div ref={divRefs[index]} className={styles.slideBarBox} />
                     </div>
                 ))}
             </div>

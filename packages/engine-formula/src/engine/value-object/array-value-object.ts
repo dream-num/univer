@@ -271,7 +271,7 @@ export class ArrayValueObject extends BaseValueObject {
 
         for (let r = startRow; r <= endRow; r++) {
             for (let c = startColumn; c <= endColumn; c++) {
-                if (callback(valueList[r][c], r, c) === false) {
+                if (callback(valueList[r]?.[c], r, c) === false) {
                     return;
                 }
             }
@@ -1366,9 +1366,6 @@ export class ArrayValueObject extends BaseValueObject {
         }
 
         const result: BaseValueObject[][] = [];
-        for (let r = 0; r < rowCount; r++) {
-            result[r] = [];
-        }
 
         for (let c = 0; c < columnCount; c++) {
             const value = valueList[c];
@@ -1417,7 +1414,11 @@ export class ArrayValueObject extends BaseValueObject {
 
                     if (rowPositions != null) {
                         rowPositions.forEach((row) => {
-                            result[row][column] = BooleanValueObject.create(true);
+                            const r = row - startRow;
+                            if (result[r] == null) {
+                                result[r] = [];
+                            }
+                            result[r][column] = BooleanValueObject.create(true);
                         });
                         // for (let r = 0; r < rowCount; r++) {
                         //     if (rowPositions.has(r + startRow)) {

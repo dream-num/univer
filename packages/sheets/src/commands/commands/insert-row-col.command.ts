@@ -107,18 +107,19 @@ export const InsertRowCommand: ICommand = {
 
         const result = sequenceExecute(
             [
+                intercepted.redos[0],
                 { id: InsertRowMutation.id, params: insertRowParams },
-                ...intercepted.redos,
+                intercepted.redos[1],
                 followSelectionOperation(range, workbook, worksheet),
-            ],
+            ].filter(Boolean),
             commandService
         );
 
         if (result.result) {
             undoRedoService.pushUndoRedo({
                 unitID: params.unitId,
-                undoMutations: [...intercepted.undos, { id: RemoveRowMutation.id, params: undoRowInsertionParams }],
-                redoMutations: [{ id: InsertRowMutation.id, params: insertRowParams }, ...intercepted.redos],
+                undoMutations: [intercepted.undos[0], { id: RemoveRowMutation.id, params: undoRowInsertionParams }, intercepted.undos[1]].filter(Boolean),
+                redoMutations: [intercepted.redos[0], { id: InsertRowMutation.id, params: insertRowParams }, intercepted.redos[1]].filter(Boolean),
             });
 
             return true;
@@ -287,8 +288,9 @@ export const InsertColCommand: ICommand<IInsertColCommandParams> = {
 
         const result = sequenceExecute(
             [
+                intercepted.redos[0],
                 { id: InsertColMutation.id, params: insertColParams },
-                ...intercepted.redos,
+                intercepted.redos[1],
                 followSelectionOperation(range, workbook, worksheet),
             ],
             commandService
@@ -298,13 +300,18 @@ export const InsertColCommand: ICommand<IInsertColCommandParams> = {
             undoRedoService.pushUndoRedo({
                 unitID: params.unitId,
                 undoMutations: [
-                    ...intercepted.undos,
+                    intercepted.undos[0],
                     {
                         id: RemoveColMutation.id,
                         params: undoColInsertionParams,
                     },
-                ],
-                redoMutations: [{ id: InsertColMutation.id, params: insertColParams }, ...intercepted.redos],
+                    intercepted.undos[1],
+                ].filter(Boolean),
+                redoMutations: [
+                    intercepted.redos[0],
+                    { id: InsertColMutation.id, params: insertColParams },
+                    intercepted.redos[1],
+                ].filter(Boolean),
             });
             return true;
         }

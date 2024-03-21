@@ -14,9 +14,12 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
-import { Disposable } from '@univerjs/core';
+import type { IUnitRange, Nullable } from '@univerjs/core';
+import { Disposable, IUniverInstanceService } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
+import type { Observable } from 'rxjs';
+import { Subject } from 'rxjs';
+import { serializeRange, serializeRangeToRefString, serializeRangeWithSheet } from '../engine/utils/reference';
 
 export interface IDefinedNamesService {
     registerDefinedName(unitId: string, name: string, formulaOrRefString: string): void;
@@ -28,14 +31,45 @@ export interface IDefinedNamesService {
     removeDefinedName(unitId: string, name: string): void;
 
     hasDefinedName(unitId: string): boolean;
+
+    setCurrentRange(range: IUnitRange): void;
+
+    getCurrentRange(): IUnitRange;
+
+    getCurrentRangeForString(): string;
+
+    currentRange$: Observable<IUnitRange>;
 }
 
 export class DefinedNamesService extends Disposable implements IDefinedNamesService {
     // 18.2.6 definedNames (Defined Names)
     private _definedNameMap: Map<string, Map<string, string>> = new Map();
 
+    private _currentRange: IUnitRange = { unitId: '', sheetId: '', range: {
+        startRow: 0,
+        endRow: 0,
+        startColumn: 0,
+        endColumn: 0,
+    } };
+
+    private readonly _currentRange$ = new Subject<IUnitRange>();
+    readonly currentRange$ = this._currentRange$.asObservable();
+
     override dispose(): void {
         this._definedNameMap.clear();
+    }
+
+    setCurrentRange(range: IUnitRange) {
+        this._currentRange = range;
+        this._currentRange$.next(range);
+    }
+
+    getCurrentRange() {
+        return this._currentRange;
+    }
+
+    getCurrentRangeForString() {
+        return serializeRange(this._currentRange.range);
     }
 
     registerDefinedName(unitId: string, name: string, formulaOrRefString: string) {

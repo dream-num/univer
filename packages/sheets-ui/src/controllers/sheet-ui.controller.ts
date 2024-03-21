@@ -95,6 +95,9 @@ import {
 import { FONT_SIZE_COMPONENT, FontSize } from '../components/font-size';
 import { MENU_ITEM_INPUT_COMPONENT, MenuItemInput } from '../components/menu-item-input';
 import { RenderSheetContent, RenderSheetFooter, RenderSheetHeader } from '../views/sheet-container/SheetContainer';
+import { DEFINED_NAME_CONTAINER } from '../views/defined-name/component-name';
+import { DefinedNameContainer } from '../views/defined-name/DefinedNameContainer';
+import { SidebarDefinedNameOperation } from '../commands/operations/sidebar-defined-name.operation';
 import { CellBorderSelectorMenuItemFactory } from './menu/border.menu';
 import {
     ClearSelectionAllMenuItemFactory,
@@ -255,6 +258,7 @@ export class SheetUIController extends Disposable {
         this.disposeWithMe(componentManager.register(FONT_FAMILY_COMPONENT, FontFamily));
         this.disposeWithMe(componentManager.register(FONT_FAMILY_ITEM_COMPONENT, FontFamilyItem));
         this.disposeWithMe(componentManager.register(FONT_SIZE_COMPONENT, FontSize));
+        this.disposeWithMe(componentManager.register(DEFINED_NAME_CONTAINER, DefinedNameContainer));
     }
 
     private _initCommands(): void {
@@ -312,6 +316,7 @@ export class SheetUIController extends Disposable {
             DeleteRangeMoveUpConfirmCommand,
             InsertRangeMoveRightConfirmCommand,
             DeleteRangeMoveLeftConfirmCommand,
+            SidebarDefinedNameOperation,
         ].forEach((c) => {
             this.disposeWithMe(this._commandService.registerCommand(c));
         });

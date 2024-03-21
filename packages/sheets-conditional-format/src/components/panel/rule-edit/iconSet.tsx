@@ -34,7 +34,7 @@ import type { IStyleEditorProps } from './type';
 
 import styles from './index.module.less';
 
-const TextInput = (props: { id: string; type: ValueType; value: number;onChange: (v: number | string) => void; error?: string }) => {
+const TextInput = (props: { id: number; type: ValueType; value: number | string;onChange: (v: number | string) => void; error?: string }) => {
     const univerInstanceService = useDependency(IUniverInstanceService);
     const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
     const subUnitId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
@@ -49,7 +49,7 @@ const TextInput = (props: { id: string; type: ValueType; value: number;onChange:
             {props.type !== ValueType.formula
                 ? (
                     <>
-                        <InputNumber className={className} value={Number(props.value)} onChange={(v) => props.onChange(v ?? 0)} />
+                        <InputNumber className={className} value={Number(props.value) || 0} onChange={(v) => props.onChange(v ?? 0)} />
                         {props.error && (
                             <div className={styles.errorText}>
                                 {props.error}
@@ -176,6 +176,7 @@ const IconSetRuleEdit = (props: {
             const isEnd = index === configList.length - 1;
             const isFirst = index === 0;
             const preItem = configList[index - 1];
+            const lessThanText = preItem?.value.type === ValueType.formula ? localeService.t('sheet.cf.valueType.formula') : preItem?.value.value;
 
             const handleIconClick = (iconType: IIconType, iconId: string) => {
                 const value = { ...item, iconId, iconType } as typeof item;
@@ -202,7 +203,7 @@ const IconSetRuleEdit = (props: {
                                         {' '}
                                         {localeService.t(`sheet.cf.symbol.${getOppositeOperator(preItem.operator)}`)}
                                         {' '}
-                                        {preItem.value.value}
+                                        {lessThanText}
                                         {isEnd ? '' : ` ${localeService.t('sheet.cf.iconSet.and')} `}
                                         )
                                     </span>
@@ -237,7 +238,7 @@ const IconSetRuleEdit = (props: {
                                         {' '}
                                         {localeService.t(`sheet.cf.symbol.${getOppositeOperator(preItem.operator)}`)}
                                         {' '}
-                                        {preItem.value.value}
+                                        {lessThanText}
                                         {isEnd ? '' : ` ${localeService.t('sheet.cf.iconSet.and')} `}
                                         )
                                     </span>
@@ -258,7 +259,7 @@ const IconSetRuleEdit = (props: {
                                 <div className={`${stylesBase.mTSm} ${styles.flex}`}>
                                     <Select className={`${styles.width45} ${stylesBase.mL0}`} options={valueTypeOptions} value={item.value.type} onChange={(v) => { handleValueTypeChange(v as NumberOperator, index); }} />
                                     <div className={`${stylesBase.mL0} ${styles.width45}`}>
-                                        <TextInput id={String(index)} type={item.value.type} error={error} value={Number(item.value.value)} onChange={(v) => handleValueValueChange(v, index)} />
+                                        <TextInput id={index} type={item.value.type} error={error} value={item.value.value || ''} onChange={(v) => handleValueValueChange(v, index)} />
                                     </div>
 
                                 </div>

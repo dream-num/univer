@@ -24,6 +24,7 @@ import { SetCellEditVisibleOperation } from '@univerjs/sheets-ui/commands/operat
 import type { IBaseDataValidationWidget } from '@univerjs/data-validation';
 import { getCellValueOrigin } from '../utils/getCellDataOrigin';
 import type { ListValidator } from '../validators';
+import { type IShowDataValidationDropdownParams, ShowDataValidationDropdown } from '../commands/operations/data-validation.operation';
 
 const PADDING_H = 4;
 const ICON_SIZE = 6;
@@ -205,10 +206,10 @@ export class DropdownWidget implements IBaseDataValidationWidget {
         ctx.restore();
 
         map.set(key, {
-            left: primaryWithCoord.startX + MARGIN_H,
-            top: primaryWithCoord.startY + paddingTop,
+            left: primaryWithCoord.startX + MARGIN_H + skeleton.rowHeaderWidth,
+            top: primaryWithCoord.startY + paddingTop + skeleton.columnHeaderHeight,
             width: rectWidth,
-            height: rectWidth,
+            height: rectHeight,
         });
     }
 
@@ -243,13 +244,14 @@ export class DropdownWidget implements IBaseDataValidationWidget {
         const map = this._ensureMap(subUnitId);
         const dropdownInfo = map.get(this._generateKey(row, col));
         const validation = data.dataValidation;
+
         if (!validation || !dropdownInfo) {
             return false;
         }
         const { top, left, width, height } = dropdownInfo;
         const { x, y } = position;
 
-        if (x >= left && x <= left + width && y >= top && y <= top + height) {
+        if (x >= left && (x <= (left + width)) && y >= top && (y <= (top + height))) {
             return true;
         }
 
@@ -257,23 +259,15 @@ export class DropdownWidget implements IBaseDataValidationWidget {
     };
 
     onPointerDown(info: ICellRenderContext) {
-        const { data } = info;
-        const validation = data.dataValidation;
-        if (!validation) {
-            return false;
-        }
+        const { unitId, subUnitId, row, col } = info;
 
-        const { rule, validator: _validator } = validation;
-        const validator = _validator as ListValidator;
-
-        const params: IEditorBridgeServiceVisibleParam = {
-            visible: true,
-            eventType: DeviceInputEventType.Dblclick,
+        const params: IShowDataValidationDropdownParams = {
+            unitId: unitId!,
+            subUnitId,
+            row,
+            column: col,
         };
 
-        this._commandService.executeCommand(
-            SetCellEditVisibleOperation.id,
-            params
-        );
+        this._commandService.executeCommand(ShowDataValidationDropdown.id, params);
     };
 }

@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-import { HorizontalAlign, VerticalAlign } from '@univerjs/core';
+import { HorizontalAlign, ICommandService, VerticalAlign } from '@univerjs/core';
 import type { ICellCustomRender, ICellRenderContext, IPaddingData, ISelectionCellWithCoord } from '@univerjs/core';
 import { getFontStyleString, type Spreadsheet, type SpreadsheetSkeleton, type UniverRenderingContext2D } from '@univerjs/engine-render';
 import type { IBaseDataValidationWidget } from '@univerjs/data-validation';
 import type { ListMultipleValidator } from '../validators/list-multiple-validator';
 import { getCellValueOrigin } from '../utils/getCellDataOrigin';
+import type { IShowDataValidationDropdownParams } from '../commands/operations/data-validation.operation';
+import { ShowDataValidationDropdown } from '../commands/operations/data-validation.operation';
 import type { IDropdownInfo } from './dropdown-widget';
 import { CELL_PADDING_H, CELL_PADDING_V, Dropdown, ICON_PLACE, layoutDropdowns, MARGIN_V } from './shape';
 
@@ -28,6 +30,10 @@ const downPath = new Path2D('M3.32201 4.84556C3.14417 5.05148 2.85583 5.05148 2.
 export class DropdownMultipleWidget implements IBaseDataValidationWidget {
     zIndex?: number | undefined;
     private _dropdownInfoMap: Map<string, Map<string, IDropdownInfo>> = new Map();
+
+    constructor(
+        @ICommandService private readonly _commandService: ICommandService
+    ) {}
 
     private _ensureMap(subUnitId: string) {
         let map = this._dropdownInfoMap.get(subUnitId);
@@ -162,8 +168,29 @@ export class DropdownMultipleWidget implements IBaseDataValidationWidget {
         return layout.cellAutoHeight;
     }
 
-    isHit?: ((position: { x: number; y: number }, info: ICellRenderContext) => boolean) | undefined;
-    onPointerDown?: ((info: ICellRenderContext) => void) | undefined;
+    isHit(position: { x: number; y: number }, info: ICellRenderContext) {
+        const { primaryWithCoord } = info;
+        const { endX } = primaryWithCoord;
+        const { x } = position;
+        if (x >= endX - ICON_PLACE && x <= endX) {
+            return true;
+        }
+        return false;
+    };
+
+    onPointerDown(info: ICellRenderContext) {
+        const { unitId, subUnitId, row, col } = info;
+
+        const params: IShowDataValidationDropdownParams = {
+            unitId: unitId!,
+            subUnitId,
+            row,
+            column: col,
+        };
+
+        this._commandService.executeCommand(ShowDataValidationDropdown.id, params);
+    }
+
     onPointerEnter?: ((info: ICellRenderContext) => void) | undefined;
     onPointerLeave?: ((info: ICellRenderContext) => void) | undefined;
 }

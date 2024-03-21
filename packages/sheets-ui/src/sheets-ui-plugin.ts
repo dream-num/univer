@@ -66,7 +66,6 @@ import { HoverController } from './controllers/hover.controller';
 import { HoverManagerService } from './services/hover-manager.service';
 import { CellAlertManagerService } from './services/cell-alert-manager.service';
 import { CellAlertController } from './controllers/cell-alert.controller';
-import { DropdownManagerService } from './services/dropdown-manager.service';
 import { CellCustomRenderController } from './controllers/cell-custom-render.controller';
 import { CanvasPopManagerService } from './services/canvas-pop-manager.service';
 
@@ -143,7 +142,6 @@ export class UniverSheetsUIPlugin extends Plugin {
                 [MarkSelectionController],
                 [HoverController],
                 [CellAlertController],
-                [DropdownManagerService],
                 [CellCustomRenderController],
             ] as Dependency[]
         ).forEach((d) => injector.add(d));

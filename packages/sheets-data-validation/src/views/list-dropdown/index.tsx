@@ -17,14 +17,13 @@
 import { DataValidationType, ICommandService } from '@univerjs/core';
 import type { ISetRangeValuesCommandParams } from '@univerjs/sheets';
 import { SetRangeValuesCommand } from '@univerjs/sheets';
-import type { IDropdownParam } from '@univerjs/sheets-ui';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useState } from 'react';
 import { CheckMarkSingle } from '@univerjs/icons';
 import { OpenValidationPanelOperation } from '@univerjs/data-validation';
-import type { IDropdownComponentProps } from '@univerjs/sheets-ui/services/dropdown-manager.service.js';
 import type { ListMultipleValidator } from '../../validators/list-multiple-validator';
 import { deserializeListOptions, getDataValidationCellValue } from '../../validators/util';
+import type { IDropdownComponentProps } from '../../services/dropdown-manager.service';
 import styles from './index.module.less';
 
 interface ISelectListProps {
@@ -130,6 +129,9 @@ export function ListDropDown(props: IDropdownComponentProps) {
                 };
                 commandService.executeCommand(SetRangeValuesCommand.id, params);
                 setLocalValue(str);
+                if (!multiple) {
+                    hideFn();
+                }
             }}
             options={list.map((str) => ({
                 label: str,

@@ -14,34 +14,28 @@
  * limitations under the License.
  */
 
-import { DisposableCollection, type IPosition, IUniverInstanceService, type Nullable } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { DisposableCollection, IUniverInstanceService, type Nullable } from '@univerjs/core';
 import type { ISheetLocation } from '@univerjs/sheets';
-import { IGlobalPopupManagerService } from '@univerjs/ui';
 import { Subject } from 'rxjs';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject } from '@wendellhu/redi';
+import { CanvasPopManagerService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { DataValidatorRegistryService } from '@univerjs/data-validation';
 import { DROP_DOWN_KEY } from '../views/drop-down';
-import { CanvasPopManagerService } from '..';
 
 export interface IDropdownParam {
-    componentKey: string;
     location: ISheetLocation;
-    position: IPosition;
-    width: number;
-    height: number;
     onHide?: () => void;
+    componentKey: string;
 }
 
 export interface IDropdownComponentProps {
     componentKey: string;
     location: ISheetLocation;
-    width: number;
-    height: number;
     hideFn: () => void;
 }
 
-export class DropdownManagerService {
+export class DataValidationDropdownManagerService {
     private _activeDropdown: Nullable<IDropdownParam>;
     private _activeDropdown$ = new Subject<Nullable<IDropdownParam>>();
     private _currentPopup: Nullable<IDisposable> = null;
@@ -53,7 +47,10 @@ export class DropdownManagerService {
     }
 
     constructor(
-        @Inject(CanvasPopManagerService) private readonly _canvasPopupManagerService: CanvasPopManagerService
+        @Inject(CanvasPopManagerService) private readonly _canvasPopupManagerService: CanvasPopManagerService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
+        @Inject(DataValidatorRegistryService) private readonly _dataValidatorRegistryService: DataValidatorRegistryService
     ) {}
 
     showDropdown(param: IDropdownParam) {
@@ -96,5 +93,48 @@ export class DropdownManagerService {
 
         this._activeDropdown = null;
         this._activeDropdown$.next(null);
+    }
+
+    showDataValidationDropdown(unitId: string, subUnitId: string, row: number, col: number, onHide?: () => void) {
+        const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
+        if (!workbook) {
+            return;
+        }
+        const worksheet = workbook.getSheetBySheetId(subUnitId);
+        if (!worksheet) {
+            return;
+        }
+
+        const cell = worksheet.getCell(row, col);
+        const rule = cell?.dataValidation?.rule;
+        const skeleton = this._sheetSkeletonManagerService.getOrCreateSkeleton({
+            unitId,
+            sheetId: subUnitId,
+        });
+
+        if (!skeleton) {
+            return;
+        }
+        if (!rule) {
+            return;
+        }
+        const validator = this._dataValidatorRegistryService.getValidatorItem(rule.type);
+        if (!validator || !validator.dropdown) {
+            this.hideDropdown();
+            return;
+        }
+
+        this.showDropdown({
+            location: {
+                workbook,
+                worksheet,
+                row,
+                col,
+                unitId,
+                subUnitId,
+            },
+            componentKey: validator.dropdown,
+            onHide,
+        });
     }
 }

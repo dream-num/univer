@@ -17,27 +17,11 @@
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { ComponentManager, useObservable } from '@univerjs/ui';
 import React from 'react';
-import { IRenderManagerService } from '@univerjs/engine-render';
 import type { IPosition } from '@univerjs/core';
-import { DropdownManagerService } from '../..';
-
-const calcAnchorStyle = (position: IPosition, width: number, height: number, containerWidth: number, containerHeight: number): React.CSSProperties => {
-    const { startX, startY, endX, endY } = position;
-
-    const verticalStyle = (endY + height) > containerHeight ? { bottom: containerHeight - startY + 3 } : { top: endY + 3 };
-    const horizontalStyle = (startX + width) > containerWidth ? { right: containerWidth - endX } : { left: startX };
-
-    return {
-        position: 'absolute',
-        ...verticalStyle,
-        ...horizontalStyle,
-        zIndex: 100,
-        background: '#fff',
-    };
-};
+import { DataValidationDropdownManagerService } from '../../services/dropdown-manager.service';
 
 export function CellDropdown() {
-    const dropdownManagerService = useDependency(DropdownManagerService);
+    const dropdownManagerService = useDependency(DataValidationDropdownManagerService);
     const activeDropdown = useObservable(dropdownManagerService.activeDropdown$, dropdownManagerService.activeDropdown);
     const componentManager = useDependency(ComponentManager);
 
@@ -45,7 +29,7 @@ export function CellDropdown() {
         return null;
     }
 
-    const { componentKey, width, height, position, location } = activeDropdown;
+    const { location, componentKey } = activeDropdown;
     const Component = componentManager.get(componentKey);
 
     const key = `${location.unitId}-${location.subUnitId}-${location.row}-${location.col}`;
@@ -61,10 +45,7 @@ export function CellDropdown() {
     return (
         <Component
             key={key}
-            width={width}
-            height={height}
             location={location}
-            position={position}
             hideFn={hideFn}
         />
     );

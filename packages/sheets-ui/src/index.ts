@@ -79,6 +79,5 @@ export { SheetCanvasView } from './views/sheet-canvas-view';
 export { HoverManagerService } from './services/hover-manager.service';
 export { CellAlertManagerService, CellAlertType, type ICellAlert } from './services/cell-alert-manager.service';
 export { HoverController } from './controllers/hover.controller';
-export { DropdownManagerService, type IDropdownParam } from './services/dropdown-manager.service';
 export { SHEET_VIEW_KEY } from './common/keys';
 export { CanvasPopManagerService } from './services/canvas-pop-manager.service';

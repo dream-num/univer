@@ -33,6 +33,8 @@ import { DataValidationAutoFillController } from './controllers/dv-auto-fill.con
 import { DataValidationSheetController } from './controllers/dv-sheet.controller';
 import { DataValidationCopyPasteController } from './controllers/dv-copy-paste.controller';
 import { DataValidationResourceController } from './controllers/dv-resource.controller';
+import { DataValidationDropdownManagerService } from './services/dropdown-manager.service';
+import { HideDataValidationDropdown, ShowDataValidationDropdown } from './commands/operations/data-validation.operation';
 
 export class UniverSheetsDataValidationPlugin extends Plugin {
     constructor(
@@ -50,6 +52,8 @@ export class UniverSheetsDataValidationPlugin extends Plugin {
             [DataValidationFormulaService],
             [DataValidationCustomFormulaService],
             [RegisterOtherFormulaService],
+            [DataValidationDropdownManagerService],
+
             // controller
             [DataValidationResourceController],
             [DataValidationController],
@@ -68,6 +72,8 @@ export class UniverSheetsDataValidationPlugin extends Plugin {
             AddSheetDataValidationAndOpenCommand,
             UpdateSheetDataValidationRangeCommand,
             DataValidationFormulaMarkDirty,
+            ShowDataValidationDropdown,
+            HideDataValidationDropdown,
         ].forEach((command) => {
             this._commandService.registerCommand(command);
         });

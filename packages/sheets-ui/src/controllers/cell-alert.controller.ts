@@ -18,7 +18,6 @@ import { Disposable, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { ComponentManager } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
 import { CellAlert } from '../views/cell-alert/CellAlertPopup';
-import { CellDropdown, DROP_DOWN_KEY } from '../views/drop-down';
 import { CELL_ALERT_KEY } from '../views/cell-alert';
 
 @OnLifecycle(LifecycleStages.Starting, CellAlertController)
@@ -32,6 +31,5 @@ export class CellAlertController extends Disposable {
 
     private _initComponent() {
         this._componentManager.register(CELL_ALERT_KEY, CellAlert);
-        this._componentManager.register(DROP_DOWN_KEY, CellDropdown);
     }
 }

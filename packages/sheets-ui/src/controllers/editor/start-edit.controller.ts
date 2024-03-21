@@ -57,6 +57,7 @@ import {
 import { IEditorService, KeyCode, SetEditorResizeOperation } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
 
+import { filter } from 'rxjs';
 import { getEditorObject } from '../../basics/editor/get-editor-object';
 import { SetCellEditVisibleOperation } from '../../commands/operations/cell-edit.operation';
 import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';
@@ -147,7 +148,7 @@ export class StartEditController extends Disposable {
 
     private _initialCursorSync() {
         this.disposeWithMe(
-            this._cellEditorManagerService.focus$.subscribe(() => {
+            this._cellEditorManagerService.focus$.pipe(filter((f) => !!f)).subscribe(() => {
                 this._textSelectionRenderManager.sync();
             })
         );

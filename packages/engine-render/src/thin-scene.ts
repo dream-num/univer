@@ -29,6 +29,8 @@ import type { UniverRenderingContext } from './context';
 export abstract class ThinScene extends Disposable {
     onTransformChangeObservable = new Observable<ITransformChangeState>();
 
+    onFileLoadedObservable = new Observable<string>();
+
     onPointerDownObserver = new Observable<IPointerEvent | IMouseEvent>();
 
     onPointerMoveObserver = new Observable<IPointerEvent | IMouseEvent>();

@@ -15,7 +15,7 @@
  */
 
 import type { EventState, IColorStyle, ISlidePage, Nullable, SlideDataModel } from '@univerjs/core';
-import { getColorStyle, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
+import { debounce, getColorStyle, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
 import type { IWheelEvent } from '@univerjs/engine-render';
 import {
     EVENT_TYPE,
@@ -217,6 +217,10 @@ export class CanvasView extends RxDisposable {
             }
         });
 
+        scene.onFileLoadedObservable.add(() => {
+            this._refreshThumb();
+        });
+
         ScrollBar.attachTo(viewMain);
 
         this._renderManagerService.setCurrent(unitId);
@@ -249,6 +253,10 @@ export class CanvasView extends RxDisposable {
             }
         });
     }
+
+    private _refreshThumb = debounce(() => {
+        this.createThumbs();
+    }, 300);
 
     private _createSlide(mainScene: Scene) {
         const model = this._currentUniverService.getCurrentUniverSlideInstance();

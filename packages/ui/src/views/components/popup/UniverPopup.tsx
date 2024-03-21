@@ -15,7 +15,7 @@
  */
 
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import React, {} from 'react';
+import React from 'react';
 import { RectPopup } from '@univerjs/design';
 import { IGlobalPopupManagerService } from '@univerjs/ui';
 import { useObservable } from '../../../components/hooks/observable';
@@ -24,12 +24,12 @@ import type { IPopup } from '../../../services/popup/global-popup-manager.servic
 
 const SingleUniverPopup = ({ popup, children }: { popup: IPopup; children?: React.ReactNode }) => {
     const anchorRect = useObservable(popup.anchorRect$, popup.anchorRect);
+
     return (
         <RectPopup
             anchorRect={anchorRect}
-            mask={popup.mask}
-            onMaskClick={popup.onMaskClick}
             direction={popup.direction}
+            onClickOther={popup.onMaskClick}
         >
 
             {children}

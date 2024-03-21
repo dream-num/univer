@@ -71,6 +71,7 @@ export class DataValidationDropdownManagerService {
                 onMaskClick: () => {
                     this.hideDropdown();
                 },
+                offset: [0, 4],
             }
         ));
 

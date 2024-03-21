@@ -27,7 +27,7 @@ export const DataValidationPanel = () => {
 
     return (
         activeRule
-            ? <DataValidationDetail />
+            ? <DataValidationDetail key={activeRule.uid} />
             : <DataValidationList />
     );
 };

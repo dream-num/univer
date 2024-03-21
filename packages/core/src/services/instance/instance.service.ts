@@ -63,7 +63,7 @@ export interface IUniverInstanceService {
     slideDisposed$: Observable<SlideDataModel>;
 
     focusUniverInstance(id: string | null): void;
-    getFocusedUniverInstance(): Workbook | DocumentDataModel | SlideDataModel | null;
+    getFocusedUniverInstance(): Nullable<Workbook | DocumentDataModel | SlideDataModel>;
 
     createDoc(data: Partial<IDocumentData>): DocumentDataModel;
     createSheet(data: Partial<IWorkbookData>): Workbook;
@@ -274,7 +274,7 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
         }
     }
 
-    getFocusedUniverInstance(): Workbook | DocumentDataModel | SlideDataModel | null {
+    getFocusedUniverInstance(): Nullable<Workbook | DocumentDataModel | SlideDataModel> {
         return this._focused;
     }
 

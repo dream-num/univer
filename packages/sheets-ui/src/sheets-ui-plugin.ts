@@ -68,6 +68,7 @@ import { CellAlertManagerService } from './services/cell-alert-manager.service';
 import { CellAlertController } from './controllers/cell-alert.controller';
 import { DropdownManagerService } from './services/dropdown-manager.service';
 import { CellCustomRenderController } from './controllers/cell-custom-render.controller';
+import { CanvasPopManagerService } from './services/canvas-pop-manager.service';
 
 export class UniverSheetsUIPlugin extends Plugin {
     static override type = PluginType.Sheet;
@@ -112,6 +113,7 @@ export class UniverSheetsUIPlugin extends Plugin {
                 [IMarkSelectionService, { useClass: MarkSelectionService }],
                 [HoverManagerService],
                 [CellAlertManagerService],
+                [CanvasPopManagerService],
 
                 // controllers
                 [ActiveWorksheetController],

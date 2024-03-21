@@ -21,6 +21,7 @@ import { Vector2 } from '@univerjs/engine-render';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
+import { VIEWPORT_KEY } from './keys';
 
 export function checkCellContentInRanges(worksheet: Worksheet, ranges: IRange[]): boolean {
     return ranges.some((range) => checkCellContentInRange(worksheet, range));
@@ -124,4 +125,27 @@ export function getCellIndexByOffsetWithMerge(offsetX: number, offsetY: number, 
     };
 
     return params;
+}
+
+export function getViewportByCell(row: number, column: number, scene: Scene, worksheet: Worksheet) {
+    const freeze = worksheet.getFreeze();
+    if (!freeze || (freeze.startRow <= 0 && freeze.startColumn <= 0)) {
+        return scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
+    }
+
+    if (row > freeze.startRow && column > freeze.startColumn) {
+        return scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
+    }
+
+    if (row <= freeze.startRow && column <= freeze.startColumn) {
+        return scene.getViewport(VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP);
+    }
+
+    if (row <= freeze.startRow && column > freeze.startColumn) {
+        return scene.getViewport(VIEWPORT_KEY.VIEW_MAIN_TOP);
+    }
+
+    if (row > freeze.startRow && column <= freeze.startColumn) {
+        return scene.getViewport(VIEWPORT_KEY.VIEW_MAIN_LEFT);
+    }
 }

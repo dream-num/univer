@@ -81,3 +81,4 @@ export { CellAlertManagerService, CellAlertType, type ICellAlert } from './servi
 export { HoverController } from './controllers/hover.controller';
 export { DropdownManagerService, type IDropdownParam } from './services/dropdown-manager.service';
 export { SHEET_VIEW_KEY } from './common/keys';
+export { CanvasPopManagerService } from './services/canvas-pop-manager.service';

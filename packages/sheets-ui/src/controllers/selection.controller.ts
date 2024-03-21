@@ -39,12 +39,12 @@ import {
 } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
+import { IDefinedNamesService } from '@univerjs/engine-formula';
 import type { ISetZoomRatioOperationParams } from '../commands/operations/set-zoom-ratio.operation';
 import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
 import { VIEWPORT_KEY } from '../common/keys';
 import { ISelectionRenderService } from '../services/selection/selection-render.service';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
-import { ScrollController } from './scroll.controller';
 import type { ISheetObjectParam } from './utils/component-tools';
 import { getSheetObject } from './utils/component-tools';
 
@@ -59,7 +59,7 @@ export class SelectionController extends Disposable {
         private readonly _selectionRenderService: ISelectionRenderService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
         @Inject(ThemeService) private readonly _themeService: ThemeService,
-        @Inject(ScrollController) private readonly _scrollController: ScrollController
+        @IDefinedNamesService private readonly _definedNamesService: IDefinedNamesService
     ) {
         super();
 
@@ -73,8 +73,6 @@ export class SelectionController extends Disposable {
         if (sheetObject == null) {
             return;
         }
-
-        // TODO@wzhudev: listen clicking event on the top-left corner to select all cells.
 
         this._initViewMainListener(sheetObject);
         this._initRowHeader(sheetObject);
@@ -233,13 +231,13 @@ export class SelectionController extends Disposable {
     private _initSelectionChangeListener() {
         this.disposeWithMe(
             toDisposable(
-                this._selectionManagerService.selectionMoveEnd$.subscribe((param) => {
+                this._selectionManagerService.selectionMoveEnd$.subscribe((params) => {
                     this._selectionRenderService.reset();
-                    if (param == null) {
+                    if (params == null) {
                         return;
                     }
 
-                    for (const selectionWithStyle of param) {
+                    for (const selectionWithStyle of params) {
                         if (selectionWithStyle == null) {
                             continue;
                         }
@@ -247,9 +245,51 @@ export class SelectionController extends Disposable {
                             this._selectionRenderService.convertSelectionRangeToData(selectionWithStyle);
                         this._selectionRenderService.addControlToCurrentByRangeData(selectionData);
                     }
+
+                    this._syncDefinedNameRange(params);
                 })
             )
         );
+
+        this.disposeWithMe(
+            toDisposable(
+                this._selectionManagerService.selectionMoving$.subscribe((params) => {
+                    if (params == null) {
+                        return;
+                    }
+
+                    this._syncDefinedNameRange(params);
+                })
+            )
+        );
+
+        this.disposeWithMe(
+            toDisposable(
+                this._selectionManagerService.selectionMoveStart$.subscribe((params) => {
+                    if (params == null) {
+                        return;
+                    }
+
+                    this._syncDefinedNameRange(params);
+                })
+            )
+        );
+    }
+
+    private _syncDefinedNameRange(params: ISelectionWithStyle[]) {
+        if (params.length === 0) {
+            return;
+        }
+        const lastSelection = params[params.length - 1];
+
+        const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+        const worksheet = workbook.getActiveSheet();
+
+        this._definedNamesService.setCurrentRange({
+            range: lastSelection.range,
+            unitId: workbook.getUnitId(),
+            sheetId: worksheet.getSheetId(),
+        });
     }
 
     private _initUserActionSyncListener() {

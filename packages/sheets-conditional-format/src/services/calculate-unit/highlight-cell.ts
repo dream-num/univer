@@ -302,7 +302,7 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
                     const sequenceNodes = Tools.deepClone(cache.sequenceNodes);
                     const transformSequenceNodes = Array.isArray(sequenceNodes)
                         ? sequenceNodes.map((node) => {
-                            if (typeof node === 'object' && node.nodeType === sequenceNodeType.REFERENCE) {
+                            if (typeof node === 'object' && node.nodeType === sequenceNodeType.REFERENCE && !node.token.startsWith('$')) {
                                 const gridRangeName = deserializeRangeWithSheet(node.token);
                                 const relativeRange = Rectangle.getRelativeRange(gridRangeName.range, originRange);
                                 const newRange = Rectangle.getPositionRange(relativeRange, getRangeFromCell(row, col));

@@ -113,7 +113,9 @@ export function RectPopup(props: IRectPopupProps) {
         const handleClick = (e: MouseEvent) => {
             clickOtherFn.current?.(e);
         };
-        window.addEventListener('click', handleClick);
+        requestAnimationFrame(() => {
+            window.addEventListener('click', handleClick);
+        });
         return () => {
             window.removeEventListener('click', handleClick);
         };

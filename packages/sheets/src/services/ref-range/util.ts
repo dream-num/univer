@@ -170,25 +170,33 @@ export const handleBaseMoveRowsCols = (
     }
 
     const toRangeIntersectsEffectRange = getIntersects(_toRange, _effectRange);
-    if (_toRange.start <= _effectRange.start && !isFromRangeContainEffectRange) {
-        _effectRange.start += toRangeStep;
-        _effectRange.end += toRangeStep;
-    } else if (toRangeIntersectsEffectRange) {
-        const insertStart = _toRange.start;
-        if (getLength(toRangeIntersectsEffectRange) <= getLength(_effectRange)) {
-            return { step: _effectRange.start - effectRange.start, length: 0 };
-        }
-        if (insertStart < _effectRange.start) {
+    if (!isFromRangeContainEffectRange) {
+        if (_toRange.start <= _effectRange.start) {
             _effectRange.start += toRangeStep;
             _effectRange.end += toRangeStep;
-        } else if (insertStart >= _effectRange.start && insertStart <= _effectRange.end) {
-            // 1. move
-            _effectRange.end += toRangeStep;
-            _effectRange.start += toRangeStep;
-            // 2. split
-            // 3. expansion
+        } else if (toRangeIntersectsEffectRange) {
+            if (!isToLargeFrom) {
+                if (_effectRange.start < _toRange.start && _effectRange.end > _toRange.end) {
+                // 2-4 9 11 14 expend
+                    _effectRange.end += toRangeStep;
+                } else if (_effectRange.start >= _toRange.end || (_effectRange.start >= _toRange.start && _effectRange.start <= _toRange.end)) {
+                // 2-5 8 12 15 move right
+                    _effectRange.end += toRangeStep;
+                    _effectRange.start += toRangeStep;
+                }
+            } else {
+                if (toRange.end <= _effectRange.start || (toRange.start <= _effectRange.start && toRange.end >= _effectRange.start)) {
+                    // 1-3 7 13
+                    _effectRange.start += toRangeStep;
+                    _effectRange.end += toRangeStep;
+                } else if (toRange.start >= _effectRange.start && toRange.start <= _effectRange.end) {
+                        // 1-6 8 10  11 14 15
+                    _effectRange.end += toRangeStep;
+                }
+            }
         }
     }
+
     return {
         step: _effectRange.start - effectRange.start,
         length: getLength(_effectRange) - getLength(effectRange),

@@ -1249,7 +1249,6 @@ describe('test different situations of adjustRangeOnMutation', () => {
         });
 
         it('should expand when move inside', () => {
-            // FIXME: there is some error with this use case!
             const range: IRange = { startRow: 5, endRow: 7, startColumn: 1, endColumn: 1 };
             const mutation: IMutationInfo<IMoveRowsMutationParams> = {
                 id: MoveRowsMutation.id,
@@ -1261,7 +1260,7 @@ describe('test different situations of adjustRangeOnMutation', () => {
                 },
             };
             const result = adjustRangeOnMutation(range, mutation);
-            expect(result).toEqual({ startRow: 2, endRow: 4, startColumn: 1, endColumn: 1 });
+            expect(result).toEqual({ startRow: 2, endRow: 7, startColumn: 1, endColumn: 1 });
         });
     });
 });

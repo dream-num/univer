@@ -304,7 +304,7 @@ export const handleBaseRemoveRange = (_removeRange: IRange, _targetRange: IRange
         }
         // 4
         if (
-            targetRange.startColumn > removeRange.startColumn &&
+            targetRange.startColumn >= removeRange.startColumn &&
             targetRange.startColumn <= removeRange.endColumn &&
             targetRange.endColumn > removeRange.endColumn
         ) {

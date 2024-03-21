@@ -51,7 +51,6 @@ import { SelectAllOperation } from './commands/operations/select-all.operation';
 import { SetDocZoomRatioOperation } from './commands/operations/set-doc-zoom-ratio.operation';
 import { SetTextSelectionsOperation } from './commands/operations/text-selection.operation';
 import { IMEInputController } from './controllers/ime-input.controller';
-import { InlineFormatController } from './controllers/inline-format.controller';
 import { MoveCursorController } from './controllers/move-cursor.controller';
 import { NormalInputController } from './controllers/normal-input.controller';
 import { DocSkeletonManagerService } from './services/doc-skeleton-manager.service';
@@ -155,7 +154,6 @@ export class UniverDocsPlugin extends Plugin {
                 // controllers
                 [NormalInputController],
                 [IMEInputController],
-                [InlineFormatController],
                 [MoveCursorController],
             ] as Dependency[]
         ).forEach((d) => docInjector.add(d));

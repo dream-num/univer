@@ -54,7 +54,6 @@ import { COLOR_PICKER_COMPONENT } from '../../components/color-picker';
 import { FONT_FAMILY_COMPONENT, FONT_FAMILY_ITEM_COMPONENT } from '../../components/font-family';
 import { FONT_SIZE_COMPONENT } from '../../components/font-size';
 
-// TODO @Dushusir: use for test, change id later
 export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const commandService = accessor.get(ICommandService);
 
@@ -392,6 +391,54 @@ export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSele
         }),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.DOC),
         // disabled$: getCurrentSheetDisabled$(accessor),
+    };
+}
+
+export function AlignLeftMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: 'a',
+        group: MenuGroup.TOOLBAR_LAYOUT,
+        type: MenuItemType.BUTTON,
+        icon: 'LeftJustifyingSingle',
+        tooltip: 'toolbar.alignLeft',
+        positions: [MenuPosition.TOOLBAR_START],
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.DOC),
+    };
+}
+
+export function AlignCenterMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: 'b',
+        group: MenuGroup.TOOLBAR_LAYOUT,
+        type: MenuItemType.BUTTON,
+        icon: 'HorizontallySingle',
+        tooltip: 'toolbar.alignCenter',
+        positions: [MenuPosition.TOOLBAR_START],
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.DOC),
+    };
+}
+
+export function AlignRightMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: 'c',
+        group: MenuGroup.TOOLBAR_LAYOUT,
+        type: MenuItemType.BUTTON,
+        icon: 'RightJustifyingSingle',
+        tooltip: 'toolbar.alignRight',
+        positions: [MenuPosition.TOOLBAR_START],
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.DOC),
+    };
+}
+
+export function AlignJustifyMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: 'd',
+        group: MenuGroup.TOOLBAR_LAYOUT,
+        type: MenuItemType.BUTTON,
+        icon: 'RightJustifyingSingle',
+        tooltip: 'toolbar.alignJustify',
+        positions: [MenuPosition.TOOLBAR_START],
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.DOC),
     };
 }
 

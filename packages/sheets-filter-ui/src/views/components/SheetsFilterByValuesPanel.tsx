@@ -57,29 +57,34 @@ export function FilterByValue(props: { model: ByValuesModel }) {
         <div className={styles.sheetsFilterPanelValuesContainer}>
             <Input value={searchText} placeholder={localeService.t('sheets-filter.panel.search-placeholder')} onChange={onSearchValueChange} />
             <div className={styles.sheetsFilterPanelValuesList}>
+                {/* The on-top select all button */}
                 <div className={styles.sheetsFilterPanelValuesItem}>
-                    <Checkbox
-                        disabled={items.length === 0}
-                        checked={allChecked}
-                        onChange={onCheckAllToggled}
-                    >
-                    </Checkbox>
-                    <span className={styles.sheetsFilterPanelValuesItemText}>{`${localeService.t('sheets-filter.panel.select-all')}`}</span>
-                    <span className={styles.sheetsFilterPanelValuesItemCount}>{`(${stat.checked}/${stat.checked + stat.unchecked})`}</span>
+                    <div className={styles.sheetsFilterPanelValuesItemInner}>
+                        <Checkbox
+                            disabled={items.length === 0}
+                            checked={allChecked}
+                            onChange={onCheckAllToggled}
+                        >
+                        </Checkbox>
+                        <span className={styles.sheetsFilterPanelValuesItemText}>{`${localeService.t('sheets-filter.panel.select-all')}`}</span>
+                        <span className={styles.sheetsFilterPanelValuesItemCount}>{`(${stat.checked}/${stat.checked + stat.unchecked})`}</span>
+                    </div>
                 </div>
-
-                <List style={{ paddingRight: 8 }} data={items} height={188} itemHeight={32} itemKey={(item) => `${item.value}----${item.checked}`}>
-                    {(item) => (
-                        <div className={styles.sheetsFilterPanelValuesItem}>
-                            <Checkbox checked={item.checked} onChange={() => onFilterCheckToggled(item, !item.checked)}></Checkbox>
-                            <span className={styles.sheetsFilterPanelValuesItemText}>{item.value}</span>
-                            <span className={styles.sheetsFilterPanelValuesItemCount}>{`(${item.count})`}</span>
-                            <Button className={styles.sheetsFilterPanelValuesItemExcludeButton} size="small" type="link" onClick={() => onFilterOnlyClicked(item)}>{filterOnly}</Button>
-                        </div>
-                    )}
-                </List>
+                <div className={styles.sheetsFilterPanelValuesVirtual}>
+                    <List style={{ paddingRight: 8 }} data={items} height={190} itemHeight={32} itemKey={(item) => `${item.value}----${item.checked}`}>
+                        {(item) => (
+                            <div className={styles.sheetsFilterPanelValuesItem}>
+                                <div className={styles.sheetsFilterPanelValuesItemInner}>
+                                    <Checkbox checked={item.checked} onChange={() => onFilterCheckToggled(item, !item.checked)}></Checkbox>
+                                    <span className={styles.sheetsFilterPanelValuesItemText}>{item.value}</span>
+                                    <span className={styles.sheetsFilterPanelValuesItemCount}>{`(${item.count})`}</span>
+                                    <Button className={styles.sheetsFilterPanelValuesItemExcludeButton} size="small" type="link" onClick={() => onFilterOnlyClicked(item)}>{filterOnly}</Button>
+                                </div>
+                            </div>
+                        )}
+                    </List>
+                </div>
             </div>
-
             {/* Here we should add a virtual scroll component to boost performance! */}
         </div>
     );

@@ -8,7 +8,8 @@
     padding: 16px;
 
     &-header {
-        flex: 0 0 32px;
+        flex-grow: 0;
+        flex-shrink: 0;
         margin-bottom: 4px;
     }
 
@@ -16,6 +17,7 @@
         flex-grow: 1;
         flex-shrink: 1;
         overflow: hidden;
+        padding-top: 8px;
     }
 
     &-select-all {
@@ -30,15 +32,18 @@
 
     &-values {
         &-container {
-            margin-top: 8px;
             display: flex;
+            height: 100%;
             flex-direction: column;
+
+            > .input-affix-wrapper {
+                flex: 0 0 32px;
+            }
 
             .select,
             .input-affix-wrapper,
             .radio-group {
                 width: 100%;
-                margin-bottom: 8px;
             }
         }
 
@@ -48,43 +53,57 @@
         }
 
         &-list {
+            flex-grow: 1;
+            margin-top: 8px;
             border: 1px solid rgb(var(--grey-200));
             box-sizing: border-box;
             border-radius: 6px;
-            height: 236px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
 
-            padding: 8px 0 8px 8px;
+            padding: 6px 0 6px 8px;
 
             &-inner-container {
                 padding-right: 8px;
             }
         }
 
+        &-virtual {
+            flex-grow: 1;
+        }
+
         &-item {
             box-sizing: border-box;
-            height: 28px;
-            line-height: 24px;
-            margin-bottom: 4px;
-            border-radius: 6px;
-            padding: 2px 2px 2px 24px;
-            display: flex;
-            font-size: 13px;
+            height: 32px;
+            padding: 2px 0;
             width: 100%;
 
-            &:hover {
-                background-color: rgb(var(--grey-50));
+            &-inner {
+                align-items: center;
+                padding: 0 2px 0 24px;
+                line-height: 28px;
+                box-sizing: border-box;
+                border-radius: 6px;
+                height: 28px;
+                display: flex;
+                font-size: 13px;
 
-                .sheets-filter-panel-values-item-count {
-                    margin-right: 2px;
-                }
+                &:hover {
+                    background-color: rgb(var(--grey-50));
 
-                .sheets-filter-panel-values-item-exclude-button {
-                    box-sizing: border-box;
-                    margin-left: auto;
-                    display: inline-block;
-                    height: 24px;
-                    font-size: 12px;
-                    line-height: 12px;
+                    .sheets-filter-panel-values-item-count {
+                        margin-right: 2px;
+                    }
+
+                    .sheets-filter-panel-values-item-exclude-button {
+                        box-sizing: border-box;
+                        margin-left: auto;
+                        display: inline-block;
+                        height: 24px;
+                        font-size: 12px;
+                        line-height: 12px;
+                    }
                 }
             }
 
@@ -123,7 +142,8 @@
 
     &-footer {
         margin-top: 16px;
-        flex: 0 0 32px;
+        flex-grow: 0;
+        flex-shrink: 0;
         display: inline-flex;
         flex-wrap: nowrap;
         overflow: hidden;

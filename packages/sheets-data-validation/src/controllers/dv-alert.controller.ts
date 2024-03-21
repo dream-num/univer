@@ -50,7 +50,6 @@ export class DataValidationAlertController extends Disposable {
                         type: CellAlertType.ERROR,
                         title: 'invalid:',
                         message: manager?.getRuleErrorMsg(cellData.dataValidation.ruleId),
-                        position: cellPos.position,
                         location: cellPos.location,
                         width: 200,
                         height: 74,

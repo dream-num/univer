@@ -15,14 +15,13 @@
  */
 
 import { Subject } from 'rxjs';
+import type { IDisposable } from '@wendellhu/redi';
 import { Inject } from '@wendellhu/redi';
-import { type IPosition, IUniverInstanceService, type Nullable } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
 import type { ISheetLocation } from '@univerjs/sheets';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { IPopupService } from '@univerjs/ui/services/popup/popup.service.js';
 import { CELL_ALERT_KEY } from '../views/cell-alert';
 import { CanvasPopManagerService } from './canvas-pop-manager.service';
-import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
 
 export enum CellAlertType {
     INFO,
@@ -34,7 +33,6 @@ export interface ICellAlert {
     type: CellAlertType;
     title: React.ReactNode;
     message: React.ReactNode;
-    position: IPosition;
     location: ISheetLocation;
     width: number;
     height: number;
@@ -42,7 +40,7 @@ export interface ICellAlert {
 
 export class CellAlertManagerService {
     private _currentAlert$ = new Subject<Nullable<ICellAlert>>();
-    private _currentPopupId: Nullable<string> = undefined;
+    private _currentPopup: Nullable<IDisposable> = undefined;
 
     private _currentAlert: Nullable<ICellAlert> = null;
 
@@ -54,49 +52,32 @@ export class CellAlertManagerService {
 
     constructor(
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @IPopupService private readonly _popupService: IPopupService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(CanvasPopManagerService) private readonly _canvasPopManagerService: CanvasPopManagerService
     ) {}
 
     showAlert(alert: ICellAlert) {
-        this._currentPopupId && this._popupService.removePopup(this._currentPopupId);
-        this._currentPopupId = null;
+        this._currentPopup && this._currentPopup.dispose();
+        this._currentPopup = null;
 
-        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
-        const unitId = workbook.getUnitId();
-        // const subUnitId = workbook.getActiveSheet().getSheetId();
+        const { location } = alert;
+        const { row, col, unitId } = location;
+
         const currentRender = this._renderManagerService.getRenderById(unitId);
         if (!currentRender) {
             return;
         }
-        const { position, location } = alert;
-        const { row, col } = location;
-        // const bounding = currentRender.engine.getCanvasElement().getBoundingClientRect();
+
         this._currentAlert = alert;
         this._currentAlert$.next(alert);
-        this._canvasPopManagerService.addPopupToCell(row, col, {
+        this._currentPopup = this._canvasPopManagerService.addPopupToCell(row, col, {
             componentKey: CELL_ALERT_KEY,
             direction: 'horizontal',
         });
-
-        // this._currentPopupId = this._popupService.addPopup({
-        //     anchorRect: {
-        //         top: position.startY + bounding.top,
-        //         bottom: position.endY + bounding.top,
-        //         left: position.startX,
-        //         right: position.endX,
-        //     },
-        //     unitId,
-        //     subUnitId,
-        //     componentKey: CELL_ALERT_KEY,
-        //     direction: 'horizontal',
-        // });
     }
 
     clearAlert() {
-        this._currentPopupId && this._popupService.removePopup(this._currentPopupId);
-        this._currentPopupId = null;
+        this._currentPopup && this._currentPopup.dispose();
+        this._currentPopup = null;
         this._currentAlert = null;
         this._currentAlert$.next(null);
     }

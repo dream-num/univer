@@ -24,8 +24,7 @@ export interface IPopup {
     anchorRect: IBoundRectNoAngle;
     anchorRect$: Observable<IBoundRectNoAngle>;
     componentKey: string;
-    mask?: boolean;
-    onMaskClick?: React.MouseEventHandler<HTMLDivElement>;
+    onMaskClick?: (e: MouseEvent) => void;
     unitId: string;
     subUnitId: string;
     direction?: 'vertical' | 'horizontal';

@@ -37,6 +37,8 @@ export interface IRectPopupProps {
     mask?: boolean;
 
     onMaskClick?: React.MouseEventHandler<HTMLDivElement>;
+
+    onClickOther?: (e: MouseEvent) => void;
 }
 
 const calcHorizontalPopupPosition = (position: IAbsolutePosition, width: number, height: number, containerWidth: number, containerHeight: number): Partial<IAbsolutePosition> => {
@@ -64,10 +66,12 @@ const calcVerticalPopupPosition = (position: IAbsolutePosition, width: number, h
 };
 
 export function RectPopup(props: IRectPopupProps) {
-    const { children, anchorRect, direction = 'vertical', mask, onMaskClick } = props;
+    const { children, anchorRect, direction = 'vertical', mask, onMaskClick, onClickOther } = props;
 
     const nodeRef = useRef(null);
+    const clickOtherFn = useRef(onClickOther);
 
+    clickOtherFn.current = onClickOther;
     const [position, setPosition] = useState<Partial<IAbsolutePosition>>({
         top: -9999,
         left: -9999,
@@ -105,6 +109,16 @@ export function RectPopup(props: IRectPopupProps) {
         direction,
     ]);
 
+    useEffect(() => {
+        const handleClick = (e: MouseEvent) => {
+            clickOtherFn.current?.(e);
+        };
+        window.addEventListener('click', handleClick);
+        return () => {
+            window.removeEventListener('click', handleClick);
+        };
+    }, [clickOtherFn]);
+
     return (
         <>
             {mask ? <div className={styles.popupMask} onClick={onMaskClick} /> : null}
@@ -112,7 +126,9 @@ export function RectPopup(props: IRectPopupProps) {
                 ref={nodeRef}
                 className={styles.popup}
                 style={position}
-
+                onClick={(e) => {
+                    e.stopPropagation();
+                }}
             >
                 {children}
             </section>

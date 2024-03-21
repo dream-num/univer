@@ -17,7 +17,7 @@
 import { type IPosition, IUniverInstanceService, type Nullable } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { ISheetLocation } from '@univerjs/sheets';
-import { IPopupService } from '@univerjs/ui/services/popup/popup.service.js';
+import { IGlobalPopupManagerService } from '@univerjs/ui';
 import { Subject } from 'rxjs';
 import { DROP_DOWN_KEY } from '../views/drop-down';
 
@@ -51,7 +51,7 @@ export class DropdownManagerService {
 
     constructor(
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @IPopupService private readonly _popupService: IPopupService,
+        @IGlobalPopupManagerService private readonly _popupService: IGlobalPopupManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {}
 

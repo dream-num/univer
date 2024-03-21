@@ -459,8 +459,10 @@ export class NumberValueObject extends BaseValueObject {
             return (o as BaseValueObject).plus(this);
         }
         const object = this.minusBy(valueObject.getValue());
+
+        // = 1 - #NAME? gets #NAME?, = 1 - #VALUE! gets #VALUE!
         if (object.isError()) {
-            return this;
+            return object;
         }
 
         // Set number format
@@ -474,6 +476,11 @@ export class NumberValueObject extends BaseValueObject {
             return valueObject.multiply(this);
         }
         const object = this.multiplyBy(valueObject.getValue());
+
+        // = 1 * #NAME? gets #NAME?, = 1 * #VALUE! gets #VALUE!
+        if (object.isError()) {
+            return object;
+        }
 
         // Set number format
         object.setPattern(this.getPattern() || valueObject.getPattern());
@@ -490,6 +497,11 @@ export class NumberValueObject extends BaseValueObject {
             return (o as BaseValueObject).multiply(this);
         }
         const object = this.dividedBy(valueObject.getValue());
+
+        // = 1 / #NAME? gets #NAME?, = 1 / #VALUE! gets #VALUE!
+        if (object.isError()) {
+            return object;
+        }
 
         // Set number format
         object.setPattern(this.getPattern() || valueObject.getPattern());

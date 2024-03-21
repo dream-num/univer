@@ -86,7 +86,7 @@ export const DEFAULT_FORTH_PAGE = {
             type: PageElementType.TEXT,
             richText: {
                 text: 'The Business Objectives',
-                fs: 32,
+                fs: 32 * 0.75,
                 cl: {
                     rgb: 'rgb(244,79,86)',
                 },
@@ -104,7 +104,7 @@ export const DEFAULT_FORTH_PAGE = {
             type: PageElementType.TEXT,
             richText: {
                 text: 'What we hope to achieve in the short and long run',
-                fs: 18,
+                fs: 18 * 0.75,
                 cl: {
                     rgb: 'rgb(127,127,127)',
                 },

@@ -2,10 +2,12 @@
 
 [![npm version](https://img.shields.io/npm/v/@univerjs/uniscript)](https://npmjs.org/package/@univerjs/uniscript)
 [![license](https://img.shields.io/npm/l/@univerjs/uniscript)](https://img.shields.io/npm/l/@univerjs/uniscript)
+![CSS Included](https://img.shields.io/badge/CSS_Included-blue?logo=CSS3)
+![i18n](https://img.shields.io/badge/zh--CN%20%7C%20en--US-cornflowerblue?label=i18n)
 
 ## Introduction
 
-![](./assets//uniscript.jpeg)
+![](./assets/uniscript.jpeg)
 
 `@univerjs/uniscript` uses the DSL (Domain-Specific Language) provided by `@univerjs/facade` and creates a code editor for Users to write code for operating Univer's data structures and business logic.
 

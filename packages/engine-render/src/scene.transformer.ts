@@ -838,7 +838,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
     private _getTopScene() {
         const currentScene = this.getScene();
-        return currentScene.getEngine()?.activeScene;
+        return currentScene.getEngine()?.activeScene as ThinScene | null;
     }
 
     private _moving(moveOffsetX: number, moveOffsetY: number, scrollTimer: ScrollTimer) {

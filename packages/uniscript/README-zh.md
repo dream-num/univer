@@ -2,10 +2,12 @@
 
 [![npm version](https://img.shields.io/npm/v/@univerjs/uniscript)](https://npmjs.org/package/@univerjs/uniscript)
 [![license](https://img.shields.io/npm/l/@univerjs/uniscript)](https://img.shields.io/npm/l/@univerjs/uniscript)
+![CSS Included](https://img.shields.io/badge/CSS_Included-blue?logo=CSS3)
+![i18n](https://img.shields.io/badge/zh--CN%20%7C%20en--US-cornflowerblue?label=i18n)
 
 ## 简介
 
-![](./assets//uniscript.jpeg)
+![](./assets/uniscript.jpeg)
 
 `@univerjs/uniscript` 提供了一个基于 TypeScript 的 DSL，可以用来操作 Univer 的数据结构和业务逻辑。
 

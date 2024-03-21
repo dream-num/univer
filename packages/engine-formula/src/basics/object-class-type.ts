@@ -23,6 +23,10 @@ export class ObjectClassType extends Disposable {
         return this.pattern;
     }
 
+    /**
+     * Only used in NumberValueObject
+     * @param pattern
+     */
     setPattern(pattern: string) {
         this.pattern = pattern;
     }

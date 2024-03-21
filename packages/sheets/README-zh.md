@@ -2,6 +2,7 @@
 
 [![npm version](https://img.shields.io/npm/v/@univerjs/sheets)](https://npmjs.org/package/@univerjs/sheets)
 [![license](https://img.shields.io/npm/l/@univerjs/sheets)](https://img.shields.io/npm/l/@univerjs/sheets)
+![i18n](https://img.shields.io/badge/zh--CN%20%7C%20en--US-cornflowerblue?label=i18n)
 
 ## 简介
 

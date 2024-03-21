@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import { DEFFAULT_DATE_FORMAT, excelDateSerial } from '../../../basics/date';
+import { DEFAULT_DATE_FORMAT, excelDateSerial } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import { NumberValueObject } from '../../../engine/value-object/primitive-object';
+import { NullValueObject, NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class DateFunction extends BaseFunction {
@@ -60,8 +60,8 @@ export class DateFunction extends BaseFunction {
         const dayArray = expandArrayValueObject(maxRowLength, maxColumnLength, day);
 
         return yearArray.map((yearValueObject, rowIndex, columnIndex) => {
-            const monthValueObject = monthArray.get(rowIndex, columnIndex);
-            const dayValueObject = dayArray.get(rowIndex, columnIndex);
+            const monthValueObject = monthArray.get(rowIndex, columnIndex) || NullValueObject.create();
+            const dayValueObject = dayArray.get(rowIndex, columnIndex) || NullValueObject.create();
 
             if (yearValueObject.isError()) {
                 return yearValueObject;
@@ -100,7 +100,7 @@ export class DateFunction extends BaseFunction {
             }
 
             const valueObject = NumberValueObject.create(currentSerial);
-            valueObject.setPattern(DEFFAULT_DATE_FORMAT);
+            valueObject.setPattern(DEFAULT_DATE_FORMAT);
 
             return valueObject;
         });

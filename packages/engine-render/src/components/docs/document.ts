@@ -555,11 +555,11 @@ export class Documents extends DocComponent {
             return false;
         }
 
-        const { pageWidth, pageHeight } = page;
+        const { pageWidth, pageHeight, marginBottom, marginTop, marginLeft, marginRight } = page;
 
-        const pageRight = pageLeft + pageWidth;
+        const pageRight = pageLeft + pageWidth + marginLeft + marginRight;
 
-        const pageBottom = pageTop + pageHeight;
+        const pageBottom = pageTop + pageHeight + marginBottom + marginTop;
 
         const { left, top, right, bottom } = bounds.viewBound;
 

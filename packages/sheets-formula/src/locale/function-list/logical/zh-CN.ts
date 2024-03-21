@@ -210,7 +210,7 @@ export default {
         },
     },
     OR: {
-        description: '如果任一参数为 TRUE，则返回 TRUE',
+        description: '如果 OR 函数的任意参数计算为 TRUE，则其返回 TRUE；如果其所有参数均计算机为 FALSE，则返回 FALSE。',
         abstract: '如果任一参数为 TRUE，则返回 TRUE',
         links: [
             {
@@ -219,8 +219,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            logical1: { name: '逻辑表达式 1', detail: '第一个想要测试且计算结果可为 TRUE 或 FALSE 的条件。' },
+            logical2: { name: '逻辑表达式 2', detail: '其他想要测试且计算结果可为 TRUE 或 FALSE 的条件（最多 255 个条件）。' },
         },
     },
     REDUCE: {

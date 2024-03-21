@@ -23,7 +23,7 @@ import { CELL_INVERTED_INDEX_CACHE } from '../../basics/inverted-index-cache';
 import { $ARRAY_VALUE_REGEX } from '../../basics/regex';
 import { compareToken } from '../../basics/token';
 import { ArrayBinarySearchType, ArrayOrderSearchType, getCompare } from '../utils/compare';
-import type { callbackMapFnType, callbackProductFnType, IArrayValueObject } from './base-value-object';
+import type { callbackMapFnType, IArrayValueObject } from './base-value-object';
 import { BaseValueObject, ErrorValueObject } from './base-value-object';
 import { BooleanValueObject, createBooleanValueObjectByRawValue, createNumberValueObjectByRawValue, createStringValueObjectByRawValue, NullValueObject, NumberValueObject, StringValueObject } from './primitive-object';
 
@@ -36,7 +36,6 @@ enum BatchOperatorType {
     COMPARE,
     CONCATENATE_FRONT,
     CONCATENATE_BACK,
-    PRODUCT,
     POW,
     ROUND,
     FLOOR,
@@ -75,7 +74,7 @@ export function transformToValueObject(array: Array<Array<number | string | bool
     return arrayValueList;
 }
 
-export function transformToValue(array: BaseValueObject[][] = []) {
+export function transformToValue(array: Nullable<BaseValueObject>[][] = []) {
     const arrayValueList: Array<Array<string | number | boolean | null>> = [];
 
     for (let r = 0; r < array.length; r++) {
@@ -88,7 +87,9 @@ export function transformToValue(array: BaseValueObject[][] = []) {
         for (let c = 0; c < row.length; c++) {
             const cell = row[c];
 
-            if (cell.isError()) {
+            if (cell == null) {
+                arrayValueList[r][c] = null;
+            } else if (cell.isError()) {
                 arrayValueList[r][c] = (cell as ErrorValueObject).getErrorType();
             } else {
                 arrayValueList[r][c] = (cell as BaseValueObject).getValue();
@@ -104,7 +105,7 @@ export class ArrayValueObject extends BaseValueObject {
         return new ArrayValueObject(rawValue);
     }
 
-    private _values: BaseValueObject[][] = [];
+    private _values: Nullable<BaseValueObject>[][] = [];
 
     private _rowCount: number = -1;
 
@@ -138,7 +139,7 @@ export class ArrayValueObject extends BaseValueObject {
     override dispose(): void {
         this._values.forEach((cells) => {
             cells.forEach((cell) => {
-                cell.dispose();
+                cell?.dispose();
             });
         });
 
@@ -214,12 +215,12 @@ export class ArrayValueObject extends BaseValueObject {
     get(row: number, column: number) {
         const rowValues = this._values[row];
         if (rowValues == null) {
-            return NullValueObject.create();
+            return null;
         }
 
         const v = rowValues[column];
         if (v == null) {
-            return NullValueObject.create();
+            return null;
         }
         return v;
     }
@@ -237,7 +238,7 @@ export class ArrayValueObject extends BaseValueObject {
         return v;
     }
 
-    set(row: number, column: number, value: BaseValueObject) {
+    set(row: number, column: number, value: Nullable<BaseValueObject>) {
         if (row >= this._rowCount || column >= this._columnCount) {
             throw new Error('Exceeding array bounds.');
         }
@@ -270,7 +271,7 @@ export class ArrayValueObject extends BaseValueObject {
 
         for (let r = startRow; r <= endRow; r++) {
             for (let c = startColumn; c <= endColumn; c++) {
-                if (callback(valueList[r][c], r, c) === false) {
+                if (callback(valueList[r]?.[c], r, c) === false) {
                     return;
                 }
             }
@@ -329,12 +330,12 @@ export class ArrayValueObject extends BaseValueObject {
 
     getFirstCell() {
         const { startRow, startColumn } = this.getRangePosition();
-        return this.get(startRow, startColumn);
+        return this.get(startRow, startColumn) || NullValueObject.create();
     }
 
     getLastCell() {
         const { endRow, endColumn } = this.getRangePosition();
-        return this.get(endRow, endColumn);
+        return this.get(endRow, endColumn) || NullValueObject.create();
     }
 
     /**
@@ -352,7 +353,7 @@ export class ArrayValueObject extends BaseValueObject {
             return this._createNewArray([[NullValueObject.create()]], 1, 1);
         }
 
-        const newValue: BaseValueObject[][] = [];
+        const newValue: Nullable<BaseValueObject>[][] = [];
 
         newValue[0] = [];
 
@@ -360,7 +361,7 @@ export class ArrayValueObject extends BaseValueObject {
             for (let c = 0; c < takeArrayColumnCount; c++) {
                 const takeCell = takeArray.get(r, c);
                 const value = this.get(r, c);
-                if (takeCell.isError()) {
+                if (takeCell == null || takeCell.isError()) {
                     continue;
                 }
 
@@ -382,7 +383,7 @@ export class ArrayValueObject extends BaseValueObject {
             return this._flattenCache;
         }
 
-        const newValue: BaseValueObject[][] = [];
+        const newValue: Nullable<BaseValueObject>[][] = [];
         newValue[0] = [];
         for (let r = 0; r < this._rowCount; r++) {
             for (let c = 0; c < this._columnCount; c++) {
@@ -417,7 +418,7 @@ export class ArrayValueObject extends BaseValueObject {
             for (let c = 0; c < this._columnCount; c++) {
                 const value = this.get(r, c);
 
-                if (value.isError() || value.isNull()) {
+                if (value == null || value.isError() || value.isNull()) {
                     index++;
                     continue;
                 }
@@ -499,9 +500,17 @@ export class ArrayValueObject extends BaseValueObject {
                 result[result_row_index] = [];
             }
             for (let c = columnStart; c < columnStop; c += columnStep) {
-                if (!array[r] || !array[r][c]) return;
+                if (!array[r]) {
+                    return;
+                };
 
-                result[result_row_index][result_column_index] = array[r][c];
+                let cell = array[r][c];
+
+                if (cell == null) {
+                    cell = NullValueObject.create();
+                }
+
+                result[result_row_index][result_column_index] = cell;
                 result_column_index++;
             }
             result_row_index++;
@@ -531,7 +540,7 @@ export class ArrayValueObject extends BaseValueObject {
 
     sortByRow(index: number) {
         // new Intl.Collator('zh', { numeric: true }).compare;
-        const result: BaseValueObject[][] = this._transposeArray(this._values);
+        const result: Nullable<BaseValueObject>[][] = this._transposeArray(this._values);
 
         result.sort(this._sort(index));
 
@@ -896,12 +905,11 @@ export class ArrayValueObject extends BaseValueObject {
         return this._batchOperator(valueObject, BatchOperatorType.CONCATENATE_BACK);
     }
 
-    override product(valueObject: BaseValueObject, callbackFn: callbackProductFnType): BaseValueObject {
-        return this._batchOperator(valueObject, BatchOperatorType.PRODUCT, callbackFn);
-    }
-
     override map(callbackFn: callbackMapFnType): BaseValueObject {
-        const wrappedCallbackFn = (currentValue: BaseValueObject, r: number, c: number) => {
+        const wrappedCallbackFn = (currentValue: Nullable<BaseValueObject>, r: number, c: number) => {
+            if (currentValue == null) {
+                return NullValueObject.create();
+            }
             if (currentValue.isError()) {
                 return currentValue as ErrorValueObject;
             } else {
@@ -921,12 +929,18 @@ export class ArrayValueObject extends BaseValueObject {
         for (let r = 0; r < rowCount; r++) {
             const rowList: BaseValueObject[] = [];
             for (let c = 0; c < columnCount; c++) {
-                const currentValue = this._values?.[r]?.[c];
+                const row = this._values?.[r];
 
-                if (currentValue) {
-                    rowList[c] = callbackFn(currentValue, r, c);
-                } else {
+                if (row == null) {
                     rowList[c] = ErrorValueObject.create(ErrorType.VALUE);
+                } else {
+                    const currentValue = row[c];
+
+                    if (currentValue) {
+                        rowList[c] = callbackFn(currentValue, r, c);
+                    } else {
+                        rowList[c] = NullValueObject.create();
+                    }
                 }
             }
             result.push(rowList);
@@ -1091,19 +1105,19 @@ export class ArrayValueObject extends BaseValueObject {
         const count = allValue.getColumnCount();
 
         if (count <= 1) {
-            return allValue.get(0, 0);
+            return allValue.get(0, 0) || NullValueObject.create();
         }
 
         allValue.sortByRow(0);
 
         if (count % 2 === 0) {
-            const medianRight = allValue.get(0, count / 2);
-            const medianLeft = allValue.get(0, count / 2 - 1);
+            const medianRight = allValue.get(0, count / 2) || NullValueObject.create();
+            const medianLeft = allValue.get(0, count / 2 - 1) || NullValueObject.create();
 
             return medianRight.plus(medianLeft).divided(NumberValueObject.create(2));
         }
 
-        return allValue.get(0, (count - 1) / 2);
+        return allValue.get(0, (count - 1) / 2) || NullValueObject.create();
     }
 
     /**
@@ -1263,9 +1277,18 @@ export class ArrayValueObject extends BaseValueObject {
 
     private _sort(index: number) {
         const compare = getCompare();
-        return (a: BaseValueObject[], b: BaseValueObject[]) => {
+        return (a: Nullable<BaseValueObject>[], b: Nullable<BaseValueObject>[]) => {
             const columnA = a[index];
             const columnB = b[index];
+
+            if (columnA == null) {
+                return 1;
+            }
+
+            if (columnB == null) {
+                return -1;
+            }
+
             if (columnA.isError() && columnA.isError()) {
                 return 0;
             }
@@ -1282,11 +1305,11 @@ export class ArrayValueObject extends BaseValueObject {
         };
     }
 
-    private _transposeArray(array: BaseValueObject[][]) {
+    private _transposeArray(array: Nullable<BaseValueObject>[][]) {
         // Create a new 2D array as the transposed matrix
         const rows = array.length;
         const cols = array[0].length;
-        const transposedArray: BaseValueObject[][] = [];
+        const transposedArray: Nullable<BaseValueObject>[][] = [];
 
         // Traverse the columns of the original two-dimensional array
         for (let col = 0; col < cols; col++) {
@@ -1306,7 +1329,7 @@ export class ArrayValueObject extends BaseValueObject {
     private _batchOperator(
         valueObject: BaseValueObject,
         batchOperatorType: BatchOperatorType,
-        operator?: compareToken | callbackProductFnType
+        operator?: compareToken
     ): BaseValueObject {
         const valueList: BaseValueObject[] = [];
 
@@ -1357,7 +1380,7 @@ export class ArrayValueObject extends BaseValueObject {
         column: number,
         result: BaseValueObject[][],
         batchOperatorType: BatchOperatorType,
-        operator?: compareToken | callbackProductFnType
+        operator?: compareToken
     ) {
         const rowCount = this._rowCount;
 
@@ -1389,15 +1412,21 @@ export class ArrayValueObject extends BaseValueObject {
                         valueObject.getValue()
                     );
 
-                    for (let r = 0; r < rowCount; r++) {
-                        if (result[r] == null) {
-                            result[r] = [];
-                        }
-                        if (rowPositions?.includes(r + startRow)) {
+                    if (rowPositions != null) {
+                        rowPositions.forEach((row) => {
+                            const r = row - startRow;
+                            if (result[r] == null) {
+                                result[r] = [];
+                            }
                             result[r][column] = BooleanValueObject.create(true);
-                        } else {
-                            result[r][column] = BooleanValueObject.create(false);
-                        }
+                        });
+                        // for (let r = 0; r < rowCount; r++) {
+                        //     if (rowPositions.has(r + startRow)) {
+                        //         result[r][column] = BooleanValueObject.create(true);
+                        //     } else {
+                        //         result[r][column] = BooleanValueObject.create(false);
+                        //     }
+                        // }
                     }
                 } else {
                     const rowValuePositions = CELL_INVERTED_INDEX_CACHE.getCellValuePositions(
@@ -1430,24 +1459,26 @@ export class ArrayValueObject extends BaseValueObject {
                             }
                         });
 
-                        for (let r = 0; r < rowCount; r++) {
-                            if (result[r] == null) {
-                                result[r] = [];
-                            }
+                        // for (let r = 0; r < rowCount; r++) {
+                        //     if (result[r] == null) {
+                        //         result[r] = [];
+                        //     }
 
-                            if (result[r][column] == null) {
-                                result[r][column] = BooleanValueObject.create(false);
-                            }
-                        }
-                    } else {
-                        for (let r = 0; r < rowCount; r++) {
-                            if (result[r] == null) {
-                                result[r] = [];
-                            }
-
-                            result[r][column] = BooleanValueObject.create(false);
-                        }
+                        //     if (result[r][column] == null) {
+                        //         result[r][column] = BooleanValueObject.create(false);
+                        //     }
+                        // }
                     }
+
+                    // else {
+                    //     for (let r = 0; r < rowCount; r++) {
+                    //         if (result[r] == null) {
+                    //             result[r] = [];
+                    //         }
+
+                    //         result[r][column] = BooleanValueObject.create(false);
+                    //     }
+                    // }
                 }
 
                 return;
@@ -1494,16 +1525,6 @@ export class ArrayValueObject extends BaseValueObject {
                             break;
                         case BatchOperatorType.CONCATENATE_BACK:
                             result[r][column] = currentValue.concatenateBack(valueObject);
-                            break;
-                        case BatchOperatorType.PRODUCT:
-                            if (!operator) {
-                                result[r][column] = ErrorValueObject.create(ErrorType.VALUE);
-                            } else {
-                                result[r][column] = currentValue.product(
-                                    valueObject,
-                                    operator as callbackProductFnType
-                                );
-                            }
                             break;
                         case BatchOperatorType.POW:
                             result[r][column] = currentValue.pow(valueObject);
@@ -1565,7 +1586,7 @@ export class ArrayValueObject extends BaseValueObject {
     private _batchOperatorArray(
         valueObject: BaseValueObject,
         batchOperatorType: BatchOperatorType,
-        operator?: compareToken | callbackProductFnType
+        operator?: compareToken
     ) {
         let rowCount = (valueObject as ArrayValueObject).getRowCount();
         let columnCount = (valueObject as ArrayValueObject).getColumnCount();
@@ -1645,13 +1666,6 @@ export class ArrayValueObject extends BaseValueObject {
                                 break;
                             case BatchOperatorType.CONCATENATE_BACK:
                                 rowList[c] = currentValue.concatenateBack(opValue);
-                                break;
-                            case BatchOperatorType.PRODUCT:
-                                if (!operator) {
-                                    rowList[c] = ErrorValueObject.create(ErrorType.VALUE);
-                                } else {
-                                    rowList[c] = currentValue.product(opValue, operator as callbackProductFnType);
-                                }
                                 break;
                             case BatchOperatorType.POW:
                                 rowList[c] = currentValue.pow(opValue);
@@ -1749,7 +1763,7 @@ export class ArrayValueObject extends BaseValueObject {
     }
 
     private _createNewArray(
-        result: BaseValueObject[][],
+        result: Nullable<BaseValueObject>[][],
         rowCount: number,
         columnCount: number,
         row: number = -1,

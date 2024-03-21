@@ -81,6 +81,10 @@ export interface IUnitSheetNameMap {
     [unitId: string]: Nullable<{ [sheetName: string]: string }>;
 }
 
+export interface IUnitSheetIdToNameMap {
+    [unitId: string]: Nullable<{ [sheetId: string]: string }>;
+}
+
 export interface IDirtyUnitSheetNameMap {
     [unitId: string]: Nullable<{ [sheetId: string]: string }>;
 }

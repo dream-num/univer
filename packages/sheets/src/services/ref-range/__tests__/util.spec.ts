@@ -290,6 +290,18 @@ describe('test ref-range move', () => {
             const result = runRefRangeMutations(operators!, targetRange);
             expect(result).toEqual({ startRow: 6, endRow: 8, startColumn: 4, endColumn: 4 });
         });
+        it('the targetRange is in the range right with overlap, but startColumn is the same', () => {
+            const targetRange = { startRow: 6, endRow: 8, startColumn: 7, endColumn: 8 };
+            const operators = handleDeleteRangeMoveLeft(
+                {
+                    params: { range },
+                    id: EffectRefRangId.DeleteRangeMoveLeftCommandId,
+                },
+                targetRange
+            );
+            const result = runRefRangeMutations(operators!, targetRange);
+            expect(result).toEqual({ startRow: 6, endRow: 8, startColumn: 4, endColumn: 4 });
+        });
         it('the targetRange is overlap with range ', () => {
             const targetRange = { startRow: 10, endRow: 13, startColumn: 11, endColumn: 11 };
             const operators = handleDeleteRangeMoveLeft(

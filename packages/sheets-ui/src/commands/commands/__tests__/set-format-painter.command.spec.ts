@@ -300,6 +300,34 @@ describe('Test format painter rules in controller', () => {
                 expect(workbook.getSheetBySheetId('sheet-0011')?.getMergeData()[0].startRow).toBe(1);
                 expect(workbook.getSheetBySheetId('sheet-0011')?.getMergeData()[1].startRow).toBe(1);
                 expect(workbook.getSheetBySheetId('sheet-0011')?.getMergeData()[2].startRow).toBe(3);
+
+                await commandService.executeCommand(SetSelectionsOperation.id, {
+                    unitId: 'workbook-01',
+                    subUnitId: 'sheet-0011',
+                    pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+                    selections: [
+                        {
+                            range: {
+                                startRow: 0,
+                                endRow: 1,
+                                startColumn: 0,
+                                endColumn: 1,
+                            },
+                        },
+                    ],
+                });
+
+                await commandService.executeCommand(SetOnceFormatPainterCommand.id);
+                await (formatPainterController as any)._applyFormatPainter({
+                    startRow: 10,
+                    endRow: 13,
+                    startColumn: 12,
+                    endColumn: 13,
+                });
+                const mergeData = workbook.getSheetBySheetId('sheet-0011')?.getMergeData();
+                expect(mergeData?.length).toBe(5);
+                expect(mergeData?.[3].startRow).toBe(11);
+                expect(mergeData?.[4].startRow).toBe(13);
             });
         });
     });

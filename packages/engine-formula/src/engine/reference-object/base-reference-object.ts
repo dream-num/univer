@@ -83,6 +83,14 @@ export class BaseReferenceObject extends ObjectClassType {
         this._runtimeData = {};
     }
 
+    getToken() {
+        return this._token;
+    }
+
+    setToken(token: string) {
+        this._token = token;
+    }
+
     isExceedRange() {
         const { startRow, endRow, startColumn, endColumn } = this.getRangePosition();
 
@@ -110,19 +118,19 @@ export class BaseReferenceObject extends ObjectClassType {
         let startColumn = this._rangeData.startColumn + this._refOffsetX;
         let endColumn = this._rangeData.endColumn + this._refOffsetX;
 
-        if (isNaN(startRow)) {
+        if (Number.isNaN(startRow)) {
             startRow = 0;
         }
 
-        if (isNaN(startColumn)) {
+        if (Number.isNaN(startColumn)) {
             startColumn = 0;
         }
 
-        if (isNaN(endRow)) {
+        if (Number.isNaN(endRow)) {
             endRow = this.getRowCount() - 1;
         }
 
-        if (isNaN(endColumn)) {
+        if (Number.isNaN(endColumn)) {
             endColumn = this.getColumnCount() - 1;
         }
 
@@ -164,9 +172,10 @@ export class BaseReferenceObject extends ObjectClassType {
                 }
 
                 const resultObjectValue = this.getCellValueObject(cell);
+                const isNumber = resultObjectValue.isNumber();
 
                 const pattern = this._numfmtItemData[unitId]?.[sheetId]?.[r]?.[c];
-                pattern && resultObjectValue.setPattern(pattern);
+                pattern && isNumber && resultObjectValue.setPattern(pattern);
 
                 result = callback(resultObjectValue, r, c);
 
@@ -186,12 +195,13 @@ export class BaseReferenceObject extends ObjectClassType {
         }
 
         const cellValueObject = this.getCellValueObject(cell);
+        const isNumber = cellValueObject.isNumber();
 
         // Set numfmt pattern
         const unitId = this._forcedUnitId || this._defaultUnitId;
         const sheetId = this._forcedSheetId || this._defaultSheetId;
         const numfmtItem = this._numfmtItemData[unitId]?.[sheetId]?.[startRow]?.[startColumn];
-        numfmtItem && cellValueObject.setPattern(numfmtItem);
+        numfmtItem && isNumber && cellValueObject.setPattern(numfmtItem);
 
         return cellValueObject;
     }

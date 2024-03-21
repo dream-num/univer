@@ -28,7 +28,7 @@ export const PAGE5_RICHTEXT_1: IDocumentData = {
                 ed: 67,
                 ts: {
                     bl: BooleanNumber.TRUE,
-                    fs: 24,
+                    fs: 24 * 0.75,
                     cl: {
                         rgb: 'rgb(205, 40, 86)',
                     },
@@ -38,7 +38,7 @@ export const PAGE5_RICHTEXT_1: IDocumentData = {
                 st: 68,
                 ed: 253,
                 ts: {
-                    fs: 16,
+                    fs: 16 * 0.75,
                     cl: {
                         rgb: 'rgb(0, 255, 86)',
                     },
@@ -48,7 +48,7 @@ export const PAGE5_RICHTEXT_1: IDocumentData = {
                 st: 254,
                 ed: 404,
                 ts: {
-                    fs: 14,
+                    fs: 14 * 0.75,
                     cl: {
                         rgb: 'rgb(0, 255, 255)',
                     },
@@ -58,7 +58,7 @@ export const PAGE5_RICHTEXT_1: IDocumentData = {
                 st: 405,
                 ed: 433,
                 ts: {
-                    fs: 16,
+                    fs: 16 * 0.75,
                     cl: {
                         rgb: 'rgb(255, 255, 86)',
                     },
@@ -68,7 +68,7 @@ export const PAGE5_RICHTEXT_1: IDocumentData = {
                 st: 434,
                 ed: 484,
                 ts: {
-                    fs: 16,
+                    fs: 16 * 0.75,
                     cl: {
                         rgb: 'rgb(0, 255, 186)',
                     },
@@ -78,7 +78,7 @@ export const PAGE5_RICHTEXT_1: IDocumentData = {
                 st: 485,
                 ed: 515,
                 ts: {
-                    fs: 16,
+                    fs: 16 * 0.75,
                     cl: {
                         rgb: 'rgb(60, 255, 86)',
                     },
@@ -110,7 +110,7 @@ export const PAGE5_RICHTEXT_1: IDocumentData = {
                     listId: 'testBullet',
                     nestingLevel: 0,
                     textStyle: {
-                        fs: 20,
+                        fs: 20 * 0.75,
                     },
                 },
                 paragraphStyle: {
@@ -124,7 +124,7 @@ export const PAGE5_RICHTEXT_1: IDocumentData = {
                     listId: 'testBullet',
                     nestingLevel: 0,
                     textStyle: {
-                        fs: 20,
+                        fs: 20 * 0.75,
                     },
                 },
                 paragraphStyle: {
@@ -138,7 +138,7 @@ export const PAGE5_RICHTEXT_1: IDocumentData = {
                     listId: 'testBullet',
                     nestingLevel: 0,
                     textStyle: {
-                        fs: 20,
+                        fs: 20 * 0.75,
                     },
                 },
                 paragraphStyle: {

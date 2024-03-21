@@ -104,6 +104,7 @@ export class FormatPainterService extends Disposable implements IFormatPainterSe
 
         const styles = workbook.getStyles();
         const stylesMatrix = new ObjectMatrix<IStyleData>();
+        this._selectionFormat.merges = [];
         for (let r = startRow; r <= endRow; r++) {
             for (let c = startColumn; c <= endColumn; c++) {
                 const cell = cellData.getValue(r, c) as ICellData;

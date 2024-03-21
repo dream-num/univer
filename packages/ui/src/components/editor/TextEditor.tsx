@@ -233,7 +233,7 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
         if (value == null) {
             return;
         }
-        editorService.setValue(value, id);
+        editorService.setValueNoRefresh(value, id);
     }, [value]);
 
     function hasValue() {

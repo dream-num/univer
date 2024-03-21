@@ -53,7 +53,7 @@ export class Picture extends Shape<IPictureProps> {
                 config.success?.();
                 this._init();
                 this.makeDirty(true);
-                this.getEngine().activeScene.onFileLoadedObservable.notifyObservers(id);
+                this.getEngine()?.activeScene?.onFileLoadedObservable.notifyObservers(id);
             };
             this._native.onerror = () => {
                 if (config.fail) {

@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-import { type IPosition, IUniverInstanceService, type Nullable } from '@univerjs/core';
+import { DisposableCollection, type IPosition, IUniverInstanceService, type Nullable } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { ISheetLocation } from '@univerjs/sheets';
 import { IGlobalPopupManagerService } from '@univerjs/ui';
 import { Subject } from 'rxjs';
+import type { IDisposable } from '@wendellhu/redi';
 import { Inject } from '@wendellhu/redi';
 import { DROP_DOWN_KEY } from '../views/drop-down';
+import { CanvasPopManagerService } from '..';
 
 export interface IDropdownParam {
     componentKey: string;
@@ -42,7 +44,8 @@ export interface IDropdownComponentProps {
 export class DropdownManagerService {
     private _activeDropdown: Nullable<IDropdownParam>;
     private _activeDropdown$ = new Subject<Nullable<IDropdownParam>>();
-    private _currentPopupId: Nullable<string> = null;
+    private _currentPopup: Nullable<IDisposable> = null;
+
     activeDropdown$ = this._activeDropdown$.asObservable();
 
     get activeDropdown() {
@@ -50,50 +53,48 @@ export class DropdownManagerService {
     }
 
     constructor(
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @IGlobalPopupManagerService private readonly _popupService: IGlobalPopupManagerService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
+        @Inject(CanvasPopManagerService) private readonly _canvasPopupManagerService: CanvasPopManagerService
     ) {}
 
     showDropdown(param: IDropdownParam) {
-        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
-        const unitId = workbook.getUnitId();
-        const subUnitId = workbook.getActiveSheet().getSheetId();
-        const currentRender = this._renderManagerService.getRenderById(unitId);
-        if (!currentRender) {
-            return;
-        }
+        const { location } = param;
+        const { row, col } = location;
+
+        this._currentPopup && this._currentPopup.dispose();
+
         this._activeDropdown = param;
         this._activeDropdown$.next(this._activeDropdown);
+        const disposableCollection = new DisposableCollection();
 
-        const { position } = param;
-        const bounding = currentRender.engine.getCanvasElement().getBoundingClientRect();
-        this._currentPopupId = this._popupService.addPopup({
-            anchorRect: {
-                top: position.startY + bounding.top - 3,
-                bottom: position.endY + bounding.top + 3,
-                left: position.startX,
-                right: position.endX,
-            },
-            unitId,
-            subUnitId,
-            componentKey: DROP_DOWN_KEY,
-            mask: true,
-            onMaskClick: () => {
-                this.hideDropdown();
+        disposableCollection.add(this._canvasPopupManagerService.attachPopupToCell(
+            row,
+            col,
+            {
+                componentKey: DROP_DOWN_KEY,
+                mask: true,
+                onMaskClick: () => {
+                    this.hideDropdown();
+                },
+            }
+        ));
+
+        disposableCollection.add({
+            dispose: () => {
+                this._activeDropdown?.onHide?.();
             },
         });
+
+        this._currentPopup = disposableCollection;
     }
 
     hideDropdown() {
         if (!this._activeDropdown) {
             return;
         }
-        const activeDropdown = this._activeDropdown;
-        this._currentPopupId && this._popupService.removePopup(this._currentPopupId);
-        this._currentPopupId = null;
+        this._currentPopup && this._currentPopup.dispose();
+        this._currentPopup = null;
+
         this._activeDropdown = null;
         this._activeDropdown$.next(null);
-        activeDropdown.onHide?.();
     }
 }

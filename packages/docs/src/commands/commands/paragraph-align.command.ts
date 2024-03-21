@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommand, IMutationInfo } from '@univerjs/core';
+import type { ICommand, IMutationInfo, IParagraphStyle } from '@univerjs/core';
 import { CommandType, HorizontalAlign,
     ICommandService,
     IUniverInstanceService,
@@ -89,9 +89,9 @@ export const AlignOperationCommand: ICommand<IAlignOperationCommandParams> = {
             });
 
             // See: univer/packages/engine-render/src/components/docs/block/paragraph/layout-ruler.ts line:802 comments.
-            const paragraphStyle = {
+            const paragraphStyle: IParagraphStyle = {
                 ...paragraph.paragraphStyle,
-                HorizontalAlign: isAlreadyAligned ? HorizontalAlign.UNSPECIFIED : alignType,
+                horizontalAlign: isAlreadyAligned ? HorizontalAlign.UNSPECIFIED : alignType,
             };
 
             textX.push({

@@ -76,12 +76,13 @@ export class CanvasPopManagerService {
             x: activeViewport.actualScrollX,
             y: activeViewport.actualScrollY,
         };
+        const bounding = currentRender.engine.getCanvasElement().getBoundingClientRect();
 
         const position = {
             left: (rect.startX - scrollXY.x) * scaleX,
             right: (rect.endX - scrollXY.x) * scaleX,
-            top: (rect.startY - scrollXY.y) * scaleY,
-            bottom: (rect.endY - scrollXY.y) * scaleY,
+            top: ((rect.startY - scrollXY.y) * scaleY) + bounding.top,
+            bottom: ((rect.endY - scrollXY.y) * scaleY) + bounding.top,
         };
 
         const id = this._popupService.addPopup({
@@ -134,11 +135,13 @@ export class CanvasPopManagerService {
             y: activeViewport.actualScrollY,
         };
 
+        const bounding = currentRender.engine.getCanvasElement().getBoundingClientRect();
+
         const position: IBoundRectNoAngle = {
-            left: (cellInfo.startX - scrollXY.x) * scaleX,
+            left: ((cellInfo.startX - scrollXY.x) * scaleX),
             right: (cellInfo.endX - scrollXY.x) * scaleX,
-            top: (cellInfo.startY - scrollXY.y) * scaleY,
-            bottom: (cellInfo.endY - scrollXY.y) * scaleY,
+            top: ((cellInfo.startY - scrollXY.y) * scaleY) + bounding.top,
+            bottom: ((cellInfo.endY - scrollXY.y) * scaleY) + bounding.top,
         };
 
         const id = this._popupService.addPopup({

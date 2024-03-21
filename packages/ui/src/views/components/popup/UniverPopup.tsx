@@ -15,19 +15,29 @@
  */
 
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { RectPopup } from '@univerjs/design';
 import { IGlobalPopupManagerService } from '@univerjs/ui';
+import type { IBoundRectNoAngle } from '@univerjs/engine-render';
 import { useObservable } from '../../../components/hooks/observable';
 import { ComponentManager } from '../../../common';
 import type { IPopup } from '../../../services/popup/global-popup-manager.service';
 
 const SingleUniverPopup = ({ popup, children }: { popup: IPopup; children?: React.ReactNode }) => {
     const anchorRect = useObservable(popup.anchorRect$, popup.anchorRect);
+    const rect: IBoundRectNoAngle = useMemo(() => {
+        const [x = 0, y = 0] = popup.offset ?? [];
+        return {
+            left: anchorRect.left - x,
+            right: anchorRect.right + x,
+            top: anchorRect.top - y,
+            bottom: anchorRect.bottom + y,
+        };
+    }, [anchorRect.bottom, anchorRect.left, anchorRect.right, anchorRect.top, popup.offset]);
 
     return (
         <RectPopup
-            anchorRect={anchorRect}
+            anchorRect={rect}
             direction={popup.direction}
             onClickOther={popup.onMaskClick}
         >

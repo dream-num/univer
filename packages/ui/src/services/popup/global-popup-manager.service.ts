@@ -28,6 +28,7 @@ export interface IPopup {
     unitId: string;
     subUnitId: string;
     direction?: 'vertical' | 'horizontal';
+    offset?: [number, number];
 }
 
 export interface IGlobalPopupManagerService {

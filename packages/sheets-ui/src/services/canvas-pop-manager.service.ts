@@ -34,6 +34,7 @@ interface ICanvasPopup {
     mask?: boolean;
     onMaskClick?: (e: MouseEvent) => void;
     direction?: 'vertical' | 'horizontal';
+    offset?: [number, number];
 }
 
 export class CanvasPopManagerService extends Disposable {
@@ -55,7 +56,6 @@ export class CanvasPopManagerService extends Disposable {
         activeViewport: Viewport
     ) {
         const { scene, engine } = currentRender;
-        // const activeViewport = getViewportByCell(row, col, scene, worksheet);
 
         const cellInfo = skeleton.getCellByIndex(row, col);
 

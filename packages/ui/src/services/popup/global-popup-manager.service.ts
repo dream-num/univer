@@ -22,6 +22,7 @@ import { BehaviorSubject } from 'rxjs';
 
 export interface IPopup {
     anchorRect: IBoundRectNoAngle;
+    anchorRect$: Observable<IBoundRectNoAngle>;
     componentKey: string;
     mask?: boolean;
     onMaskClick?: React.MouseEventHandler<HTMLDivElement>;

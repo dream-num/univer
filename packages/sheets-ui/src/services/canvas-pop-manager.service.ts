@@ -14,13 +14,18 @@
  * limitations under the License.
  */
 
-import { IUniverInstanceService } from '@univerjs/core';
+import type { Worksheet } from '@univerjs/core';
+import { Disposable, DisposableCollection, ICommandService, IUniverInstanceService } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import type { BaseObject, IBoundRectNoAngle, Viewport } from '@univerjs/engine-render';
+import type { BaseObject, IBoundRectNoAngle, IRender, Scene, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
 import { IGlobalPopupManagerService } from '@univerjs/ui';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject } from '@wendellhu/redi';
+import { BehaviorSubject, Observable } from 'rxjs';
+import type { ISetWorksheetRowAutoHeightMutationParams } from '@univerjs/sheets';
+import { SetWorksheetRowAutoHeightMutation } from '@univerjs/sheets';
 import { getViewportByCell, transformBound2OffsetBound } from '../common/utils';
+import { SetScrollOperation } from '../commands/operations/scroll.operation';
 import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
 
 interface ICanvasPopup {
@@ -30,13 +35,123 @@ interface ICanvasPopup {
     direction?: 'vertical' | 'horizontal';
 }
 
-export class CanvasPopManagerService {
+export class CanvasPopManagerService extends Disposable {
     constructor(
         @Inject(IGlobalPopupManagerService) private readonly _globalPopupManagerService: IGlobalPopupManagerService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService
-    ) {}
+        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
+        @ICommandService private readonly _commandService: ICommandService
+    ) {
+        super();
+    }
+
+    private _calcCellPosition(
+        row: number,
+        col: number,
+        currentRender: IRender,
+        skeleton: SpreadsheetSkeleton,
+        activeViewport: Viewport
+    ) {
+        const { scene, engine } = currentRender;
+        // const activeViewport = getViewportByCell(row, col, scene, worksheet);
+
+        const cellInfo = skeleton.getCellByIndex(row, col);
+
+        const { scaleX, scaleY } = scene.getAncestorScale();
+
+        const scrollXY = {
+            x: activeViewport.actualScrollX,
+            y: activeViewport.actualScrollY,
+        };
+
+        const bounding = engine.getCanvasElement().getBoundingClientRect();
+
+        const position: IBoundRectNoAngle = {
+            left: ((cellInfo.startX - scrollXY.x) * scaleX),
+            right: (cellInfo.endX - scrollXY.x) * scaleX,
+            top: ((cellInfo.startY - scrollXY.y) * scaleY) + bounding.top,
+            bottom: ((cellInfo.endY - scrollXY.y) * scaleY) + bounding.top,
+        };
+
+        return position;
+    }
+
+    private _createCellPositionObserver(
+        row: number,
+        col: number,
+        currentRender: IRender,
+        skeleton: SpreadsheetSkeleton,
+        activeViewport: Viewport
+    ) {
+        const position = this._calcCellPosition(row, col, currentRender, skeleton, activeViewport);
+        const position$ = new BehaviorSubject(position);
+
+        const disposableCollection = new DisposableCollection();
+        disposableCollection.add(this._commandService.onCommandExecuted((commandInfo) => {
+            if (commandInfo.id === SetWorksheetRowAutoHeightMutation.id) {
+                const params = commandInfo.params as ISetWorksheetRowAutoHeightMutationParams;
+                if (params.rowsAutoHeightInfo.findIndex((item) => item.row === row) > -1) {
+                    position$.next(this._calcCellPosition(row, col, currentRender, skeleton, activeViewport));
+                }
+            }
+
+            if (commandInfo.id === SetScrollOperation.id) {
+                position$.next(this._calcCellPosition(row, col, currentRender, skeleton, activeViewport));
+            }
+        }));
+
+        return {
+            position$,
+            disposableCollection,
+            position,
+        };
+    }
+
+    private _createObjectPositionObserver(
+        targetObject: BaseObject,
+        currentRender: IRender,
+        skeleton: SpreadsheetSkeleton,
+        worksheet: Worksheet
+    ) {
+        const calc = () => {
+            const { scene } = currentRender;
+            const { left, top, width, height } = targetObject;
+
+            const bound: IBoundRectNoAngle = {
+                left,
+                right: left + width,
+                top,
+                bottom: top + height,
+            };
+
+            const offsetBound = transformBound2OffsetBound(bound, scene, skeleton, worksheet);
+            const bounding = currentRender.engine.getCanvasElement().getBoundingClientRect();
+
+            const position = {
+                left: offsetBound.left,
+                right: offsetBound.right,
+                top: offsetBound.top + bounding.top,
+                bottom: offsetBound.bottom + bounding.top,
+            };
+            return position;
+        };
+
+        const position = calc();
+        const position$ = new BehaviorSubject(position);
+        const disposableCollection = new DisposableCollection();
+        disposableCollection.add(this._commandService.onCommandExecuted((commandInfo) => {
+            if (commandInfo.id === SetScrollOperation.id) {
+                position$.next(calc());
+            }
+        }));
+
+        return {
+            position,
+            position$,
+            disposableCollection,
+        };
+    }
 
     /**
      * attach a popup to canvas object
@@ -61,36 +176,21 @@ export class CanvasPopManagerService {
             };
         }
 
-        const { scene } = currentRender;
-        const { left, top, width, height } = targetObject;
-
-        const bound: IBoundRectNoAngle = {
-            left,
-            right: left + width,
-            top,
-            bottom: top + height,
-        };
-
-        const offsetBound = transformBound2OffsetBound(bound, scene, skeleton, worksheet);
-        const bounding = currentRender.engine.getCanvasElement().getBoundingClientRect();
-
-        const position = {
-            left: offsetBound.left,
-            right: offsetBound.right,
-            top: offsetBound.top + bounding.top,
-            bottom: offsetBound.bottom + bounding.top,
-        };
+        const { position, position$, disposableCollection } = this._createObjectPositionObserver(targetObject, currentRender, skeleton, worksheet);
 
         const id = this._globalPopupManagerService.addPopup({
             ...popup,
             unitId,
             subUnitId,
             anchorRect: position,
+            anchorRect$: position$,
         });
 
         return {
             dispose: () => {
                 this._globalPopupManagerService.removePopup(id);
+                position$.complete();
+                disposableCollection.dispose();
             },
         };
     }
@@ -120,9 +220,7 @@ export class CanvasPopManagerService {
             };
         }
 
-        const { scene } = currentRender;
-
-        const activeViewport = viewport ?? getViewportByCell(row, col, scene, worksheet);
+        const activeViewport = viewport ?? getViewportByCell(row, col, currentRender.scene, worksheet);
 
         if (!activeViewport) {
             return {
@@ -130,34 +228,21 @@ export class CanvasPopManagerService {
             };
         }
 
-        const cellInfo = skeleton.getCellByIndex(row, col);
-
-        const { scaleX, scaleY } = scene.getAncestorScale();
-
-        const scrollXY = {
-            x: activeViewport.actualScrollX,
-            y: activeViewport.actualScrollY,
-        };
-
-        const bounding = currentRender.engine.getCanvasElement().getBoundingClientRect();
-
-        const position: IBoundRectNoAngle = {
-            left: ((cellInfo.startX - scrollXY.x) * scaleX),
-            right: (cellInfo.endX - scrollXY.x) * scaleX,
-            top: ((cellInfo.startY - scrollXY.y) * scaleY) + bounding.top,
-            bottom: ((cellInfo.endY - scrollXY.y) * scaleY) + bounding.top,
-        };
+        const { position, position$, disposableCollection } = this._createCellPositionObserver(row, col, currentRender, skeleton, activeViewport);
 
         const id = this._globalPopupManagerService.addPopup({
             ...popup,
             unitId,
             subUnitId,
             anchorRect: position,
+            anchorRect$: position$,
         });
 
         return {
             dispose: () => {
                 this._globalPopupManagerService.removePopup(id);
+                disposableCollection.dispose();
+                position$.complete();
             },
         };
     }

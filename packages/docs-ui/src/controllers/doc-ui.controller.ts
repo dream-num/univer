@@ -31,10 +31,10 @@ import {
 import { FONT_SIZE_COMPONENT, FontSize } from '../components/font-size';
 import { DocBackground } from '../views/doc-background/DocBackground';
 import {
-    // AlignCenterMenuItemFactory,
-    // AlignJustifyMenuItemFactory,
-    // AlignLeftMenuItemFactory,
-    // AlignRightMenuItemFactory,
+    AlignCenterMenuItemFactory,
+    AlignJustifyMenuItemFactory,
+    AlignLeftMenuItemFactory,
+    AlignRightMenuItemFactory,
     BoldMenuItemFactory,
     BulletListMenuItemFactory,
     FontFamilySelectorMenuItemFactory,
@@ -86,10 +86,10 @@ export class DocUIController extends Disposable {
                 FontSizeSelectorMenuItemFactory,
                 FontFamilySelectorMenuItemFactory,
                 TextColorSelectorMenuItemFactory,
-                // AlignLeftMenuItemFactory,
-                // AlignCenterMenuItemFactory,
-                // AlignRightMenuItemFactory,
-                // AlignJustifyMenuItemFactory,
+                AlignLeftMenuItemFactory,
+                AlignCenterMenuItemFactory,
+                AlignRightMenuItemFactory,
+                AlignJustifyMenuItemFactory,
                 OrderListMenuItemFactory,
                 BulletListMenuItemFactory,
             ] as IMenuItemFactory[]

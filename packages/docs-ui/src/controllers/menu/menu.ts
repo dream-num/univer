@@ -50,6 +50,7 @@ import {
 import type { IAccessor } from '@wendellhu/redi';
 import { Observable } from 'rxjs';
 
+import { AlignCenterCommand, AlignJustifyCommand, AlignLeftCommand, AlignRightCommand } from '@univerjs/docs/commands/commands/paragraph-align.command.js';
 import { COLOR_PICKER_COMPONENT } from '../../components/color-picker';
 import { FONT_FAMILY_COMPONENT, FONT_FAMILY_ITEM_COMPONENT } from '../../components/font-family';
 import { FONT_SIZE_COMPONENT } from '../../components/font-size';
@@ -396,7 +397,7 @@ export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSele
 
 export function AlignLeftMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
-        id: 'a',
+        id: AlignLeftCommand.id,
         group: MenuGroup.TOOLBAR_LAYOUT,
         type: MenuItemType.BUTTON,
         icon: 'LeftJustifyingSingle',
@@ -408,7 +409,7 @@ export function AlignLeftMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 
 export function AlignCenterMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
-        id: 'b',
+        id: AlignCenterCommand.id,
         group: MenuGroup.TOOLBAR_LAYOUT,
         type: MenuItemType.BUTTON,
         icon: 'HorizontallySingle',
@@ -420,7 +421,7 @@ export function AlignCenterMenuItemFactory(accessor: IAccessor): IMenuButtonItem
 
 export function AlignRightMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
-        id: 'c',
+        id: AlignRightCommand.id,
         group: MenuGroup.TOOLBAR_LAYOUT,
         type: MenuItemType.BUTTON,
         icon: 'RightJustifyingSingle',
@@ -432,7 +433,7 @@ export function AlignRightMenuItemFactory(accessor: IAccessor): IMenuButtonItem 
 
 export function AlignJustifyMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
-        id: 'd',
+        id: AlignJustifyCommand.id,
         group: MenuGroup.TOOLBAR_LAYOUT,
         type: MenuItemType.BUTTON,
         icon: 'RightJustifyingSingle',

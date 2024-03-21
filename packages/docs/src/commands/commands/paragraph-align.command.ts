@@ -14,39 +14,36 @@
  * limitations under the License.
  */
 
-import type { ICommand, IMutationInfo, IParagraph } from '@univerjs/core';
-import {
-    CommandType,
+import type { ICommand, IMutationInfo } from '@univerjs/core';
+import { CommandType, HorizontalAlign,
     ICommandService,
     IUniverInstanceService,
     MemoryCursor,
-    PresetListType,
     TextX,
     TextXActionType,
-    Tools,
     UpdateDocsAttributeType,
 } from '@univerjs/core';
-import type { IActiveTextRange } from '@univerjs/engine-render';
 
 import { serializeTextRange, TextSelectionManagerService } from '../../services/text-selection-manager.service';
 import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../mutations/core-editing.mutation';
+import { getParagraphsInRange } from './list.command';
 
-interface IListOperationCommandParams {
-    listType: PresetListType;
+interface IAlignOperationCommandParams {
+    alignType: HorizontalAlign;
 }
 
-export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
-    id: 'doc.command.list-operation',
+export const AlignOperationCommand: ICommand<IAlignOperationCommandParams> = {
+    id: 'doc.command.align-operation',
 
     type: CommandType.COMMAND,
 
-    handler: (accessor, params: IListOperationCommandParams) => {
+    handler: (accessor, params: IAlignOperationCommandParams) => {
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
         const currentUniverService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
 
-        const { listType } = params;
+        const { alignType } = params;
 
         const dataModel = currentUniverService.getCurrentUniverDocInstance();
 
@@ -65,23 +62,7 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
 
         const unitId = dataModel.getUnitId();
 
-        const isAlreadyOrdered = currentParagraphs.every((paragraph) => paragraph.bullet?.listType === listType);
-
-        const ID_LENGTH = 6;
-
-        let listId = Tools.generateRandomId(ID_LENGTH);
-
-        if (currentParagraphs.length === 1) {
-            const curIndex = paragraphs.indexOf(currentParagraphs[0]);
-            const prevParagraph = paragraphs[curIndex - 1];
-            const nextParagraph = paragraphs[curIndex + 1];
-
-            if (prevParagraph && prevParagraph.bullet && prevParagraph.bullet.listType === listType) {
-                listId = prevParagraph.bullet.listId;
-            } else if (nextParagraph && nextParagraph.bullet && nextParagraph.bullet.listType === listType) {
-                listId = nextParagraph.bullet.listId;
-            }
-        }
+        const isAlreadyAligned = currentParagraphs.every((paragraph) => paragraph.paragraphStyle?.horizontalAlign === alignType);
 
         const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
             id: RichTextEditingMutation.id,
@@ -110,8 +91,7 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
             // See: univer/packages/engine-render/src/components/docs/block/paragraph/layout-ruler.ts line:802 comments.
             const paragraphStyle = {
                 ...paragraph.paragraphStyle,
-                hanging: undefined,
-                indentStart: undefined,
+                HorizontalAlign: isAlreadyAligned ? HorizontalAlign.UNSPECIFIED : alignType,
             };
 
             textX.push({
@@ -120,25 +100,10 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
                 body: {
                     dataStream: '',
                     paragraphs: [
-                        isAlreadyOrdered
-                            ? {
-                                paragraphStyle,
-                                startIndex: 0,
-                            }
-                            : {
-                                ...paragraph,
-                                startIndex: 0,
-                                bullet: {
-                                    ...(paragraph.bullet ?? {
-                                        nestingLevel: 0,
-                                        textStyle: {
-                                            fs: 20,
-                                        },
-                                    }),
-                                    listType,
-                                    listId,
-                                },
-                            },
+                        {
+                            paragraphStyle,
+                            startIndex: 0,
+                        },
                     ],
                 },
                 segmentId,
@@ -159,55 +124,66 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
     },
 };
 
-interface IBulletListCommandParams {}
+interface IAlignLeftCommandParams {}
 
-export const BulletListCommand: ICommand<IBulletListCommandParams> = {
-    id: 'doc.command.bullet-list',
-
-    type: CommandType.COMMAND,
-
-    handler: (accessor) => {
-        const commandService = accessor.get(ICommandService);
-
-        return commandService.syncExecuteCommand(ListOperationCommand.id, {
-            listType: PresetListType.BULLET_LIST,
-        });
-    },
-};
-
-interface IOrderListCommandParams {}
-
-export const OrderListCommand: ICommand<IOrderListCommandParams> = {
-    id: 'doc.command.order-list',
+export const AlignLeftCommand: ICommand<IAlignLeftCommandParams> = {
+    id: 'doc.command.align-left',
 
     type: CommandType.COMMAND,
 
     handler: (accessor) => {
         const commandService = accessor.get(ICommandService);
 
-        return commandService.syncExecuteCommand(ListOperationCommand.id, {
-            listType: PresetListType.ORDER_LIST,
+        return commandService.syncExecuteCommand(AlignOperationCommand.id, {
+            alignType: HorizontalAlign.LEFT,
         });
     },
 };
 
-export function getParagraphsInRange(activeRange: IActiveTextRange, paragraphs: IParagraph[]) {
-    const { startOffset, endOffset } = activeRange;
-    const results: IParagraph[] = [];
+interface IAlignCenterCommandParams {}
 
-    let start = -1;
+export const AlignCenterCommand: ICommand<IAlignCenterCommandParams> = {
+    id: 'doc.command.align-center',
 
-    for (const paragraph of paragraphs) {
-        const { startIndex } = paragraph;
+    type: CommandType.COMMAND,
 
-        if ((startOffset > start && startOffset <= startIndex) || (endOffset > start && endOffset <= startIndex)) {
-            results.push(paragraph);
-        } else if (startIndex >= startOffset && startIndex <= endOffset) {
-            results.push(paragraph);
-        }
+    handler: (accessor) => {
+        const commandService = accessor.get(ICommandService);
 
-        start = startIndex;
-    }
+        return commandService.syncExecuteCommand(AlignOperationCommand.id, {
+            alignType: HorizontalAlign.CENTER,
+        });
+    },
+};
 
-    return results;
-}
+interface IAlignRightCommandParams {}
+
+export const AlignRightCommand: ICommand<IAlignRightCommandParams> = {
+    id: 'doc.command.align-right',
+
+    type: CommandType.COMMAND,
+
+    handler: (accessor) => {
+        const commandService = accessor.get(ICommandService);
+
+        return commandService.syncExecuteCommand(AlignOperationCommand.id, {
+            alignType: HorizontalAlign.RIGHT,
+        });
+    },
+};
+
+interface IAlignJustifyCommandParams {}
+
+export const AlignJustifyCommand: ICommand<IAlignJustifyCommandParams> = {
+    id: 'doc.command.align-justify',
+
+    type: CommandType.COMMAND,
+
+    handler: (accessor) => {
+        const commandService = accessor.get(ICommandService);
+
+        return commandService.syncExecuteCommand(AlignOperationCommand.id, {
+            alignType: HorizontalAlign.JUSTIFIED,
+        });
+    },
+};

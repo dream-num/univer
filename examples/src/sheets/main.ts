@@ -32,8 +32,8 @@ import { UniverSheetsZenEditorPlugin } from '@univerjs/sheets-zen-editor';
 import { UniverUIPlugin } from '@univerjs/ui';
 
 import { DebuggerPlugin } from '../plugins/debugger';
+import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data/sheets/demo/default-workbook-data-demo';
 import { locales } from './locales';
-import { workData } from './data';
 
 const LOAD_LAZY_PLUGINS_TIMEOUT = 1_000;
 // univer
@@ -80,7 +80,7 @@ univer.registerPlugin(UniverFindReplacePlugin);
 univer.registerPlugin(UniverSheetsFindReplacePlugin);
 
 // create univer sheet instance
-univer.createUniverSheet(workData);
+univer.createUniverSheet(DEFAULT_WORKBOOK_DATA_DEMO);
 
 declare global {
     interface Window {

@@ -70,7 +70,8 @@ export class Offset extends BaseFunction {
         const targetRow = row + rowOffset;
         const targetColumn = column + columnOffset;
 
-        if (targetRow < 0 || targetColumn < 0 || targetRow > 1048576 || targetColumn > 16384) {
+        // Excel has a limit on the number of rows and columns: targetRow > 1048576 || targetColumn > 16384, Univer has no limit
+        if (targetRow < 0 || targetColumn < 0) {
             return ErrorValueObject.create(ErrorType.REF);
         }
 
@@ -88,7 +89,8 @@ export class Offset extends BaseFunction {
         const targetRowWithHeight = heightCount > 0 ? targetRow + heightCount - 1 : targetRow + heightCount + 1;
         const targetColumnWithWidth = widthCount > 0 ? targetColumn + widthCount - 1 : targetColumn + widthCount + 1;
 
-        if (targetRowWithHeight < 0 || targetColumnWithWidth < 0 || targetRowWithHeight > 1048576 || targetColumnWithWidth > 16384) {
+        // Excel has a limit on the number of rows and columns: targetRow > 1048576 || targetColumn > 16384, Univer has no limit
+        if (targetRowWithHeight < 0 || targetColumnWithWidth < 0) {
             return ErrorValueObject.create(ErrorType.REF);
         }
 

@@ -14,15 +14,35 @@
  * limitations under the License.
  */
 
+import type { IRange } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
+import { REFERENCE_REGEX_SINGLE_COLUMN, REFERENCE_REGEX_SINGLE_ROW, REFERENCE_SINGLE_RANGE_REGEX } from '../../../basics/regex';
+import type { BaseReferenceObject } from '../../../engine/reference-object/base-reference-object';
+import { CellReferenceObject } from '../../../engine/reference-object/cell-reference-object';
+import { ColumnReferenceObject } from '../../../engine/reference-object/column-reference-object';
+import { RangeReferenceObject } from '../../../engine/reference-object/range-reference-object';
+import { RowReferenceObject } from '../../../engine/reference-object/row-reference-object';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
+import { serializeRangeToRefString } from '../../../engine/utils/reference';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NullValueObject, NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
+/**
+ * The result of the INDEX function is a reference and is interpreted as such by other formulas. Depending on the formula, the return value of INDEX may be used as a reference or as a value.
+ *
+ * =INDEX(A2:A5,2,1):A1 same as =A1:A3
+ *
+ * OPTIMIZE: maybe we can remove some unknown type
+ */
 export class Index extends BaseFunction {
-    override calculate(reference: BaseValueObject, rowNum: BaseValueObject, columnNum?: BaseValueObject, areaNum?: BaseValueObject) {
+    override needsReferenceObject = true;
+
+    override calculate(referenceObject: BaseValueObject, rowNum: BaseValueObject, columnNum?: BaseValueObject, areaNum?: BaseValueObject) {
+        // covert to real type
+        const reference = referenceObject as unknown as RangeReferenceObject;
+
         if (reference == null) {
             return ErrorValueObject.create(ErrorType.NA);
         }
@@ -43,12 +63,13 @@ export class Index extends BaseFunction {
             return areaNum;
         }
 
-        if (!reference.isArray()) {
+        if (!(reference.isRange())) {
             return ErrorValueObject.create(ErrorType.REF);
         }
 
-        const referenceRowCount = (reference as ArrayValueObject).getRowCount();
-        const referenceColumnCount = (reference as ArrayValueObject).getColumnCount();
+        const { startRow, endRow, startColumn, endColumn } = reference.getRangeData();
+        const referenceRowCount = endRow - startRow + 1;
+        const referenceColumnCount = endColumn - startColumn + 1;
 
         // When there is only one row, the rowNum is considered to be the column number.
         // =INDEX(A6:B6,2) equals =INDEX(A6:B6,1,2)
@@ -61,6 +82,18 @@ export class Index extends BaseFunction {
         }
 
         areaNum = areaNum ?? NumberValueObject.create(1);
+
+        if (rowNum.isReferenceObject()) {
+            rowNum = (rowNum as unknown as BaseReferenceObject).toArrayValueObject();
+        }
+
+        if (columnNum.isReferenceObject()) {
+            columnNum = (columnNum as unknown as BaseReferenceObject).toArrayValueObject();
+        }
+
+        if (areaNum.isReferenceObject()) {
+            areaNum = (areaNum as unknown as BaseReferenceObject).toArrayValueObject();
+        }
 
         // get max row length
         const maxRowLength = Math.max(
@@ -79,7 +112,7 @@ export class Index extends BaseFunction {
         // If maxRowLength and maxColumnLength are both 1, pick the value from the reference array
         // Otherwise, filter the results from the reference according to the specified rowNum/columnNum/areaNum, take the upper left corner cell value of each result array, and then form an array with maxRowLength row number and maxColumnLength column number.
         if (maxRowLength === 1 && maxColumnLength === 1) {
-            return this._calculateSingleCell(reference as ArrayValueObject, rowNum, columnNum, areaNum);
+            return this._calculateSingleCell(reference, rowNum, columnNum, areaNum);
         } else {
             const rowNumArray = expandArrayValueObject(maxRowLength, maxColumnLength, rowNum, ErrorValueObject.create(ErrorType.NA));
             const columnNumArray = expandArrayValueObject(maxRowLength, maxColumnLength, columnNum, ErrorValueObject.create(ErrorType.NA));
@@ -89,18 +122,18 @@ export class Index extends BaseFunction {
                 const columnNumValue = columnNumArray.get(rowIndex, columnIndex) || NullValueObject.create();
                 const areaNumValue = areaNumArray.get(rowIndex, columnIndex) || NullValueObject.create();
 
-                const result = this._calculateSingleCell(reference as ArrayValueObject, rowNumValue, columnNumValue, areaNumValue);
+                const result = this._calculateSingleCell(reference, rowNumValue, columnNumValue, areaNumValue);
 
-                if (result.isArray()) {
-                    return (result as ArrayValueObject).getFirstCell();
+                if (result.isReferenceObject()) {
+                    return (result as BaseReferenceObject).toArrayValueObject().getFirstCell();
                 }
 
-                return result;
+                return result as BaseValueObject;
             });
         }
     }
 
-    private _calculateSingleCell(reference: ArrayValueObject, rowNum: BaseValueObject, columnNum: BaseValueObject, areaNum: BaseValueObject) {
+    private _calculateSingleCell(reference: RangeReferenceObject, rowNum: BaseValueObject, columnNum: BaseValueObject, areaNum: BaseValueObject) {
         if (rowNum.isError()) {
             return rowNum;
         }
@@ -132,16 +165,7 @@ export class Index extends BaseFunction {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        const rowParam = rowNumberValue === 0 ? [undefined] : [rowNumberValue - 1, rowNumberValue];
-        const columnParam = columnNumberValue === 0 ? [undefined] : [columnNumberValue - 1, columnNumberValue];
-
-        const result = reference.slice(rowParam, columnParam);
-
-        if (!result) {
-            return ErrorValueObject.create(ErrorType.REF);
-        }
-
-        return result;
+        return this._getReferenceObject(reference, rowNumberValue, columnNumberValue, areaNumberValue);
     }
 
     private _getNumberValue(numberValueObject?: BaseValueObject) {
@@ -188,5 +212,109 @@ export class Index extends BaseFunction {
         }
 
         return logicValue;
+    }
+
+    private _setDefault(reference: BaseReferenceObject, object: BaseReferenceObject) {
+        if (this.unitId == null || this.subUnitId == null) {
+            return ErrorValueObject.create(ErrorType.REF);
+        }
+
+        object.setDefaultUnitId(this.unitId);
+        object.setDefaultSheetId(this.subUnitId);
+        object.setUnitData(reference.getUnitData());
+        object.setRuntimeData(reference.getRuntimeData());
+        object.setArrayFormulaCellData(reference.getArrayFormulaCellData());
+        object.setRuntimeArrayFormulaCellData(reference.getRuntimeArrayFormulaCellData());
+
+        return object;
+    }
+
+    private _getReferenceObject(reference: RangeReferenceObject, rowNumberValue: number, columnNumberValue: number, areaNumberValue: number) {
+        const { startRow, endRow, startColumn, endColumn } = reference.getRangeData();
+
+        let referenceStartRow = 0;
+        let referenceEndRow = 0;
+        let referenceStartColumn = 0;
+        let referenceEndColumn = 0;
+
+        if (rowNumberValue === 0) {
+            referenceStartRow = startRow;
+            referenceEndRow = endRow;
+        } else {
+            referenceStartRow = referenceEndRow = startRow + rowNumberValue - 1;
+        }
+
+        if (columnNumberValue === 0) {
+            referenceStartColumn = startColumn;
+            referenceEndColumn = endColumn;
+        } else {
+            referenceStartColumn = referenceEndColumn = startColumn + columnNumberValue - 1;
+        }
+
+        if (referenceStartRow > endRow || referenceStartColumn > endColumn) {
+            return ErrorValueObject.create(ErrorType.REF);
+        }
+
+        const range = {
+            startRow: referenceStartRow,
+            startColumn: referenceStartColumn,
+            endRow: referenceEndRow,
+            endColumn: referenceEndColumn,
+        };
+
+        const unitId = reference.getForcedUnitId();
+        const sheetId = reference.getForcedSheetId() || '';
+        const sheetName = reference.getForcedSheetName();
+
+        const gridRangeName = {
+            unitId,
+            sheetName,
+            range,
+        };
+
+        const token = serializeRangeToRefString(gridRangeName);
+
+        const referenceObject = this._createReferenceObject(token, unitId, sheetId, range);
+
+        return this._setDefault(reference, referenceObject);
+    }
+
+    private _createReferenceObject(token: string, unitId: string, sheetId: string, range: IRange) {
+        let referenceObject: BaseReferenceObject;
+
+        if (new RegExp(REFERENCE_SINGLE_RANGE_REGEX).test(token)) {
+            referenceObject = new CellReferenceObject(token);
+        } else if (new RegExp(REFERENCE_REGEX_SINGLE_ROW).test(token)) {
+            referenceObject = new RowReferenceObject(token);
+        } else if (new RegExp(REFERENCE_REGEX_SINGLE_COLUMN).test(token)) {
+            referenceObject = new ColumnReferenceObject(token);
+        } else {
+            referenceObject = new RangeReferenceObject(range, sheetId, unitId);
+        }
+
+        return referenceObject;
+    }
+
+    private _getReferenceObjectFirstCell(reference: BaseReferenceObject) {
+        const { startRow, startColumn } = reference.getRangeData();
+        const range = {
+            startRow,
+            startColumn,
+            endRow: startRow,
+            endColumn: startColumn,
+        };
+
+        const unitId = reference.getForcedUnitId();
+        const sheetName = reference.getForcedSheetName();
+
+        const gridRangeName = {
+            unitId,
+            sheetName,
+            range,
+        };
+
+        const token = serializeRangeToRefString(gridRangeName);
+
+        return new CellReferenceObject(token);
     }
 }

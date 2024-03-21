@@ -15,13 +15,13 @@
  */
 
 import { ErrorType } from '../../../basics/error-type';
+import { getFormatPreview } from '../../../basics/format';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { createStringValueObjectByRawValue } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
-import { getDatePreview } from '../../../basics/date';
 
 export class Concatenate extends BaseFunction {
     override calculate(...textValues: BaseValueObject[]) {
@@ -92,7 +92,7 @@ export class Concatenate extends BaseFunction {
         // ="From "&TEXT(45292,"d/mm/yy") gets "From 1/01/24"
         const pattern = valueObject.getPattern();
         if (valueObject.isNumber() && pattern !== '') {
-            return getDatePreview(pattern, value as number);
+            return getFormatPreview(pattern, value as number);
         }
 
         return value;

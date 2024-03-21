@@ -19,6 +19,7 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import type { ISheetLocation } from '@univerjs/sheets';
 import { IGlobalPopupManagerService } from '@univerjs/ui';
 import { Subject } from 'rxjs';
+import { Inject } from '@wendellhu/redi';
 import { DROP_DOWN_KEY } from '../views/drop-down';
 
 export interface IDropdownParam {
@@ -33,7 +34,6 @@ export interface IDropdownParam {
 export interface IDropdownComponentProps {
     componentKey: string;
     location: ISheetLocation;
-    position: IPosition;
     width: number;
     height: number;
     hideFn: () => void;
@@ -68,7 +68,6 @@ export class DropdownManagerService {
 
         const { position } = param;
         const bounding = currentRender.engine.getCanvasElement().getBoundingClientRect();
-
         this._currentPopupId = this._popupService.addPopup({
             anchorRect: {
                 top: position.startY + bounding.top - 3,

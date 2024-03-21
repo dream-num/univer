@@ -18,6 +18,7 @@ import { ILocalStorageService, LocaleService, Plugin, PluginType } from '@univer
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
+import { GlobalPopupManagerService, IGlobalPopupManagerService } from '@univerjs/ui';
 import { DesktopGlobalZoneService } from './services/global-zone/desktop-global-zone.service';
 import { IGlobalZoneService } from './services/global-zone/global-zone.service';
 import { ComponentManager } from './common/component-manager';
@@ -52,7 +53,6 @@ import { DesktopZenZoneService } from './services/zen-zone/desktop-zen-zone.serv
 import { IZenZoneService } from './services/zen-zone/zen-zone.service';
 import { EditorService, IEditorService } from './services/editor/editor.service';
 import { IRangeSelectorService, RangeSelectorService } from './services/range-selector/range-selector.service';
-import { IPopupService, PopupService } from './services/popup/popup.service';
 
 const PLUGIN_NAME = 'ui';
 
@@ -115,7 +115,7 @@ export class UniverUIPlugin extends Plugin {
             [IBeforeCloseService, { useClass: DesktopBeforeCloseService }],
             [IEditorService, { useClass: EditorService }],
             [IRangeSelectorService, { useClass: RangeSelectorService }],
-            [IPopupService, { useClass: PopupService }],
+            [IGlobalPopupManagerService, { useClass: GlobalPopupManagerService }],
             // controllers
             [IUIController, { useClass: DesktopUIController }],
             [SharedController],

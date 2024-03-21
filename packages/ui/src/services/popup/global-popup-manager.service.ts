@@ -30,7 +30,7 @@ export interface IPopup {
     direction?: 'vertical' | 'horizontal';
 }
 
-export interface IPopupService {
+export interface IGlobalPopupManagerService {
     addPopup(item: IPopup): string;
     removePopup(id: string): void;
     removeAll(): void;
@@ -40,9 +40,9 @@ export interface IPopupService {
     get popups(): [string, IPopup][];
 }
 
-export const IPopupService = createIdentifier<IPopupService>('univer.popup.service');
+export const IGlobalPopupManagerService = createIdentifier<IGlobalPopupManagerService>('univer.popup.service');
 
-export class PopupService implements IPopupService {
+export class GlobalPopupManagerService implements IGlobalPopupManagerService {
     private _popupMap = new Map<string, IPopup>();
     private _popups$ = new BehaviorSubject<[string, IPopup][]>([]);
 

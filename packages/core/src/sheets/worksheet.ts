@@ -237,12 +237,7 @@ export class Worksheet {
             return null;
         }
 
-        const value = this._viewModel.getCell(row, col);
-        if (value) {
-            return value;
-        }
-
-        return this.getCellRaw(row, col);
+        return this._viewModel.getCell(row, col);
     }
 
     getCellRaw(row: number, col: number): Nullable<ICellData> {

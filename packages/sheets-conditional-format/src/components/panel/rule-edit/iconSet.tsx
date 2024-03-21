@@ -44,13 +44,12 @@ const TextInput = (props: { id: string; type: ValueType; value: number;onChange:
         }
         return '';
     }, [props.error]);
-
     return (
         <div>
             {props.type !== ValueType.formula
                 ? (
                     <>
-                        <InputNumber className={className} value={props.value} onChange={(v) => props.onChange(v ?? 0)} />
+                        <InputNumber className={className} value={Number(props.value)} onChange={(v) => props.onChange(v ?? 0)} />
                         {props.error && (
                             <div className={styles.errorText}>
                                 {props.error}
@@ -63,7 +62,6 @@ const TextInput = (props: { id: string; type: ValueType; value: number;onChange:
                         id={`${SHEET_CONDITION_FORMAT_PLUGIN}_icon_set_${props.id}`}
                         value={String(props.value).startsWith('=') ? String(props.value) : '='}
                         openForSheetSubUnitId={subUnitId}
-                        className={className}
                         openForSheetUnitId={unitId}
                         canvasStyle={{ fontSize: 10 }}
                         onlyInputFormula={true}
@@ -341,10 +339,11 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
         }
     };
     const checkResult = (_configList: typeof configList) => {
-        const isTypeSame = _configList.reduce((pre, cur) => {
-            if (pre.preType && !pre.result) {
+        const isTypeSame = _configList.reduce((pre, cur, index) => {
+            if ((pre.preType && !pre.result) || _configList.length - 1 === index) {
                 return pre;
             }
+
             if (cur.value.type === ValueType.formula) {
                 return {
                     preType: ValueType.formula,

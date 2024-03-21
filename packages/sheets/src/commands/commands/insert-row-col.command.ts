@@ -292,7 +292,7 @@ export const InsertColCommand: ICommand<IInsertColCommandParams> = {
                 { id: InsertColMutation.id, params: insertColParams },
                 intercepted.redos[1],
                 followSelectionOperation(range, workbook, worksheet),
-            ],
+            ].filter(Boolean),
             commandService
         );
 

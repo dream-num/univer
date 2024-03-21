@@ -365,9 +365,9 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
         }, { result: true, preType: '' }).result;
         if (isTypeSame && [ValueType.num, ValueType.percent, ValueType.percentile].includes(_configList[0].value.type)) {
             const result: Record<string, string> = {};
-            _configList.forEach((item, index) => {
+            _configList.forEach((item, index, arr) => {
                 const preIndex = index - 1;
-                if (preIndex < 0) {
+                if (preIndex < 0 || index === arr.length - 1) {
                     return;
                 }
                 const preItem = _configList[index - 1];

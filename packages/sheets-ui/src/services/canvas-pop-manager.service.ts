@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import type { IPosition } from '@univerjs/core';
-import { IUniverInstanceService, toDisposable } from '@univerjs/core';
+import { IUniverInstanceService } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import type { type BaseObject, type IBoundRectNoAngle, Scene, SpreadsheetSkeleton, type Viewport } from '@univerjs/engine-render';
+import type { BaseObject, IBoundRectNoAngle, Viewport } from '@univerjs/engine-render';
 import { PopupService } from '@univerjs/ui/services/popup/popup.service.js';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject } from '@wendellhu/redi';
 import { VIEWPORT_KEY } from '..';
+import { getViewportByCell } from '../common/utils';
 import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
 
 interface ICanvasPopup {
@@ -39,7 +39,7 @@ export class CanvasPopManagerService {
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService
     ) {}
 
-    addPopupByObject(baseObject: BaseObject, popup: ICanvasPopup, viewport?: Viewport): IDisposable {
+    addPopupToObject(baseObject: BaseObject, popup: ICanvasPopup, viewport?: Viewport): IDisposable {
         const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
         const unitId = workbook.getUnitId();
@@ -82,6 +82,63 @@ export class CanvasPopManagerService {
             right: (rect.endX - scrollXY.x) * scaleX,
             top: (rect.startY - scrollXY.y) * scaleY,
             bottom: (rect.endY - scrollXY.y) * scaleY,
+        };
+
+        const id = this._popupService.addPopup({
+            ...popup,
+            unitId,
+            subUnitId,
+            anchorRect: position,
+        });
+
+        return {
+            dispose: () => {
+                this._popupService.removePopup(id);
+            },
+        };
+    }
+
+    addPopupToCell(row: number, col: number, popup: ICanvasPopup, viewport?: Viewport) {
+        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
+        const worksheet = workbook.getActiveSheet();
+        const unitId = workbook.getUnitId();
+        const subUnitId = worksheet.getSheetId();
+        const skeleton = this._sheetSkeletonManagerService.getOrCreateSkeleton({
+            unitId,
+            sheetId: subUnitId,
+        });
+        const currentRender = this._renderManagerService.getRenderById(unitId);
+
+        if (!currentRender || !skeleton) {
+            return {
+                dispose: () => {},
+            };
+        }
+
+        const { scene } = currentRender;
+
+        const activeViewport = viewport ?? getViewportByCell(row, col, scene, worksheet);
+
+        if (!activeViewport) {
+            return {
+                dispose: () => {},
+            };
+        }
+
+        const cellInfo = skeleton.getCellByIndex(row, col);
+
+        const { scaleX, scaleY } = scene.getAncestorScale();
+
+        const scrollXY = {
+            x: activeViewport.actualScrollX,
+            y: activeViewport.actualScrollY,
+        };
+
+        const position: IBoundRectNoAngle = {
+            left: (cellInfo.startX - scrollXY.x) * scaleX,
+            right: (cellInfo.endX - scrollXY.x) * scaleX,
+            top: (cellInfo.startY - scrollXY.y) * scaleY,
+            bottom: (cellInfo.endY - scrollXY.y) * scaleY,
         };
 
         const id = this._popupService.addPopup({

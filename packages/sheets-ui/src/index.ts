@@ -76,3 +76,4 @@ export { SheetSkeletonManagerService } from './services/sheet-skeleton-manager.s
 export { UniverSheetsUIPlugin } from './sheets-ui-plugin';
 export { SheetCanvasView } from './views/sheet-canvas-view';
 export { SHEET_VIEW_KEY } from './common/keys';
+export { CanvasPopManagerService } from './services/canvas-pop-manager.service';

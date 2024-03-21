@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { isRealNum } from '@univerjs/core';
 import type { ArrayValueObject } from '../../..';
 import { ErrorType } from '../../../basics/error-type';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
@@ -24,38 +23,27 @@ import { BaseFunction } from '../../base-function';
 export class Product extends BaseFunction {
     override calculate(...variants: BaseValueObject[]) {
         if (variants.length === 0) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
-        let accumulatorAll: BaseValueObject = new NumberValueObject(1);
+        let accumulatorAll: BaseValueObject = NumberValueObject.create(1);
         for (let i = 0; i < variants.length; i++) {
             let variant = variants[i];
 
-            if (variant.isError()) {
-                return variant;
+            if (variant.isNull()) {
+                continue;
             }
 
             if (variant.isString()) {
-                const value = variant.getValue();
-                const isStringNumber = isRealNum(value);
-
-                if (!isStringNumber) {
-                    return new ErrorValueObject(ErrorType.VALUE);
-                }
-
-                variant = new NumberValueObject(value);
+                variant = variant.convertToNumberObjectValue();
             }
 
             if (variant.isArray()) {
                 variant = this._multiplyArray(variant as ArrayValueObject);
-
-                if (variant.isError()) {
-                    return variant as ErrorValueObject;
-                }
             }
 
-            if (variant.isNull()) {
-                continue;
+            if (variant.isError()) {
+                return variant as ErrorValueObject;
             }
 
             accumulatorAll = accumulatorAll.multiply(variant);
@@ -69,7 +57,7 @@ export class Product extends BaseFunction {
     }
 
     private _multiplyArray(array: ArrayValueObject) {
-        let result: BaseValueObject = new NumberValueObject(1);
+        let result: BaseValueObject = NumberValueObject.create(1);
         array.iterator((valueObject) => {
             // 'test', ' ',  blank cell, TRUE and FALSE are ignored
             if (valueObject == null || valueObject.isString() || valueObject.isBoolean() || valueObject.isNull()) {

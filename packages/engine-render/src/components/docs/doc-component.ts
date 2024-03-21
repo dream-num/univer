@@ -17,17 +17,17 @@
 import type { Nullable } from '@univerjs/core';
 
 import { RENDER_CLASS_TYPE } from '../../basics/const';
-import type { IDocumentSkeletonLine, IDocumentSkeletonSpan } from '../../basics/i-document-skeleton-cached';
+import type { IDocumentSkeletonGlyph, IDocumentSkeletonLine } from '../../basics/i-document-skeleton-cached';
 import { PageLayoutType } from '../../basics/i-document-skeleton-cached';
 import type { INodeInfo } from '../../basics/interfaces';
 import type { IBoundRectNoAngle, IViewportBound } from '../../basics/vector2';
 import type { UniverRenderingContext } from '../../context';
 import { RenderComponent } from '../component';
 import type { DOCS_EXTENSION_TYPE } from './doc-extension';
-import type { DocumentSkeleton } from './doc-skeleton';
+import type { DocumentSkeleton } from './layout/doc-skeleton';
 
 export class DocComponent extends RenderComponent<
-    IDocumentSkeletonSpan | IDocumentSkeletonLine,
+    IDocumentSkeletonGlyph | IDocumentSkeletonLine,
     DOCS_EXTENSION_TYPE,
     IBoundRectNoAngle[]
 > {
@@ -96,7 +96,7 @@ export class DocComponent extends RenderComponent<
 
     findNodeByCoord(offsetX: number, offsetY: number): Nullable<INodeInfo> {}
 
-    findCoordByNode(span: IDocumentSkeletonSpan) {}
+    findCoordByNode(glyph: IDocumentSkeletonGlyph) {}
 
     protected _getBounding(bounds?: IViewportBound) {}
 

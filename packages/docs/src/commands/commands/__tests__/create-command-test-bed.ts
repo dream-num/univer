@@ -90,23 +90,17 @@ const TEST_DOCUMENT_DATA_EN: IDocumentData = {
 
 export function createCommandTestBed(workbookConfig?: IDocumentData, dependencies?: Dependency[]) {
     const univer = new Univer();
-
-    let get: Injector['get'] | undefined;
+    const injector = univer.__getInjector();
+    const get = injector.get.bind(injector);
 
     /**
      * This plugin hooks into Doc's DI system to expose API to test scripts
      */
-    class TestSpyPlugin extends Plugin {
+    class TestPlugin extends Plugin {
         static override type = PluginType.Univer;
 
-        constructor(
-            _config: undefined,
-            @Inject(Injector) override readonly _injector: Injector
-        ) {
+        constructor(_config: undefined, @Inject(Injector) override readonly _injector: Injector) {
             super('test-plugin');
-
-            this._injector = _injector;
-            get = this._injector.get.bind(this._injector);
         }
 
         override onStarting(injector: Injector): void {
@@ -123,19 +117,11 @@ export function createCommandTestBed(workbookConfig?: IDocumentData, dependencie
 
             dependencies?.forEach((d) => injector.add(d));
         }
-
-        override onDestroy(): void {
-            get = undefined;
-        }
     }
 
-    univer.registerPlugin(TestSpyPlugin);
+    univer.registerPlugin(TestPlugin);
+
     const doc = univer.createUniverDoc(workbookConfig || TEST_DOCUMENT_DATA_EN);
-
-    if (get === undefined) {
-        throw new Error('[TestPlugin]: not hooked on!');
-    }
-
     const univerInstanceService = get(IUniverInstanceService);
     univerInstanceService.focusUniverInstance('test-doc');
 

@@ -18,7 +18,6 @@ export * from './base-object';
 export * from './basics';
 export * from './canvas';
 export * from './components';
-export { DocumentViewModel } from './components/docs/view-model/document-view-model';
 export * from './context';
 export * from './custom';
 export * from './engine';
@@ -31,3 +30,18 @@ export * from './scene-viewer';
 export * from './scroll-timer';
 export * from './shape';
 export * from './viewport';
+
+// doc
+export { DocumentViewModel } from './components/docs/view-model/document-view-model';
+export { getAnchorBounding, TEXT_RANGE_LAYER_INDEX, TextRange } from './components/docs/text-selection/text-range';
+export { NodePositionConvertToCursor } from './components/docs/text-selection/convert-cursor';
+export { Liquid } from './components/docs/liquid';
+export {
+    ITextSelectionRenderManager,
+    TextSelectionRenderManager,
+    getCanvasOffsetByEngine,
+} from './components/docs/text-selection/text-selection-render-manager';
+export type { IActiveTextRange, IEditorInputConfig, ITextSelectionInnerParam } from './components/docs/text-selection/text-selection-render-manager';
+export { Documents } from './components/docs/document';
+export type { IPageRenderConfig } from './components/docs/document';
+export { DocumentSkeleton } from './components/docs/layout/doc-skeleton';

@@ -14,10 +14,14 @@
  * limitations under the License.
  */
 
-import { Disposable, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import type { IDesktopUIController } from '@univerjs/ui';
-import { IUIController } from '@univerjs/ui';
+import { DesktopUIPart, IUIController } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
+import { connectInjector } from '@wendellhu/redi/react-bindings';
+import { SlideSideBar } from '../views/slide-bar/SlideBar';
+import { ActivateSlidePageOperation } from '../commands/operations/activate.operation';
+import { SetSlidePageThumbOperation } from '../commands/operations/setThumb.operation';
 
 /**
  * This controller registers UI parts of slide workbench to the base-ui workbench.
@@ -26,14 +30,25 @@ import { Inject, Injector } from '@wendellhu/redi';
 export class SlideUIController extends Disposable {
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
-        @IUIController private readonly _uiController: IDesktopUIController
+        @IUIController private readonly _uiController: IDesktopUIController,
+        @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
 
-        this._init();
+        this._initCommands();
+        this._initUIComponents();
     }
 
-    private _init(): void {
-        // this._uiController.registerSidebarComponent(() => connectInjector(SlideBar, this._injector));
+    private _initCommands(): void {
+        [
+            ActivateSlidePageOperation,
+            SetSlidePageThumbOperation,
+        ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
+    }
+
+    private _initUIComponents(): void {
+        this.disposeWithMe(
+            this._uiController.registerComponent(DesktopUIPart.LEFT_SIDEBAR, () => connectInjector(SlideSideBar, this._injector))
+        );
     }
 }

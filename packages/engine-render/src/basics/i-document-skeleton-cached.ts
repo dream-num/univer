@@ -126,10 +126,10 @@ export interface IDocumentSkeletonLine {
     divides: IDocumentSkeletonDivide[]; // divides 受到对象影响，把行切分为N部分
     divideLen: number; // divideLen 被对象分割为多少块
 
-    lineHeight: number; // 行总体高度 lineHeight =max(span.fontBoundingBoxAscent + span.fontBoundingBoxDescent, span2.....) + space
-    contentHeight: number; // contentHeight 行内容高度，contentHeight,=max(span.fontBoundingBoxAscent + span.fontBoundingBoxDescent, span2.....)
+    lineHeight: number; // 行总体高度 lineHeight =max(glyph.fontBoundingBoxAscent + glyph.fontBoundingBoxDescent, glyph2.....) + space
+    contentHeight: number; // contentHeight 行内容高度，contentHeight,=max(glyph.fontBoundingBoxAscent + glyph.fontBoundingBoxDescent, glyph2.....)
     top: number; // top paragraph(spaceAbove, spaceBelow, lineSpacing*PreLineHeight)
-    asc: number; //  =max(span.textMetrics.asc) alphabet对齐，需要校准
+    asc: number; //  =max(glyph.textMetrics.asc) alphabet对齐，需要校准
     paddingTop: number; // paddingTop 内容到顶部的距离
     paddingBottom: number; // paddingBottom 内容到底部的距离
     marginTop: number; // marginTop 针对段落的spaceAbove
@@ -150,7 +150,7 @@ export interface IDocumentSkeletonLine {
 
 export interface IDocumentSkeletonDivide {
     // divide 分割，为了适配插入对象、图片、表格等，图文混排
-    spanGroup: IDocumentSkeletonSpan[]; // spanGroup
+    glyphGroup: IDocumentSkeletonGlyph[]; // glyphGroup
     width: number; // width 被分割后的总宽度
     left: number; // left 被对象分割后的偏移位置 | d1 | | d2 |
     paddingLeft: number; // paddingLeft 根据horizonAlign和width计算对齐偏移
@@ -160,17 +160,26 @@ export interface IDocumentSkeletonDivide {
     parent?: IDocumentSkeletonLine;
 }
 
-export interface IDocumentSkeletonSpan {
+export interface IAdjustability {
+    // The left and right strechability
+    stretchability: [number, number];
+    // The left and right shrinkability
+    shrinkability: [number, number];
+}
+
+export interface IDocumentSkeletonGlyph {
     // word or letter or image or custom
-    eId?: string; // elementId, For custom cases
-    spanType: SpanType; // SpanType
+    glyphId?: string; // elementId, For custom cases
+    glyphType: GlyphType; // GlyphType
     streamType: DataStreamTreeTokenType;
     width: number; // cum width
-    bBox: IDocumentSkeletonBoundingBox; // bBox: size of Span
-    paddingLeft: number; // paddingLeft, adjust text align in span
+    bBox: IDocumentSkeletonBoundingBox; // bBox: size of glyph
+    paddingLeft: number; // paddingLeft, adjust text align in glyph
     left: number; // left
     count: number; // count, content length，default 1
     content: string; // content
+    adjustability: IAdjustability; // The adjustability of the glyph.
+    isJustifiable: boolean; // Whether this glyph is justifiable for CJK scripts.
     ts?: ITextStyle; // text style
     fontStyle?: IDocumentSkeletonFontStyle; // fontStyle : ITextStyle convert to canvas font
     parent?: IDocumentSkeletonDivide;
@@ -195,8 +204,8 @@ export interface IDocumentSkeletonBullet extends IIndentStart {
 
 export interface IDocumentSkeletonDrawing {
     objectId: string;
-    aLeft: number; // 相对于page的左方
-    aTop: number; // 相对于page的上方
+    aLeft: number; // 相对于 page 的左方
+    aTop: number; // 相对于 page 的上方
     width: number;
     height: number;
     angle: number; // 旋转
@@ -224,7 +233,7 @@ export interface IDocumentSkeletonBoundingBox {
 }
 
 export enum SkeletonType {
-    SPAN,
+    GLYPH,
     DIVIDE,
     LINE,
     COLUMN,
@@ -248,7 +257,7 @@ export enum LineType {
     BLOCK,
 }
 
-export enum SpanType {
+export enum GlyphType {
     LETTER,
     WORD,
     LIST,

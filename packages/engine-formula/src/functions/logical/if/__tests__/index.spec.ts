@@ -26,22 +26,22 @@ describe('Test if function', () => {
 
     describe('If', () => {
         it('LogicalTest and valueIfTrue', () => {
-            const logicTest = new BooleanValueObject(true);
-            const valueIfTrue = new NumberValueObject(1);
+            const logicTest = BooleanValueObject.create(true);
+            const valueIfTrue = NumberValueObject.create(1);
             const result = textFunction.calculate(logicTest, valueIfTrue);
             expect(result.getValue()).toBe(1);
         });
 
         it('LogicalTest and valueIfTrue and valueIfFalse', () => {
-            const logicTest = new BooleanValueObject(false);
-            const valueIfTrue = new NumberValueObject(1);
-            const valueIfFalse = new NumberValueObject(2);
+            const logicTest = BooleanValueObject.create(false);
+            const valueIfTrue = NumberValueObject.create(1);
+            const valueIfFalse = NumberValueObject.create(2);
             const result = textFunction.calculate(logicTest, valueIfTrue, valueIfFalse);
             expect(result.getValue()).toBe(2);
         });
 
         it('LogicalTest is array', () => {
-            const logicTest = new ArrayValueObject({
+            const logicTest = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [false],
                     [true],
@@ -54,7 +54,7 @@ describe('Test if function', () => {
                 row: 0,
                 column: 0,
             });
-            const valueIfTrue = new NumberValueObject(1);
+            const valueIfTrue = NumberValueObject.create(1);
             const result = textFunction.calculate(logicTest, valueIfTrue);
             expect(transformToValue(result.getArrayValue())).toStrictEqual([
                 [false],
@@ -64,8 +64,8 @@ describe('Test if function', () => {
         });
 
         it('ValueIfTrue is array', () => {
-            const logicTest = new BooleanValueObject(true);
-            const valueIfTrue = new ArrayValueObject({
+            const logicTest = BooleanValueObject.create(true);
+            const valueIfTrue = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [1],
                     [2],
@@ -86,8 +86,8 @@ describe('Test if function', () => {
             ]);
         });
         it('ValueIfTrue is array, set false', () => {
-            const logicTest = new BooleanValueObject(false);
-            const valueIfTrue = new ArrayValueObject({
+            const logicTest = BooleanValueObject.create(false);
+            const valueIfTrue = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [1],
                     [2],
@@ -105,9 +105,9 @@ describe('Test if function', () => {
         });
 
         it('ValueIfFalse is array', () => {
-            const logicTest = new BooleanValueObject(false);
-            const valueIfTrue = new NumberValueObject(1);
-            const valueIfFalse = new ArrayValueObject({
+            const logicTest = BooleanValueObject.create(false);
+            const valueIfTrue = NumberValueObject.create(1);
+            const valueIfFalse = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [1],
                     [2],
@@ -129,7 +129,7 @@ describe('Test if function', () => {
         });
 
         it('LogicalTest is array and valueIfTrue is array', () => {
-            const logicTest = new ArrayValueObject({
+            const logicTest = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [true],
                     [false],
@@ -143,7 +143,7 @@ describe('Test if function', () => {
                 row: 0,
                 column: 0,
             });
-            const valueIfTrue = new ArrayValueObject({
+            const valueIfTrue = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [1],
                     [2],
@@ -169,7 +169,7 @@ describe('Test if function', () => {
         });
 
         it('LogicalTest is array and valueIfFalse is array', () => {
-            const logicTest = new ArrayValueObject({
+            const logicTest = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [true],
                     [false],
@@ -184,9 +184,9 @@ describe('Test if function', () => {
                 column: 0,
             });
 
-            const valueIfTrue = new StringValueObject('yes');
+            const valueIfTrue = StringValueObject.create('yes');
 
-            const valueIfFalse = new ArrayValueObject({
+            const valueIfFalse = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [1],
                     [2],
@@ -209,9 +209,9 @@ describe('Test if function', () => {
         });
 
         it('ValueIfTrue is array and valueIfFalse is array', () => {
-            const logicTest = new BooleanValueObject(true);
+            const logicTest = BooleanValueObject.create(true);
 
-            const valueIfTrue = new ArrayValueObject({
+            const valueIfTrue = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [1],
                     [2],
@@ -227,7 +227,7 @@ describe('Test if function', () => {
                 column: 0,
             });
 
-            const valueIfFalse = new ArrayValueObject({
+            const valueIfFalse = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [6],
                     [7],
@@ -252,7 +252,7 @@ describe('Test if function', () => {
         });
 
         it('LogicalTest is array and valueIfTrue is array and valueIfFalse is array', () => {
-            const logicTest = new ArrayValueObject({
+            const logicTest = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [true],
                     [false],
@@ -267,7 +267,7 @@ describe('Test if function', () => {
                 column: 0,
             });
 
-            const valueIfTrue = new ArrayValueObject({
+            const valueIfTrue = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [1],
                     [2],
@@ -283,7 +283,7 @@ describe('Test if function', () => {
                 column: 0,
             });
 
-            const valueIfFalse = new ArrayValueObject({
+            const valueIfFalse = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [6],
                     [7],
@@ -309,7 +309,7 @@ describe('Test if function', () => {
         });
 
         it('LogicalTest is 3*2 array and 1*4 valueIfTrue is array and 1*3 valueIfFalse is array', () => {
-            const logicTest = new ArrayValueObject({
+            const logicTest = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [false, true],
                     [true, true],
@@ -323,7 +323,7 @@ describe('Test if function', () => {
                 column: 0,
             });
 
-            const valueIfTrue = new ArrayValueObject({
+            const valueIfTrue = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     ['yes1', 'yes2', 'yes3', 'yes4'],
                 ]),
@@ -335,7 +335,7 @@ describe('Test if function', () => {
                 column: 0,
             });
 
-            const valueIfFalse = new ArrayValueObject({
+            const valueIfFalse = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     ['no1', 'no2', 'no3'],
                 ]),
@@ -355,7 +355,7 @@ describe('Test if function', () => {
         });
 
         it('LogicalTest is 2*1 array and 3*4 valueIfTrue is array and 4*3 valueIfFalse is array', () => {
-            const logicTest = new ArrayValueObject({
+            const logicTest = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [false],
                     [true],
@@ -368,7 +368,7 @@ describe('Test if function', () => {
                 column: 0,
             });
 
-            const valueIfTrue = new ArrayValueObject({
+            const valueIfTrue = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     ['yes1', 'yes2', 'yes3', 'yes4'],
                     ['yes2', 'yes3', 'yes4', 'yes5'],
@@ -382,7 +382,7 @@ describe('Test if function', () => {
                 column: 0,
             });
 
-            const valueIfFalse = new ArrayValueObject({
+            const valueIfFalse = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     ['no1', 'no2', 'no3'],
                     ['no2', 'no3', 'no4'],
@@ -406,7 +406,7 @@ describe('Test if function', () => {
         });
 
         it('LogicalTest is 1*2 array and 3*4 valueIfTrue is array and 4*3 valueIfFalse is array', () => {
-            const logicTest = new ArrayValueObject({
+            const logicTest = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [false, true],
                 ]),
@@ -418,7 +418,7 @@ describe('Test if function', () => {
                 column: 0,
             });
 
-            const valueIfTrue = new ArrayValueObject({
+            const valueIfTrue = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     ['yes1', 'yes2', 'yes3', 'yes4'],
                     ['yes2', 'yes3', 'yes4', 'yes5'],
@@ -432,7 +432,7 @@ describe('Test if function', () => {
                 column: 0,
             });
 
-            const valueIfFalse = new ArrayValueObject({
+            const valueIfFalse = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     ['no1', 'no2', 'no3'],
                     ['no2', 'no3', 'no4'],
@@ -456,7 +456,7 @@ describe('Test if function', () => {
         });
 
         it('LogicalTest is 3*1 array and 1*4 valueIfTrue is array and 1*3 valueIfFalse is array', () => {
-            const logicTest = new ArrayValueObject({
+            const logicTest = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [false],
                     [true],
@@ -470,7 +470,7 @@ describe('Test if function', () => {
                 column: 0,
             });
 
-            const valueIfTrue = new ArrayValueObject({
+            const valueIfTrue = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     ['yes1', 'yes2', 'yes3', 'yes4'],
                 ]),
@@ -482,7 +482,7 @@ describe('Test if function', () => {
                 column: 0,
             });
 
-            const valueIfFalse = new ArrayValueObject({
+            const valueIfFalse = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     ['no1', 'no2', 'no3'],
                 ]),

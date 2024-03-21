@@ -30,7 +30,7 @@ import { BooleanNumber, DEFAULT_EMPTY_DOCUMENT_VALUE, DocumentDataModel } from '
 import { BaseObject } from '../base-object';
 import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '../basics/interfaces';
 import type { IViewportBound } from '../basics/vector2';
-import { DocumentSkeleton } from '../components/docs/doc-skeleton';
+import { DocumentSkeleton } from '../components/docs/layout/doc-skeleton';
 import { Documents } from '../components/docs/document';
 import { DocumentViewModel } from '../components/docs/view-model/document-view-model';
 import type { UniverRenderingContext } from '../context';
@@ -174,7 +174,7 @@ export class RichText extends BaseObject {
         }
 
         // Temporarily ignore the on-demand display of elements within a group：this.isInGroup
-        if (this.isRender()) {
+        if (this.isRender(bounds)) {
             const { top, left, bottom, right } = bounds!.viewBound;
 
             if (
@@ -237,7 +237,7 @@ export class RichText extends BaseObject {
                             cl: this._cl,
                         },
                         st: 0,
-                        ed: contentLength - 1,
+                        ed: contentLength,
                     },
                 ],
             },

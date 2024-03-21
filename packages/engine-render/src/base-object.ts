@@ -749,7 +749,7 @@ export abstract class BaseObject {
     getEngine(): any {
         let parent: any = this.getParent();
         while (parent != null) {
-            if (parent === RENDER_CLASS_TYPE.ENGINE) {
+            if (parent.classType === RENDER_CLASS_TYPE.ENGINE) {
                 return parent;
             }
             parent = parent.getParent();

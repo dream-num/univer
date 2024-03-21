@@ -26,7 +26,7 @@ export class Rows extends BaseFunction {
         reference?: BaseValueObject
     ) {
         if (reference == null) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         if (reference.isError()) {
@@ -34,15 +34,15 @@ export class Rows extends BaseFunction {
         }
 
         if (reference.isString() || reference.isNumber() || reference.isBoolean()) {
-            return new NumberValueObject(1);
+            return NumberValueObject.create(1);
         }
 
         if (!reference.isArray()) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         const rowCount = (reference as ArrayValueObject).getRowCount();
 
-        return new NumberValueObject(rowCount);
+        return NumberValueObject.create(rowCount);
     }
 }

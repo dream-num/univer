@@ -30,10 +30,11 @@ import type { UniverRenderingContext } from '../../context';
 import type { Scene } from '../../scene';
 import type { IExtensionConfig } from '../extension';
 import { DocumentsSpanAndLineExtensionRegistry } from '../extension';
-import { Liquid } from './common/liquid';
+import { VERTICAL_ROTATE_ANGLE } from '../../basics/text-rotation';
+import { Liquid } from './liquid';
 import { DocComponent } from './doc-component';
 import { DOCS_EXTENSION_TYPE } from './doc-extension';
-import type { DocumentSkeleton } from './doc-skeleton';
+import type { DocumentSkeleton } from './layout/doc-skeleton';
 
 interface IPageMarginLayout {
     pageMarginLeft: number;
@@ -250,6 +251,7 @@ export class Documents extends DocComponent {
                 pagePaddingRight,
                 horizontalAlign,
                 vertexAngleDeg,
+                centerAngleDeg,
                 cellValueType
             );
 
@@ -267,6 +269,18 @@ export class Documents extends DocComponent {
             const vertexAngle = degToRad(vertexAngleDeg);
 
             const finalAngle = vertexAngle - centerAngle;
+
+            if (this._isSkipByDiffBounds(page, pageTop, pageLeft, bounds)) {
+                const { x, y } = this._drawLiquid.translatePage(
+                    page,
+                    this.pageLayoutType,
+                    this.pageMarginLeft,
+                    this.pageMarginTop
+                );
+                pageLeft += x;
+                pageTop += y;
+                continue;
+            }
 
             this.onPageRenderObservable.notifyObservers({
                 page,
@@ -314,7 +328,8 @@ export class Documents extends DocComponent {
                             pagePaddingLeft,
                             pagePaddingRight,
                             horizontalAlign,
-                            vertexAngle
+                            vertexAngleDeg,
+                            centerAngleDeg
                         );
 
                         const verticalOffset = this._verticalHandler(
@@ -370,17 +385,17 @@ export class Documents extends DocComponent {
 
                             for (let i = 0; i < divideLength; i++) {
                                 const divide = divides[i];
-                                const { spanGroup } = divide;
+                                const { glyphGroup } = divide;
 
                                 this._drawLiquid.translateSave();
                                 this._drawLiquid.translateDivide(divide);
 
-                                for (const span of spanGroup) {
-                                    if (!span.content || span.content.length === 0) {
+                                for (const glyph of glyphGroup) {
+                                    if (!glyph.content || glyph.content.length === 0) {
                                         continue;
                                     }
 
-                                    const { width: spanWidth, left: spanLeft, paddingLeft } = span;
+                                    const { width: spanWidth, left: spanLeft, paddingLeft } = glyph;
 
                                     const { x: translateX, y: translateY } = this._drawLiquid;
 
@@ -419,7 +434,7 @@ export class Documents extends DocComponent {
                                     for (const extension of extensions) {
                                         if (extension.type === DOCS_EXTENSION_TYPE.SPAN) {
                                             extension.extensionOffset = extensionOffset;
-                                            extension.draw(ctx, parentScale, span);
+                                            extension.draw(ctx, parentScale, glyph);
                                         }
                                     }
                                 }
@@ -459,24 +474,23 @@ export class Documents extends DocComponent {
         pagePaddingLeft: number,
         pagePaddingRight: number,
         horizontalAlign: HorizontalAlign,
-        angle: number = 0,
+        vertexAngleDeg: number = 0,
+        centerAngleDeg: number = 0,
         cellValueType: Nullable<CellValueType>
     ) {
-        let offsetLeft = 0;
-        if (horizontalAlign === HorizontalAlign.CENTER) {
-            offsetLeft = (this.width - pageWidth) / 2;
-        } else if (horizontalAlign === HorizontalAlign.RIGHT) {
-            offsetLeft = this.width - pageWidth - pagePaddingRight;
-        } else {
-            /**
-             * In Excel, if horizontal alignment is not specified,
-             * rotated text aligns to the right when rotated downwards and aligns to the left when rotated upwards.
-             */
-            if (horizontalAlign === HorizontalAlign.UNSPECIFIED) {
-                if (angle > 0) {
-                    return this.width - pageWidth - pagePaddingRight;
-                }
-
+        /**
+         * In Excel, if horizontal alignment is not specified,
+         * rotated text aligns to the right when rotated downwards and aligns to the left when rotated upwards.
+         */
+        if (horizontalAlign === HorizontalAlign.UNSPECIFIED) {
+            if (centerAngleDeg === VERTICAL_ROTATE_ANGLE && vertexAngleDeg === VERTICAL_ROTATE_ANGLE) {
+                horizontalAlign = HorizontalAlign.CENTER;
+            } else if ((vertexAngleDeg > 0 && vertexAngleDeg !== VERTICAL_ROTATE_ANGLE) || vertexAngleDeg === -VERTICAL_ROTATE_ANGLE) {
+                /**
+                 * https://github.com/dream-num/univer-pro/issues/334
+                 */
+                horizontalAlign = HorizontalAlign.RIGHT;
+            } else {
                 /**
                  * sheet cell type, In a spreadsheet cell, without any alignment settings applied,
                  * text should be left-aligned,
@@ -484,15 +498,22 @@ export class Documents extends DocComponent {
                  * and Boolean values should be center-aligned.
                  */
                 if (cellValueType === CellValueType.NUMBER) {
-                    offsetLeft = this.width - pageWidth - pagePaddingRight;
+                    horizontalAlign = HorizontalAlign.RIGHT;
                 } else if (cellValueType === CellValueType.BOOLEAN) {
-                    offsetLeft = (this.width - pageWidth) / 2;
+                    horizontalAlign = HorizontalAlign.CENTER;
                 } else {
-                    offsetLeft = pagePaddingLeft;
+                    horizontalAlign = HorizontalAlign.LEFT;
                 }
-            } else {
-                offsetLeft = pagePaddingLeft;
             }
+        }
+
+        let offsetLeft = 0;
+        if (horizontalAlign === HorizontalAlign.CENTER) {
+            offsetLeft = (this.width - pageWidth) / 2;
+        } else if (horizontalAlign === HorizontalAlign.RIGHT) {
+            offsetLeft = this.width - pageWidth - pagePaddingRight;
+        } else {
+            offsetLeft = pagePaddingLeft;
         }
 
         return offsetLeft;
@@ -527,6 +548,34 @@ export class Documents extends DocComponent {
         DocumentsSpanAndLineExtensionRegistry.getData().forEach((extension) => {
             this.register(extension);
         });
+    }
+
+    private _isSkipByDiffBounds(page: IDocumentSkeletonPage, pageTop: number, pageLeft: number, bounds?: IViewportBound) {
+        if (bounds === null || bounds === undefined) {
+            return false;
+        }
+
+        const { pageWidth, pageHeight, marginBottom, marginTop, marginLeft, marginRight } = page;
+
+        const pageRight = pageLeft + pageWidth + marginLeft + marginRight;
+
+        const pageBottom = pageTop + pageHeight + marginBottom + marginTop;
+
+        const { left, top, right, bottom } = bounds.viewBound;
+
+        if (pageRight < left || pageBottom < top) {
+            return true;
+        }
+
+        if (pageLeft > right && pageWidth !== Number.POSITIVE_INFINITY) {
+            return true;
+        }
+
+        if (pageTop > bottom && pageHeight !== Number.POSITIVE_INFINITY) {
+            return true;
+        }
+
+        return false;
     }
 
     // private _addSkeletonChangeObserver(skeleton?: DocumentSkeleton) {

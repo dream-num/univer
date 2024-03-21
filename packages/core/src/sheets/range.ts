@@ -427,6 +427,16 @@ export class Range {
      * Returns the font size in point size of the cell in the top-left corner of the range.
      */
     getFontSize(): number {
+        const { p } = this.getValue() ?? {};
+
+        if (p && Array.isArray(p.body?.textRuns) && p.body.textRuns.length > 0) {
+            if (p.body.textRuns.some((textRun) => textRun?.ts?.fs != null)) {
+                return Math.max(...p.body.textRuns.map((textRun) => textRun?.ts?.fs || 0));
+            } else {
+                return this.getFontSizes()[0][0];
+            }
+        }
+
         return this.getFontSizes()[0][0];
     }
 

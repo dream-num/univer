@@ -50,6 +50,7 @@ const locale = {
         cut: '剪切',
         copy: '复制',
         paste: '粘贴',
+        'shortcut-panel': '打开收起快捷键面板',
     },
     'common-edit': '常用编辑',
     'toggle-shortcut-panel': '打开收起快捷键面板',
@@ -65,11 +66,13 @@ const locale = {
     },
     rangeSelector: {
         title: '选择一个数据范围',
-        addAnotherRange: '添加新范围',
+        addAnotherRange: '添加范围',
         buttonTooltip: '选择数据范围',
+        placeHolder: '框选范围或输入',
         confirm: '确认',
         cancel: '取消',
     },
+    'global-shortcut': '全局快捷键',
 };
 
 export default locale;

@@ -26,7 +26,7 @@ export class Columns extends BaseFunction {
         reference?: BaseValueObject
     ) {
         if (reference == null) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         if (reference.isError()) {
@@ -34,15 +34,15 @@ export class Columns extends BaseFunction {
         }
 
         if (reference.isString() || reference.isNumber() || reference.isBoolean()) {
-            return new NumberValueObject(1);
+            return NumberValueObject.create(1);
         }
 
         if (!reference.isArray()) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         const columnCount = (reference as ArrayValueObject).getColumnCount();
 
-        return new NumberValueObject(columnCount);
+        return NumberValueObject.create(columnCount);
     }
 }

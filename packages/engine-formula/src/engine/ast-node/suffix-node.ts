@@ -61,15 +61,17 @@ export class SuffixNode extends BaseAstNode {
             }
             result = this._functionExecutor!.calculate(
                 value as BaseValueObject,
-                new NumberValueObject(100)
+                NumberValueObject.create(100)
             ) as FunctionVariantType;
 
             // set number format
-            result.setPattern('0.00%');
+            if ((result as NumberValueObject).isNumber()) {
+                result.setPattern('0.00%');
+            }
         } else if (this._operatorString === suffixToken.POUND) {
             result = this._handlerPound(value);
         } else {
-            result = new ErrorValueObject(ErrorType.VALUE);
+            result = ErrorValueObject.create(ErrorType.VALUE);
         }
         this.setValue(result);
     }
@@ -81,11 +83,11 @@ export class SuffixNode extends BaseAstNode {
         // }
 
         if (!value.isReferenceObject()) {
-            return new ErrorValueObject(ErrorType.VALUE);
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         if (!(value as BaseReferenceObject).isCell()) {
-            return new ErrorValueObject(ErrorType.VALUE);
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         const currentConfigService = this._accessor.get(IFormulaCurrentConfigService);
@@ -101,12 +103,12 @@ export class SuffixNode extends BaseAstNode {
         const formulaString = formulaData?.[unitId]?.[sheetId]?.[range.startRow]?.[range.startColumn]?.f;
 
         if (!formulaString) {
-            return new ErrorValueObject(ErrorType.VALUE);
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         const lexerNode = lexer.treeBuilder(formulaString);
 
-        return new ErrorValueObject(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.VALUE);
         /** todo */
     }
 }

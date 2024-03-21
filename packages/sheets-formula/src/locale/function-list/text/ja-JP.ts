@@ -241,8 +241,8 @@ export default {
         },
     },
     LEN: {
-        description: '文字列に含まれる文字数を返します。',
-        abstract: '文字列に含まれる文字数を返します。',
+        description: 'は、文字列の文字数を返します。',
+        abstract: 'は、文字列の文字数を返します。',
         links: [
             {
                 title: '指導',
@@ -250,13 +250,12 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: 'text', detail: '文字数またはバイト数を調べる文字列を指定します。 スペースは文字として数えられます。' },
         },
     },
     LENB: {
-        description: '文字列に含まれる文字数を返します。',
-        abstract: '文字列に含まれる文字数を返します。',
+        description: 'は、文字列のバイト数を返します。',
+        abstract: 'は、文字列のバイト数を返します。',
         links: [
             {
                 title: '指導',
@@ -264,8 +263,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: { name: 'text', detail: '文字数またはバイト数を調べる文字列を指定します。 スペースは文字として数えられます。' },
         },
     },
     LOWER: {
@@ -488,8 +486,8 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value: { name: '値', detail: 'テキストに変換する数値。' },
+            formatText: { name: '数値形式', detail: '指定された値に適用する書式を定義するテキスト文字列。' },
         },
     },
     TEXTAFTER: {

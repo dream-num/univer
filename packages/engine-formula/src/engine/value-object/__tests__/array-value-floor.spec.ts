@@ -20,7 +20,7 @@ import { ArrayValueObject, transformToValueObject } from '../array-value-object'
 import { NumberValueObject } from '../primitive-object';
 
 describe('arrayValueObject floor method test', () => {
-    const originArrayValueObject = new ArrayValueObject({
+    const originArrayValueObject = ArrayValueObject.create({
         calculateValueList: transformToValueObject([
             [0.1234, 0.9876, 0.5432, 0.6789, 0.4567],
             [0.2345, 0.8765, 0.321, 0.7654, 0.5432],
@@ -36,7 +36,7 @@ describe('arrayValueObject floor method test', () => {
 
     describe('floor', () => {
         it('origin nm, param nm', () => {
-            const floorArrayValueObject = new ArrayValueObject({
+            const floorArrayValueObject = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [2, 3, 4],
                     [1, 4, 2],
@@ -57,7 +57,7 @@ describe('arrayValueObject floor method test', () => {
         });
 
         it('origin nm, param 1m', () => {
-            const floorArrayValueObject = new ArrayValueObject({
+            const floorArrayValueObject = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([[2, 2, 2, 3, 3]]),
                 rowCount: 1,
                 columnCount: 5,
@@ -75,7 +75,7 @@ describe('arrayValueObject floor method test', () => {
         });
 
         it('origin nm, param n1', () => {
-            const floorArrayValueObject = new ArrayValueObject({
+            const floorArrayValueObject = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([[3], [2], [1]]),
                 rowCount: 3,
                 columnCount: 1,
@@ -93,7 +93,7 @@ describe('arrayValueObject floor method test', () => {
         });
 
         it('origin 1m, param nm', () => {
-            const originArrayValueObject = new ArrayValueObject({
+            const originArrayValueObject = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([[0.1234, 0.9876, 0.5432, 0.6789, 0.4567]]),
                 rowCount: 1,
                 columnCount: 5,
@@ -102,7 +102,7 @@ describe('arrayValueObject floor method test', () => {
                 row: 0,
                 column: 0,
             });
-            const floorArrayValueObject = new ArrayValueObject({
+            const floorArrayValueObject = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [2, 2, 2, 3, 3],
                     [3, 3, 3, 4, 4],
@@ -124,7 +124,7 @@ describe('arrayValueObject floor method test', () => {
         });
 
         it('origin n1, param nm', () => {
-            const originArrayValueObject = new ArrayValueObject({
+            const originArrayValueObject = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([[0.1234], [0.2345], [0.3456]]),
                 rowCount: 3,
                 columnCount: 1,
@@ -133,7 +133,7 @@ describe('arrayValueObject floor method test', () => {
                 row: 0,
                 column: 0,
             });
-            const floorArrayValueObject = new ArrayValueObject({
+            const floorArrayValueObject = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [2, 2, 2, 3, 3],
                     [3, 3, 3, 4, 4],
@@ -155,7 +155,7 @@ describe('arrayValueObject floor method test', () => {
         });
 
         it('origin nm multiple formats, param 1 number', () => {
-            const originArrayValueObject = new ArrayValueObject({
+            const originArrayValueObject = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [1, ' ', 1.23, true, false],
                     [0, '100', '2.34', 'test', -3],
@@ -168,7 +168,7 @@ describe('arrayValueObject floor method test', () => {
                 column: 0,
             });
 
-            const floorValueObject = new NumberValueObject(1);
+            const floorValueObject = NumberValueObject.create(1);
 
             expect((originArrayValueObject.floor(floorValueObject) as ArrayValueObject).toValue()).toStrictEqual([
                 [1, '#VALUE!', 1.2, 1, 0],
@@ -177,8 +177,8 @@ describe('arrayValueObject floor method test', () => {
         });
 
         it('origin 1 number, param nm multiple formats', () => {
-            const originValueObject = new NumberValueObject(1);
-            const floorArrayValueObject = new ArrayValueObject({
+            const originValueObject = NumberValueObject.create(1);
+            const floorArrayValueObject = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [1, ' ', 1.23, true, false],
                     [0, '100', '2.34', 'test', -3],

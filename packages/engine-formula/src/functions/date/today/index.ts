@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DEFFAULT_DATE_FORMAT, excelDateSerial } from '../../../basics/date';
+import { DEFAULT_DATE_FORMAT, excelDateSerial } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
@@ -24,12 +24,12 @@ import { BaseFunction } from '../../base-function';
 export class Today extends BaseFunction {
     override calculate(value?: BaseValueObject) {
         if (value) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         const currentSerial = excelDateSerial(new Date());
-        const valueObject = new NumberValueObject(currentSerial);
-        valueObject.setPattern(DEFFAULT_DATE_FORMAT);
+        const valueObject = NumberValueObject.create(currentSerial);
+        valueObject.setPattern(DEFAULT_DATE_FORMAT);
         return valueObject;
     }
 }

@@ -54,16 +54,16 @@ export class OperatorNode extends BaseAstNode {
         const token = this.getToken();
 
         if ((object1 == null || object2 == null) && token !== operatorToken.MINUS && token !== operatorToken.PLUS) {
-            this.setValue(new ErrorValueObject(ErrorType.VALUE));
+            this.setValue(ErrorValueObject.create(ErrorType.VALUE));
             return;
         }
 
         if (object1 == null) {
-            object1 = new NullValueObject(0);
+            object1 = NullValueObject.create();
         }
 
         if (object2 == null) {
-            object2 = new NullValueObject(0);
+            object2 = NullValueObject.create();
         }
 
         if (object1.isReferenceObject()) {

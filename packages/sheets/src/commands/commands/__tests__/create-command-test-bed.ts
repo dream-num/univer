@@ -80,7 +80,7 @@ export function createCommandTestBed(workbookConfig?: IWorkbookData, dependencie
     const univer = new Univer();
     const injector = univer.__getInjector();
 
-    class TestSpyPlugin extends Plugin {
+    class TestPlugin extends Plugin {
         static override type = PluginType.Sheet;
 
         constructor(
@@ -101,7 +101,7 @@ export function createCommandTestBed(workbookConfig?: IWorkbookData, dependencie
         }
     }
 
-    univer.registerPlugin(TestSpyPlugin);
+    univer.registerPlugin(TestPlugin);
     const sheet = univer.createUniverSheet(Tools.deepClone(workbookConfig || TEST_WORKBOOK_DATA_DEMO));
 
     const univerInstanceService = injector.get(IUniverInstanceService);

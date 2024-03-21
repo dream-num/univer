@@ -19,6 +19,7 @@ import type { IRange } from '@univerjs/core';
 import { ErrorType } from '../../basics/error-type';
 import { deserializeRangeWithSheet } from '../utils/reference';
 import { ErrorValueObject } from '../value-object/base-value-object';
+import { matchToken } from '../../basics/token';
 import { BaseReferenceObject } from './base-reference-object';
 
 export class ColumnReferenceObject extends BaseReferenceObject {
@@ -42,7 +43,7 @@ export class ColumnReferenceObject extends BaseReferenceObject {
 
     override unionBy(referenceObject: BaseReferenceObject) {
         if (!referenceObject.isColumn()) {
-            return new ErrorValueObject(ErrorType.REF);
+            return ErrorValueObject.create(ErrorType.REF);
         }
 
         const columnReferenceObject = referenceObject as ColumnReferenceObject;
@@ -50,13 +51,13 @@ export class ColumnReferenceObject extends BaseReferenceObject {
             columnReferenceObject.getForcedSheetName() !== undefined &&
             columnReferenceObject.getForcedSheetName() !== ''
         ) {
-            return new ErrorValueObject(ErrorType.REF);
+            return ErrorValueObject.create(ErrorType.REF);
         }
 
         const currentRangeData = this.getRangeData();
 
         // if (currentRangeData.endColumn !== -1) {
-        //     return new ErrorValueObject(ErrorType.REF);
+        //     return ErrorValueObject.create(ErrorType.REF);
         // }
 
         const newColumn = columnReferenceObject.getRangeData().startColumn;
@@ -69,6 +70,8 @@ export class ColumnReferenceObject extends BaseReferenceObject {
             currentRangeData.startColumn = newColumn;
             currentRangeData.endColumn = column;
         }
+
+        this.setToken(`${this.getToken()}${matchToken.COLON}${columnReferenceObject.getToken()}`);
 
         return this;
     }

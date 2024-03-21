@@ -23,15 +23,15 @@ import { BaseFunction } from '../../base-function';
 export class Sumif extends BaseFunction {
     override calculate(range: BaseValueObject, criteria: BaseValueObject, sumRange?: BaseValueObject) {
         if (range == null || criteria == null) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         if (range.isError() || criteria.isError() || sumRange?.isError()) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         if (!range.isArray() || (sumRange && !sumRange.isArray())) {
-            return new ErrorValueObject(ErrorType.VALUE);
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         if (criteria.isArray()) {
@@ -53,7 +53,7 @@ export class Sumif extends BaseFunction {
             : (range as ArrayValueObject);
 
         if (!sumRangeArray) {
-            return new ErrorValueObject(ErrorType.VALUE);
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         return sumRangeArray.pick(resultArrayObject as ArrayValueObject).sum();

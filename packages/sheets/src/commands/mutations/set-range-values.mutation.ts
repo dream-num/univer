@@ -24,6 +24,7 @@ import type {
     IMutation,
     IMutationCommonParams,
     IObjectMatrixPrimitiveType,
+    IParagraph,
     IRange,
     IStyleData,
     ITextRun,
@@ -191,7 +192,12 @@ export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, bo
 
                 // Set to null, clear content
                 if (newVal.v !== undefined) {
-                    oldVal.v = type === CellValueType.NUMBER ? Number(newVal.v) : newVal.v;
+                    oldVal.v = type === CellValueType.NUMBER
+                        ? Number(newVal.v)
+                        : type === CellValueType.BOOLEAN
+                            // if the value is a boolean, we should store it as 1 or 0
+                            ? (newVal.v!.toString()).toUpperCase() === 'TRUE' ? 1 : 0
+                            : newVal.v;
                 }
 
                 if (oldVal.v !== undefined) {
@@ -372,6 +378,14 @@ export function mergeStyle(
     return backupStyle;
 }
 
+function skipParagraphs(paragraphs: IParagraph[], offset: number): number {
+    if (paragraphs.some((p) => p.startIndex === offset)) {
+        return skipParagraphs(paragraphs, offset + 1);
+    }
+
+    return offset;
+}
+
 /**
  * Find the text style of all paragraphs and modify it to the new style
  * @param p
@@ -388,11 +402,12 @@ export function mergeRichTextStyle(p: IDocumentData, newStyle: Nullable<IStyleDa
 
     let index = 0;
     const newTextRuns = [];
+    const paragraphs = p.body?.paragraphs || [];
 
     for (const textRun of p.body.textRuns) {
         const { st, ed, ts = {} } = textRun;
 
-        if (index !== st) {
+        if (index < st) {
             const tr: ITextRun = {
                 st: index,
                 ed: st,
@@ -408,27 +423,27 @@ export function mergeRichTextStyle(p: IDocumentData, newStyle: Nullable<IStyleDa
             }
 
             newTextRuns.push(tr);
-        } else {
-            const merge = mergeStyle(ts, newStyle, true);
-
-            // then remove null
-            merge && Tools.removeNull(merge);
-
-            if (Tools.isEmptyObject(merge)) {
-                delete textRun.ts;
-            } else {
-                textRun.ts = merge as ITextStyle;
-            }
-
-            newTextRuns.push(textRun);
         }
 
-        index = ed;
+        const merge = mergeStyle(ts, newStyle, true);
+
+        // then remove null
+        merge && Tools.removeNull(merge);
+
+        if (Tools.isEmptyObject(merge)) {
+            delete textRun.ts;
+        } else {
+            textRun.ts = merge as ITextStyle;
+        }
+
+        newTextRuns.push(textRun);
+
+        index = skipParagraphs(paragraphs, ed);
     }
 
     const endIndex = p.body.dataStream.endsWith('\r\n') ? p.body.dataStream.length - 2 : p.body.dataStream.length;
 
-    if (index !== endIndex) {
+    if (index < endIndex) {
         const tr: ITextRun = {
             st: index,
             ed: endIndex,
@@ -454,8 +469,8 @@ function isNumeric(str: string) {
 }
 
 function isSafeNumeric(str: string) {
-    const numberic = isNumeric(str);
-    if (!numberic) {
+    const numeric = isNumeric(str);
+    if (!numeric) {
         return false;
     }
 

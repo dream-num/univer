@@ -22,11 +22,19 @@ import { BaseFunction } from '../../base-function';
 export class Power extends BaseFunction {
     override calculate(number: BaseValueObject, power: BaseValueObject) {
         if (number == null || power == null) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
+        }
+
+        if (number.isString()) {
+            number = number.convertToNumberObjectValue();
         }
 
         if (number.isError()) {
             return number;
+        }
+
+        if (power.isString()) {
+            power = power.convertToNumberObjectValue();
         }
 
         if (power.isError()) {

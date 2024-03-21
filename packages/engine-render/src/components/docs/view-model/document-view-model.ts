@@ -346,6 +346,7 @@ export class DocumentViewModel implements IDisposable {
             const customBlock = customBlocks[i];
             if (customBlock.startIndex === index) {
                 this._customBlockCurrentIndex = i;
+
                 return customBlock;
             }
         }

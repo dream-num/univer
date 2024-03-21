@@ -24,7 +24,7 @@ import {
     SetUnderlineCommand,
 } from '@univerjs/sheets';
 import type { IDesktopUIController, IMenuItemFactory } from '@univerjs/ui';
-import { ComponentManager, ILayoutService, IMenuService, IShortcutService, IUIController } from '@univerjs/ui';
+import { ComponentManager, DesktopUIPart, ILayoutService, IMenuService, IShortcutService, IUIController } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 import { connectInjector } from '@wendellhu/redi/react-bindings';
 
@@ -65,7 +65,7 @@ import {
     SetRowFrozenCommand,
     SetSelectionFrozenCommand,
 } from '../commands/commands/set-frozen.command';
-import { ScrollCommand, SetScrollRelativeCommand } from '../commands/commands/set-scroll.command';
+import { ScrollCommand, ScrollToCellCommand, SetScrollRelativeCommand } from '../commands/commands/set-scroll.command';
 import {
     ExpandSelectionCommand,
     MoveSelectionCommand,
@@ -227,15 +227,24 @@ export class SheetUIController extends Disposable {
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
+        @ILayoutService private readonly _layoutService: ILayoutService,
         @ICommandService private readonly _commandService: ICommandService,
         @IShortcutService private readonly _shortcutService: IShortcutService,
         @IMenuService private readonly _menuService: IMenuService,
-        @IUIController private readonly _uiController: IDesktopUIController,
-        @ILayoutService private readonly _layoutService: ILayoutService
+        @IUIController private readonly _uiController: IDesktopUIController
     ) {
         super();
 
         this._init();
+    }
+
+    private _init(): void {
+        this._initCustomComponents();
+        this._initCommands();
+        this._initMenus();
+        this._initShortcuts();
+        this._initWorkbenchParts();
+        this._initFocusHandler();
     }
 
     private _initCustomComponents(): void {
@@ -265,6 +274,7 @@ export class SheetUIController extends Disposable {
             HideRowConfirmCommand,
             HideColConfirmCommand,
             ScrollCommand,
+            ScrollToCellCommand,
             SelectAllCommand,
             SetActivateCellEditOperation,
             SetBoldCommand,
@@ -445,26 +455,12 @@ export class SheetUIController extends Disposable {
     }
 
     private _initWorkbenchParts(): void {
-        this.disposeWithMe(
-            this._uiController.registerHeaderComponent(() => connectInjector(RenderSheetHeader, this._injector))
-        );
+        const uiController = this._uiController;
+        const injector = this._injector;
 
-        this.disposeWithMe(
-            this._uiController.registerFooterComponent(() => connectInjector(RenderSheetFooter, this._injector))
-        );
-
-        this.disposeWithMe(
-            this._uiController.registerContentComponent(() => connectInjector(RenderSheetContent, this._injector))
-        );
-    }
-
-    private _init(): void {
-        this._initCustomComponents();
-        this._initCommands();
-        this._initMenus();
-        this._initShortcuts();
-        this._initWorkbenchParts();
-        this._initFocusHandler();
+        this.disposeWithMe(uiController.registerComponent(DesktopUIPart.HEADER, () => connectInjector(RenderSheetHeader, injector)));
+        this.disposeWithMe(uiController.registerComponent(DesktopUIPart.FOOTER, () => connectInjector(RenderSheetFooter, injector)));
+        this.disposeWithMe(uiController.registerComponent(DesktopUIPart.CONTENT, () => connectInjector(RenderSheetContent, injector)));
     }
 
     private _initFocusHandler(): void {

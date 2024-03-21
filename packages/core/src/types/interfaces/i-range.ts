@@ -69,6 +69,7 @@ export interface IRange extends IRowRange {
      * startColumn
      */
     startColumn: number;
+
     /**
      * The end column (exclusive) of the range
      * endColumn
@@ -96,6 +97,12 @@ export function selectionToArray(range: IRange): [number, number, number, number
  */
 export interface IGridRange {
     sheetId: string;
+    range: IRange;
+}
+
+export interface IUnitRangeName {
+    unitId: string;
+    sheetName: string;
     range: IRange;
 }
 

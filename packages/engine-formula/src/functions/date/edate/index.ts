@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import { DEFFAULT_DATE_FORMAT, excelDateSerial, excelSerialToDate } from '../../../basics/date';
+import { DEFAULT_DATE_FORMAT, excelDateSerial, excelSerialToDate } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import { NumberValueObject } from '../../../engine/value-object/primitive-object';
+import { NullValueObject, NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 /**
@@ -29,7 +29,7 @@ import { BaseFunction } from '../../base-function';
 export class Edate extends BaseFunction {
     override calculate(startDate: BaseValueObject, months: BaseValueObject) {
         if (startDate == null || months == null) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         if (startDate.isError()) {
@@ -56,7 +56,7 @@ export class Edate extends BaseFunction {
         const monthsArray = expandArrayValueObject(maxRowLength, maxColumnLength, months);
 
         return startDateArray.map((startDateObject, rowIndex, columnIndex) => {
-            const monthsValueObject = monthsArray.get(rowIndex, columnIndex);
+            const monthsValueObject = monthsArray.get(rowIndex, columnIndex) || NullValueObject.create();
 
             if (startDateObject.isError()) {
                 return startDateObject;
@@ -67,13 +67,13 @@ export class Edate extends BaseFunction {
             }
 
             if (startDateObject.isString() || startDateObject.isBoolean() || monthsValueObject.isString() || monthsValueObject.isBoolean()) {
-                return new ErrorValueObject(ErrorType.VALUE);
+                return ErrorValueObject.create(ErrorType.VALUE);
             }
 
             const startDateSerial = +startDateObject.getValue();
 
             if (startDateSerial < 0) {
-                return new ErrorValueObject(ErrorType.NUM);
+                return ErrorValueObject.create(ErrorType.NUM);
             }
 
             const monthsValue = Math.floor(+monthsValueObject.getValue());
@@ -87,8 +87,8 @@ export class Edate extends BaseFunction {
             const resultDate = new Date(Date.UTC(year, month, day));
             const currentSerial = excelDateSerial(resultDate);
 
-            const valueObject = new NumberValueObject(currentSerial);
-            valueObject.setPattern(DEFFAULT_DATE_FORMAT);
+            const valueObject = NumberValueObject.create(currentSerial);
+            valueObject.setPattern(DEFAULT_DATE_FORMAT);
 
             return valueObject;
         });

@@ -37,12 +37,12 @@ export class CellReferenceObject extends BaseReferenceObject {
 
     override unionBy(referenceObject: BaseReferenceObject) {
         if (!referenceObject.isCell()) {
-            return new ErrorValueObject(ErrorType.REF);
+            return ErrorValueObject.create(ErrorType.REF);
         }
 
         const cellReferenceObject = referenceObject as CellReferenceObject;
         // if (cellReferenceObject.getForcedSheetName() !== undefined) {
-        //     return new ErrorValueObject(ErrorType.REF);
+        //     return ErrorValueObject.create(ErrorType.REF);
         // }
 
         const newRangeData = this.unionRange(this.getRangeData(), cellReferenceObject.getRangeData());

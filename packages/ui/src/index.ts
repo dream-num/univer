@@ -75,14 +75,10 @@ export { IZenZoneService } from './services/zen-zone/zen-zone.service';
 export { UniverUIPlugin } from './ui-plugin';
 export * from './utils';
 export { type IConfirmPartMethodOptions } from './views/components/confirm-part/interface';
-
 export { IEditorService, EditorService } from './services/editor/editor.service';
-
 export { TextEditor } from './components/editor/TextEditor';
-
 export { SetEditorResizeOperation } from './commands/operations/editor/set-editor-resize.operation';
-
 export { RangeSelector } from './components/range-selector/RangeSelector';
-
 export { IRangeSelectorService } from './services/range-selector/range-selector.service';
 export { DesktopLocalStorageService } from './services/local-storage/local-storage.service';
+export { useActiveWorkbook, useActiveWorksheet } from './views/hooks/active';

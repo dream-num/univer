@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import type { Nullable } from '@univerjs/core';
+import { FormulaAstLRU } from '../../basics/cache-lru';
 import { ConcatenateType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
 import { ObjectClassType } from '../../basics/object-class-type';
@@ -21,9 +23,8 @@ import { compareToken } from '../../basics/token';
 
 export type callbackMapFnType = (currentValue: BaseValueObject, row: number, column: number) => BaseValueObject;
 
-export type callbackProductFnType = (currentValue: BaseValueObject, operationValue: BaseValueObject) => BaseValueObject;
 export interface IArrayValueObject {
-    calculateValueList: BaseValueObject[][];
+    calculateValueList: Nullable<BaseValueObject>[][];
     rowCount: number;
     columnCount: number;
     unitId: string;
@@ -58,7 +59,7 @@ export class BaseValueObject extends ObjectClassType {
         return 0;
     }
 
-    getArrayValue(): BaseValueObject[][] {
+    getArrayValue(): Nullable<BaseValueObject>[][] {
         /** abstract */
         return [];
     }
@@ -104,60 +105,60 @@ export class BaseValueObject extends ObjectClassType {
     }
 
     sum(): BaseValueObject {
-        return new ErrorValueObject(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     max(): BaseValueObject {
-        return new ErrorValueObject(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     min(): BaseValueObject {
-        return new ErrorValueObject(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     count(): BaseValueObject {
-        return new ErrorValueObject(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     countA(): BaseValueObject {
-        return new ErrorValueObject(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     countBlank(): BaseValueObject {
-        return new ErrorValueObject(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     getNegative(): BaseValueObject {
-        return new ErrorValueObject(ErrorType.NAME);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     getReciprocal(): BaseValueObject {
-        return new ErrorValueObject(ErrorType.NAME);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     plus(valueObject: BaseValueObject): BaseValueObject {
         /** abstract */
-        return new ErrorValueObject(ErrorType.NAME);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     minus(valueObject: BaseValueObject): BaseValueObject {
         /** abstract */
-        return new ErrorValueObject(ErrorType.NAME);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     multiply(valueObject: BaseValueObject): BaseValueObject {
         /** abstract */
-        return new ErrorValueObject(ErrorType.NAME);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     divided(valueObject: BaseValueObject): BaseValueObject {
         /** abstract */
-        return new ErrorValueObject(ErrorType.NAME);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     mod(valueObject: BaseValueObject): BaseValueObject {
         /** abstract */
-        return new ErrorValueObject(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     /**
@@ -167,7 +168,7 @@ export class BaseValueObject extends ObjectClassType {
      */
     map(callbackFn: callbackMapFnType): BaseValueObject {
         /** abstract */
-        return new ErrorValueObject(ErrorType.NAME);
+        return ErrorValueObject.create(ErrorType.NAME);
     }
 
     /**
@@ -177,16 +178,12 @@ export class BaseValueObject extends ObjectClassType {
      */
     mapValue(callbackFn: callbackMapFnType): BaseValueObject {
         /** abstract */
-        return new ErrorValueObject(ErrorType.NAME);
-    }
-
-    product(valueObject: BaseValueObject, callbackFn: callbackProductFnType): BaseValueObject {
-        return callbackFn(this, valueObject);
+        return ErrorValueObject.create(ErrorType.NAME);
     }
 
     compare(valueObject: BaseValueObject, operator: compareToken): BaseValueObject {
         /** abstract */
-        return new ErrorValueObject(ErrorType.NAME);
+        return ErrorValueObject.create(ErrorType.NAME);
     }
 
     isEqual(valueObject: BaseValueObject): BaseValueObject {
@@ -215,42 +212,42 @@ export class BaseValueObject extends ObjectClassType {
 
     concatenateFront(valueObject: BaseValueObject): BaseValueObject {
         /** abstract */
-        return new ErrorValueObject(ErrorType.NAME);
+        return ErrorValueObject.create(ErrorType.NAME);
     }
 
     concatenateBack(valueObject: BaseValueObject): BaseValueObject {
         /** abstract */
-        return new ErrorValueObject(ErrorType.NAME);
+        return ErrorValueObject.create(ErrorType.NAME);
     }
 
     plusBy(value: string | number | boolean): BaseValueObject {
         /** abstract */
-        return new ErrorValueObject(ErrorType.NAME);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     minusBy(value: string | number | boolean): BaseValueObject {
         /** abstract */
-        return new ErrorValueObject(ErrorType.NAME);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     multiplyBy(value: string | number | boolean): BaseValueObject {
         /** abstract */
-        return new ErrorValueObject(ErrorType.NAME);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     dividedBy(value: string | number | boolean): BaseValueObject {
         /** abstract */
-        return new ErrorValueObject(ErrorType.NAME);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     modInverse(valueObject: BaseValueObject): BaseValueObject {
         /** abstract */
-        return new ErrorValueObject(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     compareBy(value: string | number | boolean, operator: compareToken): BaseValueObject {
         /** abstract */
-        return new ErrorValueObject(ErrorType.NAME);
+        return ErrorValueObject.create(ErrorType.NAME);
     }
 
     concatenate(value: string | number | boolean, concatenateType = ConcatenateType.FRONT): string {
@@ -281,82 +278,82 @@ export class BaseValueObject extends ObjectClassType {
 
     pow(valueObject: BaseValueObject): BaseValueObject {
         /** abstract */
-        return new ErrorValueObject(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     powInverse(valueObject: BaseValueObject): BaseValueObject {
         /** abstract */
-        return new ErrorValueObject(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     sqrt(): BaseValueObject {
         /** abstract */
-        return new ErrorValueObject(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     cbrt(): BaseValueObject {
         /** abstract */
-        return new ErrorValueObject(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     cos(): BaseValueObject {
         /** abstract */
-        return new ErrorValueObject(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     acos(): BaseValueObject {
         /** abstract */
-        return new ErrorValueObject(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     acosh(): BaseValueObject {
         /** abstract */
-        return new ErrorValueObject(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     sin(): BaseValueObject {
         /** abstract */
-        return new ErrorValueObject(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     asin(): BaseValueObject {
         /** abstract */
-        return new ErrorValueObject(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     asinh(): BaseValueObject {
         /** abstract */
-        return new ErrorValueObject(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     tan(): BaseValueObject {
         /** abstract */
-        return new ErrorValueObject(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     tanh(): BaseValueObject {
         /** abstract */
-        return new ErrorValueObject(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     atan(): BaseValueObject {
         /** abstract */
-        return new ErrorValueObject(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     atan2(valueObject: BaseValueObject): BaseValueObject {
         /** abstract */
-        return new ErrorValueObject(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     atan2Inverse(valueObject: BaseValueObject): BaseValueObject {
         /** abstract */
-        return new ErrorValueObject(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     atanh(): BaseValueObject {
         /** abstract */
-        return new ErrorValueObject(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     /**
@@ -403,56 +400,80 @@ export class BaseValueObject extends ObjectClassType {
 
     log(): BaseValueObject {
         /** abstract */
-        return new ErrorValueObject(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     log10(): BaseValueObject {
         /** abstract */
-        return new ErrorValueObject(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     exp(): BaseValueObject {
         /** abstract */
-        return new ErrorValueObject(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     abs(): BaseValueObject {
         /** abstract */
-        return new ErrorValueObject(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     round(valueObject: BaseValueObject): BaseValueObject {
         /** abstract */
-        return new ErrorValueObject(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     roundInverse(valueObject: BaseValueObject): BaseValueObject {
         /** abstract */
-        return new ErrorValueObject(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     floor(valueObject: BaseValueObject): BaseValueObject {
         /** abstract */
-        return new ErrorValueObject(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     floorInverse(valueObject: BaseValueObject): BaseValueObject {
         /** abstract */
-        return new ErrorValueObject(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     ceil(valueObject: BaseValueObject): BaseValueObject {
         /** abstract */
-        return new ErrorValueObject(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     ceilInverse(valueObject: BaseValueObject): BaseValueObject {
         /** abstract */
-        return new ErrorValueObject(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.VALUE);
+    }
+
+    convertToNumberObjectValue(): BaseValueObject {
+        /** abstract */
+        return ErrorValueObject.create(ErrorType.VALUE);
+    }
+
+    convertToBooleanObjectValue(): BaseValueObject {
+        /** abstract */
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 }
 
+const Error_CACHE_LRU_COUNT = 1000;
+
+export const ErrorValueObjectCache = new FormulaAstLRU<ErrorValueObject>(Error_CACHE_LRU_COUNT);
 export class ErrorValueObject extends BaseValueObject {
+    static create(errorType: ErrorType, errorContent: string = '') {
+        const key = `${errorType}-${errorContent}`;
+        const cached = ErrorValueObjectCache.get(key);
+        if (cached) {
+            return cached;
+        }
+        const instance = new ErrorValueObject(errorType, errorContent);
+        ErrorValueObjectCache.set(key, instance);
+        return instance;
+    }
+
     constructor(
         private _errorType: ErrorType,
         private _errorContent: string = ''

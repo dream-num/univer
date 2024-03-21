@@ -19,6 +19,7 @@ import type { IRange } from '@univerjs/core';
 import { ErrorType } from '../../basics/error-type';
 import { deserializeRangeWithSheet } from '../utils/reference';
 import { ErrorValueObject } from '../value-object/base-value-object';
+import { matchToken } from '../../basics/token';
 import { BaseReferenceObject } from './base-reference-object';
 
 export class RowReferenceObject extends BaseReferenceObject {
@@ -42,18 +43,18 @@ export class RowReferenceObject extends BaseReferenceObject {
 
     override unionBy(referenceObject: BaseReferenceObject) {
         if (!referenceObject.isRow()) {
-            return new ErrorValueObject(ErrorType.REF);
+            return ErrorValueObject.create(ErrorType.REF);
         }
 
         const rowReferenceObject = referenceObject as RowReferenceObject;
         if (rowReferenceObject.getForcedSheetName() !== undefined && rowReferenceObject.getForcedSheetName() !== '') {
-            return new ErrorValueObject(ErrorType.REF);
+            return ErrorValueObject.create(ErrorType.REF);
         }
 
         const currentRangeData = this.getRangeData();
 
         // if (currentRangeData.endRow !== -1) {
-        //     return new ErrorValueObject(ErrorType.REF);
+        //     return ErrorValueObject.create(ErrorType.REF);
         // }
 
         const newRow = rowReferenceObject.getRangeData().startRow;
@@ -66,6 +67,8 @@ export class RowReferenceObject extends BaseReferenceObject {
             currentRangeData.startRow = newRow;
             currentRangeData.endRow = row;
         }
+
+        this.setToken(`${this.getToken()}${matchToken.COLON}${rowReferenceObject.getToken()}`);
 
         return this;
     }

@@ -26,19 +26,19 @@ describe('Test day function', () => {
 
     describe('Day', () => {
         it('Serial number is normal', () => {
-            const serialNumber = new NumberValueObject(43832);
+            const serialNumber = NumberValueObject.create(43832);
             const result = textFunction.calculate(serialNumber);
             expect(result.getValue()).toStrictEqual(2);
         });
 
         it('Serial number is date string', () => {
-            const serialNumber = new StringValueObject('2020-01-02');
+            const serialNumber = StringValueObject.create('2020-01-02');
             const result = textFunction.calculate(serialNumber);
             expect(result.getValue()).toStrictEqual(2);
         });
 
         it('Serial number is array', () => {
-            const serialNumber = new ArrayValueObject({
+            const serialNumber = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([[1, ' ', 1.23, true, false, null],
                     [0, '100', '2.34', 'test', -3, 1900]]),
                 rowCount: 2,

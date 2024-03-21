@@ -36,14 +36,14 @@ export const PAGE3_RICHTEXT_3 = {
                         st: 0,
                         ed: 70,
                         ts: {
-                            fs: 12,
+                            fs: 12 * 0.75,
                         },
                     },
                     {
                         st: 72,
                         ed: 159,
                         ts: {
-                            fs: 12,
+                            fs: 12 * 0.75,
                         },
                     },
                 ],
@@ -55,7 +55,7 @@ export const PAGE3_RICHTEXT_3 = {
                             listId: 'orderList',
                             nestingLevel: 0,
                             textStyle: {
-                                fs: 20,
+                                fs: 20 * 0.75,
                             },
                         },
                         paragraphStyle: {
@@ -69,7 +69,7 @@ export const PAGE3_RICHTEXT_3 = {
                             listId: 'orderList',
                             nestingLevel: 0,
                             textStyle: {
-                                fs: 20,
+                                fs: 20 * 0.75,
                             },
                         },
                     },

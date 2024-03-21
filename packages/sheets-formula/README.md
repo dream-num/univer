@@ -2,6 +2,8 @@
 
 [![npm version](https://img.shields.io/npm/v/@univerjs/sheets-formula)](https://npmjs.org/package/@univerjs/sheets-formula)
 [![license](https://img.shields.io/npm/l/@univerjs/sheets-formula)](https://img.shields.io/npm/l/@univerjs/sheets-formula)
+![CSS Included](https://img.shields.io/badge/CSS_Included-blue?logo=CSS3)
+![i18n](https://img.shields.io/badge/zh--CN%20%7C%20en--US-cornflowerblue?label=i18n)
 
 ## Introduction
 
@@ -341,7 +343,7 @@ You can create a new `custom-function.ts` file to specifically place custom form
     */
     export class Customsum extends BaseFunction {
         override calculate(...variants: BaseValueObject[]) {
-            let accumulatorAll: BaseValueObject = new NumberValueObject(0);
+            let accumulatorAll: BaseValueObject = NumberValueObject.create(0);
             for (let i = 0; i < variants.length; i++) {
                 let variant = variants[i];
 
@@ -492,7 +494,7 @@ First refer to [Custom Plugin](/en-us/guides/extend/write-a-plugin/) to create a
      */
     export class Customsum extends BaseFunction {
         override calculate(...variants: BaseValueObject[]) {
-            let accumulatorAll: BaseValueObject = new NumberValueObject(0);
+            let accumulatorAll: BaseValueObject = NumberValueObject.create(0);
             for (let i = 0; i < variants.length; i++) {
                 let variant = variants[i];
 
@@ -704,10 +706,10 @@ To implement a formula, you need to add formula description, internationalizatio
     Location: [packages/sheets-formula/src/locale/function-list/math/en-US.ts](https://github.com/dream-num/univer/blob/dev/packages/sheets-formula/src/locale/function-list/math/en-US.ts).
 
     Internationalization is organized by category, with a file for each category. Refer to the Office function category page for a brief overview.
-    ![office excel](./assets/img/office-excel.png)
+    ![office excel](./assets/office-excel.png)
 
     Refer to the Office function details page for function descriptions and parameter descriptions.
-    ![sumif](./assets/img/sumif.png)
+    ![sumif](./assets/sumif.png)
 
     Most function names already have basic description, abstract, links, and parameter structures. It is recommended to modify them based on this foundation. If a function is not present, add it to the end.
 
@@ -775,10 +777,10 @@ To implement a formula, you need to add formula description, internationalizatio
 -   Any formula's input and output can be `A1`, `A1:B10`, etc. When researching Excel, consider all cases, such as `=SIN(A1:B10)`, which expands to the calculated range.
     -   For example, the `XLOOKUP` function requires at least one of the rows or columns of its two inputs to be of equal size for matrix calculation.
     -   For example, the `SUMIF` function, although commonly used for summation, can expand based on the second parameter.
-        ![sumif array](./assets/img/sumif-array.png)
-        ![sumif array result](./assets/img/sumif-array-result.png)
+        ![sumif array](./assets/sumif-array.png)
+        ![sumif array result](./assets/sumif-array-result.png)
     -   Excel formula calculation is becoming more like numpy, for example:
-        ![numpy](./assets/img/numpy.png)
+        ![numpy](./assets/numpy.png)
 -   For numerical calculations in formulas, use built-in methods and try to avoid obtaining values for manual calculation. Because formula parameters can be values, arrays, or references. You can refer to existing `sum` and `minus` functions.
 -   Precision issues: The formula introduces `big.js`, and using built-in methods will call this library. However, it is nearly 100 times slower than native calculations. Therefore, for methods like `sin`, it is advisable to use native implementations.
 -   For custom calculations, use the `product` function, suitable for calculating two input parameters. Call `map` to iterate over the values for changes to a parameter's own values.

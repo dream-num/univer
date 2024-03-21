@@ -21,7 +21,7 @@ import { ArrayValueObject, transformToValueObject } from '../array-value-object'
 describe('arrayValueObject sin method test', () => {
     describe('sin', () => {
         it('origin nm, param nm', () => {
-            const tanArrayValueObject = new ArrayValueObject({
+            const tanArrayValueObject = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [8, 1, ' ', 1.23, true, false],
                     [27, 0, '100', '2.34', 'test', -3],

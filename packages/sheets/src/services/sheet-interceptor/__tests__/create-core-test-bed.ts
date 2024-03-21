@@ -45,10 +45,10 @@ const TEST_WORKBOOK_DATA: IWorkbookData = {
 
 export function createCoreTestBed(workbookConfig?: IWorkbookData, dependencies?: Dependency[]) {
     const univer = new Univer();
+    const injector = univer.__getInjector();
+    const get = injector.get.bind(injector);
 
-    let get: Injector['get'] | undefined;
-
-    class TestSpyPlugin extends Plugin {
+    class TestPlugin extends Plugin {
         static override type = PluginType.Sheet;
 
         constructor(
@@ -56,26 +56,15 @@ export function createCoreTestBed(workbookConfig?: IWorkbookData, dependencies?:
             @Inject(Injector) override readonly _injector: Injector
         ) {
             super('test-spy-plugin');
-
-            this._injector = _injector;
-            get = this._injector.get.bind(_injector);
         }
 
         override onStarting(injector: Injector): void {
             dependencies?.forEach((d) => injector.add(d));
         }
-
-        override onDestroy(): void {
-            get = undefined;
-        }
     }
 
-    univer.registerPlugin(TestSpyPlugin);
+    univer.registerPlugin(TestPlugin);
     const sheet = univer.createUniverSheet(workbookConfig || TEST_WORKBOOK_DATA);
-
-    if (get === undefined) {
-        throw new Error('[TestPlugin]: not hooked on!');
-    }
 
     const univerInstanceService = get(IUniverInstanceService);
     univerInstanceService.focusUniverInstance('test');

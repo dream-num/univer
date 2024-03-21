@@ -61,7 +61,7 @@ export function Select(props: ISelectProps) {
 
     const { mountContainer } = useContext(ConfigContext);
 
-    return (
+    return mountContainer && (
         <RcSelect
             mode={mode}
             prefixCls={styles.select}

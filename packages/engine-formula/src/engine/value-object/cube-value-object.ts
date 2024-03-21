@@ -19,6 +19,10 @@ import { BaseValueObject } from './base-value-object';
 import { NumberValueObject } from './primitive-object';
 
 export class CubeValueObject extends BaseValueObject {
+    static create(values: ArrayValueObject[]) {
+        return new CubeValueObject(values);
+    }
+
     override isCube() {
         return true;
     }
@@ -31,7 +35,7 @@ export class CubeValueObject extends BaseValueObject {
     }
 
     override sum() {
-        const result = new NumberValueObject(0);
+        const result = NumberValueObject.create(0);
         this._values.forEach((arr) => {
             result.plus(arr.sum());
         });
@@ -39,7 +43,7 @@ export class CubeValueObject extends BaseValueObject {
     }
 
     override max() {
-        let result = new NumberValueObject(Number.NEGATIVE_INFINITY);
+        let result = NumberValueObject.create(Number.NEGATIVE_INFINITY);
         this._values.forEach((arr) => {
             const compare = arr.max() as NumberValueObject;
             if (result.isLessThan(compare)) {
@@ -50,7 +54,7 @@ export class CubeValueObject extends BaseValueObject {
     }
 
     override min() {
-        let result = new NumberValueObject(Number.POSITIVE_INFINITY);
+        let result = NumberValueObject.create(Number.POSITIVE_INFINITY);
         this._values.forEach((arr) => {
             const compare = arr.max() as NumberValueObject;
             if (result.isGreaterThan(compare)) {
@@ -61,7 +65,7 @@ export class CubeValueObject extends BaseValueObject {
     }
 
     override count() {
-        const count = new NumberValueObject(0);
+        const count = NumberValueObject.create(0);
         this._values.forEach((arr) => {
             count.plus(arr.count());
         });
@@ -69,7 +73,7 @@ export class CubeValueObject extends BaseValueObject {
     }
 
     override countA() {
-        const count = new NumberValueObject(0);
+        const count = NumberValueObject.create(0);
         this._values.forEach((arr) => {
             count.plus(arr.countA());
         });
@@ -77,7 +81,7 @@ export class CubeValueObject extends BaseValueObject {
     }
 
     override countBlank() {
-        const count = new NumberValueObject(0);
+        const count = NumberValueObject.create(0);
         this._values.forEach((arr) => {
             count.plus(arr.countBlank());
         });

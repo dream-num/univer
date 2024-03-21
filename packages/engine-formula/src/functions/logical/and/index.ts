@@ -23,7 +23,7 @@ import { BaseFunction } from '../../base-function';
 export class And extends BaseFunction {
     override calculate(...logicalValues: BaseValueObject[]) {
         if (logicalValues.length === 0) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         let result = true;
@@ -55,6 +55,6 @@ export class And extends BaseFunction {
             }
         }
 
-        return noBoolean ? new ErrorValueObject(ErrorType.VALUE) : new BooleanValueObject(result);
+        return noBoolean ? ErrorValueObject.create(ErrorType.VALUE) : BooleanValueObject.create(result);
     }
 }

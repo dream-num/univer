@@ -14,5 +14,4 @@
  * limitations under the License.
  */
 
-export * from './basics';
 export * from './slides-ui-plugin';

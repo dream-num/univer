@@ -33,18 +33,10 @@ import type { IBoundRectNoAngle } from './vector2';
 
 const DEG180 = 180;
 
-const OBJECT_ARRAY = '[object Array]';
-const OBJECT_NUMBER = '[object Number]';
-const OBJECT_STRING = '[object String]';
-const OBJECT_BOOLEAN = '[object Boolean]';
 const PI_OVER_DEG180 = Math.PI / DEG180;
 const DEG180_OVER_PI = DEG180 / Math.PI;
-const HASH = '#';
-const EMPTY_STRING = '';
-const ZERO = '0';
 const RGB_PAREN = 'rgb(';
 const RGBA_PAREN = 'rgba(';
-const RGB_REGEX = /rgb\((\d{1,3}),(\d{1,3}),(\d{1,3})\)/;
 
 // TODO :move to core @jerry
 export const getColor = (RgbArray: number[], opacity?: number): string => {
@@ -349,6 +341,11 @@ export function hasCJK(text: string) {
     return CJK_ALL_REG.test(text);
 }
 
+const CJK_PUNCTUATION_REG = cjk.punctuations().toRegExp();
+export function hasCJKPunctuation(text: string) {
+    return CJK_PUNCTUATION_REG.test(text);
+}
+
 export function hasAllLatin(text: string) {
     const pattern = /[\u0000-\u024F]/gi;
     if (!pattern.exec(text)) {
@@ -417,6 +414,29 @@ export function hasSpace(text: string) {
     return pattern.test(text);
 }
 
+// See <https://www.w3.org/TR/clreq/#punctuation_width_adjustment>
+export function isCjkLeftAlignedPunctuation(text: string) {
+    const LEFT_ALIGNED_PUNCTUATION = ['”', '’', '，', '。', '．', '、', '：', '；', '？', '！', '》', '）', '』', '」', '】', '〗', '〕', '〉', '］', '｝'];
+
+    return LEFT_ALIGNED_PUNCTUATION.indexOf(text) > -1;
+}
+
+// See <https://www.w3.org/TR/clreq/#punctuation_width_adjustment>
+export function isCjkRightAlignedPunctuation(text: string) {
+    const RIGHT_ALIGNED_PUNCTUATION = ['“', '‘', '《', '（', '『', '「', '【', '〖', '〔', '〈', '［', '｛'];
+
+    return RIGHT_ALIGNED_PUNCTUATION.indexOf(text) > -1;
+}
+
+// See <https://www.w3.org/TR/clreq/#punctuation_width_adjustment>
+export function isCjkCenterAlignedPunctuation(text: string) {
+    // U+30FB: Katakana Middle Dot
+    // U+00B7: Middle Dot
+    const CENTER_ALIGNED_PUNCTUATION = ['\u{30FB}', '\u{00B7}'];
+
+    return CENTER_ALIGNED_PUNCTUATION.indexOf(text) > -1;
+}
+
 const one_thousand = 1000;
 
 // 返回屏幕 DPI
@@ -477,10 +497,18 @@ export function getCellPositionByIndex(
     const startColumn = column - 1;
 
     const startY = rowHeightAccumulation[startRow] || 0;
-    const endY = rowHeightAccumulation[row] || rowHeightAccumulation[rowHeightAccumulation.length - 1];
+    let endY = rowHeightAccumulation[row];
+
+    if (endY == null) {
+        endY = rowHeightAccumulation[rowHeightAccumulation.length - 1];
+    }
 
     const startX = columnWidthAccumulation[startColumn] || 0;
-    const endX = columnWidthAccumulation[column] || columnWidthAccumulation[columnWidthAccumulation.length - 1];
+    let endX = columnWidthAccumulation[column];
+
+    if (endX == null) {
+        endX = columnWidthAccumulation[columnWidthAccumulation.length - 1];
+    }
 
     return {
         startY,

@@ -22,25 +22,23 @@ import { BaseFunction } from '../../base-function';
 export class Counta extends BaseFunction {
     override calculate(...variants: BaseValueObject[]) {
         if (variants.length === 0) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
-        let accumulatorAll: BaseValueObject = new NumberValueObject(0);
+        let accumulatorAll: BaseValueObject = NumberValueObject.create(0);
         for (let i = 0; i < variants.length; i++) {
             let variant = variants[i];
 
             if (variant.isError()) {
-                accumulatorAll = accumulatorAll.plus(new NumberValueObject(1));
+                accumulatorAll = accumulatorAll.plus(NumberValueObject.create(1));
                 continue;
             }
 
             if (variant.isArray()) {
                 variant = variant.countA();
                 accumulatorAll = accumulatorAll.plus(variant);
-            } else {
-                if (!variant.isNull()) {
-                    accumulatorAll = accumulatorAll.plus(new NumberValueObject(1));
-                }
+            } else if (!variant.isNull()) {
+                accumulatorAll = accumulatorAll.plus(NumberValueObject.create(1));
             }
         }
 

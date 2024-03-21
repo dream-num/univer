@@ -51,6 +51,10 @@ function getRootLexerHasValueNode(node: Nullable<BaseAstNode>): Nullable<BaseAst
 }
 
 export class LambdaValueObjectObject extends BaseValueObject {
+    static create(lambdaNode: BaseAstNode, interpreter: Interpreter, lambdaPrivacyVarKeys: string[]) {
+        return new LambdaValueObjectObject(lambdaNode, interpreter, lambdaPrivacyVarKeys);
+    }
+
     private _lambdaPrivacyValueMap = new Map<string, BaseValueObject>();
 
     constructor(
@@ -71,7 +75,7 @@ export class LambdaValueObjectObject extends BaseValueObject {
     execute(...variants: BaseValueObject[]) {
         const paramCount = this._lambdaPrivacyVarKeys.length;
         if (variants.length !== paramCount) {
-            return new ErrorValueObject(ErrorType.VALUE);
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         this._setLambdaPrivacyValueMap(variants);

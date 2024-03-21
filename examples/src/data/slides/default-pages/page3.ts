@@ -84,7 +84,7 @@ export const DEFAULT_THIRD_PAGE = {
             type: PageElementType.TEXT,
             richText: {
                 text: 'Strategic technology trends',
-                fs: 32,
+                fs: 32 * 0.75,
                 cl: {
                     rgb: 'rgb(244,79,86)',
                 },
@@ -102,7 +102,7 @@ export const DEFAULT_THIRD_PAGE = {
             type: PageElementType.TEXT,
             richText: {
                 text: 'We expect the 2023 trends to impact enterprise strategies in the coming three years by enabling organizations to address four key priorities:',
-                fs: 18,
+                fs: 18 * 0.75,
                 cl: {
                     rgb: 'rgb(127,127,127)',
                 },
@@ -140,7 +140,7 @@ export const DEFAULT_THIRD_PAGE = {
             type: PageElementType.TEXT,
             richText: {
                 text: 'Optimize',
-                fs: 16,
+                fs: 16 * 0.75,
                 cl: {
                     rgb: 'rgb(127,127,127)',
                 },
@@ -158,7 +158,7 @@ export const DEFAULT_THIRD_PAGE = {
             type: PageElementType.TEXT,
             richText: {
                 text: '20%',
-                fs: 22,
+                fs: 22 * 0.75,
                 cl: {
                     rgb: 'rgb(255,255,255)',
                 },
@@ -196,7 +196,7 @@ export const DEFAULT_THIRD_PAGE = {
             type: PageElementType.TEXT,
             richText: {
                 text: 'Scale',
-                fs: 16,
+                fs: 16 * 0.75,
                 cl: {
                     rgb: 'rgb(127,127,127)',
                 },
@@ -214,7 +214,7 @@ export const DEFAULT_THIRD_PAGE = {
             type: PageElementType.TEXT,
             richText: {
                 text: '50%',
-                fs: 22,
+                fs: 22 * 0.75,
                 cl: {
                     rgb: 'rgb(255,255,255)',
                 },
@@ -252,7 +252,7 @@ export const DEFAULT_THIRD_PAGE = {
             type: PageElementType.TEXT,
             richText: {
                 text: 'Scale',
-                fs: 16,
+                fs: 16 * 0.75,
                 cl: {
                     rgb: 'rgb(127,127,127)',
                 },
@@ -270,7 +270,7 @@ export const DEFAULT_THIRD_PAGE = {
             type: PageElementType.TEXT,
             richText: {
                 text: '30%',
-                fs: 22,
+                fs: 22 * 0.75,
                 cl: {
                     rgb: 'rgb(255,255,255)',
                 },
@@ -288,7 +288,7 @@ export const DEFAULT_THIRD_PAGE = {
             type: PageElementType.TEXT,
             richText: {
                 text: 'Theme 1: Optimize',
-                fs: 16,
+                fs: 16 * 0.75,
                 cl: {
                     rgb: 'rgb(244,79,86)',
                 },
@@ -307,7 +307,7 @@ export const DEFAULT_THIRD_PAGE = {
             type: PageElementType.TEXT,
             richText: {
                 text: 'Theme 2: Scale',
-                fs: 16,
+                fs: 16 * 0.75,
                 cl: {
                     rgb: 'rgb(244,79,86)',
                 },
@@ -326,7 +326,7 @@ export const DEFAULT_THIRD_PAGE = {
             type: PageElementType.TEXT,
             richText: {
                 text: 'Theme 2: Scale',
-                fs: 16,
+                fs: 16 * 0.75,
                 cl: {
                     rgb: 'rgb(244,79,86)',
                 },

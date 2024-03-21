@@ -15,7 +15,7 @@
  */
 
 import type { DocumentDataModel, IDocumentBody, IDocumentData, IDocumentStyle, IPosition, Nullable } from '@univerjs/core';
-import { DEFAULT_EMPTY_DOCUMENT_VALUE, Disposable, FOCUSING_UNIVER_EDITOR_SINGLE_MODE, HorizontalAlign, IContextService, IUniverInstanceService, toDisposable, VerticalAlign } from '@univerjs/core';
+import { DEFAULT_EMPTY_DOCUMENT_VALUE, Disposable, FOCUSING_EDITOR_INPUT_FORMULA, FOCUSING_UNIVER_EDITOR_SINGLE_MODE, HorizontalAlign, IContextService, IUniverInstanceService, toDisposable, VerticalAlign } from '@univerjs/core';
 import type { IDisposable } from '@wendellhu/redi';
 import { createIdentifier, Inject } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
@@ -279,6 +279,8 @@ export interface IEditorService {
 
     setValue(val: string, editorUnitId?: string): void;
 
+    setValueNoRefresh(val: string, editorUnitId?: string): void;
+
     setRichValue(body: IDocumentBody, editorUnitId?: string): void;
 
     getFirstEditor(): Editor;
@@ -424,7 +426,21 @@ export class EditorService extends Disposable implements IEditorService, IDispos
         }
         const editor = this.getEditor(editorUnitId);
 
-        return !this.getSpreadsheetFocusState() || !editor || editor.isSheetEditor();
+        if (!editor || editor.isSheetEditor()) {
+            return true;
+        }
+
+        if (editor.onlyInputRange() !== true && editor.onlyInputFormula() !== true) {
+            this.blur();
+            return true;
+        }
+
+        if (editor.onlyInputFormula() === true && this._contextService.getContextValue(FOCUSING_EDITOR_INPUT_FORMULA) !== true) {
+            this.blur();
+            return true;
+        }
+
+        return !this.getSpreadsheetFocusState();
     }
 
     blur() {
@@ -479,15 +495,15 @@ export class EditorService extends Disposable implements IEditorService, IDispos
             editorUnitId = this._getCurrentEditorUnitId();
         }
 
-        if (val.substring(0, 1) === '=') {
-            this.setFormula(val, editorUnitId);
-        } else {
-            this._setValue$.next({ body: {
-                dataStream: val,
-            }, editorUnitId });
-        }
+        this.setValueNoRefresh(val, editorUnitId);
 
         this._refreshValueChange(editorUnitId);
+    }
+
+    setValueNoRefresh(val: string, editorUnitId: string) {
+        this._setValue$.next({ body: {
+            dataStream: val,
+        }, editorUnitId });
 
         this.resize(editorUnitId);
     }

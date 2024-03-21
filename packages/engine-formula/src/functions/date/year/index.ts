@@ -24,7 +24,7 @@ import { BaseFunction } from '../../base-function';
 export class Year extends BaseFunction {
     override calculate(serialNumber: BaseValueObject) {
         if (serialNumber == null) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         if (serialNumber.isArray()) {
@@ -44,7 +44,7 @@ export class Year extends BaseFunction {
 
         if (serialNumberObject.isString()) {
             if (!isValidDateStr(`${dateValue}`)) {
-                return new ErrorValueObject(ErrorType.VALUE);
+                return ErrorValueObject.create(ErrorType.VALUE);
             }
 
             date = new Date(`${dateValue}`);
@@ -52,20 +52,20 @@ export class Year extends BaseFunction {
             const dateSerial = +dateValue;
 
             if (dateSerial < 0) {
-                return new ErrorValueObject(ErrorType.NUM);
+                return ErrorValueObject.create(ErrorType.NUM);
             }
 
             // Excel serial 0 is 1900-01-00
             // Google Sheets serial 0 is 1899-12-30
             if (dateSerial === 0) {
-                return new NumberValueObject(1900);
+                return NumberValueObject.create(1900);
             }
 
             date = excelSerialToDate(dateSerial);
         }
 
         const year = date.getUTCFullYear();
-        const valueObject = new NumberValueObject(year);
+        const valueObject = NumberValueObject.create(year);
 
         return valueObject;
     }

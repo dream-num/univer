@@ -26,7 +26,7 @@ export class Row extends BaseFunction {
         reference?: BaseValueObject
     ) {
         if (reference == null) {
-            return new NumberValueObject(this.row + 1);
+            return NumberValueObject.create(this.row + 1);
         }
 
         if (reference.isError()) {
@@ -34,7 +34,7 @@ export class Row extends BaseFunction {
         }
 
         if (!reference.isArray()) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         const row = (reference as ArrayValueObject).getCurrentRow();
@@ -42,7 +42,7 @@ export class Row extends BaseFunction {
 
         const calculateValueList = [];
         for (let i = 0; i < rowCount; i++) {
-            calculateValueList.push([new NumberValueObject(row + i + 1)]);
+            calculateValueList.push([NumberValueObject.create(row + i + 1)]);
         }
 
         const arrayValueObjectData: IArrayValueObject = {
@@ -55,6 +55,6 @@ export class Row extends BaseFunction {
             column: this.column,
         };
 
-        return new ArrayValueObject(arrayValueObjectData);
+        return ArrayValueObject.create(arrayValueObjectData);
     }
 }

@@ -23,21 +23,21 @@ import { BaseFunction } from '../../base-function';
 export class Islogical extends BaseFunction {
     override calculate(value: BaseValueObject) {
         if (value == null) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         if (value.isBoolean()) {
-            return new BooleanValueObject(true);
+            return BooleanValueObject.create(true);
         } else if (value.isArray()) {
             return (value as ArrayValueObject).mapValue((valueObject) => {
                 if (valueObject.isBoolean()) {
-                    return new BooleanValueObject(true);
+                    return BooleanValueObject.create(true);
                 }
 
-                return new BooleanValueObject(false);
+                return BooleanValueObject.create(false);
             });
         }
 
-        return new BooleanValueObject(false);
+        return BooleanValueObject.create(false);
     }
 }

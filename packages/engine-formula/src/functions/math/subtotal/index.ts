@@ -57,7 +57,7 @@ export class Subtotal extends BaseFunction {
 
     override calculate(functionNum: FunctionVariantType, ...refs: FunctionVariantType[]) {
         if (functionNum == null) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         if (functionNum.isError()) {
@@ -65,7 +65,7 @@ export class Subtotal extends BaseFunction {
         }
 
         if (refs.length === 0) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         if (functionNum.isReferenceObject()) {
@@ -164,7 +164,7 @@ export class Subtotal extends BaseFunction {
                 result = this._varp(true, ...refs);
                 break;
             default:
-                result = new ErrorValueObject(ErrorType.VALUE);
+                result = ErrorValueObject.create(ErrorType.VALUE);
         }
 
         return result as BaseValueObject;
@@ -174,8 +174,8 @@ export class Subtotal extends BaseFunction {
         // null, true, false, 0 , 1, '  1',
         const indexNumValue = indexNum ? Number(indexNum.getValue()) : 0;
 
-        if (isNaN(indexNumValue)) {
-            return new ErrorValueObject(ErrorType.VALUE);
+        if (Number.isNaN(indexNumValue)) {
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         const indexNumValueInt = Math.floor(indexNumValue);
@@ -185,7 +185,7 @@ export class Subtotal extends BaseFunction {
             return indexNumValueInt;
         }
 
-        return new ErrorValueObject(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     private _average(ignoreHidden: boolean, ...refs: FunctionVariantType[]) {
@@ -209,12 +209,12 @@ export class Subtotal extends BaseFunction {
     }
 
     private _counta(ignoreHidden: boolean, ...refs: FunctionVariantType[]) {
-        let accumulatorAll: BaseValueObject = new NumberValueObject(0);
+        let accumulatorAll: BaseValueObject = NumberValueObject.create(0);
         for (let i = 0; i < refs.length; i++) {
             const variant = refs[i];
 
             if (!variant.isReferenceObject()) {
-                return new ErrorValueObject(ErrorType.VALUE);
+                return ErrorValueObject.create(ErrorType.VALUE);
             }
 
             const rowData = (variant as BaseReferenceObject).getRowData();
@@ -243,7 +243,7 @@ export class Subtotal extends BaseFunction {
         }
 
         if (this._isBlankArrayObject(flattenArray)) {
-            return new NumberValueObject(0);
+            return NumberValueObject.create(0);
         }
 
         return flattenArray.max();
@@ -257,7 +257,7 @@ export class Subtotal extends BaseFunction {
         }
 
         if (this._isBlankArrayObject(flattenArray)) {
-            return new NumberValueObject(0);
+            return NumberValueObject.create(0);
         }
 
         return flattenArray.min();
@@ -271,10 +271,10 @@ export class Subtotal extends BaseFunction {
         }
 
         if (this._isBlankArrayObject(flattenArray)) {
-            return new NumberValueObject(0);
+            return NumberValueObject.create(0);
         }
 
-        let result: NumberValueObject = new NumberValueObject(1);
+        let result: NumberValueObject = NumberValueObject.create(1);
         (flattenArray as ArrayValueObject).iterator((valueObject) => {
             result = result.multiply(
                 valueObject as BaseValueObject
@@ -292,7 +292,7 @@ export class Subtotal extends BaseFunction {
         }
 
         if (this._isBlankArrayObject(flattenArray)) {
-            return new ErrorValueObject(ErrorType.DIV_BY_ZERO);
+            return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
         }
 
         return flattenArray.std(1);
@@ -306,7 +306,7 @@ export class Subtotal extends BaseFunction {
         }
 
         if (this._isBlankArrayObject(flattenArray)) {
-            return new ErrorValueObject(ErrorType.DIV_BY_ZERO);
+            return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
         }
 
         return flattenArray.std();
@@ -330,7 +330,7 @@ export class Subtotal extends BaseFunction {
         }
 
         if (this._isBlankArrayObject(flattenArray)) {
-            return new ErrorValueObject(ErrorType.DIV_BY_ZERO);
+            return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
         }
 
         return flattenArray.var(1);
@@ -344,7 +344,7 @@ export class Subtotal extends BaseFunction {
         }
 
         if (this._isBlankArrayObject(flattenArray)) {
-            return new ErrorValueObject(ErrorType.DIV_BY_ZERO);
+            return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
         }
 
         return flattenArray.var();
@@ -362,7 +362,7 @@ export class Subtotal extends BaseFunction {
             }
 
             if (!variant.isReferenceObject()) {
-                return new ErrorValueObject(ErrorType.VALUE);
+                return ErrorValueObject.create(ErrorType.VALUE);
             }
 
             const rowData = (variant as BaseReferenceObject).getRowData();

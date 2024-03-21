@@ -15,7 +15,7 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { Disposable, isRealNum } from '@univerjs/core';
+import { Disposable } from '@univerjs/core';
 
 import { ErrorType } from '../basics/error-type';
 import type { IFunctionNames } from '../basics/function';
@@ -25,7 +25,7 @@ import type { ArrayBinarySearchType } from '../engine/utils/compare';
 import { ArrayOrderSearchType } from '../engine/utils/compare';
 import type { ArrayValueObject } from '../engine/value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject } from '../engine/value-object/base-value-object';
-import { NumberValueObject, type PrimitiveValueType } from '../engine/value-object/primitive-object';
+import { NullValueObject, NumberValueObject, type PrimitiveValueType } from '../engine/value-object/primitive-object';
 import { convertTonNumber } from '../engine/utils/object-covert';
 import { createNewArray } from '../engine/utils/array-object';
 
@@ -95,7 +95,7 @@ export class BaseFunction extends Disposable {
     }
 
     calculate(...arg: BaseValueObject[]): NodeValueType {
-        return new ErrorValueObject(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     checkArrayType(variant: FunctionVariantType) {
@@ -107,7 +107,6 @@ export class BaseFunction extends Disposable {
      * For instance, The column number (starting with 1 for the left-most column of table_array) that contains the return value.
      * https://support.microsoft.com/en-us/office/vlookup-function-0bbc8083-26fe-4963-8ab8-93a18ad188a1
      * @param indexNum
-     * @returns
      */
     getIndexNumValue(indexNum: BaseValueObject, defaultValue = 1) {
         if (indexNum.isArray()) {
@@ -117,15 +116,15 @@ export class BaseFunction extends Disposable {
         if (indexNum.isBoolean()) {
             const colIndexNumV = indexNum.getValue() as boolean;
             if (colIndexNumV === false) {
-                return new ErrorValueObject(ErrorType.VALUE);
+                return ErrorValueObject.create(ErrorType.VALUE);
             }
 
             return defaultValue;
         }
         if (indexNum.isString()) {
             const colIndexNumV = Number(indexNum.getValue() as string);
-            if (isNaN(colIndexNumV)) {
-                return new ErrorValueObject(ErrorType.REF);
+            if (Number.isNaN(colIndexNumV)) {
+                return ErrorValueObject.create(ErrorType.REF);
             }
             return colIndexNumV;
         } else if (indexNum.isNumber()) {
@@ -133,7 +132,7 @@ export class BaseFunction extends Disposable {
             return colIndexNumV;
         }
 
-        return new ErrorValueObject(ErrorType.VALUE);
+        return ErrorValueObject.create(ErrorType.VALUE);
     }
 
     /**
@@ -147,7 +146,6 @@ export class BaseFunction extends Disposable {
      * If a1 is FALSE, ref_text is interpreted as an R1C1-style reference.
      * https://support.microsoft.com/zh-cn/office/indirect-%E5%87%BD%E6%95%B0-474b3a3a-8a26-4f44-b491-92b6306fa261
      * @param logicValueObject
-     * @returns
      */
     getZeroOrOneByOneDefault(logicValueObject?: BaseValueObject) {
         if (logicValueObject == null) {
@@ -181,7 +179,6 @@ export class BaseFunction extends Disposable {
      * A logical value that specifies 1/TRUE , 0/FALSE, -1, default 1.
      * The difference from getZeroOrOneByOneDefault is that we need to get -1
      * @param logicValueObject
-     * @returns
      */
     getMatchTypeValue(logicValueObject?: BaseValueObject) {
         if (logicValueObject == null) {
@@ -220,19 +217,19 @@ export class BaseFunction extends Disposable {
         const rowOrColumn = searchArray.binarySearch(value, searchType);
 
         if (rowOrColumn == null) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         let resultValue: BaseValueObject;
 
         if (resultArray.getRowCount() === 1) {
-            resultValue = resultArray.get(0, rowOrColumn);
+            resultValue = resultArray.get(0, rowOrColumn) || NullValueObject.create();
         } else {
-            resultValue = resultArray.get(rowOrColumn, 0);
+            resultValue = resultArray.get(rowOrColumn, 0) || NullValueObject.create();
         }
 
         if (resultValue.isNull()) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         return resultValue;
@@ -250,7 +247,7 @@ export class BaseFunction extends Disposable {
         }
 
         if (resultValue.isNull()) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         return resultValue;
@@ -268,7 +265,7 @@ export class BaseFunction extends Disposable {
         }
 
         if (resultValue.isNull()) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         return resultValue;
@@ -284,22 +281,18 @@ export class BaseFunction extends Disposable {
         const position = searchArray.orderSearch(value, searchType, isDesc);
 
         if (position == null) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
-        const resultValue = resultArray.get(position.row, position.column);
+        const resultValue = resultArray.get(position.row, position.column) || NullValueObject.create();
 
         if (resultValue.isNull()) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         return resultValue;
     }
 
-    /**
-     * @param axis 0 row, 1 column
-     * @returns
-     */
     binarySearchExpand(
         value: BaseValueObject,
         searchArray: ArrayValueObject,
@@ -310,7 +303,7 @@ export class BaseFunction extends Disposable {
         const rowOrColumn = searchArray.binarySearch(value, searchType);
 
         if (rowOrColumn == null) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         if (axis === 0) {
@@ -337,7 +330,7 @@ export class BaseFunction extends Disposable {
         }
 
         if (position == null) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         if (axis === 0) {
@@ -364,7 +357,7 @@ export class BaseFunction extends Disposable {
         }
 
         if (position == null) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         if (axis === 0) {
@@ -384,7 +377,7 @@ export class BaseFunction extends Disposable {
         const position = searchArray.orderSearch(value, searchType, isDesc);
 
         if (position == null) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         if (axis === 0) {
@@ -400,27 +393,12 @@ export class BaseFunction extends Disposable {
         for (let i = 0; i < variants.length; i++) {
             let variant = variants[i];
 
+            if (variant.isString() || variant.isBoolean() || variant.isNull()) {
+                variant = variant.convertToNumberObjectValue();
+            }
+
             if (variant.isError()) {
                 return variant;
-            }
-
-            if (variant.isString()) {
-                const value = variant.getValue();
-                const isStringNumber = isRealNum(value);
-
-                if (!isStringNumber) {
-                    return new ErrorValueObject(ErrorType.VALUE);
-                }
-
-                variant = new NumberValueObject(value);
-            }
-
-            if (variant.isBoolean()) {
-                variant = convertTonNumber(variant);
-            }
-
-            if (variant.isNull()) {
-                variant = new NumberValueObject(0);
             }
 
             if (variant.isArray()) {
@@ -467,7 +445,7 @@ export class BaseFunction extends Disposable {
             const value = Number(valueObject.getValue());
 
             // Non-text numbers also need to be counted to the sample size
-            valueObject = new NumberValueObject(isNaN(value) ? 0 : value);
+            valueObject = NumberValueObject.create(Number.isNaN(value) ? 0 : value);
         }
 
         return valueObject;

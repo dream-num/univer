@@ -19,7 +19,7 @@ import { describe, expect, it } from 'vitest';
 import { ArrayValueObject, transformToValueObject } from '../array-value-object';
 
 describe('arrayValueObject log method test', () => {
-    const originArrayValueObject = new ArrayValueObject({
+    const originArrayValueObject = ArrayValueObject.create({
         calculateValueList: transformToValueObject([
             [8, 1, ' ', 1.23, true, false],
             [27, 0, '100', '2.34', 'test', -3],

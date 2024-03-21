@@ -26,13 +26,13 @@ import {
 } from '@univerjs/core';
 import type { IAddWorksheetMergeMutationParams, IRemoveWorksheetMergeMutationParams } from '@univerjs/sheets';
 import {
+    AddMergeRedoSelectionsOperationFactory,
     AddMergeUndoMutationFactory,
+    AddMergeUndoSelectionsOperationFactory,
     AddWorksheetMergeMutation,
     getAddMergeMutationRangeByType,
     RemoveMergeUndoMutationFactory,
-    RemoveWorksheetMergeMutation,
-    SelectionManagerService,
-} from '@univerjs/sheets';
+    RemoveWorksheetMergeMutation, SelectionManagerService } from '@univerjs/sheets';
 import { IConfirmService } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 
@@ -109,6 +109,12 @@ export const AddWorksheetMergeCommand: ICommand = {
             redoMutations.unshift(...data.redos);
             undoMutations.push(...data.undos);
         }
+
+        const addMergeRedoSelectionsMutation = AddMergeRedoSelectionsOperationFactory(accessor, params, ranges);
+        addMergeRedoSelectionsMutation && redoMutations.push(addMergeRedoSelectionsMutation);
+
+        const addMergeUndoSelectionsMutation = AddMergeUndoSelectionsOperationFactory(accessor, params);
+        addMergeUndoSelectionsMutation && undoMutations.push(addMergeUndoSelectionsMutation);
 
         const result = sequenceExecute(redoMutations, commandService);
         if (result.result) {

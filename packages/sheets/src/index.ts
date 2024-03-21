@@ -54,7 +54,7 @@ export {
 
 // #region commands
 
-export { rangeMerge } from './basics/rangeMerge';
+export { rangeMerge, createTopMatrixFromRanges, createTopMatrixFromMatrix, findAllRectangle, RangeMergeUtil } from './basics/rangeMerge';
 export { ClearSelectionAllCommand } from './commands/commands/clear-selection-all.command';
 export { ClearSelectionContentCommand } from './commands/commands/clear-selection-content.command';
 export { ClearSelectionFormatCommand } from './commands/commands/clear-selection-format.command';
@@ -283,3 +283,4 @@ export { INTERCEPTOR_POINT } from './services/sheet-interceptor/interceptor-cons
 export { SheetInterceptorService } from './services/sheet-interceptor/sheet-interceptor.service';
 export type { ISheetLocation } from './services/sheet-interceptor/utils/interceptor';
 export { MergeCellController } from './controllers/merge-cell.controller';
+export { AddMergeRedoSelectionsOperationFactory, AddMergeUndoSelectionsOperationFactory } from './commands/utils/handle-merge-operation';

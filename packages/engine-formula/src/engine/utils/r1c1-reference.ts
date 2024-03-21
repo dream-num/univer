@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { AbsoluteRefType, type IRange } from '@univerjs/core';
+import { AbsoluteRefType } from '@univerjs/core';
+import type { IRange, IUnitRangeName } from '@univerjs/core';
 
-import type { IGridRangeName } from './reference';
 import { handleRefStringInfo } from './reference';
 
 const $relativeRegex = /[\[\]]/g;
@@ -50,7 +50,7 @@ function singleReference(refBody: string, currentRow = 0, currentColumn = 0) {
     };
 }
 
-export function deserializeRangeForR1C1(refString: string, currentRow = 0, currentColumn = 0): IGridRangeName {
+export function deserializeRangeForR1C1(refString: string, currentRow = 0, currentColumn = 0): IUnitRangeName {
     const { refBody, sheetName, unitId } = handleRefStringInfo(refString);
 
     const colonIndex = refBody.indexOf(':');

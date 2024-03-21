@@ -15,7 +15,7 @@
  */
 
 import type { EventState, IPosition, IRange, Nullable } from '@univerjs/core';
-import { Observable, Rectangle, Tools } from '@univerjs/core';
+import { Observable, Tools } from '@univerjs/core';
 
 import type { BaseObject } from './base-object';
 import { RENDER_CLASS_TYPE } from './basics/const';
@@ -28,6 +28,7 @@ import { Vector2 } from './basics/vector2';
 import type { UniverRenderingContext } from './context';
 import type { BaseScrollBar } from './shape/base-scroll-bar';
 import type { ThinScene } from './thin-scene';
+import { subtractViewportRange } from './basics/viewport-subtract';
 
 interface IViewPosition {
     top?: number;
@@ -100,8 +101,6 @@ export class Viewport {
     onScrollByBarObserver = new Observable<IScrollObserverParam>();
 
     private _viewPortKey: string = '';
-
-    private _dirty: boolean = true;
 
     private _topOrigin: number = 0;
 
@@ -341,21 +340,6 @@ export class Viewport {
         });
     }
 
-    makeDirty(state: boolean = true, refreshParent = false) {
-        this._dirty = state;
-
-        if (refreshParent) {
-            const parent = this.scene.getParent();
-            if (parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
-                parent.makeDirty(true);
-            }
-        }
-    }
-
-    isDirty(): boolean {
-        return this._dirty;
-    }
-
     /**
      * scroll to position, absolute
      * @param pos
@@ -574,7 +558,6 @@ export class Viewport {
             ctx.restore();
         }
 
-        this.makeDirty(false);
         this._scrollRendered();
 
         this._preViewportBound = viewBound;
@@ -795,8 +778,6 @@ export class Viewport {
                 y,
             });
         }
-
-        this.makeDirty(true);
     }
 
     private _getViewPortSize() {
@@ -940,8 +921,6 @@ export class Viewport {
 
         if (this._scrollBar) {
             this._scrollBar.makeDirty(true);
-        } else {
-            this.makeDirty(true);
         }
 
         const scroll = this.getTransformedScroll();
@@ -1089,7 +1068,7 @@ export class Viewport {
             endColumn: subBound.right,
         };
 
-        const ranges = Rectangle.subtract(range1, range2);
+        const ranges = subtractViewportRange(range1, range2);
 
         return ranges.map((range) => {
             const { startRow, endRow, startColumn, endColumn } = range;

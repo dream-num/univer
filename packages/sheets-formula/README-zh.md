@@ -2,6 +2,8 @@
 
 [![npm version](https://img.shields.io/npm/v/@univerjs/sheets-formula)](https://npmjs.org/package/@univerjs/sheets-formula)
 [![license](https://img.shields.io/npm/l/@univerjs/sheets-formula)](https://img.shields.io/npm/l/@univerjs/sheets-formula)
+![CSS Included](https://img.shields.io/badge/CSS_Included-blue?logo=CSS3)
+![i18n](https://img.shields.io/badge/zh--CN%20%7C%20en--US-cornflowerblue?label=i18n)
 
 ## 简介
 
@@ -341,7 +343,7 @@ Uniscript 底层使用了 `@univerjs/facade`，你也可以直接在项目中使
     */
     export class Customsum extends BaseFunction {
         override calculate(...variants: BaseValueObject[]) {
-            let accumulatorAll: BaseValueObject = new NumberValueObject(0);
+            let accumulatorAll: BaseValueObject = NumberValueObject.create(0);
             for (let i = 0; i < variants.length; i++) {
                 let variant = variants[i];
 
@@ -492,7 +494,7 @@ Uniscript 底层使用了 `@univerjs/facade`，你也可以直接在项目中使
      */
     export class Customsum extends BaseFunction {
         override calculate(...variants: BaseValueObject[]) {
-            let accumulatorAll: BaseValueObject = new NumberValueObject(0);
+            let accumulatorAll: BaseValueObject = NumberValueObject.create(0);
             for (let i = 0; i < variants.length; i++) {
                 let variant = variants[i];
 
@@ -704,10 +706,10 @@ univer.registerPlugin(UniverSheetsCustomFunctionPlugin);
     位置在 [packages/sheets-formula/src/locale/function-list/math/en-US.ts](https://github.com/dream-num/univer/blob/dev/packages/sheets-formula/src/locale/function-list/math/en-US.ts)。
 
     国际化也是一个分类一个文件。简介从 Office 函数分类页参考。
-    ![office excel](./assets/img/office-excel.png)
+    ![office excel](./assets/office-excel-zh.png)
 
     函数描述和参数描述从 Office 函数详情页参考
-    ![sumif](./assets//img/sumif.png)
+    ![sumif](./assets/sumif-zh.png)
 
     大部分的函数名称我们已经写好了基础的描述、简介、链接、参数结构，推荐您在此基础上进行修改，如果没有的函数需要自己加在末尾。
 
@@ -778,10 +780,10 @@ univer.registerPlugin(UniverSheetsCustomFunctionPlugin);
 
   - 例如 `XLOOKUP` 函数，要求两个入参的行或列至少又一个大小相等，这样才能进行矩阵计算。
   - 例如 `SUMIF` 函数，大家以为是求和，但是它是可以根据第二个参数进行展开的
-        ![sumif array](./assets/img/sumif-array.png)
-        ![sumif array result](./assets/img/sumif-array-result.png)
+        ![sumif array](./assets/sumif-array-zh.png)
+        ![sumif array result](./assets/sumif-array-result-zh.png)
   - Excel 的公式计算，越来越像 numpy，比如
-        ![numpy](./assets/img/numpy.png)
+        ![numpy](./assets/numpy-zh.png)
 
 - 公式的数值计算，需要使用内置的方法，尽量不要获取值自行计算。因为公式的参数可以是值、数组、引用。可以参考已有的 `sum`、`minus` 函数。
 - 精度问题，公式引入了 `big.js`，使用内置方法会调用该库，但是相比原生计算会慢接近 100 倍，所以像 `sin` 等 `js` 方法，尽量用原生实现。

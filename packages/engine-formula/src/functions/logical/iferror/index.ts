@@ -23,7 +23,7 @@ import { BaseFunction } from '../../base-function';
 export class Iferror extends BaseFunction {
     override calculate(value: BaseValueObject, valueIfError: BaseValueObject) {
         if (value == null || valueIfError == null) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         if (value.isError()) {

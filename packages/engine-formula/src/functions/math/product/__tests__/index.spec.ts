@@ -28,50 +28,56 @@ describe('Test product function', () => {
 
     describe('Product', () => {
         it('Var1 is number, var2 is number', () => {
-            const var1 = new NumberValueObject(1);
-            const var2 = new NumberValueObject(2);
+            const var1 = NumberValueObject.create(1);
+            const var2 = NumberValueObject.create(2);
             const result = textFunction.calculate(var1, var2);
             expect(result.getValue()).toBe(2);
         });
-        it('Var1 is number, var2 is string', () => {
-            const var1 = new NumberValueObject(1);
-            const var2 = new StringValueObject('test');
-            const result = textFunction.calculate(var1, var2);
-            expect(result.getValue()).toBe(ErrorType.VALUE);
-        });
-        it('Var1 is number, var2 is string number', () => {
-            const var1 = new NumberValueObject(1);
+        it('Var1 is string number, var2 is string number', () => {
+            const var1 = new StringValueObject('1');
             const var2 = new StringValueObject('2');
             const result = textFunction.calculate(var1, var2);
             expect(result.getValue()).toBe(2);
         });
+        it('Var1 is number, var2 is string', () => {
+            const var1 = NumberValueObject.create(1);
+            const var2 = StringValueObject.create('test');
+            const result = textFunction.calculate(var1, var2);
+            expect(result.getValue()).toBe(ErrorType.VALUE);
+        });
+        it('Var1 is number, var2 is string number', () => {
+            const var1 = NumberValueObject.create(1);
+            const var2 = StringValueObject.create('2');
+            const result = textFunction.calculate(var1, var2);
+            expect(result.getValue()).toBe(2);
+        });
         it('Var1 is number, var2 is boolean', () => {
-            const var1 = new NumberValueObject(2);
+            const var1 = NumberValueObject.create(2);
 
-            let var2 = new BooleanValueObject(true);
+            let var2 = BooleanValueObject.create(true);
             let result = textFunction.calculate(var1, var2);
             expect(result.getValue()).toBe(2);
 
-            var2 = new BooleanValueObject(false);
+            var2 = BooleanValueObject.create(false);
             result = textFunction.calculate(var1, var2);
             expect(result.getValue()).toBe(0);
         });
         it('Var1 is number, var2 is null', () => {
-            const var1 = new NumberValueObject(1);
-            const var2 = new NullValueObject(0);
+            const var1 = NumberValueObject.create(1);
+            const var2 = NullValueObject.create();
             const result = textFunction.calculate(var1, var2);
             expect(result.getValue()).toBe(1);
         });
         it('Var1 is number, var2 is error', () => {
-            const var1 = new NumberValueObject(1);
-            const var2 = new ErrorValueObject(ErrorType.NA);
+            const var1 = NumberValueObject.create(1);
+            const var2 = ErrorValueObject.create(ErrorType.NA);
             const result = textFunction.calculate(var1, var2);
             expect(result.getValue()).toBe(ErrorType.NA);
         });
 
         it('Var1 is number, var2 is array includes error', () => {
-            const var1 = new NumberValueObject(1);
-            const var2 = new ArrayValueObject({
+            const var1 = NumberValueObject.create(1);
+            const var2 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [1, null],
                     [0, ErrorType.VALUE],
@@ -88,8 +94,8 @@ describe('Test product function', () => {
         });
 
         it('Var1 is number, var2 is array not includes error', () => {
-            const var1 = new NumberValueObject(2);
-            const var2 = new ArrayValueObject({
+            const var1 = NumberValueObject.create(2);
+            const var2 = ArrayValueObject.create({
                 calculateValueList: transformToValueObject([
                     [1, ' ', 1.23, true, false, null],
                     [null, '100', '2.34', 'test', -3, null],

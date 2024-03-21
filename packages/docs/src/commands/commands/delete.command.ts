@@ -18,14 +18,12 @@ import type { ICommand, IDocumentBody, IMutationInfo, IParagraph, ITextRun } fro
 import {
     CommandType,
     ICommandService,
-    IUndoRedoService,
     IUniverInstanceService,
     TextX,
     TextXActionType,
     UpdateDocsAttributeType,
 } from '@univerjs/core';
-import type { IActiveTextRange, ITextRangeWithStyle, TextRange } from '@univerjs/engine-render';
-import { getParagraphBySpan, hasListSpan, isFirstSpan, isIndentBySpan } from '@univerjs/engine-render';
+import { getParagraphByGlyph, hasListGlyph, type IActiveTextRange, isFirstGlyph, isIndentByGlyph, type ITextRangeWithStyle, type TextRange } from '@univerjs/engine-render';
 
 import { DocSkeletonManagerService } from '../../services/doc-skeleton-manager.service';
 import type { ITextActiveRange } from '../../services/text-selection-manager.service';
@@ -64,9 +62,9 @@ export const DeleteLeftCommand: ICommand = {
         const preSpan = skeleton.findNodeByCharIndex(startOffset);
 
         // is in bullet list?
-        const preIsBullet = hasListSpan(preSpan);
+        const preIsBullet = hasListGlyph(preSpan);
         // is in indented paragraph?
-        const preIsIndent = isIndentBySpan(preSpan, docDataModel.getBody());
+        const preIsIndent = isIndentByGlyph(preSpan, docDataModel.getBody());
 
         let cursor = startOffset;
 
@@ -74,10 +72,10 @@ export const DeleteLeftCommand: ICommand = {
         const span = skeleton.findNodeByCharIndex(startOffset - 1);
 
         const isUpdateParagraph =
-            isFirstSpan(preSpan) && span !== preSpan && (preIsBullet === true || preIsIndent === true);
+            isFirstGlyph(preSpan) && span !== preSpan && (preIsBullet === true || preIsIndent === true);
 
         if (isUpdateParagraph) {
-            const paragraph = getParagraphBySpan(preSpan, docDataModel.getBody());
+            const paragraph = getParagraphByGlyph(preSpan, docDataModel.getBody());
 
             if (paragraph == null) {
                 return false;
@@ -264,7 +262,6 @@ export const MergeTwoParagraphCommand: ICommand<IMergeTwoParagraphParams> = {
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
         const currentUniverService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
-        const undoRedoService = accessor.get(IUndoRedoService);
 
         const { direction, range } = params;
 

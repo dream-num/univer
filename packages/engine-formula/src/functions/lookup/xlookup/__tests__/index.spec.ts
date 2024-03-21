@@ -26,7 +26,7 @@ import {
 import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
 import { Xlookup } from '..';
 
-const arrayValueObject1 = new ArrayValueObject(/*ts*/ `{
+const arrayValueObject1 = ArrayValueObject.create(/*ts*/ `{
     1, "First", 100, 89;
     2, "Second", 68, 66;
     3, "Third", 100, 75;
@@ -35,20 +35,20 @@ const arrayValueObject1 = new ArrayValueObject(/*ts*/ `{
     6, "Sixth", 96, 82
 }`);
 
-const arrayValueObject2 = new ArrayValueObject(/*ts*/ `{
+const arrayValueObject2 = ArrayValueObject.create(/*ts*/ `{
     6, "Sixth";
     1, "First";
     4, "Fourth"
 }`);
 
-const arrayValueObject3 = new ArrayValueObject(/*ts*/ `{
+const arrayValueObject3 = ArrayValueObject.create(/*ts*/ `{
     0, 500;
     101, 800;
     301, 1000;
     1000, 3000
 }`);
 
-const arrayValueObject4 = new ArrayValueObject(/*ts*/ `{
+const arrayValueObject4 = ArrayValueObject.create(/*ts*/ `{
     701, 3000;
     101, 800;
     401, 2000;
@@ -68,7 +68,7 @@ describe('Test vlookup', () => {
     describe('The value of the lookup', () => {
         it('Search normal', async () => {
             const resultObject = textFunction.calculate(
-                new StringValueObject('Second'),
+                StringValueObject.create('Second'),
                 arrayValueObject1.slice(undefined, [1, 2])!,
                 arrayValueObject1.slice(undefined, [3, 4])!
             ) as BaseValueObject;
@@ -77,7 +77,7 @@ describe('Test vlookup', () => {
 
         it('Search normal2', async () => {
             const resultObject = textFunction.calculate(
-                new StringValueObject('Second'),
+                StringValueObject.create('Second'),
                 arrayValueObject1.slice(undefined, [1, 2])!,
                 arrayValueObject1.slice(undefined, [0, 1])!
             ) as BaseValueObject;
@@ -86,7 +86,7 @@ describe('Test vlookup', () => {
 
         it('Search horizon', async () => {
             const resultObject = textFunction.calculate(
-                new StringValueObject('Second'),
+                StringValueObject.create('Second'),
                 arrayValueObject1.transpose().slice([1, 2])!,
                 arrayValueObject1.transpose().slice([0, 1])!
             ) as BaseValueObject;
@@ -104,7 +104,7 @@ describe('Test vlookup', () => {
 
         it('Search across multiple columns', async () => {
             const resultObject = textFunction.calculate(
-                new NumberValueObject(5),
+                NumberValueObject.create(5),
                 arrayValueObject1.slice(undefined, [0, 1])!,
                 arrayValueObject1.slice(undefined, [1])!
             ) as BaseValueObject;
@@ -115,80 +115,80 @@ describe('Test vlookup', () => {
     describe('Approximate match test', () => {
         it('Approximate match1', async () => {
             const resultObject = textFunction.calculate(
-                new StringValueObject('s*'),
+                StringValueObject.create('s*'),
                 arrayValueObject1.slice(undefined, [1, 2])!,
                 arrayValueObject1.slice(undefined, [3, 4])!,
-                new NullValueObject(''),
-                new NumberValueObject(2)
+                NullValueObject.create(),
+                NumberValueObject.create(2)
             ) as BaseValueObject;
             expect(resultObject.getValue().toString()).toBe('66');
         });
 
         it('Approximate asc', async () => {
             const resultObject = textFunction.calculate(
-                new StringValueObject('???th'),
+                StringValueObject.create('???th'),
                 arrayValueObject1.slice(undefined, [1, 2])!,
                 arrayValueObject1.slice(undefined, [3, 4])!,
-                new NullValueObject(''),
-                new NumberValueObject(2)
+                NullValueObject.create(),
+                NumberValueObject.create(2)
             ) as BaseValueObject;
             expect(resultObject.getValue().toString()).toBe('69');
         });
 
         it('Approximate desc', async () => {
             const resultObject = textFunction.calculate(
-                new StringValueObject('???th'),
+                StringValueObject.create('???th'),
                 arrayValueObject1.slice(undefined, [1, 2])!,
                 arrayValueObject1.slice(undefined, [3, 4])!,
-                new NullValueObject(''),
-                new NumberValueObject(2),
-                new NumberValueObject(-1)
+                NullValueObject.create(),
+                NumberValueObject.create(2),
+                NumberValueObject.create(-1)
             ) as BaseValueObject;
             expect(resultObject.getValue().toString()).toBe('82');
         });
 
         it('match_mode is -1', async () => {
             const resultObject = textFunction.calculate(
-                new NumberValueObject(110),
+                NumberValueObject.create(110),
                 arrayValueObject3.slice(undefined, [0, 1])!,
                 arrayValueObject3.slice(undefined, [1])!,
-                new NullValueObject(''),
-                new NumberValueObject(-1)
+                NullValueObject.create(),
+                NumberValueObject.create(-1)
             ) as BaseValueObject;
             expect(resultObject.getValue().toString()).toBe('800');
         });
 
         it('match_mode 1', async () => {
             const resultObject = textFunction.calculate(
-                new NumberValueObject(110),
+                NumberValueObject.create(110),
                 arrayValueObject3.slice(undefined, [0, 1])!,
                 arrayValueObject3.slice(undefined, [1])!,
-                new NullValueObject(''),
-                new NumberValueObject(1)
+                NullValueObject.create(),
+                NumberValueObject.create(1)
             ) as BaseValueObject;
             expect(resultObject.getValue().toString()).toBe('1000');
         });
 
         it('match_mode binary asc', async () => {
             const resultObject = textFunction.calculate(
-                new NumberValueObject(660),
+                NumberValueObject.create(660),
                 arrayValueObject4.slice(undefined, [0, 1])!,
                 arrayValueObject4.slice(undefined, [1])!,
-                new NullValueObject(''),
-                new NumberValueObject(0),
-                new NumberValueObject(2)
+                NullValueObject.create(),
+                NumberValueObject.create(0),
+                NumberValueObject.create(2)
             ) as BaseValueObject;
             expect(resultObject.getValue().toString()).toBe('1700');
         });
 
         it('match_mode binary desc', async () => {
             const resultObject = textFunction.calculate(
-                new NumberValueObject(660),
+                NumberValueObject.create(660),
                 arrayValueObject4.slice(undefined, [0, 1])!,
                 arrayValueObject4.slice(undefined, [1])!,
-                new NullValueObject(''),
-                new NumberValueObject(0),
-                new NumberValueObject(-2)
+                NullValueObject.create(),
+                NumberValueObject.create(0),
+                NumberValueObject.create(-2)
             ) as BaseValueObject;
             expect(resultObject.getValue().toString()).toBe('3500');
         });

@@ -30,7 +30,7 @@ import { BaseFunction } from '../../base-function';
 export class Indirect extends BaseFunction {
     override calculate(refText: BaseValueObject, a1?: BaseValueObject) {
         if (refText == null) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         if (refText.isError()) {
@@ -49,13 +49,13 @@ export class Indirect extends BaseFunction {
                 refText = refTextArray.getFirstCell();
             } else {
                 return refTextArray.map(() => {
-                    return new ErrorValueObject(ErrorType.VALUE);
+                    return ErrorValueObject.create(ErrorType.VALUE);
                 });
             }
         }
 
         if (!refText.isString()) {
-            return new ErrorValueObject(ErrorType.REF);
+            return ErrorValueObject.create(ErrorType.REF);
         }
 
         const refTextV = refText.getValue() as string;
@@ -98,7 +98,7 @@ export class Indirect extends BaseFunction {
 
     private _setDefault(object: BaseReferenceObject) {
         if (this.unitId == null || this.subUnitId == null) {
-            return new ErrorValueObject(ErrorType.REF);
+            return ErrorValueObject.create(ErrorType.REF);
         }
         object.setDefaultUnitId(this.unitId);
         object.setDefaultSheetId(this.subUnitId);

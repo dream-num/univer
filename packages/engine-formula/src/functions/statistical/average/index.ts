@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { isRealNum } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
@@ -23,27 +22,20 @@ import { BaseFunction } from '../../base-function';
 export class Average extends BaseFunction {
     override calculate(...variants: BaseValueObject[]) {
         if (variants.length === 0) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
-        let accumulatorSum: BaseValueObject = new NumberValueObject(0);
-        let accumulatorCount: BaseValueObject = new NumberValueObject(0);
+        let accumulatorSum: BaseValueObject = NumberValueObject.create(0);
+        let accumulatorCount: BaseValueObject = NumberValueObject.create(0);
         for (let i = 0; i < variants.length; i++) {
             let variant = variants[i];
 
-            if (variant.isError()) {
-                return variant;
+            if (variant.isString()) {
+                variant = variant.convertToNumberObjectValue();
             }
 
-            if (variant.isString()) {
-                const value = variant.getValue();
-                const isStringNumber = isRealNum(value);
-
-                if (!isStringNumber) {
-                    return new ErrorValueObject(ErrorType.VALUE);
-                }
-
-                variant = new NumberValueObject(value);
+            if (variant.isError()) {
+                return variant;
             }
 
             if (variant.isArray()) {
@@ -55,8 +47,8 @@ export class Average extends BaseFunction {
 
                 accumulatorCount = accumulatorCount.plus(variant.count());
             } else if (!variant.isNull()) {
-                accumulatorSum = accumulatorSum.plus(new NumberValueObject(variant.getValue()));
-                accumulatorCount = accumulatorCount.plus(new NumberValueObject(1));
+                accumulatorSum = accumulatorSum.plus(variant);
+                accumulatorCount = accumulatorCount.plus(NumberValueObject.create(1));
             }
         }
 

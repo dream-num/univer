@@ -30,9 +30,9 @@ export function whenSheetFocused(contextService: IContextService) {
 /**
  * Requires the currently focused unit to be Workbook and the sheet editor is focused but not activated.
  * @param contextService
- * @returns
+ * @returns If the sheet editor is focused but not activated.
  */
-export function whenSheetEditorFocused(contextService: IContextService) {
+export function whenSheetEditorFocused(contextService: IContextService): boolean {
     return (
         contextService.getContextValue(FOCUSING_SHEET) &&
         contextService.getContextValue(FOCUSING_UNIVER_EDITOR) &&
@@ -43,7 +43,7 @@ export function whenSheetEditorFocused(contextService: IContextService) {
 /**
  * Requires the currently focused unit to be Workbook and the sheet editor is activated.
  * @param contextService
- * @returns
+ * @returns If the sheet editor is activated.
  */
 export function whenSheetEditorActivated(contextService: IContextService) {
     return (
@@ -60,7 +60,7 @@ export function whenEditorActivated(contextService: IContextService) {
 /**
  * Requires the currently focused editor is a formula editor.
  * @param contextService
- * @returns
+ * @returns If the formula editor is focused.
  */
 export function whenFormulaEditorFocused(contextService: IContextService) {
     return (
@@ -72,7 +72,7 @@ export function whenFormulaEditorFocused(contextService: IContextService) {
 /**
  * Requires the currently focused editor is a formula editor, and it is activated.
  * @param contextService
- * @returns
+ * @returns If the formula editor is activated.
  */
 export function whenFormulaEditorActivated(contextService: IContextService) {
     return (
@@ -83,6 +83,11 @@ export function whenFormulaEditorActivated(contextService: IContextService) {
     );
 }
 
+/**
+ * Requires the currently focused editor is not a formula editor, and it is activated.
+ * @param contextService
+ * @returns If the editor is activated and the editor is not the formula editor.
+ */
 export function whenEditorDidNotInputFormulaActivated(contextService: IContextService) {
     return (
         contextService.getContextValue(FOCUSING_SHEET) &&

@@ -66,7 +66,7 @@ export function createTestBed(documentConfig?: IDocumentData, dependencies?: Dep
     const univer = new Univer();
     const injector = univer.__getInjector();
 
-    class TestSpyPlugin extends Plugin {
+    class TestPlugin extends Plugin {
         static override type = PluginType.Univer;
 
         constructor(
@@ -92,7 +92,7 @@ export function createTestBed(documentConfig?: IDocumentData, dependencies?: Dep
 
     injector.get(LocaleService).load({ zhCN, enUS });
 
-    univer.registerPlugin(TestSpyPlugin);
+    univer.registerPlugin(TestPlugin);
     const doc = univer.createUniverDoc(documentConfig || getTestDocumentDataDemo());
 
     const univerInstanceService = injector.get(IUniverInstanceService);

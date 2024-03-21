@@ -22,11 +22,15 @@ import { BaseFunction } from '../../base-function';
 export class Acosh extends BaseFunction {
     override calculate(variant: BaseValueObject) {
         if (variant == null) {
-            return new ErrorValueObject(ErrorType.NA);
+            return ErrorValueObject.create(ErrorType.NA);
+        }
+
+        if (variant.isString()) {
+            variant = variant.convertToNumberObjectValue();
         }
 
         if (variant.isError()) {
-            return new ErrorValueObject(ErrorType.VALUE);
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
         return variant.acosh();
     }

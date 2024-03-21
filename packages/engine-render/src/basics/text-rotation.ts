@@ -18,8 +18,8 @@ import { BooleanNumber, type ITextRotation } from '@univerjs/core';
 
 export const VERTICAL_ROTATE_ANGLE = 90;
 
-export function convertTextRotation(textRotation: ITextRotation) {
-    const { a: angle = 0, v: isVertical = BooleanNumber.FALSE } = textRotation;
+export function convertTextRotation(textRotation?: ITextRotation) {
+    const { a: angle = 0, v: isVertical = BooleanNumber.FALSE } = textRotation || { a: 0, v: BooleanNumber.FALSE };
     let centerAngle = 0;
     let vertexAngle = angle;
     if (isVertical === BooleanNumber.TRUE) {

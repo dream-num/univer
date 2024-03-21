@@ -29,7 +29,7 @@ export class Divided extends BaseFunction {
         }
 
         if (!variant2.isArray() && variant2.getValue() === 0) {
-            return new ErrorValueObject(ErrorType.DIV_BY_ZERO);
+            return ErrorValueObject.create(ErrorType.DIV_BY_ZERO);
         }
 
         return variant1.divided(variant2);

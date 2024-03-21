@@ -84,7 +84,7 @@ export class ReferenceNode extends BaseAstNode {
         this._referenceObject.setRefOffset(x, y);
 
         if (!this._isPrepareMerge && this._referenceObject.isExceedRange()) {
-            this.setValue(new ErrorValueObject(ErrorType.NAME));
+            this.setValue(ErrorValueObject.create(ErrorType.NAME));
         } else {
             this.setValue(this._referenceObject);
         }
@@ -130,7 +130,7 @@ export class ReferenceNodeFactory extends BaseAstNodeFactory {
         //     return true;
         // }
 
-        const { tokenTrim, minusPrefixNode, atPrefixNode } = prefixHandler(tokenTrimPre.toUpperCase(), this._functionService, this._injector);
+        const { tokenTrim, minusPrefixNode, atPrefixNode } = prefixHandler(tokenTrimPre, this._functionService, this._injector);
 
         if (!isLexerNode && tokenTrim.charAt(0) === '"' && tokenTrim.charAt(tokenTrim.length - 1) === '"') {
             return;

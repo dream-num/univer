@@ -27,7 +27,7 @@ export class InvertedIndexCache {
      *    }
      * }
      */
-    private _cache: Map<string, Map<string, Map<number, Map<string | number | boolean | null, number[]>>>> = new Map();
+    private _cache: Map<string, Map<string, Map<number, Map<string | number | boolean | null, Set<number>>>>> = new Map();
 
     private _continueBuildingCache: Map<string, Map<string, Map<number, { startRow: number; endRow: number }>>> =
         new Map();
@@ -57,11 +57,11 @@ export class InvertedIndexCache {
 
         let cellList = columnMap.get(value);
         if (cellList == null) {
-            cellList = [];
+            cellList = new Set<number>();
             columnMap.set(value, cellList);
         }
 
-        cellList.push(row);
+        cellList.add(row);
     }
 
     getCellValuePositions(unitId: string, sheetId: string, column: number) {

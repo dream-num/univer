@@ -2657,8 +2657,8 @@ export const DEFAULT_WORKBOOK_DATA_DEMO5: IWorkbookData = {
             defaultRowHeight: 25,
             mergeData: [
                 {
-                    startRow: 37,
-                    endRow: 36,
+                    startRow: 36,
+                    endRow: 37,
                     startColumn: 1,
                     endColumn: 2,
                 },

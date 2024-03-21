@@ -14,11 +14,7 @@
  * limitations under the License.
  */
 
-import type { Dependency } from '@wendellhu/redi';
-import { Inject, Injector } from '@wendellhu/redi';
-
 import { Univer } from '../../basics/univer';
-import { Plugin, PluginType } from '../../plugin/plugin';
 import { IUniverInstanceService } from '../../services/instance/instance.service';
 import { ILogService, LogLevel } from '../../services/log/log.service';
 import { LocaleType } from '../../types/enum/locale-type';
@@ -49,38 +45,14 @@ const TEST_WORKBOOK_DATA: IWorkbookData = {
     styles: {},
 };
 
-export function createCoreTestBed(workbookConfig?: IWorkbookData, dependencies?: Dependency[]) {
+export function createCoreTestBed(workbookConfig?: IWorkbookData) {
     const univer = new Univer();
+    const injector = univer.__getInjector();
+    const get = injector.get.bind(injector);
 
-    let get: Injector['get'] | undefined;
-
-    class TestSpyPlugin extends Plugin {
-        static override type = PluginType.Sheet;
-
-        constructor(
-            _config: undefined,
-            @Inject(Injector) override readonly _injector: Injector
-        ) {
-            super('test-spy-plugin');
-
-            this._injector = _injector;
-            get = this._injector.get.bind(_injector);
-        }
-
-        override onDestroy(): void {
-            get = undefined;
-        }
-    }
-
-    univer.registerPlugin(TestSpyPlugin);
     const sheet = univer.createUniverSheet(workbookConfig || TEST_WORKBOOK_DATA);
-
-    if (get === undefined) {
-        throw new Error('[TestPlugin]: not hooked on!');
-    }
-
     const univerInstanceService = get(IUniverInstanceService);
-    univerInstanceService.focusUniverInstance('test');
+    univerInstanceService.focusUniverInstance(workbookConfig?.id ?? 'test');
 
     const logService = get(ILogService);
     logService.setLogLevel(LogLevel.SILENT);

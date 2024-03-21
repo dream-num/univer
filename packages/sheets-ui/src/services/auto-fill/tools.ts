@@ -15,7 +15,7 @@
  */
 
 import type { ICellData, IObjectMatrixPrimitiveType, IRange, Nullable } from '@univerjs/core';
-import { Direction, ObjectMatrix, Tools } from '@univerjs/core';
+import { CellValueType, Direction, ObjectMatrix, Tools } from '@univerjs/core';
 
 export const chnNumChar = { 零: 0, 一: 1, 二: 2, 三: 3, 四: 4, 五: 5, 六: 6, 七: 7, 八: 8, 九: 9 };
 export const chnNumChar2 = ['零', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
@@ -394,7 +394,9 @@ export function fillSeries(data: Array<Nullable<ICellData>>, len: number, direct
             const num = Number(data[data.length - 1]?.v) * (Number(data[1]?.v) / Number(data[0]?.v)) ** i;
 
             if (d) {
-                d.v = num;
+                if (d.t !== CellValueType.BOOLEAN) {
+                    d.v = num;
+                }
                 applyData.push(d);
             }
         }
@@ -408,11 +410,14 @@ export function fillSeries(data: Array<Nullable<ICellData>>, len: number, direct
             const y = forecast(data.length + i, dataNumArr, xArr, forward);
 
             if (d) {
-                d.v = y;
+                if (d.t !== CellValueType.BOOLEAN) {
+                    d.v = y;
+                }
                 applyData.push(d);
             }
         }
     }
+
     return applyData;
 }
 

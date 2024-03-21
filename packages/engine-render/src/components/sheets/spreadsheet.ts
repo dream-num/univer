@@ -494,11 +494,16 @@ export class Spreadsheet extends SheetComponent {
 
         const columnWidthAccumulationLength = columnWidthAccumulation.length;
         const rowHeightAccumulationLength = rowHeightAccumulation.length;
-        const EXTRA_BOUND = 0.1;
-        const rowStart = Math.floor(startRow * (1 - EXTRA_BOUND));
-        const rowEnd = Math.min(Math.ceil(endRow * (1 + EXTRA_BOUND)), rowHeightAccumulationLength - 1);
-        const columnEnd = Math.min(Math.ceil(endColumn * (1 + EXTRA_BOUND)), columnWidthAccumulationLength - 1);
-        const columnStart = Math.floor(startColumn * (1 - EXTRA_BOUND));
+        const EXTRA_BOUND = 0.4;
+        const rowCount = endRow - startRow + 1;
+        const columnCount = endColumn - startColumn + 1;
+        const extraRowCount = Math.ceil(rowCount * EXTRA_BOUND);
+        const extraColumnCount = Math.ceil(columnCount * EXTRA_BOUND);
+
+        const rowStart = Math.max(Math.floor(startRow - extraRowCount), 0);
+        const rowEnd = Math.min(Math.ceil(endRow + extraRowCount), rowHeightAccumulationLength - 1);
+        const columnEnd = Math.min(Math.ceil(endColumn + (extraColumnCount)), columnWidthAccumulationLength - 1);
+        const columnStart = Math.max(Math.floor(startColumn - (extraColumnCount)), 0);
 
         const startX = columnWidthAccumulation[columnStart - 1] || 0;
         const startY = rowHeightAccumulation[rowStart - 1] || 0;

@@ -17,12 +17,12 @@
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, {} from 'react';
 import { RectPopup } from '@univerjs/design';
-import { IPopupService } from '../../../services/popup/popup.service';
+import { IGlobalPopupManagerService } from '@univerjs/ui';
 import { useObservable } from '../../../components/hooks/observable';
 import { ComponentManager } from '../../../common';
 
 export function UniverPopup() {
-    const popupService = useDependency(IPopupService);
+    const popupService = useDependency(IGlobalPopupManagerService);
     const popups = useObservable(popupService.popups$, popupService.popups);
     const componentManager = useDependency(ComponentManager);
 

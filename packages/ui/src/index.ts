@@ -82,3 +82,4 @@ export { RangeSelector } from './components/range-selector/RangeSelector';
 export { IRangeSelectorService } from './services/range-selector/range-selector.service';
 export { DesktopLocalStorageService } from './services/local-storage/local-storage.service';
 export { useActiveWorkbook, useActiveWorksheet } from './views/hooks/active';
+export { GlobalPopupManagerService, IGlobalPopupManagerService } from '@univerjs/ui/services/popup/global-popup-manager.service.js';

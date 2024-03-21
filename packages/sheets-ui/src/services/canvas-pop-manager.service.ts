@@ -17,7 +17,7 @@
 import { IUniverInstanceService } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { BaseObject, IBoundRectNoAngle, Viewport } from '@univerjs/engine-render';
-import { IPopupService } from '@univerjs/ui/services/popup/popup.service.js';
+import { IGlobalPopupManagerService } from '@univerjs/ui';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject } from '@wendellhu/redi';
 import { VIEWPORT_KEY } from '..';
@@ -33,13 +33,20 @@ interface ICanvasPopup {
 
 export class CanvasPopManagerService {
     constructor(
-        @Inject(IPopupService) private readonly _popupService: IPopupService,
+        @Inject(IGlobalPopupManagerService) private readonly _globalPopupManagerService: IGlobalPopupManagerService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService
     ) {}
 
-    addPopupToObject(baseObject: BaseObject, popup: ICanvasPopup, viewport?: Viewport): IDisposable {
+    /**
+     * attach a popup to canvas object
+     * @param targetObject target canvas object
+     * @param popup popup item
+     * @param viewport target viewport, if not given, will fallback to viewMain.
+     * @returns disposable
+     */
+    attachPopupToObject(targetObject: BaseObject, popup: ICanvasPopup, viewport?: Viewport): IDisposable {
         const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
         const unitId = workbook.getUnitId();
@@ -57,7 +64,7 @@ export class CanvasPopManagerService {
         }
 
         const { scene } = currentRender;
-        const { left, top, width, height } = baseObject;
+        const { left, top, width, height } = targetObject;
         const activeViewport = viewport ?? scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
 
         if (!activeViewport) {
@@ -85,7 +92,7 @@ export class CanvasPopManagerService {
             bottom: ((rect.endY - scrollXY.y) * scaleY) + bounding.top,
         };
 
-        const id = this._popupService.addPopup({
+        const id = this._globalPopupManagerService.addPopup({
             ...popup,
             unitId,
             subUnitId,
@@ -94,12 +101,20 @@ export class CanvasPopManagerService {
 
         return {
             dispose: () => {
-                this._popupService.removePopup(id);
+                this._globalPopupManagerService.removePopup(id);
             },
         };
     }
 
-    addPopupToCell(row: number, col: number, popup: ICanvasPopup, viewport?: Viewport) {
+    /**
+     * attach a popup to given cell
+     * @param row cell row index
+     * @param col cell column index
+     * @param popup popup item
+     * @param viewport target viewport
+     * @returns disposable
+     */
+    attachPopupToCell(row: number, col: number, popup: ICanvasPopup, viewport?: Viewport) {
         const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
         const unitId = workbook.getUnitId();
@@ -144,7 +159,7 @@ export class CanvasPopManagerService {
             bottom: ((cellInfo.endY - scrollXY.y) * scaleY) + bounding.top,
         };
 
-        const id = this._popupService.addPopup({
+        const id = this._globalPopupManagerService.addPopup({
             ...popup,
             unitId,
             subUnitId,
@@ -153,7 +168,7 @@ export class CanvasPopManagerService {
 
         return {
             dispose: () => {
-                this._popupService.removePopup(id);
+                this._globalPopupManagerService.removePopup(id);
             },
         };
     }

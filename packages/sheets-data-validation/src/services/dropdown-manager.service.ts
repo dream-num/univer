@@ -68,6 +68,9 @@ export class DataValidationDropdownManagerService {
             col,
             {
                 componentKey: DROP_DOWN_KEY,
+                onMaskClick: () => {
+                    this.hideDropdown();
+                },
             }
         ));
 

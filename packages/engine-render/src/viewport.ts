@@ -102,8 +102,6 @@ export class Viewport {
 
     private _viewPortKey: string = '';
 
-    private _dirty: boolean = true;
-
     private _topOrigin: number = 0;
 
     private _leftOrigin: number = 0;
@@ -342,21 +340,6 @@ export class Viewport {
         });
     }
 
-    makeDirty(state: boolean = true, refreshParent = false) {
-        this._dirty = state;
-
-        if (refreshParent) {
-            const parent = this.scene.getParent();
-            if (parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
-                parent.makeDirty(true);
-            }
-        }
-    }
-
-    isDirty(): boolean {
-        return this._dirty;
-    }
-
     /**
      * scroll to position, absolute
      * @param pos
@@ -575,7 +558,6 @@ export class Viewport {
             ctx.restore();
         }
 
-        this.makeDirty(false);
         this._scrollRendered();
 
         this._preViewportBound = viewBound;
@@ -796,8 +778,6 @@ export class Viewport {
                 y,
             });
         }
-
-        this.makeDirty(true);
     }
 
     private _getViewPortSize() {
@@ -941,8 +921,6 @@ export class Viewport {
 
         if (this._scrollBar) {
             this._scrollBar.makeDirty(true);
-        } else {
-            this.makeDirty(true);
         }
 
         const scroll = this.getTransformedScroll();

@@ -16,7 +16,7 @@
 
 import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import type { IDesktopUIController } from '@univerjs/ui';
-import { ComponentManager, IMenuService, IShortcutService, IUIController } from '@univerjs/ui';
+import { ComponentManager, DesktopUIPart, IMenuService, IShortcutService, IUIController } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 import { connectInjector } from '@wendellhu/redi/react-bindings';
 
@@ -99,9 +99,7 @@ export class FormulaUIController extends Disposable {
 
     private _registerComponents(): void {
         this.disposeWithMe(
-            this._uiController.registerContentComponent(() =>
-                connectInjector(RenderFormulaPromptContent, this._injector)
-            )
+            this.disposeWithMe(this._uiController.registerComponent(DesktopUIPart.CONTENT, () => connectInjector(RenderFormulaPromptContent, this._injector)))
         );
 
         this._componentManager.register(MORE_FUNCTIONS_COMPONENT, MoreFunctions);

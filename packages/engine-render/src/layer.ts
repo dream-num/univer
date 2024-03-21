@@ -103,13 +103,13 @@ export class Layer extends Disposable {
                 }
                 this._objects.push(object);
                 this.scene.setObjectBehavior(object);
-                object.layer = this;
+                this._layerBehavior(object);
             }
         }
         this._objects.push(o);
         this.scene.setObjectBehavior(o);
+        this._layerBehavior(o);
         this.scene.applyTransformer(o);
-        o.layer = this;
 
         return this;
     }
@@ -169,6 +169,14 @@ export class Layer extends Disposable {
     makeDirty(state: boolean = true) {
         this._dirty = state;
 
+        /**
+         * parent is SceneViewer, make it dirty
+         */
+        const parent = this.scene.getParent();
+        if (parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
+            parent.makeDirty(true);
+        }
+
         return this;
     }
 
@@ -201,6 +209,18 @@ export class Layer extends Disposable {
 
         this.makeDirty(false);
         return this;
+    }
+
+    private _layerBehavior(o: BaseObject) {
+        this.disposeWithMe(
+            toDisposable(
+                o.onTransformChangeObservable.add(() => {
+                    this.makeDirty(true);
+                })
+            )
+        );
+
+        o.layer = this;
     }
 
     private _initialCacheCanvas() {

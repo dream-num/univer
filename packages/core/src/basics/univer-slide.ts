@@ -17,7 +17,7 @@
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { LifecycleInitializerService, LifecycleService } from '../services/lifecycle/lifecycle.service';
-import { Slide } from '../slides/domain/slide-model';
+import { SlideDataModel } from '../slides/domain/slide-model';
 import type { ISlideData } from '../types/interfaces/i-slide-data';
 import { PluginHolder } from './plugin-holder';
 
@@ -34,8 +34,8 @@ export class UniverSlide extends PluginHolder {
         super();
     }
 
-    createSlide(data: Partial<ISlideData>): Slide {
-        const slide = this._injector.createInstance(Slide, data);
+    createSlide(data: Partial<ISlideData>): SlideDataModel {
+        const slide = this._injector.createInstance(SlideDataModel, data);
         return slide;
     }
 }

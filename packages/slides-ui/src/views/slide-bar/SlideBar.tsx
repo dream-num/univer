@@ -14,110 +14,80 @@
  * limitations under the License.
  */
 
-import type { ISlidePage } from '@univerjs/core';
-import React, { Component, createRef } from 'react';
-
+import { ICommandService, IUniverInstanceService } from '@univerjs/core';
+import type { RefObject } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useDependency } from '@wendellhu/redi/react-bindings';
+import { useObservable } from '@univerjs/ui';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import { ActivateSlidePageOperation } from '../../commands/operations/activate.operation';
+import { SetSlidePageThumbOperation } from '../../commands/operations/setThumb.operation';
 import styles from './index.module.less';
 
-interface SlideBarState {
-    slideList: ISlidePage[];
-    activePageId?: string;
-}
+/**
+ * This components works as the root component of the left Sidebar of Slide.
+ */
 
-interface IProps {
-    addSlide: () => void;
-    activeSlide: (pageId: string) => void;
-}
+export function SlideSideBar() {
+    const univerInstanceService = useDependency(IUniverInstanceService);
+    const commandService = useDependency(ICommandService);
+    const renderManagerService = useDependency(IRenderManagerService);
 
-export class SlideBar extends Component<{}, SlideBarState> {
-    slideBarRef = createRef<HTMLDivElement>();
+    const slideBarRef = useRef<HTMLDivElement>(null);
+    const currentSlide = useObservable(univerInstanceService.currentSlide$);
+    const pages = currentSlide?.getPages();
+    const pageOrder = currentSlide?.getPageOrder();
 
-    constructor(props: {}) {
-        super(props);
-
-        this.state = {
-            slideList: [],
-        };
+    if (!pages || !pageOrder) {
+        return null;
     }
 
-    override componentDidMount() {
-        this._init();
-    }
+    const slideList = pageOrder.map((id) => pages[id]);
 
-    isActive(pageId: string, index: number = 0) {
-        if (this.state.activePageId == null && index === 0) {
-            return styles.slideBarItemActive;
-        }
-        if (this.state.activePageId === pageId) {
-            return styles.slideBarItemActive;
-        }
-        return '';
-    }
+    const isPageActivated = useCallback((page: string) => {
+        return false;
+    }, []);
 
-    setSlide(slideList: ISlidePage[], cb?: () => void) {
-        this.setState(
-            {
-                slideList,
-            },
-            cb
-        );
-    }
+    const [divRefs, setDivRefs] = useState<RefObject<HTMLDivElement>[]>([]);
 
-    activeSlide(pageId: string, index: number) {
-        if (this.state.activePageId === pageId) {
-            return;
-        }
+    useEffect(() => {
+        setDivRefs(slideList.map((_) => React.createRef()));
+    }, [slideList.length]);
 
-        this.setState({
-            activePageId: pageId,
+    useEffect(() => {
+        divRefs.forEach((ref, index) => {
+            if (ref.current) {
+                const slide = slideList[index];
+                renderManagerService.getRenderById(slide.id)?.engine.setContainer(ref.current);
+            }
         });
 
-        // this.props.activeSlide(pageId);
-    }
+        if (divRefs.length > 0) {
+            commandService.syncExecuteCommand(SetSlidePageThumbOperation.id);
+        }
+    }, [divRefs]); // 依赖于divRefs数组的变化
 
-    private _init(): void {
-        // TODO: should subscribe to active slide change event
-        // const univerInstanceService = this.context.injector.get(IUniverInstanceService);
-        // const model = univerInstanceService.getCurrentUniverSlideInstance();
-        // const pages = model.getPages();
-        // const pageOrder = model.getPageOrder();
-        // if (!pages || !pageOrder) {
-        //     return;
-        // }
+    const activatePage = useCallback((page: string) => {
+        commandService.syncExecuteCommand(ActivateSlidePageOperation.id, { id: page });
+    }, [commandService]);
 
-        const p: ISlidePage[] = [];
-        // pageOrder.forEach((pageKey) => {
-        //     p.push(pages[pageKey]);
-        // });
-
-        this.setState({
-            slideList: p,
-        });
-    }
-
-    override render() {
-        // const { addSlide } = this.props;
-        const { slideList } = this.state;
-        // TODO@wzhudev: manage slides in a SlideService
-
-        return (
-            <div className={styles.slideBar} ref={this.slideBarRef}>
-                <div className={styles.slideBarContent}>
-                    {slideList.map((item, index) => (
-                        <div
-                            key={index}
-                            className={`${styles.slideBarItem} ${this.isActive(item.id, index)}`}
-                            onClick={() => this.activeSlide(item.id, index)}
-                        >
-                            <span>{index + 1}</span>
-                            <div className={styles.slideBarBox} />
-                        </div>
-                    ))}
-                </div>
-                {/* <div className={styles.slideAddButton}>
+    return (
+        <div className={styles.slideBar} ref={slideBarRef}>
+            <div className={styles.slideBarContent}>
+                {slideList.map((item, index) => (
+                    <div
+                        key={index}
+                        className={`${styles.slideBarItem} ${isPageActivated(item.id)}`}
+                        onClick={() => activatePage(item.id)}
+                    >
+                        <span>{index + 1}</span>
+                        <div ref={divRefs[index]} className={styles.slideBarBox} />
+                    </div>
+                ))}
+            </div>
+            {/* <div className={styles.slideAddButton}>
                     <Button onClick={addSlide}>+</Button>
                 </div> */}
-            </div>
-        );
-    }
+        </div>
+    );
 }

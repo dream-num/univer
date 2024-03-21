@@ -18,7 +18,7 @@ import type { EventState, IKeyValue, Nullable, Observer } from '@univerjs/core';
 import { Disposable, Observable } from '@univerjs/core';
 
 import type { BaseObject } from './base-object';
-import type { EVENT_TYPE } from './basics/const';
+import type { CURSOR_TYPE, EVENT_TYPE } from './basics/const';
 import { RENDER_CLASS_TYPE } from './basics/const';
 import type { IKeyboardEvent, IMouseEvent, IPointerEvent, IWheelEvent } from './basics/i-events';
 import type { ITransformChangeState } from './basics/interfaces';
@@ -232,5 +232,13 @@ export abstract class ThinScene extends Disposable {
             scaleX: 1,
             scaleY: 1,
         };
+    }
+
+    setCursor(val: CURSOR_TYPE) {
+
+    }
+
+    resetCursor() {
+
     }
 }

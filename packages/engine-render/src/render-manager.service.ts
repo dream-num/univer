@@ -111,6 +111,10 @@ export class RenderManagerService implements IRenderManagerService {
         return current;
     }
 
+    createRenderWithEngine(unitId: string, engine: Engine): IRender {
+        return this._createRender(unitId, engine, false);
+    }
+
     create(unitId: Nullable<string>) {
         this._createRender$.next(unitId);
     }

@@ -88,6 +88,10 @@ export class Engine extends ThinEngine<Scene> {
 
     private _isUsingFirefox = navigator.userAgent.indexOf('Firefox') !== -1;
 
+    private _previousWidth = -1000;
+
+    private _previousHeight = -1000;
+
     constructor(elemWidth: number = 1, elemHeight: number = 1, pixelRatio?: number, mode?: CanvasRenderMode) {
         super();
         this._canvas = new Canvas({
@@ -185,6 +189,14 @@ export class Engine extends ThinEngine<Scene> {
         }
 
         const { width, height } = getSizeForDom(this._container);
+
+        if (width === this._previousWidth && height === this._previousHeight) {
+            return;
+        }
+
+        this._previousWidth = width;
+
+        this._previousHeight = height;
 
         this.resizeBySize(width, height);
     }

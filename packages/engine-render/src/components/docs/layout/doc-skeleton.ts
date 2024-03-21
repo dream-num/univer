@@ -507,8 +507,8 @@ export class DocumentSkeleton extends Skeleton {
             defaultTabStop = 10.5,
             textStyle = {},
             renderConfig: global_renderConfig = {
-                horizontalAlign: HorizontalAlign.UNSPECIFIED,
-                verticalAlign: VerticalAlign.UNSPECIFIED,
+                horizontalAlign: HorizontalAlign.LEFT,
+                verticalAlign: VerticalAlign.TOP,
                 centerAngle: 0,
                 vertexAngle: 0,
                 wrapStrategy: WrapStrategy.UNSPECIFIED,

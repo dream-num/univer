@@ -17,22 +17,22 @@
 import type { Worksheet } from '@univerjs/core';
 import { Disposable, DisposableCollection, ICommandService, IUniverInstanceService } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import type { BaseObject, IBoundRectNoAngle, IRender, Scene, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
+import type { BaseObject, IBoundRectNoAngle, IRender, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
 import { IGlobalPopupManagerService } from '@univerjs/ui';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject } from '@wendellhu/redi';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import type { ISetWorksheetRowAutoHeightMutationParams } from '@univerjs/sheets';
 import { SetWorksheetRowAutoHeightMutation } from '@univerjs/sheets';
 import { getViewportByCell, transformBound2OffsetBound } from '../common/utils';
 import { SetScrollOperation } from '../commands/operations/scroll.operation';
-import { SetZoomRatioCommand } from '../commands/commands/set-zoom-ratio.command';
+import { SetZoomRatioOperation } from '..';
 import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
 
 interface ICanvasPopup {
     componentKey: string;
     mask?: boolean;
-    onMaskClick?: React.MouseEventHandler<HTMLDivElement>;
+    onMaskClick?: (e: MouseEvent) => void;
     direction?: 'vertical' | 'horizontal';
 }
 
@@ -97,7 +97,7 @@ export class CanvasPopManagerService extends Disposable {
                 }
             }
 
-            if (commandInfo.id === SetScrollOperation.id || commandInfo.id === SetZoomRatioCommand.id) {
+            if (commandInfo.id === SetScrollOperation.id || commandInfo.id === SetZoomRatioOperation.id) {
                 position$.next(this._calcCellPosition(row, col, currentRender, skeleton, activeViewport));
             }
         }));
@@ -142,7 +142,7 @@ export class CanvasPopManagerService extends Disposable {
         const position$ = new BehaviorSubject(position);
         const disposableCollection = new DisposableCollection();
         disposableCollection.add(this._commandService.onCommandExecuted((commandInfo) => {
-            if (commandInfo.id === SetScrollOperation.id || commandInfo.id === SetZoomRatioCommand.id) {
+            if (commandInfo.id === SetScrollOperation.id || commandInfo.id === SetZoomRatioOperation.id) {
                 position$.next(calc());
             }
         }));

@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import { HorizontalAlign, type IParagraphStyle } from '@univerjs/core';
+import { HorizontalAlign } from '@univerjs/core';
 import type { IDocumentSkeletonDivide, IDocumentSkeletonLine, IDocumentSkeletonPage } from '../../../../../basics/i-document-skeleton-cached';
 import { getGlyphGroupWidth, lineIterator } from '../../tools';
 import { setGlyphGroupLeft } from '../../model/glyph';
 import { hasCJK, hasCJKText, isCjkLeftAlignedPunctuation, isCjkRightAlignedPunctuation } from '../../../../../basics/tools';
+import type { DocumentViewModel } from '../../../view-model/document-view-model';
 
 // How much a character should hang into the end margin.
 // For more discussion, see:
@@ -227,9 +228,10 @@ function shrinkStartAndEndCJKPunctuation(line: IDocumentSkeletonLine) {
     }
 }
 
-export function lineAdjustment(pages: IDocumentSkeletonPage[], paragraphStyle: IParagraphStyle) {
-    const { horizontalAlign = HorizontalAlign.UNSPECIFIED } = paragraphStyle;
+export function lineAdjustment(pages: IDocumentSkeletonPage[], bodyModel: DocumentViewModel) {
     lineIterator(pages, (line) => {
+        const paragraphStyle = bodyModel.getParagraph(line.paragraphIndex)?.paragraphStyle ?? {};
+        const { horizontalAlign = HorizontalAlign.UNSPECIFIED } = paragraphStyle;
         // If the last glyph is a CJK punctuation, we want to shrink it.
         shrinkStartAndEndCJKPunctuation(line);
         // restore the original glyph width.

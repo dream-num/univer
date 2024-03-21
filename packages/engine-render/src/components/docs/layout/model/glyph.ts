@@ -154,14 +154,14 @@ export function _createSkeletonWordOrLetter(
     const bBox = FontCache.getTextSize(content, fontStyle);
     const { width: contentWidth = 0 } = bBox;
     let width = glyphWidth ?? contentWidth;
-    let paddingLeft = 0;
+    let xOffset = 0;
 
     if (validationGrid(gridType, snapToGrid)) {
         // 当文字也需要对齐到网格式，进行处理
         // const multiple = Math.ceil(contentWidth / charSpace);
         width = contentWidth + (hasCJK(content) ? charSpace : charSpace / 2);
         if (gridType === GridType.SNAP_TO_CHARS) {
-            paddingLeft = (width - contentWidth) / 2;
+            xOffset = (width - contentWidth) / 2;
         }
     }
 
@@ -171,7 +171,7 @@ export function _createSkeletonWordOrLetter(
         fontStyle,
         width,
         bBox,
-        xOffset: paddingLeft,
+        xOffset,
         left: 0,
         glyphType,
         streamType,

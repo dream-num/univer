@@ -39,6 +39,7 @@ export function dealWidthParagraph(
 
     // Step 1: Text Shaping.
     const { endIndex, content = '' } = paragraphNode;
+
     const paragraph = bodyModel.getParagraph(endIndex) || { startIndex: 0 };
     const { paragraphStyle = {} } = paragraph;
 
@@ -61,7 +62,8 @@ export function dealWidthParagraph(
     );
 
     // Step 3: Line Adjustment.
-    lineAdjustment(allPages, paragraphStyle);
+    // TODO: @JOCS, only need to adjust lines in current paragraph.
+    lineAdjustment(allPages, bodyModel);
 
     return allPages;
 }

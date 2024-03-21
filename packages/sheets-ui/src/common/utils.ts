@@ -19,7 +19,7 @@ import { ObjectMatrix } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
-import type { Scene } from '@univerjs/engine-render';
+import type { IBoundRectNoAngle, Scene, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
 import { VIEWPORT_KEY } from './keys';
 
 export function checkCellContentInRanges(worksheet: Worksheet, ranges: IRange[]): boolean {
@@ -113,4 +113,57 @@ export function getViewportByCell(row: number, column: number, scene: Scene, wor
     if (row > freeze.startRow && column <= freeze.startColumn) {
         return scene.getViewport(VIEWPORT_KEY.VIEW_MAIN_LEFT);
     }
+}
+
+export function transformBound2OffsetBound(originBound: IBoundRectNoAngle, scene: Scene, skeleton: SpreadsheetSkeleton, worksheet: Worksheet): IBoundRectNoAngle {
+    const topLeft = transformPosition2Offset(originBound.left, originBound.top, scene, skeleton, worksheet);
+    const bottomRight = transformPosition2Offset(originBound.right, originBound.bottom, scene, skeleton, worksheet);
+
+    return {
+        left: topLeft.x,
+        top: topLeft.y,
+        right: bottomRight.x,
+        bottom: bottomRight.y,
+    };
+}
+
+export function transformPosition2Offset(x: number, y: number, scene: Scene, skeleton: SpreadsheetSkeleton, worksheet: Worksheet) {
+    const { scaleX, scaleY } = scene.getAncestorScale();
+    const viewMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
+    if (!viewMain) {
+        return {
+            x,
+            y,
+        };
+    }
+    const freeze = worksheet.getFreeze();
+    const { startColumn, startRow, xSplit, ySplit } = freeze;
+     // freeze start
+    const startSheetView = skeleton.getNoMergeCellPositionByIndexWithNoHeader(startRow - ySplit, startColumn - xSplit);
+     // freeze end
+    const endSheetView = skeleton.getNoMergeCellPositionByIndexWithNoHeader(startRow, startColumn);
+    const { rowHeaderWidth, columnHeaderHeight } = skeleton;
+    const freezeWidth = endSheetView.startX - startSheetView.startX;
+    const freezeHeight = endSheetView.startY - startSheetView.startY;
+
+    const { top, left, actualScrollX, actualScrollY } = viewMain;
+    let offsetX: number;
+    // viewMain or viewTop
+    if (x > left) {
+        offsetX = (x - actualScrollX) * scaleX;
+    } else {
+        offsetX = ((freezeWidth + rowHeaderWidth) - (left - x)) * scaleX;
+    }
+
+    let offsetY: number;
+    if (y > top) {
+        offsetY = (y - actualScrollY) * scaleY;
+    } else {
+        offsetY = ((freezeHeight + columnHeaderHeight) - (top - y)) * scaleX;
+    }
+
+    return {
+        x: offsetX,
+        y: offsetY,
+    };
 }

@@ -1,8 +1,11 @@
 .sheets-filter-panel {
     display: flex;
-    width: 280px;
-    height: 368px;
+    width: 312px;
+    height: 400px;
     flex-direction: column;
+    background: rgb(var(--bg-color-secondary));
+    box-sizing: border-box;
+    padding: 16px;
 
     &-header {
         flex: 0 0 32px;
@@ -11,6 +14,8 @@
 
     &-content {
         flex-grow: 1;
+        flex-shrink: 1;
+        overflow: hidden;
     }
 
     &-select-all {
@@ -25,9 +30,16 @@
 
     &-values {
         &-container {
-            height: 100%;
+            margin-top: 8px;
             display: flex;
             flex-direction: column;
+
+            .select,
+            .input-affix-wrapper,
+            .radio-group {
+                width: 100%;
+                margin-bottom: 8px;
+            }
         }
 
         &-find {
@@ -38,8 +50,8 @@
         &-list {
             border: 1px solid rgb(var(--grey-200));
             box-sizing: border-box;
-            flex: 1;
             border-radius: 6px;
+            height: 236px;
 
             padding: 8px 0 8px 8px;
 

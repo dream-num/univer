@@ -17,11 +17,20 @@
 import { type IShortcutItem, KeyCode, MetaKeys } from '@univerjs/ui';
 import { whenSheetEditorFocused } from '@univerjs/sheets-ui';
 import { SmartToggleSheetsFilterCommand } from '../commands/sheets-filter.command';
+import { OpenFilterPanelOnCurrentSelectionOperation } from '../commands/sheets-filter.operation';
 
 export const SmartToggleFilterShortcut: IShortcutItem = {
     id: SmartToggleSheetsFilterCommand.id,
     binding: KeyCode.L | MetaKeys.CTRL_COMMAND | MetaKeys.SHIFT,
     description: 'filter.shortcut.smart-toggle-filter',
+    preconditions: whenSheetEditorFocused,
+    group: '4_sheet-edit',
+};
+
+export const OpenFilterPanelOnCurrentSelectionShortcut: IShortcutItem = {
+    id: OpenFilterPanelOnCurrentSelectionOperation.id,
+    binding: KeyCode.L | MetaKeys.CTRL_COMMAND,
+    description: 'filter.shortcut.open-filter-panel-on-current-selection',
     preconditions: whenSheetEditorFocused,
     group: '4_sheet-edit',
 };

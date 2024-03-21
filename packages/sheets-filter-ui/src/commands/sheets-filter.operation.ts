@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import { CommandType, IContextService, type IOperation } from '@univerjs/core';
+import { CommandType, ICommandService, IContextService, type IOperation, IUniverInstanceService } from '@univerjs/core';
 import { SheetsFilterService } from '@univerjs/sheets-filter';
+import { SelectionManagerService } from '@univerjs/sheets';
 import type { FilterBy } from '../services/sheets-filter-panel.service';
 import { SheetsFilterPanelService } from '../services/sheets-filter-panel.service';
 
@@ -45,13 +46,51 @@ export const OpenFilterPanelOperation: IOperation<IOpenFilterPanelOperationParam
             return false;
         }
 
-        // Open filer panel if it is not opened yet.
+        const result = sheetsFilterPanelService.setupCol(filterModel, col);
         if (!contextService.getContextValue(FILTER_PANEL_OPENED_KEY)) {
             contextService.setContextValue(FILTER_PANEL_OPENED_KEY, true);
         }
 
         // Set the filter condition to the filter ui service on the specific column.
-        return sheetsFilterPanelService.setupCol(filterModel, col);
+        return result;
+    },
+};
+
+/**
+ * This openeration would try to open the filter panel on the currently selected column
+ * if the column is inside the range of the filter.
+ */
+export const OpenFilterPanelOnCurrentSelectionOperation: IOperation = {
+    id: 'sheet.operation.open-filter-panel-on-current-selection',
+    type: CommandType.OPERATION,
+    handler: (accessor) => {
+        const selectionManagerService = accessor.get(SelectionManagerService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const commandService = accessor.get(ICommandService);
+        const sheetsFilterService = accessor.get(SheetsFilterService);
+
+        const selection = selectionManagerService.getLast();
+        if (!selection) {
+            return false;
+        }
+
+        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
+        const worksheet = workbook.getActiveSheet();
+        const filterModel = sheetsFilterService.getFilterModel(worksheet.getUnitId(), worksheet.getSheetId());
+        if (!filterModel) {
+            return false;
+        }
+
+        const filterRange = filterModel.getRange();
+        if (filterRange.startColumn <= selection.primary.startColumn && selection.primary.startColumn <= filterRange.endColumn) {
+            return commandService.syncExecuteCommand(OpenFilterPanelOperation.id, {
+                unitId: worksheet.getUnitId(),
+                subUnitId: worksheet.getSheetId(),
+                col: selection.primary.startColumn - filterRange.startColumn,
+            } as IOpenFilterPanelOperationParams);
+        }
+
+        return false;
     },
 };
 

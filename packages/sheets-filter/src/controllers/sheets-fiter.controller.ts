@@ -56,6 +56,7 @@ export class SheetsFilterController extends Disposable {
     }
 
     private _initRowFilteredInterceptor(): void {
+        // TODO@wzhudev: we should update filtered rows here?
         this.disposeWithMe(this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.ROW_FILTERED, {
             handler: (filtered, rowLocation) => {
                 if (filtered) return true;

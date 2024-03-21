@@ -73,7 +73,11 @@ export class SheetsFilterPanelService extends Disposable {
     public get filterByModel(): Nullable<FilterByModel> { return this._filterByModel; }
 
     private _filterModel: Nullable<FilterModel> = null;
-    private _col = -1;
+    get filterModel() { return this._filterModel; }
+
+    private readonly _col$ = new BehaviorSubject<number>(-1);
+    readonly col$ = this._col$.asObservable();
+    get col(): number { return this._col$.getValue(); }
 
     private _filterColumnAliveListener: Nullable<IDisposable> = null;
 
@@ -95,7 +99,7 @@ export class SheetsFilterPanelService extends Disposable {
         this.terminate();
 
         this._filterModel = filterModel;
-        this._col = col;
+        this._col$.next(col);
 
         // TODO@wzhudev: should setup listener so that
 
@@ -116,14 +120,14 @@ export class SheetsFilterPanelService extends Disposable {
     };
 
     changeFilterBy(filterBy: FilterBy): boolean {
-        if (!this._filterModel || this._col === -1) {
+        if (!this._filterModel || this.col === -1) {
             return false;
         }
 
         if (filterBy === FilterBy.VALUES) {
-            return this._setupByValues(this._filterModel, this._col);
+            return this._setupByValues(this._filterModel, this.col);
         } else {
-            return this._setupByConditions(this._filterModel, this._col);
+            return this._setupByConditions(this._filterModel, this.col);
         }
     }
 
@@ -132,7 +136,7 @@ export class SheetsFilterPanelService extends Disposable {
         this._filterColumnAliveListener = null;
 
         this._filterModel = null;
-        this._col = -1;
+        this._col$.next(-1);
 
         return true;
     }

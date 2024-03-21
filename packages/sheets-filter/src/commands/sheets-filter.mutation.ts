@@ -29,6 +29,9 @@ export interface ISetSheetsFilterRangeMutationParams extends ISheetCommandShared
 
 /**
  * Set filter range in a Worksheet. If the `FilterModel` does not exist, it will be created.
+ *
+ * Since there could only be a filter on a worksheet, when you want to update the range, you
+ * don't necessarily need to remove the filter first, you can just execute this mutation.
  */
 export const SetSheetsFilterRangeMutation: IMutation<ISetSheetsFilterRangeMutationParams> = {
     id: 'sheet.mutation.set-filter-range',
@@ -48,6 +51,9 @@ export const SetSheetsFilterRangeMutation: IMutation<ISetSheetsFilterRangeMutati
 export interface ISetSheetsFilterCriteriaMutationParams extends ISheetCommandSharedParams {
     col: number;
 
+    /**
+     * Filter criteria to set. If it is `null`, the criteria will be removed.
+     */
     criteria: Nullable<IFilterColumn>;
 
     /**
@@ -72,9 +78,7 @@ export const SetSheetsFilterCriteriaMutation: IMutation<ISetSheetsFilterCriteria
             return false;
         }
 
-        if (col === undefined) {
-            throw new Error();
-        }
+        // TODO@wzhudev: check criteria out of bound.
 
         filterModel.setCriteria(col, criteria, reCalc);
         return true;

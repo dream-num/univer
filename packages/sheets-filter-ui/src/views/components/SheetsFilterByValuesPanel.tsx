@@ -19,7 +19,7 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import { LocaleService } from '@univerjs/core';
 import { useObservable } from '@univerjs/ui';
 import List from 'rc-virtual-list';
-import { Button, Checkbox, FormLayout, Input } from '@univerjs/design';
+import { Button, Checkbox, Input } from '@univerjs/design';
 
 import type { ByValuesModel, IFilterByValueItem } from '../../services/sheets-filter-panel.service';
 import styles from './index.module.less';
@@ -55,9 +55,7 @@ export function FilterByValue(props: { model: ByValuesModel }) {
 
     return (
         <div className={styles.sheetsFilterPanelValuesContainer}>
-            <FormLayout>
-                <Input value={searchText} placeholder={localeService.t('sheets-filter.panel.search-placeholder')} onChange={onSearchValueChange} />
-            </FormLayout>
+            <Input value={searchText} placeholder={localeService.t('sheets-filter.panel.search-placeholder')} onChange={onSearchValueChange} />
             <div className={styles.sheetsFilterPanelValuesList}>
                 <div className={styles.sheetsFilterPanelValuesItem}>
                     <Checkbox
@@ -70,7 +68,7 @@ export function FilterByValue(props: { model: ByValuesModel }) {
                     <span className={styles.sheetsFilterPanelValuesItemCount}>{`(${stat.checked}/${stat.checked + stat.unchecked})`}</span>
                 </div>
 
-                <List style={{ paddingRight: 8 }} data={items} height={224} itemHeight={32} itemKey={(item) => `${item.value}----${item.checked}`}>
+                <List style={{ paddingRight: 8 }} data={items} height={188} itemHeight={32} itemKey={(item) => `${item.value}----${item.checked}`}>
                     {(item) => (
                         <div className={styles.sheetsFilterPanelValuesItem}>
                             <Checkbox checked={item.checked} onChange={() => onFilterCheckToggled(item, !item.checked)}></Checkbox>

@@ -20,6 +20,22 @@ import { RectPopup } from '@univerjs/design';
 import { IGlobalPopupManagerService } from '@univerjs/ui';
 import { useObservable } from '../../../components/hooks/observable';
 import { ComponentManager } from '../../../common';
+import type { IPopup } from '../../../services/popup/global-popup-manager.service';
+
+const SingleUniverPopup = ({ popup, children }: { popup: IPopup; children?: React.ReactNode }) => {
+    const anchorRect = useObservable(popup.anchorRect$, popup.anchorRect);
+    return (
+        <RectPopup
+            anchorRect={anchorRect}
+            mask={popup.mask}
+            onMaskClick={popup.onMaskClick}
+            direction={popup.direction}
+        >
+
+            {children}
+        </RectPopup>
+    );
+};
 
 export function UniverPopup() {
     const popupService = useDependency(IGlobalPopupManagerService);
@@ -30,16 +46,13 @@ export function UniverPopup() {
         const [key, popup] = item;
         const Component = componentManager.get(popup.componentKey);
         return (
-            <RectPopup
+            <SingleUniverPopup
                 key={key}
-                anchorRect={popup.anchorRect}
-                mask={popup.mask}
-                onMaskClick={popup.onMaskClick}
-                direction={popup.direction}
+                popup={popup}
             >
 
                 {Component ? <Component /> : null}
-            </RectPopup>
+            </SingleUniverPopup>
         );
     });
 }

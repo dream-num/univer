@@ -61,14 +61,10 @@ export function WithValuesFilterModelFactory(): IWorkbookData {
             sheet1: {
                 id: 'sheet1',
                 cellData: {
-                    0: {
-                        0: {
-                            v: 'A1',
-                        },
-                    },
+                    0: { 0: { v: 'A1' } },
                     1: { 0: { v: '1' } },
                     2: { 0: { v: '2' } },
-                    3: { 0: { v: 'Michael Jackson' } },
+                    3: { 0: { v: 'Michael Jackson King of Pop' } },
                     4: { 0: { v: 'Michael' } },
                     5: { 0: { v: 'Jackson' } },
                     6: { 0: { v: 'Evan Wallace' } },

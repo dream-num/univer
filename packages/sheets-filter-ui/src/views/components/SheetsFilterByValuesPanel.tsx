@@ -58,16 +58,18 @@ export function FilterByValue(props: { model: ByValuesModel }) {
             <FormLayout>
                 <Input value={searchText} placeholder={localeService.t('sheets-filter.panel.search-placeholder')} onChange={onSearchValueChange} />
             </FormLayout>
-            <Checkbox
-                disabled={items.length === 0}
-                checked={allChecked}
-                onChange={onCheckAllToggled}
-            >
-                <span className={styles.sheetsFilterPanelSelectAll}>{`${localeService.t('sheets-filter.panel.select-all')}`}</span>
-                <span className={styles.sheetsFilterPanelSelectAllCount}>{`(${stat.checked}/${stat.checked + stat.unchecked})`}</span>
-
-            </Checkbox>
             <div className={styles.sheetsFilterPanelValuesList}>
+                <div className={styles.sheetsFilterPanelValuesItem}>
+                    <Checkbox
+                        disabled={items.length === 0}
+                        checked={allChecked}
+                        onChange={onCheckAllToggled}
+                    >
+                    </Checkbox>
+                    <span className={styles.sheetsFilterPanelValuesItemText}>{`${localeService.t('sheets-filter.panel.select-all')}`}</span>
+                    <span className={styles.sheetsFilterPanelValuesItemCount}>{`(${stat.checked}/${stat.checked + stat.unchecked})`}</span>
+                </div>
+
                 <List style={{ paddingRight: 8 }} data={items} height={224} itemHeight={32} itemKey={(item) => `${item.value}----${item.checked}`}>
                     {(item) => (
                         <div className={styles.sheetsFilterPanelValuesItem}>

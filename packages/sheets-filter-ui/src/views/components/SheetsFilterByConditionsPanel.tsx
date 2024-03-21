@@ -16,15 +16,16 @@
 
 import { LocaleService } from '@univerjs/core';
 import type { ISelectProps } from '@univerjs/design';
-import { FormDualColumnLayout, FormLayout, Input, Radio, RadioGroup, Select } from '@univerjs/design';
+import { Input, Radio, RadioGroup, Select } from '@univerjs/design';
 import { useObservable } from '@univerjs/ui';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { Fragment, useCallback, useMemo } from 'react';
 
 import type { ByConditionsModel } from '../../services/sheets-filter-panel.service';
-
 import type { FilterOperator, IFilterConditionFormParams } from '../../models/conditions';
 import { FilterConditionItems } from '../../models/conditions';
+
+import styles from './index.module.less';
 
 /**
  * Filter by conditions.
@@ -51,74 +52,35 @@ export function FilterByCondition(props: { model: ByConditionsModel }) {
     }, [model]);
 
     const secondaryOptions = useSecondaryOptions(localeService);
-    const firstSecondaryItem = useMemo(() => operator1 ? FilterConditionItems.getItemByOperator(operator1) : null, [operator1]);
-    // TODO@wzhudev
-    const secondSecondaryItem = useMemo(() => operator2 ? FilterConditionItems.getItemByOperator(operator2) : null, [operator2]);
     const onFormParamsChange = useCallback((diffParams: Partial<IFilterConditionFormParams>) => {
         model.onConditionFormChange(diffParams);
     }, [model]);
 
+    const placeholder = localeService.t('sheets-filter.panel.input-values-placeholder');
+    function renderSecondaryCondition(operator: FilterOperator, val: string, name: 'operator1' | 'operator2') {
+        const shouldRenderInput = FilterConditionItems.getItemByOperator(operator).numOfParameters === 1;
+        return (
+            <>
+                { name === 'operator2' && (
+                    <RadioGroup value={radioValue} onChange={onRadioChange}>
+                        <Radio value="AND">{localeService.t('sheets-filter.panel.and')}</Radio>
+                        <Radio value="OR">{localeService.t('sheets-filter.panel.or')}</Radio>
+                    </RadioGroup>
+                )}
+                <Select value={operator} options={secondaryOptions} onChange={(operator) => onFormParamsChange({ [name]: operator as FilterOperator })} />
+                { shouldRenderInput && (
+                    <Input value={val} placeholder={placeholder} onChange={(value) => onFormParamsChange({ [name === 'operator1' ? 'val1' : 'val2']: value })} />
+                )}
+            </>
+        );
+    }
+
     return (
-        <div>
-            <FormLayout>
-                {/* primary condition */}
-                <Select value={operator} options={primaryOptions} onChange={onPrimaryConditionChange} />
-            </FormLayout>
-
-            { numOfParameters >= 1 ?
-                firstSecondaryItem?.numOfParameters === 0
-                    ? (
-                        <FormLayout>
-                            <Select
-                                value={operator1!}
-                                options={secondaryOptions}
-                                onChange={(operator) => onFormParamsChange({ operator1: operator as FilterOperator })}
-                            />
-                        </FormLayout>
-                    )
-                    : (
-                        <FormDualColumnLayout>
-                            {/* first secondary condition */}
-                            <Fragment>
-                                <FormLayout>
-                                    <Select
-                                        value={operator1!}
-                                        options={secondaryOptions}
-                                        onChange={(operator) => onFormParamsChange({ operator1: operator as FilterOperator })}
-                                    />
-                                </FormLayout>
-                                <FormLayout>
-                                    <Input value={val1} onChange={(value) => onFormParamsChange({ val1: value })} />
-                                </FormLayout>
-                            </Fragment>
-                        </FormDualColumnLayout>
-                    ) : null}
-
-            { numOfParameters >= 2 ? (
-                <Fragment>
-                    <FormLayout>
-                        <RadioGroup value={radioValue} onChange={onRadioChange}>
-                            <Radio value="AND">AND</Radio>
-                            <Radio value="OR">OR</Radio>
-                        </RadioGroup>
-                    </FormLayout>
-                    <FormDualColumnLayout>
-                        {/* second secondary condition */}
-                        <Fragment>
-                            <FormLayout>
-                                <Select
-                                    value={operator2!}
-                                    options={secondaryOptions}
-                                    onChange={(operator) => onFormParamsChange({ operator2: operator as FilterOperator })}
-                                />
-                            </FormLayout>
-                            <FormLayout>
-                                <Input value={val2} onChange={(value) => onFormParamsChange({ val2: value })} />
-                            </FormLayout>
-                        </Fragment>
-                    </FormDualColumnLayout>
-                </Fragment>
-            ) : null }
+        <div className={styles.sheetsFilterPanelConditionsContainer}>
+            {/* primary condition */}
+            <Select value={operator} options={primaryOptions} onChange={onPrimaryConditionChange} />
+            { numOfParameters >= 1 && renderSecondaryCondition(operator1!, val1 ?? '', 'operator1') }
+            { numOfParameters >= 2 && renderSecondaryCondition(operator2!, val2 ?? '', 'operator2') }
         </div>
     );
 }

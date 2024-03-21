@@ -33,6 +33,9 @@ export default {
             'filter-only': 'Filter Only',
             'search-placeholder': 'Use space to separate keywords',
             'select-all': 'Select All',
+            'input-values-placeholder': 'Input Values',
+            and: 'AND',
+            or: 'OR',
         },
         conditions: {
             none: 'None',
@@ -52,8 +55,6 @@ export default {
             between: 'Between',
             'not-between': 'Not Between',
             custom: 'Custom',
-            and: 'AND',
-            or: 'OR',
         },
     },
 };

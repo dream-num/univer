@@ -112,8 +112,8 @@ export class UniverSheetsUIPlugin extends Plugin {
                 [IStatusBarService, { useClass: StatusBarService }],
                 [IMarkSelectionService, { useClass: MarkSelectionService }],
                 [HoverManagerService],
-                [CellAlertManagerService],
                 [CanvasPopManagerService],
+                [CellAlertManagerService],
 
                 // controllers
                 [ActiveWorksheetController],

@@ -21,6 +21,7 @@ import type { ISheetLocation } from '@univerjs/sheets';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { IPopupService } from '@univerjs/ui/services/popup/popup.service.js';
 import { CELL_ALERT_KEY } from '../views/cell-alert';
+import { CanvasPopManagerService } from './canvas-pop-manager.service';
 import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
 
 export enum CellAlertType {
@@ -54,7 +55,8 @@ export class CellAlertManagerService {
     constructor(
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IPopupService private readonly _popupService: IPopupService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @Inject(CanvasPopManagerService) private readonly _canvasPopManagerService: CanvasPopManagerService
     ) {}
 
     showAlert(alert: ICellAlert) {
@@ -63,28 +65,33 @@ export class CellAlertManagerService {
 
         const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
         const unitId = workbook.getUnitId();
-        const subUnitId = workbook.getActiveSheet().getSheetId();
+        // const subUnitId = workbook.getActiveSheet().getSheetId();
         const currentRender = this._renderManagerService.getRenderById(unitId);
         if (!currentRender) {
             return;
         }
-        const { position } = alert;
-        const bounding = currentRender.engine.getCanvasElement().getBoundingClientRect();
+        const { position, location } = alert;
+        const { row, col } = location;
+        // const bounding = currentRender.engine.getCanvasElement().getBoundingClientRect();
         this._currentAlert = alert;
         this._currentAlert$.next(alert);
-
-        this._currentPopupId = this._popupService.addPopup({
-            anchorRect: {
-                top: position.startY + bounding.top,
-                bottom: position.endY + bounding.top,
-                left: position.startX,
-                right: position.endX,
-            },
-            unitId,
-            subUnitId,
+        this._canvasPopManagerService.addPopupToCell(row, col, {
             componentKey: CELL_ALERT_KEY,
             direction: 'horizontal',
         });
+
+        // this._currentPopupId = this._popupService.addPopup({
+        //     anchorRect: {
+        //         top: position.startY + bounding.top,
+        //         bottom: position.endY + bounding.top,
+        //         left: position.startX,
+        //         right: position.endX,
+        //     },
+        //     unitId,
+        //     subUnitId,
+        //     componentKey: CELL_ALERT_KEY,
+        //     direction: 'horizontal',
+        // });
     }
 
     clearAlert() {

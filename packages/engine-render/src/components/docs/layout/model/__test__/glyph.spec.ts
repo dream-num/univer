@@ -125,12 +125,14 @@ describe('Glyph utils test cases', () => {
                     shrinkability: [10, 10],
                     stretchability: [10, 10],
                 },
+                xOffset: 0,
                 width: 20,
             } as IDocumentSkeletonGlyph;
             glyphShrinkLeft(glyph, 5);
             expect(glyph.adjustability.shrinkability).toEqual([5, 10]);
             expect(glyph.adjustability.stretchability).toEqual([15, 10]);
             expect(glyph.width).toBe(15);
+            expect(glyph.xOffset).toBe(-5);
         });
     });
 });

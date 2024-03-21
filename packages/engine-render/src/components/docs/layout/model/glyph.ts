@@ -283,6 +283,7 @@ export function glyphShrinkRight(glyph: IDocumentSkeletonGlyph, amount: number) 
 
 export function glyphShrinkLeft(glyph: IDocumentSkeletonGlyph, amount: number) {
     glyph.width -= amount;
+    glyph.xOffset -= amount;
     glyph.adjustability.shrinkability[0] -= amount;
     glyph.adjustability.stretchability[0] += amount;
 }

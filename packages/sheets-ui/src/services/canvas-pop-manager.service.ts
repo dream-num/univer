@@ -17,10 +17,10 @@
 import { IUniverInstanceService } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { BaseObject, IBoundRectNoAngle, Viewport } from '@univerjs/engine-render';
-import { PopupService } from '@univerjs/ui/services/popup/popup.service.js';
+import { IPopupService } from '@univerjs/ui/services/popup/popup.service.js';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject } from '@wendellhu/redi';
-import { VIEWPORT_KEY } from '..';
+import { VIEWPORT_KEY } from '../common/keys';
 import { getViewportByCell } from '../common/utils';
 import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
 
@@ -33,7 +33,7 @@ interface ICanvasPopup {
 
 export class CanvasPopManagerService {
     constructor(
-        @Inject(PopupService) private readonly _popupService: PopupService,
+        @Inject(IPopupService) private readonly _popupService: IPopupService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService

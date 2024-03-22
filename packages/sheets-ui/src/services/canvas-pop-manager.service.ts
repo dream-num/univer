@@ -98,7 +98,11 @@ export class CanvasPopManagerService extends Disposable {
                 }
             }
 
-            if (COMMAND_LISTENER_SKELETON_CHANGE.indexOf(commandInfo.id) > -1) {
+            if (
+                COMMAND_LISTENER_SKELETON_CHANGE.indexOf(commandInfo.id) > -1 ||
+                commandInfo.id === SetScrollOperation.id ||
+                commandInfo.id === SetZoomRatioOperation.id
+            ) {
                 position$.next(this._calcCellPosition(row, col, currentRender, skeleton, activeViewport));
             }
         }));
@@ -143,7 +147,7 @@ export class CanvasPopManagerService extends Disposable {
         const position$ = new BehaviorSubject(position);
         const disposableCollection = new DisposableCollection();
         disposableCollection.add(this._commandService.onCommandExecuted((commandInfo) => {
-            if (COMMAND_LISTENER_SKELETON_CHANGE.indexOf(commandInfo.id) > -1) {
+            if (commandInfo.id === SetScrollOperation.id || commandInfo.id === SetZoomRatioOperation.id) {
                 position$.next(calc());
             }
         }));
@@ -174,7 +178,7 @@ export class CanvasPopManagerService extends Disposable {
 
         if (!currentRender || !skeleton) {
             return {
-                dispose: () => {},
+                dispose: () => { },
             };
         }
 
@@ -218,7 +222,7 @@ export class CanvasPopManagerService extends Disposable {
 
         if (!currentRender || !skeleton) {
             return {
-                dispose: () => {},
+                dispose: () => { },
             };
         }
 
@@ -226,7 +230,7 @@ export class CanvasPopManagerService extends Disposable {
 
         if (!activeViewport) {
             return {
-                dispose: () => {},
+                dispose: () => { },
             };
         }
 

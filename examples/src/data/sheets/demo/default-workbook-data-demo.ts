@@ -15,7 +15,7 @@
  */
 
 import type { IDocumentData, IWorkbookData } from '@univerjs/core';
-import { BooleanNumber, DataValidationOperator, DataValidationType, LocaleType } from '@univerjs/core';
+import { BooleanNumber, DataValidationErrorStyle, DataValidationOperator, DataValidationType, LocaleType } from '@univerjs/core';
 
 import { DATA_VALIDATION_PLUGIN_NAME } from '@univerjs/sheets-data-validation';
 import { PAGE5_RICHTEXT_1 } from '../../slides/rich-text/page5-richtext1';
@@ -113,6 +113,7 @@ const dataValidation = [
         }],
         operator: DataValidationOperator.GREATER_THAN,
         formula1: '111',
+        errorStyle: DataValidationErrorStyle.STOP,
     },
     {
         uid: 'xxx-2',

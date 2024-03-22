@@ -702,8 +702,7 @@ export class FreezeController extends Disposable {
                         .updateScroll({
                             scrollY,
                             actualScrollY,
-                        })
-                        .makeDirty(true);
+                        });
                 }
 
                 if (viewColumnRight.isActive) {
@@ -711,16 +710,14 @@ export class FreezeController extends Disposable {
                         .updateScroll({
                             scrollX,
                             actualScrollX,
-                        })
-                        .makeDirty(true);
+                        });
                 }
                 if (viewMainLeft.isActive) {
                     viewMainLeft
                         .updateScroll({
                             scrollY,
                             actualScrollY,
-                        })
-                        .makeDirty(true);
+                        });
                 }
 
                 if (viewMainTop.isActive) {
@@ -728,8 +725,7 @@ export class FreezeController extends Disposable {
                         .updateScroll({
                             scrollX,
                             actualScrollX,
-                        })
-                        .makeDirty(true);
+                        });
                 }
             })!
         );
@@ -861,8 +857,7 @@ export class FreezeController extends Disposable {
                     actualScrollY: startSheetView.startY,
                     x: viewMain.scrollX,
                     actualScrollX: viewMain.actualScrollX,
-                })
-                .makeDirty(true);
+                });
             viewRowTop.resize({
                 left: 0,
                 top: columnHeaderHeightAndMarginTop,
@@ -872,8 +867,7 @@ export class FreezeController extends Disposable {
             viewRowTop
                 .updateScroll({
                     actualScrollY: startSheetView.startY,
-                })
-                .makeDirty(true);
+                });
             viewRowBottom.resize({
                 left: 0,
                 top: columnHeaderHeightAndMarginTop + topGap,
@@ -918,8 +912,7 @@ export class FreezeController extends Disposable {
                     actualScrollX: startSheetView.startX,
                     y: viewMain.scrollY,
                     actualScrollY: viewMain.actualScrollY,
-                })
-                .makeDirty(true);
+                });
             viewColumnLeft.resize({
                 left: rowHeaderWidthAndMarginLeft,
                 top: 0,
@@ -929,8 +922,7 @@ export class FreezeController extends Disposable {
             viewColumnLeft
                 .updateScroll({
                     actualScrollX: startSheetView.startX,
-                })
-                .makeDirty(true);
+                });
             viewColumnRight.resize({
                 left: rowHeaderWidthAndMarginLeft + leftGap,
                 top: 0,
@@ -984,8 +976,7 @@ export class FreezeController extends Disposable {
                     actualScrollX: startSheetView.startX,
                     y: viewMain.scrollY,
                     actualScrollY: viewMain.actualScrollY,
-                })
-                .makeDirty(true);
+                });
             viewMainTop.resize({
                 left: rowHeaderWidthAndMarginLeft + leftGap,
                 top: columnHeaderHeightAndMarginTop,
@@ -997,8 +988,7 @@ export class FreezeController extends Disposable {
                     actualScrollY: startSheetView.startY,
                     x: viewMain.scrollX,
                     actualScrollX: viewMain.actualScrollX,
-                })
-                .makeDirty(true);
+                });
             viewMainLeftTop.resize({
                 left: rowHeaderWidthAndMarginLeft,
                 top: columnHeaderHeightAndMarginTop,
@@ -1010,8 +1000,7 @@ export class FreezeController extends Disposable {
                 .updateScroll({
                     actualScrollX: startSheetView.startX,
                     actualScrollY: startSheetView.startY,
-                })
-                .makeDirty(true);
+                });
 
             viewRowTop.resize({
                 left: 0,
@@ -1023,8 +1012,7 @@ export class FreezeController extends Disposable {
             viewRowTop
                 .updateScroll({
                     actualScrollY: startSheetView.startY,
-                })
-                .makeDirty(true);
+                });
 
             viewRowBottom.resize({
                 left: 0,
@@ -1043,8 +1031,7 @@ export class FreezeController extends Disposable {
             viewColumnLeft
                 .updateScroll({
                     actualScrollX: startSheetView.startX,
-                })
-                .makeDirty(true);
+                });
 
             viewColumnRight.resize({
                 left: rowHeaderWidthAndMarginLeft + leftGap,

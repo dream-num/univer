@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import { DEFFAULT_DATE_FORMAT, excelDateSerial, excelSerialToDate } from '../../../basics/date';
+import { DEFAULT_DATE_FORMAT, excelDateSerial, excelSerialToDate } from '../../../basics/date';
 import { ErrorType } from '../../../basics/error-type';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import { NumberValueObject } from '../../../engine/value-object/primitive-object';
+import { NullValueObject, NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 /**
@@ -56,7 +56,7 @@ export class Edate extends BaseFunction {
         const monthsArray = expandArrayValueObject(maxRowLength, maxColumnLength, months);
 
         return startDateArray.map((startDateObject, rowIndex, columnIndex) => {
-            const monthsValueObject = monthsArray.get(rowIndex, columnIndex);
+            const monthsValueObject = monthsArray.get(rowIndex, columnIndex) || NullValueObject.create();
 
             if (startDateObject.isError()) {
                 return startDateObject;
@@ -88,7 +88,7 @@ export class Edate extends BaseFunction {
             const currentSerial = excelDateSerial(resultDate);
 
             const valueObject = NumberValueObject.create(currentSerial);
-            valueObject.setPattern(DEFFAULT_DATE_FORMAT);
+            valueObject.setPattern(DEFAULT_DATE_FORMAT);
 
             return valueObject;
         });

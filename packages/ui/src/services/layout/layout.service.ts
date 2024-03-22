@@ -15,13 +15,14 @@
  */
 
 import type { ContextService, Nullable } from '@univerjs/core';
-import { Disposable, DocumentDataModel, FOCUSING_UNIVER_EDITOR, IContextService, ILogService, IUniverInstanceService, LifecycleStages, OnLifecycle, remove, Slide, toDisposable, UniverInstanceType, Workbook } from '@univerjs/core';
+import { Disposable, DocumentDataModel, FOCUSING_UNIVER_EDITOR, IContextService, ILogService, IUniverInstanceService, LifecycleStages, OnLifecycle, remove, SlideDataModel, toDisposable, UniverInstanceType, Workbook } from '@univerjs/core';
 import { createIdentifier, type IDisposable } from '@wendellhu/redi';
 import { fromEvent } from 'rxjs';
 
 type FocusHandlerFn = (unitId: string) => void;
 
 export const FOCUSING_UNIVER = 'FOCUSING_UNIVER';
+const collectionOfCnForFocusableEle = ['univer-app-layout', 'univer-toolbar-btn', 'univer-menu-item', 'univer-button'];
 
 export interface ILayoutService {
     readonly isFocused: boolean;
@@ -83,7 +84,7 @@ export class DesktopLayoutService extends Disposable implements ILayoutService {
             handler = this._focusHandlers.get(UniverInstanceType.SHEET);
         } else if (currentFocused instanceof DocumentDataModel) {
             handler = this._focusHandlers.get(UniverInstanceType.DOC);
-        } else if (currentFocused instanceof Slide) {
+        } else if (currentFocused instanceof SlideDataModel) {
             handler = this._focusHandlers.get(UniverInstanceType.SLIDE);
         }
 
@@ -145,7 +146,7 @@ export class DesktopLayoutService extends Disposable implements ILayoutService {
         this.disposeWithMe(
             fromEvent(window, 'focusin').subscribe((event) => {
                 const target = event.target as HTMLElement;
-                if (target.classList.contains('univer-app-layout')) {
+                if (collectionOfCnForFocusableEle.some((item) => target.classList.contains(item))) {
                     queueMicrotask(() => this.focus());
                     return;
                 }

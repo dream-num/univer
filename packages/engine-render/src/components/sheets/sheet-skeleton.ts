@@ -1626,7 +1626,10 @@ export class SpreadsheetSkeleton extends Skeleton {
             return true;
         }
 
-        const cell = this._worksheet.getCell(r, c);
+        /**
+         * TODO: DR-Univer getCellRaw for slide demo, the implementation approach will be changed in the future.
+         */
+        const cell = this._worksheet.getCell(r, c) || this._worksheet.getCellRaw(r, c);
         if (!cell) {
             return true;
         }

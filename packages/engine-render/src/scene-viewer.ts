@@ -50,10 +50,10 @@ export class SceneViewer extends BaseObject {
             const { left, top, right, bottom } = bounds.viewBound;
 
             if (
-                this.width + this.strokeWidth < left ||
-                right < 0 ||
-                this.height + this.strokeWidth < top ||
-                bottom < 0
+                this.width + this.strokeWidth + this.left < left ||
+                right < this.left ||
+                this.height + this.strokeWidth + this.top < top ||
+                bottom < this.top
             ) {
                 // console.warn('ignore object', this);
                 return this;

@@ -80,7 +80,7 @@ export const DEFAULT_FIFTH_PAGE = {
             type: PageElementType.TEXT,
             richText: {
                 text: 'Sustainable Technology',
-                fs: 32,
+                fs: 32 * 0.75,
                 cl: {
                     rgb: 'rgb(244,79,86)',
                 },
@@ -98,7 +98,7 @@ export const DEFAULT_FIFTH_PAGE = {
             type: PageElementType.TEXT,
             richText: {
                 text: 'Delivering technology alone will not be enough in 2023',
-                fs: 18,
+                fs: 18 * 0.75,
                 cl: {
                     rgb: 'rgb(127,127,127)',
                 },
@@ -180,7 +180,7 @@ export const DEFAULT_FIFTH_PAGE = {
             type: PageElementType.TEXT,
             richText: {
                 text: 'In short:',
-                fs: 16,
+                fs: 16 * 0.75,
                 cl: {
                     rgb: 'rgb(244,79,86)',
                 },
@@ -198,7 +198,7 @@ export const DEFAULT_FIFTH_PAGE = {
             type: PageElementType.TEXT,
             richText: {
                 text: 'Investments in sustainable technology also have the potential to create greater operational resiliency and financial performance, while providing new avenues for growth.',
-                fs: 12,
+                fs: 12 * 0.75,
                 cl: {
                     rgb: 'rgb(127,127,127)',
                 },
@@ -216,7 +216,7 @@ export const DEFAULT_FIFTH_PAGE = {
             type: PageElementType.TEXT,
             richText: {
                 text: 'In short:',
-                fs: 16,
+                fs: 16 * 0.75,
                 cl: {
                     rgb: 'rgb(244,79,86)',
                 },
@@ -250,7 +250,7 @@ export const DEFAULT_FIFTH_PAGE = {
             type: PageElementType.TEXT,
             richText: {
                 text: 'Gartner’s Top 10 Strategic Technology Trends will help fulfill your business needs to optimize, scale or pioneer.',
-                fs: 12,
+                fs: 12 * 0.75,
                 cl: {
                     rgb: 'rgb(127,127,127)',
                 },
@@ -285,7 +285,7 @@ export const DEFAULT_FIFTH_PAGE = {
             type: PageElementType.TEXT,
             richText: {
                 text: 'The trends allow you to align your technology innovation with the future strategic objectives of your enterprise.',
-                fs: 12,
+                fs: 12 * 0.75,
                 cl: {
                     rgb: 'rgb(127,127,127)',
                 },
@@ -320,7 +320,7 @@ export const DEFAULT_FIFTH_PAGE = {
             type: PageElementType.TEXT,
             richText: {
                 text: 'Investments in sustainable technology provide operational and financial benefits, and can create growth opportunities.',
-                fs: 12,
+                fs: 12 * 0.75,
                 cl: {
                     rgb: 'rgb(127,127,127)',
                 },

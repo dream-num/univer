@@ -74,7 +74,7 @@ export const DEFAULT_SECOND_PAGE = {
             type: PageElementType.TEXT,
             richText: {
                 text: 'Catalog',
-                fs: 42,
+                fs: 42 * 0.75,
                 cl: {
                     rgb: 'rgb(255,255,255)',
                 },
@@ -192,7 +192,7 @@ export const DEFAULT_SECOND_PAGE = {
             type: PageElementType.TEXT,
             richText: {
                 text: '01',
-                fs: 28,
+                fs: 28 * 0.75,
                 cl: {
                     rgb: 'rgb(255,255,255)',
                 },
@@ -211,7 +211,7 @@ export const DEFAULT_SECOND_PAGE = {
             type: PageElementType.TEXT,
             richText: {
                 text: 'Strategic technology trends',
-                fs: 20,
+                fs: 20 * 0.75,
                 cl: {
                     rgb: 'rgb(244,79,86)',
                 },
@@ -230,7 +230,7 @@ export const DEFAULT_SECOND_PAGE = {
             type: PageElementType.TEXT,
             richText: {
                 text: 'How they impact business goals.',
-                fs: 14,
+                fs: 14 * 0.75,
                 cl: {
                     rgb: 'rgb(255,255,255)',
                 },
@@ -248,7 +248,7 @@ export const DEFAULT_SECOND_PAGE = {
             type: PageElementType.TEXT,
             richText: {
                 text: '02',
-                fs: 28,
+                fs: 28 * 0.75,
                 cl: {
                     rgb: 'rgb(255,255,255)',
                 },
@@ -267,7 +267,7 @@ export const DEFAULT_SECOND_PAGE = {
             type: PageElementType.TEXT,
             richText: {
                 text: 'Technical profile',
-                fs: 20,
+                fs: 20 * 0.75,
                 cl: {
                     rgb: 'rgb(244,79,86)',
                 },
@@ -286,7 +286,7 @@ export const DEFAULT_SECOND_PAGE = {
             type: PageElementType.TEXT,
             richText: {
                 text: 'What the technologies are and do.',
-                fs: 14,
+                fs: 14 * 0.75,
                 cl: {
                     rgb: 'rgb(255,255,255)',
                 },
@@ -304,7 +304,7 @@ export const DEFAULT_SECOND_PAGE = {
             type: PageElementType.TEXT,
             richText: {
                 text: '03',
-                fs: 28,
+                fs: 28 * 0.75,
                 cl: {
                     rgb: 'rgb(255,255,255)',
                 },
@@ -323,7 +323,7 @@ export const DEFAULT_SECOND_PAGE = {
             type: PageElementType.TEXT,
             richText: {
                 text: 'Opportunities',
-                fs: 20,
+                fs: 20 * 0.75,
                 cl: {
                     rgb: 'rgb(244,79,86)',
                 },
@@ -342,7 +342,7 @@ export const DEFAULT_SECOND_PAGE = {
             type: PageElementType.TEXT,
             richText: {
                 text: 'What benefits and outcomes they drive.',
-                fs: 14,
+                fs: 14 * 0.75,
                 cl: {
                     rgb: 'rgb(255,255,255)',
                 },
@@ -360,7 +360,7 @@ export const DEFAULT_SECOND_PAGE = {
             type: PageElementType.TEXT,
             richText: {
                 text: '04',
-                fs: 28,
+                fs: 28 * 0.75,
                 cl: {
                     rgb: 'rgb(255,255,255)',
                 },
@@ -379,7 +379,7 @@ export const DEFAULT_SECOND_PAGE = {
             type: PageElementType.TEXT,
             richText: {
                 text: 'Implementation steps',
-                fs: 20,
+                fs: 20 * 0.75,
                 cl: {
                     rgb: 'rgb(244,79,86)',
                 },
@@ -398,7 +398,7 @@ export const DEFAULT_SECOND_PAGE = {
             type: PageElementType.TEXT,
             richText: {
                 text: 'Action plans for implementation.',
-                fs: 14,
+                fs: 14 * 0.75,
                 cl: {
                     rgb: 'rgb(255,255,255)',
                 },

@@ -15,7 +15,7 @@
  */
 
 import type { IColorStyle, IPageElement, ISlidePage } from '@univerjs/core';
-import { getColorStyle, PageElementType, Slide as SlideM } from '@univerjs/core';
+import { getColorStyle, PageElementType, SlideDataModel } from '@univerjs/core';
 import type { Engine } from '@univerjs/engine-render';
 import { Rect, Scene, Slide, Viewport } from '@univerjs/engine-render';
 import { Inject, Injector } from '@wendellhu/redi';
@@ -73,7 +73,7 @@ export class SlideAdaptor extends ObjectAdaptor {
             return;
         }
 
-        const model = new SlideM(slideData);
+        const model = new SlideDataModel(slideData);
 
         const slideComponent = new Slide(SLIDE_VIEW_KEY.MAIN + id, {
             top,
@@ -117,7 +117,7 @@ export class SlideAdaptor extends ObjectAdaptor {
         return slideComponent;
     }
 
-    private _createScene(pageId: string, parent: Engine | Slide, page: ISlidePage, mainScene: Scene, model: SlideM) {
+    private _createScene(pageId: string, parent: Engine | Slide, page: ISlidePage, mainScene: Scene, model: SlideDataModel) {
         const { width, height } = parent;
 
         const scene = new Scene(pageId, parent, {
@@ -134,8 +134,6 @@ export class SlideAdaptor extends ObjectAdaptor {
 
         viewMain.closeClip();
 
-        scene.addViewport(viewMain);
-
         const { pageElements, pageBackgroundFill } = page;
 
         const objects = this._ObjectProvider?.convertToRenderObjects(pageElements, mainScene);
@@ -149,7 +147,7 @@ export class SlideAdaptor extends ObjectAdaptor {
         return scene;
     }
 
-    private _addBackgroundRect(scene: Scene, fill: IColorStyle, model: SlideM) {
+    private _addBackgroundRect(scene: Scene, fill: IColorStyle, model: SlideDataModel) {
         const pageSize = model.getPageSize();
 
         const { width: pageWidth = 0, height: pageHeight = 0 } = pageSize;

@@ -225,10 +225,10 @@ export class Rectangle {
     static subtract(range1: IRange, range2: IRange): IRange[] {
         // 如果没有交集，则返回 range1
         if (
-            range2.startRow >= range1.endRow ||
-            range2.endRow <= range1.startRow ||
-            range2.startColumn >= range1.endColumn ||
-            range2.endColumn <= range1.startColumn
+            range2.startRow > range1.endRow ||
+            range2.endRow < range1.startRow ||
+            range2.startColumn > range1.endColumn ||
+            range2.endColumn < range1.startColumn
         ) {
             return [range1];
         }
@@ -236,19 +236,19 @@ export class Rectangle {
         const ranges: IRange[] = [];
 
         // 上部分
-        if (range2.startRow > range1.startRow) {
+        if (range2.startRow >= range1.startRow) {
             ranges.push({
                 startRow: range1.startRow,
                 startColumn: range1.startColumn,
-                endRow: range2.startRow,
+                endRow: range2.startRow - 1,
                 endColumn: range1.endColumn,
             });
         }
 
         // 下部分
-        if (range2.endRow < range1.endRow) {
+        if (range2.endRow <= range1.endRow) {
             ranges.push({
-                startRow: range2.endRow,
+                startRow: range2.endRow + 1,
                 startColumn: range1.startColumn,
                 endRow: range1.endRow,
                 endColumn: range1.endColumn,
@@ -259,25 +259,27 @@ export class Rectangle {
         const topBoundary = Math.max(range1.startRow, range2.startRow);
         const bottomBoundary = Math.min(range1.endRow, range2.endRow);
 
-        if (range2.startColumn > range1.startColumn) {
+        if (range2.startColumn >= range1.startColumn) {
             ranges.push({
                 startRow: topBoundary,
                 startColumn: range1.startColumn,
                 endRow: bottomBoundary,
-                endColumn: range2.startColumn,
+                endColumn: range2.startColumn - 1,
             });
         }
 
         // 右部分
-        if (range2.endColumn < range1.endColumn) {
+        if (range2.endColumn <= range1.endColumn) {
             ranges.push({
                 startRow: topBoundary,
-                startColumn: range2.endColumn,
+                startColumn: range2.endColumn + 1,
                 endRow: bottomBoundary,
                 endColumn: range1.endColumn,
             });
         }
 
-        return ranges;
+        const result = ranges.filter((range) => range.startRow <= range.endRow && range.startColumn <= range.endColumn);
+
+        return result;
     }
 }

@@ -29,6 +29,7 @@ import type {
     ISheetData,
     IUnitData,
     IUnitExcludedCell,
+    IUnitSheetIdToNameMap,
     IUnitSheetNameMap,
 } from '../basics/common';
 import { convertUnitDataToRuntime } from '../basics/runtime';
@@ -64,7 +65,7 @@ export interface IFormulaCurrentConfigService {
 
     getArrayFormulaCellData(): IRuntimeUnitDataType;
 
-    getDirtyUnitOtherFormulaMap(): IDirtyUnitOtherFormulaMap;
+    getSheetName(unitId: string, sheetId: string): string;
 }
 
 export class FormulaCurrentConfigService extends Disposable implements IFormulaCurrentConfigService {
@@ -90,6 +91,8 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
 
     private _excludedCell: Nullable<IUnitExcludedCell>;
 
+    private _sheetIdToNameMap: IUnitSheetIdToNameMap = {};
+
     constructor(@IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService) {
         super();
     }
@@ -104,7 +107,7 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         this._numfmtItemMap = {};
         this._dirtyUnitFeatureMap = {};
         this._excludedCell = {};
-        this._dirtyUnitOtherFormulaMap = {};
+        this._sheetIdToNameMap = {};
     }
 
     getExcludedRange() {
@@ -147,8 +150,12 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         return this._dirtyUnitFeatureMap;
     }
 
-    getDirtyUnitOtherFormulaMap() {
-        return this._dirtyUnitOtherFormulaMap;
+    getSheetName(unitId: string, sheetId: string) {
+        if (this._sheetIdToNameMap[unitId] == null) {
+            return '';
+        }
+
+        return this._sheetIdToNameMap[unitId]![sheetId] || '';
     }
 
     load(config: IFormulaDatasetConfig) {
@@ -294,6 +301,17 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
                     unitSheetNameMap[unitId]![dirtyNameMap[unitId]![sheetId]] = sheetId;
                 });
             }
+        });
+
+        this._sheetIdToNameMap = {};
+
+        Object.keys(unitSheetNameMap).forEach((unitId) => {
+            Object.keys(unitSheetNameMap[unitId]!).forEach((sheetName) => {
+                if (this._sheetIdToNameMap[unitId] == null) {
+                    this._sheetIdToNameMap[unitId] = {};
+                }
+                this._sheetIdToNameMap[unitId]![unitSheetNameMap[unitId]![sheetName]] = sheetName;
+            });
         });
     }
 

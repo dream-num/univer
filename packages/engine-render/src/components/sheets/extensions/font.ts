@@ -119,7 +119,7 @@ export class Font extends SheetExtension {
                     //     return true;
                     // }
 
-                    const cellData = worksheet.getCell(rowIndex, columnIndex) as ICellData & ISheetFontRenderExtension;
+                    const cellData = worksheet.getCell(rowIndex, columnIndex) as ICellData & ISheetFontRenderExtension || {};
                     if (cellData.fontRenderExtension?.isSkip) {
                         return true;
                     }

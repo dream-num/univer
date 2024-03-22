@@ -324,14 +324,14 @@ export abstract class Shape<T> extends BaseObject {
         }
 
         // Temporarily ignore the on-demand display of elements within a group：this.isInGroup
-        if (this.isRender()) {
+        if (this.isRender(bounds)) {
             const { top, left, bottom, right } = bounds!.viewBound;
 
             if (
-                this.width + this.strokeWidth < left ||
-                right < 0 ||
-                this.height + this.strokeWidth < top ||
-                bottom < 0
+                this.width + this.strokeWidth + this.left < left ||
+                right < this.left ||
+                this.height + this.strokeWidth + this.top < top ||
+                bottom < this.top
             ) {
                 return this;
             }

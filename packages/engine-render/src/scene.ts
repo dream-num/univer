@@ -132,8 +132,8 @@ export class Scene extends ThinScene {
     }
 
     override makeDirty(state: boolean = true) {
-        this._layers.forEach((vp) => {
-            vp.makeDirty(state);
+        this._layers.forEach((layer) => {
+            layer.makeDirty(state);
         });
         if (this._parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
             (this._parent as SceneViewer)?.makeDirty(state);
@@ -142,8 +142,8 @@ export class Scene extends ThinScene {
     }
 
     override makeDirtyNoParent(state: boolean = true) {
-        this._viewports.forEach((vp) => {
-            vp.makeDirty(state);
+        this._layers.forEach((layer) => {
+            layer.makeDirty(state);
         });
         return this;
     }
@@ -174,11 +174,11 @@ export class Scene extends ThinScene {
         return this._cursor;
     }
 
-    resetCursor() {
+    override resetCursor() {
         this.setCursor(this._defaultCursor);
     }
 
-    setCursor(val: CURSOR_TYPE) {
+    override setCursor(val: CURSOR_TYPE) {
         this._cursor = val;
         const engine = this.getEngine();
         if (!engine) {

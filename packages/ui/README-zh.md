@@ -2,6 +2,8 @@
 
 [![npm version](https://img.shields.io/npm/v/@univerjs/ui)](https://npmjs.org/package/@univerjs/ui)
 [![license](https://img.shields.io/npm/l/@univerjs/ui)](https://img.shields.io/npm/l/@univerjs/ui)
+![CSS Included](https://img.shields.io/badge/CSS_Included-blue?logo=CSS3)
+![i18n](https://img.shields.io/badge/zh--CN%20%7C%20en--US-cornflowerblue?label=i18n)
 
 ## 简介
 
@@ -18,6 +20,8 @@ npm install @univerjs/ui
 # 使用 pnpm
 pnpm add @univerjs/ui
 ```
+
+本包含有 CSS 文件，且具有第二高优先级，请在 `@univerjs/design` 之后、其他 Univer 样式文件之前引入本包的样式。
 
 ### UI 服务
 

@@ -18,7 +18,7 @@ import { ErrorType } from '../../../basics/error-type';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
-import { NumberValueObject } from '../../../engine/value-object/primitive-object';
+import { NullValueObject, NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class Index extends BaseFunction {
@@ -86,8 +86,8 @@ export class Index extends BaseFunction {
             const areaNumArray = expandArrayValueObject(maxRowLength, maxColumnLength, areaNum, ErrorValueObject.create(ErrorType.NA));
 
             return rowNumArray.map((rowNumValue, rowIndex, columnIndex) => {
-                const columnNumValue = columnNumArray.get(rowIndex, columnIndex);
-                const areaNumValue = areaNumArray.get(rowIndex, columnIndex);
+                const columnNumValue = columnNumArray.get(rowIndex, columnIndex) || NullValueObject.create();
+                const areaNumValue = areaNumArray.get(rowIndex, columnIndex) || NullValueObject.create();
 
                 const result = this._calculateSingleCell(reference as ArrayValueObject, rowNumValue, columnNumValue, areaNumValue);
 

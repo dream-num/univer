@@ -36,26 +36,17 @@ export interface IUniverAppProps extends IWorkbenchOptions {
     contentComponents?: Set<() => ComponentType>;
     footerComponents?: Set<() => ComponentType>;
     headerMenuComponents?: Set<() => ComponentType>;
+    leftSidebarComponents?: Set<() => ComponentType>;
     onRendered?: (container: HTMLElement) => void;
 }
 
 export function App(props: IUniverAppProps) {
-    const { header, footer } = props;
+    const { header, footer, mountContainer, headerComponents, headerMenuComponents, contentComponents, footerComponents, leftSidebarComponents, onRendered } = props;
 
     const localeService = useDependency(LocaleService);
     const themeService = useDependency(ThemeService);
     const messageService = useDependency(IMessageService);
     const contentRef = useRef<HTMLDivElement>(null);
-
-    const {
-        mountContainer,
-        headerComponents,
-        headerMenuComponents,
-        contentComponents,
-        footerComponents,
-        // sidebarComponents,
-        onRendered,
-    } = props;
 
     useEffect(() => {
         if (!themeService.getCurrentTheme()) {
@@ -92,7 +83,7 @@ export function App(props: IUniverAppProps) {
             // batch unsubscribe
             subscriptions.forEach((subscription) => subscription.unsubscribe());
         };
-    }, [portalContainer]);
+    }, [localeService, messageService, mountContainer, portalContainer, themeService.currentTheme$]);
 
     return (
         <ConfigProvider locale={locale} mountContainer={portalContainer}>
@@ -112,6 +103,10 @@ export function App(props: IUniverAppProps) {
                 {/* content */}
                 <section className={styles.appContainer}>
                     <div className={styles.appContainerWrapper}>
+                        <aside className={styles.appContainerLeftSidebar}>
+                            <ComponentContainer components={leftSidebarComponents} />
+                        </aside>
+
                         <section className={styles.appContainerContent}>
                             <header>
                                 {header && (

@@ -19,7 +19,7 @@ import { DEFAULT_SLIDE } from '../../types/const';
 import type { ISlideData, ISlidePage } from '../../types/interfaces';
 import { PageType } from '../../types/interfaces';
 
-export class Slide {
+export class SlideDataModel {
     private _snapshot: ISlideData;
 
     private _unitId: string;
@@ -27,6 +27,14 @@ export class Slide {
     constructor(snapshot: Partial<ISlideData>) {
         this._snapshot = { ...DEFAULT_SLIDE, ...snapshot };
         this._unitId = this._snapshot.id ?? Tools.generateRandomId(6);
+    }
+
+    getContainer() {
+        return this._snapshot.container;
+    }
+
+    getParentRenderUnitId() {
+        return this._snapshot.parentRenderUnitId;
     }
 
     getSnapshot() {

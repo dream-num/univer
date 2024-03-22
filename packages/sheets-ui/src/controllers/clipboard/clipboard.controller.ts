@@ -30,6 +30,7 @@ import {
     DEFAULT_WORKSHEET_COLUMN_WIDTH,
     DEFAULT_WORKSHEET_COLUMN_WIDTH_KEY,
     DEFAULT_WORKSHEET_ROW_HEIGHT,
+    extractPureTextFromCell,
     handleStyleToString,
     ICommandService,
     IConfigService,
@@ -162,7 +163,8 @@ export class SheetClipboardController extends RxDisposable {
             },
             onCopyCellContent(row: number, col: number): string {
                 const cell = currentSheet!.getCell(row, col);
-                return `${cell?.v || ''}`;
+                const content = cell ? extractPureTextFromCell(cell) : '';
+                return content;
             },
             onCopyCellStyle: (row: number, col: number, rowSpan?: number, colSpan?: number) => {
                 const properties: IClipboardPropertyItem = {};

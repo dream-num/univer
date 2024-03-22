@@ -17,6 +17,7 @@
 import type { ICellData, IMutationInfo, IRange, Worksheet } from '@univerjs/core';
 import {
     Disposable,
+    extractPureTextFromCell,
     ICommandService,
     ILogService,
     IUndoRedoService,
@@ -861,7 +862,7 @@ function getMatrixPlainText(matrix: ObjectMatrix<ICellDataWithSpanInfo>) {
 }
 
 function getCellTextForClipboard(cell: ICellDataWithSpanInfo) {
-    const formatValue = cell.v;
+    const formatValue = extractPureTextFromCell(cell);
     return escapeSpecialCode(formatValue?.toString() || '');
 }
 

@@ -358,22 +358,23 @@ export class ByValuesModel extends Disposable {
         const itemsByKey: Record<string, IFilterByValueItem> = {};
         const alreadyChecked = new Set(filters?.filters);
         const filteredOutRowsByOtherColumns = filterModel.getFilteredOutRowsExceptCol(col);
+        const rowManager = worksheet.getRowManager();
 
         let index = 0;
         let emptyCount = 0;
         for (const cell of worksheet.iterateByColumn(iterateRange, false, false)) { // iterate and do not skip empty cells
             const { row, rowSpan = 1 } = cell;
 
-            const value = cell?.value ? extractPureTextFromCell(cell.value) : '';
-
             let rowIndex = 0;
             while (rowIndex < rowSpan) {
                 const targetRow = row + rowIndex;
-                if (filteredOutRowsByOtherColumns.has(targetRow)) {
+
+                if (filteredOutRowsByOtherColumns.has(targetRow) || !rowManager.getRowVisible(targetRow)) {
                     rowIndex++;
                     continue;
                 }
 
+                const value = cell?.value ? extractPureTextFromCell(cell.value) : '';
                 if (!value) {
                     emptyCount += 1;
                     rowIndex += rowSpan;

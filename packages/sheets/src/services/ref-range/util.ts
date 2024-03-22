@@ -155,16 +155,26 @@ export const handleBaseMoveRowsCols = (
             //1- 5 8
             //2- 6 8 10 11 14 15
             //3- 5 7
-            _effectRange.end -= fromRangeIntersectsEffectRangeStep;
+            if (isToLargeFrom) {
+                _effectRange.end -= fromRangeIntersectsEffectRangeStep + fromRangeStep;
+                _effectRange.start -= fromRangeStep;
+            } else {
+                _effectRange.end -= fromRangeIntersectsEffectRangeStep;
+            }
         } else {
             if (isToLargeFrom) {
                 //1- 4 9 11 14 15
                 //3- 3 11
                 _effectRange.end -= fromRangeIntersectsEffectRangeStep;
             } else {
+                if (_effectRange.start > fromRange.start && _effectRange.end > fromRange.end) {
                 // 2-7
-                _effectRange.start -= fromRangeStep;
-                _effectRange.end -= fromRangeStep + fromRangeIntersectsEffectRangeStep;
+                    _effectRange.start -= fromRangeStep;
+                    _effectRange.end -= fromRangeStep + fromRangeIntersectsEffectRangeStep;
+                } else {
+                    // 2-6 10 11 14 15
+                    _effectRange.end -= fromRangeIntersectsEffectRangeStep;
+                }
             }
         }
     }
@@ -176,8 +186,8 @@ export const handleBaseMoveRowsCols = (
             _effectRange.end += toRangeStep;
         } else if (toRangeIntersectsEffectRange) {
             if (!isToLargeFrom) {
-                if (_effectRange.start < _toRange.start && _effectRange.end > _toRange.end) {
-                // 2-4 9 11 14 expend
+                if (_effectRange.start < _toRange.start && _effectRange.end > _toRange.start) {
+                // 2-4 9 14 expend
                     _effectRange.end += toRangeStep;
                 } else if (_effectRange.start >= _toRange.end || (_effectRange.start >= _toRange.start && _effectRange.start <= _toRange.end)) {
                 // 2-5 8 12 15 move right
@@ -185,11 +195,11 @@ export const handleBaseMoveRowsCols = (
                     _effectRange.start += toRangeStep;
                 }
             } else {
-                if (toRange.end <= _effectRange.start || (toRange.start <= _effectRange.start && toRange.end >= _effectRange.start)) {
+                if (_toRange.end <= _effectRange.start || (_toRange.start <= _effectRange.start && _toRange.end >= _effectRange.start)) {
                     // 1-3 7 13
                     _effectRange.start += toRangeStep;
                     _effectRange.end += toRangeStep;
-                } else if (toRange.start >= _effectRange.start && toRange.start <= _effectRange.end) {
+                } else if (_toRange.start >= _effectRange.start && _toRange.start <= _effectRange.end) {
                         // 1-6 8 10  11 14 15
                     _effectRange.end += toRangeStep;
                 }

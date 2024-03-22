@@ -980,6 +980,9 @@ export class SelectionShapeExtension {
             }
         } else if (rowOrColumn >= startRowOrColumn && rowOrColumn <= endRowOrColumn) {
             isLighten = true;
+            if (!this._isInMergeState) {
+                endRowOrColumn = rowOrColumn;
+            }
         } else {
             if (this._isInMergeState && rowOrColumn > endRowOrColumn) {
                 const current = rowOrColumn - endRowOrColumn;

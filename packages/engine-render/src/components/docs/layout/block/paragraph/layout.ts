@@ -62,8 +62,8 @@ export function dealWidthParagraph(
     );
 
     // Step 3: Line Adjustment.
-    // TODO: @JOCS, only need to adjust lines in current paragraph.
-    lineAdjustment(allPages, bodyModel);
+    // Handle line adjustment(stretch and shrink) and punctuation adjustment.
+    lineAdjustment(allPages, paragraph);
 
     return allPages;
 }

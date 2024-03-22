@@ -487,7 +487,6 @@ export class Spreadsheet extends SheetComponent {
         }
         ctx.save();
 
-        ctx.beginPath();
         ctx.setLineWidthByPrecision(1);
 
         ctx.strokeStyle = getColor([212, 212, 212]);
@@ -510,31 +509,41 @@ export class Spreadsheet extends SheetComponent {
         const endX = columnWidthAccumulation[columnEnd];
         const endY = rowHeightAccumulation[rowEnd];
         ctx.translateWithPrecisionRatio(FIX_ONE_PIXEL_BLUR_OFFSET, FIX_ONE_PIXEL_BLUR_OFFSET);
+
+        ctx.beginPath();
         ctx.moveToByPrecision(startX, startY);
         ctx.lineToByPrecision(endX, startY);
+
+        ctx.moveToByPrecision(startX, startY);
+        ctx.lineToByPrecision(startX, endY);
+
+        ctx.closePathByEnv();
+        ctx.stroke();
 
         for (let r = rowStart; r <= rowEnd; r++) {
             if (r < 0 || r > rowHeightAccumulationLength - 1) {
                 continue;
             }
             const rowEndPosition = rowHeightAccumulation[r];
+            ctx.beginPath();
             ctx.moveToByPrecision(startX, rowEndPosition);
             ctx.lineToByPrecision(endX, rowEndPosition);
+            ctx.closePathByEnv();
+            ctx.stroke();
         }
 
-        ctx.moveToByPrecision(startX, startY);
-        ctx.lineToByPrecision(startX, endY);
         for (let c = columnStart; c <= columnEnd; c++) {
             if (c < 0 || c > columnWidthAccumulationLength - 1) {
                 continue;
             }
             const columnEndPosition = columnWidthAccumulation[c];
+            ctx.beginPath();
             ctx.moveToByPrecision(columnEndPosition, startY);
             ctx.lineToByPrecision(columnEndPosition, endY);
+            ctx.closePathByEnv();
+            ctx.stroke();
         }
         // console.log('xx2', scaleX, scaleY, columnTotalWidth, rowTotalHeight, rowHeightAccumulation, columnWidthAccumulation);
-        ctx.stroke();
-        ctx.closePath();
 
         // border?.forValue((rowIndex, columnIndex, borderCaches) => {
         //     if (!borderCaches) {
@@ -569,8 +578,6 @@ export class Spreadsheet extends SheetComponent {
         // });
 
         // Clearing the dashed line issue caused by overlaid auxiliary lines and strokes
-
-        ctx.closePath();
         // merge cell
         this._clearRectangle(ctx, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
 

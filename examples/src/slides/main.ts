@@ -34,9 +34,7 @@ univer.registerPlugin(UniverRenderEnginePlugin);
 univer.registerPlugin(UniverUIPlugin, {
     container: 'univer-container',
     header: true,
-    toolbar: true,
     footer: true,
-    innerLeft: true,
 });
 univer.registerPlugin(UniverSlidesPlugin);
 univer.registerPlugin(UniverSlidesUIPlugin);

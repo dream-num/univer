@@ -55,7 +55,7 @@ import type {
 } from './type';
 import { COPY_TYPE } from './type';
 import { USMToHtmlService } from './usm-to-html/convertor';
-import { clipboardItemIsFromExcel } from './utils';
+import { clipboardItemIsFromExcel, mergeSetRangeValues } from './utils';
 
 export const PREDEFINED_HOOK_NAME = {
     DEFAULT_COPY: 'default-copy',
@@ -536,8 +536,8 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             pasteType,
         };
 
-        const redoMutationsInfo: IMutationInfo[] = [];
-        const undoMutationsInfo: IMutationInfo[] = [];
+        let redoMutationsInfo: IMutationInfo[] = [];
+        let undoMutationsInfo: IMutationInfo[] = [];
 
         // if hooks are not special or default, it will be executed in any case.
         // other hooks will be executed only when the paste type is the same as the hook name, including the default one
@@ -582,6 +582,9 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         if (setSelectionOperation) {
             redoMutationsInfo.push(setSelectionOperation);
         }
+
+        redoMutationsInfo = mergeSetRangeValues(redoMutationsInfo);
+        undoMutationsInfo = mergeSetRangeValues(undoMutationsInfo);
 
         this._logService.log('[SheetClipboardService]', 'pasting mutations', {
             undoMutationsInfo,

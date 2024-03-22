@@ -15,9 +15,11 @@
  */
 
 import type { IRange } from '@univerjs/core';
+import { SetRangeValuesMutation } from '@univerjs/sheets';
+
 import { describe, expect, it } from 'vitest';
 
-import { getRepeatRange } from '../utils';
+import { getRepeatRange, mergeSetRangeValues } from '../utils';
 
 describe('test getRepeatRange', () => {
     it('repeat row 2 times', () => {
@@ -131,6 +133,63 @@ describe('test getRepeatRange', () => {
                 startRange: { startRow: 6, endRow: 6, startColumn: 6, endColumn: 6 },
                 repeatRelativeRange: { startRow: 0, endRow: 1, startColumn: 0, endColumn: 1 },
             },
+        ]);
+    });
+});
+
+describe('test "mergeSetRangeValues"', () => {
+    it('empty', () => {
+        const mutations: any = [];
+        expect(mergeSetRangeValues(mutations)).toStrictEqual([]);
+    });
+
+    it ('no setRangeValues', () => {
+        const mutaions: any[] = [{ id: 'whatever', params: {} }];
+        expect(mergeSetRangeValues(mutaions)).toStrictEqual([{ id: 'whatever', params: {} }]);
+    });
+
+    it ('no merge', () => {
+        const mutaions: any = [
+            { id: 'whatever' },
+            { id: SetRangeValuesMutation.id, params: { unitId: '1', subUnitId: '2', cellValue: { 1: { 2: { v: 'value' } } } } },
+            { id: SetRangeValuesMutation.id, params: { unitId: '1', subUnitId: '3', cellValue: { 1: { 2: { v: 'value' } } } } },
+            { id: 'whatever' }];
+        expect(mergeSetRangeValues(mutaions)).toStrictEqual([
+            { id: 'whatever' },
+            { id: SetRangeValuesMutation.id, params: { unitId: '1', subUnitId: '2', cellValue: { 1: { 2: { v: 'value' } } } } },
+            { id: SetRangeValuesMutation.id, params: { unitId: '1', subUnitId: '3', cellValue: { 1: { 2: { v: 'value' } } } } },
+            { id: 'whatever' }]);
+    });
+    it ('merge part', () => {
+        const mutaions: any = [
+            { id: 'whatever' },
+            { id: SetRangeValuesMutation.id, params: { unitId: '1', subUnitId: '2', cellValue: { 1: { 2: { v: 'value' } } } } },
+            { id: SetRangeValuesMutation.id, params: { unitId: '1', subUnitId: '2', cellValue: { 1: { 3: { v: 'value' } } } } },
+            { id: SetRangeValuesMutation.id, params: { unitId: '1', subUnitId: '3', cellValue: { 1: { 2: { v: 'value' } } } } },
+            { id: 'whatever' }];
+        expect(mergeSetRangeValues(mutaions)).toStrictEqual([
+            { id: 'whatever' },
+            { id: SetRangeValuesMutation.id, params: { unitId: '1', subUnitId: '2', cellValue: { 1: { 2: { v: 'value' }, 3: { v: 'value' } } } } },
+            { id: SetRangeValuesMutation.id, params: { unitId: '1', subUnitId: '3', cellValue: { 1: { 2: { v: 'value' } } } } },
+            { id: 'whatever' }]);
+    });
+
+    it ('merge all', () => {
+        const mutaions: any = [
+            { id: 'whatever' },
+            { id: SetRangeValuesMutation.id, params: { unitId: '1', subUnitId: '2', cellValue: { 1: { 2: { v: 'value' } } } } },
+            { id: SetRangeValuesMutation.id, params: { unitId: '1', subUnitId: '2', cellValue: { 1: { 2: { v: 'value' } } } } },
+            { id: SetRangeValuesMutation.id, params: { unitId: '1', subUnitId: '2', cellValue: { 1: { 2: { f: 'formula' } } } } },
+            { id: 'whatever' },
+            { id: SetRangeValuesMutation.id, params: { unitId: '1', subUnitId: '2', cellValue: { 1: { 2: { v: 'value' } } } } },
+            { id: SetRangeValuesMutation.id, params: { unitId: '1', subUnitId: '2', cellValue: { 1: { 3: { v: 'value' } } } } },
+            { id: SetRangeValuesMutation.id, params: { unitId: '1', subUnitId: '2', cellValue: { 1: { 4: { v: 'value' } } } } },
+        ];
+        expect(mergeSetRangeValues(mutaions)).toStrictEqual([
+            { id: 'whatever' },
+            { id: SetRangeValuesMutation.id, params: { unitId: '1', subUnitId: '2', cellValue: { 1: { 2: { v: 'value', f: 'formula' } } } } },
+            { id: 'whatever' },
+            { id: SetRangeValuesMutation.id, params: { unitId: '1', subUnitId: '2', cellValue: { 1: { 2: { v: 'value' }, 3: { v: 'value' }, 4: { v: 'value' } } } } },
         ]);
     });
 });

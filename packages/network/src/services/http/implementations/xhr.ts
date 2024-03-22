@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+/* eslint-disable ts/no-explicit-any */
+
 import type { Nullable } from '@univerjs/core';
 import type { Observer } from 'rxjs';
 import { Observable } from 'rxjs';
@@ -26,7 +28,7 @@ import { HTTPResponse, HTTPResponseError, ResponseHeader } from '../response';
 import type { IHTTPImplementation } from './implementation';
 
 /**
- * A HTTP implementation using XHR. XHR could only be async.
+ * A HTTP implementation using XHR. HTTP service provided by this service could only be async (we do not support sync XHR now).
  */
 export class XHRHTTPImplementation implements IHTTPImplementation {
     send(request: HTTPRequest): Observable<HTTPEvent<any>> {

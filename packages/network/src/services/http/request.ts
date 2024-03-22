@@ -22,6 +22,7 @@ import type { HTTPParams } from './params';
 export type HTTPRequestMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
 
 export interface IHTTPRequestParams {
+    // eslint-disable-next-line ts/no-explicit-any
     body?: any;
     headers: HTTPHeaders;
     params?: HTTPParams;
@@ -29,18 +30,18 @@ export interface IHTTPRequestParams {
     withCredentials: boolean;
 }
 
+let HTTPRequestUID = 0;
+
+export function __TEST_ONLY_RESET_REQUEST_UID_DO_NOT_USE_IN_PRODUCTION() {
+    HTTPRequestUID = 0;
+}
+
 export class HTTPRequest {
-    get headers(): HTTPHeaders {
-        return this.requestParams!.headers;
-    }
+    get headers(): HTTPHeaders { return this.requestParams!.headers; }
+    get withCredentials(): boolean { return this.requestParams!.withCredentials; }
+    get responseType(): string { return this.requestParams!.responseType; }
 
-    get withCredentials(): boolean {
-        return this.requestParams!.withCredentials;
-    }
-
-    get responseType(): string {
-        return this.requestParams!.responseType;
-    }
+    readonly uid = HTTPRequestUID++;
 
     constructor(
         readonly method: HTTPRequestMethod,

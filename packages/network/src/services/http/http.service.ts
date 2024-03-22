@@ -29,40 +29,58 @@ import type { HTTPRequestMethod } from './request';
 import { HTTPRequest } from './request';
 import type { HTTPEvent, HTTPResponseError } from './response';
 import { HTTPResponse } from './response';
+import type { HTTPHandlerFn, HTTPInterceptorFn, RequestPipe } from './interceptor';
 
 export interface IRequestParams {
-    body?: any;
     /** Query params. These params would be append to the url before the request is sent. */
     params?: { [param: string]: string | number | boolean };
+
+    /** Query headers. */
     headers?: { [key: string]: string | number | boolean };
+    /** Expected types of the response data. */
     responseType?: HTTPResponseType;
     withCredentials?: boolean;
 }
 
 export interface IPostRequestParams extends IRequestParams {
-    body?: any;
+    body?: unknown;
 }
-
-type HTTPHandlerFn = (request: HTTPRequest) => Observable<HTTPEvent<unknown>>;
-type HTTPInterceptorFn = (request: HTTPRequest, next: HTTPHandlerFn) => Observable<HTTPEvent<unknown>>;
-type RequestPipe<T> = (req: HTTPRequest, finalHandlerFn: HTTPHandlerFn) => Observable<HTTPEvent<T>>;
 
 /**
  * Register an HTTP interceptor. Interceptor could modify requests, responses, headers or errors.
  */
 export interface IHTTPInterceptor {
+    /** The priority of the interceptor. The higher the value, the earlier the interceptor is called. */
     priority?: number;
+    /** The interceptor function. */
     interceptor: HTTPInterceptorFn;
 }
 
+/**
+ * This service provides http request methods and allows to register http interceptors.
+ *
+ * You can use interceptors to:
+ *
+ * 1. modify requests (headers included) before they are sent, or modify responses before they are returned to the caller.
+ * 2. thresholding, logging, caching, etc.
+ * 3. authentication, authorization, etc.
+ */
 export class HTTPService extends Disposable {
     private _interceptors: IHTTPInterceptor[] = [];
+
+    // eslint-disable-next-line ts/no-explicit-any
     private _pipe: Nullable<RequestPipe<any>>;
 
     constructor(@IHTTPImplementation private readonly _http: IHTTPImplementation) {
         super();
     }
 
+    /**
+     * Register an HTTP interceptor.
+     *
+     * @param interceptor the http interceptor
+     * @returns a disposable handler to remove the interceptor
+     */
     registerHTTPInterceptor(interceptor: IHTTPInterceptor): IDisposable {
         if (this._interceptors.indexOf(interceptor) !== -1) {
             throw new Error('[HTTPService]: The interceptor has already been registered!');
@@ -108,9 +126,10 @@ export class HTTPService extends Disposable {
             params,
             withCredentials: options?.withCredentials ?? false, // default value for withCredentials is false by MDN
             responseType: options?.responseType ?? 'json',
-            body: options?.body,
+            body: (method === 'GET') ? undefined : (options as IPostRequestParams)?.body,
         });
 
+        // eslint-disable-next-line ts/no-explicit-any
         const events$: Observable<HTTPEvent<any>> = of(request).pipe(
             concatMap((request) => this._runInterceptorsAndImplementation(request))
         );
@@ -125,6 +144,7 @@ export class HTTPService extends Disposable {
         throw new Error(`${(result as HTTPResponseError).error}`);
     }
 
+    // eslint-disable-next-line ts/no-explicit-any
     private _runInterceptorsAndImplementation(request: HTTPRequest): Observable<HTTPEvent<any>> {
         // In this method we first call all interceptors and finally the HTTP implementation.
         // And the HTTP response will be passed back through the interceptor chain.

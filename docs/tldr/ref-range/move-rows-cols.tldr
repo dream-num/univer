@@ -66,9 +66,9 @@
 		{
 			"id": "pointer:pointer",
 			"typeName": "pointer",
-			"x": 1173.201301463232,
-			"y": 263.3293297548847,
-			"lastActivityTimestamp": 1711080611339,
+			"x": 1064.1143908049876,
+			"y": 368.4612106924942,
+			"lastActivityTimestamp": 1711104635736,
 			"meta": {}
 		},
 		{
@@ -89,9 +89,7 @@
 		{
 			"editingShapeId": null,
 			"croppingShapeId": null,
-			"selectedShapeIds": [
-				"shape:o1rgYhARe-nUdq9dbtGsh"
-			],
+			"selectedShapeIds": [],
 			"hoveredShapeId": null,
 			"erasingShapeIds": [],
 			"hintingShapeIds": [],

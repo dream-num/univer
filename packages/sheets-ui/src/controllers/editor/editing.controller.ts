@@ -29,7 +29,7 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
 import { takeUntil } from 'rxjs';
 
-@OnLifecycle(LifecycleStages.Steady, EditingController)
+@OnLifecycle(LifecycleStages.Rendered, EditingController)
 export class EditingController extends RxDisposable {
     constructor(
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,

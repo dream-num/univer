@@ -35,6 +35,7 @@ import { DataValidationCopyPasteController } from './controllers/dv-copy-paste.c
 import { DataValidationResourceController } from './controllers/dv-resource.controller';
 import { DataValidationDropdownManagerService } from './services/dropdown-manager.service';
 import { HideDataValidationDropdown, ShowDataValidationDropdown } from './commands/operations/data-validation.operation';
+import { DataValidationRejectInputController } from './controllers/dv-reject-input.controller';
 
 export class UniverSheetsDataValidationPlugin extends Plugin {
     constructor(
@@ -63,6 +64,7 @@ export class UniverSheetsDataValidationPlugin extends Plugin {
             [DataValidationAutoFillController],
             [DataValidationSheetController],
             [DataValidationCopyPasteController],
+            [DataValidationRejectInputController],
         ] as Dependency[]).forEach((dep) => {
             injector.add(dep);
         });

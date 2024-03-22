@@ -34,3 +34,4 @@ export { DataValidationSheetController } from './controllers/dv-sheet.controller
 export { DataValidationCopyPasteController } from './controllers/dv-copy-paste.controller';
 export { DataValidationResourceController } from './controllers/dv-resource.controller';
 export { HideDataValidationDropdown, ShowDataValidationDropdown } from './commands/operations/data-validation.operation';
+export { DataValidationRejectInputController } from './controllers/dv-reject-input.controller';

@@ -122,7 +122,7 @@ export class EndEditController extends Disposable {
 
     private _initialExitInput() {
         this.disposeWithMe(
-            this._editorBridgeService.visible$.subscribe((param) => {
+            this._editorBridgeService.visible$.subscribe(async (param) => {
                 const { visible, keycode, eventType } = param;
 
                 if (visible === this._editorVisiblePrevious) {
@@ -132,11 +132,11 @@ export class EndEditController extends Disposable {
                 this._editorVisiblePrevious = visible;
 
                 if (visible === true) {
-                // Change `CursorChange` to changed status, when formula bar clicked.
+                    // Change `CursorChange` to changed status, when formula bar clicked.
                     this._isCursorChange =
-                    eventType === DeviceInputEventType.PointerDown
-                        ? CursorChange.CursorChange
-                        : CursorChange.StartEditor;
+                        eventType === DeviceInputEventType.PointerDown
+                            ? CursorChange.CursorChange
+                            : CursorChange.StartEditor;
                     return;
                 }
 
@@ -214,6 +214,10 @@ export class EndEditController extends Disposable {
                     this._editorBridgeService.interceptor.getInterceptPoints().AFTER_CELL_EDIT
                 )(cellData, context);
 
+                const finalCell = await this._editorBridgeService.interceptor.fetchThroughInterceptors(
+                    this._editorBridgeService.interceptor.getInterceptPoints().AFTER_CELL_EDIT_ASYNC
+                )(Promise.resolve(cell), context);
+
                 this._commandService.executeCommand(SetRangeValuesCommand.id, {
                     subUnitId: sheetId,
                     unitId,
@@ -223,15 +227,15 @@ export class EndEditController extends Disposable {
                         endRow: row,
                         endColumn: column,
                     },
-                    value: cell,
+                    value: finalCell,
                 });
 
-            // moveCursor need to put behind of SetRangeValuesCommand, fix https://github.com/dream-num/univer/issues/1155
+                // moveCursor need to put behind of SetRangeValuesCommand, fix https://github.com/dream-num/univer/issues/1155
                 this._moveCursor(keycode);
 
-            /**
-             * When closing the editor, switch to the current tab of the editor.
-             */
+                /**
+                 * When closing the editor, switch to the current tab of the editor.
+                 */
                 if (workbookId === unitId && sheetId !== worksheetId && this._editorBridgeService.isForceKeepVisible()) {
                     this._commandService.executeCommand(SetWorksheetActivateCommand.id, {
                         subUnitId: sheetId,
@@ -239,10 +243,10 @@ export class EndEditController extends Disposable {
                     });
                 }
 
-            /**
-             * When switching tabs while the editor is open,
-             * the operation to refresh the selection will be blocked and needs to be triggered manually.
-             */
+                /**
+                 * When switching tabs while the editor is open,
+                 * the operation to refresh the selection will be blocked and needs to be triggered manually.
+                 */
                 this._selectionManagerService.refreshSelection();
             })
         );

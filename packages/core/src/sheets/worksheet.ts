@@ -595,10 +595,12 @@ export class Worksheet {
      *
      * Performance intensive.
      *
-     * @param range the iterate range
-     * @param skipEmpty whether to skip empty cells, default to be `true`
+     * @param range The iterate range.
+     * @param skipEmpty Whether to skip empty cells, default to be `true`.
+     * @param skipNonTopLeft Whether to skip non-top-left cells of merged cells, default to be `true`. If the
+     * parameter is set to `false`, the iterator will return cells in the top row.
      */
-    iterateByColumn(range: IRange, skipEmpty = true): Iterable<Readonly<ICell>> {
+    iterateByColumn(range: IRange, skipEmpty = true, skipNonTopLeft = true): Iterable<Readonly<ICell>> {
         const { startRow, startColumn, endRow, endColumn } = range;
 
         // eslint-disable-next-line ts/no-this-alias
@@ -622,29 +624,32 @@ export class Worksheet {
                             }
 
                             // search for the next cell that is not non-top-left cell of a merged cell
-                            const cellValue = worksheet.getCell(rowIndex, columnIndex);
-                            const isEmptyCell = !cellValue;
                             const mergedCell = worksheet.getMergedCell(rowIndex, columnIndex);
 
                             if (mergedCell) {
-                                const isNotTopLeft = rowIndex !== mergedCell.startRow || columnIndex !== mergedCell.startColumn;
-                                if (isNotTopLeft) {
+                                const isNotTop = rowIndex !== mergedCell.startRow;
+                                const isNotTopLeft = isNotTop || columnIndex !== mergedCell.startColumn;
+                                if ((skipNonTopLeft && isNotTopLeft) || (!skipNonTopLeft && isNotTop)) {
                                     rowIndex = mergedCell.endRow + 1;
                                     continue;
                                 }
 
+                                const cellValue = worksheet.getCell(mergedCell.startRow, mergedCell.startColumn);
+                                const isEmptyCell = !cellValue;
                                 if (isEmptyCell && skipEmpty) {
                                     rowIndex = mergedCell.endRow + 1;
                                     continue;
                                 }
 
-                                const value: ICell = { row: rowIndex, col: columnIndex, value: cellValue };
+                                const value: ICell = { row: rowIndex, col: mergedCell.startColumn, value: cellValue };
                                 value.colSpan = mergedCell.endColumn - mergedCell.startColumn + 1;
                                 value.rowSpan = mergedCell.endRow - mergedCell.startRow + 1;
                                 rowIndex = mergedCell.endRow + 1;
                                 return { done: false, value };
                             }
 
+                            const cellValue = worksheet.getCell(rowIndex, columnIndex);
+                            const isEmptyCell = !cellValue;
                             if (isEmptyCell && skipEmpty) {
                                 rowIndex += 1;
                             } else {

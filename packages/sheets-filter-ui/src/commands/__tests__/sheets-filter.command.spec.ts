@@ -234,7 +234,7 @@ describe('test sheets filter commands', () => {
                 subUnitId: 'sheet1',
                 col: 0,
                 criteria: {
-                    filters: ['1'],
+                    filters: { filters: ['1'] },
                 },
             } as ISetSheetsFilterCriteriaCommandParams)).toBeTruthy();
             expect(getFilterModel()!.filteredOutRows).toEqual(new Set([2, 3, 4, 5]));
@@ -272,7 +272,7 @@ describe('test sheets filter commands', () => {
                 subUnitId: 'sheet1',
                 col: 0,
                 criteria: {
-                    filters: ['1'],
+                    filters: { filters: ['1'] },
                 },
             } as ISetSheetsFilterCriteriaCommandParams)).toBeTruthy();
             expect(await commandService.executeCommand(SetSheetsFilterCriteriaCommand.id, {
@@ -280,7 +280,7 @@ describe('test sheets filter commands', () => {
                 subUnitId: 'sheet1',
                 col: 1,
                 criteria: {
-                    filters: ['b'],
+                    filters: { filters: ['b'] },
                 },
             } as ISetSheetsFilterCriteriaCommandParams)).toBeTruthy();
             expect(getFilterModel()!.filteredOutRows).toEqual(new Set([1, 2, 3, 4, 5]));
@@ -309,7 +309,7 @@ describe('test sheets filter commands', () => {
                 subUnitId: 'sheet1',
                 col: 0,
                 criteria: {
-                    filters: ['1'],
+                    filters: { filters: ['1'] },
                 },
             } as ISetSheetsFilterCriteriaCommandParams)).toBeTruthy();
             expect(await commandService.executeCommand(SetSheetsFilterCriteriaCommand.id, {
@@ -317,7 +317,7 @@ describe('test sheets filter commands', () => {
                 subUnitId: 'sheet1',
                 col: 1,
                 criteria: {
-                    filters: ['b'],
+                    filters: { filters: ['b'] },
                 },
             } as ISetSheetsFilterCriteriaCommandParams)).toBeTruthy();
             expect(getFilterModel()!.filteredOutRows).toEqual(new Set([1, 2, 3, 4, 5]));

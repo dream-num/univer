@@ -24,6 +24,7 @@ export { ExpandSelectionCommand, JumpOver, MoveSelectionCommand } from './comman
 export { SetCellEditVisibleArrowOperation, SetCellEditVisibleOperation } from './commands/operations/cell-edit.operation';
 export { SetScrollOperation } from './commands/operations/scroll.operation';
 export { ScrollController } from './controllers/scroll.controller';
+export { SheetRenderController } from './controllers/sheet-render.controller';
 export { SetZoomRatioOperation } from './commands/operations/set-zoom-ratio.operation';
 export {
     ResetScrollCommand,

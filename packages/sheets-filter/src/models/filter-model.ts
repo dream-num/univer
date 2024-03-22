@@ -15,10 +15,10 @@
  */
 
 import { Disposable, mergeSets, Rectangle, Tools } from '@univerjs/core';
-import type { CellValue, IAutoFilter, ICustomFilter, ICustomFilters, IFilterColumn, IRange, Nullable, Worksheet } from '@univerjs/core';
+import type { CellValue, IAutoFilter, ICustomFilter, ICustomFilters, IFilterColumn, IFilters, IRange, Nullable, Worksheet } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
 import type { Observable } from 'rxjs';
-import { getCustomFilterFn } from './custom-filters';
+import { ensureNumeric, getCustomFilterFn } from './custom-filters';
 
 const EMPTY = () => new Set<number>();
 
@@ -116,6 +116,21 @@ export class FilterModel extends Disposable {
         }
 
         return this._range;
+    }
+
+    /**
+     * Get filtered out rows except the specific column. This method is considered as "pure". In
+     * another word it would not change `filteredOutRows` on `FilterModel` nor `FilterColumn`.
+     * @param col
+     */
+    getFilteredOutRowsExceptCol(col: number): Set<number> {
+        return this._getAllFilterColumns(true)
+            .filter(([colOffset]) => colOffset !== col)
+            .reduce((acc, [, filterColumn]) => {
+                const newResult = filterColumn.calc({ getAlreadyFilteredOutRows: () => acc });
+                if (newResult) return mergeSets(acc, newResult);
+                return acc;
+            }, new Set<number>());
     }
 
     /**
@@ -346,6 +361,11 @@ export class FilterColumn extends Disposable {
      * `filteredOutByOthers`, and it is more comprehensible if we let `FilterModel` take full control over the process.
      */
     reCalc(): Readonly<Nullable<Set<number>>> {
+        this._filteredOutRows = this.calc(this._filterColumnContext);
+        return this._filteredOutRows;
+    }
+
+    calc(context: IFilterColumnContext): Readonly<Nullable<Set<number>>> {
         if (!this._filterFn) {
             throw new Error('[FilterColumn] cannot calculate without a filter fn!');
         }
@@ -361,7 +381,7 @@ export class FilterColumn extends Disposable {
         const column = this._range.startColumn + this._columnOffset;
         const iterateRange: IRange = { startColumn: column, endColumn: column, startRow: this._range.startRow + 1, endRow: this._range.endRow };
         const filteredOutRows = new Set<number>();
-        const filteredOutByOthers = this._filterColumnContext.getAlreadyFilteredOutRows();
+        const filteredOutByOthers = context.getAlreadyFilteredOutRows();
 
         for (const range of this._worksheet.iterateByColumn(iterateRange, false)) {
             const row = range.row;
@@ -382,8 +402,7 @@ export class FilterColumn extends Disposable {
             }
         }
 
-        this._filteredOutRows = filteredOutRows;
-        return this._filteredOutRows;
+        return filteredOutRows;
     }
 
     private _generateFilterFn(): void {
@@ -418,12 +437,13 @@ export function generateFilterFn(column: IFilterColumn): FilterFn {
     throw new Error('[FilterModel]: other types of filters are not supported yet.');
 }
 
-function filterByValuesFnFactory(values: string[]): FilterFn {
-    const valuesSet = new Set(values);
+function filterByValuesFnFactory(values: IFilters): FilterFn {
+    const hasBlank = !!values.blank;
+    const valuesSet = new Set(values.filters);
 
     return (value) => {
-        if (value === undefined) {
-            return false;
+        if (value === undefined || value === '') {
+            return hasBlank;
         }
 
         return valuesSet.has(typeof value === 'string' ? value : `${value}`);
@@ -459,6 +479,13 @@ function isCompoundCustomFilter(filter: FilterFn[]): filter is [FilterFn, Filter
 
 function generateCustomFilterFn(filter: ICustomFilter): FilterFn {
     const compare = filter.val;
+    const ensured = ensureNumeric(compare);
+    if (!ensured) {
+        return () => false;
+    }
+
     const customFilterFn = getCustomFilterFn(filter.operator);
-    return (value) => customFilterFn.fn(value, compare);
+    const realCompare = Number(compare);
+
+    return (value) => customFilterFn.fn(value, realCompare);
 }

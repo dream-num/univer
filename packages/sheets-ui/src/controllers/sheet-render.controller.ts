@@ -23,6 +23,7 @@ import {
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
+    toDisposable,
 } from '@univerjs/core';
 import type { Rect, SpreadsheetColumnHeader, SpreadsheetRowHeader } from '@univerjs/engine-render';
 import { IRenderManagerService, RENDER_RAW_FORMULA_KEY, Spreadsheet } from '@univerjs/engine-render';
@@ -31,6 +32,7 @@ import {
     COMMAND_LISTENER_VALUE_CHANGE,
     SetWorksheetActiveOperation,
 } from '@univerjs/sheets';
+import type { IDisposable } from '@wendellhu/redi';
 import { Inject } from '@wendellhu/redi';
 
 import { distinctUntilChanged } from 'rxjs';
@@ -44,6 +46,7 @@ interface ISetWorksheetMutationParams {
 
 @OnLifecycle(LifecycleStages.Ready, SheetRenderController)
 export class SheetRenderController extends Disposable {
+    private readonly _skeletonChangeMutations = new Set<string>();
     constructor(
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @IContextService private readonly _contextService: IContextService,
@@ -54,6 +57,21 @@ export class SheetRenderController extends Disposable {
         super();
 
         this._init();
+    }
+
+    /**
+     * Register a mutation id that will trigger the skeleton change.
+     *
+     * @param mutationId the id of the mutation
+     * @returns a disposable to unregister the mutation
+     */
+    registerSkeletonChangingMutations(mutationId: string): IDisposable {
+        if (this._skeletonChangeMutations.has(mutationId)) {
+            throw new Error(`[SheetRenderController]: the mutationId ${mutationId} has already been registered!`);
+        }
+
+        this._skeletonChangeMutations.add(mutationId);
+        return toDisposable(() => this._skeletonChangeMutations.delete(mutationId));
     }
 
     private _init() {
@@ -111,7 +129,7 @@ export class SheetRenderController extends Disposable {
                 const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
                 const unitId = workbook.getUnitId();
 
-                if (COMMAND_LISTENER_SKELETON_CHANGE.includes(command.id)) {
+                if (COMMAND_LISTENER_SKELETON_CHANGE.includes(command.id) || this._skeletonChangeMutations.has(command.id)) {
                     const worksheet = workbook.getActiveSheet();
                     const sheetId = worksheet.getSheetId();
                     const params = command.params;

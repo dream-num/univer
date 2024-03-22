@@ -15,7 +15,7 @@
  */
 
 import type { CellValue, Nullable } from '@univerjs/core';
-import { CustomFilterOperator } from '@univerjs/core';
+import { CustomFilterOperator, isNumeric } from '@univerjs/core';
 
 export interface IFilterFn<P extends unknown[]> {
     label?: string;
@@ -148,6 +148,18 @@ export function getCustomFilterFn(operator?: CustomFilterOperator): ICustomFilte
 
 function ensureNumber(value: Nullable<CellValue>): value is number {
     return typeof value === 'number';
+}
+
+export function ensureNumeric(value: Nullable<CellValue>): boolean {
+    if (typeof value === 'number') {
+        return true;
+    };
+
+    if (typeof value === 'string' && isNumeric(value)) {
+        return true;
+    }
+
+    return false;
 }
 
 function ensureString(value: Nullable<CellValue>): string | null {

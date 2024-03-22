@@ -66,11 +66,22 @@ describe('Test filter model and related utils', () => {
         });
 
         it('should "filter by values" work', () => {
-            const fn = generateFilterFn({ colId: 0, filters: ['hello', 'univer'] });
+            const fn = generateFilterFn({ colId: 0, filters: { filters: ['hello', 'univer'] } });
 
             expect(fn('hello')).toBeTruthy();
             expect(fn('univer')).toBeTruthy();
             expect(fn('wzhudev')).toBeFalsy();
+            expect(fn('')).toBeFalsy();
+            expect(fn(undefined)).toBeFalsy();
+        });
+
+        it('should "filter by values" work with blank values', () => {
+            const fn = generateFilterFn({ colId: 0, filters: { filters: ['hello', 'univer'], blank: true } });
+            expect(fn('hello')).toBeTruthy();
+            expect(fn('univer')).toBeTruthy();
+            expect(fn('wzhudev')).toBeFalsy();
+            expect(fn('')).toBeTruthy();
+            expect(fn(undefined)).toBeTruthy();
         });
     });
 

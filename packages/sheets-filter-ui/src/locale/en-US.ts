@@ -36,6 +36,7 @@ export default {
             'input-values-placeholder': 'Input Values',
             and: 'AND',
             or: 'OR',
+            empty: '(empty)',
         },
         conditions: {
             none: 'None',

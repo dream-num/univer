@@ -24,8 +24,8 @@ import { Inject, Injector } from '@wendellhu/redi';
 import { distinctUntilChanged, distinctUntilKeyChanged, filter, map, of, startWith, switchMap, takeUntil } from 'rxjs';
 import type { RenderComponentType, SheetComponent, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { FILTER_MUTATIONS, SheetsFilterService } from '@univerjs/sheets-filter';
-import { ISelectionRenderService, SelectionShape, SHEET_VIEW_KEY, SheetCanvasPopManagerService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { FILTER_MUTATIONS, ReCalcSheetsFilterMutation, RemoveSheetsFilterMutation, SetSheetsFilterCriteriaMutation, SetSheetsFilterRangeMutation, SheetsFilterService } from '@univerjs/sheets-filter';
+import { ISelectionRenderService, SelectionShape, SHEET_VIEW_KEY, SheetCanvasPopManagerService, SheetRenderController, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import type { ISelectionStyle, ISheetCommandSharedParams } from '@univerjs/sheets';
 import { ClearSheetsFilterCriteriaCommand, ReCalcSheetsFilterConditionsCommand, SetSheetsFilterCriteriaCommand, SmartToggleSheetsFilterCommand } from '../commands/sheets-filter.command';
 import { FilterPanel } from '../views/components/SheetsFilterPanel';
@@ -56,6 +56,7 @@ export class SheetsFilterUIController extends RxDisposable {
         @Inject(ThemeService) private readonly _themeService: ThemeService,
         @Inject(SheetsFilterPanelService) private readonly _sheetsFilterPanelService: SheetsFilterPanelService,
         @Inject(SheetCanvasPopManagerService) private _sheetCanvasPopupService: SheetCanvasPopManagerService,
+        @Inject(SheetRenderController) private _sheetRenderController: SheetRenderController,
         @IShortcutService private readonly _shortcutService: IShortcutService,
         @ICommandService private readonly _commandService: ICommandService,
         @IMenuService private readonly _menuService: IMenuService,
@@ -99,6 +100,13 @@ export class SheetsFilterUIController extends RxDisposable {
         ].forEach((c) => {
             this.disposeWithMe(this._commandService.registerCommand(c));
         });
+
+        [
+            SetSheetsFilterRangeMutation,
+            SetSheetsFilterCriteriaMutation,
+            RemoveSheetsFilterMutation,
+            ReCalcSheetsFilterMutation,
+        ].forEach((m) => this.disposeWithMe(this._sheetRenderController.registerSkeletonChangingMutations(m.id)));
     }
 
     private _initMenuItems(): void {

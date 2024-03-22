@@ -31,7 +31,7 @@ import type {
     ITextStyle,
     Nullable,
 } from '@univerjs/core';
-import { CellValueType, CommandType, IUniverInstanceService, ObjectMatrix, Tools } from '@univerjs/core';
+import { CellValueType, CommandType, isBooleanString, isSafeNumeric, IUniverInstanceService, ObjectMatrix, Tools } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
 /** Params of `SetRangeValuesMutation` */
@@ -462,21 +462,4 @@ export function mergeRichTextStyle(p: IDocumentData, newStyle: Nullable<IStyleDa
     }
 
     p.body.textRuns = newTextRuns;
-}
-
-function isNumeric(str: string) {
-    return /^-?\d+(\.\d+)?$/.test(str);
-}
-
-function isSafeNumeric(str: string) {
-    const numeric = isNumeric(str);
-    if (!numeric) {
-        return false;
-    }
-
-    return Number(str) <= Number.MAX_SAFE_INTEGER;
-}
-
-function isBooleanString(str: string) {
-    return str.toUpperCase() === 'TRUE' || str.toUpperCase() === 'FALSE';
 }

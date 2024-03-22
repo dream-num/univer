@@ -35,6 +35,10 @@ const zLocale: typeof enUS = {
             'filter-only': '仅筛选',
             'search-placeholder': '使用空格分隔关键字',
             'select-all': '全选',
+            'input-values-placeholder': '',
+            or: '或',
+            and: '和',
+            empty: '(空白)',
         },
         conditions: {
             none: '无',
@@ -54,8 +58,6 @@ const zLocale: typeof enUS = {
             between: '介于',
             'not-between': '不介于',
             custom: '自定义',
-            or: '或',
-            and: '和',
         },
     },
 };

@@ -15,7 +15,7 @@
  */
 
 import type { IFilterColumn, IRange, Nullable } from '@univerjs/core';
-import { Disposable, extractPureTextFromCell, ICommandService, IUniverInstanceService } from '@univerjs/core';
+import { Disposable, extractPureTextFromCell, ICommandService, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { SheetsFilterService } from '@univerjs/sheets-filter';
 import type { FilterColumn, FilterModel } from '@univerjs/sheets-filter';
 import type { IDisposable } from '@wendellhu/redi';
@@ -27,6 +27,7 @@ import type { FilterOperator, IFilterConditionFormParams, IFilterConditionItem }
 import { FilterConditionItems } from '../models/conditions';
 import type { ISetSheetsFilterCriteriaCommandParams } from '../commands/sheets-filter.command';
 import { SetSheetsFilterCriteriaCommand } from '../commands/sheets-filter.command';
+import { statisticFilterByValueItems } from '../models/utils';
 
 export enum FilterBy {
     VALUES,
@@ -38,6 +39,11 @@ export interface IFilterByValueItem {
     checked: boolean;
     count: number;
     index: number;
+
+    /**
+     * This property indicates that this is a special item which maps to empty strings or empty cells.
+     */
+    isEmpty: boolean;
 }
 
 export interface ISheetsFilterPanelService {
@@ -70,7 +76,11 @@ export class SheetsFilterPanelService extends Disposable {
     private readonly _filterByModel$ = new ReplaySubject<Nullable<FilterByModel>>(1);
     readonly filterByModel$ = this._filterByModel$.asObservable();
     private _filterByModel: Nullable<FilterByModel> = null;
-    public get filterByModel(): Nullable<FilterByModel> { return this._filterByModel; }
+    get filterByModel(): Nullable<FilterByModel> { return this._filterByModel; }
+    private set filterByModel(model: Nullable<FilterByModel>) {
+        this._filterByModel = model;
+        this._filterByModel$.next(model);
+    }
 
     private _filterModel: Nullable<FilterModel> = null;
     get filterModel() { return this._filterModel; }
@@ -164,8 +174,7 @@ export class SheetsFilterPanelService extends Disposable {
             col
         );
 
-        this._filterByModel$.next(model);
-        this._filterByModel = model;
+        this.filterByModel = model;
         this._filterBy$.next(FilterBy.VALUES);
 
         return true;
@@ -181,8 +190,7 @@ export class SheetsFilterPanelService extends Disposable {
             filterModel.getFilterColumn(col)
         );
 
-        this._filterByModel$.next(model);
-        this._filterByModel = model;
+        this.filterByModel = model;
         this._filterBy$.next(FilterBy.CONDITIONS);
 
         return true;
@@ -190,8 +198,7 @@ export class SheetsFilterPanelService extends Disposable {
 
     private _disposePreviousModel(): void {
         this._filterByModel?.dispose();
-        this._filterByModel$.next(null);
-        this._filterByModel = null;
+        this.filterByModel = null;
     }
 }
 
@@ -327,6 +334,8 @@ export class ByValuesModel extends Disposable {
      */
     static fromFilterColumn(injector: Injector, filterModel: FilterModel, col: number): ByValuesModel {
         const univerInstanceService = injector.get(IUniverInstanceService);
+        const localeService = injector.get(LocaleService);
+
         const { unitId, subUnitId } = filterModel;
         const workbook = univerInstanceService.getUniverSheetInstance(unitId);
         if (!workbook) {
@@ -340,44 +349,67 @@ export class ByValuesModel extends Disposable {
 
         const range = filterModel.getRange();
         const column = range.startColumn + col;
-        const filters = filterModel.getFilterColumn(col)?.getColumnData().filters || [];
-        const iterateRange: IRange = { ...range, startColumn: column, endColumn: column };
+        const filters = filterModel.getFilterColumn(col)?.getColumnData().filters;
+        const emptyChecked = !filters || !!filters.blank;
 
-        // we write the iteration twice to avoid the overhead of accessing the `alreadyChecked` set if there is no
-        // already checked values
+        // the first row is filter header and should be added to options
+        const iterateRange: IRange = { ...range, startRow: range.startRow + 1, startColumn: column, endColumn: column };
         const items: IFilterByValueItem[] = [];
         const itemsByKey: Record<string, IFilterByValueItem> = {};
-        const alreadyChecked = new Set(filters);
-
-        // TODO@wzhudev: we would take merged cells into account later
+        const alreadyChecked = new Set(filters?.filters);
+        const filteredOutRowsByOtherColumns = filterModel.getFilteredOutRowsExceptCol(col);
 
         let index = 0;
-        if (alreadyChecked.size) {
-            for (const cell of worksheet.iterateByRow(iterateRange)) {
-                const value = cell?.value ? extractPureTextFromCell(cell.value) : '';
+        let emptyCount = 0;
+        for (const cell of worksheet.iterateByColumn(iterateRange, false, false)) { // iterate and do not skip empty cells
+            const { row, rowSpan = 1 } = cell;
+
+            const value = cell?.value ? extractPureTextFromCell(cell.value) : '';
+
+            let rowIndex = 0;
+            while (rowIndex < rowSpan) {
+                const targetRow = row + rowIndex;
+                if (filteredOutRowsByOtherColumns.has(targetRow)) {
+                    rowIndex++;
+                    continue;
+                }
+
+                if (!value) {
+                    emptyCount += 1;
+                    rowIndex += rowSpan;
+                    continue;
+                }
+
                 if (!itemsByKey[value]) {
-                    const item: IFilterByValueItem = { value, checked: alreadyChecked.has(value), count: 1, index };
+                    const item: IFilterByValueItem = {
+                        value,
+                        checked: alreadyChecked.size ? alreadyChecked.has(value) : true,
+                        count: 1,
+                        index,
+                        isEmpty: false,
+                    };
+
                     itemsByKey[value] = item;
                     items.push(item);
                 } else {
                     itemsByKey[value].count++;
                 }
-
-                index++;
+                rowIndex++;
             }
-        } else {
-            for (const cell of worksheet.iterateByColumn(iterateRange)) {
-                const value = cell?.value ? extractPureTextFromCell(cell.value) : '';
-                if (!itemsByKey[value]) {
-                    const item: IFilterByValueItem = { value, checked: false, count: 1, index };
-                    itemsByKey[value] = item;
-                    items.push(item);
-                } else {
-                    itemsByKey[value].count++;
-                }
 
-                index++;
-            }
+            index++;
+        }
+
+        if (emptyCount > 0) {
+            const item: IFilterByValueItem = {
+                value: localeService.t('sheets-filter.panel.empty'),
+                checked: emptyChecked,
+                count: emptyCount,
+                index,
+                isEmpty: true,
+            };
+
+            items.push(item);
         }
 
         const model = injector.createInstance(ByValuesModel, filterModel, col, items);
@@ -488,10 +520,27 @@ export class ByValuesModel extends Disposable {
             return false;
         }
 
-        const criteria: IFilterColumn = {
-            colId: this.col,
-            filters: this._filterItems.filter((item) => item.checked).map((item) => item.value),
-        };
+        const statistics = statisticFilterByValueItems(this._filterItems);
+        const { checked, checkedItems } = statistics;
+
+        const criteria: IFilterColumn = { colId: this.col };
+        if (checked === 0) {
+            throw new Error('[ByValuesModel]: no checked items!');
+        } else if (statistics.unchecked === 0) {
+            // empty
+        } else {
+            criteria.filters = {};
+
+            const nonEmptyItems = checkedItems.filter((item) => !item.isEmpty);
+            if (nonEmptyItems.length > 0) {
+                criteria.filters = { filters: nonEmptyItems.map((item) => item.value) };
+            }
+
+            const hasEmpty = nonEmptyItems.length !== checkedItems.length;
+            if (hasEmpty) {
+                criteria.filters.blank = true;
+            }
+        }
 
         return this._commandService.executeCommand(SetSheetsFilterCriteriaCommand.id, {
             unitId: this._filterModel.unitId,

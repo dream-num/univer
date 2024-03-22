@@ -206,7 +206,7 @@ describe('test "FilterConditionItems"', () => {
                 expect(FilterConditionItems.testMappingFilterColumn({ customFilters: { customFilters: [{ val: 'xxx' }] } }))
                     .toEqual([FilterConditionItems.EQUALS, { operator1: ExtendCustomFilterOperator.EQUALS, val1: 'xxx' }]);
 
-                expect(FilterConditionItems.testMappingFilterColumn({ filters: [''] }))
+                expect(FilterConditionItems.testMappingFilterColumn({ filters: { filters: [''] } }))
                     .toEqual([FilterConditionItems.EQUALS, { operator1: ExtendCustomFilterOperator.EQUALS, val1: '' }]);
             });
 

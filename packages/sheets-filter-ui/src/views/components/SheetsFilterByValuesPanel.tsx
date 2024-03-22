@@ -22,6 +22,7 @@ import List from 'rc-virtual-list';
 import { Button, Checkbox, Input } from '@univerjs/design';
 
 import type { ByValuesModel, IFilterByValueItem } from '../../services/sheets-filter-panel.service';
+import { statisticFilterByValueItems } from '../../models/utils';
 import styles from './index.module.less';
 
 /**
@@ -36,7 +37,7 @@ export function FilterByValue(props: { model: ByValuesModel }) {
     const items = useObservable(model.filterItems$, undefined, true);
     const filterOnly = localeService.t('sheets-filter.panel.filter-only');
 
-    const stat = statistics(items);
+    const stat = statisticFilterByValueItems(items);
     const allChecked = stat.checked > 0 && stat.unchecked === 0;
     const indeterminate = stat.checked > 0 && stat.unchecked > 0;
 
@@ -88,19 +89,4 @@ export function FilterByValue(props: { model: ByValuesModel }) {
             {/* Here we should add a virtual scroll component to boost performance! */}
         </div>
     );
-}
-
-function statistics(items: IFilterByValueItem[]): { checked: number; unchecked: number } {
-    let checked = 0;
-    let unchecked = 0;
-
-    for (const item of items) {
-        if (item.checked) {
-            checked += item.count;
-        } else {
-            unchecked += item.count;
-        }
-    }
-
-    return { checked, unchecked };
 }

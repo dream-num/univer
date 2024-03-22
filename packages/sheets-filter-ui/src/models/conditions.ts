@@ -289,7 +289,7 @@ export namespace FilterConditionItems {
             customFilters: { customFilters: [{ val: mapParams.val1! }] },
         }),
         testMappingFilterColumn: (filterColumn) => {
-            if (filterColumn.filters?.length === 1) {
+            if (filterColumn.filters?.filters?.length === 1) {
                 return { operator1: ExtendCustomFilterOperator.EQUALS, val1: '' };
             }
 
@@ -301,7 +301,7 @@ export namespace FilterConditionItems {
         },
     };
 
-    // ------------------------------
+    // #region number conditions
 
     export const GREATER_THAN: IFilterConditionItem = {
         label: 'sheets-filter.conditions.greater-than',
@@ -481,6 +481,8 @@ export namespace FilterConditionItems {
             return { operator1: CustomFilterOperator.NOT_EQUAL, val1: firstCustomFilter.val.toString() };
         },
     };
+
+    // #endregion
 
     export const BETWEEN: IFilterConditionItem = {
         label: 'sheets-filter.conditions.between',

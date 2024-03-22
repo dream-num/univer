@@ -17,17 +17,13 @@
 import type { BooleanNumber } from '../enum';
 import type { IRange } from './i-range';
 
-// NOTE: Please refer to 18.3.2 AutoFilter Settings.
-// Properties of this interface would be added in the future.
+// NOTE: Please refer to 18.3.2 AutoFilter Settings. Properties of this interface would be added in the future.
 // Please make sure that it is backward compatible.
-
-// OOXML
 
 export interface IAutoFilter {
     ref: IRange;
 
     filterColumns?: IFilterColumn[];
-
     cachedFilteredOut?: number[];
 }
 
@@ -37,9 +33,15 @@ export interface IFilterColumn {
     /**
      * The filter value could be an empty string, which means <filters blank="1">.
      */
-    filters?: Array<string>;
+    filters?: IFilters;
     customFilters?: ICustomFilters;
 };
+
+export interface IFilters {
+    blank?: true;
+
+    filters?: Array<string>;
+}
 
 export interface ICustomFilters {
     and?: BooleanNumber.TRUE;
@@ -76,6 +78,9 @@ export enum CustomFilterOperator {
     NOT_EQUAL = 'notEqual',
 }
 
+/**
+ * Not used now. Would be used in the future.
+ */
 export enum DynamicFilterOperator {
     ABOVE_AVERAGE = 'aboveAverage',
 }

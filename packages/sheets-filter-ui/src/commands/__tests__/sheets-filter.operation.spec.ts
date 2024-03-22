@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ICommandService, LocaleType, Plugin, PluginType, Univer } from '@univerjs/core';
+import { ICommandService, LocaleService, LocaleType, Plugin, PluginType, Univer } from '@univerjs/core';
 import { IContextService, type IWorkbookData } from '@univerjs/core';
 import type { ISetSheetsFilterRangeMutationParams } from '@univerjs/sheets-filter';
 import { SetSheetsFilterRangeMutation, UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
@@ -78,6 +78,8 @@ function createFilterOperationTestBed() {
     univer.registerPlugin(SheetsFilterOperationTestPlugin);
 
     univer.createUniverSheet(testWorkbookDataFactory());
+
+    get(LocaleService).load({});
 
     const commandService = get(ICommandService);
 

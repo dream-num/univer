@@ -79,8 +79,15 @@ export function FilterByCondition(props: { model: ByConditionsModel }) {
         <div className={styles.sheetsFilterPanelConditionsContainer}>
             {/* primary condition */}
             <Select value={operator} options={primaryOptions} onChange={onPrimaryConditionChange} />
-            { numOfParameters >= 1 && renderSecondaryCondition(operator1!, val1 ?? '', 'operator1') }
-            { numOfParameters >= 2 && renderSecondaryCondition(operator2!, val2 ?? '', 'operator2') }
+            <div className={styles.sheetsFilterPanelConditionsContainerInner}>
+                { numOfParameters >= 1 && renderSecondaryCondition(operator1!, val1 ?? '', 'operator1') }
+                { numOfParameters >= 2 && renderSecondaryCondition(operator2!, val2 ?? '', 'operator2') }
+                <div className={styles.sheetsFilterPanelConditionsDesc}>
+                    {localeService.t('sheets-filter.panel.?')}
+                    <br></br>
+                    {localeService.t('sheets-filter.panel.*')}
+                </div>
+            </div>
         </div>
     );
 }

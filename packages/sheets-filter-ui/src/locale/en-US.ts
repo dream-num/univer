@@ -37,6 +37,8 @@ export default {
             and: 'AND',
             or: 'OR',
             empty: '(empty)',
+            '?': 'Use “?” to represent a single character.',
+            '*': 'Use “*” to represent multiple characters.',
         },
         conditions: {
             none: 'None',

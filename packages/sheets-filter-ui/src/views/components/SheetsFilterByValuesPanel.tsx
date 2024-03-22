@@ -39,7 +39,6 @@ export function FilterByValue(props: { model: ByValuesModel }) {
 
     const stat = statisticFilterByValueItems(items);
     const allChecked = stat.checked > 0 && stat.unchecked === 0;
-    const confirmDisabled = stat.checked === 0;
     const indeterminate = stat.checked > 0 && stat.unchecked > 0;
 
     const onFilterCheckToggled = useCallback((item: IFilterByValueItem, checked: boolean) => {

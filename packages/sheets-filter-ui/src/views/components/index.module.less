@@ -103,6 +103,14 @@
                         height: 24px;
                         font-size: 12px;
                         line-height: 12px;
+
+                        &:hover {
+                            background-color: rgb(var(--hyacinth-50));
+                        }
+
+                        &:active {
+                            background-color: rgb(var(--hyacinth-100));
+                        }
                     }
                 }
             }
@@ -129,7 +137,9 @@
 
     &-conditions {
         &-container {
-            margin-top: 8px;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
 
             .select,
             .input-affix-wrapper,
@@ -137,6 +147,21 @@
                 width: 100%;
                 margin-bottom: 8px;
             }
+
+            &-inner {
+                flex-grow: 1;
+                border-radius: 6px;
+                border: 1px solid rgb(var(--grey-200));
+                overflow: hidden;
+                padding: 8px;
+            }
+        }
+
+        &-desc {
+            margin-top: -6px;
+            color: rgb(var(--grey-500));
+            font-size: 12px;
+            line-height: 18px;
         }
     }
 

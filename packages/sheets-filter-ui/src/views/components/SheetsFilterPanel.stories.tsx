@@ -27,6 +27,7 @@ import { SheetsFilterPanelService } from '../../services/sheets-filter-panel.ser
 import { ClearSheetsFilterCriteriaCommand, ReCalcSheetsFilterConditionsCommand, SetSheetsFilterCriteriaCommand, SmartToggleSheetsFilterCommand } from '../../commands/sheets-filter.command';
 import type { IOpenFilterPanelOperationParams } from '../../commands/sheets-filter.operation';
 import { ChangeFilterByOperation, CloseFilterPanelOperation, OpenFilterPanelOperation } from '../../commands/sheets-filter.operation';
+import zhCN from '../../locale/zh-CN';
 import enUS from '../../locale/en-US';
 import { WithCustomFilterModelFactory, WithValuesFilterModelFactory } from '../../__testing__/data';
 import { FilterPanel } from './SheetsFilterPanel';
@@ -39,7 +40,7 @@ const meta: Meta<typeof FilterPanel> = {
 
 export default meta;
 
-function createFilterStorybookBed(workbookData: IWorkbookData) {
+function createFilterStorybookBed(workbookData: IWorkbookData, locale: LocaleType = LocaleType.EN_US) {
     const univer = new Univer();
     const injector = univer.__getInjector();
     const get = injector.get.bind(injector);
@@ -77,10 +78,8 @@ function createFilterStorybookBed(workbookData: IWorkbookData) {
     univer.registerPlugin(TestPlugin);
     univer.registerPlugin(UniverSheetsFilterPlugin);
 
-    injector.get(LocaleService).setLocale(LocaleType.EN_US);
-    injector.get(LocaleService).load({ enUS });
-    // injector.get(LocaleService).setLocale(LocaleType.ZH_CN);
-    // injector.get(LocaleService).load({ zhCN });
+    injector.get(LocaleService).setLocale(locale);
+    injector.get(LocaleService).load({ enUS, zhCN });
     injector.get(ILogService).setLogLevel(LogLevel.VERBOSE);
     injector.get(ILogService).setLogLevel(LogLevel.VERBOSE);
 
@@ -111,6 +110,18 @@ export const FilterWithConditions = {
 export const FilterWithValues = {
     render() {
         const [bed] = useState(() => createFilterStorybookBed(WithValuesFilterModelFactory()));
+
+        return (
+            <RediContext.Provider value={{ injector: bed.injector }}>
+                <FilterPanel />
+            </RediContext.Provider>
+        );
+    },
+};
+
+export const FilterWithChinese = {
+    render() {
+        const [bed] = useState(() => createFilterStorybookBed(WithValuesFilterModelFactory(), LocaleType.ZH_CN));
 
         return (
             <RediContext.Provider value={{ injector: bed.injector }}>

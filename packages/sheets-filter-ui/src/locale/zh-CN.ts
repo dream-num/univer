@@ -35,10 +35,12 @@ const zLocale: typeof enUS = {
             'filter-only': '仅筛选',
             'search-placeholder': '使用空格分隔关键字',
             'select-all': '全选',
-            'input-values-placeholder': '',
+            'input-values-placeholder': '请输入',
             or: '或',
             and: '和',
             empty: '(空白)',
+            '?': '可用 ? 代表单个字符',
+            '*': '可用 * 代表任意多个字符',
         },
         conditions: {
             none: '无',

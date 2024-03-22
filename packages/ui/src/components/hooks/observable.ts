@@ -38,11 +38,10 @@ function showArrayNotEqual(arr1: unknown[], arr2: unknown[]): boolean {
     return arr1.some((value, index) => value !== arr2[index]);
 }
 
-export function useObservable<T>(observable: Nullable<ObservableOrFn<T>>, defaultValue: T): T;
 export function useObservable<T>(observable: ObservableOrFn<T>, defaultValue: T | undefined, shouldHaveSyncValue?: true): T;
+export function useObservable<T>(observable: Nullable<ObservableOrFn<T>>, defaultValue: T): T;
 export function useObservable<T>(observable: Nullable<ObservableOrFn<T>>, defaultValue?: undefined): T | undefined;
-export function useObservable<T>(observable: Nullable<ObservableOrFn<T>>, defaultValue?: T, shouldHaveSyncValue?: true): T;
-export function useObservable<T>(observable: Nullable<ObservableOrFn<T>>, defaultValue?: T, shouldHaveSyncValue?: true, deps?: any[]): T;
+export function useObservable<T>(observable: Nullable<ObservableOrFn<T>>, defaultValue?: T, shouldHaveSyncValue?: true, deps?: any[]): T | undefined;
 export function useObservable<T>(observable: Nullable<ObservableOrFn<T>>, defaultValue?: T, shouldHaveSyncValue?: boolean, deps?: any[]): T | undefined;
 /**
  * A hook to subscribe to an observable and get the latest value.

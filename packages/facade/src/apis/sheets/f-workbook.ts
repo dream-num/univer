@@ -24,11 +24,9 @@ import {
     UndoCommand,
 } from '@univerjs/core';
 import type {
-    IInsertSheetCommandParams,
-    ISetWorksheetActivateCommandParams,
     ISheetCommandSharedParams,
 } from '@univerjs/sheets';
-import { InsertSheetCommand, SelectionManagerService, SetWorksheetActivateCommand } from '@univerjs/sheets';
+import { InsertSheetCommand, SelectionManagerService, SetWorksheetActiveOperation } from '@univerjs/sheets';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -90,11 +88,11 @@ export class FWorkbook {
             unitId: this._workbook.getUnitId(),
             index: this._workbook.getSheets().length,
             sheet: newSheet,
-        } as IInsertSheetCommandParams);
-        this._commandService.syncExecuteCommand(SetWorksheetActivateCommand.id, {
+        });
+        this._commandService.syncExecuteCommand(SetWorksheetActiveOperation.id, {
             unitId: this._workbook.getUnitId(),
             subUnitId: this._workbook.getSheets()[this._workbook.getSheets().length - 1].getSheetId(),
-        } as ISetWorksheetActivateCommandParams);
+        });
 
         return this._injector.createInstance(FWorksheet, this._workbook, this._workbook.getActiveSheet());
     }

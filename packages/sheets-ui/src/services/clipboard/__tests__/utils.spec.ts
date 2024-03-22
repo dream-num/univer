@@ -167,7 +167,7 @@ describe('test "mergeSetRangeValues"', () => {
             { id: SetRangeValuesMutation.id, params: { unitId: '1', subUnitId: '2', cellValue: { 1: { 3: { v: 'value' } } } } },
             { id: SetRangeValuesMutation.id, params: { unitId: '1', subUnitId: '3', cellValue: { 1: { 2: { v: 'value' } } } } },
             { id: 'whatever' }];
-        expect(mergeSetRangeValues(mutaions)).toStrictEqual([
+        expect(mergeSetRangeValues(mutaions as any)).toStrictEqual([
             { id: 'whatever' },
             { id: SetRangeValuesMutation.id, params: { unitId: '1', subUnitId: '2', cellValue: { 1: { 2: { v: 'value' }, 3: { v: 'value' } } } } },
             { id: SetRangeValuesMutation.id, params: { unitId: '1', subUnitId: '3', cellValue: { 1: { 2: { v: 'value' } } } } },
@@ -185,7 +185,7 @@ describe('test "mergeSetRangeValues"', () => {
             { id: SetRangeValuesMutation.id, params: { unitId: '1', subUnitId: '2', cellValue: { 1: { 3: { v: 'value' } } } } },
             { id: SetRangeValuesMutation.id, params: { unitId: '1', subUnitId: '2', cellValue: { 1: { 4: { v: 'value' } } } } },
         ];
-        expect(mergeSetRangeValues(mutaions)).toStrictEqual([
+        expect(mergeSetRangeValues(mutaions as any)).toStrictEqual([
             { id: 'whatever' },
             { id: SetRangeValuesMutation.id, params: { unitId: '1', subUnitId: '2', cellValue: { 1: { 2: { v: 'value', f: 'formula' } } } } },
             { id: 'whatever' },

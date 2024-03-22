@@ -383,6 +383,10 @@ export class HtmlToUSMService {
             }
         }
     }
+
+    dispose() {
+        document.body.removeChild(this.htmlElement);
+    }
 }
 
 /**

@@ -116,6 +116,10 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         });
         this._usmToHtml = new USMToHtmlService();
         this._copyContentCache = new CopyContentCache();
+
+        this.disposeWithMe(toDisposable(() => {
+            this._htmlToUSM.dispose();
+        }));
     }
 
     copyContentCache(): CopyContentCache {

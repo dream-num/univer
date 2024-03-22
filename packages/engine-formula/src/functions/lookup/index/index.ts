@@ -14,16 +14,9 @@
  * limitations under the License.
  */
 
-import type { IRange } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
-import { REFERENCE_REGEX_SINGLE_COLUMN, REFERENCE_REGEX_SINGLE_ROW, REFERENCE_SINGLE_RANGE_REGEX } from '../../../basics/regex';
 import type { BaseReferenceObject } from '../../../engine/reference-object/base-reference-object';
-import { CellReferenceObject } from '../../../engine/reference-object/cell-reference-object';
-import { ColumnReferenceObject } from '../../../engine/reference-object/column-reference-object';
-import { RangeReferenceObject } from '../../../engine/reference-object/range-reference-object';
-import { RowReferenceObject } from '../../../engine/reference-object/row-reference-object';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
-import { serializeRangeToRefString } from '../../../engine/utils/reference';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { NullValueObject, NumberValueObject } from '../../../engine/value-object/primitive-object';
@@ -41,7 +34,7 @@ export class Index extends BaseFunction {
 
     override calculate(referenceObject: BaseValueObject, rowNum: BaseValueObject, columnNum?: BaseValueObject, areaNum?: BaseValueObject) {
         // covert to real type
-        const reference = referenceObject as unknown as RangeReferenceObject;
+        const reference = referenceObject as unknown as BaseReferenceObject;
 
         if (reference == null) {
             return ErrorValueObject.create(ErrorType.NA);
@@ -133,7 +126,7 @@ export class Index extends BaseFunction {
         }
     }
 
-    private _calculateSingleCell(reference: RangeReferenceObject, rowNum: BaseValueObject, columnNum: BaseValueObject, areaNum: BaseValueObject) {
+    private _calculateSingleCell(reference: BaseReferenceObject, rowNum: BaseValueObject, columnNum: BaseValueObject, areaNum: BaseValueObject) {
         if (rowNum.isError()) {
             return rowNum;
         }
@@ -214,22 +207,7 @@ export class Index extends BaseFunction {
         return logicValue;
     }
 
-    private _setDefault(reference: BaseReferenceObject, object: BaseReferenceObject) {
-        if (this.unitId == null || this.subUnitId == null) {
-            return ErrorValueObject.create(ErrorType.REF);
-        }
-
-        object.setDefaultUnitId(this.unitId);
-        object.setDefaultSheetId(this.subUnitId);
-        object.setUnitData(reference.getUnitData());
-        object.setRuntimeData(reference.getRuntimeData());
-        object.setArrayFormulaCellData(reference.getArrayFormulaCellData());
-        object.setRuntimeArrayFormulaCellData(reference.getRuntimeArrayFormulaCellData());
-
-        return object;
-    }
-
-    private _getReferenceObject(reference: RangeReferenceObject, rowNumberValue: number, columnNumberValue: number, areaNumberValue: number) {
+    private _getReferenceObject(reference: BaseReferenceObject, rowNumberValue: number, columnNumberValue: number, areaNumberValue: number) {
         const { startRow, endRow, startColumn, endColumn } = reference.getRangeData();
 
         let referenceStartRow = 0;
@@ -262,59 +240,6 @@ export class Index extends BaseFunction {
             endColumn: referenceEndColumn,
         };
 
-        const unitId = reference.getForcedUnitId();
-        const sheetId = reference.getForcedSheetId() || '';
-        const sheetName = reference.getForcedSheetName();
-
-        const gridRangeName = {
-            unitId,
-            sheetName,
-            range,
-        };
-
-        const token = serializeRangeToRefString(gridRangeName);
-
-        const referenceObject = this._createReferenceObject(token, unitId, sheetId, range);
-
-        return this._setDefault(reference, referenceObject);
-    }
-
-    private _createReferenceObject(token: string, unitId: string, sheetId: string, range: IRange) {
-        let referenceObject: BaseReferenceObject;
-
-        if (new RegExp(REFERENCE_SINGLE_RANGE_REGEX).test(token)) {
-            referenceObject = new CellReferenceObject(token);
-        } else if (new RegExp(REFERENCE_REGEX_SINGLE_ROW).test(token)) {
-            referenceObject = new RowReferenceObject(token);
-        } else if (new RegExp(REFERENCE_REGEX_SINGLE_COLUMN).test(token)) {
-            referenceObject = new ColumnReferenceObject(token);
-        } else {
-            referenceObject = new RangeReferenceObject(range, sheetId, unitId);
-        }
-
-        return referenceObject;
-    }
-
-    private _getReferenceObjectFirstCell(reference: BaseReferenceObject) {
-        const { startRow, startColumn } = reference.getRangeData();
-        const range = {
-            startRow,
-            startColumn,
-            endRow: startRow,
-            endColumn: startColumn,
-        };
-
-        const unitId = reference.getForcedUnitId();
-        const sheetName = reference.getForcedSheetName();
-
-        const gridRangeName = {
-            unitId,
-            sheetName,
-            range,
-        };
-
-        const token = serializeRangeToRefString(gridRangeName);
-
-        return new CellReferenceObject(token);
+        return this.createReferenceObject(reference, range);
     }
 }

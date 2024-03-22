@@ -15,7 +15,6 @@
  */
 
 import { ErrorType } from '../../../basics/error-type';
-import { getFormatPreview } from '../../../basics/format';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
@@ -58,8 +57,8 @@ export class Concatenate extends BaseFunction {
                     return textValueObject;
                 }
 
-                const resultValueObjectString = this._extractStringValue(resultValueObject);
-                const textValueObjectString = this._extractStringValue(textValueObject);
+                const resultValueObjectString = resultValueObject?.isNull() ? '' : resultValueObject?.getValue() ?? '';
+                const textValueObjectString = textValueObject?.isNull() ? '' : textValueObject?.getValue() ?? '';
 
                 return createStringValueObjectByRawValue(`${resultValueObjectString}${textValueObjectString}`);
             });
@@ -70,31 +69,5 @@ export class Concatenate extends BaseFunction {
         }
 
         return result;
-    }
-
-    /**
-     * extract string value from value object
-     *
-     * @param valueObject
-     * @returns
-     */
-    private _extractStringValue(valueObject: BaseValueObject | null) {
-        if (valueObject === null || valueObject.isNull()) {
-            return '';
-        }
-
-        const value = valueObject.getValue();
-
-        if (value === null) {
-            return '';
-        }
-
-        // ="From "&TEXT(45292,"d/mm/yy") gets "From 1/01/24"
-        const pattern = valueObject.getPattern();
-        if (valueObject.isNumber() && pattern !== '') {
-            return getFormatPreview(pattern, value as number);
-        }
-
-        return value;
     }
 }

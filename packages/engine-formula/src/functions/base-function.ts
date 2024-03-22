@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
+import type { IRange, Nullable } from '@univerjs/core';
 import { Disposable } from '@univerjs/core';
 
 import { ErrorType } from '../basics/error-type';
 import type { IFunctionNames } from '../basics/function';
 import { compareToken } from '../basics/token';
-import type { FunctionVariantType, NodeValueType } from '../engine/reference-object/base-reference-object';
+import type { BaseReferenceObject, FunctionVariantType, NodeValueType } from '../engine/reference-object/base-reference-object';
 import type { ArrayBinarySearchType } from '../engine/utils/compare';
 import { ArrayOrderSearchType } from '../engine/utils/compare';
 import type { ArrayValueObject } from '../engine/value-object/array-value-object';
@@ -28,6 +28,12 @@ import { type BaseValueObject, ErrorValueObject } from '../engine/value-object/b
 import { NullValueObject, NumberValueObject, type PrimitiveValueType } from '../engine/value-object/primitive-object';
 import { convertTonNumber } from '../engine/utils/object-covert';
 import { createNewArray } from '../engine/utils/array-object';
+import { serializeRangeToRefString } from '../engine/utils/reference';
+import { REFERENCE_REGEX_SINGLE_COLUMN, REFERENCE_REGEX_SINGLE_ROW, REFERENCE_SINGLE_RANGE_REGEX } from '../basics/regex';
+import { CellReferenceObject } from '../engine/reference-object/cell-reference-object';
+import { RowReferenceObject } from '../engine/reference-object/row-reference-object';
+import { ColumnReferenceObject } from '../engine/reference-object/column-reference-object';
+import { RangeReferenceObject } from '../engine/reference-object/range-reference-object';
 
 export class BaseFunction extends Disposable {
     private _unitId: Nullable<string>;
@@ -449,5 +455,48 @@ export class BaseFunction extends Disposable {
         }
 
         return valueObject;
+    }
+
+    createReferenceObject(reference: BaseReferenceObject, range: IRange) {
+        const unitId = reference.getForcedUnitId();
+        const sheetId = reference.getForcedSheetId() || '';
+        const sheetName = reference.getForcedSheetName();
+
+        const gridRangeName = {
+            unitId,
+            sheetName,
+            range,
+        };
+
+        const token = serializeRangeToRefString(gridRangeName);
+
+        let referenceObject: BaseReferenceObject;
+
+        if (new RegExp(REFERENCE_SINGLE_RANGE_REGEX).test(token)) {
+            referenceObject = new CellReferenceObject(token);
+        } else if (new RegExp(REFERENCE_REGEX_SINGLE_ROW).test(token)) {
+            referenceObject = new RowReferenceObject(token);
+        } else if (new RegExp(REFERENCE_REGEX_SINGLE_COLUMN).test(token)) {
+            referenceObject = new ColumnReferenceObject(token);
+        } else {
+            referenceObject = new RangeReferenceObject(range, sheetId, unitId);
+        }
+
+        return this._setDefault(reference, referenceObject); ;
+    }
+
+    private _setDefault(reference: BaseReferenceObject, object: BaseReferenceObject) {
+        if (this.unitId == null || this.subUnitId == null) {
+            return ErrorValueObject.create(ErrorType.REF);
+        }
+
+        object.setDefaultUnitId(this.unitId);
+        object.setDefaultSheetId(this.subUnitId);
+        object.setUnitData(reference.getUnitData());
+        object.setRuntimeData(reference.getRuntimeData());
+        object.setArrayFormulaCellData(reference.getArrayFormulaCellData());
+        object.setRuntimeArrayFormulaCellData(reference.getRuntimeArrayFormulaCellData());
+
+        return object;
     }
 }

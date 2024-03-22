@@ -23,7 +23,7 @@ import type { IDisposable } from '@wendellhu/redi';
 import { Inject } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
 import type { ISetWorksheetRowAutoHeightMutationParams } from '@univerjs/sheets';
-import { SetWorksheetRowAutoHeightMutation } from '@univerjs/sheets';
+import { COMMAND_LISTENER_SKELETON_CHANGE, SetWorksheetRowAutoHeightMutation } from '@univerjs/sheets';
 import { getViewportByCell, transformBound2OffsetBound } from '../common/utils';
 import { SetScrollOperation } from '../commands/operations/scroll.operation';
 import { SetZoomRatioOperation } from '..';
@@ -94,10 +94,11 @@ export class CanvasPopManagerService extends Disposable {
                 const params = commandInfo.params as ISetWorksheetRowAutoHeightMutationParams;
                 if (params.rowsAutoHeightInfo.findIndex((item) => item.row === row) > -1) {
                     position$.next(this._calcCellPosition(row, col, currentRender, skeleton, activeViewport));
+                    return;
                 }
             }
 
-            if (commandInfo.id === SetScrollOperation.id || commandInfo.id === SetZoomRatioOperation.id) {
+            if (COMMAND_LISTENER_SKELETON_CHANGE.indexOf(commandInfo.id) > -1) {
                 position$.next(this._calcCellPosition(row, col, currentRender, skeleton, activeViewport));
             }
         }));
@@ -142,7 +143,7 @@ export class CanvasPopManagerService extends Disposable {
         const position$ = new BehaviorSubject(position);
         const disposableCollection = new DisposableCollection();
         disposableCollection.add(this._commandService.onCommandExecuted((commandInfo) => {
-            if (commandInfo.id === SetScrollOperation.id || commandInfo.id === SetZoomRatioOperation.id) {
+            if (COMMAND_LISTENER_SKELETON_CHANGE.indexOf(commandInfo.id) > -1) {
                 position$.next(calc());
             }
         }));

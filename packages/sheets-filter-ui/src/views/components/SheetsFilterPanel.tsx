@@ -20,6 +20,7 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import { useObservable } from '@univerjs/ui';
 import { ICommandService, LocaleService } from '@univerjs/core';
 
+import { of } from 'rxjs';
 import type { ByConditionsModel, ByValuesModel } from '../../services/sheets-filter-panel.service';
 import { FilterBy, SheetsFilterPanelService } from '../../services/sheets-filter-panel.service';
 import { ChangeFilterByOperation, CloseFilterPanelOperation } from '../../commands/sheets-filter.operation';
@@ -40,6 +41,7 @@ export function FilterPanel() {
 
     const filterBy = useObservable(sheetsFilterPanelService.filterBy$, undefined, true);
     const filterModel = useObservable(sheetsFilterPanelService.filterByModel$, undefined, false);
+    const canApply = useObservable(() => filterModel?.canApply$ || of(false), undefined, false, [filterModel]);
     const options = useFilterByOptions(localeService);
 
     const onFilterByTypeChange = useCallback((value: FilterBy) => {
@@ -78,7 +80,7 @@ export function FilterPanel() {
                 <Button type="link" onClick={onClearCriteria}>{localeService.t('sheets-filter.panel.clear-filter')}</Button>
                 <span className={styles.sheetsFilterPanelFooterPrimaryButtons}>
                     <Button type="default" onClick={onCancel}>{localeService.t('sheets-filter.panel.cancel')}</Button>
-                    <Button type="primary" onClick={onApply}>{localeService.t('sheets-filter.panel.confirm')}</Button>
+                    <Button disabled={!canApply} type="primary" onClick={onApply}>{localeService.t('sheets-filter.panel.confirm')}</Button>
                 </span>
             </div>
         </div>

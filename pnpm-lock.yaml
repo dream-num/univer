@@ -139,7 +139,7 @@ importers:
         version: 8.0.4(react-dom@18.2.0)(react@18.2.0)(typescript@5.4.3)
       '@storybook/react-webpack5':
         specifier: 8.0.4
-        version: 8.0.4(@swc/core@1.4.4)(esbuild@0.20.2)(react-dom@18.2.0)(react@18.2.0)(typescript@5.4.3)
+        version: 8.0.4(@swc/core@1.4.2)(esbuild@0.20.2)(react-dom@18.2.0)(react@18.2.0)(typescript@5.4.3)
       '@storybook/types':
         specifier: ^8.0.4
         version: 8.0.4
@@ -312,7 +312,7 @@ importers:
     dependencies:
       '@univerjs/protocol':
         specifier: ^0.1.14
-        version: 0.1.14(@grpc/grpc-js@1.10.1)(rxjs@7.8.1)
+        version: 0.1.14(@grpc/grpc-js@1.10.2)(rxjs@7.8.1)
       dayjs:
         specifier: ^1.11.10
         version: 1.11.10
@@ -795,10 +795,10 @@ importers:
         version: 5.3.3
       vite:
         specifier: ^5.1.4
-        version: 5.1.6(@types/node@20.11.29)(less@4.2.0)
+        version: 5.2.6(@types/node@20.11.30)(less@4.2.0)
       vitest:
         specifier: ^1.3.1
-        version: 1.4.0(@types/node@20.11.29)(jsdom@24.0.0)
+        version: 1.4.0(@types/node@20.11.30)(jsdom@24.0.0)
 
   packages/sheets-filter-ui:
     dependencies:
@@ -853,10 +853,10 @@ importers:
         version: 5.3.3
       vite:
         specifier: ^5.1.4
-        version: 5.1.6(@types/node@20.11.29)(less@4.2.0)
+        version: 5.2.6(@types/node@20.11.30)(less@4.2.0)
       vitest:
         specifier: ^1.3.1
-        version: 1.4.0(@types/node@20.11.29)(less@4.2.0)
+        version: 1.4.0(@types/node@20.11.30)(less@4.2.0)
 
   packages/sheets-find-replace:
     devDependencies:
@@ -3382,6 +3382,7 @@ packages:
     engines: {node: '>=12.10.0'}
     dependencies:
       '@grpc/proto-loader': 0.7.10
+      '@js-sdsl/ordered-map': 4.4.2
       '@types/node': 20.11.30
     dev: false
 
@@ -3485,7 +3486,7 @@ packages:
 
   /@js-sdsl/ordered-map@4.4.2:
     resolution: {integrity: sha512-iUKgm52T8HOE/makSxjqoWhe95ZJA1/G1sYsGev2JDKUSS14KAgg1LHb+Ba+IPow0xflbnSkOsZcO08C7w1gYw==}
-    dev: true
+    dev: false
 
   /@ljharb/through@2.3.12:
     resolution: {integrity: sha512-ajo/heTlG3QgC8EGP6APIejksVAYt4ayz4tqoP3MolFELzcH1x1fzwEYRJTPO0IELutZ5HQ0c26/GqAYy79u3g==}
@@ -4387,7 +4388,7 @@ packages:
       - supports-color
     dev: false
 
-  /@storybook/builder-webpack5@8.0.4(@swc/core@1.4.4)(esbuild@0.20.2)(typescript@5.4.3):
+  /@storybook/builder-webpack5@8.0.4(@swc/core@1.4.2)(esbuild@0.20.2)(typescript@5.4.3):
     resolution: {integrity: sha512-FKXIGfDjZJ7KCq6w8e3NEp2+KATsh4U24UV/K8cFjCrRIU++jDpO274D9ozdpzEmhvHOfxK/QlgalqS4G599Aw==}
     peerDependencies:
       typescript: '*'
@@ -4762,7 +4763,7 @@ packages:
   /@storybook/node-logger@8.0.4:
     resolution: {integrity: sha512-cALLHuX53vLQsoJamGRlquh2pfhPq9copXou2JTmFT6mrCcipo77SzhBDfeeuhaGv6vUWPfmGjPBEHXWGPe4+g==}
 
-  /@storybook/preset-react-webpack@8.0.4(@swc/core@1.4.4)(esbuild@0.20.2)(react-dom@18.2.0)(react@18.2.0)(typescript@5.4.3):
+  /@storybook/preset-react-webpack@8.0.4(@swc/core@1.4.2)(esbuild@0.20.2)(react-dom@18.2.0)(react@18.2.0)(typescript@5.4.3):
     resolution: {integrity: sha512-XldgoZJOXNbZLGhvP6FqVeRnXigEZXV88uhEveREH4zRceYxXUmiCjFUnFy5aXaYZLcv09GHpqTPCqRoOZ+upg==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
@@ -4790,7 +4791,7 @@ packages:
       semver: 7.6.0
       tsconfig-paths: 4.2.0
       typescript: 5.4.3
-      webpack: 5.90.3(@swc/core@1.4.4)(esbuild@0.20.2)
+      webpack: 5.90.3(@swc/core@1.4.2)(esbuild@0.20.2)
     transitivePeerDependencies:
       - '@swc/core'
       - encoding
@@ -4836,7 +4837,7 @@ packages:
       react-docgen-typescript: 2.2.2(typescript@5.4.3)
       tslib: 2.6.2
       typescript: 5.4.3
-      webpack: 5.90.3(@swc/core@1.4.4)(esbuild@0.20.2)
+      webpack: 5.90.3(@swc/core@1.4.2)(esbuild@0.20.2)
     transitivePeerDependencies:
       - supports-color
     dev: false
@@ -4850,7 +4851,7 @@ packages:
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
 
-  /@storybook/react-webpack5@8.0.4(@swc/core@1.4.4)(esbuild@0.20.2)(react-dom@18.2.0)(react@18.2.0)(typescript@5.4.3):
+  /@storybook/react-webpack5@8.0.4(@swc/core@1.4.2)(esbuild@0.20.2)(react-dom@18.2.0)(react@18.2.0)(typescript@5.4.3):
     resolution: {integrity: sha512-HZzcIQLWR6pg28CRwNF9VnFWGTEFEnIAAGKbUAc7mMGysN9AgZgz618FZu0W0JmAUBtWwEJ+pYyLJCIOFoDE6w==}
     engines: {node: '>=18.0.0'}
     peerDependencies:
@@ -4861,8 +4862,8 @@ packages:
       typescript:
         optional: true
     dependencies:
-      '@storybook/builder-webpack5': 8.0.4(@swc/core@1.4.4)(esbuild@0.20.2)(typescript@5.4.3)
-      '@storybook/preset-react-webpack': 8.0.4(@swc/core@1.4.4)(esbuild@0.20.2)(react-dom@18.2.0)(react@18.2.0)(typescript@5.4.3)
+      '@storybook/builder-webpack5': 8.0.4(@swc/core@1.4.2)(esbuild@0.20.2)(typescript@5.4.3)
+      '@storybook/preset-react-webpack': 8.0.4(@swc/core@1.4.2)(esbuild@0.20.2)(react-dom@18.2.0)(react@18.2.0)(typescript@5.4.3)
       '@storybook/react': 8.0.4(react-dom@18.2.0)(react@18.2.0)(typescript@5.4.3)
       '@types/node': 18.19.17
       react: 18.2.0
@@ -5855,7 +5856,7 @@ packages:
       react-dom: 18.2.0(react@18.2.0)
     dev: false
 
-  /@univerjs/protocol@0.1.14(@grpc/grpc-js@1.10.1)(rxjs@7.8.1):
+  /@univerjs/protocol@0.1.14(@grpc/grpc-js@1.10.2)(rxjs@7.8.1):
     resolution: {integrity: sha512-f4BmBCDJ3WKVj5MIiB8S0PLnzVu0xHUpC8g4YCT4Ac2P/29UV0KfRPj2CqYQJOwsym6jLJTSHIvr9BhRGEgIWQ==}
     engines: {node: '>=16.0.0', npm: '>=8.0.0'}
     peerDependencies:
@@ -9293,7 +9294,7 @@ packages:
       semver: 7.6.0
       tapable: 2.2.1
       typescript: 5.4.3
-      webpack: 5.90.3(@swc/core@1.4.4)(esbuild@0.20.2)
+      webpack: 5.90.3(@swc/core@1.4.2)(esbuild@0.20.2)
     dev: false
 
   /form-data-encoder@2.1.4:
@@ -13869,7 +13870,7 @@ packages:
         optional: true
     dependencies:
       '@jridgewell/trace-mapping': 0.3.25
-      '@swc/core': 1.4.4
+      '@swc/core': 1.4.2
       esbuild: 0.20.2
       jest-worker: 27.5.1
       schema-utils: 3.3.0

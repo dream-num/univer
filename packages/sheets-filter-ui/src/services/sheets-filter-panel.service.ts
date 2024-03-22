@@ -21,7 +21,7 @@ import type { FilterColumn, FilterModel } from '@univerjs/sheets-filter';
 import type { IDisposable } from '@wendellhu/redi';
 import { createIdentifier, Inject, Injector } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, combineLatest, map, merge, ReplaySubject, shareReplay, startWith, Subject, throttleTime } from 'rxjs';
+import { BehaviorSubject, combineLatest, map, merge, of, ReplaySubject, shareReplay, startWith, Subject, throttleTime } from 'rxjs';
 import { RefRangeService } from '@univerjs/sheets';
 import type { FilterOperator, IFilterConditionFormParams, IFilterConditionItem } from '../models/conditions';
 import { FilterConditionItems } from '../models/conditions';
@@ -62,7 +62,11 @@ export interface ISheetsFilterPanelService {
 }
 export const ISheetsFilterPanelService = createIdentifier<ISheetsFilterPanelService>('sheets-filter-ui.sheets-filter-panel.service');
 
-export type FilterByModel = ByConditionsModel | ByValuesModel;
+export interface IFilterByModel extends IDisposable {
+    canApply$: Observable<boolean>;
+
+    apply(): Promise<boolean>;
+}
 
 /**
  * This service controls the state of the filter panel. There should be only one instance of the filter panel
@@ -73,11 +77,11 @@ export class SheetsFilterPanelService extends Disposable {
     readonly filterBy$ = this._filterBy$.asObservable();
     get filterBy(): FilterBy { return this._filterBy$.getValue(); }
 
-    private readonly _filterByModel$ = new ReplaySubject<Nullable<FilterByModel>>(1);
+    private readonly _filterByModel$ = new ReplaySubject<Nullable<IFilterByModel>>(1);
     readonly filterByModel$ = this._filterByModel$.asObservable();
-    private _filterByModel: Nullable<FilterByModel> = null;
-    get filterByModel(): Nullable<FilterByModel> { return this._filterByModel; }
-    private set filterByModel(model: Nullable<FilterByModel>) {
+    private _filterByModel: Nullable<IFilterByModel> = null;
+    get filterByModel(): Nullable<IFilterByModel> { return this._filterByModel; }
+    private set filterByModel(model: Nullable<IFilterByModel>) {
         this._filterByModel = model;
         this._filterByModel$.next(model);
     }
@@ -209,15 +213,7 @@ export class SheetsFilterPanelService extends Disposable {
  * 1. The target `FilterColumn` object is changed
  * 2. User toggles "Filter By"
  */
-export class ByConditionsModel extends Disposable {
-    private readonly _conditionItem$: BehaviorSubject<IFilterConditionItem>;
-    readonly conditionItem$: Observable<IFilterConditionItem>;
-    get conditionItem(): IFilterConditionItem { return this._conditionItem$.getValue(); }
-
-    private readonly _filterConditionFormParams$: BehaviorSubject<IFilterConditionFormParams>;
-    readonly filterConditionFormParams$: Observable<IFilterConditionFormParams>;
-    get filterConditionFormParams(): IFilterConditionFormParams { return this._filterConditionFormParams$.getValue(); }
-
+export class ByConditionsModel extends Disposable implements IFilterByModel {
     /**
      * Create a model with targeting filter column. If there is not a filter column, the model would be created with
      * default values.
@@ -235,7 +231,16 @@ export class ByConditionsModel extends Disposable {
         return model;
     }
 
-    // This model should not be constructed directly.
+    canApply$: Observable<boolean> = of(true);
+
+    private readonly _conditionItem$: BehaviorSubject<IFilterConditionItem>;
+    readonly conditionItem$: Observable<IFilterConditionItem>;
+    get conditionItem(): IFilterConditionItem { return this._conditionItem$.getValue(); }
+
+    private readonly _filterConditionFormParams$: BehaviorSubject<IFilterConditionFormParams>;
+    readonly filterConditionFormParams$: Observable<IFilterConditionFormParams>;
+    get filterConditionFormParams(): IFilterConditionFormParams { return this._filterConditionFormParams$.getValue(); }
+
     constructor(
         private readonly _filterModel: FilterModel,
         // TODO@wzhudev: this may change!
@@ -321,7 +326,7 @@ export class ByConditionsModel extends Disposable {
  * 1. The target `FilterColumn` object is changed
  * 2. User toggles "Filter By"
  */
-export class ByValuesModel extends Disposable {
+export class ByValuesModel extends Disposable implements IFilterByModel {
     /**
      * Create a model with targeting filter column. If there is not a filter column, the model would be created with
      * default values.
@@ -422,6 +427,7 @@ export class ByValuesModel extends Disposable {
     get rawFilterItems(): IFilterByValueItem[] { return this._rawFilterItems$.getValue(); }
 
     readonly filterItems$: Observable<IFilterByValueItem[]>;
+    readonly canApply$: Observable<boolean>;
     private _filterItems: IFilterByValueItem[] = [];
     private readonly _manuallyUpdateFilterItems$: Subject<IFilterByValueItem[]>;
 
@@ -472,6 +478,11 @@ export class ByValuesModel extends Disposable {
             ),
             this._manuallyUpdateFilterItems$
         ).pipe(shareReplay(1));
+
+        this.canApply$ = this.filterItems$.pipe(map((items) => {
+            const stat = statisticFilterByValueItems(items);
+            return stat.checked > 0;
+        }));
 
         this.disposeWithMe(this.filterItems$.subscribe((items) => this._filterItems = items));
     }

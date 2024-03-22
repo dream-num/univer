@@ -39,6 +39,7 @@ export function FilterByValue(props: { model: ByValuesModel }) {
 
     const stat = statisticFilterByValueItems(items);
     const allChecked = stat.checked > 0 && stat.unchecked === 0;
+    const confirmDisabled = stat.checked === 0;
     const indeterminate = stat.checked > 0 && stat.unchecked > 0;
 
     const onFilterCheckToggled = useCallback((item: IFilterByValueItem, checked: boolean) => {
@@ -79,14 +80,20 @@ export function FilterByValue(props: { model: ByValuesModel }) {
                                     <Checkbox checked={item.checked} onChange={() => onFilterCheckToggled(item, !item.checked)}></Checkbox>
                                     <span className={styles.sheetsFilterPanelValuesItemText}>{item.value}</span>
                                     <span className={styles.sheetsFilterPanelValuesItemCount}>{`(${item.count})`}</span>
-                                    <Button className={styles.sheetsFilterPanelValuesItemExcludeButton} size="small" type="link" onClick={() => onFilterOnlyClicked(item)}>{filterOnly}</Button>
+                                    <Button
+                                        className={styles.sheetsFilterPanelValuesItemExcludeButton}
+                                        size="small"
+                                        type="link"
+                                        onClick={() => onFilterOnlyClicked(item)}
+                                    >
+                                        {filterOnly}
+                                    </Button>
                                 </div>
                             </div>
                         )}
                     </List>
                 </div>
             </div>
-            {/* Here we should add a virtual scroll component to boost performance! */}
         </div>
     );
 }

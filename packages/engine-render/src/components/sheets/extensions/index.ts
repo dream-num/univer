@@ -20,3 +20,4 @@ export * from './column-header-layout';
 export * from './font';
 export * from './row-header-layout';
 export * from './sheet-extension';
+export * from './custom';

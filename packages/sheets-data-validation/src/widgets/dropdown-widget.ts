@@ -166,9 +166,7 @@ export class DropdownWidget implements IBaseDataValidationWidget {
         documentSkeleton.getActualSize();
         const textLayout = getDocsSkeletonPageSize(documentSkeleton)!;
 
-        const {
-            height: fontHeight,
-        } = textLayout;
+        const { height: fontHeight } = textLayout;
 
         let paddingTop = 0;
         switch (vt) {
@@ -183,7 +181,6 @@ export class DropdownWidget implements IBaseDataValidationWidget {
                 paddingTop = MARGIN_V;
                 break;
         }
-
         ctx.translate(MARGIN_H, paddingTop);
         const rectWidth = cellWidth - MARGIN_H * 2;
         const rectHeight = fontHeight;
@@ -194,9 +191,9 @@ export class DropdownWidget implements IBaseDataValidationWidget {
             radius: 8,
         });
         ctx.save();
-        ctx.translateWithPrecision(PADDING_H, fontHeight);
+        ctx.translateWithPrecision(PADDING_H, 0);
         ctx.beginPath();
-        ctx.rect(0, -fontHeight, realWidth, fontHeight);
+        ctx.rect(0, 0, realWidth, fontHeight);
         ctx.clip();
         documents.render(ctx);
         ctx.restore();

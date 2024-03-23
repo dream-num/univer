@@ -18,6 +18,7 @@ import type { IContextService } from '@univerjs/core';
 import {
     EDITOR_ACTIVATED,
     FOCUSING_EDITOR_INPUT_FORMULA,
+    FOCUSING_EDITOR_STANDALONE,
     FOCUSING_FORMULA_EDITOR,
     FOCUSING_SHEET,
     FOCUSING_UNIVER_EDITOR,
@@ -93,6 +94,7 @@ export function whenEditorDidNotInputFormulaActivated(contextService: IContextSe
         contextService.getContextValue(FOCUSING_SHEET) &&
         contextService.getContextValue(FOCUSING_UNIVER_EDITOR) &&
         contextService.getContextValue(EDITOR_ACTIVATED) &&
-        !contextService.getContextValue(FOCUSING_EDITOR_INPUT_FORMULA)
+        !contextService.getContextValue(FOCUSING_EDITOR_INPUT_FORMULA) &&
+        !contextService.getContextValue(FOCUSING_EDITOR_STANDALONE)
     );
 }

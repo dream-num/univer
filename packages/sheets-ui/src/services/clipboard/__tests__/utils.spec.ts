@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IRange } from '@univerjs/core';
+import type { IMutationInfo, IRange } from '@univerjs/core';
 import { SetRangeValuesMutation } from '@univerjs/sheets';
 
 import { describe, expect, it } from 'vitest';
@@ -138,54 +138,54 @@ describe('test getRepeatRange', () => {
 });
 
 describe('test "mergeSetRangeValues"', () => {
-    it('empty', () => {
-        const mutations: any = [];
+    it('empty array, will do nothing', () => {
+        const mutations: IMutationInfo[] = [];
         expect(mergeSetRangeValues(mutations)).toStrictEqual([]);
     });
 
-    it ('no setRangeValues', () => {
-        const mutaions: any[] = [{ id: 'whatever', params: {} }];
-        expect(mergeSetRangeValues(mutaions)).toStrictEqual([{ id: 'whatever', params: {} }]);
+    it ('no setRangeValues mutations, will no nothing', () => {
+        const mutations: IMutationInfo[] = [{ id: 'whatever', params: {} }];
+        expect(mergeSetRangeValues(mutations)).toStrictEqual([{ id: 'whatever', params: {} }]);
     });
 
-    it ('no merge', () => {
-        const mutaions: any = [
-            { id: 'whatever' },
+    it ('setRangeValues mutations are not applied in same worksheet, will do nothing', () => {
+        const mutations: IMutationInfo[] = [
+            { id: 'whatever', params: {} },
             { id: SetRangeValuesMutation.id, params: { unitId: '1', subUnitId: '2', cellValue: { 1: { 2: { v: 'value' } } } } },
             { id: SetRangeValuesMutation.id, params: { unitId: '1', subUnitId: '3', cellValue: { 1: { 2: { v: 'value' } } } } },
-            { id: 'whatever' }];
-        expect(mergeSetRangeValues(mutaions)).toStrictEqual([
-            { id: 'whatever' },
+            { id: 'whatever', params: {} }];
+        expect(mergeSetRangeValues(mutations)).toStrictEqual([
+            { id: 'whatever', params: {} },
             { id: SetRangeValuesMutation.id, params: { unitId: '1', subUnitId: '2', cellValue: { 1: { 2: { v: 'value' } } } } },
             { id: SetRangeValuesMutation.id, params: { unitId: '1', subUnitId: '3', cellValue: { 1: { 2: { v: 'value' } } } } },
-            { id: 'whatever' }]);
+            { id: 'whatever', params: {} }]);
     });
-    it ('merge part', () => {
-        const mutaions: any = [
-            { id: 'whatever' },
+    it ('part of setRangeValues mutations are applied in same worksheet, will merge these part', () => {
+        const mutations: IMutationInfo[] = [
+            { id: 'whatever', params: {} },
             { id: SetRangeValuesMutation.id, params: { unitId: '1', subUnitId: '2', cellValue: { 1: { 2: { v: 'value' } } } } },
             { id: SetRangeValuesMutation.id, params: { unitId: '1', subUnitId: '2', cellValue: { 1: { 3: { v: 'value' } } } } },
             { id: SetRangeValuesMutation.id, params: { unitId: '1', subUnitId: '3', cellValue: { 1: { 2: { v: 'value' } } } } },
-            { id: 'whatever' }];
-        expect(mergeSetRangeValues(mutaions as any)).toStrictEqual([
-            { id: 'whatever' },
+            { id: 'whatever', params: {} }];
+        expect(mergeSetRangeValues(mutations as IMutationInfo[])).toStrictEqual([
+            { id: 'whatever', params: {} },
             { id: SetRangeValuesMutation.id, params: { unitId: '1', subUnitId: '2', cellValue: { 1: { 2: { v: 'value' }, 3: { v: 'value' } } } } },
             { id: SetRangeValuesMutation.id, params: { unitId: '1', subUnitId: '3', cellValue: { 1: { 2: { v: 'value' } } } } },
-            { id: 'whatever' }]);
+            { id: 'whatever', params: {} }]);
     });
 
-    it ('merge all', () => {
-        const mutaions: any = [
-            { id: 'whatever' },
+    it ('If some setRangeValues appear discontinuously, they will be merged separately.', () => {
+        const mutations: IMutationInfo[] = [
+            { id: 'whatever', params: {} },
             { id: SetRangeValuesMutation.id, params: { unitId: '1', subUnitId: '2', cellValue: { 1: { 2: { v: 'value' } } } } },
             { id: SetRangeValuesMutation.id, params: { unitId: '1', subUnitId: '2', cellValue: { 1: { 2: { v: 'value' } } } } },
             { id: SetRangeValuesMutation.id, params: { unitId: '1', subUnitId: '2', cellValue: { 1: { 2: { f: 'formula' } } } } },
-            { id: 'whatever' },
+            { id: 'whatever', params: {} },
             { id: SetRangeValuesMutation.id, params: { unitId: '1', subUnitId: '2', cellValue: { 1: { 2: { v: 'value' } } } } },
             { id: SetRangeValuesMutation.id, params: { unitId: '1', subUnitId: '2', cellValue: { 1: { 3: { v: 'value' } } } } },
             { id: SetRangeValuesMutation.id, params: { unitId: '1', subUnitId: '2', cellValue: { 1: { 4: { v: 'value' } } } } },
         ];
-        expect(mergeSetRangeValues(mutaions as any)).toStrictEqual([
+        expect(mergeSetRangeValues(mutations as IMutationInfo[])).toStrictEqual([
             { id: 'whatever' },
             { id: SetRangeValuesMutation.id, params: { unitId: '1', subUnitId: '2', cellValue: { 1: { 2: { v: 'value', f: 'formula' } } } } },
             { id: 'whatever' },

@@ -119,7 +119,7 @@ export function mergeCellValues(...cellValues: IObjectMatrixPrimitiveType<Nullab
     return newMatrix.getMatrix();
 }
 
-export function setRangeValuesMergeable(m1: IMutationInfo<ISetRangeValuesMutationParams>, m2: IMutationInfo<ISetRangeValuesMutationParams>) {
+export function getRangeValuesMergeable(m1: IMutationInfo<ISetRangeValuesMutationParams>, m2: IMutationInfo<ISetRangeValuesMutationParams>) {
     return m1.id === m2.id
     && m1.params.unitId === m2.params.unitId
     && m1.params.subUnitId === m2.params.subUnitId;
@@ -132,7 +132,7 @@ export function mergeSetRangeValues(mutations: IMutationInfo[]) {
         if (mutations[i].id === SetRangeValuesMutation.id) {
             const current = mutations[i] as IMutationInfo<ISetRangeValuesMutationParams>;
             const toMerge = [current];
-            while (i + cursor < mutations.length && setRangeValuesMergeable(current, mutations[i + cursor] as IMutationInfo<ISetRangeValuesMutationParams>)) {
+            while (i + cursor < mutations.length && getRangeValuesMergeable(current, mutations[i + cursor] as IMutationInfo<ISetRangeValuesMutationParams>)) {
                 toMerge.push(mutations[i + cursor] as IMutationInfo<ISetRangeValuesMutationParams>);
                 cursor += 1;
             }

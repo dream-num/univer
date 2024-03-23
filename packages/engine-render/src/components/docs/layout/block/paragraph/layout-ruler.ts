@@ -372,11 +372,6 @@ function _lineOperator(
         paragraphStart
     );
 
-    // if (changeBulletWidth.state) {
-    //     // 为了保持__getIndentPadding的纯函数特性，把修改首行列表宽度的逻辑外置到这里
-    //     glyphGroup[0].width = changeBulletWidth.hangingNumber;
-    // }
-
     const newLine = createSkeletonLine(
         paragraphIndex,
         LineType.PARAGRAPH,
@@ -456,10 +451,6 @@ function __getIndentPadding(
 
     let paddingLeft = indentStartNumber;
     const paddingRight = indentEndNumber;
-    // const changeBulletWidth = {
-    //     state: false,
-    //     hangingNumber: 0,
-    // };
 
     if (indentFirstLineNumber > 0 && paragraphStart) {
         paddingLeft += indentFirstLineNumber;
@@ -469,25 +460,9 @@ function __getIndentPadding(
         paddingLeft += hangingNumber;
     }
 
-    // if (glyphType === GlyphType.LIST) {
-    //     // 首行的处理
-    //     const { width: fontWidth } = bBox;
-
-    //     if (indentFirstLineNumber > 0) {
-    //         paddingLeft += indentFirstLineNumber;
-    //     } else if (hangingNumber > 0 && hangingNumber > fontWidth) {
-    //         // glyph.w = hangingNumber;
-    //         changeBulletWidth.state = true;
-    //         changeBulletWidth.hangingNumber = hangingNumber;
-    //     }
-    // } else {
-    //     paddingLeft += hangingNumber;
-    // }
-
     return {
         paddingLeft,
         paddingRight,
-        // changeBulletWidth,
     };
 }
 

@@ -17,6 +17,7 @@
 import type { ICellData, IMutationInfo, IRange, Worksheet } from '@univerjs/core';
 import {
     Disposable,
+    ErrorService,
     extractPureTextFromCell,
     ICommandService,
     ILogService,
@@ -42,6 +43,7 @@ import { BehaviorSubject } from 'rxjs';
 
 import { IMarkSelectionService } from '../mark-selection/mark-selection.service';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
+import { expandWithOtherRange } from '../../commands/commands/utils/selection-utils';
 import { CopyContentCache, extractId, genId } from './copy-content-cache';
 import { HtmlToUSMService } from './html-to-usm/converter';
 import PastePluginLark from './html-to-usm/paste-plugins/plugin-lark';
@@ -108,7 +110,8 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @INotificationService private readonly _notificationService: INotificationService,
         @IPlatformService private readonly _platformService: IPlatformService,
-        @Inject(LocaleService) private readonly _localeService: LocaleService
+        @Inject(LocaleService) private readonly _localeService: LocaleService,
+        @Inject(ErrorService) private readonly _errorService: ErrorService
     ) {
         super();
         this._htmlToUSM = new HtmlToUSMService({
@@ -397,6 +400,48 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             return false;
         }
 
+        const worksheet = this._currentUniverService.getUniverSheetInstance(unitId)?.getSheetBySheetId(subUnitId);
+        if (!worksheet) {
+            return false;
+        }
+        const isPasteRows = pastedRange.startRow === 0 && pastedRange.endRow >= worksheet.getRowCount() - 1;
+        const isPasteCols = pastedRange.startColumn === 0 && pastedRange.endColumn >= worksheet.getColumnCount() - 1;
+        const isPasteRange = !(isPasteRows || isPasteCols);
+        let expandSelectionsByMergedCell = { ...pastedRange };
+        const adjustedPrimaryByMergedCell = { ...selection.primary };
+        if (isPasteRange) {
+            let hasIntersected = false;
+            worksheet.getMergeData().forEach((merge) => {
+                if (Rectangle.intersects(merge, expandSelectionsByMergedCell)) {
+                    expandSelectionsByMergedCell = expandWithOtherRange(expandSelectionsByMergedCell, merge);
+                    if (Rectangle.vertexIntersect(adjustedPrimaryByMergedCell, merge)) {
+                        adjustedPrimaryByMergedCell.endRow = merge.endRow;
+                        adjustedPrimaryByMergedCell.endColumn = merge.endColumn;
+                        adjustedPrimaryByMergedCell.isMerged = true;
+                        adjustedPrimaryByMergedCell.isMergedMainCell = true;
+                    }
+                    if (!hasIntersected) hasIntersected = true;
+                }
+            });
+            if (hasIntersected) {
+                const newSelections = [{
+                    range: expandSelectionsByMergedCell,
+                    primary: adjustedPrimaryByMergedCell,
+                    style: selection.style,
+                }];
+                this._selectionManagerService.replace(newSelections);
+                this._errorService.emit('Across a merged cell.');
+                return false;
+            }
+        } else {
+            const cellData = cellMatrix.getMatrix();
+            cellMatrix.forValue((row, col) => {
+                if (worksheet.getMergedCell(row, col)) {
+                    delete cellData[row][col];
+                }
+            });
+        }
+
         // 4. execute these mutations by the one method
         return this._pasteUSM(
             {
@@ -469,6 +514,44 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         for (let j = startRow; j <= endRow; j++) {
             const row = rowManager.getRowOrCreate(j);
             rowProperties.push({ height: `${row.h || defaultRowHeight}` });
+        }
+
+        const isPasteRows = pastedRange.startRow === 0 && pastedRange.endRow >= worksheet.getRowCount() - 1;
+        const isPasteCols = pastedRange.startColumn === 0 && pastedRange.endColumn >= worksheet.getColumnCount() - 1;
+        const isPasteRange = !(isPasteRows || isPasteCols);
+        let expandSelectionsByMergedCell = { ...pastedRange };
+        const adjustedPrimaryByMergedCell = { ...selection.primary };
+        if (isPasteRange) {
+            let hasIntersected = false;
+            worksheet.getMergeData().forEach((merge) => {
+                if (Rectangle.intersects(merge, expandSelectionsByMergedCell)) {
+                    expandSelectionsByMergedCell = expandWithOtherRange(expandSelectionsByMergedCell, merge);
+                    if (Rectangle.vertexIntersect(adjustedPrimaryByMergedCell, merge)) {
+                        adjustedPrimaryByMergedCell.endRow = merge.endRow;
+                        adjustedPrimaryByMergedCell.endColumn = merge.endColumn;
+                        adjustedPrimaryByMergedCell.isMerged = true;
+                        adjustedPrimaryByMergedCell.isMergedMainCell = true;
+                    }
+                    if (!hasIntersected) hasIntersected = true;
+                }
+            });
+            if (hasIntersected) {
+                const newSelections = [{
+                    range: expandSelectionsByMergedCell,
+                    primary: adjustedPrimaryByMergedCell,
+                    style: selection.style,
+                }];
+                this._selectionManagerService.replace(newSelections);
+                this._errorService.emit('Across a merged cell.');
+                return false;
+            }
+        } else {
+            const cellData = cellMatrix.getMatrix();
+            cellMatrix.forValue((row, col) => {
+                if (worksheet.getMergedCell(row + pastedRange.startRow, col + pastedRange.startColumn)) {
+                    delete cellData[row][col];
+                }
+            });
         }
 
         const pasteRes = this._pasteUSM(

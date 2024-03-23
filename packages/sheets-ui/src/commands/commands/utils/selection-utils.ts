@@ -742,3 +742,19 @@ export function getMergeableSelectionsByType(type: MergeType, selections: Nullab
 
     return selections;
 }
+
+/**
+ * In some cases, intersection of selections needs to be expanded
+ * @param currentRange Range of current selection
+ * @param intersectingRange Range of intersect selection
+ * @returns The newly expanded selection
+ */
+export function expandWithOtherRange(currentRange: IRange, intersectingRange: IRange): IRange {
+    return {
+        ...currentRange,
+        startRow: Math.min(currentRange.startRow, intersectingRange.startRow),
+        startColumn: Math.min(currentRange.startColumn, intersectingRange.startColumn),
+        endRow: Math.max(currentRange.endRow, intersectingRange.endRow),
+        endColumn: Math.max(currentRange.endColumn, intersectingRange.endColumn),
+    };
+}

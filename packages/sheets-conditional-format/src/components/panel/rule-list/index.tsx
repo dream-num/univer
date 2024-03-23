@@ -19,11 +19,11 @@ import { Select, Tooltip } from '@univerjs/design';
 
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { ICommandService, IUniverInstanceService, LocaleService, Rectangle } from '@univerjs/core';
-import { SelectionManagerService, SetWorksheetActiveOperation } from '@univerjs/sheets';
+import { SelectionManagerService, SetSelectionsOperation, SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { serializeRange } from '@univerjs/engine-formula';
 import { DeleteSingle, IncreaseSingle, MoreFunctionSingle } from '@univerjs/icons';
 import GridLayout from 'react-grid-layout';
-import { debounceTime, merge, Observable } from 'rxjs';
+import { debounceTime, Observable } from 'rxjs';
 import { addConditionalRuleMutation } from '../../../commands/mutations/addConditionalRule.mutation';
 import { setConditionalRuleMutation } from '../../../commands/mutations/setConditionalRule.mutation';
 import { deleteConditionalRuleMutation } from '../../../commands/mutations/deleteConditionalRule.mutation';
@@ -164,10 +164,12 @@ export const RuleList = (props: IRuleListProps) => {
     }, [selectValue, fetchRuleListId]);
 
     useEffect(() => {
-        const subscription = merge(
-            selectionManagerService.selectionMoveEnd$,
+        if (selectValue === '2') {
+            return;
+        }
+        const subscription =
             new Observable<null>((commandSubscribe) => {
-                const commandList = [addConditionalRuleMutation.id, setConditionalRuleMutation.id, deleteConditionalRuleMutation.id, moveConditionalRuleMutation.id];
+                const commandList = [SetSelectionsOperation.id, addConditionalRuleMutation.id, setConditionalRuleMutation.id, deleteConditionalRuleMutation.id, moveConditionalRuleMutation.id];
                 const disposable = commandService.onCommandExecuted((commandInfo) => {
                     const { id, params } = commandInfo;
                     const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
@@ -176,14 +178,14 @@ export const RuleList = (props: IRuleListProps) => {
                     }
                 });
                 return () => disposable.dispose();
-            })
-        ).subscribe(() => {
-            ruleListSet(getRuleList);
-        });
+            }).pipe(debounceTime(16))
+                .subscribe(() => {
+                    ruleListSet(getRuleList);
+                });
         return () => {
             subscription.unsubscribe();
         };
-    }, [selectionManagerService, univerInstanceService]);
+    }, [univerInstanceService, selectValue]);
 
     useEffect(() => {
         const dispose = conditionalFormatRuleModel.$ruleChange.subscribe(() => {

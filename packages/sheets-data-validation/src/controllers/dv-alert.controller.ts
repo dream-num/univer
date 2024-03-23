@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DataValidationStatus, Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { DataValidationStatus, Disposable, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
 import { CellAlertManagerService, CellAlertType, HoverManagerService, IEditorBridgeService } from '@univerjs/sheets-ui';
 import { Inject } from '@wendellhu/redi';
 import { SheetDataValidationService } from '../services/dv.service';
@@ -28,7 +28,8 @@ export class DataValidationAlertController extends Disposable {
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(SheetDataValidationService) private readonly _sheetDataValidationService: SheetDataValidationService,
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
-        @Inject(DataValidationDropdownManagerService) private readonly _dropdownManagerService: DataValidationDropdownManagerService
+        @Inject(DataValidationDropdownManagerService) private readonly _dropdownManagerService: DataValidationDropdownManagerService,
+        @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
         super();
         this._init();
@@ -49,7 +50,7 @@ export class DataValidationAlertController extends Disposable {
                 if (cellData?.dataValidation?.validStatus === DataValidationStatus.INVALID) {
                     this._cellAlertManagerService.showAlert({
                         type: CellAlertType.ERROR,
-                        title: 'invalid:',
+                        title: this._localeService.t('dataValidation.error.title'),
                         message: manager?.getRuleErrorMsg(cellData.dataValidation.ruleId),
                         location: cellPos.location,
                         width: 200,

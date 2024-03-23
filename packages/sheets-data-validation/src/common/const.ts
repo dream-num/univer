@@ -15,3 +15,7 @@
  */
 
 export const DATA_VALIDATION_PLUGIN_NAME = 'sheets-data-validation';
+
+export const DROP_DOWN_DEFAULT_COLOR = '#DCDCDC';
+
+export const DROP_DOWN_COLORS = [];

@@ -24,6 +24,7 @@ import { OpenValidationPanelOperation } from '@univerjs/data-validation';
 import type { ListMultipleValidator } from '../../validators/list-multiple-validator';
 import { deserializeListOptions, getDataValidationCellValue } from '../../validators/util';
 import type { IDropdownComponentProps } from '../../services/dropdown-manager.service';
+import { DROP_DOWN_DEFAULT_COLOR } from '../../common/const';
 import styles from './index.module.less';
 
 interface ISelectListProps {
@@ -62,7 +63,7 @@ const SelectList = (props: ISelectListProps) => {
                 };
                 return (
                     <div key={i} className={styles.dvListDropdownItemContainer} onClick={handleClick}>
-                        <div className={styles.dvListDropdownItem} style={{ background: '#ECECEC' }}>{item.label}</div>
+                        <div className={styles.dvListDropdownItem} style={{ background: item.color ?? DROP_DOWN_DEFAULT_COLOR }}>{item.label}</div>
                         <div className={styles.dvListDropdownSelectedIcon}>
                             {selected ? <CheckMarkSingle /> : null}
                         </div>

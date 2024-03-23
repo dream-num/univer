@@ -15,22 +15,20 @@
  */
 
 import { BooleanNumber, DEFAULT_EMPTY_DOCUMENT_VALUE, DocumentDataModel, ICommandService, LocaleService, Tools, VerticalAlign, WrapStrategy } from '@univerjs/core';
-import type { ICellRenderContext, IDocumentData, IPaddingData, ISelectionCellWithCoord, IStyleData, Nullable } from '@univerjs/core';
-import { DeviceInputEventType, Documents, DocumentSkeleton, DocumentViewModel, getDocsSkeletonPageSize, Rect, type Spreadsheet, type SpreadsheetSkeleton, type UniverRenderingContext2D } from '@univerjs/engine-render';
+import type { ICellRenderContext, IDocumentData, IPaddingData, IStyleData, Nullable } from '@univerjs/core';
+import { Documents, DocumentSkeleton, DocumentViewModel, getDocsSkeletonPageSize, Rect, type Spreadsheet, type SpreadsheetSkeleton, type UniverRenderingContext2D } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
-import { IEditorBridgeService } from '@univerjs/sheets-ui/services/editor-bridge.service.js';
-import type { IEditorBridgeServiceVisibleParam } from '@univerjs/sheets-ui/services/editor-bridge.service.js';
-import { SetCellEditVisibleOperation } from '@univerjs/sheets-ui/commands/operations/cell-edit.operation.js';
 import type { IBaseDataValidationWidget } from '@univerjs/data-validation';
 import { getCellValueOrigin } from '../utils/getCellDataOrigin';
-import type { ListValidator } from '../validators';
 import { type IShowDataValidationDropdownParams, ShowDataValidationDropdown } from '../commands/operations/data-validation.operation';
+import { DROP_DOWN_DEFAULT_COLOR } from '../common/const';
 
 const PADDING_H = 4;
 const ICON_SIZE = 6;
 const ICON_PLACE = 14;
 const MARGIN_H = 6;
 const MARGIN_V = 2;
+const DROP_DOWN_ICON_COLOR = '#565656';
 
 const downPath = new Path2D('M3.32201 4.84556C3.14417 5.05148 2.85583 5.05148 2.67799 4.84556L0.134292 1.90016C-0.152586 1.56798 0.0505937 1 0.456301 1L5.5437 1C5.94941 1 6.15259 1.56798 5.86571 1.90016L3.32201 4.84556Z');
 
@@ -115,8 +113,7 @@ export class DropdownWidget implements IBaseDataValidationWidget {
     private _dropdownInfoMap: Map<string, Map<string, IDropdownInfo>> = new Map();
     constructor(
         @Inject(LocaleService) private readonly _localeService: LocaleService,
-        @ICommandService private readonly _commandService: ICommandService,
-        @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService
+        @ICommandService private readonly _commandService: ICommandService
     ) { }
 
     zIndex?: number | undefined;
@@ -187,7 +184,7 @@ export class DropdownWidget implements IBaseDataValidationWidget {
         Rect.drawWith(ctx, {
             width: rectWidth,
             height: rectHeight,
-            fill: '#DCDCDC',
+            fill: DROP_DOWN_DEFAULT_COLOR,
             radius: 8,
         });
         ctx.save();
@@ -198,7 +195,7 @@ export class DropdownWidget implements IBaseDataValidationWidget {
         documents.render(ctx);
         ctx.restore();
         ctx.translate(realWidth + PADDING_H + 4, (fontHeight - ICON_SIZE) / 2);
-        ctx.fillStyle = '#565656';
+        ctx.fillStyle = DROP_DOWN_ICON_COLOR;
         ctx.fill(downPath);
         ctx.restore();
 
@@ -236,7 +233,6 @@ export class DropdownWidget implements IBaseDataValidationWidget {
     }
 
     isHit(position: { x: number; y: number }, info: ICellRenderContext) {
-        // const { cellHeight, cellWidth, top, left } = this._calc(info.primaryWithCoord, info.style);
         const { data, subUnitId, row, col } = info;
         const map = this._ensureMap(subUnitId);
         const dropdownInfo = map.get(this._generateKey(row, col));

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DataValidationErrorStyle, Disposable, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { DataValidationErrorStyle, Disposable, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
 import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { Inject } from '@wendellhu/redi';
@@ -28,7 +28,8 @@ export class DataValidationRejectInputController extends Disposable {
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
         @Inject(DataValidationModel) private readonly _dataValidationModel: DataValidationModel,
         @Inject(DataValidatorRegistryService) private readonly _dataValidatorRegistryService: DataValidatorRegistryService,
-        @IDialogService private readonly _dialogService: IDialogService
+        @IDialogService private readonly _dialogService: IDialogService,
+        @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
         super();
         this._initEditorBridgeInterceptor();
@@ -70,16 +71,15 @@ export class DataValidationRejectInputController extends Disposable {
                     const oldCell = worksheet.getCellRaw(row, col);
                     this._dialogService.open({
                         title: {
-                            title: 'reject-input',
+                            title: this._localeService.t('dataValidation.alert.title'),
                         },
                         id: 'reject-input-dialog',
                         children: {
-                            title: 'reject input content',
+                            title: validator.generateRuleErrorMessage(rule),
                         },
                         onClose: () => {
                             this._dialogService.close('reject-input-dialog');
                         },
-
                     });
                     return next(Promise.resolve(oldCell));
                 },

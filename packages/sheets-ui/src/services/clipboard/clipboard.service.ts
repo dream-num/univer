@@ -223,7 +223,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
     addClipboardHook(hook: ISheetClipboardHook): IDisposable {
         if (this._clipboardHooks.findIndex((h) => h.id === hook.id) !== -1) {
             this._logService.error('[SheetClipboardService]', 'hook already exists', hook.id);
-            return { dispose: () => {} };
+            return { dispose: () => { } };
         }
         // hook added should be ordered at meaning while
         const insertIndex = this._clipboardHooks.findIndex((existingHook) => {
@@ -404,15 +404,14 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         if (!worksheet) {
             return false;
         }
-        const isPasteRows = pastedRange.startRow === 0 && pastedRange.endRow >= worksheet.getRowCount() - 1;
-        const isPasteCols = pastedRange.startColumn === 0 && pastedRange.endColumn >= worksheet.getColumnCount() - 1;
-        const isPasteRange = !(isPasteRows || isPasteCols);
         let expandSelectionsByMergedCell = { ...pastedRange };
         const adjustedPrimaryByMergedCell = { ...selection.primary };
-        if (isPasteRange) {
-            let hasIntersected = false;
-            worksheet.getMergeData().forEach((merge) => {
-                if (Rectangle.intersects(merge, expandSelectionsByMergedCell)) {
+        let intersectButNoContain = false;
+        const mergeData = worksheet.getMergeData();
+        for (let i = 0; i < mergeData.length; i++) {
+            const merge = mergeData[i];
+            if (Rectangle.intersects(merge, expandSelectionsByMergedCell)) {
+                if (!Rectangle.contains(pastedRange, merge)) {
                     expandSelectionsByMergedCell = expandWithOtherRange(expandSelectionsByMergedCell, merge);
                     if (Rectangle.vertexIntersect(adjustedPrimaryByMergedCell, merge)) {
                         adjustedPrimaryByMergedCell.endRow = merge.endRow;
@@ -420,26 +419,20 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
                         adjustedPrimaryByMergedCell.isMerged = true;
                         adjustedPrimaryByMergedCell.isMergedMainCell = true;
                     }
-                    if (!hasIntersected) hasIntersected = true;
+                    intersectButNoContain = true;
                 }
-            });
-            if (hasIntersected) {
-                const newSelections = [{
-                    range: expandSelectionsByMergedCell,
-                    primary: adjustedPrimaryByMergedCell,
-                    style: selection.style,
-                }];
-                this._selectionManagerService.replace(newSelections);
-                this._errorService.emit('Across a merged cell.');
-                return false;
             }
-        } else {
-            const cellData = cellMatrix.getMatrix();
-            cellMatrix.forValue((row, col) => {
-                if (worksheet.getMergedCell(row, col)) {
-                    delete cellData[row][col];
-                }
-            });
+        }
+
+        if (intersectButNoContain) {
+            const newSelections = [{
+                range: expandSelectionsByMergedCell,
+                primary: adjustedPrimaryByMergedCell,
+                style: selection.style,
+            }];
+            this._selectionManagerService.replace(newSelections);
+            this._errorService.emit('Across a merged cell.');
+            return false;
         }
 
         // 4. execute these mutations by the one method
@@ -516,15 +509,14 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             rowProperties.push({ height: `${row.h || defaultRowHeight}` });
         }
 
-        const isPasteRows = pastedRange.startRow === 0 && pastedRange.endRow >= worksheet.getRowCount() - 1;
-        const isPasteCols = pastedRange.startColumn === 0 && pastedRange.endColumn >= worksheet.getColumnCount() - 1;
-        const isPasteRange = !(isPasteRows || isPasteCols);
         let expandSelectionsByMergedCell = { ...pastedRange };
         const adjustedPrimaryByMergedCell = { ...selection.primary };
-        if (isPasteRange) {
-            let hasIntersected = false;
-            worksheet.getMergeData().forEach((merge) => {
-                if (Rectangle.intersects(merge, expandSelectionsByMergedCell)) {
+        let intersectButNoContain = false;
+        const mergeData = worksheet.getMergeData();
+        for (let i = 0; i < mergeData.length; i++) {
+            const merge = mergeData[i];
+            if (Rectangle.intersects(merge, expandSelectionsByMergedCell)) {
+                if (!Rectangle.contains(pastedRange, merge)) {
                     expandSelectionsByMergedCell = expandWithOtherRange(expandSelectionsByMergedCell, merge);
                     if (Rectangle.vertexIntersect(adjustedPrimaryByMergedCell, merge)) {
                         adjustedPrimaryByMergedCell.endRow = merge.endRow;
@@ -532,26 +524,20 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
                         adjustedPrimaryByMergedCell.isMerged = true;
                         adjustedPrimaryByMergedCell.isMergedMainCell = true;
                     }
-                    if (!hasIntersected) hasIntersected = true;
+                    intersectButNoContain = true;
                 }
-            });
-            if (hasIntersected) {
-                const newSelections = [{
-                    range: expandSelectionsByMergedCell,
-                    primary: adjustedPrimaryByMergedCell,
-                    style: selection.style,
-                }];
-                this._selectionManagerService.replace(newSelections);
-                this._errorService.emit('Across a merged cell.');
-                return false;
             }
-        } else {
-            const cellData = cellMatrix.getMatrix();
-            cellMatrix.forValue((row, col) => {
-                if (worksheet.getMergedCell(row + pastedRange.startRow, col + pastedRange.startColumn)) {
-                    delete cellData[row][col];
-                }
-            });
+        }
+
+        if (intersectButNoContain) {
+            const newSelections = [{
+                range: expandSelectionsByMergedCell,
+                primary: adjustedPrimaryByMergedCell,
+                style: selection.style,
+            }];
+            this._selectionManagerService.replace(newSelections);
+            this._errorService.emit('Across a merged cell.');
+            return false;
         }
 
         const pasteRes = this._pasteUSM(

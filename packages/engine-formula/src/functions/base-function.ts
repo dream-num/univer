@@ -482,10 +482,10 @@ export class BaseFunction extends Disposable {
             referenceObject = new RangeReferenceObject(range, sheetId, unitId);
         }
 
-        return this._setDefault(reference, referenceObject); ;
+        return this._setReferenceDefault(reference, referenceObject); ;
     }
 
-    private _setDefault(reference: BaseReferenceObject, object: BaseReferenceObject) {
+    private _setReferenceDefault(reference: BaseReferenceObject, object: BaseReferenceObject) {
         if (this.unitId == null || this.subUnitId == null) {
             return ErrorValueObject.create(ErrorType.REF);
         }

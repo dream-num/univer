@@ -16,8 +16,8 @@
 
 import type { IWorkbookData, Workbook } from '@univerjs/core';
 import { ILogService, IUniverInstanceService, LocaleType, LogLevel, Plugin, PluginType, Univer } from '@univerjs/core';
-import { LexerTreeBuilder } from '@univerjs/engine-formula';
-import { SelectionManagerService } from '@univerjs/sheets';
+import { CalculateFormulaService, DefinedNamesService, FormulaCurrentConfigService, FormulaDataModel, FormulaRuntimeService, IDefinedNamesService, IFormulaCurrentConfigService, IFormulaRuntimeService, LexerTreeBuilder } from '@univerjs/engine-formula';
+import { SelectionManagerService, SheetInterceptorService } from '@univerjs/sheets';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -64,6 +64,8 @@ export function createCommandTestBed(workbookConfig?: IWorkbookData, dependencie
     class TestPlugin extends Plugin {
         static override type = PluginType.Sheet;
 
+        private _formulaDataModel: FormulaDataModel | null = null;
+
         constructor(
             _config: undefined,
             @Inject(Injector) override readonly _injector: Injector
@@ -73,9 +75,20 @@ export function createCommandTestBed(workbookConfig?: IWorkbookData, dependencie
 
         override onStarting(injector: Injector): void {
             injector.add([SelectionManagerService]);
+            injector.add([SheetInterceptorService]);
+            injector.add([CalculateFormulaService]);
+            injector.add([FormulaDataModel]);
             injector.add([LexerTreeBuilder]);
+            injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
+            injector.add([IFormulaRuntimeService, { useClass: FormulaRuntimeService }]);
+            injector.add([IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }]);
 
             dependencies?.forEach((d) => injector.add(d));
+        }
+
+        override onReady(): void {
+            this._formulaDataModel = get(FormulaDataModel);
+            this._formulaDataModel.initFormulaData();
         }
     }
 

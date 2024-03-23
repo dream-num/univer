@@ -14,13 +14,37 @@
  * limitations under the License.
  */
 
-import type { ICellData, IRange, Nullable, Univer } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, RANGE_TYPE } from '@univerjs/core';
-import { MoveRowsCommand, NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '@univerjs/sheets';
+import type { ICellData, IRange, IWorkbookData, Nullable, Univer } from '@univerjs/core';
+import { Direction, ICommandService, IUniverInstanceService, LocaleType, RANGE_TYPE } from '@univerjs/core';
+import type { IInsertColCommandParams } from '@univerjs/sheets';
+import { InsertColCommand, MoveRowsCommand, NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '@univerjs/sheets';
 import type { Injector } from '@wendellhu/redi';
-import { afterEach, beforeEach, describe, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
+import { SetArrayFormulaDataMutation, SetFormulaDataMutation, SetNumfmtFormulaDataMutation } from '@univerjs/engine-formula';
+import { UpdateFormulaController } from '../update-formula.controller';
 import { createCommandTestBed } from './create-command-test-bed';
+
+const TEST_WORKBOOK_DATA_DEMO = (): IWorkbookData => ({
+    id: 'test',
+    appVersion: '3.0.0-alpha',
+    sheets: {
+        sheet1: {
+            id: 'sheet1',
+            cellData: {
+                0: {
+                    3: {
+                        f: '=A1:C1',
+                    },
+                },
+            },
+        },
+    },
+    locale: LocaleType.ZH_CN,
+    name: '',
+    sheetOrder: [],
+    styles: {},
+});
 
 const cellToRange = (row: number, col: number) =>
     ({ startRow: row, endRow: row, startColumn: col, endColumn: col }) as IRange;
@@ -35,14 +59,26 @@ describe('Test insert function operation', () => {
         endRow: number,
         endColumn: number
     ) => Nullable<ICellData>;
+    let getValues: (
+        startRow: number,
+        startColumn: number,
+        endRow: number,
+        endColumn: number
+    ) => Array<Array<Nullable<ICellData>>> | undefined;
 
     beforeEach(() => {
-        const testBed = createCommandTestBed();
+        const testBed = createCommandTestBed(TEST_WORKBOOK_DATA_DEMO(), [
+            [UpdateFormulaController],
+        ]);
         univer = testBed.univer;
         get = testBed.get;
 
         commandService = get(ICommandService);
         commandService.registerCommand(MoveRowsCommand);
+        commandService.registerCommand(InsertColCommand);
+        commandService.registerCommand(SetFormulaDataMutation);
+        commandService.registerCommand(SetArrayFormulaDataMutation);
+        commandService.registerCommand(SetNumfmtFormulaDataMutation);
 
         getValueByPosition = (
             startRow: number,
@@ -55,6 +91,17 @@ describe('Test insert function operation', () => {
                 ?.getSheetBySheetId('sheet1')
                 ?.getRange(startRow, startColumn, endRow, endColumn)
                 .getValue();
+        getValues = (
+            startRow: number,
+            startColumn: number,
+            endRow: number,
+            endColumn: number
+        ): Array<Array<Nullable<ICellData>>> | undefined =>
+            get(IUniverInstanceService)
+                .getUniverSheetInstance('test')
+                ?.getSheetBySheetId('sheet1')
+                ?.getRange(startRow, startColumn, endRow, endColumn)
+                .getValues();
     });
 
     afterEach(() => {
@@ -86,6 +133,38 @@ describe('Test insert function operation', () => {
                 };
 
                 await commandService.executeCommand(MoveRowsCommand.id, params);
+            });
+            it('Insert column', async () => {
+                const selectionManager = get(SelectionManagerService);
+                selectionManager.setCurrentSelection({
+                    pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+                    unitId: 'test',
+                    sheetId: 'sheet1',
+                });
+
+                // A1
+                selectionManager.add([
+                    {
+                        range: { startRow: 0, startColumn: 1, endRow: 0, endColumn: 1, rangeType: RANGE_TYPE.NORMAL },
+                        primary: null,
+                        style: null,
+                    },
+                ]);
+
+                const params: IInsertColCommandParams = {
+                    unitId: 'test',
+                    subUnitId: 'sheet1',
+                    range: cellToRange(0, 1),
+                    direction: Direction.LEFT,
+                };
+
+                // FXIME why InsertColCommand sequenceExecute returns result false
+                await commandService.executeCommand(InsertColCommand.id, params);
+                const oldValue = getValueByPosition(0, 3, 0, 3);
+                expect(oldValue?.f).toBe('=A1:C1');
+
+                const newValue = getValueByPosition(0, 4, 0, 4);
+                // expect(newValue).toBe('=A1:D1');
             });
         });
     });

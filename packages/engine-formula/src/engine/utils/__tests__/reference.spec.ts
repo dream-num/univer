@@ -230,7 +230,7 @@ describe('Test Reference', () => {
         const testTrueCases = [
             'sheet-1',
             'sheet 1',
-            'B1048576',
+            'B1048577',
             'RC',
             'RC2',
             'R5C',
@@ -247,7 +247,7 @@ describe('Test Reference', () => {
             '!Sheet',
             '！Sheet',
         ];
-        const testFalseCase = ['Sheet1', '工作表1', 'B1048577'];
+        const testFalseCase = ['Sheet1', '工作表1'];
 
         testTrueCases.forEach((testTrueCase) => {
             expect(needsQuoting(testTrueCase)).toBeTruthy();

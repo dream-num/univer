@@ -137,7 +137,7 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
         if (value.type === ValueType.formula) {
             return value.value || '=';
         }
-        return value.value || defaultV;
+        return value.value === undefined ? defaultV : value.value;
     });
 
     const getResult = (option: { minValueType: ValueType ;

@@ -110,7 +110,7 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
             return defaultV;
         }
         const valueConfig = rule.config[0];
-        return valueConfig?.value.value || defaultV;
+        return valueConfig?.value.value === undefined ? defaultV : valueConfig?.value.value;
     });
     const [medianValue, medianValueSet] = useState(() => {
         const defaultV = 50;
@@ -120,14 +120,16 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
         if (rule.config.length !== 3) {
             return defaultV;
         }
-        return rule.config[1]?.value.value || defaultV;
+        const v = rule.config[1]?.value.value;
+        return v === undefined ? defaultV : v;
     });
     const [maxValue, maxValueSet] = useState(() => {
         const defaultV = 90;
         if (!rule) {
             return defaultV;
         }
-        return rule.config[rule.config.length - 1]?.value.value || defaultV;
+        const v = rule.config[rule.config.length - 1]?.value.value;
+        return v === undefined ? defaultV : v;
     });
 
     const [minColor, minColorSet] = useState(() => {

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import type { IFormulaValidResult } from '../../validators/base-data-validator';
+
 export interface IFormulaValue {
     formula1?: string;
     formula2?: string;
@@ -25,6 +27,8 @@ export interface IFormulaInputProps {
     onChange?: (value?: IFormulaValue) => void;
     unitId: string;
     subUnitId: string;
+    showError?: boolean;
+    validResult?: IFormulaValidResult;
 }
 
 export type FormulaInputType = React.ComponentType<IFormulaInputProps>;

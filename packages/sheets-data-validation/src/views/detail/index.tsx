@@ -45,18 +45,24 @@ export function DataValidationDetail() {
     const localeService = useDependency(LocaleService);
     const [localRule, setLocalRule] = useState(rule);
     const validator = validatorService.getValidatorItem(localRule.type);
-
-    const onClose = () => {
-        dataValidationPanelService.setActiveRule(null);
-    };
+    const [showError, setShowError] = useState(false);
 
     const validators = validatorService.getValidatorsByScope(DataValidatorRegistryScope.SHEET);
     if (!validator) {
         return null;
     }
+
     const operators = validator.operators;
     const operatorNames = validator.operatorNames;
     const isTwoFormula = localRule.operator ? TWO_FORMULA_OPERATOR_COUNT.includes(localRule.operator) : false;
+
+    const onClose = () => {
+        if (validator.validatorFormula(localRule).success) {
+            dataValidationPanelService.setActiveRule(null);
+        } else {
+            setShowError(true);
+        }
+    };
 
     const handleUpdateRuleRanges = (ranges: IRange[]) => {
         setLocalRule({
@@ -219,6 +225,9 @@ export function DataValidationDetail() {
                                 ...value,
                             });
                         }}
+                        showError={showError}
+                        validResult={validator.validatorFormula(localRule)}
+
                     />
                 )
                 : null}

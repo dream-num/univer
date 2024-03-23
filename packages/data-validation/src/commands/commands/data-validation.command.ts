@@ -239,7 +239,7 @@ export const UpdateDataValidationSettingCommand: ICommand<IUpdateDataValidationS
             return false;
         }
 
-        if (!validator.validatorFormula(setting)) {
+        if (!validator.validatorFormula(setting).success) {
             return false;
         }
 

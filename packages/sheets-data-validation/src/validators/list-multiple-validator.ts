@@ -19,6 +19,7 @@ import type { CellValue, DataValidationOperator, ICellCustomRender, IDataValidat
 import type { IFormulaResult, IValidatorCellInfo } from '@univerjs/data-validation';
 import { BaseDataValidator } from '@univerjs/data-validation';
 import { deserializeRangeWithSheet, isReferenceString } from '@univerjs/engine-formula';
+import type { IFormulaValidResult } from '@univerjs/data-validation/validators/base-data-validator.js';
 import { LIST_FORMULA_INPUT_NAME } from '../views/formula-input';
 import { LIST_DROPDOWN_KEY } from '../views';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
@@ -40,8 +41,13 @@ export class ListMultipleValidator extends BaseDataValidator {
 
     override skipDefaultFontRender: boolean = true;
 
-    override validatorFormula(rule: IDataValidationRuleBase): boolean {
-        return !Tools.isBlank(rule.formula1);
+    override validatorFormula(rule: IDataValidationRuleBase): IFormulaValidResult {
+        const success = !Tools.isBlank(rule.formula1);
+
+        return {
+            success,
+            formula1: success ? undefined : this.localeService.t('dataValidation.validFail.list'),
+        };
     }
 
     parseCellValue(cellValue: CellValue, rule: IDataValidationRule) {

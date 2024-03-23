@@ -21,10 +21,11 @@ import { TextEditor } from '@univerjs/ui';
 import type { IFormulaInputProps } from '@univerjs/data-validation/types/interfaces/i-formula-input.js';
 
 export function CustomFormulaInput(props: IFormulaInputProps) {
-    const { unitId, subUnitId, value, onChange } = props;
+    const { unitId, subUnitId, value, onChange, showError, validResult } = props;
+    const formula1Res = showError ? validResult?.formula1 : '';
 
     return (
-        <FormLayout>
+        <FormLayout error={formula1Res}>
             <TextEditor
                 value={value?.formula1 ?? ''}
                 id={`dataValidation-custom-formula-${unitId}-${subUnitId}`}

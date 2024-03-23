@@ -47,6 +47,12 @@ export interface IFormulaResult<T = any> {
     formula2: T;
 }
 
+export interface IFormulaValidResult {
+    success: boolean;
+    formula1?: string;
+    formula2?: string;
+}
+
 export abstract class BaseDataValidator<DataType = CellValue> {
     abstract id: string;
 
@@ -105,7 +111,7 @@ export abstract class BaseDataValidator<DataType = CellValue> {
 
     abstract parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): Promise<IFormulaResult>;
 
-    abstract validatorFormula(rule: IDataValidationRuleBase): boolean;
+    abstract validatorFormula(rule: IDataValidationRuleBase): IFormulaValidResult;
 
     async isValidType(cellInfo: IValidatorCellInfo, formula: IFormulaResult, rule: IDataValidationRule): Promise<boolean> {
         return true;

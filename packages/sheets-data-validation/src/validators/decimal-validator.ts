@@ -18,6 +18,7 @@ import { DataValidationOperator, DataValidationType, isFormulaString, Tools } fr
 import type { CellValue, IDataValidationRule, IDataValidationRuleBase, Nullable } from '@univerjs/core';
 import type { IFormulaResult, IValidatorCellInfo } from '@univerjs/data-validation';
 import { BaseDataValidator } from '@univerjs/data-validation';
+import type { IFormulaValidResult } from '@univerjs/data-validation/validators/base-data-validator.js';
 import { BASE_FORMULA_INPUT_NAME } from '../views/formula-input';
 import { TWO_FORMULA_OPERATOR_COUNT } from '../types/const/two-formula-operators';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
@@ -44,7 +45,7 @@ export class DecimalValidator extends BaseDataValidator<number> {
     dropDownInput?: string;
 
     private _isFormulaOrNumber(formula: string) {
-        return isFormulaString(formula) || !Number.isNaN(+formula);
+        return !Tools.isBlank(formula) && (isFormulaString(formula) || !Number.isNaN(+formula));
     }
 
     override async isValidType(cellInfo: IValidatorCellInfo<CellValue>, formula: IFormulaResult, rule: IDataValidationRule) {
@@ -80,18 +81,29 @@ export class DecimalValidator extends BaseDataValidator<number> {
         return info;
     }
 
-    override validatorFormula(rule: IDataValidationRuleBase): boolean {
+    override validatorFormula(rule: IDataValidationRuleBase): IFormulaValidResult {
         const operator = rule.operator;
         if (!operator) {
-            return false;
+            return {
+                success: false,
+            };
         }
-
+        const formula1Success = Tools.isDefine(rule.formula1) && this._isFormulaOrNumber(rule.formula1);
+        const formula2Success = Tools.isDefine(rule.formula2) && this._isFormulaOrNumber(rule.formula2);
         const isTwoFormula = TWO_FORMULA_OPERATOR_COUNT.includes(operator);
+        const errorMsg = this.localeService.t('dataValidation.validFail.number');
         if (isTwoFormula) {
-            return Tools.isDefine(rule.formula1) && this._isFormulaOrNumber(rule.formula1) && Tools.isDefine(rule.formula2) && this._isFormulaOrNumber(rule.formula2);
+            return {
+                success: formula1Success && formula2Success,
+                formula1: formula1Success ? undefined : errorMsg,
+                formula2: formula2Success ? undefined : errorMsg,
+            };
         }
 
-        return Tools.isDefine(rule.formula1) && this._isFormulaOrNumber(rule.formula1);
+        return {
+            success: formula1Success,
+            formula1: formula1Success ? '' : errorMsg,
+        };
     }
 
     override async validatorIsEqual(cellInfo: IValidatorCellInfo<CellValue>, formula: IFormulaResult, rule: IDataValidationRule) {

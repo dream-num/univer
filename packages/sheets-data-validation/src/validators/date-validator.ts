@@ -20,6 +20,7 @@ import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
 import type { IFormulaResult, IValidatorCellInfo } from '@univerjs/data-validation';
 import { BaseDataValidator } from '@univerjs/data-validation';
+import type { IFormulaValidResult } from '@univerjs/data-validation/validators/base-data-validator.js';
 import { BASE_FORMULA_INPUT_NAME } from '../views/formula-input';
 import { TWO_FORMULA_OPERATOR_COUNT } from '../types/const/two-formula-operators';
 import { serialTimeToTimestamp } from '../utils/date';
@@ -89,21 +90,33 @@ export class DateValidator extends BaseDataValidator<Dayjs> {
     }
 
     private _validatorSingleFormula(formula: string | undefined) {
-        return Tools.isDefine(formula) && (!Number.isNaN(+formula) || (Boolean(formula) && dayjs(formula).isValid()));
+        return !Tools.isBlank(formula) && (!Number.isNaN(+formula!) || (Boolean(formula) && dayjs(formula).isValid()));
     }
 
-    override validatorFormula(rule: IDataValidationRuleBase): boolean {
+    override validatorFormula(rule: IDataValidationRuleBase): IFormulaValidResult {
         const operator = rule.operator;
         if (!operator) {
-            return false;
+            return {
+                success: false,
+            };
         }
 
+        const formula1Success = this._validatorSingleFormula(rule.formula1);
+        const errorMsg = this.localeService.t('dataValidation.validFail.date');
         const isTwoFormula = TWO_FORMULA_OPERATOR_COUNT.includes(operator);
         if (isTwoFormula) {
-            return this._validatorSingleFormula(rule.formula1) && this._validatorSingleFormula(rule.formula2);
+            const formula2Success = this._validatorSingleFormula(rule.formula2);
+            return {
+                success: formula1Success && formula2Success,
+                formula1: formula1Success ? undefined : errorMsg,
+                formula2: formula2Success ? undefined : errorMsg,
+            };
         }
 
-        return this._validatorSingleFormula(rule.formula1);
+        return {
+            success: formula1Success,
+            formula1: formula1Success ? undefined : errorMsg,
+        };
     }
 
     override transform(cellInfo: IValidatorCellInfo<CellValue>, _formula: IFormulaResult, _rule: IDataValidationRule): IValidatorCellInfo<Dayjs> {

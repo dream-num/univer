@@ -17,7 +17,7 @@
 import { DataValidationType, isFormulaString, Tools } from '@univerjs/core';
 import type { CellValue, DataValidationOperator, IDataValidationRule, IDataValidationRuleBase, IStyleData, Nullable } from '@univerjs/core';
 import { BaseDataValidator } from '@univerjs/data-validation';
-import type { IFormulaResult, IValidatorCellInfo } from '@univerjs/data-validation/validators/base-data-validator.js';
+import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation/validators/base-data-validator.js';
 import { CheckboxRender } from '../widgets/checkbox-widget';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
 import { getFormulaResult } from '../utils/formula';
@@ -37,9 +37,16 @@ export class CheckboxValidator extends BaseDataValidator {
 
     private _formulaService = this.injector.get(DataValidationFormulaService);
 
-    override validatorFormula(rule: IDataValidationRuleBase): boolean {
+    override validatorFormula(rule: IDataValidationRuleBase): IFormulaValidResult {
         const { formula1 = CHECKBOX_FORMULA_1, formula2 = CHECKBOX_FORMULA_2 } = rule;
-        return typeof formula1 === 'string' && formula2 === 'string';
+        const formula1Success = typeof formula1 === 'string';
+        const formula2Success = typeof formula2 === 'string';
+
+        return {
+            success: formula1Success && formula2Success,
+            formula1: !formula1Success ? this.localeService.t('dataValidation.validFail.common') : '',
+            formula2: !formula2Success ? this.localeService.t('dataValidation.validFail.common') : '',
+        };
     }
 
     override async parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): Promise<IFormulaResult> {

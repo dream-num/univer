@@ -35,6 +35,7 @@ export default {
             rejectInput: 'Reject input',
             messageInfo: 'Helper message',
             showInfo: 'Show help text for a selected cell',
+            validFailMessage: 'Please input value or formula',
         },
         operators: {
             between: 'between',
@@ -121,6 +122,7 @@ export default {
         custom: {
             title: 'Custom formula',
             error: 'This cell\'s contents violate its validation rule',
+            validFail: 'Please input a valid formula',
         },
         alert: {
             title: 'Error',

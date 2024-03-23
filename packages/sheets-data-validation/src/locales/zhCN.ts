@@ -17,6 +17,14 @@
 export default {
     dataValidation: {
         title: '数据验证',
+        validFail: {
+            common: '请输入值或公式',
+            number: '请输入合法的数字或公式',
+            formula: '请输入合法的公式或公式',
+            integer: '请输入合法的整数或公式',
+            date: '请输入合法的日期或公式',
+            list: '请输入',
+        },
         panel: {
             title: '管理数据验证',
             addTitle: '新建数据验证',

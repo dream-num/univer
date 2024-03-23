@@ -22,13 +22,15 @@ import { LocaleService } from '@univerjs/core';
 import styles from './index.module.less';
 
 export const BaseFormulaInput = (props: IFormulaInputProps) => {
-    const { isTwoFormula = false, value, onChange } = props;
+    const { isTwoFormula = false, value, onChange, showError, validResult } = props;
     const localeService = useDependency(LocaleService);
+    const formula1Res = showError ? validResult?.formula1 : '';
+    const formula2Res = showError ? validResult?.formula2 : '';
 
     if (isTwoFormula) {
         return (
             <>
-                <FormLayout>
+                <FormLayout error={formula1Res}>
                     <Input
                         className={styles.dataValidationFormula}
                         placeholder={localeService.t('dataValidation.panel.formulaPlaceholder')}
@@ -44,7 +46,7 @@ export const BaseFormulaInput = (props: IFormulaInputProps) => {
                 <div className={styles.dataValidationFormulaAnd}>
                     {localeService.t('dataValidation.panel.formulaAnd')}
                 </div>
-                <FormLayout>
+                <FormLayout error={formula2Res}>
                     <Input
                         className={styles.dataValidationFormula}
                         placeholder={localeService.t('dataValidation.panel.formulaPlaceholder')}
@@ -62,7 +64,7 @@ export const BaseFormulaInput = (props: IFormulaInputProps) => {
     }
 
     return (
-        <FormLayout>
+        <FormLayout error={formula1Res}>
             <Input
                 className={styles.dataValidationFormula}
                 placeholder={localeService.t('dataValidation.panel.formulaPlaceholder')}

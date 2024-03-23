@@ -18,6 +18,7 @@ import { DataValidationOperator, DataValidationType, isFormulaString, Tools } fr
 import type { CellValue, IDataValidationRule, IDataValidationRuleBase, Nullable } from '@univerjs/core';
 import type { IFormulaResult, IValidatorCellInfo } from '@univerjs/data-validation';
 import { BaseDataValidator } from '@univerjs/data-validation';
+import type { IFormulaValidResult } from '@univerjs/data-validation/validators/base-data-validator.js';
 import { BASE_FORMULA_INPUT_NAME } from '../views/formula-input';
 import { TWO_FORMULA_OPERATOR_COUNT } from '../types/const/two-formula-operators';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
@@ -42,18 +43,33 @@ export class TextLengthValidator extends BaseDataValidator<number> {
 
     private _formulaService = this.injector.get(DataValidationFormulaService);
 
-    override validatorFormula(rule: IDataValidationRuleBase): boolean {
+    private _isFormulaOrInt(formula: string) {
+        return !Tools.isBlank(formula) && (isFormulaString(formula) || (!Number.isNaN(+formula) && Number.isInteger(+formula)));
+    }
+
+    override validatorFormula(rule: IDataValidationRuleBase): IFormulaValidResult {
         const operator = rule.operator;
         if (!operator) {
-            return false;
+            return {
+                success: false,
+            };
         }
-
+        const formula1Success = Tools.isDefine(rule.formula1) && this._isFormulaOrInt(rule.formula1);
+        const formula2Success = Tools.isDefine(rule.formula2) && this._isFormulaOrInt(rule.formula2);
         const isTwoFormula = TWO_FORMULA_OPERATOR_COUNT.includes(operator);
+        const errorMsg = this.localeService.t('dataValidation.validFail.number');
         if (isTwoFormula) {
-            return Tools.isDefine(rule.formula1) && !Number.isNaN(+rule.formula1) && Tools.isDefine(rule.formula2) && !Number.isNaN(+rule.formula2);
+            return {
+                success: formula1Success && formula2Success,
+                formula1: formula1Success ? undefined : errorMsg,
+                formula2: formula2Success ? undefined : errorMsg,
+            };
         }
 
-        return Tools.isDefine(rule.formula1) && !Number.isNaN(+rule.formula1);
+        return {
+            success: formula1Success,
+            formula1: errorMsg,
+        };
     }
 
     private _parseNumber(formula: Nullable<string | number | boolean>) {

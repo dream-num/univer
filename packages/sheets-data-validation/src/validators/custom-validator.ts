@@ -16,7 +16,7 @@
 
 import { DataValidationType, isFormulaString } from '@univerjs/core';
 import type { CellValue, DataValidationOperator, IDataValidationRule, IDataValidationRuleBase } from '@univerjs/core';
-import type { IFormulaResult, IValidatorCellInfo } from '@univerjs/data-validation/validators/base-data-validator.js';
+import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation/validators/base-data-validator.js';
 import { BaseDataValidator } from '@univerjs/data-validation/validators/base-data-validator.js';
 import { CUSTOM_FORMULA_INPUT_NAME } from '../views/formula-input';
 import { DataValidationCustomFormulaService } from '../services/dv-custom-formula.service';
@@ -31,8 +31,12 @@ export class CustomFormulaValidator extends BaseDataValidator {
 
     private _customFormulaService = this.injector.get(DataValidationCustomFormulaService);
 
-    override validatorFormula(rule: IDataValidationRuleBase): boolean {
-        return isFormulaString(rule.formula1);
+    override validatorFormula(rule: IDataValidationRuleBase): IFormulaValidResult {
+        const success = isFormulaString(rule.formula1);
+        return {
+            success,
+            formula1: success ? '' : this.localeService.t('dataValidation.validFail.formula'),
+        };
     }
 
     override async parseFormula(_rule: IDataValidationRule, _unitId: string, _subUnitId: string): Promise<IFormulaResult> {

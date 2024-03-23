@@ -186,9 +186,9 @@ describe('test "mergeSetRangeValues"', () => {
             { id: SetRangeValuesMutation.id, params: { unitId: '1', subUnitId: '2', cellValue: { 1: { 4: { v: 'value' } } } } },
         ];
         expect(mergeSetRangeValues(mutations as IMutationInfo[])).toStrictEqual([
-            { id: 'whatever' },
+            { id: 'whatever', params: {} },
             { id: SetRangeValuesMutation.id, params: { unitId: '1', subUnitId: '2', cellValue: { 1: { 2: { v: 'value', f: 'formula' } } } } },
-            { id: 'whatever' },
+            { id: 'whatever', params: {} },
             { id: SetRangeValuesMutation.id, params: { unitId: '1', subUnitId: '2', cellValue: { 1: { 2: { v: 'value' }, 3: { v: 'value' }, 4: { v: 'value' } } } } },
         ]);
     });

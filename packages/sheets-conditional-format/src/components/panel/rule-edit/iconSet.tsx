@@ -45,7 +45,7 @@ const TextInput = (props: { id: number; type: ValueType; value: number | string;
         return '';
     }, [props.error]);
     return (
-        <div>
+        <div className={styles.positionRelative}>
             {props.type !== ValueType.formula
                 ? (
                     <>

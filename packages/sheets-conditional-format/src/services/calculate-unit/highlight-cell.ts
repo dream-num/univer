@@ -119,7 +119,7 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
                 case SubRuleType.text:{
                     const subRuleConfig = ruleConfig as ITextHighlightCell;
                     const value = getCellValue(cellValue!);
-                    const v = String(value);
+                    const v = value === null ? '' : String(value);
                     const condition = subRuleConfig.value || '';
                     switch (subRuleConfig.operator) {
                         case TextOperator.beginsWith:{

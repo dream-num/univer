@@ -110,14 +110,11 @@ export class DataValidationRenderController extends RxDisposable {
     private _initDropdown() {
         this.disposeWithMe(this._editorBridgeService.visible$.subscribe((visible) => {
             if (!visible.visible) {
-                this._dropdownManagerService.hideDropdown();
                 return;
             }
 
             const state = this._editorBridgeService.getEditCellState();
-            if (!state) {
-                this._dropdownManagerService.hideDropdown();
-            } else {
+            if (state) {
                 const { unitId, sheetId, row, column } = state;
                 const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
                 if (!workbook) {
@@ -147,7 +144,7 @@ export class DataValidationRenderController extends RxDisposable {
                         worksheet,
                     },
                     componentKey: validator.dropdown,
-                    onHide: () => {},
+                    onHide: () => { },
                 });
             }
         }));

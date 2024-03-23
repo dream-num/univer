@@ -24,8 +24,8 @@ export { ConfigContext, ConfigProvider, type IConfigProviderProps } from './comp
 export { Confirm, type IConfirmProps } from './components/confirm';
 export { Container, type IContainerProps } from './components/container';
 export { DatePicker, type IDatePickerProps } from './components/date-picker';
-export { DatePanel, DateTimePanel } from './components/date-picker';
-export type { DatePanelProps, DateTimePanelProps } from './components/date-picker';
+export { DatePanel } from './components/date-picker';
+export type { DatePanelProps } from './components/date-picker';
 export { Dialog, type IDialogProps } from './components/dialog';
 export { Dropdown, type IDropdownProps } from './components/dropdown';
 export { FormDualColumnLayout, type IFormDualColumnLayoutProps, FormLayout, type IFormLayoutProps } from './components/form-layout';

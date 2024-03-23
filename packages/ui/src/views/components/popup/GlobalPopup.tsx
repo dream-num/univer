@@ -23,7 +23,7 @@ import { useObservable } from '../../../components/hooks/observable';
 import { ComponentManager } from '../../../common';
 import type { IPopup } from '../../../services/popup/global-popup-manager.service';
 
-const SingleUniverPopup = ({ popup, children }: { popup: IPopup; children?: React.ReactNode }) => {
+const SingleGlobalPopup = ({ popup, children }: { popup: IPopup; children?: React.ReactNode }) => {
     const anchorRect = useObservable(popup.anchorRect$, popup.anchorRect);
     const rect: IBoundRectNoAngle = useMemo(() => {
         const [x = 0, y = 0] = popup.offset ?? [];
@@ -39,7 +39,7 @@ const SingleUniverPopup = ({ popup, children }: { popup: IPopup; children?: Reac
         <RectPopup
             anchorRect={rect}
             direction={popup.direction}
-            onClickOther={popup.onMaskClick}
+            onClickOutside={popup.onClickOutside}
         >
 
             {children}
@@ -47,7 +47,7 @@ const SingleUniverPopup = ({ popup, children }: { popup: IPopup; children?: Reac
     );
 };
 
-export function UniverPopup() {
+export function GlobalPopup() {
     const popupService = useDependency(IGlobalPopupManagerService);
     const popups = useObservable(popupService.popups$, popupService.popups);
     const componentManager = useDependency(ComponentManager);
@@ -56,13 +56,13 @@ export function UniverPopup() {
         const [key, popup] = item;
         const Component = componentManager.get(popup.componentKey);
         return (
-            <SingleUniverPopup
+            <SingleGlobalPopup
                 key={key}
                 popup={popup}
             >
 
                 {Component ? <Component /> : null}
-            </SingleUniverPopup>
+            </SingleGlobalPopup>
         );
     });
 }

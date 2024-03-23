@@ -34,11 +34,7 @@ export interface IRectPopupProps {
 
     direction?: 'horizontal' | 'vertical';
 
-    mask?: boolean;
-
-    onMaskClick?: React.MouseEventHandler<HTMLDivElement>;
-
-    onClickOther?: (e: MouseEvent) => void;
+    onClickOutside?: (e: MouseEvent) => void;
 }
 
 const calcHorizontalPopupPosition = (position: IAbsolutePosition, width: number, height: number, containerWidth: number, containerHeight: number): Partial<IAbsolutePosition> => {
@@ -66,12 +62,12 @@ const calcVerticalPopupPosition = (position: IAbsolutePosition, width: number, h
 };
 
 export function RectPopup(props: IRectPopupProps) {
-    const { children, anchorRect, direction = 'vertical', mask, onMaskClick, onClickOther } = props;
+    const { children, anchorRect, direction = 'vertical', onClickOutside } = props;
 
     const nodeRef = useRef(null);
-    const clickOtherFn = useRef(onClickOther);
+    const clickOtherFn = useRef(onClickOutside);
 
-    clickOtherFn.current = onClickOther;
+    clickOtherFn.current = onClickOutside;
     const [position, setPosition] = useState<Partial<IAbsolutePosition>>({
         top: -9999,
         left: -9999,
@@ -101,7 +97,9 @@ export function RectPopup(props: IRectPopupProps) {
                 )
             );
         }
-    }, [
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
         anchorRect.left,
         anchorRect.top,
         anchorRect.bottom,
@@ -122,19 +120,15 @@ export function RectPopup(props: IRectPopupProps) {
     }, [clickOtherFn]);
 
     return (
-        <>
-            {mask ? <div className={styles.popupMask} onClick={onMaskClick} /> : null}
-            <section
-                ref={nodeRef}
-                className={styles.popup}
-                style={position}
-                onClick={(e) => {
-                    e.stopPropagation();
-                }}
-            >
-                {children}
-            </section>
-        </>
-
+        <section
+            ref={nodeRef}
+            className={styles.popup}
+            style={position}
+            onClick={(e) => {
+                e.stopPropagation();
+            }}
+        >
+            {children}
+        </section>
     );
 }

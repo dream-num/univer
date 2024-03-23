@@ -37,31 +37,41 @@ export interface IRectPopupProps {
     onClickOutside?: (e: MouseEvent) => void;
 }
 
-const calcHorizontalPopupPosition = (position: IAbsolutePosition, width: number, height: number, containerWidth: number, containerHeight: number): Partial<IAbsolutePosition> => {
-    const { left: startX, top: startY, right: endX, bottom: endY } = position;
+export interface IPopupLayoutInfo {
+    position: IAbsolutePosition;
+    width: number;
+    height: number;
+    containerWidth: number;
+    containerHeight: number;
+    direction?: 'horizontal' | 'vertical';
+}
 
-    const verticalStyle = ((startY + height) > containerHeight) ? { top: endY - height } : { top: startY };
-    const horizontalStyle = ((endX + width) > containerWidth) ? { left: startX - width } : { left: endX };
+const calcPopupPosition = (layout: IPopupLayoutInfo) => {
+    const { position, width, height, containerHeight, containerWidth, direction = 'vertical' } = layout;
+    if (direction === 'vertical') {
+        const { left: startX, top: startY, right: endX, bottom: endY } = position;
 
-    return {
-        ...verticalStyle,
-        ...horizontalStyle,
-    };
+        const verticalStyle = (endY + height) > containerHeight ? { top: startY - height } : { top: endY };
+        const horizontalStyle = (startX + width) > containerWidth ? { left: endX - width } : { left: startX };
+
+        return {
+            ...verticalStyle,
+            ...horizontalStyle,
+        };
+    } else {
+        const { left: startX, top: startY, right: endX, bottom: endY } = position;
+
+        const verticalStyle = ((startY + height) > containerHeight) ? { top: endY - height } : { top: startY };
+        const horizontalStyle = ((endX + width) > containerWidth) ? { left: startX - width } : { left: endX };
+
+        return {
+            ...verticalStyle,
+            ...horizontalStyle,
+        };
+    }
 };
 
-const calcVerticalPopupPosition = (position: IAbsolutePosition, width: number, height: number, containerWidth: number, containerHeight: number): Partial<IAbsolutePosition> => {
-    const { left: startX, top: startY, right: endX, bottom: endY } = position;
-
-    const verticalStyle = (endY + height) > containerHeight ? { top: startY - height } : { top: endY };
-    const horizontalStyle = (startX + width) > containerWidth ? { left: endX - width } : { left: startX };
-
-    return {
-        ...verticalStyle,
-        ...horizontalStyle,
-    };
-};
-
-export function RectPopup(props: IRectPopupProps) {
+function RectPopup(props: IRectPopupProps) {
     const { children, anchorRect, direction = 'vertical', onClickOutside } = props;
 
     const nodeRef = useRef(null);
@@ -76,27 +86,18 @@ export function RectPopup(props: IRectPopupProps) {
     useEffect(() => {
         const { clientWidth, clientHeight } = nodeRef.current!;
         const { innerWidth, innerHeight } = window;
-        if (direction === 'horizontal') {
-            setPosition(
-                calcHorizontalPopupPosition(
-                    anchorRect,
-                    clientWidth,
-                    clientHeight,
-                    innerWidth,
-                    innerHeight
-                )
-            );
-        } else {
-            setPosition(
-                calcVerticalPopupPosition(
-                    anchorRect,
-                    clientWidth,
-                    clientHeight,
-                    innerWidth,
-                    innerHeight
-                )
-            );
-        }
+        setPosition(
+            calcPopupPosition(
+                {
+                    position: anchorRect,
+                    width: clientWidth,
+                    height: clientHeight,
+                    containerWidth: innerWidth,
+                    containerHeight: innerHeight,
+                    direction,
+                }
+            )
+        );
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
@@ -132,3 +133,7 @@ export function RectPopup(props: IRectPopupProps) {
         </section>
     );
 }
+
+RectPopup.calcPopupPosition = calcPopupPosition;
+
+export { RectPopup };

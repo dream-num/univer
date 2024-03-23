@@ -77,3 +77,4 @@ export { UniverSheetsUIPlugin } from './sheets-ui-plugin';
 export { SheetCanvasView } from './views/sheet-canvas-view';
 export { SHEET_VIEW_KEY } from './common/keys';
 export { CanvasPopManagerService } from './services/canvas-pop-manager.service';
+export { mergeSetRangeValues } from './services/clipboard/utils';

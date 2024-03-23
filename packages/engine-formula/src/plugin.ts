@@ -59,7 +59,7 @@ const PLUGIN_NAME = 'base-formula-engine';
 
 interface IUniverFormulaEngine {
     notExecuteFormula?: boolean;
-    function: Array<[Ctor<BaseFunction>, IFunctionNames]>;
+    function?: Array<[Ctor<BaseFunction>, IFunctionNames]>;
 }
 
 export class UniverFormulaEnginePlugin extends Plugin {

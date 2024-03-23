@@ -43,9 +43,7 @@ univer.registerPlugin(UniverUIPlugin, {
     header: true,
 });
 
-univer.registerPlugin(UniverDocsPlugin, {
-    standalone: true,
-});
+univer.registerPlugin(UniverDocsPlugin);
 univer.registerPlugin(UniverDocsUIPlugin);
 
 univer.registerPlugin(UniverSheetsPlugin);

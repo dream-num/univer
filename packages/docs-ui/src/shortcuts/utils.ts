@@ -15,12 +15,12 @@
  */
 
 import type { IContextService } from '@univerjs/core';
-import { FOCUSING_DOC, FOCUSING_UNIVER_EDITOR, FOCUSING_UNIVER_EDITOR_SINGLE_MODE } from '@univerjs/core';
+import { FOCUSING_DOC, FOCUSING_UNIVER_EDITOR, FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE } from '@univerjs/core';
 
 export function whenDocAndEditorFocused(contextService: IContextService): boolean {
     return contextService.getContextValue(FOCUSING_DOC) && contextService.getContextValue(FOCUSING_UNIVER_EDITOR);
 }
 
 export function whenDocAndEditorFocusedWithBreakLine(contextService: IContextService): boolean {
-    return contextService.getContextValue(FOCUSING_DOC) && contextService.getContextValue(FOCUSING_UNIVER_EDITOR) && !contextService.getContextValue(FOCUSING_UNIVER_EDITOR_SINGLE_MODE);
+    return contextService.getContextValue(FOCUSING_DOC) && contextService.getContextValue(FOCUSING_UNIVER_EDITOR) && !contextService.getContextValue(FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE);
 }

@@ -15,12 +15,12 @@
  */
 
 import type { IContextService } from '@univerjs/core';
-import { FOCUSING_DOC, FOCUSING_UNIVER_EDITOR, FOCUSING_UNIVER_EDITOR_SINGLE_MODE } from '@univerjs/core';
+import { FOCUSING_DOC, FOCUSING_UNIVER_EDITOR, FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE } from '@univerjs/core';
 
 export function whenEditorStandalone(contextService: IContextService) {
     return (
         contextService.getContextValue(FOCUSING_DOC) &&
         contextService.getContextValue(FOCUSING_UNIVER_EDITOR) &&
-        contextService.getContextValue(FOCUSING_UNIVER_EDITOR_SINGLE_MODE)
+        contextService.getContextValue(FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE)
     );
 }

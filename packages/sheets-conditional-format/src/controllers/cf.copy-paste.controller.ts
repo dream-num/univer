@@ -144,7 +144,7 @@ export class ConditionalFormatCopyPasteController extends Disposable {
         }
 
         if (
-            [PREDEFINED_HOOK_NAME.SPECIAL_PASTE_COL_WIDTH, PREDEFINED_HOOK_NAME.SPECIAL_PASTE_VALUE].includes(
+            ![PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMAT, PREDEFINED_HOOK_NAME.DEFAULT_PASTE, PREDEFINED_HOOK_NAME.SPECIAL_PASTE_BESIDES_BORDER].includes(
                 copyInfo.pasteType
             )
         ) {

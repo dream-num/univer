@@ -88,6 +88,10 @@ export class DateValidator extends BaseDataValidator<Dayjs> {
         return false;
     }
 
+    private _validatorSingleFormula(formula: string | undefined) {
+        return Tools.isDefine(formula) && (!Number.isNaN(+formula) || (Boolean(formula) && dayjs(formula).isValid()));
+    }
+
     override validatorFormula(rule: IDataValidationRuleBase): boolean {
         const operator = rule.operator;
         if (!operator) {
@@ -96,10 +100,10 @@ export class DateValidator extends BaseDataValidator<Dayjs> {
 
         const isTwoFormula = TWO_FORMULA_OPERATOR_COUNT.includes(operator);
         if (isTwoFormula) {
-            return Tools.isDefine(rule.formula1) && !Number.isNaN(+rule.formula1) && Tools.isDefine(rule.formula2) && !Number.isNaN(+rule.formula2);
+            return this._validatorSingleFormula(rule.formula1) && this._validatorSingleFormula(rule.formula2);
         }
 
-        return Tools.isDefine(rule.formula1) && !Number.isNaN(+rule.formula1);
+        return this._validatorSingleFormula(rule.formula1);
     }
 
     override transform(cellInfo: IValidatorCellInfo<CellValue>, _formula: IFormulaResult, _rule: IDataValidationRule): IValidatorCellInfo<Dayjs> {

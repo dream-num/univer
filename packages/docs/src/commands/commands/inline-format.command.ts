@@ -33,64 +33,183 @@ import { serializeTextRange, TextSelectionManagerService } from '../../services/
 import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
 import { RichTextEditingMutation } from '../mutations/core-editing.mutation';
 
+function handleInlineFormat(
+    preCommandId: string,
+    params: object | undefined,
+    textSelectionManagerService: TextSelectionManagerService,
+    commandService: ICommandService
+) {
+    const { segmentId } = textSelectionManagerService.getActiveRange() ?? {};
+
+    if (segmentId == null) {
+        return false;
+    }
+
+    // eslint-disable-next-line ts/no-use-before-define
+    return commandService.executeCommand(SetInlineFormatCommand.id, {
+        segmentId,
+        preCommandId,
+        ...(params ?? {}),
+    });
+}
+
 export interface ISetInlineFormatCommandParams {
     segmentId: string;
     preCommandId: string;
     value?: string;
 }
 
+const SetInlineFormatBoldCommandId = 'doc.command.set-inline-format-bold';
 export const SetInlineFormatBoldCommand: ICommand = {
-    id: 'doc.command.set-inline-format-bold',
+    id: SetInlineFormatBoldCommandId,
     type: CommandType.COMMAND,
-    handler: async () => true,
+    handler: async (accessor, params) => {
+        const commandService = accessor.get(ICommandService);
+        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
+
+        return handleInlineFormat(
+            SetInlineFormatBoldCommandId,
+            params,
+            textSelectionManagerService,
+            commandService
+        );
+    },
 };
 
+const SetInlineFormatItalicCommandId = 'doc.command.set-inline-format-italic';
 export const SetInlineFormatItalicCommand: ICommand = {
-    id: 'doc.command.set-inline-format-italic',
+    id: SetInlineFormatItalicCommandId,
     type: CommandType.COMMAND,
-    handler: async () => true,
+    handler: async (accessor, params) => {
+        const commandService = accessor.get(ICommandService);
+        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
+
+        return handleInlineFormat(
+            SetInlineFormatItalicCommandId,
+            params,
+            textSelectionManagerService,
+            commandService
+        );
+    },
 };
 
+const SetInlineFormatUnderlineCommandId = 'doc.command.set-inline-format-underline';
 export const SetInlineFormatUnderlineCommand: ICommand = {
-    id: 'doc.command.set-inline-format-underline',
+    id: SetInlineFormatUnderlineCommandId,
     type: CommandType.COMMAND,
-    handler: async () => true,
+    handler: async (accessor, params) => {
+        const commandService = accessor.get(ICommandService);
+        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
+
+        return handleInlineFormat(
+            SetInlineFormatUnderlineCommandId,
+            params,
+            textSelectionManagerService,
+            commandService
+        );
+    },
 };
 
+const SetInlineFormatStrikethroughCommandId = 'doc.command.set-inline-format-strikethrough';
 export const SetInlineFormatStrikethroughCommand: ICommand = {
-    id: 'doc.command.set-inline-format-strikethrough',
+    id: SetInlineFormatStrikethroughCommandId,
     type: CommandType.COMMAND,
-    handler: async () => true,
+    handler: async (accessor, params) => {
+        const commandService = accessor.get(ICommandService);
+        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
+
+        return handleInlineFormat(
+            SetInlineFormatStrikethroughCommandId,
+            params,
+            textSelectionManagerService,
+            commandService
+        );
+    },
 };
 
+const SetInlineFormatSubscriptCommandId = 'doc.command.set-inline-format-subscript';
 export const SetInlineFormatSubscriptCommand: ICommand = {
-    id: 'doc.command.set-inline-format-subscript',
+    id: SetInlineFormatSubscriptCommandId,
     type: CommandType.COMMAND,
-    handler: async () => true,
+    handler: async (accessor, params) => {
+        const commandService = accessor.get(ICommandService);
+        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
+
+        return handleInlineFormat(
+            SetInlineFormatSubscriptCommandId,
+            params,
+            textSelectionManagerService,
+            commandService
+        );
+    },
 };
 
+const SetInlineFormatSuperscriptCommandId = 'doc.command.set-inline-format-superscript';
 export const SetInlineFormatSuperscriptCommand: ICommand = {
-    id: 'doc.command.set-inline-format-superscript',
+    id: SetInlineFormatSuperscriptCommandId,
     type: CommandType.COMMAND,
-    handler: async () => true,
+    handler: async (accessor, params) => {
+        const commandService = accessor.get(ICommandService);
+        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
+
+        return handleInlineFormat(
+            SetInlineFormatSuperscriptCommandId,
+            params,
+            textSelectionManagerService,
+            commandService
+        );
+    },
 };
 
+const SetInlineFormatFontSizeCommandId = 'doc.command.set-inline-format-fontsize';
 export const SetInlineFormatFontSizeCommand: ICommand = {
-    id: 'doc.command.set-inline-format-fontsize',
+    id: SetInlineFormatFontSizeCommandId,
     type: CommandType.COMMAND,
-    handler: async () => true,
+    handler: async (accessor, params) => {
+        const commandService = accessor.get(ICommandService);
+        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
+
+        return handleInlineFormat(
+            SetInlineFormatFontSizeCommandId,
+            params,
+            textSelectionManagerService,
+            commandService
+        );
+    },
 };
 
+const SetInlineFormatFontFamilyCommandId = 'doc.command.set-inline-format-font-family';
 export const SetInlineFormatFontFamilyCommand: ICommand = {
-    id: 'doc.command.set-inline-format-font-family',
+    id: SetInlineFormatFontFamilyCommandId,
     type: CommandType.COMMAND,
-    handler: async () => true,
+    handler: async (accessor, params) => {
+        const commandService = accessor.get(ICommandService);
+        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
+
+        return handleInlineFormat(
+            SetInlineFormatFontFamilyCommandId,
+            params,
+            textSelectionManagerService,
+            commandService
+        );
+    },
 };
 
+const SetInlineFormatTextColorCommandId = 'doc.command.set-inline-format-text-color';
 export const SetInlineFormatTextColorCommand: ICommand = {
-    id: 'doc.command.set-inline-format-text-color',
+    id: SetInlineFormatTextColorCommandId,
     type: CommandType.COMMAND,
-    handler: async () => true,
+    handler: async (accessor, params) => {
+        const commandService = accessor.get(ICommandService);
+        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
+
+        return handleInlineFormat(
+            SetInlineFormatTextColorCommandId,
+            params,
+            textSelectionManagerService,
+            commandService
+        );
+    },
 };
 
 const COMMAND_ID_TO_FORMAT_KEY_MAP: Record<string, keyof IStyleBase> = {

@@ -113,6 +113,7 @@ export class UniverSheetsUIPlugin extends Plugin {
                 [HoverManagerService],
                 [CanvasPopManagerService],
                 [CellAlertManagerService],
+                [CanvasPopManagerService],
 
                 // controllers
                 [ActiveWorksheetController],

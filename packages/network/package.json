@@ -53,6 +53,9 @@
         "npm": ">=8.0.0"
     },
     "scripts": {
+        "test": "vitest run",
+        "test:watch": "vitest",
+        "coverage": "vitest run --coverage",
         "lint:types": "tsc --noEmit",
         "build": "tsc && vite build"
     },

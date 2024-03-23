@@ -93,6 +93,7 @@ export function drawLineByBorderType(ctx: UniverRenderingContext, type: BORDER_T
     ctx.beginPath();
     ctx.moveToByPrecision(drawStartX, drawStartY);
     ctx.lineToByPrecision(drawEndX, drawEndY);
+    ctx.closePathByEnv();
     ctx.stroke();
 }
 
@@ -138,6 +139,7 @@ export function drawDiagonalLineByBorderType(ctx: UniverRenderingContext, type: 
     ctx.beginPath();
     ctx.moveToByPrecision(drawStartX, drawStartY);
     ctx.lineToByPrecision(drawEndX, drawEndY);
+    ctx.closePathByEnv();
     ctx.stroke();
 }
 

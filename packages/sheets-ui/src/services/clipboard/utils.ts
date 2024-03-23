@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-import type { IRange } from '@univerjs/core';
+import { ObjectMatrix } from '@univerjs/core';
+import type { ICellData, IMutationInfo, IObjectMatrixPrimitiveType, IRange, Nullable } from '@univerjs/core';
+import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
+import { SetRangeValuesMutation } from '@univerjs/sheets';
 
 /**
  *
@@ -98,4 +101,53 @@ export async function clipboardItemIsFromExcel(html: string): Promise<boolean> {
     }
 
     return false;
+}
+
+export function mergeCellValues(...cellValues: IObjectMatrixPrimitiveType<Nullable<ICellData>>[]) {
+    if (cellValues.length === 1) {
+        return cellValues[0];
+    }
+    const newMatrix = new ObjectMatrix<IObjectMatrixPrimitiveType<Nullable<ICellData>>>();
+    cellValues.forEach((cellValue) => {
+        if (cellValue) {
+            const matrix = new ObjectMatrix(cellValue);
+            matrix.forValue((row, col, value) => {
+                newMatrix.setValue(row, col, { ...newMatrix.getValue(row, col), ...value });
+            });
+        }
+    });
+    return newMatrix.getMatrix();
+}
+
+export function getRangeValuesMergeable(m1: IMutationInfo<ISetRangeValuesMutationParams>, m2: IMutationInfo<ISetRangeValuesMutationParams>) {
+    return m1.id === m2.id
+    && m1.params.unitId === m2.params.unitId
+    && m1.params.subUnitId === m2.params.subUnitId;
+}
+
+export function mergeSetRangeValues(mutations: IMutationInfo[]) {
+    const newMutations: IMutationInfo[] = [];
+    for (let i = 0; i < mutations.length;) {
+        let cursor = 1;
+        if (mutations[i].id === SetRangeValuesMutation.id) {
+            const current = mutations[i] as IMutationInfo<ISetRangeValuesMutationParams>;
+            const toMerge = [current];
+            while (i + cursor < mutations.length && getRangeValuesMergeable(current, mutations[i + cursor] as IMutationInfo<ISetRangeValuesMutationParams>)) {
+                toMerge.push(mutations[i + cursor] as IMutationInfo<ISetRangeValuesMutationParams>);
+                cursor += 1;
+            }
+            const merged = mergeCellValues(...toMerge.map((m: IMutationInfo<ISetRangeValuesMutationParams>) => m.params.cellValue || {}));
+            newMutations.push({
+                ...current,
+                params: {
+                    ...current.params,
+                    cellValue: merged,
+                },
+            });
+        } else {
+            newMutations.push(mutations[i]);
+        }
+        i += cursor;
+    }
+    return newMutations;
 }

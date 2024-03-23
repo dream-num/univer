@@ -395,7 +395,7 @@ export class Documents extends DocComponent {
                                         continue;
                                     }
 
-                                    const { width: spanWidth, left: spanLeft, paddingLeft } = glyph;
+                                    const { width: spanWidth, left: spanLeft, xOffset } = glyph;
 
                                     const { x: translateX, y: translateY } = this._drawLiquid;
 
@@ -404,7 +404,7 @@ export class Documents extends DocComponent {
                                     const centerPoint = Vector2.create(spanWidth / 2, lineHeight / 2);
 
                                     const spanStartPoint = calculateRectRotate(
-                                        originTranslate.addByPoint(spanLeft + paddingLeft, 0),
+                                        originTranslate.addByPoint(spanLeft + xOffset, 0),
                                         centerPoint,
                                         centerAngle,
                                         vertexAngle,
@@ -413,7 +413,7 @@ export class Documents extends DocComponent {
 
                                     const spanPointWithFont = calculateRectRotate(
                                         originTranslate.addByPoint(
-                                            spanLeft + maxLineAscSin + paddingLeft,
+                                            spanLeft + maxLineAscSin + xOffset,
                                             maxLineAscCos
                                         ),
                                         centerPoint,

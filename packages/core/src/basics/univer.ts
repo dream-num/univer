@@ -239,7 +239,7 @@ export class Univer extends PluginHolder {
     // #region register plugins
 
     /** Register a plugin into univer. */
-    registerPlugin<T extends Plugin>(plugin: PluginCtor<T>, config?: any): void {
+    registerPlugin<T extends PluginCtor<Plugin>>(plugin: T, config?: ConstructorParameters<T>[0]): void {
         if (plugin.type === PluginType.Univer) {
             this._registerUniverPlugin(plugin, config);
         } else if (plugin.type === PluginType.Sheet) {

@@ -82,6 +82,9 @@ export function App(props: IUniverAppProps) {
         return () => {
             // batch unsubscribe
             subscriptions.forEach((subscription) => subscription.unsubscribe());
+
+            // cleanup
+            document.body.removeChild(portalContainer);
         };
     }, [localeService, messageService, mountContainer, portalContainer, themeService.currentTheme$]);
 

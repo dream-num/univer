@@ -17,8 +17,8 @@
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useMemo } from 'react';
 import { RectPopup } from '@univerjs/design';
-import { IGlobalPopupManagerService } from '@univerjs/ui';
 import type { IBoundRectNoAngle } from '@univerjs/engine-render';
+import { IGlobalPopupManagerService } from '../../../services/popup/global-popup-manager.service';
 import { useObservable } from '../../../components/hooks/observable';
 import { ComponentManager } from '../../../common';
 import type { IPopup } from '../../../services/popup/global-popup-manager.service';

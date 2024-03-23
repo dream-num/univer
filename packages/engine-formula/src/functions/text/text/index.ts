@@ -15,6 +15,7 @@
  */
 
 import { ErrorType } from '../../../basics/error-type';
+import { getFormatPreview } from '../../../basics/format';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
@@ -77,7 +78,9 @@ export class Text extends BaseFunction {
 
             const textValueNumber = textValue.getValue() as number;
 
-            return NumberValueObject.create(textValueNumber, formatTextValueString);
+            const previewText = getFormatPreview(formatTextValueString, textValueNumber);
+
+            return StringValueObject.create(previewText);
         });
     }
 }

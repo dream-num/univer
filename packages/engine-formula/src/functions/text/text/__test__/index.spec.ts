@@ -19,7 +19,6 @@ import { describe, expect, it } from 'vitest';
 import { FUNCTION_NAMES_TEXT } from '../../function-names';
 import { Text } from '..';
 import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
-import type { ArrayValueObject } from '../../../../engine/value-object/array-value-object';
 import { transformToValue } from '../../../../engine/value-object/array-value-object';
 
 describe('Test text function', () => {
@@ -31,8 +30,7 @@ describe('Test text function', () => {
             const formatText = StringValueObject.create('$#,##0.00');
             const result = textFunction.calculate(text1, formatText);
             const resultArray = result.getArrayValue();
-            expect(transformToValue(resultArray)).toStrictEqual([[111]]);
-            expect((result as ArrayValueObject).getFirstCell().getPattern()).toStrictEqual('$#,##0.00');
+            expect(transformToValue(resultArray)).toStrictEqual([['$111.00']]);
         });
     });
 });

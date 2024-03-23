@@ -346,7 +346,7 @@ importers:
         version: 5.1.6(@types/node@20.11.29)(less@4.2.0)
       vitest:
         specifier: ^1.4.0
-        version: 1.4.0(@types/node@20.11.29)(happy-dom@13.3.8)
+        version: 1.4.0(@types/node@20.11.29)(jsdom@24.0.0)
 
   packages/data-validation:
     dependencies:
@@ -425,7 +425,7 @@ importers:
         version: 0.6.2(vite@5.1.6)
       vitest:
         specifier: ^1.2.1
-        version: 1.4.0(@types/node@20.11.29)(happy-dom@13.3.8)
+        version: 1.4.0(@types/node@20.11.29)(jsdom@24.0.0)
 
   packages/design:
     dependencies:
@@ -540,7 +540,7 @@ importers:
         version: 5.1.6(@types/node@20.11.29)(less@4.2.0)
       vitest:
         specifier: ^1.4.0
-        version: 1.4.0(@types/node@20.11.29)(happy-dom@13.3.8)
+        version: 1.4.0(@types/node@20.11.29)(jsdom@24.0.0)
 
   packages/docs-ui:
     devDependencies:
@@ -616,7 +616,7 @@ importers:
         version: 5.1.6(@types/node@20.11.29)(less@4.2.0)
       vitest:
         specifier: ^1.4.0
-        version: 1.4.0(@types/node@20.11.29)(happy-dom@13.3.8)
+        version: 1.4.0(@types/node@20.11.29)(jsdom@24.0.0)
 
   packages/engine-numfmt:
     dependencies:
@@ -635,7 +635,7 @@ importers:
         version: 5.1.6(@types/node@20.11.29)(less@4.2.0)
       vitest:
         specifier: ^1.4.0
-        version: 1.4.0(@types/node@20.11.29)(happy-dom@13.3.8)
+        version: 1.4.0(@types/node@20.11.29)(jsdom@24.0.0)
 
   packages/engine-render:
     dependencies:
@@ -666,7 +666,7 @@ importers:
         version: 5.1.6(@types/node@20.11.29)(less@4.2.0)
       vitest:
         specifier: ^1.4.0
-        version: 1.4.0(@types/node@20.11.29)(happy-dom@13.3.8)
+        version: 1.4.0(@types/node@20.11.29)(jsdom@24.0.0)
 
   packages/facade:
     devDependencies:
@@ -796,7 +796,7 @@ importers:
         version: 5.1.6(@types/node@20.11.29)(less@4.2.0)
       vitest:
         specifier: ^1.4.0
-        version: 1.4.0(@types/node@20.11.29)(happy-dom@13.3.8)
+        version: 1.4.0(@types/node@20.11.29)(jsdom@24.0.0)
 
   packages/rpc:
     devDependencies:
@@ -820,7 +820,7 @@ importers:
         version: 5.1.6(@types/node@20.11.29)(less@4.2.0)
       vitest:
         specifier: ^1.4.0
-        version: 1.4.0(@types/node@20.11.29)(happy-dom@13.3.8)
+        version: 1.4.0(@types/node@20.11.29)(jsdom@24.0.0)
 
   packages/sheets:
     devDependencies:
@@ -850,7 +850,7 @@ importers:
         version: 5.1.6(@types/node@20.11.29)(less@4.2.0)
       vitest:
         specifier: ^1.4.0
-        version: 1.4.0(@types/node@20.11.29)(happy-dom@13.3.8)
+        version: 1.4.0(@types/node@20.11.29)(jsdom@24.0.0)
 
   packages/sheets-conditional-format:
     dependencies:
@@ -877,10 +877,10 @@ importers:
         version: link:../engine-render
       '@univerjs/icons':
         specifier: ^0.1.33
-        version: 0.1.41(react-dom@18.2.0)(react@18.2.0)
+        version: 0.1.42(react-dom@18.2.0)(react@18.2.0)
       '@univerjs/icons-svg':
         specifier: ^0.1.33
-        version: 0.1.41
+        version: 0.1.42
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
@@ -968,7 +968,7 @@ importers:
         version: link:../design
       '@univerjs/icons':
         specifier: ^0.1.26
-        version: 0.1.41(react-dom@18.2.0)(react@18.2.0)
+        version: 0.1.42(react-dom@18.2.0)(react@18.2.0)
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui
@@ -1092,7 +1092,7 @@ importers:
         version: 5.1.6(@types/node@20.11.29)(less@4.2.0)
       vitest:
         specifier: ^1.4.0
-        version: 1.4.0(@types/node@20.11.29)(happy-dom@13.3.8)
+        version: 1.4.0(@types/node@20.11.29)(jsdom@24.0.0)
 
   packages/sheets-formula:
     dependencies:
@@ -1361,7 +1361,7 @@ importers:
         version: 5.1.6(@types/node@20.11.29)(less@4.2.0)
       vitest:
         specifier: ^1.4.0
-        version: 1.4.0(@types/node@20.11.29)(less@4.2.0)
+        version: 1.4.0(@types/node@20.11.29)(happy-dom@13.3.8)(less@4.2.0)
 
   packages/slides-ui:
     devDependencies:
@@ -6035,6 +6035,10 @@ packages:
 
   /@ungap/structured-clone@1.2.0:
     resolution: {integrity: sha512-zuVdFrMJiuCDQUMCzQaD6KL28MjnqqN8XnAqiEq9PNm/hCPTSGfrXCOfwj1ow4LFb/tNymJPwsNbVePc1xFqrQ==}
+
+  /@univerjs/icons-svg@0.1.42:
+    resolution: {integrity: sha512-WAUylnpHXmsbNnfyjlg8pV5Rea/1l3BwbmsIY3UY2eEelXNoTSChtCynxVGo8FvsbWjyQ5+7Iq30M5GPs2i1Gg==}
+    dev: false
 
   /@univerjs/icons@0.1.42(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-fHJKMGXGKK6W0E7xguXtHTTwR2P679sMMjh8JMHHobZzBCKoUuN3UBDRa8TJRyLWiY26jbe5xtJOhRD2sQyXKg==}
@@ -14844,7 +14848,7 @@ packages:
       local-pkg: 0.5.0
       magic-string: 0.30.7
       pathe: 1.1.2
-      picocolors: 1.0.0
+      picocolors: r2.cnpmjs.org/picocolors@1.0.0
       std-env: 3.7.0
       strip-literal: 2.0.0
       tinybench: 2.6.0
@@ -14901,7 +14905,7 @@ packages:
       local-pkg: 0.5.0
       magic-string: 0.30.7
       pathe: 1.1.2
-      picocolors: 1.0.0
+      picocolors: r2.cnpmjs.org/picocolors@1.0.0
       std-env: 3.7.0
       strip-literal: 2.0.0
       tinybench: 2.6.0
@@ -15641,6 +15645,7 @@ packages:
     name: source-map
     version: 0.6.1
     engines: {node: '>=0.10.0'}
+    requiresBuild: true
     optional: true
 
   r2.cnpmjs.org/sourcemap-codec@1.4.8:

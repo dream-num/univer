@@ -651,11 +651,10 @@ export function getPositionVertical(
     }
 }
 
-export function getSpanGroupWidth(divide: IDocumentSkeletonDivide) {
-    const glyphGroup = divide.glyphGroup;
+export function getGlyphGroupWidth(divide: IDocumentSkeletonDivide) {
     let width = 0;
 
-    for (const glyph of glyphGroup) {
+    for (const glyph of divide.glyphGroup) {
         width += glyph.width;
     }
 

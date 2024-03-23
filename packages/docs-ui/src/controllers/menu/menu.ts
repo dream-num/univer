@@ -17,12 +17,18 @@
 import {
     BaselineOffset,
     BooleanNumber,
+    HorizontalAlign,
     ICommandService,
     IUniverInstanceService,
     ThemeService,
     UniverInstanceType,
 } from '@univerjs/core';
 import {
+    AlignCenterCommand,
+    AlignJustifyCommand,
+    AlignLeftCommand,
+    AlignOperationCommand,
+    AlignRightCommand,
     BulletListCommand,
     OrderListCommand,
     SetInlineFormatBoldCommand,
@@ -54,7 +60,6 @@ import { COLOR_PICKER_COMPONENT } from '../../components/color-picker';
 import { FONT_FAMILY_COMPONENT, FONT_FAMILY_ITEM_COMPONENT } from '../../components/font-family';
 import { FONT_SIZE_COMPONENT } from '../../components/font-size';
 
-// TODO @Dushusir: use for test, change id later
 export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const commandService = accessor.get(ICommandService);
 
@@ -395,6 +400,146 @@ export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSele
     };
 }
 
+export function AlignLeftMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    const commandService = accessor.get(ICommandService);
+
+    return {
+        id: AlignLeftCommand.id,
+        group: MenuGroup.TOOLBAR_LAYOUT,
+        type: MenuItemType.BUTTON,
+        icon: 'LeftJustifyingSingle',
+        tooltip: 'toolbar.alignLeft',
+        positions: [MenuPosition.TOOLBAR_START],
+        activated$: new Observable<boolean>((subscriber) => {
+            const disposable = commandService.onCommandExecuted((c) => {
+                const id = c.id;
+
+                if (id === SetTextSelectionsOperation.id || id === AlignOperationCommand.id) {
+                    const paragraph = getParagraphStyleAtCursor(accessor);
+
+                    if (paragraph == null) {
+                        return;
+                    }
+
+                    const alignType = paragraph.paragraphStyle?.horizontalAlign;
+
+                    subscriber.next(alignType === HorizontalAlign.LEFT);
+                }
+            });
+
+            subscriber.next(false);
+
+            return disposable.dispose;
+        }),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.DOC),
+    };
+}
+
+export function AlignCenterMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    const commandService = accessor.get(ICommandService);
+
+    return {
+        id: AlignCenterCommand.id,
+        group: MenuGroup.TOOLBAR_LAYOUT,
+        type: MenuItemType.BUTTON,
+        icon: 'HorizontallySingle',
+        tooltip: 'toolbar.alignCenter',
+        positions: [MenuPosition.TOOLBAR_START],
+        activated$: new Observable<boolean>((subscriber) => {
+            const disposable = commandService.onCommandExecuted((c) => {
+                const id = c.id;
+
+                if (id === SetTextSelectionsOperation.id || id === AlignOperationCommand.id) {
+                    const paragraph = getParagraphStyleAtCursor(accessor);
+
+                    if (paragraph == null) {
+                        return;
+                    }
+
+                    const alignType = paragraph.paragraphStyle?.horizontalAlign;
+
+                    subscriber.next(alignType === HorizontalAlign.CENTER);
+                }
+            });
+
+            subscriber.next(false);
+
+            return disposable.dispose;
+        }),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.DOC),
+    };
+}
+
+export function AlignRightMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    const commandService = accessor.get(ICommandService);
+
+    return {
+        id: AlignRightCommand.id,
+        group: MenuGroup.TOOLBAR_LAYOUT,
+        type: MenuItemType.BUTTON,
+        icon: 'RightJustifyingSingle',
+        tooltip: 'toolbar.alignRight',
+        positions: [MenuPosition.TOOLBAR_START],
+        activated$: new Observable<boolean>((subscriber) => {
+            const disposable = commandService.onCommandExecuted((c) => {
+                const id = c.id;
+
+                if (id === SetTextSelectionsOperation.id || id === AlignOperationCommand.id) {
+                    const paragraph = getParagraphStyleAtCursor(accessor);
+
+                    if (paragraph == null) {
+                        return;
+                    }
+
+                    const alignType = paragraph.paragraphStyle?.horizontalAlign;
+
+                    subscriber.next(alignType === HorizontalAlign.RIGHT);
+                }
+            });
+
+            subscriber.next(false);
+
+            return disposable.dispose;
+        }),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.DOC),
+    };
+}
+
+export function AlignJustifyMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    const commandService = accessor.get(ICommandService);
+
+    return {
+        id: AlignJustifyCommand.id,
+        group: MenuGroup.TOOLBAR_LAYOUT,
+        type: MenuItemType.BUTTON,
+        icon: 'AlignTextBothSingle',
+        tooltip: 'toolbar.alignJustify',
+        positions: [MenuPosition.TOOLBAR_START],
+        activated$: new Observable<boolean>((subscriber) => {
+            const disposable = commandService.onCommandExecuted((c) => {
+                const id = c.id;
+
+                if (id === SetTextSelectionsOperation.id || id === AlignOperationCommand.id) {
+                    const paragraph = getParagraphStyleAtCursor(accessor);
+
+                    if (paragraph == null) {
+                        return;
+                    }
+
+                    const alignType = paragraph.paragraphStyle?.horizontalAlign;
+
+                    subscriber.next(alignType === HorizontalAlign.JUSTIFIED);
+                }
+            });
+
+            subscriber.next(false);
+
+            return disposable.dispose;
+        }),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.DOC),
+    };
+}
+
 export function OrderListMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     return {
         id: OrderListCommand.id,
@@ -440,4 +585,36 @@ function getFontStyleAtCursor(accessor: IAccessor) {
     const textRun = textRuns.find(({ st, ed }) => startOffset >= st && startOffset < ed);
 
     return textRun;
+}
+
+function getParagraphStyleAtCursor(accessor: IAccessor) {
+    const currentUniverService = accessor.get(IUniverInstanceService);
+    const textSelectionService = accessor.get(TextSelectionManagerService);
+    const editorDataModel = currentUniverService.getCurrentUniverDocInstance();
+    const activeTextRange = textSelectionService.getActiveRange();
+
+    if (editorDataModel == null || activeTextRange == null) {
+        return;
+    }
+
+    const paragraphs = editorDataModel.getBody()?.paragraphs;
+
+    if (paragraphs == null) {
+        return;
+    }
+
+    const { startOffset } = activeTextRange;
+
+    let prevIndex = -1;
+
+    for (const paragraph of paragraphs) {
+        const { startIndex } = paragraph;
+        if (startOffset > prevIndex && startOffset <= startIndex) {
+            return paragraph;
+        }
+
+        prevIndex = startIndex;
+    }
+
+    return null;
 }

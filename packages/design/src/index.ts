@@ -32,7 +32,7 @@ export { type IInputNumberProps, InputNumber } from './components/input-number';
 export { Menu, MenuItem, MenuItemGroup, SubMenu } from './components/menu';
 export { type IMessageMethodOptions, type IMessageProps, Message, MessageType } from './components/message';
 export { type IPagerProps, Pager } from './components/pager';
-export { type IPopupProps, Popup } from './components/popup';
+export { type IPopupProps, Popup, RectPopup, type IRectPopupProps } from './components/popup';
 export { type IRadioProps, Radio } from './components/radio';
 export { type IRadioGroupProps, RadioGroup } from './components/radio-group';
 export { type IScrollbarProps, Scrollbar } from './components/scrollbar';

@@ -15,7 +15,7 @@
  */
 
 import type { IDocumentData } from '@univerjs/core';
-import { BooleanNumber } from '@univerjs/core';
+import { BooleanNumber, HorizontalAlign } from '@univerjs/core';
 import { ptToPixel } from '@univerjs/engine-render';
 
 export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
@@ -115,6 +115,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                     spaceAbove: 10,
                     lineSpacing: 2,
                     spaceBelow: 0,
+                    horizontalAlign: HorizontalAlign.JUSTIFIED,
                 },
             },
             {
@@ -518,7 +519,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
             },
             {
-                startIndex: 2742,
+                startIndex: 2750,
                 paragraphStyle: {
                     spaceAbove: 10,
                     lineSpacing: 2,
@@ -526,7 +527,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
             },
             {
-                startIndex: 2743,
+                startIndex: 2751,
                 paragraphStyle: {
                     spaceAbove: 10,
                     lineSpacing: 2,
@@ -534,7 +535,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
             },
             {
-                startIndex: 2845,
+                startIndex: 2853,
                 paragraphStyle: {
                     spaceAbove: 10,
                     lineSpacing: 2,
@@ -542,7 +543,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
             },
             {
-                startIndex: 2846,
+                startIndex: 2854,
                 paragraphStyle: {
                     spaceAbove: 10,
                     lineSpacing: 2,
@@ -550,7 +551,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
             },
             {
-                startIndex: 2940,
+                startIndex: 2948,
                 paragraphStyle: {
                     spaceAbove: 10,
                     lineSpacing: 2,
@@ -558,7 +559,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
             },
             {
-                startIndex: 2941,
+                startIndex: 2949,
                 paragraphStyle: {
                     spaceAbove: 10,
                     lineSpacing: 2,
@@ -566,7 +567,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
             },
             {
-                startIndex: 3057,
+                startIndex: 3065,
                 paragraphStyle: {
                     spaceAbove: 10,
                     lineSpacing: 2,

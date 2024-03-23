@@ -33,6 +33,10 @@ const locale = {
         resetColor: '重置颜色',
         order: '有序列表',
         unorder: '无序列表',
+        alignLeft: '左对齐',
+        alignCenter: '居中对齐',
+        alignRight: '右对齐',
+        alignJustify: '两端对齐',
     },
 };
 

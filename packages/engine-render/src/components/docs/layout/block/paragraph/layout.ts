@@ -14,22 +14,19 @@
  * limitations under the License.
  */
 
-import { HorizontalAlign } from '@univerjs/core';
 import type {
-    IDocumentSkeletonLine,
     IDocumentSkeletonPage,
     ISkeletonResourceReference,
 } from '../../../../../basics/i-document-skeleton-cached';
 import type { ISectionBreakConfig } from '../../../../../basics/interfaces';
 import {
     clearFontCreateConfigCache,
-    getSpanGroupWidth,
-    lineIterator,
 } from '../../tools';
 import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../../view-model/document-view-model';
 import { shaping } from './shaping';
 import { lineBreaking } from './linebreaking';
+import { lineAdjustment } from './line-adjustment';
 
 export function dealWidthParagraph(
     bodyModel: DocumentViewModel,
@@ -42,6 +39,7 @@ export function dealWidthParagraph(
 
     // Step 1: Text Shaping.
     const { endIndex, content = '' } = paragraphNode;
+
     const paragraph = bodyModel.getParagraph(endIndex) || { startIndex: 0 };
     const { paragraphStyle = {} } = paragraph;
 
@@ -64,11 +62,8 @@ export function dealWidthParagraph(
     );
 
     // Step 3: Line Adjustment.
-    // Handle horizontal align: left\center\right\justified.
-    const { horizontalAlign = HorizontalAlign.UNSPECIFIED } = paragraphStyle;
-    lineIterator(allPages, (line) => {
-        horizontalAlignHandler(line, horizontalAlign);
-    });
+    // Handle line adjustment(stretch and shrink) and punctuation adjustment.
+    lineAdjustment(allPages, paragraph);
 
     return allPages;
 }
@@ -96,36 +91,3 @@ function _checkAndPush(pages: IDocumentSkeletonPage[], currentPages: IDocumentSk
 //         ...paragraphAffectSkeDrawings,
 //     ]);
 // }
-
-/**
- * todo: @author DR-univer
- * When aligning text horizontally within a document,
- * it may be ineffective if the total line width is not initially calculated.
- * Therefore, multiple calculations are performed, which may impact performance.
- * Needs optimization for efficiency.
- */
-function horizontalAlignHandler(line: IDocumentSkeletonLine, horizontalAlign: HorizontalAlign) {
-    if (horizontalAlign === HorizontalAlign.UNSPECIFIED || horizontalAlign === HorizontalAlign.LEFT) {
-        return;
-    }
-
-    const { divides } = line;
-    const divideLength = divides.length;
-    for (let i = 0; i < divideLength; i++) {
-        const divide = divides[i];
-        const { width } = divide;
-        const spanGroupWidth = getSpanGroupWidth(divide);
-
-        if (width === Number.POSITIVE_INFINITY) {
-            continue;
-        }
-
-        if (horizontalAlign === HorizontalAlign.CENTER) {
-            divide.paddingLeft = (width - spanGroupWidth) / 2;
-        } else if (horizontalAlign === HorizontalAlign.RIGHT) {
-            divide.paddingLeft = width - spanGroupWidth;
-        } else if (horizontalAlign === HorizontalAlign.JUSTIFIED) {
-            /**todo */
-        }
-    }
-}

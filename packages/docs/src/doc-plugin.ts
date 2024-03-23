@@ -17,9 +17,6 @@
 import type { ICommand } from '@univerjs/core';
 import {
     ICommandService,
-    IConfigService,
-    IUniverInstanceService,
-    LocaleService,
     Plugin,
     PluginType,
 } from '@univerjs/core';
@@ -51,7 +48,6 @@ import { SelectAllOperation } from './commands/operations/select-all.operation';
 import { SetDocZoomRatioOperation } from './commands/operations/set-doc-zoom-ratio.operation';
 import { SetTextSelectionsOperation } from './commands/operations/text-selection.operation';
 import { IMEInputController } from './controllers/ime-input.controller';
-import { InlineFormatController } from './controllers/inline-format.controller';
 import { MoveCursorController } from './controllers/move-cursor.controller';
 import { NormalInputController } from './controllers/normal-input.controller';
 import { DocSkeletonManagerService } from './services/doc-skeleton-manager.service';
@@ -59,6 +55,7 @@ import { DocViewModelManagerService } from './services/doc-view-model-manager.se
 import { IMEInputManagerService } from './services/ime-input-manager.service';
 import { TextSelectionManagerService } from './services/text-selection-manager.service';
 import { DocStateChangeManagerService } from './services/doc-state-change-manager.service';
+import { AlignCenterCommand, AlignJustifyCommand, AlignLeftCommand, AlignOperationCommand, AlignRightCommand } from './commands/commands/paragraph-align.command';
 
 export interface IUniverDocsConfig {
     hasScroll?: boolean;
@@ -77,10 +74,7 @@ export class UniverDocsPlugin extends Plugin {
 
     constructor(
         config: Partial<IUniverDocsConfig> = {},
-        @Inject(Injector) override _injector: Injector,
-        @Inject(LocaleService) private readonly _localeService: LocaleService,
-        @IConfigService private readonly _configService: IConfigService,
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService
+        @Inject(Injector) override _injector: Injector
     ) {
         super(PLUGIN_NAME);
 
@@ -126,6 +120,11 @@ export class UniverDocsPlugin extends Plugin {
                 OrderListCommand,
                 BulletListCommand,
                 ListOperationCommand,
+                AlignLeftCommand,
+                AlignCenterCommand,
+                AlignRightCommand,
+                AlignOperationCommand,
+                AlignJustifyCommand,
             ] as ICommand[]
         ).forEach((command) => {
             this._injector.get(ICommandService).registerCommand(command);
@@ -155,7 +154,6 @@ export class UniverDocsPlugin extends Plugin {
                 // controllers
                 [NormalInputController],
                 [IMEInputController],
-                [InlineFormatController],
                 [MoveCursorController],
             ] as Dependency[]
         ).forEach((d) => docInjector.add(d));

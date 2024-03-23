@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
 import { BooleanNumber, BulletAlignment, DataStreamTreeTokenType as DT, GridType } from '@univerjs/core';
 
 import { FontCache } from '../../../../basics/font-cache';
@@ -138,7 +137,7 @@ export function _createSkeletonWordOrLetter(
                 spr: 0,
                 spo: 0,
             },
-            paddingLeft: 0,
+            xOffset: 0,
             left: 0,
             isJustifiable: false,
             adjustability: baseAdjustability(content, 0),
@@ -155,14 +154,14 @@ export function _createSkeletonWordOrLetter(
     const bBox = FontCache.getTextSize(content, fontStyle);
     const { width: contentWidth = 0 } = bBox;
     let width = glyphWidth ?? contentWidth;
-    let paddingLeft = 0;
+    let xOffset = 0;
 
     if (validationGrid(gridType, snapToGrid)) {
         // 当文字也需要对齐到网格式，进行处理
         // const multiple = Math.ceil(contentWidth / charSpace);
         width = contentWidth + (hasCJK(content) ? charSpace : charSpace / 2);
         if (gridType === GridType.SNAP_TO_CHARS) {
-            paddingLeft = (width - contentWidth) / 2;
+            xOffset = (width - contentWidth) / 2;
         }
     }
 
@@ -172,7 +171,7 @@ export function _createSkeletonWordOrLetter(
         fontStyle,
         width,
         bBox,
-        paddingLeft,
+        xOffset,
         left: 0,
         glyphType,
         streamType,
@@ -221,7 +220,7 @@ export function createSkeletonBulletGlyph(
         ts: textStyle,
         fontStyle,
         width,
-        paddingLeft: 0,
+        xOffset: 0,
         bBox,
         left,
         isJustifiable: isJustifiable(content),
@@ -255,24 +254,6 @@ export function addGlyphToDivide(
     glyphGroup: IDocumentSkeletonGlyph[],
     offsetLeft: number = 0
 ) {
-    // const line = divide.parent;
-    // if (line != null) {
-    //     const isFirstLine = line.divides[0].glyphGroup[0] == null;
-    //     const firstSpan = glyphGroup[0];
-    //     const firstSpanContent = firstSpan.content || ' ';
-    //     if (isFirstLine && firstSpanContent === ' ') {
-    //         const width = firstSpan.width;
-    //         firstSpan.width = 0;
-    //         for (const glyph of glyphGroup) {
-    //             if (glyph === firstSpan) {
-    //                 continue;
-    //             }
-
-    //             glyph.left -= width;
-    //         }
-    //     }
-    // }
-
     setGlyphGroupLeft(glyphGroup, offsetLeft);
 
     // Set glyph parent pointer.
@@ -294,21 +275,15 @@ function _getMaxBoundingBox(glyph: IDocumentSkeletonGlyph, bulletSkeleton: IDocu
     return bulletSkeleton.bBox;
 }
 
-export function hasMixedTextLayout(preGlyph: Nullable<IDocumentSkeletonGlyph>, glyph: IDocumentSkeletonGlyph) {
-    if (preGlyph == null) {
-        return false;
-    }
-    const { content: preContent } = preGlyph;
-    const { content: curContent } = glyph;
+export function glyphShrinkRight(glyph: IDocumentSkeletonGlyph, amount: number) {
+    glyph.width -= amount;
+    glyph.adjustability.shrinkability[1] -= amount;
+    glyph.adjustability.stretchability[1] += amount;
+}
 
-    if (preContent == null || curContent == null) {
-        return false;
-    }
-
-    const ENG_NUMBERS_REG = /[a-z\d]/i;
-
-    return (
-        (ENG_NUMBERS_REG.test(preContent) && hasCJKText(curContent)) ||
-        (hasCJKText(preContent) && ENG_NUMBERS_REG.test(curContent))
-    );
+export function glyphShrinkLeft(glyph: IDocumentSkeletonGlyph, amount: number) {
+    glyph.width -= amount;
+    glyph.xOffset -= amount;
+    glyph.adjustability.shrinkability[0] -= amount;
+    glyph.adjustability.stretchability[0] += amount;
 }

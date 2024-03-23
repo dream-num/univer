@@ -174,7 +174,7 @@ export interface IDocumentSkeletonGlyph {
     streamType: DataStreamTreeTokenType;
     width: number; // cum width
     bBox: IDocumentSkeletonBoundingBox; // bBox: size of glyph
-    paddingLeft: number; // paddingLeft, adjust text align in glyph
+    xOffset: number; // xOffset, adjust text align in glyph
     left: number; // left
     count: number; // count, content length，default 1
     content: string; // content

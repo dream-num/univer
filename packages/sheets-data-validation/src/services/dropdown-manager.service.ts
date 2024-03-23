@@ -68,7 +68,7 @@ export class DataValidationDropdownManagerService {
             col,
             {
                 componentKey: DROP_DOWN_KEY,
-                onMaskClick: () => {
+                onClickOutside: () => {
                     this.hideDropdown();
                 },
                 offset: [0, 4],

@@ -21,6 +21,7 @@ import { ConfirmPart } from './components/confirm-part/ConfirmPart';
 import { ContextMenu } from './components/context-menu/ContextMenu';
 import { DialogPart } from './components/dialog-part/DialogPart';
 import { GlobalZone } from './components/global-zone/GlobalZone';
+import { GlobalPopup } from './components/popup';
 
 export const globalComponents: Set<() => ComponentType> = new Set([
     () => DialogPart,
@@ -28,4 +29,5 @@ export const globalComponents: Set<() => ComponentType> = new Set([
     () => Notification,
     () => ContextMenu,
     () => GlobalZone,
+    () => GlobalPopup,
 ]);

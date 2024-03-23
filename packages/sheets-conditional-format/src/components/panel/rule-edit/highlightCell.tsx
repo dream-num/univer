@@ -48,8 +48,8 @@ const HighlightCellInput = (props: { type: IResult['subType'] | SubRuleType.dupl
     const { type, operator, onChange, value } = props;
     const [inputNumberValue, inputNumberValueSet] = useState(() => typeof value === 'number' ? value : 0);
     const [inputTextValue, inputTextValueSet] = useState(() => typeof value === 'string' ? value : '');
-    const [inputNumberMin, inputNumberMinSet] = useState(() => Array.isArray(value) ? value[0] || 0 : 0);
-    const [inputNumberMax, inputNumberMaxSet] = useState(() => Array.isArray(value) ? value[1] || 100 : 100);
+    const [inputNumberMin, inputNumberMinSet] = useState(() => Array.isArray(value) ? value[0] === undefined ? 0 : value[0] : 0);
+    const [inputNumberMax, inputNumberMaxSet] = useState(() => Array.isArray(value) ? value[1] === undefined ? 100 : value[1] : 100);
 
     useEffect(() => {
         switch (type) {

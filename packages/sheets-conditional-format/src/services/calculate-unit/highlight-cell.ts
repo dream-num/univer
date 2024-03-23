@@ -322,12 +322,12 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
                         formulaString = `=${formulaString}`;
                         conditionalFormatFormulaService.registerFormula(unitId, subUnitId, rule.cfId, formulaString);
                         const formulaItem = conditionalFormatFormulaService.getFormulaResult(unitId, subUnitId, formulaString);
-                        const cache = conditionalFormatFormulaService.getCache(unitId, subUnitId, rule.cfId);
                         if (formulaItem && formulaItem.status === FormulaResultStatus.SUCCESS) {
-                            return !!formulaItem.result;
+                            return formulaItem.result === true;
                         } else {
                             // If the formula triggers the calculation, wait for the result,
                             // and use the previous style cache until the result comes out
+                            const cache = conditionalFormatFormulaService.getCache(unitId, subUnitId, rule.cfId);
                             const style = cache?.getValue(row, col);
                             return style && style !== EMPTY_STYLE;
                         }

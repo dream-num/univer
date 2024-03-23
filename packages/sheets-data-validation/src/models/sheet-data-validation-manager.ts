@@ -227,6 +227,15 @@ export class SheetDataValidationManager extends DataValidationManager<ISheetData
         return this._ruleMatrix.getValue(row, col);
     }
 
+    getRuleByLocation(row: number, col: number): ISheetDataValidationRule | undefined {
+        const ruleId = this.getRuleIdByLocation(row, col);
+        if (!ruleId) {
+            return undefined;
+        }
+
+        return this.getRuleById(ruleId);
+    }
+
     override validator(cellValue: Nullable<CellValue>, rule: ISheetDataValidationRule, pos: ISheetLocation, onCompete: (status: DataValidationStatus) => void): DataValidationStatus {
         const { col, row, unitId, subUnitId } = pos;
         const ruleId = rule.uid;

@@ -19,6 +19,8 @@ import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/dat
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { Inject } from '@wendellhu/redi';
 import { IDialogService } from '@univerjs/ui';
+import React from 'react';
+import { Button } from '@univerjs/design';
 import type { SheetDataValidationManager } from '../models/sheet-data-validation-manager';
 import { getCellValueOrigin } from '../utils/getCellDataOrigin';
 
@@ -76,6 +78,16 @@ export class DataValidationRejectInputController extends Disposable {
                         id: 'reject-input-dialog',
                         children: {
                             title: validator.generateRuleErrorMessage(rule),
+                        },
+                        footer: {
+                            title: React.createElement(
+                                Button,
+                                {
+                                    type: 'primary',
+                                    onClick: () => this._dialogService.close('reject-input-dialog'),
+                                },
+                                this._localeService.t('dataValidation.alert.ok')
+                            ),
                         },
                         onClose: () => {
                             this._dialogService.close('reject-input-dialog');

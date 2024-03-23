@@ -98,7 +98,6 @@ export default {
                 notEqual: 'Value must be not {FORMULA1}',
                 notBetween: 'Value must be not between {FORMULA1}',
             },
-
         },
         list: {
             title: 'Dropdown',

@@ -25,6 +25,7 @@ import { TWO_FORMULA_OPERATOR_COUNT } from '../types/const/two-formula-operators
 import { serialTimeToTimestamp } from '../utils/date';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
 import { getFormulaResult } from '../utils/formula';
+import { DATE_DROPDOWN_KEY } from '../views';
 
 const isValidDateString = (date: string) => {
     return dayjs(date).isValid();
@@ -58,6 +59,7 @@ export class DateValidator extends BaseDataValidator<Dayjs> {
 
     scopes: string | string[] = ['sheet'];
     formulaInput: string = BASE_FORMULA_INPUT_NAME;
+    override dropdown = DATE_DROPDOWN_KEY;
 
     private _formulaService = this.injector.get(DataValidationFormulaService);
 
@@ -71,10 +73,16 @@ export class DateValidator extends BaseDataValidator<Dayjs> {
         };
     }
 
+    transformDate = transformDate;
+
     override async isValidType(info: IValidatorCellInfo): Promise<boolean> {
         const { value } = info;
         if (typeof value === 'string') {
             return dayjs(value).isValid();
+        }
+
+        if (typeof value === 'number') {
+            return true;
         }
 
         return false;

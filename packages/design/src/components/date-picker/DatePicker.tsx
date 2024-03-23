@@ -15,6 +15,7 @@
  */
 
 import React, { useContext } from 'react';
+import type { PickerProps } from 'rc-picker';
 import RcPicker from 'rc-picker';
 import generateConfig from 'rc-picker/lib/generate/dayjs';
 import { CalendarSingle } from '@univerjs/icons';
@@ -22,7 +23,7 @@ import type { Dayjs } from 'dayjs';
 import { ConfigContext } from '../config-provider/ConfigProvider';
 import styles from './index.module.less';
 
-export interface IDatePickerProps {
+export interface IDatePickerProps extends Omit<PickerProps<Dayjs>, 'value' | 'onChange'> {
     /**
      * The value of the date picker.
      */
@@ -35,7 +36,7 @@ export interface IDatePickerProps {
 }
 
 export function DatePicker(props: IDatePickerProps) {
-    const { value, onChange } = props;
+    const { value, onChange, ...ext } = props;
 
     const { locale } = useContext(ConfigContext);
 
@@ -47,6 +48,7 @@ export function DatePicker(props: IDatePickerProps) {
 
     return (
         <RcPicker<Dayjs>
+            {...ext}
             value={value}
             prefixCls={styles.datePicker}
             generateConfig={generateConfig}

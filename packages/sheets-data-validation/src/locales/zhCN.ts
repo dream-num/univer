@@ -102,8 +102,8 @@ export default {
         list: {
             title: '下拉菜单',
             name: '值必须是列表中的值',
-            error: 'Input must fall within specified range',
-            emptyError: 'Please enter a value',
+            error: '输入必须在指定的范围内',
+            emptyError: '请输入一个值',
             strPlaceholder: '请输入选项，选项间通过“回车换行”或“英文逗号(,)”隔开',
             refPlaceholder: '引用单元格内容作为选项,如:\'Sheet1\'!A100',
         },

@@ -21,11 +21,10 @@ import { ComponentManager, IMenuService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 import { IEditorBridgeService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import type { Spreadsheet } from '@univerjs/engine-render';
-import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-render';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
-import { DataValidationPanel, LIST_DROPDOWN_KEY, ListDropDown } from '../views';
+import { DataValidationPanel, DATE_DROPDOWN_KEY, DateDropdown, LIST_DROPDOWN_KEY, ListDropDown } from '../views';
 import { FORMULA_INPUTS } from '../views/formula-input';
-import { SheetDataValidationService } from '../services/dv.service';
 import { getCellValueOrigin } from '../utils/getCellDataOrigin';
 import type { CheckboxValidator } from '../validators';
 import type { SheetDataValidationManager } from '../models/sheet-data-validation-manager';
@@ -63,7 +62,7 @@ export class DataValidationRenderController extends RxDisposable {
         this._initComponents();
         this._initMenu();
         this._initSkeletonChange();
-        // this._initDropdown();
+        this._initDropdown();
         this._initViewModelIntercept();
     }
 
@@ -95,6 +94,10 @@ export class DataValidationRenderController extends RxDisposable {
                 LIST_DROPDOWN_KEY,
                 ListDropDown,
             ],
+            [
+                DATE_DROPDOWN_KEY,
+                DateDropdown,
+            ],
             ...FORMULA_INPUTS,
         ] as const).forEach(([key, component]) => {
             this.disposeWithMe(this._componentManager.register(
@@ -120,7 +123,20 @@ export class DataValidationRenderController extends RxDisposable {
                 if (!workbook) {
                     return;
                 }
+                const manager = this._dataValidationModel.ensureManager(unitId, sheetId) as SheetDataValidationManager;
+                const rule = manager.getRuleByLocation(row, column);
+
+                if (!rule) {
+                    return;
+                }
+                const validator = this._dataValidatorRegistryService.getValidatorItem(rule.type);
+
+                if (!validator?.dropdown) {
+                    return;
+                }
+
                 const worksheet = workbook.getActiveSheet();
+
                 this._dropdownManagerService.showDropdown({
                     location: {
                         unitId,
@@ -130,7 +146,7 @@ export class DataValidationRenderController extends RxDisposable {
                         workbook,
                         worksheet,
                     },
-                    componentKey: LIST_DROPDOWN_KEY,
+                    componentKey: validator.dropdown,
                     onHide: () => {},
                 });
             }

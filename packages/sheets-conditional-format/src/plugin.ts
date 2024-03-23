@@ -50,6 +50,7 @@ import { moveConditionalRuleMutation } from './commands/mutations/move-condition
 import { ConditionalFormatFormulaService } from './services/conditional-format-formula.service';
 import { conditionalFormatFormulaMarkDirty } from './commands/mutations/formula-mark-dirty.mutation';
 import { ConditionalFormatEditorController } from './controllers/cf.editor.controller';
+import { ConditionalFormatClearController } from './controllers/cf.clear.controller';
 
 export class SheetsConditionalFormatPlugin extends Plugin {
     static override type = PluginType.Sheet;
@@ -95,6 +96,7 @@ export class SheetsConditionalFormatPlugin extends Plugin {
         this._injector.add([ConditionalFormatMenuController]);
         this._injector.add([ConditionalFormatI18nController]);
         this._injector.add([ConditionalFormatEditorController]);
+        this._injector.add([ConditionalFormatClearController]);
     }
 
     _initCommand() {

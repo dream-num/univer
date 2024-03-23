@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { Tools } from '@univerjs/core';
 import { fixLineWidthByScale, getColor } from './basics/tools';
 
 export class UniverRenderingContext2D implements CanvasRenderingContext2D {
@@ -461,6 +462,22 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
      * @method
      */
     closePath() {
+        this._context.closePath();
+    }
+
+    /**
+     * Chrome hardware acceleration causes canvas stroke to fail to draw lines on Mac.
+     */
+    closePathByEnv() {
+        const system = Tools.getSystemType();
+        const isMac = system === 'Mac';
+        const browser = Tools.getBrowserType();
+        const isChrome = browser === 'Chrome';
+
+        if (isMac && isChrome) {
+            return;
+        }
+
         this._context.closePath();
     }
 

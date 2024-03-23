@@ -34,44 +34,50 @@ export interface IRectPopupProps {
 
     direction?: 'horizontal' | 'vertical';
 
-    mask?: boolean;
-
-    onMaskClick?: React.MouseEventHandler<HTMLDivElement>;
-
-    onClickOther?: (e: MouseEvent) => void;
+    onClickOutside?: (e: MouseEvent) => void;
 }
 
-const calcHorizontalPopupPosition = (position: IAbsolutePosition, width: number, height: number, containerWidth: number, containerHeight: number): Partial<IAbsolutePosition> => {
-    const { left: startX, top: startY, right: endX, bottom: endY } = position;
+export interface IPopupLayoutInfo {
+    position: IAbsolutePosition;
+    width: number;
+    height: number;
+    containerWidth: number;
+    containerHeight: number;
+    direction?: 'horizontal' | 'vertical';
+}
 
-    const verticalStyle = ((startY + height) > containerHeight) ? { top: endY - height } : { top: startY };
-    const horizontalStyle = ((endX + width) > containerWidth) ? { left: startX - width } : { left: endX };
+const calcPopupPosition = (layout: IPopupLayoutInfo) => {
+    const { position, width, height, containerHeight, containerWidth, direction = 'vertical' } = layout;
+    if (direction === 'vertical') {
+        const { left: startX, top: startY, right: endX, bottom: endY } = position;
 
-    return {
-        ...verticalStyle,
-        ...horizontalStyle,
-    };
+        const verticalStyle = (endY + height) > containerHeight ? { top: startY - height } : { top: endY };
+        const horizontalStyle = (startX + width) > containerWidth ? { left: endX - width } : { left: startX };
+
+        return {
+            ...verticalStyle,
+            ...horizontalStyle,
+        };
+    } else {
+        const { left: startX, top: startY, right: endX, bottom: endY } = position;
+
+        const verticalStyle = ((startY + height) > containerHeight) ? { top: endY - height } : { top: startY };
+        const horizontalStyle = ((endX + width) > containerWidth) ? { left: startX - width } : { left: endX };
+
+        return {
+            ...verticalStyle,
+            ...horizontalStyle,
+        };
+    }
 };
 
-const calcVerticalPopupPosition = (position: IAbsolutePosition, width: number, height: number, containerWidth: number, containerHeight: number): Partial<IAbsolutePosition> => {
-    const { left: startX, top: startY, right: endX, bottom: endY } = position;
-
-    const verticalStyle = (endY + height) > containerHeight ? { top: startY - height } : { top: endY };
-    const horizontalStyle = (startX + width) > containerWidth ? { left: endX - width } : { left: startX };
-
-    return {
-        ...verticalStyle,
-        ...horizontalStyle,
-    };
-};
-
-export function RectPopup(props: IRectPopupProps) {
-    const { children, anchorRect, direction = 'vertical', mask, onMaskClick, onClickOther } = props;
+function RectPopup(props: IRectPopupProps) {
+    const { children, anchorRect, direction = 'vertical', onClickOutside } = props;
 
     const nodeRef = useRef(null);
-    const clickOtherFn = useRef(onClickOther);
+    const clickOtherFn = useRef(onClickOutside);
 
-    clickOtherFn.current = onClickOther;
+    clickOtherFn.current = onClickOutside;
     const [position, setPosition] = useState<Partial<IAbsolutePosition>>({
         top: -9999,
         left: -9999,
@@ -80,28 +86,21 @@ export function RectPopup(props: IRectPopupProps) {
     useEffect(() => {
         const { clientWidth, clientHeight } = nodeRef.current!;
         const { innerWidth, innerHeight } = window;
-        if (direction === 'horizontal') {
-            setPosition(
-                calcHorizontalPopupPosition(
-                    anchorRect,
-                    clientWidth,
-                    clientHeight,
-                    innerWidth,
-                    innerHeight
-                )
-            );
-        } else {
-            setPosition(
-                calcVerticalPopupPosition(
-                    anchorRect,
-                    clientWidth,
-                    clientHeight,
-                    innerWidth,
-                    innerHeight
-                )
-            );
-        }
-    }, [
+        setPosition(
+            calcPopupPosition(
+                {
+                    position: anchorRect,
+                    width: clientWidth,
+                    height: clientHeight,
+                    containerWidth: innerWidth,
+                    containerHeight: innerHeight,
+                    direction,
+                }
+            )
+        );
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
         anchorRect.left,
         anchorRect.top,
         anchorRect.bottom,
@@ -122,19 +121,19 @@ export function RectPopup(props: IRectPopupProps) {
     }, [clickOtherFn]);
 
     return (
-        <>
-            {mask ? <div className={styles.popupMask} onClick={onMaskClick} /> : null}
-            <section
-                ref={nodeRef}
-                className={styles.popup}
-                style={position}
-                onClick={(e) => {
-                    e.stopPropagation();
-                }}
-            >
-                {children}
-            </section>
-        </>
-
+        <section
+            ref={nodeRef}
+            className={styles.popup}
+            style={position}
+            onClick={(e) => {
+                e.stopPropagation();
+            }}
+        >
+            {children}
+        </section>
     );
 }
+
+RectPopup.calcPopupPosition = calcPopupPosition;
+
+export { RectPopup };

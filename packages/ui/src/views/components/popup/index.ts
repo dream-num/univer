@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export { UniverPopup } from './UniverPopup';
+export { GlobalPopup } from './GlobalPopup';

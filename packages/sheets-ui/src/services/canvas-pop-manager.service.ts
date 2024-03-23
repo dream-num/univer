@@ -32,7 +32,7 @@ import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
 interface ICanvasPopup {
     componentKey: string;
     mask?: boolean;
-    onMaskClick?: (e: MouseEvent) => void;
+    onClickOutside?: (e: MouseEvent) => void;
     direction?: 'vertical' | 'horizontal';
     offset?: [number, number];
 }

@@ -24,7 +24,7 @@ export interface IPopup {
     anchorRect: IBoundRectNoAngle;
     anchorRect$: Observable<IBoundRectNoAngle>;
     componentKey: string;
-    onMaskClick?: (e: MouseEvent) => void;
+    onClickOutside?: (e: MouseEvent) => void;
     unitId: string;
     subUnitId: string;
     direction?: 'vertical' | 'horizontal';

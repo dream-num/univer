@@ -110,7 +110,7 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
             switch (ruleConfig.subType) {
                 case SubRuleType.number:{
                     const v = cellValue && Number(cellValue.v);
-                    if (isNullable(v) || Number.isNaN(v)) {
+                    if (isNullable(v) || Number.isNaN(v) || cellValue?.t !== CellValueType.NUMBER) {
                         return false;
                     }
                     const subRuleConfig = ruleConfig as INumberHighlightCell;
@@ -160,7 +160,7 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
                 }
                 case SubRuleType.timePeriod:{
                     const value = getCellValue(cellValue!);
-                    if (isNullable(value) || Number.isNaN(Number(value))) {
+                    if (isNullable(value) || Number.isNaN(Number(value)) || cellValue?.t !== CellValueType.NUMBER) {
                         return false;
                     }
                     const subRuleConfig = ruleConfig as ITimePeriodHighlightCell;
@@ -228,7 +228,7 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
                 case SubRuleType.average:{
                     const value = cellValue && cellValue.v;
                     const v = Number(value);
-                    if (isNullable(value) || Number.isNaN(v)) {
+                    if (isNullable(value) || Number.isNaN(v) || cellValue?.t !== CellValueType.NUMBER) {
                         return false;
                     }
                     const subRuleConfig = ruleConfig as IAverageHighlightCell;
@@ -263,7 +263,7 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
 
                     const v = Number(value);
 
-                    if (isNullable(value) || Number.isNaN(v)) {
+                    if (isNullable(value) || Number.isNaN(v) || cellValue?.t !== CellValueType.NUMBER) {
                         return false;
                     }
 

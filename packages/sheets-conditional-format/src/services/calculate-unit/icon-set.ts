@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ObjectMatrix, Range } from '@univerjs/core';
+import { CellValueType, ObjectMatrix, Range } from '@univerjs/core';
 import type { NumberOperator } from '../../base/const';
 import { RuleType } from '../../base/const';
 
@@ -38,7 +38,7 @@ export const iconSetCalculateUnit: ICalculateUnit = {
             Range.foreach(range, (row, col) => {
                 const cell = worksheet?.getCellRaw(row, col);
                 const v = cell && cell.v;
-                if (!isNullable(v)) {
+                if (!isNullable(v) && cell?.t === CellValueType.NUMBER) {
                     const _value = Number(v);
                     !Number.isNaN(_value) && matrix.setValue(row, col, _value);
                 }

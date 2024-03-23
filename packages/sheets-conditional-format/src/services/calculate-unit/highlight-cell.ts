@@ -39,8 +39,9 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
                     rule.ranges.forEach((range) => {
                         Range.foreach(range, (row, col) => {
                             const cell = worksheet?.getCellRaw(row, col);
-                            if (cell && cell.t === CellValueType.NUMBER) {
-                                sum += Number(cell.v || 0);
+                            const v = getCellValue(cell || undefined);
+                            if (cell && cell.t === CellValueType.NUMBER && v !== undefined) {
+                                sum += Number(v) || 0;
                                 count++;
                             }
                         });
@@ -53,12 +54,13 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
                     rule.ranges.forEach((range) => {
                         Range.foreach(range, (row, col) => {
                             const cell = worksheet?.getCellRaw(row, col);
-                            if (cell && !isNullable(cell.v)) {
-                                const cache = cacheMap.get(cell.v);
+                            const v = getCellValue(cell || undefined);
+                            if (v !== undefined) {
+                                const cache = cacheMap.get(v);
                                 if (cache) {
-                                    cacheMap.set(cell.v, cache + 1);
+                                    cacheMap.set(v, cache + 1);
                                 } else {
-                                    cacheMap.set(cell.v, 1);
+                                    cacheMap.set(v, 1);
                                 }
                             }
                         });
@@ -70,8 +72,9 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
                     rule.ranges.forEach((range) => {
                         Range.foreach(range, (row, col) => {
                             const cell = worksheet?.getCellRaw(row, col);
-                            if (cell && cell.t === CellValueType.NUMBER) {
-                                allValue.push(Number(cell.v || 0));
+                            const v = getCellValue(cell || undefined);
+                            if (cell && cell.t === CellValueType.NUMBER && v !== undefined) {
+                                allValue.push(Number(v) || 0);
                             }
                         });
                     });

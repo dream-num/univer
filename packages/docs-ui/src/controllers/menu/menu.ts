@@ -512,7 +512,7 @@ export function AlignJustifyMenuItemFactory(accessor: IAccessor): IMenuButtonIte
         id: AlignJustifyCommand.id,
         group: MenuGroup.TOOLBAR_LAYOUT,
         type: MenuItemType.BUTTON,
-        icon: 'RightJustifyingSingle',
+        icon: 'AlignTextBothSingle',
         tooltip: 'toolbar.alignJustify',
         positions: [MenuPosition.TOOLBAR_START],
         activated$: new Observable<boolean>((subscriber) => {

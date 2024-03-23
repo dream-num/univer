@@ -15,6 +15,7 @@
  */
 
 import { ObjectMatrix, Range } from '@univerjs/core';
+import type { NumberOperator } from '../../base/const';
 import { RuleType } from '../../base/const';
 
 import type { IIconSetRenderParams } from '../../render/type';
@@ -60,7 +61,17 @@ export const iconSetCalculateUnit: ICalculateUnit = {
         const splitValue = splitValueResult.map((item, index) => ({
             operator: ruleConfig.config[index].operator,
             value: Number(item.result) || 0,
-        }));
+        })).reduce((result, cur, index, list) => {
+            if (!index || index === list.length - 1) {
+                result.push(cur);
+            } else {
+                const pre = list[index - 1];
+                if (!compareWithNumber(pre, cur.value)) {
+                    result.push(cur);
+                }
+            }
+            return result;
+        }, [] as { operator: NumberOperator;value: number }[]);
         const isShowValue = ruleConfig.isShowValue === undefined ? true : !!ruleConfig.isShowValue;
         matrix.forValue((row, col, value) => {
             for (let index = 0; index < splitValue.length; index++) {

@@ -34,6 +34,11 @@ import type { IStyleEditorProps } from './type';
 
 import styles from './index.module.less';
 
+const getIcon = (iconType: string, iconId: string | number) => {
+    const arr = iconMap[iconType] || [];
+    return arr[Number(iconId)] || '';
+};
+
 const TextInput = (props: { id: number; type: ValueType; value: number | string;onChange: (v: number | string) => void; error?: string }) => {
     const univerInstanceService = useDependency(IUniverInstanceService);
     const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
@@ -172,7 +177,7 @@ const IconSetRuleEdit = (props: {
     const render = useMemo(() => {
         return configList.map((item, index) => {
             const error = errorMap[index];
-            const icon = iconMap[item.iconType][Number(item.iconId)];
+            const icon = getIcon(item.iconType, item.iconId);
             const isEnd = index === configList.length - 1;
             const isFirst = index === 0;
             const preItem = configList[index - 1];
@@ -294,7 +299,7 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
         if (rule && rule.config.length) {
             return Tools.deepClone(rule?.config);
         }
-        const list = iconMap[currentIconType];
+        const list = iconMap[currentIconType] || [];
         return new Array(list.length).fill('').map((_e, index, list) => {
             if (index === list.length - 1) {
                 // The last condition is actually the complement of the above conditions,
@@ -316,7 +321,9 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
     });
 
     const previewIcon = useMemo(() => {
-        const list = configList.map((item) => iconMap[item.iconType][Number(item.iconId)]);
+        const list = configList.map((item) => {
+            return getIcon(item.iconType, item.iconId);
+        });
         return (
             <div className={styles.iconWrap}>
                 {list.map((icon, index) => <img className={styles.icon} key={index} src={icon} />)}
@@ -326,7 +333,7 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
 
     const handleClickIconList = (iconType: IIconType) => {
         currentIconTypeSet(iconType);
-        const list = iconMap[iconType];
+        const list = iconMap[iconType] || [];
         const config = new Array(list.length).fill('').map((_e, index, list) => createDefaultConfigItem(iconType, index, list));
         configListSet(config);
     };

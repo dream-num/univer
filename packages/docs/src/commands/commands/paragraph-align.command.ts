@@ -101,6 +101,7 @@ export const AlignOperationCommand: ICommand<IAlignOperationCommandParams> = {
                     dataStream: '',
                     paragraphs: [
                         {
+                            ...paragraph,
                             paragraphStyle,
                             startIndex: 0,
                         },

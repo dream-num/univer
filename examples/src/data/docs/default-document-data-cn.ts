@@ -115,7 +115,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                     spaceAbove: 10,
                     lineSpacing: 2,
                     spaceBelow: 0,
-                    horizontalAlign: HorizontalAlign.CENTER,
+                    horizontalAlign: HorizontalAlign.JUSTIFIED,
                 },
             },
             {

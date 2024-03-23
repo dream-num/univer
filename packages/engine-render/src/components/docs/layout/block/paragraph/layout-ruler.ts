@@ -72,8 +72,8 @@ export function layoutParagraph(
 
             __bulletIndentHandler(paragraphStyle, bulletSkeleton, charSpaceApply);
 
-            const bulletSpan = createSkeletonBulletGlyph(glyphGroup[0], bulletSkeleton, charSpaceApply);
-            _lineOperator([bulletSpan, ...glyphGroup], pages, sectionBreakConfig, paragraphConfig, paragraphStart);
+            const bulletGlyph = createSkeletonBulletGlyph(glyphGroup[0], bulletSkeleton, charSpaceApply);
+            _lineOperator([bulletGlyph, ...glyphGroup], pages, sectionBreakConfig, paragraphConfig, paragraphStart);
         } else {
             _lineOperator(glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart);
         }

@@ -19,7 +19,7 @@ import { ObjectMatrix } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
-import type { IBoundRectNoAngle, Scene, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
+import type { IBoundRectNoAngle, Scene, SpreadsheetSkeleton } from '@univerjs/engine-render';
 import { VIEWPORT_KEY } from './keys';
 
 export function checkCellContentInRanges(worksheet: Worksheet, ranges: IRange[]): boolean {

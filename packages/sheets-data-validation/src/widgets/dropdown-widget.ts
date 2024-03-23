@@ -54,10 +54,10 @@ function convertToDocumentData(text: string, style?: Nullable<IStyleData>) {
                         ol: {
                             s: BooleanNumber.FALSE,
                         },
-                        bg: undefined,
                         bd: undefined,
                         cl: undefined,
                         ...style,
+                        bg: undefined,
                     },
                     st: 0,
                     ed: contentLength,

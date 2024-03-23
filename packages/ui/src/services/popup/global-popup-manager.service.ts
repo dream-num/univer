@@ -35,7 +35,6 @@ export interface IGlobalPopupManagerService {
     addPopup(item: IPopup): string;
     removePopup(id: string): void;
     removeAll(): void;
-
     popups$: Observable<[string, IPopup][]>;
 
     get popups(): [string, IPopup][];

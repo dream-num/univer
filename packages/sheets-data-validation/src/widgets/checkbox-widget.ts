@@ -27,10 +27,12 @@ import { DataValidationFormulaService } from '../services/dv-formula.service';
 import { getFormulaResult } from '../utils/formula';
 import { getCellValueOrigin } from '../utils/getCellDataOrigin';
 
+const MARGIN_H = 6;
+
 export class CheckboxRender implements IBaseDataValidationWidget {
     private _calc(cellInfo: ISelectionCellWithCoord, style: Nullable<IStyleData>) {
         const { vt, ht } = style || {};
-        const width = cellInfo.endX - cellInfo.startX;
+        const width = cellInfo.endX - cellInfo.startX - (MARGIN_H * 2);
         const height = cellInfo.endY - cellInfo.startY;
         const size = (style?.fs ?? 10) * 1.6;
         let widgetLeft = 0;
@@ -49,14 +51,14 @@ export class CheckboxRender implements IBaseDataValidationWidget {
 
         switch (ht) {
             case HorizontalAlign.LEFT:
-                widgetLeft = 0;
+                widgetLeft = MARGIN_H;
                 break;
             case HorizontalAlign.RIGHT:
-                widgetLeft = 0 + (width - size);
+                widgetLeft = MARGIN_H + (width - size);
                 break;
 
             default:
-                widgetLeft = 0 + (width - size) / 2;
+                widgetLeft = MARGIN_H + (width - size) / 2;
                 break;
         }
 
@@ -76,10 +78,6 @@ export class CheckboxRender implements IBaseDataValidationWidget {
     calcCellAutoHeight(): number | undefined {
         return undefined;
     }
-
-    zIndex?: number | undefined;
-    onPointerEnter?: ((info: ICellRenderContext) => void) | undefined;
-    onPointerLeave?: ((info: ICellRenderContext) => void) | undefined;
 
     private async _parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): Promise<IFormulaResult> {
         const { formula1 = CHECKBOX_FORMULA_1, formula2 = CHECKBOX_FORMULA_2 } = rule;

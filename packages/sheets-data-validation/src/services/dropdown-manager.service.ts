@@ -71,7 +71,7 @@ export class DataValidationDropdownManagerService {
                 onClickOutside: () => {
                     this.hideDropdown();
                 },
-                offset: [0, 4],
+                offset: [0, 3],
             }
         ));
 

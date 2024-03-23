@@ -21,7 +21,7 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import cl from 'clsx';
 import { ColorPicker } from '../color-picker';
 import type { IHighlightCell } from '../../models/type';
-import { DEFAULT_BG_COLOR, DEFAULT_FONT_COLOR } from '../../base/const';
+import { removeUndefinedAttr } from '../../utils/removeUndefinedAttr';
 import styles from './index.module.less';
 
 interface IConditionalStyleEditorProps {
@@ -30,36 +30,36 @@ interface IConditionalStyleEditorProps {
     onChange: (style: IHighlightCell['style']) => void;
 };
 
-const getAnotherBooleanNumber = (v: BooleanNumber) => {
-    return v === BooleanNumber.FALSE ? BooleanNumber.TRUE : BooleanNumber.FALSE;
+const getAnotherBooleanNumber = (v: BooleanNumber | undefined) => {
+    return [BooleanNumber.FALSE, undefined].includes(v) ? BooleanNumber.TRUE : BooleanNumber.FALSE;
 };
 const getBooleanFromNumber = (v: BooleanNumber) => v !== BooleanNumber.FALSE;
 export const ConditionalStyleEditor = (props: IConditionalStyleEditorProps) => {
     const { style, onChange, className } = props;
     const componentManager = useDependency(ComponentManager);
-    const [isBold, isBoldSet] = useState(() => {
-        const defaultV = BooleanNumber.FALSE;
+    const [isBold, isBoldSet] = useState<BooleanNumber | undefined>(() => {
+        const defaultV = undefined;
         if (!style?.bl) {
             return defaultV;
         }
         return style.bl;
     });
-    const [isItalic, isItalicSet] = useState(() => {
-        const defaultV = BooleanNumber.FALSE;
+    const [isItalic, isItalicSet] = useState<BooleanNumber | undefined>(() => {
+        const defaultV = undefined;
         if (!style?.it) {
             return defaultV;
         }
         return style.it;
     });
-    const [isUnderline, isUnderlineSet] = useState(() => {
-        const defaultV = BooleanNumber.FALSE;
+    const [isUnderline, isUnderlineSet] = useState<BooleanNumber | undefined>(() => {
+        const defaultV = undefined;
         if (!style?.ul) {
             return defaultV;
         }
         return style.ul.s;
     });
-    const [isStrikethrough, isStrikethroughSet] = useState(() => {
-        const defaultV = BooleanNumber.FALSE;
+    const [isStrikethrough, isStrikethroughSet] = useState<BooleanNumber | undefined>(() => {
+        const defaultV = undefined;
         if (!style?.st) {
             return defaultV;
         }
@@ -84,34 +84,49 @@ export const ConditionalStyleEditor = (props: IConditionalStyleEditorProps) => {
     const UnderlineSingleIcon = componentManager.get('UnderlineSingle');
     const StrikethroughSingle = componentManager.get('StrikethroughSingle');
     useEffect(() => {
-        const resultStyle: IHighlightCell['style'] = { cl: { rgb: fontColor }, bg: { rgb: bgColor }, bl: isBold, it: isItalic, st: { s: isStrikethrough }, ul: { s: isUnderline } };
-        onChange(resultStyle);
+        const resultStyle: IHighlightCell['style'] = {
+            bl: isBold,
+            it: isItalic,
+        };
+        if (fontColor !== undefined) {
+            resultStyle.cl = { rgb: fontColor };
+        }
+        if (bgColor !== undefined) {
+            resultStyle.bg = { rgb: bgColor };
+        }
+        if (isStrikethrough !== undefined) {
+            resultStyle.st = { s: isStrikethrough };
+        }
+        if (isUnderline !== undefined) {
+            resultStyle.ul = { s: isUnderline };
+        }
+        onChange(removeUndefinedAttr(resultStyle));
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isBold, isItalic, isUnderline, isStrikethrough, fontColor, bgColor]);
     return (
         <div className={`${styles.cfStyleEdit} ${className}`}>
             { BoldSingleIcon && (
-                <div className={cl({ [styles.isActive]: getBooleanFromNumber(isBold) }, styles.buttonItem)} onClick={() => isBoldSet(getAnotherBooleanNumber(isBold))}>
+                <div className={cl({ [styles.isActive]: getBooleanFromNumber(isBold || BooleanNumber.FALSE) }, styles.buttonItem)} onClick={() => isBoldSet(getAnotherBooleanNumber(isBold))}>
                     <BoldSingleIcon />
                 </div>
             )}
             { ItalicSingleIcon && (
-                <div className={cl({ [styles.isActive]: getBooleanFromNumber(isItalic) }, styles.buttonItem)} onClick={() => isItalicSet(getAnotherBooleanNumber(isItalic))}>
+                <div className={cl({ [styles.isActive]: getBooleanFromNumber(isItalic || BooleanNumber.FALSE) }, styles.buttonItem)} onClick={() => isItalicSet(getAnotherBooleanNumber(isItalic))}>
                     <ItalicSingleIcon />
                 </div>
             )}
             { UnderlineSingleIcon && (
-                <div className={cl({ [styles.isActive]: getBooleanFromNumber(isUnderline) }, styles.buttonItem)} onClick={() => isUnderlineSet(getAnotherBooleanNumber(isUnderline))}>
+                <div className={cl({ [styles.isActive]: getBooleanFromNumber(isUnderline || BooleanNumber.FALSE) }, styles.buttonItem)} onClick={() => isUnderlineSet(getAnotherBooleanNumber(isUnderline))}>
                     <UnderlineSingleIcon />
                 </div>
             )}
             { StrikethroughSingle && (
-                <div className={cl({ [styles.isActive]: getBooleanFromNumber(isStrikethrough) }, styles.buttonItem)} onClick={() => isStrikethroughSet(getAnotherBooleanNumber(isStrikethrough))}>
+                <div className={cl({ [styles.isActive]: getBooleanFromNumber(isStrikethrough || BooleanNumber.FALSE) }, styles.buttonItem)} onClick={() => isStrikethroughSet(getAnotherBooleanNumber(isStrikethrough))}>
                     <StrikethroughSingle />
                 </div>
             )}
-            <ColorPicker color={fontColor || DEFAULT_FONT_COLOR} onChange={fontColorSet} iconId="FontColor" />
-            <ColorPicker color={bgColor || DEFAULT_BG_COLOR} onChange={bgColorSet} iconId="PaintBucket" />
+            <ColorPicker color={fontColor} onChange={fontColorSet} iconId="FontColor" />
+            <ColorPicker color={bgColor} onChange={bgColorSet} iconId="PaintBucket" />
         </div>
     );
 };

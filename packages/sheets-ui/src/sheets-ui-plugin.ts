@@ -62,6 +62,7 @@ import { SheetSkeletonManagerService } from './services/sheet-skeleton-manager.s
 import { ShortcutExperienceService } from './services/shortcut-experience.service';
 import { IStatusBarService, StatusBarService } from './services/status-bar.service';
 import { SheetCanvasView } from './views/sheet-canvas-view';
+import { CanvasPopManagerService } from './services/canvas-pop-manager.service';
 
 export class UniverSheetsUIPlugin extends Plugin {
     static override type = PluginType.Sheet;
@@ -104,6 +105,7 @@ export class UniverSheetsUIPlugin extends Plugin {
                 ],
                 [IStatusBarService, { useClass: StatusBarService }],
                 [IMarkSelectionService, { useClass: MarkSelectionService }],
+                [CanvasPopManagerService],
 
                 // controllers
                 [ActiveWorksheetController],

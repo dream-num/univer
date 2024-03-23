@@ -20,6 +20,7 @@ import {
     ICommandService,
     IUniverInstanceService,
     MemoryCursor,
+    PRESET_LIST_TYPE,
     PresetListType,
     TextX,
     TextXActionType,
@@ -65,7 +66,7 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
 
         const unitId = dataModel.getUnitId();
 
-        const isAlreadyOrdered = currentParagraphs.every((paragraph) => paragraph.bullet?.listType === listType);
+        const isAlreadyList = currentParagraphs.every((paragraph) => paragraph.bullet?.listType === listType);
 
         const ID_LENGTH = 6;
 
@@ -98,8 +99,17 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
 
         const textX = new TextX();
 
+        const customLists = dataModel.getSnapshot().lists ?? {};
+
+        const lists = {
+            ...PRESET_LIST_TYPE,
+            ...customLists,
+        };
+
         for (const paragraph of currentParagraphs) {
-            const { startIndex } = paragraph;
+            const { startIndex, paragraphStyle = {} } = paragraph;
+            // const { indentStart = 0 } = paragraphStyle;
+            const { hanging, indentStart } = lists[listType].nestingLevel[0];
 
             textX.push({
                 t: TextXActionType.RETAIN,
@@ -107,27 +117,29 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
                 segmentId,
             });
 
-            // See: univer/packages/engine-render/src/components/docs/block/paragraph/layout-ruler.ts line:802 comments.
-            const paragraphStyle = {
-                ...paragraph.paragraphStyle,
-                hanging: undefined,
-                indentStart: undefined,
-            };
-
             textX.push({
                 t: TextXActionType.RETAIN,
                 len: 1,
                 body: {
                     dataStream: '',
                     paragraphs: [
-                        isAlreadyOrdered
+                        isAlreadyList
                             ? {
-                                paragraphStyle,
+                                paragraphStyle: {
+                                    ...paragraphStyle,
+                                    hanging: undefined,
+                                    indentStart: undefined,
+                                },
                                 startIndex: 0,
                             }
                             : {
-                                ...paragraph,
                                 startIndex: 0,
+                                paragraphStyle: {
+                                    ...paragraphStyle,
+                                    indentFirstLine: undefined,
+                                    hanging,
+                                    indentStart: indentStart - hanging, // Add paragraphStyle.indentStart
+                                },
                                 bullet: {
                                     ...(paragraph.bullet ?? {
                                         nestingLevel: 0,

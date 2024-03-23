@@ -15,7 +15,7 @@
  */
 
 import type { IDocumentData } from '@univerjs/core';
-import { BooleanNumber, HorizontalAlign } from '@univerjs/core';
+import { BooleanNumber } from '@univerjs/core';
 import { ptToPixel } from '@univerjs/engine-render';
 
 export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
@@ -115,7 +115,10 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                     spaceAbove: 10,
                     lineSpacing: 2,
                     spaceBelow: 0,
-                    horizontalAlign: HorizontalAlign.JUSTIFIED,
+                    hanging: 20,
+                    indentStart: 50,
+                    indentEnd: 50,
+                    indentFirstLine: 50,
                 },
             },
             {

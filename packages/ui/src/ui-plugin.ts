@@ -18,7 +18,7 @@ import { ILocalStorageService, LocaleService, Plugin, PluginType } from '@univer
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { GlobalPopupManagerService, IGlobalPopupManagerService } from '@univerjs/ui';
+import { GlobalPopupManagerService, IGlobalPopupManagerService } from './services/popup/global-popup-manager.service';
 import { DesktopGlobalZoneService } from './services/global-zone/desktop-global-zone.service';
 import { IGlobalZoneService } from './services/global-zone/global-zone.service';
 import { ComponentManager } from './common/component-manager';

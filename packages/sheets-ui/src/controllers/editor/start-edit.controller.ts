@@ -74,7 +74,7 @@ interface ICanvasOffset {
     top: number;
 }
 
-@OnLifecycle(LifecycleStages.Steady, StartEditController)
+@OnLifecycle(LifecycleStages.Rendered, StartEditController)
 export class StartEditController extends Disposable {
     private _editorVisiblePrevious = false;
 

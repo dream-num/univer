@@ -18,7 +18,7 @@ import type { Nullable } from '@univerjs/core';
 import type { IDisposable } from '@wendellhu/redi';
 import { createIdentifier } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 
 export interface IFormulaEditorManagerService {
     position$: Observable<Nullable<DOMRect>>;
@@ -42,10 +42,10 @@ export class FormulaEditorManagerService implements IDisposable {
     private readonly _focus$ = new BehaviorSubject<boolean>(this._focus);
     readonly focus$ = this._focus$.asObservable();
 
-    private readonly _fxBtnClick$ = new BehaviorSubject<boolean>(false);
+    private readonly _fxBtnClick$ = new Subject<boolean>();
     readonly fxBtnClick$ = this._fxBtnClick$.asObservable();
 
-    private readonly _foldBtnStatus$ = new BehaviorSubject<boolean>(false);
+    private readonly _foldBtnStatus$ = new Subject<boolean>();
     readonly foldBtnStatus$ = this._foldBtnStatus$.asObservable();
 
     dispose(): void {

@@ -291,7 +291,7 @@ export function deserializeRangeWithSheet(refString: string): IUnitRangeName {
  * Determine whether the sheet name needs to be wrapped in quotes
  * Excel will quote the worksheet name if any of the following is true:
  *  - It contains any space or punctuation characters, such as  ()$,;-{}"'（）【】“”‘’%… and many more
- *  - It is a valid cell reference in A1 notation, e.g. B1048576 is quoted, B1048577 is not
+ *  - It is a valid cell reference in A1 notation, e.g. B1048576 is quoted
  *  - It is a valid cell reference in R1C1 notation, e.g. RC, RC2, R5C, R-4C, RC-8, R, C
  *  - It starts with a non-letter, e.g. 99, 1.5, 12a, 💩a
  *  - Excel will not quote worksheet names if they only contain non-punctuation, non-letter characters in non-initial positions. For example, a💩 remains unquoted.*
@@ -332,7 +332,8 @@ export function needsQuoting(name: string) {
 
 function isA1Notation(name: string) {
     const match = name.match(/[1-9][0-9]{0,6}/);
-    return /^[A-Z]+[1-9][0-9]{0,6}$/.test(name) && match !== null && Number.parseInt(match[0], 10) <= 1048576;
+    // Excel has a limit on the number of rows and columns: targetRow > 1048576 || targetColumn > 16384, Univer has no limit
+    return /^[A-Z]+[1-9][0-9]{0,6}$/.test(name) && match !== null;
 }
 
 function isR1C1Notation(name: string) {

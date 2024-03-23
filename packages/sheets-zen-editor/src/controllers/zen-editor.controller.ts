@@ -71,7 +71,7 @@ export class ZenEditorController extends RxDisposable {
 
         this._commandExecutedListener();
 
-        this._createZenEditorInstance();
+        // this._createZenEditorInstance();
     }
 
     private _createZenEditorInstance() {
@@ -142,7 +142,14 @@ export class ZenEditorController extends RxDisposable {
         });
     }
 
+    private _zenEditorInitialState = false;
+
     private _handleOpenZenEditor() {
+        if (!this._zenEditorInitialState) {
+            this._createZenEditorInstance();
+            this._zenEditorInitialState = true;
+        }
+
         this._zenZoneService.open();
 
         // Need to clear undo/redo service when open zen mode.

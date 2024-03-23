@@ -30,7 +30,6 @@ import {
     SelectionManagerService,
     SetRangeValuesMutation,
     SetSelectionsOperation,
-    SheetInterceptorService,
 } from '@univerjs/sheets';
 import {
     AutoFillCommand,
@@ -66,7 +65,6 @@ describe('Test auto fill with formula', () => {
 
     beforeEach(() => {
         const testBed = createCommandTestBed(undefined, [
-            [SheetInterceptorService],
             [ISelectionRenderService, { useClass: SelectionRenderService }],
             [AutoFillController],
             [IAutoFillService, { useClass: AutoFillService }],

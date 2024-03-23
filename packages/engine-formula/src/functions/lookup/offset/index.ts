@@ -16,20 +16,24 @@
 
 import { ErrorType } from '../../../basics/error-type';
 import type { BaseReferenceObject } from '../../../engine/reference-object/base-reference-object';
-import { RangeReferenceObject } from '../../../engine/reference-object/range-reference-object';
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
+import type { RangeReferenceObject } from '../../../engine/reference-object/range-reference-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BaseFunction } from '../../base-function';
 
 export class Offset extends BaseFunction {
+    override needsReferenceObject = true;
+
     override calculate(
-        reference: BaseValueObject,
+        referenceObject: BaseValueObject,
         rows: BaseValueObject,
         columns: BaseValueObject,
         height?: BaseValueObject,
         width?: BaseValueObject
     ) {
+        // covert to real type
+        const reference = referenceObject as unknown as RangeReferenceObject;
+
         if (reference == null || rows == null || columns == null) {
             return ErrorValueObject.create(ErrorType.NA);
         }
@@ -54,12 +58,20 @@ export class Offset extends BaseFunction {
             return width;
         }
 
-        if (!reference.isArray()) {
+        if (!reference.isReferenceObject()) {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        const row = (reference as ArrayValueObject).getCurrentRow();
-        const column = (reference as ArrayValueObject).getCurrentColumn();
+        const { startRow: row, endRow: referenceEndRow, startColumn: column, endColumn: referenceEndColumn } = reference.getRangeData();
+
+        if (rows.isReferenceObject()) {
+            rows = (rows as unknown as BaseReferenceObject).toArrayValueObject();
+        }
+
+        if (columns.isReferenceObject()) {
+            columns = (columns as unknown as BaseReferenceObject).toArrayValueObject();
+        }
+
         const rowOffset = this.getIndexNumValue(rows);
         const columnOffset = this.getIndexNumValue(columns);
 
@@ -70,8 +82,17 @@ export class Offset extends BaseFunction {
         const targetRow = row + rowOffset;
         const targetColumn = column + columnOffset;
 
-        if (targetRow < 0 || targetColumn < 0 || targetRow > 1048576 || targetColumn > 16384) {
+        // Excel has a limit on the number of rows and columns: targetRow > 1048576 || targetColumn > 16384, Univer has no limit
+        if (targetRow < 0 || targetColumn < 0) {
             return ErrorValueObject.create(ErrorType.REF);
+        }
+
+        if (height?.isReferenceObject()) {
+            height = (height as unknown as BaseReferenceObject).toArrayValueObject();
+        }
+
+        if (width?.isReferenceObject()) {
+            width = (width as unknown as BaseReferenceObject).toArrayValueObject();
         }
 
         const heightCount = (height && this.getIndexNumValue(height)) ?? 1;
@@ -88,7 +109,8 @@ export class Offset extends BaseFunction {
         const targetRowWithHeight = heightCount > 0 ? targetRow + heightCount - 1 : targetRow + heightCount + 1;
         const targetColumnWithWidth = widthCount > 0 ? targetColumn + widthCount - 1 : targetColumn + widthCount + 1;
 
-        if (targetRowWithHeight < 0 || targetColumnWithWidth < 0 || targetRowWithHeight > 1048576 || targetColumnWithWidth > 16384) {
+        // Excel has a limit on the number of rows and columns: targetRow > 1048576 || targetColumn > 16384, Univer has no limit
+        if (targetRowWithHeight < 0 || targetColumnWithWidth < 0) {
             return ErrorValueObject.create(ErrorType.REF);
         }
 
@@ -104,20 +126,6 @@ export class Offset extends BaseFunction {
             endColumn,
         };
 
-        const unitId = (reference as ArrayValueObject).getUnitId();
-        const sheetId = (reference as ArrayValueObject).getSheetId();
-
-        const rangeReferenceObject = new RangeReferenceObject(range, sheetId, unitId);
-
-        return this._setDefault(rangeReferenceObject);
-    }
-
-    private _setDefault(object: BaseReferenceObject) {
-        if (this.unitId == null || this.subUnitId == null) {
-            return ErrorValueObject.create(ErrorType.REF);
-        }
-        object.setDefaultUnitId(this.unitId);
-        object.setDefaultSheetId(this.subUnitId);
-        return object;
+        return this.createReferenceObject(reference, range);
     }
 }

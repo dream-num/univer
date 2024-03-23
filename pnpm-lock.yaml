@@ -592,6 +592,9 @@ importers:
       big.js:
         specifier: ^6.2.1
         version: 6.2.1
+      numfmt:
+        specifier: ^2.5.2
+        version: 2.5.2
     devDependencies:
       '@types/big.js':
         specifier: ^6.2.2

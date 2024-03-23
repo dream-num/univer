@@ -33,6 +33,7 @@ import type { BaseValueObject, ErrorValueObject } from '../../../../engine/value
 import type { ArrayValueObject } from '../../../../engine/value-object/array-value-object';
 import { Index } from '..';
 import { ErrorType } from '../../../../basics/error-type';
+import type { BaseReferenceObject } from '../../../../engine/reference-object/base-reference-object';
 
 const getTestWorkbookData = (): IWorkbookData => {
     return {
@@ -201,6 +202,8 @@ describe('Test index', () => {
 
             if ((result as ErrorValueObject).isError()) {
                 return (result as ErrorValueObject).getValue();
+            } else if ((result as BaseReferenceObject).isReferenceObject()) {
+                return (result as BaseReferenceObject).toArrayValueObject().toValue();
             } else if ((result as ArrayValueObject).isArray()) {
                 return (result as ArrayValueObject).toValue();
             }
@@ -543,6 +546,12 @@ describe('Test index', () => {
             result = await calculate('=INDEX(A6:A7,A3:A5,A3:F4)');
 
             expect(result).toStrictEqual([['Tom', ErrorType.VALUE, 'Tom', 'Tom', 'Tom', 'Tom'], ['Tom', ErrorType.REF, ErrorType.REF, ErrorType.VALUE, ErrorType.VALUE, 'Tom'], [ErrorType.NA, ErrorType.NA, ErrorType.NA, ErrorType.NA, ErrorType.NA, ErrorType.NA]]);
+        });
+
+        it('The result of the INDEX function is a reference', async () => {
+            const result = await calculate('=INDEX(A2:A5,2,1):A1');
+
+            expect(result).toStrictEqual([[1], [3], [1]]);
         });
     });
 

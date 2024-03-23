@@ -133,7 +133,7 @@ enum FormulaReferenceMoveType {
     InsertMoveDown, // range
     InsertMoveRight, // range
     SetName,
-    removeSheet,
+    RemoveSheet,
 }
 
 interface IFormulaReferenceMoveParam {
@@ -154,6 +154,17 @@ enum OriginRangeEdgeType {
     ALL,
 }
 
+/**
+ * Update formula process
+ *
+ * 1. Command intercepts, converts the command information to adapt refRange, offsets the formula content, and obtains the formula that requires offset content.
+ *
+   2. Use refRange to offset the formula position and return undo/redo data to setRangeValues mutation
+        - Redo data: Delete the old value at the old position on the match, and add the new value at the new position (the new value first checks whether the old position has offset content, if so, use the new offset content, if not, take the old value)
+        - Undo data: the old position on the match saves the old value, and the new position is left blank
+
+   3. onCommandExecuted, before formula calculation, use the setRangeValues information to delete the old formulaData, ArrayFormula and ArrayFormulaCellData, and send the worker (complementary setRangeValues after collaborative conflicts, normal operation triggers formula update, undo/redo are captured and processed here)
+ */
 @OnLifecycle(LifecycleStages.Ready, UpdateFormulaController)
 export class UpdateFormulaController extends Disposable {
     constructor(
@@ -204,7 +215,7 @@ export class UpdateFormulaController extends Disposable {
                     (command.params as IMutationCommonParams)?.trigger === UndoCommand.id ||
                     (command.params as IMutationCommonParams)?.trigger === RedoCommand.id
                 ) {
-                    this._handleRedoUndo(command);
+                    this._handleRedoUndo(command); // TODO: handle in set range values
                 }
             })
         );
@@ -399,6 +410,9 @@ export class UpdateFormulaController extends Disposable {
                 result
             );
 
+            // TODO@Dushusir: handle offset formula data
+            // const {redos, undos} = refRangeFormula(oldFormulaData, newFormulaData, result);
+
             const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
             const unitId = workbook.getUnitId();
             const sheetId = workbook.getActiveSheet().getSheetId();
@@ -444,7 +458,8 @@ export class UpdateFormulaController extends Disposable {
             oldFormulaData = offsetFormula(oldFormulaData, command, unitId, sheetId, selections);
             const offsetFormulaData = offsetFormula(formulaData, command, unitId, sheetId, selections);
 
-            // Synchronous to the worker thread
+            // TODO@Dushusir: Here we take the redos incremental data,
+            // Synchronously to the worker thread, and update the dependency cache.
             this._commandService.executeCommand(SetFormulaDataMutation.id, {
                 formulaData: this._formulaDataModel.getFormulaData(),
             });
@@ -699,7 +714,7 @@ export class UpdateFormulaController extends Disposable {
         const { unitId: workbookId, sheetId } = this._getCurrentSheetInfo();
 
         return {
-            type: FormulaReferenceMoveType.removeSheet,
+            type: FormulaReferenceMoveType.RemoveSheet,
             unitId: unitId || workbookId,
             sheetId: subUnitId || sheetId,
         };
@@ -780,12 +795,13 @@ export class UpdateFormulaController extends Disposable {
         unitSheetNameMap: IUnitSheetNameMap,
         formulaReferenceMoveParam: IFormulaReferenceMoveParam
     ) {
-        if (!Tools.isDefine(formulaData)) return { newFormulaData: {}, refRanges: [] };
+        if (!Tools.isDefine(formulaData)) return { newFormulaData: {}, oldFormulaData: {}, refRanges: [] };
 
         const formulaDataKeys = Object.keys(formulaData);
 
-        if (formulaDataKeys.length === 0) return { newFormulaData: {}, refRanges: [] };
+        if (formulaDataKeys.length === 0) return { newFormulaData: {}, oldFormulaData: {}, refRanges: [] };
 
+        const oldFormulaData: IFormulaData = {};
         const newFormulaData: IFormulaData = {};
 
         // Return all reference ranges. If the operation affects the reference range, you need to clear arrayFormulaRange and arrayFormulaCellData.
@@ -800,6 +816,10 @@ export class UpdateFormulaController extends Disposable {
 
             const sheetDataKeys = Object.keys(sheetData);
 
+            if (!Tools.isDefine(oldFormulaData[unitId])) {
+                oldFormulaData[unitId] = {};
+            }
+
             if (!Tools.isDefine(newFormulaData[unitId])) {
                 newFormulaData[unitId] = {};
             }
@@ -807,6 +827,7 @@ export class UpdateFormulaController extends Disposable {
             for (const sheetId of sheetDataKeys) {
                 const matrixData = new ObjectMatrix(sheetData[sheetId]);
 
+                const oldFormulaDataItem = new ObjectMatrix<IFormulaDataItem>();
                 const newFormulaDataItem = new ObjectMatrix<IFormulaDataItem>();
 
                 matrixData.forValue((row, column, formulaDataItem) => {
@@ -888,7 +909,7 @@ export class UpdateFormulaController extends Disposable {
                                 sheetName: newSheetName,
                                 unitId: sequenceUnitId,
                             });
-                        } else if (formulaReferenceMoveParam.type === FormulaReferenceMoveType.removeSheet) {
+                        } else if (formulaReferenceMoveParam.type === FormulaReferenceMoveType.RemoveSheet) {
                             const {
                                 unitId: userUnitId,
                                 sheetId: userSheetId,
@@ -930,6 +951,13 @@ export class UpdateFormulaController extends Disposable {
 
                     const newSequenceNodes = this._updateRefOffset(sequenceNodes, refChangeIds, x, y);
 
+                    oldFormulaDataItem.setValue(row, column, {
+                        f: formulaString,
+                        x,
+                        y,
+                        si,
+                    });
+
                     newFormulaDataItem.setValue(row, column, {
                         f: `=${generateStringWithSequence(newSequenceNodes)}`,
                         x,
@@ -938,13 +966,17 @@ export class UpdateFormulaController extends Disposable {
                     });
                 });
 
+                if (oldFormulaData[unitId]) {
+                    oldFormulaData[unitId]![sheetId] = oldFormulaDataItem.getData();
+                }
+
                 if (newFormulaData[unitId]) {
                     newFormulaData[unitId]![sheetId] = newFormulaDataItem.getData();
                 }
             }
         }
 
-        return { newFormulaData, refRanges };
+        return { newFormulaData, oldFormulaData, refRanges };
     }
 
     private _getNewRangeByMoveParam(

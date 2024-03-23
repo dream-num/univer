@@ -70,8 +70,7 @@ enum CursorChange {
     StartEditor,
     CursorChange,
 }
-
-@OnLifecycle(LifecycleStages.Steady, EndEditController)
+@OnLifecycle(LifecycleStages.Rendered, EndEditController)
 export class EndEditController extends Disposable {
     private _cursorChangeObservers: Nullable<Observer<IPointerEvent | IMouseEvent>>;
 

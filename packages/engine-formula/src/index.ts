@@ -139,3 +139,6 @@ export type { ISetNumfmtFormulaDataMutationParams } from './commands/mutations/s
 export { isReferenceString } from './basics/regex';
 export { matchRefDrawToken } from './basics/match-token';
 export { isFormulaTransformable, transformFormula } from './engine/utils/relative-formula';
+export { IDefinedNamesService, DefinedNamesService } from './services/defined-names.service';
+export { IFormulaRuntimeService, FormulaRuntimeService } from './services/runtime.service';
+export { IFormulaCurrentConfigService, FormulaCurrentConfigService } from './services/current-data.service';

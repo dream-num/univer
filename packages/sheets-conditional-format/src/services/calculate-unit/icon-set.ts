@@ -73,14 +73,17 @@ export const iconSetCalculateUnit: ICalculateUnit = {
                         computeResult.setValue(row, col, { iconId, iconType, isShowValue });
                         return;
                     }
+                } else if (index === splitValue.length - 1) {
+                    computeResult.setValue(row, col, { iconId, iconType, isShowValue });
+                    return;
                 } else {
                     const pre = splitValue[index - 1];
                     end.operator = getOppositeOperator(pre.operator);
                     end.value = pre.value;
-                }
-                if (compareWithNumber(start, value) && compareWithNumber(end, value)) {
-                    computeResult.setValue(row, col, { iconId, iconType, isShowValue });
-                    return;
+                    if (compareWithNumber(start, value) && compareWithNumber(end, value)) {
+                        computeResult.setValue(row, col, { iconId, iconType, isShowValue });
+                        return;
+                    }
                 }
             }
         });

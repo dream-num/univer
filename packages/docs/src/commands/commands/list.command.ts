@@ -27,7 +27,7 @@ import {
     Tools,
     UpdateDocsAttributeType,
 } from '@univerjs/core';
-import type { IActiveTextRange } from '@univerjs/engine-render';
+import { getCharSpaceApply, getNumberUnitValue, type IActiveTextRange } from '@univerjs/engine-render';
 
 import { serializeTextRange, TextSelectionManagerService } from '../../services/text-selection-manager.service';
 import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
@@ -106,10 +106,14 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
             ...customLists,
         };
 
+        const { charSpace, defaultTabStop = 36, gridType } = dataModel.getSnapshot().documentStyle;
+
         for (const paragraph of currentParagraphs) {
             const { startIndex, paragraphStyle = {} } = paragraph;
-            // const { indentStart = 0 } = paragraphStyle;
-            const { hanging, indentStart } = lists[listType].nestingLevel[0];
+            const { indentFirstLine = 0, snapToGrid, indentStart = 0 } = paragraphStyle;
+            const { hanging: listHanging, indentStart: listIndentStart } = lists[listType].nestingLevel[0];
+
+            const charSpaceApply = getCharSpaceApply(charSpace, defaultTabStop, gridType, snapToGrid);
 
             textX.push({
                 t: TextXActionType.RETAIN,
@@ -128,7 +132,7 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
                                 paragraphStyle: {
                                     ...paragraphStyle,
                                     hanging: undefined,
-                                    indentStart: undefined,
+                                    indentStart: indentStart ? Math.max(0, getNumberUnitValue(indentStart, charSpaceApply) + listHanging - listIndentStart) : undefined,
                                 },
                                 startIndex: 0,
                             }
@@ -137,8 +141,8 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
                                 paragraphStyle: {
                                     ...paragraphStyle,
                                     indentFirstLine: undefined,
-                                    hanging,
-                                    indentStart: indentStart - hanging, // Add paragraphStyle.indentStart
+                                    hanging: listHanging,
+                                    indentStart: listIndentStart - listHanging + getNumberUnitValue(indentFirstLine, charSpaceApply) + getNumberUnitValue(indentStart, charSpaceApply),
                                 },
                                 bullet: {
                                     ...(paragraph.bullet ?? {

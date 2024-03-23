@@ -121,17 +121,18 @@ export default {
         },
         checkbox: {
             title: '复选框',
+            error: '此单元格的内容违反了验证规则',
         },
         custom: {
             title: '自定义公式',
-            error: 'This cell\'s contents violate its validation rule',
+            error: '此单元格的内容违反了验证规则',
         },
         alert: {
             title: '提示',
             ok: '确定',
         },
         error: {
-            title: '校验错误',
+            title: '无效：',
         },
     },
 };

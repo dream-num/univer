@@ -36,8 +36,6 @@ export class ListValidator extends BaseDataValidator {
 
     override canvasRender = this.injector.createInstance(DropdownWidget);
 
-    private _formulaService = this.injector.get(DataValidationFormulaService);
-
     override dropdown: string | undefined = LIST_DROPDOWN_KEY;
 
     override skipDefaultFontRender: boolean = true;

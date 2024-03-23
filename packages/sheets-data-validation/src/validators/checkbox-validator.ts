@@ -63,10 +63,14 @@ export class CheckboxValidator extends BaseDataValidator {
     override async isValidType(cellInfo: IValidatorCellInfo<CellValue>, formula: IFormulaResult, rule: IDataValidationRule): Promise<boolean> {
         const { value, unitId, subUnitId } = cellInfo;
         const { formula1, formula2 } = await this.parseFormula(rule, unitId, subUnitId);
-        if (!formula1 || !formula2) {
+        if (!Tools.isDefine(formula1) || !Tools.isDefine(formula2)) {
             return true;
         }
 
         return Tools.isDefine(value) && (value === formula1 || value === formula2);
+    }
+
+    override generateRuleErrorMessage(rule: IDataValidationRuleBase): string {
+        return this.localeService.t('dataValidation.checkbox.error');
     }
 }

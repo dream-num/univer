@@ -73,18 +73,22 @@ export abstract class BaseDataValidator<DataType = CellValue> {
         return this.operators.map((operator) => this.localeService.t(operatorNameMap[operator]));
     }
 
+    get titleStr() {
+        return this.localeService.t(this.title);
+    }
+
     generateRuleName(rule: IDataValidationRuleBase): string {
         if (!rule.operator) {
-            return this.title;
+            return this.titleStr;
         }
 
         const ruleName = this.localeService.t(OperatorTitleMap[rule.operator]).replace(FORMULA1, rule.formula1 ?? '').replace(FORMULA2, rule.formula2 ?? '');
-        return `${this.title} ${ruleName}`;
+        return `${this.titleStr} ${ruleName}`;
     }
 
     generateRuleErrorMessage(rule: IDataValidationRuleBase) {
         if (!rule.operator) {
-            return this.title;
+            return this.titleStr;
         }
 
         const errorMsg = this.localeService.t(OperatorErrorTitleMap[rule.operator]).replace(FORMULA1, rule.formula1 ?? '').replace(FORMULA2, rule.formula2 ?? '');

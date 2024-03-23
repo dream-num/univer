@@ -34,9 +34,7 @@ export class ListMultipleValidator extends BaseDataValidator {
 
     private _univerInstanceService = this.injector.get(IUniverInstanceService);
 
-    override canvasRender: Nullable<ICellCustomRender> = this.injector.createInstance(DropdownMultipleWidget);
-
-    private _formulaService = this.injector.get(DataValidationFormulaService);
+    override canvasRender = this.injector.createInstance(DropdownMultipleWidget);
 
     override dropdown: string | undefined = LIST_DROPDOWN_KEY;
 

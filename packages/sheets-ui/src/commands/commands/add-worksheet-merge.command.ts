@@ -32,7 +32,8 @@ import {
     AddWorksheetMergeMutation,
     getAddMergeMutationRangeByType,
     RemoveMergeUndoMutationFactory,
-    RemoveWorksheetMergeMutation, SelectionManagerService } from '@univerjs/sheets';
+    RemoveWorksheetMergeMutation, SelectionManagerService,
+} from '@univerjs/sheets';
 import { IConfirmService } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 
@@ -94,14 +95,21 @@ export const AddWorksheetMergeCommand: ICommand = {
             subUnitId,
             ranges,
         };
-        redoMutations.push({ id: RemoveWorksheetMergeMutation.id, params: removeMergeMutationParams });
-        redoMutations.push({ id: AddWorksheetMergeMutation.id, params: addMergeMutationParams });
 
         // prepare undo mutations
         const undoRemoveMergeMutationParams = RemoveMergeUndoMutationFactory(accessor, removeMergeMutationParams);
         const undoMutationParams = AddMergeUndoMutationFactory(accessor, addMergeMutationParams);
+
+        // params should be the merged cells to be deleted accurately, rather than the selection
+        if (undoRemoveMergeMutationParams.ranges.length > 0) {
+            redoMutations.push({ id: RemoveWorksheetMergeMutation.id, params: undoRemoveMergeMutationParams });
+        }
+
+        redoMutations.push({ id: AddWorksheetMergeMutation.id, params: addMergeMutationParams });
         undoMutations.push({ id: RemoveWorksheetMergeMutation.id, params: undoMutationParams });
-        undoMutations.push({ id: AddWorksheetMergeMutation.id, params: undoRemoveMergeMutationParams });
+        if (undoRemoveMergeMutationParams.ranges.length > 0) {
+            undoMutations.push({ id: AddWorksheetMergeMutation.id, params: undoRemoveMergeMutationParams });
+        }
 
         // add set range values mutations to undo redo mutations
         if (willClearSomeCell) {

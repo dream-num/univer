@@ -31,7 +31,7 @@ export interface IPopup {
     offset?: [number, number];
 }
 
-export interface IGlobalPopupManagerService {
+export interface ICanvasPopupService {
     addPopup(item: IPopup): string;
     removePopup(id: string): void;
     removeAll(): void;
@@ -40,9 +40,9 @@ export interface IGlobalPopupManagerService {
     get popups(): [string, IPopup][];
 }
 
-export const IGlobalPopupManagerService = createIdentifier<IGlobalPopupManagerService>('univer.popup.service');
+export const ICanvasPopupService = createIdentifier<ICanvasPopupService>('univer.popup.service');
 
-export class GlobalPopupManagerService implements IGlobalPopupManagerService {
+export class CanvasPopupService implements ICanvasPopupService {
     private _popupMap = new Map<string, IPopup>();
     private _popups$ = new BehaviorSubject<[string, IPopup][]>([]);
 

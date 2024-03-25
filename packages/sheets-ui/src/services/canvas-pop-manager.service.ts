@@ -15,18 +15,19 @@
  */
 
 import type { Worksheet } from '@univerjs/core';
-import { Disposable, DisposableCollection, ICommandService, IUniverInstanceService } from '@univerjs/core';
+import { Disposable, DisposableCollection, ICommandService, IUniverInstanceService, Rectangle } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { BaseObject, IBoundRectNoAngle, IRender, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
-import { IGlobalPopupManagerService } from '@univerjs/ui';
+import { ICanvasPopupService } from '@univerjs/ui';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
-import type { ISetWorksheetRowAutoHeightMutationParams } from '@univerjs/sheets';
-import { COMMAND_LISTENER_SKELETON_CHANGE, SetWorksheetRowAutoHeightMutation } from '@univerjs/sheets';
+import type { IRemoveColMutationParams, ISetWorksheetRowAutoHeightMutationParams } from '@univerjs/sheets';
+import { COMMAND_LISTENER_SKELETON_CHANGE, RemoveColCommand, RemoveColMutation, RemoveRowMutation, SetWorksheetRowAutoHeightMutation } from '@univerjs/sheets';
 import { getViewportByCell, transformBound2OffsetBound } from '../common/utils';
 import { SetScrollOperation } from '../commands/operations/scroll.operation';
 import { SetZoomRatioOperation } from '..';
+import type { IRemoveRowColCommandParams } from '../../../sheets/lib/types';
 import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
 
 interface ICanvasPopup {
@@ -37,9 +38,9 @@ interface ICanvasPopup {
     offset?: [number, number];
 }
 
-export class CanvasPopManagerService extends Disposable {
+export class SheetCanvasPopManagerService extends Disposable {
     constructor(
-        @Inject(IGlobalPopupManagerService) private readonly _globalPopupManagerService: IGlobalPopupManagerService,
+        @Inject(ICanvasPopupService) private readonly _globalPopupManagerService: ICanvasPopupService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
@@ -88,8 +89,8 @@ export class CanvasPopManagerService extends Disposable {
         const position = this._calcCellPosition(row, col, currentRender, skeleton, activeViewport);
         const position$ = new BehaviorSubject(position);
 
-        const disposableCollection = new DisposableCollection();
-        disposableCollection.add(this._commandService.onCommandExecuted((commandInfo) => {
+        const disposable = new DisposableCollection();
+        disposable.add(this._commandService.onCommandExecuted((commandInfo) => {
             if (commandInfo.id === SetWorksheetRowAutoHeightMutation.id) {
                 const params = commandInfo.params as ISetWorksheetRowAutoHeightMutationParams;
                 if (params.rowsAutoHeightInfo.findIndex((item) => item.row === row) > -1) {
@@ -109,7 +110,7 @@ export class CanvasPopManagerService extends Disposable {
 
         return {
             position$,
-            disposableCollection,
+            disposable,
             position,
         };
     }
@@ -145,8 +146,9 @@ export class CanvasPopManagerService extends Disposable {
 
         const position = calc();
         const position$ = new BehaviorSubject(position);
-        const disposableCollection = new DisposableCollection();
-        disposableCollection.add(this._commandService.onCommandExecuted((commandInfo) => {
+        const disposable = new DisposableCollection();
+
+        disposable.add(this._commandService.onCommandExecuted((commandInfo) => {
             if (commandInfo.id === SetScrollOperation.id || commandInfo.id === SetZoomRatioOperation.id) {
                 position$.next(calc());
             }
@@ -155,7 +157,7 @@ export class CanvasPopManagerService extends Disposable {
         return {
             position,
             position$,
-            disposableCollection,
+            disposable,
         };
     }
 
@@ -182,7 +184,7 @@ export class CanvasPopManagerService extends Disposable {
             };
         }
 
-        const { position, position$, disposableCollection } = this._createObjectPositionObserver(targetObject, currentRender, skeleton, worksheet);
+        const { position, position$, disposable } = this._createObjectPositionObserver(targetObject, currentRender, skeleton, worksheet);
 
         const id = this._globalPopupManagerService.addPopup({
             ...popup,
@@ -196,7 +198,7 @@ export class CanvasPopManagerService extends Disposable {
             dispose: () => {
                 this._globalPopupManagerService.removePopup(id);
                 position$.complete();
-                disposableCollection.dispose();
+                disposable.dispose();
             },
         };
     }
@@ -234,7 +236,7 @@ export class CanvasPopManagerService extends Disposable {
             };
         }
 
-        const { position, position$, disposableCollection } = this._createCellPositionObserver(row, col, currentRender, skeleton, activeViewport);
+        const { position, position$, disposable } = this._createCellPositionObserver(row, col, currentRender, skeleton, activeViewport);
 
         const id = this._globalPopupManagerService.addPopup({
             ...popup,
@@ -244,11 +246,49 @@ export class CanvasPopManagerService extends Disposable {
             anchorRect$: position$,
         });
 
+        const onDispose = () => {
+            this._globalPopupManagerService.removePopup(id);
+            disposable.dispose();
+            position$.complete();
+        };
+
+        const commandDisposable = this._commandService.onCommandExecuted((commandInfo) => {
+            if (commandInfo.id === RemoveColMutation.id) {
+                const params = commandInfo.params as IRemoveColMutationParams;
+
+                if (Rectangle.contains(
+                    params.range,
+                    {
+                        startColumn: col,
+                        endColumn: col,
+                        startRow: row,
+                        endRow: row,
+                    }
+                )) {
+                    onDispose();
+                }
+            }
+
+            if (commandInfo.id === RemoveRowMutation.id) {
+                const params = commandInfo.params as IRemoveRowColCommandParams;
+                if (Rectangle.contains(
+                    params.range,
+                    {
+                        startColumn: col,
+                        endColumn: col,
+                        startRow: row,
+                        endRow: row,
+                    }
+                )) {
+                    onDispose();
+                }
+            }
+        });
+
         return {
             dispose: () => {
-                this._globalPopupManagerService.removePopup(id);
-                disposableCollection.dispose();
-                position$.complete();
+                commandDisposable.dispose();
+                onDispose();
             },
         };
     }

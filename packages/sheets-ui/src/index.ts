@@ -80,5 +80,5 @@ export { HoverManagerService } from './services/hover-manager.service';
 export { CellAlertManagerService, CellAlertType, type ICellAlert } from './services/cell-alert-manager.service';
 export { HoverController } from './controllers/hover.controller';
 export { SHEET_VIEW_KEY } from './common/keys';
-export { CanvasPopManagerService } from './services/canvas-pop-manager.service';
+export { SheetCanvasPopManagerService } from './services/canvas-pop-manager.service';
 export { mergeSetRangeValues } from './services/clipboard/utils';

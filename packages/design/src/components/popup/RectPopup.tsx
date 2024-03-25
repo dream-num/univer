@@ -73,7 +73,7 @@ const calcPopupPosition = (layout: IPopupLayoutInfo) => {
 
 function RectPopup(props: IRectPopupProps) {
     const { children, anchorRect, direction = 'vertical', onClickOutside } = props;
-    const active = useRef(true);
+    const mounted = useRef(false);
     const nodeRef = useRef(null);
     const clickOtherFn = useRef(onClickOutside);
 
@@ -109,17 +109,17 @@ function RectPopup(props: IRectPopupProps) {
     ]);
 
     useEffect(() => {
-        active.current = true;
+        mounted.current = true;
         const handleClick = (e: MouseEvent) => {
             clickOtherFn.current?.(e);
         };
         setTimeout(() => {
-            if (active.current) {
+            if (mounted.current) {
                 window.addEventListener('click', handleClick);
             }
         }, 100);
         return () => {
-            active.current = false;
+            mounted.current = false;
             window.removeEventListener('click', handleClick);
         };
     }, [clickOtherFn]);

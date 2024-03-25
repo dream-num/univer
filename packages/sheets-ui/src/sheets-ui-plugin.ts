@@ -67,7 +67,7 @@ import { HoverManagerService } from './services/hover-manager.service';
 import { CellAlertManagerService } from './services/cell-alert-manager.service';
 import { CellAlertController } from './controllers/cell-alert.controller';
 import { CellCustomRenderController } from './controllers/cell-custom-render.controller';
-import { CanvasPopManagerService } from './services/canvas-pop-manager.service';
+import { SheetCanvasPopManagerService } from './services/canvas-pop-manager.service';
 
 export class UniverSheetsUIPlugin extends Plugin {
     static override type = PluginType.Sheet;
@@ -111,7 +111,7 @@ export class UniverSheetsUIPlugin extends Plugin {
                 [IStatusBarService, { useClass: StatusBarService }],
                 [IMarkSelectionService, { useClass: MarkSelectionService }],
                 [HoverManagerService],
-                [CanvasPopManagerService],
+                [SheetCanvasPopManagerService],
                 [CellAlertManagerService],
 
                 // controllers

@@ -208,8 +208,13 @@ function restoreLastCJKGlyphWidth(line: IDocumentSkeletonLine) {
 // Compression of punctuation marks at line start or line end
 function shrinkStartAndEndCJKPunctuation(line: IDocumentSkeletonLine) {
     for (const divide of line.divides) {
+        const glyphGroupLength = divide.glyphGroup.length;
+        if (glyphGroupLength < 2) {
+            continue;
+        }
+
         const firstGlyph = divide.glyphGroup[0];
-        const lastGlyph = divide.glyphGroup[divide.glyphGroup.length - 1];
+        const lastGlyph = divide.glyphGroup[glyphGroupLength - 1];
 
         if (isCjkRightAlignedPunctuation(firstGlyph.content)) {
             const shrinkAmount = firstGlyph.adjustability.shrinkability[0];

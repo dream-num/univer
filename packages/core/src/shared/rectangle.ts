@@ -193,12 +193,13 @@ export class Rectangle {
             endColumn: range.endColumn - range.startColumn,
         }) as IRange;
 
-    static getPositionRange = (relativeRange: IRange, originRange: IRange) => {
+    static getPositionRange = (relativeRange: IRange, originRange: IRange, absoluteRange?: IRange) => {
         return ({
-            startRow: [AbsoluteRefType.ROW, AbsoluteRefType.ALL].includes(originRange.startAbsoluteRefType || 0) ? originRange.startRow : relativeRange.startRow + originRange.startRow,
-            endRow: [AbsoluteRefType.ROW, AbsoluteRefType.ALL].includes(originRange.endAbsoluteRefType || 0) ? originRange.endRow : relativeRange.endRow + relativeRange.startRow + originRange.startRow,
-            startColumn: [AbsoluteRefType.COLUMN, AbsoluteRefType.ALL].includes(originRange.startAbsoluteRefType || 0) ? originRange.startColumn : relativeRange.startColumn + originRange.startColumn,
-            endColumn: [AbsoluteRefType.COLUMN, AbsoluteRefType.ALL].includes(originRange.endAbsoluteRefType || 0) ? originRange.endColumn : relativeRange.endColumn + relativeRange.startColumn + originRange.startColumn,
+            ...(absoluteRange || {}),
+            startRow: absoluteRange ? ([AbsoluteRefType.ROW, AbsoluteRefType.ALL].includes(absoluteRange.startAbsoluteRefType || 0) ? absoluteRange.startRow : relativeRange.startRow + originRange.startRow) : (relativeRange.startRow + originRange.startRow),
+            endRow: absoluteRange ? ([AbsoluteRefType.ROW, AbsoluteRefType.ALL].includes(absoluteRange.endAbsoluteRefType || 0) ? absoluteRange.endRow : relativeRange.endRow + relativeRange.startRow + originRange.startRow) : (relativeRange.endRow + relativeRange.startRow + originRange.startRow),
+            startColumn: absoluteRange ? ([AbsoluteRefType.COLUMN, AbsoluteRefType.ALL].includes(absoluteRange.startAbsoluteRefType || 0) ? absoluteRange.startColumn : relativeRange.startColumn + originRange.startColumn) : relativeRange.startColumn + originRange.startColumn,
+            endColumn: absoluteRange ? ([AbsoluteRefType.COLUMN, AbsoluteRefType.ALL].includes(absoluteRange.endAbsoluteRefType || 0) ? absoluteRange.endColumn : relativeRange.endColumn + relativeRange.startColumn + originRange.startColumn) : relativeRange.endColumn + relativeRange.startColumn + originRange.startColumn,
         }) as IRange;
     };
 

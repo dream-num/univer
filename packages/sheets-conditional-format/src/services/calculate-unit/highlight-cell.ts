@@ -305,10 +305,10 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
                     const sequenceNodes = Tools.deepClone(cache.sequenceNodes);
                     const transformSequenceNodes = Array.isArray(sequenceNodes)
                         ? sequenceNodes.map((node) => {
-                            if (typeof node === 'object' && node.nodeType === sequenceNodeType.REFERENCE && !node.token.startsWith('$')) {
+                            if (typeof node === 'object' && node.nodeType === sequenceNodeType.REFERENCE) {
                                 const gridRangeName = deserializeRangeWithSheet(node.token);
                                 const relativeRange = Rectangle.getRelativeRange(gridRangeName.range, originRange);
-                                const newRange = Rectangle.getPositionRange(relativeRange, getRangeFromCell(row, col));
+                                const newRange = Rectangle.getPositionRange(relativeRange, getRangeFromCell(row, col), gridRangeName.range);
                                 const newToken = serializeRange(newRange);
                                 return {
                                     ...node, token: newToken,

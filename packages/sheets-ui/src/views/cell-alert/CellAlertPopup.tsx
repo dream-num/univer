@@ -22,17 +22,17 @@ import cs from 'clsx';
 import { CellAlertManagerService, CellAlertType } from '../../services/cell-alert-manager.service';
 import styles from './index.module.less';
 
-const iconMap = {
-    [CellAlertType.ERROR]: <ErrorSingle className={cs(styles.cellAlertIcon, styles.cellAlertIconError)} />,
-    [CellAlertType.INFO]: <WarningSingle className={cs(styles.cellAlertIcon, styles.cellAlertIconInfo)} />,
-    [CellAlertType.WARNING]: <WarningSingle className={cs(styles.cellAlertIcon, styles.cellAlertIconWarning)} />,
-};
-
 export function CellAlert() {
     const cellAlertService = useDependency(CellAlertManagerService);
     const currentCell = useObservable(cellAlertService.currentAlert$, cellAlertService.currentAlert);
 
     const { type, title, message } = currentCell || {};
+
+    const iconMap = {
+        [CellAlertType.ERROR]: <ErrorSingle className={cs(styles.cellAlertIcon, styles.cellAlertIconError)} />,
+        [CellAlertType.INFO]: <WarningSingle className={cs(styles.cellAlertIcon, styles.cellAlertIconInfo)} />,
+        [CellAlertType.WARNING]: <WarningSingle className={cs(styles.cellAlertIcon, styles.cellAlertIconWarning)} />,
+    };
 
     return (
         <div className={styles.cellAlert}>

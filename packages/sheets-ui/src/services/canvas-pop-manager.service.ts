@@ -18,7 +18,7 @@ import type { Worksheet } from '@univerjs/core';
 import { Disposable, DisposableCollection, ICommandService, IUniverInstanceService } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { BaseObject, IBoundRectNoAngle, IRender, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
-import { IGlobalPopupManagerService } from '@univerjs/ui';
+import { ICanvasPopupService } from '@univerjs/ui';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
@@ -37,9 +37,9 @@ interface ICanvasPopup {
     offset?: [number, number];
 }
 
-export class CanvasPopManagerService extends Disposable {
+export class SheetCanvasPopManagerService extends Disposable {
     constructor(
-        @Inject(IGlobalPopupManagerService) private readonly _globalPopupManagerService: IGlobalPopupManagerService,
+        @Inject(ICanvasPopupService) private readonly _globalPopupManagerService: ICanvasPopupService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,

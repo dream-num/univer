@@ -329,6 +329,10 @@ export class DropdownWidget implements IBaseDataValidationWidget {
             return;
         }
 
+        if (rule.renderMode === DataValidationRenderMode.TEXT) {
+            return undefined;
+        }
+
         if (rule.renderMode === DataValidationRenderMode.ARROW) {
             const realWidth = cellWidth - ICON_PLACE;
             const { documentSkeleton, docModel } = createDocSkeleton(valueStr, this._localeService, style);

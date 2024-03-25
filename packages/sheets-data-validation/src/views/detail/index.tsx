@@ -147,6 +147,7 @@ export function DataValidationDetail() {
     const options: IDataValidationRuleOptions = {
         showInputMessage: localRule.showInputMessage,
         errorStyle: localRule.errorStyle,
+        error: localRule.error,
     };
 
     const handleUpdateRuleOptions = (newOptions: IDataValidationRuleOptions) => {

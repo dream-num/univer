@@ -58,6 +58,18 @@ export class DataValidationAlertController extends Disposable {
                     });
                     return;
                 }
+
+                // if (cellData?.dataValidation?.rule.showInputMessage) {
+                //     this._cellAlertManagerService.showAlert({
+                //         type: CellAlertType.INFO,
+                //         title: this._localeService.t('dataValidation.error.title'),
+                //         message: manager?.getRuleErrorMsg(cellData.dataValidation.ruleId),
+                //         location: cellPos.location,
+                //         width: 200,
+                //         height: 74,
+                //     });
+                //     return;
+                // }
             }
 
             this._cellAlertManagerService.clearAlert();

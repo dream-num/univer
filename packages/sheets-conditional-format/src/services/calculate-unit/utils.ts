@@ -130,14 +130,16 @@ export const getValueByType = (value: IValueConfig, matrix: ObjectMatrix< number
             });
 
             const length = (max || 0) - (min || 0);
+            const v = Math.max(Math.min(Number(value.value) || 0, 100), 0);
             return {
                 status: FormulaResultStatus.SUCCESS,
-                result: (length * (Number(value.value) || 0) / 100) + (min || 0),
+                result: length * (v / 100) + (min || 0),
             };
         }
         case ValueType.percentile:{
             const list = matrix.toNativeArray().sort((a, b) => a - b);
-            const index = (list.length - 1) * (Number(value.value) || 0) / 100;
+            const v = Math.max(Math.min(Number(value.value) || 0, 100), 0);
+            const index = ((list.length - 1) * v) / 100;
             const intIndex = Math.floor(index);
             const decimalIndex = index - intIndex;
             const result = list[intIndex] + (list[Math.min(intIndex + 1, list.length - 1)] - list[intIndex]) * decimalIndex;

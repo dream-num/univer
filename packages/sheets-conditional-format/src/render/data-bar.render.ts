@@ -17,7 +17,7 @@
 import type { IRange, IScale } from '@univerjs/core';
 import { Range } from '@univerjs/core';
 import type { SpreadsheetSkeleton, UniverRenderingContext } from '@univerjs/engine-render';
-import { SheetExtension } from '@univerjs/engine-render';
+import { FIX_ONE_PIXEL_BLUR_OFFSET, SheetExtension } from '@univerjs/engine-render';
 import type { IDataBarCellData } from './type';
 
 export const dataBarUKey = 'sheet-conditional-rule-data-bar';
@@ -62,7 +62,7 @@ export class DataBar extends SheetExtension {
                     return;
                 }
                 const borderWidth = endX - startX;
-                const borderHeight = endY - startY;
+                const borderHeight = (endY + FIX_ONE_PIXEL_BLUR_OFFSET) - startY;
                 const width = borderWidth - this._paddingRightAndLeft * 2;
                 const height = borderHeight - this._paddingTopAndBottom * 2;
                 if (value > 0) {
@@ -75,11 +75,16 @@ export class DataBar extends SheetExtension {
                         gradient.addColorStop(0, color);
                         gradient.addColorStop(1, 'rgb(255 255 255)');
                         ctx.fillStyle = gradient;
+                        ctx.strokeStyle = color;
+                        ctx.lineWidth = 1;
                     } else {
                         ctx.fillStyle = color;
                     }
 
                     this._drawRectWithRoundedCorner(ctx, x0, y0, dataBarWidth, height, false, true, true, false);
+                    if (isGradient) {
+                        ctx.stroke();
+                    }
                 } else {
                     // Width less than 1, almost invisible
                     const dataBarWidth = Math.max(width * startPoint / 100 * Math.abs(value) / 100, 1);
@@ -90,11 +95,16 @@ export class DataBar extends SheetExtension {
                         gradient.addColorStop(0, 'rgb(255 255 255)');
                         gradient.addColorStop(1, color);
                         ctx.fillStyle = gradient;
+                        ctx.strokeStyle = color;
+                        ctx.lineWidth = 1;
                     } else {
                         ctx.fillStyle = color;
                     }
 
                     this._drawRectWithRoundedCorner(ctx, x0, y0, dataBarWidth, height, true, false, false, true);
+                    if (isGradient) {
+                        ctx.stroke();
+                    }
                 }
             }
         });

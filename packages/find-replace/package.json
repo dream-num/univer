@@ -17,7 +17,9 @@
     "bugs": {
         "url": "https://github.com/dream-num/univer/issues"
     },
-    "keywords": ["univer"],
+    "keywords": [
+        "univer"
+    ],
     "sideEffects": [
         "**/*.css"
     ],

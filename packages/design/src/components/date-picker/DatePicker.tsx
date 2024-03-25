@@ -23,7 +23,7 @@ import type { Dayjs } from 'dayjs';
 import { ConfigContext } from '../config-provider/ConfigProvider';
 import styles from './index.module.less';
 
-export interface IDatePickerProps extends Omit<PickerProps<Dayjs>, 'value' | 'onChange'> {
+export interface IDatePickerProps extends Omit<PickerProps<Dayjs>, 'value' | 'onChange' | 'locale' | 'generateConfig' | 'prefixCls'> {
     /**
      * The value of the date picker.
      */

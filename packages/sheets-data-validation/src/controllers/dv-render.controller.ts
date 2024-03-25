@@ -23,10 +23,11 @@ import { IEditorBridgeService, SheetSkeletonManagerService } from '@univerjs/she
 import type { Spreadsheet } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
+import { DataValidationRenderMode } from '@univerjs/core/types/enum/data-validation-render-mode.js';
 import { DataValidationPanel, DATE_DROPDOWN_KEY, DateDropdown, LIST_DROPDOWN_KEY, ListDropDown } from '../views';
 import { FORMULA_INPUTS } from '../views/formula-input';
 import { getCellValueOrigin } from '../utils/getCellDataOrigin';
-import type { CheckboxValidator } from '../validators';
+import type { CheckboxValidator, ListValidator } from '../validators';
 import type { SheetDataValidationManager } from '../models/sheet-data-validation-manager';
 import { CellDropdown, DROP_DOWN_KEY } from '../views/drop-down';
 import { DataValidationDropdownManagerService } from '../services/dropdown-manager.service';
@@ -192,7 +193,8 @@ export class DataValidationRenderController extends RxDisposable {
                         if (!manager || !skeleton) {
                             return next(cell);
                         }
-
+                        const styleMap = pos.workbook.getStyles();
+                        const defaultStyle = (typeof cell?.s === 'string' ? styleMap.get(cell?.s) : cell?.s) || {};
                         const ruleId = manager.getRuleIdByLocation(row, col);
                         if (!ruleId) {
                             return next(cell);
@@ -208,6 +210,15 @@ export class DataValidationRenderController extends RxDisposable {
 
                         let extra: ICellDataForSheetInterceptor = {};
 
+                        if (defaultStyle.tb !== WrapStrategy.WRAP) {
+                            extra = {
+                                interceptorStyle: {
+                                    ...cell?.interceptorStyle,
+                                    tb: WrapStrategy.CLIP,
+                                },
+                            };
+                        }
+
                         if (rule.type === DataValidationType.CHECKBOX) {
                             const { formula2 } = (validator as CheckboxValidator).parseFormulaSync(rule, pos.unitId, pos.subUnitId);
                             if (!cellValue) {
@@ -218,6 +229,23 @@ export class DataValidationRenderController extends RxDisposable {
                                     interceptorStyle: {
                                         ...cell?.interceptorStyle,
                                         tb: WrapStrategy.CLIP,
+                                    },
+                                };
+                            }
+                        }
+
+                        if (rule.type === DataValidationType.LIST && (rule.renderMode === DataValidationRenderMode.ARROW || rule.renderMode === DataValidationRenderMode.TEXT)) {
+                            const colorMap = (validator as ListValidator).getListWithColorMap(rule);
+                            const valueStr = `${getCellValueOrigin(cell) ?? ''}`;
+                            const color = colorMap[valueStr];
+                            if (color) {
+                                extra = {
+                                    ...extra,
+                                    interceptorStyle: {
+                                        ...extra.interceptorStyle,
+                                        bg: {
+                                            rgb: color,
+                                        },
                                     },
                                 };
                             }

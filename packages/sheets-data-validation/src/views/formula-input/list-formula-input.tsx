@@ -142,6 +142,9 @@ const Template = (props: { item: IDropdownItem; dragHandleProps: any; commonProp
             <Input
                 disabled={item.isRef}
                 value={item.label}
+                onChange={(label) => {
+                    onItemChange(item.id, label, item.color);
+                }}
             />
             {item.isRef
                 ? null
@@ -240,7 +243,13 @@ export function ListFormulaInput(props: IFormulaInputProps) {
     };
 
     useEffect(() => {
-        const finalList = strList.filter((item) => Boolean(item.label));
+        const labelSet = new Set<string>();
+        const finalList = strList.filter((item) => {
+            const label = item.label;
+            const res = Boolean(label) && !labelSet.has(label);
+            labelSet.add(label);
+            return res;
+        });
 
         onChange({
             formula1: serializeListOptions(finalList.map((item) => item.label)),

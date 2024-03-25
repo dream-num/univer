@@ -100,4 +100,16 @@ export class ListValidator extends BaseDataValidator {
 
         return list.map((label, i) => ({ label, color: colorList[i] }));
     }
+
+    getListWithColorMap(rule: IDataValidationRule, currentUnitId?: string, currentSubUnitId?: string) {
+        const list = this.getListWithColor(rule, currentUnitId, currentSubUnitId);
+        const map: Record<string, string> = {};
+
+        list.forEach((item) => {
+            if (item.color) {
+                map[item.label] = item.color;
+            }
+        });
+        return map;
+    }
 }

@@ -33,13 +33,13 @@ export function ListRenderModeInput(props: IListRenderModeInputProps) {
     return (
         <FormLayout label={localeService.t('dataValidation.renderMode.label')}>
             <RadioGroup value={`${value.renderMode ?? DataValidationRenderMode.CUSTOM}`} onChange={(renderMode) => onChange({ ...value, renderMode: +renderMode })}>
-                <Radio value={DataValidationRenderMode.CUSTOM}>
+                <Radio value={`${DataValidationRenderMode.CUSTOM}`}>
                     {localeService.t('dataValidation.renderMode.chip')}
                 </Radio>
-                <Radio value={DataValidationRenderMode.ARROW}>
+                <Radio value={`${DataValidationRenderMode.ARROW}`}>
                     {localeService.t('dataValidation.renderMode.arrow')}
                 </Radio>
-                <Radio value={DataValidationRenderMode.TEXT}>
+                <Radio value={`${DataValidationRenderMode.TEXT}`}>
                     {localeService.t('dataValidation.renderMode.text')}
                 </Radio>
             </RadioGroup>

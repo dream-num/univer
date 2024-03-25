@@ -185,7 +185,11 @@ export const getCacheStyleMatrix = <S = any>(unitId: string, subUnitId: string, 
 export const compareWithNumber = (config: { operator: NumberOperator;value: number | [number, number] }, v: number) => {
     switch (config.operator) {
         case NumberOperator.between:{
-            const [start, end] = config.value as [number, number];
+            if (typeof config.value !== 'object' && !(config.value as unknown as Array<number>).length) {
+                return;
+            }
+            const start = Math.min(...config.value as [number, number]);
+            const end = Math.max(...config.value as [number, number]);
             return v >= start && v <= end;
         }
         case NumberOperator.notBetween:{

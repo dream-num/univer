@@ -379,12 +379,13 @@ export class EditorService extends Disposable implements IEditorService, IDispos
     closeRangePrompt() {
         const documentDataModel = this._currentUniverService.getCurrentUniverDocInstance();
         const editorUnitId = documentDataModel.getUnitId();
-        if (!this.isEditor(editorUnitId) || this.isSheetEditor(editorUnitId)) {
-            return;
-        }
 
         this._contextService.setContextValue(EDITOR_ACTIVATED, false);
         this._contextService.setContextValue(FOCUSING_EDITOR_STANDALONE, false);
+
+        if (!this.isEditor(editorUnitId) || this.isSheetEditor(editorUnitId)) {
+            return;
+        }
 
         this.changeSpreadsheetFocusState(false);
 
@@ -454,6 +455,8 @@ export class EditorService extends Disposable implements IEditorService, IDispos
             this._closeRangePrompt$.next(null);
             this.singleSelection(false);
             this.setFocusId(null);
+            this._contextService.setContextValue(EDITOR_ACTIVATED, false);
+            this._contextService.setContextValue(FOCUSING_EDITOR_STANDALONE, false);
         }
 
         this.getAllEditor().forEach((editor) => {

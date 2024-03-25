@@ -22,12 +22,11 @@ import { ICanvasPopupService } from '@univerjs/ui';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
-import type { IRemoveColMutationParams, ISetWorksheetRowAutoHeightMutationParams } from '@univerjs/sheets';
-import { COMMAND_LISTENER_SKELETON_CHANGE, RemoveColCommand, RemoveColMutation, RemoveRowMutation, SetWorksheetRowAutoHeightMutation } from '@univerjs/sheets';
+import type { IRemoveColMutationParams, IRemoveRowsMutationParams, ISetWorksheetRowAutoHeightMutationParams } from '@univerjs/sheets';
+import { COMMAND_LISTENER_SKELETON_CHANGE, RemoveColMutation, RemoveRowMutation, SetWorksheetRowAutoHeightMutation } from '@univerjs/sheets';
 import { getViewportByCell, transformBound2OffsetBound } from '../common/utils';
 import { SetScrollOperation } from '../commands/operations/scroll.operation';
 import { SetZoomRatioOperation } from '..';
-import type { IRemoveRowColCommandParams } from '../../../sheets/lib/types';
 import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
 
 interface ICanvasPopup {
@@ -270,7 +269,7 @@ export class SheetCanvasPopManagerService extends Disposable {
             }
 
             if (commandInfo.id === RemoveRowMutation.id) {
-                const params = commandInfo.params as IRemoveRowColCommandParams;
+                const params = commandInfo.params as IRemoveRowsMutationParams;
                 if (Rectangle.contains(
                     params.range,
                     {

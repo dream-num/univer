@@ -39,8 +39,8 @@ export class CheckboxValidator extends BaseDataValidator {
 
     override validatorFormula(rule: IDataValidationRuleBase): IFormulaValidResult {
         const { formula1 = CHECKBOX_FORMULA_1, formula2 = CHECKBOX_FORMULA_2 } = rule;
-        const formula1Success = typeof formula1 === 'string';
-        const formula2Success = typeof formula2 === 'string';
+        const formula1Success = !Tools.isBlank(formula1);
+        const formula2Success = !Tools.isBlank(formula2);
 
         return {
             success: formula1Success && formula2Success,

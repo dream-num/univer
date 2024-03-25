@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { ICommandService, IUniverInstanceService, LocaleService } from '@univerjs/core';
-import type { DataValidationOperator, DataValidationType, IDataValidationRuleBase, IDataValidationRuleOptions, IRange, ISheetDataValidationRule } from '@univerjs/core';
+import type { DataValidationOperator, IDataValidationRuleBase, IDataValidationRuleOptions, IRange, ISheetDataValidationRule } from '@univerjs/core';
+import { DataValidationType, ICommandService, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import type { IUpdateDataValidationSettingCommandParams } from '@univerjs/data-validation';
 import { DataValidatorRegistryScope, DataValidatorRegistryService, RemoveDataValidationCommand, UpdateDataValidationOptionsCommand, UpdateDataValidationSettingCommand } from '@univerjs/data-validation';
 import { TWO_FORMULA_OPERATOR_COUNT } from '@univerjs/data-validation/types/const/two-formula-operators.js';
@@ -125,6 +125,12 @@ export function DataValidationDetail() {
             ...localRule,
             type: newType as DataValidationType,
             operator: operators[0],
+            ...(newType === DataValidationType.CHECKBOX
+                ? {
+                    formula1: undefined,
+                    formula2: undefined,
+                }
+                : null),
         };
 
         setLocalRule(newRule);

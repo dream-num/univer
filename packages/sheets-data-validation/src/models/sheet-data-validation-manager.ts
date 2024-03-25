@@ -276,7 +276,7 @@ export class SheetDataValidationManager extends DataValidationManager<ISheetData
         }
 
         if (validator) {
-            return validator.generateRuleErrorMessage(rule);
+            return validator.getRuleFinalError(rule);
         }
 
         return '';

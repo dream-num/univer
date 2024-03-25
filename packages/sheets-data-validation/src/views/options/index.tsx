@@ -15,7 +15,7 @@
  */
 
 import { DataValidationErrorStyle, type IDataValidationRuleOptions, LocaleService } from '@univerjs/core';
-import { Checkbox, FormLayout, Radio, RadioGroup } from '@univerjs/design';
+import { Checkbox, FormLayout, Input, Radio, RadioGroup } from '@univerjs/design';
 import React, { useState } from 'react';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { MoreDownSingle, MoreUpSingle } from '@univerjs/icons';
@@ -61,6 +61,13 @@ export function DataValidationOptions(props: IDataValidationOptionsParams) {
                             {localeService.t('dataValidation.panel.showInfo')}
                         </Checkbox>
                     </FormLayout>
+                    {value.showInputMessage
+                        ? (
+                            <FormLayout>
+                                <Input value={value.error} onChange={(error) => onChange({ ...value, error })} />
+                            </FormLayout>
+                        )
+                        : null}
                 </>
             )}
         </>

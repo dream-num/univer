@@ -101,6 +101,14 @@ export abstract class BaseDataValidator<DataType = CellValue> {
         return `${errorMsg}`;
     }
 
+    getRuleFinalError(rule: IDataValidationRule) {
+        if (rule.error) {
+            return rule.error;
+        }
+
+        return this.generateRuleErrorMessage(rule);
+    }
+
     isEmptyCellValue(cellValue: Nullable<CellValue>): cellValue is null | undefined | void {
         if (cellValue === '' || cellValue === undefined || cellValue === null) {
             return true;

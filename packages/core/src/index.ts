@@ -149,5 +149,6 @@ export { ClientSnapshotServerService } from './services/snapshot/snapshot-server
 export { getSheetBlocksFromSnapshot } from './services/snapshot/snapshot-transform';
 
 export { isBlackColor, isWhiteColor } from './shared/color/color-kit';
+export { cellToRange } from './shared/common';
 
 installShims();

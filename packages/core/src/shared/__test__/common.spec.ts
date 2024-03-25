@@ -14,4 +14,11 @@
  * limitations under the License.
  */
 
-export { CanvasPopup } from './CanvasPopup';
+import { describe, expect, it } from 'vitest';
+import { cellToRange } from '../common';
+
+describe('Test common', () => {
+    it('Test cellToRange', () => {
+        expect(cellToRange(0, 1)).toStrictEqual({ startRow: 0, startColumn: 1, endRow: 0, endColumn: 1 });
+    });
+});

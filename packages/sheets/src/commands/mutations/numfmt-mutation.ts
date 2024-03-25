@@ -15,7 +15,7 @@
  */
 
 import type { ICommand, IMutationInfo, IRange } from '@univerjs/core';
-import { CommandType, Range } from '@univerjs/core';
+import { cellToRange, CommandType, Range } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
 import { rangeMerge } from '../../basics/rangeMerge';
@@ -191,11 +191,3 @@ export const transformCellsToRange = (
     });
     return { unitId, subUnitId, refMap, values };
 };
-
-const cellToRange = (row: number, col: number) =>
-    ({
-        startRow: row,
-        endRow: row,
-        startColumn: col,
-        endColumn: col,
-    }) as IRange;

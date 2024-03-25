@@ -16,6 +16,7 @@
 
 import type { ICellData, ICommand, IMutationInfo, IRange, Nullable } from '@univerjs/core';
 import {
+    cellToRange,
     CommandType,
     ErrorService,
     ICommandService,
@@ -141,12 +142,6 @@ export function getMoveRangeUndoRedoMutations(
 
         const fromCellValue = new ObjectMatrix<Nullable<ICellData>>();
         const newFromCellValue = new ObjectMatrix<Nullable<ICellData>>();
-        const cellToRange = (row: number, col: number) => ({
-            startRow: row,
-            endRow: row,
-            startColumn: col,
-            endColumn: col,
-        });
 
         Range.foreach(fromRange, (row, col) => {
             fromCellValue.setValue(row, col, fromCellMatrix.getValue(row, col));

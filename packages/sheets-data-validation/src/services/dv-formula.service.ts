@@ -15,7 +15,7 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { DataValidationType, Disposable, isFormulaString, IUniverInstanceService } from '@univerjs/core';
+import { Disposable, isFormulaString } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 import { DataValidationModel } from '@univerjs/data-validation';
 import type { IDataValidationFormulaResult, IFormulaInfo } from './formula-common';
@@ -31,7 +31,7 @@ export class DataValidationFormulaService extends Disposable {
 
     constructor(
         @Inject(RegisterOtherFormulaService) private _registerOtherFormulaService: RegisterOtherFormulaService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        // @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(DataValidationCacheService) private readonly _dataValidationCacheService: DataValidationCacheService,
         @Inject(DataValidationModel) private readonly _dataValidationModel: DataValidationModel
     ) {
@@ -73,15 +73,15 @@ export class DataValidationFormulaService extends Disposable {
         if (!subUnitMap) {
             subUnitMap = new Map();
             unitMap.set(subUnitId, subUnitMap);
-            const worksheet = this._univerInstanceService.getUniverSheetInstance(unitId)?.getSheetBySheetId(subUnitId);
-            const rules = worksheet?.getSnapshot().dataValidation;
-            if (rules) {
-                rules.forEach((rule) => {
-                    if (rule.type !== DataValidationType.CUSTOM) {
-                        this.addRule(unitId, subUnitId, rule.uid, rule.formula1, rule.formula2);
-                    }
-                });
-            }
+            // const worksheet = this._univerInstanceService.getUniverSheetInstance(unitId)?.getSheetBySheetId(subUnitId);
+            // const rules = worksheet?.getSnapshot().dataValidation;
+            // if (rules) {
+            //     rules.forEach((rule) => {
+            //         if (rule.type !== DataValidationType.CUSTOM) {
+            //             this.addRule(unitId, subUnitId, rule.uid, rule.formula1, rule.formula2);
+            //         }
+            //     });
+            // }
         }
 
         return subUnitMap;

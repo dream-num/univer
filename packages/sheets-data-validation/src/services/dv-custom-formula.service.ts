@@ -126,15 +126,13 @@ export class DataValidationCustomFormulaService extends Disposable {
             formulaCellMap = new Map();
             formulaCellUnitMap.set(subUnitId, formulaCellMap);
 
-            const worksheet = this._univerInstanceService.getUniverSheetInstance(unitId)?.getSheetBySheetId(subUnitId);
-            const rules = worksheet?.getSnapshot().dataValidation;
-            if (rules) {
-                rules.forEach((rule) => {
-                    if (rule.type === DataValidationType.CUSTOM) {
-                        this.addRule(unitId, subUnitId, rule);
-                    }
-                });
-            }
+            // if (rules) {
+            //     rules.forEach((rule) => {
+            //         if (rule.type === DataValidationType.CUSTOM) {
+            //             this.addRule(unitId, subUnitId, rule);
+            //         }
+            //     });
+            // }
         }
 
         return {

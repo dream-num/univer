@@ -15,11 +15,10 @@
  */
 
 import { Range } from '@univerjs/core';
-import type { ICellData, IGridRange, IUnitRange, IUniverInstanceService, Nullable, Worksheet } from '@univerjs/core';
-import type { IGridRangeName } from '@univerjs/engine-formula/engine/utils/reference.js';
+import type { ICellData, IUnitRangeName, IUniverInstanceService, Nullable } from '@univerjs/core';
 import { getCellValueOrigin } from '../utils/getCellDataOrigin';
 
-export function getSheetRangeValueSet(grid: IGridRangeName, univerInstanceService: IUniverInstanceService, currUnitId: string, currSubUnitId: string) {
+export function getSheetRangeValueSet(grid: IUnitRangeName, univerInstanceService: IUniverInstanceService, currUnitId: string, currSubUnitId: string) {
     const set = new Set<string>();
     const unitId = grid.unitId || currUnitId;
     const workbook = univerInstanceService.getUniverSheetInstance(unitId) ?? univerInstanceService.getCurrentUniverSheetInstance();

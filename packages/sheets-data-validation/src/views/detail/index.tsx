@@ -24,7 +24,7 @@ import { ComponentManager, RangeSelector, useEvent, useObservable } from '@unive
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useRef, useState } from 'react';
 import { serializeRange } from '@univerjs/engine-formula';
-import { getRuleSetting } from '@univerjs/data-validation/common/util.js';
+import { getRuleOptions, getRuleSetting } from '@univerjs/data-validation/common/util.js';
 import { DataValidationPanelService } from '@univerjs/data-validation/services/data-validation-panel.service.js';
 import type { IUpdateSheetDataValidationRangeCommandParams } from '../../commands/commands/data-validation.command';
 import { UpdateSheetDataValidationRangeCommand } from '../../commands/commands/data-validation.command';
@@ -144,11 +144,7 @@ export function DataValidationDetail() {
     const FormulaInput = componentManager.get(validator.formulaInput);
     const rangeStr = rule.ranges.map((range) => serializeRange(range)).join(',');
 
-    const options: IDataValidationRuleOptions = {
-        showInputMessage: localRule.showInputMessage,
-        errorStyle: localRule.errorStyle,
-        error: localRule.error,
-    };
+    const options: IDataValidationRuleOptions = getRuleOptions(localRule);
 
     const handleUpdateRuleOptions = (newOptions: IDataValidationRuleOptions) => {
         setLocalRule({
@@ -236,7 +232,7 @@ export function DataValidationDetail() {
                     />
                 )
                 : null}
-            <DataValidationOptions value={options} onChange={handleUpdateRuleOptions} />
+            <DataValidationOptions value={options} onChange={handleUpdateRuleOptions} extraComponent={validator.optionsInput} />
             <div className={styles.dataValidationDetailButtons}>
                 <Button className={styles.dataValidationDetailButton} onClick={handleDelete}>
                     {localeService.t('dataValidation.panel.removeRule')}

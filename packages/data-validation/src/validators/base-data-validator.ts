@@ -64,11 +64,11 @@ export abstract class BaseDataValidator<DataType = CellValue> {
 
     abstract formulaInput: string;
 
-    skipDefaultFontRender = false;
-
     canvasRender: Nullable<IBaseDataValidationWidget> = null;
 
     dropdown: string | undefined = undefined;
+
+    optionsInput: string | undefined = undefined;
 
     constructor(
         @Inject(LocaleService) readonly localeService: LocaleService,
@@ -82,6 +82,10 @@ export abstract class BaseDataValidator<DataType = CellValue> {
     get titleStr() {
         return this.localeService.t(this.title);
     }
+
+    skipDefaultFontRender(rule: IDataValidationRule) {
+        return false;
+    };
 
     generateRuleName(rule: IDataValidationRuleBase): string {
         if (!rule.operator) {

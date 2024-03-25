@@ -30,6 +30,7 @@ import type { CheckboxValidator } from '../validators';
 import type { SheetDataValidationManager } from '../models/sheet-data-validation-manager';
 import { CellDropdown, DROP_DOWN_KEY } from '../views/drop-down';
 import { DataValidationDropdownManagerService } from '../services/dropdown-manager.service';
+import { ListRenderModeInput } from '../views/render-mode';
 import { addDataValidationMenuFactory, dataValidationMenuFactory, openDataValidationMenuFactory } from './dv.menu';
 
 const INVALID_MARK = {
@@ -97,6 +98,10 @@ export class DataValidationRenderController extends RxDisposable {
             [
                 DATE_DROPDOWN_KEY,
                 DateDropdown,
+            ],
+            [
+                ListRenderModeInput.componentKey,
+                ListRenderModeInput,
             ],
             ...FORMULA_INPUTS,
         ] as const).forEach(([key, component]) => {
@@ -239,7 +244,7 @@ export class DataValidationRenderController extends RxDisposable {
                             fontRenderExtension: {
                                 // @ts-ignore
                                 ...cell?.fontRenderExtension,
-                                isSkip: validator?.skipDefaultFontRender,
+                                isSkip: validator?.skipDefaultFontRender(rule),
                             },
 
                             interceptorStyle: {

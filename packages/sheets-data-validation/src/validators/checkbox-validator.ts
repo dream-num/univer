@@ -32,11 +32,14 @@ export class CheckboxValidator extends BaseDataValidator {
     override operators: DataValidationOperator[] = [];
     override scopes: string | string[] = ['sheet'];
     override formulaInput: string = CHECKBOX_FORMULA_INPUT_NAME;
-    override skipDefaultFontRender = true;
 
     override canvasRender = this.injector.createInstance(CheckboxRender);
 
     private _formulaService = this.injector.get(DataValidationFormulaService);
+
+    override skipDefaultFontRender() {
+        return true;
+    }
 
     override validatorFormula(rule: IDataValidationRuleBase): IFormulaValidResult {
         const { formula1 = CHECKBOX_FORMULA_1, formula2 = CHECKBOX_FORMULA_2 } = rule;

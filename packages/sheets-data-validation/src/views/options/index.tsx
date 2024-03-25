@@ -19,17 +19,22 @@ import { Checkbox, FormLayout, Input, Radio, RadioGroup } from '@univerjs/design
 import React, { useState } from 'react';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { MoreDownSingle, MoreUpSingle } from '@univerjs/icons';
+import { ComponentManager } from '@univerjs/ui';
 import styles from './index.module.less';
 
 export interface IDataValidationOptionsParams {
     value: IDataValidationRuleOptions;
     onChange: (value: IDataValidationRuleOptions) => void;
+    extraComponent?: string;
 }
 
 export function DataValidationOptions(props: IDataValidationOptionsParams) {
     const localeService = useDependency(LocaleService);
-    const { value, onChange } = props;
+    const componentManager = useDependency(ComponentManager);
+    const { value, onChange, extraComponent } = props;
     const [show, setShow] = useState(false);
+
+    const ExtraOptions = extraComponent ? componentManager.get(extraComponent) : null;
 
     return (
         <>
@@ -39,6 +44,7 @@ export function DataValidationOptions(props: IDataValidationOptionsParams) {
             </div>
             {show && (
                 <>
+                    {ExtraOptions ? <ExtraOptions value={value} onChange={onChange} /> : null}
                     <FormLayout
                         label={localeService.t('dataValidation.panel.invalid')}
                     >

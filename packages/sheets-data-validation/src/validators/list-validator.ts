@@ -15,14 +15,16 @@
  */
 
 import { DataValidationType, IUniverInstanceService, Tools } from '@univerjs/core';
-import type { CellValue, DataValidationOperator, IDataValidationRule, IDataValidationRuleBase, Nullable } from '@univerjs/core';
+import type { CellValue, DataValidationOperator, IDataValidationRule, IDataValidationRuleBase, ISheetDataValidationRule, Nullable } from '@univerjs/core';
 import type { IFormulaResult, IValidatorCellInfo } from '@univerjs/data-validation';
 import { BaseDataValidator } from '@univerjs/data-validation';
 import { deserializeRangeWithSheet, isReferenceString } from '@univerjs/engine-formula';
 import type { IFormulaValidResult } from '@univerjs/data-validation/validators/base-data-validator.js';
+import { DataValidationRenderMode } from '@univerjs/core/types/enum/data-validation-render-mode.js';
 import { LIST_FORMULA_INPUT_NAME } from '../views/formula-input';
 import { LIST_DROPDOWN_KEY } from '../views';
 import { DropdownWidget } from '../widgets/dropdown-widget';
+import { ListRenderModeInput } from '../views/render-mode';
 import { deserializeListOptions, getSheetRangeValueSet } from './util';
 
 export class ListValidator extends BaseDataValidator {
@@ -38,7 +40,11 @@ export class ListValidator extends BaseDataValidator {
 
     override dropdown: string | undefined = LIST_DROPDOWN_KEY;
 
-    override skipDefaultFontRender: boolean = true;
+    override optionsInput: string | undefined = ListRenderModeInput.componentKey;
+
+    override skipDefaultFontRender(rule: ISheetDataValidationRule) {
+        return rule.renderMode !== DataValidationRenderMode.TEXT;
+    }
 
     override validatorFormula(rule: IDataValidationRuleBase): IFormulaValidResult {
         const success = !Tools.isBlank(rule.formula1);

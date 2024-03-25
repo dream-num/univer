@@ -146,5 +146,11 @@ export default {
         error: {
             title: '无效：',
         },
+        renderMode: {
+            arrow: '箭头',
+            chip: '条状标签',
+            text: '纯文本',
+            label: '显示样式',
+        },
     },
 };

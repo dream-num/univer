@@ -18,6 +18,7 @@ import type { DataValidationOperator } from '../enum/data-validation-operator';
 import type { DataValidationType } from '../enum/data-validation-type';
 import type { DataValidationImeMode } from '../enum/data-validation-ime-mode';
 import type { DataValidationErrorStyle } from '../enum/data-validation-error-style';
+import type { DataValidationRenderMode } from '../enum/data-validation-render-mode';
 import type { IRange } from './i-range';
 
 export interface IDataValidationRuleBase {
@@ -38,11 +39,16 @@ export interface IDataValidationRuleOptions {
     showDropDown?: boolean;
     showErrorMessage?: boolean;
     showInputMessage?: boolean;
+    /**
+     * cell render mode of data validation
+     */
+    renderMode?: DataValidationRenderMode;
 }
 
 export interface IDataValidationRule extends IDataValidationRuleBase, IDataValidationRuleOptions {
     uid: string;
     ranges: any;
+
 }
 
 export interface ISheetDataValidationRule extends IDataValidationRule {

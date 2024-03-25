@@ -38,7 +38,9 @@ export class ListMultipleValidator extends BaseDataValidator {
 
     override dropdown: string | undefined = LIST_DROPDOWN_KEY;
 
-    override skipDefaultFontRender: boolean = true;
+    override skipDefaultFontRender() {
+        return true;
+    }
 
     override validatorFormula(rule: IDataValidationRuleBase): IFormulaValidResult {
         const success = !Tools.isBlank(rule.formula1);

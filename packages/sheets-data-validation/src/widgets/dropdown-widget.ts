@@ -15,10 +15,11 @@
  */
 
 import { BooleanNumber, DEFAULT_EMPTY_DOCUMENT_VALUE, DocumentDataModel, ICommandService, LocaleService, Tools, VerticalAlign, WrapStrategy } from '@univerjs/core';
-import type { ICellRenderContext, IDocumentData, IPaddingData, IStyleData, Nullable } from '@univerjs/core';
+import type { ICellRenderContext, IDocumentData, IPaddingData, ISelectionCellWithCoord, IStyleData, Nullable } from '@univerjs/core';
 import { Documents, DocumentSkeleton, DocumentViewModel, getDocsSkeletonPageSize, Rect, type Spreadsheet, type SpreadsheetSkeleton, type UniverRenderingContext2D } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
 import { DataValidationModel, DataValidatorRegistryService, type IBaseDataValidationWidget } from '@univerjs/data-validation';
+import { DataValidationRenderMode } from '@univerjs/core/types/enum/data-validation-render-mode.js';
 import { getCellValueOrigin } from '../utils/getCellDataOrigin';
 import { type IShowDataValidationDropdownParams, ShowDataValidationDropdown } from '../commands/operations/data-validation.operation';
 import { DROP_DOWN_DEFAULT_COLOR } from '../common/const';
@@ -76,13 +77,27 @@ function convertToDocumentData(text: string, style?: Nullable<IStyleData>) {
     return documentData;
 }
 
-function createDocuments(text: string, localeService: LocaleService, style?: Nullable<IStyleData>) {
+function createDocSkeleton(text: string, localeService: LocaleService, style?: Nullable<IStyleData>) {
     const documentData = convertToDocumentData(text, style);
 
     const docModel = new DocumentDataModel(documentData);
     const docViewModel = new DocumentViewModel(docModel);
 
     const documentSkeleton = DocumentSkeleton.create(docViewModel, localeService);
+
+    return {
+        documentSkeleton,
+        docModel,
+        docViewModel,
+    };
+}
+
+function createDocuments(text: string, localeService: LocaleService, style?: Nullable<IStyleData>) {
+    const {
+        documentSkeleton,
+        docModel,
+        docViewModel,
+    } = createDocSkeleton(text, localeService, style);
 
     const documents = new Documents(`DOCUMENTS_${Tools.generateRandomId()}`, documentSkeleton, {
         pageMarginLeft: 0,
@@ -137,6 +152,28 @@ export class DropdownWidget implements IBaseDataValidationWidget {
         return `${row}.${col}`;
     }
 
+    private _drawDownIcon(ctx: UniverRenderingContext2D, primaryWithCoord: ISelectionCellWithCoord, cellWidth: number, cellHeight: number, vt: VerticalAlign) {
+        const left = cellWidth - ICON_PLACE + 4;
+        let top = 4;
+
+        switch (vt) {
+            case VerticalAlign.MIDDLE:
+                top = (cellHeight - ICON_PLACE) / 2 + 4;
+                break;
+            case VerticalAlign.BOTTOM:
+                top = (cellHeight - ICON_PLACE) + 4;
+                break;
+            default:
+                break;
+        }
+
+        ctx.save();
+        ctx.translateWithPrecision(primaryWithCoord.startX + left, primaryWithCoord.startY + top);
+        ctx.fillStyle = '#565656';
+        ctx.fill(downPath);
+        ctx.restore();
+    }
+
     drawWith(ctx: UniverRenderingContext2D, info: ICellRenderContext, skeleton: SpreadsheetSkeleton, spreadsheets: Spreadsheet): void {
         const { primaryWithCoord, row, col, style, data, subUnitId } = info;
         const cellWidth = primaryWithCoord.endX - primaryWithCoord.startX;
@@ -151,72 +188,133 @@ export class DropdownWidget implements IBaseDataValidationWidget {
             return;
         }
 
-        const list = validator.getListWithColor(rule);
+        if (!validator.skipDefaultFontRender(rule)) {
+            return;
+        }
 
-        ctx.save();
-        ctx.translateWithPrecision(primaryWithCoord.startX, primaryWithCoord.startY);
-        ctx.beginPath();
-        ctx.rect(0, 0, cellWidth, cellHeight);
-        ctx.clip();
-        const vt = style?.vt;
+        const list = validator.getListWithColor(rule);
+        const vt = style?.vt ?? VerticalAlign.TOP;
         const value = getCellValueOrigin(data);
         const valueStr = `${value ?? ''}`;
         const activeItem = list.find((i) => i.label === valueStr);
-        const realWidth = cellWidth - (MARGIN_H * 2) - PADDING_H - ICON_PLACE;
-        const { documentSkeleton, documents, docModel } = createDocuments(valueStr, this._localeService, style);
-        const { tb = WrapStrategy.WRAP } = style || {};
-        if (
-            tb === WrapStrategy.WRAP
-        ) {
-            docModel.updateDocumentDataPageSize(realWidth);
+
+        if (rule.renderMode === DataValidationRenderMode.ARROW) {
+            this._drawDownIcon(ctx, primaryWithCoord, cellWidth, cellHeight, vt);
+            ctx.save();
+            ctx.translateWithPrecision(primaryWithCoord.startX, primaryWithCoord.startY);
+            ctx.beginPath();
+            ctx.rect(0, 0, cellWidth, cellHeight);
+            ctx.clip();
+
+            const realWidth = cellWidth - ICON_PLACE;
+            const { documentSkeleton, documents, docModel } = createDocuments(valueStr, this._localeService, style);
+            const { tb = WrapStrategy.WRAP } = style || {};
+            if (
+                tb === WrapStrategy.WRAP
+            ) {
+                docModel.updateDocumentDataPageSize(realWidth);
+            }
+
+            documentSkeleton.calculate();
+            documentSkeleton.getActualSize();
+            const textLayout = getDocsSkeletonPageSize(documentSkeleton)!;
+
+            const { height: fontHeight } = textLayout;
+            let paddingTop = 0;
+            switch (vt) {
+                case VerticalAlign.BOTTOM:
+                    paddingTop = (cellHeight - MARGIN_V - fontHeight);
+                    break;
+                case VerticalAlign.MIDDLE:
+                    paddingTop = (cellHeight - MARGIN_V - fontHeight) / 2;
+                    break;
+
+                default:
+                    paddingTop = MARGIN_V;
+                    break;
+            }
+
+            ctx.translate(0, paddingTop);
+
+            ctx.save();
+            ctx.translateWithPrecision(PADDING_H, 0);
+            ctx.beginPath();
+            ctx.rect(0, 0, realWidth, fontHeight);
+            ctx.clip();
+            documents.render(ctx);
+            ctx.restore();
+
+            ctx.restore();
+
+            map.set(key, {
+                left: primaryWithCoord.endX + skeleton.rowHeaderWidth - ICON_PLACE,
+                top: primaryWithCoord.startY + skeleton.columnHeaderHeight,
+                width: ICON_PLACE,
+                height: cellHeight,
+            });
+        } else {
+            ctx.save();
+            ctx.translateWithPrecision(primaryWithCoord.startX, primaryWithCoord.startY);
+            ctx.beginPath();
+            ctx.rect(0, 0, cellWidth, cellHeight);
+            ctx.clip();
+
+            const realWidth = cellWidth - (MARGIN_H * 2) - PADDING_H - ICON_PLACE;
+            const { documentSkeleton, documents, docModel } = createDocuments(valueStr, this._localeService, style);
+            const { tb = WrapStrategy.WRAP } = style || {};
+            if (
+                tb === WrapStrategy.WRAP
+            ) {
+                docModel.updateDocumentDataPageSize(realWidth);
+            }
+
+            documentSkeleton.calculate();
+            documentSkeleton.getActualSize();
+            const textLayout = getDocsSkeletonPageSize(documentSkeleton)!;
+
+            const { height: fontHeight } = textLayout;
+
+            let paddingTop = 0;
+            switch (vt) {
+                case VerticalAlign.BOTTOM:
+                    paddingTop = (cellHeight - MARGIN_V - fontHeight);
+                    break;
+                case VerticalAlign.MIDDLE:
+                    paddingTop = (cellHeight - MARGIN_V - fontHeight) / 2;
+                    break;
+
+                default:
+                    paddingTop = MARGIN_V;
+                    break;
+            }
+            ctx.translate(MARGIN_H, paddingTop);
+            const rectWidth = cellWidth - MARGIN_H * 2;
+            const rectHeight = fontHeight;
+            Rect.drawWith(ctx, {
+                width: rectWidth,
+                height: rectHeight,
+                fill: activeItem?.color || DROP_DOWN_DEFAULT_COLOR,
+                radius: 8,
+            });
+            ctx.save();
+            ctx.translateWithPrecision(PADDING_H, 0);
+            ctx.beginPath();
+            ctx.rect(0, 0, realWidth, fontHeight);
+            ctx.clip();
+            documents.render(ctx);
+            ctx.restore();
+            ctx.translate(realWidth + PADDING_H + 4, (fontHeight - ICON_SIZE) / 2);
+            ctx.fillStyle = DROP_DOWN_ICON_COLOR;
+            ctx.fill(downPath);
+            ctx.restore();
+
+            map.set(key, {
+                left: primaryWithCoord.startX + MARGIN_H + skeleton.rowHeaderWidth,
+                top: primaryWithCoord.startY + paddingTop + skeleton.columnHeaderHeight,
+                width: rectWidth,
+                height: rectHeight,
+            });
         }
-
-        documentSkeleton.calculate();
-        documentSkeleton.getActualSize();
-        const textLayout = getDocsSkeletonPageSize(documentSkeleton)!;
-
-        const { height: fontHeight } = textLayout;
-
-        let paddingTop = 0;
-        switch (vt) {
-            case VerticalAlign.BOTTOM:
-                paddingTop = (cellHeight - MARGIN_V - fontHeight);
-                break;
-            case VerticalAlign.MIDDLE:
-                paddingTop = (cellHeight - MARGIN_V - fontHeight) / 2;
-                break;
-
-            default:
-                paddingTop = MARGIN_V;
-                break;
-        }
-        ctx.translate(MARGIN_H, paddingTop);
-        const rectWidth = cellWidth - MARGIN_H * 2;
-        const rectHeight = fontHeight;
-        Rect.drawWith(ctx, {
-            width: rectWidth,
-            height: rectHeight,
-            fill: activeItem?.color || DROP_DOWN_DEFAULT_COLOR,
-            radius: 8,
-        });
-        ctx.save();
-        ctx.translateWithPrecision(PADDING_H, 0);
-        ctx.beginPath();
-        ctx.rect(0, 0, realWidth, fontHeight);
-        ctx.clip();
-        documents.render(ctx);
-        ctx.restore();
-        ctx.translate(realWidth + PADDING_H + 4, (fontHeight - ICON_SIZE) / 2);
-        ctx.fillStyle = DROP_DOWN_ICON_COLOR;
-        ctx.fill(downPath);
-        ctx.restore();
-
-        map.set(key, {
-            left: primaryWithCoord.startX + MARGIN_H + skeleton.rowHeaderWidth,
-            top: primaryWithCoord.startY + paddingTop + skeleton.columnHeaderHeight,
-            width: rectWidth,
-            height: rectHeight,
-        });
     }
 
     calcCellAutoHeight(info: ICellRenderContext): number | undefined {
@@ -224,24 +322,50 @@ export class DropdownWidget implements IBaseDataValidationWidget {
         const cellWidth = primaryWithCoord.endX - primaryWithCoord.startX;
         const value = getCellValueOrigin(data);
         const valueStr = `${value ?? ''}`;
-        const realWidth = cellWidth - (MARGIN_H * 2) - PADDING_H - ICON_PLACE;
-        const { documentSkeleton, docModel } = createDocuments(valueStr, this._localeService, style);
-        const { tb = WrapStrategy.WRAP } = style || {};
-        if (
-            tb === WrapStrategy.WRAP
-        ) {
-            docModel.updateDocumentDataPageSize(realWidth);
+
+        const rule = data.dataValidation?.rule;
+
+        if (!rule) {
+            return;
         }
 
-        documentSkeleton.calculate();
-        documentSkeleton.getActualSize();
-        const textLayout = getDocsSkeletonPageSize(documentSkeleton)!;
+        if (rule.renderMode === DataValidationRenderMode.ARROW) {
+            const realWidth = cellWidth - ICON_PLACE;
+            const { documentSkeleton, docModel } = createDocSkeleton(valueStr, this._localeService, style);
+            const { tb = WrapStrategy.WRAP } = style || {};
+            if (
+                tb === WrapStrategy.WRAP
+            ) {
+                docModel.updateDocumentDataPageSize(realWidth);
+            }
 
-        const {
-            height: fontHeight,
-        } = textLayout;
+            documentSkeleton.calculate();
+            documentSkeleton.getActualSize();
+            const textLayout = getDocsSkeletonPageSize(documentSkeleton)!;
 
-        return fontHeight + MARGIN_V * 2;
+            const { height: fontHeight } = textLayout;
+
+            return fontHeight;
+        } else {
+            const realWidth = cellWidth - (MARGIN_H * 2) - PADDING_H - ICON_PLACE;
+            const { documentSkeleton, docModel } = createDocSkeleton(valueStr, this._localeService, style);
+            const { tb = WrapStrategy.WRAP } = style || {};
+            if (
+                tb === WrapStrategy.WRAP
+            ) {
+                docModel.updateDocumentDataPageSize(realWidth);
+            }
+
+            documentSkeleton.calculate();
+            documentSkeleton.getActualSize();
+            const textLayout = getDocsSkeletonPageSize(documentSkeleton)!;
+
+            const {
+                height: fontHeight,
+            } = textLayout;
+
+            return fontHeight + MARGIN_V * 2;
+        }
     }
 
     isHit(position: { x: number; y: number }, info: ICellRenderContext) {

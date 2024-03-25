@@ -133,5 +133,11 @@ export default {
         error: {
             title: 'Invalid：',
         },
+        renderMode: {
+            arrow: 'Arrow',
+            chip: 'Chip',
+            text: 'Plain text',
+            label: 'Display style',
+        },
     },
 };

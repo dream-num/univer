@@ -39,6 +39,7 @@ export function getRuleOptions(rule: IDataValidationRule): IDataValidationRuleOp
         showDropDown: rule.showDropDown,
         showErrorMessage: rule.showErrorMessage,
         showInputMessage: rule.showInputMessage,
+        renderMode: rule.renderMode,
     };
 }
 

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICellData, IRange, IWorkbookData, Nullable, Univer } from '@univerjs/core';
-import { Direction, ICommandService, IUniverInstanceService, LocaleType, RANGE_TYPE } from '@univerjs/core';
+import type { ICellData, IWorkbookData, Nullable, Univer } from '@univerjs/core';
+import { cellToRange, Direction, ICommandService, IUniverInstanceService, LocaleType, RANGE_TYPE } from '@univerjs/core';
 import type { IInsertColCommandParams } from '@univerjs/sheets';
 import { InsertColCommand, MoveRowsCommand, NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '@univerjs/sheets';
 import type { Injector } from '@wendellhu/redi';
@@ -46,8 +46,6 @@ const TEST_WORKBOOK_DATA_DEMO = (): IWorkbookData => ({
     styles: {},
 });
 
-const cellToRange = (row: number, col: number) =>
-    ({ startRow: row, endRow: row, startColumn: col, endColumn: col }) as IRange;
 // TODO@Dushusir: add move range,insert range,delete range test case
 describe('Test insert function operation', () => {
     let univer: Univer;

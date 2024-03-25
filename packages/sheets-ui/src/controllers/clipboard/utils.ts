@@ -505,10 +505,12 @@ export function getClearAndSetMergeMutations(
         subUnitId,
         ranges: mergeRangeData,
     };
-    redoMutationsInfo.push({
-        id: AddWorksheetMergeMutation.id,
-        params: addMergeMutationParams,
-    });
+    if (mergeRangeData.length > 0) {
+        redoMutationsInfo.push({
+            id: AddWorksheetMergeMutation.id,
+            params: addMergeMutationParams,
+        });
+    }
 
     // undo
     const undoAddMergeMutation: IRemoveWorksheetMergeMutationParams = AddMergeUndoMutationFactory(
@@ -516,10 +518,12 @@ export function getClearAndSetMergeMutations(
         addMergeMutationParams
     );
 
-    undoMutationsInfo.push({
-        id: RemoveWorksheetMergeMutation.id,
-        params: undoAddMergeMutation,
-    });
+    if (mergeRangeData.length > 0) {
+        undoMutationsInfo.push({
+            id: RemoveWorksheetMergeMutation.id,
+            params: undoAddMergeMutation,
+        });
+    }
 
     return { undos: undoMutationsInfo, redos: redoMutationsInfo };
 }

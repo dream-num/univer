@@ -70,17 +70,18 @@ export const RemoveWorksheetMergeCommand: ICommand = {
         });
         if (!hasMerge) return false;
 
-        const undoMutationParams: IAddWorksheetMergeMutationParams = RemoveMergeUndoMutationFactory(
+        const undoredoMutationParams: IAddWorksheetMergeMutationParams = RemoveMergeUndoMutationFactory(
             accessor,
             removeMergeMutationParams
         );
-        const result = commandService.syncExecuteCommand(RemoveWorksheetMergeMutation.id, removeMergeMutationParams);
+        const result = commandService.syncExecuteCommand(RemoveWorksheetMergeMutation.id, undoredoMutationParams);
 
         if (result) {
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
-                undoMutations: [{ id: AddWorksheetMergeMutation.id, params: undoMutationParams }],
-                redoMutations: [{ id: RemoveWorksheetMergeMutation.id, params: removeMergeMutationParams }],
+                undoMutations: [{ id: AddWorksheetMergeMutation.id, params: undoredoMutationParams }],
+                // params should be the merged cells to be deleted accurately, rather than the selection
+                redoMutations: [{ id: RemoveWorksheetMergeMutation.id, params: undoredoMutationParams }],
             });
             return true;
         }

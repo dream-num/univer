@@ -23,7 +23,7 @@ import { useObservable } from '../../../components/hooks/observable';
 import { ComponentManager } from '../../../common';
 import type { IPopup } from '../../../services/popup/canvas-popup.service';
 
-const SingleGlobalPopup = ({ popup, children }: { popup: IPopup; children?: React.ReactNode }) => {
+const SingleCanvasPopup = ({ popup, children }: { popup: IPopup; children?: React.ReactNode }) => {
     const anchorRect = useObservable(popup.anchorRect$, popup.anchorRect);
     const rect: IBoundRectNoAngle = useMemo(() => {
         const [x = 0, y = 0] = popup.offset ?? [];
@@ -47,7 +47,7 @@ const SingleGlobalPopup = ({ popup, children }: { popup: IPopup; children?: Reac
     );
 };
 
-export function GlobalPopup() {
+export function CanvasPopup() {
     const popupService = useDependency(ICanvasPopupService);
     const popups = useObservable(popupService.popups$, popupService.popups);
     const componentManager = useDependency(ComponentManager);
@@ -56,13 +56,13 @@ export function GlobalPopup() {
         const [key, popup] = item;
         const Component = componentManager.get(popup.componentKey);
         return (
-            <SingleGlobalPopup
+            <SingleCanvasPopup
                 key={key}
                 popup={popup}
             >
 
                 {Component ? <Component /> : null}
-            </SingleGlobalPopup>
+            </SingleCanvasPopup>
         );
     });
 }

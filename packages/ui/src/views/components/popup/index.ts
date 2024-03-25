@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export { GlobalPopup } from './GlobalPopup';
+export { CanvasPopup } from './CanvasPopup';

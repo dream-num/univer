@@ -361,6 +361,7 @@ export class PromptController extends Disposable {
             this._editorService.closeRangePrompt$.subscribe(() => {
                 if (!this._editorService.getSpreadsheetFocusState() || !this._formulaPromptService.isLockedSelectionInsert()) {
                     this._closeRangePrompt();
+                    this._selectionManagerService.changePlugin(NORMAL_SELECTION_PLUGIN_NAME);
                 }
             })
         );

@@ -69,7 +69,6 @@ export function DataValidationDetail() {
             ...localRule,
             ranges,
         });
-
         const params: IUpdateSheetDataValidationRangeCommandParams = {
             unitId,
             subUnitId,
@@ -102,7 +101,7 @@ export function DataValidationDetail() {
             unitId,
             subUnitId,
         });
-        onClose();
+        dataValidationPanelService.setActiveRule(null);
     };
 
     const baseRule = {
@@ -132,7 +131,6 @@ export function DataValidationDetail() {
                 }
                 : null),
         };
-
         setLocalRule(newRule);
 
         commandService.executeCommand(UpdateDataValidationSettingCommand.id, {

@@ -20,9 +20,9 @@ import type { IUpdateDataValidationSettingCommandParams } from '@univerjs/data-v
 import { DataValidatorRegistryScope, DataValidatorRegistryService, RemoveDataValidationCommand, UpdateDataValidationOptionsCommand, UpdateDataValidationSettingCommand } from '@univerjs/data-validation';
 import { TWO_FORMULA_OPERATOR_COUNT } from '@univerjs/data-validation/types/const/two-formula-operators.js';
 import { Button, FormLayout, Select } from '@univerjs/design';
-import { ComponentManager, RangeSelector, useObservable } from '@univerjs/ui';
+import { ComponentManager, RangeSelector, useEvent, useObservable } from '@univerjs/ui';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { serializeRange } from '@univerjs/engine-formula';
 import { getRuleSetting } from '@univerjs/data-validation/common/util.js';
 import { DataValidationPanelService } from '@univerjs/data-validation/services/data-validation-panel.service.js';
@@ -64,7 +64,7 @@ export function DataValidationDetail() {
         }
     };
 
-    const handleUpdateRuleRanges = (ranges: IRange[]) => {
+    const handleUpdateRuleRanges = useEvent((ranges: IRange[]) => {
         setLocalRule({
             ...localRule,
             ranges,
@@ -77,7 +77,7 @@ export function DataValidationDetail() {
         };
 
         commandService.executeCommand(UpdateSheetDataValidationRangeCommand.id, params);
-    };
+    });
 
     const handleUpdateRuleSetting = (setting: IDataValidationRuleBase) => {
         setLocalRule({

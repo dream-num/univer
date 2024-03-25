@@ -15,7 +15,7 @@
  */
 
 import type { ICellData, IDocumentBody, IMutationInfo, IParagraph, IRange, Nullable } from '@univerjs/core';
-import { IUniverInstanceService, ObjectMatrix, Range, Rectangle, Tools } from '@univerjs/core';
+import { cellToRange, IUniverInstanceService, ObjectMatrix, Range, Rectangle, Tools } from '@univerjs/core';
 import type {
     IAddWorksheetMergeMutationParams,
     IMoveRangeMutationParams,
@@ -115,12 +115,6 @@ export function getMoveRangeMutations(
         if (fromWorksheet && toWorksheet) {
             const fromCellValue = new ObjectMatrix<Nullable<ICellData>>();
             const newFromCellValue = new ObjectMatrix<Nullable<ICellData>>();
-            const cellToRange = (row: number, col: number) => ({
-                startRow: row,
-                endRow: row,
-                startColumn: col,
-                endColumn: col,
-            });
             const fromCellMatrix = fromWorksheet.getCellMatrix();
             const toCellMatrix = toWorksheet.getCellMatrix();
 

@@ -528,3 +528,13 @@ export function isValidRange(range: IRange): boolean {
 
     return true;
 }
+
+/**
+ * Covert row/column to range object
+ * @param row
+ * @param col
+ * @returns
+ */
+export function cellToRange(row: number, col: number): IRange {
+    return { startRow: row, endRow: row, startColumn: col, endColumn: col };
+}

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IRange } from '@univerjs/core';
+import { cellToRange } from '@univerjs/core';
 import type {
     IDeleteRangeMoveLeftCommandParams,
     IDeleteRangeMoveUpCommandParams,
@@ -40,8 +40,6 @@ import { describe, expect, it } from 'vitest';
 
 import { offsetArrayFormula, offsetFormula, removeFormulaData } from '../offset-formula-data';
 
-const cellToRange = (row: number, col: number) =>
-    ({ startRow: row, endRow: row, startColumn: col, endColumn: col }) as IRange;
 describe('Utils offset formula data test', () => {
     describe('function offsetFormula', () => {
         it('move range normal formula', () => {

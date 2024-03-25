@@ -16,6 +16,7 @@
 
 import type { ICellData, IRange, IWorkbookData, Nullable, Univer } from '@univerjs/core';
 import {
+    cellToRange,
     ICommandService,
     IUniverInstanceService,
     LocaleType,
@@ -37,9 +38,6 @@ import { SetSelectionsOperation } from '../../operations/selection.operation';
 import type { IMoveColsCommandParams, IMoveRowsCommandParams } from '../move-rows-cols.command';
 import { MoveColsCommand, MoveRowsCommand } from '../move-rows-cols.command';
 import { createCommandTestBed } from './create-command-test-bed';
-
-const cellToRange = (row: number, col: number) =>
-    ({ startRow: row, endRow: row, startColumn: col, endColumn: col }) as IRange;
 
 describe('Test move rows cols', () => {
     let univer: Univer;

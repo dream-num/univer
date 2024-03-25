@@ -30,7 +30,7 @@ export class Custom extends SheetExtension {
 
     override uKey: string = UNIQUE_KEY;
 
-    override draw(ctx: UniverRenderingContext, parentScale: IScale, skeleton: SpreadsheetSkeleton, diffBounds?: IRange[] | undefined): void {
+    override draw(ctx: UniverRenderingContext, parentScale: IScale, skeleton: SpreadsheetSkeleton, diffRanges?: IRange[] | undefined): void {
         const { rowHeightAccumulation, columnWidthAccumulation, worksheet, dataMergeCache, rowColumnSegment } = skeleton;
         if (!worksheet) {
             return;
@@ -44,6 +44,11 @@ export class Custom extends SheetExtension {
 
                 if (primaryWithCoord.isMerged && !primaryWithCoord.isMergedMainCell) {
                     return;
+                }
+
+                const { mergeInfo } = primaryWithCoord;
+                if (!this.isRenderDiffRangesByRow(mergeInfo.startRow, mergeInfo.endRow, diffRanges)) {
+                    return true;
                 }
 
                 // current cell is hidden

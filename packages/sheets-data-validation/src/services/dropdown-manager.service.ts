@@ -19,7 +19,7 @@ import type { ISheetLocation } from '@univerjs/sheets';
 import { Subject } from 'rxjs';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject } from '@wendellhu/redi';
-import { CanvasPopManagerService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { SheetCanvasPopManagerService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { DataValidatorRegistryService } from '@univerjs/data-validation';
 import { DROP_DOWN_KEY } from '../views/drop-down';
 
@@ -47,7 +47,7 @@ export class DataValidationDropdownManagerService {
     }
 
     constructor(
-        @Inject(CanvasPopManagerService) private readonly _canvasPopupManagerService: CanvasPopManagerService,
+        @Inject(SheetCanvasPopManagerService) private readonly _canvasPopupManagerService: SheetCanvasPopManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @Inject(DataValidatorRegistryService) private readonly _dataValidatorRegistryService: DataValidatorRegistryService

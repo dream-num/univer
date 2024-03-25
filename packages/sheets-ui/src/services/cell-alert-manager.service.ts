@@ -21,7 +21,7 @@ import type { Nullable } from '@univerjs/core';
 import type { ISheetLocation } from '@univerjs/sheets';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { CELL_ALERT_KEY } from '../views/cell-alert';
-import { CanvasPopManagerService } from './canvas-pop-manager.service';
+import { SheetCanvasPopManagerService } from './canvas-pop-manager.service';
 
 export enum CellAlertType {
     INFO,
@@ -52,7 +52,7 @@ export class CellAlertManagerService {
 
     constructor(
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @Inject(CanvasPopManagerService) private readonly _canvasPopManagerService: CanvasPopManagerService
+        @Inject(SheetCanvasPopManagerService) private readonly _canvasPopManagerService: SheetCanvasPopManagerService
     ) {}
 
     showAlert(alert: ICellAlert) {

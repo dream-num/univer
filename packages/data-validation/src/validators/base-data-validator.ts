@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { CellValue, ICellCustomRender, IDataValidationRule, IDataValidationRuleBase, Nullable } from '@univerjs/core';
+import type { CellValue, IDataValidationRule, IDataValidationRuleBase, Nullable } from '@univerjs/core';
 import { DataValidationOperator, LocaleService, Tools } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 import { OperatorErrorTitleMap, OperatorTitleMap } from '../types/const/operator-text-map';

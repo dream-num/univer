@@ -17,7 +17,7 @@
 import type { IShapeProps, UniverRenderingContext } from '@univerjs/engine-render';
 import { Rect, Shape } from '@univerjs/engine-render';
 import type { IDropdownLayoutInfo } from './layout';
-import { PADDING_H, PADDING_V } from './layout';
+import { PADDING_H } from './layout';
 
 const RADIUS = 8;
 

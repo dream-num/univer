@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-import type { CellValue, IDataValidationRule, Nullable } from '@univerjs/core';
-import type { BaseDataValidator } from '../..';
-
 export interface IDataValidationDropdownProps {
     top: number;
     left: number;

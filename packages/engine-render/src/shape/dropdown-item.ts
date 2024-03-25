@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import { WrapStrategy } from '@univerjs/core';
-import type { IFontCacheItem } from '..';
 import type { UniverRenderingContext } from '../context';
 import type { IShapeProps } from './shape';
 import { Shape } from './shape';

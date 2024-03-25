@@ -15,7 +15,7 @@
  */
 
 import { DataValidationType, isFormulaString, Tools } from '@univerjs/core';
-import type { CellValue, DataValidationOperator, IDataValidationRule, IDataValidationRuleBase, IStyleData, Nullable } from '@univerjs/core';
+import type { CellValue, DataValidationOperator, IDataValidationRule, IDataValidationRuleBase } from '@univerjs/core';
 import { BaseDataValidator } from '@univerjs/data-validation';
 import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation/validators/base-data-validator.js';
 import { CheckboxRender } from '../widgets/checkbox-widget';

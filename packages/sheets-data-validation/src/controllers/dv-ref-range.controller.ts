@@ -15,7 +15,7 @@
  */
 
 import type { IRange, ISheetDataValidationRule } from '@univerjs/core';
-import { DataValidationType, Disposable, DisposableCollection, ICommandService, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, Range, Rectangle, toDisposable } from '@univerjs/core';
+import { DataValidationType, Disposable, DisposableCollection, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle, Range, Rectangle, toDisposable } from '@univerjs/core';
 import type { EffectRefRangeParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { handleDefaultRangeChangeWithEffectRefCommands, RefRangeService, SetRangeValuesMutation } from '@univerjs/sheets';

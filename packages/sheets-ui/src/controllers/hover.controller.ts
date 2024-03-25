@@ -15,7 +15,6 @@
  */
 
 import { Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
-import type { IMouseEvent, IPointerEvent } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
 import { HoverManagerService } from '../services/hover-manager.service';

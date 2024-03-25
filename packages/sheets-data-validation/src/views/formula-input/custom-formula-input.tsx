@@ -15,7 +15,7 @@
  */
 
 import { FormLayout } from '@univerjs/design';
-import React, { useState } from 'react';
+import React from 'react';
 
 import { TextEditor } from '@univerjs/ui';
 import type { IFormulaInputProps } from '@univerjs/data-validation/types/interfaces/i-formula-input.js';

@@ -15,7 +15,7 @@
  */
 
 import type { IPosition, IRange, Nullable } from '@univerjs/core';
-import { IUniverInstanceService, Range } from '@univerjs/core';
+import { IUniverInstanceService } from '@univerjs/core';
 import type { ISheetLocation } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 import { distinctUntilChanged, Subject } from 'rxjs';

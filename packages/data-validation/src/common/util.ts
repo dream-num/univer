@@ -16,7 +16,6 @@
 
 import { DataValidationOperator, DataValidationType, type IDataValidationRule, type IDataValidationRuleBase, type IDataValidationRuleOptions, Tools } from '@univerjs/core';
 import { SelectionManagerService } from '@univerjs/sheets';
-import { ISelectionRenderService } from '@univerjs/sheets-ui';
 import type { IAccessor } from '@wendellhu/redi';
 
 export function getRuleSetting(rule: IDataValidationRule): IDataValidationRuleBase {

@@ -21,7 +21,6 @@ import { IRenderManagerService, Vector2 } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
 import type { ICellCustomRender, ICellRenderContext } from '@univerjs/core/types/interfaces/i-cell-custom-render.js';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
-import { getCellIndexByOffsetWithMerge } from '../common/utils';
 
 @OnLifecycle(LifecycleStages.Ready, CellCustomRenderController)
 export class CellCustomRenderController extends Disposable {

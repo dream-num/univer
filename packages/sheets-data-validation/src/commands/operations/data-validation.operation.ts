@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { CommandType, type ICommand, IUniverInstanceService } from '@univerjs/core';
+import { CommandType, type ICommand } from '@univerjs/core';
 import { DataValidationDropdownManagerService } from '../../services/dropdown-manager.service';
 
 export interface IShowDataValidationDropdownParams {

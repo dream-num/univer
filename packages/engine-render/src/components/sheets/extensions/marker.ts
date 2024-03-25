@@ -18,7 +18,6 @@ import { type IRange, type IScale, Range } from '@univerjs/core';
 import type { UniverRenderingContext } from '../../../context';
 import type { SpreadsheetSkeleton } from '../sheet-skeleton';
 import { SpreadsheetExtensionRegistry } from '../../extension';
-import { getColor } from '../../../basics/tools';
 import { SheetExtension } from './sheet-extension';
 
 const UNIQUE_KEY = 'DefaultMarkerExtension';

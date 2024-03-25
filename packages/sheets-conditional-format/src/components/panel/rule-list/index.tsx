@@ -161,7 +161,7 @@ export const RuleList = (props: IRuleListProps) => {
 
     useEffect(() => {
         ruleListSet(getRuleList);
-    }, [selectValue, fetchRuleListId]);
+    }, [selectValue, fetchRuleListId, unitId, subUnitId]);
 
     useEffect(() => {
         if (selectValue === '2') {
@@ -185,7 +185,7 @@ export const RuleList = (props: IRuleListProps) => {
         return () => {
             subscription.unsubscribe();
         };
-    }, [univerInstanceService, selectValue]);
+    }, [univerInstanceService, selectValue, unitId, subUnitId]);
 
     useEffect(() => {
         const dispose = conditionalFormatRuleModel.$ruleChange.subscribe(() => {

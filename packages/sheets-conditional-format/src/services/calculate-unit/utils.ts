@@ -15,7 +15,8 @@
  */
 
 import type { ICellData } from '@univerjs/core';
-import { ColorKit, ObjectMatrix, Range } from '@univerjs/core';
+import { BooleanNumber, CellValueType, ColorKit, ObjectMatrix, Range } from '@univerjs/core';
+import { BooleanValue } from '@univerjs/engine-formula';
 import type { IConditionFormatRule, IValueConfig } from '../../models/type';
 import { NumberOperator, ValueType } from '../../base/const';
 import { ConditionalFormatFormulaService, FormulaResultStatus } from '../conditional-format-formula.service';
@@ -29,6 +30,9 @@ export const isNullable = (v: any) => [undefined, null].includes(v);
 export const getCellValue = (cell?: ICellData) => {
     if (!cell) {
         return null;
+    }
+    if (cell.t === CellValueType.BOOLEAN) {
+        return cell.v === BooleanNumber.TRUE ? BooleanValue.TRUE : BooleanValue.FALSE;
     }
     const v = cell.v;
     const dataStream = cell.p?.body?.dataStream.replace(/\r\n$/, '');

@@ -118,7 +118,7 @@ const Template = (props: { item: IDropdownItem; dragHandleProps: any; commonProp
             {!item.isRef
                 ? (
                     <div
-                        className="dragHandle"
+                        className={styles.dataValidationFormulaListItemDrag}
                         onTouchStart={(e) => {
                             e.preventDefault();
 

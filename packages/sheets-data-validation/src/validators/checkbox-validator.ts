@@ -21,6 +21,7 @@ import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@u
 import { CheckboxRender } from '../widgets/checkbox-widget';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
 import { getFormulaResult } from '../utils/formula';
+import { CHECKBOX_FORMULA_INPUT_NAME } from '../views/formula-input';
 
 export const CHECKBOX_FORMULA_1 = 1;
 export const CHECKBOX_FORMULA_2 = 0;
@@ -30,7 +31,7 @@ export class CheckboxValidator extends BaseDataValidator {
     override title: string = 'dataValidation.checkbox.title';
     override operators: DataValidationOperator[] = [];
     override scopes: string | string[] = ['sheet'];
-    override formulaInput: string;
+    override formulaInput: string = CHECKBOX_FORMULA_INPUT_NAME;
     override skipDefaultFontRender = true;
 
     override canvasRender = this.injector.createInstance(CheckboxRender);
@@ -74,7 +75,7 @@ export class CheckboxValidator extends BaseDataValidator {
             return true;
         }
 
-        return Tools.isDefine(value) && (value === formula1 || value === formula2);
+        return Tools.isDefine(value) && (String(value) === String(formula1) || String(value) === String(formula2));
     }
 
     override generateRuleErrorMessage(rule: IDataValidationRuleBase): string {

@@ -118,6 +118,7 @@ export default {
         checkbox: {
             title: 'Checkbox',
             error: 'This cell\'s contents violate its validation rule',
+            tips: '在单元格内使用自定义值',
         },
         custom: {
             title: 'Custom formula',

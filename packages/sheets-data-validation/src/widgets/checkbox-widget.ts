@@ -122,7 +122,7 @@ export class CheckboxRender implements IBaseDataValidationWidget {
         const size = (style?.fs ?? 10) * 1.6;
 
         Checkbox.drawWith(ctx, {
-            checked: value === formula1,
+            checked: String(value) === String(formula1),
             width: size,
             height: size,
             fill: style?.cl?.rgb ?? '#BCBCBC',
@@ -161,7 +161,7 @@ export class CheckboxRender implements IBaseDataValidationWidget {
                 endRow: primaryWithCoord.actualRow,
             },
             value: {
-                v: value === formula1 ? formula2 : formula1,
+                v: String(value) === String(formula1) ? formula2 : formula1,
                 p: null,
             },
         };

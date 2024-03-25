@@ -130,6 +130,9 @@ export default {
         checkbox: {
             title: '复选框',
             error: '此单元格的内容违反了验证规则',
+            tips: '在单元格内使用自定义值',
+            checked: '选中值',
+            unchecked: '未选中值',
         },
         custom: {
             title: '自定义公式',

@@ -18,16 +18,56 @@ import {
     Disposable,
     LifecycleStages,
     OnLifecycle,
+    toDisposable,
 } from '@univerjs/core';
 
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { Inject } from '@wendellhu/redi';
+import { ConditionalFormatService } from '../services/conditional-format.service';
+import { getStringFromDataStream } from '../utils/getStringFromDataStream';
 
 @OnLifecycle(LifecycleStages.Rendered, ConditionalFormatEditorController)
 export class ConditionalFormatEditorController extends Disposable {
     constructor(
-        @Inject(IEditorBridgeService) private _editorBridgeService: IEditorBridgeService
+        @Inject(IEditorBridgeService) private _editorBridgeService: IEditorBridgeService,
+        @Inject(ConditionalFormatService) private _conditionalFormatService: ConditionalFormatService
+
     ) {
         super();
+        this._initInterceptorEditorEnd();
+    }
+
+    /**
+     * Process the  values after  edit
+     * @private
+     * @memberof NumfmtService
+     */
+    private _initInterceptorEditorEnd() {
+        this.disposeWithMe(
+            toDisposable(
+                this._editorBridgeService.interceptor.intercept(
+                    this._editorBridgeService.interceptor.getInterceptPoints().AFTER_CELL_EDIT,
+                    {
+                        handler: (value, context, next) => {
+                            const result = this._conditionalFormatService.composeStyle(context.unitId, context.subUnitId, context.row, context.col);
+                            if (result?.style && value?.p) {
+                                const keys = Object.keys(result?.style);
+                                if (keys.length > 0) {
+                                    const v = getStringFromDataStream(value.p);
+                                    const s = { ...(typeof value.s === 'string' ? context.workbook.getStyles().get(value.s) : value.s) || {} };
+                                    keys.forEach((key) => {
+                                        delete s[key as keyof typeof s];
+                                    });
+                                    const cellData = { ...value, s: { ...s }, v };
+                                    delete cellData.p;
+                                    return next(cellData);
+                                }
+                            }
+                            return next(value);
+                        },
+                    }
+                )
+            )
+        );
     }
 }

@@ -105,6 +105,7 @@ export default {
             name: 'Value contains one from range',
             error: 'Input must fall within specified range',
             emptyError: 'Please enter a value',
+            add: 'Add',
         },
         textLength: {
             title: 'Text length',

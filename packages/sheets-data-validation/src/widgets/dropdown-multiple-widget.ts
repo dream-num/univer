@@ -92,6 +92,7 @@ export class DropdownMultipleWidget implements IBaseDataValidationWidget {
         const vt = _vt ?? VerticalAlign.MIDDLE;
         const cellValue = getCellValueOrigin(data) ?? '';
         const items = validator.parseCellValue(cellValue, rule);
+        const labelColorMap = validator.getListWithColorMap(rule);
         const layout = layoutDropdowns(items, fontStyle, cellWidth, cellHeight);
         this._drawDownIcon(ctx, primaryWithCoord, cellWidth, cellHeight, vt);
         ctx.save();
@@ -134,6 +135,7 @@ export class DropdownMultipleWidget implements IBaseDataValidationWidget {
                     ...fontStyle,
                     info: item,
                     color,
+                    fill: labelColorMap[item.text],
                 });
                 ctx.restore();
             });

@@ -16,6 +16,7 @@
 
 import type { IShapeProps, UniverRenderingContext } from '@univerjs/engine-render';
 import { Rect, Shape } from '@univerjs/engine-render';
+import { DROP_DOWN_DEFAULT_COLOR } from '../../common/const';
 import type { IDropdownLayoutInfo } from './layout';
 import { PADDING_H } from './layout';
 
@@ -38,7 +39,7 @@ export class Dropdown extends Shape<IDropdownProps> {
             width: layout.width,
             height: layout.height,
             radius: RADIUS,
-            fill: '#DCDCDC',
+            fill: fill || DROP_DOWN_DEFAULT_COLOR,
         });
         ctx.translateWithPrecision(PADDING_H, layout.ba);
         ctx.font = fontString;

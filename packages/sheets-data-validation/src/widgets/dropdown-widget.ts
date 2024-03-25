@@ -18,10 +18,11 @@ import { BooleanNumber, DEFAULT_EMPTY_DOCUMENT_VALUE, DocumentDataModel, IComman
 import type { ICellRenderContext, IDocumentData, IPaddingData, IStyleData, Nullable } from '@univerjs/core';
 import { Documents, DocumentSkeleton, DocumentViewModel, getDocsSkeletonPageSize, Rect, type Spreadsheet, type SpreadsheetSkeleton, type UniverRenderingContext2D } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
-import type { IBaseDataValidationWidget } from '@univerjs/data-validation';
+import { DataValidationModel, DataValidatorRegistryService, type IBaseDataValidationWidget } from '@univerjs/data-validation';
 import { getCellValueOrigin } from '../utils/getCellDataOrigin';
 import { type IShowDataValidationDropdownParams, ShowDataValidationDropdown } from '../commands/operations/data-validation.operation';
 import { DROP_DOWN_DEFAULT_COLOR } from '../common/const';
+import type { ListValidator } from '../validators';
 
 const PADDING_H = 4;
 const ICON_SIZE = 6;
@@ -113,7 +114,9 @@ export class DropdownWidget implements IBaseDataValidationWidget {
     private _dropdownInfoMap: Map<string, Map<string, IDropdownInfo>> = new Map();
     constructor(
         @Inject(LocaleService) private readonly _localeService: LocaleService,
-        @ICommandService private readonly _commandService: ICommandService
+        @ICommandService private readonly _commandService: ICommandService,
+        @Inject(DataValidationModel) private readonly _dataValidationModel: DataValidationModel,
+        @Inject(DataValidatorRegistryService) private readonly _dataValidatorRegistryService: DataValidatorRegistryService
     ) { }
 
     zIndex?: number | undefined;
@@ -141,15 +144,24 @@ export class DropdownWidget implements IBaseDataValidationWidget {
         const map = this._ensureMap(subUnitId);
         const key = this._generateKey(row, col);
 
+        const rule = data.dataValidation?.rule;
+        const validator = data.dataValidation?.validator as ListValidator;
+
+        if (!rule || !validator) {
+            return;
+        }
+
+        const list = validator.getListWithColor(rule);
+
         ctx.save();
         ctx.translateWithPrecision(primaryWithCoord.startX, primaryWithCoord.startY);
         ctx.beginPath();
         ctx.rect(0, 0, cellWidth, cellHeight);
         ctx.clip();
-
         const vt = style?.vt;
         const value = getCellValueOrigin(data);
         const valueStr = `${value ?? ''}`;
+        const activeItem = list.find((i) => i.label === valueStr);
         const realWidth = cellWidth - (MARGIN_H * 2) - PADDING_H - ICON_PLACE;
         const { documentSkeleton, documents, docModel } = createDocuments(valueStr, this._localeService, style);
         const { tb = WrapStrategy.WRAP } = style || {};
@@ -184,7 +196,7 @@ export class DropdownWidget implements IBaseDataValidationWidget {
         Rect.drawWith(ctx, {
             width: rectWidth,
             height: rectHeight,
-            fill: DROP_DOWN_DEFAULT_COLOR,
+            fill: activeItem?.color || DROP_DOWN_DEFAULT_COLOR,
             radius: 8,
         });
         ctx.save();

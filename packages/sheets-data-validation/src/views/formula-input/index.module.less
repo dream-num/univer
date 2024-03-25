@@ -6,4 +6,63 @@
         font-size: var(--font-size-sm);
         color: rgba(var(--grey-400));
     }
+
+    &-list-item {
+        display: flex;
+        padding-bottom: 2px;
+        align-items: center;
+
+        &-icon {
+            font-size: 16px;
+            cursor: pointer;
+            margin-left: 4px;
+        }
+    }
+
+    &-list-add {
+        color: rgba(var(--blue-500));
+        font-size: 13px;
+        font-weight: 400;
+        cursor: pointer;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+
+        svg {
+            margin-right: 4px;
+        }
+    }
+
+    &-color-select {
+        width: 92px;
+        margin-left: 4px;
+        margin-right: 8px;
+        height: 31px;
+    }
+
+    &-color-select-panel {
+        width: 112px;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        padding: 12px 4px 4px 12px;
+        flex-wrap: wrap;
+        box-sizing: border-box;
+
+        .data-validation-formula-color-item {
+            margin-bottom: 8px;
+            margin-right: 8px;
+            box-sizing: border-box;
+            cursor: pointer;
+        }
+    }
+
+    &-color-item {
+        border-radius: 3px;
+        border: 1px solid rgba(var(--grey-400));
+        width: 16px;
+        height: 16px;
+        box-sizing: border-box;
+        font-size: 16px;
+    }
 }

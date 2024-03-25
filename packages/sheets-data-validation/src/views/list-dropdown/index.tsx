@@ -63,7 +63,7 @@ const SelectList = (props: ISelectListProps) => {
                 };
                 return (
                     <div key={i} className={styles.dvListDropdownItemContainer} onClick={handleClick}>
-                        <div className={styles.dvListDropdownItem} style={{ background: item.color ?? DROP_DOWN_DEFAULT_COLOR }}>{item.label}</div>
+                        <div className={styles.dvListDropdownItem} style={{ background: item.color || DROP_DOWN_DEFAULT_COLOR }}>{item.label}</div>
                         <div className={styles.dvListDropdownSelectedIcon}>
                             {selected ? <CheckMarkSingle /> : null}
                         </div>
@@ -97,7 +97,7 @@ export function ListDropDown(props: IDropdownComponentProps) {
     }
 
     const multiple = rule.type === DataValidationType.LIST_MULTIPLE;
-    const list = validator.getList(rule, unitId, subUnitId);
+    const list = validator.getListWithColor(rule, unitId, subUnitId);
     const cellStr = localValue || getDataValidationCellValue(cellData);
     const value = deserializeListOptions(cellStr);
 
@@ -134,9 +134,10 @@ export function ListDropDown(props: IDropdownComponentProps) {
                     hideFn();
                 }
             }}
-            options={list.map((str) => ({
-                label: str,
-                value: str,
+            options={list.map((item) => ({
+                label: item.label,
+                value: item.label,
+                color: item.color,
             }))}
             onEdit={handleEdit}
         />

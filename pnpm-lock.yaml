@@ -346,7 +346,7 @@ importers:
         version: 5.1.6(@types/node@20.11.29)(less@4.2.0)
       vitest:
         specifier: ^1.4.0
-        version: 1.4.0(@types/node@20.11.29)(jsdom@24.0.0)
+        version: 1.4.0(@types/node@20.11.29)(happy-dom@13.3.8)
 
   packages/data-validation:
     dependencies:
@@ -425,7 +425,7 @@ importers:
         version: 0.6.2(vite@5.1.6)
       vitest:
         specifier: ^1.2.1
-        version: 1.4.0(@types/node@20.11.29)(jsdom@24.0.0)
+        version: 1.4.0(@types/node@20.11.29)(happy-dom@13.3.8)
 
   packages/design:
     dependencies:
@@ -540,7 +540,7 @@ importers:
         version: 5.1.6(@types/node@20.11.29)(less@4.2.0)
       vitest:
         specifier: ^1.4.0
-        version: 1.4.0(@types/node@20.11.29)(jsdom@24.0.0)
+        version: 1.4.0(@types/node@20.11.29)(happy-dom@13.3.8)
 
   packages/docs-ui:
     devDependencies:
@@ -619,7 +619,7 @@ importers:
         version: 5.1.6(@types/node@20.11.29)(less@4.2.0)
       vitest:
         specifier: ^1.4.0
-        version: 1.4.0(@types/node@20.11.29)(jsdom@24.0.0)
+        version: 1.4.0(@types/node@20.11.29)(happy-dom@13.3.8)
 
   packages/engine-numfmt:
     dependencies:
@@ -638,7 +638,7 @@ importers:
         version: 5.1.6(@types/node@20.11.29)(less@4.2.0)
       vitest:
         specifier: ^1.4.0
-        version: 1.4.0(@types/node@20.11.29)(jsdom@24.0.0)
+        version: 1.4.0(@types/node@20.11.29)(happy-dom@13.3.8)
 
   packages/engine-render:
     dependencies:
@@ -669,7 +669,7 @@ importers:
         version: 5.1.6(@types/node@20.11.29)(less@4.2.0)
       vitest:
         specifier: ^1.4.0
-        version: 1.4.0(@types/node@20.11.29)(jsdom@24.0.0)
+        version: 1.4.0(@types/node@20.11.29)(happy-dom@13.3.8)
 
   packages/facade:
     devDependencies:
@@ -799,7 +799,7 @@ importers:
         version: 5.1.6(@types/node@20.11.29)(less@4.2.0)
       vitest:
         specifier: ^1.4.0
-        version: 1.4.0(@types/node@20.11.29)(jsdom@24.0.0)
+        version: 1.4.0(@types/node@20.11.29)(happy-dom@13.3.8)
 
   packages/rpc:
     devDependencies:
@@ -823,7 +823,7 @@ importers:
         version: 5.1.6(@types/node@20.11.29)(less@4.2.0)
       vitest:
         specifier: ^1.4.0
-        version: 1.4.0(@types/node@20.11.29)(jsdom@24.0.0)
+        version: 1.4.0(@types/node@20.11.29)(happy-dom@13.3.8)
 
   packages/sheets:
     devDependencies:
@@ -853,7 +853,7 @@ importers:
         version: 5.1.6(@types/node@20.11.29)(less@4.2.0)
       vitest:
         specifier: ^1.4.0
-        version: 1.4.0(@types/node@20.11.29)(jsdom@24.0.0)
+        version: 1.4.0(@types/node@20.11.29)(happy-dom@13.3.8)
 
   packages/sheets-conditional-format:
     dependencies:
@@ -987,6 +987,9 @@ importers:
       react:
         specifier: ^18.2.0
         version: 18.2.0
+      react-draggable-list:
+        specifier: ^4.2.0
+        version: 4.2.0(react@18.2.0)
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -1095,7 +1098,7 @@ importers:
         version: 5.1.6(@types/node@20.11.29)(less@4.2.0)
       vitest:
         specifier: ^1.4.0
-        version: 1.4.0(@types/node@20.11.29)(jsdom@24.0.0)
+        version: 1.4.0(@types/node@20.11.29)(happy-dom@13.3.8)
 
   packages/sheets-formula:
     dependencies:
@@ -6093,7 +6096,7 @@ packages:
       magicast: 0.3.3
       picocolors: 1.0.0
       test-exclude: 6.0.0
-      vitest: 1.4.0(@types/node@20.11.29)(happy-dom@13.3.8)
+      vitest: 1.4.0(@types/node@20.11.29)(happy-dom@13.3.8)(less@4.2.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -12817,6 +12820,20 @@ packages:
       react: 18.2.0
       scheduler: 0.23.0
 
+  /react-draggable-list@4.2.0(react@18.2.0):
+    resolution: {integrity: sha512-3UG1cVNWdQHsqcqtuLRAtkkOkvB8seF8cY/IZQJbcyqT1Fbv7Hk8KwatAg6Ud1dWGbvrDuT9M+fkCyD3P+WHlw==}
+    peerDependencies:
+      react: ^16.6.0 || ^17.0.0
+    dependencies:
+      '@babel/runtime': 7.23.9
+      '@types/prop-types': 15.7.11
+      immutability-helper: r2.cnpmjs.org/immutability-helper@3.1.1
+      prop-types: 15.8.1
+      react: 18.2.0
+      react-motion: r2.cnpmjs.org/react-motion@0.5.2(react@18.2.0)
+      react-multi-ref: 1.0.1
+    dev: false
+
   /react-draggable@4.4.6(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-LtY5Xw1zTPqHkVmtM3X8MUOxNDOUhv/khTgBgrUvwaS064bwVvxT+q5El0uUFNx5IEPKXuRejr7UqLwBIg5pdw==}
     peerDependencies:
@@ -12891,6 +12908,12 @@ packages:
       - '@types/react'
       - dnd-core
       - react-dom
+    dev: false
+
+  /react-multi-ref@1.0.1:
+    resolution: {integrity: sha512-zgQKmduv95vtXIkze6583pRW7Y+mNj7R0bYgxIRWOrsEfxBQaK+MZ6yjTiZ/qcFV4bYGM74nE9isb+YRBNIw2g==}
+    dependencies:
+      '@babel/runtime': 7.23.9
     dev: false
 
   /react-refresh@0.14.0:
@@ -14634,26 +14657,6 @@ packages:
     engines: {node: '>= 0.8'}
     dev: false
 
-  /vite-node@1.4.0(@types/node@20.11.29):
-    resolution: {integrity: sha512-VZDAseqjrHgNd4Kh8icYHWzTKSCZMhia7GyHfhtzLW33fZlG9SwsB6CEhgyVOWkJfJ2pFLrp/Gj1FSfAiqH9Lw==}
-    engines: {node: ^18.0.0 || >=20.0.0}
-    hasBin: true
-    dependencies:
-      cac: 6.7.14
-      debug: 4.3.4
-      pathe: 1.1.2
-      picocolors: 1.0.0
-      vite: 5.1.6(@types/node@20.11.29)(less@4.2.0)
-    transitivePeerDependencies:
-      - '@types/node'
-      - less
-      - lightningcss
-      - sass
-      - stylus
-      - sugarss
-      - supports-color
-      - terser
-
   /vite-node@1.4.0(@types/node@20.11.29)(less@4.2.0):
     resolution: {integrity: sha512-VZDAseqjrHgNd4Kh8icYHWzTKSCZMhia7GyHfhtzLW33fZlG9SwsB6CEhgyVOWkJfJ2pFLrp/Gj1FSfAiqH9Lw==}
     engines: {node: ^18.0.0 || >=20.0.0}
@@ -14673,7 +14676,6 @@ packages:
       - sugarss
       - supports-color
       - terser
-    dev: true
 
   /vite-plugin-dts@3.7.3(@types/node@20.11.29)(typescript@5.4.2)(vite@5.1.6):
     resolution: {integrity: sha512-26eTlBYdpjRLWCsTJebM8vkCieE+p9gP3raf+ecDnzzK5E3FG6VE1wcy55OkRpfWWVlVvKkYFe6uvRHYWx7Nog==}
@@ -14795,13 +14797,13 @@ packages:
       local-pkg: 0.5.0
       magic-string: 0.30.7
       pathe: 1.1.2
-      picocolors: 1.0.0
+      picocolors: r2.cnpmjs.org/picocolors@1.0.0
       std-env: 3.7.0
       strip-literal: 2.0.0
       tinybench: 2.6.0
       tinypool: 0.8.2
       vite: 5.1.6(@types/node@20.11.29)(less@4.2.0)
-      vite-node: 1.4.0(@types/node@20.11.29)
+      vite-node: 1.4.0(@types/node@20.11.29)(less@4.2.0)
       why-is-node-running: 2.2.2
     transitivePeerDependencies:
       - less
@@ -14867,7 +14869,6 @@ packages:
       - sugarss
       - supports-color
       - terser
-    dev: true
 
   /vitest@1.4.0(@types/node@20.11.29)(jsdom@24.0.0):
     resolution: {integrity: sha512-gujzn0g7fmwf83/WzrDTnncZt2UiXP41mHuFYFrdwaLRVQ6JYQEiME2IfEjU3vcFL3VKa75XhI3lFgn+hfVsQw==}
@@ -14914,7 +14915,7 @@ packages:
       tinybench: 2.6.0
       tinypool: 0.8.2
       vite: 5.1.6(@types/node@20.11.29)(less@4.2.0)
-      vite-node: 1.4.0(@types/node@20.11.29)
+      vite-node: 1.4.0(@types/node@20.11.29)(less@4.2.0)
       why-is-node-running: 2.2.2
     transitivePeerDependencies:
       - less
@@ -15537,6 +15538,12 @@ packages:
     requiresBuild: true
     optional: true
 
+  r2.cnpmjs.org/immutability-helper@3.1.1:
+    resolution: {integrity: sha512-Q0QaXjPjwIju/28TsugCHNEASwoCcJSyJV3uO1sOIQGI0jKgm9f41Lvz0DZj3n46cNCyAZTsEYoY4C2bVRUzyQ==, tarball: https://r2.cnpmjs.org/immutability-helper/-/immutability-helper-3.1.1.tgz}
+    name: immutability-helper
+    version: 3.1.1
+    dev: false
+
   r2.cnpmjs.org/is-arrayish@0.3.2:
     resolution: {integrity: sha512-eVRqCvVlZbuw3GrM63ovNSNAeA1K16kaR/LRY/92w0zxQ5/1YzwblUX652i4Xs9RwAGjW9d9y6X88t8OaAJfWQ==, tarball: https://r2.cnpmjs.org/is-arrayish/-/is-arrayish-0.3.2.tgz}
     name: is-arrayish
@@ -15610,6 +15617,18 @@ packages:
     version: 1.0.1
     engines: {node: '>= 0.10'}
 
+  r2.cnpmjs.org/performance-now@0.2.0:
+    resolution: {integrity: sha512-YHk5ez1hmMR5LOkb9iJkLKqoBlL7WD5M8ljC75ZfzXriuBIVNuecaXuU7e+hOwyqf24Wxhh7Vxgt7Hnw9288Tg==, tarball: https://r2.cnpmjs.org/performance-now/-/performance-now-0.2.0.tgz}
+    name: performance-now
+    version: 0.2.0
+    dev: false
+
+  r2.cnpmjs.org/performance-now@2.1.0:
+    resolution: {integrity: sha512-7EAHlyLHI56VEIdK57uwHdHKIaAGbnXPiw0yWbarQZOKaKpvUIgW0jWRVLiatnM+XXlSwsanIBH/hzGMJulMow==, tarball: https://r2.cnpmjs.org/performance-now/-/performance-now-2.1.0.tgz}
+    name: performance-now
+    version: 2.1.0
+    dev: false
+
   r2.cnpmjs.org/picocolors@1.0.0:
     resolution: {integrity: sha512-1fygroTLlHu66zi26VoTDv8yRgm0Fccecssto+MhsZ0D/DGW2sm8E8AjW7NU5VVTRt5GxbeZ5qBuJr+HyLYkjQ==, tarball: https://r2.cnpmjs.org/picocolors/-/picocolors-1.0.0.tgz}
     name: picocolors
@@ -15621,6 +15640,28 @@ packages:
     version: 1.0.1
     requiresBuild: true
     optional: true
+
+  r2.cnpmjs.org/raf@3.4.1:
+    resolution: {integrity: sha512-Sq4CW4QhwOHE8ucn6J34MqtZCeWFP2aQSmrlroYgqAV1PjStIhJXxYuTgUIfkEk7zTLjmIjLmU5q+fbD1NnOJA==, tarball: https://r2.cnpmjs.org/raf/-/raf-3.4.1.tgz}
+    name: raf
+    version: 3.4.1
+    dependencies:
+      performance-now: r2.cnpmjs.org/performance-now@2.1.0
+    dev: false
+
+  r2.cnpmjs.org/react-motion@0.5.2(react@18.2.0):
+    resolution: {integrity: sha512-9q3YAvHoUiWlP3cK0v+w1N5Z23HXMj4IF4YuvjvWegWqNPfLXsOBE/V7UvQGpXxHFKRQQcNcVQE31g9SB/6qgQ==, tarball: https://r2.cnpmjs.org/react-motion/-/react-motion-0.5.2.tgz}
+    id: r2.cnpmjs.org/react-motion/0.5.2
+    name: react-motion
+    version: 0.5.2
+    peerDependencies:
+      react: ^0.14.9 || ^15.3.0 || ^16.0.0
+    dependencies:
+      performance-now: r2.cnpmjs.org/performance-now@0.2.0
+      prop-types: 15.8.1
+      raf: r2.cnpmjs.org/raf@3.4.1
+      react: 18.2.0
+    dev: false
 
   r2.cnpmjs.org/resize-observer-polyfill@1.5.1:
     resolution: {integrity: sha512-LwZrotdHOo12nQuZlHEmtuXdqGoOD0OhaxopaNFxWzInpEgaLWoVuAMbTzixuosCx2nEG58ngzW3vxdWoxIgdg==, tarball: https://r2.cnpmjs.org/resize-observer-polyfill/-/resize-observer-polyfill-1.5.1.tgz}

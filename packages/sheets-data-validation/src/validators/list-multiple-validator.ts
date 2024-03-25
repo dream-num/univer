@@ -90,4 +90,23 @@ export class ListMultipleValidator extends BaseDataValidator {
         const subUnitId = worksheet.getSheetId();
         return isReferenceString(formula1) ? getSheetRangeValueSet(deserializeRangeWithSheet(formula1), this._univerInstanceService, unitId, subUnitId) : deserializeListOptions(formula1);
     }
+
+    getListWithColor(rule: IDataValidationRule, currentUnitId?: string, currentSubUnitId?: string) {
+        const list = this.getList(rule, currentUnitId, currentSubUnitId);
+        const colorList = rule.formula2 ? rule.formula2.split(',') : [];
+
+        return list.map((label, i) => ({ label, color: colorList[i] }));
+    }
+
+    getListWithColorMap(rule: IDataValidationRule, currentUnitId?: string, currentSubUnitId?: string) {
+        const list = this.getListWithColor(rule, currentUnitId, currentSubUnitId);
+        const map: Record<string, string> = {};
+
+        list.forEach((item) => {
+            if (item.color) {
+                map[item.label] = item.color;
+            }
+        });
+        return map;
+    }
 }

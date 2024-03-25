@@ -111,8 +111,9 @@ import {
 import { Inject, Injector } from '@wendellhu/redi';
 
 import type { IRefRangeWithPosition } from './utils/offset-formula-data';
-import { offsetArrayFormula, offsetFormula, removeFormulaData } from './utils/offset-formula-data';
+import { removeFormulaData } from './utils/offset-formula-data';
 import { handleRedoUndoMoveRange } from './utils/redo-undo-formula-data';
+import { refRangeFormula } from './utils/ref-range-formula';
 
 interface IUnitRangeWithOffset extends IUnitRange {
     refOffsetX: number;
@@ -215,7 +216,7 @@ export class UpdateFormulaController extends Disposable {
                     (command.params as IMutationCommonParams)?.trigger === UndoCommand.id ||
                     (command.params as IMutationCommonParams)?.trigger === RedoCommand.id
                 ) {
-                    this._handleRedoUndo(command); // TODO: handle in set range values
+                    // this._handleRedoUndo(command); // TODO: handle in set range values
                 }
             })
         );
@@ -400,77 +401,80 @@ export class UpdateFormulaController extends Disposable {
 
         if (result) {
             const { unitSheetNameMap } = this._formulaDataModel.getCalculateData();
-            let oldFormulaData = this._formulaDataModel.getFormulaData();
+            const oldFormulaData = this._formulaDataModel.getFormulaData();
             const oldNumfmtItemMap = this._formulaDataModel.getNumfmtItemMap();
 
             // change formula reference
-            const { newFormulaData: formulaData, refRanges } = this._getFormulaReferenceMoveInfo(
+            const { newFormulaData, refRanges } = this._getFormulaReferenceMoveInfo(
                 oldFormulaData,
                 unitSheetNameMap,
                 result
             );
 
             // TODO@Dushusir: handle offset formula data
-            // const {redos, undos} = refRangeFormula(oldFormulaData, newFormulaData, result);
+            const { redoFormulaData, undoFormulaData } = refRangeFormula(oldFormulaData, newFormulaData, result);
 
-            const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
-            const unitId = workbook.getUnitId();
-            const sheetId = workbook.getActiveSheet().getSheetId();
-            const selections = this._selectionManagerService.getSelections();
+            // console.info('redoFormulaData==', redoFormulaData);
+            // console.info('undoFormulaData==', undoFormulaData);
 
-            // offset arrayFormula
-            const arrayFormulaRange = this._formulaDataModel.getArrayFormulaRange();
-            const arrayFormulaCellData = this._formulaDataModel.getArrayFormulaCellData();
+            // const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+            // const unitId = workbook.getUnitId();
+            // const sheetId = workbook.getActiveSheet().getSheetId();
+            // const selections = this._selectionManagerService.getSelections();
 
-            // First use arrayFormulaCellData and the original arrayFormulaRange to calculate the offset of arrayFormulaCellData, otherwise the offset of arrayFormulaRange will be inaccurate.
-            const offsetArrayFormulaCellData = offsetFormula(
-                arrayFormulaCellData,
-                command,
-                unitId,
-                sheetId,
-                selections,
-                arrayFormulaRange,
-                refRanges
-            );
-            let offsetArrayFormulaRange = offsetFormula(
-                arrayFormulaRange,
-                command,
-                unitId,
-                sheetId,
-                selections,
-                arrayFormulaRange
-            );
-            offsetArrayFormulaRange = offsetArrayFormula(offsetArrayFormulaRange, command, unitId, sheetId);
+            // // offset arrayFormula
+            // const arrayFormulaRange = this._formulaDataModel.getArrayFormulaRange();
+            // const arrayFormulaCellData = this._formulaDataModel.getArrayFormulaCellData();
 
-            // Synchronous to the worker thread
-            this._commandService.executeCommand(
-                SetArrayFormulaDataMutation.id,
-                {
-                    arrayFormulaRange: offsetArrayFormulaRange,
-                    arrayFormulaCellData: offsetArrayFormulaCellData,
-                },
-                {
-                    onlyLocal: true,
-                }
-            );
+            // // First use arrayFormulaCellData and the original arrayFormulaRange to calculate the offset of arrayFormulaCellData, otherwise the offset of arrayFormulaRange will be inaccurate.
+            // const offsetArrayFormulaCellData = offsetFormula(
+            //     arrayFormulaCellData,
+            //     command,
+            //     unitId,
+            //     sheetId,
+            //     selections,
+            //     arrayFormulaRange,
+            //     refRanges
+            // );
+            // let offsetArrayFormulaRange = offsetFormula(
+            //     arrayFormulaRange,
+            //     command,
+            //     unitId,
+            //     sheetId,
+            //     selections,
+            //     arrayFormulaRange
+            // );
+            // offsetArrayFormulaRange = offsetArrayFormula(offsetArrayFormulaRange, command, unitId, sheetId);
 
-            // offset formulaData
-            oldFormulaData = offsetFormula(oldFormulaData, command, unitId, sheetId, selections);
-            const offsetFormulaData = offsetFormula(formulaData, command, unitId, sheetId, selections);
+            // // Synchronous to the worker thread
+            // this._commandService.executeCommand(
+            //     SetArrayFormulaDataMutation.id,
+            //     {
+            //         arrayFormulaRange: offsetArrayFormulaRange,
+            //         arrayFormulaCellData: offsetArrayFormulaCellData,
+            //     },
+            //     {
+            //         onlyLocal: true,
+            //     }
+            // );
 
-            // TODO@Dushusir: Here we take the redos incremental data,
-            // Synchronously to the worker thread, and update the dependency cache.
-            this._commandService.executeCommand(SetFormulaDataMutation.id, {
-                formulaData: this._formulaDataModel.getFormulaData(),
-            });
+            // // offset formulaData
+            // oldFormulaData = offsetFormula(oldFormulaData, command, unitId, sheetId, selections);
+            // const offsetFormulaData = offsetFormula(formulaData, command, unitId, sheetId, selections);
 
-            // offset numfmtItemMap
-            const offsetNumfmtItemMap = offsetFormula(oldNumfmtItemMap, command, unitId, sheetId, selections);
-            this._commandService.executeCommand(SetNumfmtFormulaDataMutation.id, {
-                numfmtItemMap: offsetNumfmtItemMap,
-            });
+            // // TODO@Dushusir: Here we take the redos incremental data,
+            // // Synchronously to the worker thread, and update the dependency cache.
+            // this._commandService.executeCommand(SetFormulaDataMutation.id, {
+            //     formulaData: this._formulaDataModel.getFormulaData(),
+            // });
 
-            return this._getUpdateFormulaMutations(oldFormulaData, offsetFormulaData);
+            // // offset numfmtItemMap
+            // const offsetNumfmtItemMap = offsetFormula(oldNumfmtItemMap, command, unitId, sheetId, selections);
+            // this._commandService.executeCommand(SetNumfmtFormulaDataMutation.id, {
+            //     numfmtItemMap: offsetNumfmtItemMap,
+            // });
+
+            // return this._getUpdateFormulaMutations(oldFormulaData, offsetFormulaData);
         }
 
         return {

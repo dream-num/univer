@@ -18,6 +18,7 @@ import { MoreDownSingle } from '@univerjs/icons';
 import RcSelect from 'rc-select';
 import React, { useContext } from 'react';
 
+import type { LabelInValueType } from 'rc-select/lib/Select';
 import { ConfigContext } from '../config-provider/ConfigProvider';
 import styles from './index.module.less';
 
@@ -54,10 +55,33 @@ export interface ISelectProps {
     dropdownRender?: (
         menu: React.ReactElement<any, string | React.JSXElementConstructor<any>>
     ) => React.ReactElement<any, string | React.JSXElementConstructor<any>>;
+
+    labelRender?: ((props: LabelInValueType) => React.ReactNode) | undefined;
+
+    open?: boolean;
+
+    dropdownStyle?: React.CSSProperties;
+
+    onDropdownVisibleChange?: (open: boolean) => void;
+
+    disabled?: boolean;
 }
 
 export function Select(props: ISelectProps) {
-    const { value, options = [], onChange, style, className, mode, dropdownRender } = props;
+    const {
+        value,
+        options = [],
+        onChange,
+        style,
+        className,
+        mode,
+        dropdownRender,
+        labelRender,
+        open,
+        dropdownStyle,
+        onDropdownVisibleChange,
+        disabled,
+    } = props;
 
     const { mountContainer } = useContext(ConfigContext);
 
@@ -74,6 +98,11 @@ export function Select(props: ISelectProps) {
             style={style}
             className={className}
             dropdownRender={dropdownRender}
+            labelRender={labelRender}
+            open={open}
+            dropdownStyle={dropdownStyle}
+            onDropdownVisibleChange={onDropdownVisibleChange}
+            disabled={disabled}
         />
     );
 }

@@ -30,6 +30,21 @@
             width: 100%;
         }
     }
+
+    &-content-error {
+        .input-affix-wrapper {
+            border: 1px solid rgba(var(--red-400));
+        }
+
+        .select-single:not(.select-customize-input) .select-selector {
+            border: 1px solid rgba(var(--red-400));
+        }
+    }
+
+    &-error {
+        color: rgba(var(--red-400));
+        font-size: 12px;
+    }
 }
 
 .form-dual-column-layout {

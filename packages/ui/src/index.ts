@@ -19,6 +19,7 @@ export { getMenuHiddenObservable } from './common/menu-hidden-observable';
 export * from './components';
 export { t } from './components/hooks/locale';
 export { useObservable } from './components/hooks/observable';
+export { useEvent } from './components/hooks/event';
 export {
     CopyShortcutItem,
     CutShortcutItem,

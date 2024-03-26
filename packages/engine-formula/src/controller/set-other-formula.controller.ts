@@ -17,12 +17,11 @@
 import type { ICommandInfo } from '@univerjs/core';
 import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 
-import { RemoveOtherFormulaMutation, SetOtherFormulaMutation } from '../commands/mutations/set-other-formula.mutation';
 import {
-    type IOtherFormulaManagerInsertParam,
-    type IOtherFormulaManagerSearchParam,
     IOtherFormulaManagerService,
 } from '../services/other-formula-manager.service';
+import { RemoveOtherFormulaMutation, SetOtherFormulaMutation } from '../commands/mutations/set-other-formula.mutation';
+import type { IRemoveOtherFormulaMutationParams, ISetOtherFormulaMutationParams } from '../commands/mutations/set-other-formula.mutation';
 
 @OnLifecycle(LifecycleStages.Ready, SetOtherFormulaController)
 export class SetOtherFormulaController extends Disposable {
@@ -43,19 +42,21 @@ export class SetOtherFormulaController extends Disposable {
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (command.id === SetOtherFormulaMutation.id) {
-                    const params = command.params as IOtherFormulaManagerInsertParam;
+                    const params = command.params as ISetOtherFormulaMutationParams;
                     if (params == null) {
                         return;
                     }
-
-                    this._otherFormulaManagerService.register(params);
+                    const config = { [params.unitId]: { [params.subUnitId]: params.formulaMap } };
+                    this._otherFormulaManagerService.batchRegister(config);
                 } else if (command.id === RemoveOtherFormulaMutation.id) {
-                    const params = command.params as IOtherFormulaManagerSearchParam;
+                    const params = command.params as IRemoveOtherFormulaMutationParams;
                     if (params == null) {
                         return;
                     }
-
-                    this._otherFormulaManagerService.remove(params);
+                    const obj: Record<string, true> = {};
+                    params.formulaIdList.forEach((id) => obj[id] = true);
+                    const config = { [params.unitId]: { [params.subUnitId]: obj } };
+                    this._otherFormulaManagerService.batchRemove(config);
                 }
             })
         );

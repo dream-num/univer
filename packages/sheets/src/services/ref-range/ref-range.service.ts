@@ -192,6 +192,7 @@ export class RefRangeService extends Disposable {
                         },
                         { redos: [], undos: [] }
                     );
+
                 const redos =
                     this.interceptor.fetchThroughInterceptors(this.interceptor.getInterceptPoints().MERGE_REDO)(
                         result.redos,

@@ -20,6 +20,7 @@ import { createIdentifier } from '@wendellhu/redi';
 
 import type {
     IDirtyUnitFeatureMap,
+    IDirtyUnitOtherFormulaMap,
     IDirtyUnitSheetNameMap,
     IFormulaData,
     IFormulaDatasetConfig,
@@ -65,6 +66,8 @@ export interface IFormulaCurrentConfigService {
     getArrayFormulaCellData(): IRuntimeUnitDataType;
 
     getSheetName(unitId: string, sheetId: string): string;
+
+    getDirtyUnitOtherFormulaMap(): IDirtyUnitOtherFormulaMap;
 }
 
 export class FormulaCurrentConfigService extends Disposable implements IFormulaCurrentConfigService {
@@ -85,6 +88,8 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
     private _numfmtItemMap: INumfmtItemMap = {};
 
     private _dirtyUnitFeatureMap: IDirtyUnitFeatureMap = {};
+
+    private _dirtyUnitOtherFormulaMap: IDirtyUnitOtherFormulaMap = {};
 
     private _excludedCell: Nullable<IUnitExcludedCell>;
 
@@ -147,6 +152,10 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         return this._dirtyUnitFeatureMap;
     }
 
+    getDirtyUnitOtherFormulaMap() {
+        return this._dirtyUnitOtherFormulaMap;
+    }
+
     getSheetName(unitId: string, sheetId: string) {
         if (this._sheetIdToNameMap[unitId] == null) {
             return '';
@@ -180,6 +189,8 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         this._numfmtItemMap = config.numfmtItemMap;
 
         this._dirtyUnitFeatureMap = config.dirtyUnitFeatureMap;
+
+        this._dirtyUnitOtherFormulaMap = config.dirtyUnitOtherFormulaMap;
 
         this._excludedCell = config.excludedCell;
 

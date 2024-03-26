@@ -60,7 +60,7 @@ export const CurrencyPanel: FC<IBusinessComponentProps> = (props) => {
         props.onChange(setPatternDecimal(pattern, decimal));
     };
 
-    const onChange = (value: string) => {
+    const onChange = (value: any) => {
         patternSet(value);
         props.onChange(setPatternDecimal(value, decimal));
     };

@@ -22,6 +22,7 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useRef, useState } from 'react';
 
 import { deserializeRangeWithSheet, isReferenceString, serializeRange, serializeRangeWithSheet, serializeRangeWithSpreadsheet } from '@univerjs/engine-formula';
+import clsx from 'clsx';
 import { TextEditor } from '../editor/TextEditor';
 import { IEditorService } from '../../services/editor/editor.service';
 import { IRangeSelectorService } from '../../services/range-selector/range-selector.service';
@@ -40,10 +41,11 @@ export interface IRangeSelectorProps {
     width?: number; // The width of the selector.
     size?: 'mini' | 'small' | 'middle' | 'large'; // The size of the selector.
     placeholder?: string; // Placeholder text.
+    className?: string;
 }
 
 export function RangeSelector(props: IRangeSelectorProps) {
-    const { onChange, id, value = '', width = 220, placeholder = '', size = 'middle', onActive, onValid, isSingleChoice = false, openForSheetUnitId, openForSheetSubUnitId, isReadonly = false } = props;
+    const { onChange, id, value = '', width = 220, placeholder = '', size = 'middle', onActive, onValid, isSingleChoice = false, openForSheetUnitId, openForSheetSubUnitId, isReadonly = false, className } = props;
 
     const [rangeDataList, setRangeDataList] = useState<string[]>(['']);
 
@@ -311,7 +313,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
                 onClose={handleCloseModal}
 
             >
-                <div className={styles.rangeSelectorModal}>
+                <div className={clsx(styles.rangeSelectorModal, className)}>
                     {rangeDataList.map((item, index) => (
                         <div key={index} className={styles.rangeSelectorModalContainer}>
                             <div style={{ width: rangeDataList.length === 1 ? '280px' : '252px' }} className={styles.rangeSelectorModalContainerInput}>

@@ -30,10 +30,12 @@ import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import { UniverSheetsZenEditorPlugin } from '@univerjs/sheets-zen-editor';
 import { UniverUIPlugin } from '@univerjs/ui';
-
+import { UniverDataValidationPlugin } from '@univerjs/data-validation';
+import { UniverSheetsDataValidationPlugin } from '@univerjs/sheets-data-validation';
+import { SheetsConditionalFormatPlugin } from '@univerjs/sheets-conditional-format';
 import { DebuggerPlugin } from '../plugins/debugger';
-import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data/sheets/demo/default-workbook-data-demo';
 import { locales } from './locales';
+import { dataValidationDemo } from './data';
 
 const LOAD_LAZY_PLUGINS_TIMEOUT = 1_000;
 // univer
@@ -77,10 +79,17 @@ univer.registerPlugin(UniverRPCMainThreadPlugin, {
 
 // find replace
 univer.registerPlugin(UniverFindReplacePlugin);
+// univer.registerPlugin(UniverSheetsFindPlugin);
+univer.registerPlugin(SheetsConditionalFormatPlugin);
+
+// data validation
+univer.registerPlugin(UniverDataValidationPlugin);
+univer.registerPlugin(UniverSheetsDataValidationPlugin);
 univer.registerPlugin(UniverSheetsFindReplacePlugin);
 
 // create univer sheet instance
-univer.createUniverSheet(DEFAULT_WORKBOOK_DATA_DEMO);
+univer.createUniverSheet(dataValidationDemo);
+// univer.createUniverSheet(DEFAULT_WORKBOOK_DATA_DEMO);
 
 declare global {
     interface Window {

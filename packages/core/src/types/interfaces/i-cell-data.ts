@@ -16,8 +16,10 @@
 
 import type { Nullable } from '../../shared/types';
 import { CellValueType } from '../enum/text-style';
+import type { ICellCustomRender } from './i-cell-custom-render';
 import type { IDocumentData } from './i-document-data';
 import type { IStyleData } from './i-style-data';
+import type { ICellValidationData } from './i-cell-validation-data';
 
 /**
  * Cell value type
@@ -56,9 +58,25 @@ export interface ICellData {
     si?: Nullable<string>;
 }
 
+export interface ICellMarksStyle {
+    color: string;
+    size: number;
+}
+
+export interface ICellMarks {
+    tl?: ICellMarksStyle;
+    tr?: ICellMarksStyle;
+    bl?: ICellMarksStyle;
+    br?: ICellMarksStyle;
+}
+
 export interface ICellDataForSheetInterceptor extends ICellData {
     interceptorStyle?: Nullable<IStyleData>;
     isInArrayFormulaRange?: Nullable<boolean>;
+    dataValidation?: Nullable<ICellValidationData>;
+    markers?: ICellMarks;
+    customRender?: Nullable<ICellCustomRender[]>;
+    interceptorAutoHeight?: number;
 }
 
 export function isICellData(value: any): value is ICellData {

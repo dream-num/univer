@@ -51,7 +51,7 @@ export const ThousandthPercentilePanel: FC<IBusinessComponentProps> = (props) =>
         decimalSet(decimal || 0);
         props.onChange(setPatternDecimal(suffix, Number(decimal || 0)));
     };
-    const handleClick = (v: string) => {
+    const handleClick = (v: any) => {
         decimalSet(getDecimalFromPattern(v, 0));
         suffixSet(v);
         props.onChange(v);

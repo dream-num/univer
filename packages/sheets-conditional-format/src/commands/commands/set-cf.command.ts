@@ -22,15 +22,15 @@ import {
     IUniverInstanceService,
 } from '@univerjs/core';
 import type { IConditionFormatRule } from '../../models/type';
-import type { ISetConditionalRuleMutationParams } from '../mutations/setConditionalRule.mutation';
-import { setConditionalRuleMutation, setConditionalRuleMutationUndoFactory } from '../mutations/setConditionalRule.mutation';
+import type { ISetConditionalRuleMutationParams } from '../mutations/set-conditional-rule.mutation';
+import { SetConditionalRuleMutation, setConditionalRuleMutationUndoFactory } from '../mutations/set-conditional-rule.mutation';
 
 export interface ISetCfCommandParams {
     unitId?: string;
     subUnitId?: string;
     rule: IConditionFormatRule;
 };
-export const setCfCommand: ICommand<ISetCfCommandParams> = {
+export const SetCfCommand: ICommand<ISetCfCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-conditional-rule',
     handler(accessor, params) {
@@ -47,10 +47,10 @@ export const setCfCommand: ICommand<ISetCfCommandParams> = {
         const subUnitId = params.subUnitId ?? worksheet.getSheetId();
         const config: ISetConditionalRuleMutationParams = { unitId, subUnitId, rule: params.rule };
         const undos = setConditionalRuleMutationUndoFactory(accessor, config);
-        const result = commandService.syncExecuteCommand(setConditionalRuleMutation.id, config);
+        const result = commandService.syncExecuteCommand(SetConditionalRuleMutation.id, config);
         if (result) {
-            undoRedoService.pushUndoRedo({ unitID: unitId, undoMutations: undos, redoMutations: [{ id: setConditionalRuleMutation.id, params: config }] });
+            undoRedoService.pushUndoRedo({ unitID: unitId, undoMutations: undos, redoMutations: [{ id: SetConditionalRuleMutation.id, params: config }] });
         }
-        return true;
+        return result;
     },
 };

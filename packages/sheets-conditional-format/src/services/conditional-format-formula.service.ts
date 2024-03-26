@@ -25,7 +25,7 @@ import { RemoveOtherFormulaMutation,
 import { Subject } from 'rxjs';
 import { bufferTime, filter, map } from 'rxjs/operators';
 import type { IConditionalFormatFormulaMarkDirtyParams } from '../commands/mutations/formula-mark-dirty.mutation';
-import { conditionalFormatFormulaMarkDirty } from '../commands/mutations/formula-mark-dirty.mutation';
+import { ConditionalFormatFormulaMarkDirty } from '../commands/mutations/formula-mark-dirty.mutation';
 import { ConditionalFormatViewModel } from '../models/conditional-format-view-model';
 import { ConditionalFormatRuleModel } from '../models/conditional-format-rule-model';
 import { ConditionalFormatService } from './conditional-format.service';
@@ -134,8 +134,8 @@ export class ConditionalFormatFormulaService extends Disposable {
         }));
 
         // Register formula with Dirty Logic
-        this._activeDirtyManagerService.register(conditionalFormatFormulaMarkDirty.id,
-            { commandId: conditionalFormatFormulaMarkDirty.id,
+        this._activeDirtyManagerService.register(ConditionalFormatFormulaMarkDirty.id,
+            { commandId: ConditionalFormatFormulaMarkDirty.id,
               getDirtyData(commandInfo) {
                   const params = commandInfo.params as IConditionalFormatFormulaMarkDirtyParams;
                   return {
@@ -162,7 +162,7 @@ export class ConditionalFormatFormulaService extends Disposable {
                     const value = result[unitId][subUnitId];
                     const config: ISetOtherFormulaMutationParams = { unitId, subUnitId, formulaMap: value };
                     this._commandService.executeCommand(SetOtherFormulaMutation.id, config).then(() => {
-                        this._commandService.executeCommand(conditionalFormatFormulaMarkDirty.id,
+                        this._commandService.executeCommand(ConditionalFormatFormulaMarkDirty.id,
                             { [unitId]: { [subUnitId]: value } } as unknown as IConditionalFormatFormulaMarkDirtyParams);
                     });
                 }

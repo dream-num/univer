@@ -21,8 +21,8 @@ import { InsertColMutation, InsertRowMutation, MoveColsMutation, MoveRangeMutati
 import { Inject, Injector } from '@wendellhu/redi';
 import { Subject } from 'rxjs';
 import { filter } from 'rxjs/operators';
-import type { IDeleteConditionalRuleMutationParams } from '../commands/mutations/deleteConditionalRule.mutation';
-import { deleteConditionalRuleMutation, deleteConditionalRuleMutationUndoFactory } from '../commands/mutations/deleteConditionalRule.mutation';
+import type { IDeleteConditionalRuleMutationParams } from '../commands/mutations/delete-conditional-rule.mutation';
+import { DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory } from '../commands/mutations/delete-conditional-rule.mutation';
 import { ConditionalFormatRuleModel } from '../models/conditional-format-rule-model';
 import { ConditionalFormatViewModel } from '../models/conditional-format-view-model';
 import { CFRuleType, SHEET_CONDITION_FORMAT_PLUGIN } from '../base/const';
@@ -188,9 +188,9 @@ export class ConditionalFormatService extends Disposable {
                                 cfId: item.cfId,
                             };
                             redos.push({
-                                id: deleteConditionalRuleMutation.id, params,
+                                id: DeleteConditionalRuleMutation.id, params,
                             });
-                            undos.push(...deleteConditionalRuleMutationUndoFactory(this._injector, params));
+                            undos.push(...DeleteConditionalRuleMutationUndoFactory(this._injector, params));
                         });
 
                         return {

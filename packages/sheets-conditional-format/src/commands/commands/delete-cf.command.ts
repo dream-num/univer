@@ -21,15 +21,15 @@ import {
     IUndoRedoService,
     IUniverInstanceService,
 } from '@univerjs/core';
-import type { IDeleteConditionalRuleMutationParams } from '../mutations/deleteConditionalRule.mutation';
-import { deleteConditionalRuleMutation, deleteConditionalRuleMutationUndoFactory } from '../mutations/deleteConditionalRule.mutation';
+import type { IDeleteConditionalRuleMutationParams } from '../mutations/delete-conditional-rule.mutation';
+import { DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory } from '../mutations/delete-conditional-rule.mutation';
 
 export interface IDeleteCfCommandParams {
     unitId?: string;
     subUnitId?: string;
     cfId: string;
 }
-export const deleteCfCommand: ICommand<IDeleteCfCommandParams> = {
+export const DeleteCfCommand: ICommand<IDeleteCfCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.delete-conditional-rule',
     handler(accessor, params) {
@@ -44,11 +44,11 @@ export const deleteCfCommand: ICommand<IDeleteCfCommandParams> = {
         const unitId = params.unitId ?? workbook.getUnitId();
         const subUnitId = params.subUnitId ?? worksheet.getSheetId();
         const config: IDeleteConditionalRuleMutationParams = { unitId, subUnitId, cfId: params.cfId };
-        const undos = deleteConditionalRuleMutationUndoFactory(accessor, config);
-        const result = commandService.syncExecuteCommand(deleteConditionalRuleMutation.id, config);
+        const undos = DeleteConditionalRuleMutationUndoFactory(accessor, config);
+        const result = commandService.syncExecuteCommand(DeleteConditionalRuleMutation.id, config);
         if (result) {
-            undoRedoService.pushUndoRedo({ unitID: unitId, undoMutations: undos, redoMutations: [{ id: deleteConditionalRuleMutation.id, params: config }] });
+            undoRedoService.pushUndoRedo({ unitID: unitId, undoMutations: undos, redoMutations: [{ id: DeleteConditionalRuleMutation.id, params: config }] });
         }
-        return true;
+        return result;
     },
 };

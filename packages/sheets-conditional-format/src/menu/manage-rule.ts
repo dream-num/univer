@@ -23,13 +23,13 @@ import { SelectionManagerService, SetWorksheetActiveOperation } from '@univerjs/
 import { debounceTime } from 'rxjs/operators';
 import { ICommandService, IUniverInstanceService, LocaleService, Rectangle } from '@univerjs/core';
 import { Conditions } from '@univerjs/icons';
-import { addConditionalRuleMutation } from '../commands/mutations/addConditionalRule.mutation';
-import { setConditionalRuleMutation } from '../commands/mutations/setConditionalRule.mutation';
-import { deleteConditionalRuleMutation } from '../commands/mutations/deleteConditionalRule.mutation';
-import { moveConditionalRuleMutation } from '../commands/mutations/move-conditional-rule.mutation';
+import { AddConditionalRuleMutation } from '../commands/mutations/add-conditional-rule.mutation';
+import { SetConditionalRuleMutation } from '../commands/mutations/set-conditional-rule.mutation';
+import { DeleteConditionalRuleMutation } from '../commands/mutations/delete-conditional-rule.mutation';
+import { MoveConditionalRuleMutation } from '../commands/mutations/move-conditional-rule.mutation';
 import { ConditionalFormatRuleModel } from '../models/conditional-format-rule-model';
 
-import { OpenConditionalFormatOperator, OPERATION } from '../commands/operations/open-conditional-format-panel';
+import { CF_MENU_OPERATION, OpenConditionalFormatOperator } from '../commands/operations/open-conditional-format-panel';
 
 export const FactoryManageConditionalFormatRule = (componentManager: ComponentManager) => {
     const key = 'conditional-format-menu-icon';
@@ -42,7 +42,7 @@ export const FactoryManageConditionalFormatRule = (componentManager: ComponentMa
         const conditionalFormatRuleModel = _accessor.get(ConditionalFormatRuleModel);
         const zenZoneService = _accessor.get(IZenZoneService);
 
-        const commandList = [SetWorksheetActiveOperation.id, addConditionalRuleMutation.id, setConditionalRuleMutation.id, deleteConditionalRuleMutation.id, moveConditionalRuleMutation.id];
+        const commandList = [SetWorksheetActiveOperation.id, AddConditionalRuleMutation.id, SetConditionalRuleMutation.id, DeleteConditionalRuleMutation.id, MoveConditionalRuleMutation.id];
 
         const clearRangeEnable$ = new Observable<boolean>((subscriber) =>
             merge(
@@ -90,52 +90,52 @@ export const FactoryManageConditionalFormatRule = (componentManager: ComponentMa
             const commonSelections = [
                 {
                     label: localeService.t('sheet.cf.ruleType.highlightCell'),
-                    value: OPERATION.highlightCell,
+                    value: CF_MENU_OPERATION.highlightCell,
                 },
                 {
                     label: localeService.t('sheet.cf.panel.rankAndAverage'),
-                    value: OPERATION.rank,
+                    value: CF_MENU_OPERATION.rank,
                 },
                 {
                     label: localeService.t('sheet.cf.ruleType.formula'),
-                    value: OPERATION.formula,
+                    value: CF_MENU_OPERATION.formula,
                 },
                 {
                     label: localeService.t('sheet.cf.ruleType.colorScale'),
-                    value: OPERATION.colorScale,
+                    value: CF_MENU_OPERATION.colorScale,
                 },
                 {
                     label: localeService.t('sheet.cf.ruleType.dataBar'),
-                    value: OPERATION.dataBar,
+                    value: CF_MENU_OPERATION.dataBar,
                 }, {
                     label: localeService.t('sheet.cf.ruleType.iconSet'),
-                    value: OPERATION.icon,
+                    value: CF_MENU_OPERATION.icon,
                 },
                 {
                     label: localeService.t('sheet.cf.menu.manageConditionalFormat'),
-                    value: OPERATION.viewRule,
+                    value: CF_MENU_OPERATION.viewRule,
                 }, {
                     label: localeService.t('sheet.cf.menu.createConditionalFormat'),
-                    value: OPERATION.createRule,
+                    value: CF_MENU_OPERATION.createRule,
                 },
                 {
                     label: localeService.t('sheet.cf.menu.clearRangeRules'),
-                    value: OPERATION.clearRangeRules,
+                    value: CF_MENU_OPERATION.clearRangeRules,
                     disabled: !clearRangeEnable$,
                 },
                 {
                     label: localeService.t('sheet.cf.menu.clearWorkSheetRules'),
-                    value: OPERATION.clearWorkSheetRules,
+                    value: CF_MENU_OPERATION.clearWorkSheetRules,
                 }];
             clearRangeEnable$.subscribe((v) => {
-                const item = commonSelections.find((item) => item.value === OPERATION.clearRangeRules);
+                const item = commonSelections.find((item) => item.value === CF_MENU_OPERATION.clearRangeRules);
                 if (item) {
                     item.disabled = !v;
                     subscriber.next(commonSelections);
                 }
             });
             clearSheetEnable$.subscribe((v) => {
-                const item = commonSelections.find((item) => item.value === OPERATION.clearWorkSheetRules);
+                const item = commonSelections.find((item) => item.value === CF_MENU_OPERATION.clearWorkSheetRules);
                 if (item) {
                     item.disabled = !v;
                     subscriber.next(commonSelections);

@@ -22,9 +22,9 @@ import {
     IUniverInstanceService,
 } from '@univerjs/core';
 import type { IConditionFormatRule } from '../../models/type';
-import type { IAddConditionalRuleMutationParams } from '../mutations/addConditionalRule.mutation';
+import type { IAddConditionalRuleMutationParams } from '../mutations/add-conditional-rule.mutation';
 import type { MakePropertyOptional } from '../../utils/type';
-import { addConditionalRuleMutation, addConditionalRuleMutationUndoFactory } from '../mutations/addConditionalRule.mutation';
+import { AddConditionalRuleMutation, AddConditionalRuleMutationUndoFactory } from '../mutations/add-conditional-rule.mutation';
 import { ConditionalFormatRuleModel } from '../../models/conditional-format-rule-model';
 
 export interface IAddCfCommandParams {
@@ -33,7 +33,7 @@ export interface IAddCfCommandParams {
     rule: MakePropertyOptional<IConditionFormatRule, 'cfId'>;
 };
 
-export const addCfCommand: ICommand<IAddCfCommandParams> = {
+export const AddCfCommand: ICommand<IAddCfCommandParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.add-conditional-rule',
     handler(accessor, params) {
@@ -51,16 +51,16 @@ export const addCfCommand: ICommand<IAddCfCommandParams> = {
         const subUnitId = params.subUnitId ?? worksheet.getSheetId();
         const cfId = conditionalFormatRuleModel.createCfId(unitId, subUnitId);
         const config: IAddConditionalRuleMutationParams = { unitId, subUnitId, rule: { ...rule, cfId: rule.cfId || cfId } };
-        const undo = addConditionalRuleMutationUndoFactory(accessor, config);
-        const result = commandService.syncExecuteCommand(addConditionalRuleMutation.id, config);
+        const undo = AddConditionalRuleMutationUndoFactory(accessor, config);
+        const result = commandService.syncExecuteCommand(AddConditionalRuleMutation.id, config);
         if (result) {
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
-                redoMutations: [{ id: addConditionalRuleMutation.id, params: config }],
+                redoMutations: [{ id: AddConditionalRuleMutation.id, params: config }],
                 undoMutations: [undo],
             });
         }
 
-        return true;
+        return result;
     },
 };

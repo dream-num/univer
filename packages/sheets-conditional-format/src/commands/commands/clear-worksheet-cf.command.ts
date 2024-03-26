@@ -24,14 +24,14 @@ import {
 } from '@univerjs/core';
 import { ConditionalFormatRuleModel } from '../../models/conditional-format-rule-model';
 
-import type { IDeleteConditionalRuleMutationParams } from '../mutations/deleteConditionalRule.mutation';
-import { deleteConditionalRuleMutation, deleteConditionalRuleMutationUndoFactory } from '../mutations/deleteConditionalRule.mutation';
+import type { IDeleteConditionalRuleMutationParams } from '../mutations/delete-conditional-rule.mutation';
+import { DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory } from '../mutations/delete-conditional-rule.mutation';
 
 export interface IClearWorksheetCfParams {
     unitId?: string;
     subUnitId?: string;
 }
-export const clearWorksheetCfCommand: ICommand<IClearWorksheetCfParams> = {
+export const ClearWorksheetCfCommand: ICommand<IClearWorksheetCfParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.clear-worksheet-conditional-rule',
     handler(accessor, params) {
@@ -49,8 +49,8 @@ export const clearWorksheetCfCommand: ICommand<IClearWorksheetCfParams> = {
             return false;
         }
         const configList: IDeleteConditionalRuleMutationParams[] = ruleList.map((rule) => ({ cfId: rule.cfId, unitId, subUnitId }));
-        const redos: IMutationInfo[] = configList.map((config) => ({ id: deleteConditionalRuleMutation.id, params: config }));
-        const undos: IMutationInfo[] = configList.map((config) => deleteConditionalRuleMutationUndoFactory(accessor, config)[0]);
+        const redos: IMutationInfo[] = configList.map((config) => ({ id: DeleteConditionalRuleMutation.id, params: config }));
+        const undos: IMutationInfo[] = configList.map((config) => DeleteConditionalRuleMutationUndoFactory(accessor, config)[0]);
 
         const result = sequenceExecute(redos, commandService).result;
         if (result) {
@@ -60,6 +60,6 @@ export const clearWorksheetCfCommand: ICommand<IClearWorksheetCfParams> = {
                 undoMutations: undos,
             });
         }
-        return true;
+        return result;
     },
 };

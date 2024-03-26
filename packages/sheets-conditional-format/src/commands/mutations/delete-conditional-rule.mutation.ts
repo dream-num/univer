@@ -21,17 +21,17 @@ import {
 } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 import { ConditionalFormatRuleModel } from '../../models/conditional-format-rule-model';
-import type { IAddConditionalRuleMutationParams } from './addConditionalRule.mutation';
-import { addConditionalRuleMutation } from './addConditionalRule.mutation';
+import type { IAddConditionalRuleMutationParams } from './add-conditional-rule.mutation';
+import { AddConditionalRuleMutation } from './add-conditional-rule.mutation';
 import type { IMoveConditionalRuleMutationParams } from './move-conditional-rule.mutation';
-import { moveConditionalRuleMutation } from './move-conditional-rule.mutation';
+import { MoveConditionalRuleMutation } from './move-conditional-rule.mutation';
 
 export interface IDeleteConditionalRuleMutationParams {
     unitId: string;
     subUnitId: string;
     cfId: string;
 }
-export const deleteConditionalRuleMutationUndoFactory = (accessor: IAccessor, param: IDeleteConditionalRuleMutationParams) => {
+export const DeleteConditionalRuleMutationUndoFactory = (accessor: IAccessor, param: IDeleteConditionalRuleMutationParams) => {
     const conditionalFormatRuleModel = accessor.get(ConditionalFormatRuleModel);
     const { unitId, subUnitId, cfId } = param;
     const rule = conditionalFormatRuleModel.getRule(unitId, subUnitId, cfId);
@@ -39,11 +39,11 @@ export const deleteConditionalRuleMutationUndoFactory = (accessor: IAccessor, pa
     if (rule) {
         const index = ruleList!.findIndex((rule) => rule.cfId === cfId);
         const nextRule = ruleList![index - 1];
-        const result: IMutationInfo[] = [{ id: addConditionalRuleMutation.id,
+        const result: IMutationInfo[] = [{ id: AddConditionalRuleMutation.id,
                                            params: { unitId, subUnitId, rule: Tools.deepClone(rule) } as IAddConditionalRuleMutationParams },
         ];
         if (nextRule && index !== 0) {
-            result.push({ id: moveConditionalRuleMutation.id, params: {
+            result.push({ id: MoveConditionalRuleMutation.id, params: {
                 unitId, subUnitId, cfId, targetCfId: nextRule.cfId,
             } as IMoveConditionalRuleMutationParams });
         }
@@ -51,7 +51,7 @@ export const deleteConditionalRuleMutationUndoFactory = (accessor: IAccessor, pa
     }
     return [];
 };
-export const deleteConditionalRuleMutation: IMutation<IDeleteConditionalRuleMutationParams> = {
+export const DeleteConditionalRuleMutation: IMutation<IDeleteConditionalRuleMutationParams> = {
     type: CommandType.MUTATION,
     id: 'sheet.mutation.delete-conditional-rule',
     handler(accessor, params) {

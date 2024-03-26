@@ -24,13 +24,13 @@ import { serializeRange } from '@univerjs/engine-formula';
 import { DeleteSingle, IncreaseSingle, MoreFunctionSingle } from '@univerjs/icons';
 import GridLayout from 'react-grid-layout';
 import { debounceTime, Observable } from 'rxjs';
-import { addConditionalRuleMutation } from '../../../commands/mutations/addConditionalRule.mutation';
-import { setConditionalRuleMutation } from '../../../commands/mutations/setConditionalRule.mutation';
-import { deleteConditionalRuleMutation } from '../../../commands/mutations/deleteConditionalRule.mutation';
-import { moveConditionalRuleMutation } from '../../../commands/mutations/move-conditional-rule.mutation';
+import { AddConditionalRuleMutation } from '../../../commands/mutations/add-conditional-rule.mutation';
+import { SetConditionalRuleMutation } from '../../../commands/mutations/set-conditional-rule.mutation';
+import { DeleteConditionalRuleMutation } from '../../../commands/mutations/delete-conditional-rule.mutation';
+import { MoveConditionalRuleMutation } from '../../../commands/mutations/move-conditional-rule.mutation';
 import { ConditionalFormatRuleModel } from '../../../models/conditional-format-rule-model';
 import type { IDeleteCfCommandParams } from '../../../commands/commands/delete-cf.command';
-import { deleteCfCommand } from '../../../commands/commands/delete-cf.command';
+import { DeleteCfCommand } from '../../../commands/commands/delete-cf.command';
 import type { IMoveCfCommand } from '../../../commands/commands/move-cf.command';
 import { moveCfCommand } from '../../../commands/commands/move-cf.command';
 import type { IConditionFormatRule } from '../../../models/type';
@@ -39,7 +39,7 @@ import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 import { Preview } from '../../preview';
 import { ConditionalFormatI18nController } from '../../../controllers/cf.i18n.controller';
-import { clearWorksheetCfCommand } from '../../../commands/commands/clear-worksheet-cf.command';
+import { ClearWorksheetCfCommand } from '../../../commands/commands/clear-worksheet-cf.command';
 
 import styles from './index.module.less';
 
@@ -169,7 +169,7 @@ export const RuleList = (props: IRuleListProps) => {
         }
         const subscription =
             new Observable<null>((commandSubscribe) => {
-                const commandList = [SetSelectionsOperation.id, addConditionalRuleMutation.id, setConditionalRuleMutation.id, deleteConditionalRuleMutation.id, moveConditionalRuleMutation.id];
+                const commandList = [SetSelectionsOperation.id, AddConditionalRuleMutation.id, SetConditionalRuleMutation.id, DeleteConditionalRuleMutation.id, MoveConditionalRuleMutation.id];
                 const disposable = commandService.onCommandExecuted((commandInfo) => {
                     const { id, params } = commandInfo;
                     const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
@@ -237,7 +237,7 @@ export const RuleList = (props: IRuleListProps) => {
     const handleDelete = (rule: IConditionFormatRule) => {
         const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
         const subUnitId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
-        commandService.executeCommand(deleteCfCommand.id, { unitId, subUnitId, cfId: rule.cfId } as IDeleteCfCommandParams);
+        commandService.executeCommand(DeleteCfCommand.id, { unitId, subUnitId, cfId: rule.cfId } as IDeleteCfCommandParams);
     };
 
     const handleDragStop = (_layout: unknown, from: { y: number }, to: { y: number }) => {
@@ -257,11 +257,11 @@ export const RuleList = (props: IRuleListProps) => {
     };
     const handleClear = () => {
         if (selectValue === '2') {
-            commandService.executeCommand(clearWorksheetCfCommand.id);
+            commandService.executeCommand(ClearWorksheetCfCommand.id);
         } else if (selectValue === '1') {
             const list = ruleList.map((rule) => ({ unitId, subUnitId, cfId: rule.cfId }));
             list.forEach((config) => {
-                commandService.executeCommand(deleteCfCommand.id, config);
+                commandService.executeCommand(DeleteCfCommand.id, config);
             });
         }
     };

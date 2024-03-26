@@ -22,7 +22,7 @@ import {
     IUniverInstanceService,
 } from '@univerjs/core';
 import type { IMoveConditionalRuleMutationParams } from '../mutations/move-conditional-rule.mutation';
-import { moveConditionalRuleMutation, moveConditionalRuleMutationUndoFactory } from '../mutations/move-conditional-rule.mutation';
+import { MoveConditionalRuleMutation, MoveConditionalRuleMutationUndoFactory } from '../mutations/move-conditional-rule.mutation';
 
 export interface IMoveCfCommand {
     unitId?: string;
@@ -46,16 +46,16 @@ export const moveCfCommand: ICommand<IMoveCfCommand> = {
         const unitId = params.unitId ?? workbook.getUnitId();
         const subUnitId = params.subUnitId ?? worksheet.getSheetId();
         const config: IMoveConditionalRuleMutationParams = { unitId, subUnitId, cfId, targetCfId };
-        const undos = moveConditionalRuleMutationUndoFactory(accessor, config);
-        const result = commandService.syncExecuteCommand(moveConditionalRuleMutation.id, config);
+        const undos = MoveConditionalRuleMutationUndoFactory(accessor, config);
+        const result = commandService.syncExecuteCommand(MoveConditionalRuleMutation.id, config);
         if (result) {
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
-                redoMutations: [{ id: moveConditionalRuleMutation.id, params: config }],
+                redoMutations: [{ id: MoveConditionalRuleMutation.id, params: config }],
                 undoMutations: undos,
             });
         }
 
-        return true;
+        return result;
     },
 };

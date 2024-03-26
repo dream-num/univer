@@ -21,58 +21,58 @@ import { ConditionalFormatService } from './services/conditional-format.service'
 import { ConditionalFormatRuleModel } from './models/conditional-format-rule-model';
 import { ConditionalFormatViewModel } from './models/conditional-format-view-model';
 import { RenderController } from './controllers/cf.render.controller';
-import { addAverageCfCommand } from './commands/commands/add-average-cf.command';
-import { addColorScaleConditionalRuleCommand } from './commands/commands/add-color-scale-cf.command';
-import { addDataBarConditionalRuleCommand } from './commands/commands/add-data-bar-cf.command';
-import { addDuplicateValuesCfCommand } from './commands/commands/add-duplicate-values-cf.command';
-import { addNumberCfCommand } from './commands/commands/add-number-cf.command';
-import { addRankCfCommand } from './commands/commands/add-rank-cf.command';
-import { addTextCfCommand } from './commands/commands/add-text-cf.command';
-import { addTimePeriodCfCommand } from './commands/commands/add-time-period-cf.command';
-import { addUniqueValuesCfCommand } from './commands/commands/add-unique-values-cf.command';
-import { addConditionalRuleMutation } from './commands/mutations/addConditionalRule.mutation';
-import { deleteConditionalRuleMutation } from './commands/mutations/deleteConditionalRule.mutation';
+import { DddAverageCfCommand } from './commands/commands/add-average-cf.command';
+import { AddColorScaleConditionalRuleCommand } from './commands/commands/add-color-scale-cf.command';
+import { AddDataBarConditionalRuleCommand } from './commands/commands/add-data-bar-cf.command';
+import { AddDuplicateValuesCfCommand } from './commands/commands/add-duplicate-values-cf.command';
+import { AddNumberCfCommand } from './commands/commands/add-number-cf.command';
+import { AddRankCfCommand } from './commands/commands/add-rank-cf.command';
+import { AddTextCfCommand } from './commands/commands/add-text-cf.command';
+import { AddTimePeriodCfCommand } from './commands/commands/add-time-period-cf.command';
+import { AddUniqueValuesCfCommand } from './commands/commands/add-unique-values-cf.command';
+import { AddConditionalRuleMutation } from './commands/mutations/add-conditional-rule.mutation';
+import { DeleteConditionalRuleMutation } from './commands/mutations/delete-conditional-rule.mutation';
 import { RefRangeController } from './controllers/cf.ref-range.controller';
-import { setConditionalRuleMutation } from './commands/mutations/setConditionalRule.mutation';
+import { SetConditionalRuleMutation } from './commands/mutations/set-conditional-rule.mutation';
 import { ConditionalFormatCopyPasteController } from './controllers/cf.copy-paste.controller';
 import { ConditionalFormatAutoFillController } from './controllers/cf.auto-fill.controller';
 import { ConditionalFormatMenuController } from './controllers/cf.menu.controller';
 import { ConditionalFormatI18nController } from './controllers/cf.i18n.controller';
 
-import { clearRangeCfCommand } from './commands/commands/clear-range-cf.command';
-import { clearWorksheetCfCommand } from './commands/commands/clear-worksheet-cf.command';
+import { ClearRangeCfCommand } from './commands/commands/clear-range-cf.command';
+import { ClearWorksheetCfCommand } from './commands/commands/clear-worksheet-cf.command';
 import { OpenConditionalFormatOperator } from './commands/operations/open-conditional-format-panel';
-import { deleteCfCommand } from './commands/commands/delete-cf.command';
-import { setCfCommand } from './commands/commands/set-cf.command';
+import { DeleteCfCommand } from './commands/commands/delete-cf.command';
+import { SetCfCommand } from './commands/commands/set-cf.command';
 import { moveCfCommand } from './commands/commands/move-cf.command';
-import { addCfCommand } from './commands/commands/add-cf.command';
-import { moveConditionalRuleMutation } from './commands/mutations/move-conditional-rule.mutation';
+import { AddCfCommand } from './commands/commands/add-cf.command';
+import { MoveConditionalRuleMutation } from './commands/mutations/move-conditional-rule.mutation';
 import { ConditionalFormatFormulaService } from './services/conditional-format-formula.service';
-import { conditionalFormatFormulaMarkDirty } from './commands/mutations/formula-mark-dirty.mutation';
+import { ConditionalFormatFormulaMarkDirty } from './commands/mutations/formula-mark-dirty.mutation';
 import { ConditionalFormatEditorController } from './controllers/cf.editor.controller';
 import { ConditionalFormatClearController } from './controllers/cf.clear.controller';
 
 export class SheetsConditionalFormatPlugin extends Plugin {
     static override type = PluginType.Sheet;
-    static commandList = [addAverageCfCommand,
-        addColorScaleConditionalRuleCommand,
-        addDataBarConditionalRuleCommand,
-        addDuplicateValuesCfCommand,
-        addNumberCfCommand,
-        addRankCfCommand,
-        addTextCfCommand,
-        addTimePeriodCfCommand,
-        addUniqueValuesCfCommand,
+    static commandList = [DddAverageCfCommand,
+        AddColorScaleConditionalRuleCommand,
+        AddDataBarConditionalRuleCommand,
+        AddDuplicateValuesCfCommand,
+        AddNumberCfCommand,
+        AddRankCfCommand,
+        AddTextCfCommand,
+        AddTimePeriodCfCommand,
+        AddUniqueValuesCfCommand,
         OpenConditionalFormatOperator,
-        deleteCfCommand,
-        setCfCommand,
+        DeleteCfCommand,
+        SetCfCommand,
         moveCfCommand,
-        addCfCommand,
-        clearRangeCfCommand,
-        clearWorksheetCfCommand,
+        AddCfCommand,
+        ClearRangeCfCommand,
+        ClearWorksheetCfCommand,
     ];
 
-    static mutationList = [addConditionalRuleMutation, deleteConditionalRuleMutation, setConditionalRuleMutation, moveConditionalRuleMutation, conditionalFormatFormulaMarkDirty];
+    static mutationList = [AddConditionalRuleMutation, DeleteConditionalRuleMutation, SetConditionalRuleMutation, MoveConditionalRuleMutation, ConditionalFormatFormulaMarkDirty];
     constructor(
         _config: unknown,
         @Inject(Injector) override readonly _injector: Injector,

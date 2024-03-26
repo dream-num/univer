@@ -27,9 +27,9 @@ import type { IConditionFormatRule } from '../../../models/type';
 import { ConditionalFormatRuleModel } from '../../../models/conditional-format-rule-model';
 import { CFRuleType, CFSubRuleType, SHEET_CONDITION_FORMAT_PLUGIN } from '../../../base/const';
 import type { IAddCfCommandParams } from '../../../commands/commands/add-cf.command';
-import { addCfCommand } from '../../../commands/commands/add-cf.command';
+import { AddCfCommand } from '../../../commands/commands/add-cf.command';
 import type { ISetCfCommandParams } from '../../../commands/commands/set-cf.command';
-import { setCfCommand } from '../../../commands/commands/set-cf.command';
+import { SetCfCommand } from '../../../commands/commands/set-cf.command';
 
 import styleBase from '../index.module.less';
 import type { IStyleEditorProps } from './type';
@@ -180,12 +180,12 @@ export const RuleEdit = (props: IRuleEditProps) => {
                 let rule = {} as IConditionFormatRule;
                 if (props.rule && props.rule.cfId) {
                     rule = { ...props.rule, ranges, rule: result };
-                    commandService.executeCommand(setCfCommand.id, { unitId, subUnitId, rule } as ISetCfCommandParams);
+                    commandService.executeCommand(SetCfCommand.id, { unitId, subUnitId, rule } as ISetCfCommandParams);
                     props.onCancel();
                 } else {
                     const cfId = conditionalFormatRuleModel.createCfId(unitId, subUnitId);
                     rule = { cfId, ranges, rule: result, stopIfTrue: false };
-                    commandService.executeCommand(addCfCommand.id, { unitId, subUnitId, rule } as IAddCfCommandParams);
+                    commandService.executeCommand(AddCfCommand.id, { unitId, subUnitId, rule } as IAddCfCommandParams);
                     props.onCancel();
                 }
             }

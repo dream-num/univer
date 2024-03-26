@@ -19,10 +19,10 @@ import { Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle, Recta
 import { ClearSelectionAllCommand, ClearSelectionFormatCommand, RangeMergeUtil, SelectionManagerService, SheetInterceptorService } from '@univerjs/sheets';
 import { Inject, Injector } from '@wendellhu/redi';
 import { ConditionalFormatRuleModel } from '../models/conditional-format-rule-model';
-import type { ISetConditionalRuleMutationParams } from '../commands/mutations/setConditionalRule.mutation';
-import { setConditionalRuleMutation, setConditionalRuleMutationUndoFactory } from '../commands/mutations/setConditionalRule.mutation';
-import type { IDeleteConditionalRuleMutationParams } from '../commands/mutations/deleteConditionalRule.mutation';
-import { deleteConditionalRuleMutation, deleteConditionalRuleMutationUndoFactory } from '../commands/mutations/deleteConditionalRule.mutation';
+import type { ISetConditionalRuleMutationParams } from '../commands/mutations/set-conditional-rule.mutation';
+import { SetConditionalRuleMutation, setConditionalRuleMutationUndoFactory } from '../commands/mutations/set-conditional-rule.mutation';
+import type { IDeleteConditionalRuleMutationParams } from '../commands/mutations/delete-conditional-rule.mutation';
+import { DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory } from '../commands/mutations/delete-conditional-rule.mutation';
 
 @OnLifecycle(LifecycleStages.Rendered, ConditionalFormatClearController)
 export class ConditionalFormatClearController extends Disposable {
@@ -62,7 +62,7 @@ export class ConditionalFormatClearController extends Disposable {
                     const mergeRanges = mergeUtil.add(...rule.ranges).subtract(...ranges).merge();
                     if (mergeRanges.length) {
                         const redo: IMutationInfo<ISetConditionalRuleMutationParams> = {
-                            id: setConditionalRuleMutation.id,
+                            id: SetConditionalRuleMutation.id,
                             params: {
                                 unitId: workbook.getUnitId(),
                                 subUnitId: worksheet.getSheetId(),
@@ -74,14 +74,14 @@ export class ConditionalFormatClearController extends Disposable {
                         undos.push(...undo);
                     } else {
                         const redo: IMutationInfo<IDeleteConditionalRuleMutationParams> = {
-                            id: deleteConditionalRuleMutation.id,
+                            id: DeleteConditionalRuleMutation.id,
                             params: {
                                 unitId: workbook.getUnitId(),
                                 subUnitId: worksheet.getSheetId(),
                                 cfId: rule.cfId,
                             },
                         };
-                        const undo = deleteConditionalRuleMutationUndoFactory(this._injector, redo.params);
+                        const undo = DeleteConditionalRuleMutationUndoFactory(this._injector, redo.params);
                         redos.push(redo);
                         undos.push(...undo);
                     }

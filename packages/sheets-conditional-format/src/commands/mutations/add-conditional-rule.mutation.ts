@@ -16,40 +16,32 @@
 
 import type { IMutation } from '@univerjs/core';
 import {
-    CommandType, Tools,
+    CommandType,
 } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 import { ConditionalFormatRuleModel } from '../../models/conditional-format-rule-model';
 import type { IConditionFormatRule } from '../../models/type';
+import type { IDeleteConditionalRuleMutationParams } from './delete-conditional-rule.mutation';
+import { DeleteConditionalRuleMutation } from './delete-conditional-rule.mutation';
 
-export interface ISetConditionalRuleMutationParams {
+export interface IAddConditionalRuleMutationParams {
     unitId: string;
     subUnitId: string;
     rule: IConditionFormatRule;
 }
-
-export const setConditionalRuleMutation: IMutation<ISetConditionalRuleMutationParams> = {
+export const AddConditionalRuleMutationUndoFactory = (accessor: IAccessor, param: IAddConditionalRuleMutationParams) => {
+    return { id: DeleteConditionalRuleMutation.id, params: { unitId: param.unitId, subUnitId: param.subUnitId, cfId: param.rule.cfId } as IDeleteConditionalRuleMutationParams };
+};
+export const AddConditionalRuleMutation: IMutation<IAddConditionalRuleMutationParams> = {
     type: CommandType.MUTATION,
-    id: 'sheet.mutation.set-conditional-rule',
+    id: 'sheet.mutation.add-conditional-rule',
     handler(accessor, params) {
         if (!params) {
             return false;
         }
         const { unitId, subUnitId, rule } = params;
         const conditionalFormatRuleModel = accessor.get(ConditionalFormatRuleModel);
-        conditionalFormatRuleModel.setRule(unitId, subUnitId, rule);
+        conditionalFormatRuleModel.addRule(unitId, subUnitId, rule);
         return true;
     },
-};
-export const setConditionalRuleMutationUndoFactory = (accessor: IAccessor, param: ISetConditionalRuleMutationParams) => {
-    const conditionalFormatRuleModel = accessor.get(ConditionalFormatRuleModel);
-    const { unitId, subUnitId } = param;
-    const cfId = param.rule.cfId;
-    const rule = conditionalFormatRuleModel.getRule(unitId, subUnitId, cfId);
-    if (rule) {
-        return [{ id: setConditionalRuleMutation.id,
-                  params: { unitId, subUnitId, rule: Tools.deepClone(rule) } as ISetConditionalRuleMutationParams },
-        ];
-    }
-    return [];
 };

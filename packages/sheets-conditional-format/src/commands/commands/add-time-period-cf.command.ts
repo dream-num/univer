@@ -23,8 +23,8 @@ import {
 import { ConditionalFormatRuleModel } from '../../models/conditional-format-rule-model';
 import type { IConditionFormatRule, ITimePeriodHighlightCell } from '../../models/type';
 import { CFRuleType, CFSubRuleType } from '../../base/const';
-import type { IAddConditionalRuleMutationParams } from '../mutations/addConditionalRule.mutation';
-import { addConditionalRuleMutation } from '../mutations/addConditionalRule.mutation';
+import type { IAddConditionalRuleMutationParams } from '../mutations/add-conditional-rule.mutation';
+import { AddConditionalRuleMutation } from '../mutations/add-conditional-rule.mutation';
 
 interface IAddTimePeriodCf {
     ranges: IRange[];
@@ -33,7 +33,7 @@ interface IAddTimePeriodCf {
     operator: ITimePeriodHighlightCell['operator'];
 
 }
-export const addTimePeriodCfCommand: ICommand<IAddTimePeriodCf> = {
+export const AddTimePeriodCfCommand: ICommand<IAddTimePeriodCf> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.add-time-period-conditional-rule',
     handler(accessor, params) {
@@ -57,8 +57,6 @@ export const addTimePeriodCfCommand: ICommand<IAddTimePeriodCf> = {
                                                                            operator,
                                                                            style,
                                                                        } };
-        commandService.executeCommand(addConditionalRuleMutation.id, { unitId, subUnitId, rule } as IAddConditionalRuleMutationParams);
-
-        return true;
+        return commandService.executeCommand(AddConditionalRuleMutation.id, { unitId, subUnitId, rule } as IAddConditionalRuleMutationParams);
     },
 };

@@ -21,8 +21,8 @@ import { createTopMatrixFromMatrix, findAllRectangle } from '@univerjs/sheets';
 import type { ISheetAutoFillHook } from '@univerjs/sheets-ui';
 import { APPLY_TYPE, getAutoFillRepeatRange, IAutoFillService } from '@univerjs/sheets-ui';
 import { Inject, Injector } from '@wendellhu/redi';
-import { setConditionalRuleMutation, setConditionalRuleMutationUndoFactory } from '../commands/mutations/setConditionalRule.mutation';
-import type { ISetConditionalRuleMutationParams } from '../commands/mutations/setConditionalRule.mutation';
+import { SetConditionalRuleMutation, setConditionalRuleMutationUndoFactory } from '../commands/mutations/set-conditional-rule.mutation';
+import type { ISetConditionalRuleMutationParams } from '../commands/mutations/set-conditional-rule.mutation';
 import { ConditionalFormatViewModel } from '../models/conditional-format-view-model';
 import { ConditionalFormatRuleModel } from '../models/conditional-format-rule-model';
 
@@ -165,7 +165,7 @@ export class ConditionalFormatAutoFillController extends Disposable {
                 const params: ISetConditionalRuleMutationParams = {
                     unitId, subUnitId, rule: { ...rule, ranges },
                 };
-                redos.push({ id: setConditionalRuleMutation.id, params });
+                redos.push({ id: SetConditionalRuleMutation.id, params });
                 undos.push(...setConditionalRuleMutationUndoFactory(this._injector, params));
             });
             return {

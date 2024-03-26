@@ -23,15 +23,15 @@ import {
 import { ConditionalFormatRuleModel } from '../../models/conditional-format-rule-model';
 import type { IConditionFormatRule, IHighlightCell } from '../../models/type';
 import { CFRuleType, CFSubRuleType } from '../../base/const';
-import type { IAddConditionalRuleMutationParams } from '../mutations/addConditionalRule.mutation';
-import { addConditionalRuleMutation } from '../mutations/addConditionalRule.mutation';
+import type { IAddConditionalRuleMutationParams } from '../mutations/add-conditional-rule.mutation';
+import { AddConditionalRuleMutation } from '../mutations/add-conditional-rule.mutation';
 
 interface IAddDuplicateValuesConditionalRuleParams {
     ranges: IRange[];
     stopIfTrue?: boolean;
     style: IHighlightCell['style'];
 }
-export const addDuplicateValuesCfCommand: ICommand<IAddDuplicateValuesConditionalRuleParams> = {
+export const AddDuplicateValuesCfCommand: ICommand<IAddDuplicateValuesConditionalRuleParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.add-duplicate-values-conditional-rule',
     handler(accessor, params) {
@@ -54,8 +54,6 @@ export const addDuplicateValuesCfCommand: ICommand<IAddDuplicateValuesConditiona
                                                  subType: CFSubRuleType.duplicateValues,
                                                  style,
                                              } };
-        commandService.executeCommand(addConditionalRuleMutation.id, { unitId, subUnitId, rule } as IAddConditionalRuleMutationParams);
-
-        return true;
+        return commandService.executeCommand(AddConditionalRuleMutation.id, { unitId, subUnitId, rule } as IAddConditionalRuleMutationParams);
     },
 };

@@ -24,8 +24,8 @@ import {
 import { ConditionalFormatRuleModel } from '../../models/conditional-format-rule-model';
 import type { IConditionFormatRule, ITextHighlightCell } from '../../models/type';
 import { CFRuleType, CFSubRuleType } from '../../base/const';
-import type { IAddConditionalRuleMutationParams } from '../mutations/addConditionalRule.mutation';
-import { addConditionalRuleMutation } from '../mutations/addConditionalRule.mutation';
+import type { IAddConditionalRuleMutationParams } from '../mutations/add-conditional-rule.mutation';
+import { AddConditionalRuleMutation } from '../mutations/add-conditional-rule.mutation';
 
 interface IAddAverageCfParams {
     ranges: IRange[];
@@ -34,7 +34,7 @@ interface IAddAverageCfParams {
     operator: ITextHighlightCell['operator'];
     value: ITextHighlightCell['value'];
 }
-export const addTextCfCommand: ICommand<IAddAverageCfParams> = {
+export const AddTextCfCommand: ICommand<IAddAverageCfParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.add-text-conditional-rule',
     handler(accessor, params) {
@@ -59,8 +59,6 @@ export const addTextCfCommand: ICommand<IAddAverageCfParams> = {
                                                  style,
                                                  value,
                                              } };
-        commandService.executeCommand(addConditionalRuleMutation.id, { unitId, subUnitId, rule } as IAddConditionalRuleMutationParams);
-
-        return true;
+        return commandService.executeCommand(AddConditionalRuleMutation.id, { unitId, subUnitId, rule } as IAddConditionalRuleMutationParams);
     },
 };

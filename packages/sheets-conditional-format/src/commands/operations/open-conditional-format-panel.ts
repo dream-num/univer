@@ -22,14 +22,14 @@ import { ConditionalFormatMenuController } from '../../controllers/cf.menu.contr
 import { CFRuleType, CFSubRuleType, createDefaultRule } from '../../base/const';
 import type { IColorScale, IConditionFormatRule, IDataBar, IFormulaHighlightCell, IIconSet, IRankHighlightCell } from '../../models/type';
 import type { IClearRangeCfParams } from '../commands/clear-range-cf.command';
-import { clearRangeCfCommand } from '../commands/clear-range-cf.command';
-import { clearWorksheetCfCommand } from '../commands/clear-worksheet-cf.command';
+import { ClearRangeCfCommand } from '../commands/clear-range-cf.command';
+import { ClearWorksheetCfCommand } from '../commands/clear-worksheet-cf.command';
 
 interface IOpenConditionalFormatOperatorParams {
     value: number;
 }
 
-export enum OPERATION {
+export enum CF_MENU_OPERATION {
     createRule = 1,
     viewRule,
     highlightCell,
@@ -53,11 +53,11 @@ export const OpenConditionalFormatOperator: ICommand = {
 
         const type = params.value;
         switch (type) {
-            case OPERATION.highlightCell:{
+            case CF_MENU_OPERATION.highlightCell:{
                 conditionalFormatMenuController.openPanel({ ...createDefaultRule(), ranges });
                 break;
             }
-            case OPERATION.rank:{
+            case CF_MENU_OPERATION.rank:{
                 const rule = {
                     ...createDefaultRule,
                     ranges,
@@ -69,7 +69,7 @@ export const OpenConditionalFormatOperator: ICommand = {
                 conditionalFormatMenuController.openPanel(rule);
                 break;
             }
-            case OPERATION.formula:{
+            case CF_MENU_OPERATION.formula:{
                 const rule = {
                     ...createDefaultRule,
                     ranges,
@@ -82,7 +82,7 @@ export const OpenConditionalFormatOperator: ICommand = {
                 conditionalFormatMenuController.openPanel(rule);
                 break;
             }
-            case OPERATION.colorScale:{
+            case CF_MENU_OPERATION.colorScale:{
                 const rule = {
                     ...createDefaultRule,
                     ranges,
@@ -94,7 +94,7 @@ export const OpenConditionalFormatOperator: ICommand = {
                 conditionalFormatMenuController.openPanel(rule);
                 break;
             }
-            case OPERATION.dataBar:{
+            case CF_MENU_OPERATION.dataBar:{
                 const rule = {
                     ...createDefaultRule,
                     ranges,
@@ -105,7 +105,7 @@ export const OpenConditionalFormatOperator: ICommand = {
                 conditionalFormatMenuController.openPanel(rule);
                 break;
             }
-            case OPERATION.icon:{
+            case CF_MENU_OPERATION.icon:{
                 const rule = {
                     ...createDefaultRule,
                     ranges,
@@ -118,21 +118,21 @@ export const OpenConditionalFormatOperator: ICommand = {
                 conditionalFormatMenuController.openPanel(rule);
                 break;
             }
-            case OPERATION.viewRule:{
+            case CF_MENU_OPERATION.viewRule:{
                 conditionalFormatMenuController.openPanel();
                 break;
             }
-            case OPERATION.createRule:{
+            case CF_MENU_OPERATION.createRule:{
                 conditionalFormatMenuController.openPanel({ ...createDefaultRule(), ranges });
                 break;
             }
-            case OPERATION.clearRangeRules:{
-                commandService.executeCommand(clearRangeCfCommand.id, { ranges } as IClearRangeCfParams);
+            case CF_MENU_OPERATION.clearRangeRules:{
+                commandService.executeCommand(ClearRangeCfCommand.id, { ranges } as IClearRangeCfParams);
 
                 break;
             }
-            case OPERATION.clearWorkSheetRules:{
-                commandService.executeCommand(clearWorksheetCfCommand.id);
+            case CF_MENU_OPERATION.clearWorkSheetRules:{
+                commandService.executeCommand(ClearWorksheetCfCommand.id);
                 break;
             }
         }

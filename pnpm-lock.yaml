@@ -2710,6 +2710,7 @@ importers:
         specifier: ^1.4.0
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         version: 1.4.0(@types/node@20.11.30)(jsdom@24.0.0)
 =======
 =======
@@ -2886,6 +2887,9 @@ importers:
         version: 1.4.0(@types/node@20.11.29)(less@4.2.0)
 >>>>>>> c2cd68b18 (fix(cf): 0 can not be set (#446))
 >>>>>>> ffb0c3539 (fix(cf): 0 can not be set (#446))
+=======
+        version: 1.4.0(@types/node@20.11.29)(jsdom@24.0.0)
+>>>>>>> a1064e156 (style(cf): rename)
 
   packages/slides-ui:
     devDependencies:

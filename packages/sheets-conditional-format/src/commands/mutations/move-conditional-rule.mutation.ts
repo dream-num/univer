@@ -29,7 +29,7 @@ export interface IMoveConditionalRuleMutationParams {
     targetCfId: string;
 }
 
-export const moveConditionalRuleMutation: IMutation<IMoveConditionalRuleMutationParams> = {
+export const MoveConditionalRuleMutation: IMutation<IMoveConditionalRuleMutationParams> = {
     type: CommandType.MUTATION,
     id: 'sheet.mutation.move-conditional-rule',
     handler(accessor, params) {
@@ -42,7 +42,7 @@ export const moveConditionalRuleMutation: IMutation<IMoveConditionalRuleMutation
         return true;
     },
 };
-export const moveConditionalRuleMutationUndoFactory = (accessor: IAccessor, param: IMoveConditionalRuleMutationParams) => {
+export const MoveConditionalRuleMutationUndoFactory = (accessor: IAccessor, param: IMoveConditionalRuleMutationParams) => {
     const { unitId, subUnitId, cfId } = param;
     const conditionalFormatRuleModel = accessor.get(ConditionalFormatRuleModel);
     const ruleList = conditionalFormatRuleModel.getSubunitRules(unitId, subUnitId);
@@ -54,7 +54,7 @@ export const moveConditionalRuleMutationUndoFactory = (accessor: IAccessor, para
     if (!preTargetRule) {
         return [];
     }
-    return [{ id: moveConditionalRuleMutation.id,
+    return [{ id: MoveConditionalRuleMutation.id,
               params: { unitId, subUnitId, cfId, targetCfId: preTargetRule.cfId } as IMoveConditionalRuleMutationParams },
     ];
 };

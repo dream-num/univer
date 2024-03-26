@@ -23,8 +23,8 @@ import {
 import { ConditionalFormatRuleModel } from '../../models/conditional-format-rule-model';
 import type { IConditionFormatRule, INumberHighlightCell } from '../../models/type';
 import { CFNumberOperator, CFRuleType, CFSubRuleType } from '../../base/const';
-import type { IAddConditionalRuleMutationParams } from '../mutations/addConditionalRule.mutation';
-import { addConditionalRuleMutation } from '../mutations/addConditionalRule.mutation';
+import type { IAddConditionalRuleMutationParams } from '../mutations/add-conditional-rule.mutation';
+import { AddConditionalRuleMutation } from '../mutations/add-conditional-rule.mutation';
 
 interface IAddNumberCfParams {
     ranges: IRange[];
@@ -33,7 +33,7 @@ interface IAddNumberCfParams {
     operator: INumberHighlightCell['operator'];
     value: number | [number, number];
 }
-export const addNumberCfCommand: ICommand<IAddNumberCfParams> = {
+export const AddNumberCfCommand: ICommand<IAddNumberCfParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.add-number-conditional-rule',
     handler(accessor, params) {
@@ -77,8 +77,6 @@ export const addNumberCfCommand: ICommand<IAddNumberCfParams> = {
                          value: _value,
                      } };
         }
-        commandService.executeCommand(addConditionalRuleMutation.id, { unitId, subUnitId, rule } as IAddConditionalRuleMutationParams);
-
-        return true;
+        return commandService.executeCommand(AddConditionalRuleMutation.id, { unitId, subUnitId, rule } as IAddConditionalRuleMutationParams);
     },
 };

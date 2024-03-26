@@ -23,8 +23,8 @@ import {
 import { ConditionalFormatRuleModel } from '../../models/conditional-format-rule-model';
 import type { IConditionFormatRule, IRankHighlightCell } from '../../models/type';
 import { CFRuleType, CFSubRuleType } from '../../base/const';
-import type { IAddConditionalRuleMutationParams } from '../mutations/addConditionalRule.mutation';
-import { addConditionalRuleMutation } from '../mutations/addConditionalRule.mutation';
+import type { IAddConditionalRuleMutationParams } from '../mutations/add-conditional-rule.mutation';
+import { AddConditionalRuleMutation } from '../mutations/add-conditional-rule.mutation';
 
 interface IAddRankCfParams {
     ranges: IRange[];
@@ -35,7 +35,7 @@ interface IAddRankCfParams {
     value: number;
 
 }
-export const addRankCfCommand: ICommand<IAddRankCfParams> = {
+export const AddRankCfCommand: ICommand<IAddRankCfParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.add-rank-conditional-rule',
     handler(accessor, params) {
@@ -61,8 +61,6 @@ export const addRankCfCommand: ICommand<IAddRankCfParams> = {
                                                  style,
                                                  value,
                                              } };
-        commandService.executeCommand(addConditionalRuleMutation.id, { unitId, subUnitId, rule } as IAddConditionalRuleMutationParams);
-
-        return true;
+        return commandService.executeCommand(AddConditionalRuleMutation.id, { unitId, subUnitId, rule } as IAddConditionalRuleMutationParams);
     },
 };

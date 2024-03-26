@@ -30,17 +30,17 @@ import { createTopMatrixFromMatrix, findAllRectangle, SelectionManagerService } 
 
 import { ConditionalFormatRuleModel } from '../../models/conditional-format-rule-model';
 import type { IConditionFormatRule } from '../../models/type';
-import type { ISetConditionalRuleMutationParams } from '../mutations/setConditionalRule.mutation';
-import { setConditionalRuleMutation, setConditionalRuleMutationUndoFactory } from '../mutations/setConditionalRule.mutation';
-import type { IDeleteConditionalRuleMutationParams } from '../mutations/deleteConditionalRule.mutation';
-import { deleteConditionalRuleMutation, deleteConditionalRuleMutationUndoFactory } from '../mutations/deleteConditionalRule.mutation';
+import type { ISetConditionalRuleMutationParams } from '../mutations/set-conditional-rule.mutation';
+import { SetConditionalRuleMutation, setConditionalRuleMutationUndoFactory } from '../mutations/set-conditional-rule.mutation';
+import type { IDeleteConditionalRuleMutationParams } from '../mutations/delete-conditional-rule.mutation';
+import { DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory } from '../mutations/delete-conditional-rule.mutation';
 
 export interface IClearRangeCfParams {
     ranges?: IRange[];
     unitId?: string;
     subUnitId?: string;
 }
-export const clearRangeCfCommand: ICommand<IClearRangeCfParams> = {
+export const ClearRangeCfCommand: ICommand<IClearRangeCfParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.clear-range-conditional-rule',
     handler(accessor, params) {
@@ -82,12 +82,12 @@ export const clearRangeCfCommand: ICommand<IClearRangeCfParams> = {
                 const rule: IConditionFormatRule = { ...oldRule, ranges: newRanges };
                 const params = { unitId, subUnitId, rule } as ISetConditionalRuleMutationParams;
                 const undo = setConditionalRuleMutationUndoFactory(accessor, params);
-                redos.push({ id: setConditionalRuleMutation.id, params });
+                redos.push({ id: SetConditionalRuleMutation.id, params });
                 undos.push(...undo);
             } else {
                 const params = { unitId, subUnitId, cfId: oldRule.cfId } as IDeleteConditionalRuleMutationParams;
-                const undo = deleteConditionalRuleMutationUndoFactory(accessor, params);
-                redos.push({ id: deleteConditionalRuleMutation.id, params });
+                const undo = DeleteConditionalRuleMutationUndoFactory(accessor, params);
+                redos.push({ id: DeleteConditionalRuleMutation.id, params });
                 undos.push(...undo);
             }
         });
@@ -100,6 +100,6 @@ export const clearRangeCfCommand: ICommand<IClearRangeCfParams> = {
                 undoMutations: undos,
             });
         }
-        return true;
+        return result;
     },
 };

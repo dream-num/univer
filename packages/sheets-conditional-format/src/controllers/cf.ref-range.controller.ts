@@ -24,10 +24,10 @@ import { merge, Observable } from 'rxjs';
 import { distinctUntilChanged, map, switchMap } from 'rxjs/operators';
 import { ConditionalFormatRuleModel } from '../models/conditional-format-rule-model';
 import type { IConditionFormatRule } from '../models/type';
-import type { ISetConditionalRuleMutationParams } from '../commands/mutations/setConditionalRule.mutation';
-import type { IDeleteConditionalRuleMutationParams } from '../commands/mutations/deleteConditionalRule.mutation';
-import { deleteConditionalRuleMutation, deleteConditionalRuleMutationUndoFactory } from '../commands/mutations/deleteConditionalRule.mutation';
-import { setConditionalRuleMutation, setConditionalRuleMutationUndoFactory } from '../commands/mutations/setConditionalRule.mutation';
+import type { ISetConditionalRuleMutationParams } from '../commands/mutations/set-conditional-rule.mutation';
+import type { IDeleteConditionalRuleMutationParams } from '../commands/mutations/delete-conditional-rule.mutation';
+import { DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory } from '../commands/mutations/delete-conditional-rule.mutation';
+import { SetConditionalRuleMutation, setConditionalRuleMutationUndoFactory } from '../commands/mutations/set-conditional-rule.mutation';
 import { isRangesEqual } from '../utils/isRangesEqual';
 
 @OnLifecycle(LifecycleStages.Rendered, RefRangeController)
@@ -58,13 +58,13 @@ export class RefRangeController extends Disposable {
                 }
                 if (resultRanges.length) {
                     const redoParams: ISetConditionalRuleMutationParams = { unitId, subUnitId, rule: { ...rule, ranges: resultRanges } };
-                    const redos = [{ id: setConditionalRuleMutation.id, params: redoParams }];
+                    const redos = [{ id: SetConditionalRuleMutation.id, params: redoParams }];
                     const undos = setConditionalRuleMutationUndoFactory(this._injector, redoParams);
                     return { redos, undos };
                 } else {
                     const redoParams: IDeleteConditionalRuleMutationParams = { unitId, subUnitId, cfId: rule.cfId };
-                    const redos = [{ id: deleteConditionalRuleMutation.id, params: redoParams }];
-                    const undos = deleteConditionalRuleMutationUndoFactory(this._injector, redoParams);
+                    const redos = [{ id: DeleteConditionalRuleMutation.id, params: redoParams }];
+                    const undos = DeleteConditionalRuleMutationUndoFactory(this._injector, redoParams);
                     return { redos, undos };
                 }
             };

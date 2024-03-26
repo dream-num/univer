@@ -34,12 +34,12 @@ import { SHEET_CONDITION_FORMAT_PLUGIN } from '../base/const';
 import { ConditionalFormatViewModel } from '../models/conditional-format-view-model';
 import { ConditionalFormatRuleModel } from '../models/conditional-format-rule-model';
 import type { IConditionalFormatRuleConfig, IConditionFormatRule } from '../models/type';
-import type { IAddConditionalRuleMutationParams } from '../commands/mutations/addConditionalRule.mutation';
-import { addConditionalRuleMutation, addConditionalRuleMutationUndoFactory } from '../commands/mutations/addConditionalRule.mutation';
-import type { IDeleteConditionalRuleMutationParams } from '../commands/mutations/deleteConditionalRule.mutation';
-import { deleteConditionalRuleMutation, deleteConditionalRuleMutationUndoFactory } from '../commands/mutations/deleteConditionalRule.mutation';
-import type { ISetConditionalRuleMutationParams } from '../commands/mutations/setConditionalRule.mutation';
-import { setConditionalRuleMutation, setConditionalRuleMutationUndoFactory } from '../commands/mutations/setConditionalRule.mutation';
+import type { IAddConditionalRuleMutationParams } from '../commands/mutations/add-conditional-rule.mutation';
+import { AddConditionalRuleMutation, AddConditionalRuleMutationUndoFactory } from '../commands/mutations/add-conditional-rule.mutation';
+import type { IDeleteConditionalRuleMutationParams } from '../commands/mutations/delete-conditional-rule.mutation';
+import { DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory } from '../commands/mutations/delete-conditional-rule.mutation';
+import type { ISetConditionalRuleMutationParams } from '../commands/mutations/set-conditional-rule.mutation';
+import { SetConditionalRuleMutation, setConditionalRuleMutationUndoFactory } from '../commands/mutations/set-conditional-rule.mutation';
 
 @OnLifecycle(LifecycleStages.Rendered, ConditionalFormatCopyPasteController)
 export class ConditionalFormatCopyPasteController extends Disposable {
@@ -245,16 +245,16 @@ export class ConditionalFormatCopyPasteController extends Disposable {
                 const deleteParams: IDeleteConditionalRuleMutationParams = {
                     unitId, subUnitId, cfId,
                 };
-                redos.push({ id: deleteConditionalRuleMutation.id, params: deleteParams });
-                undos.push(...deleteConditionalRuleMutationUndoFactory(this._injector, deleteParams));
+                redos.push({ id: DeleteConditionalRuleMutation.id, params: deleteParams });
+                undos.push(...DeleteConditionalRuleMutationUndoFactory(this._injector, deleteParams));
             }
             if (waitAddRule.some((rule) => rule.cfId === cfId)) {
                 const rule = getCurrentSheetCfRule(cfId);
                 const addParams: IAddConditionalRuleMutationParams = {
                     unitId, subUnitId, rule: { ...rule, ranges },
                 };
-                redos.push({ id: addConditionalRuleMutation.id, params: addParams });
-                undos.push(addConditionalRuleMutationUndoFactory(this._injector, addParams));
+                redos.push({ id: AddConditionalRuleMutation.id, params: addParams });
+                undos.push(AddConditionalRuleMutationUndoFactory(this._injector, addParams));
             } else {
                 const rule = this._conditionalFormatRuleModel.getRule(unitId, subUnitId, cfId);
                 if (!rule) {
@@ -263,7 +263,7 @@ export class ConditionalFormatCopyPasteController extends Disposable {
                 const setParams: ISetConditionalRuleMutationParams = {
                     unitId, subUnitId, rule: { ...rule, ranges },
                 };
-                redos.push({ id: setConditionalRuleMutation.id, params: setParams });
+                redos.push({ id: SetConditionalRuleMutation.id, params: setParams });
                 undos.push(...setConditionalRuleMutationUndoFactory(this._injector, setParams));
             }
         }

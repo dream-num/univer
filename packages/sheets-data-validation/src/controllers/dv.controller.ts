@@ -14,27 +14,32 @@
  * limitations under the License.
  */
 
-import { IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
-import { DataValidatorRegistryService } from '@univerjs/data-validation';
+import { IUniverInstanceService, LifecycleStages, OnLifecycle, Range, RxDisposable } from '@univerjs/core';
+import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
 import { Inject, Injector } from '@wendellhu/redi';
 import { DataValidationSingle } from '@univerjs/icons';
 import { ComponentManager } from '@univerjs/ui';
+import { ClearSelectionAllCommand, SelectionManagerService, SheetInterceptorService } from '@univerjs/sheets';
 import { SheetDataValidationService } from '../services/dv.service';
 import { CustomFormulaValidator } from '../validators/custom-validator';
 import { CheckboxValidator, DateValidator, DecimalValidator, ListValidator, TextLengthValidator } from '../validators';
 import { WholeValidator } from '../validators/whole-validator';
 import { ListMultipleValidator } from '../validators/list-multiple-validator';
+import type { SheetDataValidationManager } from '../models/sheet-data-validation-manager';
+import { getDataValidationDiffMutations } from '../commands/commands/data-validation.command';
 import { DataValidationIcon } from './dv.menu';
 
 @OnLifecycle(LifecycleStages.Rendered, DataValidationController)
 export class DataValidationController extends RxDisposable {
     constructor(
-
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(SheetDataValidationService) private readonly _sheetDataValidationService: SheetDataValidationService,
         @Inject(DataValidatorRegistryService) private readonly _dataValidatorRegistryService: DataValidatorRegistryService,
         @Inject(Injector) private readonly _injector: Injector,
-        @Inject(ComponentManager) private readonly _componentManger: ComponentManager
+        @Inject(ComponentManager) private readonly _componentManger: ComponentManager,
+        @Inject(SelectionManagerService) private _selectionManagerService: SelectionManagerService,
+        @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
+        @Inject(DataValidationModel) private readonly _dataValidationModel: DataValidationModel
     ) {
         super();
         this._init();
@@ -44,6 +49,7 @@ export class DataValidationController extends RxDisposable {
         this._registerValidators();
         this._initInstanceChange();
         this._componentManger.register(DataValidationIcon, DataValidationSingle);
+        this._initCommandInterceptor();
     }
 
     private _registerValidators() {
@@ -81,5 +87,37 @@ export class DataValidationController extends RxDisposable {
                 }
             })
         );
+    }
+
+    private _initCommandInterceptor() {
+        this._sheetInterceptorService.interceptCommand({
+            getMutations: (commandInfo) => {
+                if (commandInfo.id === ClearSelectionAllCommand.id) {
+                    const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
+                    const unitId = workbook.getUnitId();
+                    const worksheet = workbook.getActiveSheet();
+                    const subUnitId = worksheet.getSheetId();
+                    const selections = this._selectionManagerService.getSelectionRanges();
+
+                    const manager = this._dataValidationModel.ensureManager(unitId, subUnitId) as SheetDataValidationManager;
+
+                    const ruleMatrix = manager.getRuleObjectMatrix().clone();
+
+                    selections && ruleMatrix.removeRange(selections);
+                    const diffs = ruleMatrix.diff(manager.getDataValidations());
+                    const { redoMutations, undoMutations } = getDataValidationDiffMutations(unitId, subUnitId, diffs);
+
+                    return {
+                        undos: undoMutations,
+                        redos: redoMutations,
+                    };
+                }
+
+                return {
+                    undos: [],
+                    redos: [],
+                };
+            },
+        });
     }
 }

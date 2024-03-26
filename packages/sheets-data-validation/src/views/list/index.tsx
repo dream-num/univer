@@ -22,6 +22,7 @@ import { ICommandService, IUniverInstanceService, LocaleService } from '@univerj
 import { createDefaultNewRule, DataValidationModel, RemoveAllDataValidationCommand } from '@univerjs/data-validation';
 import { Button } from '@univerjs/design';
 import { DataValidationPanelService } from '@univerjs/data-validation/services/data-validation-panel.service.js';
+import { useObservable } from '@univerjs/ui';
 import { DataValidationItem } from '../item';
 import type { IAddSheetDataValidationCommandParams } from '../../commands/commands/data-validation.command';
 import { AddSheetDataValidationCommand } from '../../commands/commands/data-validation.command';
@@ -33,15 +34,17 @@ export const DataValidationList = memo(() => {
     const commandService = useDependency(ICommandService);
     const injector = useDependency(Injector);
     const dataValidationPanelService = useDependency(DataValidationPanelService);
-    const workbook = univerInstanceService.getCurrentUniverSheetInstance();
-    const worksheet = workbook.getActiveSheet();
+    const workbook = useObservable(univerInstanceService.currentSheet$, univerInstanceService.getCurrentUniverSheetInstance()) ?? univerInstanceService.getCurrentUniverSheetInstance();
+    const localeService = useDependency(LocaleService);
+    const [rules, setRules] = useState<ISheetDataValidationRule[]>([]);
+    const worksheet = useObservable(workbook.activeSheet$, workbook.getActiveSheet()) ?? workbook.getActiveSheet();
     const unitId = workbook.getUnitId();
     const subUnitId = worksheet.getSheetId();
     const manager = dataValidationModel.ensureManager(unitId, subUnitId);
-    const localeService = useDependency(LocaleService);
-    const [rules, setRules] = useState<ISheetDataValidationRule[]>(manager.getDataValidations());
 
     useEffect(() => {
+        setRules(manager.getDataValidations());
+
         const subscription = manager.dataValidations$.subscribe((currentRules) => {
             setRules([...currentRules]);
         });
@@ -49,7 +52,7 @@ export const DataValidationList = memo(() => {
         return () => {
             subscription.unsubscribe();
         };
-    }, [manager.dataValidations$]);
+    }, [manager]);
 
     const handleAddRule = async () => {
         const rule = createDefaultNewRule(injector);

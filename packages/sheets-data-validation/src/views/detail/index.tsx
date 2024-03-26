@@ -170,8 +170,9 @@ export function DataValidationDetail() {
                     openForSheetUnitId={unitId}
                     openForSheetSubUnitId={subUnitId}
                     onChange={(newRange) => {
-                        handleUpdateRuleRanges(newRange.map((i) => i.range));
+                        handleUpdateRuleRanges(newRange.filter((i) => (!i.unitId || i.unitId === unitId) && (!i.sheetId || i.sheetId === subUnitId)).map((i) => i.range));
                     }}
+
                 />
             </FormLayout>
             <FormLayout label={localeService.t('dataValidation.panel.type')}>

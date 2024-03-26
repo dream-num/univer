@@ -23,9 +23,9 @@ export const dataValidationDemo = {
     appVersion: '0.1.4',
     locale: 'zhCN',
     styles: {
-        oyAwg6: {
+        wycIMY: {
             bg: {
-                rgb: '#2ea121',
+                rgb: '#2475e7',
             },
             cl: {
                 rgb: '#ffffff',
@@ -33,6 +33,11 @@ export const dataValidationDemo = {
             fs: 24,
             bl: 1,
             ht: 1,
+        },
+        'mm-V5J': {
+            bg: {
+                rgb: '#2475e7',
+            },
         },
         '7VfZ6p': {
             bg: {
@@ -345,151 +350,186 @@ export const dataValidationDemo = {
                     0: {
                         v: '  Requirements Progress Management',
                         t: 1,
-                        s: 'oyAwg6',
+                        s: 'wycIMY',
                     },
                     1: {
                         v: '',
                         t: 1,
+                        s: 'mm-V5J',
                     },
                     2: {
                         v: '',
                         t: 1,
+                        s: 'mm-V5J',
                     },
                     3: {
                         v: '',
                         t: 1,
+                        s: 'mm-V5J',
                     },
                     4: {
                         v: '',
                         t: 1,
+                        s: 'mm-V5J',
                     },
                     5: {
                         v: '',
                         t: 1,
+                        s: 'mm-V5J',
                     },
                     6: {
                         v: '',
                         t: 1,
+                        s: 'mm-V5J',
                     },
                     7: {
                         v: '',
                         t: 1,
+                        s: 'mm-V5J',
                     },
                     8: {
                         v: '',
                         t: 1,
+                        s: 'mm-V5J',
                     },
                     9: {
                         v: '',
                         t: 1,
+                        s: 'mm-V5J',
                     },
                     10: {
                         v: '',
                         t: 1,
+                        s: 'mm-V5J',
                     },
                     11: {
                         v: '',
                         t: 1,
+                        s: 'mm-V5J',
                     },
                 },
                 2: {
                     0: {
                         v: '',
                         t: 1,
+                        s: 'mm-V5J',
                     },
                     1: {
                         v: '',
                         t: 1,
+                        s: 'mm-V5J',
                     },
                     2: {
                         v: '',
                         t: 1,
+                        s: 'mm-V5J',
                     },
                     3: {
                         v: '',
                         t: 1,
+                        s: 'mm-V5J',
                     },
                     4: {
                         v: '',
                         t: 1,
+                        s: 'mm-V5J',
                     },
                     5: {
                         v: '',
                         t: 1,
+                        s: 'mm-V5J',
                     },
                     6: {
                         v: '',
                         t: 1,
+                        s: 'mm-V5J',
                     },
                     7: {
                         v: '',
                         t: 1,
+                        s: 'mm-V5J',
                     },
                     8: {
                         v: '',
                         t: 1,
+                        s: 'mm-V5J',
                     },
                     9: {
                         v: '',
                         t: 1,
+                        s: 'mm-V5J',
                     },
                     10: {
                         v: '',
                         t: 1,
+                        s: 'mm-V5J',
                     },
                     11: {
                         v: '',
                         t: 1,
+                        s: 'mm-V5J',
                     },
                 },
                 3: {
                     0: {
                         v: '',
                         t: 1,
+                        s: 'mm-V5J',
                     },
                     1: {
                         v: '',
                         t: 1,
+                        s: 'mm-V5J',
                     },
                     2: {
                         v: '',
                         t: 1,
+                        s: 'mm-V5J',
                     },
                     3: {
                         v: '',
                         t: 1,
+                        s: 'mm-V5J',
                     },
                     4: {
                         v: '',
                         t: 1,
+                        s: 'mm-V5J',
                     },
                     5: {
                         v: '',
                         t: 1,
+                        s: 'mm-V5J',
                     },
                     6: {
                         v: '',
                         t: 1,
+                        s: 'mm-V5J',
                     },
                     7: {
                         v: '',
                         t: 1,
+                        s: 'mm-V5J',
                     },
                     8: {
                         v: '',
                         t: 1,
+                        s: 'mm-V5J',
                     },
                     9: {
                         v: '',
                         t: 1,
+                        s: 'mm-V5J',
                     },
                     10: {
                         v: '',
                         t: 1,
+                        s: 'mm-V5J',
                     },
                     11: {
                         v: '',
                         t: 1,
+                        s: 'mm-V5J',
                     },
                 },
                 4: {
@@ -615,7 +655,7 @@ export const dataValidationDemo = {
                     },
                     3: {
                         s: '_-w4Bh',
-                        v: 'Delivered',
+                        v: 'Not started',
                         t: 1,
                     },
                     4: {
@@ -853,7 +893,7 @@ export const dataValidationDemo = {
                     },
                     1: {
                         s: '_-w4Bh',
-                        v: 'Developing',
+                        v: 'Developing,Delivered',
                         t: 1,
                     },
                     2: {
@@ -1306,7 +1346,7 @@ export const dataValidationDemo = {
                     },
                     1: {
                         s: '_-w4Bh',
-                        v: 'Not started',
+                        v: 'Not started,In review',
                         t: 1,
                     },
                     2: {
@@ -1716,7 +1756,7 @@ export const dataValidationDemo = {
                     },
                     1: {
                         s: '_-w4Bh',
-                        v: 'Released',
+                        v: 'Delivered,Released',
                         t: 1,
                     },
                     2: {
@@ -1947,13 +1987,15 @@ export const dataValidationDemo = {
                 },
                 7: {
                     hd: 0,
-                    h: 27,
+                    h: 39,
                     ah: 27,
+                    ia: 0,
                 },
                 8: {
                     hd: 0,
-                    h: 27,
+                    h: 40,
                     ah: 27,
+                    ia: 0,
                 },
                 9: {
                     hd: 0,
@@ -1967,8 +2009,9 @@ export const dataValidationDemo = {
                 },
                 11: {
                     hd: 0,
-                    h: 27,
+                    h: 41,
                     ah: 27,
+                    ia: 0,
                 },
                 12: {
                     hd: 0,
@@ -1987,8 +2030,9 @@ export const dataValidationDemo = {
                 },
                 15: {
                     hd: 0,
-                    h: 27,
+                    h: 39,
                     ah: 27,
+                    ia: 0,
                 },
                 16: {
                     hd: 0,
@@ -2068,16 +2112,16 @@ export const dataValidationDemo = {
         },
         {
             name: 'SHEET_DATA_VALIDATION',
-            data: '{"0wyUKaLV9Px9fNSQmEBks":[{"uid":"OZb9O3","type":"list","formula1":"Not started,Developing,Delivered,In review,Released","ranges":[{"startRow":5,"startColumn":3,"endRow":16,"endColumn":3,"startAbsoluteRefType":0,"endAbsoluteRefType":0,"rangeType":0}],"formula2":""},{"uid":"hi8nYC","type":"list","formula1":"Not started,Developing,Delivered,In review,Released","ranges":[{"startRow":5,"startColumn":1,"endRow":16,"endColumn":1,"startAbsoluteRefType":0,"endAbsoluteRefType":0,"rangeType":0}],"formula2":""},{"uid":"Jwncnk","type":"checkbox","ranges":[{"startRow":5,"startColumn":8,"endRow":16,"endColumn":11,"startAbsoluteRefType":0,"endAbsoluteRefType":0,"rangeType":0}]}]}',
+            data: '{"0wyUKaLV9Px9fNSQmEBks":[{"uid":"OZb9O3","type":"list","formula1":"Not%20started,Developing,Delivered,In%20review,Released","ranges":[{"startRow":5,"startColumn":3,"endRow":16,"endColumn":3,"startAbsoluteRefType":0,"endAbsoluteRefType":0,"rangeType":0}],"formula2":"#FDC49B,#FDC49B,#9FDAFF,#E3D5F6,#DEF6A2"},{"uid":"hi8nYC","type":"listMultiple","formula1":"Not%20started,Developing,Delivered,In%20review,Released","ranges":[{"startRow":5,"startColumn":1,"endRow":16,"endColumn":1,"startAbsoluteRefType":0,"endAbsoluteRefType":0,"rangeType":0}],"formula2":"#FDC49B,#FDC49B,#9FDAFF,#E3D5F6,#DEF6A2"},{"uid":"Jwncnk","type":"checkbox","ranges":[{"startRow":5,"startColumn":8,"endRow":16,"endColumn":11,"startAbsoluteRefType":0,"endAbsoluteRefType":0,"rangeType":0}]}]}',
         },
         {
             name: 'SHEET_CONDITION_FORMAT_PLUGIN',
-            data: '{"0wyUKaLV9Px9fNSQmEBks":[{"cfId":"1","ranges":[{"startRow":5,"startColumn":7,"endRow":16,"endColumn":7,"startAbsoluteRefType":0,"endAbsoluteRefType":0,"rangeType":0}],"rule":{"config":{"min":{"type":"min","value":0},"max":{"type":"max","value":100},"isGradient":true,"positiveColor":"#0aeb01","nativeColor":"#edda00"},"type":"dataBar"},"stopIfTrue":false}]}',
+            data: '{"0wyUKaLV9Px9fNSQmEBks":[{"cfId":"1","ranges":[{"startRow":5,"startColumn":7,"endRow":16,"endColumn":7,"startAbsoluteRefType":0,"endAbsoluteRefType":0,"rangeType":0}],"rule":{"config":{"min":{"type":"min","value":0},"max":{"type":"max","value":100},"isGradient":true,"positiveColor":"#A4DC16","nativeColor":"#ffae16"},"type":"dataBar"},"stopIfTrue":false}]}',
         },
     ],
     __env__: {
-        gitHash: 'f7dfe6e45',
-        gitBranch: 'dushusir/data-validation',
-        buildTime: '2024-03-25T11:15:43.856Z',
+        gitHash: '38d774f59',
+        gitBranch: 'dushusir/demo-data-validation',
+        buildTime: '2024-03-26T03:47:34.361Z',
     },
 };

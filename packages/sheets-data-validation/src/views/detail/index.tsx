@@ -56,7 +56,7 @@ export function DataValidationDetail() {
     const operatorNames = validator.operatorNames;
     const isTwoFormula = localRule.operator ? TWO_FORMULA_OPERATOR_COUNT.includes(localRule.operator) : false;
 
-    const onClose = () => {
+    const handleOk = () => {
         if (validator.validatorFormula(localRule).success) {
             dataValidationPanelService.setActiveRule(null);
         } else {
@@ -162,10 +162,7 @@ export function DataValidationDetail() {
 
     return (
         <div>
-
-            <FormLayout
-                label={localeService.t('dataValidation.panel.range')}
-            >
+            <FormLayout label={localeService.t('dataValidation.panel.range')}>
                 <RangeSelector
                     className={styles.dataValidationDetailFormItem}
                     value={rangeStr}
@@ -177,9 +174,7 @@ export function DataValidationDetail() {
                     }}
                 />
             </FormLayout>
-            <FormLayout
-                label={localeService.t('dataValidation.panel.type')}
-            >
+            <FormLayout label={localeService.t('dataValidation.panel.type')}>
                 <Select
                     options={validators?.map((validator) => ({
                         label: localeService.t(validator.title),
@@ -192,9 +187,7 @@ export function DataValidationDetail() {
             </FormLayout>
             {operators?.length
                 ? (
-                    <FormLayout
-                        label={localeService.t('dataValidation.panel.operator')}
-                    >
+                    <FormLayout label={localeService.t('dataValidation.panel.operator')}>
                         <Select
                             options={operators.map((op, i) => ({
                                 value: `${op}`,
@@ -237,7 +230,7 @@ export function DataValidationDetail() {
                 <Button className={styles.dataValidationDetailButton} onClick={handleDelete}>
                     {localeService.t('dataValidation.panel.removeRule')}
                 </Button>
-                <Button className={styles.dataValidationDetailButton} type="primary" onClick={onClose}>
+                <Button className={styles.dataValidationDetailButton} type="primary" onClick={handleOk}>
                     {localeService.t('dataValidation.panel.done')}
                 </Button>
             </div>

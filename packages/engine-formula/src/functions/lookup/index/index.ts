@@ -15,7 +15,7 @@
  */
 
 import { ErrorType } from '../../../basics/error-type';
-import type { BaseReferenceObject } from '../../../engine/reference-object/base-reference-object';
+import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
 import { expandArrayValueObject } from '../../../engine/utils/array-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
@@ -27,15 +27,12 @@ import { BaseFunction } from '../../base-function';
  *
  * =INDEX(A2:A5,2,1):A1 same as =A1:A3
  *
- * OPTIMIZE: maybe we can remove some unknown type
+ * TODO@Dushusir: Promote public type to ObjectClassType
  */
 export class Index extends BaseFunction {
     override needsReferenceObject = true;
 
-    override calculate(referenceObject: BaseValueObject, rowNum: BaseValueObject, columnNum?: BaseValueObject, areaNum?: BaseValueObject) {
-        // covert to real type
-        const reference = referenceObject as unknown as BaseReferenceObject;
-
+    override calculate(reference: FunctionVariantType, rowNum: FunctionVariantType, columnNum?: FunctionVariantType, areaNum?: FunctionVariantType) {
         if (reference == null) {
             return ErrorValueObject.create(ErrorType.NA);
         }
@@ -56,13 +53,19 @@ export class Index extends BaseFunction {
             return areaNum;
         }
 
-        if (!(reference.isRange())) {
-            return ErrorValueObject.create(ErrorType.REF);
-        }
+        let referenceRowCount = 0;
+        let referenceColumnCount = 0;
 
-        const { startRow, endRow, startColumn, endColumn } = reference.getRangeData();
-        const referenceRowCount = endRow - startRow + 1;
-        const referenceColumnCount = endColumn - startColumn + 1;
+        if (reference.isValueObject()) {
+            referenceRowCount = 1;
+            referenceColumnCount = 1;
+        } else if (reference.isReferenceObject()) {
+            const { startRow, endRow, startColumn, endColumn } = (reference as BaseReferenceObject).getRangeData();
+            referenceRowCount = endRow - startRow + 1;
+            referenceColumnCount = endColumn - startColumn + 1;
+        } else {
+            return ErrorValueObject.create(ErrorType.VALUE);
+        }
 
         // When there is only one row, the rowNum is considered to be the column number.
         // =INDEX(A6:B6,2) equals =INDEX(A6:B6,1,2)
@@ -77,15 +80,15 @@ export class Index extends BaseFunction {
         areaNum = areaNum ?? NumberValueObject.create(1);
 
         if (rowNum.isReferenceObject()) {
-            rowNum = (rowNum as unknown as BaseReferenceObject).toArrayValueObject();
+            rowNum = (rowNum as BaseReferenceObject).toArrayValueObject();
         }
 
         if (columnNum.isReferenceObject()) {
-            columnNum = (columnNum as unknown as BaseReferenceObject).toArrayValueObject();
+            columnNum = (columnNum as BaseReferenceObject).toArrayValueObject();
         }
 
         if (areaNum.isReferenceObject()) {
-            areaNum = (areaNum as unknown as BaseReferenceObject).toArrayValueObject();
+            areaNum = (areaNum as BaseReferenceObject).toArrayValueObject();
         }
 
         // get max row length
@@ -101,6 +104,10 @@ export class Index extends BaseFunction {
             columnNum.isArray() ? (columnNum as ArrayValueObject).getColumnCount() : 1,
             areaNum.isArray() ? (areaNum as ArrayValueObject).getColumnCount() : 1
         );
+
+        rowNum = rowNum as BaseValueObject;
+        columnNum = columnNum as BaseValueObject;
+        areaNum = areaNum as BaseValueObject;
 
         // If maxRowLength and maxColumnLength are both 1, pick the value from the reference array
         // Otherwise, filter the results from the reference according to the specified rowNum/columnNum/areaNum, take the upper left corner cell value of each result array, and then form an array with maxRowLength row number and maxColumnLength column number.
@@ -126,7 +133,7 @@ export class Index extends BaseFunction {
         }
     }
 
-    private _calculateSingleCell(reference: BaseReferenceObject, rowNum: BaseValueObject, columnNum: BaseValueObject, areaNum: BaseValueObject) {
+    private _calculateSingleCell(reference: FunctionVariantType, rowNum: BaseValueObject, columnNum: BaseValueObject, areaNum: BaseValueObject) {
         if (rowNum.isError()) {
             return rowNum;
         }
@@ -158,7 +165,13 @@ export class Index extends BaseFunction {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        return this._getReferenceObject(reference, rowNumberValue, columnNumberValue, areaNumberValue);
+        if (reference.isReferenceObject()) {
+            return this._getReferenceObject(reference as BaseReferenceObject, rowNumberValue, columnNumberValue, areaNumberValue);
+        } else if (reference.isValueObject() && rowNumberValue === 1 && columnNumberValue === 1) {
+            return reference;
+        } else {
+            return ErrorValueObject.create(ErrorType.REF);
+        }
     }
 
     private _getNumberValue(numberValueObject?: BaseValueObject) {

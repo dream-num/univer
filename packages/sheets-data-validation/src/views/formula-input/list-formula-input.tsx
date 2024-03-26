@@ -289,7 +289,7 @@ export function ListFormulaInput(props: IFormulaInputProps) {
                                         if (!worksheet) {
                                             return;
                                         }
-                                        const rangeStr = serializeRangeWithSpreadsheet(workbook.getUnitId(), worksheet.getName(), range.range);
+                                        const rangeStr = serializeRangeWithSheet(worksheet.getName(), range.range);
                                         onChange?.({
                                             formula1: rangeStr,
                                             formula2,

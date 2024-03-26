@@ -19,7 +19,8 @@ import { CommandType, IUniverInstanceService, Tools } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
 export interface ISetWorksheetOrderMutationParams {
-    order: number;
+    fromOrder: number;
+    toOrder: number;
     unitId: string;
     subUnitId: string;
 }
@@ -28,12 +29,10 @@ export const SetWorksheetOrderUndoMutationFactory = (
     accessor: IAccessor,
     params: ISetWorksheetOrderMutationParams
 ): ISetWorksheetOrderMutationParams => {
-    const workbook = accessor.get(IUniverInstanceService).getUniverSheetInstance(params.unitId);
-    const config = workbook!.getConfig();
-    const oldIndex = config.sheetOrder.findIndex((current: string) => current === params.subUnitId);
     return {
         ...Tools.deepClone(params),
-        order: oldIndex,
+        toOrder: params.fromOrder,
+        fromOrder: params.toOrder,
     };
 };
 
@@ -44,9 +43,8 @@ export const SetWorksheetOrderMutation: IMutation<ISetWorksheetOrderMutationPara
         const workbook = accessor.get(IUniverInstanceService).getUniverSheetInstance(params.unitId);
         if (!workbook) return false;
         const config = workbook.getConfig();
-        const exclude = config.sheetOrder.filter((currentId: string) => currentId !== params.subUnitId);
-        exclude.splice(params.order, 0, params.subUnitId);
-        config.sheetOrder = exclude;
+        config.sheetOrder.splice(params.fromOrder, 1);
+        config.sheetOrder.splice(params.toOrder, 0, params.subUnitId);
         return true;
     },
 };

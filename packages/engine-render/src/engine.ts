@@ -703,20 +703,6 @@ export class Engine extends ThinEngine<Scene> {
         return deviceType;
     }
 
-    private _handleMediaChange() {
-        this.onTransformChangeObservable.notifyObservers({
-            type: TRANSFORM_CHANGE_OBSERVABLE_TYPE.resize,
-            value: {
-                width: this._previousWidth,
-                height: this._previousHeight,
-            },
-            preValue: {
-                width: this._previousWidth,
-                height: this._previousHeight,
-            },
-        });
-    }
-
     private _matchMediaHandler() {
         if (!window?.matchMedia) {
             return;
@@ -724,11 +710,15 @@ export class Engine extends ThinEngine<Scene> {
 
         const mediaQueryList = window.matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`);
 
-        mediaQueryList.addEventListener('change', this._handleMediaChange);
+        const _handleMediaChange = () => {
+            this.resize();
+        };
+
+        mediaQueryList.addEventListener('change', _handleMediaChange);
 
         this.disposeWithMe(
             toDisposable(() => {
-                mediaQueryList.removeEventListener('change', this._handleMediaChange);
+                mediaQueryList.removeEventListener('change', _handleMediaChange);
             })
         );
     }

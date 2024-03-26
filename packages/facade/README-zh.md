@@ -7,7 +7,7 @@
 
 在 Univer 当中，除了使用底层的 API 之外，你还可以使用 `@univerjs/facade` 提供的 Facade API，它是对底层 API 的封装，更加简单易用。
 
-你可以通过阅读[这篇文档](https://univer.ai/en-us/guides/facade/)了解如何使用 Facade API。
+你可以通过阅读[这篇文档](https://univer.ai/zh-cn/guides/facade/)了解如何使用 Facade API。
 
 ## 使用指南
 

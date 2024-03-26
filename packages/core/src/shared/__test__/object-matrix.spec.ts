@@ -24,6 +24,10 @@ describe('test ObjectMatrix', () => {
         2: { 1: '111', 2: '121', 3: '313' },
     });
 
+    const getHasNullPrimitiveObj = () => ({
+        1: '111', 2: null, 3: '333',
+    });
+
     it('test deleteValue', () => {
         const matrix = new ObjectMatrix(getPrimitiveObj());
         matrix.realDeleteValue(1, 1);
@@ -68,6 +72,22 @@ describe('test ObjectMatrix', () => {
         expect(primitiveObject).toStrictEqual({
             0: { 1: '111', 2: '121', 3: '313' },
             2: { 1: '123', 2: '222', 3: '333' },
+        });
+    });
+
+    it('test moveMatrixArray, with null move backward in it', () => {
+        const primitiveObject = getHasNullPrimitiveObj();
+        moveMatrixArray(2, 1, 0, primitiveObject);
+        expect(primitiveObject).toStrictEqual({
+            0: null, 2: '111', 3: '333',
+        });
+    });
+
+    it('test moveMatrixArray, with null move forward in it', () => {
+        const primitiveObject = getHasNullPrimitiveObj();
+        moveMatrixArray(2, 1, 4, primitiveObject);
+        expect(primitiveObject).toStrictEqual({
+            1: '111', 2: '333', 3: null,
         });
     });
 });

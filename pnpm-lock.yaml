@@ -1042,10 +1042,6 @@ importers:
         version: 1.4.0(@types/node@20.11.29)(less@4.2.0)
 
   packages/slides:
-    dependencies:
-      '@univerjs/ui':
-        specifier: workspace:*
-        version: link:../ui
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -1059,9 +1055,6 @@ importers:
       '@wendellhu/redi':
         specifier: ^0.13.0
         version: 0.13.0
-      less:
-        specifier: ^4.2.0
-        version: 4.2.0
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -1073,7 +1066,7 @@ importers:
         version: 5.1.6(@types/node@20.11.29)(less@4.2.0)
       vitest:
         specifier: ^1.4.0
-        version: 1.4.0(@types/node@20.11.29)(less@4.2.0)
+        version: 1.4.0(@types/node@20.11.29)(jsdom@24.0.0)
 
   packages/slides-ui:
     devDependencies:

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IMutationInfo, IRange, Workbook } from '@univerjs/core';
+import type { ICommandInfo, IMutationInfo, IRange, Workbook } from '@univerjs/core';
 import {
     Dimension,
     Disposable,
@@ -28,7 +28,6 @@ import {
 } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import type { IMoveColsCommandParams, IMoveRowsCommandParams } from '..';
 import type {
     IAddWorksheetMergeMutationParams,
     IRemoveColMutationParams,
@@ -66,6 +65,15 @@ import { EffectRefRangId } from '../services/ref-range/type';
 import { handleMoveCols, handleMoveRows, runRefRangeMutations } from '../services/ref-range/util';
 import { SelectionManagerService } from '../services/selection-manager.service';
 import { SheetInterceptorService } from '../services/sheet-interceptor/sheet-interceptor.service';
+import type { IMoveRowsMutationParams } from '../commands/mutations/move-rows-cols.mutation';
+import { MoveColsMutation, MoveRowsMutation } from '../commands/mutations/move-rows-cols.mutation';
+import { InsertColMutation, InsertRowMutation } from '../commands/mutations/insert-row-col.mutation';
+import { RemoveColMutation, RemoveRowMutation } from '../commands/mutations/remove-row-col.mutation';
+
+const mutationIdByRowCol = [InsertColMutation.id, InsertRowMutation.id, RemoveColMutation.id, RemoveRowMutation.id];
+const mutationIdArrByMove = [MoveRowsMutation.id, MoveColsMutation.id];
+
+type IMoveRowsOrColsMutationParams = IMoveRowsMutationParams;
 
 /**
  * calculates the selection based on the merged cell type
@@ -119,6 +127,7 @@ export class MergeCellController extends Disposable {
         super();
         this._onRefRangeChange();
         this._initCommandInterceptor();
+        this._commandExecutedListener();
     }
 
     private _initCommandInterceptor() {
@@ -465,7 +474,7 @@ export class MergeCellController extends Disposable {
                 const count = endRow - startRow + 1;
                 cell.endRow += count;
 
-                if (this.checkIsMergeCell(cell)) {
+                if (this._checkIsMergeCell(cell)) {
                     mergeCellsHasLapping.push(cell);
                 }
             }
@@ -528,7 +537,7 @@ export class MergeCellController extends Disposable {
                 const count = endColumn - startColumn + 1;
                 cell.endColumn += count;
 
-                if (this.checkIsMergeCell(cell)) {
+                if (this._checkIsMergeCell(cell)) {
                     mergeCellsHasLapping.push(cell);
                 }
             }
@@ -599,7 +608,7 @@ export class MergeCellController extends Disposable {
                 } else if (endColumn > cell.endColumn) {
                     cell.endColumn = startColumn - 1;
                 }
-                if (this.checkIsMergeCell(cell)) {
+                if (this._checkIsMergeCell(cell)) {
                     mergeCellsHasLapping.push(cell);
                 }
             }
@@ -668,7 +677,7 @@ export class MergeCellController extends Disposable {
                 } else if (endRow > cell.endRow) {
                     cell.endRow = startRow - 1;
                 }
-                if (this.checkIsMergeCell(cell)) {
+                if (this._checkIsMergeCell(cell)) {
                     mergeCellsHasLapping.push(cell);
                 }
             }
@@ -1024,12 +1033,117 @@ export class MergeCellController extends Disposable {
         };
     }
 
-    private checkIsMergeCell(cell: IRange) {
+    private _checkIsMergeCell(cell: IRange) {
         return !(cell.startRow === cell.endRow && cell.startColumn === cell.endColumn);
     }
 
     private _handleNull() {
         return { redos: [], undos: [] };
+    }
+
+    private _commandExecutedListener() {
+        this.disposeWithMe(this._commandService.onCommandExecuted((command: ICommandInfo) => {
+            // 1. MoveRowsOrColsMutation
+            if (mutationIdArrByMove.includes(command.id)) {
+                const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
+                const worksheet = workbook.getActiveSheet();
+                if (!command.params) return;
+
+                const { sourceRange, targetRange } = command.params as IMoveRowsOrColsMutationParams;
+                const isRowMove = sourceRange.startColumn === targetRange.startColumn && sourceRange.endColumn === targetRange.endColumn;
+                const moveLength = isRowMove
+                    ? sourceRange.endRow - sourceRange.startRow + 1
+                    : sourceRange.endColumn - sourceRange.startColumn + 1;
+                const sourceStart = isRowMove ? sourceRange.startRow : sourceRange.startColumn;
+                const targetStart = isRowMove ? targetRange.startRow : targetRange.startColumn;
+                const mergeData = worksheet.getConfig().mergeData;
+
+                const adjustedMergedCells: IRange[] = [];
+                mergeData.forEach((merge) => {
+                    let { startRow, endRow, startColumn, endColumn, rangeType } = merge;
+
+                    if (!Rectangle.intersects(merge, sourceRange)) {
+                        if (isRowMove) {
+                            if (sourceStart < startRow && targetStart > endRow) {
+                                startRow -= moveLength;
+                                endRow -= moveLength;
+                            } else if (sourceStart > endRow && targetStart <= startRow) {
+                                startRow += moveLength;
+                                endRow += moveLength;
+                            }
+                        } else {
+                            if (sourceStart < startColumn && targetStart > endColumn) {
+                                startColumn -= moveLength;
+                                endColumn -= moveLength;
+                            } else if (sourceStart > endColumn && targetStart <= startColumn) {
+                                startColumn += moveLength;
+                                endColumn += moveLength;
+                            }
+                        }
+                    }
+
+                    if (!(merge.startRow === merge.endRow && merge.startColumn === merge.endColumn)) {
+                        adjustedMergedCells.push({ startRow, endRow, startColumn, endColumn, rangeType });
+                    }
+                });
+                worksheet.getConfig().mergeData = adjustedMergedCells;
+            }
+
+            // 2. InsertRowsOrCols / RemoveRowsOrCols Mutations
+            if (mutationIdByRowCol.includes(command.id)) {
+                const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
+                const worksheet = workbook.getActiveSheet();
+
+                const mergeData = worksheet.getConfig().mergeData;
+                const params = command.params as IInsertRowCommandParams;
+                if (!params) return;
+                const { range } = params;
+
+                const isRowOperation = command.id.includes('row');
+                const isAddOperation = command.id.includes('insert');
+
+                const operationStart = isRowOperation ? range.startRow : range.startColumn;
+                const operationEnd = isRowOperation ? range.endRow : range.endColumn;
+                const operationCount = operationEnd - operationStart + 1;
+                const adjustedMergedCells: IRange[] = [];
+
+                mergeData.forEach((merge) => {
+                    let { startRow, endRow, startColumn, endColumn, rangeType } = merge;
+
+                    if (isAddOperation) {
+                        if (isRowOperation) {
+                            if (operationStart <= startRow) {
+                                startRow += operationCount;
+                                endRow += operationCount;
+                            }
+                        } else {
+                            if (operationStart <= startColumn) {
+                                startColumn += operationCount;
+                                endColumn += operationCount;
+                            }
+                        }
+                    } else {
+                        if (isRowOperation) {
+                            if (operationEnd < startRow) {
+                                startRow -= operationCount;
+                                endRow -= operationCount;
+                            }
+                        } else {
+                            if (operationEnd < startColumn) {
+                                startColumn -= operationCount;
+                                endColumn -= operationCount;
+                            }
+                        }
+                    }
+
+                    if (!(merge.startRow === merge.endRow && merge.startColumn === merge.endColumn)) {
+                        adjustedMergedCells.push({ startRow, endRow, startColumn, endColumn, rangeType });
+                    }
+                });
+
+                worksheet.getConfig().mergeData = adjustedMergedCells;
+            }
+        }));
     }
 }
 

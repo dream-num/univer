@@ -17,6 +17,10 @@
 import type zhCN from './zh-CN';
 
 const locale: typeof zhCN = {
+    toolbar: {
+        undo: 'Undo',
+        redo: 'Redo',
+    },
 };
 
 export default locale;

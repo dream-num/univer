@@ -15,6 +15,10 @@
  */
 
 const locale = {
+    toolbar: {
+        undo: '撤销',
+        redo: '重做',
+    },
 };
 
 export default locale;

@@ -30,8 +30,6 @@ import { SheetPermissionService } from './services/permission';
 import { RefRangeService } from './services/ref-range/ref-range.service';
 import { SelectionManagerService } from './services/selection-manager.service';
 import { SheetInterceptorService } from './services/sheet-interceptor/sheet-interceptor.service';
-import { InsertOrRemoveRowColController } from './controllers/insert-or-remove-row-col.controller';
-import { MoveRowsColsController } from './controllers/move-rows-cols.controller';
 
 const PLUGIN_NAME = 'sheet';
 
@@ -75,8 +73,6 @@ export class UniverSheetsPlugin extends Plugin {
             // controllers
             [BasicWorksheetController],
             [MergeCellController],
-            [InsertOrRemoveRowColController],
-            [MoveRowsColsController],
         ];
 
         if (!this._config?.notExecuteFormula) {

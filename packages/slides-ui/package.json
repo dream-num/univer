@@ -58,7 +58,13 @@
         "node": ">=16.0.0",
         "npm": ">=8.0.0"
     },
-    "scripts": {},
+    "scripts": {
+        "test": "vitest run",
+        "test:watch": "vitest",
+        "coverage": "vitest run --coverage",
+        "lint:types": "tsc --noEmit",
+        "build": "tsc && vite build"
+    },
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",

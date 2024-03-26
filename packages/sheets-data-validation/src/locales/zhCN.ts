@@ -23,7 +23,7 @@ export default {
             formula: '请输入合法的公式或公式',
             integer: '请输入合法的整数或公式',
             date: '请输入合法的日期或公式',
-            list: '请输入',
+            list: '请输入至少一个合法选项',
         },
         panel: {
             title: '管理数据验证',

@@ -158,7 +158,7 @@ const Template = (props: { item: IDropdownItem; dragHandleProps: any; commonProp
 };
 
 export function ListFormulaInput(props: IFormulaInputProps) {
-    const { value, onChange: _onChange = () => {}, unitId, subUnitId } = props;
+    const { value, onChange: _onChange = () => {}, unitId, subUnitId, validResult, showError } = props;
     const { formula1 = '', formula2 = '' } = value || {};
     const containerRef = useRef<HTMLDivElement>(null);
     const [isRefRange, setIsRefRange] = useState(() => isReferenceString(formula1) ? '1' : '0');
@@ -167,8 +167,9 @@ export function ListFormulaInput(props: IFormulaInputProps) {
     const univerInstanceService = useDependency(IUniverInstanceService);
     const workbook = univerInstanceService.getCurrentUniverSheetInstance();
     const worksheet = workbook.getActiveSheet();
-
     const [refColors, setRefColors] = useState(() => formula2.split(','));
+
+    const formula1Res = showError ? validResult?.formula1 : '';
 
     const onChange = useEvent(_onChange);
 
@@ -265,7 +266,7 @@ export function ListFormulaInput(props: IFormulaInputProps) {
                     <Radio value="1">引用数据</Radio>
                 </RadioGroup>
             </FormLayout>
-            <FormLayout>
+            <FormLayout error={formula1Res}>
                 {isRefRange === '1'
                     ? (
                         <>

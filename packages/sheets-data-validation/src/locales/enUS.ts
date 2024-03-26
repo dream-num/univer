@@ -17,6 +17,14 @@
 export default {
     dataValidation: {
         title: 'Data validation',
+        validFail: {
+            common: 'Please input value or formula',
+            number: 'Please input number or formula',
+            formula: 'Please input formula',
+            integer: 'Please input integer or formula',
+            date: 'Please input date or formula',
+            list: 'Please input options',
+        },
         panel: {
             title: 'Data validation management',
             addTitle: 'Create new data validation',

@@ -22,7 +22,7 @@ import { TWO_FORMULA_OPERATOR_COUNT } from '@univerjs/data-validation/types/cons
 import { Button, FormLayout, Select } from '@univerjs/design';
 import { ComponentManager, RangeSelector, useEvent, useObservable } from '@univerjs/ui';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { serializeRange } from '@univerjs/engine-formula';
 import { getRuleOptions, getRuleSetting } from '@univerjs/data-validation/common/util.js';
 import { DataValidationPanelService } from '@univerjs/data-validation/services/data-validation-panel.service.js';

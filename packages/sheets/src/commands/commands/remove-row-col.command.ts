@@ -96,19 +96,19 @@ export const RemoveRowCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
         const result = sequenceExecute(
             [
-                intercepted.redos[0],
+                ...(intercepted.preRedos ?? []),
                 { id: RemoveRowMutation.id, params: removeRowsParams },
-                intercepted.redos[1],
+                ...intercepted.redos,
                 followSelectionOperation(range, workbook, worksheet),
-            ].filter(Boolean),
+            ],
             commandService
         );
 
         if (result.result) {
             accessor.get(IUndoRedoService).pushUndoRedo({
                 unitID: unitId,
-                undoMutations: [intercepted.undos[0], { id: InsertRowMutation.id, params: undoRemoveRowsParams }, intercepted.undos[1]].filter(Boolean),
-                redoMutations: [intercepted.redos[0], { id: RemoveRowMutation.id, params: removeRowsParams }, intercepted.redos[1]].filter(Boolean),
+                undoMutations: [...(intercepted.preUndos ?? []), { id: InsertRowMutation.id, params: undoRemoveRowsParams }, ...intercepted.undos],
+                redoMutations: [...(intercepted.preRedos ?? []), { id: RemoveRowMutation.id, params: removeRowsParams }, ...intercepted.redos],
             });
             return true;
         }
@@ -162,11 +162,11 @@ export const RemoveColCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
         const result = sequenceExecute(
             [
-                intercepted.redos[0],
+                ...(intercepted.preRedos ?? []),
                 { id: RemoveColMutation.id, params: removeColParams },
-                intercepted.redos[1],
+                ...intercepted.redos,
                 followSelectionOperation(range, workbook, worksheet),
-            ].filter(Boolean),
+            ],
             commandService
         );
 
@@ -175,13 +175,13 @@ export const RemoveColCommand: ICommand = {
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
                 undoMutations: [
-                    intercepted.undos[0],
+                    ...(intercepted.preUndos ?? []),
                     { id: InsertColMutation.id, params: undoRemoveColParams },
-                    intercepted.undos[1]].filter(Boolean),
+                    ...intercepted.undos],
                 redoMutations: [
-                    intercepted.redos[0],
+                    ...(intercepted.preRedos ?? []),
                     { id: RemoveColMutation.id, params: removeColParams },
-                    intercepted.redos[1]].filter(Boolean),
+                    ...intercepted.redos],
             });
 
             return true;

@@ -65,6 +65,13 @@ enum BatchingStatus {
     CREATED,
 }
 
+export interface IUndoRedoCommandInfosByInterceptor {
+    preUndos?: IMutationInfo[];
+    undos: IMutationInfo[];
+    redos: IMutationInfo[];
+    preRedos?: IMutationInfo[];
+}
+
 export interface IUndoRedoCommandInfos {
     undos: IMutationInfo[];
     redos: IMutationInfo[];

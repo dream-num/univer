@@ -624,15 +624,12 @@ export class MergeCellController extends Disposable {
             this._injector,
             addMergeMutationParams
         );
-        const redos = [
-            { id: RemoveWorksheetMergeMutation.id, params: removeMergeMutationParams },
-            { id: AddWorksheetMergeMutation.id, params: addMergeMutationParams },
-        ];
-        const undos = [
-            { id: RemoveWorksheetMergeMutation.id, params: undoAddMergeParams },
-            { id: AddWorksheetMergeMutation.id, params: undoRemoveMergeMutationParams },
-        ];
-        return { redos, undos };
+
+        const preRedos = [{ id: RemoveWorksheetMergeMutation.id, params: removeMergeMutationParams }];
+        const redos = [{ id: AddWorksheetMergeMutation.id, params: addMergeMutationParams }];
+        const preUndos = [{ id: RemoveWorksheetMergeMutation.id, params: undoAddMergeParams }];
+        const undos = [{ id: AddWorksheetMergeMutation.id, params: undoRemoveMergeMutationParams }];
+        return { preUndos, undos, preRedos, redos };
     }
 
     private _handleRemoveRowCommand(config: IRemoveRowsMutationParams, unitId: string, subUnitId: string) {
@@ -696,15 +693,12 @@ export class MergeCellController extends Disposable {
             this._injector,
             addMergeMutationParams
         );
-        const redos = [
-            { id: RemoveWorksheetMergeMutation.id, params: removeMergeMutationParams },
-            { id: AddWorksheetMergeMutation.id, params: addMergeMutationParams },
-        ];
-        const undos = [
-            { id: RemoveWorksheetMergeMutation.id, params: undoAddMergeParams },
-            { id: AddWorksheetMergeMutation.id, params: undoRemoveMergeMutationParams },
-        ];
-        return { redos, undos };
+
+        const preRedos = [{ id: RemoveWorksheetMergeMutation.id, params: removeMergeMutationParams }];
+        const redos = [{ id: AddWorksheetMergeMutation.id, params: addMergeMutationParams }];
+        const preUndos = [{ id: RemoveWorksheetMergeMutation.id, params: undoAddMergeParams }];
+        const undos = [{ id: AddWorksheetMergeMutation.id, params: undoRemoveMergeMutationParams }];
+        return { preUndos, undos, preRedos, redos };
     }
 
     private _handleInsertRangeMoveRightCommand(

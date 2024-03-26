@@ -17,7 +17,7 @@
 import { merge, Observable } from 'rxjs';
 import type { ComponentManager, IMenuSelectorItem } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
-import { MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
+import { IZenZoneService, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
 import { SelectionManagerService, SetWorksheetActiveOperation } from '@univerjs/sheets';
 
 import { debounceTime } from 'rxjs/operators';
@@ -40,6 +40,8 @@ export const FactoryManageConditionalFormatRule = (componentManager: ComponentMa
         const commandService = _accessor.get(ICommandService);
         const univerInstanceService = _accessor.get(IUniverInstanceService);
         const conditionalFormatRuleModel = _accessor.get(ConditionalFormatRuleModel);
+        const zenZoneService = _accessor.get(IZenZoneService);
+
         const commandList = [SetWorksheetActiveOperation.id, addConditionalRuleMutation.id, setConditionalRuleMutation.id, deleteConditionalRuleMutation.id, moveConditionalRuleMutation.id];
 
         const clearRangeEnable$ = new Observable<boolean>((subscriber) =>
@@ -141,6 +143,14 @@ export const FactoryManageConditionalFormatRule = (componentManager: ComponentMa
             });
             subscriber.next(commonSelections);
         });
+        const hidden$ = new Observable((subscriber) => {
+            const disposable = zenZoneService.visible$.subscribe((v) => {
+                subscriber.next(v);
+            });
+            return () => {
+                disposable.unsubscribe();
+            };
+        });
         return {
             id: OpenConditionalFormatOperator.id,
             type: MenuItemType.SELECTOR,
@@ -149,6 +159,7 @@ export const FactoryManageConditionalFormatRule = (componentManager: ComponentMa
             icon: key,
             tooltip: localeService.t('sheet.cf.title'),
             selections: selections$,
+            hidden$,
         } as IMenuSelectorItem;
     };
 };

@@ -48,8 +48,6 @@ export class CellEditorManagerService implements ICellEditorManagerService, IDis
 
     private _rect: Nullable<ICellEditorBoundingClientRect> = null;
 
-    private _focus: boolean = false;
-
     private readonly _state$ = new BehaviorSubject<Nullable<ICellEditorManagerParam>>(null);
 
     readonly state$ = this._state$.asObservable();
@@ -58,8 +56,8 @@ export class CellEditorManagerService implements ICellEditorManagerService, IDis
 
     readonly rect$ = this._rect$.asObservable();
 
+    private _focus: boolean = false;
     private readonly _focus$ = new BehaviorSubject<boolean>(this._focus);
-
     readonly focus$ = this._focus$.asObservable();
 
     dispose(): void {

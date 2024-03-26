@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { ILocalStorageService, LocaleService, Plugin, PluginType } from '@univerjs/core';
+import type { IContextService } from '@univerjs/core';
+import { IConfigService, ILocalStorageService, LocaleService, Plugin, PluginType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -56,9 +57,12 @@ import { IRangeSelectorService, RangeSelectorService } from './services/range-se
 
 const PLUGIN_NAME = 'ui';
 
-export interface IUniverUIConfig extends IWorkbenchOptions { }
+export interface IUniverUIConfig extends IWorkbenchOptions {
+    /** Disable auto focus when Univer bootstraps. */
+    disableAutoFocus?: true;
+}
 
-const DEFAULT_SLIDE_PLUGIN_DATA = {};
+export const DISABLE_AUTO_FOCUS_KEY = 'DISABLE_AUTO_FOCUS';
 
 /**
  * UI plugin provides basic interaction with users. Including workbench (menus, UI parts, notifications etc.), copy paste, shortcut.
@@ -66,20 +70,21 @@ const DEFAULT_SLIDE_PLUGIN_DATA = {};
 export class UniverUIPlugin extends Plugin {
     static override type = PluginType.Univer;
 
-    private _config: IUniverUIConfig;
-
     constructor(
-        config: Partial<IUniverUIConfig> = {},
+        private _config: Partial<IUniverUIConfig> = {},
+        @IConfigService private readonly _contextService: IContextService,
         @Inject(Injector) protected readonly _injector: Injector,
         @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
         super(PLUGIN_NAME);
 
-        this._config = { ...DEFAULT_SLIDE_PLUGIN_DATA, ...config };
-
         this._localeService.load({
             zhCN,
         });
+
+        if (this._config.disableAutoFocus) {
+            this._contextService.setContextValue(DISABLE_AUTO_FOCUS_KEY, true);
+        }
     }
 
     override onStarting(_injector: Injector): void {

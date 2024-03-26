@@ -23,11 +23,11 @@ import { DataValidationList } from '../list';
 
 export const DataValidationPanel = () => {
     const dataValidationPanelService = useDependency(DataValidationPanelService);
-    const activeRule = useObservable(dataValidationPanelService.activeRuleId$, dataValidationPanelService.activeRule);
+    const activeRule = useObservable(dataValidationPanelService.activeRule$, dataValidationPanelService.activeRule);
 
     return (
         activeRule
-            ? <DataValidationDetail key={activeRule.uid} />
+            ? <DataValidationDetail key={activeRule.rule.uid} />
             : <DataValidationList />
     );
 };

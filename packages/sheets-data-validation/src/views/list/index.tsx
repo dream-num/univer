@@ -62,7 +62,11 @@ export const DataValidationList = memo(() => {
             rule,
         };
         await commandService.executeCommand(AddSheetDataValidationCommand.id, params);
-        dataValidationPanelService.setActiveRule(rule);
+        dataValidationPanelService.setActiveRule({
+            unitId,
+            subUnitId,
+            rule,
+        });
     };
 
     const handleRemoveAll = () => {
@@ -78,7 +82,11 @@ export const DataValidationList = memo(() => {
                 <DataValidationItem
                     unitId={unitId}
                     subUnitId={subUnitId}
-                    onClick={() => dataValidationPanelService.setActiveRule(rule)}
+                    onClick={() => dataValidationPanelService.setActiveRule({
+                        unitId,
+                        subUnitId,
+                        rule,
+                    })}
                     rule={rule}
                     key={rule.uid}
                 />

@@ -44,7 +44,11 @@ export const OpenValidationPanelOperation: ICommand<IOpenValidationPanelOperatio
         const subUnitId = worksheet.getSheetId();
         const rule = ruleId ? dataValidationModel.getRuleById(unitId, subUnitId, ruleId) : undefined;
         dataValidationPanelService.open();
-        dataValidationPanelService.setActiveRule(rule);
+        dataValidationPanelService.setActiveRule(rule && {
+            unitId,
+            subUnitId,
+            rule,
+        });
         sidebarService.open({
             header: { title: isAdd ? 'dataValidation.panel.addTitle' : 'dataValidation.panel.title' },
             children: { label: DataValidationPanelName },

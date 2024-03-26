@@ -17,7 +17,7 @@
 import { RangeSelector, useEvent } from '@univerjs/ui';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { FormLayout, Input, Radio, RadioGroup, Select } from '@univerjs/design';
-import { deserializeRangeWithSheet, isReferenceString, serializeRange } from '@univerjs/engine-formula';
+import { deserializeRangeWithSheet, isReferenceString, serializeRange, serializeRangeWithSheet, serializeRangeWithSpreadsheet } from '@univerjs/engine-formula';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import type { IRange } from '@univerjs/core';
 import { IUniverInstanceService, LocaleService, Tools } from '@univerjs/core';
@@ -284,7 +284,12 @@ export function ListFormulaInput(props: IFormulaInputProps) {
                                         });
                                         setRefRange('');
                                     } else {
-                                        const rangeStr = serializeRange(ranges[0].range);
+                                        const workbook = univerInstanceService.getUniverSheetInstance(range.unitId) ?? univerInstanceService.getCurrentUniverSheetInstance();
+                                        const worksheet = workbook?.getSheetBySheetId(range.sheetId);
+                                        if (!worksheet) {
+                                            return;
+                                        }
+                                        const rangeStr = serializeRangeWithSpreadsheet(workbook.getUnitId(), worksheet.getName(), range.range);
                                         onChange?.({
                                             formula1: rangeStr,
                                             formula2,

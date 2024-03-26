@@ -33,20 +33,15 @@ import styles from './index.module.less';
 
 export function DataValidationDetail() {
     const dataValidationPanelService = useDependency(DataValidationPanelService);
-    const rule = useObservable(dataValidationPanelService.activeRuleId$, dataValidationPanelService.activeRule) as ISheetDataValidationRule;
-    const univerInstanceService = useDependency(IUniverInstanceService);
-    const workbook = univerInstanceService.getCurrentUniverSheetInstance();
-    const worksheet = workbook.getActiveSheet();
-    const unitId = workbook.getUnitId();
-    const subUnitId = worksheet.getSheetId();
+    const activeRuleInfo = useObservable(dataValidationPanelService.activeRule$, dataValidationPanelService.activeRule)!;
+    const { unitId, subUnitId, rule } = activeRuleInfo || {};
     const validatorService = useDependency(DataValidatorRegistryService);
     const componentManager = useDependency(ComponentManager);
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
-    const [localRule, setLocalRule] = useState(rule);
+    const [localRule, setLocalRule] = useState<ISheetDataValidationRule>(rule);
     const validator = validatorService.getValidatorItem(localRule.type);
     const [showError, setShowError] = useState(false);
-
     const validators = validatorService.getValidatorsByScope(DataValidatorRegistryScope.SHEET);
     if (!validator) {
         return null;
@@ -142,7 +137,7 @@ export function DataValidationDetail() {
     };
 
     const FormulaInput = componentManager.get(validator.formulaInput);
-    const rangeStr = rule.ranges.map((range) => serializeRange(range)).join(',');
+    const rangeStr = localRule.ranges.map((range) => serializeRange(range)).join(',');
 
     const options: IDataValidationRuleOptions = getRuleOptions(localRule);
 
@@ -222,7 +217,8 @@ export function DataValidationDetail() {
                         }}
                         showError={showError}
                         validResult={validator.validatorFormula(localRule)}
-
+                        unitId={unitId}
+                        subUnitId={subUnitId}
                     />
                 )
                 : null}

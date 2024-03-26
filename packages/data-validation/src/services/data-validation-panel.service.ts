@@ -20,11 +20,11 @@ import { BehaviorSubject, distinctUntilChanged } from 'rxjs';
 
 export class DataValidationPanelService extends Disposable {
     private _open$ = new BehaviorSubject<boolean>(false);
-    private _activeRule: Nullable<IDataValidationRule> = undefined;
-    private _activeRule$ = new BehaviorSubject<Nullable<IDataValidationRule>>(undefined);
+    private _activeRule: Nullable<{ unitId: string; subUnitId: string; rule: IDataValidationRule }> = undefined;
+    private _activeRule$ = new BehaviorSubject<Nullable<{ unitId: string; subUnitId: string; rule: IDataValidationRule }>>(undefined);
 
     open$ = this._open$.pipe(distinctUntilChanged());
-    activeRuleId$ = this._activeRule$.asObservable();
+    activeRule$ = this._activeRule$.asObservable();
 
     get activeRule() {
         return this._activeRule;
@@ -47,7 +47,7 @@ export class DataValidationPanelService extends Disposable {
         this._open$.next(false);
     }
 
-    setActiveRule(rule: Nullable<IDataValidationRule>): void {
+    setActiveRule(rule: Nullable<{ unitId: string; subUnitId: string; rule: IDataValidationRule }>): void {
         this._activeRule = rule;
         this._activeRule$.next(rule);
     }

@@ -14,37 +14,26 @@
  * limitations under the License.
  */
 
-import type { IRange } from '@univerjs/core';
+import { Rectangle } from '@univerjs/core';
 import { SelectionManagerService } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
-import { Observable } from 'rxjs';
-
-export function rangesIsOverLapping(range1: IRange, range2: IRange): boolean {
-    const rowsOverlap = !(range1.endRow < range2.startRow || range1.startRow > range2.endRow);
-    const columnsOverlap = !(range1.endColumn < range2.startColumn || range1.startColumn > range2.endColumn);
-    return rowsOverlap && columnsOverlap;
-}
+import { filter, map } from 'rxjs';
 
 export function getSheetSelectionsDisabled$(accessor: IAccessor) {
-    return new Observable<boolean>((subscriber) => {
-        const selectionManagerService = accessor.get(SelectionManagerService);
-        selectionManagerService.selectionMoveEnd$.subscribe((param) => {
-            if (param == null) {
-                return;
-            }
-            if (param.length < 2) {
-                subscriber.next(false);
-            } else {
-                for (let i = 0; i < param.length; i++) {
-                    for (let j = i + 1; j < param.length; j++) {
-                        if (rangesIsOverLapping(param[i].range, param[j].range)) {
-                            subscriber.next(true);
-                            return;
-                        }
+    const selectionManagerService = accessor.get(SelectionManagerService);
+
+    return selectionManagerService.selectionMoveEnd$.pipe(
+        filter((param) => param != null && param.length >= 2),
+        map((param) => {
+            if (!param) return false;
+            for (let i = 0; i < param.length; i++) {
+                for (let j = i + 1; j < param.length; j++) {
+                    if (Rectangle.intersects(param[i].range, param[j].range)) {
+                        return true;
                     }
                 }
-                subscriber.next(false);
             }
-        });
-    });
+            return false;
+        })
+    );
 }

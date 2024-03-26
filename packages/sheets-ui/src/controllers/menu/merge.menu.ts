@@ -20,7 +20,7 @@ import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import { getMenuHiddenObservable, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 
-import { combineLatestWith, map, Subject } from 'rxjs';
+import { combineLatestWith, map } from 'rxjs';
 import {
     AddWorksheetMergeAllCommand,
     AddWorksheetMergeCommand,
@@ -32,12 +32,6 @@ import { getSheetSelectionsDisabled$ } from '../utils/selections-tools';
 export function CellMergeMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
     const disabled$ = getCurrentSheetDisabled$(accessor);
     const selectionsHasCross$ = getSheetSelectionsDisabled$(accessor);
-    const disableByPermissionAndSelections$ = new Subject<boolean>();
-
-    disabled$.pipe(
-        combineLatestWith(selectionsHasCross$),
-        map(([disable, hasCross]) => disable || hasCross)
-    ).subscribe((res: boolean) => disableByPermissionAndSelections$.next(res));
 
     return {
         id: AddWorksheetMergeCommand.id,
@@ -48,7 +42,10 @@ export function CellMergeMenuItemFactory(accessor: IAccessor): IMenuSelectorItem
         type: MenuItemType.SUBITEMS,
         // selections: [...MERGE_CHILDREN],
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
-        disabled$: disableByPermissionAndSelections$,
+        disabled$: disabled$.pipe(
+            combineLatestWith(selectionsHasCross$),
+            map(([disable, hasCross]) => disable || hasCross)
+        ),
     };
 }
 export function CellMergeAllMenuItemFactory(accessor: IAccessor): IMenuButtonItem<string> {

@@ -14,7 +14,7 @@
 ![](./assets/design.jpeg)
 
 :::note
-如果你只需要扩展工具栏、右键菜单等，可以直接使用 @univerjs/ui 提供的扩展接口，无需自行实现 UI。请参考[扩展 UI](/guides/extend/ui)。
+如果你只需要扩展工具栏、右键菜单等，可以直接使用 @univerjs/ui 提供的扩展接口，无需自行实现 UI。请参考[扩展 UI](https://univer.ai/zh-cn/guides/customization/ui)。
 :::
 
 ## 使用指南

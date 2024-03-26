@@ -392,7 +392,7 @@ Uniscript 底层使用了 `@univerjs/facade`，你也可以直接在项目中使
 
 我们内部的 `UniverFormulaEnginePlugin` 插件提供了一个 `function.service`，专门用来注册公式的描述和算法。
 
-首先参考 [自定义插件](/guides/extend/write-a-plugin/)，新建一个插件，然后就可以开始添加自定义公式。
+首先参考 [自定义插件](https://univer.ai/zh-cn/guides/customization/write-a-plugin/)，新建一个插件，然后就可以开始添加自定义公式。
 
 1. `common` 文件内新建 `custom-function.ts` 文件，将公式所需要的基础模块全部写好。
 

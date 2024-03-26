@@ -392,7 +392,7 @@ If you are developing a Univer plug-in, you can add custom formulas directly to 
 
 Our internal `UniverFormulaEnginePlugin` plug-in provides a `function.service` specifically for registering formula descriptions and algorithms.
 
-First refer to [Custom Plugin](/en-us/guides/extend/write-a-plugin/) to create a new plug-in, and then you can start adding custom formulas.
+First refer to [Custom Plugin](https://univer.ai/guides/customization/write-a-plugin/) to create a new plug-in, and then you can start adding custom formulas.
 
 1. Create a new `custom-function.ts` file in the `common` file and write all the basic modules required for the formula.
 

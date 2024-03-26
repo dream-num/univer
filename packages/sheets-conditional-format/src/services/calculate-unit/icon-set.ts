@@ -58,6 +58,7 @@ export const iconSetCalculateUnit: ICalculateUnit = {
         if (isFormulaWithoutSuccess) {
             return conditionalFormatFormulaService.getCache(context.unitId, context.subUnitId, rule.cfId) ?? computeResult;
         }
+
         const splitValue = splitValueResult.map((item, index) => ({
             operator: ruleConfig.config[index].operator,
             value: Number(item.result) || 0,
@@ -72,6 +73,7 @@ export const iconSetCalculateUnit: ICalculateUnit = {
             }
             return result;
         }, [] as { operator: CFNumberOperator;value: number }[]);
+
         const isShowValue = ruleConfig.isShowValue === undefined ? true : !!ruleConfig.isShowValue;
         matrix.forValue((row, col, value) => {
             for (let index = 0; index < splitValue.length; index++) {

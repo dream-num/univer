@@ -848,6 +848,106 @@ describe('Test conditional format service', () => {
                     });
                 });
             });
+            it('Need to filter if the set value is wrong', () => {
+                const params: IConditionFormatRule<IColorScale> = {
+                    ranges: [{ startRow: 0, startColumn: 0, endRow: 5, endColumn: 6 }],
+                    cfId: testBed.getConditionalFormatRuleModel().createCfId(testBed.unitId, testBed.subUnitId),
+                    stopIfTrue: false,
+                    rule: {
+                        type: CFRuleType.colorScale,
+                        config: [{
+                            index: 0,
+                            color: '#d0d9fb',
+                            value: {
+                                type: CFValueType.num,
+                                value: 1,
+                            },
+                        },
+                        {
+                            index: 1,
+                            color: '#2e55ef',
+                            value: {
+                                type: CFValueType.num,
+                                value: -5, // this wrong value is filter
+                            },
+                        },
+                        {
+                            index: 2,
+                            color: 'rgb(231, 37, 143)',
+                            value: {
+                                type: CFValueType.num,
+                                value: 3,
+                            },
+                        },
+                        ],
+                    },
+                };
+                /**
+                 *  the same as
+                 [{
+                            index: 0,
+                            color: '#d0d9fb',
+                            value: {
+                                type: CFValueType.num,
+                                value: 1,
+                            },
+                        },
+                        {
+                            index: 2,
+                            color: 'rgb(231, 37, 143)',
+                            value: {
+                                type: CFValueType.num,
+                                value: 3,
+                            },
+                        },
+                        ]
+                 */
+                testBed.getConditionalFormatRuleModel().addRule(testBed.unitId, testBed.subUnitId, params);
+                testBed.getConditionalFormatService().composeStyle(testBed.unitId, testBed.subUnitId, 1, 0);
+                const dispose = testBed.getConditionalFormatService().ruleComputeStatus$.subscribe(() => {
+                    dispose.unsubscribe();
+                    const one = testBed.getConditionalFormatService().composeStyle(testBed.unitId, testBed.subUnitId, 1, 0); // 1
+                    const two = testBed.getConditionalFormatService().composeStyle(testBed.unitId, testBed.subUnitId, 1, 1); // 2
+                    const three = testBed.getConditionalFormatService().composeStyle(testBed.unitId, testBed.subUnitId, 1, 2);// 3
+                    const four = testBed.getConditionalFormatService().composeStyle(testBed.unitId, testBed.subUnitId, 1, 3); // 4
+                    const five = testBed.getConditionalFormatService().composeStyle(testBed.unitId, testBed.subUnitId, 1, 6); // is same as 3
+                    expect(one).toEqual({
+                        style: {
+                            bg: {
+                                rgb: 'rgb(208,217,251)',
+                            },
+                        },
+                    });
+                    expect(two).toEqual({
+                        style: {
+                            bg: {
+                                rgb: 'rgb(220,127,197)',
+                            },
+                        },
+                    });
+                    expect(three).toEqual({
+                        style: {
+                            bg: {
+                                rgb: 'rgb(231,37,143)',
+                            },
+                        },
+                    });
+                    expect(four).toEqual({
+                        style: {
+                            bg: {
+                                rgb: 'rgb(231,37,143)',
+                            },
+                        },
+                    });
+                    expect(five).toEqual({
+                        style: {
+                            bg: {
+                                rgb: 'rgb(231,37,143)',
+                            },
+                        },
+                    });
+                });
+            });
         });
     });
 });

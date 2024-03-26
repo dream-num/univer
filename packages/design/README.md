@@ -14,7 +14,7 @@ The components are developed using React and less, and you can find out more inf
 ![](./assets/design.jpeg)
 
 :::note
-If you only need to extend the toolbar, context menu, and so on, you can directly use the extension interfaces provided by `@univerjs/ui` without implementing the UI yourself. For more information, please refer to [Extending UI](/en-us/guides/extend/ui).
+If you only need to extend the toolbar, context menu, and so on, you can directly use the extension interfaces provided by `@univerjs/ui` without implementing the UI yourself. For more information, please refer to [Extending UI](https://univer.ai/guides/customization/ui).
 :::
 
 ## Usage

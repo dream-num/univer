@@ -59,7 +59,7 @@ Highlights of Univer:
 
 ## Usage
 
-We recommend to import Univer as a npm package. Please checkout the [Quick Start](https://univer.ai/en-us/guides/quick-start/) section on the documentation website. We also have an [online playground](https://univer.ai/playground/) which can help you preview Univer without setting up the development environment.
+We recommend to import Univer as a npm package. Please checkout the [Quick Start](https://univer.ai/guides/quick-start/) section on the documentation website. We also have an [online playground](https://univer.ai/playground/) which can help you preview Univer without setting up the development environment.
 
 Univer bases on a plugin architecture. You can install the following packages to enhance the functionality of Univer.
 
@@ -121,7 +121,7 @@ Thanks to our sponsors, just part of them are listed here because of the space l
 
 ## Links
 
-- [Documentation](https://univer.ai/en-us/guides/introduction/)
+- [Documentation](https://univer.ai/guides/introduction/)
 - [Online Playground](https://univer.ai/playground/)
 - [Official Website](https://univer.ai)
 

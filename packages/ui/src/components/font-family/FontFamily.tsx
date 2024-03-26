@@ -26,9 +26,16 @@ export const FontFamily = (props: IFontFamilyProps) => {
 
     const localeService = useDependency(LocaleService);
 
+    let viewValue = localeService.t(`fontFamily.${(`${value}` ?? '').replace(/\s/g, '')}`);
+
+    // Handle font family form copy paste.
+    if (viewValue.startsWith('fontFamily.') && typeof value === 'string') {
+        viewValue = value.split(',')[0];
+    }
+
     return (
         <div className={styles.uiPluginSheetsFontFamily} style={{ fontFamily: value as string }}>
-            {localeService.t(`fontFamily.${(`${value}` ?? '').replace(/\s/g, '')}`)}
+            {viewValue}
         </div>
     );
 };

@@ -15,7 +15,7 @@
  */
 
 import type { Univer } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService } from '@univerjs/core';
+import { cellToRange, ICommandService, IUniverInstanceService } from '@univerjs/core';
 import type { IRemoveNumfmtMutationParams, ISetNumfmtMutationParams } from '@univerjs/sheets';
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -25,7 +25,6 @@ import { NumfmtService } from '../numfmt/numfmt.service';
 import { INumfmtService } from '../numfmt/type';
 import { createTestBase } from './util';
 
-const cellToRange = (row: number, col: number) => ({ startRow: row, endRow: row, startColumn: col, endColumn: col });
 describe('test numfmt service', () => {
     let univer: Univer;
     let get: Injector['get'];

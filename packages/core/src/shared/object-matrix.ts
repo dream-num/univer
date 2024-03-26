@@ -190,7 +190,7 @@ function _moveBackward<T>(
         array[i + count] = item;
 
         // Prevent undefined, otherwise the forValue loop will report an error
-        if (item == null) {
+        if (item === undefined) {
             delete array[i + count];
         }
     }
@@ -199,7 +199,7 @@ function _moveBackward<T>(
     toMove.forEach((item, index) => {
         array[toIndex + index] = item;
 
-        if (item == null) {
+        if (item === undefined) {
             delete array[toIndex + index];
         }
     });
@@ -225,7 +225,7 @@ function _moveForward<T>(
         array[i - count] = item;
 
         // Prevent undefined, otherwise the forValue loop will report an error
-        if (item == null) {
+        if (item === undefined) {
             delete array[i - count];
         }
     }
@@ -234,7 +234,7 @@ function _moveForward<T>(
     toMove.forEach((item, index) => {
         array[toIndex + index - count] = item;
 
-        if (item == null) {
+        if (item === undefined) {
             delete array[toIndex + index - count];
         }
     });

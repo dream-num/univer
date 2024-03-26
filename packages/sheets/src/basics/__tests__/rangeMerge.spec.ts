@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-import type { IRange } from '@univerjs/core';
+import { cellToRange, type IRange } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
 
 import { rangeMerge, RangeMergeUtil } from '../rangeMerge';
 
-const cellToRange = (row: number, col: number) =>
-    ({ startColumn: col, endColumn: col, endRow: row, startRow: row }) as IRange;
 describe('test rangeMerge', () => {
     it('simple row', () => {
         const testRange: IRange[] = [cellToRange(2, 2), cellToRange(3, 2), cellToRange(4, 2)];

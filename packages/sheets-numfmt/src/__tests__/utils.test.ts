@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IRange } from '@univerjs/core';
+import { cellToRange } from '@univerjs/core';
 import { RemoveNumfmtMutation, SetNumfmtMutation } from '@univerjs/sheets';
 import { describe, expect, it } from 'vitest';
 
@@ -28,8 +28,6 @@ import {
 } from '../utils/decimal';
 import { mergeNumfmtMutations } from '../utils/mutation';
 
-const cellToRange = (row: number, col: number) =>
-    ({ startRow: row, endRow: row, startColumn: col, endColumn: col }) as IRange;
 describe('test numfmt utils function', () => {
     it('getCurrencyType', () => {
         expect(getCurrencyType(`_(${currencySymbols[3]} 123123`)).toBe(currencySymbols[3]);

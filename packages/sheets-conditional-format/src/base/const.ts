@@ -90,3 +90,39 @@ export const createDefaultRule = () => ({
     stopIfTrue: false,
     rule: { type: RuleType.highlightCell, subType: SubRuleType.text, operator: TextOperator.notContainsBlanks } as ITextHighlightCell,
 } as IConditionFormatRule);
+
+export const createDefaultValue = (subType: SubRuleType, operator: TextOperator | NumberOperator | TimePeriodOperator) => {
+    switch (subType) {
+        case SubRuleType.text:{
+            if ([TextOperator.beginsWith, TextOperator.containsText, TextOperator.endsWith, TextOperator.equal, TextOperator.notContainsText, TextOperator.notEqual].includes(operator as TextOperator)) {
+                return '';
+            }
+            break;
+        }
+        case SubRuleType.number:{
+            if ([NumberOperator.between, NumberOperator.notBetween].includes(operator as NumberOperator)) {
+                return [10, 100] as [number, number];
+            }
+            return 10;
+        }
+    }
+    return '';
+};
+
+export const createDefaultValueByValueType = (type: ValueType, defaultValue?: number) => {
+    switch (type) {
+        case ValueType.formula:{
+            return '=';
+        }
+        case ValueType.max:
+        case ValueType.min:{
+            return '';
+        }
+        case ValueType.percent:
+        case ValueType.percentile:
+        case ValueType.num:{
+            return defaultValue !== undefined ? defaultValue : 10;
+        }
+    }
+    return '';
+};

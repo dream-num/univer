@@ -156,7 +156,8 @@ export const RankStyleEditor = (props: IStyleEditorProps) => {
             {['isNotBottom', 'isBottom'].includes(type) && (
                 <div className={`${stylesBase.labelContainer} ${stylesBase.mTSm}`}>
                     <InputNumber
-                        min={0}
+                        min={1}
+                        max={1000}
                         value={value}
                         onChange={(v) => {
                             const value = v || 0;

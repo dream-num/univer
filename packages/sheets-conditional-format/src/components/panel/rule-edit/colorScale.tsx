@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { InputNumber, Select } from '@univerjs/design';
 import { TextEditor } from '@univerjs/ui';
-import { RuleType, SHEET_CONDITION_FORMAT_PLUGIN, ValueType } from '../../../base/const';
+import { createDefaultValueByValueType, RuleType, SHEET_CONDITION_FORMAT_PLUGIN, ValueType } from '../../../base/const';
 import { ColorPicker } from '../../color-picker';
 import type { IColorScale, IConditionalFormatRuleConfig } from '../../../models/type';
 import stylesBase from '../index.module.less';
@@ -34,7 +34,6 @@ const TextInput = (props: { id: string; type: ValueType | 'none';value: number |
     const univerInstanceService = useDependency(IUniverInstanceService);
     const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
     const subUnitId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
-    const _value = useRef(value);
     const formulaInitValue = useMemo(() => {
         return String(value).startsWith('=') ? String(value) : '=';
     }, [value]);
@@ -47,7 +46,9 @@ const TextInput = (props: { id: string; type: ValueType | 'none';value: number |
                 min: 0, max: 100,
             };
         }
-        return {};
+        return {
+            min: Number.MIN_SAFE_INTEGER, max: Number.MAX_SAFE_INTEGER,
+        };
     }, [type]);
     if (type === ValueType.formula) {
         return (
@@ -220,7 +221,9 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
                     value={minType}
                     onChange={(v) => {
                         minTypeSet(v as ValueType);
-                        handleChange({ minType: v as ValueType, medianType, maxType, minValue, medianValue, maxValue, minColor, medianColor, maxColor });
+                        const value = createDefaultValueByValueType(v as ValueType, 10);
+                        minValueSet(value);
+                        handleChange({ minType: v as ValueType, medianType, maxType, minValue: value, medianValue, maxValue, minColor, medianColor, maxColor });
                     }}
                 />
                 <TextInput
@@ -249,7 +252,9 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
                     value={medianType}
                     onChange={(v) => {
                         medianTypeSet(v as ValueType);
-                        handleChange({ minType, medianType: v as ValueType, maxType, minValue, medianValue, maxValue, minColor, medianColor, maxColor });
+                        const value = createDefaultValueByValueType(v as ValueType, 50);
+                        medianValueSet(value);
+                        handleChange({ minType, medianType: v as ValueType, maxType, minValue, medianValue: value, maxValue, minColor, medianColor, maxColor });
                     }}
                 />
 
@@ -282,7 +287,9 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
                     value={maxType}
                     onChange={(v) => {
                         maxTypeSet(v as ValueType);
-                        handleChange({ minType, medianType, maxType: v as ValueType, minValue, medianValue, maxValue, minColor, medianColor, maxColor });
+                        const value = createDefaultValueByValueType(v as ValueType, 90);
+                        maxValueSet(value);
+                        handleChange({ minType, medianType, maxType: v as ValueType, minValue, medianValue, maxValue: value, minColor, medianColor, maxColor });
                     }}
                 />
                 <TextInput

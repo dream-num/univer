@@ -18,7 +18,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Input, InputNumber, Select } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { LocaleService } from '@univerjs/core';
-import { NumberOperator,
+import { createDefaultValue,
+    NumberOperator,
     RuleType,
     SubRuleType,
     TextOperator,
@@ -215,21 +216,8 @@ export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, ITextHigh
         if (!rule) {
             return defaultV;
         }
-        switch (rule.subType) {
-            case SubRuleType.text:{
-                if ([TextOperator.beginsWith, TextOperator.containsText, TextOperator.endsWith, TextOperator.equal, TextOperator.notContainsText, TextOperator.notEqual].includes(rule.operator)) {
-                    return rule.value || defaultV;
-                }
-                break;
-            }
-            case SubRuleType.number:{
-                if ([NumberOperator.between, NumberOperator.notBetween].includes(rule.operator)) {
-                    return rule.value || [0, 0];
-                }
-                return rule.value || 0;
-            }
-        }
-        return defaultV;
+        const v = createDefaultValue(rule.subType, rule.operator);
+        return v;
     });
 
     const [style, styleSet] = useState<IHighlightCell['style']>({});
@@ -303,6 +291,7 @@ export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, ITextHigh
         const _operator = operatorList && operatorList[0].value as typeof operator;
         subTypeSet(_subType);
         operatorSet(_operator);
+        _operator && valueSet(createDefaultValue(_subType, _operator));
         onChange(getResult({ subType: _subType, operator: _operator }));
     };
     const onOperatorChange = (v: string) => {

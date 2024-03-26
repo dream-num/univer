@@ -19,7 +19,7 @@ import { InputNumber, Radio, RadioGroup, Select } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { TextEditor } from '@univerjs/ui';
-import { RuleType, SHEET_CONDITION_FORMAT_PLUGIN, ValueType } from '../../../base/const';
+import { createDefaultValueByValueType, RuleType, SHEET_CONDITION_FORMAT_PLUGIN, ValueType } from '../../../base/const';
 import type { IConditionalFormatRuleConfig, IValueConfig } from '../../../models/type';
 import { ColorPicker } from '../../color-picker';
 import stylesBase from '../index.module.less';
@@ -42,7 +42,9 @@ const InputText = (props: { disabled?: boolean; id: string; className: string; t
                 min: 0,
             };
         }
-        return {};
+        return {
+            min: Number.MIN_SAFE_INTEGER, max: Number.MAX_SAFE_INTEGER,
+        };
     }, [type]);
     if (type === ValueType.formula) {
         const v = String(_value.current).startsWith('=') ? String(_value.current) || '' : '=';
@@ -251,7 +253,9 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                         value={minValueType}
                         onChange={(v) => {
                             minValueTypeSet(v as ValueType);
-                            _handleChange({ isGradient, minValue, minValueType: v as ValueType, maxValue, maxValueType, positiveColor, nativeColor });
+                            const value = createDefaultValueByValueType(v as ValueType, 10);
+                            minValueSet(value);
+                            _handleChange({ isGradient, minValue: value, minValueType: v as ValueType, maxValue, maxValueType, positiveColor, nativeColor });
                         }}
                     />
 
@@ -274,7 +278,9 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                         value={maxValueType}
                         onChange={(v) => {
                             maxValueTypeSet(v as ValueType);
-                            _handleChange({ isGradient, minValue, minValueType, maxValue, maxValueType: v as ValueType, positiveColor, nativeColor });
+                            const value = createDefaultValueByValueType(v as ValueType, 90);
+                            maxValueSet(value);
+                            _handleChange({ isGradient, minValue, minValueType, maxValue: value, maxValueType: v as ValueType, positiveColor, nativeColor });
                         }}
                     />
                     <InputText

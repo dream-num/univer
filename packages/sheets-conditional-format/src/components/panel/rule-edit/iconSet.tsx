@@ -27,7 +27,7 @@ import { TextEditor } from '@univerjs/ui';
 import type { IIconType } from '../../../models/icon-map';
 import { iconGroup, iconMap } from '../../../models/icon-map';
 import type { IIconSet } from '../../../models/type';
-import { NumberOperator, RuleType, SHEET_CONDITION_FORMAT_PLUGIN, ValueType } from '../../../base/const';
+import { createDefaultValue, NumberOperator, RuleType, SHEET_CONDITION_FORMAT_PLUGIN, SubRuleType, ValueType } from '../../../base/const';
 import { compareWithNumber, getOppositeOperator } from '../../../services/calculate-unit/utils';
 import stylesBase from '../index.module.less';
 import type { IStyleEditorProps } from './type';
@@ -165,12 +165,16 @@ const IconSetRuleEdit = (props: {
         { label: localeService.t(`sheet.cf.valueType.${ValueType.formula}`), value: ValueType.formula },
 
     ];
-    const handleOperatorChange = (operator: NumberOperator, index: number) => {
-        onChange([String(index), 'operator'], operator);
-    };
     const handleValueValueChange = (v: number | string, index: number) => {
         onChange([String(index), 'value', 'value'], v);
     };
+
+    const handleOperatorChange = (operator: NumberOperator, index: number) => {
+        onChange([String(index), 'operator'], operator);
+        const defaultValue = createDefaultValue(SubRuleType.number, operator) as number;
+        handleValueValueChange(defaultValue, index);
+    };
+
     const handleValueTypeChange = (v: string, index: number) => {
         onChange([String(index), 'value', 'type'], v);
     };

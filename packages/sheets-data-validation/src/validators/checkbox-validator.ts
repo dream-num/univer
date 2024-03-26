@@ -15,9 +15,10 @@
  */
 
 import { DataValidationType, isFormulaString, Tools } from '@univerjs/core';
-import type { CellValue, DataValidationOperator, IDataValidationRule, IDataValidationRuleBase } from '@univerjs/core';
+import type { CellValue, DataValidationOperator, IDataValidationRule, IDataValidationRuleBase, ISheetDataValidationRule, Nullable } from '@univerjs/core';
 import { BaseDataValidator } from '@univerjs/data-validation';
 import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation/validators/base-data-validator.js';
+import type { ISheetLocation } from '@univerjs/sheets';
 import { CheckboxRender } from '../widgets/checkbox-widget';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
 import { getFormulaResult } from '../utils/formula';
@@ -37,8 +38,11 @@ export class CheckboxValidator extends BaseDataValidator {
 
     private _formulaService = this.injector.get(DataValidationFormulaService);
 
-    override skipDefaultFontRender() {
-        return true;
+    override skipDefaultFontRender(rule: ISheetDataValidationRule, cellValue: Nullable<CellValue>, pos: ISheetLocation) {
+        const { formula1, formula2 } = this.parseFormulaSync(rule, pos.unitId, pos.subUnitId);
+
+        const valueStr = `${cellValue ?? ''}`;
+        return !valueStr || (valueStr === (`${formula1}`) || valueStr === `${formula2}`);
     }
 
     override validatorFormula(rule: IDataValidationRuleBase): IFormulaValidResult {

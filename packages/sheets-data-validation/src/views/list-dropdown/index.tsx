@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import { DataValidationType, ICommandService } from '@univerjs/core';
+import { DataValidationType, ICommandService, LocaleService } from '@univerjs/core';
 import type { ISetRangeValuesCommandParams } from '@univerjs/sheets';
 import { SetRangeValuesCommand } from '@univerjs/sheets';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useState } from 'react';
 import { CheckMarkSingle } from '@univerjs/icons';
+import { Scrollbar } from '@univerjs/design';
 import { OpenValidationPanelOperation } from '@univerjs/data-validation';
 import type { ListMultipleValidator } from '../../validators/list-multiple-validator';
 import { deserializeListOptions, getDataValidationCellValue } from '../../validators/util';
@@ -43,33 +44,37 @@ const SelectList = (props: ISelectListProps) => {
             <div className={styles.dvListDropdownTitle}>
                 {title}
             </div>
-            {options.map((item, i) => {
-                const selected = value.indexOf(item.value) > -1;
-                const handleClick = () => {
-                    let set: Set<string>;
-                    if (selected) {
-                        set = new Set(value.filter((sub) => sub !== item.value));
-                    } else {
-                        set = new Set(multiple ? [...value, item.value] : [item.value]);
-                    }
-                    const newValue: string[] = [];
-                    options.forEach((opt) => {
-                        if (set.has(opt.value)) {
-                            newValue.push(opt.value);
-                        }
-                    });
+            <div className={styles.dvListDropdownList}>
+                <Scrollbar>
+                    {options.map((item, i) => {
+                        const selected = value.indexOf(item.value) > -1;
+                        const handleClick = () => {
+                            let set: Set<string>;
+                            if (selected) {
+                                set = new Set(value.filter((sub) => sub !== item.value));
+                            } else {
+                                set = new Set(multiple ? [...value, item.value] : [item.value]);
+                            }
+                            const newValue: string[] = [];
+                            options.forEach((opt) => {
+                                if (set.has(opt.value)) {
+                                    newValue.push(opt.value);
+                                }
+                            });
 
-                    onChange(newValue);
-                };
-                return (
-                    <div key={i} className={styles.dvListDropdownItemContainer} onClick={handleClick}>
-                        <div className={styles.dvListDropdownItem} style={{ background: item.color || DROP_DOWN_DEFAULT_COLOR }}>{item.label}</div>
-                        <div className={styles.dvListDropdownSelectedIcon}>
-                            {selected ? <CheckMarkSingle /> : null}
-                        </div>
-                    </div>
-                );
-            })}
+                            onChange(newValue);
+                        };
+                        return (
+                            <div key={i} className={styles.dvListDropdownItemContainer} onClick={handleClick}>
+                                <div className={styles.dvListDropdownItem} style={{ background: item.color || DROP_DOWN_DEFAULT_COLOR }}>{item.label}</div>
+                                <div className={styles.dvListDropdownSelectedIcon}>
+                                    {selected ? <CheckMarkSingle /> : null}
+                                </div>
+                            </div>
+                        );
+                    })}
+                </Scrollbar>
+            </div>
             <div className={styles.dvListDropdownSplit} />
             <div className={styles.dvListDropdownEdit} onClick={onEdit}>
                 编辑
@@ -82,6 +87,7 @@ export function ListDropDown(props: IDropdownComponentProps) {
     const { location, hideFn } = props;
     const { worksheet, row, col, unitId, subUnitId } = location;
     const commandService = useDependency(ICommandService);
+    const localeService = useDependency(LocaleService);
     const [localValue, setLocalValue] = useState('');
 
     if (!worksheet) {
@@ -110,6 +116,7 @@ export function ListDropDown(props: IDropdownComponentProps) {
 
     return (
         <SelectList
+            title={multiple ? localeService.t('dataValidation.listMultiple.dropdown') : localeService.t('dataValidation.list.dropdown')}
             value={value}
             multiple={multiple}
             onChange={(newValue) => {

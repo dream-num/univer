@@ -115,9 +115,11 @@ export default {
             strPlaceholder: '请输入选项，选项间通过“回车换行”或“英文逗号(,)”隔开',
             refPlaceholder: '引用单元格内容作为选项,如:\'Sheet1\'!A100',
             add: '添加选项',
+            dropdown: '单选',
         },
         listMultiple: {
             title: '下拉菜单-多选',
+            dropdown: '多选',
         },
         textLength: {
             title: '文本长度',

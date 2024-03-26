@@ -114,6 +114,11 @@ export default {
             error: 'Input must fall within specified range',
             emptyError: 'Please enter a value',
             add: 'Add',
+            dropdown: 'Select',
+        },
+        listMultiple: {
+            title: 'Dropdown-Multiple',
+            dropdown: 'Multiple select',
         },
         textLength: {
             title: 'Text length',

@@ -25,7 +25,7 @@ import type { IDeleteConditionalRuleMutationParams } from '../commands/mutations
 import { deleteConditionalRuleMutation, deleteConditionalRuleMutationUndoFactory } from '../commands/mutations/deleteConditionalRule.mutation';
 import { ConditionalFormatRuleModel } from '../models/conditional-format-rule-model';
 import { ConditionalFormatViewModel } from '../models/conditional-format-view-model';
-import { RuleType, SHEET_CONDITION_FORMAT_PLUGIN } from '../base/const';
+import { CFRuleType, SHEET_CONDITION_FORMAT_PLUGIN } from '../base/const';
 import type { IConditionFormatRule, IHighlightCell, IRuleModelJson } from '../models/type';
 import type { IDataBarCellData, IDataBarRenderParams, IIconSetCellData, IIconSetRenderParams } from '../render/type';
 import { dataBarCellCalculateUnit } from './calculate-unit/data-bar';
@@ -89,19 +89,19 @@ export class ConditionalFormatService extends Disposable {
                 if (ruleCacheItem?.isDirty) {
                     this._handleCalculateUnit(unitId, subUnitId, rule);
                 }
-                if (type === RuleType.highlightCell) {
+                if (type === CFRuleType.highlightCell) {
                     ruleCacheItem!.ruleCache && Tools.deepMerge(pre, { style: ruleCacheItem!.ruleCache });
-                } else if (type === RuleType.colorScale) {
+                } else if (type === CFRuleType.colorScale) {
                     const ruleCache = ruleCacheItem?.ruleCache as string;
                     if (ruleCache) {
                         pre.style = { ...(pre.style ?? {}), bg: { rgb: ruleCache } };
                     }
-                } else if (type === RuleType.dataBar) {
+                } else if (type === CFRuleType.dataBar) {
                     const ruleCache = ruleCacheItem?.ruleCache as IDataBarRenderParams;
                     if (ruleCache && ruleCache !== EMPTY_STYLE) {
                         pre.dataBar = ruleCache;
                     }
-                } else if (type === RuleType.iconSet) {
+                } else if (type === CFRuleType.iconSet) {
                     const ruleCache = ruleCacheItem?.ruleCache as IIconSetRenderParams;
                     if (ruleCache && ruleCache !== EMPTY_STYLE) {
                         pre.iconSet = ruleCache;

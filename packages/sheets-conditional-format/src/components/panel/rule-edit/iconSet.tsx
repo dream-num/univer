@@ -27,7 +27,7 @@ import { TextEditor } from '@univerjs/ui';
 import type { IIconType } from '../../../models/icon-map';
 import { iconGroup, iconMap } from '../../../models/icon-map';
 import type { IIconSet } from '../../../models/type';
-import { createDefaultValue, NumberOperator, RuleType, SHEET_CONDITION_FORMAT_PLUGIN, SubRuleType, ValueType } from '../../../base/const';
+import { CFNumberOperator, CFRuleType, CFSubRuleType, CFValueType, createDefaultValue, SHEET_CONDITION_FORMAT_PLUGIN } from '../../../base/const';
 import { compareWithNumber, getOppositeOperator } from '../../../services/calculate-unit/utils';
 import stylesBase from '../index.module.less';
 import type { IStyleEditorProps } from './type';
@@ -39,7 +39,7 @@ const getIcon = (iconType: string, iconId: string | number) => {
     return arr[Number(iconId)] || '';
 };
 
-const TextInput = (props: { id: number; type: ValueType; value: number | string;onChange: (v: number | string) => void; error?: string }) => {
+const TextInput = (props: { id: number; type: CFValueType; value: number | string;onChange: (v: number | string) => void; error?: string }) => {
     const univerInstanceService = useDependency(IUniverInstanceService);
     const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
     const subUnitId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
@@ -51,7 +51,7 @@ const TextInput = (props: { id: number; type: ValueType; value: number | string;
     }, [props.error]);
     return (
         <div className={styles.positionRelative}>
-            {props.type !== ValueType.formula
+            {props.type !== CFValueType.formula
                 ? (
                     <>
                         <InputNumber className={className} value={Number(props.value) || 0} onChange={(v) => props.onChange(v ?? 0)} />
@@ -80,8 +80,8 @@ const TextInput = (props: { id: number; type: ValueType; value: number | string;
     );
 };
 const createDefaultConfigItem = (iconType: IIconType, index: number, list: unknown[]): IIconSet['config'][number] => ({
-    operator: NumberOperator.greaterThan,
-    value: { type: ValueType.num, value: (list.length - 1 - index) * 10 },
+    operator: CFNumberOperator.greaterThan,
+    value: { type: CFValueType.num, value: (list.length - 1 - index) * 10 },
     iconType,
     iconId: String(index),
 });
@@ -156,22 +156,22 @@ const IconSetRuleEdit = (props: {
     const { onChange, configList, errorMap = {} } = props;
     const localeService = useDependency(LocaleService);
 
-    const options = [{ label: localeService.t(`sheet.cf.symbol.${NumberOperator.greaterThan}`), value: NumberOperator.greaterThan },
-        { label: localeService.t(`sheet.cf.symbol.${NumberOperator.greaterThanOrEqual}`), value: NumberOperator.greaterThanOrEqual }];
+    const options = [{ label: localeService.t(`sheet.cf.symbol.${CFNumberOperator.greaterThan}`), value: CFNumberOperator.greaterThan },
+        { label: localeService.t(`sheet.cf.symbol.${CFNumberOperator.greaterThanOrEqual}`), value: CFNumberOperator.greaterThanOrEqual }];
     const valueTypeOptions = [
-        { label: localeService.t(`sheet.cf.valueType.${ValueType.num}`), value: ValueType.num },
-        { label: localeService.t(`sheet.cf.valueType.${ValueType.percent}`), value: ValueType.percent },
-        { label: localeService.t(`sheet.cf.valueType.${ValueType.percentile}`), value: ValueType.percentile },
-        { label: localeService.t(`sheet.cf.valueType.${ValueType.formula}`), value: ValueType.formula },
+        { label: localeService.t(`sheet.cf.valueType.${CFValueType.num}`), value: CFValueType.num },
+        { label: localeService.t(`sheet.cf.valueType.${CFValueType.percent}`), value: CFValueType.percent },
+        { label: localeService.t(`sheet.cf.valueType.${CFValueType.percentile}`), value: CFValueType.percentile },
+        { label: localeService.t(`sheet.cf.valueType.${CFValueType.formula}`), value: CFValueType.formula },
 
     ];
     const handleValueValueChange = (v: number | string, index: number) => {
         onChange([String(index), 'value', 'value'], v);
     };
 
-    const handleOperatorChange = (operator: NumberOperator, index: number) => {
+    const handleOperatorChange = (operator: CFNumberOperator, index: number) => {
         onChange([String(index), 'operator'], operator);
-        const defaultValue = createDefaultValue(SubRuleType.number, operator) as number;
+        const defaultValue = createDefaultValue(CFSubRuleType.number, operator) as number;
         handleValueValueChange(defaultValue, index);
     };
 
@@ -185,7 +185,7 @@ const IconSetRuleEdit = (props: {
             const isEnd = index === configList.length - 1;
             const isFirst = index === 0;
             const preItem = configList[index - 1];
-            const lessThanText = preItem?.value.type === ValueType.formula ? localeService.t('sheet.cf.valueType.formula') : preItem?.value.value;
+            const lessThanText = preItem?.value.type === CFValueType.formula ? localeService.t('sheet.cf.valueType.formula') : preItem?.value.value;
 
             const handleIconClick = (iconType: IIconType, iconId: string) => {
                 const value = { ...item, iconId, iconType } as typeof item;
@@ -235,7 +235,7 @@ const IconSetRuleEdit = (props: {
 
                         </div>
                         {!isEnd
-                            ? <Select className={`${stylesBase.mL0} ${styles.width45} ${stylesBase.mR0}`} options={options} value={item.operator} onChange={(v) => { handleOperatorChange(v as NumberOperator, index); }} />
+                            ? <Select className={`${stylesBase.mL0} ${styles.width45} ${stylesBase.mR0}`} options={options} value={item.operator} onChange={(v) => { handleOperatorChange(v as CFNumberOperator, index); }} />
                             : (
                                 <div className={`${styles.width45} ${stylesBase.label}`} style={{ marginTop: 0 }}>
                                     {localeService.t('sheet.cf.iconSet.rule')}
@@ -266,7 +266,7 @@ const IconSetRuleEdit = (props: {
                                     </div>
                                 </div>
                                 <div className={`${stylesBase.mTSm} ${styles.flex}`}>
-                                    <Select className={`${styles.width45} ${stylesBase.mL0}`} options={valueTypeOptions} value={item.value.type} onChange={(v) => { handleValueTypeChange(v as NumberOperator, index); }} />
+                                    <Select className={`${styles.width45} ${stylesBase.mL0}`} options={valueTypeOptions} value={item.value.type} onChange={(v) => { handleValueTypeChange(v as CFNumberOperator, index); }} />
                                     <div className={`${stylesBase.mL0} ${styles.width45}`}>
                                         <TextInput id={index} type={item.value.type} error={error} value={item.value.value || ''} onChange={(v) => handleValueValueChange(v, index)} />
                                     </div>
@@ -284,7 +284,7 @@ const IconSetRuleEdit = (props: {
 };
 export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
     const { interceptorManager } = props;
-    const rule = props.rule?.type === RuleType.iconSet ? props.rule : undefined;
+    const rule = props.rule?.type === CFRuleType.iconSet ? props.rule : undefined;
     const localeService = useDependency(LocaleService);
     const [errorMap, errorMapSet] = useState<Record<string, string>>({});
     const [currentIconType, currentIconTypeSet] = useState<IIconType>(() => {
@@ -308,8 +308,8 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
             if (index === list.length - 1) {
                 // The last condition is actually the complement of the above conditions,
                 // packages/sheets-conditional-format/src/services/calculate-unit/icon-set.ts
-                return { operator: NumberOperator.lessThanOrEqual,
-                         value: { type: ValueType.num, value: Number.MAX_SAFE_INTEGER },
+                return { operator: CFNumberOperator.lessThanOrEqual,
+                         value: { type: CFValueType.num, value: Number.MAX_SAFE_INTEGER },
                          iconType: currentIconType,
                          iconId: String(index) };
             }
@@ -341,9 +341,9 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
                 return pre;
             }
 
-            if (cur.value.type === ValueType.formula) {
+            if (cur.value.type === CFValueType.formula) {
                 return {
-                    preType: ValueType.formula,
+                    preType: CFValueType.formula,
                     result: false,
                 };
             }
@@ -359,7 +359,7 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
                 };
             }
         }, { result: true, preType: '' }).result;
-        if (isTypeSame && [ValueType.num, ValueType.percent, ValueType.percentile].includes(_configList[0].value.type)) {
+        if (isTypeSame && [CFValueType.num, CFValueType.percent, CFValueType.percentile].includes(_configList[0].value.type)) {
             const result: Record<string, string> = {};
             _configList.forEach((item, index, arr) => {
                 const preIndex = index - 1;
@@ -394,7 +394,7 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
 
     useEffect(() => {
         const dispose = interceptorManager.intercept(interceptorManager.getInterceptPoints().submit, { handler() {
-            const result: IIconSet = { type: RuleType.iconSet, isShowValue, config: configList } as IIconSet;
+            const result: IIconSet = { type: CFRuleType.iconSet, isShowValue, config: configList } as IIconSet;
             return result;
         } });
         return () => {

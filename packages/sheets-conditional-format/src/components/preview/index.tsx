@@ -17,7 +17,7 @@
 import React, { useMemo } from 'react';
 import { BooleanNumber, ColorKit } from '@univerjs/core';
 import type { IConditionalFormatRuleConfig } from '../../models/type';
-import { DEFAULT_BG_COLOR, DEFAULT_FONT_COLOR, RuleType } from '../../base/const';
+import { CFRuleType, DEFAULT_BG_COLOR, DEFAULT_FONT_COLOR } from '../../base/const';
 import { getColorScaleFromValue } from '../../services/calculate-unit/utils';
 import { iconMap } from '../../models/icon-map';
 import styles from './index.module.less';
@@ -28,7 +28,7 @@ export const Preview = (props: { rule?: IConditionalFormatRuleConfig }) => {
         return null;
     }
     const colorList = useMemo(() => {
-        if (rule.type === RuleType.colorScale) {
+        if (rule.type === CFRuleType.colorScale) {
             const config = rule.config.map((c, index) => ({ color: new ColorKit(c.color), value: index }));
             const maxValue = config.length - 1;
             const valueList = new Array(5).fill('').map((_v, index, arr) => index * maxValue / (arr.length - 1));
@@ -37,7 +37,7 @@ export const Preview = (props: { rule?: IConditionalFormatRuleConfig }) => {
         return null;
     }, [rule]);
     const iconSet = useMemo(() => {
-        if (rule.type === RuleType.iconSet) {
+        if (rule.type === CFRuleType.iconSet) {
             return rule.config.map((item) => {
                 const iconList = iconMap[item.iconType];
                 return iconList && iconList[Number(item.iconId)];
@@ -45,7 +45,7 @@ export const Preview = (props: { rule?: IConditionalFormatRuleConfig }) => {
         }
     }, [rule]);
     switch (rule.type) {
-        case RuleType.dataBar:
+        case CFRuleType.dataBar:
         {
             const { isGradient } = rule.config;
             const commonStyle = { width: '50%', height: '100%' };
@@ -59,7 +59,7 @@ export const Preview = (props: { rule?: IConditionalFormatRuleConfig }) => {
             );
         }
 
-        case RuleType.colorScale:{
+        case CFRuleType.colorScale:{
             return colorList && (
                 <div className={styles.cfPreview}>
                     {colorList.map((item, index) => (
@@ -69,14 +69,14 @@ export const Preview = (props: { rule?: IConditionalFormatRuleConfig }) => {
                 </div>
             );
         }
-        case RuleType.iconSet:{
+        case CFRuleType.iconSet:{
             return iconSet && (
                 <div className={styles.cfPreview}>
                     {iconSet.map((base64, index) => <img style={{ height: '100%' }} key={index} src={base64} />)}
                 </div>
             );
         }
-        case RuleType.highlightCell:{
+        case CFRuleType.highlightCell:{
             const { ul, st, it, bl, bg, cl } = rule.style;
             const isUnderline = ul?.s === BooleanNumber.TRUE;
             const isStrikethrough = st?.s === BooleanNumber.TRUE;

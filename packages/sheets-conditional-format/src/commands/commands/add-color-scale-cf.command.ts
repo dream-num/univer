@@ -22,7 +22,7 @@ import {
 } from '@univerjs/core';
 import { ConditionalFormatRuleModel } from '../../models/conditional-format-rule-model';
 import type { IColorScale, IConditionFormatRule } from '../../models/type';
-import { RuleType } from '../../base/const';
+import { CFRuleType } from '../../base/const';
 import type { IAddConditionalRuleMutationParams } from '../mutations/addConditionalRule.mutation';
 import { addConditionalRuleMutation } from '../mutations/addConditionalRule.mutation';
 
@@ -51,7 +51,7 @@ export const addColorScaleConditionalRuleCommand: ICommand<IAddColorScaleConditi
         const cfId = conditionalFormatRuleModel.createCfId(unitId, subUnitId);
         const rule: IConditionFormatRule = { ranges, cfId, stopIfTrue: !!stopIfTrue,
                                              rule: {
-                                                 type: RuleType.colorScale,
+                                                 type: CFRuleType.colorScale,
                                                  config,
                                              } };
         commandService.executeCommand(addConditionalRuleMutation.id, { unitId, subUnitId, rule } as IAddConditionalRuleMutationParams);

@@ -22,7 +22,7 @@ import {
 } from '@univerjs/core';
 import { ConditionalFormatRuleModel } from '../../models/conditional-format-rule-model';
 import type { IConditionFormatRule, ITimePeriodHighlightCell } from '../../models/type';
-import { RuleType, SubRuleType } from '../../base/const';
+import { CFRuleType, CFSubRuleType } from '../../base/const';
 import type { IAddConditionalRuleMutationParams } from '../mutations/addConditionalRule.mutation';
 import { addConditionalRuleMutation } from '../mutations/addConditionalRule.mutation';
 
@@ -52,8 +52,8 @@ export const addTimePeriodCfCommand: ICommand<IAddTimePeriodCf> = {
         const cfId = conditionalFormatRuleModel.createCfId(unitId, subUnitId);
         const rule: IConditionFormatRule<ITimePeriodHighlightCell> = { ranges, cfId, stopIfTrue: !!stopIfTrue,
                                                                        rule: {
-                                                                           type: RuleType.highlightCell,
-                                                                           subType: SubRuleType.timePeriod,
+                                                                           type: CFRuleType.highlightCell,
+                                                                           subType: CFSubRuleType.timePeriod,
                                                                            operator,
                                                                            style,
                                                                        } };

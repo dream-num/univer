@@ -18,7 +18,7 @@ import React, { useEffect, useState } from 'react';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { LocaleService } from '@univerjs/core';
 import { Checkbox, InputNumber, Select } from '@univerjs/design';
-import { NumberOperator, RuleType, SubRuleType } from '../../../base/const';
+import { CFNumberOperator, CFRuleType, CFSubRuleType } from '../../../base/const';
 import { ConditionalStyleEditor } from '../../conditional-style-editor';
 import type { IAverageHighlightCell, IConditionalFormatRuleConfig, IHighlightCell, IRankHighlightCell } from '../../../models/type';
 import stylesBase from '../index.module.less';
@@ -30,7 +30,7 @@ export const RankStyleEditor = (props: IStyleEditorProps) => {
     const { onChange, interceptorManager } = props;
     const localeService = useDependency(LocaleService);
 
-    const rule = props.rule?.type === RuleType.highlightCell ? props.rule : undefined as IRankHighlightCell | IAverageHighlightCell | undefined;
+    const rule = props.rule?.type === CFRuleType.highlightCell ? props.rule : undefined as IRankHighlightCell | IAverageHighlightCell | undefined;
     const options = [{ label: localeService.t('sheet.cf.panel.isNotBottom'), value: 'isNotBottom' }, { label: localeService.t('sheet.cf.panel.isBottom'), value: 'isBottom' },
         { label: localeService.t('sheet.cf.panel.greaterThanAverage'), value: 'greaterThanAverage' }, { label: localeService.t('sheet.cf.panel.lessThanAverage'), value: 'lessThanAverage' }];
 
@@ -41,19 +41,19 @@ export const RankStyleEditor = (props: IStyleEditorProps) => {
             return defaultV;
         }
         switch (type) {
-            case RuleType.highlightCell:{
+            case CFRuleType.highlightCell:{
                 const subType = rule.subType;
                 switch (subType) {
-                    case SubRuleType.average:{
-                        if ([NumberOperator.greaterThan, NumberOperator.greaterThanOrEqual].includes(rule.operator)) {
+                    case CFSubRuleType.average:{
+                        if ([CFNumberOperator.greaterThan, CFNumberOperator.greaterThanOrEqual].includes(rule.operator)) {
                             return 'greaterThanAverage';
                         }
-                        if ([NumberOperator.lessThan, NumberOperator.lessThanOrEqual].includes(rule.operator)) {
+                        if ([CFNumberOperator.lessThan, CFNumberOperator.lessThanOrEqual].includes(rule.operator)) {
                             return 'lessThanAverage';
                         }
                         return defaultV;
                     }
-                    case SubRuleType.rank:{
+                    case CFSubRuleType.rank:{
                         if (rule.isBottom) {
                             return 'isBottom';
                         } else {
@@ -72,10 +72,10 @@ export const RankStyleEditor = (props: IStyleEditorProps) => {
             return defaultV;
         }
         switch (type) {
-            case RuleType.highlightCell:{
+            case CFRuleType.highlightCell:{
                 const subType = rule.subType;
                 switch (subType) {
-                    case SubRuleType.rank:{
+                    case CFSubRuleType.rank:{
                         return rule.value || defaultV;
                     }
                 }
@@ -90,10 +90,10 @@ export const RankStyleEditor = (props: IStyleEditorProps) => {
             return defaultV;
         }
         switch (type) {
-            case RuleType.highlightCell:{
+            case CFRuleType.highlightCell:{
                 const subType = rule.subType;
                 switch (subType) {
-                    case SubRuleType.rank:{
+                    case CFSubRuleType.rank:{
                         return rule.isPercent || defaultV;
                     }
                 }
@@ -112,16 +112,16 @@ export const RankStyleEditor = (props: IStyleEditorProps) => {
     }) => {
         const { type, isPercent, value, style } = config;
         if (type === 'isNotBottom') {
-            return { type: RuleType.highlightCell, subType: SubRuleType.rank, isPercent, isBottom: false, value, style };
+            return { type: CFRuleType.highlightCell, subType: CFSubRuleType.rank, isPercent, isBottom: false, value, style };
         }
         if (type === 'isBottom') {
-            return { type: RuleType.highlightCell, subType: SubRuleType.rank, isPercent, isBottom: true, value, style };
+            return { type: CFRuleType.highlightCell, subType: CFSubRuleType.rank, isPercent, isBottom: true, value, style };
         }
         if (type === 'greaterThanAverage') {
-            return { type: RuleType.highlightCell, subType: SubRuleType.average, operator: NumberOperator.greaterThan, style };
+            return { type: CFRuleType.highlightCell, subType: CFSubRuleType.average, operator: CFNumberOperator.greaterThan, style };
         }
         if (type === 'lessThanAverage') {
-            return { type: RuleType.highlightCell, subType: SubRuleType.average, operator: NumberOperator.lessThan, style };
+            return { type: CFRuleType.highlightCell, subType: CFSubRuleType.average, operator: CFNumberOperator.lessThan, style };
         }
     };
     useEffect(() => {

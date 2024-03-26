@@ -18,7 +18,7 @@ import type { IStyleBase } from '@univerjs/core';
 import { CellValueType, ObjectMatrix, Range, Rectangle, Tools } from '@univerjs/core';
 import dayjs from 'dayjs';
 import { deserializeRangeWithSheet, generateStringWithSequence, LexerTreeBuilder, sequenceNodeType, serializeRange } from '@univerjs/engine-formula';
-import { NumberOperator, RuleType, SubRuleType, TextOperator, TimePeriodOperator } from '../../base/const';
+import { CFNumberOperator, CFRuleType, CFSubRuleType, CFTextOperator, CFTimePeriodOperator } from '../../base/const';
 import type { IAverageHighlightCell, IConditionFormatRule, IFormulaHighlightCell, IHighlightCell, INumberHighlightCell, IRankHighlightCell, ITextHighlightCell, ITimePeriodHighlightCell } from '../../models/type';
 import { ConditionalFormatFormulaService, FormulaResultStatus } from '../conditional-format-formula.service';
 import { compareWithNumber, getCellValue, isFloatsEqual, isNullable, serialTimeToTimestamp } from './utils';
@@ -26,14 +26,14 @@ import type { ICalculateUnit } from './type';
 import { EMPTY_STYLE } from './type';
 
 export const highlightCellCalculateUnit: ICalculateUnit = {
-    type: RuleType.highlightCell,
+    type: CFRuleType.highlightCell,
     handle: async (rule: IConditionFormatRule, context) => {
         const ruleConfig = rule.rule as IHighlightCell;
         const { worksheet } = context;
 
         const getCache = () => {
             switch (ruleConfig.subType) {
-                case SubRuleType.average:{
+                case CFSubRuleType.average:{
                     let sum = 0;
                     let count = 0;
                     rule.ranges.forEach((range) => {
@@ -48,8 +48,8 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
                     });
                     return { average: sum / count };
                 }
-                case SubRuleType.uniqueValues:
-                case SubRuleType.duplicateValues:{
+                case CFSubRuleType.uniqueValues:
+                case CFSubRuleType.duplicateValues:{
                     const cacheMap: Map<any, number> = new Map();
                     rule.ranges.forEach((range) => {
                         Range.foreach(range, (row, col) => {
@@ -67,7 +67,7 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
                     });
                     return { count: cacheMap };
                 }
-                case SubRuleType.rank:{
+                case CFSubRuleType.rank:{
                     const allValue: number[] = [];
                     rule.ranges.forEach((range) => {
                         Range.foreach(range, (row, col) => {
@@ -89,7 +89,7 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
                         return { rank: allValue[Math.max(targetIndex - 1, 0)] };
                     }
                 }
-                case SubRuleType.formula:{
+                case CFSubRuleType.formula:{
                     const subRuleConfig = ruleConfig as IFormulaHighlightCell;
                     const lexerTreeBuilder = context.accessor.get(LexerTreeBuilder);
                     const formulaString = subRuleConfig.value;
@@ -108,7 +108,7 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
         const check = (row: number, col: number) => {
             const cellValue = worksheet?.getCellRaw(row, col);
             switch (ruleConfig.subType) {
-                case SubRuleType.number:{
+                case CFSubRuleType.number:{
                     const v = cellValue && Number(cellValue.v);
                     if (isNullable(v) || Number.isNaN(v) || cellValue?.t !== CellValueType.NUMBER) {
                         return false;
@@ -116,41 +116,41 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
                     const subRuleConfig = ruleConfig as INumberHighlightCell;
                     return compareWithNumber({ operator: subRuleConfig.operator, value: subRuleConfig.value || 0 }, v || 0);
                 }
-                case SubRuleType.text:{
+                case CFSubRuleType.text:{
                     const subRuleConfig = ruleConfig as ITextHighlightCell;
                     const value = getCellValue(cellValue!);
                     const v = value === null ? '' : String(value);
                     const condition = subRuleConfig.value || '';
                     switch (subRuleConfig.operator) {
-                        case TextOperator.beginsWith:{
+                        case CFTextOperator.beginsWith:{
                             return v.startsWith(condition);
                         }
-                        case TextOperator.containsBlanks:{
+                        case CFTextOperator.containsBlanks:{
                             return /^\s*$/.test(v);
                         }
-                        case TextOperator.notContainsBlanks:{
+                        case CFTextOperator.notContainsBlanks:{
                             return !/^\s*$/.test(v);
                         }
-                        case TextOperator.containsErrors:{
+                        case CFTextOperator.containsErrors:{
                             // wait do do.
                             return false;
                         }
-                        case TextOperator.notContainsErrors:{
+                        case CFTextOperator.notContainsErrors:{
                             return false;
                         }
-                        case TextOperator.containsText:{
+                        case CFTextOperator.containsText:{
                             return v.indexOf(condition) > -1;
                         }
-                        case TextOperator.notContainsText:{
+                        case CFTextOperator.notContainsText:{
                             return v.indexOf(condition) === -1;
                         }
-                        case TextOperator.endsWith:{
+                        case CFTextOperator.endsWith:{
                             return v.endsWith(condition);
                         }
-                        case TextOperator.equal:{
+                        case CFTextOperator.equal:{
                             return v === condition;
                         }
-                        case TextOperator.notEqual:{
+                        case CFTextOperator.notEqual:{
                             return v !== condition;
                         }
                         default:{
@@ -158,7 +158,7 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
                         }
                     }
                 }
-                case SubRuleType.timePeriod:{
+                case CFSubRuleType.timePeriod:{
                     const value = getCellValue(cellValue!);
                     if (isNullable(value) || Number.isNaN(Number(value)) || cellValue?.t !== CellValueType.NUMBER) {
                         return false;
@@ -166,56 +166,56 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
                     const subRuleConfig = ruleConfig as ITimePeriodHighlightCell;
                     const v = serialTimeToTimestamp(Number(value));
                     switch (subRuleConfig.operator) {
-                        case TimePeriodOperator.last7Days:{
+                        case CFTimePeriodOperator.last7Days:{
                             const start = dayjs().subtract(7, 'day').valueOf();
                             const end = dayjs().valueOf();
                             return v >= start && v <= end;
                         }
-                        case TimePeriodOperator.lastMonth:{
+                        case CFTimePeriodOperator.lastMonth:{
                             const preMonth = dayjs().subtract(1, 'month');
                             const start = preMonth.startOf('month').valueOf();
                             const end = preMonth.endOf('month').valueOf();
                             return v >= start && v <= end;
                         }
-                        case TimePeriodOperator.lastWeek:{
+                        case CFTimePeriodOperator.lastWeek:{
                             const start = dayjs().subtract(1, 'week').valueOf();
                             const end = dayjs().valueOf();
                             return v >= start && v <= end;
                         }
-                        case TimePeriodOperator.nextMonth:{
+                        case CFTimePeriodOperator.nextMonth:{
                             const nextMonth = dayjs().add(1, 'month');
                             const start = nextMonth.startOf('month').valueOf();
                             const end = nextMonth.endOf('month').valueOf();
                             return v >= start && v <= end;
                         }
-                        case TimePeriodOperator.nextWeek:{
+                        case CFTimePeriodOperator.nextWeek:{
                             const week = dayjs();
                             const nextWeek = week.add(1, 'week');
                             const start = nextWeek.startOf('week').valueOf();
                             const end = nextWeek.endOf('week').valueOf();
                             return v >= start && v <= end;
                         }
-                        case TimePeriodOperator.thisMonth:{
+                        case CFTimePeriodOperator.thisMonth:{
                             const start = dayjs().startOf('month').valueOf();
                             const end = dayjs().endOf('month').valueOf();
                             return v >= start && v <= end;
                         }
-                        case TimePeriodOperator.thisWeek:{
+                        case CFTimePeriodOperator.thisWeek:{
                             const start = dayjs().startOf('week').valueOf();
                             const end = dayjs().endOf('week').valueOf();
                             return v >= start && v <= end;
                         }
-                        case TimePeriodOperator.tomorrow:{
+                        case CFTimePeriodOperator.tomorrow:{
                             const start = dayjs().startOf('day').add(1, 'day').valueOf();
                             const end = dayjs().endOf('day').add(1, 'day').valueOf();
                             return v >= start && v <= end;
                         }
-                        case TimePeriodOperator.yesterday:{
+                        case CFTimePeriodOperator.yesterday:{
                             const start = dayjs().startOf('day').subtract(1, 'day').valueOf();
                             const end = dayjs().endOf('day').subtract(1, 'day').valueOf();
                             return v >= start && v <= end;
                         }
-                        case TimePeriodOperator.today:{
+                        case CFTimePeriodOperator.today:{
                             const start = dayjs().startOf('day').valueOf();
                             const end = dayjs().endOf('day').valueOf();
                             return v >= start && v <= end;
@@ -225,7 +225,7 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
                         }
                     }
                 }
-                case SubRuleType.average:{
+                case CFSubRuleType.average:{
                     const value = cellValue && cellValue.v;
                     const v = Number(value);
                     if (isNullable(value) || Number.isNaN(v) || cellValue?.t !== CellValueType.NUMBER) {
@@ -235,22 +235,22 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
                     const average = cache?.average!;
 
                     switch (subRuleConfig.operator) {
-                        case NumberOperator.greaterThan:{
+                        case CFNumberOperator.greaterThan:{
                             return v > average;
                         }
-                        case NumberOperator.greaterThanOrEqual:{
+                        case CFNumberOperator.greaterThanOrEqual:{
                             return v >= average;
                         }
-                        case NumberOperator.lessThan:{
+                        case CFNumberOperator.lessThan:{
                             return v < average;
                         }
-                        case NumberOperator.lessThanOrEqual:{
+                        case CFNumberOperator.lessThanOrEqual:{
                             return v <= average;
                         }
-                        case NumberOperator.equal:{
+                        case CFNumberOperator.equal:{
                             return isFloatsEqual(v, average);
                         }
-                        case NumberOperator.notEqual:{
+                        case CFNumberOperator.notEqual:{
                             return !isFloatsEqual(v, average);
                         }
                         default:{
@@ -258,7 +258,7 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
                         }
                     }
                 }
-                case SubRuleType.rank:{
+                case CFSubRuleType.rank:{
                     const value = getCellValue(cellValue!);
 
                     const v = Number(value);
@@ -275,7 +275,7 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
                         return v >= targetValue;
                     }
                 }
-                case SubRuleType.uniqueValues:{
+                case CFSubRuleType.uniqueValues:{
                     const value = getCellValue(cellValue!);
 
                     if (isNullable(value)) {
@@ -284,7 +284,7 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
                     const uniqueCache = cache!.count!;
                     return uniqueCache.get(value) === 1;
                 }
-                case SubRuleType.duplicateValues:{
+                case CFSubRuleType.duplicateValues:{
                     const value = getCellValue(cellValue!);
 
                     if (isNullable(value)) {
@@ -293,7 +293,7 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
                     const uniqueCache = cache!.count!;
                     return uniqueCache.get(value) !== 1;
                 }
-                case SubRuleType.formula:{
+                case CFSubRuleType.formula:{
                     if (!cache?.sequenceNodes) {
                         return false;
                     }

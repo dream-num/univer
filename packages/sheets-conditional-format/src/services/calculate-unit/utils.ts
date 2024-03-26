@@ -18,7 +18,7 @@ import type { ICellData } from '@univerjs/core';
 import { BooleanNumber, CellValueType, ColorKit, ObjectMatrix, Range } from '@univerjs/core';
 import { BooleanValue } from '@univerjs/engine-formula';
 import type { IConditionFormatRule, IValueConfig } from '../../models/type';
-import { NumberOperator, ValueType } from '../../base/const';
+import { CFNumberOperator, CFValueType } from '../../base/const';
 import { ConditionalFormatFormulaService, FormulaResultStatus } from '../conditional-format-formula.service';
 import { ConditionalFormatViewModel } from '../../models/conditional-format-view-model';
 import type { IContext } from './type';
@@ -90,7 +90,7 @@ export const serialTimeToTimestamp = (value: number) => {
 };
 export const getValueByType = (value: IValueConfig, matrix: ObjectMatrix< number>, context: IContext & { cfId: string }) => {
     switch (value.type) {
-        case ValueType.max:{
+        case CFValueType.max:{
             let max = 0;
             matrix.forValue((row, col, value) => {
                 if (value > max) {
@@ -102,7 +102,7 @@ export const getValueByType = (value: IValueConfig, matrix: ObjectMatrix< number
                 result: max,
             };
         }
-        case ValueType.min:{
+        case CFValueType.min:{
             let min: number | undefined;
             matrix.forValue((row, col, value) => {
                 if (min === undefined) {
@@ -117,7 +117,7 @@ export const getValueByType = (value: IValueConfig, matrix: ObjectMatrix< number
                 result: min,
             };
         }
-        case ValueType.percent:{
+        case CFValueType.percent:{
             let max: number | undefined;
             let min: number | undefined;
             matrix.forValue((row, col, value) => {
@@ -140,7 +140,7 @@ export const getValueByType = (value: IValueConfig, matrix: ObjectMatrix< number
                 result: length * (v / 100) + (min || 0),
             };
         }
-        case ValueType.percentile:{
+        case CFValueType.percentile:{
             const list = matrix.toNativeArray().sort((a, b) => a - b);
             const v = Math.max(Math.min(Number(value.value) || 0, 100), 0);
             const index = ((list.length - 1) * v) / 100;
@@ -153,7 +153,7 @@ export const getValueByType = (value: IValueConfig, matrix: ObjectMatrix< number
             };
         }
 
-        case ValueType.formula:{
+        case CFValueType.formula:{
             const { accessor, unitId, subUnitId, cfId } = context;
             const formulaText = String(value.value);
             const conditionalFormatFormulaService = accessor.get(ConditionalFormatFormulaService);
@@ -161,7 +161,7 @@ export const getValueByType = (value: IValueConfig, matrix: ObjectMatrix< number
             const result = conditionalFormatFormulaService.getFormulaResult(unitId, subUnitId, formulaText);
             return result;
         }
-        case ValueType.num:{
+        case CFValueType.num:{
             const v = Number(value.value);
             return {
                 status: FormulaResultStatus.SUCCESS,
@@ -186,9 +186,9 @@ export const getCacheStyleMatrix = <S = any>(unitId: string, subUnitId: string, 
     });
     return matrix;
 };
-export const compareWithNumber = (config: { operator: NumberOperator;value: number | [number, number] }, v: number) => {
+export const compareWithNumber = (config: { operator: CFNumberOperator;value: number | [number, number] }, v: number) => {
     switch (config.operator) {
-        case NumberOperator.between:{
+        case CFNumberOperator.between:{
             if (typeof config.value !== 'object' && !(config.value as unknown as Array<number>).length) {
                 return;
             }
@@ -196,31 +196,31 @@ export const compareWithNumber = (config: { operator: NumberOperator;value: numb
             const end = Math.max(...config.value as [number, number]);
             return v >= start && v <= end;
         }
-        case NumberOperator.notBetween:{
+        case CFNumberOperator.notBetween:{
             const [start, end] = config.value as [number, number];
             return !(v >= start && v <= end);
         }
-        case NumberOperator.equal:{
+        case CFNumberOperator.equal:{
             const condition = (config.value || 0) as number;
             return isFloatsEqual(condition, v);
         }
-        case NumberOperator.notEqual:{
+        case CFNumberOperator.notEqual:{
             const condition = (config.value || 0) as number;
             return !isFloatsEqual(condition, v);
         }
-        case NumberOperator.greaterThan:{
+        case CFNumberOperator.greaterThan:{
             const condition = (config.value || 0) as number;
             return v > condition;
         }
-        case NumberOperator.greaterThanOrEqual:{
+        case CFNumberOperator.greaterThanOrEqual:{
             const condition = (config.value || 0) as number;
             return v >= condition;
         }
-        case NumberOperator.lessThan:{
+        case CFNumberOperator.lessThan:{
             const condition = (config.value || 0) as number;
             return v < condition;
         }
-        case NumberOperator.lessThanOrEqual:{
+        case CFNumberOperator.lessThanOrEqual:{
             const condition = (config.value || 0) as number;
             return v <= condition;
         }
@@ -229,19 +229,19 @@ export const compareWithNumber = (config: { operator: NumberOperator;value: numb
         }
     }
 };
-export const getOppositeOperator = (operator: NumberOperator) => {
+export const getOppositeOperator = (operator: CFNumberOperator) => {
     switch (operator) {
-        case NumberOperator.greaterThan:{
-            return NumberOperator.lessThanOrEqual;
+        case CFNumberOperator.greaterThan:{
+            return CFNumberOperator.lessThanOrEqual;
         }
-        case NumberOperator.greaterThanOrEqual:{
-            return NumberOperator.lessThan;
+        case CFNumberOperator.greaterThanOrEqual:{
+            return CFNumberOperator.lessThan;
         }
-        case NumberOperator.lessThan:{
-            return NumberOperator.greaterThanOrEqual;
+        case CFNumberOperator.lessThan:{
+            return CFNumberOperator.greaterThanOrEqual;
         }
-        case NumberOperator.lessThanOrEqual:{
-            return NumberOperator.greaterThan;
+        case CFNumberOperator.lessThanOrEqual:{
+            return CFNumberOperator.greaterThan;
         }
     }
     return operator;

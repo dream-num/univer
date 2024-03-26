@@ -16,7 +16,7 @@
 
 import { CellValueType, ColorKit, ObjectMatrix, Range } from '@univerjs/core';
 import { isObject } from '@univerjs/engine-render';
-import { RuleType } from '../../base/const';
+import { CFRuleType } from '../../base/const';
 import type { IColorScale, IConditionFormatRule } from '../../models/type';
 import { ConditionalFormatFormulaService, FormulaResultStatus } from '../conditional-format-formula.service';
 import { getColorScaleFromValue, getValueByType, isNullable } from './utils';
@@ -24,7 +24,7 @@ import type { ICalculateUnit } from './type';
 
 const emptyStyle = '';
 export const colorScaleCellCalculateUnit: ICalculateUnit = {
-    type: RuleType.colorScale,
+    type: CFRuleType.colorScale,
     handle: async (rule: IConditionFormatRule, context) => {
         const ruleConfig = rule.rule as IColorScale;
         const conditionalFormatFormulaService = context.accessor.get(ConditionalFormatFormulaService);

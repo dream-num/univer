@@ -22,7 +22,7 @@ import {
 } from '@univerjs/core';
 import { ConditionalFormatRuleModel } from '../../models/conditional-format-rule-model';
 import type { IAverageHighlightCell, IConditionFormatRule } from '../../models/type';
-import { RuleType, SubRuleType } from '../../base/const';
+import { CFRuleType, CFSubRuleType } from '../../base/const';
 import type { IAddConditionalRuleMutationParams } from '../mutations/addConditionalRule.mutation';
 import { addConditionalRuleMutation } from '../mutations/addConditionalRule.mutation';
 
@@ -52,8 +52,8 @@ export const addAverageCfCommand: ICommand<IAddAverageCfParams> = {
         const cfId = conditionalFormatRuleModel.createCfId(unitId, subUnitId);
         const rule: IConditionFormatRule = { ranges, cfId, stopIfTrue: !!stopIfTrue,
                                              rule: {
-                                                 type: RuleType.highlightCell,
-                                                 subType: SubRuleType.average,
+                                                 type: CFRuleType.highlightCell,
+                                                 subType: CFSubRuleType.average,
                                                  operator,
                                                  style,
                                              } };

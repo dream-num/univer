@@ -15,7 +15,7 @@
  */
 
 import { CellValueType, ObjectMatrix, Range } from '@univerjs/core';
-import { RuleType } from '../../base/const';
+import { CFRuleType } from '../../base/const';
 import type { IDataBarRenderParams } from '../../render/type';
 import type { IConditionFormatRule, IDataBar } from '../../models/type';
 import { ConditionalFormatFormulaService, FormulaResultStatus } from '../conditional-format-formula.service';
@@ -24,7 +24,7 @@ import type { ICalculateUnit } from './type';
 import { EMPTY_STYLE } from './type';
 
 export const dataBarCellCalculateUnit: ICalculateUnit = {
-    type: RuleType.dataBar,
+    type: CFRuleType.dataBar,
     handle: async (rule: IConditionFormatRule, context) => {
         const ruleConfig = rule.rule as IDataBar;
         const conditionalFormatFormulaService = context.accessor.get(ConditionalFormatFormulaService);

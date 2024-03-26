@@ -22,7 +22,7 @@ import {
 } from '@univerjs/core';
 import { ConditionalFormatRuleModel } from '../../models/conditional-format-rule-model';
 import type { IConditionFormatRule, INumberHighlightCell } from '../../models/type';
-import { NumberOperator, RuleType, SubRuleType } from '../../base/const';
+import { CFNumberOperator, CFRuleType, CFSubRuleType } from '../../base/const';
 import type { IAddConditionalRuleMutationParams } from '../mutations/addConditionalRule.mutation';
 import { addConditionalRuleMutation } from '../mutations/addConditionalRule.mutation';
 
@@ -50,16 +50,16 @@ export const addNumberCfCommand: ICommand<IAddNumberCfParams> = {
         const subUnitId = worksheet.getSheetId();
         const cfId = conditionalFormatRuleModel.createCfId(unitId, subUnitId);
         let rule: IConditionFormatRule;
-        if ([NumberOperator.between, NumberOperator.notBetween].includes(operator)) {
+        if ([CFNumberOperator.between, CFNumberOperator.notBetween].includes(operator)) {
             const _value = value as [number, number];
             if (_value.length !== 2 || !Array.isArray(_value)) {
                 return false;
             }
             rule = { ranges, cfId, stopIfTrue: !!stopIfTrue,
                      rule: {
-                         type: RuleType.highlightCell,
-                         subType: SubRuleType.number,
-                         operator: operator as NumberOperator.between | NumberOperator.notBetween,
+                         type: CFRuleType.highlightCell,
+                         subType: CFSubRuleType.number,
+                         operator: operator as CFNumberOperator.between | CFNumberOperator.notBetween,
                          style,
                          value: _value as [number, number],
                      } };
@@ -70,8 +70,8 @@ export const addNumberCfCommand: ICommand<IAddNumberCfParams> = {
             }
             rule = { ranges, cfId, stopIfTrue: !!stopIfTrue,
                      rule: {
-                         type: RuleType.highlightCell,
-                         subType: SubRuleType.number,
+                         type: CFRuleType.highlightCell,
+                         subType: CFSubRuleType.number,
                          operator: operator as any,
                          style,
                          value: _value,

@@ -15,8 +15,8 @@
  */
 
 import { CellValueType, ObjectMatrix, Range } from '@univerjs/core';
-import type { NumberOperator } from '../../base/const';
-import { RuleType } from '../../base/const';
+import type { CFNumberOperator } from '../../base/const';
+import { CFRuleType } from '../../base/const';
 
 import type { IIconSetRenderParams } from '../../render/type';
 import type { IConditionFormatRule, IIconSet } from '../../models/type';
@@ -26,7 +26,7 @@ import type { ICalculateUnit } from './type';
 import { EMPTY_STYLE } from './type';
 
 export const iconSetCalculateUnit: ICalculateUnit = {
-    type: RuleType.iconSet,
+    type: CFRuleType.iconSet,
     handle: async (rule: IConditionFormatRule, context) => {
         const ruleConfig = rule.rule as IIconSet;
         const conditionalFormatFormulaService = context.accessor.get(ConditionalFormatFormulaService);
@@ -71,7 +71,7 @@ export const iconSetCalculateUnit: ICalculateUnit = {
                 }
             }
             return result;
-        }, [] as { operator: NumberOperator;value: number }[]);
+        }, [] as { operator: CFNumberOperator;value: number }[]);
         const isShowValue = ruleConfig.isShowValue === undefined ? true : !!ruleConfig.isShowValue;
         matrix.forValue((row, col, value) => {
             for (let index = 0; index < splitValue.length; index++) {

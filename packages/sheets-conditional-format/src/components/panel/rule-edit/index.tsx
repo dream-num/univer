@@ -25,7 +25,7 @@ import { RangeSelector } from '@univerjs/ui';
 import { SelectionManagerService } from '@univerjs/sheets';
 import type { IConditionFormatRule } from '../../../models/type';
 import { ConditionalFormatRuleModel } from '../../../models/conditional-format-rule-model';
-import { RuleType, SHEET_CONDITION_FORMAT_PLUGIN, SubRuleType } from '../../../base/const';
+import { CFRuleType, CFSubRuleType, SHEET_CONDITION_FORMAT_PLUGIN } from '../../../base/const';
 import type { IAddCfCommandParams } from '../../../commands/commands/add-cf.command';
 import { addCfCommand } from '../../../commands/commands/add-cf.command';
 import type { ISetCfCommandParams } from '../../../commands/commands/set-cf.command';
@@ -90,33 +90,33 @@ export const RuleEdit = (props: IRuleEditProps) => {
             return defaultType;
         }
         switch (type) {
-            case RuleType.highlightCell:{
+            case CFRuleType.highlightCell:{
                 const subType = props.rule?.rule.subType;
                 switch (subType) {
-                    case SubRuleType.number:
-                    case SubRuleType.text:
-                    case SubRuleType.duplicateValues:
-                    case SubRuleType.uniqueValues:
-                    case SubRuleType.timePeriod:{
+                    case CFSubRuleType.number:
+                    case CFSubRuleType.text:
+                    case CFSubRuleType.duplicateValues:
+                    case CFSubRuleType.uniqueValues:
+                    case CFSubRuleType.timePeriod:{
                         return '1';
                     }
-                    case SubRuleType.average:
-                    case SubRuleType.rank:{
+                    case CFSubRuleType.average:
+                    case CFSubRuleType.rank:{
                         return '2';
                     }
-                    case SubRuleType.formula:{
+                    case CFSubRuleType.formula:{
                         return '5';
                     }
                 }
                 break;
             }
-            case RuleType.dataBar:{
+            case CFRuleType.dataBar:{
                 return '3';
             }
-            case RuleType.colorScale:{
+            case CFRuleType.colorScale:{
                 return '4';
             }
-            case RuleType.iconSet:{
+            case CFRuleType.iconSet:{
                 return '6';
             }
         }

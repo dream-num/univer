@@ -16,7 +16,7 @@
 
 import type { IAccessor } from '@wendellhu/redi';
 import type { ObjectMatrix, Workbook, Worksheet } from '@univerjs/core';
-import type { RuleType } from '../../base/const';
+import type { CFRuleType } from '../../base/const';
 import type { IConditionFormatRule } from '../../models/type';
 
 export interface IContext {
@@ -27,7 +27,7 @@ export interface IContext {
     worksheet: Worksheet;
 };
 export interface ICalculateUnit<R = any> {
-    type: RuleType;
+    type: CFRuleType;
     handle: (rule: IConditionFormatRule, context: IContext) => Promise<ObjectMatrix<R>>;
 }
 

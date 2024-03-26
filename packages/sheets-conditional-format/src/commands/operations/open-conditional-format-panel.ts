@@ -19,7 +19,7 @@ import { CommandType, ICommandService } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 import { SelectionManagerService } from '@univerjs/sheets';
 import { ConditionalFormatMenuController } from '../../controllers/cf.menu.controller';
-import { createDefaultRule, RuleType, SubRuleType } from '../../base/const';
+import { CFRuleType, CFSubRuleType, createDefaultRule } from '../../base/const';
 import type { IColorScale, IConditionFormatRule, IDataBar, IFormulaHighlightCell, IIconSet, IRankHighlightCell } from '../../models/type';
 import type { IClearRangeCfParams } from '../commands/clear-range-cf.command';
 import { clearRangeCfCommand } from '../commands/clear-range-cf.command';
@@ -62,8 +62,8 @@ export const OpenConditionalFormatOperator: ICommand = {
                     ...createDefaultRule,
                     ranges,
                     rule: {
-                        type: RuleType.highlightCell,
-                        subType: SubRuleType.rank,
+                        type: CFRuleType.highlightCell,
+                        subType: CFSubRuleType.rank,
                     },
                 } as IConditionFormatRule<IRankHighlightCell>;
                 conditionalFormatMenuController.openPanel(rule);
@@ -74,8 +74,8 @@ export const OpenConditionalFormatOperator: ICommand = {
                     ...createDefaultRule,
                     ranges,
                     rule: {
-                        type: RuleType.highlightCell,
-                        subType: SubRuleType.formula,
+                        type: CFRuleType.highlightCell,
+                        subType: CFSubRuleType.formula,
                         value: '=',
                     },
                 } as IConditionFormatRule<IFormulaHighlightCell>;
@@ -87,7 +87,7 @@ export const OpenConditionalFormatOperator: ICommand = {
                     ...createDefaultRule,
                     ranges,
                     rule: {
-                        type: RuleType.colorScale,
+                        type: CFRuleType.colorScale,
                         config: [],
                     },
                 } as unknown as IConditionFormatRule<IColorScale>;
@@ -99,7 +99,7 @@ export const OpenConditionalFormatOperator: ICommand = {
                     ...createDefaultRule,
                     ranges,
                     rule: {
-                        type: RuleType.dataBar,
+                        type: CFRuleType.dataBar,
                     },
                 } as unknown as IConditionFormatRule<IDataBar>;
                 conditionalFormatMenuController.openPanel(rule);
@@ -110,7 +110,7 @@ export const OpenConditionalFormatOperator: ICommand = {
                     ...createDefaultRule,
                     ranges,
                     rule: {
-                        type: RuleType.iconSet,
+                        type: CFRuleType.iconSet,
                         config: [],
                         isShowValue: true,
                     },

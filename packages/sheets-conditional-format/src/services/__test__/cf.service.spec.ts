@@ -16,7 +16,7 @@
 
 import { beforeEach, describe, expect, it } from 'vitest';
 import type { IAverageHighlightCell, IColorScale, IConditionFormatRule, IDataBar, INumberHighlightCell, IRankHighlightCell, ITextHighlightCell } from '../../models/type';
-import { NumberOperator, RuleType, SubRuleType, TextOperator, ValueType } from '../../base/const';
+import { CFNumberOperator, CFRuleType, CFSubRuleType, CFTextOperator, CFValueType } from '../../base/const';
 import { EMPTY_STYLE } from '../calculate-unit/type';
 import { createTestBed } from './test.util';
 
@@ -29,16 +29,16 @@ describe('Test conditional format service', () => {
 
     describe('Test highlight', () => {
         describe('Test Number', () => {
-            it(`Is ${NumberOperator.between}`, () => {
+            it(`Is ${CFNumberOperator.between}`, () => {
                 const params: IConditionFormatRule<INumberHighlightCell> = {
                     ranges: [{ startRow: 0, startColumn: 0, endRow: 2, endColumn: 2 }],
                     cfId: testBed.getConditionalFormatRuleModel().createCfId(testBed.unitId, testBed.subUnitId),
                     stopIfTrue: false,
                     rule: {
                         style: { bg: { rgb: '#2AEAEA' } },
-                        type: RuleType.highlightCell,
-                        subType: SubRuleType.number,
-                        operator: NumberOperator.between,
+                        type: CFRuleType.highlightCell,
+                        subType: CFSubRuleType.number,
+                        operator: CFNumberOperator.between,
                         value: [0, 10],
                     },
                 };
@@ -50,16 +50,16 @@ describe('Test conditional format service', () => {
                     expect(result).toEqual({ style: { bg: { rgb: '#2AEAEA' } } });
                 });
             });
-            it(`Is not ${NumberOperator.between}`, () => {
+            it(`Is not ${CFNumberOperator.between}`, () => {
                 const params: IConditionFormatRule<INumberHighlightCell> = {
                     ranges: [{ startRow: 0, startColumn: 0, endRow: 2, endColumn: 2 }],
                     cfId: testBed.getConditionalFormatRuleModel().createCfId(testBed.unitId, testBed.subUnitId),
                     stopIfTrue: false,
                     rule: {
                         style: { bg: { rgb: '#2AEAEA' } },
-                        type: RuleType.highlightCell,
-                        subType: SubRuleType.number,
-                        operator: NumberOperator.between,
+                        type: CFRuleType.highlightCell,
+                        subType: CFSubRuleType.number,
+                        operator: CFNumberOperator.between,
                         value: [5, 10],
                     },
                 };
@@ -71,16 +71,16 @@ describe('Test conditional format service', () => {
                     expect(result).toEqual({ style: EMPTY_STYLE });
                 });
             });
-            it(`Is ${NumberOperator.equal}`, () => {
+            it(`Is ${CFNumberOperator.equal}`, () => {
                 const params: IConditionFormatRule<INumberHighlightCell> = {
                     ranges: [{ startRow: 0, startColumn: 0, endRow: 2, endColumn: 2 }],
                     cfId: testBed.getConditionalFormatRuleModel().createCfId(testBed.unitId, testBed.subUnitId),
                     stopIfTrue: false,
                     rule: {
                         style: { bg: { rgb: '#2AEAEA' } },
-                        type: RuleType.highlightCell,
-                        subType: SubRuleType.number,
-                        operator: NumberOperator.equal,
+                        type: CFRuleType.highlightCell,
+                        subType: CFSubRuleType.number,
+                        operator: CFNumberOperator.equal,
                         value: 2,
                     },
                 };
@@ -92,16 +92,16 @@ describe('Test conditional format service', () => {
                     expect(result).toEqual({ style: { bg: { rgb: '#2AEAEA' } } });
                 });
             });
-            it(`Is not ${NumberOperator.equal}`, () => {
+            it(`Is not ${CFNumberOperator.equal}`, () => {
                 const params: IConditionFormatRule<INumberHighlightCell> = {
                     ranges: [{ startRow: 0, startColumn: 0, endRow: 2, endColumn: 2 }],
                     cfId: testBed.getConditionalFormatRuleModel().createCfId(testBed.unitId, testBed.subUnitId),
                     stopIfTrue: false,
                     rule: {
                         style: { bg: { rgb: '#2AEAEA' } },
-                        type: RuleType.highlightCell,
-                        subType: SubRuleType.number,
-                        operator: NumberOperator.equal,
+                        type: CFRuleType.highlightCell,
+                        subType: CFSubRuleType.number,
+                        operator: CFNumberOperator.equal,
                         value: 2,
                     },
                 };
@@ -113,16 +113,16 @@ describe('Test conditional format service', () => {
                     expect(result).toEqual({ style: EMPTY_STYLE });
                 });
             });
-            it(`Is ${NumberOperator.greaterThan}`, () => {
+            it(`Is ${CFNumberOperator.greaterThan}`, () => {
                 const params: IConditionFormatRule<INumberHighlightCell> = {
                     ranges: [{ startRow: 0, startColumn: 0, endRow: 2, endColumn: 2 }],
                     cfId: testBed.getConditionalFormatRuleModel().createCfId(testBed.unitId, testBed.subUnitId),
                     stopIfTrue: false,
                     rule: {
                         style: { bg: { rgb: '#2AEAEA' } },
-                        type: RuleType.highlightCell,
-                        subType: SubRuleType.number,
-                        operator: NumberOperator.greaterThan,
+                        type: CFRuleType.highlightCell,
+                        subType: CFSubRuleType.number,
+                        operator: CFNumberOperator.greaterThan,
                         value: 0,
                     },
                 };
@@ -134,16 +134,16 @@ describe('Test conditional format service', () => {
                     expect(result).toEqual({ style: { bg: { rgb: '#2AEAEA' } } });
                 });
             });
-            it(`Is not ${NumberOperator.greaterThan}`, () => {
+            it(`Is not ${CFNumberOperator.greaterThan}`, () => {
                 const params: IConditionFormatRule<INumberHighlightCell> = {
                     ranges: [{ startRow: 0, startColumn: 0, endRow: 2, endColumn: 2 }],
                     cfId: testBed.getConditionalFormatRuleModel().createCfId(testBed.unitId, testBed.subUnitId),
                     stopIfTrue: false,
                     rule: {
                         style: { bg: { rgb: '#2AEAEA' } },
-                        type: RuleType.highlightCell,
-                        subType: SubRuleType.number,
-                        operator: NumberOperator.greaterThan,
+                        type: CFRuleType.highlightCell,
+                        subType: CFSubRuleType.number,
+                        operator: CFNumberOperator.greaterThan,
                         value: 2,
                     },
                 };
@@ -155,16 +155,16 @@ describe('Test conditional format service', () => {
                     expect(result).toEqual({ style: EMPTY_STYLE });
                 });
             });
-            it(`Is ${NumberOperator.greaterThanOrEqual}`, () => {
+            it(`Is ${CFNumberOperator.greaterThanOrEqual}`, () => {
                 const params: IConditionFormatRule<INumberHighlightCell> = {
                     ranges: [{ startRow: 0, startColumn: 0, endRow: 2, endColumn: 2 }],
                     cfId: testBed.getConditionalFormatRuleModel().createCfId(testBed.unitId, testBed.subUnitId),
                     stopIfTrue: false,
                     rule: {
                         style: { bg: { rgb: '#2AEAEA' } },
-                        type: RuleType.highlightCell,
-                        subType: SubRuleType.number,
-                        operator: NumberOperator.greaterThanOrEqual,
+                        type: CFRuleType.highlightCell,
+                        subType: CFSubRuleType.number,
+                        operator: CFNumberOperator.greaterThanOrEqual,
                         value: 0,
                     },
                 };
@@ -176,16 +176,16 @@ describe('Test conditional format service', () => {
                     expect(result).toEqual({ style: { bg: { rgb: '#2AEAEA' } } });
                 });
             });
-            it(`Is not ${NumberOperator.greaterThanOrEqual}`, () => {
+            it(`Is not ${CFNumberOperator.greaterThanOrEqual}`, () => {
                 const params: IConditionFormatRule<INumberHighlightCell> = {
                     ranges: [{ startRow: 0, startColumn: 0, endRow: 2, endColumn: 2 }],
                     cfId: testBed.getConditionalFormatRuleModel().createCfId(testBed.unitId, testBed.subUnitId),
                     stopIfTrue: false,
                     rule: {
                         style: { bg: { rgb: '#2AEAEA' } },
-                        type: RuleType.highlightCell,
-                        subType: SubRuleType.number,
-                        operator: NumberOperator.greaterThanOrEqual,
+                        type: CFRuleType.highlightCell,
+                        subType: CFSubRuleType.number,
+                        operator: CFNumberOperator.greaterThanOrEqual,
                         value: 3,
                     },
                 };
@@ -197,58 +197,16 @@ describe('Test conditional format service', () => {
                     expect(result).toEqual({ style: EMPTY_STYLE });
                 });
             });
-            it(`Is ${NumberOperator.lessThan}`, () => {
+            it(`Is ${CFNumberOperator.lessThan}`, () => {
                 const params: IConditionFormatRule<INumberHighlightCell> = {
                     ranges: [{ startRow: 0, startColumn: 0, endRow: 2, endColumn: 2 }],
                     cfId: testBed.getConditionalFormatRuleModel().createCfId(testBed.unitId, testBed.subUnitId),
                     stopIfTrue: false,
                     rule: {
                         style: { bg: { rgb: '#2AEAEA' } },
-                        type: RuleType.highlightCell,
-                        subType: SubRuleType.number,
-                        operator: NumberOperator.lessThan,
-                        value: 3,
-                    },
-                };
-                testBed.getConditionalFormatRuleModel().addRule(testBed.unitId, testBed.subUnitId, params);
-                testBed.getConditionalFormatService().composeStyle(testBed.unitId, testBed.subUnitId, 1, 1);
-                const dispose = testBed.getConditionalFormatService().ruleComputeStatus$.subscribe(() => {
-                    dispose.unsubscribe();
-                    const result = testBed.getConditionalFormatService().composeStyle(testBed.unitId, testBed.subUnitId, 1, 1);
-                    expect(result).toEqual({ style: { bg: { rgb: '#2AEAEA' } } });
-                });
-            });
-            it(`Is not ${NumberOperator.lessThan}`, () => {
-                const params: IConditionFormatRule<INumberHighlightCell> = {
-                    ranges: [{ startRow: 0, startColumn: 0, endRow: 2, endColumn: 2 }],
-                    cfId: testBed.getConditionalFormatRuleModel().createCfId(testBed.unitId, testBed.subUnitId),
-                    stopIfTrue: false,
-                    rule: {
-                        style: { bg: { rgb: '#2AEAEA' } },
-                        type: RuleType.highlightCell,
-                        subType: SubRuleType.number,
-                        operator: NumberOperator.lessThan,
-                        value: 0,
-                    },
-                };
-                testBed.getConditionalFormatRuleModel().addRule(testBed.unitId, testBed.subUnitId, params);
-                testBed.getConditionalFormatService().composeStyle(testBed.unitId, testBed.subUnitId, 1, 1);
-                const dispose = testBed.getConditionalFormatService().ruleComputeStatus$.subscribe(() => {
-                    dispose.unsubscribe();
-                    const result = testBed.getConditionalFormatService().composeStyle(testBed.unitId, testBed.subUnitId, 1, 1);
-                    expect(result).toEqual({ style: EMPTY_STYLE });
-                });
-            });
-            it(`Is ${NumberOperator.lessThanOrEqual}`, () => {
-                const params: IConditionFormatRule<INumberHighlightCell> = {
-                    ranges: [{ startRow: 0, startColumn: 0, endRow: 2, endColumn: 2 }],
-                    cfId: testBed.getConditionalFormatRuleModel().createCfId(testBed.unitId, testBed.subUnitId),
-                    stopIfTrue: false,
-                    rule: {
-                        style: { bg: { rgb: '#2AEAEA' } },
-                        type: RuleType.highlightCell,
-                        subType: SubRuleType.number,
-                        operator: NumberOperator.lessThanOrEqual,
+                        type: CFRuleType.highlightCell,
+                        subType: CFSubRuleType.number,
+                        operator: CFNumberOperator.lessThan,
                         value: 3,
                     },
                 };
@@ -260,16 +218,16 @@ describe('Test conditional format service', () => {
                     expect(result).toEqual({ style: { bg: { rgb: '#2AEAEA' } } });
                 });
             });
-            it(`Is not ${NumberOperator.lessThanOrEqual}`, () => {
+            it(`Is not ${CFNumberOperator.lessThan}`, () => {
                 const params: IConditionFormatRule<INumberHighlightCell> = {
                     ranges: [{ startRow: 0, startColumn: 0, endRow: 2, endColumn: 2 }],
                     cfId: testBed.getConditionalFormatRuleModel().createCfId(testBed.unitId, testBed.subUnitId),
                     stopIfTrue: false,
                     rule: {
                         style: { bg: { rgb: '#2AEAEA' } },
-                        type: RuleType.highlightCell,
-                        subType: SubRuleType.number,
-                        operator: NumberOperator.lessThanOrEqual,
+                        type: CFRuleType.highlightCell,
+                        subType: CFSubRuleType.number,
+                        operator: CFNumberOperator.lessThan,
                         value: 0,
                     },
                 };
@@ -281,16 +239,58 @@ describe('Test conditional format service', () => {
                     expect(result).toEqual({ style: EMPTY_STYLE });
                 });
             });
-            it(`Is ${NumberOperator.notBetween}`, () => {
+            it(`Is ${CFNumberOperator.lessThanOrEqual}`, () => {
                 const params: IConditionFormatRule<INumberHighlightCell> = {
                     ranges: [{ startRow: 0, startColumn: 0, endRow: 2, endColumn: 2 }],
                     cfId: testBed.getConditionalFormatRuleModel().createCfId(testBed.unitId, testBed.subUnitId),
                     stopIfTrue: false,
                     rule: {
                         style: { bg: { rgb: '#2AEAEA' } },
-                        type: RuleType.highlightCell,
-                        subType: SubRuleType.number,
-                        operator: NumberOperator.notBetween,
+                        type: CFRuleType.highlightCell,
+                        subType: CFSubRuleType.number,
+                        operator: CFNumberOperator.lessThanOrEqual,
+                        value: 3,
+                    },
+                };
+                testBed.getConditionalFormatRuleModel().addRule(testBed.unitId, testBed.subUnitId, params);
+                testBed.getConditionalFormatService().composeStyle(testBed.unitId, testBed.subUnitId, 1, 1);
+                const dispose = testBed.getConditionalFormatService().ruleComputeStatus$.subscribe(() => {
+                    dispose.unsubscribe();
+                    const result = testBed.getConditionalFormatService().composeStyle(testBed.unitId, testBed.subUnitId, 1, 1);
+                    expect(result).toEqual({ style: { bg: { rgb: '#2AEAEA' } } });
+                });
+            });
+            it(`Is not ${CFNumberOperator.lessThanOrEqual}`, () => {
+                const params: IConditionFormatRule<INumberHighlightCell> = {
+                    ranges: [{ startRow: 0, startColumn: 0, endRow: 2, endColumn: 2 }],
+                    cfId: testBed.getConditionalFormatRuleModel().createCfId(testBed.unitId, testBed.subUnitId),
+                    stopIfTrue: false,
+                    rule: {
+                        style: { bg: { rgb: '#2AEAEA' } },
+                        type: CFRuleType.highlightCell,
+                        subType: CFSubRuleType.number,
+                        operator: CFNumberOperator.lessThanOrEqual,
+                        value: 0,
+                    },
+                };
+                testBed.getConditionalFormatRuleModel().addRule(testBed.unitId, testBed.subUnitId, params);
+                testBed.getConditionalFormatService().composeStyle(testBed.unitId, testBed.subUnitId, 1, 1);
+                const dispose = testBed.getConditionalFormatService().ruleComputeStatus$.subscribe(() => {
+                    dispose.unsubscribe();
+                    const result = testBed.getConditionalFormatService().composeStyle(testBed.unitId, testBed.subUnitId, 1, 1);
+                    expect(result).toEqual({ style: EMPTY_STYLE });
+                });
+            });
+            it(`Is ${CFNumberOperator.notBetween}`, () => {
+                const params: IConditionFormatRule<INumberHighlightCell> = {
+                    ranges: [{ startRow: 0, startColumn: 0, endRow: 2, endColumn: 2 }],
+                    cfId: testBed.getConditionalFormatRuleModel().createCfId(testBed.unitId, testBed.subUnitId),
+                    stopIfTrue: false,
+                    rule: {
+                        style: { bg: { rgb: '#2AEAEA' } },
+                        type: CFRuleType.highlightCell,
+                        subType: CFSubRuleType.number,
+                        operator: CFNumberOperator.notBetween,
                         value: [5, 7],
                     },
                 };
@@ -302,16 +302,16 @@ describe('Test conditional format service', () => {
                     expect(result).toEqual({ style: { bg: { rgb: '#2AEAEA' } } });
                 });
             });
-            it(`Is not ${NumberOperator.notBetween}`, () => {
+            it(`Is not ${CFNumberOperator.notBetween}`, () => {
                 const params: IConditionFormatRule<INumberHighlightCell> = {
                     ranges: [{ startRow: 0, startColumn: 0, endRow: 2, endColumn: 2 }],
                     cfId: testBed.getConditionalFormatRuleModel().createCfId(testBed.unitId, testBed.subUnitId),
                     stopIfTrue: false,
                     rule: {
                         style: { bg: { rgb: '#2AEAEA' } },
-                        type: RuleType.highlightCell,
-                        subType: SubRuleType.number,
-                        operator: NumberOperator.notBetween,
+                        type: CFRuleType.highlightCell,
+                        subType: CFSubRuleType.number,
+                        operator: CFNumberOperator.notBetween,
                         value: [0, 3],
                     },
                 };
@@ -323,16 +323,16 @@ describe('Test conditional format service', () => {
                     expect(result).toEqual({ style: EMPTY_STYLE });
                 });
             });
-            it(`Is ${NumberOperator.notEqual}`, () => {
+            it(`Is ${CFNumberOperator.notEqual}`, () => {
                 const params: IConditionFormatRule<INumberHighlightCell> = {
                     ranges: [{ startRow: 0, startColumn: 0, endRow: 2, endColumn: 2 }],
                     cfId: testBed.getConditionalFormatRuleModel().createCfId(testBed.unitId, testBed.subUnitId),
                     stopIfTrue: false,
                     rule: {
                         style: { bg: { rgb: '#2AEAEA' } },
-                        type: RuleType.highlightCell,
-                        subType: SubRuleType.number,
-                        operator: NumberOperator.notEqual,
+                        type: CFRuleType.highlightCell,
+                        subType: CFSubRuleType.number,
+                        operator: CFNumberOperator.notEqual,
                         value: 11,
                     },
                 };
@@ -344,16 +344,16 @@ describe('Test conditional format service', () => {
                     expect(result).toEqual({ style: { bg: { rgb: '#2AEAEA' } } });
                 });
             });
-            it(`Is not ${NumberOperator.notEqual}`, () => {
+            it(`Is not ${CFNumberOperator.notEqual}`, () => {
                 const params: IConditionFormatRule<INumberHighlightCell> = {
                     ranges: [{ startRow: 0, startColumn: 0, endRow: 2, endColumn: 2 }],
                     cfId: testBed.getConditionalFormatRuleModel().createCfId(testBed.unitId, testBed.subUnitId),
                     stopIfTrue: false,
                     rule: {
                         style: { bg: { rgb: '#2AEAEA' } },
-                        type: RuleType.highlightCell,
-                        subType: SubRuleType.number,
-                        operator: NumberOperator.notEqual,
+                        type: CFRuleType.highlightCell,
+                        subType: CFSubRuleType.number,
+                        operator: CFNumberOperator.notEqual,
                         value: 2,
                     },
                 };
@@ -367,16 +367,16 @@ describe('Test conditional format service', () => {
             });
         });
         describe('Test Text', () => {
-            it(`is ${TextOperator.beginsWith}`, () => {
+            it(`is ${CFTextOperator.beginsWith}`, () => {
                 const params: IConditionFormatRule<ITextHighlightCell> = {
                     ranges: [{ startRow: 0, startColumn: 0, endRow: 2, endColumn: 2 }],
                     cfId: testBed.getConditionalFormatRuleModel().createCfId(testBed.unitId, testBed.subUnitId),
                     stopIfTrue: false,
                     rule: {
                         style: { bg: { rgb: '#2AEAEA' } },
-                        type: RuleType.highlightCell,
-                        subType: SubRuleType.text,
-                        operator: TextOperator.beginsWith,
+                        type: CFRuleType.highlightCell,
+                        subType: CFSubRuleType.text,
+                        operator: CFTextOperator.beginsWith,
                         value: '2',
                     },
                 };
@@ -388,16 +388,16 @@ describe('Test conditional format service', () => {
                     expect(result).toEqual({ style: { bg: { rgb: '#2AEAEA' } } });
                 });
             });
-            it(`is not ${TextOperator.beginsWith}`, () => {
+            it(`is not ${CFTextOperator.beginsWith}`, () => {
                 const params: IConditionFormatRule<ITextHighlightCell> = {
                     ranges: [{ startRow: 0, startColumn: 0, endRow: 2, endColumn: 2 }],
                     cfId: testBed.getConditionalFormatRuleModel().createCfId(testBed.unitId, testBed.subUnitId),
                     stopIfTrue: false,
                     rule: {
                         style: { bg: { rgb: '#2AEAEA' } },
-                        type: RuleType.highlightCell,
-                        subType: SubRuleType.text,
-                        operator: TextOperator.beginsWith,
+                        type: CFRuleType.highlightCell,
+                        subType: CFSubRuleType.text,
+                        operator: CFTextOperator.beginsWith,
                         value: '11',
                     },
                 };
@@ -410,16 +410,16 @@ describe('Test conditional format service', () => {
                 });
             });
 
-            it(`is ${TextOperator.endsWith}`, () => {
+            it(`is ${CFTextOperator.endsWith}`, () => {
                 const params: IConditionFormatRule<ITextHighlightCell> = {
                     ranges: [{ startRow: 0, startColumn: 0, endRow: 2, endColumn: 2 }],
                     cfId: testBed.getConditionalFormatRuleModel().createCfId(testBed.unitId, testBed.subUnitId),
                     stopIfTrue: false,
                     rule: {
                         style: { bg: { rgb: '#2AEAEA' } },
-                        type: RuleType.highlightCell,
-                        subType: SubRuleType.text,
-                        operator: TextOperator.endsWith,
+                        type: CFRuleType.highlightCell,
+                        subType: CFSubRuleType.text,
+                        operator: CFTextOperator.endsWith,
                         value: '2',
                     },
                 };
@@ -431,16 +431,16 @@ describe('Test conditional format service', () => {
                     expect(result).toEqual({ style: { bg: { rgb: '#2AEAEA' } } });
                 });
             });
-            it(`is not ${TextOperator.endsWith}`, () => {
+            it(`is not ${CFTextOperator.endsWith}`, () => {
                 const params: IConditionFormatRule<ITextHighlightCell> = {
                     ranges: [{ startRow: 0, startColumn: 0, endRow: 2, endColumn: 2 }],
                     cfId: testBed.getConditionalFormatRuleModel().createCfId(testBed.unitId, testBed.subUnitId),
                     stopIfTrue: false,
                     rule: {
                         style: { bg: { rgb: '#2AEAEA' } },
-                        type: RuleType.highlightCell,
-                        subType: SubRuleType.text,
-                        operator: TextOperator.endsWith,
+                        type: CFRuleType.highlightCell,
+                        subType: CFSubRuleType.text,
+                        operator: CFTextOperator.endsWith,
                         value: '11',
                     },
                 };
@@ -453,16 +453,16 @@ describe('Test conditional format service', () => {
                 });
             });
 
-            it(`is ${TextOperator.containsText}`, () => {
+            it(`is ${CFTextOperator.containsText}`, () => {
                 const params: IConditionFormatRule<ITextHighlightCell> = {
                     ranges: [{ startRow: 0, startColumn: 0, endRow: 2, endColumn: 2 }],
                     cfId: testBed.getConditionalFormatRuleModel().createCfId(testBed.unitId, testBed.subUnitId),
                     stopIfTrue: false,
                     rule: {
                         style: { bg: { rgb: '#2AEAEA' } },
-                        type: RuleType.highlightCell,
-                        subType: SubRuleType.text,
-                        operator: TextOperator.containsText,
+                        type: CFRuleType.highlightCell,
+                        subType: CFSubRuleType.text,
+                        operator: CFTextOperator.containsText,
                         value: '2',
                     },
                 };
@@ -474,16 +474,16 @@ describe('Test conditional format service', () => {
                     expect(result).toEqual({ style: { bg: { rgb: '#2AEAEA' } } });
                 });
             });
-            it(`is not ${TextOperator.containsText}`, () => {
+            it(`is not ${CFTextOperator.containsText}`, () => {
                 const params: IConditionFormatRule<ITextHighlightCell> = {
                     ranges: [{ startRow: 0, startColumn: 0, endRow: 2, endColumn: 2 }],
                     cfId: testBed.getConditionalFormatRuleModel().createCfId(testBed.unitId, testBed.subUnitId),
                     stopIfTrue: false,
                     rule: {
                         style: { bg: { rgb: '#2AEAEA' } },
-                        type: RuleType.highlightCell,
-                        subType: SubRuleType.text,
-                        operator: TextOperator.containsText,
+                        type: CFRuleType.highlightCell,
+                        subType: CFSubRuleType.text,
+                        operator: CFTextOperator.containsText,
                         value: '11',
                     },
                 };
@@ -495,16 +495,16 @@ describe('Test conditional format service', () => {
                     expect(result).toEqual({ style: EMPTY_STYLE });
                 });
             });
-            it(`is ${TextOperator.equal}`, () => {
+            it(`is ${CFTextOperator.equal}`, () => {
                 const params: IConditionFormatRule<ITextHighlightCell> = {
                     ranges: [{ startRow: 0, startColumn: 0, endRow: 2, endColumn: 2 }],
                     cfId: testBed.getConditionalFormatRuleModel().createCfId(testBed.unitId, testBed.subUnitId),
                     stopIfTrue: false,
                     rule: {
                         style: { bg: { rgb: '#2AEAEA' } },
-                        type: RuleType.highlightCell,
-                        subType: SubRuleType.text,
-                        operator: TextOperator.containsText,
+                        type: CFRuleType.highlightCell,
+                        subType: CFSubRuleType.text,
+                        operator: CFTextOperator.containsText,
                         value: '2',
                     },
                 };
@@ -516,16 +516,16 @@ describe('Test conditional format service', () => {
                     expect(result).toEqual({ style: { bg: { rgb: '#2AEAEA' } } });
                 });
             });
-            it(`is not ${TextOperator.equal}`, () => {
+            it(`is not ${CFTextOperator.equal}`, () => {
                 const params: IConditionFormatRule<ITextHighlightCell> = {
                     ranges: [{ startRow: 0, startColumn: 0, endRow: 2, endColumn: 2 }],
                     cfId: testBed.getConditionalFormatRuleModel().createCfId(testBed.unitId, testBed.subUnitId),
                     stopIfTrue: false,
                     rule: {
                         style: { bg: { rgb: '#2AEAEA' } },
-                        type: RuleType.highlightCell,
-                        subType: SubRuleType.text,
-                        operator: TextOperator.containsText,
+                        type: CFRuleType.highlightCell,
+                        subType: CFSubRuleType.text,
+                        operator: CFTextOperator.containsText,
                         value: '11',
                     },
                 };
@@ -537,16 +537,16 @@ describe('Test conditional format service', () => {
                     expect(result).toEqual({ style: EMPTY_STYLE });
                 });
             });
-            it(`is ${TextOperator.notEqual}`, () => {
+            it(`is ${CFTextOperator.notEqual}`, () => {
                 const params: IConditionFormatRule<ITextHighlightCell> = {
                     ranges: [{ startRow: 0, startColumn: 0, endRow: 2, endColumn: 2 }],
                     cfId: testBed.getConditionalFormatRuleModel().createCfId(testBed.unitId, testBed.subUnitId),
                     stopIfTrue: false,
                     rule: {
                         style: { bg: { rgb: '#2AEAEA' } },
-                        type: RuleType.highlightCell,
-                        subType: SubRuleType.text,
-                        operator: TextOperator.notEqual,
+                        type: CFRuleType.highlightCell,
+                        subType: CFSubRuleType.text,
+                        operator: CFTextOperator.notEqual,
                         value: '22',
                     },
                 };
@@ -558,16 +558,16 @@ describe('Test conditional format service', () => {
                     expect(result).toEqual({ style: { bg: { rgb: '#2AEAEA' } } });
                 });
             });
-            it(`is not ${TextOperator.notEqual}`, () => {
+            it(`is not ${CFTextOperator.notEqual}`, () => {
                 const params: IConditionFormatRule<ITextHighlightCell> = {
                     ranges: [{ startRow: 0, startColumn: 0, endRow: 2, endColumn: 2 }],
                     cfId: testBed.getConditionalFormatRuleModel().createCfId(testBed.unitId, testBed.subUnitId),
                     stopIfTrue: false,
                     rule: {
                         style: { bg: { rgb: '#2AEAEA' } },
-                        type: RuleType.highlightCell,
-                        subType: SubRuleType.text,
-                        operator: TextOperator.notEqual,
+                        type: CFRuleType.highlightCell,
+                        subType: CFSubRuleType.text,
+                        operator: CFTextOperator.notEqual,
                         value: '2',
                     },
                 };
@@ -579,16 +579,16 @@ describe('Test conditional format service', () => {
                     expect(result).toEqual({ style: EMPTY_STYLE });
                 });
             });
-            it(`is ${TextOperator.notContainsText}`, () => {
+            it(`is ${CFTextOperator.notContainsText}`, () => {
                 const params: IConditionFormatRule<ITextHighlightCell> = {
                     ranges: [{ startRow: 0, startColumn: 0, endRow: 2, endColumn: 2 }],
                     cfId: testBed.getConditionalFormatRuleModel().createCfId(testBed.unitId, testBed.subUnitId),
                     stopIfTrue: false,
                     rule: {
                         style: { bg: { rgb: '#2AEAEA' } },
-                        type: RuleType.highlightCell,
-                        subType: SubRuleType.text,
-                        operator: TextOperator.notEqual,
+                        type: CFRuleType.highlightCell,
+                        subType: CFSubRuleType.text,
+                        operator: CFTextOperator.notEqual,
                         value: '11',
                     },
                 };
@@ -600,16 +600,16 @@ describe('Test conditional format service', () => {
                     expect(result).toEqual({ style: { bg: { rgb: '#2AEAEA' } } });
                 });
             });
-            it(`is not ${TextOperator.notContainsText}`, () => {
+            it(`is not ${CFTextOperator.notContainsText}`, () => {
                 const params: IConditionFormatRule<ITextHighlightCell> = {
                     ranges: [{ startRow: 0, startColumn: 0, endRow: 2, endColumn: 2 }],
                     cfId: testBed.getConditionalFormatRuleModel().createCfId(testBed.unitId, testBed.subUnitId),
                     stopIfTrue: false,
                     rule: {
                         style: { bg: { rgb: '#2AEAEA' } },
-                        type: RuleType.highlightCell,
-                        subType: SubRuleType.text,
-                        operator: TextOperator.notEqual,
+                        type: CFRuleType.highlightCell,
+                        subType: CFSubRuleType.text,
+                        operator: CFTextOperator.notEqual,
                         value: '2',
                     },
                 };
@@ -623,16 +623,16 @@ describe('Test conditional format service', () => {
             });
         });
         describe('Test average', () => {
-            it(`is ${NumberOperator.greaterThanOrEqual} average`, () => {
+            it(`is ${CFNumberOperator.greaterThanOrEqual} average`, () => {
                 const params: IConditionFormatRule<IAverageHighlightCell> = {
                     ranges: [{ startRow: 0, startColumn: 0, endRow: 2, endColumn: 2 }],
                     cfId: testBed.getConditionalFormatRuleModel().createCfId(testBed.unitId, testBed.subUnitId),
                     stopIfTrue: false,
                     rule: {
                         style: { bg: { rgb: '#2AEAEA' } },
-                        type: RuleType.highlightCell,
-                        subType: SubRuleType.average,
-                        operator: NumberOperator.greaterThanOrEqual,
+                        type: CFRuleType.highlightCell,
+                        subType: CFSubRuleType.average,
+                        operator: CFNumberOperator.greaterThanOrEqual,
                     },
                 };
                 testBed.getConditionalFormatRuleModel().addRule(testBed.unitId, testBed.subUnitId, params);
@@ -643,16 +643,16 @@ describe('Test conditional format service', () => {
                     expect(result).toEqual({ style: { bg: { rgb: '#2AEAEA' } } });
                 });
             });
-            it(`is ${NumberOperator.lessThanOrEqual} average`, () => {
+            it(`is ${CFNumberOperator.lessThanOrEqual} average`, () => {
                 const params: IConditionFormatRule<IAverageHighlightCell> = {
                     ranges: [{ startRow: 0, startColumn: 0, endRow: 2, endColumn: 2 }],
                     cfId: testBed.getConditionalFormatRuleModel().createCfId(testBed.unitId, testBed.subUnitId),
                     stopIfTrue: false,
                     rule: {
                         style: { bg: { rgb: '#2AEAEA' } },
-                        type: RuleType.highlightCell,
-                        subType: SubRuleType.average,
-                        operator: NumberOperator.lessThanOrEqual,
+                        type: CFRuleType.highlightCell,
+                        subType: CFSubRuleType.average,
+                        operator: CFNumberOperator.lessThanOrEqual,
                     },
                 };
                 testBed.getConditionalFormatRuleModel().addRule(testBed.unitId, testBed.subUnitId, params);
@@ -672,8 +672,8 @@ describe('Test conditional format service', () => {
                     stopIfTrue: false,
                     rule: {
                         style: { bg: { rgb: '#2AEAEA' } },
-                        type: RuleType.highlightCell,
-                        subType: SubRuleType.rank,
+                        type: CFRuleType.highlightCell,
+                        subType: CFSubRuleType.rank,
                         isBottom: true,
                         isPercent: false,
                         value: 2,
@@ -694,8 +694,8 @@ describe('Test conditional format service', () => {
                     stopIfTrue: false,
                     rule: {
                         style: { bg: { rgb: '#2AEAEA' } },
-                        type: RuleType.highlightCell,
-                        subType: SubRuleType.rank,
+                        type: CFRuleType.highlightCell,
+                        subType: CFSubRuleType.rank,
                         isBottom: true,
                         isPercent: false,
                         value: 6,
@@ -720,10 +720,10 @@ describe('Test conditional format service', () => {
                     cfId: testBed.getConditionalFormatRuleModel().createCfId(testBed.unitId, testBed.subUnitId),
                     stopIfTrue: false,
                     rule: {
-                        type: RuleType.dataBar,
+                        type: CFRuleType.dataBar,
                         config: {
-                            min: { value: 2, type: ValueType.num },
-                            max: { value: 5, type: ValueType.num },
+                            min: { value: 2, type: CFValueType.num },
+                            max: { value: 5, type: CFValueType.num },
                             isGradient: true,
                             positiveColor: '#abd91a',
                             nativeColor: '#ffbe38',
@@ -784,19 +784,19 @@ describe('Test conditional format service', () => {
                     cfId: testBed.getConditionalFormatRuleModel().createCfId(testBed.unitId, testBed.subUnitId),
                     stopIfTrue: false,
                     rule: {
-                        type: RuleType.colorScale,
+                        type: CFRuleType.colorScale,
                         config: [{
                             index: 0,
                             color: '#d0d9fb',
                             value: {
-                                type: ValueType.min,
+                                type: CFValueType.min,
                             },
                         },
                         {
                             index: 1,
                             color: '#2e55ef',
                             value: {
-                                type: ValueType.max,
+                                type: CFValueType.max,
                             },
                         }],
                     },

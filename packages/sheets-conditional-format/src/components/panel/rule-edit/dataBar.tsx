@@ -19,7 +19,7 @@ import { InputNumber, Radio, RadioGroup, Select } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { TextEditor } from '@univerjs/ui';
-import { createDefaultValueByValueType, RuleType, SHEET_CONDITION_FORMAT_PLUGIN, ValueType } from '../../../base/const';
+import { CFRuleType, CFValueType, createDefaultValueByValueType, SHEET_CONDITION_FORMAT_PLUGIN } from '../../../base/const';
 import type { IConditionalFormatRuleConfig, IValueConfig } from '../../../models/type';
 import { ColorPicker } from '../../color-picker';
 import stylesBase from '../index.module.less';
@@ -27,16 +27,16 @@ import { Preview } from '../../preview';
 import styles from './index.module.less';
 import type { IStyleEditorProps } from './type';
 
-const createOptionItem = (text: ValueType, localeService: LocaleService) => ({ label: localeService.t(`sheet.cf.valueType.${text}`), value: text });
+const createOptionItem = (text: CFValueType, localeService: LocaleService) => ({ label: localeService.t(`sheet.cf.valueType.${text}`), value: text });
 
-const InputText = (props: { disabled?: boolean; id: string; className: string; type: ValueType;value: string | number;onChange: (v: string | number) => void }) => {
+const InputText = (props: { disabled?: boolean; id: string; className: string; type: CFValueType;value: string | number;onChange: (v: string | number) => void }) => {
     const { onChange, className, value, type, id, disabled = false } = props;
     const univerInstanceService = useDependency(IUniverInstanceService);
     const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
     const subUnitId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
     const _value = useRef(value);
     const config = useMemo(() => {
-        if ([ValueType.percentile, ValueType.percent].includes(type)) {
+        if ([CFValueType.percentile, CFValueType.percent].includes(type)) {
             return {
                 max: 100,
                 min: 0,
@@ -46,7 +46,7 @@ const InputText = (props: { disabled?: boolean; id: string; className: string; t
             min: Number.MIN_SAFE_INTEGER, max: Number.MAX_SAFE_INTEGER,
         };
     }, [type]);
-    if (type === ValueType.formula) {
+    if (type === CFValueType.formula) {
         const v = String(_value.current).startsWith('=') ? String(_value.current) || '' : '=';
         return (
             <TextEditor
@@ -80,7 +80,7 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
     const { interceptorManager } = props;
     const localeService = useDependency(LocaleService);
 
-    const rule = props.rule?.type === RuleType.dataBar ? props.rule : undefined;
+    const rule = props.rule?.type === CFRuleType.dataBar ? props.rule : undefined;
     const [isGradient, isGradientSet] = useState(() => {
         const defaultV = '0';
         if (!rule) {
@@ -102,18 +102,18 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
         }
         return rule.config?.nativeColor || defaultV;
     });
-    const commonOptions = [createOptionItem(ValueType.num, localeService), createOptionItem(ValueType.percent, localeService), createOptionItem(ValueType.percentile, localeService), createOptionItem(ValueType.formula, localeService)];
-    const minOptions = [createOptionItem(ValueType.min, localeService), ...commonOptions];
-    const maxOptions = [createOptionItem(ValueType.max, localeService), ...commonOptions];
-    const [minValueType, minValueTypeSet] = useState<ValueType>(() => {
-        const defaultV = minOptions[0].value as ValueType;
+    const commonOptions = [createOptionItem(CFValueType.num, localeService), createOptionItem(CFValueType.percent, localeService), createOptionItem(CFValueType.percentile, localeService), createOptionItem(CFValueType.formula, localeService)];
+    const minOptions = [createOptionItem(CFValueType.min, localeService), ...commonOptions];
+    const maxOptions = [createOptionItem(CFValueType.max, localeService), ...commonOptions];
+    const [minValueType, minValueTypeSet] = useState<CFValueType>(() => {
+        const defaultV = minOptions[0].value as CFValueType;
         if (!rule) {
             return defaultV;
         }
         return rule.config?.min.type || defaultV;
     });
-    const [maxValueType, maxValueTypeSet] = useState<ValueType>(() => {
-        const defaultV = maxOptions[0].value as ValueType;
+    const [maxValueType, maxValueTypeSet] = useState<CFValueType>(() => {
+        const defaultV = maxOptions[0].value as CFValueType;
         if (!rule) {
             return defaultV;
         }
@@ -125,7 +125,7 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
             return defaultV;
         }
         const value = rule.config?.min || {};
-        if (value.type === ValueType.formula) {
+        if (value.type === CFValueType.formula) {
             return value.value || '=';
         }
         return value.value || defaultV;
@@ -136,15 +136,15 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
             return defaultV;
         }
         const value = rule.config?.max || {};
-        if (value.type === ValueType.formula) {
+        if (value.type === CFValueType.formula) {
             return value.value || '=';
         }
         return value.value === undefined ? defaultV : value.value;
     });
 
-    const getResult = (option: { minValueType: ValueType ;
+    const getResult = (option: { minValueType: CFValueType ;
                                  minValue: number | string;
-                                 maxValueType: ValueType ;
+                                 maxValueType: CFValueType ;
                                  maxValue: number | string;
                                  isGradient: string;
                                  positiveColor: string;
@@ -160,7 +160,7 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
             positiveColor: option.positiveColor,
             nativeColor: option.nativeColor,
         };
-        return { config, type: RuleType.dataBar };
+        return { config, type: CFRuleType.dataBar };
     };
     useEffect(() => {
         const dispose = interceptorManager.intercept(interceptorManager.getInterceptPoints().submit, {
@@ -171,9 +171,9 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
         return dispose as () => void;
     }, [isGradient, minValue, minValueType, maxValue, maxValueType, positiveColor, nativeColor, interceptorManager]);
 
-    const _handleChange = (option: { minValueType: ValueType ;
+    const _handleChange = (option: { minValueType: CFValueType ;
                                      minValue: number | string;
-                                     maxValueType: ValueType ;
+                                     maxValueType: CFValueType ;
                                      maxValue: number | string;
                                      isGradient: string;
                                      positiveColor: string;
@@ -192,7 +192,7 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
     };
 
     const isShowInput = (type: string) => {
-        return commonOptions.map((item) => item.value).includes(type as ValueType);
+        return commonOptions.map((item) => item.value).includes(type as CFValueType);
     };
 
     return (
@@ -252,10 +252,10 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                         options={minOptions}
                         value={minValueType}
                         onChange={(v) => {
-                            minValueTypeSet(v as ValueType);
-                            const value = createDefaultValueByValueType(v as ValueType, 10);
+                            minValueTypeSet(v as CFValueType);
+                            const value = createDefaultValueByValueType(v as CFValueType, 10);
                             minValueSet(value);
-                            _handleChange({ isGradient, minValue: value, minValueType: v as ValueType, maxValue, maxValueType, positiveColor, nativeColor });
+                            _handleChange({ isGradient, minValue: value, minValueType: v as CFValueType, maxValue, maxValueType, positiveColor, nativeColor });
                         }}
                     />
 
@@ -277,10 +277,10 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                         options={maxOptions}
                         value={maxValueType}
                         onChange={(v) => {
-                            maxValueTypeSet(v as ValueType);
-                            const value = createDefaultValueByValueType(v as ValueType, 90);
+                            maxValueTypeSet(v as CFValueType);
+                            const value = createDefaultValueByValueType(v as CFValueType, 90);
                             maxValueSet(value);
-                            _handleChange({ isGradient, minValue, minValueType, maxValue: value, maxValueType: v as ValueType, positiveColor, nativeColor });
+                            _handleChange({ isGradient, minValue, minValueType, maxValue: value, maxValueType: v as CFValueType, positiveColor, nativeColor });
                         }}
                     />
                     <InputText

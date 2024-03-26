@@ -22,7 +22,7 @@ import {
 } from '@univerjs/core';
 import { ConditionalFormatRuleModel } from '../../models/conditional-format-rule-model';
 import type { IConditionFormatRule, IRankHighlightCell } from '../../models/type';
-import { RuleType, SubRuleType } from '../../base/const';
+import { CFRuleType, CFSubRuleType } from '../../base/const';
 import type { IAddConditionalRuleMutationParams } from '../mutations/addConditionalRule.mutation';
 import { addConditionalRuleMutation } from '../mutations/addConditionalRule.mutation';
 
@@ -54,8 +54,8 @@ export const addRankCfCommand: ICommand<IAddRankCfParams> = {
         const cfId = conditionalFormatRuleModel.createCfId(unitId, subUnitId);
         const rule: IConditionFormatRule = { ranges, cfId, stopIfTrue: !!stopIfTrue,
                                              rule: {
-                                                 type: RuleType.highlightCell,
-                                                 subType: SubRuleType.rank,
+                                                 type: CFRuleType.highlightCell,
+                                                 subType: CFSubRuleType.rank,
                                                  isPercent,
                                                  isBottom,
                                                  style,

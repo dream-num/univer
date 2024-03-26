@@ -19,7 +19,7 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import { IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { InputNumber, Select } from '@univerjs/design';
 import { TextEditor } from '@univerjs/ui';
-import { createDefaultValueByValueType, RuleType, SHEET_CONDITION_FORMAT_PLUGIN, ValueType } from '../../../base/const';
+import { CFRuleType, CFValueType, createDefaultValueByValueType, SHEET_CONDITION_FORMAT_PLUGIN } from '../../../base/const';
 import { ColorPicker } from '../../color-picker';
 import type { IColorScale, IConditionalFormatRuleConfig } from '../../../models/type';
 import stylesBase from '../index.module.less';
@@ -29,7 +29,7 @@ import type { IStyleEditorProps } from './type';
 
 const createOptionItem = (text: string, localeService: LocaleService) => ({ label: localeService.t(`sheet.cf.valueType.${text}`), value: text });
 
-const TextInput = (props: { id: string; type: ValueType | 'none';value: number | string;onChange: (v: number | string) => void; className: string }) => {
+const TextInput = (props: { id: string; type: CFValueType | 'none';value: number | string;onChange: (v: number | string) => void; className: string }) => {
     const { type, className, onChange, id, value } = props;
     const univerInstanceService = useDependency(IUniverInstanceService);
     const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
@@ -38,10 +38,10 @@ const TextInput = (props: { id: string; type: ValueType | 'none';value: number |
         return String(value).startsWith('=') ? String(value) : '=';
     }, [value]);
     const config = useMemo(() => {
-        if ([ValueType.max, ValueType.min, 'none'].includes(type as ValueType)) {
+        if ([CFValueType.max, CFValueType.min, 'none'].includes(type as CFValueType)) {
             return { disabled: true };
         }
-        if ([ValueType.percent, ValueType.percentile].includes(type as ValueType)) {
+        if ([CFValueType.percent, CFValueType.percentile].includes(type as CFValueType)) {
             return {
                 min: 0, max: 100,
             };
@@ -50,7 +50,7 @@ const TextInput = (props: { id: string; type: ValueType | 'none';value: number |
             min: Number.MIN_SAFE_INTEGER, max: Number.MAX_SAFE_INTEGER,
         };
     }, [type]);
-    if (type === ValueType.formula) {
+    if (type === CFValueType.formula) {
         return (
             <TextEditor
                 openForSheetSubUnitId={subUnitId}
@@ -74,20 +74,20 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
     const { interceptorManager } = props;
     const localeService = useDependency(LocaleService);
 
-    const rule = props.rule?.type === RuleType.colorScale ? props.rule : undefined as IColorScale | undefined;
-    const commonOptions = [createOptionItem(ValueType.num, localeService), createOptionItem(ValueType.percent, localeService), createOptionItem(ValueType.percentile, localeService), createOptionItem(ValueType.formula, localeService)];
-    const minOptions = [createOptionItem(ValueType.min, localeService), ...commonOptions];
+    const rule = props.rule?.type === CFRuleType.colorScale ? props.rule : undefined as IColorScale | undefined;
+    const commonOptions = [createOptionItem(CFValueType.num, localeService), createOptionItem(CFValueType.percent, localeService), createOptionItem(CFValueType.percentile, localeService), createOptionItem(CFValueType.formula, localeService)];
+    const minOptions = [createOptionItem(CFValueType.min, localeService), ...commonOptions];
     const medianOptions = [createOptionItem('none', localeService), ...commonOptions];
-    const maxOptions = [createOptionItem(ValueType.max, localeService), ...commonOptions];
+    const maxOptions = [createOptionItem(CFValueType.max, localeService), ...commonOptions];
 
     const [minType, minTypeSet] = useState(() => {
-        const defaultV = ValueType.min;
+        const defaultV = CFValueType.min;
         if (!rule) {
             return defaultV;
         }
         return rule.config[0]?.value.type || defaultV;
     });
-    const [medianType, medianTypeSet] = useState<ValueType | 'none'>(() => {
+    const [medianType, medianTypeSet] = useState<CFValueType | 'none'>(() => {
         const defaultV = 'none';
         if (!rule) {
             return defaultV;
@@ -98,7 +98,7 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
         return rule.config[1]?.value.type || defaultV;
     });
     const [maxType, maxTypeSet] = useState(() => {
-        const defaultV = ValueType.max;
+        const defaultV = CFValueType.max;
         if (!rule) {
             return defaultV;
         }
@@ -183,7 +183,7 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
         medianType !== 'none' && list.push({ color: medianColor, value: { type: medianType, value: medianValue } });
         list.push({ color: maxColor, value: { type: maxType, value: maxValue } });
         const config: IColorScale['config'] = list.map((item, index) => ({ ...item, index }));
-        return { config, type: RuleType.colorScale };
+        return { config, type: CFRuleType.colorScale };
     }, []);
 
     useEffect(() => {
@@ -220,10 +220,10 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
                     options={minOptions}
                     value={minType}
                     onChange={(v) => {
-                        minTypeSet(v as ValueType);
-                        const value = createDefaultValueByValueType(v as ValueType, 10);
+                        minTypeSet(v as CFValueType);
+                        const value = createDefaultValueByValueType(v as CFValueType, 10);
                         minValueSet(value);
-                        handleChange({ minType: v as ValueType, medianType, maxType, minValue: value, medianValue, maxValue, minColor, medianColor, maxColor });
+                        handleChange({ minType: v as CFValueType, medianType, maxType, minValue: value, medianValue, maxValue, minColor, medianColor, maxColor });
                     }}
                 />
                 <TextInput
@@ -251,10 +251,10 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
                     options={medianOptions}
                     value={medianType}
                     onChange={(v) => {
-                        medianTypeSet(v as ValueType);
-                        const value = createDefaultValueByValueType(v as ValueType, 50);
+                        medianTypeSet(v as CFValueType);
+                        const value = createDefaultValueByValueType(v as CFValueType, 50);
                         medianValueSet(value);
-                        handleChange({ minType, medianType: v as ValueType, maxType, minValue, medianValue: value, maxValue, minColor, medianColor, maxColor });
+                        handleChange({ minType, medianType: v as CFValueType, maxType, minValue, medianValue: value, maxValue, minColor, medianColor, maxColor });
                     }}
                 />
 
@@ -286,10 +286,10 @@ export const ColorScaleStyleEditor = (props: IStyleEditorProps) => {
                     options={maxOptions}
                     value={maxType}
                     onChange={(v) => {
-                        maxTypeSet(v as ValueType);
-                        const value = createDefaultValueByValueType(v as ValueType, 90);
+                        maxTypeSet(v as CFValueType);
+                        const value = createDefaultValueByValueType(v as CFValueType, 90);
                         maxValueSet(value);
-                        handleChange({ minType, medianType, maxType: v as ValueType, minValue, medianValue, maxValue: value, minColor, medianColor, maxColor });
+                        handleChange({ minType, medianType, maxType: v as CFValueType, minValue, medianValue, maxValue: value, minColor, medianColor, maxColor });
                     }}
                 />
                 <TextInput

@@ -15,7 +15,7 @@
  */
 
 import type { IRange, IStyleBase } from '@univerjs/core';
-import type { NumberOperator, RuleType, SubRuleType, TextOperator, TimePeriodOperator, ValueType } from '../base/const';
+import type { CFNumberOperator, CFRuleType, CFSubRuleType, CFTextOperator, CFTimePeriodOperator, CFValueType } from '../base/const';
 import type { IIconType } from './icon-map';
 
 export interface IBaseCfRule {
@@ -23,61 +23,61 @@ export interface IBaseCfRule {
 }
 export interface IHighlightCell extends IBaseCfRule {
     style: IStyleBase;
-    type: RuleType.highlightCell; // cellIs
-    subType: SubRuleType;
+    type: CFRuleType.highlightCell; // cellIs
+    subType: CFSubRuleType;
 }
 
 export interface IValueConfig {
-    type: ValueType;
+    type: CFValueType;
     value?: number | string;
 }
 
 export interface IUniqueValuesHighlightCell extends IHighlightCell {
-    subType: SubRuleType.uniqueValues;
+    subType: CFSubRuleType.uniqueValues;
 }
 export interface IDuplicateValuesHighlightCell extends IHighlightCell {
-    subType: SubRuleType.duplicateValues;
+    subType: CFSubRuleType.duplicateValues;
 }
 
 export interface IRankHighlightCell extends IHighlightCell {
-    subType: SubRuleType.rank; // top10
+    subType: CFSubRuleType.rank; // top10
     isBottom: boolean;
     isPercent: boolean;
     value: number;
 }
 
 export interface ITextHighlightCell extends IHighlightCell {
-    subType: SubRuleType.text;
-    operator: TextOperator;
+    subType: CFSubRuleType.text;
+    operator: CFTextOperator;
     value?: string;
 }
 
 export interface ITimePeriodHighlightCell extends IHighlightCell {
-    subType: SubRuleType.timePeriod;
-    operator: TimePeriodOperator;
+    subType: CFSubRuleType.timePeriod;
+    operator: CFTimePeriodOperator;
 }
 
 export interface IFormulaHighlightCell extends IHighlightCell {
-    subType: SubRuleType.formula;
+    subType: CFSubRuleType.formula;
     value: string;
 }
 export type INumberHighlightCell = ({
-    subType: SubRuleType.number;
-    operator: NumberOperator.between | NumberOperator.notBetween;
+    subType: CFSubRuleType.number;
+    operator: CFNumberOperator.between | CFNumberOperator.notBetween;
     value: [number, number];
 } & IHighlightCell) | ({
-    subType: SubRuleType.number;
-    operator: NumberOperator.equal | NumberOperator.notEqual | NumberOperator.greaterThan | NumberOperator.greaterThanOrEqual | NumberOperator.lessThanOrEqual | NumberOperator.lessThan;
+    subType: CFSubRuleType.number;
+    operator: CFNumberOperator.equal | CFNumberOperator.notEqual | CFNumberOperator.greaterThan | CFNumberOperator.greaterThanOrEqual | CFNumberOperator.lessThanOrEqual | CFNumberOperator.lessThan;
     value?: number;
 } & IHighlightCell);
 
 export interface IAverageHighlightCell extends IHighlightCell {
-    subType: SubRuleType.average;
-    operator: NumberOperator.greaterThan | NumberOperator.greaterThanOrEqual | NumberOperator.lessThan | NumberOperator.lessThanOrEqual | NumberOperator.equal | NumberOperator.notEqual;
+    subType: CFSubRuleType.average;
+    operator: CFNumberOperator.greaterThan | CFNumberOperator.greaterThanOrEqual | CFNumberOperator.lessThan | CFNumberOperator.lessThanOrEqual | CFNumberOperator.equal | CFNumberOperator.notEqual;
 }
 
 export interface IDataBar extends IBaseCfRule {
-    type: RuleType.dataBar;
+    type: CFRuleType.dataBar;
     config: {
         min: IValueConfig;
         max: IValueConfig;
@@ -88,14 +88,14 @@ export interface IDataBar extends IBaseCfRule {
 }
 
 export interface IColorScale extends IBaseCfRule {
-    type: RuleType.colorScale;
+    type: CFRuleType.colorScale;
     config: { index: number; color: string; value: IValueConfig }[];
 }
 
 export interface IIconSet extends IBaseCfRule {
-    type: RuleType.iconSet;
+    type: CFRuleType.iconSet;
     isShowValue: boolean;
-    config: { operator: NumberOperator;value: IValueConfig;iconType: IIconType; iconId: string }[];
+    config: { operator: CFNumberOperator;value: IValueConfig;iconType: IIconType; iconId: string }[];
 }
 
 export type IConditionalFormatRuleConfig = IColorScale | IDataBar | IUniqueValuesHighlightCell |

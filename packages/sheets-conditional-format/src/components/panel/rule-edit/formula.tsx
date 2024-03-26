@@ -18,7 +18,7 @@ import React, { useEffect, useState } from 'react';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { TextEditor } from '@univerjs/ui';
-import { RuleType, SHEET_CONDITION_FORMAT_PLUGIN, SubRuleType } from '../../../base/const';
+import { CFRuleType, CFSubRuleType, SHEET_CONDITION_FORMAT_PLUGIN } from '../../../base/const';
 import { ConditionalStyleEditor } from '../../conditional-style-editor';
 import type { IAverageHighlightCell, IConditionalFormatRuleConfig, IHighlightCell, IRankHighlightCell } from '../../../models/type';
 import stylesBase from '../index.module.less';
@@ -33,11 +33,11 @@ export const FormulaStyleEditor = (props: IStyleEditorProps) => {
     const workbook = univerInstanceService.getCurrentUniverSheetInstance();
     const worksheet = workbook.getActiveSheet();
 
-    const rule = props.rule?.type === RuleType.highlightCell ? props.rule : undefined as IRankHighlightCell | IAverageHighlightCell | undefined;
+    const rule = props.rule?.type === CFRuleType.highlightCell ? props.rule : undefined as IRankHighlightCell | IAverageHighlightCell | undefined;
 
     const [style, styleSet] = useState<IHighlightCell['style']>({});
     const [formula, formulaSet] = useState(() => {
-        if (rule?.subType === SubRuleType.formula) {
+        if (rule?.subType === CFSubRuleType.formula) {
             return rule.value;
         }
         return '=';
@@ -49,8 +49,8 @@ export const FormulaStyleEditor = (props: IStyleEditorProps) => {
     }) => {
         return { style: config.style,
                  value: formula,
-                 type: RuleType.highlightCell,
-                 subType: SubRuleType.formula };
+                 type: CFRuleType.highlightCell,
+                 subType: CFSubRuleType.formula };
     };
     useEffect(() => {
         const dispose = interceptorManager.intercept(interceptorManager.getInterceptPoints().submit, {

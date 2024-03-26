@@ -34,7 +34,7 @@ import { deleteCfCommand } from '../../../commands/commands/delete-cf.command';
 import type { IMoveCfCommand } from '../../../commands/commands/move-cf.command';
 import { moveCfCommand } from '../../../commands/commands/move-cf.command';
 import type { IConditionFormatRule } from '../../../models/type';
-import { RuleType, SubRuleType } from '../../../base/const';
+import { CFRuleType, CFSubRuleType } from '../../../base/const';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 import { Preview } from '../../preview';
@@ -50,41 +50,41 @@ interface IRuleListProps {
 const getRuleDescribe = (rule: IConditionFormatRule, localeService: LocaleService) => {
     const ruleConfig = rule.rule;
     switch (ruleConfig.type) {
-        case RuleType.colorScale:{
+        case CFRuleType.colorScale:{
             return localeService.t('sheet.cf.ruleType.colorScale');
         }
-        case RuleType.dataBar:{
+        case CFRuleType.dataBar:{
             return localeService.t('sheet.cf.ruleType.dataBar');
         }
-        case RuleType.iconSet:{
+        case CFRuleType.iconSet:{
             return localeService.t('sheet.cf.ruleType.iconSet');
         }
-        case RuleType.highlightCell:{
+        case CFRuleType.highlightCell:{
             switch (ruleConfig.subType) {
-                case SubRuleType.average:{
+                case CFSubRuleType.average:{
                     const operator = ruleConfig.operator;
                     return localeService.t(`sheet.cf.preview.describe.${operator}`, localeService.t('sheet.cf.subRuleType.average'));
                 }
-                case SubRuleType.duplicateValues:{
+                case CFSubRuleType.duplicateValues:{
                     return localeService.t('sheet.cf.subRuleType.duplicateValues');
                 }
-                case SubRuleType.uniqueValues:{
+                case CFSubRuleType.uniqueValues:{
                     return localeService.t('sheet.cf.subRuleType.uniqueValues');
                 }
-                case SubRuleType.number:{
+                case CFSubRuleType.number:{
                     const operator = ruleConfig.operator;
                     return localeService.t(`sheet.cf.preview.describe.${operator}`, ...Array.isArray(ruleConfig.value) ? (ruleConfig.value.map((e) => String(e))) : [String(ruleConfig.value || '')]);
                 }
-                case SubRuleType.text:{
+                case CFSubRuleType.text:{
                     const operator = ruleConfig.operator;
                     return localeService.t(`sheet.cf.preview.describe.${operator}`, ruleConfig.value || '');
                 }
 
-                case SubRuleType.timePeriod:{
+                case CFSubRuleType.timePeriod:{
                     const operator = ruleConfig.operator;
                     return localeService.t(`sheet.cf.preview.describe.${operator}`);
                 }
-                case SubRuleType.rank:{
+                case CFSubRuleType.rank:{
                     if (ruleConfig.isPercent) {
                         if (ruleConfig.isBottom) {
                             return localeService.t('sheet.cf.preview.describe.bottomNPercent', String(ruleConfig.value));
@@ -99,7 +99,7 @@ const getRuleDescribe = (rule: IConditionFormatRule, localeService: LocaleServic
                         }
                     }
                 }
-                case SubRuleType.formula:{
+                case CFSubRuleType.formula:{
                     return localeService.t('sheet.cf.ruleType.formula');
                 }
             }

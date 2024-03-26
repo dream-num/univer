@@ -17,7 +17,7 @@
 import type { IConditionFormatRule, ITextHighlightCell } from '../models/type';
 
 export const SHEET_CONDITION_FORMAT_PLUGIN = 'SHEET_CONDITION_FORMAT_PLUGIN';
-export enum TextOperator {
+export enum CFTextOperator {
     beginsWith = 'beginsWith',
     endsWith = 'endsWith',
     containsText = 'containsText',
@@ -29,7 +29,7 @@ export enum TextOperator {
     containsErrors = 'containsErrors',
     notContainsErrors = 'notContainsErrors',
 }
-export enum TimePeriodOperator {
+export enum CFTimePeriodOperator {
     today = 'today',
     yesterday = 'yesterday',
     tomorrow = 'tomorrow',
@@ -41,7 +41,7 @@ export enum TimePeriodOperator {
     lastWeek = 'lastWeek',
     nextWeek = 'nextWeek',
 }
-export enum NumberOperator {
+export enum CFNumberOperator {
     greaterThan = 'greaterThan',
     greaterThanOrEqual = 'greaterThanOrEqual',
     lessThan = 'lessThan',
@@ -52,13 +52,13 @@ export enum NumberOperator {
     notEqual = 'notEqual',
 }
 
-export enum RuleType {
+export enum CFRuleType {
     highlightCell = 'highlightCell',
     dataBar = 'dataBar',
     colorScale = 'colorScale',
     iconSet = 'iconSet',
 }
-export enum SubRuleType {
+export enum CFSubRuleType {
     uniqueValues = 'uniqueValues',
     duplicateValues = 'duplicateValues',
     rank = 'rank',
@@ -70,7 +70,7 @@ export enum SubRuleType {
 
 }
 
-export enum ValueType {
+export enum CFValueType {
     num = 'num',
     min = 'min',
     max = 'max',
@@ -88,19 +88,19 @@ export const createDefaultRule = () => ({
     cfId: undefined as unknown as string,
     ranges: [],
     stopIfTrue: false,
-    rule: { type: RuleType.highlightCell, subType: SubRuleType.text, operator: TextOperator.notContainsBlanks } as ITextHighlightCell,
+    rule: { type: CFRuleType.highlightCell, subType: CFSubRuleType.text, operator: CFTextOperator.notContainsBlanks } as ITextHighlightCell,
 } as IConditionFormatRule);
 
-export const createDefaultValue = (subType: SubRuleType, operator: TextOperator | NumberOperator | TimePeriodOperator) => {
+export const createDefaultValue = (subType: CFSubRuleType, operator: CFTextOperator | CFNumberOperator | CFTimePeriodOperator) => {
     switch (subType) {
-        case SubRuleType.text:{
-            if ([TextOperator.beginsWith, TextOperator.containsText, TextOperator.endsWith, TextOperator.equal, TextOperator.notContainsText, TextOperator.notEqual].includes(operator as TextOperator)) {
+        case CFSubRuleType.text:{
+            if ([CFTextOperator.beginsWith, CFTextOperator.containsText, CFTextOperator.endsWith, CFTextOperator.equal, CFTextOperator.notContainsText, CFTextOperator.notEqual].includes(operator as CFTextOperator)) {
                 return '';
             }
             break;
         }
-        case SubRuleType.number:{
-            if ([NumberOperator.between, NumberOperator.notBetween].includes(operator as NumberOperator)) {
+        case CFSubRuleType.number:{
+            if ([CFNumberOperator.between, CFNumberOperator.notBetween].includes(operator as CFNumberOperator)) {
                 return [10, 100] as [number, number];
             }
             return 10;
@@ -109,18 +109,18 @@ export const createDefaultValue = (subType: SubRuleType, operator: TextOperator 
     return '';
 };
 
-export const createDefaultValueByValueType = (type: ValueType, defaultValue?: number) => {
+export const createDefaultValueByValueType = (type: CFValueType, defaultValue?: number) => {
     switch (type) {
-        case ValueType.formula:{
+        case CFValueType.formula:{
             return '=';
         }
-        case ValueType.max:
-        case ValueType.min:{
+        case CFValueType.max:
+        case CFValueType.min:{
             return '';
         }
-        case ValueType.percent:
-        case ValueType.percentile:
-        case ValueType.num:{
+        case CFValueType.percent:
+        case CFValueType.percentile:
+        case CFValueType.num:{
             return defaultValue !== undefined ? defaultValue : 10;
         }
     }

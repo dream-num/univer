@@ -70,7 +70,7 @@ Highlights of Univer:
 | [Docs Big Data](https://www.univer.ai/examples/docs-big-data/)<br>1 million word Docs loading demo | [![](./docs/img/examples-docs-big-data.gif)](https://www.univer.ai/examples/docs-big-data/)                          |
 | [Docs Collaboration](https://univer.ai/pro-examples/docs-collaboration/)<br>Please open two windows or invite friends to experience Univer Docs collaboration together               | [![](./docs/img/pro-examples-docs-collaboration.gif)](https://univer.ai/pro-examples/docs-collaboration/)                           |
 | [Docs Collaboration Playground](https://univer.ai/pro-examples/docs-collaboration-playground/)<br>Demonstrate the process of collaboration. After A edits the document, how does B process it? Here is an interesting experiment    | [![](./docs/img/pro-examples-docs-collaboration-playground.gif)](https://univer.ai/pro-examples/docs-collaboration-playground/)    |
-| <h3>▶️ Univer Slides</h3>                    |                   |
+| <h3>🎨 Univer Slides</h3>                    |                   |
 | [Slides](https://www.univer.ai/examples/slides/)<br>A canvas presentation containing graphic text, floating pictures, tables and other elements                                  | [![](./docs/img/examples-slides.gif)](https://www.univer.ai/examples/slides/)                           |
 | <h3>🧩 Univer Innovation</h3>                    |                   |
 | [Zen Mode](https://github.com/dream-num/univer)<br>The cell of Sheet is a Doc?                                 | [![](./docs/img/zen-mode.gif)](https://github.com/dream-num/univer)                           |

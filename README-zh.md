@@ -72,7 +72,7 @@ Univer 的功能特性包括：
 | [Docs Big Data](https://www.univer.ai/examples/docs-big-data/)<br>100 万字 Docs 加载演示 | [![](./docs/img/examples-docs-big-data.gif)](https://www.univer.ai/examples/docs-big-data/)                          |
 | [Docs Collaboration](https://univer.ai/pro-examples/docs-collaboration/)<br>请打开两个窗口或者邀请小伙伴一起体验 Univer Docs 协同               | [![](./docs/img/pro-examples-docs-collaboration.gif)](https://univer.ai/pro-examples/docs-collaboration/)                           |
 | [Docs Collaboration Playground](https://univer.ai/pro-examples/docs-collaboration-playground/)<br>演示协同的过程，A 编辑文档后，B 到底是如何处理的？这里是一个有趣的实验    | [![](./docs/img/pro-examples-docs-collaboration-playground.gif)](https://univer.ai/pro-examples/docs-collaboration-playground/)    |
-| <h3>▶️ Univer Slides</h3>                    |                   |
+| <h3>🎨 Univer Slides</h3>                    |                   |
 | [Slides](https://www.univer.ai/examples/slides/)<br>一个包含图文本、浮动图片、表格等元素的画布演示                                  | [![](./docs/img/examples-slides.gif)](https://www.univer.ai/examples/slides/)                           |
 | <h3>🧩 Univer Innovation</h3>                    |                   |
 | [Zen Mode](https://github.com/dream-num/univer)<br>Sheet 的单元格是一个 Doc？                                  | [![](./docs/img/zen-mode.gif)](https://github.com/dream-num/univer)                           |

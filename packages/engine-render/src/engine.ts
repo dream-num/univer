@@ -718,6 +718,10 @@ export class Engine extends ThinEngine<Scene> {
     }
 
     private _matchMediaHandler() {
+        if (!window?.matchMedia) {
+            return;
+        }
+
         const mediaQueryList = window.matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`);
 
         mediaQueryList.addEventListener('change', this._handleMediaChange);

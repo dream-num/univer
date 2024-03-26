@@ -17,7 +17,7 @@
 import { RangeSelector, useEvent } from '@univerjs/ui';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { FormLayout, Input, Radio, RadioGroup, Select } from '@univerjs/design';
-import { deserializeRangeWithSheet, isReferenceString, serializeRange, serializeRangeWithSheet, serializeRangeWithSpreadsheet } from '@univerjs/engine-formula';
+import { deserializeRangeWithSheet, isReferenceString, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import type { IRange } from '@univerjs/core';
 import { IUniverInstanceService, LocaleService, Tools } from '@univerjs/core';

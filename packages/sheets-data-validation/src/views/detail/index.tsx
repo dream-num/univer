@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { DataValidationOperator, IDataValidationRuleBase, IDataValidationRuleOptions, IRange, ISheetDataValidationRule } from '@univerjs/core';
-import { DataValidationType, ICommandService, IUniverInstanceService, LocaleService } from '@univerjs/core';
+import type { DataValidationOperator, IDataValidationRuleBase, IDataValidationRuleOptions, ISheetDataValidationRule, IUnitRange } from '@univerjs/core';
+import { DataValidationType, ICommandService, isValidRange, LocaleService } from '@univerjs/core';
 import type { IUpdateDataValidationSettingCommandParams } from '@univerjs/data-validation';
 import { DataValidatorRegistryScope, DataValidatorRegistryService, RemoveDataValidationCommand, UpdateDataValidationOptionsCommand, UpdateDataValidationSettingCommand } from '@univerjs/data-validation';
 import { TWO_FORMULA_OPERATOR_COUNT } from '@univerjs/data-validation/types/const/two-formula-operators.js';
@@ -43,6 +43,8 @@ export function DataValidationDetail() {
     const validator = validatorService.getValidatorItem(localRule.type);
     const [showError, setShowError] = useState(false);
     const validators = validatorService.getValidatorsByScope(DataValidatorRegistryScope.SHEET);
+    const [localeRanges, setLocalRanges] = useState<IUnitRange[]>(() => localRule.ranges.map((i) => ({ unitId: '', sheetId: '', range: i })));
+
     if (!validator) {
         return null;
     }
@@ -59,7 +61,10 @@ export function DataValidationDetail() {
         }
     };
 
-    const handleUpdateRuleRanges = useEvent((ranges: IRange[]) => {
+    const handleUpdateRuleRanges = useEvent((unitRanges: IUnitRange[]) => {
+        setLocalRanges(unitRanges);
+        const ranges = unitRanges.filter((i) => (!i.unitId || i.unitId === unitId) && (!i.sheetId || i.sheetId === subUnitId)).map((i) => i.range);
+
         setLocalRule({
             ...localRule,
             ranges,
@@ -137,7 +142,7 @@ export function DataValidationDetail() {
     };
 
     const FormulaInput = componentManager.get(validator.formulaInput);
-    const rangeStr = localRule.ranges.map((range) => serializeRange(range)).join(',');
+    const rangeStr = localeRanges.map((i) => serializeRange(i.range)).join(',');
 
     const options: IDataValidationRuleOptions = getRuleOptions(localRule);
 
@@ -165,7 +170,11 @@ export function DataValidationDetail() {
                     openForSheetUnitId={unitId}
                     openForSheetSubUnitId={subUnitId}
                     onChange={(newRange) => {
-                        handleUpdateRuleRanges(newRange.filter((i) => (!i.unitId || i.unitId === unitId) && (!i.sheetId || i.sheetId === subUnitId)).map((i) => i.range));
+                        if (newRange.some((i) => !isValidRange(i.range) || i.range.endColumn < i.range.startColumn || i.range.endRow < i.range.startRow)) {
+                            return;
+                        }
+
+                        handleUpdateRuleRanges(newRange);
                     }}
 
                 />

@@ -729,5 +729,23 @@ describe('Test index', () => {
             expect(result).toStrictEqual([['Tom', ErrorType.VALUE, 'Tom', 'Tom', 'Tom', 'Tom'], ['Tom', ErrorType.REF, 'Sarah', ErrorType.VALUE, ErrorType.VALUE, 'Tom'], [ErrorType.NA, ErrorType.NA, ErrorType.NA, ErrorType.NA, ErrorType.NA, ErrorType.NA]]);
         });
     });
+    describe('Single base value object as referenceObject', () => {
+        it('Row number 1, column number 1', async () => {
+           // number
+            let result = await calculate('=INDEX(1,1,1)');
+
+            expect(result).toBe(1);
+
+          // boolean
+            result = await calculate('=INDEX(TRUE,1,1)');
+
+            expect(result).toBe(true);
+
+          // string
+            result = await calculate('=INDEX("Univer",1,1)');
+
+            expect(result).toBe('Univer');
+        });
+    });
     // supports array string
 });

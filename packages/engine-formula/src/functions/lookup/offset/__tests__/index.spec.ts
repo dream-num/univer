@@ -139,5 +139,11 @@ describe('Test offset', () => {
 
             expect(result).toStrictEqual([[4, 'B2']]);
         });
+
+        it('Single value object', async () => {
+            const result = await calculate('=OFFSET(1,1,1)');
+
+            expect(result).toBe(ErrorType.VALUE);
+        });
     });
 });

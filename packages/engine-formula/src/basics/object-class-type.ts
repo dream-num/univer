@@ -47,6 +47,10 @@ export class ObjectClassType extends Disposable {
         return false;
     }
 
+    isArray() {
+        return false;
+    }
+
     isValueObject() {
         return false;
     }

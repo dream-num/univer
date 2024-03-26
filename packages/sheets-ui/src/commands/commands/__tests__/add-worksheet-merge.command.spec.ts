@@ -54,8 +54,6 @@ import type { IDisposable, Injector } from '@wendellhu/redi';
 import { Subject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { InsertOrRemoveRowColController } from '@univerjs/sheets/controllers/insert-or-remove-row-col.controller.js';
-import { MoveRowsColsController } from '@univerjs/sheets/controllers/move-rows-cols.controller.js';
 import {
     AddWorksheetMergeAllCommand,
     AddWorksheetMergeCommand,
@@ -94,8 +92,6 @@ describe('Test add worksheet merge commands', () => {
             ],
             [RefRangeService],
             [MergeCellController],
-            [InsertOrRemoveRowColController],
-            [MoveRowsColsController],
         ]);
         univer = testBed.univer;
 
@@ -134,8 +130,6 @@ describe('Test add worksheet merge commands', () => {
 
         get(LocaleService).load({});
         get(MergeCellController);
-        get(InsertOrRemoveRowColController);
-        get(MoveRowsColsController);
 
         selectionManager = get(SelectionManagerService);
         selectionManager.setCurrentSelection({

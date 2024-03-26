@@ -28,7 +28,7 @@ export const FontFamily = (props: IFontFamilyProps) => {
 
     let viewValue = localeService.t(`fontFamily.${(`${value}` ?? '').replace(/\s/g, '')}`);
 
-    // Handle font family form copy paste.
+    // Handle font family from copy paste.
     if (viewValue.startsWith('fontFamily.') && typeof value === 'string') {
         viewValue = value.split(',')[0];
     }

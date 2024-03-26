@@ -335,21 +335,6 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
         );
     }, [configList]);
 
-    const handleClickIconList = (iconType: IIconType) => {
-        currentIconTypeSet(iconType);
-        const list = iconMap[iconType] || [];
-        const config = new Array(list.length).fill('').map((_e, index, list) => createDefaultConfigItem(iconType, index, list));
-        configListSet(config);
-    };
-
-    const handleChange = (keys: string[], v: unknown) => {
-        const oldV = get(configList, keys);
-        if (oldV !== v) {
-            set(configList, keys, v);
-            configListSet([...configList]);
-            errorMapSet(checkResult(configList));
-        }
-    };
     const checkResult = (_configList: typeof configList) => {
         const isTypeSame = _configList.reduce((pre, cur, index) => {
             if ((pre.preType && !pre.result) || _configList.length - 1 === index) {
@@ -390,6 +375,21 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
             return result;
         }
         return {};
+    };
+    const handleChange = (keys: string[], v: unknown) => {
+        const oldV = get(configList, keys);
+        if (oldV !== v) {
+            set(configList, keys, v);
+            configListSet([...configList]);
+            errorMapSet(checkResult(configList));
+        }
+    };
+    const handleClickIconList = (iconType: IIconType) => {
+        currentIconTypeSet(iconType);
+        const list = iconMap[iconType] || [];
+        const config = new Array(list.length).fill('').map((_e, index, list) => createDefaultConfigItem(iconType, index, list));
+        configListSet(config);
+        errorMapSet(checkResult(config));
     };
 
     useEffect(() => {

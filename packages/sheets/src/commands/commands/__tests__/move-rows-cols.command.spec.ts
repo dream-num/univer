@@ -37,7 +37,6 @@ import { RemoveWorksheetMergeMutation } from '../../mutations/remove-worksheet-m
 import { SetSelectionsOperation } from '../../operations/selection.operation';
 import type { IMoveColsCommandParams, IMoveRowsCommandParams } from '../move-rows-cols.command';
 import { MoveColsCommand, MoveRowsCommand } from '../move-rows-cols.command';
-import { MoveRowsColsController } from '../../../controllers/move-rows-cols.controller';
 import { createCommandTestBed } from './create-command-test-bed';
 
 describe('Test move rows cols', () => {
@@ -62,7 +61,6 @@ describe('Test move rows cols', () => {
             SetSelectionsOperation,
         ].forEach((c) => commandService.registerCommand(c));
         get(MergeCellController);
-        get(MoveRowsColsController);
         const selectionManagerService = get(SelectionManagerService);
         selectionManagerService.setCurrentSelection({
             pluginName: NORMAL_SELECTION_PLUGIN_NAME,
@@ -397,5 +395,5 @@ const TEST_ROWS_COLS_MOVE_DEMO: IWorkbookData = {
 };
 
 function createMoveRowsColsTestBed() {
-    return createCommandTestBed(Tools.deepClone(TEST_ROWS_COLS_MOVE_DEMO), [[MergeCellController], [RefRangeService], [MoveRowsColsController]]);
+    return createCommandTestBed(Tools.deepClone(TEST_ROWS_COLS_MOVE_DEMO), [[MergeCellController], [RefRangeService]]);
 }

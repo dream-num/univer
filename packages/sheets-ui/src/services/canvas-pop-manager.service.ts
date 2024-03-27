@@ -57,7 +57,8 @@ export class SheetCanvasPopManagerService extends Disposable {
     ) {
         const { scene, engine } = currentRender;
 
-        const cellInfo = skeleton.getCellByIndex(row, col);
+        const primaryWithCoord = skeleton.getCellByIndex(row, col);
+        const cellInfo = primaryWithCoord.isMergedMainCell ? primaryWithCoord.mergeInfo : primaryWithCoord;
 
         const { scaleX, scaleY } = scene.getAncestorScale();
 

@@ -307,6 +307,8 @@ export interface IEditorService {
 
     setFocusId(id: Nullable<string>): void;
     getFocusId(): Nullable<string>;
+
+    getFocusEditor(): Readonly<Nullable<Editor>>;
 }
 
 export class EditorService extends Disposable implements IEditorService, IDisposable {
@@ -365,6 +367,12 @@ export class EditorService extends Disposable implements IEditorService, IDispos
 
     getFocusId() {
         return this._focusEditorUnitId;
+    }
+
+    getFocusEditor() {
+        if (this._focusEditorUnitId) {
+            return this.getEditor(this._focusEditorUnitId);
+        }
     }
 
     isEditor(editorUnitId: string) {

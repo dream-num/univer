@@ -1349,8 +1349,8 @@ export const FUNCTION_LIST_STATISTICAL: IFunctionInfo[] = [
         abstract: 'formula.functionList.MAXIFS.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.MAXIFS.functionParameter.sumRange.name',
-                detail: 'formula.functionList.MAXIFS.functionParameter.sumRange.detail',
+                name: 'formula.functionList.MAXIFS.functionParameter.maxRange.name',
+                detail: 'formula.functionList.MAXIFS.functionParameter.maxRange.detail',
                 example: 'A1:A20',
                 require: 1,
                 repeat: 0,

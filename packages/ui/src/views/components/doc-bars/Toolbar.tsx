@@ -112,7 +112,7 @@ export function Toolbar(props: IToolbarProps) {
     useEffect(() => {
         function resize() {
             const wrapperWidth = toolbarRef.current?.clientWidth ?? 0;
-            const gap = 8;
+            const GAP = 8;
 
             const itemWidths = Object.entries(toolbarItemRefs.current)
                 .filter(([_, ref]) => {
@@ -121,13 +121,13 @@ export function Toolbar(props: IToolbarProps) {
                 .map(([_, ref]) => {
                     return {
                         key: ref.key,
-                        width: ref.el?.clientWidth + gap,
+                        width: ref.el?.clientWidth + GAP,
                     };
                 });
 
             const collapsedId: string[] = [];
 
-            let currentWidth = 148;
+            let currentWidth = 168;
             for (const item of itemWidths) {
                 currentWidth += item.width;
 

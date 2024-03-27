@@ -22,7 +22,7 @@ import clsx from 'clsx';
 import type { ComponentType } from 'react';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
-import { combineLatest, map } from 'rxjs';
+import { combineLatest, map, Observable } from 'rxjs';
 import type { IDisplayMenuItem, IMenuItem } from '../../../services/menu/menu';
 import { MenuGroup, MenuPosition } from '../../../services/menu/menu';
 import { IMenuService } from '../../../services/menu/menu.service';
@@ -73,7 +73,7 @@ export function Toolbar(props: IToolbarProps) {
     useEffect(() => {
         const activeItems = group.find((g) => g.name === position)?.menuItems ?? [];
         const filteredItems$ = combineLatest(
-            activeItems.map((item) => item.hidden$).filter((item) => !!item)
+            activeItems.map((item) => item.hidden$ ?? new Observable((observer) => observer.next(false)) as any)
         ).pipe(
             map((hiddenValues) => activeItems.filter((_, index) => !hiddenValues[index]))
         );
@@ -147,7 +147,7 @@ export function Toolbar(props: IToolbarProps) {
         return () => {
             observer.unobserve(document.body);
         };
-    }, [visibleItems, group]);
+    }, [visibleItems, group, position]);
 
     const toolbarGroups = useMemo(() => {
         return group

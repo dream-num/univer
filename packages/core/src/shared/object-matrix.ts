@@ -60,35 +60,18 @@ export function spliceArray<T>(
     count: number,
     o: IObjectArrayPrimitiveType<T> | IObjectMatrixPrimitiveType<T>
 ) {
-    const end = start + count;
-    const length = getArrayLength(o);
-    const array = o;
+    const length = Object.keys(o).reduce((max, key) => Math.max(max, Number.parseInt(key)), 0) + 1;
 
-    const diff = start - end;
-    const last = length;
-
-    // Delete the middle part of the table, move the following content forward.
-    if (end + count <= last) {
-        for (let i = end; i < last; i++) {
-            const item = array[i];
-            if (item !== undefined) {
-                array[i + diff] = array[i];
-            }
-            delete array[i];
-        }
-    } else {
-        // Delete the last part directly without moving or move half and delete half
-        for (let i = end; i < end + count; i++) {
-            const willMoveItem = array[i];
-            // move the item to the front
-            if (i + count <= length) {
-                if (willMoveItem !== undefined) {
-                    array[i + diff] = willMoveItem;
-                }
-                delete array[i];
-            } else {
-                // delete the last part
-                delete array[i + diff];
+    // 删除指定范围内的元素
+    for (let i = start; i < length; i++) {
+        if (i < start + count) {
+            // 如果在删除范围内，直接删除
+            delete o[i];
+        } else {
+            // 如果不在删除范围内，向前移动count个位置
+            if (o[i] !== undefined) {
+                o[i - count] = o[i];
+                delete o[i];
             }
         }
     }

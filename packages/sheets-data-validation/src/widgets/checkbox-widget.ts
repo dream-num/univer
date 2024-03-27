@@ -115,9 +115,16 @@ export class CheckboxRender implements IBaseDataValidationWidget {
             flipY: false,
         });
 
-        const m = transform.getMatrix();
-        ctx.save();
+        const cellWidth = primaryWithCoord.endX - primaryWithCoord.startX;
+        const cellHeight = primaryWithCoord.endY - primaryWithCoord.startY;
 
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(primaryWithCoord.startX, primaryWithCoord.startY, cellWidth, cellHeight);
+        ctx.clip();
+
+        ctx.save();
+        const m = transform.getMatrix();
         ctx.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
         const size = (style?.fs ?? 10) * 1.6;
 
@@ -128,6 +135,7 @@ export class CheckboxRender implements IBaseDataValidationWidget {
             fill: style?.cl?.rgb ?? '#BCBCBC',
         });
 
+        ctx.restore();
         ctx.restore();
     }
 

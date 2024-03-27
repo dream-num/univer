@@ -8,6 +8,17 @@
         .select {
             color: rgb(var(--text-color));
             width: 126px;
+            .select-selector {
+                border: none;
+                padding: 0;
+            }
+            .select-selection-item {
+                top: -2px;
+                left: 4px;
+            }
+            .select-selection-search-input {
+                cursor: pointer;
+            }
         }
         .btn-list {
             font-size: 16px;
@@ -29,6 +40,13 @@
                 &:hover {
                     background: rgb(var(--grey-300));
                 }
+            }
+            .disabled {
+                color: rgb(var(--grey-500));
+                display: flex;
+                align-items: center;
+                border-radius: 4px 4px 4px 4px;
+                padding: 4px;
             }
         }
     }
@@ -58,6 +76,9 @@
             }
         }
         &:hover {
+            background-color: rgb(var(--grey-100));
+        }
+        &.active {
             background-color: rgb(var(--grey-100));
         }
         .draggableHandle {
@@ -96,6 +117,11 @@
                 background-color: rgb(var(--grey-300));
             }
         }
+        & .active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
     }
     .grid-layout-wrap {
         width: calc(100% - 2 * var(--padding-sm) + 2 * var(--padding-xl));
@@ -105,4 +131,7 @@
             transition: none;
         }
     }
+}
+:global .react-grid-item.react-grid-placeholder {
+    background: rgb(var(--grey-300));
 }

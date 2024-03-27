@@ -88,7 +88,7 @@ export const createDefaultRule = () => ({
     cfId: undefined as unknown as string,
     ranges: [],
     stopIfTrue: false,
-    rule: { type: CFRuleType.highlightCell, subType: CFSubRuleType.text, operator: CFTextOperator.notContainsBlanks } as ITextHighlightCell,
+    rule: { type: CFRuleType.highlightCell, subType: CFSubRuleType.text, operator: CFTextOperator.containsText } as ITextHighlightCell,
 } as IConditionFormatRule);
 
 export const createDefaultValue = (subType: CFSubRuleType, operator: CFTextOperator | CFNumberOperator | CFTimePeriodOperator) => {

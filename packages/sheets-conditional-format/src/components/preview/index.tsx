@@ -16,6 +16,7 @@
 
 import React, { useMemo } from 'react';
 import { BooleanNumber, ColorKit } from '@univerjs/core';
+import { SlashSingle } from '@univerjs/icons';
 import type { IConditionalFormatRuleConfig } from '../../models/type';
 import { CFRuleType, DEFAULT_BG_COLOR, DEFAULT_FONT_COLOR } from '../../base/const';
 import { getColorScaleFromValue } from '../../services/calculate-unit/utils';
@@ -41,7 +42,7 @@ export const Preview = (props: { rule?: IConditionalFormatRuleConfig }) => {
             return rule.config.map((item) => {
                 const iconList = iconMap[item.iconType];
                 return iconList && iconList[Number(item.iconId)];
-            }).filter((icon) => !!icon);
+            });
         }
     }, [rule]);
     switch (rule.type) {
@@ -72,7 +73,7 @@ export const Preview = (props: { rule?: IConditionalFormatRuleConfig }) => {
         case CFRuleType.iconSet:{
             return iconSet && (
                 <div className={styles.cfPreview}>
-                    {iconSet.map((base64, index) => <img style={{ height: '100%' }} key={index} src={base64} />)}
+                    {iconSet.map((base64, index) => (base64 ? <img style={{ height: '100%' }} key={index} src={base64} /> : <SlashSingle key={index} />))}
                 </div>
             );
         }

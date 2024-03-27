@@ -21,7 +21,7 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import { ICommandService, IUniverInstanceService, LocaleService, Rectangle } from '@univerjs/core';
 import { SelectionManagerService, SetSelectionsOperation, SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { serializeRange } from '@univerjs/engine-formula';
-import { DeleteSingle, IncreaseSingle, MoreFunctionSingle } from '@univerjs/icons';
+import { DeleteSingle, IncreaseSingle, SequenceSingle } from '@univerjs/icons';
 import GridLayout from 'react-grid-layout';
 import { debounceTime, Observable } from 'rxjs';
 import { AddConditionalRuleMutation } from '../../../commands/mutations/add-conditional-rule.mutation';
@@ -122,6 +122,7 @@ export const RuleList = (props: IRuleListProps) => {
     const subUnitId = worksheet.getSheetId();
     const [selectValue, selectValueSet] = useState('2');
     const [fetchRuleListId, fetchRuleListIdSet] = useState(0);
+    const [draggingId, draggingIdSet] = useState<number>(-1);
     const [layoutWidth, layoutWidthSet] = useState(defaultWidth);
     const layoutContainerRef = useRef<HTMLDivElement>(null);
     const selectOption = [
@@ -240,7 +241,12 @@ export const RuleList = (props: IRuleListProps) => {
         commandService.executeCommand(DeleteCfCommand.id, { unitId, subUnitId, cfId: rule.cfId } as IDeleteCfCommandParams);
     };
 
+    const handleDragStart = (_layout: unknown, from: { y: number }) => {
+        draggingIdSet(from.y);
+    };
+
     const handleDragStop = (_layout: unknown, from: { y: number }, to: { y: number }) => {
+        draggingIdSet(-1);
         const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
         const subUnitId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
         const getSaveIndex = (index: number) => {
@@ -251,10 +257,11 @@ export const RuleList = (props: IRuleListProps) => {
         const targetCfId = ruleList[getSaveIndex(to.y)].cfId;
         commandService.executeCommand(moveCfCommand.id, { unitId, subUnitId, cfId, targetCfId } as IMoveCfCommand);
     };
-    const layout = ruleList.map((rule, index) => ({ i: rule.cfId, x: 0, w: 12, y: index, h: 1, isResizable: false }));
+
     const handleCreate = () => {
         props.onCreate();
     };
+
     const handleClear = () => {
         if (selectValue === '2') {
             commandService.executeCommand(ClearWorksheetCfCommand.id);
@@ -265,6 +272,9 @@ export const RuleList = (props: IRuleListProps) => {
             });
         }
     };
+
+    const layout = ruleList.map((rule, index) => ({ i: rule.cfId, x: 0, w: 12, y: index, h: 1, isResizable: false }));
+
     return (
         <div className={styles.cfRuleList}>
             <div className={styles.ruleSelector}>
@@ -280,11 +290,19 @@ export const RuleList = (props: IRuleListProps) => {
                             <IncreaseSingle />
                         </div>
                     </Tooltip>
-                    <Tooltip title={localeService.t('sheet.cf.panel.clear')} placement="bottom">
-                        <div className={`${styles.gap} ${styles.icon}`} onClick={handleClear}>
-                            <DeleteSingle />
-                        </div>
-                    </Tooltip>
+                    {ruleList.length
+                        ? (
+                            <Tooltip title={localeService.t('sheet.cf.panel.clear')} placement="bottom">
+                                <div className={`${styles.gap} ${styles.icon}`} onClick={handleClear}>
+                                    <DeleteSingle />
+                                </div>
+                            </Tooltip>
+                        )
+                        : (
+                            <div className={`${styles.gap}  ${styles.disabled}`}>
+                                <DeleteSingle />
+                            </div>
+                        )}
 
                 </div>
 
@@ -294,22 +312,23 @@ export const RuleList = (props: IRuleListProps) => {
                     ? (
                         <GridLayout
                             onDragStop={handleDragStop}
+                            onDragStart={handleDragStart}
                             layout={layout}
                             cols={12}
-                            rowHeight={42}
+                            rowHeight={60}
                             width={layoutWidth}
                             margin={[0, 10]}
                             draggableHandle=".draggableHandle"
                         >
-                            { ruleList.map((rule) => {
+                            { ruleList.map((rule, index) => {
                                 return (
-                                    <div key={`${rule.cfId}`} className={styles.reactGridItem}>
-                                        <div className={styles.ruleItem} onClick={() => onClick(rule)}>
+                                    <div key={`${rule.cfId}`}>
+                                        <div className={`${styles.ruleItem} ${draggingId === index ? styles.active : ''}`} onClick={() => onClick(rule)}>
                                             <div
                                                 className={`${styles.draggableHandle} draggableHandle`}
                                                 onClick={(e) => e.stopPropagation()}
                                             >
-                                                <MoreFunctionSingle />
+                                                <SequenceSingle />
                                             </div>
                                             <div className={styles.ruleDescribe}>
                                                 <div className={styles.ruleType}>{getRuleDescribe(rule, localeService)}</div>
@@ -317,7 +336,7 @@ export const RuleList = (props: IRuleListProps) => {
                                             </div>
                                             <div className={styles.preview}><Preview rule={rule.rule} /></div>
                                             <div
-                                                className={styles.deleteItem}
+                                                className={`${styles.deleteItem} ${draggingId === index ? styles.active : ''}`}
                                                 onClick={(e) => {
                                                     e.stopPropagation();
                                                     handleDelete(rule);

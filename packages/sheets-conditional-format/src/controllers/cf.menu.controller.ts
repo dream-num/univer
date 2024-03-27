@@ -38,8 +38,6 @@ export class ConditionalFormatMenuController extends Disposable {
     }
 
     openPanel(rule?: IConditionFormatRule) {
-        // eslint-disable-next-line no-console
-        console.log('openPanel', rule);
         const props = {
             header: { title: this._localeService.t('sheet.cf.title') },
             children: {

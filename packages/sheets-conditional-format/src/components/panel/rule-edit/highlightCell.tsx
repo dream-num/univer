@@ -105,8 +105,7 @@ const HighlightCellInput = (props: { type: IResult['subType'] | CFSubRuleType.du
                 };
                 return (
                     <div className={`${stylesBase.mTSm}`}>
-                        <InputNumber className={styles.width100} value={inputNumberValue} onChange={_onChange} />
-
+                        <InputNumber min={Number.MIN_SAFE_INTEGER} max={Number.MAX_SAFE_INTEGER} className={styles.width100} value={inputNumberValue} onChange={_onChange} />
                     </div>
                 );
             }
@@ -123,8 +122,8 @@ const HighlightCellInput = (props: { type: IResult['subType'] | CFSubRuleType.du
                 };
                 return (
                     <div className={`${stylesBase.mTSm} ${stylesBase.labelContainer} `}>
-                        <InputNumber value={inputNumberMin} onChange={onChangeMin} />
-                        <InputNumber className={`${stylesBase.mLSm}`} value={inputNumberMax} onChange={onChangeMax} />
+                        <InputNumber min={Number.MIN_SAFE_INTEGER} max={Number.MAX_SAFE_INTEGER} value={inputNumberMin} onChange={onChangeMin} />
+                        <InputNumber min={Number.MIN_SAFE_INTEGER} max={Number.MAX_SAFE_INTEGER} className={`${stylesBase.mLSm}`} value={inputNumberMax} onChange={onChangeMax} />
                     </div>
                 );
             }
@@ -136,39 +135,40 @@ const getOperatorOptions = (type: CFSubRuleType.duplicateValues | CFSubRuleType.
     switch (type) {
         case CFSubRuleType.text:{
             return [
-                createOptionItem(CFTextOperator.notContainsText, localeService),
                 createOptionItem(CFTextOperator.containsText, localeService),
-                createOptionItem(CFTextOperator.equal, localeService),
-                createOptionItem(CFTextOperator.notEqual, localeService),
+                createOptionItem(CFTextOperator.notContainsText, localeService),
                 createOptionItem(CFTextOperator.beginsWith, localeService),
                 createOptionItem(CFTextOperator.endsWith, localeService),
+                createOptionItem(CFTextOperator.equal, localeService),
+                createOptionItem(CFTextOperator.notEqual, localeService),
                 createOptionItem(CFTextOperator.containsBlanks, localeService),
                 createOptionItem(CFTextOperator.notContainsBlanks, localeService)];
         }
         case CFSubRuleType.number:{
             return [
-                createOptionItem(CFNumberOperator.greaterThan, localeService),
-                createOptionItem(CFNumberOperator.lessThan, localeService),
-                createOptionItem(CFNumberOperator.greaterThanOrEqual, localeService),
-                createOptionItem(CFNumberOperator.lessThanOrEqual, localeService),
-                createOptionItem(CFNumberOperator.equal, localeService),
-                createOptionItem(CFNumberOperator.notEqual, localeService),
                 createOptionItem(CFNumberOperator.between, localeService),
                 createOptionItem(CFNumberOperator.notBetween, localeService),
-
+                createOptionItem(CFNumberOperator.equal, localeService),
+                createOptionItem(CFNumberOperator.notEqual, localeService),
+                createOptionItem(CFNumberOperator.greaterThan, localeService),
+                createOptionItem(CFNumberOperator.greaterThanOrEqual, localeService),
+                createOptionItem(CFNumberOperator.lessThan, localeService),
+                createOptionItem(CFNumberOperator.lessThanOrEqual, localeService),
             ];
         }
         case CFSubRuleType.timePeriod:{
-            return [createOptionItem(CFTimePeriodOperator.last7Days, localeService),
-                createOptionItem(CFTimePeriodOperator.lastMonth, localeService),
-                createOptionItem(CFTimePeriodOperator.lastWeek, localeService),
-                createOptionItem(CFTimePeriodOperator.nextMonth, localeService),
-                createOptionItem(CFTimePeriodOperator.nextWeek, localeService),
-                createOptionItem(CFTimePeriodOperator.thisMonth, localeService),
-                createOptionItem(CFTimePeriodOperator.thisWeek, localeService),
-                createOptionItem(CFTimePeriodOperator.tomorrow, localeService),
+            return [
                 createOptionItem(CFTimePeriodOperator.yesterday, localeService),
-                createOptionItem(CFTimePeriodOperator.today, localeService)];
+                createOptionItem(CFTimePeriodOperator.today, localeService),
+                createOptionItem(CFTimePeriodOperator.tomorrow, localeService),
+                createOptionItem(CFTimePeriodOperator.last7Days, localeService),
+                createOptionItem(CFTimePeriodOperator.lastWeek, localeService),
+                createOptionItem(CFTimePeriodOperator.thisWeek, localeService),
+                createOptionItem(CFTimePeriodOperator.nextWeek, localeService),
+                createOptionItem(CFTimePeriodOperator.lastMonth, localeService),
+                createOptionItem(CFTimePeriodOperator.thisMonth, localeService),
+                createOptionItem(CFTimePeriodOperator.nextMonth, localeService),
+            ];
         }
     }
 };
@@ -216,7 +216,7 @@ export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, ITextHigh
         if (!rule) {
             return defaultV;
         }
-        const v = createDefaultValue(rule.subType, rule.operator);
+        const v = (rule as ITextHighlightCell | INumberHighlightCell).value ?? createDefaultValue(rule.subType, rule.operator);
         return v;
     });
 

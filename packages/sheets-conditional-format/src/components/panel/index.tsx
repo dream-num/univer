@@ -25,17 +25,21 @@ interface IConditionFormatPanelProps { rule?: IConditionFormatRule };
 export const ConditionFormatPanel = (props: IConditionFormatPanelProps) => {
     const [currentEditRule, currentEditRuleSet] = useState<IConditionFormatRule | undefined>(props.rule);
     const [isShowRuleEditor, isShowRuleEditorSet] = useState(!!props.rule);
+
     const createCfRule = () => {
         isShowRuleEditorSet(true);
     };
+
     const handleCancel = () => {
         isShowRuleEditorSet(false);
         currentEditRuleSet(undefined);
     };
+
     const handleRuleClick = (rule: IConditionFormatRule) => {
         currentEditRuleSet(rule);
         isShowRuleEditorSet(true);
     };
+
     return (
         <div className={styles.conditionalFormatWrap}>
             {isShowRuleEditor

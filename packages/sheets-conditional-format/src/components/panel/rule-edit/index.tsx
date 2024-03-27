@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { IRange, IUnitRange } from '@univerjs/core';
 import { ICommandService, InterceptorManager, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
@@ -22,7 +22,8 @@ import { serializeRange } from '@univerjs/engine-formula';
 import { Button, Select } from '@univerjs/design';
 
 import { RangeSelector } from '@univerjs/ui';
-import { SelectionManagerService } from '@univerjs/sheets';
+import type { IRemoveSheetMutationParams } from '@univerjs/sheets';
+import { RemoveSheetMutation, SelectionManagerService, SetWorksheetActiveOperation } from '@univerjs/sheets';
 import type { IConditionFormatRule } from '../../../models/type';
 import { ConditionalFormatRuleModel } from '../../../models/conditional-format-rule-model';
 import { CFRuleType, CFSubRuleType, SHEET_CONDITION_FORMAT_PLUGIN } from '../../../base/const';
@@ -56,7 +57,6 @@ export const RuleEdit = (props: IRuleEditProps) => {
     const univerInstanceService = useDependency(IUniverInstanceService);
     const conditionalFormatRuleModel = useDependency(ConditionalFormatRuleModel);
     const selectionManagerService = useDependency(SelectionManagerService);
-
     const unitId = getUnitId(univerInstanceService);
     const subUnitId = getSubUnitId(univerInstanceService);
 
@@ -153,6 +153,24 @@ export const RuleEdit = (props: IRuleEditProps) => {
             }
         }
     }, [ruleType]);
+
+    useEffect(() => {
+        // If the child table which  the rule being edited is deleted, exit edit mode
+        if (props.rule?.cfId !== undefined) {
+            const disposable = commandService.onCommandExecuted((commandInfo) => {
+                if (commandInfo.id === RemoveSheetMutation.id) {
+                    const params = commandInfo.params as IRemoveSheetMutationParams;
+                    if (params.subUnitId === subUnitId && params.unitId === unitId) {
+                        props.onCancel();
+                    }
+                }
+                if (commandInfo.id === SetWorksheetActiveOperation.id) {
+                    props.onCancel();
+                }
+            });
+            return () => disposable.dispose();
+        }
+    }, [props.rule?.cfId]);
 
     const onStyleChange = (config: unknown) => {
         result.current = config as Parameters<IStyleEditorProps['onChange']>;

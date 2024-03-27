@@ -67,12 +67,20 @@ export function spliceArray<T>(
     const diff = start - end;
     const last = length;
 
-    for (let i = end; i < last; i++) {
-        const item = array[i];
-        if (item !== undefined) {
-            array[i + diff] = array[i];
+    // Delete the middle part of the table, move the following content forward.
+    if (end < last) {
+        for (let i = end; i < last; i++) {
+            const item = array[i];
+            if (item !== undefined) {
+                array[i + diff] = array[i];
+            }
+            delete array[i];
         }
-        delete array[i];
+    } else {
+        // Delete the last part directly without moving.
+        for (let i = start; i < last; i++) {
+            delete array[i];
+        }
     }
 }
 

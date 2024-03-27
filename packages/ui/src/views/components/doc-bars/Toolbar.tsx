@@ -27,7 +27,6 @@ import type { IDisplayMenuItem, IMenuItem } from '../../../services/menu/menu';
 import { MenuGroup, MenuPosition } from '../../../services/menu/menu';
 import { IMenuService } from '../../../services/menu/menu.service';
 import { ComponentContainer } from '../ComponentContainer';
-import { useObservable } from '../../../components/hooks/observable';
 import { ToolbarButton } from './Button/ToolbarButton';
 import styles from './index.module.less';
 import { ToolbarItem } from './ToolbarItem';

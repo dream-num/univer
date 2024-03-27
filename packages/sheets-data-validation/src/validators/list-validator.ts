@@ -57,7 +57,7 @@ export class ListValidator extends BaseDataValidator {
 
     private _parseCellValue(cellValue: CellValue, rule: IDataValidationRule) {
         const cellString = cellValue.toString();
-        return [cellString];
+        return deserializeListOptions(cellString);
     }
 
     override async parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): Promise<IFormulaResult<string[] | undefined>> {

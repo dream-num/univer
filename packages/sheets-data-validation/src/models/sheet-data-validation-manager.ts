@@ -205,10 +205,8 @@ export class SheetDataValidationManager extends DataValidationManager<ISheetData
             this._dataValidationCustomFormulaService.updateRuleRanges(this.unitId, this.subUnitId, ruleId, oldRule.ranges, payload.payload);
         } else if (payload.type === UpdateRuleType.SETTING) {
             this._dataValidationCacheService.markRangeDirty(this.unitId, this.subUnitId, oldRule.ranges);
-            if (payload.type === UpdateRuleType.SETTING) {
-                this._dataValidationFormulaService.updateRuleFormulaText(this.unitId, this.subUnitId, ruleId, payload.payload.formula1, payload.payload.formula2);
-                this._dataValidationCustomFormulaService.updateRuleFormula(this.unitId, this.subUnitId, ruleId, oldRule.ranges, payload.payload.formula1!);
-            }
+            this._dataValidationFormulaService.updateRuleFormulaText(this.unitId, this.subUnitId, ruleId, payload.payload.formula1, payload.payload.formula2);
+            this._dataValidationCustomFormulaService.updateRuleFormula(this.unitId, this.subUnitId, ruleId, oldRule.ranges, payload.payload.formula1!);
         }
 
         return super.updateRule(ruleId, payload);

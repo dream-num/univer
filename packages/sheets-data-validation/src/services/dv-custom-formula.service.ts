@@ -134,7 +134,6 @@ export class DataValidationCustomFormulaService extends Disposable {
             //     });
             // }
         }
-
         return {
             formulaMap,
             ruleFormulaMap,
@@ -308,12 +307,7 @@ export class DataValidationCustomFormulaService extends Disposable {
     updateRuleFormula(unitId: string, subUnitId: string, ruleId: string, ranges: IRange[], formula: string) {
         const { ruleFormulaMap } = this._ensureMaps(unitId, subUnitId);
         const current = ruleFormulaMap.get(ruleId);
-        if (!current) {
-            return;
-        }
-        const { formula: oldFormula } = current;
-
-        if (oldFormula !== formula) {
+        if (!current || current.formula !== formula) {
             this._addFormulaByRange(unitId, subUnitId, ruleId, formula, ranges);
         }
     }

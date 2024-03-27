@@ -63,22 +63,21 @@
         "build": "tsc && vite build"
     },
     "peerDependencies": {
-        "@univerjs/protocol": "workspace:*",
         "@wendellhu/redi": "0.13.0",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
+        "@univerjs/protocol": "^0.1.14",
         "dayjs": "^1.11.10",
         "nanoid": "5.0.6",
         "numeral": "^2.0.6"
     },
     "devDependencies": {
         "@types/numeral": "^2.0.5",
-        "@univerjs/protocol": "^0.1.0",
         "@univerjs/shared": "workspace:*",
         "@wendellhu/redi": "^0.13.0",
         "rxjs": "^7.8.1",
-        "typescript": "^5.4.2",
+        "typescript": "^5.4.3",
         "vite": "^5.1.6",
         "vitest": "^1.4.0"
     }

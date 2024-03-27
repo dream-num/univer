@@ -37,8 +37,8 @@ const transformDate = (value: Nullable<CellValue>) => {
         return undefined;
     }
 
-    if (typeof value === 'number') {
-        return dayjs(serialTimeToTimestamp(value));
+    if (typeof value === 'number' || !Number.isNaN(+value)) {
+        return dayjs(serialTimeToTimestamp(+value));
     }
 
     return dayjs(value);

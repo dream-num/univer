@@ -90,7 +90,7 @@ export class DateValidator extends BaseDataValidator<Dayjs> {
     }
 
     private _validatorSingleFormula(formula: string | undefined) {
-        return !Tools.isBlank(formula) && (!Number.isNaN(+formula!) || (Boolean(formula) && dayjs(formula).isValid()));
+        return !Tools.isBlank(formula) && (isFormulaString(formula) || !Number.isNaN(+formula!) || (Boolean(formula) && dayjs(formula).isValid()));
     }
 
     override validatorFormula(rule: IDataValidationRuleBase): IFormulaValidResult {

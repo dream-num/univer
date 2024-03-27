@@ -152,7 +152,7 @@ export class DropdownWidget implements IBaseDataValidationWidget {
         return `${row}.${col}`;
     }
 
-    private _drawDownIcon(ctx: UniverRenderingContext2D, primaryWithCoord: ISelectionCellWithCoord, cellWidth: number, cellHeight: number, vt: VerticalAlign) {
+    private _drawDownIcon(ctx: UniverRenderingContext2D, cellBounding: { startX: number;startY: number }, cellWidth: number, cellHeight: number, vt: VerticalAlign) {
         const left = cellWidth - ICON_PLACE + 4;
         let top = 4;
 
@@ -168,7 +168,7 @@ export class DropdownWidget implements IBaseDataValidationWidget {
         }
 
         ctx.save();
-        ctx.translateWithPrecision(primaryWithCoord.startX + left, primaryWithCoord.startY + top);
+        ctx.translateWithPrecision(cellBounding.startX + left, cellBounding.startY + top);
         ctx.fillStyle = '#565656';
         ctx.fill(downPath);
         ctx.restore();
@@ -176,8 +176,9 @@ export class DropdownWidget implements IBaseDataValidationWidget {
 
     drawWith(ctx: UniverRenderingContext2D, info: ICellRenderContext, skeleton: SpreadsheetSkeleton, spreadsheets: Spreadsheet): void {
         const { primaryWithCoord, row, col, style, data, subUnitId } = info;
-        const cellWidth = primaryWithCoord.endX - primaryWithCoord.startX;
-        const cellHeight = primaryWithCoord.endY - primaryWithCoord.startY;
+        const cellBounding = primaryWithCoord.isMergedMainCell ? primaryWithCoord.mergeInfo : primaryWithCoord;
+        const cellWidth = cellBounding.endX - cellBounding.startX;
+        const cellHeight = cellBounding.endY - cellBounding.startY;
         const map = this._ensureMap(subUnitId);
         const key = this._generateKey(row, col);
 
@@ -199,9 +200,9 @@ export class DropdownWidget implements IBaseDataValidationWidget {
         const activeItem = list.find((i) => i.label === valueStr);
 
         if (rule.renderMode === DataValidationRenderMode.ARROW) {
-            this._drawDownIcon(ctx, primaryWithCoord, cellWidth, cellHeight, vt);
+            this._drawDownIcon(ctx, cellBounding, cellWidth, cellHeight, vt);
             ctx.save();
-            ctx.translateWithPrecision(primaryWithCoord.startX, primaryWithCoord.startY);
+            ctx.translateWithPrecision(cellBounding.startX, cellBounding.startY);
             ctx.beginPath();
             ctx.rect(0, 0, cellWidth, cellHeight);
             ctx.clip();
@@ -247,14 +248,14 @@ export class DropdownWidget implements IBaseDataValidationWidget {
             ctx.restore();
 
             map.set(key, {
-                left: primaryWithCoord.endX + skeleton.rowHeaderWidth - ICON_PLACE,
-                top: primaryWithCoord.startY + skeleton.columnHeaderHeight,
+                left: cellBounding.endX + skeleton.rowHeaderWidth - ICON_PLACE,
+                top: cellBounding.startY + skeleton.columnHeaderHeight,
                 width: ICON_PLACE,
                 height: cellHeight,
             });
         } else {
             ctx.save();
-            ctx.translateWithPrecision(primaryWithCoord.startX, primaryWithCoord.startY);
+            ctx.translateWithPrecision(cellBounding.startX, cellBounding.startY);
             ctx.beginPath();
             ctx.rect(0, 0, cellWidth, cellHeight);
             ctx.clip();
@@ -309,8 +310,8 @@ export class DropdownWidget implements IBaseDataValidationWidget {
             ctx.restore();
 
             map.set(key, {
-                left: primaryWithCoord.startX + MARGIN_H + skeleton.rowHeaderWidth,
-                top: primaryWithCoord.startY + paddingTop + skeleton.columnHeaderHeight,
+                left: cellBounding.startX + MARGIN_H + skeleton.rowHeaderWidth,
+                top: cellBounding.startY + paddingTop + skeleton.columnHeaderHeight,
                 width: rectWidth,
                 height: rectHeight,
             });
@@ -319,7 +320,8 @@ export class DropdownWidget implements IBaseDataValidationWidget {
 
     calcCellAutoHeight(info: ICellRenderContext): number | undefined {
         const { primaryWithCoord, style, data } = info;
-        const cellWidth = primaryWithCoord.endX - primaryWithCoord.startX;
+        const cellBounding = primaryWithCoord.isMergedMainCell ? primaryWithCoord.mergeInfo : primaryWithCoord;
+        const cellWidth = cellBounding.endX - cellBounding.startX;
         const value = getCellValueOrigin(data);
         const valueStr = `${value ?? ''}`;
 

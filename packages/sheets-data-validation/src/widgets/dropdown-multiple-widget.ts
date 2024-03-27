@@ -49,7 +49,7 @@ export class DropdownMultipleWidget implements IBaseDataValidationWidget {
         return `${row}.${col}`;
     }
 
-    private _drawDownIcon(ctx: UniverRenderingContext2D, primaryWithCoord: ISelectionCellWithCoord, cellWidth: number, cellHeight: number, vt: VerticalAlign) {
+    private _drawDownIcon(ctx: UniverRenderingContext2D, cellBounding: { startX: number;startY: number }, cellWidth: number, cellHeight: number, vt: VerticalAlign) {
         const left = cellWidth - ICON_PLACE + 4;
         let top = 4;
 
@@ -65,7 +65,7 @@ export class DropdownMultipleWidget implements IBaseDataValidationWidget {
         }
 
         ctx.save();
-        ctx.translateWithPrecision(primaryWithCoord.startX + left, primaryWithCoord.startY + top);
+        ctx.translateWithPrecision(cellBounding.startX + left, cellBounding.startY + top);
         ctx.fillStyle = '#565656';
         ctx.fill(downPath);
         ctx.restore();
@@ -73,9 +73,10 @@ export class DropdownMultipleWidget implements IBaseDataValidationWidget {
 
     drawWith(ctx: UniverRenderingContext2D, info: ICellRenderContext, skeleton: SpreadsheetSkeleton, spreadsheets: Spreadsheet): void {
         const { primaryWithCoord, row, col, style, data, subUnitId } = info;
+        const cellBounding = primaryWithCoord.isMergedMainCell ? primaryWithCoord.mergeInfo : primaryWithCoord;
         const validation = data.dataValidation;
-        const cellWidth = primaryWithCoord.endX - primaryWithCoord.startX;
-        const cellHeight = primaryWithCoord.endY - primaryWithCoord.startY;
+        const cellWidth = cellBounding.endX - cellBounding.startX;
+        const cellHeight = cellBounding.endY - cellBounding.startY;
 
         const map = this._ensureMap(subUnitId);
         const key = this._generateKey(row, col);
@@ -94,9 +95,9 @@ export class DropdownMultipleWidget implements IBaseDataValidationWidget {
         const items = validator.parseCellValue(cellValue, rule);
         const labelColorMap = validator.getListWithColorMap(rule);
         const layout = layoutDropdowns(items, fontStyle, cellWidth, cellHeight);
-        this._drawDownIcon(ctx, primaryWithCoord, cellWidth, cellHeight, vt);
+        this._drawDownIcon(ctx, cellBounding, cellWidth, cellHeight, vt);
         ctx.save();
-        ctx.translateWithPrecision(primaryWithCoord.startX, primaryWithCoord.startY);
+        ctx.translateWithPrecision(cellBounding.startX, cellBounding.startY);
         ctx.beginPath();
         ctx.rect(0, 0, cellWidth - ICON_PLACE, cellHeight);
         ctx.clip();
@@ -146,8 +147,8 @@ export class DropdownMultipleWidget implements IBaseDataValidationWidget {
         ctx.restore();
 
         map.set(key, {
-            left: primaryWithCoord.startX,
-            top: primaryWithCoord.startY,
+            left: cellBounding.startX,
+            top: cellBounding.startY,
             width: layout.contentWidth + CELL_PADDING_H + ICON_PLACE,
             height: layout.contentHeight + CELL_PADDING_V * 2,
         });
@@ -155,12 +156,13 @@ export class DropdownMultipleWidget implements IBaseDataValidationWidget {
 
     calcCellAutoHeight(info: ICellRenderContext): number | undefined {
         const { primaryWithCoord, style, data } = info;
+        const cellBounding = primaryWithCoord.isMergedMainCell ? primaryWithCoord.mergeInfo : primaryWithCoord;
         const validation = data.dataValidation;
         if (!validation) {
             return undefined;
         }
-        const cellWidth = primaryWithCoord.endX - primaryWithCoord.startX;
-        const cellHeight = primaryWithCoord.endY - primaryWithCoord.startY;
+        const cellWidth = cellBounding.endX - cellBounding.startX;
+        const cellHeight = cellBounding.endY - cellBounding.startY;
         const cellValue = getCellValueOrigin(data) ?? '';
         const { rule, validator: _validator } = validation;
         const validator = _validator as ListMultipleValidator;
@@ -172,7 +174,8 @@ export class DropdownMultipleWidget implements IBaseDataValidationWidget {
 
     isHit(position: { x: number; y: number }, info: ICellRenderContext) {
         const { primaryWithCoord } = info;
-        const { endX } = primaryWithCoord;
+        const cellBounding = primaryWithCoord.isMergedMainCell ? primaryWithCoord.mergeInfo : primaryWithCoord;
+        const { endX } = cellBounding;
         const { x } = position;
         if (x >= endX - ICON_PLACE && x <= endX) {
             return true;

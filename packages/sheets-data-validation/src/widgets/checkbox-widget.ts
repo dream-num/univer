@@ -30,7 +30,7 @@ import { getCellValueOrigin } from '../utils/getCellDataOrigin';
 const MARGIN_H = 6;
 
 export class CheckboxRender implements IBaseDataValidationWidget {
-    private _calc(cellInfo: ISelectionCellWithCoord, style: Nullable<IStyleData>) {
+    private _calc(cellInfo: { startX: number; endX: number; startY: number;endY: number }, style: Nullable<IStyleData>) {
         const { vt, ht } = style || {};
         const width = cellInfo.endX - cellInfo.startX - (MARGIN_H * 2);
         const height = cellInfo.endY - cellInfo.startY;
@@ -90,6 +90,7 @@ export class CheckboxRender implements IBaseDataValidationWidget {
 
     drawWith(ctx: UniverRenderingContext2D, info: ICellRenderContext): void {
         const { style, data, primaryWithCoord, unitId, subUnitId } = info;
+        const cellBounding = primaryWithCoord.isMergedMainCell ? primaryWithCoord.mergeInfo : primaryWithCoord;
         const value = getCellValueOrigin(data);
         const rule = data.dataValidation?.rule;
         const validator = data.dataValidation?.validator as BaseDataValidator;
@@ -103,7 +104,7 @@ export class CheckboxRender implements IBaseDataValidationWidget {
 
         const { formula1 = CHECKBOX_FORMULA_1 } = rule;
 
-        const layout = this._calc(primaryWithCoord, style);
+        const layout = this._calc(cellBounding, style);
         const { a: scaleX, d: scaleY } = ctx.getTransform();
         const left = fixLineWidthByScale(layout.left, scaleX);
         const top = fixLineWidthByScale(layout.top, scaleY);
@@ -120,12 +121,12 @@ export class CheckboxRender implements IBaseDataValidationWidget {
             flipY: false,
         });
 
-        const cellWidth = primaryWithCoord.endX - primaryWithCoord.startX;
-        const cellHeight = primaryWithCoord.endY - primaryWithCoord.startY;
+        const cellWidth = cellBounding.endX - cellBounding.startX;
+        const cellHeight = cellBounding.endY - cellBounding.startY;
 
         ctx.save();
         ctx.beginPath();
-        ctx.rect(primaryWithCoord.startX, primaryWithCoord.startY, cellWidth, cellHeight);
+        ctx.rect(cellBounding.startX, cellBounding.startY, cellWidth, cellHeight);
         ctx.clip();
 
         ctx.save();
@@ -145,7 +146,8 @@ export class CheckboxRender implements IBaseDataValidationWidget {
     }
 
     isHit(evt: { x: number;y: number }, info: ICellRenderContext): boolean {
-        const layout = this._calc(info.primaryWithCoord, info.style);
+        const cellBounding = info.primaryWithCoord.isMergedMainCell ? info.primaryWithCoord.mergeInfo : info.primaryWithCoord;
+        const layout = this._calc(cellBounding, info.style);
         const startY = layout.top;
         const endY = layout.top + layout.height;
         const startX = layout.left;

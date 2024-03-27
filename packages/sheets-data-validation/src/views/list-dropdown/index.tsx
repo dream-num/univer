@@ -23,7 +23,7 @@ import { CheckMarkSingle } from '@univerjs/icons';
 import { Scrollbar } from '@univerjs/design';
 import { OpenValidationPanelOperation } from '@univerjs/data-validation';
 import type { ListMultipleValidator } from '../../validators/list-multiple-validator';
-import { deserializeListOptions, getDataValidationCellValue } from '../../validators/util';
+import { deserializeListOptions, getDataValidationCellValue, serializeListOptions } from '../../validators/util';
 import type { IDropdownComponentProps } from '../../services/dropdown-manager.service';
 import { DROP_DOWN_DEFAULT_COLOR } from '../../common/const';
 import styles from './index.module.less';
@@ -120,7 +120,7 @@ export function ListDropDown(props: IDropdownComponentProps) {
             value={value}
             multiple={multiple}
             onChange={(newValue) => {
-                const str = newValue.join(',');
+                const str = serializeListOptions(newValue);
                 const params: ISetRangeValuesCommandParams = {
                     unitId,
                     subUnitId,

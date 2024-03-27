@@ -56,7 +56,7 @@ export class ListMultipleValidator extends BaseDataValidator {
         if (!cellString) {
             return [];
         }
-        return cellString.split(',');
+        return deserializeListOptions(cellString);
     }
 
     override async parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): Promise<IFormulaResult<string[] | undefined>> {

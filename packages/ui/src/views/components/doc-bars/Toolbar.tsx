@@ -22,10 +22,12 @@ import clsx from 'clsx';
 import type { ComponentType } from 'react';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
+import { combineLatest, map } from 'rxjs';
 import type { IDisplayMenuItem, IMenuItem } from '../../../services/menu/menu';
 import { MenuGroup, MenuPosition } from '../../../services/menu/menu';
 import { IMenuService } from '../../../services/menu/menu.service';
 import { ComponentContainer } from '../ComponentContainer';
+import { useObservable } from '../../../components/hooks/observable';
 import { ToolbarButton } from './Button/ToolbarButton';
 import styles from './index.module.less';
 import { ToolbarItem } from './ToolbarItem';
@@ -55,7 +57,6 @@ export function Toolbar(props: IToolbarProps) {
     const [position, setPosition] = useState<MenuPosition>(MenuPosition.TOOLBAR_START);
 
     const toolbarRef = useRef<HTMLDivElement>(null);
-    const toolbarContainerRef = useRef<HTMLDivElement>(null);
     const toolbarItemRefs = useRef<
         Record<
             string,
@@ -68,6 +69,24 @@ export function Toolbar(props: IToolbarProps) {
 
     const [group, setGroup] = useState<IMenuGroup[]>([]);
     const [collapsedId, setCollapsedId] = useState<string[]>([]);
+    const [visibleItems, setVisibleItems] = useState<IDisplayMenuItem<IMenuItem>[]>([]);
+
+    useEffect(() => {
+        const activeItems = group.find((g) => g.name === position)?.menuItems ?? [];
+        const filteredItems$ = combineLatest(
+            activeItems.map((item) => item.hidden$).filter((item) => !!item)
+        ).pipe(
+            map((hiddenValues) => activeItems.filter((_, index) => !hiddenValues[index]))
+        );
+
+        const subscribe = filteredItems$.subscribe((items) => {
+            setVisibleItems(items);
+        });
+
+        return () => {
+            subscribe.unsubscribe();
+        };
+    }, [group]);
 
     useEffect(() => {
         const listener = menuService.menuChanged$.subscribe(() => {
@@ -94,29 +113,31 @@ export function Toolbar(props: IToolbarProps) {
     useEffect(() => {
         function resize() {
             const wrapperWidth = toolbarRef.current?.clientWidth ?? 0;
-            const containerWidth = toolbarContainerRef.current?.clientWidth ?? 0;
-
-            const itemWidths = Object.entries(toolbarItemRefs.current).map(([key, ref]) => {
-                return {
-                    key: ref.key,
-                    width: ref.el?.clientWidth,
-                };
-            });
-
             const gap = 8;
 
-            const collapsedIds: string[] = [];
+            const itemWidths = Object.entries(toolbarItemRefs.current)
+                .filter(([_, ref]) => {
+                    return ref.el && ref.key && visibleItems.find((item) => item.id === ref.key);
+                })
+                .map(([_, ref]) => {
+                    return {
+                        key: ref.key,
+                        width: ref.el?.clientWidth + gap,
+                    };
+                });
 
-            let currentWidth = containerWidth + 120;
-            for (let i = itemWidths.length - 1; i >= 0; i--) {
-                const item = itemWidths[i];
-                currentWidth -= item.width + gap;
-                if (currentWidth >= wrapperWidth) {
-                    collapsedIds.push(item.key);
+            const collapsedId: string[] = [];
+
+            let currentWidth = 148;
+            for (const item of itemWidths) {
+                currentWidth += item.width;
+
+                if (currentWidth > wrapperWidth) {
+                    collapsedId.push(item.key);
                 }
             }
 
-            setCollapsedId(collapsedIds);
+            setCollapsedId(collapsedId);
         }
 
         resize();
@@ -127,25 +148,23 @@ export function Toolbar(props: IToolbarProps) {
         return () => {
             observer.unobserve(document.body);
         };
-    }, [group]);
+    }, [visibleItems, group]);
 
     const toolbarGroups = useMemo(() => {
-        return (
-            group
-                .find((g) => g.name === position)
-                ?.menuItems.reduce(
-                    (acc, item) => {
-                        const key = item.group ?? MenuGroup.TOOLBAR_OTHERS;
-                        if (!acc[key]) {
-                            acc[key] = [];
-                        }
+        return group
+            .find((g) => g.name === position)
+            ?.menuItems.reduce(
+                (acc, item) => {
+                    const key = item.group ?? MenuGroup.TOOLBAR_OTHERS;
+                    if (!acc[key]) {
+                        acc[key] = [];
+                    }
 
-                        acc[key].push(item);
-                        return acc;
-                    },
-                    {} as Record<MenuGroup, Array<IDisplayMenuItem<IMenuItem>>>
-                ) ?? ({} as Record<MenuGroup, Array<IDisplayMenuItem<IMenuItem>>>)
-        );
+                    acc[key].push(item);
+                    return acc;
+                },
+                {} as Record<MenuGroup, Array<IDisplayMenuItem<IMenuItem>>>
+            ) ?? ({} as Record<MenuGroup, Array<IDisplayMenuItem<IMenuItem>>>);
     }, [group]);
 
     const hasHeaderMenu = useMemo(() => (headerMenuComponents && headerMenuComponents.size > 0) || group.length > 1, [headerMenuComponents, group]);
@@ -157,17 +176,19 @@ export function Toolbar(props: IToolbarProps) {
                     <header className={styles.headerbar}>
                         <div className={styles.menubar}>
                             {group.length > 1 &&
-                        group.map((item, index) => (
-                            <a
-                                key={index}
-                                className={clsx(styles.menubarItem, {
-                                    [styles.menubarItemActive]: item.name === position,
-                                })}
-                                onClick={() => setPosition(item.name)}
-                            >
-                                {localeService.t(item.name)}
-                            </a>
-                        ))}
+                                group.map((item, index) => (
+                                    <a
+                                        key={index}
+                                        className={clsx(styles.menubarItem, {
+                                            [styles.menubarItemActive]: item.name === position,
+                                        })}
+                                        onClick={() => {
+                                            setPosition(item.name);
+                                        }}
+                                    >
+                                        {localeService.t(item.name)}
+                                    </a>
+                                ))}
                         </div>
                         <div className={styles.headerMenu}>
                             <ComponentContainer components={headerMenuComponents} />
@@ -178,18 +199,26 @@ export function Toolbar(props: IToolbarProps) {
 
             <div ref={toolbarRef} className={styles.toolbar}>
                 <div className={styles.toolbarContainer}>
-                    {Object.entries(toolbarGroups).map(([key, item]) => (
-                        <div key={key} className={styles.toolbarGroup}>
-                            {item.map(
-                                (subItem) =>
-                                    !collapsedId.includes(subItem.id) && <ToolbarItem key={subItem.id} {...subItem} />
-                            )}
-                        </div>
-                    ))}
+                    {Object.entries(toolbarGroups)
+                        .filter(([_, item]) => {
+                            const count = item.filter((subItem) => !collapsedId.includes(subItem.id)).length;
+                            return count;
+                        })
+                        .map(([key, item]) => (
+                            <div key={key} className={styles.toolbarGroup}>
+                                {item.map(
+                                    (subItem) =>
+                                        !collapsedId.includes(subItem.id) && (
+                                            <ToolbarItem key={subItem.id} {...subItem} />
+                                        )
+                                )}
+                            </div>
+                        ))}
 
                     {collapsedId.length > 0 && (
-                        <Tooltip title="更多" placement="bottom">
+                        <Tooltip title={localeService.t('more')} placement="bottom">
                             <Dropdown
+                                forceRender
                                 className={styles.toolbarMore}
                                 overlay={(
                                     <div className={styles.toolbarMoreContainer} onClick={(e) => e.stopPropagation()}>
@@ -217,7 +246,6 @@ export function Toolbar(props: IToolbarProps) {
 
             {/* fake toolbar for calculating overflow width */}
             <div
-                ref={toolbarContainerRef}
                 className={styles.toolbarContainer}
                 style={{
                     position: 'absolute',

@@ -25,7 +25,7 @@ import { CheckMarkSingle, MoreSingle } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import clsx from 'clsx';
 import React, { useState } from 'react';
-import { isObservable, of } from 'rxjs';
+import { isObservable } from 'rxjs';
 
 import type {
     IDisplayMenuItem,
@@ -180,9 +180,9 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
 
     const menuItems = menuItem.id ? menuService.getMenuItems(menuItem.id) : [];
 
-    const disabled = useObservable<boolean>(menuItem.disabled$ || of(false), false, true);
-    const hidden = useObservable(menuItem.hidden$ || of(false), false, true);
-    const value = useObservable<MenuItemDefaultValueType>(menuItem.value$ || of(undefined), undefined, true);
+    const disabled = useObservable<boolean>(menuItem.disabled$, false);
+    const hidden = useObservable(menuItem.hidden$, false);
+    const value = useObservable<MenuItemDefaultValueType>(menuItem.value$);
     const [inputValue, setInputValue] = useState(value);
 
     /**
@@ -217,12 +217,8 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
     const renderSelectorType = () => {
         const item = menuItem as IDisplayMenuItem<IMenuSelectorItem>;
 
-        let selections: IValueOption[];
-        if (isObservable(item.selections)) {
-            selections = useObservable<IValueOption[]>(item.selections || of([]), [], true);
-        } else {
-            selections = item.selections || [];
-        }
+        const selectionsFromObservable = useObservable(isObservable(item.selections) ? item.selections : undefined);
+        const selections = selectionsFromObservable ?? (item.selections as IValueOption[] | undefined) ?? [];
 
         if (selections.length > 0) {
             return (

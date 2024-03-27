@@ -110,12 +110,9 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem>, ref: 
     const { selections } = props as IDisplayMenuItem<IMenuSelectorItem>;
 
     const options = selections as IValueOption[];
-    let iconToDisplay = icon;
-    if (isObservable(icon)) {
-        iconToDisplay = useObservable(icon, undefined, true);
-    } else {
-        iconToDisplay = options?.find((o) => o.value === value)?.icon ?? icon;
-    }
+
+    const iconFromObservable = useObservable(isObservable(icon) ? icon : undefined);
+    const iconToDisplay = iconFromObservable ?? options?.find((o) => o.value === value)?.icon ?? icon;
 
     function renderSelectorType(menuType: MenuItemType) {
         function handleSelect(option: IValueOption) {

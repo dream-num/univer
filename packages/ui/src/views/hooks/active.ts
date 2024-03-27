@@ -17,7 +17,6 @@
 import type { Nullable, Workbook, Worksheet } from '@univerjs/core';
 import { IUniverInstanceService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import { of } from 'rxjs';
 
 import { useObservable } from '../../components/hooks/observable';
 
@@ -35,6 +34,6 @@ export function useActiveWorkbook(): Nullable<Workbook> {
  */
 export function useActiveWorksheet(): Nullable<Worksheet> {
     const activeWorkbook = useActiveWorkbook();
-    const activeWorksheet = useObservable(activeWorkbook ? activeWorkbook?.activeSheet$ : of(null));
+    const activeWorksheet = useObservable(activeWorkbook?.activeSheet$, null);
     return activeWorksheet;
 }

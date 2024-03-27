@@ -1615,17 +1615,25 @@ export class SpreadsheetSkeleton extends Skeleton {
             return true;
         }
 
-        const hidden = this._worksheet.getColVisible(c) === false || this._worksheet.getRowVisible(r) === false;
-        if (hidden) {
-            return true;
-        }
-
         /**
          * TODO: DR-Univer getCellRaw for slide demo, the implementation approach will be changed in the future.
          */
         const cell = this._worksheet.getCell(r, c) || this._worksheet.getCellRaw(r, c);
         if (!cell) {
             return true;
+        }
+
+        const hidden = this._worksheet.getColVisible(c) === false || this._worksheet.getRowVisible(r) === false;
+        if (hidden) {
+            const { isMerged, isMergedMainCell } = getCellInfoInMergeData(
+                r,
+                c,
+                this._dataMergeCache
+            );
+
+            if (isMerged && !isMergedMainCell) {
+                return true;
+            }
         }
 
         const cache = this._stylesCache;

@@ -105,8 +105,7 @@ const HighlightCellInput = (props: { type: IResult['subType'] | CFSubRuleType.du
                 };
                 return (
                     <div className={`${stylesBase.mTSm}`}>
-                        <InputNumber className={styles.width100} value={inputNumberValue} onChange={_onChange} />
-
+                        <InputNumber min={Number.MIN_SAFE_INTEGER} max={Number.MAX_SAFE_INTEGER} className={styles.width100} value={inputNumberValue} onChange={_onChange} />
                     </div>
                 );
             }
@@ -123,8 +122,8 @@ const HighlightCellInput = (props: { type: IResult['subType'] | CFSubRuleType.du
                 };
                 return (
                     <div className={`${stylesBase.mTSm} ${stylesBase.labelContainer} `}>
-                        <InputNumber value={inputNumberMin} onChange={onChangeMin} />
-                        <InputNumber className={`${stylesBase.mLSm}`} value={inputNumberMax} onChange={onChangeMax} />
+                        <InputNumber min={Number.MIN_SAFE_INTEGER} max={Number.MAX_SAFE_INTEGER} value={inputNumberMin} onChange={onChangeMin} />
+                        <InputNumber min={Number.MIN_SAFE_INTEGER} max={Number.MAX_SAFE_INTEGER} className={`${stylesBase.mLSm}`} value={inputNumberMax} onChange={onChangeMax} />
                     </div>
                 );
             }
@@ -216,7 +215,7 @@ export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, ITextHigh
         if (!rule) {
             return defaultV;
         }
-        const v = createDefaultValue(rule.subType, rule.operator);
+        const v = (rule as ITextHighlightCell | INumberHighlightCell).value ?? createDefaultValue(rule.subType, rule.operator);
         return v;
     });
 

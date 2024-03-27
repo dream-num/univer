@@ -94,40 +94,26 @@
     .item-content {
         display: flex;
         flex-wrap: wrap;
-    }
-    .item {
-        display: flex;
-        align-items: center;
-        justify-content: start;
-        width: 50%;
-        border-radius: var(--border-radius-base);
-        &:hover {
-            background-color: rgb(var(--bg-color-hover));
-        }
-    }
-    .icon {
-        width: 20px;
-        height: 20px;
-    }
-}
-.icon-item-list {
-    padding: var(--padding-base);
-    font-size: var(--font-size-xs);
-    background-color: rgb(var(--bg-color-secondary));
-    border: 1px solid rgb(var(--border-color));
-    border-radius: var(--border-radius-lg);
-    outline: none;
-    box-shadow: var(--box-shadow-base);
-    display: flex;
-    width: 100px;
-    flex-wrap: wrap;
-    .item {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: var(--border-radius-base);
-        &:hover {
-            background-color: rgb(var(--bg-color-hover));
+        .item-wrap {
+            display: flex;
+            align-items: center;
+            justify-content: start;
+            width: 50%;
+            margin-bottom: 4px;
+            .item {
+                border-radius: var(--border-radius-base);
+                cursor: pointer;
+                :not(:first-child).icon {
+                    margin-left: 8px;
+                }
+
+                &:hover {
+                    background-color: rgb(var(--bg-color-hover));
+                }
+            }
+            :not(:first-child).icon {
+                margin-left: 8px;
+            }
         }
     }
 
@@ -136,6 +122,50 @@
         height: 20px;
     }
 }
+.icon-item-list-wrap {
+    padding: var(--padding-base) 4px var(--padding-base) var(--padding-base);
+    font-size: var(--font-size-xs);
+    background-color: rgb(var(--bg-color-secondary));
+    border: 1px solid rgb(var(--border-color));
+    border-radius: var(--border-radius-lg);
+    outline: none;
+    box-shadow: var(--box-shadow-base);
+    .none {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+        cursor: pointer;
+        padding-left: 4px;
+        span {
+            margin-left: 8px;
+        }
+    }
+
+    .icon-item-list {
+        display: flex;
+        width: 252px;
+        flex-wrap: wrap;
+        .item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--border-radius-base);
+            margin-right: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+
+            &:hover {
+                background-color: rgb(var(--bg-color-hover));
+            }
+        }
+
+        .icon {
+            width: 20px;
+            height: 20px;
+        }
+    }
+}
+
 .width100 {
     width: 100%;
 }

@@ -72,6 +72,7 @@ export class Background extends SheetExtension {
 
                 ctx.fillStyle = rgb || getColor([255, 255, 255])!;
                 ctx.beginPath();
+                const mergeFillSet = new Set<string>();
                 backgroundCache.forValue((rowIndex, columnIndex) => {
                     const cellInfo = backgroundPositions?.getValue(rowIndex, columnIndex);
 
@@ -81,7 +82,16 @@ export class Background extends SheetExtension {
                     let { startY, endY, startX, endX } = cellInfo;
                     const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
                     if (isMerged) {
-                        return true;
+                        const key = `${mergeInfo.startRow}-${mergeInfo.endRow}-${mergeInfo.startColumn}-${mergeInfo.endColumn}`;
+                        if (mergeFillSet.has(key)) {
+                            return true;
+                        } else {
+                            startY = mergeInfo.startY;
+                            endY = mergeInfo.endY;
+                            startX = mergeInfo.startX;
+                            endX = mergeInfo.endX;
+                            mergeFillSet.add(key);
+                        }
                     }
 
                     if (
@@ -106,10 +116,16 @@ export class Background extends SheetExtension {
                     // }
 
                     if (isMergedMainCell) {
-                        startY = mergeInfo.startY;
-                        endY = mergeInfo.endY;
-                        startX = mergeInfo.startX;
-                        endX = mergeInfo.endX;
+                        const key = `${mergeInfo.startRow}-${mergeInfo.endRow}-${mergeInfo.startColumn}-${mergeInfo.endColumn}`;
+                        if (mergeFillSet.has(key)) {
+                            return true;
+                        } else {
+                            startY = mergeInfo.startY;
+                            endY = mergeInfo.endY;
+                            startX = mergeInfo.startX;
+                            endX = mergeInfo.endX;
+                            mergeFillSet.add(key);
+                        }
                     }
 
                     ctx.moveToByPrecision(startX, startY);

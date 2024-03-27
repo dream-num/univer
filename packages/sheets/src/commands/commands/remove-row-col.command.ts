@@ -39,6 +39,7 @@ import {
     RemoveRowMutation,
     RemoveRowsUndoMutationFactory,
 } from '../mutations/remove-row-col.mutation';
+import { SetRangeValuesMutation } from '../..';
 import { followSelectionOperation } from './utils/selection-utils';
 
 export interface IRemoveRowColCommandParams {
@@ -77,6 +78,13 @@ export const RemoveRowCommand: ICommand = {
             endColumn: Math.max(worksheet.getMaxColumns() - 1, 0),
         };
 
+        const undoSetValues = worksheet.getCellMatrix().getRows(range.startRow, range.endRow);
+        const undoSetValuesParams = {
+            unitId,
+            subUnitId,
+            cellValue: undoSetValues,
+        };
+
         // row count
         const removeRowsParams: IRemoveRowsMutationParams = {
             unitId,
@@ -106,7 +114,7 @@ export const RemoveRowCommand: ICommand = {
         if (result.result) {
             accessor.get(IUndoRedoService).pushUndoRedo({
                 unitID: unitId,
-                undoMutations: [...intercepted.undos, { id: InsertRowMutation.id, params: undoRemoveRowsParams }],
+                undoMutations: [...intercepted.undos, { id: InsertRowMutation.id, params: undoRemoveRowsParams }, { id: SetRangeValuesMutation.id, params: undoSetValuesParams }],
                 redoMutations: [{ id: RemoveRowMutation.id, params: removeRowsParams }, ...intercepted.redos],
             });
             return true;
@@ -154,6 +162,13 @@ export const RemoveColCommand: ICommand = {
         };
         const undoRemoveColParams: IInsertColMutationParams = RemoveColMutationFactory(accessor, removeColParams);
 
+        const undoSetValues = worksheet.getCellMatrix().getColumns(range.startColumn, range.endColumn);
+        const undoSetValuesParams = {
+            unitId,
+            subUnitId,
+            cellValue: undoSetValues,
+        };
+
         const intercepted = sheetInterceptorService.onCommandExecute({
             id: RemoveColCommand.id,
             params: { range } as IRemoveRowColCommandParams,
@@ -163,6 +178,7 @@ export const RemoveColCommand: ICommand = {
             [
                 { id: RemoveColMutation.id, params: removeColParams },
                 ...intercepted.redos,
+
                 followSelectionOperation(range, workbook, worksheet),
             ],
             commandService
@@ -172,8 +188,9 @@ export const RemoveColCommand: ICommand = {
             const undoRedoService = accessor.get(IUndoRedoService);
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
-                undoMutations: [...intercepted.undos, { id: InsertColMutation.id, params: undoRemoveColParams }],
-                redoMutations: [{ id: RemoveColMutation.id, params: removeColParams }, ...intercepted.redos],
+                undoMutations: [...intercepted.undos, { id: InsertColMutation.id, params: undoRemoveColParams }, { id: SetRangeValuesMutation.id, params: undoSetValuesParams }],
+                redoMutations: [
+                    { id: RemoveColMutation.id, params: removeColParams }, ...intercepted.redos],
             });
 
             return true;

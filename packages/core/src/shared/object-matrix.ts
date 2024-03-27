@@ -701,4 +701,31 @@ export class ObjectMatrix<T> {
     private _setOriginValue(matrix: IObjectMatrixPrimitiveType<T> = {}) {
         this._matrix = matrix;
     }
+
+    getColumns(startColumn: number, endColumn: number): IObjectMatrixPrimitiveType<T> {
+        const result = new ObjectMatrix<T>();
+        Object.keys(this._matrix).forEach((rowKey) => {
+            const row = this._matrix[Number(rowKey)];
+            const newRow: IObjectArrayPrimitiveType<T> = {};
+            Object.keys(row).forEach((columnKey) => {
+                const column = Number(columnKey);
+                if (column >= startColumn && column <= endColumn) {
+                    newRow[column] = row[column];
+                }
+            });
+            result.setRow(Number(rowKey), newRow);
+        });
+        return result.getMatrix();
+    }
+
+    getRows(startRow: number, endRow: number): IObjectMatrixPrimitiveType<T> {
+        const result = new ObjectMatrix<T>();
+        Object.keys(this._matrix).forEach((rowKey) => {
+            const row = Number(rowKey);
+            if (row >= startRow && row <= endRow) {
+                result.setRow(row, this._matrix[row]);
+            }
+        });
+        return result.getMatrix();
+    }
 }

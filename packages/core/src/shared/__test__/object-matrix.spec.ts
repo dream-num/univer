@@ -90,4 +90,19 @@ describe('test ObjectMatrix', () => {
             1: '111', 2: '333', 3: null,
         });
     });
+
+    it('test getColumns', () => {
+        const primitiveObject = new ObjectMatrix(getPrimitiveObj());
+        expect(primitiveObject.getColumns(1, 2)).toStrictEqual({
+            1: { 1: '123', 2: '222' },
+            2: { 1: '111', 2: '121' },
+        });
+    });
+
+    it('test getRows', () => {
+        const primitiveObject = new ObjectMatrix(getPrimitiveObj());
+        expect(primitiveObject.getRows(1, 1)).toStrictEqual({
+            1: { 1: '123', 2: '222', 3: '333' },
+        });
+    });
 });

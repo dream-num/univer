@@ -267,9 +267,7 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem>, ref: 
 
     // ref component
     return hidden
-        ? (
-            <></>
-        )
+        ? null
         : (
             <Tooltip
                 ref={ref}

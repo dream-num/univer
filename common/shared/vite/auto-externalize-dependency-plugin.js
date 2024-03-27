@@ -84,6 +84,9 @@ exports.autoExternalizeDependency = function autoExternalizeDependency() {
                 if (source === '@univerjs/icons') {
                     return null;
                 }
+                if (source === '@univerjs/protocol') {
+                    return null;
+                }
 
                 externals.add(source);
 

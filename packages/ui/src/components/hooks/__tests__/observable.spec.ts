@@ -22,7 +22,7 @@ import type { Observable } from 'rxjs';
 import { useState } from 'react';
 import { useObservable } from '../observable';
 
-// New to testing React Hooks? You can refer to https://mayashavin.com/articles/test-react-hooks-with-vitest.
+// New to testing React Hooks? You can refer to https://mayashavin.com/articles/test-react-hooks-with-vitest .
 
 describe('test "useObservable"', () => {
     it('should return undefined when no initial value is provided', () => {

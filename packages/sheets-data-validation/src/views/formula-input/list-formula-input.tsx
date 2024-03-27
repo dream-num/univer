@@ -285,10 +285,7 @@ export function ListFormulaInput(props: IFormulaInputProps) {
                                         setRefRange('');
                                     } else {
                                         const workbook = univerInstanceService.getUniverSheetInstance(range.unitId) ?? univerInstanceService.getCurrentUniverSheetInstance();
-                                        const worksheet = workbook?.getSheetBySheetId(range.sheetId);
-                                        if (!worksheet) {
-                                            return;
-                                        }
+                                        const worksheet = workbook?.getSheetBySheetId(range.sheetId) ?? workbook.getActiveSheet();
                                         const rangeStr = serializeRangeWithSheet(worksheet.getName(), range.range);
                                         onChange?.({
                                             formula1: rangeStr,

@@ -20,7 +20,7 @@ import { HorizontalAlign, ICommandService, isFormulaString, VerticalAlign } from
 import type { ICellRenderContext, IDataValidationRule, ISelectionCellWithCoord, IStyleData, Nullable } from '@univerjs/core';
 import type { ISetRangeValuesCommandParams } from '@univerjs/sheets';
 import { SetRangeValuesCommand } from '@univerjs/sheets';
-import type { IBaseDataValidationWidget, IFormulaResult } from '@univerjs/data-validation';
+import type { BaseDataValidator, IBaseDataValidationWidget, IFormulaResult } from '@univerjs/data-validation';
 import { Inject } from '@wendellhu/redi';
 import { CHECKBOX_FORMULA_1, CHECKBOX_FORMULA_2 } from '../validators/checkbox-validator';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
@@ -89,10 +89,15 @@ export class CheckboxRender implements IBaseDataValidationWidget {
     }
 
     drawWith(ctx: UniverRenderingContext2D, info: ICellRenderContext): void {
-        const { style, data, primaryWithCoord } = info;
+        const { style, data, primaryWithCoord, unitId, subUnitId } = info;
         const value = getCellValueOrigin(data);
         const rule = data.dataValidation?.rule;
-        if (!rule) {
+        const validator = data.dataValidation?.validator as BaseDataValidator;
+        if (!rule || !validator) {
+            return;
+        }
+
+        if (!validator.skipDefaultFontRender(rule, value, { unitId, subUnitId })) {
             return;
         }
 

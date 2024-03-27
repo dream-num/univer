@@ -1633,6 +1633,8 @@ export class SpreadsheetSkeleton extends Skeleton {
 
             if (isMerged && !isMergedMainCell) {
                 return true;
+            } else if (!isMergedMainCell) {
+                return true;
             }
         }
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { ICommandService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { DatePanel } from '@univerjs/design';
@@ -29,7 +29,7 @@ export function DateDropdown(props: IDropdownComponentProps) {
     const { location, hideFn } = props;
     const { worksheet, row, col, unitId, subUnitId } = location;
     const commandService = useDependency(ICommandService);
-
+    const [localDate, setLocalDate] = useState<dayjs.Dayjs>();
     if (!worksheet) {
         return null;
     }
@@ -48,7 +48,7 @@ export function DateDropdown(props: IDropdownComponentProps) {
     return (
         <div className={styles.dvDateDropdown}>
             <DatePanel
-                pickerValue={date}
+                pickerValue={localDate ?? date}
                 onSelect={(newValue) => {
                     const newValueStr = newValue.format('YYYY/MM/DD');
                     commandService.executeCommand(SetRangeValuesCommand.id, {
@@ -66,6 +66,9 @@ export function DateDropdown(props: IDropdownComponentProps) {
                         },
                     });
                     hideFn();
+                }}
+                onPanelChange={(value) => {
+                    setLocalDate(value);
                 }}
             />
         </div>

@@ -178,7 +178,6 @@ export class DateValidator extends BaseDataValidator<Dayjs> {
         if (!formula1) {
             return true;
         }
-
         return value.isAfter(formula1);
     }
 

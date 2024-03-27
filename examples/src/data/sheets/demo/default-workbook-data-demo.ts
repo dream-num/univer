@@ -125,7 +125,7 @@ const dataValidation = [
             endColumn: 5,
         }],
         operator: DataValidationOperator.GREATER_THAN,
-        formula1: '111',
+        formula1: '2024/03/23',
         errorStyle: DataValidationErrorStyle.STOP,
     },
     {

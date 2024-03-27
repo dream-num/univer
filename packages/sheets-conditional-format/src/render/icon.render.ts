@@ -19,7 +19,7 @@ import { Range } from '@univerjs/core';
 import type { SpreadsheetSkeleton, UniverRenderingContext } from '@univerjs/engine-render';
 import { SheetExtension } from '@univerjs/engine-render';
 import type { IIconType } from '../models/icon-map';
-import { iconMap } from '../models/icon-map';
+import { EMPTY_ICON_TYPE, iconMap } from '../models/icon-map';
 import type { IIconSetCellData } from './type';
 
 export const IconUKey = 'sheet-conditional-rule-icon';
@@ -59,6 +59,9 @@ export class ConditionalFormatIcon extends SheetExtension {
             const cellData = worksheet.getCell(row, col) as IIconSetCellData;
             if (cellData?.iconSet) {
                 const { iconType, iconId } = cellData.iconSet;
+                if (iconType === EMPTY_ICON_TYPE) {
+                    return;
+                }
                 const icon = this._imageMap.get(this._createKey(iconType, iconId));
                 if (!icon) {
                     return;

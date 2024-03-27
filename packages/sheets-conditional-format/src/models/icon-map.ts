@@ -97,3 +97,4 @@ for (const key in iconMap) {
     const v = iconMap[key as IIconType];
     Object.freeze(v);
 }
+export const EMPTY_ICON_TYPE = 'EMPTY_ICON_TYPE';

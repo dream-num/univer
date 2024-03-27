@@ -17,7 +17,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import set from 'lodash.set';
 import get from 'lodash.get';
-import { MoreDownSingle } from '@univerjs/icons';
+import { MoreDownSingle, SlashSingle } from '@univerjs/icons';
 
 import { Checkbox, Dropdown, InputNumber, Select } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
@@ -25,7 +25,7 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import { IUniverInstanceService, LocaleService, Tools } from '@univerjs/core';
 import { TextEditor } from '@univerjs/ui';
 import type { IIconType } from '../../../models/icon-map';
-import { iconGroup, iconMap } from '../../../models/icon-map';
+import { EMPTY_ICON_TYPE, iconGroup, iconMap } from '../../../models/icon-map';
 import type { IIconSet } from '../../../models/type';
 import { CFNumberOperator, CFRuleType, CFSubRuleType, CFValueType, createDefaultValue, SHEET_CONDITION_FORMAT_PLUGIN } from '../../../base/const';
 import { compareWithNumber, getOppositeOperator } from '../../../services/calculate-unit/utils';
@@ -104,8 +104,10 @@ const IconGroupList = (props: {
                         <div className={styles.itemContent}>
                             {group.group.map((groupItem) => {
                                 return (
-                                    <div className={styles.item} key={groupItem.name} onClick={() => { handleClick(groupItem.name); }}>
-                                        {groupItem.list.map((base64, index) => <img className={styles.icon} key={index} src={base64}></img>)}
+                                    <div className={styles.itemWrap} key={groupItem.name} onClick={() => { handleClick(groupItem.name); }}>
+                                        <div className={styles.item}>
+                                            {groupItem.list.map((base64, index) => <img className={styles.icon} key={index} src={base64}></img>)}
+                                        </div>
                                     </div>
                                 );
                             })}
@@ -138,13 +140,20 @@ const IconItemList = (props: { onClick: (iconType: IIconType, iconId: string) =>
         props.onClick(item.iconType, item.iconId);
     };
     return (
-        <div className={styles.iconItemList}>
-            {list.map((item) => (
-                <div key={`${item.iconType}_${item.iconId}`} className={styles.item}>
-                    <img onClick={() => handleClick(item)} className={`${styles.icon}`} src={item.base64}></img>
-                </div>
-            ))}
+        <div className={styles.iconItemListWrap}>
+            <div className={styles.none} onClick={() => handleClick({ iconType: EMPTY_ICON_TYPE as any, iconId: '', base64: '' })}>
+                <SlashSingle className={styles.icon} />
+                <span>无单元格图标</span>
+            </div>
+            <div className={styles.iconItemList}>
+                {list.map((item) => (
+                    <div key={`${item.iconType}_${item.iconId}`} className={styles.item}>
+                        <img onClick={() => handleClick(item)} className={`${styles.icon}`} src={item.base64}></img>
+                    </div>
+                ))}
+            </div>
         </div>
+
     );
 };
 
@@ -196,7 +205,6 @@ const IconSetRuleEdit = (props: {
                     <div className={`${stylesBase.label} ${styles.flex}`}>
                         <div className={`${styles.width45}`}>
                             {localeService.t('sheet.cf.iconSet.icon')}
-                            {' '}
                             {index + 1}
                         </div>
 
@@ -205,13 +213,9 @@ const IconSetRuleEdit = (props: {
                                 {!isFirst && !isEnd && localeService.t('sheet.cf.iconSet.rule')}
                                 {!isFirst && !isEnd && (
                                     <span className={styles.stress}>
-                                        {' '}
                                         (
-                                        {' '}
                                         {localeService.t('sheet.cf.iconSet.when')}
-                                        {' '}
                                         {localeService.t(`sheet.cf.symbol.${getOppositeOperator(preItem.operator)}`)}
-                                        {' '}
                                         {lessThanText}
                                         {isEnd ? '' : ` ${localeService.t('sheet.cf.iconSet.and')} `}
                                         )
@@ -227,7 +231,7 @@ const IconSetRuleEdit = (props: {
                         <div className={`${styles.iconWrap} ${styles.width45}`}>
                             <Dropdown overlay={<IconItemList onClick={handleIconClick} iconId={item.iconId} iconType={item.iconType} />}>
                                 <div className={styles.dropdownIcon}>
-                                    <img src={icon} className={styles.icon} />
+                                    {icon ? <img src={icon} className={styles.icon} /> : <SlashSingle className={styles.icon} />}
                                     <MoreDownSingle />
                                 </div>
 
@@ -240,13 +244,9 @@ const IconSetRuleEdit = (props: {
                                 <div className={`${styles.width45} ${stylesBase.label}`} style={{ marginTop: 0 }}>
                                     {localeService.t('sheet.cf.iconSet.rule')}
                                     <span className={styles.stress}>
-                                        {' '}
                                         (
-                                        {' '}
                                         {localeService.t('sheet.cf.iconSet.when')}
-                                        {' '}
                                         {localeService.t(`sheet.cf.symbol.${getOppositeOperator(preItem.operator)}`)}
-                                        {' '}
                                         {lessThanText}
                                         {isEnd ? '' : ` ${localeService.t('sheet.cf.iconSet.and')} `}
                                         )
@@ -330,7 +330,7 @@ export const IconSet = (props: IStyleEditorProps<unknown, IIconSet>) => {
         });
         return (
             <div className={styles.iconWrap}>
-                {list.map((icon, index) => <img className={styles.icon} key={index} src={icon} />)}
+                {list.map((icon, index) => (icon ? <img className={styles.icon} key={index} src={icon} /> : <SlashSingle className={styles.icon} key={index} />))}
             </div>
         );
     }, [configList]);

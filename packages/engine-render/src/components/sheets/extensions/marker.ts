@@ -44,11 +44,22 @@ export class Marker extends SheetExtension {
                 skeleton.columnWidthAccumulation,
                 skeleton.dataMergeCache
             );
+            const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
+            let { startY, endY, startX, endX } = cellInfo;
 
+            if (isMerged) {
+                return true;
+            }
+
+            if (isMergedMainCell) {
+                startY = mergeInfo.startY;
+                endY = mergeInfo.endY;
+                startX = mergeInfo.startX;
+                endX = mergeInfo.endX;
+            }
             if (cellData?.markers?.tr) {
                 ctx.save();
                 const marker = cellData.markers.tr;
-                const { startY, endX } = cellInfo;
                 const x = endX;
                 const y = startY;
                 ctx.fillStyle = marker.color;
@@ -65,7 +76,8 @@ export class Marker extends SheetExtension {
             if (cellData?.markers?.tl) {
                 ctx.save();
                 const marker = cellData.markers.tl;
-                const { startY: y, startX: x } = cellInfo;
+                const x = startX;
+                const y = startY;
                 ctx.fillStyle = marker.color;
                 ctx.moveTo(x, y);
                 ctx.beginPath();
@@ -80,7 +92,8 @@ export class Marker extends SheetExtension {
             if (cellData?.markers?.br) {
                 ctx.save();
                 const marker = cellData.markers.br;
-                const { endY: y, endX: x } = cellInfo;
+                const x = endX;
+                const y = endY;
                 ctx.fillStyle = marker.color;
                 ctx.moveTo(x, y);
                 ctx.beginPath();
@@ -95,7 +108,8 @@ export class Marker extends SheetExtension {
             if (cellData?.markers?.bl) {
                 ctx.save();
                 const marker = cellData.markers.bl;
-                const { endY: y, startX: x } = cellInfo;
+                const x = startX;
+                const y = endY;
                 ctx.fillStyle = marker.color;
                 ctx.moveTo(x, y);
                 ctx.beginPath();

@@ -189,7 +189,7 @@ export const getCacheStyleMatrix = <S = any>(unitId: string, subUnitId: string, 
 export const compareWithNumber = (config: { operator: CFNumberOperator;value: number | [number, number] }, v: number) => {
     switch (config.operator) {
         case CFNumberOperator.between:{
-            if (typeof config.value !== 'object' && !(config.value as unknown as Array<number>).length) {
+            if (typeof config.value !== 'object' || !(config.value as unknown as Array<number>).length) {
                 return;
             }
             const start = Math.min(...config.value as [number, number]);
@@ -197,7 +197,11 @@ export const compareWithNumber = (config: { operator: CFNumberOperator;value: nu
             return v >= start && v <= end;
         }
         case CFNumberOperator.notBetween:{
-            const [start, end] = config.value as [number, number];
+            if (typeof config.value !== 'object' || !(config.value as unknown as Array<number>).length) {
+                return;
+            }
+            const start = Math.min(...config.value as [number, number]);
+            const end = Math.max(...config.value as [number, number]);
             return !(v >= start && v <= end);
         }
         case CFNumberOperator.equal:{

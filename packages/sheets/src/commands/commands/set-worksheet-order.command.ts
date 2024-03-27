@@ -48,8 +48,11 @@ export const SetWorksheetOrderCommand: ICommand = {
         const worksheet = workbook.getSheetBySheetId(subUnitId);
         if (!worksheet) return false;
 
+        const fromOrder = workbook.getConfig().sheetOrder.indexOf(subUnitId);
+
         const setWorksheetOrderMutationParams: ISetWorksheetOrderMutationParams = {
-            order: params.order,
+            fromOrder,
+            toOrder: params.order,
             unitId,
             subUnitId,
         };

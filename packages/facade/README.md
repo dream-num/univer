@@ -7,7 +7,7 @@
 
 In Univer, in addition to using the low-level APIs, you can also use the Facade API provided by `@univerjs/facade`, which is a higher-level abstraction of the low-level APIs, making it easier to use.
 
-You can learn how to use the Facade API by reading [this document](https://univer.ai/en-us/guides/facade/).
+You can learn how to use the Facade API by reading [this document](https://univer.ai/guides/facade/).
 
 ## Usage
 

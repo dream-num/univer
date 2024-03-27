@@ -33,4 +33,4 @@ export class FWorkbook {
 
 ## Documentation
 
-It is strongly suggested to add documentation for your code [here](https://github.com/dream-num/docs/tree/main/src/content/docs/guides/facade). Please refer to our [documentation repo](https://github.com/dream-num/docs) for more guidance.
+It is strongly suggested to add documentation for your code [here](https://github.com/dream-num/univer.ai/tree/dev/packages/community/src/content/docs/guides/facade). Please refer to our [documentation repo](https://github.com/dream-num/docs) for more guidance.

@@ -1,7 +1,7 @@
 {
     "name": "@univerjs/slides",
     "version": "0.1.4",
-    "private": true,
+    "private": false,
     "description": "",
     "author": "DreamNum <developer@univer.ai>",
     "license": "Apache-2.0",
@@ -52,12 +52,18 @@
         "node": ">=16.0.0",
         "npm": ">=8.0.0"
     },
-    "scripts": {},
+    "scripts": {
+        "test": "vitest run",
+        "test:watch": "vitest",
+        "coverage": "vitest run --coverage",
+        "lint:types": "tsc --noEmit",
+        "build": "tsc && vite build"
+    },
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": "^0.13.0"
+        "@wendellhu/redi": "0.13.0",
+        "rxjs": ">=7.0.0"
     },
     "dependencies": {},
     "devDependencies": {
@@ -65,9 +71,8 @@
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/shared": "workspace:*",
         "@wendellhu/redi": "^0.13.0",
-        "less": "^4.2.0",
         "rxjs": "^7.8.1",
-        "typescript": "^5.4.2",
+        "typescript": "^5.4.3",
         "vite": "^5.1.6",
         "vitest": "^1.4.0"
     }

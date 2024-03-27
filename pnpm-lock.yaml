@@ -1133,7 +1133,7 @@ importers:
         version: 14.2.1(react-dom@18.2.0)(react@18.2.0)
       '@testing-library/react-hooks':
         specifier: ^8.0.1
-        version: 8.0.1(@types/react@18.2.67)(react-dom@18.2.0)(react@18.2.0)
+        version: 8.0.1(@types/react@18.2.72)(react-dom@18.2.0)(react@18.2.0)
       '@types/react':
         specifier: ^18.2.72
         version: 18.2.72
@@ -5143,7 +5143,7 @@ packages:
       redent: 3.0.0
     dev: false
 
-  /@testing-library/react-hooks@8.0.1(@types/react@18.2.67)(react-dom@18.2.0)(react@18.2.0):
+  /@testing-library/react-hooks@8.0.1(@types/react@18.2.72)(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-Aqhl2IVmLt8IovEVarNDFuJDVWVvhnr9/GCU6UUnrYXwgDFF9h2L2o2P9KBni1AST5sT6riAyoukFLyjQUgD/g==}
     engines: {node: '>=12'}
     peerDependencies:
@@ -5160,7 +5160,7 @@ packages:
         optional: true
     dependencies:
       '@babel/runtime': 7.23.9
-      '@types/react': 18.2.67
+      '@types/react': 18.2.72
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
       react-error-boundary: 3.1.4(react@18.2.0)

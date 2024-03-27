@@ -17,12 +17,12 @@
 import type { ICommand, IRange } from '@univerjs/core';
 import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory, SetSelectionsOperation } from '@univerjs/sheets';
+import { SelectionManagerService, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory, SetSelectionsOperation } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
 
 import { generateNullCellValue } from '../../services/auto-fill/tools';
 
-export interface IAutoFillCommandParams {}
+export interface IAutoFillCommandParams { }
 
 export const AutoFillCommand: ICommand = {
     type: CommandType.COMMAND,
@@ -43,6 +43,7 @@ export const AutoClearContentCommand: ICommand = {
     type: CommandType.COMMAND,
     handler: async (accessor: IAccessor, params: IAutoClearContentCommand) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
+        const selectionManagerService = accessor.get(SelectionManagerService);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
 
@@ -61,11 +62,19 @@ export const AutoClearContentCommand: ICommand = {
             accessor,
             clearMutationParams
         );
+        const { startColumn, startRow } = selectionRange;
         commandService.executeCommand(SetSelectionsOperation.id, {
             selections: [
                 {
                     primary: {
-                        ...selectionRange,
+                        startColumn,
+                        startRow,
+                        endColumn: startColumn,
+                        endRow: startRow,
+                        actualRow: startRow,
+                        actualColumn: startColumn,
+                        isMerge: false,
+                        isMergedMainCell: false,
                     },
                     range: {
                         ...selectionRange,

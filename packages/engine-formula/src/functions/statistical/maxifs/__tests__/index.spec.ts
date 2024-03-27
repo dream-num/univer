@@ -14,14 +14,148 @@
  * limitations under the License.
  */
 
-import { describe } from 'vitest';
-import { Max } from '../../max';
+import { describe, expect, it } from 'vitest';
 import { FUNCTION_NAMES_STATISTICAL } from '../../function-names';
+import { Maxifs } from '..';
+import { ArrayValueObject, transformToValue } from '../../../../engine/value-object/array-value-object';
+import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 
 describe('Test maxifs function', () => {
-    const textFunction = new Max(FUNCTION_NAMES_STATISTICAL.MAXIFS);
+    const textFunction = new Maxifs(FUNCTION_NAMES_STATISTICAL.MAXIFS);
 
     describe('Maxifs', () => {
+        it('Range and criteria', async () => {
+            const maxRange = ArrayValueObject.create(/*ts*/ `{
+                1;
+                2;
+                3
+            }`);
+            const range = ArrayValueObject.create(/*ts*/ `{
+                2;
+                3;
+                4
+            }`);
 
+            const criteria = StringValueObject.create('>2');
+            const resultObject = textFunction.calculate(maxRange, range, criteria);
+            expect(transformToValue(resultObject.getArrayValue())).toStrictEqual([[3]]);
+        });
+
+        it('Range and array criteria', async () => {
+            const maxRange = ArrayValueObject.create(/*ts*/ `{
+                1;
+                2;
+                3
+            }`);
+
+            const range = ArrayValueObject.create(/*ts*/ `{
+                2;
+                3;
+                4
+            }`);
+
+            const criteria = ArrayValueObject.create(/*ts*/ `{
+                >2;
+                >3;
+                >4
+            }`);
+
+            const resultObject = textFunction.calculate(maxRange, range, criteria);
+            expect(transformToValue(resultObject.getArrayValue())).toStrictEqual([[3], [3], [0]]);
+        });
+
+        it('2 ranges and criteria', async () => {
+            const maxRange = ArrayValueObject.create(/*ts*/ `{
+                1;
+                2;
+                3
+            }`);
+
+            const range1 = ArrayValueObject.create(/*ts*/ `{
+                2;
+                3;
+                4
+            }`);
+
+            const criteria1 = StringValueObject.create('>2');
+
+            const range2 = ArrayValueObject.create(/*ts*/ `{
+                3;
+                4;
+                5
+            }`);
+
+            const criteria2 = StringValueObject.create('<5');
+
+            const resultObject = textFunction.calculate(maxRange, range1, criteria1, range2, criteria2);
+            expect(transformToValue(resultObject.getArrayValue())).toStrictEqual([[2]]);
+        });
+
+        it('2 ranges and criteria, 1 array criteria', async () => {
+            const maxRange = ArrayValueObject.create(/*ts*/ `{
+                1;
+                2;
+                3
+            }`);
+
+            const range1 = ArrayValueObject.create(/*ts*/ `{
+                2;
+                3;
+                4
+            }`);
+
+            const criteria1 = ArrayValueObject.create(/*ts*/ `{
+                >2;
+                >3;
+                >4
+            }`);
+
+            const range2 = ArrayValueObject.create(/*ts*/ `{
+                3;
+                4;
+                5
+            }`);
+
+            const criteria2 = NumberValueObject.create(5);
+
+            const resultObject = textFunction.calculate(maxRange, range1, criteria1, range2, criteria2);
+            expect(transformToValue(resultObject.getArrayValue())).toStrictEqual([[3], [3], [0]]);
+        });
+
+        it('2 ranges and criteria, 2 array criteria', async () => {
+            const maxRange = ArrayValueObject.create(/*ts*/ `{
+                1;
+                2;
+                3
+            }`);
+
+            const range1 = ArrayValueObject.create(/*ts*/ `{
+                2;
+                3;
+                4
+            }`);
+
+            const criteria1 = ArrayValueObject.create(/*ts*/ `{
+                >2;
+                >3;
+                >4
+            }`);
+
+            const range2 = ArrayValueObject.create(/*ts*/ `{
+                3;
+                4;
+                5
+            }`);
+
+            const criteria2 = ArrayValueObject.create(/*ts*/ `{
+                4;
+                4;
+                4;
+                4
+            }`);
+
+            const resultObject = textFunction.calculate(maxRange, range1, criteria1, range2, criteria2);
+            expect(transformToValue(resultObject.getArrayValue())).toStrictEqual([[2], [0], [0], [0]]);
+        });
     });
 });

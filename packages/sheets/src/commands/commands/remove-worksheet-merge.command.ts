@@ -15,7 +15,7 @@
  */
 
 import type { ICommand } from '@univerjs/core';
-import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, Rectangle } from '@univerjs/core';
+import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, Rectangle, sequenceExecute, Tools } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
 import type {
@@ -28,6 +28,7 @@ import {
     RemoveMergeUndoMutationFactory,
     RemoveWorksheetMergeMutation,
 } from '../mutations/remove-worksheet-merge.mutation';
+import { SetSelectionsOperation } from '../..';
 
 export const RemoveWorksheetMergeCommand: ICommand = {
     type: CommandType.COMMAND,
@@ -74,14 +75,36 @@ export const RemoveWorksheetMergeCommand: ICommand = {
             accessor,
             removeMergeMutationParams
         );
-        const result = commandService.syncExecuteCommand(RemoveWorksheetMergeMutation.id, undoredoMutationParams);
+
+        const nowSelections = selectionManagerService.getSelections();
+        if (!nowSelections?.length) return false;
+        const undoSelections = Tools.deepClone(nowSelections);
+        const redoSelections = Tools.deepClone(nowSelections);
+        const redoLastSelection = redoSelections[redoSelections.length - 1];
+        const { startRow, startColumn } = redoLastSelection.range;
+        redoLastSelection.primary = {
+            startRow,
+            startColumn,
+            endRow: startRow,
+            endColumn: startColumn,
+            actualRow: startRow,
+            actualColumn: startColumn,
+            isMerged: false,
+            isMergedMainCell: false,
+        };
+
+        const result = sequenceExecute([
+            { id: RemoveWorksheetMergeMutation.id, params: undoredoMutationParams },
+            { id: SetSelectionsOperation.id, params: { selections: redoSelections } },
+
+        ], commandService);
 
         if (result) {
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
-                undoMutations: [{ id: AddWorksheetMergeMutation.id, params: undoredoMutationParams }],
+                undoMutations: [{ id: AddWorksheetMergeMutation.id, params: undoredoMutationParams }, { id: SetSelectionsOperation.id, params: { selections: undoSelections } }],
                 // params should be the merged cells to be deleted accurately, rather than the selection
-                redoMutations: [{ id: RemoveWorksheetMergeMutation.id, params: undoredoMutationParams }],
+                redoMutations: [{ id: RemoveWorksheetMergeMutation.id, params: undoredoMutationParams }, { id: SetSelectionsOperation.id, params: { selections: redoSelections } }],
             });
             return true;
         }

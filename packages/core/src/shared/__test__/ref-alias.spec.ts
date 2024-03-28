@@ -95,4 +95,15 @@ describe('test for RefAlias', () => {
         expect(newInstance.getValue('aa')).toEqual(instance.getValue('aa'));
         expect(newInstance.getValues()).toEqual(instance.getValues());
     });
+
+    it('test the same key and value', () => {
+        const instance = createInstance();
+        const obj = { a: 'cc', c: 'aa', b: 'b', d: 'd' };
+        instance.addValue({ a: 'cc', c: 'aa', b: 'b', d: 'd' });
+        // When the second getValue parameter is not set, the order of values is determined by the key order at construction time
+        // Retrieves from an object with a key of' A' first
+        expect(instance.getValue('cc')).toEqual(obj);
+        // When setting the second parameter of getValue, the order of values is determined by the second parameter.
+        expect(instance.getValue('cc', ['c'])).toEqual({ a: 'aa', b: 'bb', c: 'cc', d: 'dd' });
+    });
 });

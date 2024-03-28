@@ -281,4 +281,19 @@ export class Rectangle {
 
         return result;
     }
+
+    /**
+     * Check if vertices intersect.
+     * @param range1
+     * @param range2
+     * @returns
+     */
+    static vertexIntersect(range1: IRange, range2: IRange): boolean {
+        const leftTopIntersect = range1.startRow === range2.startRow && range1.startColumn === range2.startColumn;
+        const leftBottomIntersect = range1.endRow === range2.endRow && range1.startColumn === range2.startColumn;
+        const rightTopIntersect = range1.startRow === range2.startRow && range1.endColumn === range2.endColumn;
+        const rightBottomIntersect = range1.endRow === range2.endRow && range1.endColumn === range2.endColumn;
+
+        return leftTopIntersect || leftBottomIntersect || rightTopIntersect || rightBottomIntersect;
+    }
 }

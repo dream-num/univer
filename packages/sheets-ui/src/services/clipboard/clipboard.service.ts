@@ -17,6 +17,7 @@
 import type { ICellData, IMutationInfo, IRange, Worksheet } from '@univerjs/core';
 import {
     Disposable,
+    ErrorService,
     extractPureTextFromCell,
     ICommandService,
     ILogService,
@@ -42,6 +43,7 @@ import { BehaviorSubject } from 'rxjs';
 
 import { IMarkSelectionService } from '../mark-selection/mark-selection.service';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
+import { expandWithOtherRange } from '../../commands/commands/utils/selection-utils';
 import { CopyContentCache, extractId, genId } from './copy-content-cache';
 import { HtmlToUSMService } from './html-to-usm/converter';
 import PastePluginLark from './html-to-usm/paste-plugins/plugin-lark';
@@ -108,7 +110,8 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @INotificationService private readonly _notificationService: INotificationService,
         @IPlatformService private readonly _platformService: IPlatformService,
-        @Inject(LocaleService) private readonly _localeService: LocaleService
+        @Inject(LocaleService) private readonly _localeService: LocaleService,
+        @Inject(ErrorService) private readonly _errorService: ErrorService
     ) {
         super();
         this._htmlToUSM = new HtmlToUSMService({
@@ -220,7 +223,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
     addClipboardHook(hook: ISheetClipboardHook): IDisposable {
         if (this._clipboardHooks.findIndex((h) => h.id === hook.id) !== -1) {
             this._logService.error('[SheetClipboardService]', 'hook already exists', hook.id);
-            return { dispose: () => {} };
+            return { dispose: () => { } };
         }
         // hook added should be ordered at meaning while
         const insertIndex = this._clipboardHooks.findIndex((existingHook) => {
@@ -397,6 +400,41 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             return false;
         }
 
+        const worksheet = this._currentUniverService.getUniverSheetInstance(unitId)?.getSheetBySheetId(subUnitId);
+        if (!worksheet) {
+            return false;
+        }
+        let expandSelectionsByMergedCell = { ...pastedRange };
+        const adjustedPrimaryByMergedCell = { ...selection.primary };
+        let intersectButNoContain = false;
+        const mergeData = worksheet.getMergeData();
+        for (let i = 0; i < mergeData.length; i++) {
+            const merge = mergeData[i];
+            if (Rectangle.intersects(merge, expandSelectionsByMergedCell)) {
+                if (!Rectangle.contains(pastedRange, merge)) {
+                    expandSelectionsByMergedCell = expandWithOtherRange(expandSelectionsByMergedCell, merge);
+                    if (Rectangle.vertexIntersect(adjustedPrimaryByMergedCell, merge)) {
+                        adjustedPrimaryByMergedCell.endRow = merge.endRow;
+                        adjustedPrimaryByMergedCell.endColumn = merge.endColumn;
+                        adjustedPrimaryByMergedCell.isMerged = true;
+                        adjustedPrimaryByMergedCell.isMergedMainCell = true;
+                    }
+                    intersectButNoContain = true;
+                }
+            }
+        }
+
+        if (intersectButNoContain) {
+            const newSelections = [{
+                range: expandSelectionsByMergedCell,
+                primary: adjustedPrimaryByMergedCell,
+                style: selection.style,
+            }];
+            this._selectionManagerService.replace(newSelections);
+            this._errorService.emit('Across a merged cell.');
+            return false;
+        }
+
         // 4. execute these mutations by the one method
         return this._pasteUSM(
             {
@@ -469,6 +507,37 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         for (let j = startRow; j <= endRow; j++) {
             const row = rowManager.getRowOrCreate(j);
             rowProperties.push({ height: `${row.h || defaultRowHeight}` });
+        }
+
+        let expandSelectionsByMergedCell = { ...pastedRange };
+        const adjustedPrimaryByMergedCell = { ...selection.primary };
+        let intersectButNoContain = false;
+        const mergeData = worksheet.getMergeData();
+        for (let i = 0; i < mergeData.length; i++) {
+            const merge = mergeData[i];
+            if (Rectangle.intersects(merge, expandSelectionsByMergedCell)) {
+                if (!Rectangle.contains(pastedRange, merge)) {
+                    expandSelectionsByMergedCell = expandWithOtherRange(expandSelectionsByMergedCell, merge);
+                    if (Rectangle.vertexIntersect(adjustedPrimaryByMergedCell, merge)) {
+                        adjustedPrimaryByMergedCell.endRow = merge.endRow;
+                        adjustedPrimaryByMergedCell.endColumn = merge.endColumn;
+                        adjustedPrimaryByMergedCell.isMerged = true;
+                        adjustedPrimaryByMergedCell.isMergedMainCell = true;
+                    }
+                    intersectButNoContain = true;
+                }
+            }
+        }
+
+        if (intersectButNoContain) {
+            const newSelections = [{
+                range: expandSelectionsByMergedCell,
+                primary: adjustedPrimaryByMergedCell,
+                style: selection.style,
+            }];
+            this._selectionManagerService.replace(newSelections);
+            this._errorService.emit('Across a merged cell.');
+            return false;
         }
 
         const pasteRes = this._pasteUSM(

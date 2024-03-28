@@ -163,8 +163,8 @@ describe('Test clipboard', () => {
             const rowHeight = rowManager?.getRowData()?.[0].h;
             const columnManager = get(IUniverInstanceService).getUniverSheetInstance('test')?.getSheetBySheetId('sheet1')?.getColumnManager();
             const columnWidth = columnManager?.getColumnData()?.[0].w;
-            expect (columnWidth).toBe(73);
-            expect (rowHeight).toBe(81);
+            expect(columnWidth).toBe(73);
+            expect(rowHeight).toBe(81);
             expect(values && values[0][0]?.v).toBe('row1col2');
             expect(styles && styles[0][0]).toStrictEqual({
                 bg: { rgb: 'rgb(255,0,0)' },
@@ -671,6 +671,36 @@ describe('Test clipboard', () => {
                     endColumn: 7,
                 },
             ]);
+        });
+    });
+
+    describe('Test paste, the original data is a merged cell of 1 row and 2 columns, the current selection consists only of ordinary cells but paste selections lapping merged cell', () => {
+        it('The current selection is a single cell and next cell is merged cell', async () => {
+            const selectionManager = get(SelectionManagerService);
+
+            selectionManager.setCurrentSelection({
+                pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+                unitId: 'test',
+                sheetId: 'sheet1',
+            });
+
+            // set selection to E7
+            const startRow = 6;
+            const startColumn = 5;
+            const endRow = 6;
+            const endColumn = 4;
+
+            selectionManager.add([
+                {
+                    range: { startRow, startColumn, endRow, endColumn, rangeType: RANGE_TYPE.NORMAL },
+                    primary: null,
+                    style: null,
+                },
+            ]);
+
+            const pasteResult = await sheetClipboardService.paste(clipboardItem);
+
+            expect(pasteResult).toBeFalsy();
         });
     });
 

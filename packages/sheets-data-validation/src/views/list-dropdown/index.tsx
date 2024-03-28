@@ -22,6 +22,9 @@ import React, { useState } from 'react';
 import { CheckMarkSingle } from '@univerjs/icons';
 import { Scrollbar } from '@univerjs/design';
 import { OpenValidationPanelOperation } from '@univerjs/data-validation';
+import { IEditorBridgeService } from '@univerjs/sheets-ui';
+import { KeyCode } from '@univerjs/ui';
+import { DeviceInputEventType } from '@univerjs/engine-render';
 import type { ListMultipleValidator } from '../../validators/list-multiple-validator';
 import { deserializeListOptions, getDataValidationCellValue, serializeListOptions } from '../../validators/util';
 import type { IDropdownComponentProps } from '../../services/dropdown-manager.service';
@@ -89,6 +92,7 @@ export function ListDropDown(props: IDropdownComponentProps) {
     const commandService = useDependency(ICommandService);
     const localeService = useDependency(LocaleService);
     const [localValue, setLocalValue] = useState('');
+    const editorBridgeService = useDependency(IEditorBridgeService);
 
     if (!worksheet) {
         return null;
@@ -135,6 +139,15 @@ export function ListDropDown(props: IDropdownComponentProps) {
                         p: null,
                     },
                 };
+
+                if (editorBridgeService.isVisible()) {
+                    editorBridgeService.changeVisible({
+                        visible: false,
+                        keycode: KeyCode.ESC,
+                        eventType: DeviceInputEventType.Keyboard,
+                    });
+                }
+
                 commandService.executeCommand(SetRangeValuesCommand.id, params);
                 setLocalValue(str);
                 if (!multiple) {

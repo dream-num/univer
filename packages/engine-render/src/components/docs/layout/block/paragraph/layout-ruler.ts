@@ -129,9 +129,6 @@ function _divideOperator(
 
                     const sliceSpanGroupWidth = __getSpanGroupWidth(sliceSpanGroup);
                     if (sliceSpanGroupWidth > divide.width) {
-                        if (sliceSpanGroup.length > 1) {
-                            glyphGroup.push(sliceSpanGroup.pop()!);
-                        }
                         break;
                     }
                 }

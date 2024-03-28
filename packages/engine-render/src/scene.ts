@@ -554,7 +554,6 @@ export class Scene extends ThinScene {
         // }
 
         coord = this.getRelativeCoord(coord);
-
         return this.getActiveViewportByRelativeCoord(coord);
     }
 

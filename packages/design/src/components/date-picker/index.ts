@@ -15,3 +15,5 @@
  */
 
 export { DatePicker, type IDatePickerProps } from './DatePicker';
+export { DatePanel } from './Panel';
+export type { DatePanelProps } from './Panel';

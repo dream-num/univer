@@ -30,7 +30,9 @@ export type ICustomLabelProps<T = undefined> = {
     value$?: Observable<T>;
 
     onChange?(v: string | number): void;
-} & Pick<IMenuSelectorItem<unknown>, 'label' | 'icon' | 'title'>;
+
+    title?: React.ReactNode;
+} & Pick<IMenuSelectorItem<unknown>, 'label' | 'icon'>;
 
 /**
  * The component to render toolbar item label and menu item label.
@@ -90,7 +92,7 @@ export function CustomLabel(props: ICustomLabelProps): JSX.Element | null {
         }
     }
     if (title) {
-        nodes.push(<span key={index++}>{localeService.t(title)}</span>);
+        nodes.push(<span key={index++}>{typeof title === 'string' ? localeService.t(title) : title}</span>);
     }
 
     return <>{nodes}</>;

@@ -27,15 +27,26 @@ export interface IFormLayoutProps {
 
     style?: React.CSSProperties;
     className?: string;
+
+    error?: string;
 }
 
 export const FormLayout = (props: IFormLayoutProps) => {
-    const { label, desc, children, style, className } = props;
+    const { label, desc, children, style, className, error } = props;
     return (
         <div className={clsx(styles.formLayout, className)} style={style}>
             {label && <div className={styles.formLayoutLabel}>{label}</div>}
             {desc && <div className={styles.formLayoutDesc}>{desc}</div>}
-            <div className={styles.formLayoutContent}>{children}</div>
+            <div className={clsx(styles.formLayoutContent, error ? styles.formLayoutContentError : '')}>
+                {children}
+                {error
+                    ? (
+                        <div className={styles.formLayoutError}>
+                            {error}
+                        </div>
+                    )
+                    : null}
+            </div>
         </div>
     );
 };

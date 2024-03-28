@@ -34,6 +34,8 @@ import { Subject } from 'rxjs';
 import type { FormatType, INumfmtItem, INumfmtService, IRefItem, ISnapshot } from './type';
 
 const SHEET_NUMFMT_PLUGIN = 'SHEET_NUMFMT_PLUGIN';
+const millisecondsPerDay = 24 * 60 * 60 * 1000;
+
 @OnLifecycle(LifecycleStages.Starting, NumfmtService)
 export class NumfmtService extends Disposable implements INumfmtService {
     /**
@@ -270,5 +272,11 @@ export class NumfmtService extends Disposable implements INumfmtService {
     getRefModel(unitId: string) {
         const refModel = this._refAliasModel.get(unitId);
         return refModel;
+    }
+
+    serialTimeToTimestamp(serialValue: number, is1900 = true) {
+        const excelBaseDate = new Date('1900-01-01').getTime();
+        const timestamp = (serialValue - (is1900 ? 25569 : 24107)) * millisecondsPerDay + excelBaseDate;
+        return timestamp;
     }
 }

@@ -30,7 +30,9 @@ import { UniverSheetsNumfmtPlugin } from '@univerjs/sheets-numfmt';
 import { UniverSheetsUIPlugin } from '@univerjs/sheets-ui';
 import { UniverSheetsZenEditorPlugin } from '@univerjs/sheets-zen-editor';
 import { UniverUIPlugin } from '@univerjs/ui';
-
+import { UniverDataValidationPlugin } from '@univerjs/data-validation';
+import { UniverSheetsDataValidationPlugin } from '@univerjs/sheets-data-validation';
+import { SheetsConditionalFormatPlugin } from '@univerjs/sheets-conditional-format';
 import { DebuggerPlugin } from '../plugins/debugger';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data/sheets/demo/default-workbook-data-demo';
 import { locales } from './locales';
@@ -77,6 +79,12 @@ univer.registerPlugin(UniverRPCMainThreadPlugin, {
 
 // find replace
 univer.registerPlugin(UniverFindReplacePlugin);
+// univer.registerPlugin(UniverSheetsFindPlugin);
+univer.registerPlugin(SheetsConditionalFormatPlugin);
+
+// data validation
+univer.registerPlugin(UniverDataValidationPlugin);
+univer.registerPlugin(UniverSheetsDataValidationPlugin);
 univer.registerPlugin(UniverSheetsFindReplacePlugin);
 
 // create univer sheet instance

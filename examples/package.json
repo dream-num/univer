@@ -21,6 +21,7 @@
         "@univerjs/icons": "^0.1.42",
         "@univerjs/rpc": "workspace:*",
         "@univerjs/sheets": "workspace:*",
+        "@univerjs/sheets-conditional-format": "workspace:*",
         "@univerjs/sheets-find-replace": "workspace:*",
         "@univerjs/sheets-formula": "workspace:*",
         "@univerjs/sheets-numfmt": "workspace:*",
@@ -40,7 +41,7 @@
         "vue": "^3.4.21"
     },
     "devDependencies": {
-        "@types/react": "^18.2.67",
+        "@types/react": "^18.2.72",
         "@types/react-dom": "^18.2.22",
         "@univerjs/shared": "workspace:*",
         "esbuild": "^0.20.2",
@@ -50,6 +51,6 @@
         "esbuild-style-plugin": "^1.6.3",
         "less": "^4.2.0",
         "minimist": "^1.2.8",
-        "typescript": "^5.4.2"
+        "typescript": "^5.4.3"
     }
 }

@@ -176,6 +176,7 @@ describe('Test index', () => {
             allUnitData: {
                 [testBed.unitId]: testBed.sheetData,
             },
+            dirtyUnitOtherFormulaMap: {},
         });
 
         const sheetItem = testBed.sheetData[testBed.sheetId];

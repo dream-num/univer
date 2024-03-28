@@ -23,6 +23,7 @@ const locale = {
         view: '视图',
         others: '其他',
     },
+    more: '更多',
     fontFamily: {
         TimesNewRoman: 'Times New Roman',
         Arial: 'Arial',

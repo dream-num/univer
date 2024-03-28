@@ -98,21 +98,45 @@ export function getCellAtRowCol(row: number, col: number, worksheet: Worksheet):
     return destRange;
 }
 
+export function setEndForRange(range: IRange, rowCount: number, columnCount: number) {
+    const { startRow, startColumn, endRow, endColumn } = range;
+
+    if (Number.isNaN(startRow)) {
+        range.startRow = 0;
+    }
+
+    if (Number.isNaN(endRow)) {
+        range.endRow = rowCount;
+    }
+
+    if (Number.isNaN(startColumn)) {
+        range.startColumn = 0;
+    }
+
+    if (Number.isNaN(endColumn)) {
+        range.endColumn = columnCount;
+    }
+
+    return range;
+}
+
 /**
  * Get the default primary cell (the most top-left cell) of a range.
  * @param range
  * @param worksheet
  */
 export function getPrimaryForRange(range: IRange, worksheet: Worksheet): ISelectionCell {
-    const mergedRange = worksheet.getMergedCell(range.startRow, range.startColumn);
+    const startRow = Number.isNaN(range.startRow) ? 0 : range.startRow;
+    const startColumn = Number.isNaN(range.startColumn) ? 0 : range.startColumn;
+    const mergedRange = worksheet.getMergedCell(startRow, startColumn);
     if (!mergedRange) {
         return {
-            startRow: range.startRow,
-            startColumn: range.startColumn,
+            startRow,
+            startColumn,
             endRow: range.startRow,
             endColumn: range.startColumn,
-            actualRow: range.startRow,
-            actualColumn: range.startColumn,
+            actualRow: startRow,
+            actualColumn: startColumn,
             rangeType: RANGE_TYPE.NORMAL,
             isMerged: false,
             isMergedMainCell: false,
@@ -121,8 +145,8 @@ export function getPrimaryForRange(range: IRange, worksheet: Worksheet): ISelect
 
     return {
         ...mergedRange,
-        actualRow: range.startRow,
-        actualColumn: range.startColumn,
+        actualRow: startRow,
+        actualColumn: startColumn,
         rangeType: RANGE_TYPE.NORMAL,
         isMerged: true,
         isMergedMainCell: true,

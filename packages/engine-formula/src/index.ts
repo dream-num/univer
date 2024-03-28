@@ -27,6 +27,7 @@ export type {
     IUnitData,
     IUnitSheetNameMap,
     INumfmtItemMap,
+    IDirtyUnitOtherFormulaMap,
 } from './basics/common';
 export { isInDirtyRange } from './basics/dirty';
 export { ErrorType } from './basics/error-type';
@@ -59,7 +60,7 @@ export {
     type ISetFormulaDataMutationParams,
     SetFormulaDataMutation,
 } from './commands/mutations/set-formula-data.mutation';
-export { RemoveOtherFormulaMutation, SetOtherFormulaMutation } from './commands/mutations/set-other-formula.mutation';
+export { RemoveOtherFormulaMutation, SetOtherFormulaMutation, type ISetOtherFormulaMutationParams, type IRemoveOtherFormulaMutationParams } from './commands/mutations/set-other-formula.mutation';
 export {
     RemoveSuperTableMutation,
     SetSuperTableMutation,
@@ -84,6 +85,7 @@ export {
 export { generateStringWithSequence, type ISequenceNode, sequenceNodeType } from './engine/utils/sequence';
 export { ArrayValueObject, ValueObjectFactory } from './engine/value-object/array-value-object';
 export { BaseValueObject, ErrorValueObject } from './engine/value-object/base-value-object';
+export { BooleanValue } from './basics/common';
 export type { PrimitiveValueType } from './engine/value-object/primitive-object';
 export { NumberValueObject } from './engine/value-object/primitive-object';
 export { BooleanValueObject } from './engine/value-object/primitive-object';
@@ -130,7 +132,7 @@ export {
 } from './services/feature-calculation-manager.service';
 export { FunctionService } from './services/function.service';
 export { IFunctionService } from './services/function.service';
-export { type IOtherFormulaManagerService, OtherFormulaManagerService } from './services/other-formula-manager.service';
+export { IOtherFormulaManagerService, OtherFormulaManagerService } from './services/other-formula-manager.service';
 export { FormulaExecuteStageType, type IExecutionInProgressParams } from './services/runtime.service';
 export { FormulaExecutedStateType, type IAllRuntimeData } from './services/runtime.service';
 export { SetNumfmtFormulaDataMutation } from './commands/mutations/set-numfmt-formula-data.mutation';

@@ -16,7 +16,6 @@
 
 import { InputNumber } from '@univerjs/design';
 import React, { useMemo, useState } from 'react';
-import { Observable } from 'rxjs';
 
 import { useObservable } from '../hooks/observable';
 import styles from './index.module.less';
@@ -24,7 +23,7 @@ import type { IFontSizeProps } from './interface';
 
 export const FontSize = (props: IFontSizeProps) => {
     const { value, min, max, onChange, disabled$ } = props;
-    const disabled = useObservable(disabled$ ?? new Observable<boolean>((sub) => sub.next(false)));
+    const disabled = useObservable(disabled$);
     const [realValue, setRealValue] = useState<number>(Number(value ?? 0));
 
     const _value = useMemo(() => Number(value ?? realValue), [value]);

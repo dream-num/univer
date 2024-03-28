@@ -56,7 +56,7 @@ export {
     PREDEFINED_HOOK_NAME,
     SheetClipboardService,
 } from './services/clipboard/clipboard.service';
-export type { ICellDataWithSpanInfo, ISheetClipboardHook } from './services/clipboard/type';
+export type { ICellDataWithSpanInfo, ISheetClipboardHook, ISheetRangeLocation, ICopyPastePayload } from './services/clipboard/type';
 export { COPY_TYPE } from './services/clipboard/type';
 export { getRepeatRange } from './services/clipboard/utils';
 export { CellEditorManagerService, ICellEditorManagerService } from './services/editor/cell-editor-manager.service';

@@ -173,10 +173,12 @@ export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, bo
             } else {
                 const oldVal = cellMatrix.getValue(row, col) || {};
 
-                const type =
-                    newVal.t === CellValueType.FORCE_STRING
-                        ? newVal.t
-                        : checkCellValueType(newVal.v === undefined ? oldVal.v : newVal.v);
+                // NOTE: we may need to take `p` into account
+                const type = (newVal.t === CellValueType.FORCE_STRING)
+                    ? newVal.t
+                    : newVal.v !== undefined
+                        ? checkCellValueType(newVal.v, newVal.t)
+                        : checkCellValueType(oldVal.v, oldVal.t);
 
                 if (newVal.f !== undefined) {
                     oldVal.f = newVal.f;
@@ -195,8 +197,7 @@ export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, bo
                     oldVal.v = type === CellValueType.NUMBER
                         ? Number(newVal.v)
                         : type === CellValueType.BOOLEAN
-                            // if the value is a boolean, we should store it as 1 or 0
-                            ? (newVal.v!.toString()).toUpperCase() === 'TRUE' ? 1 : 0
+                            ? extractBooleanValue(newVal.v) ? 1 : 0
                             : newVal.v;
                 }
 
@@ -244,24 +245,85 @@ export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, bo
     },
 };
 
-function checkCellValueType(v: Nullable<CellValue>): Nullable<CellValueType> {
+/**
+ * Get the correct type after setting values to a cell.
+ *
+ * @param v the new value
+ * @param oldType the old type
+ * @returns the new type
+ */
+export function checkCellValueType(v: Nullable<CellValue>, oldType: Nullable<CellValueType>): Nullable<CellValueType> {
     if (v === null) return null;
 
     if (typeof v === 'string') {
         if (isSafeNumeric(v)) {
+            if ((+v === 0 || +v === 1) && oldType === CellValueType.BOOLEAN) {
+                return CellValueType.BOOLEAN;
+            }
+
             return CellValueType.NUMBER;
         } else if (isBooleanString(v)) {
             return CellValueType.BOOLEAN;
         }
         return CellValueType.STRING;
     }
+
     if (typeof v === 'number') {
+        if ((v === 0 || v === 1) && oldType === CellValueType.BOOLEAN) {
+            return CellValueType.BOOLEAN;
+        }
         return CellValueType.NUMBER;
     }
+
     if (typeof v === 'boolean') {
         return CellValueType.BOOLEAN;
     }
+
     return CellValueType.FORCE_STRING;
+}
+
+/**
+ * Check if the value can be casted to a boolean.
+ * @internal
+ * @param value
+ * @returns It would return null if the value cannot be casted to a boolean, and would return the boolean value if it can be casted.
+ */
+export function extractBooleanValue(value: Nullable<string | number | boolean>): Nullable<boolean> {
+    if (typeof value === 'string') {
+        if (value.toUpperCase() === 'TRUE') {
+            return true;
+        };
+
+        if (value.toUpperCase() === 'FALSE') {
+            return false;
+        }
+
+        if (isSafeNumeric(value)) {
+            if (Number(value) === 0) {
+                return false;
+            }
+
+            if (Number(value) === 1) {
+                return true;
+            }
+        }
+    }
+
+    if (typeof value === 'number') {
+        if (value === 0) {
+            return false;
+        }
+
+        if (value === 1) {
+            return true;
+        }
+    }
+
+    if (typeof value === 'boolean') {
+        return value;
+    }
+
+    return null;
 }
 
 /**

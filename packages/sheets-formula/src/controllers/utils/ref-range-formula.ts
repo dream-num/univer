@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IMutationInfo, IRange } from '@univerjs/core';
+import type { IRange } from '@univerjs/core';
 import { ObjectMatrix, Tools } from '@univerjs/core';
 import type { IFormulaData } from '@univerjs/engine-formula';
 
@@ -83,20 +83,25 @@ export function refRangeFormula(oldFormulaData: IFormulaData,
     } else if (type === FormulaReferenceMoveType.InsertMoveRight) {
         // TODO
     }
+
+    return {
+        redoFormulaData: {},
+        undoFormulaData: {},
+    };
 }
 
 function handleInsertCol(oldFormulaData: IFormulaData,
     newFormulaData: IFormulaData,
     formulaReferenceMoveParam: IFormulaReferenceMoveParam) {
-    const redos: IMutationInfo[] = [];
-    const undos: IMutationInfo[] = [];
+    const redoFormulaData = {};
+    const undoFormulaData = {};
 
     const { type, unitId, sheetId, range, from, to } = formulaReferenceMoveParam;
 
     if (!Tools.isDefine(oldFormulaData)) {
         return {
-            redos,
-            undos,
+            redoFormulaData,
+            undoFormulaData,
         };
     }
 
@@ -104,10 +109,12 @@ function handleInsertCol(oldFormulaData: IFormulaData,
 
     if (formulaDataKeys.length === 0) {
         return {
-            redos,
-            undos,
+            redoFormulaData,
+            undoFormulaData,
         };
     }
+
+    const rangeList = [];
 
     for (const unitId of formulaDataKeys) {
         const sheetData = oldFormulaData[unitId];
@@ -129,7 +136,7 @@ function handleInsertCol(oldFormulaData: IFormulaData,
     }
 
     return {
-        redos,
-        undos,
+        redoFormulaData,
+        undoFormulaData,
     };
 }

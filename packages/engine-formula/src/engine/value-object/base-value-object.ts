@@ -76,10 +76,6 @@ export class BaseValueObject extends ObjectClassType {
         return false;
     }
 
-    isArray() {
-        return false;
-    }
-
     isString() {
         return false;
     }

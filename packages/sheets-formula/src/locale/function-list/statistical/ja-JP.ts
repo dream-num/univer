@@ -865,8 +865,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            maxRange: { name: '最大値範囲', detail: '最大値を求めるセルの実際の範囲です。' },
+            criteriaRange1: { name: '条件範囲 1', detail: '条件で評価するセルのセットです。' },
+            criteria1: { name: '条件 1', detail: '最大として評価されるセルを定義する、数値、式、またはテキストの形式での条件です。 同じ条件セットを、MINIFS、SUMIFS、および AVERAGEIFS 関数に対して使用できます。' },
+            criteriaRange2: { name: '条件範囲 2', detail: '追加の範囲。 最大 127 の範囲のペアを入力できます。' },
+            criteria2: { name: '条件 2', detail: '追加対応する条件です。 最大 127 条件のペアを入力できます。' },
         },
     },
     MEDIAN: {

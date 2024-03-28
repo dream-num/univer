@@ -28,6 +28,7 @@ import { VarP } from './var-p';
 import { VarS } from './var-s';
 import { Vara } from './vara';
 import { Varpa } from './varpa';
+import { Maxifs } from './maxifs';
 
 export const functionStatistical = [
     [Average, FUNCTION_NAMES_STATISTICAL.AVERAGE],
@@ -44,4 +45,5 @@ export const functionStatistical = [
     [VarS, FUNCTION_NAMES_STATISTICAL.VAR_S],
     [Vara, FUNCTION_NAMES_STATISTICAL.VARA],
     [Varpa, FUNCTION_NAMES_STATISTICAL.VARPA],
+    [Maxifs, FUNCTION_NAMES_STATISTICAL.MAXIFS],
 ];

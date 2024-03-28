@@ -978,7 +978,6 @@ export class Viewport {
         const scaleToX = this._isRelativeX ? 1 : m[0] < 1 ? m[0] : 1;
 
         const scaleToY = this._isRelativeY ? 1 : m[3] < 1 ? m[3] : 1;
-
         let width = this._width;
 
         let height = this._height;
@@ -994,9 +993,9 @@ export class Viewport {
         }
 
         const xFrom: number = this.left * scaleFromX;
-        const xTo: number = ((width || 0) + this.left) * scaleToX;
         const yFrom: number = this.top * scaleFromY;
-        const yTo: number = ((height || 0) + this.top) * scaleToY;
+        const xTo: number = ((width || 0) * scaleToX + this.left); // _getViewPortSize has handle left scale already
+        const yTo: number = ((height || 0) * scaleToY + this.top);
 
         /**
          * @DR-Univer The coordinates here need to be consistent with the clip in the render,

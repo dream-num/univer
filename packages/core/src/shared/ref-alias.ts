@@ -36,9 +36,17 @@ export class RefAlias<T extends Record<string, unknown>, K extends keyof T = key
         });
     }
 
-    getValue(key: string) {
-        for (let index = 0; index < this._keys.length; index++) {
-            const keyMap = this._keyMaps.get(this._keys[index]);
+    /**
+     * If a key group is specified, the order of values is determined by the key group, otherwise it depends on the keys at initialization
+     * @param {string} key
+     * @param {K[]} [keyGroup]
+     * @return {*}
+     * @memberof RefAlias
+     */
+    getValue(key: string, keyGroup?: K[]) {
+        const keys = keyGroup || this._keys;
+        for (let index = 0; index < keys.length; index++) {
+            const keyMap = this._keyMaps.get(keys[index]);
             if (keyMap?.has(key)) {
                 return keyMap.get(key);
             }

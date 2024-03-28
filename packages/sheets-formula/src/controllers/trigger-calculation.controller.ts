@@ -185,7 +185,7 @@ export class TriggerCalculationController extends Disposable {
 
             numfmtModel.forValue((row, col, numfmtValue) => {
                 if (numfmtValue && refMode) {
-                    const refValue = refMode.getValue(numfmtValue?.i);
+                    const refValue = refMode.getValue(numfmtValue?.i, ['i']);
 
                     if (!refValue) return;
 

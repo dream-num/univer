@@ -116,7 +116,7 @@ export class ConditionalFormattingFormulaService extends Disposable {
                         }
                         const cfIdSet = new Set<string>();
                         for (const formulaId in params.unitOtherData[unitId]![subUnitId]) {
-                            const item = map.getValue(formulaId);
+                            const item = map.getValue(formulaId, ['formulaId']);
                             if (item) {
                                 const value = getResultFromFormula(params.unitOtherData[unitId]![subUnitId]![formulaId]);
                                 item.result = value!;
@@ -223,7 +223,7 @@ export class ConditionalFormattingFormulaService extends Disposable {
 
     public registerFormula(unitId: string, subUnitId: string, cfId: string, formulaText: string) {
         const subUnitFormulaMap = this._ensureSubunitFormulaMap(unitId, subUnitId);
-        const formulaItem = subUnitFormulaMap.getValue(formulaText);
+        const formulaItem = subUnitFormulaMap.getValue(formulaText, ['formulaText']);
         if (formulaItem) {
             if (!subUnitFormulaMap.getValues().some((item) => item.cfId === cfId)) {
                 formulaItem.count++;
@@ -238,7 +238,7 @@ export class ConditionalFormattingFormulaService extends Disposable {
     private _removeFormulaByCfId(unitId: string, subUnitId: string, cfId: string) {
         const subUnitFormulaMap = this._ensureSubunitFormulaMap(unitId, subUnitId);
         const reduceCount = (formulaText: string) => {
-            const formulaItem = subUnitFormulaMap.getValue(formulaText);
+            const formulaItem = subUnitFormulaMap.getValue(formulaText, ['formulaText']);
             if (formulaItem) {
                 formulaItem.count--;
                 if (formulaItem.count <= 0) {
@@ -259,7 +259,7 @@ export class ConditionalFormattingFormulaService extends Disposable {
         if (!map) {
             return { status: FormulaResultStatus.NOT_REGISTER };
         }
-        const item = map.getValue(formulaText);
+        const item = map.getValue(formulaText, ['formulaText']);
         if (!item) {
             return { status: FormulaResultStatus.NOT_REGISTER };
         }

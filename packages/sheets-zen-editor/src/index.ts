@@ -14,5 +14,5 @@
  * limitations under the License.
  */
 
-export * from './plugin';
+export { UniverSheetsZenEditorPlugin } from './plugin';
 export { enUS, zhCN } from './locale';

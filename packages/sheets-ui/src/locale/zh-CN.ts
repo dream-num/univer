@@ -80,7 +80,7 @@ const locale = {
         sum: '求和',
         autoSum: '自动求和',
         moreFunction: '更多函数',
-        conditionalalFormat: '条件格式',
+        conditionalFormatting: '条件格式',
         comment: '批注',
         pivotTable: '数据透视表',
         chart: '图表',

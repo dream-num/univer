@@ -90,7 +90,7 @@ const FREEZE_COLUMN_MAIN_NAME = '__SpreadsheetFreezeColumnMainName__';
 
 const FREEZE_COLUMN_HEADER_NAME = '__SpreadsheetFreezeColumnHeaderName__';
 
-const FREEZE_SIZE_NORMAL = 4;
+const FREEZE_SIZE_NORMAL = 2;
 
 const AUXILIARY_CLICK_HIDDEN_OBJECT_TRANSPARENCY = 0.01;
 
@@ -214,9 +214,13 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderC
 
         const scale = Math.max(scene.scaleX, scene.scaleY);
 
-        const FREEZE_SIZE = FREEZE_SIZE_NORMAL / (scale < 1 ? 1 : scale);
+        let FREEZE_SIZE = FREEZE_SIZE_NORMAL / (scale < 1 ? 1 : scale);
 
         if (freezeDirectionType === FREEZE_DIRECTION_TYPE.ROW) {
+            if (freezeRow === -1 || freezeRow === 0) {
+                FREEZE_SIZE = FREEZE_SIZE * 2;
+            }
+
             const FREEZE_OFFSET = FREEZE_SIZE;
 
             this._rowFreezeHeaderRect = new Rect(FREEZE_ROW_HEADER_NAME, {
@@ -235,7 +239,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderC
 
             this._rowFreezeMainRect = new Rect(FREEZE_ROW_MAIN_NAME, {
                 fill,
-                width: shapeWidth * 2,
+                width: shapeWidth * 2 / scale,
                 height: FREEZE_SIZE,
                 left: rowHeaderWidthAndMarginLeft,
                 top: startY - FREEZE_OFFSET,
@@ -244,6 +248,10 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderC
 
             scene.addObjects([this._rowFreezeHeaderRect, this._rowFreezeMainRect], SHEET_COMPONENT_HEADER_LAYER_INDEX);
         } else {
+            if (freezeColumn === -1 || freezeColumn === 0) {
+                FREEZE_SIZE = FREEZE_SIZE * 2;
+            }
+
             const FREEZE_OFFSET = FREEZE_SIZE;
 
             this._columnFreezeHeaderRect = new Rect(FREEZE_COLUMN_HEADER_NAME, {
@@ -263,7 +271,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderC
             this._columnFreezeMainRect = new Rect(FREEZE_COLUMN_MAIN_NAME, {
                 fill,
                 width: FREEZE_SIZE,
-                height: shapeHeight * 2,
+                height: shapeHeight * 2 / scale,
                 left: startX - FREEZE_OFFSET,
                 top: columnHeaderHeightAndMarginTop,
                 zIndex: 3,

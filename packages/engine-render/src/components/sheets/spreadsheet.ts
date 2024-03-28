@@ -268,68 +268,64 @@ export class Spreadsheet extends SheetComponent {
             //     return;
             // }
 
-            if (viewPortKey === 'viewMain') {
-                const ctx = this._cacheCanvas.getContext();
-                ctx.save();
+            const ctx = this._cacheCanvas.getContext();
+            ctx.save();
 
-                const { left, top, right, bottom } = viewPortPosition;
+            const { left, top, right, bottom } = viewPortPosition;
 
-                const dw = right - left + rowHeaderWidth;
+            const dw = right - left + rowHeaderWidth;
 
-                const dh = bottom - top + columnHeaderHeight;
+            const dh = bottom - top + columnHeaderHeight;
 
-                if (diffBounds.length === 0 || (diffX === 0 && diffY === 0) || this._forceDirty) {
-                    if (this.isDirty() || this._forceDirty) {
-                        this._cacheCanvas.clear();
-                        ctx.setTransform(mainCtx.getTransform());
-                        this._draw(ctx, bounds);
-                        this._forceDirty = false;
-                    }
-                    this._applyCache(mainCtx, left, top, dw, dh, left, top, dw, dh);
-                } else {
-                    if (this.isDirty()) {
+            if (this._forceDirty) {
+                if (this.isDirty() || this._forceDirty) {
+                    this._cacheCanvas.clear();
+                    ctx.setTransform(mainCtx.getTransform());
+                    this._draw(ctx, bounds);
+                    this._forceDirty = false;
+                }
+                this._applyCache(mainCtx, left, top, dw, dh, left, top, dw, dh);
+            } else {
+                if (this.isDirty()) {
+                    ctx.save();
+                    ctx.globalCompositeOperation = 'copy';
+                    ctx.setTransform(1, 0, 0, 1, 0, 0);
+                    ctx.drawImage(this._cacheCanvas.getCanvasEle(), diffX * scaleX, diffY * scaleY);
+                    ctx.restore();
+
+                    this._refreshIncrementalState = true;
+                    ctx.setTransform(mainCtx.getTransform());
+
+                    for (const diffBound of diffBounds) {
+                        const { left: diffLeft, right: diffRight, bottom: diffBottom, top: diffTop } = diffBound;
                         ctx.save();
-                        ctx.globalCompositeOperation = 'copy';
-                        ctx.setTransform(1, 0, 0, 1, 0, 0);
-                        ctx.drawImage(this._cacheCanvas.getCanvasEle(), diffX * scaleX, diffY * scaleY);
-                        ctx.restore();
-
-                        this._refreshIncrementalState = true;
-                        ctx.setTransform(mainCtx.getTransform());
-
-                        for (const diffBound of diffBounds) {
-                            const { left: diffLeft, right: diffRight, bottom: diffBottom, top: diffTop } = diffBound;
-                            ctx.save();
-                            ctx.beginPath();
-                            ctx.rectByPrecision(
-                                diffLeft - rowHeaderWidth - FIX_ONE_PIXEL_BLUR_OFFSET,
-                                diffTop - columnHeaderHeight - FIX_ONE_PIXEL_BLUR_OFFSET,
-                                diffRight - diffLeft + rowHeaderWidth + FIX_ONE_PIXEL_BLUR_OFFSET * 2,
-                                diffBottom - diffTop + columnHeaderHeight + FIX_ONE_PIXEL_BLUR_OFFSET * 2
-                            );
+                        ctx.beginPath();
+                        ctx.rectByPrecision(
+                            diffLeft - rowHeaderWidth - FIX_ONE_PIXEL_BLUR_OFFSET,
+                            diffTop - columnHeaderHeight - FIX_ONE_PIXEL_BLUR_OFFSET,
+                            diffRight - diffLeft + rowHeaderWidth + FIX_ONE_PIXEL_BLUR_OFFSET * 2,
+                            diffBottom - diffTop + columnHeaderHeight + FIX_ONE_PIXEL_BLUR_OFFSET * 2
+                        );
                             // ctx.fillStyle = 'rgb(0,0,0)';
 
-                            ctx.clip();
-                            this._draw(ctx, {
-                                viewBound: bounds.viewBound,
-                                diffBounds: [diffBound],
-                                diffX: bounds.diffX,
-                                diffY: bounds.diffY,
-                                viewPortPosition: bounds.viewPortPosition,
-                                viewPortKey: bounds.viewPortKey,
-                            });
-                            ctx.restore();
-                        }
-
-                        this._refreshIncrementalState = false;
+                        ctx.clip();
+                        this._draw(ctx, {
+                            viewBound: bounds.viewBound,
+                            diffBounds: [diffBound],
+                            diffX: bounds.diffX,
+                            diffY: bounds.diffY,
+                            viewPortPosition: bounds.viewPortPosition,
+                            viewPortKey: bounds.viewPortKey,
+                        });
+                        ctx.restore();
                     }
-                    this._applyCache(mainCtx, left, top, dw, dh, left, top, dw, dh);
-                }
 
-                ctx.restore();
-            } else {
-                this._draw(mainCtx, bounds);
+                    this._refreshIncrementalState = false;
+                }
+                this._applyCache(mainCtx, left, top, dw, dh, left, top, dw, dh);
             }
+
+            ctx.restore();
         } else {
             this._draw(mainCtx, bounds);
         }

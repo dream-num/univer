@@ -78,14 +78,16 @@ export function expandArrayValueObject(rowCount: number, columnCount: number, va
 export function createNewArray(
     result: BaseValueObject[][],
     rowCount: number,
-    columnCount: number
+    columnCount: number,
+    unitId = '',
+    sheetId = ''
 ) {
     const arrayValueObjectData: IArrayValueObject = {
         calculateValueList: result,
         rowCount,
         columnCount,
-        unitId: '',
-        sheetId: '',
+        unitId,
+        sheetId,
         row: -1,
         column: -1,
     };

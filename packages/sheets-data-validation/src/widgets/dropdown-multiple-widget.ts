@@ -15,7 +15,7 @@
  */
 
 import { HorizontalAlign, ICommandService, VerticalAlign } from '@univerjs/core';
-import type { ICellRenderContext, ISelectionCellWithCoord } from '@univerjs/core';
+import type { ICellRenderContext } from '@univerjs/core';
 import { getFontStyleString, type Spreadsheet, type SpreadsheetSkeleton, type UniverRenderingContext2D } from '@univerjs/engine-render';
 import type { IBaseDataValidationWidget } from '@univerjs/data-validation';
 import type { ListMultipleValidator } from '../validators/list-multiple-validator';

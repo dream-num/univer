@@ -25,6 +25,7 @@ const locale: typeof zhCN = {
         view: 'View',
         others: 'Others',
     },
+    more: 'More',
     fontFamily: {
         TimesNewRoman: 'Times New Roman',
         Arial: 'Arial',

@@ -74,6 +74,7 @@ import {
     getPrimaryForRange,
     NORMAL_SELECTION_PLUGIN_NAME,
     SelectionManagerService,
+    setEndForRange,
 } from '@univerjs/sheets';
 import type { EditorBridgeService, SelectionShape } from '@univerjs/sheets-ui';
 import {
@@ -149,7 +150,7 @@ export class PromptController extends Disposable {
 
     private _previousEditorUnitId: Nullable<string>;
 
-    private _executeBlurSetTimeout: number | NodeJS.Timeout = -1;
+    private _existsSequenceNode = false;
 
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
@@ -882,9 +883,11 @@ export class PromptController extends Disposable {
         this._selectionManagerService.clear();
 
         if (sequenceNodes == null || sequenceNodes.length === 0) {
+            this._existsSequenceNode = false;
             bodyList.forEach((body) => (body!.textRuns = []));
         } else {
             // this._lastSequenceNodes = sequenceNodes;
+            this._existsSequenceNode = true;
             const { textRuns, refSelections } = this._buildTextRuns(sequenceNodes);
             bodyList.forEach((body) => (body!.textRuns = textRuns));
 
@@ -988,7 +991,13 @@ export class PromptController extends Disposable {
 
             const gridRange = deserializeRangeWithSheet(token);
 
-            const { unitId: refUnitId, sheetName, range } = gridRange;
+            const { unitId: refUnitId, sheetName, range: rawRange } = gridRange;
+
+            /**
+             * pro/issues/436
+             * When the range is an entire row or column, NaN values need to be corrected.
+             */
+            const range = setEndForRange(rawRange, worksheet.getRowCount(), worksheet.getColumnCount());
 
             if (refUnitId != null && refUnitId.length > 0 && unitId !== refUnitId) {
                 continue;
@@ -1381,8 +1390,64 @@ export class PromptController extends Disposable {
         // }
     }
 
+    /**
+     * pro/issues/450
+     * In range selection mode, certain measures are implemented to ensure that the selection behavior is processed correctly.
+     */
+    private _focusIsOnlyRange(selectionCount: number) {
+        const currentEditor = this._editorService.getFocusEditor();
+        if (!currentEditor) {
+            return true;
+        }
+
+        if (!currentEditor.onlyInputRange()) {
+            return true;
+        }
+
+        if (this._existsSequenceNode) {
+            return true;
+        }
+
+        if (selectionCount > 1 || (this._previousSequenceNodes != null && this._previousSequenceNodes.length > 0)) {
+            return true;
+        }
+
+        if (this._previousInsertRefStringIndex != null) {
+            this._previousInsertRefStringIndex += 1;
+        }
+
+        return false;
+    }
+
+    /**
+     * pro/issues/450
+     * In range selection mode, certain measures are implemented to ensure that the selection behavior is processed correctly.
+     */
+    private _resetSequenceNodes(selectionCount: number) {
+        const currentEditor = this._editorService.getFocusEditor();
+        if (!currentEditor) {
+            return;
+        }
+
+        if (!currentEditor.onlyInputRange()) {
+            return;
+        }
+
+        if (selectionCount > 1) {
+            return;
+        }
+
+        if (this._existsSequenceNode) {
+            this._formulaPromptService.clearSequenceNodes();
+            this._previousRangesCount = 0;
+            this._existsSequenceNode = false;
+        }
+    }
+
     private _inertControlSelection(selectionWithStyles: ISelectionWithStyle[]) {
         const currentSelection = selectionWithStyles[selectionWithStyles.length - 1];
+
+        this._resetSequenceNodes(selectionWithStyles.length);
 
         if (
             (selectionWithStyles.length === this._previousRangesCount || this._previousRangesCount === 0) &&
@@ -1405,7 +1470,7 @@ export class PromptController extends Disposable {
 
             this._previousInsertRefStringIndex = this._currentInsertRefStringIndex;
 
-            if (!matchRefDrawToken(char)) {
+            if (!matchRefDrawToken(char) && this._focusIsOnlyRange(selectionWithStyles.length)) {
                 this._formulaPromptService.insertSequenceString(this._currentInsertRefStringIndex, matchToken.COMMA);
 
                 insertNodes = this._formulaPromptService.getSequenceNodes();

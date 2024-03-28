@@ -110,6 +110,7 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         this._dirtyUnitFeatureMap = {};
         this._excludedCell = {};
         this._sheetIdToNameMap = {};
+        this._dirtyUnitOtherFormulaMap = {};
     }
 
     getExcludedRange() {

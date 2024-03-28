@@ -85,6 +85,7 @@ export {
 export { generateStringWithSequence, type ISequenceNode, sequenceNodeType } from './engine/utils/sequence';
 export { ArrayValueObject, ValueObjectFactory } from './engine/value-object/array-value-object';
 export { BaseValueObject, ErrorValueObject } from './engine/value-object/base-value-object';
+export { BooleanValue } from './basics/common';
 export type { PrimitiveValueType } from './engine/value-object/primitive-object';
 export { NumberValueObject } from './engine/value-object/primitive-object';
 export { BooleanValueObject } from './engine/value-object/primitive-object';

@@ -15,25 +15,24 @@
  */
 
 import { ErrorType } from '../../../basics/error-type';
-import type { BaseReferenceObject } from '../../../engine/reference-object/base-reference-object';
-import type { RangeReferenceObject } from '../../../engine/reference-object/range-reference-object';
+import type { BaseReferenceObject, FunctionVariantType } from '../../../engine/reference-object/base-reference-object';
+import { expandArrayValueObject } from '../../../engine/utils/array-object';
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
+import { NumberValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class Offset extends BaseFunction {
     override needsReferenceObject = true;
 
     override calculate(
-        referenceObject: BaseValueObject,
-        rows: BaseValueObject,
-        columns: BaseValueObject,
-        height?: BaseValueObject,
-        width?: BaseValueObject
+        reference: FunctionVariantType,
+        rows: FunctionVariantType,
+        columns: FunctionVariantType,
+        height?: FunctionVariantType,
+        width?: FunctionVariantType
     ) {
-        // covert to real type
-        const reference = referenceObject as unknown as RangeReferenceObject;
-
         if (reference == null || rows == null || columns == null) {
             return ErrorValueObject.create(ErrorType.NA);
         }
@@ -62,41 +61,111 @@ export class Offset extends BaseFunction {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        const { startRow: row, endRow: referenceEndRow, startColumn: column, endColumn: referenceEndColumn } = reference.getRangeData();
+        reference = reference as BaseReferenceObject;
+
+        const rowCount = reference.getRowCount();
+        const columnCount = reference.getColumnCount();
 
         if (rows.isReferenceObject()) {
-            rows = (rows as unknown as BaseReferenceObject).toArrayValueObject();
+            rows = (rows as BaseReferenceObject).toArrayValueObject();
         }
 
         if (columns.isReferenceObject()) {
-            columns = (columns as unknown as BaseReferenceObject).toArrayValueObject();
+            columns = (columns as BaseReferenceObject).toArrayValueObject();
         }
 
-        const rowOffset = this.getIndexNumValue(rows);
-        const columnOffset = this.getIndexNumValue(columns);
+        // The default row height is the row height of reference.
+        if (!height) {
+            height = NumberValueObject.create(rowCount);
+        } else if (height.isReferenceObject()) {
+            height = (height as BaseReferenceObject).toArrayValueObject();
+        }
+
+        // The default column width is the column width of reference.
+        if (!width) {
+            width = NumberValueObject.create(columnCount);
+        } else if (width.isReferenceObject()) {
+            width = (width as BaseReferenceObject).toArrayValueObject();
+        }
+
+        // If rows/columns/height/width is a range, it needs to be extended
+        // get max row length
+        const maxRowLength = Math.max(
+            rows.isArray() ? (rows as ArrayValueObject).getRowCount() : 1,
+            columns.isArray() ? (columns as ArrayValueObject).getRowCount() : 1,
+            height.isArray() ? (height as ArrayValueObject).getRowCount() : 1,
+            width.isArray() ? (width as ArrayValueObject).getRowCount() : 1
+        );
+
+        // get max column length
+        const maxColumnLength = Math.max(
+            rows.isArray() ? (rows as ArrayValueObject).getColumnCount() : 1,
+            columns.isArray() ? (columns as ArrayValueObject).getColumnCount() : 1,
+            height.isArray() ? (height as ArrayValueObject).getColumnCount() : 1,
+            width.isArray() ? (width as ArrayValueObject).getColumnCount() : 1
+        );
+
+        rows = rows as BaseValueObject;
+        columns = columns as BaseValueObject;
+        height = height as BaseValueObject;
+        width = width as BaseValueObject;
+
+        // If any parameter of row/columns/height/width is an array(not single cell reference), an error will be reported, and the error report also needs to be expanded and specific error information is required. Otherwise, calculate the offset.
+        if (maxRowLength === 1 && maxColumnLength === 1) {
+            return this._handleSingleObject(reference, rows, columns, height, width);
+        }
+
+        const rowsArray = expandArrayValueObject(maxRowLength, maxColumnLength, rows, ErrorValueObject.create(ErrorType.NA));
+        const columnsArray = expandArrayValueObject(maxRowLength, maxColumnLength, columns, ErrorValueObject.create(ErrorType.NA));
+        const heightArray = expandArrayValueObject(maxRowLength, maxColumnLength, height, ErrorValueObject.create(ErrorType.NA));
+        const widthArray = expandArrayValueObject(maxRowLength, maxColumnLength, width, ErrorValueObject.create(ErrorType.NA));
+
+        return rowsArray.mapValue((rowsValue, rowIndex, columnIndex) => {
+            const columnsValue = columnsArray.get(rowIndex, columnIndex) as BaseValueObject;
+            const heightValue = heightArray.get(rowIndex, columnIndex) as BaseValueObject;
+            const widthValue = widthArray.get(rowIndex, columnIndex) as BaseValueObject;
+
+            if (rowsValue.isError()) {
+                return rowsValue;
+            }
+
+            if (columnsValue.isError()) {
+                return columnsValue;
+            }
+
+            if (heightValue.isError()) {
+                return heightValue;
+            }
+
+            if (widthValue.isError()) {
+                return widthValue;
+            }
+
+            // Ensure that the callback function returns a BaseValueObject
+            return this._handleSingleObject(reference, rowsValue, columnsValue, heightValue, widthValue, true) as BaseValueObject;
+        });
+    }
+
+    private _handleSingleObject(reference: BaseReferenceObject, rowsValue: BaseValueObject, columnsValue: BaseValueObject, heightValue: BaseValueObject, widthValue: BaseValueObject, isReportError = false) {
+        const { startRow: referenceStartRow, startColumn: referenceStartColumn } = reference.getRangeData();
+
+        const rowOffset = this.getIndexNumValue(rowsValue);
+        const columnOffset = this.getIndexNumValue(columnsValue);
 
         if (typeof rowOffset !== 'number' || typeof columnOffset !== 'number') {
             return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        const targetRow = row + rowOffset;
-        const targetColumn = column + columnOffset;
+        const targetRow = referenceStartRow + rowOffset;
+        const targetColumn = referenceStartColumn + columnOffset;
 
         // Excel has a limit on the number of rows and columns: targetRow > 1048576 || targetColumn > 16384, Univer has no limit
         if (targetRow < 0 || targetColumn < 0) {
             return ErrorValueObject.create(ErrorType.REF);
         }
 
-        if (height?.isReferenceObject()) {
-            height = (height as unknown as BaseReferenceObject).toArrayValueObject();
-        }
-
-        if (width?.isReferenceObject()) {
-            width = (width as unknown as BaseReferenceObject).toArrayValueObject();
-        }
-
-        const heightCount = (height && this.getIndexNumValue(height)) ?? 1;
-        const widthCount = (width && this.getIndexNumValue(width)) ?? 1;
+        const heightCount = this.getIndexNumValue(heightValue);
+        const widthCount = this.getIndexNumValue(widthValue);
 
         if (typeof heightCount !== 'number' || typeof widthCount !== 'number') {
             return ErrorValueObject.create(ErrorType.VALUE);
@@ -112,6 +181,10 @@ export class Offset extends BaseFunction {
         // Excel has a limit on the number of rows and columns: targetRow > 1048576 || targetColumn > 16384, Univer has no limit
         if (targetRowWithHeight < 0 || targetColumnWithWidth < 0) {
             return ErrorValueObject.create(ErrorType.REF);
+        }
+
+        if (isReportError) {
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         const startRow = targetRow < targetRowWithHeight ? targetRow : targetRowWithHeight;

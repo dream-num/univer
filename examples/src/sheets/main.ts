@@ -33,6 +33,7 @@ import { UniverUIPlugin } from '@univerjs/ui';
 import { UniverDataValidationPlugin } from '@univerjs/data-validation';
 import { UniverSheetsDataValidationPlugin } from '@univerjs/sheets-data-validation';
 import { SheetsConditionalFormatPlugin } from '@univerjs/sheets-conditional-format';
+import { SheetsConditionalFormattingPlugin } from '@univerjs/sheets-conditional-formatting';
 import { DebuggerPlugin } from '../plugins/debugger';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data/sheets/demo/default-workbook-data-demo';
 import { locales } from './locales';
@@ -89,6 +90,9 @@ univer.registerPlugin(UniverSheetsFindReplacePlugin);
 
 // create univer sheet instance
 univer.createUniverSheet(DEFAULT_WORKBOOK_DATA_DEMO);
+
+// sheet condition formatting
+univer.registerPlugin(SheetsConditionalFormattingPlugin);
 
 declare global {
     interface Window {

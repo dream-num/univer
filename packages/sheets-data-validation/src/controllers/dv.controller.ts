@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { IUniverInstanceService, LifecycleStages, OnLifecycle, Range, RxDisposable } from '@univerjs/core';
+import { IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
 import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
 import { Inject, Injector } from '@wendellhu/redi';
 import { DataValidationSingle } from '@univerjs/icons';

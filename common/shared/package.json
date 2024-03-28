@@ -22,7 +22,7 @@
         "@vitest/coverage-istanbul": "^1.4.0",
         "happy-dom": "^13.3.8",
         "vite": "^5.2.6",
-        "vite-plugin-dts": "^3.7.3",
+        "vite-plugin-dts": "^3.8.1",
         "vitest": "^1.4.0"
     }
 }

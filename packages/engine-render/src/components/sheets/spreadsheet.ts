@@ -342,7 +342,7 @@ export class Spreadsheet extends SheetComponent {
         }
         const { width, height } = parentSize;
         this._cacheCanvas.setSize(width, height);
-        this.makeDirty(true);
+        this.makeForceDirty(true);
     }
 
     protected _applyCache(

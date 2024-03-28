@@ -14,14 +14,5 @@
  * limitations under the License.
  */
 
-import type { BaseValueObject } from '../value-object/base-value-object';
-import { NumberValueObject } from '../value-object/primitive-object';
-
-export function convertTonNumber(valueObject: BaseValueObject) {
-    const currentValue = valueObject.getValue();
-    let result = 0;
-    if (currentValue) {
-        result = 1;
-    }
-    return NumberValueObject.create(result);
-}
+export { default as enUS } from './en-US';
+export { default as zhCN } from './zh-CN';

@@ -53,6 +53,9 @@ import { FunctionService, IFunctionService } from '../../services/function.servi
 import { IOtherFormulaManagerService, OtherFormulaManagerService } from '../../services/other-formula-manager.service';
 import { FormulaRuntimeService, IFormulaRuntimeService } from '../../services/runtime.service';
 import { ISuperTableService, SuperTableService } from '../../services/super-table.service';
+import type { BaseValueObject, ErrorValueObject } from '../../engine/value-object/base-value-object';
+import type { BaseReferenceObject, FunctionVariantType } from '../../engine/reference-object/base-reference-object';
+import type { ArrayValueObject } from '../../engine/value-object/array-value-object';
 
 const getTestWorkbookData = (): IWorkbookData => {
     return {
@@ -230,4 +233,15 @@ export function createFunctionTestBed(workbookConfig?: IWorkbookData, dependenci
         sheetId,
         sheetData,
     };
+}
+
+export function getObjectValue(result: FunctionVariantType) {
+    if ((result as ErrorValueObject).isError()) {
+        return (result as ErrorValueObject).getValue();
+    } else if ((result as BaseReferenceObject).isReferenceObject()) {
+        return (result as BaseReferenceObject).toArrayValueObject().toValue();
+    } else if ((result as ArrayValueObject).isArray()) {
+        return (result as ArrayValueObject).toValue();
+    }
+    return (result as BaseValueObject).getValue();
 }

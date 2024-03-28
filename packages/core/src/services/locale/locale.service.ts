@@ -100,7 +100,7 @@ export class LocaleService extends Disposable {
         return this._currentLocale;
     }
 
-    resolveKeyPath(obj: ILanguagePack, keys: string[]): LanguageValue | null {
+    public resolveKeyPath(obj: ILanguagePack, keys: string[]): LanguageValue | null {
         const currentKey = keys.shift();
 
         if (currentKey && obj && currentKey in obj) {

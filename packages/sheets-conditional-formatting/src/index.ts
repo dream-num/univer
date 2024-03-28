@@ -14,14 +14,5 @@
  * limitations under the License.
  */
 
-import { describe, expect, it } from 'vitest';
-
-import { convertTonNumber } from '../object-covert';
-import { BooleanValueObject } from '../../value-object/primitive-object';
-
-describe('Test object cover', () => {
-    it('Function convertTonNumber', () => {
-        expect(convertTonNumber(BooleanValueObject.create(true)).getValue()).toBe(1);
-        expect(convertTonNumber(BooleanValueObject.create(false)).getValue()).toBe(0);
-    });
-});
+export { SheetsConditionalFormattingPlugin } from './plugin';
+export { enUS, zhCN } from './locale';

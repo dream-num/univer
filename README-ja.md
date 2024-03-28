@@ -73,7 +73,7 @@ Univer の機能のハイライト:
 | <h3>🎨 Univer Slides</h3>                    |                   |
 | [Slides](https://www.univer.ai/examples/slides/)<br>A canvas presentation containing graphic text, floating pictures, tables and other elements                                  | [![](./docs/img/examples-slides.gif)](https://www.univer.ai/examples/slides/)                           |
 | <h3>🧩 Univer Innovation</h3>                    |                   |
-| [Zen Mode](https://github.com/dream-num/univer)<br>The cell of Sheet is a Doc?                                 | [![](./docs/img/zen-mode.gif)](https://github.com/dream-num/univer)                           |
+| [Zen Mode](https://univer.ai/guides/tutorials/zen-editor/#live-demo)<br>The cell of Sheet is a Doc?                                 | [![](./docs/img/zen-mode.gif)](https://univer.ai/guides/tutorials/zen-editor/#live-demo)                           |
 | [Univer(SaaS version)](https://univer.ai/)<br>With Univer, we enable users to create 3 forms of page as they wish. By merging sheet, doc and slide's capabilities together, Univer empowers individuals and teams to create, organize and streamline workflows effortlessly.                                   | [![](./docs/img/univer-workspace-drag-chart.gif)](https://youtu.be/kpV0MvQuFZA)                           |
 
 ## 使用方法
@@ -98,6 +98,7 @@ Univer を npm パッケージとしてインポートすることをお勧め�
 | [network](./packages/network)                             | WebSocket と HTTP をベースにしたネットワークサービスを実装します。                                                                | [![npm version](https://img.shields.io/npm/v/@univerjs/network)](https://npmjs.org/package/@univerjs/network)               |
 | [rpc](./packages/rpc)                                     | Univer 文書の異なるレプリカ間でデータを同期するための RPC メカニズムとメソッドを実装します。                                            | [![npm version](https://img.shields.io/npm/v/@univerjs/rpc)](https://npmjs.org/package/@univerjs/rpc)                       |
 | [sheets](./packages/sheets)                               | スプレッドシート機能の基本ロジック。                                                                                            | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets)](https://npmjs.org/package/@univerjs/sheets)                 |
+| [sheets-conditional-formatting](./packages/sheets-conditional-formatting)   | スプレッドシートの条件付き書式設定機能を実装します。                                                          | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets-conditional-formatting)](https://npmjs.org/package/@univerjs/sheets-conditional-formatting) |
 | [sheets-find-replace](./packages/sheets-find-replace)     | スプレッドシートの検索と置換機能を実装しています。                                                                             | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets-find-replace)](https://npmjs.org/package/@univerjs/sheets-find-replace) |
 | [sheets-formula](./packages/sheets-formula)               | スプレッドシートに数式を実装します。                                                                                           | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets-formula)](https://npmjs.org/package/@univerjs/sheets-formula) |
 | [sheets-numfmt](./packages/sheets-numfmt)                 | スプレッドシートの数値フォーマットを実装します。                                                                                     | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets-numfmt)](https://npmjs.org/package/@univerjs/sheets-numfmt)   |
@@ -154,4 +155,4 @@ Univer は Apache-2.0 ライセンスの下で配布されています。
 
 ---
 
-Copyright DreamNum Inc. 2023-現在
+Copyright © 2019-2024 Shanghai DreamNum Technology Co., Ltd. All rights reserved

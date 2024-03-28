@@ -45,7 +45,7 @@
 //     function?: boolean; // 'formula'
 //     frozenMode?: boolean; // 'freeze mode'
 //     sortAndFilter?: boolean; // 'Sort and filter'
-//     conditionalFormat?: boolean; // 'Conditional Format'
+//     conditionalFormatting?: boolean; // 'Conditional Formatting'
 //     dataValidation?: boolean; // 'Data Validation'
 //     splitColumn?: boolean; // 'Split column'
 //     screenshot?: boolean; // 'screenshot'

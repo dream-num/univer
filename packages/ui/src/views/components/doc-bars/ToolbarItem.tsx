@@ -20,9 +20,9 @@ import { ITextSelectionRenderManager } from '@univerjs/engine-render';
 import { MoreDownSingle } from '@univerjs/icons';
 import { useDependency, useInjector } from '@wendellhu/redi/react-bindings';
 import type { Ref } from 'react';
-import React, { forwardRef, useEffect, useState } from 'react';
+import React, { forwardRef, useEffect, useMemo, useState } from 'react';
 import type { Subscription } from 'rxjs';
-import { isObservable } from 'rxjs';
+import { isObservable, Observable } from 'rxjs';
 
 import { ComponentManager } from '../../../common/component-manager';
 import { CustomLabel } from '../../../components/custom-label/CustomLabel';
@@ -108,11 +108,29 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem>, ref: 
     const tooltipTitle = localeService.t(tooltip ?? '') + (shortcut ? ` (${shortcut})` : '');
 
     const { selections } = props as IDisplayMenuItem<IMenuSelectorItem>;
+    const selections$ = useMemo(() => {
+        if (isObservable(selections)) {
+            return selections;
+        } else {
+            return new Observable< typeof selections>((subscribe) => {
+                subscribe.next(selections);
+            });
+        }
+    }, [selections]);
+    const options = useObservable(selections$) as IValueOption[];
 
-    const options = selections as IValueOption[];
+    const icon$ = useMemo(() => {
+        if (isObservable(icon)) {
+            return icon;
+        } else {
+            return new Observable< typeof icon>((subscribe) => {
+                const v = options?.find((o) => o.value === value)?.icon ?? icon;
+                subscribe.next(v);
+            });
+        }
+    }, [icon, options, value]);
 
-    const iconFromObservable = useObservable(isObservable(icon) ? icon : undefined);
-    const iconToDisplay = iconFromObservable ?? options?.find((o) => o.value === value)?.icon ?? icon;
+    const iconToDisplay = useObservable(icon$, undefined, true);
 
     function renderSelectorType(menuType: MenuItemType) {
         function handleSelect(option: IValueOption) {

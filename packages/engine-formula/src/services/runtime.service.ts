@@ -387,7 +387,30 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
 
         const subComponentData = unitData[subUnitId];
 
-        subComponentData![formulaId] = this._objectValueToCellValue(functionVariant as BaseValueObject)!;
+        let cellDatas: Nullable<ICellData>[][] = [];
+
+        if (
+            functionVariant.isReferenceObject() ||
+            (functionVariant.isValueObject() && (functionVariant as BaseValueObject).isArray())
+        ) {
+            const objectValueRefOrArray = functionVariant as BaseReferenceObject | ArrayValueObject;
+            const { startRow, startColumn } = objectValueRefOrArray.getRangePosition();
+            objectValueRefOrArray.iterator((valueObject, rowIndex, columnIndex) => {
+                const value = this._objectValueToCellValue(valueObject);
+
+                const row = rowIndex - startRow;
+                const column = columnIndex - startColumn;
+                if (cellDatas[row] == null) {
+                    cellDatas[row] = [];
+                }
+
+                cellDatas[row][column] = value;
+            });
+        } else {
+            cellDatas = [[this._objectValueToCellValue(functionVariant as BaseValueObject)!]];
+        }
+
+        subComponentData![formulaId] = cellDatas;
     }
 
     setRuntimeData(functionVariant: FunctionVariantType) {

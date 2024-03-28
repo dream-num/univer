@@ -18,7 +18,7 @@ import type { Nullable } from '@univerjs/core';
 import { Disposable } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
 
-import type { IFormulaDataItem, IOtherFormulaData } from '../basics/common';
+import type { IDirtyUnitOtherFormulaMap, IFormulaDataItem, IOtherFormulaData } from '../basics/common';
 
 export interface IOtherFormulaManagerSearchParam {
     unitId: string;
@@ -42,6 +42,10 @@ export interface IOtherFormulaManagerService {
     register(insertParam: IOtherFormulaManagerInsertParam): void;
 
     getOtherFormulaData(): IOtherFormulaData;
+
+    batchRegister(formulaData: IOtherFormulaData): void;
+
+    batchRemove(formulaData: IDirtyUnitOtherFormulaMap): void;
 }
 
 /**
@@ -74,15 +78,65 @@ export class OtherFormulaManagerService extends Disposable implements IOtherForm
 
     register(insertParam: IOtherFormulaManagerInsertParam) {
         const { unitId, subUnitId, formulaId, item } = insertParam;
-        if (this._otherFormulaData[unitId]) {
+        if (!this._otherFormulaData[unitId]) {
             this._otherFormulaData[unitId] = {};
         }
 
-        if (this._otherFormulaData[unitId]![subUnitId]) {
+        if (!this._otherFormulaData[unitId]![subUnitId]) {
             this._otherFormulaData[unitId]![subUnitId] = {};
         }
 
         this._otherFormulaData[unitId]![subUnitId]![formulaId] = item;
+    }
+
+    batchRegister(formulaData: IOtherFormulaData) {
+        Object.keys(formulaData).forEach((unitId) => {
+            const subUnits = formulaData[unitId];
+            if (subUnits == null) {
+                return true;
+            }
+            Object.keys(subUnits).forEach((subUnitId) => {
+                const subUnit = subUnits[subUnitId];
+                if (subUnit == null) {
+                    return true;
+                }
+                Object.keys(subUnit).forEach((formulaId) => {
+                    const item = subUnit[formulaId];
+                    if (item == null) {
+                        return true;
+                    }
+
+                    this.register({
+                        unitId,
+                        subUnitId,
+                        formulaId,
+                        item,
+                    });
+                });
+            });
+        });
+    }
+
+    batchRemove(formulaData: IDirtyUnitOtherFormulaMap) {
+        Object.keys(formulaData).forEach((unitId) => {
+            const subUnits = formulaData[unitId];
+            if (subUnits == null) {
+                return true;
+            }
+            Object.keys(subUnits).forEach((subUnitId) => {
+                const subUnit = subUnits[subUnitId];
+                if (subUnit == null) {
+                    return true;
+                }
+                Object.keys(subUnit).forEach((formulaId) => {
+                    this.remove({
+                        unitId,
+                        subUnitId,
+                        formulaId,
+                    });
+                });
+            });
+        });
     }
 
     getOtherFormulaData() {

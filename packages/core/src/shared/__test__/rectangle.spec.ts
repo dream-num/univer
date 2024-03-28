@@ -17,7 +17,10 @@
 import { describe, expect, it } from 'vitest';
 
 import { Rectangle } from '../rectangle';
+import { AbsoluteRefType } from '../../types/interfaces/i-range';
+import type { IRange } from '../../types/interfaces/i-range';
 
+const cellToRange = (row: number, col: number) => ({ startRow: row, endRow: row, startColumn: col, endColumn: col } as IRange);
 describe('test "Rectangle"', () => {
     it('test "subtract"', () => {
         // completely covered
@@ -76,5 +79,35 @@ describe('test "Rectangle"', () => {
             { startRow: 2, startColumn: 1, endRow: 2, endColumn: 1 },
             { startRow: 2, startColumn: 3, endRow: 2, endColumn: 3 },
         ]);
+    });
+
+    it('test getRelativeRange', () => {
+        const relativeRange = Rectangle.getRelativeRange({ startRow: 5, endRow: 6, startColumn: 5, endColumn: 6 }, cellToRange(10, 10));
+        expect(relativeRange).toEqual({
+            endColumn: 1,
+            endRow: 1,
+            startColumn: -5,
+            startRow: -5,
+        });
+    });
+    it('test getPositionRange', () => {
+        const originRange = { startRow: 5, endRow: 6, startColumn: 5, endColumn: 6 };
+        const relativeRange = Rectangle.getRelativeRange(originRange, cellToRange(10, 10));
+        const positionRange = Rectangle.getPositionRange(relativeRange, cellToRange(11, 11));
+        expect(positionRange).toEqual({ startRow: 6, endRow: 7, startColumn: 6, endColumn: 7 });
+        const positionRangeWithAbsoluteStartAll = Rectangle.getPositionRange(relativeRange, cellToRange(11, 11), { ...originRange, startAbsoluteRefType: AbsoluteRefType.ALL });
+        const positionRangeWithAbsoluteStartRow = Rectangle.getPositionRange(relativeRange, cellToRange(11, 11), { ...originRange, startAbsoluteRefType: AbsoluteRefType.ROW });
+        const positionRangeWithAbsoluteStartCol = Rectangle.getPositionRange(relativeRange, cellToRange(11, 11), { ...originRange, startAbsoluteRefType: AbsoluteRefType.COLUMN });
+        const positionRangeWithAbsoluteEndALl = Rectangle.getPositionRange(relativeRange, cellToRange(11, 11), { ...originRange, endAbsoluteRefType: AbsoluteRefType.ALL });
+        const positionRangeWithAbsoluteEndRow = Rectangle.getPositionRange(relativeRange, cellToRange(11, 11), { ...originRange, endAbsoluteRefType: AbsoluteRefType.ROW });
+        const positionRangeWithAbsoluteEndCol = Rectangle.getPositionRange(relativeRange, cellToRange(11, 11), { ...originRange, endAbsoluteRefType: AbsoluteRefType.COLUMN });
+        const positionRangeWithALl = Rectangle.getPositionRange(relativeRange, cellToRange(11, 11), { ...originRange, endAbsoluteRefType: AbsoluteRefType.ALL, startAbsoluteRefType: AbsoluteRefType.ALL });
+        expect(positionRangeWithAbsoluteStartAll).toEqual({ ...originRange, endColumn: 7, endRow: 7, startAbsoluteRefType: AbsoluteRefType.ALL });
+        expect(positionRangeWithAbsoluteStartRow).toEqual({ ...originRange, startColumn: 6, endColumn: 7, endRow: 7, startAbsoluteRefType: AbsoluteRefType.ROW });
+        expect(positionRangeWithAbsoluteStartCol).toEqual({ ...originRange, startRow: 6, endColumn: 7, endRow: 7, startAbsoluteRefType: AbsoluteRefType.COLUMN });
+        expect(positionRangeWithAbsoluteEndALl).toEqual({ ...originRange, startRow: 6, startColumn: 6, endAbsoluteRefType: AbsoluteRefType.ALL });
+        expect(positionRangeWithAbsoluteEndRow).toEqual({ ...originRange, endColumn: 7, startRow: 6, startColumn: 6, endAbsoluteRefType: AbsoluteRefType.ROW });
+        expect(positionRangeWithAbsoluteEndCol).toEqual({ ...originRange, endRow: 7, startRow: 6, startColumn: 6, endAbsoluteRefType: AbsoluteRefType.COLUMN });
+        expect(positionRangeWithALl).toEqual({ ...originRange, endAbsoluteRefType: AbsoluteRefType.ALL, startAbsoluteRefType: AbsoluteRefType.ALL });
     });
 });

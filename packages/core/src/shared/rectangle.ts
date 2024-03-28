@@ -15,7 +15,7 @@
  */
 
 import type { IRange } from '../types/interfaces/i-range';
-import { RANGE_TYPE } from '../types/interfaces/i-range';
+import { AbsoluteRefType, RANGE_TYPE } from '../types/interfaces/i-range';
 import type { Nullable } from './types';
 
 /**
@@ -193,13 +193,15 @@ export class Rectangle {
             endColumn: range.endColumn - range.startColumn,
         }) as IRange;
 
-    static getPositionRange = (relativeRange: IRange, originRange: IRange) =>
-        ({
-            startRow: relativeRange.startRow + originRange.startRow,
-            endRow: relativeRange.endRow + relativeRange.startRow + originRange.startRow,
-            startColumn: relativeRange.startColumn + originRange.startColumn,
-            endColumn: relativeRange.endColumn + relativeRange.startColumn + originRange.startColumn,
+    static getPositionRange = (relativeRange: IRange, originRange: IRange, absoluteRange?: IRange) => {
+        return ({
+            ...(absoluteRange || {}),
+            startRow: absoluteRange ? ([AbsoluteRefType.ROW, AbsoluteRefType.ALL].includes(absoluteRange.startAbsoluteRefType || 0) ? absoluteRange.startRow : relativeRange.startRow + originRange.startRow) : (relativeRange.startRow + originRange.startRow),
+            endRow: absoluteRange ? ([AbsoluteRefType.ROW, AbsoluteRefType.ALL].includes(absoluteRange.endAbsoluteRefType || 0) ? absoluteRange.endRow : relativeRange.endRow + relativeRange.startRow + originRange.startRow) : (relativeRange.endRow + relativeRange.startRow + originRange.startRow),
+            startColumn: absoluteRange ? ([AbsoluteRefType.COLUMN, AbsoluteRefType.ALL].includes(absoluteRange.startAbsoluteRefType || 0) ? absoluteRange.startColumn : relativeRange.startColumn + originRange.startColumn) : relativeRange.startColumn + originRange.startColumn,
+            endColumn: absoluteRange ? ([AbsoluteRefType.COLUMN, AbsoluteRefType.ALL].includes(absoluteRange.endAbsoluteRefType || 0) ? absoluteRange.endColumn : relativeRange.endColumn + relativeRange.startColumn + originRange.startColumn) : relativeRange.endColumn + relativeRange.startColumn + originRange.startColumn,
         }) as IRange;
+    };
 
     static moveHorizontal = (range: IRange, step: number = 0, length: number = 0): IRange => ({
         ...range,

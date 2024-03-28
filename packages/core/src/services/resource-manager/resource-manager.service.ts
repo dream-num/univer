@@ -54,7 +54,7 @@ export class ResourceManagerService extends Disposable implements IResourceManag
     registerPluginResource<T = any>(unitID: string, resourceName: string, hook: IResourceHook<T>) {
         const resourceMap = this._resourceMap.get(unitID) || new Map<string, IResourceHook>();
         if (resourceMap.has(resourceName)) {
-            throw new Error('the pluginName is registered');
+            throw new Error(`the pluginName is registered {${resourceName}}`);
         }
         resourceMap.set(resourceName, hook);
         this._resourceMap.set(unitID, resourceMap);

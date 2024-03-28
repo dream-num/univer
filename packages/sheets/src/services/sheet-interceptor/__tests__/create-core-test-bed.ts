@@ -43,7 +43,7 @@ const TEST_WORKBOOK_DATA: IWorkbookData = {
     styles: {},
 };
 
-export function createCoreTestBed(workbookConfig?: IWorkbookData, dependencies?: Dependency[]) {
+export function createCoreTestBed(workbookData?: IWorkbookData, dependencies?: Dependency[]) {
     const univer = new Univer();
     const injector = univer.__getInjector();
     const get = injector.get.bind(injector);
@@ -64,7 +64,7 @@ export function createCoreTestBed(workbookConfig?: IWorkbookData, dependencies?:
     }
 
     univer.registerPlugin(TestPlugin);
-    const sheet = univer.createUniverSheet(workbookConfig || TEST_WORKBOOK_DATA);
+    const sheet = univer.createUniverSheet(workbookData || TEST_WORKBOOK_DATA);
 
     const univerInstanceService = get(IUniverInstanceService);
     univerInstanceService.focusUniverInstance('test');

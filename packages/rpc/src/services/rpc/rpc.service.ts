@@ -121,7 +121,7 @@ export interface IChannelServer {
     registerChannel<T extends IChannel>(channelName: string, channel: T): void;
 }
 
-const enum RequestType {
+enum RequestType {
     /** A simple remote calling wrapper in a Promise. */
     CALL = 100,
 
@@ -140,7 +140,7 @@ interface IRPCRequest {
     args?: any;
 }
 
-const enum ResponseType {
+enum ResponseType {
     /**
      * When underlying protocol is established. The server should send the
      * client an `INITIALIZE` response to indicate that the server is up

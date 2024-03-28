@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-import type { Univer } from '@univerjs/core';
+import type { IRange, Univer } from '@univerjs/core';
 import {
     DisposableCollection,
     ICommandService,
     IUniverInstanceService,
     RANGE_TYPE,
-    toDisposable,
     UniverPermissionService,
 } from '@univerjs/core';
 import {
@@ -37,7 +36,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { BoldMenuItemFactory } from '../menu';
 import { createMenuTestBed } from './create-menu-test-bed';
 
-describe('Test menu items', () => {
+describe('test menu items', () => {
     let univer: Univer;
     let get: Injector['get'];
     let commandService: ICommandService;
@@ -63,7 +62,34 @@ describe('Test menu items', () => {
         disposableCollection.dispose();
     });
 
-    it('Test bold menu item', async () => {
+    function select(range: IRange) {
+        const selectionManager = get(SelectionManagerService);
+        selectionManager.setCurrentSelection({
+            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+            unitId: 'test',
+            sheetId: 'sheet1',
+        });
+
+        const { startColumn, startRow, endColumn, endRow } = range;
+        selectionManager.add([
+            {
+                range: { startRow, startColumn, endColumn, endRow, rangeType: RANGE_TYPE.NORMAL },
+                primary: {
+                    startRow,
+                    startColumn,
+                    endColumn,
+                    endRow,
+                    actualRow: startRow,
+                    actualColumn: startColumn,
+                    isMerged: false,
+                    isMergedMainCell: false,
+                },
+                style: null,
+            },
+        ]);
+    }
+
+    it('should "BoldMenu" change status correctly', async () => {
         let activated = false;
         let disabled = false;
         const sheetPermissionService = get(SheetPermissionService);
@@ -72,33 +98,12 @@ describe('Test menu items', () => {
         const workbook = univerInstanceService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
         const menuItem = get(Injector).invoke(BoldMenuItemFactory);
-        disposableCollection.add(toDisposable(menuItem.activated$!.subscribe((v: boolean) => (activated = v))));
-        disposableCollection.add(toDisposable(menuItem.disabled$!.subscribe((v: boolean) => (disabled = v))));
+        disposableCollection.add(menuItem.activated$!.subscribe((v: boolean) => (activated = v)));
+        disposableCollection.add(menuItem.disabled$!.subscribe((v: boolean) => (disabled = v)));
         expect(activated).toBeFalsy();
         expect(disabled).toBeFalsy();
 
-        const selectionManager = get(SelectionManagerService);
-        selectionManager.setCurrentSelection({
-            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
-            unitId: 'test',
-            sheetId: 'sheet1',
-        });
-        selectionManager.add([
-            {
-                range: { startRow: 0, startColumn: 0, endColumn: 0, endRow: 0, rangeType: RANGE_TYPE.NORMAL },
-                primary: {
-                    startRow: 0,
-                    startColumn: 0,
-                    endColumn: 0,
-                    endRow: 0,
-                    actualRow: 0,
-                    actualColumn: 0,
-                    isMerged: false,
-                    isMergedMainCell: false,
-                },
-                style: null,
-            },
-        ]);
+        select({ startRow: 0, startColumn: 0, endRow: 0, endColumn: 0 });
 
         expect(await commandService.executeCommand(SetBoldCommand.id)).toBeTruthy();
         expect(activated).toBe(true);

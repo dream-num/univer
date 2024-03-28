@@ -43,22 +43,14 @@ const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
 
 export function createMenuTestBed() {
     const univer = new Univer();
+    const injector = univer.__getInjector();
+    const get = injector.get.bind(injector);
 
-    let get: Injector['get'] | null = null;
-
-    /**
-     * This plugin hooks into Sheet's DI system to expose API to test scripts
-     */
     class TestPlugin extends Plugin {
-        protected override _injector: Injector;
-
         static override type = PluginType.Sheet;
 
-        constructor(_config: unknown, @Inject(Injector) _injector: Injector) {
+        constructor(_config: unknown, @Inject(Injector) override readonly _injector: Injector) {
             super('test-plugin');
-
-            this._injector = _injector;
-            get = this._injector.get.bind(this._injector);
         }
 
         override onStarting(injector: Injector): void {
@@ -68,18 +60,10 @@ export function createMenuTestBed() {
             injector.add([SheetPermissionService]);
             injector.add([SheetInterceptorService]);
         }
-
-        override onDestroy(): void {
-            get = null;
-        }
     }
 
     univer.registerPlugin(TestPlugin);
     const sheet = univer.createUniverSheet(TEST_WORKBOOK_DATA_DEMO);
-
-    if (!get) {
-        throw new Error('[TestPlugin]: not hooked on!');
-    }
 
     return {
         univer,

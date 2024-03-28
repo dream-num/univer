@@ -28,10 +28,10 @@ import {
 import type { IAccessor } from '@wendellhu/redi';
 
 import { SelectionManagerService } from '../../services/selection-manager.service';
-import { INTERCEPTOR_POINT } from '../../services/sheet-interceptor/interceptor-const';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
 import type { ISheetCommandSharedParams } from '../utils/interface';
+import { SheetPermissionService } from '../../services/permission/sheet-permission.service';
 
 export interface ISetRangeValuesCommandParams extends Partial<ISheetCommandSharedParams> {
     range?: IRange;
@@ -56,12 +56,18 @@ export const SetRangeValuesCommand: ICommand = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const selectionManagerService = accessor.get(SelectionManagerService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
+        const sheetPermissionService = accessor.get(SheetPermissionService);
+
         const {
             value,
             range,
             unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId(),
             subUnitId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId(),
         } = params;
+
+        if (!sheetPermissionService.getSheetEditable(unitId, subUnitId)) {
+            return false;
+        }
 
         const currentSelections = range ? [range] : selectionManagerService.getSelectionRanges();
         if (!currentSelections || !currentSelections.length) {
@@ -101,15 +107,6 @@ export const SetRangeValuesCommand: ICommand = {
             cellValue: realCellValue ?? cellValue.getMatrix(),
         };
         const undoSetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(accessor, setRangeValuesMutationParams);
-
-        if (
-            !sheetInterceptorService.fetchThroughInterceptors(INTERCEPTOR_POINT.PERMISSION)(null, {
-                id: SetRangeValuesCommand.id,
-                params: setRangeValuesMutationParams,
-            })
-        ) {
-            return false;
-        }
 
         const setValueMutationResult = commandService.syncExecuteCommand(
             SetRangeValuesMutation.id,

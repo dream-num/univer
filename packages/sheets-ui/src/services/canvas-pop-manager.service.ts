@@ -210,7 +210,7 @@ export class SheetCanvasPopManagerService extends Disposable {
      * @param viewport target viewport
      * @returns disposable
      */
-    attachPopupToCell(row: number, col: number, popup: ICanvasPopup, viewport?: Viewport) {
+    attachPopupToCell(row: number, col: number, popup: ICanvasPopup, viewport?: Viewport): IDisposable {
         const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
         const unitId = workbook.getUnitId();

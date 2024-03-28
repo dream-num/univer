@@ -18,6 +18,7 @@ import type { IObjectArrayPrimitiveType, IObjectMatrixPrimitiveType } from '../.
 import type { BooleanNumber } from '../enum';
 import type { ICellData } from './i-cell-data';
 import type { IColumnData } from './i-column-data';
+import type { IAutoFilter } from './i-filter';
 import type { IFreeze } from './i-freeze';
 import type { IRange, IRangeType } from './i-range';
 import type { IRowData } from './i-row-data';
@@ -48,7 +49,11 @@ export interface IWorksheetData {
      * @defaultValue `BooleanNumber.FALSE`
      */
     hidden: BooleanNumber;
+
     freeze: IFreeze;
+
+    autoFilter?: IAutoFilter;
+
     rowCount: number;
     columnCount: number;
     zoomRatio: number;

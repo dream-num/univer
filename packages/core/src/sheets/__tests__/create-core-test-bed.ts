@@ -20,7 +20,7 @@ import { ILogService, LogLevel } from '../../services/log/log.service';
 import { LocaleType } from '../../types/enum/locale-type';
 import type { IWorkbookData } from '../../types/interfaces/i-workbook-data';
 
-const TEST_WORKBOOK_DATA: IWorkbookData = {
+const testWorkbookDataFactory: () => IWorkbookData = () => ({
     id: 'test',
     appVersion: '3.0.0-alpha',
     sheets: {
@@ -43,16 +43,17 @@ const TEST_WORKBOOK_DATA: IWorkbookData = {
     name: '',
     sheetOrder: [],
     styles: {},
-};
+});
 
-export function createCoreTestBed(workbookConfig?: IWorkbookData) {
+export function createCoreTestBed(workbookData?: IWorkbookData) {
     const univer = new Univer();
     const injector = univer.__getInjector();
     const get = injector.get.bind(injector);
 
-    const sheet = univer.createUniverSheet(workbookConfig || TEST_WORKBOOK_DATA);
+    const sheet = univer.createUniverSheet(workbookData || testWorkbookDataFactory());
+
     const univerInstanceService = get(IUniverInstanceService);
-    univerInstanceService.focusUniverInstance(workbookConfig?.id ?? 'test');
+    univerInstanceService.focusUniverInstance(workbookData?.id ?? 'test');
 
     const logService = get(ILogService);
     logService.setLogLevel(LogLevel.SILENT);

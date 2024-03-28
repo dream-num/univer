@@ -17,7 +17,6 @@
 import type { IObjectMatrixPrimitiveType, IRange, Nullable, Workbook } from '@univerjs/core';
 import {
     Disposable,
-    ICommandService,
     ILogService,
     IResourceManagerService,
     IUniverInstanceService,
@@ -28,7 +27,6 @@ import {
     RefAlias,
     toDisposable,
 } from '@univerjs/core';
-import { Inject } from '@wendellhu/redi';
 import { Subject } from 'rxjs';
 
 import type { FormatType, INumfmtItem, INumfmtService, IRefItem, ISnapshot } from './type';
@@ -49,10 +47,9 @@ export class NumfmtService extends Disposable implements INumfmtService {
     modelReplace$ = this._modelReplace$.asObservable();
 
     constructor(
-        @Inject(ICommandService) private _commandService: ICommandService,
-        @Inject(IResourceManagerService) private _resourceManagerService: IResourceManagerService,
-        @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
-        @Inject(ILogService) private _logService: ILogService
+        @IResourceManagerService private _resourceManagerService: IResourceManagerService,
+        @IUniverInstanceService private _univerInstanceService: IUniverInstanceService,
+        @ILogService private _logService: ILogService
     ) {
         super();
 
@@ -93,23 +90,23 @@ export class NumfmtService extends Disposable implements INumfmtService {
                 })
             );
         };
-        this.disposeWithMe(toDisposable(this._univerInstanceService.sheetAdded$.subscribe(handleWorkbookAdd)));
+
+        this.disposeWithMe(this._univerInstanceService.sheetAdded$.subscribe(handleWorkbookAdd));
         this.disposeWithMe(
-            toDisposable(
-                this._univerInstanceService.sheetDisposed$.subscribe((workbook) => {
-                    const unitID = workbook.getUnitId();
-                    const model = this._numfmtModel.get(unitID);
-                    if (model) {
-                        this._numfmtModel.delete(unitID);
-                    }
-                    const refModel = this._refAliasModel.get(unitID);
-                    if (refModel) {
-                        this._refAliasModel.delete(unitID);
-                    }
-                    this._resourceManagerService.disposePluginResource(unitID, SHEET_NUMFMT_PLUGIN);
-                })
-            )
+            this._univerInstanceService.sheetDisposed$.subscribe((workbook) => {
+                const unitID = workbook.getUnitId();
+                const model = this._numfmtModel.get(unitID);
+                if (model) {
+                    this._numfmtModel.delete(unitID);
+                }
+                const refModel = this._refAliasModel.get(unitID);
+                if (refModel) {
+                    this._refAliasModel.delete(unitID);
+                }
+                this._resourceManagerService.disposePluginResource(unitID, SHEET_NUMFMT_PLUGIN);
+            })
         );
+
         const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
         handleWorkbookAdd(workbook);
     }
@@ -120,6 +117,7 @@ export class NumfmtService extends Disposable implements INumfmtService {
         if (!workbookModel || !workbookRefModel) {
             return '';
         }
+
         const model = [...workbookModel.keys()].reduce(
             (result, key) => {
                 const object = workbookModel.get(key)!;

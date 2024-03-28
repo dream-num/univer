@@ -19,26 +19,27 @@ import type { Subscription, SubscriptionLike } from 'rxjs';
 import { Subject } from 'rxjs';
 import { isSubscription } from 'rxjs/internal/Subscription';
 
-import type { Nullable } from '../common/type-utils';
 import type { Observer } from '../observer/observable';
 import { isObserver } from '../observer/observable';
+import type { Nullable } from '../common/type-utils';
 
+type DisposableLike = IDisposable | Nullable<Observer<any>> | SubscriptionLike | (() => void);
+
+export function toDisposable(disposable: IDisposable): IDisposable;
 export function toDisposable(observer: Nullable<Observer<any>>): IDisposable;
 export function toDisposable(subscription: SubscriptionLike): IDisposable;
 export function toDisposable(callback: () => void): IDisposable;
-export function toDisposable(v: SubscriptionLike | (() => void) | Nullable<Observer<any>>): IDisposable {
+export function toDisposable(v: DisposableLike): IDisposable;
+export function toDisposable(v: DisposableLike): IDisposable {
     let disposed = false;
+
+    if (!v) {
+        return toDisposable(() => { });
+    }
 
     if (isSubscription(v)) {
         return {
-            dispose: () => {
-                if (disposed) {
-                    return;
-                }
-
-                disposed = true;
-                v.unsubscribe();
-            },
+            dispose: () => v.unsubscribe(),
         };
     }
 
@@ -61,16 +62,20 @@ export function toDisposable(v: SubscriptionLike | (() => void) | Nullable<Obser
         };
     }
 
-    return {
-        dispose: () => {
-            if (disposed) {
-                return;
-            }
+    if (typeof v === 'function') {
+        return {
+            dispose: () => {
+                if (disposed) {
+                    return;
+                }
 
-            disposed = true;
-            (v as () => void)();
-        },
-    };
+                disposed = true;
+                (v as () => void)();
+            },
+        };
+    }
+
+    return v as IDisposable;
 }
 
 /**
@@ -85,12 +90,14 @@ export function fromObservable(subscription: Subscription) {
 export class DisposableCollection implements IDisposable {
     private readonly _disposables = new Set<IDisposable>();
 
-    add(disposable: IDisposable): IDisposable {
-        this._disposables.add(disposable);
+    add(disposable: DisposableLike): IDisposable {
+        const d = toDisposable(disposable);
+        this._disposables.add(d);
+
         return {
             dispose: () => {
-                disposable.dispose();
-                this._disposables.delete(disposable);
+                d.dispose();
+                this._disposables.delete(d);
             },
         };
     }
@@ -107,9 +114,8 @@ export class Disposable implements IDisposable {
     protected _disposed = false;
     private readonly _collection = new DisposableCollection();
 
-    protected disposeWithMe(disposable: IDisposable | SubscriptionLike): IDisposable {
-        const d = isSubscription(disposable) ? toDisposable(disposable) : (disposable as IDisposable);
-        return this._collection.add(d);
+    protected disposeWithMe(disposable: DisposableLike): IDisposable {
+        return this._collection.add(disposable);
     }
 
     dispose(): void {

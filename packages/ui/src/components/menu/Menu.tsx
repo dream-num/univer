@@ -180,9 +180,9 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
 
     const menuItems = menuItem.id ? menuService.getMenuItems(menuItem.id) : [];
 
-    const disabled = useObservable<boolean>(menuItem.disabled$ || of(false), false, true);
-    const hidden = useObservable(menuItem.hidden$ || of(false), false, true);
-    const value = useObservable<MenuItemDefaultValueType>(menuItem.value$ || of(undefined), undefined, true);
+    const disabled = useObservable<boolean>(menuItem.disabled$, false);
+    const hidden = useObservable(menuItem.hidden$, false);
+    const value = useObservable<MenuItemDefaultValueType>(menuItem.value$, undefined);
     const [inputValue, setInputValue] = useState(value);
 
     /**

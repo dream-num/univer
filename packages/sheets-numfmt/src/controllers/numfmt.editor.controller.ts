@@ -18,6 +18,7 @@ import type { IRange, Nullable } from '@univerjs/core';
 import {
     CellValueType,
     Disposable,
+    isNumeric,
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
@@ -264,19 +265,4 @@ export class NumfmtEditorController extends Disposable {
             })
         );
     }
-}
-
-const filterAtr = (obj: Record<string, any>, filterKey: string[]) => {
-    const keys = Object.keys(obj).filter((key) => !filterKey.includes(key));
-    return keys.reduce(
-        (pre, cur) => {
-            pre[cur] = obj[cur];
-            return pre;
-        },
-        {} as Record<string, any>
-    );
-};
-
-function isNumeric(str: string) {
-    return /^-?\d+(\.\d+)?$/.test(str);
 }

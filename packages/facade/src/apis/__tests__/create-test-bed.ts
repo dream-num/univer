@@ -28,7 +28,7 @@ import {
 } from '@univerjs/core';
 import { FunctionService, IFunctionService } from '@univerjs/engine-formula';
 import { ISocketService, WebSocketService } from '@univerjs/network';
-import { SelectionManagerService, SheetInterceptorService } from '@univerjs/sheets';
+import { SelectionManagerService, SheetInterceptorService, SheetPermissionService } from '@univerjs/sheets';
 import {
     DescriptionService,
     enUS,
@@ -72,7 +72,7 @@ export interface ITestBed {
     univerAPI: FUniver;
 }
 
-export function createTestBed(workbookConfig?: IWorkbookData, dependencies?: Dependency[]): ITestBed {
+export function createTestBed(workbookData?: IWorkbookData, dependencies?: Dependency[]): ITestBed {
     const univer = new Univer();
     const injector = univer.__getInjector();
 
@@ -89,6 +89,7 @@ export function createTestBed(workbookConfig?: IWorkbookData, dependencies?: Dep
         override onStarting(injector: Injector): void {
             injector.add([SelectionManagerService]);
             injector.add([SheetInterceptorService]);
+            injector.add([SheetPermissionService]);
             injector.add([IRegisterFunctionService, { useClass: RegisterFunctionService }]);
             injector.add([
                 IDescriptionService,
@@ -119,7 +120,7 @@ export function createTestBed(workbookConfig?: IWorkbookData, dependencies?: Dep
     });
 
     univer.registerPlugin(TestPlugin);
-    const sheet = univer.createUniverSheet(workbookConfig || getTestWorkbookDataDemo());
+    const sheet = univer.createUniverSheet(workbookData || getTestWorkbookDataDemo());
 
     const univerInstanceService = injector.get(IUniverInstanceService);
     univerInstanceService.focusUniverInstance('test');

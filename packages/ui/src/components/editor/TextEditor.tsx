@@ -80,6 +80,8 @@ export interface ITextEditorProps {
     onValid?: (state: boolean) => void; // Editor input value validation, currently effective only under onlyRange and onlyFormula conditions.
 
     placeholder?: string; // Placeholder text.
+
+    isValueValid?: boolean; // Whether the value is valid.
 }
 
 /**
@@ -113,6 +115,8 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
         onValid,
 
         placeholder = '',
+
+        isValueValid = true,
     } = props;
 
     const editorService = useDependency(IEditorService);
@@ -121,7 +125,7 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
 
     const [validationContent, setValidationContent] = useState<string>('');
 
-    const [validationVisible, setValidationVisible] = useState(false);
+    const [validationVisible, setValidationVisible] = useState(isValueValid);
 
     const [validationOffset, setValidationOffset] = useState<[number, number]>([0, 0]);
 
@@ -235,6 +239,10 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
         }
         editorService.setValueNoRefresh(value, id);
     }, [value]);
+
+    useEffect(() => {
+        setValidationVisible(isValueValid);
+    }, [isValueValid]);
 
     function hasValue() {
         const value = editorService.getValue(id);

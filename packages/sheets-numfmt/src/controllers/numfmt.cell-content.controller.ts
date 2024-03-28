@@ -73,7 +73,7 @@ export class NumfmtCellContent extends Disposable {
                     let numfmtRes: string = '';
                     const cache = renderCache.getValue(location.row, location.col);
                     if (cache && cache.parameters === originCellValue.v) {
-                        return { ...cell, ...cache.result };
+                        return next({ ...cell, ...cache.result });
                     }
 
                     const info = getPatternPreview(numfmtValue.pattern, Number(originCellValue.v), this._localeService.getCurrentLocale());
@@ -98,8 +98,7 @@ export class NumfmtCellContent extends Disposable {
                         result: res,
                         parameters: originCellValue.v as number,
                     });
-
-                    return { ...cell, ...res };
+                    return next({ ...cell, ...res });
                 },
             })
         );

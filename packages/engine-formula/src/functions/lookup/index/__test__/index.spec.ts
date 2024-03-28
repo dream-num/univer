@@ -27,13 +27,10 @@ import { Interpreter } from '../../../../engine/interpreter/interpreter';
 import { IFormulaCurrentConfigService } from '../../../../services/current-data.service';
 import { IFunctionService } from '../../../../services/function.service';
 import { IFormulaRuntimeService } from '../../../../services/runtime.service';
-import { createFunctionTestBed } from '../../../__tests__/create-function-test-bed';
+import { createFunctionTestBed, getObjectValue } from '../../../__tests__/create-function-test-bed';
 import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
-import type { BaseValueObject, ErrorValueObject } from '../../../../engine/value-object/base-value-object';
-import type { ArrayValueObject } from '../../../../engine/value-object/array-value-object';
 import { Index } from '..';
 import { ErrorType } from '../../../../basics/error-type';
-import type { BaseReferenceObject } from '../../../../engine/reference-object/base-reference-object';
 
 const getTestWorkbookData = (): IWorkbookData => {
     return {
@@ -201,14 +198,7 @@ describe('Test index', () => {
 
             const result = await interpreter.executeAsync(astNode as BaseAstNode);
 
-            if ((result as ErrorValueObject).isError()) {
-                return (result as ErrorValueObject).getValue();
-            } else if ((result as BaseReferenceObject).isReferenceObject()) {
-                return (result as BaseReferenceObject).toArrayValueObject().toValue();
-            } else if ((result as ArrayValueObject).isArray()) {
-                return (result as ArrayValueObject).toValue();
-            }
-            return (result as BaseValueObject).getValue();
+            return getObjectValue(result);
         };
     });
 

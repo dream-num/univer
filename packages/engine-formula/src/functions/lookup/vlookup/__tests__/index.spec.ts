@@ -19,9 +19,10 @@ import { describe, expect, it } from 'vitest';
 import { ErrorType } from '../../../../basics/error-type';
 import { ArrayValueObject } from '../../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../../engine/value-object/base-value-object';
-import { NumberValueObject } from '../../../../engine/value-object/primitive-object';
+import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
 import { Vlookup } from '..';
+import { getObjectValue } from '../../../__tests__/create-function-test-bed';
 
 const arrayValueObject1 = ArrayValueObject.create(/*ts*/ `{
     1, "First";
@@ -51,6 +52,29 @@ const matchArrayValueObject = ArrayValueObject.create(/*ts*/ `{
     8, 7
 }`);
 
+const matchArrayValueObject2 = ArrayValueObject.create(/*ts*/ `{
+    1;
+    4;
+    8
+}`);
+
+const colIndexNumArrayValueObject = ArrayValueObject.create(/*ts*/ `{
+    1, 2
+}`);
+
+const colIndexNumArrayValueObject2 = ArrayValueObject.create(/*ts*/ `{
+    1, 2;
+    3, 4
+}`);
+
+const colIndexNumArrayValueObject3 = ArrayValueObject.create(/*ts*/ `{
+    2, 1
+}`);
+
+const rangeLookupArrayValueObject = ArrayValueObject.create(/*ts*/ `{
+    0, 1, 0, 1
+}`);
+
 describe('Test vlookup', () => {
     const textFunction = new Vlookup(FUNCTION_NAMES_LOOKUP.VLOOKUP);
 
@@ -62,7 +86,7 @@ describe('Test vlookup', () => {
                 NumberValueObject.create(2),
                 NumberValueObject.create(0)
             ) as BaseValueObject;
-            expect(resultObject.getValue().toString()).toBe('Second');
+            expect(getObjectValue(resultObject)).toStrictEqual([['Second']]);
         });
 
         it('Search eight', async () => {
@@ -72,7 +96,7 @@ describe('Test vlookup', () => {
                 NumberValueObject.create(2),
                 NumberValueObject.create(0)
             ) as BaseValueObject;
-            expect(resultObject.getValue().toString()).toBe('Eighth');
+            expect(getObjectValue(resultObject)).toStrictEqual([['Eighth']]);
         });
 
         it('Exceeding columns', async () => {
@@ -82,7 +106,7 @@ describe('Test vlookup', () => {
                 NumberValueObject.create(3),
                 NumberValueObject.create(0)
             ) as BaseValueObject;
-            expect(resultObject.getValue().toString()).toBe(ErrorType.VALUE);
+            expect(getObjectValue(resultObject)).toStrictEqual([[ErrorType.REF]]);
         });
 
         it('Not match', async () => {
@@ -92,21 +116,116 @@ describe('Test vlookup', () => {
                 NumberValueObject.create(2),
                 NumberValueObject.create(0)
             ) as BaseValueObject;
-            expect(resultObject.getValue().toString()).toBe(ErrorType.NA);
+            expect(getObjectValue(resultObject)).toStrictEqual([[ErrorType.NA]]);
         });
 
-        it('array', async () => {
+        it('LookupValue is array, colIndexNum is single cell', async () => {
             const resultObject = textFunction.calculate(
                 matchArrayValueObject.clone(),
                 arrayValueObject1.clone(),
                 NumberValueObject.create(2),
                 NumberValueObject.create(0)
             ) as BaseValueObject;
-            expect((resultObject as ArrayValueObject).toValue()).toStrictEqual([
+            expect(getObjectValue(resultObject)).toStrictEqual([
                 ['First', 'Third'],
                 ['Fourth', 'Sixth'],
                 ['Eighth', 'Seventh'],
             ]);
+        });
+
+        it('LookupValue is single cell, colIndexNum is array', async () => {
+            const resultObject = textFunction.calculate(
+                NumberValueObject.create(2),
+                arrayValueObject1.clone(),
+                colIndexNumArrayValueObject.clone(),
+                NumberValueObject.create(0)
+            ) as BaseValueObject;
+            expect(getObjectValue(resultObject)).toStrictEqual([
+                [2, 'Second'],
+            ]);
+        });
+
+        it('LookupValue is single cell, colIndexNum is array and gets colIndexNum error', async () => {
+            const resultObject = textFunction.calculate(
+                NumberValueObject.create(2),
+                arrayValueObject1.clone(),
+                colIndexNumArrayValueObject2.clone(),
+                NumberValueObject.create(0)
+            ) as BaseValueObject;
+            expect(getObjectValue(resultObject)).toStrictEqual(ErrorType.REF);
+        });
+
+        it('LookupValue is single cell, colIndexNum is array and gets lookupValue error', async () => {
+            const resultObject = textFunction.calculate(
+                StringValueObject.create('lookupValue'),
+                arrayValueObject1.clone(),
+                colIndexNumArrayValueObject2.clone(),
+                NumberValueObject.create(0)
+            ) as BaseValueObject;
+            expect(getObjectValue(resultObject)).toStrictEqual(ErrorType.REF);
+        });
+
+        it('LookupValue is single cell, colIndexNum is array and gets rangeLookup error', async () => {
+            const resultObject = textFunction.calculate(
+                StringValueObject.create('lookupValue'),
+                arrayValueObject1.clone(),
+                colIndexNumArrayValueObject2.clone(),
+                StringValueObject.create('rangeLookup')
+            ) as BaseValueObject;
+            expect(getObjectValue(resultObject)).toStrictEqual(ErrorType.VALUE);
+        });
+
+        it('LookupValue is array, colIndexNum is array', async () => {
+            const resultObject = textFunction.calculate(
+                matchArrayValueObject.clone(),
+                arrayValueObject1.clone(),
+                colIndexNumArrayValueObject.clone(),
+                NumberValueObject.create(0)
+            ) as BaseValueObject;
+            expect(getObjectValue(resultObject)).toStrictEqual([
+                [1, 3],
+                [4, 6],
+                [8, 7],
+            ]);
+        });
+
+        it('LookupValue is array and gets error, colIndexNum is array and gets error', async () => {
+            const resultObject = textFunction.calculate(
+                ArrayValueObject.create(/*ts*/ `{
+                    "Univer";
+                    2
+                }`),
+                arrayValueObject1.clone(),
+                ArrayValueObject.create(/*ts*/ `{
+                    3, 1
+                }`)
+            ) as BaseValueObject;
+            expect(getObjectValue(resultObject)).toStrictEqual([[ErrorType.REF], [ErrorType.REF]]);
+        });
+
+        it('LookupValue is array and gets error, colIndexNum is array and gets error,rangeLookup gets error', async () => {
+            const resultObject = textFunction.calculate(
+                ArrayValueObject.create(/*ts*/ `{
+                    "Univer";
+                    2
+                }`),
+                arrayValueObject1.clone(),
+                ArrayValueObject.create(/*ts*/ `{
+                    3, 1
+                }`),
+                StringValueObject.create('rangeLookup')
+            ) as BaseValueObject;
+            expect(getObjectValue(resultObject)).toStrictEqual([[ErrorType.VALUE], [ErrorType.VALUE]]);
+        });
+
+        it('LookupValue is array, colIndexNum is array, rangeLookup is array', async () => {
+            const resultObject = textFunction.calculate(
+                matchArrayValueObject2.clone(),
+                arrayValueObject1.clone(),
+                colIndexNumArrayValueObject3.clone(),
+                rangeLookupArrayValueObject.clone()
+            ) as BaseValueObject;
+            expect(getObjectValue(resultObject)).toStrictEqual([['First', 'First', 'First', 'First'], ['Fourth', 'Fourth', 'Fourth', 'Fourth'], ['Eighth', 'Eighth', 'Eighth', 'Eighth']]);
         });
     });
 
@@ -118,7 +237,7 @@ describe('Test vlookup', () => {
                 NumberValueObject.create(2),
                 NumberValueObject.create(1)
             ) as BaseValueObject;
-            expect(resultObject.getValue().toString()).toBe('Second');
+            expect(getObjectValue(resultObject)).toStrictEqual([['Second']]);
         });
 
         it('Approximate search eight', async () => {
@@ -127,7 +246,7 @@ describe('Test vlookup', () => {
                 arrayValueObject1.clone(),
                 NumberValueObject.create(2)
             ) as BaseValueObject;
-            expect(resultObject.getValue().toString()).toBe('Eighth');
+            expect(getObjectValue(resultObject)).toStrictEqual([['Eighth']]);
         });
 
         it('Approximate exceeding columns', async () => {
@@ -136,7 +255,7 @@ describe('Test vlookup', () => {
                 arrayValueObject1.clone(),
                 NumberValueObject.create(3)
             ) as BaseValueObject;
-            expect(resultObject.getValue().toString()).toBe(ErrorType.VALUE);
+            expect(getObjectValue(resultObject)).toStrictEqual([[ErrorType.REF]]);
         });
 
         it('Approximate not match', async () => {
@@ -146,7 +265,7 @@ describe('Test vlookup', () => {
                 NumberValueObject.create(2),
                 NumberValueObject.create(1)
             ) as BaseValueObject;
-            expect(resultObject.getValue().toString()).toBe('First');
+            expect(getObjectValue(resultObject)).toStrictEqual([['First']]);
         });
 
         it('Approximate not order data', async () => {
@@ -156,7 +275,7 @@ describe('Test vlookup', () => {
                 NumberValueObject.create(2),
                 NumberValueObject.create(1)
             ) as BaseValueObject;
-            expect(resultObject.getValue().toString()).toBe(ErrorType.NA);
+            expect(getObjectValue(resultObject)).toStrictEqual([[ErrorType.NA]]);
         });
 
         it('Approximate not order data match', async () => {
@@ -165,7 +284,7 @@ describe('Test vlookup', () => {
                 arrayValueObject2.clone(),
                 NumberValueObject.create(2)
             ) as BaseValueObject;
-            expect(resultObject.getValue().toString()).toBe('Third');
+            expect(getObjectValue(resultObject)).toStrictEqual([['Third']]);
         });
     });
 });

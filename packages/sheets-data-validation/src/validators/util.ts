@@ -35,18 +35,24 @@ export function getSheetRangeValueSet(grid: IUnitRangeName, univerInstanceServic
             return;
         }
 
-        set.add(`${cellValue}`);
+        const list = deserializeListOptions(`${cellValue}`);
+
+        list.forEach((item) => {
+            if (item) {
+                set.add(`${cellValue}`);
+            }
+        });
     });
 
     return Array.from(set);
 }
 
 export function serializeListOptions(options: string[]) {
-    return options.filter(Boolean).map((str) => encodeURIComponent(str)).join(',');
+    return options.filter(Boolean).join(',');
 }
 
 export function deserializeListOptions(optionsStr: string) {
-    return optionsStr.split(',').map((str) => decodeURIComponent(str)).filter(Boolean);
+    return optionsStr.split(',').filter(Boolean);
 }
 
 export function getDataValidationCellValue(cellData: Nullable<ICellData>) {

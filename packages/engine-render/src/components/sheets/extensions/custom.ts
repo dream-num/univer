@@ -42,10 +42,6 @@ export class Custom extends SheetExtension {
             if (cellData && cellData?.customRender) {
                 const primaryWithCoord = this.getCellIndex(row, col, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
 
-                if (primaryWithCoord.isMerged && !primaryWithCoord.isMergedMainCell) {
-                    return;
-                }
-
                 const { mergeInfo } = primaryWithCoord;
                 if (!this.isRenderDiffRangesByRow(mergeInfo.startRow, mergeInfo.endRow, diffRanges)) {
                     return true;

@@ -121,7 +121,6 @@ const Template = (props: { item: IDropdownItem; dragHandleProps: any; commonProp
                         className={styles.dataValidationFormulaListItemDrag}
                         onTouchStart={(e) => {
                             e.preventDefault();
-
                             onTouchStart(e);
                         }}
                         onMouseDown={(e) => {
@@ -137,7 +136,6 @@ const Template = (props: { item: IDropdownItem; dragHandleProps: any; commonProp
                 onChange={(color) => {
                     onItemChange(item.id, item.label, color);
                 }}
-
             />
             <Input
                 disabled={item.isRef}
@@ -158,7 +156,7 @@ const Template = (props: { item: IDropdownItem; dragHandleProps: any; commonProp
 };
 
 export function ListFormulaInput(props: IFormulaInputProps) {
-    const { value, onChange: _onChange = () => {}, unitId, subUnitId, validResult, showError } = props;
+    const { value, onChange: _onChange = () => { }, unitId, subUnitId, validResult, showError } = props;
     const { formula1 = '', formula2 = '' } = value || {};
     const containerRef = useRef<HTMLDivElement>(null);
     const [isRefRange, setIsRefRange] = useState(() => isReferenceString(formula1) ? '1' : '0');
@@ -245,11 +243,23 @@ export function ListFormulaInput(props: IFormulaInputProps) {
 
     useEffect(() => {
         const labelSet = new Set<string>();
-        const finalList = strList.filter((item) => {
-            const label = item.label;
-            const res = Boolean(label) && !labelSet.has(label);
-            labelSet.add(label);
-            return res;
+        const finalList: { color: string; label: string }[] = [];
+        strList.map((item) => {
+            const labelList = item.label.split(',');
+            return {
+                labelList,
+                item,
+            };
+        }).forEach(({ item, labelList }) => {
+            labelList.forEach((labelItem) => {
+                if (!labelSet.has(labelItem)) {
+                    labelSet.add(labelItem);
+                    finalList.push({
+                        label: labelItem,
+                        color: item.color,
+                    });
+                }
+            });
         });
 
         onChange({
@@ -266,70 +276,39 @@ export function ListFormulaInput(props: IFormulaInputProps) {
                     <Radio value="1">引用数据</Radio>
                 </RadioGroup>
             </FormLayout>
-            <FormLayout error={formula1Res}>
-                {isRefRange === '1'
-                    ? (
-                        <>
-                            <RangeSelector
-                                id={`list-ref-range-${unitId}-${subUnitId}`}
-                                value={refRange}
-                                openForSheetUnitId={unitId}
-                                openForSheetSubUnitId={subUnitId}
-                                onChange={(ranges) => {
-                                    const range = ranges[0];
-                                    if (!range || isRangeInValid(range.range)) {
-                                        onChange?.({
-                                            formula1: '',
-                                            formula2,
-                                        });
-                                        setRefRange('');
-                                    } else {
-                                        const workbook = univerInstanceService.getUniverSheetInstance(range.unitId) ?? univerInstanceService.getCurrentUniverSheetInstance();
-                                        const worksheet = workbook?.getSheetBySheetId(range.sheetId) ?? workbook.getActiveSheet();
-                                        const rangeStr = serializeRangeWithSheet(worksheet.getName(), range.range);
-                                        onChange?.({
-                                            formula1: rangeStr,
-                                            formula2,
-                                        });
-                                        setRefRange(rangeStr);
-                                    }
-                                }}
-                                isSingleChoice
-
-                            />
-                        </>
-
-                    )
-                    : (
-                        <div ref={containerRef}>
-                            <DraggableList
-                                itemKey="id"
-                                // @ts-ignore
-                                template={Template}
-                                list={strList}
-                                onMoveEnd={(newList) => {
-                                    // @ts-ignore
-                                    setStrList(newList);
-                                }}
-                                container={() => containerRef.current}
-                                commonProps={{
-                                    onItemChange: handleStrItemChange,
-                                    onItemDelete: handleStrItemDelete,
-                                }}
-                            />
-                            <a className={styles.dataValidationFormulaListAdd} onClick={handleAdd}>
-                                <IncreaseSingle />
-                                {localeService.t('dataValidation.list.add')}
-                            </a>
-                        </div>
-                    )}
-            </FormLayout>
             {isRefRange === '1' ? (
-                <FormLayout>
+                <FormLayout error={formula1Res}>
+                    <RangeSelector
+                        id={`list-ref-range-${unitId}-${subUnitId}`}
+                        value={refRange}
+                        openForSheetUnitId={unitId}
+                        openForSheetSubUnitId={subUnitId}
+                        onChange={(ranges) => {
+                            const range = ranges[0];
+                            if (!range || isRangeInValid(range.range)) {
+                                onChange?.({
+                                    formula1: '',
+                                    formula2,
+                                });
+                                setRefRange('');
+                            } else {
+                                const workbook = univerInstanceService.getUniverSheetInstance(range.unitId) ?? univerInstanceService.getCurrentUniverSheetInstance();
+                                const worksheet = workbook?.getSheetBySheetId(range.sheetId) ?? workbook.getActiveSheet();
+                                const rangeStr = serializeRangeWithSheet(worksheet.getName(), range.range);
+                                onChange?.({
+                                    formula1: rangeStr,
+                                    formula2,
+                                });
+                                setRefRange(rangeStr);
+                            }
+                        }}
+                        isSingleChoice
+
+                    />
                     <div ref={containerRef}>
                         <DraggableList
                             itemKey="id"
-                                    // @ts-ignore
+                            // @ts-ignore
                             template={Template}
                             list={refFinalList}
                             container={() => containerRef.current}
@@ -339,7 +318,31 @@ export function ListFormulaInput(props: IFormulaInputProps) {
                         />
                     </div>
                 </FormLayout>
-            ) : null}
+            ) : (
+                <FormLayout error={formula1Res}>
+                    <div ref={containerRef}>
+                        <DraggableList
+                            itemKey="id"
+                            // @ts-ignore
+                            template={Template}
+                            list={strList}
+                            onMoveEnd={(newList) => {
+                                // @ts-ignore
+                                setStrList(newList);
+                            }}
+                            container={() => containerRef.current}
+                            commonProps={{
+                                onItemChange: handleStrItemChange,
+                                onItemDelete: handleStrItemDelete,
+                            }}
+                        />
+                        <a className={styles.dataValidationFormulaListAdd} onClick={handleAdd}>
+                            <IncreaseSingle />
+                            {localeService.t('dataValidation.list.add')}
+                        </a>
+                    </div>
+                </FormLayout>
+            )}
         </>
     );
 }

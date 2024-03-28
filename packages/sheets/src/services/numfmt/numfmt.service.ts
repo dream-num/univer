@@ -34,6 +34,8 @@ import { Subject } from 'rxjs';
 import type { FormatType, INumfmtItem, INumfmtService, IRefItem, ISnapshot } from './type';
 
 const SHEET_NUMFMT_PLUGIN = 'SHEET_NUMFMT_PLUGIN';
+const millisecondsPerDay = 24 * 60 * 60 * 1000;
+
 @OnLifecycle(LifecycleStages.Starting, NumfmtService)
 export class NumfmtService extends Disposable implements INumfmtService {
     /**
@@ -184,7 +186,7 @@ export class NumfmtService extends Disposable implements INumfmtService {
         const refMode = this._refAliasModel.get(unitId);
         const value = _model.getValue(row, col);
         if (value && refMode) {
-            const refValue = refMode.getValue(value?.i);
+            const refValue = refMode.getValue(value?.i, ['i']);
             if (!refValue) {
                 this._logService.error('[Numfmt Service]:', 'RefAliasModel is not match model');
                 return null;
@@ -208,7 +210,7 @@ export class NumfmtService extends Disposable implements INumfmtService {
             Range.foreach(range, (row, col) => {
                 const oldValue = this.getValue(unitId, subUnitId, row, col, model);
                 if (oldValue && oldValue.pattern) {
-                    const oldRefPattern = refModel.getValue(oldValue.pattern);
+                    const oldRefPattern = refModel.getValue(oldValue.pattern, ['pattern']);
                     if (oldRefPattern) {
                         oldRefPattern.count--;
                     }
@@ -230,7 +232,7 @@ export class NumfmtService extends Disposable implements INumfmtService {
             this._refAliasModel.set(unitId, refModel);
         }
         values.forEach((value) => {
-            let refPattern = refModel.getValue(value.pattern);
+            let refPattern = refModel.getValue(value.pattern, ['pattern']);
             if (!refPattern) {
                 refPattern = {
                     count: 0,
@@ -246,7 +248,7 @@ export class NumfmtService extends Disposable implements INumfmtService {
                     if (model) {
                         const oldValue = this.getValue(unitId, subUnitId, row, col, model);
                         if (oldValue && oldValue.pattern) {
-                            const oldRefPattern = refModel.getValue(oldValue.pattern);
+                            const oldRefPattern = refModel.getValue(oldValue.pattern, ['pattern']);
                             if (oldRefPattern) {
                                 oldRefPattern.count--;
                             }
@@ -270,5 +272,11 @@ export class NumfmtService extends Disposable implements INumfmtService {
     getRefModel(unitId: string) {
         const refModel = this._refAliasModel.get(unitId);
         return refModel;
+    }
+
+    serialTimeToTimestamp(serialValue: number, is1900 = true) {
+        const excelBaseDate = new Date('1900-01-01').getTime();
+        const timestamp = (serialValue - (is1900 ? 25569 : 24107)) * millisecondsPerDay + excelBaseDate;
+        return timestamp;
     }
 }

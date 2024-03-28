@@ -81,7 +81,7 @@ const locale: typeof zhCN = {
         sum: 'SUM',
         autoSum: 'Auto SUM',
         moreFunction: 'More functions',
-        conditionalalFormat: 'Conditional format',
+        conditionalFormatting: 'Conditional formatting',
         comment: 'Comment',
         pivotTable: 'Pivot Table',
         chart: 'Chart',

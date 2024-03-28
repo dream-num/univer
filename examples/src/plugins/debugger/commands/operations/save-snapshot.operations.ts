@@ -66,12 +66,13 @@ export const SaveSnapshotOptions: ICommand = {
                 const sheet = snapshot.sheets[sheetId];
                 snapshot.sheets = { [sheetId]: sheet };
                 snapshot.sheetOrder = [sheetId];
+                const text = JSON.stringify(filterStyle(snapshot), null, 2);
+                exportController.exportJson(text, `${preName} snapshot`);
                 break;
             }
 
             case 'workbook': {
                 const text = JSON.stringify(filterStyle(snapshot), null, 2);
-                // navigator.clipboard.writeText(text);
                 exportController.exportJson(text, `${preName} snapshot`);
 
                 break;

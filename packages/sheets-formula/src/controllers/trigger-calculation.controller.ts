@@ -18,6 +18,7 @@ import type { ICommandInfo, IUnitRange } from '@univerjs/core';
 import { Disposable, ICommandService, LifecycleStages, OnLifecycle, Tools } from '@univerjs/core';
 import type {
     IDirtyUnitFeatureMap,
+    IDirtyUnitOtherFormulaMap,
     IDirtyUnitSheetNameMap,
     INumfmtItemMap,
     ISetFormulaCalculationNotificationMutation,
@@ -132,6 +133,8 @@ export class TriggerCalculationController extends Disposable {
         const allDirtyRanges: IUnitRange[] = [];
         const allDirtyNameMap: IDirtyUnitSheetNameMap = {};
         const allDirtyUnitFeatureMap: IDirtyUnitFeatureMap = {};
+        const allDirtyUnitOtherFormulaMap: IDirtyUnitOtherFormulaMap = {};
+
         const numfmtItemMap: INumfmtItemMap = Tools.deepClone(this._formulaDataModel.getNumfmtItemMap());
 
         for (const command of commands) {
@@ -143,7 +146,7 @@ export class TriggerCalculationController extends Disposable {
 
             const params = conversion.getDirtyData(command);
 
-            const { dirtyRanges, dirtyNameMap, dirtyUnitFeatureMap } = params;
+            const { dirtyRanges, dirtyNameMap, dirtyUnitFeatureMap, dirtyUnitOtherFormulaMap } = params;
 
             if (dirtyRanges != null) {
                 allDirtyRanges.push(...dirtyRanges);
@@ -154,7 +157,11 @@ export class TriggerCalculationController extends Disposable {
             }
 
             if (dirtyUnitFeatureMap != null) {
-                this._mergeDirtyUnitFeatureMap(allDirtyUnitFeatureMap, dirtyUnitFeatureMap);
+                this._mergeDirtyUnitFeatureOrOtherFormulaMap(allDirtyUnitFeatureMap, dirtyUnitFeatureMap);
+            }
+
+            if (dirtyUnitOtherFormulaMap != null) {
+                this._mergeDirtyUnitFeatureOrOtherFormulaMap(allDirtyUnitOtherFormulaMap, dirtyUnitOtherFormulaMap);
             }
         }
 
@@ -178,7 +185,7 @@ export class TriggerCalculationController extends Disposable {
 
             numfmtModel.forValue((row, col, numfmtValue) => {
                 if (numfmtValue && refMode) {
-                    const refValue = refMode.getValue(numfmtValue?.i);
+                    const refValue = refMode.getValue(numfmtValue?.i, ['i']);
 
                     if (!refValue) return;
 
@@ -195,6 +202,7 @@ export class TriggerCalculationController extends Disposable {
             dirtyRanges: allDirtyRanges,
             dirtyNameMap: allDirtyNameMap,
             dirtyUnitFeatureMap: allDirtyUnitFeatureMap,
+            dirtyUnitOtherFormulaMap: allDirtyUnitOtherFormulaMap,
             numfmtItemMap,
         };
     }
@@ -216,21 +224,21 @@ export class TriggerCalculationController extends Disposable {
         });
     }
 
-    private _mergeDirtyUnitFeatureMap(
-        allDirtyUnitFeatureMap: IDirtyUnitFeatureMap,
-        dirtyUnitFeatureMap: IDirtyUnitFeatureMap
+    private _mergeDirtyUnitFeatureOrOtherFormulaMap(
+        allDirtyUnitFeatureOrOtherFormulaMap: IDirtyUnitFeatureMap | IDirtyUnitOtherFormulaMap,
+        dirtyUnitFeatureOrOtherFormulaMap: IDirtyUnitFeatureMap | IDirtyUnitOtherFormulaMap
     ) {
-        Object.keys(dirtyUnitFeatureMap).forEach((unitId) => {
-            if (allDirtyUnitFeatureMap[unitId] == null) {
-                allDirtyUnitFeatureMap[unitId] = {};
+        Object.keys(dirtyUnitFeatureOrOtherFormulaMap).forEach((unitId) => {
+            if (allDirtyUnitFeatureOrOtherFormulaMap[unitId] == null) {
+                allDirtyUnitFeatureOrOtherFormulaMap[unitId] = {};
             }
-            Object.keys(dirtyUnitFeatureMap[unitId]!).forEach((sheetId) => {
-                if (allDirtyUnitFeatureMap[unitId]![sheetId] == null) {
-                    allDirtyUnitFeatureMap[unitId]![sheetId] = {};
+            Object.keys(dirtyUnitFeatureOrOtherFormulaMap[unitId]!).forEach((sheetId) => {
+                if (allDirtyUnitFeatureOrOtherFormulaMap[unitId]![sheetId] == null) {
+                    allDirtyUnitFeatureOrOtherFormulaMap[unitId]![sheetId] = {};
                 }
-                Object.keys(dirtyUnitFeatureMap[unitId]![sheetId]).forEach((featureId) => {
-                    allDirtyUnitFeatureMap[unitId]![sheetId][featureId] =
-                        dirtyUnitFeatureMap[unitId]![sheetId]![featureId] || false;
+                Object.keys(dirtyUnitFeatureOrOtherFormulaMap[unitId]![sheetId]).forEach((featureIdOrFormulaId) => {
+                    allDirtyUnitFeatureOrOtherFormulaMap[unitId]![sheetId][featureIdOrFormulaId] =
+                    dirtyUnitFeatureOrOtherFormulaMap[unitId]![sheetId]![featureIdOrFormulaId] || false;
                 });
             });
         });
@@ -272,7 +280,7 @@ export class TriggerCalculationController extends Disposable {
                     switch (state) {
                         case FormulaExecutedStateType.NOT_EXECUTED:
                             result = 'No tasks are being executed anymore';
-                            this._waitingCommandQueue.unshift(...this._executingCommandQueue);
+                            // this._waitingCommandQueue.unshift(...this._executingCommandQueue);
                             this._executingCommandQueue = [];
                             break;
                         case FormulaExecutedStateType.STOP_EXECUTION:

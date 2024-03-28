@@ -21,7 +21,6 @@ import {
     InsertSheetMutation,
     RemoveSheetMutation,
     SetTabColorMutation,
-    SetWorksheetActivateCommand,
     SetWorksheetActiveOperation,
     SetWorksheetHideMutation,
     SetWorksheetNameCommand,
@@ -108,8 +107,9 @@ export function SheetBarTabs() {
                 commandService.executeCommand(SetWorksheetOrderCommand.id, { order });
             },
             onChangeTab: (event: MouseEvent, subUnitId: string) => {
+                // Do not use SetWorksheetActivateCommand, otherwise the sheet will not be switched before the menu pops up, resulting in incorrect menu position.
                 commandService
-                    .executeCommand(SetWorksheetActivateCommand.id, {
+                    .executeCommand(SetWorksheetActiveOperation.id, {
                         subUnitId,
                         unitId: workbook.getUnitId(),
                     })

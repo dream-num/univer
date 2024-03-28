@@ -17,21 +17,122 @@
 import type { Injector } from '@wendellhu/redi';
 import { beforeEach, describe, expect, it } from 'vitest';
 
+import type { IWorkbookData } from '@univerjs/core';
+import { CellValueType, LocaleType } from '@univerjs/core';
 import { Lexer } from '../../../../engine/analysis/lexer';
 import type { LexerNode } from '../../../../engine/analysis/lexer-node';
 import { AstTreeBuilder } from '../../../../engine/analysis/parser';
 import type { BaseAstNode } from '../../../../engine/ast-node/base-ast-node';
 import { Interpreter } from '../../../../engine/interpreter/interpreter';
-import type { BaseReferenceObject } from '../../../../engine/reference-object/base-reference-object';
 import { IFormulaCurrentConfigService } from '../../../../services/current-data.service';
 import { IFunctionService } from '../../../../services/function.service';
 import { IFormulaRuntimeService } from '../../../../services/runtime.service';
-import { createFunctionTestBed } from '../../../__tests__/create-function-test-bed';
+import { createFunctionTestBed, getObjectValue } from '../../../__tests__/create-function-test-bed';
 import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
 import { Offset } from '..';
-import type { BaseValueObject, ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../../basics/error-type';
-import type { ArrayValueObject } from '../../../../engine/value-object/array-value-object';
+
+const getTestWorkbookData = (): IWorkbookData => {
+    return {
+        id: 'test',
+        appVersion: '3.0.0-alpha',
+        sheets: {
+            sheet1: {
+                id: 'sheet1',
+                cellData: {
+                    0: {
+                        0: {
+                            v: 1,
+                            t: CellValueType.NUMBER,
+                        },
+                        1: {
+                            v: 2,
+                            t: CellValueType.NUMBER,
+                        },
+                        2: {
+                            v: -1,
+                            t: CellValueType.NUMBER,
+                        },
+                        3: {
+                            v: -1,
+                            t: CellValueType.NUMBER,
+                        },
+                        4: {
+                            v: ErrorType.NAME,
+                            t: CellValueType.STRING,
+                        },
+                    },
+                    1: {
+                        0: {
+                            v: 3,
+                            t: CellValueType.NUMBER,
+                        },
+                        1: {
+                            v: 4,
+                            t: CellValueType.NUMBER,
+                        },
+                        2: {
+                            v: 'B2',
+                            t: CellValueType.STRING,
+                        },
+                        3: {
+                            v: 'R2C2',
+                            t: CellValueType.STRING,
+                        },
+                    },
+                    2: {
+                        0: {
+                            v: 1,
+                            t: CellValueType.NUMBER,
+                        },
+                        1: {
+                            v: ' ',
+                            t: CellValueType.STRING,
+                        },
+                        2: {
+                            v: 1.23,
+                            t: CellValueType.NUMBER,
+                        },
+                        3: {
+                            v: true,
+                            t: CellValueType.BOOLEAN,
+                        },
+                        4: {
+                            v: false,
+                            t: CellValueType.BOOLEAN,
+                        },
+                    },
+                    3: {
+                        0: {
+                            v: 0,
+                            t: CellValueType.NUMBER,
+                        },
+                        1: {
+                            v: '100',
+                            t: CellValueType.STRING,
+                        },
+                        2: {
+                            v: '2.34',
+                            t: CellValueType.STRING,
+                        },
+                        3: {
+                            v: 'test',
+                            t: CellValueType.STRING,
+                        },
+                        4: {
+                            v: -3,
+                            t: CellValueType.NUMBER,
+                        },
+                    },
+                },
+            },
+        },
+        locale: LocaleType.ZH_CN,
+        name: '',
+        sheetOrder: [],
+        styles: {},
+    };
+};
 
 describe('Test offset', () => {
     let get: Injector['get'];
@@ -41,7 +142,7 @@ describe('Test offset', () => {
     let calculate: (formula: string) => Promise<(string | number | boolean | null)[][] | string | number | boolean>;
 
     beforeEach(() => {
-        const testBed = createFunctionTestBed();
+        const testBed = createFunctionTestBed(getTestWorkbookData());
 
         get = testBed.get;
 
@@ -63,6 +164,7 @@ describe('Test offset', () => {
             dirtyRanges: [],
             dirtyNameMap: {},
             dirtyUnitFeatureMap: {},
+            dirtyUnitOtherFormulaMap: {},
             excludedCell: {},
             allUnitData: {
                 [testBed.unitId]: testBed.sheetData,
@@ -91,18 +193,11 @@ describe('Test offset', () => {
 
             const result = await interpreter.executeAsync(astNode as BaseAstNode);
 
-            if ((result as ErrorValueObject).isError()) {
-                return (result as ErrorValueObject).getValue();
-            } else if ((result as BaseReferenceObject).isReferenceObject()) {
-                return (result as BaseReferenceObject).toArrayValueObject().toValue();
-            } else if ((result as ArrayValueObject).isArray()) {
-                return (result as ArrayValueObject).toValue();
-            }
-            return (result as BaseValueObject).getValue();
+            return getObjectValue(result);
         };
     });
 
-    describe('Offset', () => {
+    describe('Offset, reference is single reference value object', () => {
         it('Normal single cell', async () => {
             const result = await calculate('=OFFSET(A1,1,0,1,1)');
 
@@ -137,6 +232,60 @@ describe('Test offset', () => {
             const result = await calculate('=OFFSET(A1,1,1):C2');
 
             expect(result).toStrictEqual([[4, 'B2']]);
+        });
+
+        it('Rows is single reference object', async () => {
+            const result = await calculate('=OFFSET(A1,A1,1,1,1)');
+
+            expect(result).toStrictEqual([[4]]);
+        });
+
+        it('Rows is array value object, positive and negative numbers', async () => {
+            const result = await calculate('=OFFSET(A1,B1:C1,1)');
+
+            expect(result).toStrictEqual([[ErrorType.VALUE, ErrorType.REF]]);
+        });
+
+        it('Rows is array value object, Columns is array value object', async () => {
+            const result = await calculate('=OFFSET(A1,A1:B1,A1:A2,1,1)');
+
+            expect(result).toStrictEqual([[ErrorType.VALUE, ErrorType.VALUE], [ErrorType.VALUE, ErrorType.VALUE]]);
+        });
+
+        it('Rows is array value object, Columns is array value object, ref error', async () => {
+            const result = await calculate('=OFFSET(A1,A1:A2,D1:E1,1,1)');
+
+            expect(result).toStrictEqual([[ErrorType.REF, ErrorType.NAME], [ErrorType.REF, ErrorType.NAME]]);
+        });
+
+        it('Rows is array value object, Columns is array value object, ref error, height is array, width is array', async () => {
+            const result = await calculate('=OFFSET(A1,A1:A2,D1:E1,I4:I6,J4:L4)');
+
+            expect(result).toStrictEqual([[ErrorType.REF, ErrorType.NAME, ErrorType.NA], [ErrorType.REF, ErrorType.NAME, ErrorType.NA], [ErrorType.NA, ErrorType.NA, ErrorType.NA]]);
+        });
+    });
+
+    describe('Offset, reference is base value object', () => {
+        it('Rows single number, columns single number', async () => {
+            let result = await calculate('=OFFSET(1,1,1)');
+
+            expect(result).toBe(ErrorType.VALUE);
+
+            result = await calculate('=OFFSET("Univer",1,1)');
+
+            expect(result).toBe(ErrorType.VALUE);
+
+            result = await calculate('=OFFSET(TRUE,1,1)');
+
+            expect(result).toBe(ErrorType.VALUE);
+        });
+    });
+
+    describe('Offset, reference is array value object', () => {
+        it('Rows single number, columns single number', async () => {
+            const result = await calculate('=OFFSET(A1:B2,1,1)');
+
+            expect(result).toStrictEqual([[4, 'B2'], [' ', 1.23]]);
         });
     });
 });

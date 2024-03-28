@@ -75,7 +75,7 @@ Univer 的功能特性包括：
 | <h3>🎨 Univer Slides</h3>                    |                   |
 | [Slides](https://www.univer.ai/examples/slides/)<br>一个包含图文本、浮动图片、表格等元素的画布演示                                  | [![](./docs/img/examples-slides.gif)](https://www.univer.ai/examples/slides/)                           |
 | <h3>🧩 Univer Innovation</h3>                    |                   |
-| [Zen Mode](https://github.com/dream-num/univer)<br>Sheet 的单元格是一个 Doc？                                  | [![](./docs/img/zen-mode.gif)](https://github.com/dream-num/univer)                           |
+| [Zen Mode](https://univer.ai/zh-cn/guides/tutorials/zen-editor/#%E6%BC%94%E7%A4%BA)<br>Sheet 的单元格是一个 Doc？                                  | [![](./docs/img/zen-mode.gif)](https://univer.ai/zh-cn/guides/tutorials/zen-editor/#%E6%BC%94%E7%A4%BA)                           |
 | [Univer(SaaS version)](https://univer.ai/)<br>通过 Univer，我们使用户能够根据自己的意愿创建 3 种形式的页面。 通过将工作表、文档和幻灯片的功能合并在一起，Univer 使个人和团队能够轻松创建、组织和简化工作流程。                                  | [![](./docs/img/univer-workspace-drag-chart.gif)](https://youtu.be/kpV0MvQuFZA)                           |
 
 ## 使用
@@ -100,6 +100,7 @@ Univer 基于插件化架构设计，你可以安装以下包来增强 Univer �
 | [network](./packages/network)                           | 实现了 Univer 的网络服务，包括 WebSocket 和 HTTP。                                      | [![npm version](https://img.shields.io/npm/v/@univerjs/network)](https://npmjs.org/package/@univerjs/network)               |
 | [rpc](./packages/rpc)                                   | 实现 RPC 机制，以及在主从文档副本之间同步数据的方法，方便 web worker 等跨线程场景的开发 | [![npm version](https://img.shields.io/npm/v/@univerjs/rpc)](https://npmjs.org/package/@univerjs/rpc)                       |
 | [sheets](./packages/sheets)                             | 实现电子表格的基本业务                                                                  | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets)](https://npmjs.org/package/@univerjs/sheets)                 |
+| [sheets-conditional-formatting](./packages/sheets-conditional-formatting)   | 实现电子表格的条件格式功能                                               | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets-conditional-formatting)](https://npmjs.org/package/@univerjs/sheets-sheets-conditional-formatting) |
 | [sheets-find-replace](./packages/sheets-find-replace)   | 实现电子表格的查找替换                                                                  | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets-find-replace)](https://npmjs.org/package/@univerjs/sheets-find-replace) |
 | [sheets-formula](./packages/sheets-formula)             | 实现电子表格的公式编辑                                                                  | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets-formula)](https://npmjs.org/package/@univerjs/sheets-formula) |
 | [sheets-numfmt](./packages/sheets-numfmt)               | 实现电子表格中的数字格式编辑                                                            | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets-numfmt)](https://npmjs.org/package/@univerjs/sheets-numfmt)   |
@@ -160,4 +161,4 @@ Univer 基于 Apache-2.0 协议分发。
 
 ---
 
-上海梦数科技有限公司 2023 版权所有
+Copyright © 2019-2024 Shanghai DreamNum Technology Co., Ltd. All rights reserved

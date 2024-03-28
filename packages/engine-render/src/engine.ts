@@ -58,6 +58,8 @@ export class Engine extends ThinEngine<Scene> {
 
     private _usingSafari: boolean = IsSafari();
 
+    private _resizeObserver: Nullable<ResizeObserver>;
+
     // FPS
     private _fps = 60;
 
@@ -103,6 +105,7 @@ export class Engine extends ThinEngine<Scene> {
         this._canvasEle = this._canvas.getCanvasEle();
         this._handleKeyboardAction();
         this._handlePointerAction();
+        this._matchMediaHandler();
     }
 
     override get width() {
@@ -164,8 +167,10 @@ export class Engine extends ThinEngine<Scene> {
         if (resize) {
             this.resize();
 
+            this._resizeObserver?.unobserve(this._container as HTMLElement);
+
             let timer: number | undefined;
-            const resizeObserver = new ResizeObserver(() => {
+            this._resizeObserver = new ResizeObserver(() => {
                 if (!timer) {
                     timer = window.requestIdleCallback(() => {
                         this.resize();
@@ -173,11 +178,11 @@ export class Engine extends ThinEngine<Scene> {
                     });
                 }
             });
-            resizeObserver.observe(this._container);
+            this._resizeObserver.observe(this._container);
 
             this.disposeWithMe(
                 toDisposable(() => {
-                    resizeObserver.unobserve(this._container as HTMLElement);
+                    this._resizeObserver?.unobserve(this._container as HTMLElement);
                 })
             );
         }
@@ -696,5 +701,25 @@ export class Engine extends ThinEngine<Scene> {
         }
 
         return deviceType;
+    }
+
+    private _matchMediaHandler() {
+        if (!window?.matchMedia) {
+            return;
+        }
+
+        const mediaQueryList = window.matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`);
+
+        const _handleMediaChange = () => {
+            this.resize();
+        };
+
+        mediaQueryList.addEventListener('change', _handleMediaChange);
+
+        this.disposeWithMe(
+            toDisposable(() => {
+                mediaQueryList.removeEventListener('change', _handleMediaChange);
+            })
+        );
     }
 }

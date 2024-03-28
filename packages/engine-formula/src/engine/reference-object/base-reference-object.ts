@@ -94,7 +94,7 @@ export class BaseReferenceObject extends ObjectClassType {
     isExceedRange() {
         const { startRow, endRow, startColumn, endColumn } = this.getRangePosition();
 
-        if (startRow < 0 || startColumn < 0 || endRow >= this.getRowCount() || endColumn >= this.getColumnCount()) {
+        if (startRow < 0 || startColumn < 0 || endRow >= this.getActiveSheetRowCount() || endColumn >= this.getActiveSheetColumnCount()) {
             return true;
         }
         return false;
@@ -127,11 +127,11 @@ export class BaseReferenceObject extends ObjectClassType {
         }
 
         if (Number.isNaN(endRow)) {
-            endRow = this.getRowCount() - 1;
+            endRow = this.getActiveSheetRowCount() - 1;
         }
 
         if (Number.isNaN(endColumn)) {
-            endColumn = this.getColumnCount() - 1;
+            endColumn = this.getActiveSheetColumnCount() - 1;
         }
 
         return {
@@ -324,12 +324,20 @@ export class BaseReferenceObject extends ObjectClassType {
         this._numfmtItemData = numfmtItemData;
     }
 
-    getRowCount() {
+    getActiveSheetRowCount() {
         return this.getCurrentActiveSheetData().rowCount;
     }
 
-    getColumnCount() {
+    getActiveSheetColumnCount() {
         return this.getCurrentActiveSheetData().columnCount;
+    }
+
+    getRowCount() {
+        return this._rangeData.endRow - this._rangeData.startRow + 1;
+    }
+
+    getColumnCount() {
+        return this._rangeData.endColumn - this._rangeData.startColumn + 1;
     }
 
     getRowData() {

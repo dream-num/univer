@@ -18,7 +18,7 @@ Some of these design requirements come from the product planning of Univer, and 
 
 ### Plugin
 
-Univer's modules should be considered from the perspective of **business type (Sheet / Doc / Slide), concern (configuration management / UI / shortcut keys / canvas rendering), function (Sheet basic operation / Sheet conditional format / Sheet filter, operating environment (desktop / mobile / Node.js, etc.)** and other factors, divided into various plugins (plugin), combined into a Univer application.
+Univer's modules should be considered from the perspective of **business type (Sheet / Doc / Slide), concern (configuration management / UI / shortcut keys / canvas rendering), function (Sheet basic operation / Sheet conditional formatting / Sheet filter, operating environment (desktop / mobile / Node.js, etc.)** and other factors, divided into various plugins (plugin), combined into a Univer application.
 
 For example, you could create a standard Spreadsheet application like this:
 

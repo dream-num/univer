@@ -27,7 +27,6 @@ import { BaseFunction } from '../../base-function';
  *
  * =INDEX(A2:A5,2,1):A1 same as =A1:A3
  *
- * TODO@Dushusir: Promote public type to ObjectClassType
  */
 export class Index extends BaseFunction {
     override needsReferenceObject = true;

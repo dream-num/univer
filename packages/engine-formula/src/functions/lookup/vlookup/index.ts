@@ -22,6 +22,7 @@ import type { BaseValueObject } from '../../../engine/value-object/base-value-ob
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BooleanValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
+import { isSingleValueObject } from '../../../engine/utils/value-object';
 
 export class Vlookup extends BaseFunction {
     override calculate(
@@ -59,7 +60,9 @@ export class Vlookup extends BaseFunction {
         // When neither lookupValue nor rangeLookup is an array, but colIndexNum is an array, expansion is allowed based on the value of colIndexNum. However, if an error is encountered in subsequent matching, the first error needs to be returned (not the entire array)
         // Otherwise colIndexNum takes the first value
 
-        if (!lookupValue.isArray() && !rangeLookup.isArray() && colIndexNum.isArray()) {
+        if (isSingleValueObject(lookupValue) && isSingleValueObject(rangeLookup) && colIndexNum.isArray()) {
+            lookupValue = lookupValue.isArray() ? (lookupValue as ArrayValueObject).getFirstCell() : lookupValue;
+
             const rangeLookupValue = this.getZeroOrOneByOneDefault(rangeLookup);
 
             if (rangeLookupValue == null) {

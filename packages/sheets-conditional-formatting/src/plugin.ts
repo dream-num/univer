@@ -54,7 +54,8 @@ import { ConditionalFormattingClearController } from './controllers/cf.clear.con
 
 export class SheetsConditionalFormattingPlugin extends Plugin {
     static override type = PluginType.Sheet;
-    static commandList = [DddAverageCfCommand,
+    static commandList = [
+        DddAverageCfCommand,
         AddColorScaleConditionalRuleCommand,
         AddDataBarConditionalRuleCommand,
         AddDuplicateValuesCfCommand,

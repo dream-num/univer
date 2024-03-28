@@ -775,9 +775,6 @@ importers:
       '@univerjs/icons':
         specifier: ^0.1.42
         version: 0.1.42(react-dom@18.2.0)(react@18.2.0)
-      '@univerjs/sheets-ui':
-        specifier: workspace:*
-        version: link:../sheets-ui
       dayjs:
         specifier: ^1.11.10
         version: 1.11.10
@@ -830,6 +827,9 @@ importers:
       '@univerjs/sheets-formula':
         specifier: workspace:*
         version: link:../sheets-formula
+      '@univerjs/sheets-ui':
+        specifier: workspace:*
+        version: link:../sheets-ui
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui

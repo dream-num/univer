@@ -75,7 +75,7 @@ Univer 的功能特性包括：
 | <h3>🎨 Univer Slides</h3>                    |                   |
 | [Slides](https://www.univer.ai/examples/slides/)<br>一个包含图文本、浮动图片、表格等元素的画布演示                                  | [![](./docs/img/examples-slides.gif)](https://www.univer.ai/examples/slides/)                           |
 | <h3>🧩 Univer Innovation</h3>                    |                   |
-| [Zen Mode](https://univer.work/guides/tutorials/zen-editor/#live-demo)<br>Sheet 的单元格是一个 Doc？                                  | [![](./docs/img/zen-mode.gif)](https://univer.work/guides/tutorials/zen-editor/#live-demo)                           |
+| [Zen Mode](https://univer.ai/guides/tutorials/zen-editor/#live-demo)<br>Sheet 的单元格是一个 Doc？                                  | [![](./docs/img/zen-mode.gif)](https://univer.ai/guides/tutorials/zen-editor/#live-demo)                           |
 | [Univer(SaaS version)](https://univer.ai/)<br>通过 Univer，我们使用户能够根据自己的意愿创建 3 种形式的页面。 通过将工作表、文档和幻灯片的功能合并在一起，Univer 使个人和团队能够轻松创建、组织和简化工作流程。                                  | [![](./docs/img/univer-workspace-drag-chart.gif)](https://youtu.be/kpV0MvQuFZA)                           |
 
 ## 使用

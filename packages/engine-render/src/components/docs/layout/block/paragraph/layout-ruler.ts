@@ -96,7 +96,7 @@ function _divideOperator(
     const divideInfo = getLastNotFullDivideInfo(lastPage); // 取得最新一行里内容未满的第一个 divide.
 
     if (divideInfo) {
-        const width = __getSpanGroupWidth(glyphGroup);
+        const width = __getGlyphGroupWidth(glyphGroup);
         const { divide } = divideInfo;
         const lastGlyph = divide?.glyphGroup?.[divide.glyphGroup.length - 1];
         const lastWidth = lastGlyph?.width || 0;
@@ -122,18 +122,18 @@ function _divideOperator(
             ) {
                 addGlyphToDivide(divide, glyphGroup, preOffsetLeft);
             } else if (divide?.glyphGroup.length === 0) {
-                const sliceSpanGroup: IDocumentSkeletonGlyph[] = [];
+                const sliceGlyphGroup: IDocumentSkeletonGlyph[] = [];
 
                 while (glyphGroup.length) {
-                    sliceSpanGroup.push(glyphGroup.shift()!);
+                    sliceGlyphGroup.push(glyphGroup.shift()!);
 
-                    const sliceSpanGroupWidth = __getSpanGroupWidth(sliceSpanGroup);
-                    if (sliceSpanGroupWidth > divide.width) {
+                    const sliceGlyphGroupWidth = __getGlyphGroupWidth(sliceGlyphGroup);
+                    if (sliceGlyphGroupWidth > divide.width) {
                         break;
                     }
                 }
 
-                addGlyphToDivide(divide, sliceSpanGroup, preOffsetLeft);
+                addGlyphToDivide(divide, sliceGlyphGroup, preOffsetLeft);
 
                 if (glyphGroup.length) {
                     _lineOperator(
@@ -158,7 +158,7 @@ function _divideOperator(
         } else {
             // w 不超过 divide 宽度，加入到 divide 中去
             const currentLine = divide.parent;
-            const maxBox = __maxFontBoundingBoxBySpanGroup(glyphGroup);
+            const maxBox = __maxFontBoundingBoxByGlyphGroup(glyphGroup);
 
             if (currentLine && maxBox && !__isNullLine(currentLine)) {
                 const { paragraphLineGapDefault, linePitch, lineSpacing, spacingRule, snapToGrid, gridType } =
@@ -668,23 +668,23 @@ function __checkPageBreak(column: IDocumentSkeletonColumn) {
     return true;
 }
 
-function __getSpanGroupWidth(glyphGroup: IDocumentSkeletonGlyph[]) {
-    const spanGroupLen = glyphGroup.length;
+function __getGlyphGroupWidth(glyphGroup: IDocumentSkeletonGlyph[]) {
+    const glyphGroupLen = glyphGroup.length;
     let width = 0;
 
-    for (let i = 0; i < spanGroupLen; i++) {
+    for (let i = 0; i < glyphGroupLen; i++) {
         const glyph = glyphGroup[i];
         width += glyph.width;
     }
     return width;
 }
 
-function __maxFontBoundingBoxBySpanGroup(glyphGroup: IDocumentSkeletonGlyph[]) {
-    const spanGroupLen = glyphGroup.length;
+function __maxFontBoundingBoxByGlyphGroup(glyphGroup: IDocumentSkeletonGlyph[]) {
+    const glyphGroupLen = glyphGroup.length;
     let height = Number.NEGATIVE_INFINITY;
     let maxBox;
 
-    for (let i = 0; i < spanGroupLen; i++) {
+    for (let i = 0; i < glyphGroupLen; i++) {
         const glyph = glyphGroup[i];
         const { ba: boundingBoxAscent, bd: boundingBoxDescent } = glyph.bBox;
 

@@ -18,10 +18,10 @@ import type { ICellData, Nullable, ObjectMatrix } from '@univerjs/core';
 import { Disposable, ICommandService, RefAlias, toDisposable, Tools } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 import type { IRemoveOtherFormulaMutationParams, ISetFormulaCalculationResultMutation, ISetOtherFormulaMutationParams } from '@univerjs/engine-formula';
-import { IActiveDirtyManagerService } from '@univerjs/sheets-formula';
-import { RemoveOtherFormulaMutation,
+import { IActiveDirtyManagerService, RemoveOtherFormulaMutation,
     SetFormulaCalculationResultMutation,
     SetOtherFormulaMutation } from '@univerjs/engine-formula';
+
 import { Subject } from 'rxjs';
 import { bufferTime, filter, map } from 'rxjs/operators';
 import type { IConditionalFormattingFormulaMarkDirtyParams } from '../commands/mutations/formula-mark-dirty.mutation';

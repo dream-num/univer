@@ -54,6 +54,7 @@ import { FunctionService, IFunctionService } from './services/function.service';
 import { IOtherFormulaManagerService, OtherFormulaManagerService } from './services/other-formula-manager.service';
 import { FormulaRuntimeService, IFormulaRuntimeService } from './services/runtime.service';
 import { ISuperTableService, SuperTableService } from './services/super-table.service';
+import { ActiveDirtyManagerService, IActiveDirtyManagerService } from './services/active-dirty-manager.service';
 
 const PLUGIN_NAME = 'base-formula-engine';
 
@@ -81,6 +82,7 @@ export class UniverFormulaEnginePlugin extends Plugin {
             [IFunctionService, { useClass: FunctionService }],
             [IFeatureCalculationManagerService, { useClass: FeatureCalculationManagerService }],
             [IDefinedNamesService, { useClass: DefinedNamesService }],
+            [IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }],
 
             // Models
             [FormulaDataModel],

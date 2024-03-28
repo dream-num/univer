@@ -24,7 +24,7 @@ import {
     OnLifecycle,
 } from '@univerjs/core';
 import type { IDirtyUnitSheetNameMap } from '@univerjs/engine-formula';
-import { FormulaDataModel } from '@univerjs/engine-formula';
+import { FormulaDataModel, IActiveDirtyManagerService } from '@univerjs/engine-formula';
 import type {
     IDeleteRangeMutationParams,
     IInsertSheetMutationParams,
@@ -48,8 +48,6 @@ import {
     SetStyleCommand,
 } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
-
-import { IActiveDirtyManagerService } from '../services/active-dirty-manager.service';
 
 @OnLifecycle(LifecycleStages.Ready, ActiveDirtyController)
 export class ActiveDirtyController extends Disposable {

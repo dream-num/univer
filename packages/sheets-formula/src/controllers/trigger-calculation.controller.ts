@@ -21,14 +21,13 @@ import type {
     IDirtyUnitOtherFormulaMap,
     IDirtyUnitSheetNameMap,
     INumfmtItemMap,
-    ISetFormulaCalculationNotificationMutation,
-} from '@univerjs/engine-formula';
+    ISetFormulaCalculationNotificationMutation } from '@univerjs/engine-formula';
 import {
     FormulaDataModel,
     FormulaExecutedStateType,
+    IActiveDirtyManagerService,
     SetFormulaCalculationNotificationMutation,
-    SetFormulaCalculationStartMutation,
-} from '@univerjs/engine-formula';
+    SetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import {
     ClearSelectionFormatCommand,
@@ -39,7 +38,6 @@ import {
 } from '@univerjs/sheets';
 
 import { Inject } from '@wendellhu/redi';
-import { IActiveDirtyManagerService } from '../services/active-dirty-manager.service';
 
 @OnLifecycle(LifecycleStages.Ready, TriggerCalculationController)
 export class TriggerCalculationController extends Disposable {

@@ -217,8 +217,7 @@ export class DataValidationRenderController extends RxDisposable {
                         const cellValue = getCellValueOrigin(cell);
 
                         let extra: ICellDataForSheetInterceptor = {};
-
-                        if (defaultStyle.tb !== WrapStrategy.WRAP) {
+                        if (defaultStyle.tb !== WrapStrategy.WRAP && defaultStyle.tb !== WrapStrategy.CLIP) {
                             extra = {
                                 interceptorStyle: {
                                     ...cell?.interceptorStyle,
@@ -282,9 +281,9 @@ export class DataValidationRenderController extends RxDisposable {
                                 ...cell?.fontRenderExtension,
                                 isSkip: validator?.skipDefaultFontRender(rule, cellValue, pos),
                             },
-
                             interceptorStyle: {
                                 ...cell?.interceptorStyle,
+                                ...extra.interceptorStyle,
                             },
                             get interceptorAutoHeight() {
                                 const mergeCell = skeleton.mergeData.find((range) => {

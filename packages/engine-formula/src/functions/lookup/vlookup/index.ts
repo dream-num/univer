@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
+import type { Nullable } from '@univerjs/core';
 import { ErrorType } from '../../../basics/error-type';
-import { expandArrayValueObject } from '../../../engine/utils/array-object';
+import { createNewArray, expandArrayValueObject } from '../../../engine/utils/array-object';
 import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
@@ -65,40 +66,34 @@ export class Vlookup extends BaseFunction {
                 return ErrorValueObject.create(ErrorType.VALUE);
             }
 
-            let errorValue: ErrorValueObject | undefined;
+            let errorValue: BaseValueObject | undefined;
+            const result: BaseValueObject[][] = [];
 
-            const result = colIndexNum.map((colIndexNumValueObject: BaseValueObject) => {
-                const colIndexNumValue = this.getIndexNumValue(colIndexNumValueObject);
-
-                if (colIndexNumValue instanceof ErrorValueObject) {
-                    errorValue = colIndexNumValue;
-                    return errorValue;
-                }
-
-                const searchArray = (tableArray as ArrayValueObject).slice(undefined, [0, 1]);
-
-                if (searchArray == null) {
+            (colIndexNum as ArrayValueObject).iterator((colIndexNumValueObject: Nullable<BaseValueObject>, rowIndex: number, columnIndex: number) => {
+                if (colIndexNumValueObject === null || colIndexNumValueObject === undefined) {
                     errorValue = ErrorValueObject.create(ErrorType.VALUE);
-                    return errorValue;
+                    return false;
                 }
 
-                const resultArray = (tableArray as ArrayValueObject).slice(undefined, [colIndexNumValue - 1, colIndexNumValue]);
+                const searchObject = this._handleTableArray(lookupValue, tableArray, colIndexNumValueObject, rangeLookupValue);
 
-                if (resultArray == null) {
-                    errorValue = ErrorValueObject.create(ErrorType.REF);
-                    return errorValue;
+                if (searchObject.isError()) {
+                    errorValue = searchObject;
+                    return false;
                 }
 
-                // The error reporting priority of lookupValue in Excel is higher than colIndexNum. It is required to execute the query from the first column first, and then take the value of colIndexNum column from the query result.
-                // Here we will first throw the colIndexNum error to avoid unnecessary queries and improve performance.
-                return this._handleSingleObject(lookupValue, searchArray, resultArray, rangeLookupValue);
+                if (result[rowIndex] === undefined) {
+                    result[rowIndex] = [];
+                }
+
+                result[rowIndex][columnIndex] = searchObject;
             });
 
             if (errorValue) {
                 return errorValue;
             }
 
-            return result;
+            return createNewArray(result, result.length, result[0].length, this.unitId || '', this.subUnitId || '');
         }
 
         // max row length
@@ -137,26 +132,32 @@ export class Vlookup extends BaseFunction {
                 return ErrorValueObject.create(ErrorType.VALUE);
             }
 
-            const colIndexNumValue = this.getIndexNumValue(colIndexNum);
-
-            if (colIndexNumValue instanceof ErrorValueObject) {
-                return colIndexNumValue;
-            }
-
-            const searchArray = (tableArray as ArrayValueObject).slice(undefined, [0, 1]);
-
-            if (searchArray == null) {
-                return ErrorValueObject.create(ErrorType.VALUE);
-            }
-
-            const resultArray = (tableArray as ArrayValueObject).slice(undefined, [colIndexNumValue - 1, colIndexNumValue]);
-
-            if (resultArray == null) {
-                return ErrorValueObject.create(ErrorType.REF);
-            }
-
-            return this._handleSingleObject(lookupValue, searchArray, resultArray, rangeLookupValue);
+            return this._handleTableArray(lookupValue, tableArray, colIndexNum, rangeLookupValue);
         });
+    }
+
+    private _handleTableArray(lookupValue: BaseValueObject, tableArray: BaseValueObject, colIndexNum: BaseValueObject, rangeLookupValue: number) {
+        const colIndexNumValue = this.getIndexNumValue(colIndexNum);
+
+        if (colIndexNumValue instanceof ErrorValueObject) {
+            return colIndexNumValue;
+        }
+
+        const searchArray = (tableArray as ArrayValueObject).slice(undefined, [0, 1]);
+
+        if (searchArray == null) {
+            return ErrorValueObject.create(ErrorType.VALUE);
+        }
+
+        const resultArray = (tableArray as ArrayValueObject).slice(undefined, [colIndexNumValue - 1, colIndexNumValue]);
+
+        // The error reporting priority of lookupValue in Excel is higher than colIndexNum. It is required to execute the query from the first column first, and then take the value of colIndexNum column from the query result.
+        // Here we will first throw the colIndexNum error to avoid unnecessary queries and improve performance.
+        if (resultArray == null) {
+            return ErrorValueObject.create(ErrorType.REF);
+        }
+
+        return this._handleSingleObject(lookupValue, searchArray, resultArray, rangeLookupValue);
     }
 
     private _handleSingleObject(

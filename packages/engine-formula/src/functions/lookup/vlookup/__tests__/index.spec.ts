@@ -159,7 +159,9 @@ describe('Test vlookup', () => {
             const resultObject = textFunction.calculate(
                 StringValueObject.create('lookupValue'),
                 arrayValueObject1.clone(),
-                colIndexNumArrayValueObject2.clone(),
+                ArrayValueObject.create(/*ts*/ `{
+                    3, 4;
+                }`),
                 NumberValueObject.create(0)
             ) as BaseValueObject;
             expect(getObjectValue(resultObject)).toStrictEqual(ErrorType.REF);

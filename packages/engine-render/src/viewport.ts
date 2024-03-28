@@ -45,6 +45,9 @@ interface IViewProps extends IViewPosition {
     isWheelPreventDefaultX?: boolean;
     isWheelPreventDefaultY?: boolean;
     active?: boolean;
+
+    isRelativeX?: boolean;
+    isRelativeY?: boolean;
 }
 
 export interface IScrollObserverParam {
@@ -136,10 +139,6 @@ export class Viewport {
 
     private _scrollStopNum: NodeJS.Timeout | number = 0;
 
-    private _preScrollX: number = 0;
-
-    private _preScrollY: number = 0;
-
     private _renderClipState = true;
 
     private _active = true;
@@ -157,6 +156,10 @@ export class Viewport {
     private _isRelativeY: boolean = false;
 
     private _preViewportBound: Nullable<IViewportBound>;
+
+    private _preScrollX: number = 0;
+
+    private _preScrollY: number = 0;
 
     constructor(viewPortKey: string, scene: ThinScene, props?: IViewProps) {
         this._viewPortKey = viewPortKey;
@@ -178,6 +181,14 @@ export class Viewport {
         //     this.height = props?.height;
         //     this._heightOrigin = this.height;
         // }
+
+        if (props?.isRelativeX != null) {
+            this._isRelativeX = props.isRelativeX;
+        }
+
+        if (props?.isRelativeY != null) {
+            this._isRelativeY = props.isRelativeY;
+        }
 
         this._setWithAndHeight(props);
 
@@ -537,7 +548,7 @@ export class Viewport {
             // DEPT: left is set by upper views but width and height is not
 
             const { scaleX, scaleY } = this._getBoundScale(m[0], m[3]);
-            ctx.rect(this.left, this.top, (this.width || 0) * scaleX, (this.height || 0) * scaleY);
+            ctx.rect(this.left, this.top, (this.width || 0), (this.height || 0));
             ctx.clip();
         }
 
@@ -790,35 +801,25 @@ export class Viewport {
         let width;
         let height;
 
-        let left = this.left * scaleX;
-        let top = this.top * scaleY;
+        const left = this._leftOrigin * scaleX;
+        const top = this._topOrigin * scaleY;
 
-        if (this._leftOrigin != null) {
-            left = this._leftOrigin * scaleX;
-        }
-
-        if (this._topOrigin != null) {
-            top = this._topOrigin * scaleY;
-        }
-
-        if (this._widthOrigin != null) {
-            width = this._widthOrigin * scaleX;
+        if (this._isRelativeX) {
+            width = parentWidth - (this._left + this._right);
         } else {
-            width = parentWidth - (left + this._right);
-            this.width = width;
+            width = (this._widthOrigin || 0) * scaleX;
         }
 
-        if (this._heightOrigin != null) {
-            height = this._heightOrigin * scaleY;
+        if (this._isRelativeY) {
+            height = parentHeight - (this._top + this._bottom);
         } else {
-            height = parentHeight - (top + this._bottom);
-            this.height = height;
+            height = (this._heightOrigin || 0) * scaleY;
         }
 
         this._left = left;
         this._top = top;
-        // this._width = width;
-        // this._height = height;
+        this._width = width;
+        this._height = height;
 
         // if (!forceCalculate && this._widthOrigin != null) {
         //     width = this._widthOrigin;
@@ -971,13 +972,13 @@ export class Viewport {
 
         const m = sceneTrans.getMatrix();
 
-        const scaleFromX = this._isRelativeX ? (m[0] < 1 ? m[0] : 1) : 1;
+        // const scaleFromX = this._isRelativeX ? (m[0] < 1 ? m[0] : 1) : 1;
 
-        const scaleFromY = this._isRelativeY ? (m[3] < 1 ? m[3] : 1) : 1;
+        // const scaleFromY = this._isRelativeY ? (m[3] < 1 ? m[3] : 1) : 1;
 
-        const scaleToX = this._isRelativeX ? 1 : m[0] < 1 ? m[0] : 1;
+        // const scaleToX = this._isRelativeX ? 1 : m[0] < 1 ? m[0] : 1;
 
-        const scaleToY = this._isRelativeY ? 1 : m[3] < 1 ? m[3] : 1;
+        // const scaleToY = this._isRelativeY ? 1 : m[3] < 1 ? m[3] : 1;
 
         let width = this._width;
 
@@ -993,10 +994,10 @@ export class Viewport {
             height = size.height;
         }
 
-        const xFrom: number = this.left * scaleFromX;
-        const xTo: number = ((width || 0) + this.left) * scaleToX;
-        const yFrom: number = this.top * scaleFromY;
-        const yTo: number = ((height || 0) + this.top) * scaleToY;
+        const xFrom: number = this.left;
+        const xTo: number = ((width || 0) + this.left);
+        const yFrom: number = this.top;
+        const yTo: number = ((height || 0) + this.top);
 
         /**
          * @DR-Univer The coordinates here need to be consistent with the clip in the render,
@@ -1094,29 +1095,36 @@ export class Viewport {
     }
 
     private _setWithAndHeight(props?: IViewProps) {
-        this.top = props?.top || 0;
-        this.left = props?.left || 0;
-        this.bottom = props?.bottom || 0;
-        this.right = props?.right || 0;
+        if (props?.top != null) {
+            this.top = props.top;
+        }
 
-        if (Tools.isDefine(props?.width)) {
+        if (props?.left != null) {
+            this.left = props.left;
+        }
+
+        if (props?.bottom != null) {
+            this.bottom = props.bottom;
+        }
+
+        if (props?.right != null) {
+            this.right = props.right;
+        }
+
+        if (Tools.isDefine(props?.width) && !this._isRelativeX) {
             this.width = props?.width;
             this._widthOrigin = this.width;
-            this._isRelativeX = false;
         } else {
             this.width = null;
             this._widthOrigin = null;
-            this._isRelativeX = true;
         }
 
-        if (Tools.isDefine(props?.height)) {
+        if (Tools.isDefine(props?.height) && !this._isRelativeY) {
             this.height = props?.height;
             this._heightOrigin = this.height;
-            this._isRelativeY = false;
         } else {
             this.height = null;
             this._heightOrigin = null;
-            this._isRelativeY = true;
         }
     }
 

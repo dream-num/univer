@@ -58,18 +58,23 @@
         "node": ">=16.0.0",
         "npm": ">=8.0.0"
     },
-    "scripts": {},
+    "scripts": {
+        "test": "vitest run",
+        "test:watch": "vitest",
+        "coverage": "vitest run --coverage",
+        "lint:types": "tsc --noEmit",
+        "build": "tsc && vite build"
+    },
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
-        "@univerjs/design": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/slides": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": "^0.13.0",
+        "@wendellhu/redi": "0.13.0",
         "react": ">=16.9.0"
     },
     "devDependencies": {
-        "@types/react": "^18.2.67",
+        "@types/react": "^18.2.72",
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
@@ -80,7 +85,7 @@
         "less": "^4.2.0",
         "react": "^18.2.0",
         "rxjs": "^7.8.1",
-        "typescript": "^5.4.2",
+        "typescript": "^5.4.3",
         "vite": "^5.1.6",
         "vitest": "^1.4.0"
     }

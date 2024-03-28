@@ -63,16 +63,18 @@ export function ContextMenu() {
     return (
         <Popup visible={visible} offset={offset}>
             <section onPointerDown={(e) => e.stopPropagation()}>
-                <Menu
-                    menuType={[menuType]}
-                    onOptionSelect={(params) => {
-                        const { label: commandId, value } = params;
-                        commandService && commandService.executeCommand(commandId as string, { value });
-                        const textSelectionRenderManager = injector.get(ITextSelectionRenderManager);
-                        textSelectionRenderManager.focus();
-                        setVisible(false);
-                    }}
-                />
+                {menuType && (
+                    <Menu
+                        menuType={[menuType]}
+                        onOptionSelect={(params) => {
+                            const { label: commandId, value } = params;
+                            commandService && commandService.executeCommand(commandId as string, { value });
+                            const textSelectionRenderManager = injector.get(ITextSelectionRenderManager);
+                            textSelectionRenderManager.focus();
+                            setVisible(false);
+                        }}
+                    />
+                )}
             </section>
         </Popup>
     );

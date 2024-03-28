@@ -37,6 +37,12 @@ export interface IDropdownProps {
     visible?: boolean;
 
     /**
+     * Whether to force render the dropdown
+     * @default false
+     */
+    forceRender?: boolean;
+
+    /**
      * The trigger mode which executes the dropdown action
      * @default ['click']
      */

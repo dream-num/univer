@@ -155,7 +155,7 @@ export function SearchFunction() {
         });
     }
 
-    return (
+    return searchList.length > 0 && (
         <Popup visible={visible} offset={offset}>
             <ul className={styles.formulaSearchFunction} ref={ulRef}>
                 {searchList.map((item, index) => (

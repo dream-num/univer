@@ -220,7 +220,8 @@ export class DropdownWidget implements IBaseDataValidationWidget {
             documentSkeleton.getActualSize();
             const textLayout = getDocsSkeletonPageSize(documentSkeleton)!;
 
-            const { height: fontHeight } = textLayout;
+            const { height: fontHeight, width } = textLayout;
+
             let paddingTop = 0;
             switch (vt) {
                 case VerticalAlign.BOTTOM:
@@ -270,11 +271,9 @@ export class DropdownWidget implements IBaseDataValidationWidget {
             }
 
             documentSkeleton.calculate();
-            documentSkeleton.getActualSize();
             const textLayout = getDocsSkeletonPageSize(documentSkeleton)!;
 
             const { height: fontHeight } = textLayout;
-
             let paddingTop = 0;
             switch (vt) {
                 case VerticalAlign.BOTTOM:

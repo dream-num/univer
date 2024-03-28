@@ -143,9 +143,9 @@ const dataValidation = [
         type: DataValidationType.LIST,
         ranges: [{
             startRow: 11,
-            endRow: 15,
+            endRow: 11,
             startColumn: 0,
-            endColumn: 5,
+            endColumn: 0,
         }],
         formula1: '1,2,3,hahaha',
     },

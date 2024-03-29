@@ -140,14 +140,17 @@ export class DataValidationRenderController extends RxDisposable {
 
                 const worksheet = workbook.getActiveSheet();
                 const activeDropdown = this._dropdownManagerService.activeDropdown;
-                if (activeDropdown
-                    && activeDropdown.location.unitId === unitId
-                    && activeDropdown.location.subUnitId === sheetId
-                    && activeDropdown.location.row === row
-                    && activeDropdown.location.col === column
+                const currLoc = activeDropdown?.location;
+                if (
+                    currLoc &&
+                    currLoc.unitId === unitId &&
+                    currLoc.subUnitId === sheetId &&
+                    currLoc.row === row &&
+                    currLoc.col === column
                 ) {
                     return;
                 }
+
                 this._dropdownManagerService.showDropdown({
                     location: {
                         unitId,

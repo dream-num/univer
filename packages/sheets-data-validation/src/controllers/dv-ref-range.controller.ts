@@ -18,7 +18,7 @@ import type { IRange, ISheetDataValidationRule } from '@univerjs/core';
 import { DataValidationType, Disposable, DisposableCollection, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle, Range, Rectangle, toDisposable } from '@univerjs/core';
 import type { EffectRefRangeParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
-import { handleDefaultRangeChangeWithEffectRefCommands, RefRangeService, SetRangeValuesMutation } from '@univerjs/sheets';
+import { handleDefaultRangeChangeWithEffectRefCommands, handleOtherDefaultRangeChangeWithEffectRefCommands, RefRangeService, SetRangeValuesMutation } from '@univerjs/sheets';
 import { Inject, Injector } from '@wendellhu/redi';
 import { merge, Observable } from 'rxjs';
 import { distinctUntilChanged, map, switchMap } from 'rxjs/operators';
@@ -149,9 +149,12 @@ export class DataValidationRefRangeController extends Disposable {
     register(unitId: string, subUnitId: string, rule: ISheetDataValidationRule) {
         const handleRangeChange = (commandInfo: EffectRefRangeParams) => {
             const oldRanges = [...rule.ranges];
-            const resultRanges = oldRanges.map((range) => {
-                return handleDefaultRangeChangeWithEffectRefCommands(range, commandInfo) as IRange;
+            const resultRangesOrigin = oldRanges.map((range) => {
+                return handleOtherDefaultRangeChangeWithEffectRefCommands(range, commandInfo) as IRange | IRange[];
             }).filter((range) => !!range);
+
+            const resultRanges = resultRangesOrigin.flat();
+
             const isEqual = isRangesEqual(resultRanges, oldRanges);
             if (isEqual) {
                 return { redos: [], undos: [] };

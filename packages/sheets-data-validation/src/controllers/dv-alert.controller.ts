@@ -48,6 +48,16 @@ export class DataValidationAlertController extends Disposable {
                 const cellData = worksheet.getCell(cellPos.location.row, cellPos.location.col);
 
                 if (cellData?.dataValidation?.validStatus === DataValidationStatus.INVALID) {
+                    const currentLoc = this._cellAlertManagerService.currentAlert?.location;
+                    if (
+                        currentLoc &&
+                        currentLoc.row === cellPos.location.row &&
+                        currentLoc.col === cellPos.location.col &&
+                        currentLoc.subUnitId === cellPos.location.subUnitId &&
+                        currentLoc.unitId === cellPos.location.unitId
+                    ) {
+                        return;
+                    }
                     this._cellAlertManagerService.showAlert({
                         type: CellAlertType.ERROR,
                         title: this._localeService.t('dataValidation.error.title'),

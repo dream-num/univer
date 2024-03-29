@@ -102,32 +102,32 @@ const richTextDemo1: IDocumentData = {
 };
 
 const dataValidation = [
-    {
-        uid: 'xxx-1',
-        type: DataValidationType.DECIMAL,
-        ranges: [{
-            startRow: 0,
-            endRow: 5,
-            startColumn: 0,
-            endColumn: 2,
-        }],
-        operator: DataValidationOperator.GREATER_THAN,
-        formula1: '111',
-        errorStyle: DataValidationErrorStyle.STOP,
-    },
-    {
-        uid: 'xxx-0',
-        type: DataValidationType.DATE,
-        ranges: [{
-            startRow: 0,
-            endRow: 5,
-            startColumn: 3,
-            endColumn: 5,
-        }],
-        operator: DataValidationOperator.GREATER_THAN,
-        formula1: '2024/03/23',
-        errorStyle: DataValidationErrorStyle.STOP,
-    },
+    // {
+    //     uid: 'xxx-1',
+    //     type: DataValidationType.DECIMAL,
+    //     ranges: [{
+    //         startRow: 0,
+    //         endRow: 5,
+    //         startColumn: 0,
+    //         endColumn: 2,
+    //     }],
+    //     operator: DataValidationOperator.GREATER_THAN,
+    //     formula1: '111',
+    //     errorStyle: DataValidationErrorStyle.STOP,
+    // },
+    // {
+    //     uid: 'xxx-0',
+    //     type: DataValidationType.DATE,
+    //     ranges: [{
+    //         startRow: 0,
+    //         endRow: 5,
+    //         startColumn: 3,
+    //         endColumn: 5,
+    //     }],
+    //     operator: DataValidationOperator.GREATER_THAN,
+    //     formula1: '2024/03/23',
+    //     errorStyle: DataValidationErrorStyle.STOP,
+    // },
     {
         uid: 'xxx-2',
         type: DataValidationType.CHECKBOX,
@@ -138,39 +138,39 @@ const dataValidation = [
             endColumn: 5,
         }],
     },
-    {
-        uid: 'xxx-3',
-        type: DataValidationType.LIST,
-        ranges: [{
-            startRow: 11,
-            endRow: 11,
-            startColumn: 0,
-            endColumn: 0,
-        }],
-        formula1: '1,2,3,hahaha',
-    },
-    {
-        uid: 'xxx-4',
-        type: DataValidationType.CUSTOM,
-        ranges: [{
-            startRow: 16,
-            endRow: 20,
-            startColumn: 0,
-            endColumn: 5,
-        }],
-        formula1: '=ISBLANK(A17)',
-    },
-    {
-        uid: 'xxx-5',
-        type: DataValidationType.LIST_MULTIPLE,
-        ranges: [{
-            startRow: 21,
-            endRow: 21,
-            startColumn: 0,
-            endColumn: 0,
-        }],
-        formula1: '1,2,3,4,5,哈哈哈哈',
-    },
+    // {
+    //     uid: 'xxx-3',
+    //     type: DataValidationType.LIST,
+    //     ranges: [{
+    //         startRow: 11,
+    //         endRow: 11,
+    //         startColumn: 0,
+    //         endColumn: 0,
+    //     }],
+    //     formula1: '1,2,3,hahaha',
+    // },
+    // {
+    //     uid: 'xxx-4',
+    //     type: DataValidationType.CUSTOM,
+    //     ranges: [{
+    //         startRow: 16,
+    //         endRow: 20,
+    //         startColumn: 0,
+    //         endColumn: 5,
+    //     }],
+    //     formula1: '=ISBLANK(A17)',
+    // },
+    // {
+    //     uid: 'xxx-5',
+    //     type: DataValidationType.LIST_MULTIPLE,
+    //     ranges: [{
+    //         startRow: 21,
+    //         endRow: 21,
+    //         startColumn: 0,
+    //         endColumn: 0,
+    //     }],
+    //     formula1: '1,2,3,4,5,哈哈哈哈',
+    // },
 ];
 
 export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {

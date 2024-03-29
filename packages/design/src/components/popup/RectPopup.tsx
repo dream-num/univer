@@ -73,7 +73,6 @@ const calcPopupPosition = (layout: IPopupLayoutInfo) => {
 
 function RectPopup(props: IRectPopupProps) {
     const { children, anchorRect, direction = 'vertical', onClickOutside } = props;
-    const mounted = useRef(false);
     const nodeRef = useRef(null);
     const clickOtherFn = useRef(onClickOutside);
 
@@ -99,7 +98,7 @@ function RectPopup(props: IRectPopupProps) {
             )
         );
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     [
         anchorRect.left,
         anchorRect.top,
@@ -109,20 +108,19 @@ function RectPopup(props: IRectPopupProps) {
     ]);
 
     useEffect(() => {
-        mounted.current = true;
         const handleClick = (e: MouseEvent) => {
+            if (e.clientX <= anchorRect.right && e.clientX >= anchorRect.left && e.clientY <= anchorRect.bottom && e.clientY >= anchorRect.top) {
+                return;
+            }
             clickOtherFn.current?.(e);
         };
-        setTimeout(() => {
-            if (mounted.current) {
-                window.addEventListener('click', handleClick);
-            }
-        }, 100);
+
+        window.addEventListener('click', handleClick);
+
         return () => {
-            mounted.current = false;
             window.removeEventListener('click', handleClick);
         };
-    }, [clickOtherFn]);
+    }, [anchorRect.bottom, anchorRect.left, anchorRect.right, anchorRect.top, clickOtherFn]);
 
     return (
         <section

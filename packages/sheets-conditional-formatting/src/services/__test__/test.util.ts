@@ -19,10 +19,10 @@ import { ICommandService, IUniverInstanceService, LocaleType, Plugin, PluginType
 import {
     SheetInterceptorService,
 } from '@univerjs/sheets';
-import { IActiveDirtyManagerService } from '@univerjs/sheets-formula';
 
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
+import { IActiveDirtyManagerService } from '@univerjs/engine-formula';
 import { ConditionalFormattingService } from '../conditional-formatting.service';
 import { ConditionalFormattingFormulaService } from '../conditional-formatting-formula.service';
 import { SheetsConditionalFormattingPlugin } from '../../plugin';
@@ -97,7 +97,7 @@ export const createTestBed = (dependencies?: Dependency[]) => {
 
     const univerInstanceService = injector.get(IUniverInstanceService);
     const commandService = injector.get(ICommandService);
-    [...SheetsConditionalFormattingPlugin.commandList, ...SheetsConditionalFormattingPlugin.mutationList].forEach((commandInfo) => {
+    [...SheetsConditionalFormattingPlugin.mutationList].forEach((commandInfo) => {
         commandService.registerCommand(commandInfo);
     });
     const unitId = workbookJson.id;

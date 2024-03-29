@@ -7,7 +7,7 @@
 
 ## 简介
 
-`@univerjs/sheets-conditional-formatting` 为 Univer Sheet 的每个 cell 提供了条件格式化的功能。
+`@univerjs/sheets-conditional-formatting` 为 Univer Sheet 提供条件格式渲染计算的基本能力.
 
 ## 使用指南
 

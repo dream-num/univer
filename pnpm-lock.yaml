@@ -219,6 +219,9 @@ importers:
       '@univerjs/sheets-conditional-formatting':
         specifier: workspace:*
         version: link:../packages/sheets-conditional-formatting
+      '@univerjs/sheets-conditional-formatting-ui':
+        specifier: workspace:*
+        version: link:../packages/sheets-conditional-formatting-ui
       '@univerjs/sheets-find-replace':
         specifier: workspace:*
         version: link:../packages/sheets-find-replace
@@ -772,15 +775,64 @@ importers:
 
   packages/sheets-conditional-formatting:
     dependencies:
-      '@univerjs/icons':
-        specifier: ^0.1.42
-        version: 0.1.42(react-dom@18.2.0)(react@18.2.0)
-      '@univerjs/sheets-ui':
-        specifier: workspace:*
-        version: link:../sheets-ui
       dayjs:
         specifier: ^1.11.10
         version: 1.11.10
+    devDependencies:
+      '@univerjs/core':
+        specifier: workspace:*
+        version: link:../core
+      '@univerjs/engine-formula':
+        specifier: workspace:*
+        version: link:../engine-formula
+      '@univerjs/engine-render':
+        specifier: workspace:*
+        version: link:../engine-render
+      '@univerjs/icons-svg':
+        specifier: ^0.1.42
+        version: 0.1.42
+      '@univerjs/shared':
+        specifier: workspace:*
+        version: link:../../common/shared
+      '@univerjs/sheets':
+        specifier: workspace:*
+        version: link:../sheets
+      '@wendellhu/redi':
+        specifier: ^0.13.0
+        version: 0.13.0
+      clsx:
+        specifier: ^2.1.0
+        version: 2.1.0
+      less:
+        specifier: ^4.2.0
+        version: 4.2.0
+      react:
+        specifier: ^18.2.0
+        version: 18.2.0
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
+      sharp:
+        specifier: ^0.33.3
+        version: 0.33.3
+      typescript:
+        specifier: ^5.4.3
+        version: 5.4.3
+      vite:
+        specifier: ^5.2.6
+        version: 5.2.6(@types/node@20.11.30)(less@4.2.0)
+      vitest:
+        specifier: ^1.4.0
+        version: 1.4.0(@types/node@20.11.30)(less@4.2.0)
+
+  packages/sheets-conditional-formatting-ui:
+    dependencies:
+      '@univerjs/icons':
+        specifier: ^0.1.42
+        version: 0.1.42(react-dom@18.2.0)(react@18.2.0)
+      '@univerjs/sheets-conditional-formatting':
+        specifier: workspace:*
+        version: link:../sheets-conditional-formatting
       lodash.get:
         specifier: ^4.4.2
         version: 4.4.2
@@ -827,9 +879,9 @@ importers:
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
-      '@univerjs/sheets-formula':
+      '@univerjs/sheets-ui':
         specifier: workspace:*
-        version: link:../sheets-formula
+        version: link:../sheets-ui
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui
@@ -1221,6 +1273,10 @@ importers:
       rc-util:
         specifier: ^5.39.1
         version: 5.39.1(react-dom@18.2.0)(react@18.2.0)
+    optionalDependencies:
+      vue:
+        specifier: '>=3.0.0'
+        version: 3.4.21(typescript@5.4.3)
     devDependencies:
       '@testing-library/react':
         specifier: ^14.2.1
@@ -1279,9 +1335,6 @@ importers:
       vitest:
         specifier: ^1.4.0
         version: 1.4.0(@types/node@20.11.30)(less@4.2.0)
-      vue:
-        specifier: ^3.4.21
-        version: 3.4.21(typescript@5.4.3)
 
   packages/uniscript:
     dependencies:
@@ -6054,7 +6107,7 @@ packages:
       '@vue/shared': 3.4.21
       entities: 4.5.0
       estree-walker: 2.0.2
-      source-map-js: 1.0.2
+      source-map-js: 1.2.0
 
   /@vue/compiler-dom@3.4.21:
     resolution: {integrity: sha512-IZC6FKowtT1sl0CR5DpXSiEB5ayw75oT2bma1BEhV7RRR1+cfwLrxc2Z8Zq/RGFzJ8w5r9QtCOvTjQgdn0IKmA==}
@@ -6072,8 +6125,8 @@ packages:
       '@vue/shared': 3.4.21
       estree-walker: 2.0.2
       magic-string: 0.30.8
-      postcss: 8.4.35
-      source-map-js: 1.0.2
+      postcss: 8.4.38
+      source-map-js: 1.2.0
 
   /@vue/compiler-ssr@3.4.21:
     resolution: {integrity: sha512-M5+9nI2lPpAsgXOGQobnIueVqc9sisBFexh5yMIMRAPYLa7+5wEJs8iqOZc1WAa9WQbx9GR2twgznU8LTIiZ4Q==}
@@ -12367,6 +12420,7 @@ packages:
       nanoid: 3.3.7
       picocolors: 1.0.0
       source-map-js: 1.0.2
+    dev: false
 
   /postcss@8.4.38:
     resolution: {integrity: sha512-Wglpdk03BSfXkHoQa3b/oulrotAkwrlLDRSOb9D0bN86FdRyE9lppSp33aHNPgBa0JKCoB+drFLZkQoRRYae5A==}
@@ -15036,7 +15090,7 @@ packages:
       '@vitest/spy': 1.4.0
       '@vitest/utils': 1.4.0
       acorn-walk: 8.3.2
-      chai: 4.3.10
+      chai: 4.4.1
       debug: 4.3.4
       execa: 8.0.1
       happy-dom: 13.3.8

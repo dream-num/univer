@@ -214,8 +214,9 @@ export interface IOptionData {
      */
     contentsOnly?: boolean;
     /**
-     *  Whether to clear only the comments.
+     *  Auxiliary data for updating local memory data without having to deal with coordination conflicts
      */
+    [key: PropertyKey]: any;
 }
 
 /**

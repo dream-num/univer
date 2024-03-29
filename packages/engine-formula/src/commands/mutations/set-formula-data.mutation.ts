@@ -19,18 +19,18 @@ import { CommandType } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
 import type { IFormulaData } from '../../basics/common';
-import { FormulaDataModel } from '../../models/formula-data.model';
 
 export interface ISetFormulaDataMutationParams {
     formulaData: IFormulaData;
 }
 
+/**
+ * There is no need to process data here, it is used as the main thread to send data to the worker. The main thread has already updated the data in advance, and there is no need to update it again here.
+ */
 export const SetFormulaDataMutation: IMutation<ISetFormulaDataMutationParams> = {
     id: 'formula.mutation.set-formula-data',
     type: CommandType.MUTATION,
     handler: (accessor: IAccessor, params: ISetFormulaDataMutationParams) => {
-        const formulaDataModel = accessor.get(FormulaDataModel);
-        formulaDataModel.setFormulaData(params.formulaData);
         return true;
     },
 };

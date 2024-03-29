@@ -64,7 +64,9 @@ export class CalculateController extends Disposable {
                     this._calculateFormulaService.stopFormulaExecution();
                 } else if (command.id === SetFormulaDataMutation.id) {
                     const formulaData = (command.params as ISetFormulaDataMutationParams).formulaData as IFormulaData;
-                    this._formulaDataModel.setFormulaData(formulaData);
+
+                    // formulaData is the incremental data sent from the main thread and needs to be merged into formulaDataModel
+                    this._formulaDataModel.mergeFormulaData(formulaData);
                 } else if (command.id === SetFormulaCalculationStartMutation.id) {
                     const params = command.params as ISetFormulaCalculationStartMutation;
 

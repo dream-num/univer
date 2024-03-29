@@ -162,7 +162,7 @@ enum OriginRangeEdgeType {
  *
    2. Use refRange to offset the formula position and return undo/redo data to setRangeValues mutation
         - Redo data: Delete the old value at the old position on the match, and add the new value at the new position (the new value first checks whether the old position has offset content, if so, use the new offset content, if not, take the old value)
-        - Undo data: the old position on the match saves the old value, and the new position is left blank
+        - Undo data: the old position on the match saves the old value, and the new position delete value
 
    3. onCommandExecuted, before formula calculation, use the setRangeValues information to delete the old formulaData, ArrayFormula and ArrayFormulaCellData, and send the worker (complementary setRangeValues after collaborative conflicts, normal operation triggers formula update, undo/redo are captured and processed here)
  */
@@ -199,6 +199,7 @@ export class UpdateFormulaController extends Disposable {
 
                 if (command.id === SetRangeValuesMutation.id) {
                     const params = command.params as ISetRangeValuesMutationParams;
+
                     if (
                         (options && options.onlyLocal === true) ||
                         params.trigger === SetStyleCommand.id ||
@@ -253,25 +254,25 @@ export class UpdateFormulaController extends Disposable {
     private _handleSetRangeValuesMutation(params: ISetRangeValuesMutationParams, options?: IExecutionOptions) {
         const { subUnitId: sheetId, unitId, cellValue } = params;
 
-        if (
-            (options && options.onlyLocal === true) ||
-            params.trigger === SetStyleCommand.id ||
-            params.trigger === SetBorderCommand.id ||
-            params.trigger === ClearSelectionFormatCommand.id ||
-            cellValue == null
-        ) {
+        if (cellValue == null) {
             return;
         }
 
-        this._formulaDataModel.updateFormulaData(unitId, sheetId, cellValue);
+        const newSheetFormulaData = this._formulaDataModel.updateFormulaData(unitId, sheetId, cellValue);
+        const newFormulaData = {
+            [unitId]: {
+                [sheetId]: newSheetFormulaData,
+            },
+        };
+
         this._formulaDataModel.updateArrayFormulaCellData(unitId, sheetId, cellValue);
         this._formulaDataModel.updateArrayFormulaRange(unitId, sheetId, cellValue);
-        this._formulaDataModel.updateNumfmtData(unitId, sheetId, cellValue);
+        this._formulaDataModel.updateNumfmtData(unitId, sheetId, cellValue); // TODO: move model to snapshot
 
         this._commandService.executeCommand(
             SetFormulaDataMutation.id,
             {
-                formulaData: this._formulaDataModel.getFormulaData(),
+                formulaData: newFormulaData,
             },
             {
                 onlyLocal: true,
@@ -402,20 +403,47 @@ export class UpdateFormulaController extends Disposable {
         if (result) {
             const { unitSheetNameMap } = this._formulaDataModel.getCalculateData();
             const oldFormulaData = this._formulaDataModel.getFormulaData();
-            const oldNumfmtItemMap = this._formulaDataModel.getNumfmtItemMap();
+            // const oldNumfmtItemMap = this._formulaDataModel.getNumfmtItemMap();
 
             // change formula reference
-            const { newFormulaData, refRanges } = this._getFormulaReferenceMoveInfo(
+            const { newFormulaData } = this._getFormulaReferenceMoveInfo(
                 oldFormulaData,
                 unitSheetNameMap,
                 result
             );
 
-            // TODO@Dushusir: handle offset formula data
             const { redoFormulaData, undoFormulaData } = refRangeFormula(oldFormulaData, newFormulaData, result);
 
             // console.info('redoFormulaData==', redoFormulaData);
             // console.info('undoFormulaData==', undoFormulaData);
+
+            const { sheetId: subUnitId, unitId } = result;
+            const redoSetRangeValuesMutationParams: ISetRangeValuesMutationParams = {
+                subUnitId,
+                unitId,
+                cellValue: redoFormulaData,
+            };
+
+            const redoMutation = {
+                id: SetRangeValuesMutation.id,
+                params: redoSetRangeValuesMutationParams,
+            };
+
+            const undoSetRangeValuesMutationParams: ISetRangeValuesMutationParams = {
+                subUnitId,
+                unitId,
+                cellValue: undoFormulaData,
+            };
+
+            const undoMutation = {
+                id: SetRangeValuesMutation.id,
+                params: undoSetRangeValuesMutationParams,
+            };
+
+            return {
+                undos: [undoMutation],
+                redos: [redoMutation],
+            };
 
             // const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
             // const unitId = workbook.getUnitId();

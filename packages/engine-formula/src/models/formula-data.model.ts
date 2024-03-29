@@ -116,19 +116,8 @@ export class FormulaDataModel extends Disposable {
             Object.keys(sheetData).forEach((sheetId) => {
                 const cellMatrixData = sheetData[sheetId]; // The runtime data for array formula value calculated by the formula engine.
 
-                let arrayFormulaRangeMatrix = new ObjectMatrix<IRange>(); // Original array formula range.
-
-                let arrayFormulaCellMatrixData = new ObjectMatrix<Nullable<ICellData>>(); // Original array formula cell data.
-
-                if (this._arrayFormulaRange[unitId]?.[sheetId] != null) {
-                    arrayFormulaRangeMatrix = new ObjectMatrix<IRange>(this._arrayFormulaRange[unitId]?.[sheetId]);
-                }
-
-                if (this._arrayFormulaCellData[unitId]?.[sheetId] != null) {
-                    arrayFormulaCellMatrixData = new ObjectMatrix<Nullable<ICellData>>(
-                        this._arrayFormulaCellData[unitId]?.[sheetId]
-                    );
-                }
+                const arrayFormulaRangeMatrix = new ObjectMatrix<IRange>(this._arrayFormulaRange[unitId]?.[sheetId]); // Original array formula range.
+                const arrayFormulaCellMatrixData = new ObjectMatrix<Nullable<ICellData>>(this._arrayFormulaCellData[unitId]?.[sheetId]); // Original array formula cell data.
 
                 /**
                  * If the calculated value of the array formula is updated, clear the values within the original data formula range.
@@ -238,12 +227,7 @@ export class FormulaDataModel extends Disposable {
 
             Object.keys(sheetData).forEach((sheetId) => {
                 const arrayFormula = new ObjectMatrix(sheetData[sheetId]);
-
-                let rangeMatrix = new ObjectMatrix<IRange>();
-
-                if (this._arrayFormulaRange[unitId]?.[sheetId]) {
-                    rangeMatrix = new ObjectMatrix(this._arrayFormulaRange[unitId]?.[sheetId]);
-                }
+                const rangeMatrix = new ObjectMatrix(this._arrayFormulaRange[unitId]?.[sheetId]);
 
                 arrayFormula.forValue((r, c, v) => {
                     rangeMatrix.setValue(r, c, v);
@@ -251,6 +235,37 @@ export class FormulaDataModel extends Disposable {
 
                 if (this._arrayFormulaRange[unitId]) {
                     this._arrayFormulaRange[unitId]![sheetId] = rangeMatrix.getData();
+                }
+            });
+        });
+    }
+
+    mergeFormulaData(formulaData: IFormulaData) {
+        Object.keys(formulaData).forEach((unitId) => {
+            const sheetData = formulaData[unitId];
+
+            if (sheetData == null) {
+                return true;
+            }
+
+            if (!this._formulaData[unitId]) {
+                this._formulaData[unitId] = {};
+            }
+
+            Object.keys(sheetData).forEach((sheetId) => {
+                const sheetFormula = new ObjectMatrix(sheetData[sheetId]);
+                const formulaMatrix = new ObjectMatrix(this._formulaData[unitId]?.[sheetId]);
+
+                sheetFormula.forValue((r, c, v) => {
+                    if (v == null) {
+                        formulaMatrix.realDeleteValue(r, c);
+                    } else {
+                        formulaMatrix.setValue(r, c, v);
+                    }
+                });
+
+                if (this._formulaData[unitId]) {
+                    this._formulaData[unitId]![sheetId] = formulaMatrix.getData();
                 }
             });
         });
@@ -349,6 +364,7 @@ export class FormulaDataModel extends Disposable {
         }
 
         const sheetFormulaDataMatrix = new ObjectMatrix<IFormulaDataItem>(workbookFormulaData[sheetId]);
+        const newSheetFormulaDataMatrix = new ObjectMatrix<IFormulaDataItem | null>();
 
         cellMatrix.forValue((r, c, cell) => {
             const formulaString = cell?.f || '';
@@ -364,8 +380,16 @@ export class FormulaDataModel extends Disposable {
                 });
 
                 formulaIdMap.set(formulaId, { f: formulaString, r, c });
+
+                newSheetFormulaDataMatrix.setValue(r, c, {
+                    f: formulaString,
+                    si: formulaId,
+                });
             } else if (checkFormulaString && !checkFormulaId) {
                 sheetFormulaDataMatrix.setValue(r, c, {
+                    f: formulaString,
+                });
+                newSheetFormulaDataMatrix.setValue(r, c, {
                     f: formulaString,
                 });
             } else if (!checkFormulaString && checkFormulaId) {
@@ -373,17 +397,21 @@ export class FormulaDataModel extends Disposable {
                     f: '',
                     si: formulaId,
                 });
-            } else if (!checkFormulaString && !checkFormulaId && sheetFormulaDataMatrix.getValue(r, c)) {
+            }
+            // When cell is null or cell.f cell.si is null, delete formulaDataItem
+            else if (((cell?.f === null && cell?.si === null) || cell === null) && sheetFormulaDataMatrix.getValue(r, c)) {
                 const currentFormulaInfo = sheetFormulaDataMatrix.getValue(r, c);
                 const f = currentFormulaInfo?.f || '';
                 const si = currentFormulaInfo?.si || '';
 
                 // The id that needs to be offset
+                // When the cell containing the formulas f and si is deleted, f and si lose their association, and f needs to be moved to the next cell containing the same si.
                 if (isFormulaString(f) && isFormulaId(si)) {
                     deleteFormulaIdMap.set(si, f);
                 }
 
                 sheetFormulaDataMatrix.realDeleteValue(r, c);
+                newSheetFormulaDataMatrix.setValue(r, c, null);
             }
         });
 
@@ -400,11 +428,14 @@ export class FormulaDataModel extends Disposable {
                     const f = formulaInfo.f;
                     const x = c - formulaInfo.c;
                     const y = r - formulaInfo.r;
+
                     sheetFormulaDataMatrix.setValue(r, c, { f, si: formulaId, x, y });
+                    newSheetFormulaDataMatrix.setValue(r, c, { f, si: formulaId, x, y });
                 } else if (typeof deleteFormula === 'string') {
                     const x = cell.x || 0;
                     const y = cell.y || 0;
                     const offsetFormula = this._lexerTreeBuilder.moveFormulaRefOffset(deleteFormula, x, y);
+
                     deleteFormulaIdMap.set(formulaId, {
                         r,
                         c,
@@ -412,10 +443,18 @@ export class FormulaDataModel extends Disposable {
                     });
 
                     sheetFormulaDataMatrix.setValue(r, c, { f: offsetFormula, si: formulaId });
+                    newSheetFormulaDataMatrix.setValue(r, c, { f: offsetFormula, si: formulaId });
                 } else if (typeof deleteFormula === 'object') {
                     const x = c - deleteFormula.c;
                     const y = r - deleteFormula.r;
+
                     sheetFormulaDataMatrix.setValue(r, c, {
+                        f: deleteFormula.f,
+                        si: formulaId,
+                        x,
+                        y,
+                    });
+                    newSheetFormulaDataMatrix.setValue(r, c, {
                         f: deleteFormula.f,
                         si: formulaId,
                         x,
@@ -424,6 +463,8 @@ export class FormulaDataModel extends Disposable {
                 }
             }
         });
+
+        return newSheetFormulaDataMatrix.clone();
     }
 
     updateArrayFormulaRange(

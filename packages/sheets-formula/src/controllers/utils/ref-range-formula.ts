@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import type { IRange } from '@univerjs/core';
-import { ObjectMatrix, Tools } from '@univerjs/core';
-import type { IFormulaData } from '@univerjs/engine-formula';
+import type { ICellData, IObjectMatrixPrimitiveType, IRange, Nullable } from '@univerjs/core';
+import { cellToRange, Direction, isFormulaId, isFormulaString, ObjectMatrix } from '@univerjs/core';
+import type { IFormulaData, IFormulaDataItem } from '@univerjs/engine-formula';
+import { EffectRefRangId, handleInsertCol, runRefRangeMutations } from '@univerjs/sheets';
+import { checkFormulaDataNull } from './offset-formula-data';
 
 export enum FormulaReferenceMoveType {
     MoveRange, // range
@@ -44,6 +46,11 @@ export interface IFormulaReferenceMoveParam {
     sheetName?: string;
 }
 
+interface IRangeChange {
+    oldCell: IRange;
+    newCell: IRange;
+}
+
 /**
  * For different Command operations, it may be necessary to perform traversal in reverse or in forward order, so first determine the type of Command and then perform traversal.
  * @param oldFormulaData
@@ -69,7 +76,7 @@ export function refRangeFormula(oldFormulaData: IFormulaData,
     } else if (type === FormulaReferenceMoveType.InsertRow) {
         // TODO
     } else if (type === FormulaReferenceMoveType.InsertColumn) {
-        return handleInsertCol(oldFormulaData, newFormulaData, formulaReferenceMoveParam);
+        return handleRefInsertCol(oldFormulaData, newFormulaData, formulaReferenceMoveParam);
     } else if (type === FormulaReferenceMoveType.RemoveRow) {
         // TODO
     } else if (type === FormulaReferenceMoveType.RemoveColumn) {
@@ -90,53 +97,161 @@ export function refRangeFormula(oldFormulaData: IFormulaData,
     };
 }
 
-function handleInsertCol(oldFormulaData: IFormulaData,
+function handleRefInsertCol(oldFormulaData: IFormulaData,
     newFormulaData: IFormulaData,
     formulaReferenceMoveParam: IFormulaReferenceMoveParam) {
-    const redoFormulaData = {};
-    const undoFormulaData = {};
+    let redoFormulaData: IObjectMatrixPrimitiveType<Nullable<ICellData>> = {};
+    let undoFormulaData: IObjectMatrixPrimitiveType<Nullable<ICellData>> = {};
 
     const { type, unitId, sheetId, range, from, to } = formulaReferenceMoveParam;
 
-    if (!Tools.isDefine(oldFormulaData)) {
+    if (range === undefined) {
         return {
             redoFormulaData,
             undoFormulaData,
         };
     }
 
-    const formulaDataKeys = Object.keys(oldFormulaData);
-
-    if (formulaDataKeys.length === 0) {
+    if (checkFormulaDataNull(oldFormulaData, unitId, sheetId)) {
         return {
             redoFormulaData,
             undoFormulaData,
         };
     }
 
-    const rangeList = [];
+    const currentOldFormulaData = oldFormulaData[unitId]![sheetId];
+    const currentNewFormulaData = newFormulaData[unitId]![sheetId];
 
-    for (const unitId of formulaDataKeys) {
-        const sheetData = oldFormulaData[unitId];
+    const oldFormulaMatrix = new ObjectMatrix(currentOldFormulaData);
+    const newFormulaMatrix = new ObjectMatrix(currentNewFormulaData);
 
-        if (sheetData == null) {
-            continue;
+    // When undoing and redoing, the traversal order may be different. Record the range list of all single formula offsets, and then retrieve the traversal as needed.
+    const rangeList: IRangeChange[] = [];
+
+    oldFormulaMatrix.forValue((row, column, cell) => {
+        const formulaString = cell?.f || '';
+        const formulaId = cell?.si || '';
+
+        const checkFormulaString = isFormulaString(formulaString);
+        const checkFormulaId = isFormulaId(formulaId);
+
+        // Offset is only needed when there is a formula
+        if (!checkFormulaString && !checkFormulaId) {
+            return;
         }
 
-        const sheetDataKeys = Object.keys(sheetData);
-        for (const sheetId of sheetDataKeys) {
-            const matrixData = new ObjectMatrix(sheetData[sheetId]);
+        const oldCell = cellToRange(row, column);
 
-            matrixData.forValue((row, column, formulaDataItem) => {
-                if (!formulaDataItem) return true;
+        const operators = handleInsertCol(
+            {
+                id: EffectRefRangId.InsertColCommandId,
+                params: { range, unitId: '', subUnitId: '', direction: Direction.RIGHT },
+            },
+            oldCell
+        );
 
-                const { f: formulaString, x, y, si } = formulaDataItem;
-            });
+        const newCell = runRefRangeMutations(operators, oldCell);
+
+        if (newCell == null) {
+            return;
         }
-    }
+
+        rangeList.push({
+            oldCell,
+            newCell,
+        });
+    });
+
+    redoFormulaData = getRedoFormulaData(rangeList.reverse(), oldFormulaMatrix, newFormulaMatrix);
+    undoFormulaData = getUndoFormulaData(rangeList, oldFormulaMatrix, newFormulaMatrix);
 
     return {
         redoFormulaData,
         undoFormulaData,
     };
+}
+
+/**
+ * Delete the old value at the old position on the match, and add the new value at the new position (the new value first checks whether the old position has offset content, if so, use the new offset content, if not, take the old value)
+ * @param rangeList
+ * @param oldFormulaData
+ * @param newFormulaData
+ */
+function getRedoFormulaData(rangeList: IRangeChange[], oldFormulaMatrix: ObjectMatrix<IFormulaDataItem>, newFormulaMatrix: ObjectMatrix<IFormulaDataItem>) {
+    const redoFormulaData = new ObjectMatrix<ICellData | null>({});
+
+    rangeList.forEach((item) => {
+        const { oldCell, newCell } = item;
+
+        const { startRow: oldStartRow, startColumn: oldStartColumn } = oldCell;
+        const { startRow: newStartRow, startColumn: newStartColumn } = newCell;
+
+        const newFormula = newFormulaMatrix.getValue(oldStartRow, oldStartColumn) || oldFormulaMatrix.getValue(oldStartRow, oldStartColumn);
+        const newValue = formulaDataItemToCellData(newFormula);
+
+        redoFormulaData.setValue(newStartRow, newStartColumn, newValue);
+        redoFormulaData.setValue(oldStartRow, oldStartColumn, null);
+    });
+
+    return redoFormulaData.clone();
+}
+
+/**
+ * The old position on the match saves the old value, and the new position delete value（for formulaData）
+ * @param rangeList
+ * @param oldFormulaData
+ * @param newFormulaData
+ */
+function getUndoFormulaData(rangeList: IRangeChange[], oldFormulaMatrix: ObjectMatrix<IFormulaDataItem>, newFormulaMatrix: ObjectMatrix<IFormulaDataItem>) {
+    const undoFormulaData = new ObjectMatrix<ICellData | null>({});
+
+    rangeList.forEach((item) => {
+        const { oldCell, newCell } = item;
+
+        const { startRow: oldStartRow, startColumn: oldStartColumn } = oldCell;
+        const { startRow: newStartRow, startColumn: newStartColumn } = newCell;
+
+        const oldFormula = oldFormulaMatrix.getValue(oldStartRow, oldStartColumn);
+        const oldValue = formulaDataItemToCellData(oldFormula);
+
+        // When undoing, setRangeValues is executed before the position changes, so we must store the old value in the new position so that the old value can be restored to the correct position after the snapshot position changes.
+
+        // For formulaData, it should be necessary to restore the old value at the old position and delete the value at the new position, which is the opposite of the situation in undo, so we set a position exchange information in the mutation information of undo, and identify and process it in the update logic of formulaData.
+        undoFormulaData.setValue(oldStartRow, oldStartColumn, null);
+        undoFormulaData.setValue(newStartRow, newStartColumn, oldValue);
+    });
+
+    return undoFormulaData.clone();
+}
+
+/**
+ * Transfer the formulaDataItem to the cellData
+ * ┌────────────────────────────────┬─────────────────┐
+ * │        IFormulaDataItem        │     ICellData   │
+ * ├──────────────────┬─────┬───┬───┼───────────┬─────┤
+ * │ f                │ si  │ x │ y │ f         │ si  │
+ * ├──────────────────┼─────┼───┼───┼───────────┼─────┤
+ * │ =SUM(1)          │     │   │   │ =SUM(1)   │     │
+ * │                  │ id1 │   │   │           │ id1 │
+ * │ =SUM(1)          │ id1 │   │   │ =SUM(1)   │ id1 │
+ * │ =SUM(1)          │ id1 │ 0 │ 0 │ =SUM(1)   │ id1 │
+ * │ =SUM(1)          │ id1 │ 0 │ 1 │           │ id1 │
+ * └──────────────────┴─────┴───┴───┴───────────┴─────┘
+ */
+export function formulaDataItemToCellData(formulaDataItem: IFormulaDataItem): ICellData {
+    const { f, si, x = 0, y = 0 } = formulaDataItem;
+    const checkFormulaString = isFormulaString(f);
+    const checkFormulaId = isFormulaId(si);
+
+    const cellData: ICellData = {};
+
+    if (checkFormulaId) {
+        cellData.si = si;
+    }
+
+    if (checkFormulaString && x === 0 && y === 0) {
+        cellData.f = f;
+    }
+
+    return cellData;
 }

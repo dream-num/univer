@@ -278,12 +278,10 @@ function _getMaxBoundingBox(glyph: IDocumentSkeletonGlyph, bulletSkeleton: IDocu
 export function glyphShrinkRight(glyph: IDocumentSkeletonGlyph, amount: number) {
     glyph.width -= amount;
     glyph.adjustability.shrinkability[1] -= amount;
-    glyph.adjustability.stretchability[1] += amount;
 }
 
 export function glyphShrinkLeft(glyph: IDocumentSkeletonGlyph, amount: number) {
     glyph.width -= amount;
     glyph.xOffset -= amount;
     glyph.adjustability.shrinkability[0] -= amount;
-    glyph.adjustability.stretchability[0] += amount;
 }

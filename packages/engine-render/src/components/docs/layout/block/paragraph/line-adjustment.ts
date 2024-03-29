@@ -18,7 +18,7 @@ import type { IParagraph } from '@univerjs/core';
 import { HorizontalAlign } from '@univerjs/core';
 import type { IDocumentSkeletonDivide, IDocumentSkeletonLine, IDocumentSkeletonPage } from '../../../../../basics/i-document-skeleton-cached';
 import { getGlyphGroupWidth, lineIterator } from '../../tools';
-import { setGlyphGroupLeft } from '../../model/glyph';
+import { glyphShrinkLeft, glyphShrinkRight, setGlyphGroupLeft } from '../../model/glyph';
 import { hasCJK, hasCJKText, isCjkLeftAlignedPunctuation, isCjkRightAlignedPunctuation } from '../../../../../basics/tools';
 
 // How much a character should hang into the end margin.
@@ -219,16 +219,13 @@ function shrinkStartAndEndCJKPunctuation(line: IDocumentSkeletonLine) {
         if (isCjkRightAlignedPunctuation(firstGlyph.content)) {
             const shrinkAmount = firstGlyph.adjustability.shrinkability[0];
 
-            firstGlyph.width -= shrinkAmount;
-            firstGlyph.adjustability.shrinkability[0] -= shrinkAmount;
-            firstGlyph.xOffset -= shrinkAmount;
+            glyphShrinkLeft(firstGlyph, shrinkAmount);
         }
 
         if (isCjkLeftAlignedPunctuation(lastGlyph.content)) {
             const shrinkAmount = lastGlyph.adjustability.shrinkability[1];
 
-            lastGlyph.width -= shrinkAmount;
-            lastGlyph.adjustability.shrinkability[1] -= shrinkAmount;
+            glyphShrinkRight(lastGlyph, shrinkAmount);
         }
     }
 }

@@ -29,7 +29,7 @@ import { CutContentCommand, InnerPasteCommand } from '@univerjs/docs';
 import { DocCopyCommand, DocCutCommand, DocPasteCommand, whenDocOrEditor } from '../commands/commands/clipboard.command';
 import { IDocClipboardService } from '../services/clipboard/clipboard.service';
 
-@OnLifecycle(LifecycleStages.Steady, DocClipboardController)
+@OnLifecycle(LifecycleStages.Rendered, DocClipboardController)
 export class DocClipboardController extends RxDisposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,

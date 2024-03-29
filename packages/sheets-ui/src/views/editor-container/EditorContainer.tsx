@@ -20,6 +20,7 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 
 import { IEditorService, TextEditor } from '@univerjs/ui';
+import { FIX_ONE_PIXEL_BLUR_OFFSET } from '@univerjs/engine-render';
 import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';
 import styles from './index.module.less';
 
@@ -81,10 +82,10 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
                 });
             } else {
                 setState({
-                    width: endX - startX,
-                    height: endY - startY,
-                    left: startX,
-                    top: startY,
+                    width: endX - startX - FIX_ONE_PIXEL_BLUR_OFFSET * 2,
+                    height: endY - startY - FIX_ONE_PIXEL_BLUR_OFFSET * 2,
+                    left: startX + FIX_ONE_PIXEL_BLUR_OFFSET,
+                    top: startY + FIX_ONE_PIXEL_BLUR_OFFSET,
                 });
 
                 const editor = editorService.getEditor(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);

@@ -20,7 +20,7 @@ import { ILogService } from '../services/log/log.service';
 import type { Nullable } from '../shared';
 import { Tools } from '../shared';
 import { Disposable } from '../shared/lifecycle';
-import { DEFAULT_RANGE_ARRAY, DEFAULT_WORKBOOK } from '../types/const';
+import { DEFAULT_RANGE_ARRAY } from '../types/const';
 import { BooleanNumber } from '../types/enum';
 import type {
     IColumnStartEndData,
@@ -34,6 +34,7 @@ import type {
 } from '../types/interfaces';
 import { Styles } from './styles';
 import { Worksheet } from './worksheet';
+import { getEmptySnapshot } from './empty-snapshot';
 
 export function getWorksheetUID(workbook: Workbook, worksheet: Worksheet): string {
     return `${workbook.getUnitId()}|${worksheet.getSheetId()}`;
@@ -87,7 +88,12 @@ export class Workbook extends Disposable {
     ) {
         super();
 
-        this._snapshot = Tools.commonExtend(DEFAULT_WORKBOOK, workbookData);
+        const DEFAULT_WORKBOOK = getEmptySnapshot();
+        if (Tools.isEmptyObject(workbookData)) {
+            this._snapshot = DEFAULT_WORKBOOK;
+        } else {
+            this._snapshot = Tools.commonExtend(DEFAULT_WORKBOOK, workbookData);
+        }
 
         const { styles } = this._snapshot;
         if (this._snapshot.id == null || this._snapshot.id.length === 0) {

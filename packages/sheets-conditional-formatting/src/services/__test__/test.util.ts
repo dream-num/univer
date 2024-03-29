@@ -97,7 +97,7 @@ export const createTestBed = (dependencies?: Dependency[]) => {
 
     const univerInstanceService = injector.get(IUniverInstanceService);
     const commandService = injector.get(ICommandService);
-    [...SheetsConditionalFormattingPlugin.commandList, ...SheetsConditionalFormattingPlugin.mutationList].forEach((commandInfo) => {
+    [...SheetsConditionalFormattingPlugin.mutationList].forEach((commandInfo) => {
         commandService.registerCommand(commandInfo);
     });
     const unitId = workbookJson.id;

@@ -47,8 +47,14 @@ export class SetDefinedNameController extends Disposable {
                     if (params == null) {
                         return;
                     }
-                    const { unitId, name, formulaOrRefString } = params;
-                    this._definedNamesService.registerDefinedName(unitId, name, formulaOrRefString);
+                    const { unitId, name, formulaOrRefString, comment, hidden, localSheetId } = params;
+                    this._definedNamesService.registerDefinedName(unitId, {
+                        name,
+                        formulaOrRefString,
+                        comment,
+                        hidden,
+                        localSheetId,
+                    });
                 } else if (command.id === RemoveDefinedNameMutation.id) {
                     const params = command.params as ISetDefinedNameMutationSearchParam;
                     if (params == null) {

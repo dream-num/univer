@@ -21,7 +21,7 @@ import { Inject, Injector } from '@wendellhu/redi';
 import type { IFunctionNames } from '../basics/function';
 import { RegisterFunctionMutation } from '../commands/mutations/register-function.mutation';
 import { SetArrayFormulaDataMutation } from '../commands/mutations/set-array-formula-data.mutation';
-import { RemoveDefinedNameMutation, SetDefinedNameMutation } from '../commands/mutations/set-defined-name.mutation';
+import { RemoveDefinedNameMutation, SetDefinedNameCurrentMutation, SetDefinedNameMutation } from '../commands/mutations/set-defined-name.mutation';
 import {
     RemoveFeatureCalculationMutation,
     SetFeatureCalculationMutation,
@@ -90,6 +90,7 @@ export class FormulaController extends Disposable {
 
             SetDefinedNameMutation,
             RemoveDefinedNameMutation,
+            SetDefinedNameCurrentMutation,
             SetFeatureCalculationMutation,
             RemoveFeatureCalculationMutation,
 

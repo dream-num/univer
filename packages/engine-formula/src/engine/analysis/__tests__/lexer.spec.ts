@@ -94,7 +94,7 @@ describe('lexer nodeMaker test', () => {
 
     describe('lexer definedName', () => {
         it('simple', () => {
-            definedNamesService.registerDefinedName('test', 'myName', '$A$10:$C$100');
+            definedNamesService.registerDefinedName('test', { name: 'myName', formulaOrRefString: '$A$10:$C$100' });
 
             const node = lexer.treeBuilder('=myName') as LexerNode;
 
@@ -104,7 +104,7 @@ describe('lexer nodeMaker test', () => {
         });
 
         it('lambda', () => {
-            definedNamesService.registerDefinedName('test', 'myName', 'lambda(x, y , x*x*y)');
+            definedNamesService.registerDefinedName('test', { name: 'myName', formulaOrRefString: 'lambda(x, y , x*x*y)' });
 
             const node = lexer.treeBuilder('=myName(1+sum(A1:B1), 100)') as LexerNode;
 

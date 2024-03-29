@@ -498,6 +498,11 @@ const locale: typeof zhCN = {
         managerDescription: 'Create a defined name by selecting cells or formulas, and entering the desired name into the text box.',
         addButton: 'Add a defined name',
         featureTitle: 'Defined names',
+        ratioRange: 'Range',
+        ratioFormula: 'Formula',
+        confirm: 'Confirm',
+        cancel: 'Cancel',
+        scopeWorkbook: 'Workbook',
     },
 };
 

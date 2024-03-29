@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-import type { IMutation } from '@univerjs/core';
+import type { IMutation, IRange } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
+import type { IAccessor } from '@wendellhu/redi';
+import { IDefinedNamesService } from '../../services/defined-names.service';
 
 export interface ISetDefinedNameMutationSearchParam {
     unitId: string;
@@ -24,6 +26,9 @@ export interface ISetDefinedNameMutationSearchParam {
 
 export interface ISetDefinedNameMutationParam extends ISetDefinedNameMutationSearchParam {
     formulaOrRefString: string;
+    comment?: string;
+    localSheetId?: string;
+    hidden?: boolean;
 }
 /**
  * In the formula engine, the mutation is solely responsible for communication between the worker and the main thread.
@@ -39,4 +44,25 @@ export const RemoveDefinedNameMutation: IMutation<ISetDefinedNameMutationSearchP
     id: 'formula.mutation.remove-defined-name',
     type: CommandType.MUTATION,
     handler: () => true,
+};
+
+export interface ISetDefinedNameCurrentMutationParam {
+    unitId: string;
+    sheetId: string;
+    range: IRange;
+};
+
+export const SetDefinedNameCurrentMutation: IMutation<ISetDefinedNameCurrentMutationParam> = {
+    id: 'formula.mutation.set-defined-name-current',
+    type: CommandType.MUTATION,
+    handler: (accessor: IAccessor, params: ISetDefinedNameCurrentMutationParam) => {
+        const definedNamesService = accessor.get(IDefinedNamesService);
+        const { unitId, sheetId, range } = params;
+        definedNamesService.setCurrentRange({
+            range,
+            unitId,
+            sheetId,
+        });
+        return true;
+    },
 };

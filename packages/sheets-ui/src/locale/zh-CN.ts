@@ -493,6 +493,11 @@ const locale = {
         managerDescription: '通过选择单元格或公式，并在文本框中输入您想要的名称来创建一个定义名称。',
         addButton: '新建名称',
         featureTitle: '定义名称',
+        ratioRange: '范围',
+        ratioFormula: '公式',
+        confirm: '确认',
+        cancel: '取消',
+        scopeWorkbook: '工作簿',
     },
 };
 

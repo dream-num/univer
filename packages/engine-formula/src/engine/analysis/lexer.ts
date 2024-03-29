@@ -62,7 +62,7 @@ export class Lexer extends Disposable {
             if (nodeType === sequenceNodeType.REFERENCE || nodeType === sequenceNodeType.FUNCTION) {
                 const definedContent = this._definedNamesService.getDefinedNameMap(unitId)?.get(token);
                 if (definedContent) {
-                    sequenceString += definedContent;
+                    sequenceString += definedContent.formulaOrRefString;
                     hasDefinedName = true;
                 } else {
                     sequenceString += token;

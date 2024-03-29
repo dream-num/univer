@@ -17,29 +17,22 @@
 import React, { useState } from 'react';
 
 import { RangeSelector, TextEditor } from '@univerjs/ui';
-import { IUniverInstanceService } from '@univerjs/core';
+import { IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import { Input } from '@univerjs/design';
-
-const containerStyle: React.CSSProperties = {
-    position: 'absolute',
-    left: '10px',
-    top: '300px',
-    width: 'calc(100% - 20px)',
-    height: 'calc(100% - 300px)',
-};
-
-const editorStyle: React.CSSProperties = {
-    width: '100%',
-};
+import { IncreaseSingle } from '@univerjs/icons';
+import { Radio, RadioGroup } from '@univerjs/design';
+import styles from './index.module.less';
 
 /**
  * Floating editor's container.
- * @returns
  */
 export const DefinedNameContainer = () => {
     const univerInstanceService = useDependency(IUniverInstanceService);
     const workbook = univerInstanceService.getCurrentUniverSheetInstance();
+    const localeService = useDependency(LocaleService);
+
+    const [editState, setEditState] = useState(false);
+
     if (workbook == null) {
         return;
     }
@@ -49,12 +42,15 @@ export const DefinedNameContainer = () => {
     const sheetId = workbook.getActiveSheet().getSheetId();
 
     return (
-        <div
-            style={containerStyle}
-        >
-            <TextEditor id="test-editor-2" placeholder="please input value" openForSheetUnitId={unitId} openForSheetSubUnitId={sheetId} onlyInputFormula={true} style={editorStyle} canvasStyle={{ fontSize: 10 }} />
-            <br></br>
-            <TextEditor id="test-editor-3" placeholder="please input value" openForSheetUnitId={unitId} openForSheetSubUnitId={sheetId} onlyInputRange={true} style={editorStyle} canvasStyle={{ fontSize: 10 }} />
-        </div>
+        <>
+            <div style={{ display: editState ? 'none' : 'unset' }}>
+                <div className={styles.definedNameContainerAddButton}>
+                    <IncreaseSingle />
+                    <span className={styles.definedNameContainerAddButtonText}>{localeService.t('definedName.addButton')}</span>
+                </div>
+            </div>
+
+        </>
+
     );
 };

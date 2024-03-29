@@ -21,12 +21,21 @@ import type { Observable } from 'rxjs';
 import { Subject } from 'rxjs';
 import { serializeRange, serializeRangeToRefString, serializeRangeWithSheet } from '../engine/utils/reference';
 
+export interface IDefinedNamesServiceParam {
+    name: string;
+    formulaOrRefString: string;
+    comment?: string;
+    localSheetId?: string;
+    hidden?: boolean;
+
+}
+
 export interface IDefinedNamesService {
-    registerDefinedName(unitId: string, name: string, formulaOrRefString: string): void;
+    registerDefinedName(unitId: string, param: IDefinedNamesServiceParam): void;
 
-    getDefinedNameMap(unitId: string): Nullable<Map<string, string>>;
+    getDefinedNameMap(unitId: string): Nullable<Map<string, IDefinedNamesServiceParam>>;
 
-    getValue(unitId: string, name: string): Nullable<string>;
+    getValue(unitId: string, name: string): Nullable<IDefinedNamesServiceParam>;
 
     removeDefinedName(unitId: string, name: string): void;
 
@@ -43,7 +52,7 @@ export interface IDefinedNamesService {
 
 export class DefinedNamesService extends Disposable implements IDefinedNamesService {
     // 18.2.6 definedNames (Defined Names)
-    private _definedNameMap: Map<string, Map<string, string>> = new Map();
+    private _definedNameMap: Map<string, Map<string, IDefinedNamesServiceParam>> = new Map();
 
     private _currentRange: IUnitRange = { unitId: '', sheetId: '', range: {
         startRow: 0,
@@ -72,14 +81,14 @@ export class DefinedNamesService extends Disposable implements IDefinedNamesServ
         return serializeRange(this._currentRange.range);
     }
 
-    registerDefinedName(unitId: string, name: string, formulaOrRefString: string) {
+    registerDefinedName(unitId: string, param: IDefinedNamesServiceParam) {
         const unitMap = this._definedNameMap.get(unitId);
 
         if (unitMap == null) {
             this._definedNameMap.set(unitId, new Map());
         }
 
-        this._definedNameMap.get(unitId)?.set(name, formulaOrRefString);
+        this._definedNameMap.get(unitId)?.set(param.name, param);
     }
 
     removeDefinedName(unitId: string, name: string) {

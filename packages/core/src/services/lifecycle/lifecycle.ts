@@ -60,12 +60,13 @@ export const LifecycleToModules = new Map<LifecycleStages, Array<DependencyIdent
  *
  *
  * @example
- * // Ignore the `\` below. This js JSDoc's bug.
+ * // Ignore the `\` below. This is JSDoc's bug.
  * \@OnLifecycle(LifecycleStages.Ready, MyService)
  * class MyService {
  * }
  *
  * @example
+ * // Ignore the `\` below. This is JSDoc's bug.
  * \@OnLifecycle(LifecycleStages.Rendered, IMyService)
  * class MyService implements IMyService {
  * }

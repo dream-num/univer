@@ -87,7 +87,7 @@ export class Workbook extends Disposable {
     ) {
         super();
 
-        this._snapshot = Tools.commonExtend(DEFAULT_WORKBOOK, workbookData);
+        this._snapshot = Tools.deepClone(Tools.commonExtend(DEFAULT_WORKBOOK, workbookData));
 
         const { styles } = this._snapshot;
         if (this._snapshot.id == null || this._snapshot.id.length === 0) {

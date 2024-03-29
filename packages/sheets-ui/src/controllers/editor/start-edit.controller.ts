@@ -248,6 +248,7 @@ export class StartEditController extends Disposable {
             offsetTop = offsetTop < (paddingData.t || 0) ? paddingData.t || 0 : offsetTop;
 
             documentDataModel.updateDocumentDataMargin({
+                ...paddingData,
                 t: offsetTop,
             });
         }

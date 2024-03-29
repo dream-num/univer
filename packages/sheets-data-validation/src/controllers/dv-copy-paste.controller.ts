@@ -19,6 +19,7 @@ import { Disposable, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLi
 import { COPY_TYPE, getRepeatRange, ISheetClipboardService, PREDEFINED_HOOK_NAME } from '@univerjs/sheets-ui';
 import { Inject } from '@wendellhu/redi';
 import { DataValidationModel } from '@univerjs/data-validation';
+import { SPECIAL_PASTE_FORMULA } from '@univerjs/sheets-formula/commands/commands/formula-clipboard.command.js';
 import type { SheetDataValidationManager } from '../models/sheet-data-validation-manager';
 import { DATA_VALIDATION_PLUGIN_NAME } from '../common/const';
 import { getDataValidationDiffMutations } from '../commands/commands/data-validation.command';
@@ -100,7 +101,12 @@ export class DataValidationCopyPasteController extends Disposable {
         }
 
         if (
-            [PREDEFINED_HOOK_NAME.SPECIAL_PASTE_COL_WIDTH, PREDEFINED_HOOK_NAME.SPECIAL_PASTE_VALUE].includes(
+            [
+                PREDEFINED_HOOK_NAME.SPECIAL_PASTE_COL_WIDTH,
+                PREDEFINED_HOOK_NAME.SPECIAL_PASTE_VALUE,
+                PREDEFINED_HOOK_NAME.SPECIAL_PASTE_FORMAT,
+                SPECIAL_PASTE_FORMULA,
+            ].includes(
                 copyInfo.pasteType
             )
         ) {

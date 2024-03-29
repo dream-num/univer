@@ -43,7 +43,8 @@ export function DateDropdown(props: IDropdownComponentProps) {
     }
 
     const cellStr = getCellValueOrigin(cellData);
-    const date = validator.transformDate(cellStr) ?? dayjs();
+    const originDate = validator.transformDate(cellStr) ?? dayjs();
+    const date = originDate.isValid() ? originDate : dayjs();
 
     return (
         <div className={styles.dvDateDropdown}>

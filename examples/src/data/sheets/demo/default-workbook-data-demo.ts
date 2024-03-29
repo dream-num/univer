@@ -115,19 +115,19 @@ const dataValidation = [
     //     formula1: '111',
     //     errorStyle: DataValidationErrorStyle.STOP,
     // },
-    // {
-    //     uid: 'xxx-0',
-    //     type: DataValidationType.DATE,
-    //     ranges: [{
-    //         startRow: 0,
-    //         endRow: 5,
-    //         startColumn: 3,
-    //         endColumn: 5,
-    //     }],
-    //     operator: DataValidationOperator.GREATER_THAN,
-    //     formula1: '2024/03/23',
-    //     errorStyle: DataValidationErrorStyle.STOP,
-    // },
+    {
+        uid: 'xxx-0',
+        type: DataValidationType.DATE,
+        ranges: [{
+            startRow: 0,
+            endRow: 5,
+            startColumn: 3,
+            endColumn: 5,
+        }],
+        operator: DataValidationOperator.GREATER_THAN,
+        formula1: '100',
+        errorStyle: DataValidationErrorStyle.STOP,
+    },
     {
         uid: 'xxx-2',
         type: DataValidationType.CHECKBOX,

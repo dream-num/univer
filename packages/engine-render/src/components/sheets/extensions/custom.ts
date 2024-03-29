@@ -47,6 +47,10 @@ export class Custom extends SheetExtension {
                     return true;
                 }
 
+                if (primaryWithCoord.isMerged && !primaryWithCoord.isMergedMainCell) {
+                    return;
+                }
+
                 // current cell is hidden
                 if (!worksheet.getColVisible(col) || !worksheet.getRowVisible(row)) {
                     return;

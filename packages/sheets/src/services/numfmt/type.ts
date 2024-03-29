@@ -76,4 +76,4 @@ export interface ISnapshot {
 }
 
 export const INumfmtService = createIdentifier<INumfmtService>('INumfmtService');
-runOnLifecycle(LifecycleStages.Rendered, INumfmtService);
+runOnLifecycle(LifecycleStages.Ready, INumfmtService);

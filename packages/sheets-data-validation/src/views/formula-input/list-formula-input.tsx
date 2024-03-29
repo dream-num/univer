@@ -303,7 +303,6 @@ export function ListFormulaInput(props: IFormulaInputProps) {
                             }
                         }}
                         isSingleChoice
-
                     />
                     <div ref={containerRef}>
                         <DraggableList

@@ -106,7 +106,7 @@ export abstract class BaseDataValidator<DataType = CellValue> {
     }
 
     getRuleFinalError(rule: IDataValidationRule) {
-        if (rule.error) {
+        if (rule.showInputMessage && rule.error) {
             return rule.error;
         }
 

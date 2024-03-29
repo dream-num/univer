@@ -92,9 +92,13 @@ export const DataValidationList = memo(() => {
                 />
             ))}
             <div className={styles.dataValidationListButtons}>
-                <Button className={styles.dataValidationListButton} onClick={handleRemoveAll}>
-                    {localeService.t('dataValidation.panel.removeAll')}
-                </Button>
+                {rules.length
+                    ? (
+                        <Button className={styles.dataValidationListButton} onClick={handleRemoveAll}>
+                            {localeService.t('dataValidation.panel.removeAll')}
+                        </Button>
+                    )
+                    : null}
                 <Button className={styles.dataValidationListButton} type="primary" onClick={handleAddRule}>
                     {localeService.t('dataValidation.panel.add')}
                 </Button>

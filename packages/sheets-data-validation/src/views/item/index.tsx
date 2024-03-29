@@ -17,7 +17,7 @@
 import { ICommandService, type ISheetDataValidationRule } from '@univerjs/core';
 import { DataValidatorRegistryService, RemoveDataValidationCommand } from '@univerjs/data-validation';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { serializeRange } from '@univerjs/engine-formula';
 import { DeleteSingle } from '@univerjs/icons';
 import { IMarkSelectionService } from '@univerjs/sheets-ui';
@@ -37,6 +37,7 @@ export const DataValidationItem = (props: IDataValidationDetailProps) => {
     const markSelectionService = useDependency(IMarkSelectionService);
     const validator = validatorRegistry.getValidatorItem(rule.type);
     const ids = useRef<(string | null)[]>();
+    const [isHover, setIsHover] = useState(false);
     const handleDelete = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
         commandService.executeCommand(RemoveDataValidationCommand.id, {
             ruleId: rule.uid,
@@ -61,6 +62,7 @@ export const DataValidationItem = (props: IDataValidationDetailProps) => {
             className={styles.dataValidationItemContainer}
             onClick={onClick}
             onMouseEnter={() => {
+                setIsHover(true);
                 ids.current = rule.ranges.map((range) => markSelectionService.addShape({
                     range,
                     style: {
@@ -83,6 +85,7 @@ export const DataValidationItem = (props: IDataValidationDetailProps) => {
                 }));
             }}
             onMouseLeave={() => {
+                setIsHover(false);
                 ids.current?.forEach((id) => {
                     id && markSelectionService.removeShape(id);
                 });
@@ -95,9 +98,13 @@ export const DataValidationItem = (props: IDataValidationDetailProps) => {
             <div className={styles.dataValidationItemContent}>
                 {rule.ranges.map((range) => serializeRange(range)).join(',')}
             </div>
-            <div className={styles.dataValidationItemIcon} onClick={handleDelete}>
-                <DeleteSingle />
-            </div>
+            {isHover
+                ? (
+                    <div className={styles.dataValidationItemIcon} onClick={handleDelete}>
+                        <DeleteSingle />
+                    </div>
+                )
+                : null}
         </div>
     );
 };

@@ -16,6 +16,11 @@
             font-size: 16px;
             cursor: pointer;
             margin-left: 4px;
+            border-radius: 4px;
+        }
+
+        &-icon:hover {
+            background: rgba(var(--grey-100));
         }
 
         &-drag {
@@ -24,13 +29,14 @@
     }
 
     &-list-add {
-        color: rgba(var(--blue-500));
+        color: #274fee;
         font-size: 13px;
         font-weight: 400;
         cursor: pointer;
         display: flex;
         flex-direction: row;
         align-items: center;
+        border-radius: 4px;
 
         svg {
             margin-right: 4px;
@@ -68,5 +74,6 @@
         height: 16px;
         box-sizing: border-box;
         font-size: 16px;
+        margin-top: 2px;
     }
 }

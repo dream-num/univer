@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle, Range, Rectangle } from '@univerjs/core';
+import { Disposable, LifecycleStages, OnLifecycle, Range, Rectangle } from '@univerjs/core';
 import type { ISheetAutoFillHook } from '@univerjs/sheets-ui';
 import { APPLY_TYPE, getAutoFillRepeatRange, IAutoFillService } from '@univerjs/sheets-ui';
 import { Inject } from '@wendellhu/redi';
@@ -28,7 +28,6 @@ import { getDataValidationDiffMutations } from '../commands/commands/data-valida
 export class DataValidationAutoFillController extends Disposable {
     constructor(
         @IAutoFillService private readonly _autoFillService: IAutoFillService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(DataValidationModel) private readonly _dataValidationModel: DataValidationModel
     ) {
         super();

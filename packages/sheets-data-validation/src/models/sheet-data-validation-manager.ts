@@ -40,6 +40,9 @@ export type RangeMutation = {
     type: 'delete';
     rule: ISheetDataValidationRule;
     index: number;
+} | {
+    type: 'add';
+    rule: ISheetDataValidationRule;
 };
 
 export class RuleMatrix {
@@ -124,6 +127,46 @@ export class RuleMatrix {
                 });
                 deleteIndex++;
             }
+        });
+
+        return mutations;
+    }
+
+    diffWithAddition(rules: ISheetDataValidationRule[], additionRules: Set<ISheetDataValidationRule>) {
+        const mutations: RangeMutation[] = [];
+        let deleteIndex = 0;
+        rules.forEach((rule, index) => {
+            const newRanges = queryObjectMatrix(this.value, (ruleId) => ruleId === rule.uid);
+            const oldRanges = rule.ranges;
+
+            if (newRanges.length !== oldRanges.length || newRanges.some((range, i) => !Rectangle.equals(range, oldRanges[i]))) {
+                mutations.push({
+                    type: 'update',
+                    ruleId: rule.uid,
+                    oldRanges,
+                    newRanges,
+                });
+            }
+
+            if (newRanges.length === 0) {
+                mutations.push({
+                    type: 'delete',
+                    rule,
+                    index: index - deleteIndex,
+                });
+                deleteIndex++;
+            }
+        });
+
+        additionRules.forEach((rule) => {
+            const newRanges = queryObjectMatrix(this.value, (ruleId) => ruleId === rule.uid);
+            mutations.push({
+                type: 'add',
+                rule: {
+                    ...rule,
+                    ranges: newRanges,
+                },
+            });
         });
 
         return mutations;

@@ -80,6 +80,25 @@ export function getDataValidationDiffMutations(unitId: string, subUnitId: string
                 });
                 break;
             }
+            case 'add': {
+                redoMutations.push({
+                    id: AddDataValidationMutation.id,
+                    params: {
+                        unitId,
+                        subUnitId,
+                        rule: diff.rule,
+                    } as IAddDataValidationMutationParams,
+                });
+                undoMutations.unshift({
+                    id: RemoveDataValidationMutation.id,
+                    params: {
+                        unitId,
+                        subUnitId,
+                        ruleId: diff.rule.uid,
+                    },
+                });
+                break;
+            }
             default:
                 break;
         }

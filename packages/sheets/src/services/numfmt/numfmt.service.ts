@@ -21,9 +21,7 @@ import {
     ILogService,
     IResourceManagerService,
     IUniverInstanceService,
-    LifecycleStages,
     ObjectMatrix,
-    OnLifecycle,
     Range,
     RefAlias,
     toDisposable,
@@ -36,7 +34,6 @@ import type { FormatType, INumfmtItem, INumfmtService, IRefItem, ISnapshot } fro
 const SHEET_NUMFMT_PLUGIN = 'SHEET_NUMFMT_PLUGIN';
 const millisecondsPerDay = 24 * 60 * 60 * 1000;
 
-@OnLifecycle(LifecycleStages.Starting, NumfmtService)
 export class NumfmtService extends Disposable implements INumfmtService {
     /**
      * Map<unitID ,<sheetId ,ObjectMatrix>>
@@ -112,8 +109,8 @@ export class NumfmtService extends Disposable implements INumfmtService {
                 })
             )
         );
-        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
-        handleWorkbookAdd(workbook);
+        const workbooks = this._univerInstanceService.getAllUniverSheetsInstance();
+        workbooks.forEach((workbook) => handleWorkbookAdd(workbook));
     }
 
     private _toJson(unitID: string) {

@@ -488,6 +488,12 @@ const locale = {
     },
     'sheet-view': '浏览表格',
     'sheet-edit': '编辑表格',
+    definedName: {
+        managerTitle: '名称管理器',
+        managerDescription: '通过选择单元格或公式，并在文本框中输入您想要的名称来创建一个定义名称。',
+        addButton: '新建名称',
+        featureTitle: '定义名称',
+    },
 };
 
 export default locale;

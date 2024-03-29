@@ -490,9 +490,15 @@ const locale: typeof zhCN = {
             'set-strike-through': 'Toggle strike through',
         },
     },
-
     'sheet-view': 'Sheet View',
     'sheet-edit': 'Sheet Edit',
+
+    definedName: {
+        managerTitle: 'Manager named',
+        managerDescription: 'Create a defined name by selecting cells or formulas, and entering the desired name into the text box.',
+        addButton: 'Add a defined name',
+        featureTitle: 'Defined names',
+    },
 };
 
 export default locale;

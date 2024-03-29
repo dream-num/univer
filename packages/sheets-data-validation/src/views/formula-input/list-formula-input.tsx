@@ -277,46 +277,50 @@ export function ListFormulaInput(props: IFormulaInputProps) {
                 </RadioGroup>
             </FormLayout>
             {isRefRange === '1' ? (
-                <FormLayout error={formula1Res}>
-                    <RangeSelector
-                        id={`list-ref-range-${unitId}-${subUnitId}`}
-                        value={refRange}
-                        openForSheetUnitId={unitId}
-                        openForSheetSubUnitId={subUnitId}
-                        onChange={(ranges) => {
-                            const range = ranges[0];
-                            if (!range || isRangeInValid(range.range)) {
-                                onChange?.({
-                                    formula1: '',
-                                    formula2,
-                                });
-                                setRefRange('');
-                            } else {
-                                const workbook = univerInstanceService.getUniverSheetInstance(range.unitId) ?? univerInstanceService.getCurrentUniverSheetInstance();
-                                const worksheet = workbook?.getSheetBySheetId(range.sheetId) ?? workbook.getActiveSheet();
-                                const rangeStr = serializeRangeWithSheet(worksheet.getName(), range.range);
-                                onChange?.({
-                                    formula1: rangeStr,
-                                    formula2,
-                                });
-                                setRefRange(rangeStr);
-                            }
-                        }}
-                        isSingleChoice
-                    />
-                    <div ref={containerRef}>
-                        <DraggableList
-                            itemKey="id"
-                            // @ts-ignore
-                            template={Template}
-                            list={refFinalList}
-                            container={() => containerRef.current}
-                            commonProps={{
-                                onItemChange: handleRefItemChange,
+                <>
+                    <FormLayout error={formula1Res}>
+                        <RangeSelector
+                            id={`list-ref-range-${unitId}-${subUnitId}`}
+                            value={refRange}
+                            openForSheetUnitId={unitId}
+                            openForSheetSubUnitId={subUnitId}
+                            onChange={(ranges) => {
+                                const range = ranges[0];
+                                if (!range || isRangeInValid(range.range)) {
+                                    onChange?.({
+                                        formula1: '',
+                                        formula2,
+                                    });
+                                    setRefRange('');
+                                } else {
+                                    const workbook = univerInstanceService.getUniverSheetInstance(range.unitId) ?? univerInstanceService.getCurrentUniverSheetInstance();
+                                    const worksheet = workbook?.getSheetBySheetId(range.sheetId) ?? workbook.getActiveSheet();
+                                    const rangeStr = serializeRangeWithSheet(worksheet.getName(), range.range);
+                                    onChange?.({
+                                        formula1: rangeStr,
+                                        formula2,
+                                    });
+                                    setRefRange(rangeStr);
+                                }
                             }}
+                            isSingleChoice
                         />
-                    </div>
-                </FormLayout>
+                    </FormLayout>
+                    <FormLayout>
+                        <div ref={containerRef}>
+                            <DraggableList
+                                itemKey="id"
+                            // @ts-ignore
+                                template={Template}
+                                list={refFinalList}
+                                container={() => containerRef.current}
+                                commonProps={{
+                                    onItemChange: handleRefItemChange,
+                                }}
+                            />
+                        </div>
+                    </FormLayout>
+                </>
             ) : (
                 <FormLayout error={formula1Res}>
                     <div ref={containerRef}>

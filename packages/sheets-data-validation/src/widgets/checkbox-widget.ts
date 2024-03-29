@@ -16,7 +16,7 @@
 
 import type { UniverRenderingContext2D } from '@univerjs/engine-render';
 import { Checkbox, fixLineWidthByScale, Transform } from '@univerjs/engine-render';
-import { HorizontalAlign, ICommandService, isFormulaString, VerticalAlign } from '@univerjs/core';
+import { HorizontalAlign, ICommandService, isFormulaString, ThemeService, VerticalAlign } from '@univerjs/core';
 import type { ICellRenderContext, IDataValidationRule, IStyleData, Nullable } from '@univerjs/core';
 import type { ISetRangeValuesCommandParams } from '@univerjs/sheets';
 import { SetRangeValuesCommand } from '@univerjs/sheets';
@@ -72,7 +72,8 @@ export class CheckboxRender implements IBaseDataValidationWidget {
 
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
-        @Inject(DataValidationFormulaService) private readonly _formulaService: DataValidationFormulaService
+        @Inject(DataValidationFormulaService) private readonly _formulaService: DataValidationFormulaService,
+        @Inject(ThemeService) private readonly _themeService: ThemeService
     ) {}
 
     calcCellAutoHeight(): number | undefined {
@@ -98,6 +99,7 @@ export class CheckboxRender implements IBaseDataValidationWidget {
             return;
         }
 
+        const colors = this._themeService.getCurrentTheme();
         if (!validator.skipDefaultFontRender(rule, value, { unitId, subUnitId })) {
             return;
         }
@@ -138,7 +140,7 @@ export class CheckboxRender implements IBaseDataValidationWidget {
             checked: String(value) === String(formula1),
             width: size,
             height: size,
-            fill: style?.cl?.rgb ?? '#BCBCBC',
+            fill: style?.cl?.rgb ?? colors.grey400,
         });
 
         ctx.restore();

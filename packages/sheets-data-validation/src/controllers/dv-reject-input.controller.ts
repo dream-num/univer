@@ -72,6 +72,7 @@ export class DataValidationRejectInputController extends Disposable {
 
                     const oldCell = worksheet.getCellRaw(row, col);
                     this._dialogService.open({
+                        width: 368,
                         title: {
                             title: this._localeService.t('dataValidation.alert.title'),
                         },

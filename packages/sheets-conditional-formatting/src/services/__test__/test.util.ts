@@ -19,10 +19,10 @@ import { ICommandService, IUniverInstanceService, LocaleType, Plugin, PluginType
 import {
     SheetInterceptorService,
 } from '@univerjs/sheets';
-import { IActiveDirtyManagerService } from '@univerjs/sheets-formula';
 
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
+import { IActiveDirtyManagerService } from '@univerjs/engine-formula';
 import { ConditionalFormattingService } from '../conditional-formatting.service';
 import { ConditionalFormattingFormulaService } from '../conditional-formatting-formula.service';
 import { SheetsConditionalFormattingPlugin } from '../../plugin';

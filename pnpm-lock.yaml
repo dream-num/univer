@@ -349,7 +349,7 @@ importers:
         version: 5.2.6(@types/node@20.11.30)(less@4.2.0)
       vitest:
         specifier: ^1.4.0
-        version: 1.4.0(@types/node@20.11.30)(happy-dom@13.3.8)
+        version: 1.4.0(@types/node@20.11.30)(jsdom@24.0.0)
 
   packages/data-validation:
     dependencies:
@@ -428,7 +428,7 @@ importers:
         version: 0.6.2(vite@5.2.6)
       vitest:
         specifier: ^1.2.1
-        version: 1.4.0(@types/node@20.11.30)(happy-dom@13.3.8)
+        version: 1.4.0(@types/node@20.11.30)(jsdom@24.0.0)
 
   packages/design:
     dependencies:
@@ -543,7 +543,7 @@ importers:
         version: 5.2.6(@types/node@20.11.30)(less@4.2.0)
       vitest:
         specifier: ^1.4.0
-        version: 1.4.0(@types/node@20.11.30)(happy-dom@13.3.8)
+        version: 1.4.0(@types/node@20.11.30)(jsdom@24.0.0)
 
   packages/docs-ui:
     devDependencies:
@@ -622,7 +622,7 @@ importers:
         version: 5.2.6(@types/node@20.11.30)(less@4.2.0)
       vitest:
         specifier: ^1.4.0
-        version: 1.4.0(@types/node@20.11.30)(happy-dom@13.3.8)
+        version: 1.4.0(@types/node@20.11.30)(jsdom@24.0.0)
 
   packages/engine-numfmt:
     dependencies:
@@ -641,7 +641,7 @@ importers:
         version: 5.2.6(@types/node@20.11.30)(less@4.2.0)
       vitest:
         specifier: ^1.4.0
-        version: 1.4.0(@types/node@20.11.30)(happy-dom@13.3.8)
+        version: 1.4.0(@types/node@20.11.30)(jsdom@24.0.0)
 
   packages/engine-render:
     dependencies:
@@ -672,7 +672,7 @@ importers:
         version: 5.2.6(@types/node@20.11.30)(less@4.2.0)
       vitest:
         specifier: ^1.4.0
-        version: 1.4.0(@types/node@20.11.30)(happy-dom@13.3.8)
+        version: 1.4.0(@types/node@20.11.30)(jsdom@24.0.0)
 
   packages/facade:
     devDependencies:
@@ -802,7 +802,7 @@ importers:
         version: 5.2.6(@types/node@20.11.30)(less@4.2.0)
       vitest:
         specifier: ^1.4.0
-        version: 1.4.0(@types/node@20.11.30)(happy-dom@13.3.8)
+        version: 1.4.0(@types/node@20.11.30)(jsdom@24.0.0)
 
   packages/rpc:
     devDependencies:
@@ -826,7 +826,7 @@ importers:
         version: 5.2.6(@types/node@20.11.30)(less@4.2.0)
       vitest:
         specifier: ^1.4.0
-        version: 1.4.0(@types/node@20.11.30)(happy-dom@13.3.8)
+        version: 1.4.0(@types/node@20.11.30)(jsdom@24.0.0)
 
   packages/sheets:
     devDependencies:
@@ -856,7 +856,7 @@ importers:
         version: 5.2.6(@types/node@20.11.30)(less@4.2.0)
       vitest:
         specifier: ^1.4.0
-        version: 1.4.0(@types/node@20.11.30)(happy-dom@13.3.8)
+        version: 1.4.0(@types/node@20.11.30)(jsdom@24.0.0)
 
   packages/sheets-conditional-format:
     dependencies:
@@ -966,9 +966,6 @@ importers:
       '@univerjs/icons':
         specifier: ^0.1.42
         version: 0.1.42(react-dom@18.2.0)(react@18.2.0)
-      '@univerjs/sheets-ui':
-        specifier: workspace:*
-        version: link:../sheets-ui
       dayjs:
         specifier: ^1.11.10
         version: 1.11.10
@@ -1018,9 +1015,9 @@ importers:
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
-      '@univerjs/sheets-formula':
+      '@univerjs/sheets-ui':
         specifier: workspace:*
-        version: link:../sheets-formula
+        version: link:../sheets-ui
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui
@@ -1192,7 +1189,7 @@ importers:
         version: 5.2.6(@types/node@20.11.30)(less@4.2.0)
       vitest:
         specifier: ^1.4.0
-        version: 1.4.0(@types/node@20.11.30)(happy-dom@13.3.8)
+        version: 1.4.0(@types/node@20.11.30)(jsdom@24.0.0)
 
   packages/sheets-formula:
     dependencies:
@@ -1454,7 +1451,7 @@ importers:
         version: 5.2.6(@types/node@20.11.30)(less@4.2.0)
       vitest:
         specifier: ^1.4.0
-        version: 1.4.0(@types/node@20.11.30)(happy-dom@13.3.8)
+        version: 1.4.0(@types/node@20.11.30)(jsdom@24.0.0)
 
   packages/slides-ui:
     devDependencies:
@@ -1515,6 +1512,10 @@ importers:
       rc-util:
         specifier: ^5.39.1
         version: 5.39.1(react-dom@18.2.0)(react@18.2.0)
+    optionalDependencies:
+      vue:
+        specifier: '>=3.0.0'
+        version: 3.4.21(typescript@5.4.3)
     devDependencies:
       '@testing-library/react':
         specifier: ^14.2.1
@@ -1573,9 +1574,6 @@ importers:
       vitest:
         specifier: ^1.4.0
         version: 1.4.0(@types/node@20.11.30)(happy-dom@13.3.8)(less@4.2.0)
-      vue:
-        specifier: ^3.4.21
-        version: 3.4.21(typescript@5.4.3)
 
   packages/uniscript:
     dependencies:
@@ -6296,7 +6294,7 @@ packages:
       '@vue/shared': 3.4.21
       entities: 4.5.0
       estree-walker: 2.0.2
-      source-map-js: 1.0.2
+      source-map-js: 1.2.0
 
   /@vue/compiler-dom@3.4.21:
     resolution: {integrity: sha512-IZC6FKowtT1sl0CR5DpXSiEB5ayw75oT2bma1BEhV7RRR1+cfwLrxc2Z8Zq/RGFzJ8w5r9QtCOvTjQgdn0IKmA==}
@@ -6314,8 +6312,8 @@ packages:
       '@vue/shared': 3.4.21
       estree-walker: 2.0.2
       magic-string: 0.30.8
-      postcss: 8.4.35
-      source-map-js: 1.0.2
+      postcss: 8.4.38
+      source-map-js: 1.2.0
 
   /@vue/compiler-ssr@3.4.21:
     resolution: {integrity: sha512-M5+9nI2lPpAsgXOGQobnIueVqc9sisBFexh5yMIMRAPYLa7+5wEJs8iqOZc1WAa9WQbx9GR2twgznU8LTIiZ4Q==}
@@ -12481,6 +12479,7 @@ packages:
       nanoid: 3.3.7
       picocolors: r2.cnpmjs.org/picocolors@1.0.0
       source-map-js: 1.0.2
+    dev: false
 
   /postcss@8.4.38:
     resolution: {integrity: sha512-Wglpdk03BSfXkHoQa3b/oulrotAkwrlLDRSOb9D0bN86FdRyE9lppSp33aHNPgBa0JKCoB+drFLZkQoRRYae5A==}
@@ -15221,7 +15220,7 @@ packages:
       local-pkg: 0.5.0
       magic-string: 0.30.8
       pathe: 1.1.1
-      picocolors: 1.0.0
+      picocolors: r2.cnpmjs.org/picocolors@1.0.0
       std-env: 3.5.0
       strip-literal: 2.0.0
       tinybench: 2.5.1
@@ -15278,7 +15277,7 @@ packages:
       local-pkg: 0.5.0
       magic-string: 0.30.8
       pathe: 1.1.1
-      picocolors: 1.0.0
+      picocolors: r2.cnpmjs.org/picocolors@1.0.0
       std-env: 3.5.0
       strip-literal: 2.0.0
       tinybench: 2.5.1

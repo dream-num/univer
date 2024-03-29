@@ -62,6 +62,7 @@ exports.autoExternalizeDependency = function autoExternalizeDependency() {
             global: 'Vue',
             name: 'vue',
             version: '>=3.0.0',
+            optional: true,
         },
     };
 
@@ -112,15 +113,23 @@ exports.autoExternalizeDependency = function autoExternalizeDependency() {
             // generate peerDependencies
             const pkg = require(`${process.cwd()}/package.json`);
             const peerDependencies = {};
+            let optionalDependencies;
 
             Array.from(externals)
                 .sort()
                 .forEach((ext) => {
-                    const { version, name } = externalMap[ext] ?? {};
+                    const { version, name, optional } = externalMap[ext] ?? {};
 
                     if (version) {
                         if (version !== name) {
-                            peerDependencies[ext] = version;
+                            if (optional) {
+                                if (!optionalDependencies) {
+                                    optionalDependencies = {};
+                                }
+                                optionalDependencies[ext] = version;
+                            } else {
+                                peerDependencies[ext] = version;
+                            }
                         } else {
                             if (!peerDependencies[version]) {
                                 peerDependencies[name] = externalMap[version].version;
@@ -132,6 +141,9 @@ exports.autoExternalizeDependency = function autoExternalizeDependency() {
                 });
 
             pkg.peerDependencies = peerDependencies;
+            if (optionalDependencies) {
+                pkg.optionalDependencies = optionalDependencies;
+            }
 
             writeFileSync(
                 `${process.cwd()}/package.json`,

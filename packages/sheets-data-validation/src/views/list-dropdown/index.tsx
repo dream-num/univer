@@ -47,37 +47,37 @@ const SelectList = (props: ISelectListProps) => {
             <div className={styles.dvListDropdownTitle}>
                 {title}
             </div>
-            <div className={styles.dvListDropdownList}>
-                <Scrollbar>
-                    {options.map((item, i) => {
-                        const selected = value.indexOf(item.value) > -1;
-                        const handleClick = () => {
-                            let set: Set<string>;
-                            if (selected) {
-                                set = new Set(value.filter((sub) => sub !== item.value));
-                            } else {
-                                set = new Set(multiple ? [...value, item.value] : [item.value]);
-                            }
-                            const newValue: string[] = [];
-                            options.forEach((opt) => {
-                                if (set.has(opt.value)) {
-                                    newValue.push(opt.value);
-                                }
-                            });
 
-                            onChange(newValue);
-                        };
-                        return (
-                            <div key={i} className={styles.dvListDropdownItemContainer} onClick={handleClick}>
-                                <div className={styles.dvListDropdownItem} style={{ background: item.color || DROP_DOWN_DEFAULT_COLOR }}>{item.label}</div>
-                                <div className={styles.dvListDropdownSelectedIcon}>
-                                    {selected ? <CheckMarkSingle /> : null}
-                                </div>
+            <Scrollbar>
+                {options.map((item, i) => {
+                    const selected = value.indexOf(item.value) > -1;
+                    const handleClick = () => {
+                        let set: Set<string>;
+                        if (selected) {
+                            set = new Set(value.filter((sub) => sub !== item.value));
+                        } else {
+                            set = new Set(multiple ? [...value, item.value] : [item.value]);
+                        }
+                        const newValue: string[] = [];
+                        options.forEach((opt) => {
+                            if (set.has(opt.value)) {
+                                newValue.push(opt.value);
+                            }
+                        });
+
+                        onChange(newValue);
+                    };
+                    return (
+                        <div key={i} className={styles.dvListDropdownItemContainer} onClick={handleClick}>
+                            <div className={styles.dvListDropdownItem} style={{ background: item.color || DROP_DOWN_DEFAULT_COLOR }}>{item.label}</div>
+                            <div className={styles.dvListDropdownSelectedIcon}>
+                                {selected ? <CheckMarkSingle /> : null}
                             </div>
-                        );
-                    })}
-                </Scrollbar>
-            </div>
+                        </div>
+                    );
+                })}
+            </Scrollbar>
+
             <div className={styles.dvListDropdownSplit} />
             <div className={styles.dvListDropdownEdit} onClick={onEdit}>
                 编辑

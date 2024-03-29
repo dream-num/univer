@@ -30,7 +30,7 @@ import { PromptController } from './controllers/prompt.controller';
 import { TriggerCalculationController } from './controllers/trigger-calculation.controller';
 import { UpdateFormulaController } from './controllers/update-formula.controller';
 import { zhCN } from './locale';
-import { ActiveDirtyManagerService, IActiveDirtyManagerService } from './services/active-dirty-manager.service';
+
 import { DescriptionService, IDescriptionService } from './services/description.service';
 import {
     FormulaCustomFunctionService,
@@ -75,7 +75,7 @@ export class UniverSheetsFormulaPlugin extends Plugin {
                 },
             ],
             [IFormulaCustomFunctionService, { useClass: FormulaCustomFunctionService }],
-            [IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }],
+
             [IRegisterFunctionService, { useClass: RegisterFunctionService }],
             [FormulaRefRangeService],
 

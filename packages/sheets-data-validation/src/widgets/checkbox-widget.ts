@@ -136,7 +136,7 @@ export class CheckboxRender implements IBaseDataValidationWidget {
         const size = (style?.fs ?? 10) * 1.6;
 
         const checked = String(value) === String(formula1);
-        const defaultColor = checked ? colors.blue500 : colors.grey400;
+        const defaultColor = colors.hyacinth500;
 
         Checkbox.drawWith(ctx, {
             checked,

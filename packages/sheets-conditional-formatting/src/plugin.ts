@@ -15,6 +15,7 @@
  */
 
 import { ICommandService, Plugin, PluginType } from '@univerjs/core';
+import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { SHEET_CONDITIONAL_FORMATTING_PLUGIN } from './base/const';
 import { ConditionalFormattingService } from './services/conditional-formatting.service';
@@ -30,6 +31,7 @@ import { ConditionalFormattingFormulaMarkDirty } from './commands/mutations/form
 
 export class SheetsConditionalFormattingPlugin extends Plugin {
     static override type = PluginType.Sheet;
+    static readonly dependencyList: Dependency[] = [[ConditionalFormattingService], [ConditionalFormattingFormulaService], [ConditionalFormattingRuleModel], [ConditionalFormattingViewModel]];
     static readonly mutationList = [AddConditionalRuleMutation, DeleteConditionalRuleMutation, SetConditionalRuleMutation, MoveConditionalRuleMutation, ConditionalFormattingFormulaMarkDirty];
     constructor(
         _config: unknown,
@@ -41,11 +43,9 @@ export class SheetsConditionalFormattingPlugin extends Plugin {
     }
 
     override onStarting(): void {
-        this._injector.add([ConditionalFormattingService]);
-        this._injector.add([ConditionalFormattingFormulaService]);
-
-        this._injector.add([ConditionalFormattingRuleModel]);
-        this._injector.add([ConditionalFormattingViewModel]);
+        SheetsConditionalFormattingPlugin.dependencyList.forEach((dependency) => {
+            this._injector.add(dependency);
+        });
     }
 
     _initCommand() {

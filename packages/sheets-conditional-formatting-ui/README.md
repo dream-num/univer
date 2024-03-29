@@ -7,7 +7,7 @@
 
 ## Introduction
 
-`@univerjs/sheets-conditional-formatting-ui` provides conditional formatting for cells in Univer Sheet.
+`@univerjs/sheets-conditional-formatting-ui` provides full capabilities for Univer Sheet conditional formatting, including panel capabilities.
 
 ## Usage
 
@@ -24,9 +24,7 @@ pnpm add @univerjs/sheets-conditional-formatting-ui
 ### Register the plugin
 
 ```typescript
-import { SheetsConditionalFormattingPlugin } from '@univerjs/sheets-conditional-formatting';
 import { SheetsConditionalFormattingUiPlugin } from '@univerjs/sheets-conditional-formatting-ui';
 
 univer.registerPlugin(SheetsConditionalFormattingUiPlugin);
-univer.registerPlugin(SheetsConditionalFormattingPlugin);
 ```

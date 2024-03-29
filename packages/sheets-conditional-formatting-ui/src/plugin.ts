@@ -16,7 +16,7 @@
 
 import { ICommandService, Plugin, PluginType } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
-import { SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '@univerjs/sheets-conditional-formatting';
+import { SHEET_CONDITIONAL_FORMATTING_PLUGIN, SheetsConditionalFormattingPlugin } from '@univerjs/sheets-conditional-formatting';
 import { DddAverageCfCommand } from './commands/commands/add-average-cf.command';
 import { AddColorScaleConditionalRuleCommand } from './commands/commands/add-color-scale-cf.command';
 import { AddDataBarConditionalRuleCommand } from './commands/commands/add-data-bar-cf.command';
@@ -71,6 +71,9 @@ export class SheetsConditionalFormattingUiPlugin extends Plugin {
     ) {
         super(SHEET_CONDITIONAL_FORMATTING_PLUGIN);
         this._initCommand();
+        SheetsConditionalFormattingPlugin.dependencyList.forEach((dependency) => {
+            this._injector.add(dependency);
+        });
         this._injector.add([RenderController]);
         this._injector.add([RefRangeController]);
         this._injector.add([ConditionalFormattingCopyPasteController]);
@@ -82,7 +85,7 @@ export class SheetsConditionalFormattingUiPlugin extends Plugin {
     }
 
     _initCommand() {
-        SheetsConditionalFormattingUiPlugin.commandList.forEach((m) => {
+        [...SheetsConditionalFormattingPlugin.mutationList, ...SheetsConditionalFormattingUiPlugin.commandList].forEach((m) => {
             this._commandService.registerCommand(m);
         });
     }

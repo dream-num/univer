@@ -7,7 +7,7 @@
 
 ## Introduction
 
-`@univerjs/sheets-conditional-formatting` provides conditional formatting for cells in Univer Sheet.
+`@univerjs/sheets-conditional-formatting` provides Univer Sheet with basic capabilities for conditional format rendering computation.
 
 ## Usage
 

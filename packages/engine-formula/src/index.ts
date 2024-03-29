@@ -142,3 +142,5 @@ export { matchRefDrawToken } from './basics/match-token';
 export { IDefinedNamesService, DefinedNamesService } from './services/defined-names.service';
 export { IFormulaRuntimeService, FormulaRuntimeService } from './services/runtime.service';
 export { IFormulaCurrentConfigService, FormulaCurrentConfigService } from './services/current-data.service';
+
+export { IActiveDirtyManagerService } from './services/active-dirty-manager.service';

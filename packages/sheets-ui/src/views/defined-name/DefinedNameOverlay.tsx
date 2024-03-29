@@ -16,7 +16,7 @@
 
 import React, { useEffect } from 'react';
 
-import { ICommandService } from '@univerjs/core';
+import { ICommandService, LocaleService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { SidebarDefinedNameOperation } from '../../commands/operations/sidebar-defined-name.operation';
 import styles from './index.module.less';
@@ -27,6 +27,7 @@ export interface IDefinedNameOverlayProps {
 
 export function DefinedNameOverlay(props: IDefinedNameOverlayProps) {
     const commandService = useDependency(ICommandService);
+    const localeService = useDependency(LocaleService);
 
     useEffect(() => {
 
@@ -39,8 +40,8 @@ export function DefinedNameOverlay(props: IDefinedNameOverlayProps) {
     return (
         <div className={styles.definedNameOverlay}>
             <div className={styles.definedNameOverlayManager} onClick={openSlider}>
-                <div className={styles.definedNameOverlayManagerTitle}>Manager named</div>
-                <div className={styles.definedNameOverlayManagerContent}>Create a named range by selecting cells and entering the desired name into the text box.</div>
+                <div className={styles.definedNameOverlayManagerTitle}>{localeService.t('definedName.managerTitle')}</div>
+                <div className={styles.definedNameOverlayManagerContent}>{localeService.t('definedName.managerDescription')}</div>
             </div>
         </div>
     );

@@ -1,13 +1,13 @@
-# @univerjs/sheets-conditional-formatting
+# @univerjs/sheets-conditional-formatting-ui
 
-[![npm version](https://img.shields.io/npm/v/@univerjs/sheets-conditional-formatting)](https://npmjs.org/packages/@univerjs/sheets-conditional-formatting)
-[![license](https://img.shields.io/npm/l/@univerjs/sheets-conditional-formatting)](https://img.shields.io/npm/l/@univerjs/sheets-conditional-formatting)
+[![npm version](https://img.shields.io/npm/v/@univerjs/sheets-conditional-formatting-ui)](https://npmjs.org/packages/@univerjs/sheets-conditional-formatting-ui)
+[![license](https://img.shields.io/npm/l/@univerjs/sheets-conditional-formatting-ui)](https://img.shields.io/npm/l/@univerjs/sheets-conditional-formatting-ui)
 ![CSS Included](https://img.shields.io/badge/CSS_Included-blue?logo=CSS3)
 ![i18n](https://img.shields.io/badge/zh--CN%20%7C%20en--US-cornflowerblue?label=i18n)
 
 ## Introduction
 
-`@univerjs/sheets-conditional-formatting` provides conditional formatting for cells in Univer Sheet.
+`@univerjs/sheets-conditional-formatting-ui` provides conditional formatting for cells in Univer Sheet.
 
 ## Usage
 
@@ -15,16 +15,18 @@
 
 ```shell
 # Using npm
-npm install @univerjs/sheets-conditional-formatting
+npm install @univerjs/sheets-conditional-formatting-ui
 
 # Using pnpm
-pnpm add @univerjs/sheets-conditional-formatting
+pnpm add @univerjs/sheets-conditional-formatting-ui
 ```
 
 ### Register the plugin
 
 ```typescript
 import { SheetsConditionalFormattingPlugin } from '@univerjs/sheets-conditional-formatting';
+import { SheetsConditionalFormattingUiPlugin } from '@univerjs/sheets-conditional-formatting-ui';
 
+univer.registerPlugin(SheetsConditionalFormattingUiPlugin);
 univer.registerPlugin(SheetsConditionalFormattingPlugin);
 ```

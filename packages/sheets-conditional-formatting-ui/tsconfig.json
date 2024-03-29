@@ -5,5 +5,5 @@
         "outDir": "lib/types"
     },
     "references": [{ "path": "./tsconfig.node.json" }],
-    "include": ["src", "../sheets-conditional-formatting/src/render"]
+    "include": ["src"]
 }

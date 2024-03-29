@@ -20,9 +20,6 @@
     "keywords": [
         "univer"
     ],
-    "sideEffects": [
-        "**/*.css"
-    ],
     "exports": {
         ".": "./src/index.ts",
         "./*": "./src/*"
@@ -72,8 +69,6 @@
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@wendellhu/redi": "0.13.0",
-        "react": ">=16.9.0",
-        "react-dom": ">=16.9.0",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {

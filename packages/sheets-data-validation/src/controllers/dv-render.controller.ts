@@ -217,11 +217,11 @@ export class DataValidationRenderController extends RxDisposable {
                         const cellValue = getCellValueOrigin(cell);
 
                         let extra: ICellDataForSheetInterceptor = {};
-                        if (defaultStyle.tb !== WrapStrategy.WRAP && defaultStyle.tb !== WrapStrategy.CLIP) {
+                        if (rule.type === DataValidationType.LIST || rule.type === DataValidationType.LIST_MULTIPLE) {
                             extra = {
                                 interceptorStyle: {
                                     ...cell?.interceptorStyle,
-                                    tb: WrapStrategy.CLIP,
+                                    tb: (defaultStyle.tb !== WrapStrategy.OVERFLOW ? defaultStyle.tb : undefined) ?? WrapStrategy.WRAP,
                                 },
                             };
                         }

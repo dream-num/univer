@@ -202,7 +202,6 @@ export class DropdownWidget implements IBaseDataValidationWidget {
         tb = tb ?? WrapStrategy.WRAP;
         vt = vt ?? VerticalAlign.TOP;
         ht = ht ?? HorizontalAlign.LEFT;
-
         if (rule.renderMode === DataValidationRenderMode.ARROW) {
             this._drawDownIcon(ctx, cellBounding, cellWidth, cellHeight, vt);
             ctx.save();
@@ -280,7 +279,6 @@ export class DropdownWidget implements IBaseDataValidationWidget {
 
             const realWidth = cellWidth - (MARGIN_H * 2) - PADDING_H - ICON_PLACE;
             const { documentSkeleton, documents, docModel } = createDocuments(valueStr, this._localeService, style);
-            const { tb = WrapStrategy.WRAP } = style || {};
             if (
                 tb === WrapStrategy.WRAP
             ) {
@@ -365,10 +363,13 @@ export class DropdownWidget implements IBaseDataValidationWidget {
             return undefined;
         }
 
+        let { tb } = style || {};
+
+        tb = tb ?? WrapStrategy.WRAP;
+
         if (rule.renderMode === DataValidationRenderMode.ARROW) {
             const realWidth = cellWidth - ICON_PLACE;
             const { documentSkeleton, docModel } = createDocSkeleton(valueStr, this._localeService, style);
-            const { tb = WrapStrategy.WRAP } = style || {};
             if (
                 tb === WrapStrategy.WRAP
             ) {
@@ -385,7 +386,6 @@ export class DropdownWidget implements IBaseDataValidationWidget {
         } else {
             const realWidth = cellWidth - (MARGIN_H * 2) - PADDING_H - ICON_PLACE;
             const { documentSkeleton, docModel } = createDocSkeleton(valueStr, this._localeService, style);
-            const { tb = WrapStrategy.WRAP } = style || {};
             if (
                 tb === WrapStrategy.WRAP
             ) {
@@ -400,7 +400,7 @@ export class DropdownWidget implements IBaseDataValidationWidget {
                 height: fontHeight,
             } = textLayout;
 
-            return fontHeight + MARGIN_V * 2;
+            return fontHeight + (MARGIN_V * 2);
         }
     }
 

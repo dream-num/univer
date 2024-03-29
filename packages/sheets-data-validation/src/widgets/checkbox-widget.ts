@@ -131,19 +131,20 @@ export class CheckboxRender implements IBaseDataValidationWidget {
         ctx.rect(cellBounding.startX, cellBounding.startY, cellWidth, cellHeight);
         ctx.clip();
 
-        ctx.save();
         const m = transform.getMatrix();
         ctx.transform(m[0], m[1], m[2], m[3], m[4], m[5]);
         const size = (style?.fs ?? 10) * 1.6;
 
+        const checked = String(value) === String(formula1);
+        const defaultColor = checked ? colors.blue500 : colors.grey400;
+
         Checkbox.drawWith(ctx, {
-            checked: String(value) === String(formula1),
+            checked,
             width: size,
             height: size,
-            fill: style?.cl?.rgb ?? colors.grey400,
+            fill: style?.cl?.rgb ?? defaultColor,
         });
 
-        ctx.restore();
         ctx.restore();
     }
 

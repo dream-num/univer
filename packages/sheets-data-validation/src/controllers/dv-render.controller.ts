@@ -224,7 +224,7 @@ export class DataValidationRenderController extends RxDisposable {
                             extra = {
                                 interceptorStyle: {
                                     ...cell?.interceptorStyle,
-                                    tb: (defaultStyle.tb !== WrapStrategy.OVERFLOW ? defaultStyle.tb : undefined) ?? WrapStrategy.WRAP,
+                                    tb: (defaultStyle.tb !== WrapStrategy.OVERFLOW ? defaultStyle.tb : WrapStrategy.CLIP) ?? WrapStrategy.WRAP,
                                 },
                             };
                         }

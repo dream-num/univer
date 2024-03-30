@@ -23,8 +23,8 @@ import type {
     ISkeletonResourceReference,
 } from '../../../basics/i-document-skeleton-cached';
 import { GlyphType, LineType, PageLayoutType } from '../../../basics/i-document-skeleton-cached';
-import type { IDocsConfig, INodeInfo, INodePosition, INodeSearch } from '../../../basics/interfaces';
-import type { IViewportBound, Vector2 } from '../../../basics/vector2';
+import type { IDocsConfig, INodeInfo, INodePosition, INodeSearch, ISectionBreakConfig } from '../../../basics/interfaces';
+import type { IViewportInfo, Vector2 } from '../../../basics/vector2';
 import { Skeleton } from '../../skeleton';
 import { Liquid } from '../liquid';
 import type { DocumentViewModel } from '../view-model/document-view-model';
@@ -87,7 +87,7 @@ export class DocumentSkeleton extends Skeleton {
     }
 
     // Layout the document.
-    calculate(bounds?: IViewportBound) {
+    calculate(bounds?: IViewportInfo) {
         if (!this.dirty) {
             return;
         }

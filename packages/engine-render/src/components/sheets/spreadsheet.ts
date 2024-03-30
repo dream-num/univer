@@ -23,13 +23,13 @@ import { FIX_ONE_PIXEL_BLUR_OFFSET, RENDER_CLASS_TYPE } from '../../basics/const
 
 // import { clearLineByBorderType } from '../../basics/draw';
 import { getCellPositionByIndex, getColor } from '../../basics/tools';
-import type { IViewportBound, Vector2 } from '../../basics/vector2';
+import type { IBoundRectNoAngle, IViewportInfo, Vector2 } from '../../basics/vector2';
 import { Canvas } from '../../canvas';
 import type { UniverRenderingContext } from '../../context';
 import type { Engine } from '../../engine';
 import type { Scene } from '../../scene';
 import type { SceneViewer } from '../../scene-viewer';
-import type { Viewport } from '../../viewport';
+import { bufferEdgeX, bufferEdgeY, type Viewport } from '../../viewport';
 import { Documents } from '../docs/document';
 import { SpreadsheetExtensionRegistry } from '../extension';
 import type { Background } from './extensions/background';
@@ -50,10 +50,24 @@ export class Spreadsheet extends SheetComponent {
     private _fontExtension!: Font;
 
     private _cacheCanvas!: Canvas;
+    private _cacheCanvasTop!: Canvas;
+    private _cacheCanvasLeft!: Canvas;
+    private _cacheCanvasLeftTop!: Canvas;
+    private _cacheCanvasMap: Map<string, Canvas> = new Map();
 
+    /**
+     * 增量更新
+     */
     private _refreshIncrementalState = false;
 
     private _forceDirty = false;
+    // private _forceDirtyByViewport: Record<string, boolean> = {};
+        // 无法导入
+        // VIEWPORT_KEY.VIEW_MAIN: false,
+        // VIEWPORT_KEY.VIEW_MAIN_TOP: false,
+        // VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP,
+
+
 
     private _forceDisableGridlines = false;
 
@@ -70,21 +84,25 @@ export class Spreadsheet extends SheetComponent {
         private _allowCache: boolean = true
     ) {
         super(oKey, spreadsheetSkeleton);
-
         if (this._allowCache) {
-            this._cacheCanvas = new Canvas();
 
             this.onIsAddedToParentObserver.add((parent) => {
-                (parent as Scene)?.getEngine()?.onTransformChangeObservable.add(() => {
-                    this._resizeCacheCanvas();
-                });
-                this._resizeCacheCanvas();
-                this._addMakeDirtyToScroll();
+                // (parent as Scene)?.getEngine()?.onTransformChangeObservable.add(() => {
+                //     this._resizeCacheCanvas();
+                // });
+                // this._resizeCacheCanvas();
+                // this._addMakeDirtyToScroll();
+
+                // (parent as Scene)?.getViewports().forEach(vp => vp.makeDirty());
+                window.scene = parent;
+
             });
         }
 
         this._initialDefaultExtension();
         this.makeDirty(true);
+
+        window.spreadsheet = this;
     }
 
     get backgroundExtension() {
@@ -136,13 +154,31 @@ export class Spreadsheet extends SheetComponent {
 
         const parentScale = this.getParentScale();
 
-        const diffRanges = this._refreshIncrementalState
-            ? bounds?.diffBounds.map((bound) => spreadsheetSkeleton.getRowColumnSegmentByViewBound(bound))
+        const diffRanges = this._refreshIncrementalState && viewportInfo?.diffBounds
+            ? viewportInfo?.diffBounds?.map((bound) => spreadsheetSkeleton.getRowColumnSegmentByViewBound(bound))
             : undefined;
+        const viewRanges = [spreadsheetSkeleton.getRowColumnSegmentByViewBound(viewportInfo?.cacheBound)];
+
         const extensions = this.getExtensionsByOrder();
-        for (const extension of extensions) {
-            extension.draw(ctx, parentScale, spreadsheetSkeleton, diffRanges);
+
+        if((viewportInfo?.viewPortKey === 'viewMain' || viewportInfo?.viewPortKey === 'viewMainLeft')) {
+            // console.log(bounds?.viewPortKey, 'diffRange count', diffRanges.length, 'diffY StartRow', diffRanges[0].startRow, 'diffY startColumn', diffRanges[0].startColumn , ':::::height', diffRanges[0].endRow - diffRanges[0].startRow,':::::width', diffRanges[0].endColumn - diffRanges[0].startColumn);
+            console.log(viewportInfo?.viewPortKey, ' ranges', viewRanges[0],'diffRanges', diffRanges, 'bounds', viewportInfo?.cacheBound, viewportInfo?.viewBound);
         }
+
+        const timeKey = `diffRange ${viewportInfo?.viewPortKey}!!ext!!`;
+        console.time(timeKey);
+        for (const extension of extensions) {
+            const timeKey = `${viewportInfo?.viewPortKey}!!ext!!${extension.uKey}`;
+            console.time(timeKey);
+            extension.draw(ctx, parentScale, spreadsheetSkeleton, {
+                viewRanges,
+                diffRanges,
+                checkOutOfViewBound: viewportInfo.allowCache, //!!bounds!.cacheCanvas,
+            });
+            console.timeEnd(timeKey);
+        }
+        console.timeEnd(timeKey);
     }
 
     override isHit(coord: Vector2) {
@@ -207,8 +243,16 @@ export class Spreadsheet extends SheetComponent {
         };
     }
 
+
+    isForceDirty(): boolean {
+        return this._forceDirty;
+    }
+
+    /**
+     * canvas resize & zoom
+     * @param state
+     */
     makeForceDirty(state = true) {
-        this.makeDirty(state);
         this._forceDirty = state;
     }
 
@@ -220,7 +264,236 @@ export class Spreadsheet extends SheetComponent {
         return this.getSkeleton()?.getMergeBounding(startRow, startColumn, endRow, endColumn);
     }
 
-    override render(mainCtx: UniverRenderingContext, bounds?: IViewportBound) {
+    /**
+     * canvas resize 并不会调用此函数
+     * resize 调用的是 forceDirty
+     * @param state
+     * @returns
+     */
+    override makeDirty(state: boolean = true) {
+        super.makeDirty(state);
+        return this;
+    }
+
+    makeDirtyArea(dirtyBounds: IBoundRectNoAngle[]) {
+        // super.makeDirty(state);
+        // if(state)this.markViewPortDirty(true);
+        // return this;
+    }
+
+    tickTime() {
+        if(!window.lastTime) {
+            window.lastTime = +new Date;
+        } else {
+            console.log('time', +new Date - window.lastTime);
+            window.lastTime = +new Date;
+        }
+    }
+
+    renderByViewport(mainCtx: UniverRenderingContext, viewportBoundsInfo: IViewportInfo, spreadsheetSkeleton: SpreadsheetSkeleton) {
+        const { viewBound, cacheBound: cacheBounds, diffBounds, diffCacheBounds, diffX, diffY, viewPortPosition, viewPortKey, isDirty, isForceDirty, shouldCacheUpdate, cacheCanvas, leftOrigin, topOrigin, bufferEdgeX, bufferEdgeY } = viewportBoundsInfo as Required<IViewportInfo>;
+        const { rowHeaderWidth, columnHeaderHeight } = spreadsheetSkeleton;
+        const { a: scaleX = 1, d: scaleY = 1 } = mainCtx.getTransform();
+        const bufferEdgeSizeX = bufferEdgeX * scaleX / window.devicePixelRatio;
+        const bufferEdgeSizeY = bufferEdgeY * scaleY / window.devicePixelRatio;
+        // mainCtx this._scene.getEngine()?.getCanvas().getContext();
+
+
+        if (viewPortKey === 'viewMain') {
+            const cacheCtx = cacheCanvas.getContext();
+            cacheCtx.save();
+
+            //
+            const { left, top, right, bottom } = viewPortPosition;
+
+            const dw = right - left + rowHeaderWidth;
+            const dh = bottom - top + columnHeaderHeight;
+
+
+            // 没有滚动
+            if (diffBounds.length === 0 || (diffX === 0 && diffY === 0) || isForceDirty) {
+                //console.time('!!!viewMain_render!!!_111');
+                // if (isDirty || isForceDirty || this.isForceDirty()) {
+                if (isDirty || isForceDirty) {
+                    cacheCtx.save();
+                    cacheCtx.setTransform(1, 0, 0, 1, 0, 0);
+                    cacheCanvas.clear();
+                    cacheCtx.restore();
+                    // cacheCtx.setTransform(sceneTrans.convert2DOMMatrix2D());
+
+                    cacheCtx.save();
+
+
+                    // 在 render() 中 mainCtx 做了这样的操作
+                    // mainCtx.translateWithPrecision(rowHeaderWidth, columnHeaderHeight);
+                    // 所以 cacheCtx.setTransform 已经包含了 rowHeaderWidth + scroll 距离
+                    const m = mainCtx.getTransform();
+                    cacheCtx.setTransform(m.a,m.b, m.c, m.d, m.e, m.f);
+                    viewportBoundsInfo.viewBound = viewportBoundsInfo.cacheBound;
+                    viewportBoundsInfo.viewPortPosition = viewportBoundsInfo.cacheViewPortPosition;
+
+                    // 处理相对 viewportPosition 的偏移  回到 (0, 0) 单元格位置
+                    // cacheCtx.translate(-left + BUFFER_EDGE_SIZE, -top);
+                    cacheCtx.translate(-leftOrigin + bufferEdgeX, -topOrigin + bufferEdgeY);
+                    // cacheCtx.translate(bufferEdgeSizeX, 0)
+
+                    // extension 绘制时按照内容的左上角计算, 不考虑 rowHeaderWidth
+                    this.draw(cacheCtx, viewportBoundsInfo);
+
+
+                    cacheCtx.restore();
+                }
+                console.log('dh ', viewPortKey, dh, bottom,  top, columnHeaderHeight);
+                this._applyCacheFreeze(mainCtx, cacheCanvas, bufferEdgeSizeX, bufferEdgeSizeY, dw, dh, left, top, dw, dh);
+            } else {
+                // diffX diffY 可以是小数
+                // console.log('!!!viewMain_render!!!_222, diffBounds', diffX, diffY, isDirty)
+                //console.time('!!!viewMain_render!!!_222');
+                if( isDirty ){
+
+                    cacheCtx.save();
+                    cacheCtx.setTransform(1, 0, 0, 1, 0, 0);
+                    cacheCtx.globalCompositeOperation = 'copy';
+                    cacheCtx.drawImage(cacheCanvas.getCanvasEle(), diffX * scaleX, diffY * scaleY);
+                    cacheCtx.restore();
+
+                    this._refreshIncrementalState = true;
+
+                    // 绘制之前重设画笔位置到 spreadsheet 原点, 当没有滚动时, 这个值是 (rowHeaderWidth, colHeaderHeight)
+                    cacheCtx.setTransform(mainCtx.getTransform());
+                    // cacheCtx.transform(1, 0, 0, 1, BUFFER_EDGE_SIZE* scaleX,  BUFFER_EDGE_SIZE* scaleX);
+
+
+                    // cacheCtx.translate(-left + BUFFER_EDGE_SIZE, -top);
+                    cacheCtx.translate(-leftOrigin + bufferEdgeX, -topOrigin + bufferEdgeY);
+
+
+                    console.time('!!!viewMain_render_222---222');
+                    if (shouldCacheUpdate) {
+
+                        for (const diffBound of diffCacheBounds) {
+                            cacheCtx.save();
+
+                            let { left: diffLeft, right: diffRight, bottom: diffBottom, top: diffTop } = diffBound;
+                            cacheCtx.beginPath();
+
+                            // 再次注意!  draw 的时候 ctx.translate 单元格偏移是相对 spreadsheet content
+                            // 不考虑 rowHeaderWidth
+                            // 但是 diffBounds 是包括 rowHeader 信息
+                            diffLeft -= bufferEdgeX; // 必须扩大范围 不然存在空白贴图
+                            diffTop -= bufferEdgeY;
+                            const x = diffLeft - (rowHeaderWidth) - FIX_ONE_PIXEL_BLUR_OFFSET * 2;
+                            const y = diffTop - columnHeaderHeight - FIX_ONE_PIXEL_BLUR_OFFSET * 2;
+                            const w = diffRight - diffLeft + (rowHeaderWidth) + FIX_ONE_PIXEL_BLUR_OFFSET * 2;
+                            const h = diffBottom - diffTop + columnHeaderHeight + FIX_ONE_PIXEL_BLUR_OFFSET * 2;
+
+
+                            cacheCtx.rectByPrecision(x, y, w, h);
+                            // cacheCtx.fillStyle = 'rgba(220, 220, 255, 1)';
+                            // cacheCtx.fill();
+                            cacheCtx.fillStyle = 'red';
+                            cacheCtx.fillText( ''+ x, x, 340)//-tr.f + 100)
+                            cacheCtx.clip();
+
+                            this.draw(cacheCtx, {
+                                ...viewportBoundsInfo,
+                                diffBounds: [diffBound],
+                            });
+                            cacheCtx.restore();
+                        }
+                    }
+                    console.timeEnd('!!!viewMain_render_222---222');
+                    this._refreshIncrementalState = false;
+
+                    // 进入到这里的坐标, 从 sheet corner 右下角计算 也就是不算行头列头
+                    const tr = cacheCtx.getTransform();
+                    for (let index = 0; index < cacheBounds.right; ) {
+                        cacheCtx.fillText( ''+index, index, 280)//-tr.f + 100)
+                        cacheCtx.beginPath();
+                        cacheCtx.moveTo(index, 280); // 将画笔移动到起点
+                        cacheCtx.lineTo(index, 1000);     // 绘制直线到终点
+                        cacheCtx.stroke();               // 绘制直线
+                        index = index + 50;
+                    }
+
+                }
+                this._applyCacheFreeze(mainCtx, cacheCanvas, bufferEdgeSizeX, bufferEdgeSizeY, dw, dh, left, top, dw, dh);
+
+            }
+            cacheCtx.restore();
+        } else {
+            const cacheCtx = cacheCanvas.getContext();
+            cacheCtx.save();
+            const { left, top, right, bottom } = viewPortPosition;
+            const dw = right - left + rowHeaderWidth;
+            const dh = bottom - top + columnHeaderHeight;
+
+            if (diffBounds.length === 0 || (diffX === 0 && diffY === 0) || isForceDirty) {
+                if (isDirty || isForceDirty || this.isForceDirty()) {
+                    cacheCtx.save();
+                    cacheCtx.setTransform(1, 0, 0, 1, 0, 0);
+                    cacheCanvas.clear();
+                    cacheCtx.restore();
+
+                    cacheCtx.save();
+                    // cacheCtx.setTransform(sceneTrans.convert2DOMMatrix2D());
+                    cacheCtx.setTransform(mainCtx.getTransform());
+                    cacheCtx.translate(-leftOrigin + bufferEdgeX, -topOrigin + bufferEdgeY);
+
+
+                    viewportBoundsInfo.viewBound = viewportBoundsInfo.cacheBound;
+                    this._draw(cacheCtx, viewportBoundsInfo);
+
+                    cacheCtx.restore();
+                }
+                this._applyCacheFreeze(mainCtx, cacheCanvas, bufferEdgeSizeX, bufferEdgeSizeY, dw, dh, left, top, dw, dh);
+            } else {
+                if(isDirty){
+                    cacheCtx.save();
+                    cacheCtx.setTransform(1, 0, 0, 1, 0, 0);
+                    cacheCtx.globalCompositeOperation = 'copy';
+                    cacheCtx.drawImage(cacheCanvas.getCanvasEle(), diffX * scaleX, diffY * scaleY);
+                    cacheCtx.restore();
+
+                    this._refreshIncrementalState = true;
+                    cacheCtx.setTransform(mainCtx.getTransform());
+                    cacheCtx.translate(-leftOrigin + bufferEdgeX, -topOrigin + bufferEdgeY);
+
+
+
+                    if (shouldCacheUpdate) {
+                        for (const diffBound of diffCacheBounds) {
+                            let { left: diffLeft, right: diffRight, bottom: diffBottom, top: diffTop } = diffBound;
+                            cacheCtx.save();
+                            cacheCtx.beginPath();
+                            diffLeft -= bufferEdgeX; // 必须扩大范围 不然存在空白贴图
+                            diffTop -= bufferEdgeY;
+                            const x = diffLeft - (rowHeaderWidth) - FIX_ONE_PIXEL_BLUR_OFFSET * 2;
+                            const y = diffTop - columnHeaderHeight - FIX_ONE_PIXEL_BLUR_OFFSET * 2;
+                            const w = diffRight - diffLeft + (rowHeaderWidth) + FIX_ONE_PIXEL_BLUR_OFFSET * 2;
+                            const h = diffBottom - diffTop + columnHeaderHeight + FIX_ONE_PIXEL_BLUR_OFFSET * 2;
+
+
+                            cacheCtx.rectByPrecision(x, y, w, h);
+                            cacheCtx.clip();
+                            this.draw(cacheCtx, {
+                                ...viewportBoundsInfo,
+                                diffBounds: [diffBound],
+                            });
+                            cacheCtx.restore();
+                        }
+                    }
+
+                    this._refreshIncrementalState = false;
+                }
+                this._applyCacheFreeze(mainCtx, cacheCanvas, bufferEdgeSizeX, bufferEdgeSizeY, dw, dh, left, top, dw, dh);
+            }
+            cacheCtx.restore();
+        }
+
+    }
+
+    override render(mainCtx: UniverRenderingContext, viewportInfo: IViewportInfo) {
         if (!this.visible) {
             this.makeDirty(false);
             return this;
@@ -229,7 +502,7 @@ export class Spreadsheet extends SheetComponent {
         const spreadsheetSkeleton = this.getSkeleton();
         if (!spreadsheetSkeleton) return;
 
-        spreadsheetSkeleton.calculateWithoutClearingCache(bounds);
+        spreadsheetSkeleton.calculateWithoutClearingCache(viewportInfo);
 
         const segment = spreadsheetSkeleton.rowColumnSegment;
 
@@ -242,112 +515,48 @@ export class Spreadsheet extends SheetComponent {
 
         mainCtx.save();
 
-        const { a: scaleX = 1, d: scaleY = 1 } = mainCtx.getTransform();
 
         const { rowHeaderWidth, columnHeaderHeight } = spreadsheetSkeleton;
-
         mainCtx.translateWithPrecision(rowHeaderWidth, columnHeaderHeight);
 
-        this._drawAuxiliary(mainCtx, bounds);
+        this._drawAuxiliary(mainCtx, viewportInfo);
 
-        if (bounds && this._allowCache === true) {
-            const { viewBound, diffBounds, diffX, diffY, viewPortPosition, viewPortKey } = bounds;
+        const { viewPortKey } = viewportInfo;
+        // scene --> layer, getObjects --> viewport.render(object) --> spreadsheet
+        // zIndex 0 spreadsheet  this.getObjectsByOrder() ---> [spreadsheet]
+        // zIndex 2 rowHeader & colHeader & freezeBorder this.getObjectsByOrder() ---> [SpreadsheetRowHeader, SpreadsheetColumnHeader, _Rect]
+        // zIndex 3 selection  this.getObjectsByOrder() ---> [group]
 
-            // if (viewPortKey === 'viewColumnRight' || viewPortKey === 'viewRowBottom' || viewPortKey === 'viewLeftTop') {
-            //     // console.warn('ignore object', this);
-            //     return;
-            // }
-
-            // if (
-            //     viewPortKey === 'viewRowTop' ||
-            //     viewPortKey === 'viewRowBottom' ||
-            //     viewPortKey === 'viewMainLeft' ||
-            //     viewPortKey === 'viewMainTop'
-            // ) {
-            //     // console.warn('ignore object', this);
-            //     return;
-            // }
-
-            const ctx = this._cacheCanvas.getContext();
-            ctx.save();
-
-            const { left, top, right, bottom } = viewPortPosition;
-
-            const dw = right - left + rowHeaderWidth;
-
-            const dh = bottom - top + columnHeaderHeight;
-
-            if (this._forceDirty) {
-                if (this.isDirty() || this._forceDirty) {
-                    this._cacheCanvas.clear();
-                    ctx.setTransform(mainCtx.getTransform());
-                    this._draw(ctx, bounds);
-                    this._forceDirty = false;
-                }
-                this._applyCache(mainCtx, left, top, dw, dh, left, top, dw, dh);
+        // SpreadsheetRowHeader SpreadsheetColumnHeader 并不在 spreadsheet 中处理
+        if(['viewMain', 'viewMainLeftTop', 'viewMainTop', 'viewMainLeft'].includes(viewPortKey)) {
+            if (viewportInfo && viewportInfo.cacheCanvas) {
+                this.renderByViewport(mainCtx, viewportInfo, spreadsheetSkeleton);
             } else {
-                if (this.isDirty()) {
-                    ctx.save();
-                    ctx.globalCompositeOperation = 'copy';
-                    ctx.setTransform(1, 0, 0, 1, 0, 0);
-                    ctx.drawImage(this._cacheCanvas.getCanvasEle(), diffX * scaleX, diffY * scaleY);
-                    ctx.restore();
-
-                    this._refreshIncrementalState = true;
-                    ctx.setTransform(mainCtx.getTransform());
-
-                    for (const diffBound of diffBounds) {
-                        const { left: diffLeft, right: diffRight, bottom: diffBottom, top: diffTop } = diffBound;
-                        ctx.save();
-                        ctx.beginPath();
-                        ctx.rectByPrecision(
-                            diffLeft - rowHeaderWidth - FIX_ONE_PIXEL_BLUR_OFFSET,
-                            diffTop - columnHeaderHeight - FIX_ONE_PIXEL_BLUR_OFFSET,
-                            diffRight - diffLeft + rowHeaderWidth + FIX_ONE_PIXEL_BLUR_OFFSET * 2,
-                            diffBottom - diffTop + columnHeaderHeight + FIX_ONE_PIXEL_BLUR_OFFSET * 2
-                        );
-                            // ctx.fillStyle = 'rgb(0,0,0)';
-
-                        ctx.clip();
-                        this._draw(ctx, {
-                            viewBound: bounds.viewBound,
-                            diffBounds: [diffBound],
-                            diffX: bounds.diffX,
-                            diffY: bounds.diffY,
-                            viewPortPosition: bounds.viewPortPosition,
-                            viewPortKey: bounds.viewPortKey,
-                        });
-                        ctx.restore();
-                    }
-
-                    this._refreshIncrementalState = false;
-                }
-                this._applyCache(mainCtx, left, top, dw, dh, left, top, dw, dh);
+                this._draw(mainCtx, viewportInfo);
             }
-
-            ctx.restore();
-        } else {
-            this._draw(mainCtx, bounds);
         }
 
         mainCtx.restore();
-
-        this.makeDirty(false);
         return this;
     }
 
-    private _resizeCacheCanvas() {
-        const parentSize = this._getAncestorSize();
-        if (!parentSize || this._cacheCanvas == null) {
-            return;
-        }
-        const { width, height } = parentSize;
-        this._cacheCanvas.setSize(width, height);
-        this.makeForceDirty(true);
-    }
-
-    protected _applyCache(
-        ctx?: UniverRenderingContext,
+    /**
+     *
+     * @param mainCtx
+     * @param cacheCanvas Source Image
+     * @param sx
+     * @param sy
+     * @param sw
+     * @param sh
+     * @param dx
+     * @param dy
+     * @param dw
+     * @param dh
+     * @returns
+     */
+    protected _applyCacheFreeze(
+        mainCtx: UniverRenderingContext,
+        cacheCanvas: Canvas,
         sx: number = 0,
         sy: number = 0,
         sw: number = 0,
@@ -357,19 +566,19 @@ export class Spreadsheet extends SheetComponent {
         dw: number = 0,
         dh: number = 0
     ) {
-        if (!ctx) {
+        if (!mainCtx) {
             return;
         }
 
-        const pixelRatio = this._cacheCanvas.getPixelRatio();
-
-        const cacheCtx = this._cacheCanvas.getContext();
+        const pixelRatio = cacheCanvas.getPixelRatio();
+        const cacheCtx = cacheCanvas.getContext();
         cacheCtx.save();
-        ctx.save();
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        mainCtx.save();
+        mainCtx.setTransform(1, 0, 0, 1, 0, 0);
         cacheCtx.setTransform(1, 0, 0, 1, 0, 0);
-        ctx.drawImage(
-            this._cacheCanvas.getCanvasEle(),
+        mainCtx.globalCompositeOperation = "source-over";
+        mainCtx.drawImage(
+            cacheCanvas.getCanvasEle(),
             sx * pixelRatio,
             sy * pixelRatio,
             sw * pixelRatio,
@@ -379,11 +588,11 @@ export class Spreadsheet extends SheetComponent {
             dw * pixelRatio,
             dh * pixelRatio
         );
-        ctx.restore();
+        mainCtx.restore();
         cacheCtx.restore();
     }
 
-    protected override _draw(ctx: UniverRenderingContext, bounds?: IViewportBound) {
+    protected override _draw(ctx: UniverRenderingContext, bounds?: IViewportInfo) {
         this.draw(ctx, bounds);
     }
 
@@ -430,42 +639,13 @@ export class Spreadsheet extends SheetComponent {
         this._fontExtension = this.getExtensionByKey('DefaultFontExtension') as Font;
     }
 
-    private _addMakeDirtyToScroll() {
-        this._hasScrollViewportOperator(this, (viewport: Viewport) => {
-            viewport.onScrollBeforeObserver.add(() => {
-                this.makeDirty(true);
-            });
-        });
-    }
-
-    private _hasScrollViewportOperator(object: BaseObject, fn: (viewPort: Viewport) => void) {
-        let parent: any = object.getParent();
-        while (parent) {
-            if (parent.classType === RENDER_CLASS_TYPE.SCENE) {
-                const viewports = parent.getViewports();
-                const viewPorts = this._getHasScrollViewports(viewports);
-                for (const viewport of viewPorts) {
-                    if (viewport) {
-                        fn(viewport);
-                    }
-                }
-            }
-            parent = parent?.getParent && parent?.getParent();
-        }
-    }
-
-    private _getHasScrollViewports(viewports: Viewport[]) {
-        const newViewports: Viewport[] = [];
-        for (const viewport of viewports) {
-            const scrollBar = viewport.getScrollBar();
-            if (scrollBar) {
-                newViewports.push(viewport);
-            }
-        }
-        return newViewports;
-    }
-
-    private _drawAuxiliary(ctx: UniverRenderingContext, bounds?: IViewportBound) {
+    /**
+     * draw gridlines
+     * @param ctx
+     * @param bounds
+     * @returns
+     */
+    private _drawAuxiliary(ctx: UniverRenderingContext, bounds?: IViewportInfo) {
         const spreadsheetSkeleton = this.getSkeleton();
         if (spreadsheetSkeleton == null) {
             return;
@@ -582,12 +762,12 @@ export class Spreadsheet extends SheetComponent {
 
         // Clearing the dashed line issue caused by overlaid auxiliary lines and strokes
         // merge cell
-        this._clearRectangle(ctx, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
+        // this._clearRectangle(ctx, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
 
         // overflow cell
-        this._clearRectangle(ctx, rowHeightAccumulation, columnWidthAccumulation, overflowCache.toNativeArray());
+        // this._clearRectangle(ctx, rowHeightAccumulation, columnWidthAccumulation, overflowCache.toNativeArray());
 
-        this._clearBackground(ctx, backgroundPositions);
+        // this._clearBackground(ctx, backgroundPositions);
 
         ctx.restore();
     }

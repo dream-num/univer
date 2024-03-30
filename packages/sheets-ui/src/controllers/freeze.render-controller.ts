@@ -176,6 +176,11 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderC
         this._bindViewportScroll();
 
         this._zoomRefresh();
+
+
+        // this._getViewports();
+        // 非冻结也需要 viewports  所以逻辑还是放在 sheet-canvas-view 中
+        // this._getSheetObject()?.spreadsheet.setViewports(Object.values(this._getViewports()|| {}));
     }
 
     private _createFreeze(
@@ -728,6 +733,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderC
         if (!viewports) {
             return;
         }
+
 
         const {
             viewMain,
@@ -1516,6 +1522,15 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderC
         return getSheetObject(this._context.unit, this._context);
     }
 
+    /**
+     * 调整冻结 & 缩放都会进入
+     * 但是窗口 resize 并不会进入
+     * @param startRow
+     * @param startColumn
+     * @param ySplit
+     * @param xSplit
+     * @param resetScroll
+     */
     private _refreshFreeze(
         startRow: number,
         startColumn: number,
@@ -1535,7 +1550,10 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderC
         this._createFreeze(FREEZE_DIRECTION_TYPE.COLUMN, newFreeze);
 
         this._updateViewport(startRow, startColumn, ySplit, xSplit, resetScroll);
+        // this._getSheetObject()?.spreadsheet.makeForceDirty();
+        // this._getSheetObject()?.scene.getViewports().forEach(vp => vp.makeForceDirty());
 
-        this._getSheetObject()?.spreadsheet.makeForceDirty();
+
+
     }
 }

@@ -92,6 +92,11 @@ export class Scene extends ThinScene {
                 })
             )
         );
+
+        if(!window.sceneMap) {
+            window.sceneMap = new Map();
+        }
+        window.sceneMap.set(sceneKey, this);
     }
 
     get ancestorScaleX() {
@@ -500,8 +505,6 @@ export class Scene extends ThinScene {
         for (let i = 0, len = layers.length; i < len; i++) {
             layers[i].render(parentCtx, i === len - 1);
         }
-
-        // this.getViewports()?.forEach((vp: Viewport) => vp.render(parentCtx));
     }
 
     async requestRender(parentCtx?: UniverRenderingContext) {

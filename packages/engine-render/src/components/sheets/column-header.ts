@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IViewportBound, Vector2 } from '../../basics/vector2';
+import type { IViewportInfo, Vector2 } from '../../basics/vector2';
 import type { UniverRenderingContext } from '../../context';
 import { SheetColumnHeaderExtensionRegistry } from '../extension';
 import type { ColumnHeaderLayout } from './extensions/column-header-layout';
@@ -36,7 +36,7 @@ export class SpreadsheetColumnHeader extends SpreadsheetHeader {
         return this._columnHeaderLayoutExtension;
     }
 
-    override draw(ctx: UniverRenderingContext, bounds?: IViewportBound) {
+    override draw(ctx: UniverRenderingContext, bounds?: IViewportInfo) {
         const spreadsheetSkeleton = this.getSkeleton();
         if (!spreadsheetSkeleton) {
             return;

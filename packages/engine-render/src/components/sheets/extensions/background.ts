@@ -16,7 +16,7 @@
 
 import type { IRange, IScale } from '@univerjs/core';
 
-import { getColor } from '../../../basics/tools';
+import { getColor, inViewRanges } from '../../../basics/tools';
 import type { UniverRenderingContext } from '../../../context';
 import { SpreadsheetExtensionRegistry } from '../../extension';
 import type { SpreadsheetSkeleton } from '../sheet-skeleton';
@@ -43,7 +43,7 @@ export class Background extends SheetExtension {
         ctx: UniverRenderingContext,
         parentScale: IScale,
         spreadsheetSkeleton: SpreadsheetSkeleton,
-        diffRanges?: IRange[]
+        {viewRanges, diffRanges, checkOutOfViewBound}: { viewRanges?: IRange[], diffRanges?: IRange[], checkOutOfViewBound?: boolean }
     ) {
         const { stylesCache } = spreadsheetSkeleton;
         const { background, backgroundPositions } = stylesCache;
@@ -70,8 +70,15 @@ export class Background extends SheetExtension {
                 const backgroundCache = background[rgb];
 
                 ctx.fillStyle = rgb || getColor([255, 255, 255])!;
-                ctx.beginPath();
+
+                const backgroundPaths = new Path2D(); // 使用 Path 对象代替原有的 ctx.moveTo ctx.lineTo, Path 性能更好
                 backgroundCache.forValue((rowIndex, columnIndex) => {
+                    // 当前单元格不在视野范围内, 提前退出
+                    // 和 font 不同的是, 不需要考虑合并单元格且单元格横跨 viewport 的情况.
+                    // 因为即使合并后, 也会进入 forValue 迭代, 此刻单元格状态是 isMerged, 也能从 cellInfo 中获取颜色信息
+                    // if(!inViewRanges(viewRanges!, rowIndex, columnIndex)) {
+                    //     return true;
+                    // }
                     const cellInfo = backgroundPositions?.getValue(rowIndex, columnIndex);
 
                     if (cellInfo == null) {
@@ -79,48 +86,51 @@ export class Background extends SheetExtension {
                     }
                     let { startY, endY, startX, endX } = cellInfo;
                     const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
-                    if (isMerged) {
-                        return true;
-                    }
 
-                    if (
-                        !this.isRenderDiffRangesByCell(
-                            {
-                                startRow: mergeInfo.startRow,
-                                endRow: mergeInfo.endRow,
-                                startColumn: mergeInfo.startColumn,
-                                endColumn: mergeInfo.endColumn,
-                            },
-                            diffRanges
-                        )
-                    ) {
-                        return true;
-                    }
+                    // 合并后的单元格, 非左上角单元格(因为在)
+                    // if (isMerged) {
+                    //     return true;
+                    // }
+                    // // 合并单元格, 但是区域是合并的左上角
+                    // if (isMergedMainCell) {
+                    //     startY = mergeInfo.startY;
+                    //     endY = mergeInfo.endY;
+                    //     startX = mergeInfo.startX;
+                    //     endX = mergeInfo.endX;
+                    // }
 
-                    // if (
-                    //     !this.isRenderDiffRangesByColumn(mergeInfo.startColumn, diffRanges) &&
-                    //     !this.isRenderDiffRangesByColumn(mergeInfo.endColumn, diffRanges)
+                    // 水平方向和 diffRange 没有交集就提前退出
+                    // 然而不能这么做  Y 方向滚动也可能存在问题
+                    // if (!this.isRowInDiffRanges(
+                    //         // {
+                    //         //     startRow: mergeInfo.startRow,
+                    //         //     endRow: mergeInfo.endRow,
+                    //         //     startColumn: mergeInfo.startColumn,
+                    //         //     endColumn: mergeInfo.endColumn,
+                    //         // },
+                    //         rowIndex,
+                    //         rowIndex,
+                    //         diffRanges
+                    //         // {
+                    //         //     startRow: rowIndex,
+                    //         //     endRow: rowIndex,
+                    //         //     startColumn: columnIndex,
+                    //         //     endColumn: columnIndex,
+                    //         // },
+                    //     )
                     // ) {
                     //     return true;
                     // }
 
-                    if (isMergedMainCell) {
-                        startY = mergeInfo.startY;
-                        endY = mergeInfo.endY;
-                        startX = mergeInfo.startX;
-                        endX = mergeInfo.endX;
-                    }
+                    backgroundPaths.rect(startX, startY, endX - startX, endY - startY)
 
-                    ctx.moveToByPrecision(startX, startY);
-                    ctx.lineToByPrecision(startX, endY);
-                    ctx.lineToByPrecision(endX, endY);
-                    ctx.lineToByPrecision(endX, startY);
                 });
-                ctx.closePath();
-                ctx.fill();
+                ctx.fill(backgroundPaths);
             });
         ctx.restore();
     }
+
+
 }
 
 SpreadsheetExtensionRegistry.add(Background);

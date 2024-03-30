@@ -19,6 +19,8 @@
 import type { ICellData, IRange, IScale, ObjectMatrix } from '@univerjs/core';
 import { HorizontalAlign, WrapStrategy } from '@univerjs/core';
 
+import { VERTICAL_ROTATE_ANGLE } from '../../../basics/text-rotation';
+import { inCurrentAndAboveViewRanges, inRowViewRanges, inViewRanges, mergeRangeIfIntersects } from '../../../basics/tools';
 import type { UniverRenderingContext } from '../../../context';
 import type { Documents } from '../../docs/document';
 import { SpreadsheetExtensionRegistry } from '../../extension';
@@ -55,7 +57,7 @@ export class Font extends SheetExtension {
         ctx: UniverRenderingContext,
         parentScale: IScale,
         spreadsheetSkeleton: SpreadsheetSkeleton,
-        diffRanges?: IRange[]
+        {viewRanges, diffRanges, checkOutOfViewBound, viewPortKey}: { viewRanges: IRange[], diffRanges?: IRange[], checkOutOfViewBound?: boolean, viewPortKey: string }
     ) {
         const { stylesCache, dataMergeCache, overflowCache, worksheet } = spreadsheetSkeleton;
         const { font: fontList } = stylesCache;
@@ -76,15 +78,32 @@ export class Font extends SheetExtension {
             return;
         }
         ctx.save();
-
         const scale = this._getScale(parentScale);
 
         fontList &&
             Object.keys(fontList).forEach((fontFormat: string) => {
                 const fontObjectArray = fontList[fontFormat];
 
+                // 提前退出渲染的条件
+                // viewMainTop 要考虑来自左右两边单元格的溢出
+                // viewLeft 要考虑来自上方合并单元格
+                // viewMain 要考虑左右溢出和上方合并的单元格的内容
+                // 因此, 在 viewBounds 中的下方的单元格 ---> 提前退出
+                // 而 viewMainLeftTop 不受 viewBounds 之外的影响, 因此视野外的单元格提前退出
+                // 此外, 不是溢出, 又不在视野内可以提前退出
+
                 // eslint-disable-next-line complexity
                 fontObjectArray.forValue((rowIndex, columnIndex, docsConfig) => {
+                    if( checkOutOfViewBound ) {
+                        // 下方单元格 提前退出
+                        if(!inCurrentAndAboveViewRanges(viewRanges!, rowIndex, columnIndex)) {
+                            return true;
+                        }
+                    } else {
+                        if(!inViewRanges(viewRanges!, rowIndex, columnIndex)) {
+                            return true;
+                        }
+                    }
                     const cellInfo = this.getCellIndex(
                         rowIndex,
                         columnIndex,
@@ -99,6 +118,16 @@ export class Font extends SheetExtension {
                         return true;
                     }
 
+                    // 合并后单元格与当前 viewRange 有交叉, 则合并到当前 viewRange 中
+                    // 合并后 font extension 在当前 viewBounds 中也走一次绘制
+                    // 但是此刻还不能认为不在 viewRanges 内就退出
+                    // 横向还可能存在 overflow, 因此此刻只能排除不在当前 row 的单元格
+                    const combineWithMergeRanges = mergeRangeIfIntersects(viewRanges[0], [mergeInfo]);
+                    if(!inRowViewRanges([combineWithMergeRanges], rowIndex)) {
+                        return true;
+                    }
+
+
                     if (isMergedMainCell) {
                         startY = mergeInfo.startY;
                         endY = mergeInfo.endY;
@@ -108,8 +137,10 @@ export class Font extends SheetExtension {
 
                     /**
                      * Incremental content rendering for texture mapping
+                     * startRow endRow 和 diffRanges 在 row 上不相交, 那么返回不渲染
+                     * (因为可以走贴图)
                      */
-                    if (!this.isRenderDiffRangesByRow(mergeInfo.startRow, mergeInfo.endRow, diffRanges)) {
+                    if (!this.isRowInDiffRanges(mergeInfo.startRow, mergeInfo.endRow, diffRanges)) {
                         return true;
                     }
 
@@ -128,8 +159,14 @@ export class Font extends SheetExtension {
                         return true;
                     }
 
+                    // 单元格是否溢出 没有设置溢出 overflowRectangle 为 undefined
                     const overflowRectangle = overflowCache.getValue(rowIndex, columnIndex);
                     const { horizontalAlign, vertexAngle = 0, centerAngle = 0 } = docsConfig;
+
+                    // 既不是溢出, 又不在当前 range 内(已考虑合并单元格带来的 range 扩展), 那么也退出
+                    if(!overflowRectangle && !inViewRanges([...viewRanges, mergeInfo], rowIndex, columnIndex)) {
+                        return true;
+                    }
 
                     /**
                      * https://github.com/dream-num/univer-pro/issues/334

@@ -148,9 +148,9 @@ export class SheetCanvasView extends RxDisposable {
 
         const sheetId = worksheet.getSheetId();
 
-        const _viewMain = this._addViewport(worksheet);
-
         const spreadsheet = new Spreadsheet(SHEET_VIEW_KEY.MAIN);
+        const _viewMain = this._addViewport(worksheet, spreadsheet);
+
         const spreadsheetRowHeader = new SpreadsheetRowHeader(SHEET_VIEW_KEY.ROW);
         const spreadsheetColumnHeader = new SpreadsheetColumnHeader(SHEET_VIEW_KEY.COLUMN);
         const SpreadsheetLeftTopPlaceholder = new Rect(SHEET_VIEW_KEY.LEFT_TOP, {
@@ -192,7 +192,7 @@ export class SheetCanvasView extends RxDisposable {
      * | VIEW_ROW_BOTTOM |   VIEW_MAIN_LEFT   |     VIEW_MAIN     |
      * +-----------------+--------------------+-------------------+
      */
-    private _addViewport(worksheet: Worksheet) {
+    private _addViewport(worksheet: Worksheet, spreadsheet: Spreadsheet) {
         const scene = this._scene;
         if (scene == null) {
             return;
@@ -208,6 +208,9 @@ export class SheetCanvasView extends RxDisposable {
             isWheelPreventDefaultX: true,
             isRelativeX: true,
             isRelativeY: true,
+            allowCache: true,
+            bufferEdgeX: 100,
+            bufferEdgeY: 50,
         });
 
         new Viewport(VIEWPORT_KEY.VIEW_ROW_TOP, scene, {
@@ -244,7 +247,7 @@ export class SheetCanvasView extends RxDisposable {
             isRelativeY: false,
         });
 
-        new Viewport(VIEWPORT_KEY.VIEW_LEFT_TOP, scene, {
+        const viewLeftTop = new Viewport(VIEWPORT_KEY.VIEW_LEFT_TOP, scene, {
             left: 0,
             top: 0,
             width: rowHeader.width,
@@ -254,25 +257,34 @@ export class SheetCanvasView extends RxDisposable {
             isRelativeY: false,
         });
 
-        new Viewport(VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP, scene, {
+        const viewMainLeftTop = new Viewport(VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP, scene, {
             isWheelPreventDefaultX: true,
             active: false,
             isRelativeX: false,
             isRelativeY: false,
+            allowCache: true,
+            bufferEdgeX: 0,
+            bufferEdgeY: 0,
         });
 
-        new Viewport(VIEWPORT_KEY.VIEW_MAIN_LEFT, scene, {
+        const viewMainLeft = new Viewport(VIEWPORT_KEY.VIEW_MAIN_LEFT, scene, {
             isWheelPreventDefaultX: true,
             active: false,
             isRelativeX: false,
             isRelativeY: true,
+            allowCache: true,
+            bufferEdgeX: 0,
+            bufferEdgeY: 50,
         });
 
-        new Viewport(VIEWPORT_KEY.VIEW_MAIN_TOP, scene, {
+        const viewMainTop = new Viewport(VIEWPORT_KEY.VIEW_MAIN_TOP, scene, {
             isWheelPreventDefaultX: true,
             active: false,
             isRelativeX: true,
             isRelativeY: false,
+            allowCache: true,
+            bufferEdgeX: 100,
+            bufferEdgeY: 0,
         });
 
         // mouse scroll
@@ -291,7 +303,8 @@ export class SheetCanvasView extends RxDisposable {
                         const deltaFactor = Math.abs(evt.deltaX);
                         // let magicNumber = deltaFactor < 40 ? 2 : deltaFactor < 80 ? 3 : 4;
                         const scrollNum = deltaFactor;
-
+                        // 展示更多右侧内容，evt.deltaX > 0
+                        // 展示更多左侧内容, evt.deltaX < 0
                         if (evt.deltaX > 0) {
                             offsetX = scrollNum;
                         } else {

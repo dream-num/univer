@@ -15,7 +15,7 @@
  */
 
 import { BaseObject } from '../base-object';
-import type { IViewportBound, Vector2 } from '../basics/vector2';
+import type { IViewportInfo, Vector2 } from '../basics/vector2';
 import type { UniverRenderingContext } from '../context';
 
 export class CustomObject extends BaseObject {
@@ -33,7 +33,7 @@ export class CustomObject extends BaseObject {
         };
     }
 
-    override render(mainCtx: UniverRenderingContext, bounds?: IViewportBound) {
+    override render(mainCtx: UniverRenderingContext, bounds?: IViewportInfo) {
         if (!this.visible) {
             this.makeDirty(false);
             return this;

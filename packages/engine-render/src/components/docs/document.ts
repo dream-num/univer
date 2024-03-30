@@ -25,7 +25,7 @@ import type { IDocumentSkeletonCached, IDocumentSkeletonPage } from '../../basic
 import { LineType } from '../../basics/i-document-skeleton-cached';
 import { degToRad } from '../../basics/tools';
 import type { Transform } from '../../basics/transform';
-import type { IViewportBound } from '../../basics/vector2';
+import type { IViewportInfo } from '../../basics/vector2';
 import { Vector2 } from '../../basics/vector2';
 import type { UniverRenderingContext } from '../../context';
 import type { Scene } from '../../scene';
@@ -164,7 +164,6 @@ export class Documents extends DocComponent {
     override getEngine() {
         return (this.getScene() as Scene).getEngine();
     }
-
 
     override draw(ctx: UniverRenderingContext, bounds?: IViewportBound) {
         const skeletonData = this.getSkeleton()?.getSkeletonData();
@@ -469,7 +468,7 @@ export class Documents extends DocComponent {
         return this;
     }
 
-    protected override _draw(ctx: UniverRenderingContext, bounds?: IViewportBound) {
+    protected override _draw(ctx: UniverRenderingContext, bounds?: IViewportInfo) {
         this.draw(ctx, bounds);
     }
 
@@ -553,6 +552,34 @@ export class Documents extends DocComponent {
         DocumentsSpanAndLineExtensionRegistry.getData().forEach((extension) => {
             this.register(extension);
         });
+    }
+
+    private _isSkipByDiffBounds(page: IDocumentSkeletonPage, pageTop: number, pageLeft: number, bounds?: IViewportInfo) {
+        if (bounds === null || bounds === undefined) {
+            return false;
+        }
+
+        const { pageWidth, pageHeight, marginBottom, marginTop, marginLeft, marginRight } = page;
+
+        const pageRight = pageLeft + pageWidth + marginLeft + marginRight;
+
+        const pageBottom = pageTop + pageHeight + marginBottom + marginTop;
+
+        const { left, top, right, bottom } = bounds.viewBound;
+
+        if (pageRight < left || pageBottom < top) {
+            return true;
+        }
+
+        if (pageLeft > right && pageWidth !== Number.POSITIVE_INFINITY) {
+            return true;
+        }
+
+        if (pageTop > bottom && pageHeight !== Number.POSITIVE_INFINITY) {
+            return true;
+        }
+
+        return false;
     }
 
     // private _addSkeletonChangeObserver(skeleton?: DocumentSkeleton) {

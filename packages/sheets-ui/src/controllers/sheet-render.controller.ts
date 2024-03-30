@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, Workbook } from '@univerjs/core';
+import type { ICommandInfo, Workbook, IRange } from '@univerjs/core';
 import {
     CommandType,
     ICommandService,
@@ -25,12 +25,14 @@ import {
     RxDisposable,
     toDisposable,
     UniverInstanceType,
+    Tools,
 } from '@univerjs/core';
-import type { Rect, SpreadsheetColumnHeader, SpreadsheetRowHeader } from '@univerjs/engine-render';
+import type { Rect, SpreadsheetColumnHeader, SpreadsheetRowHeader, Engine, SpreadsheetSkeleton, IBoundRectNoAngle, Viewport, IBounds, IViewportBounds } from '@univerjs/engine-render';
 import { IRenderManagerService, RENDER_RAW_FORMULA_KEY, Spreadsheet } from '@univerjs/engine-render';
 import {
     COMMAND_LISTENER_SKELETON_CHANGE,
     COMMAND_LISTENER_VALUE_CHANGE,
+    SetRangeValuesMutation,
     SetWorksheetActiveOperation,
 } from '@univerjs/sheets';
 import type { IDisposable } from '@wendellhu/redi';
@@ -141,6 +143,7 @@ export class SheetRenderController extends RxDisposable {
                         return;
                     }
 
+
                     if (command.id !== SetWorksheetActiveOperation.id) {
                         this._sheetSkeletonManagerService.makeDirty(
                             {
@@ -159,12 +162,35 @@ export class SheetRenderController extends RxDisposable {
                         sheetId,
                         commandId: command.id,
                     });
+                    const sk = this._sheetSkeletonManagerService.getCurrent();
+                    // const { rowHeightAccumulation, columnWidthAccumulation, rowHeaderWidth, columnHeaderHeight } = sk.skeleton;
+                    // console.log('sk', rowHeightAccumulation, columnWidthAccumulation, rowHeaderWidth, columnHeaderHeight)
+
                 } else if (COMMAND_LISTENER_VALUE_CHANGE.includes(command.id)) {
                     this._sheetSkeletonManagerService.reCalculate();
                 }
 
                 if (command.type === CommandType.MUTATION) {
                     this._renderManagerService.getRenderById(unitId)?.mainComponent?.makeDirty(); // refresh spreadsheet
+                    // 还有个概念和这个很像， SetRangeValuesCommand
+                    if(command.id === SetRangeValuesMutation.id) {
+                        const sk = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+                        const currentRender = this._renderManagerService.getRenderById(unitId);
+                        if (currentRender == null) {
+                            return;
+                        }
+
+                        const { mainComponent, components, engine, scene } = currentRender;
+                        const spreadsheet = mainComponent as Spreadsheet;
+
+                        // TODO command.params 数据结构有很多种
+                        const dirtyRange = this._cellValueToRange(command.params?.cellValue);
+                        const dirtyBounds = this._rangeToBounds([dirtyRange], sk!);
+                        const viewports = scene.getViewports();
+                        this.dirtyViewBounds(viewports, dirtyBounds);
+                        spreadsheet.makeDirtyArea(dirtyBounds);
+                        scene.makeDirty();
+                    }
                 }
             })
         );
@@ -181,5 +207,53 @@ export class SheetRenderController extends RxDisposable {
                     }
                 });
             });
+    }
+
+    private _cellValueToRange(cellValue: Record<number, Record<number, object>>) {
+        let rows = Object.keys(cellValue).map(Number);
+        let columns = [];
+
+        for (let [row, columnObj] of Object.entries(cellValue)) {
+          for (let column in columnObj) {
+            columns.push(Number(column));
+          }
+        }
+
+        let startRow = Math.min(...rows);
+        let endRow = Math.max(...rows);
+        let startColumn = Math.min(...columns);
+        let endColumn = Math.max(...columns);
+
+        return {
+          startRow: startRow,
+          endRow: endRow,
+          startColumn: startColumn,
+          endColumn: endColumn
+        } as IRange;
+    }
+
+    private _rangeToBounds(ranges: IRange[], sk: SpreadsheetSkeleton) {
+        const { rowHeightAccumulation, columnWidthAccumulation, rowHeaderWidth, columnHeaderHeight } = sk;
+        // rowHeightAccumulation 已经表示的是行底部的高度
+        const dirtyBounds:IViewportBounds[] = [];
+        for (let r of ranges) {
+            let { startRow, endRow, startColumn, endColumn } = r;
+            let top = startRow == 0 ? 0: rowHeightAccumulation[startRow -1] + columnHeaderHeight;
+            let bottom = rowHeightAccumulation[endRow] + columnHeaderHeight;
+            let left = startColumn == 0 ? 0 : columnWidthAccumulation[startColumn -1] + rowHeaderWidth;
+            let right = columnWidthAccumulation[endColumn] + rowHeaderWidth;
+            dirtyBounds.push({top, left, bottom, right, width: right - left, height: bottom - top});
+        }
+        return dirtyBounds;
+    }
+
+    private dirtyViewBounds(viewports: Viewport[], dirtyBounds:IViewportBounds[]) {
+        for (const vp of viewports) {
+            for(const b of dirtyBounds) {
+                if(Tools.hasIntersectionBetweenTwoBounds(vp.cacheBound, b)) {
+                    vp.makeDirty(true);
+                }
+            }
+        }
     }
 }

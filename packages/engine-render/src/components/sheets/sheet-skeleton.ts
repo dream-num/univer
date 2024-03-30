@@ -73,7 +73,7 @@ import {
     isRectIntersect,
     mergeInfoOffset,
 } from '../../basics/tools';
-import type { IBoundRectNoAngle, IViewportBound } from '../../basics/vector2';
+import type { IBoundRectNoAngle, IViewportInfo } from '../../basics/vector2';
 import { columnIterator } from '../docs/layout/tools';
 import { DocumentSkeleton } from '../docs/layout/doc-skeleton';
 import { DocumentViewModel } from '../docs/view-model/document-view-model';
@@ -404,7 +404,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         this._marginTop = top;
     }
 
-    calculateSegment(bounds?: IViewportBound) {
+    calculateSegment(bounds?: IViewportInfo) {
         if (!this._worksheetData) {
             return;
         }
@@ -422,7 +422,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         return true;
     }
 
-    calculateWithoutClearingCache(bounds?: IViewportBound) {
+    calculateWithoutClearingCache(bounds?: IViewportInfo) {
         if (!this.calculateSegment(bounds)) {
             return;
         }
@@ -436,7 +436,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         return this;
     }
 
-    calculate(bounds?: IViewportBound) {
+    calculate(bounds?: IViewportInfo) {
         this._resetCache();
 
         this.calculateWithoutClearingCache(bounds);
@@ -604,8 +604,9 @@ export class SpreadsheetSkeleton extends Skeleton {
         return Math.max(rowHeader.width, widthByComputation);
     }
 
-    getRowColumnSegment(bounds?: IViewportBound) {
-        return this._getBounding(this._rowHeightAccumulation, this._columnWidthAccumulation, bounds?.viewBound);
+    getRowColumnSegment(bounds?: IViewportInfo) {
+        return this._getBounding(this._rowHeightAccumulation, this._columnWidthAccumulation, bounds?.cacheBound);
+        // return this._getBounding(this._rowHeightAccumulation, this._columnWidthAccumulation, bounds?.viewBound);
     }
 
     /**
@@ -1408,7 +1409,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             endRow: dataset_row_ed,
             startColumn: dataset_col_st,
             endColumn: dataset_col_ed,
-        };
+        } as IRange;
     }
 
     private _generateRowMatrixCache(

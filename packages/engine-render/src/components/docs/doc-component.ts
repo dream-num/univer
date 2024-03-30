@@ -20,7 +20,7 @@ import { RENDER_CLASS_TYPE } from '../../basics/const';
 import type { IDocumentSkeletonGlyph, IDocumentSkeletonLine, IDocumentSkeletonPage } from '../../basics/i-document-skeleton-cached';
 import { PageLayoutType } from '../../basics/i-document-skeleton-cached';
 import type { INodeInfo } from '../../basics/interfaces';
-import type { IBoundRectNoAngle, IViewportBound } from '../../basics/vector2';
+import type { IBoundRectNoAngle, IViewportInfo } from '../../basics/vector2';
 import type { UniverRenderingContext } from '../../context';
 import { RenderComponent } from '../component';
 import type { DOCS_EXTENSION_TYPE } from './doc-extension';
@@ -85,7 +85,7 @@ export class DocComponent extends RenderComponent<
         }
     }
 
-    override render(mainCtx: UniverRenderingContext, bounds?: IViewportBound) {
+    override render(mainCtx: UniverRenderingContext, bounds?: IViewportInfo) {
         if (!this.visible) {
             this.makeDirty(false);
             return this;
@@ -159,9 +159,9 @@ export class DocComponent extends RenderComponent<
 
     findCoordByNode(glyph: IDocumentSkeletonGlyph) {}
 
-    protected _getBounding(bounds?: IViewportBound) {}
+    protected _getBounding(bounds?: IViewportInfo) {}
 
-    protected _draw(ctx: UniverRenderingContext, bounds?: IViewportBound) {
+    protected _draw(ctx: UniverRenderingContext, bounds?: IViewportInfo) {
         /* abstract */
     }
 }

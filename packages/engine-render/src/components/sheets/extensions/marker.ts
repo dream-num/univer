@@ -34,8 +34,9 @@ export class Marker extends SheetExtension {
 
     override uKey: string = UNIQUE_KEY;
 
-    // eslint-disable-next-line max-lines-per-function
-    override draw(ctx: UniverRenderingContext, parentScale: IScale, skeleton: SpreadsheetSkeleton, diffRanges?: IRange[] | undefined): void {
+    override draw(ctx: UniverRenderingContext, parentScale: IScale, skeleton: SpreadsheetSkeleton,
+        {viewRanges, diffRanges, checkOutOfViewBound, viewPortKey}: { viewRanges: IRange[], diffRanges?: IRange[], checkOutOfViewBound?: boolean, viewPortKey: string }
+    ): void {
         const { worksheet, rowColumnSegment } = skeleton;
         if (!worksheet) {
             return;

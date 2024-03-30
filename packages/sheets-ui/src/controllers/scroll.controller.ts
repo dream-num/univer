@@ -244,6 +244,7 @@ export class ScrollController extends Disposable {
                         return;
                     }
 
+                    // 数据源 packages/sheets-ui/src/services/scroll-manager.service.ts@_addByParam
                     const { sheetViewStartRow, sheetViewStartColumn, offsetX, offsetY } = param;
 
                     const { startX, startY } = skeleton.getCellByIndexWithNoHeader(

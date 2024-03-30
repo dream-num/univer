@@ -24,7 +24,7 @@ import type {
     LocaleService,
     Nullable,
 } from '@univerjs/core';
-import { BaselineOffset, DEFAULT_STYLES, FontStyleType, Tools } from '@univerjs/core';
+import { BaselineOffset, DEFAULT_STYLES, FontStyleType, Rectangle, Tools } from '@univerjs/core';
 import * as cjk from 'cjk-regex';
 
 import { FontCache } from '../components/docs/layout/shaping-engine/font-cache';
@@ -756,4 +756,81 @@ export function ptToPixel(pt: number) {
 
 export function pixelToPt(px: number) {
     return px * PX_TO_PT_RATIO;
+}
+
+/**
+ * 当前单元格在任意一个 viewRanges 中
+ * @param ranges
+ * @param rowIndex
+ * @param colIndex
+ * @returns
+ */
+export function inViewRanges(ranges: IRange[], rowIndex: number, colIndex: number) {
+    for (const range of ranges) {
+        if (rowIndex >= range.startRow && rowIndex <= range.endRow &&
+            colIndex >= range.startColumn && colIndex <= range.endColumn) {
+            return true;
+        }
+    }
+    return false;
+}
+
+/**
+ * 在非下方区域中
+ * @param ranges
+ * @param rowIndex
+ * @returns
+ */
+export function inCurrentAndAboveViewRanges(ranges: IRange[], rowIndex: number) {
+    for (const range of ranges) {
+        if (rowIndex > range.endRow) {
+            return false;
+        }
+    }
+    return true;
+}
+
+/**
+ * row 在任意一个 Range 中
+ * @param ranges
+ * @param rowIndex
+ * @returns
+ */
+export function inRowViewRanges(ranges: IRange[], rowIndex: number) {
+    let flag = false;
+    for (const range of ranges) {
+        if (rowIndex >= range.startRow && rowIndex <= range.endRow) {
+            flag = true;
+            break;
+        }
+    }
+    return flag;
+}
+
+/**
+ * 如果 range 有相交, 那么扩展到第一个 range 中.
+ * @param ranges
+ */
+export function mergeRangeIfIntersects(mainRanges: IRange[], ranges: IRange[]) {
+    for (const mainRange of mainRanges) {
+        for (const range of ranges) {
+            if (Rectangle.intersects(mainRange, range)) {
+                mainRange.startRow = Math.min(mainRange.startRow, range.startRow);
+                mainRange.endRow = Math.max(mainRange.endRow, range.endRow);
+                mainRange.startColumn = Math.min(mainRange.startColumn, range.startColumn);
+                mainRange.endColumn = Math.max(mainRange.endColumn, range.endColumn);
+            }
+        }
+    }
+    return mainRanges;
+}
+
+
+export function clampRanges(range: IRange) {
+    return {
+        startRow: Math.max(0, range.startRow),
+        startColumn: Math.max(0, range.startColumn),
+        endRow: Math.max(0, range.endRow),
+        endColumn: Math.max(0, range.endColumn),
+    };
 }

@@ -24,7 +24,7 @@ import type { IDocumentSkeletonCached, IDocumentSkeletonPage } from '../../basic
 import { LineType } from '../../basics/i-document-skeleton-cached';
 import { degToRad } from '../../basics/tools';
 import type { Transform } from '../../basics/transform';
-import type { IViewportBound } from '../../basics/vector2';
+import type { IViewportInfo } from '../../basics/vector2';
 import { Vector2 } from '../../basics/vector2';
 import type { UniverRenderingContext } from '../../context';
 import type { Scene } from '../../scene';
@@ -164,7 +164,7 @@ export class Documents extends DocComponent {
         return (this.getScene() as Scene).getEngine();
     }
 
-    override draw(ctx: UniverRenderingContext, bounds?: IViewportBound) {
+    override draw(ctx: UniverRenderingContext, bounds?: IViewportInfo) {
         const skeletonData = this.getSkeleton()?.getSkeletonData();
 
         if (skeletonData == null) {
@@ -466,7 +466,7 @@ export class Documents extends DocComponent {
         return this;
     }
 
-    protected override _draw(ctx: UniverRenderingContext, bounds?: IViewportBound) {
+    protected override _draw(ctx: UniverRenderingContext, bounds?: IViewportInfo) {
         this.draw(ctx, bounds);
     }
 

@@ -30,6 +30,7 @@ import { Inject, Injector } from '@wendellhu/redi';
 
 import type {
     IAddWorksheetMergeMutationParams,
+    IInsertColMutationParams,
     IRemoveColMutationParams,
     IRemoveRowsMutationParams,
     IRemoveWorksheetMergeMutationParams,
@@ -1046,10 +1047,11 @@ export class MergeCellController extends Disposable {
         this.disposeWithMe(this._commandService.onCommandExecuted((command: ICommandInfo) => {
             // 1. MoveRowsOrColsMutation
             if (mutationIdArrByMove.includes(command.id)) {
-                const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
-                const worksheet = workbook.getActiveSheet();
                 if (!command.params) return;
-
+                const workbook = this._univerInstanceService.getUniverSheetInstance((command.params as IMoveRowsMutationParams).unitId);
+                if (!workbook) return;
+                const worksheet = workbook.getSheetBySheetId((command.params as IMoveRowsMutationParams).subUnitId);
+                if (!worksheet) return;
                 const { sourceRange, targetRange } = command.params as IMoveRowsOrColsMutationParams;
                 const isRowMove = sourceRange.startColumn === targetRange.startColumn && sourceRange.endColumn === targetRange.endColumn;
                 const moveLength = isRowMove
@@ -1092,8 +1094,10 @@ export class MergeCellController extends Disposable {
 
             // 2. InsertRowsOrCols / RemoveRowsOrCols Mutations
             if (mutationIdByRowCol.includes(command.id)) {
-                const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
-                const worksheet = workbook.getActiveSheet();
+                const workbook = this._univerInstanceService.getUniverSheetInstance((command.params as IInsertColMutationParams).unitId);
+                if (!workbook) return;
+                const worksheet = workbook.getSheetBySheetId((command.params as IInsertColMutationParams).subUnitId);
+                if (!worksheet) return;
 
                 const mergeData = worksheet.getConfig().mergeData;
                 const params = command.params as IInsertRowCommandParams;

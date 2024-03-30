@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
+import type { Canvas } from '../canvas';
 import type { DeepImmutable, FloatArray } from './i-events';
+import type { Transform } from './transform';
 
 export interface IPoint {
     x: number;
@@ -844,17 +846,61 @@ export interface IBoundRect {
 }
 
 export interface IBoundRectNoAngle {
+    /**
+     * 冻结区域相对 MainCanvas 的物理位置,
+     * left = n * colWidth + rowHeaderWidth
+     */
     left: number;
     top: number;
     right: number;
     bottom: number;
 }
 
-export interface IViewportBound {
+export interface IViewportInfo {
+    /**
+     * viewBound 的 left right 包括列头行头
+     */
     viewBound: IBoundRectNoAngle;
     diffBounds: IBoundRectNoAngle[];
+
+    /**
+     * 让更多右侧内容呈现 diffX < 0
+     * previewBound.x - viewbound.x
+     */
     diffX: number;
     diffY: number;
+
+    /**
+     * 冻结行列在 canvas 上的物理位置, drawImage 用
+     * 例如冻结从第四列开始, left 就是 4 * column + rowHeaderWidth
+     */
     viewPortPosition: IBoundRectNoAngle;
-    viewPortKey?: string;
+    viewPortKey: string;
+    isDirty?: boolean;
+    isForceDirty?: boolean;
+
+    allowCache?: boolean;
+    cacheBound: IBoundRectNoAngle;
+    diffCacheBounds: IBoundRectNoAngle[];
+    cacheViewPortPosition: IBoundRectNoAngle;
+
+    // vp?: Viewport;
+    shouldCacheUpdate: number;
+    sceneTrans: Transform;
+    cacheCanvas?: Canvas;
+
+    leftOrigin: number;
+    topOrigin: number;
+
+    bufferEdgeX: number;
+    bufferEdgeY: number;
+}
+
+export interface IViewportInfos {
+    left: number;
+    right: number;
+    top: number;
+    bottom: number;
+    width: number;
+    height: number;
 }

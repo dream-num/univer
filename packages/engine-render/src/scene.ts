@@ -460,7 +460,7 @@ export class Scene extends ThinScene {
     override removeViewport(key: string) {
         for (let i = 0, len = this._viewports.length; i < len; i++) {
             const viewport = this._viewports[i];
-            if (viewport.viewPortKey === key) {
+            if (viewport.viewportKey === key) {
                 this._viewports.splice(i, 1);
                 return viewport;
             }
@@ -471,9 +471,13 @@ export class Scene extends ThinScene {
         return this._viewports;
     }
 
+    getSpreadSheetViewports() {
+        return this.getViewports().filter((v) => ['viewMain', 'viewMainLeftTop', 'viewMainTop', 'viewMainLeft'].includes(v.viewportKey));
+    }
+
     getViewport(key: string) {
         for (const viewport of this._viewports) {
-            if (viewport.viewPortKey === key) {
+            if (viewport.viewportKey === key) {
                 return viewport;
             }
         }
@@ -491,8 +495,6 @@ export class Scene extends ThinScene {
         for (let i = 0, len = layers.length; i < len; i++) {
             layers[i].render(parentCtx, i === len - 1);
         }
-
-        // this.getViewports()?.forEach((vp: Viewport) => vp.render(parentCtx));
     }
 
     async requestRender(parentCtx?: UniverRenderingContext) {

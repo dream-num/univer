@@ -19,6 +19,7 @@ import { BorderStyleTypes } from '@univerjs/core';
 
 import { BORDER_TYPE, COLOR_BLACK_RGB, FIX_ONE_PIXEL_BLUR_OFFSET } from '../../../basics/const';
 import { drawDiagonalLineByBorderType, drawLineByBorderType, getLineWidth, setLineType } from '../../../basics/draw';
+import { inViewRanges } from '../../../basics/tools';
 import type { UniverRenderingContext } from '../../../context';
 import { SpreadsheetExtensionRegistry } from '../../extension';
 import type { BorderCacheItem } from '../interfaces';
@@ -38,7 +39,8 @@ export class Border extends SheetExtension {
         ctx: UniverRenderingContext,
         parentScale: IScale,
         spreadsheetSkeleton: SpreadsheetSkeleton,
-        diffRanges?: IRange[]
+        diffRanges: IRange[],
+        { viewRanges }: { viewRanges?: IRange[]; diffRanges?: IRange[]; checkOutOfViewBound: boolean }
     ) {
         const { dataMergeCache, stylesCache, overflowCache } = spreadsheetSkeleton;
         const { border } = stylesCache;
@@ -70,6 +72,9 @@ export class Border extends SheetExtension {
             if (!borderCaches) {
                 return true;
             }
+            if (!inViewRanges(viewRanges!, rowIndex, columnIndex)) {
+                return true;
+            }
 
             const cellInfo = this.getCellIndex(
                 rowIndex,
@@ -82,7 +87,7 @@ export class Border extends SheetExtension {
             const { startY: cellStartY, endY: cellEndY, startX: cellStartX, endX: cellEndX } = cellInfo;
             const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
 
-            if (!this.isRenderDiffRangesByRow(mergeInfo.startRow, mergeInfo.endRow, diffRanges)) {
+            if (!this.isRowInDiffRanges(mergeInfo.startRow, mergeInfo.endRow, diffRanges)) {
                 return true;
             }
 

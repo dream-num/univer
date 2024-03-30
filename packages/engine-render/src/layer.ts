@@ -21,7 +21,8 @@ import { BaseObject } from './base-object';
 import { RENDER_CLASS_TYPE } from './basics/const';
 import { Canvas } from './canvas';
 import type { UniverRenderingContext } from './context';
-import type { ThinScene } from './thin-scene';
+import type { Scene } from './scene';
+import type { SceneViewer } from './scene-viewer';
 
 export class Layer extends Disposable {
     private _objects: BaseObject[] = [];
@@ -33,7 +34,7 @@ export class Layer extends Disposable {
     private _debounceDirtyFunc: Nullable<() => void>;
 
     constructor(
-        private _scene: ThinScene,
+        private _scene: Scene,
         objects: BaseObject[] = [],
         private _zIndex: number = 1,
         private _allowCache: boolean = false
@@ -176,7 +177,7 @@ export class Layer extends Disposable {
          */
         const parent = this.scene.getParent();
         if (parent.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
-            parent.makeDirty(true);
+            (parent as SceneViewer).makeDirty(true);
         }
 
         return this;
@@ -200,25 +201,26 @@ export class Layer extends Disposable {
 
     render(parentCtx?: UniverRenderingContext, isMaxLayer = false) {
         const mainCtx = parentCtx || this._scene.getEngine()?.getCanvas().getContext();
+        if (mainCtx) {
+            if (this._allowCache && this._cacheCanvas) {
+                if (this.isDirty()) {
+                    const ctx = this._cacheCanvas.getContext();
 
-        if (this._allowCache && this._cacheCanvas) {
-            if (this.isDirty()) {
-                const ctx = this._cacheCanvas.getContext();
+                    this._cacheCanvas.clear();
 
-                this._cacheCanvas.clear();
+                    ctx.save();
 
-                ctx.save();
+                    ctx.setTransform(mainCtx.getTransform());
+                    this._draw(ctx, isMaxLayer);
 
-                ctx.setTransform(mainCtx.getTransform());
-                this._draw(ctx, isMaxLayer);
-
-                ctx.restore();
+                    ctx.restore();
+                }
+                this._applyCache(mainCtx);
+            } else {
+                mainCtx.save();
+                this._draw(mainCtx, isMaxLayer);
+                mainCtx.restore();
             }
-            this._applyCache(mainCtx);
-        } else {
-            mainCtx.save();
-            this._draw(mainCtx, isMaxLayer);
-            mainCtx.restore();
         }
 
         this.makeDirty(false);
@@ -241,7 +243,7 @@ export class Layer extends Disposable {
         this._cacheCanvas = new Canvas();
         this.disposeWithMe(
             toDisposable(
-                this._scene.getEngine().onTransformChangeObservable.add(() => {
+                this._scene.getEngine()?.onTransformChangeObservable.add(() => {
                     this._resizeCacheCanvas();
                 })
             )
@@ -249,7 +251,10 @@ export class Layer extends Disposable {
     }
 
     private _draw(mainCtx: UniverRenderingContext, isMaxLayer: boolean) {
-        this._scene.getViewports()?.forEach((vp) => vp.render(mainCtx, this.getObjectsByOrder(), isMaxLayer));
+        const viewports = this._scene.getViewports();
+        for (const [index, vp] of viewports.entries()) {
+            vp.render(mainCtx, this.getObjectsByOrder(), isMaxLayer, index === viewports.length - 1);
+        }
     }
 
     private _applyCache(ctx?: UniverRenderingContext) {
@@ -258,12 +263,17 @@ export class Layer extends Disposable {
         }
         const width = this._cacheCanvas.getWidth();
         const height = this._cacheCanvas.getHeight();
-        ctx.drawImage(this._cacheCanvas.getCanvasEle(), 0, 0, width, height);
+        // it throw an error if canvas size is zero, and canvas size is zero when viewport isActive is false.
+        if (width !== 0 && height !== 0) {
+            ctx.drawImage(this._cacheCanvas.getCanvasEle(), 0, 0, width, height);
+        }
     }
 
     private _resizeCacheCanvas() {
         const engine = this._scene.getEngine();
-        this._cacheCanvas?.setSize(engine.width, engine.height);
+        if (engine) {
+            this._cacheCanvas?.setSize(engine.width, engine.height);
+        }
         this.makeDirty(true);
     }
 

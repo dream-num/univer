@@ -671,4 +671,35 @@ export class Tools {
 
         return !containsInvalidChars && isValidLength;
     }
+
+    static hasIntersectionBetweenTwoBounds(
+        rect1: {
+            left: number;
+            top: number;
+            right: number;
+            bottom: number;
+        },
+        rect2: {
+            left: number;
+            top: number;
+            right: number;
+            bottom: number;
+        }
+    ) {
+        // const rect1Right = rect1.left + rect1.width;
+        // const rect2Right = rect2.left + rect2.width;
+        // const rect1Bottom = rect1.top + rect1.height;
+        // const rect2Bottom = rect2.top + rect2.height;
+
+        if (
+            rect1.left > rect2.right || // rect1 在 rect2 右侧
+            rect1.right < rect2.left || // rect1 在 rect2 左侧
+            rect1.top > rect2.bottom || // rect1 在 rect2 下方
+            rect1.bottom < rect2.top // rect1 在 rect2 上方
+        ) {
+            return false;
+        }
+
+        return true;
+    }
 }

@@ -15,6 +15,7 @@
  */
 
 import type { ICommandInfo,
+    IRange,
     Workbook } from '@univerjs/core';
 import { CommandType,
     ICommandService,
@@ -24,13 +25,16 @@ import { CommandType,
     OnLifecycle,
     RxDisposable,
     toDisposable,
+    Tools,
     UniverInstanceType,
 } from '@univerjs/core';
-import type { Rect, SpreadsheetColumnHeader, SpreadsheetRowHeader } from '@univerjs/engine-render';
+import type { IViewportInfos, Rect, SpreadsheetColumnHeader, SpreadsheetRowHeader, Viewport } from '@univerjs/engine-render';
 import { IRenderManagerService, RENDER_RAW_FORMULA_KEY, Spreadsheet } from '@univerjs/engine-render';
 import {
     COMMAND_LISTENER_SKELETON_CHANGE,
     COMMAND_LISTENER_VALUE_CHANGE,
+    MoveRangeMutation,
+    SetRangeValuesMutation,
     SetWorksheetActiveOperation,
 } from '@univerjs/sheets';
 import type { IDisposable } from '@wendellhu/redi';
@@ -154,6 +158,7 @@ export class SheetRenderController extends RxDisposable {
                         return;
                     }
 
+
                     if (command.id !== SetWorksheetActiveOperation.id) {
                         this._sheetSkeletonManagerService.makeDirty(
                             {
@@ -167,6 +172,8 @@ export class SheetRenderController extends RxDisposable {
 
                     // Change the skeleton to render when the sheet is changed.
                     // Should also check the init sheet.
+                    // setCurrent ---> currentSkeletonBefore$ ---> zoom.controller.subscribe ---> scene._setTransForm --->  viewports markDirty
+                    // setCurrent ---> currentSkeleton$ ---> scroll.controller.subscribe ---> scene?.transformByState ---> scene._setTransFor
                     this._sheetSkeletonManagerService.setCurrent({
                         unitId,
                         sheetId,
@@ -177,7 +184,7 @@ export class SheetRenderController extends RxDisposable {
                 }
 
                 if (command.type === CommandType.MUTATION) {
-                    this._renderManagerService.getRenderById(unitId)?.mainComponent?.makeDirty(); // refresh spreadsheet
+                    this._markSpreadsheetDirty(unitId, command);
                 }
             })
         );
@@ -190,9 +197,95 @@ export class SheetRenderController extends RxDisposable {
             .subscribe(() => {
                 this._renderManagerService.getRenderAll().forEach((renderer) => {
                     if (renderer.mainComponent instanceof Spreadsheet) {
-                        renderer.mainComponent.makeForceDirty(true);
+                        (renderer.mainComponent as Spreadsheet).makeForceDirty(true);
                     }
                 });
             });
+    }
+
+    private _markSpreadsheetDirty(unitId: string, command: ICommandInfo) {
+        const currentRender = this._renderManagerService.getRenderById(unitId);
+        if (!currentRender) return;
+        const { mainComponent: spreadsheet, scene } = currentRender;
+        if (spreadsheet) {
+            spreadsheet.makeDirty(); // refresh spreadsheet
+        }
+        scene.makeDirty();
+        if (!command.params) return;
+        const cmdParams = command.params as Record<string, any>;
+        const viewports = scene.getSpreadSheetViewports();
+        // 还有个概念和这个很像， SetRangeValuesCommand
+        if (command.id === SetRangeValuesMutation.id && cmdParams.cellValue) {
+            // TODO command.params 数据结构有很多种
+            const dirtyRange: IRange = this._cellValueToRange(cmdParams.cellValue);
+            const dirtyBounds = this._rangeToBounds([dirtyRange]);
+            this.markViewportDirty(viewports, dirtyBounds);
+            (spreadsheet as Spreadsheet).setDirtyArea(dirtyBounds);
+        }
+
+        if (command.id === MoveRangeMutation.id && cmdParams.from && cmdParams.to) {
+            const fromRange = this._cellValueToRange(cmdParams.from.value);
+            const toRange = this._cellValueToRange(cmdParams.to.value);
+            const dirtyBounds = this._rangeToBounds([fromRange, toRange]);
+            this.markViewportDirty(viewports, dirtyBounds);
+            (spreadsheet as Spreadsheet).setDirtyArea(dirtyBounds);
+        }
+    }
+
+    /**
+     * cellValue data structure:
+     * {[row]: { [col]: value}}
+     * @param cellValue
+     * @returns
+     */
+    private _cellValueToRange(cellValue: Record<number, Record<number, object>>) {
+        const rows = Object.keys(cellValue).map(Number);
+        const columns = [];
+
+        for (const [_row, columnObj] of Object.entries(cellValue)) {
+            for (const column in columnObj) {
+                columns.push(Number(column));
+            }
+        }
+
+        const startRow = Math.min(...rows);
+        const endRow = Math.max(...rows);
+        const startColumn = Math.min(...columns);
+        const endColumn = Math.max(...columns);
+
+        return {
+            startRow,
+            endRow,
+            startColumn,
+            endColumn,
+        } as IRange;
+    }
+
+    private _rangeToBounds(ranges: IRange[]) {
+        const sk = this._sheetSkeletonManagerService.getCurrent()?.skeleton!;
+
+        const { rowHeightAccumulation, columnWidthAccumulation, rowHeaderWidth, columnHeaderHeight } = sk;
+        // rowHeightAccumulation 已经表示的是行底部的高度
+        const dirtyBounds: IViewportInfos[] = [];
+        for (const r of ranges) {
+            const { startRow, endRow, startColumn, endColumn } = r;
+            const top = startRow === 0 ? 0 : rowHeightAccumulation[startRow - 1] + columnHeaderHeight;
+            const bottom = rowHeightAccumulation[endRow] + columnHeaderHeight;
+            const left = startColumn === 0 ? 0 : columnWidthAccumulation[startColumn - 1] + rowHeaderWidth;
+            const right = columnWidthAccumulation[endColumn] + rowHeaderWidth;
+            dirtyBounds.push({ top, left, bottom, right, width: right - left, height: bottom - top });
+        }
+        return dirtyBounds;
+    }
+
+    private markViewportDirty(viewports: Viewport[], dirtyBounds: IViewportInfos[]) {
+        const activeViewports = viewports.filter((vp) => vp.isActive && vp.cacheBound);
+        for (const vp of activeViewports) {
+            for (const b of dirtyBounds) {
+                if (Tools.hasIntersectionBetweenTwoBounds(vp.cacheBound!, b)) {
+                    vp.markDirty(true);
+                }
+            }
+        }
     }
 }

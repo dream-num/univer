@@ -17,19 +17,17 @@
 import type { IRange, ISelectionCellWithCoord, Nullable, ObjectMatrix } from '@univerjs/core';
 import { BooleanNumber, sortRules } from '@univerjs/core';
 
-import type { BaseObject } from '../../base-object';
 
 import { FIX_ONE_PIXEL_BLUR_OFFSET, RENDER_CLASS_TYPE } from '../../basics/const';
 
 // import { clearLineByBorderType } from '../../basics/draw';
 import { getCellPositionByIndex, getColor } from '../../basics/tools';
-import type { IViewportBound, Vector2 } from '../../basics/vector2';
-import { Canvas } from '../../canvas';
+import type { IBoundRectNoAngle, IViewportInfo, Vector2 } from '../../basics/vector2';
+import type { Canvas } from '../../canvas';
 import type { UniverRenderingContext } from '../../context';
 import type { Engine } from '../../engine';
 import type { Scene } from '../../scene';
 import type { SceneViewer } from '../../scene-viewer';
-import type { Viewport } from '../../viewport';
 import { Documents } from '../docs/document';
 import { SpreadsheetExtensionRegistry } from '../extension';
 import type { Background } from './extensions/background';
@@ -49,11 +47,11 @@ export class Spreadsheet extends SheetComponent {
 
     private _fontExtension!: Font;
 
-    private _cacheCanvas!: Canvas;
-
     private _refreshIncrementalState = false;
 
     private _forceDirty = false;
+
+    private _dirtyBounds: IBoundRectNoAngle[] = [];
 
     private _forceDisableGridlines = false;
 
@@ -70,20 +68,8 @@ export class Spreadsheet extends SheetComponent {
         private _allowCache: boolean = true
     ) {
         super(oKey, spreadsheetSkeleton);
-
-        if (this._allowCache) {
-            this._cacheCanvas = new Canvas();
-
-            this.onIsAddedToParentObserver.add((parent) => {
-                (parent as Scene)?.getEngine()?.onTransformChangeObservable.add(() => {
-                    this._resizeCacheCanvas();
-                });
-                this._resizeCacheCanvas();
-                this._addMakeDirtyToScroll();
-            });
-        }
-
         this._initialDefaultExtension();
+
         this.makeDirty(true);
     }
 
@@ -118,14 +104,15 @@ export class Spreadsheet extends SheetComponent {
         super.dispose();
         this._documents?.dispose();
         this._documents = null as unknown as Documents;
-        this._cacheCanvas?.dispose();
-        this._cacheCanvas = null as unknown as Canvas;
+        // cacheCanvas 已经移动到 viewport 中了, cacheCanvas 的 dispose 在 viewport@dispose 中处理
+        // this._cacheCanvas?.dispose();
+        // this._cacheCanvas = null as unknown as Canvas;
         this._backgroundExtension = null as unknown as Background;
         this._borderExtension = null as unknown as Border;
         this._fontExtension = null as unknown as Font;
     }
 
-    override draw(ctx: UniverRenderingContext, bounds?: IViewportBound) {
+    override draw(ctx: UniverRenderingContext, viewportInfo: IViewportInfo) {
         // const { parent = { scaleX: 1, scaleY: 1 } } = this;
         // const mergeData = this.getMergeData();
         // const showGridlines = this.getShowGridlines() || 1;
@@ -136,12 +123,18 @@ export class Spreadsheet extends SheetComponent {
 
         const parentScale = this.getParentScale();
 
-        const diffRanges = this._refreshIncrementalState
-            ? bounds?.diffBounds.map((bound) => spreadsheetSkeleton.getRowColumnSegmentByViewBound(bound))
+        const diffRanges = this._refreshIncrementalState && viewportInfo?.diffBounds
+            ? viewportInfo?.diffBounds?.map((bound) => spreadsheetSkeleton.getRowColumnSegmentByViewBound(bound))
             : undefined;
+        const viewRanges = [spreadsheetSkeleton.getRowColumnSegmentByViewBound(viewportInfo?.cacheBound)];
         const extensions = this.getExtensionsByOrder();
+
         for (const extension of extensions) {
-            extension.draw(ctx, parentScale, spreadsheetSkeleton, diffRanges);
+            extension.draw(ctx, parentScale, spreadsheetSkeleton, diffRanges, {
+                viewRanges,
+                diffRanges,
+                checkOutOfViewBound: true,
+            });
         }
     }
 
@@ -163,10 +156,6 @@ export class Spreadsheet extends SheetComponent {
         if (!spreadsheetSkeleton) {
             return;
         }
-
-        // this.onPointerDownObserver.add((evt) => {
-        //     evt.offsetX;
-        // });
         const { rowHeightAccumulation, columnWidthAccumulation, rowHeaderWidth, columnHeaderHeight } =
             spreadsheetSkeleton;
 
@@ -207,8 +196,16 @@ export class Spreadsheet extends SheetComponent {
         };
     }
 
+
+    isForceDirty(): boolean {
+        return this._forceDirty;
+    }
+
+    /**
+     * canvas resize & zoom would call forceDirty
+     * @param state
+     */
     makeForceDirty(state = true) {
-        this.makeDirty(state);
         this._forceDirty = state;
     }
 
@@ -220,134 +217,219 @@ export class Spreadsheet extends SheetComponent {
         return this.getSkeleton()?.getMergeBounding(startRow, startColumn, endRow, endColumn);
     }
 
-    override render(mainCtx: UniverRenderingContext, bounds?: IViewportBound) {
+    /**
+     * canvas resize 并不会调用此函数
+     * resize 调用的是 forceDirty
+     * @param state
+     * @returns
+     */
+    override makeDirty(state: boolean = true) {
+        super.makeDirty(state);
+        if (state === false) {
+            this._dirtyBounds = [];
+        }
+        return this;
+    }
+
+    setDirtyArea(dirtyBounds: IBoundRectNoAngle[]) {
+        this._dirtyBounds = dirtyBounds;
+    }
+
+    renderByViewport(mainCtx: UniverRenderingContext, viewportBoundsInfo: IViewportInfo, spreadsheetSkeleton: SpreadsheetSkeleton) {
+        const { diffBounds, diffX, diffY, viewPortPosition, isDirty, isForceDirty, cacheCanvas, leftOrigin, topOrigin, bufferEdgeX, bufferEdgeY } = viewportBoundsInfo as Required<IViewportInfo>;
+        const { rowHeaderWidth, columnHeaderHeight } = spreadsheetSkeleton;
+        const { a: scaleX = 1, d: scaleY = 1 } = mainCtx.getTransform();
+        const bufferEdgeSizeX = bufferEdgeX * scaleX / window.devicePixelRatio;
+        const bufferEdgeSizeY = bufferEdgeY * scaleY / window.devicePixelRatio;
+
+
+        const cacheCtx = cacheCanvas.getContext();
+        cacheCtx.save();
+
+        const { left, top, right, bottom } = viewPortPosition;
+
+        const dw = right - left + rowHeaderWidth;
+        const dh = bottom - top + columnHeaderHeight;
+
+
+        // 没有滚动
+        if (diffBounds.length === 0 || (diffX === 0 && diffY === 0) || isForceDirty) {
+            if (isDirty || isForceDirty) {
+                this.refreshCacheCanvas(viewportBoundsInfo, { cacheCanvas, cacheCtx, mainCtx, topOrigin, leftOrigin, bufferEdgeX, bufferEdgeY });
+            }
+            this._applyCacheFreeze(mainCtx, cacheCanvas, bufferEdgeSizeX, bufferEdgeSizeY, dw, dh, left, top, dw, dh);
+        } else {
+            if (isDirty) {
+                this.paintNewAreaOfCacheCanvas(viewportBoundsInfo, {
+                    cacheCanvas, cacheCtx, mainCtx, topOrigin, leftOrigin, bufferEdgeX, bufferEdgeY, scaleX, scaleY, columnHeaderHeight, rowHeaderWidth,
+                });
+            }
+            this._applyCacheFreeze(mainCtx, cacheCanvas, bufferEdgeSizeX, bufferEdgeSizeY, dw, dh, left, top, dw, dh);
+        }
+        cacheCtx.restore();
+    }
+
+    paintNewAreaOfCacheCanvas(viewportBoundsInfo: IViewportInfo, param: {
+        cacheCanvas: Canvas; cacheCtx: UniverRenderingContext; mainCtx: UniverRenderingContext;
+        topOrigin: number;
+        leftOrigin: number;
+        bufferEdgeX: number;
+        bufferEdgeY: number;
+        rowHeaderWidth: number;
+        columnHeaderHeight: number;
+        scaleX: number;
+        scaleY: number;
+    }) {
+        const { cacheCanvas, cacheCtx, mainCtx, topOrigin, leftOrigin, bufferEdgeX, bufferEdgeY, scaleX, scaleY, columnHeaderHeight, rowHeaderWidth } = param;
+        const { shouldCacheUpdate, diffCacheBounds, diffX, diffY } = viewportBoundsInfo;
+
+        cacheCtx.save();
+        cacheCtx.setTransform(1, 0, 0, 1, 0, 0);
+        cacheCtx.globalCompositeOperation = 'copy';
+        cacheCtx.drawImage(cacheCanvas.getCanvasEle(), diffX * scaleX, diffY * scaleY);
+        cacheCtx.restore();
+
+        this._refreshIncrementalState = true;
+
+        // 绘制之前重设画笔位置到 spreadsheet 原点, 当没有滚动时, 这个值是 (rowHeaderWidth, colHeaderHeight)
+        const m = mainCtx.getTransform();
+        cacheCtx.setTransform(m.a, m.b, m.c, m.d, m.e, m.f);
+        cacheCtx.translate(-leftOrigin + bufferEdgeX, -topOrigin + bufferEdgeY);
+        if (shouldCacheUpdate) {
+            for (const diffBound of diffCacheBounds) {
+                cacheCtx.save();
+
+                const { left: diffLeft, right: diffRight, bottom: diffBottom, top: diffTop } = diffBound;
+
+                // this.draw 的时候 ctx.translate 单元格偏移是相对 spreadsheet content
+                // 但是 diffBounds 包括 rowHeader 信息, 因此绘制前需要减去行头列头的偏移
+                const onePixelFix = FIX_ONE_PIXEL_BLUR_OFFSET * 0;
+                const x = diffLeft - rowHeaderWidth - onePixelFix;
+                const y = diffTop - columnHeaderHeight - onePixelFix;
+                const w = diffRight - diffLeft + onePixelFix;
+                const h = diffBottom - diffTop + onePixelFix;
+                cacheCtx.rect(x, y, w, h);
+
+
+                // 使用 clearRect 后, 很浅很细的白色线(even not zoom has blank line)
+                const onePixelFix2 = FIX_ONE_PIXEL_BLUR_OFFSET;
+                cacheCtx.clearRect(x + onePixelFix2, y + onePixelFix2, w - onePixelFix2 * 2, h - onePixelFix2 * 2);
+                // cacheCtx.save();
+                // const m = cacheCtx.getTransform();
+                // cacheCtx.setTransform(1, 0, 0, 1, m.e, m.f);
+                // cacheCtx.clearRect(Math.ceil(x * m.a), y * m.a, Math.floor(w * m.a), h * m.a);
+                // cacheCtx.restore();
+
+                // 这里需要 clip 的原因是避免重复绘制 (否则文字有毛刺)
+                cacheCtx.clip();
+                this.draw(cacheCtx, {
+                    ...viewportBoundsInfo,
+                    diffBounds: [diffBound],
+                });
+                cacheCtx.restore();
+            }
+        }
+        this._refreshIncrementalState = false;
+    }
+
+
+    /**
+     * 整个 viewport 重绘
+     */
+    refreshCacheCanvas(viewportBoundsInfo: IViewportInfo, param: {
+        cacheCanvas: Canvas; cacheCtx: UniverRenderingContext; mainCtx: UniverRenderingContext;
+        topOrigin: number;
+        leftOrigin: number;
+        bufferEdgeX: number;
+        bufferEdgeY: number;
+    }) {
+        const { cacheCanvas, cacheCtx, mainCtx, topOrigin, leftOrigin, bufferEdgeX, bufferEdgeY } = param;
+        cacheCtx.save();
+        cacheCtx.setTransform(1, 0, 0, 1, 0, 0);
+        cacheCanvas.clear();
+        cacheCtx.restore();
+
+        cacheCtx.save();
+        // 所以 cacheCtx.setTransform 已经包含了 rowHeaderWidth + viewport + scroll 距离
+        const m = mainCtx.getTransform();
+        cacheCtx.setTransform(m.a, m.b, m.c, m.d, m.e, m.f);
+
+        // leftOrigin 是 viewport 相对 sheetcorner 的偏移(不考虑缩放)
+        // - (leftOrigin - bufferEdgeX)  ----> 简化
+        cacheCtx.translate(-leftOrigin + bufferEdgeX, -topOrigin + bufferEdgeY);
+
+        // extension 绘制时按照内容的左上角计算, 不考虑 rowHeaderWidth
+        this.draw(cacheCtx, viewportBoundsInfo);
+        cacheCtx.restore();
+    }
+
+    override render(mainCtx: UniverRenderingContext, viewportInfo: IViewportInfo) {
         if (!this.visible) {
             this.makeDirty(false);
             return this;
         }
 
         const spreadsheetSkeleton = this.getSkeleton();
-        if (!spreadsheetSkeleton) return;
 
-        spreadsheetSkeleton.calculateWithoutClearingCache(bounds);
+        if (!spreadsheetSkeleton) {
+            return;
+        }
+
+        spreadsheetSkeleton.calculateWithoutClearingCache(viewportInfo);
 
         const segment = spreadsheetSkeleton.rowColumnSegment;
 
         if (
             (segment.startRow === -1 && segment.endRow === -1) ||
-            (segment.startColumn === -1 && segment.endColumn === -1)
+                (segment.startColumn === -1 && segment.endColumn === -1)
         ) {
             return;
         }
 
         mainCtx.save();
 
-        const { a: scaleX = 1, d: scaleY = 1 } = mainCtx.getTransform();
 
         const { rowHeaderWidth, columnHeaderHeight } = spreadsheetSkeleton;
-
         mainCtx.translateWithPrecision(rowHeaderWidth, columnHeaderHeight);
 
-        this._drawAuxiliary(mainCtx, bounds);
+        this._drawAuxiliary(mainCtx, viewportInfo);
 
-        if (bounds && this._allowCache === true) {
-            const { viewBound, diffBounds, diffX, diffY, viewPortPosition, viewPortKey } = bounds;
+        const { viewPortKey } = viewportInfo;
+            // scene --> layer, getObjects --> viewport.render(object) --> spreadsheet
+            // zIndex 0 spreadsheet  this.getObjectsByOrder() ---> [spreadsheet]
+            // zIndex 2 rowHeader & colHeader & freezeBorder this.getObjectsByOrder() ---> [SpreadsheetRowHeader, SpreadsheetColumnHeader, _Rect]
+            // zIndex 3 selection  this.getObjectsByOrder() ---> [group]
 
-            // if (viewPortKey === 'viewColumnRight' || viewPortKey === 'viewRowBottom' || viewPortKey === 'viewLeftTop') {
-            //     // console.warn('ignore object', this);
-            //     return;
-            // }
-
-            // if (
-            //     viewPortKey === 'viewRowTop' ||
-            //     viewPortKey === 'viewRowBottom' ||
-            //     viewPortKey === 'viewMainLeft' ||
-            //     viewPortKey === 'viewMainTop'
-            // ) {
-            //     // console.warn('ignore object', this);
-            //     return;
-            // }
-
-            const ctx = this._cacheCanvas.getContext();
-            ctx.save();
-
-            const { left, top, right, bottom } = viewPortPosition;
-
-            const dw = right - left + rowHeaderWidth;
-
-            const dh = bottom - top + columnHeaderHeight;
-
-            if (this._forceDirty) {
-                if (this.isDirty() || this._forceDirty) {
-                    this._cacheCanvas.clear();
-                    ctx.setTransform(mainCtx.getTransform());
-                    this._draw(ctx, bounds);
-                    this._forceDirty = false;
-                }
-                this._applyCache(mainCtx, left, top, dw, dh, left, top, dw, dh);
+            // SpreadsheetRowHeader SpreadsheetColumnHeader 并不在 spreadsheet 中处理
+        if (['viewMain', 'viewMainLeftTop', 'viewMainTop', 'viewMainLeft'].includes(viewPortKey)) {
+            if (viewportInfo && viewportInfo.cacheCanvas) {
+                this.renderByViewport(mainCtx, viewportInfo, spreadsheetSkeleton);
             } else {
-                if (this.isDirty()) {
-                    ctx.save();
-                    ctx.globalCompositeOperation = 'copy';
-                    ctx.setTransform(1, 0, 0, 1, 0, 0);
-                    ctx.drawImage(this._cacheCanvas.getCanvasEle(), diffX * scaleX, diffY * scaleY);
-                    ctx.restore();
-
-                    this._refreshIncrementalState = true;
-                    ctx.setTransform(mainCtx.getTransform());
-
-                    for (const diffBound of diffBounds) {
-                        const { left: diffLeft, right: diffRight, bottom: diffBottom, top: diffTop } = diffBound;
-                        ctx.save();
-                        ctx.beginPath();
-                        ctx.rectByPrecision(
-                            diffLeft - rowHeaderWidth - FIX_ONE_PIXEL_BLUR_OFFSET,
-                            diffTop - columnHeaderHeight - FIX_ONE_PIXEL_BLUR_OFFSET,
-                            diffRight - diffLeft + rowHeaderWidth + FIX_ONE_PIXEL_BLUR_OFFSET * 2,
-                            diffBottom - diffTop + columnHeaderHeight + FIX_ONE_PIXEL_BLUR_OFFSET * 2
-                        );
-                            // ctx.fillStyle = 'rgb(0,0,0)';
-
-                        ctx.clip();
-                        this._draw(ctx, {
-                            viewBound: bounds.viewBound,
-                            diffBounds: [diffBound],
-                            diffX: bounds.diffX,
-                            diffY: bounds.diffY,
-                            viewPortPosition: bounds.viewPortPosition,
-                            viewPortKey: bounds.viewPortKey,
-                        });
-                        ctx.restore();
-                    }
-
-                    this._refreshIncrementalState = false;
-                }
-                this._applyCache(mainCtx, left, top, dw, dh, left, top, dw, dh);
+                this._draw(mainCtx, viewportInfo);
             }
-
-            ctx.restore();
-        } else {
-            this._draw(mainCtx, bounds);
         }
 
         mainCtx.restore();
-
-        this.makeDirty(false);
         return this;
     }
 
-    private _resizeCacheCanvas() {
-        const parentSize = this._getAncestorSize();
-        if (!parentSize || this._cacheCanvas == null) {
-            return;
-        }
-        const { width, height } = parentSize;
-        this._cacheCanvas.setSize(width, height);
-        this.makeForceDirty(true);
-    }
-
-    protected _applyCache(
-        ctx?: UniverRenderingContext,
+    /**
+     *
+     * @param mainCtx
+     * @param cacheCanvas Source Image
+     * @param sx
+     * @param sy
+     * @param sw
+     * @param sh
+     * @param dx
+     * @param dy
+     * @param dw
+     * @param dh
+     * @returns
+     */
+    protected _applyCacheFreeze(
+        mainCtx: UniverRenderingContext,
+        cacheCanvas: Canvas,
         sx: number = 0,
         sy: number = 0,
         sw: number = 0,
@@ -357,19 +439,19 @@ export class Spreadsheet extends SheetComponent {
         dw: number = 0,
         dh: number = 0
     ) {
-        if (!ctx) {
+        if (!mainCtx) {
             return;
         }
 
-        const pixelRatio = this._cacheCanvas.getPixelRatio();
-
-        const cacheCtx = this._cacheCanvas.getContext();
+        const pixelRatio = cacheCanvas.getPixelRatio();
+        const cacheCtx = cacheCanvas.getContext();
         cacheCtx.save();
-        ctx.save();
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        mainCtx.save();
+        mainCtx.setTransform(1, 0, 0, 1, 0, 0);
         cacheCtx.setTransform(1, 0, 0, 1, 0, 0);
-        ctx.drawImage(
-            this._cacheCanvas.getCanvasEle(),
+        mainCtx.globalCompositeOperation = 'source-over';
+        mainCtx.drawImage(
+            cacheCanvas.getCanvasEle(),
             sx * pixelRatio,
             sy * pixelRatio,
             sw * pixelRatio,
@@ -379,12 +461,12 @@ export class Spreadsheet extends SheetComponent {
             dw * pixelRatio,
             dh * pixelRatio
         );
-        ctx.restore();
+        mainCtx.restore();
         cacheCtx.restore();
     }
 
-    protected override _draw(ctx: UniverRenderingContext, bounds?: IViewportBound) {
-        this.draw(ctx, bounds);
+    protected override _draw(ctx: UniverRenderingContext, bounds?: IViewportInfo) {
+        this.draw(ctx, bounds!);
     }
 
     private _getAncestorSize() {
@@ -430,42 +512,13 @@ export class Spreadsheet extends SheetComponent {
         this._fontExtension = this.getExtensionByKey('DefaultFontExtension') as Font;
     }
 
-    private _addMakeDirtyToScroll() {
-        this._hasScrollViewportOperator(this, (viewport: Viewport) => {
-            viewport.onScrollBeforeObserver.add(() => {
-                this.makeDirty(true);
-            });
-        });
-    }
-
-    private _hasScrollViewportOperator(object: BaseObject, fn: (viewPort: Viewport) => void) {
-        let parent: any = object.getParent();
-        while (parent) {
-            if (parent.classType === RENDER_CLASS_TYPE.SCENE) {
-                const viewports = parent.getViewports();
-                const viewPorts = this._getHasScrollViewports(viewports);
-                for (const viewport of viewPorts) {
-                    if (viewport) {
-                        fn(viewport);
-                    }
-                }
-            }
-            parent = parent?.getParent && parent?.getParent();
-        }
-    }
-
-    private _getHasScrollViewports(viewports: Viewport[]) {
-        const newViewports: Viewport[] = [];
-        for (const viewport of viewports) {
-            const scrollBar = viewport.getScrollBar();
-            if (scrollBar) {
-                newViewports.push(viewport);
-            }
-        }
-        return newViewports;
-    }
-
-    private _drawAuxiliary(ctx: UniverRenderingContext, bounds?: IViewportBound) {
+    /**
+     * draw gridlines
+     * @param ctx
+     * @param bounds
+     * @returns
+     */
+    private _drawAuxiliary(ctx: UniverRenderingContext, bounds?: IViewportInfo) {
         const spreadsheetSkeleton = this.getSkeleton();
         if (spreadsheetSkeleton == null) {
             return;
@@ -547,48 +600,6 @@ export class Spreadsheet extends SheetComponent {
             ctx.closePathByEnv();
             ctx.stroke();
         }
-        // console.log('xx2', scaleX, scaleY, columnTotalWidth, rowTotalHeight, rowHeightAccumulation, columnWidthAccumulation);
-
-        // border?.forValue((rowIndex, columnIndex, borderCaches) => {
-        //     if (!borderCaches) {
-        //         return true;
-        //     }
-
-        //     const cellInfo = spreadsheetSkeleton.getCellByIndexWithNoHeader(rowIndex, columnIndex);
-
-        //     let { startY, endY, startX, endX } = cellInfo;
-        //     const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
-
-        //     if (isMerged) {
-        //         return true;
-        //     }
-
-        //     if (isMergedMainCell) {
-        //         startY = mergeInfo.startY;
-        //         endY = mergeInfo.endY;
-        //         startX = mergeInfo.startX;
-        //         endX = mergeInfo.endX;
-        //     }
-
-        //     if (!(mergeInfo.startRow >= rowStart && mergeInfo.endRow <= rowEnd)) {
-        //         return true;
-        //     }
-
-        //     for (const key in borderCaches) {
-        //         const { type } = borderCaches[key] as BorderCacheItem;
-
-        //         clearLineByBorderType(ctx, type, { startX, startY, endX, endY });
-        //     }
-        // });
-
-        // Clearing the dashed line issue caused by overlaid auxiliary lines and strokes
-        // merge cell
-        this._clearRectangle(ctx, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
-
-        // overflow cell
-        this._clearRectangle(ctx, rowHeightAccumulation, columnWidthAccumulation, overflowCache.toNativeArray());
-
-        this._clearBackground(ctx, backgroundPositions);
 
         ctx.restore();
     }

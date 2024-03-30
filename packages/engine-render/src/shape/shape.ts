@@ -19,7 +19,7 @@ import type { IKeyValue, IScale, Nullable } from '@univerjs/core';
 import { BASE_OBJECT_ARRAY, BaseObject } from '../base-object';
 import { SHAPE_TYPE } from '../basics/const';
 import type { IObjectFullState } from '../basics/interfaces';
-import type { IViewportBound, Vector2 } from '../basics/vector2';
+import type { IViewportInfo, Vector2 } from '../basics/vector2';
 import type { UniverRenderingContext } from '../context';
 
 export type LineJoin = 'round' | 'bevel' | 'miter';
@@ -304,7 +304,8 @@ export abstract class Shape<T> extends BaseObject {
         ctx.strokeStyle = stroke!;
     }
 
-    override render(mainCtx: UniverRenderingContext, bounds?: IViewportBound) {
+
+    override render(mainCtx: UniverRenderingContext, bounds?: IViewportInfo) {
         if (!this.visible) {
             this.makeDirty(false);
             return this;

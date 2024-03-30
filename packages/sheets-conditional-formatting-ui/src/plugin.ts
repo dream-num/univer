@@ -17,7 +17,7 @@
 import { ICommandService, Plugin, PluginType } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 import { SHEET_CONDITIONAL_FORMATTING_PLUGIN, SheetsConditionalFormattingPlugin } from '@univerjs/sheets-conditional-formatting';
-import { DddAverageCfCommand } from './commands/commands/add-average-cf.command';
+import { AddAverageCfCommand } from './commands/commands/add-average-cf.command';
 import { AddColorScaleConditionalRuleCommand } from './commands/commands/add-color-scale-cf.command';
 import { AddDataBarConditionalRuleCommand } from './commands/commands/add-data-bar-cf.command';
 import { AddDuplicateValuesCfCommand } from './commands/commands/add-duplicate-values-cf.command';
@@ -46,7 +46,7 @@ import { ConditionalFormattingClearController } from './controllers/cf.clear.con
 export class SheetsConditionalFormattingUiPlugin extends Plugin {
     static override type = PluginType.Sheet;
     static commandList = [
-        DddAverageCfCommand,
+        AddAverageCfCommand,
         AddColorScaleConditionalRuleCommand,
         AddDataBarConditionalRuleCommand,
         AddDuplicateValuesCfCommand,

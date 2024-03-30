@@ -46,6 +46,10 @@ export class DataBar extends SheetExtension {
         Range.foreach(spreadsheetSkeleton.rowColumnSegment, (row, col) => {
             const cellData = worksheet.getCell(row, col) as IDataBarCellData;
             if (cellData && cellData.dataBar) {
+                if (!worksheet.getColVisible(col) || !worksheet.getRowVisible(row)) {
+                    return;
+                }
+
                 const { color, value, startPoint, isGradient } = cellData.dataBar;
                 const cellInfo = this.getCellIndex(row, col, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
                 let { isMerged, isMergedMainCell, mergeInfo, startY, endY, startX, endX } = cellInfo;

@@ -40,7 +40,7 @@ type ComputeStatus = 'computing' | 'end' | 'error';
 interface IComputeCache { status: ComputeStatus };
 
 const beforeUpdateRuleResult = createInterceptorKey< { subUnitId: string; unitId: string; cfId: string }>('conditional-formatting-before-update-rule-result');
-@OnLifecycle(LifecycleStages.Starting, ConditionalFormattingService)
+@OnLifecycle(LifecycleStages.Ready, ConditionalFormattingService)
 export class ConditionalFormattingService extends Disposable {
     // <unitId,<subUnitId,<cfId,IComputeCache>>>
     private _ruleCacheMap: Map<string, Map<string, Map<string, IComputeCache>>> = new Map();
@@ -162,8 +162,8 @@ export class ConditionalFormattingService extends Disposable {
                 })
             )
         );
-        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
-        handleWorkbookAdd(workbook);
+        const workbookList = this._univerInstanceService.getAllUniverSheetsInstance();
+        workbookList.forEach((workbook) => handleWorkbookAdd(workbook));
     }
 
     private _initSheetChange() {

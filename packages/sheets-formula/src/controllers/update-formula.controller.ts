@@ -208,7 +208,7 @@ export class UpdateFormulaController extends Disposable {
                     ) {
                         return;
                     }
-                    this._handleSetRangeValuesMutation(params as ISetRangeValuesMutationParams, options);
+                    this._handleSetRangeValuesMutation(params as ISetRangeValuesMutationParams);
                 } else if (command.id === RemoveSheetMutation.id) {
                     this._handleRemoveSheetMutation(command.params as IRemoveSheetMutationParams);
                 } else if (command.id === InsertSheetMutation.id) {
@@ -251,14 +251,15 @@ export class UpdateFormulaController extends Disposable {
         });
     }
 
-    private _handleSetRangeValuesMutation(params: ISetRangeValuesMutationParams, options?: IExecutionOptions) {
-        const { subUnitId: sheetId, unitId, cellValue } = params;
+    private _handleSetRangeValuesMutation(params: ISetRangeValuesMutationParams) {
+        const { subUnitId: sheetId, unitId, cellValue, options } = params;
+        const { exchangePosition } = options || {};
 
         if (cellValue == null) {
             return;
         }
 
-        const newSheetFormulaData = this._formulaDataModel.updateFormulaData(unitId, sheetId, cellValue);
+        const newSheetFormulaData = this._formulaDataModel.updateFormulaData(unitId, sheetId, cellValue, exchangePosition);
         const newFormulaData = {
             [unitId]: {
                 [sheetId]: newSheetFormulaData,
@@ -412,7 +413,7 @@ export class UpdateFormulaController extends Disposable {
                 result
             );
 
-            const { redoFormulaData, undoFormulaData } = refRangeFormula(oldFormulaData, newFormulaData, result);
+            const { redoFormulaData, undoFormulaData, exchangePosition } = refRangeFormula(oldFormulaData, newFormulaData, result);
 
             // console.info('redoFormulaData==', redoFormulaData);
             // console.info('undoFormulaData==', undoFormulaData);
@@ -433,6 +434,9 @@ export class UpdateFormulaController extends Disposable {
                 subUnitId,
                 unitId,
                 cellValue: undoFormulaData,
+                options: {
+                    exchangePosition,
+                },
             };
 
             const undoMutation = {

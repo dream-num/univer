@@ -37,6 +37,10 @@ export interface IFormulaIdMap {
     c: number;
 }
 
+export interface IExchangePosition {
+    [key: string]: IRange;
+}
+
 export class FormulaDataModel extends Disposable {
     private _formulaData: IFormulaData = {};
 
@@ -347,7 +351,7 @@ export class FormulaDataModel extends Disposable {
         };
     }
 
-    updateFormulaData(unitId: string, sheetId: string, cellValue: IObjectMatrixPrimitiveType<Nullable<ICellData>>) {
+    updateFormulaData(unitId: string, sheetId: string, cellValue: IObjectMatrixPrimitiveType<Nullable<ICellData>>, exchangePosition?: IExchangePosition) {
         const cellMatrix = new ObjectMatrix(cellValue);
 
         const formulaIdMap = this.getFormulaIdMap(unitId, sheetId); // Connect the formula and ID
@@ -366,7 +370,20 @@ export class FormulaDataModel extends Disposable {
         const sheetFormulaDataMatrix = new ObjectMatrix<IFormulaDataItem>(workbookFormulaData[sheetId]);
         const newSheetFormulaDataMatrix = new ObjectMatrix<IFormulaDataItem | null>();
 
-        cellMatrix.forValue((r, c, cell) => {
+        cellMatrix.forValue((row, column, cell) => {
+            let r = row;
+            let c = column;
+
+            // Exchange the position of the cell
+            if (exchangePosition) {
+                const key = `${row}_${column}`;
+                if (exchangePosition[key]) {
+                    const { startRow, startColumn } = exchangePosition[key];
+                    r = startRow;
+                    c = startColumn;
+                }
+            }
+
             const formulaString = cell?.f || '';
             const formulaId = cell?.si || '';
 

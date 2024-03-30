@@ -16,7 +16,7 @@
 
 import type { ICellData, IObjectMatrixPrimitiveType, IRange, Nullable } from '@univerjs/core';
 import { cellToRange, Direction, isFormulaId, isFormulaString, ObjectMatrix } from '@univerjs/core';
-import type { IFormulaData, IFormulaDataItem } from '@univerjs/engine-formula';
+import type { IExchangePosition, IFormulaData, IFormulaDataItem } from '@univerjs/engine-formula';
 import { EffectRefRangId, handleInsertCol, runRefRangeMutations } from '@univerjs/sheets';
 import { checkFormulaDataNull } from './offset-formula-data';
 
@@ -46,7 +46,7 @@ export interface IFormulaReferenceMoveParam {
     sheetName?: string;
 }
 
-interface IRangeChange {
+export interface IRangeChange {
     oldCell: IRange;
     newCell: IRange;
 }
@@ -94,6 +94,7 @@ export function refRangeFormula(oldFormulaData: IFormulaData,
     return {
         redoFormulaData: {},
         undoFormulaData: {},
+        exchangePosition: {},
     };
 }
 
@@ -102,6 +103,7 @@ function handleRefInsertCol(oldFormulaData: IFormulaData,
     formulaReferenceMoveParam: IFormulaReferenceMoveParam) {
     let redoFormulaData: IObjectMatrixPrimitiveType<Nullable<ICellData>> = {};
     let undoFormulaData: IObjectMatrixPrimitiveType<Nullable<ICellData>> = {};
+    const exchangePosition: IExchangePosition = {};
 
     const { type, unitId, sheetId, range, from, to } = formulaReferenceMoveParam;
 
@@ -109,6 +111,7 @@ function handleRefInsertCol(oldFormulaData: IFormulaData,
         return {
             redoFormulaData,
             undoFormulaData,
+            exchangePosition,
         };
     }
 
@@ -116,6 +119,7 @@ function handleRefInsertCol(oldFormulaData: IFormulaData,
         return {
             redoFormulaData,
             undoFormulaData,
+            exchangePosition,
         };
     }
 
@@ -160,6 +164,9 @@ function handleRefInsertCol(oldFormulaData: IFormulaData,
             oldCell,
             newCell,
         });
+
+        exchangePosition[`${row}_${column}`] = oldCell;
+        exchangePosition[`${newCell.startRow}_${newCell.startColumn}`] = newCell;
     });
 
     redoFormulaData = getRedoFormulaData(rangeList.reverse(), oldFormulaMatrix, newFormulaMatrix);
@@ -168,6 +175,7 @@ function handleRefInsertCol(oldFormulaData: IFormulaData,
     return {
         redoFormulaData,
         undoFormulaData,
+        exchangePosition,
     };
 }
 

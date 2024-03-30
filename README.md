@@ -37,18 +37,19 @@
 
 ## Introduction
 
-Univer is a set of enterprise document and data collaboration solutions, including spreadsheets, documents, and slides. The highly extensible design allows developers to customize personalized functions based on Univer.
+Univer is a set of enterprise document and data collaboration solutions, integrating spreadsheets, documents, and slides.
 
-Highlights of Univer:
+Highlights:
 
-- 📈 Univer supports spreadsheets. Documents and slides will be supported in the future.
-- 🌌 Highly extensible architecture design.
-  - 🔌 Plug-in architecture, the capabilities of documents can be combined on demand, support third-party plug-ins, and facilitate customization development.
-  - 💄 Provide component library and icons to help developers present a consistent user experience.
-- ⚡ High performance.
-  - ✏️ Unified and efficient rendering engine and formula engine, based on Canvas.
-  - 🧮 High-performance formula engine, supports Web Worker.
-- 🌍 Internationalization support.
+- 📈 Univer is designed to support both **spreadsheets** and **documents**. **Slides** will be supported as well in the future.
+- ⚙️ Univer is easily **embeddable**, allowing seamless integration into your applications.
+- 🎇 Univer is **powerful**, offering a wide range of features including **formulas**, **conditional formatting**, **data validation**, **filtering**, **collaborative editing**, **printing**, **import & export** and more features on the horizon.
+- 🔌 Univer is **highly extensible**, thanks to its *plug-in architecture* and *Facade API* that makes it a delight for developers to implement their unique requirements on the top of Univer.
+- 💄 Univer is **highly customizable**, allowing you to personalize its appearance using *themes*. It also provides support for internationalization (i18n).
+- ⚡ Univer in **performant**.
+  - ✏️ Univer boasts an efficient *rendering engine* based on canvas, capable of rendering various document types flawlessly. The rendering engines supports advanced typesetting features such as *punctuation squeezing*, *text and image layout* and *scroll buffering*.
+  - 🧮 Univer incorporates a lightning-fast *formula engine* that can operate in Web Workers or even on the server side.
+- 🌌 Univer is a **highly integrated** system. Documents, spreadsheets and slides can interoperate with each others and even rendered on the same canvas, allowing information and data flow within Univer.
 
 ## Examples
 
@@ -58,23 +59,23 @@ Highlights of Univer:
 | [Sheets Multi](https://www.univer.ai/examples/sheets-multi/)<br>Multiple Univer instances can be created on a page to allow interoperability between tables    | [![](./docs/img/examples-sheets-multi.gif)](https://www.univer.ai/examples/sheets-multi/)                           |
 | [Sheets Uniscript](https://www.univer.ai/examples/sheets-uniscript/)<br>In Univer Sheets, you can directly use JavaScript syntax to operate the data in the table to achieve automation. | [![](./docs/img/examples-sheets-uniscript.gif)](https://www.univer.ai/examples/sheets-uniscript/)                       |
 | [Sheets Big Data](https://www.univer.ai/examples/sheets-big-data/)<br>Loading 10 million cells of data, completed within 500ms | [![](./docs/img/examples-sheets-big-data.gif)](https://www.univer.ai/examples/sheets-big-data/)                       |
-| [Sheets Collaboration](https://univer.ai/pro-examples/sheets-collaboration/)<br>Please open two windows or invite friends to experience Univer Sheets collaboration together            | [![](./docs/img/pro-examples-sheets-collaboration.gif)](https://univer.ai/pro-examples/sheets-collaboration/)                           |
-| [Sheets Collaboration Playground](https://univer.ai/pro-examples/sheets-collaboration-playground/)<br>Demonstrate the process of collaboration. After A edits the form, how does B process it? Here is an interesting experiment  | [![](./docs/img/pro-examples-sheets-collaboration-playground.gif)](https://univer.ai/pro-examples/sheets-collaboration-playground/)                           |
-| [Sheets Import/Export](https://univer.ai/pro-examples/sheets-exchange/)<br>Supports xlsx file import and export                | [![](./docs/img/pro-examples-sheets-exchange.gif)](https://univer.ai/pro-examples/sheets-exchange/)                           |
-| [Sheets Print](https://univer.ai/pro-examples/sheets-print/)<br>Experience the HD printing capabilities of Univer Sheets                     | [![](./docs/img/pro-examples-sheets-print.gif)](https://univer.ai/pro-examples/sheets-print/)                           |
+| [Sheets Collaboration (Pro Feature)](https://univer.ai/pro-examples/sheets-collaboration/)<br>Please open two windows or invite friends to experience Univer Sheets collaboration together            | [![](./docs/img/pro-examples-sheets-collaboration.gif)](https://univer.ai/pro-examples/sheets-collaboration/)                           |
+| [Sheets Collaboration Playground (Pro Feature)](https://univer.ai/pro-examples/sheets-collaboration-playground/)<br>Demonstrate the process of collaboration. After A edits the form, how does B process it? Here is an interesting experiment  | [![](./docs/img/pro-examples-sheets-collaboration-playground.gif)](https://univer.ai/pro-examples/sheets-collaboration-playground/)                           |
+| [Sheets Import/Export (Pro Feature)](https://univer.ai/pro-examples/sheets-exchange/)<br>Supports xlsx file import and export                | [![](./docs/img/pro-examples-sheets-exchange.gif)](https://univer.ai/pro-examples/sheets-exchange/)                           |
+| [Sheets Print (Pro Feature)](https://univer.ai/pro-examples/sheets-print/)<br>Experience the HD printing capabilities of Univer Sheets                     | [![](./docs/img/pro-examples-sheets-print.gif)](https://univer.ai/pro-examples/sheets-print/)                           |
 | [Sheets Data Validation / Conditional Formatting](https://univer-qqqkeqnw5-univer.vercel.app/sheets/)<br>Development preview of Univer Sheets data formats and conditional formatting                     | [![](./docs/img/examples-sheets-data-validation-conditional-format.png)](https://univer-qqqkeqnw5-univer.vercel.app/sheets/)                           |
 | <h3>📝 Univer Docs</h3>                    |                   |
 | [Docs](https://www.univer.ai/examples/docs/)<br>Already open: ordered and unordered lists, paragraph settings, mixed graphics and text, multi-column/single column display in sections (tentative): hyperlinks, comments, tables, charts                                  | [![](./docs/img/examples-docs.gif)](https://www.univer.ai/examples/docs/)                           |
 | [Docs Multi](https://www.univer.ai/examples/docs-multi/)<br>Multiple Univer instances can be created in a page so that doc can interoperate. | [![](./docs/img/examples-docs-multi.gif)](https://www.univer.ai/examples/docs-multi/)                          |
 | [Docs Uniscript](https://www.univer.ai/examples/docs-uniscript/)<br>You can directly use JavaScript syntax to manipulate content in Univer Docs | [![](./docs/img/examples-docs-uniscript.gif)](https://www.univer.ai/examples/docs-uniscript/)                          |
 | [Docs Big Data](https://www.univer.ai/examples/docs-big-data/)<br>1 million word Docs loading demo | [![](./docs/img/examples-docs-big-data.gif)](https://www.univer.ai/examples/docs-big-data/)                          |
-| [Docs Collaboration](https://univer.ai/pro-examples/docs-collaboration/)<br>Please open two windows or invite friends to experience Univer Docs collaboration together               | [![](./docs/img/pro-examples-docs-collaboration.gif)](https://univer.ai/pro-examples/docs-collaboration/)                           |
-| [Docs Collaboration Playground](https://univer.ai/pro-examples/docs-collaboration-playground/)<br>Demonstrate the process of collaboration. After A edits the document, how does B process it? Here is an interesting experiment    | [![](./docs/img/pro-examples-docs-collaboration-playground.gif)](https://univer.ai/pro-examples/docs-collaboration-playground/)    |
+| [Docs Collaboration (Pro Feature)](https://univer.ai/pro-examples/docs-collaboration/)<br>Please open two windows or invite friends to experience Univer Docs collaboration together               | [![](./docs/img/pro-examples-docs-collaboration.gif)](https://univer.ai/pro-examples/docs-collaboration/)                           |
+| [Docs Collaboration Playground (Pro Feature)](https://univer.ai/pro-examples/docs-collaboration-playground/)<br>Demonstrate the process of collaboration. After A edits the document, how does B process it? Here is an interesting experiment    | [![](./docs/img/pro-examples-docs-collaboration-playground.gif)](https://univer.ai/pro-examples/docs-collaboration-playground/)    |
 | <h3>🎨 Univer Slides</h3>                    |                   |
 | [Slides](https://www.univer.ai/examples/slides/)<br>A canvas presentation containing graphic text, floating pictures, tables and other elements                                  | [![](./docs/img/examples-slides.gif)](https://www.univer.ai/examples/slides/)                           |
 | <h3>🧩 Univer Innovation</h3>                    |                   |
 | [Zen Mode](https://univer.ai/guides/tutorials/zen-editor/#live-demo)<br>The cell of Sheet is a Doc?                                 | [![](./docs/img/zen-mode.gif)](https://univer.ai/guides/tutorials/zen-editor/#live-demo)                           |
-| [Univer(SaaS version)](https://univer.ai/)<br>With Univer, we enable users to create 3 forms of page as they wish. By merging sheet, doc and slide's capabilities together, Univer empowers individuals and teams to create, organize and streamline workflows effortlessly.                                   | [![](./docs/img/univer-workspace-drag-chart.gif)](https://youtu.be/kpV0MvQuFZA)                           |
+| [Univer (SaaS version)](https://univer.ai/)<br>With Univer, we enable users to create 3 forms of page as they wish. By merging sheet, doc and slide's capabilities together, Univer empowers individuals and teams to create, organize and streamline workflows effortlessly.                                   | [![](./docs/img/univer-workspace-drag-chart.gif)](https://youtu.be/kpV0MvQuFZA)                           |
 
 ## Usage
 

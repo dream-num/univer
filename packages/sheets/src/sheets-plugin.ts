@@ -76,7 +76,10 @@ export class UniverSheetsPlugin extends Plugin {
         ];
 
         if (!this._config?.notExecuteFormula) {
-            dependencies.push([CalculateResultApplyController], [FeatureCalculationController]);
+            dependencies.push(
+                [CalculateResultApplyController],
+                [FeatureCalculationController]
+            );
         }
 
         dependencies.forEach((d) => {

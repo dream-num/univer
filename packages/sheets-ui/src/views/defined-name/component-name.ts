@@ -15,3 +15,5 @@
  */
 
 export const DEFINED_NAME_CONTAINER = 'DefinedNameContainer';
+
+export const SCOPE_WORKBOOK_VALUE = 'AllDefaultWorkbook';

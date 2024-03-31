@@ -14,31 +14,34 @@
  * limitations under the License.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { RangeSelector, TextEditor } from '@univerjs/ui';
-import type { IUnitRange } from '@univerjs/core';
+import type { IUnitRange, Nullable } from '@univerjs/core';
 import { IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { Button, Input, Radio, RadioGroup, Select } from '@univerjs/design';
-import { type IDefinedNamesServiceParam, serializeRangeToRefString } from '@univerjs/engine-formula';
+import { IDefinedNamesService, type IDefinedNamesServiceParam, IFunctionService, operatorToken, serializeRangeToRefString } from '@univerjs/engine-formula';
+import { ErrorSingle } from '@univerjs/icons';
 import styles from './index.module.less';
+import { SCOPE_WORKBOOK_VALUE } from './component-name';
 
-export interface IDefinedNameInputProps extends IDefinedNamesServiceParam {
+export interface IDefinedNameInputProps extends Omit<IDefinedNamesServiceParam, 'id'> {
+    inputId: string;
     type?: string;
     state: boolean;
-    key: string;
     confirm?: (param: IDefinedNamesServiceParam) => void;
     cancel?: () => void;
+    id?: string;
 }
 
-const editorStyle: React.CSSProperties = {
+const widthStyle: React.CSSProperties = {
     width: '100%',
 };
 
 export const DefinedNameInput = (props: IDefinedNameInputProps) => {
     const {
-        key,
+        inputId,
         state = false,
         type = 'range',
         confirm,
@@ -46,13 +49,16 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
         name,
         formulaOrRefString,
         comment = '',
-        localSheetId = 'AllDefaultWorkbook',
+        localSheetId = SCOPE_WORKBOOK_VALUE,
         hidden = false, // 是否对用户隐藏，与excel兼容，暂时用不上。
+        id,
 
     } = props;
     const univerInstanceService = useDependency(IUniverInstanceService);
     const workbook = univerInstanceService.getCurrentUniverSheetInstance();
     const localeService = useDependency(LocaleService);
+    const definedNamesService = useDependency(IDefinedNamesService);
+    const functionService = useDependency(IFunctionService);
 
     if (workbook == null) {
         return;
@@ -62,18 +68,39 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
 
     const sheetId = workbook.getActiveSheet().getSheetId();
 
-    const [stateValue, setStateValue] = useState(state);
     const [nameValue, setNameValue] = useState(name);
     const [formulaOrRefStringValue, setFormulaOrRefStringValue] = useState(formulaOrRefString);
     const [commentValue, setCommentValue] = useState(comment);
     const [localSheetIdValue, setLocalSheetIdValue] = useState(localSheetId);
 
+    const [validString, setValidString] = useState('');
+
     const [typeValue, setTypeValue] = useState(type);
+
+    const [validFormulaOrRange, setValidFormulaOrRange] = useState(true);
+
+    const [updateFormulaOrRefStringValue, setUpdateFormulaOrRefStringValue] = useState(formulaOrRefString);
 
     const options = [{
         label: localeService.t('definedName.scopeWorkbook'),
-        value: 'AllDefaultWorkbook',
+        value: SCOPE_WORKBOOK_VALUE,
     }];
+
+    useEffect(() => {
+        setValidFormulaOrRange(true);
+        setFormulaOrRefStringValue(formulaOrRefString);
+        setUpdateFormulaOrRefStringValue(formulaOrRefString);
+        setNameValue(name);
+        setCommentValue(comment);
+        setLocalSheetIdValue(localSheetId);
+        if (formulaOrRefString.substring(0, 1) === operatorToken.EQUALS) {
+            setTypeValue('formula');
+        } else {
+            setTypeValue('range');
+        }
+
+        setValidString('');
+    }, [state]);
 
     workbook.getSheetOrders().forEach((sheetId) => {
         const sheet = workbook.getSheetBySheetId(sheetId);
@@ -94,50 +121,96 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
         return refs.join(',');
     };
 
+    const rangeSelectorChange = (ranges: IUnitRange[]) => {
+        setUpdateFormulaOrRefStringValue(convertRangeToString(ranges));
+    };
+
+    const formulaEditorChange = (value: Nullable<string>) => {
+        setUpdateFormulaOrRefStringValue(value || '');
+    };
+
+    const confirmChange = () => {
+        if (nameValue.length === 0) {
+            setValidString(localeService.t('definedName.nameEmpty'));
+            return;
+        }
+
+        if (definedNamesService.getValueByName(unitId, nameValue) != null && (id == null || id.length === 0)) {
+            setValidString(localeService.t('definedName.nameDuplicate'));
+            return;
+        }
+
+        if (updateFormulaOrRefStringValue.length === 0) {
+            setValidString(localeService.t('definedName.formulaOrRefStringEmpty'));
+            return;
+        }
+
+        if (!validFormulaOrRange) {
+            setValidString(localeService.t('definedName.formulaOrRefStringInvalid'));
+            return;
+        }
+
+        if (functionService.hasExecutor(nameValue.toUpperCase())) {
+            setValidString(localeService.t('definedName.nameConflict'));
+            return;
+        }
+
+        confirm && confirm({
+            id: id || '',
+            name: nameValue,
+            formulaOrRefString: updateFormulaOrRefStringValue,
+            comment: commentValue,
+            localSheetId: localSheetIdValue,
+        });
+    };
+
+    const typeValueChange = (value: string | number | boolean) => {
+        const type = value as string;
+        setTypeValue(type);
+    };
+
     return (
-        <div key={key} style={{ display: stateValue ? 'unset' : 'none' }}>
+        <div className={styles.definedNameInput} style={{ display: state ? 'block' : 'none' }}>
             <div>
-                <Input value={nameValue} allowClear onChange={setNameValue} />
+                <Input placeholder={localeService.t('definedName.inputNamePlaceholder')} value={nameValue} allowClear onChange={setNameValue} affixWrapperStyle={widthStyle} />
             </div>
             <div>
-                <RadioGroup value={typeValue} onChange={(value) => { setTypeValue(value.toString()); }}>
+                <RadioGroup value={typeValue} onChange={typeValueChange}>
                     <Radio value="range">{localeService.t('definedName.ratioRange')}</Radio>
                     <Radio value="formula">{localeService.t('definedName.ratioFormula')}</Radio>
                 </RadioGroup>
             </div>
-            <div style={{ display: typeValue === 'range' ? 'unset' : 'none' }}>
-                <RangeSelector value={formulaOrRefStringValue} onChange={(ranges) => { setFormulaOrRefStringValue(convertRangeToString(ranges)); }} placeholder="please input value" id="test-rangeSelector-1" width={280} openForSheetUnitId={unitId} openForSheetSubUnitId={sheetId} />
+            <div style={{ display: typeValue === 'range' ? 'block' : 'none' }}>
+                <RangeSelector value={formulaOrRefStringValue} onValid={setValidFormulaOrRange} onChange={rangeSelectorChange} placeholder={localeService.t('definedName.inputRangePlaceholder')} id={`${inputId}-rangeSelector`} width="99%" openForSheetUnitId={unitId} />
             </div>
-            <div style={{ display: typeValue === 'range' ? 'none' : 'unset' }}>
-                <TextEditor value={`=${formulaOrRefStringValue}`} onChange={(value) => { setFormulaOrRefStringValue(value || ''); }} id="test-editor-2" placeholder="please input value" openForSheetUnitId={unitId} openForSheetSubUnitId={sheetId} onlyInputFormula={true} style={editorStyle} canvasStyle={{ fontSize: 10 }} />
-            </div>
-            <div>
-                <Select value={localSheetIdValue} options={options} onChange={setLocalSheetIdValue} />
+            <div style={{ display: typeValue === 'range' ? 'none' : 'block' }}>
+                <TextEditor value={formulaOrRefStringValue} onValid={setValidFormulaOrRange} onChange={formulaEditorChange} id={`${inputId}-editor`} placeholder={localeService.t('definedName.inputFormulaPlaceholder')} openForSheetUnitId={unitId} onlyInputFormula={true} style={{ width: '99%' }} canvasStyle={{ fontSize: 10 }} />
             </div>
             <div>
-                <Input value={commentValue} onChange={setCommentValue} />
+                <Select style={widthStyle} value={localSheetIdValue} options={options} onChange={setLocalSheetIdValue} />
+            </div>
+            <div>
+                <Input affixWrapperStyle={widthStyle} placeholder={localeService.t('definedName.inputCommentPlaceholder')} value={commentValue} onChange={setCommentValue} />
+            </div>
+            <div style={{ display: validString.length === 0 ? 'none' : 'flex' }} className={styles.definedNameInputValidation}>
+                <span>
+                    {validString}
+                </span>
+                <ErrorSingle />
             </div>
             <div>
                 <Button onClick={() => {
-                    setStateValue(false);
                     cancel && cancel();
                 }}
                 >
-                    default button
+                    {localeService.t('definedName.cancel')}
                 </Button>
                 <Button
+                    style={{ marginLeft: 15 }}
                     type="primary"
-                    onClick={() => {
-                        setStateValue(false);
-                        confirm && confirm({
-                            name: nameValue,
-                            formulaOrRefString: formulaOrRefStringValue,
-                            comment: commentValue,
-                            localSheetId: localSheetIdValue,
-                        });
-                    }}
+                    onClick={confirmChange}
                 >
-                    primary button
+                    {localeService.t('definedName.confirm')}
                 </Button>
             </div>
         </div>

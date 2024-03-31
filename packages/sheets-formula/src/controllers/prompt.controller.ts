@@ -529,7 +529,7 @@ export class PromptController extends Disposable {
 
                     const lastSequenceNodes = this._formulaPromptService.getSequenceNodes();
 
-                    const nodeIndex = this._formulaPromptService.getCurrentSequenceNodeIndex(startOffset - 2);
+                    let nodeIndex = this._formulaPromptService.getCurrentSequenceNodeIndex(startOffset - 2);
 
                     const node = lastSequenceNodes[nodeIndex];
 
@@ -552,11 +552,16 @@ export class PromptController extends Disposable {
 
                     lastSequenceNodes[nodeIndex] = newNode;
 
-                    lastSequenceNodes.splice(nodeIndex + 1, 0, matchToken.OPEN_BRACKET);
+                    const isDefinedName = this._descriptionService.hasDefinedNameDescription(formulaString);
+
+                    if (!isDefinedName) {
+                        nodeIndex += 1;
+                        lastSequenceNodes.splice(nodeIndex, 0, matchToken.OPEN_BRACKET);
+                    }
 
                     const formulaStringCount = formulaString.length + 1;
 
-                    for (let i = nodeIndex + 2, len = lastSequenceNodes.length; i < len; i++) {
+                    for (let i = nodeIndex + 1, len = lastSequenceNodes.length; i < len; i++) {
                         const node = lastSequenceNodes[i];
                         if (typeof node === 'string') {
                             continue;

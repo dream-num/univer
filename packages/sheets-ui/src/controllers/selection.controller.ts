@@ -31,15 +31,17 @@ import type { ISelectionWithCoordAndStyle, ISelectionWithStyle } from '@univerjs
 import {
     convertSelectionDataToRange,
     getNormalSelectionStyle,
+    getPrimaryForRange,
     NORMAL_SELECTION_PLUGIN_NAME,
     SelectionManagerService,
     SelectionMoveType,
     SetSelectionsOperation,
+    SetWorksheetActivateCommand,
     transformCellDataToSelectionData,
 } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
-import { IDefinedNamesService, SetDefinedNameCurrentMutation } from '@univerjs/engine-formula';
+import { deserializeRangeWithSheet, IDefinedNamesService, isReferenceString, SetDefinedNameCurrentMutation } from '@univerjs/engine-formula';
 import type { ISetZoomRatioOperationParams } from '../commands/operations/set-zoom-ratio.operation';
 import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
 import { VIEWPORT_KEY } from '../common/keys';
@@ -83,6 +85,7 @@ export class SelectionController extends Disposable {
         this._initSkeletonChangeListener();
         this._initCommandListener();
         this._initUserActionSyncListener();
+        this._iniDefinedNameListener();
 
         const unitId = workbook.getUnitId();
         const sheetId = worksheet.getSheetId();
@@ -91,6 +94,81 @@ export class SelectionController extends Disposable {
             unitId,
             sheetId,
         });
+    }
+
+    private _iniDefinedNameListener() {
+        this.disposeWithMe(
+            toDisposable(
+                this._definedNamesService.focusRange$.subscribe(async (item) => {
+                    if (item == null) {
+                        return;
+                    }
+
+                    const { name, formulaOrRefString, localSheetId, unitId } = item;
+
+                    const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+
+                    if (unitId !== workbook.getUnitId()) {
+                        return;
+                    }
+
+                    const valueArray = formulaOrRefString.split(',');
+                    const result = valueArray.every((refString) => {
+                        return isReferenceString(refString.trim());
+                    });
+
+                    if (!result) {
+                        return;
+                    }
+
+                    let worksheet = workbook.getActiveSheet();
+
+                    const selections = [];
+
+                    for (let i = 0; i < valueArray.length; i++) {
+                        const refString = valueArray[i].trim();
+
+                        const unitRange = deserializeRangeWithSheet(refString.trim());
+
+                        if (i === 0) {
+                            const worksheetCache = workbook.getSheetBySheetName(unitRange.sheetName);
+                            if (worksheetCache && worksheet.getSheetId() !== worksheetCache.getSheetId()) {
+                                worksheet = worksheetCache;
+                                await this._commandService.executeCommand(SetWorksheetActivateCommand.id, {
+                                    subUnitId: worksheet.getSheetId(),
+                                    unitId,
+                                });
+                            }
+                        }
+
+                        if (worksheet.getName() !== unitRange.sheetName) {
+                            continue;
+                        }
+
+                        let primary = null;
+                        if (i === valueArray.length - 1) {
+                            const range = unitRange.range;
+                            const { startRow, startColumn, endRow, endColumn } = range;
+                            primary = getPrimaryForRange({
+                                startRow,
+                                startColumn,
+                                endRow,
+                                endColumn,
+
+                            }, worksheet);
+                        }
+
+                        selections.push({
+                            range: unitRange.range,
+                            style: getNormalSelectionStyle(this._themeService),
+                            primary,
+                        });
+                    }
+
+                    this._selectionManagerService.replace(selections);
+                })
+            )
+        );
     }
 
     private _getActiveViewport(evt: IPointerEvent | IMouseEvent) {

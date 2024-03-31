@@ -21,10 +21,11 @@ import { IDefinedNamesService } from '../../services/defined-names.service';
 
 export interface ISetDefinedNameMutationSearchParam {
     unitId: string;
-    name: string;
+    id: string;
 }
 
 export interface ISetDefinedNameMutationParam extends ISetDefinedNameMutationSearchParam {
+    name: string;
     formulaOrRefString: string;
     comment?: string;
     localSheetId?: string;

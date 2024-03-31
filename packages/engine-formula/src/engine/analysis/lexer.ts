@@ -18,16 +18,17 @@ import { Disposable } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
 import { IDefinedNamesService } from '../../services/defined-names.service';
-import { IFormulaRuntimeService } from '../../services/runtime.service';
 import type { ISequenceArray } from '../utils/sequence';
 import { sequenceNodeType } from '../utils/sequence';
+import { operatorToken } from '../../basics/token';
+import { IFormulaCurrentConfigService } from '../../services/current-data.service';
 import { LexerTreeBuilder } from './lexer-tree-builder';
 
 export class Lexer extends Disposable {
     constructor(
         @IDefinedNamesService private readonly _definedNamesService: IDefinedNamesService,
-        @IFormulaRuntimeService private readonly _runtimeService: IFormulaRuntimeService,
-        @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder
+        @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder,
+        @IFormulaCurrentConfigService private readonly _formulaCurrentConfigService: IFormulaCurrentConfigService
     ) {
         super();
     }
@@ -37,9 +38,9 @@ export class Lexer extends Disposable {
     }
 
     private _injectDefinedName(sequenceArray: ISequenceArray[]) {
-        const unitId = this._runtimeService.currentUnitId;
+        const unitId = this._formulaCurrentConfigService.getExecuteUnitId();
 
-        if (!this._definedNamesService.hasDefinedName(unitId)) {
+        if (unitId == null || !this._definedNamesService.hasDefinedName(unitId)) {
             return {
                 sequenceString: '',
                 hasDefinedName: false,
@@ -60,9 +61,13 @@ export class Lexer extends Disposable {
             const { nodeType, token } = node;
 
             if (nodeType === sequenceNodeType.REFERENCE || nodeType === sequenceNodeType.FUNCTION) {
-                const definedContent = this._definedNamesService.getDefinedNameMap(unitId)?.get(token);
+                const definedContent = this._definedNamesService.getValueByName(unitId, token);
                 if (definedContent) {
-                    sequenceString += definedContent.formulaOrRefString;
+                    let refString = definedContent.formulaOrRefString;
+                    if (refString.substring(0, 1) === operatorToken.EQUALS) {
+                        refString = refString.substring(1);
+                    }
+                    sequenceString += refString;
                     hasDefinedName = true;
                 } else {
                     sequenceString += token;

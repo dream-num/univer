@@ -31,6 +31,7 @@ import {
     functionMeta,
     functionStatistical,
     functionText,
+    FunctionType,
     functionUniver,
     functionWeb,
     IFunctionService,
@@ -92,6 +93,18 @@ export interface IDescriptionService {
      * @param functionList
      */
     unregisterDescriptions(functionNames: string[]): void;
+
+    /**
+     * check if has description
+     * @param name
+     */
+    hasDescription(name: string): boolean;
+
+    /**
+     * check if has defined name description
+     * @param name
+     */
+    hasDefinedNameDescription(name: string): boolean;
 }
 
 export const IDescriptionService = createIdentifier<IDescriptionService>('formula-ui.description-service');
@@ -175,6 +188,14 @@ export class DescriptionService implements IDescriptionService, IDisposable {
         this._descriptions = this._descriptions.filter((item) => !functionNames.includes(item.functionName));
 
         this._functionService.unregisterDescriptions(...functionNames);
+    }
+
+    hasDescription(name: string) {
+        return this._descriptions.some((item) => item.functionName === name);
+    }
+
+    hasDefinedNameDescription(name: string) {
+        return this._descriptions.some((item) => item.functionName === name && item.functionType === FunctionType.definedName);
     }
 
     private _initialize() {

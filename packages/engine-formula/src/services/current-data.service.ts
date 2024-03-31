@@ -68,6 +68,13 @@ export interface IFormulaCurrentConfigService {
     getSheetName(unitId: string, sheetId: string): string;
 
     getDirtyUnitOtherFormulaMap(): IDirtyUnitOtherFormulaMap;
+
+    getExecuteUnitId(): Nullable<string>;
+    getExecuteSubUnitId(): Nullable<string>;
+
+    setExecuteUnitId(unitId: string): void;
+    setExecuteSubUnitId(subUnitId: string): void;
+
 }
 
 export class FormulaCurrentConfigService extends Disposable implements IFormulaCurrentConfigService {
@@ -95,6 +102,9 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
 
     private _sheetIdToNameMap: IUnitSheetIdToNameMap = {};
 
+    private _executeUnitId: Nullable<string> = '';
+    private _executeSubUnitId: Nullable<string> = '';
+
     constructor(@IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService) {
         super();
     }
@@ -111,6 +121,22 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         this._excludedCell = {};
         this._sheetIdToNameMap = {};
         this._dirtyUnitOtherFormulaMap = {};
+    }
+
+    getExecuteUnitId() {
+        return this._executeUnitId;
+    }
+
+    getExecuteSubUnitId() {
+        return this._executeSubUnitId;
+    }
+
+    setExecuteUnitId(unitId: string) {
+        this._executeUnitId = unitId;
+    }
+
+    setExecuteSubUnitId(subUnitId: string) {
+        this._executeSubUnitId = subUnitId;
     }
 
     getExcludedRange() {
@@ -324,6 +350,12 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
 
     private _loadSheetData() {
         const unitAllSheet = this._currentUniverService.getAllUniverSheetsInstance();
+
+        const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+        const worksheet = workbook.getActiveSheet();
+
+        this._executeUnitId = workbook?.getUnitId();
+        this._executeSubUnitId = worksheet?.getSheetId();
 
         const allUnitData: IUnitData = {};
 

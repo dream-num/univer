@@ -14,24 +14,28 @@
  * limitations under the License.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
-import { RangeSelector, TextEditor } from '@univerjs/ui';
-import { IUniverInstanceService, LocaleService } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, LocaleService, Tools } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import { IncreaseSingle } from '@univerjs/icons';
-import { Radio, RadioGroup } from '@univerjs/design';
+import { CheckMarkSingle, DeleteSingle, IncreaseSingle } from '@univerjs/icons';
+import type { IDefinedNamesServiceParam } from '@univerjs/engine-formula';
+import { IDefinedNamesService, RemoveDefinedNameMutation, serializeRangeWithSheet, SetDefinedNameMutation } from '@univerjs/engine-formula';
+import clsx from 'clsx';
+import { SelectionManagerService } from '@univerjs/sheets';
+import { Confirm, Tooltip } from '@univerjs/design';
 import styles from './index.module.less';
+import { DefinedNameInput } from './DefinedNameInput';
+import { SCOPE_WORKBOOK_VALUE } from './component-name';
 
-/**
- * Floating editor's container.
- */
 export const DefinedNameContainer = () => {
+    const commandService = useDependency(ICommandService);
     const univerInstanceService = useDependency(IUniverInstanceService);
     const workbook = univerInstanceService.getCurrentUniverSheetInstance();
     const localeService = useDependency(LocaleService);
-
-    const [editState, setEditState] = useState(false);
+    const definedNamesService = useDependency(IDefinedNamesService);
+    const selectionManagerService = useDependency(SelectionManagerService);
 
     if (workbook == null) {
         return;
@@ -39,18 +43,159 @@ export const DefinedNameContainer = () => {
 
     const unitId = workbook.getUnitId();
 
-    const sheetId = workbook.getActiveSheet().getSheetId();
+    const getDefinedNameMap = () => {
+        const definedNameMap = definedNamesService.getDefinedNameMap(unitId);
+        if (definedNameMap) {
+            return Array.from(Object.values(definedNameMap));
+        }
+        return [];
+    };
+
+    const [editState, setEditState] = useState(false);
+    const [definedNames, setDefinedNames] = useState<IDefinedNamesServiceParam[]>(getDefinedNameMap());
+    const [editorKey, setEditorKey] = useState<Nullable<string>>(null);
+    const [deleteConformVisible, setDeleteConformVisible] = useState(false);
+
+    useEffect(() => {
+        const definedNamesSubscription = definedNamesService.update$.subscribe(() => {
+            setDefinedNames(getDefinedNameMap());
+        });
+
+        return () => {
+            definedNamesSubscription.unsubscribe();
+        };
+    }, []);
+
+    const insertConfirm = (param: IDefinedNamesServiceParam) => {
+        const { name, formulaOrRefString, comment, localSheetId, hidden } = param;
+
+        let id = param.id;
+        if (id == null || id.length === 0) {
+            id = Tools.generateRandomId(10);
+        }
+        // definedNamesService.registerDefinedName(unitId, { id: Tools.generateRandomId(10), name, formulaOrRefString, comment, localSheetId, hidden });
+
+        commandService.executeCommand(SetDefinedNameMutation.id, { id, unitId, name, formulaOrRefString, comment, localSheetId, hidden });
+        setEditState(false);
+        setEditorKey(null);
+    };
+
+    const deleteDefinedName = (id: string) => {
+        setDeleteConformVisible(!deleteConformVisible);
+    };
+
+    function handleDeleteClose() {
+        setDeleteConformVisible(!deleteConformVisible);
+    }
+
+    function handleDeleteConfirm(id: string) {
+        commandService.executeCommand(RemoveDefinedNameMutation.id, { id, unitId });
+        setDeleteConformVisible(!deleteConformVisible);
+    }
+
+    const focusDefinedName = (definedName: IDefinedNamesServiceParam) => {
+        definedNamesService.focusRange(unitId, definedName.id);
+    };
+
+    const getInsertDefinedName = () => {
+        const count = definedNames.length;
+        const name = localeService.t('definedName.defaultName') + count;
+        if (definedNamesService.getValueByName(unitId, name) == null) {
+            return name;
+        }
+
+        let i = count + 1;
+        while (true) {
+            const newName = localeService.t('definedName.defaultName') + i;
+            if (definedNamesService.getValueByName(unitId, newName) == null) {
+                return newName;
+            }
+            i++;
+        }
+    };
+
+    const getInertFormulaOrRefString = () => {
+        const sheetName = workbook.getActiveSheet().getName();
+
+        const selections = selectionManagerService.getSelections();
+        if (selections == null) {
+            return '';
+        }
+
+        const formulaOrRefs = selections.map((selection) => {
+            return serializeRangeWithSheet(sheetName, selection.range);
+        });
+
+        return formulaOrRefs.join(',');
+    };
+
+    const closeInput = () => {
+        setEditState(false);
+        setEditorKey(null);
+    };
+
+    const openInsertCloseKeyEditor = () => {
+        setEditState(true);
+        setEditorKey(null);
+    };
+
+    const closeInsertOpenKeyEditor = (id: string) => {
+        setEditState(false);
+        setEditorKey(id);
+    };
 
     return (
-        <>
-            <div style={{ display: editState ? 'none' : 'unset' }}>
-                <div className={styles.definedNameContainerAddButton}>
+        <div className={styles.definedNameContainer}>
+            <div key="insertDefinedName">
+                <div onClick={openInsertCloseKeyEditor} className={styles.definedNameContainerAddButton} style={{ display: editState ? 'none' : 'flex' }}>
                     <IncreaseSingle />
                     <span className={styles.definedNameContainerAddButtonText}>{localeService.t('definedName.addButton')}</span>
                 </div>
+                <DefinedNameInput confirm={insertConfirm} cancel={closeInput} state={editState} inputId="insertDefinedName" name={getInsertDefinedName()} formulaOrRefString={getInertFormulaOrRefString()} />
             </div>
 
-        </>
+            {definedNames.map((definedName, index) => {
+                return (
+                    <div key={index}>
+                        <div onClick={() => { focusDefinedName(definedName); }} className={styles.definedNameContainerItem} style={{ display: definedName.id === editorKey ? 'none' : 'flex' }}>
+                            <div title={definedName.comment}>
+                                <div className={styles.definedNameContainerItemName}>
+                                    {definedName.name}
+                                    <span className={styles.definedNameContainerItemNameForSheet}>
+                                        {definedName.localSheetId === SCOPE_WORKBOOK_VALUE ? '' : definedName.localSheetId}
+                                    </span>
+                                </div>
+                                <div className={styles.definedNameContainerItemFormulaOrRefString}>{definedName.formulaOrRefString}</div>
+                            </div>
+                            <Tooltip title={localeService.t('definedName.updateButton')} placement="top" style={{ pointerEvents: 'none' }}>
+                                <div className={clsx(styles.definedNameContainerItemUpdate, styles.definedNameContainerItemShow)} onClick={() => { closeInsertOpenKeyEditor(definedName.id); }}>
+                                    <CheckMarkSingle />
+                                </div>
+                            </Tooltip>
+                            <Tooltip title={localeService.t('definedName.deleteButton')} placement="top" style={{ pointerEvents: 'none' }}>
+                                <div className={clsx(styles.definedNameContainerItemDelete, styles.definedNameContainerItemShow)} onClick={() => { deleteDefinedName(definedName.id); }}>
+                                    <DeleteSingle />
+                                </div>
+                            </Tooltip>
+                            <Confirm visible={deleteConformVisible} onClose={handleDeleteClose} onConfirm={() => { handleDeleteConfirm(definedName.id); }}>
+                                {localeService.t('definedName.deleteConfirmText')}
+                            </Confirm>
+                        </div>
+                        <DefinedNameInput
+                            confirm={insertConfirm}
+                            cancel={closeInput}
+                            state={definedName.id === editorKey}
+                            id={definedName.id}
+                            inputId={definedName.id + index}
+                            name={definedName.name}
+                            formulaOrRefString={definedName.formulaOrRefString}
+                            comment={definedName.comment}
+                            localSheetId={definedName.localSheetId}
+                        />
+                    </div>
+                );
+            })}
 
+        </div>
     );
 };

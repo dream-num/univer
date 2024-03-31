@@ -167,9 +167,15 @@ export class CheckboxRender implements IBaseDataValidationWidget {
         const { primaryWithCoord, unitId, subUnitId, data } = info;
         const value = getCellValueOrigin(data);
         const rule = data.dataValidation?.rule;
-        if (!rule) {
+        const validator = data.dataValidation?.validator as BaseDataValidator;
+        if (!rule || !validator) {
             return;
         }
+
+        if (!validator.skipDefaultFontRender(rule, value, { unitId, subUnitId })) {
+            return;
+        }
+
         const { formula1, formula2 } = await this._parseFormula(rule, unitId!, subUnitId);
         const params: ISetRangeValuesCommandParams = {
             range: {

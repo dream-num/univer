@@ -89,6 +89,7 @@ export const UpdateDataValidationMutation: ICommand<IUpdateDataValidationMutatio
         if (!params) {
             return false;
         }
+
         const { unitId, subUnitId, ruleId, payload } = params;
         const dataValidationModel = accessor.get(DataValidationModel);
         dataValidationModel.updateRule(unitId, subUnitId, ruleId, payload);

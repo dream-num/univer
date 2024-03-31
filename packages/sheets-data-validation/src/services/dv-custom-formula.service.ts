@@ -176,6 +176,10 @@ export class DataValidationCustomFormulaService extends Disposable {
     private _addFormulaByRange(unitId: string, subUnitId: string, ruleId: string, formula: string, ranges: IRange[]) {
         const { formulaMap, ruleFormulaMap, formulaCellMap } = this._ensureMaps(unitId, subUnitId);
 
+        if (!formula) {
+            return;
+        }
+
         const isTransformable = isFormulaTransformable(
             this._lexerTreeBuilder,
             formula

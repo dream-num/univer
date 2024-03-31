@@ -137,6 +137,8 @@ export function ListDropDown(props: IDropdownComponentProps) {
                     value: {
                         v: str,
                         p: null,
+                        f: null,
+                        si: null,
                     },
                 };
 

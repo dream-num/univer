@@ -64,6 +64,9 @@ export function DateDropdown(props: IDropdownComponentProps) {
                         value: {
                             v: newValueStr,
                             p: null,
+                            f: null,
+                            si: null,
+
                         },
                     });
                     hideFn();

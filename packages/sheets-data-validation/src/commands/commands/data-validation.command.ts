@@ -131,43 +131,13 @@ export const UpdateSheetDataValidationRangeCommand: ICommand<IUpdateSheetDataVal
         matrix.updateRange(ruleId, oldRanges, ranges);
         const diffs = matrix.diff(manager.getDataValidations());
 
-        const mutationParams: IUpdateDataValidationMutationParams = {
-            unitId,
-            subUnitId,
-            ruleId,
-            payload: {
-                type: UpdateRuleType.RANGE,
-                payload: ranges,
-            },
-        };
-
         const { redoMutations, undoMutations } = getDataValidationDiffMutations(unitId, subUnitId, diffs);
-        redoMutations.push(
-            {
-                id: UpdateDataValidationMutation.id,
-                params: mutationParams,
-            }
-        );
-
-        undoMutations.unshift(
-            {
-                id: UpdateDataValidationMutation.id,
-                params: {
-                    ...mutationParams,
-                    payload: {
-                        type: UpdateRuleType.RANGE,
-                        payload: oldRanges,
-                    },
-                },
-            }
-        );
 
         undoRedoService.pushUndoRedo({
             undoMutations,
             redoMutations,
             unitID: unitId,
         });
-
         await sequenceExecuteAsync(redoMutations, commandService);
         return true;
     },

@@ -81,6 +81,7 @@ export class DataValidationModel<T extends IDataValidationRule = IDataValidation
     updateRule(unitId: string, subUnitId: string, ruleId: string, payload: IUpdateRulePayload) {
         const manager = this.ensureManager(unitId, subUnitId);
         const rule = manager.updateRule(ruleId, payload);
+
         this._ruleChange$.next({
             rule,
             type: 'update',

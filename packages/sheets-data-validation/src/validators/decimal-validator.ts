@@ -23,6 +23,19 @@ import { BASE_FORMULA_INPUT_NAME } from '../views/formula-input';
 import { TWO_FORMULA_OPERATOR_COUNT } from '../types/const/two-formula-operators';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
 
+function getCellValueNumber(cellValue: CellValue) {
+    let str = cellValue;
+    if (typeof cellValue === 'string') {
+        if (cellValue.startsWith('¥') || cellValue.startsWith('$')) {
+            str = cellValue.slice(1);
+        }
+
+        return +str;
+    }
+
+    return +cellValue;
+}
+
 export class DecimalValidator extends BaseDataValidator<number> {
     private _formulaService = this.injector.get(DataValidationFormulaService);
 
@@ -50,14 +63,16 @@ export class DecimalValidator extends BaseDataValidator<number> {
 
     override async isValidType(cellInfo: IValidatorCellInfo<CellValue>, formula: IFormulaResult, rule: IDataValidationRule) {
         const { value: cellValue } = cellInfo;
-        return !Number.isNaN(+cellValue);
+
+        return !Number.isNaN(getCellValueNumber(cellValue));
     }
 
     override transform(cellInfo: IValidatorCellInfo<CellValue>, formula: IFormulaResult, rule: IDataValidationRule) {
         const { value: cellValue } = cellInfo;
+
         return {
             ...cellInfo,
-            value: +cellValue,
+            value: getCellValueNumber(cellValue),
         };
     }
 

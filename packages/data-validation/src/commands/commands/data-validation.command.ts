@@ -234,6 +234,7 @@ export const UpdateDataValidationSettingCommand: ICommand<IUpdateDataValidationS
 
         const { unitId, subUnitId, ruleId, setting } = params;
         const validator = dataValidatorRegistryService.getValidatorItem(setting.type);
+
         if (!validator) {
             return false;
         }

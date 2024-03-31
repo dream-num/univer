@@ -84,7 +84,6 @@ export function DataValidationDetail() {
             ...localRule,
             ...setting,
         });
-
         const params: IUpdateDataValidationSettingCommandParams = {
             unitId,
             subUnitId,
@@ -159,7 +158,6 @@ export function DataValidationDetail() {
             options: newOptions,
         });
     };
-
     return (
         <div>
             <FormLayout label={localeService.t('dataValidation.panel.range')}>

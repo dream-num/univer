@@ -15,15 +15,15 @@
  */
 
 import { OpenValidationPanelOperation } from '@univerjs/data-validation';
-import { type IMenuItem, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
+import { getMenuHiddenObservable, type IMenuItem, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
+import { UniverInstanceType } from '@univerjs/core';
 import { AddSheetDataValidationAndOpenCommand } from '../commands/commands/data-validation.command';
 
 export const DataValidationIcon = 'data-validation-single';
-
 const DATA_VALIDATION_MENU_ID = 'sheet.menu.data-validation';
 
-export function dataValidationMenuFactory(_accessor: IAccessor): IMenuItem {
+export function dataValidationMenuFactory(accessor: IAccessor): IMenuItem {
     return {
         id: DATA_VALIDATION_MENU_ID,
         type: MenuItemType.SUBITEMS,
@@ -31,6 +31,7 @@ export function dataValidationMenuFactory(_accessor: IAccessor): IMenuItem {
         group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
         icon: DataValidationIcon,
         tooltip: 'dataValidation.title',
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
     };
 }
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { CellValue, DataValidationStatus, IDataValidationRule, Nullable } from '@univerjs/core';
+import { type CellValue, type DataValidationStatus, type IDataValidationRule, ILogService, type Nullable } from '@univerjs/core';
 import { debounceTime, Subject } from 'rxjs';
 import type { IUpdateRulePayload } from '../types/interfaces/i-update-rule-payload';
 import type { DataValidationManager } from './data-validation-manager';
@@ -46,7 +46,9 @@ export class DataValidationModel<T extends IDataValidationRule = IDataValidation
     ruleChangeDebounce$ = this.ruleChange$.pipe(debounceTime(20));
     validStatusChange$ = this._validStatusChange$.asObservable().pipe(debounceTime(20));
 
-    constructor() {}
+    constructor(
+        @ILogService private readonly _logService: ILogService
+    ) {}
 
     setManagerCreator(creator: (unitId: string, subUnitId: string) => DataValidationManager<T>) {
         this._managerCreator = creator;
@@ -79,15 +81,19 @@ export class DataValidationModel<T extends IDataValidationRule = IDataValidation
     }
 
     updateRule(unitId: string, subUnitId: string, ruleId: string, payload: IUpdateRulePayload) {
-        const manager = this.ensureManager(unitId, subUnitId);
-        const rule = manager.updateRule(ruleId, payload);
+        try {
+            const manager = this.ensureManager(unitId, subUnitId);
+            const rule = manager.updateRule(ruleId, payload);
 
-        this._ruleChange$.next({
-            rule,
-            type: 'update',
-            unitId,
-            subUnitId,
-        });
+            this._ruleChange$.next({
+                rule,
+                type: 'update',
+                unitId,
+                subUnitId,
+            });
+        } catch (error) {
+            this._logService.error(error);
+        }
     }
 
     removeRule(unitId: string, subUnitId: string, ruleId: string) {

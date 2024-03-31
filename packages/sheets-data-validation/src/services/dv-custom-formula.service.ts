@@ -261,6 +261,9 @@ export class DataValidationCustomFormulaService extends Disposable {
         newRanges.forEach((range) => {
             Range.foreach(range, (row, col) => {
                 const oldValue = formulaMap.getValue(row, col);
+                if (!oldValue) {
+                    return;
+                }
                 if (oldValue.ruleId !== ruleId) {
                     const oldRuleFormula = ruleFormulaMap.get(oldValue.ruleId);
                     if (oldRuleFormula?.isTransformable) {

@@ -16,7 +16,7 @@
 
 import { BooleanNumber, DEFAULT_EMPTY_DOCUMENT_VALUE, DocumentDataModel, HorizontalAlign, ICommandService, LocaleService, Tools, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import type { ICellRenderContext, IDocumentData, IPaddingData, IStyleData, Nullable } from '@univerjs/core';
-import { Documents, DocumentSkeleton, DocumentViewModel, getDocsSkeletonPageSize, Rect, type Spreadsheet, type SpreadsheetSkeleton, type UniverRenderingContext2D } from '@univerjs/engine-render';
+import { Documents, DocumentSkeleton, DocumentViewModel, getDocsSkeletonPageSize, type IMouseEvent, type IPointerEvent, Rect, type Spreadsheet, type SpreadsheetSkeleton, type UniverRenderingContext2D } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
 import { DataValidationModel, DataValidatorRegistryService, type IBaseDataValidationWidget } from '@univerjs/data-validation';
 import { DataValidationRenderMode } from '@univerjs/core/types/enum/data-validation-render-mode.js';
@@ -423,7 +423,11 @@ export class DropdownWidget implements IBaseDataValidationWidget {
         return false;
     };
 
-    onPointerDown(info: ICellRenderContext) {
+    onPointerDown(info: ICellRenderContext, evt: IPointerEvent | IMouseEvent) {
+        if (evt.button === 2) {
+            return;
+        }
+
         const { unitId, subUnitId, row, col } = info;
 
         const params: IShowDataValidationDropdownParams = {

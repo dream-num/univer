@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import { DisposableCollection, IUniverInstanceService, type Nullable } from '@univerjs/core';
+import { Disposable, DisposableCollection, IUniverInstanceService, type Nullable } from '@univerjs/core';
 import type { ISheetLocation } from '@univerjs/sheets';
 import { Subject } from 'rxjs';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject } from '@wendellhu/redi';
 import { SheetCanvasPopManagerService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { DataValidatorRegistryService } from '@univerjs/data-validation';
+import { IZenZoneService } from '@univerjs/ui';
 import { DROP_DOWN_KEY } from '../views/drop-down';
 
 export interface IDropdownParam {
@@ -35,12 +36,14 @@ export interface IDropdownComponentProps {
     hideFn: () => void;
 }
 
-export class DataValidationDropdownManagerService {
+export class DataValidationDropdownManagerService extends Disposable {
     private _activeDropdown: Nullable<IDropdownParam>;
     private _activeDropdown$ = new Subject<Nullable<IDropdownParam>>();
     private _currentPopup: Nullable<IDisposable> = null;
 
     activeDropdown$ = this._activeDropdown$.asObservable();
+
+    private _zenVisible = false;
 
     get activeDropdown() {
         return this._activeDropdown;
@@ -50,14 +53,31 @@ export class DataValidationDropdownManagerService {
         @Inject(SheetCanvasPopManagerService) private readonly _canvasPopupManagerService: SheetCanvasPopManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
-        @Inject(DataValidatorRegistryService) private readonly _dataValidatorRegistryService: DataValidatorRegistryService
-    ) {}
+        @Inject(DataValidatorRegistryService) private readonly _dataValidatorRegistryService: DataValidatorRegistryService,
+        @IZenZoneService private readonly _zenZoneService: IZenZoneService
+    ) {
+        super();
+        this._init();
+    }
+
+    private _init() {
+        this.disposeWithMe(this._zenZoneService.visible$.subscribe((visible) => {
+            this._zenVisible = visible;
+            if (visible) {
+                this.hideDropdown();
+            }
+        }));
+    }
 
     showDropdown(param: IDropdownParam) {
         const { location } = param;
         const { row, col } = location;
 
         this._currentPopup && this._currentPopup.dispose();
+
+        if (this._zenVisible) {
+            return;
+        }
 
         this._activeDropdown = param;
         this._activeDropdown$.next(this._activeDropdown);

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { UniverRenderingContext2D } from '@univerjs/engine-render';
+import type { IMouseEvent, IPointerEvent, UniverRenderingContext2D } from '@univerjs/engine-render';
 import { Checkbox, fixLineWidthByScale, Transform } from '@univerjs/engine-render';
 import { HorizontalAlign, ICommandService, isFormulaString, ThemeService, VerticalAlign } from '@univerjs/core';
 import type { ICellRenderContext, IDataValidationRule, IStyleData, Nullable } from '@univerjs/core';
@@ -163,7 +163,10 @@ export class CheckboxRender implements IBaseDataValidationWidget {
         return false;
     }
 
-    async onPointerDown(info: ICellRenderContext) {
+    async onPointerDown(info: ICellRenderContext, evt: IPointerEvent | IMouseEvent) {
+        if (evt.button === 2) {
+            return;
+        }
         const { primaryWithCoord, unitId, subUnitId, data } = info;
         const value = getCellValueOrigin(data);
         const rule = data.dataValidation?.rule;

@@ -129,7 +129,7 @@ export class CellCustomRenderController extends Disposable {
                         const activeRenderInfo = getActiveRender(evt);
                         if (activeRenderInfo) {
                             const [activeRender, cellContext] = activeRenderInfo;
-                            activeRender.onPointerDown?.(cellContext);
+                            activeRender.onPointerDown?.(cellContext, evt);
                         }
                     });
 
@@ -139,19 +139,19 @@ export class CellCustomRenderController extends Disposable {
                             const [activeRender, cellContext] = activeRenderInfo;
                             if (this._enterActiveRender) {
                                 if (this._enterActiveRender.render !== activeRender) {
-                                    this._enterActiveRender.render.onPointerLeave?.(this._enterActiveRender.cellContext);
+                                    this._enterActiveRender.render.onPointerLeave?.(this._enterActiveRender.cellContext, evt);
                                     this._enterActiveRender = {
                                         render: activeRender,
                                         cellContext,
                                     };
-                                    activeRender.onPointerEnter?.(cellContext);
+                                    activeRender.onPointerEnter?.(cellContext, evt);
                                 }
                             } else {
                                 this._enterActiveRender = {
                                     render: activeRender,
                                     cellContext,
                                 };
-                                activeRender.onPointerEnter?.(cellContext);
+                                activeRender.onPointerEnter?.(cellContext, evt);
                             }
                         }
                     });

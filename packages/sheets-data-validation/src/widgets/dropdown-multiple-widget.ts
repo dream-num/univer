@@ -16,7 +16,7 @@
 
 import { HorizontalAlign, ICommandService, VerticalAlign } from '@univerjs/core';
 import type { ICellRenderContext } from '@univerjs/core';
-import { getFontStyleString, type Spreadsheet, type SpreadsheetSkeleton, type UniverRenderingContext2D } from '@univerjs/engine-render';
+import { getFontStyleString, type IMouseEvent, type IPointerEvent, type Spreadsheet, type SpreadsheetSkeleton, type UniverRenderingContext2D } from '@univerjs/engine-render';
 import type { IBaseDataValidationWidget } from '@univerjs/data-validation';
 import type { ListMultipleValidator } from '../validators/list-multiple-validator';
 import { getCellValueOrigin } from '../utils/getCellDataOrigin';
@@ -183,7 +183,10 @@ export class DropdownMultipleWidget implements IBaseDataValidationWidget {
         return false;
     };
 
-    onPointerDown(info: ICellRenderContext) {
+    onPointerDown(info: ICellRenderContext, evt: IPointerEvent | IMouseEvent) {
+        if (evt.button === 2) {
+            return;
+        }
         const { unitId, subUnitId, row, col } = info;
 
         const params: IShowDataValidationDropdownParams = {

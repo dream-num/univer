@@ -72,6 +72,7 @@ export class CellAlertManagerService {
         this._currentPopup = this._canvasPopManagerService.attachPopupToCell(row, col, {
             componentKey: CELL_ALERT_KEY,
             direction: 'horizontal',
+            offset: [2, 0],
         });
     }
 

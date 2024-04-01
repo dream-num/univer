@@ -207,10 +207,7 @@ export class DocumentDataModel extends DocumentDataModelSimple {
     footerModelMap: Map<string, DocumentDataModel> = new Map();
 
     constructor(snapshot: Partial<IDocumentData>) {
-        if (Tools.isEmptyObject(snapshot)) {
-            snapshot = getEmptySnapshot();
-        }
-        super(snapshot);
+        super(Tools.isEmptyObject(snapshot) ? getEmptySnapshot() : snapshot);
 
         const UNIT_ID_LENGTH = 6;
 

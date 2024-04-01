@@ -127,7 +127,7 @@ export function Toolbar(props: IToolbarProps) {
 
             const collapsedId: string[] = [];
 
-            let currentWidth = 168;
+            let currentWidth = 182;
             for (const item of itemWidths) {
                 currentWidth += item.width;
 

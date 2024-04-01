@@ -68,7 +68,7 @@ export const CopyableStatisticItem: React.FC<IStatisticItem> = (item: IStatistic
         });
     };
     return (
-        <Tooltip title={localeService.t('statusbar.clickToCopy')} placement="top" style={{ pointerEvents: 'none' }}>
+        <Tooltip title={localeService.t('statusbar.clickToCopy')} placement="top">
             <div key={item.name} className={styles.statisticItem} onClick={copyToClipboard}>
                 <span>
                     {`${localeService.t(

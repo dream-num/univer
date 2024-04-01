@@ -17,13 +17,10 @@
 import {
     BooleanNumber,
     HorizontalAlign,
-    LocaleType,
     TextDirection,
     VerticalAlign,
     WrapStrategy,
 } from '../enum';
-import type { IWorkbookData } from '../interfaces';
-import { version } from '../../../package.json';
 
 /**
  * Used as an illegal range array return value
@@ -63,20 +60,6 @@ export const DEFAULT_SELECTION = {
 export const DEFAULT_CELL = {
     row: 0,
     column: 0,
-};
-
-/**
- * Used as an init workbook return value
- */
-export const DEFAULT_WORKBOOK: IWorkbookData = {
-    id: '',
-    sheetOrder: [],
-    name: '',
-    appVersion: version,
-    locale: LocaleType.ZH_CN,
-    styles: {},
-    sheets: {},
-    resources: [],
 };
 
 /**

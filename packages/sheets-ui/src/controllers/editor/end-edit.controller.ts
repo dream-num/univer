@@ -210,6 +210,15 @@ export class EndEditController extends Disposable {
                     col: column,
                 };
 
+                 /**
+                  * When closing the editor, switch to the current tab of the editor.
+                  */
+                if (workbookId === unitId && sheetId !== worksheetId && this._editorBridgeService.isForceKeepVisible()) {
+                    this._commandService.executeCommand(SetWorksheetActivateCommand.id, {
+                        subUnitId: sheetId,
+                        unitId,
+                    });
+                }
                   /**
                    * When switching tabs while the editor is open,
                    * the operation to refresh the selection will be blocked and needs to be triggered manually.
@@ -238,16 +247,6 @@ export class EndEditController extends Disposable {
 
                 // moveCursor need to put behind of SetRangeValuesCommand, fix https://github.com/dream-num/univer/issues/1155
                 this._moveCursor(keycode);
-
-                /**
-                 * When closing the editor, switch to the current tab of the editor.
-                 */
-                if (workbookId === unitId && sheetId !== worksheetId && this._editorBridgeService.isForceKeepVisible()) {
-                    this._commandService.executeCommand(SetWorksheetActivateCommand.id, {
-                        subUnitId: sheetId,
-                        unitId,
-                    });
-                }
             })
         );
     }

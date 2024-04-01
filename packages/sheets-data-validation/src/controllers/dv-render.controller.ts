@@ -15,7 +15,7 @@
  */
 
 import type { ICellDataForSheetInterceptor, ICellRenderContext } from '@univerjs/core';
-import { DataValidationStatus, DataValidationType, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, WrapStrategy } from '@univerjs/core';
+import { DataValidationStatus, DataValidationType, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, Worksheet, WrapStrategy } from '@univerjs/core';
 import { DataValidationModel, DataValidationPanelName, DataValidatorRegistryService } from '@univerjs/data-validation';
 import { ComponentManager, IMenuService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
@@ -215,7 +215,8 @@ export class DataValidationRenderController extends RxDisposable {
                         if (!rule) {
                             return next(cell);
                         }
-                        const validStatus = this._dataValidationModel.validator(getCellValueOrigin(cell), rule, pos);
+                        const cellRaw = pos.worksheet.getCellRaw(pos.row, pos.col);
+                        const validStatus = this._dataValidationModel.validator(getCellValueOrigin(cellRaw), rule, pos);
                         const validator = this._dataValidatorRegistryService.getValidatorItem(rule.type);
                         const cellValue = getCellValueOrigin(cell);
 

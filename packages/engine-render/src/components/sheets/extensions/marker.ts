@@ -24,19 +24,26 @@ const UNIQUE_KEY = 'DefaultMarkerExtension';
 
 const Z_INDEX = 60;
 
+const stringifyRange = (range: IRange) => {
+    const { startRow, endRow, startColumn, endColumn } = range;
+    return `${startRow}-${endRow}-${startColumn}-${endColumn}`;
+};
+
 export class Marker extends SheetExtension {
     protected override Z_INDEX: number = Z_INDEX;
 
     override uKey: string = UNIQUE_KEY;
 
-    override draw(ctx: UniverRenderingContext, parentScale: IScale, skeleton: SpreadsheetSkeleton, diffBounds?: IRange[] | undefined): void {
+    override draw(ctx: UniverRenderingContext, parentScale: IScale, skeleton: SpreadsheetSkeleton, diffRanges?: IRange[] | undefined): void {
         const { worksheet, rowColumnSegment } = skeleton;
         if (!worksheet) {
             return;
         }
 
+        const mergeCellRendered = new Set<string>();
+
         Range.foreach(rowColumnSegment, (row, col) => {
-            const cellData = worksheet.getCell(row, col);
+            let cellData = worksheet.getCell(row, col);
             const cellInfo = this.getCellIndex(
                 row,
                 col,
@@ -47,17 +54,45 @@ export class Marker extends SheetExtension {
             const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
             let { startY, endY, startX, endX } = cellInfo;
 
-            if (isMerged) {
-                return true;
-            }
-
-            if (isMergedMainCell) {
+            if (isMergedMainCell || isMerged) {
                 startY = mergeInfo.startY;
                 endY = mergeInfo.endY;
                 startX = mergeInfo.startX;
                 endX = mergeInfo.endX;
             }
-            if (cellData?.markers?.tr) {
+
+            if (isMerged) {
+                const mainCell = {
+                    row: mergeInfo.startRow,
+                    col: mergeInfo.startColumn,
+                };
+
+                cellData = worksheet.getCell(mainCell.row, mainCell.col);
+            }
+
+            if (!this.isRenderDiffRangesByRow(mergeInfo.startRow, mergeInfo.endRow, diffRanges)) {
+                return true;
+            }
+
+            if (cellInfo.isMerged || cellInfo.isMergedMainCell) {
+                const rangeStr = stringifyRange(mergeInfo);
+                if (mergeCellRendered.has(rangeStr)) {
+                    return;
+                } else {
+                    mergeCellRendered.add(rangeStr);
+                }
+            }
+
+            // current cell is hidden
+            if (!worksheet.getColVisible(col) || !worksheet.getRowVisible(row)) {
+                return;
+            }
+
+            if (!cellData) {
+                return;
+            }
+
+            if (cellData.markers?.tr) {
                 ctx.save();
                 const marker = cellData.markers.tr;
                 const x = endX;
@@ -73,7 +108,7 @@ export class Marker extends SheetExtension {
                 ctx.restore();
             }
 
-            if (cellData?.markers?.tl) {
+            if (cellData.markers?.tl) {
                 ctx.save();
                 const marker = cellData.markers.tl;
                 const x = startX;
@@ -89,7 +124,7 @@ export class Marker extends SheetExtension {
                 ctx.restore();
             }
 
-            if (cellData?.markers?.br) {
+            if (cellData.markers?.br) {
                 ctx.save();
                 const marker = cellData.markers.br;
                 const x = endX;
@@ -105,7 +140,7 @@ export class Marker extends SheetExtension {
                 ctx.restore();
             }
 
-            if (cellData?.markers?.bl) {
+            if (cellData.markers?.bl) {
                 ctx.save();
                 const marker = cellData.markers.bl;
                 const x = startX;

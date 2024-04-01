@@ -15,6 +15,7 @@
  */
 
 import React, { useEffect, useRef, useState } from 'react';
+import { useEvent } from 'rc-util';
 import styles from './index.module.less';
 
 interface IAbsolutePosition {
@@ -35,6 +36,8 @@ export interface IRectPopupProps {
     direction?: 'horizontal' | 'vertical';
 
     onClickOutside?: (e: MouseEvent) => void;
+
+    excludeOutSide?: HTMLElement[];
 }
 
 export interface IPopupLayoutInfo {
@@ -72,11 +75,10 @@ const calcPopupPosition = (layout: IPopupLayoutInfo) => {
 };
 
 function RectPopup(props: IRectPopupProps) {
-    const { children, anchorRect, direction = 'vertical', onClickOutside } = props;
+    const { children, anchorRect, direction = 'vertical', onClickOutside, excludeOutSide } = props;
     const nodeRef = useRef(null);
-    const clickOtherFn = useRef(onClickOutside);
+    const clickOtherFn = useEvent(onClickOutside ?? (() => {}));
 
-    clickOtherFn.current = onClickOutside;
     const [position, setPosition] = useState<Partial<IAbsolutePosition>>({
         top: -9999,
         left: -9999,
@@ -109,10 +111,13 @@ function RectPopup(props: IRectPopupProps) {
 
     useEffect(() => {
         const handleClick = (e: MouseEvent) => {
+            if (excludeOutSide && (excludeOutSide.indexOf(e.target as any) > -1)) {
+                return;
+            }
             if (e.clientX <= anchorRect.right && e.clientX >= anchorRect.left && e.clientY <= anchorRect.bottom && e.clientY >= anchorRect.top) {
                 return;
             }
-            clickOtherFn.current?.(e);
+            clickOtherFn(e);
         };
 
         window.addEventListener('click', handleClick);
@@ -120,7 +125,7 @@ function RectPopup(props: IRectPopupProps) {
         return () => {
             window.removeEventListener('click', handleClick);
         };
-    }, [anchorRect.bottom, anchorRect.left, anchorRect.right, anchorRect.top, clickOtherFn]);
+    }, [anchorRect.bottom, anchorRect.left, anchorRect.right, anchorRect.top, clickOtherFn, excludeOutSide]);
 
     return (
         <section

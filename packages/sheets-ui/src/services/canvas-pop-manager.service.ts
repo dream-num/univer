@@ -35,6 +35,7 @@ interface ICanvasPopup {
     onClickOutside?: (e: MouseEvent) => void;
     direction?: 'vertical' | 'horizontal';
     offset?: [number, number];
+    excludeOutSide?: HTMLElement[];
 }
 
 export class SheetCanvasPopManagerService extends Disposable {

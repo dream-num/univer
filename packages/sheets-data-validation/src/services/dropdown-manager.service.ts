@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Disposable, DisposableCollection, IUniverInstanceService, type Nullable } from '@univerjs/core';
+import { Disposable, DisposableCollection, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, IUniverInstanceService, type Nullable } from '@univerjs/core';
 import type { ISheetLocation } from '@univerjs/sheets';
 import { Subject } from 'rxjs';
 import type { IDisposable } from '@wendellhu/redi';
@@ -22,6 +22,7 @@ import { Inject } from '@wendellhu/redi';
 import { SheetCanvasPopManagerService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { DataValidatorRegistryService } from '@univerjs/data-validation';
 import { IZenZoneService } from '@univerjs/ui';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { DROP_DOWN_KEY } from '../views/drop-down';
 
 export interface IDropdownParam {
@@ -54,7 +55,8 @@ export class DataValidationDropdownManagerService extends Disposable {
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @Inject(DataValidatorRegistryService) private readonly _dataValidatorRegistryService: DataValidatorRegistryService,
-        @IZenZoneService private readonly _zenZoneService: IZenZoneService
+        @IZenZoneService private readonly _zenZoneService: IZenZoneService,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         super();
         this._init();
@@ -82,7 +84,7 @@ export class DataValidationDropdownManagerService extends Disposable {
         this._activeDropdown = param;
         this._activeDropdown$.next(this._activeDropdown);
         const disposableCollection = new DisposableCollection();
-
+        const currentRender = this._renderManagerService.getRenderById(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
         disposableCollection.add(this._canvasPopupManagerService.attachPopupToCell(
             row,
             col,
@@ -92,6 +94,7 @@ export class DataValidationDropdownManagerService extends Disposable {
                     this.hideDropdown();
                 },
                 offset: [0, 3],
+                excludeOutSide: [currentRender?.engine.getCanvasElement()].filter(Boolean) as HTMLElement[],
             }
         ));
 

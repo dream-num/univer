@@ -21,7 +21,7 @@ import { ICommandService, IUniverInstanceService, LocaleService, Tools } from '@
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { CheckMarkSingle, DeleteSingle, IncreaseSingle } from '@univerjs/icons';
 import type { IDefinedNamesServiceParam } from '@univerjs/engine-formula';
-import { IDefinedNamesService, RemoveDefinedNameMutation, serializeRangeWithSheet, SetDefinedNameMutation } from '@univerjs/engine-formula';
+import { IDefinedNamesService, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import clsx from 'clsx';
 import { InsertDefinedNameCommand, RemoveDefinedNameCommand, SelectionManagerService, SetDefinedNameCommand } from '@univerjs/sheets';
 import { Confirm, Tooltip } from '@univerjs/design';

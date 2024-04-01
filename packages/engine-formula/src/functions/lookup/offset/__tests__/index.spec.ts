@@ -163,6 +163,7 @@ describe('Test offset', () => {
             numfmtItemMap: {},
             dirtyRanges: [],
             dirtyNameMap: {},
+            dirtyDefinedNameMap: {},
             dirtyUnitFeatureMap: {},
             dirtyUnitOtherFormulaMap: {},
             excludedCell: {},

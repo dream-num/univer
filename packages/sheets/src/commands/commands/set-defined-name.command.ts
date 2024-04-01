@@ -21,7 +21,7 @@ import {
     IUndoRedoService,
 } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
-import { type ISetDefinedNameMutationParam, RemoveDefinedNameMutation, SetDefinedNameMutation } from '@univerjs/engine-formula';
+import { type ISetDefinedNameMutationParam, SetDefinedNameMutation } from '@univerjs/engine-formula';
 
 export interface ISetDefinedNameCommandParams {
     unitId: string;

@@ -60,6 +60,7 @@ describe('Test column', () => {
             numfmtItemMap: {},
             dirtyRanges: [],
             dirtyNameMap: {},
+            dirtyDefinedNameMap: {},
             dirtyUnitFeatureMap: {},
             excludedCell: {},
             allUnitData: {

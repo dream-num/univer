@@ -15,9 +15,9 @@
  */
 
 import type { ICellData, IObjectMatrixPrimitiveType, IRange, Nullable } from '@univerjs/core';
-import { cellToRange, Direction, isFormulaId, isFormulaString, ObjectMatrix } from '@univerjs/core';
-import type { IExchangePosition, IFormulaData, IFormulaDataItem } from '@univerjs/engine-formula';
-import { EffectRefRangId, handleInsertCol, runRefRangeMutations } from '@univerjs/sheets';
+import { cellToRange, Direction, isFormulaId, isFormulaString, ObjectMatrix, Tools } from '@univerjs/core';
+import type { IFormulaData, IFormulaDataItem, IRangeChange } from '@univerjs/engine-formula';
+import { EffectRefRangId, handleDeleteRangeMoveLeft, handleDeleteRangeMoveUp, handleInsertCol, handleInsertRangeMoveDown, handleInsertRangeMoveRight, handleInsertRow, handleIRemoveCol, handleIRemoveRow, handleMoveCols, handleMoveRange, handleMoveRows, runRefRangeMutations } from '@univerjs/sheets';
 import { checkFormulaDataNull } from './offset-formula-data';
 
 export enum FormulaReferenceMoveType {
@@ -46,11 +46,6 @@ export interface IFormulaReferenceMoveParam {
     sheetName?: string;
 }
 
-export interface IRangeChange {
-    oldCell: IRange;
-    newCell: IRange;
-}
-
 /**
  * For different Command operations, it may be necessary to perform traversal in reverse or in forward order, so first determine the type of Command and then perform traversal.
  * @param oldFormulaData
@@ -61,65 +56,20 @@ export interface IRangeChange {
 export function refRangeFormula(oldFormulaData: IFormulaData,
     newFormulaData: IFormulaData,
     formulaReferenceMoveParam: IFormulaReferenceMoveParam) {
-    const type = formulaReferenceMoveParam.type;
-
-    if (type === FormulaReferenceMoveType.SetName) {
-        // TODO
-    } else if (type === FormulaReferenceMoveType.RemoveSheet) {
-        // TODO
-    } else if (type === FormulaReferenceMoveType.MoveRange) {
-        // TODO
-    } else if (type === FormulaReferenceMoveType.MoveRows) {
-        // TODO
-    } else if (type === FormulaReferenceMoveType.MoveCols) {
-        // TODO
-    } else if (type === FormulaReferenceMoveType.InsertRow) {
-        // TODO
-    } else if (type === FormulaReferenceMoveType.InsertColumn) {
-        return handleRefInsertCol(oldFormulaData, newFormulaData, formulaReferenceMoveParam);
-    } else if (type === FormulaReferenceMoveType.RemoveRow) {
-        // TODO
-    } else if (type === FormulaReferenceMoveType.RemoveColumn) {
-        // TODO
-    } else if (type === FormulaReferenceMoveType.DeleteMoveLeft) {
-        // TODO
-    } else if (type === FormulaReferenceMoveType.DeleteMoveUp) {
-        // TODO
-    } else if (type === FormulaReferenceMoveType.InsertMoveDown) {
-        // TODO
-    } else if (type === FormulaReferenceMoveType.InsertMoveRight) {
-        // TODO
-    }
-
-    return {
-        redoFormulaData: {},
-        undoFormulaData: {},
-        exchangePosition: {},
-    };
-}
-
-function handleRefInsertCol(oldFormulaData: IFormulaData,
-    newFormulaData: IFormulaData,
-    formulaReferenceMoveParam: IFormulaReferenceMoveParam) {
     let redoFormulaData: IObjectMatrixPrimitiveType<Nullable<ICellData>> = {};
     let undoFormulaData: IObjectMatrixPrimitiveType<Nullable<ICellData>> = {};
-    const exchangePosition: IExchangePosition = {};
+    // When undoing and redoing, the traversal order may be different. Record the range list of all single formula offsets, and then retrieve the traversal as needed.
+    const rangeList: IRangeChange[] = [];
+    let isReverse = false;
 
     const { type, unitId, sheetId, range, from, to } = formulaReferenceMoveParam;
-
-    if (range === undefined) {
-        return {
-            redoFormulaData,
-            undoFormulaData,
-            exchangePosition,
-        };
-    }
 
     if (checkFormulaDataNull(oldFormulaData, unitId, sheetId)) {
         return {
             redoFormulaData,
             undoFormulaData,
-            exchangePosition,
+            rangeList,
+            isReverse,
         };
     }
 
@@ -128,9 +78,6 @@ function handleRefInsertCol(oldFormulaData: IFormulaData,
 
     const oldFormulaMatrix = new ObjectMatrix(currentOldFormulaData);
     const newFormulaMatrix = new ObjectMatrix(currentNewFormulaData);
-
-    // When undoing and redoing, the traversal order may be different. Record the range list of all single formula offsets, and then retrieve the traversal as needed.
-    const rangeList: IRangeChange[] = [];
 
     oldFormulaMatrix.forValue((row, column, cell) => {
         const formulaString = cell?.f || '';
@@ -145,38 +92,237 @@ function handleRefInsertCol(oldFormulaData: IFormulaData,
         }
 
         const oldCell = cellToRange(row, column);
+        let newCell = null;
 
-        const operators = handleInsertCol(
-            {
-                id: EffectRefRangId.InsertColCommandId,
-                params: { range, unitId: '', subUnitId: '', direction: Direction.RIGHT },
-            },
-            oldCell
-        );
+        switch (type) {
+            case FormulaReferenceMoveType.SetName:
+                // TODO
+                break;
+            case FormulaReferenceMoveType.RemoveSheet:
+                // TODO
+                break;
+            case FormulaReferenceMoveType.MoveRange:
+                if (from == null || to == null) {
+                    return;
+                }
+                newCell = handleRefMoveRange(from, to, oldCell);
+                break;
+            case FormulaReferenceMoveType.MoveRows:
+                if (from == null || to == null) {
+                    return;
+                }
+                newCell = handleRefMoveRows(from, to, oldCell);
+                break;
+            case FormulaReferenceMoveType.MoveCols:
+                if (from == null || to == null) {
+                    return;
+                }
+                newCell = handleRefMoveCols(from, to, oldCell);
+                break;
+            default:
+                break;
+        }
 
-        const newCell = runRefRangeMutations(operators, oldCell);
+        if (Tools.isDefine(range)) {
+            switch (type) {
+                case FormulaReferenceMoveType.InsertRow:
+                    newCell = handleRefInsertRow(range, oldCell);
+                    isReverse = true;
+                    break;
+                case FormulaReferenceMoveType.InsertColumn:
+                    newCell = handleRefInsertCol(range, oldCell);
+                    isReverse = true;
+                    break;
+                case FormulaReferenceMoveType.RemoveRow:
+                    newCell = handleRefRemoveRow(range, oldCell);
+                    break;
+                case FormulaReferenceMoveType.RemoveColumn:
+                    newCell = handleRefMoveCol(range, oldCell);
+                    break;
+                case FormulaReferenceMoveType.DeleteMoveLeft:
+                    newCell = handleRefDeleteMoveLeft(range, oldCell);
+                    break;
+                case FormulaReferenceMoveType.DeleteMoveUp:
+                    newCell = handleRefDeleteMoveUp(range, oldCell);
+                    break;
+                case FormulaReferenceMoveType.InsertMoveDown:
+                    newCell = handleRefInsertMoveDown(range, oldCell);
+                    isReverse = true;
+                    break;
+                case FormulaReferenceMoveType.InsertMoveRight:
+                    newCell = handleRefInsertMoveRight(range, oldCell);
+                    isReverse = true;
+                    break;
+                default:
+                    break;
+            }
+        }
 
         if (newCell == null) {
             return;
         }
 
-        rangeList.push({
-            oldCell,
-            newCell,
-        });
+        const { startRow: oldStartRow, startColumn: oldStartColumn } = oldCell;
+        const { startRow: newStartRow, startColumn: newStartColumn } = newCell;
 
-        exchangePosition[`${row}_${column}`] = oldCell;
-        exchangePosition[`${newCell.startRow}_${newCell.startColumn}`] = newCell;
+        if (oldStartRow === newStartRow && oldStartColumn === newStartColumn) {
+            return;
+        }
+
+        if (isReverse) {
+            rangeList.unshift({
+                oldCell,
+                newCell,
+            });
+        } else {
+            rangeList.push({
+                oldCell,
+                newCell,
+            });
+        }
     });
 
-    redoFormulaData = getRedoFormulaData(rangeList.reverse(), oldFormulaMatrix, newFormulaMatrix);
+    redoFormulaData = getRedoFormulaData(rangeList, oldFormulaMatrix, newFormulaMatrix);
     undoFormulaData = getUndoFormulaData(rangeList, oldFormulaMatrix, newFormulaMatrix);
 
     return {
         redoFormulaData,
         undoFormulaData,
-        exchangePosition,
+        rangeList,
+        isReverse,
     };
+}
+
+function handleRefMoveRange(from: IRange, to: IRange, oldCell: IRange) {
+    const operators = handleMoveRange(
+        {
+            id: EffectRefRangId.MoveRangeCommandId,
+            params: { toRange: to, fromRange: from },
+        },
+        oldCell
+    );
+
+    return runRefRangeMutations(operators, oldCell);
+}
+
+function handleRefMoveRows(from: IRange, to: IRange, oldCell: IRange) {
+    const operators = handleMoveRows(
+        {
+            id: EffectRefRangId.MoveRowsCommandId,
+            params: { toRange: to, fromRange: from },
+        },
+        oldCell
+    );
+
+    return runRefRangeMutations(operators, oldCell);
+}
+
+function handleRefMoveCols(from: IRange, to: IRange, oldCell: IRange) {
+    const operators = handleMoveCols(
+        {
+            id: EffectRefRangId.MoveColsCommandId,
+            params: { toRange: to, fromRange: from },
+        },
+        oldCell
+    );
+
+    return runRefRangeMutations(operators, oldCell);
+}
+
+function handleRefInsertRow(range: IRange, oldCell: IRange) {
+    const operators = handleInsertRow(
+        {
+            id: EffectRefRangId.InsertRowCommandId,
+            params: { range, unitId: '', subUnitId: '', direction: Direction.DOWN },
+        },
+        oldCell
+    );
+
+    return runRefRangeMutations(operators, oldCell);
+}
+
+function handleRefInsertCol(range: IRange, oldCell: IRange) {
+    const operators = handleInsertCol(
+        {
+            id: EffectRefRangId.InsertColCommandId,
+            params: { range, unitId: '', subUnitId: '', direction: Direction.RIGHT },
+        },
+        oldCell
+    );
+
+    return runRefRangeMutations(operators, oldCell);
+}
+
+function handleRefRemoveRow(range: IRange, oldCell: IRange) {
+    const operators = handleIRemoveRow(
+        {
+            id: EffectRefRangId.RemoveRowCommandId,
+            params: { range },
+        },
+        oldCell
+    );
+
+    return runRefRangeMutations(operators, oldCell);
+}
+
+function handleRefMoveCol(range: IRange, oldCell: IRange) {
+    const operators = handleIRemoveCol(
+        {
+            id: EffectRefRangId.RemoveColCommandId,
+            params: { range },
+        },
+        oldCell
+    );
+
+    return runRefRangeMutations(operators, oldCell);
+}
+
+function handleRefDeleteMoveLeft(range: IRange, oldCell: IRange) {
+    const operators = handleDeleteRangeMoveLeft(
+        {
+            id: EffectRefRangId.DeleteRangeMoveLeftCommandId,
+            params: { range },
+        },
+        oldCell
+    );
+
+    return runRefRangeMutations(operators, oldCell);
+}
+
+function handleRefDeleteMoveUp(range: IRange, oldCell: IRange) {
+    const operators = handleDeleteRangeMoveUp(
+        {
+            id: EffectRefRangId.DeleteRangeMoveUpCommandId,
+            params: { range },
+        },
+        oldCell
+    );
+
+    return runRefRangeMutations(operators, oldCell);
+}
+
+function handleRefInsertMoveDown(range: IRange, oldCell: IRange) {
+    const operators = handleInsertRangeMoveDown(
+        {
+            id: EffectRefRangId.InsertRangeMoveDownCommandId,
+            params: { range },
+        },
+        oldCell
+    );
+
+    return runRefRangeMutations(operators, oldCell);
+}
+
+function handleRefInsertMoveRight(range: IRange, oldCell: IRange) {
+    const operators = handleInsertRangeMoveRight(
+        {
+            id: EffectRefRangId.InsertRangeMoveRightCommandId,
+            params: { range },
+        },
+        oldCell
+    );
+
+    return runRefRangeMutations(operators, oldCell);
 }
 
 /**

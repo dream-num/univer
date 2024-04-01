@@ -41,7 +41,6 @@ export { RegisterFunctionMutation } from './commands/mutations/register-function
 export {
     type ISetArrayFormulaDataMutationParams,
     SetArrayFormulaDataMutation,
-    SetArrayFormulaDataUndoMutationFactory,
 } from './commands/mutations/set-array-formula-data.mutation';
 
 export { RemoveDefinedNameMutation, SetDefinedNameMutation, type ISetDefinedNameMutationSearchParam, type ISetDefinedNameMutationParam } from './commands/mutations/set-defined-name.mutation';
@@ -148,4 +147,4 @@ export { IFormulaCurrentConfigService, FormulaCurrentConfigService } from './ser
 
 export { IActiveDirtyManagerService } from './services/active-dirty-manager.service';
 
-export type { IExchangePosition } from './models/formula-data.model';
+export type { IRangeChange } from './models/formula-data.model';

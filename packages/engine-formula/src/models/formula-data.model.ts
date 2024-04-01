@@ -30,15 +30,12 @@ import type {
     IUnitSheetNameMap,
 } from '../basics/common';
 import { LexerTreeBuilder } from '../engine/analysis/lexer-tree-builder';
+import type { IFormulaIdMap } from './utils/formula-data-util';
+import { clearArrayFormulaCellDataByCell, updateFormulaDataByCellValue } from './utils/formula-data-util';
 
-export interface IFormulaIdMap {
-    f: string;
-    r: number;
-    c: number;
-}
-
-export interface IExchangePosition {
-    [key: string]: IRange;
+export interface IRangeChange {
+    oldCell: IRange;
+    newCell: IRange;
 }
 
 export class FormulaDataModel extends Disposable {
@@ -351,7 +348,7 @@ export class FormulaDataModel extends Disposable {
         };
     }
 
-    updateFormulaData(unitId: string, sheetId: string, cellValue: IObjectMatrixPrimitiveType<Nullable<ICellData>>, exchangePosition?: IExchangePosition) {
+    updateFormulaData(unitId: string, sheetId: string, cellValue: IObjectMatrixPrimitiveType<Nullable<ICellData>>, rangeList?: IRangeChange[], isReverse?: boolean) {
         const cellMatrix = new ObjectMatrix(cellValue);
 
         const formulaIdMap = this.getFormulaIdMap(unitId, sheetId); // Connect the formula and ID
@@ -370,67 +367,25 @@ export class FormulaDataModel extends Disposable {
         const sheetFormulaDataMatrix = new ObjectMatrix<IFormulaDataItem>(workbookFormulaData[sheetId]);
         const newSheetFormulaDataMatrix = new ObjectMatrix<IFormulaDataItem | null>();
 
-        cellMatrix.forValue((row, column, cell) => {
-            let r = row;
-            let c = column;
-
-            // Exchange the position of the cell
-            if (exchangePosition) {
-                const key = `${row}_${column}`;
-                if (exchangePosition[key]) {
-                    const { startRow, startColumn } = exchangePosition[key];
-                    r = startRow;
-                    c = startColumn;
-                }
+        if (rangeList) {
+            if (isReverse) {
+                rangeList.reverse();
             }
 
-            const formulaString = cell?.f || '';
-            const formulaId = cell?.si || '';
+            rangeList.forEach(({ oldCell, newCell }) => {
+                const { startRow: r, startColumn: c } = oldCell;
+                const { startRow: newStartRow, startColumn: newStartColumn } = newCell;
 
-            const checkFormulaString = isFormulaString(formulaString);
-            const checkFormulaId = isFormulaId(formulaId);
+                const cell = cellMatrix.getValue(newStartRow, newStartColumn);
 
-            if (checkFormulaString && checkFormulaId) {
-                sheetFormulaDataMatrix.setValue(r, c, {
-                    f: formulaString,
-                    si: formulaId,
-                });
-
-                formulaIdMap.set(formulaId, { f: formulaString, r, c });
-
-                newSheetFormulaDataMatrix.setValue(r, c, {
-                    f: formulaString,
-                    si: formulaId,
-                });
-            } else if (checkFormulaString && !checkFormulaId) {
-                sheetFormulaDataMatrix.setValue(r, c, {
-                    f: formulaString,
-                });
-                newSheetFormulaDataMatrix.setValue(r, c, {
-                    f: formulaString,
-                });
-            } else if (!checkFormulaString && checkFormulaId) {
-                sheetFormulaDataMatrix.setValue(r, c, {
-                    f: '',
-                    si: formulaId,
-                });
-            }
-            // When cell is null or cell.f cell.si is null, delete formulaDataItem
-            else if (((cell?.f === null && cell?.si === null) || cell === null) && sheetFormulaDataMatrix.getValue(r, c)) {
-                const currentFormulaInfo = sheetFormulaDataMatrix.getValue(r, c);
-                const f = currentFormulaInfo?.f || '';
-                const si = currentFormulaInfo?.si || '';
-
-                // The id that needs to be offset
-                // When the cell containing the formulas f and si is deleted, f and si lose their association, and f needs to be moved to the next cell containing the same si.
-                if (isFormulaString(f) && isFormulaId(si)) {
-                    deleteFormulaIdMap.set(si, f);
-                }
-
-                sheetFormulaDataMatrix.realDeleteValue(r, c);
-                newSheetFormulaDataMatrix.setValue(r, c, null);
-            }
-        });
+                updateFormulaDataByCellValue(sheetFormulaDataMatrix, newSheetFormulaDataMatrix, formulaIdMap, deleteFormulaIdMap, r, c, cell);
+                updateFormulaDataByCellValue(sheetFormulaDataMatrix, newSheetFormulaDataMatrix, formulaIdMap, deleteFormulaIdMap, newStartRow, newStartColumn, null);
+            });
+        } else {
+            cellMatrix.forValue((r, c, cell) => {
+                updateFormulaDataByCellValue(sheetFormulaDataMatrix, newSheetFormulaDataMatrix, formulaIdMap, deleteFormulaIdMap, r, c, cell);
+            });
+        }
 
         // Convert the formula ID to formula string
         sheetFormulaDataMatrix.forValue((r, c, cell) => {
@@ -487,7 +442,8 @@ export class FormulaDataModel extends Disposable {
     updateArrayFormulaRange(
         unitId: string,
         sheetId: string,
-        cellValue: IObjectMatrixPrimitiveType<Nullable<ICellData>>
+        cellValue: IObjectMatrixPrimitiveType<Nullable<ICellData>>,
+        rangeList?: IRangeChange[], isReverse?: boolean
     ) {
         // remove the array formula range when cell value is null
 
@@ -496,30 +452,32 @@ export class FormulaDataModel extends Disposable {
         if (!arrayFormulaRange) return;
 
         const arrayFormulaRangeMatrix = new ObjectMatrix(arrayFormulaRange);
-
         const cellMatrix = new ObjectMatrix(cellValue);
-        cellMatrix.forValue((r, c, cell) => {
-            const arrayFormulaRangeValue = arrayFormulaRangeMatrix?.getValue(r, c);
-            if (arrayFormulaRangeValue == null) {
-                return true;
+
+        if (rangeList) {
+            if (isReverse) {
+                rangeList.reverse();
             }
 
-            const formulaString = cell?.f || '';
-            const formulaId = cell?.si || '';
+            rangeList.forEach(({ oldCell, newCell }) => {
+                const { startRow: r, startColumn: c } = oldCell;
+                const { startRow: newStartRow, startColumn: newStartColumn } = newCell;
 
-            const checkFormulaString = isFormulaString(formulaString);
-            const checkFormulaId = isFormulaId(formulaId);
-
-            if (!checkFormulaString && !checkFormulaId) {
                 arrayFormulaRangeMatrix.realDeleteValue(r, c);
-            }
-        });
+                arrayFormulaRangeMatrix.realDeleteValue(newStartRow, newStartColumn);
+            });
+        } else {
+            cellMatrix.forValue((r, c, cell) => {
+                arrayFormulaRangeMatrix.realDeleteValue(r, c);
+            });
+        }
     }
 
     updateArrayFormulaCellData(
         unitId: string,
         sheetId: string,
-        cellValue: IObjectMatrixPrimitiveType<Nullable<ICellData>>
+        cellValue: IObjectMatrixPrimitiveType<Nullable<ICellData>>,
+        rangeList?: IRangeChange[], isReverse?: boolean
     ) {
         // remove the array formula range when cell value is null
 
@@ -536,27 +494,24 @@ export class FormulaDataModel extends Disposable {
         const arrayFormulaCellDataMatrix = new ObjectMatrix(arrayFormulaCellData);
 
         const cellMatrix = new ObjectMatrix(cellValue);
-        cellMatrix.forValue((r, c, cell) => {
-            const arrayFormulaRangeValue = arrayFormulaRangeMatrix?.getValue(r, c);
-            if (arrayFormulaRangeValue == null) {
-                return true;
+
+        if (rangeList) {
+            if (isReverse) {
+                rangeList.reverse();
             }
 
-            const formulaString = cell?.f || '';
-            const formulaId = cell?.si || '';
+            rangeList.forEach(({ oldCell, newCell }) => {
+                const { startRow: r, startColumn: c } = oldCell;
+                const { startRow: newStartRow, startColumn: newStartColumn } = newCell;
 
-            const checkFormulaString = isFormulaString(formulaString);
-            const checkFormulaId = isFormulaId(formulaId);
-
-            if (!checkFormulaString && !checkFormulaId) {
-                const { startRow, startColumn, endRow, endColumn } = arrayFormulaRangeValue;
-                for (let r = startRow; r <= endRow; r++) {
-                    for (let c = startColumn; c <= endColumn; c++) {
-                        arrayFormulaCellDataMatrix.realDeleteValue(r, c);
-                    }
-                }
-            }
-        });
+                clearArrayFormulaCellDataByCell(arrayFormulaRangeMatrix, arrayFormulaCellDataMatrix, r, c);
+                clearArrayFormulaCellDataByCell(arrayFormulaRangeMatrix, arrayFormulaCellDataMatrix, newStartRow, newStartColumn);
+            });
+        } else {
+            cellMatrix.forValue((r, c, cell) => {
+                clearArrayFormulaCellDataByCell(arrayFormulaRangeMatrix, arrayFormulaCellDataMatrix, r, c);
+            });
+        }
     }
 
     updateNumfmtData(

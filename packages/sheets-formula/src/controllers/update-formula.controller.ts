@@ -253,21 +253,21 @@ export class UpdateFormulaController extends Disposable {
 
     private _handleSetRangeValuesMutation(params: ISetRangeValuesMutationParams) {
         const { subUnitId: sheetId, unitId, cellValue, options } = params;
-        const { exchangePosition } = options || {};
+        const { rangeList, isReverse } = options || {};
 
         if (cellValue == null) {
             return;
         }
 
-        const newSheetFormulaData = this._formulaDataModel.updateFormulaData(unitId, sheetId, cellValue, exchangePosition);
+        const newSheetFormulaData = this._formulaDataModel.updateFormulaData(unitId, sheetId, cellValue, rangeList, isReverse);
         const newFormulaData = {
             [unitId]: {
                 [sheetId]: newSheetFormulaData,
             },
         };
 
-        this._formulaDataModel.updateArrayFormulaCellData(unitId, sheetId, cellValue);
-        this._formulaDataModel.updateArrayFormulaRange(unitId, sheetId, cellValue);
+        this._formulaDataModel.updateArrayFormulaCellData(unitId, sheetId, cellValue, rangeList, isReverse);
+        this._formulaDataModel.updateArrayFormulaRange(unitId, sheetId, cellValue, rangeList, isReverse);
         this._formulaDataModel.updateNumfmtData(unitId, sheetId, cellValue); // TODO: move model to snapshot
 
         this._commandService.executeCommand(
@@ -413,7 +413,7 @@ export class UpdateFormulaController extends Disposable {
                 result
             );
 
-            const { redoFormulaData, undoFormulaData, exchangePosition } = refRangeFormula(oldFormulaData, newFormulaData, result);
+            const { redoFormulaData, undoFormulaData, rangeList, isReverse } = refRangeFormula(oldFormulaData, newFormulaData, result);
 
             // console.info('redoFormulaData==', redoFormulaData);
             // console.info('undoFormulaData==', undoFormulaData);
@@ -435,7 +435,8 @@ export class UpdateFormulaController extends Disposable {
                 unitId,
                 cellValue: undoFormulaData,
                 options: {
-                    exchangePosition,
+                    rangeList,
+                    isReverse,
                 },
             };
 

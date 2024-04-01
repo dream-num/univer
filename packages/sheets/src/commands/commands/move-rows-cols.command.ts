@@ -150,9 +150,9 @@ export const MoveRowsCommand: ICommand<IMoveRowsCommandParams> = {
         ];
 
         const undos = [
+            ...interceptorCommands.undos,
             { id: MoveRowsMutation.id, params: undoMoveRowsParams },
             { id: SetSelectionsOperation.id, params: undoSetSelectionsParam },
-            ...interceptorCommands.undos,
         ];
 
         const result = sequenceExecute(redos, commandService);
@@ -277,9 +277,9 @@ export const MoveColsCommand: ICommand<IMoveColsCommandParams> = {
         ];
 
         const undos = [
+            ...interceptorCommands.undos,
             { id: MoveColsMutation.id, params: undoMoveColsParams },
             { id: SetSelectionsOperation.id, params: undoSetSelectionsParam },
-            ...interceptorCommands.undos,
         ];
 
         const result = sequenceExecute(redos, commandService);

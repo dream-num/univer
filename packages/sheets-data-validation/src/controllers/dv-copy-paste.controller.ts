@@ -34,7 +34,6 @@ export class DataValidationCopyPasteController extends Disposable {
 
     constructor(
         @ISheetClipboardService private _sheetClipboardService: ISheetClipboardService,
-        @IUniverInstanceService private _univerInstanceService: IUniverInstanceService,
         @Inject(DataValidationModel) private _dataValidationModel: DataValidationModel
     ) {
         super();
@@ -66,18 +65,17 @@ export class DataValidationCopyPasteController extends Disposable {
 
         Range.foreach(range, (row, col) => {
             const ruleId = manager.getRuleIdByLocation(row, col);
-            if (ruleId) {
-                const relativeRange = Rectangle.getRelativeRange(
-                    {
-                        startRow: row,
-                        endRow: row,
-                        startColumn: col,
-                        endColumn: col,
-                    },
-                    range
-                );
-                matrix.setValue(relativeRange.startRow, relativeRange.startColumn, ruleId);
-            }
+
+            const relativeRange = Rectangle.getRelativeRange(
+                {
+                    startRow: row,
+                    endRow: row,
+                    startColumn: col,
+                    endColumn: col,
+                },
+                range
+            );
+            matrix.setValue(relativeRange.startRow, relativeRange.startColumn, ruleId ?? '');
         });
     }
 
@@ -122,7 +120,6 @@ export class DataValidationCopyPasteController extends Disposable {
             const manager = this._dataValidationModel.ensureManager(copyInfo.unitId, copyInfo.subUnitId) as SheetDataValidationManager;
             const ruleMatrix = manager.getRuleObjectMatrix().clone();
             const repeatRange = getRepeatRange(copyInfo.copyRange, pastedRange, true);
-
             const additionRules: Set<ISheetDataValidationRule> = new Set();
 
             repeatRange.forEach(({ startRange }) => {
@@ -138,6 +135,7 @@ export class DataValidationCopyPasteController extends Disposable {
                     );
                     const transformedRuleId = `${subUnitId}-${ruleId}`;
                     const oldRule = originManager.getRuleById(ruleId);
+
                     if (!manager.getRuleById(transformedRuleId) && oldRule) {
                         additionRules.add({ ...oldRule, uid: transformedRuleId });
                     }

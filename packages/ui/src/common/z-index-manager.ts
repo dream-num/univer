@@ -15,6 +15,9 @@
  */
 
 export class ZIndexManager {
+    static #MAX_INDEX = 2147483647;
+    static #MIN_INDEX = -2147483647;
+
     private _list: Map<string, number> = new Map();
 
     setIndex(name: string, index: number) {

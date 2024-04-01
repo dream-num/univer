@@ -116,10 +116,12 @@
                 flex-wrap: wrap;
 
                 &:not(:last-child) {
-                    margin-bottom: var(--margin-xs);
-
                     &::after {
                         content: initial;
+                    }
+
+                    > *:last-child {
+                        margin-bottom: var(--margin-xs);
                     }
                 }
             }

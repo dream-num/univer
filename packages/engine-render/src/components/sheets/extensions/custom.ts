@@ -60,9 +60,9 @@ export class Custom extends SheetExtension {
                 const rangeStr = stringifyRange(mergeInfo);
                 if (mergeCellRendered.has(rangeStr)) {
                     return;
-                } else {
-                    mergeCellRendered.add(rangeStr);
                 }
+
+                mergeCellRendered.add(rangeStr);
             }
 
             if (primaryWithCoord.isMerged) {

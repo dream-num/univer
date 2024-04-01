@@ -78,9 +78,9 @@ export class Marker extends SheetExtension {
                 const rangeStr = stringifyRange(mergeInfo);
                 if (mergeCellRendered.has(rangeStr)) {
                     return;
-                } else {
-                    mergeCellRendered.add(rangeStr);
                 }
+
+                mergeCellRendered.add(rangeStr);
             }
 
             // current cell is hidden

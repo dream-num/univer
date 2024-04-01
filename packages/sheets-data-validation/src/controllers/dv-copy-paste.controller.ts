@@ -120,7 +120,7 @@ export class DataValidationCopyPasteController extends Disposable {
             const manager = this._dataValidationModel.ensureManager(copyInfo.unitId, copyInfo.subUnitId) as SheetDataValidationManager;
             const ruleMatrix = manager.getRuleObjectMatrix().clone();
             const repeatRange = getRepeatRange(copyInfo.copyRange, pastedRange, true);
-            const additionRules: Set<ISheetDataValidationRule> = new Set();
+            const additionRules: Map<string, ISheetDataValidationRule> = new Map();
 
             repeatRange.forEach(({ startRange }) => {
                 this._copyInfo?.matrix.forValue((row, col, ruleId) => {
@@ -137,8 +137,9 @@ export class DataValidationCopyPasteController extends Disposable {
                     const oldRule = originManager.getRuleById(ruleId);
 
                     if (!manager.getRuleById(transformedRuleId) && oldRule) {
-                        additionRules.add({ ...oldRule, uid: transformedRuleId });
+                        additionRules.set(transformedRuleId, { ...oldRule, uid: transformedRuleId });
                     }
+
                     ruleMatrix.setValue(range.startRow, range.startColumn, transformedRuleId);
                 });
             });
@@ -146,7 +147,7 @@ export class DataValidationCopyPasteController extends Disposable {
             const { redoMutations, undoMutations } = getDataValidationDiffMutations(
                 copyInfo.unitId,
                 copyInfo.subUnitId,
-                ruleMatrix.diffWithAddition(manager.getDataValidations(), additionRules)
+                ruleMatrix.diffWithAddition(manager.getDataValidations(), additionRules.values())
             );
 
             return {

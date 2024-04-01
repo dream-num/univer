@@ -132,7 +132,7 @@ export class RuleMatrix {
         return mutations;
     }
 
-    diffWithAddition(rules: ISheetDataValidationRule[], additionRules: Set<ISheetDataValidationRule>) {
+    diffWithAddition(rules: ISheetDataValidationRule[], additionRules: IterableIterator<ISheetDataValidationRule>) {
         const mutations: RangeMutation[] = [];
         let deleteIndex = 0;
         rules.forEach((rule, index) => {
@@ -158,7 +158,7 @@ export class RuleMatrix {
             }
         });
 
-        additionRules.forEach((rule) => {
+        Array.from(additionRules).forEach((rule) => {
             const newRanges = queryObjectMatrix(this.value, (ruleId) => ruleId === rule.uid);
             mutations.push({
                 type: 'add',

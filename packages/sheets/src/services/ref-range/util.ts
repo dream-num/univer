@@ -700,16 +700,17 @@ export const handleOtherDefaultRangeChangeWithEffectRefCommands = (range: IRange
             operator = handleDeleteRangeMoveUp(commandInfo as IDeleteRangeMoveUpCommand, range);
             break;
         }
-        case EffectRefRangId.InsertColCommandId: {
-            operator = handleInsertCol(commandInfo as IInsertColCommand, range);
-            break;
-        }
+
         case EffectRefRangId.InsertRangeMoveDownCommandId: {
             operator = handleInsertRangeMoveDown(commandInfo as IInsertRangeMoveDownCommand, range);
             break;
         }
         case EffectRefRangId.InsertRangeMoveRightCommandId: {
             operator = handleInsertRangeMoveRight(commandInfo as IInsertRangeMoveRightCommand, range);
+            break;
+        }
+        case EffectRefRangId.InsertColCommandId: {
+            operator = handleInsertCol(commandInfo as IInsertColCommand, range);
             break;
         }
         case EffectRefRangId.InsertRowCommandId: {

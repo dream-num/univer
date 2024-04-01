@@ -70,14 +70,18 @@ export class DataValidationModel<T extends IDataValidationRule = IDataValidation
     }
 
     addRule(unitId: string, subUnitId: string, rule: T, index?: number) {
-        const manager = this.ensureManager(unitId, subUnitId);
-        manager.addRule(rule, index);
-        this._ruleChange$.next({
-            rule: rule as any,
-            type: 'add',
-            unitId,
-            subUnitId,
-        });
+        try {
+            const manager = this.ensureManager(unitId, subUnitId);
+            manager.addRule(rule, index);
+            this._ruleChange$.next({
+                rule: rule as any,
+                type: 'add',
+                unitId,
+                subUnitId,
+            });
+        } catch (error) {
+            this._logService.error(error);
+        }
     }
 
     updateRule(unitId: string, subUnitId: string, ruleId: string, payload: IUpdateRulePayload) {
@@ -97,15 +101,19 @@ export class DataValidationModel<T extends IDataValidationRule = IDataValidation
     }
 
     removeRule(unitId: string, subUnitId: string, ruleId: string) {
-        const manager = this.ensureManager(unitId, subUnitId);
-        const oldRule = manager.getRuleById(ruleId);
-        manager.removeRule(ruleId);
-        this._ruleChange$.next({
-            rule: oldRule,
-            type: 'remove',
-            unitId,
-            subUnitId,
-        });
+        try {
+            const manager = this.ensureManager(unitId, subUnitId);
+            const oldRule = manager.getRuleById(ruleId);
+            manager.removeRule(ruleId);
+            this._ruleChange$.next({
+                rule: oldRule,
+                type: 'remove',
+                unitId,
+                subUnitId,
+            });
+        } catch (error) {
+            this._logService.error(error);
+        }
     }
 
     getRuleById(unitId: string, subUnitId: string, ruleId: string) {

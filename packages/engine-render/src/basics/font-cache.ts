@@ -169,7 +169,7 @@ export class FontCache {
             document.getElementsByTagName('body')[0].appendChild(dom);
         }
         dom.style.cssText += `${defaultStyle};${fontStyle}`;
-        dom.innerText = text;
+        dom.textContent = text;
         const rect = dom.getBoundingClientRect();
         const result = { width: rect.width, height: rect.height };
         this._getTextHeightCache[fontStyle] = result;

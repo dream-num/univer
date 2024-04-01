@@ -30,3 +30,18 @@ pnpm add @univerjs/design
 ```
 
 本包含有 CSS 文件，且具有最高优先级，请在引入其他 Univer 样式文件之前引入本包的样式。
+
+### 内置主题
+
+本包提供了两个内置主题：`defaultTheme` 和 `greenTheme`。你可以直接引入并在你的应用中使用。
+
+```typescript
+import { defaultTheme } from '@univerjs/design';
+// import { greenTheme } from '@univerjs/design';
+
+// Use the default theme
+new Univer({
+    theme: defaultTheme,
+    // theme: greenTheme,
+});
+```

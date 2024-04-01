@@ -52,6 +52,7 @@ export const Tooltip = forwardRef((props: ITooltipProps, ref: Ref<TooltipRef>) =
             builtinPlacements={placements}
             placement={placement}
             mouseEnterDelay={0.2}
+            mouseLeaveDelay={0}
             showArrow
             destroyTooltipOnHide
             onVisibleChange={onVisibleChange}

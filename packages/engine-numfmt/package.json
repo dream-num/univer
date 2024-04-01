@@ -62,14 +62,13 @@
         "lint:types": "tsc --noEmit",
         "build": "tsc && vite build"
     },
-    "peerDependencies": {},
     "dependencies": {
         "numfmt": "^2.5.2"
     },
     "devDependencies": {
         "@univerjs/shared": "workspace:*",
         "typescript": "^5.4.3",
-        "vite": "^5.2.6",
+        "vite": "^5.2.7",
         "vitest": "^1.4.0"
     }
 }

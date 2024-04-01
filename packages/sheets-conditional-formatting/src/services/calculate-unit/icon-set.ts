@@ -63,16 +63,17 @@ export const iconSetCalculateUnit: ICalculateUnit = {
             operator: ruleConfig.config[index].operator,
             value: Number(item.result) || 0,
         })).reduce((result, cur, index, list) => {
+            const item = ruleConfig.config[index];
             if (!index || index === list.length - 1) {
-                result.push(cur);
+                result.push({ ...cur, iconId: item.iconId, iconType: item.iconType });
             } else {
                 const pre = list[index - 1];
                 if (!compareWithNumber(pre, cur.value)) {
-                    result.push(cur);
+                    result.push({ ...cur, iconId: item.iconId, iconType: item.iconType });
                 }
             }
             return result;
-        }, [] as { operator: CFNumberOperator;value: number }[]);
+        }, [] as { operator: CFNumberOperator;value: number;iconType: string;iconId: string }[]);
 
         const isShowValue = ruleConfig.isShowValue === undefined ? true : !!ruleConfig.isShowValue;
         matrix.forValue((row, col, value) => {
@@ -80,7 +81,7 @@ export const iconSetCalculateUnit: ICalculateUnit = {
                 const item = splitValue[index];
                 const start = { ...item };
                 const end = { ...item };
-                const { iconId, iconType } = ruleConfig.config[index];
+                const { iconId, iconType } = item;
                 if (index === 0) {
                     if (compareWithNumber(item, value)) {
                         computeResult.setValue(row, col, { iconId, iconType, isShowValue });

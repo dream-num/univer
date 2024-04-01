@@ -14,31 +14,25 @@
  * limitations under the License.
  */
 
-export class ZIndexManager {
-    static #MAX_INDEX = 2147483647;
-    static #MIN_INDEX = -2147483647;
+import { LocaleType } from '../types/enum/locale-type';
+import type { IWorkbookData } from '../types/interfaces';
+import { version } from '../../package.json';
 
-    private _list: Map<string, number> = new Map();
+export function getEmptySnapshot(
+    unitID = '',
+    locale = LocaleType.ZH_CN,
+    name = ''
+): IWorkbookData {
+    const DEFAULT_WORKBOOK_DATA: IWorkbookData = {
+        id: unitID,
+        sheetOrder: [],
+        name,
+        appVersion: version,
+        locale,
+        styles: {},
+        sheets: {},
+        resources: [],
+    };
 
-    setIndex(name: string, index: number) {
-        this._list.set(name, index);
-    }
-
-    getIndex(name: string) {
-        return this._list.get(name);
-    }
-
-    removeIndex(name: string) {
-        this._list.delete(name);
-    }
-
-    getMaxIndex() {
-        let max = -9999999;
-        this._list.forEach((item) => {
-            if (+item > max) {
-                max = +item;
-            }
-        });
-        return max;
-    }
+    return DEFAULT_WORKBOOK_DATA;
 }

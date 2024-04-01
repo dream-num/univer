@@ -23,7 +23,7 @@ import {
     ObjectMatrix,
     OnLifecycle,
 } from '@univerjs/core';
-import type { IDirtyUnitSheetDefinedNameMap, IDirtyUnitSheetNameMap, ISetDefinedNameMutationParam, ISetDefinedNameMutationSearchParam } from '@univerjs/engine-formula';
+import type { IDirtyUnitSheetDefinedNameMap, IDirtyUnitSheetNameMap, ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
 import { FormulaDataModel, IActiveDirtyManagerService, IDefinedNamesService, RemoveDefinedNameMutation, SetDefinedNameMutation } from '@univerjs/engine-formula';
 import type {
     IDeleteRangeMutationParams,

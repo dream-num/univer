@@ -20,7 +20,6 @@ import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { IDefinedNamesService } from '../../../services/defined-names.service';
-import { IFormulaRuntimeService } from '../../../services/runtime.service';
 import { Lexer } from '../lexer';
 import type { LexerNode } from '../lexer-node';
 import { LexerTreeBuilder } from '../lexer-tree-builder';

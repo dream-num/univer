@@ -20,7 +20,6 @@ import { SetRangeValuesCommand } from '@univerjs/sheets';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useState } from 'react';
 import { CheckMarkSingle } from '@univerjs/icons';
-import { Scrollbar } from '@univerjs/design';
 import { OpenValidationPanelOperation } from '@univerjs/data-validation';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { KeyCode } from '@univerjs/ui';
@@ -48,8 +47,7 @@ const SelectList = (props: ISelectListProps) => {
             <div className={styles.dvListDropdownTitle}>
                 {title}
             </div>
-
-            <Scrollbar>
+            <div className={styles.dvListDropdownList}>
                 {options.map((item, i) => {
                     const selected = value.indexOf(item.value) > -1;
                     const handleClick = () => {
@@ -77,8 +75,7 @@ const SelectList = (props: ISelectListProps) => {
                         </div>
                     );
                 })}
-            </Scrollbar>
-
+            </div>
             <div className={styles.dvListDropdownSplit} />
             <div className={styles.dvListDropdownEdit} onClick={onEdit}>
                 编辑

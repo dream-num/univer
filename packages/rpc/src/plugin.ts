@@ -23,7 +23,7 @@ import { DataSyncReplicaController } from './controllers/data-sync/data-sync-rep
 import {
     IRemoteInstanceService,
     IRemoteSyncService,
-    RemoteInstanceReplicaService,
+    WebWorkerRemoteInstanceService,
     RemoteSyncPrimaryService,
 } from './services/remote-instance/remote-instance.service';
 import { ChannelService, IRPChannelService } from './services/rpc/channel.service';
@@ -97,7 +97,7 @@ export class UniverRPCWorkerThreadPlugin extends Plugin {
                         useFactory: () => new ChannelService(createWebWorkerMessagePortOnWorker()),
                     },
                 ],
-                [IRemoteInstanceService, { useClass: RemoteInstanceReplicaService }],
+                [IRemoteInstanceService, { useClass: WebWorkerRemoteInstanceService }],
             ] as Dependency[]
         ).forEach((dependency) => injector.add(dependency));
 

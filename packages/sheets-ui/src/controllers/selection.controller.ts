@@ -85,7 +85,7 @@ export class SelectionController extends Disposable {
         this._initSkeletonChangeListener();
         this._initCommandListener();
         this._initUserActionSyncListener();
-        this._iniDefinedNameListener();
+        this._initDefinedNameListener();
 
         const unitId = workbook.getUnitId();
         const sheetId = worksheet.getSheetId();
@@ -96,7 +96,7 @@ export class SelectionController extends Disposable {
         });
     }
 
-    private _iniDefinedNameListener() {
+    private _initDefinedNameListener() {
         this.disposeWithMe(
             toDisposable(
                 this._definedNamesService.focusRange$.subscribe(async (item) => {

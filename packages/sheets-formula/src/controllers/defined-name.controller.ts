@@ -109,7 +109,7 @@ export class DefinedNameController extends Disposable {
                     functionName: name,
                     description: formulaOrRefString + (comment || ''),
                     abstract: formulaOrRefString,
-                    functionType: FunctionType.definedName,
+                    functionType: FunctionType.DefinedName,
                     functionParameter: [],
                 });
             }

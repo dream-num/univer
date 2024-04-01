@@ -202,11 +202,11 @@ export class DescriptionService implements IDescriptionService, IDisposable {
     }
 
     hasDefinedNameDescription(name: string) {
-        return this._descriptions.some((item) => item.functionName === name && item.functionType === FunctionType.definedName);
+        return this._descriptions.some((item) => item.functionName === name && item.functionType === FunctionType.DefinedName);
     }
 
     isFormulaDefinedName(name: string) {
-        const items = this._descriptions.filter((item) => item.functionName === name && item.functionType === FunctionType.definedName);
+        const items = this._descriptions.filter((item) => item.functionName === name && item.functionType === FunctionType.DefinedName);
         if (items.length === 0) {
             return false;
         }

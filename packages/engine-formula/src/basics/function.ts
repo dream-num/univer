@@ -120,7 +120,7 @@ export enum FunctionType {
      /**
       * Defined name
       */
-    definedName,
+    DefinedName,
 }
 
 export interface IFunctionParam {

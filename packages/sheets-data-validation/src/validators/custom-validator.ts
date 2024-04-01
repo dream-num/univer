@@ -52,4 +52,8 @@ export class CustomFormulaValidator extends BaseDataValidator {
 
         return Boolean(getFormulaResult(result?.result));
     }
+
+    override generateRuleErrorMessage(rule: IDataValidationRuleBase): string {
+        return this.localeService.t('dataValidation.custom.error');
+    }
 }

@@ -25,6 +25,7 @@ import { OpenValidationPanelOperation } from '@univerjs/data-validation';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { KeyCode } from '@univerjs/ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
+import { DataValidationRenderMode } from '@univerjs/core/types/enum/data-validation-render-mode.js';
 import type { ListMultipleValidator } from '../../validators/list-multiple-validator';
 import { deserializeListOptions, getDataValidationCellValue, serializeListOptions } from '../../validators/util';
 import type { IDropdownComponentProps } from '../../services/dropdown-manager.service';
@@ -101,6 +102,7 @@ export function ListDropDown(props: IDropdownComponentProps) {
     const cellData = worksheet.getCell(row, col);
     const rule = cellData?.dataValidation?.rule;
     const validator = cellData?.dataValidation?.validator as ListMultipleValidator | undefined;
+    const showColor = rule?.renderMode === DataValidationRenderMode.CUSTOM || rule?.renderMode === undefined;
 
     if (!cellData || !rule || !validator) {
         return;
@@ -159,7 +161,7 @@ export function ListDropDown(props: IDropdownComponentProps) {
             options={list.map((item) => ({
                 label: item.label,
                 value: item.label,
-                color: item.color,
+                color: showColor ? item.color : 'transparent',
             }))}
             onEdit={handleEdit}
         />

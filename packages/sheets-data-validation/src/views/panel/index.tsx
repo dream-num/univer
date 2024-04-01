@@ -16,10 +16,10 @@
 
 import React from 'react';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import { DataValidationPanelService } from '@univerjs/data-validation/services/data-validation-panel.service.js';
 import { useObservable } from '@univerjs/ui';
 import { DataValidationDetail } from '../detail';
 import { DataValidationList } from '../list';
+import { DataValidationPanelService } from '../../services/data-validation-panel.service';
 
 export const DataValidationPanel = () => {
     const dataValidationPanelService = useDependency(DataValidationPanelService);

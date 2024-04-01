@@ -34,8 +34,9 @@ import { DataValidationSheetController } from './controllers/dv-sheet.controller
 import { DataValidationCopyPasteController } from './controllers/dv-copy-paste.controller';
 import { DataValidationResourceController } from './controllers/dv-resource.controller';
 import { DataValidationDropdownManagerService } from './services/dropdown-manager.service';
-import { HideDataValidationDropdown, ShowDataValidationDropdown } from './commands/operations/data-validation.operation';
+import { CloseValidationPanelOperation, HideDataValidationDropdown, OpenValidationPanelOperation, ShowDataValidationDropdown, ToggleValidationPanelOperation } from './commands/operations/data-validation.operation';
 import { DataValidationRejectInputController } from './controllers/dv-reject-input.controller';
+import { DataValidationPanelService } from './services/data-validation-panel.service';
 
 export class UniverSheetsDataValidationPlugin extends Plugin {
     constructor(
@@ -48,6 +49,7 @@ export class UniverSheetsDataValidationPlugin extends Plugin {
 
     override onStarting(injector: Injector) {
         ([
+            [DataValidationPanelService],
             [SheetDataValidationService],
             [DataValidationCacheService],
             [DataValidationFormulaService],
@@ -74,8 +76,13 @@ export class UniverSheetsDataValidationPlugin extends Plugin {
             AddSheetDataValidationAndOpenCommand,
             UpdateSheetDataValidationRangeCommand,
             DataValidationFormulaMarkDirty,
+
+             // operation
             ShowDataValidationDropdown,
             HideDataValidationDropdown,
+            CloseValidationPanelOperation,
+            OpenValidationPanelOperation,
+            ToggleValidationPanelOperation,
         ].forEach((command) => {
             this._commandService.registerCommand(command);
         });

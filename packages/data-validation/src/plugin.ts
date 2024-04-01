@@ -19,8 +19,6 @@ import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { DataValidatorRegistryService } from './services/data-validator-registry.service';
 import { DataValidationModel } from './models/data-validation-model';
-import { DataValidationPanelService } from './services/data-validation-panel.service';
-import { CloseValidationPanelOperation, OpenValidationPanelOperation, ToggleValidationPanelOperation } from './commands/operations/data-validation.operation';
 import { AddDataValidationCommand, RemoveAllDataValidationCommand, RemoveDataValidationCommand, UpdateDataValidationOptionsCommand, UpdateDataValidationSettingCommand } from './commands/commands/data-validation.command';
 import { AddDataValidationMutation, RemoveDataValidationMutation, UpdateDataValidationMutation } from './commands/mutations/data-validation.mutation';
 
@@ -41,7 +39,6 @@ export class UniverDataValidationPlugin extends Plugin {
 
             // service
             [DataValidatorRegistryService],
-            [DataValidationPanelService],
 
         ] as Dependency[]).forEach(
             (d) => {
@@ -56,11 +53,6 @@ export class UniverDataValidationPlugin extends Plugin {
             UpdateDataValidationOptionsCommand,
             UpdateDataValidationSettingCommand,
             RemoveDataValidationCommand,
-
-            // operation
-            CloseValidationPanelOperation,
-            OpenValidationPanelOperation,
-            ToggleValidationPanelOperation,
 
             // mutation
             AddDataValidationMutation,

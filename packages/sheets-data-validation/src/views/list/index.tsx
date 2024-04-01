@@ -21,11 +21,11 @@ import type { ISheetDataValidationRule } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { createDefaultNewRule, DataValidationModel, RemoveAllDataValidationCommand } from '@univerjs/data-validation';
 import { Button } from '@univerjs/design';
-import { DataValidationPanelService } from '@univerjs/data-validation/services/data-validation-panel.service.js';
 import { useObservable } from '@univerjs/ui';
 import { DataValidationItem } from '../item';
 import type { IAddSheetDataValidationCommandParams } from '../../commands/commands/data-validation.command';
 import { AddSheetDataValidationCommand } from '../../commands/commands/data-validation.command';
+import { DataValidationPanelService } from '../../services/data-validation-panel.service';
 import styles from './index.module.less';
 
 export const DataValidationList = memo(() => {

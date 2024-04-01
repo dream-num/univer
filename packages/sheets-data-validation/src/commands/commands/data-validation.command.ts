@@ -17,8 +17,9 @@
 import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecuteAsync } from '@univerjs/core';
 import type { ICommand, IMutationInfo, IRange, ISheetDataValidationRule } from '@univerjs/core';
 import type { IAddDataValidationMutationParams, IUpdateDataValidationMutationParams } from '@univerjs/data-validation';
-import { AddDataValidationMutation, createDefaultNewRule, DataValidationModel, OpenValidationPanelOperation, RemoveDataValidationMutation, UpdateDataValidationMutation, UpdateRuleType } from '@univerjs/data-validation';
+import { AddDataValidationMutation, createDefaultNewRule, DataValidationModel, RemoveDataValidationMutation, UpdateDataValidationMutation, UpdateRuleType } from '@univerjs/data-validation';
 import type { RangeMutation, SheetDataValidationManager } from '../../models/sheet-data-validation-manager';
+import { OpenValidationPanelOperation } from '../operations/data-validation.operation';
 
 export interface IUpdateSheetDataValidationRangeCommandParams {
     unitId: string;

@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { OpenValidationPanelOperation } from '@univerjs/data-validation';
 import { getMenuHiddenObservable, type IMenuItem, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 import { UniverInstanceType } from '@univerjs/core';
 import { AddSheetDataValidationAndOpenCommand } from '../commands/commands/data-validation.command';
+import { OpenValidationPanelOperation } from '../commands/operations/data-validation.operation';
 
 export const DataValidationIcon = 'data-validation-single';
 const DATA_VALIDATION_MENU_ID = 'sheet.menu.data-validation';

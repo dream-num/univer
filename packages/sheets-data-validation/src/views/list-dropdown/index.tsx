@@ -20,7 +20,6 @@ import { SetRangeValuesCommand } from '@univerjs/sheets';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useState } from 'react';
 import { CheckMarkSingle } from '@univerjs/icons';
-import { OpenValidationPanelOperation } from '@univerjs/data-validation';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { KeyCode } from '@univerjs/ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
@@ -29,6 +28,7 @@ import type { ListMultipleValidator } from '../../validators/list-multiple-valid
 import { deserializeListOptions, getDataValidationCellValue, serializeListOptions } from '../../validators/util';
 import type { IDropdownComponentProps } from '../../services/dropdown-manager.service';
 import { DROP_DOWN_DEFAULT_COLOR } from '../../common/const';
+import { OpenValidationPanelOperation } from '../../commands/operations/data-validation.operation';
 import styles from './index.module.less';
 
 interface ISelectListProps {

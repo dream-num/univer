@@ -399,9 +399,6 @@ importers:
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../ui
-      '@univerjs/uniscript':
-        specifier: workspace:*
-        version: link:../uniscript
       '@vitest/coverage-istanbul':
         specifier: ^1.2.1
         version: 1.4.0(vitest@1.4.0)

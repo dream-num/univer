@@ -66,8 +66,6 @@
         "@univerjs/shared": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-formula": "workspace:*",
-        "@univerjs/ui": "workspace:*",
-        "@univerjs/uniscript": "workspace:*",
         "@vitest/coverage-istanbul": "^1.2.1",
         "typescript": "^5.3.3",
         "vite": "^5.0.11",

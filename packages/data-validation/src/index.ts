@@ -16,14 +16,7 @@
 
 export { UniverDataValidationPlugin } from './plugin';
 export { DataValidatorRegistryService, DataValidatorRegistryScope } from './services/data-validator-registry.service';
-export { DataValidationPanelService } from './services/data-validation-panel.service';
 export { DataValidationModel } from './models/data-validation-model';
-export {
-    OpenValidationPanelOperation,
-    CloseValidationPanelOperation,
-    ToggleValidationPanelOperation,
-    DataValidationPanelName,
-} from './commands/operations/data-validation.operation';
 
 export {
     AddDataValidationCommand,

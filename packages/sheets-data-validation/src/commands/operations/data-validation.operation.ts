@@ -14,8 +14,78 @@
  * limitations under the License.
  */
 
-import { CommandType, type ICommand } from '@univerjs/core';
+import { CommandType, type ICommand, ICommandService, IUniverInstanceService } from '@univerjs/core';
+import { ISidebarService } from '@univerjs/ui';
+import { DataValidationModel } from '@univerjs/data-validation';
 import { DataValidationDropdownManagerService } from '../../services/dropdown-manager.service';
+import { DataValidationPanelService } from '../../services/data-validation-panel.service';
+
+export const DATA_VALIDATION_PANEL = 'DataValidationPanel';
+
+export interface IOpenValidationPanelOperationParams {
+    ruleId?: string;
+    isAdd?: boolean;
+}
+
+export const OpenValidationPanelOperation: ICommand<IOpenValidationPanelOperationParams> = {
+    id: 'data-validation.operation.open-validation-panel',
+    type: CommandType.OPERATION,
+    handler(accessor, params) {
+        if (!params) {
+            return false;
+        }
+        const { ruleId, isAdd } = params;
+        const dataValidationPanelService = accessor.get(DataValidationPanelService);
+        const dataValidationModel = accessor.get(DataValidationModel);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const sidebarService = accessor.get(ISidebarService);
+        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
+        const worksheet = workbook.getActiveSheet();
+        const unitId = workbook.getUnitId();
+        const subUnitId = worksheet.getSheetId();
+        const rule = ruleId ? dataValidationModel.getRuleById(unitId, subUnitId, ruleId) : undefined;
+        dataValidationPanelService.open();
+        dataValidationPanelService.setActiveRule(rule && {
+            unitId,
+            subUnitId,
+            rule,
+        });
+        sidebarService.open({
+            header: { title: isAdd ? 'dataValidation.panel.addTitle' : 'dataValidation.panel.title' },
+            children: { label: DATA_VALIDATION_PANEL },
+            width: 312,
+        });
+        return true;
+    },
+};
+
+export const CloseValidationPanelOperation: ICommand = {
+    id: 'data-validation.operation.close-validation-panel',
+    type: CommandType.OPERATION,
+    handler(accessor) {
+        const dataValidationPanelService = accessor.get(DataValidationPanelService);
+        dataValidationPanelService.close();
+        return true;
+    },
+};
+
+export const ToggleValidationPanelOperation: ICommand = {
+    id: 'data-validation.operation.toggle-validation-panel',
+    type: CommandType.OPERATION,
+    handler(accessor) {
+        const commandService = accessor.get(ICommandService);
+        const dataValidationPanelService = accessor.get(DataValidationPanelService);
+        dataValidationPanelService.open();
+        const isOpen = dataValidationPanelService.isOpen;
+
+        if (isOpen) {
+            commandService.executeCommand(CloseValidationPanelOperation.id);
+        } else {
+            commandService.executeCommand(OpenValidationPanelOperation.id);
+        }
+        return true;
+    },
+};
 
 export interface IShowDataValidationDropdownParams {
     unitId: string;

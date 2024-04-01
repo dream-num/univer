@@ -16,7 +16,7 @@
 
 import type { ICellDataForSheetInterceptor, ICellRenderContext } from '@univerjs/core';
 import { DataValidationStatus, DataValidationType, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, WrapStrategy } from '@univerjs/core';
-import { DataValidationModel, DataValidationPanelName, DataValidatorRegistryService } from '@univerjs/data-validation';
+import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
 import { ComponentManager, IMenuService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 import { IEditorBridgeService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
@@ -32,6 +32,7 @@ import type { SheetDataValidationManager } from '../models/sheet-data-validation
 import { CellDropdown, DROP_DOWN_KEY } from '../views/drop-down';
 import { DataValidationDropdownManagerService } from '../services/dropdown-manager.service';
 import { ListRenderModeInput } from '../views/render-mode';
+import { DATA_VALIDATION_PANEL } from '../commands/operations/data-validation.operation';
 import { addDataValidationMenuFactory, dataValidationMenuFactory, openDataValidationMenuFactory } from './dv.menu';
 
 const INVALID_MARK = {
@@ -85,7 +86,7 @@ export class DataValidationRenderController extends RxDisposable {
     private _initComponents() {
         ([
             [
-                DataValidationPanelName,
+                DATA_VALIDATION_PANEL,
                 DataValidationPanel,
             ],
             [

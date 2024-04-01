@@ -25,10 +25,10 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useState } from 'react';
 import { serializeRange } from '@univerjs/engine-formula';
 import { getRuleOptions, getRuleSetting } from '@univerjs/data-validation/common/util.js';
-import { DataValidationPanelService } from '@univerjs/data-validation/services/data-validation-panel.service.js';
 import type { IUpdateSheetDataValidationRangeCommandParams } from '../../commands/commands/data-validation.command';
 import { UpdateSheetDataValidationRangeCommand } from '../../commands/commands/data-validation.command';
 import { DataValidationOptions } from '../options';
+import { DataValidationPanelService } from '../../services/data-validation-panel.service';
 import styles from './index.module.less';
 
 export function DataValidationDetail() {

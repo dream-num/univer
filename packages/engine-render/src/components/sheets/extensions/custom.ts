@@ -25,6 +25,11 @@ const UNIQUE_KEY = 'DefaultCustomExtension';
 
 const Z_INDEX = 55;
 
+const stringifyRange = (range: IRange) => {
+    const { startRow, endRow, startColumn, endColumn } = range;
+    return `${startRow}-${endRow}-${startColumn}-${endColumn}`;
+};
+
 export class Custom extends SheetExtension {
     protected override Z_INDEX = Z_INDEX;
 
@@ -35,43 +40,66 @@ export class Custom extends SheetExtension {
         if (!worksheet) {
             return;
         }
+        const mergeCellRendered = new Set<string>();
         const subUnitId = worksheet.getSheetId();
 
         Range.foreach(rowColumnSegment, (row, col) => {
-            const cellData = worksheet.getCell(row, col);
-            if (cellData && cellData?.customRender) {
-                const primaryWithCoord = this.getCellIndex(row, col, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
+            let cellData = worksheet.getCell(row, col);
+            if (!cellData?.customRender) {
+                return;
+            }
 
-                const { mergeInfo } = primaryWithCoord;
-                if (!this.isRenderDiffRangesByRow(mergeInfo.startRow, mergeInfo.endRow, diffRanges)) {
-                    return true;
+            let primaryWithCoord = this.getCellIndex(row, col, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
+
+            const { mergeInfo } = primaryWithCoord;
+            if (!this.isRenderDiffRangesByRow(mergeInfo.startRow, mergeInfo.endRow, diffRanges)) {
+                return true;
+            }
+
+            if (primaryWithCoord.isMerged || primaryWithCoord.isMergedMainCell) {
+                const rangeStr = stringifyRange(mergeInfo);
+                if (mergeCellRendered.has(rangeStr)) {
+                    return;
+                } else {
+                    mergeCellRendered.add(rangeStr);
                 }
+            }
 
-                if (primaryWithCoord.isMerged && !primaryWithCoord.isMergedMainCell) {
+            if (primaryWithCoord.isMerged) {
+                const mainCell = {
+                    row: mergeInfo.startRow,
+                    col: mergeInfo.startColumn,
+                };
+                cellData = worksheet.getCell(mainCell.row, mainCell.col);
+                if (!cellData?.customRender) {
                     return;
                 }
+
+                primaryWithCoord = this.getCellIndex(mainCell.row, mainCell.col, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
+            }
+
+            const renderInfo = {
+                data: cellData,
+                style: skeleton.getsStyles().getStyleByCell(cellData),
+                primaryWithCoord,
+                subUnitId,
+                row,
+                col,
+            };
 
                 // current cell is hidden
-                if (!worksheet.getColVisible(col) || !worksheet.getRowVisible(row)) {
-                    return;
-                }
-
-                const customRender = cellData.customRender.sort(sortRules);
-
-                ctx.save();
-                const renderInfo = {
-                    data: cellData,
-                    style: skeleton.getsStyles().getStyleByCell(cellData),
-                    primaryWithCoord,
-                    subUnitId,
-                    row,
-                    col,
-                };
-                customRender.forEach((item) => {
-                    item.drawWith(ctx, renderInfo, skeleton, this.parent);
-                });
-                ctx.restore();
+            if (!worksheet.getColVisible(col) || !worksheet.getRowVisible(row)) {
+                return;
             }
+
+            const customRender = cellData.customRender.sort(sortRules);
+
+            ctx.save();
+
+            customRender.forEach((item) => {
+                item.drawWith(ctx, renderInfo, skeleton, this.parent);
+            });
+            ctx.restore();
         });
     }
 }

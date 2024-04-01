@@ -14,36 +14,68 @@
  * limitations under the License.
  */
 
-import type { DataValidationOperator, IDataValidationRuleBase, IDataValidationRuleOptions, ISheetDataValidationRule, IUnitRange } from '@univerjs/core';
-import { DataValidationType, ICommandService, isValidRange, LocaleService } from '@univerjs/core';
+import type { DataValidationOperator, IDataValidationRuleBase, IDataValidationRuleOptions, IExecutionOptions, ISheetDataValidationRule, IUnitRange } from '@univerjs/core';
+import { DataValidationType, debounce, ICommandService, isValidRange, LocaleService, RedoCommand, shallowEqual, UndoCommand } from '@univerjs/core';
 import type { IUpdateDataValidationSettingCommandParams } from '@univerjs/data-validation';
-import { DataValidatorRegistryScope, DataValidatorRegistryService, RemoveDataValidationCommand, UpdateDataValidationOptionsCommand, UpdateDataValidationSettingCommand } from '@univerjs/data-validation';
+import { DataValidationModel, DataValidatorRegistryScope, DataValidatorRegistryService, RemoveDataValidationCommand, UpdateDataValidationOptionsCommand, UpdateDataValidationSettingCommand } from '@univerjs/data-validation';
 import { TWO_FORMULA_OPERATOR_COUNT } from '@univerjs/data-validation/types/const/two-formula-operators.js';
 import { Button, FormLayout, Select } from '@univerjs/design';
 import { ComponentManager, RangeSelector, useEvent, useObservable } from '@univerjs/ui';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { serializeRange } from '@univerjs/engine-formula';
 import { getRuleOptions, getRuleSetting } from '@univerjs/data-validation/common/util.js';
 import type { IUpdateSheetDataValidationRangeCommandParams } from '../../commands/commands/data-validation.command';
 import { UpdateSheetDataValidationRangeCommand } from '../../commands/commands/data-validation.command';
 import { DataValidationOptions } from '../options';
 import { DataValidationPanelService } from '../../services/data-validation-panel.service';
+import { isUnitRangesEqual } from '../../utils/isRangesEqual';
 import styles from './index.module.less';
 
+// debounce execute commands, for better redo-undo experience
+const debounceExecuteFactory = (commandService: ICommandService) => debounce(
+    async (id: string, params?: any, options?: IExecutionOptions | undefined,
+        callback?: (success: boolean) => void
+    ) => {
+        const res = await commandService.executeCommand(id, params, options);
+        callback?.(res);
+    }
+    ,
+    275
+);
+
 export function DataValidationDetail() {
+    const [key, setKey] = useState(0);
     const dataValidationPanelService = useDependency(DataValidationPanelService);
     const activeRuleInfo = useObservable(dataValidationPanelService.activeRule$, dataValidationPanelService.activeRule)!;
     const { unitId, subUnitId, rule } = activeRuleInfo || {};
+    const ruleId = rule.uid;
     const validatorService = useDependency(DataValidatorRegistryService);
     const componentManager = useDependency(ComponentManager);
     const commandService = useDependency(ICommandService);
+    const dataValidationModel = useDependency(DataValidationModel);
     const localeService = useDependency(LocaleService);
     const [localRule, setLocalRule] = useState<ISheetDataValidationRule>(rule);
     const validator = validatorService.getValidatorItem(localRule.type);
     const [showError, setShowError] = useState(false);
     const validators = validatorService.getValidatorsByScope(DataValidatorRegistryScope.SHEET);
-    const [localeRanges, setLocalRanges] = useState<IUnitRange[]>(() => localRule.ranges.map((i) => ({ unitId: '', sheetId: '', range: i })));
+    const [localRanges, setLocalRanges] = useState<IUnitRange[]>(() => localRule.ranges.map((i) => ({ unitId: '', sheetId: '', range: i })));
+    const debounceExecute = useMemo(() => debounceExecuteFactory(commandService), [commandService]);
+
+    useEffect(() => {
+        commandService.onCommandExecuted((commandInfo) => {
+            if (commandInfo.id === UndoCommand.id || commandInfo.id === RedoCommand.id) {
+                setTimeout(() => {
+                    const activeRule = dataValidationModel.getRuleById(unitId, subUnitId, ruleId) as ISheetDataValidationRule;
+                    setKey((k) => k + 1);
+                    if (activeRule) {
+                        setLocalRule(activeRule);
+                        setLocalRanges(activeRule.ranges.map((i) => ({ unitId: '', sheetId: '', range: i })));
+                    }
+                }, 20);
+            }
+        });
+    }, [commandService, dataValidationModel, ruleId, subUnitId, unitId]);
 
     if (!validator) {
         return null;
@@ -62,6 +94,9 @@ export function DataValidationDetail() {
     };
 
     const handleUpdateRuleRanges = useEvent((unitRanges: IUnitRange[]) => {
+        if (isUnitRangesEqual(unitRanges, localRanges)) {
+            return;
+        }
         setLocalRanges(unitRanges);
         const ranges = unitRanges.filter((i) => (!i.unitId || i.unitId === unitId) && (!i.sheetId || i.sheetId === subUnitId)).map((i) => i.range);
 
@@ -72,14 +107,18 @@ export function DataValidationDetail() {
         const params: IUpdateSheetDataValidationRangeCommandParams = {
             unitId,
             subUnitId,
-            ruleId: rule.uid,
+            ruleId,
             ranges,
         };
 
-        commandService.executeCommand(UpdateSheetDataValidationRangeCommand.id, params);
+        debounceExecute(UpdateSheetDataValidationRangeCommand.id, params);
     });
 
     const handleUpdateRuleSetting = (setting: IDataValidationRuleBase) => {
+        if (shallowEqual(setting, getRuleSetting(localRule))) {
+            return;
+        }
+
         setLocalRule({
             ...localRule,
             ...setting,
@@ -87,16 +126,20 @@ export function DataValidationDetail() {
         const params: IUpdateDataValidationSettingCommandParams = {
             unitId,
             subUnitId,
-            ruleId: rule.uid,
+            ruleId,
             setting,
         };
 
-        commandService.executeCommand(UpdateDataValidationSettingCommand.id, params);
+        debounceExecute(
+            UpdateDataValidationSettingCommand.id,
+            params,
+            undefined
+        );
     };
 
     const handleDelete = async () => {
         await commandService.executeCommand(RemoveDataValidationCommand.id, {
-            ruleId: rule.uid,
+            ruleId,
             unitId,
             subUnitId,
         });
@@ -141,27 +184,34 @@ export function DataValidationDetail() {
     };
 
     const FormulaInput = componentManager.get(validator.formulaInput);
-    const rangeStr = localeRanges.map((i) => serializeRange(i.range)).join(',');
+    const rangeStr = localRanges.map((i) => serializeRange(i.range)).join(',');
 
     const options: IDataValidationRuleOptions = getRuleOptions(localRule);
 
     const handleUpdateRuleOptions = (newOptions: IDataValidationRuleOptions) => {
+        if (shallowEqual(newOptions, getRuleOptions(localRule))) {
+            return;
+        }
         setLocalRule({
             ...localRule,
             ...newOptions,
         });
 
-        commandService.executeCommand(UpdateDataValidationOptionsCommand.id, {
-            unitId,
-            subUnitId,
-            ruleId: rule.uid,
-            options: newOptions,
-        });
+        debounceExecute(
+            UpdateDataValidationOptionsCommand.id,
+            {
+                unitId,
+                subUnitId,
+                ruleId,
+                options: newOptions,
+            }
+        );
     };
     return (
         <div>
             <FormLayout label={localeService.t('dataValidation.panel.range')}>
                 <RangeSelector
+                    key={key}
                     className={styles.dataValidationDetailFormItem}
                     value={rangeStr}
                     id="data-validation-detail"
@@ -211,6 +261,7 @@ export function DataValidationDetail() {
             {FormulaInput
                 ? (
                     <FormulaInput
+                        key={key}
                         isTwoFormula={isTwoFormula}
                         value={{
                             formula1: localRule.formula1,

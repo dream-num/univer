@@ -14,9 +14,16 @@
  * limitations under the License.
  */
 
-import type { IRange } from '@univerjs/core';
+import type { IRange, IUnitRange } from '@univerjs/core';
 import { Rectangle } from '@univerjs/core';
 
 export const isRangesEqual = (oldRanges: IRange[], ranges: IRange[]) => {
     return ranges.length === oldRanges.length && !oldRanges.some((oldRange) => ranges.some((range) => !Rectangle.equals(range, oldRange)));
+};
+
+export const isUnitRangesEqual = (oldRanges: IUnitRange[], ranges: IUnitRange[]) => {
+    return ranges.length === oldRanges.length && oldRanges.every((oldRange, i) => {
+        const current = ranges[i];
+        return current.unitId === oldRange.unitId && current.sheetId === oldRange.sheetId && Rectangle.equals(oldRange.range, current.range);
+    });
 };

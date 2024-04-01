@@ -16,6 +16,7 @@
 
 import { installShims } from './common/shims';
 
+export { shallowEqual } from './common/equal';
 export * from './basics';
 export { dedupe, remove, rotate, groupBy } from './common/array';
 export {

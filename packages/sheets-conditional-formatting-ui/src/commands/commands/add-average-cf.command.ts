@@ -30,7 +30,7 @@ interface IAddAverageCfParams {
     operator: IAverageHighlightCell['operator'];
 }
 //  { ranges: [{ startRow: 0, endRow: 10, startColumn: 3, endColumn: 3 }, { startRow: 0, endRow: 10, startColumn: 5, endColumn: 5 }], style: { fs: 30 }, operator: 'greaterThan' };
-export const DddAverageCfCommand: ICommand<IAddAverageCfParams> = {
+export const AddAverageCfCommand: ICommand<IAddAverageCfParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.add-average-conditional-rule',
     handler(accessor, params) {

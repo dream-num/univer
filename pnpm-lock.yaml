@@ -982,15 +982,6 @@ importers:
       '@wendellhu/redi':
         specifier: ^0.13.0
         version: 0.13.0
-      clsx:
-        specifier: ^2.1.0
-        version: 2.1.0
-      less:
-        specifier: ^4.2.0
-        version: 4.2.0
-      react:
-        specifier: ^18.2.0
-        version: 18.2.0
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -1005,7 +996,7 @@ importers:
         version: 5.2.6(@types/node@20.11.30)(less@4.2.0)
       vitest:
         specifier: ^1.4.0
-        version: 1.4.0(@types/node@20.11.30)(happy-dom@13.3.8)(less@4.2.0)
+        version: 1.4.0(@types/node@20.11.30)(jsdom@24.0.0)
 
   packages/sheets-conditional-formatting-ui:
     dependencies:
@@ -1082,9 +1073,6 @@ importers:
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
-      sharp:
-        specifier: ^0.33.3
-        version: 0.33.3
       typescript:
         specifier: ^5.4.3
         version: 5.4.3

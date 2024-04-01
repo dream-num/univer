@@ -48,31 +48,26 @@ export const colorScaleCellCalculateUnit: ICalculateUnit = {
             });
         });
 
-        const _colorList = [...ruleConfig.config].sort((a, b) => a.index - b.index).map((config) => {
+        const _configList = [...ruleConfig.config].sort((a, b) => a.index - b.index).map((config) => {
             return {
                 value: getValueByType(config.value, matrix, { ...context, cfId: rule.cfId }), color: new ColorKit(config.color),
             };
         });
          // If the formula triggers the calculation, wait for the result,
          // and use the previous style cache until the result comes out
-        const isFormulaWithoutSuccess = _colorList.some((item) => isObject(item.value) ? item.value.status !== FormulaResultStatus.SUCCESS : false);
+        const isFormulaWithoutSuccess = _configList.some((item) => isObject(item.value) ? item.value.status !== FormulaResultStatus.SUCCESS : false);
         if (isFormulaWithoutSuccess) {
             return conditionalFormattingFormulaService.getCache(context.unitId, context.subUnitId, rule.cfId) ?? computeResult;
         }
 
-        const colorList = _colorList.map((item) => {
-            return { ...item, value: isObject(item.value) ? Number(item.value.result) ?? 0 : item.value ?? 0 };
-        }).reduce((res, cur) => {
-            const pre = res[res.length - 1];
-            if (pre && cur.value <= pre.value) {
-                return res;
-            }
-            res.push(cur);
-            return res;
-        }, [] as {
-            value: number;
-            color: ColorKit;
-        }[]);
+        const colorList = _configList
+            .map((item) => item.color)
+            .reduce((result, color, index) => {
+                result.result.push({ color, value: result.sortValue[index] });
+                return result;
+            }, { result: [] as { value: number;color: ColorKit }[],
+                 sortValue: _configList.map((item) => item.value.result as number).sort((a, b) => a - b) })
+            .result;
 
         if (colorList.length <= 1) {
             return computeResult;

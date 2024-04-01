@@ -219,9 +219,6 @@ importers:
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../packages/sheets
-      '@univerjs/sheets-conditional-format':
-        specifier: workspace:*
-        version: link:../packages/sheets-conditional-format
       '@univerjs/sheets-conditional-formatting':
         specifier: workspace:*
         version: link:../packages/sheets-conditional-formatting
@@ -851,109 +848,6 @@ importers:
       vitest:
         specifier: ^1.4.0
         version: 1.4.0(@types/node@20.11.30)(jsdom@24.0.0)
-
-  packages/sheets-conditional-format:
-    dependencies:
-      '@types/lodash.get':
-        specifier: ^4.4.9
-        version: 4.4.9
-      '@types/lodash.set':
-        specifier: ^4.3.9
-        version: 4.3.9
-      '@types/react-grid-layout':
-        specifier: ^1.3.5
-        version: 1.3.5
-      '@univerjs/core':
-        specifier: workspace:*
-        version: link:../core
-      '@univerjs/design':
-        specifier: workspace:*
-        version: link:../design
-      '@univerjs/engine-formula':
-        specifier: workspace:*
-        version: link:../engine-formula
-      '@univerjs/engine-render':
-        specifier: workspace:*
-        version: link:../engine-render
-      '@univerjs/icons':
-        specifier: ^0.1.33
-        version: 0.1.42(react-dom@18.2.0)(react@18.2.0)
-      '@univerjs/icons-svg':
-        specifier: ^0.1.33
-        version: 0.1.42
-      '@univerjs/sheets':
-        specifier: workspace:*
-        version: link:../sheets
-      '@univerjs/sheets-formula':
-        specifier: workspace:*
-        version: link:../sheets-formula
-      '@univerjs/sheets-ui':
-        specifier: workspace:*
-        version: link:../sheets-ui
-      '@univerjs/ui':
-        specifier: workspace:*
-        version: link:../ui
-      clsx:
-        specifier: ^2.1.0
-        version: 2.1.0
-      dayjs:
-        specifier: ^1.11.10
-        version: 1.11.10
-      lodash.get:
-        specifier: ^4.4.2
-        version: r2.cnpmjs.org/lodash.get@4.4.2
-      lodash.set:
-        specifier: ^4.3.2
-        version: r2.cnpmjs.org/lodash.set@4.3.2
-      react:
-        specifier: ^18.2.0
-        version: 18.2.0
-      react-grid-layout:
-        specifier: ^1.4.4
-        version: 1.4.4(react-dom@18.2.0)(react@18.2.0)
-      react-resizable:
-        specifier: ^3.0.5
-        version: 3.0.5(react-dom@18.2.0)(react@18.2.0)
-      rxjs:
-        specifier: ^7.8.1
-        version: 7.8.1
-    devDependencies:
-      '@univerjs/shared':
-        specifier: workspace:*
-        version: link:../../common/shared
-      '@vitejs/plugin-react':
-        specifier: ^4.2.1
-        version: 4.2.1(vite@5.2.6)
-      '@vitest/coverage-istanbul':
-        specifier: ^1.2.1
-        version: 1.4.0(vitest@1.4.0)
-      '@wendellhu/redi':
-        specifier: ^0.13.0
-        version: 0.13.0
-      happy-dom:
-        specifier: ^13.2.1
-        version: 13.3.8
-      less:
-        specifier: ^4.2.0
-        version: 4.2.0
-      sharp:
-        specifier: ^0.33.2
-        version: 0.33.3
-      typescript:
-        specifier: ^5.3.3
-        version: 5.4.3
-      vite:
-        specifier: ^5.0.12
-        version: 5.2.6(@types/node@20.11.30)(less@4.2.0)
-      vite-plugin-dts:
-        specifier: ^3.7.1
-        version: 3.8.1(@types/node@20.11.30)(typescript@5.4.3)(vite@5.2.6)
-      vite-plugin-externals:
-        specifier: ^0.6.2
-        version: 0.6.2(vite@5.2.6)
-      vitest:
-        specifier: ^1.2.1
-        version: 1.4.0(@types/node@20.11.30)(happy-dom@13.3.8)(less@4.2.0)
 
   packages/sheets-conditional-formatting:
     dependencies:
@@ -5806,11 +5700,13 @@ packages:
     resolution: {integrity: sha512-J5dvW98sxmGnamqf+/aLP87PYXyrha9xIgc2ZlHl6OHMFR2Ejdxep50QfU0abO1+CH6+ugx+8wEUN1toImAinA==}
     dependencies:
       '@types/lodash': 4.14.202
+    dev: true
 
   /@types/lodash.set@4.3.9:
     resolution: {integrity: sha512-KOxyNkZpbaggVmqbpr82N2tDVTx05/3/j0f50Es1prxrWB0XYf9p3QNxqcbWb7P1Q9wlvsUSlCFnwlPCIJ46PQ==}
     dependencies:
       '@types/lodash': 4.14.202
+    dev: true
 
   /@types/lodash@4.14.202:
     resolution: {integrity: sha512-OvlIYQK9tNneDlS0VN54LLd5uiPCBOp7gS5Z0f1mjoJYBrtStzgmJBxONW3U6OZqdtNzZPmn9BS/7WI7BFFcFQ==}
@@ -5879,6 +5775,7 @@ packages:
     resolution: {integrity: sha512-WH/po1gcEcoR6y857yAnPGug+ZhkF4PaTUxgAbwfeSH/QOgVSakKHBXoPGad/sEznmkiaK3pqHk+etdWisoeBQ==}
     dependencies:
       '@types/react': 18.2.72
+    dev: true
 
   /@types/react-transition-group@4.4.10:
     resolution: {integrity: sha512-hT/+s0VQs2ojCX823m60m5f0sL5idt9SO6Tj6Dg+rdphGPIeJbJ6CxvBYkgkGKrYeDjvIpKTR38UzmtHJOGW3Q==}
@@ -6193,6 +6090,7 @@ packages:
 
   /@univerjs/icons-svg@0.1.42:
     resolution: {integrity: sha512-WAUylnpHXmsbNnfyjlg8pV5Rea/1l3BwbmsIY3UY2eEelXNoTSChtCynxVGo8FvsbWjyQ5+7Iq30M5GPs2i1Gg==}
+    dev: true
 
   /@univerjs/icons@0.1.42(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-fHJKMGXGKK6W0E7xguXtHTTwR2P679sMMjh8JMHHobZzBCKoUuN3UBDRa8TJRyLWiY26jbe5xtJOhRD2sQyXKg==}
@@ -16087,12 +15985,6 @@ packages:
     resolution: {integrity: sha512-pDo3lu8Jhfjqls6GkMgpahsF9kCyayhgykjyLMNFTKWrpVdAQtYyB4muAMWozBB4ig/dtWAmsMxLEI8wuz+DYQ==, tarball: https://r2.cnpmjs.org/lodash.isequal/-/lodash.isequal-4.5.0.tgz}
     name: lodash.isequal
     version: 4.5.0
-
-  r2.cnpmjs.org/lodash.set@4.3.2:
-    resolution: {integrity: sha512-4hNPN5jlm/N/HLMCO43v8BXKq9Z7QdAGc/VGrRD61w8gN9g/6jF9A4L1pbUgBLCffi0w9VsXfTOij5x8iTyFvg==, tarball: https://r2.cnpmjs.org/lodash.set/-/lodash.set-4.3.2.tgz}
-    name: lodash.set
-    version: 4.3.2
-    dev: false
 
   r2.cnpmjs.org/lodash@4.17.21:
     resolution: {integrity: sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==, tarball: https://r2.cnpmjs.org/lodash/-/lodash-4.17.21.tgz}

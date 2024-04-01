@@ -868,7 +868,7 @@ function getStyles(styleText: string): IKeyValue {
     return output;
 }
 
-function extractColorFromString(str) {
+function extractColorFromString(str: string) {
     // 正则表达式匹配十六进制颜色值和RGB颜色值
     const regex = /#([0-9a-f]{3,6})\b|rgb\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*\)/gi;
     const matches = str.match(regex);

@@ -173,7 +173,9 @@ export class DocEditorBridgeController extends Disposable {
 
                 const editor = this._editorService.getEditor(unitId);
 
-                if (editor == null || editor.isSheetEditor()) {
+                const focusEditor = this._editorService.getFocusEditor();
+
+                if (editor == null || editor.isSheetEditor() || (focusEditor && focusEditor.editorUnitId === unitId)) {
                     return;
                 }
 

@@ -478,7 +478,7 @@ export class SelectionShape extends Disposable {
             stroke: SELECTION_CONTROL_BORDER_BUFFER_COLOR,
         });
 
-        if (strokeDash == null) {
+        if (strokeDash == null || endY - startY > 1000000 || endX - startX > 100000) {
             this.dashRect.hide();
             this._stopAntLineAnimation();
         } else {

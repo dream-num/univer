@@ -133,6 +133,12 @@ export class EditorBridgeController extends RxDisposable {
             if (evt.button === 2) {
                 return;
             }
+
+            const current = this._selectionManagerService.getCurrent();
+            if (current?.pluginName !== NORMAL_SELECTION_PLUGIN_NAME) {
+                return;
+            }
+
             // this._editorBridgeService.show(DeviceInputEventType.Dblclick);
             this._commandService.executeCommand(SetCellEditVisibleOperation.id, {
                 visible: true,

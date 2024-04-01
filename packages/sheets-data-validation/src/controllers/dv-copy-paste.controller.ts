@@ -136,11 +136,12 @@ export class DataValidationCopyPasteController extends Disposable {
                         },
                         startRange
                     );
+                    const transformedRuleId = `${subUnitId}-${ruleId}`;
                     const oldRule = originManager.getRuleById(ruleId);
-                    if (!manager.getRuleById(ruleId) && oldRule) {
-                        additionRules.add(oldRule);
+                    if (!manager.getRuleById(transformedRuleId) && oldRule) {
+                        additionRules.add({ ...oldRule, uid: transformedRuleId });
                     }
-                    ruleMatrix.setValue(range.startRow, range.startColumn, ruleId);
+                    ruleMatrix.setValue(range.startRow, range.startColumn, transformedRuleId);
                 });
             });
 
@@ -149,6 +150,7 @@ export class DataValidationCopyPasteController extends Disposable {
                 copyInfo.subUnitId,
                 ruleMatrix.diffWithAddition(manager.getDataValidations(), additionRules)
             );
+
             return {
                 redos: redoMutations,
                 undos: undoMutations,

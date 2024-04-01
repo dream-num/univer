@@ -33,7 +33,7 @@ export interface ISetDefinedNameCommandParams {
  * The command to update defined name
  */
 export const SetDefinedNameCommand: ICommand = {
-    id: 'sheet.command.remove-defined-name',
+    id: 'sheet.command.set-defined-name',
     type: CommandType.COMMAND,
     handler: (accessor: IAccessor, params?: ISetDefinedNameCommandParams) => {
         const commandService = accessor.get(ICommandService);

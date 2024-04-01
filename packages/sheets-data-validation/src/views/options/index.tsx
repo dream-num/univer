@@ -64,7 +64,7 @@ export function DataValidationOptions(props: IDataValidationOptionsParams) {
                         label={localeService.t('dataValidation.panel.messageInfo')}
                     >
                         <Checkbox
-                            value={value.showInputMessage}
+                            checked={value.showInputMessage}
                             onChange={() => onChange({
                                 ...value,
                                 showInputMessage: !value.showInputMessage,

@@ -848,7 +848,7 @@ describe('Test conditional formatting service', () => {
                     });
                 });
             });
-            it('Need to filter if the set value is wrong', () => {
+            it('The colors are consistent, but the values are interchangeable', () => {
                 const params: IConditionFormattingRule<IColorScale> = {
                     ranges: [{ startRow: 0, startColumn: 0, endRow: 5, endColumn: 6 }],
                     cfId: testBed.getConditionalFormattingRuleModel().createCfId(testBed.unitId, testBed.subUnitId),
@@ -868,7 +868,7 @@ describe('Test conditional formatting service', () => {
                             color: '#2e55ef',
                             value: {
                                 type: CFValueType.num,
-                                value: -5, // this wrong value is filter
+                                value: -5,
                             },
                         },
                         {
@@ -882,26 +882,6 @@ describe('Test conditional formatting service', () => {
                         ],
                     },
                 };
-                /**
-                 *  the same as
-                 [{
-                            index: 0,
-                            color: '#d0d9fb',
-                            value: {
-                                type: CFValueType.num,
-                                value: 1,
-                            },
-                        },
-                        {
-                            index: 2,
-                            color: 'rgb(231, 37, 143)',
-                            value: {
-                                type: CFValueType.num,
-                                value: 3,
-                            },
-                        },
-                        ]
-                 */
                 testBed.getConditionalFormattingRuleModel().addRule(testBed.unitId, testBed.subUnitId, params);
                 testBed.getConditionalFormattingService().composeStyle(testBed.unitId, testBed.subUnitId, 1, 0);
                 const dispose = testBed.getConditionalFormattingService().ruleComputeStatus$.subscribe(() => {
@@ -914,14 +894,14 @@ describe('Test conditional formatting service', () => {
                     expect(one).toEqual({
                         style: {
                             bg: {
-                                rgb: 'rgb(208,217,251)',
+                                rgb: 'rgb(46,85,239)',
                             },
                         },
                     });
                     expect(two).toEqual({
                         style: {
                             bg: {
-                                rgb: 'rgb(220,127,197)',
+                                rgb: 'rgb(139,61,191)',
                             },
                         },
                     });

@@ -56,7 +56,7 @@
         "npm": ">=8.0.0"
     },
     "scripts": {
-        "postinstall": "node ./scripts/build-icons",
+        "prepare": "node ./scripts/build-icons",
         "test": "vitest run",
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",
@@ -82,9 +82,6 @@
         "@univerjs/shared": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@wendellhu/redi": "^0.13.0",
-        "clsx": "^2.1.0",
-        "less": "^4.2.0",
-        "react": "^18.2.0",
         "rxjs": "^7.8.1",
         "sharp": "^0.33.3",
         "typescript": "^5.4.3",

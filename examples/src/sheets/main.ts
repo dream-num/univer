@@ -32,7 +32,6 @@ import { UniverSheetsZenEditorPlugin } from '@univerjs/sheets-zen-editor';
 import { UniverUIPlugin } from '@univerjs/ui';
 import { UniverDataValidationPlugin } from '@univerjs/data-validation';
 import { UniverSheetsDataValidationPlugin } from '@univerjs/sheets-data-validation';
-import { SheetsConditionalFormatPlugin } from '@univerjs/sheets-conditional-format';
 import { SheetsConditionalFormattingUiPlugin } from '@univerjs/sheets-conditional-formatting-ui';
 
 import { DebuggerPlugin } from '../plugins/debugger';
@@ -82,7 +81,6 @@ univer.registerPlugin(UniverRPCMainThreadPlugin, {
 // find replace
 univer.registerPlugin(UniverFindReplacePlugin);
 // univer.registerPlugin(UniverSheetsFindPlugin);
-univer.registerPlugin(SheetsConditionalFormatPlugin);
 
 // data validation
 univer.registerPlugin(UniverDataValidationPlugin);

@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import type { CellValue, IRange, ISheetDataValidationRule } from '@univerjs/core/types/interfaces/index.js';
+import type { CellValue, ISheetDataValidationRule } from '@univerjs/core/types/interfaces/index.js';
 import { DataValidationManager } from '@univerjs/data-validation/models/data-validation-manager.js';
 import type { Nullable } from '@univerjs/core/shared/index.js';
-import { ObjectMatrix, Rectangle } from '@univerjs/core/shared/index.js';
-import { queryObjectMatrix } from '@univerjs/core/shared/object-matrix-query.js';
+import { ObjectMatrix } from '@univerjs/core/shared/index.js';
 import { Range } from '@univerjs/core/sheets/range.js';
 import type { IUpdateRulePayload } from '@univerjs/data-validation/types/interfaces/i-update-rule-payload.js';
 import { DataValidatorRegistryService, UpdateRuleType } from '@univerjs/data-validation';
@@ -30,160 +29,7 @@ import { DataValidationCacheService } from '../services/dv-cache.service';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
 import { DataValidationCustomFormulaService } from '../services/dv-custom-formula.service';
 import { DataValidationRefRangeController } from '../controllers/dv-ref-range.controller';
-
-export type RangeMutation = {
-    type: 'update';
-    ruleId: string;
-    oldRanges: IRange[];
-    newRanges: IRange[];
-} | {
-    type: 'delete';
-    rule: ISheetDataValidationRule;
-    index: number;
-} | {
-    type: 'add';
-    rule: ISheetDataValidationRule;
-};
-
-export class RuleMatrix {
-    readonly value: ObjectMatrix<string>;
-
-    constructor(value: ObjectMatrix<string>) {
-        this.value = value;
-    }
-
-    addRule(rule: ISheetDataValidationRule) {
-        const ruleId = rule.uid;
-        rule.ranges.forEach((range) => {
-            Range.foreach(range, (row, col) => {
-                this.value.setValue(row, col, ruleId);
-            });
-        });
-    }
-
-    removeRange(ranges: IRange[]) {
-        ranges.forEach((range) => {
-            Range.foreach(range, (row, col) => {
-                this.value.realDeleteValue(row, col);
-            });
-        });
-    }
-
-    removeRule(rule: ISheetDataValidationRule) {
-        rule.ranges.forEach((range) => {
-            Range.foreach(range, (row, col) => {
-                this.value.setValue(row, col, '');
-            });
-        });
-    }
-
-    updateRange(ruleId: string, oldRanges: IRange[], newRanges: IRange[]) {
-        const tempRuleId = `${ruleId}$`;
-        oldRanges.forEach((range) => {
-            Range.foreach(range, (row, col) => {
-                if (this.value.getValue(row, col) === ruleId) {
-                    this.value.setValue(row, col, tempRuleId);
-                }
-            });
-        });
-
-        newRanges.forEach((range) => {
-            Range.foreach(range, (row, col) => {
-                this.value.setValue(row, col, ruleId);
-            });
-        });
-
-        oldRanges.forEach((range) => {
-            Range.foreach(range, (row, col) => {
-                const value = this.value.getValue(row, col);
-                if (value === tempRuleId) {
-                    this.value.realDeleteValue(row, col);
-                }
-            });
-        });
-    }
-
-    diff(rules: ISheetDataValidationRule[]) {
-        const mutations: RangeMutation[] = [];
-        let deleteIndex = 0;
-        rules.forEach((rule, index) => {
-            const newRanges = queryObjectMatrix(this.value, (ruleId) => ruleId === rule.uid);
-            const oldRanges = rule.ranges;
-
-            if (newRanges.length !== oldRanges.length || newRanges.some((range, i) => !Rectangle.equals(range, oldRanges[i]))) {
-                mutations.push({
-                    type: 'update',
-                    ruleId: rule.uid,
-                    oldRanges,
-                    newRanges,
-                });
-            }
-
-            if (newRanges.length === 0) {
-                mutations.push({
-                    type: 'delete',
-                    rule,
-                    index: index - deleteIndex,
-                });
-                deleteIndex++;
-            }
-        });
-
-        return mutations;
-    }
-
-    diffWithAddition(rules: ISheetDataValidationRule[], additionRules: IterableIterator<ISheetDataValidationRule>) {
-        const mutations: RangeMutation[] = [];
-        let deleteIndex = 0;
-        rules.forEach((rule, index) => {
-            const newRanges = queryObjectMatrix(this.value, (ruleId) => ruleId === rule.uid);
-            const oldRanges = rule.ranges;
-
-            if (newRanges.length !== oldRanges.length || newRanges.some((range, i) => !Rectangle.equals(range, oldRanges[i]))) {
-                mutations.push({
-                    type: 'update',
-                    ruleId: rule.uid,
-                    oldRanges,
-                    newRanges,
-                });
-            }
-
-            if (newRanges.length === 0) {
-                mutations.push({
-                    type: 'delete',
-                    rule,
-                    index: index - deleteIndex,
-                });
-                deleteIndex++;
-            }
-        });
-
-        Array.from(additionRules).forEach((rule) => {
-            const newRanges = queryObjectMatrix(this.value, (ruleId) => ruleId === rule.uid);
-            mutations.push({
-                type: 'add',
-                rule: {
-                    ...rule,
-                    ranges: newRanges,
-                },
-            });
-        });
-
-        return mutations;
-    }
-
-    clone() {
-        return new RuleMatrix(new ObjectMatrix(this.value.clone()));
-    }
-
-    getValue(row: number, col: number) {
-        return this.value.getValue(row, col);
-    }
-
-    setValue(row: number, col: number, value: string) {
-        return this.value.setValue(row, col, value);
-    }
-}
+import { RuleMatrix } from './rule-matrix';
 
 export class SheetDataValidationManager extends DataValidationManager<ISheetDataValidationRule> {
     /**

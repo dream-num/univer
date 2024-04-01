@@ -37,8 +37,8 @@ import { addDataValidationMenuFactory, dataValidationMenuFactory, openDataValida
 
 const INVALID_MARK = {
     tr: {
-        size: 8,
-        color: 'red',
+        size: 6,
+        color: '#fe4b4b',
     },
 };
 

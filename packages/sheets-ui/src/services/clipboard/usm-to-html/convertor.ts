@@ -29,13 +29,27 @@ function getRowContent(
     row: number,
     cols: number[],
     hooks: ISheetClipboardHook[],
-    matrix: ObjectMatrix<ICellDataWithSpanInfo>
+    matrix: ObjectMatrix<ICellDataWithSpanInfo>,
+    mergeSet: Set<string>
 ) {
     const properties = hooks.map((hook) => hook.onCopyRow?.(row)).filter((v) => !!v) as IClipboardPropertyItem[];
     const mergedProperties = mergeProperties(properties);
     const str = zipClipboardPropertyItemToString(mergedProperties);
     const tds = cols
-        .map((col) => getTDContent(row, col, hooks, matrix))
+        .map((col) => {
+            if (!mergeSet.has(`${row}-${col}`)) {
+                const v = matrix.getValue(row, col);
+                if (v?.rowSpan && v?.colSpan) {
+                    for (let i = row; i < row + v.rowSpan; i++) {
+                        for (let j = col; j < col + v.colSpan; j++) {
+                            mergeSet.add(`${i}-${j}`);
+                        }
+                    }
+                }
+                return getTDContent(row, col, hooks, matrix);
+            }
+            return null;
+        })
         .filter((v) => !!v)
         .join('');
 
@@ -124,6 +138,7 @@ export class USMToHtmlService {
         const colStyles = getColStyle(getArrayFromTo(startColumn, endColumn), hooks);
         // row styles and table contents
         const rowContents: string[] = [];
+        const mergeSet = new Set<string>();
 
         const {
             startRow: dataStartRow,
@@ -136,7 +151,7 @@ export class USMToHtmlService {
                 { length: dataEndColumn - dataStartColumn + 1 },
                 (_, index) => dataStartColumn + index
             );
-            rowContents.push(getRowContent(row, cols, hooks, matrix));
+            rowContents.push(getRowContent(row, cols, hooks, matrix, mergeSet));
         }
 
         const html = `<google-sheets-html-origin><table xmlns="http://www.w3.org/1999/xhtml" cellspacing="0" cellpadding="0" dir="ltr" border="1" style="table-layout:fixed;font-size:10pt;font-family:Arial;width:0px;border-collapse:collapse;border:none">${colStyles}

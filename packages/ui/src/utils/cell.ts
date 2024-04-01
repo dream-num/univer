@@ -24,7 +24,7 @@ import type {
     ITextDecoration,
     ITextRun,
 } from '@univerjs/core';
-import { BaselineOffset, getBorderStyleType, Tools } from '@univerjs/core';
+import { BaselineOffset, BorderStyleTypes, getBorderStyleType, Tools } from '@univerjs/core';
 import { ptToPx, pxToPt } from '@univerjs/engine-render';
 
 import { textTrim } from './util';
@@ -135,6 +135,7 @@ export function handleDomToJson($dom: HTMLElement): IDocumentData | string {
 export function handleStringToStyle($dom?: HTMLElement, cssStyle: string = '') {
     let cssText = $dom?.style?.cssText ?? '';
     cssText += cssStyle;
+    cssText = cssText.replace(/[\r\n]+/g, '');
     if (cssText.length === 0) {
         return {};
     }
@@ -155,7 +156,7 @@ export function handleStringToStyle($dom?: HTMLElement, cssStyle: string = '') {
 
         // bold
         if (key === 'font-weight') {
-            if (value === 'bold') {
+            if (value === 'bold' || value === '700') {
                 styleList.bl = 1;
             } else {
                 styleList.bl = 0;
@@ -201,7 +202,7 @@ export function handleStringToStyle($dom?: HTMLElement, cssStyle: string = '') {
         // fill color / background
         else if (key === 'background' || key === 'background-color') {
             styleList.bg = {
-                rgb: value,
+                rgb: extractColorFromString(value),
             };
         }
 
@@ -455,27 +456,30 @@ export function handleStringToStyle($dom?: HTMLElement, cssStyle: string = '') {
             const type = `${arr[0]} ${arr[1]}`;
             arr.splice(0, 2);
             const color = arr.join('');
-            const obj = {
-                cl: {
-                    rgb: color,
-                },
-                s: getBorderStyleType(type),
-            };
-            if (key === 'border-bottom') {
-                styleList.bd.b = value === 'none' ? null : obj;
-            } else if (key === 'border-top') {
-                styleList.bd.t = value === 'none' ? null : obj;
-            } else if (key === 'border-left') {
-                styleList.bd.l = value === 'none' ? null : obj;
-            } else if (key === 'border-right') {
-                styleList.bd.r = value === 'none' ? null : obj;
-            } else if (key === 'border') {
-                styleList.bd = {
-                    r: value === 'none' ? null : obj,
-                    t: value === 'none' ? null : obj,
-                    b: value === 'none' ? null : obj,
-                    l: value === 'none' ? null : obj,
+            const lineType = getBorderStyleType(type);
+            if (lineType !== BorderStyleTypes.NONE) {
+                const obj = {
+                    cl: {
+                        rgb: color,
+                    },
+                    s: getBorderStyleType(type),
                 };
+                if (key === 'border-bottom') {
+                    styleList.bd.b = value === 'none' ? null : obj;
+                } else if (key === 'border-top') {
+                    styleList.bd.t = value === 'none' ? null : obj;
+                } else if (key === 'border-left') {
+                    styleList.bd.l = value === 'none' ? null : obj;
+                } else if (key === 'border-right') {
+                    styleList.bd.r = value === 'none' ? null : obj;
+                } else if (key === 'border') {
+                    styleList.bd = {
+                        r: value === 'none' ? null : obj,
+                        t: value === 'none' ? null : obj,
+                        b: value === 'none' ? null : obj,
+                        l: value === 'none' ? null : obj,
+                    };
+                }
             }
         }
 
@@ -862,4 +866,11 @@ function getStyles(styleText: string): IKeyValue {
     }
 
     return output;
+}
+
+function extractColorFromString(str) {
+    // 正则表达式匹配十六进制颜色值和RGB颜色值
+    const regex = /#([0-9a-f]{3,6})\b|rgb\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*\)/gi;
+    const matches = str.match(regex);
+    return matches ? matches[0] : null;
 }

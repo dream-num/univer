@@ -247,7 +247,7 @@ export class HtmlToUSMService {
                     if (dom) {
                         const computedStyle = window.getComputedStyle(dom!, null);
 
-                        const { fontSize, fontFamily, border, borderLeft, borderRight, borderTop, borderBottom, verticalAlign } = computedStyle;
+                        const { fontSize, fontFamily, border, borderLeft, borderRight, borderTop, borderBottom, verticalAlign, background, color, textAlign, fontWeight } = computedStyle;
                         if (fontSize) {
                             styleString += `;font-size: ${pixelToPt(Number.parseInt(fontSize))}pt`;
                         }
@@ -272,29 +272,85 @@ export class HtmlToUSMService {
                         if (verticalAlign) {
                             styleString += `;vertical-align: ${verticalAlign}`;
                         }
+                        if (background) {
+                            styleString += `;background: ${background}`;
+                        }
+                        if (color) {
+                            styleString += `;color: ${color}`;
+                        }
+                        if (textAlign) {
+                            styleString += `;text-align: ${textAlign}`;
+                        }
+                        if (fontWeight) {
+                            styleString += `;font-weight: ${fontWeight}`;
+                        }
                     }
                 }
                 const style = handleStringToStyle(undefined, styleString);
 
+                // todo这里是有问题的 应该是判断里面有没有html标签 这里应该是直接赋值的逻辑了，解析p应该在上一步去做
                 if (/\r|\n/.test(value.content)) {
                     const body = generateBody(value.content);
                     const p = this._generateDocumentDataModelSnapshot({
                         body,
                     });
-                    valueMatrix.setValue(row, col, {
-                        v: value.content,
-                        p,
-                        s: style,
-                        rowSpan: value.rowSpan,
-                        colSpan: value.colSpan,
-                    });
+                    if (!valueMatrix.getValue(row, col)) {
+                        const newValue = (value.rowSpan || value.colSpan)
+                            ? {
+                                v: value.content,
+                                p,
+                                s: style,
+                                rowSpan: value.rowSpan,
+                                colSpan: value.colSpan,
+                            }
+                            : {
+                                v: value.content,
+                                p,
+                                s: style,
+                            };
+                        valueMatrix.setValue(row, col, newValue);
+                        if (value.rowSpan || value.colSpan) {
+                            const rowSpan = value.rowSpan || 1;
+                            const colSpan = value.colSpan || 1;
+                            for (let i = 0; i < rowSpan; i++) {
+                                for (let j = 0; j < colSpan; j++) {
+                                    if (i === 0 && j === 0) { /* empty */ } else {
+                                        valueMatrix.setValue(row + i, col + j, {
+                                            s: style,
+                                        });
+                                    }
+                                }
+                            }
+                        }
+                    }
                 } else {
-                    valueMatrix.setValue(row, col, {
-                        v: value.content,
-                        s: style,
-                        rowSpan: value.rowSpan,
-                        colSpan: value.colSpan,
-                    });
+                    if (!valueMatrix.getValue(row, col)) {
+                        const newValue = (value.rowSpan || value.colSpan)
+                            ? {
+                                v: value.content,
+                                s: style,
+                                rowSpan: value.rowSpan,
+                                colSpan: value.colSpan,
+                            }
+                            : {
+                                v: value.content,
+                                s: style,
+                            };
+                        valueMatrix.setValue(row, col, newValue);
+                        if (value.rowSpan || value.colSpan) {
+                            const rowSpan = value.rowSpan || 1;
+                            const colSpan = value.colSpan || 1;
+                            for (let i = 0; i < rowSpan; i++) {
+                                for (let j = 0; j < colSpan; j++) {
+                                    if (i === 0 && j === 0) { /* empty */ } else {
+                                        valueMatrix.setValue(row + i, col + j, {
+                                            s: style,
+                                        });
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             });
         return {
@@ -356,6 +412,9 @@ export class HtmlToUSMService {
                     });
                 }
             } else if (node.nodeType === Node.ELEMENT_NODE) {
+                if (node.nodeName === 'STYLE') {
+                    continue;
+                }
                 const parentStyles = parent ? this.styleCache.get(parent) : {};
                 const styleRule = this.styleRules.find(({ filter }) => matchFilter(node as HTMLElement, filter));
                 const nodeStyles = styleRule
@@ -471,9 +530,49 @@ function parseTableCells(tdStrings: string[]) {
                 maxRowOfCol.set(i, rowIndex + rowSpan - 1);
             }
 
-            // set value to matrix
-            cellMatrix.setValue(rowIndex, colIndex, value);
+            if ((rowSpan > 1 || colSpan > 1) && rowIndex === 0 && colIndex === 0) {
+                for (let i = 0; i < colSpan; i++) {
+                    if (rowSpan === 1) {
+                        cellMatrix.setValue(rowIndex, i, { content: '', properties: { style: extractBordersAndKeepOthers(cellProperties.style, ['border-top', 'border-bottom']) } });
+                    } else {
+                        cellMatrix.setValue(rowIndex, i, { content: '', properties: { style: extractBordersAndKeepOthers(cellProperties.style, ['border-top']) } });
+                        cellMatrix.setValue(rowSpan - 1, i, { content: '', properties: { style: extractBordersAndKeepOthers(cellProperties.style, ['border-bottom']) } });
+                    }
+                }
+                for (let i = 0; i < rowSpan; i++) {
+                    if (colSpan === 1) {
+                        cellMatrix.setValue(i, colIndex, { content: '', properties: { style: extractBordersAndKeepOthers(cellProperties.style, ['border-left', 'border-right']) } });
+                    } else {
+                        cellMatrix.setValue(i, colIndex, { content: '', properties: { style: extractBordersAndKeepOthers(cellProperties.style, ['border-left']) } });
+                        cellMatrix.setValue(i, colSpan - 1, { content: '', properties: { style: extractBordersAndKeepOthers(cellProperties.style, ['border-right']) } });
+                    }
+                }
 
+                if (rowSpan === 1) {
+                    cellMatrix.setValue(rowIndex, colSpan - 1, { content: '', properties: { style: extractBordersAndKeepOthers(cellProperties.style, ['border-right', 'border-top', 'border-bottom']) } });
+                    if (value?.properties?.style) {
+                        value.properties.style = extractBordersAndKeepOthers(value.properties.style, ['border-left', 'border-top', 'border-bottom']);
+                    }
+                    cellMatrix.setValue(rowIndex, colIndex, value);
+                } else if (colSpan === 1) {
+                    cellMatrix.setValue(rowSpan - 1, colIndex, { content: '', properties: { style: extractBordersAndKeepOthers(cellProperties.style, ['border-left', 'border-right', 'border-bottom']) } });
+                    if (value?.properties?.style) {
+                        value.properties.style = extractBordersAndKeepOthers(value.properties.style, ['border-top', 'border-left', 'border-right']);
+                    }
+                    cellMatrix.setValue(rowIndex, colIndex, value);
+                } else {
+                    cellMatrix.setValue(rowIndex, colSpan - 1, { content: '', properties: { style: extractBordersAndKeepOthers(cellProperties.style, ['border-right', 'border-top']) } });
+                    cellMatrix.setValue(rowSpan - 1, colIndex, { content: '', properties: { style: extractBordersAndKeepOthers(cellProperties.style, ['border-left', 'border-bottom']) } });
+                    cellMatrix.setValue(rowSpan - 1, colSpan - 1, { content: '', properties: { style: extractBordersAndKeepOthers(cellProperties.style, ['border-right', 'border-bottom']) } });
+                    if (value?.properties?.style) {
+                        value.properties.style = extractBordersAndKeepOthers(value.properties.style, ['border-top', 'border-left']);
+                    }
+                    cellMatrix.setValue(rowIndex, colIndex, value);
+                }
+            } else {
+                cellMatrix.setValue(rowIndex, colIndex, value);
+            }
+            // set value to matrix
             // point to next colIndex
             colIndex += colSpan;
         });
@@ -545,4 +644,33 @@ function decodeHTMLEntities(input: string): string {
     };
 
     return input.replace(/&lt;|&gt;|&amp;|&quot;|&#39;|&nbsp;|<br>/g, (match) => entities[match]);
+}
+
+function extractBordersAndKeepOthers(styleString: string, bordersToKeep: string[]) {
+    if (!styleString || !bordersToKeep.length) return '';
+    const borderRegex = /border(-top|-right|-bottom|-left)?\s*:\s*([^;]+);/g;
+
+    const extractedBorders: Record<string, string> = {};
+
+    const withoutBorders = styleString.replace(borderRegex, (match, p1, p2) => {
+        const borderType = `border${p1 || ''}`;
+        extractedBorders[borderType] = p2.trim();
+        return '';
+    });
+
+    let newStyleString = bordersToKeep
+        .map((border) => {
+            if (border === 'border' && extractedBorders[border]) {
+                return `border: ${extractedBorders[border]};`;
+            } else if (extractedBorders[border]) {
+                return `${border}: ${extractedBorders[border]};`;
+            }
+            return '';
+        })
+        .filter((style) => style)
+        .join(' ');
+
+    newStyleString += ` ${withoutBorders.trim()}`;
+
+    return newStyleString.trim();
 }

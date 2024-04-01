@@ -221,7 +221,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
     addClipboardHook(hook: ISheetClipboardHook): IDisposable {
         if (this._clipboardHooks.findIndex((h) => h.id === hook.id) !== -1) {
             this._logService.error('[SheetClipboardService]', 'hook already exists', hook.id);
-            return { dispose: () => {} };
+            return { dispose: () => { } };
         }
         // hook added should be ordered at meaning while
         const insertIndex = this._clipboardHooks.findIndex((existingHook) => {
@@ -849,6 +849,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
 
 function getMatrixPlainText(matrix: ObjectMatrix<ICellDataWithSpanInfo>) {
     let plain = '';
+    const matrixLength = matrix.getLength();
     matrix.forRow((row, cols) => {
         const arr: string[] = [];
         cols.forEach((col) => {
@@ -859,7 +860,7 @@ function getMatrixPlainText(matrix: ObjectMatrix<ICellDataWithSpanInfo>) {
             }
         });
         plain += arr.join('\t');
-        if (row !== matrix.getLength() - 1) {
+        if (row !== matrixLength - 1) {
             plain += '\n';
         }
     });

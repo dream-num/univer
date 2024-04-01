@@ -99,6 +99,8 @@ export class HtmlToUDMService {
                         ts: style,
                     });
                 }
+            } else if (node.nodeType === Node.COMMENT_NODE || node.nodeName === 'STYLE') {
+                continue;
             } else if (node.nodeType === Node.ELEMENT_NODE) {
                 const parentStyles = parent ? this._styleCache.get(parent) : {};
                 const styleRule = this._styleRules.find(({ filter }) => matchFilter(node as HTMLElement, filter));

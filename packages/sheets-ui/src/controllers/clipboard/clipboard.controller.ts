@@ -177,6 +177,9 @@ export class SheetClipboardController extends RxDisposable {
                 // TODO@wzhudev: should deprecate Range and
                 // use worksheet.getStyle()
                 const range = currentSheet!.getRange(row, col);
+
+                const mergedCellByRowCol = currentSheet!.getMergedCell(row, col);
+
                 const textStyle = range.getTextStyle();
                 // const color = range.getFontColor();
                 // const backgroundColor = range.getBackground();
@@ -212,6 +215,21 @@ export class SheetClipboardController extends RxDisposable {
 
                 if (textStyle) {
                     style = handleStyleToString(textStyle);
+                }
+
+                if (mergedCellByRowCol) {
+                    const endRow = mergedCellByRowCol.endRow;
+                    const endColumn = mergedCellByRowCol.endColumn;
+                    const lastRange = currentSheet!.getRange(endRow, endColumn);
+                    const lastTextStyle = lastRange.getTextStyle();
+                    if (lastTextStyle) {
+                        const lastStyle = handleStyleToString(lastTextStyle);
+                        if (style) {
+                            style += lastStyle ? `;${lastStyle}` : '';
+                        } else {
+                            style = lastStyle;
+                        }
+                    }
                 }
 
                 if (style) {

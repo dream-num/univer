@@ -34,9 +34,11 @@ import {
     SetNumfmtMutation,
     transformCellsToRange,
 } from '@univerjs/sheets';
+import type { ICellDataWithSpanInfo } from '@univerjs/sheets-ui';
 import { COPY_TYPE, getRepeatRange, ISheetClipboardService, PREDEFINED_HOOK_NAME } from '@univerjs/sheets-ui';
 import { Inject, Injector } from '@wendellhu/redi';
 
+import numfmt from '@univerjs/engine-numfmt';
 import { SHEET_NUMFMT_PLUGIN } from '../base/const/PLUGIN_NAME';
 import { mergeNumfmtMutations } from '../utils/mutation';
 
@@ -69,7 +71,8 @@ export class NumfmtCopyPasteController extends Disposable {
                     const { copyType = COPY_TYPE.COPY, pasteType } = payload;
                     const { range: copyRange } = pasteFrom || {};
                     const { range: pastedRange } = pasteTo;
-                    return this._generateNumfmtMutations(pastedRange, { copyType, pasteType, copyRange });
+                    const res = this._generateNumfmtMutations(pastedRange, { copyType, pasteType, copyRange, data });
+                    return res;
                 },
             })
         );
@@ -115,12 +118,14 @@ export class NumfmtCopyPasteController extends Disposable {
             copyType: COPY_TYPE;
             copyRange?: IRange;
             pasteType: string;
+            data: ObjectMatrix<ICellDataWithSpanInfo>;
         }
     ) {
         const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
         const sheet = workbook.getActiveSheet();
         const unitId = workbook.getUnitId();
         const subUnitId = sheet.getSheetId();
+        const numfmtModel = this._numfmtService.getModel(unitId, subUnitId);
         if (copyInfo.copyType === COPY_TYPE.CUT) {
             // This do not need to deal with clipping.
             // move range had handle this case .
@@ -128,6 +133,51 @@ export class NumfmtCopyPasteController extends Disposable {
             this._copyInfo = null;
             return { redos: [], undos: [] };
         }
+        if (!copyInfo.copyRange && copyInfo.data) {
+            const removeRedos: IRemoveNumfmtMutationParams = { unitId, subUnitId, ranges: [] };
+            const cells: ISetCellsNumfmt = [];
+            Range.foreach(pastedRange, (row, col) => {
+                if (this._numfmtService.getValue(unitId, subUnitId, row, col, numfmtModel!)) {
+                    removeRedos.ranges.push({ startRow: row, startColumn: col, endRow: row, endColumn: col });
+                }
+            });
+            copyInfo.data.forValue((row, col, value) => {
+                const content = String(value.v);
+
+                const dateInfo = numfmt.parseDate(content) || numfmt.parseTime(content);
+                const isTranslateDate = !!dateInfo;
+                if (isTranslateDate) {
+                    if (dateInfo && dateInfo.z) {
+                        cells.push({
+                            row: pastedRange.startRow + row,
+                            col: pastedRange.startColumn + col,
+                            pattern: dateInfo.z || '',
+                            type: 'date',
+                        });
+                    }
+                }
+            });
+            const setRedos = transformCellsToRange(unitId, subUnitId, cells);
+            Object.keys(setRedos.values).forEach((key) => {
+                const v = setRedos.values[key];
+                v.ranges = rangeMerge(v.ranges);
+            });
+
+            removeRedos.ranges = rangeMerge(removeRedos.ranges);
+            const undos = [
+                ...factorySetNumfmtUndoMutation(this._injector, setRedos),
+                ...factoryRemoveNumfmtUndoMutation(this._injector, removeRedos),
+            ];
+
+            return {
+                redos: [
+                    { id: RemoveNumfmtMutation.id, params: removeRedos },
+                    { id: SetNumfmtMutation.id, params: setRedos },
+                ],
+                undos: mergeNumfmtMutations(undos),
+            };
+        }
+
         if (!this._copyInfo || !this._copyInfo.matrix.getSizeOf() || !copyInfo.copyRange) {
             return { redos: [], undos: [] };
         }
@@ -139,10 +189,11 @@ export class NumfmtCopyPasteController extends Disposable {
         ) {
             return { redos: [], undos: [] };
         }
+
         const repeatRange = getRepeatRange(copyInfo.copyRange, pastedRange, true);
         const cells: ISetCellsNumfmt = [];
         const removeRedos: IRemoveNumfmtMutationParams = { unitId, subUnitId, ranges: [] };
-        const numfmtModel = this._numfmtService.getModel(unitId, subUnitId);
+
         // Clears the destination area data format
         Range.foreach(pastedRange, (row, col) => {
             if (this._numfmtService.getValue(unitId, subUnitId, row, col, numfmtModel!)) {

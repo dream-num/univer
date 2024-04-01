@@ -246,7 +246,7 @@ type LocaleTag =
     | 'th'
     | 'tr';
 
-interface ParsedReturnType {
+export interface ParsedReturnType {
     /**
      * The parsed value. For dates, this will be an Excel style serial date unless the nativeDate option is used.
      */

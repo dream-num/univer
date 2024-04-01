@@ -260,11 +260,8 @@ export class DataValidationCustomFormulaService extends Disposable {
 
         newRanges.forEach((range) => {
             Range.foreach(range, (row, col) => {
-                const oldValue = formulaMap.getValue(row, col);
-                if (!oldValue) {
-                    return;
-                }
-                if (oldValue.ruleId !== ruleId) {
+                const oldValue = formulaMap.getValue(row, col) ?? {};
+                if ((oldValue.ruleId !== ruleId)) {
                     const oldRuleFormula = ruleFormulaMap.get(oldValue.ruleId);
                     if (oldRuleFormula?.isTransformable) {
                         deleteFormulaIdList.add(oldValue.formulaId);
@@ -307,7 +304,6 @@ export class DataValidationCustomFormulaService extends Disposable {
         deleteFormulaIdList.forEach((formulaId) => {
             formulaCellMap.delete(formulaId);
         });
-
         this._registerOtherFormulaService.deleteFormula(unitId, subUnitId, Array.from(deleteFormulaIdList.values()));
     }
 

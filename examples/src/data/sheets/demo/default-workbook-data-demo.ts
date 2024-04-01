@@ -102,19 +102,19 @@ const richTextDemo1: IDocumentData = {
 };
 
 const dataValidation = [
-    // {
-    //     uid: 'xxx-1',
-    //     type: DataValidationType.DECIMAL,
-    //     ranges: [{
-    //         startRow: 0,
-    //         endRow: 5,
-    //         startColumn: 0,
-    //         endColumn: 2,
-    //     }],
-    //     operator: DataValidationOperator.GREATER_THAN,
-    //     formula1: '111',
-    //     errorStyle: DataValidationErrorStyle.STOP,
-    // },
+    {
+        uid: 'xxx-1',
+        type: DataValidationType.DECIMAL,
+        ranges: [{
+            startRow: 0,
+            endRow: 5,
+            startColumn: 0,
+            endColumn: 2,
+        }],
+        operator: DataValidationOperator.GREATER_THAN,
+        formula1: '111',
+        errorStyle: DataValidationErrorStyle.STOP,
+    },
     {
         uid: 'xxx-0',
         type: DataValidationType.DATE,
@@ -149,17 +149,17 @@ const dataValidation = [
         }],
         formula1: '1,2,3,hahaha',
     },
-    // {
-    //     uid: 'xxx-4',
-    //     type: DataValidationType.CUSTOM,
-    //     ranges: [{
-    //         startRow: 16,
-    //         endRow: 20,
-    //         startColumn: 0,
-    //         endColumn: 5,
-    //     }],
-    //     formula1: '=ISBLANK(A17)',
-    // },
+    {
+        uid: 'xxx-4',
+        type: DataValidationType.CUSTOM,
+        ranges: [{
+            startRow: 16,
+            endRow: 20,
+            startColumn: 0,
+            endColumn: 5,
+        }],
+        formula1: '=A1',
+    },
     {
         uid: 'xxx-5',
         type: DataValidationType.LIST_MULTIPLE,
@@ -13948,7 +13948,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
             id: 'sheet-0011',
             tabColor: '',
             hidden: 0,
-            rowCount: 1000000,
+            rowCount: 1000,
             columnCount: 20,
             zoomRatio: 1,
             cellData: {

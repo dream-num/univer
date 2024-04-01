@@ -23,7 +23,7 @@ import { BASE_FORMULA_INPUT_NAME } from '../views/formula-input';
 import { TWO_FORMULA_OPERATOR_COUNT } from '../types/const/two-formula-operators';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
 
-function getCellValueNumber(cellValue: CellValue) {
+export function getCellValueNumber(cellValue: CellValue) {
     let str = cellValue;
     if (typeof cellValue === 'string') {
         if (cellValue.startsWith('¥') || cellValue.startsWith('$')) {

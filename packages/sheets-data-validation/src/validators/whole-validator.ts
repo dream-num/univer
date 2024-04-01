@@ -22,6 +22,7 @@ import type { IFormulaValidResult } from '@univerjs/data-validation/validators/b
 import { BASE_FORMULA_INPUT_NAME } from '../views/formula-input';
 import { TWO_FORMULA_OPERATOR_COUNT } from '../types/const/two-formula-operators';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
+import { getCellValueNumber } from './decimal-validator';
 
 export class WholeValidator extends BaseDataValidator<number> {
     private _formulaService = this.injector.get(DataValidationFormulaService);
@@ -50,7 +51,7 @@ export class WholeValidator extends BaseDataValidator<number> {
 
     override async isValidType(cellInfo: IValidatorCellInfo<CellValue>, formula: IFormulaResult, rule: IDataValidationRule) {
         const { value: cellValue } = cellInfo;
-        const num = +cellValue;
+        const num = getCellValueNumber(cellValue);
         return !Number.isNaN(num) && Number.isInteger(num);
     }
 
@@ -58,7 +59,7 @@ export class WholeValidator extends BaseDataValidator<number> {
         const { value: cellValue } = cellInfo;
         return {
             ...cellInfo,
-            value: +cellValue,
+            value: getCellValueNumber(cellValue),
         };
     }
 

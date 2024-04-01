@@ -24,6 +24,7 @@ export * from './models/type';
 export * from './models/conditional-formatting-rule-model';
 export * from './models/conditional-formatting-view-model';
 export * from './utils/getStringFromDataStream';
+export * from './utils/createCfId';
 export * from './utils/isRangesEqual';
 export * from './utils/removeUndefinedAttr';
 export * from './utils/type';

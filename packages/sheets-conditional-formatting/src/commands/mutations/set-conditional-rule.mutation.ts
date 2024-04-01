@@ -25,6 +25,7 @@ import type { IConditionFormattingRule } from '../../models/type';
 export interface ISetConditionalRuleMutationParams {
     unitId: string;
     subUnitId: string;
+    cfId?: string;
     rule: IConditionFormattingRule;
 }
 
@@ -36,8 +37,10 @@ export const SetConditionalRuleMutation: IMutation<ISetConditionalRuleMutationPa
             return false;
         }
         const { unitId, subUnitId, rule } = params;
+        const cfId = params.cfId || params.rule.cfId;
+
         const conditionalFormattingRuleModel = accessor.get(ConditionalFormattingRuleModel);
-        conditionalFormattingRuleModel.setRule(unitId, subUnitId, rule);
+        conditionalFormattingRuleModel.setRule(unitId, subUnitId, rule, cfId);
         return true;
     },
 };
@@ -45,7 +48,7 @@ export const SetConditionalRuleMutation: IMutation<ISetConditionalRuleMutationPa
 export const setConditionalRuleMutationUndoFactory = (accessor: IAccessor, param: ISetConditionalRuleMutationParams) => {
     const conditionalFormattingRuleModel = accessor.get(ConditionalFormattingRuleModel);
     const { unitId, subUnitId } = param;
-    const cfId = param.rule.cfId;
+    const cfId = param.cfId || param.rule.cfId;
     const rule = conditionalFormattingRuleModel.getRule(unitId, subUnitId, cfId);
     if (rule) {
         return [{
@@ -53,8 +56,10 @@ export const setConditionalRuleMutationUndoFactory = (accessor: IAccessor, param
             params: {
                 unitId,
                 subUnitId,
+                cfId,
                 rule: Tools.deepClone(rule),
-            } as ISetConditionalRuleMutationParams },
+            } as ISetConditionalRuleMutationParams,
+        },
         ];
     }
     return [];

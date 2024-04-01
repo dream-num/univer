@@ -41,7 +41,7 @@ export const SetDefinedNameMutation: IMutation<ISetDefinedNameMutationParam> = {
     handler: () => true,
 };
 
-export const RemoveDefinedNameMutation: IMutation<ISetDefinedNameMutationSearchParam> = {
+export const RemoveDefinedNameMutation: IMutation<ISetDefinedNameMutationParam> = {
     id: 'formula.mutation.remove-defined-name',
     type: CommandType.MUTATION,
     handler: () => true,

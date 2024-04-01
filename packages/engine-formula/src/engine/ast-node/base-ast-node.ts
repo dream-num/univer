@@ -34,6 +34,8 @@ export type LambdaPrivacyVarType = Map<string, Nullable<BaseAstNode>>;
 export class BaseAstNode extends Disposable {
     private _children: BaseAstNode[] = [];
 
+    private _definedNames: Array<string> = [];
+
     private _parent: Nullable<BaseAstNode>;
 
     private _valueObject: Nullable<FunctionVariantType>;
@@ -165,6 +167,14 @@ export class BaseAstNode extends Disposable {
         }
 
         return result;
+    }
+
+    hasDefinedName(definedName: string) {
+        return this._definedNames.includes(definedName);
+    }
+
+    setDefinedNames(definedNames: Array<string>) {
+        this._definedNames = definedNames;
     }
 }
 

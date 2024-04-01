@@ -87,6 +87,13 @@ export class AstTreeBuilder extends Disposable {
         this._refOffsetY = refOffsetY;
 
         const node = this._parse(lexerNode, astNode);
+
+        /**
+         * If the lexer node has defined names, it means that the current formula contains a reference to the defined name.
+         */
+        if (lexerNode.hasDefinedNames()) {
+            node?.setDefinedNames(lexerNode.getDefinedNames());
+        }
         return node;
     }
 

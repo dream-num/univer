@@ -519,11 +519,14 @@ export class LexerTreeBuilder extends Disposable {
         injectDefinedName?: (sequenceArray: ISequenceArray[]) => {
             sequenceString: string;
             hasDefinedName: boolean;
-        }
+            definedNames: string[];
+        },
+        simpleCheckDefinedName?: (formulaString: string) => boolean
     ) {
         if (transformSuffix === true) {
             const lexerNode = FormulaLexerNodeCache.get(formulaString);
-            if (lexerNode) {
+            const simpleCheckDefinedNameResult = simpleCheckDefinedName?.(formulaString);
+            if (lexerNode && !simpleCheckDefinedNameResult) {
                 return lexerNode;
             }
         }
@@ -544,12 +547,16 @@ export class LexerTreeBuilder extends Disposable {
 
         let currentSequenceString = '';
 
+        let currentDefinedNames: string[] = [];
+
         if (injectDefinedName) {
-            const { hasDefinedName, sequenceString } = injectDefinedName(sequenceArray);
+            const { hasDefinedName, sequenceString, definedNames } = injectDefinedName(sequenceArray);
 
             currentHasDefinedName = hasDefinedName;
 
             currentSequenceString = sequenceString;
+
+            currentDefinedNames = definedNames;
         }
 
         /**
@@ -581,6 +588,10 @@ export class LexerTreeBuilder extends Disposable {
             }
 
             FormulaLexerNodeCache.set(formulaString, this._currentLexerNode);
+        }
+
+        if (currentHasDefinedName) {
+            this._currentLexerNode.setDefinedNames(currentDefinedNames);
         }
 
         return this._currentLexerNode;

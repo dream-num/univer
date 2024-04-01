@@ -23,7 +23,7 @@ import { CheckMarkSingle, DeleteSingle, IncreaseSingle } from '@univerjs/icons';
 import type { IDefinedNamesServiceParam } from '@univerjs/engine-formula';
 import { IDefinedNamesService, RemoveDefinedNameMutation, serializeRangeWithSheet, SetDefinedNameMutation } from '@univerjs/engine-formula';
 import clsx from 'clsx';
-import { SelectionManagerService } from '@univerjs/sheets';
+import { InsertDefinedNameCommand, RemoveDefinedNameCommand, SelectionManagerService, SetDefinedNameCommand } from '@univerjs/sheets';
 import { Confirm, Tooltip } from '@univerjs/design';
 import styles from './index.module.less';
 import { DefinedNameInput } from './DefinedNameInput';
@@ -72,10 +72,12 @@ export const DefinedNameContainer = () => {
         let id = param.id;
         if (id == null || id.length === 0) {
             id = Tools.generateRandomId(10);
+            commandService.executeCommand(InsertDefinedNameCommand.id, { id, unitId, name, formulaOrRefString, comment, localSheetId, hidden });
+        } else {
+            const oldDefinedName = definedNamesService.getValueById(unitId, id);
+            const newDefinedName = { id, unitId, name, formulaOrRefString, comment, localSheetId, hidden };
+            commandService.executeCommand(SetDefinedNameCommand.id, { unitId, oldDefinedName, newDefinedName });
         }
-        // definedNamesService.registerDefinedName(unitId, { id: Tools.generateRandomId(10), name, formulaOrRefString, comment, localSheetId, hidden });
-
-        commandService.executeCommand(SetDefinedNameMutation.id, { id, unitId, name, formulaOrRefString, comment, localSheetId, hidden });
         setEditState(false);
         setEditorKey(null);
     };
@@ -89,7 +91,8 @@ export const DefinedNameContainer = () => {
     }
 
     function handleDeleteConfirm(id: string) {
-        commandService.executeCommand(RemoveDefinedNameMutation.id, { id, unitId });
+        const item = definedNamesService.getValueById(unitId, id);
+        commandService.executeCommand(RemoveDefinedNameCommand.id, { ...item, unitId });
         setDeleteConformVisible(!deleteConformVisible);
     }
 

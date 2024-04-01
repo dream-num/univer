@@ -109,6 +109,9 @@ import {
 import { SetSelectionsOperation } from '../commands/operations/selection.operation';
 import { SetWorksheetActiveOperation } from '../commands/operations/set-worksheet-active.operation';
 import { EmptyMutation } from '../commands/mutations/empty.mutation';
+import { InsertDefinedNameCommand } from '../commands/commands/insert-defined-name.command';
+import { RemoveDefinedNameCommand } from '../commands/commands/remove-defined-name.command';
+import { SetDefinedNameCommand } from '../commands/commands/set-defined-name.command';
 import { MAX_CELL_PER_SHEET_DEFAULT, MAX_CELL_PER_SHEET_KEY } from './config/config';
 
 export interface IStyleTypeValue<T> {
@@ -214,6 +217,9 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             SetSelectionsOperation,
             RemoveNumfmtMutation,
             EmptyMutation,
+            InsertDefinedNameCommand,
+            RemoveDefinedNameCommand,
+            SetDefinedNameCommand,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
 
         this._configService.setConfig(MAX_CELL_PER_SHEET_KEY, MAX_CELL_PER_SHEET_DEFAULT);

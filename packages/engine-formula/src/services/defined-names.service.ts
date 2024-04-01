@@ -163,6 +163,9 @@ export class DefinedNamesService extends Disposable implements IDefinedNamesServ
     }
 
     hasDefinedName(unitId: string) {
+        if (this._definedNameMap[unitId] == null) {
+            return false;
+        }
         const size = Array.from(Object.values(this._definedNameMap[unitId])).length || 0;
         return size !== 0;
     }

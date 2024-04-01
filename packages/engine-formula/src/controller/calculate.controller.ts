@@ -18,7 +18,7 @@ import type { ICommandInfo, IUnitRange } from '@univerjs/core';
 import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle, Tools } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
-import type { IDirtyUnitFeatureMap, IDirtyUnitOtherFormulaMap, IDirtyUnitSheetNameMap, IFormulaData, INumfmtItemMap } from '../basics/common';
+import type { IDirtyUnitFeatureMap, IDirtyUnitOtherFormulaMap, IDirtyUnitSheetDefinedNameMap, IDirtyUnitSheetNameMap, IFormulaData, INumfmtItemMap } from '../basics/common';
 import type { ISetArrayFormulaDataMutationParams } from '../commands/mutations/set-array-formula-data.mutation';
 import { SetArrayFormulaDataMutation } from '../commands/mutations/set-array-formula-data.mutation';
 import type { ISetFormulaCalculationStartMutation } from '../commands/mutations/set-formula-calculation.mutation';
@@ -71,9 +71,9 @@ export class CalculateController extends Disposable {
                     if (params.forceCalculation === true) {
                         this._calculate(true);
                     } else {
-                        const { dirtyRanges, dirtyNameMap, dirtyUnitFeatureMap, dirtyUnitOtherFormulaMap, numfmtItemMap } = params;
+                        const { dirtyRanges, dirtyNameMap, dirtyDefinedNameMap, dirtyUnitFeatureMap, dirtyUnitOtherFormulaMap, numfmtItemMap } = params;
 
-                        this._calculate(false, dirtyRanges, dirtyNameMap, dirtyUnitFeatureMap, dirtyUnitOtherFormulaMap, numfmtItemMap);
+                        this._calculate(false, dirtyRanges, dirtyNameMap, dirtyDefinedNameMap, dirtyUnitFeatureMap, dirtyUnitOtherFormulaMap, numfmtItemMap);
                     }
                 } else if (command.id === SetArrayFormulaDataMutation.id) {
                     const params = command.params as ISetArrayFormulaDataMutationParams;
@@ -94,6 +94,7 @@ export class CalculateController extends Disposable {
         forceCalculate: boolean = false,
         dirtyRanges: IUnitRange[] = [],
         dirtyNameMap: IDirtyUnitSheetNameMap = {},
+        dirtyDefinedNameMap: IDirtyUnitSheetDefinedNameMap = {},
         dirtyUnitFeatureMap: IDirtyUnitFeatureMap = {},
         dirtyUnitOtherFormulaMap: IDirtyUnitOtherFormulaMap = {},
         numfmtItemMap: INumfmtItemMap = {}
@@ -101,6 +102,7 @@ export class CalculateController extends Disposable {
         if (
             dirtyRanges.length === 0 &&
             Object.keys(dirtyNameMap).length === 0 &&
+            Object.keys(dirtyDefinedNameMap).length === 0 &&
             Object.keys(dirtyUnitFeatureMap).length === 0 &&
             Object.keys(dirtyUnitOtherFormulaMap).length === 0 &&
             forceCalculate === false
@@ -120,6 +122,7 @@ export class CalculateController extends Disposable {
             forceCalculate,
             dirtyRanges,
             dirtyNameMap,
+            dirtyDefinedNameMap,
             dirtyUnitFeatureMap,
             dirtyUnitOtherFormulaMap,
             numfmtItemMap,

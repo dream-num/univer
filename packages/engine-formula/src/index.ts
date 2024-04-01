@@ -28,6 +28,7 @@ export type {
     IUnitSheetNameMap,
     INumfmtItemMap,
     IDirtyUnitOtherFormulaMap,
+    IDirtyUnitSheetDefinedNameMap,
 } from './basics/common';
 export { isInDirtyRange } from './basics/dirty';
 export { ErrorType } from './basics/error-type';
@@ -42,7 +43,7 @@ export {
     SetArrayFormulaDataMutation,
     SetArrayFormulaDataUndoMutationFactory,
 } from './commands/mutations/set-array-formula-data.mutation';
-export { RemoveDefinedNameMutation, SetDefinedNameMutation, SetDefinedNameCurrentMutation } from './commands/mutations/set-defined-name.mutation';
+export { RemoveDefinedNameMutation, SetDefinedNameMutation, SetDefinedNameCurrentMutation, type ISetDefinedNameMutationSearchParam, type ISetDefinedNameMutationParam } from './commands/mutations/set-defined-name.mutation';
 export {
     RemoveFeatureCalculationMutation,
     SetFeatureCalculationMutation,

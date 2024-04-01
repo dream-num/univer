@@ -23,8 +23,8 @@ import {
     ObjectMatrix,
     OnLifecycle,
 } from '@univerjs/core';
-import type { IDirtyUnitSheetNameMap } from '@univerjs/engine-formula';
-import { FormulaDataModel, IActiveDirtyManagerService } from '@univerjs/engine-formula';
+import type { IDirtyUnitSheetDefinedNameMap, IDirtyUnitSheetNameMap, ISetDefinedNameMutationParam, ISetDefinedNameMutationSearchParam } from '@univerjs/engine-formula';
+import { FormulaDataModel, IActiveDirtyManagerService, IDefinedNamesService, RemoveDefinedNameMutation, SetDefinedNameMutation } from '@univerjs/engine-formula';
 import type {
     IDeleteRangeMutationParams,
     IInsertSheetMutationParams,
@@ -54,7 +54,9 @@ export class ActiveDirtyController extends Disposable {
     constructor(
         @IActiveDirtyManagerService private readonly _activeDirtyManagerService: IActiveDirtyManagerService,
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
-        @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel
+        @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel,
+        @IDefinedNamesService private readonly _definedNamesService: IDefinedNamesService
+
     ) {
         super();
 
@@ -164,6 +166,22 @@ export class ActiveDirtyController extends Disposable {
             },
         });
 
+        this._activeDirtyManagerService.register(SetDefinedNameMutation.id, {
+            commandId: SetDefinedNameMutation.id,
+            getDirtyData: (command: ICommandInfo) => {
+                const params = command.params as ISetDefinedNameMutationParam;
+                return { dirtyDefinedNameMap: this._getDefinedNameMutation(params) };
+            },
+        });
+
+        this._activeDirtyManagerService.register(RemoveDefinedNameMutation.id, {
+            commandId: RemoveDefinedNameMutation.id,
+            getDirtyData: (command: ICommandInfo) => {
+                const params = command.params as ISetDefinedNameMutationParam;
+                return { dirtyDefinedNameMap: this._getDefinedNameMutation(params) };
+            },
+        });
+
         /**
          * Changing the name of a sheet triggers an adjustment of the formula references, but does not trigger formula calculation; therefore, this logic has been removed.
          */
@@ -174,6 +192,20 @@ export class ActiveDirtyController extends Disposable {
         //         return { dirtyNameMap: this._getRemoveSheetMutation(params, params.name) };
         //     },
         // });
+    }
+
+    private _getDefinedNameMutation(definedName: ISetDefinedNameMutationParam) {
+        const { unitId, name, formulaOrRefString } = definedName;
+        const result: IDirtyUnitSheetDefinedNameMap = {};
+        if (definedName == null) {
+            return {};
+        }
+
+        result[unitId] = {};
+
+        result[unitId]![name] = formulaOrRefString;
+
+        return result;
     }
 
     private _getSetRangeValuesMutationDirtyRange(params: ISetRangeValuesMutationParams) {

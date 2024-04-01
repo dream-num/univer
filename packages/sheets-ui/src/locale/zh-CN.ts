@@ -506,7 +506,7 @@ const locale = {
         nameDuplicate: '名称重复',
         formulaOrRefStringEmpty: '公式或引用字符串不能为空',
         formulaOrRefStringInvalid: '公式或引用字符串无效',
-        defaultName: '命名',
+        defaultName: 'DefinedName',
         updateButton: '修改',
         deleteButton: '删除',
         deleteConfirmText: '确定删除定义名称？',

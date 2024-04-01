@@ -28,7 +28,7 @@ import {
 import type { IDefinedNameMapItem } from '@univerjs/engine-formula';
 import { IDefinedNamesService } from '@univerjs/engine-formula';
 
-const SHEET_DEFINED_NAME_PLUGIN = 'sheet-defined-name-plugin';
+const SHEET_DEFINED_NAME_PLUGIN = 'SHEET_DEFINED_NAME_PLUGIN';
 
 @OnLifecycle(LifecycleStages.Ready, DefinedNameDataController)
 export class DefinedNameDataController extends Disposable {

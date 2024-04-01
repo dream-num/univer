@@ -166,6 +166,13 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
 
     const typeValueChange = (value: string | number | boolean) => {
         const type = value as string;
+        if (type === 'formula' && formulaOrRefStringValue.substring(0, 1) !== operatorToken.EQUALS) {
+            setUpdateFormulaOrRefStringValue(`${operatorToken.EQUALS}`);
+            setFormulaOrRefStringValue(`${operatorToken.EQUALS}`);
+        } else if (formulaOrRefStringValue.substring(0, 1) === operatorToken.EQUALS) {
+            setUpdateFormulaOrRefStringValue('');
+            setFormulaOrRefStringValue('');
+        }
         setTypeValue(type);
     };
 

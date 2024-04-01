@@ -35,6 +35,7 @@ import {
     functionUniver,
     functionWeb,
     IFunctionService,
+    isReferenceString,
 } from '@univerjs/engine-formula';
 import type { IDisposable } from '@wendellhu/redi';
 import { createIdentifier, Inject } from '@wendellhu/redi';
@@ -105,6 +106,12 @@ export interface IDescriptionService {
      * @param name
      */
     hasDefinedNameDescription(name: string): boolean;
+
+    /**
+     * check if is formula defined name
+     * @param name
+     */
+    isFormulaDefinedName(name: string): boolean;
 }
 
 export const IDescriptionService = createIdentifier<IDescriptionService>('formula-ui.description-service');
@@ -144,7 +151,7 @@ export class DescriptionService implements IDescriptionService, IDisposable {
         searchText = searchText.toLocaleUpperCase();
         functionList.forEach((item) => {
             const { functionName, abstract } = item;
-            if (functionName.indexOf(searchText) > -1) {
+            if (functionName.toLocaleUpperCase().indexOf(searchText) > -1) {
                 searchList.push({ name: functionName, desc: abstract });
             }
         });
@@ -158,7 +165,7 @@ export class DescriptionService implements IDescriptionService, IDisposable {
         searchText = searchText.toLocaleUpperCase();
         functionList.forEach((item) => {
             const { functionName, abstract } = item;
-            if (functionName.indexOf(searchText) === 0) {
+            if (functionName.toLocaleUpperCase().indexOf(searchText) === 0) {
                 searchList.push({ name: functionName, desc: abstract });
             }
         });
@@ -196,6 +203,18 @@ export class DescriptionService implements IDescriptionService, IDisposable {
 
     hasDefinedNameDescription(name: string) {
         return this._descriptions.some((item) => item.functionName === name && item.functionType === FunctionType.definedName);
+    }
+
+    isFormulaDefinedName(name: string) {
+        const items = this._descriptions.filter((item) => item.functionName === name && item.functionType === FunctionType.definedName);
+        if (items.length === 0) {
+            return false;
+        }
+
+        const token = items[0].description;
+        return !token.split(',').every((refString) => {
+            return isReferenceString(refString.trim());
+        });
     }
 
     private _initialize() {

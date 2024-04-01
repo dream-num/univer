@@ -30,6 +30,7 @@ import { SheetPermissionService } from './services/permission';
 import { RefRangeService } from './services/ref-range/ref-range.service';
 import { SelectionManagerService } from './services/selection-manager.service';
 import { SheetInterceptorService } from './services/sheet-interceptor/sheet-interceptor.service';
+import { DefinedNameDataController } from './controllers/defined-name-data.controller';
 
 const PLUGIN_NAME = 'sheet';
 
@@ -73,6 +74,7 @@ export class UniverSheetsPlugin extends Plugin {
             // controllers
             [BasicWorksheetController],
             [MergeCellController],
+            [DefinedNameDataController],
         ];
 
         if (!this._config?.notExecuteFormula) {

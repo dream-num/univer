@@ -15,11 +15,11 @@
  */
 
 import type { IUnitRange, Nullable } from '@univerjs/core';
-import { Disposable, IUniverInstanceService } from '@univerjs/core';
+import { Disposable } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
 import { Subject } from 'rxjs';
-import { serializeRange, serializeRangeToRefString, serializeRangeWithSheet } from '../engine/utils/reference';
+import { serializeRange } from '../engine/utils/reference';
 
 export interface IDefinedNamesServiceParam {
     id: string;
@@ -95,7 +95,7 @@ export class DefinedNamesService extends Disposable implements IDefinedNamesServ
 
     constructor() {
         super();
-        this.registerDefinedName('workbook-01', { id: 'test1', name: 'name-01', formulaOrRefString: '=sum(A1:B10)', comment: 'this is comment', localSheetId: 'sheet-0011', hidden: false });
+        // this.registerDefinedName('workbook-01', { id: 'test1', name: 'name-01', formulaOrRefString: '=sum(A1:B10)', comment: 'this is comment', localSheetId: 'sheet-0011', hidden: false });
     }
 
     override dispose(): void {

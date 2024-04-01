@@ -98,7 +98,7 @@ export const DefinedNameContainer = () => {
     };
 
     const getInsertDefinedName = () => {
-        const count = definedNames.length;
+        const count = definedNames.length + 1;
         const name = localeService.t('definedName.defaultName') + count;
         if (definedNamesService.getValueByName(unitId, name) == null) {
             return name;
@@ -177,10 +177,10 @@ export const DefinedNameContainer = () => {
                                     <DeleteSingle />
                                 </div>
                             </Tooltip>
-                            <Confirm visible={deleteConformVisible} onClose={handleDeleteClose} onConfirm={() => { handleDeleteConfirm(definedName.id); }}>
-                                {localeService.t('definedName.deleteConfirmText')}
-                            </Confirm>
                         </div>
+                        <Confirm visible={deleteConformVisible} onClose={handleDeleteClose} onConfirm={() => { handleDeleteConfirm(definedName.id); }}>
+                            {localeService.t('definedName.deleteConfirmText')}
+                        </Confirm>
                         <DefinedNameInput
                             confirm={insertConfirm}
                             cancel={closeInput}

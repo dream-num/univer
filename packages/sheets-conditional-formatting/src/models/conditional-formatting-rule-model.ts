@@ -17,7 +17,7 @@
 import { Inject, Injector } from '@wendellhu/redi';
 import { Range } from '@univerjs/core';
 import { Subject } from 'rxjs';
-import { createCfId } from '../utils/createCfId';
+import { createCfId } from '../utils/create-cf-id';
 import { ConditionalFormattingService } from '../services/conditional-formatting.service';
 import type { IAnchor } from '../utils/anchor';
 import { findIndexByAnchor, moveByAnchor } from '../utils/anchor';

@@ -15,7 +15,7 @@
  */
 
 import type { IRange, ISheetDataValidationRule } from '@univerjs/core';
-import { DataValidationType, Disposable, DisposableCollection, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle, Range, Rectangle, toDisposable } from '@univerjs/core';
+import { DataValidationType, Disposable, DisposableCollection, ICommandService, isRangesEqual, IUniverInstanceService, LifecycleStages, OnLifecycle, Range, Rectangle, toDisposable } from '@univerjs/core';
 import type { EffectRefRangeParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { handleDefaultRangeChangeWithEffectRefCommands, handleOtherDefaultRangeChangeWithEffectRefCommands, RefRangeService, SetRangeValuesMutation } from '@univerjs/sheets';
@@ -27,7 +27,6 @@ import { DataValidationModel, RemoveDataValidationMutation, UpdateDataValidation
 import { removeDataValidationUndoFactory } from '@univerjs/data-validation/commands/commands/data-validation.command.js';
 import { FormulaRefRangeService } from '@univerjs/sheets-formula';
 import { deserializeRangeWithSheet, isReferenceString, serializeRangeWithSpreadsheet } from '@univerjs/engine-formula';
-import { isRangesEqual } from '../utils/isRangesEqual';
 import { DataValidationCustomFormulaService } from '../services/dv-custom-formula.service';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
 import { DataValidationCacheService } from '../services/dv-cache.service';

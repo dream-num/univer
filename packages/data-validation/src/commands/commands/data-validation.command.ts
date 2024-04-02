@@ -17,16 +17,15 @@
 import { CommandType, ICommandService, IUndoRedoService } from '@univerjs/core';
 import type { ICommand, IDataValidationRule, IDataValidationRuleBase, IDataValidationRuleOptions, IMutationInfo, IRange, ISheetDataValidationRule } from '@univerjs/core';
 import type { Injector } from '@wendellhu/redi';
+import type { ISheetCommandSharedParams } from '@univerjs/sheets';
 import type { IAddDataValidationMutationParams, IRemoveDataValidationMutationParams, IUpdateDataValidationMutationParams } from '../mutations/data-validation.mutation';
 import { AddDataValidationMutation, RemoveDataValidationMutation, UpdateDataValidationMutation } from '../mutations/data-validation.mutation';
-import { UpdateRuleType } from '../../types';
 import { DataValidatorRegistryService } from '../../services/data-validator-registry.service';
 import { DataValidationModel } from '../../models/data-validation-model';
 import { getRuleOptions, getRuleSetting } from '../../common/util';
+import { UpdateRuleType } from '../../types/enum/update-rule-type';
 
-export interface IAddDataValidationCommandParams {
-    unitId: string;
-    subUnitId: string;
+export interface IAddDataValidationCommandParams extends ISheetCommandSharedParams {
     rule: Omit<IDataValidationRule, 'ranges'> & {
         range: IRange;
     };
@@ -74,10 +73,8 @@ export const AddDataValidationCommand: ICommand<IAddDataValidationCommandParams>
     },
 };
 
-export interface IRemoveDataValidationCommandParams {
+export interface IRemoveDataValidationCommandParams extends ISheetCommandSharedParams {
     ruleId: string;
-    unitId: string;
-    subUnitId: string;
 }
 
 export const removeDataValidationUndoFactory = (accessor: Injector, redoParams: IRemoveDataValidationMutationParams) => {
@@ -149,9 +146,7 @@ export const RemoveDataValidationCommand: ICommand<IRemoveDataValidationCommandP
     },
 };
 
-export interface IUpdateDataValidationOptionsCommandParams {
-    unitId: string;
-    subUnitId: string;
+export interface IUpdateDataValidationOptionsCommandParams extends ISheetCommandSharedParams {
     ruleId: string;
     options: IDataValidationRuleOptions;
 }
@@ -213,9 +208,7 @@ export const UpdateDataValidationOptionsCommand: ICommand<IUpdateDataValidationO
     },
 };
 
-export interface IUpdateDataValidationSettingCommandParams {
-    unitId: string;
-    subUnitId: string;
+export interface IUpdateDataValidationSettingCommandParams extends ISheetCommandSharedParams {
     ruleId: string;
     setting: IDataValidationRuleBase;
 }
@@ -287,9 +280,7 @@ export const UpdateDataValidationSettingCommand: ICommand<IUpdateDataValidationS
     },
 };
 
-export interface IRemoveAllDataValidationCommandParams {
-    unitId: string;
-    subUnitId: string;
+export interface IRemoveAllDataValidationCommandParams extends ISheetCommandSharedParams {
 }
 
 export const RemoveAllDataValidationCommand: ICommand<IRemoveAllDataValidationCommandParams> = {

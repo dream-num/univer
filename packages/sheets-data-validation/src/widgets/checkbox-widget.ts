@@ -25,7 +25,7 @@ import { Inject } from '@wendellhu/redi';
 import { CHECKBOX_FORMULA_1, CHECKBOX_FORMULA_2 } from '../validators/checkbox-validator';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
 import { getFormulaResult } from '../utils/formula';
-import { getCellValueOrigin } from '../utils/getCellDataOrigin';
+import { getCellValueOrigin } from '../utils/get-cell-data-origin';
 
 const MARGIN_H = 6;
 

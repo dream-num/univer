@@ -19,7 +19,7 @@ import type { ICellRenderContext } from '@univerjs/core';
 import { getFontStyleString, type IMouseEvent, type IPointerEvent, type Spreadsheet, type SpreadsheetSkeleton, type UniverRenderingContext2D } from '@univerjs/engine-render';
 import type { IBaseDataValidationWidget } from '@univerjs/data-validation';
 import type { ListMultipleValidator } from '../validators/list-multiple-validator';
-import { getCellValueOrigin } from '../utils/getCellDataOrigin';
+import { getCellValueOrigin } from '../utils/get-cell-data-origin';
 import type { IShowDataValidationDropdownParams } from '../commands/operations/data-validation.operation';
 import { ShowDataValidationDropdown } from '../commands/operations/data-validation.operation';
 import type { IDropdownInfo } from './dropdown-widget';

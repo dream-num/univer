@@ -15,7 +15,7 @@
  */
 
 import type { DataValidationOperator, IDataValidationRuleBase, IDataValidationRuleOptions, IExecutionOptions, ISheetDataValidationRule, IUnitRange } from '@univerjs/core';
-import { DataValidationType, debounce, ICommandService, isValidRange, LocaleService, RedoCommand, shallowEqual, UndoCommand } from '@univerjs/core';
+import { DataValidationType, debounce, ICommandService, isUnitRangesEqual, isValidRange, LocaleService, RedoCommand, shallowEqual, UndoCommand } from '@univerjs/core';
 import type { IUpdateDataValidationSettingCommandParams } from '@univerjs/data-validation';
 import { DataValidationModel, DataValidatorRegistryScope, DataValidatorRegistryService, RemoveDataValidationCommand, UpdateDataValidationOptionsCommand, UpdateDataValidationSettingCommand } from '@univerjs/data-validation';
 import { TWO_FORMULA_OPERATOR_COUNT } from '@univerjs/data-validation/types/const/two-formula-operators.js';
@@ -29,7 +29,6 @@ import type { IUpdateSheetDataValidationRangeCommandParams } from '../../command
 import { UpdateSheetDataValidationRangeCommand } from '../../commands/commands/data-validation.command';
 import { DataValidationOptions } from '../options';
 import { DataValidationPanelService } from '../../services/data-validation-panel.service';
-import { isUnitRangesEqual } from '../../utils/isRangesEqual';
 import styles from './index.module.less';
 
 // debounce execute commands, for better redo-undo experience

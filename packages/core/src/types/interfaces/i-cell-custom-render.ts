@@ -29,6 +29,9 @@ export interface ICellRenderContext {
     col: number;
 }
 
+/**
+ * @debt This shouldn't exist in core package.
+ */
 export interface ICellCustomRender {
     drawWith(ctx: CanvasRenderingContext2D, info: ICellRenderContext, skeleton: any, spreadsheets: any): void;
     zIndex?: number;

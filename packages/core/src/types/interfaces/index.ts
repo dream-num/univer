@@ -31,5 +31,3 @@ export * from './i-univer-data';
 export * from './i-workbook-data';
 export * from './i-worksheet-data';
 export * from './i-worksheet-order-data';
-export * from './i-data-validation';
-export * from './i-cell-custom-render';

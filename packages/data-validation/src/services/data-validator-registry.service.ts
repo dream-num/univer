@@ -31,7 +31,6 @@ export class DataValidatorRegistryService {
     private _validatorMap = new Map<string, BaseDataValidator>();
 
     private _validatorsChange$ = new BehaviorSubject<void>(undefined);
-
     validatorsChange$ = this._validatorsChange$.asObservable();
 
     private _addValidatorToScope(validator: BaseDataValidator, scope: string) {

@@ -16,7 +16,7 @@
 
 import { Range } from '@univerjs/core';
 import type { ICellData, IUnitRangeName, IUniverInstanceService, Nullable } from '@univerjs/core';
-import { getCellValueOrigin } from '../utils/getCellDataOrigin';
+import { getCellValueOrigin } from '../utils/get-cell-data-origin';
 
 export function getSheetRangeValueSet(grid: IUnitRangeName, univerInstanceService: IUniverInstanceService, currUnitId: string, currSubUnitId: string) {
     const set = new Set<string>();

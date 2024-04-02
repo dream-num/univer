@@ -94,7 +94,7 @@ export class DataValidationDropdownManagerService extends Disposable {
                     this.hideDropdown();
                 },
                 offset: [0, 3],
-                excludeOutSide: [currentRender?.engine.getCanvasElement()].filter(Boolean) as HTMLElement[],
+                excludeOutside: [currentRender?.engine.getCanvasElement()].filter(Boolean) as HTMLElement[],
             }
         ));
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { IUniverInstanceService, ObjectMatrix, Range } from '@univerjs/core';
+import { ObjectMatrix, Range } from '@univerjs/core';
 import type { CellValue, DataValidationStatus, IRange, ISheetDataValidationRule, Nullable } from '@univerjs/core';
 
 export interface IDataValidationResCache {
@@ -26,10 +26,6 @@ export interface IDataValidationResCache {
 
 export class DataValidationCacheService {
     private _cacheMatrix: Map<string, Map<string, ObjectMatrix<Nullable<IDataValidationResCache>>>> = new Map();
-
-    constructor(
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
-    ) {}
 
     private _ensureCache(unitId: string, subUnitId: string) {
         let unitMap = this._cacheMatrix.get(unitId);

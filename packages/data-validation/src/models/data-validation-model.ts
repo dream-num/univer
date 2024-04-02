@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { type CellValue, type DataValidationStatus, type IDataValidationRule, ILogService, type Nullable } from '@univerjs/core';
+import { type CellValue, type DataValidationStatus, Disposable, type IDataValidationRule, ILogService, type Nullable } from '@univerjs/core';
 import { debounceTime, Subject } from 'rxjs';
 import type { IUpdateRulePayload } from '../types/interfaces/i-update-rule-payload';
 import type { DataValidationManager } from './data-validation-manager';
@@ -36,7 +36,7 @@ export interface IValidStatusChange {
     status: DataValidationStatus;
 }
 
-export class DataValidationModel<T extends IDataValidationRule = IDataValidationRule> {
+export class DataValidationModel<T extends IDataValidationRule = IDataValidationRule> extends Disposable {
     private readonly _model = new Map<string, Map<string, DataValidationManager<T>>>();
     private _managerCreator: ManagerCreator<T>;
     private readonly _ruleChange$ = new Subject<IRuleChange<T>>();
@@ -48,7 +48,16 @@ export class DataValidationModel<T extends IDataValidationRule = IDataValidation
 
     constructor(
         @ILogService private readonly _logService: ILogService
-    ) {}
+    ) {
+        super();
+
+        this.disposeWithMe({
+            dispose: () => {
+                this._ruleChange$.complete();
+                this._validStatusChange$.complete();
+            },
+        });
+    }
 
     setManagerCreator(creator: (unitId: string, subUnitId: string) => DataValidationManager<T>) {
         this._managerCreator = creator;

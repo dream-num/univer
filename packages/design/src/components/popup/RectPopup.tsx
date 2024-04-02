@@ -37,7 +37,7 @@ export interface IRectPopupProps {
 
     onClickOutside?: (e: MouseEvent) => void;
 
-    excludeOutSide?: HTMLElement[];
+    excludeOutside?: HTMLElement[];
 }
 
 export interface IPopupLayoutInfo {
@@ -75,7 +75,7 @@ const calcPopupPosition = (layout: IPopupLayoutInfo) => {
 };
 
 function RectPopup(props: IRectPopupProps) {
-    const { children, anchorRect, direction = 'vertical', onClickOutside, excludeOutSide } = props;
+    const { children, anchorRect, direction = 'vertical', onClickOutside, excludeOutside } = props;
     const nodeRef = useRef(null);
     const clickOtherFn = useEvent(onClickOutside ?? (() => {}));
 
@@ -111,7 +111,7 @@ function RectPopup(props: IRectPopupProps) {
 
     useEffect(() => {
         const handleClick = (e: MouseEvent) => {
-            if (excludeOutSide && (excludeOutSide.indexOf(e.target as any) > -1)) {
+            if (excludeOutside && (excludeOutside.indexOf(e.target as any) > -1)) {
                 return;
             }
             if (e.clientX <= anchorRect.right && e.clientX >= anchorRect.left && e.clientY <= anchorRect.bottom && e.clientY >= anchorRect.top) {
@@ -125,7 +125,7 @@ function RectPopup(props: IRectPopupProps) {
         return () => {
             window.removeEventListener('click', handleClick);
         };
-    }, [anchorRect.bottom, anchorRect.left, anchorRect.right, anchorRect.top, clickOtherFn, excludeOutSide]);
+    }, [anchorRect.bottom, anchorRect.left, anchorRect.right, anchorRect.top, clickOtherFn, excludeOutside]);
 
     return (
         <section

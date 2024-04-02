@@ -15,10 +15,9 @@
  */
 
 import { DataValidationStatus, Disposable, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
-import { CellAlertManagerService, CellAlertType, HoverManagerService, IEditorBridgeService } from '@univerjs/sheets-ui';
+import { CellAlertManagerService, CellAlertType, HoverManagerService } from '@univerjs/sheets-ui';
 import { Inject } from '@wendellhu/redi';
 import { SheetDataValidationService } from '../services/dv.service';
-import { DataValidationDropdownManagerService } from '../services/dropdown-manager.service';
 
 @OnLifecycle(LifecycleStages.Rendered, DataValidationAlertController)
 export class DataValidationAlertController extends Disposable {
@@ -27,8 +26,6 @@ export class DataValidationAlertController extends Disposable {
         @Inject(CellAlertManagerService) private readonly _cellAlertManagerService: CellAlertManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(SheetDataValidationService) private readonly _sheetDataValidationService: SheetDataValidationService,
-        @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
-        @Inject(DataValidationDropdownManagerService) private readonly _dropdownManagerService: DataValidationDropdownManagerService,
         @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
         super();

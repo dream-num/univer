@@ -22,7 +22,7 @@ import { IDialogService } from '@univerjs/ui';
 import React from 'react';
 import { Button } from '@univerjs/design';
 import type { SheetDataValidationManager } from '../models/sheet-data-validation-manager';
-import { getCellValueOrigin } from '../utils/getCellDataOrigin';
+import { getCellValueOrigin } from '../utils/get-cell-data-origin';
 
 @OnLifecycle(LifecycleStages.Ready, DataValidationRejectInputController)
 export class DataValidationRejectInputController extends Disposable {

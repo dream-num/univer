@@ -22,7 +22,7 @@ import { SetRangeValuesCommand } from '@univerjs/sheets';
 import dayjs from 'dayjs';
 import type { IDropdownComponentProps } from '../../services/dropdown-manager.service';
 import type { DateValidator } from '../../validators';
-import { getCellValueOrigin } from '../../utils/getCellDataOrigin';
+import { getCellValueOrigin } from '../../utils/get-cell-data-origin';
 import styles from './index.module.less';
 
 export function DateDropdown(props: IDropdownComponentProps) {

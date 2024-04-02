@@ -20,7 +20,7 @@ import { Documents, DocumentSkeleton, DocumentViewModel, getDocsSkeletonPageSize
 import { Inject } from '@wendellhu/redi';
 import { DataValidationModel, DataValidatorRegistryService, type IBaseDataValidationWidget } from '@univerjs/data-validation';
 import { DataValidationRenderMode } from '@univerjs/core/types/enum/data-validation-render-mode.js';
-import { getCellValueOrigin } from '../utils/getCellDataOrigin';
+import { getCellValueOrigin } from '../utils/get-cell-data-origin';
 import { type IShowDataValidationDropdownParams, ShowDataValidationDropdown } from '../commands/operations/data-validation.operation';
 import { DROP_DOWN_DEFAULT_COLOR } from '../common/const';
 import type { ListValidator } from '../validators';

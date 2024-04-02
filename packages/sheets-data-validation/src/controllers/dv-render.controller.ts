@@ -26,7 +26,7 @@ import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { DataValidationRenderMode } from '@univerjs/core/types/enum/data-validation-render-mode.js';
 import { DataValidationPanel, DATE_DROPDOWN_KEY, DateDropdown, LIST_DROPDOWN_KEY, ListDropDown } from '../views';
 import { FORMULA_INPUTS } from '../views/formula-input';
-import { getCellValueOrigin } from '../utils/getCellDataOrigin';
+import { getCellValueOrigin } from '../utils/get-cell-data-origin';
 import type { CheckboxValidator, ListValidator } from '../validators';
 import type { SheetDataValidationManager } from '../models/sheet-data-validation-manager';
 import { CellDropdown, DROP_DOWN_KEY } from '../views/drop-down';

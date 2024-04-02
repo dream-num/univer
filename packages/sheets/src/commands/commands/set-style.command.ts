@@ -67,7 +67,7 @@ export const SetStyleCommand: ICommand<ISetStyleCommandParams<unknown>> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.set-style',
 
-    handler: async <T>(accessor: IAccessor, params: ISetStyleCommandParams<T>) => {
+    handler: async <T> (accessor: IAccessor, params: ISetStyleCommandParams<T>) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
         const {
@@ -466,7 +466,7 @@ export const ResetBackgroundColorCommand: ICommand = {
     },
 };
 
-export interface ISetVerticalTextAlignCommandParams {
+export interface ISetVerticalTextAlignCommandParams extends ISetStyleCommonParams {
     value: VerticalAlign;
 }
 
@@ -480,6 +480,9 @@ export const SetVerticalTextAlignCommand: ICommand<ISetVerticalTextAlignCommandP
 
         const commandService = accessor.get(ICommandService);
         const setStyleParams: ISetStyleCommandParams<VerticalAlign> = {
+            unitId: params.unitId,
+            subUnitId: params.subUnitId,
+            range: params.range,
             style: {
                 type: 'vt',
                 value: params.value,
@@ -490,7 +493,7 @@ export const SetVerticalTextAlignCommand: ICommand<ISetVerticalTextAlignCommandP
     },
 };
 
-export interface ISetHorizontalTextAlignCommandParams {
+export interface ISetHorizontalTextAlignCommandParams extends ISetStyleCommonParams {
     value: HorizontalAlign;
 }
 
@@ -504,6 +507,9 @@ export const SetHorizontalTextAlignCommand: ICommand<ISetHorizontalTextAlignComm
 
         const commandService = accessor.get(ICommandService);
         const setStyleParams: ISetStyleCommandParams<HorizontalAlign> = {
+            unitId: params.unitId,
+            subUnitId: params.subUnitId,
+            range: params.range,
             style: {
                 type: 'ht',
                 value: params.value,

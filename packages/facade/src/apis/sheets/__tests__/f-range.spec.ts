@@ -15,8 +15,8 @@
  */
 
 import type { ICellData, IStyleData, Nullable } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService } from '@univerjs/core';
-import { SetRangeValuesCommand, SetRangeValuesMutation, SetStyleCommand } from '@univerjs/sheets';
+import { HorizontalAlign, ICommandService, IUniverInstanceService, VerticalAlign } from '@univerjs/core';
+import { SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetStyleCommand, SetVerticalTextAlignCommand } from '@univerjs/sheets';
 import type { Injector } from '@wendellhu/redi';
 import { beforeEach, describe, expect, it } from 'vitest';
 
@@ -49,6 +49,8 @@ describe('Test FRange', () => {
         commandService.registerCommand(SetRangeValuesCommand);
         commandService.registerCommand(SetRangeValuesMutation);
         commandService.registerCommand(SetStyleCommand);
+        commandService.registerCommand(SetVerticalTextAlignCommand);
+        commandService.registerCommand(SetHorizontalTextAlignCommand);
 
         getValueByPosition = (
             startRow: number,
@@ -450,5 +452,17 @@ describe('Test FRange', () => {
         expect(getStyleByPosition(0, 0, 0, 0)?.ff).toBe(undefined);
         expect(getStyleByPosition(0, 0, 0, 0)?.fs).toBe(undefined);
         expect(getStyleByPosition(0, 0, 0, 0)?.cl).toBe(undefined);
+    });
+
+    it('Range set range vertical and Horizontal', async () => {
+        const activeSheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+
+        const range = activeSheet?.getRange(0, 0, 10, 10);
+
+        await range!.setVerticalAlignment('middle');
+        await range!.setHorizontalAlignment('center');
+
+        expect(getStyleByPosition(0, 0, 0, 0)?.ht).toBe(HorizontalAlign.CENTER);
+        expect(getStyleByPosition(0, 0, 0, 0)?.vt).toBe(VerticalAlign.MIDDLE);
     });
 });

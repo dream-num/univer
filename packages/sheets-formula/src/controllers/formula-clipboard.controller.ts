@@ -17,6 +17,7 @@
 import type { ICellData, IMutationInfo, IRange } from '@univerjs/core';
 import {
     Disposable,
+    isFormulaId,
     isFormulaString,
     IUniverInstanceService,
     LifecycleStages,
@@ -143,6 +144,7 @@ export function getSetCellFormulaMutations(
 
     matrix.forValue((row, col, value) => {
         const originalFormula = value.f || '';
+        const originalFormulaId = value.si || '';
 
         let valueObject: ICellDataWithSpanInfo = {};
         // Paste the formula only, you also need to process some regular values
@@ -150,7 +152,17 @@ export function getSetCellFormulaMutations(
             valueObject = Tools.deepClone(value);
         }
 
-        if (isFormulaString(originalFormula) && copyRowLength && copyColumnLength) {
+        if (!copyRowLength || !copyColumnLength) {
+            return;
+        }
+
+        // Directly reuse when there is a formula id
+        if (isFormulaId(originalFormulaId)) {
+            valueObject.si = originalFormulaId;
+            valueObject.f = null;
+            valueObject.v = null;
+            valueObject.p = null;
+        } else if (isFormulaString(originalFormula)) {
             const rowIndex = row % copyRowLength;
             const colIndex = col % copyColumnLength;
 

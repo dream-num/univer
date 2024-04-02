@@ -18,10 +18,10 @@ import React, { useEffect, useState } from 'react';
 
 import { RangeSelector, TextEditor } from '@univerjs/ui';
 import type { IUnitRange, Nullable } from '@univerjs/core';
-import { IUniverInstanceService, LocaleService } from '@univerjs/core';
+import { AbsoluteRefType, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { Button, Input, Radio, RadioGroup, Select } from '@univerjs/design';
-import { IDefinedNamesService, type IDefinedNamesServiceParam, IFunctionService, operatorToken, serializeRangeToRefString } from '@univerjs/engine-formula';
+import { IDefinedNamesService, type IDefinedNamesServiceParam, IFunctionService, LexerTreeBuilder, operatorToken, serializeRangeToRefString } from '@univerjs/engine-formula';
 import { ErrorSingle } from '@univerjs/icons';
 import styles from './index.module.less';
 import { SCOPE_WORKBOOK_VALUE } from './component-name';
@@ -59,6 +59,7 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
     const localeService = useDependency(LocaleService);
     const definedNamesService = useDependency(IDefinedNamesService);
     const functionService = useDependency(IFunctionService);
+    const lexerTreeBuilder = useDependency(LexerTreeBuilder);
 
     if (workbook == null) {
         return;
@@ -158,7 +159,7 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
         confirm && confirm({
             id: id || '',
             name: nameValue,
-            formulaOrRefString: updateFormulaOrRefStringValue,
+            formulaOrRefString: lexerTreeBuilder.convertRefersToAbsolute(updateFormulaOrRefStringValue, AbsoluteRefType.ALL, AbsoluteRefType.ALL),
             comment: commentValue,
             localSheetId: localSheetIdValue,
         });

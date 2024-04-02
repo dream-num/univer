@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
+import type { AbsoluteRefType, Nullable } from '@univerjs/core';
 import { Disposable, isValidRange, Rectangle, Tools } from '@univerjs/core';
 
 import { FormulaAstLRU } from '../../basics/cache-lru';
@@ -273,6 +273,70 @@ export class LexerTreeBuilder extends Disposable {
         }
 
         return bracketCount;
+    }
+
+    convertRefersToAbsolute(formulaString: string, startAbsoluteRefType: AbsoluteRefType, endAbsoluteRefType: AbsoluteRefType) {
+        const nodes = this.sequenceNodesBuilder(formulaString);
+        if (nodes == null) {
+            return formulaString;
+        }
+
+        let prefixToken = '';
+        if (formulaString.substring(0, 1) === operatorToken.EQUALS) {
+            prefixToken = operatorToken.EQUALS;
+        }
+
+        for (let i = 0, len = nodes.length; i < len; i++) {
+            const node = nodes[i];
+            if (typeof node === 'string') {
+                continue;
+            }
+
+            if (node.nodeType === sequenceNodeType.REFERENCE) {
+                const { token, endIndex } = node;
+                const sequenceGrid = deserializeRangeWithSheet(token);
+                if (sequenceGrid == null) {
+                    continue;
+                }
+
+                const { range, sheetName, unitId } = sequenceGrid;
+
+                const newRange = {
+                    ...range,
+                    startAbsoluteRefType,
+                    endAbsoluteRefType,
+                };
+
+                const newToken = serializeRangeToRefString({
+                    range: newRange,
+                    unitId,
+                    sheetName,
+                });
+
+                const minusCount = newToken.length - token.length;
+
+                nodes[i] = {
+                    ...node,
+                    token: newToken,
+                    endIndex: endIndex + minusCount,
+                };
+
+                /**
+                 * Adjust the start and end indexes of the subsequent nodes.
+                 */
+                for (let j = i + 1; j < len; j++) {
+                    const nextNode = nodes[j];
+                    if (typeof nextNode === 'string') {
+                        continue;
+                    }
+
+                    nextNode.startIndex += minusCount;
+                    nextNode.endIndex += minusCount;
+                }
+            }
+        }
+
+        return `${prefixToken}${generateStringWithSequence(nodes)}`;
     }
 
     sequenceNodesBuilder(formulaString: string) {

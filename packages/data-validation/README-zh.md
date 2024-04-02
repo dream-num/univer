@@ -12,7 +12,11 @@
 ### 安装
 
 ```shell
-npm i @univerjs/data-validation
+# 使用 npm
+npm install @univerjs/data-validation
+
+# 使用 pnpm
+pnpm add @univerjs/data-validation
 ```
 
 ### 注册插件

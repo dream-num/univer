@@ -17,6 +17,7 @@
 import type { IWorkbookData } from '@univerjs/core';
 import { ICommandService, LocaleType } from '@univerjs/core';
 import { SetFrozenMutation, SetSelectionsOperation } from '@univerjs/sheets';
+// FIXME: should not import from the inside of the package
 import { createCommandTestBed } from '@univerjs/sheets/commands/commands/__tests__/create-command-test-bed.js';
 
 import { ScrollManagerService } from '../../../services/scroll-manager.service';

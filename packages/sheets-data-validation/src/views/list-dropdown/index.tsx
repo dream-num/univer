@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DataValidationType, ICommandService, LocaleService } from '@univerjs/core';
+import { DataValidationRenderMode, DataValidationType, ICommandService, LocaleService } from '@univerjs/core';
 import type { ISetRangeValuesCommandParams } from '@univerjs/sheets';
 import { SetRangeValuesCommand } from '@univerjs/sheets';
 import { useDependency } from '@wendellhu/redi/react-bindings';
@@ -23,7 +23,6 @@ import { CheckMarkSingle } from '@univerjs/icons';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { KeyCode } from '@univerjs/ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
-import { DataValidationRenderMode } from '@univerjs/core/types/enum/data-validation-render-mode.js';
 import { RectPopup } from '@univerjs/design';
 import type { ListMultipleValidator } from '../../validators/list-multiple-validator';
 import { deserializeListOptions, getDataValidationCellValue, serializeListOptions } from '../../validators/util';

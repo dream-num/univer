@@ -19,7 +19,7 @@ import { Disposable, LifecycleStages, ObjectMatrix, OnLifecycle, Range, Rectangl
 import { COPY_TYPE, getRepeatRange, ISheetClipboardService, PREDEFINED_HOOK_NAME } from '@univerjs/sheets-ui';
 import { Inject } from '@wendellhu/redi';
 import { DataValidationModel } from '@univerjs/data-validation';
-import { SPECIAL_PASTE_FORMULA } from '@univerjs/sheets-formula/commands/commands/formula-clipboard.command.js';
+import { SPECIAL_PASTE_FORMULA } from '@univerjs/sheets-formula';
 import type { SheetDataValidationManager } from '../models/sheet-data-validation-manager';
 import { DATA_VALIDATION_PLUGIN_NAME } from '../common/const';
 import { getDataValidationDiffMutations } from '../commands/commands/data-validation.command';

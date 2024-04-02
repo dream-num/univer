@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export default {
+const locale = {
     dataValidation: {
         title: '数据验证',
         validFail: {
@@ -112,8 +112,8 @@ export default {
             name: '值必须是列表中的值',
             error: '输入必须在指定的范围内',
             emptyError: '请输入一个值',
-            strPlaceholder: '请输入选项，选项间通过“回车换行”或“英文逗号(,)”隔开',
-            refPlaceholder: '引用单元格内容作为选项,如:\'Sheet1\'!A100',
+            // strPlaceholder: '请输入选项，选项间通过“回车换行”或“英文逗号(,)”隔开',
+            // refPlaceholder: '引用单元格内容作为选项,如:\'Sheet1\'!A100',
             add: '添加选项',
             dropdown: '单选',
         },
@@ -140,6 +140,7 @@ export default {
         custom: {
             title: '自定义公式',
             error: '此单元格的内容违反了验证规则',
+            validFail: '请输入合法的公式',
         },
         alert: {
             title: '提示',
@@ -156,3 +157,5 @@ export default {
         },
     },
 };
+
+export default locale;

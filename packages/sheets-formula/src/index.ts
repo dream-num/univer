@@ -26,3 +26,4 @@ export type { IRegisterFunctionParams, IUnregisterFunctionParams } from './servi
 export { RegisterFunctionService } from './services/register-function.service';
 export { IRegisterFunctionService } from './services/register-function.service';
 export { FormulaRefRangeService } from './services/formula-ref-range.service';
+export { SPECIAL_PASTE_FORMULA } from './commands/commands/formula-clipboard.command';

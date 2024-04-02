@@ -62,6 +62,7 @@
         "lint:types": "tsc --noEmit",
         "build": "tsc && vite build"
     },
+    "peerDependencies": {},
     "dependencies": {
         "numfmt": "^2.5.2"
     },

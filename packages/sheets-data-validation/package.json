@@ -27,7 +27,8 @@
                 "import": "./lib/es/*",
                 "require": "./lib/cjs/*",
                 "types": "./lib/types/index.d.ts"
-            }
+            },
+            "./lib/*": "./lib/*"
         }
     },
     "directories": {
@@ -47,51 +48,38 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/data-validation": "workspace:*",
         "@univerjs/design": "workspace:*",
+        "@univerjs/engine-formula": "workspace:*",
+        "@univerjs/engine-render": "workspace:*",
         "@univerjs/sheets": "workspace:*",
+        "@univerjs/sheets-formula": "workspace:*",
+        "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": "^0.13.0",
-        "clsx": ">=2.0.0",
+        "@wendellhu/redi": "0.13.0",
         "react": ">=16.9.0",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/core": "workspace:*",
-        "@univerjs/data-validation": "workspace:*",
-        "@univerjs/design": "workspace:*",
-        "@univerjs/icons": "^0.1.26",
-        "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": "^0.13.0",
-        "clsx": "^2.1.0",
+        "@univerjs/icons": "^0.1.43",
         "dayjs": "^1.11.10",
-        "react": "^18.2.0",
-        "react-draggable-list": "^4.2.0",
-        "rxjs": "^7.8.1"
+        "react-draggable-list": "^4.2.0"
     },
     "devDependencies": {
         "@univerjs/core": "workspace:*",
+        "@univerjs/data-validation": "workspace:*",
         "@univerjs/design": "workspace:*",
-        "@univerjs/docs": "workspace:*",
-        "@univerjs/docs-ui": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
-        "@univerjs/engine-numfmt": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/network": "workspace:*",
-        "@univerjs/rpc": "workspace:*",
         "@univerjs/shared": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-formula": "workspace:*",
-        "@univerjs/sheets-numfmt": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@univerjs/uniscript": "workspace:*",
-        "@vitejs/plugin-react": "^4.2.1",
-        "@vitest/coverage-istanbul": "^1.2.1",
-        "happy-dom": "^13.0.0",
+        "@wendellhu/redi": "^0.13.0",
         "less": "^4.2.0",
-        "typescript": "^5.3.3",
-        "vite": "^5.0.11",
-        "vite-plugin-dts": "^3.7.1",
-        "vite-plugin-externals": "^0.6.2",
-        "vitest": "^1.2.1"
+        "react": "^18.2.0",
+        "rxjs": "^7.8.1",
+        "typescript": "^5.4.3",
+        "vite": "^5.2.7",
+        "vitest": "^1.4.0"
     }
 }

@@ -27,7 +27,8 @@
                 "import": "./lib/es/*",
                 "require": "./lib/cjs/*",
                 "types": "./lib/types/index.d.ts"
-            }
+            },
+            "./lib/*": "./lib/*"
         }
     },
     "directories": {
@@ -44,33 +45,22 @@
         "build": "tsc && vite build"
     },
     "peerDependencies": {
-        "@univerjs/core": "*",
-        "@wendellhu/redi": "^0.13.0",
+        "@univerjs/core": "workspace:*",
+        "@univerjs/sheets": "workspace:*",
+        "@wendellhu/redi": "0.13.0",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/core": "*",
-        "@wendellhu/redi": "^0.13.0",
-        "dayjs": "^1.11.10",
-        "rxjs": "^7.8.1"
+        "dayjs": "^1.11.10"
     },
     "devDependencies": {
         "@univerjs/core": "workspace:*",
-        "@univerjs/design": "workspace:*",
-        "@univerjs/docs": "workspace:*",
-        "@univerjs/engine-formula": "workspace:*",
-        "@univerjs/engine-numfmt": "workspace:*",
-        "@univerjs/engine-render": "workspace:*",
-        "@univerjs/network": "workspace:*",
-        "@univerjs/rpc": "workspace:*",
         "@univerjs/shared": "workspace:*",
         "@univerjs/sheets": "workspace:*",
-        "@univerjs/sheets-formula": "workspace:*",
-        "@vitest/coverage-istanbul": "^1.2.1",
-        "typescript": "^5.3.3",
-        "vite": "^5.0.11",
-        "vite-plugin-dts": "^3.7.1",
-        "vite-plugin-externals": "^0.6.2",
-        "vitest": "^1.2.1"
+        "@wendellhu/redi": "^0.13.0",
+        "rxjs": "^7.8.1",
+        "typescript": "^5.4.3",
+        "vite": "^5.2.7",
+        "vitest": "^1.4.0"
     }
 }

@@ -82,3 +82,4 @@ export { HoverController } from './controllers/hover.controller';
 export { SHEET_VIEW_KEY } from './common/keys';
 export { SheetCanvasPopManagerService } from './services/canvas-pop-manager.service';
 export { mergeSetRangeValues } from './services/clipboard/utils';
+export type { IAutoFillLocation } from './services/auto-fill/type';

@@ -15,11 +15,10 @@
  */
 
 import { Disposable, LifecycleStages, OnLifecycle, Range, Rectangle } from '@univerjs/core';
-import type { ISheetAutoFillHook } from '@univerjs/sheets-ui';
+import type { IAutoFillLocation, ISheetAutoFillHook } from '@univerjs/sheets-ui';
 import { APPLY_TYPE, getAutoFillRepeatRange, IAutoFillService } from '@univerjs/sheets-ui';
 import { Inject } from '@wendellhu/redi';
 import { DataValidationModel } from '@univerjs/data-validation';
-import type { IAutoFillLocation } from '@univerjs/sheets-ui/services/auto-fill/type.js';
 import { DATA_VALIDATION_PLUGIN_NAME } from '../common/const';
 import type { SheetDataValidationManager } from '../models/sheet-data-validation-manager';
 import { getDataValidationDiffMutations } from '../commands/commands/data-validation.command';

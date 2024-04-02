@@ -28,7 +28,7 @@ import {
     RemoveMergeUndoMutationFactory,
     RemoveWorksheetMergeMutation,
 } from '../mutations/remove-worksheet-merge.mutation';
-import { SetSelectionsOperation } from '../..';
+import { SetSelectionsOperation } from '../../commands/operations/selection.operation';
 
 export const RemoveWorksheetMergeCommand: ICommand = {
     type: CommandType.COMMAND,

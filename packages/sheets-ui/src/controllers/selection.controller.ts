@@ -33,6 +33,7 @@ import {
     getNormalSelectionStyle,
     getPrimaryForRange,
     NORMAL_SELECTION_PLUGIN_NAME,
+    ScrollToCellOperation,
     SelectionManagerService,
     SelectionMoveType,
     SetSelectionsOperation,
@@ -166,6 +167,8 @@ export class SelectionController extends Disposable {
                     }
 
                     this._selectionManagerService.replace(selections);
+
+                    this._commandService.executeCommand(ScrollToCellOperation.id, selections[0].range);
                 })
             )
         );

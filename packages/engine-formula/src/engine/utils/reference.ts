@@ -212,7 +212,7 @@ export function handleRefStringInfo(refString: string) {
         if (sheetName[0] === "'" && sheetName[sheetName.length - 1] === "'") {
             sheetName = sheetName.substring(1, sheetName.length - 1);
         }
-        refBody = refString.substring(sheetNameIndex);
+        refBody = refString.substring(sheetNameIndex + 1);
     } else {
         refBody = refString;
     }

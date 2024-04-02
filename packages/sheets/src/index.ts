@@ -288,3 +288,4 @@ export { AddMergeRedoSelectionsOperationFactory, AddMergeUndoSelectionsOperation
 export { InsertDefinedNameCommand } from './commands/commands/insert-defined-name.command';
 export { RemoveDefinedNameCommand } from './commands/commands/remove-defined-name.command';
 export { SetDefinedNameCommand } from './commands/commands/set-defined-name.command';
+export { ScrollToCellOperation } from './commands/operations/scroll-to-cell.operation';

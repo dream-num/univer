@@ -14,7 +14,9 @@
  * limitations under the License.
  */
 
-export default {
+import type zhCN from './zh-CN';
+
+const locale: typeof zhCN = {
     dataValidation: {
         title: 'Data validation',
         validFail: {
@@ -43,7 +45,6 @@ export default {
             rejectInput: 'Reject input',
             messageInfo: 'Helper message',
             showInfo: 'Show help text for a selected cell',
-            validFailMessage: 'Please input value or formula',
         },
         operators: {
             between: 'between',
@@ -123,9 +124,6 @@ export default {
         textLength: {
             title: 'Text length',
         },
-        number: {
-            title: 'Number',
-        },
         decimal: {
             title: 'Number',
         },
@@ -136,6 +134,8 @@ export default {
             title: 'Checkbox',
             error: 'This cell\'s contents violate its validation rule',
             tips: 'Use custom values within cells',
+            checked: 'Selected value',
+            unchecked: 'Unselected value',
         },
         custom: {
             title: 'Custom formula',
@@ -157,3 +157,5 @@ export default {
         },
     },
 };
+
+export default locale;

@@ -36,6 +36,7 @@ import type {
     IRemoveRowColCommandParams,
     ISetColHiddenMutationParams,
     ISetFrozenMutationParams,
+    ISetRowHiddenMutationParams,
     ISetWorksheetColWidthMutationParams,
     ISetWorksheetRowAutoHeightMutationParams,
     ISetWorksheetRowHeightMutationParams,
@@ -63,7 +64,6 @@ import {
     SetWorksheetRowHeightMutation,
     SheetInterceptorService,
 } from '@univerjs/sheets';
-import type { ISetRowHiddenMutationParams } from '@univerjs/sheets/commands/mutations/set-row-visible.mutation.js';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { ScrollCommand } from '../commands/commands/set-scroll.command';

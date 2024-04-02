@@ -37,7 +37,7 @@ import {
     SetSpecificColsVisibleCommand,
     SetSpecificRowsVisibleCommand,
 } from '@univerjs/sheets';
-import type { ISetSelectionsOperationParams } from '@univerjs/sheets/commands/operations/selection.operation.js';
+import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
 import { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 

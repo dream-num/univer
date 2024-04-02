@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-import { DataValidationType, IUniverInstanceService, Tools } from '@univerjs/core';
+import { DataValidationRenderMode, DataValidationType, IUniverInstanceService, Tools } from '@univerjs/core';
 import type { CellValue, DataValidationOperator, IDataValidationRule, IDataValidationRuleBase, ISheetDataValidationRule, Nullable } from '@univerjs/core';
-import type { IFormulaResult, IValidatorCellInfo } from '@univerjs/data-validation';
+import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
 import { BaseDataValidator } from '@univerjs/data-validation';
 import { deserializeRangeWithSheet, isReferenceString } from '@univerjs/engine-formula';
-import type { IFormulaValidResult } from '@univerjs/data-validation/validators/base-data-validator.js';
-import { DataValidationRenderMode } from '@univerjs/core/types/enum/data-validation-render-mode.js';
 import { LIST_FORMULA_INPUT_NAME } from '../views/formula-input';
 import { LIST_DROPDOWN_KEY } from '../views';
 import { DropdownWidget } from '../widgets/dropdown-widget';

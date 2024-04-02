@@ -16,10 +16,9 @@
 
 import { DataValidationType, IUniverInstanceService, Tools } from '@univerjs/core';
 import type { CellValue, DataValidationOperator, IDataValidationRule, IDataValidationRuleBase, Nullable } from '@univerjs/core';
-import type { IFormulaResult, IValidatorCellInfo } from '@univerjs/data-validation';
+import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
 import { BaseDataValidator } from '@univerjs/data-validation';
 import { deserializeRangeWithSheet, isReferenceString } from '@univerjs/engine-formula';
-import type { IFormulaValidResult } from '@univerjs/data-validation/validators/base-data-validator.js';
 import { LIST_FORMULA_INPUT_NAME } from '../views/formula-input';
 import { LIST_DROPDOWN_KEY } from '../views';
 import { DropdownMultipleWidget } from '../widgets/dropdown-multiple-widget';

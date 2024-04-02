@@ -34,7 +34,7 @@ import {
     RemoteInstanceServiceName,
     RemoteSyncServiceName,
 } from '../../services/remote-instance/remote-instance.service';
-import { IRPChannelService } from '../../services/rpc/channel.service';
+import { IRPCChannelService } from '../../services/rpc/channel.service';
 import { fromModule, toModule } from '../../services/rpc/rpc.service';
 
 /**
@@ -50,7 +50,7 @@ export class DataSyncPrimaryController extends RxDisposable {
         @Inject(Injector) private readonly _injector: Injector,
         @ICommandService private readonly _commandService: ICommandService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @IRPChannelService private readonly _rpcChannelService: IRPChannelService,
+        @IRPCChannelService private readonly _rpcChannelService: IRPCChannelService,
         @IRemoteSyncService private readonly _remoteSyncService: IRemoteSyncService
     ) {
         super();

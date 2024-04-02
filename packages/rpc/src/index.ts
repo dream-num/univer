@@ -20,10 +20,14 @@ export {
     UniverRPCMainThreadPlugin,
     UniverRPCWorkerThreadPlugin,
 } from './plugin';
+export { DataSyncReplicaController } from './controllers/data-sync/data-sync-replica.controller';
+export { DataSyncPrimaryController } from './controllers/data-sync/data-sync-primary.controller';
 export {
     IRemoteInstanceService,
     WebWorkerRemoteInstanceService,
-    RemoteInstanceServiceName
+    RemoteInstanceServiceName,
+    RemoteSyncPrimaryService,
+    RemoteSyncServiceName,
 } from './services/remote-instance/remote-instance.service';
-export { IRPChannelService } from './services/rpc/channel.service';
+export { ChannelService, IRPCChannelService } from './services/rpc/channel.service'
 export { ChannelClient, ChannelServer, type IMessageProtocol } from './services/rpc/rpc.service';

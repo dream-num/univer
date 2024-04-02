@@ -26,7 +26,7 @@ import {
     WebWorkerRemoteInstanceService,
     RemoteSyncPrimaryService,
 } from './services/remote-instance/remote-instance.service';
-import { ChannelService, IRPChannelService } from './services/rpc/channel.service';
+import { ChannelService, IRPCChannelService } from './services/rpc/channel.service';
 import {
     createWebWorkerMessagePortOnMain,
     createWebWorkerMessagePortOnWorker,
@@ -56,7 +56,7 @@ export class UniverRPCMainThreadPlugin extends Plugin {
         const messageProtocol = createWebWorkerMessagePortOnMain(worker);
         const dependencies: Dependency[] = [
             [
-                IRPChannelService,
+                IRPCChannelService,
                 {
                     useFactory: () => new ChannelService(messageProtocol),
                 },
@@ -92,7 +92,7 @@ export class UniverRPCWorkerThreadPlugin extends Plugin {
             [
                 [DataSyncReplicaController],
                 [
-                    IRPChannelService,
+                    IRPCChannelService,
                     {
                         useFactory: () => new ChannelService(createWebWorkerMessagePortOnWorker()),
                     },

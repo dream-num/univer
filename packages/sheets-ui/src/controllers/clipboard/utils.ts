@@ -293,7 +293,7 @@ export function getSetCellValueMutations(
     const setValuesMutation: ISetRangeValuesMutationParams = {
         unitId,
         subUnitId,
-        cellValue: valueMatrix.getData(),
+        cellValue: Tools.deepClone(valueMatrix.getMatrix()),
     };
 
     redoMutationsInfo.push({
@@ -341,7 +341,7 @@ export function getSetCellStyleMutations(
     const setValuesMutation: ISetRangeValuesMutationParams = {
         unitId,
         subUnitId,
-        cellValue: valueMatrix.getData(),
+        cellValue: Tools.deepClone(valueMatrix.getMatrix()),
     };
 
     redoMutationsInfo.push({
@@ -389,7 +389,7 @@ export function getClearCellStyleMutations(
         const clearMutation: ISetRangeValuesMutationParams = {
             subUnitId,
             unitId,
-            cellValue: clearStyleMatrix.getData(),
+            cellValue: Tools.deepClone(clearStyleMatrix.getMatrix()),
         };
         redoMutationsInfo.push({
             id: SetRangeValuesMutation.id,

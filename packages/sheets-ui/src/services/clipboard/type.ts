@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, IMutationInfo, IRange, ObjectMatrix } from '@univerjs/core';
+import type { ICellData, IDocumentData, IMutationInfo, IRange, ObjectMatrix } from '@univerjs/core';
 
 export enum COPY_TYPE {
     COPY = 'COPY',
@@ -32,6 +32,18 @@ export interface IParsedCellValue {
     colSpan?: number;
     properties?: IClipboardPropertyItem;
     content: string;
+}
+
+export interface IParsedCellValueByClipboard {
+    rowSpan?: number;
+    colSpan?: number;
+    style?: string;
+    content?: string;
+    richTextParma?: {
+        p?: IDocumentData;
+        v?: string;
+    };
+
 }
 
 export interface IUniverSheetCopyDataModel {

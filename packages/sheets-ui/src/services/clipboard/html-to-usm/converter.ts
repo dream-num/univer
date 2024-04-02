@@ -19,13 +19,13 @@ import { ObjectMatrix } from '@univerjs/core';
 import { handleStringToStyle } from '@univerjs/ui';
 
 import type { IPastePlugin } from '@univerjs/docs-ui';
-import { pixelToPt } from '@univerjs/engine-render';
-import { generateBody } from '../../../controllers/clipboard/utils';
+import type { SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { ISheetSkeletonManagerParam } from '../../sheet-skeleton-manager.service';
 import type {
     ICellDataWithSpanInfo,
     IClipboardPropertyItem,
     IParsedCellValue,
+    IParsedCellValueByClipboard,
     IUniverSheetCopyDataModel,
 } from '../type';
 import { extractNodeStyle } from './parse-node-style';
@@ -40,6 +40,22 @@ export interface IStyleRule {
 export interface IParsedTablesInfo {
     index: number;
 }
+
+const sheetStyleRules: string[] =
+    [
+        'color',
+        'background',
+        'font-size',
+        'border-left',
+        'border-right',
+        'border-top',
+        'border-bottom',
+        'text-align',
+        'vertical-align',
+        'font-weight',
+        'font-style',
+        'font-family',
+    ];
 
 function matchFilter(node: HTMLElement, filter: IStyleRule['filter']) {
     const tagName = node.tagName.toLowerCase();
@@ -207,14 +223,6 @@ export class HtmlToUSMService {
                     const { cellMatrix, rowProperties: tableRowProp, colProperties: tableColProp } = this._parseTable(t!);
                     if (cellMatrix) {
                         cellMatrix.forValue((row, col, value) => {
-                            const { rowSpan = 1, colSpan = 1 } = value;
-                            for (let i = 0; i < rowSpan; i++) {
-                                for (let j = 0; j < colSpan; j++) {
-                                    valueMatrix.setValue(curRow + row + i, col + j, {
-                                        v: '',
-                                    });
-                                }
-                            }
                             valueMatrix.setValue(curRow + row, col, value);
                         });
                     }
@@ -235,123 +243,26 @@ export class HtmlToUSMService {
     private _parseTable(html: string) {
         const valueMatrix = new ObjectMatrix<ICellDataWithSpanInfo>();
         const colProperties = parseColGroup(html);
-        const { rowProperties, rowCount, cellMatrix: parsedCellMatrix } = parseTableRows(html);
+        const { rowProperties } = parseTableRows(html);
+        const parsedCellMatrix = parseTableByHtml(this.htmlElement, this.getCurrentSkeleton()?.skeleton);
         parsedCellMatrix &&
             parsedCellMatrix.forValue((row, col, value) => {
-                let styleString = value.properties?.style;
-                // TODO@Dushusir Temporarily use handleStringToStyle. After all replication and paste function is completed, fix the handleStringToStyle method
-
-                const className = value.properties?.class;
-                if (className) {
-                    const dom = this.htmlElement.contentDocument?.getElementsByClassName(className)?.[0];
-                    if (dom) {
-                        const computedStyle = window.getComputedStyle(dom!, null);
-
-                        const { fontSize, fontFamily, border, borderLeft, borderRight, borderTop, borderBottom, verticalAlign, background, color, textAlign, fontWeight } = computedStyle;
-                        if (fontSize) {
-                            styleString += `;font-size: ${pixelToPt(Number.parseInt(fontSize))}pt`;
-                        }
-                        if (fontFamily) {
-                            styleString += `;font-family: ${fontFamily}`;
-                        }
-                        if (border) {
-                            styleString += `;border: ${border}`;
-                        }
-                        if (borderLeft) {
-                            styleString += `;border-left: ${borderLeft}`;
-                        }
-                        if (borderRight) {
-                            styleString += `;border-right: ${borderRight}`;
-                        }
-                        if (borderTop) {
-                            styleString += `;border-top: ${borderTop}`;
-                        }
-                        if (borderBottom) {
-                            styleString += `;border-bottom: ${borderBottom}`;
-                        }
-                        if (verticalAlign) {
-                            styleString += `;vertical-align: ${verticalAlign}`;
-                        }
-                        if (background) {
-                            styleString += `;background: ${background}`;
-                        }
-                        if (color) {
-                            styleString += `;color: ${color}`;
-                        }
-                        if (textAlign) {
-                            styleString += `;text-align: ${textAlign}`;
-                        }
-                        if (fontWeight) {
-                            styleString += `;font-weight: ${fontWeight}`;
-                        }
+                const style = handleStringToStyle(undefined, value.style);
+                const cellValue = value?.richTextParma?.p
+                    ? {
+                        v: value.richTextParma.v,
+                        p: value.richTextParma.p,
+                        s: style,
+                        rowSpan: value.rowSpan,
+                        colSpan: value.colSpan,
                     }
-                }
-                const style = handleStringToStyle(undefined, styleString);
-
-                // todo这里是有问题的 应该是判断里面有没有html标签 这里应该是直接赋值的逻辑了，解析p应该在上一步去做
-                if (/\r|\n/.test(value.content)) {
-                    const body = generateBody(value.content);
-                    const p = this._generateDocumentDataModelSnapshot({
-                        body,
-                    });
-                    if (!valueMatrix.getValue(row, col)) {
-                        const newValue = (value.rowSpan || value.colSpan)
-                            ? {
-                                v: value.content,
-                                p,
-                                s: style,
-                                rowSpan: value.rowSpan,
-                                colSpan: value.colSpan,
-                            }
-                            : {
-                                v: value.content,
-                                p,
-                                s: style,
-                            };
-                        valueMatrix.setValue(row, col, newValue);
-                        if (value.rowSpan || value.colSpan) {
-                            const rowSpan = value.rowSpan || 1;
-                            const colSpan = value.colSpan || 1;
-                            for (let i = 0; i < rowSpan; i++) {
-                                for (let j = 0; j < colSpan; j++) {
-                                    if (i === 0 && j === 0) { /* empty */ } else {
-                                        valueMatrix.setValue(row + i, col + j, {
-                                            s: style,
-                                        });
-                                    }
-                                }
-                            }
-                        }
-                    }
-                } else {
-                    if (!valueMatrix.getValue(row, col)) {
-                        const newValue = (value.rowSpan || value.colSpan)
-                            ? {
-                                v: value.content,
-                                s: style,
-                                rowSpan: value.rowSpan,
-                                colSpan: value.colSpan,
-                            }
-                            : {
-                                v: value.content,
-                                s: style,
-                            };
-                        valueMatrix.setValue(row, col, newValue);
-                        if (value.rowSpan || value.colSpan) {
-                            const rowSpan = value.rowSpan || 1;
-                            const colSpan = value.colSpan || 1;
-                            for (let i = 0; i < rowSpan; i++) {
-                                for (let j = 0; j < colSpan; j++) {
-                                    if (i === 0 && j === 0) { /* empty */ } else {
-                                        valueMatrix.setValue(row + i, col + j, {
-                                            s: style,
-                                        });
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+                    : {
+                        v: value.content,
+                        s: style,
+                        rowSpan: value.rowSpan,
+                        colSpan: value.colSpan,
+                    };
+                valueMatrix.setValue(row, col, cellValue);
             });
         return {
             rowProperties,
@@ -468,13 +379,13 @@ function parseTableRows(html: string): {
     const rowMatchesAsArray = Array.from(rowMatches);
     const rowProperties = rowMatchesAsArray.map((rowMatch) => parseProperties(rowMatch[1]));
 
-    const { colCount, cellMatrix } = parseTableCells(rowMatchesAsArray.map((rowMatch) => rowMatch[2]));
+    // const { colCount, cellMatrix } = parseTableCells(rowMatchesAsArray.map((rowMatch) => rowMatch[2]), html);
 
     return {
         rowProperties,
         rowCount: rowProperties.length,
-        colCount,
-        cellMatrix,
+        // colCount,
+        // cellMatrix,
     };
 }
 
@@ -482,7 +393,7 @@ function parseTableRows(html: string): {
  *
  * @param tdStrings
  */
-function parseTableCells(tdStrings: string[]) {
+function parseTableCells(tdStrings: string[], html: string) {
     const cellMatrix = new ObjectMatrix<IParsedCellValue>();
     const maxRowOfCol = new Map<number, number>();
     const TDS_REGEX = /<td([\s\S]*?)>([\s\S]*?)<\/td>/gi;
@@ -673,4 +584,153 @@ function extractBordersAndKeepOthers(styleString: string, bordersToKeep: string[
     newStyleString += ` ${withoutBorders.trim()}`;
 
     return newStyleString.trim();
+}
+
+function parseTableByHtml(htmlElement: HTMLIFrameElement, skeleton?: SpreadsheetSkeleton) {
+    const cellMatrix = new ObjectMatrix<IParsedCellValueByClipboard>();
+    const tableEle = htmlElement.contentDocument?.querySelector('table');
+    if (!tableEle) {
+        return cellMatrix;
+    }
+    const rows = tableEle?.querySelectorAll('tr');
+
+    for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
+        const row = rows[rowIndex];
+        const cells = row.querySelectorAll('td, th');
+        let colSetValueIndex = 0;
+        for (let colIndex = 0; colIndex < cells.length;) {
+            const cell = cells[colIndex];
+            let cellStyle = '';
+            let cellText;
+            let cellRichStyle;
+            const rowSpan = Number(cell.getAttribute('rowSpan')) || 1;
+            const colSpan = Number(cell.getAttribute('colSpan')) || 1;
+
+            const hasClass = cell.getAttribute('class');
+            if (hasClass) {
+                const computedStyle = getComputedStyle(cell);
+                sheetStyleRules.forEach((rule) => {
+                    const ruleValue = computedStyle.getPropertyValue(rule);
+                    if (ruleValue) {
+                        cellStyle += `${rule}:${ruleValue};`;
+                    }
+                });
+            } else {
+                const regex = /<\w+\s+[^>]*?style="([^"]*)"/gi;
+                const match = regex.exec(cell.outerHTML);
+                if (match?.[1]) {
+                    cellStyle = match[1];
+                }
+            }
+
+            const isRichText = /<[^>]+>/.test(cell.innerHTML);
+            if (isRichText && skeleton) {
+                const newDocBody: IDocumentBody = {
+                    dataStream: '',
+                    textRuns: [],
+                };
+                parseCellHtml(null, cell.childNodes, newDocBody);
+                const documentModel = skeleton.getBlankCellDocumentModel()?.documentModel;
+                const p = documentModel?.getSnapshot();
+                const singleDataStream = `${newDocBody.dataStream}\r\n`;
+                const documentData = {
+                    ...p, ...{
+                        body: {
+                            dataStream: singleDataStream,
+                            textRuns: newDocBody.textRuns,
+                            paragraphs: generateParagraphs(singleDataStream),
+                        },
+                    },
+                };
+                documentModel?.reset(documentData);
+                cellRichStyle = documentModel?.getSnapshot();
+                cellText = newDocBody.dataStream;
+            } else {
+                cellText = cell.innerHTML.replace(/[\r\n]/g, '');
+            }
+
+            const cellValue = {
+                rowSpan,
+                colSpan,
+                content: cellText,
+                style: cellStyle,
+                richTextParma: {
+                    p: cellRichStyle,
+                    v: cellText,
+                },
+            };
+
+            if (cellMatrix.getValue(rowIndex, colSetValueIndex)) {
+                colSetValueIndex += 1;
+                continue;
+            } else {
+                if ((rowSpan > 1 || colSpan > 1)) {
+                    if (rowSpan === 1) {
+                        for (let i = colSetValueIndex; i < colSetValueIndex + colSpan; i++) {
+                            cellMatrix.setValue(rowIndex, i, { style: extractBordersAndKeepOthers(cellStyle, ['border-top', 'border-bottom']) });
+                        }
+                        cellMatrix.setValue(rowIndex, colSetValueIndex + colSpan - 1, { style: extractBordersAndKeepOthers(cellStyle, ['border-top', 'border-bottom', 'border-right']) });
+                        cellMatrix.setValue(rowIndex, colSetValueIndex, { ...cellValue, style: extractBordersAndKeepOthers(cellStyle, ['border-top', 'border-bottom', 'border-left']) });
+                    } else if (colSpan === 1) {
+                        for (let i = rowIndex; i < rowIndex + rowSpan; i++) {
+                            cellMatrix.setValue(i, colSetValueIndex, { style: extractBordersAndKeepOthers(cellStyle, ['border-left', 'border-right']) });
+                        }
+                        cellMatrix.setValue(rowIndex + rowSpan - 1, colSetValueIndex, { style: extractBordersAndKeepOthers(cellStyle, ['border-left', 'border-right', 'border-bottom']) });
+                        cellMatrix.setValue(rowIndex, colSetValueIndex, { ...cellValue, style: extractBordersAndKeepOthers(cellStyle, ['border-left', 'border-right', 'border-top']) });
+                    } else {
+                        for (let i = colSetValueIndex; i < colSetValueIndex + colSpan; i++) {
+                            cellMatrix.setValue(rowIndex, i, { style: extractBordersAndKeepOthers(cellStyle, ['border-top']) });
+                            cellMatrix.setValue(rowIndex + rowSpan - 1, i, { style: extractBordersAndKeepOthers(cellStyle, ['border-bottom']) });
+                        }
+                        for (let i = rowIndex; i < rowIndex + rowSpan; i++) {
+                            cellMatrix.setValue(i, colSetValueIndex, { style: extractBordersAndKeepOthers(cellStyle, ['border-left']) });
+                            cellMatrix.setValue(i, colSetValueIndex + colSpan - 1, { style: extractBordersAndKeepOthers(cellStyle, ['border-right']) });
+                        }
+                        cellMatrix.setValue(rowIndex + rowSpan - 1, colSetValueIndex, { style: extractBordersAndKeepOthers(cellStyle, ['border-left', 'border-bottom']) });
+                        cellMatrix.setValue(rowIndex, colSetValueIndex + colSpan - 1, { style: extractBordersAndKeepOthers(cellStyle, ['border-right', 'border-top']) });
+                        cellMatrix.setValue(rowIndex + rowSpan - 1, colSetValueIndex + colSpan - 1, { style: extractBordersAndKeepOthers(cellStyle, ['border-right', 'border-bottom']) });
+                        cellMatrix.setValue(rowIndex, colSetValueIndex, { ...cellValue, style: extractBordersAndKeepOthers(cellStyle, ['border-top', 'border-left']) });
+                    }
+                } else {
+                    cellMatrix.setValue(rowIndex, colSetValueIndex, cellValue);
+                }
+                colSetValueIndex += colSpan;
+                colIndex++;
+            }
+        }
+    }
+    return cellMatrix;
+}
+
+function parseCellHtml(parent: Nullable<ChildNode>, nodes: NodeListOf<ChildNode>, doc: IDocumentBody, styleCache: Map<ChildNode, ITextStyle> = new Map()) {
+    for (const node of nodes) {
+        if (node.nodeType === Node.TEXT_NODE) {
+            const text = node.nodeValue?.replace(/[\r\n]/g, '');
+            let style;
+
+            if (parent && styleCache.has(parent)) {
+                style = styleCache.get(parent);
+            }
+
+            doc.dataStream += text;
+
+            if (style && Object.getOwnPropertyNames(style).length) {
+                doc.textRuns!.push({
+                    st: doc.dataStream.length - text!.length,
+                    ed: doc.dataStream.length,
+                    ts: style,
+                });
+            }
+        } else if (node.nodeType === Node.COMMENT_NODE || node.nodeName === 'STYLE') {
+            continue;
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
+            const parentStyles = parent ? styleCache.get(parent) : {};
+            const predefinedStyles = getComputedStyle(node as HTMLElement);
+            const nodeStyles = extractNodeStyle(node as HTMLElement, predefinedStyles);
+
+            styleCache.set(node, { ...parentStyles, ...nodeStyles });
+            const { childNodes } = node;
+            parseCellHtml(node, childNodes, doc, styleCache);
+        }
+    }
 }

@@ -154,7 +154,7 @@ export class USMToHtmlService {
             rowContents.push(getRowContent(row, cols, hooks, matrix, mergeSet));
         }
 
-        const html = `<google-sheets-html-origin><table xmlns="http://www.w3.org/1999/xhtml" cellspacing="0" cellpadding="0" dir="ltr" border="1" style="table-layout:fixed;font-size:10pt;font-family:Arial;width:0px;border-collapse:collapse;border:none">${colStyles}
+        const html = `<google-sheets-html-origin><table xmlns="http://www.w3.org/1999/xhtml" cellspacing="0" cellpadding="0" dir="ltr" style="table-layout:fixed;font-size:10pt;font-family:Arial;width:0px;border-collapse:collapse;border:none">${colStyles}
 <tbody>${rowContents.join('')}</tbody></table>`;
         return html;
     }

@@ -90,6 +90,7 @@ export interface IInputProps extends Pick<InputProps, 'onFocus' | 'onBlur'> {
      * @param value
      */
     onChange?: (value: string) => void;
+
 }
 
 export function Input(props: IInputProps) {
@@ -119,7 +120,7 @@ export function Input(props: IInputProps) {
         [styles.inputAffixWrapperSmall]: size === 'small',
         [styles.inputAffixWrapperMiddle]: size === 'middle',
         [styles.inputAffixWrapperLarge]: size === 'large',
-    });
+    }, className);
 
     return (
         <RcInput

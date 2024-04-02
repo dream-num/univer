@@ -25,6 +25,7 @@ export interface IPopup {
     anchorRect$: Observable<IBoundRectNoAngle>;
     componentKey: string;
     onClickOutside?: (e: MouseEvent) => void;
+    excludeOutside?: HTMLElement[];
     unitId: string;
     subUnitId: string;
     direction?: 'vertical' | 'horizontal';
@@ -35,7 +36,6 @@ export interface ICanvasPopupService {
     addPopup(item: IPopup): string;
     removePopup(id: string): void;
     removeAll(): void;
-
     popups$: Observable<[string, IPopup][]>;
 
     get popups(): [string, IPopup][];

@@ -20,7 +20,6 @@ import { ConfigProvider, defaultTheme, themeInstance } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import type { ComponentType } from 'react';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-
 import type { IWorkbenchOptions } from '../controllers/ui/ui.controller';
 import { IMessageService } from '../services/message/message.service';
 import styles from './app.module.less';
@@ -46,7 +45,6 @@ export function App(props: IUniverAppProps) {
     const localeService = useDependency(LocaleService);
     const themeService = useDependency(ThemeService);
     const messageService = useDependency(IMessageService);
-
     const contentRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -141,6 +139,7 @@ export function App(props: IUniverAppProps) {
                     )}
 
                     <ZenZone />
+
                 </section>
             </div>
 

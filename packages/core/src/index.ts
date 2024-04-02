@@ -16,6 +16,7 @@
 
 import { installShims } from './common/shims';
 
+export { shallowEqual, isRangesEqual, isUnitRangesEqual } from './common/equal';
 export * from './basics';
 export { dedupe, remove, rotate, groupBy } from './common/array';
 export {
@@ -150,5 +151,14 @@ export { getSheetBlocksFromSnapshot } from './services/snapshot/snapshot-transfo
 
 export { isBlackColor, isWhiteColor } from './shared/color/color-kit';
 export { cellToRange } from './shared/common';
+
+export type { IDataValidationRule, IDataValidationRuleBase, IDataValidationRuleInfo, IDataValidationRuleOptions, ISheetDataValidationRule } from './types/interfaces/i-data-validation';
+export type { ICellCustomRender, ICellRenderContext } from './types/interfaces/i-cell-custom-render';
+
+export { DataValidationErrorStyle } from './types/enum/data-validation-error-style';
+export { DataValidationImeMode } from './types/enum/data-validation-ime-mode';
+export { DataValidationOperator } from './types/enum/data-validation-operator';
+export { DataValidationType } from './types/enum/data-validation-type';
+export { DataValidationStatus } from './types/enum/data-validation-status';
 
 installShims();

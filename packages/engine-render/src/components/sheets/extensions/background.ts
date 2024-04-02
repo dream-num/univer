@@ -65,7 +65,6 @@ export class Background extends SheetExtension {
         ctx.save();
 
         ctx.setGlobalCompositeOperation('destination-over');
-
         background &&
             Object.keys(background).forEach((rgb: string) => {
                 const backgroundCache = background[rgb];

@@ -49,7 +49,7 @@ export const DatePanel: FC<IBusinessComponentProps> = (props) => {
 
     props.action.current = () => suffix;
 
-    const onChange = (v: string) => {
+    const onChange = (v: any) => {
         suffixSet(v);
         props.onChange(v);
     };

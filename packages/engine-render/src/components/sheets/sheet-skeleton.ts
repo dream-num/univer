@@ -1632,14 +1632,10 @@ export class SpreadsheetSkeleton extends Skeleton {
             );
 
             if (isMerged && !isMergedMainCell) {
-                /**
-                 * If the cell is merged and is not the main cell, the cell is not rendered.
-                 */
+                // If the cell is merged and is not the main cell, the cell is not rendered.
                 return true;
             } else if (!isMergedMainCell) {
-                /**
-                 * If the cell no merged, the cell is not rendered.
-                 */
+                // If the cell no merged, the cell is not rendered.
                 return true;
             }
         }

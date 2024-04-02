@@ -24,7 +24,7 @@ export interface ISelectListProps {
     /**
      * The value of select
      */
-    value: string;
+    value: string | string[];
 
     /**
      * The options of select
@@ -45,33 +45,54 @@ export interface ISelectListProps {
     /**
      * The callback function that is triggered when the value is changed
      */
-    onChange: (value: string) => void;
+    onChange: (value: string | string[] | undefined) => void;
+
+    multiple?: boolean;
 }
 
 export function SelectList(props: ISelectListProps) {
-    const { value, options = [], hideCheckMark = false, onChange } = props;
+    const { value: _value, options = [], hideCheckMark = false, onChange, multiple } = props;
 
-    function handleSelect(value: string) {
-        onChange(value);
+    const value = Array.isArray(_value) ? _value : [_value];
+
+    function handleSelect(newValue: string) {
+        const index = value.indexOf(newValue);
+
+        if (!multiple) {
+            if (index > -1) {
+                onChange(undefined);
+            } else {
+                onChange(newValue);
+            }
+        } else {
+            if (index > -1) {
+                onChange(value.filter((i) => i === newValue));
+            } else {
+                onChange([...value, newValue]);
+            }
+        }
     }
 
     return (
         <ul className={styles.selectList}>
-            {options.map((option, index) => (
-                <li
-                    key={index}
-                    className={clsx(styles.selectListItem, { [styles.selectListItemSelect]: value === option.value })}
-                >
-                    <a onClick={() => handleSelect(option.value)}>
-                        {!hideCheckMark && (
-                            <span className={styles.selectListItemIcon}>
-                                {value === option.value && <CheckMarkSingle />}
-                            </span>
-                        )}
-                        <span style={{ color: option.color }}>{option.label}</span>
-                    </a>
-                </li>
-            ))}
+            {options.map((option, index) => {
+                const checked = value.indexOf(option.value) > -1;
+                return (
+                    <li
+                        key={index}
+                        className={clsx(styles.selectListItem, { [styles.selectListItemSelect]: checked })}
+                    >
+                        <a onClick={() => handleSelect(option.value)}>
+                            {!hideCheckMark && (
+                                <span className={styles.selectListItemIcon}>
+                                    {checked && <CheckMarkSingle />}
+                                </span>
+                            )}
+                            <span style={{ color: option.color }}>{option.label}</span>
+                        </a>
+                    </li>
+                );
+            })}
         </ul>
     );
 }

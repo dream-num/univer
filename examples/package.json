@@ -11,6 +11,7 @@
     },
     "dependencies": {
         "@univerjs/core": "workspace:*",
+        "@univerjs/data-validation": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/docs": "workspace:*",
         "@univerjs/docs-ui": "workspace:*",
@@ -23,6 +24,7 @@
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-conditional-formatting": "workspace:*",
         "@univerjs/sheets-conditional-formatting-ui": "workspace:*",
+        "@univerjs/sheets-data-validation": "workspace:*",
         "@univerjs/sheets-find-replace": "workspace:*",
         "@univerjs/sheets-formula": "workspace:*",
         "@univerjs/sheets-numfmt": "workspace:*",

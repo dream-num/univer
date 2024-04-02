@@ -97,6 +97,20 @@ export class FWorkbook {
         return this._injector.createInstance(FWorksheet, this._workbook, this._workbook.getActiveSheet());
     }
 
+    /**
+     * Get a worksheet by sheet id.
+     * @param sheetId id of the worksheet
+     * @return the worksheet with given sheet id
+     */
+    getSheetBySheetId(sheetId: string): FWorksheet | null {
+        const worksheet = this._workbook.getSheetBySheetId(sheetId);
+        if (!worksheet) {
+            return null;
+        }
+
+        return this._injector.createInstance(FWorksheet, this._workbook, worksheet);
+    }
+
     // #region editing
 
     undo(): Promise<boolean> {

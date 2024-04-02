@@ -31,6 +31,10 @@ export class FWorksheet {
         @ICommandService private readonly _commandService: ICommandService
     ) {}
 
+    getId(): string {
+        return this._worksheet.getSheetId();
+    }
+
     getSelection(): FSelection | null {
         const selections = this._selectionManagerService.getSelections();
         if (!selections) {

@@ -557,6 +557,22 @@ export class ObjectMatrix<T> {
         return array;
     }
 
+    toFullArray(): T[][] {
+        const range = this.getRange();
+        const { endColumn, endRow } = range;
+        const array: T[][] = [];
+        for (let i = 0; i <= endRow; i++) {
+            const subArr = Array(endColumn + 1).fill(undefined);
+            array.push(subArr);
+        }
+
+        this.forValue((row, col, value) => {
+            array[row][col] = value;
+        });
+
+        return array;
+    }
+
     /**
      * @deprecated Use getMatrix as a substitute.
      */

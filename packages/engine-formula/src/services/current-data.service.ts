@@ -189,16 +189,16 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         return this._dirtyUnitFeatureMap;
     }
 
+    getDirtyUnitOtherFormulaMap() {
+        return this._dirtyUnitOtherFormulaMap;
+    }
+
     getSheetName(unitId: string, sheetId: string) {
         if (this._sheetIdToNameMap[unitId] == null) {
             return '';
         }
 
         return this._sheetIdToNameMap[unitId]![sheetId] || '';
-    }
-
-    getDirtyUnitOtherFormulaMap() {
-        return this._dirtyUnitOtherFormulaMap;
     }
 
     load(config: IFormulaDatasetConfig) {

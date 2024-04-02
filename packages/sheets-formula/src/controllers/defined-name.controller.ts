@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
+import type { ICommandInfo, IExecutionOptions, Nullable } from '@univerjs/core';
 import {
     Disposable,
+    ICommandService,
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
@@ -24,8 +25,10 @@ import {
 } from '@univerjs/core';
 import type { IFunctionInfo } from '@univerjs/engine-formula';
 import { FunctionType, IDefinedNamesService } from '@univerjs/engine-formula';
+import { SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { IDescriptionService } from '../services/description.service';
 
+export const SCOPE_WORKBOOK_VALUE = 'AllDefaultWorkbook';
 /**
  * header highlight
  * column menu: show, hover and mousedown event
@@ -37,7 +40,8 @@ export class DefinedNameController extends Disposable {
     constructor(
         @IDescriptionService private readonly _descriptionService: IDescriptionService,
         @IDefinedNamesService private readonly _definedNamesService: IDefinedNamesService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @ICommandService private readonly _commandService: ICommandService
 
     ) {
         super();
@@ -49,6 +53,8 @@ export class DefinedNameController extends Disposable {
         this._descriptionListener();
 
         this._changeUnitListener();
+
+        this._changeSheetListener();
     }
 
     private _descriptionListener() {
@@ -64,6 +70,21 @@ export class DefinedNameController extends Disposable {
             this._univerInstanceService.currentSheet$.subscribe(() => {
                 this._unRegisterDescriptions();
                 this._registerDescriptions();
+            })
+        );
+    }
+
+    private _changeSheetListener() {
+        this.disposeWithMe(
+            this._commandService.onCommandExecuted((command: ICommandInfo, options?: IExecutionOptions) => {
+                if (options?.fromCollab) {
+                    return;
+                }
+
+                if (command.id === SetWorksheetActiveOperation.id) {
+                    this._unregisterDescriptionsForNotInSheetId();
+                    this._registerDescriptions();
+                }
             })
         );
     }
@@ -92,7 +113,19 @@ export class DefinedNameController extends Disposable {
     }
 
     private _registerDescriptions() {
-        const unitId = this._univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
+        if (workbook == null) {
+            return;
+        }
+        const worksheet = workbook.getActiveSheet();
+
+        if (worksheet == null) {
+            return;
+        }
+
+        const unitId = workbook.getUnitId();
+        const sheetId = worksheet.getSheetId();
+
         const definedNames = this._definedNamesService.getDefinedNameMap(unitId);
         if (!definedNames) {
             return;
@@ -103,8 +136,8 @@ export class DefinedNameController extends Disposable {
         this._preUnitId = unitId;
 
         Array.from(Object.values(definedNames)).forEach((value) => {
-            const { name, comment, formulaOrRefString } = value;
-            if (!this._descriptionService.hasDescription(name)) {
+            const { name, comment, formulaOrRefString, localSheetId } = value;
+            if (!this._descriptionService.hasDescription(name) && (localSheetId == null || localSheetId === SCOPE_WORKBOOK_VALUE || localSheetId === sheetId)) {
                 functionList.push({
                     functionName: name,
                     description: formulaOrRefString + (comment || ''),
@@ -116,5 +149,36 @@ export class DefinedNameController extends Disposable {
         });
 
         this._descriptionService.registerDescriptions(functionList);
+    }
+
+    private _unregisterDescriptionsForNotInSheetId() {
+        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
+        if (workbook == null) {
+            return;
+        }
+        const worksheet = workbook.getActiveSheet();
+
+        if (worksheet == null) {
+            return;
+        }
+
+        const unitId = workbook.getUnitId();
+        const sheetId = worksheet.getSheetId();
+
+        const definedNames = this._definedNamesService.getDefinedNameMap(unitId);
+        if (!definedNames) {
+            return;
+        }
+
+        const functionList: string[] = [];
+
+        Array.from(Object.values(definedNames)).forEach((value) => {
+            const { name, localSheetId } = value;
+            if (localSheetId !== SCOPE_WORKBOOK_VALUE && localSheetId !== sheetId) {
+                functionList.push(name);
+            }
+        });
+
+        this._descriptionService.unregisterDescriptions(functionList);
     }
 }

@@ -21,7 +21,7 @@ import type { IUnitRange, Nullable } from '@univerjs/core';
 import { AbsoluteRefType, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { Button, Input, Radio, RadioGroup, Select } from '@univerjs/design';
-import { IDefinedNamesService, type IDefinedNamesServiceParam, IFunctionService, LexerTreeBuilder, operatorToken, serializeRangeToRefString } from '@univerjs/engine-formula';
+import { IDefinedNamesService, type IDefinedNamesServiceParam, IFunctionService, isReferenceString, LexerTreeBuilder, operatorToken, serializeRangeToRefString } from '@univerjs/engine-formula';
 import { ErrorSingle } from '@univerjs/icons';
 import styles from './index.module.less';
 import { SCOPE_WORKBOOK_VALUE } from './component-name';
@@ -89,19 +89,30 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
 
     useEffect(() => {
         setValidFormulaOrRange(true);
-        setFormulaOrRefStringValue(formulaOrRefString);
-        setUpdateFormulaOrRefStringValue(formulaOrRefString);
         setNameValue(name);
         setCommentValue(comment);
         setLocalSheetIdValue(localSheetId);
+        let formulaOrRefStringCache = formulaOrRefString;
         if (formulaOrRefString.substring(0, 1) === operatorToken.EQUALS) {
             setTypeValue('formula');
+        } else if (isFormula(formulaOrRefString)) {
+            setTypeValue('formula');
+            formulaOrRefStringCache = operatorToken.EQUALS + formulaOrRefString;
         } else {
             setTypeValue('range');
         }
 
+        setFormulaOrRefStringValue(formulaOrRefStringCache);
+        setUpdateFormulaOrRefStringValue(formulaOrRefStringCache);
+
         setValidString('');
     }, [state]);
+
+    const isFormula = (token: string) => {
+        return !token.split(',').every((refString) => {
+            return isReferenceString(refString.trim());
+        });
+    };
 
     workbook.getSheetOrders().forEach((sheetId) => {
         const sheet = workbook.getSheetBySheetId(sheetId);

@@ -117,7 +117,11 @@ export function shaping(
         const shapedGlyphs: IDocumentSkeletonGlyph[] = [];
 
         while (src.length > 0) {
-            const char = src[0];
+            const char = src.match(/^[\s\S]/gu)?.[0];
+
+            if (char == null) {
+                break;
+            }
 
             if (/\s/.test(char) || hasCJK(char)) {
                 const config = getFontCreateConfig(i, bodyModel, paragraphNode, sectionBreakConfig, paragraphStyle);
@@ -131,8 +135,8 @@ export function shaping(
                 }
 
                 shapedGlyphs.push(newSpan);
-                i++;
-                src = src.substring(1);
+                i += char.length;
+                src = src.substring(char.length);
             } else if (startWithEmoji(src)) {
                 const { step, glyphGroup } = emojiHandler(
                     i,

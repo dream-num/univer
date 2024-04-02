@@ -534,6 +534,9 @@ export const SetTextWrapCommand: ICommand<ISetTextWrapCommandParams> = {
 
         const commandService = accessor.get(ICommandService);
         const setStyleParams: ISetStyleCommandParams<WrapStrategy> = {
+            unitId: params.unitId,
+            subUnitId: params.subUnitId,
+            range: params.range,
             style: {
                 type: 'tb',
                 value: params.value,

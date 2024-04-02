@@ -15,8 +15,8 @@
  */
 
 import type { ICellData, IStyleData, Nullable } from '@univerjs/core';
-import { HorizontalAlign, ICommandService, IUniverInstanceService, VerticalAlign } from '@univerjs/core';
-import { SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetStyleCommand, SetVerticalTextAlignCommand } from '@univerjs/sheets';
+import { HorizontalAlign, ICommandService, IUniverInstanceService, VerticalAlign, WrapStrategy } from '@univerjs/core';
+import { SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetRangeValuesMutation, SetStyleCommand, SetTextWrapCommand, SetVerticalTextAlignCommand } from '@univerjs/sheets';
 import type { Injector } from '@wendellhu/redi';
 import { beforeEach, describe, expect, it } from 'vitest';
 
@@ -51,6 +51,7 @@ describe('Test FRange', () => {
         commandService.registerCommand(SetStyleCommand);
         commandService.registerCommand(SetVerticalTextAlignCommand);
         commandService.registerCommand(SetHorizontalTextAlignCommand);
+        commandService.registerCommand(SetTextWrapCommand);
 
         getValueByPosition = (
             startRow: number,
@@ -454,7 +455,7 @@ describe('Test FRange', () => {
         expect(getStyleByPosition(0, 0, 0, 0)?.cl).toBe(undefined);
     });
 
-    it('Range set range vertical and Horizontal', async () => {
+    it('Range set range vertical and Horizontal and Warp', async () => {
         const activeSheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
 
         const range = activeSheet?.getRange(0, 0, 10, 10);
@@ -464,5 +465,10 @@ describe('Test FRange', () => {
 
         expect(getStyleByPosition(0, 0, 0, 0)?.ht).toBe(HorizontalAlign.CENTER);
         expect(getStyleByPosition(0, 0, 0, 0)?.vt).toBe(VerticalAlign.MIDDLE);
+
+        await range!.setWrap(true);
+        expect(getStyleByPosition(0, 0, 0, 0)?.tb).toBe(WrapStrategy.WRAP);
+        await range!.setWrapStrategy(WrapStrategy.CLIP);
+        expect(getStyleByPosition(0, 0, 0, 0)?.tb).toBe(WrapStrategy.CLIP);
     });
 });

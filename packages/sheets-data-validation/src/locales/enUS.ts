@@ -127,12 +127,15 @@ export default {
             title: 'Number',
         },
         decimal: {
-            title: 'Decimal',
+            title: 'Number',
+        },
+        whole: {
+            title: 'Integer',
         },
         checkbox: {
             title: 'Checkbox',
             error: 'This cell\'s contents violate its validation rule',
-            tips: '在单元格内使用自定义值',
+            tips: 'Use custom values within cells',
         },
         custom: {
             title: 'Custom formula',
@@ -144,7 +147,7 @@ export default {
             ok: 'OK',
         },
         error: {
-            title: 'Invalid：',
+            title: 'Invalid:',
         },
         renderMode: {
             arrow: 'Arrow',

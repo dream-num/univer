@@ -125,7 +125,7 @@ export default {
             title: '文本长度',
         },
         decimal: {
-            title: '小数',
+            title: '数字',
         },
         whole: {
             title: '整数',

@@ -8,6 +8,7 @@
     display: flex;
     flex-direction: column;
     max-width: 200px;
+    box-sizing: border-box;
 
     &-title {
         padding: 0 6px;
@@ -21,6 +22,9 @@
         flex: 1;
         overflow-y: scroll;
         overflow-x: hidden;
+        scrollbar-color: #73737366 transparent;
+        scrollbar-gutter: stable;
+        scrollbar-width: thin;
     }
 
     &-selected-icon {

@@ -20,10 +20,11 @@ import { Subject } from 'rxjs';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject } from '@wendellhu/redi';
 import { SheetCanvasPopManagerService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
-import { DataValidatorRegistryService } from '@univerjs/data-validation';
+import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
 import { IZenZoneService } from '@univerjs/ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { DROP_DOWN_KEY } from '../views/drop-down';
+import type { SheetDataValidationManager } from '../models/sheet-data-validation-manager';
 
 export interface IDropdownParam {
     location: ISheetLocation;
@@ -56,7 +57,8 @@ export class DataValidationDropdownManagerService extends Disposable {
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @Inject(DataValidatorRegistryService) private readonly _dataValidatorRegistryService: DataValidatorRegistryService,
         @IZenZoneService private readonly _zenZoneService: IZenZoneService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @Inject(DataValidationModel) private readonly _dataValidationModel: DataValidationModel
     ) {
         super();
         this._init();
@@ -127,9 +129,8 @@ export class DataValidationDropdownManagerService extends Disposable {
         if (!worksheet) {
             return;
         }
-
-        const cell = worksheet.getCell(row, col);
-        const rule = cell?.dataValidation?.rule;
+        const manager = this._dataValidationModel.ensureManager(unitId, subUnitId) as SheetDataValidationManager;
+        const rule = manager.getRuleByLocation(row, col);
         const skeleton = this._sheetSkeletonManagerService.getOrCreateSkeleton({
             unitId,
             sheetId: subUnitId,

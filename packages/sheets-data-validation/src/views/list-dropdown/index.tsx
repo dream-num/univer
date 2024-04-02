@@ -24,6 +24,7 @@ import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { KeyCode } from '@univerjs/ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { DataValidationRenderMode } from '@univerjs/core/types/enum/data-validation-render-mode.js';
+import { RectPopup } from '@univerjs/design';
 import type { ListMultipleValidator } from '../../validators/list-multiple-validator';
 import { deserializeListOptions, getDataValidationCellValue, serializeListOptions } from '../../validators/util';
 import type { IDropdownComponentProps } from '../../services/dropdown-manager.service';
@@ -38,12 +39,13 @@ interface ISelectListProps {
     options: { label: string;value: string; color?: string }[];
     title?: string;
     onEdit?: () => void;
+    style?: React.CSSProperties;
 }
 
 const SelectList = (props: ISelectListProps) => {
-    const { value, onChange, multiple, options, title, onEdit } = props;
+    const { value, onChange, multiple, options, title, onEdit, style } = props;
     return (
-        <div className={styles.dvListDropdown}>
+        <div className={styles.dvListDropdown} style={style}>
             <div className={styles.dvListDropdownTitle}>
                 {title}
             </div>
@@ -91,7 +93,8 @@ export function ListDropDown(props: IDropdownComponentProps) {
     const localeService = useDependency(LocaleService);
     const [localValue, setLocalValue] = useState('');
     const editorBridgeService = useDependency(IEditorBridgeService);
-
+    const anchorRect = RectPopup.useContext();
+    const cellWidth = anchorRect.right - anchorRect.left;
     if (!worksheet) {
         return null;
     }
@@ -119,6 +122,7 @@ export function ListDropDown(props: IDropdownComponentProps) {
 
     return (
         <SelectList
+            style={{ minWidth: cellWidth, maxWidth: Math.max(cellWidth, 200) }}
             title={multiple ? localeService.t('dataValidation.listMultiple.dropdown') : localeService.t('dataValidation.list.dropdown')}
             value={value}
             multiple={multiple}

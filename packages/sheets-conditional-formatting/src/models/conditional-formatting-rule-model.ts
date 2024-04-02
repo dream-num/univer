@@ -19,6 +19,9 @@ import { Range } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import { createCfId } from '../utils/createCfId';
 import { ConditionalFormattingService } from '../services/conditional-formatting.service';
+import type { IAnchor } from '../utils/anchor';
+import { findIndexByAnchor, moveByAnchor } from '../utils/anchor';
+
 import type { IConditionFormattingRule, IRuleModel } from './type';
 import { ConditionalFormattingViewModel } from './conditional-formatting-view-model';
 
@@ -156,17 +159,16 @@ export class ConditionalFormattingRuleModel {
      * example [1,2,3,4,5,6],if you move behind 5 to 2, then cfId=5,targetId=2.
      * if targetId does not exist, it defaults to top
      */
-    moveRulePriority(unitId: string, subUnitId: string, cfId: string, targetCfId: string) {
+    moveRulePriority(unitId: string, subUnitId: string, start: IAnchor, end: IAnchor) {
         const list = this._ensureList(unitId, subUnitId);
-        const curIndex = list.findIndex((item) => item.cfId === cfId);
-        const targetCfIndex = list.findIndex((item) => item.cfId === targetCfId);
-        if (targetCfIndex === -1 || curIndex === -1 || targetCfIndex === curIndex) {
+        const curIndex = findIndexByAnchor(start, list, (rule) => rule.cfId);
+        const targetCfIndex = findIndexByAnchor(end, list, (rule) => rule.cfId);
+        if (targetCfIndex === null || curIndex === null || targetCfIndex === curIndex) {
             return;
         }
         const rule = list[curIndex];
         if (rule) {
-            list.splice(curIndex, 1);
-            list.splice(targetCfIndex, 0, rule);
+            moveByAnchor(start, end, list, (rule) => rule.cfId);
             const cfPriorityMap = list.map((item) => item.cfId).reduce((map, cur, index) => {
                 map.set(cur, index);
                 return map;

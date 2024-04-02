@@ -250,7 +250,7 @@ export const RuleList = (props: IRuleListProps) => {
         };
         const cfId = ruleList[getSaveIndex(from.y)].cfId;
         const targetCfId = ruleList[getSaveIndex(to.y)].cfId;
-        commandService.executeCommand(moveCfCommand.id, { unitId, subUnitId, cfId, targetCfId } as IMoveCfCommand);
+        commandService.executeCommand(moveCfCommand.id, { unitId, subUnitId, start: { id: cfId, type: 'self' }, end: { id: targetCfId, type: to.y > from.y ? 'after' : 'self' } } as IMoveCfCommand);
     };
 
     const handleCreate = () => {

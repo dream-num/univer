@@ -20,7 +20,7 @@ import { BooleanNumber } from '@univerjs/core';
 export const DEFAULT_DOCUMENT_DATA_SIMPLE: IDocumentData = {
     id: 'default-document-id',
     body: {
-        dataStream: '荷塘月色\r作者：朱自清\r\n',
+        dataStream: '荷塘𠮷\r作者：朱自清 👨‍👩‍👧‍👦 Today Office\r\n',
         textRuns: [
             {
                 st: 0,
@@ -36,7 +36,7 @@ export const DEFAULT_DOCUMENT_DATA_SIMPLE: IDocumentData = {
             },
             {
                 st: 5,
-                ed: 11,
+                ed: 36,
                 ts: {
                     fs: 18,
                     ff: 'Microsoft YaHei',
@@ -57,7 +57,7 @@ export const DEFAULT_DOCUMENT_DATA_SIMPLE: IDocumentData = {
                 },
             },
             {
-                startIndex: 11,
+                startIndex: 36,
                 paragraphStyle: {
                     spaceAbove: 10,
                     lineSpacing: 2,
@@ -67,7 +67,7 @@ export const DEFAULT_DOCUMENT_DATA_SIMPLE: IDocumentData = {
         ],
         sectionBreaks: [
             {
-                startIndex: 12,
+                startIndex: 37,
                 // columnProperties: [
                 //     {
                 //         width: 250,

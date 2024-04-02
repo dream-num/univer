@@ -42,6 +42,7 @@ import { getLastPage, updateBlockIndex } from './tools';
 import { createSkeletonSection } from './model/section';
 import { dealWithSections } from './block/section';
 import { createSkeletonPage } from './model/page';
+import { fontLibrary } from './shaping-engine/font-library';
 
 const DEFAULT_SECTION_BREAK: ISectionBreak = {
     columnProperties: [],

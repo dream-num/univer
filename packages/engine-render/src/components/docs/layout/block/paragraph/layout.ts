@@ -24,6 +24,7 @@ import {
 } from '../../tools';
 import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../../view-model/document-view-model';
+import { prepareParagraphBody, textShape } from '../../shaping-engine/text-shaping';
 import { shaping } from './shaping';
 import { lineBreaking } from './linebreaking';
 import { lineAdjustment } from './line-adjustment';
@@ -42,6 +43,10 @@ export function dealWidthParagraph(
 
     const paragraph = bodyModel.getParagraph(endIndex) || { startIndex: 0 };
     const { paragraphStyle = {} } = paragraph;
+
+    const paragraphBody = prepareParagraphBody(bodyModel.getBody()!, endIndex);
+
+    // textShape(paragraphBody);
 
     const shapedTextList = shaping(
         content,

@@ -62,13 +62,13 @@ export function spliceArray<T>(
 ) {
     const length = Object.keys(o).reduce((max, key) => Math.max(max, Number.parseInt(key)), 0) + 1;
 
-    // 删除指定范围内的元素
+    // Delete elements within the specified range
     for (let i = start; i < length; i++) {
         if (i < start + count) {
-            // 如果在删除范围内，直接删除
+            // If within deletion range, delete directly
             delete o[i];
         } else {
-            // 如果不在删除范围内，向前移动count个位置
+            // If not within deletion range, move forward count positions
             if (o[i] !== undefined) {
                 o[i - count] = o[i];
                 delete o[i];

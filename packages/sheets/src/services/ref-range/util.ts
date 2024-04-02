@@ -217,7 +217,7 @@ export const handleMoveRows = (params: IMoveRowsCommand, targetRange: IRange): I
 export const handleMoveRowsOther = (params: IMoveRowsCommand, targetRange: IRange) => {
     const { fromRange, toRange } = params.params || {};
     if (!fromRange || !toRange) {
-        return null;
+        return targetRange;
     }
 
     const { startRow: fromRow } = fromRange;
@@ -268,7 +268,7 @@ export const handleMoveCols = (params: IMoveColsCommand, targetRange: IRange): I
 export const handleMoveColsOther = (params: IMoveColsCommand, targetRange: IRange) => {
     const { fromRange, toRange } = params.params || {};
     if (!fromRange || !toRange) {
-        return null;
+        return targetRange;
     }
 
     const { startColumn: fromCol } = fromRange;
@@ -320,10 +320,12 @@ export const handleMoveRange = (param: IMoveRangeCommand, targetRange: IRange) =
 const handleMoveRangeOther = (param: IMoveRangeCommand, targetRange: IRange) => {
     const toRange = param.params?.toRange;
     const fromRange = param.params?.fromRange;
+    // illegal
     if (!toRange || !fromRange) {
-        return null;
+        return targetRange;
     }
 
+    // delete
     if (Rectangle.contains(toRange, targetRange)) {
         return null;
     }
@@ -543,6 +545,40 @@ export const handleInsertRangeMoveDown = (param: IInsertRangeMoveDownCommand, ta
     return operators;
 };
 
+export const handleInsertRangeMoveDownOther = (param: IInsertRangeMoveDownCommand, targetRange: IRange) => {
+    const range = param.params?.range;
+    if (!range) {
+        return targetRange;
+    }
+
+    const moveCount = range.endRow - range.startRow + 1;
+    const bottomRange: IRange = {
+        ...range,
+        startRow: range.startRow,
+        endRow: Number.POSITIVE_INFINITY,
+    };
+
+    const noMoveRanges = Rectangle.subtract(targetRange, bottomRange);
+    const targetMoveRange = Rectangle.getIntersects(bottomRange, targetRange);
+
+    if (!targetMoveRange) {
+        return targetRange;
+    }
+
+    const matrix = new ObjectMatrix<number>();
+    noMoveRanges.forEach((noMoveRange) => {
+        Range.foreach(noMoveRange, (row, col) => {
+            matrix.setValue(row, col, 1);
+        });
+    });
+
+    targetMoveRange && Range.foreach(targetMoveRange, (row, col) => {
+        matrix.setValue(row + moveCount, col, 1);
+    });
+
+    return queryObjectMatrix(matrix, (v) => v === 1);
+};
+
 export const handleInsertRangeMoveRight = (param: IInsertRangeMoveRightCommand, targetRange: IRange) => {
     const range = param.params?.range;
     if (!range) {
@@ -557,6 +593,40 @@ export const handleInsertRangeMoveRight = (param: IInsertRangeMoveRightCommand, 
         length,
     });
     return operators;
+};
+
+export const handleInsertRangeMoveRightOther = (param: IInsertRangeMoveRightCommand, targetRange: IRange) => {
+    const range = param.params?.range;
+    if (!range) {
+        return targetRange;
+    }
+
+    const moveCount = range.endColumn - range.startColumn + 1;
+    const bottomRange: IRange = {
+        ...range,
+        startColumn: range.startColumn,
+        endColumn: Number.POSITIVE_INFINITY,
+    };
+
+    const noMoveRanges = Rectangle.subtract(targetRange, bottomRange);
+    const targetMoveRange = Rectangle.getIntersects(bottomRange, targetRange);
+
+    if (!targetMoveRange) {
+        return targetRange;
+    }
+
+    const matrix = new ObjectMatrix<number>();
+    noMoveRanges.forEach((noMoveRange) => {
+        Range.foreach(noMoveRange, (row, col) => {
+            matrix.setValue(row, col, 1);
+        });
+    });
+
+    targetMoveRange && Range.foreach(targetMoveRange, (row, col) => {
+        matrix.setValue(row, col + moveCount, 1);
+    });
+
+    return queryObjectMatrix(matrix, (v) => v === 1);
 };
 
 export const handleDeleteRangeMoveLeft = (param: IDeleteRangeMoveLeftCommand, targetRange: IRange) => {
@@ -579,6 +649,48 @@ export const handleDeleteRangeMoveLeft = (param: IDeleteRangeMoveLeftCommand, ta
     return operators;
 };
 
+export const handleDeleteRangeMoveLeftOther = (param: IDeleteRangeMoveLeftCommand, targetRange: IRange) => {
+    const range = param.params?.range;
+    if (!range) {
+        return targetRange;
+    }
+
+    const rightRange: IRange = {
+        startRow: range.startRow,
+        endRow: range.endRow,
+        startColumn: range.endColumn,
+        endColumn: Number.POSITIVE_INFINITY,
+    };
+
+    const moveCount = range.endColumn - range.startColumn + 1;
+    // this range need delete
+    const targetDeleteRange = Rectangle.getIntersects(range, targetRange);
+
+    const noMoveRanges = Rectangle.subtract(targetRange, rightRange);
+    const targetMoveRange = Rectangle.getIntersects(rightRange, targetRange);
+
+    if (!targetDeleteRange && !targetMoveRange) {
+        return targetRange;
+    }
+
+    const matrix = new ObjectMatrix<number>();
+    noMoveRanges.forEach((noMoveRange) => {
+        Range.foreach(noMoveRange, (row, col) => {
+            matrix.setValue(row, col, 1);
+        });
+    });
+
+    targetMoveRange && Range.foreach(targetMoveRange, (row, col) => {
+        matrix.setValue(row, col - moveCount, 1);
+    });
+
+    targetDeleteRange && Range.foreach(targetDeleteRange, (row, col) => {
+        matrix.setValue(row, col, 0);
+    });
+
+    return queryObjectMatrix(matrix, (v) => v === 1);
+};
+
 export const handleDeleteRangeMoveUp = (param: IDeleteRangeMoveUpCommand, targetRange: IRange) => {
     const range = param.params?.range;
     if (!range) {
@@ -597,6 +709,47 @@ export const handleDeleteRangeMoveUp = (param: IDeleteRangeMoveUpCommand, target
         });
     }
     return operators;
+};
+
+export const handleDeleteRangeMoveUpOther = (param: IDeleteRangeMoveUpCommand, targetRange: IRange) => {
+    const range = param.params?.range;
+    if (!range) {
+        return targetRange;
+    }
+
+    const bottomRange: IRange = {
+        ...range,
+        startRow: range.endRow,
+        endRow: Number.POSITIVE_INFINITY,
+    };
+
+    const moveCount = range.endRow - range.startRow + 1;
+    // this range need delete
+    const targetDeleteRange = Rectangle.getIntersects(range, targetRange);
+
+    const noMoveRanges = Rectangle.subtract(targetRange, bottomRange);
+    const targetMoveRange = Rectangle.getIntersects(bottomRange, targetRange);
+
+    if (!targetDeleteRange && !targetMoveRange) {
+        return targetRange;
+    }
+
+    const matrix = new ObjectMatrix<number>();
+    noMoveRanges.forEach((noMoveRange) => {
+        Range.foreach(noMoveRange, (row, col) => {
+            matrix.setValue(row, col, 1);
+        });
+    });
+
+    targetMoveRange && Range.foreach(targetMoveRange, (row, col) => {
+        matrix.setValue(row - moveCount, col, 1);
+    });
+
+    targetDeleteRange && Range.foreach(targetDeleteRange, (row, col) => {
+        matrix.setValue(row, col, 0);
+    });
+
+    return queryObjectMatrix(matrix, (v) => v === 1);
 };
 
 export const runRefRangeMutations = (operators: IOperator[], range: IRange) => {
@@ -693,21 +846,16 @@ export const handleOtherDefaultRangeChangeWithEffectRefCommands = (range: IRange
     let operator: IOperator[] = [];
     switch (commandInfo.id) {
         case EffectRefRangId.DeleteRangeMoveLeftCommandId: {
-            operator = handleDeleteRangeMoveLeft(commandInfo as IDeleteRangeMoveLeftCommand, range);
-            break;
+            return handleDeleteRangeMoveLeftOther(commandInfo as IDeleteRangeMoveLeftCommand, range);
         }
         case EffectRefRangId.DeleteRangeMoveUpCommandId: {
-            operator = handleDeleteRangeMoveUp(commandInfo as IDeleteRangeMoveUpCommand, range);
-            break;
+            return handleDeleteRangeMoveUpOther(commandInfo as IDeleteRangeMoveUpCommand, range);
         }
-
         case EffectRefRangId.InsertRangeMoveDownCommandId: {
-            operator = handleInsertRangeMoveDown(commandInfo as IInsertRangeMoveDownCommand, range);
-            break;
+            return handleInsertRangeMoveDownOther(commandInfo as IInsertRangeMoveDownCommand, range);
         }
         case EffectRefRangId.InsertRangeMoveRightCommandId: {
-            operator = handleInsertRangeMoveRight(commandInfo as IInsertRangeMoveRightCommand, range);
-            break;
+            return handleInsertRangeMoveRightOther(commandInfo as IInsertRangeMoveRightCommand, range);
         }
         case EffectRefRangId.InsertColCommandId: {
             operator = handleInsertCol(commandInfo as IInsertColCommand, range);

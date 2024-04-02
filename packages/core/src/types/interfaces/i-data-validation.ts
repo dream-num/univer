@@ -47,6 +47,9 @@ export interface IDataValidationRuleOptions {
 
 export interface IDataValidationRule extends IDataValidationRuleBase, IDataValidationRuleOptions {
     uid: string;
+    /**
+     * @debt should using specific type cover sheet、doc、slide range type
+     */
     ranges: any;
 
 }

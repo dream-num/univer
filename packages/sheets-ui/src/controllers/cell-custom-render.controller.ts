@@ -44,7 +44,7 @@ export class CellCustomRenderController extends Disposable {
         this._univerInstanceService.currentSheet$.subscribe((workbook) => {
             if (workbook) {
                 const unitId = workbook.getUnitId();
-                const subUnitId = workbook.getActiveSheet().getSheetId();
+
                 const currentRender = this._renderManagerService.getRenderById(workbook.getUnitId());
                 if (currentRender && currentRender.mainComponent) {
                     disposableCollection.dispose();
@@ -102,7 +102,7 @@ export class CellCustomRenderController extends Disposable {
                         const row = cellIndex.actualRow;
                         const col = cellIndex.actualCol;
                         const sortedRenders = renders.sort(sortRules);
-
+                        const subUnitId = workbook.getActiveSheet().getSheetId();
                         const info: ICellRenderContext = {
                             data: cellData,
                             style: skeleton.getsStyles().getStyleByCell(cellData),

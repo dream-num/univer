@@ -132,8 +132,12 @@
 
         transition: all 0.2s;
 
+        text-decoration: none;
+
         &:hover {
             background-color: @slider-parts-hover-color;
+            text-decoration: inherit;
+            color: inherit;
         }
 
         &.dropdown-open {
@@ -173,9 +177,12 @@
         border-radius: var(--border-radius-base);
 
         transition: background 0.2s;
+        text-decoration: none;
 
         &:hover {
             background-color: rgb(var(--bg-color-hover));
+            color: inherit;
+            text-decoration: inherit;
         }
     }
 

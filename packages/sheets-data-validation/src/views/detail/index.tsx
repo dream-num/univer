@@ -17,14 +17,12 @@
 import type { DataValidationOperator, IDataValidationRuleBase, IDataValidationRuleOptions, IExecutionOptions, ISheetDataValidationRule, IUnitRange } from '@univerjs/core';
 import { DataValidationType, debounce, ICommandService, isUnitRangesEqual, isValidRange, LocaleService, RedoCommand, shallowEqual, UndoCommand } from '@univerjs/core';
 import type { IUpdateDataValidationSettingCommandParams } from '@univerjs/data-validation';
-import { DataValidationModel, DataValidatorRegistryScope, DataValidatorRegistryService, RemoveDataValidationCommand, UpdateDataValidationOptionsCommand, UpdateDataValidationSettingCommand } from '@univerjs/data-validation';
-import { TWO_FORMULA_OPERATOR_COUNT } from '@univerjs/data-validation/types/const/two-formula-operators.js';
+import { DataValidationModel, DataValidatorRegistryScope, DataValidatorRegistryService, getRuleOptions, getRuleSetting, RemoveDataValidationCommand, TWO_FORMULA_OPERATOR_COUNT, UpdateDataValidationOptionsCommand, UpdateDataValidationSettingCommand } from '@univerjs/data-validation';
 import { Button, FormLayout, Select } from '@univerjs/design';
 import { ComponentManager, RangeSelector, useEvent, useObservable } from '@univerjs/ui';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useMemo, useState } from 'react';
 import { serializeRange } from '@univerjs/engine-formula';
-import { getRuleOptions, getRuleSetting } from '@univerjs/data-validation/common/util.js';
 import type { IUpdateSheetDataValidationRangeCommandParams } from '../../commands/commands/data-validation.command';
 import { UpdateSheetDataValidationRangeCommand } from '../../commands/commands/data-validation.command';
 import { DataValidationOptions } from '../options';

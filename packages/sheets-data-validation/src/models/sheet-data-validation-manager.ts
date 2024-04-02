@@ -14,15 +14,10 @@
  * limitations under the License.
  */
 
-import type { CellValue } from '@univerjs/core/types/interfaces/index.js';
-import { DataValidationManager } from '@univerjs/data-validation/models/data-validation-manager.js';
-import type { Nullable } from '@univerjs/core/shared/index.js';
-import { ObjectMatrix } from '@univerjs/core/shared/index.js';
-import { Range } from '@univerjs/core/sheets/range.js';
-import type { IUpdateRulePayload } from '@univerjs/data-validation/types/interfaces/i-update-rule-payload.js';
-import { DataValidatorRegistryService, UpdateRuleType } from '@univerjs/data-validation';
-import type { ISheetDataValidationRule } from '@univerjs/core';
-import { DataValidationStatus } from '@univerjs/core';
+import type { CellValue, ISheetDataValidationRule, Nullable } from '@univerjs/core';
+import { DataValidationManager, DataValidatorRegistryService, UpdateRuleType } from '@univerjs/data-validation';
+import { DataValidationStatus, ObjectMatrix, Range } from '@univerjs/core';
+import type { IUpdateRulePayload } from '@univerjs/data-validation';
 import type { ISheetLocation } from '@univerjs/sheets';
 import type { Injector } from '@wendellhu/redi';
 import type { IDataValidationResCache } from '../services/dv-cache.service';
@@ -74,12 +69,12 @@ export class SheetDataValidationManager extends DataValidationManager<ISheetData
         this._ruleMatrix = new RuleMatrix(matrix);
     }
 
-    override addRule(rule: ISheetDataValidationRule): void {
+    override addRule(rule: ISheetDataValidationRule, index?: number): void {
         this._ruleMatrix.addRule(rule);
         this._dataValidationCacheService.addRule(this.unitId, this.subUnitId, rule);
         this._dataValidationFormulaService.addRule(this.unitId, this.subUnitId, rule.uid, rule.formula1, rule.formula2);
         this._dataValidationCustomFormulaService.addRule(this.unitId, this.subUnitId, rule);
-        super.addRule(rule);
+        super.addRule(rule, index);
     }
 
     override updateRule(ruleId: string, payload: IUpdateRulePayload) {

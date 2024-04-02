@@ -18,7 +18,7 @@ import { FormLayout } from '@univerjs/design';
 import React from 'react';
 
 import { TextEditor } from '@univerjs/ui';
-import type { IFormulaInputProps } from '@univerjs/data-validation/types/interfaces/i-formula-input.js';
+import type { IFormulaInputProps } from '@univerjs/data-validation';
 
 export function CustomFormulaInput(props: IFormulaInputProps) {
     const { unitId, subUnitId, value, onChange, showError, validResult } = props;

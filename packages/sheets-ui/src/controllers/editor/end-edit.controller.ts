@@ -392,7 +392,6 @@ export function getCellDataByInput(
     cellData = Tools.deepClone(cellData);
 
     const { documentModel } = documentLayoutObject;
-
     if (documentModel == null) {
         return null;
     }
@@ -400,10 +399,11 @@ export function getCellDataByInput(
     const snapshot = documentModel.getSnapshot();
 
     const { body } = snapshot;
-
     if (body == null) {
         return null;
     }
+
+    cellData.t = undefined;
 
     const data = body.dataStream;
     const lastString = data.substring(data.length - 2, data.length);

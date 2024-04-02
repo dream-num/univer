@@ -211,6 +211,6 @@ describe('Test FUniver', () => {
 
     it('Function getSheetBySheetId', () => {
         const worksheet = univerAPI.getActiveWorkbook()?.getSheetBySheetId('sheet1');
-        expect(worksheet!.getId()).toBe('sheet1');
+        expect(worksheet!.getSheetId()).toBe('sheet1');
     });
 });

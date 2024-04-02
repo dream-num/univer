@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { useEvent } from 'rc-util';
 import styles from './index.module.less';
 
@@ -24,6 +24,8 @@ interface IAbsolutePosition {
     top: number;
     bottom: number;
 }
+
+const RectPopupContext = createContext({ top: 0, bottom: 0, left: 0, right: 0 });
 
 export interface IRectPopupProps {
     children?: React.ReactNode;
@@ -136,11 +138,15 @@ function RectPopup(props: IRectPopupProps) {
                 e.stopPropagation();
             }}
         >
-            {children}
+            <RectPopupContext.Provider value={anchorRect}>
+                {children}
+            </RectPopupContext.Provider>
         </section>
     );
 }
 
 RectPopup.calcPopupPosition = calcPopupPosition;
+
+RectPopup.useContext = () => useContext(RectPopupContext);
 
 export { RectPopup };

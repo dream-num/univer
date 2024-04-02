@@ -57,7 +57,7 @@ export {
     PREDEFINED_HOOK_NAME,
     SheetClipboardService,
 } from './services/clipboard/clipboard.service';
-export type { ICellDataWithSpanInfo, ISheetClipboardHook } from './services/clipboard/type';
+export type { ICellDataWithSpanInfo, ISheetClipboardHook, ISheetRangeLocation, ICopyPastePayload } from './services/clipboard/type';
 export { COPY_TYPE } from './services/clipboard/type';
 export { getRepeatRange } from './services/clipboard/utils';
 export { CellEditorManagerService, ICellEditorManagerService } from './services/editor/cell-editor-manager.service';
@@ -82,3 +82,4 @@ export { HoverController } from './controllers/hover.controller';
 export { SHEET_VIEW_KEY } from './common/keys';
 export { SheetCanvasPopManagerService } from './services/canvas-pop-manager.service';
 export { mergeSetRangeValues } from './services/clipboard/utils';
+export type { IAutoFillLocation } from './services/auto-fill/type';

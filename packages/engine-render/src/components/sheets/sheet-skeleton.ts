@@ -1621,17 +1621,29 @@ export class SpreadsheetSkeleton extends Skeleton {
             return true;
         }
 
-        const hidden = this._worksheet.getColVisible(c) === false || this._worksheet.getRowVisible(r) === false;
-        if (hidden) {
-            return true;
-        }
-
         /**
          * TODO: DR-Univer getCellRaw for slide demo, the implementation approach will be changed in the future.
          */
         const cell = this._worksheet.getCell(r, c) || this._worksheet.getCellRaw(r, c);
         if (!cell) {
             return true;
+        }
+
+        const hidden = this._worksheet.getColVisible(c) === false || this._worksheet.getRowVisible(r) === false;
+        if (hidden) {
+            const { isMerged, isMergedMainCell } = getCellInfoInMergeData(
+                r,
+                c,
+                this._dataMergeCache
+            );
+
+            if (isMerged && !isMergedMainCell) {
+                // If the cell is merged and is not the main cell, the cell is not rendered.
+                return true;
+            } else if (!isMergedMainCell) {
+                // If the cell no merged, the cell is not rendered.
+                return true;
+            }
         }
 
         const cache = this._stylesCache;

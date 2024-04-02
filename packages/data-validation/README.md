@@ -12,7 +12,11 @@
 ### Installation
 
 ```shell
+# Using npm
 npm i @univerjs/data-validation
+
+# Using pnpm
+pnpm add @univerjs/data-validation
 ```
 
 ### Register the plugin

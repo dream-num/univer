@@ -31,7 +31,11 @@ export class FWorksheet {
         @ICommandService private readonly _commandService: ICommandService
     ) {}
 
-    getId(): string {
+    /**
+     * Returns the worksheet id
+     * @returns sheet id
+     */
+    getSheetId(): string {
         return this._worksheet.getSheetId();
     }
 

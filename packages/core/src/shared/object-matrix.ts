@@ -58,52 +58,23 @@ export function insertMatrixArray<T>(
 export function spliceArray<T>(
     start: number,
     count: number,
-    o: IObjectArrayPrimitiveType<T> | IObjectMatrixPrimitiveType<T>,
-    insert?: IObjectArrayPrimitiveType<T> | IObjectMatrixPrimitiveType<T>
+    o: IObjectArrayPrimitiveType<T> | IObjectMatrixPrimitiveType<T>
 ) {
-    const end = start + count;
-    const length = getArrayLength(o);
-    const array = o;
-    let effective = 0;
-    const splice: IObjectArrayPrimitiveType<T> | IObjectMatrixPrimitiveType<T> = {};
-    for (let i = start; i < end; i++) {
-        const item = array[i];
-        if (item !== undefined) {
-            delete array[i];
-            splice[effective] = item;
-            effective++;
-        }
-    }
-    const insertLength = insert ? getArrayLength(insert) : 0;
+    const length = Object.keys(o).reduce((max, key) => Math.max(max, Number.parseInt(key)), 0) + 1;
 
-    const diff = start - end + insertLength;
-    const last = length;
-
-    if (diff > 0) {
-        for (let i = last - 1; i >= end; i--) {
-            const item = array[i];
-            if (item !== undefined) {
-                array[i + diff] = array[i];
-                delete array[i];
-            }
-        }
-    } else if (diff < 0) {
-        for (let i = end; i < last; i++) {
-            const item = array[i];
-            if (item !== undefined) {
-                array[i + diff] = array[i];
-                delete array[i];
+    // Delete elements within the specified range
+    for (let i = start; i < length; i++) {
+        if (i < start + count) {
+            // If within deletion range, delete directly
+            delete o[i];
+        } else {
+            // If not within deletion range, move forward count positions
+            if (o[i] !== undefined) {
+                o[i - count] = o[i];
+                delete o[i];
             }
         }
     }
-
-    if (insert) {
-        for (let i = 0; i < insertLength; i++) {
-            array[start + i] = insert[i];
-        }
-    }
-
-    return splice;
 }
 
 export function concatMatrixArray<T>(source: IObjectArrayPrimitiveType<T>, target: IObjectArrayPrimitiveType<T>) {

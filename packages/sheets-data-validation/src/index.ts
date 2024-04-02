@@ -35,3 +35,4 @@ export { DataValidationCopyPasteController } from './controllers/dv-copy-paste.c
 export { DataValidationResourceController } from './controllers/dv-resource.controller';
 export { HideDataValidationDropdown, ShowDataValidationDropdown } from './commands/operations/data-validation.operation';
 export { DataValidationRejectInputController } from './controllers/dv-reject-input.controller';
+export { enUS, zhCN } from './locale';

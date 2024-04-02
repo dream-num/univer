@@ -22,8 +22,8 @@ import {
     RenderManagerService,
     Scene,
     SpreadsheetSkeleton,
+    ThinEngine,
 } from '@univerjs/engine-render';
-import { ThinEngine } from '@univerjs/engine-render/thin-engine.js';
 import type { ISelectionWithCoordAndStyle } from '@univerjs/sheets';
 import { DesktopPlatformService, DesktopShortcutService, IPlatformService, IShortcutService } from '@univerjs/ui';
 import type { Injector } from '@wendellhu/redi';

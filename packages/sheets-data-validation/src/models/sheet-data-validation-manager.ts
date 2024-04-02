@@ -69,12 +69,12 @@ export class SheetDataValidationManager extends DataValidationManager<ISheetData
         this._ruleMatrix = new RuleMatrix(matrix);
     }
 
-    override addRule(rule: ISheetDataValidationRule): void {
+    override addRule(rule: ISheetDataValidationRule, index?: number): void {
         this._ruleMatrix.addRule(rule);
         this._dataValidationCacheService.addRule(this.unitId, this.subUnitId, rule);
         this._dataValidationFormulaService.addRule(this.unitId, this.subUnitId, rule.uid, rule.formula1, rule.formula2);
         this._dataValidationCustomFormulaService.addRule(this.unitId, this.subUnitId, rule);
-        super.addRule(rule);
+        super.addRule(rule, index);
     }
 
     override updateRule(ruleId: string, payload: IUpdateRulePayload) {

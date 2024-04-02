@@ -27,6 +27,10 @@ import { serialTimeToTimestamp } from '../utils/date';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
 import { getFormulaResult } from '../utils/formula';
 import { DATE_DROPDOWN_KEY } from '../views';
+import { DateOperatorErrorTitleMap, DateOperatorNameMap, DateOperatorTitleMap } from '../common/date-text-map';
+
+const FORMULA1 = '{FORMULA1}';
+const FORMULA2 = '{FORMULA2}';
 
 const isValidDateString = (date: string) => {
     return dayjs(date).isValid();
@@ -234,5 +238,27 @@ export class DateValidator extends BaseDataValidator<Dayjs> {
                 return '';
             }
         }
+    }
+
+    override get operatorNames() {
+        return this.operators.map((operator) => this.localeService.t(DateOperatorNameMap[operator]));
+    }
+
+    override generateRuleName(rule: IDataValidationRuleBase): string {
+        if (!rule.operator) {
+            return this.titleStr;
+        }
+
+        const ruleName = this.localeService.t(DateOperatorTitleMap[rule.operator]).replace(FORMULA1, rule.formula1 ?? '').replace(FORMULA2, rule.formula2 ?? '');
+        return `${this.titleStr} ${ruleName}`;
+    }
+
+    override generateRuleErrorMessage(rule: IDataValidationRuleBase) {
+        if (!rule.operator) {
+            return this.titleStr;
+        }
+
+        const errorMsg = this.localeService.t(DateOperatorErrorTitleMap[rule.operator]).replace(FORMULA1, rule.formula1 ?? '').replace(FORMULA2, rule.formula2 ?? '');
+        return `${errorMsg}`;
     }
 }

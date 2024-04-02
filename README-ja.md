@@ -31,24 +31,24 @@
     日本語
 </p>
 
-<!-- An introduction photo here. -->
-
 > 🚧 このプロジェクトはまだ開発中です。API が大きく変更される可能性があることにご注意ください。問題や提案をお寄せください。
+> また、日本語の開発ドキュメントはまだ未完成です。英語のドキュメントをご参照ください。
 
 ## はじめに
 
-Univer は、スプレッドシート、ドキュメント、スライドを含む、企業向けドキュメントおよびデータコラボレーションソリューションのセットです。拡張性の高い設計により、開発者は Univer をベースにカスタマイズされた機能を利用することができます。
+Univer は、スプレッドシート、ドキュメント、スライドを含む、エンタープライズ向けドキュメントおよびデータコラボレーションソリューションです。高い拡張性を備えた設計により、開発者は Univer 上で独自の機能をカスタマイズできます。
 
-Univer の機能のハイライト:
+特徴：
 
-- 📈 Univer はスプレッドシートに対応しています。今後は文書やスライドにも対応する予定です。
-- 🌌 拡張性の高いアーキテクチャ設計。
-  - 🔌 プラグインアーキテクチャにより、ドキュメントの機能をオンデマンドで組み合わせることができ、サードパーティのプラグインをサポートし、カスタマイズ開発を容易にします。
-  - 💄 開発者が一貫したユーザー体験を提供できるよう、コンポーネント・ライブラリとアイコンを提供する。
-- ⚡ ハイパフォーマンス。
-  - ✏️ Canvas をベースとした、統一された効率的なレンダリングエンジンと数式エンジン。
-  - 🧮 ハイパフォーマンスフォーミュラエンジン、Web Worker をサポート。
-- 🌍 国際化サポート。
+- 📈 Univer は、**スプレッドシート**と**ドキュメント**の両方をサポートするように設計されています。将来的には**スライド**もサポートされる予定です。
+- ⚙️ Univer は簡単に**組み込む**ことができ、アプリケーションにシームレスに統合できます。
+- 🎇 Univer は**強力**で、**数式**、**条件付き書式**、**データ検証**、**フィルタリング**、**共同編集**、**印刷**、**インポート＆エクスポート**、幅広い機能を提供しています。さらに、今後も多くの機能が追加される予定です。
+- 🔌 Univer は、*プラグインアーキテクチャ*と*ファサード API*のおかげで**高い拡張性**を持ち、開発者が Univer 上で独自の要件を実装するのが楽しみになります。
+- 💄 Univer は、*テーマ*を使用して外観をパーソナライズできるため、**高度にカスタマイズ可能**です。また、国際化（i18n）のサポートも提供しています。
+- ⚡ Univerは**パフォーマンス**に優れています。
+  - ✏️ Univer は、Canvas ベースの効率的な*レンダリングエンジン*を搭載しており、さまざまなドキュメントタイプを完璧にレンダリングできます。レンダリングエンジンは、*句読点の圧縮*、*テキストと画像のレイアウト*、*スクロールバッファリング*などの高度な組版機能をサポートしています。
+  - 🧮 Univer は、Web ワーカーやサーバーサイドでも動作可能な超高速の*数式エンジン*を搭載しています。
+- 🌌 Univer は**高度に統合された**システムです。ドキュメント、スプレッドシート、スライドは相互に連携でき、同じ Canvas 上にレンダリングすることもできるため、Univer 内で情報とデータの流れを実現できます。
 
 ## Examples
 
@@ -76,11 +76,11 @@ Univer の機能のハイライト:
 | [Zen Mode](https://univer.ai/guides/tutorials/zen-editor/#live-demo)<br>The cell of Sheet is a Doc?                                 | [![](./docs/img/zen-mode.gif)](https://univer.ai/guides/tutorials/zen-editor/#live-demo)                           |
 | [Univer(SaaS version)](https://univer.ai/)<br>With Univer, we enable users to create 3 forms of page as they wish. By merging sheet, doc and slide's capabilities together, Univer empowers individuals and teams to create, organize and streamline workflows effortlessly.                                   | [![](./docs/img/univer-workspace-drag-chart.gif)](https://youtu.be/kpV0MvQuFZA)                           |
 
-## 使用方法
+## 使い方
 
 Univer を npm パッケージとしてインポートすることをお勧めします。ドキュメントサイトの [Quick Start](https://univer.ai/ja-jp/guides/quick-start/) セクションをご覧ください。また、[オンラインプレイグラウンド](https://univer.ai/playground/)では、開発環境を構築することなく Univer をプレビューすることができます。
 
-ユニバーはプラグインアーキテクチャを採用しています。以下のパッケージをインストールすることで、Univer の機能を拡張することができます。
+Univer はプラグインアーキテクチャを採用しています。以下のパッケージをインストールすることで、Univer の機能を拡張することができます。
 
 ### パッケージ
 
@@ -88,7 +88,7 @@ Univer を npm パッケージとしてインポートすることをお勧め�
 | :-------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------ | :-------------------------------------------------------------------------------------------------------------------------- |
 | [core](./packages/core)                                   | Univer のプラグインシステムとアーキテクチャを実装します。また、基本的なサービスや様々な種類のドキュメントのモデルを提供します。               | [![npm version](https://img.shields.io/npm/v/@univerjs/core)](https://npmjs.org/package/@univerjs/core)                     |
 | [design](./packages/design)                               | Univer のデザインシステムを実装。CSS と React ベースのコンポーネントキットを提供します。                                              | [![npm version](https://img.shields.io/npm/v/@univerjs/design)](https://npmjs.org/package/@univerjs/design)                 |
-| [docs](./packages/docs)                                   | リッチテキスト編集機能の基本ロジックを実装し、また他の種類の文書でのテキスト編集を容易になります。                                        | [![npm version](https://img.shields.io/npm/v/@univerjs/docs)](https://npmjs.org/package/@univerjs/docs)                     |
+| [docs](./packages/docs)                                   | リッチテキスト編集機能の基本ロジックを実装し、他の種類の文書でもテキスト編集を容易にします。                                        | [![npm version](https://img.shields.io/npm/v/@univerjs/docs)](https://npmjs.org/package/@univerjs/docs)                     |
 | [docs-ui](./packages/docs-ui)                             | Univer ドキュメントのユーザーインターフェースを提供します。                                                                       | [![npm version](https://img.shields.io/npm/v/@univerjs/docs-ui)](https://npmjs.org/package/@univerjs/docs-ui)               |
 | [engine-formula](./packages/engine-formula)               | Canvas をベースとしたレンダリングエンジンを実装し、拡張可能です。                                                                  | [![npm version](https://img.shields.io/npm/v/@univerjs/engine-formula)](https://npmjs.org/package/@univerjs/engine-formula) |
 | [engine-numfmt](./packages/engine-numfmt)                 | ナンバーフォーマットエンジンを実装します。                                                                                      | [![npm version](https://img.shields.io/npm/v/@univerjs/engine-numfmt)](https://npmjs.org/package/@univerjs/engine-numfmt)   |
@@ -100,12 +100,12 @@ Univer を npm パッケージとしてインポートすることをお勧め�
 | [sheets](./packages/sheets)                               | スプレッドシート機能の基本ロジック。                                                                                            | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets)](https://npmjs.org/package/@univerjs/sheets)                 |
 | [sheets-conditional-formatting](./packages/sheets-conditional-formatting)   | スプレッドシートの条件付き書式設定機能を実装します。                                                          | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets-conditional-formatting)](https://npmjs.org/package/@univerjs/sheets-conditional-formatting) |
 | [sheets-conditional-formatting-ui](./packages/sheets-conditional-formatting-ui)   | スプレッドシートの条件付き書式設定機能を実装します。                                                          | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets-conditional-formatting-ui)](https://npmjs.org/package/@univerjs/sheets-conditional-formatting-ui) |
-| [sheets-find-replace](./packages/sheets-find-replace)     | スプレッドシートの検索と置換機能を実装しています。                                                                             | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets-find-replace)](https://npmjs.org/package/@univerjs/sheets-find-replace) |
+| [sheets-find-replace](./packages/sheets-find-replace)     | スプレッドシートの検索と置換機能を実装します。                                                                             | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets-find-replace)](https://npmjs.org/package/@univerjs/sheets-find-replace) |
 | [sheets-formula](./packages/sheets-formula)               | スプレッドシートに数式を実装します。                                                                                           | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets-formula)](https://npmjs.org/package/@univerjs/sheets-formula) |
 | [sheets-numfmt](./packages/sheets-numfmt)                 | スプレッドシートの数値フォーマットを実装します。                                                                                     | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets-numfmt)](https://npmjs.org/package/@univerjs/sheets-numfmt)   |
 | [sheets-zen-editor](./packages/sheets-zen-editor)         | スプレッドシートの禅編集モードを実装します。                                                                                   | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets-zen-editor)](https://npmjs.org/package/@univerjs/sheets-zen-editor)   |
 | [sheets-ui](./packages/sheets-ui)                         | Univer スプレッドシートのユーザーインターフェースを提供します。                                                                      | [![npm version](https://img.shields.io/npm/v/@univerjs/sheets-ui)](https://npmjs.org/package/@univerjs/sheets-ui)           |
-| [ui](./packages/ui)                                       | React をベースにした Univer とワークベンチのレイアウトで、基本的なユーザーインタラクションを実装します。                                 | [![npm version](https://img.shields.io/npm/v/@univerjs/ui)](https://npmjs.org/package/@univerjs/ui)                         |
+| [ui](./packages/ui)                                       | React ベースの Univer とワークベンチのレイアウトを提供し、基本的なユーザーインタラクションを実装します。                                 | [![npm version](https://img.shields.io/npm/v/@univerjs/ui)](https://npmjs.org/package/@univerjs/ui)                         |
 | [uniscript](./packages/uniscript) (試験的)                 | Typescript に基づく DSL を実装し、より高度なタスクの実行を可能にします。                                                      | [![npm version](https://img.shields.io/npm/v/@univerjs/uniscript)](https://npmjs.org/package/@univerjs/uniscript)           |
 
 ## コントリビュート

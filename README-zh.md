@@ -37,20 +37,19 @@
 
 ## 介绍
 
-Univer 是一套企业文档与数据协同解决方案，包括电子表格、文档和幻灯片三大文档类型，高可扩展性设计使得开发者可以在 Univer 的基础上定制个性化功能。
+Univer 是一套企业文档与数据协同解决方案，融合了电子表格、文档和幻灯片。
 
-Univer 的功能特性包括：
+Univer 的亮点包括：
 
-- 📈 支持电子表格，后续还会支持文档和幻灯片
-- 🌌 高度可扩展的架构设计
-  - 🔌 插件化架构，文档的能力可按需组合，支持自定义插件，方便二次开发
-  - 💄 提供组件库和图标以帮助开发者呈现一致的用户体验
-- ⚡ 高性能
-  - ✏️ 统一高效的渲染引擎和公式引擎，基于 Canvas
-  - 🧮 高性能的公式引擎，支持 Web Worker
-- 🌍 国际化支持
-
-点击[这里](https://univer.ai/guides/features)以了解 Univer 目前已经推出的功能。
+- 📈 **支持多种类文档** Univer 目前支持**电子表格**和**富文本文档**，未来还会增加对**幻灯片**的支持。
+- ⚙️ **易于集成** Univer 能够无缝集成到你的应用当中。
+- 🎇 **功能强大** Univer 支持非常多的功能，包括但不限于**公式计算**、**条件格式**、**数据验证**、**筛选**、**协同编辑**、**打印**、**导入导出**等等，更多的功能即将陆续发布。
+- 🔌 **高度可扩展**Univer 的 *插件化架构* 和 *Facade API* 使得扩展 Univer 的功能变得轻松容易，你可以在 Univer 之上实现自己的业务需求。
+- 💄 **高度可定制** 你可以通过*主题*来自定义 Univer 的外观，另外还支持国际化。
+- ⚡ **性能优越**
+  - ✏️ Univer 实现了基于 canvas 的 *渲染引擎*，能够高效地渲染不同类型的文档。渲染引擎支持 *标点挤压* *盘古之白* *图文混排* *滚动贴图* 等高级特性。
+  - 🧮 自研的 *公式引擎* 拥有超快的计算速度，还能在 Web Worker 中运行，未来将会支持服务端计算。
+- 🌌 **高度集成** 文档、电子表格和幻灯片能够互操作，甚至是渲染在同一个画布上，使得信息和数据能够在 Univer 当中自由地流动。
 
 ## 例子
 
@@ -60,23 +59,23 @@ Univer 的功能特性包括：
 | [Sheets Multi](https://www.univer.ai/examples/sheets-multi/)<br>在一个页面中可以创建多个 Univer 实例，让表格间可以实现互操作    | [![](./docs/img/examples-sheets-multi.gif)](https://www.univer.ai/examples/sheets-multi/)                           |
 | [Sheets Uniscript](https://www.univer.ai/examples/sheets-uniscript/)<br>在 Univer Sheets 中可以直接使用 JavaScript 语法操作表格中的数据，实现自动化 | [![](./docs/img/examples-sheets-uniscript.gif)](https://www.univer.ai/examples/sheets-uniscript/)                       |
 | [Sheets Big Data](https://www.univer.ai/examples/sheets-big-data/)<br>加载 1000 万单元格数据量，在 500ms 内完成 | [![](./docs/img/examples-sheets-big-data.gif)](https://www.univer.ai/examples/sheets-big-data/)                       |
-| [Sheets Collaboration](https://univer.ai/pro-examples/sheets-collaboration/)<br>请打开两个窗口或者邀请小伙伴一起体验 Univer Sheets 协同            | [![](./docs/img/pro-examples-sheets-collaboration.gif)](https://univer.ai/pro-examples/sheets-collaboration/)                           |
-| [Sheets Collaboration Playground](https://univer.ai/pro-examples/sheets-collaboration-playground/)<br>演示协同的过程，A 编辑表格后，B 到底是如何处理的？这里是一个有趣的实验  | [![](./docs/img/pro-examples-sheets-collaboration-playground.gif)](https://univer.ai/pro-examples/sheets-collaboration-playground/)                           |
-| [Sheets Import/Export](https://univer.ai/pro-examples/sheets-exchange/)<br>支持 xlsx 文件导入和导出                 | [![](./docs/img/pro-examples-sheets-exchange.gif)](https://univer.ai/pro-examples/sheets-exchange/)                           |
-| [Sheets Print](https://univer.ai/pro-examples/sheets-print/)<br>体验 Univer Sheets 的高清打印能力                     | [![](./docs/img/pro-examples-sheets-print.gif)](https://univer.ai/pro-examples/sheets-print/)                           |
+| [Sheets Collaboration (Pro Feature)](https://univer.ai/pro-examples/sheets-collaboration/)<br>请打开两个窗口或者邀请小伙伴一起体验 Univer Sheets 协同            | [![](./docs/img/pro-examples-sheets-collaboration.gif)](https://univer.ai/pro-examples/sheets-collaboration/)                           |
+| [Sheets Collaboration Playground (Pro Feature)](https://univer.ai/pro-examples/sheets-collaboration-playground/)<br>演示协同的过程，A 编辑表格后，B 到底是如何处理的？这里是一个有趣的实验  | [![](./docs/img/pro-examples-sheets-collaboration-playground.gif)](https://univer.ai/pro-examples/sheets-collaboration-playground/)                           |
+| [Sheets Import/Export (Pro Feature)](https://univer.ai/pro-examples/sheets-exchange/)<br>支持 xlsx 文件导入和导出                 | [![](./docs/img/pro-examples-sheets-exchange.gif)](https://univer.ai/pro-examples/sheets-exchange/)                           |
+| [Sheets Print (Pro Feature)](https://univer.ai/pro-examples/sheets-print/)<br>体验 Univer Sheets 的高清打印能力                     | [![](./docs/img/pro-examples-sheets-print.gif)](https://univer.ai/pro-examples/sheets-print/)                           |
 | [Sheets Data Validation / Conditional Formatting](https://univer-qqqkeqnw5-univer.vercel.app/sheets/)<br>Univer Sheets 数据格式和条件格式的开发预览版                     | [![](./docs/img/examples-sheets-data-validation-conditional-format.png)](https://univer-qqqkeqnw5-univer.vercel.app/sheets/)                           |
 | <h3>📝 Univer Docs</h3>                    |                   |
 | [Docs](https://www.univer.ai/examples/docs/)<br>已开放：有序无序列表、段落设置、图文混排、分节展示多列/单列（暂定）：超链接、批注、表格、图表                                  | [![](./docs/img/examples-docs.gif)](https://www.univer.ai/examples/docs/)                           |
 | [Docs Multi](https://www.univer.ai/examples/docs-multi/)<br>在一个页面中可以创建多个 Univer 实例，让doc可以实现互操作 | [![](./docs/img/examples-docs-multi.gif)](https://www.univer.ai/examples/docs-multi/)                          |
 | [Docs Uniscript](https://www.univer.ai/examples/docs-uniscript/)<br>在 Univer Docs 中可以直接使用 JavaScript 语法操作内容 | [![](./docs/img/examples-docs-uniscript.gif)](https://www.univer.ai/examples/docs-uniscript/)                          |
 | [Docs Big Data](https://www.univer.ai/examples/docs-big-data/)<br>100 万字 Docs 加载演示 | [![](./docs/img/examples-docs-big-data.gif)](https://www.univer.ai/examples/docs-big-data/)                          |
-| [Docs Collaboration](https://univer.ai/pro-examples/docs-collaboration/)<br>请打开两个窗口或者邀请小伙伴一起体验 Univer Docs 协同               | [![](./docs/img/pro-examples-docs-collaboration.gif)](https://univer.ai/pro-examples/docs-collaboration/)                           |
-| [Docs Collaboration Playground](https://univer.ai/pro-examples/docs-collaboration-playground/)<br>演示协同的过程，A 编辑文档后，B 到底是如何处理的？这里是一个有趣的实验    | [![](./docs/img/pro-examples-docs-collaboration-playground.gif)](https://univer.ai/pro-examples/docs-collaboration-playground/)    |
+| [Docs Collaboration (Pro Feature)](https://univer.ai/pro-examples/docs-collaboration/)<br>请打开两个窗口或者邀请小伙伴一起体验 Univer Docs 协同               | [![](./docs/img/pro-examples-docs-collaboration.gif)](https://univer.ai/pro-examples/docs-collaboration/)                           |
+| [Docs Collaboration Playground (Pro Feature)](https://univer.ai/pro-examples/docs-collaboration-playground/)<br>演示协同的过程，A 编辑文档后，B 到底是如何处理的？这里是一个有趣的实验    | [![](./docs/img/pro-examples-docs-collaboration-playground.gif)](https://univer.ai/pro-examples/docs-collaboration-playground/)    |
 | <h3>🎨 Univer Slides</h3>                    |                   |
 | [Slides](https://www.univer.ai/examples/slides/)<br>一个包含图文本、浮动图片、表格等元素的画布演示                                  | [![](./docs/img/examples-slides.gif)](https://www.univer.ai/examples/slides/)                           |
 | <h3>🧩 Univer Innovation</h3>                    |                   |
 | [Zen Mode](https://univer.ai/zh-cn/guides/tutorials/zen-editor/#%E6%BC%94%E7%A4%BA)<br>Sheet 的单元格是一个 Doc？                                  | [![](./docs/img/zen-mode.gif)](https://univer.ai/zh-cn/guides/tutorials/zen-editor/#%E6%BC%94%E7%A4%BA)                           |
-| [Univer(SaaS version)](https://univer.ai/)<br>通过 Univer，我们使用户能够根据自己的意愿创建 3 种形式的页面。 通过将工作表、文档和幻灯片的功能合并在一起，Univer 使个人和团队能够轻松创建、组织和简化工作流程。                                  | [![](./docs/img/univer-workspace-drag-chart.gif)](https://youtu.be/kpV0MvQuFZA)                           |
+| [Univer (SaaS version)](https://univer.ai/)<br>通过 Univer，我们使用户能够根据自己的意愿创建 3 种形式的页面。 通过将工作表、文档和幻灯片的功能合并在一起，Univer 使个人和团队能够轻松创建、组织和简化工作流程。                                  | [![](./docs/img/univer-workspace-drag-chart.gif)](https://youtu.be/kpV0MvQuFZA)                           |
 
 ## 使用
 

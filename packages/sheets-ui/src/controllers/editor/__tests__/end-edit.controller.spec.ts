@@ -164,6 +164,7 @@ describe('Test EndEditController', () => {
                 v: 0,
                 t: 2,
             };
+
             const inputCell = {
                 v: '',
             };
@@ -175,7 +176,7 @@ describe('Test EndEditController', () => {
             }
 
             const cellData = getCellDataByInput(cell, documentLayoutObject, lexerTreeBuilder);
-            expect(cellData).toEqual({ v: '', f: null, si: null, p: null, t: 2 });
+            expect(cellData).toEqual({ v: '', f: null, si: null, p: null, t: undefined });
         });
     });
 });

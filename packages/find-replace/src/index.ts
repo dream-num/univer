@@ -25,3 +25,4 @@ export type {
     IReplaceAllResult,
 } from './services/find-replace.service';
 export { FindModel, IFindReplaceService, FindBy, FindScope, FindDirection } from './services/find-replace.service';
+export { enUS, zhCN } from './locale';

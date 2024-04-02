@@ -93,7 +93,7 @@ export class FWorksheet {
 
     /**
      * Returns the current number of columns in the sheet, regardless of content.
-     * @return The maximum width of the sheet
+     * @return The maximum columns count of the sheet
      */
     getMaxColumns() {
         return this._worksheet.getMaxColumns();
@@ -101,7 +101,7 @@ export class FWorksheet {
 
     /**
      * Returns the current number of rows in the sheet, regardless of content.
-     * @return The maximum height of the sheet
+     * @return The maximum rows count of the sheet
      */
     getMaxRows() {
         return this._worksheet.getMaxRows();

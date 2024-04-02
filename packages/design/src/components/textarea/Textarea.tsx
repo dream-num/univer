@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-import { CloseSingle } from '@univerjs/icons';
 import clsx from 'clsx';
-import type { InputProps } from 'rc-input';
-import RcInput from 'rc-input';
+import type { TextAreaProps } from 'rc-textarea';
+import RcTextarea from 'rc-textarea';
 import React from 'react';
 
 import styles from './index.module.less';
 
-export interface IInputProps extends Pick<InputProps, 'onFocus' | 'onBlur'> {
+export interface ITextareaProps extends Pick<TextAreaProps, 'onFocus' | 'onBlur'> {
     /**
      * Whether the input is autoFocus
      * @default false
@@ -37,13 +36,12 @@ export interface IInputProps extends Pick<InputProps, 'onFocus' | 'onBlur'> {
     /**
      * The input affix wrapper style
      */
-    affixWrapperStyle?: React.CSSProperties;
+    style?: React.CSSProperties;
 
     /**
-     * The input type
-     * @default text
+     * The input affix wrapper style
      */
-    type?: 'text' | 'password';
+    autoSize?: boolean | { minRows?: number; maxRows?: number };
 
     /**
      * The input placeholder
@@ -56,34 +54,16 @@ export interface IInputProps extends Pick<InputProps, 'onFocus' | 'onBlur'> {
     value?: string;
 
     /**
-     * The input size
-     * @default middle
-     */
-    size?: 'small' | 'middle' | 'large';
-
-    /**
-     * Whether the input is clearable
-     * @default false
-     */
-    allowClear?: boolean;
-
-    /**
      * Whether the input is disabled
      * @default false
      */
     disabled?: boolean;
 
     /**
-     * Callback when user click
-     * @param e
-     */
-    onClick?: (e: React.MouseEvent<HTMLInputElement>) => void;
-
-    /**
      * Callback when user press a key
      * @param e
      */
-    onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+    onKeyDown?: React.KeyboardEventHandler;
 
     /**
      * Callback when user input
@@ -93,48 +73,38 @@ export interface IInputProps extends Pick<InputProps, 'onFocus' | 'onBlur'> {
 
 }
 
-export function Input(props: IInputProps) {
+export function Textarea(props: ITextareaProps) {
     const {
-        affixWrapperStyle,
         autoFocus = false,
-        type = 'text',
+        autoSize = false,
         className,
         placeholder,
         value,
-        size = 'middle',
-        allowClear,
         disabled = false,
-        onClick,
         onKeyDown,
         onChange,
         ...rest
     } = props;
 
-    function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    function handleChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
         const { value } = e.target;
         onChange?.(value);
     }
 
     const _className = clsx(className, {
-        [styles.inputAffixWrapperSmall]: size === 'small',
-        [styles.inputAffixWrapperMiddle]: size === 'middle',
-        [styles.inputAffixWrapperLarge]: size === 'large',
     }, className);
 
     return (
-        <RcInput
-            prefixCls={styles.input}
+        <RcTextarea
+            prefixCls={styles.textarea}
             classNames={{ affixWrapper: _className }}
-            styles={{ affixWrapper: affixWrapperStyle }}
             autoFocus={autoFocus}
-            type={type}
+            autoSize={autoSize}
             placeholder={placeholder}
             value={value}
             disabled={disabled}
-            onClick={onClick}
             onKeyDown={onKeyDown}
             onChange={handleChange}
-            allowClear={{ clearIcon: allowClear ? <CloseSingle /> : <></> }}
             {...rest}
         />
     );

@@ -4,19 +4,19 @@
 [![license](https://img.shields.io/npm/l/@univerjs/sheets-data-validation)](https://img.shields.io/npm/l/@univerjs/sheets-data-validation)
 
 
-## Introduction
+## 简介
 
-> `@univerjs/sheets-data-validation` provides full capabilities for Univer Sheet data validation, including panel capabilities.
+> `@univerjs/sheets-data-validation` 为 Univer Sheet 提供了完整的数据验证功能。
 
-## Usage
+## 使用指南
 
-### Installation
+### 安装
 
 ```shell
 npm i @univerjs/sheets-data-validation
 ```
 
-### Register the plugin
+### 注册插件
 
 ```typescript
 import { UniverSheetsDataValidationPlugin } from '@univerjs/sheets-data-validation';

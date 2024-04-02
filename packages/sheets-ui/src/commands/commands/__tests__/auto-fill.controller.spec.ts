@@ -26,7 +26,9 @@ import {
 } from '@univerjs/core';
 import {
     AddWorksheetMergeMutation,
+    NORMAL_SELECTION_PLUGIN_NAME,
     RemoveWorksheetMergeMutation,
+    SelectionManagerService,
     SetRangeValuesMutation,
     SetSelectionsOperation,
 } from '@univerjs/sheets';
@@ -217,6 +219,14 @@ const TEST_WORKBOOK_DATA = {
                     },
                 },
             },
+            mergeData: [
+                {
+                    startRow: 0,
+                    endRow: 2,
+                    startColumn: 5,
+                    endColumn: 7,
+                },
+            ],
         },
     },
     createdTime: '',
@@ -261,6 +271,7 @@ describe('Test auto fill rules in controller', () => {
         endRow: number,
         endColumn: number
     ) => Array<Array<Nullable<IStyleData>>> | undefined;
+    let selectionManagerService: SelectionManagerService;
     beforeEach(() => {
         const testBed = createCommandTestBed(TEST_WORKBOOK_DATA, [
             [ISelectionRenderService, { useClass: SelectionRenderService }],
@@ -280,6 +291,12 @@ describe('Test auto fill rules in controller', () => {
         themeService = get(ThemeService);
         themeService.setTheme(theme);
         autoFillController = get(AutoFillController);
+        selectionManagerService = get(SelectionManagerService);
+        selectionManagerService.setCurrentSelection({
+            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+            unitId: 'test',
+            sheetId: 'sheet1',
+        });
         commandService.registerCommand(SetRangeValuesMutation);
         commandService.registerCommand(SetSelectionsOperation);
         commandService.registerCommand(RemoveWorksheetMergeMutation);
@@ -511,6 +528,107 @@ describe('Test auto fill rules in controller', () => {
                 expect(workbook.getSheetBySheetId('sheet1')?.getCell(7, 5)?.v).toBe(4);
                 expect(workbook.getSheetBySheetId('sheet1')?.getCell(7, 6)?.v).toBe('第 3');
                 expect(workbook.getSheetBySheetId('sheet1')?.getCell(7, 7)?.v).toBe('第 4');
+            });
+        });
+
+        describe('auto fill the merged cell', async () => {
+            it('test primary', async () => {
+                const workbook = get(IUniverInstanceService).getCurrentUniverSheetInstance();
+                if (!workbook) throw new Error('This is an error');
+
+                const selectionManagerService = get(SelectionManagerService);
+                selectionManagerService.add([{
+                    style: null,
+                    range: {
+                        startRow: 0,
+                        startColumn: 5,
+                        endRow: 2,
+                        endColumn: 7,
+                    },
+                    primary: {
+                        startRow: 0,
+                        startColumn: 5,
+                        endRow: 2,
+                        endColumn: 7,
+                        actualColumn: 5,
+                        actualRow: 0,
+                        isMerged: true,
+                        isMergedMainCell: true,
+                    },
+                }]);
+
+                (autoFillController as any)._triggerAutoFill(
+                    {
+                        startRow: 0,
+                        startColumn: 5,
+                        endRow: 2,
+                        endColumn: 7,
+                    },
+                    {
+                        startRow: 0,
+                        startColumn: 5,
+                        endRow: 5,
+                        endColumn: 7,
+                    }
+                );
+                expect(workbook.getActiveSheet().getMergeData().length).toBe(2);
+                expect(selectionManagerService.getLast()?.primary).toEqual(expect.objectContaining({
+                    startRow: 0,
+                    startColumn: 5,
+                    endRow: 2,
+                    endColumn: 7,
+                }));
+            });
+        });
+
+        describe('auto fill clear', async () => {
+            it('test primary will move to upper left corner', async () => {
+                const workbook = get(IUniverInstanceService).getCurrentUniverSheetInstance();
+                if (!workbook) throw new Error('This is an error');
+
+                const selectionManagerService = get(SelectionManagerService);
+                selectionManagerService.add([{
+                    style: null,
+                    range: {
+                        startRow: 0,
+                        startColumn: 0,
+                        endRow: 5,
+                        endColumn: 2,
+                    },
+                    // primary not in the upper left corner, but after fill clear will move to upper left corner
+                    primary: {
+                        startRow: 0,
+                        startColumn: 0,
+                        endRow: 1,
+                        endColumn: 0,
+                        actualColumn: 0,
+                        actualRow: 1,
+                        isMerged: true,
+                        isMergedMainCell: true,
+                    },
+                }]);
+
+                (autoFillController as any)._triggerAutoFill(
+                    {
+                        startRow: 0,
+                        startColumn: 0,
+                        endRow: 5,
+                        endColumn: 2,
+                    },
+                    {
+                        startRow: 0,
+                        startColumn: 0,
+                        endRow: 3,
+                        endColumn: 2,
+                    }
+                );
+                expect(workbook.getSheetBySheetId('sheet1')?.getCell(4, 0)?.v).toBeFalsy();
+                expect(selectionManagerService.getLast()?.primary).toEqual(expect.objectContaining({
+                    startRow: 0,
+                    startColumn: 0,
+                    endRow: 0,
+                    endColumn: 0,
+                }));
             });
         });
     });

@@ -81,7 +81,6 @@
         "@univerjs/design": "workspace:*",
         "@univerjs/facade": "workspace:*",
         "@univerjs/shared": "workspace:*",
-        "@univerjs/sheets": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "@wendellhu/redi": "^0.13.0",
         "less": "^4.2.0",

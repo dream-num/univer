@@ -17,11 +17,11 @@
 import type { Meta } from '@storybook/react';
 import React from 'react';
 
-import { Input } from './Input';
+import { Textarea } from './Textarea';
 
-const meta: Meta<typeof Input> = {
-    title: 'Components / Input',
-    component: Input,
+const meta: Meta<typeof Textarea> = {
+    title: 'Components / Textarea',
+    component: Textarea,
     parameters: {
         layout: 'centered',
     },
@@ -30,31 +30,18 @@ const meta: Meta<typeof Input> = {
 
 export default meta;
 
-export const InputBasic = {
+export const TextareaBasic = {
     render() {
         return (
             <>
-                <Input />
-                <Input allowClear />
+                <Textarea autoSize={{ minRows: 4 }} />
             </>
         );
     },
 };
 
-export const InputSize = {
+export const TextareaDisabled = {
     render() {
-        return (
-            <>
-                <Input size="small" />
-                <Input />
-                <Input size="large" />
-            </>
-        );
-    },
-};
-
-export const InputDisabled = {
-    render() {
-        return <Input disabled />;
+        return <Textarea disabled />;
     },
 };

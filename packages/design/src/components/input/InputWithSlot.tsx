@@ -26,10 +26,8 @@ export interface IInputWithSlotProps extends IInputProps {
     slot: React.ReactNode;
 }
 
-function getPaddingRightBySize(size?: 'mini' | 'small' | 'middle' | 'large'): number {
+function getPaddingRightBySize(size?: 'small' | 'middle' | 'large'): number {
     switch (size) {
-        case 'mini':
-            return 2;
         case 'small':
             return 6;
         case 'middle':

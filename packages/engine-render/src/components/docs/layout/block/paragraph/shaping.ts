@@ -25,6 +25,8 @@ import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-no
 import type { DocumentViewModel } from '../../../view-model/document-view-model';
 import type { ISectionBreakConfig } from '../../../../../basics/interfaces';
 import { hasArabic, hasCJK, hasCJKPunctuation, hasCJKText, hasTibetan, startWithEmoji } from '../../../../../basics/tools';
+import { prepareParagraphBody, textShape } from '../../shaping-engine/text-shaping';
+import { fontLibrary } from '../../shaping-engine/font-library';
 import { ArabicHandler, emojiHandler, otherHandler, TibetanHandler } from './language-ruler';
 
 // Now we apply consecutive punctuation adjustment, specified in Chinese Layout
@@ -102,8 +104,16 @@ export function shaping(
     const { snapToGrid = BooleanNumber.TRUE } = paragraphStyle;
     const shapedTextList: IShapedText[] = [];
     const breaker = new LineBreaker(content);
+    const { endIndex } = paragraphNode;
     let last = 0;
     let bk;
+
+    const paragraphBody = prepareParagraphBody(bodyModel.getBody()!, endIndex);
+
+    // const now = +new Date();
+    const glyphInfos = textShape(paragraphBody);
+    // console.log('Text Shaping Time:', +new Date() - now);
+    console.log(glyphInfos);
 
     // Add custom extension for linebreak.
     tabLineBreakExtension(breaker);
@@ -112,84 +122,118 @@ export function shaping(
     while ((bk = breaker.nextBreak())) {
         // get the string between the last break and this one
         const word = content.slice(last, bk.position);
-        let src = word;
-        let i = last;
         const shapedGlyphs: IDocumentSkeletonGlyph[] = [];
 
-        while (src.length > 0) {
-            const char = src.match(/^[\s\S]/gu)?.[0];
+        // TODO: 判断是否支持获取本地字体及是否授权、是否 ready
+        if (fontLibrary.isReady) {
+            const glyphInfosInWord = [];
+            for (const glyphInfo of glyphInfos) {
+                const { start, end } = glyphInfo;
+                if (start < last) {
+                    continue;
+                }
 
-            if (char == null) {
-                break;
+                if (end > bk.position) {
+                    break;
+                }
+
+                glyphInfosInWord.push(glyphInfo);
             }
 
-            if (/\s/.test(char) || hasCJK(char)) {
-                const config = getFontCreateConfig(i, bodyModel, paragraphNode, sectionBreakConfig, paragraphStyle);
-                let newSpan: IDocumentSkeletonGlyph;
+            for (const glyphInfo of glyphInfosInWord) {
+                const { start, char } = glyphInfo;
+                const config = getFontCreateConfig(start, bodyModel, paragraphNode, sectionBreakConfig, paragraphStyle);
 
                 if (char === DataStreamTreeTokenType.TAB) {
                     const charSpaceApply = getCharSpaceApply(charSpace, defaultTabStop, gridType, snapToGrid);
-                    newSpan = createSkeletonTabGlyph(config, charSpaceApply);
+                    const newSpan = createSkeletonTabGlyph(config, charSpaceApply);
+                    shapedGlyphs.push(newSpan);
+                } else if (startWithEmoji(char)) {
+                    const newSpan = createSkeletonLetterGlyph(char, config);
+                    shapedGlyphs.push(newSpan);
                 } else {
-                    newSpan = createSkeletonLetterGlyph(char, config);
+                    const newSpan = createSkeletonLetterGlyph(char, config, undefined, glyphInfo);
+                    shapedGlyphs.push(newSpan);
+                }
+            }
+        } else {
+            let src = word;
+            let i = last;
+            while (src.length > 0) {
+                const char = src.match(/^[\s\S]/gu)?.[0];
+
+                if (char == null) {
+                    break;
                 }
 
-                shapedGlyphs.push(newSpan);
-                i += char.length;
-                src = src.substring(char.length);
-            } else if (startWithEmoji(src)) {
-                const { step, glyphGroup } = emojiHandler(
-                    i,
-                    src,
-                    bodyModel,
-                    paragraphNode,
-                    sectionBreakConfig,
-                    paragraphStyle
-                );
-                shapedGlyphs.push(...glyphGroup);
-                i += step;
+                if (/\s/.test(char) || hasCJK(char)) {
+                    const config = getFontCreateConfig(i, bodyModel, paragraphNode, sectionBreakConfig, paragraphStyle);
+                    let newSpan: IDocumentSkeletonGlyph;
 
-                src = src.substring(step);
-            } else if (hasArabic(char)) {
-                const { step, glyphGroup } = ArabicHandler(
-                    i,
-                    src,
-                    bodyModel,
-                    paragraphNode,
-                    sectionBreakConfig,
-                    paragraphStyle
-                );
-                shapedGlyphs.push(...glyphGroup);
-                i += step;
+                    if (char === DataStreamTreeTokenType.TAB) {
+                        const charSpaceApply = getCharSpaceApply(charSpace, defaultTabStop, gridType, snapToGrid);
+                        newSpan = createSkeletonTabGlyph(config, charSpaceApply);
+                    } else {
+                        newSpan = createSkeletonLetterGlyph(char, config);
+                    }
 
-                src = src.substring(step);
-            } else if (hasTibetan(char)) {
-                const { step, glyphGroup } = TibetanHandler(
-                    i,
-                    src,
-                    bodyModel,
-                    paragraphNode,
-                    sectionBreakConfig,
-                    paragraphStyle
-                );
-                shapedGlyphs.push(...glyphGroup);
-                i += step;
+                    shapedGlyphs.push(newSpan);
+                    i += char.length;
+                    src = src.substring(char.length);
+                } else if (startWithEmoji(src)) {
+                    const { step, glyphGroup } = emojiHandler(
+                        i,
+                        src,
+                        bodyModel,
+                        paragraphNode,
+                        sectionBreakConfig,
+                        paragraphStyle
+                    );
+                    shapedGlyphs.push(...glyphGroup);
+                    i += step;
 
-                src = src.substring(step);
-            } else {
-                // TODO: 处理一个单词超过 page width 情况
-                const { step, glyphGroup } = otherHandler(
-                    i,
-                    src,
-                    bodyModel,
-                    paragraphNode,
-                    sectionBreakConfig,
-                    paragraphStyle
-                );
-                shapedGlyphs.push(...glyphGroup);
-                i += step;
+                    src = src.substring(step);
+                } else if (hasArabic(char)) {
+                    const { step, glyphGroup } = ArabicHandler(
+                        i,
+                        src,
+                        bodyModel,
+                        paragraphNode,
+                        sectionBreakConfig,
+                        paragraphStyle
+                    );
+                    shapedGlyphs.push(...glyphGroup);
+                    i += step;
 
-                src = src.substring(step);
+                    src = src.substring(step);
+                } else if (hasTibetan(char)) {
+                    const { step, glyphGroup } = TibetanHandler(
+                        i,
+                        src,
+                        bodyModel,
+                        paragraphNode,
+                        sectionBreakConfig,
+                        paragraphStyle
+                    );
+                    shapedGlyphs.push(...glyphGroup);
+                    i += step;
+
+                    src = src.substring(step);
+                } else {
+                    // TODO: 处理一个单词超过 page width 情况
+                    const { step, glyphGroup } = otherHandler(
+                        i,
+                        src,
+                        bodyModel,
+                        paragraphNode,
+                        sectionBreakConfig,
+                        paragraphStyle
+                    );
+                    shapedGlyphs.push(...glyphGroup);
+                    i += step;
+
+                    src = src.substring(step);
+                }
             }
         }
 
@@ -206,5 +250,6 @@ export function shaping(
     // Add some spacing between Han characters and western characters.
     addCJKLatinSpacing(shapedTextList);
 
+    console.log(shapedTextList);
     return shapedTextList;
 }

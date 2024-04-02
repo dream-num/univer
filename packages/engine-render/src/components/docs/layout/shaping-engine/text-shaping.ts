@@ -16,15 +16,35 @@
 
 import type { IDocumentBody, IStyleBase } from '@univerjs/core';
 import opentype from 'opentype.js/dist/opentype.module';
+import type { Nullable } from 'vitest';
 import { DEFAULT_FONTFACE_PLANE } from '../../../../basics/const';
-import type { IDocumentSkeletonGlyph } from '../../../..';
-import { EMOJI_REG } from '../../../..';
+import { EMOJI_REG } from '../../../../basics/tools';
 import { fontLibrary } from './font-library';
 
 interface ITextChunk {
     content: string;
     style?: IStyleBase;
 }
+
+interface IBoundingBox {
+    x1: number;
+    y1: number;
+    x2: number;
+    y2: number;
+
+}
+
+export interface IOpenTypeGlyphInfo {
+    char: string;
+    start: number;
+    end: number;
+    glyph: any;
+    font: any;
+    kerning: number;
+    boundingBox: Nullable<IBoundingBox>;
+}
+
+const fontCache = new Map<string, opentype.Font>();
 
 export function prepareParagraphBody(body: IDocumentBody, paragraphIndex: number): IDocumentBody {
     const { dataStream, paragraphs = [], textRuns = [] } = body;
@@ -98,7 +118,7 @@ function prepareTextChunks(body: IDocumentBody) {
     return chunks;
 }
 
-function shapeChunk(content: string, used: Set<string>, families: string[]): IDocumentSkeletonGlyph[] {
+function shapeChunk(content: string, charPosition: number, used: Set<string>, families: string[]): IOpenTypeGlyphInfo[] {
     let fi = 0;
     let fontFamily = families[fi];
 
@@ -108,14 +128,26 @@ function shapeChunk(content: string, used: Set<string>, families: string[]): IDo
     }
 
     if (!fontFamily) {
-        console.log(content);
-        return [];
+        return [{
+            char: content,
+            start: charPosition,
+            end: charPosition + content.length,
+            glyph: null,
+            font: null,
+            kerning: 0,
+            boundingBox: null,
+        }];
     }
 
     used.add(fontFamily);
 
-    const fontBuffer = fontLibrary.getFontByStyle({ ff: fontFamily })?.buffer;
-    const font = opentype.parse(fontBuffer);
+    const { font: fontInfo, buffer: fontBuffer } = fontLibrary.getFontByStyle({ ff: fontFamily })!;
+
+    let font = fontCache.get(fontInfo.fullName);
+    if (!font) {
+        font = opentype.parse(fontBuffer);
+        fontCache.set(fontInfo.fullName, font);
+    }
 
     const option = {
         kerning: true,
@@ -127,49 +159,89 @@ function shapeChunk(content: string, used: Set<string>, families: string[]): IDo
     const results = [];
 
     const glyphs = font.stringToGlyphs(content, option);
+    const chars = content.match(/[\s\S]/gu) ?? [];
+
+    // console.log('length', glyphs.length, chars.length);
+
     let gi = 0;
+    let startIndex = 0;
 
     while (gi < glyphs.length) {
         const glyph = glyphs[gi];
         if (glyph.index !== 0) {
-            results.push(glyph);
+            results.push({
+                char: chars[gi],
+                start: startIndex + charPosition,
+                end: startIndex + charPosition + chars[gi].length,
+                glyph,
+                font,
+                kerning: 0,
+                boundingBox: glyph.getBoundingBox(),
+            });
         } else {
-            const start = gi;
+            const start = startIndex;
             const subStr = content.substring(start);
             const emojiMatch = subStr.match(EMOJI_REG);
 
             if (emojiMatch) {
                 let nextGlyph = glyphs[gi + 1];
                 while (nextGlyph?.index === 0 || nextGlyph?.unicode === 8205) {
+                    startIndex += chars[gi].length;
                     gi++;
                     nextGlyph = glyphs[gi + 1];
                 }
-                results.push(...shapeChunk(content.slice(start, start + emojiMatch[0].length), used, families));
+                results.push(...shapeChunk(content.slice(start, start + emojiMatch[0].length), charPosition + start, used, families));
             } else {
                 let nextGlyph = glyphs[gi + 1];
                 while (nextGlyph?.index === 0) {
+                    startIndex += chars[gi].length;
                     gi++;
                     nextGlyph = glyphs[gi + 1];
                 }
 
-                results.push(...shapeChunk(content.slice(start, gi + 1), used, families));
+                results.push(...shapeChunk(content.slice(start, startIndex + chars[gi].length), charPosition + start, used, families));
             }
         }
 
+        startIndex += chars[gi].length;
         gi++;
     }
 
     return results;
 }
 
+function kerningAdjustment(glyphs: IOpenTypeGlyphInfo[]) {
+    if (glyphs.length < 2) {
+        return;
+    }
+
+    let lastFont = glyphs[0].font;
+    let lastGlyph = glyphs[0].glyph;
+    for (let i = 1; i < glyphs.length; i++) {
+        const { font, glyph } = glyphs[i];
+        if (font !== lastFont) {
+            continue;
+        }
+
+        const kerning = font.getKerningValue(lastGlyph, glyph);
+        if (kerning !== 0) {
+            glyphs[i].kerning = kerning;
+        }
+
+        lastFont = font;
+        lastGlyph = glyph;
+    }
+}
+
 export function textShape(body: IDocumentBody) {
     if (!fontLibrary.isReady) {
-        return;
+        return [];
     }
 
     const chunks = prepareTextChunks(body);
 
     const glyphs = [];
+    let charPosition = 0;
 
     for (const chunk of chunks) {
         const { content, style = {} } = chunk;
@@ -179,10 +251,12 @@ export function textShape(body: IDocumentBody) {
 
         fontFamilies = fontLibrary.getValidFontFamilies(fontFamilies);
 
-        glyphs.push(...shapeChunk(content, new Set(), fontFamilies));
+        glyphs.push(...shapeChunk(content, charPosition, new Set(), fontFamilies));
+
+        charPosition += content.length;
     }
 
-    console.log(glyphs);
+    kerningAdjustment(glyphs);
 
     return glyphs;
 }

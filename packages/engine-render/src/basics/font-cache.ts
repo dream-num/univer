@@ -16,9 +16,11 @@
 
 import type { Nullable } from '@univerjs/core';
 
+import type { IOpenTypeGlyphInfo } from '../components/docs/layout/shaping-engine/text-shaping';
 import { DEFAULT_MEASURE_TEXT } from './const';
 import type { IDocumentSkeletonBoundingBox, IDocumentSkeletonFontStyle } from './i-document-skeleton-cached';
 import type { IMeasureTextCache } from './interfaces';
+import { ptToPixel } from './tools';
 
 const getDefaultBaselineOffset = (fontSize: number) => ({
     sbr: 0.6,
@@ -191,6 +193,20 @@ export class FontCache {
         }
 
         return bBox;
+    }
+
+    static getBBoxFromGlyphInfo(glyphInfo: IOpenTypeGlyphInfo, fontSize: number) {
+        const { glyph } = glyphInfo;
+        const { y1, y2 } = glyphInfo.boundingBox!;
+        const scale = ptToPixel(fontSize) / glyphInfo.font.unitsPerEm;
+
+        return this._calculateBoundingBoxByMeasureText({
+            width: glyph.advanceWidth * scale,
+            fontBoundingBoxAscent: y1 * scale,
+            fontBoundingBoxDescent: y2 * scale,
+            actualBoundingBoxAscent: y1 * scale,
+            actualBoundingBoxDescent: y2 * scale,
+        }, fontSize);
     }
 
     // 获取有值单元格文本大小

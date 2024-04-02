@@ -27,6 +27,7 @@ import { GlyphType } from '../../../../basics/i-document-skeleton-cached';
 import type { IFontCreateConfig } from '../../../../basics/interfaces';
 import { hasCJK, hasCJKText, isCjkCenterAlignedPunctuation, isCjkLeftAlignedPunctuation, isCjkRightAlignedPunctuation } from '../../../../basics/tools';
 import { validationGrid } from '../tools';
+import type { IOpenTypeGlyphInfo } from '../shaping-engine/text-shaping';
 
 export function isSpace(char: string) {
     const SPACE_CHARS = [' ', '\u{00A0}', '　'];
@@ -86,9 +87,10 @@ export function createSkeletonWordGlyph(
 export function createSkeletonLetterGlyph(
     content: string,
     config: IFontCreateConfig,
-    glyphWidth?: number
+    glyphWidth?: number,
+    glyphInfo?: IOpenTypeGlyphInfo
 ): IDocumentSkeletonGlyph {
-    return _createSkeletonWordOrLetter(GlyphType.LETTER, content, config, glyphWidth);
+    return _createSkeletonWordOrLetter(GlyphType.LETTER, content, config, glyphWidth, glyphInfo);
 }
 
 export function createSkeletonTabGlyph(config: IFontCreateConfig, glyphWidth?: number): IDocumentSkeletonGlyph {
@@ -99,7 +101,8 @@ export function _createSkeletonWordOrLetter(
     glyphType: GlyphType,
     content: string,
     config: IFontCreateConfig,
-    glyphWidth?: number
+    glyphWidth?: number,
+    glyphInfo?: IOpenTypeGlyphInfo
 ): IDocumentSkeletonGlyph {
     const { fontStyle, textStyle, charSpace = 1, gridType = GridType.LINES, snapToGrid = BooleanNumber.FALSE } = config;
     const skipWidthList: string[] = [
@@ -151,10 +154,17 @@ export function _createSkeletonWordOrLetter(
         streamType = DT.PARAGRAPH;
     }
 
-    const bBox = FontCache.getTextSize(content, fontStyle);
+    let bBox = null;
+    let xOffset = 0;
+
+    if (glyphInfo && glyphInfo.boundingBox && glyphInfo.font) {
+        bBox = FontCache.getBBoxFromGlyphInfo(glyphInfo, fontStyle.fontSize);
+    } else {
+        bBox = FontCache.getTextSize(content, fontStyle);
+    }
+
     const { width: contentWidth = 0 } = bBox;
     let width = glyphWidth ?? contentWidth;
-    let xOffset = 0;
 
     if (validationGrid(gridType, snapToGrid)) {
         // 当文字也需要对齐到网格式，进行处理
@@ -163,6 +173,12 @@ export function _createSkeletonWordOrLetter(
         if (gridType === GridType.SNAP_TO_CHARS) {
             xOffset = (width - contentWidth) / 2;
         }
+    }
+
+    // Handle kerning.
+    if (glyphInfo && glyphInfo.kerning !== 0 && glyphInfo.font) {
+        const scale = fontStyle.fontSize / glyphInfo.font.unitsPerEm;
+        xOffset += glyphInfo.kerning * scale;
     }
 
     return {

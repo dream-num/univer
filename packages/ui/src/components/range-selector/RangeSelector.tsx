@@ -279,7 +279,9 @@ export function RangeSelector(props: IRangeSelectorProps) {
     }
 
     let height = 32;
-    if (size === 'small') {
+    if (size === 'mini') {
+        height = 24;
+    } else if (size === 'small') {
         height = 28;
     } else if (size === 'large') {
         height = 36;

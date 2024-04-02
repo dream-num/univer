@@ -72,6 +72,7 @@ export const MoveRangeCommand: ICommand = {
         });
 
         const redos = [
+            ...(interceptorCommands.preRedos ?? []),
             ...moveRangeMutations.redos,
             ...interceptorCommands.redos,
             {
@@ -85,8 +86,9 @@ export const MoveRangeCommand: ICommand = {
             },
         ];
         const undos = [
-            ...interceptorCommands.undos,
+            ...(interceptorCommands.preUndos ?? []),
             ...moveRangeMutations.undos,
+            ...interceptorCommands.undos,
             {
                 id: SetSelectionsOperation.id,
                 params: {

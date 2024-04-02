@@ -428,7 +428,7 @@ describe('Test add worksheet merge commands', () => {
     });
 
     describe('with move col', () => {
-        it('', async () => {
+        it('will adjust the merge data when move col', async () => {
             selectionManager.clear();
             selectionManager.add([
                 {

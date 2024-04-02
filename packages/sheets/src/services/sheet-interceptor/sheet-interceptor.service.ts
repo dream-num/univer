@@ -18,7 +18,7 @@ import type {
     ICellData,
     ICommandInfo,
     IInterceptor,
-    IUndoRedoCommandInfos,
+    IUndoRedoCommandInfosByInterceptor,
     Nullable,
     Workbook,
     Worksheet,
@@ -39,7 +39,7 @@ import { INTERCEPTOR_POINT } from './interceptor-const';
 
 export interface ICommandInterceptor {
     priority?: number;
-    getMutations(command: ICommandInfo): IUndoRedoCommandInfos;
+    getMutations(command: ICommandInfo): IUndoRedoCommandInfosByInterceptor;
 }
 
 /**
@@ -118,11 +118,13 @@ export class SheetInterceptorService extends Disposable {
      * @param command
      * @returns
      */
-    onCommandExecute(command: ICommandInfo): IUndoRedoCommandInfos {
+    onCommandExecute(command: ICommandInfo): IUndoRedoCommandInfosByInterceptor {
         const infos = this._commandInterceptors.map((i) => i.getMutations(command));
 
         return {
+            preUndos: infos.map((i) => i.preUndos ?? []).flat(),
             undos: infos.map((i) => i.undos).flat(),
+            preRedos: infos.map((i) => i.preRedos ?? []).flat(),
             redos: infos.map((i) => i.redos).flat(),
         };
     }

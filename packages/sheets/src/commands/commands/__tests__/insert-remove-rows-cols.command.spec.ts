@@ -59,6 +59,7 @@ describe('Test insert and remove rows cols commands', () => {
         univer = testBed.univer;
         get = testBed.get;
         get(MergeCellController);
+
         commandService = get(ICommandService);
 
         [

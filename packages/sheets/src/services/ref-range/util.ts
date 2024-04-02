@@ -658,7 +658,7 @@ export const handleDeleteRangeMoveLeftOther = (param: IDeleteRangeMoveLeftComman
     const rightRange: IRange = {
         startRow: range.startRow,
         endRow: range.endRow,
-        startColumn: range.endColumn,
+        startColumn: range.startColumn,
         endColumn: Number.POSITIVE_INFINITY,
     };
 
@@ -674,18 +674,19 @@ export const handleDeleteRangeMoveLeftOther = (param: IDeleteRangeMoveLeftComman
     }
 
     const matrix = new ObjectMatrix<number>();
-    noMoveRanges.forEach((noMoveRange) => {
-        Range.foreach(noMoveRange, (row, col) => {
-            matrix.setValue(row, col, 1);
-        });
-    });
 
     targetMoveRange && Range.foreach(targetMoveRange, (row, col) => {
         matrix.setValue(row, col - moveCount, 1);
     });
 
     targetDeleteRange && Range.foreach(targetDeleteRange, (row, col) => {
-        matrix.setValue(row, col, 0);
+        matrix.setValue(row, col - moveCount, 0);
+    });
+
+    noMoveRanges.forEach((noMoveRange) => {
+        Range.foreach(noMoveRange, (row, col) => {
+            matrix.setValue(row, col, 1);
+        });
     });
 
     return queryObjectMatrix(matrix, (v) => v === 1);
@@ -719,7 +720,7 @@ export const handleDeleteRangeMoveUpOther = (param: IDeleteRangeMoveUpCommand, t
 
     const bottomRange: IRange = {
         ...range,
-        startRow: range.endRow,
+        startRow: range.startRow,
         endRow: Number.POSITIVE_INFINITY,
     };
 
@@ -735,18 +736,19 @@ export const handleDeleteRangeMoveUpOther = (param: IDeleteRangeMoveUpCommand, t
     }
 
     const matrix = new ObjectMatrix<number>();
-    noMoveRanges.forEach((noMoveRange) => {
-        Range.foreach(noMoveRange, (row, col) => {
-            matrix.setValue(row, col, 1);
-        });
-    });
 
     targetMoveRange && Range.foreach(targetMoveRange, (row, col) => {
         matrix.setValue(row - moveCount, col, 1);
     });
 
     targetDeleteRange && Range.foreach(targetDeleteRange, (row, col) => {
-        matrix.setValue(row, col, 0);
+        matrix.setValue(row - moveCount, col, 0);
+    });
+
+    noMoveRanges.forEach((noMoveRange) => {
+        Range.foreach(noMoveRange, (row, col) => {
+            matrix.setValue(row, col, 1);
+        });
     });
 
     return queryObjectMatrix(matrix, (v) => v === 1);

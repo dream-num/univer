@@ -45,41 +45,41 @@ interface IRuleListProps {
 const getRuleDescribe = (rule: IConditionFormattingRule, localeService: LocaleService) => {
     const ruleConfig = rule.rule;
     switch (ruleConfig.type) {
-        case CFRuleType.colorScale:{
+        case CFRuleType.colorScale: {
             return localeService.t('sheet.cf.ruleType.colorScale');
         }
-        case CFRuleType.dataBar:{
+        case CFRuleType.dataBar: {
             return localeService.t('sheet.cf.ruleType.dataBar');
         }
-        case CFRuleType.iconSet:{
+        case CFRuleType.iconSet: {
             return localeService.t('sheet.cf.ruleType.iconSet');
         }
-        case CFRuleType.highlightCell:{
+        case CFRuleType.highlightCell: {
             switch (ruleConfig.subType) {
-                case CFSubRuleType.average:{
+                case CFSubRuleType.average: {
                     const operator = ruleConfig.operator;
                     return localeService.t(`sheet.cf.preview.describe.${operator}`, localeService.t('sheet.cf.subRuleType.average'));
                 }
-                case CFSubRuleType.duplicateValues:{
+                case CFSubRuleType.duplicateValues: {
                     return localeService.t('sheet.cf.subRuleType.duplicateValues');
                 }
-                case CFSubRuleType.uniqueValues:{
+                case CFSubRuleType.uniqueValues: {
                     return localeService.t('sheet.cf.subRuleType.uniqueValues');
                 }
-                case CFSubRuleType.number:{
+                case CFSubRuleType.number: {
                     const operator = ruleConfig.operator;
                     return localeService.t(`sheet.cf.preview.describe.${operator}`, ...Array.isArray(ruleConfig.value) ? (ruleConfig.value.map((e) => String(e))) : [String(ruleConfig.value || '')]);
                 }
-                case CFSubRuleType.text:{
+                case CFSubRuleType.text: {
                     const operator = ruleConfig.operator;
                     return localeService.t(`sheet.cf.preview.describe.${operator}`, ruleConfig.value || '');
                 }
 
-                case CFSubRuleType.timePeriod:{
+                case CFSubRuleType.timePeriod: {
                     const operator = ruleConfig.operator;
                     return localeService.t(`sheet.cf.preview.describe.${operator}`);
                 }
-                case CFSubRuleType.rank:{
+                case CFSubRuleType.rank: {
                     if (ruleConfig.isPercent) {
                         if (ruleConfig.isBottom) {
                             return localeService.t('sheet.cf.preview.describe.bottomNPercent', String(ruleConfig.value));
@@ -94,7 +94,7 @@ const getRuleDescribe = (rule: IConditionFormattingRule, localeService: LocaleSe
                         }
                     }
                 }
-                case CFSubRuleType.formula:{
+                case CFSubRuleType.formula: {
                     return localeService.t('sheet.cf.ruleType.formula');
                 }
             }
@@ -250,7 +250,9 @@ export const RuleList = (props: IRuleListProps) => {
         };
         const cfId = ruleList[getSaveIndex(from.y)].cfId;
         const targetCfId = ruleList[getSaveIndex(to.y)].cfId;
-        commandService.executeCommand(moveCfCommand.id, { unitId, subUnitId, start: { id: cfId, type: 'self' }, end: { id: targetCfId, type: to.y > from.y ? 'after' : 'self' } } as IMoveCfCommand);
+        if (cfId !== targetCfId) {
+            commandService.executeCommand(moveCfCommand.id, { unitId, subUnitId, start: { id: cfId, type: 'self' }, end: { id: targetCfId, type: to.y > from.y ? 'after' : 'before' } } as IMoveCfCommand);
+        }
     };
 
     const handleCreate = () => {
@@ -303,7 +305,7 @@ export const RuleList = (props: IRuleListProps) => {
 
             </div>
             <div ref={layoutContainerRef} className={styles.gridLayoutWrap}>
-                { layoutWidth
+                {layoutWidth
                     ? (
                         <GridLayout
                             onDragStop={handleDragStop}
@@ -315,7 +317,7 @@ export const RuleList = (props: IRuleListProps) => {
                             margin={[0, 10]}
                             draggableHandle=".draggableHandle"
                         >
-                            { ruleList.map((rule, index) => {
+                            {ruleList.map((rule, index) => {
                                 return (
                                     <div key={`${rule.cfId}`}>
                                         <div className={`${styles.ruleItem} ${draggingId === index ? styles.active : ''}`} onClick={() => onClick(rule)}>

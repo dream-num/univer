@@ -118,6 +118,7 @@ export function getAddMergeMutationRangeByType(selection: IRange[], type?: Dimen
 
 @OnLifecycle(LifecycleStages.Steady, MergeCellController)
 export class MergeCellController extends Disposable {
+    disposableCollection = new DisposableCollection();
     constructor(
         @Inject(ICommandService) private readonly _commandService: ICommandService,
         @Inject(RefRangeService) private readonly _refRangeService: RefRangeService,
@@ -174,8 +175,62 @@ export class MergeCellController extends Disposable {
         });
     }
 
+    refRangeHandle(config: EffectRefRangeParams, unitId: string, subUnitId: string) {
+        switch (config.id) {
+            case EffectRefRangId.MoveColsCommandId: {
+                const params = config.params as unknown as IMoveColsCommandParams;
+                return this._handleMoveColsCommand(params, unitId, subUnitId);
+            }
+            case EffectRefRangId.MoveRowsCommandId: {
+                const params = config.params as unknown as IMoveRowsCommandParams;
+                return this._handleMoveRowsCommand(params, unitId, subUnitId);
+            }
+            case InsertRowCommand.id: {
+                const params = config.params as unknown as IInsertRowCommandParams;
+                const _unitId = params.unitId || unitId;
+                const _subUnitId = params.subUnitId || subUnitId;
+                return this._handleInsertRowCommand(params, _unitId, _subUnitId);
+            }
+            case InsertColCommand.id: {
+                const params = config.params as unknown as IInsertColCommandParams;
+                const _unitId = params.unitId || unitId;
+                const _subUnitId = params.subUnitId || subUnitId;
+                return this._handleInsertColCommand(params, _unitId, _subUnitId);
+            }
+            case RemoveColCommand.id: {
+                const params = config.params as unknown as IRemoveColMutationParams;
+                return this._handleRemoveColCommand(params, unitId, subUnitId);
+            }
+            case RemoveRowCommand.id: {
+                const params = config.params as unknown as IRemoveRowsMutationParams;
+                return this._handleRemoveRowCommand(params, unitId, subUnitId);
+            }
+
+            case MoveRangeCommand.id: {
+                const params = config.params as IMoveRangeCommandParams;
+                return this._handleMoveRangeCommand(params, unitId, subUnitId);
+            }
+            case InsertRangeMoveRightCommand.id: {
+                const params = config.params as unknown as InsertRangeMoveRightCommandParams;
+                return this._handleInsertRangeMoveRightCommand(params, unitId, subUnitId);
+            }
+            case InsertRangeMoveDownCommand.id: {
+                const params = config.params as unknown as InsertRangeMoveDownCommandParams;
+                return this._handleInsertRangeMoveDownCommand(params, unitId, subUnitId);
+            }
+            case DeleteRangeMoveUpCommand.id: {
+                const params = config.params as unknown as IDeleteRangeMoveUpCommandParams;
+                return this._handleDeleteRangeMoveUpCommand(params, unitId, subUnitId);
+            }
+            case DeleteRangeMoveLeftCommand.id: {
+                const params = config.params as unknown as IDeleteRangeMoveLeftCommandParams;
+                return this._handleDeleteRangeMoveLeftCommand(params, unitId, subUnitId);
+            }
+        }
+        return { redos: [], undos: [] };
+    }
+
     private _onRefRangeChange() {
-        const disposableCollection = new DisposableCollection();
         const registerRefRange = (unitId: string, subUnitId: string) => {
             const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
             if (!workbook) {
@@ -186,65 +241,14 @@ export class MergeCellController extends Disposable {
                 return;
             }
 
-            disposableCollection.dispose();
+            this.disposableCollection.dispose();
             const mergeData = workSheet.getMergeData();
             // Handles all merged unit tasks,if multiple range effect and called only once.
             const handler = (config: EffectRefRangeParams) => {
-                switch (config.id) {
-                    case EffectRefRangId.MoveColsCommandId: {
-                        const params = config.params as unknown as IMoveColsCommandParams;
-                        return this._handleMoveColsCommand(params, unitId, subUnitId);
-                    }
-                    case EffectRefRangId.MoveRowsCommandId: {
-                        const params = config.params as unknown as IMoveRowsCommandParams;
-                        return this._handleMoveRowsCommand(params, unitId, subUnitId);
-                    }
-                    case InsertRowCommand.id: {
-                        const params = config.params as unknown as IInsertRowCommandParams;
-                        const _unitId = params.unitId || unitId;
-                        const _subUnitId = params.subUnitId || subUnitId;
-                        return this._handleInsertRowCommand(params, _unitId, _subUnitId);
-                    }
-                    case InsertColCommand.id: {
-                        const params = config.params as unknown as IInsertColCommandParams;
-                        const _unitId = params.unitId || unitId;
-                        const _subUnitId = params.subUnitId || subUnitId;
-                        return this._handleInsertColCommand(params, _unitId, _subUnitId);
-                    }
-                    case RemoveColCommand.id: {
-                        const params = config.params as unknown as IRemoveColMutationParams;
-                        return this._handleRemoveColCommand(params, unitId, subUnitId);
-                    }
-                    case RemoveRowCommand.id: {
-                        const params = config.params as unknown as IRemoveRowsMutationParams;
-                        return this._handleRemoveRowCommand(params, unitId, subUnitId);
-                    }
-
-                    case MoveRangeCommand.id: {
-                        const params = config.params as IMoveRangeCommandParams;
-                        return this._handleMoveRangeCommand(params, unitId, subUnitId);
-                    }
-                    case InsertRangeMoveRightCommand.id: {
-                        const params = config.params as unknown as InsertRangeMoveRightCommandParams;
-                        return this._handleInsertRangeMoveRightCommand(params, unitId, subUnitId);
-                    }
-                    case InsertRangeMoveDownCommand.id: {
-                        const params = config.params as unknown as InsertRangeMoveDownCommandParams;
-                        return this._handleInsertRangeMoveDownCommand(params, unitId, subUnitId);
-                    }
-                    case DeleteRangeMoveUpCommand.id: {
-                        const params = config.params as unknown as IDeleteRangeMoveUpCommandParams;
-                        return this._handleDeleteRangeMoveUpCommand(params, unitId, subUnitId);
-                    }
-                    case DeleteRangeMoveLeftCommand.id: {
-                        const params = config.params as unknown as IDeleteRangeMoveLeftCommandParams;
-                        return this._handleDeleteRangeMoveLeftCommand(params, unitId, subUnitId);
-                    }
-                }
-                return { redos: [], undos: [] };
+                return this.refRangeHandle(config, unitId, subUnitId);
             };
             mergeData.forEach((range) => {
-                disposableCollection.add(this._refRangeService.registerRefRange(range, handler, unitId, subUnitId));
+                this.disposableCollection.add(this._refRangeService.registerRefRange(range, handler, unitId, subUnitId));
             });
         };
         this.disposeWithMe(
@@ -1090,6 +1094,15 @@ export class MergeCellController extends Disposable {
                     }
                 });
                 worksheet.getConfig().mergeData = adjustedMergedCells;
+
+                this.disposableCollection.dispose();
+                const { unitId, subUnitId } = command.params as IMoveRowsMutationParams;
+                const handler = (config: EffectRefRangeParams) => {
+                    return this.refRangeHandle(config, unitId, subUnitId);
+                };
+                adjustedMergedCells.forEach((range) => {
+                    this.disposableCollection.add(this._refRangeService.registerRefRange(range, handler, unitId, subUnitId));
+                });
             }
 
             // 2. InsertRowsOrCols / RemoveRowsOrCols Mutations
@@ -1147,6 +1160,15 @@ export class MergeCellController extends Disposable {
                 });
 
                 worksheet.getConfig().mergeData = adjustedMergedCells;
+
+                this.disposableCollection.dispose();
+                const { unitId, subUnitId } = command.params as IMoveRowsMutationParams;
+                const handler = (config: EffectRefRangeParams) => {
+                    return this.refRangeHandle(config, unitId, subUnitId);
+                };
+                adjustedMergedCells.forEach((range) => {
+                    this.disposableCollection.add(this._refRangeService.registerRefRange(range, handler, unitId, subUnitId));
+                });
             }
         }));
     }

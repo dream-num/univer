@@ -213,4 +213,14 @@ describe('Test FUniver', () => {
         const worksheet = univerAPI.getActiveWorkbook()?.getSheetBySheetId('sheet1');
         expect(worksheet!.getId()).toBe('sheet1');
     });
+
+    it('Function getMaxColumns', () => {
+        const worksheet = univerAPI.getActiveWorkbook()?.getSheetBySheetId('sheet1');
+        expect(worksheet!.getMaxColumns()).toBe(100);
+    });
+
+    it('Function getMaxRows', () => {
+        const worksheet = univerAPI.getActiveWorkbook()?.getSheetBySheetId('sheet1');
+        expect(worksheet!.getMaxRows()).toBe(100);
+    });
 });

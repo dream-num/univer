@@ -56,6 +56,8 @@ function getTestWorkbookDataDemo(): IWorkbookData {
                 id: 'sheet1',
                 name: 'sheet1',
                 cellData: {},
+                rowCount: 100,
+                columnCount: 100,
             },
         },
         locale: LocaleType.ZH_CN,

@@ -19,7 +19,7 @@ export interface IAnchor {
     type: 'before' | 'after' | 'self';
 }
 
-export const findIndexByAnchor = <T = unknown[]> (anchor: IAnchor, ruleList: T[], get: (v: T) => string): number | null => {
+export const findIndexByAnchor = <T = unknown[]>(anchor: IAnchor, ruleList: T[], get: (v: T) => string): number | null => {
     if (!ruleList) {
         return null;
     }
@@ -28,13 +28,13 @@ export const findIndexByAnchor = <T = unknown[]> (anchor: IAnchor, ruleList: T[]
         return null;
     }
     switch (anchor.type) {
-        case 'after':{
+        case 'after': {
             return anchorIndex + 1;
         }
-        case 'before':{
+        case 'before': {
             return anchorIndex - 1;
         }
-        case 'self':{
+        case 'self': {
             return anchorIndex;
         }
     }
@@ -63,12 +63,12 @@ export const moveByAnchor = <T = unknown[]>(start: IAnchor, end: IAnchor, ruleLi
     }
 
     switch (end.type) {
-        case 'before':{
+        case 'before': {
             ruleList.splice(endIndex + 1, 0, rule);
             break;
         }
         case 'self':
-        case 'after':{
+        case 'after': {
             ruleList.splice(endIndex, 0, rule);
             break;
         }
@@ -136,4 +136,8 @@ export const anchorUndoFactory = (start: IAnchor, end: IAnchor): [IAnchor, IAnch
         }
     }
     return null;
+};
+
+export const isAnchorEqual = (anchor1: IAnchor, anchor2: IAnchor) => {
+    return anchor1.id === anchor2.id && anchor1.type === anchor2.type;
 };

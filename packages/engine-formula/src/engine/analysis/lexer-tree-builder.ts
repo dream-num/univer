@@ -670,9 +670,11 @@ export class LexerTreeBuilder extends Disposable {
                 baseStack.push(node);
             }
         }
+        const baseStackLength = baseStack.length;
+        const lastBaseStack = baseStack[baseStackLength - 1];
         while (symbolStack.length > 0) {
             const symbol = symbolStack.pop()!;
-            if (symbol === matchToken.OPEN_BRACKET || symbol === matchToken.CLOSE_BRACKET) {
+            if (!(lastBaseStack instanceof LexerNode) && (symbol === matchToken.OPEN_BRACKET || symbol === matchToken.CLOSE_BRACKET)) {
                 return false;
             }
             baseStack.push(symbol);
@@ -1047,10 +1049,12 @@ export class LexerTreeBuilder extends Disposable {
                          * Formula example: =IF(TODAY()>1,"TRUE", "FALSE")
                          * Copy or auto-fill at complex formula get error formula offset
                          */
+
                         this._addSequenceArray(sequenceArray, currentString, cur, isZeroAdded);
                         cur++;
                         this._addSequenceArray(sequenceArray, nextCurrentString, cur, isZeroAdded);
                         cur++;
+                        this._closeBracket();
                         continue;
                     } else if (nextCurrentString) {
                         // const subLexerNode = new LexerNode();

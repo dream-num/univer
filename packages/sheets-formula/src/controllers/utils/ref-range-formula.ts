@@ -17,7 +17,8 @@
 import type { ICellData, IObjectMatrixPrimitiveType, IRange, Nullable } from '@univerjs/core';
 import { cellToRange, Direction, isFormulaId, isFormulaString, ObjectMatrix, Tools } from '@univerjs/core';
 import type { IFormulaData, IFormulaDataItem, IRangeChange } from '@univerjs/engine-formula';
-import { EffectRefRangId, handleDeleteRangeMoveLeft, handleDeleteRangeMoveUp, handleInsertCol, handleInsertRangeMoveDown, handleInsertRangeMoveRight, handleInsertRow, handleIRemoveCol, handleIRemoveRow, handleMoveCols, handleMoveRange, handleMoveRows, runRefRangeMutations } from '@univerjs/sheets';
+import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
+import { EffectRefRangId, handleDeleteRangeMoveLeft, handleDeleteRangeMoveUp, handleInsertCol, handleInsertRangeMoveDown, handleInsertRangeMoveRight, handleInsertRow, handleIRemoveCol, handleIRemoveRow, handleMoveCols, handleMoveRange, handleMoveRows, runRefRangeMutations, SetRangeValuesMutation } from '@univerjs/sheets';
 import { checkFormulaDataNull } from './offset-formula-data';
 
 export enum FormulaReferenceMoveType {
@@ -46,6 +47,51 @@ export interface IFormulaReferenceMoveParam {
     sheetName?: string;
 }
 
+export function getFormulaReferenceMoveUndoRedo(oldFormulaData: IFormulaData,
+    newFormulaData: IFormulaData,
+    formulaReferenceMoveParam: IFormulaReferenceMoveParam) {
+    const { type, sheetId: subUnitId, unitId, range, from, to } = formulaReferenceMoveParam;
+
+    if (type === FormulaReferenceMoveType.SetName) {
+            // TODO
+        return;
+    } else if (type === FormulaReferenceMoveType.RemoveSheet) {
+            // TODO
+        return;
+    }
+
+    const { redoFormulaData, undoFormulaData } = refRangeFormula(oldFormulaData, newFormulaData, formulaReferenceMoveParam);
+
+        // console.info('redoFormulaData==', redoFormulaData);
+        // console.info('undoFormulaData==', undoFormulaData);
+
+    const redoSetRangeValuesMutationParams: ISetRangeValuesMutationParams = {
+        subUnitId,
+        unitId,
+        cellValue: redoFormulaData,
+    };
+
+    const redoMutation = {
+        id: SetRangeValuesMutation.id,
+        params: redoSetRangeValuesMutationParams,
+    };
+
+    const undoSetRangeValuesMutationParams: ISetRangeValuesMutationParams = {
+        subUnitId,
+        unitId,
+        cellValue: undoFormulaData,
+    };
+
+    const undoMutation = {
+        id: SetRangeValuesMutation.id,
+        params: undoSetRangeValuesMutationParams,
+    };
+
+    return {
+        undos: [undoMutation],
+        redos: [redoMutation],
+    };
+}
 /**
  * For different Command operations, it may be necessary to perform traversal in reverse or in forward order, so first determine the type of Command and then perform traversal.
  * @param oldFormulaData
@@ -58,9 +104,6 @@ export function refRangeFormula(oldFormulaData: IFormulaData,
     formulaReferenceMoveParam: IFormulaReferenceMoveParam) {
     let redoFormulaData: IObjectMatrixPrimitiveType<Nullable<ICellData>> = {};
     let undoFormulaData: IObjectMatrixPrimitiveType<Nullable<ICellData>> = {};
-    // When undoing and redoing, the traversal order may be different. Record the range list of all single formula offsets, and then retrieve the traversal as needed.
-    const rangeList: IRangeChange[] = [];
-    let isReverse = false;
 
     const { type, unitId, sheetId, range, from, to } = formulaReferenceMoveParam;
 
@@ -68,8 +111,6 @@ export function refRangeFormula(oldFormulaData: IFormulaData,
         return {
             redoFormulaData,
             undoFormulaData,
-            rangeList,
-            isReverse,
         };
     }
 
@@ -78,6 +119,10 @@ export function refRangeFormula(oldFormulaData: IFormulaData,
 
     const oldFormulaMatrix = new ObjectMatrix(currentOldFormulaData);
     const newFormulaMatrix = new ObjectMatrix(currentNewFormulaData);
+
+    // When undoing and redoing, the traversal order may be different. Record the range list of all single formula offsets, and then retrieve the traversal as needed.
+    const rangeList: IRangeChange[] = [];
+    let isReverse = false;
 
     oldFormulaMatrix.forValue((row, column, cell) => {
         const formulaString = cell?.f || '';
@@ -188,8 +233,6 @@ export function refRangeFormula(oldFormulaData: IFormulaData,
     return {
         redoFormulaData,
         undoFormulaData,
-        rangeList,
-        isReverse,
     };
 }
 
@@ -368,11 +411,8 @@ function getUndoFormulaData(rangeList: IRangeChange[], oldFormulaMatrix: ObjectM
         const oldFormula = oldFormulaMatrix.getValue(oldStartRow, oldStartColumn);
         const oldValue = formulaDataItemToCellData(oldFormula);
 
-        // When undoing, setRangeValues is executed before the position changes, so we must store the old value in the new position so that the old value can be restored to the correct position after the snapshot position changes.
-
-        // For formulaData, it should be necessary to restore the old value at the old position and delete the value at the new position, which is the opposite of the situation in undo, so we set a position exchange information in the mutation information of undo, and identify and process it in the update logic of formulaData.
-        undoFormulaData.setValue(oldStartRow, oldStartColumn, null);
-        undoFormulaData.setValue(newStartRow, newStartColumn, oldValue);
+        undoFormulaData.setValue(oldStartRow, oldStartColumn, oldValue);
+        undoFormulaData.setValue(newStartRow, newStartColumn, null);
     });
 
     return undoFormulaData.clone();
@@ -409,3 +449,8 @@ export function formulaDataItemToCellData(formulaDataItem: IFormulaDataItem): IC
 
     return cellData;
 }
+
+// export function handleSetNameFormula(oldFormulaData: IFormulaData,
+//     newFormulaData: IFormulaData {
+
+//     }

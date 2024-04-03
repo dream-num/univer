@@ -213,10 +213,6 @@ export interface IOptionData {
      *
      */
     contentsOnly?: boolean;
-    /**
-     *  Auxiliary data for updating local memory data without having to deal with coordination conflicts
-     */
-    [key: PropertyKey]: any;
 }
 
 /**

@@ -348,7 +348,7 @@ export class FormulaDataModel extends Disposable {
         };
     }
 
-    updateFormulaData(unitId: string, sheetId: string, cellValue: IObjectMatrixPrimitiveType<Nullable<ICellData>>, rangeList?: IRangeChange[], isReverse?: boolean) {
+    updateFormulaData(unitId: string, sheetId: string, cellValue: IObjectMatrixPrimitiveType<Nullable<ICellData>>) {
         const cellMatrix = new ObjectMatrix(cellValue);
 
         const formulaIdMap = this.getFormulaIdMap(unitId, sheetId); // Connect the formula and ID
@@ -367,25 +367,9 @@ export class FormulaDataModel extends Disposable {
         const sheetFormulaDataMatrix = new ObjectMatrix<IFormulaDataItem>(workbookFormulaData[sheetId]);
         const newSheetFormulaDataMatrix = new ObjectMatrix<IFormulaDataItem | null>();
 
-        if (rangeList) {
-            if (isReverse) {
-                rangeList.reverse();
-            }
-
-            rangeList.forEach(({ oldCell, newCell }) => {
-                const { startRow: r, startColumn: c } = oldCell;
-                const { startRow: newStartRow, startColumn: newStartColumn } = newCell;
-
-                const cell = cellMatrix.getValue(newStartRow, newStartColumn);
-
-                updateFormulaDataByCellValue(sheetFormulaDataMatrix, newSheetFormulaDataMatrix, formulaIdMap, deleteFormulaIdMap, r, c, cell);
-                updateFormulaDataByCellValue(sheetFormulaDataMatrix, newSheetFormulaDataMatrix, formulaIdMap, deleteFormulaIdMap, newStartRow, newStartColumn, null);
-            });
-        } else {
-            cellMatrix.forValue((r, c, cell) => {
-                updateFormulaDataByCellValue(sheetFormulaDataMatrix, newSheetFormulaDataMatrix, formulaIdMap, deleteFormulaIdMap, r, c, cell);
-            });
-        }
+        cellMatrix.forValue((r, c, cell) => {
+            updateFormulaDataByCellValue(sheetFormulaDataMatrix, newSheetFormulaDataMatrix, formulaIdMap, deleteFormulaIdMap, r, c, cell);
+        });
 
         // Convert the formula ID to formula string
         sheetFormulaDataMatrix.forValue((r, c, cell) => {
@@ -442,8 +426,7 @@ export class FormulaDataModel extends Disposable {
     updateArrayFormulaRange(
         unitId: string,
         sheetId: string,
-        cellValue: IObjectMatrixPrimitiveType<Nullable<ICellData>>,
-        rangeList?: IRangeChange[], isReverse?: boolean
+        cellValue: IObjectMatrixPrimitiveType<Nullable<ICellData>>
     ) {
         // remove the array formula range when cell value is null
 
@@ -454,30 +437,15 @@ export class FormulaDataModel extends Disposable {
         const arrayFormulaRangeMatrix = new ObjectMatrix(arrayFormulaRange);
         const cellMatrix = new ObjectMatrix(cellValue);
 
-        if (rangeList) {
-            if (isReverse) {
-                rangeList.reverse();
-            }
-
-            rangeList.forEach(({ oldCell, newCell }) => {
-                const { startRow: r, startColumn: c } = oldCell;
-                const { startRow: newStartRow, startColumn: newStartColumn } = newCell;
-
-                arrayFormulaRangeMatrix.realDeleteValue(r, c);
-                arrayFormulaRangeMatrix.realDeleteValue(newStartRow, newStartColumn);
-            });
-        } else {
-            cellMatrix.forValue((r, c, cell) => {
-                arrayFormulaRangeMatrix.realDeleteValue(r, c);
-            });
-        }
+        cellMatrix.forValue((r, c, cell) => {
+            arrayFormulaRangeMatrix.realDeleteValue(r, c);
+        });
     }
 
     updateArrayFormulaCellData(
         unitId: string,
         sheetId: string,
-        cellValue: IObjectMatrixPrimitiveType<Nullable<ICellData>>,
-        rangeList?: IRangeChange[], isReverse?: boolean
+        cellValue: IObjectMatrixPrimitiveType<Nullable<ICellData>>
     ) {
         // remove the array formula range when cell value is null
 
@@ -495,23 +463,9 @@ export class FormulaDataModel extends Disposable {
 
         const cellMatrix = new ObjectMatrix(cellValue);
 
-        if (rangeList) {
-            if (isReverse) {
-                rangeList.reverse();
-            }
-
-            rangeList.forEach(({ oldCell, newCell }) => {
-                const { startRow: r, startColumn: c } = oldCell;
-                const { startRow: newStartRow, startColumn: newStartColumn } = newCell;
-
-                clearArrayFormulaCellDataByCell(arrayFormulaRangeMatrix, arrayFormulaCellDataMatrix, r, c);
-                clearArrayFormulaCellDataByCell(arrayFormulaRangeMatrix, arrayFormulaCellDataMatrix, newStartRow, newStartColumn);
-            });
-        } else {
-            cellMatrix.forValue((r, c, cell) => {
-                clearArrayFormulaCellDataByCell(arrayFormulaRangeMatrix, arrayFormulaCellDataMatrix, r, c);
-            });
-        }
+        cellMatrix.forValue((r, c, cell) => {
+            clearArrayFormulaCellDataByCell(arrayFormulaRangeMatrix, arrayFormulaCellDataMatrix, r, c);
+        });
     }
 
     updateNumfmtData(

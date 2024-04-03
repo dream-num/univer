@@ -42,7 +42,7 @@ import {
 } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
-import { deserializeRangeWithSheet, IDefinedNamesService, isReferenceString, SetDefinedNameCurrentMutation } from '@univerjs/engine-formula';
+import { deserializeRangeWithSheet, IDefinedNamesService, isReferenceString, operatorToken, SetDefinedNameCurrentMutation } from '@univerjs/engine-formula';
 import type { ISetZoomRatioOperationParams } from '../commands/operations/set-zoom-ratio.operation';
 import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
 import { VIEWPORT_KEY } from '../common/keys';
@@ -105,12 +105,17 @@ export class SelectionController extends Disposable {
                         return;
                     }
 
-                    const { name, formulaOrRefString, localSheetId, unitId } = item;
+                    const { unitId } = item;
+                    let { formulaOrRefString } = item;
 
                     const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
 
                     if (unitId !== workbook.getUnitId()) {
                         return;
+                    }
+
+                    if (formulaOrRefString.substring(0, 1) === operatorToken.EQUALS) {
+                        formulaOrRefString = formulaOrRefString.substring(1);
                     }
 
                     const valueArray = formulaOrRefString.split(',');

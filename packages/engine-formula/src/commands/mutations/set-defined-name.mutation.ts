@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-import type { IMutation, IRange } from '@univerjs/core';
+import type { IMutation } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
-import type { IAccessor } from '@wendellhu/redi';
-import { IDefinedNamesService } from '../../services/defined-names.service';
 
 export interface ISetDefinedNameMutationSearchParam {
     unitId: string;

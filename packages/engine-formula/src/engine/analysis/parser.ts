@@ -98,6 +98,9 @@ export class AstTreeBuilder extends Disposable {
     }
 
     private _lambdaParameterHandler(lexerNode: LexerNode, parent: LambdaNode) {
+        if (parent.getLambdaId == null) {
+            return ErrorNode.create(ErrorType.VALUE);
+        }
         const lambdaId = parent.getLambdaId();
 
         const parentAstNode = new AstRootNode(DEFAULT_TOKEN_TYPE_ROOT);

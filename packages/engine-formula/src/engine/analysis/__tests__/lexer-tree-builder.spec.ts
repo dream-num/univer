@@ -185,6 +185,11 @@ describe('lexer nodeMaker test', () => {
             const node = lexerTreeBuilder.treeBuilder('=INDEX((A6:B6,C6:D7),1,1,2)') as LexerNode;
             expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"INDEX","st":0,"ed":4,"children":[{"token":"P_1","st":2,"ed":4,"children":[{"token":"CUBE","st":-1,"ed":-1,"children":[{"token":"P_1","st":-1,"ed":-1,"children":[{"token":":","st":-1,"ed":-1,"children":[{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"A6","st":-1,"ed":-1,"children":[]}]},{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"B6","st":-1,"ed":-1,"children":[]}]}]}]},{"token":"P_1","st":9,"ed":11,"children":[{"token":":","st":-1,"ed":-1,"children":[{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"C6","st":-1,"ed":-1,"children":[]}]},{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"D7","st":-1,"ed":-1,"children":[]}]}]}]}]}]},{"token":"P_1","st":16,"ed":18,"children":["1"]},{"token":"P_1","st":18,"ed":20,"children":["1"]},{"token":"P_1","st":20,"ed":22,"children":["2"]}]}]}');
         });
+
+        it('brackets function', () => {
+            const node = lexerTreeBuilder.treeBuilder('=(TODAY())') as LexerNode;
+            expect(node).toStrictEqual('');
+        });
     });
 
     describe('check error', () => {

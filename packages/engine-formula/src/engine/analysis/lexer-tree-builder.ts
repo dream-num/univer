@@ -670,9 +670,11 @@ export class LexerTreeBuilder extends Disposable {
                 baseStack.push(node);
             }
         }
+        const baseStackLength = baseStack.length;
+        const lastBaseStack = baseStack[baseStackLength - 1];
         while (symbolStack.length > 0) {
             const symbol = symbolStack.pop()!;
-            if (symbol === matchToken.OPEN_BRACKET || symbol === matchToken.CLOSE_BRACKET) {
+            if (!(lastBaseStack instanceof LexerNode) && (symbol === matchToken.OPEN_BRACKET || symbol === matchToken.CLOSE_BRACKET)) {
                 return false;
             }
             baseStack.push(symbol);

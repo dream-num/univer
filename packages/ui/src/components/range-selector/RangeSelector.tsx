@@ -254,6 +254,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
         setRangeValue(value || '');
 
         if (value === '') {
+            onChange && onChange([]);
             return;
         }
 

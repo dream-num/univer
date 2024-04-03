@@ -101,8 +101,14 @@ export class DefinedNameController extends Disposable {
     }
 
     private _registerDescription(param: ISetDefinedNameMutationParam) {
+        const { unitId, sheetId } = this._getUnitIdAndSheetId();
+
+        if (unitId == null || sheetId == null) {
+            return;
+        }
+
         const { name, comment, formulaOrRefString, localSheetId } = param;
-        if (!this._descriptionService.hasDescription(name) && (localSheetId == null || localSheetId === SCOPE_WORKBOOK_VALUE)) {
+        if (!this._descriptionService.hasDescription(name) && (localSheetId == null || localSheetId === SCOPE_WORKBOOK_VALUE || localSheetId === sheetId)) {
             this._descriptionService.registerDescriptions([{
                 functionName: name,
                 description: formulaOrRefString + (comment || ''),
@@ -139,19 +145,29 @@ export class DefinedNameController extends Disposable {
         this._preUnitId = null;
     }
 
-    private _registerDescriptions() {
+    private _getUnitIdAndSheetId() {
         const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
         if (workbook == null) {
-            return;
+            return {};
         }
         const worksheet = workbook.getActiveSheet();
 
         if (worksheet == null) {
-            return;
+            return {};
         }
 
-        const unitId = workbook.getUnitId();
-        const sheetId = worksheet.getSheetId();
+        return {
+            unitId: workbook.getUnitId(),
+            sheetId: worksheet.getSheetId(),
+        };
+    }
+
+    private _registerDescriptions() {
+        const { unitId, sheetId } = this._getUnitIdAndSheetId();
+
+        if (unitId == null || sheetId == null) {
+            return;
+        }
 
         const definedNames = this._definedNamesService.getDefinedNameMap(unitId);
         if (!definedNames) {
@@ -179,18 +195,11 @@ export class DefinedNameController extends Disposable {
     }
 
     private _unregisterDescriptionsForNotInSheetId() {
-        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
-        if (workbook == null) {
+        const { unitId, sheetId } = this._getUnitIdAndSheetId();
+
+        if (unitId == null || sheetId == null) {
             return;
         }
-        const worksheet = workbook.getActiveSheet();
-
-        if (worksheet == null) {
-            return;
-        }
-
-        const unitId = workbook.getUnitId();
-        const sheetId = worksheet.getSheetId();
 
         const definedNames = this._definedNamesService.getDefinedNameMap(unitId);
         if (!definedNames) {

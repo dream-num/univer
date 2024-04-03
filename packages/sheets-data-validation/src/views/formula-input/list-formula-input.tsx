@@ -270,10 +270,10 @@ export function ListFormulaInput(props: IFormulaInputProps) {
 
     return (
         <>
-            <FormLayout label="选项来源">
+            <FormLayout label={localeService.t('dataValidation.list.options')}>
                 <RadioGroup value={isRefRange} onChange={(v) => setIsRefRange(v as string)}>
-                    <Radio value="0">自定义</Radio>
-                    <Radio value="1">引用数据</Radio>
+                    <Radio value="0">{localeService.t('dataValidation.list.customOptions')}</Radio>
+                    <Radio value="1">{localeService.t('dataValidation.list.refOptions')}</Radio>
                 </RadioGroup>
             </FormLayout>
             {isRefRange === '1' ? (

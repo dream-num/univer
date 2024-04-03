@@ -242,8 +242,6 @@ class FontLibrary {
         } catch (err) {
             console.error(err);
         }
-
-        // console.log(this._fontBook);
     }
 
     fintBestMatchFontByStyle(style: IStyleBase): Nullable<IFontWithBuffer> {

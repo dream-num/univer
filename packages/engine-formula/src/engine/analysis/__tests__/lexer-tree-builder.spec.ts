@@ -309,5 +309,78 @@ describe('lexer nodeMaker test', () => {
                 ')',
             ]);
         });
+
+        it('No Parameter Function', () => {
+            expect(lexerTreeBuilder.sequenceNodesBuilder('=today()+today()+column()')).toStrictEqual([
+                {
+                    endIndex: 4,
+                    nodeType: 3,
+                    startIndex: 0,
+                    token: 'today',
+                },
+                '(',
+                ')',
+                '+',
+                {
+                    endIndex: 12,
+                    nodeType: 3,
+                    startIndex: 8,
+                    token: 'today',
+                },
+                '(',
+                ')',
+                '+',
+                {
+                    endIndex: 21,
+                    nodeType: 3,
+                    startIndex: 16,
+                    token: 'column',
+                },
+                '(',
+                ')',
+            ]);
+        });
+
+        it('No Parameter Today', () => {
+            expect(lexerTreeBuilder.sequenceNodesBuilder('=IF(TODAY()>1,"TRUE", "FALSE")')).toStrictEqual([
+                {
+                    endIndex: 1,
+                    nodeType: 3,
+                    startIndex: 0,
+                    token: 'IF',
+                },
+                '(',
+                {
+                    endIndex: 7,
+                    nodeType: 3,
+                    startIndex: 3,
+                    token: 'TODAY',
+                },
+                '(',
+                ')',
+                '>',
+                {
+                    endIndex: 11,
+                    nodeType: 1,
+                    startIndex: 11,
+                    token: '1',
+                },
+                ',',
+                {
+                    endIndex: 18,
+                    nodeType: 2,
+                    startIndex: 13,
+                    token: '"TRUE"',
+                },
+                ',',
+                {
+                    endIndex: 27,
+                    nodeType: 2,
+                    startIndex: 20,
+                    token: ' "FALSE"',
+                },
+                ')',
+            ]);
+        });
     });
 });

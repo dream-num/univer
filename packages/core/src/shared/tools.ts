@@ -652,4 +652,20 @@ export class Tools {
     ) {
         return range1End >= range2Start && range2End >= range1Start;
     }
+
+    static isValidParameter(name: string): boolean {
+        /**Validates that the name starts with a letter or underscore */
+        const startsWithLetterOrUnderscore = /^[A-Za-z_]/.test(name);
+
+       /**
+        *Validates that the name does not contain spaces or disallowed characters
+        *Assuming the set of disallowed characters includes some special characters,
+        *you can modify the regex below according to the actual requirements
+        */
+        const containsNoInvalidChars = /^[A-Za-z0-9_]+$/.test(name);
+
+        const isValidLength = name.length <= 255;
+
+        return startsWithLetterOrUnderscore && containsNoInvalidChars && isValidLength;
+    }
 }

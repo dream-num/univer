@@ -511,6 +511,8 @@ const locale = {
         deleteButton: '删除',
         deleteConfirmText: '确定删除定义名称？',
         nameConflict: '与函数名称冲突',
+        nameInvalid: '名称不包含空格或不允许的字符',
+        nameSheetConflict: '名称与工作表名称冲突',
     },
 };
 

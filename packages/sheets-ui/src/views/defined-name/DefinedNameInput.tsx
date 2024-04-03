@@ -18,7 +18,7 @@ import React, { useEffect, useState } from 'react';
 
 import { RangeSelector, TextEditor } from '@univerjs/ui';
 import type { IUnitRange, Nullable } from '@univerjs/core';
-import { AbsoluteRefType, IUniverInstanceService, LocaleService } from '@univerjs/core';
+import { AbsoluteRefType, IUniverInstanceService, LocaleService, Tools } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { Button, Input, Radio, RadioGroup, Select } from '@univerjs/design';
 import { IDefinedNamesService, type IDefinedNamesServiceParam, IFunctionService, isReferenceString, LexerTreeBuilder, operatorToken, serializeRangeToRefString } from '@univerjs/engine-formula';
@@ -149,6 +149,20 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
 
         if (definedNamesService.getValueByName(unitId, nameValue) != null && (id == null || id.length === 0)) {
             setValidString(localeService.t('definedName.nameDuplicate'));
+            return;
+        }
+
+        if (!Tools.isValidParameter(nameValue)) {
+            setValidString(localeService.t('definedName.nameInvalid'));
+            return;
+        }
+
+        const sheetNames = workbook.getSheetOrders().map((sheetId) => {
+            return workbook.getSheetBySheetId(sheetId)?.getName() || '';
+        });
+
+        if (sheetNames.includes(nameValue)) {
+            setValidString(localeService.t('definedName.nameSheetConflict'));
             return;
         }
 

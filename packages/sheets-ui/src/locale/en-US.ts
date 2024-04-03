@@ -516,6 +516,8 @@ const locale: typeof zhCN = {
         deleteButton: 'Delete',
         deleteConfirmText: 'Are you sure you want to delete this defined name?',
         nameConflict: 'The name conflicts with the function name',
+        nameInvalid: 'The name is invalid',
+        nameSheetConflict: 'The name conflicts with the sheet name',
     },
 };
 

@@ -65,14 +65,16 @@ export function DefinedNameOverlay(props: IDefinedNameOverlayProps) {
 
     return (
         <div className={styles.definedNameOverlay}>
-            {definedNames.map((definedName, index) => {
-                return (
-                    <div key={index} className={styles.definedNameOverlayItem} onClick={() => { focusDefinedName(definedName); }}>
-                        <div className={styles.definedNameOverlayItemName}>{definedName.name}</div>
-                        <div className={styles.definedNameOverlayItemFormula}>{definedName.formulaOrRefString}</div>
-                    </div>
-                );
-            })}
+            <div className={styles.definedNameOverlayContainer}>
+                {definedNames.map((definedName, index) => {
+                    return (
+                        <div key={index} className={styles.definedNameOverlayItem} onClick={() => { focusDefinedName(definedName); }}>
+                            <div className={styles.definedNameOverlayItemName}>{definedName.name}</div>
+                            <div className={styles.definedNameOverlayItemFormula}>{definedName.formulaOrRefString}</div>
+                        </div>
+                    );
+                })}
+            </div>
             <div className={styles.definedNameOverlayManager} onClick={openSlider}>
                 <div className={styles.definedNameOverlayManagerTitle}>{localeService.t('definedName.managerTitle')}</div>
                 <div className={styles.definedNameOverlayManagerContent}>{localeService.t('definedName.managerDescription')}</div>

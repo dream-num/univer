@@ -42,7 +42,7 @@ export const SidebarDefinedNameOperation: ICommand = {
                     onClose: () => {
                         editorService.closeRangePrompt();
                     },
-                    width: 313,
+                    width: 333,
                 });
                 break;
 

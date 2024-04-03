@@ -36,10 +36,20 @@
         position: relative;
         border: 1px solid rgb(var(--border-color));
         width: 300px;
-        max-height: 600px;
         background-color: rgb(var(--color-white));
-
         transform: translateX(-75px);
+
+        &-container {
+            position: relative;
+            height: 100%;
+            max-height: 400px;
+            width: 100%;
+            overflow: hidden;
+            overflow-y: auto;
+            scrollbar-color: rgba(var(--scrollbar-color), 0.7) transparent;
+            scrollbar-gutter: auto;
+            scrollbar-width: thin;
+        }
 
         &-item {
             display: flex;
@@ -79,6 +89,7 @@
         }
 
         &-manager {
+            position: absolute;
             display: flex;
             flex-direction: column;
             overflow-y: auto;
@@ -86,6 +97,8 @@
             width: 100%;
             cursor: pointer;
             overflow: hidden;
+            bottom: -70px;
+            background-color: rgb(var(--color-white));
 
             &:hover {
                 background-color: rgb(var(--grey-50));
@@ -110,8 +123,19 @@
     &-container {
         height: 100%;
         width: 100%;
-        overflow: hidden;
-        overflow-y: auto;
+        position: relative;
+
+        &-scroll {
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            overflow-y: auto;
+            position: absolute;
+            scrollbar-color: rgba(var(--scrollbar-color), 0.7) transparent;
+            scrollbar-gutter: auto;
+            scrollbar-width: thin;
+        }
+
         &-addButton {
             display: flex;
             align-items: center;
@@ -149,6 +173,9 @@
                 font-weight: 500;
                 color: rgb(var(--color-black));
                 margin: 5px 0px;
+                max-width: 190px;
+                max-height: 100px;
+                overflow: hidden;
 
                 &-for-sheet {
                     font-size: var(--font-size-xxs);

@@ -69,8 +69,8 @@ export function DefinedNameOverlay(props: IDefinedNameOverlayProps) {
                 {definedNames.map((definedName, index) => {
                     return (
                         <div key={index} className={styles.definedNameOverlayItem} onClick={() => { focusDefinedName(definedName); }}>
-                            <div className={styles.definedNameOverlayItemName}>{definedName.name}</div>
-                            <div className={styles.definedNameOverlayItemFormula}>{definedName.formulaOrRefString}</div>
+                            <div className={styles.definedNameOverlayItemName} title={definedName.name}>{definedName.name}</div>
+                            <div className={styles.definedNameOverlayItemFormula} title={definedName.formulaOrRefString}>{definedName.formulaOrRefString}</div>
                         </div>
                     );
                 })}

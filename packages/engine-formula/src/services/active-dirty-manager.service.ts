@@ -16,14 +16,15 @@
 
 import type { ICommandInfo, IUnitRange, Nullable } from '@univerjs/core';
 import { Disposable } from '@univerjs/core';
-import type { IDirtyUnitFeatureMap, IDirtyUnitOtherFormulaMap, IDirtyUnitSheetNameMap } from '@univerjs/engine-formula';
 import { createIdentifier } from '@wendellhu/redi';
+import type { IDirtyUnitFeatureMap, IDirtyUnitOtherFormulaMap, IDirtyUnitSheetDefinedNameMap, IDirtyUnitSheetNameMap } from '../basics/common';
 
 export interface IDirtyConversionManagerParams {
     commandId: string;
     getDirtyData: (command: ICommandInfo) => {
         dirtyRanges?: IUnitRange[];
         dirtyNameMap?: IDirtyUnitSheetNameMap;
+        dirtyDefinedNameMap?: IDirtyUnitSheetDefinedNameMap;
         dirtyUnitFeatureMap?: IDirtyUnitFeatureMap;
         dirtyUnitOtherFormulaMap?: IDirtyUnitOtherFormulaMap;
     };

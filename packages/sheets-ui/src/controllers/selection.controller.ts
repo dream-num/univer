@@ -31,20 +31,23 @@ import type { ISelectionWithCoordAndStyle, ISelectionWithStyle } from '@univerjs
 import {
     convertSelectionDataToRange,
     getNormalSelectionStyle,
+    getPrimaryForRange,
     NORMAL_SELECTION_PLUGIN_NAME,
+    ScrollToCellOperation,
     SelectionManagerService,
     SelectionMoveType,
     SetSelectionsOperation,
+    SetWorksheetActivateCommand,
     transformCellDataToSelectionData,
 } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
+import { deserializeRangeWithSheet, IDefinedNamesService, isReferenceString, operatorToken, SetDefinedNameCurrentMutation } from '@univerjs/engine-formula';
 import type { ISetZoomRatioOperationParams } from '../commands/operations/set-zoom-ratio.operation';
 import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
 import { VIEWPORT_KEY } from '../common/keys';
 import { ISelectionRenderService } from '../services/selection/selection-render.service';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
-import { ScrollController } from './scroll.controller';
 import type { ISheetObjectParam } from './utils/component-tools';
 import { getSheetObject } from './utils/component-tools';
 
@@ -59,7 +62,7 @@ export class SelectionController extends Disposable {
         private readonly _selectionRenderService: ISelectionRenderService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
         @Inject(ThemeService) private readonly _themeService: ThemeService,
-        @Inject(ScrollController) private readonly _scrollController: ScrollController
+        @IDefinedNamesService private readonly _definedNamesService: IDefinedNamesService
     ) {
         super();
 
@@ -74,8 +77,6 @@ export class SelectionController extends Disposable {
             return;
         }
 
-        // TODO@wzhudev: listen clicking event on the top-left corner to select all cells.
-
         this._initViewMainListener(sheetObject);
         this._initRowHeader(sheetObject);
         this._initColumnHeader(sheetObject);
@@ -85,6 +86,7 @@ export class SelectionController extends Disposable {
         this._initSkeletonChangeListener();
         this._initCommandListener();
         this._initUserActionSyncListener();
+        this._initDefinedNameListener();
 
         const unitId = workbook.getUnitId();
         const sheetId = worksheet.getSheetId();
@@ -93,6 +95,88 @@ export class SelectionController extends Disposable {
             unitId,
             sheetId,
         });
+    }
+
+    private _initDefinedNameListener() {
+        this.disposeWithMe(
+            toDisposable(
+                this._definedNamesService.focusRange$.subscribe(async (item) => {
+                    if (item == null) {
+                        return;
+                    }
+
+                    const { unitId } = item;
+                    let { formulaOrRefString } = item;
+
+                    const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+
+                    if (unitId !== workbook.getUnitId()) {
+                        return;
+                    }
+
+                    if (formulaOrRefString.substring(0, 1) === operatorToken.EQUALS) {
+                        formulaOrRefString = formulaOrRefString.substring(1);
+                    }
+
+                    const valueArray = formulaOrRefString.split(',');
+                    const result = valueArray.every((refString) => {
+                        return isReferenceString(refString.trim());
+                    });
+
+                    if (!result) {
+                        return;
+                    }
+
+                    let worksheet = workbook.getActiveSheet();
+
+                    const selections = [];
+
+                    for (let i = 0; i < valueArray.length; i++) {
+                        const refString = valueArray[i].trim();
+
+                        const unitRange = deserializeRangeWithSheet(refString.trim());
+
+                        if (i === 0) {
+                            const worksheetCache = workbook.getSheetBySheetName(unitRange.sheetName);
+                            if (worksheetCache && worksheet.getSheetId() !== worksheetCache.getSheetId()) {
+                                worksheet = worksheetCache;
+                                await this._commandService.executeCommand(SetWorksheetActivateCommand.id, {
+                                    subUnitId: worksheet.getSheetId(),
+                                    unitId,
+                                });
+                            }
+                        }
+
+                        if (worksheet.getName() !== unitRange.sheetName) {
+                            continue;
+                        }
+
+                        let primary = null;
+                        if (i === valueArray.length - 1) {
+                            const range = unitRange.range;
+                            const { startRow, startColumn, endRow, endColumn } = range;
+                            primary = getPrimaryForRange({
+                                startRow,
+                                startColumn,
+                                endRow,
+                                endColumn,
+
+                            }, worksheet);
+                        }
+
+                        selections.push({
+                            range: unitRange.range,
+                            style: getNormalSelectionStyle(this._themeService),
+                            primary,
+                        });
+                    }
+
+                    this._selectionManagerService.replace(selections);
+
+                    this._commandService.executeCommand(ScrollToCellOperation.id, selections[0].range);
+                })
+            )
+        );
     }
 
     private _getActiveViewport(evt: IPointerEvent | IMouseEvent) {
@@ -233,13 +317,13 @@ export class SelectionController extends Disposable {
     private _initSelectionChangeListener() {
         this.disposeWithMe(
             toDisposable(
-                this._selectionManagerService.selectionMoveEnd$.subscribe((param) => {
+                this._selectionManagerService.selectionMoveEnd$.subscribe((params) => {
                     this._selectionRenderService.reset();
-                    if (param == null) {
+                    if (params == null) {
                         return;
                     }
 
-                    for (const selectionWithStyle of param) {
+                    for (const selectionWithStyle of params) {
                         if (selectionWithStyle == null) {
                             continue;
                         }
@@ -247,9 +331,51 @@ export class SelectionController extends Disposable {
                             this._selectionRenderService.convertSelectionRangeToData(selectionWithStyle);
                         this._selectionRenderService.addControlToCurrentByRangeData(selectionData);
                     }
+
+                    this._syncDefinedNameRange(params);
                 })
             )
         );
+
+        this.disposeWithMe(
+            toDisposable(
+                this._selectionManagerService.selectionMoving$.subscribe((params) => {
+                    if (params == null) {
+                        return;
+                    }
+
+                    this._syncDefinedNameRange(params);
+                })
+            )
+        );
+
+        this.disposeWithMe(
+            toDisposable(
+                this._selectionManagerService.selectionMoveStart$.subscribe((params) => {
+                    if (params == null) {
+                        return;
+                    }
+
+                    this._syncDefinedNameRange(params);
+                })
+            )
+        );
+    }
+
+    private _syncDefinedNameRange(params: ISelectionWithStyle[]) {
+        if (params.length === 0) {
+            return;
+        }
+        const lastSelection = params[params.length - 1];
+
+        const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+        const worksheet = workbook.getActiveSheet();
+
+        this._commandService.executeCommand(SetDefinedNameCurrentMutation.id, {
+            range: lastSelection.range,
+            unitId: workbook.getUnitId(),
+            sheetId: worksheet.getSheetId(),
+        });
     }
 
     private _initUserActionSyncListener() {

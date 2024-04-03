@@ -318,7 +318,7 @@ export class FormulaDependencyGenerator extends Disposable {
     private _generateAstNode(formulaString: string, refOffsetX: number = 0, refOffsetY: number = 0) {
         let astNode: Nullable<AstRootNode> = FormulaASTCache.get(`${formulaString}##${refOffsetX}${refOffsetY}`);
 
-        if (astNode) {
+        if (astNode && !this._isDirtyDefinedForNode(astNode)) {
             return astNode;
         }
 
@@ -476,6 +476,22 @@ export class FormulaDependencyGenerator extends Disposable {
         return rangeList;
     }
 
+    private _isDirtyDefinedForNode(node: BaseAstNode) {
+        const definedNameMap = this._currentConfigService.getDirtyDefinedNameMap();
+        const executeUnitId = this._currentConfigService.getExecuteUnitId();
+        if (executeUnitId != null && definedNameMap[executeUnitId] != null) {
+            const names = Object.keys(definedNameMap[executeUnitId]!);
+            for (let i = 0, len = names.length; i < len; i++) {
+                const name = names[i];
+                if (node.hasDefinedName(name)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     /**
      * Build a formula dependency tree based on the dependency relationships.
      * @param treeList
@@ -563,6 +579,17 @@ export class FormulaDependencyGenerator extends Disposable {
             const otherFormulaMap = this._currentConfigService.getDirtyUnitOtherFormulaMap();
             const state = otherFormulaMap?.[unitId]?.[subUnitId]?.[formulaId];
             if (state != null) {
+                return true;
+            }
+        }
+
+        /**
+         * Detect whether the dirty map contains a defined name.
+         */
+        const node = tree.node;
+        if (node != null) {
+            const dirtyDefinedName = this._isDirtyDefinedForNode(node);
+            if (dirtyDefinedName) {
                 return true;
             }
         }

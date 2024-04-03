@@ -490,9 +490,35 @@ const locale: typeof zhCN = {
             'set-strike-through': 'Toggle strike through',
         },
     },
-
     'sheet-view': 'Sheet View',
     'sheet-edit': 'Sheet Edit',
+
+    definedName: {
+        managerTitle: 'Manager named',
+        managerDescription: 'Create a defined name by selecting cells or formulas, and entering the desired name into the text box.',
+        addButton: 'Add a defined name',
+        featureTitle: 'Defined names',
+        ratioRange: 'Range',
+        ratioFormula: 'Formula',
+        confirm: 'Confirm',
+        cancel: 'Cancel',
+        scopeWorkbook: 'Workbook',
+        inputNamePlaceholder: 'Please enter a name(No space allowed)',
+        inputCommentPlaceholder: 'Please enter a comment',
+        inputRangePlaceholder: 'Please input range(No space allowed)',
+        inputFormulaPlaceholder: 'Please input a formula(No space allowed)',
+        nameEmpty: 'Name cannot be empty',
+        nameDuplicate: 'Name already exists',
+        formulaOrRefStringEmpty: 'Formula or reference string cannot be empty',
+        formulaOrRefStringInvalid: 'Invalid formula or reference string',
+        defaultName: 'DefinedName',
+        updateButton: 'Update',
+        deleteButton: 'Delete',
+        deleteConfirmText: 'Are you sure you want to delete this defined name?',
+        nameConflict: 'The name conflicts with the function name',
+        nameInvalid: 'The name is invalid',
+        nameSheetConflict: 'The name conflicts with the sheet name',
+    },
 };
 
 export default locale;

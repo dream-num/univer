@@ -130,6 +130,7 @@ export class TriggerCalculationController extends Disposable {
     private _generateDirty(commands: ICommandInfo[]) {
         const allDirtyRanges: IUnitRange[] = [];
         const allDirtyNameMap: IDirtyUnitSheetNameMap = {};
+        const allDirtyDefinedNameMap: IDirtyUnitSheetNameMap = {};
         const allDirtyUnitFeatureMap: IDirtyUnitFeatureMap = {};
         const allDirtyUnitOtherFormulaMap: IDirtyUnitOtherFormulaMap = {};
 
@@ -144,7 +145,7 @@ export class TriggerCalculationController extends Disposable {
 
             const params = conversion.getDirtyData(command);
 
-            const { dirtyRanges, dirtyNameMap, dirtyUnitFeatureMap, dirtyUnitOtherFormulaMap } = params;
+            const { dirtyRanges, dirtyNameMap, dirtyDefinedNameMap, dirtyUnitFeatureMap, dirtyUnitOtherFormulaMap } = params;
 
             if (dirtyRanges != null) {
                 allDirtyRanges.push(...dirtyRanges);
@@ -152,6 +153,10 @@ export class TriggerCalculationController extends Disposable {
 
             if (dirtyNameMap != null) {
                 this._mergeDirtyNameMap(allDirtyNameMap, dirtyNameMap);
+            }
+
+            if (dirtyDefinedNameMap != null) {
+                this._mergeDirtyNameMap(allDirtyDefinedNameMap, dirtyDefinedNameMap);
             }
 
             if (dirtyUnitFeatureMap != null) {
@@ -199,6 +204,7 @@ export class TriggerCalculationController extends Disposable {
         return {
             dirtyRanges: allDirtyRanges,
             dirtyNameMap: allDirtyNameMap,
+            dirtyDefinedNameMap: allDirtyDefinedNameMap,
             dirtyUnitFeatureMap: allDirtyUnitFeatureMap,
             dirtyUnitOtherFormulaMap: allDirtyUnitOtherFormulaMap,
             numfmtItemMap,

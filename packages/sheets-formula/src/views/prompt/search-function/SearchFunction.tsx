@@ -169,7 +169,7 @@ export function SearchFunction() {
                         onClick={() => promptService.acceptFormulaName(item.name)}
                     >
                         <span className={styles.formulaSearchFunctionItemName}>
-                            <span className={styles.formulaSearchFunctionItemNameLight}>{searchText}</span>
+                            <span className={styles.formulaSearchFunctionItemNameLight}>{item.name.substring(0, searchText.length)}</span>
                             <span>{item.name.slice(searchText.length)}</span>
                         </span>
                         <span className={styles.formulaSearchFunctionItemDesc}>{item.desc}</span>

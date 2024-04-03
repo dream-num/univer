@@ -16,6 +16,7 @@
 
 import { describe, expect, it } from 'vitest';
 
+import { AbsoluteRefType } from '@univerjs/core';
 import type { LexerNode } from '../lexer-node';
 import { LexerTreeBuilder } from '../lexer-tree-builder';
 import { ErrorType } from '../../../basics/error-type';
@@ -391,6 +392,43 @@ describe('lexer nodeMaker test', () => {
                 },
                 ')',
             ]);
+        });
+    });
+
+    describe('convertRefersToAbsolute', () => {
+        it('Formula All', () => {
+            const result = lexerTreeBuilder.convertRefersToAbsolute('=sum(A1:B1,A1:B1,A1:B1,A1:B1)', AbsoluteRefType.ALL, AbsoluteRefType.ALL);
+            expect(result).toStrictEqual('=sum($A$1:$B$1,$A$1:$B$1,$A$1:$B$1,$A$1:$B$1)');
+        });
+
+        it('Range All', () => {
+            const result = lexerTreeBuilder.convertRefersToAbsolute('A1:B1,A1:B1,A1:B1,A1:B1', AbsoluteRefType.ALL, AbsoluteRefType.ALL);
+            expect(result).toStrictEqual('$A$1:$B$1,$A$1:$B$1,$A$1:$B$1,$A$1:$B$1');
+        });
+
+        it('Formula Column', () => {
+            const result = lexerTreeBuilder.convertRefersToAbsolute('=sum(A1:B1,A1:B1,A1:B1,A1:B1)', AbsoluteRefType.COLUMN, AbsoluteRefType.COLUMN);
+            expect(result).toStrictEqual('=sum($A1:$B1,$A1:$B1,$A1:$B1,$A1:$B1)');
+        });
+
+        it('Range Column', () => {
+            const result = lexerTreeBuilder.convertRefersToAbsolute('A1:B1,A1:B1,A1:B1,A1:B1', AbsoluteRefType.COLUMN, AbsoluteRefType.COLUMN);
+            expect(result).toStrictEqual('$A1:$B1,$A1:$B1,$A1:$B1,$A1:$B1');
+        });
+
+        it('Formula Row', () => {
+            const result = lexerTreeBuilder.convertRefersToAbsolute('=sum(A1:B1,A1:B1,A1:B1,A1:B1)', AbsoluteRefType.ROW, AbsoluteRefType.ROW);
+            expect(result).toStrictEqual('=sum(A$1:B$1,A$1:B$1,A$1:B$1,A$1:B$1)');
+        });
+
+        it('Range Row', () => {
+            const result = lexerTreeBuilder.convertRefersToAbsolute('A1:B1,A1:B1,A1:B1,A1:B1', AbsoluteRefType.ROW, AbsoluteRefType.ROW);
+            expect(result).toStrictEqual('A$1:B$1,A$1:B$1,A$1:B$1,A$1:B$1');
+        });
+
+        it('Complex Formula', () => {
+            const result = lexerTreeBuilder.convertRefersToAbsolute('=SUM(A1:B10) + LAMBDA(x, y, x*y*x)(A1:B10, A10) + MAX(A1:B10,SUM(A2))', AbsoluteRefType.ALL, AbsoluteRefType.ALL);
+            expect(result).toStrictEqual('=SUM($A$1:$B$10) + LAMBDA(x, y, x*y*x)($A$1:$B$10,$A$10) + MAX($A$1:$B$10,SUM($A$2))');
         });
     });
 });

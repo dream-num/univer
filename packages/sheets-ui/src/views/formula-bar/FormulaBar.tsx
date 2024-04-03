@@ -25,6 +25,8 @@ import React, { useEffect, useState } from 'react';
 
 import { IFormulaEditorManagerService } from '../../services/editor/formula-editor-manager.service';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
+
+import { DefinedName } from '../defined-name/DefinedName';
 import styles from './index.module.less';
 
 enum ArrowDirection {
@@ -124,7 +126,7 @@ export function FormulaBar() {
     return (
         <div className={styles.formulaBox} style={{ height: ArrowDirection.Down === arrowDirection ? '28px' : '82px' }}>
             <div className={styles.nameRanges}>
-                <div className={styles.nameRangesInput} />
+                <DefinedName />
             </div>
 
             <div className={styles.formulaBar}>
@@ -144,7 +146,7 @@ export function FormulaBar() {
                             <CheckMarkSingle />
                         </span>
 
-                        <span className={styles.iconContainer} onClick={handlerFxBtnClick}>
+                        <span className={clsx(styles.iconContainer, styles.iconContainerFx)} onClick={handlerFxBtnClick}>
                             <FxSingle />
                         </span>
                     </div>

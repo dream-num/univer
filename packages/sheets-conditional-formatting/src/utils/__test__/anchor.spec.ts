@@ -286,6 +286,8 @@ describe('Test anchor', () => {
             expect(list.map((item) => item.cfId).join('')).toBe('0123456789');
         });
 
+        // -----------------------------------------------------
+
         it('Move 0 in front of 8', () => {
             const startAnchor: IAnchor = { id: '0', type: 'self' };
             const endAnchor: IAnchor = { id: '8', type: 'before' };
@@ -307,6 +309,29 @@ describe('Test anchor', () => {
             moveByAnchor(...redoList, list, (rule) => rule.cfId);
             expect(list.map((item) => item.cfId).join('')).toBe('1234567089');
             const undoList = anchorUndoFactory(...redoList)!;
+            expect(!!undoList).toBeTruthy();
+            moveByAnchor(...undoList, list, (rule) => rule.cfId);
+            expect(list.map((item) => item.cfId).join('')).toBe('0123456789');
+        });
+
+        // -----------------------------------------------------
+        it('use before and after', () => {
+            const startAnchor: IAnchor = { id: '1', type: 'before' };
+            const endAnchor: IAnchor = { id: '1', type: 'after' };
+            moveByAnchor(startAnchor, endAnchor, list, (rule) => rule.cfId);
+            expect(list.map((item) => item.cfId).join('')).toBe('1023456789');
+            const undoList = anchorUndoFactory(startAnchor, endAnchor)!;
+            expect(!!undoList).toBeTruthy();
+            moveByAnchor(...undoList, list, (rule) => rule.cfId);
+            expect(list.map((item) => item.cfId).join('')).toBe('0123456789');
+        });
+
+        it('use after and before', () => {
+            const startAnchor: IAnchor = { id: '1', type: 'after' };
+            const endAnchor: IAnchor = { id: '1', type: 'before' };
+            moveByAnchor(startAnchor, endAnchor, list, (rule) => rule.cfId);
+            expect(list.map((item) => item.cfId).join('')).toBe('0213456789');
+            const undoList = anchorUndoFactory(startAnchor, endAnchor)!;
             expect(!!undoList).toBeTruthy();
             moveByAnchor(...undoList, list, (rule) => rule.cfId);
             expect(list.map((item) => item.cfId).join('')).toBe('0123456789');

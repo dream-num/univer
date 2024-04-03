@@ -116,6 +116,10 @@ const locale = {
             // refPlaceholder: '引用单元格内容作为选项,如:\'Sheet1\'!A100',
             add: '添加选项',
             dropdown: '单选',
+            options: '选项来源',
+            customOptions: '自定义',
+            refOptions: '引用数据',
+
         },
         listMultiple: {
             title: '下拉菜单-多选',

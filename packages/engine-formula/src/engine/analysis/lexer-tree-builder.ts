@@ -1049,10 +1049,12 @@ export class LexerTreeBuilder extends Disposable {
                          * Formula example: =IF(TODAY()>1,"TRUE", "FALSE")
                          * Copy or auto-fill at complex formula get error formula offset
                          */
+
                         this._addSequenceArray(sequenceArray, currentString, cur, isZeroAdded);
                         cur++;
                         this._addSequenceArray(sequenceArray, nextCurrentString, cur, isZeroAdded);
                         cur++;
+                        this._closeBracket();
                         continue;
                     } else if (nextCurrentString) {
                         // const subLexerNode = new LexerNode();

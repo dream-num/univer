@@ -115,7 +115,7 @@ export const RemoveRowCommand: ICommand = {
         if (result.result) {
             accessor.get(IUndoRedoService).pushUndoRedo({
                 unitID: unitId,
-                undoMutations: [...(intercepted.preUndos ?? []), { id: InsertRowMutation.id, params: undoRemoveRowsParams }, ...intercepted.undos],
+                undoMutations: [...(intercepted.preUndos ?? []), { id: InsertRowMutation.id, params: undoRemoveRowsParams }, { id: SetRangeValuesMutation.id, params: undoSetRangeValuesParams }, ...intercepted.undos],
                 redoMutations: [...(intercepted.preRedos ?? []), { id: RemoveRowMutation.id, params: removeRowsParams }, ...intercepted.redos],
             });
             return true;
@@ -191,6 +191,7 @@ export const RemoveColCommand: ICommand = {
                 undoMutations: [
                     ...(intercepted.preUndos ?? []),
                     { id: InsertColMutation.id, params: undoRemoveColParams },
+                    { id: SetRangeValuesMutation.id, params: undoSetRangeValuesParams },
                     ...intercepted.undos],
                 redoMutations: [
                     ...(intercepted.preRedos ?? []),

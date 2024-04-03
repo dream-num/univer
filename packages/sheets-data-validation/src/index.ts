@@ -30,9 +30,7 @@ export { DataValidationRefRangeController } from './controllers/dv-ref-range.con
 export { DataValidationFormulaMarkDirty } from './commands/mutations/formula.mutation';
 export { DATA_VALIDATION_PLUGIN_NAME } from './common/const';
 export { DataValidationAutoFillController } from './controllers/dv-auto-fill.controller';
-export { DataValidationSheetController } from './controllers/dv-sheet.controller';
 export { DataValidationCopyPasteController } from './controllers/dv-copy-paste.controller';
-export { DataValidationResourceController } from './controllers/dv-resource.controller';
 export { HideDataValidationDropdown, ShowDataValidationDropdown } from './commands/operations/data-validation.operation';
 export { DataValidationRejectInputController } from './controllers/dv-reject-input.controller';
 export { enUS, zhCN } from './locale';

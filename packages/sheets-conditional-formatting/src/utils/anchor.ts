@@ -76,7 +76,7 @@ export const moveByAnchor = <T = unknown[]>(start: IAnchor, end: IAnchor, ruleLi
 };
 
 /**
- * 只有 [after,after] and [after,before] 能够支持对称操作
+ * Only [after,after] and [after,before] can support symmetric operations
  */
 export const transformSupportSymmetryAnchor = <T = unknown[]>(start: IAnchor, end: IAnchor, ruleList: T[], get: (v: T) => string): [IAnchor, IAnchor] | null => {
     if (start.type === 'after' && ['after', 'before'].includes(end.type)) {

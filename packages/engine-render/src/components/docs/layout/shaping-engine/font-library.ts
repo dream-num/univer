@@ -192,8 +192,15 @@ function compareFontInfoDistance(a: [number, number], b: [number, number]) {
     return a[0] > b[0] ? CompareResult.GREATER : CompareResult.LESS;
 }
 
+async function checkLocalFontsPermission() {
+    const status = await navigator.permissions.query({ name: 'local-fonts' as PermissionName });
+
+    return status.state === 'granted';
+}
+
 class FontLibrary {
     isReady = false;
+    isSupportQueryLocalFonts = 'queryLocalFonts' in window;
     private _fontBook: Map<string, Map<string, IFontWithBuffer>> = new Map();
 
     constructor() {
@@ -201,7 +208,13 @@ class FontLibrary {
     }
 
     private async _loadFontsToBook() {
-        if (this.isReady) {
+        if (this.isReady || !this.isSupportQueryLocalFonts) {
+            return;
+        }
+
+        const permissionStatus = await checkLocalFontsPermission();
+
+        if (!permissionStatus) {
             return;
         }
 
@@ -224,16 +237,16 @@ class FontLibrary {
                     buffer,
                 });
             }
+
+            this.isReady = true;
         } catch (err) {
             console.error(err);
-        } finally {
-            this.isReady = true;
         }
 
         // console.log(this._fontBook);
     }
 
-    findBestMatchFontByStyle(style: IStyleBase): Nullable<IFontWithBuffer> {
+    fintBestMatchFontByStyle(style: IStyleBase): Nullable<IFontWithBuffer> {
         const ff = style.ff!;
         const fontMap = this._fontBook.get(ff);
 

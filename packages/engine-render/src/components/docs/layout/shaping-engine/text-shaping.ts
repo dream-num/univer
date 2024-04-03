@@ -44,7 +44,7 @@ export interface IOpenTypeGlyphInfo {
     boundingBox: Nullable<IBoundingBox>;
 }
 
-const fontCache = new Map<string, opentype.Font>();
+const fontCache = new Map<string, any>();
 
 export function prepareParagraphBody(body: IDocumentBody, paragraphIndex: number): IDocumentBody {
     const { dataStream, paragraphs = [], textRuns = [] } = body;
@@ -141,7 +141,7 @@ function shapeChunk(content: string, charPosition: number, used: Set<string>, fa
 
     used.add(fontFamily);
 
-    const { font: fontInfo, buffer: fontBuffer } = fontLibrary.findBestMatchFontByStyle({
+    const { font: fontInfo, buffer: fontBuffer } = fontLibrary.fintBestMatchFontByStyle({
         ff: fontFamily,
         bl: style.bl ?? BooleanNumber.FALSE,
         it: style.it ?? BooleanNumber.FALSE,
@@ -149,7 +149,7 @@ function shapeChunk(content: string, charPosition: number, used: Set<string>, fa
 
     let font = fontCache.get(fontInfo.fullName);
     if (!font) {
-        font = opentype.parse(fontBuffer);
+        font = (opentype as any).parse(fontBuffer);
         fontCache.set(fontInfo.fullName, font);
     }
 

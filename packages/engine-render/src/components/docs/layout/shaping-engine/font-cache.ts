@@ -15,12 +15,19 @@
  */
 
 import type { Nullable } from '@univerjs/core';
+import type { IDocumentSkeletonBoundingBox, IDocumentSkeletonFontStyle } from '../../../../basics/i-document-skeleton-cached';
+import { ptToPixel } from '../../../../basics/tools';
+import type { IOpenTypeGlyphInfo } from './text-shaping';
 
-import type { IOpenTypeGlyphInfo } from '../components/docs/layout/shaping-engine/text-shaping';
-import { DEFAULT_MEASURE_TEXT } from './const';
-import type { IDocumentSkeletonBoundingBox, IDocumentSkeletonFontStyle } from './i-document-skeleton-cached';
-import type { IMeasureTextCache } from './interfaces';
-import { ptToPixel } from './tools';
+export const DEFAULT_MEASURE_TEXT = '0';
+
+export interface IMeasureTextCache {
+    fontBoundingBoxAscent: number;
+    fontBoundingBoxDescent: number;
+    actualBoundingBoxAscent: number;
+    actualBoundingBoxDescent: number;
+    width: number;
+}
 
 const getDefaultBaselineOffset = (fontSize: number) => ({
     sbr: 0.6,

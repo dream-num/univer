@@ -88,14 +88,6 @@ export interface IFontLocale {
     defaultFontSize: number;
 }
 
-export interface IMeasureTextCache {
-    fontBoundingBoxAscent: number;
-    fontBoundingBoxDescent: number;
-    actualBoundingBoxAscent: number;
-    actualBoundingBoxDescent: number;
-    width: number;
-}
-
 export interface IDocsConfig extends IReferenceSource, IDocumentLayout {
     localeService: LocaleService;
     documentTextStyle?: ITextStyle;

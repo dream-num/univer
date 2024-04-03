@@ -123,7 +123,6 @@ export function shaping(
         const word = content.slice(last, bk.position);
         const shapedGlyphs: IDocumentSkeletonGlyph[] = [];
 
-        // TODO: 判断是否支持获取本地字体及是否授权、是否 ready
         if (fontLibrary.isReady) {
             const glyphInfosInWord = [];
             for (const glyphInfo of glyphInfos) {

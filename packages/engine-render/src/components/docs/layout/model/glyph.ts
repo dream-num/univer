@@ -16,7 +16,7 @@
 
 import { BooleanNumber, BulletAlignment, DataStreamTreeTokenType as DT, GridType } from '@univerjs/core';
 
-import { FontCache } from '../../../../basics/font-cache';
+import { FontCache } from '../shaping-engine/font-cache';
 import type {
     IAdjustability,
     IDocumentSkeletonBullet,

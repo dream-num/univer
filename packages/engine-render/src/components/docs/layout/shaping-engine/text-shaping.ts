@@ -118,7 +118,13 @@ function prepareTextChunks(body: IDocumentBody) {
     return chunks;
 }
 
-function shapeChunk(content: string, charPosition: number, used: Set<string>, families: string[], style: IStyleBase): IOpenTypeGlyphInfo[] {
+function shapeChunk(
+    content: string,
+    charPosition: number,
+    used: Set<string>,
+    families: string[],
+    style: IStyleBase
+): IOpenTypeGlyphInfo[] {
     let fi = 0;
     let fontFamily = families[fi];
 
@@ -188,6 +194,15 @@ function shapeChunk(content: string, charPosition: number, used: Set<string>, fa
             const emojiMatch = subStr.match(EMOJI_REG);
 
             if (emojiMatch) {
+                // let acc = chars[gi].length;
+
+                // while (acc < emojiMatch[0].length) {
+                //     startIndex += chars[gi].length;
+                //     gi++;
+                //     acc += chars[gi].length;
+                //     console.log(acc, emojiMatch[0].length);
+                // }
+
                 let nextGlyph = glyphs[gi + 1];
                 while (nextGlyph?.index === 0 || nextGlyph?.unicode === 8205) {
                     startIndex += chars[gi].length;

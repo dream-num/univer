@@ -177,8 +177,11 @@ export function _createSkeletonWordOrLetter(
 
     // Handle kerning.
     if (glyphInfo && glyphInfo.kerning !== 0 && glyphInfo.font) {
-        const scale = ptToPixel(fontStyle.fontSize) / glyphInfo.font.unitsPerEm;
-        xOffset += glyphInfo.kerning * scale;
+        const radio = ptToPixel(fontStyle.fontSize) / glyphInfo.font.unitsPerEm;
+        const delta = glyphInfo.kerning * radio;
+
+        width += delta;
+        xOffset += delta;
     }
 
     return {

@@ -141,7 +141,7 @@ function shapeChunk(content: string, charPosition: number, used: Set<string>, fa
 
     used.add(fontFamily);
 
-    const { font: fontInfo, buffer: fontBuffer } = fontLibrary.fintBestMatchFontByStyle({
+    const { font: fontInfo, buffer: fontBuffer } = fontLibrary.findBestMatchFontByStyle({
         ff: fontFamily,
         bl: style.bl ?? BooleanNumber.FALSE,
         it: style.it ?? BooleanNumber.FALSE,

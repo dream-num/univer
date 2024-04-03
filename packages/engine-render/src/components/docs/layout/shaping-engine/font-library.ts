@@ -29,16 +29,23 @@ interface IFontWithBuffer {
 }
 
 enum CompareResult {
+    // a is equal to b.
     EQUAL,
+
+    // a is greater than b.
     GREATER,
+
+    // a is less than b.
     LESS,
 }
 
 enum FontStyle {
     // The default, typically upright style.
     Normal,
+
     // A cursive style with custom letterform.
     Italic,
+
     // Just a slanted version of the normal style.
     Oblique,
 }
@@ -244,7 +251,7 @@ class FontLibrary {
         }
     }
 
-    fintBestMatchFontByStyle(style: IStyleBase): Nullable<IFontWithBuffer> {
+    findBestMatchFontByStyle(style: IStyleBase): Nullable<IFontWithBuffer> {
         const ff = style.ff!;
         const fontMap = this._fontBook.get(ff);
 
@@ -274,8 +281,6 @@ class FontLibrary {
                 }
             }
         }
-
-        // console.log('Best match:', style, bestFont);
 
         return bestFont;
     }

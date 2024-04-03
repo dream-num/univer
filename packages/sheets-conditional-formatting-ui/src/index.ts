@@ -14,5 +14,5 @@
  * limitations under the License.
  */
 
-export { SheetsConditionalFormattingUiPlugin } from './plugin';
+export { SheetsConditionalFormattingUIPlugin } from './plugin';
 export { enUS, zhCN } from './locale';

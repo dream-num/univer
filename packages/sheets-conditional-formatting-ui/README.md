@@ -24,7 +24,7 @@ pnpm add @univerjs/sheets-conditional-formatting-ui
 ### Register the plugin
 
 ```typescript
-import { SheetsConditionalFormattingUiPlugin } from '@univerjs/sheets-conditional-formatting-ui';
+import { SheetsConditionalFormattingUIPlugin } from '@univerjs/sheets-conditional-formatting-ui';
 
-univer.registerPlugin(SheetsConditionalFormattingUiPlugin);
+univer.registerPlugin(SheetsConditionalFormattingUIPlugin);
 ```

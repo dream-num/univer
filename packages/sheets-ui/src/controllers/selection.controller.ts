@@ -42,7 +42,7 @@ import {
 } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
-import { deserializeRangeWithSheet, IDefinedNamesService, isReferenceString, operatorToken, SetDefinedNameCurrentMutation } from '@univerjs/engine-formula';
+import { deserializeRangeWithSheet, IDefinedNamesService, isReferenceString, operatorToken } from '@univerjs/engine-formula';
 import type { ISetZoomRatioOperationParams } from '../commands/operations/set-zoom-ratio.operation';
 import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
 import { VIEWPORT_KEY } from '../common/keys';
@@ -371,7 +371,7 @@ export class SelectionController extends Disposable {
         const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
 
-        this._commandService.executeCommand(SetDefinedNameCurrentMutation.id, {
+        this._definedNamesService.setCurrentRange({
             range: lastSelection.range,
             unitId: workbook.getUnitId(),
             sheetId: worksheet.getSheetId(),

@@ -1042,7 +1042,16 @@ export class LexerTreeBuilder extends Disposable {
                         if (!this._setParentCurrentLexerNode() && cur !== formulaStringArrayCount - 1) {
                             return ErrorType.VALUE;
                         }
+                        /**
+                         * https://github.com/dream-num/univer/issues/1769
+                         * Formula example: =IF(TODAY()>1,"TRUE", "FALSE")
+                         * Copy or auto-fill at complex formula get error formula offset
+                         */
+                        this._addSequenceArray(sequenceArray, currentString, cur, isZeroAdded);
                         cur++;
+                        this._addSequenceArray(sequenceArray, nextCurrentString, cur, isZeroAdded);
+                        cur++;
+                        continue;
                     } else if (nextCurrentString) {
                         // const subLexerNode = new LexerNode();
                         // subLexerNode.token = DEFAULT_TOKEN_TYPE_PARAMETER;
@@ -1356,14 +1365,16 @@ export class LexerTreeBuilder extends Disposable {
                     if (this._negativeCondition(prevString)) {
                         this._pushSegment(operatorToken.MINUS);
 
-                        if (!(isZeroAdded && cur === 0)) {
-                            sequenceArray?.push({
-                                segment: this._segment,
-                                currentString,
-                                cur,
-                                currentLexerNode: this._currentLexerNode,
-                            });
-                        }
+                        // if (!(isZeroAdded && cur === 0)) {
+                        //     sequenceArray?.push({
+                        //         segment: this._segment,
+                        //         currentString,
+                        //         cur,
+                        //         currentLexerNode: this._currentLexerNode,
+                        //     });
+                        // }
+
+                        this._addSequenceArray(sequenceArray, currentString, cur, isZeroAdded);
 
                         cur++;
                         continue;
@@ -1371,14 +1382,15 @@ export class LexerTreeBuilder extends Disposable {
                 } else if (this._segment.length > 0 && formulaStringArray[cur - 1] && formulaStringArray[cur - 1].toUpperCase() === 'E' && (currentString === operatorToken.MINUS || currentString === operatorToken.PLUS)) {
                     this._pushSegment(currentString);
 
-                    if (!(isZeroAdded && cur === 0)) {
-                        sequenceArray?.push({
-                            segment: this._segment,
-                            currentString,
-                            cur,
-                            currentLexerNode: this._currentLexerNode,
-                        });
-                    }
+                    // if (!(isZeroAdded && cur === 0)) {
+                    //     sequenceArray?.push({
+                    //         segment: this._segment,
+                    //         currentString,
+                    //         cur,
+                    //         currentLexerNode: this._currentLexerNode,
+                    //     });
+                    // }
+                    this._addSequenceArray(sequenceArray, currentString, cur, isZeroAdded);
 
                     cur++;
                     continue;
@@ -1405,17 +1417,29 @@ export class LexerTreeBuilder extends Disposable {
                 this._pushSegment(currentString);
             }
 
-            if (!(isZeroAdded && cur === 0)) {
-                sequenceArray?.push({
-                    segment: this._segment,
-                    currentString,
-                    cur,
-                    currentLexerNode: this._currentLexerNode,
-                });
-            }
+            // if (!(isZeroAdded && cur === 0)) {
+            //     sequenceArray?.push({
+            //         segment: this._segment,
+            //         currentString,
+            //         cur,
+            //         currentLexerNode: this._currentLexerNode,
+            //     });
+            // }
+            this._addSequenceArray(sequenceArray, currentString, cur, isZeroAdded);
             cur++;
         }
 
         this._pushNodeToChildren(this._segment);
+    }
+
+    private _addSequenceArray(sequenceArray: ISequenceArray[] | undefined, currentString: string, cur: number, isZeroAdded: boolean) {
+        if (!(isZeroAdded && cur === 0)) {
+            sequenceArray?.push({
+                segment: this._segment,
+                currentString,
+                cur,
+                currentLexerNode: this._currentLexerNode,
+            });
+        }
     }
 }

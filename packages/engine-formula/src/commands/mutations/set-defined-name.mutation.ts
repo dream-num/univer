@@ -46,24 +46,3 @@ export const RemoveDefinedNameMutation: IMutation<ISetDefinedNameMutationParam> 
     type: CommandType.MUTATION,
     handler: () => true,
 };
-
-export interface ISetDefinedNameCurrentMutationParam {
-    unitId: string;
-    sheetId: string;
-    range: IRange;
-};
-
-export const SetDefinedNameCurrentMutation: IMutation<ISetDefinedNameCurrentMutationParam> = {
-    id: 'formula.mutation.set-defined-name-current',
-    type: CommandType.MUTATION,
-    handler: (accessor: IAccessor, params: ISetDefinedNameCurrentMutationParam) => {
-        const definedNamesService = accessor.get(IDefinedNamesService);
-        const { unitId, sheetId, range } = params;
-        definedNamesService.setCurrentRange({
-            range,
-            unitId,
-            sheetId,
-        });
-        return true;
-    },
-};

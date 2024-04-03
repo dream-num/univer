@@ -196,16 +196,18 @@ export class FontCache {
     }
 
     static getBBoxFromGlyphInfo(glyphInfo: IOpenTypeGlyphInfo, fontSize: number) {
-        const { glyph } = glyphInfo;
+        const { glyph, font } = glyphInfo;
         const { y1, y2 } = glyphInfo.boundingBox!;
         const scale = ptToPixel(fontSize) / glyphInfo.font.unitsPerEm;
 
+        const { ascender, descender } = font;
+
         return this._calculateBoundingBoxByMeasureText({
             width: glyph.advanceWidth * scale,
-            fontBoundingBoxAscent: y1 * scale,
-            fontBoundingBoxDescent: y2 * scale,
-            actualBoundingBoxAscent: y1 * scale,
-            actualBoundingBoxDescent: y2 * scale,
+            fontBoundingBoxAscent: ascender * scale,
+            fontBoundingBoxDescent: Math.abs(descender * scale),
+            actualBoundingBoxAscent: y2 * scale,
+            actualBoundingBoxDescent: Math.abs(y1 * scale),
         }, fontSize);
     }
 

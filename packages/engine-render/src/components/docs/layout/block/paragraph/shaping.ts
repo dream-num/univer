@@ -113,7 +113,6 @@ export function shaping(
     // const now = +new Date();
     const glyphInfos = textShape(paragraphBody);
     // console.log('Text Shaping Time:', +new Date() - now);
-    console.log(glyphInfos);
 
     // Add custom extension for linebreak.
     tabLineBreakExtension(breaker);
@@ -250,6 +249,6 @@ export function shaping(
     // Add some spacing between Han characters and western characters.
     addCJKLatinSpacing(shapedTextList);
 
-    console.log(shapedTextList);
+    // console.log(shapedTextList);
     return shapedTextList;
 }

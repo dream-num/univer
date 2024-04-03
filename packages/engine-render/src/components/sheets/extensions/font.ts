@@ -67,7 +67,8 @@ export class Font extends SheetExtension {
             !rowHeightAccumulation ||
             !columnWidthAccumulation ||
             columnTotalWidth === undefined ||
-            rowTotalHeight === undefined
+            rowTotalHeight === undefined ||
+            !worksheet
         ) {
             return;
         }

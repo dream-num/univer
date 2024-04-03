@@ -59,7 +59,7 @@ export interface IInputProps extends Pick<InputProps, 'onFocus' | 'onBlur'> {
      * The input size
      * @default middle
      */
-    size?: 'mini' | 'small' | 'middle' | 'large';
+    size?: 'small' | 'middle' | 'large';
 
     /**
      * Whether the input is clearable
@@ -90,6 +90,7 @@ export interface IInputProps extends Pick<InputProps, 'onFocus' | 'onBlur'> {
      * @param value
      */
     onChange?: (value: string) => void;
+
 }
 
 export function Input(props: IInputProps) {
@@ -115,11 +116,10 @@ export function Input(props: IInputProps) {
     }
 
     const _className = clsx(className, {
-        [styles.inputAffixWrapperMini]: size === 'mini',
         [styles.inputAffixWrapperSmall]: size === 'small',
         [styles.inputAffixWrapperMiddle]: size === 'middle',
         [styles.inputAffixWrapperLarge]: size === 'large',
-    });
+    }, className);
 
     return (
         <RcInput

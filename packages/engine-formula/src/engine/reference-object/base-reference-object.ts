@@ -325,11 +325,11 @@ export class BaseReferenceObject extends ObjectClassType {
     }
 
     getActiveSheetRowCount() {
-        return this.getCurrentActiveSheetData().rowCount;
+        return this.getCurrentActiveSheetData()?.rowCount || 0;
     }
 
     getActiveSheetColumnCount() {
-        return this.getCurrentActiveSheetData().columnCount;
+        return this.getCurrentActiveSheetData()?.columnCount || 0;
     }
 
     getRowCount() {
@@ -341,11 +341,11 @@ export class BaseReferenceObject extends ObjectClassType {
     }
 
     getRowData() {
-        return this.getCurrentActiveSheetData().rowData;
+        return this.getCurrentActiveSheetData()?.rowData || {};
     }
 
     getColumnData() {
-        return this.getCurrentActiveSheetData().columnData;
+        return this.getCurrentActiveSheetData()?.columnData || {};
     }
 
     isCell() {
@@ -411,7 +411,7 @@ export class BaseReferenceObject extends ObjectClassType {
     }
 
     getCurrentActiveSheetData() {
-        return this._unitData[this.getUnitId()][this.getSheetId()];
+        return this._unitData[this.getUnitId()]?.[this.getSheetId()];
     }
 
     getCurrentRuntimeSheetData() {

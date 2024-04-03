@@ -25,11 +25,29 @@ import {
 } from '@univerjs/core';
 import {
     AddWorksheetMergeMutation,
+    InsertColAfterCommand,
+    InsertColBeforeCommand,
+    InsertColCommand,
+    InsertColMutation,
+    InsertRowAfterCommand,
+    InsertRowBeforeCommand,
+    InsertRowCommand,
+    InsertRowMutation,
+    MergeCellController,
+    MoveColsCommand,
+    MoveColsMutation,
+    MoveRangeMutation,
     NORMAL_SELECTION_PLUGIN_NAME,
+    RefRangeService,
+    RemoveColCommand,
+    RemoveColMutation,
+    RemoveRowCommand,
+    RemoveRowMutation,
     RemoveWorksheetMergeCommand,
     RemoveWorksheetMergeMutation,
     SelectionManagerService,
     SetRangeValuesMutation,
+    SetSelectionsOperation,
 } from '@univerjs/sheets';
 import { type IConfirmPartMethodOptions, IConfirmService } from '@univerjs/ui';
 import type { IDisposable, Injector } from '@wendellhu/redi';
@@ -48,6 +66,7 @@ describe('Test add worksheet merge commands', () => {
     let univer: Univer;
     let get: Injector['get'];
     let commandService: ICommandService;
+    let selectionManager: SelectionManagerService;
 
     beforeEach(() => {
         const testBed = createCommandTestBed(undefined, [
@@ -71,6 +90,8 @@ describe('Test add worksheet merge commands', () => {
                     },
                 },
             ],
+            [RefRangeService],
+            [MergeCellController],
         ]);
         univer = testBed.univer;
 
@@ -86,7 +107,36 @@ describe('Test add worksheet merge commands', () => {
         commandService.registerCommand(AddWorksheetMergeMutation);
         commandService.registerCommand(RemoveWorksheetMergeMutation);
 
+        [
+            InsertRowCommand,
+            InsertRowBeforeCommand,
+            InsertRowAfterCommand,
+            InsertColAfterCommand,
+            InsertColBeforeCommand,
+            InsertColCommand,
+            RemoveRowCommand,
+            RemoveColCommand,
+            MoveColsCommand,
+
+            InsertColMutation,
+            InsertRowMutation,
+            RemoveRowMutation,
+            RemoveColMutation,
+            MoveRangeMutation,
+            MoveColsMutation,
+
+            SetSelectionsOperation,
+        ].forEach((c) => commandService.registerCommand(c));
+
         get(LocaleService).load({});
+        get(MergeCellController);
+
+        selectionManager = get(SelectionManagerService);
+        selectionManager.setCurrentSelection({
+            pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+            unitId: 'test',
+            sheetId: 'sheet1',
+        });
     });
 
     afterEach(() => {
@@ -279,6 +329,188 @@ describe('Test add worksheet merge commands', () => {
                 const result = await commandService.executeCommand(RemoveWorksheetMergeCommand.id);
                 expect(result).toBeFalsy();
             });
+        });
+    });
+
+    describe('with insert or remove col', () => {
+        it('will adjust the merge data when insert col and remove col', async () => {
+            selectionManager.clear();
+            selectionManager.add([
+                {
+                    range: { startRow: 0, startColumn: 0, endColumn: 5, endRow: 5, rangeType: RANGE_TYPE.NORMAL },
+                    primary: null,
+                    style: null,
+                },
+                {
+                    range: { startRow: 10, startColumn: 10, endColumn: 15, endRow: 15, rangeType: RANGE_TYPE.NORMAL },
+                    primary: null,
+                    style: null,
+                },
+            ]);
+            const commandService = get(ICommandService);
+            const univerInstanceService = get(IUniverInstanceService);
+            const workbook = univerInstanceService.getCurrentUniverSheetInstance();
+            const worksheet = workbook.getActiveSheet();
+            const mergeData = worksheet.getConfig().mergeData;
+            expect(mergeData.length).toBe(0);
+            expect(await commandService.executeCommand(AddWorksheetMergeAllCommand.id)).toBeTruthy();
+            expect(mergeData.length).toBe(2);
+            selectionManager.clear();
+            selectionManager.add([
+                {
+                    range: {
+                        startRow: 0,
+                        startColumn: 7,
+                        endColumn: 7,
+                        endRow: worksheet.getRowCount() - 1,
+                        rangeType: RANGE_TYPE.COLUMN,
+                    },
+                    primary: null,
+                    style: null,
+                },
+            ]);
+            expect(await commandService.executeCommand(InsertColAfterCommand.id)).toBeTruthy();
+            expect(worksheet.getMergeData().length).toBe(2);
+            expect(worksheet.getMergeData()[1]).toStrictEqual({ startRow: 10, startColumn: 11, endColumn: 16, endRow: 15, rangeType: 0 });
+            selectionManager.clear();
+            selectionManager.add([
+                {
+                    range: {
+                        startRow: 0,
+                        startColumn: 12,
+                        endColumn: 13,
+                        endRow: worksheet.getRowCount() - 1,
+                        rangeType: RANGE_TYPE.COLUMN,
+                    },
+                    primary: null,
+                    style: null,
+                },
+            ]);
+            expect(await commandService.executeCommand(InsertColAfterCommand.id)).toBeTruthy();
+            expect(worksheet.getMergeData().length).toBe(2);
+            expect(worksheet.getMergeData()[1]).toStrictEqual({ startRow: 10, startColumn: 11, endColumn: 18, endRow: 15, rangeType: 0 });
+
+            selectionManager.clear();
+            selectionManager.add([
+                {
+                    range: {
+                        startRow: 0,
+                        startColumn: 7,
+                        endColumn: 7,
+                        endRow: worksheet.getRowCount() - 1,
+                        rangeType: RANGE_TYPE.COLUMN,
+                    },
+                    primary: null,
+                    style: null,
+                },
+            ]);
+            expect(await commandService.executeCommand(RemoveColCommand.id)).toBeTruthy();
+            expect(worksheet.getMergeData().length).toBe(2);
+            expect(worksheet.getMergeData()[1]).toStrictEqual({ startRow: 10, startColumn: 10, endColumn: 17, endRow: 15, rangeType: 0 });
+            selectionManager.clear();
+            selectionManager.add([
+                {
+                    range: {
+                        startRow: 0,
+                        startColumn: 12,
+                        endColumn: 13,
+                        endRow: worksheet.getRowCount() - 1,
+                        rangeType: RANGE_TYPE.COLUMN,
+                    },
+                    primary: null,
+                    style: null,
+                },
+            ]);
+            expect(await commandService.executeCommand(RemoveColCommand.id)).toBeTruthy();
+            expect(worksheet.getMergeData().length).toBe(2);
+            expect(worksheet.getMergeData()[1]).toStrictEqual({ startRow: 10, startColumn: 10, endColumn: 15, endRow: 15, rangeType: 0 });
+        });
+    });
+
+    describe('with move col', () => {
+        it('will adjust the merge data when move col', async () => {
+            selectionManager.clear();
+            selectionManager.add([
+                {
+                    range: { startRow: 0, startColumn: 0, endColumn: 5, endRow: 5, rangeType: RANGE_TYPE.NORMAL },
+                    primary: null,
+                    style: null,
+                },
+                {
+                    range: { startRow: 10, startColumn: 10, endColumn: 15, endRow: 15, rangeType: RANGE_TYPE.NORMAL },
+                    primary: null,
+                    style: null,
+                },
+            ]);
+            const commandService = get(ICommandService);
+            const univerInstanceService = get(IUniverInstanceService);
+            const workbook = univerInstanceService.getCurrentUniverSheetInstance();
+            const worksheet = workbook.getActiveSheet();
+            const mergeData = worksheet.getConfig().mergeData;
+            expect(mergeData.length).toBe(0);
+            expect(await commandService.executeCommand(AddWorksheetMergeAllCommand.id)).toBeTruthy();
+            expect(mergeData.length).toBe(2);
+            selectionManager.clear();
+            selectionManager.add([{
+                primary: null,
+                style: null,
+                range: {
+                    startRow: 0,
+                    startColumn: 18,
+                    endRow: worksheet.getRowCount() - 1,
+                    endColumn: 18,
+                    rangeType: 2,
+                },
+            }]);
+            expect(await commandService.executeCommand(MoveColsCommand.id, {
+                fromRange: {
+                    startRow: 0,
+                    startColumn: 18,
+                    endRow: worksheet.getRowCount() - 1,
+                    endColumn: 18,
+                    rangeType: 2,
+                },
+                toRange: {
+                    startRow: 0,
+                    startColumn: 7,
+                    endRow: worksheet.getRowCount() - 1,
+                    endColumn: 7,
+                    rangeType: 2,
+                },
+            })).toBeTruthy();
+            expect(worksheet.getMergeData().length).toBe(2);
+            expect(worksheet.getMergeData()[1]).toStrictEqual({ startRow: 10, startColumn: 11, endColumn: 16, endRow: 15, rangeType: 0 });
+
+            selectionManager.clear();
+            selectionManager.add([{
+                primary: null,
+                style: null,
+                range: {
+                    startRow: 0,
+                    startColumn: 6,
+                    endRow: worksheet.getRowCount() - 1,
+                    endColumn: 8,
+                    rangeType: 2,
+                },
+            }]);
+            expect(await commandService.executeCommand(MoveColsCommand.id, {
+                fromRange: {
+                    startRow: 0,
+                    startColumn: 6,
+                    endRow: worksheet.getRowCount() - 1,
+                    endColumn: 8,
+                    rangeType: 2,
+                },
+                toRange: {
+                    startRow: 0,
+                    startColumn: 17,
+                    endRow: worksheet.getRowCount() - 1,
+                    endColumn: 19,
+                    rangeType: 2,
+                },
+            })).toBeTruthy();
+            expect(worksheet.getMergeData().length).toBe(2);
+            expect(worksheet.getMergeData()[1]).toStrictEqual({ startRow: 10, startColumn: 8, endColumn: 13, endRow: 15, rangeType: 0 });
         });
     });
 });

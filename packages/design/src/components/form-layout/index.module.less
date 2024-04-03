@@ -5,7 +5,7 @@
     &-label {
         font-size: var(--font-size-sm);
         min-height: var(--font-size-sm);
-        color: rgba(var(--grey-400));
+        color: rgba(var(--color-black));
     }
 
     &-desc {
@@ -27,8 +27,23 @@
         }
 
         .range-selector {
-            width: 100%;
+            width: 100% !important;
         }
+    }
+
+    &-content-error {
+        .input-affix-wrapper {
+            border: 1px solid rgba(var(--red-400));
+        }
+
+        .select-single:not(.select-customize-input) .select-selector {
+            border: 1px solid rgba(var(--red-400));
+        }
+    }
+
+    &-error {
+        color: rgba(var(--red-400));
+        font-size: var(--font-size-sm);
     }
 }
 

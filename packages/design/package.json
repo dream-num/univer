@@ -73,8 +73,8 @@
     "dependencies": {
         "@rc-component/color-picker": "^1.5.3",
         "@rc-component/trigger": "^1.18.3",
-        "@univerjs/icons": "^0.1.42",
-        "dayjs": ">=1.11.10",
+        "@univerjs/icons": "^0.1.43",
+        "dayjs": "^1.11.10",
         "rc-dialog": "^9.4.0",
         "rc-dropdown": "^4.2.0",
         "rc-input": "^1.4.5",
@@ -83,15 +83,16 @@
         "rc-picker": "^4.3.0",
         "rc-segmented": "^2.3.0",
         "rc-select": "^14.13.0",
+        "rc-textarea": "^1.6.3",
         "rc-tooltip": "^6.2.0",
         "rc-util": "^5.39.1",
         "react-draggable": "^4.4.6",
         "react-transition-group": "^4.4.5"
     },
     "devDependencies": {
-        "@testing-library/react": "^14.2.1",
-        "@types/react": "^18.2.72",
-        "@types/react-dom": "^18.2.22",
+        "@testing-library/react": "^14.2.2",
+        "@types/react": "^18.2.73",
+        "@types/react-dom": "^18.2.23",
         "@types/react-transition-group": "^4.4.10",
         "@univerjs/shared": "workspace:*",
         "clsx": "^2.1.0",
@@ -99,7 +100,7 @@
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
         "typescript": "^5.4.3",
-        "vite": "^5.2.6",
+        "vite": "^5.2.7",
         "vitest": "^1.4.0"
     }
 }

@@ -22,6 +22,7 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useRef, useState } from 'react';
 
 import { deserializeRangeWithSheet, isReferenceString, serializeRange, serializeRangeWithSheet, serializeRangeWithSpreadsheet } from '@univerjs/engine-formula';
+import clsx from 'clsx';
 import { TextEditor } from '../editor/TextEditor';
 import { IEditorService } from '../../services/editor/editor.service';
 import { IRangeSelectorService } from '../../services/range-selector/range-selector.service';
@@ -38,12 +39,13 @@ export interface IRangeSelectorProps {
     openForSheetUnitId?: Nullable<string>; //  Configuring which workbook the selector defaults to opening in determines whether the ref includes a [unitId] prefix.
     openForSheetSubUnitId?: Nullable<string>; // Configuring the default worksheet where the selector opens determines whether the ref includes a [unitId]sheet1 prefix.
     width?: number; // The width of the selector.
-    size?: 'mini' | 'small' | 'middle' | 'large'; // The size of the selector.
+    size?: 'small' | 'middle' | 'large'; // The size of the selector.
     placeholder?: string; // Placeholder text.
+    className?: string;
 }
 
 export function RangeSelector(props: IRangeSelectorProps) {
-    const { onChange, id, value = '', width = 220, placeholder = '', size = 'middle', onActive, onValid, isSingleChoice = false, openForSheetUnitId, openForSheetSubUnitId, isReadonly = false } = props;
+    const { onChange, id, value = '', width = 220, placeholder = '', size = 'middle', onActive, onValid, isSingleChoice = false, openForSheetUnitId, openForSheetSubUnitId, isReadonly = false, className } = props;
 
     const [rangeDataList, setRangeDataList] = useState<string[]>(['']);
 
@@ -277,9 +279,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
     }
 
     let height = 32;
-    if (size === 'mini') {
-        height = 24;
-    } else if (size === 'small') {
+    if (size === 'small') {
         height = 28;
     } else if (size === 'large') {
         height = 36;
@@ -311,11 +311,19 @@ export function RangeSelector(props: IRangeSelectorProps) {
                 onClose={handleCloseModal}
 
             >
-                <div className={styles.rangeSelectorModal}>
+                <div className={clsx(styles.rangeSelectorModal, className)}>
                     {rangeDataList.map((item, index) => (
                         <div key={index} className={styles.rangeSelectorModalContainer}>
                             <div style={{ width: rangeDataList.length === 1 ? '280px' : '252px' }} className={styles.rangeSelectorModalContainerInput}>
-                                <Input className={currentInputIndex === index ? styles.rangeSelectorModalContainerInputActive : ((rangeDataList.length - 1 === index && currentInputIndex === -1) ? styles.rangeSelectorModalContainerInputActive : '')} placeholder={localeService.t('rangeSelector.placeHolder')} affixWrapperStyle={{ width: '100%' }} key={`input${index}`} onClick={() => setCurrentInputIndex(index)} value={item} onChange={(value) => changeItem(index, value)} />
+                                <Input
+                                    className={currentInputIndex === index ? styles.rangeSelectorModalContainerInputActive : ((rangeDataList.length - 1 === index && currentInputIndex === -1) ? styles.rangeSelectorModalContainerInputActive : '')}
+                                    placeholder={localeService.t('rangeSelector.placeHolder')}
+                                    affixWrapperStyle={{ width: '100%' }}
+                                    key={`input${index}`}
+                                    onClick={() => setCurrentInputIndex(index)}
+                                    value={item}
+                                    onChange={(value) => changeItem(index, value)}
+                                />
                             </div>
                             <div style={{ display: rangeDataList.length === 1 ? 'none' : 'inline-block' }} className={styles.rangeSelectorModalContainerButton}>
                                 <DeleteSingle onClick={() => removeItem(index)} />

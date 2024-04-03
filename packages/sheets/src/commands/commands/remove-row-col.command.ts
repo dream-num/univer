@@ -39,6 +39,7 @@ import {
     RemoveRowMutation,
     RemoveRowsUndoMutationFactory,
 } from '../mutations/remove-row-col.mutation';
+import { type ISetRangeValuesMutationParams, SetRangeValuesMutation } from '../mutations/set-range-values.mutation';
 import { followSelectionOperation } from './utils/selection-utils';
 
 export interface IRemoveRowColCommandParams {
@@ -83,6 +84,13 @@ export const RemoveRowCommand: ICommand = {
             subUnitId,
             range,
         };
+
+        const removedRows = worksheet.getCellMatrix().getSlice(range.startRow, range.endRow, 0, worksheet.getColumnCount() - 1);
+        const undoSetRangeValuesParams: ISetRangeValuesMutationParams = {
+            unitId,
+            subUnitId,
+            cellValue: removedRows.getMatrix(),
+        };
         const undoRemoveRowsParams: IInsertRowMutationParams = RemoveRowsUndoMutationFactory(
             removeRowsParams,
             worksheet
@@ -96,6 +104,7 @@ export const RemoveRowCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
         const result = sequenceExecute(
             [
+                ...(intercepted.preRedos ?? []),
                 { id: RemoveRowMutation.id, params: removeRowsParams },
                 ...intercepted.redos,
                 followSelectionOperation(range, workbook, worksheet),
@@ -106,8 +115,8 @@ export const RemoveRowCommand: ICommand = {
         if (result.result) {
             accessor.get(IUndoRedoService).pushUndoRedo({
                 unitID: unitId,
-                undoMutations: [...intercepted.undos, { id: InsertRowMutation.id, params: undoRemoveRowsParams }],
-                redoMutations: [{ id: RemoveRowMutation.id, params: removeRowsParams }, ...intercepted.redos],
+                undoMutations: [...(intercepted.preUndos ?? []), { id: InsertRowMutation.id, params: undoRemoveRowsParams }, { id: SetRangeValuesMutation.id, params: undoSetRangeValuesParams }, ...intercepted.undos],
+                redoMutations: [...(intercepted.preRedos ?? []), { id: RemoveRowMutation.id, params: removeRowsParams }, ...intercepted.redos],
             });
             return true;
         }
@@ -154,6 +163,12 @@ export const RemoveColCommand: ICommand = {
         };
         const undoRemoveColParams: IInsertColMutationParams = RemoveColMutationFactory(accessor, removeColParams);
 
+        const removedCols = worksheet.getCellMatrix().getSlice(0, worksheet.getRowCount() - 1, range.startColumn, range.endColumn);
+        const undoSetRangeValuesParams: ISetRangeValuesMutationParams = {
+            unitId,
+            subUnitId,
+            cellValue: removedCols.getMatrix(),
+        };
         const intercepted = sheetInterceptorService.onCommandExecute({
             id: RemoveColCommand.id,
             params: { range } as IRemoveRowColCommandParams,
@@ -161,6 +176,7 @@ export const RemoveColCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
         const result = sequenceExecute(
             [
+                ...(intercepted.preRedos ?? []),
                 { id: RemoveColMutation.id, params: removeColParams },
                 ...intercepted.redos,
                 followSelectionOperation(range, workbook, worksheet),
@@ -172,8 +188,15 @@ export const RemoveColCommand: ICommand = {
             const undoRedoService = accessor.get(IUndoRedoService);
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
-                undoMutations: [...intercepted.undos, { id: InsertColMutation.id, params: undoRemoveColParams }],
-                redoMutations: [{ id: RemoveColMutation.id, params: removeColParams }, ...intercepted.redos],
+                undoMutations: [
+                    ...(intercepted.preUndos ?? []),
+                    { id: InsertColMutation.id, params: undoRemoveColParams },
+                    { id: SetRangeValuesMutation.id, params: undoSetRangeValuesParams },
+                    ...intercepted.undos],
+                redoMutations: [
+                    ...(intercepted.preRedos ?? []),
+                    { id: RemoveColMutation.id, params: removeColParams },
+                    ...intercepted.redos],
             });
 
             return true;

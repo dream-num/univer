@@ -208,4 +208,19 @@ describe('Test FUniver', () => {
 
         expect(mainExtension).toBeUndefined();
     });
+
+    it('Function getSheetBySheetId', () => {
+        const worksheet = univerAPI.getActiveWorkbook()?.getSheetBySheetId('sheet1');
+        expect(worksheet!.getSheetId()).toBe('sheet1');
+    });
+
+    it('Function getMaxColumns', () => {
+        const worksheet = univerAPI.getActiveWorkbook()?.getSheetBySheetId('sheet1');
+        expect(worksheet!.getMaxColumns()).toBe(100);
+    });
+
+    it('Function getMaxRows', () => {
+        const worksheet = univerAPI.getActiveWorkbook()?.getSheetBySheetId('sheet1');
+        expect(worksheet!.getMaxRows()).toBe(100);
+    });
 });

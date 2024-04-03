@@ -18,6 +18,8 @@ import type { IDocumentBody, IDocumentData, ITextRun, ITextStyle, Nullable } fro
 import { ObjectMatrix } from '@univerjs/core';
 import { handleStringToStyle } from '@univerjs/ui';
 
+import type { IPastePlugin } from '@univerjs/docs-ui';
+import { pixelToPt } from '@univerjs/engine-render';
 import { generateBody } from '../../../controllers/clipboard/utils';
 import type { ISheetSkeletonManagerParam } from '../../sheet-skeleton-manager.service';
 import type {
@@ -37,13 +39,6 @@ export interface IStyleRule {
 
 export interface IParsedTablesInfo {
     index: number;
-}
-
-export interface IPasteExtension {
-    name: string;
-    checkPasteType(html: string): boolean;
-    stylesRules: IStyleRule[];
-    afterProcessRules: IAfterProcessRule[];
 }
 
 function matchFilter(node: HTMLElement, filter: IStyleRule['filter']) {
@@ -74,9 +69,9 @@ function hideIframe(iframe: HTMLIFrameElement) {
 }
 
 export class HtmlToUSMService {
-    private static pluginList: IPasteExtension[] = [];
+    private static pluginList: IPastePlugin[] = [];
 
-    static use(plugin: IPasteExtension) {
+    static use(plugin: IPastePlugin) {
         if (this.pluginList.includes(plugin)) {
             throw new Error(`Univer paste plugin ${plugin.name} already added`);
         }
@@ -97,6 +92,7 @@ export class HtmlToUSMService {
     constructor(props: IHtmlToUSMServiceProps) {
         this.getCurrentSkeleton = props.getCurrentSkeleton;
         this.htmlElement = document.createElement('iframe');
+        this.htmlElement.style.display = 'none';
         document.body.appendChild(this.htmlElement);
         hideIframe(this.htmlElement);
     }
@@ -107,8 +103,7 @@ export class HtmlToUSMService {
             this.htmlElement.contentDocument.write(html);
             this.htmlElement.contentDocument.close();
         }
-
-        html = html.replace(/<!--[\s\S]*?-->/g, '');
+        html = html.replace(/<!--[\s\S]*?-->/g, '').replace(/<style[\s\S]*?<\/style>/g, '');
 
         const pastePlugin = HtmlToUSMService.pluginList.find((plugin) => plugin.checkPasteType(html));
         if (pastePlugin) {
@@ -254,7 +249,7 @@ export class HtmlToUSMService {
 
                         const { fontSize, fontFamily, border, borderLeft, borderRight, borderTop, borderBottom, verticalAlign } = computedStyle;
                         if (fontSize) {
-                            styleString += `;font-size: ${Number.parseInt(fontSize) * 0.75}pt`;
+                            styleString += `;font-size: ${pixelToPt(Number.parseInt(fontSize))}pt`;
                         }
                         if (fontFamily) {
                             styleString += `;font-family: ${fontFamily}`;

@@ -48,7 +48,7 @@ export const Playground = {
             { label: 'Option 11', value: 'option11' },
         ];
 
-        function handleChange(value: string | number | boolean) {
+        function handleChange(value: string | string[] | undefined) {
             setValue(value as string);
         }
 

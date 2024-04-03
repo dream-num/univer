@@ -23,6 +23,7 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import { Button, Input, Radio, RadioGroup, Select } from '@univerjs/design';
 import { IDefinedNamesService, type IDefinedNamesServiceParam, IFunctionService, isReferenceString, LexerTreeBuilder, operatorToken, serializeRangeToRefString } from '@univerjs/engine-formula';
 import { ErrorSingle } from '@univerjs/icons';
+import { hasCJKText } from '@univerjs/engine-render';
 import styles from './index.module.less';
 import { SCOPE_WORKBOOK_VALUE } from './component-name';
 
@@ -152,7 +153,7 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
             return;
         }
 
-        if (!Tools.isValidParameter(nameValue)) {
+        if (!Tools.isValidParameter(nameValue) || (!Tools.isStartValidPosition(nameValue) && !hasCJKText(nameValue.substring(0, 1)))) {
             setValidString(localeService.t('definedName.nameInvalid'));
             return;
         }

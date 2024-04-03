@@ -54,7 +54,7 @@ export const DefinedNameContainer = () => {
     const [editState, setEditState] = useState(false);
     const [definedNames, setDefinedNames] = useState<IDefinedNamesServiceParam[]>(getDefinedNameMap());
     const [editorKey, setEditorKey] = useState<Nullable<string>>(null);
-    const [deleteConformVisible, setDeleteConformVisible] = useState(false);
+    const [deleteConformKey, setDeleteConformKey] = useState<Nullable<string>>();
 
     useEffect(() => {
         const definedNamesSubscription = definedNamesService.update$.subscribe(() => {
@@ -83,17 +83,17 @@ export const DefinedNameContainer = () => {
     };
 
     const deleteDefinedName = (id: string) => {
-        setDeleteConformVisible(!deleteConformVisible);
+        setDeleteConformKey(id);
     };
 
     function handleDeleteClose() {
-        setDeleteConformVisible(!deleteConformVisible);
+        setDeleteConformKey(null);
     }
 
     function handleDeleteConfirm(id: string) {
         const item = definedNamesService.getValueById(unitId, id);
         commandService.executeCommand(RemoveDefinedNameCommand.id, { ...item, unitId });
-        setDeleteConformVisible(!deleteConformVisible);
+        setDeleteConformKey(null);
     }
 
     const focusDefinedName = (definedName: IDefinedNamesServiceParam) => {
@@ -147,6 +147,15 @@ export const DefinedNameContainer = () => {
         setEditorKey(id);
     };
 
+    const getSheetNameBySheetId = (sheetId: string) => {
+        const sheet = workbook.getSheetBySheetId(sheetId);
+        if (sheet == null) {
+            return '';
+        }
+
+        return sheet.getName();
+    };
+
     return (
         <div className={styles.definedNameContainer}>
             <div className={styles.definedNameContainerScroll}>
@@ -166,7 +175,7 @@ export const DefinedNameContainer = () => {
                                     <div className={styles.definedNameContainerItemName}>
                                         {definedName.name}
                                         <span className={styles.definedNameContainerItemNameForSheet}>
-                                            {definedName.localSheetId === SCOPE_WORKBOOK_VALUE ? '' : definedName.localSheetId}
+                                            {(definedName.localSheetId === SCOPE_WORKBOOK_VALUE || definedName.localSheetId == null) ? '' : getSheetNameBySheetId(definedName.localSheetId)}
                                         </span>
                                     </div>
                                     <div className={styles.definedNameContainerItemFormulaOrRefString}>{definedName.formulaOrRefString}</div>
@@ -182,7 +191,7 @@ export const DefinedNameContainer = () => {
                                     </div>
                                 </Tooltip>
                             </div>
-                            <Confirm visible={deleteConformVisible} onClose={handleDeleteClose} onConfirm={() => { handleDeleteConfirm(definedName.id); }}>
+                            <Confirm visible={deleteConformKey === definedName.id} onClose={handleDeleteClose} onConfirm={() => { handleDeleteConfirm(definedName.id); }}>
                                 {localeService.t('definedName.deleteConfirmText')}
                             </Confirm>
                             <DefinedNameInput

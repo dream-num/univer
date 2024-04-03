@@ -23,9 +23,10 @@ import {
     OnLifecycle,
     toDisposable,
 } from '@univerjs/core';
-import type { IFunctionInfo } from '@univerjs/engine-formula';
+import type { IFunctionInfo, ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
 import { FunctionType, IDefinedNamesService } from '@univerjs/engine-formula';
-import { SetWorksheetActiveOperation } from '@univerjs/sheets';
+import type { ISetDefinedNameCommandParams } from '@univerjs/sheets';
+import { InsertDefinedNameCommand, RemoveDefinedNameCommand, SetDefinedNameCommand, SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { IDescriptionService } from '../services/description.service';
 
 export const SCOPE_WORKBOOK_VALUE = 'AllDefaultWorkbook';
@@ -84,9 +85,37 @@ export class DefinedNameController extends Disposable {
                 if (command.id === SetWorksheetActiveOperation.id) {
                     this._unregisterDescriptionsForNotInSheetId();
                     this._registerDescriptions();
+                } else if (command.id === InsertDefinedNameCommand.id) {
+                    const param = command.params as ISetDefinedNameMutationParam;
+                    this._registerDescription(param);
+                } else if (command.id === RemoveDefinedNameCommand.id) {
+                    const param = command.params as ISetDefinedNameMutationParam;
+                    this._unregisterDescription(param);
+                } else if (command.id === SetDefinedNameCommand.id) {
+                    const param = command.params as ISetDefinedNameCommandParams;
+                    this._unregisterDescription(param.oldDefinedName);
+                    this._registerDescription(param.newDefinedName);
                 }
             })
         );
+    }
+
+    private _registerDescription(param: ISetDefinedNameMutationParam) {
+        const { name, comment, formulaOrRefString, localSheetId } = param;
+        if (!this._descriptionService.hasDescription(name) && (localSheetId == null || localSheetId === SCOPE_WORKBOOK_VALUE)) {
+            this._descriptionService.registerDescriptions([{
+                functionName: name,
+                description: formulaOrRefString + (comment || ''),
+                abstract: formulaOrRefString,
+                functionType: FunctionType.DefinedName,
+                functionParameter: [],
+            }]);
+        }
+    }
+
+    private _unregisterDescription(param: ISetDefinedNameMutationParam) {
+        const { name } = param;
+        this._descriptionService.unregisterDescriptions([name]);
     }
 
     private _unRegisterDescriptions() {
@@ -102,9 +131,7 @@ export class DefinedNameController extends Disposable {
         const functionList: string[] = [];
         Array.from(Object.values(definedNames)).forEach((value) => {
             const { name } = value;
-            if (this._descriptionService.hasDescription(name)) {
-                functionList.push(name);
-            }
+            functionList.push(name);
         });
 
         this._descriptionService.unregisterDescriptions(functionList);

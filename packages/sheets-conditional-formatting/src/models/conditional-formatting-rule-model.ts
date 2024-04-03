@@ -17,15 +17,19 @@
 import { Inject, Injector } from '@wendellhu/redi';
 import { Range } from '@univerjs/core';
 import { Subject } from 'rxjs';
+import { createCfId } from '../utils/create-cf-id';
 import { ConditionalFormattingService } from '../services/conditional-formatting.service';
+import type { IAnchor } from '../utils/anchor';
+import { findIndexByAnchor, moveByAnchor } from '../utils/anchor';
+
 import type { IConditionFormattingRule, IRuleModel } from './type';
 import { ConditionalFormattingViewModel } from './conditional-formatting-view-model';
 
 type RuleOperatorType = 'delete' | 'set' | 'add' | 'sort';
 export class ConditionalFormattingRuleModel {
-   //  Map<unitID ,<sheetId ,IConditionFormattingRule[]>>
+    //  Map<unitID ,<sheetId ,IConditionFormattingRule[]>>
     private _model: IRuleModel = new Map();
-    private _ruleChange$ = new Subject<{ rule: IConditionFormattingRule;unitId: string;subUnitId: string; type: RuleOperatorType }>();
+    private _ruleChange$ = new Subject<{ rule: IConditionFormattingRule; unitId: string; subUnitId: string; type: RuleOperatorType }>();
     $ruleChange = this._ruleChange$.asObservable();
 
     constructor(@Inject(ConditionalFormattingViewModel) private _conditionalFormattingViewModel: ConditionalFormattingViewModel,
@@ -84,9 +88,9 @@ export class ConditionalFormattingRuleModel {
         }
     }
 
-    setRule(unitId: string, subUnitId: string, rule: IConditionFormattingRule) {
+    setRule(unitId: string, subUnitId: string, rule: IConditionFormattingRule, oldCfId: string) {
         const list = this._ensureList(unitId, subUnitId);
-        const oldRule = list.find((item) => item.cfId === rule.cfId);
+        const oldRule = list.find((item) => item.cfId === oldCfId);
         if (oldRule) {
             const cfPriorityMap = list.map((item) => item.cfId).reduce((map, cur, index) => {
                 map.set(cur, index);
@@ -97,17 +101,20 @@ export class ConditionalFormattingRuleModel {
             // Otherwise the render will flash once
             const cloneRange = [...oldRule.ranges];
             const conditionalFormattingService = this._injector.get(ConditionalFormattingService);
+
+            Object.assign(oldRule, rule);
+
             const dispose = conditionalFormattingService.interceptorManager.intercept(conditionalFormattingService.interceptorManager.getInterceptPoints().beforeUpdateRuleResult, {
                 handler: (config) => {
-                    if (unitId === config?.unitId && subUnitId === config.subUnitId && rule.cfId === config.cfId) {
+                    if (unitId === config?.unitId && subUnitId === config.subUnitId && oldRule.cfId === config.cfId) {
                         cloneRange.forEach((range) => {
                             Range.foreach(range, (row, col) => {
                                 this._conditionalFormattingViewModel.deleteCellCf(unitId, subUnitId, row, col, oldRule.cfId);
                             });
                         });
-                        rule.ranges.forEach((range) => {
+                        oldRule.ranges.forEach((range) => {
                             Range.foreach(range, (row, col) => {
-                                this._conditionalFormattingViewModel.pushCellCf(unitId, subUnitId, row, col, rule.cfId);
+                                this._conditionalFormattingViewModel.pushCellCf(unitId, subUnitId, row, col, oldRule.cfId);
                                 this._conditionalFormattingViewModel.sortCellCf(unitId, subUnitId, row, col, cfPriorityMap);
                             });
                         });
@@ -115,14 +122,15 @@ export class ConditionalFormattingRuleModel {
                     }
                 },
             });
-            rule.ranges.forEach((range) => {
+
+            oldRule.ranges.forEach((range) => {
                 Range.foreach(range, (row, col) => {
-                    this._conditionalFormattingViewModel.pushCellCf(unitId, subUnitId, row, col, rule.cfId);
+                    this._conditionalFormattingViewModel.pushCellCf(unitId, subUnitId, row, col, oldRule.cfId);
                 });
             });
-            Object.assign(oldRule, rule);
-            this._conditionalFormattingViewModel.markRuleDirty(unitId, subUnitId, rule);
-            this._ruleChange$.next({ rule, subUnitId, unitId, type: 'set' });
+
+            this._conditionalFormattingViewModel.markRuleDirty(unitId, subUnitId, oldRule);
+            this._ruleChange$.next({ rule: oldRule, subUnitId, unitId, type: 'set' });
         }
     }
 
@@ -151,17 +159,16 @@ export class ConditionalFormattingRuleModel {
      * example [1,2,3,4,5,6],if you move behind 5 to 2, then cfId=5,targetId=2.
      * if targetId does not exist, it defaults to top
      */
-    moveRulePriority(unitId: string, subUnitId: string, cfId: string, targetCfId: string) {
+    moveRulePriority(unitId: string, subUnitId: string, start: IAnchor, end: IAnchor) {
         const list = this._ensureList(unitId, subUnitId);
-        const curIndex = list.findIndex((item) => item.cfId === cfId);
-        const targetCfIndex = list.findIndex((item) => item.cfId === targetCfId);
-        if (targetCfIndex === -1 || curIndex === -1 || targetCfIndex === curIndex) {
+        const curIndex = findIndexByAnchor(start, list, (rule) => rule.cfId);
+        const targetCfIndex = findIndexByAnchor(end, list, (rule) => rule.cfId);
+        if (targetCfIndex === null || curIndex === null || targetCfIndex === curIndex) {
             return;
         }
         const rule = list[curIndex];
         if (rule) {
-            list.splice(curIndex, 1);
-            list.splice(targetCfIndex, 0, rule);
+            moveByAnchor(start, end, list, (rule) => rule.cfId);
             const cfPriorityMap = list.map((item) => item.cfId).reduce((map, cur, index) => {
                 map.set(cur, index);
                 return map;
@@ -175,8 +182,7 @@ export class ConditionalFormattingRuleModel {
         }
     }
 
-    createCfId(unitId: string, subUnitId: string) {
-        const list = this._model.get(unitId)?.get(subUnitId);
-        return `${(list?.length || 0) + 1}`;
+    createCfId(_unitId: string, _subUnitId: string) {
+        return createCfId();
     }
 }

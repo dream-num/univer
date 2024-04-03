@@ -21,14 +21,14 @@ import {
     IUndoRedoService,
     IUniverInstanceService,
 } from '@univerjs/core';
-import type { IMoveConditionalRuleMutationParams } from '@univerjs/sheets-conditional-formatting';
-import { MoveConditionalRuleMutation, MoveConditionalRuleMutationUndoFactory } from '@univerjs/sheets-conditional-formatting';
+import type { IAnchor, IMoveConditionalRuleMutationParams } from '@univerjs/sheets-conditional-formatting';
+import { ConditionalFormattingRuleModel, MoveConditionalRuleMutation, MoveConditionalRuleMutationUndoFactory, transformSupportSymmetryAnchor } from '@univerjs/sheets-conditional-formatting';
 
 export interface IMoveCfCommand {
     unitId?: string;
     subUnitId?: string;
-    cfId: string;
-    targetCfId: string;
+    start: IAnchor;
+    end: IAnchor;
 };
 export const moveCfCommand: ICommand<IMoveCfCommand> = {
     type: CommandType.COMMAND,
@@ -37,16 +37,22 @@ export const moveCfCommand: ICommand<IMoveCfCommand> = {
         if (!params) {
             return false;
         }
-        const { cfId, targetCfId } = params;
+
         const undoRedoService = accessor.get(IUndoRedoService);
         const commandService = accessor.get(ICommandService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
+        const conditionalFormattingRuleModel = accessor.get(ConditionalFormattingRuleModel);
         const workbook = univerInstanceService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();
         const unitId = params.unitId ?? workbook.getUnitId();
         const subUnitId = params.subUnitId ?? worksheet.getSheetId();
-        const config: IMoveConditionalRuleMutationParams = { unitId, subUnitId, cfId, targetCfId };
-        const undos = MoveConditionalRuleMutationUndoFactory(accessor, config);
+        const anchorList = transformSupportSymmetryAnchor(params.start, params.end, conditionalFormattingRuleModel.getSubunitRules(unitId, subUnitId) || [], (rule) => rule.cfId);
+        if (!anchorList) {
+            return false;
+        }
+        const [start, end] = anchorList;
+        const config: IMoveConditionalRuleMutationParams = { unitId, subUnitId, start, end };
+        const undos = MoveConditionalRuleMutationUndoFactory(config);
         const result = commandService.syncExecuteCommand(MoveConditionalRuleMutation.id, config);
         if (result) {
             undoRedoService.pushUndoRedo({

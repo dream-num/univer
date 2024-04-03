@@ -233,7 +233,7 @@ class FontLibrary {
         // console.log(this._fontBook);
     }
 
-    getBestMatchFontByStyle(style: IStyleBase): Nullable<IFontWithBuffer> {
+    findBestMatchFontByStyle(style: IStyleBase): Nullable<IFontWithBuffer> {
         const ff = style.ff!;
         const fontMap = this._fontBook.get(ff);
 

@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-export * from './basics';
-export * from './docs-ui-plugin';
-export { enUS, zhCN } from './locale';
-export { DocCanvasView } from './views/doc-canvas-view';
-export * from './services';
+export { default as PastePluginLark } from './clipboard/html-to-udm/paste-plugins/plugin-lark';
+export { default as PastePluginUniver } from './clipboard/html-to-udm/paste-plugins/plugin-univer';
+export { default as PastePluginWord } from './clipboard/html-to-udm/paste-plugins/plugin-word';
+export { type IPastePlugin } from './clipboard/html-to-udm/paste-plugins/type';

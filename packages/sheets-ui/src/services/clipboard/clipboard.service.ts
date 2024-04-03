@@ -40,12 +40,12 @@ import type { IDisposable } from '@wendellhu/redi';
 import { createIdentifier, Inject } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
 
+import { PastePluginLark, PastePluginUniver, PastePluginWord } from '@univerjs/docs-ui';
 import { IMarkSelectionService } from '../mark-selection/mark-selection.service';
 import { SheetSkeletonManagerService } from '../sheet-skeleton-manager.service';
 import { CopyContentCache, extractId, genId } from './copy-content-cache';
 import { HtmlToUSMService } from './html-to-usm/converter';
-import PastePluginLark from './html-to-usm/paste-plugins/plugin-lark';
-import PastePluginWord from './html-to-usm/paste-plugins/plugin-word';
+
 import type {
     ICellDataWithSpanInfo,
     IPasteTarget,
@@ -72,6 +72,7 @@ export const PREDEFINED_HOOK_NAME = {
 
 HtmlToUSMService.use(PastePluginWord);
 HtmlToUSMService.use(PastePluginLark);
+HtmlToUSMService.use(PastePluginUniver);
 export interface ISheetClipboardService {
     copy(): Promise<boolean>;
     cut(): Promise<boolean>;

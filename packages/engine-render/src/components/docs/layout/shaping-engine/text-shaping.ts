@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IDocumentBody, IStyleBase } from '@univerjs/core';
+import { BooleanNumber, type IDocumentBody, type IStyleBase } from '@univerjs/core';
 import opentype from 'opentype.js/dist/opentype.module';
 import type { Nullable } from 'vitest';
 import { DEFAULT_FONTFACE_PLANE } from '../../../../basics/const';
@@ -118,7 +118,7 @@ function prepareTextChunks(body: IDocumentBody) {
     return chunks;
 }
 
-function shapeChunk(content: string, charPosition: number, used: Set<string>, families: string[]): IOpenTypeGlyphInfo[] {
+function shapeChunk(content: string, charPosition: number, used: Set<string>, families: string[], style: IStyleBase): IOpenTypeGlyphInfo[] {
     let fi = 0;
     let fontFamily = families[fi];
 
@@ -141,7 +141,11 @@ function shapeChunk(content: string, charPosition: number, used: Set<string>, fa
 
     used.add(fontFamily);
 
-    const { font: fontInfo, buffer: fontBuffer } = fontLibrary.getFontByStyle({ ff: fontFamily })!;
+    const { font: fontInfo, buffer: fontBuffer } = fontLibrary.getBestMatchFontByStyle({
+        ff: fontFamily,
+        bl: style.bl ?? BooleanNumber.FALSE,
+        it: style.it ?? BooleanNumber.FALSE,
+    })!;
 
     let font = fontCache.get(fontInfo.fullName);
     if (!font) {
@@ -190,7 +194,7 @@ function shapeChunk(content: string, charPosition: number, used: Set<string>, fa
                     gi++;
                     nextGlyph = glyphs[gi + 1];
                 }
-                results.push(...shapeChunk(content.slice(start, start + emojiMatch[0].length), charPosition + start, used, families));
+                results.push(...shapeChunk(content.slice(start, start + emojiMatch[0].length), charPosition + start, used, families, style));
             } else {
                 let nextGlyph = glyphs[gi + 1];
                 while (nextGlyph?.index === 0) {
@@ -199,7 +203,7 @@ function shapeChunk(content: string, charPosition: number, used: Set<string>, fa
                     nextGlyph = glyphs[gi + 1];
                 }
 
-                results.push(...shapeChunk(content.slice(start, startIndex + chars[gi].length), charPosition + start, used, families));
+                results.push(...shapeChunk(content.slice(start, startIndex + chars[gi].length), charPosition + start, used, families, style));
             }
         }
 
@@ -217,13 +221,17 @@ function kerningAdjustment(glyphs: IOpenTypeGlyphInfo[]) {
 
     let lastFont = glyphs[0].font;
     let lastGlyph = glyphs[0].glyph;
+
     for (let i = 1; i < glyphs.length; i++) {
         const { font, glyph } = glyphs[i];
-        if (font !== lastFont) {
+        if (lastFont !== font) {
+            lastFont = font;
+            lastGlyph = glyph;
             continue;
         }
 
         const kerning = font.getKerningValue(lastGlyph, glyph);
+
         if (kerning !== 0) {
             glyphs[i].kerning = kerning;
         }
@@ -251,7 +259,7 @@ export function textShape(body: IDocumentBody) {
 
         fontFamilies = fontLibrary.getValidFontFamilies(fontFamilies);
 
-        glyphs.push(...shapeChunk(content, charPosition, new Set(), fontFamilies));
+        glyphs.push(...shapeChunk(content, charPosition, new Set(), fontFamilies, style));
 
         charPosition += content.length;
     }

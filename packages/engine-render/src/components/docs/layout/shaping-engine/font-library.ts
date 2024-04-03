@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IStyleBase, Nullable } from '@univerjs/core';
+import { BooleanNumber, type IStyleBase, type Nullable } from '@univerjs/core';
 
 interface IFontData {
     readonly family: string;
@@ -26,6 +26,170 @@ interface IFontData {
 interface IFontWithBuffer {
     readonly font: IFontData;
     readonly buffer: ArrayBuffer;
+}
+
+enum CompareResult {
+    EQUAL,
+    GREATER,
+    LESS,
+}
+
+enum FontStyle {
+    // The default, typically upright style.
+    Normal,
+    // A cursive style with custom letterform.
+    Italic,
+    // Just a slanted version of the normal style.
+    Oblique,
+}
+
+enum FontWeight {
+    // Thin weight (100).
+    THIN = 100,
+
+    // Extra light weight (200).
+    EXTRALIGHT = 200,
+
+    // Light weight (300).
+    LIGHT = 300,
+
+    // Regular weight (400).
+    REGULAR = 400,
+
+    // Medium weight (500).
+    MEDIUM = 500,
+
+    // Semibold weight (600).
+    SEMIBOLD = 600,
+
+    // Bold weight (700).
+    BOLD = 700,
+
+    // Extrabold weight (800).
+    EXTRABOLD = 800,
+
+    // Black weight (900).
+    BLACK = 900,
+}
+
+interface IFontVariant {
+    // The style of the font (normal / italic).
+    style: FontStyle;
+    /// How heavy the font is normal / bold.
+    weight: FontWeight;
+    // How condensed or expanded the font is (0.5 - 2.0).
+    // stretch: FontStretch,
+}
+
+export interface IFontInfo {
+    // The typographic font family this font is part of.
+    family: string;
+    // Properties that distinguish this font from other fonts in the same family.
+    variant: IFontVariant;
+}
+
+function getFontInfoFromFontData(fontData: IFontData): IFontInfo {
+    const { family, style: styleString } = fontData;
+
+    let style = FontStyle.Normal;
+    let weight = FontWeight.REGULAR;
+
+    if (/italic/i.test(styleString)) {
+        style = FontStyle.Italic;
+    }
+
+    switch (true) {
+        case /thin|hairline/i.test(styleString): {
+            weight = FontWeight.THIN;
+            break;
+        }
+
+        case /(extra|ultra) *light/i.test(styleString): {
+            weight = FontWeight.EXTRALIGHT;
+            break;
+        }
+
+        case /light/i.test(styleString): {
+            weight = FontWeight.LIGHT;
+            break;
+        }
+
+        case /medium/i.test(styleString): {
+            weight = FontWeight.MEDIUM;
+            break;
+        }
+
+        case /(semi|demi) *bold/i.test(styleString): {
+            weight = FontWeight.SEMIBOLD;
+            break;
+        }
+
+        case /bold/i.test(styleString): {
+            weight = FontWeight.BOLD;
+            break;
+        }
+
+        case /(extra|ultra) *bold/i.test(styleString): {
+            weight = FontWeight.EXTRABOLD;
+            break;
+        }
+
+        case /black|heavy/i.test(styleString): {
+            weight = FontWeight.BLACK;
+            break;
+        }
+    }
+
+    return {
+        family,
+        variant: {
+            style,
+            weight,
+        },
+    };
+}
+
+function getFontInfoFromTextStyle(style: IStyleBase): IFontInfo {
+    const { ff, bl = BooleanNumber.FALSE, it = BooleanNumber.FALSE } = style;
+
+    return {
+        family: ff ?? 'Arial',
+        variant: {
+            style: it === BooleanNumber.TRUE ? FontStyle.Italic : FontStyle.Normal,
+            weight: bl === BooleanNumber.TRUE ? FontWeight.BOLD : FontWeight.REGULAR,
+        },
+    };
+}
+
+function fontInfoDistance(a: IFontInfo, b: IFontInfo): [number, number] {
+    let styleDistance = Number.POSITIVE_INFINITY;
+
+    if (a.variant.style === b.variant.style) {
+        styleDistance = 0;
+    } else if (a.variant.style !== FontStyle.Normal && b.variant.style !== FontStyle.Normal) {
+        styleDistance = 1;
+    } else {
+        styleDistance = 2;
+    }
+
+    const weightDistance = Math.abs(a.variant.weight - b.variant.weight);
+
+    return [
+        styleDistance,
+        weightDistance,
+    ];
+}
+
+function compareFontInfoDistance(a: [number, number], b: [number, number]) {
+    if (a[0] === b[0] && a[1] === b[1]) {
+        return CompareResult.EQUAL;
+    }
+
+    if (a[0] === b[0]) {
+        return a[1] > b[1] ? CompareResult.GREATER : CompareResult.LESS;
+    }
+
+    return a[0] > b[0] ? CompareResult.GREATER : CompareResult.LESS;
 }
 
 class FontLibrary {
@@ -60,25 +224,49 @@ class FontLibrary {
                     buffer,
                 });
             }
-
-            console.log(this._fontBook);
         } catch (err) {
             console.error(err);
         } finally {
             this.isReady = true;
         }
+
+        // console.log(this._fontBook);
     }
 
-    getFontByStyle(style: IStyleBase): Nullable<IFontWithBuffer> {
+    getBestMatchFontByStyle(style: IStyleBase): Nullable<IFontWithBuffer> {
         const ff = style.ff!;
         const fontMap = this._fontBook.get(ff);
 
         if (fontMap == null) {
+            // TODO: 根据 ff 模糊匹配最佳字体
             return;
         }
 
-        // TODO: 通过 style 模糊匹配最佳字体
-        return fontMap.values().next().value;
+        let bestFont: Nullable<IFontWithBuffer> = null;
+        let bestDistance: [number, number] = [Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY];
+
+        for (const fontWithBuffer of fontMap.values()) {
+            const { font } = fontWithBuffer;
+            const currentFontInfo = getFontInfoFromFontData(font);
+            const targetFontInfo = getFontInfoFromTextStyle(style);
+            const distance = fontInfoDistance(currentFontInfo, targetFontInfo);
+
+            if (bestFont == null) {
+                bestFont = fontWithBuffer;
+                bestDistance = distance;
+            } else {
+                const result = compareFontInfoDistance(bestDistance, distance);
+
+                if (result === CompareResult.GREATER) {
+                    bestFont = fontWithBuffer;
+                    bestDistance = distance;
+                }
+            }
+        }
+
+        // console.log('Best match:', style, bestFont);
+
+        return bestFont;
     }
 
     getValidFontFamilies(families: string[]): string[] {

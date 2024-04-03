@@ -25,7 +25,7 @@ import type {
 } from '../../../../basics/i-document-skeleton-cached';
 import { GlyphType } from '../../../../basics/i-document-skeleton-cached';
 import type { IFontCreateConfig } from '../../../../basics/interfaces';
-import { hasCJK, hasCJKText, isCjkCenterAlignedPunctuation, isCjkLeftAlignedPunctuation, isCjkRightAlignedPunctuation } from '../../../../basics/tools';
+import { hasCJK, hasCJKText, isCjkCenterAlignedPunctuation, isCjkLeftAlignedPunctuation, isCjkRightAlignedPunctuation, ptToPixel } from '../../../../basics/tools';
 import { validationGrid } from '../tools';
 import type { IOpenTypeGlyphInfo } from '../shaping-engine/text-shaping';
 
@@ -177,7 +177,7 @@ export function _createSkeletonWordOrLetter(
 
     // Handle kerning.
     if (glyphInfo && glyphInfo.kerning !== 0 && glyphInfo.font) {
-        const scale = fontStyle.fontSize / glyphInfo.font.unitsPerEm;
+        const scale = ptToPixel(fontStyle.fontSize) / glyphInfo.font.unitsPerEm;
         xOffset += glyphInfo.kerning * scale;
     }
 

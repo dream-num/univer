@@ -21,7 +21,7 @@ import { IRenderManagerService, Vector2 } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
-@OnLifecycle(LifecycleStages.Ready, CellCustomRenderController)
+@OnLifecycle(LifecycleStages.Rendered, CellCustomRenderController)
 export class CellCustomRenderController extends Disposable {
     private _enterActiveRender: Nullable<{
         render: ICellCustomRender;

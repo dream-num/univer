@@ -85,6 +85,7 @@ export class CalculateController extends Disposable {
                     }
 
                     const { arrayFormulaRange, arrayFormulaCellData } = params;
+                    // TODO@Dushusir: Merge the array formula data into the formulaDataModel
                     this._formulaDataModel.setArrayFormulaRange(arrayFormulaRange);
                     this._formulaDataModel.setArrayFormulaCellData(arrayFormulaCellData);
                 }
@@ -116,8 +117,6 @@ export class CalculateController extends Disposable {
 
         const arrayFormulaCellData = this._formulaDataModel.getArrayFormulaCellData();
 
-        // Synchronous to the main thread
-        // this._commandService.executeCommand(SetFormulaDataMutation.id, { formulaData });
         this._calculateFormulaService.execute({
             formulaData,
             arrayFormulaCellData,

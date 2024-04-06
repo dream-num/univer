@@ -81,6 +81,17 @@ describe('Ref range formula test', () => {
             expect(result).toStrictEqual({
                 si: 'id1',
             });
+
+            formulaDataItem = {
+                f: '',
+                si: '',
+                x: 0,
+                y: 1,
+            };
+
+            result = formulaDataItemToCellData(formulaDataItem);
+
+            expect(result).toBeNull();
         });
     });
 });

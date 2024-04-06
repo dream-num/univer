@@ -245,8 +245,13 @@ export class FormulaDataModel extends Disposable {
         Object.keys(formulaData).forEach((unitId) => {
             const sheetData = formulaData[unitId];
 
-            if (sheetData == null) {
-                return true;
+            if (sheetData === undefined) {
+                return;
+            }
+
+            if (sheetData === null) {
+                delete this._formulaData[unitId];
+                return;
             }
 
             if (!this._formulaData[unitId]) {
@@ -254,7 +259,18 @@ export class FormulaDataModel extends Disposable {
             }
 
             Object.keys(sheetData).forEach((sheetId) => {
-                const sheetFormula = new ObjectMatrix(sheetData[sheetId]);
+                const currentSheetData = sheetData[sheetId];
+
+                if (currentSheetData === undefined) {
+                    return;
+                }
+
+                if (currentSheetData === null) {
+                    delete this._formulaData[unitId]?.[sheetId];
+                    return;
+                }
+
+                const sheetFormula = new ObjectMatrix(currentSheetData);
                 const formulaMatrix = new ObjectMatrix(this._formulaData[unitId]?.[sheetId]);
 
                 sheetFormula.forValue((r, c, v) => {
@@ -265,9 +281,7 @@ export class FormulaDataModel extends Disposable {
                     }
                 });
 
-                if (this._formulaData[unitId]) {
-                    this._formulaData[unitId]![sheetId] = formulaMatrix.getData();
-                }
+                this._formulaData[unitId]![sheetId] = formulaMatrix.clone();
             });
         });
     }
@@ -618,7 +632,17 @@ export function initSheetFormulaData(
         }
     });
 
-    if (formulaData[unitId]) {
-        formulaData[unitId]![sheetId] = sheetFormulaDataMatrix.getData();
+    if (!formulaData[unitId]) {
+        formulaData[unitId] = {};
     }
+
+    const newSheetFormulaData = sheetFormulaDataMatrix.clone();
+
+    formulaData[unitId]![sheetId] = newSheetFormulaData;
+
+    return {
+        [unitId]: {
+            [sheetId]: newSheetFormulaData,
+        },
+    };
 }

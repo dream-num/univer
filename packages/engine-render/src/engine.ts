@@ -108,7 +108,6 @@ export class Engine extends ThinEngine<Scene> {
         if (mode !== CanvasRenderMode.Printing) {
             this._matchMediaHandler();
         }
-
     }
 
     override get width() {

@@ -39,7 +39,13 @@ export const DraggableListDemo = {
                 list={list}
                 onListChange={setList}
                 idKey="key"
-                itemRender={(item) => <div>{item.title}</div>}
+                itemRender={(item) => (
+                    <div
+                        style={{ width: 120, border: '1px solid #ccc', borderRadius: 4 }}
+                    >
+                        {item.title}
+                    </div>
+                )}
                 rowHeight={32}
                 margin={[0, 12]}
             />

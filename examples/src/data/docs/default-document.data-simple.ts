@@ -27,7 +27,7 @@ export const DEFAULT_DOCUMENT_DATA_SIMPLE: IDocumentData = {
                 ed: 4,
                 ts: {
                     fs: 24,
-                    ff: 'PingFang SC',
+                    ff: 'Microsoft YaHei',
                     cl: {
                         rgb: 'rgb(0, 0, 0)',
                     },

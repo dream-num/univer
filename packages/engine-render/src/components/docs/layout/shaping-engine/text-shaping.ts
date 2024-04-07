@@ -171,8 +171,6 @@ function shapeChunk(
     const glyphs = font.stringToGlyphs(content, option);
     const chars = content.match(/[\s\S]/gu) ?? [];
 
-    // console.log('length', glyphs.length, chars.length);
-
     let gi = 0;
     let startIndex = 0;
 
@@ -194,37 +192,36 @@ function shapeChunk(
             const emojiMatch = subStr.match(EMOJI_REG);
 
             if (emojiMatch) {
-                // let acc = chars[gi].length;
-
-                // while (acc < emojiMatch[0].length) {
-                //     startIndex += chars[gi].length;
-                //     gi++;
-                //     acc += chars[gi].length;
-                //     console.log(acc, emojiMatch[0].length);
-                // }
-
-                let nextGlyph = glyphs[gi + 1];
-                while (nextGlyph?.index === 0 || nextGlyph?.unicode === 8205) {
+                let acc = 0;
+                do {
+                    acc += chars[gi].length;
                     startIndex += chars[gi].length;
                     gi++;
-                    nextGlyph = glyphs[gi + 1];
-                }
+                } while (acc < emojiMatch[0].length);
+
                 results.push(...shapeChunk(content.slice(start, start + emojiMatch[0].length), charPosition + start, used, families, style));
+
+                continue;
             } else {
                 let nextGlyph = glyphs[gi + 1];
-                while (nextGlyph?.index === 0) {
+                let nextChar = chars[gi + 1];
+
+                while (nextGlyph?.index === 0 && !EMOJI_REG.test(nextChar)) {
                     startIndex += chars[gi].length;
                     gi++;
                     nextGlyph = glyphs[gi + 1];
+                    nextChar = chars[gi + 1];
                 }
 
                 results.push(...shapeChunk(content.slice(start, startIndex + chars[gi].length), charPosition + start, used, families, style));
             }
         }
 
-        startIndex += chars[gi].length;
+        startIndex += chars[gi]?.length;
         gi++;
     }
+
+    used.delete(fontFamily);
 
     return results;
 }
@@ -239,7 +236,7 @@ function kerningAdjustment(glyphs: IOpenTypeGlyphInfo[]) {
 
     for (let i = 1; i < glyphs.length; i++) {
         const { font, glyph } = glyphs[i];
-        if (lastFont !== font) {
+        if (lastFont !== font || font == null) {
             lastFont = font;
             lastGlyph = glyph;
             continue;

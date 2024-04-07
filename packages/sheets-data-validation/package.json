@@ -57,8 +57,10 @@
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",
         "build": "tsc && vite build"
+
     },
     "peerDependencies": {
+        "@types/react-grid-layout": "^1.3.5",
         "@univerjs/core": "workspace:*",
         "@univerjs/data-validation": "workspace:*",
         "@univerjs/design": "workspace:*",
@@ -74,8 +76,9 @@
     },
     "dependencies": {
         "@univerjs/icons": "^0.1.43",
+        "clsx": "^2.1.0",
         "dayjs": "^1.11.10",
-        "react-draggable-list": "^4.2.0"
+        "react-grid-layout": "^1.4.4"
     },
     "devDependencies": {
         "@univerjs/core": "workspace:*",

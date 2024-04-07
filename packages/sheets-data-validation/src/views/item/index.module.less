@@ -13,10 +13,12 @@
         cursor: pointer;
         position: relative;
         border-radius: 6px;
+        width: 287px;
+        overflow: hidden;
     }
 
     &-container:hover {
-        background-color: #f5f5f5;
+        background-color: rgba(var(--grey-50));
     }
 
     &-title {
@@ -24,12 +26,16 @@
         color: rgba(var(--color-black));
         line-height: 22px;
         font-weight: 500;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     &-content {
-        color: #7a7a7a;
+        color: rgba(var(--text-color-secondary));
         font-size: var(--font-size-xs);
         line-height: 18px;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     &-icon {
@@ -45,6 +51,6 @@
     }
 
     &-icon:hover {
-        background: #e5e5e5;
+        background: rgba(var(--grey-200));
     }
 }

@@ -20,11 +20,7 @@ import type { Nullable } from 'vitest';
 import { DEFAULT_FONTFACE_PLANE } from '../../../../basics/const';
 import { EMOJI_REG } from '../../../../basics/tools';
 import { fontLibrary } from './font-library';
-
-interface ITextChunk {
-    content: string;
-    style?: IStyleBase;
-}
+import { prepareTextChunks } from './utils';
 
 interface IBoundingBox {
     x1: number;
@@ -45,78 +41,6 @@ export interface IOpenTypeGlyphInfo {
 }
 
 const fontCache = new Map<string, any>();
-
-export function prepareParagraphBody(body: IDocumentBody, paragraphIndex: number): IDocumentBody {
-    const { dataStream, paragraphs = [], textRuns = [] } = body;
-
-    let last = 0;
-    for (let i = 0; i < paragraphs.length; i++) {
-        const paragraph = paragraphs[i];
-        const { startIndex } = paragraph;
-
-        if (startIndex === paragraphIndex) {
-            break;
-        }
-
-        last = startIndex + 1;
-    }
-
-    const textRunChunks = [];
-
-    for (const textRun of textRuns) {
-        const { st, ed } = textRun;
-
-        if (st >= last && st <= paragraphIndex) {
-            textRunChunks.push({
-                ...textRun,
-                st: st - last,
-                ed: Math.min(ed, paragraphIndex) - last,
-            });
-        } else if (ed >= last && ed <= paragraphIndex) {
-            textRunChunks.push({
-                ...textRun,
-                st: Math.max(st, last) - last,
-                ed: ed - last,
-            });
-        }
-    }
-
-    return {
-        dataStream: dataStream.substring(last, paragraphIndex + 1),
-        textRuns: textRunChunks,
-    };
-}
-
-// Split the paragraph content into text chunks, and each chunk has the same style and font family.
-function prepareTextChunks(body: IDocumentBody) {
-    const { dataStream, textRuns = [] } = body;
-    let offset = 0;
-    const chunks: ITextChunk[] = [];
-
-    for (const textRun of textRuns) {
-        const { st, ed, ts = {} } = textRun;
-        if (st !== offset) {
-            chunks.push({
-                content: dataStream.substring(offset, st),
-            });
-        }
-
-        chunks.push({
-            content: dataStream.substring(st, ed),
-            style: ts,
-        });
-
-        offset = ed;
-    }
-
-    if (offset !== dataStream.length) {
-        chunks.push({
-            content: dataStream.substring(offset),
-        });
-    }
-
-    return chunks;
-}
 
 function shapeChunk(
     content: string,

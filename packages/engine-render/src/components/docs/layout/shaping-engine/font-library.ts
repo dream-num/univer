@@ -28,6 +28,8 @@ interface IFontWithBuffer {
     readonly buffer: ArrayBuffer;
 }
 
+type FontDistance = [number, number];
+
 enum CompareResult {
     // a is equal to b.
     EQUAL,
@@ -168,7 +170,7 @@ function getFontInfoFromTextStyle(style: IStyleBase): IFontInfo {
     };
 }
 
-function fontInfoDistance(a: IFontInfo, b: IFontInfo): [number, number] {
+function fontInfoDistance(a: IFontInfo, b: IFontInfo): FontDistance {
     let styleDistance = Number.POSITIVE_INFINITY;
 
     if (a.variant.style === b.variant.style) {
@@ -187,7 +189,7 @@ function fontInfoDistance(a: IFontInfo, b: IFontInfo): [number, number] {
     ];
 }
 
-function compareFontInfoDistance(a: [number, number], b: [number, number]) {
+function compareFontInfoDistance(a: FontDistance, b: FontDistance) {
     if (a[0] === b[0] && a[1] === b[1]) {
         return CompareResult.EQUAL;
     }
@@ -200,6 +202,10 @@ function compareFontInfoDistance(a: [number, number], b: [number, number]) {
 }
 
 async function checkLocalFontsPermission() {
+    if (navigator == null || navigator?.permissions == null) {
+        return false;
+    }
+
     const status = await navigator.permissions.query({ name: 'local-fonts' as PermissionName });
 
     return status.state === 'granted';
@@ -207,7 +213,6 @@ async function checkLocalFontsPermission() {
 
 class FontLibrary {
     isReady = false;
-    isSupportQueryLocalFonts = 'queryLocalFonts' in window;
     private _fontBook: Map<string, Map<string, IFontWithBuffer>> = new Map();
 
     constructor() {
@@ -215,7 +220,7 @@ class FontLibrary {
     }
 
     private async _loadFontsToBook() {
-        if (this.isReady || !this.isSupportQueryLocalFonts) {
+        if (this.isReady) {
             return;
         }
 
@@ -225,8 +230,13 @@ class FontLibrary {
             return;
         }
 
+        if (!('queryLocalFonts' in window)) {
+            return;
+        }
+
         try {
             const availableFonts = await (window as any).queryLocalFonts();
+
             for (const font of availableFonts) {
                 const { family, style } = font;
                 let fontMap = this._fontBook.get(family);
@@ -256,12 +266,12 @@ class FontLibrary {
         const fontMap = this._fontBook.get(ff);
 
         if (fontMap == null) {
-            // TODO: 根据 ff 模糊匹配最佳字体
+            // TODO: @jocs use font family to match the best.
             return;
         }
 
         let bestFont: Nullable<IFontWithBuffer> = null;
-        let bestDistance: [number, number] = [Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY];
+        let bestDistance: FontDistance = [Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY];
 
         for (const fontWithBuffer of fontMap.values()) {
             const { font } = fontWithBuffer;

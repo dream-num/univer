@@ -25,8 +25,9 @@ import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-no
 import type { DocumentViewModel } from '../../../view-model/document-view-model';
 import type { ISectionBreakConfig } from '../../../../../basics/interfaces';
 import { hasArabic, hasCJK, hasCJKPunctuation, hasCJKText, hasTibetan, startWithEmoji } from '../../../../../basics/tools';
-import { prepareParagraphBody, textShape } from '../../shaping-engine/text-shaping';
+import { textShape } from '../../shaping-engine/text-shaping';
 import { fontLibrary } from '../../shaping-engine/font-library';
+import { prepareParagraphBody } from '../../shaping-engine/utils';
 import { ArabicHandler, emojiHandler, otherHandler, TibetanHandler } from './language-ruler';
 
 // Now we apply consecutive punctuation adjustment, specified in Chinese Layout

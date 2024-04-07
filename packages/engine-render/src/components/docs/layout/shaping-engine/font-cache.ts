@@ -64,7 +64,6 @@ export class FontCache {
 
     private static _fontDataMap: Map<string, IFontData> = new Map();
 
-    // 文字缓存全局变量
     private static _globalFontMeasureCache: Map<string, Map<string, IMeasureTextCache>> = new Map();
 
     static get globalFontMeasureCache() {

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+/* eslint-disable ts/no-explicit-any */
 import { BooleanNumber, type IDocumentBody, type IStyleBase } from '@univerjs/core';
 // @ts-ignore
 import opentype from 'opentype.js/dist/opentype.module';

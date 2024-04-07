@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Disposable, IResourceManagerService, IUniverInstanceService, LifecycleStages, OnLifecycle, toDisposable } from '@univerjs/core';
+import { Disposable, IResourceManagerService, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { DataValidationModel } from '@univerjs/data-validation';
 import { Inject, Injector } from '@wendellhu/redi';
 import { SheetDataValidationManager } from '../models/sheet-data-validation-manager';

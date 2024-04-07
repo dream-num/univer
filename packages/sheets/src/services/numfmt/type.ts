@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-import type { ICellData, IObjectMatrixPrimitiveType, IRange, Nullable, ObjectMatrix, RefAlias } from '@univerjs/core';
+import type { ICellData, IRange, Nullable, ObjectMatrix } from '@univerjs/core';
 import { LifecycleStages, runOnLifecycle } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
-import type { Observable } from 'rxjs';
 
 // eslint-disable-next-line ts/consistent-type-definitions
 export type INumfmtItem = {
@@ -46,9 +45,7 @@ export interface INumfmtItemWithCache {
         parameters: number; // The parameter that was last calculated
     };
     pattern: string;
-    type: FormatType;
 }
-export type IRefItem = INumfmtItem & { count: number; type: FormatType; pattern: string };
 
 export interface INumfmtService {
     getValue(
@@ -58,21 +55,12 @@ export interface INumfmtService {
         col: number,
         model?: ObjectMatrix<INumfmtItem>
     ): Nullable<INumfmtItemWithCache>;
-    getModel(unitId: string, subUnitId: string): Nullable<ObjectMatrix<INumfmtItem>>;
     setValues(
         unitId: string,
         subUnitId: string,
-        values: Array<{ ranges: IRange[]; pattern: string; type: FormatType }>
+        values: Array<{ ranges: IRange[]; pattern: string }>
     ): void;
     deleteValues(unitId: string, subUnitId: string, values: IRange[]): void;
-    getRefModel(unitId: string): Nullable<RefAlias<IRefItem, 'i' | 'pattern'>>;
-    modelReplace$: Observable<string>;
-    serialTimeToTimestamp: (v: number, is1900?: boolean) => number;
-}
-
-export interface ISnapshot {
-    model: Record<string, IObjectMatrixPrimitiveType<INumfmtItem>>;
-    refModel: IRefItem[];
 }
 
 export const INumfmtService = createIdentifier<INumfmtService>('INumfmtService');

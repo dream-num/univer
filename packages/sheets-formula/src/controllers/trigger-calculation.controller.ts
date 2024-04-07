@@ -168,39 +168,6 @@ export class TriggerCalculationController extends Disposable {
             }
         }
 
-        // number format data
-        allDirtyRanges.forEach((dirtyRange) => {
-            const { unitId, sheetId } = dirtyRange;
-
-            if (numfmtItemMap[unitId] == null) {
-                numfmtItemMap[unitId] = {};
-            }
-
-            if (numfmtItemMap[unitId]![sheetId] == null) {
-                numfmtItemMap[unitId]![sheetId] = {};
-            }
-
-            const numfmtModel = this._numfmtService.getModel(unitId, sheetId);
-
-            if (!numfmtModel) return;
-
-            const refMode = this._numfmtService.getRefModel(unitId);
-
-            numfmtModel.forValue((row, col, numfmtValue) => {
-                if (numfmtValue && refMode) {
-                    const refValue = refMode.getValue(numfmtValue?.i, ['i']);
-
-                    if (!refValue) return;
-
-                    if (numfmtItemMap[unitId]![sheetId][row] == null) {
-                        numfmtItemMap[unitId]![sheetId][row] = {};
-                    }
-
-                    numfmtItemMap[unitId]![sheetId][row][col] = refValue.pattern;
-                }
-            });
-        });
-
         return {
             dirtyRanges: allDirtyRanges,
             dirtyNameMap: allDirtyNameMap,

@@ -92,6 +92,12 @@ export const DeleteLeftCommand: ICommand = {
 
                 if (paragraphStyle) {
                     updateParagraph.paragraphStyle = paragraphStyle;
+                    // TODO: It maybe need to update codes bellow when we support nested list.
+                    const { hanging } = paragraphStyle;
+                    if (hanging) {
+                        updateParagraph.paragraphStyle.indentStart = hanging;
+                        updateParagraph.paragraphStyle.hanging = undefined;
+                    }
                 }
             } else if (preIsIndent === true) {
                 const bullet = paragraph.bullet;

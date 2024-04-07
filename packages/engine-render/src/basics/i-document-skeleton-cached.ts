@@ -141,7 +141,7 @@ export interface IDocumentSkeletonLine {
 
     lineIndex: number; // lineIndex 行号
     bullet?: IDocumentSkeletonBullet; // 无序和有序列表标题
-    paragraphStart: boolean; // Paragraph start 默认false
+    paragraphStart: boolean; // Paragraph start 默认 false
 
     // dtId: string[]; // drawingTBIds 影响行的元素id集合，会切割divide，影响上下
     // bmt: number; // benchmarkTop， drawing的位置是根据paragraph的位置进行相对定位的，段落跨页后，需要一个校准

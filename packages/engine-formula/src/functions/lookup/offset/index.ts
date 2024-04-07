@@ -142,7 +142,7 @@ export class Offset extends BaseFunction {
             }
 
             // Ensure that the callback function returns a BaseValueObject
-            return this._handleSingleObject(reference, rowsValue, columnsValue, heightValue, widthValue, true) as BaseValueObject;
+            return this._handleSingleObject(reference as BaseReferenceObject, rowsValue, columnsValue, heightValue, widthValue, true) as BaseValueObject;
         });
     }
 

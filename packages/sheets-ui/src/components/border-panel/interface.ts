@@ -66,12 +66,12 @@ export const BORDER_LINE_CHILDREN = [
     },
     {
         label: 'borderLine.borderHorizontal',
-        icon: 'InnerBorder',
+        icon: 'HorizontalBorder',
         value: 'horizontal',
     },
     {
         label: 'borderLine.borderVertical',
-        icon: 'InnerBorder',
+        icon: 'VerticalBorder',
         value: 'vertical',
     },
 

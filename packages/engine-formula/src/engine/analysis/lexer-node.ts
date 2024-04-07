@@ -46,6 +46,8 @@ export class LexerNode {
 
     private _endIndex: number = -1;
 
+    private _definedNames: Array<string> = [];
+
     dispose() {
         this._children.forEach((node) => {
             if (!(typeof node === 'string')) {
@@ -55,6 +57,10 @@ export class LexerNode {
         this._functionDefinitionPrivacyVar?.clear();
 
         this._parent = null;
+    }
+
+    getDefinedNames() {
+        return this._definedNames;
     }
 
     getStartIndex() {
@@ -120,6 +126,14 @@ export class LexerNode {
     setIndex(st: number, ed: number) {
         this._startIndex = st;
         this._endIndex = ed;
+    }
+
+    setDefinedNames(definedNames: Array<string>) {
+        this._definedNames = definedNames;
+    }
+
+    hasDefinedNames() {
+        return this._definedNames.length > 0;
     }
 
     replaceChild(lexerNode: LexerNode, newLexerNode: LexerNode) {

@@ -15,18 +15,19 @@
  */
 
 import type { IMutation } from '@univerjs/core';
-import type { IAccessor } from '@wendellhu/redi';
 
 import {
     CommandType,
 } from '@univerjs/core';
 import { ConditionalFormattingRuleModel } from '../../models/conditional-formatting-rule-model';
+import type { IAnchor } from '../../utils/anchor';
+import { anchorUndoFactory } from '../../utils/anchor';
 
 export interface IMoveConditionalRuleMutationParams {
     unitId: string;
     subUnitId: string;
-    cfId: string;
-    targetCfId: string;
+    start: IAnchor;
+    end: IAnchor;
 }
 
 export const MoveConditionalRuleMutation: IMutation<IMoveConditionalRuleMutationParams> = {
@@ -36,25 +37,22 @@ export const MoveConditionalRuleMutation: IMutation<IMoveConditionalRuleMutation
         if (!params) {
             return false;
         }
-        const { unitId, subUnitId, cfId, targetCfId } = params;
+        const { unitId, subUnitId, start, end } = params;
         const conditionalFormattingRuleModel = accessor.get(ConditionalFormattingRuleModel);
-        conditionalFormattingRuleModel.moveRulePriority(unitId, subUnitId, cfId, targetCfId);
+        conditionalFormattingRuleModel.moveRulePriority(unitId, subUnitId, start, end);
         return true;
     },
 };
-export const MoveConditionalRuleMutationUndoFactory = (accessor: IAccessor, param: IMoveConditionalRuleMutationParams) => {
-    const { unitId, subUnitId, cfId } = param;
-    const conditionalFormattingRuleModel = accessor.get(ConditionalFormattingRuleModel);
-    const ruleList = conditionalFormattingRuleModel.getSubunitRules(unitId, subUnitId);
-    if (!ruleList) {
+export const MoveConditionalRuleMutationUndoFactory = (param: IMoveConditionalRuleMutationParams) => {
+    const { unitId, subUnitId } = param;
+    const undo = anchorUndoFactory(param.start, param.end);
+
+    if (!undo) {
         return [];
     }
-    const index = ruleList.findIndex((rule) => rule.cfId === cfId);
-    const preTargetRule = ruleList[index - 1];
-    if (!preTargetRule) {
-        return [];
-    }
+    const [start, end] = undo;
+
     return [{ id: MoveConditionalRuleMutation.id,
-              params: { unitId, subUnitId, cfId, targetCfId: preTargetRule.cfId } as IMoveConditionalRuleMutationParams },
+              params: { unitId, subUnitId, start, end } as IMoveConditionalRuleMutationParams },
     ];
 };

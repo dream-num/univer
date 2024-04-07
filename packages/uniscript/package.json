@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/uniscript",
-    "version": "0.1.5",
+    "version": "0.1.6",
     "private": false,
     "description": "UI component library for building exceptional Univer.",
     "author": "DreamNum <developer@univer.ai>",
@@ -81,7 +81,6 @@
         "@univerjs/design": "workspace:*",
         "@univerjs/facade": "workspace:*",
         "@univerjs/shared": "workspace:*",
-        "@univerjs/sheets": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "@wendellhu/redi": "^0.13.0",
         "less": "^4.2.0",

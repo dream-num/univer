@@ -16,7 +16,7 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { moveMatrixArray, ObjectMatrix } from '../object-matrix';
+import { moveMatrixArray, ObjectMatrix, spliceArray } from '../object-matrix';
 
 describe('test ObjectMatrix', () => {
     const getPrimitiveObj = () => ({
@@ -88,6 +88,24 @@ describe('test ObjectMatrix', () => {
         moveMatrixArray(2, 1, 4, primitiveObject);
         expect(primitiveObject).toStrictEqual({
             1: '111', 2: '333', 3: null,
+        });
+    });
+    it('test spliceMatrix row', () => {
+        const matrix = new ObjectMatrix(getPrimitiveObj());
+        spliceArray(1, 1, matrix.getMatrix());
+        expect(matrix.getMatrix()).toStrictEqual({
+            1: { 1: '111', 2: '121', 3: '313' },
+        });
+    });
+
+    it('test spliceMatrix col', () => {
+        const matrix = new ObjectMatrix(getPrimitiveObj());
+        matrix.forEach((row, value) => {
+            spliceArray(1, 1, value);
+        });
+        expect(matrix.getMatrix()).toStrictEqual({
+            1: { 1: '222', 2: '333' },
+            2: { 1: '121', 2: '313' },
         });
     });
 });

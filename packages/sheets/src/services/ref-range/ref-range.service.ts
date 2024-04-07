@@ -36,6 +36,8 @@ import { EffectRefRangId } from './type';
 type RefRangCallback = (params: EffectRefRangeParams) => {
     redos: IMutationInfo[];
     undos: IMutationInfo[];
+    preRedos?: IMutationInfo[];
+    preUndos?: IMutationInfo[];
 };
 const MERGE_REDO = createInterceptorKey<IMutationInfo[], null>('MERGE_REDO');
 const MERGE_UNDO = createInterceptorKey<IMutationInfo[], null>('MERGE_UNDO');
@@ -182,16 +184,23 @@ export class RefRangeService extends Disposable {
                             result.push(v);
                             return result;
                         },
-                        [] as Array<{ redos: IMutationInfo[]; undos: IMutationInfo[] }>
+                        [] as Array<{ redos: IMutationInfo[]; undos: IMutationInfo[]; preUndos?: IMutationInfo[]; preRedos?: IMutationInfo[] }>
                     )
                     .reduce(
                         (result, currentValue) => {
                             result.redos.push(...currentValue.redos);
                             result.undos.push(...currentValue.undos);
+                            result.preRedos!.push(...(currentValue.preRedos ?? []));
+                            result.preUndos!.push(...(currentValue.preUndos ?? []));
                             return result;
                         },
-                        { redos: [], undos: [] }
+                        { redos: [], undos: [], preUndos: [], preRedos: [] }
                     );
+
+                const preRedos = this.interceptor.fetchThroughInterceptors(this.interceptor.getInterceptPoints().MERGE_REDO)(
+                    result.preRedos,
+                    null
+                ) || [];
 
                 const redos =
                     this.interceptor.fetchThroughInterceptors(this.interceptor.getInterceptPoints().MERGE_REDO)(
@@ -199,13 +208,18 @@ export class RefRangeService extends Disposable {
                         null
                     ) || [];
 
+                const preUndos = this.interceptor.fetchThroughInterceptors(this.interceptor.getInterceptPoints().MERGE_UNDO)(
+                    result.preUndos,
+                    null
+                ) || [];
+
                 const undos =
                     this.interceptor.fetchThroughInterceptors(this.interceptor.getInterceptPoints().MERGE_UNDO)(
                         result.undos,
                         null
                     ) || [];
 
-                return { redos, undos };
+                return { redos, undos, preRedos, preUndos };
             },
         });
     };

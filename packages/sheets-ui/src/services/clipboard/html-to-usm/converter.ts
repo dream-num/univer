@@ -24,7 +24,6 @@ import type { ISheetSkeletonManagerParam } from '../../sheet-skeleton-manager.se
 import type {
     ICellDataWithSpanInfo,
     IClipboardPropertyItem,
-    IParsedCellValue,
     IParsedCellValueByClipboard,
     IUniverSheetCopyDataModel,
 } from '../type';
@@ -375,121 +374,9 @@ function parseTableRows(html: string): {
     const rowMatchesAsArray = Array.from(rowMatches);
     const rowProperties = rowMatchesAsArray.map((rowMatch) => parseProperties(rowMatch[1]));
 
-    // const { colCount, cellMatrix } = parseTableCells(rowMatchesAsArray.map((rowMatch) => rowMatch[2]), html);
-
     return {
         rowProperties,
         rowCount: rowProperties.length,
-        // colCount,
-        // cellMatrix,
-    };
-}
-
-/**
- *
- * @param tdStrings
- */
-function parseTableCells(tdStrings: string[], html: string) {
-    const cellMatrix = new ObjectMatrix<IParsedCellValue>();
-    const maxRowOfCol = new Map<number, number>();
-    const TDS_REGEX = /<td([\s\S]*?)>([\s\S]*?)<\/td>/gi;
-
-    let colCount = 0;
-    let colIndex = 0;
-    let rowIndex = 0;
-
-    tdStrings.forEach((trStr, r) => {
-        const isFirstRow = r === 0;
-        const cellMatches = trStr.matchAll(TDS_REGEX);
-
-        colIndex = 0;
-
-        Array.from(cellMatches).forEach((cellMatch) => {
-            const cellProperties = parseProperties(cellMatch[1]);
-            const content = decodeHTMLEntities(cellMatch[2].replace('<br>', '\r').replace(/<\/?[^>]*>/g, '')); // paste from excel
-            const rowSpan = cellProperties.rowspan ? +cellProperties.rowspan : 1;
-            const colSpan = cellProperties.colspan ? +cellProperties.colspan : 1;
-
-            if (!isFirstRow) {
-                for (let i = colIndex; i < colCount; i++) {
-                    const thisPosOccupied = maxRowOfCol.get(i)! >= rowIndex;
-                    if (!thisPosOccupied) {
-                        colIndex = i;
-                        break;
-                    }
-                }
-            }
-
-            const value: IParsedCellValue = {
-                content,
-                properties: cellProperties,
-            };
-            if (colSpan > 1) value.colSpan = +colSpan;
-            if (rowSpan > 1) value.rowSpan = +rowSpan;
-
-            // when iterating the first row, we should calc colCount as well
-            if (isFirstRow) {
-                colCount += colSpan;
-            }
-
-            // update maxRowOfCol
-            for (let i = colIndex; i < colIndex + colSpan; i++) {
-                maxRowOfCol.set(i, rowIndex + rowSpan - 1);
-            }
-
-            if ((rowSpan > 1 || colSpan > 1) && rowIndex === 0 && colIndex === 0) {
-                for (let i = 0; i < colSpan; i++) {
-                    if (rowSpan === 1) {
-                        cellMatrix.setValue(rowIndex, i, { content: '', properties: { style: extractBordersAndKeepOthers(cellProperties.style, ['border-top', 'border-bottom']) } });
-                    } else {
-                        cellMatrix.setValue(rowIndex, i, { content: '', properties: { style: extractBordersAndKeepOthers(cellProperties.style, ['border-top']) } });
-                        cellMatrix.setValue(rowSpan - 1, i, { content: '', properties: { style: extractBordersAndKeepOthers(cellProperties.style, ['border-bottom']) } });
-                    }
-                }
-                for (let i = 0; i < rowSpan; i++) {
-                    if (colSpan === 1) {
-                        cellMatrix.setValue(i, colIndex, { content: '', properties: { style: extractBordersAndKeepOthers(cellProperties.style, ['border-left', 'border-right']) } });
-                    } else {
-                        cellMatrix.setValue(i, colIndex, { content: '', properties: { style: extractBordersAndKeepOthers(cellProperties.style, ['border-left']) } });
-                        cellMatrix.setValue(i, colSpan - 1, { content: '', properties: { style: extractBordersAndKeepOthers(cellProperties.style, ['border-right']) } });
-                    }
-                }
-
-                if (rowSpan === 1) {
-                    cellMatrix.setValue(rowIndex, colSpan - 1, { content: '', properties: { style: extractBordersAndKeepOthers(cellProperties.style, ['border-right', 'border-top', 'border-bottom']) } });
-                    if (value?.properties?.style) {
-                        value.properties.style = extractBordersAndKeepOthers(value.properties.style, ['border-left', 'border-top', 'border-bottom']);
-                    }
-                    cellMatrix.setValue(rowIndex, colIndex, value);
-                } else if (colSpan === 1) {
-                    cellMatrix.setValue(rowSpan - 1, colIndex, { content: '', properties: { style: extractBordersAndKeepOthers(cellProperties.style, ['border-left', 'border-right', 'border-bottom']) } });
-                    if (value?.properties?.style) {
-                        value.properties.style = extractBordersAndKeepOthers(value.properties.style, ['border-top', 'border-left', 'border-right']);
-                    }
-                    cellMatrix.setValue(rowIndex, colIndex, value);
-                } else {
-                    cellMatrix.setValue(rowIndex, colSpan - 1, { content: '', properties: { style: extractBordersAndKeepOthers(cellProperties.style, ['border-right', 'border-top']) } });
-                    cellMatrix.setValue(rowSpan - 1, colIndex, { content: '', properties: { style: extractBordersAndKeepOthers(cellProperties.style, ['border-left', 'border-bottom']) } });
-                    cellMatrix.setValue(rowSpan - 1, colSpan - 1, { content: '', properties: { style: extractBordersAndKeepOthers(cellProperties.style, ['border-right', 'border-bottom']) } });
-                    if (value?.properties?.style) {
-                        value.properties.style = extractBordersAndKeepOthers(value.properties.style, ['border-top', 'border-left']);
-                    }
-                    cellMatrix.setValue(rowIndex, colIndex, value);
-                }
-            } else {
-                cellMatrix.setValue(rowIndex, colIndex, value);
-            }
-            // set value to matrix
-            // point to next colIndex
-            colIndex += colSpan;
-        });
-
-        rowIndex += 1;
-    });
-
-    return {
-        colCount,
-        cellMatrix,
     };
 }
 

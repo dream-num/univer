@@ -29,6 +29,7 @@ import {
     handleIRemoveRow,
     handleMoveRange,
     handleMoveRows,
+    handleMoveRowsOther,
     runRefRangeMutations,
 } from '../util';
 
@@ -175,6 +176,68 @@ describe('test ref-range move', () => {
                     endColumn: endCol,
                 });
             });
+        });
+    });
+    describe('handleMoveRowsOther', () => {
+         // see docs/tldr/handMoveRowsCols.tldr
+        const startCol = 0;
+        const endCol = 999;
+        let fromRange: IRange;
+        let toRange: IRange;
+
+        describe('formRange is top of toRange', () => {
+            beforeEach(() => {
+                fromRange = { startRow: 5, endRow: 10, startColumn: startCol, endColumn: endCol };
+                toRange = { startRow: 15, endRow: 20, startColumn: startCol, endColumn: endCol };
+            });
+
+            it('contain', () => {
+                const targetRange2_1: IRange = {
+                    startRow: 6,
+                    endRow: 9,
+                    startColumn: 5,
+                    endColumn: 8,
+                };
+                const targetRange2_2: IRange = {
+                    startRow: 16,
+                    endRow: 19,
+                    startColumn: 5,
+                    endColumn: 8,
+                };
+
+                const resRange2_1 = handleMoveRowsOther(
+                    { id: EffectRefRangId.MoveRowsCommandId, params: { toRange, fromRange } },
+                    targetRange2_1
+                );
+                const resRange2_2 = handleMoveRowsOther(
+                    { id: EffectRefRangId.MoveRowsCommandId, params: { toRange, fromRange } },
+                    targetRange2_2
+                );
+
+                expect(Array.isArray(resRange2_1) ? resRange2_1 : [resRange2_1]).toEqual([{
+                    startRow: 16,
+                    endRow: 19,
+                    startColumn: 5,
+                    endColumn: 8,
+                }]);
+
+                expect((Array.isArray(resRange2_2) ? resRange2_2 : [resRange2_2])?.length).toBe(0);
+            });
+
+            // it('intersect', () => {
+            //     const targetRange1_1: IRange = {
+            //         startRow: 2,
+            //         endRow: 12,
+            //         startColumn: 0,
+            //         endColumn: 10,
+            //     };
+            //     const targetRange1_2: IRange = {
+            //         startRow: 12,
+            //         endRow: 22,
+            //         startColumn: 0,
+            //         endColumn: 10,
+            //     };
+            // });
         });
     });
     describe('handleInsertRangeMoveDown', () => {

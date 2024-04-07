@@ -122,7 +122,8 @@ export const FactoryManageConditionalFormattingRule = (componentManager: Compone
                 {
                     label: localeService.t('sheet.cf.menu.clearWorkSheetRules'),
                     value: CF_MENU_OPERATION.clearWorkSheetRules,
-                }];
+                },
+            ];
             clearRangeEnable$.subscribe((v) => {
                 const item = commonSelections.find((item) => item.value === CF_MENU_OPERATION.clearRangeRules);
                 if (item) {
@@ -147,6 +148,7 @@ export const FactoryManageConditionalFormattingRule = (componentManager: Compone
                 disposable.unsubscribe();
             };
         });
+
         return {
             id: OpenConditionalFormattingOperator.id,
             type: MenuItemType.SELECTOR,

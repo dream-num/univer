@@ -20,7 +20,7 @@ import React, { useState } from 'react';
 import { DraggableList } from './DraggableList';
 
 const meta: Meta<typeof DraggableList> = {
-    title: 'Components / Dialog',
+    title: 'Components / DraggableList',
     component: DraggableList,
     parameters: {
         layout: 'centered',

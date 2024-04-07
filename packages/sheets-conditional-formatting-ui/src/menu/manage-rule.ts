@@ -17,11 +17,11 @@
 import { merge, Observable } from 'rxjs';
 import type { ComponentManager, IMenuSelectorItem } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
-import { IZenZoneService, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
+import { getMenuHiddenObservable, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
 import { SelectionManagerService, SetWorksheetActiveOperation } from '@univerjs/sheets';
 
 import { debounceTime } from 'rxjs/operators';
-import { ICommandService, IUniverInstanceService, LocaleService, Rectangle } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, LocaleService, Rectangle, UniverInstanceType } from '@univerjs/core';
 import { Conditions } from '@univerjs/icons';
 import { AddConditionalRuleMutation, ConditionalFormattingRuleModel, DeleteConditionalRuleMutation, MoveConditionalRuleMutation, SetConditionalRuleMutation } from '@univerjs/sheets-conditional-formatting';
 
@@ -36,7 +36,6 @@ export const FactoryManageConditionalFormattingRule = (componentManager: Compone
         const commandService = _accessor.get(ICommandService);
         const univerInstanceService = _accessor.get(IUniverInstanceService);
         const conditionalFormattingRuleModel = _accessor.get(ConditionalFormattingRuleModel);
-        const zenZoneService = _accessor.get(IZenZoneService);
 
         const commandList = [SetWorksheetActiveOperation.id, AddConditionalRuleMutation.id, SetConditionalRuleMutation.id, DeleteConditionalRuleMutation.id, MoveConditionalRuleMutation.id];
 
@@ -140,14 +139,6 @@ export const FactoryManageConditionalFormattingRule = (componentManager: Compone
             });
             subscriber.next(commonSelections);
         });
-        const hidden$ = new Observable((subscriber) => {
-            const disposable = zenZoneService.visible$.subscribe((v) => {
-                subscriber.next(v);
-            });
-            return () => {
-                disposable.unsubscribe();
-            };
-        });
 
         return {
             id: OpenConditionalFormattingOperator.id,
@@ -157,7 +148,7 @@ export const FactoryManageConditionalFormattingRule = (componentManager: Compone
             icon: key,
             tooltip: localeService.t('sheet.cf.title'),
             selections: selections$,
-            hidden$,
+            hidden$: getMenuHiddenObservable(_accessor, UniverInstanceType.SHEET),
         } as IMenuSelectorItem;
     };
 };

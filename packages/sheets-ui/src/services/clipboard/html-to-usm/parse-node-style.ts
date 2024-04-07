@@ -16,7 +16,6 @@
 
 import type { ITextStyle } from '@univerjs/core';
 import { BaselineOffset, BooleanNumber, ColorKit } from '@univerjs/core';
-import { pixelToPt } from '@univerjs/engine-render';
 
 export function extractNodeStyle(node: HTMLElement, predefinedStyles?: CSSStyleDeclaration): ITextStyle {
     const styles = predefinedStyles ?? node.style;

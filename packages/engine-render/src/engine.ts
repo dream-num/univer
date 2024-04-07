@@ -676,7 +676,7 @@ export class Engine extends ThinEngine<Scene> {
         // IE11 only supports captureEvent:boolean, not options:object, and it defaults to false.
         // Feature detection technique copied from: https://github.com/github/eventlistener-polyfill (MIT license)
         let passiveSupported = false;
-        const noop = () => { };
+        const noop = () => {};
 
         try {
             const options: object = {

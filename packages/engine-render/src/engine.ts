@@ -23,7 +23,7 @@ import { DeviceType, PointerInput } from './basics/i-events';
 import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from './basics/interfaces';
 import { PerformanceMonitor } from './basics/performance-monitor';
 import { getPointerPrefix, getSizeForDom, IsSafari, requestNewFrame } from './basics/tools';
-import { Canvas, type CanvasRenderMode } from './canvas';
+import { Canvas, CanvasRenderMode } from './canvas';
 import type { Scene } from './scene';
 import { ThinEngine } from './thin-engine';
 
@@ -50,7 +50,7 @@ export class Engine extends ThinEngine<Scene> {
 
     private _activeRenderLoops = new Array<() => void>();
 
-    private _renderFunction = () => {};
+    private _renderFunction = () => { };
 
     private _requestNewFrameHandler: number = -1;
 
@@ -105,7 +105,9 @@ export class Engine extends ThinEngine<Scene> {
         this._canvasEle = this._canvas.getCanvasEle();
         this._handleKeyboardAction();
         this._handlePointerAction();
-        this._matchMediaHandler();
+        if (mode !== CanvasRenderMode.Printing) {
+            this._matchMediaHandler();
+        }
     }
 
     override get width() {

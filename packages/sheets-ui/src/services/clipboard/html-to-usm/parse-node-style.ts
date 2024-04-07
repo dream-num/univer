@@ -72,11 +72,12 @@ export function extractNodeStyle(node: HTMLElement, predefinedStyles?: CSSStyleD
                 const fontSize = Number.parseInt(cssValue);
 
                 if (!Number.isNaN(fontSize)) {
-                    // TODO: @JOCS, hand other CSS value unit, rem, em, pt, %
+                    // TODO: @ybzky need other font size unit support
                     if (cssValue.endsWith('pt')) {
                         docStyles.fs = fontSize;
                     } else if (cssValue.endsWith('px')) {
-                        docStyles.fs = pixelToPt(fontSize);
+                        const transformedFontSize = fontSize * 0.75;
+                        docStyles.fs = transformedFontSize;
                     }
                 }
 

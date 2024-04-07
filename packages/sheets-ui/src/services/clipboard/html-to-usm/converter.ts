@@ -362,8 +362,6 @@ export class HtmlToUSMService {
 function parseTableRows(html: string): {
     rowProperties: IClipboardPropertyItem[];
     rowCount: number;
-    colCount: number;
-    cellMatrix: ObjectMatrix<IParsedCellValue> | null;
 } {
     const ROWS_REGEX = /<tr([\s\S]*?)>([\s\S]*?)<\/tr>/gi;
     const rowMatches = html.matchAll(ROWS_REGEX);
@@ -371,8 +369,6 @@ function parseTableRows(html: string): {
         return {
             rowProperties: [],
             rowCount: 0,
-            colCount: 0,
-            cellMatrix: null,
         };
     }
 
@@ -622,6 +618,19 @@ function parseTableByHtml(htmlElement: HTMLIFrameElement, skeleton?: Spreadsheet
                     cellStyle = match[1];
                 }
             }
+            if (rowSpan > 1 && colSpan > 1) {
+                // compatible google sheet
+                if (!cellStyle.includes('border-top') && !cellStyle.includes('border-left')) {
+                    const topStyle = extractStyleProperty(cellMatrix.getValue(rowIndex - 1, colIndex).style, 'border-bottom');
+                    const leftStyle = extractStyleProperty(cellMatrix.getValue(rowIndex, colIndex - 1).style, 'border-right');
+                    if (topStyle) {
+                        cellStyle += `border-top:${topStyle};`;
+                    }
+                    if (leftStyle) {
+                        cellStyle += `border-left:${leftStyle};`;
+                    }
+                }
+            }
 
             const isRichText = /<[^>]+>/.test(cell.innerHTML);
             if (isRichText && skeleton) {
@@ -649,16 +658,25 @@ function parseTableByHtml(htmlElement: HTMLIFrameElement, skeleton?: Spreadsheet
                 cellText = cell.innerHTML.replace(/[\r\n]/g, '');
             }
 
-            const cellValue = {
-                rowSpan,
-                colSpan,
-                content: cellText,
-                style: cellStyle,
-                richTextParma: {
-                    p: cellRichStyle,
-                    v: cellText,
-                },
-            };
+            const cellValue = (rowSpan > 1 || colSpan > 1)
+                ? {
+                    rowSpan,
+                    colSpan,
+                    content: cellText,
+                    style: cellStyle,
+                    richTextParma: {
+                        p: cellRichStyle,
+                        v: cellText,
+                    },
+                }
+                : {
+                    content: cellText,
+                    style: cellStyle,
+                    richTextParma: {
+                        p: cellRichStyle,
+                        v: cellText,
+                    },
+                };
 
             if (cellMatrix.getValue(rowIndex, colSetValueIndex)) {
                 colSetValueIndex += 1;
@@ -733,4 +751,13 @@ function parseCellHtml(parent: Nullable<ChildNode>, nodes: NodeListOf<ChildNode>
             parseCellHtml(node, childNodes, doc, styleCache);
         }
     }
+}
+function extractStyleProperty(styleString?: string, propertyName?: string) {
+    if (!styleString || !propertyName) return null;
+    const regex = new RegExp(`(${propertyName}\\s*:\\s*[^;]+);`, 'i');
+    const match = styleString.match(regex);
+    if (match) {
+        return match[1];
+    }
+    return null;
 }

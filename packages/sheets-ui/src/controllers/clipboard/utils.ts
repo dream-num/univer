@@ -424,7 +424,7 @@ export function getClearAndSetMergeMutations(
     const mergeRangeData: IRange[] = [];
 
     matrix.forValue((row, col, value) => {
-        if (value.rowSpan) {
+        if (value.rowSpan && value.rowSpan > 1) {
             const colSpan = value.colSpan || 1;
             const mergeRange = {
                 startRow: startRow + row,
@@ -434,7 +434,7 @@ export function getClearAndSetMergeMutations(
             };
             mergeRangeData.push(mergeRange);
             hasMerge = true;
-        } else if (value.colSpan) {
+        } else if (value.colSpan && value.colSpan > 1) {
             const rowSpan = value.rowSpan || 1;
             const mergeRange = {
                 startRow: startRow + row,

@@ -57,6 +57,7 @@
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",
         "build": "tsc && vite build"
+
     },
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
@@ -69,13 +70,13 @@
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "@wendellhu/redi": "0.13.0",
+        "clsx": ">=2.0.0",
         "react": "^16.9.0 || ^17.0.0 || ^18.0.0",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
         "@univerjs/icons": "^0.1.43",
-        "dayjs": "^1.11.10",
-        "react-draggable-list": "^4.2.0"
+        "dayjs": "^1.11.10"
     },
     "devDependencies": {
         "@univerjs/core": "workspace:*",
@@ -89,6 +90,7 @@
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "@wendellhu/redi": "^0.13.0",
+        "clsx": "^2.1.0",
         "less": "^4.2.0",
         "react": "^18.2.0",
         "rxjs": "^7.8.1",

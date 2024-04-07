@@ -16,14 +16,14 @@
 
 import { RangeSelector, useEvent } from '@univerjs/ui';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { FormLayout, Input, Radio, RadioGroup, Select } from '@univerjs/design';
+import { DraggableList, FormLayout, Input, Radio, RadioGroup, Select } from '@univerjs/design';
 import { deserializeRangeWithSheet, isReferenceString, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import type { IRange } from '@univerjs/core';
 import { IUniverInstanceService, LocaleService, Tools } from '@univerjs/core';
 import type { IFormulaInputProps } from '@univerjs/data-validation';
 import { DeleteSingle, IncreaseSingle, SequenceSingle } from '@univerjs/icons';
-import DraggableList from 'react-draggable-list';
+import cs from 'clsx';
 import { deserializeListOptions, getSheetRangeValueSet, serializeListOptions } from '../../validators/util';
 import { DROP_DOWN_DEFAULT_COLOR } from '../../common/const';
 import styles from './index.module.less';
@@ -108,25 +108,15 @@ const ColorSelect = (props: IColorSelectProps) => {
     );
 };
 
-const Template = (props: { item: IDropdownItem; dragHandleProps: any; commonProps: any }) => {
-    const { item, dragHandleProps, commonProps } = props;
-    const { onMouseDown, onTouchStart } = dragHandleProps;
+const Template = (props: { item: IDropdownItem; commonProps: any; style?: React.CSSProperties }) => {
+    const { item, commonProps, style } = props;
     const { onItemChange, onItemDelete } = commonProps;
 
     return (
-        <div className={styles.dataValidationFormulaListItem}>
+        <div className={styles.dataValidationFormulaListItem} style={style}>
             {!item.isRef
                 ? (
-                    <div
-                        className={styles.dataValidationFormulaListItemDrag}
-                        onTouchStart={(e) => {
-                            e.preventDefault();
-                            onTouchStart(e);
-                        }}
-                        onMouseDown={(e) => {
-                            onMouseDown(e);
-                        }}
-                    >
+                    <div className={cs(styles.dataValidationFormulaListItemDrag, 'draggableHandle')}>
                         <SequenceSingle />
                     </div>
                 )
@@ -136,6 +126,7 @@ const Template = (props: { item: IDropdownItem; dragHandleProps: any; commonProp
                 onChange={(color) => {
                     onItemChange(item.id, item.label, color);
                 }}
+
             />
             <Input
                 disabled={item.isRef}
@@ -276,76 +267,73 @@ export function ListFormulaInput(props: IFormulaInputProps) {
                     <Radio value="1">{localeService.t('dataValidation.list.refOptions')}</Radio>
                 </RadioGroup>
             </FormLayout>
-            {isRefRange === '1' ? (
-                <>
-                    <FormLayout error={formula1Res}>
-                        <RangeSelector
-                            id={`list-ref-range-${unitId}-${subUnitId}`}
-                            value={refRange}
-                            openForSheetUnitId={unitId}
-                            openForSheetSubUnitId={subUnitId}
-                            onChange={(ranges) => {
-                                const range = ranges[0];
-                                if (!range || isRangeInValid(range.range)) {
-                                    onChange?.({
-                                        formula1: '',
-                                        formula2,
-                                    });
-                                    setRefRange('');
-                                } else {
-                                    const workbook = univerInstanceService.getUniverSheetInstance(range.unitId) ?? univerInstanceService.getCurrentUniverSheetInstance();
-                                    const worksheet = workbook?.getSheetBySheetId(range.sheetId) ?? workbook.getActiveSheet();
-                                    const rangeStr = serializeRangeWithSheet(worksheet.getName(), range.range);
-                                    onChange?.({
-                                        formula1: rangeStr,
-                                        formula2,
-                                    });
-                                    setRefRange(rangeStr);
-                                }
-                            }}
-                            isSingleChoice
-                        />
-                    </FormLayout>
-                    <FormLayout>
-                        <div ref={containerRef}>
-                            <DraggableList
-                                itemKey="id"
-                            // @ts-ignore
-                                template={Template}
-                                list={refFinalList}
-                                container={() => containerRef.current}
-                                commonProps={{
-                                    onItemChange: handleRefItemChange,
+            {isRefRange === '1'
+                ? (
+                    <>
+                        <FormLayout error={formula1Res}>
+                            <RangeSelector
+                                id={`list-ref-range-${unitId}-${subUnitId}`}
+                                value={refRange}
+                                openForSheetUnitId={unitId}
+                                openForSheetSubUnitId={subUnitId}
+                                onChange={(ranges) => {
+                                    const range = ranges[0];
+                                    if (!range || isRangeInValid(range.range)) {
+                                        onChange?.({
+                                            formula1: '',
+                                            formula2,
+                                        });
+                                        setRefRange('');
+                                    } else {
+                                        const workbook = univerInstanceService.getUniverSheetInstance(range.unitId) ?? univerInstanceService.getCurrentUniverSheetInstance();
+                                        const worksheet = workbook?.getSheetBySheetId(range.sheetId) ?? workbook.getActiveSheet();
+                                        const rangeStr = serializeRangeWithSheet(worksheet.getName(), range.range);
+                                        onChange?.({
+                                            formula1: rangeStr,
+                                            formula2,
+                                        });
+                                        setRefRange(rangeStr);
+                                    }
                                 }}
+                                isSingleChoice
                             />
+                        </FormLayout>
+                        <FormLayout>
+                            <div ref={containerRef}>
+                                {refFinalList.map((item) => {
+                                    return <Template key={item.id} item={item} commonProps={{ onItemChange: handleRefItemChange }} style={{ marginBottom: 12 }} />;
+                                })}
+                            </div>
+                        </FormLayout>
+                    </>
+                )
+                : (
+                    <FormLayout error={formula1Res}>
+                        <div ref={containerRef} style={{ margin: '-12px 0' }}>
+                            <DraggableList
+                                list={strList}
+                                onListChange={setStrList}
+                                rowHeight={32}
+                                margin={[0, 12]}
+                                itemRender={(item) => (
+                                    <Template
+                                        key={item.id}
+                                        item={item}
+                                        commonProps={{
+                                            onItemChange: handleStrItemChange,
+                                            onItemDelete: handleStrItemDelete,
+                                        }}
+                                    />
+                                )}
+                                idKey="id"
+                            />
+                            <a className={styles.dataValidationFormulaListAdd} onClick={handleAdd}>
+                                <IncreaseSingle />
+                                {localeService.t('dataValidation.list.add')}
+                            </a>
                         </div>
                     </FormLayout>
-                </>
-            ) : (
-                <FormLayout error={formula1Res}>
-                    <div ref={containerRef}>
-                        <DraggableList
-                            itemKey="id"
-                            // @ts-ignore
-                            template={Template}
-                            list={strList}
-                            onMoveEnd={(newList) => {
-                                // @ts-ignore
-                                setStrList(newList);
-                            }}
-                            container={() => containerRef.current}
-                            commonProps={{
-                                onItemChange: handleStrItemChange,
-                                onItemDelete: handleStrItemDelete,
-                            }}
-                        />
-                        <a className={styles.dataValidationFormulaListAdd} onClick={handleAdd}>
-                            <IncreaseSingle />
-                            {localeService.t('dataValidation.list.add')}
-                        </a>
-                    </div>
-                </FormLayout>
-            )}
+                )}
         </>
     );
 }

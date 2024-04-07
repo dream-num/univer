@@ -116,6 +116,11 @@ export enum FunctionType {
      * User-defined functions
      */
     User,
+
+     /**
+      * Defined name
+      */
+    DefinedName,
 }
 
 export interface IFunctionParam {

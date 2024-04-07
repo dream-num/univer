@@ -11,15 +11,9 @@
 
     .name-ranges {
         box-sizing: border-box;
-        width: 80px;
+        width: 100px;
         height: 100%;
         position: relative;
-        flex-shrink: 0;
-
-        &-input {
-            height: 100%;
-            border-right: 1px solid rgb(var(--border-color));
-        }
     }
 
     .formula-bar {
@@ -34,7 +28,7 @@
                 position: relative;
 
                 display: flex;
-                gap: var(--margin-xs);
+                // gap: var(--margin-xs);
                 align-items: center;
                 justify-content: center;
 
@@ -47,23 +41,40 @@
                 border-right: 1px solid rgb(var(--border-color));
 
                 .icon-container {
-                    cursor: pointer;
-
                     display: flex;
                     align-items: center;
                     justify-content: center;
 
+                    padding: var(--padding-xs);
+
                     font-size: var(--font-size-lg);
+
+                    border-radius: var(--border-radius-base);
 
                     &-success {
                         &.formula-active {
+                            cursor: pointer;
                             color: rgb(var(--success-color));
+                            &:hover {
+                                background-color: rgb(var(--grey-50));
+                            }
                         }
                     }
 
                     &-error {
                         &.formula-active {
+                            cursor: pointer;
                             color: rgb(var(--error-color));
+                            &:hover {
+                                background-color: rgb(var(--grey-50));
+                            }
+                        }
+                    }
+
+                    &-fx {
+                        cursor: pointer;
+                        &:hover {
+                            background-color: rgb(var(--grey-50));
                         }
                     }
                 }

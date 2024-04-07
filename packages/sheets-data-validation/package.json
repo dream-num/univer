@@ -1,11 +1,25 @@
 {
     "name": "@univerjs/sheets-data-validation",
-    "version": "0.1.5",
+    "version": "0.1.6",
     "private": false,
-    "description": "",
-    "author": "univer.ai",
-    "license": "",
-    "keywords": [],
+    "description": "Data validation for Univer Sheets",
+    "author": "DreamNum <developer@univer.ai>",
+    "license": "Apache-2.0",
+    "funding": {
+        "type": "opencollective",
+        "url": "https://opencollective.com/univer"
+    },
+    "homepage": "https://univer.ai",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/dream-num/univer"
+    },
+    "bugs": {
+        "url": "https://github.com/dream-num/univer/issues"
+    },
+    "keywords": [
+        "univer"
+    ],
     "exports": {
         ".": "./src/index.ts",
         "./*": "./src/*"
@@ -55,7 +69,7 @@
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "@wendellhu/redi": "0.13.0",
-        "react": ">=16.9.0",
+        "react": "^16.9.0 || ^17.0.0 || ^18.0.0",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {

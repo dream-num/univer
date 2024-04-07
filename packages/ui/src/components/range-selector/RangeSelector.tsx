@@ -38,8 +38,8 @@ export interface IRangeSelectorProps {
     isReadonly?: boolean; // Set the selector to read-only state.
     openForSheetUnitId?: Nullable<string>; //  Configuring which workbook the selector defaults to opening in determines whether the ref includes a [unitId] prefix.
     openForSheetSubUnitId?: Nullable<string>; // Configuring the default worksheet where the selector opens determines whether the ref includes a [unitId]sheet1 prefix.
-    width?: number; // The width of the selector.
-    size?: 'small' | 'middle' | 'large'; // The size of the selector.
+    width?: number | string; // The width of the selector.
+    size?: 'mini' | 'small' | 'middle' | 'large'; // The size of the selector.
     placeholder?: string; // Placeholder text.
     className?: string;
 }
@@ -254,6 +254,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
         setRangeValue(value || '');
 
         if (value === '') {
+            onChange && onChange([]);
             return;
         }
 
@@ -279,7 +280,9 @@ export function RangeSelector(props: IRangeSelectorProps) {
     }
 
     let height = 32;
-    if (size === 'small') {
+    if (size === 'mini') {
+        height = 24;
+    } else if (size === 'small') {
         height = 28;
     } else if (size === 'large') {
         height = 36;

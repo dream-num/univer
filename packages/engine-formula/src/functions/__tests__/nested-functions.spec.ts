@@ -276,6 +276,7 @@ describe('Test nested functions', () => {
             numfmtItemMap: {},
             dirtyRanges: [],
             dirtyNameMap: {},
+            dirtyDefinedNameMap: {},
             dirtyUnitFeatureMap: {},
             dirtyUnitOtherFormulaMap: {},
             excludedCell: {},

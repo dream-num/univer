@@ -41,12 +41,12 @@ exports.autoExternalizeDependency = function autoExternalizeDependency() {
         react: {
             global: 'React',
             name: 'react',
-            version: '>=16.9.0',
+            version: '^16.9.0 || ^17.0.0 || ^18.0.0',
         },
         'react-dom': {
             global: 'ReactDOM',
             name: 'react-dom',
-            version: '>=16.9.0',
+            version: '^16.9.0 || ^17.0.0 || ^18.0.0',
         },
         rxjs: {
             global: 'rxjs',

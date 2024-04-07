@@ -552,9 +552,17 @@ export class PromptController extends Disposable {
 
                     lastSequenceNodes[nodeIndex] = newNode;
 
-                    lastSequenceNodes.splice(nodeIndex + 1, 0, matchToken.OPEN_BRACKET);
+                    const isDefinedName = this._descriptionService.hasDefinedNameDescription(formulaString);
+
+                    const isFormulaDefinedName = this._descriptionService.isFormulaDefinedName(formulaString);
 
                     const formulaStringCount = formulaString.length + 1;
+
+                    const mustAddBracket = !isDefinedName || isFormulaDefinedName;
+
+                    if (mustAddBracket) {
+                        lastSequenceNodes.splice(nodeIndex + 1, 0, matchToken.OPEN_BRACKET);
+                    }
 
                     for (let i = nodeIndex + 2, len = lastSequenceNodes.length; i < len; i++) {
                         const node = lastSequenceNodes[i];
@@ -573,7 +581,12 @@ export class PromptController extends Disposable {
                         lastSequenceNodes[i] = newNode;
                     }
 
-                    this._syncToEditor(lastSequenceNodes, newNode.endIndex + 2);
+                    let selectionIndex = newNode.endIndex + 1;
+                    if (mustAddBracket) {
+                        selectionIndex += 1;
+                    }
+
+                    this._syncToEditor(lastSequenceNodes, selectionIndex);
                 })
             )
         );
@@ -596,7 +609,7 @@ export class PromptController extends Disposable {
             return;
         }
 
-        if (typeof currentSequenceNode !== 'string' && currentSequenceNode.nodeType === sequenceNodeType.FUNCTION) {
+        if (typeof currentSequenceNode !== 'string' && currentSequenceNode.nodeType === sequenceNodeType.FUNCTION && !this._descriptionService.hasDefinedNameDescription(currentSequenceNode.token.trim())) {
             const token = currentSequenceNode.token.toUpperCase();
 
             if (this._inputPanelState === InputPanelState.keyNormal) {
@@ -611,7 +624,7 @@ export class PromptController extends Disposable {
                     searchText: token,
                     searchList,
                 });
-            } else if (this._descriptionService.hasFunction(token)) {
+            } else {
                 // show help function panel
                 this._changeHelpFunctionPanelState(token, -1);
             }
@@ -911,7 +924,7 @@ export class PromptController extends Disposable {
 
         for (let i = 0, len = sequenceNodes.length; i < len; i++) {
             const node = sequenceNodes[i];
-            if (typeof node === 'string') {
+            if (typeof node === 'string' || this._descriptionService.hasDefinedNameDescription(node.token.trim())) {
                 continue;
             }
 

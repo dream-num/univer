@@ -160,6 +160,7 @@ describe('Test subtotal', () => {
             numfmtItemMap: {},
             dirtyRanges: [],
             dirtyNameMap: {},
+            dirtyDefinedNameMap: {},
             dirtyUnitFeatureMap: {},
             excludedCell: {},
             allUnitData: {

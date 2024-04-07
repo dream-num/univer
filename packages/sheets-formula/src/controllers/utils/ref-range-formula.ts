@@ -131,46 +131,48 @@ export function getFormulaReferenceSheet(oldFormulaData: IFormulaData,
     };
 }
 
-export function getFormulaReferenceMoveRemoveSheet(oldFormulaData: IFormulaData,
-    newFormulaData: IFormulaData,
-    formulaReferenceMoveParam: IFormulaReferenceMoveParam) {
-
-}
-
 export function getFormulaReferenceRange(oldFormulaData: IFormulaData,
     newFormulaData: IFormulaData,
     formulaReferenceMoveParam: IFormulaReferenceMoveParam) {
-    const { type, sheetId: subUnitId, unitId, range, from, to } = formulaReferenceMoveParam;
+    const { sheetId: subUnitId, unitId } = formulaReferenceMoveParam;
     const { redoFormulaData, undoFormulaData } = refRangeFormula(oldFormulaData, newFormulaData, formulaReferenceMoveParam);
 
-    // console.info('redoFormulaData==', redoFormulaData);
-    // console.info('undoFormulaData==', undoFormulaData);
+    const redos: IMutationInfo[] = [];
+    const undos: IMutationInfo[] = [];
 
-    const redoSetRangeValuesMutationParams: ISetRangeValuesMutationParams = {
-        subUnitId,
-        unitId,
-        cellValue: redoFormulaData,
-    };
+    if (Object.keys(redoFormulaData).length !== 0) {
+        const redoSetRangeValuesMutationParams: ISetRangeValuesMutationParams = {
+            subUnitId,
+            unitId,
+            cellValue: redoFormulaData,
+        };
 
-    const redoMutation = {
-        id: SetRangeValuesMutation.id,
-        params: redoSetRangeValuesMutationParams,
-    };
+        const redoMutation = {
+            id: SetRangeValuesMutation.id,
+            params: redoSetRangeValuesMutationParams,
+        };
 
-    const undoSetRangeValuesMutationParams: ISetRangeValuesMutationParams = {
-        subUnitId,
-        unitId,
-        cellValue: undoFormulaData,
-    };
+        redos.push(redoMutation);
+    }
 
-    const undoMutation = {
-        id: SetRangeValuesMutation.id,
-        params: undoSetRangeValuesMutationParams,
-    };
+    if (Object.keys(undoFormulaData).length !== 0) {
+        const undoSetRangeValuesMutationParams: ISetRangeValuesMutationParams = {
+            subUnitId,
+            unitId,
+            cellValue: undoFormulaData,
+        };
+
+        const undoMutation = {
+            id: SetRangeValuesMutation.id,
+            params: undoSetRangeValuesMutationParams,
+        };
+
+        undos.push(undoMutation);
+    }
 
     return {
-        undos: [undoMutation],
-        redos: [redoMutation],
+        undos,
+        redos,
     };
 }
 

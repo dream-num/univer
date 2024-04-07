@@ -366,7 +366,6 @@ export class UpdateFormulaController extends Disposable {
         if (result) {
             const { unitSheetNameMap } = this._formulaDataModel.getCalculateData();
             const oldFormulaData = this._formulaDataModel.getFormulaData();
-            // const oldNumfmtItemMap = this._formulaDataModel.getNumfmtItemMap();
 
             // change formula reference
             const { newFormulaData } = this._getFormulaReferenceMoveInfo(

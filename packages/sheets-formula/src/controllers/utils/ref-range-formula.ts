@@ -524,11 +524,6 @@ export function formulaDataItemToCellData(formulaDataItem: IFormulaDataItem): IC
     return cellData;
 }
 
-// export function handleSetNameFormula(oldFormulaData: IFormulaData,
-//     newFormulaData: IFormulaData {
-
-//     }
-
 export function isFormulaDataItem(cell: IFormulaDataItem) {
     const formulaString = cell?.f || '';
     const formulaId = cell?.si || '';

@@ -17,7 +17,7 @@
 import { describe, expect, it } from 'vitest';
 
 import type { IFormulaDataItem } from '@univerjs/engine-formula';
-import { formulaDataItemToCellData } from '../ref-range-formula';
+import { formulaDataItemToCellData, isFormulaDataItem } from '../ref-range-formula';
 
 describe('Ref range formula test', () => {
     describe('Util function', () => {
@@ -92,6 +92,13 @@ describe('Ref range formula test', () => {
             result = formulaDataItemToCellData(formulaDataItem);
 
             expect(result).toBeNull();
+        });
+
+        it('isFormulaDataItem', () => {
+            expect(isFormulaDataItem({ f: '=SUM(1)' })).toBeTruthy();
+            expect(isFormulaDataItem({ f: '' })).toBeFalsy();
+            expect(isFormulaDataItem({ f: '', si: 'id1' })).toBeTruthy();
+            expect(isFormulaDataItem({ f: '', si: undefined })).toBeFalsy();
         });
     });
 });

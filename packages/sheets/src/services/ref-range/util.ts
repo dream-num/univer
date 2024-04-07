@@ -325,11 +325,6 @@ const handleMoveRangeOther = (param: IMoveRangeCommand, targetRange: IRange) => 
         return targetRange;
     }
 
-    // delete
-    if (Rectangle.contains(toRange, targetRange)) {
-        return null;
-    }
-
     if (Rectangle.contains(fromRange, targetRange)) {
         const relativeRange = Rectangle.getRelativeRange(targetRange, fromRange);
         const positionRange = Rectangle.getPositionRange(relativeRange, toRange);

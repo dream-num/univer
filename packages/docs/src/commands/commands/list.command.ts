@@ -20,13 +20,14 @@ import {
     ICommandService,
     IUniverInstanceService,
     MemoryCursor,
+    PRESET_LIST_TYPE,
     PresetListType,
     TextX,
     TextXActionType,
     Tools,
     UpdateDocsAttributeType,
 } from '@univerjs/core';
-import type { IActiveTextRange } from '@univerjs/engine-render';
+import { getCharSpaceApply, getNumberUnitValue, type IActiveTextRange } from '@univerjs/engine-render';
 
 import { serializeTextRange, TextSelectionManagerService } from '../../services/text-selection-manager.service';
 import type { IRichTextEditingMutationParams } from '../mutations/core-editing.mutation';
@@ -65,7 +66,7 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
 
         const unitId = dataModel.getUnitId();
 
-        const isAlreadyOrdered = currentParagraphs.every((paragraph) => paragraph.bullet?.listType === listType);
+        const isAlreadyList = currentParagraphs.every((paragraph) => paragraph.bullet?.listType === listType);
 
         const ID_LENGTH = 6;
 
@@ -98,8 +99,21 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
 
         const textX = new TextX();
 
+        const customLists = dataModel.getSnapshot().lists ?? {};
+
+        const lists = {
+            ...PRESET_LIST_TYPE,
+            ...customLists,
+        };
+
+        const { charSpace, defaultTabStop = 36, gridType } = dataModel.getSnapshot().documentStyle;
+
         for (const paragraph of currentParagraphs) {
-            const { startIndex } = paragraph;
+            const { startIndex, paragraphStyle = {} } = paragraph;
+            const { indentFirstLine = 0, snapToGrid, indentStart = 0 } = paragraphStyle;
+            const { hanging: listHanging, indentStart: listIndentStart } = lists[listType].nestingLevel[0];
+
+            const charSpaceApply = getCharSpaceApply(charSpace, defaultTabStop, gridType, snapToGrid);
 
             textX.push({
                 t: TextXActionType.RETAIN,
@@ -107,27 +121,29 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
                 segmentId,
             });
 
-            // See: univer/packages/engine-render/src/components/docs/block/paragraph/layout-ruler.ts line:802 comments.
-            const paragraphStyle = {
-                ...paragraph.paragraphStyle,
-                hanging: undefined,
-                indentStart: undefined,
-            };
-
             textX.push({
                 t: TextXActionType.RETAIN,
                 len: 1,
                 body: {
                     dataStream: '',
                     paragraphs: [
-                        isAlreadyOrdered
+                        isAlreadyList
                             ? {
-                                paragraphStyle,
+                                paragraphStyle: {
+                                    ...paragraphStyle,
+                                    hanging: undefined,
+                                    indentStart: indentStart ? Math.max(0, getNumberUnitValue(indentStart, charSpaceApply) + listHanging - listIndentStart) : undefined,
+                                },
                                 startIndex: 0,
                             }
                             : {
-                                ...paragraph,
                                 startIndex: 0,
+                                paragraphStyle: {
+                                    ...paragraphStyle,
+                                    indentFirstLine: undefined,
+                                    hanging: listHanging,
+                                    indentStart: listIndentStart - listHanging + getNumberUnitValue(indentFirstLine, charSpaceApply) + getNumberUnitValue(indentStart, charSpaceApply),
+                                },
                                 bullet: {
                                     ...(paragraph.bullet ?? {
                                         nestingLevel: 0,

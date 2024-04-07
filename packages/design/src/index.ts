@@ -47,3 +47,4 @@ export { type ITreeNodeProps, type ITreeProps, Tree, TreeSelectionMode } from '.
 export { enUS, zhCN } from './locale';
 export { type ILocale } from './locale/interface';
 export { defaultTheme, greenTheme, themeInstance } from './themes';
+export { DraggableList, type IDraggableListProps } from './components/draggable-list';

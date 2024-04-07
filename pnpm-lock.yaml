@@ -432,6 +432,9 @@ importers:
       react-draggable:
         specifier: ^4.4.6
         version: 4.4.6(react-dom@18.2.0)(react@18.2.0)
+      react-grid-layout:
+        specifier: ^1.4.4
+        version: 1.4.4(react-dom@18.2.0)(react@18.2.0)
       react-transition-group:
         specifier: ^4.4.5
         version: 4.4.5(react-dom@18.2.0)(react@18.2.0)
@@ -445,6 +448,9 @@ importers:
       '@types/react-dom':
         specifier: ^18.2.23
         version: 18.2.23
+      '@types/react-grid-layout':
+        specifier: ^1.3.5
+        version: 1.3.5
       '@types/react-transition-group':
         specifier: ^4.4.10
         version: 4.4.10
@@ -949,9 +955,6 @@ importers:
       dayjs:
         specifier: ^1.11.10
         version: 1.11.10
-      react-draggable-list:
-        specifier: ^4.2.0
-        version: 4.2.0(react@18.2.0)
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -986,6 +989,9 @@ importers:
       '@wendellhu/redi':
         specifier: ^0.13.0
         version: 0.13.0
+      clsx:
+        specifier: ^2.1.0
+        version: 2.1.0
       less:
         specifier: ^4.2.0
         version: 4.2.0
@@ -12589,20 +12595,6 @@ packages:
       react: 18.2.0
       scheduler: 0.23.0
 
-  /react-draggable-list@4.2.0(react@18.2.0):
-    resolution: {integrity: sha512-3UG1cVNWdQHsqcqtuLRAtkkOkvB8seF8cY/IZQJbcyqT1Fbv7Hk8KwatAg6Ud1dWGbvrDuT9M+fkCyD3P+WHlw==}
-    peerDependencies:
-      react: ^16.6.0 || ^17.0.0
-    dependencies:
-      '@babel/runtime': 7.24.1
-      '@types/prop-types': 15.7.12
-      immutability-helper: r2.cnpmjs.org/immutability-helper@3.1.1
-      prop-types: 15.8.1
-      react: 18.2.0
-      react-motion: r2.cnpmjs.org/react-motion@0.5.2(react@18.2.0)
-      react-multi-ref: 1.0.1
-    dev: false
-
   /react-draggable@4.4.6(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-LtY5Xw1zTPqHkVmtM3X8MUOxNDOUhv/khTgBgrUvwaS064bwVvxT+q5El0uUFNx5IEPKXuRejr7UqLwBIg5pdw==}
     peerDependencies:
@@ -12650,7 +12642,7 @@ packages:
       react-dom: 18.2.0(react@18.2.0)
       react-draggable: 4.4.6(react-dom@18.2.0)(react@18.2.0)
       react-resizable: 3.0.5(react-dom@18.2.0)(react@18.2.0)
-      resize-observer-polyfill: 1.5.1
+      resize-observer-polyfill: r2.cnpmjs.org/resize-observer-polyfill@1.5.1
     dev: false
 
   /react-is@16.13.1:
@@ -12687,12 +12679,6 @@ packages:
       - '@types/react'
       - dnd-core
       - react-dom
-    dev: false
-
-  /react-multi-ref@1.0.1:
-    resolution: {integrity: sha512-zgQKmduv95vtXIkze6583pRW7Y+mNj7R0bYgxIRWOrsEfxBQaK+MZ6yjTiZ/qcFV4bYGM74nE9isb+YRBNIw2g==}
-    dependencies:
-      '@babel/runtime': 7.24.1
     dev: false
 
   /react-refresh@0.14.0:
@@ -15417,12 +15403,6 @@ packages:
     requiresBuild: true
     optional: true
 
-  r2.cnpmjs.org/immutability-helper@3.1.1:
-    resolution: {integrity: sha512-Q0QaXjPjwIju/28TsugCHNEASwoCcJSyJV3uO1sOIQGI0jKgm9f41Lvz0DZj3n46cNCyAZTsEYoY4C2bVRUzyQ==, registry: http://registry.npmjs.org/, tarball: https://r2.cnpmjs.org/immutability-helper/-/immutability-helper-3.1.1.tgz}
-    name: immutability-helper
-    version: 3.1.1
-    dev: false
-
   r2.cnpmjs.org/import-lazy@4.0.0:
     resolution: {integrity: sha512-rKtvo6a868b5Hu3heneU+L4yEQ4jYKLtjpnPeUdK7h0yzXGmyBTypknlkCvHFBqfX9YlorEiMM6Dnq/5atfHkw==, registry: http://registry.npmjs.org/, tarball: https://r2.cnpmjs.org/import-lazy/-/import-lazy-4.0.0.tgz}
     name: import-lazy
@@ -15490,7 +15470,7 @@ packages:
     version: 4.17.21
 
   r2.cnpmjs.org/loose-envify@1.4.0:
-    resolution: {integrity: sha512-lyuxPGr/Wfhrlem2CL/UcnUc1zcqKAImBDzukY7Y5F/yQiNdko6+fRLevlw1HgMySw7f611UIY408EtxRSoK3Q==, registry: http://registry.npmjs.org/, tarball: https://r2.cnpmjs.org/loose-envify/-/loose-envify-1.4.0.tgz}
+    resolution: {integrity: sha512-lyuxPGr/Wfhrlem2CL/UcnUc1zcqKAImBDzukY7Y5F/yQiNdko6+fRLevlw1HgMySw7f611UIY408EtxRSoK3Q==, tarball: https://r2.cnpmjs.org/loose-envify/-/loose-envify-1.4.0.tgz}
     name: loose-envify
     version: 1.4.0
     hasBin: true
@@ -15524,7 +15504,7 @@ packages:
       semver: 6.3.1
 
   r2.cnpmjs.org/mime@1.6.0:
-    resolution: {integrity: sha512-x0Vn8spI+wuJ1O6S7gnbaQg8Pxh4NNHb7KSINmEWKiPE4RKOplvijn+NkmYmmRgP68mc70j2EbeTFRsrswaQeg==, registry: http://registry.npmjs.org/, tarball: https://r2.cnpmjs.org/mime/-/mime-1.6.0.tgz}
+    resolution: {integrity: sha512-x0Vn8spI+wuJ1O6S7gnbaQg8Pxh4NNHb7KSINmEWKiPE4RKOplvijn+NkmYmmRgP68mc70j2EbeTFRsrswaQeg==, tarball: https://r2.cnpmjs.org/mime/-/mime-1.6.0.tgz}
     name: mime
     version: 1.6.0
     engines: {node: '>=4'}
@@ -15550,18 +15530,6 @@ packages:
     version: 1.0.7
     dev: false
 
-  r2.cnpmjs.org/performance-now@0.2.0:
-    resolution: {integrity: sha512-YHk5ez1hmMR5LOkb9iJkLKqoBlL7WD5M8ljC75ZfzXriuBIVNuecaXuU7e+hOwyqf24Wxhh7Vxgt7Hnw9288Tg==, registry: http://registry.npmjs.org/, tarball: https://r2.cnpmjs.org/performance-now/-/performance-now-0.2.0.tgz}
-    name: performance-now
-    version: 0.2.0
-    dev: false
-
-  r2.cnpmjs.org/performance-now@2.1.0:
-    resolution: {integrity: sha512-7EAHlyLHI56VEIdK57uwHdHKIaAGbnXPiw0yWbarQZOKaKpvUIgW0jWRVLiatnM+XXlSwsanIBH/hzGMJulMow==, registry: http://registry.npmjs.org/, tarball: https://r2.cnpmjs.org/performance-now/-/performance-now-2.1.0.tgz}
-    name: performance-now
-    version: 2.1.0
-    dev: false
-
   r2.cnpmjs.org/picocolors@1.0.0:
     resolution: {integrity: sha512-1fygroTLlHu66zi26VoTDv8yRgm0Fccecssto+MhsZ0D/DGW2sm8E8AjW7NU5VVTRt5GxbeZ5qBuJr+HyLYkjQ==, registry: http://registry.npmjs.org/, tarball: https://r2.cnpmjs.org/picocolors/-/picocolors-1.0.0.tgz}
     name: picocolors
@@ -15581,26 +15549,10 @@ packages:
     requiresBuild: true
     optional: true
 
-  r2.cnpmjs.org/raf@3.4.1:
-    resolution: {integrity: sha512-Sq4CW4QhwOHE8ucn6J34MqtZCeWFP2aQSmrlroYgqAV1PjStIhJXxYuTgUIfkEk7zTLjmIjLmU5q+fbD1NnOJA==, registry: http://registry.npmjs.org/, tarball: https://r2.cnpmjs.org/raf/-/raf-3.4.1.tgz}
-    name: raf
-    version: 3.4.1
-    dependencies:
-      performance-now: r2.cnpmjs.org/performance-now@2.1.0
-    dev: false
-
-  r2.cnpmjs.org/react-motion@0.5.2(react@18.2.0):
-    resolution: {integrity: sha512-9q3YAvHoUiWlP3cK0v+w1N5Z23HXMj4IF4YuvjvWegWqNPfLXsOBE/V7UvQGpXxHFKRQQcNcVQE31g9SB/6qgQ==, registry: http://registry.npmjs.org/, tarball: https://r2.cnpmjs.org/react-motion/-/react-motion-0.5.2.tgz}
-    id: r2.cnpmjs.org/react-motion/0.5.2
-    name: react-motion
-    version: 0.5.2
-    peerDependencies:
-      react: ^0.14.9 || ^15.3.0 || ^16.0.0
-    dependencies:
-      performance-now: r2.cnpmjs.org/performance-now@0.2.0
-      prop-types: 15.8.1
-      raf: r2.cnpmjs.org/raf@3.4.1
-      react: 18.2.0
+  r2.cnpmjs.org/resize-observer-polyfill@1.5.1:
+    resolution: {integrity: sha512-LwZrotdHOo12nQuZlHEmtuXdqGoOD0OhaxopaNFxWzInpEgaLWoVuAMbTzixuosCx2nEG58ngzW3vxdWoxIgdg==, tarball: https://r2.cnpmjs.org/resize-observer-polyfill/-/resize-observer-polyfill-1.5.1.tgz}
+    name: resize-observer-polyfill
+    version: 1.5.1
     dev: false
 
   r2.cnpmjs.org/resolve@1.19.0:

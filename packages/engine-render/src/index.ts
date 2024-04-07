@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import './types/index';
+
 export * from './base-object';
 export * from './basics';
 export * from './canvas';

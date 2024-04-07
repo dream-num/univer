@@ -871,14 +871,11 @@ importers:
         specifier: ^4.3.2
         version: 4.3.2
       react-dom:
-        specifier: '>=16.9.0'
+        specifier: ^16.9.0 || ^17.0.0 || ^18.0.0
         version: 18.2.0(react@18.2.0)
       react-grid-layout:
         specifier: ^1.4.4
         version: 1.4.4(react-dom@18.2.0)(react@18.2.0)
-      react-resizable:
-        specifier: ^3.0.5
-        version: 3.0.5(react-dom@18.2.0)(react@18.2.0)
     devDependencies:
       '@types/lodash.get':
         specifier: ^4.4.9
@@ -1434,7 +1431,7 @@ importers:
   packages/uniscript:
     dependencies:
       react:
-        specifier: '>=16.9.0'
+        specifier: ^16.9.0 || ^17.0.0 || ^18.0.0
         version: 18.2.0
     devDependencies:
       '@types/react':

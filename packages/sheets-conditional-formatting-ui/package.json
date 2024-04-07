@@ -85,8 +85,7 @@
         "@univerjs/sheets-conditional-formatting": "workspace:*",
         "lodash.get": "^4.4.2",
         "lodash.set": "^4.3.2",
-        "react-grid-layout": "^1.4.4",
-        "react-resizable": "^3.0.5"
+        "react-grid-layout": "^1.4.4"
     },
     "devDependencies": {
         "@types/lodash.get": "^4.4.9",

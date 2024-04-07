@@ -31,7 +31,6 @@ import { DeleteCfCommand } from '../../../commands/commands/delete-cf.command';
 import type { IMoveCfCommand } from '../../../commands/commands/move-cf.command';
 import { moveCfCommand } from '../../../commands/commands/move-cf.command';
 import 'react-grid-layout/css/styles.css';
-import 'react-resizable/css/styles.css';
 import { Preview } from '../../preview';
 import { ConditionalFormattingI18nController } from '../../../controllers/cf.i18n.controller';
 import { ClearWorksheetCfCommand } from '../../../commands/commands/clear-worksheet-cf.command';

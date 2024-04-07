@@ -28,6 +28,7 @@ const PLUGIN_NAME = 'data-validation';
 
 export class UniverDataValidationPlugin extends Plugin {
     constructor(
+        _config: unknown,
         @Inject(Injector) protected _injector: Injector,
         @ICommandService private _commandService: ICommandService
     ) {

@@ -39,6 +39,7 @@ import { DataValidationPanelService } from './services/data-validation-panel.ser
 
 export class UniverSheetsDataValidationPlugin extends Plugin {
     constructor(
+        _config: unknown,
         @Inject(Injector) protected _injector: Injector,
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(LocaleService) private readonly _localeService: LocaleService

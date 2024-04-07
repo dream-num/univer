@@ -43,7 +43,7 @@ import { RefRangeController } from './controllers/cf.ref-range.controller';
 import { ConditionalFormattingEditorController } from './controllers/cf.editor.controller';
 import { ConditionalFormattingClearController } from './controllers/cf.clear.controller';
 
-export class SheetsConditionalFormattingUiPlugin extends Plugin {
+export class UniverSheetsConditionalFormattingUIPlugin extends Plugin {
     static override type = PluginType.Sheet;
     static commandList = [
         AddAverageCfCommand,
@@ -85,7 +85,7 @@ export class SheetsConditionalFormattingUiPlugin extends Plugin {
     }
 
     _initCommand() {
-        [...SheetsConditionalFormattingPlugin.mutationList, ...SheetsConditionalFormattingUiPlugin.commandList].forEach((m) => {
+        [...SheetsConditionalFormattingPlugin.mutationList, ...UniverSheetsConditionalFormattingUIPlugin.commandList].forEach((m) => {
             this._commandService.registerCommand(m);
         });
     }

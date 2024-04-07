@@ -20,10 +20,10 @@ import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { IDefinedNamesService } from '../../../services/defined-names.service';
-import { IFormulaRuntimeService } from '../../../services/runtime.service';
 import { Lexer } from '../lexer';
 import type { LexerNode } from '../lexer-node';
 import { LexerTreeBuilder } from '../lexer-tree-builder';
+import { IFormulaCurrentConfigService } from '../../../services/current-data.service';
 import { createCommandTestBed } from './create-command-test-bed';
 
 const TEST_WORKBOOK_DATA: IWorkbookData = {
@@ -68,7 +68,7 @@ describe('lexer nodeMaker test', () => {
     let get: Injector['get'];
     let workbook: Workbook;
     let definedNamesService: IDefinedNamesService;
-    let runtimeService: IFormulaRuntimeService;
+    let formulaCurrentConfigService: IFormulaCurrentConfigService;
     let lexerTreeBuilder: LexerTreeBuilder;
 
     beforeEach(() => {
@@ -79,13 +79,16 @@ describe('lexer nodeMaker test', () => {
 
         definedNamesService = get(IDefinedNamesService);
 
-        runtimeService = get(IFormulaRuntimeService);
+        formulaCurrentConfigService = get(IFormulaCurrentConfigService);
 
         lexerTreeBuilder = get(LexerTreeBuilder);
 
-        runtimeService.setCurrent(0, 0, 4, 1, 'sheet1', 'test');
+        formulaCurrentConfigService.setExecuteUnitId('test');
+        formulaCurrentConfigService.setExecuteSubUnitId('sheet1');
 
-        lexer = new Lexer(definedNamesService, runtimeService, lexerTreeBuilder);
+        // runtimeService.setCurrent(0, 0, 4, 1, 'sheet1', 'test');
+
+        lexer = new Lexer(definedNamesService, lexerTreeBuilder, formulaCurrentConfigService);
     });
 
     afterEach(() => {
@@ -94,7 +97,7 @@ describe('lexer nodeMaker test', () => {
 
     describe('lexer definedName', () => {
         it('simple', () => {
-            definedNamesService.registerDefinedName('test', 'myName', '$A$10:$C$100');
+            definedNamesService.registerDefinedName('test', { id: 'test1', name: 'myName', formulaOrRefString: '$A$10:$C$100' });
 
             const node = lexer.treeBuilder('=myName') as LexerNode;
 
@@ -104,7 +107,7 @@ describe('lexer nodeMaker test', () => {
         });
 
         it('lambda', () => {
-            definedNamesService.registerDefinedName('test', 'myName', 'lambda(x, y , x*x*y)');
+            definedNamesService.registerDefinedName('test', { id: 'test2', name: 'myName', formulaOrRefString: 'lambda(x, y , x*x*y)' });
 
             const node = lexer.treeBuilder('=myName(1+sum(A1:B1), 100)') as LexerNode;
 

@@ -136,7 +136,7 @@ export class Editor {
     }
 
     isSingle() {
-        return this._param.isSingle === true || this.onlyInputFormula() || this.onlyInputFormula();
+        return this._param.isSingle === true || this.onlyInputRange();
     }
 
     isReadOnly() {

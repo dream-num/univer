@@ -21,6 +21,8 @@ import { DataValidatorRegistryService } from './services/data-validator-registry
 import { DataValidationModel } from './models/data-validation-model';
 import { AddDataValidationCommand, RemoveAllDataValidationCommand, RemoveDataValidationCommand, UpdateDataValidationOptionsCommand, UpdateDataValidationSettingCommand } from './commands/commands/data-validation.command';
 import { AddDataValidationMutation, RemoveDataValidationMutation, UpdateDataValidationMutation } from './commands/mutations/data-validation.mutation';
+import { DataValidationResourceController } from './controllers/dv-resource.controller';
+import { DataValidationSheetController } from './controllers/dv-sheet.controller';
 
 const PLUGIN_NAME = 'data-validation';
 
@@ -36,10 +38,11 @@ export class UniverDataValidationPlugin extends Plugin {
         ([
             // model
             [DataValidationModel],
-
             // service
             [DataValidatorRegistryService],
 
+            [DataValidationResourceController],
+            [DataValidationSheetController],
         ] as Dependency[]).forEach(
             (d) => {
                 injector.add(d);

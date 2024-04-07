@@ -21,6 +21,7 @@ import {
 } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 import { ConditionalFormattingRuleModel } from '../../models/conditional-formatting-rule-model';
+import { transformSupportSymmetryAnchor } from '../../utils/anchor';
 import type { IAddConditionalRuleMutationParams } from './add-conditional-rule.mutation';
 import { AddConditionalRuleMutation } from './add-conditional-rule.mutation';
 import type { IMoveConditionalRuleMutationParams } from './move-conditional-rule.mutation';
@@ -34,18 +35,30 @@ export interface IDeleteConditionalRuleMutationParams {
 export const DeleteConditionalRuleMutationUndoFactory = (accessor: IAccessor, param: IDeleteConditionalRuleMutationParams) => {
     const conditionalFormattingRuleModel = accessor.get(ConditionalFormattingRuleModel);
     const { unitId, subUnitId, cfId } = param;
-    const rule = conditionalFormattingRuleModel.getRule(unitId, subUnitId, cfId);
-    const ruleList = conditionalFormattingRuleModel.getSubunitRules(unitId, subUnitId);
-    if (rule) {
-        const index = ruleList!.findIndex((rule) => rule.cfId === cfId);
-        const nextRule = ruleList![index - 1];
-        const result: IMutationInfo[] = [{ id: AddConditionalRuleMutation.id,
-                                           params: { unitId, subUnitId, rule: Tools.deepClone(rule) } as IAddConditionalRuleMutationParams },
-        ];
-        if (nextRule && index !== 0) {
-            result.push({ id: MoveConditionalRuleMutation.id, params: {
-                unitId, subUnitId, cfId, targetCfId: nextRule.cfId,
-            } as IMoveConditionalRuleMutationParams });
+    const ruleList = ([...(conditionalFormattingRuleModel.getSubunitRules(unitId, subUnitId) || [])]);
+    const index = ruleList.findIndex((item) => item.cfId === cfId);
+    const beforeRule = ruleList[index - 1];
+    if (index > -1) {
+        const rule = ruleList[index];
+        const result: IMutationInfo[] = [{
+            id: AddConditionalRuleMutation.id,
+            params: { unitId, subUnitId, rule: Tools.deepClone(rule) } as IAddConditionalRuleMutationParams,
+        }];
+        ruleList.splice(index, 1);
+        if (index !== 0) {
+            const firstRule = ruleList[0];
+            if (firstRule) {
+                const transformResult = transformSupportSymmetryAnchor({ id: firstRule.cfId, type: 'before' }, { id: beforeRule.cfId, type: 'after' }, ruleList, (rule) => rule.cfId);
+                if (!transformResult) {
+                    return result;
+                }
+                const [start, end] = transformResult;
+                const params: IMoveConditionalRuleMutationParams = {
+                    unitId, subUnitId, start,
+                    end,
+                };
+                result.push({ id: MoveConditionalRuleMutation.id, params });
+            }
         }
         return result;
     }

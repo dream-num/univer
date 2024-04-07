@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-formula",
-    "version": "0.1.5",
+    "version": "0.1.6",
     "private": false,
     "author": "DreamNum <developer@univer.ai>",
     "license": "Apache-2.0",
@@ -69,7 +69,7 @@
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "@wendellhu/redi": "0.13.0",
-        "react": ">=16.9.0",
+        "react": "^16.9.0 || ^17.0.0 || ^18.0.0",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {

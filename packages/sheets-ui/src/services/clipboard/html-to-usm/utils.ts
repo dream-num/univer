@@ -50,6 +50,13 @@ export function getParagraphStyle(el: HTMLElement): Nullable<IParagraphStyle> {
                 break;
             }
 
+            case 'line-height': {
+                const lineHeightValue = Number.parseFloat(cssValue);
+                paragraphStyle.lineSpacing = lineHeightValue;
+
+                break;
+            }
+
             default: {
                 // console.log(`Unhandled css rule ${cssRule} in getParagraphStyle`);
                 break;

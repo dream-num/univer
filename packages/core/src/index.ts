@@ -92,6 +92,7 @@ export { IResourceManagerService, ISnapshotPersistenceService } from './services
 export { type IStyleSheet, ThemeService } from './services/theme/theme.service';
 export {
     type IUndoRedoCommandInfos,
+    type IUndoRedoCommandInfosByInterceptor,
     type IUndoRedoItem,
     IUndoRedoService,
     type IUndoRedoStatus,

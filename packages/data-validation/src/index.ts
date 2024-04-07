@@ -65,3 +65,5 @@ export { DataValidationManager } from './models/data-validation-manager';
 export type { IFormulaValidResult } from './validators/base-data-validator';
 export { removeDataValidationUndoFactory } from './commands/commands/data-validation.command';
 export { TWO_FORMULA_OPERATOR_COUNT } from './types/const/two-formula-operators';
+export { DataValidationResourceController } from './controllers/dv-resource.controller';
+export { DataValidationSheetController } from './controllers/dv-sheet.controller';

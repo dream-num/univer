@@ -17,7 +17,7 @@
 import { type CellValue, type DataValidationStatus, Disposable, type IDataValidationRule, ILogService, type Nullable } from '@univerjs/core';
 import { debounceTime, Subject } from 'rxjs';
 import type { IUpdateRulePayload } from '../types/interfaces/i-update-rule-payload';
-import type { DataValidationManager } from './data-validation-manager';
+import { DataValidationManager } from './data-validation-manager';
 
 type ManagerCreator<T extends IDataValidationRule> = (unitId: string, subUnitId: string) => DataValidationManager<T>;
 type RuleChangeType = 'update' | 'add' | 'remove';
@@ -38,7 +38,7 @@ export interface IValidStatusChange {
 
 export class DataValidationModel<T extends IDataValidationRule = IDataValidationRule> extends Disposable {
     private readonly _model = new Map<string, Map<string, DataValidationManager<T>>>();
-    private _managerCreator: ManagerCreator<T>;
+    private _managerCreator: ManagerCreator<T> = (unitId: string, subUnitId: string) => new DataValidationManager<T>(unitId, subUnitId, []);
     private readonly _ruleChange$ = new Subject<IRuleChange<T>>();
     private readonly _validStatusChange$ = new Subject<IValidStatusChange>();
 

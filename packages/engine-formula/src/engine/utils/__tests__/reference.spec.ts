@@ -224,6 +224,20 @@ describe('Test Reference', () => {
             sheetName: 'sheet-1',
             unitId: 'workbook2',
         });
+
+        expect(deserializeRangeWithSheet('[workbook1]sheet1!$A$5:$B$10')).toStrictEqual({
+            range: {
+                endAbsoluteRefType: 3,
+                endColumn: 1,
+                endRow: 9,
+                startAbsoluteRefType: 3,
+                startColumn: 0,
+                startRow: 4,
+                rangeType: RANGE_TYPE.NORMAL,
+            },
+            sheetName: 'sheet1',
+            unitId: 'workbook1',
+        });
     });
 
     it('needsQuoting', () => {
@@ -265,35 +279,35 @@ describe('Test Reference', () => {
         });
 
         expect(handleRefStringInfo('sheet1!A1')).toStrictEqual({
-            refBody: '!A1',
+            refBody: 'A1',
             sheetName: 'sheet1',
             unitId: '',
         });
 
         expect(handleRefStringInfo('[Book1]Sheet1!A1')).toStrictEqual({
-            refBody: '!A1',
+            refBody: 'A1',
             sheetName: 'Sheet1',
             unitId: 'Book1',
         });
         expect(handleRefStringInfo("'[Book1]Sheet1'!R2C3")).toStrictEqual({
-            refBody: '!R2C3',
+            refBody: 'R2C3',
             sheetName: 'Sheet1',
             unitId: 'Book1',
         });
 
         expect(handleRefStringInfo("'sheet-1'!A1")).toStrictEqual({
-            refBody: '!A1',
+            refBody: 'A1',
             sheetName: 'sheet-1',
             unitId: '',
         });
 
         expect(handleRefStringInfo("'[Book-1.xlsx]Sheet1'!$A$4")).toStrictEqual({
-            refBody: '!$A$4',
+            refBody: '$A$4',
             sheetName: 'Sheet1',
             unitId: 'Book-1.xlsx',
         });
         expect(handleRefStringInfo("'[Book-1.xlsx]sheet-1'!$A$4")).toStrictEqual({
-            refBody: '!$A$4',
+            refBody: '$A$4',
             sheetName: 'sheet-1',
             unitId: 'Book-1.xlsx',
         });

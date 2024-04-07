@@ -18,37 +18,73 @@ import { Disposable } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
 import { IDefinedNamesService } from '../../services/defined-names.service';
-import { IFormulaRuntimeService } from '../../services/runtime.service';
 import type { ISequenceArray } from '../utils/sequence';
 import { sequenceNodeType } from '../utils/sequence';
+import { operatorToken } from '../../basics/token';
+import { IFormulaCurrentConfigService } from '../../services/current-data.service';
+import { ErrorType } from '../../basics/error-type';
 import { LexerTreeBuilder } from './lexer-tree-builder';
 
 export class Lexer extends Disposable {
     constructor(
         @IDefinedNamesService private readonly _definedNamesService: IDefinedNamesService,
-        @IFormulaRuntimeService private readonly _runtimeService: IFormulaRuntimeService,
-        @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder
+        @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder,
+        @IFormulaCurrentConfigService private readonly _formulaCurrentConfigService: IFormulaCurrentConfigService
     ) {
         super();
     }
 
     treeBuilder(formulaString: string, transformSuffix = true) {
-        return this._lexerTreeBuilder.treeBuilder(formulaString, transformSuffix, this._injectDefinedName.bind(this));
+        return this._lexerTreeBuilder.treeBuilder(formulaString, transformSuffix, this._injectDefinedName.bind(this), this._simpleCheckDefinedName.bind(this));
+    }
+
+    private _simpleCheckDefinedName(formulaString: string) {
+        const definedNameMap = this._formulaCurrentConfigService.getDirtyDefinedNameMap();
+        const executeUnitId = this._formulaCurrentConfigService.getExecuteUnitId();
+        if (executeUnitId != null && definedNameMap[executeUnitId] != null) {
+            const names = Object.keys(definedNameMap[executeUnitId]!);
+            for (let i = 0, len = names.length; i < len; i++) {
+                const name = names[i];
+                if (formulaString.indexOf(name) > -1) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private _checkDefinedNameDirty(token: string) {
+        const definedNameMap = this._formulaCurrentConfigService.getDirtyDefinedNameMap();
+        const executeUnitId = this._formulaCurrentConfigService.getExecuteUnitId();
+        if (executeUnitId != null && definedNameMap[executeUnitId] != null) {
+            const names = Object.keys(definedNameMap[executeUnitId]!);
+            for (let i = 0, len = names.length; i < len; i++) {
+                const name = names[i];
+                if (name === token) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     private _injectDefinedName(sequenceArray: ISequenceArray[]) {
-        const unitId = this._runtimeService.currentUnitId;
+        const unitId = this._formulaCurrentConfigService.getExecuteUnitId();
 
-        if (!this._definedNamesService.hasDefinedName(unitId)) {
+        if (unitId == null) {
             return {
                 sequenceString: '',
                 hasDefinedName: false,
+                definedNames: [],
             };
         }
 
         const sequenceNodes = this._lexerTreeBuilder.getSequenceNode(sequenceArray);
         let sequenceString = '';
         let hasDefinedName = false;
+        const definedNames: string[] = [];
 
         for (let i = 0, len = sequenceNodes.length; i < len; i++) {
             const node = sequenceNodes[i];
@@ -60,10 +96,19 @@ export class Lexer extends Disposable {
             const { nodeType, token } = node;
 
             if (nodeType === sequenceNodeType.REFERENCE || nodeType === sequenceNodeType.FUNCTION) {
-                const definedContent = this._definedNamesService.getDefinedNameMap(unitId)?.get(token);
+                const definedContent = this._definedNamesService.getValueByName(unitId, token);
                 if (definedContent) {
-                    sequenceString += definedContent;
+                    let refString = definedContent.formulaOrRefString;
+                    if (refString.substring(0, 1) === operatorToken.EQUALS) {
+                        refString = refString.substring(1);
+                    }
+                    sequenceString += refString;
+                    definedNames.push(definedContent.name);
                     hasDefinedName = true;
+                } else if (this._checkDefinedNameDirty(token)) {
+                    sequenceString += ErrorType.NAME;
+                    hasDefinedName = true;
+                    definedNames.push(token);
                 } else {
                     sequenceString += token;
                 }
@@ -75,6 +120,7 @@ export class Lexer extends Disposable {
         return {
             sequenceString,
             hasDefinedName,
+            definedNames,
         };
     }
 }

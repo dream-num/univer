@@ -116,6 +116,9 @@ const locale: typeof zhCN = {
             emptyError: 'Please enter a value',
             add: 'Add',
             dropdown: 'Select',
+            options: 'Options',
+            customOptions: 'Custom',
+            refOptions: 'From a range',
         },
         listMultiple: {
             title: 'Dropdown-Multiple',

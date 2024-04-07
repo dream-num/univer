@@ -23,17 +23,20 @@ import { CFNumberOperator,
     CFSubRuleType,
     CFTextOperator,
     CFTimePeriodOperator,
-    createDefaultValue } from '@univerjs/sheets-conditional-formatting';
+    createDefaultValue,
+} from '@univerjs/sheets-conditional-formatting';
 import type {
     IConditionalFormattingRuleConfig,
     IHighlightCell,
     INumberHighlightCell,
     ITextHighlightCell,
-    ITimePeriodHighlightCell } from '@univerjs/sheets-conditional-formatting';
+    ITimePeriodHighlightCell,
+} from '@univerjs/sheets-conditional-formatting';
 import { ConditionalStyleEditor } from '../../conditional-style-editor';
 import { Preview } from '../../preview';
 import stylesBase from '../index.module.less';
 import type { IStyleEditorProps } from './type';
+
 import styles from './index.module.less';
 
 const createOptionItem = (text: string, localeService: LocaleService) => ({ label: localeService.t(`sheet.cf.operator.${text}`), value: text });

@@ -16,37 +16,22 @@
 
 import type { ISheetDataValidationRule, Workbook } from '@univerjs/core';
 import { Disposable, IResourceManagerService, IUniverInstanceService, LifecycleStages, OnLifecycle, toDisposable } from '@univerjs/core';
-import { DataValidationModel } from '@univerjs/data-validation';
-import { Inject, Injector } from '@wendellhu/redi';
-import { DATA_VALIDATION_PLUGIN_NAME } from '../common/const';
-import { SheetDataValidationManager } from '../models/sheet-data-validation-manager';
+import { Inject } from '@wendellhu/redi';
+import { DataValidationModel } from '../models/data-validation-model';
 
 type DataValidationJSON = Record<string, ISheetDataValidationRule[]>;
+
+const DATA_VALIDATION_PLUGIN_NAME = 'SHEET_DATA_VALIDATION';
 
 @OnLifecycle(LifecycleStages.Ready, DataValidationResourceController)
 export class DataValidationResourceController extends Disposable {
     constructor(
         @IResourceManagerService private readonly _resourceManagerService: IResourceManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(DataValidationModel) private readonly _dataValidationModel: DataValidationModel,
-        @Inject(Injector) private readonly _injector: Injector
+        @Inject(DataValidationModel) private readonly _dataValidationModel: DataValidationModel
     ) {
         super();
-        this._initDataValidationDataSource();
         this._initSnapshot();
-    }
-
-    private _createSheetDataValidationManager(unitId: string, subUnitId: string) {
-        return new SheetDataValidationManager(
-            unitId,
-            subUnitId,
-            [],
-            this._injector
-        );
-    }
-
-    private _initDataValidationDataSource() {
-        this._dataValidationModel.setManagerCreator(this._createSheetDataValidationManager.bind(this));
     }
 
     private _initSnapshot() {

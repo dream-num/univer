@@ -154,12 +154,14 @@ export class EndEditController extends Disposable {
 
                 if (keycode === KeyCode.ESC) {
                     // Reselect the current selections, when exist cell editor by press ESC.
-                    this._commandService.syncExecuteCommand(SetSelectionsOperation.id, {
-                        unitId: workbookId,
-                        subUnitId: worksheetId,
-                        pluginName,
-                        selections,
-                    });
+                    if (selections) {
+                        this._commandService.syncExecuteCommand(SetSelectionsOperation.id, {
+                            unitId: workbookId,
+                            subUnitId: worksheetId,
+                            pluginName,
+                            selections,
+                        });
+                    }
 
                     return;
                 }

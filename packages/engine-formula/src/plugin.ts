@@ -83,6 +83,7 @@ export class UniverFormulaEnginePlugin extends Plugin {
             [IFeatureCalculationManagerService, { useClass: FeatureCalculationManagerService }],
             [IDefinedNamesService, { useClass: DefinedNamesService }],
             [IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }],
+            [ISuperTableService, { useClass: SuperTableService }],
 
             // Models
             [FormulaDataModel],
@@ -98,6 +99,8 @@ export class UniverFormulaEnginePlugin extends Plugin {
                 },
             ],
             [SetFeatureCalculationController],
+            [SetDefinedNameController],
+            [SetSuperTableController],
         ];
 
         if (!this._config?.notExecuteFormula) {
@@ -106,15 +109,12 @@ export class UniverFormulaEnginePlugin extends Plugin {
                 // Services
                 [CalculateFormulaService],
                 [IOtherFormulaManagerService, { useClass: OtherFormulaManagerService }],
-                [ISuperTableService, { useClass: SuperTableService }],
                 [IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }],
                 [IFormulaRuntimeService, { useClass: FormulaRuntimeService }],
 
                 //Controller
                 [CalculateController],
-                [SetDefinedNameController],
                 [SetOtherFormulaController],
-                [SetSuperTableController],
                 [RegisterFunctionController],
 
                 // Calculation engine

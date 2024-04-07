@@ -30,9 +30,8 @@ import { DataValidationFormulaMarkDirty } from './commands/mutations/formula.mut
 import { enUS, zhCN } from './locale';
 import { DATA_VALIDATION_PLUGIN_NAME } from './common/const';
 import { DataValidationAutoFillController } from './controllers/dv-auto-fill.controller';
-import { DataValidationSheetController } from './controllers/dv-sheet.controller';
 import { DataValidationCopyPasteController } from './controllers/dv-copy-paste.controller';
-import { DataValidationResourceController } from './controllers/dv-resource.controller';
+import { DataValidationModelController } from './controllers/dv-model.controller';
 import { DataValidationDropdownManagerService } from './services/dropdown-manager.service';
 import { CloseValidationPanelOperation, HideDataValidationDropdown, OpenValidationPanelOperation, ShowDataValidationDropdown, ToggleValidationPanelOperation } from './commands/operations/data-validation.operation';
 import { DataValidationRejectInputController } from './controllers/dv-reject-input.controller';
@@ -58,13 +57,12 @@ export class UniverSheetsDataValidationPlugin extends Plugin {
             [DataValidationDropdownManagerService],
 
             // controller
-            [DataValidationResourceController],
+            [DataValidationModelController],
             [DataValidationController],
             [DataValidationRenderController],
             [DataValidationAlertController],
             [DataValidationRefRangeController],
             [DataValidationAutoFillController],
-            [DataValidationSheetController],
             [DataValidationCopyPasteController],
             [DataValidationRejectInputController],
         ] as Dependency[]).forEach((dep) => {

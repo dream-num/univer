@@ -217,7 +217,7 @@ export const handleMoveRows = (params: IMoveRowsCommand, targetRange: IRange): I
 export const handleMoveRowsOther = (params: IMoveRowsCommand, targetRange: IRange) => {
     const { fromRange, toRange } = params.params || {};
     if (!fromRange || !toRange) {
-        return targetRange;
+        return [targetRange];
     }
 
     const { startRow: fromRow } = fromRange;
@@ -233,7 +233,8 @@ export const handleMoveRowsOther = (params: IMoveRowsCommand, targetRange: IRang
 
     matrix.moveRows(fromRow, count, toRow);
 
-    return queryObjectMatrix(matrix, (value) => value === 1);
+    const res = queryObjectMatrix(matrix, (value) => value === 1);
+    return res;
 };
 
 export const handleMoveCols = (params: IMoveColsCommand, targetRange: IRange): IOperator[] => {
@@ -268,7 +269,7 @@ export const handleMoveCols = (params: IMoveColsCommand, targetRange: IRange): I
 export const handleMoveColsOther = (params: IMoveColsCommand, targetRange: IRange) => {
     const { fromRange, toRange } = params.params || {};
     if (!fromRange || !toRange) {
-        return targetRange;
+        return [targetRange];
     }
 
     const { startColumn: fromCol } = fromRange;
@@ -317,18 +318,22 @@ export const handleMoveRange = (param: IMoveRangeCommand, targetRange: IRange) =
     return operators;
 };
 
-const handleMoveRangeOther = (param: IMoveRangeCommand, targetRange: IRange) => {
+export const handleMoveRangeOther = (param: IMoveRangeCommand, targetRange: IRange) => {
     const toRange = param.params?.toRange;
     const fromRange = param.params?.fromRange;
     // illegal
     if (!toRange || !fromRange) {
-        return targetRange;
+        return [targetRange];
+    }
+
+    if (!Rectangle.intersects(fromRange, targetRange) && !Rectangle.intersects(toRange, targetRange)) {
+        return [targetRange];
     }
 
     if (Rectangle.contains(fromRange, targetRange)) {
         const relativeRange = Rectangle.getRelativeRange(targetRange, fromRange);
         const positionRange = Rectangle.getPositionRange(relativeRange, toRange);
-        return positionRange;
+        return [positionRange];
     }
 
     const matrix = new ObjectMatrix();
@@ -346,22 +351,21 @@ const handleMoveRangeOther = (param: IMoveRangeCommand, targetRange: IRange) => 
             fromMatrix.setValue(row, col, 1);
         }
     });
+
     const columnOffset = toRange.startColumn - fromRange.startColumn;
     const rowOffset = toRange.startRow - fromRange.startRow;
 
-    const relativeToRange = {
+    const loopToRange = {
         startColumn: toRange.startColumn - columnOffset,
         endColumn: toRange.endColumn - columnOffset,
         startRow: toRange.startRow - rowOffset,
         endRow: toRange.endRow - rowOffset,
     };
 
-    const loopToRange = Rectangle.getIntersects(relativeToRange, targetRange);
-
     loopToRange && Range.foreach(loopToRange, (row, col) => {
         const targetRow = row + rowOffset;
         const targetCol = col + columnOffset;
-        matrix.setValue(targetRow, targetCol, fromMatrix.getValue(row, col));
+        matrix.setValue(targetRow, targetCol, fromMatrix.getValue(row, col) ?? 0);
     });
 
     const res = queryObjectMatrix(matrix, (value) => value === 1);
@@ -543,7 +547,7 @@ export const handleInsertRangeMoveDown = (param: IInsertRangeMoveDownCommand, ta
 export const handleInsertRangeMoveDownOther = (param: IInsertRangeMoveDownCommand, targetRange: IRange) => {
     const range = param.params?.range;
     if (!range) {
-        return targetRange;
+        return [targetRange];
     }
 
     const moveCount = range.endRow - range.startRow + 1;
@@ -557,7 +561,7 @@ export const handleInsertRangeMoveDownOther = (param: IInsertRangeMoveDownComman
     const targetMoveRange = Rectangle.getIntersects(bottomRange, targetRange);
 
     if (!targetMoveRange) {
-        return targetRange;
+        return [targetRange];
     }
 
     const matrix = new ObjectMatrix<number>();
@@ -593,7 +597,7 @@ export const handleInsertRangeMoveRight = (param: IInsertRangeMoveRightCommand, 
 export const handleInsertRangeMoveRightOther = (param: IInsertRangeMoveRightCommand, targetRange: IRange) => {
     const range = param.params?.range;
     if (!range) {
-        return targetRange;
+        return [targetRange];
     }
 
     const moveCount = range.endColumn - range.startColumn + 1;
@@ -607,7 +611,7 @@ export const handleInsertRangeMoveRightOther = (param: IInsertRangeMoveRightComm
     const targetMoveRange = Rectangle.getIntersects(bottomRange, targetRange);
 
     if (!targetMoveRange) {
-        return targetRange;
+        return [targetRange];
     }
 
     const matrix = new ObjectMatrix<number>();
@@ -647,7 +651,7 @@ export const handleDeleteRangeMoveLeft = (param: IDeleteRangeMoveLeftCommand, ta
 export const handleDeleteRangeMoveLeftOther = (param: IDeleteRangeMoveLeftCommand, targetRange: IRange) => {
     const range = param.params?.range;
     if (!range) {
-        return targetRange;
+        return [targetRange];
     }
 
     const rightRange: IRange = {
@@ -665,7 +669,7 @@ export const handleDeleteRangeMoveLeftOther = (param: IDeleteRangeMoveLeftComman
     const targetMoveRange = Rectangle.getIntersects(rightRange, targetRange);
 
     if (!targetDeleteRange && !targetMoveRange) {
-        return targetRange;
+        return [targetRange];
     }
 
     const matrix = new ObjectMatrix<number>();
@@ -710,7 +714,7 @@ export const handleDeleteRangeMoveUp = (param: IDeleteRangeMoveUpCommand, target
 export const handleDeleteRangeMoveUpOther = (param: IDeleteRangeMoveUpCommand, targetRange: IRange) => {
     const range = param.params?.range;
     if (!range) {
-        return targetRange;
+        return [targetRange];
     }
 
     const bottomRange: IRange = {
@@ -727,7 +731,7 @@ export const handleDeleteRangeMoveUpOther = (param: IDeleteRangeMoveUpCommand, t
     const targetMoveRange = Rectangle.getIntersects(bottomRange, targetRange);
 
     if (!targetDeleteRange && !targetMoveRange) {
-        return targetRange;
+        return [targetRange];
     }
 
     const matrix = new ObjectMatrix<number>();

@@ -17,7 +17,7 @@
 import type { IDocumentBody } from '@univerjs/core';
 import { BooleanNumber } from '@univerjs/core';
 import { describe, expect, it } from 'vitest';
-import { prepareParagraphBody } from '../utils';
+import { prepareParagraphBody, prepareTextChunks } from '../utils';
 
 function getDocumentBody(): IDocumentBody {
     return ({
@@ -98,6 +98,49 @@ describe('Text shaping test cases', () => {
             };
 
             expect(prepareParagraphBody(body, paragraphIndex)).toEqual(expectedParagraphBody);
+        });
+    });
+
+    describe('Test prepareTextChunks', () => {
+        it('Should return correct text chunks', () => {
+            const body: IDocumentBody = {
+                dataStream: '作者：朱自清 👨‍👩‍👧‍👦 Today Office\r',
+                textRuns: [
+                    {
+                        st: 4,
+                        ed: 31,
+                        ts: {
+                            fs: 18,
+                            ff: 'Times New Roman',
+                            cl: {
+                                rgb: 'rgb(30, 30, 30)',
+                            },
+                            bl: BooleanNumber.FALSE,
+                        },
+                    },
+                ],
+            };
+            const expectedTextChunks = [
+                {
+                    content: '作者：朱',
+                },
+                {
+                    content: '自清 👨‍👩‍👧‍👦 Today Office',
+                    style: {
+                        fs: 18,
+                        ff: 'Times New Roman',
+                        cl: {
+                            rgb: 'rgb(30, 30, 30)',
+                        },
+                        bl: BooleanNumber.FALSE,
+                    },
+                },
+                {
+                    content: '\r',
+                },
+            ];
+
+            expect(prepareTextChunks(body)).toEqual(expectedTextChunks);
         });
     });
 });

@@ -361,7 +361,6 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
     const commandService = accessor.get(ICommandService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SelectionManagerService);
-
     return {
         id: SetRangeFontFamilyCommand.id,
         tooltip: 'toolbar.font',
@@ -429,7 +428,7 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
         selections: FONT_SIZE_LIST,
         disabled$,
         value$: new Observable((subscriber) => {
-            const DEFAULT_SIZE = 14;
+            const DEFAULT_SIZE = 11;
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
                 if (id === SetRangeValuesMutation.id || id === SetSelectionsOperation.id) {

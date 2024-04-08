@@ -123,6 +123,11 @@ export class ArrayValueObject extends BaseValueObject {
 
     private _flattenCache: Nullable<ArrayValueObject>;
 
+    /**
+     * The default value of the array, null values in comparison results support setting to false
+     */
+    private _defaultValue: Nullable<BaseValueObject> = null;
+
     private _flattenPosition: Nullable<{
         stringArray: BaseValueObject[];
         stringPosition: number[];
@@ -212,6 +217,10 @@ export class ArrayValueObject extends BaseValueObject {
         return true;
     }
 
+    setDefaultValue(value: Nullable<BaseValueObject>) {
+        this._defaultValue = value;
+    }
+
     get(row: number, column: number) {
         const rowValues = this._values[row];
         if (rowValues == null) {
@@ -271,7 +280,7 @@ export class ArrayValueObject extends BaseValueObject {
 
         for (let r = startRow; r <= endRow; r++) {
             for (let c = startColumn; c <= endColumn; c++) {
-                if (callback(valueList[r]?.[c], r, c) === false) {
+                if (callback(valueList[r]?.[c] || this._defaultValue, r, c) === false) {
                     return;
                 }
             }
@@ -287,7 +296,7 @@ export class ArrayValueObject extends BaseValueObject {
 
         for (let r = endRow; r >= startRow; r--) {
             for (let c = endColumn; c >= startColumn; c--) {
-                if (callback(valueList[r][c], r, c) === false) {
+                if (callback(valueList[r]?.[c] || this._defaultValue, r, c) === false) {
                     return;
                 }
             }
@@ -330,12 +339,12 @@ export class ArrayValueObject extends BaseValueObject {
 
     getFirstCell() {
         const { startRow, startColumn } = this.getRangePosition();
-        return this.get(startRow, startColumn) || NullValueObject.create();
+        return this.get(startRow, startColumn) || this._defaultValue || NullValueObject.create();
     }
 
     getLastCell() {
         const { endRow, endColumn } = this.getRangePosition();
-        return this.get(endRow, endColumn) || NullValueObject.create();
+        return this.get(endRow, endColumn) || this._defaultValue || NullValueObject.create();
     }
 
     /**
@@ -394,6 +403,8 @@ export class ArrayValueObject extends BaseValueObject {
         }
 
         const arrayV = this._createNewArray(newValue, 1, newValue[0].length);
+
+        arrayV.setDefaultValue(this._defaultValue);
 
         this._flattenCache = arrayV;
 
@@ -504,7 +515,7 @@ export class ArrayValueObject extends BaseValueObject {
                     return;
                 };
 
-                let cell = array[r][c];
+                let cell = array[r][c] || this._defaultValue;
 
                 if (cell == null) {
                     cell = NullValueObject.create();
@@ -533,6 +544,9 @@ export class ArrayValueObject extends BaseValueObject {
 
         const newResultArray = this._createNewArray(result, result.length, result[0].length, startRow, startColumn);
 
+        // Synchronize defaultValue
+        newResultArray.setDefaultValue(this._defaultValue);
+
         this._sliceCache.set(cacheKey, newResultArray);
 
         return newResultArray;
@@ -560,7 +574,10 @@ export class ArrayValueObject extends BaseValueObject {
         const rowCount = this._rowCount;
         const columnCount = this._columnCount;
 
-        return this._createNewArray(transposeArray, columnCount, rowCount);
+        const newArray = this._createNewArray(transposeArray, columnCount, rowCount);
+
+        newArray.setDefaultValue(this._defaultValue);
+        return newArray;
     }
 
     /**
@@ -934,7 +951,7 @@ export class ArrayValueObject extends BaseValueObject {
                 if (row == null) {
                     rowList[c] = ErrorValueObject.create(ErrorType.VALUE);
                 } else {
-                    const currentValue = row[c];
+                    const currentValue = row[c] || this._defaultValue;
 
                     if (currentValue) {
                         rowList[c] = callbackFn(currentValue, r, c);
@@ -1372,7 +1389,11 @@ export class ArrayValueObject extends BaseValueObject {
             this._batchOperatorValue(value, c, result, batchOperatorType, operator);
         }
 
-        return this._createNewArray(result, rowCount, columnCount);
+        const newArray = this._createNewArray(result, rowCount, columnCount);
+
+        // Mark empty values in the array as false
+        newArray.setDefaultValue(BooleanValueObject.create(false));
+        return newArray;
     }
 
     private _batchOperatorValue(

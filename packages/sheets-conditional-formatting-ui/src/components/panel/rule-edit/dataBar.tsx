@@ -17,7 +17,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { InputNumber, Radio, RadioGroup, Select } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import { IUniverInstanceService, LocaleService } from '@univerjs/core';
+import { createInternalEditorID, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { TextEditor } from '@univerjs/ui';
 import { CFRuleType, CFValueType, createDefaultValueByValueType, SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '@univerjs/sheets-conditional-formatting';
 import type { IConditionalFormattingRuleConfig, IValueConfig } from '@univerjs/sheets-conditional-formatting';
@@ -50,7 +50,7 @@ const InputText = (props: { disabled?: boolean; id: string; className: string; t
         const v = String(_value.current).startsWith('=') ? String(_value.current) || '' : '=';
         return (
             <TextEditor
-                id={`${SHEET_CONDITIONAL_FORMATTING_PLUGIN}_data_bar_${id}`}
+                id={createInternalEditorID(`${SHEET_CONDITIONAL_FORMATTING_PLUGIN}_data_bar_${id}`)}
                 value={v}
                 openForSheetSubUnitId={subUnitId}
                 openForSheetUnitId={unitId}

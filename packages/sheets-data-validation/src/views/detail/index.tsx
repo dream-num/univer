@@ -15,7 +15,7 @@
  */
 
 import type { DataValidationOperator, IDataValidationRuleBase, IDataValidationRuleOptions, IExecutionOptions, ISheetDataValidationRule, IUnitRange } from '@univerjs/core';
-import { DataValidationType, debounce, ICommandService, isUnitRangesEqual, isValidRange, LocaleService, RedoCommand, shallowEqual, UndoCommand } from '@univerjs/core';
+import { createInternalEditorID, DataValidationType, debounce, ICommandService, isUnitRangesEqual, isValidRange, LocaleService, RedoCommand, shallowEqual, UndoCommand } from '@univerjs/core';
 import type { IUpdateDataValidationSettingCommandParams } from '@univerjs/data-validation';
 import { DataValidationModel, DataValidatorRegistryScope, DataValidatorRegistryService, getRuleOptions, getRuleSetting, RemoveDataValidationCommand, TWO_FORMULA_OPERATOR_COUNT, UpdateDataValidationOptionsCommand, UpdateDataValidationSettingCommand } from '@univerjs/data-validation';
 import { Button, FormLayout, Select } from '@univerjs/design';
@@ -211,7 +211,7 @@ export function DataValidationDetail() {
                     key={key}
                     className={styles.dataValidationDetailFormItem}
                     value={rangeStr}
-                    id="data-validation-detail"
+                    id={createInternalEditorID('data-validation-detail')}
                     openForSheetUnitId={unitId}
                     openForSheetSubUnitId={subUnitId}
                     onChange={(newRange) => {

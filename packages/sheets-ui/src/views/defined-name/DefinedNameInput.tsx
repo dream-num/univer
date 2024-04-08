@@ -18,7 +18,7 @@ import React, { useEffect, useState } from 'react';
 
 import { RangeSelector, TextEditor } from '@univerjs/ui';
 import type { IUnitRange, Nullable } from '@univerjs/core';
-import { AbsoluteRefType, IUniverInstanceService, LocaleService, Tools } from '@univerjs/core';
+import { AbsoluteRefType, createInternalEditorID, IUniverInstanceService, LocaleService, Tools } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { Button, Input, Radio, RadioGroup, Select } from '@univerjs/design';
 import { IDefinedNamesService, type IDefinedNamesServiceParam, IFunctionService, isReferenceString, LexerTreeBuilder, operatorToken, serializeRangeToRefString } from '@univerjs/engine-formula';
@@ -215,10 +215,10 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
                 </RadioGroup>
             </div>
             <div style={{ display: typeValue === 'range' ? 'block' : 'none' }}>
-                <RangeSelector key={`${inputId}-rangeSelector`} value={formulaOrRefStringValue} onValid={setValidFormulaOrRange} onChange={rangeSelectorChange} placeholder={localeService.t('definedName.inputRangePlaceholder')} id={`${inputId}-rangeSelector`} width="99%" openForSheetUnitId={unitId} />
+                <RangeSelector key={`${inputId}-rangeSelector`} value={formulaOrRefStringValue} onValid={setValidFormulaOrRange} onChange={rangeSelectorChange} placeholder={localeService.t('definedName.inputRangePlaceholder')} id={createInternalEditorID(`${inputId}-rangeSelector`)} width="99%" openForSheetUnitId={unitId} />
             </div>
             <div style={{ display: typeValue === 'range' ? 'none' : 'block' }}>
-                <TextEditor key={`${inputId}-editor`} value={formulaOrRefStringValue} onValid={setValidFormulaOrRange} onChange={formulaEditorChange} id={`${inputId}-editor`} placeholder={localeService.t('definedName.inputFormulaPlaceholder')} openForSheetUnitId={unitId} onlyInputFormula={true} style={{ width: '99%' }} canvasStyle={{ fontSize: 10 }} />
+                <TextEditor key={`${inputId}-editor`} value={formulaOrRefStringValue} onValid={setValidFormulaOrRange} onChange={formulaEditorChange} id={createInternalEditorID(`${inputId}-editor`)} placeholder={localeService.t('definedName.inputFormulaPlaceholder')} openForSheetUnitId={unitId} onlyInputFormula={true} style={{ width: '99%' }} canvasStyle={{ fontSize: 10 }} />
             </div>
             <div>
                 <Select style={widthStyle} value={localSheetIdValue} options={options} onChange={setLocalSheetIdValue} />

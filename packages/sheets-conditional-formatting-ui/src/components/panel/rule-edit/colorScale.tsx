@@ -16,7 +16,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import { IUniverInstanceService, LocaleService } from '@univerjs/core';
+import { createInternalEditorID, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { InputNumber, Select } from '@univerjs/design';
 import { TextEditor } from '@univerjs/ui';
 import { CFRuleType, CFValueType, createDefaultValueByValueType, SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '@univerjs/sheets-conditional-formatting';
@@ -55,7 +55,7 @@ const TextInput = (props: { id: string; type: CFValueType | 'none';value: number
             <TextEditor
                 openForSheetSubUnitId={subUnitId}
                 openForSheetUnitId={unitId}
-                id={`${SHEET_CONDITIONAL_FORMATTING_PLUGIN}_colo_scale_${id}`}
+                id={createInternalEditorID(`${SHEET_CONDITIONAL_FORMATTING_PLUGIN}_colo_scale_${id}`)}
                 value={formulaInitValue}
                 style={{ maxWidth: '50%', marginLeft: 4 }}
                 canvasStyle={{ fontSize: 10 }}

@@ -16,7 +16,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import { IUniverInstanceService, LocaleService } from '@univerjs/core';
+import { createInternalEditorID, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { TextEditor } from '@univerjs/ui';
 import { CFRuleType, CFSubRuleType, SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '@univerjs/sheets-conditional-formatting';
 import type { IAverageHighlightCell, IConditionalFormattingRuleConfig, IHighlightCell, IRankHighlightCell } from '@univerjs/sheets-conditional-formatting';
@@ -72,7 +72,7 @@ export const FormulaStyleEditor = (props: IStyleEditorProps) => {
             <div className={`${stylesBase.title} ${stylesBase.mTBase}`}>{localeService.t('sheet.cf.panel.styleRule')}</div>
             <div className={`${stylesBase.mTSm}`}>
                 <TextEditor
-                    id={`${SHEET_CONDITIONAL_FORMATTING_PLUGIN}_formula`}
+                    id={createInternalEditorID(`${SHEET_CONDITIONAL_FORMATTING_PLUGIN}_formula`)}
                     openForSheetSubUnitId={worksheet.getSheetId()}
                     openForSheetUnitId={workbook.getUnitId()}
                     value={formula}

@@ -513,8 +513,8 @@ export class SelectionShape extends Disposable {
             this.fillControl.transformByState({
                 width: AutofillSize - AutofillStrokeWidth,
                 height: AutofillSize - AutofillStrokeWidth,
-                left: endX - startX - AutofillSize / 2 + AutofillStrokeWidth / 2,
-                top: endY - startY - AutofillSize / 2 + AutofillStrokeWidth / 2,
+                left: endX - startX - AutofillSize / 2 + AutofillStrokeWidth / 2 - fixOnePixelBlurOffset,
+                top: endY - startY - AutofillSize / 2 + AutofillStrokeWidth / 2 - fixOnePixelBlurOffset,
                 strokeWidth: AutofillStrokeWidth,
             });
             this.fillControl.show();

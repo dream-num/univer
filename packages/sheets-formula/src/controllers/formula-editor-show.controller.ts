@@ -95,7 +95,8 @@ export class FormulaEditorShowController extends Disposable {
                             if (formulaDataItem != null) {
                                 const { f, si, x = 0, y = 0 } = formulaDataItem;
 
-                                if (si != null && (x > 0 || y > 0)) {
+                                // x and y support negative numbers. Negative numbers appear when the drop-down fill moves up or to the left.
+                                if (si != null && (x !== 0 || y !== 0)) {
                                     let formulaString = '';
                                     if (f.length > 0) {
                                         formulaString = f;

@@ -202,11 +202,14 @@ function compareFontInfoDistance(a: FontDistance, b: FontDistance) {
 }
 
 async function checkLocalFontsPermission() {
-    if (navigator == null || navigator?.permissions == null) {
+    if (typeof window === 'undefined') {
+        return;
+    }
+    if (window.navigator == null || window.navigator?.permissions == null) {
         return false;
     }
 
-    const status = await navigator.permissions.query({ name: 'local-fonts' as PermissionName });
+    const status = await window.navigator.permissions.query({ name: 'local-fonts' as PermissionName });
 
     return status.state === 'granted';
 }

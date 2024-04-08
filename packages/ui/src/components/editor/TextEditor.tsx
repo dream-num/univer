@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { debounce, type IDocumentData, LocaleService, type Nullable } from '@univerjs/core';
+import { debounce, type IDocumentData, isInternalEditorID, LocaleService, type Nullable } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useRef, useState } from 'react';
 import { Popup } from '@univerjs/design';
@@ -128,6 +128,10 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
     const editorRef = useRef<HTMLDivElement>(null);
 
     const [active, setActive] = useState(false);
+
+    if (!isInternalEditorID(id)) {
+        throw new Error('Invalid editor ID');
+    }
 
     useEffect(() => {
         const editor = editorRef.current;

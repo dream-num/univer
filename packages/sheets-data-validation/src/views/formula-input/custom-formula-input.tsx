@@ -19,6 +19,7 @@ import React from 'react';
 
 import { TextEditor } from '@univerjs/ui';
 import type { IFormulaInputProps } from '@univerjs/data-validation';
+import { createInternalEditorID } from '@univerjs/core';
 
 export function CustomFormulaInput(props: IFormulaInputProps) {
     const { unitId, subUnitId, value, onChange, showError, validResult } = props;
@@ -28,7 +29,7 @@ export function CustomFormulaInput(props: IFormulaInputProps) {
         <FormLayout error={formula1Res}>
             <TextEditor
                 value={value?.formula1 ?? ''}
-                id={`dataValidation-custom-formula-${unitId}-${subUnitId}`}
+                id={createInternalEditorID(`dataValidation-custom-formula-${unitId}-${subUnitId}`)}
                 onChange={(newValue) => {
                     onChange?.({
                         ...value,

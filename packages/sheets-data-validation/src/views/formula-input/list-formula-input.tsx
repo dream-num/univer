@@ -20,7 +20,7 @@ import { DraggableList, FormLayout, Input, Radio, RadioGroup, Select } from '@un
 import { deserializeRangeWithSheet, isReferenceString, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import type { IRange } from '@univerjs/core';
-import { IUniverInstanceService, LocaleService, Tools } from '@univerjs/core';
+import { createInternalEditorID, IUniverInstanceService, LocaleService, Tools } from '@univerjs/core';
 import type { IFormulaInputProps } from '@univerjs/data-validation';
 import { DeleteSingle, IncreaseSingle, SequenceSingle } from '@univerjs/icons';
 import cs from 'clsx';
@@ -272,7 +272,7 @@ export function ListFormulaInput(props: IFormulaInputProps) {
                     <>
                         <FormLayout error={formula1Res}>
                             <RangeSelector
-                                id={`list-ref-range-${unitId}-${subUnitId}`}
+                                id={createInternalEditorID(`list-ref-range-${unitId}-${subUnitId}`)}
                                 value={refRange}
                                 openForSheetUnitId={unitId}
                                 openForSheetSubUnitId={subUnitId}

@@ -145,7 +145,10 @@ const getOperatorOptions = (type: CFSubRuleType.duplicateValues | CFSubRuleType.
                 createOptionItem(CFTextOperator.equal, localeService),
                 createOptionItem(CFTextOperator.notEqual, localeService),
                 createOptionItem(CFTextOperator.containsBlanks, localeService),
-                createOptionItem(CFTextOperator.notContainsBlanks, localeService)];
+                createOptionItem(CFTextOperator.notContainsBlanks, localeService),
+                createOptionItem(CFTextOperator.containsErrors, localeService),
+                createOptionItem(CFTextOperator.notContainsErrors, localeService),
+            ];
         }
         case CFSubRuleType.number:{
             return [
@@ -203,7 +206,8 @@ export const HighlightCellStyleEditor = (props: IStyleEditorProps<any, ITextHigh
     }, {
         value: CFSubRuleType.uniqueValues,
         label: localeService.t('sheet.cf.subRuleType.uniqueValues'),
-    }];
+    },
+    ];
     const operatorOptions = useMemo(() => getOperatorOptions(subType, localeService), [subType]);
 
     const [operator, operatorSet] = useState<IResult['operator'] | undefined>(() => {

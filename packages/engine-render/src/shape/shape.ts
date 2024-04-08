@@ -271,7 +271,8 @@ export abstract class Shape<T> extends BaseObject {
     private static _renderStroke(ctx: UniverRenderingContext, props: IShapeProps) {
         const { stroke, strokeWidth, shadowEnabled, shadowForStrokeEnabled, strokeScaleEnabled, parent } = props;
 
-        let { scaleX, scaleY } = props;
+        // let { scaleX, scaleY } = props;
+        let { scaleX, scaleY } = ctx.getScale();
         if (!stroke || strokeWidth === 0) {
             return;
         }
@@ -281,10 +282,7 @@ export abstract class Shape<T> extends BaseObject {
         }
 
         ctx.save();
-        if (strokeScaleEnabled && parent) {
-            const scaling = this._getObjectScaling();
-            ctx.scale(1 / scaling.scaleX, 1 / scaling.scaleY);
-        } else if (strokeScaleEnabled) {
+        if (strokeScaleEnabled === false) {
             scaleX = scaleX ?? 1;
             scaleY = scaleY ?? 1;
             ctx.scale(1 / scaleX, 1 / scaleY);

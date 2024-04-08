@@ -82,8 +82,8 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
                 });
             } else {
                 setState({
-                    width: endX - startX - FIX_ONE_PIXEL_BLUR_OFFSET * 2,
-                    height: endY - startY - FIX_ONE_PIXEL_BLUR_OFFSET * 2,
+                    width: endX - startX - FIX_ONE_PIXEL_BLUR_OFFSET,
+                    height: endY - startY - FIX_ONE_PIXEL_BLUR_OFFSET,
                     left: startX + FIX_ONE_PIXEL_BLUR_OFFSET,
                     top: startY + FIX_ONE_PIXEL_BLUR_OFFSET,
                 });

@@ -16,8 +16,12 @@
 
 import { describe, expect, it } from 'vitest';
 
+import type { Nullable } from '@univerjs/core';
 import { ArrayValueObject, transformToValueObject, ValueObjectFactory } from '../array-value-object';
-import type { BooleanValueObject, NumberValueObject } from '../primitive-object';
+import { BooleanValueObject, NumberValueObject } from '../primitive-object';
+import type { BaseValueObject } from '../base-value-object';
+import { ErrorValueObject } from '../base-value-object';
+import { ErrorType } from '../../../basics/error-type';
 
 describe('arrayValueObject test', () => {
     const originArrayValueObject = ArrayValueObject.create({
@@ -395,6 +399,82 @@ describe('arrayValueObject test', () => {
             errorValueObject = ValueObjectFactory.create(Number.NEGATIVE_INFINITY);
 
             expect(errorValueObject.isError()).toBeTruthy();
+        });
+    });
+
+    describe('Test DefaultValue', () => {
+        it('After set defaultValue, use ', () => {
+            const calculateValueList: Nullable<BaseValueObject>[][] = [[]];
+            calculateValueList[0][1] = NumberValueObject.create(2);
+
+            const arrayValueObject = ArrayValueObject.create({
+                calculateValueList,
+                rowCount: 2,
+                columnCount: 2,
+                unitId: '',
+                sheetId: '',
+                row: 0,
+                column: 0,
+            });
+
+            arrayValueObject.setDefaultValue(BooleanValueObject.create(false));
+
+            // getFirstCell
+            expect(arrayValueObject.getFirstCell().getValue()).toStrictEqual(false);
+
+            // getLastCell
+            expect(arrayValueObject.getLastCell().getValue()).toStrictEqual(false);
+
+            // iterator
+            arrayValueObject.iterator(iterator);
+
+            // iteratorReverse
+            arrayValueObject.iteratorReverse(iterator);
+
+            arrayValueObject.mapValue(mapValue);
+
+            function iterator(valueObject: Nullable<BaseValueObject>, row: number, column: number) {
+                if (!valueObject) {
+                    return;
+                }
+
+                const value = valueObject.getValue();
+
+                if (row === 0 && column === 0) {
+                    expect(value).toStrictEqual(false);
+                } else if (row === 0 && column === 1) {
+                    expect(value).toStrictEqual(2);
+                } else if (row === 1 && column === 0) {
+                    expect(value).toStrictEqual(false);
+                } else if (row === 1 && column === 1) {
+                    expect(value).toStrictEqual(false);
+                }
+            }
+
+            function mapValue(valueObject: Nullable<BaseValueObject>, row: number, column: number) {
+                if (!valueObject) {
+                    return ErrorValueObject.create(ErrorType.NA);
+                }
+
+                iterator(valueObject, row, column);
+
+                return valueObject;
+            }
+
+            // flatten
+            const flatten = arrayValueObject.flatten();
+            expect(flatten.getFirstCell().getValue()).toStrictEqual(false);
+
+            // slice
+            const firstColumn = arrayValueObject.slice([0, 1], [0, 1]);
+            if (!firstColumn) {
+                throw new Error('firstColumn is null');
+            }
+            expect(firstColumn.getFirstCell().getValue()).toStrictEqual(false);
+
+            // transpose
+            const transpose = arrayValueObject.transpose();
+            expect(transpose.getFirstCell().getValue()).toStrictEqual(false);
         });
     });
 });

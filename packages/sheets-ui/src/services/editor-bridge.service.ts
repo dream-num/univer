@@ -222,10 +222,10 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         const { scaleX: precisionScaleX, scaleY: precisionScaleY } = scene.getPrecisionScale();
 
         const scrollXY = scene.getScrollXY(this._selectionRenderService.getViewPort());
-        startX = fixLineWidthByScale(skeleton.convertTransformToOffsetX(startX, scaleX, scrollXY), precisionScaleX);
-        startY = fixLineWidthByScale(skeleton.convertTransformToOffsetY(startY, scaleY, scrollXY), precisionScaleY);
-        endX = fixLineWidthByScale(skeleton.convertTransformToOffsetX(endX, scaleX, scrollXY), precisionScaleX);
-        endY = fixLineWidthByScale(skeleton.convertTransformToOffsetY(endY, scaleY, scrollXY), precisionScaleY);
+        startX = skeleton.convertTransformToOffsetX(startX, scaleX, scrollXY);
+        startY = skeleton.convertTransformToOffsetY(startY, scaleY, scrollXY);
+        endX = skeleton.convertTransformToOffsetX(endX, scaleX, scrollXY);
+        endY = skeleton.convertTransformToOffsetY(endY, scaleY, scrollXY);
 
         const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();

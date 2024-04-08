@@ -214,7 +214,7 @@ export const handleMoveRows = (params: IMoveRowsCommand, targetRange: IRange): I
     ];
 };
 
-export const handleMoveRowsOther = (params: IMoveRowsCommand, targetRange: IRange) => {
+export const handleMoveRowsCommon = (params: IMoveRowsCommand, targetRange: IRange) => {
     const { fromRange, toRange } = params.params || {};
     if (!fromRange || !toRange) {
         return [targetRange];
@@ -266,7 +266,7 @@ export const handleMoveCols = (params: IMoveColsCommand, targetRange: IRange): I
     ];
 };
 
-export const handleMoveColsOther = (params: IMoveColsCommand, targetRange: IRange) => {
+export const handleMoveColsCommon = (params: IMoveColsCommand, targetRange: IRange) => {
     const { fromRange, toRange } = params.params || {};
     if (!fromRange || !toRange) {
         return [targetRange];
@@ -318,7 +318,7 @@ export const handleMoveRange = (param: IMoveRangeCommand, targetRange: IRange) =
     return operators;
 };
 
-export const handleMoveRangeOther = (param: IMoveRangeCommand, targetRange: IRange) => {
+export const handleMoveRangeCommon = (param: IMoveRangeCommand, targetRange: IRange) => {
     const toRange = param.params?.toRange;
     const fromRange = param.params?.fromRange;
     // illegal
@@ -544,7 +544,7 @@ export const handleInsertRangeMoveDown = (param: IInsertRangeMoveDownCommand, ta
     return operators;
 };
 
-export const handleInsertRangeMoveDownOther = (param: IInsertRangeMoveDownCommand, targetRange: IRange) => {
+export const handleInsertRangeMoveDownCommon = (param: IInsertRangeMoveDownCommand, targetRange: IRange) => {
     const range = param.params?.range;
     if (!range) {
         return [targetRange];
@@ -594,7 +594,7 @@ export const handleInsertRangeMoveRight = (param: IInsertRangeMoveRightCommand, 
     return operators;
 };
 
-export const handleInsertRangeMoveRightOther = (param: IInsertRangeMoveRightCommand, targetRange: IRange) => {
+export const handleInsertRangeMoveRightCommon = (param: IInsertRangeMoveRightCommand, targetRange: IRange) => {
     const range = param.params?.range;
     if (!range) {
         return [targetRange];
@@ -648,7 +648,7 @@ export const handleDeleteRangeMoveLeft = (param: IDeleteRangeMoveLeftCommand, ta
     return operators;
 };
 
-export const handleDeleteRangeMoveLeftOther = (param: IDeleteRangeMoveLeftCommand, targetRange: IRange) => {
+export const handleDeleteRangeMoveLeftCommon = (param: IDeleteRangeMoveLeftCommand, targetRange: IRange) => {
     const range = param.params?.range;
     if (!range) {
         return [targetRange];
@@ -711,7 +711,7 @@ export const handleDeleteRangeMoveUp = (param: IDeleteRangeMoveUpCommand, target
     return operators;
 };
 
-export const handleDeleteRangeMoveUpOther = (param: IDeleteRangeMoveUpCommand, targetRange: IRange) => {
+export const handleDeleteRangeMoveUpCommon = (param: IDeleteRangeMoveUpCommand, targetRange: IRange) => {
     const range = param.params?.range;
     if (!range) {
         return [targetRange];
@@ -843,20 +843,20 @@ export const handleDefaultRangeChangeWithEffectRefCommands = (range: IRange, com
     return resultRange;
 };
 
-export const handleOtherDefaultRangeChangeWithEffectRefCommands = (range: IRange, commandInfo: ICommandInfo) => {
+export const handleCommonDefaultRangeChangeWithEffectRefCommands = (range: IRange, commandInfo: ICommandInfo) => {
     let operator: IOperator[] = [];
     switch (commandInfo.id) {
         case EffectRefRangId.DeleteRangeMoveLeftCommandId: {
-            return handleDeleteRangeMoveLeftOther(commandInfo as IDeleteRangeMoveLeftCommand, range);
+            return handleDeleteRangeMoveLeftCommon(commandInfo as IDeleteRangeMoveLeftCommand, range);
         }
         case EffectRefRangId.DeleteRangeMoveUpCommandId: {
-            return handleDeleteRangeMoveUpOther(commandInfo as IDeleteRangeMoveUpCommand, range);
+            return handleDeleteRangeMoveUpCommon(commandInfo as IDeleteRangeMoveUpCommand, range);
         }
         case EffectRefRangId.InsertRangeMoveDownCommandId: {
-            return handleInsertRangeMoveDownOther(commandInfo as IInsertRangeMoveDownCommand, range);
+            return handleInsertRangeMoveDownCommon(commandInfo as IInsertRangeMoveDownCommand, range);
         }
         case EffectRefRangId.InsertRangeMoveRightCommandId: {
-            return handleInsertRangeMoveRightOther(commandInfo as IInsertRangeMoveRightCommand, range);
+            return handleInsertRangeMoveRightCommon(commandInfo as IInsertRangeMoveRightCommand, range);
         }
         case EffectRefRangId.InsertColCommandId: {
             operator = handleInsertCol(commandInfo as IInsertColCommand, range);
@@ -867,13 +867,13 @@ export const handleOtherDefaultRangeChangeWithEffectRefCommands = (range: IRange
             break;
         }
         case EffectRefRangId.MoveColsCommandId: {
-            return handleMoveColsOther(commandInfo as IMoveColsCommand, range);
+            return handleMoveColsCommon(commandInfo as IMoveColsCommand, range);
         }
         case EffectRefRangId.MoveRangeCommandId: {
-            return handleMoveRangeOther(commandInfo as IMoveRangeCommand, range);
+            return handleMoveRangeCommon(commandInfo as IMoveRangeCommand, range);
         }
         case EffectRefRangId.MoveRowsCommandId: {
-            return handleMoveRowsOther(commandInfo as IMoveRowsCommand, range);
+            return handleMoveRowsCommon(commandInfo as IMoveRowsCommand, range);
         }
         case EffectRefRangId.RemoveColCommandId: {
             operator = handleIRemoveCol(commandInfo as IRemoveRowColCommand, range);

@@ -26,7 +26,6 @@ import { DataValidationFormulaService } from './services/dv-formula.service';
 import { DataValidationCustomFormulaService } from './services/dv-custom-formula.service';
 import { RegisterOtherFormulaService } from './services/register-formula.service';
 import { DataValidationRefRangeController } from './controllers/dv-ref-range.controller';
-import { DataValidationFormulaMarkDirty } from './commands/mutations/formula.mutation';
 import { enUS, zhCN } from './locale';
 import { DATA_VALIDATION_PLUGIN_NAME } from './common/const';
 import { DataValidationAutoFillController } from './controllers/dv-auto-fill.controller';
@@ -74,7 +73,6 @@ export class UniverSheetsDataValidationPlugin extends Plugin {
             AddSheetDataValidationCommand,
             AddSheetDataValidationAndOpenCommand,
             UpdateSheetDataValidationRangeCommand,
-            DataValidationFormulaMarkDirty,
 
              // operation
             ShowDataValidationDropdown,

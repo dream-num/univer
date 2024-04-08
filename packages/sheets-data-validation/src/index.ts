@@ -27,7 +27,6 @@ export { DataValidationFormulaService } from './services/dv-formula.service';
 export { DataValidationCustomFormulaService } from './services/dv-custom-formula.service';
 export { RegisterOtherFormulaService } from './services/register-formula.service';
 export { DataValidationRefRangeController } from './controllers/dv-ref-range.controller';
-export { DataValidationFormulaMarkDirty } from './commands/mutations/formula.mutation';
 export { DATA_VALIDATION_PLUGIN_NAME } from './common/const';
 export { DataValidationAutoFillController } from './controllers/dv-auto-fill.controller';
 export { DataValidationCopyPasteController } from './controllers/dv-copy-paste.controller';

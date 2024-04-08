@@ -53,7 +53,7 @@ class WatchRange extends Disposable {
     constructor(
         private readonly _unitId: string,
         private readonly _subUnitId: string,
-        private _range: IRange,
+        private _range: Nullable<IRange>,
         private readonly _callback: WatchRangeCallback
     ) {
         super();
@@ -64,8 +64,11 @@ class WatchRange extends Disposable {
             return;
         }
 
-        const afterRange: IRange = adjustRangeOnMutation(this._range, mutation);
-        if (Rectangle.equals(afterRange, this._range)) {
+        if (!this._range) {
+            return;
+        }
+        const afterRange: Nullable<IRange> = adjustRangeOnMutation(this._range, mutation);
+        if (afterRange && Rectangle.equals(afterRange, this._range)) {
             return false;
         }
 

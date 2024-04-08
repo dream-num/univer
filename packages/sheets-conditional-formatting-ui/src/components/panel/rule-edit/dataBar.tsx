@@ -15,7 +15,7 @@
  */
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { InputNumber, Radio, RadioGroup, Select } from '@univerjs/design';
+import { Checkbox, InputNumber, Radio, RadioGroup, Select } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { createInternalEditorID, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { TextEditor } from '@univerjs/ui';
@@ -142,6 +142,8 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
         return value.value === undefined ? defaultV : value.value;
     });
 
+    const [isShowValue, isShowValueSet] = useState(true);
+
     const getResult = (option: { minValueType: CFValueType ;
                                  minValue: number | string;
                                  maxValueType: CFValueType ;
@@ -208,7 +210,7 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                     {localeService.t('sheet.cf.panel.fillType')}
                 </div>
 
-                <div className={`${stylesBase.mTSm} ${stylesBase.mLXxs} `}>
+                <div className={`${stylesBase.mTSm} ${stylesBase.mLXxs} ${stylesBase.labelContainer} `}>
                     <RadioGroup
                         value={isGradient}
                         onChange={(v) => {
@@ -223,6 +225,10 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                             <span className={styles.text}>{localeService.t('sheet.cf.panel.gradient')}</span>
                         </Radio>
                     </RadioGroup>
+                    <div className={`${styles.utilItem} ${stylesBase.mLXl}`}>
+                        <Checkbox checked={!isShowValue} onChange={(v) => { isShowValueSet(!v); }} />
+                        {localeService.t('sheet.cf.panel.onlyShowDataBar')}
+                    </div>
                 </div>
             </div>
             <div>

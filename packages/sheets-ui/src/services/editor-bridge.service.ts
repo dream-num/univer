@@ -26,7 +26,7 @@ import {
     toDisposable,
 } from '@univerjs/core';
 import type { Engine, IDocumentLayoutObject, Scene } from '@univerjs/engine-render';
-import { convertTextRotation, DeviceInputEventType, fixLineWidthByScale, getCanvasOffsetByEngine } from '@univerjs/engine-render';
+import { convertTextRotation, DeviceInputEventType, getCanvasOffsetByEngine } from '@univerjs/engine-render';
 import type { ISheetLocation } from '@univerjs/sheets';
 import { IEditorService } from '@univerjs/ui';
 import type { KeyCode } from '@univerjs/ui';
@@ -222,10 +222,10 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         const { scaleX: precisionScaleX, scaleY: precisionScaleY } = scene.getPrecisionScale();
 
         const scrollXY = scene.getScrollXY(this._selectionRenderService.getViewPort());
-        startX = fixLineWidthByScale(skeleton.convertTransformToOffsetX(startX, scaleX, scrollXY), precisionScaleX);
-        startY = fixLineWidthByScale(skeleton.convertTransformToOffsetY(startY, scaleY, scrollXY), precisionScaleY);
-        endX = fixLineWidthByScale(skeleton.convertTransformToOffsetX(endX, scaleX, scrollXY), precisionScaleX);
-        endY = fixLineWidthByScale(skeleton.convertTransformToOffsetY(endY, scaleY, scrollXY), precisionScaleY);
+        startX = skeleton.convertTransformToOffsetX(startX, scaleX, scrollXY);
+        startY = skeleton.convertTransformToOffsetY(startY, scaleY, scrollXY);
+        endX = skeleton.convertTransformToOffsetX(endX, scaleX, scrollXY);
+        endY = skeleton.convertTransformToOffsetY(endY, scaleY, scrollXY);
 
         const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();

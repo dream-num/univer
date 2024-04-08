@@ -32,6 +32,11 @@ const TEST_WORKBOOK_DATA_DEMO = (): IWorkbookData => ({
         sheet1: {
             id: 'sheet1',
             cellData: {
+                0: {
+                    6: {
+                        f: '=A1:B2',
+                    },
+                },
                 1: {
                     2: {
                         v: 1,
@@ -63,6 +68,9 @@ const TEST_WORKBOOK_DATA_DEMO = (): IWorkbookData => ({
                     },
                 },
                 14: {
+                    0: {
+                        f: '=A1:B2',
+                    },
                     2: {
                         f: '=Sheet2!A1:B2',
                     },
@@ -157,7 +165,38 @@ describe('Test insert function operation', () => {
     });
 
     describe('update formula', () => {
-        it('Move range', async () => {
+        it('Move range, update reference', async () => {
+            const params: IMoveRangeCommandParams = {
+                fromRange: {
+                    startRow: 0,
+                    startColumn: 0,
+                    endRow: 1,
+                    endColumn: 1,
+                    rangeType: 0,
+                },
+                toRange: {
+                    startRow: 0,
+                    startColumn: 3,
+                    endRow: 1,
+                    endColumn: 4,
+                    rangeType: 0,
+                },
+            };
+
+            expect(await commandService.executeCommand(MoveRangeCommand.id, params)).toBeTruthy();
+            const values = getValues(5, 2, 5, 2);
+            expect(values).toStrictEqual([[{ f: '=SUM(D1:E2)' }]]);
+
+            expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+            const valuesUndo = getValues(5, 2, 5, 2);
+            expect(valuesUndo).toStrictEqual([[{ f: '=SUM(A1:B2)' }]]);
+
+            expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+            const valuesRedo = getValues(5, 2, 5, 2);
+            expect(valuesRedo).toStrictEqual([[{ f: '=SUM(D1:E2)' }]]);
+        });
+
+        it('Move range, update position', async () => {
             const params: IMoveRangeCommandParams = {
                 fromRange: {
                     startRow: 5,
@@ -188,7 +227,54 @@ describe('Test insert function operation', () => {
             expect(valuesRedo).toStrictEqual([[{}, { f: '=SUM(A1:B2)' }]]);
         });
 
-        it('Move rows', async () => {
+        it('Move rows, update reference', async () => {
+            const selectionManager = get(SelectionManagerService);
+            selectionManager.setCurrentSelection({
+                pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+                unitId: 'test',
+                sheetId: 'sheet1',
+            });
+
+            // A1
+            selectionManager.add([
+                {
+                    range: { startRow: 1, startColumn: 0, endRow: 1, endColumn: 0, rangeType: RANGE_TYPE.ROW },
+                    primary: null,
+                    style: null,
+                },
+            ]);
+
+            const params: IMoveRowsCommandParams = {
+                fromRange: {
+                    startRow: 1,
+                    startColumn: 0,
+                    endRow: 1,
+                    endColumn: 19,
+                    rangeType: 1,
+                },
+                toRange: {
+                    startRow: 4,
+                    startColumn: 0,
+                    endRow: 4,
+                    endColumn: 19,
+                    rangeType: 1,
+                },
+            };
+
+            expect(await commandService.executeCommand(MoveRowsCommand.id, params)).toBeTruthy();
+            const values = getValues(5, 2, 5, 2);
+            expect(values).toStrictEqual([[{ f: '=SUM(A1:B4)' }]]);
+
+            expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+            const valuesUndo = getValues(5, 2, 5, 2);
+            expect(valuesUndo).toStrictEqual([[{ f: '=SUM(A1:B2)' }]]);
+
+            expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+            const valuesRedo = getValues(5, 2, 5, 2);
+            expect(valuesRedo).toStrictEqual([[{ f: '=SUM(A1:B4)' }]]);
+        });
+
+        it('Move rows, update reference and position', async () => {
             const selectionManager = get(SelectionManagerService);
             selectionManager.setCurrentSelection({
                 pluginName: NORMAL_SELECTION_PLUGIN_NAME,
@@ -241,7 +327,54 @@ describe('Test insert function operation', () => {
             expect(valuesRedo2).toStrictEqual([[{ f: '=SUM(A1:B9)' }], [{ v: 1, t: CellValueType.NUMBER }]]);
         });
 
-        it('Move columns', async () => {
+        it('Move columns, update reference', async () => {
+            const selectionManager = get(SelectionManagerService);
+            selectionManager.setCurrentSelection({
+                pluginName: NORMAL_SELECTION_PLUGIN_NAME,
+                unitId: 'test',
+                sheetId: 'sheet1',
+            });
+
+            // A1
+            selectionManager.add([
+                {
+                    range: { startRow: 0, startColumn: 0, endRow: 0, endColumn: 0, rangeType: RANGE_TYPE.COLUMN },
+                    primary: null,
+                    style: null,
+                },
+            ]);
+
+            const params: IMoveColsCommandParams = {
+                fromRange: {
+                    startRow: 0,
+                    startColumn: 0,
+                    endRow: 999,
+                    endColumn: 0,
+                    rangeType: 2,
+                },
+                toRange: {
+                    startRow: 0,
+                    startColumn: 4,
+                    endRow: 999,
+                    endColumn: 4,
+                    rangeType: 2,
+                },
+            };
+
+            expect(await commandService.executeCommand(MoveColsCommand.id, params)).toBeTruthy();
+            const values = getValues(0, 6, 0, 6);
+            expect(values).toStrictEqual([[{ f: '=A1:A2' }]]);
+
+            expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+            const valuesUndo = getValues(0, 6, 0, 6);
+            expect(valuesUndo).toStrictEqual([[{ f: '=A1:B2' }]]);
+
+            expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+            const valuesRedo = getValues(0, 6, 0, 6);
+            expect(valuesRedo).toStrictEqual([[{ f: '=A1:A2' }]]);
+        });
+
+        it('Move columns, update reference and position', async () => {
             const selectionManager = get(SelectionManagerService);
             selectionManager.setCurrentSelection({
                 pluginName: NORMAL_SELECTION_PLUGIN_NAME,
@@ -294,7 +427,33 @@ describe('Test insert function operation', () => {
             expect(valuesRedo2).toStrictEqual([[{ f: '=SUM(A1:I2)' }, { v: 1, t: CellValueType.NUMBER }]]);
         });
 
-        it('Insert row', async () => {
+        it('Insert row, update reference', async () => {
+            const params: IInsertRowCommandParams = {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                range: {
+                    startRow: 1,
+                    endRow: 1,
+                    startColumn: 0,
+                    endColumn: 19,
+                },
+                direction: Direction.UP,
+            };
+
+            expect(await commandService.executeCommand(InsertRowCommand.id, params)).toBeTruthy();
+            const values = getValues(0, 6, 0, 6);
+            expect(values).toStrictEqual([[{ f: '=A1:B3' }]]);
+
+            expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+            const valuesUndo = getValues(0, 6, 0, 6);
+            expect(valuesUndo).toStrictEqual([[{ f: '=A1:B2' }]]);
+
+            expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+            const valuesRedo = getValues(0, 6, 0, 6);
+            expect(valuesRedo).toStrictEqual([[{ f: '=A1:B3' }]]);
+        });
+
+        it('Insert row, update reference and position', async () => {
             const params: IInsertRowCommandParams = {
                 unitId: 'test',
                 subUnitId: 'sheet1',
@@ -326,7 +485,34 @@ describe('Test insert function operation', () => {
             expect(valuesRedo2).toStrictEqual([[{ f: '=SUM(A1:B3)' }], [{ v: 1, t: CellValueType.NUMBER }]]);
         });
 
-        it('Insert column', async () => {
+        it('Insert column, update reference', async () => {
+            const params: IInsertColCommandParams = {
+                unitId: 'test',
+                subUnitId: 'sheet1',
+                range: {
+                    startColumn: 1,
+                    endColumn: 1,
+                    startRow: 0,
+                    endRow: 14,
+                },
+                direction: Direction.LEFT,
+                cellValue: {},
+            };
+
+            expect(await commandService.executeCommand(InsertColCommand.id, params)).toBeTruthy();
+            const values = getValues(14, 0, 14, 0);
+            expect(values).toStrictEqual([[{ f: '=A1:C2' }]]);
+
+            expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+            const valuesUndo = getValues(14, 0, 14, 0);
+            expect(valuesUndo).toStrictEqual([[{ f: '=A1:B2' }]]);
+
+            expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+            const valuesRedo = getValues(14, 0, 14, 0);
+            expect(valuesRedo).toStrictEqual([[{ f: '=A1:C2' }]]);
+        });
+
+        it('Insert column, update reference and position', async () => {
             const params: IInsertColCommandParams = {
                 unitId: 'test',
                 subUnitId: 'sheet1',
@@ -359,7 +545,30 @@ describe('Test insert function operation', () => {
             expect(valuesRedo2).toStrictEqual([[{ f: '=SUM(A1:C2)' }, { v: 1, t: CellValueType.NUMBER }]]);
         });
 
-        it('Remove row', async () => {
+        it('Remove row, update reference', async () => {
+            const params: IRemoveRowColCommandParams = {
+                range: {
+                    startRow: 1,
+                    endRow: 1,
+                    startColumn: 0,
+                    endColumn: 19,
+                },
+            };
+
+            expect(await commandService.executeCommand(RemoveRowCommand.id, params)).toBeTruthy();
+            const values = getValues(0, 6, 0, 6);
+            expect(values).toStrictEqual([[{ f: '=A1:B1' }]]);
+
+            expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+            const valuesUndo = getValues(0, 6, 0, 6);
+            expect(valuesUndo).toStrictEqual([[{ f: '=A1:B2' }]]);
+
+            expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+            const valuesRedo = getValues(0, 6, 0, 6);
+            expect(valuesRedo).toStrictEqual([[{ f: '=A1:B1' }]]);
+        });
+
+        it('Remove row, update reference and position', async () => {
             const params: IRemoveRowColCommandParams = {
                 range: {
                     startRow: 1,
@@ -388,7 +597,30 @@ describe('Test insert function operation', () => {
             expect(valuesRedo2).toStrictEqual([[{ f: '=SUM(A1:B1)' }], [{ v: 1, t: CellValueType.NUMBER }]]);
         });
 
-        it('Remove column', async () => {
+        it('Remove column, update reference', async () => {
+            const params: IRemoveRowColCommandParams = {
+                range: {
+                    startColumn: 1,
+                    endColumn: 1,
+                    startRow: 0,
+                    endRow: 2,
+                },
+            };
+
+            expect(await commandService.executeCommand(RemoveColCommand.id, params)).toBeTruthy();
+            const values = getValues(14, 0, 14, 0);
+            expect(values).toStrictEqual([[{ f: '=A1:A2' }]]);
+
+            expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+            const valuesUndo = getValues(14, 0, 14, 0);
+            expect(valuesUndo).toStrictEqual([[{ f: '=A1:B2' }]]);
+
+            expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+            const valuesRedo = getValues(14, 0, 14, 0);
+            expect(valuesRedo).toStrictEqual([[{ f: '=A1:A2' }]]);
+        });
+
+        it('Remove column, update reference and position', async () => {
             const params: IRemoveRowColCommandParams = {
                 range: {
                     startColumn: 1,
@@ -465,6 +697,30 @@ describe('Test insert function operation', () => {
             expect(valuesRedo).toStrictEqual([[{ f: '=SUM(A1:B2)' }, { v: 1, t: CellValueType.NUMBER }]]);
         });
 
+        it('Delete move left, update reference', async () => {
+            const params: IDeleteRangeMoveLeftCommandParams = {
+                range: {
+                    startRow: 0,
+                    startColumn: 1,
+                    endRow: 1,
+                    endColumn: 1,
+                    rangeType: 0,
+                },
+            };
+
+            expect(await commandService.executeCommand(DeleteRangeMoveLeftCommand.id, params)).toBeTruthy();
+            const values = getValues(14, 0, 14, 0);
+            expect(values).toStrictEqual([[{ f: '=A1:A2' }]]);
+
+            expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+            const valuesUndo = getValues(14, 0, 14, 0);
+            expect(valuesUndo).toStrictEqual([[{ f: '=A1:B2' }]]);
+
+            expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+            const valuesRedo = getValues(14, 0, 14, 0);
+            expect(valuesRedo).toStrictEqual([[{ f: '=A1:A2' }]]);
+        });
+
         it('Delete move up, value on the top', async () => {
             const params: IDeleteRangeMoveUpCommandParams = {
                 range: {
@@ -511,6 +767,30 @@ describe('Test insert function operation', () => {
             expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
             const valuesRedo = getValues(4, 2, 5, 2);
             expect(valuesRedo).toStrictEqual([[{ f: '=SUM(A1:B2)' }], [{ v: 1, t: CellValueType.NUMBER }]]);
+        });
+
+        it('Delete move up, update reference', async () => {
+            const params: IDeleteRangeMoveUpCommandParams = {
+                range: {
+                    startRow: 1,
+                    startColumn: 0,
+                    endRow: 1,
+                    endColumn: 1,
+                    rangeType: 0,
+                },
+            };
+
+            expect(await commandService.executeCommand(DeleteRangeMoveUpCommand.id, params)).toBeTruthy();
+            const values = getValues(0, 6, 0, 6);
+            expect(values).toStrictEqual([[{ f: '=A1:B1' }]]);
+
+            expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+            const valuesUndo = getValues(0, 6, 0, 6);
+            expect(valuesUndo).toStrictEqual([[{ f: '=A1:B2' }]]);
+
+            expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+            const valuesRedo = getValues(0, 6, 0, 6);
+            expect(valuesRedo).toStrictEqual([[{ f: '=A1:B1' }]]);
         });
 
         it('Insert move down, value on the top', async () => {
@@ -561,6 +841,30 @@ describe('Test insert function operation', () => {
             expect(valuesRedo).toStrictEqual([[{ f: '=SUM(A1:B2)' }], [{ v: 1, t: CellValueType.NUMBER }]]);
         });
 
+        it('Insert move down, update reference', async () => {
+            const params: InsertRangeMoveDownCommandParams = {
+                range: {
+                    startRow: 1,
+                    startColumn: 0,
+                    endRow: 1,
+                    endColumn: 1,
+                    rangeType: 0,
+                },
+            };
+
+            expect(await commandService.executeCommand(InsertRangeMoveDownCommand.id, params)).toBeTruthy();
+            const values = getValues(0, 6, 0, 6);
+            expect(values).toStrictEqual([[{ f: '=A1:B3' }]]);
+
+            expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+            const valuesUndo = getValues(0, 6, 0, 6);
+            expect(valuesUndo).toStrictEqual([[{ f: '=A1:B2' }]]);
+
+            expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+            const valuesRedo = getValues(0, 6, 0, 6);
+            expect(valuesRedo).toStrictEqual([[{ f: '=A1:B3' }]]);
+        });
+
         it('Insert move right, value on the left', async () => {
             const params: InsertRangeMoveRightCommandParams = {
                 range: {
@@ -607,6 +911,30 @@ describe('Test insert function operation', () => {
             expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
             const valuesRedo = getValues(5, 3, 5, 4);
             expect(valuesRedo).toStrictEqual([[{ f: '=SUM(A1:B2)' }, { v: 1, t: CellValueType.NUMBER }]]);
+        });
+
+        it('Insert move right, update reference', async () => {
+            const params: InsertRangeMoveRightCommandParams = {
+                range: {
+                    startRow: 0,
+                    startColumn: 1,
+                    endRow: 1,
+                    endColumn: 1,
+                    rangeType: 0,
+                },
+            };
+
+            expect(await commandService.executeCommand(InsertRangeMoveRightCommand.id, params)).toBeTruthy();
+            const values = getValues(14, 0, 14, 0);
+            expect(values).toStrictEqual([[{ f: '=A1:C2' }]]);
+
+            expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+            const valuesUndo = getValues(14, 0, 14, 0);
+            expect(valuesUndo).toStrictEqual([[{ f: '=A1:B2' }]]);
+
+            expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+            const valuesRedo = getValues(14, 0, 14, 0);
+            expect(valuesRedo).toStrictEqual([[{ f: '=A1:C2' }]]);
         });
 
         it('set name', async () => {

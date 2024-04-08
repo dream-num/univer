@@ -278,13 +278,7 @@ export function refRangeFormula(oldFormulaData: IFormulaData,
             return;
         }
 
-        const { startRow: oldStartRow, startColumn: oldStartColumn } = oldCell;
-        const { startRow: newStartRow, startColumn: newStartColumn } = newCell;
-
-        if (oldStartRow === newStartRow && oldStartColumn === newStartColumn) {
-            return;
-        }
-
+        // Note: The formula may only update the reference and not offset the position. The situation where the position is not shifted cannot be intercepted here.
         if (isReverse) {
             rangeList.unshift({
                 oldCell,
@@ -457,8 +451,8 @@ function getRedoFormulaData(rangeList: IRangeChange[], oldFormulaMatrix: ObjectM
         const newFormula = newFormulaMatrix.getValue(oldStartRow, oldStartColumn) || oldFormulaMatrix.getValue(oldStartRow, oldStartColumn);
         const newValue = formulaDataItemToCellData(newFormula);
 
-        redoFormulaData.setValue(newStartRow, newStartColumn, newValue);
         redoFormulaData.setValue(oldStartRow, oldStartColumn, { f: null, si: null });
+        redoFormulaData.setValue(newStartRow, newStartColumn, newValue);
     });
 
     return redoFormulaData.clone();
@@ -482,8 +476,8 @@ function getUndoFormulaData(rangeList: IRangeChange[], oldFormulaMatrix: ObjectM
         const oldFormula = oldFormulaMatrix.getValue(oldStartRow, oldStartColumn);
         const oldValue = formulaDataItemToCellData(oldFormula);
 
-        undoFormulaData.setValue(oldStartRow, oldStartColumn, oldValue);
         undoFormulaData.setValue(newStartRow, newStartColumn, { f: null, si: null });
+        undoFormulaData.setValue(oldStartRow, oldStartColumn, oldValue);
     });
 
     return undoFormulaData.clone();

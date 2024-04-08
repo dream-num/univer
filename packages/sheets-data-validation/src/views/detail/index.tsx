@@ -42,7 +42,6 @@ const debounceExecuteFactory = (commandService: ICommandService) => debounce(
 );
 
 export function DataValidationDetail() {
-    const [editorId] = useState(() => Tools.generateRandomId(6));
     const [key, setKey] = useState(0);
     const dataValidationPanelService = useDependency(DataValidationPanelService);
     const activeRuleInfo = useObservable(dataValidationPanelService.activeRule$, dataValidationPanelService.activeRule)!;

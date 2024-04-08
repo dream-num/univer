@@ -14,6 +14,21 @@
  * limitations under the License.
  */
 
+import dayjs from 'dayjs';
+import advancedFormat from 'dayjs/plugin/advancedFormat';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
+import localeData from 'dayjs/plugin/localeData';
+import weekday from 'dayjs/plugin/weekday';
+import weekOfYear from 'dayjs/plugin/weekOfYear';
+import weekYear from 'dayjs/plugin/weekYear';
+
+dayjs.extend(customParseFormat);
+dayjs.extend(advancedFormat);
+dayjs.extend(weekday);
+dayjs.extend(localeData);
+dayjs.extend(weekOfYear);
+dayjs.extend(weekYear);
+
 export { Avatar, type IAvatarProps } from './components/avatar';
 export { Button, type ButtonSize, type ButtonType, type IButtonProps } from './components/button';
 export { CascaderList, type ICascaderListProps } from './components/cascader-list';

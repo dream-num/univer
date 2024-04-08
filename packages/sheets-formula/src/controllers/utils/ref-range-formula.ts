@@ -207,7 +207,6 @@ export function refRangeFormula(oldFormulaData: IFormulaData,
     // When undoing and redoing, the traversal order may be different. Record the range list of all single formula offsets, and then retrieve the traversal as needed.
     const rangeList: IRangeChange[] = [];
     let isReverse = false;
-
     oldFormulaMatrix.forValue((row, column, cell) => {
         // Offset is only needed when there is a formula
         if (!isFormulaDataItem(cell)) {
@@ -459,7 +458,7 @@ function getRedoFormulaData(rangeList: IRangeChange[], oldFormulaMatrix: ObjectM
         const newValue = formulaDataItemToCellData(newFormula);
 
         redoFormulaData.setValue(newStartRow, newStartColumn, newValue);
-        redoFormulaData.setValue(oldStartRow, oldStartColumn, null);
+        redoFormulaData.setValue(oldStartRow, oldStartColumn, { f: null, si: null });
     });
 
     return redoFormulaData.clone();
@@ -484,7 +483,7 @@ function getUndoFormulaData(rangeList: IRangeChange[], oldFormulaMatrix: ObjectM
         const oldValue = formulaDataItemToCellData(oldFormula);
 
         undoFormulaData.setValue(oldStartRow, oldStartColumn, oldValue);
-        undoFormulaData.setValue(newStartRow, newStartColumn, null);
+        undoFormulaData.setValue(newStartRow, newStartColumn, { f: null, si: null });
     });
 
     return undoFormulaData.clone();
@@ -510,7 +509,10 @@ export function formulaDataItemToCellData(formulaDataItem: IFormulaDataItem): IC
     const checkFormulaId = isFormulaId(si);
 
     if (!checkFormulaString && !checkFormulaId) {
-        return null;
+        return {
+            f: null,
+            si: null,
+        };
     }
 
     const cellData: ICellData = {};

@@ -91,7 +91,7 @@ describe('Ref range formula test', () => {
 
             result = formulaDataItemToCellData(formulaDataItem);
 
-            expect(result).toBeNull();
+            expect(result).toStrictEqual({ f: null, si: null });
         });
 
         it('isFormulaDataItem', () => {

@@ -748,6 +748,7 @@ describe('Test conditional formatting service', () => {
                             startPoint: 0,
                             value: 0,
                             isGradient: true,
+                            isShowValue: true,
                         },
                     });
                     expect(three).toEqual({
@@ -756,6 +757,7 @@ describe('Test conditional formatting service', () => {
                             startPoint: 0,
                             value: 33.333333333333336,
                             isGradient: true,
+                            isShowValue: true,
                         },
                     });
 
@@ -765,6 +767,7 @@ describe('Test conditional formatting service', () => {
                             startPoint: 0,
                             value: 66.66666666666667,
                             isGradient: true,
+                            isShowValue: true,
                         },
                     });
                     expect(five).toEqual({
@@ -773,6 +776,7 @@ describe('Test conditional formatting service', () => {
                             startPoint: 0,
                             value: 100,
                             isGradient: true,
+                            isShowValue: true,
                         },
                     });
                 });

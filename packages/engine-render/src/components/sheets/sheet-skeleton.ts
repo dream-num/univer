@@ -1759,6 +1759,13 @@ export class SpreadsheetSkeleton extends Skeleton {
         if (!documentData.documentStyle) {
             documentData.documentStyle = {};
         }
+
+        // Fix https://github.com/dream-num/univer/issues/1586
+        documentData.documentStyle.pageSize = {
+            width: Number.POSITIVE_INFINITY,
+            height: Number.POSITIVE_INFINITY,
+        };
+
         documentData.documentStyle.renderConfig = renderConfig;
 
         const paragraphs = documentData.body.paragraphs || [];

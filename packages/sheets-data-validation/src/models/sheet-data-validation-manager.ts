@@ -69,11 +69,22 @@ export class SheetDataValidationManager extends DataValidationManager<ISheetData
         this._ruleMatrix = new RuleMatrix(matrix);
     }
 
-    override addRule(rule: ISheetDataValidationRule, index?: number): void {
+
+    private _addRuleSideEffect(rule: ISheetDataValidationRule) {
+        const { unitId, subUnitId } = this;
         this._ruleMatrix.addRule(rule);
-        this._dataValidationCacheService.addRule(this.unitId, this.subUnitId, rule);
-        this._dataValidationFormulaService.addRule(this.unitId, this.subUnitId, rule.uid, rule.formula1, rule.formula2);
-        this._dataValidationCustomFormulaService.addRule(this.unitId, this.subUnitId, rule);
+        this._dataValidationCacheService.addRule(unitId, subUnitId, rule);
+        this._dataValidationFormulaService.addRule(unitId, subUnitId, rule.uid, rule.formula1, rule.formula2);
+        this._dataValidationCustomFormulaService.addRule(unitId, subUnitId, rule);
+    }
+
+    override addRule(rule: ISheetDataValidationRule | ISheetDataValidationRule[], index?: number): void {
+        const rules = Array.isArray(rule) ? rule : [rule];
+
+        rules.forEach(item => {
+            this._addRuleSideEffect(item);
+        })
+
         super.addRule(rule, index);
     }
 

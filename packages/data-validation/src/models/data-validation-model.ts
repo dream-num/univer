@@ -78,7 +78,7 @@ export class DataValidationModel<T extends IDataValidationRule = IDataValidation
         return manager;
     }
 
-    addRule(unitId: string, subUnitId: string, rule: T, index?: number) {
+    addRule(unitId: string, subUnitId: string, rule: T | T[], index?: number) {
         try {
             const manager = this.ensureManager(unitId, subUnitId);
             manager.addRule(rule, index);

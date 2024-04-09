@@ -66,22 +66,29 @@ export class DataValidationManager<T extends IDataValidationRule> extends Dispos
         return this._dataValidations.findIndex((rule) => rule.uid === id);
     }
 
-    addRule(rule: T, index?: number) {
+    addRule(rule: T | T[], index?: number) {
+        const rules = Array.isArray(rule) ? rule : [rule];
         if (typeof index === 'number' && index < this._dataValidations.length) {
-            this._dataValidations.splice(index, 0, rule);
+            this._dataValidations.splice(index, 0, ...rules);
         } else {
-            this._dataValidations.push(rule);
+            this._dataValidations.push(...rules);
         }
 
-        this._dataValidationMap.set(rule.uid, rule);
+        rules.forEach(item => {
+            this._dataValidationMap.set(item.uid, item);
+        })
+
         this._notice();
     }
 
     removeRule(ruleId: string) {
         const index = this._dataValidations.findIndex((item) => item.uid === ruleId);
-        this._dataValidations.splice(index, 1);
-        this._dataValidationMap.delete(ruleId);
-        this._notice();
+        if (index > -1) {
+            this._dataValidations.splice(index, 1);
+            this._dataValidationMap.delete(ruleId);
+            this._notice();
+        }
+
     }
 
     updateRule(ruleId: string, payload: IUpdateRulePayload) {

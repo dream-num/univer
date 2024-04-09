@@ -34,13 +34,7 @@ export const AddDataValidationMutation: ICommand<IAddDataValidationMutationParam
         }
         const { unitId, subUnitId, rule, index } = params;
         const dataValidationModel = accessor.get(DataValidationModel);
-        if (Array.isArray(rule)) {
-            rule.forEach((ruleItem) => {
-                dataValidationModel.addRule(unitId, subUnitId, ruleItem, index);
-            });
-        } else {
-            dataValidationModel.addRule(unitId, subUnitId, rule!, index);
-        }
+        dataValidationModel.addRule(unitId, subUnitId, rule, index);
 
         return true;
     },

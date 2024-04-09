@@ -20,21 +20,21 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { EffectRefRangId } from '../type';
 import {
     handleDeleteRangeMoveLeft,
-    handleDeleteRangeMoveLeftOther,
+    handleDeleteRangeMoveLeftCommon,
     handleDeleteRangeMoveUp,
-    handleDeleteRangeMoveUpOther,
+    handleDeleteRangeMoveUpCommon,
     handleInsertCol,
     handleInsertRangeMoveDown,
-    handleInsertRangeMoveDownOther,
+    handleInsertRangeMoveDownCommon,
     handleInsertRangeMoveRight,
-    handleInsertRangeMoveRightOther,
+    handleInsertRangeMoveRightCommon,
     handleInsertRow,
     handleIRemoveCol,
     handleIRemoveRow,
     handleMoveRange,
-    handleMoveRangeOther,
+    handleMoveRangeCommon,
     handleMoveRows,
-    handleMoveRowsOther,
+    handleMoveRowsCommon,
     runRefRangeMutations,
 } from '../util';
 
@@ -187,7 +187,7 @@ describe('test ref-range move', () => {
             });
         });
     });
-    describe('handleMoveRowsOther', () => {
+    describe('handleMoveRowsCommon', () => {
         // see docs/tldr/handMoveRowsCols.tldr
         const startCol = 0;
         const endCol = 999;
@@ -214,11 +214,11 @@ describe('test ref-range move', () => {
                     endColumn: 2,
                 };
 
-                const resRange2_1 = handleMoveRowsOther(
+                const resRange2_1 = handleMoveRowsCommon(
                     { id: EffectRefRangId.MoveRowsCommandId, params: { toRange, fromRange } },
                     targetRange2_1
                 );
-                const resRange2_2 = handleMoveRowsOther(
+                const resRange2_2 = handleMoveRowsCommon(
                     { id: EffectRefRangId.MoveRowsCommandId, params: { toRange, fromRange } },
                     targetRange2_2
                 );
@@ -242,11 +242,11 @@ describe('test ref-range move', () => {
                     endColumn: 10,
                 };
 
-                const resRange1_1 = handleMoveRowsOther(
+                const resRange1_1 = handleMoveRowsCommon(
                     { id: EffectRefRangId.MoveRowsCommandId, params: { toRange, fromRange } },
                     targetRange1_1
                 );
-                const resRange1_2 = handleMoveRowsOther(
+                const resRange1_2 = handleMoveRowsCommon(
                     { id: EffectRefRangId.MoveRowsCommandId, params: { toRange, fromRange } },
                     targetRange1_2
                 );
@@ -327,7 +327,7 @@ describe('test ref-range move', () => {
         });
     });
 
-    describe('handleInsertRangeMoveDownOther', () => {
+    describe('handleInsertRangeMoveDownCommon', () => {
         let range: IRange;
         beforeEach(() => {
             range = { startRow: 2, endRow: 2, startColumn: 0, endColumn: 5 };
@@ -341,7 +341,7 @@ describe('test ref-range move', () => {
                 endColumn: 5,
             };
 
-            const res = handleInsertRangeMoveDownOther(
+            const res = handleInsertRangeMoveDownCommon(
                 {
                     params: { range },
                     id: EffectRefRangId.InsertRangeMoveDownCommandId,
@@ -375,7 +375,7 @@ describe('test ref-range move', () => {
                 endColumn: 10,
             };
 
-            const res = handleInsertRangeMoveDownOther(
+            const res = handleInsertRangeMoveDownCommon(
                 {
                     params: { range },
                     id: EffectRefRangId.InsertRangeMoveDownCommandId,
@@ -439,7 +439,7 @@ describe('test ref-range move', () => {
         });
     });
 
-    describe('handleInsertRangeMoveRightOther', () => {
+    describe('handleInsertRangeMoveRightCommon', () => {
         let range: IRange;
         beforeEach(() => {
             range = { startColumn: 2, endColumn: 2, startRow: 0, endRow: 5 };
@@ -453,7 +453,7 @@ describe('test ref-range move', () => {
                 endRow: 5,
             };
 
-            const res = handleInsertRangeMoveRightOther(
+            const res = handleInsertRangeMoveRightCommon(
                 {
                     params: { range },
                     id: EffectRefRangId.InsertRangeMoveRightCommandId,
@@ -487,7 +487,7 @@ describe('test ref-range move', () => {
                 endRow: 10,
             };
 
-            const res = handleInsertRangeMoveRightOther(
+            const res = handleInsertRangeMoveRightCommon(
                 {
                     params: { range },
                     id: EffectRefRangId.InsertRangeMoveRightCommandId,
@@ -563,7 +563,7 @@ describe('test ref-range move', () => {
         });
     });
 
-    describe('handleDeleteRangeMoveLeftOther', () => {
+    describe('handleDeleteRangeMoveLeftCommon', () => {
         let range: IRange;
         beforeEach(() => {
             range = { startColumn: 2, endColumn: 2, startRow: 0, endRow: 5 };
@@ -577,7 +577,7 @@ describe('test ref-range move', () => {
                 endColumn: 5,
             };
 
-            const res = handleDeleteRangeMoveLeftOther(
+            const res = handleDeleteRangeMoveLeftCommon(
                 {
                     params: { range },
                     id: EffectRefRangId.DeleteRangeMoveLeftCommandId,
@@ -605,7 +605,7 @@ describe('test ref-range move', () => {
                 endColumn: 5,
             };
 
-            const res = handleDeleteRangeMoveLeftOther(
+            const res = handleDeleteRangeMoveLeftCommon(
                 {
                     params: { range },
                     id: EffectRefRangId.DeleteRangeMoveLeftCommandId,
@@ -626,7 +626,7 @@ describe('test ref-range move', () => {
         });
     });
 
-    describe('handleDeleteRangeMoveUpOther', () => {
+    describe('handleDeleteRangeMoveUpCommon', () => {
         let range: IRange;
         beforeEach(() => {
             range = { startRow: 2, endRow: 2, startColumn: 0, endColumn: 5 };
@@ -640,7 +640,7 @@ describe('test ref-range move', () => {
                 endColumn: 5,
             };
 
-            const res = handleDeleteRangeMoveUpOther(
+            const res = handleDeleteRangeMoveUpCommon(
                 {
                     params: { range },
                     id: EffectRefRangId.DeleteRangeMoveUpCommandId,
@@ -668,7 +668,7 @@ describe('test ref-range move', () => {
                 endColumn: 10,
             };
 
-            const res = handleDeleteRangeMoveUpOther(
+            const res = handleDeleteRangeMoveUpCommon(
                 {
                     params: { range },
                     id: EffectRefRangId.DeleteRangeMoveUpCommandId,
@@ -988,7 +988,7 @@ describe('test ref-range move', () => {
         });
     });
 
-    describe('handleMoveRangeOther', () => {
+    describe('handleMoveRangeCommon', () => {
         describe('intersects', () => {
             let toRange: IRange;
             let fromRange: IRange;
@@ -1010,12 +1010,12 @@ describe('test ref-range move', () => {
                     startColumn: 6,
                     endRow: 10,
                 };
-                const res1 = handleMoveRangeOther(
+                const res1 = handleMoveRangeCommon(
                     { id: EffectRefRangId.MoveRangeCommandId, params: { toRange, fromRange } },
                     range1
                 );
 
-                const res2 = handleMoveRangeOther(
+                const res2 = handleMoveRangeCommon(
                     { id: EffectRefRangId.MoveRangeCommandId, params: { toRange, fromRange } },
                     range2
                 );

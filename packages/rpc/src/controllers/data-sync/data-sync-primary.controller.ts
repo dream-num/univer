@@ -34,7 +34,7 @@ import {
     RemoteInstanceServiceName,
     RemoteSyncServiceName,
 } from '../../services/remote-instance/remote-instance.service';
-import { IRPChannelService } from '../../services/rpc/channel.service';
+import { IRPCChannelService } from '../../services/rpc/channel.service';
 import { fromModule, toModule } from '../../services/rpc/rpc.service';
 
 /**
@@ -50,7 +50,7 @@ export class DataSyncPrimaryController extends RxDisposable {
         @Inject(Injector) private readonly _injector: Injector,
         @ICommandService private readonly _commandService: ICommandService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @IRPChannelService private readonly _rpcChannelService: IRPChannelService,
+        @IRPCChannelService private readonly _rpcChannelService: IRPCChannelService,
         @IRemoteSyncService private readonly _remoteSyncService: IRemoteSyncService
     ) {
         super();
@@ -76,6 +76,7 @@ export class DataSyncPrimaryController extends RxDisposable {
     private _init(): void {
         this._univerInstanceService.sheetAdded$.pipe(takeUntil(this.dispose$)).subscribe((sheet) => {
             this._syncingUnits.add(sheet.getUnitId());
+
             // If a sheet is created, it should sync the data to the worker thread.
             this._remoteInstanceService.createInstance({
                 unitID: sheet.getUnitId(),
@@ -96,7 +97,9 @@ export class DataSyncPrimaryController extends RxDisposable {
             // Mutations executed on the main thread should be synced to the worker thread.
             this._commandService.onCommandExecuted((commandInfo, options) => {
                 const { type, params } = commandInfo;
-                const unitID = (params as any)?.unitId || ''; // TODO@wzhudev: use a universal way to get unitId
+                // TODO@wzhudev: use a universal way to get unitId
+                const unitID = (params as any)?.unitId || '';
+
                 if (
                     // only sync mutations to the worker thread
                     type === CommandType.MUTATION &&

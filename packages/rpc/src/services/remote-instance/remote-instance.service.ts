@@ -45,6 +45,7 @@ export class RemoteSyncPrimaryService implements IRemoteSyncService {
 }
 
 export const RemoteInstanceServiceName = 'univer.remote-instance-service';
+
 /**
  * This service is provided by the replica Univer.
  *
@@ -60,7 +61,8 @@ export interface IRemoteInstanceService {
     disposeInstance(params: { unitID: string }): Promise<boolean>;
     syncMutation(params: { mutationInfo: IMutationInfo }): Promise<boolean>;
 }
-export class RemoteInstanceReplicaService implements IRemoteInstanceService {
+
+export class WebWorkerRemoteInstanceService implements IRemoteInstanceService {
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
@@ -96,7 +98,7 @@ export class RemoteInstanceReplicaService implements IRemoteInstanceService {
                     return !!this._univerInstanceService.createSheet(snapshot);
                 default:
                     throw new Error(
-                        `[RemoteInstanceReplicaService]: cannot create replica for document type: ${type}.`
+                        `[WebWorkerRemoteInstanceService]: cannot create replica for document type: ${type}.`
                     );
             }
         } catch (err: unknown) {

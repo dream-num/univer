@@ -903,7 +903,7 @@ type MutationsAffectRange =
     | IRemoveSheetMutationParams
     | IMoveRowsMutationParams
     | IMoveColumnsMutationParams
-    | IRemoveColMutationParams
+    | IRemoveRowsMutationParams
     | IRemoveColMutationParams
     | IInsertColMutationParams
     | IInsertRowMutationParams
@@ -952,16 +952,20 @@ export function adjustRangeOnMutation(range: Readonly<IRange>, mutation: IMutati
             baseRangeOperator = handleBaseRemoveRange((params as IRemoveColMutationParams).range, range);
             if (baseRangeOperator) {
                 baseRangeOperator.type = OperatorType.HorizontalMove;
+            } else {
+                baseRangeOperator = { step: 0, length: 0, type: OperatorType.Delete };
             }
             break;
         case RemoveRowMutation.id:
-            baseRangeOperator = handleBaseRemoveRange((params as IRemoveRowsMutationParams).range, range);
+            baseRangeOperator = handleBaseRemoveRange(rotateRange((params as IRemoveRowsMutationParams).range), rotateRange(range));
             if (baseRangeOperator) {
                 baseRangeOperator.type = OperatorType.VerticalMove;
+            } else {
+                baseRangeOperator = { step: 0, length: 0, type: OperatorType.Delete };
             }
             break;
         case InsertRowMutation.id:
-            baseRangeOperator = handleBaseInsertRange((params as IInsertRowMutationParams).range, range);
+            baseRangeOperator = handleBaseInsertRange(rotateRange((params as IInsertRowMutationParams).range), rotateRange(range));
             baseRangeOperator.type = OperatorType.VerticalMove;
             break;
         case InsertColMutation.id:

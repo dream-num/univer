@@ -890,8 +890,11 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            maxRange: { name: '最大值范围', detail: '确定最大值的实际单元格区域。' },
+            criteriaRange1: { name: '条件范围 1', detail: '条件1 一组用于条件计算的单元格。' },
+            criteria1: { name: '条件 1', detail: '条件 1 用于确定哪些单元格是最大值的条件，格式为数字、表达式或文本。' },
+            criteriaRange2: { name: '条件范围 2', detail: '附加区域及其关联条件。 最多可以输入 127 个区域/条件对。' },
+            criteria2: { name: '条件 2', detail: '附加区域及其关联条件。 最多可以输入 127 个区域/条件对。' },
         },
     },
     MEDIAN: {

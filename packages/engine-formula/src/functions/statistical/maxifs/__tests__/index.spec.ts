@@ -16,7 +16,7 @@
 
 import { describe, expect, it } from 'vitest';
 import { FUNCTION_NAMES_STATISTICAL } from '../../function-names';
-import { Maxifs } from '..';
+import { Maxifs } from '../index';
 import { ArrayValueObject, transformToValue } from '../../../../engine/value-object/array-value-object';
 import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 
@@ -25,12 +25,12 @@ describe('Test maxifs function', () => {
 
     describe('Maxifs', () => {
         it('Range and criteria', async () => {
-            const maxRange = ArrayValueObject.create(/*ts*/ `{
+            const maxRange = ArrayValueObject.create(`{
                 1;
                 2;
                 3
             }`);
-            const range = ArrayValueObject.create(/*ts*/ `{
+            const range = ArrayValueObject.create(`{
                 2;
                 3;
                 4
@@ -42,19 +42,19 @@ describe('Test maxifs function', () => {
         });
 
         it('Range and array criteria', async () => {
-            const maxRange = ArrayValueObject.create(/*ts*/ `{
+            const maxRange = ArrayValueObject.create(`{
                 1;
                 2;
                 3
             }`);
 
-            const range = ArrayValueObject.create(/*ts*/ `{
+            const range = ArrayValueObject.create(`{
                 2;
                 3;
                 4
             }`);
 
-            const criteria = ArrayValueObject.create(/*ts*/ `{
+            const criteria = ArrayValueObject.create(`{
                 >2;
                 >3;
                 >4
@@ -65,13 +65,13 @@ describe('Test maxifs function', () => {
         });
 
         it('2 ranges and criteria', async () => {
-            const maxRange = ArrayValueObject.create(/*ts*/ `{
+            const maxRange = ArrayValueObject.create(`{
                 1;
                 2;
                 3
             }`);
 
-            const range1 = ArrayValueObject.create(/*ts*/ `{
+            const range1 = ArrayValueObject.create(`{
                 2;
                 3;
                 4
@@ -79,7 +79,7 @@ describe('Test maxifs function', () => {
 
             const criteria1 = StringValueObject.create('>2');
 
-            const range2 = ArrayValueObject.create(/*ts*/ `{
+            const range2 = ArrayValueObject.create(`{
                 3;
                 4;
                 5
@@ -92,25 +92,25 @@ describe('Test maxifs function', () => {
         });
 
         it('2 ranges and criteria, 1 array criteria', async () => {
-            const maxRange = ArrayValueObject.create(/*ts*/ `{
+            const maxRange = ArrayValueObject.create(`{
                 1;
                 2;
                 3
             }`);
 
-            const range1 = ArrayValueObject.create(/*ts*/ `{
+            const range1 = ArrayValueObject.create(`{
                 2;
                 3;
                 4
             }`);
 
-            const criteria1 = ArrayValueObject.create(/*ts*/ `{
+            const criteria1 = ArrayValueObject.create(`{
                 >2;
                 >3;
                 >4
             }`);
 
-            const range2 = ArrayValueObject.create(/*ts*/ `{
+            const range2 = ArrayValueObject.create(`{
                 3;
                 4;
                 5
@@ -123,31 +123,31 @@ describe('Test maxifs function', () => {
         });
 
         it('2 ranges and criteria, 2 array criteria', async () => {
-            const maxRange = ArrayValueObject.create(/*ts*/ `{
+            const maxRange = ArrayValueObject.create(`{
                 1;
                 2;
                 3
             }`);
 
-            const range1 = ArrayValueObject.create(/*ts*/ `{
+            const range1 = ArrayValueObject.create(`{
                 2;
                 3;
                 4
             }`);
 
-            const criteria1 = ArrayValueObject.create(/*ts*/ `{
+            const criteria1 = ArrayValueObject.create(`{
                 >2;
                 >3;
                 >4
             }`);
 
-            const range2 = ArrayValueObject.create(/*ts*/ `{
+            const range2 = ArrayValueObject.create(`{
                 3;
                 4;
                 5
             }`);
 
-            const criteria2 = ArrayValueObject.create(/*ts*/ `{
+            const criteria2 = ArrayValueObject.create(`{
                 4;
                 4;
                 4;

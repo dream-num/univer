@@ -27,6 +27,7 @@ import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { DEFAULT_DOCUMENT_DATA_CN } from '../data';
 
 import { DebuggerPlugin } from '../plugins/debugger';
+
 import { locales } from './locales';
 
 // package info

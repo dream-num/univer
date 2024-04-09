@@ -15,8 +15,7 @@
  */
 
 import { BooleanNumber, type IDocumentBody, type IStyleBase } from '@univerjs/core';
-// @ts-ignore
-import opentype from 'opentype.js/dist/opentype.module';
+import opentype from 'opentype.js';
 import type { Nullable } from 'vitest';
 import { DEFAULT_FONTFACE_PLANE } from '../../../../basics/const';
 import { EMOJI_REG } from '../../../../basics/tools';
@@ -35,13 +34,13 @@ export interface IOpenTypeGlyphInfo {
     char: string;
     start: number;
     end: number;
-    glyph: any;
-    font: any;
+    glyph: Nullable<opentype.Glyph>;
+    font: Nullable<opentype.Font>;
     kerning: number;
     boundingBox: Nullable<IBoundingBox>;
 }
 
-const fontCache = new Map<string, any>();
+const fontCache = new Map<string, opentype.Font>();
 
 function shapeChunk(
     content: string,
@@ -80,20 +79,20 @@ function shapeChunk(
 
     let font = fontCache.get(fontInfo.fullName);
     if (!font) {
-        font = (opentype as any).parse(fontBuffer);
+        font = opentype.parse(fontBuffer);
         fontCache.set(fontInfo.fullName, font);
     }
 
-    const option = {
-        kerning: true,
-        features: {
-            liga: false,
-        },
-    };
+    // const option = {
+    //     kerning: true,
+    //     features: {
+    //         liga: false,
+    //     },
+    // };
 
     const results = [];
 
-    const glyphs = font.stringToGlyphs(content, option);
+    const glyphs = font.stringToGlyphs(content);
     const chars = content.match(/[\s\S]/gu) ?? [];
 
     let gi = 0;
@@ -161,7 +160,7 @@ function kerningAdjustment(glyphs: IOpenTypeGlyphInfo[]) {
 
     for (let i = 1; i < glyphs.length; i++) {
         const { font, glyph } = glyphs[i];
-        if (lastFont !== font || font == null) {
+        if (lastFont !== font || font == null || lastGlyph == null || glyph == null) {
             lastFont = font;
             lastGlyph = glyph;
             continue;

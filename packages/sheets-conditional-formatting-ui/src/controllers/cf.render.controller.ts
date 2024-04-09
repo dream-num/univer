@@ -108,6 +108,12 @@ export class RenderController extends Disposable {
             }
             if (result.dataBar) {
                 cloneCell.dataBar = result.dataBar;
+                if (!result.dataBar.isShowValue) {
+                    if (!cloneCell.fontRenderExtension) {
+                        cloneCell.fontRenderExtension = {};
+                    }
+                    cloneCell.fontRenderExtension.isSkip = true;
+                }
             }
             if (result.iconSet) {
                 cloneCell.iconSet = result.iconSet;

@@ -142,7 +142,13 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
         return value.value === undefined ? defaultV : value.value;
     });
 
-    const [isShowValue, isShowValueSet] = useState(true);
+    const [isShowValue, isShowValueSet] = useState(() => {
+        const defaultV = true;
+        if (!rule) {
+            return defaultV;
+        }
+        return rule.isShowValue === undefined ? defaultV : !!rule.isShowValue;
+    });
 
     const getResult = (option: { minValueType: CFValueType ;
                                  minValue: number | string;
@@ -150,6 +156,7 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                                  maxValue: number | string;
                                  isGradient: string;
                                  positiveColor: string;
+                                 isShowValue: boolean;
                                  nativeColor: string; }) => {
         const config: { min: IValueConfig;
                         max: IValueConfig;
@@ -162,16 +169,16 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
             positiveColor: option.positiveColor,
             nativeColor: option.nativeColor,
         };
-        return { config, type: CFRuleType.dataBar };
+        return { config, type: CFRuleType.dataBar, isShowValue: option.isShowValue };
     };
     useEffect(() => {
         const dispose = interceptorManager.intercept(interceptorManager.getInterceptPoints().submit, {
             handler() {
-                return getResult({ isGradient, minValue, minValueType, maxValue, maxValueType, positiveColor, nativeColor });
+                return getResult({ isGradient, minValue, minValueType, maxValue, maxValueType, positiveColor, nativeColor, isShowValue });
             },
         });
         return dispose as () => void;
-    }, [isGradient, minValue, minValueType, maxValue, maxValueType, positiveColor, nativeColor, interceptorManager]);
+    }, [isGradient, minValue, minValueType, maxValue, maxValueType, positiveColor, nativeColor, interceptorManager, isShowValue]);
 
     const _handleChange = (option: { minValueType: CFValueType ;
                                      minValue: number | string;
@@ -179,6 +186,7 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                                      maxValue: number | string;
                                      isGradient: string;
                                      positiveColor: string;
+                                     isShowValue: boolean;
                                      nativeColor: string; }) => {
         props.onChange(getResult(option));
     };
@@ -186,11 +194,11 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
     const handlePositiveColorChange = (color: string) => {
         positiveColorSet(color);
 
-        _handleChange({ isGradient, minValue, minValueType, maxValue, maxValueType, positiveColor: color, nativeColor });
+        _handleChange({ isGradient, minValue, minValueType, maxValue, maxValueType, positiveColor: color, nativeColor, isShowValue });
     };
     const handleNativeColorChange = (color: string) => {
         nativeColorSet(color);
-        _handleChange({ isGradient, minValue, minValueType, maxValue, maxValueType, positiveColor, nativeColor: color });
+        _handleChange({ isGradient, minValue, minValueType, maxValue, maxValueType, positiveColor, nativeColor: color, isShowValue });
     };
 
     const isShowInput = (type: string) => {
@@ -203,7 +211,7 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                 {localeService.t('sheet.cf.panel.styleRule')}
             </div>
             <div className={`${styles.cfPreviewWrap}`}>
-                <Preview rule={getResult({ isGradient, minValue, minValueType, maxValue, maxValueType, positiveColor, nativeColor }) as IConditionalFormattingRuleConfig} />
+                <Preview rule={getResult({ isGradient, minValue, minValueType, maxValue, maxValueType, positiveColor, nativeColor, isShowValue }) as IConditionalFormattingRuleConfig} />
             </div>
             <div>
                 <div className={stylesBase.label}>
@@ -215,7 +223,7 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                         value={isGradient}
                         onChange={(v) => {
                             isGradientSet(v as string);
-                            _handleChange({ isGradient: v as string, minValue, minValueType, maxValue, maxValueType, positiveColor, nativeColor });
+                            _handleChange({ isGradient: v as string, minValue, minValueType, maxValue, maxValueType, positiveColor, nativeColor, isShowValue });
                         }}
                     >
                         <Radio value="0">
@@ -226,7 +234,13 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                         </Radio>
                     </RadioGroup>
                     <div className={`${styles.utilItem} ${stylesBase.mLXl}`}>
-                        <Checkbox checked={!isShowValue} onChange={(v) => { isShowValueSet(!v); }} />
+                        <Checkbox
+                            checked={!isShowValue}
+                            onChange={(v) => {
+                                isShowValueSet(!v);
+                                _handleChange({ isGradient: v as string, minValue, minValueType, maxValue, maxValueType, positiveColor, nativeColor, isShowValue: !v });
+                            }}
+                        />
                         {localeService.t('sheet.cf.panel.onlyShowDataBar')}
                     </div>
                 </div>
@@ -261,7 +275,7 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                             minValueTypeSet(v as CFValueType);
                             const value = createDefaultValueByValueType(v as CFValueType, 10);
                             minValueSet(value);
-                            _handleChange({ isGradient, minValue: value, minValueType: v as CFValueType, maxValue, maxValueType, positiveColor, nativeColor });
+                            _handleChange({ isGradient, minValue: value, minValueType: v as CFValueType, maxValue, maxValueType, positiveColor, nativeColor, isShowValue });
                         }}
                     />
 
@@ -273,7 +287,7 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                         value={minValue}
                         onChange={(v) => {
                             minValueSet(v || 0);
-                            _handleChange({ isGradient, minValue: v || 0, minValueType, maxValue, maxValueType, positiveColor, nativeColor });
+                            _handleChange({ isGradient, minValue: v || 0, minValueType, maxValue, maxValueType, positiveColor, nativeColor, isShowValue });
                         }}
                     />
                 </div>
@@ -286,7 +300,7 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                             maxValueTypeSet(v as CFValueType);
                             const value = createDefaultValueByValueType(v as CFValueType, 90);
                             maxValueSet(value);
-                            _handleChange({ isGradient, minValue, minValueType, maxValue: value, maxValueType: v as CFValueType, positiveColor, nativeColor });
+                            _handleChange({ isGradient, minValue, minValueType, maxValue: value, maxValueType: v as CFValueType, positiveColor, nativeColor, isShowValue });
                         }}
                     />
                     <InputText
@@ -297,7 +311,7 @@ export const DataBarStyleEditor = (props: IStyleEditorProps) => {
                         value={maxValue}
                         onChange={(v) => {
                             maxValueSet(v || 0);
-                            _handleChange({ isGradient, minValue, minValueType, maxValue: v || 0, maxValueType, positiveColor, nativeColor });
+                            _handleChange({ isGradient, minValue, minValueType, maxValue: v || 0, maxValueType, positiveColor, nativeColor, isShowValue });
                         }}
                     />
                 </div>

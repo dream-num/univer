@@ -721,6 +721,7 @@ describe('Test conditional formatting service', () => {
                     stopIfTrue: false,
                     rule: {
                         type: CFRuleType.dataBar,
+                        isShowValue: true,
                         config: {
                             min: { value: 2, type: CFValueType.num },
                             max: { value: 5, type: CFValueType.num },

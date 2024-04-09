@@ -329,7 +329,9 @@ export const RuleList = (props: IRuleListProps) => {
                                 return (
                                     <div key={`${rule.cfId}`}>
                                         <div
-                                            onMouseEnter={() => currentRuleRangesSet(rule.ranges)}
+                                            onMouseMove={() => {
+                                                rule.ranges !== currentRuleRanges && currentRuleRangesSet(rule.ranges);
+                                            }}
                                             onMouseLeave={() => currentRuleRangesSet([])}
                                             onClick={() => onClick(rule)}
                                             className={`${styles.ruleItem} ${draggingId === index ? styles.active : ''}`}

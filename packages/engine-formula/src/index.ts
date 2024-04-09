@@ -28,6 +28,7 @@ export type {
     IUnitSheetNameMap,
     INumfmtItemMap,
     IDirtyUnitOtherFormulaMap,
+    IDirtyUnitSheetDefinedNameMap,
 } from './basics/common';
 export { isInDirtyRange } from './basics/dirty';
 export { ErrorType } from './basics/error-type';
@@ -42,7 +43,8 @@ export {
     SetArrayFormulaDataMutation,
     SetArrayFormulaDataUndoMutationFactory,
 } from './commands/mutations/set-array-formula-data.mutation';
-export { RemoveDefinedNameMutation, SetDefinedNameMutation } from './commands/mutations/set-defined-name.mutation';
+
+export { RemoveDefinedNameMutation, SetDefinedNameMutation, type ISetDefinedNameMutationSearchParam, type ISetDefinedNameMutationParam } from './commands/mutations/set-defined-name.mutation';
 export {
     RemoveFeatureCalculationMutation,
     SetFeatureCalculationMutation,
@@ -139,7 +141,8 @@ export { SetNumfmtFormulaDataMutation } from './commands/mutations/set-numfmt-fo
 export type { ISetNumfmtFormulaDataMutationParams } from './commands/mutations/set-numfmt-formula-data.mutation';
 export { isReferenceString } from './basics/regex';
 export { matchRefDrawToken } from './basics/match-token';
-export { IDefinedNamesService, DefinedNamesService } from './services/defined-names.service';
+export { IDefinedNamesService, DefinedNamesService, type IDefinedNamesServiceParam, type IDefinedNameMapItem } from './services/defined-names.service';
+export { isFormulaTransformable, transformFormula } from './engine/utils/relative-formula';
 export { IFormulaRuntimeService, FormulaRuntimeService } from './services/runtime.service';
 export { IFormulaCurrentConfigService, FormulaCurrentConfigService } from './services/current-data.service';
 

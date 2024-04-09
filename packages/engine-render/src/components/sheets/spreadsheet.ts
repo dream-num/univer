@@ -90,7 +90,6 @@ export class Spreadsheet extends SheetComponent {
         }
 
         this._initialDefaultExtension();
-
         this.makeDirty(true);
     }
 
@@ -133,7 +132,6 @@ export class Spreadsheet extends SheetComponent {
             ? bounds?.diffBounds.map((bound) => spreadsheetSkeleton.getRowColumnSegmentByViewBound(bound))
             : undefined;
         const extensions = this.getExtensionsByOrder();
-
         for (const extension of extensions) {
             extension.draw(ctx, parentScale, spreadsheetSkeleton, diffRanges);
         }
@@ -157,6 +155,10 @@ export class Spreadsheet extends SheetComponent {
         if (!spreadsheetSkeleton) {
             return;
         }
+
+        // this.onPointerDownObserver.add((evt) => {
+        //     evt.offsetX;
+        // });
         const { rowHeightAccumulation, columnWidthAccumulation, rowHeaderWidth, columnHeaderHeight } =
             spreadsheetSkeleton;
 

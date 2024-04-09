@@ -104,7 +104,6 @@
 
         &-container {
             display: grid;
-            gap: var(--margin-xs) 0;
 
             box-sizing: border-box;
             padding: var(--padding-sm);
@@ -116,8 +115,14 @@
             .toolbar-group {
                 flex-wrap: wrap;
 
-                &:not(:last-child)::after {
-                    content: initial;
+                &:not(:last-child) {
+                    &::after {
+                        content: initial;
+                    }
+
+                    > * {
+                        margin-bottom: var(--margin-xs);
+                    }
                 }
             }
         }

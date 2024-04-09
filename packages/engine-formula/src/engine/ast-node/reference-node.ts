@@ -27,7 +27,6 @@ import {
 } from '../../basics/regex';
 import { matchToken } from '../../basics/token';
 import { IFormulaCurrentConfigService } from '../../services/current-data.service';
-import { IDefinedNamesService } from '../../services/defined-names.service';
 import { IFormulaRuntimeService } from '../../services/runtime.service';
 import { ISuperTableService } from '../../services/super-table.service';
 import { LexerNode } from '../analysis/lexer-node';
@@ -93,7 +92,6 @@ export class ReferenceNode extends BaseAstNode {
 
 export class ReferenceNodeFactory extends BaseAstNodeFactory {
     constructor(
-        @IDefinedNamesService private readonly _definedNamesService: IDefinedNamesService,
         @ISuperTableService private readonly _superTableService: ISuperTableService,
         @IFormulaRuntimeService private readonly _formulaRuntimeService: IFormulaRuntimeService,
         @IFunctionService private readonly _functionService: IFunctionService,

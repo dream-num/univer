@@ -45,7 +45,6 @@ export const InputSize = {
     render() {
         return (
             <>
-                <Input size="mini" />
                 <Input size="small" />
                 <Input />
                 <Input size="large" />

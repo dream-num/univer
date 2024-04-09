@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommand, IRange } from '@univerjs/core';
+import type { ICommand, IRange, Nullable } from '@univerjs/core';
 import {
     CommandType,
     ICommandService,
@@ -24,7 +24,6 @@ import {
     sequenceExecute,
 } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
-import type { Nullable } from 'vitest';
 
 import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../../services/selection-manager.service';
 import type { ISetRowHiddenMutationParams, ISetRowVisibleMutationParams } from '../mutations/set-row-visible.mutation';

@@ -16,6 +16,7 @@
 
 import type { IFreeze, IRange, IWorksheetData, Nullable } from '@univerjs/core';
 import {
+    Direction,
     Disposable,
     ICommandService,
     IUniverInstanceService,
@@ -24,7 +25,7 @@ import {
     toDisposable,
 } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { SelectionManagerService } from '@univerjs/sheets';
+import { ScrollToCellOperation, SelectionManagerService } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
 import { ScrollCommand } from '../commands/commands/set-scroll.command';
@@ -32,7 +33,8 @@ import { VIEWPORT_KEY } from '../common/keys';
 import { ScrollManagerService } from '../services/scroll-manager.service';
 import type { ISheetSkeletonManagerParam } from '../services/sheet-skeleton-manager.service';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
-import { MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '../commands/commands/set-selection.command';
+import type { IExpandSelectionCommandParams } from '../commands/commands/set-selection.command';
+import { ExpandSelectionCommand, MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '../commands/commands/set-selection.command';
 import { getSheetObject } from './utils/component-tools';
 
 const SHEET_NAVIGATION_COMMANDS = [MoveSelectionCommand.id, MoveSelectionEnterAndTabCommand.id];
@@ -72,9 +74,64 @@ export class ScrollController extends Disposable {
             this._commandService.onCommandExecuted((command) => {
                 if (SHEET_NAVIGATION_COMMANDS.includes(command.id)) {
                     this._scrollToSelection();
+                } else if (command.id === ScrollToCellOperation.id) {
+                    const param = command.params as IRange;
+                    this._scrollToSelectionByDirection(param);
+                } else if (command.id === ExpandSelectionCommand.id) {
+                    const param = command.params as IExpandSelectionCommandParams;
+                    this._scrollToSelectionForExpand(param);
                 }
             })
         );
+    }
+
+    private _scrollToSelectionForExpand(param: IExpandSelectionCommandParams) {
+        setTimeout(() => {
+            const selection = this._selectionManagerService.getLast();
+            if (selection == null) {
+                return;
+            }
+
+            const { startRow, startColumn, endRow, endColumn } = selection.range;
+
+            const bounds = this._getViewportBounding();
+            if (bounds == null) {
+                return;
+            }
+
+            const { startRow: viewportStartRow, startColumn: viewportStartColumn, endRow: viewportEndRow, endColumn: viewportEndColumn } = bounds;
+
+            let row = 0;
+            let column = 0;
+
+            if (startRow > viewportStartRow) {
+                row = endRow;
+            } else if (endRow < viewportEndRow) {
+                row = startRow;
+            } else {
+                row = viewportStartRow;
+            }
+
+            if (startColumn > viewportStartColumn) {
+                column = endColumn;
+            } else if (endColumn < viewportEndColumn) {
+                column = startColumn;
+            } else {
+                column = viewportStartColumn;
+            }
+
+            if (param.direction === Direction.DOWN) {
+                row = endRow;
+            } else if (param.direction === Direction.UP) {
+                row = startRow;
+            } else if (param.direction === Direction.RIGHT) {
+                column = endColumn;
+            } else if (param.direction === Direction.LEFT) {
+                column = startColumn;
+            }
+
+            this._scrollToCell(row, column);
+        }, 0);
     }
 
     private _getFreeze(): Nullable<IFreeze> {
@@ -251,6 +308,42 @@ export class ScrollController extends Disposable {
         return getSheetObject(this._currentUniverService, this._renderManagerService);
     }
 
+    private _scrollToSelectionByDirection(range: IRange) {
+        const bounds = this._getViewportBounding();
+        if (bounds == null) {
+            return false;
+        }
+        const {
+            startRow: viewportStartRow,
+            startColumn: viewportStartColumn,
+            endRow: viewportEndRow,
+            endColumn: viewportEndColumn,
+        } = bounds;
+
+        let row = 0;
+        let column = 0;
+
+        const { startRow, startColumn, endRow, endColumn } = range;
+
+        if (startRow >= viewportStartRow) {
+            row = endRow;
+        }
+
+        if (endRow <= viewportEndRow) {
+            row = startRow;
+        }
+
+        if (startColumn >= viewportStartColumn) {
+            column = endColumn;
+        }
+
+        if (endColumn <= viewportEndColumn) {
+            column = startColumn;
+        }
+
+        this._scrollToCell(row, column);
+    }
+
     private _scrollToSelection(targetIsActualRowAndColumn = true) {
         const selection = this._selectionManagerService.getLast();
         if (selection == null) {
@@ -262,6 +355,26 @@ export class ScrollController extends Disposable {
         const selectionStartColumn = targetIsActualRowAndColumn ? actualColumn : startColumn;
 
         this._scrollToCell(selectionStartRow, selectionStartColumn);
+    }
+
+    private _getViewportBounding() {
+        const scene = this._getSheetObject()?.scene;
+        if (scene == null) {
+            return;
+        }
+
+        const viewport = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
+        if (viewport == null) {
+            return;
+        }
+
+        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+        if (skeleton == null) {
+            return;
+        }
+
+        const bounds = viewport.getBounding();
+        return skeleton.getRowColumnSegment(bounds);
     }
 
     private _scrollToCell(row: number, column: number): boolean {
@@ -299,13 +412,16 @@ export class ScrollController extends Disposable {
             xSplit: freezeXSplit,
         } = worksheet.getFreeze();
 
-        const bounds = viewport.getBounding();
+        const bounds = this._getViewportBounding();
+        if (bounds == null) {
+            return false;
+        }
         const {
             startRow: viewportStartRow,
             startColumn: viewportStartColumn,
             endRow: viewportEndRow,
             endColumn: viewportEndColumn,
-        } = skeleton.getRowColumnSegment(bounds);
+        } = bounds;
 
         let startSheetViewRow: number | undefined;
         let startSheetViewColumn: number | undefined;

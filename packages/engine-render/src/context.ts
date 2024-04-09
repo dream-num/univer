@@ -206,46 +206,56 @@ export class UniverRenderingContext2D implements CanvasRenderingContext2D {
 
     // fontStretch: CanvasFontStretch;
     get fontStretch() {
+        // @ts-ignore
         return this._context.fontStretch;
     }
 
     set fontStretch(val: CanvasFontStretch) {
+        // @ts-ignore
         this._context.fontStretch = val;
     }
 
     // fontVariantCaps: CanvasFontVariantCaps;
     get fontVariantCaps() {
+        // @ts-ignore
         return this._context.fontVariantCaps;
     }
 
     set fontVariantCaps(val: CanvasFontVariantCaps) {
+        // @ts-ignore
         this._context.fontVariantCaps = val;
     }
 
     // letterSpacing: string;
     get letterSpacing() {
+        // @ts-ignore
         return this._context.letterSpacing;
     }
 
     set letterSpacing(val: string) {
+        // @ts-ignore
         this._context.letterSpacing = val;
     }
 
     // textRendering: CanvasTextRendering;
     get textRendering() {
+        // @ts-ignore
         return this._context.textRendering;
     }
 
     set textRendering(val: CanvasTextRendering) {
+        // @ts-ignore
         this._context.textRendering = val;
     }
 
     // wordSpacing: string;
     get wordSpacing() {
+        // @ts-ignore
         return this._context.wordSpacing;
     }
 
     set wordSpacing(val: string) {
+        // @ts-ignore
         this._context.wordSpacing = val;
     }
 

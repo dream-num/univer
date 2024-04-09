@@ -52,7 +52,7 @@ pnpm dev:demo
 
 ### Architecture
 
-Please refer to the architecture doc. The [Chinese version](https://univer.ai/guides/architecture/architecture/).
+Please refer to the [architecture doc](https://github.com/dream-num/univer/wiki/Univer-Architecture).
 
 ### Source code organization
 

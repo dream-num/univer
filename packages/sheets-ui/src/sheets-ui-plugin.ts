@@ -62,6 +62,11 @@ import { SheetSkeletonManagerService } from './services/sheet-skeleton-manager.s
 import { ShortcutExperienceService } from './services/shortcut-experience.service';
 import { IStatusBarService, StatusBarService } from './services/status-bar.service';
 import { SheetCanvasView } from './views/sheet-canvas-view';
+import { HoverController } from './controllers/hover.controller';
+import { HoverManagerService } from './services/hover-manager.service';
+import { CellAlertManagerService } from './services/cell-alert-manager.service';
+import { CellAlertController } from './controllers/cell-alert.controller';
+import { CellCustomRenderController } from './controllers/cell-custom-render.controller';
 import { SheetCanvasPopManagerService } from './services/canvas-pop-manager.service';
 
 export class UniverSheetsUIPlugin extends Plugin {
@@ -105,7 +110,9 @@ export class UniverSheetsUIPlugin extends Plugin {
                 ],
                 [IStatusBarService, { useClass: StatusBarService }],
                 [IMarkSelectionService, { useClass: MarkSelectionService }],
+                [HoverManagerService],
                 [SheetCanvasPopManagerService],
+                [CellAlertManagerService],
 
                 // controllers
                 [ActiveWorksheetController],
@@ -133,6 +140,9 @@ export class UniverSheetsUIPlugin extends Plugin {
                 [StatusBarController],
                 [EditingController],
                 [MarkSelectionController],
+                [HoverController],
+                [CellAlertController],
+                [CellCustomRenderController],
             ] as Dependency[]
         ).forEach((d) => injector.add(d));
     }

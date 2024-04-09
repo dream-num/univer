@@ -15,7 +15,7 @@
  */
 
 import type { IExecutionOptions, IMutationInfo, IWorkbookData } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { ICommandService, ILogService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
 
 export interface IRemoteSyncMutationOptions extends IExecutionOptions {
@@ -65,7 +65,8 @@ export interface IRemoteInstanceService {
 export class WebWorkerRemoteInstanceService implements IRemoteInstanceService {
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @ICommandService private readonly _commandService: ICommandService
+        @ICommandService private readonly _commandService: ICommandService,
+        @ILogService private readonly _logService: ILogService
     ) {}
 
     whenReady(): Promise<true> {
@@ -73,7 +74,13 @@ export class WebWorkerRemoteInstanceService implements IRemoteInstanceService {
     }
 
     async syncMutation(params: { mutationInfo: IMutationInfo }): Promise<boolean> {
-        return this._commandService.syncExecuteCommand(params.mutationInfo.id, params.mutationInfo.params, {
+        const { id, params: mutationParams } = params.mutationInfo;
+        if (!this._commandService.hasCommand(id)) {
+            this._logService.debug('[RemoteInstanceReplicaService]', `command "${id}" not found. Skip sync mutation.`);
+            return true;
+        }
+
+        return this._commandService.syncExecuteCommand(id, mutationParams, {
             onlyLocal: true,
             fromSync: true,
         });

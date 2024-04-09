@@ -17,6 +17,7 @@
 import type { ICellData, IMutationInfo, IRange } from '@univerjs/core';
 import {
     Disposable,
+    isFormulaId,
     isFormulaString,
     IUniverInstanceService,
     LifecycleStages,
@@ -27,7 +28,7 @@ import {
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
-import type { ICellDataWithSpanInfo, ISheetClipboardHook } from '@univerjs/sheets-ui';
+import type { ICellDataWithSpanInfo, ICopyPastePayload, ISheetClipboardHook, ISheetRangeLocation } from '@univerjs/sheets-ui';
 import { COPY_TYPE, ISheetClipboardService } from '@univerjs/sheets-ui';
 import type { IAccessor } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
@@ -59,71 +60,49 @@ export class FormulaClipboardController extends Disposable {
     }
 
     private _pasteFormulaHook(): ISheetClipboardHook {
-        const specialPasteFormulaHook: ISheetClipboardHook = {
+        return {
             id: SPECIAL_PASTE_FORMULA,
             priority: 10,
-            specialPasteInfo: {
-                label: 'specialPaste.formula',
-            },
-            onPasteCells: (pasteFrom, pasteTo, data, payload) => {
-                const copyInfo = {
-                    copyType: payload.copyType || COPY_TYPE.COPY,
-                    copyRange: pasteFrom?.range,
-                };
-                const pastedRange = pasteTo.range;
-                const matrix = data;
-                const workbook = this._currentUniverSheet.getCurrentUniverSheetInstance();
-                const unitId = workbook.getUnitId();
-                const subUnitId = workbook.getActiveSheet().getSheetId();
-
-                return this._injector.invoke((accessor) =>
-                    getSetCellFormulaMutations(
-                        unitId,
-                        subUnitId,
-                        pastedRange,
-                        matrix,
-                        accessor,
-                        copyInfo,
-                        this._lexerTreeBuilder,
-                        true
-                    )
-                );
-            },
+            specialPasteInfo: { label: 'specialPaste.formula' },
+            onPasteCells: (pasteFrom, pasteTo, data, payload) => this._onPasteCells(pasteFrom, pasteTo, data, payload, true),
         };
-
-        return specialPasteFormulaHook;
     }
 
     private _pasteWithFormulaHook(): ISheetClipboardHook {
-        const specialPasteFormulaHook: ISheetClipboardHook = {
+        return {
             id: DEFAULT_PASTE_FORMULA,
             priority: 10,
-            onPasteCells: (pasteFrom, pasteTo, data, payload) => {
-                const copyInfo = {
-                    copyType: payload.copyType || COPY_TYPE.COPY,
-                    copyRange: pasteFrom?.range,
-                };
-                const pastedRange = pasteTo.range;
-                const matrix = data;
-                const workbook = this._currentUniverSheet.getCurrentUniverSheetInstance();
-                const unitId = workbook.getUnitId();
-                const subUnitId = workbook.getActiveSheet().getSheetId();
-
-                return this._injector.invoke((accessor) =>
-                    getSetCellFormulaMutations(
-                        unitId,
-                        subUnitId,
-                        pastedRange,
-                        matrix,
-                        accessor,
-                        copyInfo,
-                        this._lexerTreeBuilder
-                    )
-                );
-            },
+            onPasteCells: (pasteFrom, pasteTo, data, payload) => this._onPasteCells(pasteFrom, pasteTo, data, payload, false),
         };
+    }
 
-        return specialPasteFormulaHook;
+    private _onPasteCells(
+        pasteFrom: ISheetRangeLocation | null,
+        pasteTo: ISheetRangeLocation,
+        data: ObjectMatrix<ICellDataWithSpanInfo>,
+        payload: ICopyPastePayload,
+        isSpecialPaste: boolean
+    ) {
+        const copyInfo = {
+            copyType: payload.copyType || COPY_TYPE.COPY,
+            copyRange: pasteFrom?.range,
+        };
+        const pastedRange = pasteTo.range;
+        const matrix = data;
+        const workbook = this._currentUniverSheet.getCurrentUniverSheetInstance();
+        const unitId = workbook.getUnitId();
+        const subUnitId = workbook.getActiveSheet().getSheetId();
+
+        return this._injector.invoke((accessor) => getSetCellFormulaMutations(
+            unitId,
+            subUnitId,
+            pastedRange,
+            matrix,
+            accessor,
+            copyInfo,
+            this._lexerTreeBuilder,
+            isSpecialPaste
+        ));
     }
 }
 
@@ -165,14 +144,25 @@ export function getSetCellFormulaMutations(
 
     matrix.forValue((row, col, value) => {
         const originalFormula = value.f || '';
-        const valueObject: ICellDataWithSpanInfo = {};
+        const originalFormulaId = value.si || '';
 
+        let valueObject: ICellDataWithSpanInfo = {};
         // Paste the formula only, you also need to process some regular values
         if (isSpecialPaste) {
-            valueObject.v = value.v;
+            valueObject = Tools.deepClone(value);
         }
 
-        if (isFormulaString(originalFormula) && copyRowLength && copyColumnLength) {
+        if (!copyRowLength || !copyColumnLength) {
+            return;
+        }
+
+        // Directly reuse when there is a formula id
+        if (isFormulaId(originalFormulaId)) {
+            valueObject.si = originalFormulaId;
+            valueObject.f = null;
+            valueObject.v = null;
+            valueObject.p = null;
+        } else if (isFormulaString(originalFormula)) {
             const rowIndex = row % copyRowLength;
             const colIndex = col % copyColumnLength;
 

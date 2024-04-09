@@ -131,6 +131,13 @@ export interface IExecutionOptions {
 export type CommandListener = (commandInfo: Readonly<ICommandInfo>, options?: IExecutionOptions) => void;
 
 export interface ICommandService {
+    /**
+     * Check if a command is already registered at the current command service.
+     *
+     * @param commandId The id of the command.
+     */
+    hasCommand(commandId: string): boolean;
+
     registerCommand(command: ICommand<object, unknown>): IDisposable;
 
     registerMultipleCommand(command: ICommand<object, unknown>): IDisposable;
@@ -177,6 +184,10 @@ export class CommandRegistry {
         });
     }
 
+    hasCommand(id: string): boolean {
+        return this._commands.has(id);
+    }
+
     getCommand(id: string): [ICommand] | null {
         if (!this._commands.has(id)) {
             return null;
@@ -187,6 +198,12 @@ export class CommandRegistry {
 }
 
 interface ICommandExecutionStackItem extends ICommandInfo {}
+
+export const NilCommand: ICommand = {
+    id: 'nil',
+    type: CommandType.COMMAND,
+    handler: () => true,
+};
 
 export class CommandService implements ICommandService {
     private readonly _commandRegistry: CommandRegistry;
@@ -206,6 +223,10 @@ export class CommandService implements ICommandService {
     ) {
         this._commandRegistry = new CommandRegistry();
         this._registerCommand(NilCommand);
+    }
+
+    hasCommand(commandId: string): boolean {
+        return this._commandRegistry.hasCommand(commandId);
     }
 
     registerCommand(command: ICommand): IDisposable {
@@ -467,9 +488,3 @@ export function sequenceExecuteAsync(
     const promises = tasks.map((task) => () => commandService.executeCommand(task.id, task.params, options));
     return sequenceAsync(promises);
 }
-
-export const NilCommand: ICommand = {
-    id: 'nil',
-    type: CommandType.COMMAND,
-    handler: () => true,
-};

@@ -15,7 +15,7 @@
  */
 
 import type { ICommandInfo, IRange, Nullable } from '@univerjs/core';
-import { RANGE_TYPE, Rectangle } from '@univerjs/core';
+import { ObjectMatrix, queryObjectMatrix, Range, RANGE_TYPE, Rectangle } from '@univerjs/core';
 
 import type {
     IDeleteRangeMoveLeftCommand,
@@ -214,6 +214,28 @@ export const handleMoveRows = (params: IMoveRowsCommand, targetRange: IRange): I
     ];
 };
 
+export const handleMoveRowsOther = (params: IMoveRowsCommand, targetRange: IRange) => {
+    const { fromRange, toRange } = params.params || {};
+    if (!fromRange || !toRange) {
+        return null;
+    }
+
+    const { startRow: fromRow } = fromRange;
+    const { startRow: toRow } = toRange;
+
+    const count = toRange.endRow - toRange.startRow + 1;
+
+    const matrix = new ObjectMatrix();
+
+    Range.foreach(targetRange, (row, col) => {
+        matrix.setValue(row, col, 1);
+    });
+
+    matrix.moveRows(fromRow, count, toRow);
+
+    return queryObjectMatrix(matrix, (value) => value === 1);
+};
+
 export const handleMoveCols = (params: IMoveColsCommand, targetRange: IRange): IOperator[] => {
     const { fromRange, toRange } = params.params || {};
     if (!toRange || !fromRange) {
@@ -241,6 +263,28 @@ export const handleMoveCols = (params: IMoveColsCommand, targetRange: IRange): I
             length: result.length || 0,
         },
     ];
+};
+
+export const handleMoveColsOther = (params: IMoveColsCommand, targetRange: IRange) => {
+    const { fromRange, toRange } = params.params || {};
+    if (!fromRange || !toRange) {
+        return null;
+    }
+
+    const { startColumn: fromCol } = fromRange;
+    const { startColumn: toCol } = toRange;
+
+    const count = toRange.endColumn - toRange.startColumn + 1;
+
+    const matrix = new ObjectMatrix();
+
+    Range.foreach(targetRange, (row, col) => {
+        matrix.setValue(row, col, 1);
+    });
+
+    matrix.moveColumns(fromCol, count, toCol);
+
+    return queryObjectMatrix(matrix, (value) => value === 1);
 };
 
 export const handleMoveRange = (param: IMoveRangeCommand, targetRange: IRange) => {
@@ -271,6 +315,60 @@ export const handleMoveRange = (param: IMoveRangeCommand, targetRange: IRange) =
         ] as IOperator[];
     }
     return operators;
+};
+
+const handleMoveRangeOther = (param: IMoveRangeCommand, targetRange: IRange) => {
+    const toRange = param.params?.toRange;
+    const fromRange = param.params?.fromRange;
+    if (!toRange || !fromRange) {
+        return null;
+    }
+
+    if (Rectangle.contains(toRange, targetRange)) {
+        return null;
+    }
+
+    if (Rectangle.contains(fromRange, targetRange)) {
+        const relativeRange = Rectangle.getRelativeRange(targetRange, fromRange);
+        const positionRange = Rectangle.getPositionRange(relativeRange, toRange);
+        return positionRange;
+    }
+
+    const matrix = new ObjectMatrix();
+
+    Range.foreach(targetRange, (row, col) => {
+        matrix.setValue(row, col, 1);
+    });
+
+    const fromMatrix = new ObjectMatrix();
+    const loopFromRange = Rectangle.getIntersects(fromRange, targetRange);
+
+    loopFromRange && Range.foreach(loopFromRange, (row, col) => {
+        if (matrix.getValue(row, col)) {
+            matrix.setValue(row, col, undefined);
+            fromMatrix.setValue(row, col, 1);
+        }
+    });
+    const columnOffset = toRange.startColumn - fromRange.startColumn;
+    const rowOffset = toRange.startRow - fromRange.startRow;
+
+    const relativeToRange = {
+        startColumn: toRange.startColumn - columnOffset,
+        endColumn: toRange.endColumn - columnOffset,
+        startRow: toRange.startRow - rowOffset,
+        endRow: toRange.endRow - rowOffset,
+    };
+
+    const loopToRange = Rectangle.getIntersects(relativeToRange, targetRange);
+
+    loopToRange && Range.foreach(loopToRange, (row, col) => {
+        const targetRow = row + rowOffset;
+        const targetCol = col + columnOffset;
+        matrix.setValue(targetRow, targetCol, fromMatrix.getValue(row, col));
+    });
+
+    const res = queryObjectMatrix(matrix, (value) => value === 1);
+    return res;
 };
 
 // see docs/tldr/ref-range/remove-rows-cols.tldr
@@ -542,47 +640,97 @@ export const runRefRangeMutations = (operators: IOperator[], range: IRange) => {
 export const handleDefaultRangeChangeWithEffectRefCommands = (range: IRange, commandInfo: ICommandInfo) => {
     let operator: IOperator[] = [];
     switch (commandInfo.id) {
-        case EffectRefRangId.DeleteRangeMoveLeftCommandId:{
+        case EffectRefRangId.DeleteRangeMoveLeftCommandId: {
             operator = handleDeleteRangeMoveLeft(commandInfo as IDeleteRangeMoveLeftCommand, range);
             break;
         }
-        case EffectRefRangId.DeleteRangeMoveUpCommandId:{
+        case EffectRefRangId.DeleteRangeMoveUpCommandId: {
             operator = handleDeleteRangeMoveUp(commandInfo as IDeleteRangeMoveUpCommand, range);
             break;
         }
-        case EffectRefRangId.InsertColCommandId:{
+        case EffectRefRangId.InsertColCommandId: {
             operator = handleInsertCol(commandInfo as IInsertColCommand, range);
             break;
         }
-        case EffectRefRangId.InsertRangeMoveDownCommandId:{
+        case EffectRefRangId.InsertRangeMoveDownCommandId: {
             operator = handleInsertRangeMoveDown(commandInfo as IInsertRangeMoveDownCommand, range);
             break;
         }
-        case EffectRefRangId.InsertRangeMoveRightCommandId:{
+        case EffectRefRangId.InsertRangeMoveRightCommandId: {
             operator = handleInsertRangeMoveRight(commandInfo as IInsertRangeMoveRightCommand, range);
             break;
         }
-        case EffectRefRangId.InsertRowCommandId:{
+        case EffectRefRangId.InsertRowCommandId: {
             operator = handleInsertRow(commandInfo as IInsertRowCommand, range);
             break;
         }
-        case EffectRefRangId.MoveColsCommandId:{
+        case EffectRefRangId.MoveColsCommandId: {
             operator = handleMoveCols(commandInfo as IMoveColsCommand, range);
             break;
         }
-        case EffectRefRangId.MoveRangeCommandId:{
+        case EffectRefRangId.MoveRangeCommandId: {
             operator = handleMoveRange(commandInfo as IMoveRangeCommand, range);
             break;
         }
-        case EffectRefRangId.MoveRowsCommandId:{
+        case EffectRefRangId.MoveRowsCommandId: {
             operator = handleMoveRows(commandInfo as IMoveRowsCommand, range);
             break;
         }
-        case EffectRefRangId.RemoveColCommandId:{
+        case EffectRefRangId.RemoveColCommandId: {
             operator = handleIRemoveCol(commandInfo as IRemoveRowColCommand, range);
             break;
         }
-        case EffectRefRangId.RemoveRowCommandId:{
+        case EffectRefRangId.RemoveRowCommandId: {
+            operator = handleIRemoveRow(commandInfo as IRemoveRowColCommand, range);
+            break;
+        }
+    }
+    const resultRange = runRefRangeMutations(operator, range);
+    return resultRange;
+};
+
+export const handleOtherDefaultRangeChangeWithEffectRefCommands = (range: IRange, commandInfo: ICommandInfo) => {
+    let operator: IOperator[] = [];
+    switch (commandInfo.id) {
+        case EffectRefRangId.DeleteRangeMoveLeftCommandId: {
+            operator = handleDeleteRangeMoveLeft(commandInfo as IDeleteRangeMoveLeftCommand, range);
+            break;
+        }
+        case EffectRefRangId.DeleteRangeMoveUpCommandId: {
+            operator = handleDeleteRangeMoveUp(commandInfo as IDeleteRangeMoveUpCommand, range);
+            break;
+        }
+
+        case EffectRefRangId.InsertRangeMoveDownCommandId: {
+            operator = handleInsertRangeMoveDown(commandInfo as IInsertRangeMoveDownCommand, range);
+            break;
+        }
+        case EffectRefRangId.InsertRangeMoveRightCommandId: {
+            operator = handleInsertRangeMoveRight(commandInfo as IInsertRangeMoveRightCommand, range);
+            break;
+        }
+        case EffectRefRangId.InsertColCommandId: {
+            operator = handleInsertCol(commandInfo as IInsertColCommand, range);
+            break;
+        }
+        case EffectRefRangId.InsertRowCommandId: {
+            operator = handleInsertRow(commandInfo as IInsertRowCommand, range);
+            break;
+        }
+        case EffectRefRangId.MoveColsCommandId: {
+            return handleMoveColsOther(commandInfo as IMoveColsCommand, range);
+        }
+        case EffectRefRangId.MoveRangeCommandId: {
+            return handleMoveRangeOther(commandInfo as IMoveRangeCommand, range);
+        }
+        case EffectRefRangId.MoveRowsCommandId: {
+            return handleMoveRowsOther(commandInfo as IMoveRowsCommand, range);
+        }
+        case EffectRefRangId.RemoveColCommandId: {
+            operator = handleIRemoveCol(commandInfo as IRemoveRowColCommand, range);
+            break;
+        }
+        case EffectRefRangId.RemoveRowCommandId: {
             operator = handleIRemoveRow(commandInfo as IRemoveRowColCommand, range);
             break;
         }

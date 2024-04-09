@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-formula",
-    "version": "0.1.5",
+    "version": "0.1.6",
     "private": false,
     "author": "DreamNum <developer@univer.ai>",
     "license": "Apache-2.0",
@@ -69,14 +69,14 @@
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "@wendellhu/redi": "0.13.0",
-        "react": ">=16.9.0",
+        "react": "^16.9.0 || ^17.0.0 || ^18.0.0",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/icons": "^0.1.42"
+        "@univerjs/icons": "^0.1.43"
     },
     "devDependencies": {
-        "@types/react": "^18.2.72",
+        "@types/react": "^18.2.73",
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/docs": "workspace:*",
@@ -93,7 +93,7 @@
         "react": "^18.2.0",
         "rxjs": "^7.8.1",
         "typescript": "^5.4.3",
-        "vite": "^5.2.6",
+        "vite": "^5.2.7",
         "vitest": "^1.4.0"
     }
 }

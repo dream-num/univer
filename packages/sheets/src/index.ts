@@ -278,9 +278,15 @@ export {
     rotateRange,
     runRefRangeMutations,
     handleDefaultRangeChangeWithEffectRefCommands,
+    handleOtherDefaultRangeChangeWithEffectRefCommands,
 } from './services/ref-range/util';
 export { INTERCEPTOR_POINT } from './services/sheet-interceptor/interceptor-const';
 export { SheetInterceptorService } from './services/sheet-interceptor/sheet-interceptor.service';
 export type { ISheetLocation } from './services/sheet-interceptor/utils/interceptor';
 export { MergeCellController } from './controllers/merge-cell.controller';
 export { AddMergeRedoSelectionsOperationFactory, AddMergeUndoSelectionsOperationFactory } from './commands/utils/handle-merge-operation';
+
+export { InsertDefinedNameCommand } from './commands/commands/insert-defined-name.command';
+export { RemoveDefinedNameCommand } from './commands/commands/remove-defined-name.command';
+export { SetDefinedNameCommand, type ISetDefinedNameCommandParams } from './commands/commands/set-defined-name.command';
+export { ScrollToCellOperation } from './commands/operations/scroll-to-cell.operation';

@@ -21,6 +21,7 @@ import { createIdentifier } from '@wendellhu/redi';
 import type {
     IDirtyUnitFeatureMap,
     IDirtyUnitOtherFormulaMap,
+    IDirtyUnitSheetDefinedNameMap,
     IDirtyUnitSheetNameMap,
     IFormulaData,
     IFormulaDatasetConfig,
@@ -51,6 +52,8 @@ export interface IFormulaCurrentConfigService {
 
     getDirtyNameMap(): IDirtyUnitSheetNameMap;
 
+    getDirtyDefinedNameMap(): IDirtyUnitSheetDefinedNameMap;
+
     getDirtyUnitFeatureMap(): IDirtyUnitFeatureMap;
 
     registerUnitData(unitData: IUnitData): void;
@@ -68,6 +71,13 @@ export interface IFormulaCurrentConfigService {
     getSheetName(unitId: string, sheetId: string): string;
 
     getDirtyUnitOtherFormulaMap(): IDirtyUnitOtherFormulaMap;
+
+    getExecuteUnitId(): Nullable<string>;
+    getExecuteSubUnitId(): Nullable<string>;
+
+    setExecuteUnitId(unitId: string): void;
+    setExecuteSubUnitId(subUnitId: string): void;
+
 }
 
 export class FormulaCurrentConfigService extends Disposable implements IFormulaCurrentConfigService {
@@ -85,6 +95,8 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
 
     private _dirtyNameMap: IDirtyUnitSheetNameMap = {};
 
+    private _dirtyDefinedNameMap: IDirtyUnitSheetDefinedNameMap = {};
+
     private _numfmtItemMap: INumfmtItemMap = {};
 
     private _dirtyUnitFeatureMap: IDirtyUnitFeatureMap = {};
@@ -94,6 +106,9 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
     private _excludedCell: Nullable<IUnitExcludedCell>;
 
     private _sheetIdToNameMap: IUnitSheetIdToNameMap = {};
+
+    private _executeUnitId: Nullable<string> = '';
+    private _executeSubUnitId: Nullable<string> = '';
 
     constructor(@IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService) {
         super();
@@ -106,11 +121,28 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         this._sheetNameMap = {};
         this._dirtyRanges = [];
         this._dirtyNameMap = {};
+        this._dirtyDefinedNameMap = {};
         this._numfmtItemMap = {};
         this._dirtyUnitFeatureMap = {};
         this._excludedCell = {};
         this._sheetIdToNameMap = {};
         this._dirtyUnitOtherFormulaMap = {};
+    }
+
+    getExecuteUnitId() {
+        return this._executeUnitId;
+    }
+
+    getExecuteSubUnitId() {
+        return this._executeSubUnitId;
+    }
+
+    setExecuteUnitId(unitId: string) {
+        this._executeUnitId = unitId;
+    }
+
+    setExecuteSubUnitId(subUnitId: string) {
+        this._executeSubUnitId = subUnitId;
     }
 
     getExcludedRange() {
@@ -145,6 +177,10 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         return this._dirtyNameMap;
     }
 
+    getDirtyDefinedNameMap() {
+        return this._dirtyDefinedNameMap;
+    }
+
     getNumfmtItemMap() {
         return this._numfmtItemMap;
     }
@@ -153,16 +189,16 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         return this._dirtyUnitFeatureMap;
     }
 
+    getDirtyUnitOtherFormulaMap() {
+        return this._dirtyUnitOtherFormulaMap;
+    }
+
     getSheetName(unitId: string, sheetId: string) {
         if (this._sheetIdToNameMap[unitId] == null) {
             return '';
         }
 
         return this._sheetIdToNameMap[unitId]![sheetId] || '';
-    }
-
-    getDirtyUnitOtherFormulaMap() {
-        return this._dirtyUnitOtherFormulaMap;
     }
 
     load(config: IFormulaDatasetConfig) {
@@ -186,6 +222,8 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         this._dirtyRanges = config.dirtyRanges;
 
         this._dirtyNameMap = config.dirtyNameMap;
+
+        this._dirtyDefinedNameMap = config.dirtyDefinedNameMap;
 
         this._numfmtItemMap = config.numfmtItemMap;
 
@@ -324,6 +362,12 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
 
     private _loadSheetData() {
         const unitAllSheet = this._currentUniverService.getAllUniverSheetsInstance();
+
+        const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+        const worksheet = workbook.getActiveSheet();
+
+        this._executeUnitId = workbook?.getUnitId();
+        this._executeSubUnitId = worksheet?.getSheetId();
 
         const allUnitData: IUnitData = {};
 

@@ -522,7 +522,16 @@ export function getDocsUpdateBody(model: IDocumentData, segmentId?: string) {
 
 export function isValidRange(range: IRange): boolean {
     const { startRow, endRow, startColumn, endColumn } = range;
-    if (startRow < 0 || startColumn < 0 || endRow < 0 || endColumn < 0) {
+    if (
+        startRow < 0
+        || startColumn < 0
+        || endRow < 0
+        || endColumn < 0
+        || Number.isNaN(startRow)
+        || Number.isNaN(endRow)
+        || Number.isNaN(startColumn)
+        || Number.isNaN(endColumn)
+    ) {
         return false;
     }
 

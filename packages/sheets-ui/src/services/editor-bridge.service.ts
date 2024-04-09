@@ -26,7 +26,7 @@ import {
     toDisposable,
 } from '@univerjs/core';
 import type { Engine, IDocumentLayoutObject, Scene } from '@univerjs/engine-render';
-import { convertTextRotation, DeviceInputEventType, fixLineWidthByScale, getCanvasOffsetByEngine } from '@univerjs/engine-render';
+import { convertTextRotation, DeviceInputEventType, getCanvasOffsetByEngine } from '@univerjs/engine-render';
 import type { ISheetLocation } from '@univerjs/sheets';
 import { IEditorService } from '@univerjs/ui';
 import type { KeyCode } from '@univerjs/ui';
@@ -68,6 +68,7 @@ export interface IEditorBridgeServiceParam {
 
 const BEFORE_CELL_EDIT = createInterceptorKey<ICellDataForSheetInterceptor, ISheetLocation>('BEFORE_CELL_EDIT');
 const AFTER_CELL_EDIT = createInterceptorKey<ICellDataForSheetInterceptor, ISheetLocation>('AFTER_CELL_EDIT');
+const AFTER_CELL_EDIT_ASYNC = createInterceptorKey<Promise<Nullable<ICellDataForSheetInterceptor>>, ISheetLocation>('AFTER_CELL_EDIT_ASYNC');
 
 export interface IEditorBridgeService {
     currentEditCellState$: Observable<Nullable<IEditorBridgeServiceParam>>;
@@ -75,6 +76,7 @@ export interface IEditorBridgeService {
     interceptor: InterceptorManager<{
         BEFORE_CELL_EDIT: typeof BEFORE_CELL_EDIT;
         AFTER_CELL_EDIT: typeof AFTER_CELL_EDIT;
+        AFTER_CELL_EDIT_ASYNC: typeof AFTER_CELL_EDIT_ASYNC;
     }>;
     dispose(): void;
     refreshEditCellState(): void;
@@ -118,6 +120,7 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
     interceptor = new InterceptorManager({
         BEFORE_CELL_EDIT,
         AFTER_CELL_EDIT,
+        AFTER_CELL_EDIT_ASYNC,
     });
 
     constructor(
@@ -148,6 +151,15 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         this.disposeWithMe(
             toDisposable(
                 this.interceptor.intercept(this.interceptor.getInterceptPoints().BEFORE_CELL_EDIT, {
+                    priority: -1,
+                    handler: (_value) => _value,
+                })
+            )
+        );
+
+        this.disposeWithMe(
+            toDisposable(
+                this.interceptor.intercept(this.interceptor.getInterceptPoints().AFTER_CELL_EDIT_ASYNC, {
                     priority: -1,
                     handler: (_value) => _value,
                 })
@@ -210,10 +222,10 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         const { scaleX: precisionScaleX, scaleY: precisionScaleY } = scene.getPrecisionScale();
 
         const scrollXY = scene.getScrollXY(this._selectionRenderService.getViewPort());
-        startX = fixLineWidthByScale(skeleton.convertTransformToOffsetX(startX, scaleX, scrollXY), precisionScaleX);
-        startY = fixLineWidthByScale(skeleton.convertTransformToOffsetY(startY, scaleY, scrollXY), precisionScaleY);
-        endX = fixLineWidthByScale(skeleton.convertTransformToOffsetX(endX, scaleX, scrollXY), precisionScaleX);
-        endY = fixLineWidthByScale(skeleton.convertTransformToOffsetY(endY, scaleY, scrollXY), precisionScaleY);
+        startX = skeleton.convertTransformToOffsetX(startX, scaleX, scrollXY);
+        startY = skeleton.convertTransformToOffsetY(startY, scaleY, scrollXY);
+        endX = skeleton.convertTransformToOffsetX(endX, scaleX, scrollXY);
+        endY = skeleton.convertTransformToOffsetY(endY, scaleY, scrollXY);
 
         const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
         const worksheet = workbook.getActiveSheet();

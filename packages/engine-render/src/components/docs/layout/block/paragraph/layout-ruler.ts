@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import type { INumberUnit, IParagraphStyle } from '@univerjs/core';
+import type { INumberUnit } from '@univerjs/core';
 import { BooleanNumber, DataStreamTreeTokenType, GridType, SpacingRule } from '@univerjs/core';
 
 import type {
-    IDocumentSkeletonBullet,
     IDocumentSkeletonColumn,
     IDocumentSkeletonDrawing,
     IDocumentSkeletonGlyph,
@@ -69,8 +68,6 @@ export function layoutParagraph(
             const { snapToGrid = BooleanNumber.TRUE } = paragraphStyle;
 
             const charSpaceApply = getCharSpaceApply(charSpace, defaultTabStop, gridType, snapToGrid);
-
-            __bulletIndentHandler(paragraphStyle, bulletSkeleton, charSpaceApply);
 
             const bulletGlyph = createSkeletonBulletGlyph(glyphGroup[0], bulletSkeleton, charSpaceApply);
             _lineOperator([bulletGlyph, ...glyphGroup], pages, sectionBreakConfig, paragraphConfig, paragraphStart);
@@ -366,18 +363,15 @@ function _lineOperator(
     const lineIndex = line ? line.lineIndex + 1 : 0;
     const { charSpace, defaultTabStop } = getCharSpaceConfig(sectionBreakConfig, paragraphConfig);
     const charSpaceApply = getCharSpaceApply(charSpace, defaultTabStop, gridType, snapToGrid);
-    const { paddingLeft, paddingRight, changeBulletWidth } = __getIndentPadding(
-        glyphGroup[0],
+    const { paddingLeft, paddingRight } = __getIndentPadding(
         indentFirstLine,
         hanging,
         indentStart,
         indentEnd,
-        charSpaceApply
+        charSpaceApply,
+        paragraphStart
     );
-    if (changeBulletWidth.state) {
-        // 为了保持__getIndentPadding的纯函数特性，把修改首行列表宽度的逻辑外置到这里
-        glyphGroup[0].width = changeBulletWidth.hangingNumber;
-    }
+
     const newLine = createSkeletonLine(
         paragraphIndex,
         LineType.PARAGRAPH,
@@ -443,14 +437,13 @@ function _pageOperator(
  * 17.3.1.12 ind (Paragraph Indentation)
  */
 function __getIndentPadding(
-    glyph: IDocumentSkeletonGlyph,
     indentFirstLine: INumberUnit | number = 0,
     hanging: INumberUnit | number = 0,
     indentStart: INumberUnit | number = 0,
     indentEnd: INumberUnit | number = 0,
-    charSpaceApply: number
+    charSpaceApply: number,
+    paragraphStart = false
 ) {
-    const { glyphType = GlyphType.LETTER, bBox } = glyph;
     const indentFirstLineNumber = getNumberUnitValue(indentFirstLine, charSpaceApply);
     const hangingNumber = getNumberUnitValue(hanging, charSpaceApply);
     const indentStartNumber = getNumberUnitValue(indentStart, charSpaceApply);
@@ -458,30 +451,18 @@ function __getIndentPadding(
 
     let paddingLeft = indentStartNumber;
     const paddingRight = indentEndNumber;
-    const changeBulletWidth = {
-        state: false,
-        hangingNumber: 0,
-    };
 
-    if (glyphType === GlyphType.LIST) {
-        // 首行的处理
-        const { width: fontWidth } = bBox;
+    if (indentFirstLineNumber > 0 && paragraphStart) {
+        paddingLeft += indentFirstLineNumber;
+    }
 
-        if (indentFirstLineNumber > 0) {
-            paddingLeft += indentFirstLineNumber;
-        } else if (hangingNumber > 0 && hangingNumber > fontWidth) {
-            // glyph.w = hangingNumber;
-            changeBulletWidth.state = true;
-            changeBulletWidth.hangingNumber = hangingNumber;
-        }
-    } else {
+    if (hangingNumber > 0 && !paragraphStart) {
         paddingLeft += hangingNumber;
     }
 
     return {
         paddingLeft,
         paddingRight,
-        changeBulletWidth,
     };
 }
 
@@ -713,28 +694,6 @@ function __getSpanGroupByLine(line: IDocumentSkeletonLine) {
     }
 
     return glyphGroup;
-}
-
-function __bulletIndentHandler(
-    paragraphStyle: IParagraphStyle,
-    bulletSkeleton: IDocumentSkeletonBullet,
-    charSpaceApply: number
-) {
-    const { hanging, indentStart } = paragraphStyle;
-
-    const { hanging: hangingBullet, indentStart: indentStartBullet } = bulletSkeleton;
-
-    // TODO: @JOCS, do not modify snapshot data directly.
-    if (hanging === undefined) {
-        paragraphStyle.hanging = hangingBullet;
-    }
-
-    // TODO: @JOCS, do not modify snapshot data directly.
-    if (indentStart === undefined) {
-        paragraphStyle.indentStart =
-            getNumberUnitValue(indentStartBullet || 0, charSpaceApply) -
-            getNumberUnitValue(hangingBullet || 0, charSpaceApply);
-    }
 }
 
 function __isNullLine(line: IDocumentSkeletonLine) {

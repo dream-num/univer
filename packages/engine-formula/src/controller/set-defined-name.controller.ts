@@ -47,15 +47,22 @@ export class SetDefinedNameController extends Disposable {
                     if (params == null) {
                         return;
                     }
-                    const { unitId, name, formulaOrRefString } = params;
-                    this._definedNamesService.registerDefinedName(unitId, name, formulaOrRefString);
+                    const { id, unitId, name, formulaOrRefString, comment, hidden, localSheetId } = params;
+                    this._definedNamesService.registerDefinedName(unitId, {
+                        id,
+                        name: name.trim(),
+                        formulaOrRefString: formulaOrRefString.trim(),
+                        comment: comment?.trim(),
+                        hidden,
+                        localSheetId,
+                    });
                 } else if (command.id === RemoveDefinedNameMutation.id) {
                     const params = command.params as ISetDefinedNameMutationSearchParam;
                     if (params == null) {
                         return;
                     }
-                    const { unitId, name } = params;
-                    this._definedNamesService.removeDefinedName(unitId, name);
+                    const { unitId, id } = params;
+                    this._definedNamesService.removeDefinedName(unitId, id);
                 }
             })
         );

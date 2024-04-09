@@ -34,3 +34,25 @@ npm install @univerjs/core
 # 使用 pnpm
 pnpm add @univerjs/core
 ```
+
+### 配置
+
+```typescript
+import { Univer } from '@univerjs/core';
+
+new Univer({
+    theme: defaultTheme,
+    locale: LocaleType.ZH_CN,
+    locales,
+    logLevel: LogLevel.VERBOSE,
+});
+```
+
+#### 选项
+
+| 名称 | 类型 | 默认值 | 描述 |
+| --- | --- | --- | --- |
+| theme | [Theme](https://univer.ai/api/design/#built-in-themes) | - | 应用的主题，用于控制应用的外观。 |
+| locale | [LocaleType](https://univer.ai/api/core/enums/LocaleType.html) | `LocaleType.ZH_CN` | 应用的语言环境，默认值为 `LocaleType.ZH_CN`。 |
+| locales | [ILocales](https://univer.ai/api/core/interfaces/ILocales.html) | - | 应用支持的语言环境，默认支持中文。 |
+| logLevel | [LogLevel](https://univer.ai/api/core/enums/LogLevel.html) | `LogLevel.SILENT` | 应用的日志级别。 |

@@ -31,6 +31,14 @@ export class FWorksheet {
         @ICommandService private readonly _commandService: ICommandService
     ) {}
 
+    /**
+     * Returns the worksheet id
+     * @returns sheet id
+     */
+    getSheetId(): string {
+        return this._worksheet.getSheetId();
+    }
+
     getSelection(): FSelection | null {
         const selections = this._selectionManagerService.getSelections();
         if (!selections) {
@@ -81,5 +89,21 @@ export class FWorksheet {
             ],
             colWidth: width,
         } as ISetWorksheetColWidthMutationParams);
+    }
+
+    /**
+     * Returns the current number of columns in the sheet, regardless of content.
+     * @return The maximum columns count of the sheet
+     */
+    getMaxColumns() {
+        return this._worksheet.getMaxColumns();
+    }
+
+    /**
+     * Returns the current number of rows in the sheet, regardless of content.
+     * @return The maximum rows count of the sheet
+     */
+    getMaxRows() {
+        return this._worksheet.getMaxRows();
     }
 }

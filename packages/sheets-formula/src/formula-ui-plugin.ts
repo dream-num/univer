@@ -39,6 +39,8 @@ import {
 import { FormulaPromptService, IFormulaPromptService } from './services/prompt.service';
 import { IRegisterFunctionService, RegisterFunctionService } from './services/register-function.service';
 import { NumfmtFormulaDisplayController } from './controllers/numfmt-formula-display.controller';
+import { DefinedNameController } from './controllers/defined-name.controller';
+import { FormulaRefRangeService } from './services/formula-ref-range.service';
 
 /**
  * The configuration of the formula UI plugin.
@@ -76,6 +78,7 @@ export class UniverSheetsFormulaPlugin extends Plugin {
             [IFormulaCustomFunctionService, { useClass: FormulaCustomFunctionService }],
 
             [IRegisterFunctionService, { useClass: RegisterFunctionService }],
+            [FormulaRefRangeService],
 
             // controllers
             [FormulaUIController],
@@ -88,6 +91,7 @@ export class UniverSheetsFormulaPlugin extends Plugin {
             [UpdateFormulaController],
             [FormulaEditorShowController],
             [ActiveDirtyController],
+            [DefinedNameController],
         ];
 
         dependencies.forEach((dependency) => this._injector.add(dependency));

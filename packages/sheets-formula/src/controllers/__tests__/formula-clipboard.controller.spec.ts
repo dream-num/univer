@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, IMutationInfo, Nullable, Univer } from '@univerjs/core';
+import type { ICellData, Nullable, Univer } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, ObjectMatrix } from '@univerjs/core';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { type ISetRangeValuesMutationParams, SetRangeValuesMutation } from '@univerjs/sheets';
@@ -144,7 +144,8 @@ describe('Test paste with formula', () => {
                                 12: {
                                     2: {},
                                     3: {
-                                        f: '=SUM(A13)',
+                                        f: null,
+                                        si: '3e4r5t',
                                         v: null,
                                         p: null,
                                     },
@@ -164,25 +165,461 @@ describe('Test paste with formula', () => {
                 copyInfo,
                 lexerTreeBuilder
             );
-            removeFormulaId(redoUndoList.redos as Array<IMutationInfo<ISetRangeValuesMutationParams>>);
+
+            expect(redoUndoList).toStrictEqual(result);
+        });
+
+        it('Copy range with formulas', async () => {
+            const unitId = 'test';
+            const subUnitId = 'sheet1';
+            const range = {
+                startRow: 5,
+                startColumn: 5,
+                endRow: 8,
+                endColumn: 8,
+                rangeType: 0,
+            };
+            const matrix = new ObjectMatrix<ICellDataWithSpanInfo>({
+                0: {
+                    0: {
+                        p: null,
+                        v: 1,
+                        s: null,
+                        f: '=SUM(A1)',
+                        si: null,
+                        t: 2,
+                    },
+                    1: {
+                        p: null,
+                        v: 2,
+                        s: null,
+                        f: '=SUM(B1)',
+                        si: 'OENnXU',
+                        t: 2,
+                    },
+                    2: {
+                        p: null,
+                        v: 3,
+                        s: null,
+                        f: null,
+                        si: 'OENnXU',
+                        t: 2,
+                    },
+                    3: {
+                        p: null,
+                        v: 4,
+                        s: null,
+                        f: null,
+                        si: 'OENnXU',
+                        t: 2,
+                    },
+                },
+                1: {
+                    0: {
+                        p: null,
+                        v: 2,
+                        s: null,
+                        f: '=SUM(A2)',
+                        si: 'jcozeE',
+                        t: 2,
+                    },
+                    1: {
+                        p: null,
+                        v: 3,
+                        s: null,
+                        f: null,
+                        si: 'OENnXU',
+                        t: 2,
+                    },
+                    2: {
+                        p: null,
+                        v: 4,
+                        s: null,
+                        f: null,
+                        si: 'OENnXU',
+                        t: 2,
+                    },
+                    3: {
+                        p: null,
+                        v: 5,
+                        s: null,
+                        f: null,
+                        si: 'OENnXU',
+                        t: 2,
+                    },
+                },
+                2: {
+                    0: {
+                        p: null,
+                        v: 3,
+                        s: null,
+                        f: null,
+                        si: 'jcozeE',
+                        t: 2,
+                    },
+                    1: {
+                        p: null,
+                        v: 4,
+                        s: null,
+                        f: null,
+                        si: 'OENnXU',
+                        t: 2,
+                    },
+                    2: {
+                        p: null,
+                        v: 5,
+                        s: null,
+                        f: null,
+                        si: 'OENnXU',
+                        t: 2,
+                    },
+                    3: {
+                        p: null,
+                        v: 6,
+                        s: null,
+                        f: null,
+                        si: 'OENnXU',
+                        t: 2,
+                    },
+                },
+                3: {
+                    0: {
+                        p: null,
+                        v: 4,
+                        s: null,
+                        f: null,
+                        si: 'jcozeE',
+                        t: 2,
+                    },
+                    1: {
+                        p: null,
+                        v: 5,
+                        s: null,
+                        f: null,
+                        si: 'OENnXU',
+                        t: 2,
+                    },
+                    2: {
+                        p: null,
+                        v: 6,
+                        s: null,
+                        f: null,
+                        si: 'OENnXU',
+                        t: 2,
+                    },
+                    3: {
+                        p: null,
+                        v: 7,
+                        s: null,
+                        f: null,
+                        si: 'OENnXU',
+                        t: 2,
+                    },
+                },
+            });
+
+            const accessor = {
+                get,
+            };
+
+            const copyInfo = {
+                copyType: COPY_TYPE.COPY,
+                copyRange: {
+                    startRow: 0,
+                    startColumn: 5,
+                    endRow: 3,
+                    endColumn: 8,
+                    rangeType: 0,
+                },
+            };
+
+            const result = {
+                undos: [
+                    {
+                        id: 'sheet.mutation.set-range-values',
+                        params: {
+                            unitId,
+                            subUnitId,
+                            cellValue: {
+                                5: {
+                                    5: {
+                                        s: null,
+                                        f: null,
+                                        si: null,
+                                        p: null,
+                                        v: null,
+                                        t: null,
+                                    },
+                                    6: {
+                                        s: null,
+                                        f: null,
+                                        si: null,
+                                        p: null,
+                                        v: null,
+                                        t: null,
+                                    },
+                                    7: {
+                                        s: null,
+                                        f: null,
+                                        si: null,
+                                        p: null,
+                                        v: null,
+                                        t: null,
+                                    },
+                                    8: {
+                                        s: null,
+                                        f: null,
+                                        si: null,
+                                        p: null,
+                                        v: null,
+                                        t: null,
+                                    },
+                                },
+                                6: {
+                                    5: {
+                                        s: null,
+                                        f: null,
+                                        si: null,
+                                        p: null,
+                                        v: null,
+                                        t: null,
+                                    },
+                                    6: {
+                                        s: null,
+                                        f: null,
+                                        si: null,
+                                        p: null,
+                                        v: null,
+                                        t: null,
+                                    },
+                                    7: {
+                                        s: null,
+                                        f: null,
+                                        si: null,
+                                        p: null,
+                                        v: null,
+                                        t: null,
+                                    },
+                                    8: {
+                                        s: null,
+                                        f: null,
+                                        si: null,
+                                        p: null,
+                                        v: null,
+                                        t: null,
+                                    },
+                                },
+                                7: {
+                                    5: {
+                                        s: null,
+                                        f: null,
+                                        si: null,
+                                        p: null,
+                                        v: null,
+                                        t: null,
+                                    },
+                                    6: {
+                                        s: null,
+                                        f: null,
+                                        si: null,
+                                        p: null,
+                                        v: null,
+                                        t: null,
+                                    },
+                                    7: {
+                                        s: null,
+                                        f: null,
+                                        si: null,
+                                        p: null,
+                                        v: null,
+                                        t: null,
+                                    },
+                                    8: {
+                                        s: null,
+                                        f: null,
+                                        si: null,
+                                        p: null,
+                                        v: null,
+                                        t: null,
+                                    },
+                                },
+                                8: {
+                                    5: {
+                                        s: null,
+                                        f: null,
+                                        si: null,
+                                        p: null,
+                                        v: null,
+                                        t: null,
+                                    },
+                                    6: {
+                                        s: null,
+                                        f: null,
+                                        si: null,
+                                        p: null,
+                                        v: null,
+                                        t: null,
+                                    },
+                                    7: {
+                                        s: null,
+                                        f: null,
+                                        si: null,
+                                        p: null,
+                                        v: null,
+                                        t: null,
+                                    },
+                                    8: {
+                                        s: null,
+                                        f: null,
+                                        si: null,
+                                        p: null,
+                                        v: null,
+                                        t: null,
+                                    },
+                                },
+                            },
+                            options: {},
+                        },
+                    },
+                ],
+                redos: [
+                    {
+                        id: 'sheet.mutation.set-range-values',
+                        params: {
+                            unitId,
+                            subUnitId,
+                            cellValue: {
+                                5: {
+                                    5: {
+                                        si: 'bBSIMi',
+                                        f: '=SUM(A6)',
+                                        v: null,
+                                        p: null,
+                                    },
+                                    6: {
+                                        si: 'OENnXU',
+                                        f: null,
+                                        v: null,
+                                        p: null,
+                                    },
+                                    7: {
+                                        si: 'OENnXU',
+                                        f: null,
+                                        v: null,
+                                        p: null,
+                                    },
+                                    8: {
+                                        si: 'OENnXU',
+                                        f: null,
+                                        v: null,
+                                        p: null,
+                                    },
+                                },
+                                6: {
+                                    5: {
+                                        si: 'jcozeE',
+                                        f: null,
+                                        v: null,
+                                        p: null,
+                                    },
+                                    6: {
+                                        si: 'OENnXU',
+                                        f: null,
+                                        v: null,
+                                        p: null,
+                                    },
+                                    7: {
+                                        si: 'OENnXU',
+                                        f: null,
+                                        v: null,
+                                        p: null,
+                                    },
+                                    8: {
+                                        si: 'OENnXU',
+                                        f: null,
+                                        v: null,
+                                        p: null,
+                                    },
+                                },
+                                7: {
+                                    5: {
+                                        si: 'jcozeE',
+                                        f: null,
+                                        v: null,
+                                        p: null,
+                                    },
+                                    6: {
+                                        si: 'OENnXU',
+                                        f: null,
+                                        v: null,
+                                        p: null,
+                                    },
+                                    7: {
+                                        si: 'OENnXU',
+                                        f: null,
+                                        v: null,
+                                        p: null,
+                                    },
+                                    8: {
+                                        si: 'OENnXU',
+                                        f: null,
+                                        v: null,
+                                        p: null,
+                                    },
+                                },
+                                8: {
+                                    5: {
+                                        si: 'jcozeE',
+                                        f: null,
+                                        v: null,
+                                        p: null,
+                                    },
+                                    6: {
+                                        si: 'OENnXU',
+                                        f: null,
+                                        v: null,
+                                        p: null,
+                                    },
+                                    7: {
+                                        si: 'OENnXU',
+                                        f: null,
+                                        v: null,
+                                        p: null,
+                                    },
+                                    8: {
+                                        si: 'OENnXU',
+                                        f: null,
+                                        v: null,
+                                        p: null,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                ],
+            };
+
+            const redoUndoList = getSetCellFormulaMutations(
+                unitId,
+                subUnitId,
+                range,
+                matrix,
+                accessor,
+                copyInfo,
+                lexerTreeBuilder
+            );
+
+            // Randomly generated id, no comparison is made
+            const resultFormulaId = result.redos[0].params.cellValue['5'][5].si;
+            const originRedoParams = redoUndoList.redos[0].params as ISetRangeValuesMutationParams;
+
+            if (!originRedoParams.cellValue || !originRedoParams.cellValue['5'] || !originRedoParams.cellValue['5'][5]) {
+                throw new Error('cellValue is undefined');
+            }
+
+            originRedoParams.cellValue['5'][5].si = resultFormulaId;
+
             expect(redoUndoList).toStrictEqual(result);
         });
     });
 });
-
-function removeFormulaId(redos: Array<IMutationInfo<ISetRangeValuesMutationParams>>) {
-    if (redos.length > 0) {
-        const cellValue = redos[0].params.cellValue;
-        if (cellValue) {
-            Object.keys(cellValue).forEach((rowIndex) => {
-                const row = cellValue[Number(rowIndex)];
-                Object.keys(row).forEach((columnIndex) => {
-                    const cell = row[Number(columnIndex)];
-                    if (cell?.hasOwnProperty('si')) {
-                        delete cell?.si;
-                    }
-                });
-            });
-        }
-    }
-}

@@ -22,7 +22,7 @@ import { MoreDownSingle, SlashSingle } from '@univerjs/icons';
 import { Checkbox, Dropdown, InputNumber, Select } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 
-import { IUniverInstanceService, LocaleService, Tools } from '@univerjs/core';
+import { createInternalEditorID, IUniverInstanceService, LocaleService, Tools } from '@univerjs/core';
 import { TextEditor } from '@univerjs/ui';
 import type { IIconSet, IIconType } from '@univerjs/sheets-conditional-formatting';
 import { CFNumberOperator, CFRuleType, CFSubRuleType, CFValueType, compareWithNumber, createDefaultValue, EMPTY_ICON_TYPE, getOppositeOperator, iconGroup, iconMap, SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '@univerjs/sheets-conditional-formatting';
@@ -61,7 +61,7 @@ const TextInput = (props: { id: number; type: CFValueType; value: number | strin
                 )
                 : (
                     <TextEditor
-                        id={`${SHEET_CONDITIONAL_FORMATTING_PLUGIN}_icon_set_${props.id}`}
+                        id={createInternalEditorID(`${SHEET_CONDITIONAL_FORMATTING_PLUGIN}_icon_set_${props.id}`)}
                         value={String(props.value).startsWith('=') ? String(props.value) : '='}
                         openForSheetSubUnitId={subUnitId}
                         openForSheetUnitId={unitId}

@@ -24,6 +24,8 @@ export { ConfigContext, ConfigProvider, type IConfigProviderProps } from './comp
 export { Confirm, type IConfirmProps } from './components/confirm';
 export { Container, type IContainerProps } from './components/container';
 export { DatePicker, type IDatePickerProps } from './components/date-picker';
+export { DatePanel } from './components/date-picker';
+export type { DatePanelProps } from './components/date-picker';
 export { Dialog, type IDialogProps } from './components/dialog';
 export { Dropdown, type IDropdownProps } from './components/dropdown';
 export { FormDualColumnLayout, type IFormDualColumnLayoutProps, FormLayout, type IFormLayoutProps } from './components/form-layout';
@@ -45,3 +47,4 @@ export { type ITreeNodeProps, type ITreeProps, Tree, TreeSelectionMode } from '.
 export { enUS, zhCN } from './locale';
 export { type ILocale } from './locale/interface';
 export { defaultTheme, greenTheme, themeInstance } from './themes';
+export { DraggableList, type IDraggableListProps } from './components/draggable-list';

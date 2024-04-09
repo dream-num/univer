@@ -22,7 +22,7 @@ import { Disposable, toDisposable } from '../shared/lifecycle';
 import type { ICellDataForSheetInterceptor } from '../types/interfaces/i-cell-data';
 
 export interface ICellContentInterceptor {
-    getCell(row: number, col: number): Nullable<ICellDataForSheetInterceptor>;
+    getCell: (row: number, col: number) => Nullable<ICellDataForSheetInterceptor>;
 }
 
 export interface IRowFilteredInterceptor {}
@@ -32,12 +32,12 @@ export interface IRowVisibleInterceptor {}
 export interface IColVisibleInterceptor {}
 
 export interface ISheetViewModel {
-    registerCellContentInterceptor(interceptor: ICellContentInterceptor): IDisposable;
-    registerRowFilteredInterceptor(interceptor: IRowFilteredInterceptor): IDisposable;
-    registerRowVisibleInterceptor(interceptor: IRowVisibleInterceptor): IDisposable;
-    registerColVisibleInterceptor(interceptor: IColVisibleInterceptor): IDisposable;
+    registerCellContentInterceptor: (interceptor: ICellContentInterceptor) => IDisposable;
+    registerRowFilteredInterceptor: (interceptor: IRowFilteredInterceptor) => IDisposable;
+    registerRowVisibleInterceptor: (interceptor: IRowVisibleInterceptor) => IDisposable;
+    registerColVisibleInterceptor: (interceptor: IColVisibleInterceptor) => IDisposable;
 
-    getCell(row: number, col: number): Nullable<ICellDataForSheetInterceptor>;
+    getCell: (row: number, col: number) => Nullable<ICellDataForSheetInterceptor>;
 }
 
 /**
@@ -73,7 +73,6 @@ export class SheetViewModel extends Disposable implements ISheetViewModel {
         if (this._cellContentInterceptors.includes(interceptor)) {
             throw new Error('[SheetViewModel]: Interceptor already registered.');
         }
-
         this._cellContentInterceptors.push(interceptor);
         return toDisposable(() => remove(this._cellContentInterceptors, interceptor));
     }

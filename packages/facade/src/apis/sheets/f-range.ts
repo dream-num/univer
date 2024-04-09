@@ -160,6 +160,10 @@ export class FRange {
         });
     }
 
+    /**
+     * Set the cell wrap of the given range.
+     * Cells with wrap enabled (the default) resize to display their full content. Cells with wrap disabled display as much as possible in the cell without resizing or running to multiple lines.
+     */
     setWrap(isWrapEnabled: boolean): Promise<boolean> {
         return this._commandService.executeCommand(SetTextWrapCommand.id, {
             unitId: this._workbook.getUnitId(),
@@ -169,6 +173,9 @@ export class FRange {
         } as ISetTextWrapCommandParams);
     }
 
+    /**
+     * Sets the text wrapping strategy for the cells in the range.
+     */
     setWrapStrategy(strategy: WrapStrategy): Promise<boolean> {
         return this._commandService.executeCommand(SetTextWrapCommand.id, {
             unitId: this._workbook.getUnitId(),
@@ -178,6 +185,9 @@ export class FRange {
         } as ISetTextWrapCommandParams);
     }
 
+    /**
+     * Set the vertical (top to bottom) alignment for the given range (top/middle/bottom).
+     */
     setVerticalAlignment(alignment: FVerticalAlignment): Promise<boolean> {
         return this._commandService.executeCommand(SetVerticalTextAlignCommand.id, {
             unitId: this._workbook.getUnitId(),
@@ -187,6 +197,9 @@ export class FRange {
         } as ISetVerticalTextAlignCommandParams);
     }
 
+    /**
+     * Set the horizontal (left to right) alignment for the given range (left/center/right).
+     */
     setHorizontalAlignment(alignment: FHorizontalAlignment): Promise<boolean> {
         return this._commandService.executeCommand(SetHorizontalTextAlignCommand.id, {
             unitId: this._workbook.getUnitId(),

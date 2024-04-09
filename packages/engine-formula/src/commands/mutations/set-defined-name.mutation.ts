@@ -19,11 +19,15 @@ import { CommandType } from '@univerjs/core';
 
 export interface ISetDefinedNameMutationSearchParam {
     unitId: string;
-    name: string;
+    id: string;
 }
 
 export interface ISetDefinedNameMutationParam extends ISetDefinedNameMutationSearchParam {
+    name: string;
     formulaOrRefString: string;
+    comment?: string;
+    localSheetId?: string;
+    hidden?: boolean;
 }
 /**
  * In the formula engine, the mutation is solely responsible for communication between the worker and the main thread.
@@ -35,7 +39,7 @@ export const SetDefinedNameMutation: IMutation<ISetDefinedNameMutationParam> = {
     handler: () => true,
 };
 
-export const RemoveDefinedNameMutation: IMutation<ISetDefinedNameMutationSearchParam> = {
+export const RemoveDefinedNameMutation: IMutation<ISetDefinedNameMutationParam> = {
     id: 'formula.mutation.remove-defined-name',
     type: CommandType.MUTATION,
     handler: () => true,

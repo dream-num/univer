@@ -45,3 +45,5 @@ export type { IActiveTextRange, IEditorInputConfig, ITextSelectionInnerParam } f
 export { Documents } from './components/docs/document';
 export type { IPageRenderConfig } from './components/docs/document';
 export { DocumentSkeleton } from './components/docs/layout/doc-skeleton';
+export { ThinEngine } from './thin-engine';
+export { getCharSpaceApply, getNumberUnitValue } from './components/docs/layout/tools';

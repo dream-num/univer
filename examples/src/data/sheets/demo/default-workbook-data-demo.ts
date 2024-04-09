@@ -15,8 +15,9 @@
  */
 
 import type { IDocumentData, IWorkbookData } from '@univerjs/core';
-import { BooleanNumber, LocaleType } from '@univerjs/core';
+import { BooleanNumber, DataValidationErrorStyle, DataValidationOperator, DataValidationType, LocaleType } from '@univerjs/core';
 
+import { DATA_VALIDATION_PLUGIN_NAME } from '@univerjs/sheets-data-validation';
 import { PAGE5_RICHTEXT_1 } from '../../slides/rich-text/page5-richtext1';
 
 const richTextDemo: IDocumentData = {
@@ -99,6 +100,78 @@ const richTextDemo1: IDocumentData = {
         marginLeft: 2,
     },
 };
+
+const dataValidation = [
+    {
+        uid: 'xxx-1',
+        type: DataValidationType.DECIMAL,
+        ranges: [{
+            startRow: 0,
+            endRow: 5,
+            startColumn: 0,
+            endColumn: 2,
+        }],
+        operator: DataValidationOperator.GREATER_THAN,
+        formula1: '111',
+        errorStyle: DataValidationErrorStyle.STOP,
+    },
+    {
+        uid: 'xxx-0',
+        type: DataValidationType.DATE,
+        ranges: [{
+            startRow: 0,
+            endRow: 5,
+            startColumn: 3,
+            endColumn: 5,
+        }],
+        operator: DataValidationOperator.GREATER_THAN,
+        formula1: '100',
+        errorStyle: DataValidationErrorStyle.STOP,
+    },
+    {
+        uid: 'xxx-2',
+        type: DataValidationType.CHECKBOX,
+        ranges: [{
+            startRow: 6,
+            endRow: 10,
+            startColumn: 0,
+            endColumn: 5,
+        }],
+    },
+    {
+        uid: 'xxx-3',
+        type: DataValidationType.LIST,
+        ranges: [{
+            startRow: 11,
+            endRow: 15,
+            startColumn: 0,
+            endColumn: 5,
+        }],
+        formula1: '1,2,3,hahaha',
+    },
+    {
+        uid: 'xxx-4',
+        type: DataValidationType.CUSTOM,
+        ranges: [{
+            startRow: 16,
+            endRow: 20,
+            startColumn: 0,
+            endColumn: 5,
+        }],
+        formula1: '=A1',
+    },
+    {
+        uid: 'xxx-5',
+        type: DataValidationType.LIST_MULTIPLE,
+        ranges: [{
+            startRow: 21,
+            endRow: 21,
+            startColumn: 0,
+            endColumn: 0,
+        }],
+        formula1: '1,2,3,4,5,哈哈哈哈',
+    },
+];
 
 export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
     id: 'workbook-01',
@@ -13875,7 +13948,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
             id: 'sheet-0011',
             tabColor: '',
             hidden: 0,
-            rowCount: 1000000,
+            rowCount: 1000,
             columnCount: 20,
             zoomRatio: 1,
             cellData: {
@@ -15147,9 +15220,11 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                 21: {
                     0: {
                         s: 'u5otPe',
+                        v: '1,2',
                     },
                     1: {
                         s: 'u5otPe',
+                        v: '1,2,3',
                     },
                     2: {
                         s: 'u5otPe',
@@ -23303,6 +23378,14 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
         //     },
         // },
     },
+    resources: [
+        {
+            name: DATA_VALIDATION_PLUGIN_NAME,
+            data: JSON.stringify({
+                'sheet-0011': dataValidation,
+            }),
+        },
+    ],
     // namedRanges: [
     //     {
     //         namedRangeId: 'named-rang',

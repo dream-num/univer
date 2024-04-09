@@ -16,7 +16,7 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { IRange, IUnitRange } from '@univerjs/core';
-import { ICommandService, InterceptorManager, IUniverInstanceService, LocaleService } from '@univerjs/core';
+import { createInternalEditorID, ICommandService, InterceptorManager, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { serializeRange } from '@univerjs/engine-formula';
 import { Button, Select } from '@univerjs/design';
@@ -215,7 +215,7 @@ export const RuleEdit = (props: IRuleEditProps) => {
         <div className={styles.cfRuleStyleEditor}>
             <div className={styleBase.title}>{localeService.t('sheet.cf.panel.range')}</div>
             <div className={`${styleBase.mTBase}`}>
-                <RangeSelector placeholder={localeService.t('sheet.cf.form.rangeSelector')} width={'100%' as unknown as number} openForSheetSubUnitId={subUnitId} openForSheetUnitId={unitId} value={rangeString} id={`${SHEET_CONDITIONAL_FORMATTING_PLUGIN}_rangeSelector`} onChange={onRangeSelectorChange} />
+                <RangeSelector placeholder={localeService.t('sheet.cf.form.rangeSelector')} width={'100%' as unknown as number} openForSheetSubUnitId={subUnitId} openForSheetUnitId={unitId} value={rangeString} id={createInternalEditorID(`${SHEET_CONDITIONAL_FORMATTING_PLUGIN}_rangeSelector`)} onChange={onRangeSelectorChange} />
             </div>
             <div className={styleBase.title}>{localeService.t('sheet.cf.panel.styleType')}</div>
             <div className={styleBase.mTBase}>

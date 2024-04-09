@@ -34,10 +34,8 @@ export function ScriptEditorPanel() {
     const monacoEditorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
 
     const localeService = useDependency(LocaleService);
-    const scriptService = useDependency(UniscriptExecutionService);
     const shortcutService = useDependency(IShortcutService);
     const editorService = useDependency(ScriptEditorService);
-    const messageService = useDependency(IMessageService);
 
     useEffect(() => {
         const containerElement = editorContainerRef.current;
@@ -89,9 +87,30 @@ export function ScriptEditorPanel() {
 
             disposableCollection?.dispose();
         };
-    }, []);
+    }, [editorService, shortcutService]);
 
-    const startExecution = useCallback(() => {
+    const startExecution = useExecution(monacoEditorRef);
+
+    return (
+        <div className={styles.scriptEditorPanel}>
+            <div className={styles.scriptEditorContent} ref={editorContentRef}>
+                <div className={styles.scriptEditorContainer} ref={editorContainerRef} />
+            </div>
+            <div className={styles.scriptEditorActions}>
+                <Button type="primary" size="small" onClick={startExecution}>
+                    {localeService.t('script-panel.panel.execute')}
+                </Button>
+            </div>
+        </div>
+    );
+}
+
+function useExecution(monacoEditorRef: React.MutableRefObject<Nullable<editor.IStandaloneCodeEditor>>) {
+    const scriptService = useDependency(UniscriptExecutionService);
+    const messageService = useDependency(IMessageService);
+    const localeService = useDependency(LocaleService);
+
+    return useCallback(() => {
         const model = monacoEditorRef.current?.getModel();
         if (model) {
             scriptService
@@ -109,18 +128,5 @@ export function ScriptEditorPanel() {
                     });
                 });
         }
-    }, [scriptService]);
-
-    return (
-        <div className={styles.scriptEditorPanel}>
-            <div className={styles.scriptEditorContent} ref={editorContentRef}>
-                <div className={styles.scriptEditorContainer} ref={editorContainerRef} />
-            </div>
-            <div className={styles.scriptEditorActions}>
-                <Button type="primary" size="small" onClick={startExecution}>
-                    {localeService.t('script-panel.panel.execute')}
-                </Button>
-            </div>
-        </div>
-    );
+    }, [localeService, messageService, monacoEditorRef, scriptService]);
 }

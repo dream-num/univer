@@ -35,6 +35,7 @@ export {
 } from './commands/commands/set-scroll.command';
 export { VIEWPORT_KEY } from './common/keys';
 export { AutoFillController } from './controllers/auto-fill.controller';
+export { CellCustomRenderController } from './controllers/cell-custom-render.controller';
 export { PASTE_SPECIAL_MENU_ID } from './controllers/menu/menu';
 export { whenFormulaEditorActivated } from './controllers/shortcuts/utils';
 export {
@@ -56,7 +57,7 @@ export {
     PREDEFINED_HOOK_NAME,
     SheetClipboardService,
 } from './services/clipboard/clipboard.service';
-export type { ICellDataWithSpanInfo, ISheetClipboardHook } from './services/clipboard/type';
+export type { ICellDataWithSpanInfo, ISheetClipboardHook, ISheetRangeLocation, ICopyPastePayload } from './services/clipboard/type';
 export { COPY_TYPE } from './services/clipboard/type';
 export { getRepeatRange } from './services/clipboard/utils';
 export { CellEditorManagerService, ICellEditorManagerService } from './services/editor/cell-editor-manager.service';
@@ -75,6 +76,10 @@ export type { ISheetSkeletonManagerParam } from './services/sheet-skeleton-manag
 export { SheetSkeletonManagerService } from './services/sheet-skeleton-manager.service';
 export { UniverSheetsUIPlugin } from './sheets-ui-plugin';
 export { SheetCanvasView } from './views/sheet-canvas-view';
+export { HoverManagerService } from './services/hover-manager.service';
+export { CellAlertManagerService, CellAlertType, type ICellAlert } from './services/cell-alert-manager.service';
+export { HoverController } from './controllers/hover.controller';
 export { SHEET_VIEW_KEY } from './common/keys';
 export { SheetCanvasPopManagerService } from './services/canvas-pop-manager.service';
 export { mergeSetRangeValues } from './services/clipboard/utils';
+export type { IAutoFillLocation } from './services/auto-fill/type';

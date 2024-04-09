@@ -16,6 +16,7 @@
 
 import { describe, expect, it } from 'vitest';
 
+import { AbsoluteRefType } from '@univerjs/core';
 import type { LexerNode } from '../lexer-node';
 import { LexerTreeBuilder } from '../lexer-tree-builder';
 import { ErrorType } from '../../../basics/error-type';
@@ -185,6 +186,16 @@ describe('lexer nodeMaker test', () => {
             const node = lexerTreeBuilder.treeBuilder('=INDEX((A6:B6,C6:D7),1,1,2)') as LexerNode;
             expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"INDEX","st":0,"ed":4,"children":[{"token":"P_1","st":2,"ed":4,"children":[{"token":"CUBE","st":-1,"ed":-1,"children":[{"token":"P_1","st":-1,"ed":-1,"children":[{"token":":","st":-1,"ed":-1,"children":[{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"A6","st":-1,"ed":-1,"children":[]}]},{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"B6","st":-1,"ed":-1,"children":[]}]}]}]},{"token":"P_1","st":9,"ed":11,"children":[{"token":":","st":-1,"ed":-1,"children":[{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"C6","st":-1,"ed":-1,"children":[]}]},{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"D7","st":-1,"ed":-1,"children":[]}]}]}]}]}]},{"token":"P_1","st":16,"ed":18,"children":["1"]},{"token":"P_1","st":18,"ed":20,"children":["1"]},{"token":"P_1","st":20,"ed":22,"children":["2"]}]}]}');
         });
+
+        it('no parameter function', () => {
+            const node = lexerTreeBuilder.treeBuilder('=TODAY()') as LexerNode;
+            expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"TODAY","st":0,"ed":4,"children":[]}]}');
+        });
+
+        it('no parameter function with bracket', () => {
+            const node = lexerTreeBuilder.treeBuilder('=(TODAY())') as LexerNode;
+            expect(JSON.stringify(node.serialize())).toStrictEqual('{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"TODAY","st":1,"ed":5,"children":[]}]}');
+        });
     });
 
     describe('check error', () => {
@@ -308,6 +319,116 @@ describe('lexer nodeMaker test', () => {
                 },
                 ')',
             ]);
+        });
+
+        it('No Parameter Function', () => {
+            expect(lexerTreeBuilder.sequenceNodesBuilder('=today()+today()+column()')).toStrictEqual([
+                {
+                    endIndex: 4,
+                    nodeType: 3,
+                    startIndex: 0,
+                    token: 'today',
+                },
+                '(',
+                ')',
+                '+',
+                {
+                    endIndex: 12,
+                    nodeType: 3,
+                    startIndex: 8,
+                    token: 'today',
+                },
+                '(',
+                ')',
+                '+',
+                {
+                    endIndex: 21,
+                    nodeType: 3,
+                    startIndex: 16,
+                    token: 'column',
+                },
+                '(',
+                ')',
+            ]);
+        });
+
+        it('No Parameter Today', () => {
+            expect(lexerTreeBuilder.sequenceNodesBuilder('=IF(TODAY()>1,"TRUE", "FALSE")')).toStrictEqual([
+                {
+                    endIndex: 1,
+                    nodeType: 3,
+                    startIndex: 0,
+                    token: 'IF',
+                },
+                '(',
+                {
+                    endIndex: 7,
+                    nodeType: 3,
+                    startIndex: 3,
+                    token: 'TODAY',
+                },
+                '(',
+                ')',
+                '>',
+                {
+                    endIndex: 11,
+                    nodeType: 1,
+                    startIndex: 11,
+                    token: '1',
+                },
+                ',',
+                {
+                    endIndex: 18,
+                    nodeType: 2,
+                    startIndex: 13,
+                    token: '"TRUE"',
+                },
+                ',',
+                {
+                    endIndex: 27,
+                    nodeType: 2,
+                    startIndex: 20,
+                    token: ' "FALSE"',
+                },
+                ')',
+            ]);
+        });
+    });
+
+    describe('convertRefersToAbsolute', () => {
+        it('Formula All', () => {
+            const result = lexerTreeBuilder.convertRefersToAbsolute('=sum(A1:B1,A1:B1,A1:B1,A1:B1)', AbsoluteRefType.ALL, AbsoluteRefType.ALL);
+            expect(result).toStrictEqual('=sum($A$1:$B$1,$A$1:$B$1,$A$1:$B$1,$A$1:$B$1)');
+        });
+
+        it('Range All', () => {
+            const result = lexerTreeBuilder.convertRefersToAbsolute('A1:B1,A1:B1,A1:B1,A1:B1', AbsoluteRefType.ALL, AbsoluteRefType.ALL);
+            expect(result).toStrictEqual('$A$1:$B$1,$A$1:$B$1,$A$1:$B$1,$A$1:$B$1');
+        });
+
+        it('Formula Column', () => {
+            const result = lexerTreeBuilder.convertRefersToAbsolute('=sum(A1:B1,A1:B1,A1:B1,A1:B1)', AbsoluteRefType.COLUMN, AbsoluteRefType.COLUMN);
+            expect(result).toStrictEqual('=sum($A1:$B1,$A1:$B1,$A1:$B1,$A1:$B1)');
+        });
+
+        it('Range Column', () => {
+            const result = lexerTreeBuilder.convertRefersToAbsolute('A1:B1,A1:B1,A1:B1,A1:B1', AbsoluteRefType.COLUMN, AbsoluteRefType.COLUMN);
+            expect(result).toStrictEqual('$A1:$B1,$A1:$B1,$A1:$B1,$A1:$B1');
+        });
+
+        it('Formula Row', () => {
+            const result = lexerTreeBuilder.convertRefersToAbsolute('=sum(A1:B1,A1:B1,A1:B1,A1:B1)', AbsoluteRefType.ROW, AbsoluteRefType.ROW);
+            expect(result).toStrictEqual('=sum(A$1:B$1,A$1:B$1,A$1:B$1,A$1:B$1)');
+        });
+
+        it('Range Row', () => {
+            const result = lexerTreeBuilder.convertRefersToAbsolute('A1:B1,A1:B1,A1:B1,A1:B1', AbsoluteRefType.ROW, AbsoluteRefType.ROW);
+            expect(result).toStrictEqual('A$1:B$1,A$1:B$1,A$1:B$1,A$1:B$1');
+        });
+
+        it('Complex Formula', () => {
+            const result = lexerTreeBuilder.convertRefersToAbsolute('=SUM(A1:B10) + LAMBDA(x, y, x*y*x)(A1:B10, A10) + MAX(A1:B10,SUM(A2))', AbsoluteRefType.ALL, AbsoluteRefType.ALL);
+            expect(result).toStrictEqual('=SUM($A$1:$B$10) + LAMBDA(x, y, x*y*x)($A$1:$B$10,$A$10) + MAX($A$1:$B$10,SUM($A$2))');
         });
     });
 });

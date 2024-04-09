@@ -146,12 +146,22 @@ export function getColorStyle(color: Nullable<IColorStyle>): Nullable<string> {
     return null;
 }
 
+/**
+ * A string starting with an equal sign is a formula
+ * @param value
+ * @returns
+ */
 export function isFormulaString(value: any): boolean {
     return Tools.isString(value) && value.substring(0, 1) === '=' && value.length > 1;
 }
 
+/**
+ * any string
+ * @param value
+ * @returns
+ */
 export function isFormulaId(value: any): boolean {
-    return Tools.isString(value) && value.indexOf('=') === -1 && value.length === 6;
+    return Tools.isString(value) && value.length > 0;
 }
 
 /**

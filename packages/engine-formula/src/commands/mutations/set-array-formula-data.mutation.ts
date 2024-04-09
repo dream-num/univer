@@ -15,34 +15,23 @@
  */
 
 import type { IMutation } from '@univerjs/core';
-import { CommandType, Tools } from '@univerjs/core';
+import { CommandType } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
 import type { IArrayFormulaRangeType, IArrayFormulaUnitCellType } from '../../basics/common';
-import { FormulaDataModel } from '../../models/formula-data.model';
 
 export interface ISetArrayFormulaDataMutationParams {
     arrayFormulaRange: IArrayFormulaRangeType;
     arrayFormulaCellData: IArrayFormulaUnitCellType;
 }
 
-export const SetArrayFormulaDataUndoMutationFactory = (accessor: IAccessor): ISetArrayFormulaDataMutationParams => {
-    const formulaDataModel = accessor.get(FormulaDataModel);
-    const arrayFormulaRange = Tools.deepClone(formulaDataModel.getArrayFormulaRange());
-    const arrayFormulaCellData = Tools.deepClone(formulaDataModel.getArrayFormulaCellData());
-    return {
-        arrayFormulaRange,
-        arrayFormulaCellData,
-    };
-};
-
+/**
+ * There is no need to process data here, it is used as the main thread to send data to the worker. The main thread has already updated the data in advance, and there is no need to update it again here.
+ */
 export const SetArrayFormulaDataMutation: IMutation<ISetArrayFormulaDataMutationParams> = {
     id: 'formula.mutation.set-array-formula-data',
     type: CommandType.MUTATION,
     handler: (accessor: IAccessor, params: ISetArrayFormulaDataMutationParams) => {
-        const formulaDataModel = accessor.get(FormulaDataModel);
-        formulaDataModel.setArrayFormulaRange(params.arrayFormulaRange);
-        formulaDataModel.setArrayFormulaCellData(params.arrayFormulaCellData);
         return true;
     },
 };

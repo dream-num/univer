@@ -213,9 +213,6 @@ export interface IOptionData {
      *
      */
     contentsOnly?: boolean;
-    /**
-     *  Whether to clear only the comments.
-     */
 }
 
 /**

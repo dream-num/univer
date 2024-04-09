@@ -27,6 +27,7 @@ import type {
 } from '@univerjs/core';
 import {
     BooleanNumber,
+    convertBodyToHtml,
     DEFAULT_WORKSHEET_COLUMN_WIDTH,
     DEFAULT_WORKSHEET_COLUMN_WIDTH_KEY,
     DEFAULT_WORKSHEET_ROW_HEIGHT,
@@ -163,6 +164,9 @@ export class SheetClipboardController extends RxDisposable {
             },
             onCopyCellContent(row: number, col: number): string {
                 const cell = currentSheet!.getCell(row, col);
+                if (cell?.p?.body?.paragraphs || cell?.p?.body?.textRuns) {
+                    return convertBodyToHtml(cell.p.body);
+                }
                 const content = cell ? extractPureTextFromCell(cell) : '';
                 return content;
             },

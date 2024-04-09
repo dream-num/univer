@@ -441,7 +441,7 @@ function decodeHTMLEntities(input: string): string {
 }
 
 function extractBordersAndKeepOthers(styleString: string, bordersToKeep: string[]) {
-    if (!styleString || !bordersToKeep.length) return '';
+    if (!styleString) return '';
     const borderRegex = /border(-top|-right|-bottom|-left)?\s*:\s*([^;]+);/g;
 
     const extractedBorders: Record<string, string> = {};
@@ -489,6 +489,7 @@ function parseTableByHtml(htmlElement: HTMLIFrameElement, skeleton?: Spreadsheet
             const rowSpan = Number(cell.getAttribute('rowSpan')) || 1;
             const colSpan = Number(cell.getAttribute('colSpan')) || 1;
 
+            // If there is a class attribute, use getComputedStyle
             const hasClass = cell.getAttribute('class');
             if (hasClass) {
                 const computedStyle = getComputedStyle(cell);
@@ -506,10 +507,10 @@ function parseTableByHtml(htmlElement: HTMLIFrameElement, skeleton?: Spreadsheet
                 }
             }
             if (rowSpan > 1 && colSpan > 1) {
-                // compatible google sheet
+                // compatible google sheet；The border style of merged cells in Google is set on the right and bottom sides of the merged cells
                 if (!cellStyle.includes('border-top') && !cellStyle.includes('border-left')) {
-                    const topStyle = extractStyleProperty(cellMatrix.getValue(rowIndex - 1, colIndex).style, 'border-bottom');
-                    const leftStyle = extractStyleProperty(cellMatrix.getValue(rowIndex, colIndex - 1).style, 'border-right');
+                    const topStyle = extractStyleProperty(cellMatrix.getValue(rowIndex - 1, colIndex)?.style, 'border-bottom');
+                    const leftStyle = extractStyleProperty(cellMatrix.getValue(rowIndex, colIndex - 1)?.style, 'border-right');
                     if (topStyle) {
                         cellStyle += `border-top:${topStyle};`;
                     }
@@ -519,12 +520,14 @@ function parseTableByHtml(htmlElement: HTMLIFrameElement, skeleton?: Spreadsheet
                 }
             }
 
+            // Determine whether it is rich text based on whether there are html tags
             const isRichText = /<[^>]+>/.test(cell.innerHTML);
             if (isRichText && skeleton) {
                 const newDocBody: IDocumentBody = {
                     dataStream: '',
                     textRuns: [],
                 };
+                // Rich text parsing method, refer to the doc
                 parseCellHtml(null, cell.childNodes, newDocBody);
                 const documentModel = skeleton.getBlankCellDocumentModel()?.documentModel;
                 const p = documentModel?.getSnapshot();
@@ -569,6 +572,7 @@ function parseTableByHtml(htmlElement: HTMLIFrameElement, skeleton?: Spreadsheet
                 colSetValueIndex += 1;
                 continue;
             } else {
+                // Clone the style of merged cells to each individual cell; switch to cloning only border styles if there are issues later.
                 if ((rowSpan > 1 || colSpan > 1)) {
                     if (rowSpan === 1) {
                         for (let i = colSetValueIndex; i < colSetValueIndex + colSpan; i++) {
@@ -595,6 +599,13 @@ function parseTableByHtml(htmlElement: HTMLIFrameElement, skeleton?: Spreadsheet
                         cellMatrix.setValue(rowIndex, colSetValueIndex + colSpan - 1, { style: extractBordersAndKeepOthers(cellStyle, ['border-right', 'border-top']) });
                         cellMatrix.setValue(rowIndex + rowSpan - 1, colSetValueIndex + colSpan - 1, { style: extractBordersAndKeepOthers(cellStyle, ['border-right', 'border-bottom']) });
                         cellMatrix.setValue(rowIndex, colSetValueIndex, { ...cellValue, style: extractBordersAndKeepOthers(cellStyle, ['border-top', 'border-left']) });
+                        for (let i = rowIndex; i < rowIndex + rowSpan; i++) {
+                            for (let j = colIndex; j < colIndex + colSpan; j++) {
+                                if (!cellMatrix.getValue(i, j)) {
+                                    cellMatrix.setValue(i, j, { style: extractBordersAndKeepOthers(cellStyle, []) });
+                                }
+                            }
+                        }
                     }
                 } else {
                     cellMatrix.setValue(rowIndex, colSetValueIndex, cellValue);
@@ -639,6 +650,7 @@ function parseCellHtml(parent: Nullable<ChildNode>, nodes: NodeListOf<ChildNode>
         }
     }
 }
+
 function extractStyleProperty(styleString?: string, propertyName?: string) {
     if (!styleString || !propertyName) return null;
     const regex = new RegExp(`(${propertyName}\\s*:\\s*[^;]+);`, 'i');

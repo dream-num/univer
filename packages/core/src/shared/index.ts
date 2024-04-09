@@ -37,4 +37,5 @@ export * from './sort-rules';
 export * from './tools';
 export * from './types';
 export * from './debounce';
+export * from './clipboard';
 export { queryObjectMatrix } from './object-matrix-query';

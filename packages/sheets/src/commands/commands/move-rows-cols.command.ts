@@ -144,12 +144,14 @@ export const MoveRowsCommand: ICommand<IMoveRowsCommandParams> = {
         const interceptorCommands = sheetInterceptorService.onCommandExecute({ id: MoveRowsCommand.id, params });
 
         const redos = [
+            ...(interceptorCommands.preRedos ?? []),
             { id: MoveRowsMutation.id, params: moveRowsParams },
             { id: SetSelectionsOperation.id, params: setSelectionsParam },
             ...interceptorCommands.redos,
         ];
 
         const undos = [
+            ...(interceptorCommands.preUndos ?? []),
             { id: MoveRowsMutation.id, params: undoMoveRowsParams },
             { id: SetSelectionsOperation.id, params: undoSetSelectionsParam },
             ...interceptorCommands.undos,
@@ -271,12 +273,14 @@ export const MoveColsCommand: ICommand<IMoveColsCommandParams> = {
         const interceptorCommands = sheetInterceptorService.onCommandExecute({ id: MoveColsCommand.id, params });
 
         const redos = [
+            ...(interceptorCommands.preRedos ?? []),
             { id: MoveColsMutation.id, params: moveColsParams },
             { id: SetSelectionsOperation.id, params: setSelectionsParam },
             ...interceptorCommands.redos,
         ];
 
         const undos = [
+            ...(interceptorCommands.preUndos ?? []),
             { id: MoveColsMutation.id, params: undoMoveColsParams },
             { id: SetSelectionsOperation.id, params: undoSetSelectionsParam },
             ...interceptorCommands.undos,

@@ -66,8 +66,8 @@ export const SetWorksheetNameCommand: ICommand = {
             params,
         });
 
-        const redos = [{ id: SetWorksheetNameMutation.id, params: redoMutationParams }, ...interceptorCommands.redos];
-        const undos = [...interceptorCommands.undos, { id: SetWorksheetNameMutation.id, params: undoMutationParams }];
+        const redos = [...(interceptorCommands.preRedos ?? []), { id: SetWorksheetNameMutation.id, params: redoMutationParams }, ...interceptorCommands.redos];
+        const undos = [...(interceptorCommands.preUndos ?? []), { id: SetWorksheetNameMutation.id, params: undoMutationParams }, ...interceptorCommands.undos];
 
         const result = await sequenceExecute(redos, commandService).result;
         if (result) {

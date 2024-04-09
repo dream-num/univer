@@ -89,8 +89,8 @@ export const RemoveSheetCommand: ICommand = {
             id: RemoveSheetCommand.id,
             params: { unitId, subUnitId },
         });
-        const redos = [{ id: RemoveSheetMutation.id, params: RemoveSheetMutationParams }, ...intercepted.redos];
-        const undos = [...intercepted.undos, { id: InsertSheetMutation.id, params: InsertSheetMutationParams }];
+        const redos = [...(intercepted.preRedos ?? []), { id: RemoveSheetMutation.id, params: RemoveSheetMutationParams }, ...intercepted.redos];
+        const undos = [...(intercepted.preUndos ?? []), { id: InsertSheetMutation.id, params: InsertSheetMutationParams }, ...intercepted.undos];
         const result = sequenceExecute(redos, commandService);
 
         if (result) {

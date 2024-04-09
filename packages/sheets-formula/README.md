@@ -719,7 +719,7 @@ To implement a formula, you need to add formula description, internationalizatio
     - Extract the `description` from the content, as some Excel descriptions are lengthy and need simplification.
     - `abstract` and `links` generally do not need modification.
     - `aliasFunctionName` is optional; most formulas do not need to be filled (or can be set for aliases in specific countries). Currently, there is no documentation for formula aliases. Currently I have found a function translation plug-in that may provide similar functions [Excel Functions Translator](https://support.microsoft.com/en-us/office/excel-functions-translator-f262d0c0-991c-485b-89b6-32cc8d326889)
-    - `functionParameter` needs a name for each parameter. We recommend varying names based on the parameter's meaning, e.g., use `number` for a numeric parameter (if there is only one) or `number1`, `number2` for multiple numeric parameters. Use `range` for a range, `criteria` for conditions, and `sum_range` for the sum range (separated by `_` for multiple words).
+    - `functionParameter` needs a name for each parameter. We recommend varying names based on the parameter's meaning, e.g., use `number` for a numeric parameter (if there is only one) or `number1`, `number2` for multiple numeric parameters. Use `range` for a range, `criteria` for conditions, and `sumRange` for the sum range, use `camelCase`. For specific parameter content, the English format of `name` uses the underlined format `sum_range`, other languages use the translated text, and `detail` uses all translations.
     - Some Chinese translations in the Office function documentation are machine-translated and may be unclear. Modify as needed. For example, `单元格参考` (Cell Reference) should be translated as `单元格引用`. Numeric type parameters are uniformly translated as: `数值`.
     - Do not end `abstract` with a period (used in the search list when users input cells), but end `description` and `detail` with a period (used in descriptions).
     - Capitalize the first letter of English sentences.
@@ -743,11 +743,11 @@ To implement a formula, you need to add formula description, internationalizatio
 
     Location: [packages/engine-formula/src/functions/math/sumif/index.ts](https://github.com/dream-num/univer/blob/dev/packages/engine-formula/src/functions/math/sumif/index.ts).
 
-    Create a new folder for the formula under the current formula category, with one folder per formula. Then create an `index.ts` file to write the formula algorithm. Use camel case for the formula `class` name, considering the formula as one word. If a formula contains `_` or `.`, treat it as two words, such as:
+    Create a new formula folder under the classification folder of the current formula. The folder name is the same as the formula, named with `kebab-case`, one folder for each formula. Then create a new `index.ts` file to write the formula algorithm. The name of the formula `class` adopts `PascalCase`. The formula is considered to be one word, and the formula with `_` or `.` is considered to be two words such as
 
-    - `SUMIF` => `Sumif`
-    - `NETWORKDAYS.INTL` => `Networkdays_Intl`
-    - `ARRAY_CONSTRAIN` => `Array_Constrain`
+     - `SUMIF` => folder `sumif`, class `Sumif`
+     - `NETWORKDAYS.INTL` => folder `networkdays-intl`, class `NetworkdaysIntl`
+     - `ARRAY_CONSTRAIN` => folder `array-constrain`, class `ArrayConstrain`
 
     Create a `__tests__` folder at the same level to write unit tests. After writing, remember to add the formula algorithm and function name mapping in the `function-map` file in the category directory to register the formula algorithm.
 
@@ -772,20 +772,26 @@ To implement a formula, you need to add formula description, internationalizatio
     - After selecting `SUMIF` or entering `=sumif(`, trigger the formula details popup and carefully check the contents.
     - Select the data range, trigger the calculation, and check if the formula calculation result is correct.
 
-#### Considerations for Formula Implementation
+### Considerations for Formula Implementation
 
--   Any formula's input and output can be `A1`, `A1:B10`, etc. When researching Excel, consider all cases, such as `=SIN(A1:B10)`, which expands to the calculated range.
-    -   For example, the `XLOOKUP` function requires at least one of the rows or columns of its two inputs to be of equal size for matrix calculation.
-    -   For example, the `SUMIF` function, although commonly used for summation, can expand based on the second parameter.
+- For most formula rules, please refer to the latest version of Excel. If there are any unreasonable rules, please refer to Google Sheets.
+- The input and output parameters of any formula can be `A1`, `A1:B10`, and the cell content may also be numbers, strings, Boolean values, empty cells, error values, arrays, etc., although the formula tutorial explains In order to identify fixed data types, the program implementation needs to be compatible. When researching Excel, consider all cases, such as `=SIN(A1:B10)`, which expands to the calculated range.
+    - For example, the `XLOOKUP` function requires at least one of the rows or columns of its two inputs to be of equal size for matrix calculation.
+    - For example, the `SUMIF` function, although commonly used for summation, can expand based on the second parameter.
         ![sumif array](./assets/sumif-array.png)
         ![sumif array result](./assets/sumif-array-result.png)
-    -   Excel formula calculation is becoming more like numpy, for example:
+    - Excel formula calculation is becoming more like numpy, for example:
         ![numpy](./assets/numpy.png)
--   For numerical calculations in formulas, use built-in methods and try to avoid obtaining values for manual calculation. Because formula parameters can be values, arrays, or references. You can refer to existing `sum` and `minus` functions.
--   Precision issues: The formula introduces `big.js`, and using built-in methods will call this library. However, it is nearly 100 times slower than native calculations. Therefore, for methods like `sin`, it is advisable to use native implementations.
--   For custom calculations, use the `product` function, suitable for calculating two input parameters. Call `map` to iterate over the values for changes to a parameter's own values.
+- For numerical calculations in formulas, use built-in methods and try to avoid obtaining values for manual calculation. Because formula parameters can be values, arrays, or references. You can refer to existing `sum` and `minus` functions.
+- Precision issues: The formula introduces `big.js`, and using built-in methods will call this library. However, it is nearly 100 times slower than native calculations. Therefore, for methods like `sin`, it is advisable to use native implementations.
+- For custom calculations, use the `product` function, suitable for calculating two input parameters. Call `map` to iterate over the values for changes to a parameter's own values.
+- Formula algorithm supports two configurations `needsExpandParams` and `needsReferenceObject`
+     - `needsExpandParams`: Whether the function needs to expand parameters, mainly handles situations where the `LOOKUP` function needs to handle vectors of different sizes
+     - `needsReferenceObject`: Whether the function needs to pass in a reference object. After setting, `BaseReferenceObject` will not be converted into `ArrayValueObject` but will be passed directly into the formula algorithm, such as the `OFFSET` function
+- Formula calculation errors will return fixed types of errors, such as `#NAME?`, `#VALUE!`, which need to be aligned with Excel, because there are functions `ISERR`, `ISNA`, etc. that determine the error type. If the type is not specified correctly, the result will be It may be different.
+- In the formula algorithm, even if it is a required parameter, it is necessary to intercept the case of `null` and return the error `#N/A`, because the user may not enter any parameters. This behavior will be intercepted in Excel and `#N/A` will be returned in Google Sheets. We refer to Google Sheets.
 
-#### Formula Basic Tools
+### Formula Basic Tools
 
 1. `ValueObjectFactory` is used to automatically recognize parameter formats and create a parameter instance. Use `RangeReferenceObject` to create parameter instances for range-type data.
 2. The array `toArrayValueObject` can be operated directly with values to get a new array.

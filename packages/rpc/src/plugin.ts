@@ -23,10 +23,10 @@ import { DataSyncReplicaController } from './controllers/data-sync/data-sync-rep
 import {
     IRemoteInstanceService,
     IRemoteSyncService,
-    RemoteInstanceReplicaService,
     RemoteSyncPrimaryService,
+    WebWorkerRemoteInstanceService,
 } from './services/remote-instance/remote-instance.service';
-import { ChannelService, IRPChannelService } from './services/rpc/channel.service';
+import { ChannelService, IRPCChannelService } from './services/rpc/channel.service';
 import {
     createWebWorkerMessagePortOnMain,
     createWebWorkerMessagePortOnWorker,
@@ -56,7 +56,7 @@ export class UniverRPCMainThreadPlugin extends Plugin {
         const messageProtocol = createWebWorkerMessagePortOnMain(worker);
         const dependencies: Dependency[] = [
             [
-                IRPChannelService,
+                IRPCChannelService,
                 {
                     useFactory: () => new ChannelService(messageProtocol),
                 },
@@ -81,7 +81,7 @@ export class UniverRPCWorkerThreadPlugin extends Plugin {
     static override type = PluginType.Univer;
 
     constructor(
-        private readonly _config: UniverRPCWorkerThreadPlugin,
+        private readonly _config: IUniverRPCWorkerThreadPluginConfig,
         @Inject(Injector) protected readonly _injector: Injector
     ) {
         super('UNIVER_RPC_WORKER_THREAD_PLUGIN');
@@ -92,12 +92,12 @@ export class UniverRPCWorkerThreadPlugin extends Plugin {
             [
                 [DataSyncReplicaController],
                 [
-                    IRPChannelService,
+                    IRPCChannelService,
                     {
                         useFactory: () => new ChannelService(createWebWorkerMessagePortOnWorker()),
                     },
                 ],
-                [IRemoteInstanceService, { useClass: RemoteInstanceReplicaService }],
+                [IRemoteInstanceService, { useClass: WebWorkerRemoteInstanceService }],
             ] as Dependency[]
         ).forEach((dependency) => injector.add(dependency));
 

@@ -126,6 +126,16 @@ const locale: typeof zhCN = {
         },
         textLength: {
             title: 'Text length',
+            errorMsg: {
+                between: 'Text length must be between {FORMULA1} and {FORMULA2}',
+                greaterThan: 'Text length must be after {FORMULA1}',
+                greaterThanOrEqual: 'Text length must be on or after {FORMULA1}',
+                lessThan: 'Text length must be before {FORMULA1}',
+                lessThanOrEqual: 'Text length must be on or before {FORMULA1}',
+                equal: 'Text length must be {FORMULA1}',
+                notEqual: 'Text length must be not {FORMULA1}',
+                notBetween: 'Text length must be not between {FORMULA1}',
+            },
         },
         decimal: {
             title: 'Number',

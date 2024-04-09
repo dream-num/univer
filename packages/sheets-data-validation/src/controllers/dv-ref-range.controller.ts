@@ -18,7 +18,7 @@ import type { IRange, ISheetDataValidationRule } from '@univerjs/core';
 import { DataValidationType, Disposable, DisposableCollection, ICommandService, isRangesEqual, IUniverInstanceService, LifecycleStages, OnLifecycle, Range, Rectangle, toDisposable } from '@univerjs/core';
 import type { EffectRefRangeParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
-import { handleDefaultRangeChangeWithEffectRefCommands, handleOtherDefaultRangeChangeWithEffectRefCommands, RefRangeService, SetRangeValuesMutation } from '@univerjs/sheets';
+import { handleCommonDefaultRangeChangeWithEffectRefCommands, handleDefaultRangeChangeWithEffectRefCommands, RefRangeService, SetRangeValuesMutation } from '@univerjs/sheets';
 import { Inject, Injector } from '@wendellhu/redi';
 import { merge, Observable } from 'rxjs';
 import { distinctUntilChanged, map, switchMap } from 'rxjs/operators';
@@ -53,6 +53,12 @@ export class DataValidationRefRangeController extends Disposable {
     private _getIdWithUnitId(unitID: string, subUnitId: string, ruleId: string) {
         return `${unitID}_${subUnitId}_${ruleId}`;
     }
+
+    registerRule = (unitId: string, subUnitId: string, rule: ISheetDataValidationRule) => {
+        this.register(unitId, subUnitId, rule);
+        this.registerFormula(unitId, subUnitId, rule);
+        this.registerRange(unitId, subUnitId, rule);
+    };
 
     registerFormula(unitId: string, subUnitId: string, rule: ISheetDataValidationRule) {
         const ruleId = rule.uid;
@@ -148,7 +154,7 @@ export class DataValidationRefRangeController extends Disposable {
         const handleRangeChange = (commandInfo: EffectRefRangeParams) => {
             const oldRanges = [...rule.ranges];
             const resultRangesOrigin = oldRanges.map((range) => {
-                return handleOtherDefaultRangeChangeWithEffectRefCommands(range, commandInfo) as IRange | IRange[];
+                return handleCommonDefaultRangeChangeWithEffectRefCommands(range, commandInfo) as IRange | IRange[];
             }).filter((range) => !!range);
 
             const resultRanges = resultRangesOrigin.flat();
@@ -191,11 +197,11 @@ export class DataValidationRefRangeController extends Disposable {
             }
         };
         const disposeList: (() => void)[] = [];
+
         rule.ranges.forEach((range) => {
-            const disposable = this._refRangeService.registerRefRange(range, handleRangeChange);
+            const disposable = this._refRangeService.registerRefRange(range, handleRangeChange, unitId, subUnitId);
             disposeList.push(() => disposable.dispose());
         });
-
         const id = this._getIdWithUnitId(unitId, subUnitId, rule.uid);
         const current = this._disposableMap.get(id) ?? new Set();
         current.add(() => disposeList.forEach((dispose) => dispose()));
@@ -356,17 +362,10 @@ export class DataValidationRefRangeController extends Disposable {
                         toDisposable(
                             this._dataValidationModel.ruleChange$.subscribe((option) => {
                                 const { unitId, subUnitId, rule } = option;
-                                const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
-                                const worksheet = workbook.getActiveSheet();
-                                if (option.unitId !== workbook.getUnitId() || option.subUnitId !== worksheet.getSheetId()) {
-                                    return;
-                                }
                                 switch (option.type) {
                                     case 'add': {
                                         const rule = option.rule!;
-                                        this.register(option.unitId, option.subUnitId, rule);
-                                        this.registerFormula(option.unitId, option.subUnitId, rule);
-                                        this.registerRange(option.unitId, option.subUnitId, rule);
+                                        this.registerRule(option.unitId, option.subUnitId, rule);
                                         break;
                                     }
                                     case 'remove': {
@@ -378,9 +377,8 @@ export class DataValidationRefRangeController extends Disposable {
                                         const rule = option.rule!;
                                         const disposeSet = this._disposableMap.get(this._getIdWithUnitId(unitId, subUnitId, rule!.uid));
                                         disposeSet && disposeSet.forEach((dispose) => dispose());
-                                        this.register(option.unitId, option.subUnitId, rule);
-                                        this.registerFormula(option.unitId, option.subUnitId, rule);
-                                        this.registerRange(option.unitId, option.subUnitId, rule);
+                                        this.registerRule(option.unitId, option.subUnitId, rule);
+                                        break;
                                     }
                                 }
                             })));

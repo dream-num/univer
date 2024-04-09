@@ -34,7 +34,7 @@ export interface IRemoteSyncService {
     syncMutation(params: { mutationInfo: IMutationInfo }): Promise<boolean>;
 }
 export class RemoteSyncPrimaryService implements IRemoteSyncService {
-    constructor(@ICommandService private readonly _commandService: ICommandService) {}
+    constructor(@ICommandService private readonly _commandService: ICommandService) { }
 
     async syncMutation(params: { mutationInfo: IMutationInfo }): Promise<boolean> {
         return this._commandService.syncExecuteCommand(params.mutationInfo.id, params.mutationInfo.params, {
@@ -45,6 +45,7 @@ export class RemoteSyncPrimaryService implements IRemoteSyncService {
 }
 
 export const RemoteInstanceServiceName = 'univer.remote-instance-service';
+
 /**
  * This service is provided by the replica Univer.
  *
@@ -60,28 +61,20 @@ export interface IRemoteInstanceService {
     disposeInstance(params: { unitID: string }): Promise<boolean>;
     syncMutation(params: { mutationInfo: IMutationInfo }): Promise<boolean>;
 }
-export class RemoteInstanceReplicaService implements IRemoteInstanceService {
+
+export class WebWorkerRemoteInstanceService implements IRemoteInstanceService {
     constructor(
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @ICommandService private readonly _commandService: ICommandService,
-        @ILogService private readonly _logService: ILogService
-    ) {}
+        @IUniverInstanceService protected readonly _univerInstanceService: IUniverInstanceService,
+        @ICommandService protected readonly _commandService: ICommandService,
+        @ILogService protected readonly _logService: ILogService
+    ) { }
 
     whenReady(): Promise<true> {
         return Promise.resolve(true);
     }
 
     async syncMutation(params: { mutationInfo: IMutationInfo }): Promise<boolean> {
-        const { id, params: mutationParams } = params.mutationInfo;
-        if (!this._commandService.hasCommand(id)) {
-            this._logService.debug('[RemoteInstanceReplicaService]', `command "${id}" not found. Skip sync mutation.`);
-            return true;
-        }
-
-        return this._commandService.syncExecuteCommand(id, mutationParams, {
-            onlyLocal: true,
-            fromSync: true,
-        });
+        return this._applyMutation(params.mutationInfo);
     }
 
     async createInstance(params: {
@@ -96,7 +89,7 @@ export class RemoteInstanceReplicaService implements IRemoteInstanceService {
                     return !!this._univerInstanceService.createSheet(snapshot);
                 default:
                     throw new Error(
-                        `[RemoteInstanceReplicaService]: cannot create replica for document type: ${type}.`
+                        `[WebWorkerRemoteInstanceService]: cannot create replica for document type: ${type}.`
                     );
             }
         } catch (err: unknown) {
@@ -110,5 +103,18 @@ export class RemoteInstanceReplicaService implements IRemoteInstanceService {
 
     async disposeInstance(params: { unitID: string }): Promise<boolean> {
         return this._univerInstanceService.disposeDocument(params.unitID);
+    }
+
+    protected _applyMutation(mutationInfo: IMutationInfo): boolean {
+        const { id, params: mutationParams } = mutationInfo;
+        if (!this._commandService.hasCommand(id)) {
+            this._logService.debug('[RemoteInstanceReplicaService]', `command "${id}" not found. Skip sync mutation.`);
+            return true;
+        }
+
+        return this._commandService.syncExecuteCommand(id, mutationParams, {
+            onlyLocal: true,
+            fromSync: true,
+        });
     }
 }

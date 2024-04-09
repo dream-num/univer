@@ -132,17 +132,17 @@ export function Slider(props: ISliderProps) {
 
         function onMouseUp() {
             isDragging = false;
-            document.removeEventListener('mousemove', onMouseMove);
-            window.removeEventListener('mouseup', onMouseUp);
+            document.removeEventListener('pointermove', onMouseMove);
+            window.removeEventListener('pointerup', onMouseUp);
         }
 
         function onMouseOut(e: MouseEvent) {
             e.relatedTarget === null && onMouseUp();
         }
 
-        document.addEventListener('mousemove', onMouseMove);
-        window.addEventListener('mouseup', onMouseUp);
-        window.addEventListener('mouseout', onMouseOut);
+        window.addEventListener('pointermove', onMouseMove);
+        window.addEventListener('pointerup', onMouseUp);
+        window.addEventListener('pointerout', onMouseOut);
     }
 
     return (
@@ -167,7 +167,7 @@ export function Slider(props: ISliderProps) {
                         style={{
                             left: `${offset}%`,
                         }}
-                        onMouseDown={handleMouseDown}
+                        onPointerDown={handleMouseDown}
                     />
                 </div>
             </div>

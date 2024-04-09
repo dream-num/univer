@@ -278,7 +278,7 @@ export function getMoveRangeMutations(
 
 export function getSetCellValueMutations(
     pasteTo: ISheetRangeLocation,
-    pasteFrom: ISheetRangeLocation,
+    pasteFrom: Nullable<ISheetRangeLocation>,
     matrix: ObjectMatrix<ICellDataWithSpanInfo>,
     accessor: IAccessor
 ) {

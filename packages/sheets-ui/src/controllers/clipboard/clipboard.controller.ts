@@ -542,9 +542,8 @@ export class SheetClipboardController extends RxDisposable {
             specialPasteInfo: {
                 label: 'specialPaste.value',
             },
-            onPasteCells: (pasteFrom, pasteTo, data, pasteType) => {
-                const workbook = self._currentUniverSheet.getCurrentUniverSheetInstance()!;
-                return getSetCellValueMutations(pasteTo, data, accessor);
+            onPasteCells: (pasteFrom, pasteTo, data) => {
+                return getSetCellValueMutations(pasteTo, pasteFrom, data, accessor);
             },
         };
         const specialPasteFormatHook: ISheetClipboardHook = {
@@ -552,8 +551,7 @@ export class SheetClipboardController extends RxDisposable {
             specialPasteInfo: {
                 label: 'specialPaste.format',
             },
-            onPasteCells(pasteFrom, pasteTo, matrix, pasteType) {
-                const workbook = self._currentUniverSheet.getCurrentUniverSheetInstance()!;
+            onPasteCells(pasteFrom, pasteTo, matrix) {
                 const redoMutationsInfo: IMutationInfo[] = [];
                 const undoMutationsInfo: IMutationInfo[] = [];
 

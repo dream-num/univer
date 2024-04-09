@@ -39,6 +39,7 @@ import {
 } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
 
+import numfmt from '@univerjs/engine-numfmt';
 import type { ICellDataWithSpanInfo, ICopyPastePayload, ISheetRangeLocation } from '../../services/clipboard/type';
 import { COPY_TYPE } from '../../services/clipboard/type';
 
@@ -64,7 +65,7 @@ export function getDefaultOnPasteCellMutations(
         undoMutationsInfo.push(...clearStyleUndos);
 
         // set values
-        const { undos: setValuesUndos, redos: setValuesRedos } = getSetCellValueMutations(pasteTo, data, accessor);
+        const { undos: setValuesUndos, redos: setValuesRedos } = getSetCellValueMutations(pasteTo, pasteFrom, data, accessor);
         redoMutationsInfo.push(...setValuesRedos);
         undoMutationsInfo.push(...setValuesUndos);
 
@@ -277,6 +278,7 @@ export function getMoveRangeMutations(
 
 export function getSetCellValueMutations(
     pasteTo: ISheetRangeLocation,
+    pasteFrom: ISheetRangeLocation,
     matrix: ObjectMatrix<ICellDataWithSpanInfo>,
     accessor: IAccessor
 ) {
@@ -287,6 +289,13 @@ export function getSetCellValueMutations(
     const valueMatrix = new ObjectMatrix<ICellData>();
 
     matrix.forValue((row, col, value) => {
+        if (!value.p && value.v && !pasteFrom) {
+            const content = String(value.v);
+            const numfmtValue = numfmt.parseDate(content) || numfmt.parseTime(content) || numfmt.parseNumber(content);
+            if (numfmtValue?.v && typeof numfmtValue.v === 'number') {
+                value.v = numfmtValue.v;
+            }
+        }
         valueMatrix.setValue(row + startRow, col + startColumn, Tools.deepClone(value));
     });
     // set cell value and style

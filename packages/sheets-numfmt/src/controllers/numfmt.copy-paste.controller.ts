@@ -144,7 +144,7 @@ export class NumfmtCopyPasteController extends Disposable {
             copyInfo.data.forValue((row, col, value) => {
                 const content = String(value.v);
 
-                const dateInfo = numfmt.parseDate(content) || numfmt.parseTime(content);
+                const dateInfo = numfmt.parseDate(content) || numfmt.parseTime(content) || numfmt.parseNumber(content);
                 const isTranslateDate = !!dateInfo;
                 if (isTranslateDate) {
                     if (dateInfo && dateInfo.z) {

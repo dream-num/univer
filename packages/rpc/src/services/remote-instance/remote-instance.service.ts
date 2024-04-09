@@ -34,7 +34,7 @@ export interface IRemoteSyncService {
     syncMutation(params: { mutationInfo: IMutationInfo }): Promise<boolean>;
 }
 export class RemoteSyncPrimaryService implements IRemoteSyncService {
-    constructor(@ICommandService private readonly _commandService: ICommandService) {}
+    constructor(@ICommandService private readonly _commandService: ICommandService) { }
 
     async syncMutation(params: { mutationInfo: IMutationInfo }): Promise<boolean> {
         return this._commandService.syncExecuteCommand(params.mutationInfo.id, params.mutationInfo.params, {
@@ -64,26 +64,17 @@ export interface IRemoteInstanceService {
 
 export class WebWorkerRemoteInstanceService implements IRemoteInstanceService {
     constructor(
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @ICommandService private readonly _commandService: ICommandService,
-        @ILogService private readonly _logService: ILogService
-    ) {}
+        @IUniverInstanceService protected readonly _univerInstanceService: IUniverInstanceService,
+        @ICommandService protected readonly _commandService: ICommandService,
+        @ILogService protected readonly _logService: ILogService
+    ) { }
 
     whenReady(): Promise<true> {
         return Promise.resolve(true);
     }
 
     async syncMutation(params: { mutationInfo: IMutationInfo }): Promise<boolean> {
-        const { id, params: mutationParams } = params.mutationInfo;
-        if (!this._commandService.hasCommand(id)) {
-            this._logService.debug('[RemoteInstanceReplicaService]', `command "${id}" not found. Skip sync mutation.`);
-            return true;
-        }
-
-        return this._commandService.syncExecuteCommand(id, mutationParams, {
-            onlyLocal: true,
-            fromSync: true,
-        });
+        return this._applyMutation(params.mutationInfo);
     }
 
     async createInstance(params: {
@@ -112,5 +103,18 @@ export class WebWorkerRemoteInstanceService implements IRemoteInstanceService {
 
     async disposeInstance(params: { unitID: string }): Promise<boolean> {
         return this._univerInstanceService.disposeDocument(params.unitID);
+    }
+
+    protected _applyMutation(mutationInfo: IMutationInfo): boolean {
+        const { id, params: mutationParams } = mutationInfo;
+        if (!this._commandService.hasCommand(id)) {
+            this._logService.debug('[RemoteInstanceReplicaService]', `command "${id}" not found. Skip sync mutation.`);
+            return true;
+        }
+
+        return this._commandService.syncExecuteCommand(id, mutationParams, {
+            onlyLocal: true,
+            fromSync: true,
+        });
     }
 }

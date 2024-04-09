@@ -376,27 +376,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         // cell properties and cell contents.
         const { rowProperties, colProperties, cellMatrix } = this._htmlToUSM.convert(html);
         const { startColumn, endColumn, startRow, endRow } = cellMatrix.getDataRange();
-        const rowCount = endRow - startRow + 1;
-        const colCount = endColumn - startColumn + 1;
         if (!cellMatrix || endColumn < startColumn || endRow < startRow) {
-            return false;
-        }
-
-        // 2. get filtered rows in the target pasting area and get the final pasting matrix
-        // we also handle transpose pasting at this step
-        // note: handle transpose before filtering
-        // matrix before adjustment -> transpose -> filtering -> matrix under adjustment
-        // TODO: not implemented yet
-
-        // 3. call hooks with cell position and properties and get mutations (both do mutations and undo mutations)
-        // we also handle 'copy value only' or 'copy style only' as this step
-        const pastedRange = this._transformPastedData(rowCount, colCount, cellMatrix, selection.range);
-
-        // pastedRange.endColumn = pastedRange.startColumn + colCount;
-        // pastedRange.endRow = pastedRange.startRow + rowCount;
-
-        // If PastedRange is null, it means that the paste fails
-        if (!pastedRange) {
             return false;
         }
 
@@ -408,6 +388,24 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         }
 
         const mergeData = worksheet?.getMergeData();
+
+        // 2. get filtered rows in the target pasting area and get the final pasting matrix
+        // we also handle transpose pasting at this step
+        // note: handle transpose before filtering
+        // matrix before adjustment -> transpose -> filtering -> matrix under adjustment
+        // TODO: not implemented yet
+
+        // 3. call hooks with cell position and properties and get mutations (both do mutations and undo mutations)
+        // we also handle 'copy value only' or 'copy style only' as this step
+        const pastedRange = this._getPastedRange(cellMatrix, selection.range, mergeData);
+
+        // pastedRange.endColumn = pastedRange.startColumn + colCount;
+        // pastedRange.endRow = pastedRange.startRow + rowCount;
+
+        // If PastedRange is null, it means that the paste fails
+        if (!pastedRange) {
+            return false;
+        }
 
         if (mergeData) {
             const pastedRangeLapWithMergedCell = mergeData.some((merge) => Rectangle.intersects(pastedRange, merge) && !Rectangle.contains(pastedRange, merge));
@@ -455,18 +453,6 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             }
         });
 
-        const { startColumn, endColumn, startRow, endRow } = range;
-        const pastedRange = this._transformPastedData(
-            endRow - startRow + 1,
-            endColumn - startColumn + 1,
-            cellMatrix,
-            selection.range
-        );
-
-        if (!pastedRange) {
-            return false;
-        }
-
         const worksheet = this._univerInstanceService
             .getUniverSheetInstance(copyUnitId)
             ?.getSheetBySheetId(copySubUnitId);
@@ -475,6 +461,17 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         }
 
         const mergeData = worksheet?.getMergeData();
+
+        const { startColumn, endColumn, startRow, endRow } = range;
+        const pastedRange = this._getPastedRange(
+            cellMatrix,
+            selection.range,
+            mergeData
+        );
+
+        if (!pastedRange) {
+            return false;
+        }
 
         if (mergeData) {
             const pastedRangeLapWithMergedCell = mergeData.some((merge) => Rectangle.intersects(pastedRange, merge) && !Rectangle.contains(pastedRange, merge));
@@ -846,6 +843,39 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         }
 
         return range;
+    }
+
+    private _getPastedRange(cellMatrix: ObjectMatrix<ICellDataWithSpanInfo>, pasteRange: IRange, mergedCell: IRange[]) {
+        const { startColumn, endColumn, startRow, endRow } = cellMatrix.getDataRange();
+        const rowCount = endRow - startRow + 1;
+        const colCount = endColumn - startColumn + 1;
+
+        const pasteStartRow = pasteRange.startRow;
+        const pasteStartColumn = pasteRange.startColumn;
+
+        const pasteSelectionRangeRowLen = pasteRange.endRow - pasteRange.startRow + 1;
+        const pasteSelectionRangeColLen = pasteRange.endColumn - pasteRange.startColumn + 1;
+
+        if (pasteSelectionRangeRowLen % rowCount === 0 && pasteSelectionRangeColLen % colCount === 0) {
+            const hasLapWithMerge = mergedCell?.some((merge) => Rectangle.intersects(pasteRange, merge));
+            if (!hasLapWithMerge) {
+                for (let r = 0; r < pasteSelectionRangeRowLen; r++) {
+                    for (let c = 0; c < pasteSelectionRangeColLen; c++) {
+                        const cell = cellMatrix.getValue(r % rowCount, c % colCount);
+                        cell && cellMatrix.setValue(r, c, cell);
+                    }
+                }
+                return pasteRange;
+            }
+        }
+
+        return {
+            ...pasteRange,
+            startRow: pasteStartRow,
+            startColumn: pasteStartColumn,
+            endRow: pasteStartRow + rowCount - 1,
+            endColumn: pasteStartColumn + colCount - 1,
+        };
     }
 
     /**

@@ -29,5 +29,5 @@ export {
     RemoteSyncPrimaryService,
     RemoteSyncServiceName,
 } from './services/remote-instance/remote-instance.service';
-export { ChannelService, IRPCChannelService } from './services/rpc/channel.service'
+export { ChannelService, IRPCChannelService } from './services/rpc/channel.service';
 export { ChannelClient, ChannelServer, type IMessageProtocol } from './services/rpc/rpc.service';

@@ -23,8 +23,8 @@ import { DataSyncReplicaController } from './controllers/data-sync/data-sync-rep
 import {
     IRemoteInstanceService,
     IRemoteSyncService,
-    WebWorkerRemoteInstanceService,
     RemoteSyncPrimaryService,
+    WebWorkerRemoteInstanceService,
 } from './services/remote-instance/remote-instance.service';
 import { ChannelService, IRPCChannelService } from './services/rpc/channel.service';
 import {

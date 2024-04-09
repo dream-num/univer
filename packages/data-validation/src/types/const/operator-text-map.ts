@@ -48,3 +48,14 @@ export const OperatorErrorTitleMap: Record<DataValidationOperator, string> = {
     [DataValidationOperator.NOT_BETWEEN]: 'dataValidation.errorMsg.notBetween',
     [DataValidationOperator.NOT_EQUAL]: 'dataValidation.errorMsg.notEqual',
 };
+
+export const TextLengthErrorTitleMap: Record<DataValidationOperator, string> = {
+    [DataValidationOperator.BETWEEN]: 'dataValidation.textLength.errorMsg.between',
+    [DataValidationOperator.EQUAL]: 'dataValidation.textLength.errorMsg.equal',
+    [DataValidationOperator.GREATER_THAN]: 'dataValidation.textLength.errorMsg.greaterThan',
+    [DataValidationOperator.GREATER_THAN_OR_EQUAL]: 'dataValidation.textLength.errorMsg.greaterThanOrEqual',
+    [DataValidationOperator.LESS_THAN]: 'dataValidation.textLength.errorMsg.lessThan',
+    [DataValidationOperator.LESS_THAN_OR_EQUAL]: 'dataValidation.textLength.errorMsg.lessThanOrEqual',
+    [DataValidationOperator.NOT_BETWEEN]: 'dataValidation.textLength.errorMsg.notBetween',
+    [DataValidationOperator.NOT_EQUAL]: 'dataValidation.textLength.errorMsg.notEqual',
+};

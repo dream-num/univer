@@ -19,8 +19,8 @@ import { Disposable, ICommandService, Tools } from '@univerjs/core';
 import type { IRemoveOtherFormulaMutationParams, ISetFormulaCalculationResultMutation, ISetOtherFormulaMutationParams } from '@univerjs/engine-formula';
 import { IActiveDirtyManagerService, RemoveOtherFormulaMutation, SetFormulaCalculationResultMutation, SetOtherFormulaMutation } from '@univerjs/engine-formula';
 import { bufferTime, filter, map, Subject } from 'rxjs';
-import type { IDataValidationFormulaMarkDirtyParams } from '../commands/mutations/formula.mutation';
-import { DataValidationFormulaMarkDirty } from '../commands/mutations/formula.mutation';
+import type { IDataValidationFormulaMarkDirtyParams } from '@univerjs/data-validation';
+import { DataValidationFormulaMarkDirty } from '@univerjs/data-validation';
 import { FormulaResultStatus, type IDataValidationFormulaResult } from './formula-common';
 
 export class RegisterOtherFormulaService extends Disposable {

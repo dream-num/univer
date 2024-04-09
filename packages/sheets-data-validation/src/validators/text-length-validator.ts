@@ -18,9 +18,13 @@ import { DataValidationOperator, DataValidationType, isFormulaString, Tools } fr
 import type { CellValue, IDataValidationRule, IDataValidationRuleBase, Nullable } from '@univerjs/core';
 import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
 import { BaseDataValidator } from '@univerjs/data-validation';
+import { TextLengthErrorTitleMap } from '@univerjs/data-validation/types/const/operator-text-map.js';
 import { BASE_FORMULA_INPUT_NAME } from '../views/formula-input';
 import { TWO_FORMULA_OPERATOR_COUNT } from '../types/const/two-formula-operators';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
+
+const FORMULA1 = '{FORMULA1}';
+const FORMULA2 = '{FORMULA2}';
 
 export class TextLengthValidator extends BaseDataValidator<number> {
     id: string = DataValidationType.TEXT_LENGTH;
@@ -187,5 +191,14 @@ export class TextLengthValidator extends BaseDataValidator<number> {
         }
 
         return cellValue <= formula1;
+    }
+
+    override generateRuleErrorMessage(rule: IDataValidationRuleBase) {
+        if (!rule.operator) {
+            return this.titleStr;
+        }
+
+        const errorMsg = this.localeService.t(TextLengthErrorTitleMap[rule.operator]).replace(FORMULA1, rule.formula1 ?? '').replace(FORMULA2, rule.formula2 ?? '');
+        return `${errorMsg}`;
     }
 }

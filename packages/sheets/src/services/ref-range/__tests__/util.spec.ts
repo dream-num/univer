@@ -20,17 +20,27 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { EffectRefRangId } from '../type';
 import {
     handleDeleteRangeMoveLeft,
+    handleDeleteRangeMoveLeftCommon,
     handleDeleteRangeMoveUp,
+    handleDeleteRangeMoveUpCommon,
     handleInsertCol,
     handleInsertRangeMoveDown,
+    handleInsertRangeMoveDownCommon,
     handleInsertRangeMoveRight,
+    handleInsertRangeMoveRightCommon,
     handleInsertRow,
     handleIRemoveCol,
     handleIRemoveRow,
     handleMoveRange,
+    handleMoveRangeCommon,
     handleMoveRows,
+    handleMoveRowsCommon,
     runRefRangeMutations,
 } from '../util';
+
+const countRange = ([a, b, c, d]: readonly [number, number, number, number]) => (a * 1000 + b * 100 + c * 10 + d);
+
+const formatRanges = (ranges: IRange[]) => ranges.map((range) => [range.startRow, range.endRow, range.startColumn, range.endColumn] as const).sort((prev, aft) => countRange(prev) - countRange(aft));
 
 describe('test ref-range move', () => {
     describe('handleMoveRows', () => {
@@ -177,6 +187,103 @@ describe('test ref-range move', () => {
             });
         });
     });
+    describe('handleMoveRowsCommon', () => {
+        // see docs/tldr/handMoveRowsCols.tldr
+        const startCol = 0;
+        const endCol = 999;
+        let fromRange: IRange;
+        let toRange: IRange;
+
+        describe('formRange is top of toRange', () => {
+            beforeEach(() => {
+                fromRange = { startRow: 5, endRow: 10, startColumn: startCol, endColumn: endCol };
+                toRange = { startRow: 15, endRow: 20, startColumn: startCol, endColumn: endCol };
+            });
+
+            it('contain', () => {
+                const targetRange2_1: IRange = {
+                    startRow: 6,
+                    endRow: 9,
+                    startColumn: 0,
+                    endColumn: 2,
+                };
+                const targetRange2_2: IRange = {
+                    startRow: 16,
+                    endRow: 19,
+                    startColumn: 0,
+                    endColumn: 2,
+                };
+
+                const resRange2_1 = handleMoveRowsCommon(
+                    { id: EffectRefRangId.MoveRowsCommandId, params: { toRange, fromRange } },
+                    targetRange2_1
+                );
+                const resRange2_2 = handleMoveRowsCommon(
+                    { id: EffectRefRangId.MoveRowsCommandId, params: { toRange, fromRange } },
+                    targetRange2_2
+                );
+                expect(resRange2_1[0].startRow).toEqual(10);
+                expect(resRange2_1[0].endRow).toEqual(13);
+
+                expect(formatRanges(resRange2_2)).toEqual(formatRanges([targetRange2_2]));
+            });
+
+            it('intersect', () => {
+                const targetRange1_1: IRange = {
+                    startRow: 2,
+                    endRow: 12,
+                    startColumn: 0,
+                    endColumn: 10,
+                };
+                const targetRange1_2: IRange = {
+                    startRow: 12,
+                    endRow: 22,
+                    startColumn: 0,
+                    endColumn: 10,
+                };
+
+                const resRange1_1 = handleMoveRowsCommon(
+                    { id: EffectRefRangId.MoveRowsCommandId, params: { toRange, fromRange } },
+                    targetRange1_1
+                );
+                const resRange1_2 = handleMoveRowsCommon(
+                    { id: EffectRefRangId.MoveRowsCommandId, params: { toRange, fromRange } },
+                    targetRange1_2
+                );
+
+                expect(resRange1_1).toEqual(
+                    [
+                        {
+                            endColumn: 10,
+                            endRow: 14,
+                            startColumn: 0,
+                            startRow: 9,
+                        },
+                        {
+                            endColumn: 10,
+                            endRow: 6,
+                            startColumn: 0,
+                            startRow: 2,
+                        },
+                    ]
+                );
+                expect(resRange1_2).toEqual([
+                    {
+                        endColumn: 10,
+                        endRow: 22,
+                        startColumn: 0,
+                        startRow: 15,
+                    },
+                    {
+                        endColumn: 10,
+                        endRow: 8,
+                        startColumn: 0,
+                        startRow: 6,
+                    },
+                ]);
+            });
+        });
+    });
     describe('handleInsertRangeMoveDown', () => {
         let range: IRange;
         beforeEach(() => {
@@ -219,6 +326,76 @@ describe('test ref-range move', () => {
             expect(result).toEqual({ ...targetRange, startRow: 18, endRow: 19 });
         });
     });
+
+    describe('handleInsertRangeMoveDownCommon', () => {
+        let range: IRange;
+        beforeEach(() => {
+            range = { startRow: 2, endRow: 2, startColumn: 0, endColumn: 5 };
+        });
+
+        it('intersects', () => {
+            const target = {
+                startRow: 0,
+                endRow: 5,
+                startColumn: 0,
+                endColumn: 5,
+            };
+
+            const res = handleInsertRangeMoveDownCommon(
+                {
+                    params: { range },
+                    id: EffectRefRangId.InsertRangeMoveDownCommandId,
+                },
+                target
+            );
+
+            expect(formatRanges(res)).toEqual(
+                formatRanges([
+                    {
+                        startRow: 3,
+                        endRow: 6,
+                        startColumn: 0,
+                        endColumn: 5,
+                    },
+                    {
+                        startRow: 0,
+                        endRow: 1,
+                        startColumn: 0,
+                        endColumn: 5,
+                    },
+                ])
+            );
+        });
+
+        it('no-intersects', () => {
+            const target = {
+                startRow: 0,
+                endRow: 5,
+                startColumn: 6,
+                endColumn: 10,
+            };
+
+            const res = handleInsertRangeMoveDownCommon(
+                {
+                    params: { range },
+                    id: EffectRefRangId.InsertRangeMoveDownCommandId,
+                },
+                target
+            );
+
+            expect(formatRanges(res)).toEqual(
+                formatRanges([
+                    {
+                        startRow: 0,
+                        endRow: 5,
+                        startColumn: 6,
+                        endColumn: 10,
+                    },
+                ])
+            );
+        });
+    });
+
     describe('handleInsertRangeMoveRight', () => {
         let range: IRange;
         beforeEach(() => {
@@ -261,6 +438,76 @@ describe('test ref-range move', () => {
             expect(result).toEqual(targetRange);
         });
     });
+
+    describe('handleInsertRangeMoveRightCommon', () => {
+        let range: IRange;
+        beforeEach(() => {
+            range = { startColumn: 2, endColumn: 2, startRow: 0, endRow: 5 };
+        });
+
+        it('intersects', () => {
+            const target = {
+                startColumn: 0,
+                endColumn: 5,
+                startRow: 0,
+                endRow: 5,
+            };
+
+            const res = handleInsertRangeMoveRightCommon(
+                {
+                    params: { range },
+                    id: EffectRefRangId.InsertRangeMoveRightCommandId,
+                },
+                target
+            );
+
+            expect(formatRanges(res)).toEqual(
+                formatRanges([
+                    {
+                        startColumn: 3,
+                        endColumn: 6,
+                        startRow: 0,
+                        endRow: 5,
+                    },
+                    {
+                        startColumn: 0,
+                        endColumn: 1,
+                        startRow: 0,
+                        endRow: 5,
+                    },
+                ])
+            );
+        });
+
+        it('no-intersects', () => {
+            const target = {
+                startColumn: 0,
+                endColumn: 5,
+                startRow: 6,
+                endRow: 10,
+            };
+
+            const res = handleInsertRangeMoveRightCommon(
+                {
+                    params: { range },
+                    id: EffectRefRangId.InsertRangeMoveRightCommandId,
+                },
+                target
+            );
+
+            expect(formatRanges(res)).toEqual(
+                formatRanges([
+                    {
+                        startColumn: 0,
+                        endColumn: 5,
+                        startRow: 6,
+                        endRow: 10,
+                    },
+                ])
+            );
+        });
+    });
+
     describe('handleDeleteRangeMoveLeft', () => {
         let range: IRange;
         beforeEach(() => {
@@ -313,6 +560,132 @@ describe('test ref-range move', () => {
             );
             const result = runRefRangeMutations(operators!, targetRange);
             expect(result).toEqual(targetRange);
+        });
+    });
+
+    describe('handleDeleteRangeMoveLeftCommon', () => {
+        let range: IRange;
+        beforeEach(() => {
+            range = { startColumn: 2, endColumn: 2, startRow: 0, endRow: 5 };
+        });
+
+        it('intersects', () => {
+            const target = {
+                startRow: 0,
+                endRow: 5,
+                startColumn: 0,
+                endColumn: 5,
+            };
+
+            const res = handleDeleteRangeMoveLeftCommon(
+                {
+                    params: { range },
+                    id: EffectRefRangId.DeleteRangeMoveLeftCommandId,
+                },
+                target
+            );
+
+            expect(formatRanges(res)).toEqual(
+                formatRanges([
+                    {
+                        startRow: 0,
+                        endRow: 5,
+                        startColumn: 0,
+                        endColumn: 4,
+                    },
+                ])
+            );
+        });
+
+        it('no-intersects', () => {
+            const target = {
+                startRow: 6,
+                endRow: 10,
+                startColumn: 0,
+                endColumn: 5,
+            };
+
+            const res = handleDeleteRangeMoveLeftCommon(
+                {
+                    params: { range },
+                    id: EffectRefRangId.DeleteRangeMoveLeftCommandId,
+                },
+                target
+            );
+
+            expect(formatRanges(res)).toEqual(
+                formatRanges([
+                    {
+                        startRow: 6,
+                        endRow: 10,
+                        startColumn: 0,
+                        endColumn: 5,
+                    },
+                ])
+            );
+        });
+    });
+
+    describe('handleDeleteRangeMoveUpCommon', () => {
+        let range: IRange;
+        beforeEach(() => {
+            range = { startRow: 2, endRow: 2, startColumn: 0, endColumn: 5 };
+        });
+
+        it('intersects', () => {
+            const target = {
+                startRow: 0,
+                endRow: 5,
+                startColumn: 0,
+                endColumn: 5,
+            };
+
+            const res = handleDeleteRangeMoveUpCommon(
+                {
+                    params: { range },
+                    id: EffectRefRangId.DeleteRangeMoveUpCommandId,
+                },
+                target
+            );
+
+            expect(formatRanges(res)).toEqual(
+                formatRanges([
+                    {
+                        startRow: 0,
+                        endRow: 4,
+                        startColumn: 0,
+                        endColumn: 5,
+                    },
+                ])
+            );
+        });
+
+        it('no-intersects', () => {
+            const target = {
+                startRow: 0,
+                endRow: 5,
+                startColumn: 6,
+                endColumn: 10,
+            };
+
+            const res = handleDeleteRangeMoveUpCommon(
+                {
+                    params: { range },
+                    id: EffectRefRangId.DeleteRangeMoveUpCommandId,
+                },
+                target
+            );
+
+            expect(formatRanges(res)).toEqual(
+                formatRanges([
+                    {
+                        startRow: 0,
+                        endRow: 5,
+                        startColumn: 6,
+                        endColumn: 10,
+                    },
+                ])
+            );
         });
     });
     describe('handleDeleteRangeMoveUp', () => {
@@ -370,6 +743,7 @@ describe('test ref-range move', () => {
             expect(result).toEqual(null);
         });
     });
+
     describe('handleInsertCol', () => {
         let range: IRange;
         beforeEach(() => {
@@ -610,6 +984,78 @@ describe('test ref-range move', () => {
                 );
                 const result = runRefRangeMutations(operators!, targetRange);
                 expect(result).toEqual(null);
+            });
+        });
+    });
+
+    describe('handleMoveRangeCommon', () => {
+        describe('intersects', () => {
+            let toRange: IRange;
+            let fromRange: IRange;
+            beforeEach(() => {
+                toRange = { startRow: 4, endColumn: 7, startColumn: 4, endRow: 7 };
+                fromRange = { startRow: 0, endColumn: 3, startColumn: 0, endRow: 3 };
+            });
+
+            it('should work', () => {
+                const range1 = {
+                    startRow: 0,
+                    endColumn: 5,
+                    startColumn: 0,
+                    endRow: 5,
+                };
+                const range2 = {
+                    startRow: 6,
+                    endColumn: 10,
+                    startColumn: 6,
+                    endRow: 10,
+                };
+                const res1 = handleMoveRangeCommon(
+                    { id: EffectRefRangId.MoveRangeCommandId, params: { toRange, fromRange } },
+                    range1
+                );
+
+                const res2 = handleMoveRangeCommon(
+                    { id: EffectRefRangId.MoveRangeCommandId, params: { toRange, fromRange } },
+                    range2
+                );
+
+                expect(formatRanges(res1)).toEqual(
+                    formatRanges(
+                        [{
+                            endColumn: 7,
+                            endRow: 5,
+                            startColumn: 0,
+                            startRow: 4,
+                        }, {
+                            endColumn: 5,
+                            endRow: 3,
+                            startColumn: 4,
+                            startRow: 0,
+                        }, {
+                            endColumn: 7,
+                            endRow: 7,
+                            startColumn: 4,
+                            startRow: 6,
+                        }]
+                    )
+                );
+                expect(formatRanges(res2)).toEqual(
+                    formatRanges(
+                        [{
+                            endColumn: 10,
+                            endRow: 10,
+                            startColumn: 8,
+                            startRow: 6,
+                        },
+                        {
+                            endColumn: 7,
+                            endRow: 10,
+                            startColumn: 6,
+                            startRow: 8,
+                        }]
+                    )
+                );
             });
         });
     });

@@ -127,6 +127,16 @@ const locale = {
         },
         textLength: {
             title: '文本长度',
+            errorMsg: {
+                between: '文本长度必须介于 {FORMULA1} 和 {FORMULA2} 之间',
+                greaterThan: '文本长度必须大于 {FORMULA1}',
+                greaterThanOrEqual: '文本长度必须大于或等于 {FORMULA1}',
+                lessThan: '文本长度必须小于 {FORMULA1}',
+                lessThanOrEqual: '文本长度必须小于或等于 {FORMULA1}',
+                equal: '文本长度必须等于 {FORMULA1}',
+                notEqual: '文本长度必须不等于 {FORMULA1}',
+                notBetween: '文本长度必须在 {FORMULA1} 和 {FORMULA2} 范围之外',
+            },
         },
         decimal: {
             title: '数字',

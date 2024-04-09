@@ -420,7 +420,6 @@ export function getClearAndSetMergeMutations(
     const undoMutationsInfo: IMutationInfo[] = [];
     const { unitId, subUnitId, range } = pasteTo;
     const { startColumn, startRow, endColumn, endRow } = range;
-    let hasMerge = false;
     const mergeRangeData: IRange[] = [];
 
     matrix.forValue((row, col, value) => {
@@ -433,7 +432,6 @@ export function getClearAndSetMergeMutations(
                 endColumn: startColumn + col + colSpan - 1,
             };
             mergeRangeData.push(mergeRange);
-            hasMerge = true;
         } else if (value.colSpan && value.colSpan > 1) {
             const rowSpan = value.rowSpan || 1;
             const mergeRange = {
@@ -443,43 +441,40 @@ export function getClearAndSetMergeMutations(
                 endColumn: startColumn + col + value.colSpan - 1,
             };
             mergeRangeData.push(mergeRange);
-            hasMerge = true;
         }
     });
 
     // clear merge
     // remove current range's all merged Cell
-    if (hasMerge) {
-        // get all merged cells
-        const currentService = accessor.get(IUniverInstanceService) as IUniverInstanceService;
-        const workbook = currentService.getUniverSheetInstance(unitId);
-        const worksheet = workbook?.getSheetBySheetId(subUnitId);
-        if (workbook && worksheet) {
-            const mergeData = worksheet.getMergeData();
-            const mergedCellsInRange = mergeData.filter((rect) =>
-                Rectangle.intersects({ startRow, startColumn, endRow, endColumn }, rect)
-            );
+    // get all merged cells
+    const currentService = accessor.get(IUniverInstanceService) as IUniverInstanceService;
+    const workbook = currentService.getUniverSheetInstance(unitId);
+    const worksheet = workbook?.getSheetBySheetId(subUnitId);
+    if (workbook && worksheet) {
+        const mergeData = worksheet.getMergeData();
+        const mergedCellsInRange = mergeData.filter((rect) =>
+            Rectangle.intersects({ startRow, startColumn, endRow, endColumn }, rect)
+        );
 
-            const removeMergeMutationParams: IRemoveWorksheetMergeMutationParams = {
-                unitId,
-                subUnitId,
-                ranges: mergedCellsInRange,
-            };
-            redoMutationsInfo.push({
-                id: RemoveWorksheetMergeMutation.id,
-                params: removeMergeMutationParams,
-            });
+        const removeMergeMutationParams: IRemoveWorksheetMergeMutationParams = {
+            unitId,
+            subUnitId,
+            ranges: mergedCellsInRange,
+        };
+        redoMutationsInfo.push({
+            id: RemoveWorksheetMergeMutation.id,
+            params: removeMergeMutationParams,
+        });
 
-            const undoRemoveMergeMutationParams: IAddWorksheetMergeMutationParams = RemoveMergeUndoMutationFactory(
-                accessor,
-                removeMergeMutationParams
-            );
+        const undoRemoveMergeMutationParams: IAddWorksheetMergeMutationParams = RemoveMergeUndoMutationFactory(
+            accessor,
+            removeMergeMutationParams
+        );
 
-            undoMutationsInfo.push({
-                id: AddWorksheetMergeMutation.id,
-                params: undoRemoveMergeMutationParams,
-            });
-        }
+        undoMutationsInfo.push({
+            id: AddWorksheetMergeMutation.id,
+            params: undoRemoveMergeMutationParams,
+        });
     }
 
     // set merged cell info

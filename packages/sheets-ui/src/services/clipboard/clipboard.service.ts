@@ -17,6 +17,7 @@
 import type { ICellData, IMutationInfo, IRange, Worksheet } from '@univerjs/core';
 import {
     Disposable,
+    ErrorService,
     extractPureTextFromCell,
     ICommandService,
     ILogService,
@@ -109,7 +110,8 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @INotificationService private readonly _notificationService: INotificationService,
         @IPlatformService private readonly _platformService: IPlatformService,
-        @Inject(LocaleService) private readonly _localeService: LocaleService
+        @Inject(LocaleService) private readonly _localeService: LocaleService,
+        @Inject(ErrorService) private readonly _errorService: ErrorService
     ) {
         super();
         this._htmlToUSM = new HtmlToUSMService({
@@ -398,6 +400,23 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             return false;
         }
 
+        const worksheet = this._currentUniverService
+            .getUniverSheetInstance(unitId)
+            ?.getSheetBySheetId(subUnitId);
+        if (!worksheet) {
+            return false;
+        }
+
+        const mergeData = worksheet?.getMergeData();
+
+        if (mergeData) {
+            const pastedRangeLapWithMergedCell = mergeData.some((merge) => Rectangle.intersects(pastedRange, merge) && !Rectangle.contains(pastedRange, merge));
+            if (pastedRangeLapWithMergedCell) {
+                this._errorService.emit('The paste area overlaps with merged cells.');
+                return false;
+            }
+        }
+
         // 4. execute these mutations by the one method
         return this._pasteUSM(
             {
@@ -454,6 +473,17 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         if (!worksheet) {
             return false;
         }
+
+        const mergeData = worksheet?.getMergeData();
+
+        if (mergeData) {
+            const pastedRangeLapWithMergedCell = mergeData.some((merge) => Rectangle.intersects(pastedRange, merge) && !Rectangle.contains(pastedRange, merge));
+            if (pastedRangeLapWithMergedCell) {
+                this._errorService.emit('The paste area overlaps with merged cells.');
+                return false;
+            }
+        }
+
         const colManager = worksheet.getColumnManager();
         const rowManager = worksheet.getRowManager();
         const defaultColumnWidth = worksheet.getConfig().defaultColumnWidth;

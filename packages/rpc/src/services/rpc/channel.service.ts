@@ -19,12 +19,12 @@ import { createIdentifier } from '@wendellhu/redi';
 import type { IChannel, IMessageProtocol } from './rpc.service';
 import { ChannelClient, ChannelServer } from './rpc.service';
 
-export interface IRPChannelService {
+export interface IRPCChannelService {
     requestChannel(name: string): IChannel;
     registerChannel(name: string, channel: IChannel): void;
 }
 
-export const IRPChannelService = createIdentifier<IRPChannelService>('IRPChannelService');
+export const IRPCChannelService = createIdentifier<IRPCChannelService>('IRPCChannelService');
 
 /**
  * This service is responsible for managing the RPC channels.

@@ -601,7 +601,7 @@ function parseTableByHtml(htmlElement: HTMLIFrameElement, skeleton?: Spreadsheet
                         cellMatrix.setValue(rowIndex + rowSpan - 1, colSetValueIndex + colSpan - 1, { style: extractBordersAndKeepOthers(cellStyle, ['border-right', 'border-bottom']) });
                         cellMatrix.setValue(rowIndex, colSetValueIndex, { ...cellValue, style: extractBordersAndKeepOthers(cellStyle, ['border-top', 'border-left']) });
                         for (let i = rowIndex; i < rowIndex + rowSpan; i++) {
-                            for (let j = colIndex; j < colIndex + colSpan; j++) {
+                            for (let j = colSetValueIndex; j < colSetValueIndex + colSpan; j++) {
                                 if (!cellMatrix.getValue(i, j)) {
                                     cellMatrix.setValue(i, j, { style: extractBordersAndKeepOthers(cellStyle, []) });
                                 }

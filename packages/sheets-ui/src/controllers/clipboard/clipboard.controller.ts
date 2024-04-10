@@ -398,7 +398,7 @@ export class SheetClipboardController extends RxDisposable {
 
                 // if the range is outside ot the worksheet's boundary, we should add rows
                 const maxColumn = currentSheet!.getMaxColumns();
-                const addingColsCount = range.endColumn - maxColumn;
+                const addingColsCount = range.endColumn - maxColumn + 1;
                 const existingColsCount = colProperties.length - addingColsCount;
 
                 const defaultColumnWidth = self._configService.getConfig<number>(DEFAULT_WORKSHEET_COLUMN_WIDTH_KEY) ?? DEFAULT_WORKSHEET_COLUMN_WIDTH;

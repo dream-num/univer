@@ -147,7 +147,7 @@ const dataValidation = [
             startColumn: 0,
             endColumn: 5,
         }],
-        formula1: '1,2,3,hahaha',
+        formula1: '1,2,3,hahaha,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18',
     },
     {
         uid: 'xxx-4',

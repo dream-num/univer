@@ -88,30 +88,23 @@ export function Scrollbar(props: IScrollbarProps) {
     const [thumbHeight, setThumbHeight] = useState(0);
     const [thumbTop, setThumbTop] = useState(0);
     useEffect(() => {
-        const observer = new ResizeObserver(() => {
-            let timer: number | undefined = requestIdleCallback(() => {
-                if (!timer) return;
+        const { height: containerHeight } = containerRef.current!.parentElement!.getBoundingClientRect();
 
-                const { height: containerHeight } = containerRef.current!.getBoundingClientRect();
+        const { scrollHeight } = contentRef.current!;
+        setThumbHeight((containerHeight / scrollHeight) * 100);
+        containerRef.current!.style.height = `${containerHeight}px`;
 
-                const { scrollHeight } = contentRef.current!;
-                setThumbHeight((containerHeight / scrollHeight) * 100);
-
-                timer = undefined;
-            });
-        });
-
-        observer.observe(document.body);
-
-        // handle scroll event
-        contentRef.current!.addEventListener('scroll', (e) => {
+        function handleScroll(e: Event) {
             const { scrollTop, scrollHeight } = e.target as HTMLDivElement;
             const thumbTop = (scrollTop / scrollHeight) * 100;
             setThumbTop(thumbTop);
-        });
+        }
+
+        // handle scroll event
+        contentRef.current!.addEventListener('scroll', handleScroll);
 
         return () => {
-            observer.unobserve(document.body);
+            contentRef.current?.removeEventListener('scroll', handleScroll);
         };
     }, []);
 

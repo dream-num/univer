@@ -78,6 +78,7 @@ export interface IAverageHighlightCell extends IHighlightCell {
 
 export interface IDataBar extends IBaseCfRule {
     type: CFRuleType.dataBar;
+    isShowValue: boolean;
     config: {
         min: IValueConfig;
         max: IValueConfig;

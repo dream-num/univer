@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-import type { IMutationInfo, IRange } from '@univerjs/core';
+import type { IMutationInfo, IRange, Nullable } from '@univerjs/core';
 import {
+    CommandType,
     createInterceptorKey,
     Disposable,
+    ICommandService,
     InterceptorManager,
     IUniverInstanceService,
     LifecycleStages,
@@ -30,8 +32,10 @@ import { Inject } from '@wendellhu/redi';
 
 import { SelectionManagerService } from '../selection-manager.service';
 import { SheetInterceptorService } from '../sheet-interceptor/sheet-interceptor.service';
+import type { ISheetCommandSharedParams } from '../../commands/utils/interface';
 import type { EffectRefRangeParams } from './type';
 import { EffectRefRangId } from './type';
+import { adjustRangeOnMutation } from './util';
 
 type RefRangCallback = (params: EffectRefRangeParams) => {
     redos: IMutationInfo[];
@@ -39,17 +43,52 @@ type RefRangCallback = (params: EffectRefRangeParams) => {
     preRedos?: IMutationInfo[];
     preUndos?: IMutationInfo[];
 };
+
+export type WatchRangeCallback = (before: IRange, after: Nullable<IRange>) => void;
+
 const MERGE_REDO = createInterceptorKey<IMutationInfo[], null>('MERGE_REDO');
 const MERGE_UNDO = createInterceptorKey<IMutationInfo[], null>('MERGE_UNDO');
+
+class WatchRange extends Disposable {
+    constructor(
+        private readonly _unitId: string,
+        private readonly _subUnitId: string,
+        private _range: Nullable<IRange>,
+        private readonly _callback: WatchRangeCallback
+    ) {
+        super();
+    }
+
+    onMutation(mutation: IMutationInfo<ISheetCommandSharedParams>) {
+        if (mutation.params.unitId !== this._unitId || mutation.params.subUnitId !== this._subUnitId) {
+            return;
+        }
+
+        if (!this._range) {
+            return;
+        }
+        const afterRange: Nullable<IRange> = adjustRangeOnMutation(this._range, mutation);
+        if (afterRange && Rectangle.equals(afterRange, this._range)) {
+            return false;
+        }
+
+        const beforeChange = this._range;
+        this._range = afterRange;
+        this._callback(beforeChange, afterRange);
+    }
+}
 
 /**
  * Collect side effects caused by ref range change
  */
-@OnLifecycle(LifecycleStages.Steady, RefRangeService)
+@OnLifecycle(LifecycleStages.Ready, RefRangeService)
 export class RefRangeService extends Disposable {
     interceptor = new InterceptorManager({ MERGE_REDO, MERGE_UNDO });
 
+    private _watchRanges = new Set<WatchRange>();
+
     constructor(
+        @ICommandService private readonly _commandService: ICommandService,
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
         @Inject(SelectionManagerService) private _selectionManagerService: SelectionManagerService
@@ -63,6 +102,38 @@ export class RefRangeService extends Disposable {
         this.interceptor.intercept(this.interceptor.getInterceptPoints().MERGE_UNDO, {
             priority: -1,
             handler: (list) => list,
+        });
+    }
+
+    watchRange(unitId: string, subUnitId: string, range: IRange, callback: WatchRangeCallback): IDisposable {
+        let watchRangesListener: Nullable<IDisposable>;
+        if (this._watchRanges.size === 0) {
+            watchRangesListener = this._commandService.onCommandExecuted((command) => {
+                if (command.type !== CommandType.MUTATION) return false;
+
+                for (const watchRange of this._watchRanges) {
+                    watchRange.onMutation(command as IMutationInfo<ISheetCommandSharedParams>);
+                }
+            });
+        }
+
+        const watchRange = new WatchRange(unitId, subUnitId, range, callback);
+        this._watchRanges.add(watchRange);
+
+        const teardownWatching = toDisposable(() => {
+            this._watchRanges.delete(watchRange);
+
+            if (this._watchRanges.size === 0) {
+                watchRangesListener?.dispose();
+                watchRangesListener = null;
+            }
+        });
+
+        const registerToService = this.disposeWithMe(teardownWatching);
+
+        return toDisposable(() => {
+            registerToService.dispose();
+            teardownWatching.dispose();
         });
     }
 

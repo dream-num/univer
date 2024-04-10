@@ -40,6 +40,8 @@ export {
     SetInlineFormatSuperscriptCommand,
     SetInlineFormatTextColorCommand,
     SetInlineFormatUnderlineCommand,
+    ResetInlineFormatTextBackgroundColorCommand,
+    SetInlineFormatTextBackgroundColorCommand,
 } from './commands/commands/inline-format.command';
 export { AlignOperationCommand, AlignLeftCommand, AlignCenterCommand, AlignRightCommand, AlignJustifyCommand } from './commands/commands/paragraph-align.command';
 export { BulletListCommand, OrderListCommand } from './commands/commands/list.command';

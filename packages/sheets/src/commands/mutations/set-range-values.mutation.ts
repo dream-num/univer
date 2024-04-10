@@ -31,7 +31,7 @@ import type {
     ITextStyle,
     Nullable,
 } from '@univerjs/core';
-import { CellValueType, CommandType, IUniverInstanceService, ObjectMatrix, Tools } from '@univerjs/core';
+import { CellValueType, CommandType, IUniverInstanceService, normalizeTextRuns, ObjectMatrix, Tools } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
 /** Params of `SetRangeValuesMutation` */
@@ -148,7 +148,9 @@ function setNull(value: Nullable<ICellData>) {
  */
 export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, boolean> = {
     id: 'sheet.mutation.set-range-values',
+
     type: CommandType.MUTATION,
+
     handler: (accessor, params) => {
         const { cellValue, subUnitId, unitId } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -523,7 +525,7 @@ export function mergeRichTextStyle(p: IDocumentData, newStyle: Nullable<IStyleDa
         newTextRuns.push(tr);
     }
 
-    p.body.textRuns = newTextRuns;
+    p.body.textRuns = normalizeTextRuns(newTextRuns);
 }
 
 function isNumeric(str: string) {

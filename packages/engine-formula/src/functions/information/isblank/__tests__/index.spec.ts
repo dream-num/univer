@@ -21,7 +21,7 @@ import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObje
 import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../../basics/error-type';
-import { Isblank } from '..';
+import { Isblank } from '../index';
 
 describe('Test isblank function', () => {
     const textFunction = new Isblank(FUNCTION_NAMES_INFORMATION.ISBLANK);

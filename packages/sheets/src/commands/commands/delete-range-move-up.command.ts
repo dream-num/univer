@@ -78,11 +78,11 @@ export const DeleteRangeMoveUpCommand: ICommand = {
             accessor,
             deleteRangeMutationParams
         );
-        const redos: IMutationInfo[] = [...removeRangeRedo];
-        const undos: IMutationInfo[] = [...removeRangeUndo];
+        const redos: IMutationInfo[] = [...(sheetInterceptor.preRedos ?? []), ...removeRangeRedo];
+        const undos: IMutationInfo[] = [...sheetInterceptor.undos, ...removeRangeUndo];
         redos.push(...sheetInterceptor.redos);
         redos.push(followSelectionOperation(range, workbook, worksheet));
-        undos.push(...sheetInterceptor.undos);
+        undos.push(...(sheetInterceptor.preUndos ?? []));
         const result = await sequenceExecute(redos, commandService).result;
 
         if (result) {

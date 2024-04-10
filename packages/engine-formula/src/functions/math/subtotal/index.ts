@@ -22,7 +22,7 @@ import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-ob
 import { BaseFunction } from '../../base-function';
 import { createNewArray } from '../../../engine/utils/array-object';
 import { NumberValueObject } from '../../../engine/value-object/primitive-object';
-import type { ArrayValueObject } from '../../..';
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 
 enum FunctionNum {
     AVERAGE = 1,

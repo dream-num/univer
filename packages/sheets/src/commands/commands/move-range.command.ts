@@ -72,6 +72,7 @@ export const MoveRangeCommand: ICommand = {
         });
 
         const redos = [
+            ...(interceptorCommands.preRedos ?? []),
             ...moveRangeMutations.redos,
             ...interceptorCommands.redos,
             {
@@ -85,6 +86,9 @@ export const MoveRangeCommand: ICommand = {
             },
         ];
         const undos = [
+            ...(interceptorCommands.preUndos ?? []),
+            ...moveRangeMutations.undos,
+            ...interceptorCommands.undos,
             {
                 id: SetSelectionsOperation.id,
                 params: {
@@ -94,8 +98,6 @@ export const MoveRangeCommand: ICommand = {
                     selections: [{ range: params.fromRange, primary: getPrimaryForRange(params.fromRange, worksheet) }],
                 } as ISetSelectionsOperationParams,
             },
-            ...moveRangeMutations.undos,
-            ...interceptorCommands.undos,
         ];
 
         const result = sequenceExecute(redos, commandService).result;

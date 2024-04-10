@@ -397,6 +397,11 @@ export function checkFormulaDataNull<T>(formulaData: IFormulaDataGenerics<T>, un
 export function removeFormulaData<T>(formulaData: IFormulaDataGenerics<T>, unitId: string, sheetId: string) {
     if (formulaData && formulaData[unitId] && formulaData[unitId]?.[sheetId]) {
         delete formulaData[unitId]![sheetId];
+        return {
+            [unitId]: {
+                [sheetId]: null,
+            },
+        };
     }
 }
 export function removeValueFormulaArray<T>(formulaRange: IRange, formulaMatrix: ObjectMatrix<T>) {

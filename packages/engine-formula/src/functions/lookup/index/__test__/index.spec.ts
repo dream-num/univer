@@ -29,7 +29,7 @@ import { IFunctionService } from '../../../../services/function.service';
 import { IFormulaRuntimeService } from '../../../../services/runtime.service';
 import { createFunctionTestBed, getObjectValue } from '../../../__tests__/create-function-test-bed';
 import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
-import { Index } from '..';
+import { Index } from '../index';
 import { ErrorType } from '../../../../basics/error-type';
 
 const getTestWorkbookData = (): IWorkbookData => {

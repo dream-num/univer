@@ -156,7 +156,11 @@ export const InsertRangeMoveRightCommand: ICommand = {
         });
         redoMutations.push(...sheetInterceptor.redos);
         redoMutations.push(followSelectionOperation(range, workbook, worksheet));
-        undoMutations.push(...sheetInterceptor.undos);
+        undoMutations.push(...(sheetInterceptor.preUndos ?? []));
+
+        redoMutations.unshift(...(sheetInterceptor.preRedos ?? []));
+        undoMutations.unshift(...sheetInterceptor.undos);
+
         // execute do mutations and add undo mutations to undo stack if completed
         const result = sequenceExecute(redoMutations, commandService);
         if (result.result) {

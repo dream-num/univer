@@ -32,6 +32,10 @@ const locale: typeof zhCN = {
             main: 'Text color',
             right: 'Choose color',
         },
+        fillColor: {
+            main: 'Text Background color',
+            right: 'Choose color',
+        },
         resetColor: 'Reset',
         order: 'Ordered list',
         unorder: 'Unordered list',

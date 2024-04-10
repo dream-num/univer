@@ -27,7 +27,7 @@ import { IFunctionService } from '../../../../services/function.service';
 import { IFormulaRuntimeService } from '../../../../services/runtime.service';
 import { createFunctionTestBed } from '../../../__tests__/create-function-test-bed';
 import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
-import { Row } from '..';
+import { Row } from '../index';
 import type { BaseValueObject, ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import type { ArrayValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorType } from '../../../../basics/error-type';

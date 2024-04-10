@@ -15,16 +15,16 @@
  */
 
 import type { IDocumentData } from '@univerjs/core';
-import { DEFAULT_EMPTY_DOCUMENT_VALUE, DOCS_NORMAL_EDITOR_UNIT_ID_KEY } from '@univerjs/core';
+import { DEFAULT_EMPTY_DOCUMENT_VALUE, DOCS_NORMAL_EDITOR_UNIT_ID_KEY, IContextService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useState } from 'react';
 
-import { IEditorService, TextEditor } from '@univerjs/ui';
 import { FIX_ONE_PIXEL_BLUR_OFFSET } from '@univerjs/engine-render';
+import { DISABLE_AUTO_FOCUS_KEY, IEditorService, TextEditor, useObservable } from '@univerjs/ui';
 import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';
 import styles from './index.module.less';
 
-interface ICellIEditorProps {}
+interface ICellIEditorProps { }
 
 const HIDDEN_EDITOR_POSITION = -1000;
 
@@ -44,9 +44,16 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
         ...EDITOR_DEFAULT_POSITION,
     });
 
-    const cellEditorManagerService: ICellEditorManagerService = useDependency(ICellEditorManagerService);
+    const cellEditorManagerService = useDependency(ICellEditorManagerService);
+    const editorService = useDependency(IEditorService);
+    const contextService = useDependency(IContextService);
 
-    const editorService: IEditorService = useDependency(IEditorService);
+    const disableAutoFocus = useObservable(
+        () => contextService.subscribeContextValue$(DISABLE_AUTO_FOCUS_KEY),
+        false,
+        undefined,
+        [contextService, DISABLE_AUTO_FOCUS_KEY]
+    );
 
     const snapshot: IDocumentData = {
         id: DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
@@ -102,8 +109,11 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
     }, []); // Empty dependency array means this effect runs once on mount and clean up on unmount
 
     useEffect(() => {
-        cellEditorManagerService.setFocus(true);
-    }, [state]);
+        if (!disableAutoFocus) {
+            cellEditorManagerService.setFocus(true);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [disableAutoFocus, state]);
 
     return (
         <div

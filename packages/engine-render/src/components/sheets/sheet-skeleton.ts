@@ -168,6 +168,18 @@ interface ICellOtherConfig {
     cellValueType?: CellValueType;
 }
 
+interface ICellDocumentModelOption {
+    isDeepClone?: boolean;
+    displayRawFormula?: boolean;
+    ignoreTextRotation?: boolean;
+}
+
+const DEFAULT_CELL_DOCUMENT_MODEL_OPTION: ICellDocumentModelOption = {
+    isDeepClone: false,
+    displayRawFormula: false,
+    ignoreTextRotation: false,
+};
+
 interface IRowColumnSegment {
     startRow: number;
     endRow: number;
@@ -443,8 +455,7 @@ export class SpreadsheetSkeleton extends Skeleton {
 
     // TODO: auto height
     private _calculateRowAutoHeight(rowNum: number): number {
-        const { columnCount, columnData, mergeData, defaultRowHeight } = this._config;
-        const data = columnData;
+        const { columnCount, columnData, mergeData, defaultRowHeight, defaultColumnWidth } = this._config;
         let height = defaultRowHeight;
 
         const worksheet = this._worksheet;
@@ -471,7 +482,7 @@ export class SpreadsheetSkeleton extends Skeleton {
                 continue;
             }
 
-            const { documentModel, textRotation, wrapStrategy, paddingData } = modelObject;
+            const { documentModel, textRotation, wrapStrategy } = modelObject;
             if (documentModel == null) {
                 continue;
             }
@@ -480,7 +491,7 @@ export class SpreadsheetSkeleton extends Skeleton {
 
             const { vertexAngle: angle } = convertTextRotation(textRotation);
 
-            const colWidth = data[i]?.w;
+            const colWidth = columnData[i]?.w ?? defaultColumnWidth;
             if (typeof colWidth === 'number' && wrapStrategy === WrapStrategy.WRAP) {
                 documentModel.updateDocumentDataPageSize(colWidth);
             }
@@ -1011,7 +1022,9 @@ export class SpreadsheetSkeleton extends Skeleton {
 
     // Only used for cell edit, and no need to rotate text when edit cell content!
     getBlankCellDocumentModel(cell: Nullable<ICellData>): IDocumentLayoutObject {
-        const documentModelObject = this._getCellDocumentModel(cell, undefined, undefined, true);
+        const documentModelObject = this._getCellDocumentModel(cell, {
+            ignoreTextRotation: true,
+        });
 
         if (documentModelObject != null) {
             if (documentModelObject.documentModel == null) {
@@ -1047,15 +1060,22 @@ export class SpreadsheetSkeleton extends Skeleton {
 
     // Only used for cell edit, and no need to rotate text when edit cell content!
     getCellDocumentModelWithFormula(cell: ICellData) {
-        return this._getCellDocumentModel(cell, true, true, true);
+        return this._getCellDocumentModel(cell, {
+            isDeepClone: true,
+            displayRawFormula: true,
+            ignoreTextRotation: true,
+        });
     }
 
     private _getCellDocumentModel(
         cell: Nullable<ICellData>,
-        isDeepClone: boolean = false,
-        displayRawFormula: boolean = false,
-        ignoreTextRotation: boolean = false
+        options: ICellDocumentModelOption = DEFAULT_CELL_DOCUMENT_MODEL_OPTION
     ): Nullable<IDocumentLayoutObject> {
+        const { isDeepClone, displayRawFormula, ignoreTextRotation } = {
+            ...DEFAULT_CELL_DOCUMENT_MODEL_OPTION,
+            ...options,
+        };
+
         const style = this._styles.getStyleByCell(cell);
 
         if (!cell) {
@@ -1697,7 +1717,9 @@ export class SpreadsheetSkeleton extends Skeleton {
             return;
         }
 
-        const modelObject = cell && this._getCellDocumentModel(cell, undefined, this._renderRawFormula);
+        const modelObject = cell && this._getCellDocumentModel(cell, {
+            displayRawFormula: this._renderRawFormula,
+        });
         if (modelObject == null) {
             return;
         }
@@ -1759,6 +1781,13 @@ export class SpreadsheetSkeleton extends Skeleton {
         if (!documentData.documentStyle) {
             documentData.documentStyle = {};
         }
+
+        // Fix https://github.com/dream-num/univer/issues/1586
+        documentData.documentStyle.pageSize = {
+            width: Number.POSITIVE_INFINITY,
+            height: Number.POSITIVE_INFINITY,
+        };
+
         documentData.documentStyle.renderConfig = renderConfig;
 
         const paragraphs = documentData.body.paragraphs || [];

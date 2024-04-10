@@ -17,7 +17,7 @@
 import type { IStyleBase } from '@univerjs/core';
 import { CellValueType, ObjectMatrix, Range, Rectangle, Tools } from '@univerjs/core';
 import dayjs from 'dayjs';
-import { deserializeRangeWithSheet, generateStringWithSequence, LexerTreeBuilder, sequenceNodeType, serializeRange } from '@univerjs/engine-formula';
+import { deserializeRangeWithSheet, ERROR_TYPE_SET, generateStringWithSequence, LexerTreeBuilder, sequenceNodeType, serializeRange } from '@univerjs/engine-formula';
 import { CFNumberOperator, CFRuleType, CFSubRuleType, CFTextOperator, CFTimePeriodOperator } from '../../base/const';
 import type { IAverageHighlightCell, IConditionFormattingRule, IFormulaHighlightCell, IHighlightCell, INumberHighlightCell, IRankHighlightCell, ITextHighlightCell, ITimePeriodHighlightCell } from '../../models/type';
 import { ConditionalFormattingFormulaService, FormulaResultStatus } from '../conditional-formatting-formula.service';
@@ -132,11 +132,10 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
                             return !/^\s*$/.test(v);
                         }
                         case CFTextOperator.containsErrors:{
-                            // wait do do.
-                            return false;
+                            return (ERROR_TYPE_SET as Set<unknown>).has(v);
                         }
                         case CFTextOperator.notContainsErrors:{
-                            return false;
+                            return !(ERROR_TYPE_SET as Set<unknown>).has(v);
                         }
                         case CFTextOperator.containsText:{
                             return v.indexOf(condition) > -1;

@@ -17,11 +17,11 @@
 import { describe, expect, it } from 'vitest';
 
 import { FUNCTION_NAMES_STATISTICAL } from '../../function-names';
-import { Varpa } from '..';
+import { Varpa } from '../index';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorType } from '../../../../basics/error-type';
-import { ErrorValueObject } from '../../../..';
+import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 
 describe('Test varpa function', () => {
     const textFunction = new Varpa(FUNCTION_NAMES_STATISTICAL.VARPA);

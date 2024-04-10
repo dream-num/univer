@@ -31,7 +31,7 @@ export type {
     IDirtyUnitSheetDefinedNameMap,
 } from './basics/common';
 export { isInDirtyRange } from './basics/dirty';
-export { ErrorType } from './basics/error-type';
+export { ErrorType, ERROR_TYPE_SET } from './basics/error-type';
 export { FunctionType, type IFunctionInfo, type IFunctionParam } from './basics/function';
 export { type IFunctionNames } from './basics/function';
 export { includeFormulaLexerToken, isFormulaLexerToken, normalizeSheetName } from './basics/match-token';
@@ -41,7 +41,6 @@ export { RegisterFunctionMutation } from './commands/mutations/register-function
 export {
     type ISetArrayFormulaDataMutationParams,
     SetArrayFormulaDataMutation,
-    SetArrayFormulaDataUndoMutationFactory,
 } from './commands/mutations/set-array-formula-data.mutation';
 
 export { RemoveDefinedNameMutation, SetDefinedNameMutation, type ISetDefinedNameMutationSearchParam, type ISetDefinedNameMutationParam } from './commands/mutations/set-defined-name.mutation';
@@ -147,3 +146,5 @@ export { IFormulaRuntimeService, FormulaRuntimeService } from './services/runtim
 export { IFormulaCurrentConfigService, FormulaCurrentConfigService } from './services/current-data.service';
 
 export { IActiveDirtyManagerService } from './services/active-dirty-manager.service';
+
+export type { IRangeChange } from './models/formula-data.model';

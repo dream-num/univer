@@ -117,8 +117,8 @@ export const InsertRowCommand: ICommand = {
         if (result.result) {
             undoRedoService.pushUndoRedo({
                 unitID: params.unitId,
-                undoMutations: [{ id: RemoveRowMutation.id, params: undoRowInsertionParams }, ...intercepted.undos],
-                redoMutations: [{ id: InsertRowMutation.id, params: insertRowParams }, ...intercepted.redos],
+                undoMutations: [...(intercepted.preUndos ?? []), { id: RemoveRowMutation.id, params: undoRowInsertionParams }, ...intercepted.undos],
+                redoMutations: [...(intercepted.preRedos ?? []), { id: InsertRowMutation.id, params: insertRowParams }, ...intercepted.redos],
             });
 
             return true;
@@ -287,7 +287,7 @@ export const InsertColCommand: ICommand<IInsertColCommandParams> = {
 
         const result = sequenceExecute(
             [
-
+                ...(intercepted.preRedos ?? []),
                 { id: InsertColMutation.id, params: insertColParams },
                 ...intercepted.redos,
                 followSelectionOperation(range, workbook, worksheet),
@@ -299,6 +299,7 @@ export const InsertColCommand: ICommand<IInsertColCommandParams> = {
             undoRedoService.pushUndoRedo({
                 unitID: params.unitId,
                 undoMutations: [
+                    ...(intercepted.preUndos ?? []),
                     {
                         id: RemoveColMutation.id,
                         params: undoColInsertionParams,
@@ -306,6 +307,7 @@ export const InsertColCommand: ICommand<IInsertColCommandParams> = {
                     ...intercepted.undos,
                 ].filter(Boolean),
                 redoMutations: [
+                    ...(intercepted.preRedos ?? []),
                     { id: InsertColMutation.id, params: insertColParams },
                     ...intercepted.redos,
                 ].filter(Boolean),

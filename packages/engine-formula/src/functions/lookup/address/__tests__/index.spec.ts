@@ -24,7 +24,7 @@ import {
     StringValueObject,
 } from '../../../../engine/value-object/primitive-object';
 import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
-import { Address } from '..';
+import { Address } from '../index';
 
 describe('Test address', () => {
     const textFunction = new Address(FUNCTION_NAMES_LOOKUP.ADDRESS);

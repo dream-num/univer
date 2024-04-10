@@ -49,7 +49,7 @@ export class Line extends docExtension {
             return;
         }
 
-        const { sp: strikeoutPosition, spo, sbo } = bBox;
+        const { sp: strikeoutPosition, spo, sbo, bd } = bBox;
 
         const scale = getScale(parentScale);
 
@@ -75,9 +75,9 @@ export class Line extends docExtension {
              * --------- subscript offset   -----------------------
              */
             if (baselineOffset === BaselineOffset.SUPERSCRIPT) {
-                startY = asc - spo - strikeoutPosition;
+                startY = asc + bd - spo - strikeoutPosition;
             } else if (baselineOffset === BaselineOffset.SUBSCRIPT) {
-                startY = asc + sbo - strikeoutPosition;
+                startY = asc + bd + sbo - strikeoutPosition;
             }
 
             this._drawLine(ctx, span, strikethrough, startY, scale);

@@ -39,13 +39,13 @@ type ComputeStatus = 'computing' | 'end' | 'error';
 
 interface IComputeCache { status: ComputeStatus };
 
-const beforeUpdateRuleResult = createInterceptorKey< { subUnitId: string; unitId: string; cfId: string }>('conditional-formatting-before-update-rule-result');
+const beforeUpdateRuleResult = createInterceptorKey<{ subUnitId: string; unitId: string; cfId: string }>('conditional-formatting-before-update-rule-result');
 @OnLifecycle(LifecycleStages.Starting, ConditionalFormattingService)
 export class ConditionalFormattingService extends Disposable {
     // <unitId,<subUnitId,<cfId,IComputeCache>>>
     private _ruleCacheMap: Map<string, Map<string, Map<string, IComputeCache>>> = new Map();
 
-    private _ruleComputeStatus$: Subject<{ status: ComputeStatus;result?: ObjectMatrix<any>;unitId: string; subUnitId: string; cfId: string }> = new Subject();
+    private _ruleComputeStatus$: Subject<{ status: ComputeStatus; result?: ObjectMatrix<any>; unitId: string; subUnitId: string; cfId: string }> = new Subject();
     public ruleComputeStatus$ = this._ruleComputeStatus$.asObservable();
 
     public interceptorManager = new InterceptorManager({ beforeUpdateRuleResult });
@@ -100,15 +100,17 @@ export class ConditionalFormattingService extends Disposable {
                     const ruleCache = ruleCacheItem?.ruleCache as IDataBarRenderParams;
                     if (ruleCache && ruleCache !== EMPTY_STYLE) {
                         pre.dataBar = ruleCache;
+                        pre.isShowValue = ruleCache.isShowValue;
                     }
                 } else if (type === CFRuleType.iconSet) {
                     const ruleCache = ruleCacheItem?.ruleCache as IIconSetRenderParams;
                     if (ruleCache && ruleCache !== EMPTY_STYLE) {
                         pre.iconSet = ruleCache;
+                        pre.isShowValue = ruleCache.isShowValue;
                     }
                 }
                 return pre;
-            }, {} as { style?: IHighlightCell['style'] } & IDataBarCellData & IIconSetCellData);
+            }, {} as { style?: IHighlightCell['style'] } & IDataBarCellData & IIconSetCellData & { isShowValue: boolean });
             return result;
         }
         return null;
@@ -261,7 +263,7 @@ export class ConditionalFormattingService extends Disposable {
                 };
 
                 switch (commandInfo.id) {
-                    case SetRangeValuesMutation.id:{
+                    case SetRangeValuesMutation.id: {
                         const params = commandInfo.params as ISetRangeValuesMutationParams;
                         const { subUnitId, unitId, cellValue } = params;
                         const cellMatrix: [number, number][] = [];
@@ -280,7 +282,7 @@ export class ConditionalFormattingService extends Disposable {
                         break;
                     }
                     case InsertColMutation.id:
-                    case RemoveColMutation.id:{
+                    case RemoveColMutation.id: {
                         const { range, unitId, subUnitId } = commandInfo.params as IInsertColMutationParams;
                         const allRules = this._conditionalFormattingRuleModel.getSubunitRules(unitId, subUnitId);
                         const effectRange: IRange = { ...range, endColumn: Number.MAX_SAFE_INTEGER };
@@ -294,7 +296,7 @@ export class ConditionalFormattingService extends Disposable {
                         break;
                     }
                     case RemoveRowMutation.id:
-                    case InsertRowMutation.id:{
+                    case InsertRowMutation.id: {
                         const { range, unitId, subUnitId } = commandInfo.params as IRemoveRowsMutationParams;
                         const allRules = this._conditionalFormattingRuleModel.getSubunitRules(unitId, subUnitId);
                         const effectRange: IRange = { ...range, endRow: Number.MAX_SAFE_INTEGER };
@@ -307,13 +309,15 @@ export class ConditionalFormattingService extends Disposable {
                         }
                         break;
                     }
-                    case MoveRowsMutation.id:{
+                    case MoveRowsMutation.id: {
                         const { sourceRange, targetRange, unitId, subUnitId } = commandInfo.params as IMoveRowsMutationParams;
                         const allRules = this._conditionalFormattingRuleModel.getSubunitRules(unitId, subUnitId);
-                        const effectRange: IRange = { startRow: Math.min(sourceRange.startRow, targetRange.startRow),
-                                                      endRow: Number.MAX_SAFE_INTEGER,
-                                                      startColumn: 0,
-                                                      endColumn: Number.MAX_SAFE_INTEGER };
+                        const effectRange: IRange = {
+                            startRow: Math.min(sourceRange.startRow, targetRange.startRow),
+                            endRow: Number.MAX_SAFE_INTEGER,
+                            startColumn: 0,
+                            endColumn: Number.MAX_SAFE_INTEGER,
+                        };
                         if (allRules) {
                             const effectRule = allRules.filter((rule) => rule.ranges.some((ruleRange) => Rectangle.intersects(ruleRange, effectRange)));
                             effectRule.forEach((rule) => {
@@ -323,13 +327,15 @@ export class ConditionalFormattingService extends Disposable {
                         }
                         break;
                     }
-                    case MoveColsMutation.id:{
+                    case MoveColsMutation.id: {
                         const { sourceRange, targetRange, unitId, subUnitId } = commandInfo.params as IMoveColumnsMutationParams;
                         const allRules = this._conditionalFormattingRuleModel.getSubunitRules(unitId, subUnitId);
-                        const effectRange: IRange = { startRow: 0,
-                                                      endRow: Number.MAX_SAFE_INTEGER,
-                                                      startColumn: Math.min(sourceRange.startColumn, targetRange.startColumn),
-                                                      endColumn: Number.MAX_SAFE_INTEGER };
+                        const effectRange: IRange = {
+                            startRow: 0,
+                            endRow: Number.MAX_SAFE_INTEGER,
+                            startColumn: Math.min(sourceRange.startColumn, targetRange.startColumn),
+                            endColumn: Number.MAX_SAFE_INTEGER,
+                        };
                         if (allRules) {
                             const effectRule = allRules.filter((rule) => rule.ranges.some((ruleRange) => Rectangle.intersects(ruleRange, effectRange)));
                             effectRule.forEach((rule) => {
@@ -339,7 +345,7 @@ export class ConditionalFormattingService extends Disposable {
                         }
                         break;
                     }
-                    case MoveRangeMutation.id:{
+                    case MoveRangeMutation.id: {
                         const { unitId, to, from } = commandInfo.params as IMoveRangeMutationParams;
                         const handleSubUnit = (value: IMoveRangeMutationParams['from']) => {
                             const cellMatrix: [number, number][] = [];

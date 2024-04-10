@@ -750,6 +750,7 @@ describe('Test conditional formatting service', () => {
                             isGradient: true,
                             isShowValue: true,
                         },
+                        isShowValue: true,
                     });
                     expect(three).toEqual({
                         dataBar: {
@@ -759,6 +760,8 @@ describe('Test conditional formatting service', () => {
                             isGradient: true,
                             isShowValue: true,
                         },
+                        isShowValue: true,
+
                     });
 
                     expect(four).toEqual({
@@ -769,6 +772,8 @@ describe('Test conditional formatting service', () => {
                             isGradient: true,
                             isShowValue: true,
                         },
+                        isShowValue: true,
+
                     });
                     expect(five).toEqual({
                         dataBar: {
@@ -778,6 +783,7 @@ describe('Test conditional formatting service', () => {
                             isGradient: true,
                             isShowValue: true,
                         },
+                        isShowValue: true,
                     });
                 });
             });

@@ -31,6 +31,7 @@ import {
     AlignRightCommand,
     BulletListCommand,
     OrderListCommand,
+    ResetInlineFormatTextBackgroundColorCommand,
     SetInlineFormatBoldCommand,
     SetInlineFormatCommand,
     SetInlineFormatFontFamilyCommand,
@@ -39,6 +40,7 @@ import {
     SetInlineFormatStrikethroughCommand,
     SetInlineFormatSubscriptCommand,
     SetInlineFormatSuperscriptCommand,
+    SetInlineFormatTextBackgroundColorCommand,
     SetInlineFormatTextColorCommand,
     SetInlineFormatUnderlineCommand,
     SetTextSelectionsOperation,
@@ -560,6 +562,51 @@ export function BulletListMenuItemFactory(accessor: IAccessor): IMenuButtonItem 
         icon: 'UnorderSingle',
         tooltip: 'toolbar.unorder',
         positions: [MenuPosition.TOOLBAR_START],
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.DOC),
+    };
+}
+
+export function ResetBackgroundColorMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
+    return {
+        id: ResetInlineFormatTextBackgroundColorCommand.id,
+        type: MenuItemType.BUTTON,
+        title: 'toolbar.resetColor',
+        icon: 'NoColor',
+        positions: SetInlineFormatTextBackgroundColorCommand.id,
+    };
+}
+
+export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<string> {
+    const commandService = accessor.get(ICommandService);
+    const themeService = accessor.get(ThemeService);
+
+    return {
+        id: SetInlineFormatTextBackgroundColorCommand.id,
+        tooltip: 'toolbar.fillColor.main',
+        group: MenuGroup.TOOLBAR_FORMAT,
+        type: MenuItemType.BUTTON_SELECTOR,
+        positions: [MenuPosition.TOOLBAR_START],
+        icon: 'PaintBucket',
+        selections: [
+            {
+                label: {
+                    name: COLOR_PICKER_COMPONENT,
+                    hoverable: false,
+                },
+            },
+        ],
+        value$: new Observable<string>((subscriber) => {
+            const defaultColor = themeService.getCurrentTheme().primaryColor;
+            const disposable = commandService.onCommandExecuted((c) => {
+                if (c.id === SetInlineFormatTextBackgroundColorCommand.id) {
+                    const color = (c.params as { value: string }).value;
+                    subscriber.next(color ?? defaultColor);
+                }
+            });
+
+            subscriber.next(defaultColor);
+            return disposable.dispose;
+        }),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.DOC),
     };
 }

@@ -212,6 +212,40 @@ export const SetInlineFormatTextColorCommand: ICommand = {
     },
 };
 
+const SetInlineFormatTextBackgroundColorCommandId = 'doc.command.set-inline-format-text-background-color';
+export const SetInlineFormatTextBackgroundColorCommand: ICommand = {
+    id: SetInlineFormatTextBackgroundColorCommandId,
+    type: CommandType.COMMAND,
+    handler: async (accessor, params) => {
+        const commandService = accessor.get(ICommandService);
+        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
+
+        return handleInlineFormat(
+            SetInlineFormatTextBackgroundColorCommandId,
+            params,
+            textSelectionManagerService,
+            commandService
+        );
+    },
+};
+
+const ResetInlineFormatTextBackgroundColorCommandId = 'doc.command.reset-inline-format-text-background-color';
+export const ResetInlineFormatTextBackgroundColorCommand: ICommand = {
+    id: ResetInlineFormatTextBackgroundColorCommandId,
+    type: CommandType.COMMAND,
+    handler: async (accessor, params) => {
+        const commandService = accessor.get(ICommandService);
+        const textSelectionManagerService = accessor.get(TextSelectionManagerService);
+
+        return handleInlineFormat(
+            ResetInlineFormatTextBackgroundColorCommandId,
+            params,
+            textSelectionManagerService,
+            commandService
+        );
+    },
+};
+
 const COMMAND_ID_TO_FORMAT_KEY_MAP: Record<string, keyof IStyleBase> = {
     [SetInlineFormatBoldCommand.id]: 'bl',
     [SetInlineFormatItalicCommand.id]: 'it',
@@ -220,6 +254,8 @@ const COMMAND_ID_TO_FORMAT_KEY_MAP: Record<string, keyof IStyleBase> = {
     [SetInlineFormatFontSizeCommand.id]: 'fs',
     [SetInlineFormatFontFamilyCommand.id]: 'ff',
     [SetInlineFormatTextColorCommand.id]: 'cl',
+    [SetInlineFormatTextBackgroundColorCommand.id]: 'bg',
+    [ResetInlineFormatTextBackgroundColorCommand.id]: 'bg',
     [SetInlineFormatSubscriptCommand.id]: 'va',
     [SetInlineFormatSuperscriptCommand.id]: 'va',
 };
@@ -273,9 +309,17 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
                 break;
             }
 
-            case SetInlineFormatTextColorCommand.id: {
+            case SetInlineFormatTextColorCommand.id:
+            case SetInlineFormatTextBackgroundColorCommand.id: {
                 formatValue = {
                     rgb: value,
+                };
+                break;
+            }
+
+            case ResetInlineFormatTextBackgroundColorCommand.id: {
+                formatValue = {
+                    rgb: null,
                 };
                 break;
             }

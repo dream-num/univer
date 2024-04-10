@@ -164,7 +164,7 @@ export function getSetCellFormulaMutations(
             valueObject.f = null;
             valueObject.v = null;
             valueObject.p = null;
-        } else (isFormulaString(originalFormula) && copyInfo.pasteType === PREDEFINED_HOOK_NAME.DEFAULT_PASTE) {
+        } else if (isFormulaString(originalFormula) && copyInfo.pasteType === PREDEFINED_HOOK_NAME.DEFAULT_PASTE) {
             const rowIndex = row % copyRowLength;
             const colIndex = col % copyColumnLength;
 

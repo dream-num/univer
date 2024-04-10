@@ -300,7 +300,7 @@ export class SheetClipboardController extends RxDisposable {
 
                 // if the range is outside ot the worksheet's boundary, we should add rows
                 const maxRow = currentSheet!.getMaxRows();
-                const addingRowsCount = range.endRow - maxRow;
+                const addingRowsCount = range.endRow - maxRow + 1;
                 const existingRowsCount = rowProperties.length - addingRowsCount;
                 if (addingRowsCount > 0) {
                     const rowInfo: IObjectArrayPrimitiveType<IRowData> = {};

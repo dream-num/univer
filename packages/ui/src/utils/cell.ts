@@ -879,7 +879,7 @@ function extractColorFromString(str: string) {
 }
 
 function getPtFontSizeByPx(size: number) {
-    const ptSize = Math.floor(size * PX_TO_PT_RATIO);
+    const ptSize = Math.round(size * PX_TO_PT_RATIO);
 
     if (ptSize < MIN_FONT_SIZE) return MIN_FONT_SIZE;
     if (ptSize > MAX_FONT_SIZE) return MAX_FONT_SIZE;

@@ -23,7 +23,7 @@ import { Button, Select } from '@univerjs/design';
 
 import { RangeSelector } from '@univerjs/ui';
 import type { IRemoveSheetMutationParams } from '@univerjs/sheets';
-import { RemoveSheetMutation, SelectionManagerService, SetWorksheetActiveOperation } from '@univerjs/sheets';
+import { RemoveSheetMutation, SelectionManagerService, setEndForRange, SetWorksheetActiveOperation } from '@univerjs/sheets';
 import type { IConditionFormattingRule } from '@univerjs/sheets-conditional-formatting';
 import { CFRuleType, CFSubRuleType, ConditionalFormattingRuleModel, SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '@univerjs/sheets-conditional-formatting';
 import type { IAddCfCommandParams } from '../../../commands/commands/add-cf.command';
@@ -182,9 +182,10 @@ export const RuleEdit = (props: IRuleEditProps) => {
     const handleSubmit = () => {
         const beforeSubmitResult = interceptorManager.fetchThroughInterceptors(interceptorManager.getInterceptPoints().beforeSubmit)(true, null);
         const getRanges = () => {
-            const ranges = rangeResult.current;
-            const isError = ranges.some((range) => Number.isNaN(range.startRow) || Number.isNaN(range.startColumn));
-            return isError ? [] : ranges;
+            const worksheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
+            const ranges = rangeResult.current.map((range) => setEndForRange(range, worksheet.getRowCount(), worksheet.getColumnCount()));
+            const result = ranges.filter((range) => !(Number.isNaN(range.startRow) || Number.isNaN(range.startColumn)));
+            return result;
         };
 
         if (beforeSubmitResult) {

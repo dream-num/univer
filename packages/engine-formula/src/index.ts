@@ -31,7 +31,7 @@ export type {
     IDirtyUnitSheetDefinedNameMap,
 } from './basics/common';
 export { isInDirtyRange } from './basics/dirty';
-export { ErrorType } from './basics/error-type';
+export { ErrorType, ERROR_TYPE_SET } from './basics/error-type';
 export { FunctionType, type IFunctionInfo, type IFunctionParam } from './basics/function';
 export { type IFunctionNames } from './basics/function';
 export { includeFormulaLexerToken, isFormulaLexerToken, normalizeSheetName } from './basics/match-token';

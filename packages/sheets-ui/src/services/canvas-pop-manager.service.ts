@@ -93,13 +93,14 @@ export class SheetCanvasPopManagerService extends Disposable {
 
         const position = this._calcCellPosition(row, col, currentRender, skeleton, activeViewport);
         const position$ = new BehaviorSubject(position);
+        const updatePosition = () => position$.next(this._calcCellPosition(row, col, currentRender, skeleton, activeViewport));
 
         const disposable = new DisposableCollection();
         disposable.add(this._commandService.onCommandExecuted((commandInfo) => {
             if (commandInfo.id === SetWorksheetRowAutoHeightMutation.id) {
                 const params = commandInfo.params as ISetWorksheetRowAutoHeightMutationParams;
                 if (params.rowsAutoHeightInfo.findIndex((item) => item.row === row) > -1) {
-                    position$.next(this._calcCellPosition(row, col, currentRender, skeleton, activeViewport));
+                    updatePosition();
                     return;
                 }
             }
@@ -109,7 +110,7 @@ export class SheetCanvasPopManagerService extends Disposable {
                 commandInfo.id === SetScrollOperation.id ||
                 commandInfo.id === SetZoomRatioOperation.id
             ) {
-                position$.next(this._calcCellPosition(row, col, currentRender, skeleton, activeViewport));
+                updatePosition();
             }
         }));
 
@@ -117,7 +118,7 @@ export class SheetCanvasPopManagerService extends Disposable {
             row = newRow;
             col = newCol;
 
-            position$.next(this._calcCellPosition(row, col, currentRender, skeleton, activeViewport));
+            updatePosition();
         };
 
         return {

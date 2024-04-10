@@ -642,8 +642,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
     private _objectValueToCellValue(objectValue: Nullable<BaseValueObject>) {
         if (objectValue == null) {
             return {
-                v: 0,
-                t: CellValueType.NUMBER,
+                v: null,
             };
         }
         if (objectValue.isError()) {

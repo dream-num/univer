@@ -15,56 +15,59 @@
  */
 
 import { Subject } from 'rxjs';
-
 import { Disposable, toDisposable } from '../../shared/lifecycle';
-import type { IResourceHook, IResourceManagerService } from './type';
+import type { IWorkbookData } from '../../types/interfaces/i-workbook-data';
+import type { IResourceHook, IResourceManagerService, IResourceName } from './type';
 
 export class ResourceManagerService extends Disposable implements IResourceManagerService {
-    private _resourceMap = new Map<string, Map<string, IResourceHook>>();
+    private _resourceMap = new Map<IResourceName, IResourceHook>();
 
-    private _register$ = new Subject<{ resourceName: string; hook: IResourceHook; unitID: string }>();
-    register$ = this._register$.asObservable();
+    private _register$ = new Subject<IResourceHook>();
+    public register$ = this._register$.asObservable();
 
-    getAllResource(unitID: string) {
-        const resourceMap = this._resourceMap.get(unitID);
-        if (resourceMap) {
-            return [...resourceMap.keys()].reduce(
-                (list, resourceName) => {
-                    const hook = resourceMap.get(resourceName);
-                    if (hook) {
-                        list.push({
-                            unitID,
-                            resourceName,
-                            hook,
-                        });
-                    }
-                    return list;
-                },
-                [] as Array<{ unitID: string; resourceName: string; hook: IResourceHook }>
-            );
-        }
-        return [];
+    public getAllResourceHooks() {
+        const list = [...this._resourceMap.values()];
+        return list;
     }
 
-    /**
-     * the pluginName is map to resourceId which is created by serve.
-     * @param {string} pluginName
-     * @param {ResourceHook<T>} hook
-     */
-    registerPluginResource<T = any>(unitID: string, resourceName: string, hook: IResourceHook<T>) {
-        const resourceMap = this._resourceMap.get(unitID) || new Map<string, IResourceHook>();
-        if (resourceMap.has(resourceName)) {
+    public getResources(unitId: string) {
+        const resourceHooks = this.getAllResourceHooks();
+        const resources = resourceHooks.map((resourceHook) => {
+            const data = resourceHook.toJson(unitId);
+            return {
+                name: resourceHook.pluginName,
+                data,
+            };
+        });
+        return resources;
+    }
+
+    public registerPluginResource<T = unknown>(hook: IResourceHook<T>) {
+        const resourceName = hook.pluginName;
+        if (this._resourceMap.has(resourceName)) {
             throw new Error(`the pluginName is registered {${resourceName}}`);
         }
-        resourceMap.set(resourceName, hook);
-        this._resourceMap.set(unitID, resourceMap);
-        this._register$.next({ unitID, resourceName, hook });
-        return toDisposable(() => resourceMap.delete(resourceName));
+        this._resourceMap.set(resourceName, hook);
+        this._register$.next(hook);
+        return toDisposable(() => this._resourceMap.delete(resourceName));
     }
 
-    disposePluginResource(unitID: string, pluginName: string) {
-        const resourceMap = this._resourceMap.get(unitID);
-        resourceMap?.delete(pluginName);
+    public disposePluginResource(pluginName: IResourceName) {
+        this._resourceMap.delete(pluginName);
+    }
+
+    public loadResources(unitId: string, resources: IWorkbookData['resources']) {
+        this.getAllResourceHooks().forEach((hook) => {
+            const data = resources?.find((resource) => resource.name === hook.pluginName)?.data;
+            if (data) {
+                try {
+                    const model = hook.parseJson(data);
+                    hook.onChange(unitId, model);
+                } catch (err) {
+                    console.error('LoadResources Error!');
+                }
+            }
+        });
     }
 
     override dispose(): void {

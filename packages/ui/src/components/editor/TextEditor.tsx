@@ -185,7 +185,7 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
             setValidationVisible(!isLegality);
             const rect = editor.getBoundingClientRect();
 
-            setValidationOffset([rect.left, rect.top - 16]);
+            setValidationOffset([rect.left, rect.top]);
 
             if (editor.onlyInputFormula()) {
                 setValidationContent(localeService.t('textEditor.formulaError'));

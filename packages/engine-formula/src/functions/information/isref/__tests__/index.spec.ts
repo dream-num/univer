@@ -31,7 +31,7 @@ import { createFunctionTestBed } from '../../../__tests__/create-function-test-b
 import { FUNCTION_NAMES_INFORMATION } from '../../function-names';
 import type { BaseValueObject, ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import type { ArrayValueObject } from '../../../../engine/value-object/array-value-object';
-import { Isref } from '..';
+import { Isref } from '../index';
 
 const getTestWorkbookData = (): IWorkbookData => {
     return {

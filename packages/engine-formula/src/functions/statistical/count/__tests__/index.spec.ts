@@ -17,11 +17,11 @@
 import { describe, expect, it } from 'vitest';
 
 import { FUNCTION_NAMES_STATISTICAL } from '../../function-names';
-import { Count } from '..';
+import { Count } from '../index';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorType } from '../../../../basics/error-type';
-import { ErrorValueObject } from '../../../..';
+import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 
 describe('Test count function', () => {
     const textFunction = new Count(FUNCTION_NAMES_STATISTICAL.COUNT);

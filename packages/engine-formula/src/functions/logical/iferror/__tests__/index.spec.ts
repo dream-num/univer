@@ -17,7 +17,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { FUNCTION_NAMES_LOGICAL } from '../../function-names';
-import { Iferror } from '..';
+import { Iferror } from '../index';
 import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';

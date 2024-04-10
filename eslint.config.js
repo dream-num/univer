@@ -1,5 +1,6 @@
 import antfu from '@antfu/eslint-config';
 import header from 'eslint-plugin-header';
+import barrel from 'eslint-plugin-no-barrel-import';
 import { baseRules, typescriptPreset } from '@univerjs/shared/eslint';
 
 export default antfu({
@@ -25,8 +26,10 @@ export default antfu({
     ignores: ['**/*.d.ts', '**/vite.config.ts', 'playwright.config.ts'],
     plugins: {
         header,
+        barrel,
     },
     rules: {
+        'barrel/no-barrel-import': 2,
         'header/header': [
             2,
             'block',

@@ -17,11 +17,11 @@
 import { describe, expect, it } from 'vitest';
 
 import { FUNCTION_NAMES_STATISTICAL } from '../../function-names';
-import { Min } from '..';
+import { Min } from '../index';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorType } from '../../../../basics/error-type';
-import { ErrorValueObject } from '../../../..';
+import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 
 describe('Test min function', () => {
     const textFunction = new Min(FUNCTION_NAMES_STATISTICAL.MIN);

@@ -19,7 +19,7 @@ import { describe, expect, it } from 'vitest';
 import { ArrayValueObject } from '../../../../engine/value-object/array-value-object';
 
 import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
-import { Xmatch } from '..';
+import { Xmatch } from '../index';
 import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 
 const arrayValueObject1 = ArrayValueObject.create(/*ts*/ `{

@@ -20,7 +20,7 @@ import { FUNCTION_NAMES_INFORMATION } from '../../function-names';
 import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../../basics/error-type';
-import { Isna } from '..';
+import { Isna } from '../index';
 
 describe('Test isna function', () => {
     const textFunction = new Isna(FUNCTION_NAMES_INFORMATION.ISNA);

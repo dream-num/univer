@@ -24,7 +24,7 @@ import {
     StringValueObject,
 } from '../../../../engine/value-object/primitive-object';
 import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
-import { Xlookup } from '..';
+import { Xlookup } from '../index';
 
 const arrayValueObject1 = ArrayValueObject.create(/*ts*/ `{
     1, "First", 100, 89;

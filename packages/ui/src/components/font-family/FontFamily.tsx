@@ -16,7 +16,7 @@
 
 import { LocaleService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import styles from './index.module.less';
 import type { IFontFamilyProps } from './interface';
@@ -26,9 +26,21 @@ export const FontFamily = (props: IFontFamilyProps) => {
 
     const localeService = useDependency(LocaleService);
 
+    const viewValue = useMemo(() => {
+        let fontFamily = localeService.t(`fontFamily.${(`${value}` ?? '').replace(/\s/g, '')}`);
+
+        // Handle font family from copy paste.
+        if (fontFamily.startsWith('fontFamily.') && typeof value === 'string') {
+            fontFamily = value.split(',')[0];
+        }
+
+        return fontFamily;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [value]);
+
     return (
         <div className={styles.uiPluginSheetsFontFamily} style={{ fontFamily: value as string }}>
-            {localeService.t(`fontFamily.${(`${value}` ?? '').replace(/\s/g, '')}`)}
+            {viewValue}
         </div>
     );
 };

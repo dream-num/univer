@@ -19,7 +19,7 @@ import { describe, expect, it } from 'vitest';
 import { FUNCTION_NAMES_INFORMATION } from '../../function-names';
 import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorType } from '../../../../basics/error-type';
-import { Isnumber } from '..';
+import { Isnumber } from '../index';
 import { NumberValueObject } from '../../../../engine/value-object/primitive-object';
 
 describe('Test isnumber function', () => {

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import { BooleanValueObject } from '../../..';
 import { ErrorType } from '../../../basics/error-type';
 import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-object/base-value-object';
+import { BooleanValueObject } from '../../../engine/value-object/primitive-object';
 import { BaseFunction } from '../../base-function';
 
 export class Isref extends BaseFunction {

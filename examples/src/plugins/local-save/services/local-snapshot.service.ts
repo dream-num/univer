@@ -38,27 +38,12 @@ export class LocalSnapshotService extends Disposable implements ISnapshotPersist
     private _initWorkbookFromSnapshot(workbook: Workbook) {
         const unitId = workbook.getUnitId();
         const snapshot = workbook.getSnapshot();
-        const resources = this._resourceManagerService.getAllResource(unitId);
-        resources.forEach((resource) => {
-            const resourceSnapshot = (snapshot.resources || []).find((item) => item.name === resource.resourceName);
-            if (resourceSnapshot) {
-                const model = resource.hook.parseJson(resourceSnapshot.data);
-                resource.hook.onChange(unitId, model);
-            }
-        });
+        this._resourceManagerService.loadResources(unitId, snapshot.resources);
     }
 
     saveWorkbook(workbook: Workbook) {
         const snapshot = { ...workbook.getSnapshot() };
-        const unitId = workbook.getUnitId();
-        const resourceHooks = this._resourceManagerService.getAllResource(workbook.getUnitId());
-        const resources = resourceHooks.map((resourceHook) => {
-            const data = resourceHook.hook.toJson(unitId);
-            return {
-                name: resourceHook.resourceName,
-                data,
-            };
-        });
+        const resources = this._resourceManagerService.getResources(workbook.getUnitId());
         snapshot.resources = resources;
         return snapshot;
     }

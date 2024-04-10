@@ -134,7 +134,7 @@ export class FormulaEditorShowController extends Disposable {
                                 arrayFormulaMatrixCell[unitId]?.[subUnitId]?.[row]?.[col] == null
                             ) {
                                 if (cellInfo) {
-                                    return cellInfo;
+                                    return { ...value, ...cellInfo };
                                 }
 
                                 return next(value);
@@ -186,7 +186,7 @@ export class FormulaEditorShowController extends Disposable {
                             }
 
                             if (cellInfo) {
-                                return cellInfo;
+                                return { ...value, ...cellInfo };
                             }
 
                             return next(value);

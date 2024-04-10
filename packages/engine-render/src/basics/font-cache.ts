@@ -21,9 +21,9 @@ import type { IDocumentSkeletonBoundingBox, IDocumentSkeletonFontStyle } from '.
 import type { IMeasureTextCache } from './interfaces';
 
 const getDefaultBaselineOffset = (fontSize: number) => ({
-    sbr: 0.5,
+    sbr: 0.6,
     sbo: fontSize,
-    spr: 0.5,
+    spr: 0.6,
     spo: fontSize,
 });
 
@@ -340,10 +340,11 @@ export class FontCache {
             aba: actualBoundingBoxAscent,
             abd: actualBoundingBoxDescent,
             sp: (fontBoundingBoxAscent + fontBoundingBoxDescent) / 2,
-            sbr: 0.5,
-            sbo: fontSize,
-            spr: 0.5,
-            spo: fontSize,
+            sbr: 0.6,
+            spr: 0.6,
+            // https://en.wikipedia.org/wiki/Subscript_and_superscript Microsoft Word 2015
+            sbo: (fontBoundingBoxAscent + fontBoundingBoxDescent) * 0.141,
+            spo: (fontBoundingBoxAscent + fontBoundingBoxDescent) * 0.4,
         };
     }
 }

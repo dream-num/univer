@@ -49,7 +49,7 @@ export class Line extends docExtension {
             return;
         }
 
-        const { sp: strikeoutPosition, ba } = bBox;
+        const { sp: strikeoutPosition, spo, sbo } = bBox;
 
         const scale = getScale(parentScale);
 
@@ -64,12 +64,20 @@ export class Line extends docExtension {
         }
 
         if (strikethrough) {
-            // We use the asc baseline to find the position of the strikethrough,
-            // and ba - strikeoutPosition is exactly the offset position of the strikethrough from the baseline
-            let startY = asc - (ba - strikeoutPosition) - DELTA;
+            // strikethrough position is the middle of bounding box ascent and descent.
+            let startY = strikeoutPosition - DELTA;
 
+            /**
+             * --------- superscript strikethrough position -------
+             * --------- superscript offset -----------------------
+             * --------- baseline           -----------------------
+             * --------- subscript strikethrough position ---------
+             * --------- subscript offset   -----------------------
+             */
             if (baselineOffset === BaselineOffset.SUPERSCRIPT) {
-                startY = strikeoutPosition - DELTA;
+                startY = asc - spo - strikeoutPosition;
+            } else if (baselineOffset === BaselineOffset.SUBSCRIPT) {
+                startY = asc + sbo - strikeoutPosition;
             }
 
             this._drawLine(ctx, span, strikethrough, startY, scale);

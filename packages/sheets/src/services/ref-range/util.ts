@@ -909,6 +909,51 @@ type MutationsAffectRange =
     | IInsertRowMutationParams
     | IMoveRangeMutationParams;
 
+export const handleCommonDefaultRangeChangeWithEffectRefCommands = (range: IRange, commandInfo: ICommandInfo) => {
+    let operator: IOperator[] = [];
+    switch (commandInfo.id) {
+        case EffectRefRangId.DeleteRangeMoveLeftCommandId: {
+            return handleDeleteRangeMoveLeftCommon(commandInfo as IDeleteRangeMoveLeftCommand, range);
+        }
+        case EffectRefRangId.DeleteRangeMoveUpCommandId: {
+            return handleDeleteRangeMoveUpCommon(commandInfo as IDeleteRangeMoveUpCommand, range);
+        }
+        case EffectRefRangId.InsertRangeMoveDownCommandId: {
+            return handleInsertRangeMoveDownCommon(commandInfo as IInsertRangeMoveDownCommand, range);
+        }
+        case EffectRefRangId.InsertRangeMoveRightCommandId: {
+            return handleInsertRangeMoveRightCommon(commandInfo as IInsertRangeMoveRightCommand, range);
+        }
+        case EffectRefRangId.InsertColCommandId: {
+            operator = handleInsertCol(commandInfo as IInsertColCommand, range);
+            break;
+        }
+        case EffectRefRangId.InsertRowCommandId: {
+            operator = handleInsertRow(commandInfo as IInsertRowCommand, range);
+            break;
+        }
+        case EffectRefRangId.MoveColsCommandId: {
+            return handleMoveColsCommon(commandInfo as IMoveColsCommand, range);
+        }
+        case EffectRefRangId.MoveRangeCommandId: {
+            return handleMoveRangeCommon(commandInfo as IMoveRangeCommand, range);
+        }
+        case EffectRefRangId.MoveRowsCommandId: {
+            return handleMoveRowsCommon(commandInfo as IMoveRowsCommand, range);
+        }
+        case EffectRefRangId.RemoveColCommandId: {
+            operator = handleIRemoveCol(commandInfo as IRemoveRowColCommand, range);
+            break;
+        }
+        case EffectRefRangId.RemoveRowCommandId: {
+            operator = handleIRemoveRow(commandInfo as IRemoveRowColCommand, range);
+            break;
+        }
+    }
+    const resultRange = runRefRangeMutations(operator, range);
+    return resultRange;
+};
+
 /**
  * This function should work as a pure function.
  *

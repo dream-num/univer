@@ -18,14 +18,13 @@ import { DataValidationRenderMode, DataValidationType, isFormulaString, IUniverI
 import type { CellValue, DataValidationOperator, ICellData, IDataValidationRule, IDataValidationRuleBase, ISheetDataValidationRule, Nullable } from '@univerjs/core';
 import type { IBaseDataValidationWidget, IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
 import { BaseDataValidator } from '@univerjs/data-validation';
-import { deserializeRangeWithSheet, isReferenceString } from '@univerjs/engine-formula';
 import { LIST_FORMULA_INPUT_NAME } from '../views/formula-input';
 import { LIST_DROPDOWN_KEY } from '../views';
 import { DropdownWidget } from '../widgets/dropdown-widget';
 import { ListRenderModeInput } from '../views/render-mode';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
 import { getCellValueOrigin } from '../utils/get-cell-data-origin';
-import { deserializeListOptions, getSheetRangeValueSet } from './util';
+import { deserializeListOptions } from './util';
 
 export function getRuleFormulaResultSet(result: Nullable<Nullable<ICellData>[][]>) {
     if (!result) {

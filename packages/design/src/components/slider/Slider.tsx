@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { IncreaseSingle, ReduceSingle } from '@univerjs/icons';
+import { CheckMarkSingle, IncreaseSingle, ReduceSingle } from '@univerjs/icons';
 import clsx from 'clsx';
 import React, { useContext, useMemo, useRef } from 'react';
 
@@ -189,7 +189,11 @@ export function Slider(props: ISliderProps) {
                                 )}
                                 onClick={() => onChange && onChange(item)}
                             >
-                                {item === value && <span className={styles.sliderShortcutIcon}>✔</span>}
+                                {item === value && (
+                                    <span className={styles.sliderShortcutIcon}>
+                                        <CheckMarkSingle />
+                                    </span>
+                                )}
                                 <span>
                                     {item}
                                     %

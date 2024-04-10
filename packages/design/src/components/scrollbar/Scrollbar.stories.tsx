@@ -34,7 +34,7 @@ export const ScrollbarBasic: StoryObj = {
     render() {
         return (
             <section style={{ display: 'flex', gap: '24px' }}>
-                <section style={{ height: '320px' }}>
+                <section style={{ maxHeight: '320px' }}>
                     <Scrollbar>
                         top
                         <br />

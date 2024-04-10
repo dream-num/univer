@@ -57,7 +57,6 @@
         "test:watch": "vitest",
         "coverage": "vitest run --coverage",
         "build": "tsc && vite build"
-
     },
     "peerDependencies": {
         "@univerjs/core": "workspace:*",

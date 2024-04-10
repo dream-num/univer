@@ -68,3 +68,4 @@ export { TWO_FORMULA_OPERATOR_COUNT } from './types/const/two-formula-operators'
 export { DataValidationResourceController } from './controllers/dv-resource.controller';
 export { DataValidationSheetController } from './controllers/dv-sheet.controller';
 export { DataValidationFormulaMarkDirty, type IDataValidationFormulaMarkDirtyParams } from './commands/mutations/formula.mutation';
+export { TextLengthErrorTitleMap } from './types/const/operator-text-map';

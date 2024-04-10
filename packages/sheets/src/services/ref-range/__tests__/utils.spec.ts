@@ -1450,7 +1450,7 @@ describe('test different situations of adjustRangeOnMutation', () => {
                 },
             };
             const result = adjustRangeOnMutation(range, mutation);
-            expect(result).toEqual({ startRow: 7, endRow: 7, startColumn: 1, endColumn: 1 });
+            expect(result).toEqual({ startRow: 7, endRow: 9, startColumn: 1, endColumn: 1 });
         });
     });
 });

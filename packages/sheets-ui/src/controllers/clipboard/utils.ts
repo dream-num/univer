@@ -296,7 +296,11 @@ export function getSetCellValueMutations(
                 value.v = numfmtValue.v;
             }
         }
-        valueMatrix.setValue(row + startRow, col + startColumn, Tools.deepClone(value));
+        if (value.p?.body) {
+            valueMatrix.setValue(row + startRow, col + startColumn, Tools.deepClone({ p: value.p, v: value.v }));
+        } else {
+            valueMatrix.setValue(row + startRow, col + startColumn, Tools.deepClone({ v: value.v }));
+        }
     });
     // set cell value and style
     const setValuesMutation: ISetRangeValuesMutationParams = {

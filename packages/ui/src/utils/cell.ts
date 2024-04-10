@@ -25,9 +25,13 @@ import type {
     ITextRun,
 } from '@univerjs/core';
 import { BaselineOffset, BorderStyleTypes, getBorderStyleType, Tools } from '@univerjs/core';
-import { ptToPx, pxToPt } from '@univerjs/engine-render';
+import { ptToPx } from '@univerjs/engine-render';
 
 import { textTrim } from './util';
+
+const PX_TO_PT_RATIO = 0.75;
+const MAX_FONT_SIZE = 78;
+const MIN_FONT_SIZE = 9;
 
 // TODO: move to Utils
 /**
@@ -188,7 +192,7 @@ export function handleStringToStyle($dom?: HTMLElement, cssStyle: string = '') {
 
             // px to pt TODO@Dushusir: px or pt?
             if (value.indexOf('px') !== -1) {
-                fs = pxToPt(Number.parseInt(value));
+                fs = getPtFontSizeByPx(Number.parseInt(value, 10));
             }
 
             styleList.fs = fs;
@@ -869,8 +873,15 @@ function getStyles(styleText: string): IKeyValue {
 }
 
 function extractColorFromString(str: string) {
-    // 正则表达式匹配十六进制颜色值和RGB颜色值
     const regex = /#([0-9a-f]{3,6})\b|rgb\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*\)/gi;
     const matches = str.match(regex);
     return matches ? matches[0] : null;
+}
+
+function getPtFontSizeByPx(size: number) {
+    const ptSize = size * PX_TO_PT_RATIO;
+
+    if (ptSize < MIN_FONT_SIZE) return MIN_FONT_SIZE;
+    if (ptSize > MAX_FONT_SIZE) return MAX_FONT_SIZE;
+    return ptSize;
 }

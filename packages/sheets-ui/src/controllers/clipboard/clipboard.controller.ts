@@ -36,6 +36,7 @@ import {
     ICommandService,
     IConfigService,
     IContextService,
+    isFormulaString,
     IUniverInstanceService,
     LifecycleStages,
     LocaleService,
@@ -485,13 +486,23 @@ export class SheetClipboardController extends RxDisposable {
                 },
             };
         } else {
-            cellValue = {
-                [range.startRow]: {
-                    [range.startColumn]: {
-                        v: text,
+            if (isFormulaString(text)) {
+                cellValue = {
+                    [range.startRow]: {
+                        [range.startColumn]: {
+                            f: text,
+                        },
                     },
-                },
-            };
+                };
+            } else {
+                cellValue = {
+                    [range.startRow]: {
+                        [range.startColumn]: {
+                            v: text,
+                        },
+                    },
+                };
+            }
         }
 
         const setRangeValuesParams: ISetRangeValuesMutationParams = {

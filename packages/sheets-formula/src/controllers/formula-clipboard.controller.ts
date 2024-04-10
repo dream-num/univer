@@ -29,7 +29,7 @@ import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
 import type { ICellDataWithSpanInfo, ICopyPastePayload, ISheetClipboardHook, ISheetRangeLocation } from '@univerjs/sheets-ui';
-import { COPY_TYPE, ISheetClipboardService } from '@univerjs/sheets-ui';
+import { COPY_TYPE, ISheetClipboardService, PREDEFINED_HOOK_NAME } from '@univerjs/sheets-ui';
 import type { IAccessor } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -86,6 +86,7 @@ export class FormulaClipboardController extends Disposable {
         const copyInfo = {
             copyType: payload.copyType || COPY_TYPE.COPY,
             copyRange: pasteFrom?.range,
+            pasteType: payload.pasteType,
         };
         const pastedRange = pasteTo.range;
         const matrix = data;
@@ -115,6 +116,7 @@ export function getSetCellFormulaMutations(
     copyInfo: {
         copyType: COPY_TYPE;
         copyRange?: IRange;
+        pasteType: string;
     },
     lexerTreeBuilder: LexerTreeBuilder,
     isSpecialPaste = false
@@ -162,7 +164,7 @@ export function getSetCellFormulaMutations(
             valueObject.f = null;
             valueObject.v = null;
             valueObject.p = null;
-        } else if (isFormulaString(originalFormula)) {
+        } else (isFormulaString(originalFormula) && copyInfo.pasteType === PREDEFINED_HOOK_NAME.DEFAULT_PASTE) {
             const rowIndex = row % copyRowLength;
             const colIndex = col % copyColumnLength;
 

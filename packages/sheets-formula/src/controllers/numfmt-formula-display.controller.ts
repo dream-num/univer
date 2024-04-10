@@ -14,12 +14,9 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo } from '@univerjs/core';
-import { CellValueType, Disposable, ICommandService, LifecycleStages, OnLifecycle, ThemeService } from '@univerjs/core';
-import type { ISetNumfmtFormulaDataMutationParams } from '@univerjs/engine-formula';
-import { FormulaDataModel, SetNumfmtFormulaDataMutation } from '@univerjs/engine-formula';
-import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
-import { getPatternPreview } from '@univerjs/sheets-numfmt';
+import { Disposable, ICommandService, LifecycleStages, OnLifecycle, ThemeService } from '@univerjs/core';
+import { FormulaDataModel } from '@univerjs/engine-formula';
+import { SheetInterceptorService } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
 @OnLifecycle(LifecycleStages.Ready, NumfmtFormulaDisplayController)
@@ -36,73 +33,73 @@ export class NumfmtFormulaDisplayController extends Disposable {
     }
 
     private _initialize(): void {
-        this._commandExecutedListener();
+        // this._commandExecutedListener();
 
-        this._initInterceptorCellContent();
+        // this._initInterceptorCellContent();
     }
 
-    private _commandExecutedListener() {
-        this.disposeWithMe(
-            this._commandService.onCommandExecuted((command: ICommandInfo) => {
-                // Synchronous data from worker
-                if (command.id !== SetNumfmtFormulaDataMutation.id) {
-                    return;
-                }
+    // private _commandExecutedListener() {
+    //     this.disposeWithMe(
+    //         this._commandService.onCommandExecuted((command: ICommandInfo) => {
+    //             // Synchronous data from worker
+    //             if (command.id !== SetNumfmtFormulaDataMutation.id) {
+    //                 return;
+    //             }
 
-                const params = command.params as ISetNumfmtFormulaDataMutationParams;
+    //             const params = command.params as ISetNumfmtFormulaDataMutationParams;
 
-                if (params == null) {
-                    return;
-                }
+    //             if (params == null) {
+    //                 return;
+    //             }
 
-                const { numfmtItemMap } = params;
-                this._formulaDataModel.updateNumfmtItemMap(numfmtItemMap);
-            })
-        );
-    }
+    //             // const { numfmtItemMap } = params;
+    //             // this._formulaDataModel.updateNumfmtItemMap(numfmtItemMap);
+    //         })
+    //     );
+    // }
 
-    private _initInterceptorCellContent() {
-        this.disposeWithMe(
-            this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
-                priority: 98,
-                handler: (cell, location, next) => {
-                    const { unitId, subUnitId, row, col } = location;
+    // private _initInterceptorCellContent() {
+    //     this.disposeWithMe(
+    //         this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
+    //             priority: 98,
+    //             handler: (cell, location, next) => {
+    //                 const { unitId, subUnitId, row, col } = location;
 
-                    const numfmtItemMap = this._formulaDataModel.getNumfmtItemMap();
-                    const numfmtItem = numfmtItemMap[unitId]?.[subUnitId]?.[row]?.[col];
-                    const v = next(cell);
-                    if (numfmtItem == null || numfmtItem === '') {
-                        return v;
-                    }
+    //                 const numfmtItemMap = this._formulaDataModel.getNumfmtItemMap();
+    //                 const numfmtItem = numfmtItemMap[unitId]?.[subUnitId]?.[row]?.[col];
+    //                 const v = next(cell);
+    //                 if (numfmtItem == null || numfmtItem === '') {
+    //                     return v;
+    //                 }
 
-                    const rawValue = location.worksheet.getCellRaw(row, col);
-                    const value = rawValue?.v;
-                    const type = rawValue?.t;
+    //                 const rawValue = location.worksheet.getCellRaw(row, col);
+    //                 const value = rawValue?.v;
+    //                 const type = rawValue?.t;
 
-                    if (value == null || type !== CellValueType.NUMBER) {
-                        return v;
-                    }
+    //                 if (value == null || type !== CellValueType.NUMBER) {
+    //                     return v;
+    //                 }
 
-                    const info = getPatternPreview(numfmtItem, value as number);
+    //                 const info = getPatternPreview(numfmtItem, value as number);
 
-                    if (info.color) {
-                        const colorMap = this._themeService.getCurrentTheme();
-                        const color = colorMap[`${info.color}500`];
-                        return {
-                            ...v,
-                            v: info.result,
-                            t: CellValueType.STRING,
-                            s: { cl: { rgb: color } },
-                        };
-                    }
+    //                 if (info.color) {
+    //                     const colorMap = this._themeService.getCurrentTheme();
+    //                     const color = colorMap[`${info.color}500`];
+    //                     return {
+    //                         ...v,
+    //                         v: info.result,
+    //                         t: CellValueType.STRING,
+    //                         s: { cl: { rgb: color } },
+    //                     };
+    //                 }
 
-                    return {
-                        ...v,
-                        v: info.result,
-                        t: CellValueType.STRING,
-                    };
-                },
-            })
-        );
-    }
+    //                 return {
+    //                     ...v,
+    //                     v: info.result,
+    //                     t: CellValueType.STRING,
+    //                 };
+    //             },
+    //         })
+    //     );
+    // }
 }

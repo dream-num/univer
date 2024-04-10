@@ -18,11 +18,10 @@ import type { IMutation } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
-import type { INumfmtItemMap } from '../../basics/common';
 import { FormulaDataModel } from '../../models/formula-data.model';
 
 export interface ISetNumfmtFormulaDataMutationParams {
-    numfmtItemMap: INumfmtItemMap;
+    // numfmtItemMap: INumfmtItemMap;
 }
 
 export const SetNumfmtFormulaDataMutation: IMutation<ISetNumfmtFormulaDataMutationParams> = {
@@ -30,7 +29,7 @@ export const SetNumfmtFormulaDataMutation: IMutation<ISetNumfmtFormulaDataMutati
     type: CommandType.MUTATION,
     handler: (accessor: IAccessor, params: ISetNumfmtFormulaDataMutationParams) => {
         const formulaDataModel = accessor.get(FormulaDataModel);
-        formulaDataModel.updateNumfmtItemMap(params.numfmtItemMap);
+        // formulaDataModel.updateNumfmtItemMap(params.numfmtItemMap);
         return true;
     },
 };

@@ -22,7 +22,6 @@ import type {
     IDirtyUnitOtherFormulaMap,
     IDirtyUnitSheetDefinedNameMap,
     IDirtyUnitSheetNameMap,
-    INumfmtItemMap,
     IRuntimeOtherUnitDataType,
     IRuntimeUnitDataPrimitiveType,
 } from '../../basics/common';
@@ -35,7 +34,7 @@ export interface ISetFormulaCalculationStartMutation {
     dirtyUnitFeatureMap: IDirtyUnitFeatureMap;
     dirtyUnitOtherFormulaMap: IDirtyUnitOtherFormulaMap;
     options: Nullable<IExecutionOptions>;
-    numfmtItemMap: INumfmtItemMap;
+    // numfmtItemMap: INumfmtItemMap;
     forceCalculation?: boolean;
 }
 /**

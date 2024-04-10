@@ -15,10 +15,10 @@
  */
 
 import type { ICommandInfo, IUnitRange } from '@univerjs/core';
-import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle, Tools } from '@univerjs/core';
+import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
-import type { IDirtyUnitFeatureMap, IDirtyUnitOtherFormulaMap, IDirtyUnitSheetDefinedNameMap, IDirtyUnitSheetNameMap, IFormulaData, INumfmtItemMap } from '../basics/common';
+import type { IDirtyUnitFeatureMap, IDirtyUnitOtherFormulaMap, IDirtyUnitSheetDefinedNameMap, IDirtyUnitSheetNameMap, IFormulaData } from '../basics/common';
 import type { ISetArrayFormulaDataMutationParams } from '../commands/mutations/set-array-formula-data.mutation';
 import { SetArrayFormulaDataMutation } from '../commands/mutations/set-array-formula-data.mutation';
 import type { ISetFormulaCalculationStartMutation } from '../commands/mutations/set-formula-calculation.mutation';
@@ -34,7 +34,6 @@ import { FormulaDataModel } from '../models/formula-data.model';
 import { CalculateFormulaService } from '../services/calculate-formula.service';
 import type { IAllRuntimeData } from '../services/runtime.service';
 import { FormulaExecutedStateType } from '../services/runtime.service';
-import { SetNumfmtFormulaDataMutation } from '../commands/mutations/set-numfmt-formula-data.mutation';
 import { convertRuntimeToUnitData } from '../basics/runtime';
 
 @OnLifecycle(LifecycleStages.Ready, CalculateController)
@@ -73,9 +72,9 @@ export class CalculateController extends Disposable {
                     if (params.forceCalculation === true) {
                         this._calculate(true);
                     } else {
-                        const { dirtyRanges, dirtyNameMap, dirtyDefinedNameMap, dirtyUnitFeatureMap, dirtyUnitOtherFormulaMap, numfmtItemMap } = params;
+                        const { dirtyRanges, dirtyNameMap, dirtyDefinedNameMap, dirtyUnitFeatureMap, dirtyUnitOtherFormulaMap } = params;
 
-                        this._calculate(false, dirtyRanges, dirtyNameMap, dirtyDefinedNameMap, dirtyUnitFeatureMap, dirtyUnitOtherFormulaMap, numfmtItemMap);
+                        this._calculate(false, dirtyRanges, dirtyNameMap, dirtyDefinedNameMap, dirtyUnitFeatureMap, dirtyUnitOtherFormulaMap);
                     }
                 } else if (command.id === SetArrayFormulaDataMutation.id) {
                     const params = command.params as ISetArrayFormulaDataMutationParams;
@@ -99,8 +98,8 @@ export class CalculateController extends Disposable {
         dirtyNameMap: IDirtyUnitSheetNameMap = {},
         dirtyDefinedNameMap: IDirtyUnitSheetDefinedNameMap = {},
         dirtyUnitFeatureMap: IDirtyUnitFeatureMap = {},
-        dirtyUnitOtherFormulaMap: IDirtyUnitOtherFormulaMap = {},
-        numfmtItemMap: INumfmtItemMap = {}
+        dirtyUnitOtherFormulaMap: IDirtyUnitOtherFormulaMap = {}
+        // numfmtItemMap: INumfmtItemMap = {}
     ) {
         if (
             dirtyRanges.length === 0 &&
@@ -126,7 +125,7 @@ export class CalculateController extends Disposable {
             dirtyDefinedNameMap,
             dirtyUnitFeatureMap,
             dirtyUnitOtherFormulaMap,
-            numfmtItemMap,
+            // numfmtItemMap,
         });
     }
 
@@ -197,7 +196,7 @@ export class CalculateController extends Disposable {
     }
 
     private async _applyFormula(data: IAllRuntimeData) {
-        const { unitData, unitOtherData, arrayFormulaRange, arrayFormulaCellData, clearArrayFormulaCellData, numfmtItemMap } = data;
+        const { unitData, unitOtherData, arrayFormulaRange, arrayFormulaCellData, clearArrayFormulaCellData } = data;
 
         if (!unitData) {
             console.error('No sheetData from Formula Engine!');
@@ -227,17 +226,17 @@ export class CalculateController extends Disposable {
         }
 
         // Synchronous to the main thread
-        if (!Tools.isEmptyObject(numfmtItemMap)) {
-            this._commandService.executeCommand(
-                SetNumfmtFormulaDataMutation.id,
-                {
-                    numfmtItemMap,
-                },
-                {
-                    onlyLocal: true,
-                }
-            );
-        }
+        // if (!Tools.isEmptyObject(numfmtItemMap)) {
+        //     this._commandService.executeCommand(
+        //         SetNumfmtFormulaDataMutation.id,
+        //         {
+        //             numfmtItemMap,
+        //         },
+        //         {
+        //             onlyLocal: true,
+        //         }
+        //     );
+        // }
 
         this._commandService.executeCommand(
             SetFormulaCalculationResultMutation.id,

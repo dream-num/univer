@@ -172,48 +172,48 @@ export class FormulaDataModel extends Disposable {
         this._arrayFormulaCellData = value;
     }
 
-    getNumfmtItemMap() {
-        return this._numfmtItemMap;
-    }
+    // getNumfmtItemMap() {
+    //     return this._numfmtItemMap;
+    // }
 
-    getNumfmtValue(unitId: string, sheetId: string, row: number, column: number) {
-        return this._numfmtItemMap[unitId]?.[sheetId]?.[row]?.[column];
-    }
+    // getNumfmtValue(unitId: string, sheetId: string, row: number, column: number) {
+    //     return this._numfmtItemMap[unitId]?.[sheetId]?.[row]?.[column];
+    // }
 
-    setNumfmtItemMap(value: INumfmtItemMap) {
-        this._numfmtItemMap = value;
-    }
+    // setNumfmtItemMap(value: INumfmtItemMap) {
+    //     this._numfmtItemMap = value;
+    // }
 
-    updateNumfmtItemMap(value: INumfmtItemMap) {
-        Object.keys(value).forEach((unitId) => {
-            const sheetData = value[unitId];
+    // updateNumfmtItemMap(value: INumfmtItemMap) {
+    //     Object.keys(value).forEach((unitId) => {
+    //         const sheetData = value[unitId];
 
-            if (sheetData == null) {
-                return true;
-            }
+    //         if (sheetData == null) {
+    //             return true;
+    //         }
 
-            if (this._numfmtItemMap[unitId] == null) {
-                this._numfmtItemMap[unitId] = {};
-            }
+    //         if (this._numfmtItemMap[unitId] == null) {
+    //             this._numfmtItemMap[unitId] = {};
+    //         }
 
-            Object.keys(sheetData).forEach((sheetId) => {
-                const numfmtItemMap = sheetData[sheetId];
-                const numfmtItemMatrix = new ObjectMatrix(numfmtItemMap);
+    //         Object.keys(sheetData).forEach((sheetId) => {
+    //             const numfmtItemMap = sheetData[sheetId];
+    //             const numfmtItemMatrix = new ObjectMatrix(numfmtItemMap);
 
-                if (this._numfmtItemMap[unitId]![sheetId] == null) {
-                    this._numfmtItemMap[unitId]![sheetId] = {};
-                }
+    //             if (this._numfmtItemMap[unitId]![sheetId] == null) {
+    //                 this._numfmtItemMap[unitId]![sheetId] = {};
+    //             }
 
-                numfmtItemMatrix.forValue((r, c, numfmtItem) => {
-                    if (this._numfmtItemMap[unitId]![sheetId][r] == null) {
-                        this._numfmtItemMap[unitId]![sheetId][r] = {};
-                    }
+    //             numfmtItemMatrix.forValue((r, c, numfmtItem) => {
+    //                 if (this._numfmtItemMap[unitId]![sheetId][r] == null) {
+    //                     this._numfmtItemMap[unitId]![sheetId][r] = {};
+    //                 }
 
-                    this._numfmtItemMap[unitId]![sheetId][r][c] = numfmtItem;
-                });
-            });
-        });
-    }
+    //                 this._numfmtItemMap[unitId]![sheetId][r][c] = numfmtItem;
+    //             });
+    //         });
+    //     });
+    // }
 
     mergeArrayFormulaRange(formulaData: IArrayFormulaRangeType) {
         Object.keys(formulaData).forEach((unitId) => {

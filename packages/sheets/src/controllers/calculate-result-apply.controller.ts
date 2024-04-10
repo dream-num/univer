@@ -40,6 +40,8 @@ export class CalculateResultApplyController extends Disposable {
                     return;
                 }
 
+               // TODO 处理 unitData 中新设置的数字格式和原有格式的优先级，再更新到 model
+
                 const params = command.params as ISetFormulaCalculationResultMutation;
 
                 const { unitData, unitOtherData } = params;

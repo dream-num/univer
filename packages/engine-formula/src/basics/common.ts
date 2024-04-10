@@ -25,6 +25,7 @@ import type {
     IUnitRange,
     Nullable,
     ObjectMatrix,
+    Styles,
 } from '@univerjs/core';
 
 export const ERROR_VALUE_OBJECT_CLASS_TYPE = 'errorValueObject';
@@ -63,6 +64,13 @@ export interface ISheetData {
  */
 export interface IUnitData {
     [unitId: string]: ISheetData;
+}
+
+/**
+ * Style data, numfmt needs to be queried from the style sheet
+ */
+export interface IUnitStylesData {
+    [unitId: string]: Styles;
 }
 
 export interface IRuntimeUnitDataType {
@@ -164,9 +172,10 @@ export interface IFormulaDatasetConfig {
     dirtyDefinedNameMap: IDirtyUnitSheetNameMap;
     dirtyUnitFeatureMap: IDirtyUnitFeatureMap;
     dirtyUnitOtherFormulaMap: IDirtyUnitOtherFormulaMap;
-    numfmtItemMap: INumfmtItemMap;
+    // numfmtItemMap: INumfmtItemMap;
     excludedCell?: IUnitExcludedCell;
     allUnitData?: IUnitData;
+    unitStylesData?: IUnitStylesData;
     unitSheetNameMap?: IUnitSheetNameMap;
 }
 

@@ -104,7 +104,9 @@ export class CellReferenceObject extends BaseReferenceObject {
 
         rangeReferenceObject.setRuntimeData(this.getRuntimeData());
 
-        rangeReferenceObject.setNumfmtItemData(this.getNumfmtItemData());
+        rangeReferenceObject.setUnitStylesData(this.getUnitStylesData());
+
+        // rangeReferenceObject.setNumfmtItemData(this.getNumfmtItemData());
 
         rangeReferenceObject.setArrayFormulaCellData(this.getArrayFormulaCellData());
 

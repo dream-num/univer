@@ -220,7 +220,9 @@ export { type ISetRangeValuesRangeMutationParams } from './commands/mutations/se
 export {
     type ISetRowHiddenMutationParams,
     type ISetRowVisibleMutationParams,
-    SetRowHiddenMutation, SetRowVisibleMutation } from './commands/mutations/set-row-visible.mutation';
+    SetRowHiddenMutation,
+    SetRowVisibleMutation,
+} from './commands/mutations/set-row-visible.mutation';
 export { SetTabColorMutation } from './commands/mutations/set-tab-color.mutation';
 export { type ISetTabColorMutationParams } from './commands/mutations/set-tab-color.mutation';
 export {
@@ -278,7 +280,6 @@ export {
     rotateRange,
     runRefRangeMutations,
     handleDefaultRangeChangeWithEffectRefCommands,
-    handleCommonDefaultRangeChangeWithEffectRefCommands,
 } from './services/ref-range/util';
 export { INTERCEPTOR_POINT } from './services/sheet-interceptor/interceptor-const';
 export { SheetInterceptorService } from './services/sheet-interceptor/sheet-interceptor.service';

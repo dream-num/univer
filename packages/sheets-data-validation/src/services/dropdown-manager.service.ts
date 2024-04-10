@@ -87,7 +87,7 @@ export class DataValidationDropdownManagerService extends Disposable {
         this._activeDropdown$.next(this._activeDropdown);
         const disposableCollection = new DisposableCollection();
         const currentRender = this._renderManagerService.getRenderById(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
-        disposableCollection.add(this._canvasPopupManagerService.attachPopupToCell(
+        const attachDispose = this._canvasPopupManagerService.attachPopupToCell(
             row,
             col,
             {
@@ -98,7 +98,8 @@ export class DataValidationDropdownManagerService extends Disposable {
                 offset: [0, 3],
                 excludeOutside: [currentRender?.engine.getCanvasElement()].filter(Boolean) as HTMLElement[],
             }
-        ));
+        );
+        attachDispose && disposableCollection.add(attachDispose);
 
         disposableCollection.add({
             dispose: () => {

@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-import type {
-    Workbook } from '@univerjs/core';
 import {
     Disposable,
     ICommandService,
@@ -23,7 +21,6 @@ import {
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
-    toDisposable,
 } from '@univerjs/core';
 import type { IDefinedNameMapItem } from '@univerjs/engine-formula';
 import { IDefinedNamesService } from '@univerjs/engine-formula';
@@ -66,31 +63,16 @@ export class DefinedNameDataController extends Disposable {
                 return {};
             }
         };
-        const handleWorkbookAdd = (workbook: Workbook) => {
-            const unitID = workbook.getUnitId();
-            this.disposeWithMe(
-                this._resourceManagerService.registerPluginResource<IDefinedNameMapItem>(unitID, SHEET_DEFINED_NAME_PLUGIN, {
-                    toJson: (unitID) => toJson(unitID),
-                    parseJson: (json) => parseJson(json),
-                    onChange: (unitID, value) => {
-                        this._definedNamesService.registerDefinedNames(unitID, value);
-                    },
-                })
-            );
-        };
-        this.disposeWithMe(toDisposable(this._univerInstanceService.sheetAdded$.subscribe(handleWorkbookAdd)));
         this.disposeWithMe(
-            toDisposable(
-                this._univerInstanceService.sheetDisposed$.subscribe((workbook) => {
-                    const unitID = workbook.getUnitId();
-                    this._resourceManagerService.disposePluginResource(unitID, SHEET_DEFINED_NAME_PLUGIN);
-                })
-            )
+            this._resourceManagerService.registerPluginResource<IDefinedNameMapItem>({
+                pluginName: SHEET_DEFINED_NAME_PLUGIN,
+                businesses: ['SHEET'],
+                toJson: (unitID) => toJson(unitID),
+                parseJson: (json) => parseJson(json),
+                onChange: (unitID, value) => {
+                    this._definedNamesService.registerDefinedNames(unitID, value);
+                },
+            })
         );
-
-        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
-        if (workbook) {
-            handleWorkbookAdd(workbook);
-        }
     }
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export const DATA_VALIDATION_PLUGIN_NAME = 'SHEET_DATA_VALIDATION';
+export const DATA_VALIDATION_PLUGIN_NAME = 'SHEET_DATA_VALIDATION_PLUGIN';
 
 export const DROP_DOWN_DEFAULT_COLOR = '#ECECEC';
 

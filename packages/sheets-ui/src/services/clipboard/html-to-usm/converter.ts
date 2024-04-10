@@ -54,6 +54,7 @@ const sheetStyleRules: string[] =
         'font-weight',
         'font-style',
         'font-family',
+        'text-decoration-line',
     ];
 
 function matchFilter(node: HTMLElement, filter: IStyleRule['filter']) {

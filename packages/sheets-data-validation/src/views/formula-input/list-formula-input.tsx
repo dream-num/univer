@@ -14,23 +14,18 @@
  * limitations under the License.
  */
 
-import { RangeSelector, useEvent } from '@univerjs/ui';
+import { TextEditor, useEvent } from '@univerjs/ui';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { DraggableList, FormLayout, Input, Radio, RadioGroup, Select } from '@univerjs/design';
-import { deserializeRangeWithSheet, isReferenceString, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import type { IRange } from '@univerjs/core';
-import { createInternalEditorID, IUniverInstanceService, LocaleService, Tools } from '@univerjs/core';
-import type { IFormulaInputProps } from '@univerjs/data-validation';
+import { createInternalEditorID, DataValidationType, isFormulaString, LocaleService, Tools } from '@univerjs/core';
+import { DataValidationModel, DataValidatorRegistryService, type IFormulaInputProps } from '@univerjs/data-validation';
 import { DeleteSingle, IncreaseSingle, SequenceSingle } from '@univerjs/icons';
 import cs from 'clsx';
-import { deserializeListOptions, getSheetRangeValueSet, serializeListOptions } from '../../validators/util';
+import { deserializeListOptions, serializeListOptions } from '../../validators/util';
 import { DROP_DOWN_DEFAULT_COLOR } from '../../common/const';
+import type { ListValidator } from '../../validators';
 import styles from './index.module.less';
-
-function isRangeInValid(range: IRange) {
-    return Number.isNaN(range.startColumn) || Number.isNaN(range.endColumn) || Number.isNaN(range.startRow) || Number.isNaN(range.endRow);
-}
 
 const DEFAULT_COLOR_PRESET = [
     '#FFFFFF',
@@ -147,23 +142,33 @@ const Template = (props: { item: IDropdownItem; commonProps: any; style?: React.
 };
 
 export function ListFormulaInput(props: IFormulaInputProps) {
-    const { value, onChange: _onChange = () => { }, unitId, subUnitId, validResult, showError } = props;
+    const { value, onChange: _onChange = () => { }, unitId, subUnitId, validResult, showError, ruleId } = props;
     const { formula1 = '', formula2 = '' } = value || {};
     const containerRef = useRef<HTMLDivElement>(null);
-    const [isRefRange, setIsRefRange] = useState(() => isReferenceString(formula1) ? '1' : '0');
-    const [refRange, setRefRange] = useState(isRefRange === '1' ? formula1 : '');
+    const [isFormulaStr, setIsFormulaStr] = useState(() => isFormulaString(formula1) ? '1' : '0');
+    const [formulaStr, setFormulaStr] = useState(isFormulaStr === '1' ? formula1 : '');
     const localeService = useDependency(LocaleService);
-    const univerInstanceService = useDependency(IUniverInstanceService);
-    const workbook = univerInstanceService.getCurrentUniverSheetInstance();
-    const worksheet = workbook.getActiveSheet();
+    const dataValidatorRegistryService = useDependency(DataValidatorRegistryService);
+    const dataValidationModel = useDependency(DataValidationModel);
     const [refColors, setRefColors] = useState(() => formula2.split(','));
-
+    const listValidator = dataValidatorRegistryService.getValidatorItem(DataValidationType.LIST) as ListValidator;
+    const [refOptions, setRefOptions] = useState<string[]>([]);
     const formula1Res = showError ? validResult?.formula1 : '';
 
     const onChange = useEvent(_onChange);
 
+    useEffect(() => {
+        (async () => {
+            const rule = dataValidationModel.getRuleById(unitId, subUnitId, ruleId);
+            if (isFormulaString(formula1) && listValidator && rule) {
+                const res = await listValidator.getListAsync(rule, unitId, subUnitId);
+                setRefOptions(res);
+            }
+        })();
+    }, [dataValidationModel, formula1, listValidator, ruleId, subUnitId, unitId]);
+
     const [strList, setStrList] = useState<IDropdownItem[]>(() => {
-        const strOptions = isRefRange !== '1' ? deserializeListOptions(formula1) : [];
+        const strOptions = isFormulaStr !== '1' ? deserializeListOptions(formula1) : [];
         const strColors = formula2.split(',');
         return strOptions.map((label, i) => ({
             label,
@@ -192,13 +197,6 @@ export function ListFormulaInput(props: IFormulaInputProps) {
             setStrList([...strList]);
         }
     };
-
-    const refOptions = useMemo(() => getSheetRangeValueSet(
-        deserializeRangeWithSheet(refRange),
-        univerInstanceService,
-        workbook.getUnitId(),
-        worksheet.getSheetId()
-    ), [refRange, univerInstanceService, workbook, worksheet]);
 
     const colorList = formula2.split(',');
 
@@ -262,40 +260,29 @@ export function ListFormulaInput(props: IFormulaInputProps) {
     return (
         <>
             <FormLayout label={localeService.t('dataValidation.list.options')}>
-                <RadioGroup value={isRefRange} onChange={(v) => setIsRefRange(v as string)}>
+                <RadioGroup value={isFormulaStr} onChange={(v) => setIsFormulaStr(v as string)}>
                     <Radio value="0">{localeService.t('dataValidation.list.customOptions')}</Radio>
                     <Radio value="1">{localeService.t('dataValidation.list.refOptions')}</Radio>
                 </RadioGroup>
             </FormLayout>
-            {isRefRange === '1'
+            {isFormulaStr === '1'
                 ? (
                     <>
                         <FormLayout error={formula1Res}>
-                            <RangeSelector
+                            <TextEditor
                                 id={createInternalEditorID(`list-ref-range-${unitId}-${subUnitId}`)}
-                                value={refRange}
+                                value={formulaStr}
                                 openForSheetUnitId={unitId}
                                 openForSheetSubUnitId={subUnitId}
-                                onChange={(ranges) => {
-                                    const range = ranges[0];
-                                    if (!range || isRangeInValid(range.range)) {
-                                        onChange?.({
-                                            formula1: '',
-                                            formula2,
-                                        });
-                                        setRefRange('');
-                                    } else {
-                                        const workbook = univerInstanceService.getUniverSheetInstance(range.unitId) ?? univerInstanceService.getCurrentUniverSheetInstance();
-                                        const worksheet = workbook?.getSheetBySheetId(range.sheetId) ?? workbook.getActiveSheet();
-                                        const rangeStr = serializeRangeWithSheet(worksheet.getName(), range.range);
-                                        onChange?.({
-                                            formula1: rangeStr,
-                                            formula2,
-                                        });
-                                        setRefRange(rangeStr);
-                                    }
+                                onlyInputFormula
+                                onChange={(newString) => {
+                                    const str = newString ?? '';
+                                    setFormulaStr(str);
+                                    onChange?.({
+                                        formula1: isFormulaString(str) ? str : '',
+                                        formula2,
+                                    });
                                 }}
-                                isSingleChoice
                             />
                         </FormLayout>
                         <FormLayout>

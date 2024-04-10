@@ -274,6 +274,7 @@ export function DataValidationDetail() {
                         validResult={validator.validatorFormula(localRule)}
                         unitId={unitId}
                         subUnitId={subUnitId}
+                        ruleId={ruleId}
                     />
                 )
                 : null}

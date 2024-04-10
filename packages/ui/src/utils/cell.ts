@@ -485,6 +485,15 @@ export function handleStringToStyle($dom?: HTMLElement, cssStyle: string = '') {
                     };
                 }
             }
+        } else if (key === 'data-rotate') {
+            const regex = /[+-]?\d+/;
+            const match = value.match(regex);
+
+            if (value === '(0deg ,1)') {
+                styleList.tr = { a: 0, v: 1 };
+            } else if (match) {
+                styleList.tr = { a: Number(match[0]) };
+            }
         }
 
         // if (style.tb === WrapStrategy.CLIP) {

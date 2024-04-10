@@ -302,6 +302,8 @@ export class SheetClipboardController extends RxDisposable {
                 const maxRow = currentSheet!.getMaxRows();
                 const addingRowsCount = range.endRow - maxRow + 1;
                 const existingRowsCount = rowProperties.length - addingRowsCount;
+
+                const rowManager = currentSheet!.getRowManager();
                 if (addingRowsCount > 0) {
                     const rowInfo: IObjectArrayPrimitiveType<IRowData> = {};
                     rowProperties.slice(existingRowsCount).forEach((property, index) => {
@@ -348,6 +350,7 @@ export class SheetClipboardController extends RxDisposable {
                 // get row height of existing rows
                 // TODO When Excel pasted, there was no width height, Do we still need to set the height?
                 const rowHeight: IObjectArrayPrimitiveType<number> = {};
+                const originRowHeight: IObjectArrayPrimitiveType<number> = {};
                 rowProperties.slice(0, existingRowsCount).forEach((property, index) => {
                     const { style, height: propertyHeight } = property;
                     if (style) {
@@ -367,7 +370,19 @@ export class SheetClipboardController extends RxDisposable {
 
                         rowHeight[index + range.startRow] = height;
                     } else if (propertyHeight) {
-                        rowHeight[index + range.startRow] = Number.parseFloat(propertyHeight);
+                        const rowConfigBeforePaste = rowManager.getRow(range.startRow + index);
+                        const willSetHeight = Number.parseFloat(propertyHeight);
+                        if (rowConfigBeforePaste) {
+                            const { h = DEFAULT_WORKSHEET_ROW_HEIGHT, ah = 0 } = rowConfigBeforePaste;
+                            const nowRowHeight = Math.max(h, ah);
+                            if (willSetHeight > nowRowHeight) {
+                                rowHeight[index + range.startRow] = willSetHeight;
+                                originRowHeight[index + range.startRow] = nowRowHeight;
+                            }
+                        } else {
+                            rowHeight[index + range.startRow] = willSetHeight;
+                            originRowHeight[index + range.startRow] = rowManager.getRow(range.startRow + index)?.h ?? DEFAULT_WORKSHEET_ROW_HEIGHT;
+                        }
                     }
                 });
 
@@ -383,11 +398,17 @@ export class SheetClipboardController extends RxDisposable {
                     params: setRowPropertyMutation,
                 });
 
-                // TODO: add undo mutations but we cannot do it now because underlying mechanism is not ready
+                undoMutations.push({
+                    id: SetWorksheetRowHeightMutation.id,
+                    params: {
+                        ...setRowPropertyMutation,
+                        rowHeight: 20,
+                    },
+                });
 
                 return {
                     redos: redoMutations,
-                    undos: [] || undoMutations,
+                    undos: undoMutations,
                 };
             },
 

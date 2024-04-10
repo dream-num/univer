@@ -496,7 +496,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
 
         for (let j = startRow; j <= endRow; j++) {
             const row = rowManager.getRowOrCreate(j);
-            rowProperties.push({ height: `${row.h || defaultRowHeight}` });
+            rowProperties.push({ height: `${row.ah || row.h || defaultRowHeight}` });
         }
 
         const pasteRes = this._pasteUSM(

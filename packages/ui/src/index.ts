@@ -73,7 +73,7 @@ export { DesktopShortcutService, type IShortcutItem, IShortcutService } from './
 export { DesktopSidebarService } from './services/sidebar/desktop-sidebar.service';
 export { ISidebarService } from './services/sidebar/sidebar.service';
 export { IZenZoneService } from './services/zen-zone/zen-zone.service';
-export { UniverUIPlugin } from './ui-plugin';
+export { UniverUIPlugin, DISABLE_AUTO_FOCUS_KEY } from './ui-plugin';
 export * from './utils';
 export { type IConfirmPartMethodOptions } from './views/components/confirm-part/interface';
 export { IEditorService, EditorService } from './services/editor/editor.service';

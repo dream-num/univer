@@ -24,7 +24,7 @@ import { UniverUIPlugin } from '@univerjs/ui';
 
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 
-import { DEFAULT_DOCUMENT_DATA_CN } from '../data';
+import { DEFAULT_DOCUMENT_DATA_SIMPLE } from '../data';
 
 import { DebuggerPlugin } from '../plugins/debugger';
 
@@ -64,7 +64,7 @@ univer.registerPlugin(UniverDocsUIPlugin, {
     },
 });
 
-univer.createUniverDoc(DEFAULT_DOCUMENT_DATA_CN);
+univer.createUniverDoc(DEFAULT_DOCUMENT_DATA_SIMPLE);
 
 // use for console test
 declare global {

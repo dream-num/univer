@@ -108,6 +108,7 @@ export function shaping(
     const { endIndex } = paragraphNode;
     let last = 0;
     let bk;
+    let lastGlyphIndex = 0;
 
     const paragraphBody = prepareParagraphBody(bodyModel.getBody()!, endIndex);
 
@@ -126,11 +127,11 @@ export function shaping(
 
         if (fontLibrary.isReady) {
             const glyphInfosInWord = [];
-            for (const glyphInfo of glyphInfos) {
-                const { start, end } = glyphInfo;
-                if (start < last) {
-                    continue;
-                }
+
+            let i = 0;
+            for (i = lastGlyphIndex; i < glyphInfos.length; i++) {
+                const glyphInfo = glyphInfos[i];
+                const { end } = glyphInfo;
 
                 if (end > bk.position) {
                     break;
@@ -138,6 +139,7 @@ export function shaping(
 
                 glyphInfosInWord.push(glyphInfo);
             }
+            lastGlyphIndex = i;
 
             for (const glyphInfo of glyphInfosInWord) {
                 const { start, char } = glyphInfo;

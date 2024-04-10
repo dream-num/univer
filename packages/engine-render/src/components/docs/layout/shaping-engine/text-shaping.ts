@@ -41,6 +41,7 @@ export interface IOpenTypeGlyphInfo {
 }
 
 const fontCache = new Map<string, opentype.Font>();
+const glyphCache: Map<string, IOpenTypeGlyphInfo[]> = new Map();
 
 function shapeChunk(
     content: string,
@@ -182,6 +183,12 @@ export function textShape(body: IDocumentBody) {
         return [];
     }
 
+    const key = JSON.stringify(body);
+
+    if (glyphCache.has(key)) {
+        return glyphCache.get(key)!;
+    }
+
     const chunks = prepareTextChunks(body);
 
     const glyphs = [];
@@ -201,6 +208,8 @@ export function textShape(body: IDocumentBody) {
     }
 
     kerningAdjustment(glyphs);
+
+    glyphCache.set(key, glyphs);
 
     return glyphs;
 }

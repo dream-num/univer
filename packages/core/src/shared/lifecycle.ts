@@ -98,8 +98,9 @@ export class DisposableCollection implements IDisposable {
     dispose(): void {
         this._disposables.forEach((item) => {
             item.dispose();
-            this._disposables.delete(item);
         });
+
+        this._disposables.clear();
     }
 }
 

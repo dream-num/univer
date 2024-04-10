@@ -75,6 +75,7 @@ const locale = {
                 workSheet: '整张工作表',
                 selectedRange: '所选单元格',
                 managerRuleSelect: '管理 {0} 的规则',
+                onlyShowDataBar: '仅显示数据条',
             },
             preview: {
                 describe: {

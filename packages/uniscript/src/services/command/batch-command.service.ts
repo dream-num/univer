@@ -18,6 +18,10 @@ import type { CommandListener, ICommand, ICommandService, IExecutionOptions } fr
 import type { IDisposable } from '@wendellhu/redi';
 
 export class BatchCommandService implements ICommandService {
+    hasCommand(commandId: string): boolean {
+        throw new Error('Method not implemented.');
+    }
+
     beforeCommandExecuted(listener: CommandListener): IDisposable {
         throw new Error('Method not implemented.');
     }

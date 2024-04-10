@@ -17,8 +17,7 @@
 import { DataValidationOperator, DataValidationType, isFormulaString, Tools } from '@univerjs/core';
 import type { CellValue, IDataValidationRule, IDataValidationRuleBase, Nullable } from '@univerjs/core';
 import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
-import { BaseDataValidator } from '@univerjs/data-validation';
-import { TextLengthErrorTitleMap } from '@univerjs/data-validation/types/const/operator-text-map.js';
+import { BaseDataValidator, TextLengthErrorTitleMap } from '@univerjs/data-validation';
 import { BASE_FORMULA_INPUT_NAME } from '../views/formula-input';
 import { TWO_FORMULA_OPERATOR_COUNT } from '../types/const/two-formula-operators';
 import { DataValidationFormulaService } from '../services/dv-formula.service';

@@ -106,20 +106,18 @@ export class RenderController extends Disposable {
             if (result.style) {
                 Object.assign(s, result.style);
             }
+            if (!cloneCell.fontRenderExtension) {
+                cloneCell.fontRenderExtension = {};
+                if (!result.isShowValue) {
+                    cloneCell.fontRenderExtension.isSkip = true;
+                }
+            }
             if (result.dataBar) {
                 cloneCell.dataBar = result.dataBar;
             }
             if (result.iconSet) {
                 cloneCell.iconSet = result.iconSet;
-                if (!cloneCell.fontRenderExtension) {
-                    cloneCell.fontRenderExtension = {};
-                }
-
                 cloneCell.fontRenderExtension.leftOffset = DEFAULT_PADDING + DEFAULT_WIDTH;
-
-                if (!result.iconSet.isShowValue) {
-                    cloneCell.fontRenderExtension.isSkip = true;
-                }
             }
 
             return next(cloneCell);

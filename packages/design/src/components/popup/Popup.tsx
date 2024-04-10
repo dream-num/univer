@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { CSSTransition } from 'react-transition-group';
 
+import { ConfigContext } from '../config-provider/ConfigProvider';
 import styles from './index.module.less';
 
 export interface IPopupProps {
@@ -42,6 +44,8 @@ export function Popup(props: IPopupProps) {
 
     const [realOffset, setRealOffset] = useState<[number, number]>(offset);
 
+    const { mountContainer } = useContext(ConfigContext);
+
     useEffect(() => {
         if (!visible) {
             setRealOffset([-9999, -9999]);
@@ -62,7 +66,7 @@ export function Popup(props: IPopupProps) {
         event.preventDefault();
     }
 
-    return (
+    return createPortal(
         <CSSTransition
             in={visible}
             nodeRef={nodeRef}
@@ -89,6 +93,7 @@ export function Popup(props: IPopupProps) {
             >
                 {children}
             </section>
-        </CSSTransition>
+        </CSSTransition>,
+        mountContainer!
     );
 }

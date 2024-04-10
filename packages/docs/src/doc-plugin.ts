@@ -28,6 +28,7 @@ import { DeleteCommand, InsertCommand, UpdateCommand } from './commands/commands
 import { DeleteLeftCommand, DeleteRightCommand, MergeTwoParagraphCommand } from './commands/commands/delete.command';
 import { IMEInputCommand } from './commands/commands/ime-input.command';
 import {
+    ResetInlineFormatTextBackgroundColorCommand,
     SetInlineFormatBoldCommand,
     SetInlineFormatCommand,
     SetInlineFormatFontFamilyCommand,
@@ -36,6 +37,7 @@ import {
     SetInlineFormatStrikethroughCommand,
     SetInlineFormatSubscriptCommand,
     SetInlineFormatSuperscriptCommand,
+    SetInlineFormatTextBackgroundColorCommand,
     SetInlineFormatTextColorCommand,
     SetInlineFormatUnderlineCommand,
 } from './commands/commands/inline-format.command';
@@ -103,6 +105,8 @@ export class UniverDocsPlugin extends Plugin {
                 SetInlineFormatFontSizeCommand,
                 SetInlineFormatFontFamilyCommand,
                 SetInlineFormatTextColorCommand,
+                ResetInlineFormatTextBackgroundColorCommand,
+                SetInlineFormatTextBackgroundColorCommand,
                 SetInlineFormatCommand,
                 BreakLineCommand,
                 InsertCommand,

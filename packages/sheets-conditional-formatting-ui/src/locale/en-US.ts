@@ -77,6 +77,7 @@ const locale: typeof zhCN = {
                 workSheet: 'Entire Sheet',
                 selectedRange: 'Selected Range',
                 managerRuleSelect: 'Manage {0} Rules',
+                onlyShowDataBar: 'Only Show Data Bars',
             },
             preview: {
                 describe: {

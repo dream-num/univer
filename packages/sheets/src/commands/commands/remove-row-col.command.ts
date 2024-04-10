@@ -49,7 +49,7 @@ export const RemoveRowCommandId = 'sheet.command.remove-row';
 /**
  * This command would remove the selected rows. These selected rows can be non-continuous.
  */
-export const RemoveRowCommand: ICommand = {
+export const RemoveRowCommand: ICommand<IRemoveRowColCommandParams> = {
     type: CommandType.COMMAND,
 
     id: RemoveRowCommandId,

@@ -31,6 +31,7 @@ interface IAddUniqueValuesConditionalRuleParams {
     nativeColor: IDataBar['config']['nativeColor'];
     positiveColor: IDataBar['config']['positiveColor'];
     isGradient: IDataBar['config']['isGradient'];
+    isShowValue: IDataBar['isShowValue'];
 
 }
 export const AddDataBarConditionalRuleCommand: ICommand<IAddUniqueValuesConditionalRuleParams> = {
@@ -40,7 +41,7 @@ export const AddDataBarConditionalRuleCommand: ICommand<IAddUniqueValuesConditio
         if (!params) {
             return false;
         }
-        const { ranges, min, max, nativeColor, positiveColor, isGradient, stopIfTrue } = params;
+        const { ranges, min, max, nativeColor, positiveColor, isGradient, stopIfTrue, isShowValue } = params;
         const conditionalFormattingRuleModel = accessor.get(ConditionalFormattingRuleModel);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
@@ -55,6 +56,7 @@ export const AddDataBarConditionalRuleCommand: ICommand<IAddUniqueValuesConditio
             stopIfTrue: !!stopIfTrue,
             rule: {
                 type: CFRuleType.dataBar,
+                isShowValue,
                 config: {
                     min, max, nativeColor, positiveColor, isGradient,
                 },

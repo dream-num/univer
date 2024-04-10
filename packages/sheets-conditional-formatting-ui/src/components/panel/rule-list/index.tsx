@@ -18,6 +18,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Select, Tooltip } from '@univerjs/design';
 
 import { useDependency } from '@wendellhu/redi/react-bindings';
+import type { IRange } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, LocaleService, Rectangle } from '@univerjs/core';
 import { SelectionManagerService, SetSelectionsOperation, SetWorksheetActiveOperation } from '@univerjs/sheets';
 import { serializeRange } from '@univerjs/engine-formula';
@@ -35,6 +36,7 @@ import 'react-resizable/css/styles.css';
 import { Preview } from '../../preview';
 import { ConditionalFormattingI18nController } from '../../../controllers/cf.i18n.controller';
 import { ClearWorksheetCfCommand } from '../../../commands/commands/clear-worksheet-cf.command';
+import { useHighlightRange } from '../../hook/useHighlightRange';
 
 import styles from './index.module.less';
 
@@ -115,15 +117,19 @@ export const RuleList = (props: IRuleListProps) => {
     const unitId = workbook.getUnitId();
     const worksheet = workbook.getActiveSheet();
     const subUnitId = worksheet.getSheetId();
+
+    const [currentRuleRanges, currentRuleRangesSet] = useState<IRange[]>([]);
     const [selectValue, selectValueSet] = useState('2');
     const [fetchRuleListId, fetchRuleListIdSet] = useState(0);
     const [draggingId, draggingIdSet] = useState<number>(-1);
     const [layoutWidth, layoutWidthSet] = useState(defaultWidth);
     const layoutContainerRef = useRef<HTMLDivElement>(null);
+
     const selectOption = [
         { label: localeService.t('sheet.cf.panel.workSheet'), value: '2' },
         { label: localeService.t('sheet.cf.panel.selectedRange'), value: '1' },
     ];
+
     const getRuleList = () => {
         const ruleList = conditionalFormattingRuleModel.getSubunitRules(unitId, subUnitId);
         if (!ruleList || !ruleList.length) {
@@ -145,6 +151,8 @@ export const RuleList = (props: IRuleListProps) => {
         return [];
     };
     const [ruleList, ruleListSet] = useState(getRuleList);
+
+    useHighlightRange(currentRuleRanges);
 
     useEffect(() => {
         const disposable = commandService.onCommandExecuted((commandInfo) => {
@@ -320,7 +328,14 @@ export const RuleList = (props: IRuleListProps) => {
                             {ruleList.map((rule, index) => {
                                 return (
                                     <div key={`${rule.cfId}`}>
-                                        <div className={`${styles.ruleItem} ${draggingId === index ? styles.active : ''}`} onClick={() => onClick(rule)}>
+                                        <div
+                                            onMouseMove={() => {
+                                                rule.ranges !== currentRuleRanges && currentRuleRangesSet(rule.ranges);
+                                            }}
+                                            onMouseLeave={() => currentRuleRangesSet([])}
+                                            onClick={() => onClick(rule)}
+                                            className={`${styles.ruleItem} ${draggingId === index ? styles.active : ''}`}
+                                        >
                                             <div
                                                 className={`${styles.draggableHandle} draggableHandle`}
                                                 onClick={(e) => e.stopPropagation()}

@@ -100,6 +100,7 @@ export const OpenConditionalFormattingOperator: ICommand = {
                     ranges,
                     rule: {
                         type: CFRuleType.dataBar,
+                        isShowValue: true,
                     },
                 } as unknown as IConditionFormattingRule<IDataBar>;
                 conditionalFormattingMenuController.openPanel(rule);

@@ -30,6 +30,10 @@ const locale = {
             main: '文本颜色',
             right: '颜色选择',
         },
+        fillColor: {
+            main: '文本背景色',
+            right: '背景色选择',
+        },
         resetColor: '重置颜色',
         order: '有序列表',
         unorder: '无序列表',

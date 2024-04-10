@@ -25,6 +25,7 @@ import {
     SectionType,
     WrapTextType,
 } from '@univerjs/core';
+import { ptToPixel } from '@univerjs/engine-render';
 
 export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
     id: 'd',
@@ -399,7 +400,7 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                 startIndex: 2629,
                 columnProperties: [
                     {
-                        width: 200,
+                        width: 300,
                         paddingEnd: 5,
                     },
                 ],
@@ -418,13 +419,17 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
     },
     documentStyle: {
         pageSize: {
-            width: 594.3,
-            height: 840.51,
+            width: ptToPixel(595),
+            height: ptToPixel(842),
         },
-        marginTop: 72,
-        marginBottom: 72,
-        marginRight: 90,
-        marginLeft: 90,
+        marginTop: ptToPixel(50),
+        marginBottom: ptToPixel(50),
+        marginRight: ptToPixel(50),
+        marginLeft: ptToPixel(50),
+        renderConfig: {
+            vertexAngle: 0,
+            centerAngle: 0,
+        },
         // gridType: GridType.LINES_AND_CHARS,
         // linePitch: 24,
         // charSpace: 12,

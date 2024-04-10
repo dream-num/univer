@@ -15,9 +15,10 @@
  */
 
 import type { IMenuButtonItem } from '@univerjs/ui';
-import { MenuItemType, MenuPosition } from '@univerjs/ui';
+import { getMenuHiddenObservable, MenuItemType, MenuPosition } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 
+import { UniverInstanceType } from '@univerjs/core';
 import { ToggleScriptPanelOperation } from '../commands/operations/panel.operation';
 
 export function UniscriptMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
@@ -29,7 +30,7 @@ export function UniscriptMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         type: MenuItemType.BUTTON,
         positions: [MenuPosition.TOOLBAR_START],
         // FIXME hidden$ and disabled$ are not correctly in doc
-        // hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
         // disabled$: getCurrentSheetDisabled$(accessor),
     };
 }

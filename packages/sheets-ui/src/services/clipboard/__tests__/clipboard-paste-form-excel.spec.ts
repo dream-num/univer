@@ -63,6 +63,13 @@ describe('Test clipboard', () => {
             sheets: {
                 sheet1: {
                     id: 'sheet1',
+                    cellData: {
+                        0: {
+                            0: {
+                                v: 1,
+                            },
+                        },
+                    },
                 },
             },
             locale: LocaleType.ZH_CN,
@@ -186,7 +193,16 @@ describe('Test clipboard', () => {
             const res = await sheetClipboardService.legacyPaste(excelSample);
             expect(res).toBeTruthy();
             const cellValue = getValues(15, 2, 15, 2)?.[0]?.[0];
-            expect(cellValue?.v).toEqual('2024/11/11');
+            expect(cellValue?.v).toEqual(45607);
+        });
+
+        it('test formula with paste', async () => {
+            const worksheet = get(IUniverInstanceService).getUniverSheetInstance('test')?.getSheetBySheetId('sheet1');
+            if (!worksheet) return false;
+            const res = await sheetClipboardService.legacyPaste('', '=SUM(A1');
+            expect(res).toBeTruthy();
+            const cellValue = getValues(1, 1, 1, 1)?.[0]?.[0];
+            expect(cellValue?.f).toEqual('=SUM(A1');
         });
     });
 });

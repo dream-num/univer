@@ -66,6 +66,11 @@ describe('Test clipboard', () => {
             sheets: {
                 sheet1: {
                     id: 'sheet1',
+                    cellData: {
+                        0: {
+                            0: { v: 1 },
+                        },
+                    },
                 },
             },
             locale: LocaleType.ZH_CN,
@@ -188,7 +193,21 @@ describe('Test clipboard', () => {
             const res = await sheetClipboardService.legacyPaste(googleSample);
             expect(res).toBeTruthy();
             const cellValue = getValues(14, 2, 14, 2)?.[0]?.[0];
-            expect(cellValue?.v).toEqual('2024/11/11');
+            expect(cellValue?.v).toEqual(45607);
+        });
+
+        it('test merge style with paste', async () => {
+            const worksheet = get(IUniverInstanceService).getUniverSheetInstance('test')?.getSheetBySheetId('sheet1');
+            if (!worksheet) return false;
+            const res = await sheetClipboardService.legacyPaste(googleSample);
+            expect(res).toBeTruthy();
+            expect(worksheet.getMergeData().length).toBe(3);
+            expect(worksheet.getMergedCell(9, 2)).toStrictEqual({ startRow: 9, endRow: 12, startColumn: 2, endColumn: 2 });
+            expect(getStyles(8, 2, 8, 2)?.[0]?.[0]?.bd?.b).toStrictEqual({ cl: { rgb: '#000000' }, s: 1 });
+            expect(getStyles(9, 2, 9, 2)?.[0]?.[0]?.bd?.r).toStrictEqual({ cl: { rgb: '#000000' }, s: 1 });
+            expect(getStyles(9, 1, 9, 1)?.[0]?.[0]?.bd?.r).toStrictEqual({ cl: { rgb: '#000000' }, s: 1 });
+            expect(getStyles(12, 2, 12, 2)?.[0]?.[0]?.bd?.r).toStrictEqual({ cl: { rgb: '#000000' }, s: 1 });
+            expect(getStyles(12, 2, 12, 2)?.[0]?.[0]?.bd?.b).toStrictEqual({ cl: { rgb: '#000000' }, s: 1 });
         });
     });
 });

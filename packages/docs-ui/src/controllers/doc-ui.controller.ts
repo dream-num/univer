@@ -35,12 +35,14 @@ import {
     AlignJustifyMenuItemFactory,
     AlignLeftMenuItemFactory,
     AlignRightMenuItemFactory,
+    BackgroundColorSelectorMenuItemFactory,
     BoldMenuItemFactory,
     BulletListMenuItemFactory,
     FontFamilySelectorMenuItemFactory,
     FontSizeSelectorMenuItemFactory,
     ItalicMenuItemFactory,
     OrderListMenuItemFactory,
+    ResetBackgroundColorMenuItemFactory,
     StrikeThroughMenuItemFactory,
     SubscriptMenuItemFactory,
     SuperscriptMenuItemFactory,
@@ -92,6 +94,8 @@ export class DocUIController extends Disposable {
                 AlignJustifyMenuItemFactory,
                 OrderListMenuItemFactory,
                 BulletListMenuItemFactory,
+                ResetBackgroundColorMenuItemFactory,
+                BackgroundColorSelectorMenuItemFactory,
             ] as IMenuItemFactory[]
         ).forEach((factory) => {
             this.disposeWithMe(this._menuService.addMenuItem(this._injector.invoke(factory)));

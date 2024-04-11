@@ -18,7 +18,6 @@ import type { ICellData, IStyleData, Nullable, Univer } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, LocaleType, RANGE_TYPE } from '@univerjs/core';
 import {
     AddWorksheetMergeMutation,
-    MoveRangeMutation,
     NORMAL_SELECTION_PLUGIN_NAME,
     RemoveWorksheetMergeMutation,
     SelectionManagerService,
@@ -33,7 +32,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { ISheetClipboardService } from '../clipboard.service';
 import { SheetSkeletonManagerService } from '../../sheet-skeleton-manager.service';
 import { clipboardTestBed } from './clipboard-test-bed';
-import { excelSample } from './constant';
+import { rotateSampleByUniver } from './constant';
 
 describe('Test clipboard', () => {
     let univer: Univer;
@@ -49,12 +48,8 @@ describe('Test clipboard', () => {
         endColumn: number
     ) => Array<Array<Nullable<ICellData>>> | undefined;
 
-    let getStyles: (
-        startRow: number,
-        startColumn: number,
-        endRow: number,
-        endColumn: number
-    ) => Array<Array<Nullable<IStyleData>>> | undefined;
+    let getStyles: (key: Nullable<string | IStyleData>) => Nullable<IStyleData>;
+    let convertColor: (color: Nullable<string>) => string;
 
     beforeEach(async () => {
         const testBed = clipboardTestBed({
@@ -87,8 +82,6 @@ describe('Test clipboard', () => {
         commandService.registerCommand(AddWorksheetMergeMutation);
         commandService.registerCommand(RemoveWorksheetMergeMutation);
         commandService.registerCommand(SetSelectionsOperation);
-        commandService.registerCommand(MoveRangeMutation);
-
         sheetSkeletonManagerService = get(SheetSkeletonManagerService);
         sheetClipboardService = get(ISheetClipboardService);
 
@@ -104,17 +97,18 @@ describe('Test clipboard', () => {
                 ?.getRange(startRow, startColumn, endRow, endColumn)
                 .getValues();
 
-        getStyles = (
-            startRow: number,
-            startColumn: number,
-            endRow: number,
-            endColumn: number
-        ): Array<Array<Nullable<IStyleData>>> | undefined => {
-            const values = getValues(startRow, startColumn, endRow, endColumn);
+        getStyles = (key) => {
+            if (!key) return;
             const styles = get(IUniverInstanceService).getUniverSheetInstance('test')?.getStyles();
-            if (values && styles) {
-                return values.map((row) => row.map((cell) => styles.getStyleByCell(cell)));
+            return styles?.get(key);
+        };
+
+        convertColor = (color) => {
+            if (!color) return '';
+            if (color === 'black' || color === '#000000') {
+                return 'rgb(0,0,0)';
             }
+            return color;
         };
     });
 
@@ -122,7 +116,7 @@ describe('Test clipboard', () => {
         univer?.dispose();
     });
 
-    describe('Test paste from excel ', () => {
+    describe('Test paste from univer ', () => {
         beforeEach(() => {
             const selectionManager = get(SelectionManagerService);
 
@@ -149,60 +143,19 @@ describe('Test clipboard', () => {
                 sheetId: 'sheet1',
             });
         });
-        it('test style with paste cell style', async () => {
+        it('test font style paste from univer', async () => {
             const worksheet = get(IUniverInstanceService).getUniverSheetInstance('test')?.getSheetBySheetId('sheet1');
             if (!worksheet) return false;
-            const res = await sheetClipboardService.legacyPaste(excelSample);
+            const res = await sheetClipboardService.legacyPaste(rotateSampleByUniver);
             expect(res).toBeTruthy();
-            expect(worksheet.getMergeData().length).toBe(3);
-            expect(getValues(2, 2, 2, 2)?.[0]?.[0]?.v).toEqual('Univer');
-            expect(getStyles(2, 2, 2, 2)?.[0]?.[0]).toStrictEqual({
-                bl: 1, cl: { rgb: 'black' }, ff: '等线', fs: 12, ht: 0, it: 1, vt: 2,
-            });
-        });
-
-        it('test style with paste rich text style', async () => {
-            const worksheet = get(IUniverInstanceService).getUniverSheetInstance('test')?.getSheetBySheetId('sheet1');
-            if (!worksheet) return false;
-            const res = await sheetClipboardService.legacyPaste(excelSample);
-            expect(res).toBeTruthy();
-            expect(getValues(2, 3, 2, 3)?.[0]?.[0]?.v).toEqual('Univer');
-            const cellStyle = getStyles(2, 3, 2, 3)?.[0]?.[0];
-            expect(cellStyle?.vt).toBe(2);
-            expect(cellStyle?.bg).toStrictEqual({ rgb: '#0f9ed5' });
-            const richTextStyle = getValues(2, 3, 2, 3)?.[0]?.[0]?.p;
-            expect(richTextStyle?.body?.dataStream).toBe('Univer\r\n');
-            expect(richTextStyle?.body?.paragraphs).toStrictEqual([{ startIndex: 6 }]);
-            expect(richTextStyle?.body?.textRuns).toStrictEqual([
-                {
-                    st: 1, ed: 4, ts: {
-                        cl:
-                            { rgb: 'rgb(218,233,248)' },
-                        ff: '等线', fs: 28, it: 1, bl: 1,
-                    },
-                },
-                {
-                    ed: 6, st: 4, ts: { fs: 12, ff: '等线', cl: { rgb: 'rgb(0,0,0)' } },
-                },
-            ]);
-        });
-
-        it('test numfmt with paste', async () => {
-            const worksheet = get(IUniverInstanceService).getUniverSheetInstance('test')?.getSheetBySheetId('sheet1');
-            if (!worksheet) return false;
-            const res = await sheetClipboardService.legacyPaste(excelSample);
-            expect(res).toBeTruthy();
-            const cellValue = getValues(15, 2, 15, 2)?.[0]?.[0];
-            expect(cellValue?.v).toEqual(45607);
-        });
-
-        it('test formula with paste', async () => {
-            const worksheet = get(IUniverInstanceService).getUniverSheetInstance('test')?.getSheetBySheetId('sheet1');
-            if (!worksheet) return false;
-            const res = await sheetClipboardService.legacyPaste('', '=SUM(A1');
-            expect(res).toBeTruthy();
-            const cellValue = getValues(1, 1, 1, 1)?.[0]?.[0];
-            expect(cellValue?.f).toEqual('=SUM(A1');
+            const cellData = worksheet.getCellMatrix();
+            expect(getStyles(cellData.getValue(1, 1)?.s)?.tr?.a).toBeFalsy();
+            expect(getStyles(cellData.getValue(2, 1)?.s)?.tr?.a).toBe(-45);
+            expect(getStyles(cellData.getValue(3, 1)?.s)?.tr?.a).toBe(45);
+            expect(getStyles(cellData.getValue(4, 1)?.s)?.tr).toStrictEqual(
+                { a: 0, v: 1 });
+            expect(getStyles(cellData.getValue(5, 1)?.s)?.tr?.a).toBe(-90);
+            expect(getStyles(cellData.getValue(6, 1)?.s)?.tr?.a).toBe(90);
         });
     });
 });

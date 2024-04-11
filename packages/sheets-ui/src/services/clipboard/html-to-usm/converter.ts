@@ -42,19 +42,19 @@ export interface IParsedTablesInfo {
 
 const sheetStyleRules: string[] =
     [
-        'color',
-        'background',
-        'font-size',
-        'border-left',
-        'border-right',
-        'border-top',
-        'border-bottom',
-        'text-align',
-        'vertical-align',
-        'font-weight',
-        'font-style',
-        'font-family',
-        'text-decoration-line',
+        'color_color',
+        'background_background',
+        'font-size_fontSize',
+        'border-left_borderLeft',
+        'border-right_borderRight',
+        'border-top_borderTop',
+        'border-bottom_borderBottom',
+        'text-align_textAlign',
+        'vertical-align_verticalAlign',
+        'font-weight_fontWeight',
+        'font-style_fontStyle',
+        'font-family_fontFamily',
+        'text-decoration_textDecoration',
     ];
 
 function matchFilter(node: HTMLElement, filter: IStyleRule['filter']) {
@@ -495,9 +495,10 @@ function parseTableByHtml(htmlElement: HTMLIFrameElement, skeleton?: Spreadsheet
             if (hasClass) {
                 const computedStyle = getComputedStyle(cell);
                 sheetStyleRules.forEach((rule) => {
-                    const ruleValue = computedStyle.getPropertyValue(rule);
+                    const [originName, camelName] = rule.split('_');
+                    const ruleValue = computedStyle.getPropertyValue(originName) || computedStyle[camelName as keyof typeof computedStyle];
                     if (ruleValue) {
-                        cellStyle += `${rule}:${ruleValue};`;
+                        cellStyle += `${originName}:${ruleValue};`;
                     }
                 });
             } else {

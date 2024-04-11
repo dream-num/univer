@@ -144,7 +144,7 @@ export function handleStringToStyle($dom?: HTMLElement, cssStyle: string = '') {
         return {};
     }
     const cssTextArray = cssText.split(';');
-    const styleList: IStyleData = {};
+    const styleList: IStyleData & Record<string, unknown> = {};
 
     const borderInfo = {
         t: '',
@@ -154,6 +154,7 @@ export function handleStringToStyle($dom?: HTMLElement, cssStyle: string = '') {
     };
 
     cssTextArray.forEach((s) => {
+        const originStr = s;
         s = s.toLowerCase();
         const key = textTrim(s.substr(0, s.indexOf(':')));
         const value = textTrim(s.substr(s.indexOf(':') + 1));
@@ -176,6 +177,7 @@ export function handleStringToStyle($dom?: HTMLElement, cssStyle: string = '') {
         }
         // font family
         else if (key === 'font-family') {
+            const value = textTrim(originStr.substr(originStr.indexOf(':') + 1));
             styleList.ff = value;
         }
         // font size
@@ -205,9 +207,12 @@ export function handleStringToStyle($dom?: HTMLElement, cssStyle: string = '') {
         }
         // fill color / background
         else if (key === 'background' || key === 'background-color') {
-            styleList.bg = {
-                rgb: extractColorFromString(value),
-            };
+            const backgroundColor = extractColorFromString(value);
+            if (backgroundColor) {
+                styleList.bg = {
+                    rgb: backgroundColor,
+                };
+            }
         }
 
         // text line type
@@ -288,10 +293,27 @@ export function handleStringToStyle($dom?: HTMLElement, cssStyle: string = '') {
 
         // line through
         else if (key === 'text-decoration' || key === 'univer-strike') {
-            if (value !== 'none') {
-                styleList.st = {
-                    s: 1,
-                };
+            const lineValue = value.split(' ')?.[0];
+            if (lineValue === 'underline') {
+                if (!styleList.ul) {
+                    styleList.ul = { s: 1 };
+                }
+                styleList.ul.s = 1;
+            }
+
+            // line through
+            else if (lineValue === 'line-through') {
+                if (!styleList.st) {
+                    styleList.st = { s: 1 };
+                }
+                styleList.st.s = 1;
+            }
+            // overline
+            else if (lineValue === 'overline') {
+                if (!styleList.ol) {
+                    styleList.ol = { s: 1 };
+                }
+                styleList.ol.s = 1;
             }
         }
         // underline
@@ -503,6 +525,12 @@ export function handleStringToStyle($dom?: HTMLElement, cssStyle: string = '') {
         // } else if (style.tb === WrapStrategy.WRAP) {
         //     str += `word-wrap: break-word; word-break: normal; `;
         // }
+    });
+
+    Object.keys(styleList).forEach((key) => {
+        if (typeof styleList[key] === 'object' && !Object.keys(styleList[key] as object).length) {
+            delete styleList[key];
+        }
     });
 
     return styleList;

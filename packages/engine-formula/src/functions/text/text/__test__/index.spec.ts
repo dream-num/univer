@@ -17,7 +17,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { FUNCTION_NAMES_TEXT } from '../../function-names';
-import { Text } from '..';
+import { Text } from '../index';
 import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { transformToValue } from '../../../../engine/value-object/array-value-object';
 

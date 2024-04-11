@@ -21,7 +21,7 @@ import {
     NumberValueObject,
 } from '../../../../engine/value-object/primitive-object';
 import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
-import { Match } from '..';
+import { Match } from '../index';
 import { ErrorType } from '../../../../basics/error-type';
 
 describe('Test match', () => {

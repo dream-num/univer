@@ -29,7 +29,7 @@ import { IFunctionService } from '../../../../services/function.service';
 import { IFormulaRuntimeService } from '../../../../services/runtime.service';
 import { createFunctionTestBed } from '../../../__tests__/create-function-test-bed';
 import { FUNCTION_NAMES_MATH } from '../../function-names';
-import { Subtotal } from '..';
+import { Subtotal } from '../index';
 import type { BaseValueObject, ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../../basics/error-type';
 import type { ArrayValueObject } from '../../../../engine/value-object/array-value-object';

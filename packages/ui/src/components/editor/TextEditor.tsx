@@ -182,10 +182,12 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
         const valueChange = debounce((editor: Readonly<Editor>) => {
             const unitId = editor.editorUnitId;
             const isLegality = editorService.checkValueLegality(unitId);
-            setValidationVisible(!isLegality);
             const rect = editor.getBoundingClientRect();
 
             setValidationOffset([rect.left, rect.top]);
+            if (rect.left + rect.top > 0) {
+                setValidationVisible(!isLegality);
+            }
 
             if (editor.onlyInputFormula()) {
                 setValidationContent(localeService.t('textEditor.formulaError'));

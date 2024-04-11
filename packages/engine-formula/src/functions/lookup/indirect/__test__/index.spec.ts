@@ -32,7 +32,7 @@ import { createFunctionTestBed } from '../../../__tests__/create-function-test-b
 import { FUNCTION_NAMES_META } from '../../../meta/function-names';
 import { Multiply } from '../../../meta/multiply';
 import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
-import { Indirect } from '..';
+import { Indirect } from '../index';
 
 describe('Test indirect', () => {
     // const textFunction = new Makearray(FUNCTION_NAMES_LOGICAL.MAKEARRAY);

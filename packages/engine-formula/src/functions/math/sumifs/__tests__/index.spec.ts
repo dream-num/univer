@@ -18,7 +18,7 @@ import { describe, expect, it } from 'vitest';
 
 import { ArrayValueObject, transformToValue } from '../../../../engine/value-object/array-value-object';
 import { FUNCTION_NAMES_MATH } from '../../function-names';
-import { Sumifs } from '..';
+import { Sumifs } from '../index';
 import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 
 describe('Test sumifs function', () => {

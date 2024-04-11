@@ -18,8 +18,9 @@ import type { IAccessor } from '@wendellhu/redi';
 import type { IRange } from '@univerjs/core';
 import { Dimension } from '@univerjs/core';
 import type { IAddMergeCommandParams } from '../commands/add-worksheet-merge.command';
-import type { ISetSelectionsOperationParams } from '../..';
-import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService, SetSelectionsOperation } from '../..';
+import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '../../services/selection-manager.service';
+import type { ISetSelectionsOperationParams } from '../operations/selection.operation';
+import { SetSelectionsOperation } from '../operations/selection.operation';
 
 export const AddMergeRedoSelectionsOperationFactory = (accessor: IAccessor, params: IAddMergeCommandParams, ranges: IRange[]) => {
     const selectionManagerService = accessor.get(SelectionManagerService);

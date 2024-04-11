@@ -16,6 +16,7 @@
 
 import type { ICellDataForSheetInterceptor, ICommandInfo, IRange, Nullable } from '@univerjs/core';
 import {
+    CellValueType,
     ColorKit,
     Disposable,
     ICommandService,
@@ -133,7 +134,7 @@ export class FormulaEditorShowController extends Disposable {
                                 arrayFormulaMatrixCell[unitId]?.[subUnitId]?.[row]?.[col] == null
                             ) {
                                 if (cellInfo) {
-                                    return cellInfo;
+                                    return { ...value, ...cellInfo };
                                 }
 
                                 return next(value);
@@ -185,7 +186,7 @@ export class FormulaEditorShowController extends Disposable {
                             }
 
                             if (cellInfo) {
-                                return cellInfo;
+                                return { ...value, ...cellInfo };
                             }
 
                             return next(value);
@@ -200,14 +201,21 @@ export class FormulaEditorShowController extends Disposable {
         this.disposeWithMe(
             this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
                 handler: (cell, location, next) => {
-                    const { row, col, unitId, subUnitId } = location;
+                    // const { row, col, unitId, subUnitId } = location;
 
-                    const arrayFormulaMatrixCell = this._formulaDataModel.getArrayFormulaCellData();
+                    // const arrayFormulaMatrixCell = this._formulaDataModel.getArrayFormulaCellData();
 
-                    const arrayValue = arrayFormulaMatrixCell?.[unitId]?.[subUnitId]?.[row]?.[col];
+                    // const arrayValue = arrayFormulaMatrixCell?.[unitId]?.[subUnitId]?.[row]?.[col];
 
-                    if (arrayValue) {
-                        return next({ ...cell, ...arrayValue });
+                    // if (arrayValue) {
+                    //     return next({ ...cell, ...arrayValue });
+                    // }
+
+                    if (cell && cell.v == null && cell.t == null && cell.f != null) {
+                        return next({ ...cell,
+                                      v: 0,
+                                      t: CellValueType.NUMBER,
+                        });
                     }
 
                     return next(cell);

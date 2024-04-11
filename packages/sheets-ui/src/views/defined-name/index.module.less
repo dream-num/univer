@@ -5,8 +5,6 @@
 
     transition: height 0.15s;
 
-    height: 100%;
-
     border-right: 1px solid rgb(var(--border-color));
 
     &-drop-down {
@@ -124,19 +122,14 @@
     }
 
     &-container {
-        height: 100%;
         width: 100%;
         position: relative;
 
         &-scroll {
-            height: 100%;
             width: 100%;
             overflow: hidden;
             overflow-y: auto;
             position: absolute;
-            scrollbar-color: rgba(var(--scrollbar-color), 0.7) transparent;
-            scrollbar-gutter: auto;
-            scrollbar-width: thin;
         }
 
         &-addButton {

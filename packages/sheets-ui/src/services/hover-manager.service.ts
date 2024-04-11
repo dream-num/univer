@@ -20,10 +20,10 @@ import type { ISheetLocation } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 import { distinctUntilChanged, Subject } from 'rxjs';
 import { IRenderManagerService, Vector2 } from '@univerjs/engine-render';
-import { ISelectionRenderService } from '..';
 import { getCellIndexByOffsetWithMerge } from '../common/utils';
 import { ScrollManagerService } from './scroll-manager.service';
 import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
+import { ISelectionRenderService } from './selection/selection-render.service';
 
 export interface IHoverCellPosition {
     position: IPosition;

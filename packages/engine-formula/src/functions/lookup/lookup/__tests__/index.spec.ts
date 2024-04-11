@@ -21,7 +21,7 @@ import { ArrayValueObject } from '../../../../engine/value-object/array-value-ob
 import type { BaseValueObject } from '../../../../engine/value-object/base-value-object';
 import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { FUNCTION_NAMES_LOOKUP } from '../../function-names';
-import { Lookup } from '..';
+import { Lookup } from '../index';
 
 const arrayValueObject1 = ArrayValueObject.create(/*ts*/ `{
     1, "First";

@@ -17,10 +17,10 @@
 import { describe, expect, it } from 'vitest';
 
 import { FUNCTION_NAMES_LOGICAL } from '../../function-names';
-import { Or } from '..';
 import { ArrayValueObject, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
-import { ErrorType } from '../../../..';
+import { ErrorType } from '../../../../basics/error-type';
+import { Or } from '../index';
 
 describe('Test or function', () => {
     const textFunction = new Or(FUNCTION_NAMES_LOGICAL.OR);

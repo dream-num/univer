@@ -29,7 +29,7 @@ import { FUNCTION_NAMES_META } from '../../../meta/function-names';
 import { Multiply } from '../../../meta/multiply';
 import { FUNCTION_NAMES_LOGICAL } from '../../function-names';
 import { Lambda } from '../../lambda';
-import { Makearray } from '..';
+import { Makearray } from '../index';
 import type { BaseValueObject } from '../../../../engine/value-object/base-value-object';
 
 describe('Test makearray', () => {

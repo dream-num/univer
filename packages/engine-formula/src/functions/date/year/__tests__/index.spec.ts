@@ -17,7 +17,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { FUNCTION_NAMES_DATE } from '../../function-names';
-import { Year } from '..';
+import { Year } from '../index';
 import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 

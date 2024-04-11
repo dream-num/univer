@@ -17,7 +17,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { FUNCTION_NAMES_TEXT } from '../../function-names';
-import { Len } from '..';
+import { Len } from '../index';
 import { StringValueObject } from '../../../../engine/value-object/primitive-object';
 import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorType } from '../../../../basics/error-type';

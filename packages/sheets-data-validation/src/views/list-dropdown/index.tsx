@@ -23,7 +23,7 @@ import { CheckMarkSingle } from '@univerjs/icons';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { KeyCode } from '@univerjs/ui';
 import { DeviceInputEventType } from '@univerjs/engine-render';
-import { RectPopup } from '@univerjs/design';
+import { RectPopup, Scrollbar } from '@univerjs/design';
 import type { ListMultipleValidator } from '../../validators/list-multiple-validator';
 import { deserializeListOptions, getDataValidationCellValue, serializeListOptions } from '../../validators/util';
 import type { IDropdownComponentProps } from '../../services/dropdown-manager.service';
@@ -49,37 +49,41 @@ const SelectList = (props: ISelectListProps) => {
                 {title}
             </div>
             <div className={styles.dvListDropdownList}>
-                {options.map((item, i) => {
-                    const selected = value.indexOf(item.value) > -1;
-                    const handleClick = () => {
-                        let set: Set<string>;
-                        if (selected) {
-                            set = new Set(value.filter((sub) => sub !== item.value));
-                        } else {
-                            set = new Set(multiple ? [...value, item.value] : [item.value]);
-                        }
-                        const newValue: string[] = [];
-                        options.forEach((opt) => {
-                            if (set.has(opt.value)) {
-                                newValue.push(opt.value);
-                            }
-                        });
+                <Scrollbar>
+                    <div className={styles.dvListDropdownListContainer}>
+                        {options.map((item, i) => {
+                            const selected = value.indexOf(item.value) > -1;
+                            const handleClick = () => {
+                                let set: Set<string>;
+                                if (selected) {
+                                    set = new Set(value.filter((sub) => sub !== item.value));
+                                } else {
+                                    set = new Set(multiple ? [...value, item.value] : [item.value]);
+                                }
+                                const newValue: string[] = [];
+                                options.forEach((opt) => {
+                                    if (set.has(opt.value)) {
+                                        newValue.push(opt.value);
+                                    }
+                                });
 
-                        onChange(newValue);
-                    };
-                    return (
-                        <div key={i} className={styles.dvListDropdownItemContainer} onClick={handleClick}>
-                            <div className={styles.dvListDropdownItem} style={{ background: item.color || DROP_DOWN_DEFAULT_COLOR }}>{item.label}</div>
-                            <div className={styles.dvListDropdownSelectedIcon}>
-                                {selected ? <CheckMarkSingle /> : null}
-                            </div>
-                        </div>
-                    );
-                })}
+                                onChange(newValue);
+                            };
+                            return (
+                                <div key={i} className={styles.dvListDropdownItemContainer} onClick={handleClick}>
+                                    <div className={styles.dvListDropdownItem} style={{ background: item.color || DROP_DOWN_DEFAULT_COLOR }}>{item.label}</div>
+                                    <div className={styles.dvListDropdownSelectedIcon}>
+                                        {selected ? <CheckMarkSingle /> : null}
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </Scrollbar>
             </div>
             <div className={styles.dvListDropdownSplit} />
-            <div className={styles.dvListDropdownEdit} onClick={onEdit}>
-                编辑
+            <div className={styles.dvListDropdownEdit}>
+                <a onClick={onEdit}>编辑</a>
             </div>
         </div>
     );

@@ -20,7 +20,7 @@ import { FUNCTION_NAMES_INFORMATION } from '../../function-names';
 import { ArrayValueObject, transformToValue, transformToValueObject } from '../../../../engine/value-object/array-value-object';
 import { ErrorValueObject } from '../../../../engine/value-object/base-value-object';
 import { ErrorType } from '../../../../basics/error-type';
-import { Iserror } from '..';
+import { Iserror } from '../index';
 
 describe('Test iserror function', () => {
     const textFunction = new Iserror(FUNCTION_NAMES_INFORMATION.ISERROR);

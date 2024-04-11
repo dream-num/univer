@@ -113,13 +113,15 @@ export class DataValidationModel<T extends IDataValidationRule = IDataValidation
         try {
             const manager = this.ensureManager(unitId, subUnitId);
             const oldRule = manager.getRuleById(ruleId);
-            manager.removeRule(ruleId);
-            this._ruleChange$.next({
-                rule: oldRule,
-                type: 'remove',
-                unitId,
-                subUnitId,
-            });
+            if (oldRule) {
+                manager.removeRule(ruleId);
+                this._ruleChange$.next({
+                    rule: oldRule,
+                    type: 'remove',
+                    unitId,
+                    subUnitId,
+                });
+            }
         } catch (error) {
             this._logService.error(error);
         }

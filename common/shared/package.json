@@ -17,11 +17,11 @@
         "./vite": "./vite/index.js"
     },
     "dependencies": {
-        "@typescript-eslint/parser": "^7.4.0",
+        "@typescript-eslint/parser": "^7.6.0",
         "@vitejs/plugin-react": "^4.2.1",
         "@vitest/coverage-istanbul": "^1.4.0",
         "happy-dom": "13.3.8",
-        "vite": "^5.2.7",
+        "vite": "^5.2.8",
         "vite-plugin-dts": "^3.8.1",
         "vitest": "^1.4.0"
     }

@@ -22,10 +22,11 @@ import { PickerPanel } from 'rc-picker';
 import { ConfigContext } from '../config-provider';
 import styles from './index.module.less';
 
-export type DatePanelProps = Omit<BasePickerPanelProps<Dayjs>, 'prefixCls' | 'locale' | 'generateConfig'>;
+export type IDatePanelProps = Omit<BasePickerPanelProps<Dayjs>, 'prefixCls' | 'locale' | 'generateConfig'>;
 
-export const DatePanel = (props: DatePanelProps) => {
+export const DatePanel = (props: IDatePanelProps) => {
     const { locale } = useContext(ConfigContext);
+
     return (
         <PickerPanel
             {...props}

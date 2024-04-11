@@ -87,6 +87,7 @@ export interface IShapedText {
     glyphs: IDocumentSkeletonGlyph[];
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function shaping(
     content: string,
     bodyModel: DocumentViewModel,

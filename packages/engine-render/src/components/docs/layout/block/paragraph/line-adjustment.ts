@@ -203,7 +203,7 @@ function restoreLastCJKGlyphWidth(line: IDocumentSkeletonLine) {
     }
 }
 
-// If the last glyph is a CJK punctuation, we want to shrink it.
+// If the first or last glyph is a CJK punctuation, we want to shrink it.
 // See Requirements for Chinese Text Layout, Section 3.1.6.3
 // Compression of punctuation marks at line start or line end
 function shrinkStartAndEndCJKPunctuation(line: IDocumentSkeletonLine) {
@@ -227,6 +227,8 @@ function shrinkStartAndEndCJKPunctuation(line: IDocumentSkeletonLine) {
 
             glyphShrinkRight(lastGlyph, shrinkAmount);
         }
+
+        setGlyphGroupLeft(divide.glyphGroup);
     }
 }
 

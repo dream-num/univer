@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 
+/* eslint-disable max-lines-per-function */
+/* eslint-disable complexity */
+
 import type { INumberUnit } from '@univerjs/core';
 import { BooleanNumber, DataStreamTreeTokenType, GridType, SpacingRule } from '@univerjs/core';
 
@@ -194,6 +197,7 @@ function _divideOperator(
                     }
                     const column = currentLine.parent;
 
+                    // eslint-disable-next-line ts/no-non-null-asserted-optional-chain
                     const { paragraphStart: lineIsStart } = column?.lines.pop()!; // Delete the previous line and recalculate according to the maximum content height
 
                     _lineOperator(

@@ -293,3 +293,4 @@ export { InsertDefinedNameCommand } from './commands/commands/insert-defined-nam
 export { RemoveDefinedNameCommand } from './commands/commands/remove-defined-name.command';
 export { SetDefinedNameCommand, type ISetDefinedNameCommandParams } from './commands/commands/set-defined-name.command';
 export { ScrollToCellOperation } from './commands/operations/scroll-to-cell.operation';
+export type { FormatType } from './services/numfmt/type';

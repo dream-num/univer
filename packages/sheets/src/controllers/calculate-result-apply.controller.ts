@@ -14,16 +14,21 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo } from '@univerjs/core';
-import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import type { ICellData, ICommandInfo, IObjectMatrixPrimitiveType, Nullable } from '@univerjs/core';
+import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle } from '@univerjs/core';
 import type { ISetFormulaCalculationResultMutation } from '@univerjs/engine-formula';
 import { SetFormulaCalculationResultMutation } from '@univerjs/engine-formula';
 
+import { Inject } from '@wendellhu/redi';
 import { SetRangeValuesMutation } from '../commands/mutations/set-range-values.mutation';
+import { handleNumfmtInCell } from '../basics/numfmt-kit';
 
 @OnLifecycle(LifecycleStages.Ready, CalculateResultApplyController)
 export class CalculateResultApplyController extends Disposable {
-    constructor(@ICommandService private readonly _commandService: ICommandService) {
+    constructor(
+        @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
+        @ICommandService private readonly _commandService: ICommandService
+    ) {
         super();
 
         this._initialize();
@@ -40,11 +45,9 @@ export class CalculateResultApplyController extends Disposable {
                     return;
                 }
 
-               // TODO 处理 unitData 中新设置的数字格式和原有格式的优先级，再更新到 model
-
                 const params = command.params as ISetFormulaCalculationResultMutation;
 
-                const { unitData, unitOtherData } = params;
+                const { unitData } = params;
 
                 const unitIds = Object.keys(unitData);
 
@@ -69,10 +72,12 @@ export class CalculateResultApplyController extends Disposable {
                             return true;
                         }
 
+                        const cellValue = this._getMergedCellData(unitId, sheetId, cellData);
+
                         const setRangeValuesMutation = {
                             subUnitId: sheetId,
                             unitId,
-                            cellValue: cellData,
+                            cellValue,
                         };
 
                         redoMutationsInfo.push({
@@ -90,5 +95,29 @@ export class CalculateResultApplyController extends Disposable {
                 return result;
             })
         );
+    }
+
+    /**
+     * Priority that mainly deals with number format in unitData
+     * @param unitId
+     * @param sheetId
+     * @param cellData
+     * @returns
+     */
+    private _getMergedCellData(unitId: string, sheetId: string, cellData: IObjectMatrixPrimitiveType<Nullable<ICellData>>) {
+        const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
+        const styles = workbook?.getStyles();
+
+        const worksheet = workbook?.getSheetBySheetId(sheetId);
+        const oldCellDataMatrix = worksheet?.getCellMatrix();
+        const cellDataMatrix = new ObjectMatrix(cellData);
+
+        cellDataMatrix.forValue((row, col, cell) => {
+            const oldCell = oldCellDataMatrix?.getValue(row, col);
+            const newCell = handleNumfmtInCell(oldCell, cell, styles);
+            cellDataMatrix.setValue(row, col, newCell);
+        });
+
+        return cellDataMatrix.clone();
     }
 }

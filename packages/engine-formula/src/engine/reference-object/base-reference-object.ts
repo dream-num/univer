@@ -165,7 +165,7 @@ export class BaseReferenceObject extends ObjectClassType {
 
                 const cell = this.getCellData(r, c);
                 let result: Nullable<boolean> = false;
-                if (cell == null || isNullCell(cell)) {
+                if (isNullCell(cell)) {
                     result = callback(null, r, c);
                     continue;
                 }

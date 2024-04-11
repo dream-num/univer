@@ -865,6 +865,9 @@ importers:
       '@univerjs/engine-formula':
         specifier: workspace:*
         version: link:../engine-formula
+      '@univerjs/engine-numfmt':
+        specifier: workspace:*
+        version: link:../engine-numfmt
       '@univerjs/engine-render':
         specifier: workspace:*
         version: link:../engine-render

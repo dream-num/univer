@@ -16,8 +16,9 @@
 
 import numfmt from '@univerjs/engine-numfmt';
 import { LocaleType } from '@univerjs/core';
+import type { FormatType } from '@univerjs/sheets';
 
-export const getPatternType = (pattern: string): string => numfmt.getInfo(pattern).type || 'unknown';
+export const getPatternType = (pattern: string): FormatType => numfmt.getInfo(pattern).type || 'unknown';
 export const getPatternPreview = (pattern: string, value: number, _locale?: LocaleType) => {
     const info = numfmt.getInfo(pattern);
     const locale = _locale === LocaleType.ZH_CN ? 'zh-CN' : 'en';

@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+/* eslint-disable max-lines-per-function */
+
 import './extensions';
 
 import type { Nullable, Observer } from '@univerjs/core';
@@ -189,6 +191,7 @@ export class Documents extends DocComponent {
         return (this.getScene() as Scene).getEngine();
     }
 
+    // eslint-disable-next-line complexity
     override draw(ctx: UniverRenderingContext, bounds?: IViewportBound) {
         const documentSkeleton = this.getSkeleton();
 
@@ -529,10 +532,13 @@ export class Documents extends DocComponent {
         if (verticalAlign === VerticalAlign.MIDDLE) {
             offsetTop = (this.height - pageHeight) / 2;
         } else if (verticalAlign === VerticalAlign.TOP) {
+            offsetTop = 0;
+        } else if (verticalAlign === VerticalAlign.UNSPECIFIED) {
             offsetTop = pagePaddingTop;
         } else {
             offsetTop = this.height - pageHeight - pagePaddingBottom;
         }
+
         return offsetTop;
     }
 

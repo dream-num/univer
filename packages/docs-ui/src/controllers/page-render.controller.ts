@@ -83,14 +83,15 @@ export class PageRenderController extends Disposable {
                         ctx.save();
 
                         ctx.translate(pageLeft - 0.5, pageTop - 0.5);
-                        Rect.drawWith(ctx, {
+                        const options = {
                             width: pageSize?.width ?? pageWidth ?? width,
                             height: pageSize?.height ?? pageHeight ?? height,
                             strokeWidth: 1,
                             stroke: PAGE_STROKE_COLOR,
                             fill: PAGE_FILL_COLOR,
                             zIndex: 3,
-                        });
+                        };
+                        Rect.drawWith(ctx, options);
                         ctx.restore();
                     })
                 )

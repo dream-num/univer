@@ -84,6 +84,7 @@ export class DocCanvasView extends RxDisposable {
         }
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _addNewRender() {
         const documentModel = this._currentDocumentModel;
 

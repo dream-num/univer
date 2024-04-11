@@ -15,6 +15,7 @@
  */
 
 import { BooleanNumber, type IDocumentBody, type IStyleBase } from '@univerjs/core';
+// @ts-ignore
 import opentype from 'opentype.js';
 import type { Nullable } from 'vitest';
 import { DEFAULT_FONTFACE_PLANE } from '../../../../basics/const';
@@ -43,6 +44,7 @@ export interface IOpenTypeGlyphInfo {
 const fontCache = new Map<string, opentype.Font>();
 const glyphCache: Map<string, IOpenTypeGlyphInfo[]> = new Map();
 
+// eslint-disable-next-line max-lines-per-function
 function shapeChunk(
     content: string,
     charPosition: number,

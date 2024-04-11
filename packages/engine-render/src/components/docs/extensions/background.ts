@@ -56,9 +56,11 @@ export class Background extends docExtension {
 
         const { spanStartPoint = Vector2.create(0, 0) } = this.extensionOffset;
 
+        const DELTA = 1.5;
+
         if (background) {
             ctx.fillStyle = background;
-            ctx.fillRectByPrecision(spanStartPoint.x - 0.5, spanStartPoint.y, width + 1, contentHeight + 1);
+            ctx.fillRectByPrecision(spanStartPoint.x - 0.5, spanStartPoint.y - 1, width + 1, contentHeight + 2 * DELTA);
         }
     }
 

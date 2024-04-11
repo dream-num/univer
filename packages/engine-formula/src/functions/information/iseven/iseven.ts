@@ -1,0 +1,52 @@
+/**
+ * Copyright 2023-present DreamNum Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import { ErrorType } from '../../../basics/error-type';
+import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
+import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
+import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
+import { BooleanValueObject } from '../../../engine/value-object/primitive-object';
+import { BaseFunction } from '../../base-function';
+
+export class Iseven extends BaseFunction {
+    override calculate(value: BaseValueObject) {
+        if (value == null) {
+            return ErrorValueObject.create(ErrorType.NA);
+        }
+
+        if (value.isArray()) {
+            return (value as ArrayValueObject).mapValue((valueObject) => {
+                return this._calculate(valueObject);
+            });
+        }
+
+        return this._calculate(value);
+    }
+
+    private _calculate(value: BaseValueObject) {
+        // Try convert the value to number first, if it fails to convert, we should throw an #VALUE error.
+        if (!value.isNumber()) {
+            value = value.convertToNumberObjectValue();
+            if (!value.isNumber()) {
+                return ErrorValueObject.create(ErrorType.VALUE);
+            }
+        }
+
+        const val = value.getValue() as number;
+        const floored = Math.floor(Math.abs(val));
+        return BooleanValueObject.create(floored % 2 === 0);
+    }
+}

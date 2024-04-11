@@ -107,7 +107,6 @@ export default {
         ],
         functionParameter: {
             number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
         },
     },
     ISFORMULA: {
@@ -187,7 +186,6 @@ export default {
         ],
         functionParameter: {
             number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
         },
     },
     ISOMITTED: {

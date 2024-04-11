@@ -18,6 +18,7 @@ import { FUNCTION_NAMES_INFORMATION } from './function-names';
 import { Isblank } from './isblank';
 import { Iserr } from './iserr';
 import { Iserror } from './iserror';
+import { Iseven } from './iseven/iseven';
 import { Islogical } from './islogical';
 import { Isna } from './isna';
 import { Isnontext } from './isnontext';
@@ -28,6 +29,7 @@ import { Istext } from './istext';
 export const functionInformation = [
     [Isblank, FUNCTION_NAMES_INFORMATION.ISBLANK],
     [Iserr, FUNCTION_NAMES_INFORMATION.ISERR],
+    [Iseven, FUNCTION_NAMES_INFORMATION.ISEVEN],
     [Iserror, FUNCTION_NAMES_INFORMATION.ISERROR],
     [Islogical, FUNCTION_NAMES_INFORMATION.ISLOGICAL],
     [Isna, FUNCTION_NAMES_INFORMATION.ISNA],

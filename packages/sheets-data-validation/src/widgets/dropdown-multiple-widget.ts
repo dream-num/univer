@@ -165,7 +165,7 @@ export class DropdownMultipleWidget implements IBaseDataValidationWidget {
         const cellWidth = cellBounding.endX - cellBounding.startX;
         const cellHeight = cellBounding.endY - cellBounding.startY;
         const cellValue = getCellValueOrigin(data) ?? '';
-        const { rule, validator: _validator } = validation;
+        const { validator: _validator } = validation;
         const validator = _validator as ListMultipleValidator;
         const items = validator.parseCellValue(cellValue);
         const fontStyle = getFontStyleString(style ?? undefined);

@@ -93,7 +93,7 @@ describe('ConfigProvider', () => {
             </ConfigProvider>
         );
 
-        expect(_locale).equals(enUS);
+        expect(_locale).equals(zhCN);
 
         root.unmount();
     });

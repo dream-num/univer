@@ -15,7 +15,7 @@
  */
 
 import type { IScale, ITextDecoration } from '@univerjs/core';
-import { BooleanNumber, getColorStyle, TextDecoration } from '@univerjs/core';
+import { BaselineOffset, BooleanNumber, getColorStyle, TextDecoration } from '@univerjs/core';
 
 import { COLOR_BLACK_RGB, DEFAULT_OFFSET_SPACING, FIX_ONE_PIXEL_BLUR_OFFSET } from '../../../basics/const';
 import { calculateRectRotate } from '../../../basics/draw';
@@ -49,13 +49,13 @@ export class Line extends docExtension {
             return;
         }
 
-        const { sp: strikeoutPosition, ba } = bBox;
+        const { sp: strikeoutPosition, spo, sbo, bd } = bBox;
 
         const scale = getScale(parentScale);
 
         const DELTA = 0.5;
 
-        const { ul: underline, st: strikethrough, ol: overline } = textStyle;
+        const { ul: underline, st: strikethrough, ol: overline, va: baselineOffset } = textStyle;
 
         if (underline) {
             const startY = contentHeight + DEFAULT_OFFSET_SPACING - 3;
@@ -64,9 +64,21 @@ export class Line extends docExtension {
         }
 
         if (strikethrough) {
-            // We use the asc baseline to find the position of the strikethrough,
-            // and ba - strikeoutPosition is exactly the offset position of the strikethrough from the baseline
-            const startY = asc - (ba - strikeoutPosition) - DELTA;
+            // strikethrough position is the middle of bounding box ascent and descent.
+            let startY = strikeoutPosition - DELTA;
+
+            /**
+             * --------- superscript strikethrough position -------
+             * --------- superscript offset -----------------------
+             * --------- baseline           -----------------------
+             * --------- subscript strikethrough position ---------
+             * --------- subscript offset   -----------------------
+             */
+            if (baselineOffset === BaselineOffset.SUPERSCRIPT) {
+                startY = asc + bd - spo - strikeoutPosition;
+            } else if (baselineOffset === BaselineOffset.SUBSCRIPT) {
+                startY = asc + bd + sbo - strikeoutPosition;
+            }
 
             this._drawLine(ctx, span, strikethrough, startY, scale);
         }
@@ -87,7 +99,7 @@ export class Line extends docExtension {
         span: IDocumentSkeletonGlyph,
         line: ITextDecoration,
         startY: number,
-        scale: number
+        _scale: number
     ) {
         const { s: show, cl: colorStyle, t: lineType, c = BooleanNumber.TRUE } = line;
 

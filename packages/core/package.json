@@ -67,9 +67,9 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/protocol": "^0.1.14",
+        "@univerjs/protocol": "^0.1.17",
         "dayjs": "^1.11.10",
-        "nanoid": "5.0.6",
+        "nanoid": "5.0.7",
         "numeral": "^2.0.6"
     },
     "devDependencies": {
@@ -77,8 +77,8 @@
         "@univerjs/shared": "workspace:*",
         "@wendellhu/redi": "^0.13.0",
         "rxjs": "^7.8.1",
-        "typescript": "^5.4.3",
-        "vite": "^5.2.7",
+        "typescript": "^5.4.5",
+        "vite": "^5.2.8",
         "vitest": "^1.4.0"
     }
 }

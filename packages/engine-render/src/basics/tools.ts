@@ -249,9 +249,6 @@ export const UNIVER_GLOBAL_DEFAULT_FONT_SIZE = 11;
 export const UNIVER_GLOBAL_DEFAULT_FONT_FAMILY = 'Arial';
 
 export function getFontStyleString(textStyle?: IStyleBase, localeService?: LocaleService) {
-    // 获取字体配置
-
-    // TODO: @jikkai @DR-Univer should read default font from configuration, not from locale service
     const defaultFont = UNIVER_GLOBAL_DEFAULT_FONT_FAMILY;
 
     const defaultFontSize = UNIVER_GLOBAL_DEFAULT_FONT_SIZE;
@@ -263,6 +260,7 @@ export function getFontStyleString(textStyle?: IStyleBase, localeService?: Local
             fontCache: fontString,
             fontString,
             fontSize: defaultFontSize,
+            originFontSize: defaultFontSize,
             fontFamily: defaultFont,
         };
     }
@@ -283,10 +281,11 @@ export function getFontStyleString(textStyle?: IStyleBase, localeService?: Local
     }
 
     // font-size/line-height
-    let fontSize = defaultFontSize;
+    let originFontSize = defaultFontSize;
     if (textStyle.fs) {
-        fontSize = Math.ceil(textStyle.fs);
+        originFontSize = Math.ceil(textStyle.fs);
     }
+    let fontSize = originFontSize;
 
     let fontFamilyResult = defaultFont;
     if (textStyle.ff) {
@@ -329,6 +328,7 @@ export function getFontStyleString(textStyle?: IStyleBase, localeService?: Local
         fontCache: fontStringPure,
         fontString,
         fontSize,
+        originFontSize,
         fontFamily: fontFamilyResult,
     };
 }

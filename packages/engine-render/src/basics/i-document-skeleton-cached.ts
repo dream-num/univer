@@ -216,6 +216,7 @@ export interface IDocumentSkeletonDrawing {
 export interface IDocumentSkeletonFontStyle {
     fontString: string;
     fontSize: number;
+    originFontSize: number;
     fontFamily: string;
 }
 

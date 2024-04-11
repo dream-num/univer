@@ -23,6 +23,7 @@ import { Islogical } from './islogical';
 import { Isna } from './isna';
 import { Isnontext } from './isnontext';
 import { Isnumber } from './isnumber';
+import { Isodd } from './isodd/isodd';
 import { Isref } from './isref';
 import { Istext } from './istext';
 
@@ -30,6 +31,7 @@ export const functionInformation = [
     [Isblank, FUNCTION_NAMES_INFORMATION.ISBLANK],
     [Iserr, FUNCTION_NAMES_INFORMATION.ISERR],
     [Iseven, FUNCTION_NAMES_INFORMATION.ISEVEN],
+    [Isodd, FUNCTION_NAMES_INFORMATION.ISODD],
     [Iserror, FUNCTION_NAMES_INFORMATION.ISERROR],
     [Islogical, FUNCTION_NAMES_INFORMATION.ISLOGICAL],
     [Isna, FUNCTION_NAMES_INFORMATION.ISNA],

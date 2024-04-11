@@ -71,6 +71,7 @@ export class DropdownMultipleWidget implements IBaseDataValidationWidget {
         ctx.restore();
     }
 
+    // eslint-disable-next-line max-lines-per-function
     drawWith(ctx: UniverRenderingContext2D, info: ICellRenderContext, skeleton: SpreadsheetSkeleton, spreadsheets: Spreadsheet): void {
         const { primaryWithCoord, row, col, style, data, subUnitId } = info;
         const cellBounding = primaryWithCoord.isMergedMainCell ? primaryWithCoord.mergeInfo : primaryWithCoord;
@@ -166,7 +167,7 @@ export class DropdownMultipleWidget implements IBaseDataValidationWidget {
         const cellValue = getCellValueOrigin(data) ?? '';
         const { rule, validator: _validator } = validation;
         const validator = _validator as ListMultipleValidator;
-        const items = validator.parseCellValue(cellValue, rule);
+        const items = validator.parseCellValue(cellValue);
         const fontStyle = getFontStyleString(style ?? undefined);
         const layout = layoutDropdowns(items, fontStyle, cellWidth, cellHeight);
         return layout.cellAutoHeight;

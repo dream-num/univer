@@ -57,7 +57,6 @@ describe('Test column', () => {
             formulaData: {},
             arrayFormulaCellData: {},
             forceCalculate: false,
-            // numfmtItemMap: {},
             dirtyRanges: [],
             dirtyNameMap: {},
             dirtyDefinedNameMap: {},

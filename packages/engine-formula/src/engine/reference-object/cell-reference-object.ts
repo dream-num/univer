@@ -106,8 +106,6 @@ export class CellReferenceObject extends BaseReferenceObject {
 
         rangeReferenceObject.setUnitStylesData(this.getUnitStylesData());
 
-        // rangeReferenceObject.setNumfmtItemData(this.getNumfmtItemData());
-
         rangeReferenceObject.setArrayFormulaCellData(this.getArrayFormulaCellData());
 
         rangeReferenceObject.setRuntimeArrayFormulaCellData(this.getRuntimeArrayFormulaCellData());

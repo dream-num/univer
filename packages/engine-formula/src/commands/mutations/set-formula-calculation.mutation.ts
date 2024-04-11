@@ -34,7 +34,6 @@ export interface ISetFormulaCalculationStartMutation {
     dirtyUnitFeatureMap: IDirtyUnitFeatureMap;
     dirtyUnitOtherFormulaMap: IDirtyUnitOtherFormulaMap;
     options: Nullable<IExecutionOptions>;
-    // numfmtItemMap: INumfmtItemMap;
     forceCalculation?: boolean;
 }
 /**

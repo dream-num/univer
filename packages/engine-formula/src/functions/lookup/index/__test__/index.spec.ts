@@ -165,7 +165,6 @@ describe('Test index', () => {
             formulaData: {},
             arrayFormulaCellData: {},
             forceCalculate: false,
-            // numfmtItemMap: {},
             dirtyRanges: [],
             dirtyNameMap: {},
             dirtyDefinedNameMap: {},

@@ -99,7 +99,6 @@ export class CalculateController extends Disposable {
         dirtyDefinedNameMap: IDirtyUnitSheetDefinedNameMap = {},
         dirtyUnitFeatureMap: IDirtyUnitFeatureMap = {},
         dirtyUnitOtherFormulaMap: IDirtyUnitOtherFormulaMap = {}
-        // numfmtItemMap: INumfmtItemMap = {}
     ) {
         if (
             dirtyRanges.length === 0 &&
@@ -125,7 +124,6 @@ export class CalculateController extends Disposable {
             dirtyDefinedNameMap,
             dirtyUnitFeatureMap,
             dirtyUnitOtherFormulaMap,
-            // numfmtItemMap,
         });
     }
 
@@ -224,19 +222,6 @@ export class CalculateController extends Disposable {
                 }
             );
         }
-
-        // Synchronous to the main thread
-        // if (!Tools.isEmptyObject(numfmtItemMap)) {
-        //     this._commandService.executeCommand(
-        //         SetNumfmtFormulaDataMutation.id,
-        //         {
-        //             numfmtItemMap,
-        //         },
-        //         {
-        //             onlyLocal: true,
-        //         }
-        //     );
-        // }
 
         this._commandService.executeCommand(
             SetFormulaCalculationResultMutation.id,

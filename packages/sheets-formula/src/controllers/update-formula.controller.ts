@@ -226,7 +226,6 @@ export class UpdateFormulaController extends Disposable {
 
         this._formulaDataModel.updateArrayFormulaCellData(unitId, sheetId, cellValue);
         this._formulaDataModel.updateArrayFormulaRange(unitId, sheetId, cellValue);
-        // this._formulaDataModel.updateNumfmtData(unitId, sheetId, cellValue); // TODO: move model to snapshot
 
         this._commandService.executeCommand(
             SetFormulaDataMutation.id,
@@ -249,16 +248,6 @@ export class UpdateFormulaController extends Disposable {
                 remove: true, // remove array formula range shape
             }
         );
-
-        // this._commandService.executeCommand(
-        //     SetNumfmtFormulaDataMutation.id,
-        //     {
-        //         numfmtItemMap: this._formulaDataModel.getNumfmtItemMap(),
-        //     },
-        //     {
-        //         onlyLocal: true,
-        //     }
-        // );
     }
 
     private _handleRemoveSheetMutation(params: IRemoveSheetMutationParams) {

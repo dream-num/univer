@@ -69,8 +69,6 @@ export class BaseReferenceObject extends ObjectClassType {
 
     private _runtimeFeatureCellData: { [featureId: string]: IRuntimeUnitDataType } = {};
 
-    // private _numfmtItemData: INumfmtItemMap = {};
-
     private _refOffsetX = 0;
 
     private _refOffsetY = 0;
@@ -325,14 +323,6 @@ export class BaseReferenceObject extends ObjectClassType {
     setRuntimeFeatureCellData(unitData: { [featureId: string]: IRuntimeUnitDataType }) {
         this._runtimeFeatureCellData = unitData;
     }
-
-    // getNumfmtItemData() {
-    //     return this._numfmtItemData;
-    // }
-
-    // setNumfmtItemData(numfmtItemData: INumfmtItemMap) {
-    //     this._numfmtItemData = numfmtItemData;
-    // }
 
     getActiveSheetRowCount() {
         return this.getCurrentActiveSheetData()?.rowCount || 0;

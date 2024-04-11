@@ -38,7 +38,6 @@ import {
 } from './services/formula-custom-function.service';
 import { FormulaPromptService, IFormulaPromptService } from './services/prompt.service';
 import { IRegisterFunctionService, RegisterFunctionService } from './services/register-function.service';
-import { NumfmtFormulaDisplayController } from './controllers/numfmt-formula-display.controller';
 import { DefinedNameController } from './controllers/defined-name.controller';
 import { FormulaRefRangeService } from './services/formula-ref-range.service';
 import { RegisterOtherFormulaService } from './services/register-other-formula.service';
@@ -88,7 +87,6 @@ export class UniverSheetsFormulaPlugin extends Plugin {
             [FormulaAutoFillController],
             [FormulaClipboardController],
             [ArrayFormulaDisplayController],
-            [NumfmtFormulaDisplayController],
             [TriggerCalculationController],
             [UpdateFormulaController],
             [FormulaEditorShowController],

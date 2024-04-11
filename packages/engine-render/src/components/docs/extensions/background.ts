@@ -54,8 +54,6 @@ export class Background extends docExtension {
 
         const background = getColorStyle(bg);
 
-        // console.log('background', content, background, textStyle);
-
         const { spanStartPoint = Vector2.create(0, 0) } = this.extensionOffset;
 
         if (background) {

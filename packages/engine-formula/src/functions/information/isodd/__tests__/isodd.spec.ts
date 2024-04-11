@@ -20,7 +20,7 @@ import { Isodd } from '../isodd';
 import { FUNCTION_NAMES_INFORMATION } from '../../function-names';
 import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
 
-describe('Test iseven function', () => {
+describe('Test isodd function', () => {
     const testFunction = new Isodd(FUNCTION_NAMES_INFORMATION.ISODD);
 
     it('should work with different kind of number values', () => {

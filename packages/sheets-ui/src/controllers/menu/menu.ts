@@ -52,8 +52,10 @@ import {
     SetTextRotationCommand,
     SetTextWrapCommand,
     SetVerticalTextAlignCommand,
+    SetWorksheetActiveOperation,
     SetWorksheetRowIsAutoHeightCommand,
 } from '@univerjs/sheets';
+
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import {
     CopyCommand,
@@ -157,7 +159,7 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         activated$: new Observable<boolean>((subscriber) => {
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
-                if (id === SetRangeValuesMutation.id || id === SetSelectionsOperation.id) {
+                if (id === SetRangeValuesMutation.id || id === SetSelectionsOperation.id || id === SetWorksheetActiveOperation.id) {
                     const primary = selectionManagerService.getLast()?.primary;
                     const worksheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
                     let isBold = FontWeight.NORMAL;
@@ -187,8 +189,16 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
                 }
             });
 
-            subscriber.next(false);
+            const primary = selectionManagerService.getLast()?.primary;
+            const worksheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
+            let isBold = FontWeight.NORMAL;
 
+            if (primary != null) {
+                const range = worksheet.getRange(primary.startRow, primary.startColumn);
+                isBold = range?.getFontWeight();
+            }
+
+            subscriber.next(isBold === FontWeight.BOLD);
             return disposable.dispose;
         }),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
@@ -213,7 +223,7 @@ export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         activated$: new Observable<boolean>((subscriber) => {
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
-                if (id === SetRangeValuesMutation.id || id === SetSelectionsOperation.id) {
+                if (id === SetRangeValuesMutation.id || id === SetSelectionsOperation.id || id === SetWorksheetActiveOperation.id) {
                     const primary = selectionManagerService.getLast()?.primary;
                     const worksheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
                     let isItalic = FontItalic.NORMAL;
@@ -242,7 +252,15 @@ export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
                 }
             });
 
-            subscriber.next(false);
+            const primary = selectionManagerService.getLast()?.primary;
+            const worksheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
+            let isItalic = FontItalic.NORMAL;
+            if (primary != null) {
+                const range = worksheet.getRange(primary.startRow, primary.startColumn);
+                isItalic = range?.getFontStyle();
+            }
+
+            subscriber.next(isItalic === FontItalic.ITALIC);
             return disposable.dispose;
         }),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
@@ -267,7 +285,7 @@ export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         activated$: new Observable<boolean>((subscriber) => {
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
-                if (id === SetRangeValuesMutation.id || id === SetSelectionsOperation.id) {
+                if (id === SetRangeValuesMutation.id || id === SetSelectionsOperation.id || id === SetWorksheetActiveOperation.id) {
                     const primary = selectionManagerService.getLast()?.primary;
                     const worksheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
                     let isUnderline;
@@ -296,7 +314,15 @@ export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
                 }
             });
 
-            subscriber.next(false);
+            const primary = selectionManagerService.getLast()?.primary;
+            const worksheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
+            let isUnderline;
+            if (primary != null) {
+                const range = worksheet.getRange(primary.startRow, primary.startColumn);
+                isUnderline = range?.getUnderline();
+            }
+
+            subscriber.next(!!(isUnderline && isUnderline.s));
             return disposable.dispose;
         }),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
@@ -321,7 +347,7 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonIt
         activated$: new Observable<boolean>((subscriber) => {
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
-                if (id === SetRangeValuesMutation.id || id === SetSelectionsOperation.id) {
+                if (id === SetRangeValuesMutation.id || id === SetSelectionsOperation.id || id === SetWorksheetActiveOperation.id) {
                     const primary = selectionManagerService.getLast()?.primary;
                     const worksheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
                     let st;
@@ -350,7 +376,15 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonIt
                 }
             });
 
-            subscriber.next(false);
+            const primary = selectionManagerService.getLast()?.primary;
+            const worksheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
+            let st;
+            if (primary != null) {
+                const range = worksheet.getRange(primary.startRow, primary.startColumn);
+                st = range?.getStrikeThrough();
+            }
+
+            subscriber.next(!!(st && st.s));
             return disposable.dispose;
         }),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
@@ -381,7 +415,7 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
 
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
-                if (id !== SetRangeValuesMutation.id && id !== SetSelectionsOperation.id) {
+                if (id !== SetRangeValuesMutation.id && id !== SetSelectionsOperation.id && id !== SetWorksheetActiveOperation.id) {
                     return;
                 }
 
@@ -396,7 +430,15 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
                 subscriber.next(ff ?? defaultValue);
             });
 
-            subscriber.next(defaultValue);
+            const primary = selectionManagerService.getLast()?.primary;
+            const worksheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
+            let ff;
+            if (primary != null) {
+                const range = worksheet.getRange(primary.startRow, primary.startColumn);
+                ff = range?.getFontFamily();
+            }
+
+            subscriber.next(ff ?? defaultValue);
             return disposable.dispose;
         }),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
@@ -408,7 +450,6 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SelectionManagerService);
     const contextService = accessor.get(IContextService);
-
     const disabled$ = getCurrentSheetDisabled$(accessor);
 
     return {
@@ -431,7 +472,7 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
             const DEFAULT_SIZE = 11;
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
-                if (id === SetRangeValuesMutation.id || id === SetSelectionsOperation.id) {
+                if (id === SetRangeValuesMutation.id || id === SetSelectionsOperation.id || id === SetWorksheetActiveOperation.id) {
                     const primary = selectionManagerService.getLast()?.primary;
                     const worksheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
                     let fs;
@@ -439,7 +480,6 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
                         const range = worksheet.getRange(primary.startRow, primary.startColumn);
                         fs = range?.getFontSize();
                     }
-
                     subscriber.next(fs ?? DEFAULT_SIZE);
                 }
 
@@ -455,12 +495,18 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
                     }
 
                     const fs = textRun.ts?.fs;
-
                     subscriber.next(fs ?? DEFAULT_SIZE);
                 }
             });
 
-            subscriber.next(DEFAULT_SIZE);
+            const primary = selectionManagerService.getLast()?.primary;
+            const worksheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
+            let fs;
+            if (primary != null) {
+                const range = worksheet.getRange(primary.startRow, primary.startColumn);
+                fs = range?.getFontSize();
+            }
+            subscriber.next(fs ?? DEFAULT_SIZE);
 
             return disposable.dispose;
         }),
@@ -596,7 +642,7 @@ export function HorizontalAlignMenuItemFactory(accessor: IAccessor): IMenuSelect
         value$: new Observable<HorizontalAlign>((subscriber) => {
             const disposable = accessor.get(ICommandService).onCommandExecuted((c) => {
                 const id = c.id;
-                if (id !== SetHorizontalTextAlignCommand.id && id !== SetSelectionsOperation.id) {
+                if (id !== SetHorizontalTextAlignCommand.id && id !== SetSelectionsOperation.id && id !== SetWorksheetActiveOperation.id) {
                     return;
                 }
 
@@ -611,7 +657,15 @@ export function HorizontalAlignMenuItemFactory(accessor: IAccessor): IMenuSelect
                 subscriber.next(ha ?? HorizontalAlign.LEFT);
             });
 
-            subscriber.next(HorizontalAlign.LEFT);
+            const primary = selectionManagerService.getLast()?.primary;
+            const worksheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
+            let ha;
+            if (primary != null) {
+                const range = worksheet.getRange(primary.startRow, primary.startColumn);
+                ha = range?.getHorizontalAlignment();
+            }
+
+            subscriber.next(ha ?? HorizontalAlign.LEFT);
 
             return disposable.dispose;
         }),
@@ -653,7 +707,7 @@ export function VerticalAlignMenuItemFactory(accessor: IAccessor): IMenuSelector
         value$: new Observable<VerticalAlign>((subscriber) => {
             const disposable = accessor.get(ICommandService).onCommandExecuted((c) => {
                 const id = c.id;
-                if (id !== SetVerticalTextAlignCommand.id && id !== SetSelectionsOperation.id) {
+                if (id !== SetVerticalTextAlignCommand.id && id !== SetSelectionsOperation.id && id !== SetWorksheetActiveOperation.id) {
                     return;
                 }
 
@@ -668,7 +722,15 @@ export function VerticalAlignMenuItemFactory(accessor: IAccessor): IMenuSelector
                 subscriber.next(va ?? VerticalAlign.TOP);
             });
 
-            subscriber.next(VerticalAlign.TOP);
+            const primary = selectionManagerService.getLast()?.primary;
+            const worksheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
+            let va;
+            if (primary != null) {
+                const range = worksheet.getRange(primary.startRow, primary.startColumn);
+                va = range?.getVerticalAlignment();
+            }
+
+            subscriber.next(va ?? VerticalAlign.TOP);
 
             return disposable.dispose;
         }),
@@ -710,7 +772,7 @@ export function WrapTextMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<
         value$: new Observable((subscriber) => {
             const disposable = accessor.get(ICommandService).onCommandExecuted((c) => {
                 const id = c.id;
-                if (id !== SetTextWrapCommand.id && id !== SetSelectionsOperation.id) {
+                if (id !== SetTextWrapCommand.id && id !== SetSelectionsOperation.id && id !== SetWorksheetActiveOperation.id) {
                     return;
                 }
 
@@ -725,7 +787,15 @@ export function WrapTextMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<
                 subscriber.next(ws ?? WrapStrategy.OVERFLOW);
             });
 
-            subscriber.next(WrapStrategy.OVERFLOW);
+            const primary = selectionManagerService.getLast()?.primary;
+            const worksheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
+            let ws;
+            if (primary != null) {
+                const range = worksheet.getRange(primary.startRow, primary.startColumn);
+                ws = range?.getWrapStrategy();
+            }
+
+            subscriber.next(ws ?? WrapStrategy.OVERFLOW);
 
             return disposable.dispose;
         }),
@@ -782,7 +852,7 @@ export function TextRotateMenuItemFactory(accessor: IAccessor): IMenuSelectorIte
         value$: new Observable<number | string>((subscriber) => {
             const disposable = accessor.get(ICommandService).onCommandExecuted((c) => {
                 const id = c.id;
-                if (id !== SetTextRotationCommand.id && id !== SetSelectionsOperation.id) {
+                if (id !== SetTextRotationCommand.id && id !== SetSelectionsOperation.id && id !== SetWorksheetActiveOperation.id) {
                     return;
                 }
 
@@ -801,7 +871,19 @@ export function TextRotateMenuItemFactory(accessor: IAccessor): IMenuSelectorIte
                 }
             });
 
-            subscriber.next(0);
+            const primary = selectionManagerService.getLast()?.primary;
+            const worksheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
+            let tr;
+            if (primary != null) {
+                const range = worksheet.getRange(primary.startRow, primary.startColumn);
+                tr = range?.getTextRotation();
+            }
+
+            if (tr?.v === BooleanNumber.TRUE) {
+                subscriber.next('v');
+            } else {
+                subscriber.next((tr && tr.a) ?? 0);
+            }
 
             return disposable.dispose;
         }),

@@ -39,6 +39,12 @@ export interface ICheckboxProps {
     checked?: boolean;
 
     /**
+     * Used for setting the checkbox to indeterminate
+     * @default false
+     */
+    indeterminate?: boolean;
+
+    /**
      * Used for setting the currently selected value
      * Only used when the checkbox is in a group
      */
@@ -60,7 +66,7 @@ export interface ICheckboxProps {
  * Checkbox Component
  */
 export function Checkbox(props: ICheckboxProps) {
-    const { children, className, style, checked, value, disabled = false, onChange } = props;
+    const { children, className, style, checked = false, indeterminate = false, value, disabled = false, onChange } = props;
 
     const inputRef = useRef<HTMLInputElement>(null);
 
@@ -79,6 +85,7 @@ export function Checkbox(props: ICheckboxProps) {
 
     const _className = clsx(className, styles.checkbox, {
         [styles.checkboxDisabled]: disabled,
+        [styles.checkboxIndeterminate]: indeterminate && !checked,
     });
 
     return (

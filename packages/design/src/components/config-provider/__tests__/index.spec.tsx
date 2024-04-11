@@ -19,7 +19,7 @@ import React, { useContext } from 'react';
 import { describe, expect, it } from 'vitest';
 
 import type { ILocale } from '../../../locale';
-import { enUS, zhCN } from '../../../locale';
+import { zhCN } from '../../../locale';
 import { ConfigContext, ConfigProvider } from '../ConfigProvider';
 
 describe('ConfigProvider', () => {

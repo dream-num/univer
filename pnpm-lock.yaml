@@ -609,9 +609,6 @@ importers:
 
   packages/engine-render:
     dependencies:
-      '@types/opentype.js':
-        specifier: ^1.3.8
-        version: 1.3.8
       cjk-regex:
         specifier: ^3.1.0
         version: 3.1.0
@@ -619,6 +616,9 @@ importers:
         specifier: ^1.3.4
         version: 1.3.4
     devDependencies:
+      '@types/opentype.js':
+        specifier: ^1.3.8
+        version: 1.3.8
       '@univerjs/core':
         specifier: workspace:*
         version: link:../core
@@ -5575,7 +5575,7 @@ packages:
 
   /@types/opentype.js@1.3.8:
     resolution: {integrity: sha512-H6qeTp03jrknklSn4bpT1/9+1xCAEIU2CnjcWPkicJy8A1SKuthanbvoHYMiv79/2W3Xn1XE4gfSJFzt2U3JSw==}
-    dev: false
+    dev: true
 
   /@types/parse-json@4.0.2:
     resolution: {integrity: sha512-dISoDXWWQwUquiKsyZ4Ng+HX2KsPL7LyHKHQwgGFEA3IaKac4Obd+h2a/a6waisAoepJlBcx9paWqjA8/HVjCw==}

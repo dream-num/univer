@@ -3,6 +3,7 @@ exports.baseRules = {
     'import/no-cycle': 'error',
     'import/no-self-import': 'error',
     'ts/no-explicit-any': 'warn',
+    'style/no-multiple-empty-lines': ['error', { max: 2, maxEOF: 1 }],
     'style/brace-style': ['warn', '1tbs', { allowSingleLine: true }],
     'style/comma-dangle': ['error', {
         arrays: 'always-multiline',

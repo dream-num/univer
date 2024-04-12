@@ -15,11 +15,12 @@
  */
 
 import { describe, expect, it } from 'vitest';
+import { FUNCTION_NAMES_INFORMATION } from '../function-names';
 
-import { Isodd } from '../isodd';
-import { FUNCTION_NAMES_INFORMATION } from '../../function-names';
-import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
-import { ErrorType } from '../../../../basics/error-type';
+import { BooleanValueObject, NumberValueObject, StringValueObject } from '../../../engine/value-object/primitive-object';
+import { ErrorType } from '../../../basics/error-type';
+import { Isodd } from './isodd';
+
 
 describe('Test isodd function', () => {
     const testFunction = new Isodd(FUNCTION_NAMES_INFORMATION.ISODD);
@@ -38,5 +39,7 @@ describe('Test isodd function', () => {
 
     it('should throw error when value is not convertable to number', () => {
         expect(testFunction.calculate(StringValueObject.create('not')).getValue()).toBe(ErrorType.VALUE);
+        expect(testFunction.calculate(BooleanValueObject.create(true)).getValue()).toBe(ErrorType.VALUE);
+        expect(testFunction.calculate(BooleanValueObject.create(false)).getValue()).toBe(ErrorType.VALUE);
     });
 });

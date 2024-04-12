@@ -45,6 +45,10 @@ export class Iseven extends BaseFunction {
             }
         }
 
+        if (value.isBoolean()) {
+            return ErrorValueObject.create(ErrorType.VALUE);
+        }
+
         const val = value.getValue() as number;
         const floored = Math.floor(Math.abs(val));
         return BooleanValueObject.create(floored % 2 === 0);

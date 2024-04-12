@@ -311,9 +311,13 @@ export function getFontStyleString(textStyle?: IStyleBase, localeService?: Local
 
     const { va: baselineOffset } = textStyle;
 
-    if (baselineOffset === BaselineOffset.SUBSCRIPT || baselineOffset === BaselineOffset.SUPERSCRIPT) {
+    if (
+        baselineOffset === BaselineOffset.SUBSCRIPT ||
+        baselineOffset === BaselineOffset.SUPERSCRIPT
+    ) {
         const baselineOffsetInfo = FontCache.getBaselineOffsetInfo(fontFamilyResult, fontSize);
         const { sbr, spr } = baselineOffsetInfo;
+
         fontSize *= baselineOffset === BaselineOffset.SUBSCRIPT ? sbr : spr;
     }
 

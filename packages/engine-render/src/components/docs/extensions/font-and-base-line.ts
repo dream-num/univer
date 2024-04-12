@@ -72,20 +72,10 @@ export class FontAndBaseLine extends docExtension {
             ctx.fillStyle = fontColor;
         }
 
-        if (baselineOffset === BaselineOffset.SUBSCRIPT || baselineOffset === BaselineOffset.SUPERSCRIPT) {
-            // const { renderConfig = {} } = this.extensionOffset;
-
-            // const { centerAngle = 0 } = renderConfig;
-            let offset = 0;
-
-            if (baselineOffset === BaselineOffset.SUPERSCRIPT) {
-                offset = -bBox.sbo;
-            }
-
-            // const offsetSin = offset * Math.sin(centerAngle);
-            // const offsetCos = offset * Math.cos(centerAngle);
-
-            spanPointWithFont.y += offset;
+        if (baselineOffset === BaselineOffset.SUPERSCRIPT) {
+            spanPointWithFont.y += -bBox.spo;
+        } else if (baselineOffset === BaselineOffset.SUBSCRIPT) {
+            spanPointWithFont.y += bBox.sbo;
         }
 
         // console.log(content, spanPointWithFont.x, spanPointWithFont.y, startX, startY);

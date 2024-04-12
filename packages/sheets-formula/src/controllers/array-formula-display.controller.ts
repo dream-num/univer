@@ -111,6 +111,14 @@ export class ArrayFormulaDisplayController extends Disposable {
                         };
                     }
 
+                    if (cellData.v == null && cellData.t == null) {
+                        return next({ ...cell,
+                                      ...cellData,
+                                      v: 0,
+                                      t: CellValueType.NUMBER,
+                        });
+                    }
+
                     return next({ ...cell, ...cellData });
                 },
             })

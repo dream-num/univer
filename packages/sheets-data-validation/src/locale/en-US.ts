@@ -119,6 +119,7 @@ const locale: typeof zhCN = {
             options: 'Options',
             customOptions: 'Custom',
             refOptions: 'From a range',
+            formulaError: 'The list source must be a delimited list of data, or a reference to a single row or column.',
         },
         listMultiple: {
             title: 'Dropdown-Multiple',

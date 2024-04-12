@@ -26,7 +26,7 @@ import { FormulaResultStatus, type IDataValidationFormulaResult } from './formul
 export class RegisterOtherFormulaService extends Disposable {
     private _formulaCacheMap: Map<string, Map<string, Map<string, IDataValidationFormulaResult>>> = new Map();
 
-    private _formulaChange$ = new Subject<{ unitId: string; subUnitId: string; ruleId: string; formulaText: string; formulaId: string }>();
+    private _formulaChange$ = new Subject<{ unitId: string; subUnitId: string; formulaText: string; formulaId: string }>();
     public formulaChange$ = this._formulaChange$.asObservable();
 
     private _formulaResult$ = new Subject<Record<string, Record<string, IDataValidationFormulaResult[]>>>();
@@ -149,7 +149,6 @@ export class RegisterOtherFormulaService extends Disposable {
         });
         this._formulaChange$.next({
             unitId,
-            ruleId,
             subUnitId,
             formulaText,
             formulaId,
@@ -175,7 +174,7 @@ export class RegisterOtherFormulaService extends Disposable {
             return Promise.resolve(null);
         }
 
-        if (item.status === FormulaResultStatus.SUCCESS || FormulaResultStatus.ERROR) {
+        if (item.status === FormulaResultStatus.SUCCESS || item.status === FormulaResultStatus.ERROR) {
             return Promise.resolve(item);
         }
 
@@ -184,6 +183,13 @@ export class RegisterOtherFormulaService extends Disposable {
                 resolve(cacheMap.get(formulaId));
             });
         });
+    }
+
+    async getTempFormulaResult(unitId: string, subUnitId: string, formulaString: string) {
+        const formulaId = this.registerFormula(unitId, subUnitId, 'temp', formulaString);
+        const formulaValue = await this.getFormulaValue(unitId, subUnitId, formulaId);
+        this.deleteFormula(unitId, subUnitId, [formulaId]);
+        return formulaValue;
     }
 
     getFormulaValueSync(unitId: string, subUnitId: string, formulaId: string): Nullable<IDataValidationFormulaResult> {

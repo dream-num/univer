@@ -212,19 +212,19 @@ export class EndEditController extends Disposable {
                     col: column,
                 };
 
-                 /**
-                  * When closing the editor, switch to the current tab of the editor.
-                  */
+                /**
+                 * When closing the editor, switch to the current tab of the editor.
+                 */
                 if (workbookId === unitId && sheetId !== worksheetId && this._editorBridgeService.isForceKeepVisible()) {
                     this._commandService.executeCommand(SetWorksheetActivateCommand.id, {
                         subUnitId: sheetId,
                         unitId,
                     });
                 }
-                  /**
-                   * When switching tabs while the editor is open,
-                   * the operation to refresh the selection will be blocked and needs to be triggered manually.
-                   */
+                /**
+                 * When switching tabs while the editor is open,
+                 * the operation to refresh the selection will be blocked and needs to be triggered manually.
+                 */
                 this._selectionManagerService.refreshSelection();
 
                 const cell = this._editorBridgeService.interceptor.fetchThroughInterceptors(
@@ -348,7 +348,9 @@ export class EndEditController extends Disposable {
                      * the up, down, left, and right keys can no longer switch editing cells,
                      * but move the cursor within the editor instead.
                      */
-                    if (keycode != null && this._isCursorChange === CursorChange.CursorChange) {
+                    if (keycode != null &&
+                        (this._isCursorChange === CursorChange.CursorChange || this._contextService.getContextValue(FOCUSING_FORMULA_EDITOR))
+                    ) {
                         this._moveInEditor(keycode, isShift);
                         return;
                     }

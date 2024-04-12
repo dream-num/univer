@@ -41,6 +41,15 @@ export function whenSheetEditorFocused(contextService: IContextService): boolean
     );
 }
 
+export function whenSheetEditorFocusedAndFxNotFocused(contextService: IContextService): boolean {
+    return (
+        contextService.getContextValue(FOCUSING_SHEET) &&
+        contextService.getContextValue(FOCUSING_UNIVER_EDITOR) &&
+        !contextService.getContextValue(EDITOR_ACTIVATED) &&
+        !contextService.getContextValue(FOCUSING_FORMULA_EDITOR)
+    );
+}
+
 /**
  * Requires the currently focused unit to be Workbook and the sheet editor is activated.
  * @param contextService

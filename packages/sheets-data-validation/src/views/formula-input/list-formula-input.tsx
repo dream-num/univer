@@ -349,6 +349,7 @@ export function ListFormulaInput(props: IFormulaInputProps) {
                                 onListChange={setStrList}
                                 rowHeight={32}
                                 margin={[0, 12]}
+                                draggableHandle=".draggableHandle"
                                 itemRender={(item) => (
                                     <Template
                                         key={item.id}

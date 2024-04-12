@@ -364,7 +364,7 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
         const unitAllSheet = this._currentUniverService.getAllUniverSheetsInstance();
 
         const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
-        const worksheet = workbook.getActiveSheet();
+        const worksheet = workbook?.getActiveSheet();
 
         this._executeUnitId = workbook?.getUnitId();
         this._executeSubUnitId = worksheet?.getSheetId();

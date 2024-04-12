@@ -304,11 +304,13 @@ export class FormulaDataModel extends Disposable {
     initFormulaData() {
         // load formula data from workbook config data
 
-        const unitFile = this._currentUniverService.getAllUniverSheetsInstance();
-        if (unitFile.length === 0) {
+        const sheetInstances = this._currentUniverService.getAllUniverSheetsInstance();
+        if (sheetInstances.length === 0) {
             return;
         }
-        const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+
+        // There are Univer Sheets so we can anticipate that there is a Workbook.
+        const workbook = this._currentUniverService.getCurrentUniverSheetInstance()!;
         const unitId = workbook.getUnitId();
         this._formulaData[unitId] = {};
 

@@ -40,10 +40,11 @@ export class UniverPermissionService extends Disposable {
     }
 
     getEditable(unitID?: string) {
-        let unitId = unitID;
+        const unitId = unitID ?? this._univerInstanceService.getCurrentUniverSheetInstance()?.getUnitId();
         if (!unitId) {
-            unitId = this._univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+            return false;
         }
+
         const univerEditablePermission = new UniverEditablePermission(unitId);
         const permission = this._permissionService.getPermissionPoint(unitId, univerEditablePermission.id);
         return permission?.value;

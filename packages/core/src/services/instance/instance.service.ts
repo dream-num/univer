@@ -29,11 +29,8 @@ import { IContextService } from '../context/context.service';
 
 export enum UniverInstanceType {
     UNKNOWN = 0,
-
     DOC = 1,
-
     SHEET = 2,
-
     SLIDE = 3,
 }
 
@@ -78,9 +75,11 @@ export interface IUniverInstanceService {
     getUniverDocInstance(id: string): Nullable<DocumentDataModel>;
     getUniverSlideInstance(id: string): Nullable<SlideDataModel>;
 
-    getCurrentUniverSheetInstance(): Workbook;
+    // TODO@wzhudev: the syntax signature is not correct. How many types error would there be if we change the typo annotation?
+    getCurrentUniverSheetInstance(): Nullable<Workbook>;
     getCurrentUniverDocInstance(): DocumentDataModel;
     getCurrentUniverSlideInstance(): SlideDataModel;
+
     setCurrentUniverSheetInstance(id: string): void;
     setCurrentUniverDocInstance(id: string): void;
     setCurrentUniverSlideInstance(id: string): void;

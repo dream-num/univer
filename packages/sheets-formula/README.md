@@ -732,6 +732,41 @@ To implement a formula, you need to add formula description, internationalizatio
 
     Most function names already have basic description structure. It is recommended to modify them based on this foundation. If a function is not present, add it to the end.
 
+    Here is an example of `SUMIF`
+
+    ```ts
+    {
+        functionName: FUNCTION_NAMES_MATH.SUMIF,
+        aliasFunctionName: 'formula.functionList.SUMIF.aliasFunctionName',
+        functionType: FunctionType.Math,
+        description: 'formula.functionList.SUMIF.description',
+        abstract: 'formula.functionList.SUMIF.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.SUMIF.functionParameter.range.name',
+                detail: 'formula.functionList.SUMIF.functionParameter.range.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+            {
+                name: 'formula.functionList.SUMIF.functionParameter.criteria.name',
+                detail: 'formula.functionList.SUMIF.functionParameter.criteria.detail',
+                example: '">5"',
+                require: 1,
+                repeat: 0,
+            },
+            {
+                name: 'formula.functionList.SUMIF.functionParameter.sumRange.name',
+                detail: 'formula.functionList.SUMIF.functionParameter.sumRange.detail',
+                example: 'B1:B20',
+                require: 0,
+                repeat: 0,
+            },
+        ],
+    }
+    ```
+
     Requirements:
 
     - Add the formula to the `FUNCTION_LIST_MATH` array. It is recommended to keep the order consistent with the internationalization file for easy management and retrieval.

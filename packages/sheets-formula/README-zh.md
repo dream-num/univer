@@ -734,6 +734,41 @@ univer.registerPlugin(UniverSheetsCustomFunctionPlugin);
 
     大部分的函数名称我们已经写好了基础的描述结构，推荐您在此基础上进行修改，如果没有的函数需要自己加在末尾。
 
+    以下是 `SUMIF` 的示例
+
+    ```ts
+    {
+        functionName: FUNCTION_NAMES_MATH.SUMIF,
+        aliasFunctionName: 'formula.functionList.SUMIF.aliasFunctionName',
+        functionType: FunctionType.Math,
+        description: 'formula.functionList.SUMIF.description',
+        abstract: 'formula.functionList.SUMIF.abstract',
+        functionParameter: [
+            {
+                name: 'formula.functionList.SUMIF.functionParameter.range.name',
+                detail: 'formula.functionList.SUMIF.functionParameter.range.detail',
+                example: 'A1:A20',
+                require: 1,
+                repeat: 0,
+            },
+            {
+                name: 'formula.functionList.SUMIF.functionParameter.criteria.name',
+                detail: 'formula.functionList.SUMIF.functionParameter.criteria.detail',
+                example: '">5"',
+                require: 1,
+                repeat: 0,
+            },
+            {
+                name: 'formula.functionList.SUMIF.functionParameter.sumRange.name',
+                detail: 'formula.functionList.SUMIF.functionParameter.sumRange.detail',
+                example: 'B1:B20',
+                require: 0,
+                repeat: 0,
+            },
+        ],
+    }
+    ```
+
     要求：
 
     - 在 `FUNCTION_LIST_MATH` 数组中增加公式，我们建议保持和国际化文件中的顺序一致，便于管理和查找

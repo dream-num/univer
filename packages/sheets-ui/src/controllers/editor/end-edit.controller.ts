@@ -70,6 +70,7 @@ enum CursorChange {
     StartEditor,
     CursorChange,
 }
+
 @OnLifecycle(LifecycleStages.Rendered, EndEditController)
 export class EndEditController extends Disposable {
     private _cursorChangeObservers: Nullable<Observer<IPointerEvent | IMouseEvent>>;
@@ -79,7 +80,7 @@ export class EndEditController extends Disposable {
     /**
      * It is used to distinguish whether the user has actively moved the cursor in the editor, mainly through mouse clicks.
      */
-    private _isCursorChange: CursorChange = CursorChange.InitialState;
+    private _cursorChange: CursorChange = CursorChange.InitialState;
 
     constructor(
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
@@ -132,14 +133,14 @@ export class EndEditController extends Disposable {
 
                 if (visible === true) {
                     // Change `CursorChange` to changed status, when formula bar clicked.
-                    this._isCursorChange =
+                    this._cursorChange =
                         eventType === DeviceInputEventType.PointerDown
                             ? CursorChange.CursorChange
                             : CursorChange.StartEditor;
                     return;
                 }
 
-                this._isCursorChange = CursorChange.InitialState;
+                this._cursorChange = CursorChange.InitialState;
 
                 const selections = this._selectionManagerService.getSelections();
                 const currentSelection = this._selectionManagerService.getCurrent();
@@ -310,6 +311,10 @@ export class EndEditController extends Disposable {
         }
     }
 
+    public updateCursorChangeState() {
+        this._cursorChange = CursorChange.CursorChange;
+    }
+
     private _cursorStateListener() {
         /**
          * The user's operations follow the sequence of opening the editor and then moving the cursor.
@@ -317,7 +322,6 @@ export class EndEditController extends Disposable {
          */
 
         const editorObject = this._getEditorObject();
-
         if (editorObject == null) {
             return;
         }
@@ -327,8 +331,8 @@ export class EndEditController extends Disposable {
         this.disposeWithMe(
             toDisposable(
                 documentComponent.onPointerDownObserver.add(() => {
-                    if (this._isCursorChange === CursorChange.StartEditor) {
-                        this._isCursorChange = CursorChange.CursorChange;
+                    if (this._cursorChange === CursorChange.StartEditor) {
+                        this._cursorChange = CursorChange.CursorChange;
                     }
                 })
             )
@@ -349,7 +353,7 @@ export class EndEditController extends Disposable {
                      * but move the cursor within the editor instead.
                      */
                     if (keycode != null &&
-                        (this._isCursorChange === CursorChange.CursorChange || this._contextService.getContextValue(FOCUSING_FORMULA_EDITOR))
+                        (this._cursorChange === CursorChange.CursorChange || this._contextService.getContextValue(FOCUSING_FORMULA_EDITOR))
                     ) {
                         this._moveInEditor(keycode, isShift);
                         return;

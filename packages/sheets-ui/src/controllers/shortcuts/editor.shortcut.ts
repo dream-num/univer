@@ -22,6 +22,7 @@ import { KeyCode, MetaKeys } from '@univerjs/ui';
 import {
     SetCellEditVisibleArrowOperation,
     SetCellEditVisibleOperation,
+    SetCellEditVisibleWithF2Operation,
 } from '../../commands/operations/cell-edit.operation';
 import {
     whenEditorActivated,
@@ -71,6 +72,19 @@ export function generateArrowSelectionShortCutItem() {
 
     return shortcutList;
 }
+
+export const StartEditWithF2Shortcut: IShortcutItem = {
+    id: SetCellEditVisibleWithF2Operation.id,
+    binding: KeyCode.F2,
+    description: 'shortcut.sheet.start-editing',
+    group: '4_sheet-edit',
+    preconditions: whenSheetEditorFocused,
+    staticParameters: {
+        visible: true,
+        eventType: DeviceInputEventType.Keyboard,
+        keycode: KeyCode.F2,
+    },
+};
 
 export const EditorCursorEnterShortcut: IShortcutItem = {
     id: SetCellEditVisibleOperation.id,

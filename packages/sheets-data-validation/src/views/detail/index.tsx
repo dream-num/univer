@@ -102,6 +102,11 @@ export function DataValidationDetail() {
             ...localRule,
             ranges,
         });
+
+        if (ranges.length === 0) {
+            return;
+        }
+
         const params: IUpdateSheetDataValidationRangeCommandParams = {
             unitId,
             subUnitId,

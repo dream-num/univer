@@ -39,14 +39,14 @@ export class Isodd extends BaseFunction {
     private _calculate(value: BaseValueObject) {
         // Try convert the value to number first, if it fails to convert, we should throw an #VALUE error.
         if (!value.isNumber()) {
+            if (value.isBoolean()) {
+                return ErrorValueObject.create(ErrorType.VALUE);
+            }
+
             value = value.convertToNumberObjectValue();
             if (!value.isNumber()) {
                 return ErrorValueObject.create(ErrorType.VALUE);
             }
-        }
-
-        if (value.isBoolean()) {
-            return ErrorValueObject.create(ErrorType.VALUE);
         }
 
         const val = value.getValue() as number;

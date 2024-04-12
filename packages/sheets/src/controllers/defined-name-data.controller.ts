@@ -69,7 +69,10 @@ export class DefinedNameDataController extends Disposable {
                 businesses: ['SHEET'],
                 toJson: (unitID) => toJson(unitID),
                 parseJson: (json) => parseJson(json),
-                onChange: (unitID, value) => {
+                onUnLoad: (unitID) => {
+                    this._definedNamesService.removeUnitDefinedName(unitID);
+                },
+                onLoad: (unitID, value) => {
                     this._definedNamesService.registerDefinedNames(unitID, value);
                 },
             })

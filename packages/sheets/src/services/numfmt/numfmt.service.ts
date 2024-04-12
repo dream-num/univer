@@ -71,7 +71,11 @@ export class NumfmtService extends Disposable implements INumfmtService {
                 businesses: ['SHEET'],
                 toJson: (unitID) => this._toJson(unitID),
                 parseJson: (json) => this._parseJson(json),
-                onChange: (unitID, value) => {
+                onUnLoad: (unitID) => {
+                    this._numfmtModel.delete(unitID);
+                    this._refAliasModel.delete(unitID);
+                },
+                onLoad: (unitID, value) => {
                     const { model, refModel } = value;
                     if (model) {
                         const parseModel = Object.keys(model).reduce((result, sheetId) => {
@@ -89,21 +93,6 @@ export class NumfmtService extends Disposable implements INumfmtService {
                     this._modelReplace$.next(unitID);
                 },
             })
-        );
-        this.disposeWithMe(
-            toDisposable(
-                this._univerInstanceService.sheetDisposed$.subscribe((workbook) => {
-                    const unitID = workbook.getUnitId();
-                    const model = this._numfmtModel.get(unitID);
-                    if (model) {
-                        this._numfmtModel.delete(unitID);
-                    }
-                    const refModel = this._refAliasModel.get(unitID);
-                    if (refModel) {
-                        this._refAliasModel.delete(unitID);
-                    }
-                })
-            )
         );
     }
 

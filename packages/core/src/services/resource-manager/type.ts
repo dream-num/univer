@@ -26,7 +26,8 @@ export type IResourceName = `${IBusinessName}_${string}_PLUGIN`;
 export interface IResourceHook<T = any> {
     pluginName: IResourceName;
     businesses: IBusinessName[];
-    onChange: (unitID: string, resource: T) => void;
+    onLoad: (unitID: string, resource: T) => void;
+    onUnLoad: (unitID: string) => void;
     toJson: (unitID: string) => string;
     parseJson: (bytes: string) => T;
 }
@@ -38,6 +39,8 @@ export interface IResourceManagerService {
     getAllResourceHooks: () => IResourceHook[];
     getResources: (unitId: string) => IWorkbookData['resources'];
     loadResources: (unitId: string, resources: IWorkbookData['resources']) => void;
+
+    unloadResources(unitId: string): void;
 }
 
 export const IResourceManagerService = createIdentifier<IResourceManagerService>('resource-manager-service');

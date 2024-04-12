@@ -144,7 +144,10 @@ export class ConditionalFormattingService extends Disposable {
                 businesses: ['SHEET'],
                 toJson: (unitID) => toJson(unitID),
                 parseJson: (json) => parseJson(json),
-                onChange: (unitID, value) => {
+                onUnLoad: (unitID) => {
+                    this._conditionalFormattingRuleModel.deleteUnitId(unitID);
+                },
+                onLoad: (unitID, value) => {
                     Object.keys(value).forEach((subunitId) => {
                         const ruleList = value[subunitId];
                         ruleList.forEach((rule) => {

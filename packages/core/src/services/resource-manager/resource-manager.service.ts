@@ -62,11 +62,17 @@ export class ResourceManagerService extends Disposable implements IResourceManag
             if (data) {
                 try {
                     const model = hook.parseJson(data);
-                    hook.onChange(unitId, model);
+                    hook.onLoad(unitId, model);
                 } catch (err) {
                     console.error('LoadResources Error!');
                 }
             }
+        });
+    }
+
+    public unloadResources(unitId: string) {
+        this.getAllResourceHooks().forEach((hook) => {
+            hook.onUnLoad(unitId);
         });
     }
 

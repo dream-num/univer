@@ -18,13 +18,14 @@ import { TextEditor, useEvent, useObservable } from '@univerjs/ui';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { DraggableList, FormLayout, Input, Radio, RadioGroup, Select } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import { createInternalEditorID, DataValidationType, isFormulaString, LocaleService, Tools } from '@univerjs/core';
+import { createInternalEditorID, DataValidationType, debounce, isFormulaString, LocaleService, Tools } from '@univerjs/core';
 import { DataValidationModel, DataValidatorRegistryService, type IFormulaInputProps } from '@univerjs/data-validation';
 import { DeleteSingle, IncreaseSingle, SequenceSingle } from '@univerjs/icons';
 import cs from 'clsx';
 import { deserializeListOptions, serializeListOptions } from '../../validators/util';
 import { DROP_DOWN_DEFAULT_COLOR } from '../../common/const';
 import type { ListValidator } from '../../validators';
+import { RegisterOtherFormulaService } from '../../services/register-formula.service';
 import styles from './index.module.less';
 
 const DEFAULT_COLOR_PRESET = [
@@ -155,8 +156,10 @@ export function ListFormulaInput(props: IFormulaInputProps) {
     const [refColors, setRefColors] = useState(() => formula2.split(','));
     const listValidator = dataValidatorRegistryService.getValidatorItem(DataValidationType.LIST) as ListValidator;
     const [refOptions, setRefOptions] = useState<string[]>([]);
+    const [localError, setLocalError] = useState('');
     const formula1Res = showError ? validResult?.formula1 : '';
     const ruleChange = useObservable(dataValidationModel.ruleChange$);
+    const registerFormulaService = useDependency(RegisterOtherFormulaService);
 
     const onChange = useEvent(_onChange);
 
@@ -272,6 +275,38 @@ export function ListFormulaInput(props: IFormulaInputProps) {
         });
     }, [strList, onChange]);
 
+    const updateFormula = useMemo(
+        () => debounce(
+            async (str: string) => {
+                if (!isFormulaString(str)) {
+                    onChange?.({
+                        formula1: '',
+                        formula2,
+                    });
+                    return;
+                }
+
+                // const result = await registerFormulaService.getTempFormulaResult(unitId, subUnitId, str);
+                // console.log('===result', JSON.stringify(result?.result, null, 2));
+                // if (!result?.result || result.result.flat().length <= 1) {
+                //     onChange?.({
+                //         formula1: '',
+                //         formula2,
+                //     });
+                //     setLocalError(localeService.t('dataValidation.list.formulaError'));
+                //     return;
+                // }
+
+                onChange?.({
+                    formula1: isFormulaString(str) ? str : '',
+                    formula2,
+                });
+            },
+            125
+        ),
+        [formula2, localeService, onChange, registerFormulaService, subUnitId, unitId]
+    );
+
     return (
         <>
             <FormLayout label={localeService.t('dataValidation.list.options')}>
@@ -283,20 +318,17 @@ export function ListFormulaInput(props: IFormulaInputProps) {
             {isFormulaStr === '1'
                 ? (
                     <>
-                        <FormLayout error={formula1Res}>
+                        <FormLayout error={formula1Res || localError}>
                             <TextEditor
                                 id={createInternalEditorID(`list-ref-range-${unitId}-${subUnitId}`)}
                                 value={formulaStr}
                                 openForSheetUnitId={unitId}
                                 openForSheetSubUnitId={subUnitId}
                                 onlyInputFormula
-                                onChange={(newString) => {
+                                onChange={async (newString) => {
                                     const str = newString ?? '';
                                     setFormulaStrCopy(str);
-                                    onChange?.({
-                                        formula1: isFormulaString(str) ? str : '',
-                                        formula2,
-                                    });
+                                    updateFormula(str);
                                 }}
                             />
                         </FormLayout>

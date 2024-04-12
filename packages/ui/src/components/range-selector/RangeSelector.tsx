@@ -279,13 +279,13 @@ export function RangeSelector(props: IRangeSelectorProps) {
         sClassName = `${styles.rangeSelector} ${styles.rangeSelectorActive}`;
     }
 
-    let height = 32;
+    let height = 28;
     if (size === 'mini') {
-        height = 24;
+        height = 20;
     } else if (size === 'small') {
-        height = 28;
+        height = 24;
     } else if (size === 'large') {
-        height = 36;
+        height = 32;
     }
 
     return (

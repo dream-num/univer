@@ -15,9 +15,8 @@
  */
 
 import type { ISheetDataValidationRule, Workbook } from '@univerjs/core';
-import { Disposable, IResourceManagerService, IUniverInstanceService, LifecycleService, LifecycleStages, OnLifecycle, toDisposable } from '@univerjs/core';
+import { Disposable, IResourceManagerService, IUniverInstanceService, LifecycleStages, OnLifecycle, toDisposable } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
-import { filter } from 'rxjs';
 import { DataValidationModel } from '../models/data-validation-model';
 
 type DataValidationJSON = Record<string, ISheetDataValidationRule[]>;
@@ -30,7 +29,6 @@ export class DataValidationResourceController extends Disposable {
         @IResourceManagerService private readonly _resourceManagerService: IResourceManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(DataValidationModel) private readonly _dataValidationModel: DataValidationModel,
-        @Inject(LifecycleService) private _lifecycleService: LifecycleService
     ) {
         super();
         this._initSnapshot();
@@ -73,16 +71,7 @@ export class DataValidationResourceController extends Disposable {
                                 });
                             });
                         };
-
-                        if (typeof window !== 'undefined') {
-                            this.disposeWithMe(
-                                this._lifecycleService.lifecycle$.pipe(
-                                    filter((stage) => stage === LifecycleStages.Rendered)
-                                ).subscribe(addRules)
-                            );
-                        } else {
-                            addRules();
-                        }
+                        addRules();
                     },
                 })
             );

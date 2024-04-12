@@ -218,6 +218,7 @@ export interface IDocumentSkeletonFontStyle {
     fontSize: number;
     originFontSize: number;
     fontFamily: string;
+    fontCache: string;
 }
 
 export interface IDocumentSkeletonBoundingBox {

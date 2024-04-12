@@ -30,6 +30,7 @@ import * as cjk from 'cjk-regex';
 import { FontCache } from '../components/docs/layout/shaping-engine/font-cache';
 import { DEFAULT_FONTFACE_PLANE } from './const';
 import type { IBoundRectNoAngle } from './vector2';
+import type { IDocumentSkeletonFontStyle } from './i-document-skeleton-cached';
 
 const DEG180 = 180;
 
@@ -248,7 +249,11 @@ export const UNIVER_GLOBAL_DEFAULT_FONT_SIZE = 11;
 
 export const UNIVER_GLOBAL_DEFAULT_FONT_FAMILY = 'Arial';
 
-export function getFontStyleString(textStyle?: IStyleBase, localeService?: LocaleService) {
+// eslint-disable-next-line max-lines-per-function
+export function getFontStyleString(
+    textStyle?: IStyleBase,
+    _localeService?: LocaleService
+): IDocumentSkeletonFontStyle {
     const defaultFont = UNIVER_GLOBAL_DEFAULT_FONT_FAMILY;
 
     const defaultFontSize = UNIVER_GLOBAL_DEFAULT_FONT_SIZE;

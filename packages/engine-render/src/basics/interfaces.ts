@@ -132,8 +132,8 @@ export interface IFontCreateConfig {
     fontStyle: IDocumentSkeletonFontStyle;
     textStyle: ITextStyle;
     charSpace: number;
-    gridType?: GridType;
     snapToGrid: BooleanNumber;
+    gridType?: GridType;
     pageWidth?: number;
 }
 

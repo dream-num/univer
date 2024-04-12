@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { DataValidationOperator, IDataValidationRuleBase, IDataValidationRuleOptions, IExecutionOptions, ISheetDataValidationRule, IUnitRange } from '@univerjs/core';
-import { createInternalEditorID, DataValidationType, debounce, ICommandService, isUnitRangesEqual, isValidRange, LocaleService, RedoCommand, shallowEqual, UndoCommand } from '@univerjs/core';
+import type { DataValidationOperator, DataValidationType, IDataValidationRuleBase, IDataValidationRuleOptions, IExecutionOptions, ISheetDataValidationRule, IUnitRange } from '@univerjs/core';
+import { createInternalEditorID, debounce, ICommandService, isUnitRangesEqual, isValidRange, LocaleService, RedoCommand, shallowEqual, UndoCommand } from '@univerjs/core';
 import type { IUpdateDataValidationSettingCommandParams } from '@univerjs/data-validation';
 import { DataValidationModel, DataValidatorRegistryScope, DataValidatorRegistryService, getRuleOptions, getRuleSetting, RemoveDataValidationCommand, TWO_FORMULA_OPERATOR_COUNT, UpdateDataValidationOptionsCommand, UpdateDataValidationSettingCommand } from '@univerjs/data-validation';
 import { Button, FormLayout, Select } from '@univerjs/design';
@@ -41,6 +41,7 @@ const debounceExecuteFactory = (commandService: ICommandService) => debounce(
     275
 );
 
+// eslint-disable-next-line max-lines-per-function
 export function DataValidationDetail() {
     const [key, setKey] = useState(0);
     const dataValidationPanelService = useDependency(DataValidationPanelService);
@@ -158,18 +159,18 @@ export function DataValidationDetail() {
         }
 
         const operators = validator.operators;
-
-        const newRule = {
-            ...localRule,
-            type: newType as DataValidationType,
-            operator: operators[0],
-            ...(newType === DataValidationType.CHECKBOX
-                ? {
-                    formula1: undefined,
-                    formula2: undefined,
-                }
-                : null),
-        };
+        const rule = dataValidationModel.getRuleById(unitId, subUnitId, ruleId);
+        const newRule = newType === rule?.type
+            ? {
+                ...rule,
+            }
+            : {
+                ...localRule,
+                type: newType as DataValidationType,
+                operator: operators[0],
+                formula1: undefined,
+                formula2: undefined,
+            };
         setLocalRule(newRule);
 
         commandService.executeCommand(UpdateDataValidationSettingCommand.id, {

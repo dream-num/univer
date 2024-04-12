@@ -137,10 +137,12 @@ export class ReferenceNodeFactory extends BaseAstNodeFactory {
         let node: Nullable<ReferenceNode>;
         if (new RegExp(REFERENCE_SINGLE_RANGE_REGEX).test(tokenTrim)) {
             node = new ReferenceNode(this._injector, tokenTrim, new CellReferenceObject(tokenTrim), isPrepareMerge);
-        } else if (isLexerNode && new RegExp(REFERENCE_REGEX_SINGLE_ROW).test(tokenTrim)) {
-            node = new ReferenceNode(this._injector, tokenTrim, new RowReferenceObject(tokenTrim), isPrepareMerge);
-        } else if (isLexerNode && new RegExp(REFERENCE_REGEX_SINGLE_COLUMN).test(tokenTrim)) {
-            node = new ReferenceNode(this._injector, tokenTrim, new ColumnReferenceObject(tokenTrim), isPrepareMerge);
+        } else if (isLexerNode && this._checkParentIsUnionOperator(param as LexerNode)) {
+            if (new RegExp(REFERENCE_REGEX_SINGLE_ROW).test(tokenTrim)) {
+                node = new ReferenceNode(this._injector, tokenTrim, new RowReferenceObject(tokenTrim), isPrepareMerge);
+            } else if (new RegExp(REFERENCE_REGEX_SINGLE_COLUMN).test(tokenTrim)) {
+                node = new ReferenceNode(this._injector, tokenTrim, new ColumnReferenceObject(tokenTrim), isPrepareMerge);
+            }
         } else {
             const unitId = this._formulaRuntimeService.currentUnitId;
             // parserDataLoader.get
@@ -172,5 +174,9 @@ export class ReferenceNodeFactory extends BaseAstNodeFactory {
             }
             return node;
         }
+    }
+
+    private _checkParentIsUnionOperator(param: LexerNode) {
+        return param.getParent()?.getParent()?.getToken().trim() === matchToken.COLON;
     }
 }

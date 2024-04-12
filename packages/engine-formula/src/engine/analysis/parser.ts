@@ -232,7 +232,7 @@ export class AstTreeBuilder extends Disposable {
             currentAstNode = this._checkAstNode(lexerNode);
             if (currentAstNode == null) {
                 // console.log('error2', currentAstNode, lexerNode);
-                return ErrorNode.create(ErrorType.ERROR);
+                return ErrorNode.create(ErrorType.NAME);
             }
 
             // currentAstNode.setParent(parent);

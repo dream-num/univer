@@ -175,7 +175,7 @@ export class RegisterOtherFormulaService extends Disposable {
             return Promise.resolve(null);
         }
 
-        if (item.status === FormulaResultStatus.SUCCESS || FormulaResultStatus.ERROR) {
+        if (item.status === FormulaResultStatus.SUCCESS || item.status === FormulaResultStatus.ERROR) {
             return Promise.resolve(item);
         }
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { TextEditor, useEvent } from '@univerjs/ui';
+import { TextEditor, useEvent, useObservable } from '@univerjs/ui';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { DraggableList, FormLayout, Input, Radio, RadioGroup, Select } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
@@ -141,12 +141,14 @@ const Template = (props: { item: IDropdownItem; commonProps: any; style?: React.
     );
 };
 
+// eslint-disable-next-line max-lines-per-function
 export function ListFormulaInput(props: IFormulaInputProps) {
     const { value, onChange: _onChange = () => { }, unitId, subUnitId, validResult, showError, ruleId } = props;
     const { formula1 = '', formula2 = '' } = value || {};
     const containerRef = useRef<HTMLDivElement>(null);
     const [isFormulaStr, setIsFormulaStr] = useState(() => isFormulaString(formula1) ? '1' : '0');
-    const [formulaStr, setFormulaStr] = useState(isFormulaStr === '1' ? formula1 : '');
+    const [formulaStr, setFormulaStr] = useState(isFormulaStr === '1' ? formula1 : '=');
+    const [formulaStrCopy, setFormulaStrCopy] = useState(isFormulaStr === '1' ? formula1 : '=');
     const localeService = useDependency(LocaleService);
     const dataValidatorRegistryService = useDependency(DataValidatorRegistryService);
     const dataValidationModel = useDependency(DataValidationModel);
@@ -154,18 +156,31 @@ export function ListFormulaInput(props: IFormulaInputProps) {
     const listValidator = dataValidatorRegistryService.getValidatorItem(DataValidationType.LIST) as ListValidator;
     const [refOptions, setRefOptions] = useState<string[]>([]);
     const formula1Res = showError ? validResult?.formula1 : '';
+    const ruleChange = useObservable(dataValidationModel.ruleChange$);
 
     const onChange = useEvent(_onChange);
 
     useEffect(() => {
         (async () => {
+            await new Promise<any>((resolve) => {
+                setTimeout(() => resolve(true), 100);
+            });
+
             const rule = dataValidationModel.getRuleById(unitId, subUnitId, ruleId);
+            const formula1 = rule?.formula1;
             if (isFormulaString(formula1) && listValidator && rule) {
                 const res = await listValidator.getListAsync(rule, unitId, subUnitId);
                 setRefOptions(res);
             }
         })();
-    }, [dataValidationModel, formula1, listValidator, ruleId, subUnitId, unitId]);
+    }, [dataValidationModel, ruleChange, listValidator, ruleId, subUnitId, unitId]);
+
+    useEffect(() => {
+        if (isFormulaString(formula1) && formula1 !== formulaStrCopy) {
+            setFormulaStr(formula1);
+            setFormulaStrCopy(formulaStrCopy);
+        }
+    }, [formulaStrCopy, formula1]);
 
     const [strList, setStrList] = useState<IDropdownItem[]>(() => {
         const strOptions = isFormulaStr !== '1' ? deserializeListOptions(formula1) : [];
@@ -277,7 +292,7 @@ export function ListFormulaInput(props: IFormulaInputProps) {
                                 onlyInputFormula
                                 onChange={(newString) => {
                                     const str = newString ?? '';
-                                    setFormulaStr(str);
+                                    setFormulaStrCopy(str);
                                     onChange?.({
                                         formula1: isFormulaString(str) ? str : '',
                                         formula2,

@@ -23,7 +23,14 @@ export default antfu({
     rules: baseRules,
 }, {
     files: ['**/*.ts', '**/*.tsx'],
-    ignores: ['**/*.d.ts', '**/vite.config.ts', 'playwright.config.ts', '**/*.spec.ts', '**/*.spec.tsx'], // do not check test files
+    ignores: [
+        'packages/engine-render/src/components/docs/**/*.ts',
+        '**/*.d.ts',
+        '**/vite.config.ts',
+        'playwright.config.ts',
+        '**/*.spec.ts',
+        '**/*.spec.tsx',
+    ], // do not check test files
     rules: {
         complexity: ['warn', { max: 20 }],
         'max-lines-per-function': ['warn', 80],

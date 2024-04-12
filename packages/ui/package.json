@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/ui",
-    "version": "0.1.6",
+    "version": "0.1.7",
     "private": false,
     "description": "UniverSheet normal plugin UI manager",
     "author": "DreamNum <developer@univer.ai>",
@@ -77,7 +77,7 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/icons": "^0.1.43",
+        "@univerjs/icons": "^0.1.44",
         "localforage": "^1.10.0",
         "rc-notification": "^5.4.0",
         "rc-util": "^5.39.1"
@@ -88,8 +88,8 @@
     "devDependencies": {
         "@testing-library/react": "^14.2.2",
         "@testing-library/react-hooks": "^8.0.1",
-        "@types/react": "^18.2.73",
-        "@types/react-dom": "^18.2.23",
+        "@types/react": "^18.2.75",
+        "@types/react-dom": "^18.2.24",
         "@types/react-transition-group": "^4.4.10",
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
@@ -102,8 +102,8 @@
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
         "rxjs": "^7.8.1",
-        "typescript": "^5.4.3",
-        "vite": "^5.2.7",
+        "typescript": "^5.4.5",
+        "vite": "^5.2.8",
         "vitest": "^1.4.0",
         "vue": "^3.4.21"
     }

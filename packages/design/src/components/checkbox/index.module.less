@@ -49,6 +49,32 @@
                 border-color: rgb(var(--grey-300));
             }
         }
+
+        &.checkbox-indeterminate {
+            .checkbox-target-inner {
+                background-color: rgb(var(--grey-300));
+            }
+        }
+    }
+
+    &-indeterminate {
+        .checkbox-target {
+            &-inner {
+                background-color: rgb(var(--primary-color));
+
+                &::after {
+                    top: 50%;
+                    left: 50%;
+                    width: calc(100% - 2px);
+                    height: 2px;
+                    background-color: rgb(var(--bg-color-secondary));
+                    border: none;
+                    border-radius: var(--border-radius-base);
+                    opacity: 1;
+                    transform: translate(-50%, -50%);
+                }
+            }
+        }
     }
 
     &-target {

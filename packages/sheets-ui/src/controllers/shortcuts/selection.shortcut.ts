@@ -31,7 +31,7 @@ import {
     MoveSelectionEnterAndTabCommand,
     SelectAllCommand,
 } from '../../commands/commands/set-selection.command';
-import { whenSheetEditorFocused } from './utils';
+import { whenSheetEditorFocused, whenSheetEditorFocusedAndFxNotFocused } from './utils';
 
 export const MoveSelectionDownShortcutItem: IShortcutItem<IMoveSelectionCommandParams> = {
     id: MoveSelectionCommand.id,
@@ -63,7 +63,7 @@ export const MoveSelectionLeftShortcutItem: IShortcutItem<IMoveSelectionCommandP
     group: '3_sheet-view',
     binding: KeyCode.ARROW_LEFT,
     priority: 100,
-    preconditions: whenSheetEditorFocused,
+    preconditions: whenSheetEditorFocusedAndFxNotFocused,
     staticParameters: {
         direction: Direction.LEFT,
     },
@@ -75,7 +75,7 @@ export const MoveSelectionRightShortcutItem: IShortcutItem<IMoveSelectionCommand
     group: '3_sheet-view',
     binding: KeyCode.ARROW_RIGHT,
     priority: 100,
-    preconditions: whenSheetEditorFocused,
+    preconditions: whenSheetEditorFocusedAndFxNotFocused,
     staticParameters: {
         direction: Direction.RIGHT,
     },

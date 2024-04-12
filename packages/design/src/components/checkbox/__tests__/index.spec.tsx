@@ -15,21 +15,31 @@
  */
 
 import { fireEvent, render } from '@testing-library/react';
-import React from 'react';
+import React, { useState } from 'react';
 import { describe, expect, it } from 'vitest';
 
 import { Checkbox } from '../Checkbox';
 
 describe('Checkbox', () => {
-    const component = <Checkbox value="0">text</Checkbox>;
-
     it('click Checkbox', async () => {
-        const { container } = render(component);
+        function Component() {
+            const [checked, setChecked] = useState(false);
 
-        fireEvent.click(container.querySelector('input')!);
+            function handleChange(value: string | number | boolean) {
+                setChecked(value as boolean);
+            }
 
-        const $input = container.querySelector('input');
+            return <Checkbox checked={checked} onChange={handleChange}>text</Checkbox>;
+        }
+
+        const root = render(<Component />);
+
+        fireEvent.click(root.container.querySelector('input')!);
+
+        const $input = root.container.querySelector('input');
 
         expect($input?.checked).toBe(true);
+
+        root.unmount();
     });
 });

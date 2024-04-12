@@ -135,15 +135,8 @@ export const FUNCTION_LIST_INFORMATION: IFunctionInfo[] = [
         abstract: 'formula.functionList.ISEVEN.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.ISEVEN.functionParameter.number1.name',
-                detail: 'formula.functionList.ISEVEN.functionParameter.number1.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-            {
-                name: 'formula.functionList.ISEVEN.functionParameter.number2.name',
-                detail: 'formula.functionList.ISEVEN.functionParameter.number2.detail',
+                name: 'formula.functionList.ISEVEN.functionParameter.value.name',
+                detail: 'formula.functionList.ISEVEN.functionParameter.value.detail',
                 example: 'A1:A20',
                 require: 1,
                 repeat: 0,
@@ -239,15 +232,8 @@ export const FUNCTION_LIST_INFORMATION: IFunctionInfo[] = [
         abstract: 'formula.functionList.ISODD.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.ISODD.functionParameter.number1.name',
-                detail: 'formula.functionList.ISODD.functionParameter.number1.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-            {
-                name: 'formula.functionList.ISODD.functionParameter.number2.name',
-                detail: 'formula.functionList.ISODD.functionParameter.number2.detail',
+                name: 'formula.functionList.ISODD.functionParameter.value.name',
+                detail: 'formula.functionList.ISODD.functionParameter.value.detail',
                 example: 'A1:A20',
                 require: 1,
                 repeat: 0,

@@ -69,11 +69,11 @@ export const DEFAULT_STYLES = {
     /**
      * fontFamily
      */
-    ff: 'Times New Roman',
+    ff: 'Arial',
     /**
      * fontSize
      */
-    fs: 14,
+    fs: 11,
     /**
      * italic
      * 0: false

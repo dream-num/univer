@@ -30,6 +30,7 @@ import type {
     IUnitSheetNameMap,
 } from '../basics/common';
 import { LexerTreeBuilder } from '../engine/analysis/lexer-tree-builder';
+import { Lexer } from '../engine/analysis/lexer';
 import type { IFormulaIdMap } from './utils/formula-data-util';
 import { clearArrayFormulaCellDataByCell, updateFormulaDataByCellValue } from './utils/formula-data-util';
 
@@ -50,7 +51,7 @@ export class FormulaDataModel extends Disposable {
 
     constructor(
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
-        @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder
+        @Inject(Lexer) private readonly _lexer: Lexer
     ) {
         super();
     }
@@ -404,7 +405,7 @@ export class FormulaDataModel extends Disposable {
                 } else if (typeof deleteFormula === 'string') {
                     const x = cell.x || 0;
                     const y = cell.y || 0;
-                    const offsetFormula = this._lexerTreeBuilder.moveFormulaRefOffset(deleteFormula, x, y);
+                    const offsetFormula = this._lexer.moveFormulaRefOffset(deleteFormula, x, y);
 
                     deleteFormulaIdMap.set(formulaId, {
                         r,

@@ -29,6 +29,7 @@ import {
 import {
     ErrorType,
     FormulaDataModel,
+    Lexer,
     LexerTreeBuilder,
     SetArrayFormulaDataMutation,
     SetFormulaCalculationResultMutation,
@@ -50,7 +51,7 @@ export class FormulaEditorShowController extends Disposable {
     constructor(
         @Inject(IEditorBridgeService) private _editorBridgeService: IEditorBridgeService,
         @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel,
-        @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder,
+        @Inject(Lexer) private readonly _lexer: Lexer,
         @Inject(ThemeService) private readonly _themeService: ThemeService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
@@ -115,7 +116,7 @@ export class FormulaEditorShowController extends Disposable {
                                         formulaString = originItem.f;
                                     }
 
-                                    const newFormulaString = this._lexerTreeBuilder.moveFormulaRefOffset(
+                                    const newFormulaString = this._lexer.moveFormulaRefOffset(
                                         formulaString,
                                         x,
                                         y

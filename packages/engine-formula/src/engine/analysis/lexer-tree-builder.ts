@@ -168,50 +168,6 @@ export class LexerTreeBuilder extends Disposable {
         }
     }
 
-    moveFormulaRefOffset(formulaString: string, refOffsetX: number, refOffsetY: number) {
-        const sequenceNodes = this.sequenceNodesBuilder(formulaString);
-
-        if (sequenceNodes == null) {
-            return formulaString;
-        }
-
-        const newSequenceNodes: Array<string | ISequenceNode> = [];
-
-        for (let i = 0, len = sequenceNodes.length; i < len; i++) {
-            const node = sequenceNodes[i];
-            if (typeof node === 'string' || node.nodeType !== sequenceNodeType.REFERENCE) {
-                newSequenceNodes.push(node);
-                continue;
-            }
-
-            const { token } = node;
-
-            const sequenceGrid = deserializeRangeWithSheet(token);
-
-            const { range, sheetName, unitId: sequenceUnitId } = sequenceGrid;
-
-            const newRange = Rectangle.moveOffset(range, refOffsetX, refOffsetY);
-
-            let newToken = '';
-            if (isValidRange(newRange)) {
-                newToken = serializeRangeToRefString({
-                    range: newRange,
-                    unitId: sequenceUnitId,
-                    sheetName,
-                });
-            } else {
-                newToken = ErrorType.REF;
-            }
-
-            newSequenceNodes.push({
-                ...node,
-                token: newToken,
-            });
-        }
-
-        return `=${generateStringWithSequence(newSequenceNodes)}`;
-    }
-
     /**
      * Estimate the number of right brackets that need to be automatically added to the end of the formula.
      * @param formulaString
@@ -275,71 +231,7 @@ export class LexerTreeBuilder extends Disposable {
         return bracketCount;
     }
 
-    convertRefersToAbsolute(formulaString: string, startAbsoluteRefType: AbsoluteRefType, endAbsoluteRefType: AbsoluteRefType) {
-        const nodes = this.sequenceNodesBuilder(formulaString);
-        if (nodes == null) {
-            return formulaString;
-        }
-
-        let prefixToken = '';
-        if (formulaString.substring(0, 1) === operatorToken.EQUALS) {
-            prefixToken = operatorToken.EQUALS;
-        }
-
-        for (let i = 0, len = nodes.length; i < len; i++) {
-            const node = nodes[i];
-            if (typeof node === 'string') {
-                continue;
-            }
-
-            if (node.nodeType === sequenceNodeType.REFERENCE) {
-                const { token, endIndex } = node;
-                const sequenceGrid = deserializeRangeWithSheet(token);
-                if (sequenceGrid == null) {
-                    continue;
-                }
-
-                const { range, sheetName, unitId } = sequenceGrid;
-
-                const newRange = {
-                    ...range,
-                    startAbsoluteRefType,
-                    endAbsoluteRefType,
-                };
-
-                const newToken = serializeRangeToRefString({
-                    range: newRange,
-                    unitId,
-                    sheetName,
-                });
-
-                const minusCount = newToken.length - token.length;
-
-                nodes[i] = {
-                    ...node,
-                    token: newToken,
-                    endIndex: endIndex + minusCount,
-                };
-
-                /**
-                 * Adjust the start and end indexes of the subsequent nodes.
-                 */
-                for (let j = i + 1; j < len; j++) {
-                    const nextNode = nodes[j];
-                    if (typeof nextNode === 'string') {
-                        continue;
-                    }
-
-                    nextNode.startIndex += minusCount;
-                    nextNode.endIndex += minusCount;
-                }
-            }
-        }
-
-        return `${prefixToken}${generateStringWithSequence(nodes)}`;
-    }
-
-    sequenceNodesBuilder(formulaString: string) {
+    sequenceNodesBuilder(formulaString: string, definedNameCheck: (nodeToken: string) => boolean) {
         const sequenceNodesCache = FormulaSequenceNodeCache.get(formulaString);
         if (sequenceNodesCache) {
             return [...sequenceNodesCache];
@@ -350,7 +242,7 @@ export class LexerTreeBuilder extends Disposable {
             return;
         }
 
-        const newSequenceNodes = this.getSequenceNode(sequenceArray);
+        const newSequenceNodes = this.getSequenceNode(sequenceArray, definedNameCheck);
 
         // let sequenceString = '';
         // for (const node of newSequenceNodes) {
@@ -367,7 +259,7 @@ export class LexerTreeBuilder extends Disposable {
         return newSequenceNodes;
     }
 
-    getSequenceNode(sequenceArray: ISequenceArray[]) {
+    getSequenceNode(sequenceArray: ISequenceArray[], definedNameCheck: (nodeToken: string) => boolean) {
         const sequenceNodes: Array<ISequenceNode | string> = [];
 
         let maybeString = false;
@@ -411,7 +303,18 @@ export class LexerTreeBuilder extends Disposable {
 
             const preSegmentNotPrefixToken = this._replacePrefixString(preSegmentTrim);
 
-            if (maybeString === true && preSegmentTrim[preSegmentTrim.length - 1] === matchToken.DOUBLE_QUOTATION) {
+            if (definedNameCheck && definedNameCheck(preSegmentTrim)) {
+                this._pushSequenceNode(
+                    sequenceNodes,
+                    {
+                        nodeType: sequenceNodeType.DEFINED_NAME,
+                        token: preSegment,
+                        startIndex,
+                        endIndex,
+                    },
+                    deleteEndIndex
+                );
+            } else if (maybeString === true && preSegmentTrim[preSegmentTrim.length - 1] === matchToken.DOUBLE_QUOTATION) {
                 maybeString = false;
                 this._pushSequenceNode(
                     sequenceNodes,

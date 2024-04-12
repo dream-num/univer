@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 export type {
     IArrayFormulaRangeType,
     IArrayFormulaUnitCellType,
@@ -70,6 +71,7 @@ export {
 export { UnregisterFunctionMutation } from './commands/mutations/unregister-function.mutation';
 export { LexerNode } from './engine/analysis/lexer-node';
 export { LexerTreeBuilder } from './engine/analysis/lexer-tree-builder';
+export { Lexer } from './engine/analysis/lexer';
 export { BaseReferenceObject, type FunctionVariantType } from './engine/reference-object/base-reference-object';
 export { RangeReferenceObject } from './engine/reference-object/range-reference-object';
 export { deserializeRangeForR1C1 } from './engine/utils/r1c1-reference';

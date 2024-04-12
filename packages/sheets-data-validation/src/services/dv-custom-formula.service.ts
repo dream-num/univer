@@ -16,7 +16,7 @@
 
 import type { IRange, ISheetDataValidationRule } from '@univerjs/core';
 import { DataValidationType, Disposable, isFormulaString, IUniverInstanceService, ObjectMatrix, Range } from '@univerjs/core';
-import { isFormulaTransformable, LexerTreeBuilder, transformFormula } from '@univerjs/engine-formula';
+import { isFormulaTransformable, Lexer, LexerTreeBuilder, transformFormula } from '@univerjs/engine-formula';
 import { Inject } from '@wendellhu/redi';
 import { DataValidationModel } from '@univerjs/data-validation';
 import { RegisterOtherFormulaService } from './register-formula.service';
@@ -62,7 +62,7 @@ export class DataValidationCustomFormulaService extends Disposable {
 
     constructor(
         @Inject(RegisterOtherFormulaService) private _registerOtherFormulaService: RegisterOtherFormulaService,
-        @Inject(LexerTreeBuilder) private _lexerTreeBuilder: LexerTreeBuilder,
+        @Inject(Lexer) private _lexer: Lexer,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(DataValidationModel) private readonly _dataValidationModel: DataValidationModel,
         @Inject(DataValidationCacheService) private readonly _dataValidationCacheService: DataValidationCacheService
@@ -181,7 +181,7 @@ export class DataValidationCustomFormulaService extends Disposable {
         }
 
         const isTransformable = isFormulaTransformable(
-            this._lexerTreeBuilder,
+            this._lexer,
             formula
         );
 
@@ -193,7 +193,7 @@ export class DataValidationCustomFormulaService extends Disposable {
             ranges.forEach((range) => {
                 Range.foreach(range, (row, column) => {
                     const relativeFormula = transformFormula(
-                        this._lexerTreeBuilder,
+                        this._lexer,
                         formula,
                         originRow,
                         originCol,
@@ -268,7 +268,7 @@ export class DataValidationCustomFormulaService extends Disposable {
                     }
 
                     if (isTransformable) {
-                        const relativeText = transformFormula(this._lexerTreeBuilder, formula, originRow, originCol, row, col);
+                        const relativeText = transformFormula(this._lexer, formula, originRow, originCol, row, col);
                         const formulaId = this._registerFormula(unitId, subUnitId, ruleId, relativeText);
                         formulaMap.setValue(row, col, {
                             // formulaText: relativeText,

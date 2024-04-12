@@ -34,12 +34,12 @@ import {
     Tools,
 } from '@univerjs/core';
 import type { IFormulaData, IFormulaDataItem, ISequenceNode, IUnitSheetNameMap } from '@univerjs/engine-formula';
-import {
-    deserializeRangeWithSheet,
+import { deserializeRangeWithSheet,
     ErrorType,
     FormulaDataModel,
     generateStringWithSequence,
     initSheetFormulaData,
+    Lexer,
     LexerTreeBuilder,
     sequenceNodeType,
     serializeRangeToRefString,
@@ -47,6 +47,7 @@ import {
     SetFormulaDataMutation,
     SetNumfmtFormulaDataMutation,
 } from '@univerjs/engine-formula';
+
 import type {
     IDeleteRangeMoveLeftCommandParams,
     IDeleteRangeMoveUpCommandParams,
@@ -162,7 +163,7 @@ export class UpdateFormulaController extends Disposable {
     constructor(
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
-        @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder,
+        @Inject(Lexer) private readonly _lexer: Lexer,
         @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel,
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
         @Inject(SelectionManagerService) private _selectionManagerService: SelectionManagerService,
@@ -674,7 +675,7 @@ export class UpdateFormulaController extends Disposable {
 
                     const { f: formulaString, x, y, si } = formulaDataItem;
 
-                    const sequenceNodes = this._lexerTreeBuilder.sequenceNodesBuilder(formulaString);
+                    const sequenceNodes = this._lexer.sequenceNodesBuilder(formulaString);
 
                     if (sequenceNodes == null) {
                         return true;

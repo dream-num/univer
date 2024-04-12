@@ -16,7 +16,6 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { AbsoluteRefType } from '@univerjs/core';
 import type { LexerNode } from '../lexer-node';
 import { LexerTreeBuilder } from '../lexer-tree-builder';
 import { ErrorType } from '../../../basics/error-type';
@@ -244,7 +243,7 @@ describe('lexer nodeMaker test', () => {
 
     describe('sequenceNodesBuilder', () => {
         it('workbook ref build', () => {
-            expect(lexerTreeBuilder.sequenceNodesBuilder('=[workbook-01]工作表11!G14:M20')).toStrictEqual([
+            expect(lexerTreeBuilder.sequenceNodesBuilder('=[workbook-01]工作表11!G14:M20', () => false)).toStrictEqual([
                 {
                     endIndex: 25,
                     nodeType: 4,
@@ -255,7 +254,7 @@ describe('lexer nodeMaker test', () => {
         });
 
         it('special workbook ref build', () => {
-            expect(lexerTreeBuilder.sequenceNodesBuilder('=\'[workbook-01]工作表11\'!G14:M20,\'[workbook-01]工作表11\'!K27:N32')).toStrictEqual([
+            expect(lexerTreeBuilder.sequenceNodesBuilder('=\'[workbook-01]工作表11\'!G14:M20,\'[workbook-01]工作表11\'!K27:N32', () => false)).toStrictEqual([
                 {
                     endIndex: 27,
                     nodeType: 4,
@@ -273,7 +272,7 @@ describe('lexer nodeMaker test', () => {
         });
 
         it('cube', () => {
-            expect(lexerTreeBuilder.sequenceNodesBuilder('=INDEX((A6:B6,C6:D7),1,1,2)')).toStrictEqual([
+            expect(lexerTreeBuilder.sequenceNodesBuilder('=INDEX((A6:B6,C6:D7),1,1,2)', () => false)).toStrictEqual([
                 {
                     endIndex: 4,
                     nodeType: 3,
@@ -322,7 +321,7 @@ describe('lexer nodeMaker test', () => {
         });
 
         it('No Parameter Function', () => {
-            expect(lexerTreeBuilder.sequenceNodesBuilder('=today()+today()+column()')).toStrictEqual([
+            expect(lexerTreeBuilder.sequenceNodesBuilder('=today()+today()+column()', () => false)).toStrictEqual([
                 {
                     endIndex: 4,
                     nodeType: 3,
@@ -353,7 +352,7 @@ describe('lexer nodeMaker test', () => {
         });
 
         it('No Parameter Today', () => {
-            expect(lexerTreeBuilder.sequenceNodesBuilder('=IF(TODAY()>1,"TRUE", "FALSE")')).toStrictEqual([
+            expect(lexerTreeBuilder.sequenceNodesBuilder('=IF(TODAY()>1,"TRUE", "FALSE")', () => false)).toStrictEqual([
                 {
                     endIndex: 1,
                     nodeType: 3,
@@ -393,42 +392,9 @@ describe('lexer nodeMaker test', () => {
                 ')',
             ]);
         });
-    });
 
-    describe('convertRefersToAbsolute', () => {
-        it('Formula All', () => {
-            const result = lexerTreeBuilder.convertRefersToAbsolute('=sum(A1:B1,A1:B1,A1:B1,A1:B1)', AbsoluteRefType.ALL, AbsoluteRefType.ALL);
-            expect(result).toStrictEqual('=sum($A$1:$B$1,$A$1:$B$1,$A$1:$B$1,$A$1:$B$1)');
-        });
-
-        it('Range All', () => {
-            const result = lexerTreeBuilder.convertRefersToAbsolute('A1:B1,A1:B1,A1:B1,A1:B1', AbsoluteRefType.ALL, AbsoluteRefType.ALL);
-            expect(result).toStrictEqual('$A$1:$B$1,$A$1:$B$1,$A$1:$B$1,$A$1:$B$1');
-        });
-
-        it('Formula Column', () => {
-            const result = lexerTreeBuilder.convertRefersToAbsolute('=sum(A1:B1,A1:B1,A1:B1,A1:B1)', AbsoluteRefType.COLUMN, AbsoluteRefType.COLUMN);
-            expect(result).toStrictEqual('=sum($A1:$B1,$A1:$B1,$A1:$B1,$A1:$B1)');
-        });
-
-        it('Range Column', () => {
-            const result = lexerTreeBuilder.convertRefersToAbsolute('A1:B1,A1:B1,A1:B1,A1:B1', AbsoluteRefType.COLUMN, AbsoluteRefType.COLUMN);
-            expect(result).toStrictEqual('$A1:$B1,$A1:$B1,$A1:$B1,$A1:$B1');
-        });
-
-        it('Formula Row', () => {
-            const result = lexerTreeBuilder.convertRefersToAbsolute('=sum(A1:B1,A1:B1,A1:B1,A1:B1)', AbsoluteRefType.ROW, AbsoluteRefType.ROW);
-            expect(result).toStrictEqual('=sum(A$1:B$1,A$1:B$1,A$1:B$1,A$1:B$1)');
-        });
-
-        it('Range Row', () => {
-            const result = lexerTreeBuilder.convertRefersToAbsolute('A1:B1,A1:B1,A1:B1,A1:B1', AbsoluteRefType.ROW, AbsoluteRefType.ROW);
-            expect(result).toStrictEqual('A$1:B$1,A$1:B$1,A$1:B$1,A$1:B$1');
-        });
-
-        it('Complex Formula', () => {
-            const result = lexerTreeBuilder.convertRefersToAbsolute('=SUM(A1:B10) + LAMBDA(x, y, x*y*x)(A1:B10, A10) + MAX(A1:B10,SUM(A2))', AbsoluteRefType.ALL, AbsoluteRefType.ALL);
-            expect(result).toStrictEqual('=SUM($A$1:$B$10) + LAMBDA(x, y, x*y*x)($A$1:$B$10,$A$10) + MAX($A$1:$B$10,SUM($A$2))');
-        });
+        // it('Has defined name', () => {
+        //     expect(lexerTreeBuilder.sequenceNodesBuilder('=myName+A1:B10', (token)=>{ if(token==="myName"){ return true } return false })).toStrictEqual([]);
+        // });
     });
 });

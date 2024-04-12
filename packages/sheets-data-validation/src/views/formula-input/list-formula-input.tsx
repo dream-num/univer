@@ -177,12 +177,12 @@ export function ListFormulaInput(props: IFormulaInputProps) {
         })();
     }, [dataValidationModel, ruleChange, listValidator, ruleId, subUnitId, unitId]);
 
-    // useEffect(() => {
-    //     if (isFormulaString(formula1) && formula1 !== formulaStrCopy) {
-    //         setFormulaStr(formula1);
-    //         setFormulaStrCopy(formulaStrCopy);
-    //     }
-    // }, [formulaStrCopy, formula1]);
+    useEffect(() => {
+        if (isFormulaString(formula1) && formula1 !== formulaStrCopy) {
+            setFormulaStr(formula1);
+            setFormulaStrCopy(formulaStrCopy);
+        }
+    }, [formulaStrCopy, formula1]);
 
     const [strList, setStrList] = useState<IDropdownItem[]>(() => {
         const strOptions = isFormulaStr !== '1' ? deserializeListOptions(formula1) : [];
@@ -275,7 +275,7 @@ export function ListFormulaInput(props: IFormulaInputProps) {
     }, [strList, onChange]);
 
     const updateFormula = useMemo(
-        () => debounce(
+        () =>
             async (str: string) => {
                 if (!isFormulaString(str)) {
                     onChange?.({
@@ -285,24 +285,12 @@ export function ListFormulaInput(props: IFormulaInputProps) {
                     return;
                 }
 
-                // const result = await registerFormulaService.getTempFormulaResult(unitId, subUnitId, str);
-                // console.log('===result', JSON.stringify(result?.result, null, 2));
-                // if (!result?.result || result.result.flat().length <= 1) {
-                //     onChange?.({
-                //         formula1: '',
-                //         formula2,
-                //     });
-                //     setLocalError(localeService.t('dataValidation.list.formulaError'));
-                //     return;
-                // }
 
                 onChange?.({
                     formula1: isFormulaString(str) ? str : '',
                     formula2,
                 });
             },
-            125
-        ),
         [formula2, onChange]
     );
 

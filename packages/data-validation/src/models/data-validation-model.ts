@@ -78,15 +78,28 @@ export class DataValidationModel<T extends IDataValidationRule = IDataValidation
         return manager;
     }
 
+    private _addRuleSideEffect(unitId: string, subUnitId: string, rule: T,) {
+        const manager = this.ensureManager(unitId, subUnitId);
+        const oldRule = manager.getRuleById(rule.uid);
+        if (oldRule) {
+            return;
+        }
+        this._ruleChange$.next({
+            rule: rule,
+            type: 'add',
+            unitId,
+            subUnitId,
+        });
+    }
+
     addRule(unitId: string, subUnitId: string, rule: T | T[], index?: number) {
         try {
             const manager = this.ensureManager(unitId, subUnitId);
             manager.addRule(rule, index);
-            this._ruleChange$.next({
-                rule: rule as any,
-                type: 'add',
-                unitId,
-                subUnitId,
+
+            const rules = Array.isArray(rule) ? rule : [rule];
+            rules.forEach(item => {
+                this._addRuleSideEffect(unitId, subUnitId, item);
             });
         } catch (error) {
             this._logService.error(error);

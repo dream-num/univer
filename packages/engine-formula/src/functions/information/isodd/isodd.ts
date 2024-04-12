@@ -15,7 +15,6 @@
  */
 
 import { ErrorType } from '../../../basics/error-type';
-import type { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import type { BaseValueObject } from '../../../engine/value-object/base-value-object';
 import { ErrorValueObject } from '../../../engine/value-object/base-value-object';
 import { BooleanValueObject } from '../../../engine/value-object/primitive-object';
@@ -27,22 +26,11 @@ export class Isodd extends BaseFunction {
             return ErrorValueObject.create(ErrorType.NA);
         }
 
-        if (value.isArray()) {
-            return (value as ArrayValueObject).mapValue((valueObject) => {
-                return this._calculate(valueObject);
-            });
+        if (value.isArray() || value.isBoolean()) {
+            return ErrorValueObject.create(ErrorType.VALUE);
         }
 
-        return this._calculate(value);
-    }
-
-    private _calculate(value: BaseValueObject) {
-        // Try convert the value to number first, if it fails to convert, we should throw an #VALUE error.
         if (!value.isNumber()) {
-            if (value.isBoolean()) {
-                return ErrorValueObject.create(ErrorType.VALUE);
-            }
-
             value = value.convertToNumberObjectValue();
             if (!value.isNumber()) {
                 return ErrorValueObject.create(ErrorType.VALUE);

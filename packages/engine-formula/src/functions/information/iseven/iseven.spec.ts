@@ -19,6 +19,7 @@ import { describe, expect, it } from 'vitest';
 import { FUNCTION_NAMES_INFORMATION } from '../function-names';
 import { BooleanValueObject, NumberValueObject, StringValueObject } from '../../../engine/value-object/primitive-object';
 import { ErrorType } from '../../../basics/error-type';
+import { ArrayValueObject } from '../../../engine/value-object/array-value-object';
 import { Iseven } from './iseven';
 
 describe('Test iseven function', () => {
@@ -40,5 +41,9 @@ describe('Test iseven function', () => {
         expect(testFunction.calculate(StringValueObject.create('not')).getValue()).toBe(ErrorType.VALUE);
         expect(testFunction.calculate(BooleanValueObject.create(true)).getValue()).toBe(ErrorType.VALUE);
         expect(testFunction.calculate(BooleanValueObject.create(false)).getValue()).toBe(ErrorType.VALUE);
+    });
+
+    it('should throw error for array values', () => {
+        expect(testFunction.calculate(ArrayValueObject.create('A1:C1')).getValue()).toBe(ErrorType.VALUE);
     });
 });

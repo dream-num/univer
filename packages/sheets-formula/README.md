@@ -737,7 +737,7 @@ To implement a formula, you need to add formula description, internationalizatio
     - Add the formula to the `FUNCTION_LIST_MATH` array. It is recommended to keep the order consistent with the internationalization file for easy management and retrieval.
     - Reference the previously defined `FUNCTION_NAMES_MATH` enum for the `functionName`.
     - `aliasFunctionName` is also optional; if there are no aliases in the internationalization file, you do not need to add them here.
-    - Pay attention to the correspondence between internationalization fields and function and parameter names.
+    - Pay attention to the internationalized fields corresponding to the function name and parameter name. For example, the `name` of `functionParameter` is written as `formula.functionList.SUMIF.functionParameter.range.name`, `SUMIF` is the function name, and `range` is the parameter name.
     - Modify function parameter information, including the `example` parameter example (e.g., for a range, use `"A1:A20"`; for conditions, use `">5"`), the `require` parameter (1 for required, 0 for optional), and the `repeat` parameter (1 for allowed, 0 for not allowed). For detailed information, refer to the interface [IFunctionParam](https://github.com/dream-num/univer/blob/dev/packages/engine-formula/src/basics/function.ts).
 
 4. Formula Algorithm
@@ -776,13 +776,14 @@ To implement a formula, you need to add formula description, internationalizatio
 ### Considerations for Formula Implementation
 
 - For most formula rules, please refer to the latest version of Excel. If there are any unreasonable rules, please refer to Google Sheets.
-- The input and output parameters of any formula can be `A1`, `A1:B10`, and the cell content may also be numbers, strings, Boolean values, empty cells, error values, arrays, etc., although the formula tutorial explains In order to identify fixed data types, the program implementation needs to be compatible. When researching Excel, consider all cases, such as `=SIN(A1:B10)`, which expands to the calculated range.
+- The input and output parameters of any formula can be `A1`, `A1:B10`, and the cell content may also be numbers, strings, Boolean values, empty cells, error values, arrays, etc., although the formula tutorial explains In order to identify fixed data types, the program implementation needs to be compatible. When researching Excel, consider all cases, such as `=SIN(A1:B10)`, which expands to the calculated range.   
     - For example, the `XLOOKUP` function requires at least one of the rows or columns of its two inputs to be of equal size for matrix calculation.
     - For example, the `SUMIF` function, although commonly used for summation, can expand based on the second parameter.
         ![sumif array](./assets/sumif-array.png)
         ![sumif array result](./assets/sumif-array-result.png)
     - Excel formula calculation is becoming more like numpy, for example:
         ![numpy](./assets/numpy.png)
+- In formula algorithms, the number of parameters passed in needs to be checked. If it is less than the number of required parameters, or more than the number of required + optional parameters, `#N/A` will be returned (this behavior will be intercepted in Excel, and `#N/A` will be returned in Google Sheets, we refer to Google Sheets).
 - For numerical calculations in formulas, use built-in methods and try to avoid obtaining values for manual calculation. Because formula parameters can be values, arrays, or references. You can refer to existing `sum` and `minus` functions.
 - Precision issues: The formula introduces `big.js`, and using built-in methods will call this library. However, it is nearly 100 times slower than native calculations. Therefore, for methods like `sin`, it is advisable to use native implementations.
 - For custom calculations, use the `product` function, suitable for calculating two input parameters. Call `map` to iterate over the values for changes to a parameter's own values.
@@ -790,7 +791,6 @@ To implement a formula, you need to add formula description, internationalizatio
      - `needsExpandParams`: Whether the function needs to expand parameters, mainly handles situations where the `LOOKUP` function needs to handle vectors of different sizes
      - `needsReferenceObject`: Whether the function needs to pass in a reference object. After setting, `BaseReferenceObject` will not be converted into `ArrayValueObject` but will be passed directly into the formula algorithm, such as the `OFFSET` function
 - Formula calculation errors will return fixed types of errors, such as `#NAME?`, `#VALUE!`, which need to be aligned with Excel, because there are functions `ISERR`, `ISNA`, etc. that determine the error type. If the type is not specified correctly, the result will be It may be different.
-- In the formula algorithm, even if it is a required parameter, it is necessary to intercept the case of `null` and return the error `#N/A`, because the user may not enter any parameters. This behavior will be intercepted in Excel and `#N/A` will be returned in Google Sheets. We refer to Google Sheets.
 
 ### Formula Basic Tools
 

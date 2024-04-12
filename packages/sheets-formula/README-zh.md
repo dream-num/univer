@@ -739,7 +739,7 @@ univer.registerPlugin(UniverSheetsCustomFunctionPlugin);
     - 在 `FUNCTION_LIST_MATH` 数组中增加公式，我们建议保持和国际化文件中的顺序一致，便于管理和查找
     - `functionName` 需要引用之前定义的 `FUNCTION_NAMES_MATH` 枚举
     - `aliasFunctionName` 也是可选的，如果国际化文件中没有别名，这里也不用添加
-    - 国际化字段注意对应好函数名和参数名
+    - 国际化字段注意对应好函数名和参数名，比如 `functionParameter` 的 `name` 写成 `formula.functionList.SUMIF.functionParameter.range.name`，`SUMIF` 是函数名，`range` 是参数名
     - 注意修改函数参数的信息， `example` 参数示例（比如范围写 `"A1:A20"`，条件写 `">5"` ），`require` 是否必需（1 必需，0 可选） ，`repeat` 是否允许重复（1 允许重复，0 不允许重复），详细说明参考文件内的接口 [IFunctionParam](https://github.com/dream-num/univer/blob/dev/packages/engine-formula/src/basics/function.ts)
 
 4. 公式算法
@@ -779,14 +779,13 @@ univer.registerPlugin(UniverSheetsCustomFunctionPlugin);
 
 - 大部分的公式规则请参考最新版本的 Excel，如果有不合理的地方，再参考 Google Sheets。
 - 任何公式的入参和出参都可以是 `A1`、`A1:B10`，单元格内容也可能是数字、字符串、布尔值、空单元格、错误值、数组等，虽然公式教程中说明了识别固定的数据类型，但是程序上实现是需要都兼容的，调研 Excel 的时候需要把所有情况考虑到，比如 `=SIN(A1:B10)`，会展开一个正弦计算后的范围。
-
   - 例如 `XLOOKUP` 函数，要求两个入参的行或列至少又一个大小相等，这样才能进行矩阵计算。
   - 例如 `SUMIF` 函数，大家以为是求和，但是它是可以根据第二个参数进行展开的
         ![sumif array](./assets/sumif-array-zh.png)
         ![sumif array result](./assets/sumif-array-result-zh.png)
   - Excel 的公式计算，越来越像 numpy，比如
         ![numpy](./assets/numpy-zh.png)
-
+- 在公式算法中，需要检查传入参数的数量。少于必传参数数量，或者大于必传+可选参数数量，都要返回 `#N/A`（这个行为在 Excel 中会被拦截，在 Google Sheets 中返回 `#N/A`，我们参照 Google Sheets）。
 - 公式的数值计算，需要使用内置的方法，尽量不要获取值自行计算。因为公式的参数可以是值、数组、引用。可以参考已有的 `sum`、`minus` 函数。
 - 精度问题，公式引入了 `big.js`，使用内置方法会调用该库，但是相比原生计算会慢接近 100 倍，所以像 `sin` 等 `js` 方法，尽量用原生实现。
 - 需要自定义计算，使用 `product` 函数，适合两个入参的计算，调用 `map` 对值自身进行迭代计算，适合对一个入参本身的值进行改变。
@@ -794,7 +793,6 @@ univer.registerPlugin(UniverSheetsCustomFunctionPlugin);
     - `needsExpandParams`: 函数是否需要扩展参数，主要处理类似 `LOOKUP` 函数需要处理不同大小向量的情况
     - `needsReferenceObject`：函数是否需要传入引用对象，设置之后 `BaseReferenceObject` 不会转化为 `ArrayValueObject` 而是直接传入公式算法，比如 `OFFSET` 函数
 - 公式计算错误会返回固定类型的错误，比如 `#NAME?`、`#VALUE!`，需要对齐 Excel，因为有判断报错类型的函数 `ISERR`、`ISNA`等，类型指定不对，结果就可能不一样。
-- 公式算法中，即使是必选参数，也需要拦截为 `null` 的情况并返回错误 `#N/A`，因为用户有可能不输入任何参数。这个行为在 Excel 中会被拦截，在 Google Sheets 中返回 `#N/A`，我们参照 Google Sheets。
 
 ### 公式基础工具
 

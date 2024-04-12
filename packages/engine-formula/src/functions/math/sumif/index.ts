@@ -22,7 +22,8 @@ import { BaseFunction } from '../../base-function';
 
 export class Sumif extends BaseFunction {
     override calculate(range: BaseValueObject, criteria: BaseValueObject, sumRange?: BaseValueObject) {
-        if (range == null || criteria == null) {
+        // Check the number of parameters
+        if (arguments.length < 2 || arguments.length > 3) {
             return ErrorValueObject.create(ErrorType.NA);
         }
 

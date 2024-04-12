@@ -25,6 +25,7 @@ export default antfu({
     files: ['**/*.ts', '**/*.tsx'],
     ignores: [
         'packages/engine-render/src/components/docs/**/*.ts',
+        '**/*.tsx',
         '**/*.d.ts',
         '**/vite.config.ts',
         'playwright.config.ts',

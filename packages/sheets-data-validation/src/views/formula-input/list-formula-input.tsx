@@ -159,7 +159,6 @@ export function ListFormulaInput(props: IFormulaInputProps) {
     const [localError, setLocalError] = useState('');
     const formula1Res = showError ? validResult?.formula1 : '';
     const ruleChange = useObservable(dataValidationModel.ruleChange$);
-    const registerFormulaService = useDependency(RegisterOtherFormulaService);
 
     const onChange = useEvent(_onChange);
 
@@ -178,12 +177,12 @@ export function ListFormulaInput(props: IFormulaInputProps) {
         })();
     }, [dataValidationModel, ruleChange, listValidator, ruleId, subUnitId, unitId]);
 
-    useEffect(() => {
-        if (isFormulaString(formula1) && formula1 !== formulaStrCopy) {
-            setFormulaStr(formula1);
-            setFormulaStrCopy(formulaStrCopy);
-        }
-    }, [formulaStrCopy, formula1]);
+    // useEffect(() => {
+    //     if (isFormulaString(formula1) && formula1 !== formulaStrCopy) {
+    //         setFormulaStr(formula1);
+    //         setFormulaStrCopy(formulaStrCopy);
+    //     }
+    // }, [formulaStrCopy, formula1]);
 
     const [strList, setStrList] = useState<IDropdownItem[]>(() => {
         const strOptions = isFormulaStr !== '1' ? deserializeListOptions(formula1) : [];
@@ -304,7 +303,7 @@ export function ListFormulaInput(props: IFormulaInputProps) {
             },
             125
         ),
-        [formula2, localeService, onChange, registerFormulaService, subUnitId, unitId]
+        [formula2, onChange]
     );
 
     return (

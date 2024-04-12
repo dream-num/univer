@@ -97,7 +97,7 @@ export class UniverSheetsFormulaPlugin extends Plugin {
         dependencies.forEach((dependency) => this._injector.add(dependency));
     }
 
-    override onReady(): void {
+    override onStarting(): void {
         this.initialize();
     }
 }

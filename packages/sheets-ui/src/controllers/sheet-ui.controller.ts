@@ -78,6 +78,7 @@ import { SetActivateCellEditOperation } from '../commands/operations/activate-ce
 import {
     SetCellEditVisibleArrowOperation,
     SetCellEditVisibleOperation,
+    SetCellEditVisibleWithF2Operation,
 } from '../commands/operations/cell-edit.operation';
 import { RenameSheetOperation } from '../commands/operations/rename-sheet.operation';
 import { SetScrollOperation } from '../commands/operations/scroll.operation';
@@ -183,6 +184,7 @@ import {
     EditorDeleteLeftShortcut,
     EditorDeleteLeftShortcutInActive,
     generateArrowSelectionShortCutItem,
+    StartEditWithF2Shortcut,
 } from './shortcuts/editor.shortcut';
 import { SetColHiddenShortcutItem, SetRowHiddenShortcutItem } from './shortcuts/operation.shortcut';
 import {
@@ -284,6 +286,7 @@ export class SheetUIController extends Disposable {
             SetBoldCommand,
             SetCellEditVisibleArrowOperation,
             SetCellEditVisibleOperation,
+            SetCellEditVisibleWithF2Operation,
             SetRangeBoldCommand,
             SetRangeItalicCommand,
             SetRangeUnderlineCommand,
@@ -445,6 +448,7 @@ export class SheetUIController extends Disposable {
             ClearSelectionValueShortcutItem,
             ...generateArrowSelectionShortCutItem(),
             EditorCursorEnterShortcut,
+            StartEditWithF2Shortcut,
             EditorCursorTabShortcut,
             EditorBreakLineShortcut,
             EditorDeleteLeftShortcut,

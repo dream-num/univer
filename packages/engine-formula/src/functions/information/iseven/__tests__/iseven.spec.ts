@@ -19,6 +19,7 @@ import { describe, expect, it } from 'vitest';
 import { Iseven } from '../iseven';
 import { FUNCTION_NAMES_INFORMATION } from '../../function-names';
 import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { ErrorType } from '../../../../basics/error-type';
 
 describe('Test iseven function', () => {
     const testFunction = new Iseven(FUNCTION_NAMES_INFORMATION.ISEVEN);
@@ -33,5 +34,9 @@ describe('Test iseven function', () => {
     it('should convert value first if is it not a number value', () => {
         expect(testFunction.calculate(StringValueObject.create('123')).getValue()).toBeFalsy();
         expect(testFunction.calculate(StringValueObject.create('122')).getValue()).toBeTruthy();
+    });
+
+    it('should throw error when value is not convertable to number', () => {
+        expect(testFunction.calculate(StringValueObject.create('not')).getValue()).toBe(ErrorType.VALUE);
     });
 });

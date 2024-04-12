@@ -19,6 +19,7 @@ import { describe, expect, it } from 'vitest';
 import { Isodd } from '../isodd';
 import { FUNCTION_NAMES_INFORMATION } from '../../function-names';
 import { NumberValueObject, StringValueObject } from '../../../../engine/value-object/primitive-object';
+import { ErrorType } from '../../../../basics/error-type';
 
 describe('Test isodd function', () => {
     const testFunction = new Isodd(FUNCTION_NAMES_INFORMATION.ISODD);
@@ -33,5 +34,9 @@ describe('Test isodd function', () => {
     it('should convert value first if is it not a number value', () => {
         expect(testFunction.calculate(StringValueObject.create('123')).getValue()).toBeTruthy();
         expect(testFunction.calculate(StringValueObject.create('122')).getValue()).toBeFalsy();
+    });
+
+    it('should throw error when value is not convertable to number', () => {
+        expect(testFunction.calculate(StringValueObject.create('not')).getValue()).toBe(ErrorType.VALUE);
     });
 });

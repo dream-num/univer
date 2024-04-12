@@ -24,6 +24,7 @@ import {
 } from '@univerjs/core';
 import type { IDefinedNameMapItem } from '@univerjs/engine-formula';
 import { IDefinedNamesService } from '@univerjs/engine-formula';
+import { UniverType } from '@univerjs/protocol';
 
 const SHEET_DEFINED_NAME_PLUGIN = 'SHEET_DEFINED_NAME_PLUGIN';
 
@@ -66,7 +67,7 @@ export class DefinedNameDataController extends Disposable {
         this.disposeWithMe(
             this._resourceManagerService.registerPluginResource<IDefinedNameMapItem>({
                 pluginName: SHEET_DEFINED_NAME_PLUGIN,
-                businesses: ['SHEET'],
+                businesses: [UniverType.UNIVER_SHEET],
                 toJson: (unitID) => toJson(unitID),
                 parseJson: (json) => parseJson(json),
                 onUnLoad: (unitID) => {

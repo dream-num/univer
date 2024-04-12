@@ -66,6 +66,7 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
+        "@univerjs/protocol": "^0.1.14",
         "@wendellhu/redi": "0.13.0",
         "rxjs": ">=7.0.0"
     },

@@ -63,6 +63,7 @@
     },
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
+        "@univerjs/protocol": "^0.1.14",
         "@univerjs/sheets": "workspace:*",
         "@wendellhu/redi": "0.13.0",
         "rxjs": ">=7.0.0"

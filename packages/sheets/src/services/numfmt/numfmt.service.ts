@@ -28,6 +28,7 @@ import {
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 import { Subject } from 'rxjs';
+import { UniverType } from '@univerjs/protocol';
 
 import type { FormatType, INumfmtItem, INumfmtService, IRefItem, ISnapshot } from './type';
 
@@ -68,7 +69,7 @@ export class NumfmtService extends Disposable implements INumfmtService {
         this.disposeWithMe(
             this._resourceManagerService.registerPluginResource<ISnapshot>({
                 pluginName: SHEET_NUMFMT_PLUGIN,
-                businesses: ['SHEET'],
+                businesses: [UniverType.UNIVER_SHEET],
                 toJson: (unitID) => this._toJson(unitID),
                 parseJson: (json) => this._parseJson(json),
                 onUnLoad: (unitID) => {

@@ -19,7 +19,6 @@ import { CommandType, ICommandService } from '@univerjs/core';
 
 import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
-import { EndEditController } from '../../controllers/editor/end-edit.controller';
 
 export const SetCellEditVisibleOperation: IOperation<IEditorBridgeServiceVisibleParam> = {
     id: 'sheet.operation.set-cell-edit-visible',
@@ -42,10 +41,8 @@ export const SetCellEditVisibleWithF2Operation: IOperation<IEditorBridgeServiceV
     type: CommandType.OPERATION,
     handler: (accessor, params) => {
         const commandService = accessor.get(ICommandService);
-        const endEditorController = accessor.get(EndEditController);
 
         commandService.syncExecuteCommand(SetCellEditVisibleOperation.id, params);
-        endEditorController.updateCursorChangeState();
 
         return true;
     },

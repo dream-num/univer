@@ -49,7 +49,7 @@ import { Inject } from '@wendellhu/redi';
 
 import { getEditorObject } from '../../basics/editor/get-editor-object';
 import { MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '../../commands/commands/set-selection.command';
-import { SetCellEditVisibleArrowOperation } from '../../commands/operations/cell-edit.operation';
+import { SetCellEditVisibleArrowOperation, SetCellEditVisibleWithF2Operation } from '../../commands/operations/cell-edit.operation';
 import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';
 import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
@@ -311,10 +311,6 @@ export class EndEditController extends Disposable {
         }
     }
 
-    public updateCursorChangeState() {
-        this._cursorChange = CursorChange.CursorChange;
-    }
-
     private _cursorStateListener() {
         /**
          * The user's operations follow the sequence of opening the editor and then moving the cursor.
@@ -341,6 +337,7 @@ export class EndEditController extends Disposable {
 
     private _commandExecutedListener() {
         const updateCommandList = [SetCellEditVisibleArrowOperation.id];
+
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (updateCommandList.includes(command.id)) {
@@ -360,6 +357,10 @@ export class EndEditController extends Disposable {
                     }
 
                     this._editorBridgeService.changeVisible(params);
+                }
+
+                if (command.id === SetCellEditVisibleWithF2Operation.id) {
+                    this._cursorChange = CursorChange.CursorChange;
                 }
             })
         );

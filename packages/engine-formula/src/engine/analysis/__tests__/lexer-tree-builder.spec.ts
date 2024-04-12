@@ -20,6 +20,13 @@ import type { LexerNode } from '../lexer-node';
 import { LexerTreeBuilder } from '../lexer-tree-builder';
 import { ErrorType } from '../../../basics/error-type';
 
+function checkDefinedName(token: string) {
+    if (token === 'myName') {
+        return true;
+    }
+    return false;
+}
+
 describe('lexer nodeMaker test', () => {
     const lexerTreeBuilder = new LexerTreeBuilder();
 
@@ -393,8 +400,22 @@ describe('lexer nodeMaker test', () => {
             ]);
         });
 
-        // it('Has defined name', () => {
-        //     expect(lexerTreeBuilder.sequenceNodesBuilder('=myName+A1:B10', (token)=>{ if(token==="myName"){ return true } return false })).toStrictEqual([]);
-        // });
+        it('Has defined name', () => {
+            expect(lexerTreeBuilder.sequenceNodesBuilder('=myName+A1:B10', checkDefinedName.bind(this))).toStrictEqual([
+                {
+                    endIndex: 5,
+                    nodeType: 6,
+                    startIndex: 0,
+                    token: 'myName',
+                },
+                '+',
+                {
+                    endIndex: 12,
+                    nodeType: 4,
+                    startIndex: 7,
+                    token: 'A1:B10',
+                },
+            ]);
+        });
     });
 });

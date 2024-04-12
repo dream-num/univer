@@ -1361,7 +1361,7 @@ export class LexerTreeBuilder extends Disposable {
                         cur++;
                         continue;
                     }
-                } else if (this._segment.length > 0 && formulaStringArray[cur - 1] && formulaStringArray[cur - 1].toUpperCase() === 'E' && (currentString === operatorToken.MINUS || currentString === operatorToken.PLUS)) {
+                } else if (this._segment.length > 0 && this._isScientificNotation(formulaStringArray, cur, currentString)) {
                     this._pushSegment(currentString);
 
                     // if (!(isZeroAdded && cur === 0)) {
@@ -1412,6 +1412,16 @@ export class LexerTreeBuilder extends Disposable {
         }
 
         this._pushNodeToChildren(this._segment);
+    }
+
+    private _isScientificNotation(formulaStringArray: string[], cur: number, currentString: string) {
+        const preTwoChar = formulaStringArray[cur - 2];
+        if (preTwoChar && isNaN(Number(preTwoChar))) {
+            return false;
+        }
+
+        const preOneChar = formulaStringArray[cur - 1];
+        return preOneChar && preOneChar.toUpperCase() === 'E' && (currentString === operatorToken.MINUS || currentString === operatorToken.PLUS);
     }
 
     private _addSequenceArray(sequenceArray: ISequenceArray[] | undefined, currentString: string, cur: number, isZeroAdded: boolean) {

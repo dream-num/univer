@@ -19,6 +19,7 @@ import { DataValidationStatus, Disposable } from '@univerjs/core';
 import { Subject } from 'rxjs';
 import type { IUpdateRulePayload } from '../types/interfaces/i-update-rule-payload';
 import { UpdateRuleType } from '../types/enum/update-rule-type';
+import { getRuleOptions, getRuleSetting } from '../common/util';
 
 export class DataValidationManager<T extends IDataValidationRule> extends Disposable {
     private _dataValidations: T[];
@@ -102,18 +103,19 @@ export class DataValidationManager<T extends IDataValidationRule> extends Dispos
 
         const rule = { ...oldRule };
 
+
         switch (payload.type) {
             case UpdateRuleType.RANGE: {
                 rule.ranges = payload.payload;
                 break;
             }
             case UpdateRuleType.SETTING: {
-                Object.assign(rule, payload.payload);
+                Object.assign(rule, getRuleSetting(payload.payload));
                 break;
             }
 
             case UpdateRuleType.OPTIONS: {
-                Object.assign(rule, payload.payload);
+                Object.assign(rule, getRuleOptions(payload.payload));
                 break;
             }
             default:

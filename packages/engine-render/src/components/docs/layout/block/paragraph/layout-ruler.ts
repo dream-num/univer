@@ -118,6 +118,13 @@ function _divideOperator(
                     glyphGroup[0].content === DataStreamTreeTokenType.PARAGRAPH)
             ) {
                 addGlyphToDivide(divide, glyphGroup, preOffsetLeft);
+            } else if (
+                // If a line of text ends with consecutive spaces, the spaces should not be placed on the second line.
+                divideInfo.isLast && glyphGroup.length > 1 && glyphGroup.slice(1).every((g) => (
+                    g.content === DataStreamTreeTokenType.SPACE || g.content === DataStreamTreeTokenType.PARAGRAPH || g.streamType === DataStreamTreeTokenType.SECTION_BREAK
+                ))
+            ) {
+                addGlyphToDivide(divide, glyphGroup, preOffsetLeft);
             } else if (divide?.glyphGroup.length === 0) {
                 const sliceGlyphGroup: IDocumentSkeletonGlyph[] = [];
 

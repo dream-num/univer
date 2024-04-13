@@ -14,14 +14,9 @@
  * limitations under the License.
  */
 
-import type {
-    IDocumentSkeletonPage,
-    ISkeletonResourceReference,
-} from '../../../../../basics/i-document-skeleton-cached';
+import type { IDocumentSkeletonPage, ISkeletonResourceReference } from '../../../../../basics/i-document-skeleton-cached';
 import type { ISectionBreakConfig } from '../../../../../basics/interfaces';
-import {
-    clearFontCreateConfigCache,
-} from '../../tools';
+import { clearFontCreateConfigCache } from '../../tools';
 import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../../view-model/document-view-model';
 import { shaping } from './shaping';
@@ -41,6 +36,7 @@ export function dealWidthParagraph(
     const { endIndex, content = '' } = paragraphNode;
 
     const paragraph = bodyModel.getParagraph(endIndex) || { startIndex: 0 };
+
     const { paragraphStyle = {} } = paragraph;
 
     const shapedTextList = shaping(

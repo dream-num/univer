@@ -24,7 +24,7 @@ import type {
     ITextDecoration,
     ITextRun,
 } from '@univerjs/core';
-import { BaselineOffset, BorderStyleTypes, getBorderStyleType, Tools } from '@univerjs/core';
+import { BaselineOffset, BorderStyleTypes, ColorKit, getBorderStyleType, Tools } from '@univerjs/core';
 import { ptToPx } from '@univerjs/engine-render';
 
 import { textTrim } from './util';
@@ -207,10 +207,10 @@ export function handleStringToStyle($dom?: HTMLElement, cssStyle: string = '') {
         }
         // fill color / background
         else if (key === 'background' || key === 'background-color') {
-            const backgroundColor = extractColorFromString(value);
+            const backgroundColor = new ColorKit(value);
             if (backgroundColor) {
                 styleList.bg = {
-                    rgb: backgroundColor,
+                    rgb: backgroundColor.toRgbString(),
                 };
             }
         }

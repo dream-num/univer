@@ -169,7 +169,7 @@ describe('Test clipboard', () => {
             expect(getValues(2, 3, 2, 3)?.[0]?.[0]?.v).toEqual('Univer');
             const cellStyle = getStyles(2, 3, 2, 3)?.[0]?.[0];
             expect(cellStyle?.vt).toBe(2);
-            expect(cellStyle?.bg).toStrictEqual({ rgb: '#0f9ed5' });
+            expect(cellStyle?.bg).toStrictEqual({ rgb: 'rgb(15,158,213)' });
             const richTextStyle = getValues(2, 3, 2, 3)?.[0]?.[0]?.p;
             expect(richTextStyle?.body?.dataStream).toBe('Univer\r\n');
             expect(richTextStyle?.body?.paragraphs).toStrictEqual([{ startIndex: 6 }]);

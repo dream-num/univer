@@ -201,11 +201,11 @@ export class FontCache {
         return bBox;
     }
 
-    static getBBoxFromGlyphInfo(glyphInfo: IOpenTypeGlyphInfo, fontSize: number) {
+    static getBBoxFromGlyphInfo(glyphInfo: IOpenTypeGlyphInfo, fontStyle: IDocumentSkeletonFontStyle) {
         const glyph = glyphInfo.glyph!;
         const font = glyphInfo.font!;
         const { y1, y2 } = glyphInfo.boundingBox!;
-        const scale = ptToPixel(fontSize) / font.unitsPerEm;
+        const scale = ptToPixel(fontStyle.fontSize) / font.unitsPerEm;
 
         const { ascender, descender } = font;
 
@@ -215,7 +215,7 @@ export class FontCache {
             fontBoundingBoxDescent: Math.abs(descender * scale),
             actualBoundingBoxAscent: y2 * scale,
             actualBoundingBoxDescent: Math.abs(y1 * scale),
-        }, fontSize);
+        }, fontStyle);
     }
 
     // 获取有值单元格文本大小

@@ -19,7 +19,7 @@ import { ICommandService, IUniverInstanceService, ObjectMatrix } from '@univerjs
 import { Lexer } from '@univerjs/engine-formula';
 import { type ISetRangeValuesMutationParams, SetRangeValuesMutation } from '@univerjs/sheets';
 import type { ICellDataWithSpanInfo } from '@univerjs/sheets-ui';
-import { COPY_TYPE, ISelectionRenderService, SelectionRenderService } from '@univerjs/sheets-ui';
+import { COPY_TYPE, ISelectionRenderService, PREDEFINED_HOOK_NAME, SelectionRenderService } from '@univerjs/sheets-ui';
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
@@ -101,6 +101,7 @@ describe('Test paste with formula', () => {
                     rangeType: 0,
                 },
                 copyType: COPY_TYPE.COPY,
+                pasteType: PREDEFINED_HOOK_NAME.DEFAULT_PASTE,
             };
 
             const result = {
@@ -331,6 +332,7 @@ describe('Test paste with formula', () => {
                     endColumn: 8,
                     rangeType: 0,
                 },
+                pasteType: PREDEFINED_HOOK_NAME.DEFAULT_PASTE,
             };
 
             const result = {

@@ -27,6 +27,7 @@ import type {
 } from '@univerjs/core';
 import {
     BooleanNumber,
+    convertBodyToHtml,
     DEFAULT_WORKSHEET_COLUMN_WIDTH,
     DEFAULT_WORKSHEET_COLUMN_WIDTH_KEY,
     DEFAULT_WORKSHEET_ROW_HEIGHT,
@@ -35,6 +36,7 @@ import {
     ICommandService,
     IConfigService,
     IContextService,
+    isFormulaString,
     IUniverInstanceService,
     LifecycleStages,
     LocaleService,
@@ -163,6 +165,9 @@ export class SheetClipboardController extends RxDisposable {
             },
             onCopyCellContent(row: number, col: number): string {
                 const cell = currentSheet!.getCell(row, col);
+                if (cell?.p?.body?.paragraphs || cell?.p?.body?.textRuns) {
+                    return convertBodyToHtml(cell.p.body);
+                }
                 const content = cell ? extractPureTextFromCell(cell) : '';
                 return content;
             },
@@ -177,6 +182,9 @@ export class SheetClipboardController extends RxDisposable {
                 // TODO@wzhudev: should deprecate Range and
                 // use worksheet.getStyle()
                 const range = currentSheet!.getRange(row, col);
+
+                const mergedCellByRowCol = currentSheet!.getMergedCell(row, col);
+
                 const textStyle = range.getTextStyle();
                 // const color = range.getFontColor();
                 // const backgroundColor = range.getBackground();
@@ -212,6 +220,21 @@ export class SheetClipboardController extends RxDisposable {
 
                 if (textStyle) {
                     style = handleStyleToString(textStyle);
+                }
+
+                if (mergedCellByRowCol) {
+                    const endRow = mergedCellByRowCol.endRow;
+                    const endColumn = mergedCellByRowCol.endColumn;
+                    const lastRange = currentSheet!.getRange(endRow, endColumn);
+                    const lastTextStyle = lastRange.getTextStyle();
+                    if (lastTextStyle) {
+                        const lastStyle = handleStyleToString(lastTextStyle);
+                        if (style) {
+                            style += lastStyle ? `;${lastStyle}` : '';
+                        } else {
+                            style = lastStyle;
+                        }
+                    }
                 }
 
                 if (style) {
@@ -277,8 +300,10 @@ export class SheetClipboardController extends RxDisposable {
 
                 // if the range is outside ot the worksheet's boundary, we should add rows
                 const maxRow = currentSheet!.getMaxRows();
-                const addingRowsCount = range.endRow - maxRow;
+                const addingRowsCount = range.endRow - maxRow + 1;
                 const existingRowsCount = rowProperties.length - addingRowsCount;
+
+                const rowManager = currentSheet!.getRowManager();
                 if (addingRowsCount > 0) {
                     const rowInfo: IObjectArrayPrimitiveType<IRowData> = {};
                     rowProperties.slice(existingRowsCount).forEach((property, index) => {
@@ -325,6 +350,7 @@ export class SheetClipboardController extends RxDisposable {
                 // get row height of existing rows
                 // TODO When Excel pasted, there was no width height, Do we still need to set the height?
                 const rowHeight: IObjectArrayPrimitiveType<number> = {};
+                const originRowHeight: IObjectArrayPrimitiveType<number> = {};
                 rowProperties.slice(0, existingRowsCount).forEach((property, index) => {
                     const { style, height: propertyHeight } = property;
                     if (style) {
@@ -344,7 +370,19 @@ export class SheetClipboardController extends RxDisposable {
 
                         rowHeight[index + range.startRow] = height;
                     } else if (propertyHeight) {
-                        rowHeight[index + range.startRow] = Number.parseFloat(propertyHeight);
+                        const rowConfigBeforePaste = rowManager.getRow(range.startRow + index);
+                        const willSetHeight = Number.parseFloat(propertyHeight);
+                        if (rowConfigBeforePaste) {
+                            const { h = DEFAULT_WORKSHEET_ROW_HEIGHT, ah = 0 } = rowConfigBeforePaste;
+                            const nowRowHeight = Math.max(h, ah);
+                            if (willSetHeight > nowRowHeight) {
+                                rowHeight[index + range.startRow] = willSetHeight;
+                                originRowHeight[index + range.startRow] = nowRowHeight;
+                            }
+                        } else {
+                            rowHeight[index + range.startRow] = willSetHeight;
+                            originRowHeight[index + range.startRow] = rowManager.getRow(range.startRow + index)?.h ?? DEFAULT_WORKSHEET_ROW_HEIGHT;
+                        }
                     }
                 });
 
@@ -360,11 +398,17 @@ export class SheetClipboardController extends RxDisposable {
                     params: setRowPropertyMutation,
                 });
 
-                // TODO: add undo mutations but we cannot do it now because underlying mechanism is not ready
+                undoMutations.push({
+                    id: SetWorksheetRowHeightMutation.id,
+                    params: {
+                        ...setRowPropertyMutation,
+                        rowHeight: 20,
+                    },
+                });
 
                 return {
                     redos: redoMutations,
-                    undos: [] || undoMutations,
+                    undos: undoMutations,
                 };
             },
 
@@ -375,7 +419,7 @@ export class SheetClipboardController extends RxDisposable {
 
                 // if the range is outside ot the worksheet's boundary, we should add rows
                 const maxColumn = currentSheet!.getMaxColumns();
-                const addingColsCount = range.endColumn - maxColumn;
+                const addingColsCount = range.endColumn - maxColumn + 1;
                 const existingColsCount = colProperties.length - addingColsCount;
 
                 const defaultColumnWidth = self._configService.getConfig<number>(DEFAULT_WORKSHEET_COLUMN_WIDTH_KEY) ?? DEFAULT_WORKSHEET_COLUMN_WIDTH;
@@ -463,13 +507,23 @@ export class SheetClipboardController extends RxDisposable {
                 },
             };
         } else {
-            cellValue = {
-                [range.startRow]: {
-                    [range.startColumn]: {
-                        v: text,
+            if (isFormulaString(text)) {
+                cellValue = {
+                    [range.startRow]: {
+                        [range.startColumn]: {
+                            f: text,
+                        },
                     },
-                },
-            };
+                };
+            } else {
+                cellValue = {
+                    [range.startRow]: {
+                        [range.startColumn]: {
+                            v: text,
+                        },
+                    },
+                };
+            }
         }
 
         const setRangeValuesParams: ISetRangeValuesMutationParams = {
@@ -520,9 +574,8 @@ export class SheetClipboardController extends RxDisposable {
             specialPasteInfo: {
                 label: 'specialPaste.value',
             },
-            onPasteCells: (pasteFrom, pasteTo, data, pasteType) => {
-                const workbook = self._currentUniverSheet.getCurrentUniverSheetInstance()!;
-                return getSetCellValueMutations(pasteTo, data, accessor);
+            onPasteCells: (pasteFrom, pasteTo, data) => {
+                return getSetCellValueMutations(pasteTo, pasteFrom, data, accessor);
             },
         };
         const specialPasteFormatHook: ISheetClipboardHook = {
@@ -530,8 +583,7 @@ export class SheetClipboardController extends RxDisposable {
             specialPasteInfo: {
                 label: 'specialPaste.format',
             },
-            onPasteCells(pasteFrom, pasteTo, matrix, pasteType) {
-                const workbook = self._currentUniverSheet.getCurrentUniverSheetInstance()!;
+            onPasteCells(pasteFrom, pasteTo, matrix) {
                 const redoMutationsInfo: IMutationInfo[] = [];
                 const undoMutationsInfo: IMutationInfo[] = [];
 

@@ -94,6 +94,18 @@ export const SHEET_CONDITIONAL_FORMATTING_PLUGIN = 'SHEET_CONDITIONAL_FORMATTING
 export const SHEET_CONDITIONAL_FORMATTING_PLUGIN = 'sheet-conditional-formatting-plugin';
 ```
 
+### Plugin classes
+
+Plugin classes should be named in PascalCase and prefixed by `Univer`. For example:
+
+```typescript
+// ✅
+export class UniverFilterPlugin extends Plugin {}
+
+// 🚫
+export class FilterPlugin extends Plugin {}
+```
+
 ### Resource key
 
 Resource keys should reuse the corresponding plugin's name.

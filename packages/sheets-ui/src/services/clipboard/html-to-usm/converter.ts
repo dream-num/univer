@@ -224,7 +224,7 @@ export class HtmlToUSMService {
         const valueMatrix = new ObjectMatrix<ICellDataWithSpanInfo>();
         const colProperties = parseColGroup(html);
         const { rowProperties } = parseTableRows(html);
-        const parsedCellMatrix = parseTableByHtml(this.htmlElement, colProperties, rowProperties, this.getCurrentSkeleton()?.skeleton);
+        const parsedCellMatrix = parseTableByHtml(this.htmlElement, this.getCurrentSkeleton()?.skeleton);
         parsedCellMatrix &&
             parsedCellMatrix.forValue((row, col, value) => {
                 const style = handleStringToStyle(undefined, value.style);
@@ -450,7 +450,7 @@ function extractBordersAndKeepOthers(styleString: string, bordersToKeep: string[
     return newStyleString.trim();
 }
 
-function parseTableByHtml(htmlElement: HTMLIFrameElement, colProperties: IClipboardPropertyItem[] = [], rowProperties: IClipboardPropertyItem[] = [], skeleton?: SpreadsheetSkeleton) {
+function parseTableByHtml(htmlElement: HTMLIFrameElement, skeleton?: SpreadsheetSkeleton) {
     const cellMatrix = new ObjectMatrix<IParsedCellValueByClipboard>();
     const tableEle = htmlElement.contentDocument?.querySelector('table');
     if (!tableEle) {

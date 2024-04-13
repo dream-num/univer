@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-/* eslint-disable max-lines-per-function */
 
 import './extensions';
 
@@ -191,7 +190,7 @@ export class Documents extends DocComponent {
         return (this.getScene() as Scene).getEngine();
     }
 
-    // eslint-disable-next-line complexity
+
     override draw(ctx: UniverRenderingContext, bounds?: IViewportBound) {
         const documentSkeleton = this.getSkeleton();
 
@@ -533,9 +532,7 @@ export class Documents extends DocComponent {
             offsetTop = (this.height - pageHeight) / 2;
         } else if (verticalAlign === VerticalAlign.TOP) {
             offsetTop = 0;
-        } else if (verticalAlign === VerticalAlign.UNSPECIFIED) {
-            offsetTop = pagePaddingTop;
-        } else {
+        } else { // VerticalAlign.UNSPECIFIED follow the same rule as HorizontalAlign.BOTTOM.
             offsetTop = this.height - pageHeight - pagePaddingBottom;
         }
 

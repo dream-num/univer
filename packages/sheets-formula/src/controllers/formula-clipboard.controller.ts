@@ -25,7 +25,7 @@ import {
     OnLifecycle,
     Tools,
 } from '@univerjs/core';
-import { Lexer, LexerTreeBuilder } from '@univerjs/engine-formula';
+import { Lexer } from '@univerjs/engine-formula';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
 import type { ICellDataWithSpanInfo, ICopyPastePayload, ISheetClipboardHook, ISheetRangeLocation } from '@univerjs/sheets-ui';

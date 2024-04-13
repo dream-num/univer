@@ -30,7 +30,6 @@ import {
     ErrorType,
     FormulaDataModel,
     Lexer,
-    LexerTreeBuilder,
     SetArrayFormulaDataMutation,
     SetFormulaCalculationResultMutation,
 } from '@univerjs/engine-formula';

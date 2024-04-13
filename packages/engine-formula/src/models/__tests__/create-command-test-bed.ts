@@ -25,6 +25,7 @@ import { FormulaCurrentConfigService, IFormulaCurrentConfigService } from '../..
 import { DefinedNamesService, IDefinedNamesService } from '../../services/defined-names.service';
 import { FormulaRuntimeService, IFormulaRuntimeService } from '../../services/runtime.service';
 import { FormulaDataModel } from '../formula-data.model';
+import { Lexer } from '../../engine/analysis/lexer';
 
 const TEST_WORKBOOK_DATA: IWorkbookData = {
     id: 'test',
@@ -71,6 +72,7 @@ export function createCommandTestBed(workbookConfig?: IWorkbookData, dependencie
             injector.add([CalculateFormulaService]);
             injector.add([FormulaDataModel]);
             injector.add([LexerTreeBuilder]);
+            injector.add([Lexer]);
             injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
             injector.add([IFormulaRuntimeService, { useClass: FormulaRuntimeService }]);
             injector.add([IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }]);

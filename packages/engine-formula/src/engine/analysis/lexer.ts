@@ -15,7 +15,7 @@
  */
 
 import type { IRange } from '@univerjs/core';
-import { AbsoluteRefType, Disposable, isValidRange, IUniverInstanceService, moveRangeByOffset, Rectangle } from '@univerjs/core';
+import { AbsoluteRefType, Disposable, isValidRange, IUniverInstanceService, moveRangeByOffset } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
 import { IDefinedNamesService } from '../../services/defined-names.service';

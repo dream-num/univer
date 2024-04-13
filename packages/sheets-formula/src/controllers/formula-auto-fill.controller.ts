@@ -24,7 +24,7 @@ import {
     OnLifecycle,
     Tools,
 } from '@univerjs/core';
-import { Lexer, LexerTreeBuilder } from '@univerjs/engine-formula';
+import { Lexer } from '@univerjs/engine-formula';
 import type { AutoFillService, IAutoFillRule, ICopyDataInTypeIndexInfo, ICopyDataPiece } from '@univerjs/sheets-ui';
 import { APPLY_TYPE, DATA_TYPE, IAutoFillService } from '@univerjs/sheets-ui';
 import { Inject } from '@wendellhu/redi';

@@ -426,7 +426,36 @@ describe('lexer nodeMaker test', () => {
         });
 
         it('Has defined name11', () => {
-            expect(lexerTreeBuilder.sequenceNodesBuilder('=SUM(DefinedName2+E22:E32,J21:J32)', checkDefinedName2.bind(this))).toStrictEqual([]);
+            expect(lexerTreeBuilder.sequenceNodesBuilder('=SUM(DefinedName2+E22:E32,J21:J32)', checkDefinedName2.bind(this))).toStrictEqual([
+                {
+                    endIndex: 2,
+                    nodeType: 3,
+                    startIndex: 0,
+                    token: 'SUM',
+                },
+                '(',
+                {
+                    endIndex: 15,
+                    nodeType: 6,
+                    startIndex: 4,
+                    token: 'DefinedName2',
+                },
+                '+',
+                {
+                    endIndex: 23,
+                    nodeType: 4,
+                    startIndex: 17,
+                    token: 'E22:E32',
+                },
+                ',',
+                {
+                    endIndex: 31,
+                    nodeType: 4,
+                    startIndex: 25,
+                    token: 'J21:J32',
+                },
+                ')',
+            ]);
         });
     });
 });

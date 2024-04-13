@@ -16,7 +16,7 @@
 
 import type { IMutationInfo, IRange } from '@univerjs/core';
 import { Disposable, DisposableCollection, IUniverInstanceService } from '@univerjs/core';
-import { deserializeRangeWithSheet, ErrorType, generateStringWithSequence, Lexer, LexerTreeBuilder, sequenceNodeType, serializeRange, serializeRangeWithSheet, serializeRangeWithSpreadsheet } from '@univerjs/engine-formula';
+import { deserializeRangeWithSheet, ErrorType, generateStringWithSequence, Lexer, sequenceNodeType, serializeRange, serializeRangeWithSheet, serializeRangeWithSpreadsheet } from '@univerjs/engine-formula';
 import type { EffectRefRangeParams } from '@univerjs/sheets';
 import { handleDefaultRangeChangeWithEffectRefCommands, RefRangeService } from '@univerjs/sheets';
 import type { IDisposable } from '@wendellhu/redi';

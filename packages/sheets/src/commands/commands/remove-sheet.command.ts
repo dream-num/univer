@@ -32,6 +32,7 @@ import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-
 import { InsertSheetMutation } from '../mutations/insert-sheet.mutation';
 import { RemoveSheetMutation, RemoveSheetUndoMutationFactory } from '../mutations/remove-sheet.mutation';
 import type { ISetWorksheetActiveOperationParams } from '../operations/set-worksheet-active.operation';
+import { getSheetCommandTarget } from './utils/target-util';
 
 export interface IRemoveSheetCommandParams {
     unitId?: string;
@@ -49,22 +50,12 @@ export const RemoveSheetCommand: ICommand = {
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
-        let unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-        let subUnitId = univerInstanceService
-            .getCurrentUniverSheetInstance()
 
-            .getActiveSheet()
-            .getSheetId();
+        const target = getSheetCommandTarget(univerInstanceService, params);
+        if (!target) return false;
 
-        if (params) {
-            unitId = params.unitId ?? unitId;
-            subUnitId = params.subUnitId ?? subUnitId;
-        }
+        const { unitId, subUnitId, workbook, worksheet } = target;
 
-        const workbook = univerInstanceService.getUniverSheetInstance(unitId);
-        if (!workbook) return false;
-        const worksheet = workbook.getSheetBySheetId(subUnitId);
-        if (!worksheet) return false;
         if (workbook.getSheets().length <= 1) return false;
 
         const index = workbook.getSheetIndex(worksheet);

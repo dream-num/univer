@@ -114,13 +114,13 @@ export class StatusBarController extends Disposable {
     }
 
     private _calculateSelection(selections: IRange[], primary: Nullable<ISelectionCell>) {
-        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
+        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
         const unitId = workbook.getUnitId();
         const sheetId = workbook.getActiveSheet().getSheetId();
         const sheetData: ISheetData = {};
         const arrayFormulaMatrixCell = this._formulaDataModel.getArrayFormulaCellData();
         this._univerInstanceService
-            .getCurrentUniverSheetInstance()
+            .getCurrentUniverSheetInstance()!
             .getSheets()
             .forEach((sheet) => {
                 const sheetConfig = sheet.getConfig();

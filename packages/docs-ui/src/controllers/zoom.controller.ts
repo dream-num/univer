@@ -40,7 +40,7 @@ export class ZoomController extends Disposable {
 
     constructor(
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
@@ -92,14 +92,17 @@ export class ZoomController extends Disposable {
                             return;
                         }
 
+                        const documentModel = this._univerInstanceService.getCurrentUniverDocInstance();
+                        if (!documentModel) {
+                            return;
+                        }
+
                         const deltaFactor = Math.abs(e.deltaX);
                         let ratioDelta = deltaFactor < 40 ? 0.2 : deltaFactor < 80 ? 0.4 : 0.2;
                         ratioDelta *= e.deltaY > 0 ? -1 : 1;
                         if (scene.scaleX < 1) {
                             ratioDelta /= 2;
                         }
-
-                        const documentModel = this._currentUniverService.getCurrentUniverDocInstance();
 
                         const currentRatio = documentModel.zoomRatio;
 
@@ -135,7 +138,8 @@ export class ZoomController extends Disposable {
                         return;
                     }
 
-                    const documentModel = this._currentUniverService.getCurrentUniverDocInstance();
+                    const documentModel = this._univerInstanceService.getCurrentUniverDocInstance();
+                    if (!documentModel) return;
 
                     const zoomRatio = documentModel.zoomRatio || 1;
 
@@ -151,7 +155,8 @@ export class ZoomController extends Disposable {
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (updateCommandList.includes(command.id)) {
-                    const documentModel = this._currentUniverService.getCurrentUniverDocInstance();
+                    const documentModel = this._univerInstanceService.getCurrentUniverDocInstance();
+                    if (!documentModel) return;
 
                     const params = command.params;
                     const { unitId } = params as ISetDocMutationParams;
@@ -244,6 +249,6 @@ export class ZoomController extends Disposable {
     }
 
     private _getDocObject() {
-        return getDocObject(this._currentUniverService, this._renderManagerService);
+        return getDocObject(this._univerInstanceService, this._renderManagerService);
     }
 }

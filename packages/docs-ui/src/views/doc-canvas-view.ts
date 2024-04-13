@@ -41,7 +41,7 @@ export class DocCanvasView extends RxDisposable {
     constructor(
         @IRenderManagerService private readonly _renderManagerService: RenderManagerService,
         @IConfigService private readonly _configService: IConfigService,
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IEditorService private readonly _editorService: IEditorService
     ) {
         super();
@@ -53,11 +53,11 @@ export class DocCanvasView extends RxDisposable {
             this._create(unitId);
         });
 
-        this._currentUniverService.currentDoc$.pipe(takeUntil(this.dispose$)).subscribe((documentModel) => {
+        this._univerInstanceService.currentDoc$.pipe(takeUntil(this.dispose$)).subscribe((documentModel) => {
             this._create(documentModel?.getUnitId());
         });
 
-        this._currentUniverService.getAllUniverDocsInstance().forEach((documentModel) => {
+        this._univerInstanceService.getAllUniverDocsInstance().forEach((documentModel) => {
             this._create(documentModel.getUnitId());
         });
     }
@@ -71,7 +71,7 @@ export class DocCanvasView extends RxDisposable {
             return;
         }
 
-        const model = this._currentUniverService.getUniverDocInstance(unitId);
+        const model = this._univerInstanceService.getUniverDocInstance(unitId);
 
         if (model == null) {
             return;

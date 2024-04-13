@@ -404,5 +404,5 @@ export class ConditionalFormattingService extends Disposable {
     }
 }
 
-const getUnitId = (u: IUniverInstanceService) => u.getCurrentUniverSheetInstance().getUnitId();
-const getSubUnitId = (u: IUniverInstanceService) => u.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
+const getUnitId = (u: IUniverInstanceService) => u.getCurrentUniverSheetInstance()!.getUnitId();
+const getSubUnitId = (u: IUniverInstanceService) => u.getCurrentUniverSheetInstance()!.getActiveSheet().getSheetId();

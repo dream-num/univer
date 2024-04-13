@@ -46,6 +46,8 @@ export const ClearSelectionContentCommand: ICommand = {
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
         const workbook = univerInstanceService.getCurrentUniverSheetInstance();
+        if (!workbook) return false;
+
         const unitId = workbook.getUnitId();
         const worksheet = workbook.getActiveSheet();
         const subUnitId = worksheet.getSheetId();

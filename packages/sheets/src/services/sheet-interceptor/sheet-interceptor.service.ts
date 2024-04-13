@@ -55,21 +55,21 @@ export class SheetInterceptorService extends Disposable {
     private readonly _workbookDisposables = new Map<string, IDisposable>();
     private readonly _worksheetDisposables = new Map<string, IDisposable>();
 
-    constructor(@IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService) {
+    constructor(@IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService) {
         super();
 
         // When a workbook is created or a worksheet is added after when workbook is created,
         // `SheetInterceptorService` inject interceptors to worksheet instances to it.
         this.disposeWithMe(
             toDisposable(
-                this._currentUniverService.sheetAdded$.subscribe((workbook) => {
+                this._univerInstanceService.sheetAdded$.subscribe((workbook) => {
                     this._interceptWorkbook(workbook);
                 })
             )
         );
         this.disposeWithMe(
             toDisposable(
-                this._currentUniverService.sheetDisposed$.subscribe((workbook) =>
+                this._univerInstanceService.sheetDisposed$.subscribe((workbook) =>
                     this._disposeWorkbookInterceptor(workbook)
                 )
             )

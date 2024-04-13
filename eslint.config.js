@@ -31,6 +31,8 @@ export default antfu({
         'playwright.config.ts',
         '**/*.spec.ts',
         '**/*.spec.tsx',
+        '**/*.test.ts',
+        '**/*.test.tsx',
     ], // do not check test files
     rules: {
         complexity: ['warn', { max: 20 }],

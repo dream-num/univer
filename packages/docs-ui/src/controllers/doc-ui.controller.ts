@@ -60,7 +60,7 @@ export class DocUIController extends Disposable {
         @IEditorService private readonly _editorService: IEditorService,
         @IMenuService private readonly _menuService: IMenuService,
         @IUIController private readonly _uiController: IDesktopUIController,
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
 
@@ -110,7 +110,7 @@ export class DocUIController extends Disposable {
     }
 
     private _initDocBackground() {
-        const firstDocUnitId = this._currentUniverService.getAllUniverDocsInstance()[0].getUnitId();
+        const firstDocUnitId = this._univerInstanceService.getAllUniverDocsInstance()[0].getUnitId();
         if (firstDocUnitId == null) {
             return;
         }

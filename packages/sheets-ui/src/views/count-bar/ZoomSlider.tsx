@@ -34,7 +34,7 @@ export function ZoomSlider() {
     const univerInstanceService = useDependency(IUniverInstanceService);
 
     const getCurrentZoom = useCallback(() => {
-        const currentZoom = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getZoomRatio() * 100 || 100;
+        const currentZoom = univerInstanceService.getCurrentUniverSheetInstance()!.getActiveSheet().getZoomRatio() * 100 || 100;
         return Math.round(currentZoom);
     }, [univerInstanceService]);
 
@@ -52,7 +52,7 @@ export function ZoomSlider() {
 
     function handleChange(value: number) {
         setZoom(value);
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
+        const workbook = univerInstanceService.getCurrentUniverSheetInstance()!;
         const worksheet = workbook?.getActiveSheet();
         if (worksheet == null) {
             return;

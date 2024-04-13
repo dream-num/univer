@@ -16,7 +16,7 @@
 
 import type { ICommand, IRange } from '@univerjs/core';
 import { CommandType, ICommandService, IUniverInstanceService, LocaleService, Rectangle } from '@univerjs/core';
-import { InsertRangeMoveDownCommand, SelectionManagerService } from '@univerjs/sheets';
+import { getSheetCommandTarget, InsertRangeMoveDownCommand, SelectionManagerService } from '@univerjs/sheets';
 import { IConfirmService } from '@univerjs/ui';
 
 export const InsertRangeMoveDownConfirmCommand: ICommand = {
@@ -33,8 +33,11 @@ export const InsertRangeMoveDownConfirmCommand: ICommand = {
         if (!selection) {
             return false;
         }
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
-        const worksheet = workbook.getActiveSheet();
+
+        const target = getSheetCommandTarget(univerInstanceService);
+        if (!target) return false;
+
+        const { worksheet } = target;
         let range = selection[0].range;
 
         if (!range) {

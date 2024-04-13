@@ -36,6 +36,7 @@ import {
 import type { ISetSelectionsOperationParams } from '../operations/selection.operation';
 import { SetSelectionsOperation } from '../operations/selection.operation';
 import { getPrimaryForRange } from './utils/selection-utils';
+import { getSheetCommandTarget } from './utils/target-util';
 
 export interface ISetSpecificRowsVisibleCommandParams {
     unitId: string;
@@ -160,12 +161,10 @@ export const SetRowHiddenCommand: ICommand = {
             return false;
         }
 
-        const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-        const subUnitId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
-        const workbook = univerInstanceService.getUniverSheetInstance(unitId);
-        if (!workbook) return false;
-        const worksheet = workbook.getSheetBySheetId(subUnitId);
-        if (!worksheet) return false;
+        const target = getSheetCommandTarget(univerInstanceService);
+        if (!target) return false;
+
+        const { unitId, subUnitId, worksheet } = target;
 
         const redoMutationParams: ISetRowHiddenMutationParams = {
             unitId,

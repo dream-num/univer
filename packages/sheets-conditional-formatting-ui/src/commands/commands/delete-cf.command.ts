@@ -21,6 +21,7 @@ import {
     IUndoRedoService,
     IUniverInstanceService,
 } from '@univerjs/core';
+import { getSheetCommandTarget } from '@univerjs/sheets';
 import type { IDeleteConditionalRuleMutationParams } from '@univerjs/sheets-conditional-formatting';
 import { DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory } from '@univerjs/sheets-conditional-formatting';
 
@@ -39,10 +40,10 @@ export const DeleteCfCommand: ICommand<IDeleteCfCommandParams> = {
         const undoRedoService = accessor.get(IUndoRedoService);
         const commandService = accessor.get(ICommandService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
-        const worksheet = workbook.getActiveSheet();
-        const unitId = params.unitId ?? workbook.getUnitId();
-        const subUnitId = params.subUnitId ?? worksheet.getSheetId();
+        const target = getSheetCommandTarget(univerInstanceService, params);
+        if (!target) return false;
+
+        const { unitId, subUnitId } = target;
         const config: IDeleteConditionalRuleMutationParams = { unitId, subUnitId, cfId: params.cfId };
         const undos = DeleteConditionalRuleMutationUndoFactory(accessor, config);
         const result = commandService.syncExecuteCommand(DeleteConditionalRuleMutation.id, config);

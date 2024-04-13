@@ -612,9 +612,9 @@ export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMe
 }
 
 function getFontStyleAtCursor(accessor: IAccessor) {
-    const currentUniverService = accessor.get(IUniverInstanceService);
+    const univerInstanceService = accessor.get(IUniverInstanceService);
     const textSelectionService = accessor.get(TextSelectionManagerService);
-    const editorDataModel = currentUniverService.getCurrentUniverDocInstance();
+    const editorDataModel = univerInstanceService.getCurrentUniverDocInstance();
     const activeTextRange = textSelectionService.getActiveRange();
 
     if (editorDataModel == null || activeTextRange == null) {
@@ -635,9 +635,9 @@ function getFontStyleAtCursor(accessor: IAccessor) {
 }
 
 function getParagraphStyleAtCursor(accessor: IAccessor) {
-    const currentUniverService = accessor.get(IUniverInstanceService);
+    const univerInstanceService = accessor.get(IUniverInstanceService);
     const textSelectionService = accessor.get(TextSelectionManagerService);
-    const editorDataModel = currentUniverService.getCurrentUniverDocInstance();
+    const editorDataModel = univerInstanceService.getCurrentUniverDocInstance();
     const activeTextRange = textSelectionService.getActiveRange();
 
     if (editorDataModel == null || activeTextRange == null) {

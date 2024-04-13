@@ -84,7 +84,7 @@ export class HeaderResizeController extends Disposable {
 
     constructor(
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService
@@ -480,7 +480,7 @@ export class HeaderResizeController extends Disposable {
                     });
 
                     this._upObserver = scene.onPointerUpObserver.add((upEvt: IPointerEvent | IMouseEvent) => {
-                        const sheetObject = getSheetObject(this._currentUniverService, this._renderManagerService);
+                        const sheetObject = getSheetObject(this._univerInstanceService, this._renderManagerService);
 
                         if (sheetObject == null) {
                             return;
@@ -562,6 +562,6 @@ export class HeaderResizeController extends Disposable {
     }
 
     private _getSheetObject() {
-        return getSheetObject(this._currentUniverService, this._renderManagerService);
+        return getSheetObject(this._univerInstanceService, this._renderManagerService);
     }
 }

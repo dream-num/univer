@@ -38,7 +38,9 @@ export const SetDocZoomRatioCommand: ICommand = {
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        let documentId = univerInstanceService.getCurrentUniverDocInstance().getUnitId();
+        let documentId = univerInstanceService.getCurrentUniverDocInstance()?.getUnitId();
+        if (!documentId) return false;
+
         let zoomRatio = 1;
 
         if (params) {

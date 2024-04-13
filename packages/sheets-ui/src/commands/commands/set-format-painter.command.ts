@@ -34,6 +34,7 @@ import {
     AddMergeUndoMutationFactory,
     AddWorksheetMergeMutation,
     getAddMergeMutationRangeByType,
+    getSheetCommandTarget,
     INTERCEPTOR_POINT,
     RemoveMergeUndoMutationFactory,
     RemoveWorksheetMergeMutation,
@@ -105,12 +106,15 @@ export const ApplyFormatPainterCommand: ICommand = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const selectionManagerService = accessor.get(SelectionManagerService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
+
+        const target = getSheetCommandTarget(univerInstanceService, params);
+        if (!target) return false;
+
+        const { worksheet, unitId, subUnitId } = target;
         const {
             styleValues: value,
             styleRange: range,
             mergeRanges,
-            unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId(),
-            subUnitId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId(),
         } = params;
 
         const currentSelections = range ? [range] : selectionManagerService.getSelectionRanges();
@@ -172,7 +176,6 @@ export const ApplyFormatPainterCommand: ICommand = {
 
         // handle merge
         const ranges = getAddMergeMutationRangeByType(mergeRanges);
-        const worksheet = univerInstanceService.getUniverSheetInstance(unitId)!.getSheetBySheetId(subUnitId)!;
 
         const mergeRedos: IMutationInfo[] = [];
         const mergeUndos: IMutationInfo[] = [];

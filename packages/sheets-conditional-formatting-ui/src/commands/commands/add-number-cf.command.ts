@@ -20,6 +20,7 @@ import {
     ICommandService,
     IUniverInstanceService,
 } from '@univerjs/core';
+import { getSheetCommandTarget } from '@univerjs/sheets';
 import { AddConditionalRuleMutation, CFNumberOperator, CFRuleType, CFSubRuleType, ConditionalFormattingRuleModel } from '@univerjs/sheets-conditional-formatting';
 import type { IAddConditionalRuleMutationParams, IConditionFormattingRule, INumberHighlightCell } from '@univerjs/sheets-conditional-formatting';
 
@@ -41,10 +42,10 @@ export const AddNumberCfCommand: ICommand<IAddNumberCfParams> = {
         const conditionalFormattingRuleModel = accessor.get(ConditionalFormattingRuleModel);
         const commandService = accessor.get(ICommandService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
-        const worksheet = workbook.getActiveSheet();
-        const unitId = workbook.getUnitId();
-        const subUnitId = worksheet.getSheetId();
+        const target = getSheetCommandTarget(univerInstanceService);
+        if (!target) return false;
+
+        const { unitId, subUnitId } = target;
         const cfId = conditionalFormattingRuleModel.createCfId(unitId, subUnitId);
         let rule: IConditionFormattingRule;
         if ([CFNumberOperator.between, CFNumberOperator.notBetween].includes(operator)) {

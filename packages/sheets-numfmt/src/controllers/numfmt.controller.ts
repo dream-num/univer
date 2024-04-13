@@ -107,7 +107,7 @@ export class NumfmtController extends Disposable implements INumfmtController {
         if (!range) {
             return false;
         }
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
+        const workbook = univerInstanceService.getCurrentUniverSheetInstance()!;
         const sheet = workbook.getActiveSheet();
 
         const cellValue = sheet.getCellRaw(range.startRow, range.startColumn);
@@ -193,11 +193,9 @@ export class NumfmtController extends Disposable implements INumfmtController {
                     switch (command.id) {
                         case ClearSelectionAllCommand.id:
                         case ClearSelectionFormatCommand.id: {
-                            const unitId = self._univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-                            const subUnitId = self._univerInstanceService
-                                .getCurrentUniverSheetInstance()
-                                .getActiveSheet()
-                                .getSheetId();
+                            const workbook = self._univerInstanceService.getCurrentUniverSheetInstance()!;
+                            const unitId = workbook.getUnitId();
+                            const subUnitId = workbook.getActiveSheet().getSheetId();
                             const selections = self._selectionManagerService.getSelectionRanges();
                             if (!selections?.length) {
                                 break;
@@ -283,7 +281,7 @@ export class NumfmtController extends Disposable implements INumfmtController {
                         })
                     )
                     .subscribe(({ disposableCollection, selectionRanges }) => {
-                        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
+                        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
                         this.openPanel();
                         disposableCollection.add(
                             this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {

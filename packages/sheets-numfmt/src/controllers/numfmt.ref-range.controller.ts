@@ -114,12 +114,9 @@ export class NumfmtRefRangeController extends Disposable {
                         )
                     )
                     .subscribe((disposableCollection) => {
-                        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
+                        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
                         const unitId = workbook.getUnitId();
-                        const subUnitId = this._univerInstanceService
-                            .getCurrentUniverSheetInstance()
-                            .getActiveSheet()
-                            .getSheetId();
+                        const subUnitId = workbook.getActiveSheet().getSheetId();
                         const model = this._numfmtService.getModel(unitId, subUnitId);
                         const disposableMap: Map<string, IDisposable> = new Map();
                         const register = (commandInfo: EffectRefRangeParams, row: number, col: number) => {

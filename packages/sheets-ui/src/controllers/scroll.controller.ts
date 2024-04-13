@@ -46,7 +46,7 @@ const SHEET_NAVIGATION_COMMANDS = [MoveSelectionCommand.id, MoveSelectionEnterAn
 export class ScrollController extends Disposable {
     constructor(
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
@@ -305,7 +305,7 @@ export class ScrollController extends Disposable {
     }
 
     private _getSheetObject() {
-        return getSheetObject(this._currentUniverService, this._renderManagerService);
+        return getSheetObject(this._univerInstanceService, this._renderManagerService);
     }
 
     private _scrollToSelectionByDirection(range: IRange) {
@@ -404,7 +404,7 @@ export class ScrollController extends Disposable {
             return false;
         }
 
-        const worksheet = this._currentUniverService.getCurrentUniverSheetInstance().getActiveSheet();
+        const worksheet = this._univerInstanceService.getCurrentUniverSheetInstance()!.getActiveSheet();
         const {
             startColumn: freezeStartColumn,
             startRow: freezeStartRow,

@@ -127,7 +127,7 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
         @Inject(ThemeService) private readonly _themeService: ThemeService,
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IEditorService private readonly _editorService: IEditorService
     ) {
         super();
@@ -227,7 +227,7 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         endX = skeleton.convertTransformToOffsetX(endX, scaleX, scrollXY);
         endY = skeleton.convertTransformToOffsetY(endY, scaleY, scrollXY);
 
-        const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
         const worksheet = workbook.getActiveSheet();
         const location = {
             workbook,

@@ -45,7 +45,7 @@ export const FactoryManageConditionalFormattingRule = (componentManager: Compone
                 new Observable<null>((commandSubscribe) => {
                     const disposable = commandService.onCommandExecuted((commandInfo) => {
                         const { id, params } = commandInfo;
-                        const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+                        const unitId = univerInstanceService.getCurrentUniverSheetInstance()!.getUnitId();
                         if (commandList.includes(id) && (params as { unitId: string }).unitId === unitId) {
                             commandSubscribe.next(null);
                         }
@@ -54,8 +54,8 @@ export const FactoryManageConditionalFormattingRule = (componentManager: Compone
                 })
             ).pipe(debounceTime(16)).subscribe(() => {
                 const ranges = selectionManagerService.getSelections()?.map((selection) => selection.range) || [];
-                const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-                const subUnitId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
+                const unitId = univerInstanceService.getCurrentUniverSheetInstance()!.getUnitId();
+                const subUnitId = univerInstanceService.getCurrentUniverSheetInstance()!.getActiveSheet().getSheetId();
                 const allRule = conditionalFormattingRuleModel.getSubunitRules(unitId, subUnitId) || [];
                 const ruleList = allRule.filter((rule) => rule.ranges.some((ruleRange) => ranges.some((range) => Rectangle.intersects(range, ruleRange))));
                 subscriber.next(!!ruleList.length);
@@ -67,7 +67,7 @@ export const FactoryManageConditionalFormattingRule = (componentManager: Compone
                 new Observable<null>((commandSubscribe) => {
                     const disposable = commandService.onCommandExecuted((commandInfo) => {
                         const { id, params } = commandInfo;
-                        const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+                        const unitId = univerInstanceService.getCurrentUniverSheetInstance()!.getUnitId();
                         if (commandList.includes(id) && (params as { unitId: string }).unitId === unitId) {
                             commandSubscribe.next(null);
                         }
@@ -75,8 +75,8 @@ export const FactoryManageConditionalFormattingRule = (componentManager: Compone
                     return () => disposable.dispose();
                 })
             ).pipe(debounceTime(16)).subscribe(() => {
-                const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-                const subUnitId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
+                const unitId = univerInstanceService.getCurrentUniverSheetInstance()!.getUnitId();
+                const subUnitId = univerInstanceService.getCurrentUniverSheetInstance()!.getActiveSheet().getSheetId();
                 const allRule = conditionalFormattingRuleModel.getSubunitRules(unitId, subUnitId) || [];
                 subscriber.next(!!allRule.length);
             })

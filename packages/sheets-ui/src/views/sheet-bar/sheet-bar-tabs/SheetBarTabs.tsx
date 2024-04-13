@@ -62,7 +62,7 @@ export function SheetBarTabs() {
     const editorBridgeService = useDependency(IEditorBridgeService);
     const injector = useInjector();
 
-    const workbook = univerInstanceService.getCurrentUniverSheetInstance();
+    const workbook = univerInstanceService.getCurrentUniverSheetInstance()!;
 
     useEffect(() => {
         statusInit();
@@ -161,7 +161,7 @@ export function SheetBarTabs() {
     };
 
     const nameRepeatCheck = (name: string) => {
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
+        const workbook = univerInstanceService.getCurrentUniverSheetInstance()!;
         const worksheet = workbook.getActiveSheet();
         const currenSheetName = worksheet.getName();
         // TODO@Dushusir: no need trigger save

@@ -40,7 +40,7 @@ export class EditorBridgeController extends RxDisposable {
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
@@ -148,7 +148,7 @@ export class EditorBridgeController extends RxDisposable {
 
     private _initialChangeEditorListener() {
         this.disposeWithMe(
-            this._currentUniverService.currentDoc$.subscribe((documentDataModel) => {
+            this._univerInstanceService.currentDoc$.subscribe((documentDataModel) => {
                 if (documentDataModel == null) {
                     return;
                 }
@@ -260,7 +260,7 @@ export class EditorBridgeController extends RxDisposable {
     }
 
     private _getCurrentUnitIdAndSheetId() {
-        const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
         const worksheet = workbook.getActiveSheet();
         return {
             unitId: workbook.getUnitId(),
@@ -270,7 +270,7 @@ export class EditorBridgeController extends RxDisposable {
     }
 
     private _getSheetObject() {
-        return getSheetObject(this._currentUniverService, this._renderManagerService);
+        return getSheetObject(this._univerInstanceService, this._renderManagerService);
     }
 
     private _commandExecutedListener() {

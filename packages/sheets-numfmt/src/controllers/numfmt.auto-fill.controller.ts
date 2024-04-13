@@ -50,8 +50,9 @@ export class NumfmtAutoFillController extends Disposable {
             targetStartCell: { row: number; col: number },
             relativeRange: IRange
         ) => {
-            const unitId = this._univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-            const subUnitId = this._univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
+            const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
+            const unitId = workbook.getUnitId();
+            const subUnitId = workbook.getActiveSheet().getSheetId();
             const sourceRange = {
                 startRow: sourceStartCell.row,
                 startColumn: sourceStartCell.col,

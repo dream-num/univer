@@ -25,6 +25,7 @@ import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-no
 import type { DocumentViewModel } from '../../../view-model/document-view-model';
 import type { ISectionBreakConfig } from '../../../../../basics/interfaces';
 import { hasArabic, hasCJK, hasCJKPunctuation, hasCJKText, hasTibetan, startWithEmoji } from '../../../../../basics/tools';
+import type { IOpenTypeGlyphInfo } from '../../shaping-engine/text-shaping';
 import { textShape } from '../../shaping-engine/text-shaping';
 import { fontLibrary } from '../../shaping-engine/font-library';
 import { prepareParagraphBody } from '../../shaping-engine/utils';
@@ -95,7 +96,8 @@ export function shaping(
     bodyModel: DocumentViewModel,
     paragraphNode: DataStreamTreeNode,
     sectionBreakConfig: ISectionBreakConfig,
-    paragraphStyle: IParagraphStyle
+    paragraphStyle: IParagraphStyle,
+    useOpenType = false // Temporarily disable using opentype for shaping.
 ): IShapedText[] {
     const {
         gridType = GridType.LINES,
@@ -113,7 +115,11 @@ export function shaping(
     const paragraphBody = prepareParagraphBody(bodyModel.getBody()!, endIndex);
 
     // const now = +new Date();
-    const glyphInfos = textShape(paragraphBody);
+    let glyphInfos: IOpenTypeGlyphInfo[] = [];
+
+    if (useOpenType) {
+        glyphInfos = textShape(paragraphBody);
+    }
     // console.log('Text Shaping Time:', +new Date() - now);
 
     // Add custom extension for linebreak.
@@ -125,7 +131,7 @@ export function shaping(
         const word = content.slice(last, bk.position);
         const shapedGlyphs: IDocumentSkeletonGlyph[] = [];
 
-        if (fontLibrary.isReady) {
+        if (fontLibrary.isReady && useOpenType) {
             const glyphInfosInWord = [];
 
             let i = 0;

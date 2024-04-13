@@ -380,7 +380,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             return false;
         }
 
-        const worksheet = this._currentUniverService
+        const worksheet = this._univerInstanceService
             .getUniverSheetInstance(unitId)
             ?.getSheetBySheetId(subUnitId);
         if (!worksheet) {

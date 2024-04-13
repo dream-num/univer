@@ -84,7 +84,6 @@ export class DataValidationModel<T extends IDataValidationRule = IDataValidation
         if (oldRule) {
             return;
         }
-        console.log('===side', rule);
         this._ruleChange$.next({
             rule: rule,
             type: 'add',

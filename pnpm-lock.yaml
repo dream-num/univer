@@ -645,6 +645,10 @@ importers:
         version: 1.4.0(@types/node@20.12.7)(jsdom@24.0.0)
 
   packages/facade:
+    dependencies:
+      '@univerjs/sheets-conditional-formatting':
+        specifier: workspace:*
+        version: link:../sheets-conditional-formatting
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*

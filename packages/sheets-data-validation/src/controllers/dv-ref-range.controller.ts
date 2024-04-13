@@ -29,7 +29,7 @@ import { DataValidationCustomFormulaService } from '../services/dv-custom-formul
 import { DataValidationFormulaService } from '../services/dv-formula.service';
 import { DataValidationCacheService } from '../services/dv-cache.service';
 
-@OnLifecycle(LifecycleStages.Rendered, DataValidationRefRangeController)
+@OnLifecycle(LifecycleStages.Ready, DataValidationRefRangeController)
 export class DataValidationRefRangeController extends Disposable {
     private _disposableMap: Map<string, Set<() => void>> = new Map();
 

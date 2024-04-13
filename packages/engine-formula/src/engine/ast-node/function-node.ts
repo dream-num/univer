@@ -33,6 +33,7 @@ import type {
 import { ArrayValueObject, transformToValueObject, ValueObjectFactory } from '../value-object/array-value-object';
 import type { BaseValueObject } from '../value-object/base-value-object';
 import { prefixHandler } from '../utils/prefixHandler';
+import { IDefinedNamesService } from '../../services/defined-names.service';
 import { BaseAstNode, ErrorNode } from './base-ast-node';
 import { BaseAstNodeFactory, DEFAULT_AST_NODE_FACTORY_Z_INDEX } from './base-ast-node-factory';
 import { NODE_ORDER_MAP, NodeType } from './node-type';
@@ -42,7 +43,8 @@ export class FunctionNode extends BaseAstNode {
         token: string,
         private _functionExecutor: BaseFunction,
         private _currentConfigService: IFormulaCurrentConfigService,
-        private _runtimeService: IFormulaRuntimeService
+        private _runtimeService: IFormulaRuntimeService,
+        private _definedNamesService: IDefinedNamesService
     ) {
         super(token);
 
@@ -206,10 +208,32 @@ export class FunctionNode extends BaseAstNode {
                 });
             }
         } else {
+            /**
+             * In Excel, to inject a defined name into a function that has positioning capabilities,
+             * such as using the INDIRECT function to reference a named range,
+             * you can write it as follows:
+             * =INDIRECT("DefinedName1")
+             */
+            if (this._functionExecutor.isAddress()) {
+                this._setDefinedNamesForFunction();
+            }
             resultVariant = this._functionExecutor.calculate(...variants);
         }
 
         return resultVariant;
+    }
+
+    private _setDefinedNamesForFunction() {
+        const editorUnitId = this._currentConfigService.getExecuteUnitId();
+        if (editorUnitId == null) {
+            return;
+        }
+        const definedNames = this._definedNamesService.getDefinedNameMap(editorUnitId);
+        if (definedNames == null) {
+            return;
+        }
+
+        this._functionExecutor.setDefinedNames(definedNames);
     }
 
     private _setRefInfo() {
@@ -243,6 +267,7 @@ export class FunctionNodeFactory extends BaseAstNodeFactory {
         @IFunctionService private readonly _functionService: IFunctionService,
         @IFormulaCurrentConfigService private readonly _currentConfigService: IFormulaCurrentConfigService,
         @IFormulaRuntimeService private readonly _runtimeService: IFormulaRuntimeService,
+        @IDefinedNamesService private readonly _definedNamesService: IDefinedNamesService,
         @Inject(Injector) private readonly _injector: Injector
     ) {
         super();
@@ -259,7 +284,7 @@ export class FunctionNodeFactory extends BaseAstNodeFactory {
             return ErrorNode.create(ErrorType.NAME);
         }
 
-        return new FunctionNode(token, functionExecutor, this._currentConfigService, this._runtimeService);
+        return new FunctionNode(token, functionExecutor, this._currentConfigService, this._runtimeService, this._definedNamesService);
     }
 
     override checkAndCreateNodeType(param: LexerNode | string) {

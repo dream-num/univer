@@ -185,7 +185,7 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
         confirm && confirm({
             id: id || '',
             name: nameValue,
-            formulaOrRefString: lexer.convertRefersToAbsolute(updateFormulaOrRefStringValue, AbsoluteRefType.ALL, AbsoluteRefType.ALL),
+            formulaOrRefString: lexer.convertRefersToAbsolute(formulaOrRefStringValue, AbsoluteRefType.ALL, AbsoluteRefType.ALL),
             comment: commentValue,
             localSheetId: localSheetIdValue,
         });

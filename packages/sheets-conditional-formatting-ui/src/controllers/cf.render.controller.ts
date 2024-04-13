@@ -94,34 +94,35 @@ export class RenderController extends Disposable {
     }
 
     _initViewModelInterceptor() {
-        this.disposeWithMe(this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, { handler: (cell, context, next) => {
-            const result = this._conditionalFormattingService.composeStyle(context.unitId, context.subUnitId, context.row, context.col);
-            if (!result) {
-                return next(cell);
-            }
-            const styleMap = context.workbook.getStyles();
-            const defaultStyle = (typeof cell?.s === 'string' ? styleMap.get(cell?.s) : cell?.s) || {};
-            const s = { ...defaultStyle };
-            const cloneCell = { ...cell, s } as IConditionalFormattingCellData & ISheetFontRenderExtension;
-            if (result.style) {
-                Object.assign(s, result.style);
-            }
-            if (!cloneCell.fontRenderExtension) {
-                cloneCell.fontRenderExtension = {};
-                if (!result.isShowValue) {
-                    cloneCell.fontRenderExtension.isSkip = true;
+        this.disposeWithMe(this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
+            handler: (cell, context, next) => {
+                const result = this._conditionalFormattingService.composeStyle(context.unitId, context.subUnitId, context.row, context.col);
+                if (!result) {
+                    return next(cell);
                 }
-            }
-            if (result.dataBar) {
-                cloneCell.dataBar = result.dataBar;
-            }
-            if (result.iconSet) {
-                cloneCell.iconSet = result.iconSet;
-                cloneCell.fontRenderExtension.leftOffset = DEFAULT_PADDING + DEFAULT_WIDTH;
-            }
+                const styleMap = context.workbook.getStyles();
+                const defaultStyle = (typeof cell?.s === 'string' ? styleMap.get(cell?.s) : cell?.s) || {};
+                const s = { ...defaultStyle };
+                const cloneCell = { ...cell, s } as IConditionalFormattingCellData & ISheetFontRenderExtension;
+                if (result.style) {
+                    Object.assign(s, result.style);
+                }
+                if (!cloneCell.fontRenderExtension) {
+                    cloneCell.fontRenderExtension = {};
+                    if (result.isShowValue !== undefined) {
+                        cloneCell.fontRenderExtension.isSkip = !result.isShowValue;
+                    }
+                }
+                if (result.dataBar) {
+                    cloneCell.dataBar = result.dataBar;
+                }
+                if (result.iconSet) {
+                    cloneCell.iconSet = result.iconSet;
+                    cloneCell.fontRenderExtension.leftOffset = DEFAULT_PADDING + DEFAULT_WIDTH;
+                }
 
-            return next(cloneCell);
-        },
+                return next(cloneCell);
+            },
         }));
     }
 }

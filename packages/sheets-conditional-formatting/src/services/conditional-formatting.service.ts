@@ -150,7 +150,7 @@ export class ConditionalFormattingService extends Disposable {
                 },
                 onLoad: (unitID, value) => {
                     Object.keys(value).forEach((subunitId) => {
-                        const ruleList = value[subunitId];
+                        const ruleList = [...value[subunitId]].reverse();
                         ruleList.forEach((rule) => {
                             this._conditionalFormattingRuleModel.addRule(unitID, subunitId, rule);
                         });

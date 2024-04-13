@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData } from '@univerjs/core';
+import type { ICellData, IRange } from '@univerjs/core';
 import { BooleanNumber, CellValueType, ColorKit, ObjectMatrix, Range } from '@univerjs/core';
 import { BooleanValue } from '@univerjs/engine-formula';
 import type { IConditionFormattingRule, IValueConfig } from '../../models/type';
@@ -88,9 +88,9 @@ export const serialTimeToTimestamp = (value: number) => {
     dt.setUTCHours(hh, mm, ss);
     return dt.getTime();
 };
-export const getValueByType = (value: IValueConfig, matrix: ObjectMatrix< number>, context: IContext & { cfId: string }) => {
+export const getValueByType = (value: IValueConfig, matrix: ObjectMatrix<number>, context: IContext & { cfId: string }) => {
     switch (value.type) {
-        case CFValueType.max:{
+        case CFValueType.max: {
             let max = 0;
             matrix.forValue((row, col, value) => {
                 if (value > max) {
@@ -102,7 +102,7 @@ export const getValueByType = (value: IValueConfig, matrix: ObjectMatrix< number
                 result: max,
             };
         }
-        case CFValueType.min:{
+        case CFValueType.min: {
             let min: number | undefined;
             matrix.forValue((row, col, value) => {
                 if (min === undefined) {
@@ -117,7 +117,7 @@ export const getValueByType = (value: IValueConfig, matrix: ObjectMatrix< number
                 result: min,
             };
         }
-        case CFValueType.percent:{
+        case CFValueType.percent: {
             let max: number | undefined;
             let min: number | undefined;
             matrix.forValue((row, col, value) => {
@@ -140,7 +140,7 @@ export const getValueByType = (value: IValueConfig, matrix: ObjectMatrix< number
                 result: length * (v / 100) + (min || 0),
             };
         }
-        case CFValueType.percentile:{
+        case CFValueType.percentile: {
             const list = matrix.toNativeArray().sort((a, b) => a - b);
             const v = Math.max(Math.min(Number(value.value) || 0, 100), 0);
             const index = (list.length - 1) * v / 100;
@@ -153,7 +153,7 @@ export const getValueByType = (value: IValueConfig, matrix: ObjectMatrix< number
             };
         }
 
-        case CFValueType.formula:{
+        case CFValueType.formula: {
             const { accessor, unitId, subUnitId, cfId } = context;
             const formulaText = String(value.value);
             const conditionalFormattingFormulaService = accessor.get(ConditionalFormattingFormulaService);
@@ -161,7 +161,7 @@ export const getValueByType = (value: IValueConfig, matrix: ObjectMatrix< number
             const result = conditionalFormattingFormulaService.getFormulaResult(unitId, subUnitId, formulaText);
             return result;
         }
-        case CFValueType.num:{
+        case CFValueType.num: {
             const v = Number(value.value);
             return {
                 status: FormulaResultStatus.SUCCESS,
@@ -186,9 +186,9 @@ export const getCacheStyleMatrix = <S = any>(unitId: string, subUnitId: string, 
     });
     return matrix;
 };
-export const compareWithNumber = (config: { operator: CFNumberOperator;value: number | [number, number] }, v: number) => {
+export const compareWithNumber = (config: { operator: CFNumberOperator; value: number | [number, number] }, v: number) => {
     switch (config.operator) {
-        case CFNumberOperator.between:{
+        case CFNumberOperator.between: {
             if (typeof config.value !== 'object' || !(config.value as unknown as Array<number>).length) {
                 return;
             }
@@ -196,7 +196,7 @@ export const compareWithNumber = (config: { operator: CFNumberOperator;value: nu
             const end = Math.max(...config.value as [number, number]);
             return v >= start && v <= end;
         }
-        case CFNumberOperator.notBetween:{
+        case CFNumberOperator.notBetween: {
             if (typeof config.value !== 'object' || !(config.value as unknown as Array<number>).length) {
                 return;
             }
@@ -204,56 +204,56 @@ export const compareWithNumber = (config: { operator: CFNumberOperator;value: nu
             const end = Math.max(...config.value as [number, number]);
             return !(v >= start && v <= end);
         }
-        case CFNumberOperator.equal:{
+        case CFNumberOperator.equal: {
             const condition = (config.value || 0) as number;
             return isFloatsEqual(condition, v);
         }
-        case CFNumberOperator.notEqual:{
+        case CFNumberOperator.notEqual: {
             const condition = (config.value || 0) as number;
             return !isFloatsEqual(condition, v);
         }
-        case CFNumberOperator.greaterThan:{
+        case CFNumberOperator.greaterThan: {
             const condition = (config.value || 0) as number;
             return v > condition;
         }
-        case CFNumberOperator.greaterThanOrEqual:{
+        case CFNumberOperator.greaterThanOrEqual: {
             const condition = (config.value || 0) as number;
             return v >= condition;
         }
-        case CFNumberOperator.lessThan:{
+        case CFNumberOperator.lessThan: {
             const condition = (config.value || 0) as number;
             return v < condition;
         }
-        case CFNumberOperator.lessThanOrEqual:{
+        case CFNumberOperator.lessThanOrEqual: {
             const condition = (config.value || 0) as number;
             return v <= condition;
         }
-        default:{
+        default: {
             return false;
         }
     }
 };
 export const getOppositeOperator = (operator: CFNumberOperator) => {
     switch (operator) {
-        case CFNumberOperator.greaterThan:{
+        case CFNumberOperator.greaterThan: {
             return CFNumberOperator.lessThanOrEqual;
         }
-        case CFNumberOperator.greaterThanOrEqual:{
+        case CFNumberOperator.greaterThanOrEqual: {
             return CFNumberOperator.lessThan;
         }
-        case CFNumberOperator.lessThan:{
+        case CFNumberOperator.lessThan: {
             return CFNumberOperator.greaterThanOrEqual;
         }
-        case CFNumberOperator.lessThanOrEqual:{
+        case CFNumberOperator.lessThanOrEqual: {
             return CFNumberOperator.greaterThan;
         }
     }
     return operator;
 };
 
-export const getColorScaleFromValue = (colorList: { color: ColorKit;value: number }[], value: number) => {
+export const getColorScaleFromValue = (colorList: { color: ColorKit; value: number }[], value: number) => {
     interface IRgbColor {
-        b: number; g: number;r: number;a?: number;
+        b: number; g: number; r: number; a?: number;
     }
     const prefixRgba = (rgb: IRgbColor): Required<IRgbColor> => {
         if (rgb.a !== undefined) {
@@ -286,4 +286,17 @@ export const getColorScaleFromValue = (colorList: { color: ColorKit;value: numbe
     } else {
         return colorList[colorList.length - 1].color.toRgbString();
     }
+};
+
+
+export const filterRange = (ranges: IRange[], maxRow: number, maxCol: number): IRange[] => {
+    return ranges.map((range) => {
+        if (range.startColumn > maxCol || range.startRow > maxRow) {
+            return null as unknown as IRange;
+        }
+        const _range = { ...range };
+        _range.endRow = Math.min(_range.endRow, maxRow);
+        _range.endColumn = Math.min(_range.endColumn, maxCol);
+        return _range;
+    }).filter((range) => !!range);
 };

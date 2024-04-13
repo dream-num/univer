@@ -43,6 +43,8 @@ const TEST_WORKBOOK_DATA_DEMO: () => IWorkbookData = () => ({
                 4: { 0: { v: 1, t: 2 }, 1: { v: 2, t: 2 }, 2: { v: 3, t: 2 }, 3: { v: 4, t: 2 }, 4: { v: 5, t: 2 }, 5: { v: 6, t: 2 }, 6: { v: 7, t: 2 } },
                 5: { 0: { v: 1, t: 2 }, 1: { v: 2, t: 2 }, 2: { v: 3, t: 2 }, 3: { v: 4, t: 2 }, 4: { v: 5, t: 2 }, 5: { v: 6, t: 2 }, 6: { v: 7, t: 2 } },
             },
+            rowCount: 6,
+            columnCount: 8,
         },
     },
     locale: LocaleType.ZH_CN,
@@ -85,7 +87,7 @@ export const createTestBed = (dependencies?: Dependency[]) => {
             this._injector.add([ConditionalFormattingFormulaService]);
             this._injector.add([ConditionalFormattingRuleModel]);
             this._injector.add([ConditionalFormattingViewModel]);
-            this._injector.add([IActiveDirtyManagerService, { useFactory: () => ({ register: () => {} } as any) }]);
+            this._injector.add([IActiveDirtyManagerService, { useFactory: () => ({ register: () => { } } as any) }]);
             this._injector.get(ConditionalFormattingService);
         }
     }

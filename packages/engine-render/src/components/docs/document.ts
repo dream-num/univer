@@ -221,6 +221,9 @@ export class Documents extends DocComponent {
             extension.clearCache();
         }
 
+        const backgroundExtension = extensions.find((e) => e.uKey === 'DefaultDocsBackgroundExtension');
+        const glyphExtensionsExcludeBackground = extensions.filter((e) => e.type === DOCS_EXTENSION_TYPE.SPAN && e.uKey !== 'DefaultDocsBackgroundExtension');
+
         // broadcasting the pageTop and pageLeft for each page in the document with multiple pages.
         let pageTop = 0;
         let pageLeft = 0;
@@ -392,6 +395,39 @@ export class Documents extends DocComponent {
                                 this._drawLiquid.translateSave();
                                 this._drawLiquid.translateDivide(divide);
 
+                                // Draw text background.
+                                for (const glyph of glyphGroup) {
+                                    if (!glyph.content || glyph.content.length === 0) {
+                                        continue;
+                                    }
+
+                                    const { width: spanWidth, left: spanLeft } = glyph;
+
+                                    const { x: translateX, y: translateY } = this._drawLiquid;
+
+                                    const originTranslate = Vector2.create(translateX, translateY);
+
+                                    const centerPoint = Vector2.create(spanWidth / 2, lineHeight / 2);
+
+                                    const spanStartPoint = calculateRectRotate(
+                                        originTranslate.addByPoint(spanLeft, 0),
+                                        centerPoint,
+                                        centerAngle,
+                                        vertexAngle,
+                                        alignOffset
+                                    );
+
+                                    const extensionOffset: IExtensionConfig = {
+                                        spanStartPoint,
+                                    };
+
+                                    if (backgroundExtension) {
+                                        backgroundExtension.extensionOffset = extensionOffset;
+                                        backgroundExtension.draw(ctx, parentScale, glyph);
+                                    }
+                                }
+
+                                // Draw text\border\lines etc.
                                 for (const glyph of glyphGroup) {
                                     if (!glyph.content || glyph.content.length === 0) {
                                         continue;
@@ -433,13 +469,12 @@ export class Documents extends DocComponent {
                                         renderConfig,
                                     };
 
-                                    for (const extension of extensions) {
-                                        if (extension.type === DOCS_EXTENSION_TYPE.SPAN) {
-                                            extension.extensionOffset = extensionOffset;
-                                            extension.draw(ctx, parentScale, glyph);
-                                        }
+                                    for (const extension of glyphExtensionsExcludeBackground) {
+                                        extension.extensionOffset = extensionOffset;
+                                        extension.draw(ctx, parentScale, glyph);
                                     }
                                 }
+
                                 this._drawLiquid.translateRestore();
                             }
                             this._drawLiquid.translateRestore();

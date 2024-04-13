@@ -37,6 +37,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                     bg: {
                         rgb: '#FF6670',
                     },
+                    it: BooleanNumber.TRUE,
                 },
             },
             {

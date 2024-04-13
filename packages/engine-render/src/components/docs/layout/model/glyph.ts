@@ -158,7 +158,7 @@ export function _createSkeletonWordOrLetter(
     let xOffset = 0;
 
     if (glyphInfo && glyphInfo.boundingBox && glyphInfo.font) {
-        bBox = FontCache.getBBoxFromGlyphInfo(glyphInfo, fontStyle.fontSize);
+        bBox = FontCache.getBBoxFromGlyphInfo(glyphInfo, fontStyle);
     } else {
         bBox = FontCache.getTextSize(content, fontStyle);
     }

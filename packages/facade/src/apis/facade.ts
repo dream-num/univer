@@ -28,7 +28,7 @@ import {
     WrapStrategy,
 } from '@univerjs/core';
 import { ISocketService, WebSocketService } from '@univerjs/network';
-import type { IRegisterFunctionParams, IUnregisterFunctionParams } from '@univerjs/sheets-formula';
+import type { IRegisterFunctionParams } from '@univerjs/sheets-formula';
 import { IRegisterFunctionService, RegisterFunctionService } from '@univerjs/sheets-formula';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject, Injector, Quantity } from '@wendellhu/redi';
@@ -143,7 +143,7 @@ export class FUniver {
      * Register a function to the spreadsheet.
      * @param config
      */
-    registerFunction(config: IRegisterFunctionParams) {
+    registerFunction(config: IRegisterFunctionParams): IDisposable {
         let registerFunctionService = this._injector.get(IRegisterFunctionService);
 
         if (!registerFunctionService) {
@@ -151,24 +151,11 @@ export class FUniver {
             registerFunctionService = this._injector.get(IRegisterFunctionService);
         }
 
-        registerFunctionService.registerFunctions(config);
-    }
+        const functionsDisposable = registerFunctionService.registerFunctions(config);
 
-    /**
-     * Unregister a function from the spreadsheet.
-     *
-     * TODO@Dushusir: remove unregister,use IDisposable
-     * @param config
-     */
-    unregisterFunction(config: IUnregisterFunctionParams) {
-        let registerFunctionService = this._injector.get(IRegisterFunctionService);
-
-        if (!registerFunctionService) {
-            this._injector.add([IRegisterFunctionService, { useClass: RegisterFunctionService }]);
-            registerFunctionService = this._injector.get(IRegisterFunctionService);
-        }
-
-        registerFunctionService.unregisterFunctions(config);
+        return toDisposable(() => {
+            functionsDisposable.dispose();
+        });
     }
 
     /**

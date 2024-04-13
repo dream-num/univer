@@ -38,7 +38,7 @@ Using Uniscript scripts, you can quickly and easily register custom formulas in 
 As shown in the following case, use `registerFunction` to register the algorithm, name, and description required by a `CUSTOMSUM` formula into the formula plug-in at one time. After execution, the formula can be used. Enter `=CUSTOMSUM` in any blank cell to see the prompt.
 
 ```js
-univerAPI.registerFunction({
+const functionDisposable = univerAPI.registerFunction({
     calculate: [
         [function (...variants) {
             let sum = 0;
@@ -52,14 +52,9 @@ univerAPI.registerFunction({
         // ... more formulas
     ]
 })
-```
 
-Use the `unregisterFunction` method to quickly unregister custom formulas
-
-```ts
-univerAPI.unregisterFunction({
-     functionNames: ['CUSTOMSUM']
-})
+// Unregister the function
+functionDisposable.dispose();
 ```
 
 If you want to provide more complete international content and description, you can also configure the `locales` and `description` fields. As follows.
@@ -68,7 +63,8 @@ If you want to provide more complete international content and description, you 
 const FUNCTION_NAMES_USER = {
      CUSTOMSUM: 'CUSTOMSUM'
 }
-univerAPI.registerFunction({
+
+const functionDisposable = univerAPI.registerFunction({
     locales:{
         'zhCN': {
             formulaCustom: {
@@ -159,6 +155,9 @@ univerAPI.registerFunction({
         // ... more formulas
     ]
 })
+
+// Unregister the function
+functionDisposable.dispose();
 ```
 
 Note
@@ -166,18 +165,6 @@ Note
 -   Multiple languages can be set under `locales`. For naming rules, please refer to [LocaleType](/api/core/enums/LocaleType.html). Translations for multiple formulas can be added under `functionList`. For detailed field descriptions, please refer to the [How to add formulas in UniverFormulaEnginePlugin](./#how-to-add-formulas-in-univerformulaengineplugin) section.
 -   `description` sets the description of the custom formula.
 -   `calculate` writes the specific algorithm and name mapping of the calculation formula. The input parameter is the content entered by the user when using the formula, which may be a number, a string, a Boolean value, or a range, and the same format is returned.
-
-Likewise, if using the `unregisterFunction` method, it is recommended that you remove the internationalization files as well. The example below removes the Chinese and English `formulaCustom` nodes.
-
-```ts
-univerAPI.unregisterFunction({
-    localeKeys: {
-        'zhCN': ['formulaCustom'],
-        'enUS': ['formulaCustom'],
-        },
-    functionNames: ['CUSTOMSUM']
-})
-```
 
 Uniscript uses `@univerjs/facade` under the hood. You can also use Uniscript-like APIs directly in your project. Please refer to [Registering Function](/en-us/guides/facade/register-function).
 

@@ -15,7 +15,8 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { Disposable } from '@univerjs/core';
+import { Disposable, toDisposable } from '@univerjs/core';
+import type { IDisposable } from '@wendellhu/redi';
 import { createIdentifier } from '@wendellhu/redi';
 
 import type { IFunctionInfo, IFunctionNames } from '../basics/function';
@@ -45,7 +46,7 @@ export interface IFunctionService {
 
     unregisterExecutors(...functionTokens: IFunctionNames[]): void;
 
-    registerDescriptions(...functions: IFunctionInfo[]): void;
+    registerDescriptions(...functions: IFunctionInfo[]): IDisposable;
 
     getDescriptions(): Map<IFunctionNames, IFunctionInfo>;
 
@@ -92,11 +93,18 @@ export class FunctionService extends Disposable implements IFunctionService {
         }
     }
 
-    registerDescriptions(...descriptions: IFunctionInfo[]) {
+    registerDescriptions(...descriptions: IFunctionInfo[]): IDisposable {
         for (let i = 0; i < descriptions.length; i++) {
             const description = descriptions[i];
             this._functionDescriptions.set(description.functionName, description);
         }
+
+        return toDisposable(() => {
+            for (let i = 0; i < descriptions.length; i++) {
+                const description = descriptions[i];
+                this._functionDescriptions.delete(description.functionName);
+            }
+        });
     }
 
     getDescriptions() {

@@ -38,7 +38,7 @@ pnpm add @univerjs/sheets-formula
 如下案例所示，使用 `registerFunction` 将一个 `CUSTOMSUM` 公式所需要的算法、名称、描述一次性注册到公式插件，执行之后就可以使用公式了。在任一空白单元格输入 `=CUSTOMSUM` 可以看到提示。
 
 ```js
-univerAPI.registerFunction({
+const functionDisposable = univerAPI.registerFunction({
     calculate: [
         [function (...variants) {
             let sum = 0;
@@ -52,14 +52,9 @@ univerAPI.registerFunction({
         // ... 更多公式
     ]
 })
-```
 
-使用 `unregisterFunction` 方法能快速卸载自定义公式
-
-```ts
-univerAPI.unregisterFunction({
-    functionNames: ['CUSTOMSUM']
-})
+// 卸载所注册的公式
+functionDisposable.dispose();
 ```
 
 如果想要提供更完善的国际化内容和描述，还可以配置 `locales` 和 `description` 字段。如下所示。
@@ -68,7 +63,8 @@ univerAPI.unregisterFunction({
 const FUNCTION_NAMES_USER = {
     CUSTOMSUM: 'CUSTOMSUM'
 }
-univerAPI.registerFunction({
+
+const functionDisposable = univerAPI.registerFunction({
     locales:{
         'zhCN': {
             formulaCustom: {
@@ -159,6 +155,9 @@ univerAPI.registerFunction({
         // ... 更多公式
     ]
 })
+
+// 卸载所注册的公式
+functionDisposable.dispose();
 ```
 
 说明
@@ -166,18 +165,6 @@ univerAPI.registerFunction({
 - `locales` 下可以设置多种语言，命名规则参考 [LocaleType](/api/core/enums/LocaleType.html)。可以在 `functionList` 下添加多个公式的翻译。详细的字段说明请参考[如何在 UniverFormulaEnginePlugin 中添加公式](./#如何在-univerformulaengineplugin-中添加公式)的部分。
 - `description` 设置自定义公式的描述。
 - `calculate` 编写计算公式的具体算法和名称映射。入参为使用公式时用户输入的内容，可能为数字、字符串、布尔值，或者一个范围，也是返回同样的格式。
-
-同样的， 如果使用 `unregisterFunction` 方法，推荐你把国际化文件也移除。下方示例是将中文和英文的 `formulaCustom` 节点移除。
-
-```ts
-univerAPI.unregisterFunction({
-    localeKeys: {
-         'zhCN': ['formulaCustom'],
-         'enUS': ['formulaCustom'],
-        },
-    functionNames: ['CUSTOMSUM']
-})
-```
 
 Uniscript 底层使用了 `@univerjs/facade`，你也可以直接在项目中使用类似 Uniscript 的 API，请参考 [注册公式](/guides/facade/register-function)。
 

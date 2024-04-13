@@ -30,7 +30,7 @@ import {
     Viewport,
 } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, takeUntil } from 'rxjs';
 
 import { SetScrollRelativeCommand } from '../commands/commands/set-scroll.command';
 import {
@@ -39,14 +39,14 @@ import {
     SHEET_VIEW_KEY,
     VIEWPORT_KEY,
 } from '../common/keys';
-import { ISelectionRenderService } from '../services/selection/selection-render.service';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
+/**
+ * @todo RenderUnit
+ */
 @OnLifecycle(LifecycleStages.Ready, SheetCanvasView)
 export class SheetCanvasView extends RxDisposable {
     private _scene!: Scene;
-
-    private _currentWorkbook!: Workbook;
 
     private readonly _fps$ = new BehaviorSubject<string>('');
 
@@ -56,8 +56,6 @@ export class SheetCanvasView extends RxDisposable {
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @ISelectionRenderService
-        private readonly _selectionRenderService: ISelectionRenderService,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService
     ) {
         super();
@@ -73,31 +71,28 @@ export class SheetCanvasView extends RxDisposable {
     }
 
     private _init() {
-        this._univerInstanceService.currentSheet$.subscribe((workbook) => {
-            this._create(workbook);
-        });
+        this._univerInstanceService.currentSheet$.pipe(takeUntil(this.dispose$)).subscribe((workbook) => this._create(workbook));
+        this._univerInstanceService.sheetDisposed$.pipe(takeUntil(this.dispose$)).subscribe((workbook) => this._dispose(workbook));
+        this._univerInstanceService.getAllUniverSheetsInstance().forEach((workbook) => this._create(workbook));
+    }
 
-        this._univerInstanceService.getAllUniverSheetsInstance().forEach((workbook) => {
-            this._create(workbook);
-        });
+    private _dispose(workbook: Workbook) {
+        const unitId = workbook.getUnitId();
+        this._renderManagerService.removeRender(unitId);
     }
 
     private _create(workbook: Nullable<Workbook>) {
-        if (workbook == null) {
+        if (!workbook) {
             return;
-            // throw new Error('workbook is null');
         }
 
         const unitId = workbook.getUnitId();
         if (!this._renderManagerService.has(unitId)) {
-            this._currentWorkbook = workbook;
-            this._addNewRender();
+            this._addNewRender(workbook);
         }
     }
 
-    private _addNewRender() {
-        const workbook = this._currentWorkbook;
-
+    private _addNewRender(workbook: Workbook) {
         const unitId = workbook.getUnitId();
         const container = workbook.getContainer();
 
@@ -129,7 +124,7 @@ export class SheetCanvasView extends RxDisposable {
         scene.addLayer(new Layer(scene, [], 0), new Layer(scene, [], 2));
 
         if (currentRender != null) {
-            this._addComponent(currentRender);
+            this._addComponent(currentRender, workbook);
         }
 
         const should = workbook.getShouldRenderLoopImmediately();
@@ -144,10 +139,8 @@ export class SheetCanvasView extends RxDisposable {
         this._renderManagerService.setCurrent(unitId);
     }
 
-    private _addComponent(currentRender: IRender) {
+    private _addComponent(currentRender: IRender, workbook: Workbook) {
         const scene = this._scene;
-
-        const workbook = this._currentWorkbook;
 
         const worksheet = workbook.getActiveSheet();
 
@@ -155,7 +148,7 @@ export class SheetCanvasView extends RxDisposable {
 
         const sheetId = worksheet.getSheetId();
 
-        const viewMain = this._addViewport(worksheet);
+        const _viewMain = this._addViewport(worksheet);
 
         const spreadsheet = new Spreadsheet(SHEET_VIEW_KEY.MAIN);
         const spreadsheetRowHeader = new SpreadsheetRowHeader(SHEET_VIEW_KEY.ROW);

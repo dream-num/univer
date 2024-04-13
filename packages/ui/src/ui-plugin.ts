@@ -89,9 +89,6 @@ export class UniverUIPlugin extends Plugin {
 
     override onStarting(_injector: Injector): void {
         this._initDependencies(_injector);
-    }
-
-    override onReady(): void {
         this._initUI();
     }
 

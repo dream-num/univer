@@ -32,7 +32,7 @@ export interface ISheetSkeletonManagerParam {
 export interface ISheetSkeletonManagerSearch {
     unitId: string;
     sheetId: string;
-    commandId?: string;
+    commandId?: string; // WTF: why?
 }
 
 /**
@@ -57,7 +57,6 @@ export class SheetSkeletonManagerService implements IDisposable {
      * CurrentSkeletonBefore for pre-triggered logic during registration
      */
     private readonly _currentSkeletonBefore$ = new BehaviorSubject<Nullable<ISheetSkeletonManagerParam>>(null);
-
     readonly currentSkeletonBefore$ = this._currentSkeletonBefore$.asObservable();
 
     constructor(
@@ -78,6 +77,15 @@ export class SheetSkeletonManagerService implements IDisposable {
 
     setCurrent(searchParam: ISheetSkeletonManagerSearch): Nullable<ISheetSkeletonManagerParam> {
         this._setCurrent(searchParam);
+    }
+
+    removeSkeleton(searchParam: Pick<ISheetSkeletonManagerSearch, 'unitId'>) {
+        const index = this._sheetSkeletonParam.findIndex((param) => param.unitId === searchParam.unitId);
+        if (index !== -1) {
+            this._sheetSkeletonParam.splice(index, 1);
+            this._currentSkeletonBefore$.next(null);
+            this._currentSkeleton$.next(null);
+        }
     }
 
     private _compareSearch(param1: Nullable<ISheetSkeletonManagerSearch>, param2: Nullable<ISheetSkeletonManagerSearch>) {
@@ -119,9 +127,7 @@ export class SheetSkeletonManagerService implements IDisposable {
         this._currentSkeleton = searchParam;
 
         const nextParam = this.getCurrent();
-
         this._currentSkeletonBefore$.next(nextParam);
-
         this._currentSkeleton$.next(nextParam);
     }
 

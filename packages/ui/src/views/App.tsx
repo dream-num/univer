@@ -111,9 +111,7 @@ export function App(props: IUniverAppProps) {
 
                         <section className={styles.appContainerContent}>
                             <header>
-                                {header && (
-                                    <ComponentContainer components={headerComponents} />
-                                )}
+                                {header && <ComponentContainer components={headerComponents} />}
                             </header>
 
                             <section

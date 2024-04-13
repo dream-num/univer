@@ -34,13 +34,11 @@ enum ArrowDirection {
     Up,
 }
 
-// eslint-disable-next-line max-lines-per-function
 export function FormulaBar() {
     const [iconStyle, setIconStyle] = useState<string>(styles.formulaGrey);
     const [arrowDirection, setArrowDirection] = useState<ArrowDirection>(ArrowDirection.Down);
 
     const formulaEditorManagerService = useDependency(IFormulaEditorManagerService);
-
     const editorBridgeService = useDependency(IEditorBridgeService);
 
     const INITIAL_SNAPSHOT = {
@@ -75,10 +73,12 @@ export function FormulaBar() {
     };
 
     useEffect(() => {
-        editorBridgeService.visible$.subscribe((visibleInfo) => {
+        const subscription = editorBridgeService.visible$.subscribe((visibleInfo) => {
             setIconStyle(visibleInfo.visible ? styles.formulaActive : styles.formulaGrey);
         });
-    }, []); // Empty dependency array means this effect runs once on mount and clean up on unmount
+
+        return () => subscription.unsubscribe();
+    }, [editorBridgeService.visible$]);
 
     function resizeCallBack(editor: Nullable<HTMLDivElement>) {
         if (editor == null) {

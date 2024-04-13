@@ -41,6 +41,9 @@ const INVALID_MARK = {
     },
 };
 
+/**
+ * @todo RenderUnit
+ */
 @OnLifecycle(LifecycleStages.Rendered, DataValidationRenderController)
 export class DataValidationRenderController extends RxDisposable {
     constructor(
@@ -169,7 +172,9 @@ export class DataValidationRenderController extends RxDisposable {
 
     private _initSkeletonChange() {
         const markSkeletonDirty = () => {
-            const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
+            const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
+            if (!workbook) return;
+
             const unitId = workbook.getUnitId();
             const subUnitId = workbook.getActiveSheet().getSheetId();
             const skeleton = this._sheetSkeletonManagerService.getOrCreateSkeleton({ unitId, sheetId: subUnitId });

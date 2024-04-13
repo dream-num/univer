@@ -26,6 +26,9 @@ import { ConditionalFormattingIcon, ConditionalFormattingRuleModel, ConditionalF
 
 import type { IConditionalFormattingCellData } from '@univerjs/sheets-conditional-formatting';
 
+/**
+ * @todo RenderUnit
+ */
 @OnLifecycle(LifecycleStages.Rendered, RenderController)
 export class RenderController extends Disposable {
     constructor(@Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
@@ -72,14 +75,18 @@ export class RenderController extends Disposable {
 
         // After the conditional formatting is marked dirty to drive a rendering, to trigger the window within the conditional formatting recalculation
         this.disposeWithMe(this._conditionalFormattingViewModel.markDirty$.pipe(bufferTime(16), filter((v) => {
-            const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
+            const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
+            if (!workbook) return false;
+
             const worksheet = workbook.getActiveSheet();
             return v.filter((item) => item.unitId === workbook.getUnitId() && item.subUnitId === worksheet.getSheetId()).length > 0;
         })).subscribe(markDirtySkeleton));
 
         // Sort and delete does not mark dirty.
         this.disposeWithMe(this._conditionalFormattingRuleModel.$ruleChange.pipe(bufferTime(16), filter((v) => {
-            const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
+            const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
+            if (!workbook) return false;
+
             const worksheet = workbook.getActiveSheet();
             return v.filter((item) => ['sort', 'delete'].includes(item.type) && item.unitId === workbook.getUnitId() && item.subUnitId === worksheet.getSheetId()).length > 0;
         })).subscribe(markDirtySkeleton));
@@ -87,7 +94,9 @@ export class RenderController extends Disposable {
         // Once the calculation is complete, a view update is triggered
         // This rendering does not trigger conditional formatting recalculation,because the rule is not mark dirty
         this.disposeWithMe(this._conditionalFormattingService.ruleComputeStatus$.pipe(bufferTime(16), filter((v) => {
-            const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
+            const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
+            if (!workbook) return false;
+
             const worksheet = workbook.getActiveSheet();
             return v.filter((item) => item.unitId === workbook.getUnitId() && item.subUnitId === worksheet.getSheetId()).length > 0;
         })).subscribe(markDirtySkeleton));

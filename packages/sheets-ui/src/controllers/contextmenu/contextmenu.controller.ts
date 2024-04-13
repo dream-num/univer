@@ -35,6 +35,8 @@ import { getSheetObject } from '../utils/component-tools';
  * This controller subscribe to context menu events in
  * sheet rendering views and invoke context menu at a correct position
  * and with correct menu type.
+ *
+ * @todo RenderUnit
  */
 @OnLifecycle(LifecycleStages.Rendered, SheetContextMenuController)
 export class SheetContextMenuController extends Disposable {
@@ -48,10 +50,9 @@ export class SheetContextMenuController extends Disposable {
     ) {
         super();
         this._univerInstanceService.currentSheet$.subscribe((workbook) => {
-            if (workbook == null) {
-                throw new Error('workbook is null');
+            if (workbook) {
+                this._addListeners();
             }
-            this._addListeners();
         });
     }
 

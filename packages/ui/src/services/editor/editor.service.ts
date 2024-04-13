@@ -651,7 +651,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
             return;
         }
 
-        this._renderManagerService.removeItem(editorUnitId);
+        this._renderManagerService.removeRender(editorUnitId);
 
         editor.documentDataModel.dispose();
 

@@ -393,7 +393,9 @@ export class SelectionController extends Disposable {
     }
 
     private _move(selectionDataWithStyleList: ISelectionWithCoordAndStyle[], type: SelectionMoveType) {
-        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
+        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
+        if (!workbook) return;
+
         const unitId = workbook.getUnitId();
         const sheetId = workbook.getActiveSheet().getSheetId();
         const current = this._selectionManagerService.getCurrent();

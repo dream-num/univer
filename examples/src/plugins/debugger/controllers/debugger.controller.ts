@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, ISnapshotPersistenceService, IUniverInstanceService } from '@univerjs/core';
+import { Disposable, ICommandService, IUniverInstanceService } from '@univerjs/core';
 import { ComponentManager, IMenuService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { ExportController, LocalSnapshotService, RecordController } from '../../local-save';
+import { ExportController, RecordController } from '../../local-save';
 import { ConfirmOperation } from '../commands/operations/confirm.operation';
 import { DialogOperation } from '../commands/operations/dialog.operation';
 import { LocaleOperation } from '../commands/operations/locale.operation';
@@ -71,7 +71,6 @@ export class DebuggerController extends Disposable {
             SaveSnapshotOptions,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
 
-        this._injector.add([ISnapshotPersistenceService, { useClass: LocalSnapshotService }]);
         this._injector.add([ExportController]);
         this._injector.add([RecordController]);
     }

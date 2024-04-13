@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-import type { ISheetDataValidationRule, Workbook } from '@univerjs/core';
-import { Disposable, IResourceManagerService, IUniverInstanceService, LifecycleStages, OnLifecycle, toDisposable } from '@univerjs/core';
+import type { ISheetDataValidationRule } from '@univerjs/core';
+import { Disposable, IResourceManagerService, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
+import { UniverType } from '@univerjs/protocol';
 import { DataValidationModel } from '../models/data-validation-model';
 
 type DataValidationJSON = Record<string, ISheetDataValidationRule[]>;
 
-const DATA_VALIDATION_PLUGIN_NAME = 'SHEET_DATA_VALIDATION';
+const DATA_VALIDATION_PLUGIN_NAME = 'SHEET_DATA_VALIDATION_PLUGIN';
 
 @OnLifecycle(LifecycleStages.Ready, DataValidationResourceController)
 export class DataValidationResourceController extends Disposable {
@@ -56,33 +57,24 @@ export class DataValidationResourceController extends Disposable {
                 return {};
             }
         };
-        const handleWorkbookAdd = (workbook: Workbook) => {
-            const unitID = workbook.getUnitId();
-            this.disposeWithMe(
-                this._resourceManagerService.registerPluginResource<DataValidationJSON>(unitID, DATA_VALIDATION_PLUGIN_NAME, {
-                    toJson: (unitID) => toJson(unitID),
-                    parseJson: (json) => parseJson(json),
-                    onChange: (unitID, value) => {
-                        Object.keys(value).forEach((subunitId) => {
-                            const ruleList = value[subunitId];
-                            ruleList.forEach((rule) => {
-                                this._dataValidationModel.addRule(unitID, subunitId, rule);
-                            });
-                        });
-                    },
-                })
-            );
-        };
-        this.disposeWithMe(toDisposable(this._univerInstanceService.sheetAdded$.subscribe(handleWorkbookAdd)));
         this.disposeWithMe(
-            toDisposable(
-                this._univerInstanceService.sheetDisposed$.subscribe((workbook) => {
-                    const unitID = workbook.getUnitId();
-                    this._resourceManagerService.disposePluginResource(unitID, DATA_VALIDATION_PLUGIN_NAME);
-                })
-            )
+            this._resourceManagerService.registerPluginResource<DataValidationJSON>({
+                pluginName: DATA_VALIDATION_PLUGIN_NAME,
+                businesses: [UniverType.UNIVER_SHEET],
+                toJson: (unitID) => toJson(unitID),
+                parseJson: (json) => parseJson(json),
+                onUnLoad: (unitID) => {
+                    this._dataValidationModel.deleteUnitRules(unitID);
+                },
+                onLoad: (unitID, value) => {
+                    Object.keys(value).forEach((subunitId) => {
+                        const ruleList = value[subunitId];
+                        ruleList.forEach((rule) => {
+                            this._dataValidationModel.addRule(unitID, subunitId, rule);
+                        });
+                    });
+                },
+            })
         );
-        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
-        handleWorkbookAdd(workbook);
     }
 }

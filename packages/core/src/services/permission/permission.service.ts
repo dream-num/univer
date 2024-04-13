@@ -20,7 +20,7 @@ import { BehaviorSubject, combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import type { PermissionPoint } from '../../shared';
-import { Disposable, PermissionStatus, toDisposable } from '../../shared';
+import { Disposable, PermissionStatus } from '../../shared';
 import type { Nullable } from '../../shared/types';
 import { IUniverInstanceService } from '../instance/instance.service';
 import { LifecycleStages, OnLifecycle } from '../lifecycle/lifecycle';
@@ -50,34 +50,34 @@ export class PermissionService extends Disposable implements IPermissionService 
         // this._init();
     }
 
-    private _init() {
-        this.disposeWithMe(
-            toDisposable(
-                this._univerInstanceService.sheetAdded$.subscribe((workbook) => {
-                    this._resourceManagerService.registerPluginResource(workbook.getUnitId(), resourceKey, {
-                        onChange: (unitID, value) => {
-                            (value as PermissionPoint[]).forEach((permissionPoint) => {
-                                if (this.getPermissionPoint(unitID, permissionPoint.id)) {
-                                    this.updatePermissionPoint(unitID, permissionPoint.id, permissionPoint.value);
-                                } else {
-                                    this.addPermissionPoint(unitID, permissionPoint);
-                                }
-                            });
-                        },
-                        toJson: (unitID: string) => this._toJson(unitID),
-                        parseJson: (json: string) => this._parseJson(json),
-                    });
-                })
-            )
-        );
-        this.disposeWithMe(
-            toDisposable(
-                this._univerInstanceService.sheetDisposed$.subscribe((workbook) => {
-                    this._resourceManagerService.disposePluginResource(workbook.getUnitId(), resourceKey);
-                })
-            )
-        );
-    }
+    // private _init() {
+    //     this.disposeWithMe(
+    //         toDisposable(
+    //             this._univerInstanceService.sheetAdded$.subscribe((workbook) => {
+    //                 this._resourceManagerService.registerPluginResource(workbook.getUnitId(), resourceKey, {
+    //                     onChange: (unitID, value) => {
+    //                         (value as PermissionPoint[]).forEach((permissionPoint) => {
+    //                             if (this.getPermissionPoint(unitID, permissionPoint.id)) {
+    //                                 this.updatePermissionPoint(unitID, permissionPoint.id, permissionPoint.value);
+    //                             } else {
+    //                                 this.addPermissionPoint(unitID, permissionPoint);
+    //                             }
+    //                         });
+    //                     },
+    //                     toJson: (unitID: string) => this._toJson(unitID),
+    //                     parseJson: (json: string) => this._parseJson(json),
+    //                 });
+    //             })
+    //         )
+    //     );
+    //     this.disposeWithMe(
+    //         toDisposable(
+    //             this._univerInstanceService.sheetDisposed$.subscribe((workbook) => {
+    //                 this._resourceManagerService.disposePluginResource(workbook.getUnitId(), resourceKey);
+    //             })
+    //         )
+    //     );
+    // }
 
     private _toJson(unitID: string) {
         const permissionMap = this._permissionPointMap.get(unitID);

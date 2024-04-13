@@ -14,8 +14,13 @@
  * limitations under the License.
  */
 
-export const DATA_VALIDATION_PLUGIN_NAME = 'SHEET_DATA_VALIDATION_PLUGIN';
+import { createIdentifier } from '@wendellhu/redi';
+import type { Workbook } from '../../sheets/workbook';
+import type { IWorkbookData } from '../../types/interfaces/i-workbook-data';
+import { LifecycleStages, runOnLifecycle } from '../lifecycle/lifecycle';
 
-export const DROP_DOWN_DEFAULT_COLOR = '#ECECEC';
-
-export const DROP_DOWN_COLORS = [];
+export interface IResourceLoaderService {
+    saveWorkbook: (workbook: Workbook) => IWorkbookData;
+}
+export const IResourceLoaderService = createIdentifier<IResourceLoaderService>('resource-loader-service');
+runOnLifecycle(LifecycleStages.Ready, IResourceLoaderService);

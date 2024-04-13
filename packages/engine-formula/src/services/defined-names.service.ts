@@ -56,6 +56,8 @@ export interface IDefinedNamesService {
 
     removeDefinedName(unitId: string, name: string): void;
 
+    removeUnitDefinedName(unitId: string): void;
+
     hasDefinedName(unitId: string): boolean;
 
     setCurrentRange(range: IUnitRange): void;
@@ -80,12 +82,14 @@ export class DefinedNamesService extends Disposable implements IDefinedNamesServ
     private readonly _update$ = new Subject();
     readonly update$ = this._update$.asObservable();
 
-    private _currentRange: IUnitRange = { unitId: '', sheetId: '', range: {
-        startRow: 0,
-        endRow: 0,
-        startColumn: 0,
-        endColumn: 0,
-    } };
+    private _currentRange: IUnitRange = {
+        unitId: '', sheetId: '', range: {
+            startRow: 0,
+            endRow: 0,
+            startColumn: 0,
+            endColumn: 0,
+        },
+    };
 
     private readonly _currentRange$ = new Subject<IUnitRange>();
     readonly currentRange$ = this._currentRange$.asObservable();
@@ -141,6 +145,11 @@ export class DefinedNamesService extends Disposable implements IDefinedNamesServ
 
     removeDefinedName(unitId: string, id: string) {
         delete this._definedNameMap[unitId]?.[id];
+        this._update();
+    }
+
+    removeUnitDefinedName(unitId: string) {
+        delete this._definedNameMap[unitId];
         this._update();
     }
 

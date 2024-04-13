@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IObjectMatrixPrimitiveType, IRange, Nullable, Workbook } from '@univerjs/core';
+import type { IObjectMatrixPrimitiveType, IRange, Nullable } from '@univerjs/core';
 import {
     Disposable,
     ICommandService,
@@ -28,6 +28,7 @@ import {
 } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 import { Subject } from 'rxjs';
+import { UniverType } from '@univerjs/protocol';
 
 import type { FormatType, INumfmtItem, INumfmtService, IRefItem, ISnapshot } from './type';
 
@@ -65,52 +66,35 @@ export class NumfmtService extends Disposable implements INumfmtService {
     }
 
     private _initModel() {
-        const handleWorkbookAdd = (workbook: Workbook) => {
-            const unitID = workbook.getUnitId();
-            this.disposeWithMe(
-                this._resourceManagerService.registerPluginResource<ISnapshot>(unitID, SHEET_NUMFMT_PLUGIN, {
-                    toJson: (unitID) => this._toJson(unitID),
-                    parseJson: (json) => this._parseJson(json),
-                    onChange: (unitID, value) => {
-                        const { model, refModel } = value;
-
-                        if (model) {
-                            const parseModel = Object.keys(model).reduce((result, sheetId) => {
-                                result.set(sheetId, new ObjectMatrix<INumfmtItem>(model[sheetId]));
-                                return result;
-                            }, new Map<string, ObjectMatrix<INumfmtItem>>());
-                            this._numfmtModel.set(unitID, parseModel);
-                        }
-                        if (refModel) {
-                            this._refAliasModel.set(
-                                unitID,
-                                new RefAlias<IRefItem, 'pattern' | 'i'>(refModel, ['pattern', 'i'])
-                            );
-                        }
-                        this._modelReplace$.next(unitID);
-                    },
-                })
-            );
-        };
-        this.disposeWithMe(toDisposable(this._univerInstanceService.sheetAdded$.subscribe(handleWorkbookAdd)));
         this.disposeWithMe(
-            toDisposable(
-                this._univerInstanceService.sheetDisposed$.subscribe((workbook) => {
-                    const unitID = workbook.getUnitId();
-                    const model = this._numfmtModel.get(unitID);
+            this._resourceManagerService.registerPluginResource<ISnapshot>({
+                pluginName: SHEET_NUMFMT_PLUGIN,
+                businesses: [UniverType.UNIVER_SHEET],
+                toJson: (unitID) => this._toJson(unitID),
+                parseJson: (json) => this._parseJson(json),
+                onUnLoad: (unitID) => {
+                    this._numfmtModel.delete(unitID);
+                    this._refAliasModel.delete(unitID);
+                },
+                onLoad: (unitID, value) => {
+                    const { model, refModel } = value;
                     if (model) {
-                        this._numfmtModel.delete(unitID);
+                        const parseModel = Object.keys(model).reduce((result, sheetId) => {
+                            result.set(sheetId, new ObjectMatrix<INumfmtItem>(model[sheetId]));
+                            return result;
+                        }, new Map<string, ObjectMatrix<INumfmtItem>>());
+                        this._numfmtModel.set(unitID, parseModel);
                     }
-                    const refModel = this._refAliasModel.get(unitID);
                     if (refModel) {
-                        this._refAliasModel.delete(unitID);
+                        this._refAliasModel.set(
+                            unitID,
+                            new RefAlias<IRefItem, 'pattern' | 'i'>(refModel, ['pattern', 'i'])
+                        );
                     }
-                    this._resourceManagerService.disposePluginResource(unitID, SHEET_NUMFMT_PLUGIN);
-                })
-            )
+                    this._modelReplace$.next(unitID);
+                },
+            })
         );
-        const workbooks = this._univerInstanceService.getAllUniverSheetsInstance();
-        workbooks.forEach((workbook) => handleWorkbookAdd(workbook));
     }
 
     private _toJson(unitID: string) {

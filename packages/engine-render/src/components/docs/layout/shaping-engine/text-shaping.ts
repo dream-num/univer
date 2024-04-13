@@ -16,7 +16,8 @@
 
 import { BooleanNumber, type IDocumentBody, type IStyleBase } from '@univerjs/core';
 // @ts-ignore
-import opentype from 'opentype.js';
+import opentype from 'opentype.js/dist/opentype.module';
+import type Opentype from 'opentype.js';
 import type { Nullable } from 'vitest';
 import { DEFAULT_FONTFACE_PLANE } from '../../../../basics/const';
 import { EMOJI_REG } from '../../../../basics/tools';
@@ -35,16 +36,16 @@ export interface IOpenTypeGlyphInfo {
     char: string;
     start: number;
     end: number;
-    glyph: Nullable<opentype.Glyph>;
-    font: Nullable<opentype.Font>;
+    glyph: Nullable<Opentype.Glyph>;
+    font: Nullable<Opentype.Font>;
     kerning: number;
     boundingBox: Nullable<IBoundingBox>;
 }
 
-const fontCache = new Map<string, opentype.Font>();
+const fontCache = new Map<string, Opentype.Font>();
 const glyphCache: Map<string, IOpenTypeGlyphInfo[]> = new Map();
 
-// eslint-disable-next-line max-lines-per-function
+
 function shapeChunk(
     content: string,
     charPosition: number,
@@ -82,7 +83,7 @@ function shapeChunk(
 
     let font = fontCache.get(fontInfo.fullName);
     if (!font) {
-        font = opentype.parse(fontBuffer);
+        font = opentype.parse(fontBuffer) as Opentype.Font;
         fontCache.set(fontInfo.fullName, font);
     }
 

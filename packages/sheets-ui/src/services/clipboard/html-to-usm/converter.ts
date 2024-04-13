@@ -222,8 +222,8 @@ export class HtmlToUSMService {
 
     private _parseTable(html: string) {
         const valueMatrix = new ObjectMatrix<ICellDataWithSpanInfo>();
-        const colProperties = parseColGroup(html);
-        const { rowProperties } = parseTableRows(html);
+        const colProperties = parseColGroup(html) ?? [];
+        const { rowProperties = [] } = parseTableRows(html);
         const parsedCellMatrix = parseTableByHtml(this.htmlElement, this.getCurrentSkeleton()?.skeleton);
         parsedCellMatrix &&
             parsedCellMatrix.forValue((row, col, value) => {
@@ -387,14 +387,8 @@ function parseProperties(propertyStr: string): IClipboardPropertyItem {
  * @returns cols and their properties
  */
 function parseColGroup(raw: string): IClipboardPropertyItem[] | null {
-    const COLGROUP_TAG_REGEX = /<colgroup([\s\S]*?)>(.*?)<\/colgroup>/;
-    const colgroupMatch = raw.match(COLGROUP_TAG_REGEX);
-    if (!colgroupMatch || !colgroupMatch[2]) {
-        return null;
-    }
-
     const COL_TAG_REGEX = /<col([\s\S]*?)>/g;
-    const colMatches = colgroupMatch[2].matchAll(COL_TAG_REGEX);
+    const colMatches = raw.matchAll(COL_TAG_REGEX);
     if (!colMatches) {
         return null;
     }

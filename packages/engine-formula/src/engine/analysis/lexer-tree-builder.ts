@@ -1415,12 +1415,21 @@ export class LexerTreeBuilder extends Disposable {
 
     private _isScientificNotation(formulaStringArray: string[], cur: number, currentString: string) {
         const preTwoChar = formulaStringArray[cur - 2];
-        if (preTwoChar && isNaN(Number(preTwoChar))) {
+        if (preTwoChar && Number.isNaN(Number(preTwoChar))) {
+            return false;
+        }
+
+        if (!(currentString === operatorToken.MINUS || currentString === operatorToken.PLUS)) {
+            return false;
+        }
+
+        const nextOneChar = formulaStringArray[cur + 1];
+        if (nextOneChar && Number.isNaN(Number(nextOneChar))) {
             return false;
         }
 
         const preOneChar = formulaStringArray[cur - 1];
-        return preOneChar && preOneChar.toUpperCase() === 'E' && (currentString === operatorToken.MINUS || currentString === operatorToken.PLUS);
+        return preOneChar && preOneChar.toUpperCase() === 'E';
     }
 
     private _addSequenceArray(sequenceArray: ISequenceArray[] | undefined, currentString: string, cur: number, isZeroAdded: boolean) {

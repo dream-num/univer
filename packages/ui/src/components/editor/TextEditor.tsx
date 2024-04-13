@@ -198,9 +198,13 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
                 }
             }, 100);
 
-            onValid && onValid(isLegality);
 
-            onChange && onChange(editorService.getValue(id));
+            const currentValue = editorService.getValue(unitId);
+
+            if (currentValue !== value) {
+                onValid && onValid(isLegality);
+                onChange && onChange(editorService.getValue(id));
+            }
         }, 30);
 
         const valueChangeSubscription = editorService.valueChange$.subscribe((editor) => {

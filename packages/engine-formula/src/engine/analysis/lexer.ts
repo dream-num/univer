@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { AbsoluteRefType } from '@univerjs/core';
-import { Disposable, isValidRange, Rectangle } from '@univerjs/core';
+import type { IRange } from '@univerjs/core';
+import { AbsoluteRefType, Disposable, isValidRange, IUniverInstanceService, moveRangeByOffset, Rectangle } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
 import { IDefinedNamesService } from '../../services/defined-names.service';
@@ -31,7 +31,8 @@ export class Lexer extends Disposable {
     constructor(
         @IDefinedNamesService private readonly _definedNamesService: IDefinedNamesService,
         @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder,
-        @IFormulaCurrentConfigService private readonly _formulaCurrentConfigService: IFormulaCurrentConfigService
+        @IFormulaCurrentConfigService private readonly _formulaCurrentConfigService: IFormulaCurrentConfigService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
     }
@@ -108,7 +109,7 @@ export class Lexer extends Disposable {
         return `${prefixToken}${generateStringWithSequence(nodes)}`;
     }
 
-    moveFormulaRefOffset(formulaString: string, refOffsetX: number, refOffsetY: number) {
+    moveFormulaRefOffset(formulaString: string, refOffsetX: number, refOffsetY: number, ignoreAbsolute = false) {
         const sequenceNodes = this.sequenceNodesBuilder(formulaString);
 
         if (sequenceNodes == null) {
@@ -128,9 +129,16 @@ export class Lexer extends Disposable {
 
             const sequenceGrid = deserializeRangeWithSheet(token);
 
-            const { range, sheetName, unitId: sequenceUnitId } = sequenceGrid;
+            const { sheetName, unitId: sequenceUnitId } = sequenceGrid;
 
-            const newRange = Rectangle.moveOffset(range, refOffsetX, refOffsetY);
+            let newRange: IRange = sequenceGrid.range;
+
+            if (newRange.startAbsoluteRefType === AbsoluteRefType.ALL && newRange.endAbsoluteRefType === AbsoluteRefType.ALL) {
+                newSequenceNodes.push(node);
+                continue;
+            } else {
+                newRange = moveRangeByOffset(newRange, refOffsetX, refOffsetY, ignoreAbsolute);
+            }
 
             let newToken = '';
             if (isValidRange(newRange)) {
@@ -154,9 +162,13 @@ export class Lexer extends Disposable {
 
 
     private _injectDefinedNameCheck(nodeToken: string) {
-        const executeUnitId = this._formulaCurrentConfigService.getExecuteUnitId();
+        let executeUnitId = this._formulaCurrentConfigService.getExecuteUnitId();
 
-        if (!executeUnitId) {
+        if (!executeUnitId || executeUnitId === '') {
+            executeUnitId = this._univerInstanceService.getCurrentUniverSheetInstance()?.getUnitId();
+        }
+
+        if (!executeUnitId || executeUnitId === '') {
             return false;
         }
 

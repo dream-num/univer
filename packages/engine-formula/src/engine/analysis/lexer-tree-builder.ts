@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { AbsoluteRefType, Nullable } from '@univerjs/core';
-import { Disposable, isValidRange, Rectangle, Tools } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
+import { Disposable, Tools } from '@univerjs/core';
 
 import { FormulaAstLRU } from '../../basics/cache-lru';
 import { ErrorType } from '../../basics/error-type';
@@ -38,9 +38,8 @@ import {
     DEFAULT_TOKEN_TYPE_PARAMETER,
     DEFAULT_TOKEN_TYPE_ROOT,
 } from '../../basics/token-type';
-import { deserializeRangeWithSheet, serializeRangeToRefString } from '../utils/reference';
 import type { ISequenceArray, ISequenceNode } from '../utils/sequence';
-import { generateStringWithSequence, sequenceNodeType } from '../utils/sequence';
+import { sequenceNodeType } from '../utils/sequence';
 import { LexerNode } from './lexer-node';
 
 enum bracketType {

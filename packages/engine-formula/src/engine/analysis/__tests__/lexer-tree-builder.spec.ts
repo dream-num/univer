@@ -27,6 +27,13 @@ function checkDefinedName(token: string) {
     return false;
 }
 
+function checkDefinedName2(token: string) {
+    if (token === 'DefinedName2') {
+        return true;
+    }
+    return false;
+}
+
 describe('lexer nodeMaker test', () => {
     const lexerTreeBuilder = new LexerTreeBuilder();
 
@@ -416,6 +423,10 @@ describe('lexer nodeMaker test', () => {
                     token: 'A1:B10',
                 },
             ]);
+        });
+
+        it('Has defined name11', () => {
+            expect(lexerTreeBuilder.sequenceNodesBuilder('=SUM(DefinedName2+E22:E32,J21:J32)', checkDefinedName2.bind(this))).toStrictEqual([]);
         });
     });
 });

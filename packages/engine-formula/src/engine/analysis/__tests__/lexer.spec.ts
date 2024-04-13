@@ -15,7 +15,7 @@
  */
 
 import type { IWorkbookData, Univer, Workbook } from '@univerjs/core';
-import { AbsoluteRefType, LocaleType } from '@univerjs/core';
+import { AbsoluteRefType, IUniverInstanceService, LocaleType } from '@univerjs/core';
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
@@ -70,6 +70,7 @@ describe('lexer test', () => {
     let definedNamesService: IDefinedNamesService;
     let formulaCurrentConfigService: IFormulaCurrentConfigService;
     let lexerTreeBuilder: LexerTreeBuilder;
+    let univerInstanceService: IUniverInstanceService;
 
     beforeEach(() => {
         const testBed = createCommandTestBed(TEST_WORKBOOK_DATA);
@@ -78,17 +79,16 @@ describe('lexer test', () => {
         get = testBed.get;
 
         definedNamesService = get(IDefinedNamesService);
-
         formulaCurrentConfigService = get(IFormulaCurrentConfigService);
-
         lexerTreeBuilder = get(LexerTreeBuilder);
+        univerInstanceService = get(IUniverInstanceService);
 
         formulaCurrentConfigService.setExecuteUnitId('test');
         formulaCurrentConfigService.setExecuteSubUnitId('sheet1');
 
         // runtimeService.setCurrent(0, 0, 4, 1, 'sheet1', 'test');
 
-        lexer = new Lexer(definedNamesService, lexerTreeBuilder, formulaCurrentConfigService);
+        lexer = new Lexer(definedNamesService, lexerTreeBuilder, formulaCurrentConfigService, univerInstanceService);
     });
 
     afterEach(() => {

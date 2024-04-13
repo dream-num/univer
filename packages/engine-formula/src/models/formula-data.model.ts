@@ -29,7 +29,6 @@ import type {
     IUnitData,
     IUnitSheetNameMap,
 } from '../basics/common';
-import { LexerTreeBuilder } from '../engine/analysis/lexer-tree-builder';
 import { Lexer } from '../engine/analysis/lexer';
 import type { IFormulaIdMap } from './utils/formula-data-util';
 import { clearArrayFormulaCellDataByCell, updateFormulaDataByCellValue } from './utils/formula-data-util';

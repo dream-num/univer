@@ -15,10 +15,19 @@
  */
 
 import type { Nullable } from '@univerjs/core';
+import type { IDocumentSkeletonBoundingBox, IDocumentSkeletonFontStyle } from '../../../../basics/i-document-skeleton-cached';
+import { ptToPixel } from '../../../../basics/tools';
+import type { IOpenTypeGlyphInfo } from './text-shaping';
 
-import { DEFAULT_MEASURE_TEXT } from './const';
-import type { IDocumentSkeletonBoundingBox, IDocumentSkeletonFontStyle } from './i-document-skeleton-cached';
-import type { IMeasureTextCache } from './interfaces';
+export const DEFAULT_MEASURE_TEXT = '0';
+
+export interface IMeasureTextCache {
+    fontBoundingBoxAscent: number;
+    fontBoundingBoxDescent: number;
+    actualBoundingBoxAscent: number;
+    actualBoundingBoxDescent: number;
+    width: number;
+}
 
 const getDefaultBaselineOffset = (fontSize: number) => ({
     sbr: 0.6,
@@ -55,7 +64,6 @@ export class FontCache {
 
     private static _fontDataMap: Map<string, IFontData> = new Map();
 
-    // 文字缓存全局变量
     private static _globalFontMeasureCache: Map<string, Map<string, IMeasureTextCache>> = new Map();
 
     static get globalFontMeasureCache() {
@@ -191,6 +199,23 @@ export class FontCache {
         }
 
         return bBox;
+    }
+
+    static getBBoxFromGlyphInfo(glyphInfo: IOpenTypeGlyphInfo, fontSize: number) {
+        const glyph = glyphInfo.glyph!;
+        const font = glyphInfo.font!;
+        const { y1, y2 } = glyphInfo.boundingBox!;
+        const scale = ptToPixel(fontSize) / font.unitsPerEm;
+
+        const { ascender, descender } = font;
+
+        return this._calculateBoundingBoxByMeasureText({
+            width: (glyph.advanceWidth ?? 0) * scale,
+            fontBoundingBoxAscent: ascender * scale,
+            fontBoundingBoxDescent: Math.abs(descender * scale),
+            actualBoundingBoxAscent: y2 * scale,
+            actualBoundingBoxDescent: Math.abs(y1 * scale),
+        }, fontSize);
     }
 
     // 获取有值单元格文本大小

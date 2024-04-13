@@ -27,8 +27,8 @@ import type {
 import { BaselineOffset, FontStyleType, Tools } from '@univerjs/core';
 import * as cjk from 'cjk-regex';
 
+import { FontCache } from '../components/docs/layout/shaping-engine/font-cache';
 import { DEFAULT_FONTFACE_PLANE } from './const';
-import { FontCache } from './font-cache';
 import type { IBoundRectNoAngle } from './vector2';
 
 const DEG180 = 180;

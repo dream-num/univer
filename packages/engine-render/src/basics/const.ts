@@ -77,8 +77,6 @@ export const DEFAULT_SKELETON_FOOTER = {
     marginBottom: 20,
 };
 
-export const DEFAULT_MEASURE_TEXT = '0';
-
 export const DEFAULT_OFFSET_SPACING = 1;
 
 export const DEFAULT_DOCUMENT_FONTSIZE = 14;

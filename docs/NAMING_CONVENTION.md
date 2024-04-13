@@ -79,7 +79,7 @@ export const ILogService = createIdentifier<ILogService>('core.log.service');
 export const ILogService = createIdentifier<ILogService>('log-service');
 ```
 
-## Plugin Names
+## Plugins' Names
 
 Plugin names should be all in capitalized letters and suffixed by `PLUGIN`. Words should be separated by underscores and suffixed. For example:
 
@@ -94,7 +94,7 @@ export const SHEET_CONDITIONAL_FORMATTING_PLUGIN = 'SHEET_CONDITIONAL_FORMATTING
 export const SHEET_CONDITIONAL_FORMATTING_PLUGIN = 'sheet-conditional-formatting-plugin';
 ```
 
-### Plugin classes
+### Plugins' classes
 
 Plugin classes should be named in PascalCase and prefixed by `Univer`. For example:
 

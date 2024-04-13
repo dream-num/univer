@@ -18,9 +18,7 @@ import type { IDisposable } from '@wendellhu/redi';
 import { createIdentifier } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
 import type { UniverType } from '@univerjs/protocol';
-import type { Workbook } from '../../sheets/workbook';
 import type { IWorkbookData } from '../../types/interfaces/i-workbook-data';
-import { LifecycleStages, runOnLifecycle } from '../lifecycle/lifecycle';
 
 type IBusinessName = 'SHEET' | 'DOC';
 export type IResourceName = `${IBusinessName}_${string}_PLUGIN`;
@@ -45,9 +43,3 @@ export interface IResourceManagerService {
 }
 
 export const IResourceManagerService = createIdentifier<IResourceManagerService>('resource-manager-service');
-export interface ISnapshotPersistenceService {
-    saveWorkbook: (workbook: Workbook) => IWorkbookData;
-}
-
-export const ISnapshotPersistenceService = createIdentifier<ISnapshotPersistenceService>('ResourcePersistenceService');
-runOnLifecycle(LifecycleStages.Ready, ISnapshotPersistenceService);

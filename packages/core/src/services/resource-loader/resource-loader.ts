@@ -18,6 +18,7 @@ import { Inject } from '@wendellhu/redi';
 import { UniverType } from '@univerjs/protocol';
 import type { Workbook } from '../../sheets/workbook';
 import type { IWorkbookData } from '../../types/interfaces';
+import type { IResourceHook } from '../resource-manager/type';
 import { IResourceManagerService } from '../resource-manager/type';
 import { IUniverInstanceService } from '../instance/instance.service';
 import { Disposable, toDisposable } from '../../shared/lifecycle';
@@ -36,22 +37,7 @@ export class ResourceLoaderService extends Disposable implements IResourceLoader
     }
 
     private _init() {
-        this.disposeWithMe(
-            toDisposable(
-                this._univerInstanceService.sheetAdded$.subscribe((workbook) => {
-                    this._resourceManagerService.loadResources(workbook.getUnitId(), workbook.getSnapshot().resources);
-                })
-            )
-        );
-        this.disposeWithMe(
-            toDisposable(
-                this._univerInstanceService.sheetDisposed$.subscribe((workbook) => {
-                    this._resourceManagerService.unloadResources(workbook.getUnitId());
-                })
-            )
-        );
-        const allResourceHooks = this._resourceManagerService.getAllResourceHooks();
-        allResourceHooks.forEach((hook) => {
+        const handleHookAdd = (hook: IResourceHook) => {
             hook.businesses.forEach((business) => {
                 switch (business) {
                     case UniverType.UNRECOGNIZED:
@@ -77,7 +63,32 @@ export class ResourceLoaderService extends Disposable implements IResourceLoader
                     }
                 }
             });
+        };
+
+        const allResourceHooks = this._resourceManagerService.getAllResourceHooks();
+        allResourceHooks.forEach((hook) => {
+            handleHookAdd(hook);
         });
+
+        this.disposeWithMe(this._resourceManagerService.register$.subscribe((hook) => {
+            handleHookAdd(hook);
+        }));
+
+        this.disposeWithMe(
+            toDisposable(
+                this._univerInstanceService.sheetAdded$.subscribe((workbook) => {
+                    this._resourceManagerService.loadResources(workbook.getUnitId(), workbook.getSnapshot().resources);
+                })
+            )
+        );
+
+        this.disposeWithMe(
+            toDisposable(
+                this._univerInstanceService.sheetDisposed$.subscribe((workbook) => {
+                    this._resourceManagerService.unloadResources(workbook.getUnitId());
+                })
+            )
+        );
     }
 
     saveWorkbook: (workbook: Workbook) => IWorkbookData = (workbook) => {

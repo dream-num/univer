@@ -51,7 +51,15 @@ src/
 
 ## Interfaces
 
-Interfaces should be named starting with a capital "I". For example,
+Interfaces should be named starting with a capital "I". For example:
+
+```typescript
+// ✅
+export interface IMyInterface {}
+
+// 🚫
+export interface MyInterface {}
+```
 
 ## Dependency Injection Token
 
@@ -86,7 +94,7 @@ export const SHEET_CONDITIONAL_FORMATTING_PLUGIN = 'SHEET_CONDITIONAL_FORMATTING
 export const SHEET_CONDITIONAL_FORMATTING_PLUGIN = 'sheet-conditional-formatting-plugin';
 ```
 
-## Resource Key
+### Resource key
 
 Resource keys should reuse the corresponding plugin's name.
 
@@ -112,7 +120,6 @@ export const SetSelectionFrozenCommand: ICommand<ISetSelectionFrozenCommandParam
 }
 
 // 🚫
-
 export const SetSelectionFrozenCommand: ICommand<ISetSelectionFrozenCommandParams> = {
     id: 'SetSelectionFrozenCommmand',
 }

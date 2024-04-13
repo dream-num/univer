@@ -17,7 +17,7 @@
 import type { IStyleBase } from '@univerjs/core';
 import { CellValueType, ObjectMatrix, Range, Rectangle, Tools } from '@univerjs/core';
 import dayjs from 'dayjs';
-import { deserializeRangeWithSheet, ERROR_TYPE_SET, generateStringWithSequence, LexerTreeBuilder, sequenceNodeType, serializeRange } from '@univerjs/engine-formula';
+import { deserializeRangeWithSheet, ERROR_TYPE_SET, generateStringWithSequence, Lexer, sequenceNodeType, serializeRange } from '@univerjs/engine-formula';
 import { CFNumberOperator, CFRuleType, CFSubRuleType, CFTextOperator, CFTimePeriodOperator } from '../../base/const';
 import type { IAverageHighlightCell, IConditionFormattingRule, IFormulaHighlightCell, IHighlightCell, INumberHighlightCell, IRankHighlightCell, ITextHighlightCell, ITimePeriodHighlightCell } from '../../models/type';
 import { ConditionalFormattingFormulaService, FormulaResultStatus } from '../conditional-formatting-formula.service';
@@ -91,9 +91,9 @@ export const highlightCellCalculateUnit: ICalculateUnit = {
                 }
                 case CFSubRuleType.formula:{
                     const subRuleConfig = ruleConfig as IFormulaHighlightCell;
-                    const lexerTreeBuilder = context.accessor.get(LexerTreeBuilder);
+                    const lexer = context.accessor.get(Lexer);
                     const formulaString = subRuleConfig.value;
-                    const sequenceNodes = lexerTreeBuilder.sequenceNodesBuilder(formulaString);
+                    const sequenceNodes = lexer.sequenceNodesBuilder(formulaString);
                     if (!sequenceNodes) {
                         return {
                             sequenceNodes: null,

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 export * from './array-search';
 export * from './blob';
 export * from './color/color';
@@ -38,3 +39,4 @@ export * from './tools';
 export * from './types';
 export * from './debounce';
 export { queryObjectMatrix } from './object-matrix-query';
+export { moveRangeByOffset } from './range';

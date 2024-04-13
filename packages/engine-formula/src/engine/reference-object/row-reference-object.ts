@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IRange } from '@univerjs/core';
+import { type IRange, RANGE_TYPE } from '@univerjs/core';
 
 import { ErrorType } from '../../basics/error-type';
 import { deserializeRangeWithSheet } from '../utils/reference';
@@ -56,8 +56,9 @@ export class RowReferenceObject extends BaseReferenceObject {
         // if (currentRangeData.endRow !== -1) {
         //     return ErrorValueObject.create(ErrorType.REF);
         // }
+        const newRowRange = rowReferenceObject.getRangeData();
 
-        const newRow = rowReferenceObject.getRangeData().startRow;
+        const newRow = newRowRange.startRow;
 
         const row = currentRangeData.startRow;
 
@@ -67,6 +68,12 @@ export class RowReferenceObject extends BaseReferenceObject {
             currentRangeData.startRow = newRow;
             currentRangeData.endRow = row;
         }
+
+        if (newRowRange.startAbsoluteRefType) {
+            currentRangeData.endAbsoluteRefType = newRowRange.startAbsoluteRefType;
+        }
+
+        currentRangeData.rangeType = RANGE_TYPE.ROW;
 
         this.setToken(`${this.getToken()}${matchToken.COLON}${rowReferenceObject.getToken()}`);
 

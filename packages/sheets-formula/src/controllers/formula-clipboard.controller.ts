@@ -25,7 +25,7 @@ import {
     OnLifecycle,
     Tools,
 } from '@univerjs/core';
-import { LexerTreeBuilder } from '@univerjs/engine-formula';
+import { Lexer } from '@univerjs/engine-formula';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
 import type { ICellDataWithSpanInfo, ICopyPastePayload, ISheetClipboardHook, ISheetRangeLocation } from '@univerjs/sheets-ui';
@@ -41,7 +41,7 @@ export const DEFAULT_PASTE_FORMULA = 'default-paste-formula';
 export class FormulaClipboardController extends Disposable {
     constructor(
         @IUniverInstanceService private readonly _currentUniverSheet: IUniverInstanceService,
-        @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder,
+        @Inject(Lexer) private readonly _lexer: Lexer,
         @ISheetClipboardService private readonly _sheetClipboardService: ISheetClipboardService,
         @Inject(Injector) private readonly _injector: Injector
     ) {
@@ -100,7 +100,7 @@ export class FormulaClipboardController extends Disposable {
             matrix,
             accessor,
             copyInfo,
-            this._lexerTreeBuilder,
+            this._lexer,
             isSpecialPaste
         ));
     }
@@ -116,7 +116,7 @@ export function getSetCellFormulaMutations(
         copyType: COPY_TYPE;
         copyRange?: IRange;
     },
-    lexerTreeBuilder: LexerTreeBuilder,
+    lexer: Lexer,
     isSpecialPaste = false
 ) {
     const redoMutationsInfo: IMutationInfo[] = [];
@@ -175,7 +175,7 @@ export function getSetCellFormulaMutations(
 
                 const offsetX = col + startColumn - (copyRangeStartColumn + colIndex);
                 const offsetY = row + startRow - (copyRangeStartRow + rowIndex);
-                const shiftedFormula = lexerTreeBuilder.moveFormulaRefOffset(originalFormula, offsetX, offsetY);
+                const shiftedFormula = lexer.moveFormulaRefOffset(originalFormula, offsetX, offsetY);
 
                 valueObject.si = formulaId;
                 valueObject.f = shiftedFormula;

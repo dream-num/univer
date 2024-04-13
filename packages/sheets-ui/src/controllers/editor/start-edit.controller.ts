@@ -241,7 +241,7 @@ export class StartEditController extends Disposable {
             if (verticalAlign === VerticalAlign.MIDDLE) {
                 offsetTop = (editorHeight - actualHeight) / 2 / scaleY;
             } else if (verticalAlign === VerticalAlign.TOP) {
-                offsetTop = 0;
+                offsetTop = paddingData.t || 0;
             } else { // VerticalAlign.UNSPECIFIED follow the same rule as HorizontalAlign.BOTTOM.
                 offsetTop = (editorHeight - actualHeight) / scaleY - (paddingData.b || 0);
             }

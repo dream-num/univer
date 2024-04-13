@@ -56,7 +56,7 @@ export class HoverManagerService {
             return;
         }
         const { offsetX, offsetY } = this._lastPosition;
-        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
+        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
         const worksheet = workbook.getActiveSheet();
         const skeletonParam = this._sheetSkeletonManagerService.getCurrent();
         const currentRender = this._renderManagerService.getRenderById(workbook.getUnitId());

@@ -97,10 +97,10 @@ export class FormatPainterService extends Disposable implements IFormatPainterSe
         const range = selection?.range;
         if (!range) return;
         const { startRow, endRow, startColumn, endColumn } = range;
-        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
+        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
         const worksheet = workbook?.getActiveSheet();
         const cellData = worksheet.getCellMatrix();
-        const mergeData = this._univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getMergeData();
+        const mergeData = this._univerInstanceService.getCurrentUniverSheetInstance()!.getActiveSheet().getMergeData();
 
         const styles = workbook.getStyles();
         const stylesMatrix = new ObjectMatrix<IStyleData>();

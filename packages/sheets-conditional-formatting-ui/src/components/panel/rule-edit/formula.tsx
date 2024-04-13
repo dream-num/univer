@@ -30,7 +30,7 @@ export const FormulaStyleEditor = (props: IStyleEditorProps) => {
     const { onChange, interceptorManager } = props;
     const localeService = useDependency(LocaleService);
     const univerInstanceService = useDependency(IUniverInstanceService);
-    const workbook = univerInstanceService.getCurrentUniverSheetInstance();
+    const workbook = univerInstanceService.getCurrentUniverSheetInstance()!;
     const worksheet = workbook.getActiveSheet();
 
     const rule = props.rule?.type === CFRuleType.highlightCell ? props.rule : undefined as IRankHighlightCell | IAverageHighlightCell | undefined;

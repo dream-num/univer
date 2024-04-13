@@ -100,7 +100,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
 
     constructor(
         @ILogService private readonly _logService: ILogService,
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
         @IClipboardInterfaceService private readonly _clipboardInterfaceService: IClipboardInterfaceService,
         @IUndoRedoService private readonly _undoRedoService: IUndoRedoService,
@@ -131,7 +131,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             return false; // maybe we should notify user that there is no selection
         }
 
-        const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
         const worksheet = workbook.getActiveSheet();
         const hooks = this._clipboardHooks;
 
@@ -247,7 +247,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
     }
 
     private _generateCopyContent(unitId: string, subUnitId: string, range: IRange, hooks: ISheetClipboardHook[]) {
-        const workbook = this._currentUniverService.getUniverSheetInstance(unitId);
+        const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
         const worksheet = workbook?.getSheetBySheetId(subUnitId);
 
         if (!workbook || !worksheet) {
@@ -340,7 +340,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         if (result) {
             // add to undo redo services
             this._undoRedoService.pushUndoRedo({
-                unitID: this._currentUniverService.getCurrentUniverSheetInstance().getUnitId(),
+                unitID: this._univerInstanceService.getCurrentUniverSheetInstance()!.getUnitId(),
                 undoMutations: undoMutationsInfo,
                 redoMutations: redoMutationsInfo,
             });
@@ -427,7 +427,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             return false;
         }
 
-        const styles = this._currentUniverService.getUniverSheetInstance(copyUnitId)?.getStyles();
+        const styles = this._univerInstanceService.getUniverSheetInstance(copyUnitId)?.getStyles();
         cellMatrix.forValue((row, col, value) => {
             if (typeof value.s === 'string') {
                 const newValue = Tools.deepClone(value);
@@ -448,7 +448,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             return false;
         }
 
-        const worksheet = this._currentUniverService
+        const worksheet = this._univerInstanceService
             .getUniverSheetInstance(copyUnitId)
             ?.getSheetBySheetId(copySubUnitId);
         if (!worksheet) {
@@ -611,7 +611,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         range: IRange,
         cellMatrix: ObjectMatrix<ICellDataWithSpanInfo>
     ) {
-        const worksheet = this._currentUniverService.getUniverSheetInstance(unitId)?.getSheetBySheetId(subUnitId);
+        const worksheet = this._univerInstanceService.getUniverSheetInstance(unitId)?.getSheetBySheetId(subUnitId);
         if (!worksheet) {
             return null;
         }
@@ -660,7 +660,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
     }
 
     private _getPastingTarget() {
-        const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
         const worksheet = workbook.getActiveSheet();
         const selection = this._selectionManagerService.getLast();
         return {
@@ -722,7 +722,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         const destinationRows = endRow - startRow + 1;
         const destinationColumns = endColumn - startColumn + 1;
 
-        const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
         const worksheet = workbook.getActiveSheet();
         // const mergedRange = worksheet.getMergedCell(startRow, startColumn);
         const mergeData = worksheet.getMergeData();
@@ -824,7 +824,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
      * @param range
      */
     private _topLeftCellsMatch(rowCount: number, colCount: number, range: IRange): boolean {
-        const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
         const worksheet = workbook.getActiveSheet();
         const { startRow, startColumn, endRow, endColumn } = range;
 

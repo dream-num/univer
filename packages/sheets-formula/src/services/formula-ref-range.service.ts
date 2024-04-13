@@ -43,7 +43,7 @@ export class FormulaRefRangeService extends Disposable {
         const sequenceNodes = this._lexer.sequenceNodesBuilder(formula);
         const disposableCollection = new DisposableCollection();
         const handleChange = (params: EffectRefRangeParams) => {
-            const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
+            const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
             const worksheet = workbook.getActiveSheet();
             const unitId = workbook.getUnitId();
             const subUnitId = worksheet.getSheetId();
@@ -81,7 +81,7 @@ export class FormulaRefRangeService extends Disposable {
             if (typeof node === 'object' && node.nodeType === sequenceNodeType.REFERENCE) {
                 const gridRangeName = deserializeRangeWithSheet(node.token);
                 const { range, unitId, sheetName } = gridRangeName;
-                const workbook = unitId ? this._univerInstanceService.getUniverSheetInstance(unitId) : this._univerInstanceService.getCurrentUniverSheetInstance();
+                const workbook = unitId ? this._univerInstanceService.getUniverSheetInstance(unitId) : this._univerInstanceService.getCurrentUniverSheetInstance()!;
                 const worksheet = sheetName ? workbook?.getSheetBySheetName(sheetName) : workbook?.getActiveSheet();
                 if (!worksheet) {
                     return;

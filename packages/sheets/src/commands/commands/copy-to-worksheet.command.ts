@@ -23,11 +23,12 @@ import {
     SetWorksheetConfigMutation,
     SetWorksheetConfigUndoMutationFactory,
 } from '../mutations/set-worksheet-config.mutation';
+import { getSheetCommandTarget } from './utils/target-util';
 
 export interface ICopySheetToCommandParams {
     unitId?: string;
     subUnitId?: string;
-    copyTounitId?: string;
+    copyToUnitId?: string;
     copyToSheetId?: string;
 }
 
@@ -39,21 +40,13 @@ export const CopySheetToCommand: ICommand = {
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const unitId = params.unitId || univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-        const subUnitId =
-            params.subUnitId || univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
-        const copyTounitId = params.unitId || univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-        const copyToSheetId =
-            params.copyToSheetId || univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
-        const workbook = univerInstanceService.getUniverSheetInstance(unitId);
-        if (!workbook) return false;
-        const copyToWorkbook = univerInstanceService.getUniverSheetInstance(copyTounitId);
-        if (!copyToWorkbook) return false;
-        const worksheet = workbook.getSheetBySheetId(subUnitId);
-        if (!worksheet) return false;
-        const copyToWorksheet = workbook.getSheetBySheetId(copyToSheetId);
-        if (!copyToWorksheet) return false;
-        if (unitId === copyTounitId && subUnitId === copyToSheetId) return false;
+        const fromTarget = getSheetCommandTarget(univerInstanceService, { unitId: params.unitId, subUnitId: params.subUnitId });
+        const toTarget = getSheetCommandTarget(univerInstanceService, { unitId: params.copyToUnitId, subUnitId: params.copyToSheetId });
+        if (!fromTarget || !toTarget) return false;
+
+        const { subUnitId, unitId, worksheet } = fromTarget;
+        const { unitId: copyToUnitId, subUnitId: copyToSheetId } = toTarget;
+        if (unitId === copyToUnitId && subUnitId === copyToSheetId) return false;
 
         const config = Tools.deepClone(worksheet.getConfig());
 

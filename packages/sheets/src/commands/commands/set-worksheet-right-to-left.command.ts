@@ -23,6 +23,7 @@ import {
     SetWorksheetRightToLeftMutation,
     SetWorksheetRightToLeftUndoMutationFactory,
 } from '../mutations/set-worksheet-right-to-left.mutation';
+import { getSheetCommandTarget } from './utils/target-util';
 
 export interface ISetWorksheetRightToLeftCommandParams {
     rightToLeft?: BooleanNumber;
@@ -37,26 +38,16 @@ export const SetWorksheetRightToLeftCommand: ICommand = {
     handler: async (accessor: IAccessor, params?: ISetWorksheetRightToLeftCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
-        const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        let unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-        let subUnitId = univerInstanceService
-            .getCurrentUniverSheetInstance()
+        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), params);
+        if (!target) return false;
 
-            .getActiveSheet()
-            .getSheetId();
+        const { unitId, subUnitId } = target;
         let rightToLeft = BooleanNumber.FALSE;
 
         if (params) {
-            unitId = params.unitId ?? unitId;
-            subUnitId = params.subUnitId ?? subUnitId;
             rightToLeft = params.rightToLeft ?? BooleanNumber.FALSE;
         }
-
-        const workbook = univerInstanceService.getUniverSheetInstance(unitId);
-        if (!workbook) return false;
-        const worksheet = workbook.getSheetBySheetId(subUnitId);
-        if (!worksheet) return false;
 
         const setWorksheetRightToLeftMutationParams: ISetWorksheetRightToLeftMutationParams = {
             rightToLeft,

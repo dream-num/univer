@@ -248,7 +248,7 @@ describe('Test format painter rules in controller', () => {
     describe('format painter', () => {
         describe('format painter the numbers', async () => {
             it('correct situation', async () => {
-                const workbook = get(IUniverInstanceService).getCurrentUniverSheetInstance();
+                const workbook = get(IUniverInstanceService).getCurrentUniverSheetInstance()!;
                 if (!workbook) throw new Error('This is an error');
                 await commandService.executeCommand(SetSelectionsOperation.id, {
                     unitId: 'workbook-01',

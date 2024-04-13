@@ -15,7 +15,8 @@
  */
 
 import type { ICommand, IMutationInfo, IParagraphStyle } from '@univerjs/core';
-import { CommandType, HorizontalAlign,
+import {
+    CommandType, HorizontalAlign,
     ICommandService,
     IUniverInstanceService,
     MemoryCursor,
@@ -40,28 +41,24 @@ export const AlignOperationCommand: ICommand<IAlignOperationCommandParams> = {
 
     handler: (accessor, params: IAlignOperationCommandParams) => {
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
-        const currentUniverService = accessor.get(IUniverInstanceService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
 
         const { alignType } = params;
 
-        const dataModel = currentUniverService.getCurrentUniverDocInstance();
+        const dataModel = univerInstanceService.getCurrentUniverDocInstance();
+        if (!dataModel) return false;
 
         const activeRange = textSelectionManagerService.getActiveRange();
         const selections = textSelectionManagerService.getSelections() ?? [];
         const paragraphs = dataModel.getBody()?.paragraphs;
         const serializedSelections = selections.map(serializeTextRange);
 
-        if (activeRange == null || paragraphs == null) {
-            return false;
-        }
+        if (activeRange == null || paragraphs == null) return false;
 
         const currentParagraphs = getParagraphsInRange(activeRange, paragraphs);
-
         const { segmentId } = activeRange;
-
         const unitId = dataModel.getUnitId();
-
         const isAlreadyAligned = currentParagraphs.every((paragraph) => paragraph.paragraphStyle?.horizontalAlign === alignType);
 
         const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
@@ -74,11 +71,9 @@ export const AlignOperationCommand: ICommand<IAlignOperationCommandParams> = {
         };
 
         const memoryCursor = new MemoryCursor();
-
         memoryCursor.reset();
 
         const textX = new TextX();
-
         for (const paragraph of currentParagraphs) {
             const { startIndex } = paragraph;
 
@@ -125,7 +120,7 @@ export const AlignOperationCommand: ICommand<IAlignOperationCommandParams> = {
     },
 };
 
-interface IAlignLeftCommandParams {}
+interface IAlignLeftCommandParams { }
 
 export const AlignLeftCommand: ICommand<IAlignLeftCommandParams> = {
     id: 'doc.command.align-left',
@@ -141,7 +136,7 @@ export const AlignLeftCommand: ICommand<IAlignLeftCommandParams> = {
     },
 };
 
-interface IAlignCenterCommandParams {}
+interface IAlignCenterCommandParams { }
 
 export const AlignCenterCommand: ICommand<IAlignCenterCommandParams> = {
     id: 'doc.command.align-center',
@@ -157,7 +152,7 @@ export const AlignCenterCommand: ICommand<IAlignCenterCommandParams> = {
     },
 };
 
-interface IAlignRightCommandParams {}
+interface IAlignRightCommandParams { }
 
 export const AlignRightCommand: ICommand<IAlignRightCommandParams> = {
     id: 'doc.command.align-right',
@@ -173,7 +168,7 @@ export const AlignRightCommand: ICommand<IAlignRightCommandParams> = {
     },
 };
 
-interface IAlignJustifyCommandParams {}
+interface IAlignJustifyCommandParams { }
 
 export const AlignJustifyCommand: ICommand<IAlignJustifyCommandParams> = {
     id: 'doc.command.align-justify',

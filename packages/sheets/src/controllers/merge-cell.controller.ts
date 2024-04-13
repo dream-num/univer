@@ -140,7 +140,8 @@ export class MergeCellController extends Disposable {
                 switch (commandInfo.id) {
                     case ClearSelectionAllCommand.id:
                     case ClearSelectionFormatCommand.id: {
-                        const workbook = self._univerInstanceService.getCurrentUniverSheetInstance();
+                        // TODO@Gggpound: get by unit id and subUnitId
+                        const workbook = self._univerInstanceService.getCurrentUniverSheetInstance()!;
                         const unitId = workbook.getUnitId();
                         const worksheet = workbook.getActiveSheet();
                         const subUnitId = worksheet.getSheetId();
@@ -274,9 +275,11 @@ export class MergeCellController extends Disposable {
             })
         );
 
-        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
-        const sheet = workbook.getActiveSheet();
-        registerRefRange(workbook.getUnitId(), sheet.getSheetId());
+        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
+        if (workbook) {
+            const sheet = workbook.getActiveSheet();
+            registerRefRange(workbook.getUnitId(), sheet.getSheetId());
+        }
     }
 
     private _handleMoveRowsCommand(params: IMoveRowsCommandParams, unitId: string, subUnitId: string) {
@@ -1178,7 +1181,7 @@ function getWorkbook(univerInstanceService: IUniverInstanceService, unitId?: str
     if (unitId) {
         return univerInstanceService.getUniverSheetInstance(unitId);
     }
-    return univerInstanceService.getCurrentUniverSheetInstance();
+    return univerInstanceService.getCurrentUniverSheetInstance()!;
 }
 
 function getWorksheet(workbook: Workbook, subUnitId?: string) {

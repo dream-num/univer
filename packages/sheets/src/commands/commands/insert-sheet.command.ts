@@ -32,6 +32,7 @@ import type {
 } from '../../basics/interfaces/mutation-interface';
 import { InsertSheetMutation, InsertSheetUndoMutationFactory } from '../mutations/insert-sheet.mutation';
 import { RemoveSheetMutation } from '../mutations/remove-sheet.mutation';
+import { getSheetCommandTargetWorkbook } from './utils/target-util';
 
 export interface IInsertSheetCommandParams {
     unitId?: string;
@@ -51,11 +52,10 @@ export const InsertSheetCommand: ICommand = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const localeService = accessor.get(LocaleService);
 
-        const unitId = params?.unitId ?? univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+        const target = getSheetCommandTargetWorkbook(univerInstanceService, { unitId: params?.unitId });
+        if (!target) return false;
 
-        const workbook = univerInstanceService.getUniverSheetInstance(unitId);
-        if (!workbook) return false;
-
+        const { unitId, workbook } = target;
         let index = workbook.getSheets().length;
         let sheetConfig = mergeWorksheetSnapshotWithDefault({});
         if (params) {

@@ -30,7 +30,7 @@ export class TextSelectionController extends Disposable {
 
     constructor(
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ITextSelectionRenderManager
@@ -66,7 +66,7 @@ export class TextSelectionController extends Disposable {
             return;
         }
 
-        if (this._currentUniverService.getUniverDocInstance(unitId) == null) {
+        if (this._univerInstanceService.getUniverDocInstance(unitId) == null) {
             return;
         }
 
@@ -115,10 +115,9 @@ export class TextSelectionController extends Disposable {
                         return;
                     }
 
-                    const currentDocInstance = this._currentUniverService.getCurrentUniverDocInstance();
-
-                    if (currentDocInstance.getUnitId() !== unitId) {
-                        this._currentUniverService.setCurrentUniverDocInstance(unitId);
+                    const currentDocInstance = this._univerInstanceService.getCurrentUniverDocInstance();
+                    if (currentDocInstance?.getUnitId() !== unitId) {
+                        this._univerInstanceService.setCurrentUniverDocInstance(unitId);
                     }
 
                     this._textSelectionRenderManager.eventTrigger(evt);
@@ -183,9 +182,9 @@ export class TextSelectionController extends Disposable {
         /**
          * The object for selecting data in the editor is set to the current sheet.
          */
-        const sheetInstances = this._currentUniverService.getAllUniverSheetsInstance();
+        const sheetInstances = this._univerInstanceService.getAllUniverSheetsInstance();
         if (sheetInstances.length > 0) {
-            const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+            const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
             this._editorService.setOperationSheetUnitId(workbook.getUnitId());
             // this._editorService.setOperationSheetSubUnitId(workbook.getActiveSheet().getSheetId());
         }

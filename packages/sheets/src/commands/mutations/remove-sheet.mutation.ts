@@ -22,6 +22,7 @@ import type {
     IInsertSheetMutationParams,
     IRemoveSheetMutationParams,
 } from '../../basics/interfaces/mutation-interface';
+import { getSheetMutationTarget } from '../commands/utils/target-util';
 
 /**
  * Generate undo mutation of a `RemoveSheetMutation`
@@ -35,10 +36,16 @@ export const RemoveSheetUndoMutationFactory = (
     params: IRemoveSheetMutationParams
 ): IInsertSheetMutationParams => {
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const workbook = univerInstanceService.getCurrentUniverSheetInstance();
     const { subUnitId, unitId } = params;
-    const sheet = workbook.getSheetBySheetId(subUnitId)!.getConfig();
-    const config = workbook!.getConfig();
+
+    const target = getSheetMutationTarget(univerInstanceService, params);
+    if (!target) {
+        throw new Error('[RemoveSheetUndoMutationFactory]: Worksheet is null error!');
+    }
+
+    const { workbook, worksheet } = target;
+    const sheet = worksheet.getConfig();
+    const config = workbook.getConfig();
     const index = config.sheetOrder.findIndex((id) => id === subUnitId);
 
     return {

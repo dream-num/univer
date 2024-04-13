@@ -94,7 +94,7 @@ export function App(props: IUniverAppProps) {
               * all focusin event merged from its descendants. The DesktopLayoutService would listen to focusin events
               * bubbled to this element and refocus the input element.
               */}
-            <div className={styles.appLayout} tabIndex={-1}>
+            <div className={styles.appLayout} tabIndex={-1} onBlur={(e) => e.stopPropagation()}>
                 {/* header */}
                 {header && (
                     <header className={styles.appContainerHeader}>

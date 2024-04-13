@@ -521,9 +521,7 @@ export class SheetClipboardController extends RxDisposable {
                 label: 'specialPaste.value',
             },
             onPasteCells: (pasteFrom, pasteTo, data, pasteType) => {
-                const workbook = self._currentUniverSheet.getCurrentUniverSheetInstance();
-                const unitId = workbook.getUnitId();
-                const subUnitId = workbook.getActiveSheet().getSheetId();
+                const workbook = self._currentUniverSheet.getCurrentUniverSheetInstance()!;
                 return getSetCellValueMutations(pasteTo, data, accessor);
             },
         };
@@ -533,9 +531,7 @@ export class SheetClipboardController extends RxDisposable {
                 label: 'specialPaste.format',
             },
             onPasteCells(pasteFrom, pasteTo, matrix, pasteType) {
-                const workbook = self._currentUniverSheet.getCurrentUniverSheetInstance();
-                const unitId = workbook.getUnitId();
-                const subUnitId = workbook.getActiveSheet().getSheetId();
+                const workbook = self._currentUniverSheet.getCurrentUniverSheetInstance()!;
                 const redoMutationsInfo: IMutationInfo[] = [];
                 const undoMutationsInfo: IMutationInfo[] = [];
 
@@ -581,7 +577,7 @@ export class SheetClipboardController extends RxDisposable {
                 };
             },
             onPasteColumns(pasteTo, colProperties, payload) {
-                const workbook = self._currentUniverSheet.getCurrentUniverSheetInstance();
+                const workbook = self._currentUniverSheet.getCurrentUniverSheetInstance()!;
                 const unitId = workbook.getUnitId();
                 const subUnitId = workbook.getActiveSheet().getSheetId();
                 const redoMutations: IMutationInfo[] = [];
@@ -627,7 +623,7 @@ export class SheetClipboardController extends RxDisposable {
                 label: 'specialPaste.besidesBorder',
             },
             onPasteCells(pasteFrom, pasteTo, matrix, payload) {
-                const workbook = self._currentUniverSheet.getCurrentUniverSheetInstance();
+                const workbook = self._currentUniverSheet.getCurrentUniverSheetInstance()!;
                 const redoMutationsInfo: IMutationInfo[] = [];
                 const undoMutationsInfo: IMutationInfo[] = [];
                 const { range, unitId, subUnitId } = pasteTo;

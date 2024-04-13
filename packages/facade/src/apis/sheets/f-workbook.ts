@@ -160,7 +160,7 @@ export class FWorkbook {
     onSelectionChange(callback: (selections: IRange[]) => void): IDisposable {
         return toDisposable(
             this._selectionManagerService.selectionMoveEnd$.subscribe((selections) => {
-                if (this._univerInstanceService.getCurrentUniverSheetInstance().getUnitId() !== this.id) {
+                if (this._univerInstanceService.getCurrentUniverSheetInstance()!.getUnitId() !== this.id) {
                     return;
                 }
 

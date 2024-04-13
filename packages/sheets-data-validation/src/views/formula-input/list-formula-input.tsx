@@ -154,7 +154,7 @@ export function ListFormulaInput(props: IFormulaInputProps) {
     const [refRange, setRefRange] = useState(isRefRange === '1' ? formula1 : '');
     const localeService = useDependency(LocaleService);
     const univerInstanceService = useDependency(IUniverInstanceService);
-    const workbook = univerInstanceService.getCurrentUniverSheetInstance();
+    const workbook = univerInstanceService.getCurrentUniverSheetInstance()!;
     const worksheet = workbook.getActiveSheet();
     const [refColors, setRefColors] = useState(() => formula2.split(','));
 
@@ -285,7 +285,7 @@ export function ListFormulaInput(props: IFormulaInputProps) {
                                         });
                                         setRefRange('');
                                     } else {
-                                        const workbook = univerInstanceService.getUniverSheetInstance(range.unitId) ?? univerInstanceService.getCurrentUniverSheetInstance();
+                                        const workbook = univerInstanceService.getUniverSheetInstance(range.unitId) ?? univerInstanceService.getCurrentUniverSheetInstance()!;
                                         const worksheet = workbook?.getSheetBySheetId(range.sheetId) ?? workbook.getActiveSheet();
                                         const rangeStr = serializeRangeWithSheet(worksheet.getName(), range.range);
                                         onChange?.({

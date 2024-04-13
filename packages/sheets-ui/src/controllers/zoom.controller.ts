@@ -45,7 +45,7 @@ interface ISetWorksheetMutationParams {
 export class ZoomController extends Disposable {
     constructor(
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ISelectionRenderService
@@ -90,7 +90,7 @@ export class ZoomController extends Disposable {
                         ratioDelta /= 2;
                     }
 
-                    const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+                    const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
                     const sheet = workbook.getActiveSheet();
                     const currentRatio = sheet.getZoomRatio();
                     let nextRatio = +Number.parseFloat(`${currentRatio + ratioDelta}`).toFixed(1);
@@ -116,7 +116,7 @@ export class ZoomController extends Disposable {
                         return;
                     }
 
-                    const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+                    const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
 
                     const worksheet = workbook.getActiveSheet();
 
@@ -134,7 +134,7 @@ export class ZoomController extends Disposable {
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (updateCommandList.includes(command.id)) {
-                    const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+                    const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
                     const worksheet = workbook.getActiveSheet();
 
                     const params = command.params;
@@ -158,6 +158,6 @@ export class ZoomController extends Disposable {
     }
 
     private _getSheetObject() {
-        return getSheetObject(this._currentUniverService, this._renderManagerService);
+        return getSheetObject(this._univerInstanceService, this._renderManagerService);
     }
 }

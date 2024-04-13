@@ -28,6 +28,7 @@ import {
 import { serializeRange } from '@univerjs/engine-formula';
 import {
     getCellAtRowCol,
+    getSheetCommandTarget,
     NORMAL_SELECTION_PLUGIN_NAME,
     SelectionManagerService,
     SetSelectionsOperation,
@@ -56,11 +57,10 @@ export const InsertFunctionOperation: ICommand = {
             return false;
         }
 
-        const workbook = accessor.get(IUniverInstanceService).getCurrentUniverSheetInstance();
-        const worksheet = workbook.getActiveSheet();
+        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService));
+        if (!target) return false;
 
-        const unitId = workbook.getUnitId();
-        const sheetId = worksheet.getSheetId();
+        const { worksheet, unitId, subUnitId } = target;
         const cellMatrix = worksheet.getCellMatrix();
 
         const { value } = params;
@@ -146,7 +146,7 @@ export const InsertFunctionOperation: ICommand = {
 
             const setSelectionParams = {
                 unitId,
-                subUnitId: sheetId,
+                subUnitId,
                 pluginName: NORMAL_SELECTION_PLUGIN_NAME,
                 selections: [resultRange],
             };

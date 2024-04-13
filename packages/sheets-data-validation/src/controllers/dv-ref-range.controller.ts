@@ -220,7 +220,7 @@ export class DataValidationRefRangeController extends Disposable {
         const gridRange = deserializeRangeWithSheet(formula1 ?? '');
         const id = this._getIdWithUnitId(propUnitId, propSubUnitId, ruleId);
         const rangeUnitId = gridRange.unitId || propUnitId;
-        const workbook = this._univerInstanceService.getUniverSheetInstance(rangeUnitId) ?? this._univerInstanceService.getCurrentUniverSheetInstance();
+        const workbook = this._univerInstanceService.getUniverSheetInstance(rangeUnitId) ?? this._univerInstanceService.getCurrentUniverSheetInstance()!;
         const sheetId = workbook.getSheetBySheetName(gridRange.sheetName)?.getSheetId() ?? propSubUnitId;
         const worksheet = workbook.getSheetBySheetId(sheetId) ?? workbook.getActiveSheet();
         const disposableCollection = new DisposableCollection();

@@ -16,7 +16,7 @@
 
 import type { ICommand } from '@univerjs/core';
 import { CommandType, ICommandService, IUniverInstanceService, Range } from '@univerjs/core';
-import { INumfmtService, SelectionManagerService } from '@univerjs/sheets';
+import { getSheetCommandTarget, INumfmtService, SelectionManagerService } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
 
 import { getDecimalFromPattern, setPatternDecimal } from '../../utils/decimal';
@@ -36,10 +36,11 @@ export const AddDecimalCommand: ICommand = {
         if (!selections || !selections.length) {
             return false;
         }
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
-        const sheet = workbook.getActiveSheet();
-        const unitId = workbook.getUnitId();
-        const subUnitId = sheet.getSheetId();
+
+        const target = getSheetCommandTarget(univerInstanceService);
+        if (!target) return false;
+
+        const { unitId, subUnitId } = target;
 
         let maxDecimals = 0;
         selections.forEach((selection) => {

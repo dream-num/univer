@@ -32,6 +32,7 @@ import { INTERCEPTOR_POINT } from '../../services/sheet-interceptor/interceptor-
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
 import type { ISheetCommandSharedParams } from '../utils/interface';
+import { getSheetCommandTarget } from './utils/target-util';
 
 export interface ISetRangeValuesCommandParams extends Partial<ISheetCommandSharedParams> {
     range?: IRange;
@@ -56,12 +57,12 @@ export const SetRangeValuesCommand: ICommand = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const selectionManagerService = accessor.get(SelectionManagerService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
-        const {
-            value,
-            range,
-            unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId(),
-            subUnitId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId(),
-        } = params;
+
+        const target = getSheetCommandTarget(univerInstanceService);
+        if (!target) return false;
+
+        const { subUnitId, unitId } = target;
+        const { value, range } = params;
         const currentSelections = range ? [range] : selectionManagerService.getSelectionRanges();
         if (!currentSelections || !currentSelections.length) {
             return false;

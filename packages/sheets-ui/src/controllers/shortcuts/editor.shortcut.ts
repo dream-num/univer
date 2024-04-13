@@ -115,7 +115,7 @@ export const EditorCursorEscShortcut: IShortcutItem = {
     binding: KeyCode.ESC,
     description: 'shortcut.sheet.abort-editing',
     group: '4_sheet-edit',
-    preconditions: (contextService) => whenSheetEditorActivated(contextService),
+    preconditions: (contextService) => whenEditorDidNotInputFormulaActivated(contextService),
     staticParameters: {
         visible: false,
         eventType: DeviceInputEventType.Keyboard,

@@ -17,6 +17,7 @@
 import { CommandType, type ICommand, ICommandService, IUniverInstanceService } from '@univerjs/core';
 import { ISidebarService } from '@univerjs/ui';
 import { DataValidationModel } from '@univerjs/data-validation';
+import { getSheetCommandTarget } from '@univerjs/sheets';
 import { DataValidationDropdownManagerService } from '../../services/dropdown-manager.service';
 import { DataValidationPanelService } from '../../services/data-validation-panel.service';
 
@@ -39,10 +40,10 @@ export const OpenValidationPanelOperation: ICommand<IOpenValidationPanelOperatio
         const dataValidationModel = accessor.get(DataValidationModel);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const sidebarService = accessor.get(ISidebarService);
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
-        const worksheet = workbook.getActiveSheet();
-        const unitId = workbook.getUnitId();
-        const subUnitId = worksheet.getSheetId();
+        const target = getSheetCommandTarget(univerInstanceService);
+        if (!target) return false;
+
+        const { unitId, subUnitId } = target;
         const rule = ruleId ? dataValidationModel.getRuleById(unitId, subUnitId, ruleId) : undefined;
         dataValidationPanelService.open();
         dataValidationPanelService.setActiveRule(rule && {

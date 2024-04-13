@@ -20,6 +20,7 @@ import type { IAccessor } from '@wendellhu/redi';
 
 import type { ISetFrozenMutationParams } from '../mutations/set-frozen.mutation';
 import { SetFrozenMutation, SetFrozenMutationFactory } from '../mutations/set-frozen.mutation';
+import { getSheetCommandTarget } from './utils/target-util';
 
 interface ISetFrozenCommandParams {
     startRow: number;
@@ -36,18 +37,10 @@ export const SetFrozenCommand: ICommand = {
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-        const subUnitId = univerInstanceService
-            .getCurrentUniverSheetInstance()
+        const target = getSheetCommandTarget(univerInstanceService);
+        if (!target) return false;
 
-            .getActiveSheet()
-            .getSheetId();
-
-        const workbook = univerInstanceService.getUniverSheetInstance(unitId);
-        if (!workbook) return false;
-        const worksheet = workbook.getSheetBySheetId(subUnitId);
-        if (!worksheet) return false;
-
+        const { unitId, subUnitId, worksheet } = target;
         const { startColumn, startRow, xSplit, ySplit } = params;
 
         if (

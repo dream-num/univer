@@ -24,8 +24,8 @@ import { getLastNotFullColumnInfo } from '../../tools';
 import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../../view-model/document-view-model';
 import type { IParagraphConfig, ISectionBreakConfig } from '../../../../../basics/interfaces';
-import { layoutParagraph } from './layout-ruler';
 import type { IShapedText } from './shaping';
+import { layoutParagraph } from './layout-ruler';
 import { dealWidthInlineDrawing } from './inline-drawing';
 import { dealWithBullet } from './bullet';
 

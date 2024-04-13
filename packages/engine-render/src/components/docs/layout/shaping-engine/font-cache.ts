@@ -15,10 +15,19 @@
  */
 
 import type { Nullable } from '@univerjs/core';
+import type { IDocumentSkeletonBoundingBox, IDocumentSkeletonFontStyle } from '../../../../basics/i-document-skeleton-cached';
+import { ptToPixel } from '../../../../basics/tools';
+import type { IOpenTypeGlyphInfo } from './text-shaping';
 
-import { DEFAULT_MEASURE_TEXT } from './const';
-import type { IDocumentSkeletonBoundingBox, IDocumentSkeletonFontStyle } from './i-document-skeleton-cached';
-import type { IMeasureTextCache } from './interfaces';
+export const DEFAULT_MEASURE_TEXT = '0';
+
+export interface IMeasureTextCache {
+    fontBoundingBoxAscent: number;
+    fontBoundingBoxDescent: number;
+    actualBoundingBoxAscent: number;
+    actualBoundingBoxDescent: number;
+    width: number;
+}
 
 const getDefaultBaselineOffset = (fontSize: number) => ({
     sbr: 0.6,
@@ -55,7 +64,6 @@ export class FontCache {
 
     private static _fontDataMap: Map<string, IFontData> = new Map();
 
-    // 文字缓存全局变量
     private static _globalFontMeasureCache: Map<string, Map<string, IMeasureTextCache>> = new Map();
 
     static get globalFontMeasureCache() {
@@ -187,10 +195,27 @@ export class FontCache {
             //     content = '0';
             // }
             const measureText = this.getMeasureText(content, fontString);
-            bBox = this._calculateBoundingBoxByMeasureText(measureText, fontSize);
+            bBox = this._calculateBoundingBoxByMeasureText(measureText, fontStyle);
         }
 
         return bBox;
+    }
+
+    static getBBoxFromGlyphInfo(glyphInfo: IOpenTypeGlyphInfo, fontStyle: IDocumentSkeletonFontStyle) {
+        const glyph = glyphInfo.glyph!;
+        const font = glyphInfo.font!;
+        const { y1, y2 } = glyphInfo.boundingBox!;
+        const scale = ptToPixel(fontStyle.fontSize) / font.unitsPerEm;
+
+        const { ascender, descender } = font;
+
+        return this._calculateBoundingBoxByMeasureText({
+            width: (glyph.advanceWidth ?? 0) * scale,
+            fontBoundingBoxAscent: ascender * scale,
+            fontBoundingBoxDescent: Math.abs(descender * scale),
+            actualBoundingBoxAscent: y2 * scale,
+            actualBoundingBoxDescent: Math.abs(y1 * scale),
+        }, fontStyle);
     }
 
     // 获取有值单元格文本大小
@@ -324,27 +349,32 @@ export class FontCache {
         };
     }
 
-    private static _calculateBoundingBoxByMeasureText(textCache: IMeasureTextCache, fontSize: number) {
+    private static _calculateBoundingBoxByMeasureText(textCache: IMeasureTextCache, fontStyle: IDocumentSkeletonFontStyle) {
         const {
             width,
             fontBoundingBoxAscent,
             fontBoundingBoxDescent,
-            actualBoundingBoxAscent,
-            actualBoundingBoxDescent,
+            actualBoundingBoxAscent: aba,
+            actualBoundingBoxDescent: abd,
         } = textCache;
+
+        const { fontSize, originFontSize } = fontStyle;
+        const scale = originFontSize / fontSize;
+        const ba = fontBoundingBoxAscent * scale;
+        const bd = fontBoundingBoxDescent * scale;
 
         return {
             width,
-            ba: fontBoundingBoxAscent,
-            bd: fontBoundingBoxDescent,
-            aba: actualBoundingBoxAscent,
-            abd: actualBoundingBoxDescent,
-            sp: (fontBoundingBoxAscent + fontBoundingBoxDescent) / 2,
+            ba,
+            bd,
+            aba,
+            abd,
+            sp: (ba + bd) / 2,
             sbr: 0.6,
             spr: 0.6,
             // https://en.wikipedia.org/wiki/Subscript_and_superscript Microsoft Word 2015
-            sbo: (fontBoundingBoxAscent + fontBoundingBoxDescent) * 0.141,
-            spo: (fontBoundingBoxAscent + fontBoundingBoxDescent) * 0.4,
+            sbo: (ba + bd) * 0.141,
+            spo: (ba + bd) * 0.4,
         };
     }
 }

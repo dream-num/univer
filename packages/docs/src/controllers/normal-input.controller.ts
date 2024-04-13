@@ -30,7 +30,7 @@ export class NormalInputController extends Disposable {
 
     constructor(
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
         @ICommandService private readonly _commandService: ICommandService
@@ -56,7 +56,10 @@ export class NormalInputController extends Disposable {
                 return;
             }
 
-            const documentModel = this._currentUniverService.getCurrentUniverDocInstance();
+            const documentModel = this._univerInstanceService.getCurrentUniverDocInstance();
+            if (!documentModel) {
+                return;
+            }
 
             const unitId = documentModel.getUnitId();
 
@@ -98,9 +101,9 @@ export class NormalInputController extends Disposable {
         });
     }
 
-    private _commandExecutedListener() {}
+    private _commandExecutedListener() { }
 
     private _getDocObject() {
-        return getDocObject(this._currentUniverService, this._renderManagerService);
+        return getDocObject(this._univerInstanceService, this._renderManagerService);
     }
 }

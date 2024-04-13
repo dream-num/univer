@@ -123,7 +123,7 @@ export class HeaderMoveController extends Disposable {
 
     constructor(
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ICommandService private readonly _commandService: ICommandService,
         @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
@@ -538,6 +538,6 @@ export class HeaderMoveController extends Disposable {
     }
 
     private _getSheetObject() {
-        return getSheetObject(this._currentUniverService, this._renderManagerService);
+        return getSheetObject(this._univerInstanceService, this._renderManagerService);
     }
 }

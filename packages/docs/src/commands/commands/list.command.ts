@@ -44,12 +44,15 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
 
     handler: (accessor, params: IListOperationCommandParams) => {
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
-        const currentUniverService = accessor.get(IUniverInstanceService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
 
         const { listType } = params;
 
-        const dataModel = currentUniverService.getCurrentUniverDocInstance();
+        const dataModel = univerInstanceService.getCurrentUniverDocInstance();
+        if (!dataModel) {
+            return false;
+        }
 
         const activeRange = textSelectionManagerService.getActiveRange();
         const selections = textSelectionManagerService.getSelections() ?? [];
@@ -175,7 +178,7 @@ export const ListOperationCommand: ICommand<IListOperationCommandParams> = {
     },
 };
 
-interface IBulletListCommandParams {}
+interface IBulletListCommandParams { }
 
 export const BulletListCommand: ICommand<IBulletListCommandParams> = {
     id: 'doc.command.bullet-list',
@@ -191,7 +194,7 @@ export const BulletListCommand: ICommand<IBulletListCommandParams> = {
     },
 };
 
-interface IOrderListCommandParams {}
+interface IOrderListCommandParams { }
 
 export const OrderListCommand: ICommand<IOrderListCommandParams> = {
     id: 'doc.command.order-list',

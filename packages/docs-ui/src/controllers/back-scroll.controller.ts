@@ -29,7 +29,7 @@ export class BackScrollController extends RxDisposable {
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
         @IEditorService private readonly _editorService: IEditorService,
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
     ) {
         super();
@@ -117,6 +117,6 @@ export class BackScrollController extends RxDisposable {
     }
 
     private _getDocObject() {
-        return getDocObject(this._currentUniverService, this._renderManagerService);
+        return getDocObject(this._univerInstanceService, this._renderManagerService);
     }
 }

@@ -135,7 +135,7 @@ export const FactoryOtherMenuItem = (componentManager: ComponentManager) => {
             ).subscribe(() => {
                 const selections = selectionManagerService.getSelections();
                 if (selections && selections[0]) {
-                    const workbook = univerInstanceService.getCurrentUniverSheetInstance();
+                    const workbook = univerInstanceService.getCurrentUniverSheetInstance()!;
                     const worksheet = workbook.getActiveSheet();
                     const range = selections[0].range;
                     const row = range.startRow;

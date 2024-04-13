@@ -106,7 +106,7 @@ export function setEndForRange(range: IRange, rowCount: number, columnCount: num
     }
 
     if (Number.isNaN(endRow)) {
-        range.endRow = rowCount;
+        range.endRow = rowCount - 1;
     }
 
     if (Number.isNaN(startColumn)) {
@@ -114,7 +114,7 @@ export function setEndForRange(range: IRange, rowCount: number, columnCount: num
     }
 
     if (Number.isNaN(endColumn)) {
-        range.endColumn = columnCount;
+        range.endColumn = columnCount - 1;
     }
 
     return range;

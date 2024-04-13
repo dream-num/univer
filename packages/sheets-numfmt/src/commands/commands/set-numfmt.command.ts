@@ -31,6 +31,7 @@ import type {
 import {
     factoryRemoveNumfmtUndoMutation,
     factorySetNumfmtUndoMutation,
+    getSheetCommandTarget,
     rangeMerge,
     RemoveNumfmtMutation,
     SetNumfmtMutation,
@@ -56,10 +57,10 @@ export const SetNumfmtCommand: ICommand<ISetNumfmtCommandParams> = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const undoRedoService = accessor.get(IUndoRedoService);
 
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
-        const unitId = workbook.getUnitId();
-        const worksheet = workbook.getActiveSheet();
-        const subUnitId = worksheet.getSheetId();
+        const target = getSheetCommandTarget(univerInstanceService, params);
+        if (!target) return false;
+
+        const { unitId, subUnitId } = target;
         const setCells = params.values.filter((value) => !!value.pattern) as ISetCellsNumfmt;
         const removeCells = params.values.filter((value) => !value.pattern);
         const setRedos = transformCellsToRange(unitId, subUnitId, setCells);

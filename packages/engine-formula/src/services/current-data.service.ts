@@ -110,7 +110,7 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
     private _executeUnitId: Nullable<string> = '';
     private _executeSubUnitId: Nullable<string> = '';
 
-    constructor(@IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService) {
+    constructor(@IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService) {
         super();
     }
 
@@ -260,9 +260,9 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
     }
 
     // private _loadOtherFormulaData() {
-    //     const unitAllDoc = this._currentUniverService.getAllUniverDocsInstance();
+    //     const unitAllDoc = this._univerInstanceService.getAllUniverDocsInstance();
 
-    //     const unitAllSlide = this._currentUniverService.getAllUniverSlidesInstance();
+    //     const unitAllSlide = this._univerInstanceService.getAllUniverSlidesInstance();
 
     //     const otherFormulaData: IOtherFormulaData = {};
 
@@ -361,10 +361,10 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
     }
 
     private _loadSheetData() {
-        const unitAllSheet = this._currentUniverService.getAllUniverSheetsInstance();
+        const unitAllSheet = this._univerInstanceService.getAllUniverSheetsInstance();
 
-        const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
-        const worksheet = workbook.getActiveSheet();
+        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
+        const worksheet = workbook?.getActiveSheet();
 
         this._executeUnitId = workbook?.getUnitId();
         this._executeSubUnitId = worksheet?.getSheetId();

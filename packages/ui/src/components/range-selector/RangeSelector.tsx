@@ -81,7 +81,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
 
     const rangeSelectorService = useDependency(IRangeSelectorService);
 
-    const currentUniverService = useDependency(IUniverInstanceService);
+    const univerInstanceService = useDependency(IUniverInstanceService);
 
     const [selectorVisible, setSelectorVisible] = useState(false);
 
@@ -247,7 +247,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
     }
 
     function getSheetIdByName(name: string) {
-        return currentUniverService.getCurrentUniverSheetInstance().getSheetBySheetName(name)?.getSheetId() || '';
+        return univerInstanceService.getCurrentUniverSheetInstance()?.getSheetBySheetName(name)?.getSheetId() || '';
     }
 
     function handleTextValueChange(value: Nullable<string>) {

@@ -33,6 +33,7 @@ import {
     SetWorksheetColWidthMutation,
     SetWorksheetColWidthMutationFactory,
 } from '../mutations/set-worksheet-col-width.mutation';
+import { getSheetCommandTarget } from './utils/target-util';
 
 export interface IDeltaColumnWidthCommandParams {
     anchorCol: number;
@@ -52,11 +53,11 @@ export const DeltaColumnWidthCommand: ICommand<IDeltaColumnWidthCommandParams> =
 
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
-        const univerInstanceService = accessor.get(IUniverInstanceService);
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
-        const worksheet = workbook.getActiveSheet();
-        const unitId = workbook.getUnitId();
-        const subUnitId = worksheet.getSheetId();
+
+        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService));
+        if (!target) return false;
+
+        const { worksheet, unitId, subUnitId } = target;
 
         const { anchorCol, deltaX } = params;
         const anchorColWidth = worksheet.getColumnWidth(anchorCol);
@@ -154,16 +155,14 @@ export const SetColWidthCommand: ICommand = {
         const selectionManagerService = accessor.get(SelectionManagerService);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
-        const univerInstanceService = accessor.get(IUniverInstanceService);
 
         const selections = selectionManagerService.getSelectionRanges();
-        if (!selections?.length) {
-            return false;
-        }
+        if (!selections?.length) return false;
 
-        const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-        const subUnitId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
+        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService));
+        if (!target) return false;
 
+        const { subUnitId, unitId } = target;
         const redoMutationParams: ISetWorksheetColWidthMutationParams = {
             subUnitId,
             unitId,

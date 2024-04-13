@@ -267,7 +267,7 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
         const { segmentId, value, preCommandId } = params;
         const commandService = accessor.get(ICommandService);
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
-        const currentUniverService = accessor.get(IUniverInstanceService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
 
         const selections = textSelectionManagerService.getSelections();
 
@@ -275,13 +275,17 @@ export const SetInlineFormatCommand: ICommand<ISetInlineFormatCommandParams> = {
             return false;
         }
 
-        let docsModel = currentUniverService.getCurrentUniverDocInstance();
+        let docsModel = univerInstanceService.getCurrentUniverDocInstance();
+        if (!docsModel) {
+            return false;
+        }
+
         let unitId = docsModel.getUnitId();
 
         // When setting the formula bar style, the effect will be displayed in the cell editor,
         // and the formula bar only displays plain text.
         if (unitId === DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY) {
-            docsModel = currentUniverService.getUniverDocInstance(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)!;
+            docsModel = univerInstanceService.getUniverDocInstance(DOCS_NORMAL_EDITOR_UNIT_ID_KEY)!;
             unitId = docsModel.getUnitId();
         }
 

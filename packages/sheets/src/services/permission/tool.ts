@@ -23,8 +23,9 @@ import { SheetPermissionService } from './sheet-permission.service';
 export function getCurrentSheetDisabled$(accessor: IAccessor) {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const sheetPermissionService = accessor.get(SheetPermissionService);
-    const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-    const sheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
+
+    const unitId = univerInstanceService.getCurrentUniverSheetInstance()?.getUnitId();
+    const sheetId = univerInstanceService.getCurrentUniverSheetInstance()?.getActiveSheet().getSheetId();
 
     return new Observable<boolean>((subscriber) => {
         const permission$ = sheetPermissionService.getEditable$(unitId, sheetId)?.subscribe((e) => {

@@ -85,7 +85,9 @@ export class DocumentSkeleton extends Skeleton {
             return;
         }
 
+        // const start = +new Date();
         this._skeletonData = this._createSkeleton(bounds);
+        // console.log('skeleton calculate cost', +new Date() - start);
     }
 
     getSkeletonData() {
@@ -238,6 +240,7 @@ export class DocumentSkeleton extends Skeleton {
         return glyphGroup[glyph];
     }
 
+    // eslint-disable-next-line max-lines-per-function
     findNodeByCoord(
         coord: Vector2,
         pageLayoutType: PageLayoutType,
@@ -470,6 +473,7 @@ export class DocumentSkeleton extends Skeleton {
      * Split the document according to SectionBreak and perform layout calculations.
      * @returns view model: skeleton
      */
+    // eslint-disable-next-line max-lines-per-function
     private _createSkeleton(_bounds?: IViewportBound) {
         // 每一个布局
         const DEFAULT_PAGE_SIZE = { width: Number.POSITIVE_INFINITY, height: Number.POSITIVE_INFINITY };

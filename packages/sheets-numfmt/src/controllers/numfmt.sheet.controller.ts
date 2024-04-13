@@ -45,8 +45,8 @@ export class NumfmtSheetController extends Disposable {
                 getMutations: (commandInfo) => {
                     if (commandInfo.id === RemoveSheetCommand.id) {
                         const params = commandInfo.params as IRemoveSheetCommandParams;
-                        const unitId = params.unitId || getunitId(this._univerInstanceService);
-                        const subUnitId = params.subUnitId || getsubUnitId(this._univerInstanceService);
+                        const unitId = params.unitId || getUnitId(this._univerInstanceService);
+                        const subUnitId = params.subUnitId || getSubUnitID(this._univerInstanceService);
                         const model = this._numfmtService.getModel(unitId, subUnitId);
                         if (!model) {
                             return { redos: [], undos: [] };
@@ -73,5 +73,5 @@ export class NumfmtSheetController extends Disposable {
     }
 }
 
-const getunitId = (u: IUniverInstanceService) => u.getCurrentUniverSheetInstance().getUnitId();
-const getsubUnitId = (u: IUniverInstanceService) => u.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
+const getUnitId = (u: IUniverInstanceService) => u.getCurrentUniverSheetInstance()!.getUnitId();
+const getSubUnitID = (u: IUniverInstanceService) => u.getCurrentUniverSheetInstance()!.getActiveSheet().getSheetId();

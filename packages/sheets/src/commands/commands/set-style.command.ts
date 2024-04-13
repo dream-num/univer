@@ -43,6 +43,7 @@ import { SelectionManagerService } from '../../services/selection-manager.servic
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
+import { getSheetCommandTarget } from './utils/target-util';
 
 export interface IStyleTypeValue<T> {
     type: keyof IStyleData;
@@ -70,24 +71,17 @@ export const SetStyleCommand: ICommand<ISetStyleCommandParams<unknown>> = {
     handler: async <T> (accessor: IAccessor, params: ISetStyleCommandParams<T>) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const {
-            unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId(),
-            subUnitId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId(),
-            range,
-            style,
-        } = params;
+        const target = getSheetCommandTarget(univerInstanceService);
+        if (!target) return false;
+
+        const { unitId, subUnitId } = target;
+        const { range, style } = params;
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const selectionManagerService = accessor.get(SelectionManagerService);
 
         const ranges = range ? [range] : selectionManagerService.getSelectionRanges();
         if (!ranges?.length) {
-            return false;
-        }
-
-        const workbook = univerInstanceService.getUniverSheetInstance(unitId);
-        const worksheet = workbook?.getSheetBySheetId(subUnitId);
-        if (worksheet == null) {
             return false;
         }
 
@@ -171,12 +165,12 @@ export const SetBoldCommand: ICommand = {
     id: 'sheet.command.set-bold',
     handler: async (accessor) => {
         const selection = accessor.get(SelectionManagerService).getLast();
+        if (!selection) return false;
 
-        if (!selection) {
-            return false;
-        }
+        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService));
+        if (!target) return false;
 
-        const worksheet = accessor.get(IUniverInstanceService).getCurrentUniverSheetInstance().getActiveSheet();
+        const { worksheet } = target;
         const { actualRow, actualColumn } = selection.primary;
         const currentlyBold = worksheet.getRange(actualRow, actualColumn).getFontWeight() === FontWeight.BOLD;
 
@@ -200,12 +194,12 @@ export const SetItalicCommand: ICommand = {
     id: 'sheet.command.set-italic',
     handler: async (accessor) => {
         const selection = accessor.get(SelectionManagerService).getLast();
+        if (!selection) return false;
 
-        if (!selection) {
-            return false;
-        }
+        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService));
+        if (!target) return false;
 
-        const worksheet = accessor.get(IUniverInstanceService).getCurrentUniverSheetInstance().getActiveSheet();
+        const { worksheet } = target;
         let currentlyItalic = true;
 
         if (selection.primary) {
@@ -233,15 +227,13 @@ export const SetUnderlineCommand: ICommand = {
     id: 'sheet.command.set-underline',
     handler: async (accessor) => {
         const selection = accessor.get(SelectionManagerService).getLast();
-        if (!selection) {
-            return false;
-        }
+        if (!selection) return false;
 
-        const worksheet = accessor
-            .get(IUniverInstanceService)
-            .getCurrentUniverSheetInstance()
+        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService));
+        if (!target) return false;
 
-            .getActiveSheet();
+        const { worksheet } = target;
+
         let currentlyUnderline = true;
         if (selection.primary) {
             currentlyUnderline = !!worksheet
@@ -270,15 +262,13 @@ export const SetStrikeThroughCommand: ICommand = {
     id: 'sheet.command.set-stroke',
     handler: async (accessor) => {
         const selection = accessor.get(SelectionManagerService).getLast();
-        if (!selection) {
-            return false;
-        }
+        if (!selection) return false;
 
-        const worksheet = accessor
-            .get(IUniverInstanceService)
-            .getCurrentUniverSheetInstance()
+        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService));
+        if (!target) return false;
 
-            .getActiveSheet();
+        const { worksheet } = target;
+
         let currentlyStrokeThrough = true;
         if (selection.primary) {
             currentlyStrokeThrough = !!worksheet
@@ -305,15 +295,12 @@ export const SetOverlineCommand: ICommand = {
     id: 'sheet.command.set-overline',
     handler: async (accessor) => {
         const selection = accessor.get(SelectionManagerService).getLast();
-        if (!selection) {
-            return false;
-        }
+        if (!selection) return false;
 
-        const worksheet = accessor
-            .get(IUniverInstanceService)
-            .getCurrentUniverSheetInstance()
+        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService));
+        if (!target) return false;
 
-            .getActiveSheet();
+        const { worksheet } = target;
         let currentlyOverline = true;
         if (selection.primary) {
             currentlyOverline = !!worksheet

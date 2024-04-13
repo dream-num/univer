@@ -23,6 +23,7 @@ import {
     SetWorksheetOrderMutation,
     SetWorksheetOrderUndoMutationFactory,
 } from '../mutations/set-worksheet-order.mutation';
+import { getSheetCommandTarget } from './utils/target-util';
 
 export interface ISetWorksheetOrderCommandParams {
     order: number;
@@ -37,19 +38,12 @@ export const SetWorksheetOrderCommand: ICommand = {
     handler: async (accessor: IAccessor, params: ISetWorksheetOrderCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
-        const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const unitId = params.unitId || univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-        const subUnitId =
-            params.subUnitId || univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
+        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), params);
+        if (!target) return false;
 
-        const workbook = univerInstanceService.getUniverSheetInstance(unitId);
-        if (!workbook) return false;
-        const worksheet = workbook.getSheetBySheetId(subUnitId);
-        if (!worksheet) return false;
-
+        const { workbook, unitId, subUnitId } = target;
         const fromOrder = workbook.getConfig().sheetOrder.indexOf(subUnitId);
-
         const setWorksheetOrderMutationParams: ISetWorksheetOrderMutationParams = {
             fromOrder,
             toOrder: params.order,

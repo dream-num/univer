@@ -76,7 +76,7 @@ export class UniverSheetsUIPlugin extends Plugin {
         config: undefined,
         @Inject(Injector) override readonly _injector: Injector,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super(SHEET_UI_PLUGIN_NAME);
 
@@ -152,7 +152,7 @@ export class UniverSheetsUIPlugin extends Plugin {
     }
 
     private _markSheetAsFocused() {
-        const univerInstanceService = this._currentUniverService;
+        const univerInstanceService = this._univerInstanceService;
         univerInstanceService.currentSheet$.pipe(filter((v) => !!v)).subscribe((workbook) => {
             univerInstanceService.focusUniverInstance(workbook!.getUnitId());
         });

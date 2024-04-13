@@ -143,6 +143,8 @@ export class UniverDocsUIPlugin extends Plugin {
         const editorService = this._injector.get(IEditorService);
         try {
             const doc = currentService.getCurrentUniverDocInstance();
+            if (!doc) return;
+
             const id = doc.getUnitId();
             if (!editorService.isEditor(id)) {
                 currentService.focusUniverInstance(doc.getUnitId());

@@ -165,7 +165,7 @@ export class PromptController extends Disposable {
         @Inject(ThemeService) private readonly _themeService: ThemeService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(ISelectionRenderService) private readonly _selectionRenderService: ISelectionRenderService,
         @Inject(IDescriptionService) private readonly _descriptionService: IDescriptionService,
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
@@ -342,7 +342,7 @@ export class PromptController extends Disposable {
 
     private _initialChangeEditor() {
         this.disposeWithMe(
-            this._currentUniverService.currentDoc$.subscribe((documentDataModel) => {
+            this._univerInstanceService.currentDoc$.subscribe((documentDataModel) => {
                 if (documentDataModel == null) {
                     return;
                 }
@@ -757,12 +757,12 @@ export class PromptController extends Disposable {
     }
 
     // private _getCurrentBody() {
-    //     const documentModel = this._currentUniverService.getCurrentUniverDocInstance();
+    //     const documentModel = this._univerInstanceService.getCurrentUniverDocInstance();
     //     return documentModel?.snapshot?.body;
     // }
 
     private _getCurrentBodyDataStreamAndOffset() {
-        const documentModel = this._currentUniverService.getCurrentUniverDocInstance();
+        const documentModel = this._univerInstanceService.getCurrentUniverDocInstance();
 
         if (!documentModel?.snapshot?.body) {
             return;
@@ -783,15 +783,14 @@ export class PromptController extends Disposable {
 
     private _getFormulaAndCellEditorBody(unitIds: string[]) {
         return unitIds.map((unitId) => {
-            const dataModel = this._currentUniverService.getUniverDocInstance(unitId);
+            const dataModel = this._univerInstanceService.getUniverDocInstance(unitId);
 
             return dataModel?.getBody();
         });
     }
 
     private _editorModelUnitIds() {
-        const currentDocumentDataModel = this._currentUniverService.getCurrentUniverDocInstance();
-
+        const currentDocumentDataModel = this._univerInstanceService.getCurrentUniverDocInstance()!;
         const unitId = currentDocumentDataModel.getUnitId();
 
         if (this._editorService.isEditor(unitId) && !this._editorService.isSheetEditor(unitId)) {
@@ -991,7 +990,7 @@ export class PromptController extends Disposable {
 
         const selectionWithStyle: ISelectionWithStyle[] = [];
 
-        const workbook = this._currentUniverService.getUniverSheetInstance(unitId);
+        const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
         const worksheet = workbook?.getSheetBySheetId(sheetId);
 
         if (worksheet == null) {
@@ -1112,13 +1111,13 @@ export class PromptController extends Disposable {
     }
 
     private _getSheetIdByName(unitId: string, sheetName: string) {
-        const workbook = this._currentUniverService.getUniverSheetInstance(unitId);
+        const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
 
         return workbook?.getSheetBySheetName(normalizeSheetName(sheetName))?.getSheetId();
     }
 
     private _getSheetNameById(unitId: string, sheetId: string) {
-        const workbook = this._currentUniverService.getUniverSheetInstance(unitId);
+        const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
 
         const sheetName = workbook?.getSheetBySheetId(sheetId)?.getName() || '';
 
@@ -1129,7 +1128,7 @@ export class PromptController extends Disposable {
         const current = this._sheetSkeletonManagerService.getCurrent();
 
         if (current == null) {
-            const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+            const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
             const worksheet = workbook.getActiveSheet();
             return {
                 unitId: workbook.getUnitId(),
@@ -1147,7 +1146,7 @@ export class PromptController extends Disposable {
     }
 
     private _getOpenForCurrentSheet() {
-        const documentDataModel = this._currentUniverService.getCurrentUniverDocInstance();
+        const documentDataModel = this._univerInstanceService.getCurrentUniverDocInstance()!;
         const editorUnitId = documentDataModel.getUnitId();
         const editor = this._editorService.getEditor(editorUnitId);
         if (editor == null) {
@@ -1260,7 +1259,7 @@ export class PromptController extends Disposable {
         this._currentInsertRefStringIndex = textSelectionOffset;
 
         if (editorUnitId == null) {
-            editorUnitId = this._currentUniverService.getCurrentUniverDocInstance().getUnitId();
+            editorUnitId = this._univerInstanceService.getCurrentUniverDocInstance()!.getUnitId();
         }
 
         this._fitEditorSize();
@@ -1319,8 +1318,8 @@ export class PromptController extends Disposable {
     }
 
     private _fitEditorSize() {
-        const currentDocumentDataModel = this._currentUniverService.getCurrentUniverDocInstance();
-        const editorUnitId = currentDocumentDataModel.getUnitId();
+        const currentDocumentDataModel = this._univerInstanceService.getCurrentUniverDocInstance();
+        const editorUnitId = currentDocumentDataModel!.getUnitId();
         if (this._editorService.isEditor(editorUnitId) && !this._editorService.isSheetEditor(editorUnitId)) {
             return;
         }
@@ -1336,9 +1335,9 @@ export class PromptController extends Disposable {
      * @param textRuns
      */
     private _updateEditorModel(dataStream: string, textRuns: ITextRun[]) {
-        const documentDataModel = this._currentUniverService.getCurrentUniverDocInstance();
+        const documentDataModel = this._univerInstanceService.getCurrentUniverDocInstance();
 
-        const editorUnitId = documentDataModel.getUnitId();
+        const editorUnitId = documentDataModel!.getUnitId();
 
         if (!this._editorService.isEditor(editorUnitId)) {
             return;
@@ -2029,7 +2028,7 @@ export class PromptController extends Disposable {
     }
 
     private _getEditorObject() {
-        const editorUnitId = this._currentUniverService.getCurrentUniverDocInstance().getUnitId();
+        const editorUnitId = this._univerInstanceService.getCurrentUniverDocInstance()!.getUnitId();
         const editor = this._editorService.getEditor(editorUnitId);
         return editor?.render;
         // return getEditorObject(this._editorBridgeService.getCurrentEditorId(), this._renderManagerService);

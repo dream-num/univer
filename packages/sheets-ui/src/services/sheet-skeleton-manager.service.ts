@@ -61,7 +61,7 @@ export class SheetSkeletonManagerService implements IDisposable {
     readonly currentSkeletonBefore$ = this._currentSkeletonBefore$.asObservable();
 
     constructor(
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(LocaleService) private readonly _localeService: LocaleService
     ) { }
@@ -98,7 +98,7 @@ export class SheetSkeletonManagerService implements IDisposable {
         } else {
             const { unitId, sheetId } = searchParam;
 
-            const workbook = this._currentUniverService.getUniverSheetInstance(searchParam.unitId);
+            const workbook = this._univerInstanceService.getUniverSheetInstance(searchParam.unitId);
 
             const worksheet = workbook?.getSheetBySheetId(searchParam.sheetId);
 
@@ -159,7 +159,7 @@ export class SheetSkeletonManagerService implements IDisposable {
             return skeleton.skeleton;
         }
 
-        const workbook = this._currentUniverService.getUniverSheetInstance(searchParam.unitId);
+        const workbook = this._univerInstanceService.getUniverSheetInstance(searchParam.unitId);
         const worksheet = workbook?.getSheetBySheetId(searchParam.sheetId);
         if (!worksheet || !workbook) {
             return;

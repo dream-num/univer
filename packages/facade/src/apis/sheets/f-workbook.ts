@@ -17,6 +17,7 @@
 import type { CommandListener, ICommandInfo, IRange, IWorkbookData, Workbook } from '@univerjs/core';
 import {
     ICommandService,
+    IResourceManagerService,
     IUniverInstanceService,
     mergeWorksheetSnapshotWithDefault,
     RedoCommand,
@@ -38,9 +39,11 @@ export class FWorkbook {
     constructor(
         private readonly _workbook: Workbook,
         @Inject(Injector) private readonly _injector: Injector,
+        @Inject(IResourceManagerService) private readonly _resourceManagerService: IResourceManagerService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService
+
     ) {
         this.id = this._workbook.getUnitId();
     }
@@ -54,7 +57,11 @@ export class FWorkbook {
     }
 
     getSnapshot(): IWorkbookData {
-        return this._workbook.getSnapshot();
+        const unitId = this._workbook.getUnitId();
+        const resources = this._resourceManagerService.getResources(unitId) || [];
+        const snapshot = this._workbook.getSnapshot();
+        snapshot.resources = resources;
+        return snapshot;
     }
 
     /**

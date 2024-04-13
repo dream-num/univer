@@ -22,7 +22,7 @@ import { fromEvent } from 'rxjs';
 type FocusHandlerFn = (unitId: string) => void;
 
 export const FOCUSING_UNIVER = 'FOCUSING_UNIVER';
-const collectionOfCnForFocusableEle = ['univer-app-layout', 'univer-toolbar-btn', 'univer-menu-item', 'univer-button'];
+const collectionOfCnForFocusableEle = ['univer-app-layout', 'univer-toolbar-btn', 'univer-menu-item', 'univer-button', 'univer-sheet-bar-btn'];
 
 export interface ILayoutService {
     readonly isFocused: boolean;

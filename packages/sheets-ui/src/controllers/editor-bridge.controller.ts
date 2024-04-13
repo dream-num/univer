@@ -85,6 +85,7 @@ export class EditorBridgeController extends RxDisposable {
         }
 
         const textSelectionRenderManager = this._injector.get(ITextSelectionRenderManager, Quantity.OPTIONAL);
+
         if (!this._layoutService.checkCanvasIsFocused() && textSelectionRenderManager && !textSelectionRenderManager!.hasFocus()) {
             return;
         }

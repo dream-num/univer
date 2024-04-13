@@ -34,6 +34,7 @@ enum ArrowDirection {
     Up,
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function FormulaBar() {
     const [iconStyle, setIconStyle] = useState<string>(styles.formulaGrey);
     const [arrowDirection, setArrowDirection] = useState<ArrowDirection>(ArrowDirection.Down);
@@ -65,7 +66,7 @@ export function FormulaBar() {
             paragraphLineGapDefault: 0,
             renderConfig: {
                 horizontalAlign: HorizontalAlign.UNSPECIFIED,
-                verticalAlign: VerticalAlign.TOP,
+                verticalAlign: VerticalAlign.UNSPECIFIED,
                 centerAngle: 0,
                 vertexAngle: 0,
                 wrapStrategy: WrapStrategy.WRAP,

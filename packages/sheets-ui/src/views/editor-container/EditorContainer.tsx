@@ -39,6 +39,7 @@ const EDITOR_DEFAULT_POSITION = {
  * Floating editor's container.
  * @returns
  */
+// eslint-disable-next-line max-lines-per-function
 export const EditorContainer: React.FC<ICellIEditorProps> = () => {
     const [state, setState] = useState({
         ...EDITOR_DEFAULT_POSITION,
@@ -89,8 +90,8 @@ export const EditorContainer: React.FC<ICellIEditorProps> = () => {
                 });
             } else {
                 setState({
-                    width: endX - startX - FIX_ONE_PIXEL_BLUR_OFFSET,
-                    height: endY - startY - FIX_ONE_PIXEL_BLUR_OFFSET,
+                    width: endX - startX - FIX_ONE_PIXEL_BLUR_OFFSET + 2,
+                    height: endY - startY - FIX_ONE_PIXEL_BLUR_OFFSET + 2,
                     left: startX + FIX_ONE_PIXEL_BLUR_OFFSET,
                     top: startY + FIX_ONE_PIXEL_BLUR_OFFSET,
                 });

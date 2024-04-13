@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 import './extensions';
 
 import type { Nullable, Observer } from '@univerjs/core';
@@ -188,6 +189,7 @@ export class Documents extends DocComponent {
     override getEngine() {
         return (this.getScene() as Scene).getEngine();
     }
+
 
     override draw(ctx: UniverRenderingContext, bounds?: IViewportBound) {
         const documentSkeleton = this.getSkeleton();
@@ -529,10 +531,11 @@ export class Documents extends DocComponent {
         if (verticalAlign === VerticalAlign.MIDDLE) {
             offsetTop = (this.height - pageHeight) / 2;
         } else if (verticalAlign === VerticalAlign.TOP) {
-            offsetTop = pagePaddingTop;
-        } else {
+            offsetTop = 0;
+        } else { // VerticalAlign.UNSPECIFIED follow the same rule as HorizontalAlign.BOTTOM.
             offsetTop = this.height - pageHeight - pagePaddingBottom;
         }
+
         return offsetTop;
     }
 

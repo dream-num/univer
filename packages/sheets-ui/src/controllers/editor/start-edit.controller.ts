@@ -236,16 +236,19 @@ export class StartEditController extends Disposable {
             documentDataModel.updateDocumentDataMargin(paddingData);
         } else {
             // Set the top margin under vertical alignment.
-            let offsetTop = (editorHeight - actualHeight) || 0;
+            let offsetTop = 0;
 
             if (verticalAlign === VerticalAlign.MIDDLE) {
-                offsetTop = (editorHeight - actualHeight) / 2;
+                offsetTop = (editorHeight - actualHeight) / 2 / scaleY;
             } else if (verticalAlign === VerticalAlign.TOP) {
-                offsetTop = paddingData.t || 0;
+                offsetTop = 0;
+            } else { // VerticalAlign.UNSPECIFIED follow the same rule as HorizontalAlign.BOTTOM.
+                offsetTop = (editorHeight - actualHeight) / scaleY - (paddingData.b || 0);
             }
 
-            offsetTop /= scaleY;
+            // offsetTop /= scaleY;
             offsetTop = offsetTop < (paddingData.t || 0) ? paddingData.t || 0 : offsetTop;
+
             documentDataModel.updateDocumentDataMargin({
                 t: offsetTop,
             });
@@ -322,6 +325,7 @@ export class StartEditController extends Disposable {
      * determine whether a scrollbar appears,
      * and calculate the editor's boundaries relative to the browser.
      */
+    // eslint-disable-next-line max-lines-per-function
     private _editAreaProcessing(
         editorWidth: number,
         editorHeight: number,
@@ -453,8 +457,10 @@ export class StartEditController extends Disposable {
     }
 
     // You can double-click on the cell or input content by keyboard to put the cell into the edit state.
+    // eslint-disable-next-line max-lines-per-function
     private _initialStartEdit() {
         this.disposeWithMe(
+            // eslint-disable-next-line max-lines-per-function
             this._editorBridgeService.visible$.subscribe((param) => {
                 const { visible, eventType, keycode } = param;
 

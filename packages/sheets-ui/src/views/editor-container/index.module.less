@@ -11,6 +11,7 @@
 
     border: 1px solid rgb(var(--primary-color));
     box-shadow: none;
+    box-sizing: border-box;
 
     .editor-input {
         position: relative;
@@ -21,5 +22,11 @@
         height: 100%;
 
         background: white;
+
+        canvas {
+            position: absolute;
+            top: -1px !important;
+            left: -1px !important;
+        }
     }
 }

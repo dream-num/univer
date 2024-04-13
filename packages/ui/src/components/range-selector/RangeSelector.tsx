@@ -253,12 +253,23 @@ export function RangeSelector(props: IRangeSelectorProps) {
     function handleTextValueChange(value: Nullable<string>) {
         setRangeValue(value || '');
 
-        if (value === '') {
+        const valueArray = value?.split(',') || [];
+
+        if (value === '' || valueArray.length === 0) {
             onChange && onChange([]);
             return;
         }
 
-        const ranges = value?.split(',').map((ref) => {
+        const result = valueArray.every((refString) => {
+            return isReferenceString(refString.trim());
+        });
+
+        if (!result) {
+            onChange && onChange([]);
+            return;
+        }
+
+        const ranges = valueArray.map((ref) => {
             const unitRange = deserializeRangeWithSheet(ref);
             return {
                 unitId: unitRange.unitId,

@@ -39,7 +39,7 @@ export function DefinedName() {
 
     return (
         <div className={styles.definedName}>
-            <Input value={rangeString} type="text" size="small" affixWrapperStyle={{ border: 'none', paddingLeft: '6px', paddingRight: '6px' }} />
+            <Input value={rangeString} type="text" size="small" affixWrapperStyle={{ border: 'none', paddingLeft: '6px', paddingRight: '6px', height: '100%' }} />
 
             <Dropdown overlay={<DefinedNameOverlay />}>
                 <div className={styles.definedNameDropDown}>

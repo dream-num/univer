@@ -805,8 +805,8 @@ importers:
   packages/sheets:
     dependencies:
       '@univerjs/protocol':
-        specifier: ^0.1.14
-        version: 0.1.14(@grpc/grpc-js@1.10.4)(rxjs@7.8.1)
+        specifier: ^0.1.17
+        version: 0.1.17(@grpc/grpc-js@1.10.4)(rxjs@7.8.1)
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*

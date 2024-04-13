@@ -51,16 +51,7 @@ const TEST_WORKBOOK_DATA_DEMO: () => IWorkbookData = () => ({
     name: '',
     sheetOrder: [],
     styles: {},
-    resources: [
-        {
-            name: 'SHEET_NUMFMT_PLUGIN',
-            data: '{"model":{},"refModel":[]}',
-        },
-        {
-            name: 'SHEET_CONDITIONAL_FORMATTING_PLUGIN',
-            data: '{"sheet1":[{"cfId":"1","ranges":[{"startRow":0,"startColumn":0,"endRow":5,"endColumn":6,"startAbsoluteRefType":0,"endAbsoluteRefType":0,"rangeType":0}],"rule":{"config":[{"color":"#ff0000","value":{"type":"min","value":10},"index":0},{"color":"#0000ff","value":{"type":"max","value":90},"index":1}],"type":"colorScale"},"stopIfTrue":false}]}',
-        },
-    ],
+    resources: [],
 });
 export const createTestBed = (dependencies?: Dependency[]) => {
     const univer = new Univer();

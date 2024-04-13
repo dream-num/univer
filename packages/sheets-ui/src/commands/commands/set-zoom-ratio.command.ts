@@ -17,6 +17,7 @@
 import type { ICommand } from '@univerjs/core';
 import { CommandType, ICommandService, IUniverInstanceService } from '@univerjs/core';
 
+import { getSheetCommandTarget } from '@univerjs/sheets';
 import { SHEET_ZOOM_RANGE } from '../../common/keys';
 import { SetZoomRatioOperation } from '../operations/set-zoom-ratio.operation';
 
@@ -41,11 +42,13 @@ export const ChangeZoomRatioCommand: ICommand<IChangeZoomRatioCommandParams> = {
         if (!params) {
             return false;
         }
+
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const target = getSheetCommandTarget(univerInstanceService);
+        if (!target) return false;
+
+        const { worksheet, subUnitId, unitId } = target;
         const { delta, reset } = params;
-        const workbook = accessor.get(IUniverInstanceService).getCurrentUniverSheetInstance();
-        const worksheet = workbook.getActiveSheet();
-        const unitId = workbook.getUnitId();
-        const subUnitId = worksheet.getSheetId();
 
         let zoom = reset ? 100 : Math.round((worksheet.getConfig().zoomRatio + delta) * 100);
         zoom = Math.max(SHEET_ZOOM_RANGE[0], zoom);
@@ -68,8 +71,8 @@ export const SetZoomRatioCommand: ICommand<ISetZoomRatioCommandParams> = {
         if (!params) {
             return false;
         }
-        const { unitId, subUnitId, zoomRatio } = params;
 
+        const { unitId, subUnitId, zoomRatio } = params;
         return accessor.get(ICommandService).executeCommand(SetZoomRatioOperation.id, {
             unitId,
             subUnitId,

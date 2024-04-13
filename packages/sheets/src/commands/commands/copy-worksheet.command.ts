@@ -31,6 +31,7 @@ import type {
 } from '../../basics/interfaces/mutation-interface';
 import { InsertSheetMutation, InsertSheetUndoMutationFactory } from '../mutations/insert-sheet.mutation';
 import { RemoveSheetMutation } from '../mutations/remove-sheet.mutation';
+import { getSheetCommandTarget } from './utils/target-util';
 
 export interface ICopySheetCommandParams {
     unitId?: string;
@@ -46,21 +47,12 @@ export const CopySheetCommand: ICommand = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const localeService = accessor.get(LocaleService);
 
-        let unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-        let subUnitId = univerInstanceService
-            .getCurrentUniverSheetInstance()
-
-            .getActiveSheet()
-            .getSheetId();
-        if (params) {
-            unitId = params.unitId ?? unitId;
-            subUnitId = params.subUnitId ?? subUnitId;
+        const target = getSheetCommandTarget(univerInstanceService, params);
+        if (!target) {
+            return false;
         }
-        const workbook = univerInstanceService.getUniverSheetInstance(unitId);
-        if (!workbook) return false;
-        const worksheet = workbook.getSheetBySheetId(subUnitId);
-        if (!worksheet) return false;
 
+        const { workbook, worksheet, unitId } = target;
         const config = Tools.deepClone(worksheet.getConfig());
         config.name += localeService.t('sheets.sheetCopy'); // TODO: 文字国际化
         config.id = Tools.generateRandomId();

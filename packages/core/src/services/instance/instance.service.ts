@@ -27,13 +27,13 @@ import type { IDocumentData, ISlideData, IWorkbookData } from '../../types/inter
 import { FOCUSING_DOC, FOCUSING_SHEET, FOCUSING_SLIDE } from '../context/context';
 import { IContextService } from '../context/context.service';
 
+/**
+ * Type of built-in univer document instances.
+ */
 export enum UniverInstanceType {
     UNKNOWN = 0,
-
     DOC = 1,
-
     SHEET = 2,
-
     SLIDE = 3,
 }
 
@@ -44,8 +44,10 @@ export interface IUniverHandler {
 }
 
 /**
- * IUniverInstanceService holds all the current univer instances. And it also manages
- * the focused univer instance.
+ * IUniverInstanceService holds all the current univer instances and provides a set of
+ * methods to add and remove univer instances.
+ *
+ * It also manages the focused univer instance.
  */
 export interface IUniverInstanceService {
     focused$: Observable<Nullable<string>>;
@@ -78,9 +80,10 @@ export interface IUniverInstanceService {
     getUniverDocInstance(id: string): Nullable<DocumentDataModel>;
     getUniverSlideInstance(id: string): Nullable<SlideDataModel>;
 
-    getCurrentUniverSheetInstance(): Workbook;
-    getCurrentUniverDocInstance(): DocumentDataModel;
-    getCurrentUniverSlideInstance(): SlideDataModel;
+    getCurrentUniverSheetInstance(): Nullable<Workbook>;
+    getCurrentUniverDocInstance(): Nullable<DocumentDataModel>;
+    getCurrentUniverSlideInstance(): Nullable<SlideDataModel>;
+
     setCurrentUniverSheetInstance(id: string): void;
     setCurrentUniverDocInstance(id: string): void;
     setCurrentUniverSlideInstance(id: string): void;

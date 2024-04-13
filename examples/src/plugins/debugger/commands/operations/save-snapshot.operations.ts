@@ -52,7 +52,7 @@ export const SaveSnapshotOptions: ICommand = {
         const exportController = accessor.get(ExportController);
         const recordController = accessor.get(RecordController);
 
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
+        const workbook = univerInstanceService.getCurrentUniverSheetInstance()!;
         const worksheet = workbook.getActiveSheet();
         const snapshot = localPersistenceService.saveWorkbook(workbook);
         const gitHash = process.env.GIT_COMMIT_HASH;

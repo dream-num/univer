@@ -23,6 +23,7 @@ import {
     SetHideGridlinesMutation,
     SetHideGridlinesUndoMutationFactory,
 } from '../mutations/set-hide-gridlines.mutatiom';
+import { getSheetCommandTarget } from './utils/target-util';
 
 export interface ISetHideGridlinesCommandParams {
     hideGridlines?: BooleanNumber;
@@ -39,17 +40,13 @@ export const SetHideGridlinesCommand: ICommand = {
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        let unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-        let subUnitId = univerInstanceService
-            .getCurrentUniverSheetInstance()
+        const target = getSheetCommandTarget(univerInstanceService);
+        if (!target) return false;
 
-            .getActiveSheet()
-            .getSheetId();
+        const { unitId, subUnitId } = target;
         let hideGridlines = BooleanNumber.FALSE;
 
         if (params) {
-            unitId = params.unitId ?? unitId;
-            subUnitId = params.subUnitId ?? unitId;
             hideGridlines = params.hideGridlines ?? BooleanNumber.FALSE;
         }
 

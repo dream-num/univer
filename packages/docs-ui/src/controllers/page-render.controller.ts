@@ -34,7 +34,7 @@ export class PageRenderController extends Disposable {
     constructor(
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IEditorService private readonly _editorService: IEditorService,
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
 
@@ -55,7 +55,7 @@ export class PageRenderController extends Disposable {
 
             const currentRender = this._renderManagerService.getRenderById(unitId);
 
-            if (this._editorService.isEditor(unitId) || this._currentUniverService.getUniverDocInstance(unitId) == null) {
+            if (this._editorService.isEditor(unitId) || this._univerInstanceService.getUniverDocInstance(unitId) == null) {
                 return;
             }
 

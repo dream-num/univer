@@ -63,7 +63,7 @@ export class HeaderMenuController extends Disposable {
 
     constructor(
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IContextMenuService private readonly _contextMenuService: IContextMenuService,
         @ICommandService private readonly _commandService: ICommandService,
@@ -280,11 +280,11 @@ export class HeaderMenuController extends Disposable {
     }
 
     private _getSheetObject() {
-        return getSheetObject(this._currentUniverService, this._renderManagerService);
+        return getSheetObject(this._univerInstanceService, this._renderManagerService);
     }
 
     private _getSelectionOnColumn(column: number): ISetSelectionsOperationParams {
-        const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
         const worksheet = workbook.getActiveSheet();
 
         return {

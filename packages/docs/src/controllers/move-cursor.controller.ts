@@ -46,7 +46,7 @@ export class MoveCursorController extends Disposable {
 
     constructor(
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(TextSelectionManagerService) private readonly _textSelectionManagerService: TextSelectionManagerService,
         @ICommandService private readonly _commandService: ICommandService
@@ -62,7 +62,7 @@ export class MoveCursorController extends Disposable {
         this._onInputSubscription?.unsubscribe();
     }
 
-    private _initialize() {}
+    private _initialize() { }
 
     private _commandExecutedListener() {
         const updateCommandList = [MoveCursorOperation.id, MoveSelectionOperation.id];
@@ -95,7 +95,10 @@ export class MoveCursorController extends Disposable {
     private _handleShiftMoveSelection(direction: Direction) {
         const activeRange = this._textSelectionManagerService.getActiveRange();
         const allRanges = this._textSelectionManagerService.getSelections()!;
-        const docDataModel = this._currentUniverService.getCurrentUniverDocInstance();
+        const docDataModel = this._univerInstanceService.getCurrentUniverDocInstance();
+        if (!docDataModel) {
+            return;
+        }
 
         const skeleton = this._docSkeletonManagerService.getCurrent()?.skeleton;
 
@@ -196,7 +199,10 @@ export class MoveCursorController extends Disposable {
     private _handleMoveCursor(direction: Direction) {
         const activeRange = this._textSelectionManagerService.getActiveRange();
         const allRanges = this._textSelectionManagerService.getSelections();
-        const docDataModel = this._currentUniverService.getCurrentUniverDocInstance();
+        const docDataModel = this._univerInstanceService.getCurrentUniverDocInstance();
+        if (!docDataModel) {
+            return false;
+        }
 
         const skeleton = this._docSkeletonManagerService.getCurrent()?.skeleton;
 
@@ -479,6 +485,6 @@ export class MoveCursorController extends Disposable {
     }
 
     private _getDocObject() {
-        return getDocObject(this._currentUniverService, this._renderManagerService);
+        return getDocObject(this._univerInstanceService, this._renderManagerService);
     }
 }

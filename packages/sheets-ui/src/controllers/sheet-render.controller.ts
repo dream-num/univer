@@ -47,7 +47,7 @@ export class SheetRenderController extends Disposable {
     constructor(
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @IContextService private readonly _contextService: IContextService,
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ICommandService private readonly _commandService: ICommandService
     ) {
@@ -71,7 +71,7 @@ export class SheetRenderController extends Disposable {
 
                 const { skeleton: spreadsheetSkeleton, unitId, sheetId } = param;
 
-                const workbook = this._currentUniverService.getUniverSheetInstance(unitId);
+                const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
 
                 const worksheet = workbook?.getSheetBySheetId(sheetId);
 
@@ -108,7 +108,7 @@ export class SheetRenderController extends Disposable {
     private _initCommandListener(): void {
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
-                const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+                const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
                 const unitId = workbook.getUnitId();
 
                 if (COMMAND_LISTENER_SKELETON_CHANGE.includes(command.id)) {

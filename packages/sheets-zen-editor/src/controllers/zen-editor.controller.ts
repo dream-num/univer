@@ -50,7 +50,7 @@ export const DOCS_ZEN_EDITOR_UNIT_ID_KEY = '__defaultDocumentZenEditorSpecialUni
 @OnLifecycle(LifecycleStages.Steady, ZenEditorController)
 export class ZenEditorController extends RxDisposable {
     constructor(
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IZenEditorManagerService private readonly _zenEditorManagerService: IZenEditorManagerService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ICommandService private readonly _commandService: ICommandService,
@@ -103,7 +103,7 @@ export class ZenEditorController extends RxDisposable {
             },
         };
 
-        this._currentUniverService.createDoc(INITIAL_SNAPSHOT);
+        this._univerInstanceService.createDoc(INITIAL_SNAPSHOT);
     }
 
     // Listen to changes in the size of the zen editor container to set the size of the editor.
@@ -114,7 +114,7 @@ export class ZenEditorController extends RxDisposable {
             }
 
             const editorObject = getEditorObject(DOCS_ZEN_EDITOR_UNIT_ID_KEY, this._renderManagerService);
-            const zenEditorDataModel = this._currentUniverService.getUniverDocInstance(DOCS_ZEN_EDITOR_UNIT_ID_KEY);
+            const zenEditorDataModel = this._univerInstanceService.getUniverDocInstance(DOCS_ZEN_EDITOR_UNIT_ID_KEY);
 
             if (editorObject == null || zenEditorDataModel == null) {
                 return;
@@ -155,9 +155,9 @@ export class ZenEditorController extends RxDisposable {
         // Need to clear undo/redo service when open zen mode.
         this._undoRedoService.clearUndoRedo(DOCS_ZEN_EDITOR_UNIT_ID_KEY);
 
-        this._currentUniverService.focusUniverInstance(DOCS_ZEN_EDITOR_UNIT_ID_KEY);
+        this._univerInstanceService.focusUniverInstance(DOCS_ZEN_EDITOR_UNIT_ID_KEY);
 
-        this._currentUniverService.setCurrentUniverDocInstance(DOCS_ZEN_EDITOR_UNIT_ID_KEY);
+        this._univerInstanceService.setCurrentUniverDocInstance(DOCS_ZEN_EDITOR_UNIT_ID_KEY);
 
         const visibleState = this._editorBridgeService.isVisible();
         if (visibleState.visible === false) {
@@ -219,7 +219,7 @@ export class ZenEditorController extends RxDisposable {
         ];
 
         const docsSkeletonObject = this._docSkeletonManagerService.getSkeletonByUnitId(unitId);
-        const docDataModel = this._currentUniverService.getUniverDocInstance(unitId);
+        const docDataModel = this._univerInstanceService.getUniverDocInstance(unitId);
         const docViewModel = this._docViewModelManagerService.getViewModel(unitId);
 
         if (docDataModel == null || docViewModel == null || docsSkeletonObject == null) {
@@ -336,7 +336,7 @@ export class ZenEditorController extends RxDisposable {
 
                     if (unitId === DOCS_ZEN_EDITOR_UNIT_ID_KEY) {
                         // sync cell content to formula editor bar when edit cell editor and vice verse.
-                        const editorDocDataModel = this._currentUniverService.getUniverDocInstance(unitId);
+                        const editorDocDataModel = this._univerInstanceService.getUniverDocInstance(unitId);
                         const docBody = editorDocDataModel?.getBody();
                         const dataStream = docBody?.dataStream;
                         const paragraphs = docBody?.paragraphs;
@@ -359,6 +359,6 @@ export class ZenEditorController extends RxDisposable {
     }
 
     private _getDocObject() {
-        return getDocObject(this._currentUniverService, this._renderManagerService);
+        return getDocObject(this._univerInstanceService, this._renderManagerService);
     }
 }

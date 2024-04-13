@@ -46,7 +46,9 @@ export class SheetPermissionService extends Disposable {
     }
 
     private _init() {
-        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
+        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
+        if (!workbook) return;
+
         const unitId = workbook.getUnitId();
         workbook.getSheets().forEach((worksheet) => {
             const subUnitId = worksheet.getSheetId();
@@ -78,7 +80,7 @@ export class SheetPermissionService extends Disposable {
             this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.PERMISSION, {
                 priority: 99,
                 handler: (_value, commandInfo, next) => {
-                    const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
+                    const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
                     const sheet = workbook?.getActiveSheet();
                     const unitId = workbook?.getUnitId();
                     const sheetId = sheet?.getSheetId();
@@ -96,8 +98,13 @@ export class SheetPermissionService extends Disposable {
         );
     }
 
+    // TODO@Gggpound: should get by unitId instead of the current one
     getEditable$(unitId?: string, sheetId?: string) {
-        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
+        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
+        if (!workbook) {
+            throw new Error('[SheetPermissionService]: trying to get permission from a non-existing sheet.');
+        }
+
         const _unitId = unitId || workbook.getUnitId();
         const sheet = workbook.getActiveSheet();
         const _sheetId = sheetId || sheet.getSheetId();
@@ -114,7 +121,9 @@ export class SheetPermissionService extends Disposable {
     }
 
     getSheetEditable(unitId?: string, sheetId?: string) {
-        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
+        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
+        if (!workbook) return false;
+
         const _unitId = unitId || workbook.getUnitId();
         const sheet = workbook.getActiveSheet();
         const _sheetId = sheetId || sheet.getSheetId();
@@ -125,7 +134,9 @@ export class SheetPermissionService extends Disposable {
     }
 
     setSheetEditable(v: boolean, unitId?: string, sheetId?: string) {
-        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
+        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
+        if (!workbook) return;
+
         const _unitId = unitId || workbook.getUnitId();
         const sheet = workbook.getActiveSheet();
         const _sheetId = sheetId || sheet.getSheetId();

@@ -120,7 +120,7 @@ export class ConditionalFormattingCopyPasteController extends Disposable {
             pasteType: string;
         }
     ) {
-        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
+        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
         const sheet = workbook.getActiveSheet();
         const unitId = workbook.getUnitId();
         const subUnitId = sheet.getSheetId();

@@ -52,7 +52,7 @@ describe('test cell-content', () => {
                 },
             },
         };
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
+        const workbook = univerInstanceService.getCurrentUniverSheetInstance()!;
         const worksheet = workbook.getActiveSheet();
         testBed.get(NumfmtCellContent);
         const value = worksheet.getCell(0, 0);

@@ -39,6 +39,7 @@ import { InsertColMutation, InsertColMutationUndoFactory } from '../mutations/in
 import { RemoveColMutation } from '../mutations/remove-row-col.mutation';
 import { getInsertRangeMutations } from '../utils/handle-range-mutation';
 import { followSelectionOperation } from './utils/selection-utils';
+import { getSheetCommandTarget } from './utils/target-util';
 
 export interface InsertRangeMoveRightCommandParams {
     range: IRange;
@@ -65,18 +66,16 @@ export const InsertRangeMoveRightCommand: ICommand = {
             return false;
         }
 
-        const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-        const subUnitId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
+        const target = getSheetCommandTarget(univerInstanceService);
+        if (!target) return false;
+
+        const { workbook, worksheet, unitId, subUnitId } = target;
+
         let range = params?.range;
         if (!range) {
             range = selectionManagerService.getLast()?.range;
         }
         if (!range) return false;
-
-        const workbook = univerInstanceService.getUniverSheetInstance(unitId);
-        if (!workbook) return false;
-        const worksheet = workbook.getSheetBySheetId(subUnitId);
-        if (!worksheet) return false;
 
         const redoMutations: IMutationInfo[] = [];
         const undoMutations: IMutationInfo[] = [];
@@ -147,7 +146,6 @@ export const InsertRangeMoveRightCommand: ICommand = {
         );
 
         redoMutations.push(...insertRangeRedo);
-
         undoMutations.push(...insertRangeUndo);
 
         const sheetInterceptor = sheetInterceptorService.onCommandExecute({

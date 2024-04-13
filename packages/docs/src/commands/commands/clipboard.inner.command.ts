@@ -54,15 +54,18 @@ export const InnerPasteCommand: ICommand<IInnerPasteCommandParams> = {
         const { segmentId, body, textRanges } = params;
         const commandService = accessor.get(ICommandService);
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
-        const currentUniverService = accessor.get(IUniverInstanceService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
 
         const selections = textSelectionManagerService.getSelections();
-
         if (!Array.isArray(selections) || selections.length === 0) {
             return false;
         }
 
-        const docsModel = currentUniverService.getCurrentUniverDocInstance();
+        const docsModel = univerInstanceService.getCurrentUniverDocInstance();
+        if (!docsModel) {
+            return false;
+        }
+
         const unitId = docsModel.getUnitId();
 
         const doMutation: IMutationInfo<IRichTextEditingMutationParams> = {
@@ -132,7 +135,7 @@ export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
         const { segmentId, textRanges } = params;
         const commandService = accessor.get(ICommandService);
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
-        const currentUniverService = accessor.get(IUniverInstanceService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
 
         const selections = textSelectionManagerService.getSelections();
 
@@ -140,12 +143,13 @@ export const CutContentCommand: ICommand<IInnerCutCommandParams> = {
             return false;
         }
 
-        const unitId = currentUniverService.getCurrentUniverDocInstance().getUnitId();
+        const unitId = univerInstanceService.getCurrentUniverDocInstance()?.getUnitId();
+        if (!unitId) {
+            return false;
+        }
 
-        const documentModel = currentUniverService.getUniverDocInstance(unitId);
-
+        const documentModel = univerInstanceService.getUniverDocInstance(unitId);
         const originBody = getDocsUpdateBody(documentModel!.snapshot, segmentId);
-
         if (originBody == null) {
             return false;
         }

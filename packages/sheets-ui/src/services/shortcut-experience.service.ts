@@ -41,7 +41,7 @@ export class ShortcutExperienceService implements IDisposable {
     private _shortcutParam: IShortcutExperienceParam[] = [];
 
     constructor(
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {}
 

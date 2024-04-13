@@ -39,7 +39,7 @@ import { getSheetObject } from '../utils/component-tools';
 @OnLifecycle(LifecycleStages.Rendered, SheetContextMenuController)
 export class SheetContextMenuController extends Disposable {
     constructor(
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IContextMenuService private readonly _contextMenuService: IContextMenuService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(SelectionManagerService)
@@ -47,7 +47,7 @@ export class SheetContextMenuController extends Disposable {
         @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService
     ) {
         super();
-        this._currentUniverService.currentSheet$.subscribe((workbook) => {
+        this._univerInstanceService.currentSheet$.subscribe((workbook) => {
             if (workbook == null) {
                 throw new Error('workbook is null');
             }
@@ -56,7 +56,7 @@ export class SheetContextMenuController extends Disposable {
     }
 
     private _addListeners(): void {
-        const objects = getSheetObject(this._currentUniverService, this._renderManagerService);
+        const objects = getSheetObject(this._univerInstanceService, this._renderManagerService);
         if (!objects) {
             return;
         }

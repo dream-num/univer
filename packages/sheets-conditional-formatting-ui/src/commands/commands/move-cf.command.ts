@@ -21,6 +21,7 @@ import {
     IUndoRedoService,
     IUniverInstanceService,
 } from '@univerjs/core';
+import { getSheetCommandTarget } from '@univerjs/sheets';
 import type { IAnchor, IMoveConditionalRuleMutationParams } from '@univerjs/sheets-conditional-formatting';
 import { ConditionalFormattingRuleModel, MoveConditionalRuleMutation, MoveConditionalRuleMutationUndoFactory, transformSupportSymmetryAnchor } from '@univerjs/sheets-conditional-formatting';
 
@@ -42,10 +43,11 @@ export const moveCfCommand: ICommand<IMoveCfCommand> = {
         const commandService = accessor.get(ICommandService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const conditionalFormattingRuleModel = accessor.get(ConditionalFormattingRuleModel);
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
-        const worksheet = workbook.getActiveSheet();
-        const unitId = params.unitId ?? workbook.getUnitId();
-        const subUnitId = params.subUnitId ?? worksheet.getSheetId();
+
+        const target = getSheetCommandTarget(univerInstanceService, params);
+        if (!target) return false;
+
+        const { unitId, subUnitId } = target;
         const anchorList = transformSupportSymmetryAnchor(params.start, params.end, conditionalFormattingRuleModel.getSubunitRules(unitId, subUnitId) || [], (rule) => rule.cfId);
         if (!anchorList) {
             return false;

@@ -40,7 +40,7 @@ describe('Test SheetInterceptorService', () => {
 
     function getCell(row: number, col: number): Nullable<ICellData> {
         const cus = get(IUniverInstanceService);
-        const sheet = cus.getCurrentUniverSheetInstance().getActiveSheet()!;
+        const sheet = cus.getCurrentUniverSheetInstance()!.getActiveSheet()!;
         return sheet.getCell(row, col);
     }
 
@@ -157,12 +157,12 @@ describe('Test SheetInterceptorService', () => {
     // it('Test SheetInterceptorService', () => {
     //     it('getLastRowWithContent', () => {
     //         const univerInstanceService = get(IUniverInstanceService);
-    //         const sheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet()!;
+    //         const sheet = univerInstanceService.getCurrentUniverSheetInstance()!.getActiveSheet()!;
     //         expect(sheet.getLastRowWithContent()).toBe(3);
     //     });
     //     it('getLastColumnWithContent', () => {
     //         const univerInstanceService = get(IUniverInstanceService);
-    //         const sheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet()!;
+    //         const sheet = univerInstanceService.getCurrentUniverSheetInstance()!.getActiveSheet()!;
     //         expect(sheet.getLastColumnWithContent()).toBe(3);
     //     });
     // });

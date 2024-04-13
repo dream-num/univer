@@ -56,7 +56,7 @@ const useUpdate = () => {
 export const AutoFillPopupMenu: React.FC<{}> = () => {
     const commandService = useDependency(ICommandService);
     const sheetSkeletonManagerService = useDependency(SheetSkeletonManagerService);
-    const currentUniverService = useDependency(IUniverInstanceService);
+    const univerInstanceService = useDependency(IUniverInstanceService);
     const renderManagerService = useDependency(IRenderManagerService);
     const selectionRenderService = useDependency(ISelectionRenderService);
     const autoFillService = useDependency(IAutoFillService);
@@ -77,7 +77,7 @@ export const AutoFillPopupMenu: React.FC<{}> = () => {
     };
     const forceUpdate = useUpdate();
 
-    const sheetObject = getSheetObject(currentUniverService, renderManagerService);
+    const sheetObject = getSheetObject(univerInstanceService, renderManagerService);
 
     if (sheetObject == null) {
         return null;

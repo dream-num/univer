@@ -244,32 +244,7 @@ export function createCommandTestBed(workbookConfig?: IWorkbookData, dependencie
         }
 
         override onStarting(injector: Injector): void {
-            injector.add([CalculateFormulaService]);
-            injector.add([Lexer]);
-            injector.add([LexerTreeBuilder]);
-
-            injector.add([IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }]);
-            injector.add([IFormulaRuntimeService, { useClass: FormulaRuntimeService }]);
-            injector.add([IFunctionService, { useClass: FunctionService }]);
-            injector.add([IOtherFormulaManagerService, { useClass: OtherFormulaManagerService }]);
-            injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
-            injector.add([ISuperTableService, { useClass: SuperTableService }]);
-
-            injector.add([FormulaDependencyGenerator]);
-            injector.add([Interpreter]);
-            injector.add([AstTreeBuilder]);
-
-            injector.add([AstRootNodeFactory]);
-            injector.add([FunctionNodeFactory]);
-            injector.add([LambdaNodeFactory]);
-            injector.add([LambdaParameterNodeFactory]);
-            injector.add([OperatorNodeFactory]);
-            injector.add([PrefixNodeFactory]);
-            injector.add([ReferenceNodeFactory]);
-            injector.add([SuffixNodeFactory]);
-            injector.add([UnionNodeFactory]);
-            injector.add([ValueNodeFactory]);
-
+            registerFormulaDependencies(injector);
             dependencies?.forEach((d) => injector.add(d));
         }
 
@@ -288,7 +263,7 @@ export function createCommandTestBed(workbookConfig?: IWorkbookData, dependencie
     logService.setLogLevel(LogLevel.SILENT); // change this to `true` to debug tests via logs
 
     const sheetData: ISheetData = {};
-    const workbook = univerInstanceService.getCurrentUniverSheetInstance();
+    const workbook = univerInstanceService.getCurrentUniverSheetInstance()!;
     const unitId = workbook.getUnitId();
     const sheetId = workbook.getActiveSheet().getSheetId();
     workbook.getSheets().forEach((sheet) => {
@@ -310,4 +285,32 @@ export function createCommandTestBed(workbookConfig?: IWorkbookData, dependencie
         sheetId,
         sheetData,
     };
+}
+
+function registerFormulaDependencies(injector: Injector) {
+    injector.add([CalculateFormulaService]);
+    injector.add([Lexer]);
+    injector.add([LexerTreeBuilder]);
+
+    injector.add([IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }]);
+    injector.add([IFormulaRuntimeService, { useClass: FormulaRuntimeService }]);
+    injector.add([IFunctionService, { useClass: FunctionService }]);
+    injector.add([IOtherFormulaManagerService, { useClass: OtherFormulaManagerService }]);
+    injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
+    injector.add([ISuperTableService, { useClass: SuperTableService }]);
+
+    injector.add([FormulaDependencyGenerator]);
+    injector.add([Interpreter]);
+    injector.add([AstTreeBuilder]);
+
+    injector.add([AstRootNodeFactory]);
+    injector.add([FunctionNodeFactory]);
+    injector.add([LambdaNodeFactory]);
+    injector.add([LambdaParameterNodeFactory]);
+    injector.add([OperatorNodeFactory]);
+    injector.add([PrefixNodeFactory]);
+    injector.add([ReferenceNodeFactory]);
+    injector.add([SuffixNodeFactory]);
+    injector.add([UnionNodeFactory]);
+    injector.add([ValueNodeFactory]);
 }

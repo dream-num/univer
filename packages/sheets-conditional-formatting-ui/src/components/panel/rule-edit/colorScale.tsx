@@ -32,8 +32,8 @@ const createOptionItem = (text: string, localeService: LocaleService) => ({ labe
 const TextInput = (props: { id: string; type: CFValueType | 'none';value: number | string;onChange: (v: number | string) => void; className: string }) => {
     const { type, className, onChange, id, value } = props;
     const univerInstanceService = useDependency(IUniverInstanceService);
-    const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-    const subUnitId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
+    const unitId = univerInstanceService.getCurrentUniverSheetInstance()!.getUnitId();
+    const subUnitId = univerInstanceService.getCurrentUniverSheetInstance()!.getActiveSheet().getSheetId();
     const formulaInitValue = useMemo(() => {
         return String(value).startsWith('=') ? String(value) : '=';
     }, [value]);

@@ -74,7 +74,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
     private _umdToHtml = new UDMToHtmlService();
 
     constructor(
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ILogService private readonly _logService: ILogService,
         @ICommandService private readonly _commandService: ICommandService,
         @IClipboardInterfaceService private readonly _clipboardInterfaceService: IClipboardInterfaceService,
@@ -236,11 +236,10 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
 
     private _getDocumentBodyInRanges(): IDocumentBody[] {
         const ranges = this._textSelectionManagerService.getSelections();
-        const docDataModel = this._currentUniverService.getCurrentUniverDocInstance();
-
+        const doc = this._univerInstanceService.getCurrentUniverDocInstance();
         const results: IDocumentBody[] = [];
 
-        if (ranges == null) {
+        if (ranges == null || !doc) {
             return results;
         }
 
@@ -255,7 +254,7 @@ export class DocClipboardService extends Disposable implements IDocClipboardServ
                 continue;
             }
 
-            const docBody = docDataModel.sliceBody(startOffset, endOffset);
+            const docBody = doc.sliceBody(startOffset, endOffset);
             if (docBody == null) {
                 continue;
             }

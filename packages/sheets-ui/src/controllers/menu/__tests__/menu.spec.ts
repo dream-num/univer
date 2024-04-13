@@ -69,7 +69,7 @@ describe('Test menu items', () => {
         const sheetPermissionService = get(SheetPermissionService);
         const univerPermissionService = get(UniverPermissionService);
         const univerInstanceService = get(IUniverInstanceService);
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
+        const workbook = univerInstanceService.getCurrentUniverSheetInstance()!;
         const worksheet = workbook.getActiveSheet();
         const menuItem = get(Injector).invoke(BoldMenuItemFactory);
         disposableCollection.add(toDisposable(menuItem.activated$!.subscribe((v: boolean) => (activated = v))));

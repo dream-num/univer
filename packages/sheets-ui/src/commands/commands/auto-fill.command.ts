@@ -17,7 +17,7 @@
 import type { ICommand, IRange } from '@univerjs/core';
 import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
-import { SelectionManagerService, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory, SetSelectionsOperation } from '@univerjs/sheets';
+import { getSheetCommandTarget, SetRangeValuesMutation, SetRangeValuesUndoMutationFactory, SetSelectionsOperation } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
 
 import { generateNullCellValue } from '../../services/auto-fill/tools';
@@ -43,14 +43,13 @@ export const AutoClearContentCommand: ICommand = {
     type: CommandType.COMMAND,
     handler: async (accessor: IAccessor, params: IAutoClearContentCommand) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const selectionManagerService = accessor.get(SelectionManagerService);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
 
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
-        const unitId = workbook.getUnitId();
-        const worksheet = workbook.getActiveSheet();
-        const subUnitId = worksheet.getSheetId();
+        const target = getSheetCommandTarget(univerInstanceService);
+        if (!target) return false;
+
+        const { unitId, subUnitId } = target;
         const { clearRange, selectionRange } = params;
 
         const clearMutationParams: ISetRangeValuesMutationParams = {

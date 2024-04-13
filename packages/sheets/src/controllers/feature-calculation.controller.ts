@@ -31,7 +31,7 @@ export class FeatureCalculationController extends Disposable {
         @ICommandService private readonly _commandService: ICommandService,
         @IFeatureCalculationManagerService
         private readonly _featureCalculationManagerService: IFeatureCalculationManagerService,
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel
     ) {
         super();

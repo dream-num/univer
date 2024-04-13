@@ -83,7 +83,7 @@ export class StartEditController extends Disposable {
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @Inject(DocViewModelManagerService) private readonly _docViewModelManagerService: DocViewModelManagerService,
         @IContextService private readonly _contextService: IContextService,
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
         @ICellEditorManagerService private readonly _cellEditorManagerService: ICellEditorManagerService,
@@ -181,7 +181,7 @@ export class StartEditController extends Disposable {
                     documentModel!.updateDocumentDataPageSize((endX - startX) / scaleX);
                 }
 
-                this._currentUniverService.changeDoc(editorUnitId, documentModel!);
+                this._univerInstanceService.changeDoc(editorUnitId, documentModel!);
 
                 this._contextService.setContextValue(FOCUSING_EDITOR_BUT_HIDDEN, true);
 
@@ -609,7 +609,7 @@ export class StartEditController extends Disposable {
             this._textSelectionRenderManager.onInputBefore$.subscribe((config) => {
                 const isFocusFormulaEditor = this._contextService.getContextValue(FOCUSING_FORMULA_EDITOR);
                 const isFocusSheets = this._contextService.getContextValue(FOCUSING_SHEET);
-                const unitId = this._currentUniverService.getCurrentUniverDocInstance().getUnitId();
+                const unitId = this._univerInstanceService.getCurrentUniverDocInstance()!.getUnitId();
 
                 if (isFocusSheets && !isFocusFormulaEditor && this._editorService.isSheetEditor(unitId)) {
                     this._showEditorByKeyboard(config);

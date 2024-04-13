@@ -40,7 +40,7 @@ export class UniverSlidesPlugin extends Plugin {
 
     constructor(
         config: Partial<IUniverSlidesConfig> = {},
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(Injector) override readonly _injector: Injector
     ) {

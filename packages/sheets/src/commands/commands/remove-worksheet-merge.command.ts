@@ -29,6 +29,7 @@ import {
     RemoveWorksheetMergeMutation,
 } from '../mutations/remove-worksheet-merge.mutation';
 import { SetSelectionsOperation } from '../../commands/operations/selection.operation';
+import { getSheetCommandTarget } from './utils/target-util';
 
 export const RemoveWorksheetMergeCommand: ICommand = {
     type: CommandType.COMMAND,
@@ -41,18 +42,11 @@ export const RemoveWorksheetMergeCommand: ICommand = {
 
         const selections = selectionManagerService.getSelectionRanges();
         if (!selections?.length) return false;
-        const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-        const subUnitId = univerInstanceService
-            .getCurrentUniverSheetInstance()
 
-            .getActiveSheet()
-            .getSheetId();
+        const target = getSheetCommandTarget(univerInstanceService);
+        if (!target) return false;
 
-        const workbook = univerInstanceService.getUniverSheetInstance(unitId);
-        if (!workbook) return false;
-        const worksheet = workbook.getSheetBySheetId(subUnitId);
-        if (!worksheet) return false;
-
+        const { subUnitId, unitId, worksheet } = target;
         const removeMergeMutationParams: IRemoveWorksheetMergeMutationParams = {
             unitId,
             subUnitId,
@@ -78,6 +72,7 @@ export const RemoveWorksheetMergeCommand: ICommand = {
 
         const nowSelections = selectionManagerService.getSelections();
         if (!nowSelections?.length) return false;
+
         const undoSelections = Tools.deepClone(nowSelections);
         const redoSelections = Tools.deepClone(nowSelections);
         const redoLastSelection = redoSelections[redoSelections.length - 1];

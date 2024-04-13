@@ -53,7 +53,7 @@ export class SheetCanvasView extends RxDisposable {
     readonly fps$ = this._fps$.asObservable();
 
     constructor(
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ISelectionRenderService
@@ -73,11 +73,11 @@ export class SheetCanvasView extends RxDisposable {
     }
 
     private _init() {
-        this._currentUniverService.currentSheet$.subscribe((workbook) => {
+        this._univerInstanceService.currentSheet$.subscribe((workbook) => {
             this._create(workbook);
         });
 
-        this._currentUniverService.getAllUniverSheetsInstance().forEach((workbook) => {
+        this._univerInstanceService.getAllUniverSheetsInstance().forEach((workbook) => {
             this._create(workbook);
         });
     }

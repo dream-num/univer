@@ -18,6 +18,7 @@ import type { Direction, ICommand, IRange } from '@univerjs/core';
 import { CommandType, ICommandService, IUniverInstanceService, RANGE_TYPE, Rectangle, Tools } from '@univerjs/core';
 import {
     getCellAtRowCol,
+    getSheetCommandTarget,
     NORMAL_SELECTION_PLUGIN_NAME,
     SelectionManagerService,
     SetSelectionsOperation,
@@ -65,8 +66,10 @@ export const MoveSelectionCommand: ICommand<IMoveSelectionCommandParams> = {
             return false;
         }
 
-        const workbook = accessor.get(IUniverInstanceService).getCurrentUniverSheetInstance();
-        const worksheet = workbook.getActiveSheet();
+        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService));
+        if (!target) return false;
+
+        const { workbook, worksheet } = target;
         const selection = accessor.get(SelectionManagerService).getLast();
         if (!selection) {
             return false;
@@ -136,9 +139,16 @@ export const MoveSelectionEnterAndTabCommand: ICommand<IMoveSelectionEnterAndTab
             return false;
         }
 
-        const workbook = accessor.get(IUniverInstanceService).getCurrentUniverSheetInstance();
-        const worksheet = workbook.getActiveSheet();
+        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService));
+        if (!target) return false;
+
+        const { workbook, worksheet } = target;
+
         const selection = accessor.get(SelectionManagerService).getLast();
+        if (!selection) {
+            return false;
+        }
+
         const unitId = workbook.getUnitId();
         const sheetId = worksheet.getSheetId();
         if (!selection) {
@@ -276,40 +286,43 @@ export const ExpandSelectionCommand: ICommand<IExpandSelectionCommandParams> = {
             return false;
         }
 
-        const currentWorkbook = accessor.get(IUniverInstanceService).getCurrentUniverSheetInstance();
-        const currentWorksheet = currentWorkbook.getActiveSheet();
+        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService));
+        if (!target) return false;
+
+        const { worksheet, unitId, subUnitId } = target;
 
         const selection = accessor.get(SelectionManagerService).getLast();
         if (!selection) {
             return false;
         }
 
+
         const { range: startRange, primary } = selection;
         const { jumpOver, direction } = params;
 
-        const isShrink = checkIfShrink(selection, direction, currentWorksheet);
+        const isShrink = checkIfShrink(selection, direction, worksheet);
 
         const destRange = !isShrink
             ? jumpOver === JumpOver.moveGap
-                ? expandToNextGapRange(startRange, direction, currentWorksheet)
-                : expandToNextCell(startRange, direction, currentWorksheet)
+                ? expandToNextGapRange(startRange, direction, worksheet)
+                : expandToNextCell(startRange, direction, worksheet)
             : jumpOver === JumpOver.moveGap
                 ? shrinkToNextGapRange(
                     startRange,
                     // TODO: should fix on SelectionManagerService's side
                     { ...Rectangle.clone(primary), rangeType: RANGE_TYPE.NORMAL },
                     direction,
-                    currentWorksheet
+                    worksheet
                 )
-                : shrinkToNextCell(startRange, direction, currentWorksheet);
+                : shrinkToNextCell(startRange, direction, worksheet);
 
         if (Rectangle.equals(destRange, startRange)) {
             return false;
         }
 
         return accessor.get(ICommandService).executeCommand(SetSelectionsOperation.id, {
-            unitId: currentWorkbook.getUnitId(),
-            subUnitId: currentWorksheet.getSheetId(),
+            unitId,
+            subUnitId,
             pluginName: NORMAL_SELECTION_PLUGIN_NAME,
             selections: [
                 {
@@ -342,14 +355,16 @@ export const SelectAllCommand: ICommand<ISelectAllCommandParams> = {
     },
     handler: async (accessor, params = { expandToGapFirst: true, loop: false }) => {
         const selection = accessor.get(SelectionManagerService).getLast();
-        const workbook = accessor.get(IUniverInstanceService).getCurrentUniverSheetInstance();
-        const worksheet = workbook.getActiveSheet();
+        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService));
+        if (!target) return false;
+
+        const { worksheet, unitId, subUnitId } = target;
 
         if (!selection || !worksheet) {
             return false;
         }
 
-        const id = `${workbook.getUnitId()}|${worksheet.getSheetId()}`;
+        const id = `${unitId}|${subUnitId}`;
         if (id !== SELECTED_RANGE_WORKSHEET) {
             RANGES_STACK = [];
             SELECTED_RANGE_WORKSHEET = id;
@@ -399,8 +414,8 @@ export const SelectAllCommand: ICommand<ISelectAllCommandParams> = {
         }
 
         return accessor.get(ICommandService).executeCommand(SetSelectionsOperation.id, {
-            unitId: workbook.getUnitId(),
-            subUnitId: worksheet.getSheetId(),
+            unitId,
+            subUnitId,
             pluginName: NORMAL_SELECTION_PLUGIN_NAME,
             selections: [
                 {

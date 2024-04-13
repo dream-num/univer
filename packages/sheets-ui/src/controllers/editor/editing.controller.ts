@@ -32,7 +32,7 @@ import { takeUntil } from 'rxjs';
 @OnLifecycle(LifecycleStages.Rendered, EditingController)
 export class EditingController extends RxDisposable {
     constructor(
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(IUndoRedoService) private readonly _undoRedoService: IUndoRedoService
     ) {
@@ -49,7 +49,7 @@ export class EditingController extends RxDisposable {
     }
 
     private _listenEditorBlur() {
-        this._currentUniverService.currentDoc$.pipe(takeUntil(this.dispose$)).subscribe((docDataModel) => {
+        this._univerInstanceService.currentDoc$.pipe(takeUntil(this.dispose$)).subscribe((docDataModel) => {
             if (docDataModel == null) {
                 return;
             }
@@ -78,8 +78,8 @@ export class EditingController extends RxDisposable {
          * formulaEngine?.calculate(`=lambda(x,y, x*y*x)(sum(1,(1+2)*3),2)+1-max(100,200)`);
          */
         const sheetData: ISheetData = {};
-        this._currentUniverService
-            .getCurrentUniverSheetInstance()
+        this._univerInstanceService
+            .getCurrentUniverSheetInstance()!
             .getSheets()
             .forEach((sheet) => {
                 const sheetConfig = sheet.getConfig();
@@ -139,6 +139,6 @@ export class EditingController extends RxDisposable {
     private _commandExecutedListener() {}
 
     private _getDocObject() {
-        return getDocObject(this._currentUniverService, this._renderManagerService);
+        return getDocObject(this._univerInstanceService, this._renderManagerService);
     }
 }

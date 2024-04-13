@@ -87,7 +87,10 @@ export class DefinedNameDataController extends Disposable {
                 })
             )
         );
-        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
-        handleWorkbookAdd(workbook);
+
+        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
+        if (workbook) {
+            handleWorkbookAdd(workbook);
+        }
     }
 }

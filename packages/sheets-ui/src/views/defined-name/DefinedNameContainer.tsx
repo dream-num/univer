@@ -32,7 +32,7 @@ import { SCOPE_WORKBOOK_VALUE } from './component-name';
 export const DefinedNameContainer = () => {
     const commandService = useDependency(ICommandService);
     const univerInstanceService = useDependency(IUniverInstanceService);
-    const workbook = univerInstanceService.getCurrentUniverSheetInstance();
+    const workbook = univerInstanceService.getCurrentUniverSheetInstance()!;
     const localeService = useDependency(LocaleService);
     const definedNamesService = useDependency(IDefinedNamesService);
     const selectionManagerService = useDependency(SelectionManagerService);

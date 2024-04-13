@@ -46,7 +46,7 @@ export class IMEInputController extends Disposable {
 
     constructor(
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ITextSelectionRenderManager private readonly _textSelectionRenderManager: ITextSelectionRenderManager,
         @Inject(IMEInputManagerService) private readonly _imeInputManagerService: IMEInputManagerService,
         @ICommandService private readonly _commandService: ICommandService
@@ -107,7 +107,10 @@ export class IMEInputController extends Disposable {
             return;
         }
 
-        const documentModel = this._currentUniverService.getCurrentUniverDocInstance();
+        const documentModel = this._univerInstanceService.getCurrentUniverDocInstance();
+        if (!documentModel) {
+            return;
+        }
 
         const { event, activeRange } = config;
 

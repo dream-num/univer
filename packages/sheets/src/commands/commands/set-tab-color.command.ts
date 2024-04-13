@@ -20,6 +20,7 @@ import type { IAccessor } from '@wendellhu/redi';
 
 import type { ISetTabColorMutationParams } from '../mutations/set-tab-color.mutation';
 import { SetTabColorMutation, SetTabColorUndoMutationFactory } from '../mutations/set-tab-color.mutation';
+import { getSheetCommandTarget } from './utils/target-util';
 
 export interface ISetTabColorCommandParams {
     value: string;
@@ -32,20 +33,11 @@ export const SetTabColorCommand: ICommand = {
     handler: async (accessor: IAccessor, params: ISetTabColorCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
-        const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-        const subUnitId = univerInstanceService
-            .getCurrentUniverSheetInstance()
+        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService));
+        if (!target) return false;
 
-            .getActiveSheet()
-            .getSheetId();
-
-        const workbook = univerInstanceService.getUniverSheetInstance(unitId);
-        if (!workbook) return false;
-        const worksheet = workbook.getSheetBySheetId(subUnitId);
-        if (!worksheet) return false;
-
+        const { unitId, subUnitId } = target;
         const setTabColorMutationParams: ISetTabColorMutationParams = {
             color: params.value,
             unitId,

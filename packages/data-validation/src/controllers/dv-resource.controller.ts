@@ -82,7 +82,7 @@ export class DataValidationResourceController extends Disposable {
                 })
             )
         );
-        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
+        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
         handleWorkbookAdd(workbook);
     }
 }

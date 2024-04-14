@@ -22,6 +22,7 @@ import {
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
+    PermissionStatus,
     RxDisposable,
     toDisposable,
     UniverEditablePermissionPoint,
@@ -118,7 +119,7 @@ export class SheetPermissionService extends RxDisposable {
     getEditable$(unitId?: string, sheetId?: string) {
         const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
         if (!workbook) {
-            return of(false);
+            return of({ value: false, status: PermissionStatus.INIT });
         }
 
         const _unitId = unitId || workbook.getUnitId();

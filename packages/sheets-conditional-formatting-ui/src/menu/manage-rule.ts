@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-import { BlobOptions } from 'node:buffer';
 import { merge, Observable } from 'rxjs';
 import type { ComponentManager, IMenuSelectorItem } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 import { getMenuHiddenObservable, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
 import { SelectionManagerService, SetWorksheetActiveOperation } from '@univerjs/sheets';
 
-import { debounceTime, map } from 'rxjs/operators';
+import { debounceTime } from 'rxjs/operators';
 import { ICommandService, IUniverInstanceService, LocaleService, Rectangle, UniverInstanceType } from '@univerjs/core';
 import { Conditions } from '@univerjs/icons';
 import { AddConditionalRuleMutation, ConditionalFormattingRuleModel, DeleteConditionalRuleMutation, MoveConditionalRuleMutation, SetConditionalRuleMutation } from '@univerjs/sheets-conditional-formatting';

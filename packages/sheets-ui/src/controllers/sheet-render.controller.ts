@@ -17,7 +17,6 @@
 import type { ICommandInfo } from '@univerjs/core';
 import {
     CommandType,
-    Disposable,
     ICommandService,
     IContextService,
     IUniverInstanceService,

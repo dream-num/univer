@@ -57,6 +57,7 @@ export function App(props: IUniverAppProps) {
         if (contentRef.current) {
             onRendered?.(contentRef.current);
         }
+        // TODO@wzhudev: this is problem matic, we cannot register renderer once the component is mounted.
     }, [onRendered]);
 
     const [locale, setLocale] = useState<ILocale>(localeService.getLocales() as unknown as ILocale);

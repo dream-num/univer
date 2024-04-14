@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { Disposable, LifecycleService, LifecycleStages, toDisposable } from '@univerjs/core';
+import type { Nullable } from '@univerjs/core';
+import { LifecycleService, LifecycleStages, RxDisposable, toDisposable } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject, Injector, Optional } from '@wendellhu/redi';
@@ -23,7 +24,7 @@ import { render as createRoot, unmount } from 'rc-util/lib/React/render';
 import type { ComponentType } from 'react';
 import React from 'react';
 import type { Observable } from 'rxjs';
-import { Subject } from 'rxjs';
+import { Subject, takeUntil } from 'rxjs';
 
 import { ILayoutService } from '../../services/layout/layout.service';
 import { App } from '../../views/App';
@@ -47,8 +48,9 @@ export interface IDesktopUIController extends IUIController {
 
 const STEADY_TIMEOUT = 3000;
 
-export class DesktopUIController extends Disposable implements IDesktopUIController {
+export class DesktopUIController extends RxDisposable implements IDesktopUIController {
     private _componentsByPart: Map<DesktopUIPart, Set<() => ComponentType>> = new Map();
+    private _canvasContainerElement: Nullable<HTMLElement> = null;
 
     private readonly _componentRegistered$ = new Subject<void>();
     readonly componentRegistered$ = this._componentRegistered$.asObservable();
@@ -60,17 +62,25 @@ export class DesktopUIController extends Disposable implements IDesktopUIControl
         @Optional(ILayoutService) private readonly _layoutService?: ILayoutService
     ) {
         super();
+
+        this._renderManagerService.createRender$.pipe(takeUntil(this.dispose$)).subscribe((renderer) => {
+            if (!this._canvasContainerElement || !renderer) {
+                return;
+            }
+
+            this._renderManagerService.getRenderById(renderer)!.engine.setContainer(this._canvasContainerElement as HTMLCanvasElement);
+        });
     }
 
     bootstrapWorkbench(options: IWorkbenchOptions): void {
         this.disposeWithMe(
-            bootStrap(this._injector, options, (canvasElement, containerElement) => {
-                this._initializeEngine(canvasElement);
+            bootStrap(this._injector, options, (canvasContainerElement, containerElement) => {
+                this._initCanvasContainer(canvasContainerElement);
                 this._lifecycleService.stage = LifecycleStages.Rendered;
 
                 if (this._layoutService) {
                     this.disposeWithMe(this._layoutService.registerRootContainerElement(containerElement));
-                    this.disposeWithMe(this._layoutService.registerCanvasElement(canvasElement as HTMLCanvasElement));
+                    this.disposeWithMe(this._layoutService.registerCanvasElement(canvasContainerElement as HTMLCanvasElement));
                 }
 
                 setTimeout(() => (this._lifecycleService.stage = LifecycleStages.Steady), STEADY_TIMEOUT);
@@ -98,9 +108,11 @@ export class DesktopUIController extends Disposable implements IDesktopUIControl
         return new Set([...(this._componentsByPart.get(part) || new Set())]);
     }
 
-    private _initializeEngine(element: HTMLElement) {
-        const engine = this._renderManagerService.getFirst()?.engine;
-        engine?.setContainer(element);
+    private _initCanvasContainer(element: HTMLElement) {
+        this._canvasContainerElement = element;
+
+        // Get first is pretty hack.
+        this._renderManagerService.getFirst()?.engine.setContainer(element as HTMLCanvasElement);
     }
 }
 

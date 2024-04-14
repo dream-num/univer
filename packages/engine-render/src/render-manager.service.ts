@@ -115,14 +115,17 @@ export class RenderManagerService implements IRenderManagerService {
         return this._createRender(unitId, engine, false);
     }
 
+    // WTF: this method only emit events but not create render?
     create(unitId: Nullable<string>) {
         this._createRender$.next(unitId);
     }
 
     createRender(unitId: string): IRender {
         const engine = new Engine();
+        const render = this._createRender(unitId, engine);
 
-        return this._createRender(unitId, engine);
+        this.create(unitId);
+        return render;
     }
 
     private _createRender(unitId: string, engine: Engine, isMainScene: boolean = true): IRender {

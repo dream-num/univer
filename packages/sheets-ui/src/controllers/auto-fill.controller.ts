@@ -358,11 +358,12 @@ export class AutoFillController extends Disposable {
         const {
             source,
             target,
-            unitId = this._univerInstanceService.getCurrentUniverSheetInstance()!.getUnitId(),
-            subUnitId = this._univerInstanceService.getCurrentUniverSheetInstance()!.getActiveSheet().getSheetId(),
+            unitId = this._univerInstanceService.getCurrentUniverSheetInstance()?.getUnitId(),
+            subUnitId = this._univerInstanceService.getCurrentUniverSheetInstance()?.getActiveSheet().getSheetId(),
         } = this._autoFillService.autoFillLocation || {};
+
         const direction = this._autoFillService.direction;
-        if (!source || !target) {
+        if (!source || !target || !unitId || !subUnitId) {
             return;
         }
 

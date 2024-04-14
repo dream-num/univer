@@ -1102,7 +1102,7 @@ export function ShowRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 
 
             const disposable = commandService.onCommandExecuted((command) => {
-                if (affectedCommands.findIndex((c) => c === command.id)) subscriber.next(!hasHiddenRowsInSelections());
+                if (affectedCommands.findIndex((c) => c === command.id) !== -1) subscriber.next(!hasHiddenRowsInSelections());
             });
 
             // it only shows when selected area has hidden rows

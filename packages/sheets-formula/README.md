@@ -25,10 +25,11 @@ npm install @univerjs/sheets-formula
 pnpm add @univerjs/sheets-formula
 ```
 
-### Add formula preconditions
+### How to customize formulas
 
 If the officially provided formula does not meet your needs, you can expand the formula yourself. Depending on different needs, we provide multiple ways to support registering one or more custom formulas.
 
+<<<<<<< HEAD
 You need to first prepare the international copywriting and algorithms required for formula prompts, and then refer to our [Contribution Guide](https://github.com/dream-num/univer/blob/dev/CONTRIBUTING.md) to run the Univer project , and then start adding formulas.
 
 ### How to add formulas using Uniscript
@@ -818,3 +819,7 @@ To implement a formula, you need to add formula description, internationalizatio
 
 1. `ValueObjectFactory` is used to automatically recognize parameter formats and create a parameter instance. Use `RangeReferenceObject` to create parameter instances for range-type data.
 2. The array `toArrayValueObject` can be operated directly with values to get a new array.
+=======
+- [Register formula using Facade API](https://univer.ai/guides/facade/general/#register-formula)
+- [Configure custom formulas through plugin](https://univer.ai/guides/customization/formula/)
+>>>>>>> b875eb265 (docs(formula): move formula docs to univer.ai)

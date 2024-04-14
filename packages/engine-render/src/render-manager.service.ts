@@ -35,7 +35,7 @@ export interface IRenderManagerService {
     createRenderWithParent(unitId: string, parentUnitId: string): IRender;
     createRender(unitId: string): IRender;
     addItem(unitId: string, item: IRender): void;
-    removeItem(unitId: string): void;
+    removeRender(unitId: string): void;
     setCurrent(unitId: string): void;
     getRenderById(unitId: string): Nullable<IRender>;
     getRenderAll(): Map<string, IRender>;
@@ -163,7 +163,7 @@ export class RenderManagerService implements IRenderManagerService {
         this._renderMap.set(unitId, item);
     }
 
-    removeItem(unitId: string) {
+    removeRender(unitId: string) {
         const item = this._renderMap.get(unitId);
         if (item != null) {
             this._disposeItem(item);

@@ -85,7 +85,9 @@ export class ListMultipleValidator extends BaseDataValidator {
     getList(rule: IDataValidationRule, propUnitId?: string, propSubUnitId?: string) {
         const { formula1 = '' } = rule;
         const univerInstanceService = this.injector.get(IUniverInstanceService);
-        const workbook = (propUnitId ? univerInstanceService.getUniverSheetInstance(propUnitId) : undefined) ?? univerInstanceService.getCurrentUniverSheetInstance()!;
+        const workbook = (propUnitId ? univerInstanceService.getUniverSheetInstance(propUnitId) : undefined) ?? univerInstanceService.getCurrentUniverSheetInstance();
+        if (!workbook) return [];
+
         const worksheet = (propSubUnitId ? workbook.getSheetBySheetId(propSubUnitId) : undefined) ?? workbook.getActiveSheet();
         const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();

@@ -17,12 +17,12 @@
 import type { ICommandInfo } from '@univerjs/core';
 import {
     CommandType,
-    Disposable,
     ICommandService,
     IContextService,
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
+    RxDisposable,
 } from '@univerjs/core';
 import type { Rect, SpreadsheetColumnHeader, SpreadsheetRowHeader } from '@univerjs/engine-render';
 import { IRenderManagerService, RENDER_RAW_FORMULA_KEY, Spreadsheet } from '@univerjs/engine-render';
@@ -33,7 +33,7 @@ import {
 } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
-import { distinctUntilChanged } from 'rxjs';
+import { distinctUntilChanged, takeUntil } from 'rxjs';
 import { SHEET_VIEW_KEY } from '../common/keys';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
@@ -42,8 +42,11 @@ interface ISetWorksheetMutationParams {
     subUnitId: string;
 }
 
+/**
+ * @todo RenderUnit. This should be merged with `SheetCanvasView`.
+ */
 @OnLifecycle(LifecycleStages.Ready, SheetRenderController)
-export class SheetRenderController extends Disposable {
+export class SheetRenderController extends RxDisposable {
     constructor(
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @IContextService private readonly _contextService: IContextService,
@@ -58,6 +61,7 @@ export class SheetRenderController extends Disposable {
 
     private _init() {
         this._initialRenderRefresh();
+        this._initSheetDisposeListener();
         this._initCommandListener();
         this._initContextListener();
     }
@@ -65,33 +69,21 @@ export class SheetRenderController extends Disposable {
     private _initialRenderRefresh(): void {
         this.disposeWithMe(
             this._sheetSkeletonManagerService.currentSkeleton$.subscribe((param) => {
-                if (param == null) {
-                    return;
-                }
+                if (!param) return null;
 
                 const { skeleton: spreadsheetSkeleton, unitId, sheetId } = param;
-
                 const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
-
                 const worksheet = workbook?.getSheetBySheetId(sheetId);
-
-                if (workbook == null || worksheet == null) {
-                    return;
-                }
+                if (workbook == null || worksheet == null) return;
 
                 const currentRender = this._renderManagerService.getRenderById(unitId);
-
-                if (currentRender == null) {
-                    return;
-                }
+                if (currentRender == null) return;
 
                 const { mainComponent, components } = currentRender;
-
                 const spreadsheet = mainComponent as Spreadsheet;
                 const spreadsheetRowHeader = components.get(SHEET_VIEW_KEY.ROW) as SpreadsheetRowHeader;
                 const spreadsheetColumnHeader = components.get(SHEET_VIEW_KEY.COLUMN) as SpreadsheetColumnHeader;
                 const spreadsheetLeftTopPlaceholder = components.get(SHEET_VIEW_KEY.LEFT_TOP) as Rect;
-
                 const { rowHeaderWidth, columnHeaderHeight } = spreadsheetSkeleton;
 
                 spreadsheet?.updateSkeleton(spreadsheetSkeleton);
@@ -105,17 +97,29 @@ export class SheetRenderController extends Disposable {
         );
     }
 
+    private _initSheetDisposeListener(): void {
+        this._univerInstanceService.sheetDisposed$
+            .pipe(takeUntil(this.dispose$))
+            .subscribe((workbook) => {
+                const unitId = workbook.getUnitId();
+
+                this._sheetSkeletonManagerService.removeSkeleton({ unitId });
+            });
+    }
+
     private _initCommandListener(): void {
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
-                const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
-                const unitId = workbook.getUnitId();
+                const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
+                if (!workbook) return;
 
+                const unitId = workbook.getUnitId();
                 if (COMMAND_LISTENER_SKELETON_CHANGE.includes(command.id)) {
                     const worksheet = workbook.getActiveSheet();
                     const sheetId = worksheet.getSheetId();
                     const params = command.params;
                     const { unitId, subUnitId } = params as ISetWorksheetMutationParams;
+
                     if (!(unitId === workbook.getUnitId() && subUnitId === worksheet.getSheetId())) {
                         return;
                     }
@@ -150,14 +154,15 @@ export class SheetRenderController extends Disposable {
     }
 
     private _initContextListener(): void {
-        this._contextService.subscribeContextValue$(RENDER_RAW_FORMULA_KEY).pipe(
-            distinctUntilChanged()
-        ).subscribe(() => {
-            this._renderManagerService.getRenderAll().forEach((renderer) => {
-                if (renderer.mainComponent instanceof Spreadsheet) {
-                    renderer.mainComponent.makeForceDirty(true);
-                }
+        // If we toggle the raw formula, we need to refresh all spreadsheets.
+        this._contextService.subscribeContextValue$(RENDER_RAW_FORMULA_KEY)
+            .pipe(distinctUntilChanged(), takeUntil(this.dispose$))
+            .subscribe(() => {
+                this._renderManagerService.getRenderAll().forEach((renderer) => {
+                    if (renderer.mainComponent instanceof Spreadsheet) {
+                        renderer.mainComponent.makeForceDirty(true);
+                    }
+                });
             });
-        });
     }
 }

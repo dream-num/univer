@@ -21,6 +21,9 @@ import { IRenderManagerService, Vector2 } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
+/**
+ * @todo RenderUnit
+ */
 @OnLifecycle(LifecycleStages.Rendered, CellCustomRenderController)
 export class CellCustomRenderController extends Disposable {
     private _enterActiveRender: Nullable<{
@@ -46,8 +49,6 @@ export class CellCustomRenderController extends Disposable {
 
                 const currentRender = this._renderManagerService.getRenderById(workbook.getUnitId());
                 if (currentRender && currentRender.mainComponent) {
-                    disposableCollection.dispose();
-
                     const spreadsheet = currentRender.mainComponent as Spreadsheet;
                     const getActiveRender = (evt: IPointerEvent | IMouseEvent) => {
                         const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton!;
@@ -159,6 +160,8 @@ export class CellCustomRenderController extends Disposable {
                     moveDisposable && disposableCollection.add(moveDisposable);
                 }
             }
+
+            disposableCollection.dispose();
         });
 
         this.disposeWithMe(disposableCollection);

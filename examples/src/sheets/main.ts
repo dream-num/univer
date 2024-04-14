@@ -90,6 +90,11 @@ univer.registerPlugin(UniverSheetsFindReplacePlugin);
 // create univer sheet instance
 univer.createUniverSheet(DEFAULT_WORKBOOK_DATA_DEMO);
 
+// Uncomment the following lines to test if the document is disposed correctly without memory leaks.
+// setTimeout(() => {
+//     univer.__getInjector().get(IUniverInstanceService).disposeDocument(DEFAULT_WORKBOOK_DATA_DEMO.id);
+// }, 5000);
+
 // sheet condition formatting
 univer.registerPlugin(UniverSheetsConditionalFormattingUIPlugin);
 

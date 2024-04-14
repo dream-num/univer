@@ -29,7 +29,8 @@ import {
     SetWorksheetShowCommand,
 } from '@univerjs/sheets';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useObservable } from '@univerjs/ui';
 
 import { ISheetBarService } from '../../../services/sheet-bar/sheet-bar.service';
 import { SheetBarButton } from '../sheet-bar-button/SheetBarButton';
@@ -56,11 +57,11 @@ export function SheetBarMenu(props: ISheetBarMenuProps) {
     const univerInstanceService = useDependency(IUniverInstanceService);
     const commandService = useDependency(ICommandService);
     const sheetBarService = useDependency(ISheetBarService);
-    const workbook = univerInstanceService.getCurrentUniverSheetInstance()!;
+    const workbook = useObservable(univerInstanceService.currentSheet$);
 
     const handleClick = (item: ISheetBarMenuItem) => {
         const { sheetId } = item;
-        if (!sheetId) return;
+        if (!sheetId || !workbook) return;
 
         if (item.hidden) {
             commandService.executeCommand(SetWorksheetShowCommand.id, {
@@ -76,25 +77,23 @@ export function SheetBarMenu(props: ISheetBarMenuProps) {
         setVisible(false);
     };
 
-    useEffect(() => {
-        statusInit();
+    const statusInit = useCallback(() => {
+        if (!workbook) return;
 
-        const _disposables = new DisposableCollection();
+        const sheets = workbook.getSheets();
+        const activeSheet = workbook.getActiveSheet();
+        const worksheetMenuItems = sheets.map((sheet, index) => ({
+            label: sheet.getName(),
+            index: `${index}`,
+            sheetId: sheet.getSheetId(),
+            hidden: sheet.isSheetHidden() === BooleanNumber.TRUE,
+            selected: activeSheet === sheet,
+        }));
 
-        _disposables.add(setupStatusUpdate());
-        _disposables.add(
-            sheetBarService.registerSheetBarMenuHandler({
-                handleSheetBarMenu,
-            })
-        );
+        setMenu(worksheetMenuItems);
+    }, [workbook]);
 
-        return () => {
-            // Clean up disposable when the component unmounts
-            _disposables.dispose();
-        };
-    }, []);
-
-    const setupStatusUpdate = () =>
+    const setupStatusUpdate = useCallback(() =>
         commandService.onCommandExecuted((commandInfo: ICommandInfo) => {
             switch (commandInfo.id) {
                 case SetWorksheetHideMutation.id:
@@ -108,21 +107,7 @@ export function SheetBarMenu(props: ISheetBarMenuProps) {
                 default:
                     break;
             }
-        });
-
-    const statusInit = () => {
-        const sheets = workbook.getSheets();
-        const activeSheet = workbook.getActiveSheet();
-        const worksheetMenuItems = sheets.map((sheet, index) => ({
-            label: sheet.getName(),
-            index: `${index}`,
-            sheetId: sheet.getSheetId(),
-            hidden: sheet.isSheetHidden() === BooleanNumber.TRUE,
-            selected: activeSheet === sheet,
-        }));
-
-        setMenu(worksheetMenuItems);
-    };
+        }), [commandService, statusInit]);
 
     function handleSheetBarMenu() {
         setVisible(true);
@@ -131,6 +116,16 @@ export function SheetBarMenu(props: ISheetBarMenuProps) {
     const onVisibleChange = (visible: boolean) => {
         setVisible(visible);
     };
+
+    useEffect(() => {
+        statusInit();
+
+        const disposables = new DisposableCollection();
+        disposables.add(setupStatusUpdate());
+        disposables.add(sheetBarService.registerSheetBarMenuHandler({ handleSheetBarMenu }));
+
+        return () => disposables.dispose();
+    }, [setupStatusUpdate, sheetBarService, statusInit, workbook]);
 
     return (
         <Dropdown
@@ -150,16 +145,10 @@ export function SheetBarMenu(props: ISheetBarMenuProps) {
                         >
                             <span className={styles.sheetBarMenuItemIcon}>
                                 {item.selected
-                                    ? (
-                                        <CheckMarkSingle />
-                                    )
+                                    ? <CheckMarkSingle />
                                     : item.hidden
-                                        ? (
-                                            <EyelashSingle />
-                                        )
-                                        : (
-                                            <CheckMarkSingle />
-                                        )}
+                                        ? <EyelashSingle />
+                                        : <CheckMarkSingle />}
                             </span>
                             <span className={styles.sheetBarMenuItemLabel}>{item.label}</span>
                         </li>

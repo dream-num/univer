@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { IUniverInstanceService, LocaleType, LogLevel, Univer } from '@univerjs/core';
+import { LocaleType, LogLevel, Univer } from '@univerjs/core';
 import { defaultTheme } from '@univerjs/design';
 import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
@@ -90,9 +90,10 @@ univer.registerPlugin(UniverSheetsFindReplacePlugin);
 // create univer sheet instance
 univer.createUniverSheet(DEFAULT_WORKBOOK_DATA_DEMO);
 
-setTimeout(() => {
-    univer.__getInjector().get(IUniverInstanceService).disposeDocument(DEFAULT_WORKBOOK_DATA_DEMO.id);
-}, 5000);
+// Uncomment the following lines to test if the document is disposed correctly without memory leaks.
+// setTimeout(() => {
+//     univer.__getInjector().get(IUniverInstanceService).disposeDocument(DEFAULT_WORKBOOK_DATA_DEMO.id);
+// }, 5000);
 
 // sheet condition formatting
 univer.registerPlugin(UniverSheetsConditionalFormattingUIPlugin);

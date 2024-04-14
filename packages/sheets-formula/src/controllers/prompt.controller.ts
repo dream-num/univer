@@ -1772,6 +1772,19 @@ export class PromptController extends Disposable {
                         return;
                     }
 
+                    if (keycode === KeyCode.ESC) {
+                        const focusEditor = this._editorService.getFocusEditor();
+                        if (focusEditor && focusEditor.isSheetEditor() === true) {
+                            this._editorBridgeService.changeVisible({
+                                visible: false,
+                                eventType: DeviceInputEventType.Keyboard,
+                                keycode,
+                            });
+                            this._selectionManagerService.refreshSelection();
+                        }
+                        return;
+                    }
+
                     if (this._formulaPromptService.isSearching()) {
                         if (keycode === KeyCode.ARROW_DOWN) {
                             this._formulaPromptService.navigate({ direction: Direction.DOWN });

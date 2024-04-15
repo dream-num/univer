@@ -59,8 +59,6 @@ export class SetOtherFormulaController extends Disposable {
                     params.formulaIdList.forEach((id) => obj[id] = true);
                     const config = { [params.unitId]: { [params.subUnitId]: obj } };
                     this._otherFormulaManagerService.batchRemove(config);
-
-                    this._dependencyManagerService.removeOtherFormulaDependency(params.unitId, params.subUnitId, params.formulaIdList);
                 }
             })
         );

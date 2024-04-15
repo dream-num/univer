@@ -24,7 +24,7 @@ export interface IFormulaIdMap {
     c: number;
 }
 
-export function updateFormulaDataByCellValue(sheetFormulaDataMatrix: ObjectMatrix<IFormulaDataItem>, newSheetFormulaDataMatrix: ObjectMatrix<IFormulaDataItem | null>, formulaIdMap: Map<string, IFormulaIdMap>, deleteFormulaIdMap: Map<string, string | IFormulaIdMap>, r: number, c: number, cell: Nullable<ICellData>) {
+export function updateFormulaDataByCellValue(sheetFormulaDataMatrix: ObjectMatrix<Nullable<IFormulaDataItem>>, newSheetFormulaDataMatrix: ObjectMatrix<IFormulaDataItem | null>, formulaIdMap: Map<string, IFormulaIdMap>, deleteFormulaIdMap: Map<string, string | IFormulaIdMap>, r: number, c: number, cell: Nullable<ICellData>) {
     const formulaString = cell?.f || '';
     const formulaId = cell?.si || '';
 

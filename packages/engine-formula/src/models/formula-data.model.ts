@@ -380,7 +380,7 @@ export class FormulaDataModel extends Disposable {
             workbookFormulaData[sheetId] = {};
         }
 
-        const sheetFormulaDataMatrix = new ObjectMatrix<IFormulaDataItem>(workbookFormulaData[sheetId]);
+        const sheetFormulaDataMatrix = new ObjectMatrix<Nullable<IFormulaDataItem>>(workbookFormulaData[sheetId]);
         const newSheetFormulaDataMatrix = new ObjectMatrix<IFormulaDataItem | null>();
 
         cellMatrix.forValue((r, c, cell) => {
@@ -404,8 +404,8 @@ export class FormulaDataModel extends Disposable {
                     sheetFormulaDataMatrix.setValue(r, c, { f, si: formulaId, x, y });
                     newSheetFormulaDataMatrix.setValue(r, c, { f, si: formulaId, x, y });
                 } else if (typeof deleteFormula === 'string') {
-                    const x = cell.x || 0;
-                    const y = cell.y || 0;
+                    const x = cell?.x || 0;
+                    const y = cell?.y || 0;
                     const offsetFormula = this._lexerTreeBuilder.moveFormulaRefOffset(deleteFormula, x, y);
 
                     deleteFormulaIdMap.set(formulaId, {
@@ -540,6 +540,9 @@ export class FormulaDataModel extends Disposable {
         let formulaDataItem: Nullable<IFormulaDataItem> = null;
 
         cellMatrix.forValue((row, column, item) => {
+            if (item == null) {
+                return true;
+            }
             const { f, si, x = 0, y = 0 } = item;
 
             if (si === sId && f.length > 0 && x === 0 && y === 0) {

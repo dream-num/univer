@@ -22,8 +22,8 @@ import {
 } from '../commands/mutations/set-feature-calculation.mutation';
 import { IFeatureCalculationManagerService } from '../services/feature-calculation-manager.service';
 import { IDependencyManagerService } from '../services/dependency-manager.service';
+import type { IRemoveOtherFormulaMutationParams } from '../commands/mutations/set-other-formula.mutation';
 import { RemoveOtherFormulaMutation } from '../commands/mutations/set-other-formula.mutation';
-import type { IOtherFormulaManagerSearchParam } from '../services/other-formula-manager.service';
 
 @OnLifecycle(LifecycleStages.Ready, SetDependencyController)
 export class SetDependencyController extends Disposable {
@@ -52,12 +52,12 @@ export class SetDependencyController extends Disposable {
                     const { featureId } = params;
                     this._dependencyManagerService.removeFeatureFormulaDependency(featureId);
                 } else if (command.id === RemoveOtherFormulaMutation.id) {
-                    const params = command.params as IOtherFormulaManagerSearchParam;
+                    const params = command.params as IRemoveOtherFormulaMutationParams;
                     if (params == null) {
                         return;
                     }
 
-                    this._dependencyManagerService.removeOtherFormulaDependency(params.unitId, params.subUnitId, params.formulaId);
+                    this._dependencyManagerService.removeOtherFormulaDependency(params.unitId, params.subUnitId, params.formulaIdList);
                 }
             })
         );

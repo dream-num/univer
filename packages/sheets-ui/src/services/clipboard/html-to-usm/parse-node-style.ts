@@ -90,7 +90,7 @@ function parseStyleByProperty(styles: CSSStyleDeclaration, docStyles: ITextStyle
             }
             case 'font-weight': {
                 const MIDDLE_FONT_WEIGHT = 400;
-                if (Number(cssValue) > MIDDLE_FONT_WEIGHT || cssValue) {
+                if (Number(cssValue) > MIDDLE_FONT_WEIGHT || cssValue === 'bold') {
                     docStyles.bl = BooleanNumber.TRUE;
                 }
                 break;

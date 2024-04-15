@@ -176,6 +176,7 @@ describe('Test clipboard', () => {
                 { ed: 1, st: 0, ts: { fs: 9.75, ff: 'Arial' } },
                 {
                     st: 1, ed: 4, ts: {
+                        bl: 1,
                         cl:
                             { rgb: 'rgb(217,210,233)' },
                         ff: 'Arial', fs: 17.25, it: 1,

@@ -15,7 +15,7 @@
  */
 
 import type { ISheetDataValidationRule } from '@univerjs/core';
-import { Disposable, IResourceManagerService, IUniverInstanceService, LifecycleService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { Disposable, IResourceManagerService, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 import { UniverType } from '@univerjs/protocol';
 import { DataValidationModel } from '../models/data-validation-model';
@@ -29,8 +29,7 @@ export class DataValidationResourceController extends Disposable {
     constructor(
         @IResourceManagerService private readonly _resourceManagerService: IResourceManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(DataValidationModel) private readonly _dataValidationModel: DataValidationModel,
-        @Inject(LifecycleService) private _lifecycleService: LifecycleService
+        @Inject(DataValidationModel) private readonly _dataValidationModel: DataValidationModel
     ) {
         super();
         this._initSnapshot();

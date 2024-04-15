@@ -157,7 +157,7 @@ describe('Test clipboard', () => {
             expect(worksheet.getMergeData().length).toBe(3);
             expect(getValues(2, 2, 2, 2)?.[0]?.[0]?.v).toEqual('Univer');
             expect(getStyles(2, 2, 2, 2)?.[0]?.[0]).toStrictEqual({
-                bl: 1, cl: { rgb: 'black' }, ff: '等线', fs: 12, ht: 0, it: 1, vt: 2,
+                bl: 1, cl: { rgb: 'black' }, ff: '等线', fs: 12, ht: 0, it: 1, vt: 2, tb: 1,
             });
         });
 

@@ -403,11 +403,9 @@ export function handleStyleToString(style: IStyleData, isCell: boolean = false) 
             'tb',
             () => {
                 if (style.tb === WrapStrategy.CLIP) {
-                    str += 'text-overflow: clip; ';
-                } else if (style.tb === WrapStrategy.OVERFLOW) {
-                    str += 'text-break: overflow; ';
+                    str += 'white-space: clip; ';
                 } else if (style.tb === WrapStrategy.WRAP) {
-                    str += 'word-wrap: break-word;';
+                    str += 'white-space: normal;';
                 }
             },
         ],

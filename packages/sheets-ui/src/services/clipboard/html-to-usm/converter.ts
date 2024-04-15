@@ -51,6 +51,8 @@ const sheetStyleRules: string[] =
         'font-style_fontStyle',
         'font-family_fontFamily',
         'text-decoration_textDecoration',
+        'white-space_whiteSpace',
+        'word-wrap_wordWrap',
     ];
 
 const borderRules: string[] =
@@ -227,8 +229,24 @@ export class HtmlToUSMService {
         const parsedCellMatrix = parseTableByHtml(this.htmlElement, this.getCurrentSkeleton()?.skeleton);
         parsedCellMatrix &&
             parsedCellMatrix.forValue((row, col, value) => {
-                const style = handleStringToStyle(undefined, value.style);
-                const cellValue = value?.richTextParma?.p
+                let style = handleStringToStyle(undefined, value.style);
+                if (value?.richTextParma?.p?.body?.textRuns?.length) {
+                    const textLen = value?.richTextParma?.v?.length;
+                    for (let i = 0; i < value?.richTextParma?.p?.body?.textRuns?.length; i++) {
+                        const textRunItem = value?.richTextParma?.p?.body?.textRuns[i];
+                        if (textRunItem.st === 0 && textRunItem.ed === textLen) {
+                            style = { ...textRunItem.ts, ...style };
+                            value?.richTextParma?.p?.body?.textRuns.splice(i, 1);
+                            i--;
+                        }
+                    }
+                    if (value?.richTextParma?.p?.body?.textRuns?.length === 0) {
+                        value.content = value?.richTextParma?.v;
+                        delete value.richTextParma;
+                    }
+                }
+
+                const cellValue = value?.richTextParma?.p?.body?.textRuns
                     ? {
                         v: value.richTextParma.v,
                         p: value.richTextParma.p,
@@ -389,12 +407,16 @@ function parseProperties(propertyStr: string): IClipboardPropertyItem {
 function parseColGroup(raw: string): IClipboardPropertyItem[] | null {
     const COLGROUP_TAG_REGEX = /<colgroup([\s\S]*?)>(.*?)<\/colgroup>/;
     const colgroupMatch = raw.match(COLGROUP_TAG_REGEX);
-    if (!colgroupMatch || !colgroupMatch[2]) {
-        return null;
-    }
+
 
     const COL_TAG_REGEX = /<col([\s\S]*?)>/g;
-    const colMatches = colgroupMatch[2].matchAll(COL_TAG_REGEX);
+    let colMatches;
+    if (colgroupMatch?.[2]) {
+        colMatches = colgroupMatch[2].matchAll(COL_TAG_REGEX);
+    } else {
+        colMatches = raw.matchAll(COL_TAG_REGEX);
+    }
+
     if (!colMatches) {
         return null;
     }

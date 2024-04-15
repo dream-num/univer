@@ -16,6 +16,7 @@
 
 import type { ITextStyle } from '@univerjs/core';
 import { BaselineOffset, BooleanNumber, ColorKit } from '@univerjs/core';
+import { DEFAULT_BACKGROUND_COLOR_RGB, DEFAULT_BACKGROUND_COLOR_RGBA } from '@univerjs/ui';
 
 export function extractNodeStyle(node: HTMLElement, predefinedStyles?: CSSStyleDeclaration): ITextStyle {
     const styles = predefinedStyles ?? node.style;
@@ -60,6 +61,8 @@ export function extractNodeStyle(node: HTMLElement, predefinedStyles?: CSSStyleD
     return docStyles;
 }
 
+
+// eslint-disable-next-line complexity
 function parseStyleByProperty(styles: CSSStyleDeclaration, docStyles: ITextStyle) {
     for (let i = 0; i < styles.length; i++) {
         const cssRule = styles[i];
@@ -123,7 +126,8 @@ function parseStyleByProperty(styles: CSSStyleDeclaration, docStyles: ITextStyle
             }
             case 'background-color': {
                 const color = new ColorKit(cssValue);
-                if (color.isValid) {
+                const bgColor = color.isValid ? color.toRgbString() : '';
+                if (bgColor !== DEFAULT_BACKGROUND_COLOR_RGB || bgColor !== DEFAULT_BACKGROUND_COLOR_RGBA) {
                     docStyles.bg = {
                         rgb: color.toRgbString(),
                     };

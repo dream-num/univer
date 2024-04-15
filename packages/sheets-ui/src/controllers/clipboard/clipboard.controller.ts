@@ -64,7 +64,7 @@ import {
 import { IClipboardInterfaceService, IMessageService, textTrim } from '@univerjs/ui';
 import { Inject, Injector, Optional } from '@wendellhu/redi';
 
-import { ITextSelectionRenderManager } from '@univerjs/engine-render';
+import { ITextSelectionRenderManager, ptToPx } from '@univerjs/engine-render';
 import { takeUntil } from 'rxjs';
 import {
     SheetCopyCommand,
@@ -317,7 +317,11 @@ export class SheetClipboardController extends RxDisposable {
                                 const key = textTrim(css.substr(0, css.indexOf(':')));
                                 const value = textTrim(css.substr(css.indexOf(':') + 1));
                                 if (key === 'height') {
-                                    height = Number.parseFloat(value);
+                                    if (value.endsWith('pt')) {
+                                        height = ptToPx(Number.parseFloat(value));
+                                    } else {
+                                        height = Number.parseFloat(value);
+                                    }
                                     return true;
                                 }
                                 return false;
@@ -362,7 +366,11 @@ export class SheetClipboardController extends RxDisposable {
                             const key = textTrim(css.substr(0, css.indexOf(':')));
                             const value = textTrim(css.substr(css.indexOf(':') + 1));
                             if (key === 'height') {
-                                height = Number.parseFloat(value);
+                                if (value.endsWith('pt')) {
+                                    height = ptToPx(Number.parseFloat(value));
+                                } else {
+                                    height = Number.parseFloat(value);
+                                }
                                 return true;
                             }
                             return false;

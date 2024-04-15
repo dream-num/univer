@@ -160,7 +160,7 @@ describe('Test clipboard', () => {
             expect(getStyles(cellData.getValue(3, 1)?.s)?.ul?.s).toBe(1);
             // font line-through
             expect(cellData.getValue(4, 1)?.v).toBe('S');
-            expect(cellData.getValue(4, 1)?.p?.body?.textRuns?.[0].ts?.st?.s).toBe(1);
+            expect(getStyles(cellData.getValue(4, 1)?.s)?.st?.s).toBe(1);
 
             // font-size
             expect(cellData.getValue(6, 1)?.v).toBe('font-size:12');

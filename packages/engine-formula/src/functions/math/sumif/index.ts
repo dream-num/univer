@@ -21,12 +21,11 @@ import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-ob
 import { BaseFunction } from '../../base-function';
 
 export class Sumif extends BaseFunction {
-    override calculate(range: BaseValueObject, criteria: BaseValueObject, sumRange?: BaseValueObject) {
-        // Check the number of parameters
-        if (arguments.length < 2 || arguments.length > 3) {
-            return ErrorValueObject.create(ErrorType.NA);
-        }
+    override minParams = 2;
 
+    override maxParams = 3;
+
+    override calculate(range: BaseValueObject, criteria: BaseValueObject, sumRange?: BaseValueObject) {
         if (range.isError() || criteria.isError() || sumRange?.isError()) {
             return ErrorValueObject.create(ErrorType.NA);
         }

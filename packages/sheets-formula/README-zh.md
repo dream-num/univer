@@ -30,5 +30,5 @@ pnpm add @univerjs/sheets-formula
 如果官方提供的公式不满足您的需求，可以自己扩展公式。根据不同的需求，我们提供了多种方式来支持注册一个或多个自定义公式。
 
 - [使用 Facade API 注册公式](https://univer.ai/zh-cn/guides/facade/general/#注册公式)
-- [通过插件配置自定义公式](https://univer.ai/zh-cn/guides/customization/formula/)
+- [自定义公式](https://univer.ai/zh-cn/guides/customization/formula/)
 

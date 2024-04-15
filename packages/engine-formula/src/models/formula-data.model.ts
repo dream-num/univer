@@ -272,7 +272,7 @@ export class FormulaDataModel extends Disposable {
                 }
 
                 const sheetFormula = new ObjectMatrix(currentSheetData);
-                const formulaMatrix = new ObjectMatrix(this._formulaData[unitId]?.[sheetId]);
+                const formulaMatrix = new ObjectMatrix(this._formulaData[unitId]?.[sheetId] || {});
 
                 sheetFormula.forValue((r, c, v) => {
                     if (v == null) {
@@ -380,7 +380,7 @@ export class FormulaDataModel extends Disposable {
             workbookFormulaData[sheetId] = {};
         }
 
-        const sheetFormulaDataMatrix = new ObjectMatrix<Nullable<IFormulaDataItem>>(workbookFormulaData[sheetId]);
+        const sheetFormulaDataMatrix = new ObjectMatrix<Nullable<IFormulaDataItem>>(workbookFormulaData[sheetId] || {});
         const newSheetFormulaDataMatrix = new ObjectMatrix<IFormulaDataItem | null>();
 
         cellMatrix.forValue((r, c, cell) => {
@@ -535,7 +535,7 @@ export class FormulaDataModel extends Disposable {
             return null;
         }
 
-        const cellMatrix = new ObjectMatrix(workbookFormulaData[sheetId]);
+        const cellMatrix = new ObjectMatrix(workbookFormulaData[sheetId] || {});
 
         let formulaDataItem: Nullable<IFormulaDataItem> = null;
 
@@ -571,7 +571,7 @@ export class FormulaDataModel extends Disposable {
             return formulaIdMap;
         }
 
-        const sheetFormulaDataMatrix = new ObjectMatrix(workbookFormulaData[sheetId]);
+        const sheetFormulaDataMatrix = new ObjectMatrix(workbookFormulaData[sheetId] || {});
 
         sheetFormulaDataMatrix.forValue((r, c, cell) => {
             const formulaString = cell?.f || '';

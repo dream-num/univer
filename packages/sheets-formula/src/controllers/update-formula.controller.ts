@@ -664,7 +664,7 @@ export class UpdateFormulaController extends Disposable {
             }
 
             for (const sheetId of sheetDataKeys) {
-                const matrixData = new ObjectMatrix(sheetData[sheetId]);
+                const matrixData = new ObjectMatrix(sheetData[sheetId] || {});
 
                 const oldFormulaDataItem = new ObjectMatrix<IFormulaDataItem>();
                 const newFormulaDataItem = new ObjectMatrix<IFormulaDataItem>();

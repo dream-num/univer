@@ -77,8 +77,8 @@ export function getFormulaReferenceSheet(oldFormulaData: IFormulaData,
         }
 
         Object.keys(newSheetData).forEach((subUnitId) => {
-            const newSheetFormula = new ObjectMatrix(newSheetData[subUnitId]);
-            const oldSheetFormula = new ObjectMatrix(oldSheetData[subUnitId]);
+            const newSheetFormula = new ObjectMatrix(newSheetData[subUnitId] || {});
+            const oldSheetFormula = new ObjectMatrix(oldSheetData[subUnitId] || {});
             const redoFormulaMatrix = new ObjectMatrix<Nullable<ICellData>>();
             const undoFormulaMatrix = new ObjectMatrix<Nullable<ICellData>>();
 
@@ -204,8 +204,8 @@ export function refRangeFormula(oldFormulaData: IFormulaData,
     const currentOldFormulaData = oldFormulaData[unitId]![sheetId];
     const currentNewFormulaData = newFormulaData[unitId]![sheetId];
 
-    const oldFormulaMatrix = new ObjectMatrix(currentOldFormulaData);
-    const newFormulaMatrix = new ObjectMatrix(currentNewFormulaData);
+    const oldFormulaMatrix = new ObjectMatrix(currentOldFormulaData || {});
+    const newFormulaMatrix = new ObjectMatrix(currentNewFormulaData || {});
 
     // When undoing and redoing, the traversal order may be different. Record the range list of all single formula offsets, and then retrieve the traversal as needed.
     const rangeList: IRangeChange[] = [];

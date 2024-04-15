@@ -16,6 +16,7 @@
 
 import { ErrorType } from '../../../basics/error-type';
 import { REFERENCE_REGEX_COLUMN, REFERENCE_REGEX_ROW, REFERENCE_SINGLE_RANGE_REGEX } from '../../../basics/regex';
+import { operatorToken } from '../../../basics/token';
 import type { BaseReferenceObject } from '../../../engine/reference-object/base-reference-object';
 import { CellReferenceObject } from '../../../engine/reference-object/cell-reference-object';
 import { ColumnReferenceObject } from '../../../engine/reference-object/column-reference-object';
@@ -28,6 +29,10 @@ import { type BaseValueObject, ErrorValueObject } from '../../../engine/value-ob
 import { BaseFunction } from '../../base-function';
 
 export class Indirect extends BaseFunction {
+    override isAddress() {
+        return true;
+    }
+
     override calculate(refText: BaseValueObject, a1?: BaseValueObject) {
         if (refText == null) {
             return ErrorValueObject.create(ErrorType.NA);
@@ -58,7 +63,7 @@ export class Indirect extends BaseFunction {
             return ErrorValueObject.create(ErrorType.REF);
         }
 
-        const refTextV = refText.getValue() as string;
+        const refTextV = this._convertToDefinedName(refText.getValue() as string);
 
         if (a1Value === 0) {
             const gridRange = deserializeRangeForR1C1(refTextV);
@@ -103,5 +108,30 @@ export class Indirect extends BaseFunction {
         object.setDefaultUnitId(this.unitId);
         object.setDefaultSheetId(this.subUnitId);
         return object;
+    }
+
+    /**
+     * In Excel, to inject a defined name into a function that has positioning capabilities,
+     * such as using the INDIRECT function to reference a named range,
+     * you can write it as follows:
+     * =INDIRECT("DefinedName1")
+     */
+    private _convertToDefinedName(refText: string) {
+        const definedName = this.getDefinedName(refText);
+        if (definedName == null) {
+            return refText;
+        }
+
+        const formulaOrRefString = definedName.formulaOrRefString;
+
+        if (formulaOrRefString == null) {
+            return refText;
+        }
+
+        if (formulaOrRefString.startsWith(operatorToken.EQUALS)) {
+            return formulaOrRefString.slice(1);
+        }
+
+        return formulaOrRefString;
     }
 }

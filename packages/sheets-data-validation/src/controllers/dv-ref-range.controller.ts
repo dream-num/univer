@@ -25,7 +25,7 @@ import { distinctUntilChanged, map, switchMap } from 'rxjs/operators';
 import type { IRemoveDataValidationMutationParams, IUpdateDataValidationMutationParams } from '@univerjs/data-validation';
 import { DataValidationModel, RemoveDataValidationMutation, removeDataValidationUndoFactory, UpdateDataValidationMutation, UpdateRuleType } from '@univerjs/data-validation';
 import { FormulaRefRangeService } from '@univerjs/sheets-formula';
-import { deserializeRangeWithSheet, isReferenceString, serializeRangeWithSpreadsheet } from '@univerjs/engine-formula';
+import { deserializeRangeWithSheet, isReferenceStringWithEffectiveColumn, serializeRangeWithSpreadsheet } from '@univerjs/engine-formula';
 import { DataValidationCustomFormulaService } from '../services/dv-custom-formula.service';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
 import { DataValidationCacheService } from '../services/dv-cache.service';
@@ -214,7 +214,7 @@ export class DataValidationRefRangeController extends Disposable {
             return;
         }
 
-        if (!isReferenceString(formula1 ?? '')) {
+        if (!isReferenceStringWithEffectiveColumn(formula1 ?? '')) {
             return;
         }
         const gridRange = deserializeRangeWithSheet(formula1 ?? '');

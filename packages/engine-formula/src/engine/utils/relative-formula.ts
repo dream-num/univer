@@ -15,11 +15,12 @@
  */
 
 import { Rectangle, Tools } from '@univerjs/core';
-import type { Lexer } from '../analysis/lexer';
+
+import type { LexerTreeBuilder } from '../analysis/lexer-tree-builder';
 import { generateStringWithSequence, sequenceNodeType } from './sequence';
 import { deserializeRangeWithSheet, serializeRange } from './reference';
 
-export function isFormulaTransformable(lexerTreeBuilder: Lexer, formula: string) {
+export function isFormulaTransformable(lexerTreeBuilder: LexerTreeBuilder, formula: string) {
     const originSequenceNodes = lexerTreeBuilder.sequenceNodesBuilder(formula);
     if (!originSequenceNodes) {
         return false;
@@ -32,7 +33,7 @@ export function isFormulaTransformable(lexerTreeBuilder: Lexer, formula: string)
     return true;
 }
 
-export function transformFormula(lexerTreeBuilder: Lexer, formula: string, originRow: number, originCol: number, targetRow: number, targetCol: number) {
+export function transformFormula(lexerTreeBuilder: LexerTreeBuilder, formula: string, originRow: number, originCol: number, targetRow: number, targetCol: number) {
     if (!isFormulaTransformable(lexerTreeBuilder, formula)) {
         return formula;
     }

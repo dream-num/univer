@@ -21,7 +21,7 @@ import { CloseSingle, DeleteSingle, IncreaseSingle, SelectRangeSingle } from '@u
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useRef, useState } from 'react';
 
-import { deserializeRangeWithSheet, isReferenceString, serializeRange, serializeRangeWithSheet, serializeRangeWithSpreadsheet } from '@univerjs/engine-formula';
+import { deserializeRangeWithSheet, isReferenceStringWithEffectiveColumn, serializeRange, serializeRangeWithSheet, serializeRangeWithSpreadsheet } from '@univerjs/engine-formula';
 import clsx from 'clsx';
 import { TextEditor } from '../editor/TextEditor';
 import { IEditorService } from '../../services/editor/editor.service';
@@ -225,11 +225,11 @@ export function RangeSelector(props: IRangeSelectorProps) {
 
         let result = '';
         const list = rangeDataList.filter((rangeRef) => {
-            return isReferenceString(rangeRef.trim());
+            return isReferenceStringWithEffectiveColumn(rangeRef.trim());
         });
         if (list.length === 1) {
             const rangeRef = list[0];
-            if (isReferenceString(rangeRef.trim())) {
+            if (isReferenceStringWithEffectiveColumn(rangeRef.trim())) {
                 result = rangeRef.trim();
             }
         } else {
@@ -261,7 +261,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
         }
 
         const result = valueArray.every((refString) => {
-            return isReferenceString(refString.trim());
+            return isReferenceStringWithEffectiveColumn(refString.trim());
         });
 
         if (!result) {

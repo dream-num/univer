@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-import { IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
-import { ComponentManager, IMenuService } from '@univerjs/ui';
-import { Inject, Injector } from '@wendellhu/redi';
-import { IEditorBridgeService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
-import { IRenderManagerService } from '@univerjs/engine-render';
+import { LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
+import { Inject } from '@wendellhu/redi';
+import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { extractFormulaError } from './utils/utils';
 
@@ -35,15 +33,8 @@ const INVALID_MARK = {
 @OnLifecycle(LifecycleStages.Rendered, FormulaRenderController)
 export class FormulaRenderController extends RxDisposable {
     constructor(
-        @Inject(ComponentManager) private _componentManager: ComponentManager,
-        @IMenuService private _menuService: IMenuService,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
-        @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
-        @Inject(Injector) private readonly _injector: Injector
-    ) {
+        @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService) {
         super();
         this._init();
     }

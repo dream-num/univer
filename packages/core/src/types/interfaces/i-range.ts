@@ -113,6 +113,10 @@ export interface IUnitRange extends IGridRange {
     unitId: string;
 }
 
+export interface IUnitRangeWithName extends IUnitRange {
+    sheetName: string;
+}
+
 /**
  * One of the range types,
  *

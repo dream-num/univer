@@ -59,7 +59,7 @@ export const RuleEdit = (props: IRuleEditProps) => {
     const unitId = getUnitId(univerInstanceService);
     const subUnitId = getSubUnitId(univerInstanceService);
 
-    const rangeResult = useRef<IRange[]>([]);
+    const rangeResult = useRef<IRange[]>(props.rule?.ranges ?? []);
     const rangeString = useMemo(() => {
         let ranges = props.rule?.ranges;
         if (!ranges?.length) {

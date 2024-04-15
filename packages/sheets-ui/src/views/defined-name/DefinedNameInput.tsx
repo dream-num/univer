@@ -21,7 +21,7 @@ import type { IUnitRange, Nullable } from '@univerjs/core';
 import { AbsoluteRefType, createInternalEditorID, IUniverInstanceService, LocaleService, Tools } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { Button, Input, Radio, RadioGroup, Select } from '@univerjs/design';
-import { IDefinedNamesService, type IDefinedNamesServiceParam, IFunctionService, isReferenceStringWithEffectiveColumn, LexerTreeBuilder, operatorToken, serializeRangeToRefString } from '@univerjs/engine-formula';
+import { IDefinedNamesService, type IDefinedNamesServiceParam, IFunctionService, isReferenceStrings, isReferenceStringWithEffectiveColumn, LexerTreeBuilder, operatorToken, serializeRangeToRefString } from '@univerjs/engine-formula';
 import { ErrorSingle } from '@univerjs/icons';
 import { hasCJKText } from '@univerjs/engine-render';
 import styles from './index.module.less';
@@ -89,6 +89,11 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
         value: SCOPE_WORKBOOK_VALUE,
     }];
 
+
+    const isFormula = (token: string) => {
+        return !isReferenceStrings(token);
+    };
+
     useEffect(() => {
         setValidFormulaOrRange(true);
         setNameValue(name);
@@ -109,11 +114,6 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
         setValidString('');
     }, [state]);
 
-    const isFormula = (token: string) => {
-        return !token.split(',').every((refString) => {
-            return isReferenceStringWithEffectiveColumn(refString.trim());
-        });
-    };
 
     workbook.getSheetOrders().forEach((sheetId) => {
         const sheet = workbook.getSheetBySheetId(sheetId);

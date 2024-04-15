@@ -17,13 +17,13 @@
 import { toDisposable } from '@univerjs/core';
 import type { IDisposable } from '@wendellhu/redi';
 
-export function fromDocumentEvent<K extends keyof DocumentEventMap>(
+export function fromGlobalEvent<K extends keyof WindowEventMap>(
     type: K,
-    listener: (this: Document, ev: DocumentEventMap[K]) => any,
+    listener: (this: Window, ev: WindowEventMap[K]) => any,
     options?: boolean | AddEventListenerOptions
 ): IDisposable {
-    document.addEventListener(type, listener, options);
-    return toDisposable(() => document.removeEventListener(type, listener, options));
+    window.addEventListener(type, listener, options);
+    return toDisposable(() => window.removeEventListener(type, listener, options));
 }
 
 export function fromEvent<K extends keyof HTMLElementEventMap>(

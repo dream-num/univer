@@ -71,7 +71,6 @@ export {
 export { UnregisterFunctionMutation } from './commands/mutations/unregister-function.mutation';
 export { LexerNode } from './engine/analysis/lexer-node';
 export { LexerTreeBuilder } from './engine/analysis/lexer-tree-builder';
-export { Lexer } from './engine/analysis/lexer';
 export { BaseReferenceObject, type FunctionVariantType } from './engine/reference-object/base-reference-object';
 export { RangeReferenceObject } from './engine/reference-object/range-reference-object';
 export { deserializeRangeForR1C1 } from './engine/utils/r1c1-reference';
@@ -84,6 +83,7 @@ export {
     serializeRangeToRefString,
     serializeRangeWithSheet,
     serializeRangeWithSpreadsheet,
+    isReferenceStringWithEffectiveColumn,
 } from './engine/utils/reference';
 export { generateStringWithSequence, type ISequenceNode, sequenceNodeType } from './engine/utils/sequence';
 export { ArrayValueObject, ValueObjectFactory } from './engine/value-object/array-value-object';

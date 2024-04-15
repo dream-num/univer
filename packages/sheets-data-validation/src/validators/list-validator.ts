@@ -18,7 +18,7 @@ import { DataValidationRenderMode, DataValidationType, IUniverInstanceService, T
 import type { CellValue, DataValidationOperator, IDataValidationRule, IDataValidationRuleBase, ISheetDataValidationRule, Nullable } from '@univerjs/core';
 import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
 import { BaseDataValidator } from '@univerjs/data-validation';
-import { deserializeRangeWithSheet, isReferenceString } from '@univerjs/engine-formula';
+import { deserializeRangeWithSheet, isReferenceStringWithEffectiveColumn } from '@univerjs/engine-formula';
 import { LIST_FORMULA_INPUT_NAME } from '../views/formula-input';
 import { LIST_DROPDOWN_KEY } from '../views';
 import { DropdownWidget } from '../widgets/dropdown-widget';
@@ -62,7 +62,7 @@ export class ListValidator extends BaseDataValidator {
         const { formula1 = '' } = rule;
 
         return {
-            formula1: isReferenceString(formula1) ? getSheetRangeValueSet(deserializeRangeWithSheet(formula1), this._univerInstanceService, unitId, subUnitId) : deserializeListOptions(formula1),
+            formula1: isReferenceStringWithEffectiveColumn(formula1) ? getSheetRangeValueSet(deserializeRangeWithSheet(formula1), this._univerInstanceService, unitId, subUnitId) : deserializeListOptions(formula1),
             formula2: undefined,
         };
     }
@@ -91,7 +91,7 @@ export class ListValidator extends BaseDataValidator {
         const worksheet = (currentSubUnitId ? workbook.getSheetBySheetId(currentSubUnitId) : undefined) ?? workbook.getActiveSheet();
         const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();
-        return isReferenceString(formula1)
+        return isReferenceStringWithEffectiveColumn(formula1)
             ? getSheetRangeValueSet(deserializeRangeWithSheet(formula1), this._univerInstanceService, unitId, subUnitId)
             : deserializeListOptions(formula1);
     }

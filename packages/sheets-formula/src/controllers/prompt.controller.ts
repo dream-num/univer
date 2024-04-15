@@ -53,7 +53,6 @@ import {
     deserializeRangeWithSheet,
     generateStringWithSequence,
     getAbsoluteRefTypeWitString,
-    Lexer,
     LexerTreeBuilder,
     matchRefDrawToken,
     matchToken,
@@ -160,7 +159,6 @@ export class PromptController extends Disposable {
         @Inject(IEditorBridgeService) private readonly _editorBridgeService: EditorBridgeService,
         @Inject(IFormulaPromptService) private readonly _formulaPromptService: IFormulaPromptService,
         @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder,
-        @Inject(Lexer) private readonly _lexer: Lexer,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(ThemeService) private readonly _themeService: ThemeService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
@@ -813,7 +811,7 @@ export class PromptController extends Disposable {
             this._contextService.setContextValue(FOCUSING_EDITOR_INPUT_FORMULA, true);
 
             const lastSequenceNodes =
-                this._lexer.sequenceNodesBuilder(config.dataStream.replace(/\r/g, '').replace(/\n/g, '')) ||
+                this._lexerTreeBuilder.sequenceNodesBuilder(config.dataStream.replace(/\r/g, '').replace(/\n/g, '')) ||
                 [];
 
             this._formulaPromptService.setSequenceNodes(lastSequenceNodes);
@@ -1922,7 +1920,7 @@ export class PromptController extends Disposable {
                         });
                     }
 
-                    const lastSequenceNodes = this._lexer.sequenceNodesBuilder(formulaString) || [];
+                    const lastSequenceNodes = this._lexerTreeBuilder.sequenceNodesBuilder(formulaString) || [];
 
                     this._formulaPromptService.setSequenceNodes(lastSequenceNodes);
 

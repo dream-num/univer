@@ -78,7 +78,7 @@ const calcPopupPosition = (layout: IPopupLayoutInfo) => {
 
 function RectPopup(props: IRectPopupProps) {
     const { children, anchorRect, direction = 'vertical', onClickOutside, excludeOutside } = props;
-    const nodeRef = useRef(null);
+    const nodeRef = useRef<HTMLElement>(null);
     const clickOtherFn = useEvent(onClickOutside ?? (() => {}));
 
     const [position, setPosition] = useState<Partial<IAbsolutePosition>>({
@@ -112,27 +112,33 @@ function RectPopup(props: IRectPopupProps) {
     ]);
 
     useEffect(() => {
-        const handleClick = (e: MouseEvent) => {
-            if (excludeOutside && (excludeOutside.indexOf(e.target as any) > -1)) {
-                return;
-            }
-            if (e.clientX <= anchorRect.right && e.clientX >= anchorRect.left && e.clientY <= anchorRect.bottom && e.clientY >= anchorRect.top) {
-                return;
-            }
-            clickOtherFn(e);
-        };
+        const parent = nodeRef.current?.parentElement;
+        if (parent) {
+            const handleClick = (e: MouseEvent) => {
+                if (excludeOutside && (excludeOutside.indexOf(e.target as any) > -1)) {
+                    return;
+                }
+                const bounding = parent.getBoundingClientRect();
 
-        window.addEventListener('click', handleClick);
+                const x = e.clientX - bounding.left;
+                const y = e.clientY - bounding.top;
+                if (x <= anchorRect.right && x >= anchorRect.left && y <= anchorRect.bottom && y >= anchorRect.top) {
+                    return;
+                }
+                clickOtherFn(e);
+            };
+            parent.addEventListener('click', handleClick);
 
-        return () => {
-            window.removeEventListener('click', handleClick);
-        };
-    }, [anchorRect.bottom, anchorRect.left, anchorRect.right, anchorRect.top, clickOtherFn, excludeOutside]);
+            return () => {
+                parent.removeEventListener('click', handleClick);
+            };
+        }
+    }, [anchorRect, anchorRect.bottom, anchorRect.left, anchorRect.right, anchorRect.top, clickOtherFn, excludeOutside]);
 
     return (
         <section
             ref={nodeRef}
-            className={styles.popup}
+            className={styles.popupAbsolute}
             style={position}
             onClick={(e) => {
                 e.stopPropagation();

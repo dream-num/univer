@@ -56,20 +56,21 @@ export function extractNodeStyle(node: HTMLElement, predefinedStyles?: CSSStyleD
         }
     }
 
+    parseStyleByProperty(styles, docStyles);
+    return docStyles;
+}
+
+function parseStyleByProperty(styles: CSSStyleDeclaration, docStyles: ITextStyle) {
     for (let i = 0; i < styles.length; i++) {
         const cssRule = styles[i];
         const cssValue = styles.getPropertyValue(cssRule);
-
         switch (cssRule) {
             case 'font-family': {
                 docStyles.ff = cssValue;
-
                 break;
             }
-
             case 'font-size': {
                 const fontSize = Number.parseInt(cssValue);
-
                 if (!Number.isNaN(fontSize)) {
                     // TODO: @ybzky need other font size unit support
                     if (cssValue.endsWith('pt')) {
@@ -79,28 +80,21 @@ export function extractNodeStyle(node: HTMLElement, predefinedStyles?: CSSStyleD
                         docStyles.fs = transformedFontSize;
                     }
                 }
-
                 break;
             }
-
             case 'font-style': {
                 if (cssValue === 'italic') {
                     docStyles.it = BooleanNumber.TRUE;
                 }
-
                 break;
             }
-
             case 'font-weight': {
                 const MIDDLE_FONT_WEIGHT = 400;
-
-                if (Number(cssValue) > MIDDLE_FONT_WEIGHT) {
+                if (Number(cssValue) > MIDDLE_FONT_WEIGHT || cssValue) {
                     docStyles.bl = BooleanNumber.TRUE;
                 }
-
                 break;
             }
-
             case 'text-decoration': {
                 // TODO: @JOCS， Parse CSS values like: underline dotted;
                 if (/underline/.test(cssValue)) {
@@ -116,40 +110,30 @@ export function extractNodeStyle(node: HTMLElement, predefinedStyles?: CSSStyleD
                         s: BooleanNumber.TRUE,
                     };
                 }
-
                 break;
             }
-
             case 'color': {
                 const color = new ColorKit(cssValue);
-
                 if (color.isValid) {
                     docStyles.cl = {
                         rgb: color.toRgbString(),
                     };
                 }
-
                 break;
             }
-
             case 'background-color': {
                 const color = new ColorKit(cssValue);
-
                 if (color.isValid) {
                     docStyles.bg = {
                         rgb: color.toRgbString(),
                     };
                 }
-
                 break;
             }
-
             default: {
                 // console.log(`Unhandled css rule ${cssRule}`);
                 break;
             }
         }
     }
-
-    return docStyles;
 }

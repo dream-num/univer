@@ -68,6 +68,7 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
+        "@univerjs/protocol": "^0.1.17",
         "dayjs": "^1.11.10"
     },
     "devDependencies": {

@@ -92,13 +92,19 @@ export class DependencyManagerService extends Disposable implements IDependencyM
             }
             Object.values(unit).forEach((sheet) => {
                 Object.values(sheet).forEach((formula) => {
-                    formula && trees.push(formula);
+                    if (formula) {
+                        formula.resetState();
+                        trees.push(formula);
+                    }
                 });
             });
         });
 
         this._featureFormulaData.forEach((feature) => {
-            feature && trees.push(feature);
+            if (feature) {
+                feature.resetState();
+                trees.push(feature);
+            }
         });
 
         Object.values(this._formulaData).map((unit) => {
@@ -107,7 +113,10 @@ export class DependencyManagerService extends Disposable implements IDependencyM
             }
             return Object.values(unit).forEach((sheet) => {
                 return sheet.forValue((row, col, item) => {
-                    item && trees.push(item);
+                    if (item) {
+                        item.resetState();
+                        trees.push(item);
+                    }
                 });
             });
         });

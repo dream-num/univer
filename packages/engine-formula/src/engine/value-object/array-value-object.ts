@@ -222,16 +222,16 @@ export class ArrayValueObject extends BaseValueObject {
     }
 
     get(row: number, column: number) {
-        const rowValues = this._values[row];
-        if (rowValues == null) {
-            return null;
-        }
+        // const rowValues = this._values[row];
+        // if (rowValues == null) {
+        //     return null;
+        // }
 
-        const v = rowValues[column];
-        if (v == null) {
-            return null;
-        }
-        return v;
+        // const v = rowValues[column];
+        // if (v == null) {
+        //     return null;
+        // }
+        return this._values[row]?.[column];
     }
 
     getRealValue(row: number, column: number) {
@@ -355,11 +355,17 @@ export class ArrayValueObject extends BaseValueObject {
      * @param takeArray
      */
     pick(takeArray: ArrayValueObject) {
+        const newValue = this.pickRaw(takeArray);
+
+        return this._createNewArray(newValue, 1, newValue[0].length);
+    }
+
+    pickRaw(takeArray: ArrayValueObject) {
         const takeArrayRowCount = takeArray.getRowCount();
         const takeArrayColumnCount = takeArray.getColumnCount();
 
         if (takeArrayRowCount !== this._rowCount || takeArrayColumnCount !== this._columnCount) {
-            return this._createNewArray([[NullValueObject.create()]], 1, 1);
+            return [[NullValueObject.create()]];
         }
 
         const newValue: Nullable<BaseValueObject>[][] = [];
@@ -369,18 +375,19 @@ export class ArrayValueObject extends BaseValueObject {
         for (let r = 0; r < takeArrayRowCount; r++) {
             for (let c = 0; c < takeArrayColumnCount; c++) {
                 const takeCell = takeArray.get(r, c);
-                const value = this.get(r, c);
+
                 if (takeCell == null || takeCell.isError()) {
                     continue;
                 }
 
                 if ((takeCell as BaseValueObject).getValue() === true) {
+                    const value = this.get(r, c);
                     newValue[0].push(value);
                 }
             }
         }
 
-        return this._createNewArray(newValue, 1, newValue[0].length);
+        return newValue;
     }
 
     /**

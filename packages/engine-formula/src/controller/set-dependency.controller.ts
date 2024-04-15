@@ -19,11 +19,12 @@ import { Disposable, ICommandService, LifecycleStages, ObjectMatrix, OnLifecycle
 
 import {
     RemoveFeatureCalculationMutation,
+    SetFeatureCalculationMutation,
 } from '../commands/mutations/set-feature-calculation.mutation';
 import { IFeatureCalculationManagerService } from '../services/feature-calculation-manager.service';
 import { IDependencyManagerService } from '../services/dependency-manager.service';
-import type { IRemoveOtherFormulaMutationParams } from '../commands/mutations/set-other-formula.mutation';
-import { RemoveOtherFormulaMutation } from '../commands/mutations/set-other-formula.mutation';
+import type { IRemoveOtherFormulaMutationParams, ISetOtherFormulaMutationParams } from '../commands/mutations/set-other-formula.mutation';
+import { RemoveOtherFormulaMutation, SetOtherFormulaMutation } from '../commands/mutations/set-other-formula.mutation';
 import type { ISetFormulaDataMutationParams } from '../commands/mutations/set-formula-data.mutation';
 import { SetFormulaDataMutation } from '../commands/mutations/set-formula-data.mutation';
 
@@ -46,7 +47,7 @@ export class SetDependencyController extends Disposable {
     private _commandExecutedListener() {
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
-                if (command.id === RemoveFeatureCalculationMutation.id) {
+                if (command.id === RemoveFeatureCalculationMutation.id || command.id === SetFeatureCalculationMutation.id) {
                     const params = command.params as { featureId: string };
                     if (params == null) {
                         return;
@@ -60,6 +61,18 @@ export class SetDependencyController extends Disposable {
                     }
 
                     this._dependencyManagerService.removeOtherFormulaDependency(params.unitId, params.subUnitId, params.formulaIdList);
+                } else if (command.id === SetOtherFormulaMutation.id) {
+                    const params = command.params as ISetOtherFormulaMutationParams;
+                    if (params == null) {
+                        return;
+                    }
+
+                    const formulaMap = params.formulaMap;
+                    const formulaIdList: string[] = [];
+                    Object.keys(formulaMap).forEach((formulaId) => {
+                        formulaIdList.push(formulaId);
+                    });
+                    this._dependencyManagerService.removeOtherFormulaDependency(params.unitId, params.subUnitId, formulaIdList);
                 } else if (command.id === SetFormulaDataMutation.id) {
                     const formulaData = (command.params as ISetFormulaDataMutationParams).formulaData;
                     Object.keys(formulaData).forEach((unitId) => {
@@ -73,10 +86,8 @@ export class SetDependencyController extends Disposable {
                                 return true;
                             }
 
-                            new ObjectMatrix(formulaDataItem).forValue((row, column, value) => {
-                                if (value == null) {
-                                    this._dependencyManagerService.removeFormulaDependency(unitId, subUnitId, row, column);
-                                }
+                            new ObjectMatrix(formulaDataItem).forValue((row, column) => {
+                                this._dependencyManagerService.removeFormulaDependency(unitId, subUnitId, row, column);
                             });
                         });
                     });

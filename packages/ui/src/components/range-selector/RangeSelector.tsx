@@ -21,7 +21,7 @@ import { CloseSingle, DeleteSingle, IncreaseSingle, SelectRangeSingle } from '@u
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useRef, useState } from 'react';
 
-import { deserializeRangeWithSheet, getRangeWithRefsString, isReferenceStringWithEffectiveColumn, serializeRange, serializeRangeWithSheet, serializeRangeWithSpreadsheet } from '@univerjs/engine-formula';
+import { getRangeWithRefsString, isReferenceStringWithEffectiveColumn, serializeRange, serializeRangeWithSheet, serializeRangeWithSpreadsheet } from '@univerjs/engine-formula';
 import clsx from 'clsx';
 import { TextEditor } from '../editor/TextEditor';
 import { IEditorService } from '../../services/editor/editor.service';

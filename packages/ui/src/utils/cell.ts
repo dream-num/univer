@@ -32,6 +32,8 @@ import { textTrim } from './util';
 const PX_TO_PT_RATIO = 0.75;
 const MAX_FONT_SIZE = 78;
 const MIN_FONT_SIZE = 9;
+const defaultBackgroundByRGBA = 'rgba(0,0,0,0)';
+const defaultBackgroundByRGB = 'rgb(0,0,0)';
 
 // TODO: move to Utils
 /**
@@ -209,9 +211,12 @@ export function handleStringToStyle($dom?: HTMLElement, cssStyle: string = '') {
         else if (key === 'background' || key === 'background-color') {
             const backgroundColor = new ColorKit(value);
             if (backgroundColor) {
-                styleList.bg = {
-                    rgb: backgroundColor.toRgbString(),
-                };
+                const backgroundStr = backgroundColor.toRgbString();
+                if (backgroundStr !== defaultBackgroundByRGBA && backgroundStr !== defaultBackgroundByRGB) {
+                    styleList.bg = {
+                        rgb: backgroundColor.toRgbString(),
+                    };
+                }
             }
         }
 

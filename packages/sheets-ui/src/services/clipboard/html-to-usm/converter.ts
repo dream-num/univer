@@ -387,8 +387,14 @@ function parseProperties(propertyStr: string): IClipboardPropertyItem {
  * @returns cols and their properties
  */
 function parseColGroup(raw: string): IClipboardPropertyItem[] | null {
+    const COLGROUP_TAG_REGEX = /<colgroup([\s\S]*?)>(.*?)<\/colgroup>/;
+    const colgroupMatch = raw.match(COLGROUP_TAG_REGEX);
+    if (!colgroupMatch || !colgroupMatch[2]) {
+        return null;
+    }
+
     const COL_TAG_REGEX = /<col([\s\S]*?)>/g;
-    const colMatches = raw.matchAll(COL_TAG_REGEX);
+    const colMatches = colgroupMatch[2].matchAll(COL_TAG_REGEX);
     if (!colMatches) {
         return null;
     }
@@ -463,7 +469,6 @@ function parseTableByHtml(htmlElement: HTMLIFrameElement, skeleton?: Spreadsheet
             let cellRichStyle;
             const rowSpan = Number(cell.getAttribute('rowSpan')) || 1;
             const colSpan = Number(cell.getAttribute('colSpan')) || 1;
-
             // If there is a class attribute, use getComputedStyle
             const hasClass = cell.getAttribute('class');
             const computedStyle = getComputedStyle(cell);
@@ -530,7 +535,7 @@ function parseTableByHtml(htmlElement: HTMLIFrameElement, skeleton?: Spreadsheet
                 cellRichStyle = documentModel?.getSnapshot();
                 cellText = newDocBody.dataStream;
             } else {
-                cellText = cell.innerHTML.replace(/[\r\n]/g, '');
+                cellText = cell.innerHTML.replace(/[\r\n]/g, '').replace(/&nbsp;/gi, '');
             }
 
             const cellValue = (rowSpan > 1 || colSpan > 1)

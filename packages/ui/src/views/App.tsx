@@ -28,6 +28,7 @@ import { Toolbar } from './components/doc-bars/Toolbar';
 import { Sidebar } from './components/sidebar/Sidebar';
 import { ZenZone } from './components/zen-zone/ZenZone';
 import { globalComponents } from './parts';
+import { CanvasPopup } from './components/popup';
 
 export interface IUniverAppProps extends IWorkbenchOptions {
     mountContainer: HTMLElement;
@@ -139,6 +140,7 @@ export function App(props: IUniverAppProps) {
                     <ZenZone />
 
                 </section>
+                <CanvasPopup />
             </div>
 
             <ComponentContainer components={globalComponents} />

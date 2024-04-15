@@ -301,7 +301,7 @@ export function isReferenceStringWithEffectiveColumn(refString: string) {
      * where each worksheet can support columns ranging from A to XFD.
      * Therefore, the symbol for the maximum column is XFD.
      */
-    if (range.endColumn > 16384) {
+    if (range.endColumn >= 16384) {
         return false;
     }
 

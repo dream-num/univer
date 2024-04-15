@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
-import type { IRange } from '@univerjs/core';
-import { AbsoluteRefType, Disposable, isValidRange, IUniverInstanceService, moveRangeByOffset } from '@univerjs/core';
+import { Disposable } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
 import { IDefinedNamesService } from '../../services/defined-names.service';
-import type { ISequenceArray, ISequenceNode } from '../utils/sequence';
-import { generateStringWithSequence, sequenceNodeType } from '../utils/sequence';
+import type { ISequenceArray } from '../utils/sequence';
+import { sequenceNodeType } from '../utils/sequence';
 import { operatorToken } from '../../basics/token';
 import { IFormulaCurrentConfigService } from '../../services/current-data.service';
 import { ErrorType } from '../../basics/error-type';
-import { deserializeRangeWithSheet, serializeRangeToRefString } from '../utils/reference';
 import { LexerTreeBuilder } from './lexer-tree-builder';
 
 export class Lexer extends Disposable {

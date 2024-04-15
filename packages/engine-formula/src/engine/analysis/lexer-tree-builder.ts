@@ -699,13 +699,10 @@ export class LexerTreeBuilder extends Disposable {
             }
         }
 
-        this._processSuffixExpressionRemain(baseStack, symbolStack);
-        lexerNode.setChildren(baseStack);
-
-        return true;
+        return this._processSuffixExpressionRemain(baseStack, symbolStack, lexerNode);
     }
 
-    private _processSuffixExpressionRemain(baseStack: (string | LexerNode)[], symbolStack: string[]) {
+    private _processSuffixExpressionRemain(baseStack: (string | LexerNode)[], symbolStack: string[], lexerNode: LexerNode) {
         const baseStackLength = baseStack.length;
         const lastBaseStack = baseStack[baseStackLength - 1];
         while (symbolStack.length > 0) {
@@ -715,6 +712,8 @@ export class LexerTreeBuilder extends Disposable {
             }
             baseStack.push(symbol);
         }
+        lexerNode.setChildren(baseStack);
+        return true;
     }
 
     private _processSuffixExpressionCloseBracket(baseStack: (string | LexerNode)[], symbolStack: string[], children: (string | LexerNode)[], i: number) {

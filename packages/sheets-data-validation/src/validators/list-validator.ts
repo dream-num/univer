@@ -18,6 +18,7 @@ import { DataValidationRenderMode, DataValidationType, isFormulaString, IUniverI
 import type { CellValue, DataValidationOperator, ICellData, IDataValidationRule, IDataValidationRuleBase, ISheetDataValidationRule, Nullable } from '@univerjs/core';
 import type { IBaseDataValidationWidget, IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
 import { BaseDataValidator } from '@univerjs/data-validation';
+import { isReferenceString, Lexer, sequenceNodeType } from '@univerjs/engine-formula';
 import { LIST_FORMULA_INPUT_NAME } from '../views/formula-input';
 import { LIST_DROPDOWN_KEY } from '../views';
 import { DropdownWidget } from '../widgets/dropdown-widget';
@@ -45,8 +46,32 @@ export function getRuleFormulaResultSet(result: Nullable<Nullable<ICellData>[][]
     return [...resultSet];
 }
 
+const supportedFormula = [
+    'if',
+    'indirect',
+    'choose',
+    'offset',
+];
+
+// 1. must have REFERENCE or DEFINED_NAME node.
+// 2. only support some formula
+export function isValidListFormula(formula: string, lexer: Lexer) {
+    if (!isFormulaString(formula)) {
+        return true;
+    }
+    const isRefString = isReferenceString(formula.slice(1));
+    if (isRefString) {
+        return false;
+    }
+
+    const nodes = lexer.sequenceNodesBuilder(formula);
+
+    return (nodes) && nodes.some((node) => typeof node === 'object' && node.nodeType === sequenceNodeType.FUNCTION && supportedFormula.indexOf(node.token.toLowerCase()) > -1);
+}
+
 export class ListValidator extends BaseDataValidator {
     protected formulaService = this.injector.get(DataValidationFormulaService);
+    private _lexer = this.injector.get(Lexer);
 
     id: string = DataValidationType.LIST;
     title: string = 'dataValidation.list.title';
@@ -66,6 +91,7 @@ export class ListValidator extends BaseDataValidator {
 
     override validatorFormula(rule: IDataValidationRuleBase): IFormulaValidResult {
         const success = !Tools.isBlank(rule.formula1);
+        const valid = isValidListFormula(rule.formula1, this._lexer);
 
         return {
             success,

@@ -18,7 +18,7 @@ import { DataValidationRenderMode, DataValidationType, isFormulaString, IUniverI
 import type { CellValue, DataValidationOperator, ICellData, IDataValidationRule, IDataValidationRuleBase, ISheetDataValidationRule, Nullable } from '@univerjs/core';
 import type { IBaseDataValidationWidget, IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
 import { BaseDataValidator } from '@univerjs/data-validation';
-import { isReferenceString, Lexer, sequenceNodeType } from '@univerjs/engine-formula';
+import { isReferenceString, LexerTreeBuilder, sequenceNodeType } from '@univerjs/engine-formula';
 import { LIST_FORMULA_INPUT_NAME } from '../views/formula-input';
 import { LIST_DROPDOWN_KEY } from '../views';
 import { DropdownWidget } from '../widgets/dropdown-widget';
@@ -55,7 +55,7 @@ const supportedFormula = [
 
 // 1. must have REFERENCE or DEFINED_NAME node.
 // 2. only support some formula
-export function isValidListFormula(formula: string, lexer: Lexer) {
+export function isValidListFormula(formula: string, lexer: LexerTreeBuilder) {
     if (!isFormulaString(formula)) {
         return true;
     }
@@ -72,7 +72,7 @@ export function isValidListFormula(formula: string, lexer: Lexer) {
 
 export class ListValidator extends BaseDataValidator {
     protected formulaService = this.injector.get(DataValidationFormulaService);
-    private _lexer = this.injector.get(Lexer);
+    private _lexer = this.injector.get(LexerTreeBuilder);
 
     id: string = DataValidationType.LIST;
     title: string = 'dataValidation.list.title';

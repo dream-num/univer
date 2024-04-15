@@ -15,7 +15,7 @@
  */
 
 import type { ICommandInfo } from '@univerjs/core';
-import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { Disposable, ICommandService, LifecycleStages, ObjectMatrix, OnLifecycle } from '@univerjs/core';
 
 import {
     RemoveFeatureCalculationMutation,
@@ -24,6 +24,8 @@ import { IFeatureCalculationManagerService } from '../services/feature-calculati
 import { IDependencyManagerService } from '../services/dependency-manager.service';
 import type { IRemoveOtherFormulaMutationParams } from '../commands/mutations/set-other-formula.mutation';
 import { RemoveOtherFormulaMutation } from '../commands/mutations/set-other-formula.mutation';
+import type { ISetFormulaDataMutationParams } from '../commands/mutations/set-formula-data.mutation';
+import { SetFormulaDataMutation } from '../commands/mutations/set-formula-data.mutation';
 
 @OnLifecycle(LifecycleStages.Ready, SetDependencyController)
 export class SetDependencyController extends Disposable {
@@ -58,6 +60,26 @@ export class SetDependencyController extends Disposable {
                     }
 
                     this._dependencyManagerService.removeOtherFormulaDependency(params.unitId, params.subUnitId, params.formulaIdList);
+                } else if (command.id === SetFormulaDataMutation.id) {
+                    const formulaData = (command.params as ISetFormulaDataMutationParams).formulaData;
+                    Object.keys(formulaData).forEach((unitId) => {
+                        if (formulaData[unitId] == null) {
+                            return true;
+                        }
+                        Object.keys(formulaData[unitId]!).forEach((subUnitId) => {
+                            const formulaDataItem = formulaData[unitId]![subUnitId];
+                            if (formulaDataItem == null) {
+                                this._dependencyManagerService.clearFormulaDependency(unitId, subUnitId);
+                                return true;
+                            }
+
+                            new ObjectMatrix(formulaDataItem).forValue((row, column, value) => {
+                                if (value == null) {
+                                    this._dependencyManagerService.removeFormulaDependency(unitId, subUnitId, row, column);
+                                }
+                            });
+                        });
+                    });
                 }
             })
         );

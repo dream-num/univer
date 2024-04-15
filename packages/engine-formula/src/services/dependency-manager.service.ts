@@ -56,6 +56,8 @@ export interface IDependencyManagerService {
     removeFormulaDependency(unitId: string, sheetId: string, row: number, column: number): void;
 
     hasFormulaDependency(unitId: string, sheetId: string, row: number, column: number): boolean;
+
+    clearFormulaDependency(unitId: string, sheetId: string): void;
 }
 
 /**
@@ -231,6 +233,12 @@ export class DependencyManagerService extends Disposable implements IDependencyM
             const deleteTree = this._formulaData[unitId]![sheetId].getValue(row, column);
             this.clearDependencyForTree(deleteTree);
             this._formulaData[unitId]![sheetId].realDeleteValue(row, column);
+        }
+    }
+
+    clearFormulaDependency(unitId: string, sheetId: string) {
+        if (this._formulaData[unitId] && this._formulaData[unitId]![sheetId]) {
+            this._formulaData[unitId]![sheetId].reset();
         }
     }
 

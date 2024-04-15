@@ -59,9 +59,10 @@ export function isValidListFormula(formula: string, lexer: Lexer) {
     if (!isFormulaString(formula)) {
         return true;
     }
+
     const isRefString = isReferenceString(formula.slice(1));
     if (isRefString) {
-        return false;
+        return true;
     }
 
     const nodes = lexer.sequenceNodesBuilder(formula);

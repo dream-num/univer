@@ -569,7 +569,7 @@ function extractStyleProperty(styleString?: string, propertyName?: string) {
 }
 
 
-function getCellStyle(cell: HTMLElement) {
+function getCellStyle(cell: Element) {
     let cellStyle = '';
     const hasClass = cell.getAttribute('class');
     const computedStyle = getComputedStyle(cell);

@@ -29,13 +29,14 @@ import { SetScrollOperation } from '../commands/operations/scroll.operation';
 import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
 import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
 
-interface ICanvasPopup {
+export interface ICanvasPopup {
     componentKey: string;
     mask?: boolean;
     onClickOutside?: (e: MouseEvent) => void;
     direction?: 'vertical' | 'horizontal';
     offset?: [number, number];
     excludeOutside?: HTMLElement[];
+    extraProps?: Record<string, any>;
 }
 
 export class SheetCanvasPopManagerService extends Disposable {

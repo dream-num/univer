@@ -36,13 +36,12 @@ export interface ICellAlert {
     location: ISheetLocation;
     width: number;
     height: number;
+    key: string;
 }
 
 export class CellAlertManagerService {
-    private _currentAlert$ = new Subject<Nullable<ICellAlert>>();
-    private _currentPopup: Nullable<IDisposable> = undefined;
-
-    private _currentAlert: Nullable<ICellAlert> = null;
+    private _currentAlert$ = new Subject<[string, { alert: ICellAlert; dispose: IDisposable }][]>();
+    private _currentAlert: Map<string, { alert: ICellAlert; dispose: IDisposable }> = new Map();
 
     get currentAlert() {
         return this._currentAlert;
@@ -56,8 +55,19 @@ export class CellAlertManagerService {
     ) {}
 
     showAlert(alert: ICellAlert) {
-        this._currentPopup && this._currentPopup.dispose();
-        this._currentPopup = null;
+        let lastPopup = this._currentAlert.get(alert.key);
+        lastPopup && lastPopup.dispose.dispose();
+        if (lastPopup) {
+            lastPopup.dispose.dispose();
+        } else {
+            lastPopup = {
+                alert,
+                dispose: {
+                    dispose() {},
+                },
+            };
+            this._currentAlert.set(alert.key, lastPopup);
+        }
 
         const { location } = alert;
         const { row, col, unitId } = location;
@@ -67,19 +77,36 @@ export class CellAlertManagerService {
             return;
         }
 
-        this._currentAlert = alert;
-        this._currentAlert$.next(alert);
-        this._currentPopup = this._canvasPopManagerService.attachPopupToCell(row, col, {
+        const disposable = this._canvasPopManagerService.attachPopupToCell(row, col, {
             componentKey: CELL_ALERT_KEY,
             direction: 'horizontal',
             offset: [2, 0],
+            extraProps: {
+                alert,
+            },
         });
+        if (disposable) {
+            lastPopup.dispose = disposable;
+        }
+
+        this._currentAlert$.next(Array.from(this._currentAlert.entries()));
+    }
+
+    removeAlert(key: string) {
+        const lastPopup = this._currentAlert.get(key);
+        if (lastPopup) {
+            this._currentAlert.delete(key);
+            lastPopup?.dispose.dispose();
+            this._currentAlert$.next(Array.from(this._currentAlert.entries()));
+        }
     }
 
     clearAlert() {
-        this._currentPopup && this._currentPopup.dispose();
-        this._currentPopup = null;
-        this._currentAlert = null;
-        this._currentAlert$.next(null);
+        this._currentAlert.forEach((alert) => {
+            alert.dispose.dispose();
+        });
+
+        this._currentAlert.clear();
+        this._currentAlert$.next(Array.from(this._currentAlert.entries()));
     }
 }

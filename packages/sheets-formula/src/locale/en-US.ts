@@ -63,6 +63,7 @@ export default {
             helpAbstract: 'ABOUT',
             required: 'Required.',
             optional: 'Optional.',
+            errorTitle: 'Error',
         },
         functionType: {
             financial: 'Financial',

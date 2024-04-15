@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Plugin } from '@univerjs/core';
+import { Plugin, LocaleService } from '@univerjs/core';
 import type { Ctor, Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -57,6 +57,7 @@ import { ISuperTableService, SuperTableService } from './services/super-table.se
 import { ActiveDirtyManagerService, IActiveDirtyManagerService } from './services/active-dirty-manager.service';
 import { DependencyManagerService, IDependencyManagerService } from './services/dependency-manager.service';
 import { SetDependencyController } from './controller/set-dependency.controller';
+import zhCN from './locale/zh-CN';
 
 const PLUGIN_NAME = 'base-formula-engine';
 
@@ -70,6 +71,7 @@ export class UniverFormulaEnginePlugin extends Plugin {
 
     constructor(
         private _config: IUniverFormulaEngine,
+        @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(Injector) protected override _injector: Injector
     ) {
         super();
@@ -80,6 +82,10 @@ export class UniverFormulaEnginePlugin extends Plugin {
     }
 
     private _initialize() {
+        this._localeService.load({
+            zhCN,
+        });
+
         // worker and main thread
         const dependencies: Dependency[] = [
             // Services

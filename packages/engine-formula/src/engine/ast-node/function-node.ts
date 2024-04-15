@@ -16,6 +16,7 @@
 
 import { Inject, Injector } from '@wendellhu/redi';
 
+import { LocaleService } from '@univerjs/core';
 import { AstNodePromiseType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
 import type { BaseFunction } from '../../functions/base-function';
@@ -44,7 +45,8 @@ export class FunctionNode extends BaseAstNode {
         private _functionExecutor: BaseFunction,
         private _currentConfigService: IFormulaCurrentConfigService,
         private _runtimeService: IFormulaRuntimeService,
-        private _definedNamesService: IDefinedNamesService
+        private _definedNamesService: IDefinedNamesService,
+        private _localeService: LocaleService
     ) {
         super(token);
 
@@ -274,6 +276,7 @@ export class FunctionNodeFactory extends BaseAstNodeFactory {
         @IFormulaCurrentConfigService private readonly _currentConfigService: IFormulaCurrentConfigService,
         @IFormulaRuntimeService private readonly _runtimeService: IFormulaRuntimeService,
         @IDefinedNamesService private readonly _definedNamesService: IDefinedNamesService,
+        @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(Injector) private readonly _injector: Injector
     ) {
         super();
@@ -290,7 +293,7 @@ export class FunctionNodeFactory extends BaseAstNodeFactory {
             return ErrorNode.create(ErrorType.NAME);
         }
 
-        return new FunctionNode(token, functionExecutor, this._currentConfigService, this._runtimeService, this._definedNamesService);
+        return new FunctionNode(token, functionExecutor, this._currentConfigService, this._runtimeService, this._definedNamesService, this._localeService);
     }
 
     override checkAndCreateNodeType(param: LexerNode | string) {

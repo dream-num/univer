@@ -64,6 +64,7 @@ export default {
             helpAbstract: '简介',
             required: '必需。',
             optional: '可选。',
+            errorTitle: '错误',
         },
 
         functionType: {

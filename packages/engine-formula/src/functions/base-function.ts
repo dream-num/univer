@@ -34,12 +34,14 @@ import { CellReferenceObject } from '../engine/reference-object/cell-reference-o
 import { RowReferenceObject } from '../engine/reference-object/row-reference-object';
 import { ColumnReferenceObject } from '../engine/reference-object/column-reference-object';
 import { RangeReferenceObject } from '../engine/reference-object/range-reference-object';
+import type { IDefinedNameMapItem } from '../services/defined-names.service';
 
 export class BaseFunction extends Disposable {
     private _unitId: Nullable<string>;
     private _subUnitId: Nullable<string>;
     private _row: number = -1;
     private _column: number = -1;
+    private _definedNames: Nullable<IDefinedNameMapItem>;
 
     /**
      * Whether the function needs to expand the parameters
@@ -73,6 +75,26 @@ export class BaseFunction extends Disposable {
 
     get column() {
         return this._column;
+    }
+
+    /**
+     * In Excel, to inject a defined name into a function that has positioning capabilities,
+     * such as using the INDIRECT function to reference a named range,
+     * you can write it as follows:
+     * =INDIRECT("DefinedName1")
+     */
+    getDefinedName(name: string) {
+        const nameMap = this._definedNames;
+        if (nameMap == null) {
+            return null;
+        }
+        return Array.from(Object.values(nameMap)).filter((value) => {
+            return value.name === name;
+        })?.[0];
+    }
+
+    setDefinedNames(definedNames: IDefinedNameMapItem) {
+        this._definedNames = definedNames;
     }
 
     isAsync() {

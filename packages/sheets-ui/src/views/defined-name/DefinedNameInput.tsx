@@ -21,7 +21,7 @@ import type { IUnitRange, Nullable } from '@univerjs/core';
 import { AbsoluteRefType, createInternalEditorID, IUniverInstanceService, LocaleService, Tools } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { Button, Input, Radio, RadioGroup, Select } from '@univerjs/design';
-import { IDefinedNamesService, type IDefinedNamesServiceParam, IFunctionService, isReferenceString, LexerTreeBuilder, operatorToken, serializeRangeToRefString } from '@univerjs/engine-formula';
+import { IDefinedNamesService, type IDefinedNamesServiceParam, IFunctionService, isReferenceString, Lexer, operatorToken, serializeRangeToRefString } from '@univerjs/engine-formula';
 import { ErrorSingle } from '@univerjs/icons';
 import { hasCJKText } from '@univerjs/engine-render';
 import styles from './index.module.less';
@@ -56,11 +56,11 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
 
     } = props;
     const univerInstanceService = useDependency(IUniverInstanceService);
-    const workbook = univerInstanceService.getCurrentUniverSheetInstance();
+    const workbook = univerInstanceService.getCurrentUniverSheetInstance()!;
     const localeService = useDependency(LocaleService);
     const definedNamesService = useDependency(IDefinedNamesService);
     const functionService = useDependency(IFunctionService);
-    const lexerTreeBuilder = useDependency(LexerTreeBuilder);
+    const lexer = useDependency(Lexer);
 
     if (workbook == null) {
         return;
@@ -71,8 +71,11 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
     const sheetId = workbook.getActiveSheet().getSheetId();
 
     const [nameValue, setNameValue] = useState(name);
+
     const [formulaOrRefStringValue, setFormulaOrRefStringValue] = useState(formulaOrRefString);
+
     const [commentValue, setCommentValue] = useState(comment);
+
     const [localSheetIdValue, setLocalSheetIdValue] = useState(localSheetId);
 
     const [validString, setValidString] = useState('');
@@ -80,8 +83,6 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
     const [typeValue, setTypeValue] = useState(type);
 
     const [validFormulaOrRange, setValidFormulaOrRange] = useState(true);
-
-    const [updateFormulaOrRefStringValue, setUpdateFormulaOrRefStringValue] = useState(formulaOrRefString);
 
     const options = [{
         label: localeService.t('definedName.scopeWorkbook'),
@@ -104,7 +105,6 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
         }
 
         setFormulaOrRefStringValue(formulaOrRefStringCache);
-        setUpdateFormulaOrRefStringValue(formulaOrRefStringCache);
 
         setValidString('');
     }, [state]);
@@ -135,11 +135,11 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
     };
 
     const rangeSelectorChange = (ranges: IUnitRange[]) => {
-        setUpdateFormulaOrRefStringValue(convertRangeToString(ranges));
+        setFormulaOrRefStringValue(convertRangeToString(ranges));
     };
 
     const formulaEditorChange = (value: Nullable<string>) => {
-        setUpdateFormulaOrRefStringValue(value || '');
+        setFormulaOrRefStringValue(value || '');
     };
 
     const confirmChange = () => {
@@ -167,7 +167,7 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
             return;
         }
 
-        if (updateFormulaOrRefStringValue.length === 0) {
+        if (formulaOrRefStringValue.length === 0) {
             setValidString(localeService.t('definedName.formulaOrRefStringEmpty'));
             return;
         }
@@ -185,7 +185,7 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
         confirm && confirm({
             id: id || '',
             name: nameValue,
-            formulaOrRefString: lexerTreeBuilder.convertRefersToAbsolute(updateFormulaOrRefStringValue, AbsoluteRefType.ALL, AbsoluteRefType.ALL),
+            formulaOrRefString: lexer.convertRefersToAbsolute(formulaOrRefStringValue, AbsoluteRefType.ALL, AbsoluteRefType.ALL),
             comment: commentValue,
             localSheetId: localSheetIdValue,
         });
@@ -194,10 +194,10 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
     const typeValueChange = (value: string | number | boolean) => {
         const type = value as string;
         if (type === 'formula' && formulaOrRefStringValue.substring(0, 1) !== operatorToken.EQUALS) {
-            setUpdateFormulaOrRefStringValue(`${operatorToken.EQUALS}`);
+            setFormulaOrRefStringValue(`${operatorToken.EQUALS}`);
             setFormulaOrRefStringValue(`${operatorToken.EQUALS}`);
         } else if (formulaOrRefStringValue.substring(0, 1) === operatorToken.EQUALS) {
-            setUpdateFormulaOrRefStringValue('');
+            setFormulaOrRefStringValue('');
             setFormulaOrRefStringValue('');
         }
         setTypeValue(type);

@@ -37,7 +37,7 @@ export class HoverController extends Disposable {
 
     private _initPointerEvent() {
         const currentRender = this._renderManagerService.getRenderById(
-            this._univerInstanceService.getCurrentUniverSheetInstance().getUnitId()
+            this._univerInstanceService.getCurrentUniverSheetInstance()!.getUnitId()
         );
         if (!currentRender) {
             return;

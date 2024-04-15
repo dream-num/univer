@@ -41,6 +41,7 @@ import {
 } from '../mutations/remove-row-col.mutation';
 import { type ISetRangeValuesMutationParams, SetRangeValuesMutation } from '../mutations/set-range-values.mutation';
 import { followSelectionOperation } from './utils/selection-utils';
+import { getSheetCommandTarget } from './utils/target-util';
 
 export interface IRemoveRowColCommandParams {
     range: IRange;
@@ -59,18 +60,14 @@ export const RemoveRowCommand: ICommand<IRemoveRowColCommandParams> = {
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
         let range = params?.range;
-        if (!range) {
-            range = selectionManagerService.getLast()?.range;
-        }
-        if (!range) {
-            return false;
-        }
-        const univerInstanceService = accessor.get(IUniverInstanceService);
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
-        const worksheet = workbook.getActiveSheet();
+        if (!range) range = selectionManagerService.getLast()?.range;
+        if (!range) return false;
 
-        const unitId = workbook.getUnitId();
-        const subUnitId = worksheet.getSheetId();
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const target = getSheetCommandTarget(univerInstanceService);
+        if (!target) return false;
+
+        const { workbook, worksheet, subUnitId, unitId } = target;
 
         range = {
             ...range,
@@ -123,7 +120,9 @@ export const RemoveRowCommand: ICommand<IRemoveRowColCommandParams> = {
         return false;
     },
 };
+
 export const RemoveColCommandId = 'sheet.command.remove-col';
+
 /**
  * This command would remove the selected columns. These selected rows can be non-continuous.
  */
@@ -134,20 +133,16 @@ export const RemoveColCommand: ICommand = {
     handler: async (accessor: IAccessor, params?: IRemoveRowColCommandParams) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
+
         let range = params?.range;
-        if (!range) {
-            range = selectionManagerService.getLast()?.range;
-        }
-        if (!range) {
-            return false;
-        }
+        if (!range) range = selectionManagerService.getLast()?.range;
+        if (!range) return false;
 
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
-        const worksheet = workbook.getActiveSheet();
+        const target = getSheetCommandTarget(univerInstanceService);
+        if (!target) return false;
 
-        const unitId = workbook.getUnitId();
-        const subUnitId = worksheet.getSheetId();
+        const { workbook, worksheet, subUnitId, unitId } = target;
 
         range = {
             ...range,

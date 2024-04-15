@@ -48,8 +48,8 @@ export class ConditionalFormattingAutoFillController extends Disposable {
             relativeRange: IRange,
             matrixMap: Map<string, ObjectMatrix<1>>
         ) => {
-            const unitId = this._univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-            const subUnitId = this._univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
+            const unitId = this._univerInstanceService.getCurrentUniverSheetInstance()!.getUnitId();
+            const subUnitId = this._univerInstanceService.getCurrentUniverSheetInstance()!.getActiveSheet().getSheetId();
             const sourceRange = {
                 startRow: sourceStartCell.row,
                 startColumn: sourceStartCell.col,
@@ -137,8 +137,8 @@ export class ConditionalFormattingAutoFillController extends Disposable {
             });
         };
         const generalApplyFunc = (sourceRange: IRange, targetRange: IRange) => {
-            const unitId = this._univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-            const subUnitId = this._univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
+            const unitId = this._univerInstanceService.getCurrentUniverSheetInstance()!.getUnitId();
+            const subUnitId = this._univerInstanceService.getCurrentUniverSheetInstance()!.getActiveSheet().getSheetId();
             const matrixMap: Map<string, ObjectMatrix<1>> = new Map();
 
             const redos: IMutationInfo[] = [];

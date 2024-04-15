@@ -51,7 +51,7 @@ export function DeleteSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem
                     id === InsertSheetMutation.id ||
                     id === SetWorksheetHideMutation.id
                 ) {
-                    const worksheets = univerInstanceService.getCurrentUniverSheetInstance().getWorksheets();
+                    const worksheets = univerInstanceService.getCurrentUniverSheetInstance()!.getWorksheets();
                     // loop through all worksheets Map to see if there is more than one visible sheet
                     const visibleSheets = Array.from(worksheets.values()).filter(
                         (sheet) => sheet.getConfig().hidden === BooleanNumber.FALSE
@@ -117,7 +117,7 @@ export function HideSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
                     id === InsertSheetMutation.id ||
                     id === SetWorksheetHideMutation.id
                 ) {
-                    const worksheets = univerInstanceService.getCurrentUniverSheetInstance().getWorksheets();
+                    const worksheets = univerInstanceService.getCurrentUniverSheetInstance()!.getWorksheets();
                     // loop through all worksheets Map to see if there is more than one visible sheet
                     const visibleSheets = Array.from(worksheets.values()).filter(
                         (sheet) => sheet.getConfig().hidden === BooleanNumber.FALSE
@@ -135,7 +135,7 @@ export function HideSheetMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 export function UnHideSheetMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<any> {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const commandService = accessor.get(ICommandService);
-    const workbook = univerInstanceService.getCurrentUniverSheetInstance();
+    const workbook = univerInstanceService.getCurrentUniverSheetInstance()!;
     const hiddenList = workbook.getHiddenWorksheets().map((s) => ({
         label: workbook.getSheetBySheetId(s)?.getName() || '',
         value: s,
@@ -190,7 +190,7 @@ export function ShowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
                     id === InsertSheetMutation.id ||
                     id === SetWorksheetHideMutation.id
                 ) {
-                    const worksheets = univerInstanceService.getCurrentUniverSheetInstance().getWorksheets();
+                    const worksheets = univerInstanceService.getCurrentUniverSheetInstance()!.getWorksheets();
                     // loop through all worksheets Map to see if there is more than one sheet
                     const visibleSheets = Array.from(worksheets.values());
 

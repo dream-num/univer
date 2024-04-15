@@ -75,7 +75,7 @@ export function HelpFunction() {
     }, []);
 
     function getPosition() {
-        const documentDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        const documentDataModel = univerInstanceService.getCurrentUniverDocInstance()!;
 
         const editorUnitId = documentDataModel.getUnitId();
 

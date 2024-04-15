@@ -21,6 +21,7 @@ import {
     IUndoRedoService,
     IUniverInstanceService,
 } from '@univerjs/core';
+import { getSheetCommandTarget } from '@univerjs/sheets';
 import type { IAddConditionalRuleMutationParams, IConditionFormattingRule, MakePropertyOptional } from '@univerjs/sheets-conditional-formatting';
 import { AddConditionalRuleMutation, AddConditionalRuleMutationUndoFactory, ConditionalFormattingRuleModel } from '@univerjs/sheets-conditional-formatting';
 
@@ -42,10 +43,10 @@ export const AddCfCommand: ICommand<IAddCfCommandParams> = {
         const commandService = accessor.get(ICommandService);
         const conditionalFormattingRuleModel = accessor.get(ConditionalFormattingRuleModel);
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
-        const worksheet = workbook.getActiveSheet();
-        const unitId = params.unitId ?? workbook.getUnitId();
-        const subUnitId = params.subUnitId ?? worksheet.getSheetId();
+        const target = getSheetCommandTarget(univerInstanceService);
+        if (!target) return false;
+
+        const { unitId, subUnitId } = target;
         const cfId = conditionalFormattingRuleModel.createCfId(unitId, subUnitId);
         const config: IAddConditionalRuleMutationParams = { unitId, subUnitId, rule: { ...rule, cfId: rule.cfId || cfId } };
         const undo = AddConditionalRuleMutationUndoFactory(accessor, config);

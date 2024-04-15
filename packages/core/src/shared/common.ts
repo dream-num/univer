@@ -508,6 +508,8 @@ export function getBorderStyleType(type: string) {
         str = BorderStyleTypes.MEDIUM_DASH_DOT_DOT;
     } else if (type === '1.5pt solid') {
         str = BorderStyleTypes.THICK;
+    } else if (!type.includes('none')) {
+        str = BorderStyleTypes.THIN;
     } else {
         return BorderStyleTypes.NONE;
     }

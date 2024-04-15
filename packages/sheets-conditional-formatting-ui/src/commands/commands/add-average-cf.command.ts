@@ -20,6 +20,7 @@ import {
     ICommandService,
     IUniverInstanceService,
 } from '@univerjs/core';
+import { getSheetCommandTarget } from '@univerjs/sheets';
 import { AddConditionalRuleMutation, CFRuleType, CFSubRuleType, ConditionalFormattingRuleModel } from '@univerjs/sheets-conditional-formatting';
 import type { IAddConditionalRuleMutationParams, IAverageHighlightCell, IConditionFormattingRule } from '@univerjs/sheets-conditional-formatting';
 
@@ -29,7 +30,6 @@ interface IAddAverageCfParams {
     style: IAverageHighlightCell['style'];
     operator: IAverageHighlightCell['operator'];
 }
-//  { ranges: [{ startRow: 0, endRow: 10, startColumn: 3, endColumn: 3 }, { startRow: 0, endRow: 10, startColumn: 5, endColumn: 5 }], style: { fs: 30 }, operator: 'greaterThan' };
 export const AddAverageCfCommand: ICommand<IAddAverageCfParams> = {
     type: CommandType.COMMAND,
     id: 'sheet.command.add-average-conditional-rule',
@@ -40,12 +40,12 @@ export const AddAverageCfCommand: ICommand<IAddAverageCfParams> = {
         const { ranges, style, stopIfTrue, operator } = params;
         const conditionalFormattingRuleModel = accessor.get(ConditionalFormattingRuleModel);
         const commandService = accessor.get(ICommandService);
-
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
-        const worksheet = workbook.getActiveSheet();
-        const unitId = workbook.getUnitId();
-        const subUnitId = worksheet.getSheetId();
+
+        const target = getSheetCommandTarget(univerInstanceService);
+        if (!target) return false;
+
+        const { unitId, subUnitId } = target;
         const cfId = conditionalFormattingRuleModel.createCfId(unitId, subUnitId);
         const rule: IConditionFormattingRule = {
             ranges,

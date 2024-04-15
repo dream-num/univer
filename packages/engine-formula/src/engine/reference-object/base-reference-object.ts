@@ -15,7 +15,7 @@
  */
 
 import type { ICellData, IRange, Nullable } from '@univerjs/core';
-import { CellValueType, isNullCell } from '@univerjs/core';
+import { CellValueType, isNullCell, moveRangeByOffset } from '@univerjs/core';
 
 import { FormulaAstLRU } from '../../basics/cache-lru';
 import type { INumfmtItemMap, IRuntimeUnitDataType, IUnitData, IUnitSheetNameMap } from '../../basics/common';
@@ -113,10 +113,7 @@ export class BaseReferenceObject extends ObjectClassType {
     }
 
     getRangePosition() {
-        let startRow = this._rangeData.startRow + this._refOffsetY;
-        let endRow = this._rangeData.endRow + this._refOffsetY;
-        let startColumn = this._rangeData.startColumn + this._refOffsetX;
-        let endColumn = this._rangeData.endColumn + this._refOffsetX;
+        let { startRow, startColumn, endRow, endColumn } = moveRangeByOffset(this._rangeData, this._refOffsetX, this._refOffsetY);
 
         if (Number.isNaN(startRow)) {
             startRow = 0;

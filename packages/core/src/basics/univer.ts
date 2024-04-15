@@ -36,6 +36,8 @@ import { IPermissionService, PermissionService } from '../services/permission/pe
 import { UniverPermissionService } from '../services/permission/univer.permission.service';
 import { ResourceManagerService } from '../services/resource-manager/resource-manager.service';
 import { IResourceManagerService } from '../services/resource-manager/type';
+import { ResourceLoaderService } from '../services/resource-loader/resource-loader';
+import { IResourceLoaderService } from '../services/resource-loader/type';
 import { ThemeService } from '../services/theme/theme.service';
 import { IUndoRedoService, LocalUndoRedoService } from '../services/undoredo/undoredo.service';
 import type { Workbook } from '../sheets/workbook';
@@ -213,6 +215,7 @@ export class Univer extends PluginHolder {
             [IContextService, { useClass: ContextService }],
             [IFloatingObjectManagerService, { useClass: FloatingObjectManagerService, lazy: true }],
             [IResourceManagerService, { useClass: ResourceManagerService, lazy: true }],
+            [IResourceLoaderService, { useClass: ResourceLoaderService, lazy: true }],
         ]);
     }
 

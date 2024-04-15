@@ -16,7 +16,7 @@
 
 import type { IWorkbookData, Workbook } from '@univerjs/core';
 import { ILogService, IUniverInstanceService, LocaleType, LogLevel, Plugin, PluginType, Univer } from '@univerjs/core';
-import { CalculateFormulaService, DefinedNamesService, FormulaCurrentConfigService, FormulaDataModel, FormulaRuntimeService, IDefinedNamesService, IFormulaCurrentConfigService, IFormulaRuntimeService, LexerTreeBuilder } from '@univerjs/engine-formula';
+import { CalculateFormulaService, DefinedNamesService, FormulaCurrentConfigService, FormulaDataModel, FormulaRuntimeService, IDefinedNamesService, IFormulaCurrentConfigService, IFormulaRuntimeService, Lexer, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { SelectionManagerService, SheetInterceptorService } from '@univerjs/sheets';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
@@ -79,6 +79,7 @@ export function createCommandTestBed(workbookConfig?: IWorkbookData, dependencie
             injector.add([CalculateFormulaService]);
             injector.add([FormulaDataModel]);
             injector.add([LexerTreeBuilder]);
+            injector.add([Lexer]);
             injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
             injector.add([IFormulaRuntimeService, { useClass: FormulaRuntimeService }]);
             injector.add([IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }]);

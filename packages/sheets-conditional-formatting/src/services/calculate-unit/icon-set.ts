@@ -21,7 +21,7 @@ import { CFRuleType } from '../../base/const';
 import type { IIconSetRenderParams } from '../../render/type';
 import type { IConditionFormattingRule, IIconSet } from '../../models/type';
 import { ConditionalFormattingFormulaService, FormulaResultStatus } from '../conditional-formatting-formula.service';
-import { compareWithNumber, getOppositeOperator, getValueByType, isNullable } from './utils';
+import { compareWithNumber, filterRange, getOppositeOperator, getValueByType, isNullable } from './utils';
 import type { ICalculateUnit } from './type';
 import { EMPTY_STYLE } from './type';
 
@@ -33,8 +33,9 @@ export const iconSetCalculateUnit: ICalculateUnit = {
 
         const { worksheet } = context;
         const matrix = new ObjectMatrix<number>();
+        const ranges = filterRange(rule.ranges, worksheet.getMaxRows() - 1, worksheet.getMaxColumns() - 1);
 
-        rule.ranges.forEach((range) => {
+        ranges.forEach((range) => {
             Range.foreach(range, (row, col) => {
                 const cell = worksheet?.getCellRaw(row, col);
                 const v = cell && cell.v;
@@ -46,7 +47,7 @@ export const iconSetCalculateUnit: ICalculateUnit = {
         });
 
         const computeResult = new ObjectMatrix<IIconSetRenderParams >();
-        rule.ranges.forEach((range) => {
+        ranges.forEach((range) => {
             Range.foreach(range, (row, col) => {
                 computeResult.setValue(row, col, EMPTY_STYLE as IIconSetRenderParams);
             });

@@ -44,14 +44,11 @@ export function getSheetObject(
     renderManagerService: IRenderManagerService
 ): Nullable<ISheetObjectParam> {
     const workbook = univerInstanceService.getCurrentUniverSheetInstance();
+    if (!workbook) return null;
 
     const unitId = workbook.getUnitId();
-
     const currentRender = renderManagerService.getRenderById(unitId);
-
-    if (currentRender == null) {
-        return;
-    }
+    if (currentRender == null) return null;
 
     const { components, mainComponent, scene, engine } = currentRender;
 

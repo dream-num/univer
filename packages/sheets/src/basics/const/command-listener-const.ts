@@ -31,6 +31,9 @@ import {
 } from '../../commands/mutations/set-worksheet-row-height.mutation';
 import { SetWorksheetActiveOperation } from '../../commands/operations/set-worksheet-active.operation';
 
+/**
+ * Mutations those will trigger the skeleton change.
+ */
 export const COMMAND_LISTENER_SKELETON_CHANGE = [
     SetWorksheetRowHeightMutation.id,
     SetWorksheetRowIsAutoHeightMutation.id,

@@ -35,11 +35,13 @@ import { getSheetObject } from '../utils/component-tools';
  * This controller subscribe to context menu events in
  * sheet rendering views and invoke context menu at a correct position
  * and with correct menu type.
+ *
+ * @todo RenderUnit
  */
 @OnLifecycle(LifecycleStages.Rendered, SheetContextMenuController)
 export class SheetContextMenuController extends Disposable {
     constructor(
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IContextMenuService private readonly _contextMenuService: IContextMenuService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(SelectionManagerService)
@@ -47,16 +49,15 @@ export class SheetContextMenuController extends Disposable {
         @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService
     ) {
         super();
-        this._currentUniverService.currentSheet$.subscribe((workbook) => {
-            if (workbook == null) {
-                throw new Error('workbook is null');
+        this._univerInstanceService.currentSheet$.subscribe((workbook) => {
+            if (workbook) {
+                this._addListeners();
             }
-            this._addListeners();
         });
     }
 
     private _addListeners(): void {
-        const objects = getSheetObject(this._currentUniverService, this._renderManagerService);
+        const objects = getSheetObject(this._univerInstanceService, this._renderManagerService);
         if (!objects) {
             return;
         }

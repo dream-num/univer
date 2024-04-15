@@ -23,7 +23,7 @@ export interface IRemoteSyncMutationOptions extends IExecutionOptions {
     fromSync?: boolean;
 }
 
-export const RemoteSyncServiceName = 'univer.remote-sync-service';
+export const RemoteSyncServiceName = 'rpc.remote-sync.service';
 /**
  * This service is provided by the primary Univer.
  *

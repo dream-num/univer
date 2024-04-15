@@ -32,7 +32,7 @@ export interface ISheetSkeletonManagerParam {
 export interface ISheetSkeletonManagerSearch {
     unitId: string;
     sheetId: string;
-    commandId?: string;
+    commandId?: string; // WTF: why?
 }
 
 /**
@@ -57,11 +57,10 @@ export class SheetSkeletonManagerService implements IDisposable {
      * CurrentSkeletonBefore for pre-triggered logic during registration
      */
     private readonly _currentSkeletonBefore$ = new BehaviorSubject<Nullable<ISheetSkeletonManagerParam>>(null);
-
     readonly currentSkeletonBefore$ = this._currentSkeletonBefore$.asObservable();
 
     constructor(
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(LocaleService) private readonly _localeService: LocaleService
     ) { }
@@ -78,6 +77,15 @@ export class SheetSkeletonManagerService implements IDisposable {
 
     setCurrent(searchParam: ISheetSkeletonManagerSearch): Nullable<ISheetSkeletonManagerParam> {
         this._setCurrent(searchParam);
+    }
+
+    removeSkeleton(searchParam: Pick<ISheetSkeletonManagerSearch, 'unitId'>) {
+        const index = this._sheetSkeletonParam.findIndex((param) => param.unitId === searchParam.unitId);
+        if (index !== -1) {
+            this._sheetSkeletonParam.splice(index, 1);
+            this._currentSkeletonBefore$.next(null);
+            this._currentSkeleton$.next(null);
+        }
     }
 
     private _compareSearch(param1: Nullable<ISheetSkeletonManagerSearch>, param2: Nullable<ISheetSkeletonManagerSearch>) {
@@ -98,7 +106,7 @@ export class SheetSkeletonManagerService implements IDisposable {
         } else {
             const { unitId, sheetId } = searchParam;
 
-            const workbook = this._currentUniverService.getUniverSheetInstance(searchParam.unitId);
+            const workbook = this._univerInstanceService.getUniverSheetInstance(searchParam.unitId);
 
             const worksheet = workbook?.getSheetBySheetId(searchParam.sheetId);
 
@@ -119,9 +127,7 @@ export class SheetSkeletonManagerService implements IDisposable {
         this._currentSkeleton = searchParam;
 
         const nextParam = this.getCurrent();
-
         this._currentSkeletonBefore$.next(nextParam);
-
         this._currentSkeleton$.next(nextParam);
     }
 
@@ -159,7 +165,7 @@ export class SheetSkeletonManagerService implements IDisposable {
             return skeleton.skeleton;
         }
 
-        const workbook = this._currentUniverService.getUniverSheetInstance(searchParam.unitId);
+        const workbook = this._univerInstanceService.getUniverSheetInstance(searchParam.unitId);
         const worksheet = workbook?.getSheetBySheetId(searchParam.sheetId);
         if (!worksheet || !workbook) {
             return;

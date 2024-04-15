@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import type { BorderStyleTypes, IRange, IScale, ObjectMatrix } from '@univerjs/core';
+import type { IRange, IScale, ObjectMatrix } from '@univerjs/core';
+import { BorderStyleTypes } from '@univerjs/core';
 
 import { BORDER_TYPE, COLOR_BLACK_RGB, FIX_ONE_PIXEL_BLUR_OFFSET } from '../../../basics/const';
 import { drawDiagonalLineByBorderType, drawLineByBorderType, getLineWidth, setLineType } from '../../../basics/draw';
@@ -94,6 +95,10 @@ export class Border extends SheetExtension {
 
             for (const key in borderCaches) {
                 const { type, style, color } = borderCaches[key] as BorderCacheItem;
+
+                if (style === BorderStyleTypes.NONE) {
+                    continue;
+                }
 
                 let startY = cellStartY;
                 let endY = cellEndY;

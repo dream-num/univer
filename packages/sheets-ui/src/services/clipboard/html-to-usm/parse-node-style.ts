@@ -16,10 +16,9 @@
 
 import type { ITextStyle } from '@univerjs/core';
 import { BaselineOffset, BooleanNumber, ColorKit } from '@univerjs/core';
-import { pixelToPt } from '@univerjs/engine-render';
 
-export function extractNodeStyle(node: HTMLElement): ITextStyle {
-    const styles = node.style;
+export function extractNodeStyle(node: HTMLElement, predefinedStyles?: CSSStyleDeclaration): ITextStyle {
+    const styles = predefinedStyles ?? node.style;
     const docStyles: ITextStyle = {};
     const tagName = node.tagName.toLowerCase();
 
@@ -72,11 +71,12 @@ export function extractNodeStyle(node: HTMLElement): ITextStyle {
                 const fontSize = Number.parseInt(cssValue);
 
                 if (!Number.isNaN(fontSize)) {
-                    // TODO: @JOCS, hand other CSS value unit, rem, em, pt, %
+                    // TODO: @ybzky need other font size unit support
                     if (cssValue.endsWith('pt')) {
                         docStyles.fs = fontSize;
                     } else if (cssValue.endsWith('px')) {
-                        docStyles.fs = pixelToPt(fontSize);
+                        const transformedFontSize = fontSize * 0.75;
+                        docStyles.fs = transformedFontSize;
                     }
                 }
 

@@ -37,6 +37,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                     bg: {
                         rgb: '#FF6670',
                     },
+                    it: BooleanNumber.TRUE,
                 },
             },
             {
@@ -80,7 +81,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
             {
                 startIndex: 4,
                 paragraphStyle: {
-                    spaceAbove: 10,
+                    spaceAbove: 0,
                     lineSpacing: 2,
                     spaceBelow: 0,
                 },
@@ -601,8 +602,8 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
         },
         marginTop: ptToPixel(50),
         marginBottom: ptToPixel(50),
-        marginRight: ptToPixel(40),
-        marginLeft: ptToPixel(40),
+        marginRight: ptToPixel(50),
+        marginLeft: ptToPixel(50),
         renderConfig: {
             vertexAngle: 0,
             centerAngle: 0,

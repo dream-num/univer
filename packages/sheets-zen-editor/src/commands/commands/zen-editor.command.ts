@@ -22,14 +22,10 @@ import { IZenZoneService, KeyCode } from '@univerjs/ui';
 
 export const CancelZenEditCommand: ICommand = {
     id: 'zen-editor.command.cancel-zen-edit',
-
     type: CommandType.COMMAND,
-
     handler: async (accessor) => {
         const zenZoneEditorService = accessor.get(IZenZoneService);
-
         const editorBridgeService = accessor.get(IEditorBridgeService);
-
         const univerInstanceManager = accessor.get(IUniverInstanceService);
 
         const visibleState = editorBridgeService.isVisible();
@@ -44,12 +40,14 @@ export const CancelZenEditCommand: ICommand = {
         zenZoneEditorService.close();
 
         const currentSheetInstance = univerInstanceManager.getCurrentUniverSheetInstance();
+        if (currentSheetInstance) {
+            univerInstanceManager.focusUniverInstance(currentSheetInstance.getUnitId());
+            editorBridgeService.refreshEditCellState();
 
-        univerInstanceManager.focusUniverInstance(currentSheetInstance.getUnitId());
+            return true;
+        }
 
-        editorBridgeService.refreshEditCellState();
-
-        return true;
+        return false;
     },
 };
 
@@ -60,9 +58,7 @@ export const ConfirmZenEditCommand: ICommand = {
 
     handler: async (accessor) => {
         const zenZoneEditorService = accessor.get(IZenZoneService);
-
         const editorBridgeService = accessor.get(IEditorBridgeService);
-
         const univerInstanceManager = accessor.get(IUniverInstanceService);
 
         const visibleState = editorBridgeService.isVisible();
@@ -76,11 +72,12 @@ export const ConfirmZenEditCommand: ICommand = {
         zenZoneEditorService.close();
 
         const currentSheetInstance = univerInstanceManager.getCurrentUniverSheetInstance();
+        if (currentSheetInstance) {
+            univerInstanceManager.focusUniverInstance(currentSheetInstance.getUnitId());
+            editorBridgeService.refreshEditCellState();
+            return true;
+        }
 
-        univerInstanceManager.focusUniverInstance(currentSheetInstance.getUnitId());
-
-        editorBridgeService.refreshEditCellState();
-
-        return true;
+        return false;
     },
 };

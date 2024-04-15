@@ -23,6 +23,7 @@ export enum sequenceNodeType {
     FUNCTION,
     REFERENCE,
     ARRAY,
+    DEFINED_NAME,
 }
 
 export interface ISequenceNode {

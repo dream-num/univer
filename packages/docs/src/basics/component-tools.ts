@@ -28,17 +28,17 @@ export function getDocObject(
     renderManagerService: IRenderManagerService
 ): Nullable<IDocObjectParam> {
     const documentModel = univerInstanceService.getCurrentUniverDocInstance();
+    if (!documentModel) {
+        return null;
+    }
 
     const unitId = documentModel.getUnitId();
-
     const currentRender = renderManagerService.getRenderById(unitId);
-
     if (currentRender == null) {
         return;
     }
 
     const { mainComponent, scene, engine } = currentRender;
-
     const document = mainComponent as Documents;
 
     return {

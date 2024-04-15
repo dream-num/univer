@@ -42,7 +42,7 @@ export class CalculateController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(CalculateFormulaService) private readonly _calculateFormulaService: CalculateFormulaService,
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel
     ) {
         super();

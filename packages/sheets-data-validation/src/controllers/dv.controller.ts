@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
+import type { Workbook } from '@univerjs/core';
+import { DisposableCollection, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, toDisposable } from '@univerjs/core';
 import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
 import { Inject, Injector } from '@wendellhu/redi';
 import { DataValidationSingle } from '@univerjs/icons';
@@ -76,9 +77,14 @@ export class DataValidationController extends RxDisposable {
     }
 
     private _initInstanceChange() {
-        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
+        // TODO@wzhudev: sheet added and sheet dispose event
+    }
+
+    private _initOnWorkbook(workbook: Workbook): void {
+        const disposeCollection = new DisposableCollection();
+
         this._sheetDataValidationService.switchCurrent(workbook.getUnitId(), workbook.getActiveSheet().getSheetId());
-        this.disposeWithMe(
+        disposeCollection.add(toDisposable(
             workbook.activeSheet$.subscribe((worksheet) => {
                 if (worksheet) {
                     const unitId = workbook.getUnitId();
@@ -86,14 +92,14 @@ export class DataValidationController extends RxDisposable {
                     this._sheetDataValidationService.switchCurrent(unitId, subUnitId);
                 }
             })
-        );
+        ));
     }
 
     private _initCommandInterceptor() {
         this._sheetInterceptorService.interceptCommand({
             getMutations: (commandInfo) => {
                 if (commandInfo.id === ClearSelectionAllCommand.id) {
-                    const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
+                    const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
                     const unitId = workbook.getUnitId();
                     const worksheet = workbook.getActiveSheet();
                     const subUnitId = worksheet.getSheetId();

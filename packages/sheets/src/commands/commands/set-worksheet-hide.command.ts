@@ -27,6 +27,7 @@ import type { IAccessor } from '@wendellhu/redi';
 
 import type { ISetWorksheetHideMutationParams } from '../mutations/set-worksheet-hide.mutation';
 import { SetWorksheetHideMutation, SetWorksheetHideMutationFactory } from '../mutations/set-worksheet-hide.mutation';
+import { getSheetCommandTarget } from './utils/target-util';
 
 export interface ISetWorksheetHiddenCommandParams {
     subUnitId?: string;
@@ -39,21 +40,12 @@ export const SetWorksheetHideCommand: ICommand = {
     handler: async (accessor: IAccessor, params?: ISetWorksheetHiddenCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
-        const univerInstanceService = accessor.get(IUniverInstanceService);
         const errorService = accessor.get(ErrorService);
 
-        const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-        let subUnitId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
+        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), params);
+        if (!target) return false;
 
-        if (params) {
-            subUnitId = params.subUnitId ?? subUnitId;
-        }
-
-        const workbook = univerInstanceService.getUniverSheetInstance(unitId);
-        if (!workbook) return false;
-        const worksheet = workbook.getSheetBySheetId(subUnitId);
-        if (!worksheet) return false;
-
+        const { workbook, worksheet, unitId, subUnitId } = target;
         const hidden = worksheet.getConfig().hidden;
         if (hidden === BooleanNumber.TRUE) return false;
 
@@ -73,7 +65,6 @@ export const SetWorksheetHideCommand: ICommand = {
         }
 
         const result = commandService.syncExecuteCommand(SetWorksheetHideMutation.id, redoMutationParams);
-
         if (result) {
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
@@ -82,6 +73,7 @@ export const SetWorksheetHideCommand: ICommand = {
             });
             return true;
         }
+
         return false;
     },
 };

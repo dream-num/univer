@@ -96,7 +96,7 @@ export function SearchFunction() {
     }, []);
 
     function getPosition() {
-        const documentDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        const documentDataModel = univerInstanceService.getCurrentUniverDocInstance()!;
 
         const editorUnitId = documentDataModel.getUnitId();
 

@@ -52,7 +52,7 @@ describe('test sheet permission service', () => {
         const univerInstanceService = get(IUniverInstanceService);
         const univerPermissionService = get(UniverPermissionService);
 
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
+        const workbook = univerInstanceService.getCurrentUniverSheetInstance()!;
         const sheet = workbook.getActiveSheet();
         const sheetPermissionService = get(SheetPermissionService);
         expect(sheetPermissionService.getSheetEditable(workbook.getUnitId(), sheet.getSheetId())).toBe(
@@ -72,7 +72,7 @@ describe('test sheet permission service', () => {
         const univerInstanceService = get(IUniverInstanceService);
         const univerPermissionService = get(UniverPermissionService);
 
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
+        const workbook = univerInstanceService.getCurrentUniverSheetInstance()!;
         const sheet = workbook.getActiveSheet();
         const sheetPermissionService = get(SheetPermissionService);
         expect(sheetPermissionService.getSheetEditable(workbook.getUnitId(), sheet.getSheetId())).toBe(
@@ -91,7 +91,7 @@ describe('test sheet permission service', () => {
     it('test setRangeValue commands', async () => {
         const univerPermissionService = get(UniverPermissionService);
         const univerInstanceService = get(IUniverInstanceService);
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
+        const workbook = univerInstanceService.getCurrentUniverSheetInstance()!;
 
         const commandService = get(ICommandService);
         univerPermissionService.setEditable(workbook.getUnitId(), false);

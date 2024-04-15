@@ -25,6 +25,7 @@ import {
     SetWorksheetActiveOperation,
     // SetWorksheetUnActivateMutationFactory,
 } from '../operations/set-worksheet-active.operation';
+import { getSheetCommandTarget } from './utils/target-util';
 
 export interface ISetWorksheetShowCommandParams {
     value?: string;
@@ -39,17 +40,10 @@ export const SetWorksheetShowCommand: ICommand = {
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-        let subUnitId = univerInstanceService
-            .getCurrentUniverSheetInstance()
+        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService));
+        if (!target) return false;
 
-            .getActiveSheet()
-            .getSheetId();
-
-        if (params) {
-            subUnitId = params.value ?? subUnitId;
-        }
-
+        const { unitId, subUnitId } = target;
         const workbook = univerInstanceService.getUniverSheetInstance(unitId);
         if (!workbook) return false;
         const worksheet = workbook.getSheetBySheetId(subUnitId);

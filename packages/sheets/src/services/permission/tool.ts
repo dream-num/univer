@@ -16,22 +16,16 @@
 
 import { IUniverInstanceService } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
-import { Observable } from 'rxjs';
+import { map } from 'rxjs';
 
 import { SheetPermissionService } from './sheet-permission.service';
 
 export function getCurrentSheetDisabled$(accessor: IAccessor) {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const sheetPermissionService = accessor.get(SheetPermissionService);
-    const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-    const sheetId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
 
-    return new Observable<boolean>((subscriber) => {
-        const permission$ = sheetPermissionService.getEditable$(unitId, sheetId)?.subscribe((e) => {
-            subscriber.next(!e.value);
-        });
-        return () => {
-            permission$?.unsubscribe();
-        };
-    });
+    const unitId = univerInstanceService.getCurrentUniverSheetInstance()?.getUnitId();
+    const sheetId = univerInstanceService.getCurrentUniverSheetInstance()?.getActiveSheet().getSheetId();
+
+    return sheetPermissionService.getEditable$(unitId, sheetId)?.pipe(map((e) => !e.value));
 }

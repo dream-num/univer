@@ -141,7 +141,7 @@ const Template = (props: { item: IDropdownItem; commonProps: any; style?: React.
     );
 };
 
-// eslint-disable-next-line max-lines-per-function
+
 export function ListFormulaInput(props: IFormulaInputProps) {
     const { value, onChange: _onChange = () => { }, unitId, subUnitId, validResult, showError, ruleId } = props;
     const { formula1 = '', formula2 = '' } = value || {};

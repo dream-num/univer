@@ -18,6 +18,7 @@ import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService,
 import type { ICommand, IMutationInfo, IRange, ISheetDataValidationRule } from '@univerjs/core';
 import type { IAddDataValidationMutationParams, IUpdateDataValidationMutationParams } from '@univerjs/data-validation';
 import { AddDataValidationMutation, createDefaultNewRule, DataValidationModel, RemoveDataValidationMutation, UpdateDataValidationMutation, UpdateRuleType } from '@univerjs/data-validation';
+import { getSheetCommandTarget } from '@univerjs/sheets';
 import type { SheetDataValidationManager } from '../../models/sheet-data-validation-manager';
 import { OpenValidationPanelOperation } from '../operations/data-validation.operation';
 import type { RangeMutation } from '../../models/rule-matrix';
@@ -206,8 +207,10 @@ export const AddSheetDataValidationAndOpenCommand: ICommand = {
     id: 'data-validation.command.addRuleAndOpen',
     async handler(accessor) {
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
-        const worksheet = workbook.getActiveSheet();
+        const target = getSheetCommandTarget(univerInstanceService);
+        if (!target) return false;
+
+        const { workbook, worksheet } = target;
         const rule = createDefaultNewRule(accessor);
         const commandService = accessor.get(ICommandService);
         const unitId = workbook.getUnitId();

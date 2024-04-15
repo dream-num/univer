@@ -17,6 +17,7 @@
 import type { ICellData, IMutationInfo, IRange, Worksheet } from '@univerjs/core';
 import {
     Disposable,
+    ErrorService,
     extractPureTextFromCell,
     ICommandService,
     ILogService,
@@ -100,7 +101,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
 
     constructor(
         @ILogService private readonly _logService: ILogService,
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
         @IClipboardInterfaceService private readonly _clipboardInterfaceService: IClipboardInterfaceService,
         @IUndoRedoService private readonly _undoRedoService: IUndoRedoService,
@@ -109,7 +110,8 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @INotificationService private readonly _notificationService: INotificationService,
         @IPlatformService private readonly _platformService: IPlatformService,
-        @Inject(LocaleService) private readonly _localeService: LocaleService
+        @Inject(LocaleService) private readonly _localeService: LocaleService,
+        @Inject(ErrorService) private readonly _errorService: ErrorService
     ) {
         super();
         this._htmlToUSM = new HtmlToUSMService({
@@ -131,7 +133,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             return false; // maybe we should notify user that there is no selection
         }
 
-        const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
         const worksheet = workbook.getActiveSheet();
         const hooks = this._clipboardHooks;
 
@@ -221,7 +223,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
     addClipboardHook(hook: ISheetClipboardHook): IDisposable {
         if (this._clipboardHooks.findIndex((h) => h.id === hook.id) !== -1) {
             this._logService.error('[SheetClipboardService]', 'hook already exists', hook.id);
-            return { dispose: () => {} };
+            return { dispose: () => { } };
         }
         // hook added should be ordered at meaning while
         const insertIndex = this._clipboardHooks.findIndex((existingHook) => {
@@ -247,7 +249,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
     }
 
     private _generateCopyContent(unitId: string, subUnitId: string, range: IRange, hooks: ISheetClipboardHook[]) {
-        const workbook = this._currentUniverService.getUniverSheetInstance(unitId);
+        const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
         const worksheet = workbook?.getSheetBySheetId(subUnitId);
 
         if (!workbook || !worksheet) {
@@ -340,7 +342,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         if (result) {
             // add to undo redo services
             this._undoRedoService.pushUndoRedo({
-                unitID: this._currentUniverService.getCurrentUniverSheetInstance().getUnitId(),
+                unitID: this._univerInstanceService.getCurrentUniverSheetInstance()!.getUnitId(),
                 undoMutations: undoMutationsInfo,
                 redoMutations: redoMutationsInfo,
             });
@@ -374,11 +376,18 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         // cell properties and cell contents.
         const { rowProperties, colProperties, cellMatrix } = this._htmlToUSM.convert(html);
         const { startColumn, endColumn, startRow, endRow } = cellMatrix.getDataRange();
-        const rowCount = endRow - startRow + 1;
-        const colCount = endColumn - startColumn + 1;
         if (!cellMatrix || endColumn < startColumn || endRow < startRow) {
             return false;
         }
+
+        const worksheet = this._univerInstanceService
+            .getUniverSheetInstance(unitId)
+            ?.getSheetBySheetId(subUnitId);
+        if (!worksheet) {
+            return false;
+        }
+
+        const mergeData = worksheet?.getMergeData();
 
         // 2. get filtered rows in the target pasting area and get the final pasting matrix
         // we also handle transpose pasting at this step
@@ -388,7 +397,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
 
         // 3. call hooks with cell position and properties and get mutations (both do mutations and undo mutations)
         // we also handle 'copy value only' or 'copy style only' as this step
-        const pastedRange = this._transformPastedData(rowCount, colCount, cellMatrix, selection.range);
+        const pastedRange = this._getPastedRange(cellMatrix, selection.range, mergeData);
 
         // pastedRange.endColumn = pastedRange.startColumn + colCount;
         // pastedRange.endRow = pastedRange.startRow + rowCount;
@@ -396,6 +405,14 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         // If PastedRange is null, it means that the paste fails
         if (!pastedRange) {
             return false;
+        }
+
+        if (mergeData) {
+            const pastedRangeLapWithMergedCell = mergeData.some((merge) => Rectangle.intersects(pastedRange, merge) && !Rectangle.contains(pastedRange, merge));
+            if (pastedRangeLapWithMergedCell) {
+                this._errorService.emit('The paste area overlaps with merged cells.');
+                return false;
+            }
         }
 
         // 4. execute these mutations by the one method
@@ -427,7 +444,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             return false;
         }
 
-        const styles = this._currentUniverService.getUniverSheetInstance(copyUnitId)?.getStyles();
+        const styles = this._univerInstanceService.getUniverSheetInstance(copyUnitId)?.getStyles();
         cellMatrix.forValue((row, col, value) => {
             if (typeof value.s === 'string') {
                 const newValue = Tools.deepClone(value);
@@ -436,24 +453,34 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             }
         });
 
+        const worksheet = this._univerInstanceService
+            .getUniverSheetInstance(copyUnitId)
+            ?.getSheetBySheetId(copySubUnitId);
+        if (!worksheet) {
+            return false;
+        }
+
+        const mergeData = worksheet?.getMergeData();
+
         const { startColumn, endColumn, startRow, endRow } = range;
-        const pastedRange = this._transformPastedData(
-            endRow - startRow + 1,
-            endColumn - startColumn + 1,
+        const pastedRange = this._getPastedRange(
             cellMatrix,
-            selection.range
+            selection.range,
+            mergeData
         );
 
         if (!pastedRange) {
             return false;
         }
 
-        const worksheet = this._currentUniverService
-            .getUniverSheetInstance(copyUnitId)
-            ?.getSheetBySheetId(copySubUnitId);
-        if (!worksheet) {
-            return false;
+        if (mergeData) {
+            const pastedRangeLapWithMergedCell = mergeData.some((merge) => Rectangle.intersects(pastedRange, merge) && !Rectangle.contains(pastedRange, merge));
+            if (pastedRangeLapWithMergedCell) {
+                this._errorService.emit('The paste area overlaps with merged cells.');
+                return false;
+            }
         }
+
         const colManager = worksheet.getColumnManager();
         const rowManager = worksheet.getRowManager();
         const defaultColumnWidth = worksheet.getConfig().defaultColumnWidth;
@@ -469,7 +496,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
 
         for (let j = startRow; j <= endRow; j++) {
             const row = rowManager.getRowOrCreate(j);
-            rowProperties.push({ height: `${row.h || defaultRowHeight}` });
+            rowProperties.push({ height: `${row.ah || row.h || defaultRowHeight}` });
         }
 
         const pasteRes = this._pasteUSM(
@@ -611,7 +638,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         range: IRange,
         cellMatrix: ObjectMatrix<ICellDataWithSpanInfo>
     ) {
-        const worksheet = this._currentUniverService.getUniverSheetInstance(unitId)?.getSheetBySheetId(subUnitId);
+        const worksheet = this._univerInstanceService.getUniverSheetInstance(unitId)?.getSheetBySheetId(subUnitId);
         if (!worksheet) {
             return null;
         }
@@ -660,7 +687,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
     }
 
     private _getPastingTarget() {
-        const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
         const worksheet = workbook.getActiveSheet();
         const selection = this._selectionManagerService.getLast();
         return {
@@ -722,7 +749,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         const destinationRows = endRow - startRow + 1;
         const destinationColumns = endColumn - startColumn + 1;
 
-        const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
         const worksheet = workbook.getActiveSheet();
         // const mergedRange = worksheet.getMergedCell(startRow, startColumn);
         const mergeData = worksheet.getMergeData();
@@ -818,13 +845,46 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         return range;
     }
 
+    private _getPastedRange(cellMatrix: ObjectMatrix<ICellDataWithSpanInfo>, pasteRange: IRange, mergedCell: IRange[]) {
+        const { startColumn, endColumn, startRow, endRow } = cellMatrix.getDataRange();
+        const rowCount = endRow - startRow + 1;
+        const colCount = endColumn - startColumn + 1;
+
+        const pasteStartRow = pasteRange.startRow;
+        const pasteStartColumn = pasteRange.startColumn;
+
+        const pasteSelectionRangeRowLen = pasteRange.endRow - pasteRange.startRow + 1;
+        const pasteSelectionRangeColLen = pasteRange.endColumn - pasteRange.startColumn + 1;
+
+        if (pasteSelectionRangeRowLen % rowCount === 0 && pasteSelectionRangeColLen % colCount === 0) {
+            const hasLapWithMerge = mergedCell?.some((merge) => Rectangle.intersects(pasteRange, merge));
+            if (!hasLapWithMerge) {
+                for (let r = 0; r < pasteSelectionRangeRowLen; r++) {
+                    for (let c = 0; c < pasteSelectionRangeColLen; c++) {
+                        const cell = cellMatrix.getValue(r % rowCount, c % colCount);
+                        cell && cellMatrix.setValue(r, c, cell);
+                    }
+                }
+                return pasteRange;
+            }
+        }
+
+        return {
+            ...pasteRange,
+            startRow: pasteStartRow,
+            startColumn: pasteStartColumn,
+            endRow: pasteStartRow + rowCount - 1,
+            endColumn: pasteStartColumn + colCount - 1,
+        };
+    }
+
     /**
      * Determine whether the cells starting from the upper left corner of the range (merged or non-merged or combined) are consistent with the size of the original data
      * @param cellMatrix
      * @param range
      */
     private _topLeftCellsMatch(rowCount: number, colCount: number, range: IRange): boolean {
-        const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
         const worksheet = workbook.getActiveSheet();
         const { startRow, startColumn, endRow, endColumn } = range;
 
@@ -849,6 +909,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
 
 function getMatrixPlainText(matrix: ObjectMatrix<ICellDataWithSpanInfo>) {
     let plain = '';
+    const matrixLength = matrix.getLength();
     matrix.forRow((row, cols) => {
         const arr: string[] = [];
         cols.forEach((col) => {
@@ -859,7 +920,7 @@ function getMatrixPlainText(matrix: ObjectMatrix<ICellDataWithSpanInfo>) {
             }
         });
         plain += arr.join('\t');
-        if (row !== matrix.getLength() - 1) {
+        if (row !== matrixLength - 1) {
             plain += '\n';
         }
     });

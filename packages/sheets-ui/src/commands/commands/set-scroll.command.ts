@@ -17,6 +17,7 @@
 import type { ICommand, IRange } from '@univerjs/core';
 import { CommandType, ICommandService, IUniverInstanceService } from '@univerjs/core';
 
+import { getSheetCommandTarget } from '@univerjs/sheets';
 import { ScrollManagerService } from '../../services/scroll-manager.service';
 import { SetScrollOperation } from '../operations/scroll.operation';
 import { ScrollController } from '../../controllers/scroll.controller';
@@ -35,9 +36,12 @@ export const SetScrollRelativeCommand: ICommand<ISetScrollRelativeCommandParams>
     handler: async (accessor, params = { offsetX: 0, offsetY: 0 }) => {
         const commandService = accessor.get(ICommandService);
         const scrollManagerService = accessor.get(ScrollManagerService);
-        const currentUniverService = accessor.get(IUniverInstanceService);
-        const workbook = currentUniverService.getCurrentUniverSheetInstance();
-        const worksheet = workbook.getActiveSheet();
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+
+        const target = getSheetCommandTarget(univerInstanceService);
+        if (!target) return false;
+
+        const { unitId, subUnitId, worksheet } = target;
         const { xSplit, ySplit } = worksheet.getConfig().freeze;
         const currentScroll = scrollManagerService.getCurrentScroll();
         const { offsetX = 0, offsetY = 0 } = params || {};
@@ -49,8 +53,8 @@ export const SetScrollRelativeCommand: ICommand<ISetScrollRelativeCommandParams>
         } = currentScroll || {};
 
         return commandService.executeCommand(SetScrollOperation.id, {
-            unitId: workbook.getUnitId(),
-            sheetId: worksheet.getSheetId(),
+            unitId,
+            sheetId: subUnitId,
             sheetViewStartRow: sheetViewStartRow + ySplit,
             sheetViewStartColumn: sheetViewStartColumn + xSplit,
             offsetX: currentOffsetX + offsetX,
@@ -80,11 +84,13 @@ export const ScrollCommand: ICommand<IScrollCommandParams> = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const scrollManagerService = accessor.get(ScrollManagerService);
 
-        const currentWorkbook = univerInstanceService.getCurrentUniverSheetInstance();
-        const currentWorksheet = currentWorkbook.getActiveSheet();
+        const target = getSheetCommandTarget(univerInstanceService);
+        if (!target) return false;
+
+        const { workbook, worksheet } = target;
         const currentScroll = scrollManagerService.getCurrentScroll();
 
-        if (!currentWorksheet) {
+        if (!worksheet) {
             return false;
         }
 
@@ -96,12 +102,12 @@ export const ScrollCommand: ICommand<IScrollCommandParams> = {
             offsetY: currentOffsetY,
         } = currentScroll || {};
 
-        const { xSplit, ySplit } = currentWorksheet.getConfig().freeze;
+        const { xSplit, ySplit } = worksheet.getConfig().freeze;
 
         const commandService = accessor.get(ICommandService);
         return commandService.syncExecuteCommand(SetScrollOperation.id, {
-            unitId: currentWorkbook.getUnitId(),
-            sheetId: currentWorksheet.getSheetId(),
+            unitId: workbook.getUnitId(),
+            sheetId: worksheet.getSheetId(),
             sheetViewStartRow: sheetViewStartRow ?? (currentRow ?? 0) + ySplit,
             sheetViewStartColumn: sheetViewStartColumn ?? (currentColumn ?? 0) + xSplit,
             offsetX: offsetX ?? currentOffsetX,
@@ -134,19 +140,14 @@ export const ResetScrollCommand: ICommand = {
     type: CommandType.COMMAND,
     handler: async (accessor) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
+        const target = getSheetCommandTarget(univerInstanceService);
+        if (!target) return false;
 
-        const currentWorkbook = univerInstanceService.getCurrentUniverSheetInstance();
-        const currentWorksheet = currentWorkbook.getActiveSheet();
-
-        if (!currentWorksheet) {
-            return false;
-        }
-
+        const { subUnitId, unitId } = target;
         const commandService = accessor.get(ICommandService);
-
         return commandService.executeCommand(SetScrollOperation.id, {
-            unitId: currentWorkbook.getUnitId(),
-            sheetId: currentWorksheet.getSheetId(),
+            unitId,
+            sheetId: subUnitId,
             sheetViewStartRow: 0,
             sheetViewStartColumn: 0,
         });

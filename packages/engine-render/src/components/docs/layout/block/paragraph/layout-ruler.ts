@@ -81,6 +81,28 @@ export function layoutParagraph(
     return [...pages];
 }
 
+function isGlyphGroupEndWithWhiteSpaces(glyphGroup: IDocumentSkeletonGlyph[]) {
+    if (glyphGroup.length <= 1) {
+        return false;
+    }
+
+    let isInWhiteSpace = false;
+
+    for (const g of glyphGroup) {
+        if (g.content === DataStreamTreeTokenType.SPACE) {
+            isInWhiteSpace = true;
+        }
+
+        if (isInWhiteSpace &&
+            g.content !== DataStreamTreeTokenType.SPACE && g.content !== DataStreamTreeTokenType.PARAGRAPH && g.streamType !== DataStreamTreeTokenType.SECTION_BREAK
+        ) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 function _divideOperator(
     glyphGroup: IDocumentSkeletonGlyph[],
     pages: IDocumentSkeletonPage[],
@@ -116,6 +138,11 @@ function _divideOperator(
                 glyphGroup.length === 1 &&
                 (glyphGroup[0].content === DataStreamTreeTokenType.SPACE ||
                     glyphGroup[0].content === DataStreamTreeTokenType.PARAGRAPH)
+            ) {
+                addGlyphToDivide(divide, glyphGroup, preOffsetLeft);
+            } else if (
+                // If a line of text ends with consecutive spaces, the spaces should not be placed on the second line.
+                divideInfo.isLast && isGlyphGroupEndWithWhiteSpaces(glyphGroup)
             ) {
                 addGlyphToDivide(divide, glyphGroup, preOffsetLeft);
             } else if (divide?.glyphGroup.length === 0) {

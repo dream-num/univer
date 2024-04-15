@@ -49,7 +49,7 @@ export class DocSkeletonManagerService extends RxDisposable {
     constructor(
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(DocViewModelManagerService) private readonly _docViewModelManagerService: DocViewModelManagerService,
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
         this._initialize();
@@ -84,10 +84,10 @@ export class DocSkeletonManagerService extends RxDisposable {
             this._setCurrent(docViewModel);
         });
 
-        this._currentUniverService.docDisposed$.pipe(takeUntil(this.dispose$)).subscribe((documentModel) => {
+        this._univerInstanceService.docDisposed$.pipe(takeUntil(this.dispose$)).subscribe((documentModel) => {
             this._docSkeletonMap.delete(documentModel.getUnitId());
 
-            this._currentSkeletonUnitId = this._currentUniverService.getCurrentUniverDocInstance().getUnitId();
+            this._currentSkeletonUnitId = this._univerInstanceService.getCurrentUniverDocInstance()?.getUnitId() ?? '';
         });
     }
 

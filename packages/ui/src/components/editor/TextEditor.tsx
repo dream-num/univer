@@ -182,22 +182,29 @@ export function TextEditor(props: ITextEditorProps & Omit<MyComponentProps, 'onC
         const valueChange = debounce((editor: Readonly<Editor>) => {
             const unitId = editor.editorUnitId;
             const isLegality = editorService.checkValueLegality(unitId);
-            const rect = editor.getBoundingClientRect();
 
-            setValidationOffset([rect.left, rect.top]);
-            if (rect.left + rect.top > 0) {
-                setValidationVisible(!isLegality);
+
+            setTimeout(() => {
+                const rect = editor.getBoundingClientRect();
+                setValidationOffset([rect.left, rect.top - 16]);
+                if (rect.left + rect.top > 0) {
+                    setValidationVisible(!isLegality);
+                }
+
+                if (editor.onlyInputFormula()) {
+                    setValidationContent(localeService.t('textEditor.formulaError'));
+                } else {
+                    setValidationContent(localeService.t('textEditor.rangeError'));
+                }
+            }, 100);
+
+
+            const currentValue = editorService.getValue(unitId);
+
+            if (currentValue !== value) {
+                onValid && onValid(isLegality);
+                onChange && onChange(editorService.getValue(id));
             }
-
-            if (editor.onlyInputFormula()) {
-                setValidationContent(localeService.t('textEditor.formulaError'));
-            } else {
-                setValidationContent(localeService.t('textEditor.rangeError'));
-            }
-
-            onValid && onValid(isLegality);
-
-            onChange && onChange(editorService.getValue(id));
         }, 30);
 
         const valueChangeSubscription = editorService.valueChange$.subscribe((editor) => {

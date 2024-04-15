@@ -16,7 +16,7 @@
 
 import type { IMutationInfo, IRange } from '@univerjs/core';
 import { Disposable, DisposableCollection, IUniverInstanceService } from '@univerjs/core';
-import { deserializeRangeWithSheet, ErrorType, generateStringWithSequence, LexerTreeBuilder, sequenceNodeType, serializeRange, serializeRangeWithSheet, serializeRangeWithSpreadsheet } from '@univerjs/engine-formula';
+import { deserializeRangeWithSheet, ErrorType, generateStringWithSequence, Lexer, sequenceNodeType, serializeRange, serializeRangeWithSheet, serializeRangeWithSpreadsheet } from '@univerjs/engine-formula';
 import type { EffectRefRangeParams } from '@univerjs/sheets';
 import { handleDefaultRangeChangeWithEffectRefCommands, RefRangeService } from '@univerjs/sheets';
 import type { IDisposable } from '@wendellhu/redi';
@@ -32,7 +32,7 @@ export type FormulaChangeCallback = (formulaString: string) => {
 export class FormulaRefRangeService extends Disposable {
     constructor(
         @Inject(RefRangeService) private readonly _refRangeService: RefRangeService,
-        @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder,
+        @Inject(Lexer) private readonly _lexer: Lexer,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
@@ -40,10 +40,10 @@ export class FormulaRefRangeService extends Disposable {
 
     registerFormula(formula: string, callback: FormulaChangeCallback): IDisposable {
         const rangeMap = new Map<string, { unitId: string; subUnitId: string; range: IRange; sheetName: string }>();
-        const sequenceNodes = this._lexerTreeBuilder.sequenceNodesBuilder(formula);
+        const sequenceNodes = this._lexer.sequenceNodesBuilder(formula);
         const disposableCollection = new DisposableCollection();
         const handleChange = (params: EffectRefRangeParams) => {
-            const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
+            const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
             const worksheet = workbook.getActiveSheet();
             const unitId = workbook.getUnitId();
             const subUnitId = worksheet.getSheetId();
@@ -81,7 +81,7 @@ export class FormulaRefRangeService extends Disposable {
             if (typeof node === 'object' && node.nodeType === sequenceNodeType.REFERENCE) {
                 const gridRangeName = deserializeRangeWithSheet(node.token);
                 const { range, unitId, sheetName } = gridRangeName;
-                const workbook = unitId ? this._univerInstanceService.getUniverSheetInstance(unitId) : this._univerInstanceService.getCurrentUniverSheetInstance();
+                const workbook = unitId ? this._univerInstanceService.getUniverSheetInstance(unitId) : this._univerInstanceService.getCurrentUniverSheetInstance()!;
                 const worksheet = sheetName ? workbook?.getSheetBySheetName(sheetName) : workbook?.getActiveSheet();
                 if (!worksheet) {
                     return;

@@ -38,6 +38,7 @@ import { DEFAULT_DOCUMENT_FONTSIZE } from '../../../basics/const';
 import type {
     IDocumentSkeletonColumn,
     IDocumentSkeletonDivide,
+    IDocumentSkeletonFontStyle,
     IDocumentSkeletonGlyph,
     IDocumentSkeletonLine,
     IDocumentSkeletonPage,
@@ -662,11 +663,7 @@ export function getGlyphGroupWidth(divide: IDocumentSkeletonDivide) {
 }
 
 interface IFontCreateConfig {
-    fontStyle: {
-        fontString: string;
-        fontSize: number;
-        fontFamily: string;
-    };
+    fontStyle: IDocumentSkeletonFontStyle;
     textStyle: ITextStyle;
     charSpace: number;
     gridType: GridType;

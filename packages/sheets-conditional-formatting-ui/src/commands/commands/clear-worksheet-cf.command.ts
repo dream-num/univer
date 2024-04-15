@@ -22,6 +22,7 @@ import {
     IUniverInstanceService,
     sequenceExecute,
 } from '@univerjs/core';
+import { getSheetCommandTarget } from '@univerjs/sheets';
 import { ConditionalFormattingRuleModel, DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory } from '@univerjs/sheets-conditional-formatting';
 
 import type { IDeleteConditionalRuleMutationParams } from '@univerjs/sheets-conditional-formatting';
@@ -37,12 +38,12 @@ export const ClearWorksheetCfCommand: ICommand<IClearWorksheetCfParams> = {
         const conditionalFormattingRuleModel = accessor.get(ConditionalFormattingRuleModel);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
         const undoRedoService = accessor.get(IUndoRedoService);
 
-        const worksheet = workbook.getActiveSheet();
-        const unitId = params?.unitId ?? workbook.getUnitId();
-        const subUnitId = params?.subUnitId ?? worksheet.getSheetId();
+        const target = getSheetCommandTarget(univerInstanceService, params);
+        if (!target) return false;
+
+        const { unitId, subUnitId } = target;
         const ruleList = conditionalFormattingRuleModel.getSubunitRules(unitId, subUnitId);
         if (!ruleList?.length) {
             return false;

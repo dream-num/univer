@@ -53,7 +53,7 @@ import { Inject } from '@wendellhu/redi';
 export class ActiveDirtyController extends Disposable {
     constructor(
         @IActiveDirtyManagerService private readonly _activeDirtyManagerService: IActiveDirtyManagerService,
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel,
         @IDefinedNamesService private readonly _definedNamesService: IDefinedNamesService
 
@@ -261,7 +261,7 @@ export class ActiveDirtyController extends Disposable {
 
         const dirtyRanges: IUnitRange[] = [];
 
-        const workbook = this._currentUniverService.getUniverSheetInstance(unitId);
+        const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
 
         const worksheet = workbook?.getSheetBySheetId(sheetId);
 
@@ -307,7 +307,7 @@ export class ActiveDirtyController extends Disposable {
 
         const dirtyRanges: IUnitRange[] = [];
 
-        const workbook = this._currentUniverService.getUniverSheetInstance(unitId);
+        const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
 
         const worksheet = workbook?.getSheetBySheetId(sheetId);
 

@@ -176,5 +176,25 @@ describe('Test indirect', () => {
 
             expect((result as BaseValueObject).getValue()).toStrictEqual(4);
         });
+
+        it('Reference column', async () => {
+            const lexerNode = lexer.treeBuilder('=sum(A:A)');
+
+            const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
+
+            const result = interpreter.execute(astNode as BaseAstNode);
+
+            expect((result as BaseValueObject).getValue()).toStrictEqual(5);
+        });
+
+        it('Not exist formula', async () => {
+            const lexerNode = lexer.treeBuilder('=notExistFormula(A:A)');
+
+            const astNode = astTreeBuilder.parse(lexerNode as LexerNode);
+
+            const result = interpreter.execute(astNode as BaseAstNode);
+
+            expect((result as BaseValueObject).getValue()).toStrictEqual(ErrorType.NAME);
+        });
     });
 });

@@ -78,6 +78,14 @@ export class CellReferenceObject extends BaseReferenceObject {
             range.endColumn = startColumn2;
         }
 
+        if (rangeData1.startAbsoluteRefType) {
+            range.startAbsoluteRefType = rangeData1.startAbsoluteRefType;
+        }
+
+        if (rangeData2.startAbsoluteRefType) {
+            range.endAbsoluteRefType = rangeData2.startAbsoluteRefType;
+        }
+
         return range;
     }
 

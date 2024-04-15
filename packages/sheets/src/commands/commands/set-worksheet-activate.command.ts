@@ -20,6 +20,7 @@ import type { IAccessor } from '@wendellhu/redi';
 
 import type { ISetWorksheetActiveOperationParams } from '../operations/set-worksheet-active.operation';
 import { SetWorksheetActiveOperation } from '../operations/set-worksheet-active.operation';
+import { getSheetCommandTarget } from './utils/target-util';
 
 export interface ISetWorksheetActivateCommandParams {
     unitId?: string;
@@ -34,16 +35,11 @@ export const SetWorksheetActivateCommand: ICommand = {
     id: 'sheet.command.set-worksheet-activate',
     handler: (accessor: IAccessor, params?: ISetWorksheetActivateCommandParams, options?: IExecutionOptions) => {
         const commandService = accessor.get(ICommandService);
-        const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        let unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-        let subUnitId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
+        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), params);
+        if (!target) return false;
 
-        if (params) {
-            unitId = params.unitId ?? unitId;
-            subUnitId = params.subUnitId ?? subUnitId;
-        }
-
+        const { unitId, subUnitId } = target;
         return new Promise((resolve) => {
             setTimeout(() => {
                 const result = commandService.syncExecuteCommand(SetWorksheetActiveOperation.id, {

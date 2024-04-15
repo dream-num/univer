@@ -85,7 +85,7 @@ During the refactoring process, it is recommended to remove legacy folders such 
 
 Avoid creating barrel imports (index.ts) unless it is the main root index.ts file of a plugin.
 
-### Contextual Connections
+### Connecting context
 
 To effectively contribute as a member of a software engineering team (and community as well!), it is crucial to establish strong contextual connections. Providing links to relevant resources can greatly assist others in understanding the context. Consider the following practices:
 
@@ -95,26 +95,9 @@ To effectively contribute as a member of a software engineering team (and commun
 
 By adopting these practices, you can enhance collaboration and facilitate a better understanding of the codebase within our community.
 
-### Naming conventions
+### Naming convention
 
-To ensure code quality and consistency, please adhere to the following guidelines:
-
--   Use kebab-case for both file names and folder names. If the file contains a React component, it should be in PascalCase, e.g. `SheetTab.tsx`.
--   Folder names should be in plural format.
--   Interfaces should be named starting with a capital "I".
--   Do use conventional type names including .service, .controller, .menu, .command, .mutation, and .operation. Invent additional type names if you must but take care not to create too many.
-
-Sometimes you need to defined a dependency injection token. Please adhere to the following naming convention:
-
-```typescript
-export const IYourServiceOrControllerName = createIdentifier<IYourServiceOrControllerName>('<package-name>.<your-service-or-controller-name>.(service|controller)');
-```
-
-For example:
-
-```typescript
-export const ILogService = createIdentifier<ILogService>('core.log.service');
-```
+Please refer to [Univer Naming Convention](./docs/NAMING_CONVENTION.md).
 
 ### Submitting pull requests
 

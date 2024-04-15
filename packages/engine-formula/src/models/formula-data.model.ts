@@ -29,7 +29,7 @@ import type {
     IUnitData,
     IUnitSheetNameMap,
 } from '../basics/common';
-import { LexerTreeBuilder } from '../engine/analysis/lexer-tree-builder';
+import { Lexer } from '../engine/analysis/lexer';
 import type { IFormulaIdMap } from './utils/formula-data-util';
 import { clearArrayFormulaCellDataByCell, updateFormulaDataByCellValue } from './utils/formula-data-util';
 
@@ -49,8 +49,8 @@ export class FormulaDataModel extends Disposable {
     private _numfmtItemMap: INumfmtItemMap = {};
 
     constructor(
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
-        @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @Inject(Lexer) private readonly _lexer: Lexer
     ) {
         super();
     }
@@ -302,13 +302,14 @@ export class FormulaDataModel extends Disposable {
     }
 
     initFormulaData() {
-        // load formula data from workbook config data
-
-        const unitFile = this._currentUniverService.getAllUniverSheetsInstance();
-        if (unitFile.length === 0) {
+        // Load formula data from workbook config data.
+        const allSheets = this._univerInstanceService.getAllUniverSheetsInstance();
+        if (allSheets.length === 0) {
             return;
         }
-        const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+
+        // Since there is at least a sheet, there must be current univer sheet instance.
+        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
         const unitId = workbook.getUnitId();
         this._formulaData[unitId] = {};
 
@@ -322,7 +323,7 @@ export class FormulaDataModel extends Disposable {
     }
 
     getCalculateData() {
-        const unitAllSheet = this._currentUniverService.getAllUniverSheetsInstance();
+        const unitAllSheet = this._univerInstanceService.getAllUniverSheetsInstance();
 
         const allUnitData: IUnitData = {};
 
@@ -404,7 +405,7 @@ export class FormulaDataModel extends Disposable {
                 } else if (typeof deleteFormula === 'string') {
                     const x = cell.x || 0;
                     const y = cell.y || 0;
-                    const offsetFormula = this._lexerTreeBuilder.moveFormulaRefOffset(deleteFormula, x, y);
+                    const offsetFormula = this._lexer.moveFormulaRefOffset(deleteFormula, x, y);
 
                     deleteFormulaIdMap.set(formulaId, {
                         r,

@@ -55,7 +55,7 @@ import { getSheetObject } from './utils/component-tools';
 export class SelectionController extends Disposable {
     constructor(
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ISelectionRenderService
@@ -70,7 +70,7 @@ export class SelectionController extends Disposable {
     }
 
     private _initialize() {
-        const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
         const worksheet = workbook.getActiveSheet();
         const sheetObject = this._getSheetObject();
         if (sheetObject == null) {
@@ -108,7 +108,7 @@ export class SelectionController extends Disposable {
                     const { unitId } = item;
                     let { formulaOrRefString } = item;
 
-                    const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+                    const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
 
                     if (unitId !== workbook.getUnitId()) {
                         return;
@@ -368,7 +368,7 @@ export class SelectionController extends Disposable {
         }
         const lastSelection = params[params.length - 1];
 
-        const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
         const worksheet = workbook.getActiveSheet();
 
         this._definedNamesService.setCurrentRange({
@@ -393,7 +393,9 @@ export class SelectionController extends Disposable {
     }
 
     private _move(selectionDataWithStyleList: ISelectionWithCoordAndStyle[], type: SelectionMoveType) {
-        const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
+        if (!workbook) return;
+
         const unitId = workbook.getUnitId();
         const sheetId = workbook.getActiveSheet().getSheetId();
         const current = this._selectionManagerService.getCurrent();
@@ -414,7 +416,7 @@ export class SelectionController extends Disposable {
     }
 
     private _getSheetObject() {
-        return getSheetObject(this._currentUniverService, this._renderManagerService);
+        return getSheetObject(this._univerInstanceService, this._renderManagerService);
     }
 
     private _initCommandListener() {
@@ -423,7 +425,7 @@ export class SelectionController extends Disposable {
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (updateCommandList.includes(command.id)) {
-                    const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+                    const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
                     const worksheet = workbook.getActiveSheet();
 
                     const params = command.params as ISetZoomRatioOperationParams;

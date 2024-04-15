@@ -27,9 +27,10 @@ import type {
 import { BaselineOffset, FontStyleType, Tools } from '@univerjs/core';
 import * as cjk from 'cjk-regex';
 
+import { FontCache } from '../components/docs/layout/shaping-engine/font-cache';
 import { DEFAULT_FONTFACE_PLANE } from './const';
-import { FontCache } from './font-cache';
 import type { IBoundRectNoAngle } from './vector2';
+import type { IDocumentSkeletonFontStyle } from './i-document-skeleton-cached';
 
 const DEG180 = 180;
 
@@ -248,10 +249,11 @@ export const UNIVER_GLOBAL_DEFAULT_FONT_SIZE = 11;
 
 export const UNIVER_GLOBAL_DEFAULT_FONT_FAMILY = 'Arial';
 
-export function getFontStyleString(textStyle?: IStyleBase, localeService?: LocaleService) {
-    // 获取字体配置
-
-    // TODO: @jikkai @DR-Univer should read default font from configuration, not from locale service
+// eslint-disable-next-line max-lines-per-function
+export function getFontStyleString(
+    textStyle?: IStyleBase,
+    _localeService?: LocaleService
+): IDocumentSkeletonFontStyle {
     const defaultFont = UNIVER_GLOBAL_DEFAULT_FONT_FAMILY;
 
     const defaultFontSize = UNIVER_GLOBAL_DEFAULT_FONT_SIZE;
@@ -263,6 +265,7 @@ export function getFontStyleString(textStyle?: IStyleBase, localeService?: Local
             fontCache: fontString,
             fontString,
             fontSize: defaultFontSize,
+            originFontSize: defaultFontSize,
             fontFamily: defaultFont,
         };
     }
@@ -283,10 +286,11 @@ export function getFontStyleString(textStyle?: IStyleBase, localeService?: Local
     }
 
     // font-size/line-height
-    let fontSize = defaultFontSize;
+    let originFontSize = defaultFontSize;
     if (textStyle.fs) {
-        fontSize = Math.ceil(textStyle.fs);
+        originFontSize = Math.ceil(textStyle.fs);
     }
+    let fontSize = originFontSize;
 
     let fontFamilyResult = defaultFont;
     if (textStyle.ff) {
@@ -329,6 +333,7 @@ export function getFontStyleString(textStyle?: IStyleBase, localeService?: Local
         fontCache: fontStringPure,
         fontString,
         fontSize,
+        originFontSize,
         fontFamily: fontFamilyResult,
     };
 }

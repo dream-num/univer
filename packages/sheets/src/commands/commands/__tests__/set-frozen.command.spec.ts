@@ -108,7 +108,7 @@ describe('Test set frozen commands', () => {
     describe('set frozen', () => {
         describe('set frozen', async () => {
             it('correct situation: ', async () => {
-                const workbook = get(IUniverInstanceService).getCurrentUniverSheetInstance();
+                const workbook = get(IUniverInstanceService).getCurrentUniverSheetInstance()!;
                 if (!workbook) throw new Error('This is an error');
 
                 const targetActiveSheet = workbook.getActiveSheet();

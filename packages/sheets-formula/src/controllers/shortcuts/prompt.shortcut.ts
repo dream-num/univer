@@ -31,7 +31,7 @@ export const PROMPT_SELECTION_KEYCODE_ARROW_LIST = [
     KeyCode.ARROW_RIGHT,
 ];
 
-export const PROMPT_SELECTION_KEYCODE_LIST = [...PROMPT_SELECTION_KEYCODE_ARROW_LIST, KeyCode.ENTER, KeyCode.TAB];
+export const PROMPT_SELECTION_KEYCODE_LIST = [...PROMPT_SELECTION_KEYCODE_ARROW_LIST, KeyCode.ENTER, KeyCode.TAB, KeyCode.ESC];
 
 export function promptSelectionShortcutItem() {
     const shortcutList: IShortcutItem[] = [];

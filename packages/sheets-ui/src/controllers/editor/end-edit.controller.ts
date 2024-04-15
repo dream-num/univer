@@ -83,7 +83,7 @@ export class EndEditController extends Disposable {
     private _cursorChange: CursorChange = CursorChange.InitialState;
 
     constructor(
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ICommandService private readonly _commandService: ICommandService,
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
@@ -184,7 +184,7 @@ export class EndEditController extends Disposable {
                     return;
                 }
 
-                const workbook = this._currentUniverService.getUniverSheetInstance(unitId);
+                const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
 
                 const worksheet = workbook?.getSheetBySheetId(sheetId);
 

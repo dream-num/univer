@@ -81,7 +81,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
 
     const rangeSelectorService = useDependency(IRangeSelectorService);
 
-    const currentUniverService = useDependency(IUniverInstanceService);
+    const univerInstanceService = useDependency(IUniverInstanceService);
 
     const [selectorVisible, setSelectorVisible] = useState(false);
 
@@ -247,18 +247,29 @@ export function RangeSelector(props: IRangeSelectorProps) {
     }
 
     function getSheetIdByName(name: string) {
-        return currentUniverService.getCurrentUniverSheetInstance().getSheetBySheetName(name)?.getSheetId() || '';
+        return univerInstanceService.getCurrentUniverSheetInstance()?.getSheetBySheetName(name)?.getSheetId() || '';
     }
 
     function handleTextValueChange(value: Nullable<string>) {
         setRangeValue(value || '');
 
-        if (value === '') {
+        const valueArray = value?.split(',') || [];
+
+        if (value === '' || valueArray.length === 0) {
             onChange && onChange([]);
             return;
         }
 
-        const ranges = value?.split(',').map((ref) => {
+        const result = valueArray.every((refString) => {
+            return isReferenceString(refString.trim());
+        });
+
+        if (!result) {
+            onChange && onChange([]);
+            return;
+        }
+
+        const ranges = valueArray.map((ref) => {
             const unitRange = deserializeRangeWithSheet(ref);
             return {
                 unitId: unitRange.unitId,

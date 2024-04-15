@@ -16,7 +16,7 @@
 
 import type { ICommand } from '@univerjs/core';
 import { CommandType, ICommandService, IUniverInstanceService, LocaleService } from '@univerjs/core';
-import { SelectionManagerService, SetColHiddenCommand, SetRowHiddenCommand } from '@univerjs/sheets';
+import { getSheetCommandTarget, SelectionManagerService, SetColHiddenCommand, SetRowHiddenCommand } from '@univerjs/sheets';
 import { IConfirmService } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 
@@ -29,14 +29,15 @@ export const HideRowConfirmCommand: ICommand = {
         const selectionManagerService = accessor.get(SelectionManagerService);
 
         const ranges = selectionManagerService.getSelections()?.map((s) => s.range);
-        if (!ranges?.length) {
-            return false;
-        }
+        if (!ranges?.length) return false;
 
         const commandService = accessor.get(ICommandService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
-        const worksheet = workbook.getActiveSheet();
+
+        const target = getSheetCommandTarget(univerInstanceService);
+        if (!target) return false;
+
+        const { worksheet } = target;
         const allRowRanges = worksheet.getVisibleRows();
 
         if (isAllRowsCovered(allRowRanges, ranges)) {
@@ -74,8 +75,11 @@ export const HideColConfirmCommand: ICommand = {
 
         const commandService = accessor.get(ICommandService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
-        const worksheet = workbook.getActiveSheet();
+
+        const target = getSheetCommandTarget(univerInstanceService);
+        if (!target) return false;
+
+        const { worksheet } = target;
         const allColumnRanges = worksheet.getVisibleCols();
 
         if (isAllColumnsCovered(allColumnRanges, ranges)) {

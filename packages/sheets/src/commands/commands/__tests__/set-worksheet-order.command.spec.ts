@@ -53,7 +53,7 @@ describe('Test set worksheet order commands', () => {
     describe('set worksheet order', () => {
         describe('set worksheet order', async () => {
             it('correct situation: ', async () => {
-                const workbook = get(IUniverInstanceService).getCurrentUniverSheetInstance();
+                const workbook = get(IUniverInstanceService).getCurrentUniverSheetInstance()!;
                 if (!workbook) throw new Error('This is an error');
 
                 const targetActiveSheet = workbook.getActiveSheet();

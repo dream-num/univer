@@ -57,7 +57,7 @@ export class AutoHeightController {
         const { skeleton } = sheetSkeletonService.getCurrent()!;
         const rowsAutoHeightInfo = skeleton.calculateAutoHeightInRange(ranges);
 
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
+        const workbook = univerInstanceService.getCurrentUniverSheetInstance()!;
         const unitId = workbook.getUnitId();
         const subUnitId = workbook.getActiveSheet().getSheetId();
 

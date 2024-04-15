@@ -19,7 +19,7 @@ import { isObject } from '@univerjs/engine-render';
 import { CFRuleType } from '../../base/const';
 import type { IColorScale, IConditionFormattingRule } from '../../models/type';
 import { ConditionalFormattingFormulaService, FormulaResultStatus } from '../conditional-formatting-formula.service';
-import { getColorScaleFromValue, getValueByType, isNullable } from './utils';
+import { filterRange, getColorScaleFromValue, getValueByType, isNullable } from './utils';
 import type { ICalculateUnit } from './type';
 
 const emptyStyle = '';
@@ -29,8 +29,9 @@ export const colorScaleCellCalculateUnit: ICalculateUnit = {
         const ruleConfig = rule.rule as IColorScale;
         const conditionalFormattingFormulaService = context.accessor.get(ConditionalFormattingFormulaService);
         const { worksheet } = context;
-        const matrix = new ObjectMatrix< number>();
-        rule.ranges.forEach((range) => {
+        const matrix = new ObjectMatrix<number>();
+        const ranges = filterRange(rule.ranges, worksheet.getMaxRows() - 1, worksheet.getMaxColumns() - 1);
+        ranges.forEach((range) => {
             Range.foreach(range, (row, col) => {
                 const cell = worksheet?.getCellRaw(row, col);
                 const v = cell && cell.v;
@@ -41,8 +42,8 @@ export const colorScaleCellCalculateUnit: ICalculateUnit = {
             });
         });
 
-        const computeResult = new ObjectMatrix< string >();
-        rule.ranges.forEach((range) => {
+        const computeResult = new ObjectMatrix<string>();
+        ranges.forEach((range) => {
             Range.foreach(range, (row, col) => {
                 computeResult.setValue(row, col, emptyStyle);
             });
@@ -53,8 +54,8 @@ export const colorScaleCellCalculateUnit: ICalculateUnit = {
                 value: getValueByType(config.value, matrix, { ...context, cfId: rule.cfId }), color: new ColorKit(config.color),
             };
         });
-         // If the formula triggers the calculation, wait for the result,
-         // and use the previous style cache until the result comes out
+        // If the formula triggers the calculation, wait for the result,
+        // and use the previous style cache until the result comes out
         const isFormulaWithoutSuccess = _configList.some((item) => isObject(item.value) ? item.value.status !== FormulaResultStatus.SUCCESS : false);
         if (isFormulaWithoutSuccess) {
             return conditionalFormattingFormulaService.getCache(context.unitId, context.subUnitId, rule.cfId) ?? computeResult;
@@ -65,8 +66,10 @@ export const colorScaleCellCalculateUnit: ICalculateUnit = {
             .reduce((result, color, index) => {
                 result.result.push({ color, value: result.sortValue[index] });
                 return result;
-            }, { result: [] as { value: number;color: ColorKit }[],
-                 sortValue: _configList.map((item) => item.value.result as number).sort((a, b) => a - b) })
+            }, {
+                result: [] as { value: number; color: ColorKit }[],
+                sortValue: _configList.map((item) => item.value.result as number).sort((a, b) => a - b),
+            })
             .result;
 
         if (colorList.length <= 1) {

@@ -20,6 +20,7 @@ import {
     ICommandService,
     IUniverInstanceService,
 } from '@univerjs/core';
+import { getSheetCommandTarget } from '@univerjs/sheets';
 import { AddConditionalRuleMutation, CFRuleType, CFSubRuleType, ConditionalFormattingRuleModel } from '@univerjs/sheets-conditional-formatting';
 import type { IAddConditionalRuleMutationParams, IConditionFormattingRule, ITimePeriodHighlightCell } from '@univerjs/sheets-conditional-formatting';
 
@@ -42,10 +43,10 @@ export const AddTimePeriodCfCommand: ICommand<IAddTimePeriodCf> = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
 
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
-        const worksheet = workbook.getActiveSheet();
-        const unitId = workbook.getUnitId();
-        const subUnitId = worksheet.getSheetId();
+        const target = getSheetCommandTarget(univerInstanceService);
+        if (!target) return false;
+
+        const { unitId, subUnitId } = target;
         const cfId = conditionalFormattingRuleModel.createCfId(unitId, subUnitId);
         const rule: IConditionFormattingRule<ITimePeriodHighlightCell> = {
             ranges, cfId,

@@ -83,7 +83,7 @@ export class StartEditController extends Disposable {
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @Inject(DocViewModelManagerService) private readonly _docViewModelManagerService: DocViewModelManagerService,
         @IContextService private readonly _contextService: IContextService,
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
         @ICellEditorManagerService private readonly _cellEditorManagerService: ICellEditorManagerService,
@@ -181,7 +181,7 @@ export class StartEditController extends Disposable {
                     documentModel!.updateDocumentDataPageSize((endX - startX) / scaleX);
                 }
 
-                this._currentUniverService.changeDoc(editorUnitId, documentModel!);
+                this._univerInstanceService.changeDoc(editorUnitId, documentModel!);
 
                 this._contextService.setContextValue(FOCUSING_EDITOR_BUT_HIDDEN, true);
 
@@ -236,16 +236,19 @@ export class StartEditController extends Disposable {
             documentDataModel.updateDocumentDataMargin(paddingData);
         } else {
             // Set the top margin under vertical alignment.
-            let offsetTop = (editorHeight - actualHeight) || 0;
+            let offsetTop = 0;
 
             if (verticalAlign === VerticalAlign.MIDDLE) {
-                offsetTop = (editorHeight - actualHeight) / 2;
+                offsetTop = (editorHeight - actualHeight) / 2 / scaleY;
             } else if (verticalAlign === VerticalAlign.TOP) {
                 offsetTop = paddingData.t || 0;
+            } else { // VerticalAlign.UNSPECIFIED follow the same rule as HorizontalAlign.BOTTOM.
+                offsetTop = (editorHeight - actualHeight) / scaleY - (paddingData.b || 0);
             }
 
-            offsetTop /= scaleY;
+            // offsetTop /= scaleY;
             offsetTop = offsetTop < (paddingData.t || 0) ? paddingData.t || 0 : offsetTop;
+
             documentDataModel.updateDocumentDataMargin({
                 t: offsetTop,
             });
@@ -322,6 +325,7 @@ export class StartEditController extends Disposable {
      * determine whether a scrollbar appears,
      * and calculate the editor's boundaries relative to the browser.
      */
+    // eslint-disable-next-line max-lines-per-function
     private _editAreaProcessing(
         editorWidth: number,
         editorHeight: number,
@@ -453,8 +457,10 @@ export class StartEditController extends Disposable {
     }
 
     // You can double-click on the cell or input content by keyboard to put the cell into the edit state.
+    // eslint-disable-next-line max-lines-per-function
     private _initialStartEdit() {
         this.disposeWithMe(
+            // eslint-disable-next-line max-lines-per-function
             this._editorBridgeService.visible$.subscribe((param) => {
                 const { visible, eventType, keycode } = param;
 
@@ -609,7 +615,7 @@ export class StartEditController extends Disposable {
             this._textSelectionRenderManager.onInputBefore$.subscribe((config) => {
                 const isFocusFormulaEditor = this._contextService.getContextValue(FOCUSING_FORMULA_EDITOR);
                 const isFocusSheets = this._contextService.getContextValue(FOCUSING_SHEET);
-                const unitId = this._currentUniverService.getCurrentUniverDocInstance().getUnitId();
+                const unitId = this._univerInstanceService.getCurrentUniverDocInstance()!.getUnitId();
 
                 if (isFocusSheets && !isFocusFormulaEditor && this._editorService.isSheetEditor(unitId)) {
                     this._showEditorByKeyboard(config);

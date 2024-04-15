@@ -29,6 +29,7 @@ import {
 import type { Dependency, IDisposable } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
+import { CalculateFormulaService, DefinedNamesService, FormulaCurrentConfigService, FormulaDataModel, FormulaRuntimeService, IDefinedNamesService, IFormulaCurrentConfigService, IFormulaRuntimeService, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { SheetClipboardController } from '../../../controllers/clipboard/clipboard.controller';
 import { IMarkSelectionService } from '../../mark-selection/mark-selection.service';
 import { ISelectionRenderService, SelectionRenderService } from '../../selection/selection-render.service';
@@ -548,6 +549,12 @@ export function clipboardTestBed(workbookConfig?: IWorkbookData, dependencies?: 
             const sheetClipboardController = injector.createInstance(SheetClipboardController);
             injector.add([SheetClipboardController, { useValue: sheetClipboardController }]);
             injector.add([SheetInterceptorService]);
+            injector.add([CalculateFormulaService]);
+            injector.add([FormulaDataModel]);
+            injector.add([LexerTreeBuilder]);
+            injector.add([IDefinedNamesService, { useClass: DefinedNamesService }]);
+            injector.add([IFormulaRuntimeService, { useClass: FormulaRuntimeService }]);
+            injector.add([IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }]);
 
             dependencies?.forEach((d) => injector.add(d));
         }

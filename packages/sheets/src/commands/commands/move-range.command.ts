@@ -36,6 +36,7 @@ import { MoveRangeMutation } from '../mutations/move-range.mutation';
 import type { ISetSelectionsOperationParams } from '../operations/selection.operation';
 import { SetSelectionsOperation } from '../operations/selection.operation';
 import { alignToMergedCellsBorders, getPrimaryForRange } from './utils/selection-utils';
+import { getSheetCommandTarget } from './utils/target-util';
 
 export interface IMoveRangeCommandParams {
     toRange: IRange;
@@ -50,11 +51,11 @@ export const MoveRangeCommand: ICommand = {
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const errorService = accessor.get(ErrorService);
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
-        const worksheet = workbook.getActiveSheet();
-        const unitId = workbook.getUnitId();
-        const subUnitId = worksheet.getSheetId();
 
+        const target = getSheetCommandTarget(univerInstanceService);
+        if (!target) return false;
+
+        const { worksheet, subUnitId, unitId } = target;
         const moveRangeMutations = getMoveRangeUndoRedoMutations(
             accessor,
             { unitId, subUnitId, range: params.fromRange },

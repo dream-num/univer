@@ -34,19 +34,19 @@ import {
     Tools,
 } from '@univerjs/core';
 import type { IFormulaData, IFormulaDataItem, ISequenceNode, IUnitSheetNameMap } from '@univerjs/engine-formula';
-import {
-    deserializeRangeWithSheet,
+import { deserializeRangeWithSheet,
     ErrorType,
     FormulaDataModel,
     generateStringWithSequence,
     initSheetFormulaData,
-    LexerTreeBuilder,
+    Lexer,
     sequenceNodeType,
     serializeRangeToRefString,
     SetArrayFormulaDataMutation,
     SetFormulaDataMutation,
     SetNumfmtFormulaDataMutation,
 } from '@univerjs/engine-formula';
+
 import type {
     IDeleteRangeMoveLeftCommandParams,
     IDeleteRangeMoveUpCommandParams,
@@ -160,9 +160,9 @@ enum OriginRangeEdgeType {
 @OnLifecycle(LifecycleStages.Ready, UpdateFormulaController)
 export class UpdateFormulaController extends Disposable {
     constructor(
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
-        @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder,
+        @Inject(Lexer) private readonly _lexer: Lexer,
         @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel,
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
         @Inject(SelectionManagerService) private _selectionManagerService: SelectionManagerService,
@@ -415,7 +415,7 @@ export class UpdateFormulaController extends Disposable {
             toRange: { startRow: toStartRow, endRow: toEndRow },
         } = params;
 
-        const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
         const unitId = workbook.getUnitId();
         const worksheet = workbook.getActiveSheet();
         const sheetId = worksheet.getSheetId();
@@ -453,7 +453,7 @@ export class UpdateFormulaController extends Disposable {
             toRange: { startColumn: toStartCol, endColumn: toEndCol },
         } = params;
 
-        const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
         const unitId = workbook.getUnitId();
         const worksheet = workbook.getActiveSheet();
         const sheetId = worksheet.getSheetId();
@@ -674,7 +674,7 @@ export class UpdateFormulaController extends Disposable {
 
                     const { f: formulaString, x, y, si } = formulaDataItem;
 
-                    const sequenceNodes = this._lexerTreeBuilder.sequenceNodesBuilder(formulaString);
+                    const sequenceNodes = this._lexer.sequenceNodesBuilder(formulaString);
 
                     if (sequenceNodes == null) {
                         return true;
@@ -1387,7 +1387,7 @@ export class UpdateFormulaController extends Disposable {
     }
 
     private _getCurrentSheetInfo() {
-        const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
         const unitId = workbook.getUnitId();
         const sheetId = workbook.getActiveSheet().getSheetId();
 

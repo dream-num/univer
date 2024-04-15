@@ -89,7 +89,8 @@ export class AstTreeBuilder extends Disposable {
         const node = this._parse(lexerNode, astNode);
 
         /**
-         * If the lexer node has defined names, it means that the current formula contains a reference to the defined name.
+         * If the lexer node has defined names,
+         * it means that the current formula contains a reference to the defined name.
          */
         if (lexerNode.hasDefinedNames()) {
             node?.setDefinedNames(lexerNode.getDefinedNames());
@@ -184,6 +185,7 @@ export class AstTreeBuilder extends Disposable {
         return newLambdaNode;
     }
 
+    // eslint-disable-next-line max-lines-per-function, complexity
     private _parse(lexerNode: LexerNode, parent: BaseAstNode): Nullable<BaseAstNode> {
         const children = lexerNode.getChildren();
         const childrenCount = children.length;

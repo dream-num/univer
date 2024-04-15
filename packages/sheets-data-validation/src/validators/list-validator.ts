@@ -91,11 +91,15 @@ export class ListValidator extends BaseDataValidator {
 
     override validatorFormula(rule: IDataValidationRuleBase): IFormulaValidResult {
         const success = !Tools.isBlank(rule.formula1);
-        const valid = isValidListFormula(rule.formula1, this._lexer);
+        const valid = isValidListFormula(rule.formula1 ?? '', this._lexer);
 
         return {
-            success,
-            formula1: success ? undefined : this.localeService.t('dataValidation.validFail.list'),
+            success: Boolean(success && valid),
+            formula1: success
+                ? valid ?
+                    undefined :
+                    this.localeService.t('dataValidation.validFail.listInvalid')
+                : this.localeService.t('dataValidation.validFail.list'),
         };
     }
 

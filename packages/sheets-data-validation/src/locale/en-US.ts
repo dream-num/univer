@@ -26,6 +26,7 @@ const locale: typeof zhCN = {
             integer: 'Please input integer or formula',
             date: 'Please input date or formula',
             list: 'Please input options',
+            listInvalid: 'The list source must be a delimited list or a reference to a single row or column',
         },
         panel: {
             title: 'Data validation management',

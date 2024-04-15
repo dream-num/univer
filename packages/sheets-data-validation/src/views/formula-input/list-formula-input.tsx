@@ -329,7 +329,7 @@ export function ListFormulaInput(props: IFormulaInputProps) {
                 )
                 : (
                     <FormLayout error={formula1Res}>
-                        <div ref={containerRef} style={{ margin: '-12px 0' }}>
+                        <div ref={containerRef} style={{ marginTop: '-12px' }}>
                             <DraggableList
                                 list={strList}
                                 onListChange={setStrList}

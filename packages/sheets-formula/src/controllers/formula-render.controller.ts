@@ -20,6 +20,7 @@ import { Inject, Injector } from '@wendellhu/redi';
 import { IEditorBridgeService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
+import { extractFormulaError } from './utils/utils';
 
 const INVALID_MARK = {
     tr: {
@@ -62,7 +63,12 @@ export class FormulaRenderController extends RxDisposable {
                         if (!skeleton) {
                             return next(cell);
                         }
-                        return next(cell);
+
+                        const errorType = extractFormulaError(cell);
+
+                        if (!errorType) {
+                            return next(cell);
+                        }
 
                         return next({
                             ...cell,

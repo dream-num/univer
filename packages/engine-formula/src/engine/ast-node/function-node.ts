@@ -16,7 +16,6 @@
 
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { LocaleService } from '@univerjs/core';
 import { AstNodePromiseType } from '../../basics/common';
 import { ErrorType } from '../../basics/error-type';
 import type { BaseFunction } from '../../functions/base-function';
@@ -45,8 +44,7 @@ export class FunctionNode extends BaseAstNode {
         private _functionExecutor: BaseFunction,
         private _currentConfigService: IFormulaCurrentConfigService,
         private _runtimeService: IFormulaRuntimeService,
-        private _definedNamesService: IDefinedNamesService,
-        private _localeService: LocaleService
+        private _definedNamesService: IDefinedNamesService
     ) {
         super(token);
 
@@ -183,8 +181,7 @@ export class FunctionNode extends BaseAstNode {
         // Check the number of parameters
         const { minParams, maxParams } = this._functionExecutor;
         if (minParams !== -1 && maxParams !== -1 && (variants.length < minParams || variants.length > maxParams)) {
-            // use _localeService get error message
-            return ErrorValueObject.create(ErrorType.NA, 'Params Number Error');
+            return ErrorValueObject.create(ErrorType.NA);
         }
 
         let resultVariant: NodeValueType;
@@ -277,7 +274,6 @@ export class FunctionNodeFactory extends BaseAstNodeFactory {
         @IFormulaCurrentConfigService private readonly _currentConfigService: IFormulaCurrentConfigService,
         @IFormulaRuntimeService private readonly _runtimeService: IFormulaRuntimeService,
         @IDefinedNamesService private readonly _definedNamesService: IDefinedNamesService,
-        @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(Injector) private readonly _injector: Injector
     ) {
         super();
@@ -294,7 +290,7 @@ export class FunctionNodeFactory extends BaseAstNodeFactory {
             return ErrorNode.create(ErrorType.NAME);
         }
 
-        return new FunctionNode(token, functionExecutor, this._currentConfigService, this._runtimeService, this._definedNamesService, this._localeService);
+        return new FunctionNode(token, functionExecutor, this._currentConfigService, this._runtimeService, this._definedNamesService);
     }
 
     override checkAndCreateNodeType(param: LexerNode | string) {

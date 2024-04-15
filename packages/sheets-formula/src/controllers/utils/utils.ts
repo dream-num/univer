@@ -14,8 +14,10 @@
  * limitations under the License.
  */
 
-import type { IContextService } from '@univerjs/core';
+import type { ICellData, IContextService, Nullable } from '@univerjs/core';
 import { FOCUSING_DOC, FOCUSING_UNIVER_EDITOR, FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE } from '@univerjs/core';
+import type { ErrorType } from '@univerjs/engine-formula';
+import { ERROR_TYPE_SET } from '@univerjs/engine-formula';
 
 export function whenEditorStandalone(contextService: IContextService) {
     return (
@@ -23,4 +25,17 @@ export function whenEditorStandalone(contextService: IContextService) {
         contextService.getContextValue(FOCUSING_UNIVER_EDITOR) &&
         contextService.getContextValue(FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE)
     );
+}
+
+/**
+ * Extract the formula error from the cell
+ * @param cell
+ * @returns
+ */
+export function extractFormulaError(cell: Nullable<ICellData>) {
+    if (typeof cell?.v === 'string' && ERROR_TYPE_SET.has(cell.v as ErrorType)) {
+        return cell.v as ErrorType;
+    }
+
+    return null;
 }

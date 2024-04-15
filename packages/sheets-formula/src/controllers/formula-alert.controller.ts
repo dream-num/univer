@@ -15,8 +15,27 @@
  */
 
 import { Disposable, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
+import { ErrorType } from '@univerjs/engine-formula';
 import { CellAlertManagerService, CellAlertType, HoverManagerService } from '@univerjs/sheets-ui';
 import { Inject } from '@wendellhu/redi';
+import { extractFormulaError } from './utils/utils';
+
+const ALERT_KEY = 'SHEET_FORMULA_ALERT';
+
+const ErrorTypeToMessageMap = {
+    [ErrorType.DIV_BY_ZERO]: 'divByZero',
+    [ErrorType.NAME]: 'name',
+    [ErrorType.VALUE]: 'value',
+    [ErrorType.NUM]: 'num',
+    [ErrorType.NA]: 'na',
+    [ErrorType.CYCLE]: 'cycle',
+    [ErrorType.REF]: 'ref',
+    [ErrorType.SPILL]: 'spill',
+    [ErrorType.CALC]: 'calc',
+    [ErrorType.ERROR]: 'error',
+    [ErrorType.CONNECT]: 'connect',
+    [ErrorType.NULL]: 'null',
+};
 
 @OnLifecycle(LifecycleStages.Rendered, FormulaAlertController)
 export class FormulaAlertController extends Disposable {
@@ -41,30 +60,39 @@ export class FormulaAlertController extends Disposable {
                 const worksheet = workbook.getActiveSheet();
                 const cellData = worksheet.getCell(cellPos.location.row, cellPos.location.col);
 
-                // if (cellData?.dataValidation?.validStatus === DataValidationStatus.INVALID) {
-                const currentLoc = this._cellAlertManagerService.currentAlert?.location;
-                if (
-                    currentLoc &&
+                if (cellData) {
+                    const errorType = extractFormulaError(cellData);
+
+                    if (!errorType) {
+                        return;
+                    }
+
+                    const currentAlert = this._cellAlertManagerService.currentAlert.get(ALERT_KEY);
+                    const currentLoc = currentAlert?.alert?.location;
+                    if (
+                        currentLoc &&
                         currentLoc.row === cellPos.location.row &&
                         currentLoc.col === cellPos.location.col &&
                         currentLoc.subUnitId === cellPos.location.subUnitId &&
                         currentLoc.unitId === cellPos.location.unitId
-                ) {
+                    ) {
+                        return;
+                    }
+
+                    this._cellAlertManagerService.showAlert({
+                        type: CellAlertType.ERROR,
+                        title: this._localeService.t('formula.error.title'),
+                        message: this._localeService.t(`formula.error.${ErrorTypeToMessageMap[errorType]}`),
+                        location: cellPos.location,
+                        width: 200,
+                        height: 74,
+                        key: ALERT_KEY,
+                    });
                     return;
                 }
-                this._cellAlertManagerService.showAlert({
-                    type: CellAlertType.ERROR,
-                    title: this._localeService.t('formula.prompt.errorTitle'),
-                    message: 'Formula error',
-                    location: cellPos.location,
-                    width: 200,
-                    height: 74,
-                });
-                return;
-                // }
             }
 
-            this._cellAlertManagerService.clearAlert();
+            this._cellAlertManagerService.removeAlert(ALERT_KEY);
         }));
     }
 }

@@ -64,7 +64,22 @@ export default {
             helpAbstract: '简介',
             required: '必需。',
             optional: '可选。',
-            errorTitle: '错误',
+        },
+
+        error: {
+            title: '错误',
+            divByZero: '除数为零',
+            name: '无效名称',
+            value: '值中的错误',
+            num: '数值错误',
+            na: '值不可用',
+            cycle: '循环引用',
+            ref: '无效的单元格引用',
+            spill: '溢出区域不是空白区域',
+            calc: '计算错误',
+            error: '错误',
+            connect: '正在连接中',
+            null: '空值错误',
         },
 
         functionType: {

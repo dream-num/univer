@@ -183,7 +183,8 @@ export class FunctionNode extends BaseAstNode {
         // Check the number of parameters
         const { minParams, maxParams } = this._functionExecutor;
         if (minParams !== -1 && maxParams !== -1 && (variants.length < minParams || variants.length > maxParams)) {
-            return ErrorValueObject.create(ErrorType.NA);
+            // use _localeService get error message
+            return ErrorValueObject.create(ErrorType.NA, 'Params Number Error');
         }
 
         let resultVariant: NodeValueType;

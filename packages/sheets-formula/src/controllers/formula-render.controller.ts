@@ -1,0 +1,79 @@
+/**
+ * Copyright 2023-present DreamNum Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import { IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
+import { ComponentManager, IMenuService } from '@univerjs/ui';
+import { Inject, Injector } from '@wendellhu/redi';
+import { IEditorBridgeService, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { IRenderManagerService } from '@univerjs/engine-render';
+import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
+
+const INVALID_MARK = {
+    tr: {
+        size: 6,
+        color: '#fe4b4b',
+    },
+};
+
+/**
+ * @todo RenderUnit
+ */
+@OnLifecycle(LifecycleStages.Rendered, FormulaRenderController)
+export class FormulaRenderController extends RxDisposable {
+    constructor(
+        @Inject(ComponentManager) private _componentManager: ComponentManager,
+        @IMenuService private _menuService: IMenuService,
+        @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
+        @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
+        @Inject(Injector) private readonly _injector: Injector
+    ) {
+        super();
+        this._init();
+    }
+
+    private _init() {
+        this._initViewModelIntercept();
+    }
+
+    private _initViewModelIntercept() {
+        this.disposeWithMe(
+            this._sheetInterceptorService.intercept(
+                INTERCEPTOR_POINT.CELL_CONTENT,
+                {
+                    handler: (cell, pos, next) => {
+                        const { row, col, unitId, subUnitId } = pos;
+                        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+                        if (!skeleton) {
+                            return next(cell);
+                        }
+                        return next(cell);
+
+                        return next({
+                            ...cell,
+                            markers: {
+                                ...cell?.markers,
+                                ...INVALID_MARK,
+                            },
+                        });
+                    },
+                }
+            )
+        );
+    }
+}

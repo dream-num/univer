@@ -127,7 +127,7 @@ function parseStyleByProperty(styles: CSSStyleDeclaration, docStyles: ITextStyle
             case 'background-color': {
                 const color = new ColorKit(cssValue);
                 const bgColor = color.isValid ? color.toRgbString() : '';
-                if (bgColor !== DEFAULT_BACKGROUND_COLOR_RGB || bgColor !== DEFAULT_BACKGROUND_COLOR_RGBA) {
+                if (bgColor !== DEFAULT_BACKGROUND_COLOR_RGB && bgColor !== DEFAULT_BACKGROUND_COLOR_RGBA) {
                     docStyles.bg = {
                         rgb: color.toRgbString(),
                     };

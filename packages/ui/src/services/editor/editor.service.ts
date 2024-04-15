@@ -22,7 +22,7 @@ import type { Observable } from 'rxjs';
 import { Subject } from 'rxjs';
 import type { IRender, ISuccinctTextRangeParam, Scene } from '@univerjs/engine-render';
 import { IRenderManagerService, UNIVER_GLOBAL_DEFAULT_FONT_SIZE } from '@univerjs/engine-render';
-import { isReferenceStringWithEffectiveColumn, LexerTreeBuilder, operatorToken } from '@univerjs/engine-formula';
+import { isReferenceStrings, LexerTreeBuilder, operatorToken } from '@univerjs/engine-formula';
 
 export interface IEditorStateParam extends Partial<IPosition> {
     visible?: boolean;
@@ -704,10 +704,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
                 editor.setValueLegality(false);
                 return false;
             }
-            const result = valueArray.every((refString) => {
-                return isReferenceStringWithEffectiveColumn(refString.trim());
-            });
-            editor.setValueLegality(result);
+            editor.setValueLegality(isReferenceStrings(value));
         }
 
         return editor.isValueLegality();

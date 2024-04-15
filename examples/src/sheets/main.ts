@@ -38,6 +38,9 @@ import { DebuggerPlugin } from '../plugins/debugger';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data/sheets/demo/default-workbook-data-demo';
 import { locales } from './locales';
 
+// const app = document.getElementById('app')!;
+// app.style.marginLeft = '100px';
+
 const LOAD_LAZY_PLUGINS_TIMEOUT = 1_000;
 // univer
 const univer = new Univer({

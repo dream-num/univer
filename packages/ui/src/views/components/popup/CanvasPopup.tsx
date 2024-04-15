@@ -61,8 +61,7 @@ export function CanvasPopup() {
                 key={key}
                 popup={popup}
             >
-
-                {Component ? <Component /> : null}
+                {Component ? <Component popup={popup} /> : null}
             </SingleCanvasPopup>
         );
     });

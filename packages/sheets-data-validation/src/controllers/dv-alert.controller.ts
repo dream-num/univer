@@ -19,6 +19,8 @@ import { CellAlertManagerService, CellAlertType, HoverManagerService } from '@un
 import { Inject } from '@wendellhu/redi';
 import type { BaseDataValidator } from '@univerjs/data-validation';
 
+const ALERT_KEY = 'SHEET_DATA_VALIDATION_ALERT';
+
 @OnLifecycle(LifecycleStages.Rendered, DataValidationAlertController)
 export class DataValidationAlertController extends Disposable {
     constructor(
@@ -43,7 +45,8 @@ export class DataValidationAlertController extends Disposable {
                 const cellData = worksheet.getCell(cellPos.location.row, cellPos.location.col);
 
                 if (cellData?.dataValidation?.validStatus === DataValidationStatus.INVALID) {
-                    const currentLoc = this._cellAlertManagerService.currentAlert?.location;
+                    const currentAlert = this._cellAlertManagerService.currentAlert.get(ALERT_KEY);
+                    const currentLoc = currentAlert?.alert?.location;
                     if (
                         currentLoc &&
                         currentLoc.row === cellPos.location.row &&
@@ -65,12 +68,13 @@ export class DataValidationAlertController extends Disposable {
                         location: cellPos.location,
                         width: 200,
                         height: 74,
+                        key: ALERT_KEY,
                     });
                     return;
                 }
             }
 
-            this._cellAlertManagerService.clearAlert();
+            this._cellAlertManagerService.removeAlert(ALERT_KEY);
         }));
     }
 }

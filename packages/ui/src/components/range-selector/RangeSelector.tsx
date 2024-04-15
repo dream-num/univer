@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import type { IUnitRange, Nullable } from '@univerjs/core';
+import type { IUnitRangeWithName, Nullable } from '@univerjs/core';
 import { IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { Button, Dialog, Input, Tooltip } from '@univerjs/design';
 import { CloseSingle, DeleteSingle, IncreaseSingle, SelectRangeSingle } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useRef, useState } from 'react';
 
-import { deserializeRangeWithSheet, isReferenceStringWithEffectiveColumn, serializeRange, serializeRangeWithSheet, serializeRangeWithSpreadsheet } from '@univerjs/engine-formula';
+import { getRangeWithRefsString, isReferenceStringWithEffectiveColumn, serializeRange, serializeRangeWithSheet, serializeRangeWithSpreadsheet } from '@univerjs/engine-formula';
 import clsx from 'clsx';
 import { TextEditor } from '../editor/TextEditor';
 import { IEditorService } from '../../services/editor/editor.service';
@@ -31,7 +31,7 @@ import styles from './index.module.less';
 export interface IRangeSelectorProps {
     id: string;
     value?: string; // default values.
-    onChange?: (ranges: IUnitRange[]) => void; // Callback for changes in the selector value.
+    onChange?: (ranges: IUnitRangeWithName[]) => void; // Callback for changes in the selector value.
     onActive?: (state: boolean) => void; // Callback for editor active.
     onValid?: (state: boolean) => void; // input value validation
     isSingleChoice?: boolean; // Whether to restrict to only selecting a single region/area/district.
@@ -253,30 +253,13 @@ export function RangeSelector(props: IRangeSelectorProps) {
     function handleTextValueChange(value: Nullable<string>) {
         setRangeValue(value || '');
 
-        const valueArray = value?.split(',') || [];
-
-        if (value === '' || valueArray.length === 0) {
+        if (value == null) {
             onChange && onChange([]);
             return;
         }
 
-        const result = valueArray.every((refString) => {
-            return isReferenceStringWithEffectiveColumn(refString.trim());
-        });
+        const ranges = getRangeWithRefsString(value, getSheetIdByName);
 
-        if (!result) {
-            onChange && onChange([]);
-            return;
-        }
-
-        const ranges = valueArray.map((ref) => {
-            const unitRange = deserializeRangeWithSheet(ref);
-            return {
-                unitId: unitRange.unitId,
-                sheetId: getSheetIdByName(unitRange.sheetName),
-                range: unitRange.range,
-            } as IUnitRange;
-        });
         onChange && onChange(ranges || []);
     }
 

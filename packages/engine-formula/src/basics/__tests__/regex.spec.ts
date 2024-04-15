@@ -15,7 +15,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { REFERENCE_MULTIPLE_RANGE_REGEX, REFERENCE_REGEX_COLUMN, REFERENCE_REGEX_ROW, REFERENCE_SINGLE_RANGE_REGEX, REFERENCE_TABLE_MULTIPLE_COLUMN_REGEX, REFERENCE_TABLE_SINGLE_COLUMN_REGEX } from '../regex';
+import { isReferenceString, REFERENCE_MULTIPLE_RANGE_REGEX, REFERENCE_REGEX_COLUMN, REFERENCE_REGEX_ROW, REFERENCE_SINGLE_RANGE_REGEX, REFERENCE_TABLE_MULTIPLE_COLUMN_REGEX, REFERENCE_TABLE_SINGLE_COLUMN_REGEX } from '../regex';
 
 describe('Test ref regex', () => {
     it('Single range', () => {
@@ -56,5 +56,31 @@ describe('Test ref regex', () => {
 
     it('Table multiple range', () => {
         expect(new RegExp(REFERENCE_TABLE_MULTIPLE_COLUMN_REGEX).test('Table1[[#Title],[#Data],[Column1]:[Column10]]')).toBe(true);
+    });
+
+    it('isReferenceString', () => {
+        expect(isReferenceString('A1')).toBeTruthy();
+        expect(isReferenceString('Sheet1!A1')).toBeTruthy();
+        expect(isReferenceString('[workbook]Sheet1!A1')).toBeTruthy();
+        expect(isReferenceString('[workbook]\'Sheet-1\'!A1')).toBeTruthy();
+        expect(isReferenceString('\'[workbook]Sheet1\'!A1')).toBeTruthy();
+
+        expect(isReferenceString('A1:B10')).toBeTruthy();
+        expect(isReferenceString('Sheet1!A1:B10')).toBeTruthy();
+        expect(isReferenceString('[workbook]Sheet1!A1:B10')).toBeTruthy();
+        expect(isReferenceString('[workbook]\'Sheet-1\'!A1:B10')).toBeTruthy();
+        expect(isReferenceString('\'[workbook]Sheet1\'!A1:B10')).toBeTruthy();
+
+        expect(isReferenceString('1:10')).toBeTruthy();
+        expect(isReferenceString('Sheet1!1:10')).toBeTruthy();
+        expect(isReferenceString('[workbook]Sheet1!1:10')).toBeTruthy();
+        expect(isReferenceString('[workbook]\'Sheet-1\'!1:10')).toBeTruthy();
+        expect(isReferenceString('\'[workbook]Sheet1\'!1:10')).toBeTruthy();
+
+        expect(isReferenceString('A:B')).toBeTruthy();
+        expect(isReferenceString('Sheet1!A:B')).toBeTruthy();
+        expect(isReferenceString('[workbook]Sheet1!A:B')).toBeTruthy();
+        expect(isReferenceString('[workbook]\'Sheet-1\'!A:B')).toBeTruthy();
+        expect(isReferenceString('\'[workbook]Sheet1\'!A:B')).toBeTruthy();
     });
 });

@@ -30,6 +30,7 @@ import {
     SetRangeValuesMutation,
     SetRangeValuesUndoMutationFactory,
 } from '../mutations/set-range-values.mutation';
+import { getSheetMutationTarget } from '../commands/utils/target-util';
 
 /**
  * Generate undo mutation of a `InsertRangeMutation`
@@ -348,10 +349,11 @@ export const DeleteRangeUndoMutationFactory = (
     params: IDeleteRangeMutationParams
 ): Nullable<IInsertRangeMutationParams> => {
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const worksheet = univerInstanceService.getCurrentUniverSheetInstance().getSheetBySheetId(params.subUnitId);
-    if (!worksheet) return null;
-    const cellMatrix = worksheet.getCellMatrix();
+    const target = getSheetMutationTarget(univerInstanceService, params);
+    if (!target) return null;
 
+    const { worksheet } = target;
+    const cellMatrix = worksheet.getCellMatrix();
     const undoData = new ObjectMatrix<ICellData>();
     const lastEndRow = worksheet.getConfig().rowCount;
     const lastEndColumn = worksheet.getConfig().columnCount;

@@ -24,10 +24,14 @@ import type {
     ITextDecoration,
     ITextRun,
 } from '@univerjs/core';
-import { BaselineOffset, getBorderStyleType, Tools } from '@univerjs/core';
-import { ptToPx, pxToPt } from '@univerjs/engine-render';
+import { BaselineOffset, BorderStyleTypes, ColorKit, getBorderStyleType, Tools } from '@univerjs/core';
+import { ptToPx } from '@univerjs/engine-render';
 
 import { textTrim } from './util';
+
+const PX_TO_PT_RATIO = 0.75;
+const MAX_FONT_SIZE = 78;
+const MIN_FONT_SIZE = 9;
 
 // TODO: move to Utils
 /**
@@ -135,11 +139,12 @@ export function handleDomToJson($dom: HTMLElement): IDocumentData | string {
 export function handleStringToStyle($dom?: HTMLElement, cssStyle: string = '') {
     let cssText = $dom?.style?.cssText ?? '';
     cssText += cssStyle;
+    cssText = cssText.replace(/[\r\n]+/g, '');
     if (cssText.length === 0) {
         return {};
     }
     const cssTextArray = cssText.split(';');
-    const styleList: IStyleData = {};
+    const styleList: IStyleData & Record<string, unknown> = {};
 
     const borderInfo = {
         t: '',
@@ -149,13 +154,14 @@ export function handleStringToStyle($dom?: HTMLElement, cssStyle: string = '') {
     };
 
     cssTextArray.forEach((s) => {
+        const originStr = s;
         s = s.toLowerCase();
         const key = textTrim(s.substr(0, s.indexOf(':')));
         const value = textTrim(s.substr(s.indexOf(':') + 1));
 
         // bold
         if (key === 'font-weight') {
-            if (value === 'bold') {
+            if (value === 'bold' || value === '700') {
                 styleList.bl = 1;
             } else {
                 styleList.bl = 0;
@@ -171,6 +177,7 @@ export function handleStringToStyle($dom?: HTMLElement, cssStyle: string = '') {
         }
         // font family
         else if (key === 'font-family') {
+            const value = textTrim(originStr.substr(originStr.indexOf(':') + 1));
             styleList.ff = value;
         }
         // font size
@@ -187,7 +194,7 @@ export function handleStringToStyle($dom?: HTMLElement, cssStyle: string = '') {
 
             // px to pt TODO@Dushusir: px or pt?
             if (value.indexOf('px') !== -1) {
-                fs = pxToPt(Number.parseInt(value));
+                fs = getPtFontSizeByPx(Number.parseInt(value, 10));
             }
 
             styleList.fs = fs;
@@ -200,9 +207,12 @@ export function handleStringToStyle($dom?: HTMLElement, cssStyle: string = '') {
         }
         // fill color / background
         else if (key === 'background' || key === 'background-color') {
-            styleList.bg = {
-                rgb: value,
-            };
+            const backgroundColor = new ColorKit(value);
+            if (backgroundColor) {
+                styleList.bg = {
+                    rgb: backgroundColor.toRgbString(),
+                };
+            }
         }
 
         // text line type
@@ -283,10 +293,27 @@ export function handleStringToStyle($dom?: HTMLElement, cssStyle: string = '') {
 
         // line through
         else if (key === 'text-decoration' || key === 'univer-strike') {
-            if (value !== 'none') {
-                styleList.st = {
-                    s: 1,
-                };
+            const lineValue = value.split(' ')?.[0];
+            if (lineValue === 'underline') {
+                if (!styleList.ul) {
+                    styleList.ul = { s: 1 };
+                }
+                styleList.ul.s = 1;
+            }
+
+            // line through
+            else if (lineValue === 'line-through') {
+                if (!styleList.st) {
+                    styleList.st = { s: 1 };
+                }
+                styleList.st.s = 1;
+            }
+            // overline
+            else if (lineValue === 'overline') {
+                if (!styleList.ol) {
+                    styleList.ol = { s: 1 };
+                }
+                styleList.ol.s = 1;
             }
         }
         // underline
@@ -455,27 +482,39 @@ export function handleStringToStyle($dom?: HTMLElement, cssStyle: string = '') {
             const type = `${arr[0]} ${arr[1]}`;
             arr.splice(0, 2);
             const color = arr.join('');
-            const obj = {
-                cl: {
-                    rgb: color,
-                },
-                s: getBorderStyleType(type),
-            };
-            if (key === 'border-bottom') {
-                styleList.bd.b = value === 'none' ? null : obj;
-            } else if (key === 'border-top') {
-                styleList.bd.t = value === 'none' ? null : obj;
-            } else if (key === 'border-left') {
-                styleList.bd.l = value === 'none' ? null : obj;
-            } else if (key === 'border-right') {
-                styleList.bd.r = value === 'none' ? null : obj;
-            } else if (key === 'border') {
-                styleList.bd = {
-                    r: value === 'none' ? null : obj,
-                    t: value === 'none' ? null : obj,
-                    b: value === 'none' ? null : obj,
-                    l: value === 'none' ? null : obj,
+            const lineType = getBorderStyleType(type);
+            if (lineType !== BorderStyleTypes.NONE) {
+                const obj = {
+                    cl: {
+                        rgb: color,
+                    },
+                    s: getBorderStyleType(type),
                 };
+                if (key === 'border-bottom') {
+                    styleList.bd.b = value === 'none' ? null : obj;
+                } else if (key === 'border-top') {
+                    styleList.bd.t = value === 'none' ? null : obj;
+                } else if (key === 'border-left') {
+                    styleList.bd.l = value === 'none' ? null : obj;
+                } else if (key === 'border-right') {
+                    styleList.bd.r = value === 'none' ? null : obj;
+                } else if (key === 'border') {
+                    styleList.bd = {
+                        r: value === 'none' ? null : obj,
+                        t: value === 'none' ? null : obj,
+                        b: value === 'none' ? null : obj,
+                        l: value === 'none' ? null : obj,
+                    };
+                }
+            }
+        } else if (key === 'data-rotate') {
+            const regex = /[+-]?\d+/;
+            const match = value.match(regex);
+
+            if (value === '(0deg ,1)') {
+                styleList.tr = { a: 0, v: 1 };
+            } else if (match) {
+                styleList.tr = { a: Number(match[0]) };
             }
         }
 
@@ -486,6 +525,12 @@ export function handleStringToStyle($dom?: HTMLElement, cssStyle: string = '') {
         // } else if (style.tb === WrapStrategy.WRAP) {
         //     str += `word-wrap: break-word; word-break: normal; `;
         // }
+    });
+
+    Object.keys(styleList).forEach((key) => {
+        if (typeof styleList[key] === 'object' && !Object.keys(styleList[key] as object).length) {
+            delete styleList[key];
+        }
     });
 
     return styleList;
@@ -862,4 +907,18 @@ function getStyles(styleText: string): IKeyValue {
     }
 
     return output;
+}
+
+function extractColorFromString(str: string) {
+    const regex = /#([0-9a-f]{3,6})\b|rgb\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*\)/gi;
+    const matches = str.match(regex);
+    return matches ? matches[0] : null;
+}
+
+function getPtFontSizeByPx(size: number) {
+    const ptSize = Math.round(size * PX_TO_PT_RATIO);
+
+    if (ptSize < MIN_FONT_SIZE) return MIN_FONT_SIZE;
+    if (ptSize > MAX_FONT_SIZE) return MAX_FONT_SIZE;
+    return ptSize;
 }

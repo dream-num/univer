@@ -34,7 +34,7 @@ export const DataValidationList = memo(() => {
     const commandService = useDependency(ICommandService);
     const injector = useDependency(Injector);
     const dataValidationPanelService = useDependency(DataValidationPanelService);
-    const workbook = useObservable(univerInstanceService.currentSheet$, univerInstanceService.getCurrentUniverSheetInstance()) ?? univerInstanceService.getCurrentUniverSheetInstance();
+    const workbook = useObservable(univerInstanceService.currentSheet$, univerInstanceService.getCurrentUniverSheetInstance()) ?? univerInstanceService.getCurrentUniverSheetInstance()!;
     const localeService = useDependency(LocaleService);
     const [rules, setRules] = useState<ISheetDataValidationRule[]>([]);
     const worksheet = useObservable(workbook.activeSheet$, workbook.getActiveSheet()) ?? workbook.getActiveSheet();

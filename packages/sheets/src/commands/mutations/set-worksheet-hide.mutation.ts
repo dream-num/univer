@@ -17,6 +17,7 @@
 import type { BooleanNumber, IMutation } from '@univerjs/core';
 import { CommandType, IUniverInstanceService } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
+import { getSheetMutationTarget } from '../commands/utils/target-util';
 
 export interface ISetWorksheetHideMutationParams {
     hidden: BooleanNumber;
@@ -28,11 +29,12 @@ export const SetWorksheetHideMutationFactory = (
     accessor: IAccessor,
     params: ISetWorksheetHideMutationParams
 ): ISetWorksheetHideMutationParams => {
-    const universheet = accessor.get(IUniverInstanceService).getCurrentUniverSheetInstance();
-    const worksheet = universheet.getSheetBySheetId(params.subUnitId);
-    if (worksheet == null) {
-        throw new Error('worksheet is null error!');
+    const target = getSheetMutationTarget(accessor.get(IUniverInstanceService), params);
+    if (!target) {
+        throw new Error('[SetWorksheetHideMutationFactory]: worksheet is null error!');
     }
+
+    const { worksheet } = target;
     return {
         hidden: worksheet.isSheetHidden(),
         unitId: params.unitId,

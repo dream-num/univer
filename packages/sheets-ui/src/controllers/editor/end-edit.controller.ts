@@ -49,7 +49,7 @@ import { Inject } from '@wendellhu/redi';
 
 import { getEditorObject } from '../../basics/editor/get-editor-object';
 import { MoveSelectionCommand, MoveSelectionEnterAndTabCommand } from '../../commands/commands/set-selection.command';
-import { SetCellEditVisibleArrowOperation } from '../../commands/operations/cell-edit.operation';
+import { SetCellEditVisibleArrowOperation, SetCellEditVisibleWithF2Operation } from '../../commands/operations/cell-edit.operation';
 import { ICellEditorManagerService } from '../../services/editor/cell-editor-manager.service';
 import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
@@ -70,6 +70,7 @@ enum CursorChange {
     StartEditor,
     CursorChange,
 }
+
 @OnLifecycle(LifecycleStages.Rendered, EndEditController)
 export class EndEditController extends Disposable {
     private _cursorChangeObservers: Nullable<Observer<IPointerEvent | IMouseEvent>>;
@@ -79,10 +80,10 @@ export class EndEditController extends Disposable {
     /**
      * It is used to distinguish whether the user has actively moved the cursor in the editor, mainly through mouse clicks.
      */
-    private _isCursorChange: CursorChange = CursorChange.InitialState;
+    private _cursorChange: CursorChange = CursorChange.InitialState;
 
     constructor(
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ICommandService private readonly _commandService: ICommandService,
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService,
@@ -132,14 +133,14 @@ export class EndEditController extends Disposable {
 
                 if (visible === true) {
                     // Change `CursorChange` to changed status, when formula bar clicked.
-                    this._isCursorChange =
+                    this._cursorChange =
                         eventType === DeviceInputEventType.PointerDown
                             ? CursorChange.CursorChange
                             : CursorChange.StartEditor;
                     return;
                 }
 
-                this._isCursorChange = CursorChange.InitialState;
+                this._cursorChange = CursorChange.InitialState;
 
                 const selections = this._selectionManagerService.getSelections();
                 const currentSelection = this._selectionManagerService.getCurrent();
@@ -183,7 +184,7 @@ export class EndEditController extends Disposable {
                     return;
                 }
 
-                const workbook = this._currentUniverService.getUniverSheetInstance(unitId);
+                const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
 
                 const worksheet = workbook?.getSheetBySheetId(sheetId);
 
@@ -212,19 +213,19 @@ export class EndEditController extends Disposable {
                     col: column,
                 };
 
-                 /**
-                  * When closing the editor, switch to the current tab of the editor.
-                  */
+                /**
+                 * When closing the editor, switch to the current tab of the editor.
+                 */
                 if (workbookId === unitId && sheetId !== worksheetId && this._editorBridgeService.isForceKeepVisible()) {
                     this._commandService.executeCommand(SetWorksheetActivateCommand.id, {
                         subUnitId: sheetId,
                         unitId,
                     });
                 }
-                  /**
-                   * When switching tabs while the editor is open,
-                   * the operation to refresh the selection will be blocked and needs to be triggered manually.
-                   */
+                /**
+                 * When switching tabs while the editor is open,
+                 * the operation to refresh the selection will be blocked and needs to be triggered manually.
+                 */
                 this._selectionManagerService.refreshSelection();
 
                 const cell = this._editorBridgeService.interceptor.fetchThroughInterceptors(
@@ -317,7 +318,6 @@ export class EndEditController extends Disposable {
          */
 
         const editorObject = this._getEditorObject();
-
         if (editorObject == null) {
             return;
         }
@@ -327,8 +327,8 @@ export class EndEditController extends Disposable {
         this.disposeWithMe(
             toDisposable(
                 documentComponent.onPointerDownObserver.add(() => {
-                    if (this._isCursorChange === CursorChange.StartEditor) {
-                        this._isCursorChange = CursorChange.CursorChange;
+                    if (this._cursorChange === CursorChange.StartEditor) {
+                        this._cursorChange = CursorChange.CursorChange;
                     }
                 })
             )
@@ -337,6 +337,7 @@ export class EndEditController extends Disposable {
 
     private _commandExecutedListener() {
         const updateCommandList = [SetCellEditVisibleArrowOperation.id];
+
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (updateCommandList.includes(command.id)) {
@@ -348,12 +349,18 @@ export class EndEditController extends Disposable {
                      * the up, down, left, and right keys can no longer switch editing cells,
                      * but move the cursor within the editor instead.
                      */
-                    if (keycode != null && this._isCursorChange === CursorChange.CursorChange) {
+                    if (keycode != null &&
+                        (this._cursorChange === CursorChange.CursorChange || this._contextService.getContextValue(FOCUSING_FORMULA_EDITOR))
+                    ) {
                         this._moveInEditor(keycode, isShift);
                         return;
                     }
 
                     this._editorBridgeService.changeVisible(params);
+                }
+
+                if (command.id === SetCellEditVisibleWithF2Operation.id) {
+                    this._cursorChange = CursorChange.CursorChange;
                 }
             })
         );

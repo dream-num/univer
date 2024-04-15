@@ -15,7 +15,7 @@
  */
 
 import type { Meta } from '@storybook/react';
-import React from 'react';
+import React, { useState } from 'react';
 
 import { Checkbox } from './Checkbox';
 
@@ -32,7 +32,12 @@ export default meta;
 
 export const CheckboxBasic = {
     render() {
-        return <Checkbox value="c0">checkbox 1</Checkbox>;
+        const [checked, setChecked] = useState(false);
+        function handleChange(value: string | number | boolean) {
+            setChecked(value as boolean);
+        }
+
+        return <Checkbox checked={checked} onChange={handleChange}>checkbox 1</Checkbox>;
     },
 };
 
@@ -40,10 +45,28 @@ export const CheckboxDisabled = {
     render() {
         return (
             <>
-                <Checkbox value="c1" disabled>
+                <Checkbox disabled>
                     checkbox 1
                 </Checkbox>
-                <Checkbox value="c2" disabled checked>
+                <Checkbox disabled checked>
+                    checkbox 2
+                </Checkbox>
+            </>
+        );
+    },
+};
+
+export const CheckboxIndeterminate = {
+    render() {
+        const [checked, setChecked] = useState(false);
+        function handleChange(value: string | number | boolean) {
+            setChecked(value as boolean);
+        }
+
+        return (
+            <>
+                <Checkbox checked={checked} onChange={handleChange} indeterminate>checkbox 1</Checkbox>
+                <Checkbox disabled indeterminate>
                     checkbox 2
                 </Checkbox>
             </>

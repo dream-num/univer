@@ -335,7 +335,7 @@ describe("Test commands used for updating cells' styles", () => {
 
                 // undo
                 expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
-                expect(getFontSize()).toBe(14);
+                expect(getFontSize()).toBe(11);
 
                 // redo
                 expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
@@ -376,16 +376,16 @@ describe("Test commands used for updating cells' styles", () => {
                         .getFontFamily();
                 }
 
-                expect(await commandService.executeCommand(SetFontFamilyCommand.id, { value: 'Arial' })).toBeTruthy();
-                expect(getFontFamily()).toBe('Arial');
+                expect(await commandService.executeCommand(SetFontFamilyCommand.id, { value: 'Times New Roman' })).toBeTruthy();
+                expect(getFontFamily()).toBe('Times New Roman');
 
                 // undo
                 expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
-                expect(getFontFamily()).toBe('Times New Roman');
+                expect(getFontFamily()).toBe('Arial');
 
                 // redo
                 expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
-                expect(getFontFamily()).toBe('Arial');
+                expect(getFontFamily()).toBe('Times New Roman');
             });
         });
 

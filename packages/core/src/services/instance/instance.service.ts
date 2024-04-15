@@ -27,13 +27,13 @@ import type { IDocumentData, ISlideData, IWorkbookData } from '../../types/inter
 import { FOCUSING_DOC, FOCUSING_SHEET, FOCUSING_SLIDE } from '../context/context';
 import { IContextService } from '../context/context.service';
 
+/**
+ * Type of built-in univer document instances.
+ */
 export enum UniverInstanceType {
     UNKNOWN = 0,
-
     DOC = 1,
-
     SHEET = 2,
-
     SLIDE = 3,
 }
 
@@ -44,8 +44,10 @@ export interface IUniverHandler {
 }
 
 /**
- * IUniverInstanceService holds all the current univer instances. And it also manages
- * the focused univer instance.
+ * IUniverInstanceService holds all the current univer instances and provides a set of
+ * methods to add and remove univer instances.
+ *
+ * It also manages the focused univer instance.
  */
 export interface IUniverInstanceService {
     focused$: Observable<Nullable<string>>;
@@ -78,9 +80,10 @@ export interface IUniverInstanceService {
     getUniverDocInstance(id: string): Nullable<DocumentDataModel>;
     getUniverSlideInstance(id: string): Nullable<SlideDataModel>;
 
-    getCurrentUniverSheetInstance(): Workbook;
-    getCurrentUniverDocInstance(): DocumentDataModel;
-    getCurrentUniverSlideInstance(): SlideDataModel;
+    getCurrentUniverSheetInstance(): Nullable<Workbook>;
+    getCurrentUniverDocInstance(): Nullable<DocumentDataModel>;
+    getCurrentUniverSlideInstance(): Nullable<SlideDataModel>;
+
     setCurrentUniverSheetInstance(id: string): void;
     setCurrentUniverDocInstance(id: string): void;
     setCurrentUniverSlideInstance(id: string): void;
@@ -95,9 +98,16 @@ export interface IUniverInstanceService {
 
 export const IUniverInstanceService = createIdentifier<IUniverInstanceService>('univer.current');
 export class UniverInstanceService extends Disposable implements IUniverInstanceService {
-    private _focused: DocumentDataModel | Workbook | SlideDataModel | null = null;
     private readonly _focused$ = new BehaviorSubject<Nullable<string>>(null);
     readonly focused$ = this._focused$.asObservable();
+    get focused(): Nullable<Workbook | DocumentDataModel | SlideDataModel> {
+        const id = this._focused$.getValue();
+        if (!id) {
+            return null;
+        }
+
+        return this.getUniverSheetInstance(id) || this.getUniverDocInstance(id) || this.getUniverSlideInstance(id);
+    }
 
     private readonly _currentSheet$ = new BehaviorSubject<Nullable<Workbook>>(null);
     readonly currentSheet$ = this._currentSheet$.asObservable();
@@ -226,11 +236,12 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
         this._currentDoc$.next(this.getUniverDocInstance(id) || null);
     }
 
-    getCurrentUniverSheetInstance(): Workbook {
+    getCurrentUniverSheetInstance(): Nullable<Workbook> {
         const sheet = this._currentSheet$.getValue();
         if (!sheet) {
-            throw new Error('No current sheet!');
+            return null;
         }
+
         return sheet;
     }
 
@@ -253,29 +264,25 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
     }
 
     focusUniverInstance(id: string | null): void {
-        if (id) {
-            this._focused =
-                this.getUniverSheetInstance(id) ||
-                this.getUniverDocInstance(id) ||
-                this.getUniverSlideInstance(id) ||
-                null;
-        }
-
         this._focused$.next(id);
 
-        [FOCUSING_DOC, FOCUSING_SHEET, FOCUSING_SLIDE].forEach((k) => this._contextService.setContextValue(k, false));
-
-        if (this._focused instanceof Workbook) {
+        if (this.focused instanceof Workbook) {
+            this._contextService.setContextValue(FOCUSING_DOC, false);
             this._contextService.setContextValue(FOCUSING_SHEET, true);
-        } else if (this._focused instanceof DocumentDataModel) {
+            this._contextService.setContextValue(FOCUSING_SLIDE, false);
+        } else if (this.focused instanceof DocumentDataModel) {
             this._contextService.setContextValue(FOCUSING_DOC, true);
-        } else if (this._focused instanceof SlideDataModel) {
+            this._contextService.setContextValue(FOCUSING_SHEET, false);
+            this._contextService.setContextValue(FOCUSING_SLIDE, false);
+        } else if (this.focused instanceof SlideDataModel) {
+            this._contextService.setContextValue(FOCUSING_DOC, false);
+            this._contextService.setContextValue(FOCUSING_SHEET, false);
             this._contextService.setContextValue(FOCUSING_SLIDE, true);
         }
     }
 
     getFocusedUniverInstance(): Nullable<Workbook | DocumentDataModel | SlideDataModel> {
-        return this._focused;
+        return this.focused;
     }
 
     getDocumentType(unitId: string): UniverInstanceType {
@@ -309,7 +316,8 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
             const index = this._sheets.indexOf(sheet);
             this._sheets.splice(index, 1);
             this._sheetDisposed$.next(sheet);
-            // this.focusUniverInstance(null);
+            this.setCurrentUniverSheetInstance('');
+            this.focusUniverInstance(null);
             return true;
         }
 

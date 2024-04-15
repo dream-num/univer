@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo } from '@univerjs/core';
+import type { ICommandInfo, Workbook } from '@univerjs/core';
 import {
     Disposable,
     ICommandService,
@@ -42,7 +42,7 @@ import {
 } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
-import { deserializeRangeWithSheet, IDefinedNamesService, isReferenceString, operatorToken } from '@univerjs/engine-formula';
+import { deserializeRangeWithSheet, IDefinedNamesService, isReferenceStrings, operatorToken } from '@univerjs/engine-formula';
 import type { ISetZoomRatioOperationParams } from '../commands/operations/set-zoom-ratio.operation';
 import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
 import { VIEWPORT_KEY } from '../common/keys';
@@ -55,7 +55,7 @@ import { getSheetObject } from './utils/component-tools';
 export class SelectionController extends Disposable {
     constructor(
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ISelectionRenderService
@@ -70,7 +70,7 @@ export class SelectionController extends Disposable {
     }
 
     private _initialize() {
-        const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
         const worksheet = workbook.getActiveSheet();
         const sheetObject = this._getSheetObject();
         if (sheetObject == null) {
@@ -108,7 +108,7 @@ export class SelectionController extends Disposable {
                     const { unitId } = item;
                     let { formulaOrRefString } = item;
 
-                    const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+                    const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
 
                     if (unitId !== workbook.getUnitId()) {
                         return;
@@ -118,58 +118,15 @@ export class SelectionController extends Disposable {
                         formulaOrRefString = formulaOrRefString.substring(1);
                     }
 
-                    const valueArray = formulaOrRefString.split(',');
-                    const result = valueArray.every((refString) => {
-                        return isReferenceString(refString.trim());
-                    });
+
+                    const result = isReferenceStrings(formulaOrRefString);
 
                     if (!result) {
                         return;
                     }
 
-                    let worksheet = workbook.getActiveSheet();
+                    const selections = await this._getSelections(workbook, unitId, formulaOrRefString);
 
-                    const selections = [];
-
-                    for (let i = 0; i < valueArray.length; i++) {
-                        const refString = valueArray[i].trim();
-
-                        const unitRange = deserializeRangeWithSheet(refString.trim());
-
-                        if (i === 0) {
-                            const worksheetCache = workbook.getSheetBySheetName(unitRange.sheetName);
-                            if (worksheetCache && worksheet.getSheetId() !== worksheetCache.getSheetId()) {
-                                worksheet = worksheetCache;
-                                await this._commandService.executeCommand(SetWorksheetActivateCommand.id, {
-                                    subUnitId: worksheet.getSheetId(),
-                                    unitId,
-                                });
-                            }
-                        }
-
-                        if (worksheet.getName() !== unitRange.sheetName) {
-                            continue;
-                        }
-
-                        let primary = null;
-                        if (i === valueArray.length - 1) {
-                            const range = unitRange.range;
-                            const { startRow, startColumn, endRow, endColumn } = range;
-                            primary = getPrimaryForRange({
-                                startRow,
-                                startColumn,
-                                endRow,
-                                endColumn,
-
-                            }, worksheet);
-                        }
-
-                        selections.push({
-                            range: unitRange.range,
-                            style: getNormalSelectionStyle(this._themeService),
-                            primary,
-                        });
-                    }
 
                     this._selectionManagerService.replace(selections);
 
@@ -177,6 +134,56 @@ export class SelectionController extends Disposable {
                 })
             )
         );
+    }
+
+    private async _getSelections(workbook: Workbook, unitId: string, formulaOrRefString: string) {
+        const valueArray = formulaOrRefString.split(',');
+
+        let worksheet = workbook.getActiveSheet();
+
+        const selections = [];
+
+        for (let i = 0; i < valueArray.length; i++) {
+            const refString = valueArray[i].trim();
+
+            const unitRange = deserializeRangeWithSheet(refString.trim());
+
+            if (i === 0) {
+                const worksheetCache = workbook.getSheetBySheetName(unitRange.sheetName);
+                if (worksheetCache && worksheet.getSheetId() !== worksheetCache.getSheetId()) {
+                    worksheet = worksheetCache;
+                    await this._commandService.executeCommand(SetWorksheetActivateCommand.id, {
+                        subUnitId: worksheet.getSheetId(),
+                        unitId,
+                    });
+                }
+            }
+
+            if (worksheet.getName() !== unitRange.sheetName) {
+                continue;
+            }
+
+            let primary = null;
+            if (i === valueArray.length - 1) {
+                const range = unitRange.range;
+                const { startRow, startColumn, endRow, endColumn } = range;
+                primary = getPrimaryForRange({
+                    startRow,
+                    startColumn,
+                    endRow,
+                    endColumn,
+
+                }, worksheet);
+            }
+
+            selections.push({
+                range: unitRange.range,
+                style: getNormalSelectionStyle(this._themeService),
+                primary,
+            });
+        }
+
+        return selections;
     }
 
     private _getActiveViewport(evt: IPointerEvent | IMouseEvent) {
@@ -368,7 +375,7 @@ export class SelectionController extends Disposable {
         }
         const lastSelection = params[params.length - 1];
 
-        const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
         const worksheet = workbook.getActiveSheet();
 
         this._definedNamesService.setCurrentRange({
@@ -393,7 +400,9 @@ export class SelectionController extends Disposable {
     }
 
     private _move(selectionDataWithStyleList: ISelectionWithCoordAndStyle[], type: SelectionMoveType) {
-        const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
+        if (!workbook) return;
+
         const unitId = workbook.getUnitId();
         const sheetId = workbook.getActiveSheet().getSheetId();
         const current = this._selectionManagerService.getCurrent();
@@ -414,7 +423,7 @@ export class SelectionController extends Disposable {
     }
 
     private _getSheetObject() {
-        return getSheetObject(this._currentUniverService, this._renderManagerService);
+        return getSheetObject(this._univerInstanceService, this._renderManagerService);
     }
 
     private _initCommandListener() {
@@ -423,7 +432,7 @@ export class SelectionController extends Disposable {
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (updateCommandList.includes(command.id)) {
-                    const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+                    const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
                     const worksheet = workbook.getActiveSheet();
 
                     const params = command.params as ISetZoomRatioOperationParams;

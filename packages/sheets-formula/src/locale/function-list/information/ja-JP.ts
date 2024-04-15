@@ -108,8 +108,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value: { name: '値', detail: '検定する値を指定します。 数値が整数でない場合は、小数点以下が切り捨てられます。' },
         },
     },
     ISFORMULA: {
@@ -192,8 +191,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value: { name: '値', detail: '検定する値を指定します。 数値が整数でない場合は、小数点以下が切り捨てられます。' },
         },
     },
     ISOMITTED: {

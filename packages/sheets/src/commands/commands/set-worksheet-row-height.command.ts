@@ -39,6 +39,7 @@ import {
     SetWorksheetRowIsAutoHeightMutation,
     SetWorksheetRowIsAutoHeightMutationFactory,
 } from '../mutations/set-worksheet-row-height.mutation';
+import { getSheetCommandTarget } from './utils/target-util';
 
 export interface IDeltaRowHeightCommand {
     anchorRow: number;
@@ -55,11 +56,10 @@ export const DeltaRowHeightCommand: ICommand = {
             return false;
         }
 
-        const univerInstanceService = accessor.get(IUniverInstanceService);
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
-        const worksheet = workbook.getActiveSheet();
-        const unitId = workbook.getUnitId();
-        const subUnitId = worksheet.getSheetId();
+        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService));
+        if (!target) return false;
+
+        const { worksheet, subUnitId, unitId } = target;
 
         const { anchorRow, deltaY } = params;
         const anchorRowHeight = worksheet.getRowHeight(anchorRow);
@@ -195,9 +195,10 @@ export const SetRowHeightCommand: ICommand = {
             return false;
         }
 
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
-        const unitId = workbook.getUnitId();
-        const subUnitId = workbook.getActiveSheet().getSheetId();
+        const target = getSheetCommandTarget(univerInstanceService);
+        if (!target) return false;
+
+        const { unitId, subUnitId } = target;
 
         const redoMutationParams: ISetWorksheetRowHeightMutationParams = {
             subUnitId,
@@ -278,10 +279,11 @@ export const SetWorksheetRowIsAutoHeightCommand: ICommand = {
         const undoRedoService = accessor.get(IUndoRedoService);
         const selectionManagerService = accessor.get(SelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-        const workSheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
-        const subUnitId = workSheet.getSheetId();
 
+        const target = getSheetCommandTarget(univerInstanceService);
+        if (!target) return false;
+
+        const { unitId, subUnitId, worksheet } = target;
         const { anchorRow } = params ?? {};
 
         const ranges =
@@ -291,7 +293,7 @@ export const SetWorksheetRowIsAutoHeightCommand: ICommand = {
                         startRow: anchorRow,
                         endRow: anchorRow,
                         startColumn: 0,
-                        endColumn: workSheet.getMaxColumns() - 1,
+                        endColumn: worksheet.getMaxColumns() - 1,
                     },
                 ]
                 : selectionManagerService.getSelectionRanges();

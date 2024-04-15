@@ -52,20 +52,22 @@ export class HoverManagerService {
     ) { }
 
     private _calcActiveCell() {
-        if (!this._lastPosition) {
-            return;
-        }
+        if (!this._lastPosition) return;
+
         const { offsetX, offsetY } = this._lastPosition;
         const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
+        if (!workbook) {
+            this._currentCell$.next(null);
+            return;
+        }
+
         const worksheet = workbook.getActiveSheet();
         const skeletonParam = this._sheetSkeletonManagerService.getCurrent();
         const currentRender = this._renderManagerService.getRenderById(workbook.getUnitId());
 
         const scrollInfo = this._scrollManagerService.getCurrentScroll();
 
-        if (!skeletonParam || !scrollInfo || !currentRender) {
-            return;
-        }
+        if (!skeletonParam || !scrollInfo || !currentRender) return;
 
         const { scene } = currentRender;
 

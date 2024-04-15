@@ -18,7 +18,7 @@ import React, { createContext } from 'react';
 import canUseDom from 'rc-util/lib/Dom/canUseDom';
 
 import type { ILocale } from '../../locale';
-import { enUS } from '../../locale';
+import { zhCN } from '../../locale';
 
 export interface IConfigProviderProps {
     children: React.ReactNode;
@@ -27,7 +27,7 @@ export interface IConfigProviderProps {
 }
 
 export const ConfigContext = createContext<Omit<IConfigProviderProps, 'children'>>({
-    locale: enUS,
+    locale: zhCN,
     mountContainer: canUseDom() ? document.body : null,
 });
 
@@ -39,7 +39,7 @@ export function ConfigProvider(props: IConfigProviderProps) {
     if (Object.prototype.hasOwnProperty.call(locale, 'design')) {
         _locale = locale as ILocale;
     } else {
-        _locale = enUS;
+        _locale = zhCN;
     }
 
     return <ConfigContext.Provider value={{ locale: _locale, mountContainer }}>{children}</ConfigContext.Provider>;

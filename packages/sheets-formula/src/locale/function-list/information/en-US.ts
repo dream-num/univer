@@ -106,8 +106,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value: { name: 'value', detail: 'The value to test. If number is not an integer, it is truncated.' },
         },
     },
     ISFORMULA: {
@@ -186,8 +185,7 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            value: { name: 'value', detail: 'The value to test. If number is not an integer, it is truncated.' },
         },
     },
     ISOMITTED: {

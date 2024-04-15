@@ -57,9 +57,12 @@ export function useObservable<T>(observable: Nullable<ObservableOrFn<T>>, defaul
     const depsRef = useRef<any[] | undefined>(deps ?? undefined);
     const initializedRef = useRef<boolean>(false);
 
-    const [value, setValue] = useState<T | undefined>(() => {
-        let innerDefaultValue: T | undefined = defaultValue;
+    // This state is only for trigger React to re-render. We do not use `setValue` directly because it may cause
+    // memory leaking.
+    const [_, setRenderCounter] = useState<number>(0);
 
+    const valueRef = useRef((() => {
+        let innerDefaultValue: T | undefined;
         if (observable) {
             const sub = unwrap(observable).subscribe((value) => {
                 initializedRef.current = true;
@@ -69,8 +72,9 @@ export function useObservable<T>(observable: Nullable<ObservableOrFn<T>>, defaul
             sub.unsubscribe();
         }
 
-        return innerDefaultValue;
-    });
+        return innerDefaultValue ?? defaultValue;
+    })());
+
 
     const shouldResubscribe = (() => {
         if (typeof depsRef.current !== 'undefined') {
@@ -86,19 +90,23 @@ export function useObservable<T>(observable: Nullable<ObservableOrFn<T>>, defaul
         return observableRef.current !== observable;
     })();
 
+    // Subscribe on first rendering and re-subscribe when deps change.
     if ((!subscriptionRef.current || shouldResubscribe) && observable) {
         observableRef.current = unwrap(observable);
         subscriptionRef.current?.unsubscribe();
         subscriptionRef.current = observableRef.current.subscribe((value) => {
-            setValue(value);
+            valueRef.current = value;
+            setRenderCounter((prev) => prev + 1);
         });
     }
+
+    useEffect(() => () => {
+        subscriptionRef.current?.unsubscribe();
+        subscriptionRef.current = null;
+    }, []);
 
     if (shouldHaveSyncValue && !initializedRef.current) {
         throw new Error('[useObservable]: expect shouldHaveSyncValue but not getting a sync value!');
     }
-
-    useEffect(() => () => subscriptionRef.current?.unsubscribe(), []);
-
-    return value;
+    return valueRef.current;
 }

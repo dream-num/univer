@@ -85,11 +85,13 @@ export class UniverFormulaEnginePlugin extends Plugin {
             [IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }],
             [ISuperTableService, { useClass: SuperTableService }],
 
+
             // Models
             [FormulaDataModel],
 
             // Engine
             [LexerTreeBuilder],
+
 
             //Controllers
             [
@@ -109,8 +111,8 @@ export class UniverFormulaEnginePlugin extends Plugin {
                 // Services
                 [CalculateFormulaService],
                 [IOtherFormulaManagerService, { useClass: OtherFormulaManagerService }],
-                [IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }],
                 [IFormulaRuntimeService, { useClass: FormulaRuntimeService }],
+                [IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }],
 
                 //Controller
                 [CalculateController],
@@ -122,7 +124,6 @@ export class UniverFormulaEnginePlugin extends Plugin {
                 [Interpreter],
                 [AstTreeBuilder],
                 [Lexer],
-
                 // AstNode factory
                 [AstRootNodeFactory],
                 [FunctionNodeFactory],

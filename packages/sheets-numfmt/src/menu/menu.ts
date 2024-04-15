@@ -29,6 +29,7 @@ import type { IAccessor } from '@wendellhu/redi';
 import { merge, Observable } from 'rxjs';
 
 import { FormulaDataModel } from '@univerjs/engine-formula';
+import { deriveStateFromActiveSheet$ } from '@univerjs/sheets-ui';
 import { MENU_OPTIONS } from '../base/const/MENU-OPTIONS';
 import { AddDecimalCommand } from '../commands/commands/add-decimal.command';
 import { SetCurrencyCommand } from '../commands/commands/set-currency.command';
@@ -120,7 +121,7 @@ export const FactoryOtherMenuItem = (componentManager: ComponentManager) => {
         const localeService = _accessor.get(LocaleService);
 
         const selectionManagerService = _accessor.get(SelectionManagerService);
-        const value$ = new Observable((subscribe) =>
+        const value$ = deriveStateFromActiveSheet$(univerInstanceService, '', ({ workbook, worksheet }) => new Observable((subscribe) =>
             merge(
                 selectionManagerService.selectionMoveEnd$,
                 new Observable<null>((commandSubscribe) => {
@@ -135,8 +136,6 @@ export const FactoryOtherMenuItem = (componentManager: ComponentManager) => {
             ).subscribe(() => {
                 const selections = selectionManagerService.getSelections();
                 if (selections && selections[0]) {
-                    const workbook = univerInstanceService.getCurrentUniverSheetInstance();
-                    const worksheet = workbook.getActiveSheet();
                     const range = selections[0].range;
                     const row = range.startRow;
                     const col = range.startColumn;
@@ -157,13 +156,13 @@ export const FactoryOtherMenuItem = (componentManager: ComponentManager) => {
                             value = localeService.t('sheet.numfmt.moreFmt');
                         }
                     }
+
                     subscribe.next(value);
                 }
             })
-        );
+        ));
 
         return {
-            // icon: 'MoreDownSingle',
             label: moreTypeKey,
             id: OpenNumfmtPanelOperator.id,
             tooltip: 'sheet.numfmt.title',

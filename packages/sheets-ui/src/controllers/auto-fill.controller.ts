@@ -275,8 +275,12 @@ export class AutoFillController extends Disposable {
         } else {
             return;
         }
-        const unitId = this._univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-        const subUnitId = this._univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
+
+        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
+        if (!workbook) return;
+
+        const unitId = workbook.getUnitId();
+        const subUnitId = workbook.getActiveSheet().getSheetId();
         this._autoFillService.direction = direction;
         this._autoFillService.autoFillLocation = {
             source,
@@ -354,8 +358,8 @@ export class AutoFillController extends Disposable {
         const {
             source,
             target,
-            unitId = this._univerInstanceService.getCurrentUniverSheetInstance().getUnitId(),
-            subUnitId = this._univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId(),
+            unitId = this._univerInstanceService.getCurrentUniverSheetInstance()!.getUnitId(),
+            subUnitId = this._univerInstanceService.getCurrentUniverSheetInstance()!.getActiveSheet().getSheetId(),
         } = this._autoFillService.autoFillLocation || {};
         const direction = this._autoFillService.direction;
         if (!source || !target) {
@@ -524,7 +528,7 @@ export class AutoFillController extends Disposable {
             endColumn: copyEndColumn,
         } = source;
         const currentCellDatas = this._univerInstanceService
-            .getCurrentUniverSheetInstance()
+            .getCurrentUniverSheetInstance()!
             .getActiveSheet()
             .getCellMatrix();
         const rules = this._autoFillService.getRules();
@@ -600,7 +604,7 @@ export class AutoFillController extends Disposable {
     }
 
     private _getMergeApplyData(source: IRange, target: IRange, direction: Direction, csLen: number) {
-        const mergeData = this._univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getMergeData();
+        const mergeData = this._univerInstanceService.getCurrentUniverSheetInstance()!.getActiveSheet().getMergeData();
         const applyMergeRanges = [];
         for (let i = source.startRow; i <= source.endRow; i++) {
             for (let j = source.startColumn; j <= source.endColumn; j++) {
@@ -673,7 +677,7 @@ export class AutoFillController extends Disposable {
         const { source, target } = location;
         // cache original data of apply range
         const currentCellDatas = this._univerInstanceService
-            .getCurrentUniverSheetInstance()
+            .getCurrentUniverSheetInstance()!
             .getActiveSheet()
             .getCellMatrix();
         // cache the original data in currentCellDatas in apply range for later use / refill
@@ -776,7 +780,7 @@ export class AutoFillController extends Disposable {
 
         // deal with styles
         let applyMergeRanges: IRange[] = [];
-        const style = this._univerInstanceService.getCurrentUniverSheetInstance().getStyles();
+        const style = this._univerInstanceService.getCurrentUniverSheetInstance()!.getStyles();
         if (hasStyle) {
             applyMergeRanges = this._getMergeApplyData(source, target, direction, csLen);
             applyDatas.forEach((row) => {

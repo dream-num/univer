@@ -18,6 +18,7 @@ import { DataValidationRenderMode, DataValidationType, isFormulaString, IUniverI
 import type { CellValue, DataValidationOperator, ICellData, IDataValidationRule, IDataValidationRuleBase, ISheetDataValidationRule, Nullable } from '@univerjs/core';
 import type { IBaseDataValidationWidget, IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
 import { BaseDataValidator } from '@univerjs/data-validation';
+import { isReferenceString, LexerTreeBuilder, sequenceNodeType } from '@univerjs/engine-formula';
 import { LIST_FORMULA_INPUT_NAME } from '../views/formula-input';
 import { LIST_DROPDOWN_KEY } from '../views';
 import { DropdownWidget } from '../widgets/dropdown-widget';
@@ -45,8 +46,33 @@ export function getRuleFormulaResultSet(result: Nullable<Nullable<ICellData>[][]
     return [...resultSet];
 }
 
+const supportedFormula = [
+    'if',
+    'indirect',
+    'choose',
+    'offset',
+];
+
+// 1. must have REFERENCE or DEFINED_NAME node.
+// 2. only support some formula
+export function isValidListFormula(formula: string, lexer: LexerTreeBuilder) {
+    if (!isFormulaString(formula)) {
+        return true;
+    }
+
+    const isRefString = isReferenceString(formula.slice(1));
+    if (isRefString) {
+        return true;
+    }
+
+    const nodes = lexer.sequenceNodesBuilder(formula);
+
+    return (nodes) && nodes.some((node) => typeof node === 'object' && node.nodeType === sequenceNodeType.FUNCTION && supportedFormula.indexOf(node.token.toLowerCase()) > -1);
+}
+
 export class ListValidator extends BaseDataValidator {
     protected formulaService = this.injector.get(DataValidationFormulaService);
+    private _lexer = this.injector.get(LexerTreeBuilder);
 
     id: string = DataValidationType.LIST;
     title: string = 'dataValidation.list.title';
@@ -66,10 +92,15 @@ export class ListValidator extends BaseDataValidator {
 
     override validatorFormula(rule: IDataValidationRuleBase): IFormulaValidResult {
         const success = !Tools.isBlank(rule.formula1);
+        const valid = isValidListFormula(rule.formula1 ?? '', this._lexer);
 
         return {
-            success,
-            formula1: success ? undefined : this.localeService.t('dataValidation.validFail.list'),
+            success: Boolean(success && valid),
+            formula1: success
+                ? valid ?
+                    undefined :
+                    this.localeService.t('dataValidation.validFail.listInvalid')
+                : this.localeService.t('dataValidation.validFail.list'),
         };
     }
 
@@ -107,6 +138,8 @@ export class ListValidator extends BaseDataValidator {
         const { formula1 = '' } = rule;
         const univerInstanceService = this.injector.get(IUniverInstanceService);
         const workbook = (currentUnitId ? univerInstanceService.getUniverSheetInstance(currentUnitId) : undefined) ?? univerInstanceService.getCurrentUniverSheetInstance();
+        if (!workbook) return [];
+
         const worksheet = (currentSubUnitId ? workbook.getSheetBySheetId(currentSubUnitId) : undefined) ?? workbook.getActiveSheet();
         const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();
@@ -118,6 +151,9 @@ export class ListValidator extends BaseDataValidator {
         const { formula1 = '' } = rule;
         const univerInstanceService = this.injector.get(IUniverInstanceService);
         const workbook = (currentUnitId ? univerInstanceService.getUniverSheetInstance(currentUnitId) : undefined) ?? univerInstanceService.getCurrentUniverSheetInstance();
+        if (!workbook) {
+            return [];
+        }
         const worksheet = (currentSubUnitId ? workbook.getSheetBySheetId(currentSubUnitId) : undefined) ?? workbook.getActiveSheet();
         const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();

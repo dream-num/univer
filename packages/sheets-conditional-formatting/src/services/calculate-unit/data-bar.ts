@@ -19,7 +19,7 @@ import { CFRuleType } from '../../base/const';
 import type { IDataBarRenderParams } from '../../render/type';
 import type { IConditionFormattingRule, IDataBar } from '../../models/type';
 import { ConditionalFormattingFormulaService, FormulaResultStatus } from '../conditional-formatting-formula.service';
-import { getValueByType, isNullable } from './utils';
+import { filterRange, getValueByType, isNullable } from './utils';
 import type { ICalculateUnit } from './type';
 import { EMPTY_STYLE } from './type';
 
@@ -31,8 +31,8 @@ export const dataBarCellCalculateUnit: ICalculateUnit = {
 
         const { worksheet } = context;
         const matrix = new ObjectMatrix<number>();
-
-        rule.ranges.forEach((range) => {
+        const ranges = filterRange(rule.ranges, worksheet.getMaxRows() - 1, worksheet.getMaxColumns() - 1);
+        ranges.forEach((range) => {
             Range.foreach(range, (row, col) => {
                 const cell = worksheet?.getCellRaw(row, col);
                 const v = cell && cell.v;
@@ -44,7 +44,7 @@ export const dataBarCellCalculateUnit: ICalculateUnit = {
         });
 
         const computeResult = new ObjectMatrix<IDataBarRenderParams>();
-        rule.ranges.forEach((range) => {
+        ranges.forEach((range) => {
             Range.foreach(range, (row, col) => {
                 computeResult.setValue(row, col, EMPTY_STYLE as IDataBarRenderParams);
             });

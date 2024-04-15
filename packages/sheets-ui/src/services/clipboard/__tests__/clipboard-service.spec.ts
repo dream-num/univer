@@ -163,8 +163,8 @@ describe('Test clipboard', () => {
             const rowHeight = rowManager?.getRowData()?.[0].h;
             const columnManager = get(IUniverInstanceService).getUniverSheetInstance('test')?.getSheetBySheetId('sheet1')?.getColumnManager();
             const columnWidth = columnManager?.getColumnData()?.[0].w;
-            expect (columnWidth).toBe(73);
-            expect (rowHeight).toBe(81);
+            expect(columnWidth).toBe(73);
+            expect(rowHeight).toBe(81);
             expect(values && values[0][0]?.v).toBe('row1col2');
             expect(styles && styles[0][0]).toStrictEqual({
                 bg: { rgb: 'rgb(255,0,0)' },
@@ -476,19 +476,8 @@ describe('Test clipboard', () => {
                 },
             ]);
 
-            await sheetClipboardService.paste(clipboardItem);
-            const values = getValues(startRow, startColumn, endRow, endColumn);
-            const styles = getStyles(startRow, startColumn, endRow, endColumn);
-            const mergedCells = getMergedCells(startRow, startColumn, endRow, endColumn);
-
-            expect(values && values[0][0]?.v).toBe('row1col2');
-            expect(styles && styles[0][0]).toBe(undefined);
-            expect(mergedCells && mergedCells[0]).toStrictEqual({
-                startRow,
-                startColumn,
-                endRow,
-                endColumn,
-            });
+            const res = await sheetClipboardService.paste(clipboardItem);
+            expect(res).toBeFalsy();
         });
 
         it('The current selection is a merged cell of 1 row and 4 columns.', async () => {
@@ -514,23 +503,8 @@ describe('Test clipboard', () => {
                 },
             ]);
 
-            await sheetClipboardService.paste(clipboardItem);
-            const values = getValues(startRow, startColumn, endRow, endColumn);
-            const styles = getStyles(startRow, startColumn, endRow, endColumn);
-            const mergedCells = getMergedCells(startRow, startColumn, endRow, endColumn);
-
-            expect(values && values[0][0]?.v).toBe('row1col2');
-            expect(styles && styles[0][0]).toStrictEqual({
-                bg: { rgb: 'rgb(255,0,0)' },
-                ht: 2,
-                vt: 2,
-            });
-            expect(mergedCells && mergedCells[0]).toStrictEqual({
-                startRow,
-                startColumn,
-                endRow,
-                endColumn: endColumn - 2,
-            });
+            const res = await sheetClipboardService.paste(clipboardItem);
+            expect(res).toBeFalsy();
         });
 
         it('The current selection is a merged cell of 2 rows and 2 columns.', async () => {
@@ -556,29 +530,8 @@ describe('Test clipboard', () => {
                 },
             ]);
 
-            await sheetClipboardService.paste(clipboardItem);
-            const values = getValues(startRow, startColumn, endRow, endColumn);
-            const styles = getStyles(startRow, startColumn, endRow, endColumn);
-            const mergedCells = getMergedCells(startRow, startColumn, endRow, endColumn);
-
-            expect(values && values[0][0]?.v).toBe('row1col2');
-            expect(styles && styles[0][0]).toStrictEqual({
-                bg: { rgb: 'rgb(255,0,0)' },
-                ht: 2,
-                vt: 2,
-            });
-            expect(mergedCells && mergedCells[0]).toStrictEqual({
-                startRow,
-                startColumn,
-                endRow: endRow - 1,
-                endColumn,
-            });
-            expect(mergedCells && mergedCells[1]).toStrictEqual({
-                startRow: startRow + 1,
-                startColumn,
-                endRow,
-                endColumn,
-            });
+            const res = await sheetClipboardService.paste(clipboardItem);
+            expect(res).toBeFalsy();
         });
 
         it('The current selection is a merged cell of 1 row and 2 columns, with 1 ordinary cell', async () => {
@@ -648,29 +601,9 @@ describe('Test clipboard', () => {
             //     alert = true;
             // });
 
-            await sheetClipboardService.paste(clipboardItem);
+            const res = await sheetClipboardService.paste(clipboardItem);
+            expect(res).toBeFalsy();
             // expect(alert).toBe(true);
-
-            const values = getValues(startRow, startColumn, endRow, endColumn);
-            const styles = getStyles(startRow, startColumn, endRow, endColumn);
-            const mergedCells = getMergedCells(startRow, startColumn, endRow, endColumn);
-
-            expect(values && values[0][0]?.v).toBe(undefined);
-            expect(styles && styles[0][0]).toBe(undefined);
-            expect(mergedCells).toStrictEqual([
-                {
-                    startRow: 11,
-                    startColumn: 5,
-                    endRow: 12,
-                    endColumn: 6,
-                },
-                {
-                    startRow: 11,
-                    startColumn: 7,
-                    endRow: 12,
-                    endColumn: 7,
-                },
-            ]);
         });
     });
 
@@ -698,20 +631,8 @@ describe('Test clipboard', () => {
                 },
             ]);
 
-            await sheetClipboardService.paste(clipboardItem);
-
-            const values = getValues(startRow, startColumn, endRow, endColumn);
-            const styles = getStyles(startRow, startColumn, endRow, endColumn);
-            const mergedCells = getMergedCells(startRow, startColumn, endRow, endColumn);
-
-            expect(values && values[0][0]?.v).toBe('row1col2');
-
-            expect(mergedCells && mergedCells[0]).toStrictEqual({
-                startRow,
-                startColumn,
-                endRow,
-                endColumn,
-            });
+            const res = await sheetClipboardService.paste(clipboardItem);
+            expect(res).toBeFalsy();
         });
         it('The current selection is a merged cell of 1 row and 2 columns, with a merged cell of 2 rows and 2 columns', async () => {
             const selectionManager = get(SelectionManagerService);

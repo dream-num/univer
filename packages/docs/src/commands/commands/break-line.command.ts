@@ -57,18 +57,20 @@ export const BreakLineCommand: ICommand = {
 
     handler: async (accessor) => {
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
-        const currentUniverService = accessor.get(IUniverInstanceService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
 
         const activeRange = textSelectionManagerService.getActiveRange();
-
         if (activeRange == null) {
             return false;
         }
 
-        const docDataModel = currentUniverService.getCurrentUniverDocInstance();
-        const unitId = docDataModel.getUnitId();
+        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        if (!docDataModel) {
+            return false;
+        }
 
+        const unitId = docDataModel.getUnitId();
         const { startOffset, segmentId, style } = activeRange;
 
         // move selection

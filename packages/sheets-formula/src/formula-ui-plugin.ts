@@ -56,7 +56,7 @@ export class UniverSheetsFormulaPlugin extends Plugin {
         private _config: Partial<IFormulaUIConfig>,
         @Inject(Injector) override readonly _injector: Injector,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super(FORMULA_UI_PLUGIN_NAME);
     }
@@ -97,7 +97,7 @@ export class UniverSheetsFormulaPlugin extends Plugin {
         dependencies.forEach((dependency) => this._injector.add(dependency));
     }
 
-    override onReady(): void {
+    override onStarting(): void {
         this.initialize();
     }
 }

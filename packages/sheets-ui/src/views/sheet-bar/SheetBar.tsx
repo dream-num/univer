@@ -34,10 +34,10 @@ export const SheetBar = () => {
     const [rightScrollState, setRightScrollState] = useState(true);
 
     const commandService = useDependency(ICommandService);
-    const sheetbarService = useDependency(ISheetBarService);
+    const sheetBarService = useDependency(ISheetBarService);
 
     useEffect(() => {
-        const subscription = sheetbarService.scroll$.subscribe((state: IScrollState) => {
+        const subscription = sheetBarService.scroll$.subscribe((state: IScrollState) => {
             updateScrollButtonState(state);
         });
 
@@ -56,16 +56,16 @@ export const SheetBar = () => {
     const addSheet = () => {
         commandService.executeCommand(InsertSheetCommand.id);
         setTimeout(() => {
-            sheetbarService.setAddSheet(0);
+            sheetBarService.setAddSheet(0);
         }, 0);
     };
 
     const handleScrollLeft = () => {
-        sheetbarService.setScrollX(-SCROLL_WIDTH);
+        sheetBarService.setScrollX(-SCROLL_WIDTH);
     };
 
     const handleScrollRight = () => {
-        sheetbarService.setScrollX(SCROLL_WIDTH);
+        sheetBarService.setScrollX(SCROLL_WIDTH);
     };
 
     return (

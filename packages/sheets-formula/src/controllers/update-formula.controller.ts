@@ -34,8 +34,7 @@ import {
     Tools,
 } from '@univerjs/core';
 import type { IFormulaData, IFormulaDataItem, ISequenceNode, IUnitSheetNameMap } from '@univerjs/engine-formula';
-import {
-    deserializeRangeWithSheet,
+import { deserializeRangeWithSheet,
     ErrorType,
     FormulaDataModel,
     generateStringWithSequence,
@@ -47,6 +46,7 @@ import {
     SetFormulaDataMutation,
     SetNumfmtFormulaDataMutation,
 } from '@univerjs/engine-formula';
+
 import type {
     IDeleteRangeMoveLeftCommandParams,
     IDeleteRangeMoveUpCommandParams,
@@ -160,7 +160,7 @@ enum OriginRangeEdgeType {
 @OnLifecycle(LifecycleStages.Ready, UpdateFormulaController)
 export class UpdateFormulaController extends Disposable {
     constructor(
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder,
         @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel,
@@ -415,7 +415,7 @@ export class UpdateFormulaController extends Disposable {
             toRange: { startRow: toStartRow, endRow: toEndRow },
         } = params;
 
-        const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
         const unitId = workbook.getUnitId();
         const worksheet = workbook.getActiveSheet();
         const sheetId = worksheet.getSheetId();
@@ -453,7 +453,7 @@ export class UpdateFormulaController extends Disposable {
             toRange: { startColumn: toStartCol, endColumn: toEndCol },
         } = params;
 
-        const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
         const unitId = workbook.getUnitId();
         const worksheet = workbook.getActiveSheet();
         const sheetId = worksheet.getSheetId();
@@ -1387,7 +1387,7 @@ export class UpdateFormulaController extends Disposable {
     }
 
     private _getCurrentSheetInfo() {
-        const workbook = this._currentUniverService.getCurrentUniverSheetInstance();
+        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
         const unitId = workbook.getUnitId();
         const sheetId = workbook.getActiveSheet().getSheetId();
 

@@ -29,7 +29,7 @@ export class DocEditorBridgeController extends Disposable {
     private _initialEditors = new Set<string>();
 
     constructor(
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(DocSkeletonManagerService) private readonly _docSkeletonManagerService: DocSkeletonManagerService,
         @IEditorService private readonly _editorService: IEditorService,
         @ICommandService private readonly _commandService: ICommandService,
@@ -81,7 +81,7 @@ export class DocEditorBridgeController extends Disposable {
 
         const skeleton = this._docSkeletonManagerService.getSkeletonByUnitId(unitId)?.skeleton;
 
-        const editorDataModel = this._currentUniverService.getUniverDocInstance(unitId);
+        const editorDataModel = this._univerInstanceService.getUniverDocInstance(unitId);
 
         if (editor == null || editor.render == null || skeleton == null || editorDataModel == null) {
             return;
@@ -166,14 +166,16 @@ export class DocEditorBridgeController extends Disposable {
 
         this.disposeWithMe(
             this._textSelectionRenderManager.onBlur$.subscribe(() => {
-                const unitId = this._currentUniverService.getCurrentUniverDocInstance().getUnitId();
+                const unitId = this._univerInstanceService.getCurrentUniverDocInstance()?.getUnitId();
                 if (unitId == null) {
                     return;
                 }
 
                 const editor = this._editorService.getEditor(unitId);
 
-                if (editor == null || editor.isSheetEditor()) {
+                const focusEditor = this._editorService.getFocusEditor();
+
+                if (editor == null || editor.isSheetEditor() || (focusEditor && focusEditor.editorUnitId === unitId)) {
                     return;
                 }
 
@@ -217,7 +219,7 @@ export class DocEditorBridgeController extends Disposable {
         //     })
         // );
 
-        const currentUniverSheet = this._currentUniverService.getAllUniverSheetsInstance();
+        const currentUniverSheet = this._univerInstanceService.getAllUniverSheetsInstance();
         currentUniverSheet.forEach((unit) => {
             const unitId = unit.getUnitId();
             const render = this._renderManagerService.getRenderById(unitId);
@@ -248,7 +250,7 @@ export class DocEditorBridgeController extends Disposable {
     }
 
     private _valueChange() {
-        const unitId = this._currentUniverService.getCurrentUniverDocInstance().getUnitId();
+        const unitId = this._univerInstanceService.getCurrentUniverDocInstance()?.getUnitId();
         if (unitId == null) {
             return;
         }

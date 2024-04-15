@@ -62,7 +62,7 @@ const TEST_WORKBOOK_DATA: IWorkbookData = {
     styles: {},
 };
 
-describe('lexer nodeMaker test', () => {
+describe('lexer test', () => {
     let univer: Univer;
     let lexer: Lexer;
     let get: Injector['get'];
@@ -71,6 +71,7 @@ describe('lexer nodeMaker test', () => {
     let formulaCurrentConfigService: IFormulaCurrentConfigService;
     let lexerTreeBuilder: LexerTreeBuilder;
 
+
     beforeEach(() => {
         const testBed = createCommandTestBed(TEST_WORKBOOK_DATA);
         univer = testBed.univer;
@@ -78,10 +79,9 @@ describe('lexer nodeMaker test', () => {
         get = testBed.get;
 
         definedNamesService = get(IDefinedNamesService);
-
         formulaCurrentConfigService = get(IFormulaCurrentConfigService);
-
         lexerTreeBuilder = get(LexerTreeBuilder);
+
 
         formulaCurrentConfigService.setExecuteUnitId('test');
         formulaCurrentConfigService.setExecuteSubUnitId('sheet1');

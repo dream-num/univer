@@ -15,6 +15,7 @@
  */
 
 import { Rectangle, Tools } from '@univerjs/core';
+
 import type { LexerTreeBuilder } from '../analysis/lexer-tree-builder';
 import { generateStringWithSequence, sequenceNodeType } from './sequence';
 import { deserializeRangeWithSheet, serializeRange } from './reference';

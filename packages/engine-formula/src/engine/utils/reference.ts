@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import type { IRange, IUnitRangeName } from '@univerjs/core';
+import type { IRange, IUnitRangeName, IUnitRangeWithName } from '@univerjs/core';
 import { AbsoluteRefType, RANGE_TYPE, Tools } from '@univerjs/core';
 
 import { includeFormulaLexerToken } from '../../basics/match-token';
-import { UNIT_NAME_REGEX } from '../../basics/regex';
+import { isReferenceString, UNIT_NAME_REGEX } from '../../basics/regex';
 
 const $ROW_REGEX = /[^0-9]/g;
 const $COLUMN_REGEX = /[^A-Za-z]/g;
@@ -286,6 +286,67 @@ export function deserializeRangeWithSheet(refString: string): IUnitRangeName {
         },
     };
 }
+
+export function isReferenceStringWithEffectiveColumn(refString: string) {
+    if (!isReferenceString(refString)) {
+        return false;
+    }
+
+    const { range } = deserializeRangeWithSheet(refString);
+
+    /**
+     * As of the latest information I have, which is up to the end of 2023,
+     * the maximum limit for columns in Excel is 16,384.
+     * This standard applies to Excel 2007 and later versions,
+     * where each worksheet can support columns ranging from A to XFD.
+     * Therefore, the symbol for the maximum column is XFD.
+     */
+    if (range.endColumn >= 16384) {
+        return false;
+    }
+
+    return true;
+}
+
+/**
+ * implement getSheetIdByName
+ * function getSheetIdByName(name: string) {
+        return univerInstanceService.getCurrentUniverSheetInstance()?.getSheetBySheetName(name)?.getSheetId() || '';
+    }
+ */
+export function getRangeWithRefsString(refString: string, getSheetIdByName: (name: string) => string): IUnitRangeWithName[] {
+    const valueArray = refString?.split(',') || [];
+
+    if (refString === '' || valueArray.length === 0) {
+        return [];
+    }
+
+    const result = isReferenceStrings(refString);
+
+    if (!result) {
+        return [];
+    }
+
+    const ranges = valueArray.map((ref) => {
+        const unitRange = deserializeRangeWithSheet(ref);
+        return {
+            unitId: unitRange.unitId,
+            sheetId: getSheetIdByName(unitRange.sheetName),
+            range: unitRange.range,
+            sheetName: unitRange.sheetName,
+        };
+    });
+
+    return ranges;
+}
+
+export function isReferenceStrings(refString: string) {
+    const valueArray = refString?.split(',') || [];
+    return valueArray.every((refString) => {
+        return isReferenceStringWithEffectiveColumn(refString.trim());
+    });
+}
+
 
 /**
  * Determine whether the sheet name needs to be wrapped in quotes

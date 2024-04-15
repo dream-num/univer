@@ -19,13 +19,12 @@ import { ObjectMatrix } from '@univerjs/core';
 import { handleStringToStyle } from '@univerjs/ui';
 
 import type { IPastePlugin } from '@univerjs/docs-ui';
-import { pixelToPt } from '@univerjs/engine-render';
-import { generateBody } from '../../../controllers/clipboard/utils';
+import type { SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { ISheetSkeletonManagerParam } from '../../sheet-skeleton-manager.service';
 import type {
     ICellDataWithSpanInfo,
     IClipboardPropertyItem,
-    IParsedCellValue,
+    IParsedCellValueByClipboard,
     IUniverSheetCopyDataModel,
 } from '../type';
 import { extractNodeStyle } from './parse-node-style';
@@ -40,6 +39,27 @@ export interface IStyleRule {
 export interface IParsedTablesInfo {
     index: number;
 }
+
+const sheetStyleRules: string[] =
+    [
+        'color_color',
+        'background_background',
+        'font-size_fontSize',
+        'text-align_textAlign',
+        'vertical-align_verticalAlign',
+        'font-weight_fontWeight',
+        'font-style_fontStyle',
+        'font-family_fontFamily',
+        'text-decoration_textDecoration',
+    ];
+
+const borderRules: string[] =
+    [
+        'border-left_borderLeft',
+        'border-right_borderRight',
+        'border-top_borderTop',
+        'border-bottom_borderBottom',
+    ];
 
 function matchFilter(node: HTMLElement, filter: IStyleRule['filter']) {
     const tagName = node.tagName.toLowerCase();
@@ -159,29 +179,6 @@ export class HtmlToUSMService {
                     p,
                 });
                 rowProperties.push({}); // TODO@yuhongz
-
-                if (tableStrings) {
-                    tables.forEach((t) => {
-                        const curRow = valueMatrix.getDataRange().endRow + 1;
-                        if (t.index === i) {
-                            const tableString = tableStrings.shift();
-                            const {
-                                cellMatrix,
-                                colProperties: tableColProp,
-                                rowProperties: tableRowProp,
-                            } = this._parseTable(tableString!);
-
-                            cellMatrix &&
-                                cellMatrix.forValue((row, col, value) => {
-                                    valueMatrix.setValue(curRow + row, col, value);
-                                });
-                            if (tableColProp) {
-                                colProperties.push(...tableColProp);
-                            }
-                            rowProperties.push(...tableRowProp);
-                        }
-                    });
-                }
             }
         } else {
             if (dataStream) {
@@ -200,30 +197,21 @@ export class HtmlToUSMService {
                 });
                 rowProperties.push({}); // TODO@yuhongz
             }
-
-            if (tableStrings) {
-                tableStrings.forEach((t) => {
-                    const curRow = valueMatrix.getDataRange().endRow + 1;
-                    const { cellMatrix, rowProperties: tableRowProp, colProperties: tableColProp } = this._parseTable(t!);
-                    if (cellMatrix) {
-                        cellMatrix.forValue((row, col, value) => {
-                            const { rowSpan = 1, colSpan = 1 } = value;
-                            for (let i = 0; i < rowSpan; i++) {
-                                for (let j = 0; j < colSpan; j++) {
-                                    valueMatrix.setValue(curRow + row + i, col + j, {
-                                        v: '',
-                                    });
-                                }
-                            }
-                            valueMatrix.setValue(curRow + row, col, value);
-                        });
-                    }
-                    if (tableColProp) {
-                        colProperties.push(...tableColProp);
-                    }
-                    rowProperties.push(...tableRowProp);
-                });
-            }
+        }
+        if (tableStrings) {
+            tableStrings.forEach((t) => {
+                const curRow = valueMatrix.getDataRange().endRow + 1;
+                const { cellMatrix, rowProperties: tableRowProp, colProperties: tableColProp } = this._parseTable(t!);
+                if (cellMatrix) {
+                    cellMatrix.forValue((row, col, value) => {
+                        valueMatrix.setValue(curRow + row, col, value);
+                    });
+                }
+                if (tableColProp) {
+                    colProperties.push(...tableColProp);
+                }
+                rowProperties.push(...tableRowProp);
+            });
         }
         return {
             rowProperties,
@@ -234,68 +222,27 @@ export class HtmlToUSMService {
 
     private _parseTable(html: string) {
         const valueMatrix = new ObjectMatrix<ICellDataWithSpanInfo>();
-        const colProperties = parseColGroup(html);
-        const { rowProperties, rowCount, cellMatrix: parsedCellMatrix } = parseTableRows(html);
+        const colProperties = parseColGroup(html) ?? [];
+        const { rowProperties = [] } = parseTableRows(html);
+        const parsedCellMatrix = parseTableByHtml(this.htmlElement, this.getCurrentSkeleton()?.skeleton);
         parsedCellMatrix &&
             parsedCellMatrix.forValue((row, col, value) => {
-                let styleString = value.properties?.style;
-                // TODO@Dushusir Temporarily use handleStringToStyle. After all replication and paste function is completed, fix the handleStringToStyle method
-
-                const className = value.properties?.class;
-                if (className) {
-                    const dom = this.htmlElement.contentDocument?.getElementsByClassName(className)?.[0];
-                    if (dom) {
-                        const computedStyle = window.getComputedStyle(dom!, null);
-
-                        const { fontSize, fontFamily, border, borderLeft, borderRight, borderTop, borderBottom, verticalAlign } = computedStyle;
-                        if (fontSize) {
-                            styleString += `;font-size: ${pixelToPt(Number.parseInt(fontSize))}pt`;
-                        }
-                        if (fontFamily) {
-                            styleString += `;font-family: ${fontFamily}`;
-                        }
-                        if (border) {
-                            styleString += `;border: ${border}`;
-                        }
-                        if (borderLeft) {
-                            styleString += `;border-left: ${borderLeft}`;
-                        }
-                        if (borderRight) {
-                            styleString += `;border-right: ${borderRight}`;
-                        }
-                        if (borderTop) {
-                            styleString += `;border-top: ${borderTop}`;
-                        }
-                        if (borderBottom) {
-                            styleString += `;border-bottom: ${borderBottom}`;
-                        }
-                        if (verticalAlign) {
-                            styleString += `;vertical-align: ${verticalAlign}`;
-                        }
+                const style = handleStringToStyle(undefined, value.style);
+                const cellValue = value?.richTextParma?.p
+                    ? {
+                        v: value.richTextParma.v,
+                        p: value.richTextParma.p,
+                        s: style,
+                        rowSpan: value.rowSpan,
+                        colSpan: value.colSpan,
                     }
-                }
-                const style = handleStringToStyle(undefined, styleString);
-
-                if (/\r|\n/.test(value.content)) {
-                    const body = generateBody(value.content);
-                    const p = this._generateDocumentDataModelSnapshot({
-                        body,
-                    });
-                    valueMatrix.setValue(row, col, {
-                        v: value.content,
-                        p,
-                        s: style,
-                        rowSpan: value.rowSpan,
-                        colSpan: value.colSpan,
-                    });
-                } else {
-                    valueMatrix.setValue(row, col, {
+                    : {
                         v: value.content,
                         s: style,
                         rowSpan: value.rowSpan,
                         colSpan: value.colSpan,
-                    });
-                }
+                    };
+                valueMatrix.setValue(row, col, cellValue);
             });
         return {
             rowProperties,
@@ -356,6 +303,9 @@ export class HtmlToUSMService {
                     });
                 }
             } else if (node.nodeType === Node.ELEMENT_NODE) {
+                if (node.nodeName === 'STYLE') {
+                    continue;
+                }
                 const parentStyles = parent ? this.styleCache.get(parent) : {};
                 const styleRule = this.styleRules.find(({ filter }) => matchFilter(node as HTMLElement, filter));
                 const nodeStyles = styleRule
@@ -392,8 +342,6 @@ export class HtmlToUSMService {
 function parseTableRows(html: string): {
     rowProperties: IClipboardPropertyItem[];
     rowCount: number;
-    colCount: number;
-    cellMatrix: ObjectMatrix<IParsedCellValue> | null;
 } {
     const ROWS_REGEX = /<tr([\s\S]*?)>([\s\S]*?)<\/tr>/gi;
     const rowMatches = html.matchAll(ROWS_REGEX);
@@ -401,89 +349,15 @@ function parseTableRows(html: string): {
         return {
             rowProperties: [],
             rowCount: 0,
-            colCount: 0,
-            cellMatrix: null,
         };
     }
 
     const rowMatchesAsArray = Array.from(rowMatches);
     const rowProperties = rowMatchesAsArray.map((rowMatch) => parseProperties(rowMatch[1]));
 
-    const { colCount, cellMatrix } = parseTableCells(rowMatchesAsArray.map((rowMatch) => rowMatch[2]));
-
     return {
         rowProperties,
         rowCount: rowProperties.length,
-        colCount,
-        cellMatrix,
-    };
-}
-
-/**
- *
- * @param tdStrings
- */
-function parseTableCells(tdStrings: string[]) {
-    const cellMatrix = new ObjectMatrix<IParsedCellValue>();
-    const maxRowOfCol = new Map<number, number>();
-    const TDS_REGEX = /<td([\s\S]*?)>([\s\S]*?)<\/td>/gi;
-
-    let colCount = 0;
-    let colIndex = 0;
-    let rowIndex = 0;
-
-    tdStrings.forEach((trStr, r) => {
-        const isFirstRow = r === 0;
-        const cellMatches = trStr.matchAll(TDS_REGEX);
-
-        colIndex = 0;
-
-        Array.from(cellMatches).forEach((cellMatch) => {
-            const cellProperties = parseProperties(cellMatch[1]);
-            const content = decodeHTMLEntities(cellMatch[2].replace('<br>', '\r').replace(/<\/?[^>]*>/g, '')); // paste from excel
-            const rowSpan = cellProperties.rowspan ? +cellProperties.rowspan : 1;
-            const colSpan = cellProperties.colspan ? +cellProperties.colspan : 1;
-
-            if (!isFirstRow) {
-                for (let i = colIndex; i < colCount; i++) {
-                    const thisPosOccupied = maxRowOfCol.get(i)! >= rowIndex;
-                    if (!thisPosOccupied) {
-                        colIndex = i;
-                        break;
-                    }
-                }
-            }
-
-            const value: IParsedCellValue = {
-                content,
-                properties: cellProperties,
-            };
-            if (colSpan > 1) value.colSpan = +colSpan;
-            if (rowSpan > 1) value.rowSpan = +rowSpan;
-
-            // when iterating the first row, we should calc colCount as well
-            if (isFirstRow) {
-                colCount += colSpan;
-            }
-
-            // update maxRowOfCol
-            for (let i = colIndex; i < colIndex + colSpan; i++) {
-                maxRowOfCol.set(i, rowIndex + rowSpan - 1);
-            }
-
-            // set value to matrix
-            cellMatrix.setValue(rowIndex, colIndex, value);
-
-            // point to next colIndex
-            colIndex += colSpan;
-        });
-
-        rowIndex += 1;
-    });
-
-    return {
-        colCount,
-        cellMatrix,
     };
 }
 
@@ -513,14 +387,8 @@ function parseProperties(propertyStr: string): IClipboardPropertyItem {
  * @returns cols and their properties
  */
 function parseColGroup(raw: string): IClipboardPropertyItem[] | null {
-    const COLGROUP_TAG_REGEX = /<colgroup([\s\S]*?)>(.*?)<\/colgroup>/;
-    const colgroupMatch = raw.match(COLGROUP_TAG_REGEX);
-    if (!colgroupMatch || !colgroupMatch[2]) {
-        return null;
-    }
-
     const COL_TAG_REGEX = /<col([\s\S]*?)>/g;
-    const colMatches = colgroupMatch[2].matchAll(COL_TAG_REGEX);
+    const colMatches = raw.matchAll(COL_TAG_REGEX);
     if (!colMatches) {
         return null;
     }
@@ -545,4 +413,235 @@ function decodeHTMLEntities(input: string): string {
     };
 
     return input.replace(/&lt;|&gt;|&amp;|&quot;|&#39;|&nbsp;|<br>/g, (match) => entities[match]);
+}
+
+function extractBordersAndKeepOthers(styleString: string, bordersToKeep: string[]) {
+    if (!styleString) return '';
+    const borderRegex = /border(-top|-right|-bottom|-left)?\s*:\s*([^;]+);/g;
+
+    const extractedBorders: Record<string, string> = {};
+
+    const withoutBorders = styleString.replace(borderRegex, (match, p1, p2) => {
+        const borderType = `border${p1 || ''}`;
+        extractedBorders[borderType] = p2.trim();
+        return '';
+    });
+
+    let newStyleString = bordersToKeep
+        .map((border) => {
+            if (border === 'border' && extractedBorders[border]) {
+                return `border: ${extractedBorders[border]};`;
+            } else if (extractedBorders[border]) {
+                return `${border}: ${extractedBorders[border]};`;
+            }
+            return '';
+        })
+        .filter((style) => style)
+        .join(' ');
+
+    newStyleString += ` ${withoutBorders.trim()}`;
+
+    return newStyleString.trim();
+}
+
+function parseTableByHtml(htmlElement: HTMLIFrameElement, skeleton?: SpreadsheetSkeleton) {
+    const cellMatrix = new ObjectMatrix<IParsedCellValueByClipboard>();
+    const tableEle = htmlElement.contentDocument?.querySelector('table');
+    if (!tableEle) {
+        return cellMatrix;
+    }
+    const rows = tableEle?.querySelectorAll('tr');
+
+    for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
+        const row = rows[rowIndex];
+        const cells = row.querySelectorAll('td, th');
+        let colSetValueIndex = 0;
+        for (let colIndex = 0; colIndex < cells.length;) {
+            const cell = cells[colIndex];
+            let cellStyle = '';
+            let cellText;
+            let cellRichStyle;
+            const rowSpan = Number(cell.getAttribute('rowSpan')) || 1;
+            const colSpan = Number(cell.getAttribute('colSpan')) || 1;
+
+            // If there is a class attribute, use getComputedStyle
+            const hasClass = cell.getAttribute('class');
+            const computedStyle = getComputedStyle(cell);
+            if (hasClass) {
+                sheetStyleRules.forEach((rule) => {
+                    const [originName, camelName] = rule.split('_');
+                    const ruleValue = computedStyle.getPropertyValue(originName) || computedStyle[camelName as keyof typeof computedStyle];
+                    if (ruleValue) {
+                        cellStyle += `${originName}:${ruleValue};`;
+                    }
+                });
+            } else {
+                const regex = /<\w+\s+[^>]*?style="([^"]*)"/gi;
+                const match = regex.exec(cell.outerHTML);
+                if (match?.[1]) {
+                    cellStyle = match[1];
+                }
+            }
+
+            borderRules.forEach((rule) => {
+                const [originName, camelName] = rule.split('_');
+                const ruleValue = computedStyle.getPropertyValue(originName) || computedStyle[camelName as keyof typeof computedStyle];
+                if (ruleValue) {
+                    cellStyle += `${originName}:${ruleValue};`;
+                }
+            });
+
+            if (rowSpan > 1 && colSpan > 1) {
+                // compatible google sheet；The border style of merged cells in Google is set on the right and bottom sides of the merged cells
+                if (!cellStyle.includes('border-top') && !cellStyle.includes('border-left')) {
+                    const topStyle = extractStyleProperty(cellMatrix.getValue(rowIndex - 1, colIndex)?.style, 'border-bottom');
+                    const leftStyle = extractStyleProperty(cellMatrix.getValue(rowIndex, colIndex - 1)?.style, 'border-right');
+                    if (topStyle) {
+                        cellStyle += `border-top:${topStyle};`;
+                    }
+                    if (leftStyle) {
+                        cellStyle += `border-left:${leftStyle};`;
+                    }
+                }
+            }
+
+            // Determine whether it is rich text based on whether there are html tags
+            const isRichText = /<[^>]+>/.test(cell.innerHTML);
+            if (isRichText && skeleton) {
+                const newDocBody: IDocumentBody = {
+                    dataStream: '',
+                    textRuns: [],
+                };
+                // Rich text parsing method, refer to the doc
+                parseCellHtml(null, cell.childNodes, newDocBody);
+                const documentModel = skeleton.getBlankCellDocumentModel()?.documentModel;
+                const p = documentModel?.getSnapshot();
+                const singleDataStream = `${newDocBody.dataStream}\r\n`;
+                const documentData = {
+                    ...p, ...{
+                        body: {
+                            dataStream: singleDataStream,
+                            textRuns: newDocBody.textRuns,
+                            paragraphs: generateParagraphs(singleDataStream),
+                        },
+                    },
+                };
+                documentModel?.reset(documentData);
+                cellRichStyle = documentModel?.getSnapshot();
+                cellText = newDocBody.dataStream;
+            } else {
+                cellText = cell.innerHTML.replace(/[\r\n]/g, '');
+            }
+
+            const cellValue = (rowSpan > 1 || colSpan > 1)
+                ? {
+                    rowSpan,
+                    colSpan,
+                    content: cellText,
+                    style: cellStyle,
+                    richTextParma: {
+                        p: cellRichStyle,
+                        v: cellText,
+                    },
+                }
+                : {
+                    content: cellText,
+                    style: cellStyle,
+                    richTextParma: {
+                        p: cellRichStyle,
+                        v: cellText,
+                    },
+                };
+
+            if (cellMatrix.getValue(rowIndex, colSetValueIndex)) {
+                colSetValueIndex += 1;
+                continue;
+            } else {
+                // Clone the style of merged cells to each individual cell; switch to cloning only border styles if there are issues later.
+                if ((rowSpan > 1 || colSpan > 1)) {
+                    if (rowSpan === 1) {
+                        for (let i = colSetValueIndex; i < colSetValueIndex + colSpan; i++) {
+                            cellMatrix.setValue(rowIndex, i, { style: extractBordersAndKeepOthers(cellStyle, ['border-top', 'border-bottom']) });
+                        }
+                        cellMatrix.setValue(rowIndex, colSetValueIndex + colSpan - 1, { style: extractBordersAndKeepOthers(cellStyle, ['border-top', 'border-bottom', 'border-right']) });
+                        cellMatrix.setValue(rowIndex, colSetValueIndex, { ...cellValue, style: extractBordersAndKeepOthers(cellStyle, ['border-top', 'border-bottom', 'border-left']) });
+                    } else if (colSpan === 1) {
+                        for (let i = rowIndex; i < rowIndex + rowSpan; i++) {
+                            cellMatrix.setValue(i, colSetValueIndex, { style: extractBordersAndKeepOthers(cellStyle, ['border-left', 'border-right']) });
+                        }
+                        cellMatrix.setValue(rowIndex + rowSpan - 1, colSetValueIndex, { style: extractBordersAndKeepOthers(cellStyle, ['border-left', 'border-right', 'border-bottom']) });
+                        cellMatrix.setValue(rowIndex, colSetValueIndex, { ...cellValue, style: extractBordersAndKeepOthers(cellStyle, ['border-left', 'border-right', 'border-top']) });
+                    } else {
+                        for (let i = colSetValueIndex; i < colSetValueIndex + colSpan; i++) {
+                            cellMatrix.setValue(rowIndex, i, { style: extractBordersAndKeepOthers(cellStyle, ['border-top']) });
+                            cellMatrix.setValue(rowIndex + rowSpan - 1, i, { style: extractBordersAndKeepOthers(cellStyle, ['border-bottom']) });
+                        }
+                        for (let i = rowIndex; i < rowIndex + rowSpan; i++) {
+                            cellMatrix.setValue(i, colSetValueIndex, { style: extractBordersAndKeepOthers(cellStyle, ['border-left']) });
+                            cellMatrix.setValue(i, colSetValueIndex + colSpan - 1, { style: extractBordersAndKeepOthers(cellStyle, ['border-right']) });
+                        }
+                        cellMatrix.setValue(rowIndex + rowSpan - 1, colSetValueIndex, { style: extractBordersAndKeepOthers(cellStyle, ['border-left', 'border-bottom']) });
+                        cellMatrix.setValue(rowIndex, colSetValueIndex + colSpan - 1, { style: extractBordersAndKeepOthers(cellStyle, ['border-right', 'border-top']) });
+                        cellMatrix.setValue(rowIndex + rowSpan - 1, colSetValueIndex + colSpan - 1, { style: extractBordersAndKeepOthers(cellStyle, ['border-right', 'border-bottom']) });
+                        cellMatrix.setValue(rowIndex, colSetValueIndex, { ...cellValue, style: extractBordersAndKeepOthers(cellStyle, ['border-top', 'border-left']) });
+                        for (let i = rowIndex; i < rowIndex + rowSpan; i++) {
+                            for (let j = colSetValueIndex; j < colSetValueIndex + colSpan; j++) {
+                                if (!cellMatrix.getValue(i, j)) {
+                                    cellMatrix.setValue(i, j, { style: extractBordersAndKeepOthers(cellStyle, []) });
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    cellMatrix.setValue(rowIndex, colSetValueIndex, cellValue);
+                }
+                colSetValueIndex += colSpan;
+                colIndex++;
+            }
+        }
+    }
+    return cellMatrix;
+}
+
+function parseCellHtml(parent: Nullable<ChildNode>, nodes: NodeListOf<ChildNode>, doc: IDocumentBody, styleCache: Map<ChildNode, ITextStyle> = new Map()) {
+    for (const node of nodes) {
+        if (node.nodeType === Node.TEXT_NODE) {
+            const text = node.nodeValue?.replace(/[\r\n]/g, '');
+            let style;
+
+            if (parent && styleCache.has(parent)) {
+                style = styleCache.get(parent);
+            }
+
+            doc.dataStream += text;
+
+            if (style && Object.getOwnPropertyNames(style).length) {
+                doc.textRuns!.push({
+                    st: doc.dataStream.length - text!.length,
+                    ed: doc.dataStream.length,
+                    ts: style,
+                });
+            }
+        } else if (node.nodeType === Node.COMMENT_NODE || node.nodeName === 'STYLE') {
+            continue;
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
+            const parentStyles = parent ? styleCache.get(parent) : {};
+            const predefinedStyles = getComputedStyle(node as HTMLElement);
+            const nodeStyles = extractNodeStyle(node as HTMLElement, predefinedStyles);
+
+            styleCache.set(node, { ...parentStyles, ...nodeStyles });
+            const { childNodes } = node;
+            parseCellHtml(node, childNodes, doc, styleCache);
+        }
+    }
+}
+
+function extractStyleProperty(styleString?: string, propertyName?: string) {
+    if (!styleString || !propertyName) return null;
+    const regex = new RegExp(`(${propertyName}\\s*:\\s*[^;]+);`, 'i');
+    const match = styleString.match(regex);
+    if (match) {
+        return match[1];
+    }
+    return null;
 }

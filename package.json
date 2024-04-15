@@ -1,7 +1,7 @@
 {
     "name": "univer",
     "type": "module",
-    "version": "0.1.6",
+    "version": "0.1.7",
     "private": true,
     "packageManager": "pnpm@8.6.2",
     "author": "DreamNum Inc. <developer@univer.ai>",
@@ -41,19 +41,19 @@
         "release:rc": "release-it prerelease --preRelease=rc"
     },
     "devDependencies": {
-        "@antfu/eslint-config": "^2.11.6",
+        "@antfu/eslint-config": "^2.13.3",
         "@commitlint/cli": "^19.2.1",
         "@commitlint/config-conventional": "^19.1.0",
-        "@playwright/test": "^1.42.1",
+        "@playwright/test": "^1.43.0",
         "@release-it-plugins/workspaces": "^4.2.0",
         "@release-it/conventional-changelog": "^8.0.1",
-        "@storybook/react": "8.0.5",
-        "@types/node": "^20.12.2",
-        "@types/react": "^18.2.73",
+        "@storybook/react": "8.0.6",
+        "@types/node": "^20.12.7",
+        "@types/react": "^18.2.75",
         "@univerjs/design": "workspace:*",
         "@univerjs/shared": "workspace:*",
         "@vitejs/plugin-react": "^4.2.1",
-        "eslint": "^8.57.0",
+        "eslint": "8.57.0",
         "eslint-plugin-format": "^0.1.0",
         "eslint-plugin-header": "^3.1.1",
         "eslint-plugin-no-barrel-import": "^0.0.2",
@@ -65,8 +65,8 @@
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
         "release-it": "^17.1.1",
-        "turbo": "^1.13.0",
-        "typescript": "^5.4.3"
+        "turbo": "^1.13.2",
+        "typescript": "^5.4.5"
     },
     "lint-staged": {
         "*": "eslint --fix"

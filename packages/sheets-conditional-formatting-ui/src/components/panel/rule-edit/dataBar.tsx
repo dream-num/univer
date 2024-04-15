@@ -32,8 +32,8 @@ const createOptionItem = (text: CFValueType, localeService: LocaleService) => ({
 const InputText = (props: { disabled?: boolean; id: string; className: string; type: CFValueType;value: string | number;onChange: (v: string | number) => void }) => {
     const { onChange, className, value, type, id, disabled = false } = props;
     const univerInstanceService = useDependency(IUniverInstanceService);
-    const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-    const subUnitId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
+    const unitId = univerInstanceService.getCurrentUniverSheetInstance()!.getUnitId();
+    const subUnitId = univerInstanceService.getCurrentUniverSheetInstance()!.getActiveSheet().getSheetId();
     const _value = useRef(value);
     const config = useMemo(() => {
         if ([CFValueType.percentile, CFValueType.percent].includes(type)) {

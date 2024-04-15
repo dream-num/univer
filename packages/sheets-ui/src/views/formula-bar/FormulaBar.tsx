@@ -39,7 +39,6 @@ export function FormulaBar() {
     const [arrowDirection, setArrowDirection] = useState<ArrowDirection>(ArrowDirection.Down);
 
     const formulaEditorManagerService = useDependency(IFormulaEditorManagerService);
-
     const editorBridgeService = useDependency(IEditorBridgeService);
 
     const INITIAL_SNAPSHOT = {
@@ -65,7 +64,7 @@ export function FormulaBar() {
             paragraphLineGapDefault: 0,
             renderConfig: {
                 horizontalAlign: HorizontalAlign.UNSPECIFIED,
-                verticalAlign: VerticalAlign.TOP,
+                verticalAlign: VerticalAlign.UNSPECIFIED,
                 centerAngle: 0,
                 vertexAngle: 0,
                 wrapStrategy: WrapStrategy.WRAP,
@@ -74,10 +73,12 @@ export function FormulaBar() {
     };
 
     useEffect(() => {
-        editorBridgeService.visible$.subscribe((visibleInfo) => {
+        const subscription = editorBridgeService.visible$.subscribe((visibleInfo) => {
             setIconStyle(visibleInfo.visible ? styles.formulaActive : styles.formulaGrey);
         });
-    }, []); // Empty dependency array means this effect runs once on mount and clean up on unmount
+
+        return () => subscription.unsubscribe();
+    }, [editorBridgeService.visible$]);
 
     function resizeCallBack(editor: Nullable<HTMLDivElement>) {
         if (editor == null) {

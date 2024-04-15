@@ -26,10 +26,10 @@ export interface IFontFamilyItemProps extends ICustomComponentProps<string> {
 
 export const FONT_FAMILY_LIST = [
     {
-        value: 'Times New Roman',
+        value: 'Arial',
     },
     {
-        value: 'Arial',
+        value: 'Times New Roman',
     },
     {
         value: 'Tahoma',

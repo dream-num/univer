@@ -168,4 +168,8 @@ export class DataValidationModel<T extends IDataValidationRule = IDataValidation
 
         return res;
     }
+
+    deleteUnitRules(unitId: string) {
+        this._model.delete(unitId);
+    }
 }

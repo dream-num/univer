@@ -185,4 +185,8 @@ export class ConditionalFormattingRuleModel {
     createCfId(_unitId: string, _subUnitId: string) {
         return createCfId();
     }
+
+    deleteUnitId(unitId: string) {
+        this._model.delete(unitId);
+    }
 }

@@ -22,7 +22,7 @@ import type { Observable } from 'rxjs';
 import { Subject } from 'rxjs';
 import type { IRender, ISuccinctTextRangeParam, Scene } from '@univerjs/engine-render';
 import { IRenderManagerService, UNIVER_GLOBAL_DEFAULT_FONT_SIZE } from '@univerjs/engine-render';
-import { isReferenceString, LexerTreeBuilder, operatorToken } from '@univerjs/engine-formula';
+import { isReferenceStrings, LexerTreeBuilder, operatorToken } from '@univerjs/engine-formula';
 
 export interface IEditorStateParam extends Partial<IPosition> {
     visible?: boolean;
@@ -254,10 +254,10 @@ export interface IEditorService {
      */
     setOperationSheetUnitId(unitId: Nullable<string>): void;
     getOperationSheetUnitId(): Nullable<string>;
-     /**
-      * The sub-table within the sheet currently being operated on
-      * will determine whether to include subUnitId information in the ref.
-      */
+    /**
+     * The sub-table within the sheet currently being operated on
+     * will determine whether to include subUnitId information in the ref.
+     */
     setOperationSheetSubUnitId(sheetId: Nullable<string>): void;
     getOperationSheetSubUnitId(): Nullable<string>;
 
@@ -353,7 +353,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
     private _spreadsheetFocusState: boolean = false;
 
     constructor(
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder,
         @IContextService private readonly _contextService: IContextService
@@ -385,7 +385,11 @@ export class EditorService extends Disposable implements IEditorService, IDispos
     }
 
     closeRangePrompt() {
-        const documentDataModel = this._currentUniverService.getCurrentUniverDocInstance();
+        const documentDataModel = this._univerInstanceService.getCurrentUniverDocInstance();
+        if (!documentDataModel) {
+            return;
+        }
+
         const editorUnitId = documentDataModel.getUnitId();
 
         this._contextService.setContextValue(EDITOR_ACTIVATED, false);
@@ -434,7 +438,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
     }
 
     selectionChangingState() {
-        // const documentDataModel = this._currentUniverService.getCurrentUniverDocInstance();
+        // const documentDataModel = this._univerInstanceService.getCurrentUniverDocInstance();
         const editorUnitId = this.getFocusId();
         if (editorUnitId == null) {
             return true;
@@ -478,17 +482,20 @@ export class EditorService extends Disposable implements IEditorService, IDispos
 
     focus(editorUnitId?: string) {
         if (editorUnitId == null) {
-            const documentDataModel = this._currentUniverService.getCurrentUniverDocInstance();
+            const documentDataModel = this._univerInstanceService.getCurrentUniverDocInstance();
+            if (!documentDataModel) {
+                return;
+            }
+
             editorUnitId = documentDataModel.getUnitId();
         }
 
         const editor = this.getEditor(editorUnitId);
-
         if (editor == null) {
             return;
         }
 
-        this._currentUniverService.setCurrentUniverDocInstance(editorUnitId);
+        this._univerInstanceService.setCurrentUniverDocInstance(editorUnitId);
 
         const valueCount = editor.getValue().length;
 
@@ -518,9 +525,12 @@ export class EditorService extends Disposable implements IEditorService, IDispos
     }
 
     setValueNoRefresh(val: string, editorUnitId: string) {
-        this._setValue$.next({ body: {
-            dataStream: val,
-        }, editorUnitId });
+        this._setValue$.next({
+            body: {
+                dataStream: val,
+            },
+            editorUnitId,
+        });
 
         this.resize(editorUnitId);
     }
@@ -606,7 +616,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
     register(config: IEditorConfigParam, container: HTMLDivElement): IDisposable {
         const { initialSnapshot, editorUnitId, canvasStyle = {} } = config;
 
-        const documentDataModel = this._currentUniverService.createDoc(initialSnapshot || this._getBlank(editorUnitId));
+        const documentDataModel = this._univerInstanceService.createDoc(initialSnapshot || this._getBlank(editorUnitId));
 
         let render = this._renderManagerService.getRenderById(editorUnitId);
 
@@ -641,22 +651,22 @@ export class EditorService extends Disposable implements IEditorService, IDispos
             return;
         }
 
-        this._renderManagerService.removeItem(editorUnitId);
+        this._renderManagerService.removeRender(editorUnitId);
 
         editor.documentDataModel.dispose();
 
         this._editors.delete(editorUnitId);
 
-        this._currentUniverService.disposeDocument(editorUnitId);
+        this._univerInstanceService.disposeDocument(editorUnitId);
 
         /**
          * Compatible with the editor in the sheet scenario,
          * it is necessary to refocus back to the current sheet when unloading.
          */
-        const sheets = this._currentUniverService.getAllUniverSheetsInstance();
+        const sheets = this._univerInstanceService.getAllUniverSheetsInstance();
         if (sheets.length > 0) {
-            const current = this._currentUniverService.getCurrentUniverSheetInstance();
-            this._currentUniverService.focusUniverInstance(current.getUnitId());
+            const current = this._univerInstanceService.getCurrentUniverSheetInstance()!;
+            this._univerInstanceService.focusUniverInstance(current.getUnitId());
         }
     }
 
@@ -694,10 +704,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
                 editor.setValueLegality(false);
                 return false;
             }
-            const result = valueArray.every((refString) => {
-                return isReferenceString(refString.trim());
-            });
-            editor.setValueLegality(result);
+            editor.setValueLegality(isReferenceStrings(value));
         }
 
         return editor.isValueLegality();
@@ -713,7 +720,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
     }
 
     private _getCurrentEditorUnitId() {
-        const current = this._currentUniverService.getCurrentUniverDocInstance();
+        const current = this._univerInstanceService.getCurrentUniverDocInstance()!;
         return current.getUnitId();
     }
 

@@ -18,6 +18,7 @@ import type { ICommand } from '@univerjs/core';
 import { CommandType, IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { IEditorService, ISidebarService } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
+import { getSheetCommandTarget } from '@univerjs/sheets';
 import { DEFINED_NAME_CONTAINER } from '../../views/defined-name/component-name';
 
 export interface IUIComponentCommandParams {
@@ -32,10 +33,14 @@ export const SidebarDefinedNameOperation: ICommand = {
         const editorService = accessor.get(IEditorService);
         const localeService = accessor.get(LocaleService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const unit = univerInstanceService.getCurrentUniverSheetInstance();
+
+        const target = getSheetCommandTarget(univerInstanceService);
+        if (!target) return false;
+
+        const { unitId } = target;
         switch (params.value) {
             case 'open':
-                editorService.setOperationSheetUnitId(unit.getUnitId());
+                editorService.setOperationSheetUnitId(unitId);
                 sidebarService.open({
                     header: { title: localeService.t('definedName.featureTitle') },
                     children: { label: DEFINED_NAME_CONTAINER },

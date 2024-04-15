@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 import type { ICellDataForSheetInterceptor, ICellRenderContext } from '@univerjs/core';
 import { DataValidationRenderMode, DataValidationStatus, DataValidationType, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, WrapStrategy } from '@univerjs/core';
 import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
@@ -41,6 +42,9 @@ const INVALID_MARK = {
     },
 };
 
+/**
+ * @todo RenderUnit
+ */
 @OnLifecycle(LifecycleStages.Rendered, DataValidationRenderController)
 export class DataValidationRenderController extends RxDisposable {
     constructor(
@@ -170,6 +174,8 @@ export class DataValidationRenderController extends RxDisposable {
     private _initSkeletonChange() {
         const markSkeletonDirty = () => {
             const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
+            if (!workbook) return;
+
             const unitId = workbook.getUnitId();
             const subUnitId = workbook.getActiveSheet().getSheetId();
             const skeleton = this._sheetSkeletonManagerService.getOrCreateSkeleton({ unitId, sheetId: subUnitId });
@@ -192,11 +198,13 @@ export class DataValidationRenderController extends RxDisposable {
         }));
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _initViewModelIntercept() {
         this.disposeWithMe(
             this._sheetInterceptorService.intercept(
                 INTERCEPTOR_POINT.CELL_CONTENT,
                 {
+                    // eslint-disable-next-line max-lines-per-function
                     handler: (cell, pos, next) => {
                         const { row, col, unitId, subUnitId } = pos;
                         const manager = this._dataValidationModel.ensureManager(unitId, subUnitId) as SheetDataValidationManager;

@@ -14,25 +14,28 @@
  * limitations under the License.
  */
 
-import { useDependency } from '@wendellhu/redi/react-bindings';
-import { useObservable } from '@univerjs/ui';
 import React from 'react';
 import { ErrorSingle, WarningSingle } from '@univerjs/icons';
 import cs from 'clsx';
-import { CellAlertManagerService, CellAlertType } from '../../services/cell-alert-manager.service';
+import type { ICellAlert } from '../../services/cell-alert-manager.service';
+import { CellAlertType } from '../../services/cell-alert-manager.service';
+import type { ICanvasPopup } from '../../services/canvas-pop-manager.service';
 import styles from './index.module.less';
 
-export function CellAlert() {
-    const cellAlertService = useDependency(CellAlertManagerService);
-    const currentCell = useObservable(cellAlertService.currentAlert$, cellAlertService.currentAlert);
+export function CellAlert({ popup }: { popup: ICanvasPopup }) {
+    const alert = popup.extraProps?.alert;
 
-    const { type, title, message } = currentCell || {};
+    if (!alert) {
+        return null;
+    }
+    const { type, title, message } = alert as ICellAlert;
 
     const iconMap = {
         [CellAlertType.ERROR]: <ErrorSingle className={cs(styles.cellAlertIcon, styles.cellAlertIconError)} />,
         [CellAlertType.INFO]: <WarningSingle className={cs(styles.cellAlertIcon, styles.cellAlertIconInfo)} />,
         [CellAlertType.WARNING]: <WarningSingle className={cs(styles.cellAlertIcon, styles.cellAlertIconWarning)} />,
     };
+
 
     return (
         <div className={styles.cellAlert}>

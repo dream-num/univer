@@ -38,8 +38,8 @@ const getIcon = (iconType: string, iconId: string | number) => {
 
 const TextInput = (props: { id: number; type: CFValueType; value: number | string;onChange: (v: number | string) => void; error?: string }) => {
     const univerInstanceService = useDependency(IUniverInstanceService);
-    const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-    const subUnitId = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
+    const unitId = univerInstanceService.getCurrentUniverSheetInstance()!.getUnitId();
+    const subUnitId = univerInstanceService.getCurrentUniverSheetInstance()!.getActiveSheet().getSheetId();
     const className = useMemo(() => {
         if (props.error) {
             return styles.errorInput;

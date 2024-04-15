@@ -15,6 +15,7 @@
  */
 
 import fs from 'node:fs';
+import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 import { tabLineBreakExtension } from '../extensions/tab-linebreak-extension';
@@ -29,7 +30,7 @@ describe('unicode line break tests', () => {
         7604, 7610, 7611, 7681,
     ];
 
-    const data = fs.readFileSync(new URL('LineBreakTest.txt', import.meta.url), 'utf8');
+    const data = fs.readFileSync(resolve(__dirname, 'LineBreakTest.txt'), 'utf8');
     const lines = data.split('\n');
 
     return lines.forEach((line, i) => {

@@ -43,22 +43,15 @@ const TEST_WORKBOOK_DATA_DEMO: () => IWorkbookData = () => ({
                 4: { 0: { v: 1, t: 2 }, 1: { v: 2, t: 2 }, 2: { v: 3, t: 2 }, 3: { v: 4, t: 2 }, 4: { v: 5, t: 2 }, 5: { v: 6, t: 2 }, 6: { v: 7, t: 2 } },
                 5: { 0: { v: 1, t: 2 }, 1: { v: 2, t: 2 }, 2: { v: 3, t: 2 }, 3: { v: 4, t: 2 }, 4: { v: 5, t: 2 }, 5: { v: 6, t: 2 }, 6: { v: 7, t: 2 } },
             },
+            rowCount: 6,
+            columnCount: 8,
         },
     },
     locale: LocaleType.ZH_CN,
     name: '',
     sheetOrder: [],
     styles: {},
-    resources: [
-        {
-            name: 'SHEET_NUMFMT_PLUGIN',
-            data: '{"model":{},"refModel":[]}',
-        },
-        {
-            name: 'SHEET_CONDITIONAL_FORMATTING_PLUGIN',
-            data: '{"sheet1":[{"cfId":"1","ranges":[{"startRow":0,"startColumn":0,"endRow":5,"endColumn":6,"startAbsoluteRefType":0,"endAbsoluteRefType":0,"rangeType":0}],"rule":{"config":[{"color":"#ff0000","value":{"type":"min","value":10},"index":0},{"color":"#0000ff","value":{"type":"max","value":90},"index":1}],"type":"colorScale"},"stopIfTrue":false}]}',
-        },
-    ],
+    resources: [],
 });
 export const createTestBed = (dependencies?: Dependency[]) => {
     const univer = new Univer();
@@ -85,7 +78,7 @@ export const createTestBed = (dependencies?: Dependency[]) => {
             this._injector.add([ConditionalFormattingFormulaService]);
             this._injector.add([ConditionalFormattingRuleModel]);
             this._injector.add([ConditionalFormattingViewModel]);
-            this._injector.add([IActiveDirtyManagerService, { useFactory: () => ({ register: () => {} } as any) }]);
+            this._injector.add([IActiveDirtyManagerService, { useFactory: () => ({ register: () => { } } as any) }]);
             this._injector.get(ConditionalFormattingService);
         }
     }

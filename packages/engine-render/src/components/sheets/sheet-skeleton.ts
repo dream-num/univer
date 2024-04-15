@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+/* eslint-disable max-lines-per-function */
+
 import type {
     BorderStyleTypes,
     IBorderStyleData,
@@ -200,7 +202,7 @@ export interface IDocumentLayoutObject {
 
 const DEFAULT_PADDING_DATA = {
     t: 0,
-    b: 0,
+    b: 1,
     l: 2,
     r: 2,
 };
@@ -1625,6 +1627,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         }
     }
 
+    // eslint-disable-next-line complexity
     private _setCellCache(r: number, c: number, skipBackgroundAndBorder: boolean, mergeRange?: IRange) {
         const needsRendering = this._renderedCellCache.getValue(r, c);
 
@@ -1808,9 +1811,9 @@ export class SpreadsheetSkeleton extends Skeleton {
         const {
             textRotation,
             paddingData = {
-                t: 2,
+                t: 0,
                 r: 2,
-                b: 0,
+                b: 1,
                 l: 2,
             },
             horizontalAlign = HorizontalAlign.UNSPECIFIED,

@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import type { IMutationInfo, IRange, Workbook } from '@univerjs/core';
-import { createInterceptorKey, Disposable, ICommandService, InterceptorManager, IResourceManagerService, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, Rectangle, toDisposable, Tools } from '@univerjs/core';
+import type { IMutationInfo, IRange } from '@univerjs/core';
+import { createInterceptorKey, Disposable, ICommandService, InterceptorManager, IResourceManagerService, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, Rectangle, Tools } from '@univerjs/core';
 import type { IInsertColMutationParams, IMoveColumnsMutationParams, IMoveRangeMutationParams, IMoveRowsMutationParams, IRemoveRowsMutationParams, IRemoveSheetCommandParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { InsertColMutation, InsertRowMutation, MoveColsMutation, MoveRangeMutation, MoveRowsMutation, RemoveColMutation, RemoveRowMutation, RemoveSheetCommand, SetRangeValuesMutation, SheetInterceptorService } from '@univerjs/sheets';
 import { Inject, Injector } from '@wendellhu/redi';
 import { Subject } from 'rxjs';
 import { filter } from 'rxjs/operators';
+import { UniverType } from '@univerjs/protocol';
 import type { IDeleteConditionalRuleMutationParams } from '../commands/mutations/delete-conditional-rule.mutation';
 import { DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory } from '../commands/mutations/delete-conditional-rule.mutation';
 import { ConditionalFormattingRuleModel } from '../models/conditional-formatting-rule-model';
@@ -138,34 +139,25 @@ export class ConditionalFormattingService extends Disposable {
                 return {};
             }
         };
-        const handleWorkbookAdd = (workbook: Workbook) => {
-            const unitID = workbook.getUnitId();
-            this.disposeWithMe(
-                this._resourceManagerService.registerPluginResource<IRuleModelJson[keyof IRuleModelJson]>(unitID, SHEET_CONDITIONAL_FORMATTING_PLUGIN, {
-                    toJson: (unitID) => toJson(unitID),
-                    parseJson: (json) => parseJson(json),
-                    onChange: (unitID, value) => {
-                        Object.keys(value).forEach((subunitId) => {
-                            const ruleList = value[subunitId];
-                            ruleList.forEach((rule) => {
-                                this._conditionalFormattingRuleModel.addRule(unitID, subunitId, rule);
-                            });
-                        });
-                    },
-                })
-            );
-        };
-        this.disposeWithMe(toDisposable(this._univerInstanceService.sheetAdded$.subscribe(handleWorkbookAdd)));
         this.disposeWithMe(
-            toDisposable(
-                this._univerInstanceService.sheetDisposed$.subscribe((workbook) => {
-                    const unitID = workbook.getUnitId();
-                    this._resourceManagerService.disposePluginResource(unitID, SHEET_CONDITIONAL_FORMATTING_PLUGIN);
-                })
-            )
+            this._resourceManagerService.registerPluginResource<IRuleModelJson[keyof IRuleModelJson]>({
+                pluginName: SHEET_CONDITIONAL_FORMATTING_PLUGIN,
+                businesses: [UniverType.UNIVER_SHEET],
+                toJson: (unitID) => toJson(unitID),
+                parseJson: (json) => parseJson(json),
+                onUnLoad: (unitID) => {
+                    this._conditionalFormattingRuleModel.deleteUnitId(unitID);
+                },
+                onLoad: (unitID, value) => {
+                    Object.keys(value).forEach((subunitId) => {
+                        const ruleList = [...value[subunitId]].reverse();
+                        ruleList.forEach((rule) => {
+                            this._conditionalFormattingRuleModel.addRule(unitID, subunitId, rule);
+                        });
+                    });
+                },
+            })
         );
-        const workbookList = this._univerInstanceService.getAllUniverSheetsInstance();
-        workbookList.forEach((workbook) => handleWorkbookAdd(workbook));
     }
 
     private _initSheetChange() {
@@ -404,5 +396,5 @@ export class ConditionalFormattingService extends Disposable {
     }
 }
 
-const getUnitId = (u: IUniverInstanceService) => u.getCurrentUniverSheetInstance().getUnitId();
-const getSubUnitId = (u: IUniverInstanceService) => u.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
+const getUnitId = (u: IUniverInstanceService) => u.getCurrentUniverSheetInstance()!.getUnitId();
+const getSubUnitId = (u: IUniverInstanceService) => u.getCurrentUniverSheetInstance()!.getActiveSheet().getSheetId();

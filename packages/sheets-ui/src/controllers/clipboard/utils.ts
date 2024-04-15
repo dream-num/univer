@@ -39,6 +39,7 @@ import {
 } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
 
+import numfmt from '@univerjs/engine-numfmt';
 import type { ICellDataWithSpanInfo, ICopyPastePayload, ISheetRangeLocation } from '../../services/clipboard/type';
 import { COPY_TYPE } from '../../services/clipboard/type';
 
@@ -64,7 +65,7 @@ export function getDefaultOnPasteCellMutations(
         undoMutationsInfo.push(...clearStyleUndos);
 
         // set values
-        const { undos: setValuesUndos, redos: setValuesRedos } = getSetCellValueMutations(pasteTo, data, accessor);
+        const { undos: setValuesUndos, redos: setValuesRedos } = getSetCellValueMutations(pasteTo, pasteFrom, data, accessor);
         redoMutationsInfo.push(...setValuesRedos);
         undoMutationsInfo.push(...setValuesUndos);
 
@@ -277,6 +278,7 @@ export function getMoveRangeMutations(
 
 export function getSetCellValueMutations(
     pasteTo: ISheetRangeLocation,
+    pasteFrom: Nullable<ISheetRangeLocation>,
     matrix: ObjectMatrix<ICellDataWithSpanInfo>,
     accessor: IAccessor
 ) {
@@ -287,13 +289,24 @@ export function getSetCellValueMutations(
     const valueMatrix = new ObjectMatrix<ICellData>();
 
     matrix.forValue((row, col, value) => {
-        valueMatrix.setValue(row + startRow, col + startColumn, Tools.deepClone(value));
+        if (!value.p && value.v && !pasteFrom) {
+            const content = String(value.v);
+            const numfmtValue = numfmt.parseDate(content) || numfmt.parseTime(content) || numfmt.parseNumber(content);
+            if (numfmtValue?.v && typeof numfmtValue.v === 'number') {
+                value.v = numfmtValue.v;
+            }
+        }
+        if (value.p?.body) {
+            valueMatrix.setValue(row + startRow, col + startColumn, Tools.deepClone({ p: value.p, v: value.v }));
+        } else {
+            valueMatrix.setValue(row + startRow, col + startColumn, Tools.deepClone({ v: value.v }));
+        }
     });
     // set cell value and style
     const setValuesMutation: ISetRangeValuesMutationParams = {
         unitId,
         subUnitId,
-        cellValue: valueMatrix.getData(),
+        cellValue: Tools.deepClone(valueMatrix.getMatrix()),
     };
 
     redoMutationsInfo.push({
@@ -341,7 +354,7 @@ export function getSetCellStyleMutations(
     const setValuesMutation: ISetRangeValuesMutationParams = {
         unitId,
         subUnitId,
-        cellValue: valueMatrix.getData(),
+        cellValue: Tools.deepClone(valueMatrix.getMatrix()),
     };
 
     redoMutationsInfo.push({
@@ -389,7 +402,7 @@ export function getClearCellStyleMutations(
         const clearMutation: ISetRangeValuesMutationParams = {
             subUnitId,
             unitId,
-            cellValue: clearStyleMatrix.getData(),
+            cellValue: Tools.deepClone(clearStyleMatrix.getMatrix()),
         };
         redoMutationsInfo.push({
             id: SetRangeValuesMutation.id,
@@ -420,11 +433,10 @@ export function getClearAndSetMergeMutations(
     const undoMutationsInfo: IMutationInfo[] = [];
     const { unitId, subUnitId, range } = pasteTo;
     const { startColumn, startRow, endColumn, endRow } = range;
-    let hasMerge = false;
     const mergeRangeData: IRange[] = [];
 
     matrix.forValue((row, col, value) => {
-        if (value.rowSpan) {
+        if (value.rowSpan && value.rowSpan > 1) {
             const colSpan = value.colSpan || 1;
             const mergeRange = {
                 startRow: startRow + row,
@@ -433,8 +445,7 @@ export function getClearAndSetMergeMutations(
                 endColumn: startColumn + col + colSpan - 1,
             };
             mergeRangeData.push(mergeRange);
-            hasMerge = true;
-        } else if (value.colSpan) {
+        } else if (value.colSpan && value.colSpan > 1) {
             const rowSpan = value.rowSpan || 1;
             const mergeRange = {
                 startRow: startRow + row,
@@ -443,43 +454,40 @@ export function getClearAndSetMergeMutations(
                 endColumn: startColumn + col + value.colSpan - 1,
             };
             mergeRangeData.push(mergeRange);
-            hasMerge = true;
         }
     });
 
     // clear merge
     // remove current range's all merged Cell
-    if (hasMerge) {
-        // get all merged cells
-        const currentService = accessor.get(IUniverInstanceService) as IUniverInstanceService;
-        const workbook = currentService.getUniverSheetInstance(unitId);
-        const worksheet = workbook?.getSheetBySheetId(subUnitId);
-        if (workbook && worksheet) {
-            const mergeData = worksheet.getMergeData();
-            const mergedCellsInRange = mergeData.filter((rect) =>
-                Rectangle.intersects({ startRow, startColumn, endRow, endColumn }, rect)
-            );
+    // get all merged cells
+    const currentService = accessor.get(IUniverInstanceService) as IUniverInstanceService;
+    const workbook = currentService.getUniverSheetInstance(unitId);
+    const worksheet = workbook?.getSheetBySheetId(subUnitId);
+    if (workbook && worksheet) {
+        const mergeData = worksheet.getMergeData();
+        const mergedCellsInRange = mergeData.filter((rect) =>
+            Rectangle.intersects({ startRow, startColumn, endRow, endColumn }, rect)
+        );
 
-            const removeMergeMutationParams: IRemoveWorksheetMergeMutationParams = {
-                unitId,
-                subUnitId,
-                ranges: mergedCellsInRange,
-            };
-            redoMutationsInfo.push({
-                id: RemoveWorksheetMergeMutation.id,
-                params: removeMergeMutationParams,
-            });
+        const removeMergeMutationParams: IRemoveWorksheetMergeMutationParams = {
+            unitId,
+            subUnitId,
+            ranges: mergedCellsInRange,
+        };
+        redoMutationsInfo.push({
+            id: RemoveWorksheetMergeMutation.id,
+            params: removeMergeMutationParams,
+        });
 
-            const undoRemoveMergeMutationParams: IAddWorksheetMergeMutationParams = RemoveMergeUndoMutationFactory(
-                accessor,
-                removeMergeMutationParams
-            );
+        const undoRemoveMergeMutationParams: IAddWorksheetMergeMutationParams = RemoveMergeUndoMutationFactory(
+            accessor,
+            removeMergeMutationParams
+        );
 
-            undoMutationsInfo.push({
-                id: AddWorksheetMergeMutation.id,
-                params: undoRemoveMergeMutationParams,
-            });
-        }
+        undoMutationsInfo.push({
+            id: AddWorksheetMergeMutation.id,
+            params: undoRemoveMergeMutationParams,
+        });
     }
 
     // set merged cell info

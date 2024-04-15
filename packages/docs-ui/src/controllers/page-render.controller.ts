@@ -34,7 +34,7 @@ export class PageRenderController extends Disposable {
     constructor(
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IEditorService private readonly _editorService: IEditorService,
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
 
@@ -55,7 +55,7 @@ export class PageRenderController extends Disposable {
 
             const currentRender = this._renderManagerService.getRenderById(unitId);
 
-            if (this._editorService.isEditor(unitId) || this._currentUniverService.getUniverDocInstance(unitId) == null) {
+            if (this._editorService.isEditor(unitId) || this._univerInstanceService.getUniverDocInstance(unitId) == null) {
                 return;
             }
 
@@ -83,14 +83,15 @@ export class PageRenderController extends Disposable {
                         ctx.save();
 
                         ctx.translate(pageLeft - 0.5, pageTop - 0.5);
-                        Rect.drawWith(ctx, {
+                        const options = {
                             width: pageSize?.width ?? pageWidth ?? width,
                             height: pageSize?.height ?? pageHeight ?? height,
                             strokeWidth: 1,
                             stroke: PAGE_STROKE_COLOR,
                             fill: PAGE_FILL_COLOR,
                             zIndex: 3,
-                        });
+                        };
+                        Rect.drawWith(ctx, options);
                         ctx.restore();
                     })
                 )

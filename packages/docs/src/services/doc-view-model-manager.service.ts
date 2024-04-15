@@ -33,7 +33,7 @@ export class DocViewModelManagerService extends RxDisposable {
     private readonly _currentDocViewModel$ = new BehaviorSubject<Nullable<IDocumentViewModelManagerParam>>(null);
     readonly currentDocViewModel$ = this._currentDocViewModel$.asObservable();
 
-    constructor(@IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService) {
+    constructor(@IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService) {
         super();
         this._initialize();
     }
@@ -48,15 +48,15 @@ export class DocViewModelManagerService extends RxDisposable {
     }
 
     private _init() {
-        this._currentUniverService.currentDoc$.pipe(takeUntil(this.dispose$)).subscribe((documentModel) => {
+        this._univerInstanceService.currentDoc$.pipe(takeUntil(this.dispose$)).subscribe((documentModel) => {
             this._create(documentModel);
         });
 
-        this._currentUniverService.getAllUniverDocsInstance().forEach((documentModel) => {
+        this._univerInstanceService.getAllUniverDocsInstance().forEach((documentModel) => {
             this._create(documentModel);
         });
 
-        this._currentUniverService.docDisposed$.pipe(takeUntil(this.dispose$)).subscribe((documentModel) => {
+        this._univerInstanceService.docDisposed$.pipe(takeUntil(this.dispose$)).subscribe((documentModel) => {
             this._docViewModelMap.delete(documentModel.getUnitId());
         });
     }
@@ -80,7 +80,7 @@ export class DocViewModelManagerService extends RxDisposable {
     }
 
     private _setCurrent(unitId: string) {
-        const documentDataModel = this._currentUniverService.getUniverDocInstance(unitId);
+        const documentDataModel = this._univerInstanceService.getUniverDocInstance(unitId);
         if (documentDataModel == null) {
             throw new Error(`Document data model with id ${unitId} not found when build view model.`);
         }

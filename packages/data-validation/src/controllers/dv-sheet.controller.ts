@@ -39,7 +39,7 @@ export class DataValidationSheetController extends Disposable {
                 getMutations: (commandInfo) => {
                     if (commandInfo.id === RemoveSheetCommand.id) {
                         const params = commandInfo.params as IRemoveSheetCommandParams;
-                        const unitId = params.unitId || this._univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+                        const unitId = params.unitId || this._univerInstanceService.getCurrentUniverSheetInstance()!.getUnitId();
                         const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
                         if (!workbook) {
                             return { redos: [], undos: [] };

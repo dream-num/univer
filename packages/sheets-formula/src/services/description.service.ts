@@ -35,7 +35,7 @@ import {
     functionUniver,
     functionWeb,
     IFunctionService,
-    isReferenceString,
+    isReferenceStrings,
 } from '@univerjs/engine-formula';
 import type { IDisposable } from '@wendellhu/redi';
 import { createIdentifier, Inject } from '@wendellhu/redi';
@@ -212,9 +212,7 @@ export class DescriptionService implements IDescriptionService, IDisposable {
         }
 
         const token = items[0].description;
-        return !token.split(',').every((refString) => {
-            return isReferenceString(refString.trim());
-        });
+        return !isReferenceStrings(token);
     }
 
     private _initialize() {

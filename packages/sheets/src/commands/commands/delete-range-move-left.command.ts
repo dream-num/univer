@@ -30,6 +30,7 @@ import { SelectionManagerService } from '../../services/selection-manager.servic
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { getRemoveRangeMutations } from '../utils/handle-range-mutation';
 import { followSelectionOperation } from './utils/selection-utils';
+import { getSheetCommandTarget } from './utils/target-util';
 
 export interface IDeleteRangeMoveLeftCommandParams {
     range: IRange;
@@ -50,23 +51,17 @@ export const DeleteRangeMoveLeftCommand: ICommand = {
         const selectionManagerService = accessor.get(SelectionManagerService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
-        const unitId = univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-        const subUnitId = univerInstanceService
-            .getCurrentUniverSheetInstance()
+        const target = getSheetCommandTarget(univerInstanceService);
+        if (!target) return false;
 
-            .getActiveSheet()
-            .getSheetId();
+        const { worksheet, workbook, subUnitId, unitId } = target;
+
         let range = params?.range;
         if (!range) {
             range = selectionManagerService.getLast()?.range;
         }
+
         if (!range) return false;
-
-        const workbook = univerInstanceService.getUniverSheetInstance(unitId);
-        if (!workbook) return false;
-        const worksheet = workbook.getSheetBySheetId(subUnitId);
-        if (!worksheet) return false;
-
         const deleteRangeMutationParams: IDeleteRangeMutationParams = {
             range,
             subUnitId,

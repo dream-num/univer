@@ -144,16 +144,16 @@ export class RefRangeService extends Disposable {
     private _onRefRangeChange = () => {
         this._sheetInterceptorService.interceptCommand({
             getMutations: (command: EffectRefRangeParams) => {
-                const workSheet = this._univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
-                const unitId = getunitId(this._univerInstanceService);
-                const subUnitId = getsubUnitId(this._univerInstanceService);
+                const worksheet = this._univerInstanceService.getCurrentUniverSheetInstance()!.getActiveSheet();
+                const unitId = getUnitId(this._univerInstanceService);
+                const subUnitId = getSubUnitId(this._univerInstanceService);
                 const getEffectsCbList = () => {
                     switch (command.id) {
                         case EffectRefRangId.MoveColsCommandId: {
                             const params = command.params!;
                             const startColumn = Math.min(params.fromRange.startColumn, params.toRange.startColumn);
                             return this._checkRange(
-                                [{ ...params.fromRange, startColumn, endColumn: workSheet.getColumnCount() - 1 }],
+                                [{ ...params.fromRange, startColumn, endColumn: worksheet.getColumnCount() - 1 }],
                                 unitId,
                                 subUnitId
                             );
@@ -163,7 +163,7 @@ export class RefRangeService extends Disposable {
                             const startRow = Math.min(params.fromRange.startRow, params.toRange.startRow);
 
                             return this._checkRange(
-                                [{ ...params.fromRange, startRow, endRow: workSheet.getRowCount() - 1 }],
+                                [{ ...params.fromRange, startRow, endRow: worksheet.getRowCount() - 1 }],
                                 unitId,
                                 subUnitId
                             );
@@ -181,9 +181,9 @@ export class RefRangeService extends Disposable {
                             const rowStart = params.params!.range.startRow;
                             const range: IRange = {
                                 startRow: rowStart,
-                                endRow: workSheet.getRowCount() - 1,
+                                endRow: worksheet.getRowCount() - 1,
                                 startColumn: 0,
-                                endColumn: workSheet.getColumnCount() - 1,
+                                endColumn: worksheet.getColumnCount() - 1,
                             };
                             return this._checkRange([range], unitId, subUnitId);
                         }
@@ -192,9 +192,9 @@ export class RefRangeService extends Disposable {
                             const colStart = params.params!.range.startColumn;
                             const range: IRange = {
                                 startRow: 0,
-                                endRow: workSheet.getRowCount() - 1,
+                                endRow: worksheet.getRowCount() - 1,
                                 startColumn: colStart,
-                                endColumn: workSheet.getColumnCount() - 1,
+                                endColumn: worksheet.getColumnCount() - 1,
                             };
                             return this._checkRange([range], unitId, subUnitId);
                         }
@@ -204,9 +204,9 @@ export class RefRangeService extends Disposable {
                             const rowStart = params.params!.range.startRow;
                             const range: IRange = {
                                 startRow: rowStart,
-                                endRow: workSheet.getRowCount() - 1,
+                                endRow: worksheet.getRowCount() - 1,
                                 startColumn: 0,
-                                endColumn: workSheet.getColumnCount() - 1,
+                                endColumn: worksheet.getColumnCount() - 1,
                             };
                             return this._checkRange([range], unitId, subUnitId);
                         }
@@ -215,9 +215,9 @@ export class RefRangeService extends Disposable {
                             const colStart = params.params!.range.startColumn;
                             const range: IRange = {
                                 startRow: 0,
-                                endRow: workSheet.getRowCount() - 1,
+                                endRow: worksheet.getRowCount() - 1,
                                 startColumn: colStart,
-                                endColumn: workSheet.getColumnCount() - 1,
+                                endColumn: worksheet.getColumnCount() - 1,
                             };
                             return this._checkRange([range], unitId, subUnitId);
                         }
@@ -229,7 +229,7 @@ export class RefRangeService extends Disposable {
                                 startRow: range.startRow,
                                 startColumn: range.startColumn,
                                 endColumn: range.endColumn,
-                                endRow: workSheet.getRowCount() - 1,
+                                endRow: worksheet.getRowCount() - 1,
                             };
                             return this._checkRange([effectRange], unitId, subUnitId);
                         }
@@ -240,7 +240,7 @@ export class RefRangeService extends Disposable {
                             const effectRange = {
                                 startRow: range.startRow,
                                 startColumn: range.startColumn,
-                                endColumn: workSheet.getColumnCount() - 1,
+                                endColumn: worksheet.getColumnCount() - 1,
                                 endRow: range.endRow,
                             };
                             return this._checkRange([effectRange], unitId, subUnitId);
@@ -333,8 +333,8 @@ export class RefRangeService extends Disposable {
         _unitId?: string,
         _subUnitId?: string
     ): IDisposable => {
-        const unitId = _unitId || getunitId(this._univerInstanceService);
-        const subUnitId = _subUnitId || getsubUnitId(this._univerInstanceService);
+        const unitId = _unitId || getUnitId(this._univerInstanceService);
+        const subUnitId = _subUnitId || getSubUnitId(this._univerInstanceService);
         const refRangeManagerId = getRefRangId(unitId, subUnitId);
         const rangeString = this._serializer.serialize(range);
 
@@ -365,12 +365,12 @@ export class RefRangeService extends Disposable {
     };
 }
 
-function getunitId(univerInstanceService: IUniverInstanceService) {
-    return univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
+function getUnitId(univerInstanceService: IUniverInstanceService) {
+    return univerInstanceService.getCurrentUniverSheetInstance()!.getUnitId();
 }
 
-function getsubUnitId(univerInstanceService: IUniverInstanceService) {
-    return univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
+function getSubUnitId(univerInstanceService: IUniverInstanceService) {
+    return univerInstanceService.getCurrentUniverSheetInstance()!.getActiveSheet().getSheetId();
 }
 
 function getSelectionRanges(selectionManagerService: SelectionManagerService) {

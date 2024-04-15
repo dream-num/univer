@@ -42,7 +42,7 @@ export const DeleteLeftCommand: ICommand = {
     handler: async (accessor) => {
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
         const docSkeletonManagerService = accessor.get(DocSkeletonManagerService);
-        const currentUniverService = accessor.get(IUniverInstanceService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
 
         const activeRange = textSelectionManagerService.getActiveRange();
@@ -55,7 +55,10 @@ export const DeleteLeftCommand: ICommand = {
             return false;
         }
 
-        const docDataModel = currentUniverService.getCurrentUniverDocInstance();
+        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        if (!docDataModel) {
+            return false;
+        }
 
         const { startOffset, collapsed, segmentId, style } = activeRange;
 
@@ -190,7 +193,7 @@ export const DeleteRightCommand: ICommand = {
     handler: async (accessor) => {
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
         const docSkeletonManagerService = accessor.get(DocSkeletonManagerService);
-        const currentUniverService = accessor.get(IUniverInstanceService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
 
         const activeRange = textSelectionManagerService.getActiveRange();
@@ -204,7 +207,10 @@ export const DeleteRightCommand: ICommand = {
             return false;
         }
 
-        const docDataModel = currentUniverService.getCurrentUniverDocInstance();
+        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        if (!docDataModel) {
+            return false;
+        }
 
         const { startOffset, collapsed, segmentId, style } = activeRange;
 
@@ -266,7 +272,7 @@ export const MergeTwoParagraphCommand: ICommand<IMergeTwoParagraphParams> = {
 
     handler: async (accessor, params: IMergeTwoParagraphParams) => {
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
-        const currentUniverService = accessor.get(IUniverInstanceService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
         const commandService = accessor.get(ICommandService);
 
         const { direction, range } = params;
@@ -278,7 +284,10 @@ export const MergeTwoParagraphCommand: ICommand<IMergeTwoParagraphParams> = {
             return false;
         }
 
-        const docDataModel = currentUniverService.getCurrentUniverDocInstance();
+        const docDataModel = univerInstanceService.getCurrentUniverDocInstance();
+        if (!docDataModel) {
+            return false;
+        }
 
         const { startOffset, collapsed, segmentId, style } = activeRange;
 

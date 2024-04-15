@@ -55,25 +55,17 @@ export class SheetInterceptorService extends Disposable {
     private readonly _workbookDisposables = new Map<string, IDisposable>();
     private readonly _worksheetDisposables = new Map<string, IDisposable>();
 
-    constructor(@IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService) {
+    constructor(@IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService) {
         super();
 
         // When a workbook is created or a worksheet is added after when workbook is created,
         // `SheetInterceptorService` inject interceptors to worksheet instances to it.
-        this.disposeWithMe(
-            toDisposable(
-                this._currentUniverService.sheetAdded$.subscribe((workbook) => {
-                    this._interceptWorkbook(workbook);
-                })
-            )
-        );
-        this.disposeWithMe(
-            toDisposable(
-                this._currentUniverService.sheetDisposed$.subscribe((workbook) =>
-                    this._disposeWorkbookInterceptor(workbook)
-                )
-            )
-        );
+        this.disposeWithMe(this._univerInstanceService.sheetAdded$.subscribe((workbook) => {
+            this._interceptWorkbook(workbook);
+        }));
+        this.disposeWithMe(this._univerInstanceService.sheetDisposed$.subscribe((workbook) =>
+            this._disposeWorkbookInterceptor(workbook)
+        ));
 
         // register default viewModel interceptor
         this.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
@@ -160,6 +152,8 @@ export class SheetInterceptorService extends Disposable {
         const interceptViewModel = (worksheet: Worksheet): void => {
             const subUnitId = worksheet.getSheetId();
             worksheet.__interceptViewModel((viewModel) => {
+                const disposableId = getWorksheetDisposableID(unitId, worksheet);
+
                 const sheetDisposables = new DisposableCollection();
                 const cellInterceptorDisposable = viewModel.registerCellContentInterceptor({
                     getCell(row: number, col: number): Nullable<ICellData> {
@@ -176,8 +170,11 @@ export class SheetInterceptorService extends Disposable {
                         );
                     },
                 });
+
                 sheetDisposables.add(cellInterceptorDisposable);
-                self._worksheetDisposables.set(getWorksheetDisposableID(unitId, worksheet), sheetDisposables);
+                sheetDisposables.add(toDisposable(() => self._workbookDisposables.delete(disposableId)));
+
+                self._worksheetDisposables.set(disposableId, sheetDisposables);
             });
         };
 
@@ -185,18 +182,13 @@ export class SheetInterceptorService extends Disposable {
         // worksheet creation event to intercept newly created worksheet.
         workbook.getSheets().forEach((worksheet) => interceptViewModel(worksheet));
         disposables.add(toDisposable(workbook.sheetCreated$.subscribe((worksheet) => interceptViewModel(worksheet))));
-        disposables.add(
-            toDisposable(
-                workbook.sheetDisposed$.subscribe((worksheet) => this._disposeSheetInterceptor(unitId, worksheet))
-            )
-        );
 
         // Dispose all underlying interceptors when workbook is disposed.
-        disposables.add(
-            toDisposable(() =>
-                workbook.getSheets().forEach((worksheet) => this._disposeSheetInterceptor(unitId, worksheet))
-            )
-        );
+        disposables.add(toDisposable(() => workbook.getSheets().forEach((worksheet) => this._disposeSheetInterceptor(unitId, worksheet))));
+        // Dispose interceptor when a worksheet is destroyed.
+        disposables.add(toDisposable(workbook.sheetDisposed$.subscribe((worksheet) => this._disposeSheetInterceptor(unitId, worksheet))));
+
+        this._workbookDisposables.set(unitId, disposables);
     }
 
     private _disposeWorkbookInterceptor(workbook: Workbook): void {

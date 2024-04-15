@@ -22,6 +22,8 @@ import {
     getAbsoluteRefTypeWithSingleString,
     getAbsoluteRefTypeWitString,
     handleRefStringInfo,
+    isReferenceStrings,
+    isReferenceStringWithEffectiveColumn,
     needsQuoting,
     serializeRange,
     serializeRangeToRefString,
@@ -311,5 +313,29 @@ describe('Test Reference', () => {
             sheetName: 'sheet-1',
             unitId: 'Book-1.xlsx',
         });
+    });
+
+    it('isReferenceStringWithEffectiveColumn', () => {
+        expect(isReferenceStringWithEffectiveColumn('A1:A2')).toBeTruthy();
+
+        expect(isReferenceStringWithEffectiveColumn('AAA1')).toBeTruthy();
+
+        expect(isReferenceStringWithEffectiveColumn('DefinedName1')).toBeFalsy();
+
+        expect(isReferenceStringWithEffectiveColumn('XFD1')).toBeTruthy();
+
+        expect(isReferenceStringWithEffectiveColumn('XFE1')).toBeFalsy();
+    });
+
+    it('isReferenceStrings', () => {
+        expect(isReferenceStrings('A1:B10,B30:C20')).toBeTruthy();
+        expect(isReferenceStrings('A1:B10,DefinedName1')).toBeFalsy();
+        expect(isReferenceStrings('A1:B10,XFD1,Sheet1!A1')).toBeTruthy();
+        expect(isReferenceStrings('A1:B10,Sheet1!A1')).toBeTruthy();
+        expect(isReferenceStrings('A1:B10,Sheet1!A1,Sheet2!A1')).toBeTruthy();
+        expect(isReferenceStrings('A1:B10,Sheet1!A1,Sheet2!A1,DefinedName1')).toBeFalsy();
+        expect(isReferenceStrings('A1:B10,Sheet1!A1,Sheet2!A1,DefinedName1,Sheet3!A1')).toBeFalsy();
+        expect(isReferenceStrings('A1:B10,')).toBeFalsy();
+        expect(isReferenceStrings('A1:B10,  B30:C20')).toBeTruthy();
     });
 });

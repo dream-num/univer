@@ -21,6 +21,9 @@ import { IRenderManagerService, Vector2 } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
+/**
+ * @todo RenderUnit
+ */
 @OnLifecycle(LifecycleStages.Rendered, CellCustomRenderController)
 export class CellCustomRenderController extends Disposable {
     private _enterActiveRender: Nullable<{
@@ -38,16 +41,17 @@ export class CellCustomRenderController extends Disposable {
         this._initEventBinding();
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _initEventBinding() {
         const disposableCollection = new DisposableCollection();
+        // eslint-disable-next-line max-lines-per-function
         this._univerInstanceService.currentSheet$.subscribe((workbook) => {
+            disposableCollection.dispose();
             if (workbook) {
                 const unitId = workbook.getUnitId();
 
                 const currentRender = this._renderManagerService.getRenderById(workbook.getUnitId());
                 if (currentRender && currentRender.mainComponent) {
-                    disposableCollection.dispose();
-
                     const spreadsheet = currentRender.mainComponent as Spreadsheet;
                     const getActiveRender = (evt: IPointerEvent | IMouseEvent) => {
                         const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton!;

@@ -14,25 +14,29 @@
  * limitations under the License.
  */
 
-import { LocaleType } from '@univerjs/core';
+import { LocaleType, Tools } from '@univerjs/core';
 import { enUS as UniverDesignEnUS } from '@univerjs/design';
 import { enUS as UniverDocsUIEnUS } from '@univerjs/docs-ui';
 import { enUS as UniverSheetsEnUS } from '@univerjs/sheets';
 import { enUS as UniverSheetsUIEnUS } from '@univerjs/sheets-ui';
+import { enUS as UniverFindReplaceEnUS } from '@univerjs/find-replace';
 import { enUS as UniverSheetsFormulaEnUS } from '@univerjs/sheets-formula';
 import { enUS as UniverSheetsDataValidationEnUS } from '@univerjs/sheets-data-validation';
 import { enUS as UniverSheetsConditionalFormattingUIEnUS } from '@univerjs/sheets-conditional-formatting-ui';
+import { enUS as UniverSheetsZenEditorEnUS } from '@univerjs/sheets-zen-editor';
 import { enUS as UniverUiEnUS } from '@univerjs/ui';
 
 export const locales = {
-    [LocaleType.EN_US]: {
-        ...UniverSheetsEnUS,
-        ...UniverDocsUIEnUS,
-        ...UniverSheetsUIEnUS,
-        ...UniverSheetsFormulaEnUS,
-        ...UniverSheetsDataValidationEnUS,
-        ...UniverSheetsConditionalFormattingUIEnUS,
-        ...UniverUiEnUS,
-        ...UniverDesignEnUS,
-    },
+    [LocaleType.EN_US]: Tools.deepMerge(
+        UniverSheetsEnUS,
+        UniverDocsUIEnUS,
+        UniverFindReplaceEnUS,
+        UniverSheetsUIEnUS,
+        UniverSheetsFormulaEnUS,
+        UniverSheetsDataValidationEnUS,
+        UniverSheetsConditionalFormattingUIEnUS,
+        UniverSheetsZenEditorEnUS,
+        UniverUiEnUS,
+        UniverDesignEnUS
+    ),
 };

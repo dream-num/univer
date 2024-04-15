@@ -27,6 +27,7 @@ import type { IAccessor } from '@wendellhu/redi';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import type { ISetWorksheetNameMutationParams } from '../mutations/set-worksheet-name.mutation';
 import { SetWorksheetNameMutation, SetWorksheetNameMutationFactory } from '../mutations/set-worksheet-name.mutation';
+import { getSheetCommandTarget } from './utils/target-util';
 
 export interface ISetWorksheetNameCommandParams {
     name: string;
@@ -44,13 +45,12 @@ export const SetWorksheetNameCommand: ICommand = {
     handler: async (accessor: IAccessor, params: ISetWorksheetNameCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
-        const univerInstanceService = accessor.get(IUniverInstanceService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
-        const unitId = params.unitId || univerInstanceService.getCurrentUniverSheetInstance().getUnitId();
-        const subUnitId =
-            params.subUnitId || univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
+        const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), params);
+        if (!target) return false;
 
+        const { unitId, subUnitId } = target;
         const redoMutationParams: ISetWorksheetNameMutationParams = {
             subUnitId,
             name: params.name,

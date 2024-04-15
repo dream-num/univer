@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 export type {
     IArrayFormulaRangeType,
     IArrayFormulaUnitCellType,
@@ -82,6 +83,9 @@ export {
     serializeRangeToRefString,
     serializeRangeWithSheet,
     serializeRangeWithSpreadsheet,
+    isReferenceStringWithEffectiveColumn,
+    getRangeWithRefsString,
+    isReferenceStrings,
 } from './engine/utils/reference';
 export { generateStringWithSequence, type ISequenceNode, sequenceNodeType } from './engine/utils/sequence';
 export { ArrayValueObject, ValueObjectFactory } from './engine/value-object/array-value-object';

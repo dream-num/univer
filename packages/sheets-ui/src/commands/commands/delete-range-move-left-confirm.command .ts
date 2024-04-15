@@ -16,7 +16,7 @@
 
 import type { ICommand, IRange } from '@univerjs/core';
 import { CommandType, ICommandService, IUniverInstanceService, LocaleService, Rectangle } from '@univerjs/core';
-import { DeleteRangeMoveLeftCommand, SelectionManagerService } from '@univerjs/sheets';
+import { DeleteRangeMoveLeftCommand, getSheetCommandTarget, SelectionManagerService } from '@univerjs/sheets';
 import { IConfirmService } from '@univerjs/ui';
 
 export const DeleteRangeMoveLeftConfirmCommand: ICommand = {
@@ -33,13 +33,16 @@ export const DeleteRangeMoveLeftConfirmCommand: ICommand = {
         if (!selection) {
             return false;
         }
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
-        const worksheet = workbook.getActiveSheet();
-        let range = selection[0].range;
 
+        const target = getSheetCommandTarget(univerInstanceService);
+        if (!target) return false;
+
+        const { worksheet } = target;
+        let range = selection[0].range;
         if (!range) {
             return false;
         }
+
         range = { ...range, endColumn: worksheet.getColumnCount() - 1 };
 
         const getRowLength = (range: IRange) => range.endRow - range.startRow;

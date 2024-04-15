@@ -39,7 +39,7 @@ export class FormatPainterController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @IFormatPainterService private readonly _formatPainterService: IFormatPainterService,
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService
     ) {
@@ -89,8 +89,9 @@ export class FormatPainterController extends Disposable {
 
     private async _applyFormatPainter(range: IRange) {
         const { styles: stylesMatrix, merges } = this._formatPainterService.getSelectionFormat();
-        const unitId = this._currentUniverService.getCurrentUniverSheetInstance().getUnitId();
-        const subUnitId = this._currentUniverService.getCurrentUniverSheetInstance().getActiveSheet().getSheetId();
+        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
+        const unitId = workbook.getUnitId();
+        const subUnitId = workbook.getActiveSheet().getSheetId();
         if (!stylesMatrix) return;
 
         const { startRow, startColumn, endRow, endColumn } = stylesMatrix.getDataRange();
@@ -147,6 +148,6 @@ export class FormatPainterController extends Disposable {
     }
 
     private _getSheetObject() {
-        return getSheetObject(this._currentUniverService, this._renderManagerService);
+        return getSheetObject(this._univerInstanceService, this._renderManagerService);
     }
 }

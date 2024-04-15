@@ -18,14 +18,13 @@ import { TextEditor, useEvent, useObservable } from '@univerjs/ui';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { DraggableList, FormLayout, Input, Radio, RadioGroup, Select } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import { createInternalEditorID, DataValidationType, debounce, isFormulaString, LocaleService, Tools } from '@univerjs/core';
+import { createInternalEditorID, DataValidationType, isFormulaString, LocaleService, Tools } from '@univerjs/core';
 import { DataValidationModel, DataValidatorRegistryService, type IFormulaInputProps } from '@univerjs/data-validation';
 import { DeleteSingle, IncreaseSingle, SequenceSingle } from '@univerjs/icons';
 import cs from 'clsx';
 import { deserializeListOptions, serializeListOptions } from '../../validators/util';
 import { DROP_DOWN_DEFAULT_COLOR } from '../../common/const';
 import type { ListValidator } from '../../validators';
-import { RegisterOtherFormulaService } from '../../services/register-formula.service';
 import styles from './index.module.less';
 
 const DEFAULT_COLOR_PRESET = [
@@ -142,7 +141,7 @@ const Template = (props: { item: IDropdownItem; commonProps: any; style?: React.
     );
 };
 
-// eslint-disable-next-line max-lines-per-function
+
 export function ListFormulaInput(props: IFormulaInputProps) {
     const { value, onChange: _onChange = () => { }, unitId, subUnitId, validResult, showError, ruleId } = props;
     const { formula1 = '', formula2 = '' } = value || {};
@@ -330,7 +329,7 @@ export function ListFormulaInput(props: IFormulaInputProps) {
                 )
                 : (
                     <FormLayout error={formula1Res}>
-                        <div ref={containerRef} style={{ margin: '-12px 0' }}>
+                        <div ref={containerRef} style={{ marginTop: '-12px' }}>
                             <DraggableList
                                 list={strList}
                                 onListChange={setStrList}

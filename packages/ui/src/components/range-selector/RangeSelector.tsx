@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import type { IUnitRange, Nullable } from '@univerjs/core';
+import type { IUnitRangeWithName, Nullable } from '@univerjs/core';
 import { IUniverInstanceService, LocaleService } from '@univerjs/core';
 import { Button, Dialog, Input, Tooltip } from '@univerjs/design';
 import { CloseSingle, DeleteSingle, IncreaseSingle, SelectRangeSingle } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useEffect, useRef, useState } from 'react';
 
-import { deserializeRangeWithSheet, isReferenceString, serializeRange, serializeRangeWithSheet, serializeRangeWithSpreadsheet } from '@univerjs/engine-formula';
+import { getRangeWithRefsString, isReferenceStringWithEffectiveColumn, serializeRange, serializeRangeWithSheet, serializeRangeWithSpreadsheet } from '@univerjs/engine-formula';
 import clsx from 'clsx';
 import { TextEditor } from '../editor/TextEditor';
 import { IEditorService } from '../../services/editor/editor.service';
@@ -31,7 +31,7 @@ import styles from './index.module.less';
 export interface IRangeSelectorProps {
     id: string;
     value?: string; // default values.
-    onChange?: (ranges: IUnitRange[]) => void; // Callback for changes in the selector value.
+    onChange?: (ranges: IUnitRangeWithName[]) => void; // Callback for changes in the selector value.
     onActive?: (state: boolean) => void; // Callback for editor active.
     onValid?: (state: boolean) => void; // input value validation
     isSingleChoice?: boolean; // Whether to restrict to only selecting a single region/area/district.
@@ -81,7 +81,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
 
     const rangeSelectorService = useDependency(IRangeSelectorService);
 
-    const currentUniverService = useDependency(IUniverInstanceService);
+    const univerInstanceService = useDependency(IUniverInstanceService);
 
     const [selectorVisible, setSelectorVisible] = useState(false);
 
@@ -225,11 +225,11 @@ export function RangeSelector(props: IRangeSelectorProps) {
 
         let result = '';
         const list = rangeDataList.filter((rangeRef) => {
-            return isReferenceString(rangeRef.trim());
+            return isReferenceStringWithEffectiveColumn(rangeRef.trim());
         });
         if (list.length === 1) {
             const rangeRef = list[0];
-            if (isReferenceString(rangeRef.trim())) {
+            if (isReferenceStringWithEffectiveColumn(rangeRef.trim())) {
                 result = rangeRef.trim();
             }
         } else {
@@ -247,25 +247,19 @@ export function RangeSelector(props: IRangeSelectorProps) {
     }
 
     function getSheetIdByName(name: string) {
-        return currentUniverService.getCurrentUniverSheetInstance().getSheetBySheetName(name)?.getSheetId() || '';
+        return univerInstanceService.getCurrentUniverSheetInstance()?.getSheetBySheetName(name)?.getSheetId() || '';
     }
 
     function handleTextValueChange(value: Nullable<string>) {
         setRangeValue(value || '');
 
-        if (value === '') {
+        if (value == null) {
             onChange && onChange([]);
             return;
         }
 
-        const ranges = value?.split(',').map((ref) => {
-            const unitRange = deserializeRangeWithSheet(ref);
-            return {
-                unitId: unitRange.unitId,
-                sheetId: getSheetIdByName(unitRange.sheetName),
-                range: unitRange.range,
-            } as IUnitRange;
-        });
+        const ranges = getRangeWithRefsString(value, getSheetIdByName);
+
         onChange && onChange(ranges || []);
     }
 
@@ -279,13 +273,13 @@ export function RangeSelector(props: IRangeSelectorProps) {
         sClassName = `${styles.rangeSelector} ${styles.rangeSelectorActive}`;
     }
 
-    let height = 32;
+    let height = 28;
     if (size === 'mini') {
-        height = 24;
+        height = 20;
     } else if (size === 'small') {
-        height = 28;
+        height = 24;
     } else if (size === 'large') {
-        height = 36;
+        height = 32;
     }
 
     return (

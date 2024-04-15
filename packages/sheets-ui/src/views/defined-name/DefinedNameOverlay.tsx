@@ -32,7 +32,7 @@ export function DefinedNameOverlay(props: IDefinedNameOverlayProps) {
     const localeService = useDependency(LocaleService);
     const definedNamesService = useDependency(IDefinedNamesService);
     const univerInstanceService = useDependency(IUniverInstanceService);
-    const workbook = univerInstanceService.getCurrentUniverSheetInstance();
+    const workbook = univerInstanceService.getCurrentUniverSheetInstance()!;
     const unitId = workbook.getUnitId();
 
     const getDefinedNameMap = () => {

@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/engine-numfmt",
-    "version": "0.1.6",
+    "version": "0.1.7",
     "private": false,
     "description": "UniverSheet normal plugin UI manager",
     "author": "DreamNum <developer@univer.ai>",
@@ -68,8 +68,8 @@
     },
     "devDependencies": {
         "@univerjs/shared": "workspace:*",
-        "typescript": "^5.4.3",
-        "vite": "^5.2.7",
+        "typescript": "^5.4.5",
+        "vite": "^5.2.8",
         "vitest": "^1.4.0"
     }
 }

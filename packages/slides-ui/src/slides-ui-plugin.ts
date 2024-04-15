@@ -30,7 +30,7 @@ export class UniverSlidesUIPlugin extends Plugin {
         _config: unknown,
         @Inject(Injector) override readonly _injector: Injector,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
-        @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super(SLIDE_UI_PLUGIN_NAME);
     }
@@ -48,10 +48,10 @@ export class UniverSlidesUIPlugin extends Plugin {
     }
 
     private _markSlideAsFocused() {
-        const currentService = this._currentUniverService;
+        const currentService = this._univerInstanceService;
         try {
-            const c = currentService.getCurrentUniverSlideInstance();
-            currentService.focusUniverInstance(c.getUnitId());
+            const slide = currentService.getCurrentUniverSlideInstance()!;
+            currentService.focusUniverInstance(slide.getUnitId());
         } catch (e) {
         }
     }

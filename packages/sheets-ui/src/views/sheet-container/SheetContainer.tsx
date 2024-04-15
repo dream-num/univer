@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
+import { useDependency } from '@wendellhu/redi/react-bindings';
+import { IUniverInstanceService } from '@univerjs/core';
 import React from 'react';
+import { useObservable } from '@univerjs/ui';
 
 import { CountBar } from '../count-bar/CountBar';
 import { EditorContainer } from '../editor-container/EditorContainer';
@@ -25,6 +28,10 @@ import { StatusBar } from '../status-bar/StatusBar';
 import styles from './index.module.less';
 
 export function RenderSheetFooter() {
+    const univerInstanceService = useDependency(IUniverInstanceService);
+    const workbook = useObservable(univerInstanceService.currentSheet$);
+    if (!workbook) return null;
+
     return (
         <section className={styles.sheetContainer} data-range-selector>
             <SheetBar />
@@ -35,12 +42,20 @@ export function RenderSheetFooter() {
 }
 
 export function RenderSheetHeader() {
+    const univerInstanceService = useDependency(IUniverInstanceService);
+    const workbook = useObservable(univerInstanceService.currentSheet$);
+    if (!workbook) return null;
+
     return (
         <FormulaBar />
     );
 }
 
 export function RenderSheetContent() {
+    const univerInstanceService = useDependency(IUniverInstanceService);
+    const workbook = useObservable(univerInstanceService.currentSheet$);
+    if (!workbook) return null;
+
     return (
         <>
             <EditorContainer />

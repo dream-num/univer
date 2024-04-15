@@ -19,7 +19,7 @@ import { CommandType, IUniverInstanceService } from '@univerjs/core';
 
 import { TextSelectionManagerService } from '../../services/text-selection-manager.service';
 
-interface ISelectAllOperationParams {}
+interface ISelectAllOperationParams { }
 
 export const SelectAllOperation: ICommand<ISelectAllOperationParams> = {
     id: 'doc.operation.select-all',
@@ -30,7 +30,10 @@ export const SelectAllOperation: ICommand<ISelectAllOperationParams> = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const textSelectionManagerService = accessor.get(TextSelectionManagerService);
 
-        const prevBody = univerInstanceService.getCurrentUniverDocInstance().getSnapshot().body;
+        const currentDoc = univerInstanceService.getCurrentUniverDocInstance();
+        if (!currentDoc) return false;
+
+        const prevBody = currentDoc.getSnapshot().body;
 
         if (prevBody == null) {
             return false;

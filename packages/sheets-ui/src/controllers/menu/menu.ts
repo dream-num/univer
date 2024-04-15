@@ -52,8 +52,10 @@ import {
     SetTextRotationCommand,
     SetTextWrapCommand,
     SetVerticalTextAlignCommand,
+    SetWorksheetActiveOperation,
     SetWorksheetRowIsAutoHeightCommand,
 } from '@univerjs/sheets';
+
 import type { IMenuButtonItem, IMenuSelectorItem } from '@univerjs/ui';
 import {
     CopyCommand,
@@ -101,6 +103,7 @@ import { FONT_FAMILY_COMPONENT, FONT_FAMILY_ITEM_COMPONENT } from '../../compone
 import { FONT_SIZE_COMPONENT } from '../../components/font-size';
 import { MENU_ITEM_INPUT_COMPONENT } from '../../components/menu-item-input';
 import { FormatPainterStatus, IFormatPainterService } from '../../services/format-painter/format-painter.service';
+import { deriveStateFromActiveSheet$ } from './menu-util';
 
 export enum SheetMenuPosition {
     ROW_HEADER_CONTEXT_MENU = 'rowHeaderContextMenu',
@@ -154,12 +157,11 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         tooltip: 'toolbar.bold',
         positions: [MenuPosition.TOOLBAR_START],
         disabled$: getCurrentSheetDisabled$(accessor),
-        activated$: new Observable<boolean>((subscriber) => {
+        activated$: deriveStateFromActiveSheet$(univerInstanceService, false, ({ worksheet }) => new Observable<boolean>((subscriber) => {
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
-                if (id === SetRangeValuesMutation.id || id === SetSelectionsOperation.id) {
+                if (id === SetRangeValuesMutation.id || id === SetSelectionsOperation.id || id === SetWorksheetActiveOperation.id) {
                     const primary = selectionManagerService.getLast()?.primary;
-                    const worksheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
                     let isBold = FontWeight.NORMAL;
 
                     if (primary != null) {
@@ -172,25 +174,34 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 
                 if (
                     (id === SetTextSelectionsOperation.id || id === SetInlineFormatCommand.id) &&
-                    contextService.getContextValue(EDITOR_ACTIVATED) &&
-                    contextService.getContextValue(FOCUSING_SHEET)
+                        contextService.getContextValue(EDITOR_ACTIVATED) &&
+                        contextService.getContextValue(FOCUSING_SHEET)
                 ) {
                     const textRun = getFontStyleAtCursor(accessor);
-
                     if (textRun == null) {
                         return;
                     }
 
                     const bl = textRun.ts?.bl;
-
                     subscriber.next(bl === BooleanNumber.TRUE);
                 }
             });
 
-            subscriber.next(false);
+            const primary = selectionManagerService.getLast()?.primary;
+            if (!worksheet) {
+                subscriber.next(false);
+                return;
+            }
+
+            let isBold = FontWeight.NORMAL;
+            if (primary != null) {
+                const range = worksheet.getRange(primary.startRow, primary.startColumn);
+                isBold = range?.getFontWeight();
+            }
+            subscriber.next(isBold === FontWeight.BOLD);
 
             return disposable.dispose;
-        }),
+        })),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
     };
 }
@@ -210,12 +221,11 @@ export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         tooltip: 'toolbar.italic',
         positions: [MenuPosition.TOOLBAR_START],
         disabled$: getCurrentSheetDisabled$(accessor),
-        activated$: new Observable<boolean>((subscriber) => {
+        activated$: deriveStateFromActiveSheet$(univerInstanceService, false, ({ worksheet }) => new Observable<boolean>((subscriber) => {
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
-                if (id === SetRangeValuesMutation.id || id === SetSelectionsOperation.id) {
+                if (id === SetRangeValuesMutation.id || id === SetSelectionsOperation.id || id === SetWorksheetActiveOperation.id) {
                     const primary = selectionManagerService.getLast()?.primary;
-                    const worksheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
                     let isItalic = FontItalic.NORMAL;
                     if (primary != null) {
                         const range = worksheet.getRange(primary.startRow, primary.startColumn);
@@ -227,24 +237,27 @@ export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 
                 if (
                     (id === SetTextSelectionsOperation.id || id === SetInlineFormatCommand.id) &&
-                    contextService.getContextValue(EDITOR_ACTIVATED) &&
-                    contextService.getContextValue(FOCUSING_SHEET)
+                        contextService.getContextValue(EDITOR_ACTIVATED) &&
+                        contextService.getContextValue(FOCUSING_SHEET)
                 ) {
                     const textRun = getFontStyleAtCursor(accessor);
-
-                    if (textRun == null) {
-                        return;
-                    }
+                    if (textRun == null) return;
 
                     const it = textRun.ts?.it;
-
                     subscriber.next(it === BooleanNumber.TRUE);
                 }
             });
 
-            subscriber.next(false);
+            const primary = selectionManagerService.getLast()?.primary;
+            let isItalic = FontItalic.NORMAL;
+            if (primary != null) {
+                const range = worksheet.getRange(primary.startRow, primary.startColumn);
+                isItalic = range?.getFontStyle();
+            }
+
+            subscriber.next(isItalic === FontItalic.ITALIC);
             return disposable.dispose;
-        }),
+        })),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
     };
 }
@@ -264,12 +277,11 @@ export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         tooltip: 'toolbar.underline',
         positions: [MenuPosition.TOOLBAR_START],
         disabled$: getCurrentSheetDisabled$(accessor),
-        activated$: new Observable<boolean>((subscriber) => {
+        activated$: deriveStateFromActiveSheet$(univerInstanceService, false, ({ worksheet }) => new Observable<boolean>((subscriber) => {
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
-                if (id === SetRangeValuesMutation.id || id === SetSelectionsOperation.id) {
+                if (id === SetRangeValuesMutation.id || id === SetSelectionsOperation.id || id === SetWorksheetActiveOperation.id) {
                     const primary = selectionManagerService.getLast()?.primary;
-                    const worksheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
                     let isUnderline;
                     if (primary != null) {
                         const range = worksheet.getRange(primary.startRow, primary.startColumn);
@@ -281,24 +293,28 @@ export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 
                 if (
                     (id === SetTextSelectionsOperation.id || id === SetInlineFormatCommand.id) &&
-                    contextService.getContextValue(EDITOR_ACTIVATED) &&
-                    contextService.getContextValue(FOCUSING_SHEET)
+                        contextService.getContextValue(EDITOR_ACTIVATED) &&
+                        contextService.getContextValue(FOCUSING_SHEET)
                 ) {
                     const textRun = getFontStyleAtCursor(accessor);
-
-                    if (textRun == null) {
-                        return;
-                    }
+                    if (textRun == null) return;
 
                     const ul = textRun.ts?.ul;
-
                     subscriber.next(ul?.s === BooleanNumber.TRUE);
                 }
             });
 
-            subscriber.next(false);
+            const primary = selectionManagerService.getLast()?.primary;
+            let isUnderline;
+            if (primary != null) {
+                const range = worksheet.getRange(primary.startRow, primary.startColumn);
+                isUnderline = range?.getUnderline();
+            }
+
+            subscriber.next(!!(isUnderline && isUnderline.s));
             return disposable.dispose;
-        }),
+        })),
+
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
     };
 }
@@ -318,12 +334,11 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonIt
         tooltip: 'toolbar.strikethrough',
         positions: [MenuPosition.TOOLBAR_START],
         disabled$: getCurrentSheetDisabled$(accessor),
-        activated$: new Observable<boolean>((subscriber) => {
+        activated$: deriveStateFromActiveSheet$(univerInstanceService, false, ({ worksheet }) => new Observable<boolean>((subscriber) => {
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
-                if (id === SetRangeValuesMutation.id || id === SetSelectionsOperation.id) {
+                if (id === SetRangeValuesMutation.id || id === SetSelectionsOperation.id || id === SetWorksheetActiveOperation.id) {
                     const primary = selectionManagerService.getLast()?.primary;
-                    const worksheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
                     let st;
                     if (primary != null) {
                         const range = worksheet.getRange(primary.startRow, primary.startColumn);
@@ -335,8 +350,8 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonIt
 
                 if (
                     (id === SetTextSelectionsOperation.id || id === SetInlineFormatCommand.id) &&
-                    contextService.getContextValue(EDITOR_ACTIVATED) &&
-                    contextService.getContextValue(FOCUSING_SHEET)
+                        contextService.getContextValue(EDITOR_ACTIVATED) &&
+                        contextService.getContextValue(FOCUSING_SHEET)
                 ) {
                     const textRun = getFontStyleAtCursor(accessor);
 
@@ -350,9 +365,16 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonIt
                 }
             });
 
-            subscriber.next(false);
+            const primary = selectionManagerService.getLast()?.primary;
+            let st;
+            if (primary != null) {
+                const range = worksheet.getRange(primary.startRow, primary.startColumn);
+                st = range?.getStrikeThrough();
+            }
+
+            subscriber.next(!!(st && st.s));
             return disposable.dispose;
-        }),
+        })),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
     };
 }
@@ -361,6 +383,7 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
     const commandService = accessor.get(ICommandService);
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SelectionManagerService);
+    const defaultValue = FONT_FAMILY_LIST[0].value;
 
     return {
         id: SetRangeFontFamilyCommand.id,
@@ -377,17 +400,14 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
             value: item.value,
         })),
         disabled$: getCurrentSheetDisabled$(accessor),
-        value$: new Observable((subscriber) => {
-            const defaultValue = FONT_FAMILY_LIST[0].value;
-
+        value$: deriveStateFromActiveSheet$(univerInstanceService, defaultValue, ({ worksheet }) => new Observable((subscriber) => {
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
-                if (id !== SetRangeValuesMutation.id && id !== SetSelectionsOperation.id) {
+                if (id !== SetRangeValuesMutation.id && id !== SetSelectionsOperation.id && id !== SetWorksheetActiveOperation.id) {
                     return;
                 }
 
                 const primary = selectionManagerService.getLast()?.primary;
-                const worksheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
                 let ff;
                 if (primary != null) {
                     const range = worksheet.getRange(primary.startRow, primary.startColumn);
@@ -397,9 +417,16 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
                 subscriber.next(ff ?? defaultValue);
             });
 
-            subscriber.next(defaultValue);
+            const primary = selectionManagerService.getLast()?.primary;
+            let ff;
+            if (primary != null) {
+                const range = worksheet.getRange(primary.startRow, primary.startColumn);
+                ff = range?.getFontFamily();
+            }
+
+            subscriber.next(ff ?? defaultValue);
             return disposable.dispose;
-        }),
+        })),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
     };
 }
@@ -409,8 +436,8 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SelectionManagerService);
     const contextService = accessor.get(IContextService);
-
     const disabled$ = getCurrentSheetDisabled$(accessor);
+    const DEFAULT_SIZE = 11;
 
     return {
         id: SetRangeFontSizeCommand.id,
@@ -428,19 +455,16 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
         positions: [MenuPosition.TOOLBAR_START],
         selections: FONT_SIZE_LIST,
         disabled$,
-        value$: new Observable((subscriber) => {
-            const DEFAULT_SIZE = 14;
+        value$: deriveStateFromActiveSheet$(univerInstanceService, DEFAULT_SIZE, ({ worksheet }) => new Observable((subscriber) => {
             const disposable = commandService.onCommandExecuted((c) => {
                 const id = c.id;
-                if (id === SetRangeValuesMutation.id || id === SetSelectionsOperation.id) {
+                if (id === SetRangeValuesMutation.id || id === SetSelectionsOperation.id || id === SetWorksheetActiveOperation.id) {
                     const primary = selectionManagerService.getLast()?.primary;
-                    const worksheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
                     let fs;
                     if (primary != null) {
                         const range = worksheet.getRange(primary.startRow, primary.startColumn);
                         fs = range?.getFontSize();
                     }
-
                     subscriber.next(fs ?? DEFAULT_SIZE);
                 }
 
@@ -456,15 +480,20 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
                     }
 
                     const fs = textRun.ts?.fs;
-
                     subscriber.next(fs ?? DEFAULT_SIZE);
                 }
             });
 
-            subscriber.next(DEFAULT_SIZE);
+            const primary = selectionManagerService.getLast()?.primary;
+            let fs;
+            if (primary != null) {
+                const range = worksheet.getRange(primary.startRow, primary.startColumn);
+                fs = range?.getFontSize();
+            }
+            subscriber.next(fs ?? DEFAULT_SIZE);
 
             return disposable.dispose;
-        }),
+        })),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
     };
 }
@@ -594,15 +623,14 @@ export function HorizontalAlignMenuItemFactory(accessor: IAccessor): IMenuSelect
         group: MenuGroup.TOOLBAR_LAYOUT,
         type: MenuItemType.SELECTOR,
         selections: HORIZONTAL_ALIGN_CHILDREN,
-        value$: new Observable<HorizontalAlign>((subscriber) => {
+        value$: deriveStateFromActiveSheet$(univerInstanceService, HorizontalAlign.LEFT, ({ worksheet }) => new Observable<HorizontalAlign>((subscriber) => {
             const disposable = accessor.get(ICommandService).onCommandExecuted((c) => {
                 const id = c.id;
-                if (id !== SetHorizontalTextAlignCommand.id && id !== SetSelectionsOperation.id) {
+                if (id !== SetHorizontalTextAlignCommand.id && id !== SetSelectionsOperation.id && id !== SetWorksheetActiveOperation.id) {
                     return;
                 }
 
                 const primary = selectionManagerService.getLast()?.primary;
-                const worksheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
                 let ha;
                 if (primary != null) {
                     const range = worksheet.getRange(primary.startRow, primary.startColumn);
@@ -612,10 +640,17 @@ export function HorizontalAlignMenuItemFactory(accessor: IAccessor): IMenuSelect
                 subscriber.next(ha ?? HorizontalAlign.LEFT);
             });
 
-            subscriber.next(HorizontalAlign.LEFT);
+            const primary = selectionManagerService.getLast()?.primary;
+            let ha;
+            if (primary != null) {
+                const range = worksheet.getRange(primary.startRow, primary.startColumn);
+                ha = range?.getHorizontalAlignment();
+            }
+
+            subscriber.next(ha ?? HorizontalAlign.LEFT);
 
             return disposable.dispose;
-        }),
+        })),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
         disabled$: getCurrentSheetDisabled$(accessor),
     };
@@ -651,15 +686,14 @@ export function VerticalAlignMenuItemFactory(accessor: IAccessor): IMenuSelector
         type: MenuItemType.SELECTOR,
         positions: [MenuPosition.TOOLBAR_START],
         selections: VERTICAL_ALIGN_CHILDREN,
-        value$: new Observable<VerticalAlign>((subscriber) => {
+        value$: deriveStateFromActiveSheet$(univerInstanceService, VerticalAlign.TOP, ({ worksheet }) => new Observable<VerticalAlign>((subscriber) => {
             const disposable = accessor.get(ICommandService).onCommandExecuted((c) => {
                 const id = c.id;
-                if (id !== SetVerticalTextAlignCommand.id && id !== SetSelectionsOperation.id) {
+                if (id !== SetVerticalTextAlignCommand.id && id !== SetSelectionsOperation.id && id !== SetWorksheetActiveOperation.id) {
                     return;
                 }
 
                 const primary = selectionManagerService.getLast()?.primary;
-                const worksheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
                 let va;
                 if (primary != null) {
                     const range = worksheet.getRange(primary.startRow, primary.startColumn);
@@ -669,10 +703,17 @@ export function VerticalAlignMenuItemFactory(accessor: IAccessor): IMenuSelector
                 subscriber.next(va ?? VerticalAlign.TOP);
             });
 
-            subscriber.next(VerticalAlign.TOP);
+            const primary = selectionManagerService.getLast()?.primary;
+            let va;
+            if (primary != null) {
+                const range = worksheet.getRange(primary.startRow, primary.startColumn);
+                va = range?.getVerticalAlignment();
+            }
+
+            subscriber.next(va ?? VerticalAlign.TOP);
 
             return disposable.dispose;
-        }),
+        })),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
         disabled$: getCurrentSheetDisabled$(accessor),
     };
@@ -708,15 +749,14 @@ export function WrapTextMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<
         type: MenuItemType.SELECTOR,
         positions: [MenuPosition.TOOLBAR_START],
         selections: TEXT_WRAP_CHILDREN,
-        value$: new Observable((subscriber) => {
+        value$: deriveStateFromActiveSheet$<WrapStrategy>(univerInstanceService, WrapStrategy.OVERFLOW, ({ worksheet }) => new Observable((subscriber) => {
             const disposable = accessor.get(ICommandService).onCommandExecuted((c) => {
                 const id = c.id;
-                if (id !== SetTextWrapCommand.id && id !== SetSelectionsOperation.id) {
+                if (id !== SetTextWrapCommand.id && id !== SetSelectionsOperation.id && id !== SetWorksheetActiveOperation.id) {
                     return;
                 }
 
                 const primary = selectionManagerService.getLast()?.primary;
-                const worksheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
                 let ws;
                 if (primary != null) {
                     const range = worksheet.getRange(primary.startRow, primary.startColumn);
@@ -726,10 +766,17 @@ export function WrapTextMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<
                 subscriber.next(ws ?? WrapStrategy.OVERFLOW);
             });
 
-            subscriber.next(WrapStrategy.OVERFLOW);
+            const primary = selectionManagerService.getLast()?.primary;
+            let ws;
+            if (primary != null) {
+                const range = worksheet.getRange(primary.startRow, primary.startColumn);
+                ws = range?.getWrapStrategy();
+            }
+
+            subscriber.next(ws ?? WrapStrategy.OVERFLOW);
 
             return disposable.dispose;
-        }),
+        })),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
         disabled$: getCurrentSheetDisabled$(accessor),
     };
@@ -780,15 +827,14 @@ export function TextRotateMenuItemFactory(accessor: IAccessor): IMenuSelectorIte
         type: MenuItemType.SELECTOR,
         selections: TEXT_ROTATE_CHILDREN,
         positions: [MenuPosition.TOOLBAR_START],
-        value$: new Observable<number | string>((subscriber) => {
+        value$: deriveStateFromActiveSheet$(univerInstanceService, 0, ({ worksheet }) => new Observable<number | string>((subscriber) => {
             const disposable = accessor.get(ICommandService).onCommandExecuted((c) => {
                 const id = c.id;
-                if (id !== SetTextRotationCommand.id && id !== SetSelectionsOperation.id) {
+                if (id !== SetTextRotationCommand.id && id !== SetSelectionsOperation.id && id !== SetWorksheetActiveOperation.id) {
                     return;
                 }
 
                 const primary = selectionManagerService.getLast()?.primary;
-                const worksheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
                 let tr;
                 if (primary != null) {
                     const range = worksheet.getRange(primary.startRow, primary.startColumn);
@@ -802,10 +848,21 @@ export function TextRotateMenuItemFactory(accessor: IAccessor): IMenuSelectorIte
                 }
             });
 
-            subscriber.next(0);
+            const primary = selectionManagerService.getLast()?.primary;
+            let tr;
+            if (primary != null) {
+                const range = worksheet.getRange(primary.startRow, primary.startColumn);
+                tr = range?.getTextRotation();
+            }
+
+            if (tr?.v === BooleanNumber.TRUE) {
+                subscriber.next('v');
+            } else {
+                subscriber.next((tr && tr.a) ?? 0);
+            }
 
             return disposable.dispose;
-        }),
+        })),
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
         disabled$: getCurrentSheetDisabled$(accessor),
     };
@@ -1022,26 +1079,8 @@ export function HideColMenuItemFactory(): IMenuButtonItem {
 export function ShowRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SelectionManagerService);
-
-    function hasHiddenRowsInSelections(): boolean {
-        const worksheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
-        const rowRanges = selectionManagerService
-            .getSelections()
-            ?.map((s) => s.range)
-            .filter((r) => r.rangeType === RANGE_TYPE.ROW);
-
-        return !!rowRanges?.some((range) => {
-            for (let r = range.startRow; r <= range.endRow; r++) {
-                if (!worksheet.getRowVisible(r)) {
-                    return true;
-                }
-            }
-
-            return false;
-        });
-    }
-
     const commandService = accessor.get(ICommandService);
+    const affectedCommands = [SetSelectionsOperation, SetRowHiddenMutation, SetRowVisibleMutation].map((c) => c.id);
 
     return {
         id: SetSelectedRowsVisibleCommand.id,
@@ -1049,51 +1088,35 @@ export function ShowRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         type: MenuItemType.BUTTON,
         positions: [SheetMenuPosition.ROW_HEADER_CONTEXT_MENU],
         title: 'rightClick.showHideRow',
-        hidden$: new Observable((subscriber) => {
-            const disposable = commandService.onCommandExecuted((c) => {
-                if (
-                    c.id === SetSelectionsOperation.id ||
-                    c.id === SetRowHiddenMutation.id ||
-                    c.id === SetRowVisibleMutation.id
-                ) {
-                    subscriber.next(!hasHiddenRowsInSelections());
-                }
+        hidden$: deriveStateFromActiveSheet$(univerInstanceService, true, ({ worksheet }) => new Observable((subscriber) => {
+            function hasHiddenRowsInSelections(): boolean {
+                const rowRanges = selectionManagerService.getSelections()?.map((s) => s.range).filter((r) => r.rangeType === RANGE_TYPE.ROW);
+                return !!rowRanges?.some((range) => {
+                    for (let r = range.startRow; r <= range.endRow; r++) {
+                        if (!worksheet.getRowVisible(r)) return true;
+                    }
+
+                    return false;
+                });
+            }
+
+
+            const disposable = commandService.onCommandExecuted((command) => {
+                if (affectedCommands.findIndex((c) => c === command.id) !== -1) subscriber.next(!hasHiddenRowsInSelections());
             });
 
             // it only shows when selected area has hidden rows
             subscriber.next(!hasHiddenRowsInSelections());
             return () => disposable.dispose();
-        }),
+        })),
     };
 }
 
 export function ShowColMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SelectionManagerService);
-
-    function hasHiddenColsInSelections(): boolean {
-        const worksheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
-        const colRanges = selectionManagerService
-            .getSelections()
-            ?.map((s) => s.range)
-            .filter((r) => r.rangeType === RANGE_TYPE.COLUMN);
-
-        if (!colRanges || colRanges.length === 0) {
-            return false;
-        }
-
-        return !!colRanges.some((range) => {
-            for (let r = range.startColumn; r <= range.endColumn; r++) {
-                if (!worksheet.getColVisible(r)) {
-                    return true;
-                }
-            }
-
-            return false;
-        });
-    }
-
     const commandService = accessor.get(ICommandService);
+    const affectedCommands = [SetSelectionsOperation, SetColHiddenMutation, SetColVisibleMutation].map((c) => c.id);
 
     return {
         id: SetSelectedColsVisibleCommand.id,
@@ -1101,20 +1124,27 @@ export function ShowColMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
         type: MenuItemType.BUTTON,
         positions: [SheetMenuPosition.COL_HEADER_CONTEXT_MENU],
         title: 'rightClick.showHideColumn',
-        hidden$: new Observable((subscriber) => {
-            const disposable = commandService.onCommandExecuted((c) => {
-                if (
-                    c.id === SetSelectionsOperation.id ||
-                    c.id === SetColHiddenMutation.id ||
-                    c.id === SetColVisibleMutation.id
-                ) {
-                    subscriber.next(!hasHiddenColsInSelections());
-                }
+        hidden$: deriveStateFromActiveSheet$(univerInstanceService, true, ({ worksheet }) => new Observable((subscriber) => {
+            function hasHiddenColsInSelections(): boolean {
+                const colRanges = selectionManagerService.getSelections()?.map((s) => s.range).filter((r) => r.rangeType === RANGE_TYPE.COLUMN);
+                if (!colRanges || colRanges.length === 0) return false;
+
+                return !!colRanges.some((range) => {
+                    for (let r = range.startColumn; r <= range.endColumn; r++) {
+                        if (!worksheet.getColVisible(r)) return true;
+                    }
+
+                    return false;
+                });
+            }
+
+            const disposable = commandService.onCommandExecuted((commandInfo) => {
+                if (affectedCommands.findIndex((c) => c === commandInfo.id) !== -1) subscriber.next(!hasHiddenColsInSelections());
             });
 
             subscriber.next(!hasHiddenColsInSelections());
             return () => disposable.dispose();
-        }),
+        })),
     };
 }
 
@@ -1138,16 +1168,11 @@ export function SetRowHeightMenuItemFactory(accessor: IAccessor): IMenuButtonIte
                 max: 1000,
             },
         },
-        value$: new Observable((subscriber) => {
+        value$: deriveStateFromActiveSheet$(univerInstanceService, 0, ({ worksheet }) => new Observable((subscriber) => {
             function update() {
                 const primary = selectionManagerService.getLast()?.primary;
-                const worksheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
-                let rowHeight;
-                if (primary != null) {
-                    rowHeight = worksheet.getRowHeight(primary.startRow);
-                }
-
-                subscriber.next(rowHeight ?? 0);
+                const rowHeight = primary ? worksheet.getRowHeight(primary.startRow) : 0;
+                subscriber.next(rowHeight);
             }
 
             const disposable = commandService.onCommandExecuted((c) => {
@@ -1159,7 +1184,7 @@ export function SetRowHeightMenuItemFactory(accessor: IAccessor): IMenuButtonIte
 
             update();
             return disposable.dispose;
-        }),
+        })),
     };
 }
 
@@ -1183,11 +1208,9 @@ export function SetColWidthMenuItemFactory(accessor: IAccessor): IMenuButtonItem
                 max: 1000,
             },
         },
-        value$: new Observable((subscriber) => {
+        value$: deriveStateFromActiveSheet$(univerInstanceService, 0, ({ worksheet }) => new Observable((subscriber) => {
             function update() {
                 const primary = selectionManagerService.getLast()?.primary;
-                const worksheet = univerInstanceService.getCurrentUniverSheetInstance().getActiveSheet();
-
                 let colWidth: number = 0;
                 if (primary != null) {
                     colWidth = worksheet.getColumnWidth(primary.startColumn);
@@ -1205,29 +1228,23 @@ export function SetColWidthMenuItemFactory(accessor: IAccessor): IMenuButtonItem
 
             update();
             return disposable.dispose;
-        }),
+        })),
     };
 }
 
 function getFontStyleAtCursor(accessor: IAccessor) {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const textSelectionService = accessor.get(TextSelectionManagerService);
+
     const editorDataModel = univerInstanceService.getUniverDocInstance(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
     const activeTextRange = textSelectionService.getActiveRange();
 
-    if (editorDataModel == null || activeTextRange == null) {
-        return;
-    }
+    if (editorDataModel == null || activeTextRange == null) return null;
 
     const textRuns = editorDataModel.getBody()?.textRuns;
-
-    if (textRuns == null) {
-        return;
-    }
+    if (textRuns == null) return;
 
     const { startOffset } = activeTextRange;
-
     const textRun = textRuns.find(({ st, ed }) => startOffset >= st && startOffset <= ed);
-
     return textRun;
 }

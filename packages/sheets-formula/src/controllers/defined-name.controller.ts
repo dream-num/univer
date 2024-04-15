@@ -146,7 +146,7 @@ export class DefinedNameController extends Disposable {
     }
 
     private _getUnitIdAndSheetId() {
-        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
+        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
         if (workbook == null) {
             return {};
         }

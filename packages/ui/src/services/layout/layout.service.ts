@@ -18,6 +18,7 @@ import type { ContextService, Nullable } from '@univerjs/core';
 import { Disposable, DocumentDataModel, FOCUSING_UNIVER_EDITOR, IContextService, ILogService, IUniverInstanceService, LifecycleStages, OnLifecycle, remove, SlideDataModel, toDisposable, UniverInstanceType, Workbook } from '@univerjs/core';
 import { createIdentifier, type IDisposable } from '@wendellhu/redi';
 import { fromEvent } from 'rxjs';
+import { IEditorService } from '../editor/editor.service';
 
 type FocusHandlerFn = (unitId: string) => void;
 
@@ -65,7 +66,8 @@ export class DesktopLayoutService extends Disposable implements ILayoutService {
     constructor(
         @IContextService private readonly _contextService: ContextService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @ILogService private readonly _logService: ILogService
+        @ILogService private readonly _logService: ILogService,
+        @IEditorService private readonly _editorService: IEditorService
     ) {
         super();
 
@@ -147,6 +149,7 @@ export class DesktopLayoutService extends Disposable implements ILayoutService {
             fromEvent(window, 'focusin').subscribe((event) => {
                 const target = event.target as HTMLElement;
                 if (collectionOfCnForFocusableEle.some((item) => target.classList.contains(item))) {
+                    this._editorService.blur();
                     queueMicrotask(() => this.focus());
                     return;
                 }

@@ -47,7 +47,7 @@ describe('test auto fill', () => {
         const univerInstanceService = testBed.get(IUniverInstanceService);
         testBed.get(NumfmtAutoFillController);
         testBed.get(NumfmtCellContent);
-        workbook = univerInstanceService.getCurrentUniverSheetInstance();
+        workbook = univerInstanceService.getCurrentUniverSheetInstance()!;
         worksheet = workbook.getActiveSheet();
     });
     it('test fill format ,repeat range is divisible', () => {

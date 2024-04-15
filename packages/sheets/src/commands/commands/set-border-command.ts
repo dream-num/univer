@@ -39,7 +39,7 @@ import { BorderStyleManagerService, type IBorderInfo } from '../../services/bord
 import { SelectionManagerService } from '../../services/selection-manager.service';
 import type { ISetRangeValuesMutationParams } from '../mutations/set-range-values.mutation';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
-import { getCommandTarget } from '../utils/get-target';
+import { getSheetCommandTarget } from './utils/target-util';
 
 function forEach(range: IRange, action: (row: number, column: number) => void): void {
     const { startRow, startColumn, endRow, endColumn } = range;
@@ -142,11 +142,10 @@ export const SetBorderCommand: ICommand = {
         const selectionManagerService = accessor.get(SelectionManagerService);
         const borderStyleManagerService = accessor.get(BorderStyleManagerService);
 
-        const { worksheet, unitId, subUnitId } = getCommandTarget(
-            univerInstanceService,
-            params?.unitId,
-            params?.subUnitId
-        );
+        const target = getSheetCommandTarget(univerInstanceService, params);
+        if (!target) return false;
+
+        const { worksheet, unitId, subUnitId } = target;
         const selections = selectionManagerService.getSelectionRanges();
         const mergeData = worksheet.getConfig().mergeData;
         if (!selections?.length) {

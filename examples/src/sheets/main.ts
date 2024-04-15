@@ -38,6 +38,9 @@ import { DebuggerPlugin } from '../plugins/debugger';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data/sheets/demo/default-workbook-data-demo';
 import { locales } from './locales';
 
+// const app = document.getElementById('app')!;
+// app.style.marginLeft = '100px';
+
 const LOAD_LAZY_PLUGINS_TIMEOUT = 1_000;
 // univer
 const univer = new Univer({
@@ -89,6 +92,11 @@ univer.registerPlugin(UniverSheetsFindReplacePlugin);
 
 // create univer sheet instance
 univer.createUniverSheet(DEFAULT_WORKBOOK_DATA_DEMO);
+
+// Uncomment the following lines to test if the document is disposed correctly without memory leaks.
+// setTimeout(() => {
+//     univer.__getInjector().get(IUniverInstanceService).disposeDocument(DEFAULT_WORKBOOK_DATA_DEMO.id);
+// }, 5000);
 
 // sheet condition formatting
 univer.registerPlugin(UniverSheetsConditionalFormattingUIPlugin);

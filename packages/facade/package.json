@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/facade",
-    "version": "0.1.6",
+    "version": "0.1.7",
     "private": false,
     "description": "",
     "author": "DreamNum <developer@univer.ai>",
@@ -68,6 +68,7 @@
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/network": "workspace:*",
         "@univerjs/sheets": "workspace:*",
+        "@univerjs/sheets-conditional-formatting": "workspace:*",
         "@univerjs/sheets-formula": "workspace:*",
         "@univerjs/sheets-numfmt": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
@@ -88,8 +89,8 @@
         "@wendellhu/redi": "^0.13.0",
         "jsdom": "^24.0.0",
         "rxjs": "^7.8.1",
-        "typescript": "^5.4.3",
-        "vite": "^5.2.7",
+        "typescript": "^5.4.5",
+        "vite": "^5.2.8",
         "vitest": "^1.4.0",
         "vitest-canvas-mock": "^0.3.3"
     }

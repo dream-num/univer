@@ -70,7 +70,8 @@
             display: flex;
 
             box-sizing: border-box;
-            padding: var(--padding-sm) var(--padding-lg);
+            height: 28px;
+            padding: 0 10px;
 
             transition: all 0.15s;
 
@@ -80,6 +81,7 @@
 
                 &-input {
                     width: 100%;
+                    height: 100%;
                 }
             }
 
@@ -88,10 +90,12 @@
                 pointer-events: none;
 
                 position: absolute;
-                top: 6px;
-                left: 16px;
+                left: 10px;
+                height: 100%;
 
                 font-size: var(--font-size-sm);
+                display: inline-flex;
+                align-items: center;
             }
         }
 
@@ -225,7 +229,6 @@
     &-dropdown {
         position: absolute;
 
-        min-height: 100px;
         z-index: 1060;
 
         background: rgb(var(--bg-color-secondary));

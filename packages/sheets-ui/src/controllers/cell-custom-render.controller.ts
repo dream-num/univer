@@ -41,9 +41,12 @@ export class CellCustomRenderController extends Disposable {
         this._initEventBinding();
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _initEventBinding() {
         const disposableCollection = new DisposableCollection();
+        // eslint-disable-next-line max-lines-per-function
         this._univerInstanceService.currentSheet$.subscribe((workbook) => {
+            disposableCollection.dispose();
             if (workbook) {
                 const unitId = workbook.getUnitId();
 
@@ -160,8 +163,6 @@ export class CellCustomRenderController extends Disposable {
                     moveDisposable && disposableCollection.add(moveDisposable);
                 }
             }
-
-            disposableCollection.dispose();
         });
 
         this.disposeWithMe(disposableCollection);

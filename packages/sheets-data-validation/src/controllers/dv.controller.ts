@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import type { Workbook } from '@univerjs/core';
 import { DisposableCollection, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, toDisposable } from '@univerjs/core';
 import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
 import { Inject, Injector } from '@wendellhu/redi';
@@ -77,23 +76,27 @@ export class DataValidationController extends RxDisposable {
     }
 
     private _initInstanceChange() {
-        // TODO@wzhudev: sheet added and sheet dispose event
+        const disposableCollection = new DisposableCollection();
+        this._univerInstanceService.currentSheet$.subscribe((workbook) => {
+            disposableCollection.dispose();
+            if (!workbook) {
+                return;
+            }
+            this._sheetDataValidationService.switchCurrent(workbook.getUnitId(), workbook.getActiveSheet().getSheetId());
+            disposableCollection.add(toDisposable(
+                workbook.activeSheet$.subscribe((worksheet) => {
+                    if (worksheet) {
+                        const unitId = workbook.getUnitId();
+                        const subUnitId = worksheet.getSheetId();
+                        this._sheetDataValidationService.switchCurrent(unitId, subUnitId);
+                    }
+                })
+            ));
+        });
+
+        this.disposeWithMe(disposableCollection);
     }
 
-    private _initOnWorkbook(workbook: Workbook): void {
-        const disposeCollection = new DisposableCollection();
-
-        this._sheetDataValidationService.switchCurrent(workbook.getUnitId(), workbook.getActiveSheet().getSheetId());
-        disposeCollection.add(toDisposable(
-            workbook.activeSheet$.subscribe((worksheet) => {
-                if (worksheet) {
-                    const unitId = workbook.getUnitId();
-                    const subUnitId = worksheet.getSheetId();
-                    this._sheetDataValidationService.switchCurrent(unitId, subUnitId);
-                }
-            })
-        ));
-    }
 
     private _initCommandInterceptor() {
         this._sheetInterceptorService.interceptCommand({

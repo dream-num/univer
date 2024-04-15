@@ -17,7 +17,7 @@
 import { DataValidationStatus, Disposable, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
 import { CellAlertManagerService, CellAlertType, HoverManagerService } from '@univerjs/sheets-ui';
 import { Inject } from '@wendellhu/redi';
-import { SheetDataValidationService } from '../services/dv.service';
+import type { BaseDataValidator } from '@univerjs/data-validation';
 
 @OnLifecycle(LifecycleStages.Rendered, DataValidationAlertController)
 export class DataValidationAlertController extends Disposable {
@@ -25,7 +25,6 @@ export class DataValidationAlertController extends Disposable {
         @Inject(HoverManagerService) private readonly _hoverManagerService: HoverManagerService,
         @Inject(CellAlertManagerService) private readonly _cellAlertManagerService: CellAlertManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(SheetDataValidationService) private readonly _sheetDataValidationService: SheetDataValidationService,
         @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
         super();
@@ -41,7 +40,6 @@ export class DataValidationAlertController extends Disposable {
             if (cellPos) {
                 const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
                 const worksheet = workbook.getActiveSheet();
-                const manager = this._sheetDataValidationService.currentManager?.manager;
                 const cellData = worksheet.getCell(cellPos.location.row, cellPos.location.col);
 
                 if (cellData?.dataValidation?.validStatus === DataValidationStatus.INVALID) {
@@ -55,28 +53,21 @@ export class DataValidationAlertController extends Disposable {
                     ) {
                         return;
                     }
+                    const validator = cellData.dataValidation.validator as BaseDataValidator;
+                    const rule = cellData.dataValidation.rule;
+                    if (!validator) {
+                        return;
+                    }
                     this._cellAlertManagerService.showAlert({
                         type: CellAlertType.ERROR,
                         title: this._localeService.t('dataValidation.error.title'),
-                        message: manager?.getRuleErrorMsg(cellData.dataValidation.ruleId),
+                        message: validator?.generateRuleErrorMessage(rule),
                         location: cellPos.location,
                         width: 200,
                         height: 74,
                     });
                     return;
                 }
-
-                // if (cellData?.dataValidation?.rule.showInputMessage) {
-                //     this._cellAlertManagerService.showAlert({
-                //         type: CellAlertType.INFO,
-                //         title: this._localeService.t('dataValidation.error.title'),
-                //         message: manager?.getRuleErrorMsg(cellData.dataValidation.ruleId),
-                //         location: cellPos.location,
-                //         width: 200,
-                //         height: 74,
-                //     });
-                //     return;
-                // }
             }
 
             this._cellAlertManagerService.clearAlert();

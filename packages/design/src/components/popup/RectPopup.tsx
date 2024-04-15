@@ -132,7 +132,7 @@ function RectPopup(props: IRectPopupProps) {
     return (
         <section
             ref={nodeRef}
-            className={styles.popup}
+            className={styles.popupAbsolute}
             style={position}
             onClick={(e) => {
                 e.stopPropagation();

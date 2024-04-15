@@ -17,7 +17,7 @@
 import type { ISheetDataValidationRule } from '@univerjs/core';
 import { Disposable, IResourceManagerService, IUniverInstanceService, LifecycleService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
-import type { UniverType } from '@univerjs/protocol';
+import { UniverType } from '@univerjs/protocol';
 import { DataValidationModel } from '../models/data-validation-model';
 
 type DataValidationJSON = Record<string, ISheetDataValidationRule[]>;

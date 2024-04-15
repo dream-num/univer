@@ -22,6 +22,7 @@ import {
     getAbsoluteRefTypeWithSingleString,
     getAbsoluteRefTypeWitString,
     handleRefStringInfo,
+    isReferenceStringWithEffectiveColumn,
     needsQuoting,
     serializeRange,
     serializeRangeToRefString,
@@ -311,5 +312,17 @@ describe('Test Reference', () => {
             sheetName: 'sheet-1',
             unitId: 'Book-1.xlsx',
         });
+    });
+
+    it('isReferenceStringWithEffectiveColumn', () => {
+        expect(isReferenceStringWithEffectiveColumn('A1:A2')).toBeTruthy();
+
+        expect(isReferenceStringWithEffectiveColumn('AAA1')).toBeTruthy();
+
+        expect(isReferenceStringWithEffectiveColumn('DefinedName1')).toBeFalsy();
+
+        expect(isReferenceStringWithEffectiveColumn('XFD1')).toBeTruthy();
+
+        expect(isReferenceStringWithEffectiveColumn('XFE1')).toBeFalsy();
     });
 });

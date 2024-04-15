@@ -42,7 +42,7 @@ import {
 } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
-import { deserializeRangeWithSheet, IDefinedNamesService, isReferenceString, operatorToken } from '@univerjs/engine-formula';
+import { deserializeRangeWithSheet, IDefinedNamesService, isReferenceStringWithEffectiveColumn, operatorToken } from '@univerjs/engine-formula';
 import type { ISetZoomRatioOperationParams } from '../commands/operations/set-zoom-ratio.operation';
 import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
 import { VIEWPORT_KEY } from '../common/keys';
@@ -120,7 +120,7 @@ export class SelectionController extends Disposable {
 
                     const valueArray = formulaOrRefString.split(',');
                     const result = valueArray.every((refString) => {
-                        return isReferenceString(refString.trim());
+                        return isReferenceStringWithEffectiveColumn(refString.trim());
                     });
 
                     if (!result) {

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 import type { ICellDataForSheetInterceptor, ICellRenderContext } from '@univerjs/core';
 import { DataValidationRenderMode, DataValidationStatus, DataValidationType, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, WrapStrategy } from '@univerjs/core';
 import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
@@ -197,11 +198,13 @@ export class DataValidationRenderController extends RxDisposable {
         }));
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _initViewModelIntercept() {
         this.disposeWithMe(
             this._sheetInterceptorService.intercept(
                 INTERCEPTOR_POINT.CELL_CONTENT,
                 {
+                    // eslint-disable-next-line max-lines-per-function
                     handler: (cell, pos, next) => {
                         const { row, col, unitId, subUnitId } = pos;
                         const manager = this._dataValidationModel.ensureManager(unitId, subUnitId) as SheetDataValidationManager;

@@ -15,7 +15,7 @@
  */
 
 import type { IWorkbookData, Univer, Workbook } from '@univerjs/core';
-import { AbsoluteRefType, IUniverInstanceService, LocaleType } from '@univerjs/core';
+import { LocaleType } from '@univerjs/core';
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
@@ -70,7 +70,7 @@ describe('lexer test', () => {
     let definedNamesService: IDefinedNamesService;
     let formulaCurrentConfigService: IFormulaCurrentConfigService;
     let lexerTreeBuilder: LexerTreeBuilder;
-    let univerInstanceService: IUniverInstanceService;
+
 
     beforeEach(() => {
         const testBed = createCommandTestBed(TEST_WORKBOOK_DATA);
@@ -81,14 +81,14 @@ describe('lexer test', () => {
         definedNamesService = get(IDefinedNamesService);
         formulaCurrentConfigService = get(IFormulaCurrentConfigService);
         lexerTreeBuilder = get(LexerTreeBuilder);
-        univerInstanceService = get(IUniverInstanceService);
+
 
         formulaCurrentConfigService.setExecuteUnitId('test');
         formulaCurrentConfigService.setExecuteSubUnitId('sheet1');
 
         // runtimeService.setCurrent(0, 0, 4, 1, 'sheet1', 'test');
 
-        lexer = new Lexer(definedNamesService, lexerTreeBuilder, formulaCurrentConfigService, univerInstanceService);
+        lexer = new Lexer(definedNamesService, lexerTreeBuilder, formulaCurrentConfigService);
     });
 
     afterEach(() => {
@@ -114,43 +114,6 @@ describe('lexer test', () => {
             expect(JSON.stringify(node.serialize())).toStrictEqual(
                 '{"token":"R_1","st":-1,"ed":-1,"children":[{"token":"lambda","st":0,"ed":5,"children":[{"token":"L_1","st":16,"ed":18,"children":[{"token":"P_1","st":17,"ed":19,"children":["1",{"token":"sum","st":23,"ed":25,"children":[{"token":"P_1","st":23,"ed":25,"children":[{"token":":","st":-1,"ed":-1,"children":[{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"A1","st":-1,"ed":-1,"children":[]}]},{"token":"P_1","st":-1,"ed":-1,"children":[{"token":"B1","st":-1,"ed":-1,"children":[]}]}]}]}]},"+"]},{"token":"P_1","st":30,"ed":32,"children":[" 100"]}]},{"token":"P_1","st":3,"ed":5,"children":["x"]},{"token":"P_1","st":5,"ed":7,"children":[" y "]},{"token":"P_1","st":9,"ed":11,"children":[" x","x","*","y","*"]}]}]}'
             );
-        });
-    });
-
-    describe('convertRefersToAbsolute', () => {
-        it('Formula All', () => {
-            const result = lexer.convertRefersToAbsolute('=sum(A1:B1,A1:B1,A1:B1,A1:B1)', AbsoluteRefType.ALL, AbsoluteRefType.ALL);
-            expect(result).toStrictEqual('=sum($A$1:$B$1,$A$1:$B$1,$A$1:$B$1,$A$1:$B$1)');
-        });
-
-        it('Range All', () => {
-            const result = lexer.convertRefersToAbsolute('A1:B1,A1:B1,A1:B1,A1:B1', AbsoluteRefType.ALL, AbsoluteRefType.ALL);
-            expect(result).toStrictEqual('$A$1:$B$1,$A$1:$B$1,$A$1:$B$1,$A$1:$B$1');
-        });
-
-        it('Formula Column', () => {
-            const result = lexer.convertRefersToAbsolute('=sum(A1:B1,A1:B1,A1:B1,A1:B1)', AbsoluteRefType.COLUMN, AbsoluteRefType.COLUMN);
-            expect(result).toStrictEqual('=sum($A1:$B1,$A1:$B1,$A1:$B1,$A1:$B1)');
-        });
-
-        it('Range Column', () => {
-            const result = lexer.convertRefersToAbsolute('A1:B1,A1:B1,A1:B1,A1:B1', AbsoluteRefType.COLUMN, AbsoluteRefType.COLUMN);
-            expect(result).toStrictEqual('$A1:$B1,$A1:$B1,$A1:$B1,$A1:$B1');
-        });
-
-        it('Formula Row', () => {
-            const result = lexer.convertRefersToAbsolute('=sum(A1:B1,A1:B1,A1:B1,A1:B1)', AbsoluteRefType.ROW, AbsoluteRefType.ROW);
-            expect(result).toStrictEqual('=sum(A$1:B$1,A$1:B$1,A$1:B$1,A$1:B$1)');
-        });
-
-        it('Range Row', () => {
-            const result = lexer.convertRefersToAbsolute('A1:B1,A1:B1,A1:B1,A1:B1', AbsoluteRefType.ROW, AbsoluteRefType.ROW);
-            expect(result).toStrictEqual('A$1:B$1,A$1:B$1,A$1:B$1,A$1:B$1');
-        });
-
-        it('Complex Formula', () => {
-            const result = lexer.convertRefersToAbsolute('=SUM(A1:B10) + LAMBDA(x, y, x*y*x)(A1:B10, A10) + MAX(A1:B10,SUM(A2))', AbsoluteRefType.ALL, AbsoluteRefType.ALL);
-            expect(result).toStrictEqual('=SUM($A$1:$B$10) + LAMBDA(x, y, x*y*x)($A$1:$B$10,$A$10) + MAX($A$1:$B$10,SUM($A$2))');
         });
     });
 });

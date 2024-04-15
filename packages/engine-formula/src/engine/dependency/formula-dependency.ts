@@ -292,7 +292,7 @@ export class FormulaDependencyGenerator extends Disposable {
             const sheetDataKeys = Object.keys(sheetData);
 
             for (const sheetId of sheetDataKeys) {
-                const matrixData = new ObjectMatrix(sheetData[sheetId]);
+                const matrixData = new ObjectMatrix(sheetData[sheetId] || {});
 
                 matrixData.forValue((row, column, formulaDataItem) => {
                     // const formulaString = formulaDataItem.f;

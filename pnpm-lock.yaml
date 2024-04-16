@@ -356,6 +356,9 @@ importers:
 
   packages/data-validation:
     dependencies:
+      '@univerjs/protocol':
+        specifier: ^0.1.17
+        version: 0.1.17(@grpc/grpc-js@1.10.4)(rxjs@7.8.1)
       dayjs:
         specifier: ^1.11.10
         version: 1.11.10
@@ -363,9 +366,6 @@ importers:
       '@univerjs/core':
         specifier: workspace:*
         version: link:../core
-      '@univerjs/protocol':
-        specifier: ^0.1.14
-        version: 0.1.14(@grpc/grpc-js@1.10.4)(rxjs@7.8.1)
       '@univerjs/shared':
         specifier: workspace:*
         version: link:../../common/shared
@@ -3363,6 +3363,7 @@ packages:
     dependencies:
       '@grpc/proto-loader': 0.7.12
       '@js-sdsl/ordered-map': 4.4.2
+    dev: false
 
   /@grpc/proto-loader@0.7.12:
     resolution: {integrity: sha512-DCVwMxqYzpUCiDMl7hQ384FqP4T3DbNpXU8pt681l3UWCip1WUiD5JrkImUwCB9a7f2cq4CUTmi5r/xIMRPY1Q==}
@@ -3373,6 +3374,7 @@ packages:
       long: 5.2.3
       protobufjs: 7.2.6
       yargs: 17.7.2
+    dev: false
 
   /@humanwhocodes/config-array@0.11.14:
     resolution: {integrity: sha512-3T8LkOmg45BV5FICb15QQMsyUSWrQ8AygVfC7ZG32zOalnqrilm018ZVCw0eapXux8FtA33q8PSRSstjee3jSg==}
@@ -3656,6 +3658,7 @@ packages:
 
   /@js-sdsl/ordered-map@4.4.2:
     resolution: {integrity: sha512-iUKgm52T8HOE/makSxjqoWhe95ZJA1/G1sYsGev2JDKUSS14KAgg1LHb+Ba+IPow0xflbnSkOsZcO08C7w1gYw==}
+    dev: false
 
   /@ljharb/through@2.3.13:
     resolution: {integrity: sha512-/gKJun8NNiWGZJkGzI/Ragc53cOdcLNdzjLaIa+GEjguQs0ulsurx8WN0jijdK9yPqDvziX995sMRLyLt1uZMQ==}
@@ -5908,16 +5911,6 @@ packages:
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
     dev: false
-
-  /@univerjs/protocol@0.1.14(@grpc/grpc-js@1.10.4)(rxjs@7.8.1):
-    resolution: {integrity: sha512-f4BmBCDJ3WKVj5MIiB8S0PLnzVu0xHUpC8g4YCT4Ac2P/29UV0KfRPj2CqYQJOwsym6jLJTSHIvr9BhRGEgIWQ==}
-    engines: {node: '>=16.0.0', npm: '>=8.0.0'}
-    peerDependencies:
-      '@grpc/grpc-js': ^1.9.14
-      rxjs: '>=7.0.0'
-    dependencies:
-      '@grpc/grpc-js': 1.10.4
-      rxjs: 7.8.1
 
   /@univerjs/protocol@0.1.17(@grpc/grpc-js@1.10.4)(rxjs@7.8.1):
     resolution: {integrity: sha512-V7THIzlOroiTPwXPS57q1IfOLK9Be+oH6mSRH5XAsYEywNqRVwUlMIe1TTu4GWKhJpfjTMwihkcDeVZfA1+C4A==}
@@ -10990,6 +10983,7 @@ packages:
 
   /long@5.2.3:
     resolution: {integrity: sha512-lcHwpNoggQTObv5apGNCTdJrO69eHOZMi4BNC+rTLER8iHAqGrUVeLh/irVIM7zTw2bOXA8T6uNPeujwOLg/2Q==}
+    dev: false
 
   /loose-envify@1.4.0:
     resolution: {integrity: sha512-lyuxPGr/Wfhrlem2CL/UcnUc1zcqKAImBDzukY7Y5F/yQiNdko6+fRLevlw1HgMySw7f611UIY408EtxRSoK3Q==}
@@ -12157,6 +12151,7 @@ packages:
       '@protobufjs/utf8': r2.cnpmjs.org/@protobufjs/utf8@1.1.0
       '@types/node': 20.12.7
       long: 5.2.3
+    dev: false
 
   /protocols@2.0.1:
     resolution: {integrity: sha512-/XJ368cyBJ7fzLMwLKv1e4vLxOju2MNAIokcr7meSaNcVbWz/CPcW22cP04mwxOErdA5mwjA8Q6w/cdAQxVn7Q==}
@@ -15216,21 +15211,25 @@ packages:
     resolution: {integrity: sha512-j+gKExEuLmKwvz3OgROXtrJ2UG2x8Ch2YZUxahh+s1F2HZ+wAceUNLkvy6zKCPVRkU++ZWQrdxsUeQXmcg4uoQ==, tarball: https://r2.cnpmjs.org/@protobufjs/aspromise/-/aspromise-1.1.2.tgz}
     name: '@protobufjs/aspromise'
     version: 1.1.2
+    dev: false
 
   r2.cnpmjs.org/@protobufjs/base64@1.1.2:
     resolution: {integrity: sha512-AZkcAA5vnN/v4PDqKyMR5lx7hZttPDgClv83E//FMNhR2TMcLUhfRUBHCmSl0oi9zMgDDqRUJkSxO3wm85+XLg==, tarball: https://r2.cnpmjs.org/@protobufjs/base64/-/base64-1.1.2.tgz}
     name: '@protobufjs/base64'
     version: 1.1.2
+    dev: false
 
   r2.cnpmjs.org/@protobufjs/codegen@2.0.4:
     resolution: {integrity: sha512-YyFaikqM5sH0ziFZCN3xDC7zeGaB/d0IUb9CATugHWbd1FRFwWwt4ld4OYMPWu5a3Xe01mGAULCdqhMlPl29Jg==, tarball: https://r2.cnpmjs.org/@protobufjs/codegen/-/codegen-2.0.4.tgz}
     name: '@protobufjs/codegen'
     version: 2.0.4
+    dev: false
 
   r2.cnpmjs.org/@protobufjs/eventemitter@1.1.0:
     resolution: {integrity: sha512-j9ednRT81vYJ9OfVuXG6ERSTdEL1xVsNgqpkxMsbIabzSo3goCjDIveeGv5d03om39ML71RdmrGNjG5SReBP/Q==, tarball: https://r2.cnpmjs.org/@protobufjs/eventemitter/-/eventemitter-1.1.0.tgz}
     name: '@protobufjs/eventemitter'
     version: 1.1.0
+    dev: false
 
   r2.cnpmjs.org/@protobufjs/fetch@1.1.0:
     resolution: {integrity: sha512-lljVXpqXebpsijW71PZaCYeIcE5on1w5DlQy5WH6GLbFryLUrBD4932W/E2BSpfRJWseIL4v/KPgBFxDOIdKpQ==, tarball: https://r2.cnpmjs.org/@protobufjs/fetch/-/fetch-1.1.0.tgz}
@@ -15239,31 +15238,37 @@ packages:
     dependencies:
       '@protobufjs/aspromise': r2.cnpmjs.org/@protobufjs/aspromise@1.1.2
       '@protobufjs/inquire': r2.cnpmjs.org/@protobufjs/inquire@1.1.0
+    dev: false
 
   r2.cnpmjs.org/@protobufjs/float@1.0.2:
     resolution: {integrity: sha512-Ddb+kVXlXst9d+R9PfTIxh1EdNkgoRe5tOX6t01f1lYWOvJnSPDBlG241QLzcyPdoNTsblLUdujGSE4RzrTZGQ==, tarball: https://r2.cnpmjs.org/@protobufjs/float/-/float-1.0.2.tgz}
     name: '@protobufjs/float'
     version: 1.0.2
+    dev: false
 
   r2.cnpmjs.org/@protobufjs/inquire@1.1.0:
     resolution: {integrity: sha512-kdSefcPdruJiFMVSbn801t4vFK7KB/5gd2fYvrxhuJYg8ILrmn9SKSX2tZdV6V+ksulWqS7aXjBcRXl3wHoD9Q==, tarball: https://r2.cnpmjs.org/@protobufjs/inquire/-/inquire-1.1.0.tgz}
     name: '@protobufjs/inquire'
     version: 1.1.0
+    dev: false
 
   r2.cnpmjs.org/@protobufjs/path@1.1.2:
     resolution: {integrity: sha512-6JOcJ5Tm08dOHAbdR3GrvP+yUUfkjG5ePsHYczMFLq3ZmMkAD98cDgcT2iA1lJ9NVwFd4tH/iSSoe44YWkltEA==, tarball: https://r2.cnpmjs.org/@protobufjs/path/-/path-1.1.2.tgz}
     name: '@protobufjs/path'
     version: 1.1.2
+    dev: false
 
   r2.cnpmjs.org/@protobufjs/pool@1.1.0:
     resolution: {integrity: sha512-0kELaGSIDBKvcgS4zkjz1PeddatrjYcmMWOlAuAPwAeccUrPHdUqo/J6LiymHHEiJT5NrF1UVwxY14f+fy4WQw==, tarball: https://r2.cnpmjs.org/@protobufjs/pool/-/pool-1.1.0.tgz}
     name: '@protobufjs/pool'
     version: 1.1.0
+    dev: false
 
   r2.cnpmjs.org/@protobufjs/utf8@1.1.0:
     resolution: {integrity: sha512-Vvn3zZrhQZkkBE8LSuW3em98c0FwgO4nxzv6OdSxPKJIEKY2bGbHn+mhGIPerzI4twdxaP8/0+06HBpwf345Lw==, tarball: https://r2.cnpmjs.org/@protobufjs/utf8/-/utf8-1.1.0.tgz}
     name: '@protobufjs/utf8'
     version: 1.1.0
+    dev: false
 
   r2.cnpmjs.org/@types/argparse@1.0.38:
     resolution: {integrity: sha512-ebDJ9b0e702Yr7pWgB0jzm+CX4Srzz8RcXtLJDJB+BSccqMa36uyH/zUsSYao5+BD1ytv3k3rPYCq4mAE1hsXA==, registry: https://registry.npmjs.org/, tarball: https://r2.cnpmjs.org/@types/argparse/-/argparse-1.0.38.tgz}
@@ -15452,6 +15457,7 @@ packages:
     resolution: {integrity: sha512-TwuEnCnxbc3rAvhf/LbG7tJUDzhqXyFnv3dtzLOPgCG/hODL7WFnsbwktkD7yUV0RrreP/l1PALq/YSg6VvjlA==, tarball: https://r2.cnpmjs.org/lodash.camelcase/-/lodash.camelcase-4.3.0.tgz}
     name: lodash.camelcase
     version: 4.3.0
+    dev: false
 
   r2.cnpmjs.org/lodash.get@4.4.2:
     resolution: {integrity: sha512-z+Uw/vLuy6gQe8cfaFWD7p0wVv8fJl3mbzXh33RS+0oW2wvUqiRXiQ69gLWSLpgB5/6sU+r6BlQR0MBILadqTQ==, registry: https://registry.npmjs.org/, tarball: https://r2.cnpmjs.org/lodash.get/-/lodash.get-4.4.2.tgz}

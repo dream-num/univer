@@ -23,7 +23,7 @@ import { render as createRoot, unmount } from 'rc-util/lib/React/render';
 import type { ComponentType } from 'react';
 import React from 'react';
 import type { Observable } from 'rxjs';
-import { Subject, delay, filter, take } from 'rxjs';
+import { delay, filter, Subject, take } from 'rxjs';
 
 import { ILayoutService } from '../../services/layout/layout.service';
 import { App } from '../../views/App';
@@ -66,13 +66,12 @@ export class DesktopUIController extends Disposable implements IDesktopUIControl
     bootstrapWorkbench(options: IWorkbenchOptions): void {
         this.disposeWithMe(
             bootStrap(this._injector, options, (canvasElement, containerElement) => {
-
                 if (this._layoutService) {
                     this.disposeWithMe(this._layoutService.registerRootContainerElement(containerElement));
                     this.disposeWithMe(this._layoutService.registerCanvasElement(canvasElement as HTMLCanvasElement));
                 }
 
-                this._lifecycleService.lifecycle$.pipe(filter(lifecycle => lifecycle === LifecycleStages.Ready), delay(300), take(1)).subscribe(() => {
+                this._lifecycleService.lifecycle$.pipe(filter((lifecycle) => lifecycle === LifecycleStages.Ready), delay(300), take(1)).subscribe(() => {
                     const engine = this._renderManagerService.getFirst()?.engine;
                     engine?.setContainer(canvasElement);
                     this._lifecycleService.stage = LifecycleStages.Rendered;

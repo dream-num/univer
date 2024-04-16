@@ -1025,59 +1025,13 @@ export class PromptController extends Disposable {
                 continue;
             }
 
-            let primary = this._insertSelections.find((selection) => {
-                const { startRow, startColumn, endRow, endColumn } = selection.range;
-                if (
-                    startRow === range.startRow &&
-                    startColumn === range.startColumn &&
-                    endRow === range.endRow &&
-                    endColumn === range.endColumn
-                ) {
-                    return true;
-                }
-                if (
-                    startRow === range.startRow &&
-                    startColumn === range.startColumn &&
-                    range.startRow === range.endRow &&
-                    range.startColumn === range.endColumn
-                ) {
-                    return true;
-                }
-
-                return false;
-            })?.primary;
-
-            if (primary != null) {
-                const {
-                    isMerged,
-                    isMergedMainCell,
-                    startRow: mergeStartRow,
-                    endRow: mergeEndRow,
-                    startColumn: mergeStartColumn,
-                    endColumn: mergeEndColumn,
-                } = primary;
-
-                if (
-                    (isMerged || isMergedMainCell) &&
-                    mergeStartRow === range.startRow &&
-                    mergeStartColumn === range.startColumn &&
-                    range.startRow === range.endRow &&
-                    range.startColumn === range.endColumn
-                ) {
-                    range.endRow = mergeEndRow;
-                    range.endColumn = mergeEndColumn;
-                }
-
-                lastRange = {
-                    range,
-                    primary,
-                    style: getFormulaRefSelectionStyle(this._themeService, themeColor, refIndex.toString()),
-                };
-
+            const lastRangeCopy = this._getPrimary(range, themeColor, refIndex);
+            if (lastRangeCopy) {
+                lastRange = lastRangeCopy;
                 continue;
             }
 
-            primary = getPrimaryForRange(range, worksheet);
+            const primary = getPrimaryForRange(range, worksheet);
 
             if (
                 !Rectangle.equals(primary, range) &&
@@ -1106,6 +1060,60 @@ export class PromptController extends Disposable {
         }
 
         this._selectionManagerService.add(selectionWithStyle);
+    }
+
+    private _getPrimary(range: IRange, themeColor: string, refIndex: number) {
+        const primary = this._insertSelections.find((selection) => {
+            const { startRow, startColumn, endRow, endColumn } = selection.range;
+            if (
+                startRow === range.startRow &&
+                startColumn === range.startColumn &&
+                endRow === range.endRow &&
+                endColumn === range.endColumn
+            ) {
+                return true;
+            }
+            if (
+                startRow === range.startRow &&
+                startColumn === range.startColumn &&
+                range.startRow === range.endRow &&
+                range.startColumn === range.endColumn
+            ) {
+                return true;
+            }
+
+            return false;
+        })?.primary;
+
+        if (primary == null) {
+            return;
+        }
+
+        const {
+            isMerged,
+            isMergedMainCell,
+            startRow: mergeStartRow,
+            endRow: mergeEndRow,
+            startColumn: mergeStartColumn,
+            endColumn: mergeEndColumn,
+        } = primary;
+
+        if (
+            (isMerged || isMergedMainCell) &&
+            mergeStartRow === range.startRow &&
+            mergeStartColumn === range.startColumn &&
+            range.startRow === range.endRow &&
+            range.startColumn === range.endColumn
+        ) {
+            range.endRow = mergeEndRow;
+            range.endColumn = mergeEndColumn;
+        }
+
+        return {
+            range,
+            primary,
+            style: getFormulaRefSelectionStyle(this._themeService, themeColor, refIndex.toString()),
+        };
     }
 
     private _getSheetIdByName(unitId: string, sheetName: string) {
@@ -1582,35 +1590,24 @@ export class PromptController extends Disposable {
         }
 
         const { skeleton } = this._getCurrentUnitIdAndSheetId();
-
         this._formulaPromptService.enableLockedSelectionChange();
-
         const id = controlSelection.selectionStyle?.id;
-
         if (id == null || !Tools.isStringNumber(id)) {
             return;
         }
 
         let { startRow, endRow, startColumn, endColumn } = toRange;
-
         const primary = getCellInfoInMergeData(startRow, startColumn, skeleton?.mergeData);
 
         if (primary) {
-            const {
-                isMerged,
-                isMergedMainCell,
-                startRow: mergeStartRow,
-                endRow: mergeEndRow,
-                startColumn: mergeStartColumn,
-                endColumn: mergeEndColumn,
+            const { isMerged, isMergedMainCell, startRow: mergeStartRow,
+                    endRow: mergeEndRow, startColumn: mergeStartColumn,
+                    endColumn: mergeEndColumn,
             } = primary;
 
             if (
-                (isMerged || isMergedMainCell) &&
-                mergeStartRow === startRow &&
-                mergeStartColumn === startColumn &&
-                mergeEndRow === endRow &&
-                mergeEndColumn === endColumn
+                (isMerged || isMergedMainCell) && mergeStartRow === startRow && mergeStartColumn === startColumn &&
+                mergeEndRow === endRow && mergeEndColumn === endColumn
             ) {
                 startRow = mergeStartRow;
                 startColumn = mergeStartColumn;
@@ -1647,9 +1644,7 @@ export class PromptController extends Disposable {
         });
 
         this._formulaPromptService.updateSequenceRef(nodeIndex, refString);
-
         const sequenceNodes = this._formulaPromptService.getSequenceNodes();
-
         const node = sequenceNodes[nodeIndex];
 
         if (typeof node === 'string') {
@@ -1658,13 +1653,7 @@ export class PromptController extends Disposable {
 
         this._syncToEditor(sequenceNodes, node.endIndex + 1);
 
-        controlSelection.update(
-            toRange,
-            undefined,
-            undefined,
-            undefined,
-            this._selectionRenderService.convertCellRangeToInfo(primary)
-        );
+        controlSelection.update(toRange, undefined, undefined, undefined, this._selectionRenderService.convertCellRangeToInfo(primary));
     }
 
     private _refreshFormulaAndCellEditor(unitIds: string[]) {
@@ -1717,6 +1706,96 @@ export class PromptController extends Disposable {
         );
     }
 
+    private _pressEnter(params: ISelectEditorFormulaOperationParam) {
+        const { keycode, isSingleEditor = false } = params;
+
+        if (this._formulaPromptService.isSearching()) {
+            this._formulaPromptService.accept(true);
+            return;
+        }
+
+        if (isSingleEditor === true) {
+            return;
+        }
+
+        this._editorBridgeService.changeVisible({
+            visible: false,
+            eventType: DeviceInputEventType.Keyboard,
+            keycode,
+        });
+        this._commandService.executeCommand(MoveSelectionCommand.id, {
+            direction: Direction.DOWN,
+        });
+    }
+
+    private _pressTab(params: ISelectEditorFormulaOperationParam) {
+        const { keycode, isSingleEditor = false } = params;
+        if (this._formulaPromptService.isSearching()) {
+            this._formulaPromptService.accept(true);
+            return;
+        }
+
+        if (isSingleEditor === true) {
+            return;
+        }
+
+        this._editorBridgeService.changeVisible({
+            visible: false,
+            eventType: DeviceInputEventType.Keyboard,
+            keycode,
+        });
+        this._commandService.executeCommand(MoveSelectionCommand.id, {
+            direction: Direction.RIGHT,
+        });
+    }
+
+    private _pressEsc(params: ISelectEditorFormulaOperationParam) {
+        const { keycode } = params;
+        const focusEditor = this._editorService.getFocusEditor();
+        if (!focusEditor || focusEditor?.isSheetEditor() === true) {
+            this._editorBridgeService.changeVisible({
+                visible: false,
+                eventType: DeviceInputEventType.Keyboard,
+                keycode,
+            });
+            this._selectionManagerService.refreshSelection();
+        }
+    }
+
+    private _pressArrowKey(params: ISelectEditorFormulaOperationParam) {
+        const { keycode, metaKey } = params;
+        let direction = Direction.DOWN;
+        if (keycode === KeyCode.ARROW_DOWN) {
+            direction = Direction.DOWN;
+        } else if (keycode === KeyCode.ARROW_UP) {
+            direction = Direction.UP;
+        } else if (keycode === KeyCode.ARROW_LEFT) {
+            direction = Direction.LEFT;
+        } else if (keycode === KeyCode.ARROW_RIGHT) {
+            direction = Direction.RIGHT;
+        }
+
+        if (metaKey === MetaKeys.CTRL_COMMAND) {
+            this._commandService.executeCommand(MoveSelectionCommand.id, {
+                direction,
+                jumpOver: JumpOver.moveGap,
+            });
+        } else if (metaKey === MetaKeys.SHIFT) {
+            this._commandService.executeCommand(ExpandSelectionCommand.id, {
+                direction,
+            });
+        } else if (metaKey === META_KEY_CTRL_AND_SHIFT) {
+            this._commandService.executeCommand(ExpandSelectionCommand.id, {
+                direction,
+                jumpOver: JumpOver.moveGap,
+            });
+        } else {
+            this._commandService.executeCommand(MoveSelectionCommand.id, {
+                direction,
+            });
+        }
+    }
+
     private _commandExecutedListener() {
         // Listen to document edits to refresh the size of the editor.
         const updateCommandList = [SelectEditorFormulaOperation.id];
@@ -1727,59 +1806,19 @@ export class PromptController extends Disposable {
                     this._changeRefString();
                 } else if (updateCommandList.includes(command.id)) {
                     const params = command.params as ISelectEditorFormulaOperationParam;
-                    const { keycode, metaKey, isSingleEditor = false } = params;
+                    const { keycode, isSingleEditor = false } = params;
 
                     if (keycode === KeyCode.ENTER) {
-                        if (this._formulaPromptService.isSearching()) {
-                            this._formulaPromptService.accept(true);
-                            return;
-                        }
-
-                        if (isSingleEditor === true) {
-                            return;
-                        }
-
-                        this._editorBridgeService.changeVisible({
-                            visible: false,
-                            eventType: DeviceInputEventType.Keyboard,
-                            keycode,
-                        });
-                        this._commandService.executeCommand(MoveSelectionCommand.id, {
-                            direction: Direction.DOWN,
-                        });
+                        this._pressEnter(params);
                         return;
                     }
                     if (keycode === KeyCode.TAB) {
-                        if (this._formulaPromptService.isSearching()) {
-                            this._formulaPromptService.accept(true);
-                            return;
-                        }
-
-                        if (isSingleEditor === true) {
-                            return;
-                        }
-
-                        this._editorBridgeService.changeVisible({
-                            visible: false,
-                            eventType: DeviceInputEventType.Keyboard,
-                            keycode,
-                        });
-                        this._commandService.executeCommand(MoveSelectionCommand.id, {
-                            direction: Direction.RIGHT,
-                        });
+                        this._pressTab(params);
                         return;
                     }
 
                     if (keycode === KeyCode.ESC) {
-                        const focusEditor = this._editorService.getFocusEditor();
-                        if (focusEditor && focusEditor.isSheetEditor() === true) {
-                            this._editorBridgeService.changeVisible({
-                                visible: false,
-                                eventType: DeviceInputEventType.Keyboard,
-                                keycode,
-                            });
-                            this._selectionManagerService.refreshSelection();
-                        }
+                        this._pressEsc(params);
                         return;
                     }
 
@@ -1826,36 +1865,7 @@ export class PromptController extends Disposable {
                         }
                     }
 
-                    let direction = Direction.DOWN;
-                    if (keycode === KeyCode.ARROW_DOWN) {
-                        direction = Direction.DOWN;
-                    } else if (keycode === KeyCode.ARROW_UP) {
-                        direction = Direction.UP;
-                    } else if (keycode === KeyCode.ARROW_LEFT) {
-                        direction = Direction.LEFT;
-                    } else if (keycode === KeyCode.ARROW_RIGHT) {
-                        direction = Direction.RIGHT;
-                    }
-
-                    if (metaKey === MetaKeys.CTRL_COMMAND) {
-                        this._commandService.executeCommand(MoveSelectionCommand.id, {
-                            direction,
-                            jumpOver: JumpOver.moveGap,
-                        });
-                    } else if (metaKey === MetaKeys.SHIFT) {
-                        this._commandService.executeCommand(ExpandSelectionCommand.id, {
-                            direction,
-                        });
-                    } else if (metaKey === META_KEY_CTRL_AND_SHIFT) {
-                        this._commandService.executeCommand(ExpandSelectionCommand.id, {
-                            direction,
-                            jumpOver: JumpOver.moveGap,
-                        });
-                    } else {
-                        this._commandService.executeCommand(MoveSelectionCommand.id, {
-                            direction,
-                        });
-                    }
+                    this._pressArrowKey(params);
 
                     const selectionWithStyles = this._selectionManagerService.getSelections() || [];
 
@@ -1866,6 +1876,7 @@ export class PromptController extends Disposable {
             })
         );
     }
+
 
     private _moveInEditor(keycode: Nullable<KeyCode>) {
         if (keycode == null) {

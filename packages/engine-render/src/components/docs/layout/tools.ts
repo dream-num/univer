@@ -477,6 +477,7 @@ export function columnIterator(
     }
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function getPositionHorizon(
     positionH: ObjectPositionH,
     column: IDocumentSkeletonColumn,
@@ -571,6 +572,7 @@ export function getPositionHorizon(
     }
 }
 
+// eslint-disable-next-line complexity
 export function getPositionVertical(
     positionV: ObjectPositionV,
     page: IDocumentSkeletonPage,

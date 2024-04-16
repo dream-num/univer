@@ -112,9 +112,11 @@ function RectPopup(props: IRectPopupProps) {
     ]);
 
     useEffect(() => {
-        const parent = nodeRef.current?.parentElement;
+        const current = nodeRef.current;
+        const parent = current?.parentElement;
+
         if (parent) {
-            const handleClick = (e: MouseEvent) => {
+            const handleClickOther = (e: MouseEvent) => {
                 if (excludeOutside && (excludeOutside.indexOf(e.target as any) > -1)) {
                     return;
                 }
@@ -127,10 +129,11 @@ function RectPopup(props: IRectPopupProps) {
                 }
                 clickOtherFn(e);
             };
-            parent.addEventListener('click', handleClick);
+
+            window.addEventListener('click', handleClickOther);
 
             return () => {
-                parent.removeEventListener('click', handleClick);
+                window.removeEventListener('click', handleClickOther);
             };
         }
     }, [anchorRect, anchorRect.bottom, anchorRect.left, anchorRect.right, anchorRect.top, clickOtherFn, excludeOutside]);

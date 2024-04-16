@@ -23,7 +23,7 @@ import { render as createRoot, unmount } from 'rc-util/lib/React/render';
 import type { ComponentType } from 'react';
 import React from 'react';
 import type { Observable } from 'rxjs';
-import { Subject } from 'rxjs';
+import { delay, filter, Subject, take } from 'rxjs';
 
 import { ILayoutService } from '../../services/layout/layout.service';
 import { App } from '../../views/App';
@@ -38,6 +38,8 @@ export enum DesktopUIPart {
     LEFT_SIDEBAR = 'left-sidebar',
 }
 
+const STEADY_TIMEOUT = 3000;
+
 export interface IDesktopUIController extends IUIController {
     componentRegistered$: Observable<void>;
 
@@ -45,7 +47,6 @@ export interface IDesktopUIController extends IUIController {
     getComponents(part: DesktopUIPart): Set<() => ComponentType>;
 }
 
-const STEADY_TIMEOUT = 3000;
 
 export class DesktopUIController extends Disposable implements IDesktopUIController {
     private _componentsByPart: Map<DesktopUIPart, Set<() => ComponentType>> = new Map();
@@ -65,15 +66,17 @@ export class DesktopUIController extends Disposable implements IDesktopUIControl
     bootstrapWorkbench(options: IWorkbenchOptions): void {
         this.disposeWithMe(
             bootStrap(this._injector, options, (canvasElement, containerElement) => {
-                this._initializeEngine(canvasElement);
-                this._lifecycleService.stage = LifecycleStages.Rendered;
-
                 if (this._layoutService) {
                     this.disposeWithMe(this._layoutService.registerRootContainerElement(containerElement));
                     this.disposeWithMe(this._layoutService.registerCanvasElement(canvasElement as HTMLCanvasElement));
                 }
 
-                setTimeout(() => (this._lifecycleService.stage = LifecycleStages.Steady), STEADY_TIMEOUT);
+                this._lifecycleService.lifecycle$.pipe(filter((lifecycle) => lifecycle === LifecycleStages.Ready), delay(300), take(1)).subscribe(() => {
+                    const engine = this._renderManagerService.getFirst()?.engine;
+                    engine?.setContainer(canvasElement);
+                    this._lifecycleService.stage = LifecycleStages.Rendered;
+                    setTimeout(() => this._lifecycleService.stage = LifecycleStages.Rendered, STEADY_TIMEOUT);
+                });
             })
         );
     }
@@ -96,11 +99,6 @@ export class DesktopUIController extends Disposable implements IDesktopUIControl
 
     getComponents(part: DesktopUIPart): Set<() => ComponentType> {
         return new Set([...(this._componentsByPart.get(part) || new Set())]);
-    }
-
-    private _initializeEngine(element: HTMLElement) {
-        const engine = this._renderManagerService.getFirst()?.engine;
-        engine?.setContainer(element);
     }
 }
 

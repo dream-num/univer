@@ -686,7 +686,7 @@ export function VerticalAlignMenuItemFactory(accessor: IAccessor): IMenuSelector
         type: MenuItemType.SELECTOR,
         positions: [MenuPosition.TOOLBAR_START],
         selections: VERTICAL_ALIGN_CHILDREN,
-        value$: deriveStateFromActiveSheet$(univerInstanceService, VerticalAlign.TOP, ({ worksheet }) => new Observable<VerticalAlign>((subscriber) => {
+        value$: deriveStateFromActiveSheet$(univerInstanceService, VerticalAlign.BOTTOM, ({ worksheet }) => new Observable<VerticalAlign>((subscriber) => {
             const disposable = accessor.get(ICommandService).onCommandExecuted((c) => {
                 const id = c.id;
                 if (id !== SetVerticalTextAlignCommand.id && id !== SetSelectionsOperation.id && id !== SetWorksheetActiveOperation.id) {
@@ -700,7 +700,7 @@ export function VerticalAlignMenuItemFactory(accessor: IAccessor): IMenuSelector
                     va = range?.getVerticalAlignment();
                 }
 
-                subscriber.next(va ?? VerticalAlign.TOP);
+                subscriber.next(va ?? VerticalAlign.BOTTOM);
             });
 
             const primary = selectionManagerService.getLast()?.primary;
@@ -710,7 +710,7 @@ export function VerticalAlignMenuItemFactory(accessor: IAccessor): IMenuSelector
                 va = range?.getVerticalAlignment();
             }
 
-            subscriber.next(va ?? VerticalAlign.TOP);
+            subscriber.next(va ?? VerticalAlign.BOTTOM);
 
             return disposable.dispose;
         })),

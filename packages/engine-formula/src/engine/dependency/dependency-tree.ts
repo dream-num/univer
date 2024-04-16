@@ -147,13 +147,11 @@ export class FormulaDependencyTree extends Disposable {
             }
 
             const sheetRangeMap = dependencyRangeList.get(unitId)!;
-
             if (!sheetRangeMap.has(sheetId)) {
                 continue;
             }
 
             const dependencyRanges = sheetRangeMap.get(sheetId)!;
-
             const excludedCell = unitExcludedCell?.[unitId]?.[sheetId];
 
             let {
@@ -166,15 +164,12 @@ export class FormulaDependencyTree extends Disposable {
             if (Number.isNaN(rangeStartRow)) {
                 rangeStartRow = 0;
             }
-
             if (Number.isNaN(rangeStartColumn)) {
                 rangeStartColumn = 0;
             }
-
             if (Number.isNaN(rangeEndRow)) {
                 rangeEndRow = Number.POSITIVE_INFINITY;
             }
-
             if (Number.isNaN(rangeEndColumn)) {
                 rangeEndColumn = Number.POSITIVE_INFINITY;
             }
@@ -182,12 +177,7 @@ export class FormulaDependencyTree extends Disposable {
             for (const dependencyRange of dependencyRanges) {
                 const { startRow, startColumn, endRow, endColumn } = dependencyRange;
 
-                if (
-                    rangeStartRow > endRow ||
-                    rangeEndRow < startRow ||
-                    rangeStartColumn > endColumn ||
-                    rangeEndColumn < startColumn
-                ) {
+                if (rangeStartRow > endRow || rangeEndRow < startRow || rangeStartColumn > endColumn || rangeEndColumn < startColumn) {
                     continue;
                 } else {
                     let isInclude = true;
@@ -196,12 +186,7 @@ export class FormulaDependencyTree extends Disposable {
                      * This is because its impact was already considered during the first calculation.
                      */
                     excludedCell?.forValue((row, column) => {
-                        if (
-                            row >= rangeStartRow &&
-                            row <= rangeEndRow &&
-                            column >= rangeStartColumn &&
-                            column <= rangeEndColumn
-                        ) {
+                        if (row >= rangeStartRow && row <= rangeEndRow && column >= rangeStartColumn && column <= rangeEndColumn) {
                             isInclude = false;
                             return false;
                         }
@@ -213,7 +198,6 @@ export class FormulaDependencyTree extends Disposable {
                 }
             }
         }
-
         return false;
     }
 

@@ -19,7 +19,7 @@ import type { Observable } from 'rxjs';
 
 export type OneOrMany<T> = T | T[];
 
-export const enum MenuPosition {
+export enum MenuPosition {
     VOID = 'void',
     TOOLBAR_START = 'uiToolbar.start',
     TOOLBAR_INSERT = 'uiToolbar.insert',
@@ -30,7 +30,7 @@ export const enum MenuPosition {
     CONTEXT_MENU = 'contextMenu',
 }
 
-export const enum MenuGroup {
+export enum MenuGroup {
     TOOLBAR_HISTORY,
     TOOLBAR_FORMAT,
     TOOLBAR_LAYOUT,
@@ -45,7 +45,7 @@ export const enum MenuGroup {
     CONTEXT_MENU_OTHERS,
 }
 
-export const enum MenuItemType {
+export enum MenuItemType {
     /** Button style menu item. */
     BUTTON,
     /** Menu item with submenus. Submenus could be other IMenuItem or an ID of a registered component. */

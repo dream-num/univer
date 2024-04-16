@@ -19,17 +19,17 @@ import { Disposable, ICommandService, Tools } from '@univerjs/core';
 import type { IRemoveOtherFormulaMutationParams, ISetFormulaCalculationResultMutation, ISetOtherFormulaMutationParams } from '@univerjs/engine-formula';
 import { IActiveDirtyManagerService, RemoveOtherFormulaMutation, SetFormulaCalculationResultMutation, SetOtherFormulaMutation } from '@univerjs/engine-formula';
 import { bufferTime, filter, map, Subject } from 'rxjs';
-import type { IDataValidationFormulaMarkDirtyParams } from '@univerjs/data-validation';
-import { DataValidationFormulaMarkDirty } from '@univerjs/data-validation';
-import { FormulaResultStatus, type IDataValidationFormulaResult } from './formula-common';
+import type { IOtherFormulaMarkDirtyParams } from '../commands/mutations/formula.mutation';
+import { OtherFormulaMarkDirty } from '../commands/mutations/formula.mutation';
+import { FormulaResultStatus, type IOtherFormulaResult } from './formula-common';
 
 export class RegisterOtherFormulaService extends Disposable {
-    private _formulaCacheMap: Map<string, Map<string, Map<string, IDataValidationFormulaResult>>> = new Map();
+    private _formulaCacheMap: Map<string, Map<string, Map<string, IOtherFormulaResult>>> = new Map();
 
-    private _formulaChange$ = new Subject<{ unitId: string; subUnitId: string; ruleId: string; formulaText: string; formulaId: string }>();
+    private _formulaChange$ = new Subject<{ unitId: string; subUnitId: string; formulaText: string; formulaId: string }>();
     public formulaChange$ = this._formulaChange$.asObservable();
 
-    private _formulaResult$ = new Subject<Record<string, Record<string, IDataValidationFormulaResult[]>>>();
+    private _formulaResult$ = new Subject<Record<string, Record<string, IOtherFormulaResult[]>>>();
     public formulaResult$ = this._formulaResult$.asObservable();
 
     constructor(
@@ -64,10 +64,10 @@ export class RegisterOtherFormulaService extends Disposable {
     }
 
     private _initFormulaRegister() {
-        this._activeDirtyManagerService.register(DataValidationFormulaMarkDirty.id,
-            { commandId: DataValidationFormulaMarkDirty.id,
+        this._activeDirtyManagerService.register(OtherFormulaMarkDirty.id,
+            { commandId: OtherFormulaMarkDirty.id,
               getDirtyData(commandInfo) {
-                  const params = commandInfo.params as IDataValidationFormulaMarkDirtyParams;
+                  const params = commandInfo.params as IOtherFormulaMarkDirtyParams;
                   return {
                       dirtyUnitOtherFormulaMap: params,
                   };
@@ -91,8 +91,8 @@ export class RegisterOtherFormulaService extends Disposable {
                     const value = result[unitId][subUnitId];
                     const config: ISetOtherFormulaMutationParams = { unitId, subUnitId, formulaMap: value };
                     this._commandService.executeCommand(SetOtherFormulaMutation.id, config).then(() => {
-                        this._commandService.executeCommand(DataValidationFormulaMarkDirty.id,
-                            { [unitId]: { [subUnitId]: value } } as unknown as IDataValidationFormulaMarkDirtyParams);
+                        this._commandService.executeCommand(OtherFormulaMarkDirty.id,
+                            { [unitId]: { [subUnitId]: value } } as unknown as IOtherFormulaMarkDirtyParams);
                     });
                 }
             }
@@ -106,15 +106,15 @@ export class RegisterOtherFormulaService extends Disposable {
                 const params = commandInfo.params as ISetFormulaCalculationResultMutation;
 
                 const { unitOtherData } = params;
-                const results: Record<string, Record<string, IDataValidationFormulaResult[]>> = {};
+                const results: Record<string, Record<string, IOtherFormulaResult[]>> = {};
                 for (const unitId in unitOtherData) {
                     const unitData = unitOtherData[unitId];
-                    const unitResults: Record<string, IDataValidationFormulaResult[]> = {};
+                    const unitResults: Record<string, IOtherFormulaResult[]> = {};
                     results[unitId] = unitResults;
                     for (const subUnitId in unitData) {
                         const cacheMap = this._ensureCacheMap(unitId, subUnitId);
                         const subUnitData = unitData[subUnitId];
-                        const subUnitResults: IDataValidationFormulaResult[] = [];
+                        const subUnitResults: IOtherFormulaResult[] = [];
                         unitResults[subUnitId] = subUnitResults;
                         for (const formulaId in subUnitData) {
                             const current = subUnitData[formulaId];
@@ -136,20 +136,19 @@ export class RegisterOtherFormulaService extends Disposable {
         }));
     }
 
-    registerFormula(unitId: string, subUnitId: string, ruleId: string, formulaText: string) {
+    registerFormula(unitId: string, subUnitId: string, formulaText: string, extra?: Record<string, any>) {
         const formulaId = this._createFormulaId(unitId, subUnitId);
         const cacheMap = this._ensureCacheMap(unitId, subUnitId);
 
         cacheMap.set(formulaId, {
             result: undefined,
             status: FormulaResultStatus.WAIT,
-            ruleId,
             formulaId,
             callbacks: new Set(),
+            extra,
         });
         this._formulaChange$.next({
             unitId,
-            ruleId,
             subUnitId,
             formulaText,
             formulaId,
@@ -168,7 +167,7 @@ export class RegisterOtherFormulaService extends Disposable {
         formulaIdList.forEach((id) => cacheMap.delete(id));
     }
 
-    getFormulaValue(unitId: string, subUnitId: string, formulaId: string): Promise<Nullable<IDataValidationFormulaResult>> {
+    getFormulaValue(unitId: string, subUnitId: string, formulaId: string): Promise<Nullable<IOtherFormulaResult>> {
         const cacheMap = this._ensureCacheMap(unitId, subUnitId);
         const item = cacheMap.get(formulaId);
         if (!item) {
@@ -186,7 +185,7 @@ export class RegisterOtherFormulaService extends Disposable {
         });
     }
 
-    getFormulaValueSync(unitId: string, subUnitId: string, formulaId: string): Nullable<IDataValidationFormulaResult> {
+    getFormulaValueSync(unitId: string, subUnitId: string, formulaId: string): Nullable<IOtherFormulaResult> {
         const cacheMap = this._ensureCacheMap(unitId, subUnitId);
         return cacheMap.get(formulaId);
     }

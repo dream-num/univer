@@ -15,11 +15,11 @@
  */
 
 import type { IRange, ISheetDataValidationRule } from '@univerjs/core';
-import { DataValidationType, Disposable, isFormulaString, IUniverInstanceService, ObjectMatrix, Range } from '@univerjs/core';
+import { DataValidationType, Disposable, isFormulaString, ObjectMatrix, Range } from '@univerjs/core';
 import { isFormulaTransformable, LexerTreeBuilder, transformFormula } from '@univerjs/engine-formula';
 import { Inject } from '@wendellhu/redi';
 import { DataValidationModel } from '@univerjs/data-validation';
-import { RegisterOtherFormulaService } from './register-formula.service';
+import { RegisterOtherFormulaService } from '@univerjs/sheets-formula';
 import { DataValidationCacheService } from './dv-cache.service';
 
 interface IDataValidationFormula {
@@ -63,7 +63,6 @@ export class DataValidationCustomFormulaService extends Disposable {
     constructor(
         @Inject(RegisterOtherFormulaService) private _registerOtherFormulaService: RegisterOtherFormulaService,
         @Inject(LexerTreeBuilder) private _lexerTreeBuilder: LexerTreeBuilder,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(DataValidationModel) private readonly _dataValidationModel: DataValidationModel,
         @Inject(DataValidationCacheService) private readonly _dataValidationCacheService: DataValidationCacheService
     ) {
@@ -81,9 +80,9 @@ export class DataValidationCustomFormulaService extends Disposable {
                     const { formulaCellMap, ruleFormulaMap } = this._ensureMaps(unitId, subUnitId);
                     const manager = this._dataValidationModel.ensureManager(unitId, subUnitId);
                     results.forEach((result) => {
-                        const ruleInfo = ruleFormulaMap.get(result.ruleId);
+                        const ruleInfo = ruleFormulaMap.get(result.extra?.ruleId);
                         const cellInfo = formulaCellMap.get(result.formulaId);
-                        const rule = manager.getRuleById(result.ruleId);
+                        const rule = manager.getRuleById(result.extra?.ruleId);
 
                         if (rule && ruleInfo && !ruleInfo.isTransformable) {
                             this._dataValidationCacheService.markRangeDirty(unitId, subUnitId, rule.ranges);
@@ -125,14 +124,6 @@ export class DataValidationCustomFormulaService extends Disposable {
 
             formulaCellMap = new Map();
             formulaCellUnitMap.set(subUnitId, formulaCellMap);
-
-            // if (rules) {
-            //     rules.forEach((rule) => {
-            //         if (rule.type === DataValidationType.CUSTOM) {
-            //             this.addRule(unitId, subUnitId, rule);
-            //         }
-            //     });
-            // }
         }
         return {
             formulaMap,
@@ -142,7 +133,7 @@ export class DataValidationCustomFormulaService extends Disposable {
     };
 
     private _registerFormula(unitId: string, subUnitId: string, ruleId: string, formulaString: string) {
-        return this._registerOtherFormulaService.registerFormula(unitId, subUnitId, ruleId, formulaString);
+        return this._registerOtherFormulaService.registerFormula(unitId, subUnitId, formulaString, { ruleId });
     };
 
     deleteByRuleId(unitId: string, subUnitId: string, ruleId: string) {

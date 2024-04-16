@@ -23,7 +23,6 @@ import { AddDataValidationCommand, RemoveAllDataValidationCommand, RemoveDataVal
 import { AddDataValidationMutation, RemoveDataValidationMutation, UpdateDataValidationMutation } from './commands/mutations/data-validation.mutation';
 import { DataValidationResourceController } from './controllers/dv-resource.controller';
 import { DataValidationSheetController } from './controllers/dv-sheet.controller';
-import { DataValidationFormulaMarkDirty } from './commands/mutations/formula.mutation.ts';
 
 const PLUGIN_NAME = 'data-validation';
 
@@ -60,7 +59,6 @@ export class UniverDataValidationPlugin extends Plugin {
             RemoveDataValidationCommand,
 
             // mutation
-            DataValidationFormulaMarkDirty,
             AddDataValidationMutation,
             UpdateDataValidationMutation,
             RemoveDataValidationMutation,

@@ -67,19 +67,19 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/protocol": "^0.1.14",
         "@univerjs/sheets": "workspace:*",
         "@wendellhu/redi": "0.13.0",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
+        "@univerjs/protocol": "^0.1.17",
         "dayjs": "^1.11.10"
     },
     "devDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@univerjs/icons-svg": "^0.1.43",
+        "@univerjs/icons-svg": "^0.1.44",
         "@univerjs/shared": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@wendellhu/redi": "^0.13.0",

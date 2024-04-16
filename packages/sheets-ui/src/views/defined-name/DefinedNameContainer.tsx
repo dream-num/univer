@@ -76,7 +76,7 @@ export const DefinedNameContainer = () => {
         } else {
             const oldDefinedName = definedNamesService.getValueById(unitId, id);
             const newDefinedName = { id, unitId, name, formulaOrRefString, comment, localSheetId, hidden };
-            commandService.executeCommand(SetDefinedNameCommand.id, { unitId, oldDefinedName, newDefinedName });
+            commandService.executeCommand(SetDefinedNameCommand.id, { unitId, oldDefinedName: { ...oldDefinedName, unitId }, newDefinedName });
         }
         setEditState(false);
         setEditorKey(null);

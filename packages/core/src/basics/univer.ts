@@ -36,7 +36,7 @@ import { IPermissionService, PermissionService } from '../services/permission/pe
 import { UniverPermissionService } from '../services/permission/univer.permission.service';
 import { ResourceManagerService } from '../services/resource-manager/resource-manager.service';
 import { IResourceManagerService } from '../services/resource-manager/type';
-import { ResourceLoaderService } from '../services/resource-loader/resource-loader';
+import { ResourceLoaderService } from '../services/resource-loader/resource-loader.service';
 import { IResourceLoaderService } from '../services/resource-loader/type';
 import { ThemeService } from '../services/theme/theme.service';
 import { IUndoRedoService, LocalUndoRedoService } from '../services/undoredo/undoredo.service';

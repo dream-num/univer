@@ -20,7 +20,7 @@ import { createIdentifier, Optional } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
 import { Subject } from 'rxjs';
 
-import { fromDocumentEvent } from '../../common/lifecycle';
+import { fromGlobalEvent } from '../../common/lifecycle';
 import { ILayoutService } from '../layout/layout.service';
 import { IPlatformService } from '../platform/platform.service';
 import { KeyCodeToChar, MetaKeys } from './keycode';
@@ -89,8 +89,10 @@ export class DesktopShortcutService extends Disposable implements IShortcutServi
 
         // Register native keydown event handler to trigger shortcuts.
         this.disposeWithMe(
-            fromDocumentEvent('keydown', (e: KeyboardEvent) => {
+            fromGlobalEvent('keydown', (e: KeyboardEvent) => {
                 this._resolveKeyboardEvent(e);
+            }, {
+                capture: true,
             })
         );
     }

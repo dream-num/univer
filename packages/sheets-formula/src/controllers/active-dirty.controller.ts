@@ -34,6 +34,7 @@ import type {
     IRemoveColMutationParams,
     IRemoveRowsMutationParams,
     IRemoveSheetMutationParams,
+    ISetDefinedNameCommandParams,
     ISetRangeValuesMutationParams,
 } from '@univerjs/sheets';
 import {
@@ -44,6 +45,7 @@ import {
     RemoveColMutation,
     RemoveRowMutation,
     RemoveSheetMutation,
+    SetDefinedNameCommand,
     SetRangeValuesMutation,
     SetStyleCommand,
 } from '@univerjs/sheets';
@@ -100,6 +102,27 @@ export class ActiveDirtyController extends Disposable {
             },
         });
 
+        this._initialMove();
+
+        this._initialRowAndColumn();
+
+        this._initialSheet();
+
+        this._initialDefinedName();
+
+        /**
+         * Changing the name of a sheet triggers an adjustment of the formula references, but does not trigger formula calculation; therefore, this logic has been removed.
+         */
+        // this._activeDirtyManagerService.register(SetWorksheetNameMutation.id, {
+        //     commandId: SetWorksheetNameMutation.id,
+        //     getDirtyData: (command: ICommandInfo) => {
+        //         const params = command.params as ISetWorksheetNameMutationParams;
+        //         return { dirtyNameMap: this._getRemoveSheetMutation(params, params.name) };
+        //     },
+        // });
+    }
+
+    private _initialMove() {
         this._activeDirtyManagerService.register(MoveRangeMutation.id, {
             commandId: MoveRangeMutation.id,
             getDirtyData: (command: ICommandInfo) => {
@@ -129,7 +152,9 @@ export class ActiveDirtyController extends Disposable {
                 };
             },
         });
+    }
 
+    private _initialRowAndColumn() {
         this._activeDirtyManagerService.register(RemoveRowMutation.id, {
             commandId: RemoveRowMutation.id,
             getDirtyData: (command: ICommandInfo) => {
@@ -149,7 +174,10 @@ export class ActiveDirtyController extends Disposable {
                 };
             },
         });
+    }
 
+
+    private _initialSheet() {
         this._activeDirtyManagerService.register(RemoveSheetMutation.id, {
             commandId: RemoveSheetMutation.id,
             getDirtyData: (command: ICommandInfo) => {
@@ -165,7 +193,9 @@ export class ActiveDirtyController extends Disposable {
                 return { dirtyNameMap: this._getInsertSheetMutation(params) };
             },
         });
+    }
 
+    private _initialDefinedName() {
         this._activeDirtyManagerService.register(SetDefinedNameMutation.id, {
             commandId: SetDefinedNameMutation.id,
             getDirtyData: (command: ICommandInfo) => {
@@ -182,16 +212,16 @@ export class ActiveDirtyController extends Disposable {
             },
         });
 
-        /**
-         * Changing the name of a sheet triggers an adjustment of the formula references, but does not trigger formula calculation; therefore, this logic has been removed.
-         */
-        // this._activeDirtyManagerService.register(SetWorksheetNameMutation.id, {
-        //     commandId: SetWorksheetNameMutation.id,
-        //     getDirtyData: (command: ICommandInfo) => {
-        //         const params = command.params as ISetWorksheetNameMutationParams;
-        //         return { dirtyNameMap: this._getRemoveSheetMutation(params, params.name) };
-        //     },
-        // });
+        this._activeDirtyManagerService.register(SetDefinedNameCommand.id, {
+            commandId: SetDefinedNameCommand.id,
+            getDirtyData: (command: ICommandInfo) => {
+                const params = command.params as ISetDefinedNameCommandParams;
+                const { oldDefinedName, newDefinedName } = params;
+                return { dirtyDefinedNameMap: this._getDefinedNameMutation({ ...newDefinedName, name: oldDefinedName.name }) };
+
+                // return { dirtyDefinedNameMap: this._getDefinedNameMutation(params) };
+            },
+        });
     }
 
     private _getDefinedNameMutation(definedName: ISetDefinedNameMutationParam) {

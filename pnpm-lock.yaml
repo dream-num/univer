@@ -356,6 +356,9 @@ importers:
 
   packages/data-validation:
     dependencies:
+      '@univerjs/protocol':
+        specifier: ^0.1.17
+        version: 0.1.17(@grpc/grpc-js@1.10.4)(rxjs@7.8.1)
       dayjs:
         specifier: ^1.11.10
         version: 1.11.10
@@ -645,10 +648,6 @@ importers:
         version: 1.4.0(@types/node@20.12.7)(jsdom@24.0.0)
 
   packages/facade:
-    dependencies:
-      '@univerjs/sheets-conditional-formatting':
-        specifier: workspace:*
-        version: link:../sheets-conditional-formatting
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -671,6 +670,9 @@ importers:
       '@univerjs/sheets':
         specifier: workspace:*
         version: link:../sheets
+      '@univerjs/sheets-conditional-formatting':
+        specifier: workspace:*
+        version: link:../sheets-conditional-formatting
       '@univerjs/sheets-formula':
         specifier: workspace:*
         version: link:../sheets-formula
@@ -839,8 +841,8 @@ importers:
   packages/sheets-conditional-formatting:
     dependencies:
       '@univerjs/protocol':
-        specifier: ^0.1.14
-        version: 0.1.14(@grpc/grpc-js@1.10.4)(rxjs@7.8.1)
+        specifier: ^0.1.17
+        version: 0.1.17(@grpc/grpc-js@1.10.4)(rxjs@7.8.1)
       dayjs:
         specifier: ^1.11.10
         version: 1.11.10
@@ -855,8 +857,8 @@ importers:
         specifier: workspace:*
         version: link:../engine-render
       '@univerjs/icons-svg':
-        specifier: ^0.1.43
-        version: 0.1.43
+        specifier: ^0.1.44
+        version: 0.1.44
       '@univerjs/shared':
         specifier: workspace:*
         version: link:../../common/shared
@@ -5896,6 +5898,10 @@ packages:
     resolution: {integrity: sha512-QIHvXOczbNq26Cisio8vpkQuaK8zKVwDO3diCSw17PYA2ZDn6d2umwbfP/Ptwt6aYW4kCNlJGAX2wSTUrL1MvA==}
     dev: true
 
+  /@univerjs/icons-svg@0.1.44:
+    resolution: {integrity: sha512-2n/WnFGcRYxkiFa85te2hs57VLM+8WZ4aZvdJlXB+2AT61KuA0crt5uDUUNv9BXYVi3jtLxh3fF/pJb4DJyK6Q==}
+    dev: true
+
   /@univerjs/icons@0.1.44(react-dom@18.2.0)(react@18.2.0):
     resolution: {integrity: sha512-emPPhk9aNGIl/wF/z+9KLAq5EG/zmUoSwj2UaHHssnM/mv96Ieob4MpkhTfrVtvtiAUI2zZpUXrbsRX3PShrXg==}
     peerDependencies:
@@ -5905,16 +5911,6 @@ packages:
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
     dev: false
-
-  /@univerjs/protocol@0.1.14(@grpc/grpc-js@1.10.4)(rxjs@7.8.1):
-    resolution: {integrity: sha512-f4BmBCDJ3WKVj5MIiB8S0PLnzVu0xHUpC8g4YCT4Ac2P/29UV0KfRPj2CqYQJOwsym6jLJTSHIvr9BhRGEgIWQ==}
-    engines: {node: '>=16.0.0', npm: '>=8.0.0'}
-    peerDependencies:
-      '@grpc/grpc-js': ^1.9.14
-      rxjs: '>=7.0.0'
-    dependencies:
-      '@grpc/grpc-js': 1.10.4
-      rxjs: 7.8.1
 
   /@univerjs/protocol@0.1.17(@grpc/grpc-js@1.10.4)(rxjs@7.8.1):
     resolution: {integrity: sha512-V7THIzlOroiTPwXPS57q1IfOLK9Be+oH6mSRH5XAsYEywNqRVwUlMIe1TTu4GWKhJpfjTMwihkcDeVZfA1+C4A==}

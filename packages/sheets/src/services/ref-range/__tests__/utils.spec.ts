@@ -43,7 +43,6 @@ import type { IRemoveSheetMutationParams } from '../../../basics';
 import type { IMoveRowsMutationParams } from '../../../commands/mutations/move-rows-cols.mutation';
 import { MoveRowsMutation } from '../../../commands/mutations/move-rows-cols.mutation';
 
-
 const countRange = ([a, b, c, d]: readonly [number, number, number, number]) => (a * 1000 + b * 100 + c * 10 + d);
 
 const formatRanges = (ranges: IRange[]) => ranges.map((range) => [range.startRow, range.endRow, range.startColumn, range.endColumn] as const).sort((prev, aft) => countRange(prev) - countRange(aft));

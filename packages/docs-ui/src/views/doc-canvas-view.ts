@@ -15,12 +15,12 @@
  */
 
 import type { DocumentDataModel, EventState, Nullable } from '@univerjs/core';
-import {
-    IConfigService,
+import { IConfigService,
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
     RxDisposable,
+    UniverInstanceType,
 } from '@univerjs/core';
 import { DOCS_COMPONENT_DEFAULT_Z_INDEX, DOCS_COMPONENT_HEADER_LAYER_INDEX, DOCS_COMPONENT_MAIN_LAYER_INDEX, DOCS_VIEW_KEY, VIEWPORT_KEY } from '@univerjs/docs';
 import type { IRender, IWheelEvent, RenderManagerService, Scene } from '@univerjs/engine-render';
@@ -53,11 +53,11 @@ export class DocCanvasView extends RxDisposable {
             this._create(unitId);
         });
 
-        this._univerInstanceService.currentDoc$.pipe(takeUntil(this.dispose$)).subscribe((documentModel) => {
+        this._univerInstanceService.getCurrentTypeOfUnit$(UniverInstanceType.DOC).pipe(takeUntil(this.dispose$)).subscribe((documentModel) => {
             this._create(documentModel?.getUnitId());
         });
 
-        this._univerInstanceService.getAllUniverDocsInstance().forEach((documentModel) => {
+        this._univerInstanceService.getAllUnitsForType<DocumentDataModel>(UniverInstanceType.DOC).forEach((documentModel) => {
             this._create(documentModel.getUnitId());
         });
     }

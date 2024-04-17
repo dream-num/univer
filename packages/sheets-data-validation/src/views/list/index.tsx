@@ -17,8 +17,8 @@
 import React, { memo, useEffect, useState } from 'react';
 import { Injector } from '@wendellhu/redi';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import type { ISheetDataValidationRule } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, LocaleService } from '@univerjs/core';
+import type { ISheetDataValidationRule, Workbook } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { createDefaultNewRule, DataValidationModel, RemoveAllDataValidationCommand } from '@univerjs/data-validation';
 import { Button } from '@univerjs/design';
 import { useObservable } from '@univerjs/ui';
@@ -34,7 +34,7 @@ export const DataValidationList = memo(() => {
     const commandService = useDependency(ICommandService);
     const injector = useDependency(Injector);
     const dataValidationPanelService = useDependency(DataValidationPanelService);
-    const workbook = useObservable(univerInstanceService.currentSheet$, univerInstanceService.getCurrentUniverSheetInstance()) ?? univerInstanceService.getCurrentUniverSheetInstance()!;
+    const workbook = useObservable(univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.SHEET), univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)) ?? univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
     const localeService = useDependency(LocaleService);
     const [rules, setRules] = useState<ISheetDataValidationRule[]>([]);
     const worksheet = useObservable(workbook.activeSheet$, workbook.getActiveSheet()) ?? workbook.getActiveSheet();

@@ -15,7 +15,7 @@
  */
 
 import type { DocumentDataModel, Nullable } from '@univerjs/core';
-import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, IUniverInstanceService, RxDisposable } from '@univerjs/core';
+import { DOCS_NORMAL_EDITOR_UNIT_ID_KEY, IUniverInstanceService, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { DocumentViewModel } from '@univerjs/engine-render';
 import { BehaviorSubject, takeUntil } from 'rxjs';
 
@@ -48,15 +48,17 @@ export class DocViewModelManagerService extends RxDisposable {
     }
 
     private _init() {
-        this._univerInstanceService.currentDoc$.pipe(takeUntil(this.dispose$)).subscribe((documentModel) => {
+        this._univerInstanceService
+            .getCurrentTypeOfUnit$<DocumentDataModel>(UniverInstanceType.DOC)
+            .pipe(takeUntil(this.dispose$)).subscribe((documentModel) => {
+                this._create(documentModel);
+            });
+
+        this._univerInstanceService.getAllUnitsForType<DocumentDataModel>(UniverInstanceType.DOC).forEach((documentModel) => {
             this._create(documentModel);
         });
 
-        this._univerInstanceService.getAllUniverDocsInstance().forEach((documentModel) => {
-            this._create(documentModel);
-        });
-
-        this._univerInstanceService.docDisposed$.pipe(takeUntil(this.dispose$)).subscribe((documentModel) => {
+        this._univerInstanceService.getTypeOfUnitDisposed$(UniverInstanceType.DOC).pipe(takeUntil(this.dispose$)).subscribe((documentModel) => {
             this._docViewModelMap.delete(documentModel.getUnitId());
         });
     }

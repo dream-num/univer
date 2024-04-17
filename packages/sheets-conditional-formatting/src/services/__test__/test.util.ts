@@ -95,8 +95,8 @@ export const createTestBed = (dependencies?: Dependency[]) => {
     });
     const unitId = workbookJson.id;
     const subUnitId = workbookJson.sheets.sheet1.id!;
-    univerInstanceService.focusUniverInstance('test');
-    univerInstanceService.setCurrentUniverSheetInstance(subUnitId);
+    univerInstanceService.focusUnit('test');
+    univerInstanceService.setCurrentUnitForType(subUnitId);
     const getConditionalFormattingRuleModel = () => injector.get(ConditionalFormattingRuleModel);
     const getConditionalFormattingViewModel = () => injector.get(ConditionalFormattingViewModel);
     const getConditionalFormattingService = () => injector.get(ConditionalFormattingService);

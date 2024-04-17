@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IFreeze, IRange, IStyleSheet, IWorksheetData, Nullable, Observer } from '@univerjs/core';
+import type { ICommandInfo, IFreeze, IRange, IStyleSheet, IWorksheetData, Nullable, Observer, Workbook } from '@univerjs/core';
 import {
     ColorKit,
     Disposable,
@@ -25,6 +25,7 @@ import {
     RANGE_TYPE,
     ThemeService,
     toDisposable,
+    UniverInstanceType,
 } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, IScrollObserverParam, Viewport } from '@univerjs/engine-render';
 import { CURSOR_TYPE, IRenderManagerService, Rect, TRANSFORM_CHANGE_OBSERVABLE_TYPE, Vector2 } from '@univerjs/engine-render';
@@ -586,7 +587,7 @@ export class FreezeController extends Disposable {
                 return;
             }
 
-            const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
+            const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
             const worksheet = workbook.getActiveSheet();
             const oldFreeze = worksheet.getConfig()?.freeze;
             let xSplit = oldFreeze?.xSplit || 0;
@@ -1074,7 +1075,7 @@ export class FreezeController extends Disposable {
     }
 
     private _refreshCurrent() {
-        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
+        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
         const worksheet = workbook.getActiveSheet();
 
         const freeze = worksheet.getConfig().freeze;
@@ -1125,7 +1126,7 @@ export class FreezeController extends Disposable {
                     }
 
                     const createFreezeMutationAndRefresh = (newFreeze: IFreeze) => {
-                        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
+                        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
                         const unitId = workbook.getUnitId();
                         const worksheet = workbook.getActiveSheet();
                         const subUnitId = worksheet.getSheetId();
@@ -1353,7 +1354,7 @@ export class FreezeController extends Disposable {
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (updateCommandList.includes(command.id)) {
                     const lastFreeze = this._lastFreeze;
-                    const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
+                    const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
                     const worksheet = workbook.getActiveSheet();
 
                     const params = command.params as ISetFrozenMutationParams;

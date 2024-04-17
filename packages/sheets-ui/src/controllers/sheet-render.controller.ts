@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo } from '@univerjs/core';
+import type { ICommandInfo, Workbook } from '@univerjs/core';
 import {
     CommandType,
     ICommandService,
@@ -23,6 +23,7 @@ import {
     LifecycleStages,
     OnLifecycle,
     RxDisposable,
+    UniverInstanceType,
 } from '@univerjs/core';
 import type { Rect, SpreadsheetColumnHeader, SpreadsheetRowHeader } from '@univerjs/engine-render';
 import { IRenderManagerService, RENDER_RAW_FORMULA_KEY, Spreadsheet } from '@univerjs/engine-render';
@@ -98,7 +99,7 @@ export class SheetRenderController extends RxDisposable {
     }
 
     private _initSheetDisposeListener(): void {
-        this._univerInstanceService.sheetDisposed$
+        this._univerInstanceService.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.SHEET)
             .pipe(takeUntil(this.dispose$))
             .subscribe((workbook) => {
                 const unitId = workbook.getUnitId();
@@ -110,7 +111,7 @@ export class SheetRenderController extends RxDisposable {
     private _initCommandListener(): void {
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
-                const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
+                const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET);
                 if (!workbook) return;
 
                 const unitId = workbook.getUnitId();

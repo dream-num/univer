@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { IUniverInstanceService, LocaleService, Plugin, PluginType } from '@univerjs/core';
+import type { SlideDataModel } from '@univerjs/core';
+import { IUniverInstanceService, LocaleService, Plugin, PluginType, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -50,8 +51,8 @@ export class UniverSlidesUIPlugin extends Plugin {
     private _markSlideAsFocused() {
         const currentService = this._univerInstanceService;
         try {
-            const slide = currentService.getCurrentUniverSlideInstance()!;
-            currentService.focusUniverInstance(slide.getUnitId());
+            const slide = currentService.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.SLIDE)!;
+            currentService.focusUnit(slide.getUnitId());
         } catch (e) {
         }
     }

@@ -23,6 +23,7 @@ import {
     RedoCommand,
     toDisposable,
     UndoCommand,
+    UniverInstanceType,
 } from '@univerjs/core';
 import type {
     ISheetCommandSharedParams,
@@ -121,12 +122,12 @@ export class FWorkbook {
     // #region editing
 
     undo(): Promise<boolean> {
-        this._univerInstanceService.focusUniverInstance(this.id);
+        this._univerInstanceService.focusUnit(this.id);
         return this._commandService.executeCommand(UndoCommand.id);
     }
 
     redo(): Promise<boolean> {
-        this._univerInstanceService.focusUniverInstance(this.id);
+        this._univerInstanceService.focusUnit(this.id);
         return this._commandService.executeCommand(RedoCommand.id);
     }
 
@@ -167,7 +168,7 @@ export class FWorkbook {
     onSelectionChange(callback: (selections: IRange[]) => void): IDisposable {
         return toDisposable(
             this._selectionManagerService.selectionMoveEnd$.subscribe((selections) => {
-                if (this._univerInstanceService.getCurrentUniverSheetInstance()!.getUnitId() !== this.id) {
+                if (this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!.getUnitId() !== this.id) {
                     return;
                 }
 

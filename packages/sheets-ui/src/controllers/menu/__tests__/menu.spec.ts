@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import type { Univer } from '@univerjs/core';
+import type { Univer, Workbook } from '@univerjs/core';
 import {
     DisposableCollection,
     ICommandService,
     IUniverInstanceService,
     RANGE_TYPE,
     toDisposable,
+    UniverInstanceType,
     UniverPermissionService,
 } from '@univerjs/core';
 import {
@@ -69,7 +70,7 @@ describe('Test menu items', () => {
         const sheetPermissionService = get(SheetPermissionService);
         const univerPermissionService = get(UniverPermissionService);
         const univerInstanceService = get(IUniverInstanceService);
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance()!;
+        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
         const worksheet = workbook.getActiveSheet();
         const menuItem = get(Injector).invoke(BoldMenuItemFactory);
         disposableCollection.add(toDisposable(menuItem.activated$!.subscribe((v: boolean) => (activated = v))));

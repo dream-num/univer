@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ColorKit, CommandType, Disposable, EDITOR_ACTIVATED, fromCallback, groupBy, ICommandService, IContextService, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, replaceInDocumentBody, rotate, ThemeService, Tools } from '@univerjs/core';
+import { ColorKit, CommandType, Disposable, EDITOR_ACTIVATED, fromCallback, groupBy, ICommandService, IContextService, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, replaceInDocumentBody, rotate, ThemeService, Tools, UniverInstanceType } from '@univerjs/core';
 import type { ICellData, IObjectMatrixPrimitiveType, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import { IRenderManagerService, RENDER_RAW_FORMULA_KEY } from '@univerjs/engine-render';
 import type { IFindComplete, IFindMatch, IFindMoveParams, IFindQuery, IFindReplaceProvider, IReplaceAllResult } from '@univerjs/find-replace';
@@ -450,7 +450,7 @@ export class SheetFindModel extends FindModel {
             return;
         }
 
-        const currentUnitId = this._univerInstanceService.getFocusedUniverInstance()?.getUnitId();
+        const currentUnitId = this._univerInstanceService.getFocusedUnit()?.getUnitId();
         if (currentUnitId !== this._workbook.getUnitId()) {
             return;
         }
@@ -896,7 +896,7 @@ class SheetsFindReplaceProvider extends Disposable implements IFindReplaceProvid
 
         // NOTE: If there are multi Workbook instances then we should create `SheetFindModel` for each of them.
         // But we don't need to implement that in the foreseeable future.
-        const currentWorkbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
+        const currentWorkbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
         if (currentWorkbook) {
             const sheetFind = this._injector.createInstance(SheetFindModel, currentWorkbook);
             this._findModelsByUnitId.set(currentWorkbook.getUnitId(), sheetFind);

@@ -15,7 +15,7 @@
  */
 
 import type { Nullable, Workbook, Worksheet } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, toDisposable } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, toDisposable, UniverInstanceType } from '@univerjs/core';
 import type { IRender, IWheelEvent, Scene } from '@univerjs/engine-render';
 import {
     IRenderManagerService,
@@ -71,9 +71,9 @@ export class SheetCanvasView extends RxDisposable {
     }
 
     private _init() {
-        this._univerInstanceService.currentSheet$.pipe(takeUntil(this.dispose$)).subscribe((workbook) => this._create(workbook));
-        this._univerInstanceService.sheetDisposed$.pipe(takeUntil(this.dispose$)).subscribe((workbook) => this._dispose(workbook));
-        this._univerInstanceService.getAllUniverSheetsInstance().forEach((workbook) => this._create(workbook));
+        this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.SHEET).pipe(takeUntil(this.dispose$)).subscribe((workbook) => this._create(workbook));
+        this._univerInstanceService.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.SHEET).pipe(takeUntil(this.dispose$)).subscribe((workbook) => this._dispose(workbook));
+        this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.SHEET).forEach((workbook) => this._create(workbook));
     }
 
     private _dispose(workbook: Workbook) {

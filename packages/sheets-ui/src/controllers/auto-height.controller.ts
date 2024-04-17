@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IRange } from '@univerjs/core';
-import { IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import type { IRange, Workbook } from '@univerjs/core';
+import { IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import type {
     ISetRangeValuesRangeMutationParams,
     ISetStyleCommandParams,
@@ -57,7 +57,7 @@ export class AutoHeightController {
         const { skeleton } = sheetSkeletonService.getCurrent()!;
         const rowsAutoHeightInfo = skeleton.calculateAutoHeightInRange(ranges);
 
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance()!;
+        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
         const unitId = workbook.getUnitId();
         const subUnitId = workbook.getActiveSheet().getSheetId();
 

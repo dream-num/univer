@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IRange } from '@univerjs/core';
-import { Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import type { IRange, Workbook } from '@univerjs/core';
+import { Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import type { IRemoveNumfmtMutationParams, IRemoveSheetCommandParams } from '@univerjs/sheets';
 import {
     factoryRemoveNumfmtUndoMutation,
@@ -73,5 +73,5 @@ export class NumfmtSheetController extends Disposable {
     }
 }
 
-const getUnitId = (u: IUniverInstanceService) => u.getCurrentUniverSheetInstance()!.getUnitId();
-const getSubUnitID = (u: IUniverInstanceService) => u.getCurrentUniverSheetInstance()!.getActiveSheet().getSheetId();
+const getUnitId = (u: IUniverInstanceService) => u.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!.getUnitId();
+const getSubUnitID = (u: IUniverInstanceService) => u.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!.getActiveSheet().getSheetId();

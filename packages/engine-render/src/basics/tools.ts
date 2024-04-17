@@ -24,7 +24,7 @@ import type {
     LocaleService,
     Nullable,
 } from '@univerjs/core';
-import { BaselineOffset, DEFAULT_STYLES, FontStyleType, Rectangle, Tools } from '@univerjs/core';
+import { BaselineOffset, ColorKit, DEFAULT_STYLES, FontStyleType, Rectangle, Tools } from '@univerjs/core';
 import * as cjk from 'cjk-regex';
 
 import { FontCache } from '../components/docs/layout/shaping-engine/font-cache';
@@ -832,4 +832,21 @@ export function clampRanges(range: IRange) {
         endRow: Math.max(0, range.endRow),
         endColumn: Math.max(0, range.endColumn),
     };
+}
+
+// Get system highlight color in rgb format.
+export function getSystemHighlightColor() {
+    const hiddenEle = document.createElement('div');
+    hiddenEle.style.width = '0';
+    hiddenEle.style.height = '0';
+    hiddenEle.style.backgroundColor = 'highlight';
+    document.body.append(hiddenEle);
+
+    const highlightColor = getComputedStyle(hiddenEle).backgroundColor;
+
+    hiddenEle.remove();
+
+    const colorParser = new ColorKit(highlightColor);
+
+    return colorParser.toRgb();
 }

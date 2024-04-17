@@ -233,6 +233,6 @@ export class FloatingObjectController extends Disposable {
             this._liquid.translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
         }
 
-        this._floatingObjectManagerService.BatchAddOrUpdate(Objects);
+        this._floatingObjectManagerService.batchAddOrUpdate(Objects);
     }
 }

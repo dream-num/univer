@@ -61,7 +61,7 @@ export interface IFloatingObjectManagerService {
 
     remove(searchItem: IFloatingObjectManagerSearchItemParam): void;
 
-    BatchAddOrUpdate(insertParam: IFloatingObjectManagerParam[]): void;
+    batchAddOrUpdate(insertParam: IFloatingObjectManagerParam[]): void;
 
     remove(searchItem: IFloatingObjectManagerSearchItemParam): void;
 
@@ -132,7 +132,7 @@ export class FloatingObjectManagerService implements IDisposable, IFloatingObjec
         this._andOrUpdate$.next(searchObjects);
     }
 
-    BatchAddOrUpdate(insertParams: IFloatingObjectManagerParam[]): void {
+    batchAddOrUpdate(insertParams: IFloatingObjectManagerParam[]): void {
         const searchObjects: IFloatingObjectManagerParam[] = [];
         insertParams.forEach((insertParam) => {
             searchObjects.push(...this._addByParam(insertParam));

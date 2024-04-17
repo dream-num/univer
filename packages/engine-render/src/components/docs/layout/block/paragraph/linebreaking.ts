@@ -109,7 +109,6 @@ function _getNextPageNumber(lastPage: IDocumentSkeletonPage) {
     return lastPage.pageNumber + 1;
 }
 
-// eslint-disable-next-line max-lines-per-function
 export function lineBreaking(
     shapedTextList: IShapedText[],
     curPage: IDocumentSkeletonPage,

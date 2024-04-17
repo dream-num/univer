@@ -14,27 +14,19 @@
  * limitations under the License.
  */
 
-import { LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
+import { LifecycleStages, OnLifecycle, RxDisposable, ThemeService } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { extractFormulaError } from './utils/utils';
 
-const INVALID_MARK = {
-    tr: {
-        size: 6,
-        color: '#fe4b4b',
-    },
-};
-
-/**
- * @todo RenderUnit
- */
 @OnLifecycle(LifecycleStages.Rendered, FormulaRenderController)
 export class FormulaRenderController extends RxDisposable {
     constructor(
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
-        @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService) {
+        @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
+        @Inject(ThemeService) private readonly _themeService: ThemeService
+    ) {
         super();
         this._init();
     }
@@ -44,12 +36,19 @@ export class FormulaRenderController extends RxDisposable {
     }
 
     private _initViewModelIntercept() {
+        const color = this._themeService.getCurrentTheme().errorColor;
+        const FORMULA_ERROR_MARK = {
+            tr: {
+                size: 6,
+                color,
+            },
+        };
+
         this.disposeWithMe(
             this._sheetInterceptorService.intercept(
                 INTERCEPTOR_POINT.CELL_CONTENT,
                 {
                     handler: (cell, pos, next) => {
-                        const { row, col, unitId, subUnitId } = pos;
                         const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
                         if (!skeleton) {
                             return next(cell);
@@ -65,7 +64,7 @@ export class FormulaRenderController extends RxDisposable {
                             ...cell,
                             markers: {
                                 ...cell?.markers,
-                                ...INVALID_MARK,
+                                ...FORMULA_ERROR_MARK,
                             },
                         });
                     },

@@ -102,14 +102,14 @@ function RectPopup(props: IRectPopupProps) {
             )
         );
     },
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        [
-            anchorRect.left,
-            anchorRect.top,
-            anchorRect.bottom,
-            anchorRect.right,
-            direction,
-        ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+        anchorRect.left,
+        anchorRect.top,
+        anchorRect.bottom,
+        anchorRect.right,
+        direction,
+    ]);
 
     useEffect(() => {
         const handleClickOther = (e: MouseEvent) => {
@@ -123,14 +123,13 @@ function RectPopup(props: IRectPopupProps) {
                 return;
             }
             clickOtherFn(e);
+        };
 
+        window.addEventListener('click', handleClickOther);
 
-            window.addEventListener('click', handleClickOther);
-
-            return () => {
-                window.removeEventListener('click', handleClickOther);
-            };
-        }
+        return () => {
+            window.removeEventListener('click', handleClickOther);
+        };
     }, [anchorRect, anchorRect.bottom, anchorRect.left, anchorRect.right, anchorRect.top, clickOtherFn, excludeOutside]);
 
     return (

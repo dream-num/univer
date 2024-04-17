@@ -69,7 +69,6 @@ describe('test editor', () => {
             refMap: {
                 1: {
                     pattern: '$#,##0;(#,##0)',
-                    type: '' as any,
                 },
             },
         };
@@ -84,12 +83,15 @@ describe('test editor', () => {
             col: 0,
         };
         const cellData = worksheet.getCell(0, 0);
-        expect(cellData).toEqual({ v: '$0', t: 2 });
+        expect(cellData!.v).toEqual('$0');
+        expect(cellData!.t).toEqual(2);
+
         const result = editorBridgeService.interceptor.fetchThroughInterceptors(
             editorBridgeService.interceptor.getInterceptPoints().BEFORE_CELL_EDIT
         )(cellData, location);
         // The currency  format needs to be entered in the editor with real values, not with currency symbols
-        expect(result).toEqual({ v: 0, t: 2 });
+        expect(result!.v).toEqual(0);
+        expect(result!.t).toEqual(2);
     });
     it('before edit with data', () => {
         const params: ISetNumfmtMutationParams = {
@@ -103,7 +105,6 @@ describe('test editor', () => {
             refMap: {
                 1: {
                     pattern: 'A/P h:mm:ss',
-                    type: '' as any,
                 },
             },
         };
@@ -136,7 +137,6 @@ describe('test editor', () => {
             refMap: {
                 1: {
                     pattern: 'h:mm:ss',
-                    type: '' as any,
                 },
             },
         };

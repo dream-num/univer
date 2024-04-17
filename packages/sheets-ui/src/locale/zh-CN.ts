@@ -393,6 +393,7 @@ const locale = {
     },
     info: {
         tooltip: '提示',
+        error: '错误',
         notChangeMerge: '不能对合并单元格做部分更改',
         detailUpdate: '新打开',
         detailSave: '已恢复本地缓存',
@@ -422,6 +423,7 @@ const locale = {
         // eslint-disable-next-line no-template-curly-in-string
         pageInfoFull: '共${total}条，${totalPage}页，已显示全部数据',
         problem: '出现了一个问题',
+        forceStringInfo: '以文本形式存储的数字',
     },
     clipboard: {
         paste: {

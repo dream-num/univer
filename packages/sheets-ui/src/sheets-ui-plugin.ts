@@ -68,6 +68,8 @@ import { CellAlertManagerService } from './services/cell-alert-manager.service';
 import { CellAlertController } from './controllers/cell-alert.controller';
 import { CellCustomRenderController } from './controllers/cell-custom-render.controller';
 import { SheetCanvasPopManagerService } from './services/canvas-pop-manager.service';
+import { ForceStringRenderController } from './controllers/force-string-render.controller';
+import { ForceStringAlertController } from './controllers/force-string-alert.controller';
 
 export class UniverSheetsUIPlugin extends Plugin {
     static override pluginName = 'SHEET_UI_PLUGIN_NAME';
@@ -144,6 +146,8 @@ export class UniverSheetsUIPlugin extends Plugin {
                 [HoverController],
                 [CellAlertController],
                 [CellCustomRenderController],
+                [ForceStringRenderController],
+                [ForceStringAlertController],
             ] as Dependency[]
         ).forEach((d) => injector.add(d));
     }

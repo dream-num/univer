@@ -191,7 +191,7 @@ function _divideOperator(
                 addGlyphToDivide(divide, sliceGlyphGroup, preOffsetLeft);
 
                 if (glyphGroup.length) {
-                    _lineOperator(
+                    _divideOperator(
                         glyphGroup,
                         pages,
                         sectionBreakConfig,
@@ -201,7 +201,7 @@ function _divideOperator(
                     );
                 }
             } else {
-                _lineOperator(
+                _divideOperator(
                     glyphGroup,
                     pages,
                     sectionBreakConfig,

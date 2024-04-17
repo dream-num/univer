@@ -65,7 +65,7 @@ export class Line extends docExtension {
 
         if (strikethrough) {
             // strikethrough position is the middle of bounding box ascent and descent.
-            let startY = strikeoutPosition - DELTA;
+            let startY = asc + bd - strikeoutPosition - DELTA;
 
             /**
              * --------- superscript strikethrough position -------
@@ -75,9 +75,9 @@ export class Line extends docExtension {
              * --------- subscript offset   -----------------------
              */
             if (baselineOffset === BaselineOffset.SUPERSCRIPT) {
-                startY = asc + bd - spo - strikeoutPosition;
+                startY -= spo;
             } else if (baselineOffset === BaselineOffset.SUBSCRIPT) {
-                startY = asc + bd + sbo - strikeoutPosition;
+                startY += sbo;
             }
 
             this._drawLine(ctx, span, strikethrough, startY, scale);

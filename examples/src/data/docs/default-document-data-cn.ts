@@ -15,7 +15,7 @@
  */
 
 import type { IDocumentData } from '@univerjs/core';
-import { BooleanNumber } from '@univerjs/core';
+import { BooleanNumber, ColumnSeparatorType, SectionType } from '@univerjs/core';
 import { ptToPixel } from '@univerjs/engine-render';
 
 export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
@@ -581,15 +581,15 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
         ],
         sectionBreaks: [
             {
-                startIndex: 3058,
-                // columnProperties: [
-                //     {
-                //         width: 250,
-                //         paddingEnd: 15,
-                //     },
-                // ],
-                // columnSeparatorType: ColumnSeparatorType.NONE,
-                // sectionType: SectionType.SECTION_TYPE_UNSPECIFIED,
+                startIndex: 3066,
+                columnProperties: [
+                    {
+                        width: ptToPixel(240),
+                        paddingEnd: ptToPixel(15),
+                    },
+                ],
+                columnSeparatorType: ColumnSeparatorType.NONE,
+                sectionType: SectionType.SECTION_TYPE_UNSPECIFIED,
                 // textDirection: textDirectionDocument,
                 // contentDirection: textDirection!,
             },

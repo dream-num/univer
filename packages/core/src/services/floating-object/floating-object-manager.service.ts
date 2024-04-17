@@ -19,7 +19,7 @@ import { createIdentifier } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
 import { Subject } from 'rxjs';
 
-import type { Nullable } from '../../common/type-utils';
+import type { Nullable } from '../../common/type-util';
 import type { ITransformState } from './floating-object-interfaces';
 
 export const DEFAULT_DOCUMENT_SUB_COMPONENT_ID = '__default_document_sub_component_id20231101__';

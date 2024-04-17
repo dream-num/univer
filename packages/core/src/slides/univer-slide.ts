@@ -16,15 +16,15 @@
 
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { DocumentDataModel } from '../docs/data-model/document-data-model';
 import { LifecycleInitializerService, LifecycleService } from '../services/lifecycle/lifecycle.service';
-import type { IDocumentData } from '../types/interfaces/i-document-data';
-import { PluginHolder } from './plugin-holder';
+import type { ISlideData } from '../types/interfaces/i-slide-data';
+import { PluginHolder } from '../common/plugin-holder';
+import { SlideDataModel } from './slide-model';
 
 /**
- * Externally provided UniverDoc root instance
+ * Externally provided UniverSlide root instance
  */
-export class UniverDoc extends PluginHolder {
+export class UniverSlide extends PluginHolder {
     constructor(
         @Inject(Injector) protected readonly _injector: Injector,
         @Inject(LifecycleService) protected readonly _lifecycleService: LifecycleService,
@@ -34,7 +34,8 @@ export class UniverDoc extends PluginHolder {
         super();
     }
 
-    createDoc(docData: Partial<IDocumentData>): DocumentDataModel {
-        return this._injector.createInstance(DocumentDataModel, docData);
+    createSlide(data: Partial<ISlideData>): SlideDataModel {
+        const slide = this._injector.createInstance(SlideDataModel, data);
+        return slide;
     }
 }

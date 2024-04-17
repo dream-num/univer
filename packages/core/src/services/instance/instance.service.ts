@@ -22,7 +22,7 @@ import { DocumentDataModel } from '../../docs/data-model/document-data-model';
 import type { Nullable } from '../../shared';
 import { Disposable } from '../../shared/lifecycle';
 import { Workbook } from '../../sheets/workbook';
-import { SlideDataModel } from '../../slides/domain/slide-model';
+import { SlideDataModel } from '../../slides/slide-model';
 import type { IDocumentData, ISlideData, IWorkbookData } from '../../types/interfaces';
 import { FOCUSING_DOC, FOCUSING_SHEET, FOCUSING_SLIDE } from '../context/context';
 import { IContextService } from '../context/context.service';

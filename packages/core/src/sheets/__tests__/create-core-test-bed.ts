@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Univer } from '../../basics/univer';
+import { Univer } from '../../univer';
 import { IUniverInstanceService } from '../../services/instance/instance.service';
 import { ILogService, LogLevel } from '../../services/log/log.service';
 import { LocaleType } from '../../types/enum/locale-type';

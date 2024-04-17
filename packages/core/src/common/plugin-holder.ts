@@ -16,10 +16,10 @@
 
 import type { Ctor, Injector } from '@wendellhu/redi';
 
-import type { Plugin, PluginCtor } from '../plugin/plugin';
 import { LifecycleStages } from '../services/lifecycle/lifecycle';
 import type { LifecycleInitializerService, LifecycleService } from '../services/lifecycle/lifecycle.service';
 import { Disposable, toDisposable } from '../shared/lifecycle';
+import type { Plugin, PluginCtor } from './plugin';
 
 export abstract class PluginHolder extends Disposable {
     protected abstract get _lifecycleService(): LifecycleService;

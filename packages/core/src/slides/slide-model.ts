@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { Tools } from '../../shared';
-import { DEFAULT_SLIDE } from '../../types/const';
-import type { ISlideData, ISlidePage } from '../../types/interfaces';
-import { PageType } from '../../types/interfaces';
+import { Tools } from '../shared';
+import { DEFAULT_SLIDE } from '../types/const';
+import type { ISlideData, ISlidePage } from '../types/interfaces';
+import { PageType } from '../types/interfaces';
 
 export class SlideDataModel {
     private _snapshot: ISlideData;

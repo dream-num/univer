@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '../common/type-utils';
+import type { Nullable } from '../common/type-util';
 import type { IObjectArrayPrimitiveType } from '../shared/object-matrix';
 import { getArrayLength } from '../shared/object-matrix';
 import { BooleanNumber } from '../types/enum';

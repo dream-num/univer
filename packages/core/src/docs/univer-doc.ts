@@ -14,18 +14,17 @@
  * limitations under the License.
  */
 
-import type { IDisposable } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { LifecycleInitializerService, LifecycleService } from '../services/lifecycle/lifecycle.service';
-import { Workbook } from '../sheets/workbook';
-import type { IWorkbookData } from '../types/interfaces/i-workbook-data';
-import { PluginHolder } from './plugin-holder';
+import type { IDocumentData } from '../types/interfaces/i-document-data';
+import { PluginHolder } from '../common/plugin-holder';
+import { DocumentDataModel } from './data-model/document-data-model';
 
 /**
- * Externally provided UniverSheet root instance
+ * Externally provided UniverDoc root instance
  */
-export class UniverSheet extends PluginHolder implements IDisposable {
+export class UniverDoc extends PluginHolder {
     constructor(
         @Inject(Injector) protected readonly _injector: Injector,
         @Inject(LifecycleService) protected readonly _lifecycleService: LifecycleService,
@@ -35,8 +34,7 @@ export class UniverSheet extends PluginHolder implements IDisposable {
         super();
     }
 
-    createSheet(workbookConfig: Partial<IWorkbookData>): Workbook {
-        const workbook = this._injector.createInstance(Workbook, workbookConfig);
-        return workbook;
+    createDoc(docData: Partial<IDocumentData>): DocumentDataModel {
+        return this._injector.createInstance(DocumentDataModel, docData);
     }
 }

@@ -16,38 +16,38 @@
 
 import { Injector } from '@wendellhu/redi';
 
-import type { DocumentDataModel } from '../docs/data-model/document-data-model';
-import type { Plugin, PluginCtor } from '../plugin/plugin';
-import { PluginRegistry, PluginStore, PluginType } from '../plugin/plugin';
-import { CommandService, ICommandService } from '../services/command/command.service';
-import { ConfigService, IConfigService } from '../services/config/config.service';
-import { ContextService, IContextService } from '../services/context/context.service';
-import { ErrorService } from '../services/error/error.service';
+import type { DocumentDataModel } from './docs/data-model/document-data-model';
+import type { Plugin, PluginCtor } from './common/plugin';
+import { PluginRegistry, PluginStore, PluginType } from './common/plugin';
+import { CommandService, ICommandService } from './services/command/command.service';
+import { ConfigService, IConfigService } from './services/config/config.service';
+import { ContextService, IContextService } from './services/context/context.service';
+import { ErrorService } from './services/error/error.service';
 import {
     FloatingObjectManagerService,
     IFloatingObjectManagerService,
-} from '../services/floating-object/floating-object-manager.service';
-import { IUniverInstanceService, UniverInstanceService } from '../services/instance/instance.service';
-import { LifecycleStages } from '../services/lifecycle/lifecycle';
-import { LifecycleInitializerService, LifecycleService } from '../services/lifecycle/lifecycle.service';
-import { LocaleService } from '../services/locale/locale.service';
-import { DesktopLogService, ILogService } from '../services/log/log.service';
-import { IPermissionService, PermissionService } from '../services/permission/permission.service';
-import { UniverPermissionService } from '../services/permission/univer.permission.service';
-import { ResourceManagerService } from '../services/resource-manager/resource-manager.service';
-import { IResourceManagerService } from '../services/resource-manager/type';
-import { ResourceLoaderService } from '../services/resource-loader/resource-loader.service';
-import { IResourceLoaderService } from '../services/resource-loader/type';
-import { ThemeService } from '../services/theme/theme.service';
-import { IUndoRedoService, LocalUndoRedoService } from '../services/undoredo/undoredo.service';
-import type { Workbook } from '../sheets/workbook';
-import type { SlideDataModel } from '../slides/domain/slide-model';
-import type { LocaleType } from '../types/enum/locale-type';
-import type { IDocumentData, ISlideData, IUniverData, IWorkbookData } from '../types/interfaces';
-import { PluginHolder } from './plugin-holder';
-import { UniverDoc } from './univer-doc';
-import { UniverSheet } from './univer-sheet';
-import { UniverSlide } from './univer-slide';
+} from './services/floating-object/floating-object-manager.service';
+import { IUniverInstanceService, UniverInstanceService } from './services/instance/instance.service';
+import { LifecycleStages } from './services/lifecycle/lifecycle';
+import { LifecycleInitializerService, LifecycleService } from './services/lifecycle/lifecycle.service';
+import { LocaleService } from './services/locale/locale.service';
+import { DesktopLogService, ILogService } from './services/log/log.service';
+import { IPermissionService, PermissionService } from './services/permission/permission.service';
+import { UniverPermissionService } from './services/permission/univer.permission.service';
+import { ResourceManagerService } from './services/resource-manager/resource-manager.service';
+import { IResourceManagerService } from './services/resource-manager/type';
+import { ResourceLoaderService } from './services/resource-loader/resource-loader.service';
+import { IResourceLoaderService } from './services/resource-loader/type';
+import { ThemeService } from './services/theme/theme.service';
+import { IUndoRedoService, LocalUndoRedoService } from './services/undoredo/undoredo.service';
+import type { Workbook } from './sheets/workbook';
+import type { SlideDataModel } from './slides/slide-model';
+import type { LocaleType } from './types/enum/locale-type';
+import type { IDocumentData, ISlideData, IUniverData, IWorkbookData } from './types/interfaces';
+import { PluginHolder } from './common/plugin-holder';
+import { UniverDoc } from './docs/univer-doc';
+import { UniverSheet } from './sheets/univer-sheet';
+import { UniverSlide } from './slides/univer-slide';
 
 const INIT_LAZY_PLUGINS_TIMEOUT = 200;
 

@@ -16,7 +16,7 @@
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import type { Univer } from '../../basics/univer';
+import type { Univer } from '../../univer';
 import type { IWorkbookData } from '../../types/interfaces/i-workbook-data';
 import { LocaleType } from '../../types/enum/locale-type';
 import { extractPureTextFromCell, type Worksheet } from '../worksheet';

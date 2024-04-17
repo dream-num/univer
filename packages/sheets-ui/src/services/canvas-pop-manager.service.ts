@@ -73,8 +73,8 @@ export class SheetCanvasPopManagerService extends Disposable {
         const bounding = engine.getCanvasElement().getBoundingClientRect();
 
         const position: IBoundRectNoAngle = {
-            left: ((cellInfo.startX - scrollXY.x) * scaleX),
-            right: (cellInfo.endX - scrollXY.x) * scaleX,
+            left: ((cellInfo.startX - scrollXY.x) * scaleX) + bounding.left,
+            right: (cellInfo.endX - scrollXY.x) * scaleX + bounding.left,
             top: ((cellInfo.startY - scrollXY.y) * scaleY) + bounding.top,
             bottom: ((cellInfo.endY - scrollXY.y) * scaleY) + bounding.top,
         };

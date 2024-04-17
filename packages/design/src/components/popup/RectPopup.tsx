@@ -79,7 +79,7 @@ const calcPopupPosition = (layout: IPopupLayoutInfo) => {
 function RectPopup(props: IRectPopupProps) {
     const { children, anchorRect, direction = 'vertical', onClickOutside, excludeOutside } = props;
     const nodeRef = useRef<HTMLElement>(null);
-    const clickOtherFn = useEvent(onClickOutside ?? (() => {}));
+    const clickOtherFn = useEvent(onClickOutside ?? (() => { }));
 
     const [position, setPosition] = useState<Partial<IAbsolutePosition>>({
         top: -9999,
@@ -103,32 +103,27 @@ function RectPopup(props: IRectPopupProps) {
         );
     },
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-        anchorRect.left,
-        anchorRect.top,
-        anchorRect.bottom,
-        anchorRect.right,
-        direction,
-    ]);
+        [
+            anchorRect.left,
+            anchorRect.top,
+            anchorRect.bottom,
+            anchorRect.right,
+            direction,
+        ]);
 
     useEffect(() => {
-        const current = nodeRef.current;
-        const parent = current?.parentElement;
+        const handleClickOther = (e: MouseEvent) => {
+            if (excludeOutside && (excludeOutside.indexOf(e.target as any) > -1)) {
+                return;
+            }
 
-        if (parent) {
-            const handleClickOther = (e: MouseEvent) => {
-                if (excludeOutside && (excludeOutside.indexOf(e.target as any) > -1)) {
-                    return;
-                }
-                const bounding = parent.getBoundingClientRect();
+            const x = e.clientX;
+            const y = e.clientY;
+            if (x <= anchorRect.right && x >= anchorRect.left && y <= anchorRect.bottom && y >= anchorRect.top) {
+                return;
+            }
+            clickOtherFn(e);
 
-                const x = e.clientX - bounding.left;
-                const y = e.clientY - bounding.top;
-                if (x <= anchorRect.right && x >= anchorRect.left && y <= anchorRect.bottom && y >= anchorRect.top) {
-                    return;
-                }
-                clickOtherFn(e);
-            };
 
             window.addEventListener('click', handleClickOther);
 
@@ -141,7 +136,7 @@ function RectPopup(props: IRectPopupProps) {
     return (
         <section
             ref={nodeRef}
-            className={styles.popupAbsolute}
+            className={styles.popup}
             style={position}
             onClick={(e) => {
                 e.stopPropagation();

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DEFAULT_DOCUMENT_SUB_COMPONENT_ID, LocaleService, Plugin, PluginType } from '@univerjs/core';
+import { DEFAULT_DOCUMENT_SUB_COMPONENT_ID, LocaleService, Plugin } from '@univerjs/core';
 import type { Dependency, Injector } from '@wendellhu/redi';
 import { Inject } from '@wendellhu/redi';
 

@@ -17,8 +17,8 @@
 
 import { CellValueType, isRealNum, LifecycleStages, OnLifecycle, RxDisposable, ThemeService } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
-import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
+import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
 /**
  * @todo RenderUnit

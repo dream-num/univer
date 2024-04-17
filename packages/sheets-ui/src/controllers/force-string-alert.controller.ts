@@ -15,8 +15,10 @@
  */
 
 import { CellValueType, Disposable, isRealNum, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
-import { CellAlertManagerService, CellAlertType, HoverManagerService } from '@univerjs/sheets-ui';
+
 import { Inject } from '@wendellhu/redi';
+import { HoverManagerService } from '../services/hover-manager.service';
+import { CellAlertManagerService, CellAlertType } from '../services/cell-alert-manager.service';
 
 const ALERT_KEY = 'SHEET_FORCE_STRING_ALERT';
 

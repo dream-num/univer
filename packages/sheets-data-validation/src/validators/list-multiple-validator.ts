@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { DataValidationType, IUniverInstanceService, Tools } from '@univerjs/core';
-import type { CellValue, DataValidationOperator, IDataValidationRule, IDataValidationRuleBase, Nullable } from '@univerjs/core';
+import { DataValidationType, IUniverInstanceService, Tools, UniverInstanceType } from '@univerjs/core';
+import type { CellValue, DataValidationOperator, IDataValidationRule, IDataValidationRuleBase, Nullable, Workbook } from '@univerjs/core';
 import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
 import { BaseDataValidator } from '@univerjs/data-validation';
 import { deserializeRangeWithSheet, isReferenceStringWithEffectiveColumn } from '@univerjs/engine-formula';
@@ -85,7 +85,7 @@ export class ListMultipleValidator extends BaseDataValidator {
     getList(rule: IDataValidationRule, propUnitId?: string, propSubUnitId?: string) {
         const { formula1 = '' } = rule;
         const univerInstanceService = this.injector.get(IUniverInstanceService);
-        const workbook = (propUnitId ? univerInstanceService.getUniverSheetInstance(propUnitId) : undefined) ?? univerInstanceService.getCurrentUniverSheetInstance();
+        const workbook = (propUnitId ? univerInstanceService.getUniverSheetInstance(propUnitId) : undefined) ?? univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET);
         if (!workbook) return [];
 
         const worksheet = (propSubUnitId ? workbook.getSheetBySheetId(propSubUnitId) : undefined) ?? workbook.getActiveSheet();

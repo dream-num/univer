@@ -80,7 +80,7 @@ export const createTestBed = (dependencies?: Dependency[]) => {
     const commandService = injector.get(ICommandService);
     commandService.registerCommand(RemoveNumfmtMutation);
     commandService.registerCommand(SetNumfmtMutation);
-    univerInstanceService.focusUniverInstance('test');
+    univerInstanceService.focusUnit('test');
     const unitId = workbookJson.id;
     const subUnitId = workbookJson.sheets.sheet1.id!;
 

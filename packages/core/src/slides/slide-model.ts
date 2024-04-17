@@ -14,17 +14,22 @@
  * limitations under the License.
  */
 
+import { UnitModel, UniverInstanceType } from '../common/unit';
 import { Tools } from '../shared';
 import { DEFAULT_SLIDE } from '../types/const';
 import type { ISlideData, ISlidePage } from '../types/interfaces';
 import { PageType } from '../types/interfaces';
 
-export class SlideDataModel {
+export class SlideDataModel extends UnitModel<ISlideData, UniverInstanceType.SLIDE> {
+    override type: UniverInstanceType.SLIDE = UniverInstanceType.SLIDE;
+
     private _snapshot: ISlideData;
 
     private _unitId: string;
 
     constructor(snapshot: Partial<ISlideData>) {
+        super();
+
         this._snapshot = { ...DEFAULT_SLIDE, ...snapshot };
         this._unitId = this._snapshot.id ?? Tools.generateRandomId(6);
     }

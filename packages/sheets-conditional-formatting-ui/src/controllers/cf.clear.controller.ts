@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IMutationInfo } from '@univerjs/core';
-import { Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle, Rectangle } from '@univerjs/core';
+import type { IMutationInfo, Workbook } from '@univerjs/core';
+import { Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle, Rectangle, UniverInstanceType } from '@univerjs/core';
 import { ClearSelectionAllCommand, ClearSelectionFormatCommand, RangeMergeUtil, SelectionManagerService, SheetInterceptorService } from '@univerjs/sheets';
 import { Inject, Injector } from '@wendellhu/redi';
 import { ConditionalFormattingRuleModel, DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory, SetConditionalRuleMutation, setConditionalRuleMutationUndoFactory } from '@univerjs/sheets-conditional-formatting';
@@ -46,7 +46,7 @@ export class ConditionalFormattingClearController extends Disposable {
                 if (!ranges) {
                     return defaultV;
                 }
-                const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
+                const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
                 const worksheet = workbook.getActiveSheet();
                 const allRules = this._conditionalFormattingRuleModel.getSubunitRules(workbook.getUnitId(), worksheet.getSheetId());
                 if (!allRules || !allRules.length) {

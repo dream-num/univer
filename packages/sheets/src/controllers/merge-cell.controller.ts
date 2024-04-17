@@ -25,6 +25,7 @@ import {
     OnLifecycle,
     Rectangle,
     Tools,
+    UniverInstanceType,
 } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -141,7 +142,7 @@ export class MergeCellController extends Disposable {
                     case ClearSelectionAllCommand.id:
                     case ClearSelectionFormatCommand.id: {
                         // TODO@Gggpound: get by unit id and subUnitId
-                        const workbook = self._univerInstanceService.getCurrentUniverSheetInstance()!;
+                        const workbook = self._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
                         const unitId = workbook.getUnitId();
                         const worksheet = workbook.getActiveSheet();
                         const subUnitId = worksheet.getSheetId();
@@ -275,7 +276,7 @@ export class MergeCellController extends Disposable {
             })
         );
 
-        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
+        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
         if (workbook) {
             const sheet = workbook.getActiveSheet();
             registerRefRange(workbook.getUnitId(), sheet.getSheetId());
@@ -1181,7 +1182,7 @@ function getWorkbook(univerInstanceService: IUniverInstanceService, unitId?: str
     if (unitId) {
         return univerInstanceService.getUniverSheetInstance(unitId);
     }
-    return univerInstanceService.getCurrentUniverSheetInstance()!;
+    return univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
 }
 
 function getWorksheet(workbook: Workbook, subUnitId?: string) {

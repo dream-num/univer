@@ -130,7 +130,7 @@ export class FormulaEditorController extends RxDisposable {
                 !this._contextService.getContextValue(EDITOR_ACTIVATED);
 
             if (isFocusButHidden) {
-                this._univerInstanceService.setCurrentUniverDocInstance(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
+                this._univerInstanceService.setCurrentUnitForType(DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY);
 
                 this._contextService.setContextValue(FOCUSING_FORMULA_EDITOR, true);
 

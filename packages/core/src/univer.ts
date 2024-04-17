@@ -16,7 +16,7 @@
 
 import { Injector } from '@wendellhu/redi';
 
-import type { DocumentDataModel } from './docs/data-model/document-data-model';
+import { DocumentDataModel } from './docs/data-model/document-data-model';
 import type { Plugin, PluginCtor } from './common/plugin';
 import { PluginRegistry, PluginStore, PluginType } from './common/plugin';
 import { CommandService, ICommandService } from './services/command/command.service';
@@ -40,8 +40,8 @@ import { ResourceLoaderService } from './services/resource-loader/resource-loade
 import { IResourceLoaderService } from './services/resource-loader/type';
 import { ThemeService } from './services/theme/theme.service';
 import { IUndoRedoService, LocalUndoRedoService } from './services/undoredo/undoredo.service';
-import type { Workbook } from './sheets/workbook';
-import type { SlideDataModel } from './slides/slide-model';
+import { Workbook } from './sheets/workbook';
+import { SlideDataModel } from './slides/slide-model';
 import type { LocaleType } from './types/enum/locale-type';
 import type { IDocumentData, ISlideData, IUniverData, IWorkbookData } from './types/interfaces';
 import { PluginHolder } from './common/plugin-holder';
@@ -103,17 +103,18 @@ export class Univer extends PluginHolder {
     /**
      * Create a univer sheet instance with internal dependency injection.
      */
-    createUniverSheet(config: Partial<IWorkbookData>): Workbook {
+    createUniverSheet(data: Partial<IWorkbookData>): Workbook {
         let workbook: Workbook;
         const addSheet = () => {
-            workbook = this._univerSheet!.createSheet(config);
-            this._univerInstanceService.addSheet(workbook);
+            workbook = this._injector.createInstance(Workbook, data);
+            this._univerInstanceService.addUnit(workbook);
         };
 
         if (!this._univerSheet) {
             this._tryProgressToStart();
 
             const univerSheet = (this._univerSheet = this._injector.createInstance(UniverSheet));
+            // eslint-disable-next-line ts/no-explicit-any
             const sheetPlugins: Array<[PluginCtor<any>, any]> = this._univerPluginRegistry
                 .getRegisterPlugins(PluginType.Sheet)
                 .map((p) => [p.plugin, p.options]);
@@ -133,8 +134,8 @@ export class Univer extends PluginHolder {
     createUniverDoc(config: Partial<IDocumentData>): DocumentDataModel {
         let doc: DocumentDataModel;
         const addDoc = () => {
-            doc = this._univerDoc!.createDoc(config);
-            this._univerInstanceService.addDoc(doc);
+            doc = this._injector.createInstance(DocumentDataModel, config);
+            this._univerInstanceService.addUnit(doc);
         };
 
         if (!this._univerDoc) {
@@ -157,11 +158,11 @@ export class Univer extends PluginHolder {
         return doc!;
     }
 
-    createUniverSlide(config: Partial<ISlideData>): SlideDataModel {
+    createUniverSlide(data: Partial<ISlideData>): SlideDataModel {
         let slide: SlideDataModel;
         const addSlide = () => {
-            slide = this._univerSlide!.createSlide(config);
-            this._univerInstanceService.addSlide(slide);
+            slide = this._injector.createInstance(SlideDataModel, data);
+            this._univerInstanceService.addUnit(slide);
         };
 
         if (!this._univerSlide) {
@@ -186,28 +187,14 @@ export class Univer extends PluginHolder {
 
     private _initDependencies(): Injector {
         return new Injector([
-            [
-                IUniverInstanceService,
-                {
-                    useFactory: (contextService: IContextService) =>
-                        new UniverInstanceService(
-                            {
-                                createUniverDoc: (data) => this.createUniverDoc(data),
-                                createUniverSheet: (data) => this.createUniverSheet(data),
-                                createUniverSlide: (data) => this.createUniverSlide(data),
-                            },
-                            contextService
-                        ),
-                    deps: [IContextService],
-                },
-            ],
             [ErrorService],
             [LocaleService],
             [ThemeService],
             [LifecycleService],
             [LifecycleInitializerService],
-            [IPermissionService, { useClass: PermissionService }],
             [UniverPermissionService],
+            [IUniverInstanceService, { useClass: UniverInstanceService }],
+            [IPermissionService, { useClass: PermissionService }],
             [ILogService, { useClass: DesktopLogService, lazy: true }],
             [ICommandService, { useClass: CommandService, lazy: true }],
             [IUndoRedoService, { useClass: LocalUndoRedoService, lazy: true }],

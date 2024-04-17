@@ -95,7 +95,7 @@ univer.createUniverSheet(DEFAULT_WORKBOOK_DATA_DEMO);
 
 // Uncomment the following lines to test if the document is disposed correctly without memory leaks.
 // setTimeout(() => {
-//     univer.__getInjector().get(IUniverInstanceService).disposeDocument(DEFAULT_WORKBOOK_DATA_DEMO.id);
+//     univer.__getInjector().get(IUniverInstanceService).disposeUnit(DEFAULT_WORKBOOK_DATA_DEMO.id);
 // }, 5000);
 
 // sheet condition formatting

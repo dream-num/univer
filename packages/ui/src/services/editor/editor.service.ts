@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type { DocumentDataModel, IDocumentBody, IDocumentData, IDocumentStyle, IPosition, Nullable } from '@univerjs/core';
-import { DEFAULT_EMPTY_DOCUMENT_VALUE, Disposable, EDITOR_ACTIVATED, FOCUSING_EDITOR_INPUT_FORMULA, FOCUSING_EDITOR_STANDALONE, FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE, HorizontalAlign, IContextService, IUniverInstanceService, toDisposable, VerticalAlign } from '@univerjs/core';
+import type { IDocumentBody, IDocumentData, IDocumentStyle, IPosition, Nullable, Workbook } from '@univerjs/core';
+import { DEFAULT_EMPTY_DOCUMENT_VALUE, Disposable, DocumentDataModel, EDITOR_ACTIVATED, FOCUSING_EDITOR_INPUT_FORMULA, FOCUSING_EDITOR_STANDALONE, FOCUSING_UNIVER_EDITOR_STANDALONE_SINGLE_MODE, HorizontalAlign, IContextService, IUniverInstanceService, toDisposable, UniverInstanceType, VerticalAlign } from '@univerjs/core';
 import type { IDisposable } from '@wendellhu/redi';
-import { createIdentifier, Inject } from '@wendellhu/redi';
+import { createIdentifier, Inject, Injector } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
 import { Subject } from 'rxjs';
 import type { IRender, ISuccinctTextRangeParam, Scene } from '@univerjs/engine-render';
@@ -353,6 +353,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
     private _spreadsheetFocusState: boolean = false;
 
     constructor(
+        @Inject(Injector) private readonly _injector: Injector,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder,
@@ -495,7 +496,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
             return;
         }
 
-        this._univerInstanceService.setCurrentUniverDocInstance(editorUnitId);
+        this._univerInstanceService.setCurrentUnitForType(editorUnitId);
 
         const valueCount = editor.getValue().length;
 
@@ -616,7 +617,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
     register(config: IEditorConfigParam, container: HTMLDivElement): IDisposable {
         const { initialSnapshot, editorUnitId, canvasStyle = {} } = config;
 
-        const documentDataModel = this._univerInstanceService.createDoc(initialSnapshot || this._getBlank(editorUnitId));
+        const documentDataModel = this._injector.createInstance(DocumentDataModel, initialSnapshot || this._getBlank(editorUnitId));
 
         let render = this._renderManagerService.getRenderById(editorUnitId);
 
@@ -657,16 +658,16 @@ export class EditorService extends Disposable implements IEditorService, IDispos
 
         this._editors.delete(editorUnitId);
 
-        this._univerInstanceService.disposeDocument(editorUnitId);
+        this._univerInstanceService.disposeUnit(editorUnitId);
 
         /**
          * Compatible with the editor in the sheet scenario,
          * it is necessary to refocus back to the current sheet when unloading.
          */
-        const sheets = this._univerInstanceService.getAllUniverSheetsInstance();
+        const sheets = this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.SHEET);
         if (sheets.length > 0) {
-            const current = this._univerInstanceService.getCurrentUniverSheetInstance()!;
-            this._univerInstanceService.focusUniverInstance(current.getUnitId());
+            const current = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+            this._univerInstanceService.focusUnit(current.getUnitId());
         }
     }
 

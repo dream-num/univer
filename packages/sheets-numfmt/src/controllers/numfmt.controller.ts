@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IRange } from '@univerjs/core';
+import type { IRange, Workbook } from '@univerjs/core';
 import {
     CellValueType,
     Disposable,
@@ -27,6 +27,7 @@ import {
     Range,
     ThemeService,
     toDisposable,
+    UniverInstanceType,
 } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { IRemoveNumfmtMutationParams, ISetNumfmtMutationParams } from '@univerjs/sheets';
@@ -107,7 +108,7 @@ export class NumfmtController extends Disposable implements INumfmtController {
         if (!range) {
             return false;
         }
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance()!;
+        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
         const sheet = workbook.getActiveSheet();
 
         const cellValue = sheet.getCellRaw(range.startRow, range.startColumn);
@@ -193,7 +194,7 @@ export class NumfmtController extends Disposable implements INumfmtController {
                     switch (command.id) {
                         case ClearSelectionAllCommand.id:
                         case ClearSelectionFormatCommand.id: {
-                            const workbook = self._univerInstanceService.getCurrentUniverSheetInstance()!;
+                            const workbook = self._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
                             const unitId = workbook.getUnitId();
                             const subUnitId = workbook.getActiveSheet().getSheetId();
                             const selections = self._selectionManagerService.getSelectionRanges();
@@ -281,7 +282,7 @@ export class NumfmtController extends Disposable implements INumfmtController {
                         })
                     )
                     .subscribe(({ disposableCollection, selectionRanges }) => {
-                        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
+                        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
                         this.openPanel();
                         disposableCollection.add(
                             this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {

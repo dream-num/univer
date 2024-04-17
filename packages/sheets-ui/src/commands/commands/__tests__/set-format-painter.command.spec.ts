@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Univer } from '@univerjs/core';
+import type { Univer, Workbook } from '@univerjs/core';
 import {
     Disposable,
     ICommandService,
@@ -23,6 +23,7 @@ import {
     RedoCommand,
     ThemeService,
     UndoCommand,
+    UniverInstanceType,
 } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { ISelectionWithCoordAndStyle } from '@univerjs/sheets';
@@ -248,7 +249,7 @@ describe('Test format painter rules in controller', () => {
     describe('format painter', () => {
         describe('format painter the numbers', async () => {
             it('correct situation', async () => {
-                const workbook = get(IUniverInstanceService).getCurrentUniverSheetInstance()!;
+                const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
                 if (!workbook) throw new Error('This is an error');
                 await commandService.executeCommand(SetSelectionsOperation.id, {
                     unitId: 'workbook-01',
@@ -281,7 +282,7 @@ describe('Test format painter rules in controller', () => {
                 expect(workbook.getSheetBySheetId('sheet-0011')?.getMergeData()[1].startRow).toBe(1);
                 expect(workbook.getSheetBySheetId('sheet-0011')?.getMergeData()[2].startRow).toBe(3);
 
-                get(IUniverInstanceService).focusUniverInstance('workbook-01');
+                get(IUniverInstanceService).focusUnit('workbook-01');
                 // undo
                 await commandService.executeCommand(UndoCommand.id);
                 expect(workbook.getSheetBySheetId('sheet-0011')?.getCell(0, 2)?.s).toBe(undefined);

@@ -17,7 +17,8 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Checkbox, InputNumber, Radio, RadioGroup, Select } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import { createInternalEditorID, IUniverInstanceService, LocaleService } from '@univerjs/core';
+import type { Workbook } from '@univerjs/core';
+import { createInternalEditorID, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { TextEditor } from '@univerjs/ui';
 import { CFRuleType, CFValueType, createDefaultValueByValueType, SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '@univerjs/sheets-conditional-formatting';
 import type { IConditionalFormattingRuleConfig, IValueConfig } from '@univerjs/sheets-conditional-formatting';
@@ -32,8 +33,8 @@ const createOptionItem = (text: CFValueType, localeService: LocaleService) => ({
 const InputText = (props: { disabled?: boolean; id: string; className: string; type: CFValueType;value: string | number;onChange: (v: string | number) => void }) => {
     const { onChange, className, value, type, id, disabled = false } = props;
     const univerInstanceService = useDependency(IUniverInstanceService);
-    const unitId = univerInstanceService.getCurrentUniverSheetInstance()!.getUnitId();
-    const subUnitId = univerInstanceService.getCurrentUniverSheetInstance()!.getActiveSheet().getSheetId();
+    const unitId = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!.getUnitId();
+    const subUnitId = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!.getActiveSheet().getSheetId();
     const _value = useRef(value);
     const config = useMemo(() => {
         if ([CFValueType.percentile, CFValueType.percent].includes(type)) {

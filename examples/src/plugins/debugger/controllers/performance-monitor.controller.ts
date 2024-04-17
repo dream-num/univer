@@ -47,7 +47,7 @@ export class PerformanceMonitorController extends RxDisposable {
     private _listenDocumentTypeChange() {
         this._instanceService.focused$.pipe(takeUntil(this.dispose$)).subscribe((unitId) => {
             if (unitId != null) {
-                const univerType = this._instanceService.getDocumentType(unitId);
+                const univerType = this._instanceService.getUnitType(unitId);
 
                 this._documentType = univerType;
 

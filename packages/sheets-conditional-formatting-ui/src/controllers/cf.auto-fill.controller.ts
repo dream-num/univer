@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IMutationInfo, IRange } from '@univerjs/core';
-import { Disposable, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, Range, Rectangle } from '@univerjs/core';
+import type { IMutationInfo, IRange, Workbook } from '@univerjs/core';
+import { Disposable, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, Range, Rectangle, UniverInstanceType } from '@univerjs/core';
 import { createTopMatrixFromMatrix, findAllRectangle } from '@univerjs/sheets';
 
 import type { ISheetAutoFillHook } from '@univerjs/sheets-ui';
@@ -48,8 +48,8 @@ export class ConditionalFormattingAutoFillController extends Disposable {
             relativeRange: IRange,
             matrixMap: Map<string, ObjectMatrix<1>>
         ) => {
-            const unitId = this._univerInstanceService.getCurrentUniverSheetInstance()!.getUnitId();
-            const subUnitId = this._univerInstanceService.getCurrentUniverSheetInstance()!.getActiveSheet().getSheetId();
+            const unitId = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!.getUnitId();
+            const subUnitId = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!.getActiveSheet().getSheetId();
             const sourceRange = {
                 startRow: sourceStartCell.row,
                 startColumn: sourceStartCell.col,
@@ -137,8 +137,8 @@ export class ConditionalFormattingAutoFillController extends Disposable {
             });
         };
         const generalApplyFunc = (sourceRange: IRange, targetRange: IRange) => {
-            const unitId = this._univerInstanceService.getCurrentUniverSheetInstance()!.getUnitId();
-            const subUnitId = this._univerInstanceService.getCurrentUniverSheetInstance()!.getActiveSheet().getSheetId();
+            const unitId = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!.getUnitId();
+            const subUnitId = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!.getActiveSheet().getSheetId();
             const matrixMap: Map<string, ObjectMatrix<1>> = new Map();
 
             const redos: IMutationInfo[] = [];

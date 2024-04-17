@@ -15,7 +15,7 @@
  */
 
 import type { ICellDataForSheetInterceptor, Workbook, Worksheet } from '@univerjs/core';
-import { createInterceptorKey, ICommandService, InterceptorManager, IUniverInstanceService } from '@univerjs/core';
+import { createInterceptorKey, ICommandService, InterceptorManager, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import type { ISetNumfmtMutationParams, ISheetLocation } from '@univerjs/sheets';
 import { SetNumfmtMutation } from '@univerjs/sheets';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
@@ -53,7 +53,7 @@ describe('test editor', () => {
         const univerInstanceService = testBed.get(IUniverInstanceService);
         testBed.get(NumfmtEditorController);
         testBed.get(NumfmtCellContent);
-        workbook = univerInstanceService.getCurrentUniverSheetInstance()!;
+        workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
         worksheet = workbook.getActiveSheet();
     });
 

@@ -15,12 +15,14 @@
  */
 
 import type {
+    DocumentDataModel,
     ICommandInfo,
     IRange,
     IRangeWithCoord,
     ITextRun,
+
     Nullable,
-} from '@univerjs/core';
+    Workbook } from '@univerjs/core';
 import {
     AbsoluteRefType,
     Direction,
@@ -40,6 +42,7 @@ import {
     ThemeService,
     toDisposable,
     Tools,
+    UniverInstanceType,
 } from '@univerjs/core';
 import {
     DocViewModelManagerService,
@@ -340,7 +343,7 @@ export class PromptController extends Disposable {
 
     private _initialChangeEditor() {
         this.disposeWithMe(
-            this._univerInstanceService.currentDoc$.subscribe((documentDataModel) => {
+            this._univerInstanceService.getCurrentTypeOfUnit$<DocumentDataModel>(UniverInstanceType.DOC).subscribe((documentDataModel) => {
                 if (documentDataModel == null) {
                     return;
                 }
@@ -1134,7 +1137,7 @@ export class PromptController extends Disposable {
         const current = this._sheetSkeletonManagerService.getCurrent();
 
         if (current == null) {
-            const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
+            const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
             const worksheet = workbook.getActiveSheet();
             return {
                 unitId: workbook.getUnitId(),

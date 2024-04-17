@@ -19,6 +19,7 @@ import {
     DEFAULT_EMPTY_DOCUMENT_VALUE,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
+    DocumentDataModel,
     ICommandService,
     IUndoRedoService,
     IUniverInstanceService,
@@ -39,7 +40,7 @@ import { DeviceInputEventType, IRenderManagerService } from '@univerjs/engine-re
 import { getEditorObject, IEditorBridgeService } from '@univerjs/sheets-ui';
 import type { IEditorBridgeServiceParam } from '@univerjs/sheets-ui';
 import { IZenZoneService } from '@univerjs/ui';
-import { Inject } from '@wendellhu/redi';
+import { Inject, Injector } from '@wendellhu/redi';
 import { takeUntil } from 'rxjs';
 
 import { OpenZenEditorOperation } from '../commands/operations/zen-editor.operation';
@@ -50,6 +51,7 @@ export const DOCS_ZEN_EDITOR_UNIT_ID_KEY = '__defaultDocumentZenEditorSpecialUni
 @OnLifecycle(LifecycleStages.Steady, ZenEditorController)
 export class ZenEditorController extends RxDisposable {
     constructor(
+        @Inject(Injector) private readonly _injector: Injector,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IZenEditorManagerService private readonly _zenEditorManagerService: IZenEditorManagerService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
@@ -103,7 +105,8 @@ export class ZenEditorController extends RxDisposable {
             },
         };
 
-        this._univerInstanceService.createDoc(INITIAL_SNAPSHOT);
+        const document = this._injector.createInstance(DocumentDataModel, INITIAL_SNAPSHOT);
+        this._univerInstanceService.addUnit(document);
     }
 
     // Listen to changes in the size of the zen editor container to set the size of the editor.
@@ -155,9 +158,9 @@ export class ZenEditorController extends RxDisposable {
         // Need to clear undo/redo service when open zen mode.
         this._undoRedoService.clearUndoRedo(DOCS_ZEN_EDITOR_UNIT_ID_KEY);
 
-        this._univerInstanceService.focusUniverInstance(DOCS_ZEN_EDITOR_UNIT_ID_KEY);
+        this._univerInstanceService.focusUnit(DOCS_ZEN_EDITOR_UNIT_ID_KEY);
 
-        this._univerInstanceService.setCurrentUniverDocInstance(DOCS_ZEN_EDITOR_UNIT_ID_KEY);
+        this._univerInstanceService.setCurrentUnitForType(DOCS_ZEN_EDITOR_UNIT_ID_KEY);
 
         const visibleState = this._editorBridgeService.isVisible();
         if (visibleState.visible === false) {

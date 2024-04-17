@@ -18,7 +18,11 @@ import type { Ctor, Injector } from '@wendellhu/redi';
 
 export type PluginCtor<T extends Plugin> = Ctor<T> & { type: PluginType };
 
-/** Plugin types for different kinds of business. */
+/**
+ * Plugin types for different kinds of business.
+ *
+ * @deprecated use UnitType instead
+ */
 export enum PluginType {
     Univer,
     Doc,

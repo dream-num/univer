@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { ICommandService, IUniverInstanceService } from '@univerjs/core';
+import type { SlideDataModel } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import type { RefObject } from 'react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useDependency } from '@wendellhu/redi/react-bindings';
@@ -34,7 +35,7 @@ export function SlideSideBar() {
     const renderManagerService = useDependency(IRenderManagerService);
 
     const slideBarRef = useRef<HTMLDivElement>(null);
-    const currentSlide = useObservable(univerInstanceService.currentSlide$);
+    const currentSlide = useObservable(univerInstanceService.getCurrentTypeOfUnit$<SlideDataModel>(UniverInstanceType.SLIDE));
     const pages = currentSlide?.getPages();
     const pageOrder = currentSlide?.getPageOrder();
 

@@ -17,11 +17,14 @@
 import type { CommandListener, IDocumentData, IExecutionOptions, IWorkbookData, Nullable } from '@univerjs/core';
 import {
     BorderStyleTypes,
+    DocumentDataModel,
     ICommandService,
     IUniverInstanceService,
     toDisposable,
     UndoCommand,
     Univer,
+    UniverInstanceType,
+    Workbook,
     WrapStrategy,
 } from '@univerjs/core';
 import { ISocketService, WebSocketService } from '@univerjs/network';
@@ -68,7 +71,8 @@ export class FUniver {
      * @returns Spreadsheet API instance.
      */
     createUniverSheet(data: Partial<IWorkbookData>): FWorkbook {
-        const workbook = this._univerInstanceService.createSheet(data);
+        const workbook = this._injector.createInstance(Workbook, data);
+        this._univerInstanceService.addUnit(workbook);
         return this._injector.createInstance(FWorkbook, workbook);
     }
 
@@ -78,7 +82,8 @@ export class FUniver {
      * @returns Document API instance.
      */
     createUniverDoc(data: Partial<IDocumentData>): FDocument {
-        const document = this._univerInstanceService.createDoc(data);
+        const document = this._injector.createInstance(DocumentDataModel, data);
+        this._univerInstanceService.addUnit(document);
         return this._injector.createInstance(FDocument, document);
     }
 
@@ -115,7 +120,7 @@ export class FUniver {
      * @returns the currently focused Univer spreadsheet.
      */
     getActiveWorkbook(): FWorkbook | null {
-        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
+        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
         if (!workbook) {
             return null;
         }

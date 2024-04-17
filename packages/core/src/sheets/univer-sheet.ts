@@ -18,9 +18,7 @@ import type { IDisposable } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { LifecycleInitializerService, LifecycleService } from '../services/lifecycle/lifecycle.service';
-import type { IWorkbookData } from '../types/interfaces/i-workbook-data';
 import { PluginHolder } from '../common/plugin-holder';
-import { Workbook } from './workbook';
 
 /**
  * Externally provided UniverSheet root instance
@@ -33,10 +31,5 @@ export class UniverSheet extends PluginHolder implements IDisposable {
         protected readonly _lifecycleInitializerService: LifecycleInitializerService
     ) {
         super();
-    }
-
-    createSheet(workbookConfig: Partial<IWorkbookData>): Workbook {
-        const workbook = this._injector.createInstance(Workbook, workbookConfig);
-        return workbook;
     }
 }

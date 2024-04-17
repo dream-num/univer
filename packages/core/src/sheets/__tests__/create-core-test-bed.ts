@@ -52,7 +52,7 @@ export function createCoreTestBed(workbookConfig?: IWorkbookData) {
 
     const sheet = univer.createUniverSheet(workbookConfig || TEST_WORKBOOK_DATA);
     const univerInstanceService = get(IUniverInstanceService);
-    univerInstanceService.focusUniverInstance(workbookConfig?.id ?? 'test');
+    univerInstanceService.focusUnit(workbookConfig?.id ?? 'test');
 
     const logService = get(ILogService);
     logService.setLogLevel(LogLevel.SILENT);

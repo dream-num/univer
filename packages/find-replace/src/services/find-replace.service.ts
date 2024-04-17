@@ -415,7 +415,7 @@ export class FindReplaceModel extends Disposable {
     }
 
     private _moveToInitialMatch(findModels: FindModel[], results: IFindMatch[], noFocus = false): number {
-        const focusedUnitId = this._univerInstanceService.getFocusedUniverInstance()?.getUnitId();
+        const focusedUnitId = this._univerInstanceService.getFocusedUnit()?.getUnitId();
         if (!focusedUnitId) {
             return -1;
         }

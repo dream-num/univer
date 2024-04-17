@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IMutationInfo, IRange } from '@univerjs/core';
+import type { IMutationInfo, IRange, Workbook } from '@univerjs/core';
 import {
     Disposable,
     DisposableCollection,
@@ -24,6 +24,7 @@ import {
     OnLifecycle,
     Range,
     toDisposable,
+    UniverInstanceType,
 } from '@univerjs/core';
 import type {
     EffectRefRangeParams,
@@ -114,7 +115,7 @@ export class NumfmtRefRangeController extends Disposable {
                         )
                     )
                     .subscribe((disposableCollection) => {
-                        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
+                        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
                         const unitId = workbook.getUnitId();
                         const subUnitId = workbook.getActiveSheet().getSheetId();
                         const model = this._numfmtService.getModel(unitId, subUnitId);

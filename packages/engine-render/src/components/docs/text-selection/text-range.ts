@@ -423,7 +423,7 @@ export class TextRange {
             left,
             top,
             height,
-            strokeWidth: this.style?.strokeWidth || 1,
+            strokeWidth: this.style?.strokeWidth || 1.5,
             stroke: this.style?.strokeActive || getColor(COLORS.black, 1),
             evented: false,
         });

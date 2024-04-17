@@ -61,7 +61,7 @@ export class ForceStringAlertController extends Disposable {
                         title: this._localeService.t('info.error'),
                         message: this._localeService.t('info.forceStringInfo'),
                         location: cellPos.location,
-                        width: 260,
+                        width: 200,
                         height: 74,
                         key: ALERT_KEY,
                     });

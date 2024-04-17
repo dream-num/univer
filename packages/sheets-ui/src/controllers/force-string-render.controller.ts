@@ -40,9 +40,9 @@ export class ForceStringRenderController extends RxDisposable {
 
 
     private _initViewModelIntercept() {
-        const color = this._themeService.getCurrentTheme().primaryColor;
+        const color = this._themeService.getCurrentTheme().errorColor;
         const FORCE_STRING_MARK = {
-            tl: {
+            tr: {
                 size: 6,
                 color,
             },

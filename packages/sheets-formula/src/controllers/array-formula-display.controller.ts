@@ -15,7 +15,7 @@
  */
 
 import type { ICommandInfo } from '@univerjs/core';
-import { Disposable, ICommandService, LifecycleStages, OnLifecycle, ThemeService } from '@univerjs/core';
+import { CellValueType, Disposable, ICommandService, LifecycleStages, OnLifecycle, ThemeService } from '@univerjs/core';
 import type { ISetArrayFormulaDataMutationParams } from '@univerjs/engine-formula';
 import { FormulaDataModel, SetArrayFormulaDataMutation } from '@univerjs/engine-formula';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';

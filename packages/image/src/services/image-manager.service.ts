@@ -54,6 +54,8 @@ export interface IImageManagerService {
     getCurrent(): Nullable<IImageManagerParam>;
 
     getImageByParam(param: Nullable<IImageManagerSearchParam>): Nullable<IImageManagerParam>;
+
+    getImageByOKey(oKey: string): Nullable<IImageManagerParam>;
 }
 
 /**
@@ -112,6 +114,11 @@ export class ImageManagerService implements IDisposable, IImageManagerService {
 
     getImageByParam(param: Nullable<IImageManagerSearchParam>): Nullable<IImageManagerParam> {
         return this._getCurrentBySearch(param);
+    }
+
+    getImageByOKey(oKey: string): Nullable<IImageManagerParam> {
+        const [unitId, subUnitId, imageId] = oKey.split('-');
+        return this._getCurrentBySearch({ unitId, subUnitId, imageId });
     }
 
     private _getCurrentBySearch(searchParam: Nullable<IImageManagerSearchParam>): Nullable<IImageManagerParam> {

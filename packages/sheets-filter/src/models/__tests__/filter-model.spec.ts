@@ -15,8 +15,8 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import type { IWorkbookData } from '@univerjs/core';
-import { ILogService, IUniverInstanceService, LocaleType, LogLevel, Univer } from '@univerjs/core';
+import type { IWorkbookData, Workbook } from '@univerjs/core';
+import { ILogService, IUniverInstanceService, LocaleType, LogLevel, Univer, UniverInstanceType } from '@univerjs/core';
 import type { Injector } from '@wendellhu/redi';
 
 import { FilterColumn, generateFilterFn } from '../filter-model';
@@ -131,7 +131,7 @@ describe('Test filter model and related utils', () => {
             filterColumn = new FilterColumn(
                 'test',
                 'sheet1',
-                get(IUniverInstanceService).getCurrentUniverSheetInstance()!.getActiveSheet()!,
+                get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!.getActiveSheet()!,
                 { colId: 0, customFilters: { customFilters: [{ operator: CustomFilterOperator.LESS_THAN, val: 123 }] } },
                 { getAlreadyFilteredOutRows() { return new Set(); } }
             );
@@ -151,7 +151,7 @@ describe('Test filter model and related utils', () => {
             filterColumn = new FilterColumn(
                 'test',
                 'sheet1',
-                get(IUniverInstanceService).getCurrentUniverSheetInstance()!.getActiveSheet()!,
+                get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!.getActiveSheet()!,
                 { colId: 0, customFilters: { customFilters: [{ operator: CustomFilterOperator.LESS_THAN, val: 123 }] } },
                 { getAlreadyFilteredOutRows() { return new Set(); } }
             );
@@ -169,7 +169,7 @@ describe('Test filter model and related utils', () => {
             filterColumn = new FilterColumn(
                 'test',
                 'sheet1',
-                get(IUniverInstanceService).getCurrentUniverSheetInstance()!.getActiveSheet()!,
+                get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!.getActiveSheet()!,
                 { colId: 0, customFilters: { customFilters: [{ operator: CustomFilterOperator.LESS_THAN, val: 123 }] } },
                 { getAlreadyFilteredOutRows() { return new Set(); } }
             );
@@ -190,7 +190,7 @@ describe('Test filter model and related utils', () => {
             filterColumn = new FilterColumn(
                 'test',
                 'sheet1',
-                get(IUniverInstanceService).getCurrentUniverSheetInstance()!.getActiveSheet()!,
+                get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!.getActiveSheet()!,
                 { colId: 0, customFilters: { customFilters: [{ operator: CustomFilterOperator.LESS_THAN, val: 123 }] } },
                 { getAlreadyFilteredOutRows() { return new Set(); } }
             );
@@ -205,7 +205,7 @@ describe('Test filter model and related utils', () => {
             filterColumn = new FilterColumn(
                 'test',
                 'sheet1',
-                get(IUniverInstanceService).getCurrentUniverSheetInstance()!.getActiveSheet()!,
+                get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!.getActiveSheet()!,
                 { colId: 0, customFilters: { customFilters: [{ operator: CustomFilterOperator.LESS_THAN, val: 123 }] } },
                 { getAlreadyFilteredOutRows() { return new Set([1]); } }
             );
@@ -271,7 +271,7 @@ function createFilterModelTestBed(workbookData: IWorkbookData) {
     const sheet = univer.createUniverSheet(workbookData);
 
     const univerInstanceService = get(IUniverInstanceService);
-    univerInstanceService.focusUniverInstance('test');
+    univerInstanceService.focusUnit('test');
 
     const logService = get(ILogService);
     logService.setLogLevel(LogLevel.SILENT);

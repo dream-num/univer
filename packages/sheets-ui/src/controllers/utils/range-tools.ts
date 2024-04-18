@@ -15,8 +15,8 @@
  */
 
 import type { IAccessor } from '@wendellhu/redi';
-import type { ICellData, IObjectMatrixPrimitiveType, IRange } from '@univerjs/core';
-import { IUniverInstanceService, ObjectMatrix } from '@univerjs/core';
+import type { ICellData, IObjectMatrixPrimitiveType, IRange, Workbook } from '@univerjs/core';
+import { IUniverInstanceService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
 
 export interface IDiscreteRange {
     rows: number[];
@@ -25,7 +25,9 @@ export interface IDiscreteRange {
 
 export function rangeToDiscreteRange(range: IRange, accessor: IAccessor, unitId?: string, subUnitId?: string): IDiscreteRange | null {
     const univerInstanceService = accessor.get(IUniverInstanceService);
-    const workbook = unitId ? univerInstanceService.getUniverSheetInstance(unitId) : univerInstanceService.getCurrentUniverSheetInstance();
+    const workbook = unitId
+        ? univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.SHEET)
+        : univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET);
     const worksheet = subUnitId ? workbook?.getSheetBySheetId(subUnitId) : workbook?.getActiveSheet();
     if (!worksheet) {
         return null;

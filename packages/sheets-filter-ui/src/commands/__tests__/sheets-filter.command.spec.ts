@@ -114,7 +114,7 @@ function createFilterCommandTestBed() {
     ].forEach((command) => commandService.registerCommand(command));
 
     const univerInstanceService = get(IUniverInstanceService);
-    univerInstanceService.focusUniverInstance('test');
+    univerInstanceService.focusUnit('test');
 
     return { univer, get };
 }

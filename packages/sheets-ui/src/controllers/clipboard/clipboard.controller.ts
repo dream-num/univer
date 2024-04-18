@@ -264,7 +264,7 @@ export class SheetClipboardController extends RxDisposable {
             },
             getFilteredOutRows(range: IRange) {
                 const { startRow, endRow } = range;
-                const worksheet = self._currentUniverSheet.getCurrentUniverSheetInstance()?.getActiveSheet();
+                const worksheet = self._currentUniverSheet.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)?.getActiveSheet();
                 const res: number[] = [];
                 if (!worksheet) {
                     return res;

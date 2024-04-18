@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-import type { ICommand, IMutationInfo, Nullable } from '@univerjs/core';
-import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecute } from '@univerjs/core';
+import type { ICommand, IMutationInfo, Nullable, Workbook } from '@univerjs/core';
+import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecute, UniverInstanceType } from '@univerjs/core';
 import type { ISheetCommandSharedParams } from '@univerjs/sheets';
 import { isSingleCellSelection, SelectionManagerService } from '@univerjs/sheets';
 import type { FilterColumn, IAutoFilter, IFilterColumn, IReCalcSheetsFilterMutationParams, ISetSheetsFilterCriteriaMutationParams, ISetSheetsFilterRangeMutationParams } from '@univerjs/sheets-filter';
 import { ReCalcSheetsFilterMutation, RemoveSheetsFilterMutation, SetSheetsFilterCriteriaMutation, SetSheetsFilterRangeMutation, SheetsFilterService } from '@univerjs/sheets-filter';
 import { expandToContinuousRange } from '@univerjs/sheets-ui';
-import { IMessageService } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 
 /**
@@ -32,12 +31,11 @@ export const SmartToggleSheetsFilterCommand: ICommand = {
     type: CommandType.COMMAND,
     handler: async (accessor: IAccessor) => {
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const messageService = accessor.get(IMessageService);
         const sheetsFilterService = accessor.get(SheetsFilterService);
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
 
-        const currentWorkbook = univerInstanceService.getCurrentUniverSheetInstance();
+        const currentWorkbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET);
         const currentWorksheet = currentWorkbook?.getActiveSheet();
 
         if (!currentWorksheet || !currentWorkbook) {

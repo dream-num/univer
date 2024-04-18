@@ -18,7 +18,7 @@ import type { IMutationInfo, IRange, Workbook } from '@univerjs/core';
 import { Disposable, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, Range, Rectangle, UniverInstanceType } from '@univerjs/core';
 import { createTopMatrixFromMatrix, findAllRectangle } from '@univerjs/sheets';
 
-import type { IDiscreteRange, ISheetAutoFillHook } from '@univerjs/sheets-ui';
+import type { ISheetAutoFillHook } from '@univerjs/sheets-ui';
 import { APPLY_TYPE, getAutoFillRepeatRange, IAutoFillService, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
 import { Inject, Injector } from '@wendellhu/redi';
 import { ConditionalFormattingRuleModel, ConditionalFormattingViewModel, SetConditionalRuleMutation, setConditionalRuleMutationUndoFactory, SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '@univerjs/sheets-conditional-formatting';
@@ -40,8 +40,10 @@ export class ConditionalFormattingAutoFillController extends Disposable {
         this._initAutoFill();
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _initAutoFill() {
         const noopReturnFunc = () => ({ redos: [], undos: [] });
+        // eslint-disable-next-line max-lines-per-function
         const loopFunc = (
             sourceStartCell: { row: number; col: number },
             targetStartCell: { row: number; col: number },

@@ -166,10 +166,6 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
         return unit;
     }
 
-    getCurrentUniverSheetInstance<Workbook>(): Nullable<Workbook> {
-        return this.getCurrentUnitForType(UniverInstanceType.SHEET) as Nullable<Workbook>;
-    }
-
     getCurrentUniverDocInstance(): Nullable<DocumentDataModel> {
         return this.getCurrentUnitForType(UniverInstanceType.DOC) as Nullable<DocumentDataModel>;
     }

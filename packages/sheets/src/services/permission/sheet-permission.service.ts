@@ -16,7 +16,6 @@
 
 import type { Workbook } from '@univerjs/core';
 import {
-    DisposableCollection,
     IPermissionService,
     IUniverInstanceService,
     LifecycleStages,

@@ -33,12 +33,14 @@ describe('test "FilterConditionItems"', () => {
                 expect(() => FilterConditionItems.NONE.getDefaultFormParams()).toThrowError();
             });
 
-            it('should not by mapped by params change', () => {
-                expect(FilterConditionItems.NONE.testMappingParams({ operator1: ExtendCustomFilterOperator.NONE })).toBeFalsy();
+            it('should mapped to its own operator', () => {
+                expect(FilterConditionItems.NONE.testMappingParams({ operator1: ExtendCustomFilterOperator.NONE })).toBeTruthy();
+                expect(FilterConditionItems.NONE.testMappingParams({ operator1: ExtendCustomFilterOperator.NOT_EQUALS })).toBeFalsy();
             });
 
             it('should map to empty filter column', () => {
-                expect(FilterConditionItems.NONE.mapToFilterColumn({ operator1: ExtendCustomFilterOperator.NONE })).toEqual({});
+                // clear filter column
+                expect(FilterConditionItems.NONE.mapToFilterColumn({ operator1: ExtendCustomFilterOperator.NONE })).toEqual(null);
             });
         });
 
@@ -52,8 +54,9 @@ describe('test "FilterConditionItems"', () => {
                 expect(() => FilterConditionItems.EMPTY.getDefaultFormParams()).toThrowError();
             });
 
-            it('should not mapped by params change', () => {
-                expect(FilterConditionItems.EMPTY.testMappingParams({ operator1: ExtendCustomFilterOperator.EMPTY })).toBeFalsy();
+            it('should map to its own operator', () => {
+                expect(FilterConditionItems.EMPTY.testMappingParams({ operator1: ExtendCustomFilterOperator.EMPTY })).toBeTruthy();
+                expect(FilterConditionItems.EMPTY.testMappingParams({ operator1: ExtendCustomFilterOperator.NONE })).toBeFalsy();
             });
 
             it('should map to filter  column with empty string', () => {
@@ -77,8 +80,9 @@ describe('test "FilterConditionItems"', () => {
                 expect(() => FilterConditionItems.NOT_EMPTY.getDefaultFormParams()).toThrowError();
             });
 
-            it('should not mapped by params change', () => {
-                expect(FilterConditionItems.NOT_EMPTY.testMappingParams({ operator1: ExtendCustomFilterOperator.NOT_EMPTY })).toBeFalsy();
+            it('should map to its own operator', () => {
+                expect(FilterConditionItems.NOT_EMPTY.testMappingParams({ operator1: ExtendCustomFilterOperator.NOT_EMPTY })).toBeTruthy();
+                expect(FilterConditionItems.NOT_EMPTY.testMappingParams({ operator1: ExtendCustomFilterOperator.NONE })).toBeFalsy();
             });
 
             it('should map to filter column with space string', () => {
@@ -580,7 +584,7 @@ describe('test "FilterConditionItems"', () => {
             });
 
             it('should fallback to NONE when no custom filter is provided', () => {
-                expect(FilterConditionItems.CUSTOM.mapToFilterColumn({ operator1: ExtendCustomFilterOperator.NONE })).toEqual({});
+                expect(FilterConditionItems.CUSTOM.mapToFilterColumn({ operator1: ExtendCustomFilterOperator.NONE })).toEqual(null);
             });
 
             it('should fallback to one conditional filter when only one is provided', () => {

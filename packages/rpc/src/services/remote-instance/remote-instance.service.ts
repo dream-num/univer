@@ -15,7 +15,7 @@
  */
 
 import type { IExecutionOptions, IMutationInfo, IWorkbookData } from '@univerjs/core';
-import { ICommandService, ILogService, IUniverInstanceService, UniverInstanceType, Workbook } from '@univerjs/core';
+import { ICommandService, ILogService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { createIdentifier, Inject, Injector } from '@wendellhu/redi';
 
 export interface IRemoteSyncMutationOptions extends IExecutionOptions {
@@ -87,9 +87,7 @@ export class WebWorkerRemoteInstanceService implements IRemoteInstanceService {
         try {
             switch (type) {
                 case UniverInstanceType.SHEET:
-                    // eslint-disable-next-line no-case-declarations
-                    const workbook = this._injector.createInstance(Workbook, snapshot);
-                    this._univerInstanceService.addUnit(workbook);
+                    this._univerInstanceService.createUnit(UniverInstanceType.SHEET, snapshot);
                     return true;
                 default:
                     throw new Error(

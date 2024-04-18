@@ -115,15 +115,14 @@ describe('Test custom filter functions', () => {
 
         it('should support "?" wild card', () => {
             expect(textMatch.fn('hello', 'hell?')).toBeTruthy();
+            expect(textMatch.fn('helloooo', 'hell?')).toBeFalsy();
+            expect(textMatch.fn('helloooo', 'hell?ooo')).toBeTruthy();
             expect(textMatch.fn('hello world', 'hell?')).toBeFalsy();
-            expect(textMatch.fn('hello', '?hell?')).toBeTruthy();
-            expect(textMatch.fn('yhell', '?hell?')).toBeTruthy();
+            expect(textMatch.fn('hello', '?hell?')).toBeFalsy();
+            expect(textMatch.fn('yhell', '?hell?')).toBeFalsy();
+
+            expect(textMatch.fn('hello111', '*hello?*')).toBeTruthy();
+            expect(textMatch.fn('hello', '*hello?*')).toBeFalsy();
         });
-
-        // it('should support empty value', () => {
-        // });
-
-        // it('should support non-empty value', () => {
-        // });
     });
 });

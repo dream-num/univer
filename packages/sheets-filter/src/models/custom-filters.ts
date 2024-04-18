@@ -191,6 +191,6 @@ function isWildCardString(str: string | number): boolean {
 
 function createREGEXFromWildChar(wildChar: string): RegExp {
     // only '*' and '?' is supported
-    const regexpStr = wildChar.replace(/[.+^${}()|[\]\\]/g, '\\$&').replaceAll('?', '+').replace(/[*+]/g, '.$&');
+    const regexpStr = wildChar.replace(/[.+^${}()|[\]\\]/g, '\\$&').replaceAll('?', '.').replace(/[*]/g, '.$&');
     return new RegExp(`^${regexpStr}$`);
 }

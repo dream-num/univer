@@ -45,7 +45,7 @@ import { SlideDataModel } from './slides/slide-model';
 import type { LocaleType } from './types/enum/locale-type';
 import type { IDocumentData, ISlideData, IUniverData, IWorkbookData } from './types/interfaces';
 import { PluginHolder } from './common/plugin-holder';
-import type { UnitType } from './common/unit';
+import type { UnitModel, UnitType } from './common/unit';
 import { UniverInstanceType } from './common/unit';
 
 const INIT_LAZY_PLUGINS_TIMEOUT = 200;
@@ -89,24 +89,28 @@ export class Univer extends PluginHolder {
         this._injector.get(LocaleService).setLocale(locale);
     }
 
+    createUnit<T, U extends UnitModel>(type: UnitType, data: Partial<T>): U {
+        return this._univerInstanceService.createUnit(type, data);
+    }
+
     /**
      * Create a univer sheet instance with internal dependency injection.
      *
-     * @deprecated
+     * @deprecated use `createUnit` instead
      */
     createUniverSheet(data: Partial<IWorkbookData>): Workbook {
         return this._univerInstanceService.createUnit<IWorkbookData, Workbook>(UniverInstanceType.SHEET, data);
     }
 
     /**
-     * @deprecated
+     * @deprecated use `createUnit` instead
      */
     createUniverDoc(data: Partial<IDocumentData>): DocumentDataModel {
         return this._univerInstanceService.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.DOC, data);
     }
 
     /**
-     * @deprecated
+     * @deprecated use `createUnit` instead
      */
     createUniverSlide(data: Partial<ISlideData>): SlideDataModel {
         return this._univerInstanceService.createUnit<ISlideData, SlideDataModel>(UniverInstanceType.SLIDE, data);
@@ -129,7 +133,7 @@ export class Univer extends PluginHolder {
                     pluginHolder._start();
 
                     const model = injector.createInstance(ctor, data);
-                    univerInstanceService.addUnit(model);
+                    univerInstanceService.__addUnit(model);
 
                     this._tryProgressToReady();
 
@@ -137,7 +141,7 @@ export class Univer extends PluginHolder {
                 }
 
                 const model = injector.createInstance(ctor, data);
-                univerInstanceService.addUnit(model);
+                univerInstanceService.__addUnit(model);
                 return model;
             }
         );

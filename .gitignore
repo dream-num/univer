@@ -112,5 +112,3 @@ storybook-static
 /playwright/.cache/
 
 *storybook.log
-
-.git-bak

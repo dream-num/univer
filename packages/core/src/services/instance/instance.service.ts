@@ -36,25 +36,37 @@ import { UniverInstanceType } from '../../common/unit';
  * It also manages the focused univer instance.
  */
 export interface IUniverInstanceService {
+    /** Omits value when a new UnitModel is created. */
     unitAdded$: Observable<UnitModel>;
+    /** Subscribe to curtain type of units' creation. */
     getTypeOfUnitAdded$<T extends UnitModel>(type: UnitType): Observable<T>;
-    addUnit(unit: UnitModel): void;
 
+    /** @interal */
+    __addUnit(unit: UnitModel): void;
+
+    /** Omits value when a UnitModel is disposed. */
     unitDisposed$: Observable<UnitModel>;
+    /** Subscribe to curtain type of units' disposing. */
     getTypeOfUnitDisposed$<T extends UnitModel>(type: UnitType): Observable<T>;
-    disposeUnit(unitId: string): boolean;
 
     focused$: Observable<Nullable<string>>;
     focusUnit(unitId: string | null): void;
+
     getFocusedUnit(): Nullable<UnitModel>;
 
     getCurrentUnitForType<T extends UnitModel>(type: UnitType): Nullable<T>;
     setCurrentUnitForType(unitId: string): void;
+
     getCurrentTypeOfUnit$<T extends UnitModel>(type: UnitType): Observable<Nullable<T>>;
 
+    /** Create a unit with snapshot info. */
     createUnit<T, U extends UnitModel>(type: UnitType, data: Partial<T>): U;
+    /** Dispose a unit  */
+    disposeUnit(unitId: string): boolean;
 
     registerCtorForType<T extends UnitModel>(type: UnitType, ctor: new (...args: any[]) => T): IDisposable;
+
+    /** @deprecated */
     changeDoc(unitId: string, doc: DocumentDataModel): void;
 
     getUnit<T extends UnitModel>(id: string, type: UnitType): Nullable<T>;
@@ -63,8 +75,6 @@ export interface IUniverInstanceService {
 
     /** @deprecated */
     getUniverSheetInstance(unitId: string): Nullable<Workbook>;
-    /** @deprecated */
-    getCurrentUnitForType<Workbook>(type: UniverInstanceType): Nullable<Workbook>;
     /** @deprecated */
     getUniverDocInstance(unitId: string): Nullable<DocumentDataModel>;
     /** @deprecated */
@@ -132,7 +142,7 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
         return this._unitAdded$.pipe(filter((unit) => unit.type === type)) as Observable<T>;
     }
 
-    addUnit(unit: UnitModel): void {
+    __addUnit(unit: UnitModel): void {
         const type = unit.type;
 
         if (!this._unitsByType.has(type)) {
@@ -183,7 +193,7 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
             allDocs.splice(index, 1);
         }
 
-        this.addUnit(doc);
+        this.__addUnit(doc);
     }
 
     private readonly _focused$ = new BehaviorSubject<Nullable<string>>(null);

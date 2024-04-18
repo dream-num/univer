@@ -1,16 +1,17 @@
+@height: 4px;
 .progress-bar {
     position: absolute;
     top: 12px;
     right: 22px;
 
-    width: 20%;
-    height: 4px;
+    width: 160px;
+    height: @height;
     background-color: rgb(var(--border-color));
-    border-radius: 8px;
+    border-radius: var(--border-radius-lg);
 
     &-inner {
-        height: 4px;
-        border-radius: 8px;
+        height: @height;
+        border-radius: var(--border-radius-lg);
         transition: width 0.5s;
     }
 }

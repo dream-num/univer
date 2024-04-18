@@ -228,7 +228,7 @@ export class TriggerCalculationController extends Disposable {
          * Assignment operation after formula calculation.
          */
         const debouncedPushTask = throttle(this._pushTask.bind(this), 300);
-        let startDependencyTimer: NodeJS.Timeout;
+        let startDependencyTimer: NodeJS.Timeout | null;
 
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
@@ -252,12 +252,15 @@ export class TriggerCalculationController extends Disposable {
                         startDependencyTimer = setTimeout(() => {
                             this._progressService.insertTaskCount(100);
                             this._progressService.pushTask({ count: 5 });
+
+                            startDependencyTimer = null;
                         }, 500);
                     } else if (stage === FormulaExecuteStageType.START_CALCULATION) {
-                        // Clear the timer directly, ignore the progress error in setTimeout, and finally the complete method ensures the correct completion of the progress
-                        clearTimeout(startDependencyTimer);
-
-                        if (totalFormulasToCalculate >= MINIMUM_FORMULA_NUMBER) {
+                        if (startDependencyTimer) {
+                            // Clear the timer directly, ignore the progress error in setTimeout, and finally the complete method ensures the correct completion of the progress
+                            clearTimeout(startDependencyTimer);
+                            startDependencyTimer = null;
+                        } else {
                             // Array formulas also go through the calculation process, so the total is twice
                             this._progressService.insertTaskCount(totalFormulasToCalculate * 2);
                         }

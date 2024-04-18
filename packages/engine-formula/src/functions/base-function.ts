@@ -263,40 +263,40 @@ export class BaseFunction extends Disposable {
         return resultValue;
     }
 
-    equalSearch(value: BaseValueObject, searchArray: ArrayValueObject, resultArray: ArrayValueObject, isFirst = true) {
-        const resultArrayValue = resultArray.pick(searchArray.isEqual(value) as ArrayValueObject);
-
-        let resultValue: BaseValueObject;
-
-        if (isFirst) {
-            resultValue = resultArrayValue.getFirstCell();
-        } else {
-            resultValue = resultArrayValue.getLastCell();
-        }
-
-        if (resultValue.isNull()) {
+    private _getOneFirstByRaw(array: Nullable<BaseValueObject>[][]) {
+        if (array.length === 0) {
             return ErrorValueObject.create(ErrorType.NA);
         }
 
-        return resultValue;
+        return array[0][0] || ErrorValueObject.create(ErrorType.NA);
+    }
+
+    private _getOneLastByRaw(array: Nullable<BaseValueObject>[][]) {
+        if (array.length === 0) {
+            return ErrorValueObject.create(ErrorType.NA);
+        }
+
+        return array[array.length - 1][array[0].length - 1] || ErrorValueObject.create(ErrorType.NA);
+    }
+
+    equalSearch(value: BaseValueObject, searchArray: ArrayValueObject, resultArray: ArrayValueObject, isFirst = true) {
+        const resultArrayValue = resultArray.pickRaw(searchArray.isEqual(value) as ArrayValueObject);
+
+        if (isFirst) {
+            return this._getOneFirstByRaw(resultArrayValue);
+        }
+
+        return this._getOneLastByRaw(resultArrayValue);
     }
 
     fuzzySearch(value: BaseValueObject, searchArray: ArrayValueObject, resultArray: ArrayValueObject, isFirst = true) {
-        const resultArrayValue = resultArray.pick(searchArray.compare(value, compareToken.EQUALS) as ArrayValueObject);
-
-        let resultValue: BaseValueObject;
+        const resultArrayValue = resultArray.pickRaw(searchArray.compare(value, compareToken.EQUALS) as ArrayValueObject);
 
         if (isFirst) {
-            resultValue = resultArrayValue.getFirstCell();
-        } else {
-            resultValue = resultArrayValue.getLastCell();
+            return this._getOneFirstByRaw(resultArrayValue);
         }
 
-        if (resultValue.isNull()) {
-            return ErrorValueObject.create(ErrorType.NA);
-        }
-
-        return resultValue;
+        return this._getOneLastByRaw(resultArrayValue);
     }
 
     orderSearch(

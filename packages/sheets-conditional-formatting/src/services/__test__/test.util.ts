@@ -53,6 +53,7 @@ const TEST_WORKBOOK_DATA_DEMO: () => IWorkbookData = () => ({
     styles: {},
     resources: [],
 });
+
 export const createTestBed = (dependencies?: Dependency[]) => {
     const univer = new Univer();
     const injector = univer.__getInjector();
@@ -96,7 +97,7 @@ export const createTestBed = (dependencies?: Dependency[]) => {
     const unitId = workbookJson.id;
     const subUnitId = workbookJson.sheets.sheet1.id!;
     univerInstanceService.focusUnit('test');
-    univerInstanceService.setCurrentUnitForType(subUnitId);
+    univerInstanceService.setCurrentUnitForType(unitId);
     const getConditionalFormattingRuleModel = () => injector.get(ConditionalFormattingRuleModel);
     const getConditionalFormattingViewModel = () => injector.get(ConditionalFormattingViewModel);
     const getConditionalFormattingService = () => injector.get(ConditionalFormattingService);

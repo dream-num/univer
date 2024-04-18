@@ -369,6 +369,10 @@ export class SheetFindModel extends FindModel {
                 continue;
             };
 
+            if (worksheet.getRowFiltered(row)) {
+                continue;
+            }
+
             const { hit, replaceable, isFormula } = hitCell(worksheet, row, col, query, cellData);
             if (hit) {
                 const result: ISheetCellMatch = {

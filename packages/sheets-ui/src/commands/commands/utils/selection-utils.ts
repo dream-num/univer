@@ -409,6 +409,7 @@ export function shrinkToNextCell(startRange: IRange, direction: Direction, works
     return alignToMergedCellsBorders(Rectangle.union(otherEdge, next), worksheet, false);
 }
 
+// eslint-disable-next-line max-lines-per-function
 export function expandToContinuousRange(startRange: IRange, directions: IExpandParams, worksheet: Worksheet): IRange {
     const { left, right, up, down } = directions;
     const maxRow = worksheet.getMaxRows();

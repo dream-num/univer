@@ -133,6 +133,7 @@ export class SheetsFilterUIController extends RxDisposable {
         this._popupDisposable = this._sheetCanvasPopupService.attachPopupToCell(startRow, col, {
             componentKey: FILTER_PANEL_POPUP_KEY,
             direction: 'horizontal',
+            closeOnSelfTarget: true,
             onClickOutside: () => this._commandService.syncExecuteCommand(CloseFilterPanelOperation.id),
         });
 

@@ -39,44 +39,47 @@ export function FilterPanel() {
     const commandService = useDependency(ICommandService);
 
     const filterBy = useObservable(sheetsFilterPanelService.filterBy$, undefined, true);
-    const filterModel = useObservable(sheetsFilterPanelService.filterByModel$, undefined, false);
-    const canApply = useObservable(() => filterModel?.canApply$ || of(false), undefined, false, [filterModel]);
+    const filterByModel = useObservable(sheetsFilterPanelService.filterByModel$, undefined, false);
+    const canApply = useObservable(() => filterByModel?.canApply$ || of(false), undefined, false, [filterByModel]);
     const options = useFilterByOptions(localeService);
+
+    // only can disable clear when there is no criteria
+    const clearFilterDisabled = !useObservable(sheetsFilterPanelService.hasCriteria$);
 
     const onFilterByTypeChange = useCallback((value: FilterBy) => {
         commandService.executeCommand(ChangeFilterByOperation.id, { filterBy: value });
     }, [commandService]);
 
     const onClearCriteria = useCallback(async () => {
-        await filterModel?.clear();
+        await filterByModel?.clear();
         commandService.executeCommand(CloseFilterPanelOperation.id);
-    }, [filterModel, commandService]);
+    }, [filterByModel, commandService]);
 
     const onCancel = useCallback(() => {
         commandService.executeCommand(CloseFilterPanelOperation.id);
     }, [commandService]);
 
     const onApply = useCallback(async () => {
-        await filterModel?.apply();
+        await filterByModel?.apply();
         commandService.executeCommand(CloseFilterPanelOperation.id);
-    }, [filterModel, commandService]);
+    }, [filterByModel, commandService]);
 
     return (
         <div className={styles.sheetsFilterPanel}>
             <div className={styles.sheetsFilterPanelHeader}>
                 <Segmented value={filterBy} options={options} onChange={(value) => onFilterByTypeChange(value as FilterBy)}></Segmented>
             </div>
-            { filterModel
+            { filterByModel
                 ? (
                     <div className={styles.sheetsFilterPanelContent}>
                         {filterBy === FilterBy.VALUES
-                            ? <FilterByValue model={filterModel as ByValuesModel} />
-                            : <FilterByCondition model={filterModel as ByConditionsModel} />}
+                            ? <FilterByValue model={filterByModel as ByValuesModel} />
+                            : <FilterByCondition model={filterByModel as ByConditionsModel} />}
                     </div>
                 )
                 : null }
             <div className={styles.sheetsFilterPanelFooter}>
-                <Button type="link" onClick={onClearCriteria}>{localeService.t('sheets-filter.panel.clear-filter')}</Button>
+                <Button type="link" onClick={onClearCriteria} disabled={clearFilterDisabled}>{localeService.t('sheets-filter.panel.clear-filter')}</Button>
                 <span className={styles.sheetsFilterPanelFooterPrimaryButtons}>
                     <Button type="default" onClick={onCancel}>{localeService.t('sheets-filter.panel.cancel')}</Button>
                     <Button disabled={!canApply} type="primary" onClick={onApply}>{localeService.t('sheets-filter.panel.confirm')}</Button>

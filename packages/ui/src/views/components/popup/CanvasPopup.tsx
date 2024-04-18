@@ -41,6 +41,7 @@ const SingleCanvasPopup = ({ popup, children }: { popup: IPopup; children?: Reac
             direction={popup.direction}
             onClickOutside={popup.onClickOutside}
             excludeOutside={popup.excludeOutside}
+            closeOnSelfTarget={popup.closeOnSelfTarget}
         >
             {children}
         </RectPopup>

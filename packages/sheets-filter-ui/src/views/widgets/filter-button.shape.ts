@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { ICommandService, ThemeService } from '@univerjs/core';
+import { ICommandService, IContextService, ThemeService } from '@univerjs/core';
 import { type IMouseEvent, type IPointerEvent, type IShapeProps, Shape, type UniverRenderingContext2D } from '@univerjs/engine-render';
 
 import { Inject } from '@wendellhu/redi';
 import type { IOpenFilterPanelOperationParams } from '../../commands/sheets-filter.operation';
-import { OpenFilterPanelOperation } from '../../commands/sheets-filter.operation';
+import { FILTER_PANEL_OPENED_KEY, OpenFilterPanelOperation } from '../../commands/sheets-filter.operation';
 import { FilterButton } from './drawings';
 
 export const FILTER_ICON_SIZE = 16;
@@ -45,6 +45,7 @@ export class SheetsFilterButtonShape extends Shape<ISheetsFilterButtonShapeProps
     constructor(
         key: string,
         props: ISheetsFilterButtonShapeProps,
+        @IContextService private readonly _contextService: IContextService,
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(ThemeService) private readonly _themeService: ThemeService
     ) {
@@ -112,6 +113,9 @@ export class SheetsFilterButtonShape extends Shape<ISheetsFilterButtonShapeProps
         }
 
         const { col, unitId, subUnitId } = this._filterParams!;
+        const opened = this._contextService.getContextValue(FILTER_PANEL_OPENED_KEY);
+        if (opened) return;
+
         setTimeout(() => {
             this._commandService.executeCommand(OpenFilterPanelOperation.id, {
                 unitId,

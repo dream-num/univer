@@ -36,6 +36,8 @@ export interface ICanvasPopup {
     direction?: 'vertical' | 'horizontal';
     offset?: [number, number];
     excludeOutside?: HTMLElement[];
+    /** Close the popup even if the outside element clicked is its target. */
+    closeOnSelfTarget?: boolean;
     extraProps?: Record<string, any>;
 }
 

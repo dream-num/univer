@@ -90,6 +90,9 @@ export class SheetsFilterPanelService extends Disposable {
         this._filterByModel$.next(model);
     }
 
+    private readonly _hasCriteria$ = new BehaviorSubject<boolean>(false);
+    readonly hasCriteria$ = this._hasCriteria$.asObservable();
+
     private _filterModel: Nullable<FilterModel> = null;
     get filterModel() { return this._filterModel; }
 
@@ -109,6 +112,7 @@ export class SheetsFilterPanelService extends Disposable {
     override dispose(): void {
         this._filterBy$.complete();
         this._filterByModel$.complete();
+        this._hasCriteria$.complete();
     }
 
     setupCol(filterModel: FilterModel, col: number): boolean {
@@ -125,10 +129,11 @@ export class SheetsFilterPanelService extends Disposable {
                 return this._setupByConditions(filterModel, col);
             }
 
-            // TODO: when there's only one value filter and it's not empty, we should use FilterByCondition
+            this._hasCriteria$.next(true);
             return this._setupByValues(filterModel, col);
         }
 
+        this._hasCriteria$.next(false);
         // By default we filter by values.
         return this._setupByValues(filterModel, col);
     };

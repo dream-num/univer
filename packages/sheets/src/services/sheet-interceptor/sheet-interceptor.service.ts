@@ -64,6 +64,7 @@ export class SheetInterceptorService extends Disposable {
         this.disposeWithMe(this._univerInstanceService.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.SHEET).subscribe((workbook) => {
             this._interceptWorkbook(workbook);
         }));
+
         this.disposeWithMe(this._univerInstanceService.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.SHEET).subscribe((workbook) =>
             this._disposeWorkbookInterceptor(workbook)
         ));

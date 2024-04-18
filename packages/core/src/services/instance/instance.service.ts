@@ -138,8 +138,9 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
         if (!this._unitsByType.has(type)) {
             this._unitsByType.set(type, []);
         }
-
         this._unitsByType.get(type)!.push(unit);
+
+        this._unitAdded$.next(unit);
         this._currentUnits$.next({ ...this._currentUnits$.getValue(), [type]: unit });
     }
 

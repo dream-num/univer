@@ -18,7 +18,7 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import type { Workbook } from '@univerjs/core';
 import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import React from 'react';
-import { useObservable } from '@univerjs/ui';
+import { ProgressBar, useObservable } from '@univerjs/ui';
 
 import { CountBar } from '../count-bar/CountBar';
 import { EditorContainer } from '../editor-container/EditorContainer';
@@ -48,7 +48,10 @@ export function RenderSheetHeader() {
     if (!workbook) return null;
 
     return (
-        <FormulaBar />
+        <>
+            <FormulaBar />
+            <ProgressBar />
+        </>
     );
 }
 

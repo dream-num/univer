@@ -24,7 +24,6 @@ import {
     PermissionStatus,
     RxDisposable,
     toDisposable,
-    UniverEditablePermissionPoint,
     UniverInstanceType,
 } from '@univerjs/core';
 import type { IDisposable } from '@wendellhu/redi';
@@ -139,16 +138,17 @@ export class SheetPermissionService extends RxDisposable {
     }
 
     getSheetEditable(unitId?: string, sheetId?: string) {
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
-        if (!workbook) return false;
+        return true;
+        // const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+        // if (!workbook) return false;
 
-        const _unitId = unitId || workbook.getUnitId();
-        const sheet = workbook.getActiveSheet();
-        const _sheetId = sheetId || sheet.getSheetId();
-        const sheetPermission = new SheetEditablePermission(_unitId, _sheetId);
-        return this._permissionService
-            .composePermission(_unitId, [UniverEditablePermissionPoint, sheetPermission.id])
-            .every((item) => item.value);
+        // const _unitId = unitId || workbook.getUnitId();
+        // const sheet = workbook.getActiveSheet();
+        // const _sheetId = sheetId || sheet.getSheetId();
+        // const sheetPermission = new SheetEditablePermission(_unitId, _sheetId);
+        // return this._permissionService
+        //     .composePermission(_unitId, [UniverEditablePermissionPoint, sheetPermission.id])
+        //     .every((item) => item.value);
     }
 
     setSheetEditable(v: boolean, unitId?: string, sheetId?: string) {

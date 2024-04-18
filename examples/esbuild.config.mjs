@@ -105,7 +105,7 @@ if (args.watch) {
 
     const { port } = await ctx.serve({
         servedir: './local',
-        port: 3002,
+        port: 3003,
     });
 
     const url = `http://localhost:${port}`;

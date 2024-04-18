@@ -241,6 +241,10 @@ export class TextSelectionController extends Disposable {
     }
 
     private _getDocObjectById(unitId: string) {
+        if (this._univerInstanceService.getUnitType(unitId) !== UniverInstanceType.DOC) {
+            return null;
+        }
+
         return getDocObjectById(unitId, this._renderManagerService);
     }
 }

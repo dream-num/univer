@@ -53,13 +53,11 @@ export function getDocObjectById(
     renderManagerService: IRenderManagerService
 ): Nullable<IDocObjectParam> {
     const currentRender = renderManagerService.getRenderById(unitId);
-
     if (currentRender == null) {
         return;
     }
 
     const { mainComponent, scene, engine } = currentRender;
-
     const document = mainComponent as Documents;
 
     return {

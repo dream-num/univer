@@ -53,21 +53,17 @@ export class SheetsFilterController extends Disposable {
     }
 
     private _initInterceptors(): void {
-        this.disposeWithMe(
-            this._sheetInterceptorService.interceptCommand({
-                getMutations: (command) => this._getUpdateFilter(command),
-            })
-        );
+        this.disposeWithMe(this._sheetInterceptorService.interceptCommand({
+            getMutations: (command) => this._getUpdateFilter(command),
+        }));
+
         const disposableCollection = new DisposableCollection();
         const registerRefRange = (unitId: string, subUnitId: string) => {
             const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
-            if (!workbook) {
-                return;
-            }
+            if (!workbook) return;
+
             const workSheet = workbook?.getSheetBySheetId(subUnitId);
-            if (!workSheet) {
-                return;
-            }
+            if (!workSheet) return;
 
             disposableCollection.dispose();
             const range = this._sheetsFilterService.getFilterModel(unitId, subUnitId)?.getRange();
@@ -109,28 +105,26 @@ export class SheetsFilterController extends Disposable {
                 disposableCollection.add(this._refRangeService.registerRefRange(range, handler, unitId, subUnitId));
             }
         };
-        this.disposeWithMe(
-            this._commandService.onCommandExecuted((commandInfo) => {
-                if (commandInfo.id === SetWorksheetActivateCommand.id) {
-                    const params = commandInfo.params as ISetWorksheetActivateCommandParams;
-                    const sheetId = params.subUnitId;
-                    const unitId = params.unitId;
-                    if (!sheetId || !unitId) {
-                        return;
-                    }
-                    registerRefRange(unitId, sheetId);
+        this.disposeWithMe(this._commandService.onCommandExecuted((commandInfo) => {
+            if (commandInfo.id === SetWorksheetActivateCommand.id) {
+                const params = commandInfo.params as ISetWorksheetActivateCommandParams;
+                const sheetId = params.subUnitId;
+                const unitId = params.unitId;
+                if (!sheetId || !unitId) {
+                    return;
                 }
-                if (commandInfo.id === SetSheetsFilterRangeMutation.id) {
-                    const params = commandInfo.params as IAddWorksheetMergeMutationParams;
-                    const sheetId = params.subUnitId;
-                    const unitId = params.unitId;
-                    if (!sheetId || !unitId) {
-                        return;
-                    }
-                    registerRefRange(params.unitId, params.subUnitId);
+                registerRefRange(unitId, sheetId);
+            }
+            if (commandInfo.id === SetSheetsFilterRangeMutation.id) {
+                const params = commandInfo.params as IAddWorksheetMergeMutationParams;
+                const sheetId = params.subUnitId;
+                const unitId = params.unitId;
+                if (!sheetId || !unitId) {
+                    return;
                 }
-            })
-        );
+                registerRefRange(params.unitId, params.subUnitId);
+            }
+        }));
 
         this.disposeWithMe(this._sheetsFilterService.loadedUnitId$.subscribe((unitId) => {
             if (unitId) {
@@ -324,10 +318,11 @@ export class SheetsFilterController extends Disposable {
 
     private _handleRemoveRowCommand(config: IRemoveRowsMutationParams, unitId: string, subUnitId: string) {
         const filterModel = this._sheetsFilterService.getFilterModel(unitId, subUnitId);
-        const filterRange = filterModel?.getRange() ?? null;
-        if (!filterModel || !filterRange) {
+        if (!filterModel) {
             return this._handleNull();
         }
+
+        const filterRange = filterModel.getRange();
         const { startRow, endRow } = filterRange;
         const { startRow: removeStartRow, endRow: removeEndRow } = config.range;
         if (removeStartRow > endRow) {
@@ -339,6 +334,8 @@ export class SheetsFilterController extends Disposable {
 
         const filterHeaderIsRemoved = startRow <= removeEndRow && startRow >= removeStartRow;
 
+        undos.push({ id: SetSheetsFilterRangeMutation.id, params: { range: filterRange, unitId, subUnitId } });
+
         const count = Math.min(removeEndRow, endRow) - Math.max(removeStartRow, startRow) + 1;
         if (count === endRow - startRow + 1 || filterHeaderIsRemoved) {
             const removeFilterRangeMutationParams: IRemoveSheetsFilterMutationParams = {
@@ -346,6 +343,7 @@ export class SheetsFilterController extends Disposable {
                 subUnitId,
             };
             redos.push({ id: RemoveSheetsFilterMutation.id, params: removeFilterRangeMutationParams });
+
             filterColumn.forEach((column) => {
                 const [offset, filter] = column;
                 const setCriteriaMutationParams: ISetSheetsFilterCriteriaMutationParams = {
@@ -370,7 +368,7 @@ export class SheetsFilterController extends Disposable {
             };
             redos.push({ id: SetSheetsFilterRangeMutation.id, params: setFilterRangeMutationParams });
         }
-        undos.push({ id: SetSheetsFilterRangeMutation.id, params: { range: filterRange, unitId, subUnitId } });
+
         return {
             undos: mergeSetFilterCriteria(undos),
             redos: mergeSetFilterCriteria(redos),

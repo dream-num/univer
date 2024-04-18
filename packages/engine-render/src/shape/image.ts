@@ -20,7 +20,7 @@ import type { UniverRenderingContext } from '../context';
 import type { IShapeProps } from './shape';
 import { Shape } from './shape';
 
-export interface IPictureProps extends IShapeProps {
+export interface IImageProps extends IShapeProps {
     image?: HTMLImageElement;
     url?: string;
     success?: () => void;
@@ -31,12 +31,12 @@ export interface IPictureProps extends IShapeProps {
     autoHeight?: boolean;
 }
 
-export class Picture extends Shape<IPictureProps> {
-    protected _props: IPictureProps;
+export class Image extends Shape<IImageProps> {
+    protected _props: IImageProps;
 
     protected _native: Nullable<HTMLImageElement>;
 
-    constructor(id: string, config: IPictureProps) {
+    constructor(id: string, config: IImageProps) {
         super(id, config);
         this._props = {
             autoWidth: false,
@@ -70,7 +70,7 @@ export class Picture extends Shape<IPictureProps> {
         }
     }
 
-    static override drawWith(ctx: UniverRenderingContext, picture: Picture) {
+    static override drawWith(ctx: UniverRenderingContext, picture: Image) {
         if (picture._native?.complete) {
             const { width, height } = picture;
             try {
@@ -81,16 +81,16 @@ export class Picture extends Shape<IPictureProps> {
         }
     }
 
-    static create(id: string, url: string, callback?: () => void): Picture {
-        return new Picture(id, { url, success: callback });
+    static create(id: string, url: string, callback?: () => void): Image {
+        return new Image(id, { url, success: callback });
     }
 
-    getPictureProps(): IPictureProps {
+    getPictureProps(): IImageProps {
         return this._props;
     }
 
     protected override _draw(ctx: UniverRenderingContext) {
-        Picture.drawWith(ctx, this);
+        Image.drawWith(ctx, this);
     }
 
     protected _init(): void {

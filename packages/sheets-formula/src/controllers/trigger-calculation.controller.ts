@@ -229,6 +229,8 @@ export class TriggerCalculationController extends Disposable {
          */
         const debouncedPushTask = throttle(this._pushTask.bind(this), 300);
         let startDependencyTimer: NodeJS.Timeout | null;
+        let formulaInsertTaskCount = false;
+        let arrayFormulaInsertTaskCount = false;
 
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
@@ -248,25 +250,25 @@ export class TriggerCalculationController extends Disposable {
                     } = params.stageInfo;
 
                     if (stage === FormulaExecuteStageType.START_DEPENDENCY) {
-                        // If the dependency analysis is not completed within 500ms, it means that the amount of calculation is very large, and the progress is displayed as 5%.
+                        // If the total calculation time exceeds 1s, a progress bar is displayed. The first progress shows 5%
                         startDependencyTimer = setTimeout(() => {
+                            // Ignore progress deviations, and finally the complete method ensures the correct completion of the progress
                             this._progressService.insertTaskCount(100);
                             this._progressService.pushTask({ count: 5 });
 
                             startDependencyTimer = null;
-                        }, 500);
-                    } else if (stage === FormulaExecuteStageType.START_CALCULATION) {
-                        if (startDependencyTimer) {
-                            // Clear the timer directly, ignore the progress error in setTimeout, and finally the complete method ensures the correct completion of the progress
-                            clearTimeout(startDependencyTimer);
-                            startDependencyTimer = null;
-                        } else {
-                            // Array formulas also go through the calculation process, so the total is twice
-                            this._progressService.insertTaskCount(totalFormulasToCalculate * 2);
-                        }
+                        }, 1000);
                     } else if (stage === FormulaExecuteStageType.CURRENTLY_CALCULATING) {
+                        if (!formulaInsertTaskCount && !startDependencyTimer) {
+                            formulaInsertTaskCount = true;
+                            this._progressService.insertTaskCount(totalFormulasToCalculate);
+                        }
                         debouncedPushTask(completedFormulasCount);
                     } else if (stage === FormulaExecuteStageType.CURRENTLY_CALCULATING_ARRAY_FORMULA) {
+                        if (!arrayFormulaInsertTaskCount && !startDependencyTimer) {
+                            arrayFormulaInsertTaskCount = true;
+                            this._progressService.insertTaskCount(totalArrayFormulasToCalculate);
+                        }
                         debouncedPushTask(completedArrayFormulasCount);
                     }
 
@@ -276,9 +278,9 @@ export class TriggerCalculationController extends Disposable {
                     //     `Stage ${stage} Array formula.There are ${totalArrayFormulasToCalculate} functions to be executed, ${completedArrayFormulasCount} complete.`
                     // );
                     // } else {
-                    //     console.warn(
-                    //         `Stage ${stage} .There are ${totalFormulasToCalculate} functions to be executed, ${completedFormulasCount} complete.`
-                    //     );
+                    // console.warn(
+                    //     `Stage ${stage} .There are ${totalFormulasToCalculate} functions to be executed, ${completedFormulasCount} complete.`
+                    // );
                     // }
                 } else {
                     const state = params.functionsExecutedState;
@@ -305,8 +307,16 @@ export class TriggerCalculationController extends Disposable {
                             break;
                     }
 
-                    //  Manually hide the progress bar to prevent the progress bar from not being hidden due to pushTask statistical errors
-                    this._progressService.complete();
+                    if (startDependencyTimer) {
+                        // The total calculation time does not exceed 1s, and the progress bar is not displayed.
+                        clearTimeout(startDependencyTimer);
+                        startDependencyTimer = null;
+                    } else {
+                        //  Manually hide the progress bar to prevent the progress bar from not being hidden due to pushTask statistical errors
+                        this._progressService.complete();
+                    }
+
+
                     console.warn(`execution result${result}`);
                 }
             })

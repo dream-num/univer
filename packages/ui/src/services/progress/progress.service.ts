@@ -95,7 +95,10 @@ export class ProgressService extends Disposable implements IProgressService, IDi
         this._taskCount -= count;
         if (this._taskCount <= 0) {
             this._taskCount = 0;
-            this.complete();
+            this._progressChange$.next({
+                step: 1,
+            });
+            this._progressVisible$.next(false);
         }
     }
 

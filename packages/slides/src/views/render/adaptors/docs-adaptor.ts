@@ -22,9 +22,9 @@ import {
     DocumentSkeleton,
     DocumentViewModel,
     EVENT_TYPE,
+    Image,
     Liquid,
     PageLayoutType,
-    Picture,
     Rect,
     Scene,
     SceneViewer,
@@ -205,7 +205,7 @@ export class DocsAdaptor extends ObjectAdaptor {
 
                 const { objectTransform } = drawingOrigin;
 
-                const rect = new Picture(drawing.objectId, {
+                const rect = new Image(drawing.objectId, {
                     // url: objectTransform.imageProperties?.contentUrl || '',
                     left: aLeft + docsLeft + this._liquid.x,
                     top: aTop + docsTop + this._liquid.y,

@@ -60,11 +60,13 @@ export const RuleEdit = (props: IRuleEditProps) => {
     const subUnitId = getSubUnitId(univerInstanceService);
 
     const rangeResult = useRef<IRange[]>(props.rule?.ranges ?? []);
+
     const rangeString = useMemo(() => {
         let ranges = props.rule?.ranges;
         if (!ranges?.length) {
             ranges = selectionManagerService.getSelectionRanges() ?? [];
         }
+        rangeResult.current = ranges;
         if (!ranges?.length) {
             return '';
         }

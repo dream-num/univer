@@ -747,5 +747,5 @@ export function getMergeableSelectionsByType(type: MergeType, selections: Nullab
 }
 
 function cellHasValue(cell: ICellData): boolean {
-    return cell.v !== undefined || cell.p !== undefined;
+    return (cell.v !== undefined && cell.v !== null && cell.v !== '') || cell.p !== undefined;
 }

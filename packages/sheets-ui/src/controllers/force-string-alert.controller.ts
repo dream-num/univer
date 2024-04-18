@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { CellValueType, Disposable, isRealNum, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
+import type { Workbook } from '@univerjs/core';
+import { CellValueType, Disposable, isRealNum, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 
 import { Inject } from '@wendellhu/redi';
 import { HoverManagerService } from '../services/hover-manager.service';
@@ -41,7 +42,7 @@ export class ForceStringAlertController extends Disposable {
     private _initCellAlertPopup() {
         this.disposeWithMe(this._hoverManagerService.currentCell$.subscribe((cellPos) => {
             if (cellPos) {
-                const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
+                const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
                 const worksheet = workbook.getActiveSheet();
                 const cellData = worksheet.getCell(cellPos.location.row, cellPos.location.col);
 

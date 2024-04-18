@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { Disposable, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
+import type { Workbook } from '@univerjs/core';
+import { Disposable, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import { ErrorType } from '@univerjs/engine-formula';
 import { CellAlertManagerService, CellAlertType, HoverManagerService } from '@univerjs/sheets-ui';
 import { Inject } from '@wendellhu/redi';
@@ -56,7 +57,7 @@ export class FormulaAlertController extends Disposable {
     private _initCellAlertPopup() {
         this.disposeWithMe(this._hoverManagerService.currentCell$.subscribe((cellPos) => {
             if (cellPos) {
-                const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
+                const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
                 const worksheet = workbook.getActiveSheet();
                 const cellData = worksheet.getCell(cellPos.location.row, cellPos.location.col);
 

@@ -15,15 +15,14 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { ICommandService, IContextService, LifecycleStages, OnLifecycle, RxDisposable, toDisposable } from '@univerjs/core';
+import { ICommandService, IContextService, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
 import type { IMenuItemFactory } from '@univerjs/ui';
 import { ComponentManager, IMenuService, IShortcutService } from '@univerjs/ui';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { distinctUntilChanged } from 'rxjs';
-import { ReCalcSheetsFilterMutation, RemoveSheetsFilterMutation, SetSheetsFilterCriteriaMutation, SetSheetsFilterRangeMutation } from '@univerjs/sheets-filter';
-import { SheetCanvasPopManagerService, SheetRenderController } from '@univerjs/sheets-ui';
+import { SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
 import { FilterSingle } from '@univerjs/icons';
 
 import { ClearSheetsFilterCriteriaCommand, ReCalcSheetsFilterCommand, SetSheetsFilterCriteriaCommand, SmartToggleSheetsFilterCommand } from '../commands/sheets-filter.command';
@@ -84,7 +83,6 @@ export class SheetsFilterUIController extends RxDisposable {
         ].forEach((c) => {
             this.disposeWithMe(this._commandService.registerCommand(c));
         });
-
     }
 
     private _initMenuItems(): void {
@@ -127,21 +125,10 @@ export class SheetsFilterUIController extends RxDisposable {
             closeOnSelfTarget: true,
             onClickOutside: () => this._commandService.syncExecuteCommand(CloseFilterPanelOperation.id),
         });
-
-        this._setupClosePanelListener();
     }
 
     private _closeFilterPopup(): void {
         this._popupDisposable?.dispose();
         this._popupDisposable = null;
-    }
-
-    /**
-     * When some mutation happens, we may need to close the filter panel.
-     */
-    private _setupClosePanelListener(): IDisposable {
-        // TODO@wzhudev: when the `col` changes, the filter panel should
-        // TODO@wzhudev: implement these kind of listeners.
-        return toDisposable(() => { });
     }
 }

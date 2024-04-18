@@ -15,7 +15,7 @@
  */
 
 import type { IRange, Workbook, Worksheet } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import type { ISetNumfmtMutationParams } from '@univerjs/sheets';
 import { SelectionManagerService, SetNumfmtMutation } from '@univerjs/sheets';
 import { APPLY_TYPE, AutoFillService, IAutoFillService } from '@univerjs/sheets-ui';
@@ -47,7 +47,7 @@ describe('test auto fill', () => {
         const univerInstanceService = testBed.get(IUniverInstanceService);
         testBed.get(NumfmtAutoFillController);
         testBed.get(NumfmtCellContent);
-        workbook = univerInstanceService.getCurrentUniverSheetInstance()!;
+        workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
         worksheet = workbook.getActiveSheet();
     });
     it('test fill format ,repeat range is divisible', () => {

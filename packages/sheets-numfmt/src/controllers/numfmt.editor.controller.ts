@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IRange, Nullable } from '@univerjs/core';
+import type { IRange, Nullable, Workbook } from '@univerjs/core';
 import {
     CellValueType,
     Disposable,
@@ -22,6 +22,7 @@ import {
     LifecycleStages,
     OnLifecycle,
     toDisposable,
+    UniverInstanceType,
 } from '@univerjs/core';
 import numfmt from '@univerjs/engine-numfmt';
 import type {
@@ -200,7 +201,7 @@ export class NumfmtEditorController extends Disposable {
                 getMutations(command) {
                     switch (command.id) {
                         case SetRangeValuesCommand.id: {
-                            const workbook = self._univerInstanceService.getCurrentUniverSheetInstance()!;
+                            const workbook = self._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
                             const unitId = workbook.getUnitId();
                             const subUnitId = workbook.getActiveSheet().getSheetId();
                             const list = self._collectEffectMutation.getEffects();

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICommand, IDocumentData, IStyleBase, Univer } from '@univerjs/core';
-import { BooleanNumber, ICommandService, IUniverInstanceService, UndoCommand } from '@univerjs/core';
+import type { DocumentDataModel, ICommand, IDocumentData, IStyleBase, Univer } from '@univerjs/core';
+import { BooleanNumber, ICommandService, IUniverInstanceService, UndoCommand, UniverInstanceType } from '@univerjs/core';
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -101,7 +101,7 @@ describe('test cases in clipboard', () => {
 
     function getFormatValueAt(key: keyof IStyleBase, pos: number) {
         const univerInstanceService = get(IUniverInstanceService);
-        const docsModel = univerInstanceService.getUniverDocInstance('test-doc');
+        const docsModel = univerInstanceService.getUnit<DocumentDataModel>('test-doc', UniverInstanceType.DOC);
 
         if (docsModel?.body?.textRuns == null) {
             return;
@@ -118,7 +118,7 @@ describe('test cases in clipboard', () => {
 
     function getTextByPosition(start: number, end: number) {
         const univerInstanceService = get(IUniverInstanceService);
-        const docsModel = univerInstanceService.getUniverDocInstance('test-doc');
+        const docsModel = univerInstanceService.getUnit<DocumentDataModel>('test-doc', UniverInstanceType.DOC);
 
         return docsModel?.body?.dataStream.slice(start, end);
     }

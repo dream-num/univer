@@ -147,7 +147,7 @@ export class UniverDocsUIPlugin extends Plugin {
 
             const id = doc.getUnitId();
             if (!editorService.isEditor(id)) {
-                currentService.focusUniverInstance(doc.getUnitId());
+                currentService.focusUnit(doc.getUnitId());
             }
         } catch (err) {
             this._logService.warn(err);

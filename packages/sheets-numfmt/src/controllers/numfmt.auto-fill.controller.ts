@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IMutationInfo, IRange } from '@univerjs/core';
-import { Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle, Range, Rectangle } from '@univerjs/core';
+import type { IMutationInfo, IRange, Workbook } from '@univerjs/core';
+import { Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle, Range, Rectangle, UniverInstanceType } from '@univerjs/core';
 import type { ISetCellsNumfmt, ISetNumfmtMutationParams } from '@univerjs/sheets';
 import {
     factorySetNumfmtUndoMutation,
@@ -50,7 +50,7 @@ export class NumfmtAutoFillController extends Disposable {
             targetStartCell: { row: number; col: number },
             relativeRange: IRange
         ) => {
-            const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
+            const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
             const unitId = workbook.getUnitId();
             const subUnitId = workbook.getActiveSheet().getSheetId();
             const sourceRange = {

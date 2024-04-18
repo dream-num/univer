@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IUniverInstanceService, Nullable } from '@univerjs/core';
+import { type IUniverInstanceService, type Nullable, UniverInstanceType } from '@univerjs/core';
 import type { Documents, Engine, IRenderManagerService, Scene } from '@univerjs/engine-render';
 
 export interface IDocObjectParam {
@@ -27,7 +27,7 @@ export function getDocObject(
     univerInstanceService: IUniverInstanceService,
     renderManagerService: IRenderManagerService
 ): Nullable<IDocObjectParam> {
-    const documentModel = univerInstanceService.getCurrentUniverDocInstance();
+    const documentModel = univerInstanceService.getCurrentUnitForType(UniverInstanceType.DOC);
     if (!documentModel) {
         return null;
     }
@@ -53,13 +53,11 @@ export function getDocObjectById(
     renderManagerService: IRenderManagerService
 ): Nullable<IDocObjectParam> {
     const currentRender = renderManagerService.getRenderById(unitId);
-
     if (currentRender == null) {
         return;
     }
 
     const { mainComponent, scene, engine } = currentRender;
-
     const document = mainComponent as Documents;
 
     return {

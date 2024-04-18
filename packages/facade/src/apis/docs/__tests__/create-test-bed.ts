@@ -96,7 +96,7 @@ export function createTestBed(documentConfig?: IDocumentData, dependencies?: Dep
     const doc = univer.createUniverDoc(documentConfig || getTestDocumentDataDemo());
 
     const univerInstanceService = injector.get(IUniverInstanceService);
-    univerInstanceService.focusUniverInstance('test');
+    univerInstanceService.focusUnit('test');
     const logService = injector.get(ILogService);
 
     logService.setLogLevel(LogLevel.SILENT); // change this to `LogLevel.VERBOSE` to debug tests via logs

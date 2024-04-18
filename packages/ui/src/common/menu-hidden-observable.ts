@@ -30,18 +30,18 @@ export function getMenuHiddenObservable(
             if (unitId == null) {
                 return subscriber.next(true);
             }
-            const univerType = univerInstanceService.getDocumentType(unitId);
+            const univerType = univerInstanceService.getUnitType(unitId);
 
             subscriber.next(univerType !== targetUniverType);
         });
 
-        const focusedUniverInstance = univerInstanceService.getFocusedUniverInstance();
+        const focusedUniverInstance = univerInstanceService.getFocusedUnit();
 
         if (focusedUniverInstance == null) {
             return subscriber.next(true);
         }
 
-        const univerType = univerInstanceService.getDocumentType(focusedUniverInstance.getUnitId());
+        const univerType = univerInstanceService.getUnitType(focusedUniverInstance.getUnitId());
         subscriber.next(univerType !== targetUniverType);
 
         return () => subscription.unsubscribe();

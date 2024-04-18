@@ -52,6 +52,10 @@ export function useObservable<T>(observable: Nullable<ObservableOrFn<T>>, defaul
  * @param deps The dependencies to trigger a re-subscription.
  */
 export function useObservable<T>(observable: Nullable<ObservableOrFn<T>>, defaultValue?: T, shouldHaveSyncValue?: boolean, deps?: any[]): T | undefined {
+    if (typeof observable === 'function' && !deps) {
+        throw new Error('[useObservable]: expect deps when observable is a function! Otherwise it would cause an infinite loop.');
+    }
+
     const observableRef = useRef<Observable<T> | null>(null);
     const subscriptionRef = useRef<Subscription | null>(null);
     const depsRef = useRef<any[] | undefined>(deps ?? undefined);

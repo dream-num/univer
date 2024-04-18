@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommand, IRange } from '@univerjs/core';
+import type { ICommand, IRange, Workbook } from '@univerjs/core';
 import {
     CommandType,
     ErrorService,
@@ -24,6 +24,7 @@ import {
     RANGE_TYPE,
     Rectangle,
     sequenceExecute,
+    UniverInstanceType,
 } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
@@ -72,7 +73,7 @@ export const MoveRowsCommand: ICommand<IMoveRowsCommandParams> = {
 
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
+        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET);
         if (!workbook) {
             return false;
         }
@@ -201,7 +202,7 @@ export const MoveColsCommand: ICommand<IMoveColsCommandParams> = {
 
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
+        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET);
         if (!workbook) {
             return false;
         }

@@ -14,4 +14,4 @@
  * limitations under the License.
  */
 
-export * from './slide-model';
+export type Nullable<T> = T | null | undefined | void;

@@ -15,8 +15,8 @@
  */
 
 
-import type { ICellDataForSheetInterceptor, ICellRenderContext } from '@univerjs/core';
-import { DataValidationRenderMode, DataValidationStatus, DataValidationType, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, WrapStrategy } from '@univerjs/core';
+import type { ICellDataForSheetInterceptor, ICellRenderContext, Workbook } from '@univerjs/core';
+import { DataValidationRenderMode, DataValidationStatus, DataValidationType, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, UniverInstanceType, WrapStrategy } from '@univerjs/core';
 import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
 import { ComponentManager, IMenuService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
@@ -173,7 +173,7 @@ export class DataValidationRenderController extends RxDisposable {
 
     private _initSkeletonChange() {
         const markSkeletonDirty = () => {
-            const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
+            const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET);
             if (!workbook) return;
 
             const unitId = workbook.getUnitId();

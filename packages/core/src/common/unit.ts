@@ -14,8 +14,23 @@
  * limitations under the License.
  */
 
-export * from './registry';
-export * from './univer';
-export * from './univer-doc';
-export * from './univer-sheet';
-export * from './univer-slide';
+import { Disposable } from '../shared';
+
+/**
+ * Type of built-in univer document instances.
+ */
+export enum UniverInstanceType {
+    UNKNOWN = 0,
+    DOC = 1,
+    SHEET = 2,
+    SLIDE = 3,
+
+    UNRECOGNIZED = -1,
+}
+
+export type UnitType = UniverInstanceType | number;
+
+export abstract class UnitModel<_D = object, T extends UnitType = UnitType> extends Disposable {
+    abstract readonly type: T;
+    abstract getUnitId(): string;
+}

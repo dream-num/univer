@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IRange, ISheetDataValidationRule } from '@univerjs/core';
-import { DataValidationType, Disposable, DisposableCollection, ICommandService, isRangesEqual, IUniverInstanceService, LifecycleStages, OnLifecycle, Range, Rectangle, toDisposable } from '@univerjs/core';
+import type { IRange, ISheetDataValidationRule, Workbook } from '@univerjs/core';
+import { DataValidationType, Disposable, DisposableCollection, ICommandService, isRangesEqual, IUniverInstanceService, LifecycleStages, OnLifecycle, Range, Rectangle, toDisposable, UniverInstanceType } from '@univerjs/core';
 import type { EffectRefRangeParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { handleCommonDefaultRangeChangeWithEffectRefCommands, handleDefaultRangeChangeWithEffectRefCommands, RefRangeService, SetRangeValuesMutation } from '@univerjs/sheets';
@@ -220,7 +220,7 @@ export class DataValidationRefRangeController extends Disposable {
         const gridRange = deserializeRangeWithSheet(formula1 ?? '');
         const id = this._getIdWithUnitId(propUnitId, propSubUnitId, ruleId);
         const rangeUnitId = gridRange.unitId || propUnitId;
-        const workbook = this._univerInstanceService.getUniverSheetInstance(rangeUnitId) ?? this._univerInstanceService.getCurrentUniverSheetInstance()!;
+        const workbook = this._univerInstanceService.getUniverSheetInstance(rangeUnitId) ?? this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
         const sheetId = workbook.getSheetBySheetName(gridRange.sheetName)?.getSheetId() ?? propSubUnitId;
         const worksheet = workbook.getSheetBySheetId(sheetId) ?? workbook.getActiveSheet();
         const disposableCollection = new DisposableCollection();

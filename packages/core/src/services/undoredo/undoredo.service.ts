@@ -26,7 +26,7 @@ import { CommandType, ICommandService, sequenceExecute } from '../command/comman
 import { EDITOR_ACTIVATED, FOCUSING_FORMULA_EDITOR, FOCUSING_SHEET } from '../context/context';
 import { IContextService } from '../context/context.service';
 import { IUniverInstanceService } from '../instance/instance.service';
-import type { Nullable } from '../../common/type-utils';
+import type { Nullable } from '../../common/type-util';
 
 export interface IUndoRedoItem {
     /** unitID maps to unitId for UniverSheet / UniverDoc / UniverSlide */
@@ -226,12 +226,12 @@ export class LocalUndoRedoService extends Disposable implements IUndoRedoService
     }
 
     pitchTopUndoElement(): Nullable<IUndoRedoItem> {
-        const unitID = this._getFocusedUniverInstanceId();
+        const unitID = this._getFocusedUnitId();
         return this._pitchUndoElement(unitID);
     }
 
     pitchTopRedoElement(): Nullable<IUndoRedoItem> {
-        const unitID = this._getFocusedUniverInstanceId();
+        const unitID = this._getFocusedUnitId();
         return this._pitchRedoElement(unitID);
     }
 
@@ -275,7 +275,7 @@ export class LocalUndoRedoService extends Disposable implements IUndoRedoService
     }
 
     protected _updateStatus(): void {
-        const unitID = this._getFocusedUniverInstanceId();
+        const unitID = this._getFocusedUnitId();
         const undos = (unitID && this._undoStacks.get(unitID)?.length) || 0;
         const redos = (unitID && this._redoStacks.get(unitID)?.length) || 0;
 
@@ -310,7 +310,7 @@ export class LocalUndoRedoService extends Disposable implements IUndoRedoService
     }
 
     protected _getUndoStackForFocused(): IUndoRedoItem[] {
-        const unitID = this._getFocusedUniverInstanceId();
+        const unitID = this._getFocusedUnitId();
 
         if (!unitID) {
             throw new Error('No focused univer instance!');
@@ -320,7 +320,7 @@ export class LocalUndoRedoService extends Disposable implements IUndoRedoService
     }
 
     protected _getRedoStackForFocused(): IUndoRedoItem[] {
-        const unitID = this._getFocusedUniverInstanceId();
+        const unitID = this._getFocusedUnitId();
 
         if (!unitID) {
             throw new Error('No focused univer instance!');
@@ -335,7 +335,7 @@ export class LocalUndoRedoService extends Disposable implements IUndoRedoService
         item.undoMutations.push(...newItem.undoMutations);
     }
 
-    private _getFocusedUniverInstanceId() {
+    private _getFocusedUnitId() {
         let unitID: string = '';
 
         const isFocusSheet = this._contextService.getContextValue(FOCUSING_SHEET);
@@ -348,10 +348,10 @@ export class LocalUndoRedoService extends Disposable implements IUndoRedoService
             } else if (isFocusEditor) {
                 unitID = DOCS_NORMAL_EDITOR_UNIT_ID_KEY;
             } else {
-                unitID = this._univerInstanceService.getFocusedUniverInstance()?.getUnitId() ?? '';
+                unitID = this._univerInstanceService.getFocusedUnit()?.getUnitId() ?? '';
             }
         } else {
-            unitID = this._univerInstanceService.getFocusedUniverInstance()?.getUnitId() ?? '';
+            unitID = this._univerInstanceService.getFocusedUnit()?.getUnitId() ?? '';
         }
 
         return unitID;

@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { ICommandService, IUniverInstanceService } from '@univerjs/core';
+import type { Workbook } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import type { ISetNumfmtMutationParams } from '@univerjs/sheets';
 import { SetNumfmtMutation } from '@univerjs/sheets';
 import { beforeEach, describe, expect, it } from 'vitest';
@@ -52,7 +53,7 @@ describe('test cell-content', () => {
                 },
             },
         };
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance()!;
+        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
         const worksheet = workbook.getActiveSheet();
         testBed.get(NumfmtCellContent);
         const value = worksheet.getCell(0, 0);

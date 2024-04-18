@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import type { Workbook } from '@univerjs/core';
+import { Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { Inject } from '@wendellhu/redi';
@@ -60,7 +61,7 @@ export class RenderController extends Disposable {
         this.disposeWithMe(this._renderManagerService.currentRender$.subscribe((renderId) => {
             renderId && register(renderId);
         }));
-        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
+        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
         if (workbook) {
             register(workbook.getUnitId());
         }
@@ -69,13 +70,13 @@ export class RenderController extends Disposable {
     _initSkeleton() {
         const markDirtySkeleton = () => {
             this._sheetSkeletonManagerService.reCalculate();
-            const unitId = this._univerInstanceService.getCurrentUniverSheetInstance()!.getUnitId();
+            const unitId = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!.getUnitId();
             this._renderManagerService.getRenderById(unitId)?.mainComponent?.makeDirty();
         };
 
         // After the conditional formatting is marked dirty to drive a rendering, to trigger the window within the conditional formatting recalculation
         this.disposeWithMe(this._conditionalFormattingViewModel.markDirty$.pipe(bufferTime(16), filter((v) => {
-            const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
+            const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET);
             if (!workbook) return false;
 
             const worksheet = workbook.getActiveSheet();
@@ -84,7 +85,7 @@ export class RenderController extends Disposable {
 
         // Sort and delete does not mark dirty.
         this.disposeWithMe(this._conditionalFormattingRuleModel.$ruleChange.pipe(bufferTime(16), filter((v) => {
-            const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
+            const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET);
             if (!workbook) return false;
 
             const worksheet = workbook.getActiveSheet();
@@ -94,7 +95,7 @@ export class RenderController extends Disposable {
         // Once the calculation is complete, a view update is triggered
         // This rendering does not trigger conditional formatting recalculation,because the rule is not mark dirty
         this.disposeWithMe(this._conditionalFormattingService.ruleComputeStatus$.pipe(bufferTime(16), filter((v) => {
-            const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
+            const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET);
             if (!workbook) return false;
 
             const worksheet = workbook.getActiveSheet();

@@ -15,7 +15,7 @@
  */
 
 import { remove } from './array';
-import type { Nullable } from './type-utils';
+import type { Nullable } from './type-util';
 
 export type InterceptorHandler<M = unknown, C = unknown> = (
     value: Nullable<M>,

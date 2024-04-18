@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IMutationInfo, IRange, Nullable } from '@univerjs/core';
+import type { IMutationInfo, IRange, Nullable, Workbook } from '@univerjs/core';
 import {
     CommandType,
     createInterceptorKey,
@@ -26,6 +26,7 @@ import {
     OnLifecycle,
     Rectangle,
     toDisposable,
+    UniverInstanceType,
 } from '@univerjs/core';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject } from '@wendellhu/redi';
@@ -144,7 +145,7 @@ export class RefRangeService extends Disposable {
     private _onRefRangeChange = () => {
         this._sheetInterceptorService.interceptCommand({
             getMutations: (command: EffectRefRangeParams) => {
-                const worksheet = this._univerInstanceService.getCurrentUniverSheetInstance()!.getActiveSheet();
+                const worksheet = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!.getActiveSheet();
                 const unitId = getUnitId(this._univerInstanceService);
                 const subUnitId = getSubUnitId(this._univerInstanceService);
                 const getEffectsCbList = () => {
@@ -366,11 +367,11 @@ export class RefRangeService extends Disposable {
 }
 
 function getUnitId(univerInstanceService: IUniverInstanceService) {
-    return univerInstanceService.getCurrentUniverSheetInstance()!.getUnitId();
+    return univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!.getUnitId();
 }
 
 function getSubUnitId(univerInstanceService: IUniverInstanceService) {
-    return univerInstanceService.getCurrentUniverSheetInstance()!.getActiveSheet().getSheetId();
+    return univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!.getActiveSheet().getSheetId();
 }
 
 function getSelectionRanges(selectionManagerService: SelectionManagerService) {

@@ -22,7 +22,8 @@ import { MoreDownSingle, SlashSingle } from '@univerjs/icons';
 import { Checkbox, Dropdown, InputNumber, Select } from '@univerjs/design';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 
-import { createInternalEditorID, IUniverInstanceService, LocaleService, Tools } from '@univerjs/core';
+import type { Workbook } from '@univerjs/core';
+import { createInternalEditorID, IUniverInstanceService, LocaleService, Tools, UniverInstanceType } from '@univerjs/core';
 import { TextEditor } from '@univerjs/ui';
 import type { IIconSet, IIconType } from '@univerjs/sheets-conditional-formatting';
 import { CFNumberOperator, CFRuleType, CFSubRuleType, CFValueType, compareWithNumber, createDefaultValue, EMPTY_ICON_TYPE, getOppositeOperator, iconGroup, iconMap, SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '@univerjs/sheets-conditional-formatting';
@@ -38,8 +39,8 @@ const getIcon = (iconType: string, iconId: string | number) => {
 
 const TextInput = (props: { id: number; type: CFValueType; value: number | string;onChange: (v: number | string) => void; error?: string }) => {
     const univerInstanceService = useDependency(IUniverInstanceService);
-    const unitId = univerInstanceService.getCurrentUniverSheetInstance()!.getUnitId();
-    const subUnitId = univerInstanceService.getCurrentUniverSheetInstance()!.getActiveSheet().getSheetId();
+    const unitId = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!.getUnitId();
+    const subUnitId = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!.getActiveSheet().getSheetId();
     const className = useMemo(() => {
         if (props.error) {
             return styles.errorInput;

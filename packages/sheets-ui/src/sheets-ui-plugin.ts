@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { IUniverInstanceService, LocaleService, Plugin, PluginType } from '@univerjs/core';
+import type { Workbook } from '@univerjs/core';
+import { IUniverInstanceService, LocaleService, Plugin, PluginType, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { filter } from 'rxjs/operators';
@@ -153,8 +154,8 @@ export class UniverSheetsUIPlugin extends Plugin {
 
     private _markSheetAsFocused() {
         const univerInstanceService = this._univerInstanceService;
-        univerInstanceService.currentSheet$.pipe(filter((v) => !!v)).subscribe((workbook) => {
-            univerInstanceService.focusUniverInstance(workbook!.getUnitId());
+        univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.SHEET).pipe(filter((v) => !!v)).subscribe((workbook) => {
+            univerInstanceService.focusUnit(workbook!.getUnitId());
         });
     }
 }

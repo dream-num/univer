@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import type { Workbook } from '@univerjs/core';
+import { Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
 import { HoverManagerService } from '../services/hover-manager.service';
@@ -37,7 +38,7 @@ export class HoverController extends Disposable {
 
     private _initPointerEvent() {
         const currentRender = this._renderManagerService.getRenderById(
-            this._univerInstanceService.getCurrentUniverSheetInstance()!.getUnitId()
+            this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!.getUnitId()
         );
         if (!currentRender) {
             return;

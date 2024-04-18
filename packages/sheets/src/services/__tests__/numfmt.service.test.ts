@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { Univer } from '@univerjs/core';
-import { cellToRange, ICommandService, IUniverInstanceService } from '@univerjs/core';
+import type { Univer, Workbook } from '@univerjs/core';
+import { cellToRange, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import type { IRemoveNumfmtMutationParams, ISetNumfmtMutationParams } from '@univerjs/sheets';
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -46,7 +46,7 @@ describe('test numfmt service', () => {
     it('model set', () => {
         const univerInstanceService = get(IUniverInstanceService);
         const numfmtService = get(INumfmtService);
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance()!;
+        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
         const sheet = workbook.getActiveSheet();
         const unitId = workbook.getUnitId();
         const subUnitId = sheet.getSheetId();
@@ -71,7 +71,7 @@ describe('test numfmt service', () => {
     it('model delete', () => {
         const univerInstanceService = get(IUniverInstanceService);
         const numfmtService = get(INumfmtService);
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance()!;
+        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
         const sheet = workbook.getActiveSheet();
         const unitId = workbook.getUnitId();
         const subUnitId = sheet.getSheetId();
@@ -102,7 +102,7 @@ describe('test numfmt service', () => {
     it('ref model set', () => {
         const univerInstanceService = get(IUniverInstanceService);
         const numfmtService = get(INumfmtService);
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance()!;
+        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
         const sheet = workbook.getActiveSheet();
         const unitId = workbook.getUnitId();
         const subUnitId = sheet.getSheetId();
@@ -128,7 +128,7 @@ describe('test numfmt service', () => {
     it('model delete', () => {
         const univerInstanceService = get(IUniverInstanceService);
         const numfmtService = get(INumfmtService);
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance()!;
+        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
         const sheet = workbook.getActiveSheet();
         const unitId = workbook.getUnitId();
         const subUnitId = sheet.getSheetId();
@@ -158,7 +158,7 @@ describe('test numfmt service', () => {
     it('model delete', () => {
         const univerInstanceService = get(IUniverInstanceService);
         const numfmtService = get(INumfmtService);
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance()!;
+        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
         const unitId = workbook.getUnitId();
         const sheets = workbook.getSheets();
         const pattern = 'asdws';

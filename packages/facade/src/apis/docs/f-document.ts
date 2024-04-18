@@ -47,12 +47,12 @@ export class FDocument {
     }
 
     undo(): Promise<boolean> {
-        this._univerInstanceService.focusUniverInstance(this.id);
+        this._univerInstanceService.focusUnit(this.id);
         return this._commandService.executeCommand(UndoCommand.id);
     }
 
     redo(): Promise<boolean> {
-        this._univerInstanceService.focusUniverInstance(this.id);
+        this._univerInstanceService.focusUnit(this.id);
         return this._commandService.executeCommand(RedoCommand.id);
     }
 

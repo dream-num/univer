@@ -35,7 +35,7 @@ export class ColumnHeaderLayout extends SheetExtension {
         const { rowColumnSegment, columnHeaderHeight = 0 } = spreadsheetSkeleton;
         const { startColumn, endColumn } = rowColumnSegment;
 
-        if (!spreadsheetSkeleton || columnHeaderHeight === 0) {
+        if (!spreadsheetSkeleton) {
             return;
         }
 

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICellData, IObjectMatrixPrimitiveType, IRange, Nullable } from '@univerjs/core';
-import { Disposable, isFormulaId, isFormulaString, IUniverInstanceService, ObjectMatrix } from '@univerjs/core';
+import type { ICellData, IObjectMatrixPrimitiveType, IRange, Nullable, Workbook } from '@univerjs/core';
+import { Disposable, isFormulaId, isFormulaString, IUniverInstanceService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
 import type {
@@ -304,13 +304,13 @@ export class FormulaDataModel extends Disposable {
 
     initFormulaData() {
         // Load formula data from workbook config data.
-        const allSheets = this._univerInstanceService.getAllUniverSheetsInstance();
+        const allSheets = this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.SHEET);
         if (allSheets.length === 0) {
             return;
         }
 
         // Since there is at least a sheet, there must be current univer sheet instance.
-        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
+        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
         const unitId = workbook.getUnitId();
         this._formulaData[unitId] = {};
 
@@ -324,7 +324,7 @@ export class FormulaDataModel extends Disposable {
     }
 
     getCalculateData() {
-        const unitAllSheet = this._univerInstanceService.getAllUniverSheetsInstance();
+        const unitAllSheet = this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.SHEET);
 
         const allUnitData: IUnitData = {};
 

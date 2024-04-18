@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IExecutionOptions, Nullable } from '@univerjs/core';
+import type { ICommandInfo, IExecutionOptions, Nullable, Workbook } from '@univerjs/core';
 import {
     Disposable,
     ICommandService,
@@ -22,6 +22,7 @@ import {
     LifecycleStages,
     OnLifecycle,
     toDisposable,
+    UniverInstanceType,
 } from '@univerjs/core';
 import type { IFunctionInfo, ISetDefinedNameMutationParam } from '@univerjs/engine-formula';
 import { FunctionType, IDefinedNamesService } from '@univerjs/engine-formula';
@@ -68,7 +69,7 @@ export class DefinedNameController extends Disposable {
 
     private _changeUnitListener() {
         toDisposable(
-            this._univerInstanceService.currentSheet$.subscribe(() => {
+            this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.SHEET).subscribe(() => {
                 this._unRegisterDescriptions();
                 this._registerDescriptions();
             })
@@ -146,7 +147,7 @@ export class DefinedNameController extends Disposable {
     }
 
     private _getUnitIdAndSheetId() {
-        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
+        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
         if (workbook == null) {
             return {};
         }

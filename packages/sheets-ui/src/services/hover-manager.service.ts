@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IPosition, IRange, Nullable } from '@univerjs/core';
-import { IUniverInstanceService } from '@univerjs/core';
+import type { IPosition, IRange, Nullable, Workbook } from '@univerjs/core';
+import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import type { ISheetLocation } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 import { distinctUntilChanged, Subject } from 'rxjs';
@@ -55,7 +55,7 @@ export class HoverManagerService {
         if (!this._lastPosition) return;
 
         const { offsetX, offsetY } = this._lastPosition;
-        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
+        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET);
         if (!workbook) {
             this._currentCell$.next(null);
             return;

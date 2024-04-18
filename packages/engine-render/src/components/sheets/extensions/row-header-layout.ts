@@ -31,9 +31,9 @@ export class RowHeaderLayout extends SheetExtension {
     override Z_INDEX = 10;
 
     override draw(ctx: UniverRenderingContext, parentScale: IScale, spreadsheetSkeleton: SpreadsheetSkeleton) {
-        const { rowColumnSegment, rowHeaderWidth = 0 } = spreadsheetSkeleton;
-        const { startRow, endRow } = rowColumnSegment;
-        if (!spreadsheetSkeleton || rowHeaderWidth === 0) {
+        const { rowColumnSegment, rowHeaderWidth = 0, columnHeaderHeight = 0 } = spreadsheetSkeleton;
+        const { startRow, endRow, startColumn, endColumn } = rowColumnSegment;
+        if (!spreadsheetSkeleton) {
             return;
         }
 

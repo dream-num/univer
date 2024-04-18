@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IMutationInfo } from '@univerjs/core';
+import type { IMutationInfo, Workbook } from '@univerjs/core';
 import {
     CommandType,
     ICommandService,
@@ -74,7 +74,7 @@ export class DataSyncPrimaryController extends RxDisposable {
     }
 
     private _init(): void {
-        this._univerInstanceService.sheetAdded$.pipe(takeUntil(this.dispose$)).subscribe((sheet) => {
+        this._univerInstanceService.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.SHEET).pipe(takeUntil(this.dispose$)).subscribe((sheet) => {
             this._syncingUnits.add(sheet.getUnitId());
 
             // If a sheet is created, it should sync the data to the worker thread.
@@ -85,7 +85,7 @@ export class DataSyncPrimaryController extends RxDisposable {
             });
         });
 
-        this._univerInstanceService.sheetDisposed$.pipe(takeUntil(this.dispose$)).subscribe((workbook) => {
+        this._univerInstanceService.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.SHEET).pipe(takeUntil(this.dispose$)).subscribe((workbook) => {
             this._syncingUnits.delete(workbook.getUnitId());
             // If a sheet is disposed, it should sync the data to the worker thread.
             this._remoteInstanceService.disposeInstance({

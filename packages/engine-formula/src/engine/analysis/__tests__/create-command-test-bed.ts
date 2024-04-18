@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IWorkbookData } from '@univerjs/core';
+import type { IWorkbookData, Workbook } from '@univerjs/core';
 import {
     CellValueType,
     ILogService,
@@ -25,6 +25,7 @@ import {
     Plugin,
     PluginType,
     Univer,
+    UniverInstanceType,
 } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
@@ -257,13 +258,13 @@ export function createCommandTestBed(workbookConfig?: IWorkbookData, dependencie
     const sheet = univer.createUniverSheet(workbookConfig || TEST_WORKBOOK_DATA);
 
     const univerInstanceService = get(IUniverInstanceService);
-    univerInstanceService.focusUniverInstance('test');
+    univerInstanceService.focusUnit('test');
 
     const logService = get(ILogService);
     logService.setLogLevel(LogLevel.SILENT); // change this to `true` to debug tests via logs
 
     const sheetData: ISheetData = {};
-    const workbook = univerInstanceService.getCurrentUniverSheetInstance()!;
+    const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
     const unitId = workbook.getUnitId();
     const sheetId = workbook.getActiveSheet().getSheetId();
     workbook.getSheets().forEach((sheet) => {

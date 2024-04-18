@@ -19,7 +19,7 @@ import type { Subscription, SubscriptionLike } from 'rxjs';
 import { Subject } from 'rxjs';
 import { isSubscription } from 'rxjs/internal/Subscription';
 
-import type { Nullable } from '../common/type-utils';
+import type { Nullable } from '../common/type-util';
 import type { Observer } from '../observer/observable';
 import { isObserver } from '../observer/observable';
 

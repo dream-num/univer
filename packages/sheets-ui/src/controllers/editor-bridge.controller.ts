@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IExecutionOptions, Nullable } from '@univerjs/core';
-import { FOCUSING_DOC, FOCUSING_SHEET, ICommandService, IContextService, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
+import type { ICommandInfo, IExecutionOptions, Nullable, Workbook } from '@univerjs/core';
+import { FOCUSING_DOC, FOCUSING_SHEET, ICommandService, IContextService, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import { DeviceInputEventType, IRenderManagerService, ITextSelectionRenderManager } from '@univerjs/engine-render';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import {
@@ -155,7 +155,7 @@ export class EditorBridgeController extends RxDisposable {
 
     private _initialChangeEditorListener() {
         this.disposeWithMe(
-            this._univerInstanceService.currentDoc$.subscribe((documentDataModel) => {
+            this._univerInstanceService.getCurrentTypeOfUnit$(UniverInstanceType.DOC).subscribe((documentDataModel) => {
                 if (documentDataModel == null) {
                     return;
                 }
@@ -267,7 +267,7 @@ export class EditorBridgeController extends RxDisposable {
     }
 
     private _getCurrentUnitIdAndSheetId() {
-        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
+        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
         const worksheet = workbook.getActiveSheet();
         return {
             unitId: workbook.getUnitId(),

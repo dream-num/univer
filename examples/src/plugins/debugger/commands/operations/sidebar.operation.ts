@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICommand } from '@univerjs/core';
-import { CommandType, IUniverInstanceService } from '@univerjs/core';
+import type { ICommand, Workbook } from '@univerjs/core';
+import { CommandType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { IEditorService, ISidebarService } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 import { TEST_EDITOR_CONTAINER_COMPONENT } from '../../views/test-editor/component-name';
@@ -31,7 +31,7 @@ export const SidebarOperation: ICommand = {
         const sidebarService = accessor.get(ISidebarService);
         const editorService = accessor.get(IEditorService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const unit = univerInstanceService.getCurrentUniverSheetInstance()!;
+        const unit = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
         switch (params.value) {
             case 'open':
                 editorService.setOperationSheetUnitId(unit.getUnitId());

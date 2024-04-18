@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, ICommand, IObjectMatrixPrimitiveType, IRange } from '@univerjs/core';
+import type { ICellData, ICommand, IObjectMatrixPrimitiveType, IRange, Workbook } from '@univerjs/core';
 import {
     BooleanNumber,
     CommandType,
@@ -25,6 +25,7 @@ import {
     IUniverInstanceService,
     Range,
     sequenceExecute,
+    UniverInstanceType,
 } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
@@ -145,7 +146,7 @@ export const InsertRowBeforeCommand: ICommand = {
         }
 
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
+        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET);
         if (!workbook) {
             return false;
         }
@@ -203,7 +204,7 @@ export const InsertRowAfterCommand: ICommand = {
         }
 
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
+        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET);
         if (!workbook) {
             return false;
         }
@@ -334,7 +335,7 @@ export const InsertColBeforeCommand: ICommand = {
         }
 
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
+        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET);
         if (!workbook) {
             return false;
         }
@@ -390,7 +391,7 @@ export const InsertColAfterCommand: ICommand = {
         }
 
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
+        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET);
         if (!workbook) {
             return false;
         }

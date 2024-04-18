@@ -304,7 +304,6 @@ export class Documents extends DocComponent {
                 for (const column of columns) {
                     const { lines, width: columnWidth } = column;
 
-                    this._drawLiquid.translateSave();
                     this._drawLiquid.translateColumn(column);
 
                     const linesCount = lines.length;
@@ -481,8 +480,6 @@ export class Documents extends DocComponent {
                             this._drawLiquid.translateRestore();
                         }
                     }
-
-                    this._drawLiquid.translateRestore();
                 }
             }
 

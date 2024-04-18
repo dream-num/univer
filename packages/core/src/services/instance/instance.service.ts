@@ -14,34 +14,20 @@
  * limitations under the License.
  */
 
-import { createIdentifier } from '@wendellhu/redi';
+import type { IDisposable } from '@wendellhu/redi';
+import { createIdentifier, Inject, Injector } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged, filter, map, Subject } from 'rxjs';
 
 import { DocumentDataModel } from '../../docs/data-model/document-data-model';
 import type { Nullable } from '../../shared';
 import { Disposable } from '../../shared/lifecycle';
 import { Workbook } from '../../sheets/workbook';
-import { SlideDataModel } from '../../slides/domain/slide-model';
-import type { IDocumentData, ISlideData, IWorkbookData } from '../../types/interfaces';
+import { SlideDataModel } from '../../slides/slide-model';
 import { FOCUSING_DOC, FOCUSING_SHEET, FOCUSING_SLIDE } from '../context/context';
 import { IContextService } from '../context/context.service';
-
-/**
- * Type of built-in univer document instances.
- */
-export enum UniverInstanceType {
-    UNKNOWN = 0,
-    DOC = 1,
-    SHEET = 2,
-    SLIDE = 3,
-}
-
-export interface IUniverHandler {
-    createUniverDoc(data: Partial<IDocumentData>): DocumentDataModel;
-    createUniverSheet(data: Partial<IWorkbookData>): Workbook;
-    createUniverSlide(data: Partial<ISlideData>): SlideDataModel;
-}
+import type { UnitModel, UnitType } from '../../common/unit';
+import { UniverInstanceType } from '../../common/unit';
 
 /**
  * IUniverInstanceService holds all the current univer instances and provides a set of
@@ -50,92 +36,47 @@ export interface IUniverHandler {
  * It also manages the focused univer instance.
  */
 export interface IUniverInstanceService {
+    unitAdded$: Observable<UnitModel>;
+    getTypeOfUnitAdded$<T extends UnitModel>(type: UnitType): Observable<T>;
+    addUnit(unit: UnitModel): void;
+
+    unitDisposed$: Observable<UnitModel>;
+    getTypeOfUnitDisposed$<T extends UnitModel>(type: UnitType): Observable<T>;
+    disposeUnit(unitId: string): boolean;
+
     focused$: Observable<Nullable<string>>;
+    focusUnit(unitId: string | null): void;
+    getFocusedUnit(): Nullable<UnitModel>;
 
-    currentSheet$: Observable<Nullable<Workbook>>;
-    currentDoc$: Observable<Nullable<DocumentDataModel>>;
-    currentSlide$: Observable<Nullable<SlideDataModel>>;
+    getCurrentUnitForType<T extends UnitModel>(type: UnitType): Nullable<T>;
+    setCurrentUnitForType(unitId: string): void;
+    getCurrentTypeOfUnit$<T extends UnitModel>(type: UnitType): Observable<Nullable<T>>;
 
-    sheetAdded$: Observable<Workbook>;
-    docAdded$: Observable<DocumentDataModel>;
-    slideAdded$: Observable<SlideDataModel>;
+    createUnit<T, U extends UnitModel>(type: UnitType, data: Partial<T>): U;
 
-    sheetDisposed$: Observable<Workbook>;
-    docDisposed$: Observable<DocumentDataModel>;
-    slideDisposed$: Observable<SlideDataModel>;
-
-    focusUniverInstance(id: string | null): void;
-    getFocusedUniverInstance(): Nullable<Workbook | DocumentDataModel | SlideDataModel>;
-
-    createDoc(data: Partial<IDocumentData>): DocumentDataModel;
-    createSheet(data: Partial<IWorkbookData>): Workbook;
-    createSlide(data: Partial<ISlideData>): SlideDataModel;
-
+    registerCtorForType<T extends UnitModel>(type: UnitType, ctor: new (...args: any[]) => T): IDisposable;
     changeDoc(unitId: string, doc: DocumentDataModel): void;
-    addDoc(doc: DocumentDataModel): void;
-    addSheet(sheet: Workbook): void;
-    addSlide(slide: SlideDataModel): void;
 
-    getUniverSheetInstance(id: string): Nullable<Workbook>;
-    getUniverDocInstance(id: string): Nullable<DocumentDataModel>;
-    getUniverSlideInstance(id: string): Nullable<SlideDataModel>;
+    getUnit<T extends UnitModel>(id: string, type: UnitType): Nullable<T>;
+    getAllUnitsForType<T>(type: UnitType): T[];
+    getUnitType(unitId: string): UnitType;
 
-    getCurrentUniverSheetInstance(): Nullable<Workbook>;
+    /** @deprecated */
+    getUniverSheetInstance(unitId: string): Nullable<Workbook>;
+    /** @deprecated */
+    getCurrentUnitForType<Workbook>(type: UniverInstanceType): Nullable<Workbook>;
+    /** @deprecated */
+    getUniverDocInstance(unitId: string): Nullable<DocumentDataModel>;
+    /** @deprecated */
     getCurrentUniverDocInstance(): Nullable<DocumentDataModel>;
-    getCurrentUniverSlideInstance(): Nullable<SlideDataModel>;
-
-    setCurrentUniverSheetInstance(id: string): void;
-    setCurrentUniverDocInstance(id: string): void;
-    setCurrentUniverSlideInstance(id: string): void;
-
-    getAllUniverSheetsInstance(): Workbook[];
-    getAllUniverDocsInstance(): DocumentDataModel[];
-    getAllUniverSlidesInstance(): SlideDataModel[];
-
-    getDocumentType(unitId: string): UniverInstanceType;
-    disposeDocument(unitId: string): boolean;
 }
 
 export const IUniverInstanceService = createIdentifier<IUniverInstanceService>('univer.current');
 export class UniverInstanceService extends Disposable implements IUniverInstanceService {
-    private readonly _focused$ = new BehaviorSubject<Nullable<string>>(null);
-    readonly focused$ = this._focused$.asObservable();
-    get focused(): Nullable<Workbook | DocumentDataModel | SlideDataModel> {
-        const id = this._focused$.getValue();
-        if (!id) {
-            return null;
-        }
-
-        return this.getUniverSheetInstance(id) || this.getUniverDocInstance(id) || this.getUniverSlideInstance(id);
-    }
-
-    private readonly _currentSheet$ = new BehaviorSubject<Nullable<Workbook>>(null);
-    readonly currentSheet$ = this._currentSheet$.asObservable();
-    private readonly _currentDoc$ = new BehaviorSubject<Nullable<DocumentDataModel>>(null);
-    readonly currentDoc$ = this._currentDoc$.asObservable();
-    private readonly _currentSlide$ = new BehaviorSubject<Nullable<SlideDataModel>>(null);
-    readonly currentSlide$ = this._currentSlide$.asObservable();
-
-    private readonly _sheetAdded$ = new Subject<Workbook>();
-    readonly sheetAdded$ = this._sheetAdded$.asObservable();
-    private readonly _docAdded$ = new Subject<DocumentDataModel>();
-    readonly docAdded$ = this._docAdded$.asObservable();
-    private readonly _slideAdded$ = new Subject<SlideDataModel>();
-    readonly slideAdded$ = this._slideAdded$.asObservable();
-
-    private readonly _sheetDisposed$ = new Subject<Workbook>();
-    readonly sheetDisposed$ = this._sheetDisposed$.asObservable();
-    private readonly _docDisposed$ = new Subject<DocumentDataModel>();
-    readonly docDisposed$ = this._docDisposed$.asObservable();
-    private readonly _slideDisposed$ = new Subject<SlideDataModel>();
-    readonly slideDisposed$ = this._slideDisposed$.asObservable();
-
-    private readonly _sheets: Workbook[] = [];
-    private readonly _docs: DocumentDataModel[] = [];
-    private readonly _slides: SlideDataModel[] = [];
+    private readonly _unitsByType = new Map<UnitType, UnitModel[]>();
 
     constructor(
-        private readonly _handler: IUniverHandler,
+        @Inject(Injector) private readonly _injector: Injector,
         @IContextService private readonly _contextService: IContextService
     ) {
         super();
@@ -145,125 +86,115 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
         super.dispose();
 
         this._focused$.complete();
-
-        this._currentDoc$.complete();
-        this._currentSheet$.complete();
-        this._currentSlide$.complete();
-
-        this._sheetAdded$.complete();
-        this._docAdded$.complete();
-        this._slideAdded$.complete();
-
-        this._sheetDisposed$.complete();
-        this._docDisposed$.complete();
-        this._slideDisposed$.complete();
     }
 
-    createDoc(data: Partial<IDocumentData>): DocumentDataModel {
-        return this._handler.createUniverDoc(data);
+    private _createHandler!: (type: UnitType, data: unknown, ctor: new (...args: any[]) => UnitModel) => UnitModel;
+    __setCreateHandler(handler: (type: UnitType, data: unknown, ctor: new (...args: any[]) => UnitModel) => UnitModel): void {
+        this._createHandler = handler;
     }
 
-    createSheet(data: Partial<IWorkbookData>): Workbook {
-        return this._handler.createUniverSheet(data);
+    createUnit<T, U extends UnitModel>(type: UnitType, data: T): U {
+        const model = this._createHandler(type, data, this._ctorByType.get(type)!);
+        return model as U;
     }
 
-    createSlide(data: Partial<ISlideData>): SlideDataModel {
-        return this._handler.createUniverSlide(data);
+    private readonly _ctorByType = new Map<UnitType, new () => UnitModel>();
+    registerCtorForType<T extends UnitModel>(type: UnitType, ctor: new () => T): IDisposable {
+        this._ctorByType.set(type, ctor);
+
+        return {
+            dispose: () => {
+                this._ctorByType.delete(type);
+            },
+        };
     }
 
-    addSheet(sheet: Workbook): void {
-        this._sheets.push(sheet);
-        this._sheetAdded$.next(sheet);
-        this.setCurrentUniverSheetInstance(sheet.getUnitId());
+    private readonly _currentUnits$ = new BehaviorSubject<{ [type: UnitType]: UnitModel }>({});
+    readonly currentUnits$ = this._currentUnits$.asObservable();
+    getCurrentTypeOfUnit$<T>(type: number): Observable<Nullable<T>> {
+        return this.currentUnits$.pipe(map((units) => units[type] ?? null), distinctUntilChanged()) as Observable<Nullable<T>>;
+    }
+
+    getCurrentUnitForType<T>(type: UnitType): Nullable<T> {
+        return this._currentUnits$.getValue()[type] as Nullable<T>;
+    }
+
+    setCurrentUnitForType(unitId: string): void {
+        const result = this._getUnitById(unitId);
+        if (!result) throw new Error(`[UniverInstanceService]: no document with unitId ${unitId}!`);
+
+        this._currentUnits$.next({ ...this._currentUnits$.getValue(), [result[1]]: result[0] });
+    }
+
+    private readonly _unitAdded$ = new Subject<UnitModel>();
+    readonly unitAdded$ = this._unitAdded$.asObservable();
+    getTypeOfUnitAdded$<T extends UnitModel<object, number>>(type: UnitType): Observable<T> {
+        return this._unitAdded$.pipe(filter((unit) => unit.type === type)) as Observable<T>;
+    }
+
+    addUnit(unit: UnitModel): void {
+        const type = unit.type;
+
+        if (!this._unitsByType.has(type)) {
+            this._unitsByType.set(type, []);
+        }
+
+        this._unitsByType.get(type)!.push(unit);
+        this._currentUnits$.next({ ...this._currentUnits$.getValue(), [type]: unit });
+    }
+
+    private _unitDisposed$ = new Subject<UnitModel>();
+    unitDisposed$ = this._unitDisposed$.asObservable();
+    getTypeOfUnitDisposed$<T extends UnitModel<object, number>>(type: UniverInstanceType): Observable<T> {
+        return this.unitDisposed$.pipe(filter((unit) => unit.type === type)) as Observable<T>;
+    }
+
+    getUnit<T>(id: string, _type: UnitType): Nullable<T> {
+        return this._getUnitById(id)?.[0] as Nullable<T>;
+    }
+
+    getCurrentUniverSheetInstance<Workbook>(): Nullable<Workbook> {
+        return this.getCurrentUnitForType(UniverInstanceType.SHEET) as Nullable<Workbook>;
+    }
+
+    getCurrentUniverDocInstance(): Nullable<DocumentDataModel> {
+        return this.getCurrentUnitForType(UniverInstanceType.DOC) as Nullable<DocumentDataModel>;
+    }
+
+    getUniverDocInstance(unitId: string): Nullable<DocumentDataModel> {
+        return this.getUnit<DocumentDataModel>(unitId, UniverInstanceType.DOC);
+    }
+
+    getUniverSheetInstance(unitId: string): Nullable<Workbook> {
+        return this.getUnit<Workbook>(unitId, UniverInstanceType.SHEET);
+    }
+
+    getAllUnitsForType<T>(type: UnitType): T[] {
+        return (this._unitsByType.get(type) ?? []) as T[];
     }
 
     changeDoc(unitId: string, doc: DocumentDataModel): void {
-        const oldDoc = this._docs.find((doc) => doc.getUnitId() === unitId);
+        const allDocs = this.getAllUnitsForType<DocumentDataModel>(UniverInstanceType.DOC);
+        const oldDoc = allDocs.find((doc) => doc.getUnitId() === unitId);
 
         if (oldDoc != null) {
-            const index = this._docs.indexOf(oldDoc);
-            this._docs.splice(index, 1);
+            const index = allDocs.indexOf(oldDoc);
+            allDocs.splice(index, 1);
         }
 
-        this.addDoc(doc);
+        this.addUnit(doc);
     }
 
-    addDoc(doc: DocumentDataModel): void {
-        this._docs.push(doc);
-        this._docAdded$.next(doc);
-        this.setCurrentUniverDocInstance(doc.getUnitId());
+    private readonly _focused$ = new BehaviorSubject<Nullable<string>>(null);
+    readonly focused$ = this._focused$.asObservable();
+    get focused(): Nullable<UnitModel> {
+        const id = this._focused$.getValue();
+        if (!id) return null;
+
+        return this._getUnitById(id)?.[0];
     }
 
-    addSlide(slide: SlideDataModel): void {
-        this._slides.push(slide);
-        this._slideAdded$.next(slide);
-        this.setCurrentUniverSlideInstance(slide.getUnitId());
-    }
-
-    getUniverSheetInstance(id: string): Nullable<Workbook> {
-        return this._sheets.find((sheet) => sheet.getUnitId() === id);
-    }
-
-    getUniverDocInstance(id: string): Nullable<DocumentDataModel> {
-        return this._docs.find((doc) => doc.getUnitId() === id);
-    }
-
-    getUniverSlideInstance(id: string): Nullable<SlideDataModel> {
-        return this._slides.find((slide) => slide.getUnitId() === id);
-    }
-
-    getAllUniverSheetsInstance() {
-        return this._sheets;
-    }
-
-    getAllUniverDocsInstance() {
-        return this._docs;
-    }
-
-    getAllUniverSlidesInstance() {
-        return this._slides;
-    }
-
-    setCurrentUniverSheetInstance(id: string): void {
-        this._currentSheet$.next(this.getUniverSheetInstance(id) || null);
-    }
-
-    setCurrentUniverSlideInstance(id: string): void {
-        this._currentSlide$.next(this.getUniverSlideInstance(id) || null);
-    }
-
-    setCurrentUniverDocInstance(id: string): void {
-        this._currentDoc$.next(this.getUniverDocInstance(id) || null);
-    }
-
-    getCurrentUniverSheetInstance(): Nullable<Workbook> {
-        const sheet = this._currentSheet$.getValue();
-        if (!sheet) {
-            return null;
-        }
-
-        return sheet;
-    }
-
-    getCurrentUniverDocInstance(): DocumentDataModel {
-        const doc = this._currentDoc$.getValue();
-
-        if (!doc) {
-            throw new Error('No current doc!');
-        }
-
-        return doc;
-    }
-
-    getCurrentUniverSlideInstance() {
-        const slide = this._currentSlide$.getValue();
-        if (!slide) {
-            throw new Error('No current slide!');
-        }
-        return slide;
-    }
-
-    focusUniverInstance(id: string | null): void {
+    focusUnit(id: string | null): void {
         this._focused$.next(id);
 
         if (this.focused instanceof Workbook) {
@@ -281,55 +212,36 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
         }
     }
 
-    getFocusedUniverInstance(): Nullable<Workbook | DocumentDataModel | SlideDataModel> {
+    getFocusedUnit(): Nullable<UnitModel> {
         return this.focused;
     }
 
-    getDocumentType(unitId: string): UniverInstanceType {
-        if (this.getUniverDocInstance(unitId)) {
-            return UniverInstanceType.DOC;
-        }
+    getUnitType(unitId: string): UniverInstanceType {
+        const result = this._getUnitById(unitId);
+        if (!result) throw new Error(`[UniverInstanceService]: No document with unitId ${unitId}`);
 
-        if (this.getUniverSheetInstance(unitId)) {
-            return UniverInstanceType.SHEET;
-        }
-
-        if (this.getUniverSlideInstance(unitId)) {
-            return UniverInstanceType.SLIDE;
-        }
-
-        throw new Error(`[UniverInstanceService]: No document with unitId ${unitId}`);
+        return result[1];
     }
 
-    disposeDocument(unitId: string): boolean {
-        const doc = this.getUniverDocInstance(unitId);
-        if (doc) {
-            const index = this._docs.indexOf(doc);
-            this._docs.splice(index, 1);
-            this._docDisposed$.next(doc);
-            // this.focusUniverInstance(null);
-            return true;
-        }
+    disposeUnit(unitId: string): boolean {
+        const result = this._getUnitById(unitId);
+        if (!result) return false;
 
-        const sheet = this.getUniverSheetInstance(unitId);
-        if (sheet) {
-            const index = this._sheets.indexOf(sheet);
-            this._sheets.splice(index, 1);
-            this._sheetDisposed$.next(sheet);
-            this.setCurrentUniverSheetInstance('');
-            this.focusUniverInstance(null);
-            return true;
-        }
+        const [unit, type] = result;
+        const units = this._unitsByType.get(type)!;
+        const index = units.indexOf(unit);
+        units.splice(index, 1);
 
-        const slide = this.getUniverSlideInstance(unitId);
-        if (slide) {
-            const index = this._slides.indexOf(slide);
-            this._slides.splice(index, 1);
-            this._slideDisposed$.next(slide);
-            // this.focusUniverInstance(null);
-            return true;
-        }
+        this._unitDisposed$.next(unit);
+        return true;
+    }
 
-        return false;
+    private _getUnitById(unitId: string): Nullable<[UnitModel, UnitType]> {
+        for (const [type, units] of this._unitsByType) {
+            const unit = units.find((unit) => unit.getUnitId() === unitId);
+            if (unit) {
+                return [unit, type];
+            }
+        }
     }
 }

@@ -21,7 +21,6 @@ import { UniverSlidesPlugin } from '@univerjs/slides';
 import { UniverSlidesUIPlugin } from '@univerjs/slides-ui';
 import { UniverUIPlugin } from '@univerjs/ui';
 
-import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { DEFAULT_SLIDE_DATA } from '../data';
 
 // univer
@@ -32,7 +31,6 @@ const univer = new Univer({
 
 // base-render
 univer.registerPlugin(UniverRenderEnginePlugin);
-univer.registerPlugin(UniverFormulaEnginePlugin);
 univer.registerPlugin(UniverUIPlugin, {
     container: 'univer-container',
     header: true,

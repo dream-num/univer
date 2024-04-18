@@ -123,7 +123,7 @@ export function createCommandTestBed(workbookConfig?: IDocumentData, dependencie
 
     const doc = univer.createUniverDoc(workbookConfig || TEST_DOCUMENT_DATA_EN);
     const univerInstanceService = get(IUniverInstanceService);
-    univerInstanceService.focusUniverInstance('test-doc');
+    univerInstanceService.focusUnit('test-doc');
 
     const logService = get(ILogService);
     logService.setLogLevel(LogLevel.SILENT); // change this to `LogLevel.VERBOSE` to debug tests via logs

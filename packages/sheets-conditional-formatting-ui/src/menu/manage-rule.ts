@@ -21,6 +21,7 @@ import { getMenuHiddenObservable, MenuGroup, MenuItemType, MenuPosition } from '
 import { SelectionManagerService, SetWorksheetActiveOperation } from '@univerjs/sheets';
 
 import { debounceTime } from 'rxjs/operators';
+import type { Workbook } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, LocaleService, Rectangle, UniverInstanceType } from '@univerjs/core';
 import { Conditions } from '@univerjs/icons';
 import { AddConditionalRuleMutation, ConditionalFormattingRuleModel, DeleteConditionalRuleMutation, MoveConditionalRuleMutation, SetConditionalRuleMutation } from '@univerjs/sheets-conditional-formatting';
@@ -43,7 +44,7 @@ export const FactoryManageConditionalFormattingRule = (componentManager: Compone
             new Observable<null>((commandSubscribe) => {
                 const disposable = commandService.onCommandExecuted((commandInfo) => {
                     const { id, params } = commandInfo;
-                    const unitId = univerInstanceService.getCurrentUniverSheetInstance()?.getUnitId();
+                    const unitId = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)?.getUnitId();
                     if (commandList.includes(id) && (params as { unitId: string }).unitId === unitId) {
                         commandSubscribe.next(null);
                     }
@@ -52,7 +53,7 @@ export const FactoryManageConditionalFormattingRule = (componentManager: Compone
             })
         ).pipe(debounceTime(16)).subscribe(() => {
             const ranges = selectionManagerService.getSelections()?.map((selection) => selection.range) || [];
-            const workbook = univerInstanceService.getCurrentUniverSheetInstance();
+            const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET);
             if (!workbook) return;
             const allRule = conditionalFormattingRuleModel.getSubunitRules(workbook.getUnitId(), workbook.getActiveSheet().getSheetId()) || [];
             const ruleList = allRule.filter((rule) => rule.ranges.some((ruleRange) => ranges.some((range) => Rectangle.intersects(range, ruleRange))));
@@ -64,7 +65,7 @@ export const FactoryManageConditionalFormattingRule = (componentManager: Compone
                 new Observable<null>((commandSubscribe) => {
                     const disposable = commandService.onCommandExecuted((commandInfo) => {
                         const { id, params } = commandInfo;
-                        const unitId = univerInstanceService.getCurrentUniverSheetInstance()?.getUnitId();
+                        const unitId = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)?.getUnitId();
                         if (commandList.includes(id) && (params as { unitId: string }).unitId === unitId) {
                             commandSubscribe.next(null);
                         }
@@ -72,7 +73,7 @@ export const FactoryManageConditionalFormattingRule = (componentManager: Compone
                     return () => disposable.dispose();
                 })
             ).pipe(debounceTime(16)).subscribe(() => {
-                const workbook = univerInstanceService.getCurrentUniverSheetInstance();
+                const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET);
                 if (!workbook) return;
                 const allRule = conditionalFormattingRuleModel.getSubunitRules(workbook.getUnitId(), workbook.getActiveSheet().getSheetId()) || [];
                 subscriber.next(!!allRule.length);

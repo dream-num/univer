@@ -133,7 +133,7 @@ export function createTestBed(workbookConfig?: IWorkbookData, dependencies?: Dep
     const sheet = univer.createUniverSheet(workbookConfig || getTestWorkbookDataDemo());
 
     const univerInstanceService = injector.get(IUniverInstanceService);
-    univerInstanceService.focusUniverInstance('test');
+    univerInstanceService.focusUnit('test');
     const logService = injector.get(ILogService);
 
     logService.setLogLevel(LogLevel.SILENT); // change this to `LogLevel.VERBOSE` to debug tests via logs

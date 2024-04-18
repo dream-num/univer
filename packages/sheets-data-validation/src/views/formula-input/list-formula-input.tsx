@@ -19,8 +19,8 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { DraggableList, FormLayout, Input, Radio, RadioGroup, Select } from '@univerjs/design';
 import { deserializeRangeWithSheet, isReferenceStringWithEffectiveColumn, serializeRangeWithSheet } from '@univerjs/engine-formula';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import type { IRange } from '@univerjs/core';
-import { createInternalEditorID, IUniverInstanceService, LocaleService, Tools } from '@univerjs/core';
+import type { IRange, Workbook } from '@univerjs/core';
+import { createInternalEditorID, IUniverInstanceService, LocaleService, Tools, UniverInstanceType } from '@univerjs/core';
 import type { IFormulaInputProps } from '@univerjs/data-validation';
 import { DeleteSingle, IncreaseSingle, SequenceSingle } from '@univerjs/icons';
 import cs from 'clsx';
@@ -154,7 +154,7 @@ export function ListFormulaInput(props: IFormulaInputProps) {
     const [refRange, setRefRange] = useState(isRefRange === '1' ? formula1 : '');
     const localeService = useDependency(LocaleService);
     const univerInstanceService = useDependency(IUniverInstanceService);
-    const workbook = univerInstanceService.getCurrentUniverSheetInstance()!;
+    const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
     const worksheet = workbook.getActiveSheet();
     const [refColors, setRefColors] = useState(() => formula2.split(','));
 
@@ -285,7 +285,7 @@ export function ListFormulaInput(props: IFormulaInputProps) {
                                         });
                                         setRefRange('');
                                     } else {
-                                        const workbook = univerInstanceService.getUniverSheetInstance(range.unitId) ?? univerInstanceService.getCurrentUniverSheetInstance()!;
+                                        const workbook = univerInstanceService.getUniverSheetInstance(range.unitId) ?? univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
                                         const worksheet = workbook?.getSheetBySheetId(range.sheetId) ?? workbook.getActiveSheet();
                                         const rangeStr = serializeRangeWithSheet(worksheet.getName(), range.range);
                                         onChange?.({

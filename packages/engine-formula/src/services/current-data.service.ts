@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IUnitRange, Nullable } from '@univerjs/core';
-import { Disposable, IUniverInstanceService, ObjectMatrix } from '@univerjs/core';
+import type { IUnitRange, Nullable, Workbook } from '@univerjs/core';
+import { Disposable, IUniverInstanceService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
 
 import type {
@@ -361,9 +361,9 @@ export class FormulaCurrentConfigService extends Disposable implements IFormulaC
     }
 
     private _loadSheetData() {
-        const unitAllSheet = this._univerInstanceService.getAllUniverSheetsInstance();
+        const unitAllSheet = this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.SHEET);
 
-        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
+        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
         const worksheet = workbook?.getActiveSheet();
 
         this._executeUnitId = workbook?.getUnitId();

@@ -251,8 +251,8 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
             {
                 startIndex: 253,
                 paragraphStyle: {
-                    spaceAbove: 30,
-                    lineSpacing: 1.5,
+                    spaceAbove: 20,
+                    indentFirstLine: 20,
                 },
             },
             {
@@ -260,7 +260,6 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                 paragraphStyle: {
                     spaceAbove: 20,
                     indentFirstLine: 20,
-                    lineSpacing: 1.5,
                 },
             },
             {
@@ -278,7 +277,6 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                 },
                 paragraphStyle: {
                     lineSpacing: 1.5,
-                    spaceAbove: 20,
                 },
             },
             {
@@ -292,7 +290,6 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                     },
                 },
                 paragraphStyle: {
-                    spaceAbove: 10,
                     lineSpacing: 1.5,
                 },
             },
@@ -307,30 +304,25 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                     },
                 },
                 paragraphStyle: {
-                    spaceAbove: 10,
                     lineSpacing: 1.5,
                 },
             },
             {
                 startIndex: 713,
                 paragraphStyle: {
-                    spaceAbove: 20,
                     indentFirstLine: 20,
-                    lineSpacing: 1.5,
                 },
             },
             {
                 startIndex: 771,
                 paragraphStyle: {
                     spaceAbove: 20,
-                    lineSpacing: 1.5,
                 },
             },
             {
                 startIndex: 1244,
                 paragraphStyle: {
                     spaceAbove: 20,
-                    lineSpacing: 1.5,
                     indentFirstLine: 20,
                 },
             },
@@ -338,28 +330,24 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                 startIndex: 1589,
                 paragraphStyle: {
                     indentFirstLine: 20,
-                    lineSpacing: 1.5,
                 },
             },
             {
                 startIndex: 1986,
                 paragraphStyle: {
                     indentFirstLine: 20,
-                    lineSpacing: 1.5,
                 },
             },
             {
                 startIndex: 2062,
                 paragraphStyle: {
                     indentFirstLine: 20,
-                    lineSpacing: 1.5,
                 },
             },
             {
                 startIndex: 2294,
                 paragraphStyle: {
                     indentFirstLine: 20,
-                    lineSpacing: 1.5,
                 },
                 bullet: {
                     listType: PresetListType.BULLET_LIST,
@@ -374,7 +362,6 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                 startIndex: 2438,
                 paragraphStyle: {
                     indentFirstLine: 20,
-                    lineSpacing: 1.5,
                 },
                 bullet: {
                     listType: PresetListType.BULLET_LIST,
@@ -389,7 +376,6 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
                 startIndex: 2628,
                 paragraphStyle: {
                     indentFirstLine: 20,
-                    lineSpacing: 1.5,
                 },
                 bullet: {
                     listType: PresetListType.BULLET_LIST,
@@ -404,6 +390,9 @@ export const DEFAULT_DOCUMENT_DATA_EN: IDocumentData = {
         sectionBreaks: [
             {
                 startIndex: 1245,
+                columnProperties: [],
+                columnSeparatorType: ColumnSeparatorType.NONE,
+                sectionType: SectionType.SECTION_TYPE_UNSPECIFIED,
                 // textDirection: textDirectionDocument,
                 // contentDirection: textDirection!,
             },

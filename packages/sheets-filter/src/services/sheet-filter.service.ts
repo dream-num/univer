@@ -15,15 +15,14 @@
  */
 
 import type { Nullable, Workbook } from '@univerjs/core';
-import {
-    CommandType,
-    Disposable,
+import { CommandType, Disposable,
     fromCallback,
     ICommandService,
     IResourceManagerService,
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
+    UniverInstanceType,
 } from '@univerjs/core';
 import { BehaviorSubject, filter, merge, of, switchMap } from 'rxjs';
 
@@ -120,7 +119,7 @@ export class SheetsFilterService extends Disposable {
     private _updateActiveFilterModel() {
         let workbook: Nullable<Workbook>;
         try {
-            workbook = this._univerInstanceService.getCurrentUniverSheetInstance();
+            workbook = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.SHEET);
             if (!workbook) {
                 this._activeFilterModel$.next(null);
                 return;
@@ -149,7 +148,7 @@ export class SheetsFilterService extends Disposable {
                     .pipe(filter(([command]) => command.type === CommandType.MUTATION && FILTER_MUTATIONS.has(command.id))),
 
                 // source2: activte sheet changes
-                this._univerInstanceService.currentSheet$
+                this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.SHEET)
                     .pipe(switchMap((workbook) => workbook?.activeSheet$ ?? of(null)))
             ).subscribe(() => this._updateActiveFilterModel()));
     }

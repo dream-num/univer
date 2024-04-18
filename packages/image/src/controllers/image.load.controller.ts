@@ -25,10 +25,9 @@ import {
     toDisposable,
 } from '@univerjs/core';
 import type { Scene } from '@univerjs/engine-render';
-import { IRenderManagerService, Picture } from '@univerjs/engine-render';
+import { Image, IRenderManagerService } from '@univerjs/engine-render';
 
 import { IImageManagerService } from '../services/image-manager.service';
-import { IImageRenderService } from '../services/image-render.service';
 
 const IMAGE_DEFAULT_LAYER_INDEX = 11;
 const IMAGE_BEHIND_TEXT_LAYER_INDEX = 1;
@@ -40,7 +39,6 @@ export class ImageLoadController extends Disposable {
         @ICommandService private readonly _commandService: ICommandService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IImageManagerService private readonly _imageManagerService: IImageManagerService,
-        @IImageRenderService private readonly _imageRenderService: IImageRenderService,
         @IFloatingObjectManagerService private readonly _floatingObjectManagerService: IFloatingObjectManagerService
     ) {
         super();
@@ -87,11 +85,7 @@ export class ImageLoadController extends Disposable {
                             return true;
                         }
 
-                        const searchParam = {
-                            unitId,
-                            subUnitId,
-                            imageId: floatingObjectId,
-                        };
+                        const searchParam = { unitId, subUnitId, imageId: floatingObjectId };
 
                         const imageModel = this._imageManagerService.getImageByParam(searchParam)?.imageModel;
 
@@ -101,36 +95,22 @@ export class ImageLoadController extends Disposable {
 
                         const { left, top, width, height, angle, flipX, flipY, skewX, skewY } = floatingObject;
 
-                        const imageShapeKey = `${unitId}_${subUnitId}_${floatingObjectId}`;
+                        const imageShapeKey = `${unitId}-${subUnitId}-${floatingObjectId}`;
 
                         const imageShape = scene.getObject(imageShapeKey);
 
                         if (imageShape != null) {
-                            imageShape.transformByState({
-                                left,
-                                top,
-                                width,
-                                height,
-                                angle,
-                                flipX,
-                                flipY,
-                                skewX,
-                                skewY,
-                            });
+                            imageShape.transformByState({ left, top, width, height, angle, flipX, flipY, skewX, skewY });
                             return;
                         }
 
-                        this._imageRenderService.add(imageShapeKey, searchParam);
+                        // this._imageRenderService.add(imageShapeKey, searchParam);
 
-                        const image = new Picture(imageShapeKey, {
-                            url: imageModel.getUrl(),
-                            left,
-                            top,
-                            width,
-                            height,
-                            zIndex: 11,
-                            isTransformer: true,
-                        });
+                        imageModel.setKey(imageShapeKey);
+
+                        const image = new Image(imageShapeKey, {
+                            url: imageModel.getSource(),
+                            left, top, width, height, zIndex: 11, isTransformer: true });
 
                         if (!scene.getTransformer()) {
                             scene.openTransformer();
@@ -161,7 +141,7 @@ export class ImageLoadController extends Disposable {
             objects.forEach((object) => {
                 const { oKey, left, top, height, width } = object;
 
-                const searchParam = this._imageRenderService.get(oKey);
+                const searchParam = this._imageManagerService.getImageByOKey(oKey);
 
                 if (searchParam == null) {
                     return true;

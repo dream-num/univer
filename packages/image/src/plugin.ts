@@ -18,9 +18,8 @@ import { DEFAULT_DOCUMENT_SUB_COMPONENT_ID, Plugin } from '@univerjs/core';
 import type { Dependency, Injector } from '@wendellhu/redi';
 
 import { ImageLoadController } from './controllers/image.load.controller';
-import { ImageModel } from './models/image-model';
+import { ImageModel, SourceType } from './models/image-model';
 import { IImageManagerService, ImageManagerService } from './services/image-manager.service';
-import { IImageRenderService, ImageRenderService } from './services/image-render.service';
 
 const PLUGIN_NAME = 'IMAGE_PLUGIN';
 
@@ -51,6 +50,8 @@ export class UniverImagePlugin extends Plugin {
         const model = new ImageModel({
             imageId: 'shapeTest1',
             contentUrl: 'https://static01.nyt.com/images/2019/09/04/business/04chinaclone-01/merlin_160087014_de761d9a-4360-402d-a15b-ddeff775760d-master1050.jpg',
+            sourceType: SourceType.URL,
+            source: 'https://minio.cnbabylon.com/univer/slide/gartner-tech-2022.png',
         });
         imageManagerService.add({
             unitId: 'd',
@@ -119,7 +120,6 @@ export class UniverImagePlugin extends Plugin {
             // [ZIndexManager],
             // services
             [IImageManagerService, { useClass: ImageManagerService }],
-            [IImageRenderService, { useClass: ImageRenderService }],
             // controllers
             [ImageLoadController],
             // [SharedController],

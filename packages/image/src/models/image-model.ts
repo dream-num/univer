@@ -16,9 +16,17 @@
 
 import type { Nullable } from '@univerjs/core';
 
+
+export enum SourceType {
+    URL = 'URL',
+    BASE64 = 'BASE64',
+    UUID = 'UUID',
+}
+
 export interface IImageData {
     imageId: string;
-    contentUrl: string;
+    sourceType: SourceType;
+    source: string;
 }
 
 export class ImageModel {
@@ -30,8 +38,8 @@ export class ImageModel {
         return this._imageData;
     }
 
-    getUrl() {
-        return this._imageData.contentUrl;
+    getSource() {
+        return this._imageData.source;
     }
 
     getId() {

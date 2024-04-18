@@ -16,7 +16,7 @@
 
 import type { IPageElement } from '@univerjs/core';
 import { PageElementType } from '@univerjs/core';
-import { Picture } from '@univerjs/engine-render';
+import { Image } from '@univerjs/engine-render';
 import type { Injector } from '@wendellhu/redi';
 
 import { CanvasObjectProviderRegistry, ObjectAdaptor } from '../adaptor';
@@ -56,7 +56,7 @@ export class ImageAdaptor extends ObjectAdaptor {
 
         const contentUrl = imageProperties?.contentUrl || '';
 
-        return new Picture(id, {
+        return new Image(id, {
             url: contentUrl,
             top,
             left,

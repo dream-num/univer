@@ -19,7 +19,7 @@ import { BooleanNumber, ObjectRelativeFromH, ObjectRelativeFromV, PositionedObje
 import { ptToPixel } from '@univerjs/engine-render';
 
 export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
-    id: 'default-document-id',
+    id: 'd',
     drawings: {
         shapeTest1: {
             objectId: 'shapeTest1',
@@ -27,8 +27,8 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
             description: 'test shape',
             objectTransform: {
                 size: {
-                    width: 1484 * 0.15,
-                    height: 864 * 0.15,
+                    width: 1484 * 0.1,
+                    height: 864 * 0.1,
                 },
                 positionH: {
                     relativeFrom: ObjectRelativeFromH.COLUMN,
@@ -36,7 +36,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
                 positionV: {
                     relativeFrom: ObjectRelativeFromV.PAGE,
-                    posOffset: 510,
+                    posOffset: 490,
                 },
                 angle: 0,
             },

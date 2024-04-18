@@ -16,11 +16,11 @@
 
 import type {
     INumberUnit,
+    IObjectPositionH,
+    IObjectPositionV,
     IParagraphStyle,
     ITextStyle,
     Nullable,
-    ObjectPositionH,
-    ObjectPositionV,
 } from '@univerjs/core';
 import {
     AlignTypeH,
@@ -486,7 +486,7 @@ export function columnIterator(
 
 
 export function getPositionHorizon(
-    positionH: ObjectPositionH,
+    positionH: IObjectPositionH,
     column: IDocumentSkeletonColumn,
     page: IDocumentSkeletonPage,
     objectWidth: number,
@@ -581,7 +581,7 @@ export function getPositionHorizon(
 
 
 export function getPositionVertical(
-    positionV: ObjectPositionV,
+    positionV: IObjectPositionV,
     page: IDocumentSkeletonPage,
     lineTop: number,
     lineHeight: number,

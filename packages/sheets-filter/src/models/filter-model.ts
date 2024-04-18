@@ -386,18 +386,27 @@ export class FilterColumn extends Disposable {
         const filteredOutRows = new Set<number>();
         const filteredOutByOthers = context.getAlreadyFilteredOutRows();
 
+        // Merged cells are take into consideration here.
         for (const range of this._worksheet.iterateByColumn(iterateRange, false)) {
-            const row = range.row;
+            const { row, col, rowSpan } = range;
 
-            // if this row is already filtered out by others, we don't need to check it again
-            if (filteredOutByOthers.has(row)) {
+            // If this row is already filtered out by others, we don't need to check it again.
+            // But it only works for non-vertically-merged cells.
+            if (filteredOutByOthers.has(row) && (!rowSpan || rowSpan === 1)) {
                 continue;
             }
 
-            const cell = this._useValueFromViewModel ? this._worksheet.getCell(row, column) : this._worksheet.getCellRaw(row, column);
+            const cell = this._useValueFromViewModel ? this._worksheet.getCell(row, col) : this._worksheet.getCellRaw(row, col);
             const value = cell ? extractFilterValueFromCell(cell) : undefined;
             if (!this._filterFn(value)) {
                 filteredOutRows.add(row);
+
+                // Add all rows into filtered out rows if the cell is a merged cell.
+                if (rowSpan) {
+                    for (let i = 1; i < rowSpan; i++) {
+                        filteredOutRows.add(row + i);
+                    }
+                }
             }
         }
 

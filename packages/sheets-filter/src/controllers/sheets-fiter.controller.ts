@@ -525,16 +525,11 @@ export class SheetsFilterController extends Disposable {
     }
 
     private _initRowFilteredInterceptor(): void {
-        // TODO@wzhudev: we should update filtered rows here?
         this.disposeWithMe(this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.ROW_FILTERED, {
             handler: (filtered, rowLocation) => {
                 if (filtered) return true;
-
-                // NOTE@wzhudev: maybe we should use some cache or add some cache on the skeleton to improve performance
-                const f = this._sheetsFilterService
-                    .getFilterModel(rowLocation.unitId, rowLocation.subUnitId)
-                    ?.isRowFiltered(rowLocation.row);
-                return f ?? false;
+                return this._sheetsFilterService.getFilterModel(
+                    rowLocation.unitId, rowLocation.subUnitId)?.isRowFiltered(rowLocation.row) ?? false;
             },
         }));
     }

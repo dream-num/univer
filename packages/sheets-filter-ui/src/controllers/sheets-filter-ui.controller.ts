@@ -45,7 +45,6 @@ export class SheetsFilterUIController extends RxDisposable {
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
         @Inject(SheetsFilterPanelService) private readonly _sheetsFilterPanelService: SheetsFilterPanelService,
         @Inject(SheetCanvasPopManagerService) private _sheetCanvasPopupService: SheetCanvasPopManagerService,
-        @Inject(SheetRenderController) private _sheetRenderController: SheetRenderController,
         @IShortcutService private readonly _shortcutService: IShortcutService,
         @ICommandService private readonly _commandService: ICommandService,
         @IMenuService private readonly _menuService: IMenuService,
@@ -86,14 +85,6 @@ export class SheetsFilterUIController extends RxDisposable {
             this.disposeWithMe(this._commandService.registerCommand(c));
         });
 
-        [
-            SetSheetsFilterRangeMutation,
-            SetSheetsFilterCriteriaMutation,
-            RemoveSheetsFilterMutation,
-            ReCalcSheetsFilterMutation,
-        ].forEach((m) => {
-            this.disposeWithMe(this._sheetRenderController.registerSkeletonChangingMutations(m.id));
-        });
     }
 
     private _initMenuItems(): void {

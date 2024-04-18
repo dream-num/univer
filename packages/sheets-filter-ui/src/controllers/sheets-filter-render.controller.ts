@@ -15,18 +15,18 @@
  */
 
 import type { IRange } from '@univerjs/core';
-import { CommandType, fromCallback, ICommandService, ILogService, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, ThemeService } from '@univerjs/core';
+import { CommandType, fromCallback, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, ThemeService } from '@univerjs/core';
 import type { SpreadsheetSkeleton } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { ISelectionStyle, ISheetCommandSharedParams } from '@univerjs/sheets';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import type { FilterModel } from '@univerjs/sheets-filter';
-import { FILTER_MUTATIONS, SheetsFilterService } from '@univerjs/sheets-filter';
-import { getCoordByCell, ISelectionRenderService, SelectionShape, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
+import { FILTER_MUTATIONS, ReCalcSheetsFilterMutation, RemoveSheetsFilterMutation, SetSheetsFilterCriteriaMutation, SetSheetsFilterRangeMutation, SheetsFilterService } from '@univerjs/sheets-filter';
+import { getCoordByCell, ISelectionRenderService, SelectionShape, SheetRenderController, SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { filter, map, of, startWith, switchMap, takeUntil } from 'rxjs';
+import { filter, map, of, startWith, switchMap, takeUntil, throttleTime } from 'rxjs';
 import type { ISheetsFilterButtonShapeProps } from '../views/widgets/filter-button.shape';
 import { FILTER_ICON_PADDING, FILTER_ICON_SIZE, SheetsFilterButtonShape } from '../views/widgets/filter-button.shape';
 
@@ -54,13 +54,20 @@ export class SheetsFilterRenderController extends RxDisposable {
         @Inject(SheetsFilterService) private readonly _sheetsFilterService: SheetsFilterService,
         @Inject(ThemeService) private readonly _themeService: ThemeService,
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
-        @ILogService private readonly _logService: ILogService,
+        @Inject(SheetRenderController) private _sheetRenderController: SheetRenderController,
         @ICommandService private readonly _commandService: ICommandService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService
     ) {
         super();
+
+        [
+            SetSheetsFilterRangeMutation,
+            SetSheetsFilterCriteriaMutation,
+            RemoveSheetsFilterMutation,
+            ReCalcSheetsFilterMutation,
+        ].forEach((m) => this.disposeWithMe(this._sheetRenderController.registerSkeletonChangingMutations(m.id)));
 
         this._initRenderer();
     }
@@ -97,6 +104,7 @@ export class SheetsFilterRenderController extends RxDisposable {
                                 && (command.params as ISheetCommandSharedParams).unitId === workbook.getUnitId()
                                 && FILTER_MUTATIONS.has(command.id)
                             ),
+                            throttleTime(20, undefined, { leading: false, trailing: true }),
                             map(getParams),
                             startWith(getParams()) // must trigger once
                         );

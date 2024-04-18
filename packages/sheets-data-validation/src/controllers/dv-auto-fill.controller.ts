@@ -33,6 +33,7 @@ export class DataValidationAutoFillController extends Disposable {
         this._initAutoFill();
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _initAutoFill() {
         const noopReturnFunc = () => ({ redos: [], undos: [] });
 

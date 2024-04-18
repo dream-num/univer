@@ -18,7 +18,7 @@ import type { IMutationInfo, IRange, Workbook } from '@univerjs/core';
 import { Disposable, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, Range, Rectangle, UniverInstanceType } from '@univerjs/core';
 import { createTopMatrixFromMatrix, findAllRectangle } from '@univerjs/sheets';
 
-import type { ISheetAutoFillHook } from '@univerjs/sheets-ui';
+import type { IDiscreteRange, ISheetAutoFillHook } from '@univerjs/sheets-ui';
 import { APPLY_TYPE, getAutoFillRepeatRange, IAutoFillService, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
 import { Inject, Injector } from '@wendellhu/redi';
 import { ConditionalFormattingRuleModel, ConditionalFormattingViewModel, SetConditionalRuleMutation, setConditionalRuleMutationUndoFactory, SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '@univerjs/sheets-conditional-formatting';
@@ -140,7 +140,8 @@ export class ConditionalFormattingAutoFillController extends Disposable {
                 }
             });
         };
-        const generalApplyFunc = (sourceRange: IRange, targetRange: IRange) => {
+
+        const generalApplyFunc = (sourceRange: IDiscreteRange, targetRange: IDiscreteRange) => {
             const unitId = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)?.getUnitId();
             const subUnitId = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)?.getActiveSheet().getSheetId();
             const matrixMap: Map<string, ObjectMatrix<1>> = new Map();
@@ -181,20 +182,19 @@ export class ConditionalFormattingAutoFillController extends Disposable {
                 redos,
             };
         };
+
         const hook: ISheetAutoFillHook = {
             id: SHEET_CONDITIONAL_FORMATTING_PLUGIN,
             onFillData: (location, direction, applyType) => {
-                if (
-                    applyType === APPLY_TYPE.COPY ||
-                    applyType === APPLY_TYPE.ONLY_FORMAT ||
-                    applyType === APPLY_TYPE.SERIES
-                ) {
+                if (applyType === APPLY_TYPE.COPY || applyType === APPLY_TYPE.ONLY_FORMAT || applyType === APPLY_TYPE.SERIES) {
                     const { source, target } = location;
                     return generalApplyFunc(source, target);
                 }
+
                 return noopReturnFunc();
             },
         };
+
         this.disposeWithMe(this._autoFillService.addHook(hook));
     }
 }

@@ -60,7 +60,10 @@ export function discreteRangeToRange(discreteRange: IDiscreteRange): IRange {
     };
 }
 
-export function virtualizeDiscreteRanges(ranges: IDiscreteRange[]): { ranges: IRange[]; mapFunc: (row: number, col: number) => { row: number; col: number } } {
+export function virtualizeDiscreteRanges(ranges: IDiscreteRange[]): {
+    ranges: IRange[];
+    mapFunc: (row: number, col: number) => { row: number; col: number };
+} {
     let totalRows: number[] = [];
     let totalCols: number[] = [];
     const totalRanges: IRange[] = [];

@@ -75,7 +75,7 @@ export class PluginService extends PluginHolder {
         }
     }
 
-    override _registerPlugin<T extends PluginCtor<Plugin>>(pluginCtor: T, options?: ConstructorParameters<T>[0]): void {
+    protected override _registerPlugin<T extends PluginCtor<Plugin>>(pluginCtor: T, options?: ConstructorParameters<T>[0]): void {
         const { pluginName } = pluginCtor;
         if (this._pluginRegistered.has(pluginName)) {
             this._logService.warn('[PluginService]', `plugin ${pluginName} has already been registered. This registration will be ignored.`);

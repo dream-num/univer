@@ -48,6 +48,7 @@ export { TextX } from './docs/data-model/text-x/text-x';
 export { replaceInDocumentBody } from './docs/data-model/replacement';
 export * from './observer';
 export { Plugin } from './services/plugin/plugin';
+export { PluginService } from './services/plugin/plugin.service';
 export {
     type CommandListener,
     CommandService,

@@ -20,7 +20,6 @@ import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
-import { UniverFindReplacePlugin } from '@univerjs/find-replace';
 import type { IUniverRPCMainThreadConfig } from '@univerjs/rpc';
 import { UniverRPCMainThreadPlugin } from '@univerjs/rpc';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
@@ -80,10 +79,6 @@ univer.registerPlugin(UniverSheetsFormulaPlugin);
 univer.registerPlugin(UniverRPCMainThreadPlugin, {
     workerURL: './worker.js',
 } as IUniverRPCMainThreadConfig);
-
-// find replace
-univer.registerPlugin(UniverFindReplacePlugin);
-// univer.registerPlugin(UniverSheetsFindPlugin);
 
 // data validation
 univer.registerPlugin(UniverDataValidationPlugin);

@@ -126,15 +126,20 @@ export class SheetsFilterPanelService extends Disposable {
         if (filterColumn) {
             const info = filterColumn.getColumnData();
             if (info.customFilters) {
+                this._hasCriteria$.next(true);
                 return this._setupByConditions(filterModel, col);
             }
 
-            this._hasCriteria$.next(true);
+            if (info.filters) {
+                this._hasCriteria$.next(true);
+            }
+
+            this._hasCriteria$.next(false);
             return this._setupByValues(filterModel, col);
         }
 
-        this._hasCriteria$.next(false);
         // By default we filter by values.
+        this._hasCriteria$.next(false);
         return this._setupByValues(filterModel, col);
     };
 

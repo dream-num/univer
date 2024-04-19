@@ -504,7 +504,7 @@ function generateCustomFilterFn(filter: ICustomFilter): FilterFn {
 
 function extractFilterValueFromCell(cell: ICellData): string | number {
     const richTextValue = cell.p?.body?.dataStream;
-    if (richTextValue) return richTextValue;
+    if (richTextValue) return richTextValue.trimEnd();
 
     const rawValue = cell.v;
 

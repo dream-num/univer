@@ -125,9 +125,8 @@ export const notEquals: ICustomFilterFn<TwoParameters<number | string>> = {
 // Register the custom filter functions to the registry, making it easier to get them.
 export const CustomFilterFnRegistry = new Map<CustomFilterOperator, ICustomFilterFn<TwoParameters<number>>>([]);
 
-const allFns = [greaterThan, greaterThanOrEqualTo, lessThan, lessThanOrEqualTo, equals, notEquals];
-
-allFns.forEach((fn) => {
+const ALL_CUSTOM_FILTER_FUNCTIONS = [greaterThan, greaterThanOrEqualTo, lessThan, lessThanOrEqualTo, equals, notEquals];
+ALL_CUSTOM_FILTER_FUNCTIONS.forEach((fn) => {
     CustomFilterFnRegistry.set(fn.operator!, fn);
 });
 

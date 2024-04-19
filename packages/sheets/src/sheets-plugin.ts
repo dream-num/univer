@@ -32,7 +32,7 @@ import { SelectionManagerService } from './services/selection-manager.service';
 import { SheetInterceptorService } from './services/sheet-interceptor/sheet-interceptor.service';
 import { DefinedNameDataController } from './controllers/defined-name-data.controller';
 
-const PLUGIN_NAME = 'sheet';
+const PLUGIN_NAME = 'sheets';
 
 export interface IUniverSheetsConfig {
     notExecuteFormula?: boolean;
@@ -42,6 +42,7 @@ export interface IUniverSheetsConfig {
  * The main sheet base, construct the sheet container and layout, mount the rendering engine
  */
 export class UniverSheetsPlugin extends Plugin {
+    static override pluginName = PLUGIN_NAME;
     static override type = PluginType.Sheet;
 
     constructor(
@@ -50,7 +51,7 @@ export class UniverSheetsPlugin extends Plugin {
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(Injector) override readonly _injector: Injector
     ) {
-        super(PLUGIN_NAME);
+        super();
 
         this._initializeDependencies(_injector);
     }

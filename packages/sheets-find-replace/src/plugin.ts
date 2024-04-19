@@ -25,13 +25,14 @@ export interface IFindPluginConfig {}
 const NAME = 'UNIVER_SHEETS_FIND_REPLACE_PLUGIN';
 
 export class UniverSheetsFindReplacePlugin extends Plugin {
+    static override pluginName = NAME;
     static override type = PluginType.Sheet;
 
     constructor(
         _config: Partial<IFindPluginConfig>,
         @Inject(Injector) protected readonly _injector: Injector
     ) {
-        super(NAME);
+        super();
     }
 
     override onStarting(injector: Injector): void {

@@ -28,12 +28,14 @@ import { DataValidationFormulaMarkDirty } from './commands/mutations/formula.mut
 const PLUGIN_NAME = 'data-validation';
 
 export class UniverDataValidationPlugin extends Plugin {
+    static override pluginName = PLUGIN_NAME;
+
     constructor(
         _config: unknown,
         @Inject(Injector) protected _injector: Injector,
         @ICommandService private _commandService: ICommandService
     ) {
-        super(PLUGIN_NAME);
+        super();
     }
 
     override onStarting(injector: Injector): void {

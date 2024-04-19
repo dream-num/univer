@@ -70,6 +70,7 @@ const DEFAULT_DOCUMENT_PLUGIN_DATA = {
 const PLUGIN_NAME = 'docs';
 
 export class UniverDocsPlugin extends Plugin {
+    static override name = PLUGIN_NAME;
     static override type = PluginType.Doc;
 
     private _config: IUniverDocsConfig;
@@ -78,7 +79,7 @@ export class UniverDocsPlugin extends Plugin {
         config: Partial<IUniverDocsConfig> = {},
         @Inject(Injector) override _injector: Injector
     ) {
-        super(PLUGIN_NAME);
+        super();
 
         this._config = Object.assign(DEFAULT_DOCUMENT_PLUGIN_DATA, config);
 

@@ -625,10 +625,11 @@ import { FORMULA_UI_PLUGIN_NAME } from './common/plugin-name';
 import { CustomFunctionController } from './controllers/custom-function.controller';
 
 export class UniverSheetsCustomFunctionPlugin extends Plugin {
+     static override pluginName = FORMULA_UI_PLUGIN_NAME
      static override type = PluginType.Sheet;
 
      constructor(@Inject(Injector) override readonly _injector: Injector) {
-         super(FORMULA_UI_PLUGIN_NAME);
+         super();
      }
 
      initialize(): void {

@@ -50,12 +50,13 @@ export function createMenuTestBed() {
      * This plugin hooks into Sheet's DI system to expose API to test scripts
      */
     class TestPlugin extends Plugin {
+        static override pluginName = 'test-plugin';
         protected override _injector: Injector;
 
         static override type = PluginType.Sheet;
 
         constructor(_config: unknown, @Inject(Injector) _injector: Injector) {
-            super('test-plugin');
+            super();
 
             this._injector = _injector;
             get = this._injector.get.bind(this._injector);
@@ -67,10 +68,6 @@ export function createMenuTestBed() {
             injector.add([IMenuService, { useClass: DesktopMenuService }]);
             injector.add([SheetPermissionService]);
             injector.add([SheetInterceptorService]);
-        }
-
-        override onDestroy(): void {
-            get = null;
         }
     }
 

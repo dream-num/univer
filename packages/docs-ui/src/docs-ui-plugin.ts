@@ -58,6 +58,7 @@ import { TextSelectionController } from './controllers/text-selection.controller
 import { BackScrollController } from './controllers/back-scroll.controller';
 
 export class UniverDocsUIPlugin extends Plugin {
+    static override name = DOC_UI_PLUGIN_NAME;
     static override type = PluginType.Doc;
 
     constructor(
@@ -66,7 +67,7 @@ export class UniverDocsUIPlugin extends Plugin {
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @ILogService private _logService: ILogService
     ) {
-        super(DOC_UI_PLUGIN_NAME);
+        super();
 
         this._localeService.load({
             zhCN,
@@ -81,8 +82,6 @@ export class UniverDocsUIPlugin extends Plugin {
         this._initModules();
         this._markDocAsFocused();
     }
-
-    override onDestroy(): void {}
 
     private _initializeCommands(): void {
         [

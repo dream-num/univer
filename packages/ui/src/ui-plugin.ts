@@ -68,6 +68,7 @@ export const DISABLE_AUTO_FOCUS_KEY = 'DISABLE_AUTO_FOCUS';
  * UI plugin provides basic interaction with users. Including workbench (menus, UI parts, notifications etc.), copy paste, shortcut.
  */
 export class UniverUIPlugin extends Plugin {
+    static override pluginName = PLUGIN_NAME;
     static override type = PluginType.Univer;
 
     constructor(
@@ -76,11 +77,9 @@ export class UniverUIPlugin extends Plugin {
         @Inject(Injector) protected readonly _injector: Injector,
         @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
-        super(PLUGIN_NAME);
+        super();
 
-        this._localeService.load({
-            zhCN,
-        });
+        this._localeService.load({ zhCN });
 
         if (this._config.disableAutoFocus) {
             this._contextService.setContextValue(DISABLE_AUTO_FOCUS_KEY, true);

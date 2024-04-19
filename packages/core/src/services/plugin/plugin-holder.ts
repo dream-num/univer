@@ -26,7 +26,7 @@ import { type Plugin, type PluginCtor, PluginRegistry, PluginStore } from './plu
 export class PluginHolder extends Disposable {
     protected _started: boolean = false;
 
-    protected readonly _univerPluginStore = new PluginStore();
+    protected readonly _pluginStore = new PluginStore();
     protected readonly _pluginRegistry = new PluginRegistry();
 
     constructor(
@@ -35,6 +35,14 @@ export class PluginHolder extends Disposable {
         @Inject(LifecycleInitializerService) protected readonly _lifecycleInitializerService: LifecycleInitializerService
     ) {
         super();
+    }
+
+    override dispose(): void {
+        super.dispose();
+
+        this._pluginStore.forEachPlugin((plugin) => plugin.dispose());
+        this._pluginStore.removePlugins();
+        this._pluginRegistry.removePlugins();
     }
 
     _registerPlugin<T extends PluginCtor<Plugin>>(pluginCtor: T, config?: ConstructorParameters<T>[0]): void {
@@ -52,7 +60,7 @@ export class PluginHolder extends Disposable {
         if (!this._started) return;
 
         const plugins = this._pluginRegistry.getRegisterPlugins().map(({ plugin, options }) => this._initPlugin(plugin, options));
-        this._pluginRegistry.clearPlugins();
+        this._pluginRegistry.removePlugins();
 
         this.disposeWithMe(this._lifecycleService.subscribeWithPrevious().subscribe((stage) => {
             this._pluginsRunLifecycle(plugins, stage);

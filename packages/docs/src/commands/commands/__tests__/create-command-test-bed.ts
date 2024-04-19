@@ -97,10 +97,11 @@ export function createCommandTestBed(workbookConfig?: IDocumentData, dependencie
      * This plugin hooks into Doc's DI system to expose API to test scripts
      */
     class TestPlugin extends Plugin {
+        static override pluginName = 'test-plugin';
         static override type = PluginType.Univer;
 
         constructor(_config: undefined, @Inject(Injector) override readonly _injector: Injector) {
-            super('test-plugin');
+            super();
         }
 
         override onStarting(injector: Injector): void {

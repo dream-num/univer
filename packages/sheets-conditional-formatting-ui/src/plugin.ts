@@ -44,7 +44,9 @@ import { ConditionalFormattingEditorController } from './controllers/cf.editor.c
 import { ConditionalFormattingClearController } from './controllers/cf.clear.controller';
 
 export class UniverSheetsConditionalFormattingUIPlugin extends Plugin {
+    static override pluginName = SHEET_CONDITIONAL_FORMATTING_PLUGIN;
     static override type = PluginType.Sheet;
+
     static commandList = [
         AddAverageCfCommand,
         AddColorScaleConditionalRuleCommand,
@@ -69,7 +71,7 @@ export class UniverSheetsConditionalFormattingUIPlugin extends Plugin {
         @Inject(Injector) override readonly _injector: Injector,
         @Inject(ICommandService) private _commandService: ICommandService
     ) {
-        super(SHEET_CONDITIONAL_FORMATTING_PLUGIN);
+        super();
         this._initCommand();
         SheetsConditionalFormattingPlugin.dependencyList.forEach((dependency) => {
             this._injector.add(dependency);

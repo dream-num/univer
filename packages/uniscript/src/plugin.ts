@@ -30,6 +30,7 @@ const PLUGIN_NAME = 'uniscript';
 export interface IUniscriptConfig extends IScriptEditorServiceConfig {}
 
 export class UniverUniscriptPlugin extends Plugin {
+    static override pluginName = PLUGIN_NAME;
     static override type = PluginType.Univer;
 
     constructor(
@@ -37,7 +38,7 @@ export class UniverUniscriptPlugin extends Plugin {
         @Inject(Injector) protected override _injector: Injector,
         @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
-        super(PLUGIN_NAME);
+        super();
     }
 
     override onStarting(injector: Injector): void {

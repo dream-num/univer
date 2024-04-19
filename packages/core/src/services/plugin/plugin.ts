@@ -15,6 +15,7 @@
  */
 
 import type { Ctor, Injector } from '@wendellhu/redi';
+import { Disposable } from '../../shared';
 
 export type PluginCtor<T extends Plugin> = Ctor<T> & { type: PluginType };
 
@@ -33,17 +34,13 @@ export enum PluginType {
 /**
  * Plug-in base class, all plug-ins must inherit from this base class. Provide basic methods.
  */
-export abstract class Plugin {
+export abstract class Plugin extends Disposable {
+    static pluginName: string = 'ANONYMOUS_PLUGIN';
     static type: PluginType = PluginType.Univer;
 
     protected abstract _injector: Injector;
 
-    private _name: string;
-
-    protected constructor(name: string) {
-        this._name = name;
-    }
-
+    // eslint-disable-next-line unused-imports/no-unused-vars
     onStarting(injector: Injector): void {}
 
     onReady(): void {}
@@ -52,15 +49,18 @@ export abstract class Plugin {
 
     onSteady(): void {}
 
-    onDestroy(): void {}
+    getPluginType(): PluginType {
+        return (this.constructor as typeof Plugin).type;
+    }
 
     getPluginName(): string {
-        return this._name;
+        return (this.constructor as typeof Plugin).pluginName;
     }
 }
 
 interface IPluginRegistryItem {
     plugin: PluginCtor<Plugin>;
+    // eslint-disable-next-line ts/no-explicit-any
     options: any;
 }
 
@@ -100,7 +100,7 @@ export class PluginRegistry {
         return this._pluginsRegistered.slice();
     }
 
-    clearPlugins(): void {
+    removePlugins(): void {
         this._pluginsRegistered = [];
     }
 }

@@ -49,13 +49,14 @@ export function createCoreTestBed(workbookConfig?: IWorkbookData, dependencies?:
     const get = injector.get.bind(injector);
 
     class TestPlugin extends Plugin {
+        static override pluginName = 'test-plugin';
         static override type = PluginType.Sheet;
 
         constructor(
             _config: undefined,
             @Inject(Injector) override readonly _injector: Injector
         ) {
-            super('test-spy-plugin');
+            super();
         }
 
         override onStarting(injector: Injector): void {

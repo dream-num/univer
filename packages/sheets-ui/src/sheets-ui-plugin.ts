@@ -20,7 +20,6 @@ import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { filter } from 'rxjs/operators';
 
-import { SHEET_UI_PLUGIN_NAME } from './basics';
 import { ActiveWorksheetController } from './controllers/active-worksheet/active-worksheet.controller';
 import { AutoFillController } from './controllers/auto-fill.controller';
 import { AutoHeightController } from './controllers/auto-height.controller';
@@ -71,6 +70,7 @@ import { CellCustomRenderController } from './controllers/cell-custom-render.con
 import { SheetCanvasPopManagerService } from './services/canvas-pop-manager.service';
 
 export class UniverSheetsUIPlugin extends Plugin {
+    static override pluginName = 'SHEET_UI_PLUGIN_NAME';
     static override type = PluginType.Sheet;
 
     constructor(
@@ -79,7 +79,7 @@ export class UniverSheetsUIPlugin extends Plugin {
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
-        super(SHEET_UI_PLUGIN_NAME);
+        super();
 
         this._localeService.load({
             zhCN,

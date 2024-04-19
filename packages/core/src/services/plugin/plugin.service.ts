@@ -16,11 +16,10 @@
 
 import { Inject, Injector } from '@wendellhu/redi';
 import type { UnitType } from '../../common/unit';
-import { PluginType } from '../../plugin/plugin';
 import { LifecycleInitializerService, LifecycleService } from '../lifecycle/lifecycle.service';
 import { LifecycleStages } from '../lifecycle/lifecycle';
 import { PluginHolder } from './plugin-holder';
-import type { Plugin, PluginCtor } from './plugin';
+import { type Plugin, type PluginCtor, PluginType } from './plugin';
 
 const INIT_LAZY_PLUGINS_TIMEOUT = 200;
 
@@ -36,6 +35,16 @@ export class PluginService extends PluginHolder {
         @Inject(LifecycleInitializerService) _lifecycleInitializerService: LifecycleInitializerService
     ) {
         super(_injector, _lifecycleService, _lifecycleInitializerService);
+    }
+
+    override dispose(): void {
+        this._clearFlushLazyPluginsTimer();
+
+        // Dispose all plugin holders including self.
+        super.dispose();
+        for (const holder of this._pluginHoldersForTypes.values()) {
+            holder.dispose();
+        }
     }
 
     /** Register a plugin into univer. */
@@ -62,7 +71,7 @@ export class PluginService extends PluginHolder {
         } else {
             // For plugins at Univer level. Plugins would be initialized immediately so they can register dependencies.
             const pluginInstance: Plugin = this._injector.createInstance(pluginCtor, options);
-            this._univerPluginStore.addPlugin(pluginInstance);
+            this._pluginStore.addPlugin(pluginInstance);
             this._pluginsRunLifecycle([pluginInstance], LifecycleStages.Starting);
         }
     }
@@ -84,6 +93,13 @@ export class PluginService extends PluginHolder {
                 () => this._flushLazyPlugins(),
                 INIT_LAZY_PLUGINS_TIMEOUT
             ) as unknown as number;
+        }
+    }
+
+    private _clearFlushLazyPluginsTimer() {
+        if (this._initLazyPluginsTimer) {
+            clearTimeout(this._initLazyPluginsTimer);
+            this._initLazyPluginsTimer = undefined;
         }
     }
 

@@ -73,13 +73,14 @@ export function createTestBed(workbookConfig?: IWorkbookData, dependencies?: Dep
     const injector = univer.__getInjector();
 
     class TestPlugin extends Plugin {
+        static override pluginName = 'test-plugin';
         static override type = PluginType.Sheet;
 
         constructor(
             _config: undefined,
             @Inject(Injector) override readonly _injector: Injector
         ) {
-            super('test-plugin');
+            super();
 
             this._injector = _injector;
         }

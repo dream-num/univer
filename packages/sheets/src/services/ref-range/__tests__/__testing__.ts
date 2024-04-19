@@ -66,13 +66,14 @@ export function createTestBase(workbookConfig?: IWorkbookData, dependencies?: De
      * This plugin hooks into Sheet's DI system to expose API to test scripts
      */
     class TestPlugin extends Plugin {
+        static override pluginName = 'test-plugin';
         static override type = PluginType.Sheet;
 
         constructor(
             _config: undefined,
             @Inject(Injector) override readonly _injector: Injector
         ) {
-            super('test-plugin');
+            super();
         }
 
         override onStarting(injector: Injector): void {

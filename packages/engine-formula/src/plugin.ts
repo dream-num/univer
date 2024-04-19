@@ -66,11 +66,13 @@ interface IUniverFormulaEngine {
 }
 
 export class UniverFormulaEnginePlugin extends Plugin {
+    static override pluginName = PLUGIN_NAME;
+
     constructor(
         private _config: IUniverFormulaEngine,
         @Inject(Injector) protected override _injector: Injector
     ) {
-        super(PLUGIN_NAME);
+        super();
     }
 
     override onStarting(): void {

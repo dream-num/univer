@@ -30,6 +30,7 @@ const DEFAULT_SLIDE_PLUGIN_DATA = {};
 const PLUGIN_NAME = 'slides';
 
 export class UniverSlidesPlugin extends Plugin {
+    static override pluginName = PLUGIN_NAME;
     static override type = PluginType.Slide;
 
     private _config: IUniverSlidesConfig;
@@ -44,7 +45,7 @@ export class UniverSlidesPlugin extends Plugin {
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(Injector) override readonly _injector: Injector
     ) {
-        super(PLUGIN_NAME);
+        super();
 
         this._config = Object.assign(DEFAULT_SLIDE_PLUGIN_DATA, config);
         this._initializeDependencies(this._injector);
@@ -67,10 +68,6 @@ export class UniverSlidesPlugin extends Plugin {
 
     override onRendered(): void {
         this.initialize();
-    }
-
-    override onDestroy(): void {
-        super.onDestroy();
     }
 
     getCanvasEngine() {

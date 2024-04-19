@@ -25,14 +25,16 @@ import { zhCN } from './locale';
 
 export interface IUniverSheetsZenEditorPluginConfig {}
 export class UniverSheetsZenEditorPlugin extends Plugin {
+    static override pluginName = 'zen-editor';
     static override type = PluginType.Doc;
 
     constructor(
-        config: IUniverSheetsZenEditorPluginConfig,
+        _config: IUniverSheetsZenEditorPluginConfig,
         @Inject(Injector) override readonly _injector: Injector,
         @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
-        super('zen-editor');
+        super();
+
         this._initialize();
         this._initializeDependencies(this._injector);
     }
@@ -52,8 +54,4 @@ export class UniverSheetsZenEditorPlugin extends Plugin {
 
         dependencies.forEach((dependency) => injector.add(dependency));
     }
-
-    override onRendered(): void {}
-
-    override onDestroy(): void {}
 }

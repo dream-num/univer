@@ -16,7 +16,7 @@
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { IWorkbookData, LocaleType } from '@univerjs/core';
-import { Direction, ICommandService, Plugin, PluginType, RANGE_TYPE, Univer } from '@univerjs/core';
+import { Direction, ICommandService, Plugin, RANGE_TYPE, Univer, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -162,13 +162,14 @@ function createFilterTestUniver(dependencies?: Dependency[], workbookData?: IWor
      * This plugin hooks into Sheet's DI system to expose API to test scripts
      */
     class TestPlugin extends Plugin {
-        static override type = PluginType.Sheet;
+        static override type = UniverInstanceType.SHEET;
+        static override pluginName = 'test-plugin';
 
         constructor(
             _config: undefined,
             @Inject(Injector) override readonly _injector: Injector
         ) {
-            super('test-plugin');
+            super();
         }
 
         override onStarting(injector: Injector): void {

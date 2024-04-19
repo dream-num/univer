@@ -20,7 +20,7 @@ import { RediContext } from '@wendellhu/redi/react-bindings';
 import type { Injector } from '@wendellhu/redi';
 import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 import type { IWorkbookData } from '@univerjs/core';
-import { ICommandService, ILogService, LocaleService, LocaleType, LogLevel, Plugin, PluginType, Univer } from '@univerjs/core';
+import { ICommandService, ILogService, LocaleService, LocaleType, LogLevel, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
 import { RefRangeService, SelectionManagerService, SheetInterceptorService, SheetPermissionService } from '@univerjs/sheets';
 import { DesktopMenuService, DesktopShortcutService, IMenuService, IShortcutService } from '@univerjs/ui';
 import { SheetsFilterPanelService } from '../../services/sheets-filter-panel.service';
@@ -48,10 +48,11 @@ function createFilterStorybookBed(workbookData: IWorkbookData, locale: LocaleTyp
     const commandService = get(ICommandService);
 
     class TestPlugin extends Plugin {
-        static override type = PluginType.Sheet;
+        static override type = UniverInstanceType.SHEET;
+        static override pluginName = 'test-plugin';
 
         constructor(_config: unknown, override readonly _injector: Injector) {
-            super('test-plugin');
+            super();
         }
 
         override onStarting(injector: Injector): void {

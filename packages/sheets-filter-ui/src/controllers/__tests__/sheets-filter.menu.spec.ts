@@ -15,7 +15,7 @@
  */
 
 import type { IRange, IWorkbookData } from '@univerjs/core';
-import { DisposableCollection, ICommandService, LocaleType, Plugin, PluginType, RANGE_TYPE, Univer } from '@univerjs/core';
+import { DisposableCollection, ICommandService, LocaleType, Plugin, RANGE_TYPE, Univer, UniverInstanceType } from '@univerjs/core';
 import { NORMAL_SELECTION_PLUGIN_NAME, RefRangeService, SelectionManagerService, SheetInterceptorService, SheetPermissionService } from '@univerjs/sheets';
 import type { ISetSheetsFilterCriteriaMutationParams, ISetSheetsFilterRangeMutationParams } from '@univerjs/sheets-filter';
 import { RemoveSheetsFilterMutation, SetSheetsFilterCriteriaMutation, SetSheetsFilterRangeMutation, UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
@@ -53,10 +53,11 @@ function createSheetsFilterMenuTestBed() {
     const get = injector.get.bind(injector);
 
     class TestPlugin extends Plugin {
-        static override type = PluginType.Sheet;
+        static override type = UniverInstanceType.SHEET;
+        static override pluginName = 'test-plugin';
 
         constructor(_config: unknown, override readonly _injector: Injector) {
-            super('test-plugin');
+            super();
         }
 
         override onStarting(injector: Injector): void {

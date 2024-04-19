@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Plugin, PluginType } from '@univerjs/core';
+import { Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -24,10 +24,11 @@ import { SheetsFilterController } from './controllers/sheets-fiter.controller';
 const NAME = 'UNIVER_SHEETS_FILTER_PLUGIN';
 
 export class UniverSheetsFilterPlugin extends Plugin {
-    static override type = PluginType.Sheet;
+    static override type = UniverInstanceType.SHEET;
+    static override pluginName = NAME;
 
     constructor(_config: unknown, @Inject(Injector) protected readonly _injector: Injector) {
-        super(NAME);
+        super();
     }
 
     override onStarting(injector: Injector): void {

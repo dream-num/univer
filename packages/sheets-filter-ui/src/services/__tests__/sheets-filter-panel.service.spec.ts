@@ -15,7 +15,7 @@
  */
 
 import type { IWorkbookData } from '@univerjs/core';
-import { ICommandService, LocaleService, Plugin, PluginType, Univer } from '@univerjs/core';
+import { ICommandService, LocaleService, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
 import { RefRangeService, SelectionManagerService, SheetInterceptorService } from '@univerjs/sheets';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
@@ -36,10 +36,11 @@ function createSheetsFilterPanelServiceTestBed(workbookData: IWorkbookData) {
     const get = injector.get.bind(injector);
 
     class SheetsFilterPanelTestPlugin extends Plugin {
-        static override type = PluginType.Sheet;
+        static override type = UniverInstanceType.SHEET;
+        static override pluginName = 'sheets-filter-panel-test';
 
         constructor(_config: unknown, @Inject(Injector) protected readonly _injector: Injector) {
-            super('sheets-filter-panel-test');
+            super();
         }
 
         override onStarting(injector: Injector): void {

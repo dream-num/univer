@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ICommandService, LocaleService, LocaleType, Plugin, PluginType, Univer } from '@univerjs/core';
+import { ICommandService, LocaleService, LocaleType, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
 import { IContextService, type IWorkbookData } from '@univerjs/core';
 import type { ISetSheetsFilterRangeMutationParams } from '@univerjs/sheets-filter';
 import { SetSheetsFilterRangeMutation, UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
@@ -58,10 +58,11 @@ function createFilterOperationTestBed() {
     const get = injector.get.bind(injector);
 
     class SheetsFilterOperationTestPlugin extends Plugin {
-        static override type = PluginType.Sheet;
+        static override type = UniverInstanceType.SHEET;
+        static override pluginName = 'sheets-filter-operation-test';
 
         constructor(_config: unknown, @Inject(Injector) protected readonly _injector: Injector) {
-            super('sheets-filter-operation-test');
+            super();
         }
 
         override onStarting(injector: Injector): void {

@@ -15,7 +15,7 @@
  */
 
 import type { IRange, IWorkbookData } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, LocaleType, Plugin, RANGE_TYPE, RedoCommand, UndoCommand, Univer } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, LocaleType, Plugin, RANGE_TYPE, RedoCommand, UndoCommand, Univer, UniverInstanceType } from '@univerjs/core';
 import type { ISetRangeValuesCommandParams } from '@univerjs/sheets';
 import { NORMAL_SELECTION_PLUGIN_NAME, RefRangeService, SelectionManagerService, SetRangeValuesCommand, SetRangeValuesMutation, SheetInterceptorService, SheetPermissionService } from '@univerjs/sheets';
 import type { FilterModel, ISetSheetsFilterRangeMutationParams } from '@univerjs/sheets-filter';
@@ -83,8 +83,10 @@ function createFilterCommandTestBed() {
     const get = injector.get.bind(injector);
 
     class SheetsFilterCommandTestPlugin extends Plugin {
+        static override pluginName = 'sheets-filter-command-test';
+        static override type = UniverInstanceType.SHEET;
         constructor(_config: unknown, @Inject(Injector) protected readonly _injector: Injector) {
-            super('sheets-filter-command-test');
+            super();
         }
 
         override onStarting(injector: Injector): void {

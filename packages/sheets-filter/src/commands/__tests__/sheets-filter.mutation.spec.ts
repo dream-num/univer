@@ -15,7 +15,7 @@
  */
 
 import type { IWorkbookData } from '@univerjs/core';
-import { ICommandService, LocaleType, Plugin, PluginType, Univer } from '@univerjs/core';
+import { ICommandService, LocaleType, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 import { afterEach, describe, expect, it } from 'vitest';
 import { SHEET_FILTER_SNAPSHOT_ID, SheetsFilterService } from '../../services/sheet-filter.service';
@@ -98,10 +98,11 @@ function createFilterMutationTestBed(workbookData?: IWorkbookData) {
     const get = injector.get.bind(injector);
 
     class SheetsFilterTestPlugin extends Plugin {
-        static override type = PluginType.Sheet;
+        static override type = UniverInstanceType.SHEET;
+        static override pluginName = 'SheetsFilterTestPlugin';
 
         constructor(_config: unknown, @Inject(Injector) protected readonly _injector: Injector) {
-            super('SheetsFilterTestPlugin');
+            super();
         }
 
         override onStarting(injector: Injector): void {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { LocaleService, Plugin, PluginType } from '@univerjs/core';
+import { LocaleService, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -26,7 +26,8 @@ import { SheetsFilterRenderController } from './controllers/sheets-filter-render
 const NAME = 'UNIVER_SHEETS_FILTER_UI_PLUGIN';
 
 export class UniverSheetsFilterUIPlugin extends Plugin {
-    static override type = PluginType.Sheet;
+    static override type = UniverInstanceType.SHEET;
+    static override pluginName = NAME;
 
     constructor(
         _config: unknown,

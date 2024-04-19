@@ -17,6 +17,7 @@
 import { CommandType, IContextService, type IOperation } from '@univerjs/core';
 import { SheetsFilterService } from '@univerjs/sheets-filter';
 import { ILayoutService } from '@univerjs/ui';
+import { Quantity } from '@wendellhu/redi';
 import type { FilterBy } from '../services/sheets-filter-panel.service';
 import { SheetsFilterPanelService } from '../services/sheets-filter-panel.service';
 
@@ -62,11 +63,11 @@ export const CloseFilterPanelOperation: IOperation = {
     handler: (accessor) => {
         const contextService = accessor.get(IContextService);
         const sheetsFilterPanelService = accessor.get(SheetsFilterPanelService);
-        const layoutService = accessor.get(ILayoutService);
+        const layoutService = accessor.get(ILayoutService, Quantity.OPTIONAL);
 
         if (contextService.getContextValue(FILTER_PANEL_OPENED_KEY)) {
             contextService.setContextValue(FILTER_PANEL_OPENED_KEY, false);
-            layoutService.focus();
+            layoutService?.focus();
 
             return sheetsFilterPanelService.terminate();
         }

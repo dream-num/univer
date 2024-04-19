@@ -56,7 +56,7 @@ export function createMenuTestBed() {
             super();
 
             this._injector = _injector;
-            get = this._injector.get.bind(this._injector);
+            // get = this._injector.get.bind(this._injector);
         }
 
         override onStarting(injector: Injector): void {

@@ -48,7 +48,7 @@ export class PluginHolder extends Disposable {
         this._pluginRegistry.removePlugins();
     }
 
-    _registerPlugin<T extends PluginCtor<Plugin>>(pluginCtor: T, config?: ConstructorParameters<T>[0]): void {
+    protected _registerPlugin<T extends PluginCtor<Plugin>>(pluginCtor: T, config?: ConstructorParameters<T>[0]): void {
         const { pluginName } = pluginCtor;
         if (this._pluginRegistered.has(pluginName)) {
             this._logService.warn('[PluginService]', `plugin ${pluginName} has already been registered. This registration will be ignored.`);

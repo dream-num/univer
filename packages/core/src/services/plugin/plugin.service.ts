@@ -60,6 +60,8 @@ export class PluginService extends PluginHolder {
 
         // If it's type is for specific document, we should run them at specific time.
         const holder = this._ensurePluginHolderForType(type);
+
+        // @ts-ignore
         holder._registerPlugin(plugin, config);
     }
 

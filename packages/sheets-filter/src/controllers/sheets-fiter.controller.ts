@@ -15,9 +15,9 @@
  */
 
 import type { ICommandInfo, IMutationInfo, IObjectArrayPrimitiveType, Nullable } from '@univerjs/core';
-import { Disposable, DisposableCollection, ICommandService, IUniverInstanceService, LifecycleStages, moveMatrixArray, OnLifecycle } from '@univerjs/core';
-import type { EffectRefRangeParams, IAddWorksheetMergeMutationParams, IInsertColCommandParams, IInsertRowCommandParams, IMoveColsCommandParams, IMoveRowsCommandParams, IRemoveColMutationParams, IRemoveRowsMutationParams, IRemoveSheetCommandParams, ISetWorksheetActivateCommandParams, ISheetCommandSharedParams } from '@univerjs/sheets';
-import { EffectRefRangId, InsertColCommand, InsertRowCommand, INTERCEPTOR_POINT, RefRangeService, RemoveColCommand, RemoveRowCommand, RemoveSheetCommand, SetWorksheetActivateCommand, SheetInterceptorService } from '@univerjs/sheets';
+import { Disposable, DisposableCollection, ICommandService, IUniverInstanceService, LifecycleStages, moveMatrixArray, OnLifecycle, Rectangle } from '@univerjs/core';
+import type { EffectRefRangeParams, IAddWorksheetMergeMutationParams, IInsertColCommandParams, IInsertRowCommandParams, IMoveColsCommandParams, IMoveRangeCommandParams, IMoveRowsCommandParams, IRemoveColMutationParams, IRemoveRowsMutationParams, IRemoveSheetCommandParams, ISetWorksheetActivateCommandParams, ISheetCommandSharedParams } from '@univerjs/sheets';
+import { EffectRefRangId, InsertColCommand, InsertRowCommand, INTERCEPTOR_POINT, MoveRangeCommand, RefRangeService, RemoveColCommand, RemoveRowCommand, RemoveSheetCommand, SetWorksheetActivateCommand, SheetInterceptorService } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
 import { SheetsFilterService } from '../services/sheet-filter.service';
@@ -96,6 +96,10 @@ export class SheetsFilterController extends Disposable {
                     case EffectRefRangId.MoveRowsCommandId: {
                         const params = config.params as IMoveRowsCommandParams;
                         return this._handleMoveRowsCommand(params, unitId, subUnitId);
+                    }
+                    case MoveRangeCommand.id: {
+                        const params = config.params as IMoveRangeCommandParams;
+                        return this._handleMoveRangeCommand(params, unitId, subUnitId);
                     }
                 }
                 return { redos: [], undos: [] };
@@ -489,6 +493,39 @@ export class SheetsFilterController extends Disposable {
             };
             redos.unshift({ id: SetSheetsFilterRangeMutation.id, params: setFilterRangeMutationParams });
             undos.push({ id: SetSheetsFilterRangeMutation.id, params: { range: filterRange, unitId, subUnitId } });
+        }
+        return {
+            redos,
+            undos,
+        };
+    }
+
+    private _handleMoveRangeCommand(config: IMoveRangeCommandParams, unitId: string, subUnitId: string) {
+        const { fromRange, toRange } = config;
+        const filterModel = this._sheetsFilterService.getFilterModel(unitId, subUnitId);
+        if (!filterModel) {
+            return this._handleNull();
+        }
+        const filterRange = filterModel.getRange();
+        if (!filterRange) {
+            return this._handleNull();
+        }
+
+        const redos: IMutationInfo[] = [];
+        const undos: IMutationInfo[] = [];
+
+        if (Rectangle.contains(fromRange, filterRange)) {
+            const rowOffset = filterRange.startRow - fromRange.startRow;
+            const colOffset = filterRange.startColumn - fromRange.startColumn;
+            const newFilterRange = {
+                startRow: toRange.startRow + rowOffset,
+                startColumn: toRange.startColumn + colOffset,
+                endRow: toRange.startRow + rowOffset + (filterRange.endRow - filterRange.startRow),
+                endColumn: toRange.startColumn + colOffset + (filterRange.endColumn - filterRange.startColumn),
+            };
+
+            redos.push({ id: SetSheetsFilterRangeMutation.id, params: { unitId, subUnitId, range: newFilterRange } as ISetSheetsFilterRangeMutationParams });
+            undos.push({ id: SetSheetsFilterRangeMutation.id, params: { unitId, subUnitId, range: filterRange } as ISetSheetsFilterRangeMutationParams });
         }
         return {
             redos,

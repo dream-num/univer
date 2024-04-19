@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ICommandService, LocaleService, Plugin, PluginType } from '@univerjs/core';
+import { ICommandService, LocaleService, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -43,7 +43,7 @@ export interface IUniverSheetsConfig {
  */
 export class UniverSheetsPlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;
-    static override type = PluginType.Sheet;
+    static override type = UniverInstanceType.SHEET;
 
     constructor(
         private _config: IUniverSheetsConfig,

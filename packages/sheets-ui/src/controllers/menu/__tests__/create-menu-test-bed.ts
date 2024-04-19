@@ -15,7 +15,7 @@
  */
 
 import type { IWorkbookData } from '@univerjs/core';
-import { LocaleType, Plugin, PluginType, Univer } from '@univerjs/core';
+import { LocaleType, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
 import { SelectionManagerService, SheetInterceptorService, SheetPermissionService } from '@univerjs/sheets';
 import { DesktopMenuService, DesktopShortcutService, IMenuService, IShortcutService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
@@ -53,7 +53,7 @@ export function createMenuTestBed() {
         static override pluginName = 'test-plugin';
         protected override _injector: Injector;
 
-        static override type = PluginType.Sheet;
+        static override type = UniverInstanceType.SHEET;
 
         constructor(_config: unknown, @Inject(Injector) _injector: Injector) {
             super();

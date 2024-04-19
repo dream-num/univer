@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Plugin, PluginType } from '@univerjs/core';
+import { Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -26,7 +26,7 @@ const NAME = 'UNIVER_SHEETS_FIND_REPLACE_PLUGIN';
 
 export class UniverSheetsFindReplacePlugin extends Plugin {
     static override pluginName = NAME;
-    static override type = PluginType.Sheet;
+    static override type = UniverInstanceType.SHEET;
 
     constructor(
         _config: Partial<IFindPluginConfig>,

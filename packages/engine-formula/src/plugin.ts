@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Plugin } from '@univerjs/core';
+import { Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Ctor, Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -66,6 +66,7 @@ interface IUniverFormulaEngine {
 }
 
 export class UniverFormulaEnginePlugin extends Plugin {
+    static override type = UniverInstanceType.UNIVER;
     static override pluginName = PLUGIN_NAME;
 
     constructor(

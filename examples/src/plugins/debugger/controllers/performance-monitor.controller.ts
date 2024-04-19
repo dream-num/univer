@@ -22,7 +22,7 @@ import { interval, takeUntil, throttle } from 'rxjs';
 
 @OnLifecycle(LifecycleStages.Rendered, PerformanceMonitorController)
 export class PerformanceMonitorController extends RxDisposable {
-    private _documentType: UniverInstanceType = UniverInstanceType.UNKNOWN;
+    private _documentType: UniverInstanceType = UniverInstanceType.UNIVER;
     private _hasWatched = false;
     private _container!: HTMLDivElement;
     private _styleElement!: HTMLStyleElement;

@@ -21,8 +21,8 @@ import {
     LocaleService,
     LogLevel,
     Plugin,
-    PluginType,
     Univer,
+    UniverInstanceType,
 } from '@univerjs/core';
 import {
     enUS,
@@ -68,7 +68,7 @@ export function createTestBed(documentConfig?: IDocumentData, dependencies?: Dep
 
     class TestPlugin extends Plugin {
         static override pluginName = 'test-plugin';
-        static override type = PluginType.Univer;
+        static override type = UniverInstanceType.UNIVER;
 
         constructor(
             _config: undefined,

@@ -21,8 +21,8 @@ import {
     IUniverInstanceService,
     LogLevel,
     Plugin,
-    PluginType,
     Univer,
+    UniverInstanceType,
 } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
@@ -110,7 +110,7 @@ export function createCommandTestBed(workbookConfig?: IWorkbookData, dependencie
 
     class TestPlugin extends Plugin {
         static override pluginName = 'test-plugin';
-        static override type = PluginType.Sheet;
+        static override type = UniverInstanceType.SHEET;
 
         constructor(
             _config: undefined,

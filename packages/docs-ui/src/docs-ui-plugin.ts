@@ -19,8 +19,8 @@ import {
     IUniverInstanceService,
     LocaleService,
     Plugin,
-    PluginType,
     Tools,
+    UniverInstanceType,
 } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
@@ -58,8 +58,8 @@ import { TextSelectionController } from './controllers/text-selection.controller
 import { BackScrollController } from './controllers/back-scroll.controller';
 
 export class UniverDocsUIPlugin extends Plugin {
-    static override name = DOC_UI_PLUGIN_NAME;
-    static override type = PluginType.Doc;
+    static override pluginName = DOC_UI_PLUGIN_NAME;
+    static override type = UniverInstanceType.DOC;
 
     constructor(
         private readonly _config: IUniverDocsUIConfig,

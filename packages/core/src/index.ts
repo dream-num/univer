@@ -47,7 +47,7 @@ export { getBodySlice, composeBody } from './docs/data-model/text-x/utils';
 export { TextX } from './docs/data-model/text-x/text-x';
 export { replaceInDocumentBody } from './docs/data-model/replacement';
 export * from './observer';
-export { Plugin, PluginType } from './services/plugin/plugin';
+export { Plugin } from './services/plugin/plugin';
 export {
     type CommandListener,
     CommandService,

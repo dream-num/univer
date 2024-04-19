@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ICommandService, Plugin, PluginType } from '@univerjs/core';
+import { ICommandService, Plugin, UniverInstanceType } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 import { SHEET_CONDITIONAL_FORMATTING_PLUGIN, SheetsConditionalFormattingPlugin } from '@univerjs/sheets-conditional-formatting';
 import { AddAverageCfCommand } from './commands/commands/add-average-cf.command';
@@ -45,7 +45,7 @@ import { ConditionalFormattingClearController } from './controllers/cf.clear.con
 
 export class UniverSheetsConditionalFormattingUIPlugin extends Plugin {
     static override pluginName = SHEET_CONDITIONAL_FORMATTING_PLUGIN;
-    static override type = PluginType.Sheet;
+    static override type = UniverInstanceType.SHEET;
 
     static commandList = [
         AddAverageCfCommand,

@@ -15,7 +15,7 @@
  */
 
 import type { IContextService } from '@univerjs/core';
-import { IConfigService, ILocalStorageService, LocaleService, Plugin, PluginType } from '@univerjs/core';
+import { IConfigService, ILocalStorageService, LocaleService, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -69,7 +69,7 @@ export const DISABLE_AUTO_FOCUS_KEY = 'DISABLE_AUTO_FOCUS';
  */
 export class UniverUIPlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;
-    static override type = PluginType.Univer;
+    static override type = UniverInstanceType.UNIVER;
 
     constructor(
         private _config: Partial<IUniverUIConfig> = {},

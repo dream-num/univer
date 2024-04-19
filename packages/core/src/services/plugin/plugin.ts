@@ -16,27 +16,16 @@
 
 import type { Ctor, Injector } from '@wendellhu/redi';
 import { Disposable } from '../../shared';
+import { UniverInstanceType } from '../../common/unit';
 
-export type PluginCtor<T extends Plugin> = Ctor<T> & { type: PluginType };
-
-/**
- * Plugin types for different kinds of business.
- *
- * @deprecated use UnitType instead
- */
-export enum PluginType {
-    Univer = 0,
-    Doc = 1,
-    Sheet = 2,
-    Slide = 3,
-}
+export type PluginCtor<T extends Plugin> = Ctor<T> & { type: UniverInstanceType; pluginName: string };
 
 /**
  * Plug-in base class, all plug-ins must inherit from this base class. Provide basic methods.
  */
 export abstract class Plugin extends Disposable {
-    static pluginName: string = 'ANONYMOUS_PLUGIN';
-    static type: PluginType = PluginType.Univer;
+    static pluginName: string = '';
+    static type: UniverInstanceType = UniverInstanceType.UNRECOGNIZED;
 
     protected abstract _injector: Injector;
 
@@ -49,7 +38,7 @@ export abstract class Plugin extends Disposable {
 
     onSteady(): void {}
 
-    getPluginType(): PluginType {
+    getUniverInstanceType(): UniverInstanceType {
         return (this.constructor as typeof Plugin).type;
     }
 

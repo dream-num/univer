@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Plugin, PluginType } from '@univerjs/core';
+import { Plugin, UniverInstanceType } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { SHEET_NUMFMT_PLUGIN } from './base/const/PLUGIN_NAME';
@@ -32,7 +32,7 @@ import { UserHabitController } from './controllers/user-habit.controller';
 
 export class UniverSheetsNumfmtPlugin extends Plugin {
     static override pluginName = SHEET_NUMFMT_PLUGIN;
-    static override type = PluginType.Sheet;
+    static override type = UniverInstanceType.SHEET;
 
     constructor(
         _config: unknown,

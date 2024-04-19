@@ -15,7 +15,7 @@
  */
 
 import type { IWorkbookData } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, LocaleType, Plugin, PluginType, Univer } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, LocaleType, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
 import {
     SheetInterceptorService,
 } from '@univerjs/sheets';
@@ -61,7 +61,7 @@ export const createTestBed = (dependencies?: Dependency[]) => {
 
     class TestPlugin extends Plugin {
         static override pluginName = 'test-plugin';
-        static override type = PluginType.Sheet;
+        static override type = UniverInstanceType.SHEET;
 
         constructor(
             _config: undefined,

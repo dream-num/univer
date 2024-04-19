@@ -15,7 +15,7 @@
  */
 
 import type { IWorkbookData, Workbook } from '@univerjs/core';
-import { ILogService, IUniverInstanceService, LocaleType, LogLevel, Plugin, PluginType, Univer } from '@univerjs/core';
+import { ILogService, IUniverInstanceService, LocaleType, LogLevel, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
 import { SelectionManagerService, SheetInterceptorService } from '@univerjs/sheets';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
@@ -49,7 +49,7 @@ export function createTestBed(workbookConfig?: IWorkbookData, dependencies?: Dep
 
     class TestPlugin extends Plugin {
         static override pluginName = 'test-plugin';
-        static override type = PluginType.Sheet;
+        static override type = UniverInstanceType.SHEET;
 
         constructor(
             _config: undefined,

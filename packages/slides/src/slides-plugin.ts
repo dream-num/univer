@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { IUniverInstanceService, LocaleService, Plugin, PluginType } from '@univerjs/core';
+import { IUniverInstanceService, LocaleService, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Engine } from '@univerjs/engine-render';
 import { IRenderingEngine } from '@univerjs/engine-render';
 import type { Dependency } from '@wendellhu/redi';
@@ -31,7 +31,7 @@ const PLUGIN_NAME = 'slides';
 
 export class UniverSlidesPlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;
-    static override type = PluginType.Slide;
+    static override type = UniverInstanceType.SLIDE;
 
     private _config: IUniverSlidesConfig;
 

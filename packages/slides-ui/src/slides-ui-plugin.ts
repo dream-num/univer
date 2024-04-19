@@ -15,7 +15,7 @@
  */
 
 import type { SlideDataModel } from '@univerjs/core';
-import { IUniverInstanceService, LocaleService, Plugin, PluginType, UniverInstanceType } from '@univerjs/core';
+import { IUniverInstanceService, LocaleService, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -26,7 +26,7 @@ export const SLIDE_UI_PLUGIN_NAME = 'slides-ui';
 
 export class UniverSlidesUIPlugin extends Plugin {
     static override pluginName = SLIDE_UI_PLUGIN_NAME;
-    static override type = PluginType.Slide;
+    static override type = UniverInstanceType.SLIDE;
 
     constructor(
         _config: unknown,

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { LocaleService, Plugin, PluginType } from '@univerjs/core';
+import { LocaleService, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -26,7 +26,7 @@ import { zhCN } from './locale';
 export interface IUniverSheetsZenEditorPluginConfig {}
 export class UniverSheetsZenEditorPlugin extends Plugin {
     static override pluginName = 'zen-editor';
-    static override type = PluginType.Doc;
+    static override type = UniverInstanceType.DOC;
 
     constructor(
         _config: IUniverSheetsZenEditorPluginConfig,

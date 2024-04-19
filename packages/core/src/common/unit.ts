@@ -20,7 +20,7 @@ import { Disposable } from '../shared';
  * Type of built-in univer document instances.
  */
 export enum UniverInstanceType {
-    UNKNOWN = 0,
+    UNIVER = 0,
     DOC = 1,
     SHEET = 2,
     SLIDE = 3,

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Plugin, PluginType } from '@univerjs/core';
+import { Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -42,7 +42,7 @@ export interface IUniverRPCMainThreadConfig {
  */
 export class UniverRPCMainThreadPlugin extends Plugin {
     static override pluginName = 'UNIVER_RPC_MAIN_THREAD_PLUGIN';
-    static override type = PluginType.Univer;
+    static override type = UniverInstanceType.UNIVER;
 
     constructor(
         private readonly _config: IUniverRPCMainThreadConfig,
@@ -80,7 +80,7 @@ export interface IUniverRPCWorkerThreadPluginConfig {}
  */
 export class UniverRPCWorkerThreadPlugin extends Plugin {
     static override pluginName = 'UNIVER_RPC_WORKER_THREAD_PLUGIN';
-    static override type = PluginType.Univer;
+    static override type = UniverInstanceType.UNIVER;
 
     constructor(
         private readonly _config: IUniverRPCWorkerThreadPluginConfig,

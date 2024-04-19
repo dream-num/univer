@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Plugin, PluginType } from '@univerjs/core';
+import { Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -25,7 +25,7 @@ export interface IDebuggerPluginConfig {}
 
 export class DebuggerPlugin extends Plugin {
     static override pluginName = 'debugger';
-    static override type = PluginType.Doc;
+    static override type = UniverInstanceType.DOC;
 
     private _debuggerController!: DebuggerController;
 

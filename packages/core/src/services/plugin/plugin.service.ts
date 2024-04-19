@@ -15,11 +15,11 @@
  */
 
 import { Inject, Injector } from '@wendellhu/redi';
-import type { UnitType } from '../../common/unit';
+import { type UnitType, UniverInstanceType } from '../../common/unit';
 import { LifecycleInitializerService, LifecycleService } from '../lifecycle/lifecycle.service';
 import { LifecycleStages } from '../lifecycle/lifecycle';
 import { PluginHolder } from './plugin-holder';
-import { type Plugin, type PluginCtor, PluginType } from './plugin';
+import type { Plugin, PluginCtor } from './plugin';
 
 const INIT_LAZY_PLUGINS_TIMEOUT = 200;
 
@@ -49,14 +49,27 @@ export class PluginService extends PluginHolder {
 
     /** Register a plugin into univer. */
     registerPlugin<T extends PluginCtor<Plugin>>(plugin: T, config?: ConstructorParameters<T>[0]): void {
+        this._assertPluginValid(plugin);
+
         const type = plugin.type;
-        if (type === PluginType.Univer) {
+        if (type === UniverInstanceType.UNIVER) {
             return this._registerPlugin(plugin, config);
         }
 
         // If it's type is for specific document, we should run them at specific time.
         const holder = this._ensurePluginHolderForType(type);
         holder._registerPlugin(plugin, config);
+    }
+
+    private _assertPluginValid(plugin: PluginCtor<Plugin>): void {
+        const { type, pluginName } = plugin;
+        if (type === UniverInstanceType.UNRECOGNIZED) {
+            throw new Error(`[PluginService]: invalid plugin type for ${plugin}. Please assign a "type" to your plugin.`);
+        }
+
+        if (pluginName === '') {
+            throw new Error(`[PluginService]: no plugin name for ${plugin}. Please assign a "pluginName" to your plugin.`);
+        }
     }
 
     // TODO@wzhudev: we should dedupe here!

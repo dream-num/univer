@@ -617,7 +617,7 @@ In addition to registering through the `UniverFormulaEnginePlugin` configuration
 First of all, there is no need to register `CustomFunctionController` in `plugin.ts`. Create a new `custom-function-plugin.ts` in the same directory, specifically for registering `CustomFunctionController`.
 
 ```ts
-import { Plugin, PluginType } from '@univerjs/core';
+import { Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -626,7 +626,7 @@ import { CustomFunctionController } from './controllers/custom-function.controll
 
 export class UniverSheetsCustomFunctionPlugin extends Plugin {
      static override pluginName = FORMULA_UI_PLUGIN_NAME
-     static override type = PluginType.Sheet;
+     static override type = UniverInstanceType.SHEET;
 
      constructor(@Inject(Injector) override readonly _injector: Injector) {
          super();

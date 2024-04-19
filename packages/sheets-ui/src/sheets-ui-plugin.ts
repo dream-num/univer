@@ -15,7 +15,7 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { IUniverInstanceService, LocaleService, Plugin, PluginType, UniverInstanceType } from '@univerjs/core';
+import { IUniverInstanceService, LocaleService, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { filter } from 'rxjs/operators';
@@ -71,7 +71,7 @@ import { SheetCanvasPopManagerService } from './services/canvas-pop-manager.serv
 
 export class UniverSheetsUIPlugin extends Plugin {
     static override pluginName = 'SHEET_UI_PLUGIN_NAME';
-    static override type = PluginType.Sheet;
+    static override type = UniverInstanceType.SHEET;
 
     constructor(
         config: undefined,

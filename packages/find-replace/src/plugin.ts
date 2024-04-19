@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { LocaleService, Plugin } from '@univerjs/core';
+import { LocaleService, Plugin, UniverInstanceType } from '@univerjs/core';
 import { type Dependency, Inject, type Injector } from '@wendellhu/redi';
 
 import { FindReplaceController } from './controllers/find-replace.controller';
@@ -25,6 +25,7 @@ const PLUGIN_NAME = 'FIND_REPLACE';
 
 export class UniverFindReplacePlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;
+    static override type = UniverInstanceType.UNIVER;
 
     constructor(
         protected readonly _injector: Injector,

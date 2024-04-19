@@ -15,7 +15,7 @@
  */
 
 import type { IWorkbookData, Workbook } from '@univerjs/core';
-import { ILogService, IUniverInstanceService, LocaleType, LogLevel, Plugin, PluginType, Univer } from '@univerjs/core';
+import { ILogService, IUniverInstanceService, LocaleType, LogLevel, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
 import { CalculateFormulaService, DefinedNamesService, FormulaCurrentConfigService, FormulaDataModel, FormulaRuntimeService, IDefinedNamesService, IFormulaCurrentConfigService, IFormulaRuntimeService, LexerTreeBuilder } from '@univerjs/engine-formula';
 import { SelectionManagerService, SheetInterceptorService } from '@univerjs/sheets';
 import type { Dependency } from '@wendellhu/redi';
@@ -63,7 +63,7 @@ export function createCommandTestBed(workbookConfig?: IWorkbookData, dependencie
 
     class TestPlugin extends Plugin {
         static override pluginName = 'test-plugin';
-        static override type = PluginType.Sheet;
+        static override type = UniverInstanceType.SHEET;
 
         private _formulaDataModel: FormulaDataModel | null = null;
 

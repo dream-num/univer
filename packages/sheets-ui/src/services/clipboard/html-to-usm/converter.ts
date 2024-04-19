@@ -648,7 +648,7 @@ function getCellTextAndRichText(cell: Element, skeleton?: SpreadsheetSkeleton) {
         cellRichStyle = documentModel?.getSnapshot();
         cellText = newDocBody.dataStream;
     } else {
-        cellText = cell.innerHTML.replace(/[\r\n]/g, '').replace(/&nbsp;/gi, '');
+        cellText = decodeHTMLEntities(cell.innerHTML.replace(/[\r\n]/g, ''));
     }
     return {
         cellText,

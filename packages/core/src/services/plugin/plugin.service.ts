@@ -18,6 +18,7 @@ import { Inject, Injector } from '@wendellhu/redi';
 import { type UnitType, UniverInstanceType } from '../../common/unit';
 import { LifecycleInitializerService, LifecycleService } from '../lifecycle/lifecycle.service';
 import { LifecycleStages } from '../lifecycle/lifecycle';
+import { ILogService } from '../log/log.service';
 import { PluginHolder } from './plugin-holder';
 import type { Plugin, PluginCtor } from './plugin';
 
@@ -30,11 +31,12 @@ export class PluginService extends PluginHolder {
     private _pluginHoldersForTypes = new Map<UnitType, PluginHolder>();
 
     constructor(
-    @Inject(Injector) _injector: Injector,
+    @ILogService _logService: ILogService,
+        @Inject(Injector) _injector: Injector,
         @Inject(LifecycleService) _lifecycleService: LifecycleService,
         @Inject(LifecycleInitializerService) _lifecycleInitializerService: LifecycleInitializerService
     ) {
-        super(_injector, _lifecycleService, _lifecycleInitializerService);
+        super(_logService, _injector, _lifecycleService, _lifecycleInitializerService);
     }
 
     override dispose(): void {
@@ -51,7 +53,7 @@ export class PluginService extends PluginHolder {
     registerPlugin<T extends PluginCtor<Plugin>>(plugin: T, config?: ConstructorParameters<T>[0]): void {
         this._assertPluginValid(plugin);
 
-        const type = plugin.type;
+        const { type } = plugin;
         if (type === UniverInstanceType.UNIVER) {
             return this._registerPlugin(plugin, config);
         }
@@ -63,6 +65,7 @@ export class PluginService extends PluginHolder {
 
     private _assertPluginValid(plugin: PluginCtor<Plugin>): void {
         const { type, pluginName } = plugin;
+
         if (type === UniverInstanceType.UNRECOGNIZED) {
             throw new Error(`[PluginService]: invalid plugin type for ${plugin}. Please assign a "type" to your plugin.`);
         }
@@ -72,9 +75,15 @@ export class PluginService extends PluginHolder {
         }
     }
 
-    // TODO@wzhudev: we should dedupe here!
-
     override _registerPlugin<T extends PluginCtor<Plugin>>(pluginCtor: T, options?: ConstructorParameters<T>[0]): void {
+        const { pluginName } = pluginCtor;
+        if (this._pluginRegistered.has(pluginName)) {
+            this._logService.warn('[PluginService]', `plugin ${pluginName} has already been registered. This registration will be ignored.`);
+            return;
+        }
+
+        this._pluginRegistered.add(pluginName);
+
         if (this._started) {
             this._pluginRegistry.registerPlugin(pluginCtor, options);
 

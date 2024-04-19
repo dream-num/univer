@@ -42,14 +42,14 @@ import { Workbook } from './sheets/workbook';
 import { SlideDataModel } from './slides/slide-model';
 import type { LocaleType } from './types/enum/locale-type';
 import type { IDocumentData, ISlideData, IUniverData, IWorkbookData } from './types/interfaces';
-import { PluginHolder } from './services/plugin/plugin-holder';
 import type { UnitModel, UnitType } from './common/unit';
 import { UniverInstanceType } from './common/unit';
 import { PluginService } from './services/plugin/plugin.service';
 import type { Plugin, PluginCtor } from './services/plugin/plugin';
 
-export class Univer extends PluginHolder {
+export class Univer {
     private _startedTypes = new Set<UnitType>();
+    private _injector: Injector;
 
     private get _univerInstanceService(): IUniverInstanceService {
         return this._injector.get(IUniverInstanceService);
@@ -60,11 +60,7 @@ export class Univer extends PluginHolder {
     }
 
     constructor(univerData: Partial<IUniverData> = {}) {
-        const injector = createUniverInjector();
-        const lifecycleService = injector.get(LifecycleService);
-        const lifecycleInitializerService = injector.get(LifecycleInitializerService);
-
-        super(injector, lifecycleService, lifecycleInitializerService);
+        const injector = this._injector = createUniverInjector();
 
         const { theme, locale, locales, logLevel } = univerData;
 
@@ -80,10 +76,8 @@ export class Univer extends PluginHolder {
         return this._injector;
     }
 
-    override dispose(): void {
+    dispose(): void {
         this._injector.dispose();
-
-        super.dispose();
     }
 
     setLocale(locale: LocaleType) {
@@ -125,7 +119,7 @@ export class Univer extends PluginHolder {
         const univerInstanceService = injector.get(IUniverInstanceService) as UniverInstanceService;
         univerInstanceService.__setCreateHandler(
             (type: UnitType, data, ctor) => {
-                this._start();
+                this._tryProgressToStart();
 
                 if (!this._startedTypes.has(type)) {
                     this._startedTypes.add(type);
@@ -146,6 +140,10 @@ export class Univer extends PluginHolder {
                 return model;
             }
         );
+    }
+
+    private _tryProgressToStart(): void {
+        this._pluginService._start();
     }
 
     private _tryProgressToReady(): void {

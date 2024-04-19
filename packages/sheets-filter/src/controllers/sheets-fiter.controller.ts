@@ -16,8 +16,8 @@
 
 import type { ICommandInfo, IMutationInfo, IObjectArrayPrimitiveType, Nullable } from '@univerjs/core';
 import { Disposable, DisposableCollection, ICommandService, IUniverInstanceService, LifecycleStages, moveMatrixArray, OnLifecycle, Rectangle } from '@univerjs/core';
-import type { EffectRefRangeParams, IAddWorksheetMergeMutationParams, IInsertColCommandParams, IInsertRowCommandParams, IMoveColsCommandParams, IMoveRangeCommandParams, IMoveRowsCommandParams, IRemoveColMutationParams, IRemoveRowsMutationParams, IRemoveSheetCommandParams, ISetWorksheetActivateCommandParams, ISheetCommandSharedParams } from '@univerjs/sheets';
-import { EffectRefRangId, InsertColCommand, InsertRowCommand, INTERCEPTOR_POINT, MoveRangeCommand, RefRangeService, RemoveColCommand, RemoveRowCommand, RemoveSheetCommand, SetWorksheetActivateCommand, SheetInterceptorService } from '@univerjs/sheets';
+import type { EffectRefRangeParams, IAddWorksheetMergeMutationParams, IInsertColCommandParams, IInsertRowCommandParams, IInsertRowMutationParams, IMoveColsCommandParams, IMoveRangeCommandParams, IMoveRowsCommandParams, IRemoveColMutationParams, IRemoveRowsMutationParams, IRemoveSheetCommandParams, ISetWorksheetActivateCommandParams, ISheetCommandSharedParams } from '@univerjs/sheets';
+import { EffectRefRangId, InsertColCommand, InsertRowCommand, InsertRowMutation, INTERCEPTOR_POINT, MoveRangeCommand, RefRangeService, RemoveColCommand, RemoveRowCommand, RemoveRowMutation, RemoveSheetCommand, SetWorksheetActivateCommand, SheetInterceptorService } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
 import { SheetsFilterService } from '../services/sheet-filter.service';
@@ -41,6 +41,7 @@ export class SheetsFilterController extends Disposable {
         this._initCommands();
         this._initRowFilteredInterceptor();
         this._initInterceptors();
+        this._commandExecutedListener();
     }
 
     private _initCommands(): void {
@@ -626,55 +627,64 @@ export class SheetsFilterController extends Disposable {
         };
     }
 
-    // private _commandExecutedListener() {
-    //     this.disposeWithMe(this._commandService.onCommandExecuted((command: ICommandInfo) => {
-    //         const { unitId, subUnitId } = command.params as unknown as ISheetCommandSharedParams || {};
+    private _commandExecutedListener() {
+        this.disposeWithMe(this._commandService.onCommandExecuted((command: ICommandInfo) => {
+            const { unitId, subUnitId } = command.params as unknown as ISheetCommandSharedParams || {};
 
-    //         const filterModel = this._sheetsFilterService.getFilterModel(unitId, subUnitId);
-    //         if (!filterModel) return;
+            const filterModel = this._sheetsFilterService.getFilterModel(unitId, subUnitId);
+            if (!filterModel) return;
 
-    //         // InsertRowsOrCols / RemoveRowsOrCols Mutations
-    //         if (mutationIdByRowCol.includes(command.id)) {
-    //             const params = command.params as IInsertRowCommandParams;
-    //             if (!params) return;
-    //             const { range } = params;
+            if (command.id === RemoveRowMutation.id || command.id === InsertRowMutation.id) {
+                const { startRow } = (command.params as (IRemoveRowsMutationParams | IInsertRowMutationParams)).range;
+                const { endRow: filterEndRow } = filterModel.getRange();
+                if (startRow <= filterEndRow) {
+                    filterModel.reCalc();
+                }
+            }
 
-    //             const isRowOperation = command.id.includes('row');
-    //             const isAddOperation = command.id.includes('insert');
 
-    //             const operationStart = isRowOperation ? range.startRow : range.startColumn;
-    //             const operationEnd = isRowOperation ? range.endRow : range.endColumn;
-    //             const operationCount = operationEnd - operationStart + 1;
+            // InsertRowsOrCols / RemoveRowsOrCols Mutations
+            // if (mutationIdByRowCol.includes(command.id)) {
+            //     const params = command.params as IInsertRowCommandParams;
+            //     if (!params) return;
+            //     const { range } = params;
 
-    //             let { startRow, endRow, startColumn, endColumn } = filterModel.getRange();
+            //     const isRowOperation = command.id.includes('row');
+            //     const isAddOperation = command.id.includes('insert');
 
-    //             if (isAddOperation) {
-    //                 if (isRowOperation) {
-    //                     if (operationStart <= startRow) {
-    //                         startRow += operationCount;
-    //                         endRow += operationCount;
-    //                     }
-    //                 } else {
-    //                     if (operationStart <= startColumn) {
-    //                         startColumn += operationCount;
-    //                         endColumn += operationCount;
-    //                     }
-    //                 }
-    //             } else {
-    //                 if (isRowOperation) {
-    //                     if (operationEnd < startRow) {
-    //                         startRow -= operationCount;
-    //                         endRow -= operationCount;
-    //                     }
-    //                 } else {
-    //                     if (operationEnd < startColumn) {
-    //                         startColumn -= operationCount;
-    //                         endColumn -= operationCount;
-    //                     }
-    //                 }
-    //             }
-    //             filterModel.setRange({ startRow, endRow, startColumn, endColumn });
-    //         }
-    //     }));
-    // }
+            //     const operationStart = isRowOperation ? range.startRow : range.startColumn;
+            //     const operationEnd = isRowOperation ? range.endRow : range.endColumn;
+            //     const operationCount = operationEnd - operationStart + 1;
+
+            //     let { startRow, endRow, startColumn, endColumn } = filterModel.getRange();
+
+            //     if (isAddOperation) {
+            //         if (isRowOperation) {
+            //             if (operationStart <= startRow) {
+            //                 startRow += operationCount;
+            //                 endRow += operationCount;
+            //             }
+            //         } else {
+            //             if (operationStart <= startColumn) {
+            //                 startColumn += operationCount;
+            //                 endColumn += operationCount;
+            //             }
+            //         }
+            //     } else {
+            //         if (isRowOperation) {
+            //             if (operationEnd < startRow) {
+            //                 startRow -= operationCount;
+            //                 endRow -= operationCount;
+            //             }
+            //         } else {
+            //             if (operationEnd < startColumn) {
+            //                 startColumn -= operationCount;
+            //                 endColumn -= operationCount;
+            //             }
+            //         }
+            //     }
+            //     filterModel.setRange({ startRow, endRow, startColumn, endColumn });
+            // }
+        }));
+    }
 }

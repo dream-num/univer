@@ -18,9 +18,9 @@
 
 import { type Ctor, Inject, Injector } from '@wendellhu/redi';
 
-import { LifecycleStages } from '../services/lifecycle/lifecycle';
-import { LifecycleInitializerService, LifecycleService } from '../services/lifecycle/lifecycle.service';
-import { Disposable } from '../shared/lifecycle';
+import { LifecycleStages } from '../lifecycle/lifecycle';
+import { LifecycleInitializerService, LifecycleService } from '../lifecycle/lifecycle.service';
+import { Disposable } from '../../shared/lifecycle';
 import { type Plugin, type PluginCtor, PluginRegistry, PluginStore } from './plugin';
 
 export class PluginHolder extends Disposable {

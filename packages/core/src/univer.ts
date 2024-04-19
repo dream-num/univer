@@ -17,8 +17,6 @@
 import { Injector } from '@wendellhu/redi';
 
 import { DocumentDataModel } from './docs/data-model/document-data-model';
-import type { Plugin, PluginCtor } from './common/plugin';
-import { PluginType } from './common/plugin';
 import { CommandService, ICommandService } from './services/command/command.service';
 import { ConfigService, IConfigService } from './services/config/config.service';
 import { ContextService, IContextService } from './services/context/context.service';
@@ -44,18 +42,21 @@ import { Workbook } from './sheets/workbook';
 import { SlideDataModel } from './slides/slide-model';
 import type { LocaleType } from './types/enum/locale-type';
 import type { IDocumentData, ISlideData, IUniverData, IWorkbookData } from './types/interfaces';
-import { PluginHolder } from './common/plugin-holder';
+import { PluginHolder } from './services/plugin/plugin-holder';
 import type { UnitModel, UnitType } from './common/unit';
 import { UniverInstanceType } from './common/unit';
-
-const INIT_LAZY_PLUGINS_TIMEOUT = 200;
+import { PluginService } from './services/plugin/plugin.service';
+import type { Plugin, PluginCtor } from './services/plugin/plugin';
 
 export class Univer extends PluginHolder {
     private _startedTypes = new Set<UnitType>();
-    private _pluginHoldersForTypes = new Map<UnitType, PluginHolder>();
 
     private get _univerInstanceService(): IUniverInstanceService {
         return this._injector.get(IUniverInstanceService);
+    }
+
+    private get _pluginService(): PluginService {
+        return this._injector.get(PluginService);
     }
 
     constructor(univerData: Partial<IUniverData> = {}) {
@@ -129,7 +130,7 @@ export class Univer extends PluginHolder {
                 if (!this._startedTypes.has(type)) {
                     this._startedTypes.add(type);
 
-                    const pluginHolder = this._ensurePluginHolderForType(type);
+                    const pluginHolder = this._pluginService._ensurePluginHolderForType(type);
                     pluginHolder._start();
 
                     const model = injector.createInstance(ctor, data);
@@ -154,59 +155,10 @@ export class Univer extends PluginHolder {
         }
     }
 
-    private _ensurePluginHolderForType(type: UnitType): PluginHolder {
-        if (!this._pluginHoldersForTypes.has(type)) {
-            const pluginHolder = this._injector.createInstance(PluginHolder);
-            this._pluginHoldersForTypes.set(type, pluginHolder);
-            return pluginHolder;
-        }
-
-        return this._pluginHoldersForTypes.get(type)!;
-    }
 
     /** Register a plugin into univer. */
     registerPlugin<T extends PluginCtor<Plugin>>(plugin: T, config?: ConstructorParameters<T>[0]): void {
-        const type = plugin.type;
-        if (type === PluginType.Univer) {
-            return this._registerPlugin(plugin, config);
-        }
-
-        // If it's type is for specific document, we should run them at specific time.
-        const holder = this._ensurePluginHolderForType(type);
-        holder._registerPlugin(plugin, config);
-    }
-
-    override _registerPlugin<T extends PluginCtor<Plugin>>(pluginCtor: T, options?: ConstructorParameters<T>[0]): void {
-        if (this._started) {
-            this._pluginRegistry.registerPlugin(pluginCtor, options);
-
-            // If Univer has already started, we should manually call onStarting for the plugin.
-            // We do that in an asynchronous way, because user may lazy load several plugins at the same time.
-            return this._scheduleInitPluginAfterStarted();
-        } else {
-            // For plugins at Univer level. Plugins would be initialized immediately so they can register dependencies.
-            const pluginInstance: Plugin = this._injector.createInstance(pluginCtor, options);
-            this._univerPluginStore.addPlugin(pluginInstance);
-            this._pluginsRunLifecycle([pluginInstance], LifecycleStages.Starting);
-        }
-    }
-
-    private _initLazyPluginsTimer?: number;
-    private _scheduleInitPluginAfterStarted() {
-        if (this._initLazyPluginsTimer === undefined) {
-            this._initLazyPluginsTimer = setTimeout(
-                () => this._flushLazyPlugins(),
-                INIT_LAZY_PLUGINS_TIMEOUT
-            ) as unknown as number;
-        }
-    }
-
-    private _flushLazyPlugins() {
-        this._flush();
-
-        for (const [_, holder] of this._pluginHoldersForTypes) {
-            holder._flush();
-        }
+        this._pluginService.registerPlugin(plugin, config);
     }
 }
 
@@ -218,6 +170,7 @@ function createUniverInjector() {
         [LifecycleService],
         [LifecycleInitializerService],
         [UniverPermissionService],
+        [PluginService],
         [IUniverInstanceService, { useClass: UniverInstanceService }],
         [IPermissionService, { useClass: PermissionService }],
         [ILogService, { useClass: DesktopLogService, lazy: true }],

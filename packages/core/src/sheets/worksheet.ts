@@ -440,6 +440,9 @@ export class Worksheet {
      * @returns Gets the height in pixels of the given row.
      */
     getRowHeight(row: number): number {
+        const filtered = this._viewModel.getRowFiltered(row);
+        if (filtered) return 0;
+
         return this.getRowManager().getRowHeight(row);
     }
 

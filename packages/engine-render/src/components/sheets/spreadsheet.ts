@@ -219,10 +219,7 @@ export class Spreadsheet extends SheetComponent {
         }
 
         const spreadsheetSkeleton = this.getSkeleton();
-
-        if (!spreadsheetSkeleton) {
-            return;
-        }
+        if (!spreadsheetSkeleton) return;
 
         spreadsheetSkeleton.calculateWithoutClearingCache(bounds);
 

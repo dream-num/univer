@@ -22,8 +22,8 @@ import {
     LocaleType,
     LogLevel,
     Plugin,
-    PluginType,
     Univer,
+    UniverInstanceType,
 } from '@univerjs/core';
 import { FunctionService, IFunctionService } from '@univerjs/engine-formula';
 import { ISocketService, WebSocketService } from '@univerjs/network';
@@ -73,13 +73,14 @@ export function createTestBed(workbookConfig?: IWorkbookData, dependencies?: Dep
     const injector = univer.__getInjector();
 
     class TestPlugin extends Plugin {
-        static override type = PluginType.Sheet;
+        static override pluginName = 'test-plugin';
+        static override type = UniverInstanceType.SHEET;
 
         constructor(
             _config: undefined,
             @Inject(Injector) override readonly _injector: Injector
         ) {
-            super('test-plugin');
+            super();
 
             this._injector = _injector;
         }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ICommandService, LocaleService, Plugin } from '@univerjs/core';
+import { ICommandService, LocaleService, Plugin, UniverInstanceType } from '@univerjs/core';
 import { type Dependency, Inject, Injector } from '@wendellhu/redi';
 import { DataValidationRenderController } from './controllers/dv-render.controller';
 import { DataValidationController } from './controllers/dv.controller';
@@ -37,13 +37,16 @@ import { DataValidationRejectInputController } from './controllers/dv-reject-inp
 import { DataValidationPanelService } from './services/data-validation-panel.service';
 
 export class UniverSheetsDataValidationPlugin extends Plugin {
+    static override pluginName = DATA_VALIDATION_PLUGIN_NAME;
+    static override type = UniverInstanceType.SHEET;
+
     constructor(
         _config: unknown,
         @Inject(Injector) protected _injector: Injector,
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
-        super(DATA_VALIDATION_PLUGIN_NAME);
+        super();
     }
 
     override onStarting(injector: Injector) {

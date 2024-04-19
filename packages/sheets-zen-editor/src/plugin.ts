@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { LocaleService, Plugin, PluginType } from '@univerjs/core';
+import { LocaleService, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -25,14 +25,16 @@ import { zhCN } from './locale';
 
 export interface IUniverSheetsZenEditorPluginConfig {}
 export class UniverSheetsZenEditorPlugin extends Plugin {
-    static override type = PluginType.Doc;
+    static override pluginName = 'zen-editor';
+    static override type = UniverInstanceType.DOC;
 
     constructor(
-        config: IUniverSheetsZenEditorPluginConfig,
+        _config: IUniverSheetsZenEditorPluginConfig,
         @Inject(Injector) override readonly _injector: Injector,
         @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
-        super('zen-editor');
+        super();
+
         this._initialize();
         this._initializeDependencies(this._injector);
     }
@@ -52,8 +54,4 @@ export class UniverSheetsZenEditorPlugin extends Plugin {
 
         dependencies.forEach((dependency) => injector.add(dependency));
     }
-
-    override onRendered(): void {}
-
-    override onDestroy(): void {}
 }

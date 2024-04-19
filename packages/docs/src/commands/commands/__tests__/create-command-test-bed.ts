@@ -21,8 +21,8 @@ import {
     IUniverInstanceService,
     LogLevel,
     Plugin,
-    PluginType,
     Univer,
+    UniverInstanceType,
 } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
@@ -97,10 +97,11 @@ export function createCommandTestBed(workbookConfig?: IDocumentData, dependencie
      * This plugin hooks into Doc's DI system to expose API to test scripts
      */
     class TestPlugin extends Plugin {
-        static override type = PluginType.Univer;
+        static override pluginName = 'test-plugin';
+        static override type = UniverInstanceType.UNIVER;
 
         constructor(_config: undefined, @Inject(Injector) override readonly _injector: Injector) {
-            super('test-plugin');
+            super();
         }
 
         override onStarting(injector: Injector): void {

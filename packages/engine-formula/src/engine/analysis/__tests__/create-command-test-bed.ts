@@ -23,9 +23,9 @@ import {
     LogLevel,
     ObjectMatrix,
     Plugin,
-    PluginType,
     Univer,
     UniverInstanceType,
+
 } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
@@ -233,7 +233,8 @@ export function createCommandTestBed(workbookConfig?: IWorkbookData, dependencie
      * This plugin hooks into Sheet's DI system to expose API to test scripts
      */
     class TestPlugin extends Plugin {
-        static override type = PluginType.Sheet;
+        static override pluginName = 'test-plugin';
+        static override type = UniverInstanceType.SHEET;
 
         private _formulaDataModel: FormulaDataModel | null = null;
 
@@ -241,7 +242,7 @@ export function createCommandTestBed(workbookConfig?: IWorkbookData, dependencie
             _config: undefined,
             @Inject(Injector) override readonly _injector: Injector
         ) {
-            super('test-plugin');
+            super();
         }
 
         override onStarting(injector: Injector): void {

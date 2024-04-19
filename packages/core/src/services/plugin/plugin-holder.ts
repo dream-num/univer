@@ -18,18 +18,21 @@
 
 import { type Ctor, Inject, Injector } from '@wendellhu/redi';
 
-import { LifecycleStages } from '../services/lifecycle/lifecycle';
-import { LifecycleInitializerService, LifecycleService } from '../services/lifecycle/lifecycle.service';
-import { Disposable } from '../shared/lifecycle';
+import { LifecycleStages } from '../lifecycle/lifecycle';
+import { LifecycleInitializerService, LifecycleService } from '../lifecycle/lifecycle.service';
+import { Disposable } from '../../shared/lifecycle';
+import { ILogService } from '../log/log.service';
 import { type Plugin, type PluginCtor, PluginRegistry, PluginStore } from './plugin';
 
 export class PluginHolder extends Disposable {
     protected _started: boolean = false;
 
-    protected readonly _univerPluginStore = new PluginStore();
+    protected readonly _pluginRegistered = new Set<string>();
+    protected readonly _pluginStore = new PluginStore();
     protected readonly _pluginRegistry = new PluginRegistry();
 
     constructor(
+        @ILogService protected readonly _logService: ILogService,
         @Inject(Injector) protected readonly _injector: Injector,
         @Inject(LifecycleService) protected readonly _lifecycleService: LifecycleService,
         @Inject(LifecycleInitializerService) protected readonly _lifecycleInitializerService: LifecycleInitializerService
@@ -37,7 +40,21 @@ export class PluginHolder extends Disposable {
         super();
     }
 
-    _registerPlugin<T extends PluginCtor<Plugin>>(pluginCtor: T, config?: ConstructorParameters<T>[0]): void {
+    override dispose(): void {
+        super.dispose();
+
+        this._pluginStore.forEachPlugin((plugin) => plugin.dispose());
+        this._pluginStore.removePlugins();
+        this._pluginRegistry.removePlugins();
+    }
+
+    protected _registerPlugin<T extends PluginCtor<Plugin>>(pluginCtor: T, config?: ConstructorParameters<T>[0]): void {
+        const { pluginName } = pluginCtor;
+        if (this._pluginRegistered.has(pluginName)) {
+            this._logService.warn('[PluginService]', `plugin ${pluginName} has already been registered. This registration will be ignored.`);
+            return;
+        }
+
         this._pluginRegistry.registerPlugin(pluginCtor, config);
     }
 
@@ -52,7 +69,7 @@ export class PluginHolder extends Disposable {
         if (!this._started) return;
 
         const plugins = this._pluginRegistry.getRegisterPlugins().map(({ plugin, options }) => this._initPlugin(plugin, options));
-        this._pluginRegistry.clearPlugins();
+        this._pluginRegistry.removePlugins();
 
         this.disposeWithMe(this._lifecycleService.subscribeWithPrevious().subscribe((stage) => {
             this._pluginsRunLifecycle(plugins, stage);

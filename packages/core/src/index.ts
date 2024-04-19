@@ -19,7 +19,7 @@ import { installShims } from './common/shims';
 export { type UnitType, UnitModel, UniverInstanceType } from './common/unit';
 export { Registry, RegistryAsMap } from './common/registry';
 export { Univer } from './univer';
-export { PluginHolder } from './common/plugin-holder';
+export { PluginHolder } from './services/plugin/plugin-holder';
 export { shallowEqual, isRangesEqual, isUnitRangesEqual } from './common/equal';
 export { dedupe, remove, rotate, groupBy } from './common/array';
 export {
@@ -47,7 +47,8 @@ export { getBodySlice, composeBody } from './docs/data-model/text-x/utils';
 export { TextX } from './docs/data-model/text-x/text-x';
 export { replaceInDocumentBody } from './docs/data-model/replacement';
 export * from './observer';
-export { Plugin, PluginType } from './common/plugin';
+export { Plugin } from './services/plugin/plugin';
+export { PluginService } from './services/plugin/plugin.service';
 export {
     type CommandListener,
     CommandService,
@@ -115,7 +116,7 @@ export { fromCallback } from './shared/rxjs';
 export type { IComposeInterceptors, IInterceptor, InterceptorHandler } from './common/interceptor';
 export { composeInterceptors, createInterceptorKey, InterceptorManager } from './common/interceptor';
 export { normalizeTextRuns } from './docs/data-model/apply-utils/common';
-export type { PluginCtor } from './common/plugin';
+export type { PluginCtor } from './services/plugin/plugin';
 export { Range } from './sheets/range';
 export { Styles } from './sheets/styles';
 export {

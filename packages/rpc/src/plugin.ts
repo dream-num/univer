@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Plugin, PluginType } from '@univerjs/core';
+import { Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -41,13 +41,14 @@ export interface IUniverRPCMainThreadConfig {
  * is also responsible for booting up the Web Worker instance of Univer.
  */
 export class UniverRPCMainThreadPlugin extends Plugin {
-    static override type = PluginType.Univer;
+    static override pluginName = 'UNIVER_RPC_MAIN_THREAD_PLUGIN';
+    static override type = UniverInstanceType.UNIVER;
 
     constructor(
         private readonly _config: IUniverRPCMainThreadConfig,
         @Inject(Injector) protected readonly _injector: Injector
     ) {
-        super('UNIVER_RPC_MAIN_THREAD_PLUGIN');
+        super();
     }
 
     override async onStarting(injector: Injector): Promise<void> {
@@ -78,13 +79,14 @@ export interface IUniverRPCWorkerThreadPluginConfig {}
  * This plugin is used to register the RPC services on the worker thread.
  */
 export class UniverRPCWorkerThreadPlugin extends Plugin {
-    static override type = PluginType.Univer;
+    static override pluginName = 'UNIVER_RPC_WORKER_THREAD_PLUGIN';
+    static override type = UniverInstanceType.UNIVER;
 
     constructor(
         private readonly _config: IUniverRPCWorkerThreadPluginConfig,
         @Inject(Injector) protected readonly _injector: Injector
     ) {
-        super('UNIVER_RPC_WORKER_THREAD_PLUGIN');
+        super();
     }
 
     override onStarting(injector: Injector): void {

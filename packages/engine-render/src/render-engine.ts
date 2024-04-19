@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Plugin, PluginType } from '@univerjs/core';
+import { Plugin, UniverInstanceType } from '@univerjs/core';
 import { createIdentifier, Inject, Injector } from '@wendellhu/redi';
 
 import { Engine } from './engine';
@@ -28,13 +28,14 @@ export const IRenderingEngine = createIdentifier<Engine>('univer.render-engine')
 const PLUGIN_NAME = 'render-engine';
 
 export class UniverRenderEnginePlugin extends Plugin {
-    static override type = PluginType.Univer;
+    static override pluginName = PLUGIN_NAME;
+    static override type = UniverInstanceType.UNIVER;
 
     constructor(
         _config: undefined,
         @Inject(Injector) override readonly _injector: Injector
     ) {
-        super(PLUGIN_NAME);
+        super();
 
         this._injector.add([IRenderingEngine, { useFactory: () => new Engine() }]);
 

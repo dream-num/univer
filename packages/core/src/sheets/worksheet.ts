@@ -266,7 +266,8 @@ export class Worksheet {
         row: number,
         col: number,
         endRow: number,
-        endCol: number
+        endCol: number,
+        isRaw = false
     ): ObjectMatrix<ICellData & { rowSpan?: number; colSpan?: number }> {
         const matrix = this.getCellMatrix();
 
@@ -278,7 +279,7 @@ export class Worksheet {
         // iterate all cells in the range
         const returnCellMatrix = new ObjectMatrix<ICellData & { rowSpan?: number; colSpan?: number }>();
         createRowColIter(row, endRow, col, endCol).forEach((row, col) => {
-            const v = this.getCell(row, col);
+            const v = isRaw ? this.getCellRaw(row, col) : this.getCell(row, col);
             if (v) {
                 returnCellMatrix.setValue(row, col, v);
             }

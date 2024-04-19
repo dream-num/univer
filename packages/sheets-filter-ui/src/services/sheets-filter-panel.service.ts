@@ -132,8 +132,10 @@ export class SheetsFilterPanelService extends Disposable {
 
             if (info.filters) {
                 this._hasCriteria$.next(true);
+                return this._setupByValues(filterModel, col);
             }
 
+            // Use value values by default.
             this._hasCriteria$.next(false);
             return this._setupByValues(filterModel, col);
         }

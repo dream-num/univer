@@ -491,13 +491,19 @@ function generateCustomFilterFn(filter: ICustomFilter): FilterFn {
         return (value) => notEquals.fn(value, compare);
     }
 
+    // numeric match
     if (isNumericFilterFn(filter.operator)) {
         const ensured = ensureNumeric(compare);
         if (!ensured) {
             return () => false;
         }
+
+        const customFilterFn = getCustomFilterFn(filter.operator);
+        const ensuredNumber = Number(compare);
+        return (value) => customFilterFn.fn(value, ensuredNumber);
     }
 
+    // text match
     const customFilterFn = getCustomFilterFn(filter.operator);
     return (value) => customFilterFn.fn(value, compare);
 }

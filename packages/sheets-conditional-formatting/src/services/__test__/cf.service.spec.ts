@@ -22,6 +22,7 @@ import { createTestBed } from './test.util';
 
 describe('Test conditional formatting service', () => {
     let testBed: ReturnType<typeof createTestBed>;
+
     beforeEach(() => {
         testBed && testBed.univer.dispose();
         testBed = createTestBed();

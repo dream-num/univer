@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IUniverInstanceService, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import { type IUniverInstanceService, type Nullable, UniverInstanceType, type Workbook, type Worksheet } from '@univerjs/core';
 
 export function getSheetCommandTargetWorkbook(univerInstanceService: IUniverInstanceService, params: { unitId?: string }): Nullable<{
     workbook: Workbook;
@@ -23,7 +23,7 @@ export function getSheetCommandTargetWorkbook(univerInstanceService: IUniverInst
     const { unitId } = params;
     const workbook = unitId
         ? univerInstanceService.getUniverSheetInstance(unitId)
-        : univerInstanceService.getCurrentUniverSheetInstance();
+        : univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET);
 
     if (!workbook) return null;
 
@@ -55,7 +55,7 @@ export function getSheetCommandTarget(univerInstanceService: IUniverInstanceServ
 
     const workbook = unitId
         ? univerInstanceService.getUniverSheetInstance(unitId)
-        : univerInstanceService.getCurrentUniverSheetInstance();
+        : univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET);
     if (!workbook) return null;
 
     const worksheet = subUnitId ? workbook.getSheetBySheetId(subUnitId) : workbook.getActiveSheet();

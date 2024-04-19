@@ -17,7 +17,7 @@
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 
-import type { Nullable } from '../../common/type-utils';
+import type { Nullable } from '../../common/type-util';
 import { Disposable, toDisposable } from '../../shared/lifecycle';
 
 export interface IStyleSheet {

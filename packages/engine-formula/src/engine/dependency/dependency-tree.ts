@@ -77,6 +77,8 @@ export class FormulaDependencyTree extends Disposable {
     private _state = FDtreeStateType.DEFAULT;
 
     override dispose(): void {
+        super.dispose();
+
         this.children.forEach((tree) => {
             tree.dispose();
         });
@@ -85,6 +87,10 @@ export class FormulaDependencyTree extends Disposable {
         this.parents = [];
 
         this.node?.dispose();
+    }
+
+    resetState() {
+        this._state = FDtreeStateType.DEFAULT;
     }
 
     setAdded() {
@@ -153,28 +159,18 @@ export class FormulaDependencyTree extends Disposable {
             }
 
             const dependencyRanges = sheetRangeMap.get(sheetId)!;
-
             const excludedCell = unitExcludedCell?.[unitId]?.[sheetId];
-
-            let {
-                startRow: rangeStartRow,
-                endRow: rangeEndRow,
-                startColumn: rangeStartColumn,
-                endColumn: rangeEndColumn,
-            } = range;
+            let { startRow: rangeStartRow, endRow: rangeEndRow, startColumn: rangeStartColumn, endColumn: rangeEndColumn } = range;
 
             if (Number.isNaN(rangeStartRow)) {
                 rangeStartRow = 0;
             }
-
             if (Number.isNaN(rangeStartColumn)) {
                 rangeStartColumn = 0;
             }
-
             if (Number.isNaN(rangeEndRow)) {
                 rangeEndRow = Number.POSITIVE_INFINITY;
             }
-
             if (Number.isNaN(rangeEndColumn)) {
                 rangeEndColumn = Number.POSITIVE_INFINITY;
             }
@@ -182,12 +178,7 @@ export class FormulaDependencyTree extends Disposable {
             for (const dependencyRange of dependencyRanges) {
                 const { startRow, startColumn, endRow, endColumn } = dependencyRange;
 
-                if (
-                    rangeStartRow > endRow ||
-                    rangeEndRow < startRow ||
-                    rangeStartColumn > endColumn ||
-                    rangeEndColumn < startColumn
-                ) {
+                if (rangeStartRow > endRow || rangeEndRow < startRow || rangeStartColumn > endColumn || rangeEndColumn < startColumn) {
                     continue;
                 } else {
                     let isInclude = true;
@@ -196,12 +187,7 @@ export class FormulaDependencyTree extends Disposable {
                      * This is because its impact was already considered during the first calculation.
                      */
                     excludedCell?.forValue((row, column) => {
-                        if (
-                            row >= rangeStartRow &&
-                            row <= rangeEndRow &&
-                            column >= rangeStartColumn &&
-                            column <= rangeEndColumn
-                        ) {
+                        if (row >= rangeStartRow && row <= rangeEndRow && column >= rangeStartColumn && column <= rangeEndColumn) {
                             isInclude = false;
                             return false;
                         }
@@ -275,6 +261,10 @@ export class FormulaDependencyTreeCache extends Disposable {
     }
 
     size() {
+        return this._cacheItems.size;
+    }
+
+    get length() {
         return this._cacheItems.size;
     }
 

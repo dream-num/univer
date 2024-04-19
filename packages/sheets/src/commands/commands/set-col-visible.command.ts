@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommand, IRange, Nullable } from '@univerjs/core';
+import type { ICommand, IRange, Nullable, Workbook } from '@univerjs/core';
 import {
     CommandType,
     ICommandService,
@@ -22,6 +22,7 @@ import {
     IUniverInstanceService,
     RANGE_TYPE,
     sequenceExecute,
+    UniverInstanceType,
 } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
@@ -120,7 +121,7 @@ export const SetSelectedColsVisibleCommand: ICommand = {
         }
 
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
+        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET);
         if (!workbook) return false;
         const worksheet = workbook.getActiveSheet();
         if (!worksheet) return false;
@@ -154,7 +155,7 @@ export const SetColHiddenCommand: ICommand = {
         }
 
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
+        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET);
         if (!workbook) return false;
         const worksheet = workbook.getActiveSheet();
         if (!worksheet) return false;

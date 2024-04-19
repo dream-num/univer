@@ -23,6 +23,7 @@ import type {
     IRange,
     IRowData,
     Nullable,
+    Workbook,
     Worksheet,
 } from '@univerjs/core';
 import {
@@ -43,6 +44,7 @@ import {
     ObjectMatrix,
     OnLifecycle,
     RxDisposable,
+    UniverInstanceType,
 } from '@univerjs/core';
 import { MessageType } from '@univerjs/design';
 import type {
@@ -629,7 +631,7 @@ export class SheetClipboardController extends RxDisposable {
                 };
             },
             onPasteColumns(pasteTo, colProperties, payload) {
-                const workbook = self._currentUniverSheet.getCurrentUniverSheetInstance()!;
+                const workbook = self._currentUniverSheet.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
                 const unitId = workbook.getUnitId();
                 const subUnitId = workbook.getActiveSheet().getSheetId();
                 const redoMutations: IMutationInfo[] = [];
@@ -675,7 +677,7 @@ export class SheetClipboardController extends RxDisposable {
                 label: 'specialPaste.besidesBorder',
             },
             onPasteCells(pasteFrom, pasteTo, matrix, payload) {
-                const workbook = self._currentUniverSheet.getCurrentUniverSheetInstance()!;
+                const workbook = self._currentUniverSheet.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
                 const redoMutationsInfo: IMutationInfo[] = [];
                 const undoMutationsInfo: IMutationInfo[] = [];
                 const { range, unitId, subUnitId } = pasteTo;

@@ -21,8 +21,8 @@ import {
     LocaleService,
     LogLevel,
     Plugin,
-    PluginType,
     Univer,
+    UniverInstanceType,
 } from '@univerjs/core';
 import {
     enUS,
@@ -67,13 +67,14 @@ export function createTestBed(documentConfig?: IDocumentData, dependencies?: Dep
     const injector = univer.__getInjector();
 
     class TestPlugin extends Plugin {
-        static override type = PluginType.Univer;
+        static override pluginName = 'test-plugin';
+        static override type = UniverInstanceType.UNIVER;
 
         constructor(
             _config: undefined,
             @Inject(Injector) override readonly _injector: Injector
         ) {
-            super('test-plugin');
+            super();
 
             this._injector = _injector;
         }
@@ -96,7 +97,7 @@ export function createTestBed(documentConfig?: IDocumentData, dependencies?: Dep
     const doc = univer.createUniverDoc(documentConfig || getTestDocumentDataDemo());
 
     const univerInstanceService = injector.get(IUniverInstanceService);
-    univerInstanceService.focusUniverInstance('test');
+    univerInstanceService.focusUnit('test');
     const logService = injector.get(ILogService);
 
     logService.setLogLevel(LogLevel.SILENT); // change this to `LogLevel.VERBOSE` to debug tests via logs

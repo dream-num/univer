@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Plugin } from '@univerjs/core';
+import { Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Ctor, Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -55,6 +55,8 @@ import { IOtherFormulaManagerService, OtherFormulaManagerService } from './servi
 import { FormulaRuntimeService, IFormulaRuntimeService } from './services/runtime.service';
 import { ISuperTableService, SuperTableService } from './services/super-table.service';
 import { ActiveDirtyManagerService, IActiveDirtyManagerService } from './services/active-dirty-manager.service';
+import { DependencyManagerService, IDependencyManagerService } from './services/dependency-manager.service';
+import { SetDependencyController } from './controller/set-dependency.controller';
 
 const PLUGIN_NAME = 'base-formula-engine';
 
@@ -64,11 +66,14 @@ interface IUniverFormulaEngine {
 }
 
 export class UniverFormulaEnginePlugin extends Plugin {
+    static override type = UniverInstanceType.UNIVER;
+    static override pluginName = PLUGIN_NAME;
+
     constructor(
         private _config: IUniverFormulaEngine,
         @Inject(Injector) protected override _injector: Injector
     ) {
-        super(PLUGIN_NAME);
+        super();
     }
 
     override onStarting(): void {
@@ -113,11 +118,13 @@ export class UniverFormulaEnginePlugin extends Plugin {
                 [IOtherFormulaManagerService, { useClass: OtherFormulaManagerService }],
                 [IFormulaRuntimeService, { useClass: FormulaRuntimeService }],
                 [IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }],
+                [IDependencyManagerService, { useClass: DependencyManagerService }],
 
                 //Controller
                 [CalculateController],
                 [SetOtherFormulaController],
                 [RegisterFunctionController],
+                [SetDependencyController],
 
                 // Calculation engine
                 [FormulaDependencyGenerator],

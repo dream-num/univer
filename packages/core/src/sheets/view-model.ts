@@ -17,7 +17,7 @@
 import type { IDisposable } from '@wendellhu/redi';
 
 import { remove } from '../common/array';
-import type { Nullable } from '../common/type-utils';
+import type { Nullable } from '../common/type-util';
 import { Disposable, toDisposable } from '../shared/lifecycle';
 import type { ICellDataForSheetInterceptor } from '../types/interfaces/i-cell-data';
 

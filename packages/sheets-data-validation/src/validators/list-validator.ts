@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { DataValidationRenderMode, DataValidationType, isFormulaString, IUniverInstanceService, Tools } from '@univerjs/core';
-import type { CellValue, DataValidationOperator, ICellData, IDataValidationRule, IDataValidationRuleBase, ISheetDataValidationRule, Nullable } from '@univerjs/core';
+import { DataValidationRenderMode, DataValidationType, isFormulaString, IUniverInstanceService, Tools, UniverInstanceType } from '@univerjs/core';
+import type { CellValue, DataValidationOperator, ICellData, IDataValidationRule, IDataValidationRuleBase, ISheetDataValidationRule, Nullable, Workbook } from '@univerjs/core';
 import type { IBaseDataValidationWidget, IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
 import { BaseDataValidator } from '@univerjs/data-validation';
 import { isReferenceString, LexerTreeBuilder, sequenceNodeType } from '@univerjs/engine-formula';
@@ -137,7 +137,7 @@ export class ListValidator extends BaseDataValidator {
     getList(rule: IDataValidationRule, currentUnitId?: string, currentSubUnitId?: string) {
         const { formula1 = '' } = rule;
         const univerInstanceService = this.injector.get(IUniverInstanceService);
-        const workbook = (currentUnitId ? univerInstanceService.getUniverSheetInstance(currentUnitId) : undefined) ?? univerInstanceService.getCurrentUniverSheetInstance();
+        const workbook = (currentUnitId ? univerInstanceService.getUniverSheetInstance(currentUnitId) : undefined) ?? univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET);
         if (!workbook) return [];
 
         const worksheet = (currentSubUnitId ? workbook.getSheetBySheetId(currentSubUnitId) : undefined) ?? workbook.getActiveSheet();
@@ -150,7 +150,7 @@ export class ListValidator extends BaseDataValidator {
     async getListAsync(rule: IDataValidationRule, currentUnitId?: string, currentSubUnitId?: string) {
         const { formula1 = '' } = rule;
         const univerInstanceService = this.injector.get(IUniverInstanceService);
-        const workbook = (currentUnitId ? univerInstanceService.getUniverSheetInstance(currentUnitId) : undefined) ?? univerInstanceService.getCurrentUniverSheetInstance();
+        const workbook = (currentUnitId ? univerInstanceService.getUniverSheetInstance(currentUnitId) : undefined) ?? univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET);
         if (!workbook) {
             return [];
         }

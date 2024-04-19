@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { BooleanNumber, ICommandService, IUniverInstanceService } from '@univerjs/core';
+import type { Workbook } from '@univerjs/core';
+import { BooleanNumber, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import type { Injector } from '@wendellhu/redi';
 import { beforeEach, describe, expect, it } from 'vitest';
 
@@ -35,13 +36,13 @@ describe('Test moving rows & cols', () => {
     let get: Injector['get'];
     const getWorksheet = () => {
         const univerInstanceService = get(IUniverInstanceService);
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance()!;
+        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
         const worksheet = workbook.getActiveSheet();
         return worksheet;
     };
     const getId = () => {
         const univerInstanceService = get(IUniverInstanceService);
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance()!;
+        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
         const worksheet = workbook.getActiveSheet();
         return {
             unitId: workbook.getUnitId(),

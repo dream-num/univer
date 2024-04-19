@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IUniverInstanceService, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import { type IUniverInstanceService, type Nullable, UniverInstanceType, type Workbook, type Worksheet } from '@univerjs/core';
 import type { Observable } from 'rxjs';
 import { map, of, switchMap } from 'rxjs';
 
@@ -24,7 +24,7 @@ interface IActive {
 }
 
 function getActiveSheet$(univerInstanceService: IUniverInstanceService): Observable<Nullable<IActive>> {
-    return univerInstanceService.currentSheet$.pipe(switchMap((workbook) =>
+    return univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.SHEET).pipe(switchMap((workbook) =>
         workbook
             ? workbook.activeSheet$.pipe(map((worksheet) => {
                 if (!worksheet) return null;

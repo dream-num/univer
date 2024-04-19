@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICellData, Nullable, Univer } from '@univerjs/core';
-import { createInterceptorKey, IUniverInstanceService } from '@univerjs/core';
+import type { ICellData, Nullable, Univer, Workbook } from '@univerjs/core';
+import { createInterceptorKey, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
@@ -40,7 +40,7 @@ describe('Test SheetInterceptorService', () => {
 
     function getCell(row: number, col: number): Nullable<ICellData> {
         const cus = get(IUniverInstanceService);
-        const sheet = cus.getCurrentUniverSheetInstance()!.getActiveSheet()!;
+        const sheet = cus.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!.getActiveSheet()!;
         return sheet.getCell(row, col);
     }
 
@@ -157,12 +157,12 @@ describe('Test SheetInterceptorService', () => {
     // it('Test SheetInterceptorService', () => {
     //     it('getLastRowWithContent', () => {
     //         const univerInstanceService = get(IUniverInstanceService);
-    //         const sheet = univerInstanceService.getCurrentUniverSheetInstance()!.getActiveSheet()!;
+    //         const sheet = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!.getActiveSheet()!;
     //         expect(sheet.getLastRowWithContent()).toBe(3);
     //     });
     //     it('getLastColumnWithContent', () => {
     //         const univerInstanceService = get(IUniverInstanceService);
-    //         const sheet = univerInstanceService.getCurrentUniverSheetInstance()!.getActiveSheet()!;
+    //         const sheet = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!.getActiveSheet()!;
     //         expect(sheet.getLastColumnWithContent()).toBe(3);
     //     });
     // });

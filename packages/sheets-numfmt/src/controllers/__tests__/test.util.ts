@@ -15,7 +15,7 @@
  */
 
 import type { IWorkbookData } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, LocaleType, Plugin, PluginType, Univer } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, LocaleType, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import {
     INumfmtService,
@@ -53,13 +53,14 @@ export const createTestBed = (dependencies?: Dependency[]) => {
     const get = injector.get.bind(injector);
 
     class TestPlugin extends Plugin {
-        static override type = PluginType.Sheet;
+        static override pluginName = 'test-plugin';
+        static override type = UniverInstanceType.SHEET;
 
         constructor(
             _config: undefined,
             @Inject(Injector) override readonly _injector: Injector
         ) {
-            super('test-plugin');
+            super();
         }
 
         override onStarting(injector: Injector): void {
@@ -80,7 +81,7 @@ export const createTestBed = (dependencies?: Dependency[]) => {
     const commandService = injector.get(ICommandService);
     commandService.registerCommand(RemoveNumfmtMutation);
     commandService.registerCommand(SetNumfmtMutation);
-    univerInstanceService.focusUniverInstance('test');
+    univerInstanceService.focusUnit('test');
     const unitId = workbookJson.id;
     const subUnitId = workbookJson.sheets.sheet1.id!;
 

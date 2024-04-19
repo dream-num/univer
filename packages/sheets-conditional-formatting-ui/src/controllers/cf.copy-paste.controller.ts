@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IRange, Nullable } from '@univerjs/core';
+import type { IRange, Nullable, Workbook } from '@univerjs/core';
 import {
     Disposable,
     IUniverInstanceService,
@@ -24,6 +24,7 @@ import {
     Range,
     Rectangle,
     Tools,
+    UniverInstanceType,
 } from '@univerjs/core';
 import {
     createTopMatrixFromMatrix, findAllRectangle,
@@ -120,7 +121,7 @@ export class ConditionalFormattingCopyPasteController extends Disposable {
             pasteType: string;
         }
     ) {
-        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
+        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
         const sheet = workbook.getActiveSheet();
         const unitId = workbook.getUnitId();
         const subUnitId = sheet.getSheetId();

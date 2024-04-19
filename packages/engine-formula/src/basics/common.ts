@@ -112,7 +112,7 @@ export interface IFeatureDirtyRangeType {
 export interface IArrayFormulaUnitCellType extends IRuntimeUnitDataPrimitiveType {}
 
 export interface IFormulaData {
-    [unitId: string]: Nullable<{ [sheetId: string]: IObjectMatrixPrimitiveType<IFormulaDataItem> }>;
+    [unitId: string]: Nullable<{ [sheetId: string]: Nullable<IObjectMatrixPrimitiveType<Nullable<IFormulaDataItem>>> }>;
 }
 
 export interface IOtherFormulaData {

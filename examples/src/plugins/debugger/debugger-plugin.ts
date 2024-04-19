@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { LocaleService, Plugin, PluginType } from '@univerjs/core';
+import { Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -24,16 +24,16 @@ import { PerformanceMonitorController } from './controllers/performance-monitor.
 export interface IDebuggerPluginConfig {}
 
 export class DebuggerPlugin extends Plugin {
-    static override type = PluginType.Doc;
+    static override pluginName = 'debugger';
+    static override type = UniverInstanceType.DOC;
 
     private _debuggerController!: DebuggerController;
 
     constructor(
-        config: IDebuggerPluginConfig,
-        @Inject(Injector) override readonly _injector: Injector,
-        @Inject(LocaleService) private readonly _localeService: LocaleService
+        _config: IDebuggerPluginConfig,
+        @Inject(Injector) override readonly _injector: Injector
     ) {
-        super('debugger');
+        super();
         this._initializeDependencies(_injector);
     }
 
@@ -53,8 +53,6 @@ export class DebuggerPlugin extends Plugin {
     override onRendered(): void {
         this.initialize();
     }
-
-    override onDestroy(): void {}
 
     getDebuggerController() {
         return this._debuggerController;

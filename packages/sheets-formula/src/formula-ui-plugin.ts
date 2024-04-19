@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { IUniverInstanceService, LocaleService, Plugin, PluginType } from '@univerjs/core';
+import { LocaleService, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { BaseFunction, IFunctionInfo, IFunctionNames } from '@univerjs/engine-formula';
 import type { Ctor, Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
@@ -50,15 +50,15 @@ interface IFormulaUIConfig {
     function: Array<[Ctor<BaseFunction>, IFunctionNames]>;
 }
 export class UniverSheetsFormulaPlugin extends Plugin {
-    static override type = PluginType.Sheet;
+    static override pluginName = FORMULA_UI_PLUGIN_NAME;
+    static override type = UniverInstanceType.SHEET;
 
     constructor(
         private _config: Partial<IFormulaUIConfig>,
         @Inject(Injector) override readonly _injector: Injector,
-        @Inject(LocaleService) private readonly _localeService: LocaleService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
+        @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
-        super(FORMULA_UI_PLUGIN_NAME);
+        super();
     }
 
     initialize(): void {

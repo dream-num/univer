@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IRange, ISelectionCell, Nullable } from '@univerjs/core';
+import type { ICommandInfo, IRange, ISelectionCell, Nullable, Workbook } from '@univerjs/core';
 import {
     debounce,
     Disposable,
@@ -24,6 +24,7 @@ import {
     ObjectMatrix,
     OnLifecycle,
     toDisposable,
+    UniverInstanceType,
 } from '@univerjs/core';
 import type { BaseValueObject, ISheetData } from '@univerjs/engine-formula';
 import {
@@ -114,13 +115,13 @@ export class StatusBarController extends Disposable {
     }
 
     private _calculateSelection(selections: IRange[], primary: Nullable<ISelectionCell>) {
-        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
+        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
         const unitId = workbook.getUnitId();
         const sheetId = workbook.getActiveSheet().getSheetId();
         const sheetData: ISheetData = {};
         const arrayFormulaMatrixCell = this._formulaDataModel.getArrayFormulaCellData();
         this._univerInstanceService
-            .getCurrentUniverSheetInstance()!
+            .getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!
             .getSheets()
             .forEach((sheet) => {
                 const sheetConfig = sheet.getConfig();

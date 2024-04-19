@@ -20,6 +20,7 @@ import type {
     IRange,
     IUnitRange,
     Nullable,
+    Workbook,
 } from '@univerjs/core';
 import {
     Direction,
@@ -32,6 +33,7 @@ import {
     RANGE_TYPE,
     Rectangle,
     Tools,
+    UniverInstanceType,
 } from '@univerjs/core';
 import type { IFormulaData, IFormulaDataItem, ISequenceNode, IUnitSheetNameMap } from '@univerjs/engine-formula';
 import { deserializeRangeWithSheet,
@@ -415,7 +417,7 @@ export class UpdateFormulaController extends Disposable {
             toRange: { startRow: toStartRow, endRow: toEndRow },
         } = params;
 
-        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
+        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
         const unitId = workbook.getUnitId();
         const worksheet = workbook.getActiveSheet();
         const sheetId = worksheet.getSheetId();
@@ -453,7 +455,7 @@ export class UpdateFormulaController extends Disposable {
             toRange: { startColumn: toStartCol, endColumn: toEndCol },
         } = params;
 
-        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
+        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
         const unitId = workbook.getUnitId();
         const worksheet = workbook.getActiveSheet();
         const sheetId = worksheet.getSheetId();
@@ -664,7 +666,7 @@ export class UpdateFormulaController extends Disposable {
             }
 
             for (const sheetId of sheetDataKeys) {
-                const matrixData = new ObjectMatrix(sheetData[sheetId]);
+                const matrixData = new ObjectMatrix(sheetData[sheetId] || {});
 
                 const oldFormulaDataItem = new ObjectMatrix<IFormulaDataItem>();
                 const newFormulaDataItem = new ObjectMatrix<IFormulaDataItem>();
@@ -1387,7 +1389,7 @@ export class UpdateFormulaController extends Disposable {
     }
 
     private _getCurrentSheetInfo() {
-        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
+        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
         const unitId = workbook.getUnitId();
         const sheetId = workbook.getActiveSheet().getSheetId();
 

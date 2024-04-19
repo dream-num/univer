@@ -16,8 +16,11 @@
 
 import { installShims } from './common/shims';
 
+export { type UnitType, UnitModel, UniverInstanceType } from './common/unit';
+export { Registry, RegistryAsMap } from './common/registry';
+export { Univer } from './univer';
+export { PluginHolder } from './services/plugin/plugin-holder';
 export { shallowEqual, isRangesEqual, isUnitRangesEqual } from './common/equal';
-export * from './basics';
 export { dedupe, remove, rotate, groupBy } from './common/array';
 export {
     DEFAULT_EMPTY_DOCUMENT_VALUE,
@@ -44,7 +47,8 @@ export { getBodySlice, composeBody } from './docs/data-model/text-x/utils';
 export { TextX } from './docs/data-model/text-x/text-x';
 export { replaceInDocumentBody } from './docs/data-model/replacement';
 export * from './observer';
-export { Plugin, PluginType } from './plugin/plugin';
+export { Plugin } from './services/plugin/plugin';
+export { PluginService } from './services/plugin/plugin.service';
 export {
     type CommandListener,
     CommandService,
@@ -75,7 +79,7 @@ export {
     type IFloatingObjectManagerSearchItemParam,
     IFloatingObjectManagerService,
 } from './services/floating-object/floating-object-manager.service';
-export { IUniverInstanceService, UniverInstanceType } from './services/instance/instance.service';
+export { IUniverInstanceService } from './services/instance/instance.service';
 export { LifecycleStages, OnLifecycle, runOnLifecycle } from './services/lifecycle/lifecycle';
 export { LifecycleService } from './services/lifecycle/lifecycle.service';
 export { ILocalStorageService } from './services/local-storage/local-storage.service';
@@ -112,7 +116,7 @@ export { fromCallback } from './shared/rxjs';
 export type { IComposeInterceptors, IInterceptor, InterceptorHandler } from './common/interceptor';
 export { composeInterceptors, createInterceptorKey, InterceptorManager } from './common/interceptor';
 export { normalizeTextRuns } from './docs/data-model/apply-utils/common';
-export type { PluginCtor } from './plugin/plugin';
+export type { PluginCtor } from './services/plugin/plugin';
 export { Range } from './sheets/range';
 export { Styles } from './sheets/styles';
 export {
@@ -133,7 +137,7 @@ export {
 export { SheetViewModel } from './sheets/view-model';
 export { getWorksheetUID, Workbook } from './sheets/workbook';
 export { Worksheet, extractPureTextFromCell } from './sheets/worksheet';
-export * from './slides/domain';
+export { SlideDataModel } from './slides/slide-model';
 export * from './types/const';
 export * from './types/enum';
 export * from './types/interfaces';

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, Nullable } from '@univerjs/core';
-import { checkForSubstrings, Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import type { ICommandInfo, Nullable, Workbook } from '@univerjs/core';
+import { checkForSubstrings, Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
 import { IRenderManagerService, ITextSelectionRenderManager, ScrollBar } from '@univerjs/engine-render';
@@ -219,7 +219,7 @@ export class DocEditorBridgeController extends Disposable {
         //     })
         // );
 
-        const currentUniverSheet = this._univerInstanceService.getAllUniverSheetsInstance();
+        const currentUniverSheet = this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.SHEET);
         currentUniverSheet.forEach((unit) => {
             const unitId = unit.getUnitId();
             const render = this._renderManagerService.getRenderById(unitId);

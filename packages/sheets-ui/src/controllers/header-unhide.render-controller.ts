@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-import type { IKeyValue, Workbook, Worksheet } from '@univerjs/core';
+import type { Workbook, Worksheet } from '@univerjs/core';
 import {
-    getWorksheetUID,
     ICommandService,
     LifecycleStages,
     OnLifecycle,
     RxDisposable,
 } from '@univerjs/core';
-import { IRenderManagerService } from '@univerjs/engine-render';
-import type { ISetSpecificColsVisibleCommandParams, ISetSpecificRowsVisibleCommandParams } from '@univerjs/sheets';
+import type { IRenderContext } from '@univerjs/engine-render';
+import type { ISetSpecificColsVisibleCommandParams, ISetSpecificRowsVisibleCommandParams, ISheetCommandSharedParams } from '@univerjs/sheets';
 import {
     SetColHiddenMutation,
     SetColVisibleMutation,
@@ -33,7 +32,7 @@ import {
     SetSpecificRowsVisibleCommand,
 } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
-import { pairwise, startWith, takeUntil } from 'rxjs';
+import { takeUntil } from 'rxjs';
 
 import { SHEET_COMPONENT_UNHIDE_LAYER_INDEX } from '../common/keys';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
@@ -52,15 +51,14 @@ const RENDER_COMMANDS: string[] = [
 /**
  * This controller controls rendering of the buttons to unhide hidden rows and columns.
  */
-@OnLifecycle(LifecycleStages.Rendered, HeaderUnihideRenderController)
-export class HeaderUnihideRenderController extends RxDisposable {
-    private _shapes = new Map<string, { cols: HeaderUnhideShape[]; rows: HeaderUnhideShape[] }>();
+export class HeaderUnhideRenderController extends RxDisposable {
+    private _shapes: { cols: HeaderUnhideShape[]; rows: HeaderUnhideShape[] } = { cols: [], rows: [] };
+    private get _workbook(): Workbook { return this._context.unit; }
 
     constructor(
-        private readonly _unit: Workbook,
+        private readonly _context: IRenderContext<Workbook>,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
-        @ICommandService private readonly _cmdSrv: ICommandService,
-        @IRenderManagerService private readonly _rendererManagerService: IRenderManagerService
+        @ICommandService private readonly _commandService: ICommandService
     ) {
         super();
 
@@ -69,52 +67,50 @@ export class HeaderUnihideRenderController extends RxDisposable {
 
     override dispose(): void {
         super.dispose();
+
+        this._clearShapes();
     }
 
     private _init(): void {
-        const sheetObject = this._getSheetObject();
-        if (!sheetObject) {
-            return;
-        }
+        let activeSheetId: string = '';
 
-        // Re-render when sheet skeleton changes.
-        this._sheetSkeletonManagerService.currentSkeleton$
-            .pipe(takeUntil(this.dispose$), startWith(undefined), pairwise())
-            .subscribe(([lastSkeleton, skeleton]) => {
-                if (skeleton) {
-                    const workbook = this._unit;
-                    const worksheet = workbook.getSheetBySheetId(skeleton.sheetId)!;
-                    this._updateWorksheet(workbook!, worksheet, lastSkeleton?.sheetId);
-                }
+        this._context.unit.activeSheet$.pipe(takeUntil(this.dispose$))
+            .subscribe((worksheet) => {
+                this._clearShapes();
+
+                if (!worksheet) {
+                    activeSheetId = '';
+                    return;
+                };
+
+                activeSheetId = worksheet.getSheetId();
+                this._update(this._workbook, worksheet);
             });
 
         // Re-render hidden rows / cols when specific commands are executed.
         this.disposeWithMe(
-            this._cmdSrv.onCommandExecuted((command) => {
+            this._commandService.onCommandExecuted((command) => {
                 if (
                     !RENDER_COMMANDS.includes(command.id) ||
                     !command.params ||
-                    !(command.params as IKeyValue).unitId ||
-                    !(command.params as IKeyValue).subUnitId
+                    !(command.params as ISheetCommandSharedParams).unitId ||
+                    (command.params as ISheetCommandSharedParams).subUnitId !== activeSheetId
                 ) {
                     return;
                 }
 
-                const workbook = this._unit;
-                const worksheet = workbook.getSheetBySheetId((command.params as IKeyValue).subUnitId);
+                const workbook = this._workbook;
+                const worksheet = workbook.getSheetBySheetId((command.params as ISheetCommandSharedParams).subUnitId);
                 if (worksheet) {
-                    this._updateWorksheet(workbook!, worksheet, worksheet.getSheetId());
+                    this._update(workbook, worksheet);
                 }
             })
         );
     }
 
-    /** Initialize header unhide render shapes for a specific worksheet.  */
-    private _initForWorksheet(workbook: Workbook, worksheet: Worksheet): void {
-        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
-        if (!skeleton) {
-            return;
-        }
+    private _update(workbook: Workbook, worksheet: Worksheet): void {
+        const skeleton = this._sheetSkeletonManagerService.getUnitSkeleton(workbook.getUnitId(), worksheet.getSheetId())?.skeleton;
+        if (!skeleton) return;
 
         // steps to render the unhide button for the current worksheet
         // 1. and get hidden rows and columns
@@ -123,9 +119,6 @@ export class HeaderUnihideRenderController extends RxDisposable {
 
         // First just let me render a unhide button of the column header!.
         const sheetObject = this._getSheetObject();
-        if (!sheetObject) {
-            return;
-        }
 
         // NOTE: for performance consideration we should only get hidden rows & cols in the viewport
         // 2. create shapes and add them to the scene, the position should be calculated from SheetSkeleton
@@ -146,15 +139,14 @@ export class HeaderUnihideRenderController extends RxDisposable {
                     top: position.startY - (hasPrevious ? UNHIDE_ICON_SIZE : 0),
                     left: position.startX - UNHIDE_ICON_SIZE,
                 },
-                () =>
-                    this._cmdSrv.executeCommand<ISetSpecificRowsVisibleCommandParams>(
-                        SetSpecificRowsVisibleCommand.id,
-                        {
-                            unitId: workbook.getUnitId(),
-                            subUnitId: worksheet.getSheetId(),
-                            ranges: [range],
-                        }
-                    )
+                () => this._commandService.executeCommand<ISetSpecificRowsVisibleCommandParams>(
+                    SetSpecificRowsVisibleCommand.id,
+                    {
+                        unitId: workbook.getUnitId(),
+                        subUnitId: worksheet.getSheetId(),
+                        ranges: [range],
+                    }
+                )
             );
         });
         const colCount = worksheet.getColumnCount();
@@ -174,34 +166,29 @@ export class HeaderUnihideRenderController extends RxDisposable {
 
                     top: 20 - UNHIDE_ICON_SIZE,
                 },
-                () =>
-                    this._cmdSrv.executeCommand<ISetSpecificColsVisibleCommandParams>(
-                        SetSpecificColsVisibleCommand.id,
-                        {
-                            unitId: workbook.getUnitId(),
-                            subUnitId: worksheet.getSheetId(),
-                            ranges: [range],
-                        }
-                    )
+                () => this._commandService.executeCommand<ISetSpecificColsVisibleCommandParams>(
+                    SetSpecificColsVisibleCommand.id,
+                    {
+                        unitId: workbook.getUnitId(),
+                        subUnitId: worksheet.getSheetId(),
+                        ranges: [range],
+                    }
+                )
             );
         });
 
         scene.addObjects(colShapes, SHEET_COMPONENT_UNHIDE_LAYER_INDEX);
         scene.addObjects(rowShapes, SHEET_COMPONENT_UNHIDE_LAYER_INDEX);
-        this._shapes.set(getWorksheetUID(workbook, worksheet), { cols: colShapes, rows: rowShapes });
+        this._shapes = { cols: colShapes, rows: rowShapes };
     }
 
-    private _updateWorksheet(workbook: Workbook, worksheet: Worksheet, lastWorksheetId?: string): void {
-        if (lastWorksheetId) {
-            const shapes = this._shapes.get(`${workbook.getUnitId()}|${lastWorksheetId}`);
-            shapes?.cols.forEach((shape) => shape.dispose());
-            shapes?.rows.forEach((shape) => shape.dispose());
-        }
-
-        this._initForWorksheet(workbook, worksheet);
+    private _clearShapes(): void {
+        this._shapes.cols.forEach((shape) => shape.dispose());
+        this._shapes.rows.forEach((shape) => shape.dispose());
+        this._shapes = { cols: [], rows: [] };
     }
 
     private _getSheetObject() {
-        return getSheetObject(this._unit, this._rendererManagerService);
+        return getSheetObject(this._workbook, this._context)!;
     }
 }

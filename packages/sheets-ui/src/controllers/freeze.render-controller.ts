@@ -27,7 +27,7 @@ import {
     toDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
-import type { IMouseEvent, IPointerEvent, IScrollObserverParam, Viewport } from '@univerjs/engine-render';
+import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderController, IScrollObserverParam, Viewport } from '@univerjs/engine-render';
 import { CURSOR_TYPE, IRenderManagerService, Rect, TRANSFORM_CHANGE_OBSERVABLE_TYPE, Vector2 } from '@univerjs/engine-render';
 import type {
     IInsertColCommandParams,
@@ -99,8 +99,7 @@ const FREEZE_SIZE_NORMAL = 4;
 
 const AUXILIARY_CLICK_HIDDEN_OBJECT_TRANSPARENCY = 0.01;
 
-@OnLifecycle(LifecycleStages.Rendered, FreezeController)
-export class FreezeController extends Disposable {
+export class HeaderFreezeRenderController extends Disposable implements IRenderController {
     private _rowFreezeHeaderRect: Nullable<Rect>;
 
     private _rowFreezeMainRect: Nullable<Rect>;
@@ -140,11 +139,11 @@ export class FreezeController extends Disposable {
     private _lastFreeze: IFreeze | undefined = undefined;
 
     constructor(
+        private readonly _context: IRenderContext<Workbook>,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        // @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
+        // @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
         @Inject(ScrollManagerService) private readonly _scrollManagerService: ScrollManagerService,
         @Inject(ThemeService) private readonly _themeService: ThemeService,
@@ -189,57 +188,33 @@ export class FreezeController extends Disposable {
         freezeConfig?: IFreeze
     ) {
         const config = freezeConfig ?? this._getFreeze();
+        if (config == null) return null;
 
-        if (config == null) {
-            return;
-        }
-
-        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
-
-        if (skeleton == null) {
-            return;
-        }
+        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton!;
 
         const { startRow: freezeRow, startColumn: freezeColumn } = config;
-
         const position = this._getPositionByIndex(freezeRow, freezeColumn);
+        if (position == null) return null;
 
-        if (position == null) {
-            return;
-        }
-
-        const sheetObject = this._getSheetObject();
-        if (sheetObject == null) {
-            return;
-        }
-
+        const sheetObject = this._getSheetObject()!;
         const engine = sheetObject.engine;
         const canvasMaxWidth = engine?.width || 0;
         const canvasMaxHeight = engine?.height || 0;
-
         const scene = sheetObject.scene;
-
         const { startX, startY } = position;
+        const { rowTotalHeight, columnTotalWidth, rowHeaderWidthAndMarginLeft, columnHeaderHeightAndMarginTop } = skeleton;
 
-        const { rowTotalHeight, columnTotalWidth, rowHeaderWidthAndMarginLeft, columnHeaderHeightAndMarginTop } =
-            skeleton;
+        const shapeWidth = canvasMaxWidth > columnTotalWidth + rowHeaderWidthAndMarginLeft
+            ? canvasMaxWidth
+            : columnTotalWidth + columnHeaderHeightAndMarginTop;
 
-        const shapeWidth =
-            canvasMaxWidth > columnTotalWidth + rowHeaderWidthAndMarginLeft
-                ? canvasMaxWidth
-                : columnTotalWidth + columnHeaderHeightAndMarginTop;
-
-        const shapeHeight =
-            canvasMaxHeight > rowTotalHeight + columnHeaderHeightAndMarginTop
-                ? canvasMaxHeight
-                : rowTotalHeight + columnHeaderHeightAndMarginTop;
+        const shapeHeight = canvasMaxHeight > rowTotalHeight + columnHeaderHeightAndMarginTop
+            ? canvasMaxHeight
+            : rowTotalHeight + columnHeaderHeightAndMarginTop;
 
         this._changeToRow = freezeRow;
-
         this._changeToColumn = freezeColumn;
-
         this._changeToOffsetX = startX;
-
         this._changeToOffsetY = startY;
 
         const scale = Math.max(scene.scaleX, scene.scaleY);
@@ -587,7 +562,7 @@ export class FreezeController extends Disposable {
                 return;
             }
 
-            const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+            const workbook = this._context.unit;
             const worksheet = workbook.getActiveSheet();
             const oldFreeze = worksheet.getConfig()?.freeze;
             let xSplit = oldFreeze?.xSplit || 0;
@@ -1075,7 +1050,7 @@ export class FreezeController extends Disposable {
     }
 
     private _refreshCurrent() {
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+        const workbook = this._context.unit;
         const worksheet = workbook.getActiveSheet();
 
         const freeze = worksheet.getConfig().freeze;
@@ -1126,7 +1101,7 @@ export class FreezeController extends Disposable {
                     }
 
                     const createFreezeMutationAndRefresh = (newFreeze: IFreeze) => {
-                        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+                        const workbook = this._context.unit;
                         const unitId = workbook.getUnitId();
                         const worksheet = workbook.getActiveSheet();
                         const subUnitId = worksheet.getSheetId();
@@ -1354,7 +1329,7 @@ export class FreezeController extends Disposable {
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (updateCommandList.includes(command.id)) {
                     const lastFreeze = this._lastFreeze;
-                    const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+                    const workbook = this._context.unit;
                     const worksheet = workbook.getActiveSheet();
 
                     const params = command.params as ISetFrozenMutationParams;
@@ -1537,7 +1512,7 @@ export class FreezeController extends Disposable {
     }
 
     private _getSheetObject() {
-        return getSheetObject(this._univerInstanceService, this._renderManagerService);
+        return getSheetObject(this._context.unit, this._context);
     }
 
     private _refreshFreeze(

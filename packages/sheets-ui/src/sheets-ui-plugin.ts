@@ -32,11 +32,11 @@ import { FormulaEditorController } from './controllers/editor/formula-editor.con
 import { StartEditController } from './controllers/editor/start-edit.controller';
 import { EditorBridgeController } from './controllers/editor-bridge.controller';
 import { FormatPainterController } from './controllers/format-painter/format-painter.controller';
-import { FreezeController } from './controllers/freeze.controller';
+import { HeaderFreezeRenderController } from './controllers/freeze.render-controller';
 import { HeaderMenuController } from './controllers/header-menu.controller';
 import { HeaderMoveController } from './controllers/header-move.controller';
-import { HeaderResizeController } from './controllers/header-resize.controller';
-import { HeaderUnihideRenderController } from './controllers/header-unhide.controller';
+import { HeaderResizeController } from './controllers/header-resize.render-controller';
+import { HeaderUnhideRenderController } from './controllers/header-unhide.render-controller';
 import { MarkSelectionController } from './controllers/mark-selection.controller';
 import { MoveRangeController } from './controllers/move-range.controller';
 import { ScrollController } from './controllers/scroll.controller';
@@ -124,7 +124,7 @@ export class UniverSheetsUIPlugin extends Plugin {
                 [EndEditController],
                 [FormulaEditorController],
                 [FormatPainterController],
-                [FreezeController],
+                [HeaderFreezeRenderController],
                 [HeaderMenuController],
                 [HeaderMoveController],
                 [HeaderResizeController],
@@ -150,8 +150,13 @@ export class UniverSheetsUIPlugin extends Plugin {
 
     override onReady(): void {
         this._markSheetAsFocused();
+        this._registerRenderControllers();
+    }
 
-        this._renderManagerService.registerRenderControllers(UniverInstanceType.SHEET, HeaderUnihideRenderController);
+    private _registerRenderControllers(): void {
+        ([HeaderFreezeRenderController, HeaderUnhideRenderController, HeaderResizeController]).forEach((controller) => {
+            this.disposeWithMe(this._renderManagerService.registerRenderControllers(UniverInstanceType.SHEET, controller));
+        });
     }
 
     private _markSheetAsFocused() {

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { Nullable, UnitType } from '@univerjs/core';
-import { Disposable, IUniverInstanceService } from '@univerjs/core';
+import type { Nullable, UnitModel, UnitType } from '@univerjs/core';
+import { Disposable, IUniverInstanceService, toDisposable } from '@univerjs/core';
 import type { IDisposable } from '@wendellhu/redi';
 import { createIdentifier, Inject, Injector } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
@@ -48,7 +48,7 @@ export interface IRenderManagerService extends IDisposable {
     getFirst(): Nullable<IRender>;
     has(unitId: string): boolean;
 
-    registerRenderControllers(type: UnitType, ctor: IRenderControllerCtor): IDisposable;
+    registerRenderControllers<T extends UnitModel>(type: UnitType, ctor: IRenderControllerCtor<T>): IDisposable;
 }
 
 const DEFAULT_SCENE_SIZE = { width: 1500, height: 1000 };
@@ -56,7 +56,7 @@ const DEFAULT_SCENE_SIZE = { width: 1500, height: 1000 };
 const SCENE_NAMESPACE = '_UNIVER_SCENE_';
 
 
-export class RenderManagerService extends Disposable {
+export class RenderManagerService extends Disposable implements IRenderManagerService {
     private _defaultEngine!: Engine;
 
     private _currentUnitId: string = '';
@@ -98,7 +98,7 @@ export class RenderManagerService extends Disposable {
         this._currentRender$.complete();
     }
 
-    registerRenderControllers(type: UnitType, ctor: IRenderControllerCtor) {
+    registerRenderControllers(type: UnitType, ctor: IRenderControllerCtor): IDisposable {
         if (!this._renderControllers.has(type)) {
             this._renderControllers.set(type, new Set());
         }
@@ -109,9 +109,11 @@ export class RenderManagerService extends Disposable {
         for (const [renderUnitId, render] of this._renderMap) {
             const renderType = this._univerInstanceService.getUnitType(renderUnitId);
             if (renderType === type) {
-                (render as RenderUnit<any>).addRenderController(ctor);
+                (render as RenderUnit).addRenderControllers([ctor]);
             }
         }
+
+        return toDisposable(() => set.delete(ctor));
     }
 
     private _getRenderControllersForType(type: UnitType): Array<IRenderControllerCtor> {
@@ -172,12 +174,13 @@ export class RenderManagerService extends Disposable {
         const unit = this._univerInstanceService.getUnit(unitId)!;
         const type = this._univerInstanceService.getUnitType(unitId);
         const ctors = this._getRenderControllersForType(type);
-        const renderUnit = new RenderUnit(unit, this._injector, ctors);
-        renderUnit.engine = engine;
-        renderUnit.scene = scene;
-        renderUnit.mainComponent = null;
-        renderUnit.components = new Map();
-        renderUnit.isMainScene = isMainScene;
+        const renderUnit = new RenderUnit(this._injector, {
+            unit,
+            engine,
+            scene,
+            isMainScene,
+        });
+        renderUnit.addRenderControllers(ctors);
 
         this.addRenderItem(unitId, renderUnit);
         return renderUnit;

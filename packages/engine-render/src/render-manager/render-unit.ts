@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-import type { Nullable, UnitModel } from '@univerjs/core';
+import type { Nullable, UnitModel, UnitType } from '@univerjs/core';
 import { Disposable } from '@univerjs/core';
-import type { Injector } from '@wendellhu/redi';
+import type { IDisposable, Injector } from '@wendellhu/redi';
 import type { Engine } from '../engine';
 import type { Scene } from '../scene';
 import type { RenderComponentType } from './render-manager.service';
@@ -31,34 +31,58 @@ export interface IRender {
 }
 
 // eslint-disable-next-line ts/no-explicit-any
-export interface IRenderControllerCtor { new (unit: UnitModel, ...args: []): any }
+export interface IRenderControllerCtor<T extends UnitModel = UnitModel> { new(unit: IRenderContext<T>, ...args: any[]): IRenderController }
+export interface IRenderController extends IDisposable {}
+
+/**
+ * This object encapsulates methods or properties to render each element.
+ */
+export interface IRenderContext<T extends UnitModel = UnitModel> extends IRender {
+    unit: T;
+    type: UnitType;
+}
 
 /**
  * This class is responsible
  */
-export class RenderUnit<M extends UnitModel> extends Disposable implements IRender {
-    // These declared fields would be assigned right after it is instantiated in `RenderManagerService.createRender`.
-    declare engine: Engine;
-    declare scene: Scene;
-    declare mainComponent: Nullable<RenderComponentType>;
-    declare components: Map<string, RenderComponentType>;
-    declare isMainScene: boolean;
+export class RenderUnit extends Disposable implements IRender {
+    readonly isRenderUnit: true;
 
     readonly unitId: string;
+    readonly type: UnitType;
 
-    private readonly _renderControllers: Disposable[] = [];
     private readonly _injector: Injector;
+    private readonly _renderControllers: IRenderController[] = [];
+
+    private _renderContext: IRenderContext<UnitModel>;
+    set isMainScene(is: boolean) { this._renderContext.isMainScene = is; }
+    get isMainScene(): boolean { return this._renderContext.isMainScene; }
+    set engine(engine: Engine) { this._renderContext.engine = engine; }
+    get engine(): Engine { return this._renderContext.engine; }
+    set mainComponent(component: Nullable<RenderComponentType>) { this._renderContext.mainComponent = component; }
+    get mainComponent(): Nullable<RenderComponentType> { return this._renderContext.mainComponent; }
+    set scene(scene: Scene) { this._renderContext.scene = scene; }
+    get scene(): Scene { return this._renderContext.scene; }
+    get components() { return this._renderContext.components; }
 
     constructor(
-        private readonly _unit: M,
         parentInjector: Injector,
-        renderControllerCtors: IRenderControllerCtor[]
+        init: Pick<IRenderContext, 'engine' | 'scene' | 'isMainScene' | 'unit' >
     ) {
         super();
 
         this._injector = parentInjector.createChild();
-        this.unitId = _unit.getUnitId();
-        this._initControllers(renderControllerCtors);
+
+        this._renderContext = {
+            unit: init.unit,
+            unitId: this.unitId,
+            type: init.unit.type,
+            components: new Map(),
+            mainComponent: null,
+            isMainScene: init.isMainScene,
+            engine: init.engine,
+            scene: init.scene,
+        };
     }
 
     override dispose() {
@@ -66,13 +90,13 @@ export class RenderUnit<M extends UnitModel> extends Disposable implements IRend
         this._renderControllers.length = 0;
     }
 
-    addRenderController(ctor: IRenderControllerCtor) {
-        this._initControllers([ctor]);
+    addRenderControllers(ctors: IRenderControllerCtor[]) {
+        this._initControllers(ctors);
     }
 
     private _initControllers(ctors: IRenderControllerCtor[]): void {
         ctors
-            .map((ctor) => this._injector.createInstance(ctor, this._unit))
+            .map((ctor) => this._injector.createInstance(ctor, this._renderContext))
             .forEach((controller) => this._renderControllers.push(controller));
     }
 }

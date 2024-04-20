@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IUniverInstanceService, Nullable, Workbook } from '@univerjs/core';
-import { UniverInstanceType } from '@univerjs/core';
+import type { IUniverInstanceService, Nullable } from '@univerjs/core';
+import { UniverInstanceType, Workbook } from '@univerjs/core';
 import type {
     Engine,
     IRenderManagerService,
@@ -41,10 +41,12 @@ export interface ISheetObjectParam {
 }
 
 export function getSheetObject(
-    univerInstanceService: IUniverInstanceService,
+    univerInstanceService: IUniverInstanceService | Workbook,
     renderManagerService: IRenderManagerService
 ): Nullable<ISheetObjectParam> {
-    const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET);
+    const workbook = univerInstanceService instanceof Workbook
+        ? univerInstanceService
+        : univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET);
     if (!workbook) return null;
 
     const unitId = workbook.getUnitId();

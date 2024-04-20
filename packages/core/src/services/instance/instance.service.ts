@@ -69,7 +69,7 @@ export interface IUniverInstanceService {
     /** @deprecated */
     changeDoc(unitId: string, doc: DocumentDataModel): void;
 
-    getUnit<T extends UnitModel>(id: string, type: UnitType): Nullable<T>;
+    getUnit<T extends UnitModel>(id: string, type?: UnitType): Nullable<T>;
     getAllUnitsForType<T>(type: UnitType): T[];
     getUnitType(unitId: string): UnitType;
 

@@ -18,7 +18,6 @@ import type { IKeyValue, Workbook, Worksheet } from '@univerjs/core';
 import {
     getWorksheetUID,
     ICommandService,
-    IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
     RxDisposable,
@@ -53,15 +52,14 @@ const RENDER_COMMANDS: string[] = [
 /**
  * This controller controls rendering of the buttons to unhide hidden rows and columns.
  */
-@OnLifecycle(LifecycleStages.Rendered, HeaderUnhideController)
-export class HeaderUnhideController extends RxDisposable {
+@OnLifecycle(LifecycleStages.Rendered, HeaderUnihideRenderController)
+export class HeaderUnihideRenderController extends RxDisposable {
     private _shapes = new Map<string, { cols: HeaderUnhideShape[]; rows: HeaderUnhideShape[] }>();
 
-    // It should support several workbooks & worksheet.
     constructor(
+        private readonly _unit: Workbook,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @ICommandService private readonly _cmdSrv: ICommandService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IRenderManagerService private readonly _rendererManagerService: IRenderManagerService
     ) {
         super();
@@ -84,7 +82,7 @@ export class HeaderUnhideController extends RxDisposable {
             .pipe(takeUntil(this.dispose$), startWith(undefined), pairwise())
             .subscribe(([lastSkeleton, skeleton]) => {
                 if (skeleton) {
-                    const workbook = this._univerInstanceService.getUniverSheetInstance(skeleton.unitId)!;
+                    const workbook = this._unit;
                     const worksheet = workbook.getSheetBySheetId(skeleton.sheetId)!;
                     this._updateWorksheet(workbook!, worksheet, lastSkeleton?.sheetId);
                 }
@@ -102,10 +100,8 @@ export class HeaderUnhideController extends RxDisposable {
                     return;
                 }
 
-                const workbook = this._univerInstanceService.getUniverSheetInstance(
-                    (command.params as IKeyValue).unitId
-                );
-                const worksheet = workbook?.getSheetBySheetId((command.params as IKeyValue).subUnitId);
+                const workbook = this._unit;
+                const worksheet = workbook.getSheetBySheetId((command.params as IKeyValue).subUnitId);
                 if (worksheet) {
                     this._updateWorksheet(workbook!, worksheet, worksheet.getSheetId());
                 }
@@ -206,6 +202,6 @@ export class HeaderUnhideController extends RxDisposable {
     }
 
     private _getSheetObject() {
-        return getSheetObject(this._univerInstanceService, this._rendererManagerService);
+        return getSheetObject(this._unit, this._rendererManagerService);
     }
 }

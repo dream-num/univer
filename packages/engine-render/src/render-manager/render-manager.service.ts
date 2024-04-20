@@ -14,27 +14,30 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
-import { createIdentifier } from '@wendellhu/redi';
+import type { Nullable, UnitType } from '@univerjs/core';
+import { Disposable, IUniverInstanceService } from '@univerjs/core';
+import type { IDisposable } from '@wendellhu/redi';
+import { createIdentifier, Inject, Injector } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 
-import type { BaseObject } from './base-object';
-import type { DocComponent } from './components/docs/doc-component';
-import type { SheetComponent } from './components/sheets/sheet-component';
-import type { Slide } from './components/slides/slide';
-import { Engine } from './engine';
-import { Scene } from './scene';
-import { SceneViewer } from './scene-viewer';
+import type { BaseObject } from '../base-object';
+import type { DocComponent } from '../components/docs/doc-component';
+import type { SheetComponent } from '../components/sheets/sheet-component';
+import type { Slide } from '../components/slides/slide';
+import { Engine } from '../engine';
+import { Scene } from '../scene';
+import { SceneViewer } from '../scene-viewer';
+import { type IRender, type IRenderControllerCtor, RenderUnit } from './render-unit';
 
-export interface IRenderManagerService {
+export type RenderComponentType = SheetComponent | DocComponent | Slide | BaseObject;
+
+export interface IRenderManagerService extends IDisposable {
     currentRender$: Observable<Nullable<string>>;
     createRender$: Observable<Nullable<string>>;
-    dispose(): void;
-    // createRenderWithNewEngine(unitId: string): IRenderManagerService;
     createRenderWithParent(unitId: string, parentUnitId: string): IRender;
     createRender(unitId: string): IRender;
-    addItem(unitId: string, item: IRender): void;
+    addRenderItem(unitId: string, item: IRender): void;
     removeRender(unitId: string): void;
     setCurrent(unitId: string): void;
     getRenderById(unitId: string): Nullable<IRender>;
@@ -44,24 +47,16 @@ export interface IRenderManagerService {
     getCurrent(): Nullable<IRender>;
     getFirst(): Nullable<IRender>;
     has(unitId: string): boolean;
-}
 
-export type RenderComponentType = SheetComponent | DocComponent | Slide | BaseObject;
-
-export interface IRender {
-    unitId: string;
-    engine: Engine;
-    scene: Scene;
-    mainComponent: Nullable<RenderComponentType>;
-    components: Map<string, RenderComponentType>;
-    isMainScene: boolean;
+    registerRenderControllers(type: UnitType, ctor: IRenderControllerCtor): IDisposable;
 }
 
 const DEFAULT_SCENE_SIZE = { width: 1500, height: 1000 };
 
 const SCENE_NAMESPACE = '_UNIVER_SCENE_';
 
-export class RenderManagerService implements IRenderManagerService {
+
+export class RenderManagerService extends Disposable {
     private _defaultEngine!: Engine;
 
     private _currentUnitId: string = '';
@@ -81,14 +76,46 @@ export class RenderManagerService implements IRenderManagerService {
         return this._defaultEngine;
     }
 
-    dispose() {
+    private readonly _renderControllers = new Map<UnitType, Set<IRenderControllerCtor>>();
+
+    constructor(
+        @Inject(Injector) private readonly _injector: Injector,
+        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
+    ) {
+        super();
+    }
+
+    override dispose() {
+        super.dispose();
+
         this._renderMap.forEach((item) => {
             this._disposeItem(item);
         });
 
+        this._renderControllers.clear();
         this._renderMap.clear();
 
         this._currentRender$.complete();
+    }
+
+    registerRenderControllers(type: UnitType, ctor: IRenderControllerCtor) {
+        if (!this._renderControllers.has(type)) {
+            this._renderControllers.set(type, new Set());
+        }
+
+        const set = this._renderControllers.get(type)!;
+        set.add(ctor);
+
+        for (const [renderUnitId, render] of this._renderMap) {
+            const renderType = this._univerInstanceService.getUnitType(renderUnitId);
+            if (renderType === type) {
+                (render as RenderUnit<any>).addRenderController(ctor);
+            }
+        }
+    }
+
+    private _getRenderControllersForType(type: UnitType): Array<IRenderControllerCtor> {
+        return Array.from(this._renderControllers.get(type) ?? []);
     }
 
     createRenderWithParent(unitId: string, parentUnitId: string): IRender {
@@ -96,16 +123,13 @@ export class RenderManagerService implements IRenderManagerService {
         if (parent == null) {
             throw new Error('parent render is null');
         }
+
         const { scene, engine } = parent;
-
         const current = this._createRender(unitId, engine, false);
-
         const currentScene = current.scene;
-
         const sv = new SceneViewer(unitId);
 
         sv.addSubScene(currentScene);
-
         scene.addObject(sv);
 
         return current;
@@ -145,21 +169,21 @@ export class RenderManagerService implements IRenderManagerService {
             height,
         });
 
-        const item: IRender = {
-            unitId,
-            engine,
-            scene,
-            mainComponent: null,
-            components: new Map(),
-            isMainScene,
-        };
+        const unit = this._univerInstanceService.getUnit(unitId)!;
+        const type = this._univerInstanceService.getUnitType(unitId);
+        const ctors = this._getRenderControllersForType(type);
+        const renderUnit = new RenderUnit(unit, this._injector, ctors);
+        renderUnit.engine = engine;
+        renderUnit.scene = scene;
+        renderUnit.mainComponent = null;
+        renderUnit.components = new Map();
+        renderUnit.isMainScene = isMainScene;
 
-        this.addItem(unitId, item);
-
-        return item;
+        this.addRenderItem(unitId, renderUnit);
+        return renderUnit;
     }
 
-    addItem(unitId: string, item: IRender) {
+    addRenderItem(unitId: string, item: IRender) {
         this._renderMap.set(unitId, item);
     }
 
@@ -214,4 +238,4 @@ export class RenderManagerService implements IRenderManagerService {
     }
 }
 
-export const IRenderManagerService = createIdentifier<RenderManagerService>('univer.render-manager-service');
+export const IRenderManagerService = createIdentifier<RenderManagerService>('engine-render.render-manager.service');

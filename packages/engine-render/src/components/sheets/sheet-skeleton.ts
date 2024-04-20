@@ -1180,6 +1180,7 @@ export class SpreadsheetSkeleton extends Skeleton {
      * the text content of this cell can be drawn to both sides, not limited by the cell's width.
      * Overflow on the left or right is aligned according to the text's horizontal alignment.
      */
+    // eslint-disable-next-line complexity
     private _calculateOverflowCell(row: number, column: number, docsConfig: IFontCacheItem) {
         // wrap and angle handler
         const { documentSkeleton, vertexAngle = 0, centerAngle = 0, horizontalAlign, wrapStrategy } = docsConfig;

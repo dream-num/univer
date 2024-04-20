@@ -62,9 +62,7 @@ univer.registerPlugin(UniverUIPlugin, {
 
 univer.registerPlugin(UniverDocsUIPlugin);
 
-univer.registerPlugin(UniverSheetsPlugin, {
-    notExecuteFormula: true,
-});
+univer.registerPlugin(UniverSheetsPlugin);
 univer.registerPlugin(UniverSheetsUIPlugin);
 
 // sheet feature plugins
@@ -73,7 +71,7 @@ univer.registerPlugin(UniverSheetsNumfmtPlugin);
 univer.registerPlugin(DebuggerPlugin);
 univer.registerPlugin(UniverSheetsZenEditorPlugin);
 univer.registerPlugin(UniverFormulaEnginePlugin, {
-    notExecuteFormula: true,
+    notExecuteFormula: false,
 });
 univer.registerPlugin(UniverSheetsFormulaPlugin);
 univer.registerPlugin(UniverRPCMainThreadPlugin, {

@@ -111,10 +111,6 @@ export class Univer {
         return this._univerInstanceService.createUnit<ISlideData, SlideDataModel>(UniverInstanceType.SLIDE, data);
     }
 
-    start(): void {
-        this._tryProgressToStart();
-    }
-
     private _init(injector: Injector): void {
         this._univerInstanceService.registerCtorForType(UniverInstanceType.SHEET, Workbook);
         this._univerInstanceService.registerCtorForType(UniverInstanceType.DOC, DocumentDataModel);

@@ -90,7 +90,6 @@ export class UniverFormulaEnginePlugin extends Plugin {
             [IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }],
             [ISuperTableService, { useClass: SuperTableService }],
 
-
             // Models
             [FormulaDataModel],
 
@@ -146,9 +145,5 @@ export class UniverFormulaEnginePlugin extends Plugin {
         }
 
         dependencies.forEach((dependency) => this._injector.add(dependency));
-    }
-
-    override onReady(): void {
-        this._injector.get(FormulaDataModel).initFormulaData();
     }
 }

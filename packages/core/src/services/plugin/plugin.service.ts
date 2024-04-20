@@ -21,7 +21,7 @@ import { type UnitType, UniverInstanceType } from '../../common/unit';
 import { PluginHolder } from './plugin-holder';
 import type { Plugin, PluginCtor } from './plugin';
 
-const INIT_LAZY_PLUGINS_TIMEOUT = 200;
+const INIT_LAZY_PLUGINS_TIMEOUT = 4;
 
 /**
  * This service manages plugin registration.
@@ -50,9 +50,7 @@ export class PluginService implements IDisposable {
     registerPlugin<T extends PluginCtor<Plugin>>(plugin: T, config?: ConstructorParameters<T>[0]): void {
         this._assertPluginValid(plugin);
 
-        if (this._pluginHolderForUniver.started) {
-            this._scheduleInitPluginAfterStarted();
-        }
+        this._scheduleInitPlugin();
 
         const { type } = plugin;
         if (type === UniverInstanceType.UNIVER) {
@@ -96,7 +94,7 @@ export class PluginService implements IDisposable {
     }
 
     private _initLazyPluginsTimer?: number;
-    private _scheduleInitPluginAfterStarted() {
+    private _scheduleInitPlugin() {
         if (this._initLazyPluginsTimer === undefined) {
             this._initLazyPluginsTimer = setTimeout(
                 () => {

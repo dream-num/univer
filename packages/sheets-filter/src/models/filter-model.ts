@@ -31,7 +31,10 @@ export class FilterModel extends Disposable {
     /** An observable value. A set of filtered out rows. */
     readonly filteredOutRows$: Observable<Readonly<Set<number>>> = this._filteredOutRows$.asObservable();
     get filteredOutRows() { return this._filteredOutRows$.getValue(); }
-
+    set filteredOutRows(rows: Set<number>) {
+        this._alreadyFilteredOutRows = rows;
+        this._filteredOutRows$.next(rows);
+    }
     // TODO: we may need to update which cols have criteria rather than simple boolean
 
     private readonly _hasCriteria$ = new BehaviorSubject<boolean>(false);

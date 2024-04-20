@@ -633,15 +633,48 @@ export class SheetsFilterController extends Disposable {
 
             const filterModel = this._sheetsFilterService.getFilterModel(unitId, subUnitId);
             if (!filterModel) return;
+            const filteredOutRows = Array.from(filterModel.filteredOutRows).sort((a, b) => a - b);
+            const newFilteredOutRows: number[] = [];
+            let changed = false;
 
-            if (command.id === RemoveRowMutation.id || command.id === InsertRowMutation.id) {
-                const { startRow } = (command.params as (IRemoveRowsMutationParams | IInsertRowMutationParams)).range;
-                const { endRow: filterEndRow } = filterModel.getRange();
-                if (startRow <= filterEndRow) {
-                    filterModel.reCalc();
-                }
+            if (command.id === RemoveRowMutation.id) {
+                const { startRow, endRow } = (command.params as IRemoveRowsMutationParams).range;
+                filteredOutRows.forEach((row) => {
+                    if (row < startRow) {
+                        newFilteredOutRows.push(row);
+                    } else {
+                        changed = true;
+                        if (row > endRow) {
+                            newFilteredOutRows.push(row - (endRow - startRow + 1));
+                        }
+                    }
+                });
             }
 
+            if (command.id === InsertRowMutation.id) {
+                const { startRow, endRow } = (command.params as IInsertRowMutationParams).range;
+                filteredOutRows.forEach((row) => {
+                    if (row >= startRow) {
+                        changed = true;
+                        newFilteredOutRows.push(row + (endRow - startRow + 1));
+                    } else {
+                        newFilteredOutRows.push(row);
+                    }
+                });
+            }
+
+            if (changed) {
+                filterModel.filteredOutRows = new Set(newFilteredOutRows);
+            }
+
+            // if (command.id === DeleteRangeMoveLeftCommand.id || command.id === DeleteRangeMoveUpCommand.id || command.id === InsertRangeMoveRightCommand.id || command.id === InsertRangeMoveDownCommand.id) {
+            //     const { range } = command.params as (IDeleteRangeMoveUpCommandParams | IDeleteRangeMoveLeftCommandParams | InsertRangeMoveDownCommandParams | InsertRangeMoveRightCommandParams);
+            //     const { startRow } = range;
+            //     const { endRow: filterEndRow } = filterModel.getRange();
+            //     if (startRow <= filterEndRow) {
+            //         filterModel.reCalc();
+            //     }
+            // }
 
             // InsertRowsOrCols / RemoveRowsOrCols Mutations
             // if (mutationIdByRowCol.includes(command.id)) {
@@ -688,3 +721,4 @@ export class SheetsFilterController extends Disposable {
         }));
     }
 }
+

@@ -34,7 +34,7 @@ export class UniverSheetsFilterUIPlugin extends Plugin {
         @Inject(Injector) protected readonly _injector: Injector,
         @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
-        super(NAME);
+        super();
 
         this._localeService.load({
             zhCN,

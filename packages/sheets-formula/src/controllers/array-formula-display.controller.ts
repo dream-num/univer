@@ -68,14 +68,8 @@ export class ArrayFormulaDisplayController extends Disposable {
                 handler: (cell, location, next) => {
                     const { unitId, subUnitId, row, col } = location;
                     const arrayFormulaCellData = this._formulaDataModel.getArrayFormulaCellData();
-                    const arrayFormulaRange = this._formulaDataModel.getArrayFormulaRange();
                     const cellData = arrayFormulaCellData?.[unitId]?.[subUnitId]?.[row]?.[col];
-                    const cellRange = arrayFormulaRange?.[unitId]?.[subUnitId]?.[row]?.[col];
                     if (cellData == null) {
-                        return next(cell);
-                    }
-
-                    if (cellRange != null && cellRange.startRow === row && cellRange.startColumn === col) {
                         return next(cell);
                     }
 
@@ -110,10 +104,11 @@ export class ArrayFormulaDisplayController extends Disposable {
                     //     };
                     // }
 
+                    // The cell in the upper left corner of the array formula also triggers the default value determination
                     if (cellData.v == null && cellData.t == null) {
                         return next({ ...cell,
                                       ...cellData,
-                                      v: 0,
+                                      v: 0, // Default value for empty cell
                                       t: CellValueType.NUMBER,
                         });
                     }

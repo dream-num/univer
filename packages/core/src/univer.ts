@@ -111,6 +111,10 @@ export class Univer {
         return this._univerInstanceService.createUnit<ISlideData, SlideDataModel>(UniverInstanceType.SLIDE, data);
     }
 
+    start(): void {
+        this._tryProgressToStart();
+    }
+
     private _init(injector: Injector): void {
         this._univerInstanceService.registerCtorForType(UniverInstanceType.SHEET, Workbook);
         this._univerInstanceService.registerCtorForType(UniverInstanceType.DOC, DocumentDataModel);
@@ -122,10 +126,8 @@ export class Univer {
                 this._tryProgressToStart();
 
                 if (!this._startedTypes.has(type)) {
+                    this._pluginService.startPluginForType(type);
                     this._startedTypes.add(type);
-
-                    const pluginHolder = this._pluginService._ensurePluginHolderForType(type);
-                    pluginHolder.start();
 
                     const model = injector.createInstance(ctor, data);
                     univerInstanceService.__addUnit(model);

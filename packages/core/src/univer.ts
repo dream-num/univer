@@ -125,7 +125,7 @@ export class Univer {
                     this._startedTypes.add(type);
 
                     const pluginHolder = this._pluginService._ensurePluginHolderForType(type);
-                    pluginHolder._start();
+                    pluginHolder.start();
 
                     const model = injector.createInstance(ctor, data);
                     univerInstanceService.__addUnit(model);
@@ -143,7 +143,7 @@ export class Univer {
     }
 
     private _tryProgressToStart(): void {
-        this._pluginService._start();
+        this._pluginService.start();
     }
 
     private _tryProgressToReady(): void {

@@ -85,6 +85,9 @@ univer.registerPlugin(UniverDataValidationPlugin);
 univer.registerPlugin(UniverSheetsDataValidationPlugin);
 univer.registerPlugin(UniverSheetsFindReplacePlugin);
 
+// sheet condition formatting
+univer.registerPlugin(UniverSheetsConditionalFormattingUIPlugin);
+
 // create univer sheet instance
 univer.createUniverSheet(DEFAULT_WORKBOOK_DATA_DEMO);
 
@@ -92,9 +95,6 @@ univer.createUniverSheet(DEFAULT_WORKBOOK_DATA_DEMO);
 // setTimeout(() => {
 //     univer.__getInjector().get(IUniverInstanceService).disposeUnit(DEFAULT_WORKBOOK_DATA_DEMO.id);
 // }, 5000);
-
-// sheet condition formatting
-univer.registerPlugin(UniverSheetsConditionalFormattingUIPlugin);
 
 declare global {
     interface Window {

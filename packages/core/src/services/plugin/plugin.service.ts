@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
+import type { IDisposable } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
+import type { UniverType } from '@univerjs/protocol';
 import { type UnitType, UniverInstanceType } from '../../common/unit';
-import { LifecycleInitializerService, LifecycleService } from '../lifecycle/lifecycle.service';
-import { LifecycleStages } from '../lifecycle/lifecycle';
-import { ILogService } from '../log/log.service';
 import { PluginHolder } from './plugin-holder';
 import type { Plugin, PluginCtor } from './plugin';
 
@@ -27,42 +26,61 @@ const INIT_LAZY_PLUGINS_TIMEOUT = 200;
 /**
  * This service manages plugin registration.
  */
-export class PluginService extends PluginHolder {
-    private _pluginHoldersForTypes = new Map<UnitType, PluginHolder>();
+export class PluginService implements IDisposable {
+    private readonly _pluginHolderForUniver: PluginHolder;
+    private readonly _pluginHoldersForTypes = new Map<UnitType, PluginHolder>();
 
     constructor(
-    @ILogService _logService: ILogService,
-        @Inject(Injector) _injector: Injector,
-        @Inject(LifecycleService) _lifecycleService: LifecycleService,
-        @Inject(LifecycleInitializerService) _lifecycleInitializerService: LifecycleInitializerService
+        @Inject(Injector) private readonly _injector: Injector
     ) {
-        super(_logService, _injector, _lifecycleService, _lifecycleInitializerService);
+        this._pluginHolderForUniver = this._injector.createInstance(PluginHolder, true);
     }
 
-    override dispose(): void {
+    dispose(): void {
         this._clearFlushLazyPluginsTimer();
 
-        // Dispose all plugin holders including self.
-        super.dispose();
         for (const holder of this._pluginHoldersForTypes.values()) {
             holder.dispose();
         }
+
+        this._pluginHolderForUniver.dispose();
     }
 
     /** Register a plugin into univer. */
     registerPlugin<T extends PluginCtor<Plugin>>(plugin: T, config?: ConstructorParameters<T>[0]): void {
         this._assertPluginValid(plugin);
 
-        const { type } = plugin;
-        if (type === UniverInstanceType.UNIVER) {
-            return this._registerPlugin(plugin, config);
+        if (this._pluginHolderForUniver.started) {
+            this._scheduleInitPluginAfterStarted();
         }
 
-        // If it's type is for specific document, we should run them at specific time.
-        const holder = this._ensurePluginHolderForType(type);
+        const { type } = plugin;
+        if (type === UniverInstanceType.UNIVER) {
+            this._pluginHolderForUniver.registerPlugin(plugin, config);
+        } else {
+            // If it's type is for specific document, we should run them at specific time.
+            const holder = this._ensurePluginHolderForType(type);
+            holder.registerPlugin(plugin, config);
+        }
+    }
 
-        // @ts-ignore
-        holder._registerPlugin(plugin, config);
+    start(): void {
+        this._pluginHolderForUniver.start();
+    }
+
+    startPluginForType(type: UniverType): void {
+        const holder = this._ensurePluginHolderForType(type);
+        holder.start();
+    }
+
+    _ensurePluginHolderForType(type: UnitType): PluginHolder {
+        if (!this._pluginHoldersForTypes.has(type)) {
+            const pluginHolder = this._injector.createInstance(PluginHolder, false);
+            this._pluginHoldersForTypes.set(type, pluginHolder);
+            return pluginHolder;
+        }
+
+        return this._pluginHoldersForTypes.get(type)!;
     }
 
     private _assertPluginValid(plugin: PluginCtor<Plugin>): void {
@@ -77,44 +95,14 @@ export class PluginService extends PluginHolder {
         }
     }
 
-    protected override _registerPlugin<T extends PluginCtor<Plugin>>(pluginCtor: T, options?: ConstructorParameters<T>[0]): void {
-        const { pluginName } = pluginCtor;
-        if (this._pluginRegistered.has(pluginName)) {
-            this._logService.warn('[PluginService]', `plugin ${pluginName} has already been registered. This registration will be ignored.`);
-            return;
-        }
-
-        this._pluginRegistered.add(pluginName);
-
-        if (this._started) {
-            this._pluginRegistry.registerPlugin(pluginCtor, options);
-
-            // If Univer has already started, we should manually call onStarting for the plugin.
-            // We do that in an asynchronous way, because user may lazy load several plugins at the same time.
-            return this._scheduleInitPluginAfterStarted();
-        } else {
-            // For plugins at Univer level. Plugins would be initialized immediately so they can register dependencies.
-            const pluginInstance: Plugin = this._injector.createInstance(pluginCtor, options);
-            this._pluginStore.addPlugin(pluginInstance);
-            this._pluginsRunLifecycle([pluginInstance], LifecycleStages.Starting);
-        }
-    }
-
-    _ensurePluginHolderForType(type: UnitType): PluginHolder {
-        if (!this._pluginHoldersForTypes.has(type)) {
-            const pluginHolder = this._injector.createInstance(PluginHolder);
-            this._pluginHoldersForTypes.set(type, pluginHolder);
-            return pluginHolder;
-        }
-
-        return this._pluginHoldersForTypes.get(type)!;
-    }
-
     private _initLazyPluginsTimer?: number;
     private _scheduleInitPluginAfterStarted() {
         if (this._initLazyPluginsTimer === undefined) {
             this._initLazyPluginsTimer = setTimeout(
-                () => this._flushLazyPlugins(),
+                () => {
+                    this._flushLazyPlugins();
+                    this._clearFlushLazyPluginsTimer();
+                },
                 INIT_LAZY_PLUGINS_TIMEOUT
             ) as unknown as number;
         }
@@ -128,10 +116,11 @@ export class PluginService extends PluginHolder {
     }
 
     private _flushLazyPlugins() {
-        this._flush();
-
+        this._pluginHolderForUniver.flush();
         for (const [_, holder] of this._pluginHoldersForTypes) {
-            holder._flush();
+            if (holder.started) {
+                holder.flush();
+            }
         }
     }
 }

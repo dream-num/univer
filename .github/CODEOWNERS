@@ -4,6 +4,7 @@ docs @wzhudev
 
 # core
 packages/core @wzhudev
+packages/core/src/services/resource-loader @Gggpound
 packages/core/src/services/resource-manager @Gggpound
 packages/core/src/services/permission @Gggpound
 
@@ -38,6 +39,8 @@ packages/docs-ui @jikkai @Jocs
 packages/sheets @wzhudev @DR-Univer
 packages/sheets/src/services/numfmt @Gggpound
 packages/sheets/src/services/ref-range @Gggpound
+packages/sheets/src/services/ref-range @weird94
+packages/sheets/src/services/sheet-interceptor @Gggpound
 packages/sheets-ui @jikkai @wzhudev
 packages/sheets-ui/src/controllers/clipboard @yuhongz
 packages/sheets-ui/src/controllers/editor @Jocs

@@ -37,9 +37,13 @@ export class UniverImagePlugin extends Plugin {
     override onStarting(_injector: Injector): void {
         this._initDependencies(_injector);
         this._injector = _injector;
+
+        this._mockAddImage();
     }
 
-    override onReady(): void {
+    override onReady(): void {}
+
+    private _mockAddImage(): void {
         /**
          * TODO: @DR-Univer Before the loading process is completed, mock some data for testing.
          */

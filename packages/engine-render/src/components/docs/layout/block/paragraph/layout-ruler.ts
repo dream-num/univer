@@ -261,6 +261,7 @@ function _divideOperator(
                     );
 
                     for (let i = startIndex; i < spanGroupCached.length; i++) {
+                        // TODO: @jocs Here you may see non-breakpoints appearing at the end of the line.
                         _divideOperator(
                             [spanGroupCached[i]],
                             pages,
@@ -320,6 +321,7 @@ function _lineOperator(
     const {
         paragraphStyle = {},
         paragraphAffectSkeDrawings,
+        paragraphInlineSkeDrawings,
         skeHeaders,
         skeFooters,
         drawingAnchor,
@@ -448,6 +450,11 @@ function _lineOperator(
         headersDrawings,
         footersDrawings
     );
+
+    // TODO: Use queueMicrotask to mark sure the new line is full?
+    queueMicrotask(() => {
+        __updatePreLineDrawingPosition(newLine, paragraphInlineSkeDrawings);
+    });
 
     column.lines.push(newLine);
     newLine.parent = column;
@@ -619,6 +626,55 @@ function __getLineHeight(
         contentHeight: spanLineHeight,
         lineSpacingApply,
     };
+}
+
+function __updatePreLineDrawingPosition(
+    line: IDocumentSkeletonLine,
+    paragraphInlineSkeDrawings?: Map<string, IDocumentSkeletonDrawing>
+) {
+    const page = line?.parent?.parent?.parent;
+
+    if (page == null) {
+        return;
+    }
+
+    const drawings: Map<string, IDocumentSkeletonDrawing> = new Map();
+    const { top } = line;
+
+    for (const divide of line.divides) {
+        for (const glyph of divide.glyphGroup) {
+            if (glyph.streamType === DataStreamTreeTokenType.CUSTOM_BLOCK && glyph.width !== 0) {
+                const { objectId } = glyph;
+
+                if (objectId == null) {
+                    continue;
+                }
+
+                const drawing = paragraphInlineSkeDrawings?.get(objectId);
+
+                const drawingOrigin = drawing?.drawingOrigin;
+
+                if (drawingOrigin == null || drawing == null) {
+                    continue;
+                }
+
+                const { objectTransform } = drawingOrigin;
+
+                const { size, angle } = objectTransform;
+                const { width = 0, height = 0 } = size;
+
+                drawing.aLeft = glyph.left || 0;
+                drawing.aTop = top || 0;
+                drawing.width = width;
+                drawing.height = height;
+                drawing.angle = angle;
+
+                drawings.set(drawing.objectId, drawing);
+            }
+        }
+    }
+
+    page.skeDrawings = new Map([...page.skeDrawings, ...drawings]);
 }
 
 // 更新paragraphAffectSkeDrawings的绝对位置，相对于段落的第一行布局

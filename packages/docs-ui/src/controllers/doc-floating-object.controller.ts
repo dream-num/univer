@@ -162,7 +162,10 @@ export class DocFloatingObjectController extends Disposable {
                         return;
                     }
 
-                    this._refreshFloatingObject(unitId, skeleton, currentRender);
+                    // TODO: @JOCS remove microtask.
+                    queueMicrotask(() => {
+                        this._refreshFloatingObject(unitId, skeleton, currentRender);
+                    });
 
                     // this.calculatePagePosition(currentRender);
                 }
@@ -204,7 +207,6 @@ export class DocFloatingObjectController extends Disposable {
         for (let i = 0, len = pages.length; i < len; i++) {
             const page = pages[i];
             const { skeDrawings, marginLeft, marginTop } = page;
-
             // cumPageLeft + = pageWidth + documents.pageMarginLeft;
 
             this._liquid.translatePagePadding(page);

@@ -26,7 +26,6 @@ import type { DocumentViewModel } from '../../../view-model/document-view-model'
 import type { IParagraphConfig, ISectionBreakConfig } from '../../../../../basics/interfaces';
 import type { IShapedText } from './shaping';
 import { layoutParagraph } from './layout-ruler';
-import { dealWidthInlineDrawing } from './inline-drawing';
 import { dealWithBullet } from './bullet';
 
 function _getListLevelAncestors(
@@ -93,6 +92,7 @@ function _changeDrawingToSkeletonFormat(
 
 function _getDrawingSkeletonFormat(drawingOrigin: IDrawing) {
     const objectId = drawingOrigin.objectId;
+
     return {
         objectId,
         aLeft: 0,
@@ -123,7 +123,7 @@ export function lineBreaking(
         localeService,
     } = sectionBreakConfig;
 
-    const { endIndex, startIndex, blocks = [] } = paragraphNode;
+    const { endIndex, blocks = [] } = paragraphNode;
 
     const paragraph = bodyModel.getParagraph(endIndex) || { startIndex: 0 };
 
@@ -132,11 +132,13 @@ export function lineBreaking(
     const { skeHeaders, skeFooters, skeListLevel, drawingAnchor } = skeletonResourceReference;
 
     const paragraphAffectSkeDrawings: Map<string, IDocumentSkeletonDrawing> = new Map();
+    const paragraphInlineSkeDrawings: Map<string, IDocumentSkeletonDrawing> = new Map();
 
     const paragraphConfig: IParagraphConfig = {
         paragraphIndex: endIndex,
         paragraphStyle,
         paragraphAffectSkeDrawings,
+        paragraphInlineSkeDrawings,
         skeHeaders,
         skeFooters,
         drawingAnchor,
@@ -149,6 +151,7 @@ export function lineBreaking(
 
     paragraphConfig.bulletSkeleton = bulletSkeleton;
 
+    // TODO: @jocs, move cache to shaping or remove cache?
     const customBlockCache = new Map<number, Nullable<ICustomBlock>>();
 
     for (let i = 0, len = blocks.length; i < len; i++) {
@@ -163,15 +166,15 @@ export function lineBreaking(
         const drawingOrigin = drawings[blockId];
         if (drawingOrigin.layoutType !== PositionedObjectLayoutType.INLINE) {
             paragraphAffectSkeDrawings.set(blockId, _getDrawingSkeletonFormat(drawingOrigin));
+        } else {
+            paragraphInlineSkeDrawings.set(blockId, _getDrawingSkeletonFormat(drawingOrigin));
         }
     }
 
     let allPages = [curPage];
     let paragraphStart = true;
-    let charIndex = startIndex;
 
     for (const { text, glyphs } of shapedTextList) {
-        charIndex += text.length;
         const pushPending = () => {
             if (glyphs.length === 0) {
                 return;
@@ -188,30 +191,7 @@ export function lineBreaking(
             paragraphStart = false;
         };
 
-        if (text.endsWith(DataStreamTreeTokenType.CUSTOM_BLOCK)) {
-            let customBlock = customBlockCache.get(charIndex);
-            if (customBlock == null) {
-                customBlock = bodyModel.getCustomBlock(charIndex);
-            }
-
-            // console.log(customBlockCache, charIndex);
-
-            if (customBlock != null) {
-                const blockId = customBlock.blockId;
-                const drawingOrigin = drawings[blockId];
-                if (drawingOrigin.layoutType === PositionedObjectLayoutType.INLINE) {
-                    allPages = dealWidthInlineDrawing(
-                        drawingOrigin,
-                        sectionBreakConfig,
-                        allPages,
-                        paragraphConfig,
-                        localeService
-                    );
-                }
-            }
-            pushPending();
-            continue;
-        } else if (text.endsWith(DataStreamTreeTokenType.PAGE_BREAK)) {
+        if (text.endsWith(DataStreamTreeTokenType.PAGE_BREAK)) {
             pushPending();
             allPages.push(
                 createSkeletonPage(
@@ -222,6 +202,7 @@ export function lineBreaking(
                 )
             );
             paragraphAffectSkeDrawings.clear();
+            paragraphInlineSkeDrawings.clear();
             continue;
         } else if (text.endsWith(DataStreamTreeTokenType.COLUMN_BREAK)) {
             pushPending();

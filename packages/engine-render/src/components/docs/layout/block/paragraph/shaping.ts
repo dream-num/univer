@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { IParagraphStyle } from '@univerjs/core';
-import { BooleanNumber, DataStreamTreeTokenType, GridType } from '@univerjs/core';
+import type { IParagraphStyle, Nullable } from '@univerjs/core';
+import { BooleanNumber, DataStreamTreeTokenType, GridType, PositionedObjectLayoutType } from '@univerjs/core';
 import type { IDocumentSkeletonGlyph } from '../../../../../basics/i-document-skeleton-cached';
 import { LineBreaker } from '../../linebreak';
 import { tabLineBreakExtension } from '../../linebreak/extensions/tab-linebreak-extension';
-import { createSkeletonLetterGlyph, createSkeletonTabGlyph, glyphShrinkLeft, glyphShrinkRight } from '../../model/glyph';
+import { createSkeletonInlineCustomBlockGlyph, createSkeletonLetterGlyph, createSkeletonTabGlyph, glyphShrinkLeft, glyphShrinkRight } from '../../model/glyph';
 import { getCharSpaceApply, getFontCreateConfig } from '../../tools';
 import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../../view-model/document-view-model';
@@ -104,6 +104,7 @@ export function shaping(
         gridType = GridType.LINES,
         charSpace = 0,
         defaultTabStop = 10.5,
+        drawings = {},
     } = sectionBreakConfig;
     const { snapToGrid = BooleanNumber.TRUE } = paragraphStyle;
     const shapedTextList: IShapedText[] = [];
@@ -174,9 +175,31 @@ export function shaping(
                     break;
                 }
 
-                if (/\s/.test(char) || hasCJK(char)) {
+                if (char === DataStreamTreeTokenType.CUSTOM_BLOCK) {
                     const config = getFontCreateConfig(i, bodyModel, paragraphNode, sectionBreakConfig, paragraphStyle);
-                    let newSpan: IDocumentSkeletonGlyph;
+                    let newSpan: Nullable<IDocumentSkeletonGlyph> = null;
+                    const customBlock = bodyModel.getCustomBlock(paragraphNode.startIndex + i);
+
+                    if (customBlock != null) {
+                        const { blockId } = customBlock;
+                        const drawingOrigin = drawings[blockId];
+                        if (drawingOrigin.layoutType === PositionedObjectLayoutType.INLINE) {
+                            const { width, height } = drawingOrigin.objectTransform.size;
+                            const { objectId } = drawingOrigin;
+                            newSpan = createSkeletonInlineCustomBlockGlyph(config, width, height, objectId);
+                        }
+                    }
+
+                    if (newSpan == null) {
+                        newSpan = createSkeletonLetterGlyph(char, config);
+                    }
+
+                    shapedGlyphs.push(newSpan);
+                    i += char.length;
+                    src = src.substring(char.length);
+                } else if (/\s/.test(char) || hasCJK(char)) {
+                    const config = getFontCreateConfig(i, bodyModel, paragraphNode, sectionBreakConfig, paragraphStyle);
+                    let newSpan: Nullable<IDocumentSkeletonGlyph> = null;
 
                     if (char === DataStreamTreeTokenType.TAB) {
                         const charSpaceApply = getCharSpaceApply(charSpace, defaultTabStop, gridType, snapToGrid);
@@ -248,10 +271,29 @@ export function shaping(
         // Continuous punctuation space adjustment.
         punctuationSpaceAdjustment(shapedGlyphs);
 
-        shapedTextList.push({
-            text: word,
-            glyphs: shapedGlyphs,
-        });
+        const shapedGlyphsList: IDocumentSkeletonGlyph[][] = [[]];
+
+        for (let i = 0; i < shapedGlyphs.length; i++) {
+            const lastList = shapedGlyphsList[shapedGlyphsList.length - 1];
+            const glyph = shapedGlyphs[i];
+
+            // Inline Custom Block can open a new line.
+            if (glyph.streamType === DataStreamTreeTokenType.CUSTOM_BLOCK && glyph.width !== 0) {
+                shapedGlyphsList.push([glyph]);
+            } else {
+                lastList.push(glyph);
+            }
+        }
+
+        for (const shapedGlyphs of shapedGlyphsList) {
+            const word = shapedGlyphs.map((g) => g.content).join();
+
+            shapedTextList.push({
+                text: word,
+                glyphs: shapedGlyphs,
+            });
+        }
+
         last = bk.position;
     }
 

@@ -97,6 +97,39 @@ export function createSkeletonTabGlyph(config: IFontCreateConfig, glyphWidth?: n
     return _createSkeletonWordOrLetter(GlyphType.TAB, DT.TAB, config, glyphWidth);
 }
 
+// It is used to create inline custom blocks, such as inline images, to occupy placeholders in the layout.
+export function createSkeletonInlineCustomBlockGlyph(config: IFontCreateConfig, glyphWidth = 0, glyphHeight = 0, objectId = ''): IDocumentSkeletonGlyph {
+    const { fontStyle, textStyle } = config;
+    const content = DT.CUSTOM_BLOCK;
+
+    return {
+        content: '',
+        ts: textStyle,
+        fontStyle,
+        width: glyphWidth,
+        bBox: {
+            width: 0,
+            ba: glyphHeight, // Or 1/2 glyphHeight each for ba and bd.
+            bd: 0,
+            aba: 0,
+            abd: 0,
+            sp: 0,
+            sbr: 0,
+            sbo: 0,
+            spr: 0,
+            spo: 0,
+        },
+        xOffset: 0,
+        left: 0,
+        isJustifiable: false,
+        adjustability: baseAdjustability(content, 0),
+        glyphType: GlyphType.PLACEHOLDER,
+        streamType: content as DT,
+        count: 1,
+        objectId,
+    };
+}
+
 export function _createSkeletonWordOrLetter(
     glyphType: GlyphType,
     content: string,

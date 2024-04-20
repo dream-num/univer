@@ -428,6 +428,7 @@ const locale: typeof zhCN = {
     clipboard: {
         paste: {
             exceedMaxCells: 'The number of cells pasted exceeds the maximum number of cells',
+            overlappingMergedCells: 'The paste area overlaps with merged cells',
         },
         shortCutNotify: {
             title: 'Kindly paste using keyboard shortcuts.',

@@ -31,8 +31,8 @@ import { IRenderManagerService, Liquid } from '@univerjs/engine-render';
 import { IEditorService } from '@univerjs/ui';
 import { Inject } from '@wendellhu/redi';
 
-@OnLifecycle(LifecycleStages.Steady, FloatingObjectController)
-export class FloatingObjectController extends Disposable {
+@OnLifecycle(LifecycleStages.Steady, DocFloatingObjectController)
+export class DocFloatingObjectController extends Disposable {
     private _liquid = new Liquid();
 
     private _pageMarginCache = new Map<string, { marginLeft: number; marginTop: number }>();

@@ -51,7 +51,7 @@ import { DocClipboardController } from './controllers/clipboard.controller';
 import { DocEditorBridgeController } from './controllers/doc-editor-bridge.controller';
 import { DocRenderController } from './controllers/doc-render.controller';
 import { DocCanvasView } from './views/doc-canvas-view';
-import { FloatingObjectController } from './controllers/floating-object.controller';
+import { DocFloatingObjectController } from './controllers/doc-floating-object.controller';
 import { PageRenderController } from './controllers/page-render.controller';
 import { ZoomController } from './controllers/zoom.controller';
 import { TextSelectionController } from './controllers/text-selection.controller';
@@ -109,7 +109,7 @@ export class UniverDocsUIPlugin extends Plugin {
             [DocClipboardController],
             [DocEditorBridgeController],
             [DocRenderController],
-            [FloatingObjectController],
+            [DocFloatingObjectController],
             [PageRenderController],
             [ZoomController],
             [TextSelectionController],

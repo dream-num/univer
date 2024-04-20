@@ -91,7 +91,7 @@ export interface IShapedText {
     glyphs: IDocumentSkeletonGlyph[];
 }
 
-// eslint-disable-next-line max-lines-per-function
+
 export function shaping(
     content: string,
     bodyModel: DocumentViewModel,
@@ -258,6 +258,5 @@ export function shaping(
     // Add some spacing between Han characters and western characters.
     addCJKLatinSpacing(shapedTextList);
 
-    // console.log(shapedTextList);
     return shapedTextList;
 }

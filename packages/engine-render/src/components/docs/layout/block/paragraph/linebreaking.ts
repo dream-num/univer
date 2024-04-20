@@ -193,6 +193,9 @@ export function lineBreaking(
             if (customBlock == null) {
                 customBlock = bodyModel.getCustomBlock(charIndex);
             }
+
+            // console.log(customBlockCache, charIndex);
+
             if (customBlock != null) {
                 const blockId = customBlock.blockId;
                 const drawingOrigin = drawings[blockId];

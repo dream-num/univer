@@ -26,12 +26,14 @@ import { type Plugin, type PluginCtor, PluginRegistry, PluginStore } from './plu
 
 export class PluginHolder extends Disposable {
     protected _started: boolean = false;
+    get started(): boolean { return this._started; }
 
     protected readonly _pluginRegistered = new Set<string>();
     protected readonly _pluginStore = new PluginStore();
     protected readonly _pluginRegistry = new PluginRegistry();
 
     constructor(
+        private readonly _immediateStart: boolean,
         @ILogService protected readonly _logService: ILogService,
         @Inject(Injector) protected readonly _injector: Injector,
         @Inject(LifecycleService) protected readonly _lifecycleService: LifecycleService,
@@ -48,7 +50,7 @@ export class PluginHolder extends Disposable {
         this._pluginRegistry.removePlugins();
     }
 
-    protected _registerPlugin<T extends PluginCtor<Plugin>>(pluginCtor: T, config?: ConstructorParameters<T>[0]): void {
+    registerPlugin<T extends PluginCtor<Plugin>>(pluginCtor: T, config?: ConstructorParameters<T>[0]): void {
         const { pluginName } = pluginCtor;
         if (this._pluginRegistered.has(pluginName)) {
             this._logService.warn('[PluginService]', `plugin ${pluginName} has already been registered. This registration will be ignored.`);
@@ -58,21 +60,24 @@ export class PluginHolder extends Disposable {
         this._pluginRegistry.registerPlugin(pluginCtor, config);
     }
 
-    _start(): void {
+    start(): void {
         if (this._started) return;
         this._started = true;
 
-        this._flush();
+        this.flush();
     }
 
-    _flush(): void {
+    flush(): void {
         if (!this._started) return;
 
         const plugins = this._pluginRegistry.getRegisterPlugins().map(({ plugin, options }) => this._initPlugin(plugin, options));
         this._pluginRegistry.removePlugins();
 
-        this.disposeWithMe(this._lifecycleService.subscribeWithPrevious().subscribe((stage) => {
+        const lifecycleSubscription = this.disposeWithMe(this._lifecycleService.subscribeWithPrevious().subscribe((stage) => {
             this._pluginsRunLifecycle(plugins, stage);
+            if (stage === LifecycleStages.Steady) {
+                lifecycleSubscription.dispose();
+            }
         }));
     }
 

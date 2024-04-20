@@ -58,9 +58,9 @@ export interface ICellData {
     si?: Nullable<string>;
 
     /**
-     * Custom meta data
+     * User stored custom fields
      */
-    meta?: { [key: string]: any };
+    custom?: { [key: string]: any };
 }
 
 export interface ICellMarksStyle {

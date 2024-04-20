@@ -144,6 +144,7 @@ export class SheetsFilterRenderController extends RxDisposable {
             fill: 'rgba(0, 0, 0, 0.0)',
             ...style,
         } as ISelectionStyle);
+        filterRangeShape.setEvent(false);
 
         scene.makeDirty(true);
     }

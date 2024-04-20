@@ -46,6 +46,8 @@ describe('ProgressService', () => {
 
         const steps: IProgressStep[] = [];
         result.current.progressChange$.subscribe((step) => steps.push(step));
+        const visibilities: boolean[] = [];
+        result.current.progressVisible$.subscribe((visible) => visibilities.push(visible));
 
         act(() => {
             service.insertTaskCount(10);
@@ -57,6 +59,31 @@ describe('ProgressService', () => {
             service.pushTask({ count: 5 });
         });
         expect(steps).toEqual([{ step: 0.5 }, { step: 1 }]);
+        expect(visibilities).toEqual([true, false]);
+    });
+
+    it('pushTask should emit step change and handle task count, exceeded the total number of tasks', () => {
+        const { result } = renderHook(() => ({
+            progressChange$: service.progressChange$,
+            progressVisible$: service.progressVisible$,
+        }));
+
+        const steps: IProgressStep[] = [];
+        result.current.progressChange$.subscribe((step) => steps.push(step));
+        const visibilities: boolean[] = [];
+        result.current.progressVisible$.subscribe((visible) => visibilities.push(visible));
+
+        act(() => {
+            service.insertTaskCount(10);
+            service.pushTask({ count: 5 });
+        });
+        expect(steps).toEqual([{ step: 0.5 }]);
+
+        act(() => {
+            service.pushTask({ count: 10 });
+        });
+        expect(steps).toEqual([{ step: 0.5 }, { step: 1 }]);
+        expect(visibilities).toEqual([true, false]);
     });
 
     it('insertTaskCount should make progress visible if task count was zero', () => {

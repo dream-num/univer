@@ -57,6 +57,7 @@ export class PluginHolder extends Disposable {
             return;
         }
 
+        this._pluginRegistered.add(pluginName);
         this._pluginRegistry.registerPlugin(pluginCtor, config);
     }
 

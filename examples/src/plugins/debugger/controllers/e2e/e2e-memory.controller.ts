@@ -18,30 +18,17 @@ import { IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceTyp
 
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '../../../../data/sheets/demo/default-workbook-data-demo';
 
-const AWAIT_LOADING_TIMEOUT = 2000;
-const AWAIT_DISPOSING_TIMEOUT = 2000;
+const AWAIT_LOADING_TIMEOUT = 5000;
+const AWAIT_DISPOSING_TIMEOUT = 5000;
 
 export interface IE2EMemoryControllerAPI {
     loadAndRelease(id: number): Promise<void>;
-    getHeapMemoryUsage(): number;
 }
 
 declare global {
     // eslint-disable-next-line ts/naming-convention
     interface Window {
         E2EMemoryAPI: IE2EMemoryControllerAPI;
-    }
-
-    // eslint-disable-next-line ts/naming-convention
-    interface Performance {
-        memory: {
-            /** The maximum size of the heap, in bytes, that is available to the context. */
-            jsHeapSizeLimit: number;
-            /** The total allocated heap size, in bytes. */
-            totalJSHeapSize: number;
-            /** The currently active segment of JS heap, in bytes. */
-            usedJSHeapSize: number;
-        };
     }
 }
 
@@ -59,13 +46,12 @@ export class E2EMemoryController {
     private _initPlugin(): void {
         window.E2EMemoryAPI = {
             loadAndRelease: (id) => this._loadAndRelease(id),
-            getHeapMemoryUsage: () => performance.memory.usedJSHeapSize,
         };
     }
 
     private async _loadAndRelease(id: number): Promise<void> {
-        this._univerInstanceService.createUnit(UniverInstanceType.SHEET, { ...DEFAULT_WORKBOOK_DATA_DEMO, id: `e2e${id}` });
-        const unitId = DEFAULT_WORKBOOK_DATA_DEMO.id;
+        const unitId = `e2e${id}`;
+        this._univerInstanceService.createUnit(UniverInstanceType.SHEET, { ...DEFAULT_WORKBOOK_DATA_DEMO, id: unitId });
         await timer(AWAIT_LOADING_TIMEOUT);
         this._univerInstanceService.disposeUnit(unitId);
         await timer(AWAIT_DISPOSING_TIMEOUT);

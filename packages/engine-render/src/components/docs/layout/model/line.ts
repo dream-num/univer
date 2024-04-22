@@ -163,6 +163,7 @@ function _getLineTopWidthWrapTopBottom(drawing: IDocumentSkeletonDrawing, lineHe
         if (newAtop + newHeight < lineTop || newAtop > lineHeight + lineTop) {
             return;
         }
+
         return newAtop + height;
     }
     // 旋转的情况，要考虑行首位与drawing旋转后得到的最大区域

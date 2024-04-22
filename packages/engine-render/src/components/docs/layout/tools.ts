@@ -20,7 +20,6 @@ import type {
     IObjectPositionV,
     IParagraphStyle,
     ITextStyle,
-    Nullable,
 } from '@univerjs/core';
 import {
     AlignTypeH,
@@ -315,7 +314,7 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
                 let preLineStartIndex = columStartIndex;
                 let columnHeight = 0;
                 let maxColumnWidth = Number.NEGATIVE_INFINITY;
-                let preLine: Nullable<IDocumentSkeletonLine> = null;
+                // const preLine: Nullable<IDocumentSkeletonLine> = null;
 
                 for (const line of lines) {
                     const { divides, lineHeight } = line;
@@ -381,8 +380,10 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
                     line.width = actualWidth;
                     line.asc = maxLineAsc;
                     maxColumnWidth = Math.max(maxColumnWidth, actualWidth);
-                    line.top = (preLine?.top || 0) + (preLine?.lineHeight || 0);
-                    preLine = line;
+                    // Please do not use pre line's top and height to calculate the current's top,
+                    // because of float objects will between lines.
+                    // line.top = (preLine?.top || 0) + (preLine?.lineHeight || 0);
+                    // preLine = line;
                     preLineStartIndex = line.ed;
                 }
                 column.st = columStartIndex + 1;

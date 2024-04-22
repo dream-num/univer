@@ -18,9 +18,9 @@ import type { ICommand } from '@univerjs/core';
 import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
-import type { IInsertDrawingMutation } from '../mutations/insert-floating-object.mutation';
-import { InsertDrawingMutation } from '../mutations/insert-floating-object.mutation';
-import { RemoveDrawingMutation } from '../mutations/remove-floating-object.mutation';
+import type { IInsertDrawingMutation } from '../mutations/insert-drawing.mutation';
+import { InsertDrawingMutation } from '../mutations/insert-drawing.mutation';
+import { RemoveDrawingMutation } from '../mutations/remove-drawing.mutation';
 
 export const InsertDrawingCommand: ICommand = {
     type: CommandType.COMMAND,

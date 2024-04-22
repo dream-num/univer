@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-import { DEFAULT_DOCUMENT_SUB_COMPONENT_ID, Plugin } from '@univerjs/core';
-import type { Dependency, Injector } from '@wendellhu/redi';
+import { DEFAULT_DOCUMENT_SUB_COMPONENT_ID, LocaleService, Plugin } from '@univerjs/core';
+import type { Dependency } from '@wendellhu/redi';
+import { Inject, Injector } from '@wendellhu/redi';
 
 import { ImageLoadController } from './controllers/image.load.controller';
 import { ImageModel, SourceType } from './models/image-model';
@@ -27,8 +28,9 @@ export class UniverImagePlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;
 
     constructor(
-        _config: undefined,
-        protected _injector: Injector
+        config: undefined,
+        @Inject(Injector) protected _injector: Injector,
+        @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
         super();
     }

@@ -20,7 +20,7 @@ import { createIdentifier } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
 import { Subject } from 'rxjs';
 
-import type { ImageModel } from '../models/image-model';
+import { type ImageModel, SourceType } from '../models/image-model';
 
 export interface IImageManagerSearchParam {
     unitId: string;
@@ -42,20 +42,20 @@ export interface IImageManagerService {
     dispose(): void;
 
     add(insertParam: IImageManagerParam): void;
-
     batchAdd(insertParams: IImageManagerParam[]): void;
 
     remove(searchParam: IImageManagerSearchParam): void;
-
     batchRemove(removeParams: IImageManagerSearchParam[]): void;
 
     setCurrent(searchParam: Nullable<IImageManagerSearchParam>): void;
-
     getCurrent(): Nullable<IImageManagerParam>;
 
     getImageByParam(param: Nullable<IImageManagerSearchParam>): Nullable<IImageManagerParam>;
 
     getImageByOKey(oKey: string): Nullable<IImageManagerParam>;
+
+    addImageSourceCache(imageData: ImageModel, imageSource: Nullable<HTMLImageElement>): void;
+    getImageSourceCache(imageData: ImageModel): Nullable<HTMLImageElement>;
 }
 
 /**
@@ -65,6 +65,8 @@ export class ImageManagerService implements IDisposable, IImageManagerService {
     private _current: Nullable<IImageManagerSearchParam> = null;
 
     private _imageManagerInfo: ImageManagerInfo = new Map();
+
+    private _imageSourceCache: Map<string, HTMLImageElement> = new Map();
 
     private readonly _remove$ = new Subject<IImageManagerParam[]>();
     readonly remove$ = this._remove$.asObservable();
@@ -119,6 +121,25 @@ export class ImageManagerService implements IDisposable, IImageManagerService {
     getImageByOKey(oKey: string): Nullable<IImageManagerParam> {
         const [unitId, subUnitId, imageId] = oKey.split('-');
         return this._getCurrentBySearch({ unitId, subUnitId, imageId });
+    }
+
+    addImageSourceCache(imageData: ImageModel, imageSource: Nullable<HTMLImageElement>) {
+        const { source, sourceType } = imageData;
+        if (sourceType === SourceType.BASE64 || imageSource == null) {
+            return;
+        }
+
+        this._imageSourceCache.set(source, imageSource);
+    }
+
+    getImageSourceCache(imageData: ImageModel): Nullable<HTMLImageElement> {
+        const { source, sourceType } = imageData;
+
+        if (sourceType === SourceType.BASE64) {
+            return;
+        }
+
+        return this._imageSourceCache.get(source);
     }
 
     private _getCurrentBySearch(searchParam: Nullable<IImageManagerSearchParam>): Nullable<IImageManagerParam> {

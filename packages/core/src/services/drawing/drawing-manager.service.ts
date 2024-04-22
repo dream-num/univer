@@ -20,52 +20,52 @@ import type { Observable } from 'rxjs';
 import { Subject } from 'rxjs';
 
 import type { Nullable } from '../../common/type-util';
-import type { ITransformState } from './floating-object-interfaces';
+import type { ITransformState } from './drawing-interfaces';
 
 export const DEFAULT_DOCUMENT_SUB_COMPONENT_ID = '__default_document_sub_component_id20231101__';
 
-export interface IFloatingObjectManagerSearchParam {
+export interface IDrawingManagerSearchParam {
     unitId: string;
     subUnitId: string; //sheetId, pageId and so on, it has a default name in doc business
 }
 
-export interface IFloatingObjectManagerSearchItemParam extends IFloatingObjectManagerSearchParam {
-    floatingObjectId: string;
+export interface IDrawingManagerSearchItemParam extends IDrawingManagerSearchParam {
+    drawingId: string;
 }
 
-export interface IFloatingObjectManagerParam extends IFloatingObjectManagerSearchItemParam {
-    // TODO: Maybe it shouldn't be here？
-    behindText?: boolean; // If it's true, put the float object behind the text, otherwise, put it in front of the text.
-    floatingObject: ITransformState;
+export interface IDrawingManagerParam extends IDrawingManagerSearchItemParam {
+    drawing: ITransformState;
 }
 
-export type FloatingObjects = Map<string, ITransformState>;
+export type Drawings = Map<string, ITransformState>;
 
 //{ [unitId: string]: { [sheetId: string]: ISelectionWithCoord[] } }
-export type IFloatingObjectManagerInfo = Map<string, Map<string, FloatingObjects>>;
+export type IDrawingManagerInfo = Map<string, Map<string, Drawings>>;
 
-export interface IFloatingObjectManagerService {
-    readonly remove$: Observable<IFloatingObjectManagerParam[]>;
+export interface IDrawingManagerService {
+    readonly remove$: Observable<IDrawingManagerParam[]>;
 
-    readonly andOrUpdate$: Observable<IFloatingObjectManagerParam[]>;
+    readonly andOrUpdate$: Observable<IDrawingManagerParam[]>;
 
-    readonly pluginUpdate$: Observable<IFloatingObjectManagerParam[]>;
+    readonly pluginUpdate$: Observable<IDrawingManagerParam[]>;
 
-    getFloatObject(searchItem: IFloatingObjectManagerSearchItemParam): Nullable<ITransformState>;
+    getDrawing(searchItem: IDrawingManagerSearchItemParam): Nullable<ITransformState>;
 
-    getFloatObjects(search: IFloatingObjectManagerSearchParam): Nullable<FloatingObjects>;
+    getDrawings(search: IDrawingManagerSearchParam): Nullable<Drawings>;
 
     dispose(): void;
 
-    clear(search: IFloatingObjectManagerSearchParam): void;
+    clear(search: IDrawingManagerSearchParam): void;
 
-    addOrUpdate(insertParam: IFloatingObjectManagerParam): void;
+    addOrUpdate(insertParam: IDrawingManagerParam): void;
 
-    remove(searchItem: IFloatingObjectManagerSearchItemParam): void;
+    remove(searchItem: IDrawingManagerSearchItemParam): void;
 
-    batchAddOrUpdate(insertParam: IFloatingObjectManagerParam[]): void;
+    BatchAddOrUpdate(insertParam: IDrawingManagerParam[]): void;
 
-    pluginUpdateRefresh(searchObjects: IFloatingObjectManagerParam[]): void;
+    remove(searchItem: IDrawingManagerSearchItemParam): void;
+
+    pluginUpdateRefresh(searchObjects: IDrawingManagerParam[]): void;
 }
 
 /**
@@ -82,21 +82,21 @@ export interface IFloatingObjectManagerService {
  * Please open the architecture diagram with TLDraw.
  * https://github.com/dream-num/univer/blob/db227563b4df65572dd4fceebecdbd9f27fa7a39/docs/selection%20architecture%20design.tldr
  */
-export class FloatingObjectManagerService implements IDisposable, IFloatingObjectManagerService {
-    private readonly _managerInfo: IFloatingObjectManagerInfo = new Map();
+export class DrawingManagerService implements IDisposable, IDrawingManagerService {
+    private readonly _managerInfo: IDrawingManagerInfo = new Map();
 
     /**
      * The deletion action is triggered and broadcasted within the core business plugin.
      * Upon receiving the deletion broadcast, the plugin executes the plugin command logic.
      */
-    private readonly _remove$ = new Subject<IFloatingObjectManagerParam[]>();
+    private readonly _remove$ = new Subject<IDrawingManagerParam[]>();
     readonly remove$ = this._remove$.asObservable();
 
     /**
      * Addition and updates are also triggered and broadcasted within the core business plugin.
      * Upon receiving the update broadcast, the plugin updates the location of its business components.
      */
-    private readonly _andOrUpdate$ = new Subject<IFloatingObjectManagerParam[]>();
+    private readonly _andOrUpdate$ = new Subject<IDrawingManagerParam[]>();
     readonly andOrUpdate$ = this._andOrUpdate$.asObservable();
 
     /**
@@ -104,15 +104,15 @@ export class FloatingObjectManagerService implements IDisposable, IFloatingObjec
      * Here, it is necessary to notify the core business plugin to update the relevant location model.
      * The logic converges in the core business plugin.
      */
-    private readonly _pluginUpdate$ = new Subject<IFloatingObjectManagerParam[]>();
+    private readonly _pluginUpdate$ = new Subject<IDrawingManagerParam[]>();
     readonly pluginUpdate$ = this._pluginUpdate$.asObservable();
 
-    getFloatObject(searchItem: IFloatingObjectManagerSearchItemParam): Nullable<ITransformState> {
-        return this._getFloatingObject(searchItem);
+    getDrawing(searchItem: IDrawingManagerSearchItemParam): Nullable<ITransformState> {
+        return this._getDrawing(searchItem);
     }
 
-    getFloatObjects(search: IFloatingObjectManagerSearchParam): Nullable<FloatingObjects> {
-        return this._getFloatingObjects(search);
+    getDrawings(search: IDrawingManagerSearchParam): Nullable<Drawings> {
+        return this._getDrawings(search);
     }
 
     dispose(): void {
@@ -122,34 +122,34 @@ export class FloatingObjectManagerService implements IDisposable, IFloatingObjec
         this._managerInfo.clear();
     }
 
-    clear(search: IFloatingObjectManagerSearchParam): void {
+    clear(search: IDrawingManagerSearchParam): void {
         const searchObjects = this._clearByParam(search);
         this._remove$.next(searchObjects);
     }
 
-    addOrUpdate(insertParam: IFloatingObjectManagerParam): void {
+    addOrUpdate(insertParam: IDrawingManagerParam): void {
         const searchObjects = this._addByParam(insertParam);
         this._andOrUpdate$.next(searchObjects);
     }
 
-    batchAddOrUpdate(insertParams: IFloatingObjectManagerParam[]): void {
-        const searchObjects: IFloatingObjectManagerParam[] = [];
+    BatchAddOrUpdate(insertParams: IDrawingManagerParam[]): void {
+        const searchObjects: IDrawingManagerParam[] = [];
         insertParams.forEach((insertParam) => {
             searchObjects.push(...this._addByParam(insertParam));
         });
         this._andOrUpdate$.next(searchObjects);
     }
 
-    remove(searchItem: IFloatingObjectManagerSearchItemParam): void {
+    remove(searchItem: IDrawingManagerSearchItemParam): void {
         const searchObjects = this._removeByParam(searchItem);
         this._remove$.next(searchObjects);
     }
 
-    pluginUpdateRefresh(updateObjects: IFloatingObjectManagerParam[]) {
+    pluginUpdateRefresh(updateObjects: IDrawingManagerParam[]) {
         this._pluginUpdate$.next(updateObjects);
     }
 
-    private _getFloatingObjects(param: Nullable<IFloatingObjectManagerSearchParam>) {
+    private _getDrawings(param: Nullable<IDrawingManagerSearchParam>) {
         if (param == null) {
             return;
         }
@@ -157,16 +157,16 @@ export class FloatingObjectManagerService implements IDisposable, IFloatingObjec
         return this._managerInfo.get(unitId)?.get(subUnitId);
     }
 
-    private _getFloatingObject(param: Nullable<IFloatingObjectManagerSearchItemParam>) {
+    private _getDrawing(param: Nullable<IDrawingManagerSearchItemParam>) {
         if (param == null) {
             return;
         }
-        const { unitId, subUnitId, floatingObjectId } = param;
-        return this._managerInfo.get(unitId)?.get(subUnitId)?.get(floatingObjectId);
+        const { unitId, subUnitId, drawingId } = param;
+        return this._managerInfo.get(unitId)?.get(subUnitId)?.get(drawingId);
     }
 
-    private _addByParam(insertParam: IFloatingObjectManagerParam): IFloatingObjectManagerParam[] {
-        const { unitId, subUnitId, floatingObject, floatingObjectId, behindText } = insertParam;
+    private _addByParam(insertParam: IDrawingManagerParam): IDrawingManagerParam[] {
+        const { unitId, subUnitId, drawing, drawingId } = insertParam;
 
         if (!this._managerInfo.has(unitId)) {
             this._managerInfo.set(unitId, new Map());
@@ -178,46 +178,46 @@ export class FloatingObjectManagerService implements IDisposable, IFloatingObjec
             subComponentData.set(subUnitId, new Map());
         }
 
-        subComponentData.get(subUnitId)!.set(floatingObjectId, floatingObject);
+        subComponentData.get(subUnitId)!.set(drawingId, drawing);
 
-        return [{ unitId, subUnitId, floatingObjectId, floatingObject, behindText }];
+        return [{ unitId, subUnitId, drawingId, drawing }];
     }
 
-    private _clearByParam(param: IFloatingObjectManagerSearchParam): IFloatingObjectManagerParam[] {
-        const floatingObjects = this._getFloatingObjects(param);
+    private _clearByParam(param: IDrawingManagerSearchParam): IDrawingManagerParam[] {
+        const drawings = this._getDrawings(param);
 
         const { unitId, subUnitId } = param;
 
-        const refreshObjects: IFloatingObjectManagerParam[] = [];
+        const refreshObjects: IDrawingManagerParam[] = [];
 
-        floatingObjects?.forEach((value, key) => {
+        drawings?.forEach((value, key) => {
             refreshObjects.push({
                 unitId,
                 subUnitId,
-                floatingObjectId: key,
-                floatingObject: value,
+                drawingId: key,
+                drawing: value,
             });
         });
 
-        floatingObjects?.clear();
+        drawings?.clear();
 
         return refreshObjects;
     }
 
-    private _removeByParam(param: IFloatingObjectManagerSearchItemParam): IFloatingObjectManagerParam[] {
-        const floatingObjects = this._getFloatingObjects(param);
-        const item = floatingObjects?.get(param.floatingObjectId);
+    private _removeByParam(param: IDrawingManagerSearchItemParam): IDrawingManagerParam[] {
+        const drawings = this._getDrawings(param);
+        const item = drawings?.get(param.drawingId);
 
         if (item == null) {
             return [];
         }
 
-        floatingObjects?.delete(param.floatingObjectId);
+        drawings?.delete(param.drawingId);
 
-        return [{ ...param, floatingObject: item }];
+        return [{ ...param, drawing: item }];
     }
 }
 
-export const IFloatingObjectManagerService = createIdentifier<IFloatingObjectManagerService>(
-    'univer.floating-object.service'
+export const IDrawingManagerService = createIdentifier<IDrawingManagerService>(
+    'univer.drawing.service'
 );

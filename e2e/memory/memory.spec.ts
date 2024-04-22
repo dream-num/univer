@@ -48,8 +48,8 @@ test('memory', async ({ page }) => {
     const memoryAfterSecondLoad = (await getMetrics(page)).JSHeapUsedSize;
     console.log('Memory after second load:', memoryAfterSecondLoad);
 
-    const memoryAfterFirstLoadDiff = memoryAfterSecondLoad - memoryAfterFirstLoad;
-    const notLeaking = (memoryAfterSecondLoad <= memoryAfterFirstLoad) || (memoryAfterSecondLoad - memoryAfterFirstLoadDiff <= 5_000_000);
+    // max overflow for 5MB
+    const notLeaking = (memoryAfterSecondLoad <= memoryAfterFirstLoad) || (memoryAfterSecondLoad - memoryAfterFirstLoad <= 5_000_000);
     expect(notLeaking).toBeTruthy();
 });
 

@@ -73,6 +73,9 @@ export default defineConfig({
         command: 'pnpm serve:e2e',
         url: 'http://localhost:3000/sheets',
         reuseExistingServer: !process.env.CI,
+        timeout: 10000,
+        stdout: 'pipe',
+        stderr: 'pipe',
     },
 
     /* Run your local dev server before starting the tests */

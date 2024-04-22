@@ -74,14 +74,14 @@ export { IConfigService } from './services/config/config.service';
 export * from './services/context/context';
 export { ContextService, IContextService } from './services/context/context.service';
 export { ErrorService, type IError } from './services/error/error.service';
-export type { IOffset, IScale, ISize, ITransformState } from './services/floating-object/floating-object-interfaces';
+export type { IOffset, IScale, ISize, ITransformState } from './services/drawing/drawing-interfaces';
 export {
     DEFAULT_DOCUMENT_SUB_COMPONENT_ID,
-    FloatingObjectManagerService,
-    type IFloatingObjectManagerParam,
-    type IFloatingObjectManagerSearchItemParam,
-    IFloatingObjectManagerService,
-} from './services/floating-object/floating-object-manager.service';
+    DrawingManagerService,
+    type IDrawingManagerParam,
+    type IDrawingManagerSearchItemParam,
+    IDrawingManagerService,
+} from './services/drawing/drawing-manager.service';
 export { IUniverInstanceService } from './services/instance/instance.service';
 export { LifecycleStages, OnLifecycle, runOnLifecycle } from './services/lifecycle/lifecycle';
 export { LifecycleService } from './services/lifecycle/lifecycle.service';

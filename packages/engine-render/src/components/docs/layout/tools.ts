@@ -346,17 +346,11 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
 
                             if (i === divideLength - 1) {
                                 // When the width is set to Infinity, the last divide should also be Infinity, and an actual width needs to be calculated.
-                                actualWidth += glyph.width;
+                                // Use to fix issue: https://github.com/dream-num/univer/issues/2002
+                                // Because the Chinese punctuation marks at the beginning and end of the line are squeezed and narrowed,
+                                // the extruded width needs to be added when calculating the overall width.
+                                actualWidth += glyph.bBox.width;
                             }
-                        }
-
-                        // Use to fix issue: https://github.com/dream-num/univer/issues/2002
-                        // Because the Chinese punctuation marks at the beginning and end of the line are squeezed and narrowed,
-                        // the extruded width needs to be added when calculating the overall width.
-
-                        // I'm not quite sure if it's more accurate to calculate the row width based on the width in the bbox?
-                        if (glyphGroup[0] && glyphGroup[0].xOffset !== 0 && i === divideLength - 1) {
-                            actualWidth -= glyphGroup[0].xOffset;
                         }
 
                         if (i === divideLength - 1) {

@@ -42,8 +42,6 @@ import { IProgressService } from '@univerjs/ui';
 
 import { Inject } from '@wendellhu/redi';
 
-const MINIMUM_FORMULA_NUMBER = 500;
-
 @OnLifecycle(LifecycleStages.Ready, TriggerCalculationController)
 export class TriggerCalculationController extends Disposable {
     private _waitingCommandQueue: ICommandInfo[] = [];
@@ -318,6 +316,10 @@ export class TriggerCalculationController extends Disposable {
                         } else if (state === FormulaExecutedStateType.STOP_EXECUTION) {
                             this._progressService.stop();
                         }
+
+                        formulaInsertTaskCount = false;
+                        arrayFormulaInsertTaskCount = false;
+                        this._formulaCalculationDoneCount = 0;
                     }
 
 

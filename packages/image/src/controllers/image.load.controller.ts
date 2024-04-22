@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IFloatingObjectManagerParam } from '@univerjs/core';
+import type { ICommandInfo, IDrawingManagerParam } from '@univerjs/core';
 import {
     Disposable,
     ICommandService,
-    IFloatingObjectManagerService,
+    IDrawingManagerService,
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
     toDisposable,
 } from '@univerjs/core';
-import type { Scene } from '@univerjs/engine-render';
+import type { IImageProps, Scene } from '@univerjs/engine-render';
 import { Image, IRenderManagerService } from '@univerjs/engine-render';
 
 import { IImageManagerService } from '../services/image-manager.service';
@@ -39,7 +39,7 @@ export class ImageLoadController extends Disposable {
         @ICommandService private readonly _commandService: ICommandService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IImageManagerService private readonly _imageManagerService: IImageManagerService,
-        @IFloatingObjectManagerService private readonly _floatingObjectManagerService: IFloatingObjectManagerService
+        @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService
     ) {
         super();
 
@@ -51,7 +51,7 @@ export class ImageLoadController extends Disposable {
     }
 
     private _initialize() {
-        this._floatingObjectListener();
+        this._drawingListener();
 
         this._commandExecutedListener();
     }
@@ -68,13 +68,13 @@ export class ImageLoadController extends Disposable {
         );
     }
 
-    private _floatingObjectListener() {
+    private _drawingListener() {
         this.disposeWithMe(
             toDisposable(
-                this._floatingObjectManagerService.andOrUpdate$.subscribe((params) => {
+                this._drawingManagerService.andOrUpdate$.subscribe((params) => {
                     const sceneList: Scene[] = [];
                     params.forEach((param) => {
-                        const { unitId, subUnitId, floatingObjectId, floatingObject, behindText } = param;
+                        const { unitId, subUnitId, drawingId, drawing } = param;
 
                         const renderObject = this._renderManagerService.getRenderById(unitId);
 
@@ -84,17 +84,21 @@ export class ImageLoadController extends Disposable {
                             return true;
                         }
 
-                        const searchParam = { unitId, subUnitId, imageId: floatingObjectId };
+                        const searchParam = { unitId, subUnitId, imageId: drawingId };
 
-                        const imageModel = this._imageManagerService.getImageByParam(searchParam)?.imageModel;
 
-                        if (imageModel == null) {
+                        const imageParam = this._imageManagerService.getImageByParam(searchParam);
+
+                        if (imageParam == null) {
                             return true;
                         }
 
-                        const { left, top, width, height, angle, flipX, flipY, skewX, skewY } = floatingObject;
+                        const imageModel = imageParam.imageModel;
 
-                        const imageShapeKey = `${unitId}-${subUnitId}-${floatingObjectId}`;
+
+                        const { left, top, width, height, angle, flipX, flipY, skewX, skewY } = drawing;
+
+                        const imageShapeKey = `${unitId}-${subUnitId}-${drawingId}`;
 
                         const imageShape = scene.getObject(imageShapeKey);
 
@@ -107,9 +111,21 @@ export class ImageLoadController extends Disposable {
 
                         imageModel.setKey(imageShapeKey);
 
-                        const image = new Image(imageShapeKey, {
-                            url: imageModel.getSource(),
-                            left, top, width, height, zIndex: 11, isTransformer: true });
+                        const imageConfig: IImageProps = {
+                            left, top, width, height, zIndex: 11, isTransformer: true };
+
+
+                        const imageNativeCache = this._imageManagerService.getImageSourceCache(imageModel);
+                        if (imageNativeCache != null) {
+                            imageConfig.image = imageNativeCache;
+                        } else {
+                            imageConfig.url = imageModel.source;
+                        }
+
+                        const image = new Image(imageShapeKey, imageConfig);
+
+
+                        this._imageManagerService.addImageSourceCache(imageModel, image.getNative());
 
                         if (!scene.getTransformer()) {
                             scene.openTransformer();
@@ -136,7 +152,7 @@ export class ImageLoadController extends Disposable {
             const { objects } = state;
 
             // const { docsLeft, docsTop } = documents;
-            const params: IFloatingObjectManagerParam[] = [];
+            const params: IDrawingManagerParam[] = [];
             objects.forEach((object) => {
                 const { oKey, left, top, height, width } = object;
 
@@ -151,8 +167,8 @@ export class ImageLoadController extends Disposable {
                 params.push({
                     unitId,
                     subUnitId,
-                    floatingObjectId: imageId,
-                    floatingObject: {
+                    drawingId: imageId,
+                    drawing: {
                         left,
                         top,
                         height,
@@ -174,7 +190,7 @@ export class ImageLoadController extends Disposable {
                 // });
             });
 
-            this._floatingObjectManagerService.pluginUpdateRefresh(params);
+            this._drawingManagerService.pluginUpdateRefresh(params);
         });
     }
 }

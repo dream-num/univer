@@ -18,11 +18,11 @@ import type { ICommand, IObjectPositionH, IObjectPositionV, ISize } from '@unive
 import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
-import type { IDrawingTransformMutation } from '../mutations/set-floating-object.mutation';
+import type { IDrawingTransformMutation } from '../mutations/set-drawing.mutation';
 import {
     SetDrawingTransformMutation,
     SetDrawingTransformMutationFactory,
-} from '../mutations/set-floating-object.mutation';
+} from '../mutations/set-drawing.mutation';
 
 export interface ISetDrawingSizeCommandParams {
     documentId: string;

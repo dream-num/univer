@@ -35,7 +35,6 @@ import { UniverDataValidationPlugin } from '@univerjs/data-validation';
 import { UniverSheetsDataValidationPlugin } from '@univerjs/sheets-data-validation';
 import { UniverSheetsConditionalFormattingUIPlugin } from '@univerjs/sheets-conditional-formatting-ui';
 
-import { DebuggerPlugin } from '../plugins/debugger';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data/sheets/demo/default-workbook-data-demo';
 import { locales } from './locales';
 
@@ -108,10 +107,10 @@ if (!IS_E2E) {
 // }, 7000);
 
 // sheet condition formatting
-univer.registerPlugin(UniverSheetsConditionalFormattingUIPlugin);
+// univer.registerPlugin(UniverSheetsConditionalFormattingUIPlugin);
 
 // debugger plugin
-univer.registerPlugin(DebuggerPlugin);
+// univer.registerPlugin(DebuggerPlugin);
 
 declare global {
     interface Window {

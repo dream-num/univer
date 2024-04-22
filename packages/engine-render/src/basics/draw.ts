@@ -252,6 +252,7 @@ export function getRotateOrientation(angle: number) {
 }
 
 // rotate calculate logic https://www.processon.com/view/link/630df928f346fb0714c9c4ec
+// eslint-disable-next-line max-lines-per-function
 export function getRotateOffsetAndFarthestHypotenuse(
     lines: IDocumentSkeletonLine[],
     rectWidth: number,

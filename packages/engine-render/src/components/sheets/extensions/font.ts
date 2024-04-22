@@ -270,6 +270,7 @@ export class Font extends SheetExtension {
         const overflowRectangle = overflowCache.getValue(row, column);
         if (!(wrapStrategy === WrapStrategy.WRAP && !overflowRectangle && vertexAngle === 0)) {
             const contentSize = getDocsSkeletonPageSize(documentSkeleton);
+
             const documentStyle = documentSkeleton.getViewModel().getDataModel().getSnapshot().documentStyle;
             if (contentSize && documentStyle) {
                 const { width } = contentSize;

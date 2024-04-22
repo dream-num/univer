@@ -37,6 +37,8 @@ export function CustomFormulaInput(props: IFormulaInputProps) {
                     });
                 }}
                 onlyInputFormula
+                openForSheetUnitId={unitId}
+                openForSheetSubUnitId={subUnitId}
             />
         </FormLayout>
     );

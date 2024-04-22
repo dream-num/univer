@@ -23,7 +23,7 @@ import { AddDataValidationCommand, RemoveAllDataValidationCommand, RemoveDataVal
 import { AddDataValidationMutation, RemoveDataValidationMutation, UpdateDataValidationMutation } from './commands/mutations/data-validation.mutation';
 import { DataValidationResourceController } from './controllers/dv-resource.controller';
 import { DataValidationSheetController } from './controllers/dv-sheet.controller';
-import { DataValidationFormulaMarkDirty } from './commands/mutations/formula.mutation.ts';
+import { DataValidationFormulaMarkDirty } from './commands/mutations/formula.mutation';
 
 const PLUGIN_NAME = 'data-validation';
 

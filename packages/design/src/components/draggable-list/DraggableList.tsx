@@ -51,7 +51,6 @@ export function DraggableList<T = any>(props: IDraggableListProps<T>) {
 
     return (
         <ReactGridLayout
-            useCSSTransforms={false}
             {...gridProps}
             cols={12}
             preventCollision={false}

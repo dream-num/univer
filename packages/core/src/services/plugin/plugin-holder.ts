@@ -33,7 +33,6 @@ export class PluginHolder extends Disposable {
     protected readonly _pluginRegistry = new PluginRegistry();
 
     constructor(
-        private readonly _immediateStart: boolean,
         @ILogService protected readonly _logService: ILogService,
         @Inject(Injector) protected readonly _injector: Injector,
         @Inject(LifecycleService) protected readonly _lifecycleService: LifecycleService,
@@ -48,6 +47,7 @@ export class PluginHolder extends Disposable {
         this._pluginStore.forEachPlugin((plugin) => plugin.dispose());
         this._pluginStore.removePlugins();
         this._pluginRegistry.removePlugins();
+        this._pluginRegistered.clear();
     }
 
     registerPlugin<T extends PluginCtor<Plugin>>(pluginCtor: T, config?: ConstructorParameters<T>[0]): void {

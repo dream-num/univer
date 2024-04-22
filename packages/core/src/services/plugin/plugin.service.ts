@@ -33,7 +33,7 @@ export class PluginService implements IDisposable {
     constructor(
         @Inject(Injector) private readonly _injector: Injector
     ) {
-        this._pluginHolderForUniver = this._injector.createInstance(PluginHolder, true);
+        this._pluginHolderForUniver = this._injector.createInstance(PluginHolder);
         this._pluginHolderForUniver.start();
     }
 
@@ -71,7 +71,7 @@ export class PluginService implements IDisposable {
 
     _ensurePluginHolderForType(type: UnitType): PluginHolder {
         if (!this._pluginHoldersForTypes.has(type)) {
-            const pluginHolder = this._injector.createInstance(PluginHolder, false);
+            const pluginHolder = this._injector.createInstance(PluginHolder);
             this._pluginHoldersForTypes.set(type, pluginHolder);
             return pluginHolder;
         }

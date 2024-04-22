@@ -29,10 +29,10 @@ jobs:
               run: pnpm exec playwright install --with-deps
 
             # build the example locally and run from the built files
-            - name: Build E2E client
+            - name: Build E2E Client
               run: pnpm run build:e2e
 
-            - name: Run Playwright tests
+            - name: Run Playwright Tests
               run: pnpm exec playwright test
 
             - uses: actions/upload-artifact@v3

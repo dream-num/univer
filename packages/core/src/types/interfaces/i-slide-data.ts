@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ISize, ITransformState } from '../../services/floating-object/floating-object-interfaces';
+import type { ISize, ITransformState } from '../../services/drawing/drawing-interfaces';
 import type { IKeyType, Nullable } from '../../shared/types';
 import type { LocaleType, ThemeColorType } from '../enum';
 import type { ShapeType } from '../enum/shape-type';

@@ -14,20 +14,18 @@
  * limitations under the License.
  */
 
-import type { IDrawing, IMutation } from '@univerjs/core';
-import { CommandType, IUniverInstanceService } from '@univerjs/core';
+import type { IMutation } from '@univerjs/core';
+import { CommandType, IDrawingManagerService, IUniverInstanceService } from '@univerjs/core';
 
-import type { ISeachDrawingMutation } from './set-floating-object.mutation';
+import type { ISeachDrawingMutation } from './set-drawing.mutation';
 
-export interface IInsertDrawingMutation extends ISeachDrawingMutation {
-    drawing: IDrawing;
-}
-
-export const InsertDrawingMutation: IMutation<IInsertDrawingMutation> = {
-    id: 'doc.mutation.insert-drawing',
+export const RemoveDrawingMutation: IMutation<ISeachDrawingMutation> = {
+    id: 'doc.mutation.remove-drawing',
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
         const univerdoc = accessor.get(IUniverInstanceService).getUniverDocInstance(params.documentId);
+
+        const drawingManagerService = accessor.get(IDrawingManagerService);
 
         if (univerdoc == null) {
             return false;
@@ -40,9 +38,7 @@ export const InsertDrawingMutation: IMutation<IInsertDrawingMutation> = {
             univerdoc.getSnapshot().drawings = drawings;
         }
 
-        const { objectId, drawing } = params;
-
-        drawings[objectId] = drawing;
+        delete drawings[params.objectId];
 
         return true;
     },

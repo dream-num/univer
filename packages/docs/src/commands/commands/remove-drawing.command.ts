@@ -18,15 +18,16 @@ import type { ICommand } from '@univerjs/core';
 import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
-import type { IInsertDrawingMutation } from '../mutations/insert-floating-object.mutation';
-import { InsertDrawingMutation } from '../mutations/insert-floating-object.mutation';
-import { RemoveDrawingMutation } from '../mutations/remove-floating-object.mutation';
+import type { IInsertDrawingMutation } from '../mutations/insert-drawing.mutation';
+import { InsertDrawingMutation } from '../mutations/insert-drawing.mutation';
+import { RemoveDrawingMutation } from '../mutations/remove-drawing.mutation';
+import type { ISeachDrawingMutation } from '../mutations/set-drawing.mutation';
 
-export const InsertDrawingCommand: ICommand = {
+export const RemoveDrawingCommand: ICommand = {
     type: CommandType.COMMAND,
-    id: 'doc.command.insert-drawing',
+    id: 'doc.command.remove-drawing',
 
-    handler: async (accessor: IAccessor, params?: IInsertDrawingMutation) => {
+    handler: async (accessor: IAccessor, params?: ISeachDrawingMutation) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -43,27 +44,26 @@ export const InsertDrawingCommand: ICommand = {
         const snapshot = documentModel.getSnapshot();
         if (snapshot == null || snapshot.drawings == null) return false;
 
-        const { objectId, drawing } = params;
+        const { objectId } = params;
 
-        const redoMutationParams: IInsertDrawingMutation = {
-            documentId,
-            objectId,
-            drawing,
-        };
-
-        const undoMutationParams = {
+        const redoMutationParams: ISeachDrawingMutation = {
             documentId,
             objectId,
         };
-        const result = commandService.syncExecuteCommand(InsertDrawingMutation.id, redoMutationParams);
+
+        const undoMutationParams: IInsertDrawingMutation = {
+            documentId,
+            objectId,
+            drawing: snapshot.drawings[objectId],
+        };
+        const result = commandService.syncExecuteCommand(RemoveDrawingMutation.id, redoMutationParams);
 
         if (result) {
             undoRedoService.pushUndoRedo({
                 unitID: documentId,
-                undoMutations: [{ id: RemoveDrawingMutation.id, params: undoMutationParams }],
-                redoMutations: [{ id: InsertDrawingMutation.id, params: redoMutationParams }],
+                undoMutations: [{ id: InsertDrawingMutation.id, params: undoMutationParams }],
+                redoMutations: [{ id: RemoveDrawingMutation.id, params: redoMutationParams }],
             });
-
             return true;
         }
 

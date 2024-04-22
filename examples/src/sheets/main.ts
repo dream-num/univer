@@ -36,6 +36,9 @@ import { UniverSheetsDataValidationPlugin } from '@univerjs/sheets-data-validati
 import { UniverSheetsConditionalFormattingUIPlugin } from '@univerjs/sheets-conditional-formatting-ui';
 
 import { FUniver } from '@univerjs/facade';
+import { UniverImagePlugin } from '@univerjs/image';
+import { UniverImageUIPlugin } from '@univerjs/image-ui';
+import { UniverSheetsImageUIPlugin } from '@univerjs/sheets-image-ui';
 import { DebuggerPlugin } from '../plugins/debugger';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data/sheets/demo/default-workbook-data-demo';
 import { locales } from './locales';
@@ -94,6 +97,12 @@ univer.registerPlugin(UniverSheetsFilterPlugin);
 
 // sheet condition formatting
 univer.registerPlugin(UniverSheetsConditionalFormattingUIPlugin);
+
+// image
+univer.registerPlugin(UniverImagePlugin);
+univer.registerPlugin(UniverImageUIPlugin);
+univer.registerPlugin(UniverSheetsImageUIPlugin);
+
 
 // create univer sheet instance
 if (!IS_E2E) {

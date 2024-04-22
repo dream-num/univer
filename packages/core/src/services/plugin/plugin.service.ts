@@ -37,7 +37,7 @@ export class PluginService implements IDisposable {
     }
 
     dispose(): void {
-        this._clearFlushLazyPluginsTimer();
+        this._clearFlushTimer();
 
         for (const holder of this._pluginHoldersForTypes.values()) {
             holder.dispose();
@@ -93,27 +93,31 @@ export class PluginService implements IDisposable {
         }
     }
 
-    private _initLazyPluginsTimer?: number;
+    private _flushTimer?: number;
     private _scheduleInitPlugin() {
-        if (this._initLazyPluginsTimer === undefined) {
-            this._initLazyPluginsTimer = setTimeout(
+        if (this._flushTimer === undefined) {
+            this._flushTimer = setTimeout(
                 () => {
-                    this._flushLazyPlugins();
-                    this._clearFlushLazyPluginsTimer();
+                    if (!this._pluginHolderForUniver.started) {
+                        this._pluginHolderForUniver.start();
+                    }
+
+                    this._flushPlugins();
+                    this._clearFlushTimer();
                 },
                 INIT_LAZY_PLUGINS_TIMEOUT
             ) as unknown as number;
         }
     }
 
-    private _clearFlushLazyPluginsTimer() {
-        if (this._initLazyPluginsTimer) {
-            clearTimeout(this._initLazyPluginsTimer);
-            this._initLazyPluginsTimer = undefined;
+    private _clearFlushTimer() {
+        if (this._flushTimer) {
+            clearTimeout(this._flushTimer);
+            this._flushTimer = undefined;
         }
     }
 
-    private _flushLazyPlugins() {
+    private _flushPlugins() {
         this._pluginHolderForUniver.flush();
         for (const [_, holder] of this._pluginHoldersForTypes) {
             if (holder.started) {

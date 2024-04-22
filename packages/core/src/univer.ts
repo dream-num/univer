@@ -119,7 +119,7 @@ export class Univer {
         const univerInstanceService = injector.get(IUniverInstanceService) as UniverInstanceService;
         univerInstanceService.__setCreateHandler(
             (type: UnitType, data, ctor) => {
-                this._tryProgressToStart();
+                this._pluginService.start();
 
                 if (!this._startedTypes.has(type)) {
                     this._pluginService.startPluginForType(type);
@@ -138,10 +138,6 @@ export class Univer {
                 return model;
             }
         );
-    }
-
-    private _tryProgressToStart(): void {
-        this._pluginService.start();
     }
 
     private _tryProgressToReady(): void {

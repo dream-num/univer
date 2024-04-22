@@ -34,6 +34,7 @@ export class PluginService implements IDisposable {
         @Inject(Injector) private readonly _injector: Injector
     ) {
         this._pluginHolderForUniver = this._injector.createInstance(PluginHolder, true);
+        this._pluginHolderForUniver.start();
     }
 
     dispose(): void {
@@ -55,15 +56,12 @@ export class PluginService implements IDisposable {
         const { type } = plugin;
         if (type === UniverInstanceType.UNIVER) {
             this._pluginHolderForUniver.registerPlugin(plugin, config);
+            this._pluginHolderForUniver.flush();
         } else {
             // If it's type is for specific document, we should run them at specific time.
             const holder = this._ensurePluginHolderForType(type);
             holder.registerPlugin(plugin, config);
         }
-    }
-
-    start(): void {
-        this._pluginHolderForUniver.start();
     }
 
     startPluginForType(type: UniverType): void {

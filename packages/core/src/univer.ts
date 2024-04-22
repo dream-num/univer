@@ -70,6 +70,7 @@ export class Univer {
         logLevel && this._injector.get(ILogService).setLogLevel(logLevel);
 
         this._init(injector);
+        const _a = this._pluginService;
     }
 
     __getInjector(): Injector {
@@ -119,8 +120,6 @@ export class Univer {
         const univerInstanceService = injector.get(IUniverInstanceService) as UniverInstanceService;
         univerInstanceService.__setCreateHandler(
             (type: UnitType, data, ctor) => {
-                this._pluginService.start();
-
                 if (!this._startedTypes.has(type)) {
                     this._pluginService.startPluginForType(type);
                     this._startedTypes.add(type);

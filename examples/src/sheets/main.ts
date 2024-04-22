@@ -99,6 +99,11 @@ univer.registerPlugin(UniverSheetsFilterPlugin);
 // sheet condition formatting
 univer.registerPlugin(UniverSheetsConditionalFormattingUIPlugin);
 
+// image
+univer.registerPlugin(UniverImagePlugin);
+univer.registerPlugin(UniverImageUIPlugin);
+univer.registerPlugin(UniverSheetsImageUIPlugin);
+
 // create univer sheet instance
 if (!IS_E2E) {
     univer.createUnit(UniverInstanceType.UNIVER_SHEET, DEFAULT_WORKBOOK_DATA_DEMO);

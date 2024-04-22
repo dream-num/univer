@@ -54,7 +54,13 @@ export interface IUpdateCommentMutationParams {
 export const UpdateCommentMutation: ICommand<IUpdateCommentMutationParams> = {
     id: 'thread-comment.mutation.update-comment',
     type: CommandType.MUTATION,
-    handler(accessor, params, options) {
+    handler(accessor, params) {
+        if (!params) {
+            return false;
+        }
+        const threadCommentModel = accessor.get(ThreadCommentModel);
+        const { unitId, subUnitId, payload } = params;
+        threadCommentModel.updateComment(unitId, subUnitId, payload);
         return true;
     },
 };
@@ -69,7 +75,13 @@ export interface IResolveCommentMutationParams {
 export const ResolveCommentMutation: ICommand<IResolveCommentMutationParams> = {
     id: 'thread-comment.mutation.resolve-comment',
     type: CommandType.MUTATION,
-    handler(accessor, params, options) {
+    handler(accessor, params) {
+        if (!params) {
+            return false;
+        }
+        const threadCommentModel = accessor.get(ThreadCommentModel);
+        const { unitId, subUnitId, resolved, commentId } = params;
+        threadCommentModel.resolveComment(unitId, subUnitId, commentId, resolved);
         return true;
     },
 };
@@ -84,7 +96,13 @@ export interface IDeleteCommentMutationParams {
 export const DeleteCommentMutation: ICommand<IDeleteCommentMutationParams> = {
     id: 'thread-comment.mutation.delete-comment',
     type: CommandType.MUTATION,
-    handler(accessor, params, options) {
+    handler(accessor, params) {
+        if (!params) {
+            return false;
+        }
+        const threadCommentModel = accessor.get(ThreadCommentModel);
+        const { unitId, subUnitId, commentIds } = params;
+        threadCommentModel.deleteComment(unitId, subUnitId, commentIds);
         return true;
     },
 };

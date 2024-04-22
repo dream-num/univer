@@ -2,17 +2,25 @@ name: 🎭 Playwright Tests
 
 on:
     push:
-        branches: [dev]
+        branches: [main, dev]
     pull_request:
-        branches: [dev]
+        branches: [main, dev]
 
 jobs:
     test:
         timeout-minutes: 60
         runs-on: ubuntu-latest
 
+        env:
+            TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+            TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+
         steps:
-            - uses: actions/checkout@v4
+            - name: Checkout
+              uses: actions/checkout@v4
+              with:
+                  repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+                  ref: ${{ github.head_ref }}
 
             - name: Setup Node.js
               uses: ./.github/actions/setup-node
@@ -22,7 +30,7 @@ jobs:
 
             # build the example locally and run from the built files
             - name: Build E2E client
-              run: pnpm build:e2e
+              run: pnpm run build:e2e
 
             - name: Run Playwright tests
               run: pnpm exec playwright test

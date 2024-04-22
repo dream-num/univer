@@ -2,14 +2,16 @@ name: 🎭 Playwright Tests
 
 on:
     push:
-        branches: [main, master]
+        branches: [dev]
     pull_request:
-        branches: [main, master]
+        branches: [dev]
 
 jobs:
     test:
         timeout-minutes: 60
         runs-on: ubuntu-latest
+        container:
+            image: mcr.microsoft.com/playwright:v1.43.0-jammy
 
         steps:
             - uses: actions/checkout@v4

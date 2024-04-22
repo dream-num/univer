@@ -677,7 +677,7 @@ function __updatePreLineDrawingPosition(
     page.skeDrawings = new Map([...page.skeDrawings, ...drawings]);
 }
 
-// 更新paragraphAffectSkeDrawings的绝对位置，相对于段落的第一行布局
+// 更新 paragraphAffectSkeDrawings 的绝对位置，相对于段落的第一行布局
 function __updateDrawingPosition(
     lineTop: number,
     lineHeight: number,
@@ -685,13 +685,8 @@ function __updateDrawingPosition(
     blockAnchorTop?: number,
     paragraphAffectSkeDrawings?: Map<string, IDocumentSkeletonDrawing>
 ) {
-    if (!paragraphAffectSkeDrawings) {
-        return;
-    }
-
     const page = column.parent?.parent;
-
-    if (!page) {
+    if (!paragraphAffectSkeDrawings || page == null) {
         return;
     }
 
@@ -712,13 +707,13 @@ function __updateDrawingPosition(
         }
 
         const { objectTransform } = drawingOrigin;
-
         const { positionH, positionV, size, angle } = objectTransform;
         const { width = 0, height = 0 } = size;
 
         drawing.aLeft = getPositionHorizon(positionH, column, page, width, isPageBreak) || 0;
-        drawing.aTop =
-            getPositionVertical(positionV, page, lineTop, lineHeight, height, blockAnchorTop, isPageBreak) || 0;
+        drawing.aTop = getPositionVertical(
+            positionV, page, lineTop, lineHeight, height, blockAnchorTop, isPageBreak
+        ) || 0;
         drawing.width = width;
         drawing.height = height;
         drawing.angle = angle;

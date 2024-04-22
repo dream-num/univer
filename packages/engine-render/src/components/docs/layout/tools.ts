@@ -603,8 +603,7 @@ export function getPositionVertical(
                 absoluteTop = lineTop + lineHeight / 2 - objectHeight / 2;
             }
             return absoluteTop;
-        }
-        if (relativeFrom === ObjectRelativeFromV.TOP_MARGIN) {
+        } else if (relativeFrom === ObjectRelativeFromV.TOP_MARGIN) {
             // TODO
         } else if (relativeFrom === ObjectRelativeFromV.MARGIN) {
             // TODO

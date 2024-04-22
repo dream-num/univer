@@ -35,8 +35,8 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                     posOffset: 130,
                 },
                 positionV: {
-                    relativeFrom: ObjectRelativeFromV.PAGE,
-                    posOffset: 490,
+                    relativeFrom: ObjectRelativeFromV.PARAGRAPH,
+                    posOffset: 10,
                 },
                 angle: 0,
             },

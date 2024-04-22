@@ -65,10 +65,10 @@
         "eslint-plugin-react-refresh": "^0.4.6",
         "husky": "^9.0.11",
         "lint-staged": "^15.2.2",
-        "lite-server": "^2.6.1",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
         "release-it": "^17.1.1",
+        "serve": "^14.2.2",
         "turbo": "^1.13.2",
         "typescript": "^5.4.5"
     },

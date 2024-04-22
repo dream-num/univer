@@ -181,7 +181,7 @@ export function serializeRangeToRefString(gridRangeName: IUnitRangeName) {
     return serializeRange(range);
 }
 
-function singleReferenceToGrid(refBody: string) {
+export function singleReferenceToGrid(refBody: string) {
     const row = Number.parseInt(refBody.replace($ROW_REGEX, '')) - 1;
     const column = Tools.ABCatNum(refBody.replace($COLUMN_REGEX, ''));
 

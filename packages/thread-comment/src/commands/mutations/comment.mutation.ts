@@ -65,6 +65,32 @@ export const UpdateCommentMutation: ICommand<IUpdateCommentMutationParams> = {
     },
 };
 
+export interface IUpdateCommentRefPayload {
+    commentId: string;
+    ref: string;
+}
+
+export interface IUpdateCommentPositionMutationParams {
+    unitId: string;
+    subUnitId: string;
+    payload: IUpdateCommentRefPayload;
+}
+
+export const UpdateCommentPositionMutation: ICommand<IUpdateCommentPositionMutationParams> = {
+    id: 'thread-comment.mutation.update-comment',
+    type: CommandType.MUTATION,
+    handler(accessor, params) {
+        if (!params) {
+            return false;
+        }
+        const threadCommentModel = accessor.get(ThreadCommentModel);
+        const { unitId, subUnitId, payload } = params;
+        threadCommentModel.updateCommentRef(unitId, subUnitId, payload);
+        return true;
+    },
+};
+
+
 export interface IResolveCommentMutationParams {
     unitId: string;
     subUnitId: string;
@@ -90,7 +116,7 @@ export const ResolveCommentMutation: ICommand<IResolveCommentMutationParams> = {
 export interface IDeleteCommentMutationParams {
     unitId: string;
     subUnitId: string;
-    commentIds: string[];
+    commentId: string;
 }
 
 export const DeleteCommentMutation: ICommand<IDeleteCommentMutationParams> = {
@@ -101,8 +127,8 @@ export const DeleteCommentMutation: ICommand<IDeleteCommentMutationParams> = {
             return false;
         }
         const threadCommentModel = accessor.get(ThreadCommentModel);
-        const { unitId, subUnitId, commentIds } = params;
-        threadCommentModel.deleteComment(unitId, subUnitId, commentIds);
+        const { unitId, subUnitId, commentId } = params;
+        threadCommentModel.deleteComment(unitId, subUnitId, commentId);
         return true;
     },
 };

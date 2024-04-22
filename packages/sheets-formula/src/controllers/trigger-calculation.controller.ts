@@ -313,7 +313,11 @@ export class TriggerCalculationController extends Disposable {
                         startDependencyTimer = null;
                     } else {
                         //  Manually hide the progress bar to prevent the progress bar from not being hidden due to pushTask statistical errors
-                        this._progressService.complete();
+                        if (state === FormulaExecutedStateType.SUCCESS) {
+                            this._progressService.complete();
+                        } else if (state === FormulaExecutedStateType.STOP_EXECUTION) {
+                            this._progressService.stop();
+                        }
                     }
 
 

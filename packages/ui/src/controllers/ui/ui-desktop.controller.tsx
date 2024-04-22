@@ -71,6 +71,14 @@ export class DesktopUIController extends Disposable implements IDesktopUIControl
                     this.disposeWithMe(this._layoutService.registerCanvasElement(canvasElement as HTMLCanvasElement));
                 }
 
+                // TODO: this is subject to change in the future
+                this._renderManagerService.currentRender$.subscribe((renderId) => {
+                    if (renderId) {
+                        const render = this._renderManagerService.getRenderById(renderId)!;
+                        render.engine.setContainer(canvasElement);
+                    }
+                });
+
                 this._lifecycleService.lifecycle$.pipe(filter((lifecycle) => lifecycle === LifecycleStages.Ready), delay(300), take(1)).subscribe(() => {
                     const engine = this._renderManagerService.getFirst()?.engine;
                     engine?.setContainer(canvasElement);

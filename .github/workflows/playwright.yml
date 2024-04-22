@@ -22,6 +22,10 @@ jobs:
             - name: Install Playwright Browsers
               run: pnpm exec playwright install --with-deps
 
+            # build the example locally and run from the built files
+            - name: Build E2E client
+              run: pnpm build:e2e
+
             - name: Run Playwright tests
               run: pnpm exec playwright test
 

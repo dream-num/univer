@@ -87,6 +87,10 @@ export class Image extends Shape<IImageProps> {
         return this._props;
     }
 
+    getNative(): Nullable<HTMLImageElement> {
+        return this._native;
+    }
+
     protected override _draw(ctx: UniverRenderingContext) {
         Image.drawWith(ctx, this);
     }

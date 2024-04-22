@@ -15,18 +15,37 @@
  */
 
 import type { Nullable } from '@univerjs/core';
+import type { PresetGeometryType } from './prst-geom-type';
 
 
 export enum SourceType {
     URL = 'URL',
-    BASE64 = 'BASE64',
     UUID = 'UUID',
+    BASE64 = 'BASE64',
 }
+
+export interface ISrcRect {
+    left?: number;
+    top?: number;
+    right?: number;
+    bottom?: number;
+}
+
 
 export interface IImageData {
     imageId: string;
     sourceType: SourceType;
     source: string;
+
+    /**
+     * 20.1.8.55 srcRect (Source Rectangle)
+     */
+    srcRect?: ISrcRect;
+
+    /**
+     * 20.1.9.18 prstGeom (Preset geometry)
+     */
+    prstGeom?: PresetGeometryType;
 }
 
 export class ImageModel {
@@ -36,12 +55,16 @@ export class ImageModel {
         // empty
     }
 
-    getImageData() {
-        return this._imageData;
+    get sourceType() {
+        return this._imageData.sourceType;
     }
 
-    getSource() {
+    get source() {
         return this._imageData.source;
+    }
+
+    getImageData() {
+        return this._imageData;
     }
 
     getId() {

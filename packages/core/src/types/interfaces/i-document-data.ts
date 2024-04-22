@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ISize } from '../../services/floating-object/floating-object-interfaces';
+import type { ISize } from '../../services/drawing/drawing-interfaces';
 import type { BooleanNumber, CellValueType, HorizontalAlign, LocaleType, TextDirection, VerticalAlign, WrapStrategy } from '../enum';
 import type { IExtraModelData } from './i-extra-model-data';
 import type { IColorStyle, IStyleBase } from './i-style-data';

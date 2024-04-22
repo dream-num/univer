@@ -19,16 +19,12 @@ import {
     ColorKit,
     Disposable,
     ICommandService,
-    IUniverInstanceService,
-    LifecycleStages,
-    OnLifecycle,
     RANGE_TYPE,
     ThemeService,
     toDisposable,
-    UniverInstanceType,
 } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderController, IScrollObserverParam, Viewport } from '@univerjs/engine-render';
-import { CURSOR_TYPE, IRenderManagerService, Rect, TRANSFORM_CHANGE_OBSERVABLE_TYPE, Vector2 } from '@univerjs/engine-render';
+import { CURSOR_TYPE, Rect, TRANSFORM_CHANGE_OBSERVABLE_TYPE, Vector2 } from '@univerjs/engine-render';
 import type {
     IInsertColCommandParams,
     IInsertRowCommandParams,
@@ -71,7 +67,6 @@ import { ScrollCommand } from '../commands/commands/set-scroll.command';
 import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
 import { SHEET_COMPONENT_HEADER_LAYER_INDEX, VIEWPORT_KEY } from '../common/keys';
 import { ScrollManagerService } from '../services/scroll-manager.service';
-import { ISelectionRenderService } from '../services/selection/selection-render.service';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 import { getCoordByOffset, getSheetObject } from './utils/component-tools';
 

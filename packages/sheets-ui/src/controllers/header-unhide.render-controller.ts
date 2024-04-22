@@ -17,8 +17,6 @@
 import type { Workbook, Worksheet } from '@univerjs/core';
 import {
     ICommandService,
-    LifecycleStages,
-    OnLifecycle,
     RxDisposable,
 } from '@univerjs/core';
 import type { IRenderContext } from '@univerjs/engine-render';

@@ -69,7 +69,7 @@
         "@univerjs/core": "workspace:*",
         "@univerjs/shared": "workspace:*",
         "@univerjs/sheets": "workspace:*",
-        "@wendellhu/redi": "^0.13.0",
+        "@wendellhu/redi": "^0.13.1",
         "rxjs": "^7.8.1",
         "typescript": "^5.3.3",
         "vite": "^5.1.4",

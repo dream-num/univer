@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IDocumentData, Univer, Workbook } from '@univerjs/core';
-import { IContextService, LocaleService } from '@univerjs/core';
+import type { ICellData, IDocumentData, Univer, Workbook } from '@univerjs/core';
+import { CellValueType, IContextService, LocaleService } from '@univerjs/core';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { SpreadsheetSkeleton } from '@univerjs/engine-render';
 import type { Injector } from '@wendellhu/redi';
@@ -77,6 +77,7 @@ describe('Test EndEditController', () => {
     let contextService: IContextService;
     let lexerTreeBuilder: LexerTreeBuilder;
     let spreadsheetSkeleton: SpreadsheetSkeleton;
+    let getCellDataByInputCell: (cell: ICellData, inputCell: ICellData) => ICellData | null;
 
     beforeEach(() => {
         const testBed = createTestBed();
@@ -99,14 +100,23 @@ describe('Test EndEditController', () => {
             localeService,
             contextService
         );
+
+        getCellDataByInputCell = (cell: ICellData, inputCell: ICellData) => {
+            const documentLayoutObject = spreadsheetSkeleton.getCellDocumentModelWithFormula(inputCell);
+            if (!documentLayoutObject) {
+                throw new Error('documentLayoutObject is undefined');
+            }
+
+            return getCellDataByInput(cell, documentLayoutObject, lexerTreeBuilder);
+        };
     });
 
     afterEach(() => {
         univer.dispose();
     });
 
-    describe('getCellDataByInput', () => {
-        it('normal cell', () => {
+    describe('Function getCellDataByInput', () => {
+        it('Normal cell', () => {
             const cell = {
                 v: 1,
             };
@@ -115,16 +125,10 @@ describe('Test EndEditController', () => {
                 v: 2,
             };
 
-            const documentLayoutObject = spreadsheetSkeleton.getCellDocumentModelWithFormula(inputCell);
-            if (!documentLayoutObject) {
-                expect(documentLayoutObject).not.toBeUndefined();
-                return;
-            }
-
-            const cellData = getCellDataByInput(cell, documentLayoutObject, lexerTreeBuilder);
+            const cellData = getCellDataByInputCell(cell, inputCell);
             expect(cellData).toEqual({ v: '2', f: null, si: null, p: null });
         });
-        it('rich text cell', () => {
+        it('Rich text cell', () => {
             const cell = {
                 v: 1,
             };
@@ -132,16 +136,10 @@ describe('Test EndEditController', () => {
                 p: richTextDemo,
             };
 
-            const documentLayoutObject = spreadsheetSkeleton.getCellDocumentModelWithFormula(inputCell);
-            if (!documentLayoutObject) {
-                expect(documentLayoutObject).not.toBeUndefined();
-                return;
-            }
-
-            const cellData = getCellDataByInput(cell, documentLayoutObject, lexerTreeBuilder);
+            const cellData = getCellDataByInputCell(cell, inputCell);
             expect(cellData).toEqual({ v: null, f: null, si: null, p: richTextDemo });
         });
-        it('formula cell', () => {
+        it('Formula cell', () => {
             const cell = {
                 v: 1,
             };
@@ -149,16 +147,10 @@ describe('Test EndEditController', () => {
                 f: '=SUM(1)',
             };
 
-            const documentLayoutObject = spreadsheetSkeleton.getCellDocumentModelWithFormula(inputCell);
-            if (!documentLayoutObject) {
-                expect(documentLayoutObject).not.toBeUndefined();
-                return;
-            }
-
-            const cellData = getCellDataByInput(cell, documentLayoutObject, lexerTreeBuilder);
+            const cellData = getCellDataByInputCell(cell, inputCell);
             expect(cellData).toEqual({ v: null, f: '=SUM(1)', p: null });
         });
-        it('clear formula cell', () => {
+        it('Clear formula cell', () => {
             const cell = {
                 f: '=H18:H25',
                 v: 0,
@@ -169,14 +161,38 @@ describe('Test EndEditController', () => {
                 v: '',
             };
 
-            const documentLayoutObject = spreadsheetSkeleton.getCellDocumentModelWithFormula(inputCell);
-            if (!documentLayoutObject) {
-                expect(documentLayoutObject).not.toBeUndefined();
-                return;
-            }
-
-            const cellData = getCellDataByInput(cell, documentLayoutObject, lexerTreeBuilder);
+            const cellData = getCellDataByInputCell(cell, inputCell);
             expect(cellData).toEqual({ v: '', f: null, si: null, p: null, t: undefined });
+        });
+
+        it('Clear formula cell with rich text', () => {
+            const cell = {
+                f: '=H18:H25',
+                v: 0,
+                t: 2,
+            };
+
+            const inputCell = {
+                p: richTextDemo,
+            };
+
+            const cellData = getCellDataByInputCell(cell, inputCell);
+            expect(cellData).toEqual({ v: null, f: null, si: null, p: richTextDemo, t: undefined });
+        });
+
+        it('Input force string, normal string', () => {
+            const cell = {
+                v: null,
+            };
+
+            let cellData = getCellDataByInputCell(cell, { v: "'test" });
+            expect(cellData).toEqual({ v: 'test', t: CellValueType.FORCE_STRING, f: null, si: null, p: null });
+
+            cellData = getCellDataByInputCell(cell, { v: "'1" });
+            expect(cellData).toEqual({ v: '1', t: CellValueType.FORCE_STRING, f: null, si: null, p: null });
+
+            cellData = getCellDataByInputCell(cell, { v: "'=SUM" });
+            expect(cellData).toEqual({ v: '=SUM', t: CellValueType.FORCE_STRING, f: null, si: null, p: null });
         });
     });
 });

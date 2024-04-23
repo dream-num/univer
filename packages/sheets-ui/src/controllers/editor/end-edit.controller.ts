@@ -15,7 +15,7 @@
  */
 
 import type { ICellData, ICommandInfo, IDocumentBody, Nullable, Observer } from '@univerjs/core';
-import {
+import { CellValueType,
     DEFAULT_EMPTY_DOCUMENT_VALUE,
     Direction,
     Disposable,
@@ -54,6 +54,7 @@ import { ICellEditorManagerService } from '../../services/editor/cell-editor-man
 import type { IEditorBridgeServiceVisibleParam } from '../../services/editor-bridge.service';
 import { IEditorBridgeService } from '../../services/editor-bridge.service';
 import { MOVE_SELECTION_KEYCODE_LIST } from '../shortcuts/editor.shortcut';
+import { extractStringFromForceString, isForceString } from '../utils/cell-tools';
 
 function isRichText(body: IDocumentBody) {
     const { textRuns = [], paragraphs = [] } = body;
@@ -430,6 +431,13 @@ export function getCellDataByInput(
         cellData.f = newDataStream;
         cellData.v = null;
         cellData.p = null;
+    } else if (isForceString(newDataStream)) {
+        const v = extractStringFromForceString(newDataStream);
+        cellData.v = v;
+        cellData.f = null;
+        cellData.si = null;
+        cellData.p = null;
+        cellData.t = CellValueType.FORCE_STRING;
     } else if (isRichText(body)) {
         if (body.dataStream === '\r\n') {
             cellData.v = '';

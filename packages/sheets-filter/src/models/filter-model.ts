@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { CellValueType, Disposable, mergeSets, Rectangle, Tools } from '@univerjs/core';
+import { CellValueType, Disposable, extractPureTextFromCell, mergeSets, Rectangle, Tools } from '@univerjs/core';
 import type { CellValue, ICellData, IRange, Nullable, Worksheet } from '@univerjs/core';
 import { BehaviorSubject } from 'rxjs';
 import type { Observable } from 'rxjs';
@@ -301,7 +301,7 @@ export class FilterColumn extends Disposable {
     private _range: Nullable<IRange> = null;
     private _column: number = 0;
 
-    private _useValueFromViewModel = false;
+    private _filterByValues = false;
 
     constructor(
         public readonly unitId: string,
@@ -402,8 +402,11 @@ export class FilterColumn extends Disposable {
                 continue;
             }
 
-            const cell = this._useValueFromViewModel ? this._worksheet.getCell(row, col) : this._worksheet.getCellRaw(row, col);
-            const value = cell ? extractFilterValueFromCell(cell) : undefined;
+            // FIXME: 这里的取值逻辑比较复杂，如果是日期的话，需要从
+            // 另外还要考虑是否使用视图模型的值
+            const value = this._filterByValues
+                ? extractPureTextFromCell(this._worksheet.getCell(row, col))
+                : getFilterValueForConditionalFiltering(this._worksheet, row, col);
             if (!this._filterFn(value)) {
                 filteredOutRows.add(row);
 
@@ -425,7 +428,7 @@ export class FilterColumn extends Disposable {
         }
 
         this._filterFn = generateFilterFn(this._criteria);
-        this._useValueFromViewModel = !!this._criteria.filters;
+        this._filterByValues = !!this._criteria.filters;
     }
 }
 
@@ -512,6 +515,23 @@ function generateCustomFilterFn(filter: ICustomFilter): FilterFn {
     // text match
     const customFilterFn = getCustomFilterFn(filter.operator);
     return (value) => customFilterFn.fn(value, compare);
+}
+
+function getFilterValueForConditionalFiltering(worksheet: Worksheet, row: number, col: number): Nullable<string | number | boolean> {
+    const interceptedCell = worksheet.getCell(row, col);
+    if (!interceptedCell) return null;
+
+    const rawCell = worksheet.getCellRaw(row, col);
+
+    if (interceptedCell && !rawCell) return extractFilterValueFromCell(interceptedCell);
+
+    if (!rawCell) return null;
+
+    if (interceptedCell.t === CellValueType.NUMBER && typeof interceptedCell.v === 'string') {
+        return rawCell.v as number;
+    }
+
+    return extractFilterValueFromCell(rawCell);
 }
 
 function extractFilterValueFromCell(cell: ICellData): string | number {

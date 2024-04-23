@@ -703,7 +703,9 @@ export interface ICell {
  * @param cell
  * @returns pure text in this cell
  */
-export function extractPureTextFromCell(cell: ICellData): string {
+export function extractPureTextFromCell(cell: Nullable<ICellData>): string {
+    if (!cell) return '';
+
     const richTextValue = cell.p?.body?.dataStream;
     if (richTextValue) return richTextValue;
 

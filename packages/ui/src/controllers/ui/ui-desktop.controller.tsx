@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Disposable, LifecycleService, LifecycleStages, toDisposable } from '@univerjs/core';
+import { Disposable, IUniverInstanceService, LifecycleService, LifecycleStages, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject, Injector, Optional } from '@wendellhu/redi';
@@ -55,9 +55,10 @@ export class DesktopUIController extends Disposable implements IDesktopUIControl
     readonly componentRegistered$ = this._componentRegistered$.asObservable();
 
     constructor(
+        @IUniverInstanceService private readonly _instanceService: IUniverInstanceService,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(LifecycleService) private readonly _lifecycleService: LifecycleService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Optional(ILayoutService) private readonly _layoutService?: ILayoutService
     ) {
         super();
@@ -75,6 +76,9 @@ export class DesktopUIController extends Disposable implements IDesktopUIControl
                 this._renderManagerService.currentRender$.subscribe((renderId) => {
                     if (renderId) {
                         const render = this._renderManagerService.getRenderById(renderId)!;
+                        const unitType = this._instanceService.getUnitType(render.unitId);
+                        if (unitType !== UniverInstanceType.SHEET) return;
+
                         render.engine.setContainer(canvasElement);
                     }
                 });

@@ -185,13 +185,6 @@ export class RegisterOtherFormulaService extends Disposable {
         });
     }
 
-    async getTempFormulaResult(unitId: string, subUnitId: string, formulaString: string) {
-        const formulaId = this.registerFormula(unitId, subUnitId, formulaString, { ruleId: 'temp' });
-        const formulaValue = await this.getFormulaValue(unitId, subUnitId, formulaId);
-        this.deleteFormula(unitId, subUnitId, [formulaId]);
-        return formulaValue;
-    }
-
     getFormulaValueSync(unitId: string, subUnitId: string, formulaId: string): Nullable<IOtherFormulaResult> {
         const cacheMap = this._ensureCacheMap(unitId, subUnitId);
         return cacheMap.get(formulaId);

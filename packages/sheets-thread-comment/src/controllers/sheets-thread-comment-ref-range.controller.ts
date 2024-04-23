@@ -24,7 +24,7 @@ import type { IAddCommentMutationParams } from '@univerjs/thread-comment';
 import { AddCommentMutation, DeleteCommentMutation } from '@univerjs/thread-comment';
 import type { IUpdateCommentRefMutationParams } from '@univerjs/thread-comment/commands/mutations/comment.mutation.js';
 import { UpdateCommentRefMutation } from '@univerjs/thread-comment/commands/mutations/comment.mutation.js';
-import { serializeRange, serializeRangeToRefString } from '@univerjs/engine-formula';
+import { serializeRange } from '@univerjs/engine-formula';
 import { distinctUntilChanged, map, merge, Observable, switchMap } from 'rxjs';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import type { ISheetThreadComment } from '../types/interfaces/i-sheet-thread-comment';

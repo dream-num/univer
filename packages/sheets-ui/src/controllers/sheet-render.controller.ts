@@ -43,9 +43,6 @@ interface ISetWorksheetMutationParams {
     subUnitId: string;
 }
 
-/**
- * @todo RenderUnit. This should be merged with `SheetCanvasView`.
- */
 @OnLifecycle(LifecycleStages.Ready, SheetRenderController)
 export class SheetRenderController extends RxDisposable {
     constructor(

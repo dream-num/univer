@@ -18,7 +18,7 @@ import { Plugin, UniverInstanceType } from '@univerjs/core';
 import { createIdentifier, Inject, Injector } from '@wendellhu/redi';
 
 import { Engine } from './engine';
-import { IRenderManagerService, RenderManagerService } from './render-manager.service';
+import { IRenderManagerService, RenderManagerService } from './render-manager/render-manager.service';
 
 /**
  * The global rendering engine.

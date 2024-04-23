@@ -113,6 +113,12 @@ export class Disposable implements IDisposable {
         return this._collection.add(d);
     }
 
+    protected ensureNotDisposed(): void {
+        if (this._disposed) {
+            throw new Error('[Disposable]: object is disposed!');
+        }
+    }
+
     dispose(): void {
         if (this._disposed) {
             return;

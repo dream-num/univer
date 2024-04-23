@@ -58,12 +58,16 @@ export function insertMatrixArray<T>(
 export function spliceArray<T>(
     start: number,
     count: number,
-    o: IObjectArrayPrimitiveType<T> | IObjectMatrixPrimitiveType<T>
+    o: IObjectArrayPrimitiveType<T> | IObjectMatrixPrimitiveType<T>,
+    skip?: number[]
 ) {
     const length = Object.keys(o).reduce((max, key) => Math.max(max, Number.parseInt(key)), 0) + 1;
 
     // Delete elements within the specified range
     for (let i = start; i < length; i++) {
+        if (skip && skip.includes(i)) {
+            continue;
+        }
         if (i < start + count) {
             // If within deletion range, delete directly
             delete o[i];

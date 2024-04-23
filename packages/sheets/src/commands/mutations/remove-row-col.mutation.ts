@@ -65,14 +65,21 @@ export const RemoveRowMutation: IMutation<IRemoveRowsMutationParams> = {
         const manager = worksheet.getRowManager();
         const rowPrimitive = manager.getRowData();
 
+        const filterOutRows = [];
+        for (let i = range.startRow; i <= range.endRow; i++) {
+            if (worksheet.getRowFiltered(i)) {
+                filterOutRows.push(i);
+            }
+        }
+
         const rowCount = range.endRow - range.startRow + 1;
-        spliceArray(range.startRow, rowCount, rowPrimitive);
+        spliceArray(range.startRow, rowCount, rowPrimitive, filterOutRows);
 
         // remove cells contents by directly mutating worksheetCellMatrix
-        const cellMatrix = worksheet.getCellMatrix();
-        cellMatrix.removeRows(range.startRow, rowCount);
+        const cellMatrix = worksheet.getCellMatrix().getMatrix();
+        spliceArray(range.startRow, rowCount, cellMatrix, filterOutRows);
 
-        worksheet.setRowCount(worksheet.getRowCount() - rowCount);
+        worksheet.setRowCount(worksheet.getRowCount() - rowCount + filterOutRows.length);
 
         return true;
     },

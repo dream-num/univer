@@ -39,6 +39,14 @@ export class FWorksheet {
         return this._worksheet.getSheetId();
     }
 
+    /**
+     * Returns the name of the worksheet.
+     * @returns name of the worksheet
+     */
+    getName(): string {
+        return this._worksheet.getName();
+    }
+
     getSelection(): FSelection | null {
         const selections = this._selectionManagerService.getSelections();
         if (!selections) {

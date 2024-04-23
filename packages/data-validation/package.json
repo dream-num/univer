@@ -68,12 +68,10 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/protocol": "^0.1.18",
-        "dayjs": "^1.11.10"
+        "@univerjs/protocol": "^0.1.18"
     },
     "devDependencies": {
         "@univerjs/core": "workspace:*",
-        "@univerjs/protocol": "^0.1.14",
         "@univerjs/shared": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@wendellhu/redi": "^0.13.1",

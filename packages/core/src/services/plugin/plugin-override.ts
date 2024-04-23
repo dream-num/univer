@@ -41,7 +41,7 @@ export function mergeOverrideWithDependencies(dependencies: Dependency[], overri
             if (overrideItem[1] === null) {
                 continue;
             }
-            result.push({ ...dependency, ...overrideItem[1] });
+            result.push([dependency[0], overrideItem[1]]);
         } else {
             result.push(dependency);
         }

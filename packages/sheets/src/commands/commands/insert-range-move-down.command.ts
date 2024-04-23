@@ -19,10 +19,11 @@ import {
     BooleanNumber,
     CommandType,
     Dimension,
+    ErrorService,
     ICommandService,
-    ILogService,
     IUndoRedoService,
     IUniverInstanceService,
+    LocaleService,
     Range,
     sequenceExecute,
 } from '@univerjs/core';
@@ -57,13 +58,13 @@ export const InsertRangeMoveDownCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const logService = accessor.get(ILogService);
         const selectionManagerService = accessor.get(SelectionManagerService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
+        const errorService = accessor.get(ErrorService);
+        const localeService = accessor.get(LocaleService);
 
         if (selectionManagerService.isOverlapping()) {
-            // TODO@Dushusir: use Dialog after Dialog component completed
-            logService.error('Cannot use that command on overlapping selections.');
+            errorService.emit(localeService.t('sheets.info.overlappingSelections'));
             return false;
         }
 

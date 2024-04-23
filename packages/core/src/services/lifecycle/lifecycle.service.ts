@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
+import type { DependencyIdentifier } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { BehaviorSubject, Observable } from 'rxjs';
 
-import { Disposable, toDisposable } from '../../shared/lifecycle';
+import { Disposable } from '../../shared/lifecycle';
 import { ILogService } from '../log/log.service';
 import { LifecycleNameMap, LifecycleStages, LifecycleToModules } from './lifecycle';
 
@@ -29,6 +30,8 @@ import { LifecycleNameMap, LifecycleStages, LifecycleToModules } from './lifecyc
 export class LifecycleService extends Disposable {
     private _lifecycle$ = new BehaviorSubject<LifecycleStages>(LifecycleStages.Starting);
     readonly lifecycle$ = this._lifecycle$.asObservable();
+
+    private _lock = false;
 
     constructor(@ILogService private readonly _logService: ILogService) {
         super();
@@ -49,8 +52,15 @@ export class LifecycleService extends Disposable {
             return;
         }
 
+        if (this._lock) {
+            throw new Error('[LifecycleService]: cannot set new stage when related logic is all handled!');
+        }
+        this._lock = true;
+
         this._reportProgress(stage);
         this._lifecycle$.next(stage);
+
+        this._lock = false;
     }
 
     override dispose(): void {
@@ -98,7 +108,7 @@ export class LifecycleService extends Disposable {
  * @internal
  */
 export class LifecycleInitializerService extends Disposable {
-    private _started = false;
+    private _seenTokens = new Set<DependencyIdentifier<unknown>>();
 
     constructor(
         @Inject(LifecycleService) private _lifecycleService: LifecycleService,
@@ -107,24 +117,13 @@ export class LifecycleInitializerService extends Disposable {
         super();
     }
 
-    start(): void {
-        if (this._started) {
-            return;
-        }
-
-        this._started = true;
-        this.disposeWithMe(
-            toDisposable(
-                this._lifecycleService.subscribeWithPrevious().subscribe((stage) => this.initModulesOnStage(stage))
-            )
-        );
-    }
-
     initModulesOnStage(stage: LifecycleStages): void {
-        const modules = LifecycleToModules.get(stage);
-        modules?.forEach((m) => {
-            if (this._injector.has(m)) {
+        LifecycleToModules.get(stage)?.forEach((m) => {
+            if (this._injector.has(m) && !this._seenTokens.has(m)) {
                 this._injector.get(m);
+
+                // swap these two lines and they will be fixed
+                this._seenTokens.add(m);
             }
         });
     }

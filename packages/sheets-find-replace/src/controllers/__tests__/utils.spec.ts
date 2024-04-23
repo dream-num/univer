@@ -313,7 +313,7 @@ function createTestBed(dependencies?: Dependency[]) {
 
     const sheet = univer.createUniverSheet(TEST_WORKBOOK_DATA);
     const univerInstanceService = get(IUniverInstanceService);
-    univerInstanceService.focusUniverInstance(TEST_WORKBOOK_DATA.id);
+    univerInstanceService.focusUnit(TEST_WORKBOOK_DATA.id);
 
     const logService = get(ILogService);
     logService.setLogLevel(LogLevel.SILENT);

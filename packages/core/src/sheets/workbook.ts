@@ -19,7 +19,6 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { ILogService } from '../services/log/log.service';
 import type { Nullable } from '../shared';
 import { Tools } from '../shared';
-import { Disposable } from '../shared/lifecycle';
 import { DEFAULT_RANGE_ARRAY } from '../types/const';
 import { BooleanNumber } from '../types/enum';
 import type {
@@ -32,6 +31,7 @@ import type {
     IWorkbookData,
     IWorksheetData,
 } from '../types/interfaces';
+import { UnitModel, UniverInstanceType } from '../common/unit';
 import { Styles } from './styles';
 import { Worksheet } from './worksheet';
 import { getEmptySnapshot } from './empty-snapshot';
@@ -43,7 +43,9 @@ export function getWorksheetUID(workbook: Workbook, worksheet: Worksheet): strin
 /**
  * Access and create Univer Sheets files
  */
-export class Workbook extends Disposable {
+export class Workbook extends UnitModel<IWorkbookData, UniverInstanceType.SHEET> {
+    override type: UniverInstanceType.SHEET = UniverInstanceType.SHEET;
+
     private readonly _sheetCreated$ = new Subject<Worksheet>();
     readonly sheetCreated$ = this._sheetCreated$.asObservable();
 

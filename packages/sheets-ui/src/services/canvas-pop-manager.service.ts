@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IRange, Nullable, Worksheet } from '@univerjs/core';
-import { Disposable, DisposableCollection, ICommandService, IUniverInstanceService, toDisposable } from '@univerjs/core';
+import type { IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
+import { Disposable, DisposableCollection, ICommandService, IUniverInstanceService, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { BaseObject, IBoundRectNoAngle, IRender, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
 import { ICanvasPopupService } from '@univerjs/ui';
@@ -73,8 +73,8 @@ export class SheetCanvasPopManagerService extends Disposable {
         const bounding = engine.getCanvasElement().getBoundingClientRect();
 
         const position: IBoundRectNoAngle = {
-            left: ((cellInfo.startX - scrollXY.x) * scaleX),
-            right: (cellInfo.endX - scrollXY.x) * scaleX,
+            left: ((cellInfo.startX - scrollXY.x) * scaleX) + bounding.left,
+            right: (cellInfo.endX - scrollXY.x) * scaleX + bounding.left,
             top: ((cellInfo.startY - scrollXY.y) * scaleY) + bounding.top,
             bottom: ((cellInfo.endY - scrollXY.y) * scaleY) + bounding.top,
         };
@@ -183,7 +183,7 @@ export class SheetCanvasPopManagerService extends Disposable {
      * @returns disposable
      */
     attachPopupToObject(targetObject: BaseObject, popup: ICanvasPopup): IDisposable {
-        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
+        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
         const worksheet = workbook.getActiveSheet();
         const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();
@@ -227,7 +227,7 @@ export class SheetCanvasPopManagerService extends Disposable {
      * @returns disposable
      */
     attachPopupToCell(row: number, col: number, popup: ICanvasPopup, viewport?: Viewport): Nullable<IDisposable> {
-        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
+        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
         const worksheet = workbook.getActiveSheet();
         const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();

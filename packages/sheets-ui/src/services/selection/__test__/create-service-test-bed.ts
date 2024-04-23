@@ -21,8 +21,8 @@ import {
     IUniverInstanceService,
     LogLevel,
     Plugin,
-    PluginType,
     Univer,
+    UniverInstanceType,
 } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
@@ -109,14 +109,14 @@ export function createCommandTestBed(workbookConfig?: IWorkbookData, dependencie
     const injector = univer.__getInjector();
 
     class TestPlugin extends Plugin {
-        static override type = PluginType.Sheet;
+        static override pluginName = 'test-plugin';
+        static override type = UniverInstanceType.SHEET;
 
         constructor(
             _config: undefined,
             @Inject(Injector) override readonly _injector: Injector
         ) {
-            super('test-plugin');
-
+            super();
             this._injector = _injector;
         }
 
@@ -129,7 +129,7 @@ export function createCommandTestBed(workbookConfig?: IWorkbookData, dependencie
     const sheet = univer.createUniverSheet(workbookConfig || TEST_WORKBOOK_DATA_DEMO());
 
     const univerInstanceService = injector.get(IUniverInstanceService);
-    univerInstanceService.focusUniverInstance('test');
+    univerInstanceService.focusUnit('test');
     const logService = injector.get(ILogService);
 
     logService.setLogLevel(LogLevel.SILENT); // change this to `LogLevel.VERBOSE` to debug tests via logs

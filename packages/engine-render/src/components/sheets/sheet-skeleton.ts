@@ -1117,7 +1117,15 @@ export class SpreadsheetSkeleton extends Skeleton {
             const textStyle = this._getFontFormat(style);
             fontString = getFontStyleString(textStyle, this._localService).fontCache;
 
-            documentModel = this._getDocumentDataByStyle(extractPureTextFromCell(cell), textStyle, {
+            let cellText = extractPureTextFromCell(cell);
+
+            // Add a single quotation mark to the force string type. Don't add single quotation mark in extractPureTextFromCell, because copy and paste will be affected.
+            // edit mode when displayRawFormula is true
+            if (cell.t === CellValueType.FORCE_STRING && displayRawFormula) {
+                cellText = `'${cellText}`;
+            }
+
+            documentModel = this._getDocumentDataByStyle(cellText, textStyle, {
                 ...cellOtherConfig,
                 textRotation,
                 cellValueType: cell.t!,
@@ -1180,6 +1188,7 @@ export class SpreadsheetSkeleton extends Skeleton {
      * the text content of this cell can be drawn to both sides, not limited by the cell's width.
      * Overflow on the left or right is aligned according to the text's horizontal alignment.
      */
+    // eslint-disable-next-line complexity
     private _calculateOverflowCell(row: number, column: number, docsConfig: IFontCacheItem) {
         // wrap and angle handler
         const { documentSkeleton, vertexAngle = 0, centerAngle = 0, horizontalAlign, wrapStrategy } = docsConfig;

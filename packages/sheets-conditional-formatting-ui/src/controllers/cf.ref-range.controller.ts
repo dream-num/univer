@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IRange } from '@univerjs/core';
-import { Disposable, DisposableCollection, IUniverInstanceService, LifecycleStages, OnLifecycle, toDisposable } from '@univerjs/core';
+import type { IRange, Workbook } from '@univerjs/core';
+import { Disposable, DisposableCollection, IUniverInstanceService, LifecycleStages, OnLifecycle, toDisposable, UniverInstanceType } from '@univerjs/core';
 import type { EffectRefRangeParams } from '@univerjs/sheets';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { handleDefaultRangeChangeWithEffectRefCommands, RefRangeService } from '@univerjs/sheets';
@@ -94,7 +94,7 @@ export class RefRangeController extends Disposable {
                         toDisposable(
                             this._conditionalFormattingRuleModel.$ruleChange.subscribe((option) => {
                                 const { unitId, subUnitId, rule } = option;
-                                const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
+                                const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
                                 const worksheet = workbook.getActiveSheet();
                                 if (option.unitId !== workbook.getUnitId() || option.subUnitId !== worksheet.getSheetId()) {
                                     return;

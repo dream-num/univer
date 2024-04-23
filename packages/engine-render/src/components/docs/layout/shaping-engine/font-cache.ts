@@ -369,7 +369,7 @@ export class FontCache {
             bd,
             aba,
             abd,
-            sp: (ba + bd) / 2,
+            sp: (fontBoundingBoxAscent + fontBoundingBoxDescent) / 2,
             sbr: 0.6,
             spr: 0.6,
             // https://en.wikipedia.org/wiki/Subscript_and_superscript Microsoft Word 2015

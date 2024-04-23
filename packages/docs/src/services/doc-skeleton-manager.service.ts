@@ -15,7 +15,7 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { IUniverInstanceService, LocaleService, RxDisposable } from '@univerjs/core';
+import { IUniverInstanceService, LocaleService, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import type { DocumentViewModel } from '@univerjs/engine-render';
 import { DocumentSkeleton } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
@@ -84,10 +84,10 @@ export class DocSkeletonManagerService extends RxDisposable {
             this._setCurrent(docViewModel);
         });
 
-        this._univerInstanceService.docDisposed$.pipe(takeUntil(this.dispose$)).subscribe((documentModel) => {
+        this._univerInstanceService.getTypeOfUnitDisposed$(UniverInstanceType.DOC).pipe(takeUntil(this.dispose$)).subscribe((documentModel) => {
             this._docSkeletonMap.delete(documentModel.getUnitId());
 
-            this._currentSkeletonUnitId = this._univerInstanceService.getCurrentUniverDocInstance()?.getUnitId() ?? '';
+            this._currentSkeletonUnitId = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.DOC)?.getUnitId() ?? '';
         });
     }
 

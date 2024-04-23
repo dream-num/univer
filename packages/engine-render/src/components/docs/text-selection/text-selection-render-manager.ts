@@ -527,9 +527,9 @@ export class TextSelectionRenderManager extends RxDisposable implements ITextSel
 
             this._moving(moveOffsetX, moveOffsetY);
 
-            scrollTimer.scrolling(moveOffsetX, moveOffsetY, () => {
-                this._moving(moveOffsetX, moveOffsetY);
-            });
+            // scrollTimer.scrolling(moveOffsetX, moveOffsetY, () => {
+                // this._moving(moveOffsetX, moveOffsetY);
+            // });
 
             preMoveOffsetX = moveOffsetX;
             preMoveOffsetY = moveOffsetY;

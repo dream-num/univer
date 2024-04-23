@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import { IUniverInstanceService, LocaleService, Plugin, PluginType } from '@univerjs/core';
+import type { Workbook } from '@univerjs/core';
+import { IUniverInstanceService, LocaleService, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { filter } from 'rxjs/operators';
 
-import { SHEET_UI_PLUGIN_NAME } from './basics';
 import { ActiveWorksheetController } from './controllers/active-worksheet/active-worksheet.controller';
 import { AutoFillController } from './controllers/auto-fill.controller';
 import { AutoHeightController } from './controllers/auto-height.controller';
@@ -68,9 +68,12 @@ import { CellAlertManagerService } from './services/cell-alert-manager.service';
 import { CellAlertController } from './controllers/cell-alert.controller';
 import { CellCustomRenderController } from './controllers/cell-custom-render.controller';
 import { SheetCanvasPopManagerService } from './services/canvas-pop-manager.service';
+import { ForceStringRenderController } from './controllers/force-string-render.controller';
+import { ForceStringAlertController } from './controllers/force-string-alert.controller';
 
 export class UniverSheetsUIPlugin extends Plugin {
-    static override type = PluginType.Sheet;
+    static override pluginName = 'SHEET_UI_PLUGIN_NAME';
+    static override type = UniverInstanceType.SHEET;
 
     constructor(
         config: undefined,
@@ -78,7 +81,7 @@ export class UniverSheetsUIPlugin extends Plugin {
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
-        super(SHEET_UI_PLUGIN_NAME);
+        super();
 
         this._localeService.load({
             zhCN,
@@ -143,6 +146,8 @@ export class UniverSheetsUIPlugin extends Plugin {
                 [HoverController],
                 [CellAlertController],
                 [CellCustomRenderController],
+                [ForceStringRenderController],
+                [ForceStringAlertController],
             ] as Dependency[]
         ).forEach((d) => injector.add(d));
     }
@@ -153,8 +158,8 @@ export class UniverSheetsUIPlugin extends Plugin {
 
     private _markSheetAsFocused() {
         const univerInstanceService = this._univerInstanceService;
-        univerInstanceService.currentSheet$.pipe(filter((v) => !!v)).subscribe((workbook) => {
-            univerInstanceService.focusUniverInstance(workbook!.getUnitId());
+        univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.SHEET).pipe(filter((v) => !!v)).subscribe((workbook) => {
+            univerInstanceService.focusUnit(workbook!.getUnitId());
         });
     }
 }

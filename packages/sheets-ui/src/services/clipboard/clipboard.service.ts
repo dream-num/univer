@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, IMutationInfo, IRange, Worksheet } from '@univerjs/core';
+import type { ICellData, IMutationInfo, IRange, Workbook, Worksheet } from '@univerjs/core';
 import {
     Disposable,
     ErrorService,
@@ -28,6 +28,7 @@ import {
     Rectangle,
     toDisposable,
     Tools,
+    UniverInstanceType,
 } from '@univerjs/core';
 import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
 import {
@@ -133,7 +134,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             return false; // maybe we should notify user that there is no selection
         }
 
-        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
+        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
         const worksheet = workbook.getActiveSheet();
         const hooks = this._clipboardHooks;
 
@@ -342,7 +343,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         if (result) {
             // add to undo redo services
             this._undoRedoService.pushUndoRedo({
-                unitID: this._univerInstanceService.getCurrentUniverSheetInstance()!.getUnitId(),
+                unitID: this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!.getUnitId(),
                 undoMutations: undoMutationsInfo,
                 redoMutations: redoMutationsInfo,
             });
@@ -410,7 +411,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         if (mergeData) {
             const pastedRangeLapWithMergedCell = mergeData.some((merge) => Rectangle.intersects(pastedRange, merge) && !Rectangle.contains(pastedRange, merge));
             if (pastedRangeLapWithMergedCell) {
-                this._errorService.emit('The paste area overlaps with merged cells.');
+                this._errorService.emit(this._localeService.t('clipboard.paste.overlappingMergedCells'));
                 return false;
             }
         }
@@ -476,7 +477,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         if (mergeData) {
             const pastedRangeLapWithMergedCell = mergeData.some((merge) => Rectangle.intersects(pastedRange, merge) && !Rectangle.contains(pastedRange, merge));
             if (pastedRangeLapWithMergedCell) {
-                this._errorService.emit('The paste area overlaps with merged cells.');
+                this._errorService.emit(this._localeService.t('clipboard.paste.overlappingMergedCells'));
                 return false;
             }
         }
@@ -687,7 +688,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
     }
 
     private _getPastingTarget() {
-        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
+        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
         const worksheet = workbook.getActiveSheet();
         const selection = this._selectionManagerService.getLast();
         return {
@@ -749,7 +750,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         const destinationRows = endRow - startRow + 1;
         const destinationColumns = endColumn - startColumn + 1;
 
-        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
+        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
         const worksheet = workbook.getActiveSheet();
         // const mergedRange = worksheet.getMergedCell(startRow, startColumn);
         const mergeData = worksheet.getMergeData();
@@ -826,8 +827,6 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
                 range.endRow = startRow + rowCount - 1;
                 range.endColumn = startColumn + colCount - 1;
             } else if (endRow > mergedRange.endRow || endColumn > mergedRange.endColumn) {
-                // TODO@Dushusir: use dialog component
-                // alert("We can't do that to a merged cell ");
                 return null;
             } else {
                 cellMatrix.forValue((row, col, cell) => {
@@ -884,7 +883,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
      * @param range
      */
     private _topLeftCellsMatch(rowCount: number, colCount: number, range: IRange): boolean {
-        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
+        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
         const worksheet = workbook.getActiveSheet();
         const { startRow, startColumn, endRow, endColumn } = range;
 

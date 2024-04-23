@@ -77,12 +77,15 @@ export function getFormulaReferenceSheet(oldFormulaData: IFormulaData,
         }
 
         Object.keys(newSheetData).forEach((subUnitId) => {
-            const newSheetFormula = new ObjectMatrix(newSheetData[subUnitId]);
-            const oldSheetFormula = new ObjectMatrix(oldSheetData[subUnitId]);
-            const redoFormulaMatrix = new ObjectMatrix<ICellData>();
-            const undoFormulaMatrix = new ObjectMatrix<ICellData>();
+            const newSheetFormula = new ObjectMatrix(newSheetData[subUnitId] || {});
+            const oldSheetFormula = new ObjectMatrix(oldSheetData[subUnitId] || {});
+            const redoFormulaMatrix = new ObjectMatrix<Nullable<ICellData>>();
+            const undoFormulaMatrix = new ObjectMatrix<Nullable<ICellData>>();
 
             newSheetFormula.forValue((r, c, cell) => {
+                if (cell == null) {
+                    return true;
+                }
                 const newValue = formulaDataItemToCellData(cell);
 
                 if (newValue === null) {
@@ -201,13 +204,17 @@ export function refRangeFormula(oldFormulaData: IFormulaData,
     const currentOldFormulaData = oldFormulaData[unitId]![sheetId];
     const currentNewFormulaData = newFormulaData[unitId]![sheetId];
 
-    const oldFormulaMatrix = new ObjectMatrix(currentOldFormulaData);
-    const newFormulaMatrix = new ObjectMatrix(currentNewFormulaData);
+    const oldFormulaMatrix = new ObjectMatrix(currentOldFormulaData || {});
+    const newFormulaMatrix = new ObjectMatrix(currentNewFormulaData || {});
 
     // When undoing and redoing, the traversal order may be different. Record the range list of all single formula offsets, and then retrieve the traversal as needed.
     const rangeList: IRangeChange[] = [];
     let isReverse = false;
     oldFormulaMatrix.forValue((row, column, cell) => {
+        if (cell == null) {
+            return true;
+        }
+
         // Offset is only needed when there is a formula
         if (!isFormulaDataItem(cell)) {
             return;
@@ -439,8 +446,8 @@ function handleRefInsertMoveRight(range: IRange, oldCell: IRange) {
  * @param oldFormulaData
  * @param newFormulaData
  */
-function getRedoFormulaData(rangeList: IRangeChange[], oldFormulaMatrix: ObjectMatrix<IFormulaDataItem>, newFormulaMatrix: ObjectMatrix<IFormulaDataItem>) {
-    const redoFormulaData = new ObjectMatrix<ICellData | null>({});
+function getRedoFormulaData(rangeList: IRangeChange[], oldFormulaMatrix: ObjectMatrix<Nullable<IFormulaDataItem>>, newFormulaMatrix: ObjectMatrix<Nullable<IFormulaDataItem>>) {
+    const redoFormulaData = new ObjectMatrix<Nullable<ICellData>>({});
 
     rangeList.forEach((item) => {
         const { oldCell, newCell } = item;
@@ -464,8 +471,8 @@ function getRedoFormulaData(rangeList: IRangeChange[], oldFormulaMatrix: ObjectM
  * @param oldFormulaData
  * @param newFormulaData
  */
-function getUndoFormulaData(rangeList: IRangeChange[], oldFormulaMatrix: ObjectMatrix<IFormulaDataItem>) {
-    const undoFormulaData = new ObjectMatrix<ICellData | null>({});
+function getUndoFormulaData(rangeList: IRangeChange[], oldFormulaMatrix: ObjectMatrix<Nullable<IFormulaDataItem>>) {
+    const undoFormulaData = new ObjectMatrix<Nullable<ICellData>>({});
 
     rangeList.forEach((item) => {
         const { oldCell, newCell } = item;
@@ -497,7 +504,10 @@ function getUndoFormulaData(rangeList: IRangeChange[], oldFormulaMatrix: ObjectM
  * │ =SUM(1)          │ id1 │ 0 │ 1 │           │ id1 │
  * └──────────────────┴─────┴───┴───┴───────────┴─────┘
  */
-export function formulaDataItemToCellData(formulaDataItem: IFormulaDataItem): ICellData | null {
+export function formulaDataItemToCellData(formulaDataItem: Nullable<IFormulaDataItem>): Nullable<ICellData> {
+    if (formulaDataItem == null) {
+        return;
+    }
     const { f, si, x = 0, y = 0 } = formulaDataItem;
     const checkFormulaString = isFormulaString(f);
     const checkFormulaId = isFormulaId(si);

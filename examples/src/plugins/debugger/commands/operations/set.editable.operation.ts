@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICommand } from '@univerjs/core';
-import { CommandType, IUniverInstanceService, UniverPermissionService } from '@univerjs/core';
+import type { ICommand, Workbook } from '@univerjs/core';
+import { CommandType, IUniverInstanceService, UniverInstanceType, UniverPermissionService } from '@univerjs/core';
 import { SheetPermissionService } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
 
@@ -34,7 +34,7 @@ export const SetEditable: ICommand = {
         } else {
             const univerPermissionService = accessor.get(UniverPermissionService);
             const univerInstanceService = accessor.get(IUniverInstanceService);
-            const unitId = univerInstanceService.getCurrentUniverSheetInstance()!.getUnitId();
+            const unitId = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!.getUnitId();
             const editable = univerPermissionService.getEditable(unitId);
             univerPermissionService.setEditable(unitId, !editable);
         }

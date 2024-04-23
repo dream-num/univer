@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, IUniverInstanceService, ThemeService, Tools } from '@univerjs/core';
+import type { Workbook } from '@univerjs/core';
+import { Disposable, ICommandService, IUniverInstanceService, ThemeService, Tools, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import type { ISelectionWithStyle } from '@univerjs/sheets';
 import { SelectionManagerService } from '@univerjs/sheets';
@@ -60,7 +61,7 @@ export class MarkSelectionService extends Disposable implements IMarkSelectionSe
     }
 
     addShape(selection: ISelectionWithStyle, exits: string[] = [], zIndex: number = DEFAULT_Z_INDEX): string | null {
-        const workbook = this._currentService.getCurrentUniverSheetInstance()!;
+        const workbook = this._currentService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
         const subUnitId = workbook.getActiveSheet().getSheetId();
         const id = Tools.generateRandomId();
         this._shapeMap.set(id, {
@@ -76,8 +77,8 @@ export class MarkSelectionService extends Disposable implements IMarkSelectionSe
     }
 
     refreshShapes() {
-        const currentUnitId = this._currentService.getCurrentUniverSheetInstance()!.getUnitId();
-        const currentSubUnitId = this._currentService.getCurrentUniverSheetInstance()!.getActiveSheet().getSheetId();
+        const currentUnitId = this._currentService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!.getUnitId();
+        const currentSubUnitId = this._currentService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!.getActiveSheet().getSheetId();
         this._shapeMap.forEach((shape) => {
             const { unitId, subUnitId, selection, control: oldControl, zIndex } = shape;
 

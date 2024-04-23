@@ -15,7 +15,7 @@
  */
 
 import type { IWorkbookData, Workbook } from '@univerjs/core';
-import { ILogService, IUniverInstanceService, LocaleType, LogLevel, Plugin, PluginType, Univer } from '@univerjs/core';
+import { ILogService, IUniverInstanceService, LocaleType, LogLevel, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
 import { SelectionManagerService, SheetInterceptorService } from '@univerjs/sheets';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
@@ -48,13 +48,14 @@ export function createTestBed(workbookConfig?: IWorkbookData, dependencies?: Dep
     const injector = univer.__getInjector();
 
     class TestPlugin extends Plugin {
-        static override type = PluginType.Sheet;
+        static override pluginName = 'test-plugin';
+        static override type = UniverInstanceType.SHEET;
 
         constructor(
             _config: undefined,
             @Inject(Injector) override readonly _injector: Injector
         ) {
-            super('test-plugin');
+            super();
 
             this._injector = _injector;
         }
@@ -71,7 +72,7 @@ export function createTestBed(workbookConfig?: IWorkbookData, dependencies?: Dep
     const sheet = univer.createUniverSheet(workbookConfig || getTestWorkbookDataDemo());
 
     const univerInstanceService = injector.get(IUniverInstanceService);
-    univerInstanceService.focusUniverInstance('test');
+    univerInstanceService.focusUnit('test');
     const logService = injector.get(ILogService);
 
     logService.setLogLevel(LogLevel.SILENT); // change this to `LogLevel.VERBOSE` to debug tests via logs

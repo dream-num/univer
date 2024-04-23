@@ -22,6 +22,7 @@ import type { IResourceHook } from '../resource-manager/type';
 import { IResourceManagerService } from '../resource-manager/type';
 import { IUniverInstanceService } from '../instance/instance.service';
 import { Disposable, toDisposable } from '../../shared/lifecycle';
+import { UniverInstanceType } from '../../common/unit';
 import type { IResourceLoaderService } from './type';
 
 
@@ -48,7 +49,7 @@ export class ResourceLoaderService extends Disposable implements IResourceLoader
                         break;
                     }
                     case UniverType.UNIVER_SHEET: {
-                        this._univerInstanceService.getAllUniverSheetsInstance().forEach((workbook) => {
+                        this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.SHEET).forEach((workbook) => {
                             const snapshotResource = workbook.getSnapshot().resources || [];
                             const plugin = snapshotResource.find((r) => r.name === hook.pluginName);
                             if (plugin) {
@@ -76,7 +77,7 @@ export class ResourceLoaderService extends Disposable implements IResourceLoader
 
         this.disposeWithMe(
             toDisposable(
-                this._univerInstanceService.sheetAdded$.subscribe((workbook) => {
+                this._univerInstanceService.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.SHEET).subscribe((workbook) => {
                     this._resourceManagerService.loadResources(workbook.getUnitId(), workbook.getSnapshot().resources);
                 })
             )
@@ -84,7 +85,7 @@ export class ResourceLoaderService extends Disposable implements IResourceLoader
 
         this.disposeWithMe(
             toDisposable(
-                this._univerInstanceService.sheetDisposed$.subscribe((workbook) => {
+                this._univerInstanceService.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.SHEET).subscribe((workbook) => {
                     this._resourceManagerService.unloadResources(workbook.getUnitId());
                 })
             )

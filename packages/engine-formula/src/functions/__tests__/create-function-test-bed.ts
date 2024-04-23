@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IWorkbookData } from '@univerjs/core';
+import type { IWorkbookData, Workbook } from '@univerjs/core';
 import {
     CellValueType,
     ILogService,
@@ -23,8 +23,9 @@ import {
     LogLevel,
     ObjectMatrix,
     Plugin,
-    PluginType,
     Univer,
+    UniverInstanceType,
+
 } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
@@ -155,7 +156,8 @@ export function createFunctionTestBed(workbookConfig?: IWorkbookData, dependenci
      * This plugin hooks into Sheet's DI system to expose API to test scripts
      */
     class TestPlugin extends Plugin {
-        static override type = PluginType.Sheet;
+        static override pluginName = 'test-plugin';
+        static override type = UniverInstanceType.SHEET;
 
         private _formulaDataModel: FormulaDataModel | null = null;
 
@@ -163,7 +165,7 @@ export function createFunctionTestBed(workbookConfig?: IWorkbookData, dependenci
             _config: undefined,
             @Inject(Injector) override readonly _injector: Injector
         ) {
-            super('test-plugin');
+            super();
         }
 
         override onStarting(injector: Injector): void {
@@ -205,13 +207,13 @@ export function createFunctionTestBed(workbookConfig?: IWorkbookData, dependenci
     const sheet = univer.createUniverSheet(workbookConfig || getTestWorkbookData());
 
     const univerInstanceService = get(IUniverInstanceService);
-    univerInstanceService.focusUniverInstance('test');
+    univerInstanceService.focusUnit('test');
 
     const logService = get(ILogService);
     logService.setLogLevel(LogLevel.SILENT); // change this to `true` to debug tests via logs
 
     const sheetData: ISheetData = {};
-    const workbook = univerInstanceService.getCurrentUniverSheetInstance()!;
+    const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
     const unitId = workbook.getUnitId();
     const sheetId = workbook.getActiveSheet().getSheetId();
     workbook.getSheets().forEach((sheet) => {

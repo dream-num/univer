@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IMutationInfo, IRange } from '@univerjs/core';
-import { createInterceptorKey, Disposable, ICommandService, InterceptorManager, IResourceManagerService, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, Rectangle, Tools } from '@univerjs/core';
+import type { IMutationInfo, IRange, Workbook } from '@univerjs/core';
+import { createInterceptorKey, Disposable, ICommandService, InterceptorManager, IResourceManagerService, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, Rectangle, Tools, UniverInstanceType } from '@univerjs/core';
 import type { IInsertColMutationParams, IMoveColumnsMutationParams, IMoveRangeMutationParams, IMoveRowsMutationParams, IRemoveRowsMutationParams, IRemoveSheetCommandParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { InsertColMutation, InsertRowMutation, MoveColsMutation, MoveRangeMutation, MoveRowsMutation, RemoveColMutation, RemoveRowMutation, RemoveSheetCommand, SetRangeValuesMutation, SheetInterceptorService } from '@univerjs/sheets';
 import { Inject, Injector } from '@wendellhu/redi';
@@ -396,5 +396,5 @@ export class ConditionalFormattingService extends Disposable {
     }
 }
 
-const getUnitId = (u: IUniverInstanceService) => u.getCurrentUniverSheetInstance()!.getUnitId();
-const getSubUnitId = (u: IUniverInstanceService) => u.getCurrentUniverSheetInstance()!.getActiveSheet().getSheetId();
+const getUnitId = (u: IUniverInstanceService) => u.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!.getUnitId();
+const getSubUnitId = (u: IUniverInstanceService) => u.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!.getActiveSheet().getSheetId();

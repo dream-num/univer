@@ -14,9 +14,6 @@
  * limitations under the License.
  */
 
-/* eslint-disable max-lines-per-function */
-/* eslint-disable complexity */
-
 import type { INumberUnit } from '@univerjs/core';
 import { BooleanNumber, DataStreamTreeTokenType, GridType, SpacingRule } from '@univerjs/core';
 
@@ -103,7 +100,34 @@ function isGlyphGroupEndWithWhiteSpaces(glyphGroup: IDocumentSkeletonGlyph[]) {
         }
     }
 
-    return true;
+    return isInWhiteSpace;
+}
+
+function isGlyphGroupBeyondContentBox(glyphGroup: IDocumentSkeletonGlyph[], left: number, divideWidth: number) {
+    if (glyphGroup.length <= 1) {
+        return false;
+    }
+
+    let width = left;
+    let isBeyondContentBox = false;
+
+    for (const g of glyphGroup) {
+        if (
+            g.content === DataStreamTreeTokenType.SPACE ||
+            g.content === DataStreamTreeTokenType.PARAGRAPH ||
+            g.streamType === DataStreamTreeTokenType.SECTION_BREAK
+        ) {
+            break;
+        }
+        width += g.width;
+
+        if (width > divideWidth) {
+            isBeyondContentBox = true;
+            break;
+        }
+    }
+
+    return isBeyondContentBox;
 }
 
 function _divideOperator(
@@ -145,7 +169,7 @@ function _divideOperator(
                 addGlyphToDivide(divide, glyphGroup, preOffsetLeft);
             } else if (
                 // If a line of text ends with consecutive spaces, the spaces should not be placed on the second line.
-                divideInfo.isLast && isGlyphGroupEndWithWhiteSpaces(glyphGroup)
+                divideInfo.isLast && !isGlyphGroupBeyondContentBox(glyphGroup, preOffsetLeft, divide.width) && isGlyphGroupEndWithWhiteSpaces(glyphGroup)
             ) {
                 addGlyphToDivide(divide, glyphGroup, preOffsetLeft);
             } else if (divide?.glyphGroup.length === 0) {

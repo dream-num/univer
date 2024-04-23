@@ -7,6 +7,8 @@
     "scripts": {
         "build:demo": "node ./esbuild.config.mjs",
         "dev:demo": "node ./esbuild.config.mjs --watch",
+        "dev:e2e": "node ./esbuild.config.mjs --watch --e2e",
+        "build:e2e": "node ./esbuild.config.mjs --e2e",
         "lint:types": "tsc --noEmit"
     },
     "dependencies": {
@@ -20,6 +22,7 @@
         "@univerjs/facade": "workspace:*",
         "@univerjs/find-replace": "workspace:*",
         "@univerjs/icons": "^0.1.44",
+        "@univerjs/image": "workspace:*",
         "@univerjs/rpc": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-conditional-formatting": "workspace:*",

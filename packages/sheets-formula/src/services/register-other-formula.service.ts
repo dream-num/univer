@@ -174,7 +174,7 @@ export class RegisterOtherFormulaService extends Disposable {
             return Promise.resolve(null);
         }
 
-        if (item.status === FormulaResultStatus.SUCCESS || FormulaResultStatus.ERROR) {
+        if (item.status === FormulaResultStatus.SUCCESS || item.status === FormulaResultStatus.ERROR) {
             return Promise.resolve(item);
         }
 
@@ -183,6 +183,13 @@ export class RegisterOtherFormulaService extends Disposable {
                 resolve(cacheMap.get(formulaId));
             });
         });
+    }
+
+    async getTempFormulaResult(unitId: string, subUnitId: string, formulaString: string) {
+        const formulaId = this.registerFormula(unitId, subUnitId, formulaString, { ruleId: 'temp' });
+        const formulaValue = await this.getFormulaValue(unitId, subUnitId, formulaId);
+        this.deleteFormula(unitId, subUnitId, [formulaId]);
+        return formulaValue;
     }
 
     getFormulaValueSync(unitId: string, subUnitId: string, formulaId: string): Nullable<IOtherFormulaResult> {

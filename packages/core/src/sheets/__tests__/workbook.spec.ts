@@ -16,7 +16,7 @@
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import type { Univer } from '../../basics/univer';
+import type { Univer } from '../../univer';
 import type { Workbook } from '../workbook';
 import { createCoreTestBed } from './create-core-test-bed';
 

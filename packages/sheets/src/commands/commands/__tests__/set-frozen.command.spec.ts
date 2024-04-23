@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IWorkbookData, Univer } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, LocaleType, RedoCommand, UndoCommand } from '@univerjs/core';
+import type { IWorkbookData, Univer, Workbook } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, LocaleType, RedoCommand, UndoCommand, UniverInstanceType } from '@univerjs/core';
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
@@ -108,7 +108,7 @@ describe('Test set frozen commands', () => {
     describe('set frozen', () => {
         describe('set frozen', async () => {
             it('correct situation: ', async () => {
-                const workbook = get(IUniverInstanceService).getCurrentUniverSheetInstance()!;
+                const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
                 if (!workbook) throw new Error('This is an error');
 
                 const targetActiveSheet = workbook.getActiveSheet();

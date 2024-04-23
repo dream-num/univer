@@ -16,7 +16,7 @@
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { ICommand, IRange, IWorkbookData, Nullable } from '@univerjs/core';
-import { ICommandService, ILogService, IUniverInstanceService, LocaleType, LogLevel, Plugin, PluginType, Univer } from '@univerjs/core';
+import { ICommandService, ILogService, IUniverInstanceService, LocaleType, LogLevel, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -61,13 +61,14 @@ export function createRefRangeTestBed() {
     const get = injector.get.bind(injector);
 
     class TestPlugin extends Plugin {
-        static override type = PluginType.Sheet;
+        static override pluginName = 'test-plugin';
+        static override type = UniverInstanceType.SHEET;
 
         constructor(
             _config: undefined,
             @Inject(Injector) override readonly _injector: Injector
         ) {
-            super('test-plugin');
+            super();
         }
     }
 
@@ -87,7 +88,7 @@ export function createRefRangeTestBed() {
     const sheet = univer.createUniverSheet(TEST_WORKBOOK_DATA);
 
     const univerInstanceService = get(IUniverInstanceService);
-    univerInstanceService.focusUniverInstance('test');
+    univerInstanceService.focusUnit('test');
 
     const logService = get(ILogService);
     logService.setLogLevel(LogLevel.SILENT);

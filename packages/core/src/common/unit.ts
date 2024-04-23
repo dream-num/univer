@@ -14,21 +14,23 @@
  * limitations under the License.
  */
 
-import { expect, test } from '@playwright/test';
+import { Disposable } from '../shared';
 
-test('has title', async ({ page }) => {
-    await page.goto('https://playwright.dev/');
+/**
+ * Type of built-in univer document instances.
+ */
+export enum UniverInstanceType {
+    UNIVER = 0,
+    DOC = 1,
+    SHEET = 2,
+    SLIDE = 3,
 
-    // Expect a title "to contain" a substring.
-    await expect(page).toHaveTitle(/Playwright/);
-});
+    UNRECOGNIZED = -1,
+}
 
-test('get started link', async ({ page }) => {
-    await page.goto('https://playwright.dev/');
+export type UnitType = UniverInstanceType | number;
 
-    // Click the get started link.
-    await page.getByRole('link', { name: 'Get started' }).click();
-
-    // Expects page to have a heading with the name of Installation.
-    await expect(page.getByRole('heading', { name: 'Installation' })).toBeVisible();
-});
+export abstract class UnitModel<_D = object, T extends UnitType = UnitType> extends Disposable {
+    abstract readonly type: T;
+    abstract getUnitId(): string;
+}

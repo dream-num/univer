@@ -14,24 +14,26 @@
  * limitations under the License.
  */
 
-import { Plugin, PluginType } from '@univerjs/core';
+import { Plugin, PluginService, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
-
+import { UniverFindReplacePlugin } from '@univerjs/find-replace';
 import { SheetsFindReplaceController } from './controllers/sheet-find-replace.controller';
-
-export interface IFindPluginConfig {}
 
 const NAME = 'UNIVER_SHEETS_FIND_REPLACE_PLUGIN';
 
 export class UniverSheetsFindReplacePlugin extends Plugin {
-    static override type = PluginType.Sheet;
+    static override pluginName = NAME;
+    static override type = UniverInstanceType.SHEET;
 
     constructor(
-        _config: Partial<IFindPluginConfig>,
-        @Inject(Injector) protected readonly _injector: Injector
+        _config: unknown,
+        @Inject(Injector) protected readonly _injector: Injector,
+        @Inject(PluginService) private readonly _pluginService: PluginService
     ) {
-        super(NAME);
+        super();
+
+        this._pluginService.registerPlugin(UniverFindReplacePlugin);
     }
 
     override onStarting(injector: Injector): void {

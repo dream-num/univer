@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '../common/type-utils';
+import type { Nullable } from '../common/type-util';
 import { Range } from '../sheets/range';
 import type { IRange } from '../types/interfaces';
 import type { ObjectMatrix } from './object-matrix';

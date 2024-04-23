@@ -15,31 +15,21 @@
  */
 
 import type { Ctor, Injector } from '@wendellhu/redi';
+import { Disposable } from '../../shared';
+import { UniverInstanceType } from '../../common/unit';
 
-export type PluginCtor<T extends Plugin> = Ctor<T> & { type: PluginType };
-
-/** Plugin types for different kinds of business. */
-export enum PluginType {
-    Univer,
-    Doc,
-    Sheet,
-    Slide,
-}
+export type PluginCtor<T extends Plugin> = Ctor<T> & { type: UniverInstanceType; pluginName: string };
 
 /**
  * Plug-in base class, all plug-ins must inherit from this base class. Provide basic methods.
  */
-export abstract class Plugin {
-    static type: PluginType = PluginType.Univer;
+export abstract class Plugin extends Disposable {
+    static pluginName: string = '';
+    static type: UniverInstanceType = UniverInstanceType.UNRECOGNIZED;
 
     protected abstract _injector: Injector;
 
-    private _name: string;
-
-    protected constructor(name: string) {
-        this._name = name;
-    }
-
+    // eslint-disable-next-line unused-imports/no-unused-vars
     onStarting(injector: Injector): void {}
 
     onReady(): void {}
@@ -48,15 +38,18 @@ export abstract class Plugin {
 
     onSteady(): void {}
 
-    onDestroy(): void {}
+    getUniverInstanceType(): UniverInstanceType {
+        return (this.constructor as typeof Plugin).type;
+    }
 
     getPluginName(): string {
-        return this._name;
+        return (this.constructor as typeof Plugin).pluginName;
     }
 }
 
 interface IPluginRegistryItem {
     plugin: PluginCtor<Plugin>;
+    // eslint-disable-next-line ts/no-explicit-any
     options: any;
 }
 
@@ -85,22 +78,18 @@ export class PluginStore {
  * Store plugin registry items.
  */
 export class PluginRegistry {
-    private readonly _pluginsRegisteredByBusiness = new Map<PluginType, [IPluginRegistryItem]>();
+    private _pluginsRegistered: IPluginRegistryItem[] = [];
 
+    // eslint-disable-next-line ts/no-explicit-any
     registerPlugin(pluginCtor: PluginCtor<any>, options: any) {
-        const type = pluginCtor.type;
-        if (!this._pluginsRegisteredByBusiness.has(type)) {
-            this._pluginsRegisteredByBusiness.set(type, [] as unknown[] as [IPluginRegistryItem]);
-        }
-
-        this._pluginsRegisteredByBusiness.get(type)!.push({ plugin: pluginCtor, options });
+        this._pluginsRegistered.push({ plugin: pluginCtor, options });
     }
 
-    getRegisterPlugins(type: PluginType): [IPluginRegistryItem] {
-        return this._pluginsRegisteredByBusiness.get(type) || ([] as unknown[] as [IPluginRegistryItem]);
+    getRegisterPlugins(): IPluginRegistryItem[] {
+        return this._pluginsRegistered.slice();
     }
 
-    clearPluginsOfType(type: PluginType): void {
-        this._pluginsRegisteredByBusiness.delete(type);
+    removePlugins(): void {
+        this._pluginsRegistered = [];
     }
 }

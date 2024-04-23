@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { Univer } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, RedoCommand, UndoCommand } from '@univerjs/core';
+import type { Univer, Workbook } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, RedoCommand, UndoCommand, UniverInstanceType } from '@univerjs/core';
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
@@ -61,7 +61,7 @@ describe('Test remove worksheet commands', () => {
                 ).toBeFalsy();
             });
             it('will be working if there are more than one sheet', async () => {
-                const workbook = get(IUniverInstanceService).getCurrentUniverSheetInstance()!;
+                const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
                 if (!workbook) throw new Error('This is an error');
 
                 const targetActiveSheet = workbook.getActiveSheet();

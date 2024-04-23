@@ -78,16 +78,29 @@ export class DataValidationModel<T extends IDataValidationRule = IDataValidation
         return manager;
     }
 
-    addRule(unitId: string, subUnitId: string, rule: T, index?: number) {
+    private _addRuleSideEffect(unitId: string, subUnitId: string, rule: T) {
+        const manager = this.ensureManager(unitId, subUnitId);
+        const oldRule = manager.getRuleById(rule.uid);
+        if (oldRule) {
+            return;
+        }
+        this._ruleChange$.next({
+            rule,
+            type: 'add',
+            unitId,
+            subUnitId,
+        });
+    }
+
+    addRule(unitId: string, subUnitId: string, rule: T | T[], index?: number) {
         try {
             const manager = this.ensureManager(unitId, subUnitId);
-            manager.addRule(rule, index);
-            this._ruleChange$.next({
-                rule: rule as any,
-                type: 'add',
-                unitId,
-                subUnitId,
+            const rules = Array.isArray(rule) ? rule : [rule];
+            rules.forEach((item) => {
+                this._addRuleSideEffect(unitId, subUnitId, item);
             });
+
+            manager.addRule(rule, index);
         } catch (error) {
             this._logService.error(error);
         }
@@ -113,13 +126,15 @@ export class DataValidationModel<T extends IDataValidationRule = IDataValidation
         try {
             const manager = this.ensureManager(unitId, subUnitId);
             const oldRule = manager.getRuleById(ruleId);
-            manager.removeRule(ruleId);
-            this._ruleChange$.next({
-                rule: oldRule,
-                type: 'remove',
-                unitId,
-                subUnitId,
-            });
+            if (oldRule) {
+                manager.removeRule(ruleId);
+                this._ruleChange$.next({
+                    rule: oldRule,
+                    type: 'remove',
+                    unitId,
+                    subUnitId,
+                });
+            }
         } catch (error) {
             this._logService.error(error);
         }

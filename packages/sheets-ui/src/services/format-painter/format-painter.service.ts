@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICellData, IRange, IStyleData } from '@univerjs/core';
-import { Disposable, IUniverInstanceService, ObjectMatrix } from '@univerjs/core';
+import type { ICellData, IRange, IStyleData, Workbook } from '@univerjs/core';
+import { Disposable, IUniverInstanceService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
 import { getCellInfoInMergeData } from '@univerjs/engine-render';
 import { SelectionManagerService, SetRangeValuesMutation } from '@univerjs/sheets';
 import { createIdentifier, Inject } from '@wendellhu/redi';
@@ -97,10 +97,10 @@ export class FormatPainterService extends Disposable implements IFormatPainterSe
         const range = selection?.range;
         if (!range) return;
         const { startRow, endRow, startColumn, endColumn } = range;
-        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
+        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
         const worksheet = workbook?.getActiveSheet();
         const cellData = worksheet.getCellMatrix();
-        const mergeData = this._univerInstanceService.getCurrentUniverSheetInstance()!.getActiveSheet().getMergeData();
+        const mergeData = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!.getActiveSheet().getMergeData();
 
         const styles = workbook.getStyles();
         const stylesMatrix = new ObjectMatrix<IStyleData>();

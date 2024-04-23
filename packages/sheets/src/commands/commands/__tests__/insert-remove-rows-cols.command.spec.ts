@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, IRange, IStyleData, IWorkbookData, Nullable, Univer } from '@univerjs/core';
+import type { ICellData, IRange, IStyleData, IWorkbookData, Nullable, Univer, Workbook } from '@univerjs/core';
 import {
     ICommandService,
     IUniverInstanceService,
@@ -23,6 +23,7 @@ import {
     RedoCommand,
     Tools,
     UndoCommand,
+    UniverInstanceType,
 } from '@univerjs/core';
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -142,14 +143,14 @@ describe('Test insert and remove rows cols commands', () => {
 
     function getRowCount(): number {
         const currentService = get(IUniverInstanceService);
-        const workbook = currentService.getCurrentUniverSheetInstance()!;
+        const workbook = currentService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
         const worksheet = workbook.getActiveSheet();
         return worksheet.getRowCount();
     }
 
     function getColCount(): number {
         const currentService = get(IUniverInstanceService);
-        const workbook = currentService.getCurrentUniverSheetInstance()!;
+        const workbook = currentService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
         const worksheet = workbook.getActiveSheet();
         return worksheet.getColumnCount();
     }
@@ -160,21 +161,21 @@ describe('Test insert and remove rows cols commands', () => {
 
     function getCellInfo(row: number, col: number): Nullable<ICellData> {
         const currentService = get(IUniverInstanceService);
-        const workbook = currentService.getCurrentUniverSheetInstance()!;
+        const workbook = currentService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
         const worksheet = workbook.getActiveSheet();
         return worksheet.getCellMatrix().getValue(row, col);
     }
 
     function getMergedInfo(row: number, col: number): Nullable<IRange> {
         const currentService = get(IUniverInstanceService);
-        const workbook = currentService.getCurrentUniverSheetInstance()!;
+        const workbook = currentService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
         const worksheet = workbook.getActiveSheet();
         return worksheet.getMergedCell(row, col);
     }
 
     function getMergeData() {
         const currentService = get(IUniverInstanceService);
-        const workbook = currentService.getCurrentUniverSheetInstance()!;
+        const workbook = currentService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
         const worksheet = workbook.getActiveSheet();
         return worksheet.getMergeData();
     }

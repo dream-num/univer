@@ -76,7 +76,7 @@ export class DesktopLayoutService extends Disposable implements ILayoutService {
     }
 
     focus(): void {
-        const currentFocused = this._univerInstanceService.getFocusedUniverInstance();
+        const currentFocused = this._univerInstanceService.getFocusedUnit();
         if (!currentFocused) {
             return;
         }

@@ -15,7 +15,7 @@
  */
 
 import type { EventState, IColorStyle, ISlidePage, Nullable, SlideDataModel } from '@univerjs/core';
-import { debounce, getColorStyle, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
+import { debounce, getColorStyle, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import type { IWheelEvent } from '@univerjs/engine-render';
 import {
     EVENT_TYPE,
@@ -57,17 +57,17 @@ export class CanvasView extends RxDisposable {
             this._create(unitId);
         });
 
-        this._univerInstanceService.currentSlide$.pipe(takeUntil(this.dispose$)).subscribe((slideModel) => {
+        this._univerInstanceService.getCurrentTypeOfUnit$<SlideDataModel>(UniverInstanceType.SLIDE).pipe(takeUntil(this.dispose$)).subscribe((slideModel) => {
             this._create(slideModel?.getUnitId());
         });
 
-        this._univerInstanceService.getAllUniverSlidesInstance().forEach((slideModel) => {
+        this._univerInstanceService.getAllUnitsForType<SlideDataModel>(UniverInstanceType.SLIDE).forEach((slideModel) => {
             this._create(slideModel.getUnitId());
         });
     }
 
     activePage(pageId?: string) {
-        const model = this._univerInstanceService.getCurrentUniverSlideInstance()!;
+        const model = this._univerInstanceService.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.SLIDE)!;
         let page: Nullable<ISlidePage>;
         if (pageId) {
             page = model.getPage(pageId);
@@ -122,8 +122,7 @@ export class CanvasView extends RxDisposable {
             return;
         }
 
-        const model = this._univerInstanceService.getUniverSlideInstance(unitId);
-
+        const model = this._univerInstanceService.getUnit(unitId, UniverInstanceType.SLIDE);
         if (model == null) {
             return;
         }
@@ -134,12 +133,12 @@ export class CanvasView extends RxDisposable {
     }
 
     private _currentRender() {
-        const slideDataModel = this._univerInstanceService.getCurrentUniverSlideInstance()!;
+        const slideDataModel = this._univerInstanceService.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.SLIDE)!;
         return this._renderManagerService.getRenderById(slideDataModel.getUnitId());
     }
 
     private _addNewRender(unitId: string) {
-        const slideDataModel = this._univerInstanceService.getUniverSlideInstance(unitId);
+        const slideDataModel = this._univerInstanceService.getUnit<SlideDataModel>(unitId, UniverInstanceType.SLIDE);
 
         if (slideDataModel == null) {
             return;
@@ -259,7 +258,7 @@ export class CanvasView extends RxDisposable {
     }, 300);
 
     private _createSlide(mainScene: Scene) {
-        const model = this._univerInstanceService.getCurrentUniverSlideInstance()!;
+        const model = this._univerInstanceService.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.SLIDE)!;
 
         const { width: sceneWidth, height: sceneHeight } = mainScene;
 
@@ -285,7 +284,7 @@ export class CanvasView extends RxDisposable {
     }
 
     private _addBackgroundRect(scene: Scene, fill: IColorStyle) {
-        const model = this._univerInstanceService.getCurrentUniverSlideInstance()!;
+        const model = this._univerInstanceService.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.SLIDE)!;
 
         const pageSize = model.getPageSize();
 
@@ -377,7 +376,7 @@ export class CanvasView extends RxDisposable {
     }
 
     createThumbs() {
-        const slideDataModel = this._univerInstanceService.getCurrentUniverSlideInstance()!;
+        const slideDataModel = this._univerInstanceService.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.SLIDE)!;
 
         const pageOrder = slideDataModel.getPageOrder();
 

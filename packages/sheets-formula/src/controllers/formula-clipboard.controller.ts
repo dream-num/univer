@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, IMutationInfo, IRange } from '@univerjs/core';
+import type { ICellData, IMutationInfo, IRange, Workbook } from '@univerjs/core';
 import {
     Disposable,
     isFormulaId,
@@ -24,6 +24,7 @@ import {
     ObjectMatrix,
     OnLifecycle,
     Tools,
+    UniverInstanceType,
 } from '@univerjs/core';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
@@ -90,7 +91,7 @@ export class FormulaClipboardController extends Disposable {
         };
         const pastedRange = pasteTo.range;
         const matrix = data;
-        const workbook = this._currentUniverSheet.getCurrentUniverSheetInstance()!;
+        const workbook = this._currentUniverSheet.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
         const unitId = workbook.getUnitId();
         const subUnitId = workbook.getActiveSheet().getSheetId();
 

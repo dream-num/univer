@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Univer } from '../../basics/univer';
+import { Univer } from '../../univer';
 import { IUniverInstanceService } from '../../services/instance/instance.service';
 import { ILogService, LogLevel } from '../../services/log/log.service';
 import { LocaleType } from '../../types/enum/locale-type';
@@ -52,7 +52,7 @@ export function createCoreTestBed(workbookConfig?: IWorkbookData) {
 
     const sheet = univer.createUniverSheet(workbookConfig || TEST_WORKBOOK_DATA);
     const univerInstanceService = get(IUniverInstanceService);
-    univerInstanceService.focusUniverInstance(workbookConfig?.id ?? 'test');
+    univerInstanceService.focusUnit(workbookConfig?.id ?? 'test');
 
     const logService = get(ILogService);
     logService.setLogLevel(LogLevel.SILENT);

@@ -14,3 +14,33 @@
  * limitations under the License.
  */
 
+import type { Dependency } from '@wendellhu/redi';
+import { Inject, Injector } from '@wendellhu/redi';
+import { Plugin } from '@univerjs/core';
+import { SheetsThreadCommentController } from './controllers/sheets-thread-comment.controller';
+import { SheetsThreadCommentRefRangeController } from './controllers/sheets-thread-comment-ref-range.controller';
+import { SheetsThreadCommentModel } from './models/sheets-thread-comment.model';
+import { SheetsThreadCommentPanelService } from './services/sheets-thread-comment-panel.service';
+import { SheetsThreadCommentPopupService } from './services/sheets-thread-comment-popup.service';
+
+export class SheetsThreadPlugin extends Plugin {
+    constructor(
+        _config: unknown,
+        @Inject(Injector) readonly _injector: Injector
+    ) {
+        super();
+    }
+
+    override onStarting(): void {
+        ([
+            [SheetsThreadCommentModel],
+            [SheetsThreadCommentController],
+            [SheetsThreadCommentRefRangeController],
+
+            [SheetsThreadCommentPanelService],
+            [SheetsThreadCommentPopupService],
+        ] as Dependency[]).forEach((dep) => {
+            this._injector.add(dep);
+        });
+    }
+}

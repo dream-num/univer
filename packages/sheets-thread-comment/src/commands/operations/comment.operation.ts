@@ -14,29 +14,74 @@
  * limitations under the License.
  */
 
-import { CommandType, type ICommand } from '@univerjs/core';
+import type { ICommand, Workbook } from '@univerjs/core';
+import { CommandType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import type { ISheetLocation } from '@univerjs/sheets';
+import { SelectionManagerService } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
+import { ISidebarService } from '@univerjs/ui';
+import { SheetsThreadCommentPopupService } from '../../services/sheets-thread-comment-popup.service';
+import { THREAD_COMMENT_PANEL } from '../../types/const';
+import { SheetsThreadCommentPanelService } from '../../services/sheets-thread-comment-panel.service';
 
-export const ToggleAddSheetCommentModalOperation: ICommand = {
+export const ShowAddSheetCommentModalOperation: ICommand = {
     type: CommandType.OPERATION,
     id: 'sheets.operation.toggle-comment-modal',
-    handler(accessor, params) {
+    handler(accessor) {
+        const selectionManagerService = accessor.get(SelectionManagerService);
+        const univerInstanceService = accessor.get(IUniverInstanceService);
+        const sheetsThreadCommentPopupService = accessor.get(SheetsThreadCommentPopupService);
+        const activeCell = selectionManagerService.getFirst()?.primary;
+        const current = selectionManagerService.getCurrent();
+
+        if (!current || !activeCell) {
+            return false;
+        }
+
+        const { unitId, sheetId } = current;
+        const workbook = univerInstanceService.getUnit<Workbook>(current.unitId, UniverInstanceType.SHEET);
+        if (!workbook) {
+            return false;
+        }
+
+        const worksheet = workbook.getSheetBySheetId(sheetId);
+        if (!worksheet) {
+            return false;
+        }
+        const location: ISheetLocation = {
+            workbook,
+            worksheet,
+            unitId,
+            subUnitId: sheetId,
+            row: activeCell.actualRow,
+            col: activeCell.startColumn,
+        };
+
+        sheetsThreadCommentPopupService.showPopup(location);
         return true;
     },
 };
 
-export const OpenSheetCommentPanelOperation: ICommand = {
-    id: 'sheets.operation.open-comment-panel',
+export const ToggleSheetCommentPanelOperation: ICommand = {
+    id: 'sheets.operation.toggle-comment-panel',
     type: CommandType.OPERATION,
     handler(accessor: IAccessor) {
+        const sidebarService = accessor.get(ISidebarService);
+        const panelService = accessor.get(SheetsThreadCommentPanelService);
+
+        if (panelService.visible) {
+            sidebarService.close();
+            panelService.setVisible(false);
+        } else {
+            sidebarService.open({
+                header: { title: 'sheetThreadComment.panel.title' },
+                children: { label: THREAD_COMMENT_PANEL },
+                width: 280,
+            });
+            panelService.setVisible(true);
+        }
+
         return true;
     },
 };
 
-export const CloseSheetCommentPanelOperation: ICommand = {
-    id: 'sheets.operation.close-comment-panel',
-    type: CommandType.OPERATION,
-    handler(accessor: IAccessor) {
-        return true;
-    },
-};

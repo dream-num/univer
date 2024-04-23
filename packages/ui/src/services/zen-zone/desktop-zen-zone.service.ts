@@ -25,8 +25,14 @@ import type { IZenZoneService } from './zen-zone.service';
 export class DesktopZenZoneService implements IZenZoneService {
     readonly visible$ = new Subject<boolean>();
     readonly componentKey$ = new Subject<string>();
+    private _visible = false;
+
+    get visible() {
+        return this._visible;
+    }
 
     constructor(@Inject(ComponentManager) private readonly _componentManager: ComponentManager) {}
+
 
     set(key: string, component: ForwardRefExoticComponent<any>): IDisposable {
         this._componentManager.register(key, component);
@@ -40,10 +46,12 @@ export class DesktopZenZoneService implements IZenZoneService {
     }
 
     open(): void {
+        this._visible = true;
         this.visible$.next(true);
     }
 
     close() {
+        this._visible = false;
         this.visible$.next(false);
     }
 }

@@ -15,11 +15,22 @@
  */
 
 import { Disposable } from '@univerjs/core';
+import { IMenuService } from '@univerjs/ui';
+import { Inject, Injector } from '@wendellhu/redi';
+import { threadCommentMenu } from './menu';
 
 export class SheetsThreadCommentController extends Disposable {
     constructor(
-
+        @IMenuService private readonly _menuService: IMenuService,
+        @Inject(Injector) private readonly _injector: Injector
     ) {
         super();
+        this._initMenu();
+    }
+
+    private _initMenu() {
+        [threadCommentMenu].forEach((menu) => {
+            this._menuService.addMenuItem(menu(this._injector));
+        });
     }
 }

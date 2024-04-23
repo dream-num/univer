@@ -14,15 +14,4 @@
  * limitations under the License.
  */
 
-import { type IMenuItem, MenuItemType, MenuPosition } from '@univerjs/ui';
-import type { IAccessor } from '@wendellhu/redi';
-import { ShowAddSheetCommentModalOperation } from '../commands/operations/comment.operation';
-
-export const threadCommentMenu = (accessor: IAccessor) => {
-    return {
-        id: ShowAddSheetCommentModalOperation.id,
-        type: MenuItemType.BUTTON,
-        title: '',
-        positions: MenuPosition.CONTEXT_MENU,
-    };
-};
+export default {};

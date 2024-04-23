@@ -14,15 +14,20 @@
  * limitations under the License.
  */
 
-import { type IMenuItem, MenuItemType, MenuPosition } from '@univerjs/ui';
-import type { IAccessor } from '@wendellhu/redi';
-import { ShowAddSheetCommentModalOperation } from '../commands/operations/comment.operation';
+import { Subject } from 'rxjs';
 
-export const threadCommentMenu = (accessor: IAccessor) => {
-    return {
-        id: ShowAddSheetCommentModalOperation.id,
-        type: MenuItemType.BUTTON,
-        title: '',
-        positions: MenuPosition.CONTEXT_MENU,
-    };
-};
+export class SheetsThreadCommentPanelService {
+    private _visible = false;
+    private _visible$ = new Subject();
+
+    visible$ = this._visible$.asObservable();
+
+    get visible() {
+        return this._visible;
+    }
+
+    setVisible(visible: boolean) {
+        this._visible = visible;
+        this._visible$.next(visible);
+    }
+}

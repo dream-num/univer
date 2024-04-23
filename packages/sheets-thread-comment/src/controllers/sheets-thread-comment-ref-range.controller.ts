@@ -155,7 +155,7 @@ export class SheetsThreadCommentRefRangeController extends Disposable {
                                         break;
                                     }
                                     case 'delete': {
-                                        const disposable = this._disposableMap.get(this._getIdWithUnitId(unitId, subUnitId, rule!.uid));
+                                        const disposable = this._disposableMap.get(this._getIdWithUnitId(unitId, subUnitId, option.payload.commentId));
                                         disposable?.dispose();
                                         break;
                                     }
@@ -175,8 +175,11 @@ export class SheetsThreadCommentRefRangeController extends Disposable {
                                         break;
                                     }
                                 }
-                            })));
-                }));
+                            })
+                        )
+                    );
+                })
+        );
 
         this.disposeWithMe(toDisposable(() => {
             this._disposableMap.forEach((item) => {

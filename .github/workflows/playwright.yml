@@ -30,7 +30,7 @@ jobs:
 
             # build the example locally and run from the built files
             - name: Build E2E Client
-              run: pnpm run build:e2e
+              run: pnpm build:e2e
 
             - name: Run Playwright Tests
               run: pnpm exec playwright test

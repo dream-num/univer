@@ -491,6 +491,7 @@ export function createAndUpdateBlockAnchor(
     if (!drawingAnchor) {
         return;
     }
+
     if (drawingAnchor.has(paragraphIndex)) {
         const anchor = drawingAnchor.get(paragraphIndex);
         anchor?.elements.push(line);

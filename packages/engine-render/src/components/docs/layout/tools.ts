@@ -625,12 +625,14 @@ export function getPositionVertical(
         }
     } else if (posOffset) {
         let absoluteTop = 0;
+        const { marginTop } = page;
+
         if (relativeFrom === ObjectRelativeFromV.LINE) {
-            absoluteTop = lineTop || 0 + posOffset;
+            absoluteTop = (lineTop || 0) + posOffset;
         } else if (relativeFrom === ObjectRelativeFromV.TOP_MARGIN) {
             // TODO
         } else if (relativeFrom === ObjectRelativeFromV.MARGIN) {
-            // TODO
+            absoluteTop = posOffset;
         } else if (relativeFrom === ObjectRelativeFromV.BOTTOM_MARGIN) {
             // TODO
         } else if (relativeFrom === ObjectRelativeFromV.INSIDE_MARGIN) {
@@ -638,7 +640,7 @@ export function getPositionVertical(
         } else if (relativeFrom === ObjectRelativeFromV.OUTSIDE_MARGIN) {
             // TODO
         } else if (relativeFrom === ObjectRelativeFromV.PAGE) {
-            absoluteTop = posOffset;
+            absoluteTop = posOffset - marginTop;
         } else if (relativeFrom === ObjectRelativeFromV.PARAGRAPH) {
             absoluteTop = (isPageBreak ? 0 : blockAnchorTop == null ? lineTop : blockAnchorTop) + posOffset;
         }

@@ -170,6 +170,9 @@ export class FilterModel extends Disposable {
         if (!criteria) {
             this._removeCriteria(col);
             this._rebuildAlreadyFilteredOutRowsWithCache();
+            if (reCalc) {
+                this._reCalcAllColumns();
+            }
             this._emit();
             this._emitHasCriteria();
             return;

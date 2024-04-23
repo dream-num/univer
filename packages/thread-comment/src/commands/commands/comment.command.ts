@@ -17,15 +17,16 @@
 import { CommandType, type ICommand } from '@univerjs/core';
 import type { IThreadComment } from '../../types/interfaces/i-thread-comment';
 import { ThreadCommentModel } from '../../models/thread-comment.model';
+import type { IUpdateCommentPayload } from '../mutations/comment.mutation';
 
-export interface IAddCommentMutationParams {
+export interface IAddCommentCommandParams {
     unitId: string;
     subUnitId: string;
     comment: IThreadComment;
 }
 
-export const AddCommentMutation: ICommand<IAddCommentMutationParams> = {
-    id: 'thread-comment.mutation.add-comment',
+export const AddCommentCommand: ICommand<IAddCommentCommandParams> = {
+    id: 'thread-comment.command.add-comment',
     type: CommandType.MUTATION,
     handler(accessor, params) {
         if (!params) {
@@ -38,21 +39,16 @@ export const AddCommentMutation: ICommand<IAddCommentMutationParams> = {
     },
 };
 
-export interface IUpdateCommentPayload {
-    commentId: string;
-    text: string;
-    attachment?: string[];
-}
 
-export interface IUpdateCommentMutationParams {
+export interface IUpdateCommentCommandParams {
     unitId: string;
     subUnitId: string;
     payload: IUpdateCommentPayload;
 }
 
 
-export const UpdateCommentMutation: ICommand<IUpdateCommentMutationParams> = {
-    id: 'thread-comment.mutation.update-comment',
+export const UpdateCommentCommand: ICommand<IUpdateCommentCommandParams> = {
+    id: 'thread-comment.command.update-comment',
     type: CommandType.MUTATION,
     handler(accessor, params) {
         if (!params) {
@@ -70,14 +66,14 @@ export interface IUpdateCommentRefPayload {
     ref: string;
 }
 
-export interface IUpdateCommentRefMutationParams {
+export interface IUpdateCommentPositionCommandParams {
     unitId: string;
     subUnitId: string;
     payload: IUpdateCommentRefPayload;
 }
 
-export const UpdateCommentRefMutation: ICommand<IUpdateCommentRefMutationParams> = {
-    id: 'thread-comment.mutation.update-comment',
+export const UpdateCommentPositionCommand: ICommand<IUpdateCommentPositionCommandParams> = {
+    id: 'thread-comment.command.update-comment',
     type: CommandType.MUTATION,
     handler(accessor, params) {
         if (!params) {
@@ -91,15 +87,15 @@ export const UpdateCommentRefMutation: ICommand<IUpdateCommentRefMutationParams>
 };
 
 
-export interface IResolveCommentMutationParams {
+export interface IResolveCommentCommandParams {
     unitId: string;
     subUnitId: string;
     commentId: string;
     resolved: boolean;
 }
 
-export const ResolveCommentMutation: ICommand<IResolveCommentMutationParams> = {
-    id: 'thread-comment.mutation.resolve-comment',
+export const ResolveCommentCommand: ICommand<IResolveCommentCommandParams> = {
+    id: 'thread-comment.command.resolve-comment',
     type: CommandType.MUTATION,
     handler(accessor, params) {
         if (!params) {
@@ -113,14 +109,14 @@ export const ResolveCommentMutation: ICommand<IResolveCommentMutationParams> = {
 };
 
 
-export interface IDeleteCommentMutationParams {
+export interface IDeleteCommentCommandParams {
     unitId: string;
     subUnitId: string;
     commentId: string;
 }
 
-export const DeleteCommentMutation: ICommand<IDeleteCommentMutationParams> = {
-    id: 'thread-comment.mutation.delete-comment',
+export const DeleteCommentCommand: ICommand<IDeleteCommentCommandParams> = {
+    id: 'thread-comment.command.delete-comment',
     type: CommandType.MUTATION,
     handler(accessor, params) {
         if (!params) {

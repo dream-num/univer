@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
-export { ThreadCommentModel } from './models/thread-comment.model';
+export { ThreadCommentModel, type CommentUpdate } from './models/thread-comment.model';
 export { ThreadCommentResourceController } from './controllers/tc-resource.controller';
 export { TC_PLUGIN_NAME } from './types/const';
 export { AddCommentMutation, DeleteCommentMutation, ResolveCommentMutation, UpdateCommentMutation } from './commands/mutations/comment.mutation';
 export type { IAddCommentMutationParams, IDeleteCommentMutationParams, IResolveCommentMutationParams, IUpdateCommentMutationParams, IUpdateCommentPayload } from './commands/mutations/comment.mutation';
 export type { IThreadComment } from './types/interfaces/i-thread-comment';
+export { AddCommentCommand, DeleteCommentCommand, ResolveCommentCommand, UpdateCommentCommand } from './commands/commands/comment.command';
+export type { IAddCommentCommandParams, IDeleteCommentCommandParams, IResolveCommentCommandParams, IUpdateCommentCommandParams } from './commands/commands/comment.command';

@@ -20,6 +20,7 @@ import { ThreadCommentModel } from './models/thread-comment.model';
 import { ThreadCommentResourceController } from './controllers/tc-resource.controller';
 import { TC_PLUGIN_NAME } from './types/const';
 import { AddCommentMutation, DeleteCommentMutation, ResolveCommentMutation, UpdateCommentMutation } from './commands/mutations/comment.mutation';
+import { AddCommentCommand, DeleteCommentCommand, ResolveCommentCommand, UpdateCommentCommand } from './commands/commands/comment.command';
 
 export class ThreadCommentPlugin extends Plugin {
     static override pluginName = TC_PLUGIN_NAME;
@@ -45,6 +46,11 @@ export class ThreadCommentPlugin extends Plugin {
         );
 
         [
+            AddCommentCommand,
+            UpdateCommentCommand,
+            DeleteCommentCommand,
+            ResolveCommentCommand,
+
             AddCommentMutation,
             UpdateCommentMutation,
             DeleteCommentMutation,

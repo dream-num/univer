@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import type { IWorkbookData } from '@univerjs/core';
-import { ICommandService, LocaleService, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
+import type { IOperation, IWorkbookData } from '@univerjs/core';
+import { CommandType, ICommandService, LocaleService, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
 import { RefRangeService, SelectionManagerService, SheetInterceptorService } from '@univerjs/sheets';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it, vitest } from 'vitest';
 import { CustomFilterOperator, SheetsFilterService, UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
+import type { IEditorBridgeServiceVisibleParam } from '@univerjs/sheets-ui';
 import { ByConditionsModel, ByValuesModel, FilterBy, SheetsFilterPanelService } from '../sheets-filter-panel.service';
 import type { IOpenFilterPanelOperationParams } from '../../commands/sheets-filter.operation';
 import { CloseFilterPanelOperation, OpenFilterPanelOperation } from '../../commands/sheets-filter.operation';
@@ -29,6 +30,16 @@ import type { IFilterConditionFormParams } from '../../models/conditions';
 import { FilterConditionItems } from '../../models/conditions';
 import { ExtendCustomFilterOperator } from '../../models/extended-operators';
 import { SetSheetsFilterCriteriaCommand } from '../../commands/sheets-filter.command';
+
+
+const SetCellEditVisibleOperation: IOperation<IEditorBridgeServiceVisibleParam> = {
+    id: 'sheet.operation.set-cell-edit-visible',
+    type: CommandType.OPERATION,
+    handler: () => {
+        return true;
+    },
+};
+
 
 function createSheetsFilterPanelServiceTestBed(workbookData: IWorkbookData) {
     const univer = new Univer();
@@ -70,6 +81,7 @@ function createSheetsFilterPanelServiceTestBed(workbookData: IWorkbookData) {
         OpenFilterPanelOperation,
         CloseFilterPanelOperation,
         SetSheetsFilterCriteriaCommand,
+        SetCellEditVisibleOperation,
     ].forEach((command) => commandService.registerCommand(command));
 
     return { univer, get };

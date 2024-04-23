@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { Dependency } from '@wendellhu/redi';
 import { Injector } from '@wendellhu/redi';
 
 import { DocumentDataModel } from './docs/data-model/document-data-model';
@@ -59,10 +60,15 @@ export class Univer {
         return this._injector.get(PluginService);
     }
 
-    constructor(univerData: Partial<IUniverData> = {}) {
-        const injector = this._injector = createUniverInjector();
+    /**
+     * Create a Univer instance.
+     * @param config Configuration data for Univer
+     * @param parentInjector An optional parent injector of the Univer injector. For more information, see https://redi.wendell.fun/docs/hierarchy.
+     */
+    constructor(config: Partial<IUniverData> = {}, parentInjector?: Injector) {
+        const injector = this._injector = createUniverInjector(parentInjector);
 
-        const { theme, locale, locales, logLevel } = univerData;
+        const { theme, locale, locales, logLevel } = config;
 
         theme && this._injector.get(ThemeService).setTheme(theme);
         locales && this._injector.get(LocaleService).load(locales);
@@ -153,8 +159,8 @@ export class Univer {
     }
 }
 
-function createUniverInjector() {
-    const injector = new Injector([
+function createUniverInjector(parentInjector?: Injector) {
+    const dependencies: Dependency[] = ([
         [ErrorService],
         [LocaleService],
         [ThemeService],
@@ -174,5 +180,5 @@ function createUniverInjector() {
         [IResourceLoaderService, { useClass: ResourceLoaderService, lazy: true }],
     ]);
 
-    return injector;
+    return parentInjector ? parentInjector.createChild(dependencies) : new Injector(dependencies);
 }

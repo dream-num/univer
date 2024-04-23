@@ -96,6 +96,7 @@ const ctx = await esbuild[args.watch ? 'context' : 'build']({
         'process.env.GIT_COMMIT_HASH': `"${gitCommitHash}"`,
         'process.env.GIT_REF_NAME': `"${gitRefName}"`,
         'process.env.BUILD_TIME': `"${new Date().toISOString()}"`,
+        'process.env.IS_E2E': args.e2e ? 'true' : 'false',
     },
 });
 

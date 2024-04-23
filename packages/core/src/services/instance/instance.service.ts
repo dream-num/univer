@@ -69,7 +69,7 @@ export interface IUniverInstanceService {
     /** @deprecated */
     changeDoc(unitId: string, doc: DocumentDataModel): void;
 
-    getUnit<T extends UnitModel>(id: string, type: UnitType): Nullable<T>;
+    getUnit<T extends UnitModel>(id: string, type?: UnitType): Nullable<T>;
     getAllUnitsForType<T>(type: UnitType): T[];
     getUnitType(unitId: string): UnitType;
 
@@ -119,7 +119,7 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
         };
     }
 
-    private readonly _currentUnits$ = new BehaviorSubject<{ [type: UnitType]: UnitModel }>({});
+    private readonly _currentUnits$ = new BehaviorSubject<{ [type: UnitType]: Nullable<UnitModel> }>({});
     readonly currentUnits$ = this._currentUnits$.asObservable();
     getCurrentTypeOfUnit$<T>(type: number): Observable<Nullable<T>> {
         return this.currentUnits$.pipe(map((units) => units[type] ?? null), distinctUntilChanged()) as Observable<Nullable<T>>;
@@ -160,8 +160,10 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
         return this.unitDisposed$.pipe(filter((unit) => unit.type === type)) as Observable<T>;
     }
 
-    getUnit<T>(id: string, _type: UnitType): Nullable<T> {
-        return this._getUnitById(id)?.[0] as Nullable<T>;
+    getUnit<T extends UnitModel = UnitModel>(id: string, type?: UnitType): Nullable<T> {
+        const unit = this._getUnitById(id)?.[0] as Nullable<T>;
+        if (type && unit?.type !== type) return null;
+        return unit;
     }
 
     getCurrentUniverSheetInstance<Workbook>(): Nullable<Workbook> {
@@ -244,6 +246,9 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
         units.splice(index, 1);
 
         this._unitDisposed$.next(unit);
+        this._currentUnits$.next({ ...this._currentUnits$.getValue(), [type]: null });
+        this._focused$.next(null);
+
         return true;
     }
 

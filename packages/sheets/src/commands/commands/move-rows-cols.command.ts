@@ -21,6 +21,7 @@ import {
     ICommandService,
     IUndoRedoService,
     IUniverInstanceService,
+    LocaleService,
     RANGE_TYPE,
     Rectangle,
     sequenceExecute,
@@ -86,17 +87,18 @@ export const MoveRowsCommand: ICommand<IMoveRowsCommandParams> = {
         const subUnitId = worksheet.getSheetId();
 
         const errorService = accessor.get(ErrorService);
+        const localeService = accessor.get(LocaleService);
         // Forbid action when some parts of a merged cell are selected.
         const rangeToMove = filteredSelections[0].range;
         const beforePrimary = filteredSelections[0].primary;
         const alignedRange = alignToMergedCellsBorders(rangeToMove, worksheet, false);
         if (!Rectangle.equals(rangeToMove, alignedRange)) {
-            errorService.emit('Only part of a merged cell is selected.');
+            errorService.emit(localeService.t('sheets.info.partOfCell'));
             return false;
         }
 
         if (rowAcrossMergedCell(toRow, worksheet)) {
-            errorService.emit('Across a merged cell.');
+            errorService.emit(localeService.t('sheets.info.acrossMergedCell'));
             return false;
         }
 
@@ -215,17 +217,18 @@ export const MoveColsCommand: ICommand<IMoveColsCommandParams> = {
         const subUnitId = worksheet.getSheetId();
 
         const errorService = accessor.get(ErrorService);
+        const localeService = accessor.get(LocaleService);
         // Forbid action when some parts of a merged cell are selected.
         const rangeToMove = filteredSelections[0].range;
         const beforePrimary = filteredSelections[0].primary;
         const alignedRange = alignToMergedCellsBorders(rangeToMove, worksheet, false);
         if (!Rectangle.equals(rangeToMove, alignedRange)) {
-            errorService.emit('Only part of a merged cell is selected.');
+            errorService.emit(localeService.t('sheets.info.partOfCell'));
             return false;
         }
 
         if (columnAcrossMergedCell(toCol, worksheet)) {
-            errorService.emit('Across a merged cell.');
+            errorService.emit(localeService.t('sheets.info.acrossMergedCell'));
             return false;
         }
 

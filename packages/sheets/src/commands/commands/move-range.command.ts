@@ -22,6 +22,7 @@ import {
     ICommandService,
     IUndoRedoService,
     IUniverInstanceService,
+    LocaleService,
     ObjectMatrix,
     Range,
     Rectangle,
@@ -51,6 +52,7 @@ export const MoveRangeCommand: ICommand = {
         const undoRedoService = accessor.get(IUndoRedoService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const errorService = accessor.get(ErrorService);
+        const localeService = accessor.get(LocaleService);
 
         const target = getSheetCommandTarget(univerInstanceService);
         if (!target) return false;
@@ -62,7 +64,7 @@ export const MoveRangeCommand: ICommand = {
             { unitId, subUnitId, range: params.toRange }
         );
         if (moveRangeMutations === null) {
-            errorService.emit('Across a merged cell.');
+            errorService.emit(localeService.t('sheets.info.acrossMergedCell'));
             return false;
         }
 

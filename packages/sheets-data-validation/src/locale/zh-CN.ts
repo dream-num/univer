@@ -24,6 +24,7 @@ const locale = {
             integer: '请输入合法的整数或公式',
             date: '请输入合法的日期或公式',
             list: '请输入至少一个合法选项',
+            listInvalid: '列表源必须是分隔列表或对单行或列的引用。',
         },
         panel: {
             title: '管理数据验证',
@@ -78,10 +79,10 @@ const locale = {
             title: '日期',
             operators: {
                 between: '介于',
-                greaterThan: '大于',
-                greaterThanOrEqual: '大于或等于',
-                lessThan: '小于',
-                lessThanOrEqual: '小于或等于',
+                greaterThan: '晚于',
+                greaterThanOrEqual: '晚于或等于',
+                lessThan: '早于',
+                lessThanOrEqual: '早于或等于',
                 equal: '等于',
                 notEqual: '不等于',
                 notBetween: '未介于',
@@ -119,7 +120,7 @@ const locale = {
             options: '选项来源',
             customOptions: '自定义',
             refOptions: '引用数据',
-
+            formulaError: '列表源必须是划定分界后的数据列表,或是对单一行或一列的引用。',
         },
         listMultiple: {
             title: '下拉菜单-多选',

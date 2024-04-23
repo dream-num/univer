@@ -395,6 +395,7 @@ const locale: typeof zhCN = {
     },
     info: {
         tooltip: 'Tooltip',
+        error: 'Error',
         notChangeMerge: 'You cannot make partial changes to the merged cells',
         detailUpdate: 'New opened',
         detailSave: 'Local cache restored',
@@ -424,10 +425,12 @@ const locale: typeof zhCN = {
         // eslint-disable-next-line no-template-curly-in-string
         pageInfoFull: 'Total ${total}, ${totalPage} page, All data displayed',
         problem: 'There was a problem',
+        forceStringInfo: 'Number stored as text',
     },
     clipboard: {
         paste: {
             exceedMaxCells: 'The number of cells pasted exceeds the maximum number of cells',
+            overlappingMergedCells: 'The paste area overlaps with merged cells',
         },
         shortCutNotify: {
             title: 'Kindly paste using keyboard shortcuts.',

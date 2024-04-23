@@ -54,7 +54,6 @@ export class PageRenderController extends Disposable {
             }
 
             const currentRender = this._renderManagerService.getRenderById(unitId);
-
             if (this._editorService.isEditor(unitId) || this._univerInstanceService.getUniverDocInstance(unitId) == null) {
                 return;
             }
@@ -99,5 +98,5 @@ export class PageRenderController extends Disposable {
         });
     }
 
-    private _commandExecutedListener() {}
+    private _commandExecutedListener() { }
 }

@@ -411,7 +411,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         if (mergeData) {
             const pastedRangeLapWithMergedCell = mergeData.some((merge) => Rectangle.intersects(pastedRange, merge) && !Rectangle.contains(pastedRange, merge));
             if (pastedRangeLapWithMergedCell) {
-                this._errorService.emit('The paste area overlaps with merged cells.');
+                this._errorService.emit(this._localeService.t('clipboard.paste.overlappingMergedCells'));
                 return false;
             }
         }
@@ -477,7 +477,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         if (mergeData) {
             const pastedRangeLapWithMergedCell = mergeData.some((merge) => Rectangle.intersects(pastedRange, merge) && !Rectangle.contains(pastedRange, merge));
             if (pastedRangeLapWithMergedCell) {
-                this._errorService.emit('The paste area overlaps with merged cells.');
+                this._errorService.emit(this._localeService.t('clipboard.paste.overlappingMergedCells'));
                 return false;
             }
         }
@@ -827,8 +827,6 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
                 range.endRow = startRow + rowCount - 1;
                 range.endColumn = startColumn + colCount - 1;
             } else if (endRow > mergedRange.endRow || endColumn > mergedRange.endColumn) {
-                // TODO@Dushusir: use dialog component
-                // alert("We can't do that to a merged cell ");
                 return null;
             } else {
                 cellMatrix.forValue((row, col, cell) => {

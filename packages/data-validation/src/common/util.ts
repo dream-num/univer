@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-import { DataValidationOperator, DataValidationType, type IDataValidationRule, type IDataValidationRuleBase, type IDataValidationRuleOptions, Tools } from '@univerjs/core';
+import { DataValidationOperator, DataValidationType, type IDataValidationRuleBase, type IDataValidationRuleOptions, Tools } from '@univerjs/core';
 import { SelectionManagerService } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
 
-export function getRuleSetting(rule: IDataValidationRule): IDataValidationRuleBase {
+export function getRuleSetting(rule: IDataValidationRuleBase): IDataValidationRuleBase {
     return {
         type: rule.type,
         operator: rule.operator,
@@ -28,7 +28,7 @@ export function getRuleSetting(rule: IDataValidationRule): IDataValidationRuleBa
     };
 }
 
-export function getRuleOptions(rule: IDataValidationRule): IDataValidationRuleOptions {
+export function getRuleOptions(rule: IDataValidationRuleOptions): IDataValidationRuleOptions {
     return {
         error: rule.error,
         errorStyle: rule.errorStyle,

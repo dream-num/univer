@@ -2,6 +2,7 @@
     "name": "@univerjs/core",
     "version": "0.1.7",
     "private": false,
+    "packageManager": "pnpm@9.0.5",
     "description": "Core library for Univer.",
     "author": "DreamNum <developer@univer.ai>",
     "license": "Apache-2.0",

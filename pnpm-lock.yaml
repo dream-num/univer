@@ -329,8 +329,8 @@ importers:
   packages/core:
     dependencies:
       '@univerjs/protocol':
-        specifier: ^0.1.18
-        version: 0.1.18(@grpc/grpc-js@1.10.4)(rxjs@7.8.1)
+        specifier: ^0.1.19
+        version: 0.1.19(@grpc/grpc-js@1.10.4)(rxjs@7.8.1)
       nanoid:
         specifier: 5.0.7
         version: 5.0.7
@@ -366,8 +366,8 @@ importers:
   packages/data-validation:
     dependencies:
       '@univerjs/protocol':
-        specifier: ^0.1.18
-        version: 0.1.18(@grpc/grpc-js@1.10.4)(rxjs@7.8.1)
+        specifier: ^0.1.19
+        version: 0.1.19(@grpc/grpc-js@1.10.4)(rxjs@7.8.1)
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -856,8 +856,8 @@ importers:
   packages/sheets:
     dependencies:
       '@univerjs/protocol':
-        specifier: ^0.1.18
-        version: 0.1.18(@grpc/grpc-js@1.10.4)(rxjs@7.8.1)
+        specifier: ^0.1.19
+        version: 0.1.19(@grpc/grpc-js@1.10.4)(rxjs@7.8.1)
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -890,8 +890,8 @@ importers:
   packages/sheets-conditional-formatting:
     dependencies:
       '@univerjs/protocol':
-        specifier: ^0.1.18
-        version: 0.1.18(@grpc/grpc-js@1.10.4)(rxjs@7.8.1)
+        specifier: ^0.1.19
+        version: 0.1.19(@grpc/grpc-js@1.10.4)(rxjs@7.8.1)
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -3810,8 +3810,8 @@ packages:
       react: '*'
       react-dom: '*'
 
-  '@univerjs/protocol@0.1.18':
-    resolution: {integrity: sha512-ZDsPjv/jtojqRnhsEtc6tvErLvdjIbxMluGwGP4DdBdsagpGG3pYBu2BgHufHlnjvEZkryEd7MYTGyTkdc29+Q==}
+  '@univerjs/protocol@0.1.19':
+    resolution: {integrity: sha512-FmSezbI29MZr9IS8U9cGlWHbxMiM4NO3cCrhG3S5sH+69BGUppHqHI7psoP7CqGyowxaZN5dDDfSNTbrHenYVQ==}
     engines: {node: '>=16.0.0', npm: '>=8.0.0'}
     peerDependencies:
       '@grpc/grpc-js': ^1.9.14
@@ -12104,7 +12104,7 @@ snapshots:
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
 
-  '@univerjs/protocol@0.1.18(@grpc/grpc-js@1.10.4)(rxjs@7.8.1)':
+  '@univerjs/protocol@0.1.19(@grpc/grpc-js@1.10.4)(rxjs@7.8.1)':
     dependencies:
       '@grpc/grpc-js': 1.10.4
       rxjs: 7.8.1

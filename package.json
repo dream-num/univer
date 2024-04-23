@@ -31,6 +31,9 @@
         "coverage": "turbo coverage -- --passWithNoTests",
         "build": "turbo build",
         "build:demo": "turbo build:demo",
+        "build:e2e": "pnpm --filter univer-examples build:e2e",
+        "serve:e2e": "serve ./examples/local",
+        "test:e2e": "playwright test",
         "lint": "eslint .",
         "lint:fix": "eslint . --fix",
         "storybook:dev": "pnpm --filter @univerjs/storybook dev",
@@ -65,6 +68,7 @@
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
         "release-it": "^17.1.1",
+        "serve": "^14.2.2",
         "turbo": "^1.13.2",
         "typescript": "^5.4.5"
     },

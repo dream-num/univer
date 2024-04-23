@@ -20,12 +20,13 @@ import { Inject, Injector } from '@wendellhu/redi';
 
 import { DebuggerController } from './controllers/debugger.controller';
 import { PerformanceMonitorController } from './controllers/performance-monitor.controller';
+import { E2EMemoryController } from './controllers/e2e/e2e-memory.controller';
 
-export interface IDebuggerPluginConfig {}
+export interface IDebuggerPluginConfig { }
 
 export class DebuggerPlugin extends Plugin {
     static override pluginName = 'debugger';
-    static override type = UniverInstanceType.DOC;
+    static override type = UniverInstanceType.UNIVER;
 
     private _debuggerController!: DebuggerController;
 
@@ -34,24 +35,18 @@ export class DebuggerPlugin extends Plugin {
         @Inject(Injector) override readonly _injector: Injector
     ) {
         super();
-        this._initializeDependencies(_injector);
     }
 
-    initialize(): void {
-        this._debuggerController = this._injector.createInstance(DebuggerController);
-        this._injector.add([DebuggerController, { useValue: this._debuggerController }]);
-
-        this.registerExtension();
-    }
-
-    registerExtension() {}
-
-    private _initializeDependencies(injector: Injector) {
-        ([[PerformanceMonitorController]] as Dependency[]).forEach((d) => injector.add(d));
+    override onStarting(injector: Injector): void {
+        ([
+            [PerformanceMonitorController],
+            [E2EMemoryController],
+        ] as Dependency[]).forEach((d) => injector.add(d));
     }
 
     override onRendered(): void {
-        this.initialize();
+        this._injector.add([DebuggerController]);
+        this._debuggerController = this._injector.get(DebuggerController);
     }
 
     getDebuggerController() {

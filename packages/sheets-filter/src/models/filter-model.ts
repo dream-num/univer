@@ -496,16 +496,17 @@ function isCompoundCustomFilter(filter: FilterFn[]): filter is [FilterFn, Filter
 function generateCustomFilterFn(filter: ICustomFilter): FilterFn {
     const compare = filter.val;
 
+    // Not NOT_EQUALS, if the compare cannot be ensured as number, we should treat it like test not matching.
+    // Otherwise it goes to numeric match.
     if (filter.operator === CustomFilterOperator.NOT_EQUALS) {
-        return (value) => notEquals.fn(value, compare);
+        const ensured = ensureNumeric(compare);
+        if (!ensured) return (value) => notEquals.fn(value, compare);
     }
 
     // numeric match
     if (isNumericFilterFn(filter.operator)) {
         const ensured = ensureNumeric(compare);
-        if (!ensured) {
-            return () => false;
-        }
+        if (!ensured) return () => false;
 
         const customFilterFn = getCustomFilterFn(filter.operator);
         const ensuredNumber = Number(compare);

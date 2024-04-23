@@ -107,16 +107,19 @@ export const equals: ICustomFilterFn<TwoParameters<number>> = {
 export const notEquals: ICustomFilterFn<TwoParameters<number | string>> = {
     operator: CustomFilterOperator.NOT_EQUALS,
     fn: (value, compare): boolean => {
-        if (compare === ' ') {
-            if (value !== undefined && value !== null) return true;
-            return false;
-        };
+        // As text match.
+        if (typeof compare === 'string') {
+            if (compare === ' ') {
+                if (value !== undefined && value !== null) return true;
+                return false;
+            };
 
-        const ensured = ensureString(value);
-        if (ensured) {
-            if (isWildCardString(compare)) return !createREGEXFromWildChar(compare as string).test(ensured);
+            const ensuredString = ensureString(value);
+            if (ensuredString && isWildCardString(compare)) return !createREGEXFromWildChar(compare as string).test(ensuredString);
+            return ensuredString !== compare;
         }
 
+        // As numeric match.
         if (!ensureNumber(value)) return true;
         return value !== compare;
     },

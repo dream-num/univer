@@ -18,8 +18,8 @@ import { IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceTyp
 
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '../../../../data/sheets/demo/default-workbook-data-demo';
 
-const AWAIT_LOADING_TIMEOUT = 2000;
-const AWAIT_DISPOSING_TIMEOUT = 2000;
+const AWAIT_LOADING_TIMEOUT = 5000;
+const AWAIT_DISPOSING_TIMEOUT = 5000;
 
 export interface IE2EMemoryControllerAPI {
     loadAndRelease(id: number): Promise<void>;

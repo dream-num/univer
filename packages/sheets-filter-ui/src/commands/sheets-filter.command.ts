@@ -15,13 +15,15 @@
  */
 
 import type { ICommand, IMutationInfo, Nullable, Workbook } from '@univerjs/core';
-import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, sequenceExecute, UniverInstanceType } from '@univerjs/core';
+import { CommandType, ICommandService, IUndoRedoService, IUniverInstanceService, LocaleService, sequenceExecute, UniverInstanceType } from '@univerjs/core';
+import { MessageType } from '@univerjs/design';
 import type { ISheetCommandSharedParams } from '@univerjs/sheets';
 import { isSingleCellSelection, SelectionManagerService } from '@univerjs/sheets';
 import type { FilterColumn, IAutoFilter, IFilterColumn, IReCalcSheetsFilterMutationParams, ISetSheetsFilterCriteriaMutationParams, ISetSheetsFilterRangeMutationParams } from '@univerjs/sheets-filter';
 import { ReCalcSheetsFilterMutation, RemoveSheetsFilterMutation, SetSheetsFilterCriteriaMutation, SetSheetsFilterRangeMutation, SheetsFilterService } from '@univerjs/sheets-filter';
 import { expandToContinuousRange } from '@univerjs/sheets-ui';
-import type { IAccessor } from '@wendellhu/redi';
+import { IMessageService } from '@univerjs/ui';
+import { type IAccessor, Quantity } from '@wendellhu/redi';
 
 /**
  * This command is for toggling filter in the currently active Worksheet.
@@ -37,10 +39,7 @@ export const SmartToggleSheetsFilterCommand: ICommand = {
 
         const currentWorkbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET);
         const currentWorksheet = currentWorkbook?.getActiveSheet();
-
-        if (!currentWorksheet || !currentWorkbook) {
-            return false;
-        }
+        if (!currentWorksheet || !currentWorkbook) return false;
 
         const unitId = currentWorkbook.getUnitId();
         const subUnitId = currentWorksheet.getSheetId();
@@ -62,16 +61,21 @@ export const SmartToggleSheetsFilterCommand: ICommand = {
             return result;
         }
 
-        // Calculate filter range.
         const selectionManager = accessor.get(SelectionManagerService);
         const lastSelection = selectionManager.getLast();
-        if (!lastSelection) {
-            return false;
-        }
+        if (!lastSelection) return false;
+
         const startRange = lastSelection.range;
         const targetFilterRange = isSingleCellSelection(lastSelection)
             ? expandToContinuousRange(startRange, { left: true, right: true, up: true, down: true }, currentWorksheet)
             : startRange;
+
+        if (targetFilterRange.endRow === targetFilterRange.startRow) {
+            const messageService = accessor.get(IMessageService, Quantity.OPTIONAL);
+            const localeService = accessor.get(LocaleService);
+            messageService?.show({ type: MessageType.Warning, content: localeService.t('sheets-filter.command.not-valid-filter-range') });
+            return false;
+        }
 
         // Execute the command to set filter range and prepare undo redo.
         const redoMutation = { id: SetSheetsFilterRangeMutation.id, params: { unitId, subUnitId, range: targetFilterRange } };

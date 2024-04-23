@@ -23,6 +23,9 @@ const zLocale: typeof enUS = {
             'clear-filter-criteria': '清除筛选条件',
             're-calc-filter-conditions': '重新计算',
         },
+        command: {
+            'not-valid-filter-range': '选中的区域只有一行，无法进行筛选',
+        },
         shortcut: {
             'smart-toggle-filter': '切换筛选',
         },

@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import { CommandType, IContextService, type IOperation } from '@univerjs/core';
+import { CommandType, ICommandService, IContextService, type IOperation } from '@univerjs/core';
 import { SheetsFilterService } from '@univerjs/sheets-filter';
 import { ILayoutService } from '@univerjs/ui';
 import { Quantity } from '@wendellhu/redi';
+import { SetCellEditVisibleOperation } from '@univerjs/sheets-ui';
 import type { FilterBy } from '../services/sheets-filter-panel.service';
 import { SheetsFilterPanelService } from '../services/sheets-filter-panel.service';
 
@@ -40,6 +41,10 @@ export const OpenFilterPanelOperation: IOperation<IOpenFilterPanelOperationParam
         const contextService = accessor.get(IContextService);
         const sheetsFilterService = accessor.get(SheetsFilterService);
         const sheetsFilterPanelService = accessor.get(SheetsFilterPanelService);
+        const commandService = accessor.get(ICommandService);
+
+        // Close the cell edit if it is opened.
+        commandService.syncExecuteCommand(SetCellEditVisibleOperation.id, { visible: false });
 
         const { unitId, subUnitId, col } = params;
         const filterModel = sheetsFilterService.getFilterModel(unitId, subUnitId);

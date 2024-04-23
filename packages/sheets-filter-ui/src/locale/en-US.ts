@@ -21,6 +21,9 @@ export default {
             'clear-filter-criteria': 'Clear Filter Conditions',
             're-calc-filter-conditions': 'Re-calc Filter Conditions',
         },
+        command: {
+            'not-valid-filter-range': 'The selected range only has one row and not valid for filter.',
+        },
         shortcut: {
             'smart-toggle-filter': 'Toggle Filter',
         },

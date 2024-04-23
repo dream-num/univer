@@ -180,7 +180,7 @@ export class SheetsThreadCommentRefRangeController extends Disposable {
 
         this.disposeWithMe(toDisposable(() => {
             this._disposableMap.forEach((item) => {
-                item.forEach((dispose) => dispose());
+                item.dispose();
             });
             this._disposableMap.clear();
         }));

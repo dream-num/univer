@@ -56,6 +56,11 @@ export interface ICellData {
      * Id of the formula.
      */
     si?: Nullable<string>;
+
+    /**
+     * User stored custom fields
+     */
+    custom?: { [key: string]: any };
 }
 
 export interface ICellMarksStyle {

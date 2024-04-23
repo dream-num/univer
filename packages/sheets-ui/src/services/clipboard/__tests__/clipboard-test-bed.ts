@@ -15,7 +15,7 @@
  */
 
 import type { IWorkbookData } from '@univerjs/core';
-import { ILogService, IUniverInstanceService, LocaleType, LogLevel, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
+import { ILogService, IUniverInstanceService, LocaleService, LocaleType, LogLevel, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
 import { SelectionManagerService, SheetInterceptorService } from '@univerjs/sheets';
 import {
@@ -558,6 +558,9 @@ export function clipboardTestBed(workbookConfig?: IWorkbookData, dependencies?: 
             injector.add([IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }]);
 
             dependencies?.forEach((d) => injector.add(d));
+
+            const localeService = injector.get(LocaleService);
+            localeService.load({});
         }
     }
 

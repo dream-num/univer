@@ -64,11 +64,11 @@ export const InsertSheetCommand: ICommand = {
                 sheetConfig = params.sheet;
             } else {
                 sheetConfig.id = Tools.generateRandomId();
-                sheetConfig.name = workbook.generateNewSheetName(`${localeService.t('sheets.sheet')}`);
+                sheetConfig.name = workbook.generateNewSheetName(`${localeService.t('sheets.tabs.sheet')}`);
             }
         } else {
             sheetConfig.id = Tools.generateRandomId();
-            sheetConfig.name = workbook.generateNewSheetName(`${localeService.t('sheets.sheet')}`);
+            sheetConfig.name = workbook.generateNewSheetName(`${localeService.t('sheets.tabs.sheet')}`);
         }
 
         // prepare do mutations

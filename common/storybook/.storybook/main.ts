@@ -39,7 +39,7 @@ const config: StorybookConfig = {
             const rootDir = resolve(__dirname, rootPath);
             if (existsSync(rootDir)) {
                 readdirSync(rootDir).forEach((pkg) => {
-                    const pkgDir = resolve(rootDir, pkg);
+                    const pkgDir = resolve(rootDir, pkg, 'package.json');
                     if (existsSync(pkgDir)) {
                         stories.push({
                             directory: `${rootPath}/${pkg}/src`,

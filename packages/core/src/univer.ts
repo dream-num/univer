@@ -47,6 +47,8 @@ import type { UnitModel, UnitType } from './common/unit';
 import { UniverInstanceType } from './common/unit';
 import { PluginService } from './services/plugin/plugin.service';
 import type { Plugin, PluginCtor } from './services/plugin/plugin';
+import type { DependencyOverride } from './services/plugin/plugin-override';
+import { mergeOverrideWithDependencies } from './services/plugin/plugin-override';
 
 export class Univer {
     private _startedTypes = new Set<UnitType>();
@@ -66,7 +68,7 @@ export class Univer {
      * @param parentInjector An optional parent injector of the Univer injector. For more information, see https://redi.wendell.fun/docs/hierarchy.
      */
     constructor(config: Partial<IUniverData> = {}, parentInjector?: Injector) {
-        const injector = this._injector = createUniverInjector(parentInjector);
+        const injector = this._injector = createUniverInjector(parentInjector, config?.override);
 
         const { theme, locale, locales, logLevel } = config;
 
@@ -159,8 +161,8 @@ export class Univer {
     }
 }
 
-function createUniverInjector(parentInjector?: Injector) {
-    const dependencies: Dependency[] = ([
+function createUniverInjector(parentInjector?: Injector, override?: DependencyOverride) {
+    const dependencies: Dependency[] = mergeOverrideWithDependencies([
         [ErrorService],
         [LocaleService],
         [ThemeService],
@@ -168,6 +170,8 @@ function createUniverInjector(parentInjector?: Injector) {
         [LifecycleInitializerService],
         [UniverPermissionService],
         [PluginService],
+
+        // abstract services
         [IUniverInstanceService, { useClass: UniverInstanceService }],
         [IPermissionService, { useClass: PermissionService }],
         [ILogService, { useClass: DesktopLogService, lazy: true }],
@@ -178,7 +182,7 @@ function createUniverInjector(parentInjector?: Injector) {
         [IFloatingObjectManagerService, { useClass: FloatingObjectManagerService, lazy: true }],
         [IResourceManagerService, { useClass: ResourceManagerService, lazy: true }],
         [IResourceLoaderService, { useClass: ResourceLoaderService, lazy: true }],
-    ]);
+    ], override);
 
     return parentInjector ? parentInjector.createChild(dependencies) : new Injector(dependencies);
 }

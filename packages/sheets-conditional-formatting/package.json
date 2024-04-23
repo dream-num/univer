@@ -68,7 +68,7 @@
         "@univerjs/engine-formula": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/sheets": "workspace:*",
-        "@wendellhu/redi": "0.13.0",
+        "@wendellhu/redi": "^0.13.1",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
@@ -82,7 +82,7 @@
         "@univerjs/icons-svg": "^0.1.44",
         "@univerjs/shared": "workspace:*",
         "@univerjs/sheets": "workspace:*",
-        "@wendellhu/redi": "^0.13.0",
+        "@wendellhu/redi": "^0.13.1",
         "rxjs": "^7.8.1",
         "sharp": "^0.33.3",
         "typescript": "^5.4.5",

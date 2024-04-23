@@ -69,11 +69,11 @@
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@wendellhu/redi": "^0.13.1",
+        "dayjs": ">=1.11.0",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/protocol": "^0.1.18",
-        "dayjs": "^1.11.10"
+        "@univerjs/protocol": "^0.1.18"
     },
     "devDependencies": {
         "@univerjs/core": "workspace:*",
@@ -83,6 +83,7 @@
         "@univerjs/shared": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@wendellhu/redi": "^0.13.1",
+        "dayjs": "^1.11.10",
         "rxjs": "^7.8.1",
         "sharp": "^0.33.3",
         "typescript": "^5.4.5",

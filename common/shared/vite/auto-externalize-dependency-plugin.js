@@ -23,6 +23,11 @@ exports.autoExternalizeDependency = function autoExternalizeDependency() {
             name: 'clsx',
             version: '>=2.0.0',
         },
+        dayjs: {
+            global: 'dayjs',
+            name: 'dayjs',
+            version: '>=1.11.0',
+        },
         lodash: {
             global: 'lodash',
             name: 'lodash',

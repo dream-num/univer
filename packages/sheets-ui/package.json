@@ -84,7 +84,7 @@
         "@univerjs/icons": "^0.1.44"
     },
     "devDependencies": {
-        "@types/react": "^18.2.75",
+        "@types/react": "^18.2.79",
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/docs": "workspace:*",
@@ -95,12 +95,12 @@
         "@univerjs/sheets": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "@wendellhu/redi": "^0.13.0",
-        "clsx": "^2.1.0",
+        "clsx": "^2.1.1",
         "less": "^4.2.0",
         "react": "^18.2.0",
         "rxjs": "^7.8.1",
         "typescript": "^5.4.5",
-        "vite": "^5.2.8",
-        "vitest": "^1.4.0"
+        "vite": "^5.2.10",
+        "vitest": "^1.5.0"
     }
 }

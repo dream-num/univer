@@ -29,7 +29,7 @@ jobs:
               uses: ./.github/actions/setup-node
 
             - name: 📦 Build
-              run: pnpm run build
+              run: pnpm build
 
     set-pr-info:
         name: set PR info

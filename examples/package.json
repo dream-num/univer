@@ -38,7 +38,7 @@
         "@univerjs/ui": "workspace:*",
         "@univerjs/uniscript": "workspace:*",
         "@wendellhu/redi": "^0.13.0",
-        "clsx": "^2.1.0",
+        "clsx": "^2.1.1",
         "monaco-editor": "0.47.0",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
@@ -47,8 +47,8 @@
         "vue": "^3.4.21"
     },
     "devDependencies": {
-        "@types/react": "^18.2.75",
-        "@types/react-dom": "^18.2.24",
+        "@types/react": "^18.2.79",
+        "@types/react-dom": "^18.2.25",
         "@univerjs/shared": "workspace:*",
         "esbuild": "^0.20.2",
         "esbuild-plugin-clean": "^1.0.1",

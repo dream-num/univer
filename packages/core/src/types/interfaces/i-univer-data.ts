@@ -15,6 +15,7 @@
  */
 
 import type { LogLevel } from '../../services/log/log.service';
+import type { DependencyOverride } from '../../services/plugin/plugin-override';
 import type { IStyleSheet } from '../../services/theme/theme.service';
 import type { ILocales } from '../../shared/locale';
 import type { LocaleType } from '../enum';
@@ -25,19 +26,6 @@ export interface IUniverData {
     locales: ILocales;
     logLevel: LogLevel;
     id: string;
-}
 
-/**
- * Toolbar Observer generic interface, convenient for plug-ins to define their own types
- */
-export interface UIObserver<T = string> {
-    /**
-     * fontSize, fontFamily,color...
-     */
-    name: string;
-
-    /**
-     * fontSize:number, fontFamily:string ...
-     */
-    value?: T;
+    override?: DependencyOverride;
 }

@@ -117,6 +117,7 @@ export type { IComposeInterceptors, IInterceptor, InterceptorHandler } from './c
 export { composeInterceptors, createInterceptorKey, InterceptorManager } from './common/interceptor';
 export { normalizeTextRuns } from './docs/data-model/apply-utils/common';
 export type { PluginCtor } from './services/plugin/plugin';
+export { type DependencyOverride, mergeOverrideWithDependencies } from './services/plugin/plugin-override';
 export { Range } from './sheets/range';
 export { Styles } from './sheets/styles';
 export {

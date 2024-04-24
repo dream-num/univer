@@ -461,6 +461,7 @@ export class Documents extends DocComponent {
                                         alignOffset
                                     );
 
+
                                     const extensionOffset: IExtensionConfig = {
                                         originTranslate,
                                         spanStartPoint,

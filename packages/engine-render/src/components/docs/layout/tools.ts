@@ -345,9 +345,16 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
                             maxLineAsc = Math.max(maxLineAsc, ba);
 
                             if (i === divideLength - 1) {
-                                // When the width is set to Infinity, the last divide should also be Infinity, and an actual width needs to be calculated.
                                 actualWidth += glyph.width;
                             }
+                        }
+
+                        // When the width is set to Infinity, the last divide should also be Infinity, and an actual width needs to be calculated.
+                        // Use to fix issue: https://github.com/dream-num/univer/issues/2002
+                        // Because the Chinese punctuation marks at the beginning and end of the line are squeezed and narrowed,
+                        // the extruded width needs to be added when calculating the overall width.
+                        if (glyphGroup[0].xOffset !== 0 && i === divideLength - 1) {
+                            actualWidth -= glyphGroup[0].xOffset;
                         }
 
                         if (i === divideLength - 1) {
@@ -477,7 +484,7 @@ export function columnIterator(
     }
 }
 
-// eslint-disable-next-line max-lines-per-function
+
 export function getPositionHorizon(
     positionH: ObjectPositionH,
     column: IDocumentSkeletonColumn,
@@ -572,7 +579,7 @@ export function getPositionHorizon(
     }
 }
 
-// eslint-disable-next-line complexity
+
 export function getPositionVertical(
     positionV: ObjectPositionV,
     page: IDocumentSkeletonPage,

@@ -31,6 +31,7 @@ univer.registerPlugin(UniverDataValidationPlugin);
 univer.registerPlugin(UniverSheetsDataValidationPlugin);
 
 // 配置初始化数据验证数据
+// 定义: https://github.com/dream-num/univer/blob/dev/packages/core/src/types/interfaces/i-data-validation.ts#L48
 const dataValidation = [
     {
         uid: 'xxx-2',

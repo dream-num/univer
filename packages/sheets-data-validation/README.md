@@ -30,6 +30,7 @@ univer.registerPlugin(UniverDataValidationPlugin);
 univer.registerPlugin(UniverSheetsDataValidationPlugin);
 
 // initial data validation
+// dentation: https://github.com/dream-num/univer/blob/dev/packages/core/src/types/interfaces/i-data-validation.ts#L48
 const dataValidation = [
     {
         uid: 'xxx-2',

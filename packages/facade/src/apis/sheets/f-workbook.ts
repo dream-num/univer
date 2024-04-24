@@ -174,10 +174,10 @@ export class FWorkbook {
 
                 if (!selections?.length) {
                     callback([]);
+                } else {
+                    // TODO@wzhudev: filtered out ranges changes not other currently sheet
+                    callback(selections!.map((s) => s.range));
                 }
-
-                // TODO@wzhudev: filtered out ranges changes not other currently sheet
-                callback(selections!.map((s) => s.range));
             })
         );
     }

@@ -16,10 +16,54 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { isCellV, isICellData } from '../i-cell-data';
+import { isCellV, isICellData, isNullCell } from '../i-cell-data';
+
+const DOCUMENT_DATA = {
+    id: 'd',
+    body: {
+        dataStream: 'No.2824163\r\n',
+        textRuns: [
+            {
+                st: 0,
+                ed: 2,
+                ts: {
+                    cl: {
+                        rgb: '#000',
+                    },
+                    fs: 20,
+                },
+            },
+            {
+                st: 3,
+                ed: 10,
+                ts: {
+                    cl: {
+                        rgb: 'rgb(255, 0, 0)',
+                    },
+                    fs: 20,
+                },
+            },
+        ],
+        paragraphs: [
+            {
+                startIndex: 10,
+            },
+        ],
+    },
+    documentStyle: {
+        pageSize: {
+            width: Number.POSITIVE_INFINITY,
+            height: Number.POSITIVE_INFINITY,
+        },
+        marginTop: 0,
+        marginBottom: 0,
+        marginRight: 2,
+        marginLeft: 2,
+    },
+};
 
 describe('Test cell data', () => {
-    it('function isICellData', () => {
+    it('Function isICellData', () => {
         expect(isICellData({ s: '1' })).toBeTruthy();
         expect(isICellData({ p: { id: '1' } })).toBeTruthy();
         expect(isICellData({ v: '1' })).toBeTruthy();
@@ -33,7 +77,7 @@ describe('Test cell data', () => {
         expect(isICellData({})).toBeFalsy();
     });
 
-    it('function isCellV', () => {
+    it('Function isCellV', () => {
         expect(isCellV('1')).toBeTruthy();
         expect(isCellV(1)).toBeTruthy();
         expect(isCellV(true)).toBeTruthy();
@@ -42,5 +86,26 @@ describe('Test cell data', () => {
         expect(isCellV(null)).toBeFalsy();
         expect(isCellV(undefined)).toBeFalsy();
         expect(isCellV({})).toBeFalsy();
+    });
+
+    it('Function isNullCell', () => {
+        expect(isNullCell(null)).toBeTruthy();
+        expect(isNullCell(undefined)).toBeTruthy();
+        expect(isNullCell({ v: null })).toBeTruthy();
+        expect(isNullCell({ v: undefined })).toBeTruthy();
+        expect(isNullCell({ v: '' })).toBeTruthy();
+        expect(isNullCell({ p: null })).toBeTruthy();
+        expect(isNullCell({ p: undefined })).toBeTruthy();
+        expect(isNullCell({ f: null })).toBeTruthy();
+        expect(isNullCell({ f: undefined })).toBeTruthy();
+        expect(isNullCell({ f: '' })).toBeTruthy();
+        expect(isNullCell({ si: null })).toBeTruthy();
+        expect(isNullCell({ si: undefined })).toBeTruthy();
+        expect(isNullCell({ si: '' })).toBeTruthy();
+
+        expect(isNullCell({ v: 1 })).toBeFalsy();
+        expect(isNullCell({ p: DOCUMENT_DATA })).toBeFalsy();
+        expect(isNullCell({ f: '=SUM(A1)' })).toBeFalsy();
+        expect(isNullCell({ si: 'id1' })).toBeFalsy();
     });
 });

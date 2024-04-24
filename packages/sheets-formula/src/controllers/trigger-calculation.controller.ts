@@ -15,12 +15,11 @@
  */
 
 import type { ICommandInfo, IUnitRange } from '@univerjs/core';
-import { Disposable, ICommandService, LifecycleStages, OnLifecycle, Tools } from '@univerjs/core';
+import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
 import type {
     IDirtyUnitFeatureMap,
     IDirtyUnitOtherFormulaMap,
     IDirtyUnitSheetNameMap,
-    INumfmtItemMap,
     ISetFormulaCalculationNotificationMutation } from '@univerjs/engine-formula';
 import {
     FormulaDataModel,
@@ -134,7 +133,7 @@ export class TriggerCalculationController extends Disposable {
         const allDirtyUnitFeatureMap: IDirtyUnitFeatureMap = {};
         const allDirtyUnitOtherFormulaMap: IDirtyUnitOtherFormulaMap = {};
 
-        const numfmtItemMap: INumfmtItemMap = Tools.deepClone(this._formulaDataModel.getNumfmtItemMap());
+        // const numfmtItemMap: INumfmtItemMap = Tools.deepClone(this._formulaDataModel.getNumfmtItemMap());
 
         for (const command of commands) {
             const conversion = this._activeDirtyManagerService.get(command.id);
@@ -168,46 +167,13 @@ export class TriggerCalculationController extends Disposable {
             }
         }
 
-        // number format data
-        allDirtyRanges.forEach((dirtyRange) => {
-            const { unitId, sheetId } = dirtyRange;
-
-            if (numfmtItemMap[unitId] == null) {
-                numfmtItemMap[unitId] = {};
-            }
-
-            if (numfmtItemMap[unitId]![sheetId] == null) {
-                numfmtItemMap[unitId]![sheetId] = {};
-            }
-
-            const numfmtModel = this._numfmtService.getModel(unitId, sheetId);
-
-            if (!numfmtModel) return;
-
-            const refMode = this._numfmtService.getRefModel(unitId);
-
-            numfmtModel.forValue((row, col, numfmtValue) => {
-                if (numfmtValue && refMode) {
-                    const refValue = refMode.getValue(numfmtValue?.i, ['i']);
-
-                    if (!refValue) return;
-
-                    if (numfmtItemMap[unitId]![sheetId][row] == null) {
-                        numfmtItemMap[unitId]![sheetId][row] = {};
-                    }
-
-                    numfmtItemMap[unitId]![sheetId][row][col] = refValue.pattern;
-                }
-            });
-        });
-
         return {
             dirtyRanges: allDirtyRanges,
             dirtyNameMap: allDirtyNameMap,
             dirtyDefinedNameMap: allDirtyDefinedNameMap,
             dirtyUnitFeatureMap: allDirtyUnitFeatureMap,
             dirtyUnitOtherFormulaMap: allDirtyUnitOtherFormulaMap,
-            numfmtItemMap,
+            // numfmtItemMap,
         };
     }
 

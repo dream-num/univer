@@ -27,3 +27,5 @@ export { RegisterFunctionService } from './services/register-function.service';
 export { IRegisterFunctionService } from './services/register-function.service';
 export { FormulaRefRangeService } from './services/formula-ref-range.service';
 export { SPECIAL_PASTE_FORMULA } from './commands/commands/formula-clipboard.command';
+export { RegisterOtherFormulaService } from './services/register-other-formula.service';
+export type { IFormulaInfo, IOtherFormulaResult } from './services/formula-common';

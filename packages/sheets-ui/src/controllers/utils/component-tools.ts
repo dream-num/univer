@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-import type { IUniverInstanceService, Nullable, Workbook } from '@univerjs/core';
-import { UniverInstanceType } from '@univerjs/core';
+import type { IUniverInstanceService, Nullable } from '@univerjs/core';
+import { UniverInstanceType, Workbook } from '@univerjs/core';
 import type {
     Engine,
+    IRenderContext,
     IRenderManagerService,
     Rect,
     Scene,
@@ -40,18 +41,38 @@ export interface ISheetObjectParam {
     engine: Engine;
 }
 
+function isRenderManagerService(renderManagerService: IRenderManagerService | IRenderContext): renderManagerService is IRenderManagerService {
+    return typeof (renderManagerService as IRenderContext).isMainScene === 'undefined';
+}
+
 export function getSheetObject(
-    univerInstanceService: IUniverInstanceService,
-    renderManagerService: IRenderManagerService
+    univerInstanceService: IUniverInstanceService | Workbook,
+    renderManagerService: IRenderManagerService | IRenderContext
 ): Nullable<ISheetObjectParam> {
-    const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET);
+    const workbook = univerInstanceService instanceof Workbook
+        ? univerInstanceService
+        : univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET);
     if (!workbook) return null;
 
     const unitId = workbook.getUnitId();
-    const currentRender = renderManagerService.getRenderById(unitId);
-    if (currentRender == null) return null;
 
-    const { components, mainComponent, scene, engine } = currentRender;
+    let components, mainComponent, scene, engine;
+    if (isRenderManagerService(renderManagerService)) {
+        const currentRender = renderManagerService.getRenderById(unitId);
+        if (currentRender == null) return null;
+        components = currentRender.components;
+        components = currentRender.components;
+        mainComponent = currentRender.mainComponent;
+        scene = currentRender.scene;
+        engine = currentRender.engine;
+    } else {
+        components = renderManagerService.components;
+        mainComponent = renderManagerService.mainComponent;
+        scene = renderManagerService.scene;
+        engine = renderManagerService.engine;
+    }
+
+    if (!components) return null;
 
     const spreadsheet = mainComponent as Spreadsheet;
     const spreadsheetRowHeader = components.get(SHEET_VIEW_KEY.ROW) as SpreadsheetHeader;

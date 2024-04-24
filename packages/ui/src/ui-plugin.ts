@@ -88,6 +88,7 @@ export class UniverUIPlugin extends Plugin {
 
     override onStarting(_injector: Injector): void {
         this._initDependencies(_injector);
+
         this._initUI();
     }
 
@@ -117,6 +118,7 @@ export class UniverUIPlugin extends Plugin {
             [IEditorService, { useClass: EditorService }],
             [IRangeSelectorService, { useClass: RangeSelectorService }],
             [ICanvasPopupService, { useClass: CanvasPopupService }],
+
             // controllers
             [IUIController, { useClass: DesktopUIController }],
             [SharedController],

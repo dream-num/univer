@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { Dependency } from '@wendellhu/redi';
 import { Injector } from '@wendellhu/redi';
 
 import { DocumentDataModel } from './docs/data-model/document-data-model';
@@ -46,6 +47,8 @@ import type { UnitModel, UnitType } from './common/unit';
 import { UniverInstanceType } from './common/unit';
 import { PluginService } from './services/plugin/plugin.service';
 import type { Plugin, PluginCtor } from './services/plugin/plugin';
+import type { DependencyOverride } from './services/plugin/plugin-override';
+import { mergeOverrideWithDependencies } from './services/plugin/plugin-override';
 
 export class Univer {
     private _startedTypes = new Set<UnitType>();
@@ -59,10 +62,15 @@ export class Univer {
         return this._injector.get(PluginService);
     }
 
-    constructor(univerData: Partial<IUniverData> = {}) {
-        const injector = this._injector = createUniverInjector();
+    /**
+     * Create a Univer instance.
+     * @param config Configuration data for Univer
+     * @param parentInjector An optional parent injector of the Univer injector. For more information, see https://redi.wendell.fun/docs/hierarchy.
+     */
+    constructor(config: Partial<IUniverData> = {}, parentInjector?: Injector) {
+        const injector = this._injector = createUniverInjector(parentInjector, config?.override);
 
-        const { theme, locale, locales, logLevel } = univerData;
+        const { theme, locale, locales, logLevel } = config;
 
         theme && this._injector.get(ThemeService).setTheme(theme);
         locales && this._injector.get(LocaleService).load(locales);
@@ -153,8 +161,8 @@ export class Univer {
     }
 }
 
-function createUniverInjector() {
-    const injector = new Injector([
+function createUniverInjector(parentInjector?: Injector, override?: DependencyOverride) {
+    const dependencies: Dependency[] = mergeOverrideWithDependencies([
         [ErrorService],
         [LocaleService],
         [ThemeService],
@@ -162,6 +170,8 @@ function createUniverInjector() {
         [LifecycleInitializerService],
         [UniverPermissionService],
         [PluginService],
+
+        // abstract services
         [IUniverInstanceService, { useClass: UniverInstanceService }],
         [IPermissionService, { useClass: PermissionService }],
         [ILogService, { useClass: DesktopLogService, lazy: true }],
@@ -172,7 +182,7 @@ function createUniverInjector() {
         [IFloatingObjectManagerService, { useClass: FloatingObjectManagerService, lazy: true }],
         [IResourceManagerService, { useClass: ResourceManagerService, lazy: true }],
         [IResourceLoaderService, { useClass: ResourceLoaderService, lazy: true }],
-    ]);
+    ], override);
 
-    return injector;
+    return parentInjector ? parentInjector.createChild(dependencies) : new Injector(dependencies);
 }

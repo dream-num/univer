@@ -14,15 +14,24 @@
  * limitations under the License.
  */
 
-import type { IMutation } from '@univerjs/core';
-import { CommandType } from '@univerjs/core';
+import type { ICellData, Nullable } from '@univerjs/core';
 
-export interface IDataValidationFormulaMarkDirtyParams { [unitId: string]: { [sunUnitId: string]: { [formulaId: string]: boolean } } }
+export enum FormulaResultStatus {
+    NOT_REGISTER = 1,
+    SUCCESS,
+    WAIT,
+    ERROR,
+}
 
-export const DataValidationFormulaMarkDirty: IMutation<IDataValidationFormulaMarkDirtyParams> = {
-    type: CommandType.MUTATION,
-    id: 'sheet.mutation.data-validation-formula-mark-dirty',
-    handler() {
-        return true;
-    },
-};
+export interface IOtherFormulaResult {
+    result?: Nullable<ICellData>[][];
+    status: FormulaResultStatus;
+    formulaId: string;
+    callbacks: Set<(value: Nullable<ICellData>[][]) => void>;
+    extra?: Record<string, any>;
+}
+
+export interface IFormulaInfo {
+    id: string;
+    text: string;
+}

@@ -266,7 +266,7 @@ export default {
         },
     },
     LOWER: {
-        description: 'Converts text to lowercase',
+        description: 'Converts text to lowercase.',
         abstract: 'Converts text to lowercase',
         links: [
             {
@@ -275,8 +275,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: {
+                name: 'text',
+                detail: 'The text you want to convert to lowercase. LOWER does not change characters in text that are not letters.',
+            },
         },
     },
     MID: {

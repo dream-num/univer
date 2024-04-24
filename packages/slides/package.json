@@ -62,17 +62,17 @@
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
-        "@wendellhu/redi": "0.13.0",
+        "@wendellhu/redi": "^0.13.3",
         "rxjs": ">=7.0.0"
     },
     "devDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/shared": "workspace:*",
-        "@wendellhu/redi": "^0.13.0",
+        "@wendellhu/redi": "^0.13.3",
         "rxjs": "^7.8.1",
         "typescript": "^5.4.5",
-        "vite": "^5.2.8",
-        "vitest": "^1.4.0"
+        "vite": "^5.2.10",
+        "vitest": "^1.5.0"
     }
 }

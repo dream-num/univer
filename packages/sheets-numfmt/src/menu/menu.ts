@@ -28,7 +28,6 @@ import { getMenuHiddenObservable, MenuGroup, MenuItemType, MenuPosition } from '
 import type { IAccessor } from '@wendellhu/redi';
 import { merge, Observable } from 'rxjs';
 
-import { FormulaDataModel } from '@univerjs/engine-formula';
 import { deriveStateFromActiveSheet$ } from '@univerjs/sheets-ui';
 import { MENU_OPTIONS } from '../base/const/MENU-OPTIONS';
 import { AddDecimalCommand } from '../commands/commands/add-decimal.command';
@@ -115,7 +114,6 @@ export const FactoryOtherMenuItem = (componentManager: ComponentManager) => {
 
     return (_accessor: IAccessor) => {
         const numfmtService = _accessor.get(INumfmtService);
-        const formulaDataModel = _accessor.get(FormulaDataModel);
         const univerInstanceService = _accessor.get(IUniverInstanceService);
         const commandService = _accessor.get(ICommandService);
         const localeService = _accessor.get(LocaleService);
@@ -141,9 +139,8 @@ export const FactoryOtherMenuItem = (componentManager: ComponentManager) => {
                     const col = range.startColumn;
 
                     const numfmtValue = numfmtService.getValue(workbook.getUnitId(), worksheet.getSheetId(), row, col);
-                    const numfmtValueByFormula = formulaDataModel.getNumfmtValue(workbook.getUnitId(), worksheet.getSheetId(), row, col);
 
-                    const pattern = numfmtValue?.pattern || numfmtValueByFormula;
+                    const pattern = numfmtValue?.pattern;
                     let value: string = localeService.t('sheet.numfmt.general');
 
                     if (pattern) {

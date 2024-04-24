@@ -13958,6 +13958,21 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                         v: 'A Schedule of Items',
                     },
                 },
+                1: {
+                    0: {
+                        s: {
+                            n: {
+                                pattern: 'yyyy-mm-dd;@',
+                            },
+                        },
+                        v: 1,
+                    },
+                },
+                2: {
+                    0: {
+                        f: '=A2',
+                    },
+                },
                 5: {
                     5: {
                         s: 'uJSelZ11',

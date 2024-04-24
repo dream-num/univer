@@ -20,6 +20,7 @@ import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { filter } from 'rxjs/operators';
 
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { ActiveWorksheetController } from './controllers/active-worksheet/active-worksheet.controller';
 import { AutoFillController } from './controllers/auto-fill.controller';
 import { AutoHeightController } from './controllers/auto-height.controller';
@@ -31,11 +32,11 @@ import { FormulaEditorController } from './controllers/editor/formula-editor.con
 import { StartEditController } from './controllers/editor/start-edit.controller';
 import { EditorBridgeController } from './controllers/editor-bridge.controller';
 import { FormatPainterController } from './controllers/format-painter/format-painter.controller';
-import { FreezeController } from './controllers/freeze.controller';
+import { HeaderFreezeRenderController } from './controllers/freeze.render-controller';
 import { HeaderMenuController } from './controllers/header-menu.controller';
 import { HeaderMoveController } from './controllers/header-move.controller';
-import { HeaderResizeController } from './controllers/header-resize.controller';
-import { HeaderUnhideController } from './controllers/header-unhide.controller';
+import { HeaderResizeController } from './controllers/header-resize.render-controller';
+import { HeaderUnhideRenderController } from './controllers/header-unhide.render-controller';
 import { MarkSelectionController } from './controllers/mark-selection.controller';
 import { MoveRangeController } from './controllers/move-range.controller';
 import { ScrollController } from './controllers/scroll.controller';
@@ -76,9 +77,10 @@ export class UniverSheetsUIPlugin extends Plugin {
     static override type = UniverInstanceType.SHEET;
 
     constructor(
-        config: undefined,
+        _config: undefined,
         @Inject(Injector) override readonly _injector: Injector,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
         super();
@@ -124,12 +126,10 @@ export class UniverSheetsUIPlugin extends Plugin {
                 [EndEditController],
                 [FormulaEditorController],
                 [FormatPainterController],
-                [FreezeController],
+                [HeaderFreezeRenderController],
                 [HeaderMenuController],
                 [HeaderMoveController],
                 [HeaderResizeController],
-                [HeaderUnhideController],
-                // [InitializeEditorController],
                 [MoveRangeController],
                 [ScrollController],
                 [SelectionController],
@@ -154,6 +154,13 @@ export class UniverSheetsUIPlugin extends Plugin {
 
     override onReady(): void {
         this._markSheetAsFocused();
+        this._registerRenderControllers();
+    }
+
+    private _registerRenderControllers(): void {
+        ([HeaderFreezeRenderController, HeaderUnhideRenderController, HeaderResizeController]).forEach((controller) => {
+            this.disposeWithMe(this._renderManagerService.registerRenderControllers(UniverInstanceType.SHEET, controller));
+        });
     }
 
     private _markSheetAsFocused() {

@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-import type { Nullable, Observer } from '@univerjs/core';
+/* eslint-disable max-lines-per-function */
+
+import type { Nullable, Observer, Workbook } from '@univerjs/core';
 import {
     Disposable,
     ICommandService,
-    IUniverInstanceService,
-    LifecycleStages,
-    OnLifecycle,
     toDisposable,
 } from '@univerjs/core';
-import type { IMouseEvent, IPointerEvent } from '@univerjs/engine-render';
-import { CURSOR_TYPE, DeviceInputEventType, IRenderManagerService, Rect, Vector2 } from '@univerjs/engine-render';
+import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderController } from '@univerjs/engine-render';
+import { CURSOR_TYPE, DeviceInputEventType, Rect, Vector2 } from '@univerjs/engine-render';
 import type {
     IDeltaColumnWidthCommandParams,
     IDeltaRowHeightCommand,
@@ -60,8 +59,8 @@ enum HEADER_RESIZE_TYPE {
     COLUMN,
 }
 
-@OnLifecycle(LifecycleStages.Rendered, HeaderResizeController)
-export class HeaderResizeController extends Disposable {
+
+export class HeaderResizeController extends Disposable implements IRenderController {
     private _currentRow: number = 0;
 
     private _currentColumn: number = 0;
@@ -83,15 +82,14 @@ export class HeaderResizeController extends Disposable {
     private _startOffsetY: number = Number.POSITIVE_INFINITY;
 
     constructor(
+        private readonly _context: IRenderContext<Workbook>,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IEditorBridgeService private readonly _editorBridgeService: IEditorBridgeService
     ) {
         super();
 
-        this._initialize();
+        this._init();
     }
 
     override dispose(): void {
@@ -118,7 +116,7 @@ export class HeaderResizeController extends Disposable {
         this._observers = [];
     }
 
-    private _initialize() {
+    private _init() {
         const sheetObject = this._getSheetObject();
         if (sheetObject == null) {
             return;
@@ -265,12 +263,7 @@ export class HeaderResizeController extends Disposable {
     }
 
     private _initialHoverResize(initialType: HEADER_RESIZE_TYPE = HEADER_RESIZE_TYPE.ROW) {
-        const sheetObject = this._getSheetObject();
-
-        if (sheetObject == null) {
-            return;
-        }
-
+        const sheetObject = this._getSheetObject()!;
         const { scene } = sheetObject;
 
         const eventBindingObject =
@@ -280,9 +273,6 @@ export class HeaderResizeController extends Disposable {
             return;
         }
 
-        const engine = scene.getEngine();
-        const canvasMaxWidth = engine?.width || 0;
-        const canvasMaxHeight = engine?.height || 0;
 
         this.disposeWithMe(
             toDisposable(
@@ -318,27 +308,18 @@ export class HeaderResizeController extends Disposable {
             toDisposable(
                 eventBindingObject.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
                     const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
-
-                    if (skeleton == null) {
-                        return;
-                    }
+                    if (skeleton == null) return;
 
                     const sheetObject = this._getSheetObject();
-
-                    if (sheetObject == null) {
-                        return;
-                    }
-
                     const { scene } = sheetObject;
-
+                    const engine = scene.getEngine();
+                    const canvasMaxHeight = engine?.height || 0;
+                    const canvasMaxWidth = engine?.width || 0;
                     const viewPort = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
 
                     const scrollBarHorizontalHeight = (viewPort?.getScrollBar()?.horizonBarRect?.height || 0) + 10;
-
                     const scrollBarVerticalWidth = (viewPort?.getScrollBar()?.verticalBarRect?.width || 0) + 10;
-
                     const transformCoord = getTransformCoord(evt.offsetX, evt.offsetY, scene, skeleton);
-
                     const { scaleX, scaleY } = scene.getAncestorScale();
 
                     this._startOffsetX = transformCoord.x;
@@ -346,28 +327,22 @@ export class HeaderResizeController extends Disposable {
                     this._startOffsetY = transformCoord.y;
 
                     const currentOffsetX = skeleton.getOffsetByPositionX(this._currentColumn);
-
                     const currentOffsetY = skeleton.getOffsetByPositionY(this._currentRow);
-
                     const cell = skeleton.getNoMergeCellPositionByIndex(this._currentRow, this._currentColumn);
 
                     let isStartMove = false;
-
                     let moveChangeX = 0;
-
                     let moveChangeY = 0;
 
                     const { columnTotalWidth, rowHeaderWidth, rowTotalHeight, columnHeaderHeight } = skeleton;
 
-                    const shapeWidth =
-                        canvasMaxWidth > columnTotalWidth + rowHeaderWidth
-                            ? canvasMaxWidth
-                            : columnTotalWidth + rowHeaderWidth;
+                    const shapeWidth = canvasMaxWidth > columnTotalWidth + rowHeaderWidth
+                        ? canvasMaxWidth
+                        : columnTotalWidth + rowHeaderWidth;
 
-                    const shapeHeight =
-                        canvasMaxHeight > rowTotalHeight + columnHeaderHeight
-                            ? canvasMaxHeight
-                            : rowTotalHeight + columnHeaderHeight;
+                    const shapeHeight = canvasMaxHeight > rowTotalHeight + columnHeaderHeight
+                        ? canvasMaxHeight
+                        : rowTotalHeight + columnHeaderHeight;
 
                     const scale = Math.max(scaleX, scaleY);
 
@@ -480,7 +455,7 @@ export class HeaderResizeController extends Disposable {
                     });
 
                     this._upObserver = scene.onPointerUpObserver.add((upEvt: IPointerEvent | IMouseEvent) => {
-                        const sheetObject = getSheetObject(this._univerInstanceService, this._renderManagerService);
+                        const sheetObject = this._getSheetObject();
 
                         if (sheetObject == null) {
                             return;
@@ -524,12 +499,7 @@ export class HeaderResizeController extends Disposable {
                 eventBindingObject.onDblclickObserver.add(() => {
                     if (initialType === HEADER_RESIZE_TYPE.ROW) {
                         const sheetObject = this._getSheetObject();
-                        if (sheetObject == null) {
-                            return;
-                        }
-
                         const { scene } = sheetObject;
-
                         scene.resetCursor();
 
                         this._commandService.executeCommand<ISetWorksheetRowIsAutoHeightCommandParams>(
@@ -548,20 +518,14 @@ export class HeaderResizeController extends Disposable {
 
     private _clearObserverEvent() {
         const sheetObject = this._getSheetObject();
-
-        if (sheetObject == null) {
-            return;
-        }
-
         const { scene } = sheetObject;
         scene.onPointerMoveObserver.remove(this._moveObserver);
         scene.onPointerUpObserver.remove(this._upObserver);
-
         this._moveObserver = null;
         this._upObserver = null;
     }
 
     private _getSheetObject() {
-        return getSheetObject(this._univerInstanceService, this._renderManagerService);
+        return getSheetObject(this._context.unit, this._context)!;
     }
 }

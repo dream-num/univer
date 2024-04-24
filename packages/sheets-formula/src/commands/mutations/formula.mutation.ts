@@ -16,21 +16,13 @@
 
 import type { IMutation } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
-import type { IAccessor } from '@wendellhu/redi';
 
-import type { INumfmtItemMap } from '../../basics/common';
-import { FormulaDataModel } from '../../models/formula-data.model';
+export interface IOtherFormulaMarkDirtyParams { [unitId: string]: { [sunUnitId: string]: { [formulaId: string]: boolean } } }
 
-export interface ISetNumfmtFormulaDataMutationParams {
-    numfmtItemMap: INumfmtItemMap;
-}
-
-export const SetNumfmtFormulaDataMutation: IMutation<ISetNumfmtFormulaDataMutationParams> = {
-    id: 'formula.mutation.set-numfmt-formula-data',
+export const OtherFormulaMarkDirty: IMutation<IOtherFormulaMarkDirtyParams> = {
     type: CommandType.MUTATION,
-    handler: (accessor: IAccessor, params: ISetNumfmtFormulaDataMutationParams) => {
-        const formulaDataModel = accessor.get(FormulaDataModel);
-        formulaDataModel.updateNumfmtItemMap(params.numfmtItemMap);
+    id: 'sheet.mutation.data-validation-formula-mark-dirty',
+    handler() {
         return true;
     },
 };

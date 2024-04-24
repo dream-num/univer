@@ -139,7 +139,7 @@ export class SheetCanvasView extends RxDisposable {
         this._renderManagerService.setCurrent(unitId);
     }
 
-    private _addComponent(currentRender: IRender, workbook: Workbook) {
+    private _addComponent(renderUnit: IRender, workbook: Workbook) {
         const scene = this._scene;
 
         const worksheet = workbook.getActiveSheet();
@@ -162,11 +162,11 @@ export class SheetCanvasView extends RxDisposable {
             strokeWidth: 1,
         });
 
-        currentRender.mainComponent = spreadsheet;
-        currentRender.components.set(SHEET_VIEW_KEY.MAIN, spreadsheet);
-        currentRender.components.set(SHEET_VIEW_KEY.ROW, spreadsheetRowHeader);
-        currentRender.components.set(SHEET_VIEW_KEY.COLUMN, spreadsheetColumnHeader);
-        currentRender.components.set(SHEET_VIEW_KEY.LEFT_TOP, SpreadsheetLeftTopPlaceholder);
+        renderUnit.mainComponent = spreadsheet;
+        renderUnit.components.set(SHEET_VIEW_KEY.MAIN, spreadsheet);
+        renderUnit.components.set(SHEET_VIEW_KEY.ROW, spreadsheetRowHeader);
+        renderUnit.components.set(SHEET_VIEW_KEY.COLUMN, spreadsheetColumnHeader);
+        renderUnit.components.set(SHEET_VIEW_KEY.LEFT_TOP, SpreadsheetLeftTopPlaceholder);
 
         scene.addObjects([spreadsheet], SHEET_COMPONENT_MAIN_LAYER_INDEX);
         scene.addObjects(

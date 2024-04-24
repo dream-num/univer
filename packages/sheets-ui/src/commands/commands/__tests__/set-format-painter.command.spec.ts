@@ -212,6 +212,7 @@ describe('Test format painter rules in controller', () => {
     let commandService: ICommandService;
     let themeService: ThemeService;
     let formatPainterController: FormatPainterController;
+
     beforeEach(() => {
         const testBed = createCommandTestBed(TEST_WORKBOOK_DATA, [
             [IMarkSelectionService, { useClass: MarkSelectionService }],

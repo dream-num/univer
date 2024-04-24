@@ -74,7 +74,7 @@
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": "0.13.0",
+        "@wendellhu/redi": "^0.13.3",
         "react": "^16.9.0 || ^17.0.0 || ^18.0.0",
         "rxjs": ">=7.0.0"
     },
@@ -82,7 +82,7 @@
         "@univerjs/icons": "^0.1.44"
     },
     "devDependencies": {
-        "@types/react": "^18.2.75",
+        "@types/react": "^18.2.79",
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
@@ -92,12 +92,12 @@
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
         "@univerjs/ui": "workspace:*",
-        "@wendellhu/redi": "^0.13.0",
+        "@wendellhu/redi": "^0.13.3",
         "less": "^4.2.0",
         "react": "^18.2.0",
         "rxjs": "^7.8.1",
         "typescript": "^5.4.5",
-        "vite": "^5.2.8",
-        "vitest": "^1.4.0"
+        "vite": "^5.2.10",
+        "vitest": "^1.5.0"
     }
 }

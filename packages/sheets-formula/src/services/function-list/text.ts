@@ -406,16 +406,9 @@ export const FUNCTION_LIST_TEXT: IFunctionInfo[] = [
         abstract: 'formula.functionList.LOWER.abstract',
         functionParameter: [
             {
-                name: 'formula.functionList.LOWER.functionParameter.number1.name',
-                detail: 'formula.functionList.LOWER.functionParameter.number1.detail',
-                example: 'A1:A20',
-                require: 1,
-                repeat: 0,
-            },
-            {
-                name: 'formula.functionList.LOWER.functionParameter.number2.name',
-                detail: 'formula.functionList.LOWER.functionParameter.number2.detail',
-                example: 'A1:A20',
+                name: 'formula.functionList.LOWER.functionParameter.text.name',
+                detail: 'formula.functionList.LOWER.functionParameter.text.detail',
+                example: '"Univer"',
                 require: 1,
                 repeat: 0,
             },

@@ -258,7 +258,7 @@ export { type ISheetCommandSharedParams } from './commands/utils/interface';
 export { getAddMergeMutationRangeByType } from './controllers/merge-cell.controller';
 export { enUS, zhCN } from './locale';
 export { NumfmtService } from './services/numfmt/numfmt.service';
-export type { FormatType, INumfmtItem, INumfmtItemWithCache } from './services/numfmt/type';
+export type { INumfmtItem, INumfmtItemWithCache } from './services/numfmt/type';
 export { INumfmtService } from './services/numfmt/type';
 export { RefRangeService } from './services/ref-range/ref-range.service';
 export type { EffectRefRangeParams, IOperator } from './services/ref-range/type';
@@ -293,3 +293,4 @@ export { InsertDefinedNameCommand } from './commands/commands/insert-defined-nam
 export { RemoveDefinedNameCommand } from './commands/commands/remove-defined-name.command';
 export { SetDefinedNameCommand, type ISetDefinedNameCommandParams } from './commands/commands/set-defined-name.command';
 export { ScrollToCellOperation } from './commands/operations/scroll-to-cell.operation';
+export type { FormatType } from './services/numfmt/type';

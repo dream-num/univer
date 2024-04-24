@@ -27,8 +27,8 @@ export {
     SharedController,
     UndoShortcutItem,
 } from './controllers/shared-shortcut.controller';
-export { IUIController } from './controllers/ui/ui.controller';
-export { DesktopUIPart, type IDesktopUIController } from './controllers/ui/ui-desktop.controller';
+export { IUIController, type IWorkbenchOptions } from './controllers/ui/ui.controller';
+export { DesktopUIController, DesktopUIPart, type IDesktopUIController } from './controllers/ui/ui-desktop.controller';
 export { enUS, zhCN } from './locale';
 export { DesktopBeforeCloseService, IBeforeCloseService } from './services/before-close/before-close.service';
 export { CopyCommand, CutCommand, PasteCommand } from './services/clipboard/clipboard.command';

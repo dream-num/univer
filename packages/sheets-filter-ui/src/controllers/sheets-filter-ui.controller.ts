@@ -37,7 +37,7 @@ export const FILTER_PANEL_POPUP_KEY = 'FILTER_PANEL_POPUP';
 /**
  * This controller controls the UI of "filter" features. Menus, commands and filter panel etc. Except for the rendering.
  */
-@OnLifecycle(LifecycleStages.Rendered, SheetsFilterUIController)
+@OnLifecycle(LifecycleStages.Ready, SheetsFilterUIController)
 export class SheetsFilterUIController extends RxDisposable {
     constructor(
         @Inject(Injector) private readonly _injector: Injector,

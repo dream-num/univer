@@ -22,9 +22,6 @@ import {
     IUniverInstanceService,
     Range,
 } from '@univerjs/core';
-import { Inject } from '@wendellhu/redi';
-import { Subject } from 'rxjs';
-import { UniverType } from '@univerjs/protocol';
 
 import type { INumfmtService } from './type';
 

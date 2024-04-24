@@ -76,6 +76,8 @@ export class DesktopUIController extends Disposable implements IDesktopUIControl
                 this._renderManagerService.currentRender$.subscribe((renderId) => {
                     if (renderId) {
                         const render = this._renderManagerService.getRenderById(renderId)!;
+                        if (!render.unitId) return;
+
                         const unitType = this._instanceService.getUnitType(render.unitId);
                         if (unitType !== UniverInstanceType.SHEET) return;
 

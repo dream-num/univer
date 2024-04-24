@@ -157,7 +157,6 @@ describe('Test subtotal', () => {
             formulaData: {},
             arrayFormulaCellData: {},
             forceCalculate: false,
-            numfmtItemMap: {},
             dirtyRanges: [],
             dirtyNameMap: {},
             dirtyDefinedNameMap: {},

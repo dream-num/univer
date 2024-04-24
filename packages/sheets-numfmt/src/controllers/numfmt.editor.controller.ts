@@ -147,6 +147,7 @@ export class NumfmtEditorController extends Disposable {
                                 context.row,
                                 context.col
                             );
+                            const currentNumfmtType = (currentNumfmtValue && getPatternType(currentNumfmtValue.pattern)) ?? '';
                             const clean = () => {
                                 currentNumfmtValue &&
                                     this._collectEffectMutation.add(
@@ -174,14 +175,13 @@ export class NumfmtEditorController extends Disposable {
                                         context.row,
                                         context.col,
                                         {
-                                            type: 'date',
                                             pattern: dateInfo.z,
                                         }
                                     );
                                     return { ...value, v, t: CellValueType.NUMBER };
                                 }
                             } else if (
-                                ['date', 'time', 'datetime'].includes(currentNumfmtValue?.type || '') ||
+                                ['date', 'time', 'datetime'].includes(currentNumfmtType) ||
                                 !isNumeric(content)
                             ) {
                                 clean();
@@ -217,7 +217,6 @@ export class NumfmtEditorController extends Disposable {
                                     row: item.row,
                                     col: item.col,
                                     pattern: item.value!.pattern,
-                                    type: item.value!.type,
                                 }));
                             const removeCells: IRange[] = list
                                 .filter((item) => !item.value?.pattern)
@@ -264,17 +263,6 @@ export class NumfmtEditorController extends Disposable {
         );
     }
 }
-
-const filterAtr = (obj: Record<string, any>, filterKey: string[]) => {
-    const keys = Object.keys(obj).filter((key) => !filterKey.includes(key));
-    return keys.reduce(
-        (pre, cur) => {
-            pre[cur] = obj[cur];
-            return pre;
-        },
-        {} as Record<string, any>
-    );
-};
 
 function isNumeric(str: string) {
     return /^-?\d+(\.\d+)?$/.test(str);

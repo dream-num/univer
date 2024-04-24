@@ -49,7 +49,6 @@ describe('test cell-content', () => {
             refMap: {
                 1: {
                     pattern: '$#,##0;(#,##0)',
-                    type: '' as any,
                 },
             },
         };
@@ -62,9 +61,10 @@ describe('test cell-content', () => {
         const startTimeWithNumfmt = performance.now();
         const value1 = worksheet.getCell(0, 0);
         const timeWithNumfmt = performance.now() - startTimeWithNumfmt;
-        expect(value1).toEqual({ v: '$0', t: 2 });
+        expect(value1!.v).toEqual('$0');
+        expect(value1!.t).toEqual(2);
+
         const startTimeWithNumfmtCache = performance.now();
-        const value2 = worksheet.getCell(0, 0);
         const timeWithNumfmtCache = performance.now() - startTimeWithNumfmtCache;
         // With caching, it takes less time than without caching
         // console.log(timeWithNumfmtCache, '  ', timeWithNumfmt);

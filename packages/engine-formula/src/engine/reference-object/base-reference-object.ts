@@ -18,7 +18,7 @@ import type { ICellData, IRange, Nullable } from '@univerjs/core';
 import { CellValueType, isNullCell, moveRangeByOffset } from '@univerjs/core';
 
 import { FormulaAstLRU } from '../../basics/cache-lru';
-import type { INumfmtItemMap, IRuntimeUnitDataType, IUnitData, IUnitSheetNameMap } from '../../basics/common';
+import type { IRuntimeUnitDataType, IUnitData, IUnitSheetNameMap, IUnitStylesData } from '../../basics/common';
 import { ERROR_TYPE_SET, ErrorType } from '../../basics/error-type';
 import { ObjectClassType } from '../../basics/object-class-type';
 import { ArrayValueObject, ValueObjectFactory } from '../value-object/array-value-object';
@@ -55,6 +55,8 @@ export class BaseReferenceObject extends ObjectClassType {
 
     private _unitData: IUnitData = {};
 
+    private _unitStylesData: IUnitStylesData = {};
+
     private _defaultUnitId: string = '';
 
     private _forcedUnitId: string = '';
@@ -67,8 +69,6 @@ export class BaseReferenceObject extends ObjectClassType {
 
     private _runtimeFeatureCellData: { [featureId: string]: IRuntimeUnitDataType } = {};
 
-    private _numfmtItemData: INumfmtItemMap = {};
-
     private _refOffsetX = 0;
 
     private _refOffsetY = 0;
@@ -79,6 +79,8 @@ export class BaseReferenceObject extends ObjectClassType {
 
     override dispose(): void {
         this._unitData = {};
+
+        this._unitStylesData = {};
 
         this._runtimeData = {};
     }
@@ -163,16 +165,18 @@ export class BaseReferenceObject extends ObjectClassType {
 
                 const cell = this.getCellData(r, c);
                 let result: Nullable<boolean> = false;
-                if (cell == null || isNullCell(cell)) {
+                if (isNullCell(cell)) {
                     result = callback(null, r, c);
                     continue;
                 }
 
                 const resultObjectValue = this.getCellValueObject(cell);
-                const isNumber = resultObjectValue.isNumber();
 
-                const pattern = this._numfmtItemData[unitId]?.[sheetId]?.[r]?.[c];
-                pattern && isNumber && resultObjectValue.setPattern(pattern);
+                // Set numfmt pattern for first cell, it does not have to be a number, the string can also be set a number format
+                if (r === startRow && c === startColumn) {
+                    const pattern = this.getCellPattern(unitId, sheetId, r, c);
+                    pattern && resultObjectValue.setPattern(pattern);
+                }
 
                 result = callback(resultObjectValue, r, c);
 
@@ -192,13 +196,12 @@ export class BaseReferenceObject extends ObjectClassType {
         }
 
         const cellValueObject = this.getCellValueObject(cell);
-        const isNumber = cellValueObject.isNumber();
 
-        // Set numfmt pattern
+        // Set numfmt pattern, it does not have to be a number, the string can also be set a number format
         const unitId = this._forcedUnitId || this._defaultUnitId;
         const sheetId = this._forcedSheetId || this._defaultSheetId;
-        const numfmtItem = this._numfmtItemData[unitId]?.[sheetId]?.[startRow]?.[startColumn];
-        numfmtItem && isNumber && cellValueObject.setPattern(numfmtItem);
+        const pattern = this.getCellPattern(unitId, sheetId, startRow, startColumn);
+        pattern && cellValueObject.setPattern(pattern);
 
         return cellValueObject;
     }
@@ -281,6 +284,14 @@ export class BaseReferenceObject extends ObjectClassType {
         this._unitData = unitData;
     }
 
+    getUnitStylesData() {
+        return this._unitStylesData;
+    }
+
+    setUnitStylesData(unitStylesData: IUnitStylesData) {
+        this._unitStylesData = unitStylesData;
+    }
+
     getRuntimeData() {
         return this._runtimeData;
     }
@@ -311,14 +322,6 @@ export class BaseReferenceObject extends ObjectClassType {
 
     setRuntimeFeatureCellData(unitData: { [featureId: string]: IRuntimeUnitDataType }) {
         this._runtimeFeatureCellData = unitData;
-    }
-
-    getNumfmtItemData() {
-        return this._numfmtItemData;
-    }
-
-    setNumfmtItemData(numfmtItemData: INumfmtItemMap) {
-        this._numfmtItemData = numfmtItemData;
     }
 
     getActiveSheetRowCount() {
@@ -411,6 +414,10 @@ export class BaseReferenceObject extends ObjectClassType {
         return this._unitData[this.getUnitId()]?.[this.getSheetId()];
     }
 
+    getCurrentStylesData() {
+        return this._unitStylesData[this.getUnitId()];
+    }
+
     getCurrentRuntimeSheetData() {
         return this._runtimeData?.[this.getUnitId()]?.[this.getSheetId()];
     }
@@ -477,6 +484,32 @@ export class BaseReferenceObject extends ObjectClassType {
         }
 
         return this.getCellValueObject(cell);
+    }
+
+    /**
+     * Get the pattern of the cell
+     * @param unitId
+     * @param sheetId
+     * @param row
+     * @param column
+     * @returns
+     */
+    getCellPattern(unitId: string, sheetId: string, row: number, column: number) {
+        const currentStyles = this._unitStylesData[unitId];
+
+        if (!currentStyles) {
+            return '';
+        }
+
+        const currentCell = this._unitData[unitId]?.[sheetId]?.cellData?.getValue(row, column);
+
+        if (!currentCell) {
+            return '';
+        }
+
+        const style = currentStyles.getStyleByCell(currentCell);
+
+        return style?.n?.pattern || '';
     }
 
     toArrayValueObject(useCache: boolean = true): ArrayValueObject {

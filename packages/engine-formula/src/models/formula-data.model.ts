@@ -23,7 +23,6 @@ import type {
     IArrayFormulaUnitCellType,
     IFormulaData,
     IFormulaDataItem,
-    INumfmtItemMap,
     IRuntimeUnitDataType,
     ISheetData,
     IUnitData,
@@ -45,9 +44,6 @@ export class FormulaDataModel extends Disposable {
     private _arrayFormulaRange: IArrayFormulaRangeType = {};
 
     private _arrayFormulaCellData: IArrayFormulaUnitCellType = {};
-
-    // TODO@Dushusir: Determine the node.js environment and synchronize to the resource plugin when SSC is used
-    private _numfmtItemMap: INumfmtItemMap = {};
 
     constructor(
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
@@ -170,49 +166,6 @@ export class FormulaDataModel extends Disposable {
 
     setArrayFormulaCellData(value: IArrayFormulaUnitCellType) {
         this._arrayFormulaCellData = value;
-    }
-
-    getNumfmtItemMap() {
-        return this._numfmtItemMap;
-    }
-
-    getNumfmtValue(unitId: string, sheetId: string, row: number, column: number) {
-        return this._numfmtItemMap[unitId]?.[sheetId]?.[row]?.[column];
-    }
-
-    setNumfmtItemMap(value: INumfmtItemMap) {
-        this._numfmtItemMap = value;
-    }
-
-    updateNumfmtItemMap(value: INumfmtItemMap) {
-        Object.keys(value).forEach((unitId) => {
-            const sheetData = value[unitId];
-
-            if (sheetData == null) {
-                return true;
-            }
-
-            if (this._numfmtItemMap[unitId] == null) {
-                this._numfmtItemMap[unitId] = {};
-            }
-
-            Object.keys(sheetData).forEach((sheetId) => {
-                const numfmtItemMap = sheetData[sheetId];
-                const numfmtItemMatrix = new ObjectMatrix(numfmtItemMap);
-
-                if (this._numfmtItemMap[unitId]![sheetId] == null) {
-                    this._numfmtItemMap[unitId]![sheetId] = {};
-                }
-
-                numfmtItemMatrix.forValue((r, c, numfmtItem) => {
-                    if (this._numfmtItemMap[unitId]![sheetId][r] == null) {
-                        this._numfmtItemMap[unitId]![sheetId][r] = {};
-                    }
-
-                    this._numfmtItemMap[unitId]![sheetId][r][c] = numfmtItem;
-                });
-            });
-        });
     }
 
     mergeArrayFormulaRange(formulaData: IArrayFormulaRangeType) {
@@ -481,46 +434,6 @@ export class FormulaDataModel extends Disposable {
 
         cellMatrix.forValue((r, c, cell) => {
             clearArrayFormulaCellDataByCell(arrayFormulaRangeMatrix, arrayFormulaCellDataMatrix, r, c);
-        });
-    }
-
-    updateNumfmtData(
-        unitId: string,
-        sheetId: string,
-        cellValue: IObjectMatrixPrimitiveType<Nullable<ICellData>>
-    ) {
-        // remove the array formula range when cell value is null
-
-        const arrayFormulaRange = this._arrayFormulaRange[unitId]?.[sheetId];
-        const arrayFormulaRangeMatrix = new ObjectMatrix(arrayFormulaRange);
-
-        const numfmtData = this._numfmtItemMap[unitId]?.[sheetId];
-
-        if (!numfmtData) return;
-
-        const numfmtDataMatrix = new ObjectMatrix(numfmtData);
-
-        const cellMatrix = new ObjectMatrix(cellValue);
-        cellMatrix.forValue((r, c, cell) => {
-            const formulaString = cell?.f || '';
-            const formulaId = cell?.si || '';
-
-            const checkFormulaString = isFormulaString(formulaString);
-            const checkFormulaId = isFormulaId(formulaId);
-
-            if (!checkFormulaString && !checkFormulaId) {
-                numfmtDataMatrix.setValue(r, c, null);
-
-                const arrayFormulaRangeValue = arrayFormulaRangeMatrix.getValue(r, c);
-                if (arrayFormulaRangeValue) {
-                    const { startRow, startColumn, endRow, endColumn } = arrayFormulaRangeValue;
-                    for (let row = startRow; row <= endRow; row++) {
-                        for (let column = startColumn; column <= endColumn; column++) {
-                            numfmtDataMatrix.setValue(row, column, null);
-                        }
-                    }
-                }
-            }
         });
     }
 

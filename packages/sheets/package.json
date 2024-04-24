@@ -75,6 +75,7 @@
     "devDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/engine-formula": "workspace:*",
+        "@univerjs/engine-numfmt": "workspace:*",
         "@univerjs/engine-render": "workspace:*",
         "@univerjs/shared": "workspace:*",
         "@wendellhu/redi": "^0.13.1",

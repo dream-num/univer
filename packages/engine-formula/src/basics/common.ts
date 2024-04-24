@@ -25,6 +25,7 @@ import type {
     IUnitRange,
     Nullable,
     ObjectMatrix,
+    Styles,
 } from '@univerjs/core';
 
 export const ERROR_VALUE_OBJECT_CLASS_TYPE = 'errorValueObject';
@@ -63,6 +64,13 @@ export interface ISheetData {
  */
 export interface IUnitData {
     [unitId: string]: ISheetData;
+}
+
+/**
+ * Style data, numfmt needs to be queried from the style sheet
+ */
+export interface IUnitStylesData {
+    [unitId: string]: Styles;
 }
 
 export interface IRuntimeUnitDataType {
@@ -118,11 +126,6 @@ export interface IFormulaData {
 export interface IOtherFormulaData {
     [unitId: string]: Nullable<{ [subUnitId: string]: Nullable<{ [formulaId: string]: IFormulaDataItem }> }>;
 }
-
-export interface INumfmtItemMap {
-    [unitId: string]: Nullable<{ [sheetId: string]: IObjectMatrixPrimitiveType<Nullable<string>> }>;
-}
-
 /**
  * @f  formulaString, the text string of the formula.
  * @si The formula ID can be utilized in scenarios such as copy-pasting and drag-filling to convert formulas into references, eliminating the need for recreating the formulaString.
@@ -164,9 +167,9 @@ export interface IFormulaDatasetConfig {
     dirtyDefinedNameMap: IDirtyUnitSheetNameMap;
     dirtyUnitFeatureMap: IDirtyUnitFeatureMap;
     dirtyUnitOtherFormulaMap: IDirtyUnitOtherFormulaMap;
-    numfmtItemMap: INumfmtItemMap;
     excludedCell?: IUnitExcludedCell;
     allUnitData?: IUnitData;
+    unitStylesData?: IUnitStylesData;
     unitSheetNameMap?: IUnitSheetNameMap;
 }
 

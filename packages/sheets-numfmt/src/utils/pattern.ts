@@ -15,8 +15,8 @@
  */
 
 import numfmt from '@univerjs/engine-numfmt';
-import type { FormatType } from '@univerjs/sheets';
 import { LocaleType } from '@univerjs/core';
+import type { FormatType } from '@univerjs/sheets';
 
 export const getPatternType = (pattern: string): FormatType => numfmt.getInfo(pattern).type || 'unknown';
 export const getPatternPreview = (pattern: string, value: number, _locale?: LocaleType) => {

@@ -251,6 +251,12 @@ const locale = {
             dismantleMergeCellWaring: '此操作会导致一些合并单元格被拆散，是否继续?',
         },
     },
+    filter: {
+        confirm: {
+            error: '出现了一个问题',
+            notAllowedToInsertRange: '要移动这些单元格，请清除该区域的筛选器',
+        },
+    },
     textWrap: {
         overflow: '溢出',
         wrap: '自动换行',

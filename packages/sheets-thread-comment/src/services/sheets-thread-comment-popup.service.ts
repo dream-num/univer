@@ -21,7 +21,6 @@ import { SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
 import { IZenZoneService } from '@univerjs/ui';
 import { type IDisposable, Inject } from '@wendellhu/redi';
 import { Subject } from 'rxjs';
-import { THREAD_COMMENT_POPUP } from '../types/const';
 
 export class SheetsThreadCommentPopupService extends Disposable {
     private _lastPopup: Nullable<IDisposable> = null;
@@ -56,7 +55,7 @@ export class SheetsThreadCommentPopupService extends Disposable {
             row,
             col,
             {
-                componentKey: THREAD_COMMENT_POPUP,
+                componentKey: 'THREAD_COMMENT_POPUP',
                 onClickOutside: () => {
                     this.hidePopup();
                 },

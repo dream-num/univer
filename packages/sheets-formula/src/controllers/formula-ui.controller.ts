@@ -31,6 +31,7 @@ import { SearchFunctionOperation } from '../commands/operations/search-function.
 import { RenderFormulaPromptContent } from '../views/FormulaPromptContainer';
 import { MORE_FUNCTIONS_COMPONENT } from '../views/more-functions/interface';
 import { MoreFunctions } from '../views/more-functions/MoreFunctions';
+import { OtherFormulaMarkDirty } from '../commands/mutations/formula.mutation';
 import { InsertFunctionMenuItemFactory, MoreFunctionsMenuItemFactory, PasteFormulaMenuItemFactory } from './menu';
 import {
     ChangeRefToAbsoluteShortcut,
@@ -81,6 +82,7 @@ export class FormulaUIController extends Disposable {
             HelpFunctionOperation,
             SelectEditorFormulaOperation,
             ReferenceAbsoluteOperation,
+            OtherFormulaMarkDirty,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 

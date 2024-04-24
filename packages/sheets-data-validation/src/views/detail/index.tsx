@@ -41,7 +41,7 @@ const debounceExecuteFactory = (commandService: ICommandService) => debounce(
     275
 );
 
-// eslint-disable-next-line max-lines-per-function
+
 export function DataValidationDetail() {
     const [key, setKey] = useState(0);
     const dataValidationPanelService = useDependency(DataValidationPanelService);

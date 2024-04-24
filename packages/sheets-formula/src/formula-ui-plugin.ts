@@ -41,6 +41,7 @@ import { IRegisterFunctionService, RegisterFunctionService } from './services/re
 import { NumfmtFormulaDisplayController } from './controllers/numfmt-formula-display.controller';
 import { DefinedNameController } from './controllers/defined-name.controller';
 import { FormulaRefRangeService } from './services/formula-ref-range.service';
+import { RegisterOtherFormulaService } from './services/register-other-formula.service';
 
 /**
  * The configuration of the formula UI plugin.
@@ -79,6 +80,7 @@ export class UniverSheetsFormulaPlugin extends Plugin {
 
             [IRegisterFunctionService, { useClass: RegisterFunctionService }],
             [FormulaRefRangeService],
+            [RegisterOtherFormulaService],
 
             // controllers
             [FormulaUIController],

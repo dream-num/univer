@@ -64,7 +64,7 @@
         "build": "tsc && vite build"
     },
     "peerDependencies": {
-        "@wendellhu/redi": "^0.13.1",
+        "@wendellhu/redi": "^0.13.2",
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
@@ -75,7 +75,7 @@
     "devDependencies": {
         "@types/numeral": "^2.0.5",
         "@univerjs/shared": "workspace:*",
-        "@wendellhu/redi": "^0.13.1",
+        "@wendellhu/redi": "^0.13.2",
         "dayjs": "^1.11.10",
         "rxjs": "^7.8.1",
         "typescript": "^5.4.5",

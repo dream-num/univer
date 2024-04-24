@@ -162,8 +162,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/ui
       '@wendellhu/redi':
-        specifier: ^0.13.1
-        version: 0.13.1
+        specifier: ^0.13.2
+        version: 0.13.2
       css-loader:
         specifier: ^6.10.0
         version: 6.10.0(webpack@5.91.0(@swc/core@1.4.11)(esbuild@0.20.2))
@@ -268,8 +268,8 @@ importers:
         specifier: workspace:*
         version: link:../packages/uniscript
       '@wendellhu/redi':
-        specifier: ^0.13.1
-        version: 0.13.1
+        specifier: ^0.13.2
+        version: 0.13.2
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -345,8 +345,8 @@ importers:
         specifier: workspace:*
         version: link:../../common/shared
       '@wendellhu/redi':
-        specifier: ^0.13.1
-        version: 0.13.1
+        specifier: ^0.13.2
+        version: 0.13.2
       dayjs:
         specifier: ^1.11.10
         version: 1.11.10
@@ -542,8 +542,8 @@ importers:
         specifier: workspace:*
         version: link:../ui
       '@wendellhu/redi':
-        specifier: ^0.13.1
-        version: 0.13.1
+        specifier: ^0.13.2
+        version: 0.13.2
       less:
         specifier: ^4.2.0
         version: 4.2.0
@@ -582,8 +582,8 @@ importers:
         specifier: workspace:*
         version: link:../../common/shared
       '@wendellhu/redi':
-        specifier: ^0.13.1
-        version: 0.13.1
+        specifier: ^0.13.2
+        version: 0.13.2
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -689,8 +689,8 @@ importers:
         specifier: workspace:*
         version: link:../ui
       '@wendellhu/redi':
-        specifier: ^0.13.1
-        version: 0.13.1
+        specifier: ^0.13.2
+        version: 0.13.2
       jsdom:
         specifier: ^24.0.0
         version: 24.0.0
@@ -784,8 +784,8 @@ importers:
         specifier: workspace:*
         version: link:../ui
       '@wendellhu/redi':
-        specifier: ^0.13.1
-        version: 0.13.1
+        specifier: ^0.13.2
+        version: 0.13.2
       less:
         specifier: ^4.2.0
         version: 4.2.0
@@ -814,8 +814,8 @@ importers:
         specifier: workspace:*
         version: link:../../common/shared
       '@wendellhu/redi':
-        specifier: ^0.13.1
-        version: 0.13.1
+        specifier: ^0.13.2
+        version: 0.13.2
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -838,8 +838,8 @@ importers:
         specifier: workspace:*
         version: link:../../common/shared
       '@wendellhu/redi':
-        specifier: ^0.13.1
-        version: 0.13.1
+        specifier: ^0.13.2
+        version: 0.13.2
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -1106,8 +1106,8 @@ importers:
         specifier: workspace:*
         version: link:../sheets-ui
       '@wendellhu/redi':
-        specifier: ^0.13.1
-        version: 0.13.1
+        specifier: ^0.13.2
+        version: 0.13.2
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -1164,8 +1164,8 @@ importers:
         specifier: ^4.2.1
         version: 4.2.1(vite@5.2.10(@types/node@20.12.7)(less@4.2.0)(sass@1.72.0)(terser@5.30.0))
       '@wendellhu/redi':
-        specifier: ^0.13.1
-        version: 0.13.1
+        specifier: ^0.13.2
+        version: 0.13.2
       less:
         specifier: ^4.2.0
         version: 4.2.0
@@ -1283,8 +1283,8 @@ importers:
         specifier: workspace:*
         version: link:../ui
       '@wendellhu/redi':
-        specifier: ^0.13.1
-        version: 0.13.1
+        specifier: ^0.13.2
+        version: 0.13.2
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -1335,8 +1335,8 @@ importers:
         specifier: workspace:*
         version: link:../ui
       '@wendellhu/redi':
-        specifier: ^0.13.1
-        version: 0.13.1
+        specifier: ^0.13.2
+        version: 0.13.2
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -1410,8 +1410,8 @@ importers:
         specifier: workspace:*
         version: link:../ui
       '@wendellhu/redi':
-        specifier: ^0.13.1
-        version: 0.13.1
+        specifier: ^0.13.2
+        version: 0.13.2
       less:
         specifier: ^4.2.0
         version: 4.2.0
@@ -3951,6 +3951,9 @@ packages:
 
   '@wendellhu/redi@0.13.1':
     resolution: {integrity: sha512-u3KvOC6w5tU9Gx8Ich3FH+4TjFVUAFz+Gso5hDbWmctEnUSfnVEZoJAemX3RzqKc8XU9UDK4W/sOHtOfmLPP7g==}
+
+  '@wendellhu/redi@0.13.2':
+    resolution: {integrity: sha512-aBE3NrVk3S1VjdnsDf6FJTmYLggeUTnx2L9Y4EBaTk5pYf+9KpZYrvqpomzXoTWCBS6cnzmzBZIyuM24p5ZexQ==}
 
   '@xtuc/ieee754@1.2.0':
     resolution: {integrity: sha512-DX8nKgqcGwsc0eJSqYt5lwP4DH5FlHnmuWWBRy7X0NcaGR0ZtuyeESgMwTYVEtxmsNGY+qit4QYT/MIYTOTPeA==}
@@ -12349,6 +12352,8 @@ snapshots:
       '@xtuc/long': 4.2.2
 
   '@wendellhu/redi@0.13.1': {}
+
+  '@wendellhu/redi@0.13.2': {}
 
   '@xtuc/ieee754@1.2.0': {}
 

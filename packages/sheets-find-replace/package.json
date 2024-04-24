@@ -68,7 +68,7 @@
         "@univerjs/find-replace": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
-        "@wendellhu/redi": "^0.13.1",
+        "@wendellhu/redi": "^0.13.2",
         "rxjs": ">=7.0.0"
     },
     "devDependencies": {
@@ -79,7 +79,7 @@
         "@univerjs/shared": "workspace:*",
         "@univerjs/sheets": "workspace:*",
         "@univerjs/sheets-ui": "workspace:*",
-        "@wendellhu/redi": "^0.13.1",
+        "@wendellhu/redi": "^0.13.2",
         "rxjs": "^7.8.1",
         "typescript": "^5.4.5",
         "vite": "^5.2.10",

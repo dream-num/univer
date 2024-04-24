@@ -19,10 +19,12 @@ import { FUNCTION_NAMES_TEXT } from './function-names';
 import { Len } from './len';
 import { Lenb } from './lenb';
 import { Text } from './text';
+import { Lower } from './lower';
 
 export const functionText = [
     [Concatenate, FUNCTION_NAMES_TEXT.CONCATENATE],
     [Len, FUNCTION_NAMES_TEXT.LEN],
     [Lenb, FUNCTION_NAMES_TEXT.LENB],
     [Text, FUNCTION_NAMES_TEXT.TEXT],
+    [Lower, FUNCTION_NAMES_TEXT.LOWER],
 ];

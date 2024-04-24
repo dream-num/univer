@@ -268,7 +268,7 @@ export default {
     },
     LOWER: {
         description: '文字列に含まれる英字をすべて小文字に変換します。',
-        abstract: '文字列に含まれる英字をすべて小文字に変換します。',
+        abstract: '文字列に含まれる英字をすべて小文字に変換します',
         links: [
             {
                 title: '指導',
@@ -276,8 +276,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: {
+                name: '文字列',
+                detail: '小文字に変換する文字列を指定します。 それ以外の文字は変換されません。',
+            },
         },
     },
     MID: {

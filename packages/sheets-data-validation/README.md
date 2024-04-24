@@ -51,10 +51,10 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
     resource: [{
         name: DATA_VALIDATION_PLUGIN_NAME,
         data: JSON.stringify({
-            'sheet-0011': dataValidation,
+            'sheetId-1': dataValidation,
         }),
     }]
-    // 其他配置省略
+    // ...
 }
 
 // load initial snapshot

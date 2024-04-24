@@ -360,8 +360,18 @@ export class SheetsFilterController extends Disposable {
                 undos.push({ id: SetSheetsFilterCriteriaMutation.id, params: setCriteriaMutationParams });
             });
         } else {
+            const worksheet = this._univerInstanceService.getUniverSheetInstance(unitId)?.getSheetBySheetId(subUnitId);
+            if (!worksheet) {
+                return this._handleNull();
+            }
+            const hiddenRows = [];
+            for (let r = removeStartRow; r <= removeEndRow; r++) {
+                if (worksheet.getRowFiltered(r)) {
+                    hiddenRows.push(r);
+                }
+            }
             const afterStartRow = Math.min(startRow, removeStartRow);
-            const afterEndRow = afterStartRow + (endRow - startRow) - count;
+            const afterEndRow = afterStartRow + (endRow - startRow) - count + hiddenRows.length;
             const setFilterRangeMutationParams: ISetSheetsFilterRangeMutationParams = {
                 unitId,
                 subUnitId,
@@ -639,13 +649,17 @@ export class SheetsFilterController extends Disposable {
 
             if (command.id === RemoveRowMutation.id) {
                 const { startRow, endRow } = (command.params as IRemoveRowsMutationParams).range;
+                const filterOutInRemove = filteredOutRows.filter((row) => row >= startRow && row <= endRow);
                 filteredOutRows.forEach((row) => {
                     if (row < startRow) {
                         newFilteredOutRows.push(row);
                     } else {
                         changed = true;
-                        if (row > endRow) {
-                            newFilteredOutRows.push(row - (endRow - startRow + 1));
+                        if (row <= endRow) {
+                            const newIndex = Math.max(startRow, newFilteredOutRows.length ? newFilteredOutRows[newFilteredOutRows.length - 1] + 1 : startRow);
+                            newFilteredOutRows.push(newIndex);
+                        } else {
+                            newFilteredOutRows.push(row - (endRow - startRow + 1 - filterOutInRemove.length));
                         }
                     }
                 });

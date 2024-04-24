@@ -62,22 +62,26 @@ export function spliceArray<T>(
     skip?: number[]
 ) {
     const length = Object.keys(o).reduce((max, key) => Math.max(max, Number.parseInt(key)), 0) + 1;
-
+    const skipLength = skip?.length || 0;
+    const toBeSkipped = [];
     // Delete elements within the specified range
     for (let i = start; i < length; i++) {
-        if (skip && skip.includes(i)) {
-            continue;
-        }
         if (i < start + count) {
+            if (skip && skip.includes(i)) {
+                toBeSkipped.push(o[i]);
+            }
             // If within deletion range, delete directly
             delete o[i];
         } else {
             // If not within deletion range, move forward count positions
             if (o[i] !== undefined) {
-                o[i - count] = o[i];
+                o[i - count + skipLength] = o[i];
                 delete o[i];
             }
         }
+    }
+    for (let i = 0; i < toBeSkipped.length; i++) {
+        o[start + i] = toBeSkipped[i];
     }
 }
 

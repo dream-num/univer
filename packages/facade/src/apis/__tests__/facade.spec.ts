@@ -100,6 +100,16 @@ describe('Test FUniver', () => {
         };
     });
 
+    it('Function disposeUnit', () => {
+        const workbook = univerAPI.getActiveWorkbook();
+
+        expect(workbook).toBeDefined();
+
+        univerAPI.disposeUnit(workbook!.getId());
+
+        expect(univerAPI.getActiveWorkbook()).toBeNull();
+    });
+
     it('Function onBeforeCommandExecute', () => {
         const callback = vi.fn();
         univerAPI.onBeforeCommandExecute(callback);
@@ -161,6 +171,7 @@ describe('Test FUniver', () => {
     it('Function createSocket', () => {
         expect(() => univerAPI.createSocket('URL')).toThrowError();
     });
+
 
     it('Function registerSheetRowHeaderExtension and unregisterSheetRowHeaderExtension', () => {
         const rowHeader = univerAPI.registerSheetRowHeaderExtension('test', new RowHeaderCustomExtension());

@@ -33,17 +33,17 @@ export class FWorksheet {
 
     /**
      * Returns the worksheet id
-     * @returns sheet id
+     * @returns The id of the worksheet
      */
     getSheetId(): string {
         return this._worksheet.getSheetId();
     }
 
     /**
-     * Returns the name of the worksheet.
-     * @returns name of the worksheet
+     * Returns the worksheet name
+     * @returns The name of the worksheet
      */
-    getName(): string {
+    getSheetName(): string {
         return this._worksheet.getName();
     }
 

@@ -76,9 +76,9 @@ export class Background extends SheetExtension {
                     // 当前单元格不在视野范围内, 提前退出
                     // 和 font 不同的是, 不需要考虑合并单元格且单元格横跨 viewport 的情况.
                     // 因为即使合并后, 也会进入 forValue 迭代, 此刻单元格状态是 isMerged, 也能从 cellInfo 中获取颜色信息
-                    // if(!inViewRanges(viewRanges!, rowIndex, columnIndex)) {
-                    //     return true;
-                    // }
+                    if(!inViewRanges(viewRanges!, rowIndex, columnIndex)) {
+                        return true;
+                    }
                     const cellInfo = backgroundPositions?.getValue(rowIndex, columnIndex);
 
                     if (cellInfo == null) {

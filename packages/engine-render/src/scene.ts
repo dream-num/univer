@@ -476,6 +476,10 @@ export class Scene extends ThinScene {
         return this._viewports;
     }
 
+    getSpreadSheetViewports() {
+        return this.getViewports().filter( v=> ['viewMain', 'viewMainLeftTop', 'viewMainTop', 'viewMainLeft'].includes(v.viewPortKey ))
+    }
+
     getViewport(key: string) {
         for (const viewport of this._viewports) {
             if (viewport.viewPortKey === key) {

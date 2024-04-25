@@ -29,7 +29,6 @@ import type { UniverRenderingContext } from '../../context';
 import type { Engine } from '../../engine';
 import type { Scene } from '../../scene';
 import type { SceneViewer } from '../../scene-viewer';
-import { bufferEdgeX, bufferEdgeY, type Viewport } from '../../viewport';
 import { Documents } from '../docs/document';
 import { SpreadsheetExtensionRegistry } from '../extension';
 import type { Background } from './extensions/background';
@@ -61,13 +60,8 @@ export class Spreadsheet extends SheetComponent {
     private _refreshIncrementalState = false;
 
     private _forceDirty = false;
-    // private _forceDirtyByViewport: Record<string, boolean> = {};
-        // 无法导入
-        // VIEWPORT_KEY.VIEW_MAIN: false,
-        // VIEWPORT_KEY.VIEW_MAIN_TOP: false,
-        // VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP,
 
-
+    private _dirtyBounds: IBoundRectNoAngle[] = [];
 
     private _forceDisableGridlines = false;
 
@@ -272,22 +266,14 @@ export class Spreadsheet extends SheetComponent {
      */
     override makeDirty(state: boolean = true) {
         super.makeDirty(state);
+        if(state === false) {
+            this._dirtyBounds = [];
+        }
         return this;
     }
 
-    makeDirtyArea(dirtyBounds: IBoundRectNoAngle[]) {
-        // super.makeDirty(state);
-        // if(state)this.markViewPortDirty(true);
-        // return this;
-    }
-
-    tickTime() {
-        if(!window.lastTime) {
-            window.lastTime = +new Date;
-        } else {
-            console.log('time', +new Date - window.lastTime);
-            window.lastTime = +new Date;
-        }
+    setDirtyArea(dirtyBounds: IBoundRectNoAngle[]) {
+        this._dirtyBounds = dirtyBounds;
     }
 
     renderByViewport(mainCtx: UniverRenderingContext, viewportBoundsInfo: IViewportInfo, spreadsheetSkeleton: SpreadsheetSkeleton) {
@@ -312,30 +298,21 @@ export class Spreadsheet extends SheetComponent {
 
             // 没有滚动
             if (diffBounds.length === 0 || (diffX === 0 && diffY === 0) || isForceDirty) {
-                //console.time('!!!viewMain_render!!!_111');
-                // if (isDirty || isForceDirty || this.isForceDirty()) {
                 if (isDirty || isForceDirty) {
                     cacheCtx.save();
                     cacheCtx.setTransform(1, 0, 0, 1, 0, 0);
                     cacheCanvas.clear();
                     cacheCtx.restore();
-                    // cacheCtx.setTransform(sceneTrans.convert2DOMMatrix2D());
 
                     cacheCtx.save();
-
-
-                    // 在 render() 中 mainCtx 做了这样的操作
                     // mainCtx.translateWithPrecision(rowHeaderWidth, columnHeaderHeight);
-                    // 所以 cacheCtx.setTransform 已经包含了 rowHeaderWidth + scroll 距离
+                    // 所以 cacheCtx.setTransform 已经包含了 rowHeaderWidth + viewport + scroll 距离
                     const m = mainCtx.getTransform();
                     cacheCtx.setTransform(m.a,m.b, m.c, m.d, m.e, m.f);
-                    viewportBoundsInfo.viewBound = viewportBoundsInfo.cacheBound;
-                    viewportBoundsInfo.viewPortPosition = viewportBoundsInfo.cacheViewPortPosition;
 
-                    // 处理相对 viewportPosition 的偏移  回到 (0, 0) 单元格位置
-                    // cacheCtx.translate(-left + BUFFER_EDGE_SIZE, -top);
+                    // leftOrigin 是 viewport 相对 sheetcorner 的偏移(不考虑缩放)
+                    // - (leftOrigin - bufferEdgeX)  ----> 简化
                     cacheCtx.translate(-leftOrigin + bufferEdgeX, -topOrigin + bufferEdgeY);
-                    // cacheCtx.translate(bufferEdgeSizeX, 0)
 
                     // extension 绘制时按照内容的左上角计算, 不考虑 rowHeaderWidth
                     this.draw(cacheCtx, viewportBoundsInfo);
@@ -343,12 +320,8 @@ export class Spreadsheet extends SheetComponent {
 
                     cacheCtx.restore();
                 }
-                console.log('dh ', viewPortKey, dh, bottom,  top, columnHeaderHeight);
                 this._applyCacheFreeze(mainCtx, cacheCanvas, bufferEdgeSizeX, bufferEdgeSizeY, dw, dh, left, top, dw, dh);
             } else {
-                // diffX diffY 可以是小数
-                // console.log('!!!viewMain_render!!!_222, diffBounds', diffX, diffY, isDirty)
-                //console.time('!!!viewMain_render!!!_222');
                 if( isDirty ){
 
                     cacheCtx.save();
@@ -361,10 +334,6 @@ export class Spreadsheet extends SheetComponent {
 
                     // 绘制之前重设画笔位置到 spreadsheet 原点, 当没有滚动时, 这个值是 (rowHeaderWidth, colHeaderHeight)
                     cacheCtx.setTransform(mainCtx.getTransform());
-                    // cacheCtx.transform(1, 0, 0, 1, BUFFER_EDGE_SIZE* scaleX,  BUFFER_EDGE_SIZE* scaleX);
-
-
-                    // cacheCtx.translate(-left + BUFFER_EDGE_SIZE, -top);
                     cacheCtx.translate(-leftOrigin + bufferEdgeX, -topOrigin + bufferEdgeY);
 
 
@@ -389,10 +358,6 @@ export class Spreadsheet extends SheetComponent {
 
 
                             cacheCtx.rectByPrecision(x, y, w, h);
-                            // cacheCtx.fillStyle = 'rgba(220, 220, 255, 1)';
-                            // cacheCtx.fill();
-                            cacheCtx.fillStyle = 'red';
-                            cacheCtx.fillText( ''+ x, x, 340)//-tr.f + 100)
                             cacheCtx.clip();
 
                             this.draw(cacheCtx, {
@@ -404,17 +369,6 @@ export class Spreadsheet extends SheetComponent {
                     }
                     console.timeEnd('!!!viewMain_render_222---222');
                     this._refreshIncrementalState = false;
-
-                    // 进入到这里的坐标, 从 sheet corner 右下角计算 也就是不算行头列头
-                    const tr = cacheCtx.getTransform();
-                    for (let index = 0; index < cacheBounds.right; ) {
-                        cacheCtx.fillText( ''+index, index, 280)//-tr.f + 100)
-                        cacheCtx.beginPath();
-                        cacheCtx.moveTo(index, 280); // 将画笔移动到起点
-                        cacheCtx.lineTo(index, 1000);     // 绘制直线到终点
-                        cacheCtx.stroke();               // 绘制直线
-                        index = index + 50;
-                    }
 
                 }
                 this._applyCacheFreeze(mainCtx, cacheCanvas, bufferEdgeSizeX, bufferEdgeSizeY, dw, dh, left, top, dw, dh);
@@ -436,7 +390,6 @@ export class Spreadsheet extends SheetComponent {
                     cacheCtx.restore();
 
                     cacheCtx.save();
-                    // cacheCtx.setTransform(sceneTrans.convert2DOMMatrix2D());
                     cacheCtx.setTransform(mainCtx.getTransform());
                     cacheCtx.translate(-leftOrigin + bufferEdgeX, -topOrigin + bufferEdgeY);
 

@@ -459,7 +459,7 @@ export class Viewport {
 
 
         this._resizeCacheCanvasAndScrollBar();
-        this.makeForceDirty();
+        this.markForceDirty();
     }
 
     setPadding(param: IPosition) {
@@ -688,7 +688,7 @@ export class Viewport {
         const sceneTrans = this._scene.transform.clone();
         sceneTrans.multiply(Transform.create([1, 0, 0, 1, -this.actualScrollX || 0, -this.actualScrollY || 0]));
 
-        // 逻辑上的位移
+        // 逻辑上的位移 & 缩放, 和 dpr 无关
         const sceneTransM = sceneTrans.getMatrix();
         const scrollbarTransMatrix = this.getScrollBarTransForm().getMatrix();
 
@@ -711,12 +711,12 @@ export class Viewport {
         // cacheCtx?.setTransform(mainTF.a, mainTF.b, mainTF.c, mainTF.d, mainTF.e + BUFFER_EDGE_SIZE * mainTF.a, mainTF.f + BUFFER_EDGE_SIZE * mainTF.d);
         // cacheCtx 修正 实际上 translate 到 mtf.e = 100
         // cacheCtx?.translate(BUFFER_EDGE_SIZE, BUFFER_EDGE_SIZE);
-        let viewPortInfo:IViewportInfo = this._calViewportRelativeBounding();
+        const viewPortInfo = this._calcViewportInfo();
 
 
         // scrolling ---> make Dirty
         if(viewPortInfo.diffX !== 0 || viewPortInfo.diffY !== 0 || viewPortInfo.diffBounds.length !== 0) {
-            this.makeDirty();
+            this.markDirty();
             viewPortInfo.isDirty = true;
         }
         viewPortInfo.cacheCanvas = this._cacheCanvas!;
@@ -726,6 +726,19 @@ export class Viewport {
             o.render(mainCtx, viewPortInfo);
         });
 
+        // 进入到这里的坐标, 从 sheet corner 右下角计算 也就是不算行头列头
+        // if(viewPortInfo.cacheCanvas) {
+        //     const cacheCtx = viewPortInfo.cacheCanvas.getContext();
+        //     const tr = cacheCtx.getTransform();
+        //     for (let index = 0; index < viewPortInfo.cacheBound.right; ) {
+        //         cacheCtx.fillText( ''+index, index, 280)//-tr.f + 100)
+        //         cacheCtx.beginPath();
+        //         cacheCtx.moveTo(index, 280); // 将画笔移动到起点
+        //         cacheCtx.lineTo(index, 1000);     // 绘制直线到终点
+        //         cacheCtx.stroke();               // 绘制直线
+        //         index = index + 50;
+        //     }
+        // }
 
         if(isLast) {
             objects.forEach((o) => {
@@ -733,8 +746,8 @@ export class Viewport {
                 if(o instanceof Spreadsheet) o.makeForceDirty?.(false);
             });
         }
-        this.makeDirty(false);
-        this.makeForceDirty(false);
+        this.markDirty(false);
+        this.markForceDirty(false);
 
         this._preViewportInfo = viewPortInfo;
         this._preViewBound = viewPortInfo.viewBound;
@@ -754,7 +767,7 @@ export class Viewport {
         this._scrollRendered();
     }
 
-    private _calViewportRelativeBounding(): IViewportInfo {
+    private _calcViewportInfo(): IViewportInfo {
         if (this.isActive === false) {
             return {
                 viewBound: {
@@ -932,7 +945,7 @@ export class Viewport {
     }
 
     getBounding() {
-        return this._calViewportRelativeBounding();
+        return this._calcViewportInfo();
     }
 
     getRelativeVector(coord: Vector2) {
@@ -1125,8 +1138,8 @@ export class Viewport {
         };
     }
 
-    makeDirty(state?: boolean) {
-        if(state == undefined) {
+    markDirty(state?: boolean) {
+        if(state === undefined) {
             state = true;
         }
         this._isDirty = state;
@@ -1137,12 +1150,11 @@ export class Viewport {
     }
 
     private _isForceDirty = true;
-    makeForceDirty(state?: boolean) {
-        if(state !== undefined) {
-            this._isForceDirty = state;
-        } else {
-            this._isForceDirty = true;
+    markForceDirty(state?: boolean) {
+        if(state === undefined) {
+            state = true;
         }
+        this._isForceDirty = state;
     }
 
     get isForceDirty() {
@@ -1173,7 +1185,7 @@ export class Viewport {
                 y,
             });
         }
-        this.makeForceDirty(true);
+        this.markForceDirty(true);
     }
 
     private _getViewPortSize() {
@@ -1345,8 +1357,8 @@ export class Viewport {
 
     expandBounds(value: {top:number, left: number, bottom: number, right: number}) {
         return {
-            left: Math.max(this.left, value.left - BUFFER_EDGE_SIZE_X),
-            top: Math.max(this.top, value.top - BUFFER_EDGE_SIZE_Y),
+            left: Math.max(this.leftOrigin, value.left - BUFFER_EDGE_SIZE_X),
+            top: Math.max(this.topOrigin, value.top - BUFFER_EDGE_SIZE_Y),
             right: value.right + BUFFER_EDGE_SIZE_X,
             bottom: value.bottom + BUFFER_EDGE_SIZE_Y,
         } as IBoundRectNoAngle;
@@ -1539,6 +1551,6 @@ export class Viewport {
         let height = mainCanvas.getHeight();
         this._mainCanvasW = width;
         this._mainCanvasH = height;
-        this.makeForceDirty(true);
+        this.markForceDirty(true);
     }
 }

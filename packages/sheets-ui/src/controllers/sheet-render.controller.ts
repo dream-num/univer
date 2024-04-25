@@ -32,6 +32,7 @@ import { IRenderManagerService, RENDER_RAW_FORMULA_KEY, Spreadsheet } from '@uni
 import {
     COMMAND_LISTENER_SKELETON_CHANGE,
     COMMAND_LISTENER_VALUE_CHANGE,
+    MoveRangeMutation,
     SetRangeValuesMutation,
     SetWorksheetActiveOperation,
 } from '@univerjs/sheets';
@@ -157,40 +158,20 @@ export class SheetRenderController extends RxDisposable {
 
                     // Change the skeleton to render when the sheet is changed.
                     // Should also check the init sheet.
+                    // setCurrent ---> currentSkeletonBefore$ ---> zoom.controller.subscribe ---> scene._setTransForm --->  viewports markDirty
+                    // setCurrent ---> currentSkeleton$ ---> scroll.controller.subscribe ---> scene?.transformByState ---> scene._setTransFor
                     this._sheetSkeletonManagerService.setCurrent({
                         unitId,
                         sheetId,
                         commandId: command.id,
                     });
-                    const sk = this._sheetSkeletonManagerService.getCurrent();
-                    // const { rowHeightAccumulation, columnWidthAccumulation, rowHeaderWidth, columnHeaderHeight } = sk.skeleton;
-                    // console.log('sk', rowHeightAccumulation, columnWidthAccumulation, rowHeaderWidth, columnHeaderHeight)
 
                 } else if (COMMAND_LISTENER_VALUE_CHANGE.includes(command.id)) {
                     this._sheetSkeletonManagerService.reCalculate();
                 }
 
                 if (command.type === CommandType.MUTATION) {
-                    this._renderManagerService.getRenderById(unitId)?.mainComponent?.makeDirty(); // refresh spreadsheet
-                    // 还有个概念和这个很像， SetRangeValuesCommand
-                    if(command.id === SetRangeValuesMutation.id) {
-                        const sk = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
-                        const currentRender = this._renderManagerService.getRenderById(unitId);
-                        if (currentRender == null) {
-                            return;
-                        }
-
-                        const { mainComponent, components, engine, scene } = currentRender;
-                        const spreadsheet = mainComponent as Spreadsheet;
-
-                        // TODO command.params 数据结构有很多种
-                        const dirtyRange = this._cellValueToRange(command.params?.cellValue);
-                        const dirtyBounds = this._rangeToBounds([dirtyRange], sk!);
-                        const viewports = scene.getViewports();
-                        this.dirtyViewBounds(viewports, dirtyBounds);
-                        spreadsheet.makeDirtyArea(dirtyBounds);
-                        scene.makeDirty();
-                    }
+                    this._markSpreadsheetDirty(unitId, command);
                 }
             })
         );
@@ -203,10 +184,40 @@ export class SheetRenderController extends RxDisposable {
             .subscribe(() => {
                 this._renderManagerService.getRenderAll().forEach((renderer) => {
                     if (renderer.mainComponent instanceof Spreadsheet) {
-                        renderer.mainComponent.makeForceDirty(true);
+                        (renderer.mainComponent as Spreadsheet).makeForceDirty(true);
                     }
                 });
             });
+    }
+
+    private _markSpreadsheetDirty(unitId: string, command: ICommandInfo) {
+        const currentRender = this._renderManagerService.getRenderById(unitId);
+        if(!currentRender) return;
+        const { mainComponent: spreadsheet, components, engine, scene } = currentRender;
+        if(spreadsheet) {
+            spreadsheet.makeDirty(); // refresh spreadsheet
+        }
+        scene.makeDirty();
+        if(!command.params) return;
+        const cmdParams = command.params as Record<string, any>;
+        const viewports = scene.getSpreadSheetViewports();
+        // 还有个概念和这个很像， SetRangeValuesCommand
+        if(command.id === SetRangeValuesMutation.id && cmdParams.cellValue) {
+
+            // TODO command.params 数据结构有很多种
+            const dirtyRange:IRange = this._cellValueToRange(cmdParams.cellValue);
+            const dirtyBounds = this._rangeToBounds([dirtyRange]);
+            this.markViewportDirty(viewports, dirtyBounds);
+            (spreadsheet as Spreadsheet).setDirtyArea(dirtyBounds);
+        }
+
+        if(command.id === MoveRangeMutation.id && cmdParams.from && cmdParams.to) {
+            const fromRange = this._cellValueToRange(cmdParams.from.value);
+            const toRange = this._cellValueToRange(cmdParams.to.value);
+            const dirtyBounds = this._rangeToBounds([fromRange, toRange]);
+            this.markViewportDirty(viewports, dirtyBounds);
+            (spreadsheet as Spreadsheet).setDirtyArea(dirtyBounds);
+        }
     }
 
     private _cellValueToRange(cellValue: Record<number, Record<number, object>>) {
@@ -232,7 +243,9 @@ export class SheetRenderController extends RxDisposable {
         } as IRange;
     }
 
-    private _rangeToBounds(ranges: IRange[], sk: SpreadsheetSkeleton) {
+    private _rangeToBounds(ranges: IRange[]) {
+        const sk = this._sheetSkeletonManagerService.getCurrent()?.skeleton!;
+
         const { rowHeightAccumulation, columnWidthAccumulation, rowHeaderWidth, columnHeaderHeight } = sk;
         // rowHeightAccumulation 已经表示的是行底部的高度
         const dirtyBounds:IViewportBounds[] = [];
@@ -247,11 +260,11 @@ export class SheetRenderController extends RxDisposable {
         return dirtyBounds;
     }
 
-    private dirtyViewBounds(viewports: Viewport[], dirtyBounds:IViewportBounds[]) {
+    private markViewportDirty(viewports: Viewport[], dirtyBounds:IViewportBounds[]) {
         for (const vp of viewports) {
             for(const b of dirtyBounds) {
                 if(Tools.hasIntersectionBetweenTwoBounds(vp.cacheBound, b)) {
-                    vp.makeDirty(true);
+                    vp.markDirty(true);
                 }
             }
         }

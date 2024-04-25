@@ -155,7 +155,7 @@ export class ZoomController extends Disposable {
     private _updateViewZoom(zoomRatio: number) {
         const sheetObject = this._getSheetObject();
         sheetObject?.scene.scale(zoomRatio, zoomRatio);
-        sheetObject?.scene.getViewports().forEach(vp => vp.makeForceDirty());
+        sheetObject?.scene.getViewports().forEach(vp => vp.markForceDirty());
         sheetObject?.spreadsheet.makeForceDirty();
     }
 

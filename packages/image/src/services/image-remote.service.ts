@@ -15,7 +15,7 @@
  */
 
 import type { IImageRemoteService, IImageRemoteServiceParam, Nullable } from '@univerjs/core';
-import { Tools } from '@univerjs/core';
+import { ImageSourceType, Tools } from '@univerjs/core';
 
 const ALLOW_IMAGE_LIST = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/bmp'];
 
@@ -23,24 +23,22 @@ const ALLOW_IMAGE_SIZE = 5 * 1024 * 1024;
 
 
 export class ImageRemoteService implements IImageRemoteService {
-    private _imageCacheMap = new Map<string, string>(); // imageId,
-
     async getImage(imageId: string): Promise<string> {
         return Promise.resolve(imageId);
     }
 
     async saveImage(imageFile: File): Promise<Nullable<IImageRemoteServiceParam>> {
-        return new Promise(function (resolve, reject) {
+        return new Promise((resolve, reject) => {
             if (!ALLOW_IMAGE_LIST.includes(imageFile.type)) {
                 reject(new Error('Not support image type'));
             }
             if (imageFile.size > ALLOW_IMAGE_SIZE) {
                 reject(new Error('Image size is too large'));
             }
-        // 获取上传的图片的宽高
+            // 获取上传的图片的宽高
             const reader = new FileReader();
             reader.readAsDataURL(imageFile);
-            reader.onload = function (evt) {
+            reader.onload = (evt) => {
                 const replaceSrc = evt.target?.result as string;
                 if (replaceSrc == null) {
                     reject(new Error('Image is null'));
@@ -48,10 +46,15 @@ export class ImageRemoteService implements IImageRemoteService {
                 }
                 const imageObj = new Image();
                 imageObj.src = replaceSrc;
+                const imageId = Tools.generateRandomId(6);
                 imageObj.onload = function () {
+                    const { width, height } = imageObj;
                     resolve({
-                        imageId: Tools.generateRandomId(6),
-                        imageFile: imageObj,
+                        imageId,
+                        width,
+                        height,
+                        imageSourceType: ImageSourceType.BASE64,
+                        source: replaceSrc,
                     });
                 };
             };

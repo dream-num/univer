@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IRange, IRangeWithCoord, ITransformState, Nullable, Workbook } from '@univerjs/core';
-import { Disposable, ICommandService, IImageRemoteService, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import type { ICommandInfo, IRange, ITransformState, Nullable, Workbook } from '@univerjs/core';
+import { Disposable, ICommandService, IImageRemoteService, ImageSourceType, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 import { IImageManagerService, ImageModel, SourceType } from '@univerjs/image';
 import type { ISheetDrawingPosition } from '@univerjs/sheets';
@@ -89,8 +89,9 @@ export class SheetImageUpdateController extends Disposable {
             zIndex = drawingIds.length;
         }
 
-        const { imageId, imageFile } = imageParam;
-        const { width, height } = imageFile;
+        const { imageId, width, height, imageSourceType } = imageParam;
+
+        let { source } = imageParam;
 
         let scale = 1;
         if (width > SHEET_IMAGE_WIDTH_LIMIT || height > SHEET_IMAGE_HEIGHT_LIMIT) {
@@ -100,11 +101,16 @@ export class SheetImageUpdateController extends Disposable {
         }
 
 
+        if (imageSourceType !== ImageSourceType.BASE64) {
+            source = await this._imageRemoteService.getImage(imageId);
+        }
+
         const model = new ImageModel({
             imageId,
             sourceType: SourceType.BASE64,
-            source: 'https://minio.cnbabylon.com/univer/slide/gartner-tech-2022.png',
+            source,
         });
+
 
         this._imageManagerService.add({
             unitId,

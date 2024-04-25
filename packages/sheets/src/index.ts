@@ -371,3 +371,7 @@ export {
 
 export { RangeProtectionPermissionEditPoint } from './services/permission/permission-point/range/edit';
 export { RangeProtectionPermissionViewPoint } from './services/permission/permission-point/range/view';
+export { InsertDrawingCommand } from './commands/commands/insert-drawing.command';
+export { RemoveDrawingCommand } from './commands/commands/remove-drawing.command';
+export { SetDrawingCommand } from './commands/commands/set-drawing.command';
+export { type ISheetDrawingServiceParam, type ISheetDrawingServiceUpdateParam, type ISheetDrawingPosition, ISheetDrawingService } from './services/sheet-drawing.service';

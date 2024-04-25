@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 export { type IUniverSheetsConfig, UniverSheetsPlugin } from './sheets-plugin';
 
 // #region services
@@ -296,3 +297,7 @@ export { SetDefinedNameCommand, type ISetDefinedNameCommandParams } from './comm
 export { ScrollToCellOperation } from './commands/operations/scroll-to-cell.operation';
 export type { FormatType } from './services/numfmt/type';
 export { getMoveRangeUndoRedoMutations } from './commands/commands/move-range.command';
+export { InsertDrawingCommand } from './commands/commands/insert-drawing.command';
+export { RemoveDrawingCommand } from './commands/commands/remove-drawing.command';
+export { SetDrawingCommand } from './commands/commands/set-drawing.command';
+export { type ISheetDrawingServiceParam, type ISheetDrawingServiceUpdateParam, type ISheetDrawingPosition, ISheetDrawingService } from './services/sheet-drawing.service';

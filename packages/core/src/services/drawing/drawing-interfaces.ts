@@ -29,10 +29,18 @@ export interface IOffset {
     top?: number;
 }
 
-export interface ITransformState extends IOffset, ISize, IScale {
+export interface IOtherTransform {
     angle?: number;
     skewX?: number;
     skewY?: number;
     flipX?: boolean;
     flipY?: boolean;
+}
+
+export interface IAbsoluteTransform extends ISize, IOffset, IScale {
+
+}
+
+export interface ITransformState extends IAbsoluteTransform, IOtherTransform {
+
 }

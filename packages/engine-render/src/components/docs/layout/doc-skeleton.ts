@@ -38,7 +38,7 @@ import type { IViewportBound, Vector2 } from '../../../basics/vector2';
 import { Skeleton } from '../../skeleton';
 import { Liquid } from '../liquid';
 import type { DocumentViewModel } from '../view-model/document-view-model';
-import { getLastPage, updateBlockIndex } from './tools';
+import { getLastPage, getNullSkeleton, updateBlockIndex } from './tools';
 import { createSkeletonSection } from './model/section';
 import { dealWithSections } from './block/section';
 import { createSkeletonPage } from './model/page';
@@ -485,8 +485,9 @@ export class DocumentSkeleton extends Skeleton {
     private _createSkeleton(_bounds?: IViewportBound) {
         const DEFAULT_PAGE_SIZE = { width: Number.POSITIVE_INFINITY, height: Number.POSITIVE_INFINITY };
         const viewModel = this.getViewModel();
+        const dataModel = viewModel.getDataModel();
         const { headerTreeMap, footerTreeMap } = viewModel;
-        const { documentStyle, drawings, lists: customLists = {} } = viewModel.getDataModel();
+        const { documentStyle, drawings, lists: customLists = {} } = dataModel;
         const lists = {
             ...PRESET_LIST_TYPE,
             ...customLists,
@@ -541,7 +542,7 @@ export class DocumentSkeleton extends Skeleton {
             documentTextStyle: textStyle,
         };
 
-        const skeleton = this._getNullSke();
+        const skeleton = getNullSkeleton();
 
         const { skeHeaders, skeFooters, skeListLevel, drawingAnchor } = skeleton;
 
@@ -552,9 +553,7 @@ export class DocumentSkeleton extends Skeleton {
             drawingAnchor,
         };
 
-        const allSkeletonPages: IDocumentSkeletonPage[] = [];
-
-        skeleton.pages = allSkeletonPages;
+        const allSkeletonPages = skeleton.pages;
 
         viewModel.resetCache();
 
@@ -717,19 +716,6 @@ export class DocumentSkeleton extends Skeleton {
         );
         newSection.parent = curSkeletonPage;
         sections.push(newSection);
-    }
-
-    private _getNullSke(): IDocumentSkeletonCached {
-        return {
-            pages: [],
-            left: 0,
-            top: 0,
-            st: 0,
-            skeHeaders: new Map(),
-            skeFooters: new Map(),
-            skeListLevel: new Map(),
-            drawingAnchor: new Map(),
-        };
     }
 
     private _findNodeIterator(charIndex: number) {

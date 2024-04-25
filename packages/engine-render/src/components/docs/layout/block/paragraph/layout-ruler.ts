@@ -451,7 +451,7 @@ function _lineOperator(
         footersDrawings
     );
 
-    // TODO: Use queueMicrotask to mark sure the new line is full?
+    // TODO: Use queueMicrotask to mark sure the new line is full? remove it later.
     queueMicrotask(() => {
         __updatePreLineDrawingPosition(newLine, paragraphInlineSkeDrawings);
     });

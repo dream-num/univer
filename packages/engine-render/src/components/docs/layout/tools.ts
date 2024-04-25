@@ -35,6 +35,7 @@ import {
 
 import { DEFAULT_DOCUMENT_FONTSIZE } from '../../../basics/const';
 import type {
+    IDocumentSkeletonCached,
     IDocumentSkeletonColumn,
     IDocumentSkeletonDivide,
     IDocumentSkeletonFontStyle,
@@ -743,4 +744,18 @@ export function getFontCreateConfig(
     fontCreateConfigCache.setValue(st, ed, result);
 
     return result;
+}
+
+// Generate an empty doc skeleton with the initial states.
+export function getNullSkeleton(): IDocumentSkeletonCached {
+    return {
+        pages: [],
+        left: 0,
+        top: 0,
+        st: 0,
+        skeHeaders: new Map(),
+        skeFooters: new Map(),
+        skeListLevel: new Map(), // TODO: 移到 context 中管理？
+        drawingAnchor: new Map(), // TODO: 移到 context 中管理
+    };
 }

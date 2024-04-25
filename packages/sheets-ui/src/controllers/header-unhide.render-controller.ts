@@ -132,6 +132,7 @@ export class HeaderUnhideRenderController extends RxDisposable {
                 {
                     type: HeaderUnhideShapeType.ROW,
                     hovered: false,
+                    clicked: false,
                     hasPrevious,
                     hasNext,
                     top: position.startY - (hasPrevious ? UNHIDE_ICON_SIZE : 0),
@@ -158,11 +159,11 @@ export class HeaderUnhideRenderController extends RxDisposable {
                 {
                     type: HeaderUnhideShapeType.COLUMN,
                     hovered: false,
+                    clicked: false,
                     hasPrevious,
                     hasNext,
-                    left: position.startX - (hasPrevious ? UNHIDE_ICON_SIZE : 0),
-
                     top: 20 - UNHIDE_ICON_SIZE,
+                    left: position.startX - (hasPrevious ? UNHIDE_ICON_SIZE : 0),
                 },
                 () => this._commandService.executeCommand<ISetSpecificColsVisibleCommandParams>(
                     SetSpecificColsVisibleCommand.id,

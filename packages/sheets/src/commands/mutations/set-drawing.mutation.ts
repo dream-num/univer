@@ -14,6 +14,19 @@
  * limitations under the License.
  */
 
-export { UniverImagePlugin } from './plugin';
-export { ImageManagerService, IImageManagerService } from './services/image-manager.service';
-export { ImageModel, SourceType } from './models/image-model';
+import type { IMutation } from '@univerjs/core';
+import { CommandType } from '@univerjs/core';
+import { ISheetDrawingService, type ISheetDrawingServiceUpdateParam } from '../../services/sheet-drawing.service';
+
+
+export const SetDrawingMutation: IMutation<ISheetDrawingServiceUpdateParam> = {
+    id: 'sheet.mutation.set-drawing',
+    type: CommandType.MUTATION,
+    handler: (accessor, params) => {
+        const sheetDrawingService = accessor.get(ISheetDrawingService);
+
+        sheetDrawingService.updateDrawing(params);
+
+        return true;
+    },
+};

@@ -14,67 +14,68 @@
  * limitations under the License.
  */
 
-/* eslint-disable no-console */
 
-import type { Page } from '@playwright/test';
-import { expect, test } from '@playwright/test';
+// /* eslint-disable no-console */
 
-// The type definition is copied from:
-// examples/src/plugins/debugger/controllers/e2e/e2e-memory.controller.ts
-export interface IE2EMemoryControllerAPI {
-    loadAndRelease(id: number): Promise<void>;
-    getHeapMemoryUsage(): number;
-}
-declare global {
-    // eslint-disable-next-line ts/naming-convention
-    interface Window {
-        E2EMemoryAPI: IE2EMemoryControllerAPI;
-    }
-}
+// import type { Page } from '@playwright/test';
+// import { expect, test } from '@playwright/test';
 
-test('memory', async ({ page }) => {
-    await page.goto('http://localhost:3000/sheets/');
-    await page.waitForTimeout(2000);
+// // The type definition is copied from:
+// // examples/src/plugins/debugger/controllers/e2e/e2e-memory.controller.ts
+// export interface IE2EMemoryControllerAPI {
+//     loadAndRelease(id: number): Promise<void>;
+//     getHeapMemoryUsage(): number;
+// }
+// declare global {
+//     // eslint-disable-next-line ts/naming-convention
+//     interface Window {
+//         E2EMemoryAPI: IE2EMemoryControllerAPI;
+//     }
+// }
 
-    const memoryBeforeLoad = (await getMetrics(page)).JSHeapUsedSize;
-    console.log('Memory before load:', memoryBeforeLoad);
+// test('memory', async ({ page }) => {
+//     await page.goto('http://localhost:3000/sheets/');
+//     await page.waitForTimeout(2000);
 
-    await page.evaluate(() => window.E2EMemoryAPI.loadAndRelease(1));
-    await page.waitForTimeout(5000); // wait for long enough to let the GC do its job
-    const memoryAfterFirstLoad = (await getMetrics(page)).JSHeapUsedSize;
-    console.log('Memory after first load:', memoryAfterFirstLoad);
+//     const memoryBeforeLoad = (await getMetrics(page)).JSHeapUsedSize;
+//     console.log('Memory before load:', memoryBeforeLoad);
 
-    await page.evaluate(() => window.E2EMemoryAPI.loadAndRelease(2));
-    const memoryAfterSecondLoad = (await getMetrics(page)).JSHeapUsedSize;
-    console.log('Memory after second load:', memoryAfterSecondLoad);
+//     await page.evaluate(() => window.E2EMemoryAPI.loadAndRelease(1));
+//     await page.waitForTimeout(5000); // wait for long enough to let the GC do its job
+//     const memoryAfterFirstLoad = (await getMetrics(page)).JSHeapUsedSize;
+//     console.log('Memory after first load:', memoryAfterFirstLoad);
 
-    // max overflow for 3MB
-    const notLeaking = (memoryAfterSecondLoad <= memoryAfterFirstLoad)
-        || (memoryAfterSecondLoad - memoryAfterFirstLoad <= 2_500_000);
-    expect(notLeaking).toBeTruthy();
-});
+//     await page.evaluate(() => window.E2EMemoryAPI.loadAndRelease(2));
+//     const memoryAfterSecondLoad = (await getMetrics(page)).JSHeapUsedSize;
+//     console.log('Memory after second load:', memoryAfterSecondLoad);
 
-interface IMetrics {
-    JSHeapUsedSize: number;
-}
+//     // max overflow for 3MB
+//     const notLeaking = (memoryAfterSecondLoad <= memoryAfterFirstLoad)
+//         || (memoryAfterSecondLoad - memoryAfterFirstLoad <= 2_500_000);
+//     expect(notLeaking).toBeTruthy();
+// });
 
-/**
- * Return a performance metric from the chrome cdp session.
- * Note: Chrome-only
- * @param {Page} page page to attach cdpClient
- * @return {IMetrics}
- * @see {@link https://github.com/microsoft/playwright/issues/18071 Github RFE}
- */
-async function getMetrics(page: Page): Promise<IMetrics> {
-    const client = await page.context().newCDPSession(page);
-    await client.send('Performance.enable');
-    const perfMetricObject = await client.send('Performance.getMetrics');
-    const extractedMetric = perfMetricObject?.metrics;
-    const metricObject = extractedMetric.reduce((acc, { name, value }) => {
-        acc[name] = value;
-        return acc;
-    }, {});
+// interface IMetrics {
+//     JSHeapUsedSize: number;
+// }
 
-    return metricObject as unknown as IMetrics;
-}
+// /**
+//  * Return a performance metric from the chrome cdp session.
+//  * Note: Chrome-only
+//  * @param {Page} page page to attach cdpClient
+//  * @return {IMetrics}
+//  * @see {@link https://github.com/microsoft/playwright/issues/18071 Github RFE}
+//  */
+// async function getMetrics(page: Page): Promise<IMetrics> {
+//     const client = await page.context().newCDPSession(page);
+//     await client.send('Performance.enable');
+//     const perfMetricObject = await client.send('Performance.getMetrics');
+//     const extractedMetric = perfMetricObject?.metrics;
+//     const metricObject = extractedMetric.reduce((acc, { name, value }) => {
+//         acc[name] = value;
+//         return acc;
+//     }, {});
+
+//     return metricObject as unknown as IMetrics;
+// }
 

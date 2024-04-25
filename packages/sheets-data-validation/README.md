@@ -23,7 +23,40 @@ pnpm add
 ### Register the plugin
 
 ```typescript
+import { UniverDataValidationPlugin } from '@univerjs/data-validation';
 import { UniverSheetsDataValidationPlugin } from '@univerjs/sheets-data-validation';
 
+univer.registerPlugin(UniverDataValidationPlugin);
 univer.registerPlugin(UniverSheetsDataValidationPlugin);
+
+// initial data validation
+// dentation: https://github.com/dream-num/univer/blob/dev/packages/core/src/types/interfaces/i-data-validation.ts#L48
+const dataValidation = [
+    {
+        uid: 'xxx-2',
+        type: DataValidationType.CHECKBOX,
+        ranges: [{
+            startRow: 6,
+            endRow: 10,
+            startColumn: 0,
+            endColumn: 5,
+        }],
+    },
+];
+
+export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
+    id: 'workbook-01',
+    locale: LocaleType.ZH_CN,
+    name: 'UniverSheet Demo',
+    resource: [{
+        name: DATA_VALIDATION_PLUGIN_NAME,
+        data: JSON.stringify({
+            'sheetId-1': dataValidation,
+        }),
+    }]
+    // ...
+}
+
+// load initial snapshot
+univer.createUnit(UniverInstanceType.SHEET, DEFAULT_WORKBOOK_DATA_DEMO);
 ```

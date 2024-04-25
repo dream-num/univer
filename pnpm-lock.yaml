@@ -10,7 +10,7 @@ importers:
     devDependencies:
       '@antfu/eslint-config':
         specifier: ^2.15.0
-        version: 2.15.0(@eslint-react/eslint-plugin@1.5.9(@typescript-eslint/parser@7.7.1(eslint@8.57.0)(typescript@5.4.5))(eslint@8.57.0)(typescript@5.4.5))(@vue/compiler-sfc@3.4.21)(eslint-plugin-format@0.1.1(eslint@8.57.0))(eslint-plugin-react-hooks@4.6.0(eslint@8.57.0))(eslint-plugin-react-refresh@0.4.6(eslint@8.57.0))(eslint@8.57.0)(typescript@5.4.5)(vitest@1.5.0(@types/node@20.12.7)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.0))
+        version: 2.15.0(@eslint-react/eslint-plugin@1.5.9(@typescript-eslint/parser@7.7.1(eslint@8.57.0)(typescript@5.4.5))(eslint@8.57.0)(typescript@5.4.5))(@vue/compiler-sfc@3.4.21)(eslint-plugin-format@0.1.1(eslint@8.57.0))(eslint-plugin-react-hooks@4.6.0(eslint@8.57.0))(eslint-plugin-react-refresh@0.4.6(eslint@8.57.0))(eslint@8.57.0)(typescript@5.4.5)(vitest@1.5.2(@types/node@20.12.7)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.0))
       '@commitlint/cli':
         specifier: ^19.3.0
         version: 19.3.0(@types/node@20.12.7)(typescript@5.4.5)
@@ -127,7 +127,7 @@ importers:
         version: 8.0.9(@types/react@18.2.79)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@storybook/addon-interactions':
         specifier: 8.0.9
-        version: 8.0.9(vitest@1.5.0(@types/node@20.12.7)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.0))
+        version: 8.0.9(vitest@1.5.2(@types/node@20.12.7)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.0))
       '@storybook/addon-links':
         specifier: 8.0.9
         version: 8.0.9(react@18.2.0)
@@ -1103,29 +1103,32 @@ importers:
         specifier: workspace:*
         version: link:../sheets
       '@wendellhu/redi':
-        specifier: ^0.13.1
+        specifier: ^0.13.3
         version: 0.13.3
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
       typescript:
-        specifier: ^5.3.3
+        specifier: ^5.4.5
         version: 5.4.5
       vite:
-        specifier: ^5.1.4
+        specifier: ^5.2.10
         version: 5.2.10(@types/node@20.12.7)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)
       vitest:
-        specifier: ^1.3.1
-        version: 1.5.0(@types/node@20.12.7)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)
+        specifier: ^1.5.2
+        version: 1.5.2(@types/node@20.12.7)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)
 
   packages/sheets-filter-ui:
     dependencies:
       '@univerjs/icons':
-        specifier: ^0.1.42
+        specifier: ^0.1.44
         version: 0.1.44(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       rc-virtual-list:
-        specifier: ^3.11.4
-        version: 3.11.4(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+        specifier: ^3.11.5
+        version: 3.11.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      react-dom:
+        specifier: ^16.9.0 || ^17.0.0 || ^18.0.0
+        version: 18.2.0(react@18.2.0)
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -1152,10 +1155,10 @@ importers:
         specifier: workspace:*
         version: link:../ui
       '@wendellhu/redi':
-        specifier: ^0.13.1
+        specifier: ^0.13.3
         version: 0.13.3
       clsx:
-        specifier: ^2.1.0
+        specifier: ^2.1.1
         version: 2.1.1
       less:
         specifier: ^4.2.0
@@ -1167,14 +1170,14 @@ importers:
         specifier: ^7.8.1
         version: 7.8.1
       typescript:
-        specifier: ^5.3.3
+        specifier: ^5.4.5
         version: 5.4.5
       vite:
-        specifier: ^5.1.4
+        specifier: ^5.2.10
         version: 5.2.10(@types/node@20.12.7)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)
       vitest:
-        specifier: ^1.3.1
-        version: 1.5.0(@types/node@20.12.7)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)
+        specifier: ^1.5.2
+        version: 1.5.2(@types/node@20.12.7)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)
 
   packages/sheets-find-replace:
     devDependencies:
@@ -1658,6 +1661,12 @@ importers:
       '@univerjs/sheets-data-validation':
         specifier: workspace:*
         version: link:../sheets-data-validation
+      '@univerjs/sheets-filter':
+        specifier: workspace:*
+        version: link:../sheets-filter
+      '@univerjs/sheets-filter-ui':
+        specifier: workspace:*
+        version: link:../sheets-filter-ui
       '@univerjs/sheets-find-replace':
         specifier: workspace:*
         version: link:../sheets-find-replace
@@ -4033,11 +4042,20 @@ packages:
   '@vitest/expect@1.5.0':
     resolution: {integrity: sha512-0pzuCI6KYi2SIC3LQezmxujU9RK/vwC1U9R0rLuGlNGcOuDWxqWKu6nUdFsX9tH1WU0SXtAxToOsEjeUn1s3hA==}
 
+  '@vitest/expect@1.5.2':
+    resolution: {integrity: sha512-rf7MTD1WCoDlN3FfYJ9Llfp0PbdtOMZ3FIF0AVkDnKbp3oiMW1c8AmvRZBcqbAhDUAvF52e9zx4WQM1r3oraVA==}
+
   '@vitest/runner@1.5.0':
     resolution: {integrity: sha512-7HWwdxXP5yDoe7DTpbif9l6ZmDwCzcSIK38kTSIt6CFEpMjX4EpCgT6wUmS0xTXqMI6E/ONmfgRKmaujpabjZQ==}
 
+  '@vitest/runner@1.5.2':
+    resolution: {integrity: sha512-7IJ7sJhMZrqx7HIEpv3WrMYcq8ZNz9L6alo81Y6f8hV5mIE6yVZsFoivLZmr0D777klm1ReqonE9LyChdcmw6g==}
+
   '@vitest/snapshot@1.5.0':
     resolution: {integrity: sha512-qpv3fSEuNrhAO3FpH6YYRdaECnnRjg9VxbhdtPwPRnzSfHVXnNzzrpX4cJxqiwgRMo7uRMWDFBlsBq4Cr+rO3A==}
+
+  '@vitest/snapshot@1.5.2':
+    resolution: {integrity: sha512-CTEp/lTYos8fuCc9+Z55Ga5NVPKUgExritjF5VY7heRFUfheoAqBneUlvXSUJHUZPjnPmyZA96yLRJDP1QATFQ==}
 
   '@vitest/spy@1.3.1':
     resolution: {integrity: sha512-xAcW+S099ylC9VLU7eZfdT9myV67Nor9w9zhf0mGCYJSO+zM2839tOeROTdikOi/8Qeusffvxb/MyBSOja1Uig==}
@@ -4048,6 +4066,9 @@ packages:
   '@vitest/spy@1.5.0':
     resolution: {integrity: sha512-vu6vi6ew5N5MMHJjD5PoakMRKYdmIrNJmyfkhRpQt5d9Ewhw9nZ5Aqynbi3N61bvk9UvZ5UysMT6ayIrZ8GA9w==}
 
+  '@vitest/spy@1.5.2':
+    resolution: {integrity: sha512-xCcPvI8JpCtgikT9nLpHPL1/81AYqZy1GCy4+MCHBE7xi8jgsYkULpW5hrx5PGLgOQjUpb6fd15lqcriJ40tfQ==}
+
   '@vitest/utils@1.3.1':
     resolution: {integrity: sha512-d3Waie/299qqRyHTm2DjADeTaNdNSVsnwHPWrs20JMpjh6eiVq7ggggweO8rc4arhf6rRkWuHKwvxGvejUXZZQ==}
 
@@ -4056,6 +4077,9 @@ packages:
 
   '@vitest/utils@1.5.0':
     resolution: {integrity: sha512-BDU0GNL8MWkRkSRdNFvCUCAVOeHaUlVJ9Tx0TYBZyXaaOTmGtUFObzchCivIBrIwKzvZA7A9sCejVhXM2aY98A==}
+
+  '@vitest/utils@1.5.2':
+    resolution: {integrity: sha512-sWOmyofuXLJ85VvXNsroZur7mOJGiQeM0JN3/0D1uU8U9bGFM69X1iqHaRXl6R8BwaLY6yPCogP257zxTzkUdA==}
 
   '@volar/language-core@1.11.1':
     resolution: {integrity: sha512-dOcNn3i9GgZAcJt43wuaEykSluAuOkQgzni1cuxLxTV0nJKanQztp7FxyswdRILaKH+P2XZMPRp2S4MV/pElCw==}
@@ -7903,6 +7927,13 @@ packages:
       react: '>=16.9.0'
       react-dom: '>=16.9.0'
 
+  rc-virtual-list@3.11.5:
+    resolution: {integrity: sha512-iZRW99m5jAxtwKNPLwUrPryurcnKpXBdTyhuBp6ythf7kg/otKO5cCiIvL55GQwU0QGSlouQS0tnkciRMJUwRQ==}
+    engines: {node: '>=8.x'}
+    peerDependencies:
+      react: '>=16.9.0'
+      react-dom: '>=16.9.0'
+
   rc@1.2.8:
     resolution: {integrity: sha512-y3bGgqKj3QBdxLbLkomlohkvsA8gdAiUQlSBJnBhfn+BPxg4bc62d8TcBW15wavDfgexCgccckhcZvywyQYPOw==}
     hasBin: true
@@ -9040,6 +9071,11 @@ packages:
     engines: {node: ^18.0.0 || >=20.0.0}
     hasBin: true
 
+  vite-node@1.5.2:
+    resolution: {integrity: sha512-Y8p91kz9zU+bWtF7HGt6DVw2JbhyuB2RlZix3FPYAYmUyZ3n7iTp8eSyLyY6sxtPegvxQtmlTMhfPhUfCUF93A==}
+    engines: {node: ^18.0.0 || >=20.0.0}
+    hasBin: true
+
   vite-plugin-dts@3.9.0:
     resolution: {integrity: sha512-pwFIEYQ3LZvMafkEGvNnileb6af5JuyZsBfYQrTDYxdeGEy0OS4B4hCsLPo5YGnhK5k9EzyO6BXVO6y+Lt5T2A==}
     engines: {node: ^14.18.0 || >=16.0.0}
@@ -9092,6 +9128,31 @@ packages:
       '@types/node': ^18.0.0 || >=20.0.0
       '@vitest/browser': 1.5.0
       '@vitest/ui': 1.5.0
+      happy-dom: '*'
+      jsdom: '*'
+    peerDependenciesMeta:
+      '@edge-runtime/vm':
+        optional: true
+      '@types/node':
+        optional: true
+      '@vitest/browser':
+        optional: true
+      '@vitest/ui':
+        optional: true
+      happy-dom:
+        optional: true
+      jsdom:
+        optional: true
+
+  vitest@1.5.2:
+    resolution: {integrity: sha512-l9gwIkq16ug3xY7BxHwcBQovLZG75zZL0PlsiYQbf76Rz6QGs54416UWMtC0jXeihvHvcHrf2ROEjkQRVpoZYw==}
+    engines: {node: ^18.0.0 || >=20.0.0}
+    hasBin: true
+    peerDependencies:
+      '@edge-runtime/vm': '*'
+      '@types/node': ^18.0.0 || >=20.0.0
+      '@vitest/browser': 1.5.2
+      '@vitest/ui': 1.5.2
       happy-dom: '*'
       jsdom: '*'
     peerDependenciesMeta:
@@ -9366,7 +9427,7 @@ snapshots:
       '@jridgewell/gen-mapping': 0.3.5
       '@jridgewell/trace-mapping': 0.3.25
 
-  '@antfu/eslint-config@2.15.0(@eslint-react/eslint-plugin@1.5.9(@typescript-eslint/parser@7.7.1(eslint@8.57.0)(typescript@5.4.5))(eslint@8.57.0)(typescript@5.4.5))(@vue/compiler-sfc@3.4.21)(eslint-plugin-format@0.1.1(eslint@8.57.0))(eslint-plugin-react-hooks@4.6.0(eslint@8.57.0))(eslint-plugin-react-refresh@0.4.6(eslint@8.57.0))(eslint@8.57.0)(typescript@5.4.5)(vitest@1.5.0(@types/node@20.12.7)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.0))':
+  '@antfu/eslint-config@2.15.0(@eslint-react/eslint-plugin@1.5.9(@typescript-eslint/parser@7.7.1(eslint@8.57.0)(typescript@5.4.5))(eslint@8.57.0)(typescript@5.4.5))(@vue/compiler-sfc@3.4.21)(eslint-plugin-format@0.1.1(eslint@8.57.0))(eslint-plugin-react-hooks@4.6.0(eslint@8.57.0))(eslint-plugin-react-refresh@0.4.6(eslint@8.57.0))(eslint@8.57.0)(typescript@5.4.5)(vitest@1.5.2(@types/node@20.12.7)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.0))':
     dependencies:
       '@antfu/install-pkg': 0.3.2
       '@clack/prompts': 0.7.0
@@ -9389,7 +9450,7 @@ snapshots:
       eslint-plugin-toml: 0.11.0(eslint@8.57.0)
       eslint-plugin-unicorn: 52.0.0(eslint@8.57.0)
       eslint-plugin-unused-imports: 3.1.0(@typescript-eslint/eslint-plugin@7.7.1(@typescript-eslint/parser@7.7.1(eslint@8.57.0)(typescript@5.4.5))(eslint@8.57.0)(typescript@5.4.5))(eslint@8.57.0)
-      eslint-plugin-vitest: 0.5.3(@typescript-eslint/eslint-plugin@7.7.1(@typescript-eslint/parser@7.7.1(eslint@8.57.0)(typescript@5.4.5))(eslint@8.57.0)(typescript@5.4.5))(eslint@8.57.0)(typescript@5.4.5)(vitest@1.5.0(@types/node@20.12.7)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.0))
+      eslint-plugin-vitest: 0.5.3(@typescript-eslint/eslint-plugin@7.7.1(@typescript-eslint/parser@7.7.1(eslint@8.57.0)(typescript@5.4.5))(eslint@8.57.0)(typescript@5.4.5))(eslint@8.57.0)(typescript@5.4.5)(vitest@1.5.2(@types/node@20.12.7)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.0))
       eslint-plugin-vue: 9.25.0(eslint@8.57.0)
       eslint-plugin-yml: 1.14.0(eslint@8.57.0)
       eslint-processor-vue-blocks: 0.1.2(@vue/compiler-sfc@3.4.21)(eslint@8.57.0)
@@ -11116,11 +11177,11 @@ snapshots:
     dependencies:
       '@storybook/global': 5.0.0
 
-  '@storybook/addon-interactions@8.0.9(vitest@1.5.0(@types/node@20.12.7)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.0))':
+  '@storybook/addon-interactions@8.0.9(vitest@1.5.2(@types/node@20.12.7)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.0))':
     dependencies:
       '@storybook/global': 5.0.0
       '@storybook/instrumenter': 8.0.9
-      '@storybook/test': 8.0.9(vitest@1.5.0(@types/node@20.12.7)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.0))
+      '@storybook/test': 8.0.9(vitest@1.5.2(@types/node@20.12.7)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.0))
       '@storybook/types': 8.0.9
       polished: 4.3.1
       ts-dedent: 2.2.0
@@ -11688,14 +11749,14 @@ snapshots:
       - encoding
       - supports-color
 
-  '@storybook/test@8.0.9(vitest@1.5.0(@types/node@20.12.7)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.0))':
+  '@storybook/test@8.0.9(vitest@1.5.2(@types/node@20.12.7)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.0))':
     dependencies:
       '@storybook/client-logger': 8.0.9
       '@storybook/core-events': 8.0.9
       '@storybook/instrumenter': 8.0.9
       '@storybook/preview-api': 8.0.9
       '@testing-library/dom': 9.3.4
-      '@testing-library/jest-dom': 6.4.2(vitest@1.5.0(@types/node@20.12.7)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.0))
+      '@testing-library/jest-dom': 6.4.2(vitest@1.5.2(@types/node@20.12.7)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.0))
       '@testing-library/user-event': 14.5.2(@testing-library/dom@9.3.4)
       '@vitest/expect': 1.3.1
       '@vitest/spy': 1.4.0
@@ -11838,7 +11899,7 @@ snapshots:
       lz-string: 1.5.0
       pretty-format: 27.5.1
 
-  '@testing-library/jest-dom@6.4.2(vitest@1.5.0(@types/node@20.12.7)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.0))':
+  '@testing-library/jest-dom@6.4.2(vitest@1.5.2(@types/node@20.12.7)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.0))':
     dependencies:
       '@adobe/css-tools': 4.3.3
       '@babel/runtime': 7.24.1
@@ -11849,7 +11910,7 @@ snapshots:
       lodash: 4.17.21
       redent: 3.0.0
     optionalDependencies:
-      vitest: 1.5.0(@types/node@20.12.7)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)
+      vitest: 1.5.2(@types/node@20.12.7)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)
 
   '@testing-library/react-hooks@8.0.1(@types/react@18.2.79)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
@@ -12344,13 +12405,31 @@ snapshots:
       '@vitest/utils': 1.5.0
       chai: 4.4.1
 
+  '@vitest/expect@1.5.2':
+    dependencies:
+      '@vitest/spy': 1.5.2
+      '@vitest/utils': 1.5.2
+      chai: 4.4.1
+
   '@vitest/runner@1.5.0':
     dependencies:
       '@vitest/utils': 1.5.0
       p-limit: 5.0.0
       pathe: 1.1.2
 
+  '@vitest/runner@1.5.2':
+    dependencies:
+      '@vitest/utils': 1.5.2
+      p-limit: 5.0.0
+      pathe: 1.1.2
+
   '@vitest/snapshot@1.5.0':
+    dependencies:
+      magic-string: 0.30.8
+      pathe: 1.1.2
+      pretty-format: 29.7.0
+
+  '@vitest/snapshot@1.5.2':
     dependencies:
       magic-string: 0.30.8
       pathe: 1.1.2
@@ -12365,6 +12444,10 @@ snapshots:
       tinyspy: 2.2.1
 
   '@vitest/spy@1.5.0':
+    dependencies:
+      tinyspy: 2.2.1
+
+  '@vitest/spy@1.5.2':
     dependencies:
       tinyspy: 2.2.1
 
@@ -12383,6 +12466,13 @@ snapshots:
       pretty-format: 29.7.0
 
   '@vitest/utils@1.5.0':
+    dependencies:
+      diff-sequences: 29.6.3
+      estree-walker: 3.0.3
+      loupe: 2.3.7
+      pretty-format: 29.7.0
+
+  '@vitest/utils@1.5.2':
     dependencies:
       diff-sequences: 29.6.3
       estree-walker: 3.0.3
@@ -14253,13 +14343,13 @@ snapshots:
     optionalDependencies:
       '@typescript-eslint/eslint-plugin': 7.7.1(@typescript-eslint/parser@7.7.1(eslint@8.57.0)(typescript@5.4.5))(eslint@8.57.0)(typescript@5.4.5)
 
-  eslint-plugin-vitest@0.5.3(@typescript-eslint/eslint-plugin@7.7.1(@typescript-eslint/parser@7.7.1(eslint@8.57.0)(typescript@5.4.5))(eslint@8.57.0)(typescript@5.4.5))(eslint@8.57.0)(typescript@5.4.5)(vitest@1.5.0(@types/node@20.12.7)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)):
+  eslint-plugin-vitest@0.5.3(@typescript-eslint/eslint-plugin@7.7.1(@typescript-eslint/parser@7.7.1(eslint@8.57.0)(typescript@5.4.5))(eslint@8.57.0)(typescript@5.4.5))(eslint@8.57.0)(typescript@5.4.5)(vitest@1.5.2(@types/node@20.12.7)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)):
     dependencies:
       '@typescript-eslint/utils': 7.6.0(eslint@8.57.0)(typescript@5.4.5)
       eslint: 8.57.0
     optionalDependencies:
       '@typescript-eslint/eslint-plugin': 7.7.1(@typescript-eslint/parser@7.7.1(eslint@8.57.0)(typescript@5.4.5))(eslint@8.57.0)(typescript@5.4.5)
-      vitest: 1.5.0(@types/node@20.12.7)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)
+      vitest: 1.5.2(@types/node@20.12.7)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)
     transitivePeerDependencies:
       - supports-color
       - typescript
@@ -16645,6 +16735,15 @@ snapshots:
       react: 18.2.0
       react-dom: 18.2.0(react@18.2.0)
 
+  rc-virtual-list@3.11.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
+    dependencies:
+      '@babel/runtime': 7.24.1
+      classnames: 2.5.1
+      rc-resize-observer: 1.4.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      rc-util: 5.39.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+
   rc@1.2.8:
     dependencies:
       deep-extend: 0.6.0
@@ -17971,6 +18070,23 @@ snapshots:
       - supports-color
       - terser
 
+  vite-node@1.5.2(@types/node@20.12.7)(less@4.2.0)(sass@1.72.0)(terser@5.30.0):
+    dependencies:
+      cac: 6.7.14
+      debug: 4.3.4
+      pathe: 1.1.2
+      picocolors: 1.0.0
+      vite: 5.2.10(@types/node@20.12.7)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)
+    transitivePeerDependencies:
+      - '@types/node'
+      - less
+      - lightningcss
+      - sass
+      - stylus
+      - sugarss
+      - supports-color
+      - terser
+
   vite-plugin-dts@3.9.0(@types/node@20.12.7)(rollup@4.13.2)(typescript@5.4.5)(vite@5.2.10(@types/node@20.12.7)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)):
     dependencies:
       '@microsoft/api-extractor': 7.43.0(@types/node@20.12.7)
@@ -18026,6 +18142,41 @@ snapshots:
       tinypool: 0.8.3
       vite: 5.2.10(@types/node@20.12.7)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)
       vite-node: 1.5.0(@types/node@20.12.7)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)
+      why-is-node-running: 2.2.2
+    optionalDependencies:
+      '@types/node': 20.12.7
+      happy-dom: 13.3.8
+      jsdom: 24.0.0
+    transitivePeerDependencies:
+      - less
+      - lightningcss
+      - sass
+      - stylus
+      - sugarss
+      - supports-color
+      - terser
+
+  vitest@1.5.2(@types/node@20.12.7)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.0):
+    dependencies:
+      '@vitest/expect': 1.5.2
+      '@vitest/runner': 1.5.2
+      '@vitest/snapshot': 1.5.2
+      '@vitest/spy': 1.5.2
+      '@vitest/utils': 1.5.2
+      acorn-walk: 8.3.2
+      chai: 4.4.1
+      debug: 4.3.4
+      execa: 8.0.1
+      local-pkg: 0.5.0
+      magic-string: 0.30.8
+      pathe: 1.1.2
+      picocolors: 1.0.0
+      std-env: 3.7.0
+      strip-literal: 2.1.0
+      tinybench: 2.6.0
+      tinypool: 0.8.3
+      vite: 5.2.10(@types/node@20.12.7)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)
+      vite-node: 1.5.2(@types/node@20.12.7)(less@4.2.0)(sass@1.72.0)(terser@5.30.0)
       why-is-node-running: 2.2.2
     optionalDependencies:
       '@types/node': 20.12.7

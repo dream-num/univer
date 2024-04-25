@@ -3,20 +3,20 @@
 [![npm version](https://img.shields.io/npm/v/@univerjs/sheets-filter)](https://npmjs.org/packages/@univerjs/sheets-filter)
 [![license](https://img.shields.io/npm/l/@univerjs/sheets-filter)](https://img.shields.io/npm/l/@univerjs/sheets-filter)
 
-## Introduction
+## 简介
 
-`@univerjs/sheets-filter` is a filter plugin for Univer Sheet.
+`@univerjs/sheets-filter` 是 Univer Sheet 的筛选插件。
 
-## Usage
+## 使用指南
 
-You should use this plugin with the `@univerjs/sheets-filter-ui` package.
+你应该将此插件与 `@univerjs/sheets-filter-ui` 包一起使用。
 
-### Installation
+### 安装
 
 ```shell
-# Using npm
+# 使用 npm
 npm install @univerjs/sheets-filter
 
-# Using pnpm
+# 使用 pnpm
 pnpm add @univerjs/sheets-filter
 ```

@@ -5,13 +5,13 @@
 ![CSS Included](https://img.shields.io/badge/CSS_Included-blue?logo=CSS3)
 ![i18n](https://img.shields.io/badge/zh--CN%20%7C%20en--US-cornflowerblue?label=i18n)
 
-## Introduction
+## 简介
 
-`@univerjs/sheets-filter-ui` provides a user interface for filtering in sheets.
+`@univerjs/sheets-filter-ui` 为 sheets 提供了筛选功能的用户界面。
 
-## Usage
+## 使用指南
 
-You should use this plugin with the `@univerjs/sheets-filter` package.
+你应该将此插件与 `@univerjs/sheets-filter` 包一起使用。
 
 ```ts
 import '@univerjs/sheets-filter-ui/lib/index.css';
@@ -23,12 +23,12 @@ univer.registerPlugin(UniverSheetsFilterPlugin);
 univer.registerPlugin(UniverSheetsFilterUIPlugin);
 ```
 
-### Installation
+### 安装
 
 ```shell
-# Using npm
+# 使用 npm
 npm install @univerjs/sheets-filter-ui
 
-# Using pnpm
+# 使用 pnpm
 pnpm add @univerjs/sheets-filter-ui
 ```

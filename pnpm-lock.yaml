@@ -1277,8 +1277,8 @@ importers:
         specifier: workspace:*
         version: link:../ui
       '@wendellhu/redi':
-        specifier: ^0.13.0
-        version: 0.13.0
+        specifier: ^0.13.3
+        version: 0.13.3
       clsx:
         specifier: ^2.1.0
         version: 2.1.0
@@ -1514,8 +1514,8 @@ importers:
         specifier: workspace:*
         version: link:../ui
       '@wendellhu/redi':
-        specifier: ^0.13.0
-        version: 0.13.0
+        specifier: ^0.13.3
+        version: 0.13.3
       clsx:
         specifier: ^2.1.0
         version: 2.1.0
@@ -6856,10 +6856,6 @@ packages:
       '@webassemblyjs/ast': 1.12.1
       '@xtuc/long': r2.cnpmjs.org/@xtuc/long@4.2.2
     dev: false
-
-  /@wendellhu/redi@0.13.0:
-    resolution: {integrity: sha512-ZqMpzpMYdBLfDyMxRVxfX0JR5x9rljKiMxdFVcVgoPf2AbkjzFcyWTT92gQspSZauweM3fjrx/ZeO4H4DPTAEA==}
-    dev: true
 
   /@wendellhu/redi@0.13.3:
     resolution: {integrity: sha512-Fsk+L7zVs+R56GnymqLEgH+WaliLhHFwxrKkIppEAQB10uH7YQLRja+jvXKTbaQpNWZvF5jiK5qJHyTkURv8Pg==}

@@ -33,7 +33,7 @@ export const ToggleSheetCommentPanelOperation: ICommand = {
             panelService.setPanelVisible(false);
         } else {
             sidebarService.open({
-                header: { title: 'sheetThreadComment.panel.title' },
+                header: { title: 'threadComment.panel.title' },
                 children: { label: THREAD_COMMENT_PANEL },
                 width: 312,
             });

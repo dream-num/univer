@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-export const THREAD_COMMENT_POPUP = 'thread-comment-popup';
-
-export const THREAD_COMMENT_PANEL = 'thread-comment-panel';
-
-export const PLUGIN_NAME = 'thread-comment-ui-plugin';
+export { ThreadCommentUIPlugin } from './plugin';
+export { ToggleSheetCommentPanelOperation } from './commands/operations/comment.operations';
+export { ThreadCommentPanelService } from './services/thread-comment-panel.service';

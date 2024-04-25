@@ -14,8 +14,13 @@
  * limitations under the License.
  */
 
-export const THREAD_COMMENT_POPUP = 'thread-comment-popup';
+import React from 'react';
+import styles from './index.module.less';
 
-export const THREAD_COMMENT_PANEL = 'thread-comment-panel';
+export const ThreadCommentPanel = () => {
+    return (
+        <div className={styles.ThreadCommentPanel}>
 
-export const PLUGIN_NAME = 'thread-comment-ui-plugin';
+        </div>
+    );
+};

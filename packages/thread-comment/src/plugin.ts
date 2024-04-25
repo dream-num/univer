@@ -29,7 +29,7 @@ export class ThreadCommentPlugin extends Plugin {
     constructor(
         _config: unknown,
         @Inject(Injector) protected _injector: Injector,
-        @ICommandService private _commandService: ICommandService
+        @ICommandService protected _commandService: ICommandService
     ) {
         super();
     }

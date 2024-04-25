@@ -22,3 +22,4 @@ export type { IAddCommentMutationParams, IDeleteCommentMutationParams, IResolveC
 export type { IThreadComment } from './types/interfaces/i-thread-comment';
 export { AddCommentCommand, DeleteCommentCommand, ResolveCommentCommand, UpdateCommentCommand } from './commands/commands/comment.command';
 export type { IAddCommentCommandParams, IDeleteCommentCommandParams, IResolveCommentCommandParams, IUpdateCommentCommandParams } from './commands/commands/comment.command';
+export { ThreadCommentPlugin } from './plugin';

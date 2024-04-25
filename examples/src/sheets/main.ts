@@ -72,7 +72,7 @@ univer.registerPlugin(UniverSheetsNumfmtPlugin);
 univer.registerPlugin(DebuggerPlugin);
 univer.registerPlugin(UniverSheetsZenEditorPlugin);
 univer.registerPlugin(UniverFormulaEnginePlugin, {
-    notExecuteFormula: false,
+    notExecuteFormula: true,
 });
 univer.registerPlugin(UniverSheetsFormulaPlugin);
 univer.registerPlugin(UniverRPCMainThreadPlugin, {

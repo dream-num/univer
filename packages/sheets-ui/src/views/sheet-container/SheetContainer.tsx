@@ -48,7 +48,9 @@ export function RenderSheetHeader() {
     if (!workbook) return null;
 
     return (
-        <FormulaBar />
+        <>
+            <FormulaBar />
+        </>
     );
 }
 

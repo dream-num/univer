@@ -60,7 +60,7 @@ export interface ICellData {
     /**
      * User stored custom fields
      */
-    custom?: { [key: string]: any };
+    custom?: Nullable<Record<string, any>>;
 }
 
 export interface ICellMarksStyle {

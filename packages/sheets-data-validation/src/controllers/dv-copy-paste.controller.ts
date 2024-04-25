@@ -73,20 +73,11 @@ export class DataValidationCopyPasteController extends Disposable {
             return;
         }
         const { rows, cols } = discreteRange;
-        rows.forEach((row) => {
-            cols.forEach((col) => {
+        rows.forEach((row, rowIndex) => {
+            cols.forEach((col, colIndex) => {
                 const ruleId = manager.getRuleIdByLocation(row, col);
 
-                const relativeRange = Rectangle.getRelativeRange(
-                    {
-                        startRow: row,
-                        endRow: row,
-                        startColumn: col,
-                        endColumn: col,
-                    },
-                    range
-                );
-                matrix.setValue(relativeRange.startRow, relativeRange.startColumn, ruleId ?? '');
+                matrix.setValue(rowIndex, colIndex, ruleId ?? '');
             });
         });
     }

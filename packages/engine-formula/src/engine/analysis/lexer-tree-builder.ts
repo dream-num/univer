@@ -347,7 +347,7 @@ export class LexerTreeBuilder extends Disposable {
 
             let newRange: IRange = sequenceGrid.range;
 
-            if (newRange.startAbsoluteRefType === AbsoluteRefType.ALL && newRange.endAbsoluteRefType === AbsoluteRefType.ALL) {
+            if (!ignoreAbsolute && newRange.startAbsoluteRefType === AbsoluteRefType.ALL && newRange.endAbsoluteRefType === AbsoluteRefType.ALL) {
                 newSequenceNodes.push(node);
                 continue;
             } else {

@@ -812,16 +812,18 @@ export function inRowViewRanges( ranges:IRange[], rowIndex: number) {
  * 如果 range 有相交, 那么扩展到第一个 range 中.
  * @param ranges
  */
-export function mergeRangeIfIntersects(mainRange: IRange, ranges:IRange[]) {
-    for (const range of ranges) {
-        if(Rectangle.intersects(mainRange, range)) {
-            mainRange.startRow = Math.min(mainRange.startRow, range.startRow);
-            mainRange.endRow = Math.max(mainRange.endRow, range.endRow);
-            mainRange.startColumn = Math.min(mainRange.startColumn, range.startColumn);
-            mainRange.endColumn = Math.max(mainRange.endColumn, range.endColumn);
+export function mergeRangeIfIntersects(mainRanges: IRange[], ranges:IRange[]) {
+    for(const mainRange of mainRanges) {
+        for (const range of ranges) {
+            if(Rectangle.intersects(mainRange, range)) {
+                mainRange.startRow = Math.min(mainRange.startRow, range.startRow);
+                mainRange.endRow = Math.max(mainRange.endRow, range.endRow);
+                mainRange.startColumn = Math.min(mainRange.startColumn, range.startColumn);
+                mainRange.endColumn = Math.max(mainRange.endColumn, range.endColumn);
+            }
         }
     }
-    return mainRange;
+    return mainRanges;
 }
 
 

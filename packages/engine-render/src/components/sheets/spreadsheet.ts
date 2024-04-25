@@ -79,15 +79,8 @@ export class Spreadsheet extends SheetComponent {
     ) {
         super(oKey, spreadsheetSkeleton);
         if (this._allowCache) {
-
+            // TODO:raku delete
             this.onIsAddedToParentObserver.add((parent) => {
-                // (parent as Scene)?.getEngine()?.onTransformChangeObservable.add(() => {
-                //     this._resizeCacheCanvas();
-                // });
-                // this._resizeCacheCanvas();
-                // this._addMakeDirtyToScroll();
-
-                // (parent as Scene)?.getViewports().forEach(vp => vp.makeDirty());
                 window.scene = parent;
 
             });
@@ -152,27 +145,15 @@ export class Spreadsheet extends SheetComponent {
             ? viewportInfo?.diffBounds?.map((bound) => spreadsheetSkeleton.getRowColumnSegmentByViewBound(bound))
             : undefined;
         const viewRanges = [spreadsheetSkeleton.getRowColumnSegmentByViewBound(viewportInfo?.cacheBound)];
-
         const extensions = this.getExtensionsByOrder();
 
-        if((viewportInfo?.viewPortKey === 'viewMain' || viewportInfo?.viewPortKey === 'viewMainLeft')) {
-            // console.log(bounds?.viewPortKey, 'diffRange count', diffRanges.length, 'diffY StartRow', diffRanges[0].startRow, 'diffY startColumn', diffRanges[0].startColumn , ':::::height', diffRanges[0].endRow - diffRanges[0].startRow,':::::width', diffRanges[0].endColumn - diffRanges[0].startColumn);
-            console.log(viewportInfo?.viewPortKey, ' ranges', viewRanges[0],'diffRanges', diffRanges, 'bounds', viewportInfo?.cacheBound, viewportInfo?.viewBound);
-        }
-
-        const timeKey = `diffRange ${viewportInfo?.viewPortKey}!!ext!!`;
-        console.time(timeKey);
         for (const extension of extensions) {
-            const timeKey = `${viewportInfo?.viewPortKey}!!ext!!${extension.uKey}`;
-            console.time(timeKey);
             extension.draw(ctx, parentScale, spreadsheetSkeleton, {
                 viewRanges,
                 diffRanges,
                 checkOutOfViewBound: viewportInfo.allowCache, //!!bounds!.cacheCanvas,
             });
-            console.timeEnd(timeKey);
         }
-        console.timeEnd(timeKey);
     }
 
     override isHit(coord: Vector2) {
@@ -282,14 +263,12 @@ export class Spreadsheet extends SheetComponent {
         const { a: scaleX = 1, d: scaleY = 1 } = mainCtx.getTransform();
         const bufferEdgeSizeX = bufferEdgeX * scaleX / window.devicePixelRatio;
         const bufferEdgeSizeY = bufferEdgeY * scaleY / window.devicePixelRatio;
-        // mainCtx this._scene.getEngine()?.getCanvas().getContext();
 
 
         if (viewPortKey === 'viewMain') {
             const cacheCtx = cacheCanvas.getContext();
             cacheCtx.save();
 
-            //
             const { left, top, right, bottom } = viewPortPosition;
 
             const dw = right - left + rowHeaderWidth;
@@ -337,9 +316,8 @@ export class Spreadsheet extends SheetComponent {
                     cacheCtx.translate(-leftOrigin + bufferEdgeX, -topOrigin + bufferEdgeY);
 
 
-                    console.time('!!!viewMain_render_222---222');
                     if (shouldCacheUpdate) {
-
+                        console.time('viewMain---222---222');
                         for (const diffBound of diffCacheBounds) {
                             cacheCtx.save();
 
@@ -347,7 +325,6 @@ export class Spreadsheet extends SheetComponent {
                             cacheCtx.beginPath();
 
                             // 再次注意!  draw 的时候 ctx.translate 单元格偏移是相对 spreadsheet content
-                            // 不考虑 rowHeaderWidth
                             // 但是 diffBounds 是包括 rowHeader 信息
                             diffLeft -= bufferEdgeX; // 必须扩大范围 不然存在空白贴图
                             diffTop -= bufferEdgeY;
@@ -366,8 +343,8 @@ export class Spreadsheet extends SheetComponent {
                             });
                             cacheCtx.restore();
                         }
+                        console.time('viewMain---222---222');
                     }
-                    console.timeEnd('!!!viewMain_render_222---222');
                     this._refreshIncrementalState = false;
 
                 }

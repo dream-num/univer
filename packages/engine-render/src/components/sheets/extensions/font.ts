@@ -122,8 +122,8 @@ export class Font extends SheetExtension {
                     // 合并后 font extension 在当前 viewBounds 中也走一次绘制
                     // 但是此刻还不能认为不在 viewRanges 内就退出
                     // 横向还可能存在 overflow, 因此此刻只能排除不在当前 row 的单元格
-                    const combineWithMergeRanges = mergeRangeIfIntersects(viewRanges[0], [mergeInfo]);
-                    if(!inRowViewRanges([combineWithMergeRanges], rowIndex)) {
+                    const combineWithMergeRanges = mergeRangeIfIntersects(diffRanges || viewRanges, [mergeInfo]);
+                    if(!inRowViewRanges(combineWithMergeRanges, rowIndex)) {
                         return true;
                     }
 
@@ -164,7 +164,7 @@ export class Font extends SheetExtension {
                     const { horizontalAlign, vertexAngle = 0, centerAngle = 0 } = docsConfig;
 
                     // 既不是溢出, 又不在当前 range 内(已考虑合并单元格带来的 range 扩展), 那么也退出
-                    if(!overflowRectangle && !inViewRanges([...viewRanges, mergeInfo], rowIndex, columnIndex)) {
+                    if(!overflowRectangle && !inViewRanges(combineWithMergeRanges, rowIndex, columnIndex)) {
                         return true;
                     }
 

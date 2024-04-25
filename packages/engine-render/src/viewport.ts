@@ -280,7 +280,10 @@ export class Viewport {
         this.bufferEdgeY = props?.bufferEdgeY || 0;
     }
 
-
+    /**
+     * test
+     * TODO:raku delete
+     */
     _testDisplayCache() {
         const globalThis = window as any;
         if (!globalThis.cacheSet) {
@@ -704,13 +707,6 @@ export class Viewport {
         }
 
         mainCtx.transform(sceneTransM[0], sceneTransM[1], sceneTransM[2], sceneTransM[3], sceneTransM[4], sceneTransM[5]);
-        // e = e' * a  f = f' * d  位移 * scale
-        // const mainTF = mainCtx.getTransform()
-        // // 向右滚动 200 后, mtf.e = -200
-        // cacheCtx?.setTransform(mainTF.a, mainTF.b, mainTF.c, mainTF.d, mainTF.e, mainTF.f);
-        // cacheCtx?.setTransform(mainTF.a, mainTF.b, mainTF.c, mainTF.d, mainTF.e + BUFFER_EDGE_SIZE * mainTF.a, mainTF.f + BUFFER_EDGE_SIZE * mainTF.d);
-        // cacheCtx 修正 实际上 translate 到 mtf.e = 100
-        // cacheCtx?.translate(BUFFER_EDGE_SIZE, BUFFER_EDGE_SIZE);
         const viewPortInfo = this._calcViewportInfo();
 
 
@@ -725,20 +721,6 @@ export class Viewport {
         objects.forEach((o) => {
             o.render(mainCtx, viewPortInfo);
         });
-
-        // 进入到这里的坐标, 从 sheet corner 右下角计算 也就是不算行头列头
-        // if(viewPortInfo.cacheCanvas) {
-        //     const cacheCtx = viewPortInfo.cacheCanvas.getContext();
-        //     const tr = cacheCtx.getTransform();
-        //     for (let index = 0; index < viewPortInfo.cacheBound.right; ) {
-        //         cacheCtx.fillText( ''+index, index, 280)//-tr.f + 100)
-        //         cacheCtx.beginPath();
-        //         cacheCtx.moveTo(index, 280); // 将画笔移动到起点
-        //         cacheCtx.lineTo(index, 1000);     // 绘制直线到终点
-        //         cacheCtx.stroke();               // 绘制直线
-        //         index = index + 50;
-        //     }
-        // }
 
         if(isLast) {
             objects.forEach((o) => {
@@ -841,38 +823,11 @@ export class Viewport {
         const xTo: number = ((width || 0) + this.left);
         const yFrom: number = this.top;
         const yTo: number = ((height || 0) + this.top);
-        // console.log('height:::', this.viewPortKey, size.height, height, yTo)
-        /**
-         * @DR-Univer The coordinates here need to be consistent with the clip in the render,
-         * which may be caused by other issues that will be optimized later.
-         */
-        // const sceneTrans = this._scene.transform.clone();
-        // const m = sceneTrans.getMatrix();
-        // const { scaleX, scaleY } = this._getBoundScale(m[0], m[3]);
-
-        // let differenceX = 0;
-
-        // let differenceY = 0;
-
-        // const ratioScrollX = this._scrollBar?.ratioScrollX ?? 1;
-
-        // const ratioScrollY = this._scrollBar?.ratioScrollY ?? 1;
-
-        // if (this._preScrollX != null) {
-        //     differenceX = (this._preScrollX - this.scrollX) / ratioScrollX;
-        // }
-
-        // if (this._preScrollY != null) {
-        //     differenceY = (this._preScrollY - this.scrollY) / ratioScrollY;
-        // }
 
         // this.getRelativeVector 加上了 scroll 后的坐标
         const topLeft = this.getRelativeVector(Vector2.FromArray([xFrom, yFrom]));
         const bottomRight = this.getRelativeVector(Vector2.FromArray([xTo, yTo]));
-        // if(this.viewPortKey == 'viewMain' || this.viewPortKey == 'viewMainLeft'){
 
-        //     console.log('yTo ', this.viewPortKey, yTo, 'bottomRight', bottomRight.y, 'height', height, 'top', this.top)
-        // }
 
 
         const viewBound = {
@@ -898,27 +853,11 @@ export class Viewport {
             this._preCacheBound = this.expandBounds(viewBound);
         }
         let diffCacheBounds: IBoundRectNoAngle[] = [];// = this._diffViewBound(cacheBounds, prevCacheBounds);
-        // const prevCacheBounds = this._prevCacheBound;
-        // const cacheDiffX = (prevCacheBounds?.left || 0) - cacheBound.left;
-        // const cacheDiffY = (prevCacheBounds?.top || 0) - cacheBound.top;
-        // this._prevCacheBound.left += diffX;
-        // this._prevCacheBound.right += diffX;
-        // console.log('prev cache bound', this._preCacheBound.left, this._preCacheBound.right)
         const cacheViewPortPosition = this.expandBounds(viewPortPosition);
 
         let shouldCacheUpdate = this._shouldCacheUpdate(viewBound, this._preCacheBound, diffX, diffY);
         if(shouldCacheUpdate) {
             diffCacheBounds = this._diffCacheBound(this._preCacheBound, cacheBound);
-        }
-        if(this.viewPortKey === 'viewMain') {
-            console.log('shouldCacheUpdate', shouldCacheUpdate)
-            // if(diffX < 0) {
-            //     if(shouldCacheUpdate ) {
-            //         console.log('shouldCacheUpdate',shouldCacheUpdate, this._preCacheBound.right, diffCacheBounds.length && diffCacheBounds[0].left)
-            //     } else {
-            //         console.log(`%cError!`,  'background-color: red; color: white', this._preCacheBound.right, diffCacheBounds.length && diffCacheBounds[0].left);
-            //     }
-            // }
         }
 
         return {
@@ -1169,8 +1108,8 @@ export class Viewport {
 
         const scaleX = this.scene.scaleX;
         const scaleY = this.scene.scaleY;
-        const canvasW = width + this.bufferEdgeX * 2 * scaleX;
-        const canvasH = height + this.bufferEdgeY * 2 * scaleY;
+        const canvasW = width !== 0 ? width + this.bufferEdgeX * 2 * scaleX : 0;
+        const canvasH = height !== 0 ? height + this.bufferEdgeY * 2 * scaleY : 0;
 
         this._cacheCanvas?.setSize(canvasW, canvasH);
 

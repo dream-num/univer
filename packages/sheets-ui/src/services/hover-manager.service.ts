@@ -15,7 +15,7 @@
  */
 
 import type { IPosition, IRange, Nullable, Workbook } from '@univerjs/core';
-import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import { Disposable, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import type { ISheetLocation } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 import { distinctUntilChanged, Subject } from 'rxjs';
@@ -23,14 +23,13 @@ import { IRenderManagerService, Vector2 } from '@univerjs/engine-render';
 import { getCellIndexByOffsetWithMerge } from '../common/utils';
 import { ScrollManagerService } from './scroll-manager.service';
 import { SheetSkeletonManagerService } from './sheet-skeleton-manager.service';
-import { ISelectionRenderService } from './selection/selection-render.service';
 
 export interface IHoverCellPosition {
     position: IPosition;
     location: ISheetLocation;
 }
 
-export class HoverManagerService {
+export class HoverManagerService extends Disposable {
     private _currentCell$ = new Subject<Nullable<IHoverCellPosition>>();
     currentCell$ = this._currentCell$.asObservable().pipe(distinctUntilChanged((
         (pre, aft) => (
@@ -47,9 +46,19 @@ export class HoverManagerService {
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @Inject(ScrollManagerService) private readonly _scrollManagerService: ScrollManagerService,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService
-    ) { }
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
+    ) {
+        super();
+
+        // TODO@weird94: any better solution here?
+        this._initCellDisposableListener();
+    }
+
+    private _initCellDisposableListener(): void {
+        this.disposeWithMe(this._univerInstanceService.getCurrentTypeOfUnit$(UniverInstanceType.SHEET).subscribe((workbook) => {
+            if (!workbook) this._currentCell$.next(null);
+        }));
+    }
 
     private _calcActiveCell() {
         if (!this._lastPosition) return;

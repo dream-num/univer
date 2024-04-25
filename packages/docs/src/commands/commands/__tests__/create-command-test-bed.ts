@@ -87,7 +87,7 @@ const TEST_DOCUMENT_DATA_EN: IDocumentData = {
     },
 };
 
-export function createCommandTestBed(workbookConfig?: IDocumentData, dependencies?: Dependency[]) {
+export function createCommandTestBed(workbookData?: IDocumentData, dependencies?: Dependency[]) {
     const univer = new Univer();
     const injector = univer.__getInjector();
     const get = injector.get.bind(injector);
@@ -120,7 +120,7 @@ export function createCommandTestBed(workbookConfig?: IDocumentData, dependencie
 
     univer.registerPlugin(TestPlugin);
 
-    const doc = univer.createUniverDoc(workbookConfig || TEST_DOCUMENT_DATA_EN);
+    const doc = univer.createUniverDoc(workbookData || TEST_DOCUMENT_DATA_EN);
     const univerInstanceService = get(IUniverInstanceService);
     univerInstanceService.focusUnit('test-doc');
 

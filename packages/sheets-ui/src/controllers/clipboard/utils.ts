@@ -40,13 +40,14 @@ import {
 import type { IAccessor } from '@wendellhu/redi';
 
 import numfmt from '@univerjs/engine-numfmt';
-import type { ICellDataWithSpanInfo, ICopyPastePayload, ISheetRangeLocation } from '../../services/clipboard/type';
+import type { ICellDataWithSpanInfo, ICopyPastePayload, ISheetDiscreteRangeLocation } from '../../services/clipboard/type';
 import { COPY_TYPE } from '../../services/clipboard/type';
+import { discreteRangeToRange, type IDiscreteRange, virtualizeDiscreteRanges } from '../utils/range-tools';
 
 // if special paste need append mutations instead of replace the default, it can use this function to generate default mutations.
 export function getDefaultOnPasteCellMutations(
-    pasteFrom: ISheetRangeLocation,
-    pasteTo: ISheetRangeLocation,
+    pasteFrom: ISheetDiscreteRangeLocation,
+    pasteTo: ISheetDiscreteRangeLocation,
     data: ObjectMatrix<ICellDataWithSpanInfo>,
     payload: ICopyPastePayload,
     accessor: IAccessor
@@ -58,7 +59,6 @@ export function getDefaultOnPasteCellMutations(
         redoMutationsInfo.push(...redos);
         undoMutationsInfo.push(...undos);
     } else {
-        const { unitId, subUnitId, range } = pasteTo;
         // clear style
         const { undos: clearStyleUndos, redos: clearStyleRedos } = getClearCellStyleMutations(pasteTo, data, accessor);
         redoMutationsInfo.push(...clearStyleRedos);
@@ -93,19 +93,21 @@ export function getMoveRangeMutations(
     from: {
         unitId: string;
         subUnitId: string;
-        range?: IRange;
+        range?: IDiscreteRange;
     },
     to: {
         unitId: string;
         subUnitId: string;
-        range?: IRange;
+        range?: IDiscreteRange;
     },
     accessor: IAccessor
 ) {
     let redos: IMutationInfo[] = [];
     let undos: IMutationInfo[] = [];
-    const { range: fromRange, subUnitId: fromSubUnitId, unitId } = from;
-    const { range: toRange, subUnitId: toSubUnitId } = to;
+    const { range: fromDiscreteRange, subUnitId: fromSubUnitId, unitId } = from;
+    const { range: toDiscreteRange, subUnitId: toSubUnitId } = to;
+    const toRange = toDiscreteRange ? discreteRangeToRange(toDiscreteRange) : null;
+    const fromRange = fromDiscreteRange ? discreteRangeToRange(fromDiscreteRange) : null;
 
     if (fromRange && toRange) {
         const univerInstanceService = accessor.get(IUniverInstanceService);
@@ -254,6 +256,9 @@ export function getMoveRangeMutations(
                 },
             ];
             undos = [
+                { id: MoveRangeMutation.id, params: undoMoveRangeMutation },
+                ...interceptorCommands.undos,
+                ...mergeUndos,
                 {
                     id: SetSelectionsOperation.id,
                     params: {
@@ -263,9 +268,6 @@ export function getMoveRangeMutations(
                         selections: [{ range: fromRange }],
                     },
                 },
-                ...interceptorCommands.undos,
-                ...mergeUndos,
-                { id: MoveRangeMutation.id, params: undoMoveRangeMutation },
             ];
         }
     }
@@ -277,15 +279,15 @@ export function getMoveRangeMutations(
 }
 
 export function getSetCellValueMutations(
-    pasteTo: ISheetRangeLocation,
-    pasteFrom: Nullable<ISheetRangeLocation>,
+    pasteTo: ISheetDiscreteRangeLocation,
+    pasteFrom: Nullable<ISheetDiscreteRangeLocation>,
     matrix: ObjectMatrix<ICellDataWithSpanInfo>,
     accessor: IAccessor
 ) {
     const { unitId, subUnitId, range } = pasteTo;
     const redoMutationsInfo: IMutationInfo[] = [];
     const undoMutationsInfo: IMutationInfo[] = [];
-    const { startColumn, startRow } = range;
+    const { mapFunc } = virtualizeDiscreteRanges([range]);
     const valueMatrix = new ObjectMatrix<ICellData>();
 
     matrix.forValue((row, col, value) => {
@@ -296,10 +298,12 @@ export function getSetCellValueMutations(
                 value.v = numfmtValue.v;
             }
         }
+        const { row: realRow, col: realCol } = mapFunc(row, col);
+
         if (value.p?.body) {
-            valueMatrix.setValue(row + startRow, col + startColumn, Tools.deepClone({ p: value.p, v: value.v }));
+            valueMatrix.setValue(realRow, realCol, Tools.deepClone({ p: value.p, v: value.v }));
         } else {
-            valueMatrix.setValue(row + startRow, col + startColumn, Tools.deepClone({ v: value.v }));
+            valueMatrix.setValue(realRow, realCol, Tools.deepClone({ v: value.v }));
         }
     });
     // set cell value and style
@@ -331,15 +335,16 @@ export function getSetCellValueMutations(
 }
 
 export function getSetCellStyleMutations(
-    pasteTo: ISheetRangeLocation,
+    pasteTo: ISheetDiscreteRangeLocation,
     matrix: ObjectMatrix<ICellDataWithSpanInfo>,
     accessor: IAccessor
 ) {
     const redoMutationsInfo: IMutationInfo[] = [];
     const undoMutationsInfo: IMutationInfo[] = [];
     const { unitId, subUnitId, range } = pasteTo;
-    const { startColumn, startRow } = range;
     const valueMatrix = new ObjectMatrix<ICellData>();
+
+    const { mapFunc } = virtualizeDiscreteRanges([range]);
 
     matrix.forValue((row, col, value) => {
         const newValue: ICellData = {
@@ -348,7 +353,8 @@ export function getSetCellStyleMutations(
         if (value.p?.body) {
             newValue.p = value.p;
         }
-        valueMatrix.setValue(row + startRow, col + startColumn, newValue);
+        const { row: actualRow, col: actualCol } = mapFunc(row, col);
+        valueMatrix.setValue(actualRow, actualCol, newValue);
     });
     // set cell style
     const setValuesMutation: ISetRangeValuesMutationParams = {
@@ -379,7 +385,7 @@ export function getSetCellStyleMutations(
 }
 
 export function getClearCellStyleMutations(
-    pasteTo: ISheetRangeLocation,
+    pasteTo: ISheetDiscreteRangeLocation,
     matrix: ObjectMatrix<ICellDataWithSpanInfo>,
     accessor: IAccessor
 ) {
@@ -387,14 +393,15 @@ export function getClearCellStyleMutations(
     const undoMutationsInfo: IMutationInfo[] = [];
     const clearStyleMatrix = new ObjectMatrix<ICellData>();
     const { unitId, subUnitId, range } = pasteTo;
-    const { startColumn, startRow } = range;
+    const { mapFunc } = virtualizeDiscreteRanges([range]);
 
     matrix.forValue((row, col, value) => {
         // NOTE: When pasting, the original cell may contain a default style that is not explicitly carried, resulting in the failure to overwrite the style of the target cell.
         // If the original cell has a style (lack of other default styles) or is undefined (all default styles), we need to clear the existing styles in the target area
         // If the original cell style is "", it is to handle the situation where the target area contains merged cells. The style is not overwritten, only the value is overwritten. There is no need to clear the existing style of the target area.
         if (value.s) {
-            clearStyleMatrix.setValue(row + startRow, col + startColumn, { s: null });
+            const { row: actualRow, col: actualCol } = mapFunc(row, col);
+            clearStyleMatrix.setValue(actualRow, actualCol, { s: null });
         }
     });
     // clear style
@@ -425,14 +432,15 @@ export function getClearCellStyleMutations(
 }
 
 export function getClearAndSetMergeMutations(
-    pasteTo: ISheetRangeLocation,
+    pasteTo: ISheetDiscreteRangeLocation,
     matrix: ObjectMatrix<ICellDataWithSpanInfo>,
     accessor: IAccessor
 ) {
     const redoMutationsInfo: IMutationInfo[] = [];
     const undoMutationsInfo: IMutationInfo[] = [];
     const { unitId, subUnitId, range } = pasteTo;
-    const { startColumn, startRow, endColumn, endRow } = range;
+    const { startColumn, startRow, endColumn, endRow } = discreteRangeToRange(range);
+    const hasMerge = false;
     const mergeRangeData: IRange[] = [];
 
     matrix.forValue((row, col, value) => {

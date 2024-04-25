@@ -40,7 +40,7 @@ type ComputeStatus = 'computing' | 'end' | 'error';
 
 interface IComputeCache { status: ComputeStatus };
 
-const beforeUpdateRuleResult = createInterceptorKey<{ subUnitId: string; unitId: string; cfId: string }>('conditional-formatting-before-update-rule-result');
+const beforeUpdateRuleResult = createInterceptorKey<{ subUnitId: string; unitId: string; cfId: string }, undefined>('conditional-formatting-before-update-rule-result');
 @OnLifecycle(LifecycleStages.Starting, ConditionalFormattingService)
 export class ConditionalFormattingService extends Disposable {
     // <unitId,<subUnitId,<cfId,IComputeCache>>>

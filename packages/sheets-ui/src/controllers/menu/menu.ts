@@ -1079,6 +1079,7 @@ export function HideColMenuItemFactory(): IMenuButtonItem {
 export function ShowRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const selectionManagerService = accessor.get(SelectionManagerService);
+
     const commandService = accessor.get(ICommandService);
     const affectedCommands = [SetSelectionsOperation, SetRowHiddenMutation, SetRowVisibleMutation].map((c) => c.id);
 
@@ -1093,7 +1094,7 @@ export function ShowRowMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
                 const rowRanges = selectionManagerService.getSelections()?.map((s) => s.range).filter((r) => r.rangeType === RANGE_TYPE.ROW);
                 return !!rowRanges?.some((range) => {
                     for (let r = range.startRow; r <= range.endRow; r++) {
-                        if (!worksheet.getRowVisible(r)) return true;
+                        if (!worksheet.getRowRawVisible(r)) return true; // should not take filtered out rows into account
                     }
 
                     return false;

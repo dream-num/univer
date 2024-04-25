@@ -56,7 +56,7 @@ import { Inject, Injector } from '@wendellhu/redi';
 import { AutoClearContentCommand, AutoFillCommand } from '../commands/commands/auto-fill.command';
 import { IAutoFillService } from '../services/auto-fill/auto-fill.service';
 import { otherRule } from '../services/auto-fill/rules';
-import { fillCopy, fillCopyStyles, generateNullCellValue, getDataIndex, getLenS } from '../services/auto-fill/tools';
+import { fillCopy, fillCopyStyles, getDataIndex, getLenS } from '../services/auto-fill/tools';
 import type {
     APPLY_FUNCTIONS,
     IAutoFillLocation,
@@ -68,6 +68,8 @@ import type {
 import { APPLY_TYPE, AutoFillHookType, DATA_TYPE } from '../services/auto-fill/type';
 import { IEditorBridgeService } from '../services/editor-bridge.service';
 import { ISelectionRenderService } from '../services/selection/selection-render.service';
+import type { IDiscreteRange } from './utils/range-tools';
+import { discreteRangeToRange, generateNullCellValue, rangeToDiscreteRange } from './utils/range-tools';
 
 @OnLifecycle(LifecycleStages.Steady, AutoFillController)
 export class AutoFillController extends Disposable {
@@ -283,16 +285,25 @@ export class AutoFillController extends Disposable {
         const unitId = workbook.getUnitId();
         const subUnitId = workbook.getActiveSheet().getSheetId();
         this._autoFillService.direction = direction;
+        const accessor = {
+            get: this._injector.get.bind(this._injector),
+        };
+        const autoFillSource = rangeToDiscreteRange(source, accessor);
+        const autoFillTarget = rangeToDiscreteRange(target, accessor);
+
+        if (!autoFillSource || !autoFillTarget) {
+            return;
+        }
         this._autoFillService.autoFillLocation = {
-            source,
-            target,
+            source: autoFillSource,
+            target: autoFillTarget,
             unitId,
             subUnitId,
         };
 
         const activeHooks = this._autoFillService.getActiveHooks();
         activeHooks.forEach((hook) => {
-            hook?.onBeforeFillData?.({ source, target, unitId, subUnitId }, direction!);
+            hook?.onBeforeFillData?.({ source: autoFillSource, target: autoFillTarget, unitId, subUnitId }, direction!);
         });
 
         // set apply type will trigger fillData
@@ -367,7 +378,7 @@ export class AutoFillController extends Disposable {
             return;
         }
 
-        const selection = Rectangle.union(source, target);
+        const selection = Rectangle.union(discreteRangeToRange(source), discreteRangeToRange(target));
         const applyType = this._autoFillService.applyType;
         const activeHooks = this._autoFillService.getActiveHooks();
 
@@ -521,43 +532,37 @@ export class AutoFillController extends Disposable {
         }
     }
 
-    private _getCopyData(source: IRange, direction: Direction) {
-        const {
-            startRow: copyStartRow,
-            startColumn: copyStartColumn,
-            endRow: copyEndRow,
-            endColumn: copyEndColumn,
-        } = source;
+    private _getCopyData(source: IDiscreteRange, direction: Direction) {
+        // const {
+        //     startRow: copyStartRow,
+        //     startColumn: copyStartColumn,
+        //     endRow: copyEndRow,
+        //     endColumn: copyEndColumn,
+        // } = source;
         const currentCellDatas = this._univerInstanceService
             .getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!
             .getActiveSheet()
             .getCellMatrix();
         const rules = this._autoFillService.getRules();
-        const copyData = [];
+        const copyData: ICopyDataPiece[] = [];
         const isVertical = direction === Direction.DOWN || direction === Direction.UP;
-        let a1: number;
-        let a2: number;
-        let b1: number;
-        let b2: number;
+        let aArray: number[];
+        let bArray: number[];
         if (isVertical) {
-            a1 = copyStartColumn;
-            a2 = copyEndColumn;
-            b1 = copyStartRow;
-            b2 = copyEndRow;
+            aArray = source.cols;
+            bArray = source.rows;
         } else {
-            a1 = copyStartRow;
-            a2 = copyEndRow;
-            b1 = copyStartColumn;
-            b2 = copyEndColumn;
+            aArray = source.rows;
+            bArray = source.cols;
         }
-        for (let a = a1; a <= a2; a++) {
+        aArray.forEach((a) => {
             // a copyDataPiece is an array of original cells in same column or row, depending on direction (horizontal or vertical)
             const copyDataPiece = this._getEmptyCopyDataPiece();
             const prevData: IRuleConfirmedData = {
                 type: undefined,
                 cellData: undefined,
             };
-            for (let b = b1; b <= b2; b++) {
+            bArray.forEach((b) => {
                 let data: Nullable<ICellData>;
                 if (isVertical) {
                     data = currentCellDatas.getValue(b, a);
@@ -570,28 +575,28 @@ export class AutoFillController extends Disposable {
 
                     const last = typeInfo![typeInfo!.length - 1];
                     last.data.push(data);
-                    last.index.push(b - b1);
+                    last.index.push(b - bArray[0]);
                 } else {
                     const typeInfo = copyDataPiece[type];
                     if (typeInfo) {
                         typeInfo.push({
                             data: [data],
-                            index: [b - b1],
+                            index: [b - bArray[0]],
                         });
                     } else {
                         copyDataPiece[type] = [
                             {
                                 data: [data],
-                                index: [b - b1],
+                                index: [b - bArray[0]],
                             },
                         ];
                     }
                 }
                 prevData.type = type;
                 prevData.cellData = data;
-            }
+            });
             copyData.push(copyDataPiece);
-        }
+        });
         return copyData;
     }
 
@@ -682,14 +687,14 @@ export class AutoFillController extends Disposable {
             .getActiveSheet()
             .getCellMatrix();
         // cache the original data in currentCellDatas in apply range for later use / refill
-        const applyData = [];
-        for (let i = target.startRow; i <= target.endRow; i++) {
-            const row = [];
-            for (let j = target.startColumn; j <= target.endColumn; j++) {
+        const applyData: Nullable<ICellData>[][] = [];
+        target.rows.forEach((i) => {
+            const row: Nullable<ICellData>[] = [];
+            target.cols.forEach((j) => {
                 row.push(Tools.deepClone(currentCellDatas.getValue(i, j)));
-            }
+            });
             applyData.push(row);
-        }
+        });
         this._beforeApplyData = applyData;
         this._copyData = this._getCopyData(source, direction);
         if (this._hasSeries(this._copyData)) {
@@ -719,40 +724,32 @@ export class AutoFillController extends Disposable {
             };
         }
 
-        const {
-            startRow: copyStartRow,
-            startColumn: copyStartColumn,
-            endRow: copyEndRow,
-            endColumn: copyEndColumn,
-        } = source;
+        const sourceRange = discreteRangeToRange(source);
+        const targetRange = discreteRangeToRange(target);
 
-        const {
-            startRow: applyStartRow,
-            startColumn: applyStartColumn,
-            endRow: applyEndRow,
-            endColumn: applyEndColumn,
-        } = target;
+        const { cols: targetCols, rows: targetRows } = target;
+        const { cols: sourceCols, rows: sourceRows } = source;
 
         const copyData = this._copyData;
 
         let csLen;
         if (direction === Direction.DOWN || direction === Direction.UP) {
-            csLen = copyEndRow - copyStartRow + 1;
+            csLen = sourceRows.length;
         } else {
-            csLen = copyEndColumn - copyStartColumn + 1;
+            csLen = sourceCols.length;
         }
 
         const applyDatas: Array<Array<Nullable<ICellData>>> = [];
 
         if (direction === Direction.DOWN || direction === Direction.UP) {
-            const asLen = applyEndRow - applyStartRow + 1;
-            const untransformedApplyDatas = [];
-            for (let i = applyStartColumn; i <= applyEndColumn; i++) {
-                const copyD = copyData[i - applyStartColumn];
+            const asLen = targetRows.length;
+            const untransformedApplyDatas: Nullable<ICellData>[][] = [];
+            targetCols.forEach((_, i) => {
+                const copyD = copyData[i];
 
                 const applyData = this._getApplyData(copyD, csLen, asLen, direction, applyType, hasStyle);
                 untransformedApplyDatas.push(applyData);
-            }
+            });
             for (let i = 0; i < untransformedApplyDatas[0].length; i++) {
                 const row: Array<Nullable<ICellData>> = [];
                 for (let j = 0; j < untransformedApplyDatas.length; j++) {
@@ -764,9 +761,9 @@ export class AutoFillController extends Disposable {
                 applyDatas.push(row);
             }
         } else {
-            const asLen = applyEndColumn - applyStartColumn + 1;
-            for (let i = applyStartRow; i <= applyEndRow; i++) {
-                const copyD = copyData[i - applyStartRow];
+            const asLen = targetCols.length;
+            targetRows.forEach((_, i) => {
+                const copyD = copyData[i];
                 const applyData = this._getApplyData(copyD, csLen, asLen, direction, applyType, hasStyle);
                 const row: Array<Nullable<ICellData>> = [];
                 for (let j = 0; j < applyData.length; j++) {
@@ -776,14 +773,14 @@ export class AutoFillController extends Disposable {
                     });
                 }
                 applyDatas.push(row);
-            }
+            });
         }
 
         // deal with styles
         let applyMergeRanges: IRange[] = [];
         const style = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!.getStyles();
         if (hasStyle) {
-            applyMergeRanges = this._getMergeApplyData(source, target, direction, csLen);
+            applyMergeRanges = this._getMergeApplyData(sourceRange, targetRange, direction, csLen);
             applyDatas.forEach((row) => {
                 row.forEach((cellData) => {
                     if (cellData && style) {
@@ -828,7 +825,7 @@ export class AutoFillController extends Disposable {
             ?.getMergeData();
         if (mergeData) {
             mergeData.forEach((merge) => {
-                if (Rectangle.intersects(merge, target)) {
+                if (Rectangle.intersects(merge, targetRange)) {
                     deleteMergeRanges.push(merge);
                 }
             });
@@ -863,15 +860,13 @@ export class AutoFillController extends Disposable {
 
         // set range value
         const cellValue = new ObjectMatrix<ICellData>();
-        const { startRow, startColumn, endRow, endColumn } = target;
-
-        for (let r = 0; r <= endRow - startRow; r++) {
-            for (let c = 0; c <= endColumn - startColumn; c++) {
-                if (applyDatas[r][c]) {
-                    cellValue.setValue(r + startRow, c + startColumn, applyDatas[r][c]!);
+        targetRows.forEach((row, rowIndex) => {
+            targetCols.forEach((col, colIndex) => {
+                if (applyDatas[rowIndex][colIndex]) {
+                    cellValue.setValue(row, col, applyDatas[rowIndex][colIndex]!);
                 }
-            }
-        }
+            });
+        });
 
         const setRangeValuesMutationParams: ISetRangeValuesMutationParams = {
             subUnitId,

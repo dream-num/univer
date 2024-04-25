@@ -19,11 +19,13 @@ export { getEditorObject } from './basics/editor/get-editor-object';
 export { AutoFillCommand } from './commands/commands/auto-fill.command';
 export { SheetPasteCommand } from './commands/commands/clipboard.command';
 export { SheetCopyCommand } from './commands/commands/clipboard.command';
+export { expandToContinuousRange } from './commands/commands/utils/selection-utils';
 export { ExpandSelectionCommand, JumpOver, MoveSelectionCommand } from './commands/commands/set-selection.command';
 export { SetCellEditVisibleArrowOperation, SetCellEditVisibleOperation } from './commands/operations/cell-edit.operation';
 export { SetScrollOperation } from './commands/operations/scroll.operation';
 export { ScrollController } from './controllers/scroll.controller';
 export { deriveStateFromActiveSheet$ } from './controllers/menu/menu-util';
+export { SheetRenderController } from './controllers/sheet-render.controller';
 export { SetZoomRatioOperation } from './commands/operations/set-zoom-ratio.operation';
 export {
     ResetScrollCommand,
@@ -58,7 +60,7 @@ export {
     PREDEFINED_HOOK_NAME,
     SheetClipboardService,
 } from './services/clipboard/clipboard.service';
-export type { ICellDataWithSpanInfo, ISheetClipboardHook, ISheetRangeLocation, ICopyPastePayload } from './services/clipboard/type';
+export type { ICellDataWithSpanInfo, ISheetClipboardHook, ISheetRangeLocation, ISheetDiscreteRangeLocation, ICopyPastePayload } from './services/clipboard/type';
 export { COPY_TYPE } from './services/clipboard/type';
 export { getRepeatRange } from './services/clipboard/utils';
 export { CellEditorManagerService, ICellEditorManagerService } from './services/editor/cell-editor-manager.service';
@@ -84,3 +86,5 @@ export { SHEET_VIEW_KEY } from './common/keys';
 export { SheetCanvasPopManagerService } from './services/canvas-pop-manager.service';
 export { mergeSetRangeValues } from './services/clipboard/utils';
 export type { IAutoFillLocation } from './services/auto-fill/type';
+export type { IDiscreteRange } from './controllers/utils/range-tools';
+export { virtualizeDiscreteRanges, rangeToDiscreteRange } from './controllers/utils/range-tools';

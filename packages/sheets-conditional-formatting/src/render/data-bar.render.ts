@@ -46,7 +46,7 @@ export class DataBar extends SheetExtension {
         Range.foreach(spreadsheetSkeleton.rowColumnSegment, (row, col) => {
             const cellData = worksheet.getCell(row, col) as IDataBarCellData;
             if (cellData && cellData.dataBar) {
-                if (!worksheet.getColVisible(col) || !worksheet.getRowVisible(row)) {
+                if (!worksheet.getColVisible(col) || !worksheet.getRowRawVisible(row)) {
                     return;
                 }
 

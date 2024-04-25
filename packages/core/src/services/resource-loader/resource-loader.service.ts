@@ -30,8 +30,6 @@ export class ResourceLoaderService extends Disposable implements IResourceLoader
     constructor(
         @Inject(IResourceManagerService) private readonly _resourceManagerService: IResourceManagerService,
         @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService
-
-
     ) {
         super();
         this._init();

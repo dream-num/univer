@@ -16,7 +16,7 @@
 
 import { BooleanNumber, DataValidationRenderMode, DEFAULT_EMPTY_DOCUMENT_VALUE, DocumentDataModel, HorizontalAlign, ICommandService, LocaleService, Tools, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import type { ICellRenderContext, IDocumentData, IPaddingData, IStyleData, Nullable } from '@univerjs/core';
-import { Documents, DocumentSkeleton, DocumentViewModel, getDocsSkeletonPageSize, type IMouseEvent, type IPointerEvent, Rect, type Spreadsheet, type SpreadsheetSkeleton, type UniverRenderingContext2D } from '@univerjs/engine-render';
+import { Documents, DocumentSkeleton, DocumentViewModel, getDocsSkeletonPageSize, type IMouseEvent, type IPointerEvent, Rect, type SpreadsheetSkeleton, type UniverRenderingContext2D } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
 import { DataValidationModel, DataValidatorRegistryService, type IBaseDataValidationWidget } from '@univerjs/data-validation';
 import { getCellValueOrigin } from '../utils/get-cell-data-origin';
@@ -126,6 +126,7 @@ export class DropdownWidget implements IBaseDataValidationWidget {
     };
 
     private _dropdownInfoMap: Map<string, Map<string, IDropdownInfo>> = new Map();
+
     constructor(
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @ICommandService private readonly _commandService: ICommandService,
@@ -173,7 +174,7 @@ export class DropdownWidget implements IBaseDataValidationWidget {
         ctx.restore();
     }
 
-    drawWith(ctx: UniverRenderingContext2D, info: ICellRenderContext, skeleton: SpreadsheetSkeleton, spreadsheets: Spreadsheet): void {
+    drawWith(ctx: UniverRenderingContext2D, info: ICellRenderContext, skeleton: SpreadsheetSkeleton): void {
         const { primaryWithCoord, row, col, style, data, subUnitId } = info;
         const cellBounding = primaryWithCoord.isMergedMainCell ? primaryWithCoord.mergeInfo : primaryWithCoord;
         const cellWidth = cellBounding.endX - cellBounding.startX;

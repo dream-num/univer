@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import type { Direction, ICellData, IMutationInfo, IRange, Nullable } from '@univerjs/core';
+import type { Direction, ICellData, IMutationInfo, Nullable } from '@univerjs/core';
+import type { IDiscreteRange } from '../../controllers/utils/range-tools';
 
 export enum AutoFillHookType {
     Append = 'APPEND',
@@ -23,8 +24,8 @@ export enum AutoFillHookType {
 }
 
 export interface IAutoFillLocation {
-    source: IRange;
-    target: IRange;
+    source: IDiscreteRange;
+    target: IDiscreteRange;
     unitId: string;
     subUnitId: string;
 }

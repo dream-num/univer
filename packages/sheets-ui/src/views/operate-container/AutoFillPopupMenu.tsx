@@ -15,7 +15,7 @@
  */
 
 import type { ICommandInfo } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, LocaleService, Rectangle, toDisposable } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, LocaleService, toDisposable } from '@univerjs/core';
 import { Dropdown } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { Autofill, CheckMarkSingle, MoreDownSingle } from '@univerjs/icons';
@@ -111,8 +111,9 @@ export const AutoFillPopupMenu: React.FC<{}> = () => {
             autoFillService.showMenu$.subscribe((show) => {
                 const { source, target } = autoFillService.autoFillLocation || { source: null, target: null };
                 if (show && source && target) {
-                    const selection = Rectangle.union(source, target);
-                    setAnchor({ row: selection.endRow, col: selection.endColumn });
+                    const lastRow = Math.max(source.rows[source.rows.length - 1], target.rows[target.rows.length - 1]);
+                    const lastCol = Math.max(source.cols[source.cols.length - 1], target.cols[target.cols.length - 1]);
+                    setAnchor({ row: lastRow, col: lastCol });
                 }
             })
         );

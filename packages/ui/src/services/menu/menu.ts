@@ -19,7 +19,7 @@ import type { Observable } from 'rxjs';
 
 export type OneOrMany<T> = T | T[];
 
-export const enum MenuPosition {
+export enum MenuPosition {
     VOID = 'void',
     TOOLBAR_START = 'uiToolbar.start',
     TOOLBAR_INSERT = 'uiToolbar.insert',
@@ -30,7 +30,7 @@ export const enum MenuPosition {
     CONTEXT_MENU = 'contextMenu',
 }
 
-export const enum MenuGroup {
+export enum MenuGroup {
     TOOLBAR_HISTORY,
     TOOLBAR_FORMAT,
     TOOLBAR_LAYOUT,
@@ -45,7 +45,7 @@ export const enum MenuGroup {
     CONTEXT_MENU_OTHERS,
 }
 
-export const enum MenuItemType {
+export enum MenuItemType {
     /** Button style menu item. */
     BUTTON,
     /** Menu item with submenus. Submenus could be other IMenuItem or an ID of a registered component. */
@@ -71,8 +71,8 @@ interface IMenuItemBase<V> {
     /** In what menu should the item display. */
     positions: OneOrMany<MenuPosition | string>;
 
-    /** @deprecated this type seems unnecessary */
     type: MenuItemType;
+
     /**
      * Custom label component id.
      */
@@ -127,6 +127,9 @@ export interface IMenuSelectorItem<V = MenuItemDefaultValueType, T = undefined> 
     // 一个是其他 menu 的 id，直接渲染成其他的 menu
     /** Options or IDs of registered components. */
     selections?: Array<IValueOption<T>> | Observable<Array<IValueOption<T>>>;
+
+    /** If `type` is `MenuItemType.BUTTON_SELECTOR`, this determines if the button is activated. */
+    activated$?: Observable<boolean>;
 }
 
 export function isMenuSelectorItem<T extends MenuItemDefaultValueType>(v: IMenuItem): v is IMenuSelectorItem<T> {

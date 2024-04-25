@@ -14,15 +14,8 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
+import type { ImageSourceType, Nullable } from '@univerjs/core';
 import type { PresetGeometryType } from './prst-geom-type';
-
-
-export enum SourceType {
-    URL = 'URL',
-    UUID = 'UUID',
-    BASE64 = 'BASE64',
-}
 
 export interface ISrcRect {
     left?: number;
@@ -34,7 +27,7 @@ export interface ISrcRect {
 
 export interface IImageData {
     imageId: string;
-    sourceType: SourceType;
+    sourceType: ImageSourceType;
     source: string;
 
     /**

@@ -78,9 +78,10 @@ export interface ISelectionRenderService {
     getActiveRange(): Nullable<IRange>;
     getActiveSelection(): Nullable<SelectionShape>;
     getSelectionDataWithStyle(): ISelectionWithCoordAndStyle[];
-    convertSelectionToCoord(selectionWithStyle: ISelectionWithStyle): ISelectionWithCoordAndStyle;
-    convertRangeDataToSelection(range: IRange): Nullable<IRangeWithCoord>;
-    convertCellRangeToInfo(primary: Nullable<ISelectionCell>): Nullable<ISelectionCellWithCoord>;
+    attachSelectionWithCoord(selectionWithStyle: ISelectionWithStyle): ISelectionWithCoordAndStyle;
+    attachRangeWithCoord(range: IRange): Nullable<IRangeWithCoord>;
+    attachPrimaryWithCoord(primary: Nullable<ISelectionCell>): Nullable<ISelectionCellWithCoord>;
+    getSelectionCellByPosition(x: number, y: number): Nullable<ISelectionCellWithCoord>;
     eventTrigger(
         evt: IPointerEvent | IMouseEvent,
         zIndex: number,
@@ -525,8 +526,8 @@ export class SelectionRenderService implements ISelectionRenderService {
      * @param style selection style, Styles for user-customized selectors
      * @param zIndex Stacking order of the selection object
      * @param rangeType Determines whether the selection is made normally according to the range or by rows and columns
-     * @returns
      */
+    // eslint-disable-next-line max-lines-per-function, complexity
     eventTrigger(
         evt: IPointerEvent | IMouseEvent,
         zIndex = 0,
@@ -772,6 +773,7 @@ export class SelectionRenderService implements ISelectionRenderService {
         let lastX = newEvtOffsetX;
         let lastY = newEvtOffsetY;
 
+        // eslint-disable-next-line max-lines-per-function, complexity
         this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
             const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
 
@@ -915,9 +917,9 @@ export class SelectionRenderService implements ISelectionRenderService {
         this._shortcutService.setDisable(true);
     }
 
-    convertSelectionToCoord(selectionWithStyle: ISelectionWithStyle): ISelectionWithCoordAndStyle {
+    attachSelectionWithCoord(selectionWithStyle: ISelectionWithStyle): ISelectionWithCoordAndStyle {
         const { range, primary, style } = selectionWithStyle;
-        let rangeWithCoord = this.convertRangeDataToSelection(range);
+        let rangeWithCoord = this.attachRangeWithCoord(range);
         if (rangeWithCoord == null) {
             rangeWithCoord = {
                 startRow: -1,
@@ -933,12 +935,12 @@ export class SelectionRenderService implements ISelectionRenderService {
         }
         return {
             rangeWithCoord,
-            primaryWithCoord: this.convertCellRangeToInfo(primary),
+            primaryWithCoord: this.attachPrimaryWithCoord(primary),
             style,
         };
     }
 
-    convertRangeDataToSelection(range: IRange): Nullable<IRangeWithCoord> {
+    attachRangeWithCoord(range: IRange): Nullable<IRangeWithCoord> {
         const { startRow, startColumn, endRow, endColumn, rangeType } = range;
         const scene = this._scene;
         const skeleton = this._skeleton;
@@ -962,7 +964,7 @@ export class SelectionRenderService implements ISelectionRenderService {
         };
     }
 
-    convertCellRangeToInfo(primary: Nullable<ISelectionCell>): Nullable<ISelectionCellWithCoord> {
+    attachPrimaryWithCoord(primary: Nullable<ISelectionCell>): Nullable<ISelectionCellWithCoord> {
         if (primary == null) {
             return;
         }
@@ -1002,9 +1004,36 @@ export class SelectionRenderService implements ISelectionRenderService {
         };
     }
 
+    getSelectionCellByPosition(x: number, y: number) {
+        const scene = this._scene;
+
+        if (scene == null) {
+            return;
+        }
+
+        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
+        if (skeleton == null) {
+            return;
+        }
+
+        // const scrollXY = scene.getScrollXYByRelativeCoords(Vector2.FromArray([this._startOffsetX, this._startOffsetY]));
+        const scrollXY = scene.getScrollXY(scene.getViewport(VIEWPORT_KEY.VIEW_MAIN)!);
+        const { scaleX, scaleY } = scene.getAncestorScale();
+
+        return skeleton.calculateCellIndexByPosition(
+            x,
+            y,
+            scaleX,
+            scaleY,
+            scrollXY
+        );
+    }
+
     /**
      * When mousedown and mouseup need to go to the coordination and undo stack, when mousemove does not need to go to the coordination and undo stack
      */
+
+    // eslint-disable-next-line max-lines-per-function
     private _moving(
         moveOffsetX: number,
         moveOffsetY: number,
@@ -1229,5 +1258,5 @@ export class SelectionRenderService implements ISelectionRenderService {
  * @deprecated Should be refactored to RenderUnit.
  */
 export const ISelectionRenderService = createIdentifier<SelectionRenderService>(
-    'deprecated.univer.sheet.selection-render-service'
+    'univer.sheet.selection-render-service'
 );

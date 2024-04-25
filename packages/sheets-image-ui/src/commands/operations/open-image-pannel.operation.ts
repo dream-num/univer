@@ -14,6 +14,3 @@
  * limitations under the License.
  */
 
-export { UniverImagePlugin } from './plugin';
-export { ImageManagerService, IImageManagerService } from './services/image-manager.service';
-export { ImageModel, SourceType } from './models/image-model';

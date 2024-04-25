@@ -151,7 +151,7 @@ export class FilterModel extends Disposable {
         this._getAllFilterColumns(true)
             .forEach(([col, filterColumn]) => {
                 filterColumn.setRangeAndColumn({
-                    startRow: range.startRow + 1,
+                    startRow: range.startRow,
                     endRow: range.endRow,
                     startColumn: col,
                     endColumn: col,

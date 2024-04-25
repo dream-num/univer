@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
+import { ImageSourceType, type Nullable } from '@univerjs/core';
 import type { IDisposable } from '@wendellhu/redi';
 import { createIdentifier } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
 import { Subject } from 'rxjs';
 
-import { type ImageModel, SourceType } from '../models/image-model';
+import type { ImageModel } from '../models/image-model';
+
 
 export interface IImageManagerSearchParam {
     unitId: string;
@@ -125,7 +126,7 @@ export class ImageManagerService implements IDisposable, IImageManagerService {
 
     addImageSourceCache(imageData: ImageModel, imageSource: Nullable<HTMLImageElement>) {
         const { source, sourceType } = imageData;
-        if (sourceType === SourceType.BASE64 || imageSource == null) {
+        if (sourceType === ImageSourceType.BASE64 || imageSource == null) {
             return;
         }
 
@@ -135,7 +136,7 @@ export class ImageManagerService implements IDisposable, IImageManagerService {
     getImageSourceCache(imageData: ImageModel): Nullable<HTMLImageElement> {
         const { source, sourceType } = imageData;
 
-        if (sourceType === SourceType.BASE64) {
+        if (sourceType === ImageSourceType.BASE64) {
             return;
         }
 

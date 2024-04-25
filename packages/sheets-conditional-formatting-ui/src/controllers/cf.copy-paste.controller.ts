@@ -30,7 +30,7 @@ import {
     createTopMatrixFromMatrix, findAllRectangle,
 } from '@univerjs/sheets';
 import type { IDiscreteRange } from '@univerjs/sheets-ui';
-import { COPY_TYPE, getRepeatRange, ISheetClipboardService, PREDEFINED_HOOK_NAME, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
+import { COPY_TYPE, getRepeatRange, ISheetClipboardService, PREDEFINED_HOOK_NAME, rangeToDiscreteRange, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
 import { Inject, Injector } from '@wendellhu/redi';
 import { AddConditionalRuleMutation, AddConditionalRuleMutationUndoFactory, ConditionalFormattingRuleModel, ConditionalFormattingViewModel, DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory, SetConditionalRuleMutation, setConditionalRuleMutationUndoFactory, SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '@univerjs/sheets-conditional-formatting';
 import type { IAddConditionalRuleMutationParams, IConditionalFormattingRuleConfig, IConditionFormattingRule, IDeleteConditionalRuleMutationParams, ISetConditionalRuleMutationParams } from '@univerjs/sheets-conditional-formatting';
@@ -88,23 +88,24 @@ export class ConditionalFormattingCopyPasteController extends Disposable {
         if (!model) {
             return;
         }
+        const accessor = {
+            get: this._injector.get.bind(this._injector),
+        };
+        const discreteRange = rangeToDiscreteRange(range, accessor, unitId, subUnitId);
+        if (!discreteRange) {
+            return;
+        }
+        const { rows, cols } = discreteRange;
         const cfIdSet: Set<string> = new Set();
-        Range.foreach(range, (row, col) => {
-            const cellCfList = this._conditionalFormattingViewModel.getCellCf(unitId, subUnitId, row, col, model);
-            if (!cellCfList) {
-                return;
-            }
-            const relativeRange = Rectangle.getRelativeRange(
-                {
-                    startRow: row,
-                    endRow: row,
-                    startColumn: col,
-                    endColumn: col,
-                },
-                range
-            );
-            cellCfList.cfList.forEach((item) => cfIdSet.add(item.cfId));
-            matrix.setValue(relativeRange.startRow, relativeRange.startColumn, cellCfList.cfList.map((item) => item.cfId));
+        rows.forEach((row, rowIndex) => {
+            cols.forEach((col, colIndex) => {
+                const cellCfList = this._conditionalFormattingViewModel.getCellCf(unitId, subUnitId, row, col, model);
+                if (!cellCfList) {
+                    return;
+                }
+                cellCfList.cfList.forEach((item) => cfIdSet.add(item.cfId));
+                matrix.setValue(rowIndex, colIndex, cellCfList.cfList.map((item) => item.cfId));
+            });
         });
         cfIdSet.forEach((cfId) => {
             const rule = this._conditionalFormattingRuleModel.getRule(unitId, subUnitId, cfId);

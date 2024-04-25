@@ -87,4 +87,4 @@ export { SheetCanvasPopManagerService } from './services/canvas-pop-manager.serv
 export { mergeSetRangeValues } from './services/clipboard/utils';
 export type { IAutoFillLocation } from './services/auto-fill/type';
 export type { IDiscreteRange } from './controllers/utils/range-tools';
-export { virtualizeDiscreteRanges } from './controllers/utils/range-tools';
+export { virtualizeDiscreteRanges, rangeToDiscreteRange } from './controllers/utils/range-tools';

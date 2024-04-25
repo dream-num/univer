@@ -63,8 +63,6 @@ export interface IFloatingObjectManagerService {
 
     batchAddOrUpdate(insertParam: IFloatingObjectManagerParam[]): void;
 
-    remove(searchItem: IFloatingObjectManagerSearchItemParam): void;
-
     pluginUpdateRefresh(searchObjects: IFloatingObjectManagerParam[]): void;
 }
 

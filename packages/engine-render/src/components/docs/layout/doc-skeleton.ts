@@ -483,7 +483,6 @@ export class DocumentSkeleton extends Skeleton {
      */
 
     private _createSkeleton(_bounds?: IViewportBound) {
-        // 每一个布局
         const DEFAULT_PAGE_SIZE = { width: Number.POSITIVE_INFINITY, height: Number.POSITIVE_INFINITY };
         const viewModel = this.getViewModel();
         const { headerTreeMap, footerTreeMap } = viewModel;
@@ -557,13 +556,11 @@ export class DocumentSkeleton extends Skeleton {
 
         skeleton.pages = allSkeletonPages;
 
-        const bodyModel = this.getViewModel();
+        viewModel.resetCache();
 
-        bodyModel.resetCache();
-
-        for (let i = 0, len = bodyModel.children.length; i < len; i++) {
-            const sectionNode = bodyModel.children[i];
-            const sectionBreak = bodyModel.getSectionBreak(sectionNode.endIndex) || DEFAULT_SECTION_BREAK;
+        for (let i = 0, len = viewModel.children.length; i < len; i++) {
+            const sectionNode = viewModel.children[i];
+            const sectionBreak = viewModel.getSectionBreak(sectionNode.endIndex) || DEFAULT_SECTION_BREAK;
             const {
                 pageNumberStart = global_pageNumberStart,
                 pageSize = global_pageSize,
@@ -592,8 +589,8 @@ export class DocumentSkeleton extends Skeleton {
                 renderConfig = global_renderConfig,
             } = sectionBreak;
 
-            const sectionNodeNext = bodyModel.children[i + 1];
-            const sectionTypeNext = bodyModel.getSectionBreak(sectionNodeNext?.endIndex)?.sectionType;
+            const sectionNodeNext = viewModel.children[i + 1];
+            const sectionTypeNext = viewModel.getSectionBreak(sectionNodeNext?.endIndex)?.sectionType;
 
             const headerIds = { defaultHeaderId, evenPageHeaderId, firstPageHeaderId };
             const footerIds = { defaultFooterId, evenPageFooterId, firstPageFooterId };
@@ -634,7 +631,7 @@ export class DocumentSkeleton extends Skeleton {
                 ...docsConfig,
             };
 
-            let curSkeletonPage: IDocumentSkeletonPage = getLastPage(allSkeletonPages);
+            let curSkeletonPage = getLastPage(allSkeletonPages);
             let isContinuous = false;
 
             if (sectionType === SectionType.CONTINUOUS) {
@@ -651,7 +648,7 @@ export class DocumentSkeleton extends Skeleton {
 
             // 计算页内布局，block 结构
             const blockInfo = dealWithSections(
-                bodyModel,
+                viewModel,
                 sectionNode,
                 curSkeletonPage,
                 sectionBreakConfig,

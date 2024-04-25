@@ -1,8 +1,8 @@
 {
     "name": "@univerjs/sheets-filter",
-    "version": "0.1.1",
-    "private": true,
-    "description": "",
+    "version": "0.1.7",
+    "private": false,
+    "description": "A library for filtering data in Univer Sheet",
     "author": "DreamNum <developer@univer.ai>",
     "license": "Apache-2.0",
     "funding": {
@@ -58,21 +58,19 @@
     },
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
-        "@univerjs/shared": "workspace:*",
         "@univerjs/sheets": "workspace:*",
-        "@wendellhu/redi": ">=0.12.13",
+        "@wendellhu/redi": "^0.13.3",
         "rxjs": ">=7.0.0"
     },
-    "dependencies": {
-    },
+    "dependencies": {},
     "devDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/shared": "workspace:*",
         "@univerjs/sheets": "workspace:*",
-        "@wendellhu/redi": "^0.13.1",
+        "@wendellhu/redi": "^0.13.3",
         "rxjs": "^7.8.1",
-        "typescript": "^5.3.3",
-        "vite": "^5.1.4",
-        "vitest": "^1.3.1"
+        "typescript": "^5.4.5",
+        "vite": "^5.2.10",
+        "vitest": "^1.5.2"
     }
 }

@@ -15,22 +15,31 @@
  */
 
 import type {
+    DocumentDataModel,
     INumberUnit,
     IObjectPositionH,
     IObjectPositionV,
     IParagraphStyle,
+    ISectionBreak,
     ITextStyle,
+    Nullable,
 } from '@univerjs/core';
 import {
     AlignTypeH,
     AlignTypeV,
     BooleanNumber,
+    ColumnSeparatorType,
     GridType,
+    HorizontalAlign,
     NumberUnitType,
     ObjectMatrix,
     ObjectRelativeFromH,
     ObjectRelativeFromV,
+    PageOrientType,
+    SectionType,
     SpacingRule,
+    VerticalAlign,
+    WrapStrategy,
 } from '@univerjs/core';
 
 import { DEFAULT_DOCUMENT_FONTSIZE } from '../../../basics/const';
@@ -42,9 +51,10 @@ import type {
     IDocumentSkeletonGlyph,
     IDocumentSkeletonLine,
     IDocumentSkeletonPage,
+    ISkeletonResourceReference,
 } from '../../../basics/i-document-skeleton-cached';
 import { GlyphType } from '../../../basics/i-document-skeleton-cached';
-import type { IParagraphConfig, ISectionBreakConfig } from '../../../basics/interfaces';
+import type { IDocsConfig, IParagraphConfig, ISectionBreakConfig } from '../../../basics/interfaces';
 import { getFontStyleString, isFunction } from '../../../basics/tools';
 import type { DataStreamTreeNode } from '../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../view-model/document-view-model';
@@ -758,4 +768,152 @@ export function getNullSkeleton(): IDocumentSkeletonCached {
         skeListLevel: new Map(), // TODO: 移到 context 中管理？
         drawingAnchor: new Map(), // TODO: 移到 context 中管理
     };
+}
+
+export function setPageParent(pages: IDocumentSkeletonPage[], parent: IDocumentSkeletonCached) {
+    for (const page of pages) {
+        page.parent = parent;
+    }
+}
+
+// The context state of the layout process, which is used to store some cache and intermediate states in the typesetting process,
+// as well as identifying information such as the pointer of the layout.
+export interface ILayoutContext {
+    // The view model of current layout document.
+    viewModel: DocumentViewModel;
+    // The data model of current layout document.
+    dataModel: DocumentDataModel;
+    // The document style: pageSize, renderConfig, etc.
+    // documentStyle: IDocumentStyle;
+    // Configuration for document layout.
+    docsConfig: IDocsConfig;
+    // The initial layout skeleton, it will be the empty skeleton if it's the first layout.
+    skeleton: IDocumentSkeletonCached;
+    // The position coordinates of the layout,
+    // which are used to indicate which section and paragraph are currently layout,
+    // and used to support the starting point of the reflow when re-layout.
+    layoutPointer: {
+        paragraph: Nullable<DataStreamTreeNode>;
+        section: Nullable<DataStreamTreeNode>;
+    };
+    // It is used to identify whether it is a re-layout,
+    // and if it is a re-layout, the skeleton needs to be backtracked to the layoutPointer states.
+    isDirty: boolean;
+    // Used to store the resource of document and resource cache.
+    skeletonResourceReference: ISkeletonResourceReference;
+}
+
+const DEFAULT_SECTION_BREAK: ISectionBreak = {
+    columnProperties: [],
+    columnSeparatorType: ColumnSeparatorType.NONE,
+    sectionType: SectionType.SECTION_TYPE_UNSPECIFIED,
+    startIndex: 0,
+};
+
+export const DEFAULT_PAGE_SIZE = { width: Number.POSITIVE_INFINITY, height: Number.POSITIVE_INFINITY };
+
+export function prepareSectionBreakConfig(nodeIndex: number, ctx: ILayoutContext) {
+    const { viewModel, dataModel, docsConfig } = ctx;
+    const sectionNode = viewModel.children[nodeIndex];
+    const sectionBreak = viewModel.getSectionBreak(sectionNode.endIndex) || DEFAULT_SECTION_BREAK;
+    const { documentStyle } = dataModel;
+    const {
+        pageNumberStart: global_pageNumberStart = 1, // pageNumberStart
+        pageSize: global_pageSize = DEFAULT_PAGE_SIZE,
+        pageOrient: global_pageOrient = PageOrientType.PORTRAIT,
+        defaultHeaderId: global_defaultHeaderId,
+        defaultFooterId: global_defaultFooterId,
+        evenPageHeaderId: global_evenPageHeaderId,
+        evenPageFooterId: global_evenPageFooterId,
+        firstPageHeaderId: global_firstPageHeaderId,
+        firstPageFooterId: global_firstPageFooterId,
+        useFirstPageHeaderFooter: global_useFirstPageHeaderFooter,
+        useEvenPageHeaderFooter: global_useEvenPageHeaderFooter,
+
+        marginTop: global_marginTop = 0,
+        marginBottom: global_marginBottom = 0,
+        marginRight: global_marginRight = 0,
+        marginLeft: global_marginLeft = 0,
+        marginHeader: global_marginHeader = 0,
+        marginFooter: global_marginFooter = 0,
+
+        renderConfig: global_renderConfig = {
+            horizontalAlign: HorizontalAlign.LEFT,
+            verticalAlign: VerticalAlign.TOP,
+            centerAngle: 0,
+            vertexAngle: 0,
+            wrapStrategy: WrapStrategy.UNSPECIFIED,
+        },
+    } = documentStyle;
+    const {
+        pageNumberStart = global_pageNumberStart,
+        pageSize = global_pageSize,
+        pageOrient = global_pageOrient,
+        marginTop = global_marginTop,
+        marginBottom = global_marginBottom,
+        marginRight = global_marginRight,
+        marginLeft = global_marginLeft,
+        marginHeader = global_marginHeader,
+        marginFooter = global_marginFooter,
+
+        defaultHeaderId = global_defaultHeaderId,
+        defaultFooterId = global_defaultFooterId,
+        evenPageHeaderId = global_evenPageHeaderId,
+        evenPageFooterId = global_evenPageFooterId,
+        firstPageHeaderId = global_firstPageHeaderId,
+        firstPageFooterId = global_firstPageFooterId,
+        useFirstPageHeaderFooter = global_useFirstPageHeaderFooter,
+        useEvenPageHeaderFooter = global_useEvenPageHeaderFooter,
+
+        columnProperties = [],
+        columnSeparatorType = ColumnSeparatorType.NONE,
+        contentDirection,
+        sectionType,
+        textDirection,
+        renderConfig = global_renderConfig,
+    } = sectionBreak;
+
+    const sectionNodeNext = viewModel.children[nodeIndex + 1];
+    const sectionTypeNext = viewModel.getSectionBreak(sectionNodeNext?.endIndex)?.sectionType;
+
+    const headerIds = { defaultHeaderId, evenPageHeaderId, firstPageHeaderId };
+    const footerIds = { defaultFooterId, evenPageFooterId, firstPageFooterId };
+
+    if (pageSize.width === null) {
+        pageSize.width = Number.POSITIVE_INFINITY;
+    }
+
+    if (pageSize.height === null) {
+        pageSize.height = Number.POSITIVE_INFINITY;
+    }
+
+    const sectionBreakConfig: ISectionBreakConfig = {
+        pageNumberStart,
+        pageSize,
+        pageOrient,
+        marginTop,
+        marginBottom,
+        marginRight,
+        marginLeft,
+        marginHeader,
+        marginFooter,
+
+        headerIds,
+        footerIds,
+
+        useFirstPageHeaderFooter,
+        useEvenPageHeaderFooter,
+
+        columnProperties,
+        columnSeparatorType,
+        contentDirection,
+        sectionType,
+        sectionTypeNext,
+        textDirection,
+        renderConfig,
+
+        ...docsConfig,
+    };
+
+    return sectionBreakConfig;
 }

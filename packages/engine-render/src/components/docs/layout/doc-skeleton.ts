@@ -14,16 +14,12 @@
  * limitations under the License.
  */
 
-import type { ISectionBreak, ISectionColumnProperties, LocaleService, Nullable } from '@univerjs/core';
+import type { ColumnSeparatorType, ISectionColumnProperties, LocaleService,
+    Nullable } from '@univerjs/core';
 import {
-    ColumnSeparatorType,
     GridType,
-    HorizontalAlign,
-    PageOrientType,
     PRESET_LIST_TYPE,
     SectionType,
-    VerticalAlign,
-    WrapStrategy,
 } from '@univerjs/core';
 
 import type {
@@ -33,22 +29,16 @@ import type {
     ISkeletonResourceReference,
 } from '../../../basics/i-document-skeleton-cached';
 import { GlyphType, LineType, PageLayoutType } from '../../../basics/i-document-skeleton-cached';
-import type { IDocsConfig, INodeInfo, INodePosition, INodeSearch, ISectionBreakConfig } from '../../../basics/interfaces';
+import type { IDocsConfig, INodeInfo, INodePosition, INodeSearch } from '../../../basics/interfaces';
 import type { IViewportBound, Vector2 } from '../../../basics/vector2';
 import { Skeleton } from '../../skeleton';
 import { Liquid } from '../liquid';
 import type { DocumentViewModel } from '../view-model/document-view-model';
-import { getLastPage, getNullSkeleton, updateBlockIndex } from './tools';
+import type { ILayoutContext } from './tools';
+import { getLastPage, getNullSkeleton, prepareSectionBreakConfig, setPageParent, updateBlockIndex } from './tools';
 import { createSkeletonSection } from './model/section';
 import { dealWithSections } from './block/section';
 import { createSkeletonPage } from './model/page';
-
-const DEFAULT_SECTION_BREAK: ISectionBreak = {
-    columnProperties: [],
-    columnSeparatorType: ColumnSeparatorType.NONE,
-    sectionType: SectionType.SECTION_TYPE_UNSPECIFIED,
-    startIndex: 0,
-};
 
 export enum DocumentSkeletonState {
     PENDING = 'pending',
@@ -93,8 +83,10 @@ export class DocumentSkeleton extends Skeleton {
             return;
         }
 
+        const ctx = this._prepareLayoutContext();
+
         // const start = +new Date();
-        this._skeletonData = this._createSkeleton(bounds);
+        this._skeletonData = this._createSkeleton(ctx, bounds);
         // console.log('skeleton calculate cost', +new Date() - start);
     }
 
@@ -454,36 +446,7 @@ export class DocumentSkeleton extends Skeleton {
         this._findLiquid.translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
     }
 
-    /**
-     * \v COLUMN_BREAK
-     * \f PAGE_BREAK
-     * \0 DOCS_END
-     * \t TAB
-     *
-     * Needs to be changed：
-     * \r PARAGRAPH
-     * \n SECTION_BREAK
-     *
-     * \b customBlock: Scenarios where customBlock, images, mentions, etc. do not participate in the document flow.
-     *
-     * Table
-     * \x1A table start
-     * \x1B table row start
-     * \x1C table cell start
-     * \x1D table cell end
-     * \x1E table row end
-     * \x1F table end
-     *
-     * Special ranges within the document flow:：hyperlinks，field，structured document tags， bookmark，comment
-     * \x1F customRange start
-     * \x1E customRange end
-     *
-     * Split the document according to SectionBreak and perform layout calculations.
-     * @returns view model: skeleton
-     */
-
-    private _createSkeleton(_bounds?: IViewportBound) {
-        const DEFAULT_PAGE_SIZE = { width: Number.POSITIVE_INFINITY, height: Number.POSITIVE_INFINITY };
+    private _prepareLayoutContext(): ILayoutContext {
         const viewModel = this.getViewModel();
         const dataModel = viewModel.getDataModel();
         const { headerTreeMap, footerTreeMap } = viewModel;
@@ -493,38 +456,12 @@ export class DocumentSkeleton extends Skeleton {
             ...customLists,
         };
         const {
-            pageNumberStart: global_pageNumberStart = 1, // pageNumberStart
-            pageSize: global_pageSize = DEFAULT_PAGE_SIZE,
-            pageOrient: global_pageOrient = PageOrientType.PORTRAIT,
-            defaultHeaderId: global_defaultHeaderId,
-            defaultFooterId: global_defaultFooterId,
-            evenPageHeaderId: global_evenPageHeaderId,
-            evenPageFooterId: global_evenPageFooterId,
-            firstPageHeaderId: global_firstPageHeaderId,
-            firstPageFooterId: global_firstPageFooterId,
-            useFirstPageHeaderFooter: global_useFirstPageHeaderFooter,
-            useEvenPageHeaderFooter: global_useEvenPageHeaderFooter,
-
-            marginTop: global_marginTop = 0,
-            marginBottom: global_marginBottom = 0,
-            marginRight: global_marginRight = 0,
-            marginLeft: global_marginLeft = 0,
-            marginHeader: global_marginHeader = 0,
-            marginFooter: global_marginFooter = 0,
-
             charSpace = 0, // charSpace
             linePitch = 15.6, // linePitch pt
             gridType = GridType.LINES, // gridType
             paragraphLineGapDefault = 0,
             defaultTabStop = 10.5,
             textStyle = {},
-            renderConfig: global_renderConfig = {
-                horizontalAlign: HorizontalAlign.LEFT,
-                verticalAlign: VerticalAlign.TOP,
-                centerAngle: 0,
-                vertexAngle: 0,
-                wrapStrategy: WrapStrategy.UNSPECIFIED,
-            },
         } = documentStyle;
 
         const docsConfig: IDocsConfig = {
@@ -553,89 +490,66 @@ export class DocumentSkeleton extends Skeleton {
             drawingAnchor,
         };
 
+        return {
+            viewModel,
+            dataModel,
+            skeleton,
+            skeletonResourceReference,
+            docsConfig,
+            layoutPointer: {
+                paragraph: null,
+                section: null,
+            },
+            isDirty: false,
+        };
+    }
+
+    /**
+     * \v COLUMN_BREAK
+     * \f PAGE_BREAK
+     * \0 DOCS_END
+     * \t TAB
+     *
+     * Needs to be changed：
+     * \r PARAGRAPH
+     * \n SECTION_BREAK
+     *
+     * \b customBlock: Scenarios where customBlock, images, mentions, etc. do not participate in the document flow.
+     *
+     * Table
+     * \x1A table start
+     * \x1B table row start
+     * \x1C table cell start
+     * \x1D table cell end
+     * \x1E table row end
+     * \x1F table end
+     *
+     * Special ranges within the document flow:：hyperlinks，field，structured document tags， bookmark，comment
+     * \x1F customRange start
+     * \x1E customRange end
+     *
+     * Split the document according to SectionBreak and perform layout calculations.
+     * @returns view model: skeleton
+     */
+
+    private _createSkeleton(ctx: ILayoutContext, _bounds?: IViewportBound) {
+        const { viewModel, skeleton, skeletonResourceReference } = ctx;
+
         const allSkeletonPages = skeleton.pages;
 
         viewModel.resetCache();
 
         for (let i = 0, len = viewModel.children.length; i < len; i++) {
             const sectionNode = viewModel.children[i];
-            const sectionBreak = viewModel.getSectionBreak(sectionNode.endIndex) || DEFAULT_SECTION_BREAK;
-            const {
-                pageNumberStart = global_pageNumberStart,
-                pageSize = global_pageSize,
-                pageOrient = global_pageOrient,
-                marginTop = global_marginTop,
-                marginBottom = global_marginBottom,
-                marginRight = global_marginRight,
-                marginLeft = global_marginLeft,
-                marginHeader = global_marginHeader,
-                marginFooter = global_marginFooter,
-
-                defaultHeaderId = global_defaultHeaderId,
-                defaultFooterId = global_defaultFooterId,
-                evenPageHeaderId = global_evenPageHeaderId,
-                evenPageFooterId = global_evenPageFooterId,
-                firstPageHeaderId = global_firstPageHeaderId,
-                firstPageFooterId = global_firstPageFooterId,
-                useFirstPageHeaderFooter = global_useFirstPageHeaderFooter,
-                useEvenPageHeaderFooter = global_useEvenPageHeaderFooter,
-
-                columnProperties = [],
-                columnSeparatorType = ColumnSeparatorType.NONE,
-                contentDirection,
-                sectionType,
-                textDirection,
-                renderConfig = global_renderConfig,
-            } = sectionBreak;
-
-            const sectionNodeNext = viewModel.children[i + 1];
-            const sectionTypeNext = viewModel.getSectionBreak(sectionNodeNext?.endIndex)?.sectionType;
-
-            const headerIds = { defaultHeaderId, evenPageHeaderId, firstPageHeaderId };
-            const footerIds = { defaultFooterId, evenPageFooterId, firstPageFooterId };
-
-            if (pageSize.width === null) {
-                pageSize.width = Number.POSITIVE_INFINITY;
-            }
-
-            if (pageSize.height === null) {
-                pageSize.height = Number.POSITIVE_INFINITY;
-            }
-
-            const sectionBreakConfig: ISectionBreakConfig = {
-                pageNumberStart,
-                pageSize,
-                pageOrient,
-                marginTop,
-                marginBottom,
-                marginRight,
-                marginLeft,
-                marginHeader,
-                marginFooter,
-
-                headerIds,
-                footerIds,
-
-                useFirstPageHeaderFooter,
-                useEvenPageHeaderFooter,
-
-                columnProperties,
-                columnSeparatorType,
-                contentDirection,
-                sectionType,
-                sectionTypeNext,
-                textDirection,
-                renderConfig,
-
-                ...docsConfig,
-            };
+            const sectionBreakConfig = prepareSectionBreakConfig(i, ctx);
+            const { sectionType, columnProperties, columnSeparatorType, sectionTypeNext } = sectionBreakConfig;
 
             let curSkeletonPage = getLastPage(allSkeletonPages);
             let isContinuous = false;
 
             if (sectionType === SectionType.CONTINUOUS) {
                 updateBlockIndex(allSkeletonPages);
-                this._addNewSectionByContinuous(curSkeletonPage, columnProperties, columnSeparatorType);
+                this._addNewSectionByContinuous(curSkeletonPage, columnProperties!, columnSeparatorType!);
                 isContinuous = true;
             } else {
                 curSkeletonPage = createSkeletonPage(
@@ -651,20 +565,15 @@ export class DocumentSkeleton extends Skeleton {
                 sectionNode,
                 curSkeletonPage,
                 sectionBreakConfig,
-                skeletonResourceReference,
-                this._renderedBlockIdMap
+                skeletonResourceReference
             );
 
             // todo: 当本节有多个列，且下一节为连续节类型的时候，需要按照列数分割，重新计算 lines
-            if (sectionTypeNext === SectionType.CONTINUOUS && columnProperties.length > 0) {
+            if (sectionTypeNext === SectionType.CONTINUOUS && columnProperties!.length > 0) {
                 // TODO
             }
 
             const { pages } = blockInfo;
-
-            // renderedBlockIdMap.forEach((value, blockId) => {
-            //     this._renderedBlockIdMap.set(blockId, value);
-            // });
 
             if (isContinuous) {
                 pages.splice(0, 1);
@@ -676,15 +585,9 @@ export class DocumentSkeleton extends Skeleton {
         // 计算页和节的位置信息
         updateBlockIndex(allSkeletonPages);
 
-        this._setPageParent(allSkeletonPages, skeleton);
+        setPageParent(allSkeletonPages, skeleton);
 
         return skeleton;
-    }
-
-    private _setPageParent(pages: IDocumentSkeletonPage[], parent: IDocumentSkeletonCached) {
-        for (const page of pages) {
-            page.parent = parent;
-        }
     }
 
     // 一页存在多个 section 的情况，仅在 SectionType.CONTINUOUS 的情况下出现

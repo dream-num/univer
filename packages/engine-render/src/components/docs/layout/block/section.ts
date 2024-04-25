@@ -28,8 +28,7 @@ export function dealWithSections(
     sectionNode: DataStreamTreeNode,
     curPage: IDocumentSkeletonPage,
     sectionBreakConfig: ISectionBreakConfig,
-    skeletonResourceReference: ISkeletonResourceReference,
-    _preRenderedBlockIdMap?: Map<string, boolean>
+    skeletonResourceReference: ISkeletonResourceReference
 ) {
     const allCurrentSkeletonPages: IDocumentSkeletonPage[] = [];
     const renderedBlockIdMap = new Map<string, boolean>();

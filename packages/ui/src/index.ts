@@ -84,3 +84,5 @@ export { IRangeSelectorService } from './services/range-selector/range-selector.
 export { DesktopLocalStorageService } from './services/local-storage/local-storage.service';
 export { useActiveWorkbook, useActiveWorksheet } from './views/hooks/active';
 export { CanvasPopupService, ICanvasPopupService } from './services/popup/canvas-popup.service';
+export { ProgressBar } from './components/progress-bar/ProgressBar';
+export { IProgressService } from './services/progress/progress.service';

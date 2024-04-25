@@ -221,7 +221,7 @@ export class FormulaEditorShowController extends Disposable {
         };
 
         const { scene } = this._renderManagerService.getRenderById(unitId) || {};
-        const { rangeWithCoord, primaryWithCoord } = this._selectionRenderService.convertSelectionRangeToData({
+        const { rangeWithCoord, primaryWithCoord } = this._selectionRenderService.attachSelectionWithCoord({
             range: arrayRange,
             primary: null,
             style,

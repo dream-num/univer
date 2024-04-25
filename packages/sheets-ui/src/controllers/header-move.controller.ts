@@ -384,7 +384,7 @@ export class HeaderMoveController extends Disposable {
 
         const { startX: cellStartX, startY: cellStartY, endX: cellEndX, endY: cellEndY } = startCell;
 
-        const selectionWithCoord = this._selectionRenderService.convertRangeDataToSelection(matchSelectionData.range);
+        const selectionWithCoord = this._selectionRenderService.attachRangeWithCoord(matchSelectionData.range);
 
         if (selectionWithCoord == null) {
             return;

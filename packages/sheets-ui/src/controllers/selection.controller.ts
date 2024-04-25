@@ -236,7 +236,7 @@ export class SelectionController extends Disposable {
 
     private _refreshSelection(params: readonly ISelectionWithStyle[]) {
         const selections = params.map((selectionWithStyle) => {
-            const selectionData = this._selectionRenderService.convertSelectionRangeToData(selectionWithStyle);
+            const selectionData = this._selectionRenderService.attachSelectionWithCoord(selectionWithStyle);
             selectionData.style = getNormalSelectionStyle(this._themeService);
             return selectionData;
         });
@@ -307,7 +307,7 @@ export class SelectionController extends Disposable {
 
                     const selectionWithStyle = this._getAllRange(skeleton);
 
-                    const selectionData = this._selectionRenderService.convertSelectionRangeToData(selectionWithStyle);
+                    const selectionData = this._selectionRenderService.attachSelectionWithCoord(selectionWithStyle);
                     this._selectionRenderService.addControlToCurrentByRangeData(selectionData);
 
                     this._selectionRenderService.refreshSelectionMoveStart();
@@ -336,7 +336,7 @@ export class SelectionController extends Disposable {
                             continue;
                         }
                         const selectionData =
-                            this._selectionRenderService.convertSelectionRangeToData(selectionWithStyle);
+                            this._selectionRenderService.attachSelectionWithCoord(selectionWithStyle);
                         this._selectionRenderService.addControlToCurrentByRangeData(selectionData);
                     }
 

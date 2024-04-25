@@ -14,6 +14,24 @@
  * limitations under the License.
  */
 
-export { UniverImagePlugin } from './plugin';
-export { ImageManagerService, IImageManagerService } from './services/image-manager.service';
-export { ImageModel, SourceType } from './models/image-model';
+import { createIdentifier } from '@wendellhu/redi';
+import type { Nullable } from '../../shared';
+
+export interface IImageRemoteServiceParam {
+    imageId: string;
+    imageFile: HTMLImageElement;
+}
+
+export interface IImageRemoteService {
+
+    getImage(imageId: string): Promise<string>;
+
+    saveImage(imageFile: File): Promise<Nullable<IImageRemoteServiceParam>>;
+
+    applyFilter(imageId: string): Promise<string>;
+
+    applyAI(imageId: string, operatorType: string): Promise<string>;
+}
+
+
+export const IImageRemoteService = createIdentifier<IImageRemoteService>('univer.plugin.image-remote.service');

@@ -205,7 +205,7 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
 
         const { primary, unitId, sheetId, scene, engine } = currentEditCell;
         const { startRow, startColumn } = primary;
-        const primaryWithCoord = this._selectionRenderService.convertCellRangeToInfo(primary);
+        const primaryWithCoord = this._selectionRenderService.attachPrimaryWithCoord(primary);
         if (primaryWithCoord == null) {
             return;
         }

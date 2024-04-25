@@ -74,7 +74,7 @@ export class SheetContextMenuController extends Disposable {
                     return;
                 }
                 const rangeType = currentSelection.range.rangeType;
-                const range = this._selectionRenderService.convertSelectionRangeToData(currentSelection).rangeWithCoord;
+                const range = this._selectionRenderService.attachSelectionWithCoord(currentSelection).rangeWithCoord;
                 const isPointerInRange = () => {
                     if (!range) {
                         return false;

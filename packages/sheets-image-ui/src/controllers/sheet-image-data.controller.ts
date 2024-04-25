@@ -40,26 +40,6 @@ export class SheetImageUIController extends Disposable {
     }
 
     private _init(): void {
-        this._initCommandListeners();
-    }
-
-    private _initCommandListeners(): void {
-        this.disposeWithMe(
-            this._commandService.onCommandExecuted((command: ICommandInfo) => {
-                if (command.id === InsertCellImageOperation.id) {
-                    this._insertCellImage();
-                } else if (command.id === InsertFloatImageOperation.id) {
-                    this._insertFloatImage();
-                }
-            })
-        );
-    }
-
-    private _insertCellImage(): void {
-
-    }
-
-    private _insertFloatImage(): void {
 
     }
 }

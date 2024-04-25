@@ -16,10 +16,19 @@
 
 import { createIdentifier } from '@wendellhu/redi';
 import type { Nullable } from '../../shared';
+import type { ISize } from '../../services/drawing/drawing-interfaces';
 
-export interface IImageRemoteServiceParam {
+
+export enum ImageSourceType {
+    URL = 'URL',
+    UUID = 'UUID',
+    BASE64 = 'BASE64',
+}
+
+export interface IImageRemoteServiceParam extends Required<ISize> {
     imageId: string;
-    imageFile: HTMLImageElement;
+    imageSourceType: ImageSourceType;
+    source: string;
 }
 
 export interface IImageRemoteService {

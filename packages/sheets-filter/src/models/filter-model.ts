@@ -393,8 +393,8 @@ export class FilterColumn extends Disposable {
         const filteredOutByOthers = context.getAlreadyFilteredOutRows();
 
         // Merged cells are take into consideration here.
-        for (const range of this._worksheet.iterateByColumn(iterateRange, false)) {
-            const { row, col, rowSpan } = range;
+        for (const range of this._worksheet.iterateByColumn(iterateRange, false, false)) {
+            const { row, rowSpan, col } = range;
 
             // If this row is already filtered out by others, we don't need to check it again.
             // But it only works for non-vertically-merged cells.
@@ -402,8 +402,6 @@ export class FilterColumn extends Disposable {
                 continue;
             }
 
-            // FIXME: 这里的取值逻辑比较复杂，如果是日期的话，需要从
-            // 另外还要考虑是否使用视图模型的值
             const value = this._filterByValues
                 ? extractPureTextFromCell(this._worksheet.getCell(row, col))
                 : getFilterValueForConditionalFiltering(this._worksheet, row, col);

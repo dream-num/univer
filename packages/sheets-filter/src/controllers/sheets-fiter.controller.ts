@@ -534,9 +534,33 @@ export class SheetsFilterController extends Disposable {
                 endRow: toRange.startRow + rowOffset + (filterRange.endRow - filterRange.startRow),
                 endColumn: toRange.startColumn + colOffset + (filterRange.endColumn - filterRange.startColumn),
             };
+            const removeFilter = {
+                id: RemoveSheetsFilterMutation.id,
+                params: {
+                    unitId,
+                    subUnitId,
+                },
+            };
+            const setNewFilterRange = { id: SetSheetsFilterRangeMutation.id, params: { unitId, subUnitId, range: newFilterRange } as ISetSheetsFilterRangeMutationParams };
+            const setOldFilterRange = { id: SetSheetsFilterRangeMutation.id, params: { unitId, subUnitId, range: filterRange } as ISetSheetsFilterRangeMutationParams };
 
-            redos.push({ id: SetSheetsFilterRangeMutation.id, params: { unitId, subUnitId, range: newFilterRange } as ISetSheetsFilterRangeMutationParams });
-            undos.push({ id: SetSheetsFilterRangeMutation.id, params: { unitId, subUnitId, range: filterRange } as ISetSheetsFilterRangeMutationParams });
+
+            redos.push(removeFilter, setNewFilterRange);
+
+            undos.push(removeFilter, setOldFilterRange);
+
+            const filterColumn = filterModel.getAllFilterColumns();
+            const moveColDelta = toRange.startColumn - fromRange.startColumn;
+            filterColumn.forEach((column) => {
+                const [col, criteria] = column;
+                if (criteria) {
+                    redos.push({ id: SetSheetsFilterCriteriaMutation.id, params: { unitId, subUnitId, col: col + moveColDelta, criteria: { ...criteria.serialize(), colId: col + moveColDelta } } });
+                    undos.push({ id: SetSheetsFilterCriteriaMutation.id, params: { unitId, subUnitId, col, criteria: { ...criteria.serialize(), colId: col } } });
+                }
+            });
+
+            // redos.push({ id: ReCalcSheetsFilterMutation.id, params: { unitId, subUnitId } });
+            // undos.push({ id: ReCalcSheetsFilterMutation.id, params: { unitId, subUnitId } });
         }
         return {
             redos,

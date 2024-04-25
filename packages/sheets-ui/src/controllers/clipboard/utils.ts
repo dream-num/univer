@@ -256,6 +256,9 @@ export function getMoveRangeMutations(
                 },
             ];
             undos = [
+                { id: MoveRangeMutation.id, params: undoMoveRangeMutation },
+                ...interceptorCommands.undos,
+                ...mergeUndos,
                 {
                     id: SetSelectionsOperation.id,
                     params: {
@@ -265,9 +268,6 @@ export function getMoveRangeMutations(
                         selections: [{ range: fromRange }],
                     },
                 },
-                ...interceptorCommands.undos,
-                ...mergeUndos,
-                { id: MoveRangeMutation.id, params: undoMoveRangeMutation },
             ];
         }
     }

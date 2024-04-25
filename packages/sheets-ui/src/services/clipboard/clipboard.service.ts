@@ -518,6 +518,12 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             rowProperties.push({ height: `${row.ah || row.h || defaultRowHeight}` });
         });
 
+        if (cachedData.copyType === COPY_TYPE.CUT) {
+            const start = pasteTarget.pastedRange.rows[0];
+            const end = range.rows[range.rows.length - 1] - range.rows[0] + start;
+            pasteTarget.pastedRange.rows = Array.from(new Array(end + 1).keys()).slice(start);
+        }
+
         const pasteRes = this._pasteUSM(
             {
                 cellMatrix,
@@ -552,7 +558,6 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
     ): boolean {
         const { rowProperties, colProperties, cellMatrix } = data;
         const { unitId, subUnitId, pastedRange } = target;
-        // const { startColumn, endColumn } = pastedRange;
         const colCount = pastedRange.cols.length;
         const hooks = this._clipboardHooks;
         const enabledHooks: ISheetClipboardHook[] = [];

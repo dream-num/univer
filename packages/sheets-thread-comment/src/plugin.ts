@@ -17,7 +17,6 @@
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { Plugin } from '@univerjs/core';
-import { SheetsThreadCommentPanelService } from '../../thread-comment-ui/src/services/thread-comment-panel.service';
 import { SheetsThreadCommentController } from './controllers/sheets-thread-comment.controller';
 import { SheetsThreadCommentRefRangeController } from './controllers/sheets-thread-comment-ref-range.controller';
 import { SheetsThreadCommentModel } from './models/sheets-thread-comment.model';

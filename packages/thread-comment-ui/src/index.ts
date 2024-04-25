@@ -17,3 +17,8 @@
 export { ThreadCommentUIPlugin } from './plugin';
 export { ToggleSheetCommentPanelOperation } from './commands/operations/comment.operations';
 export { ThreadCommentPanelService } from './services/thread-comment-panel.service';
+export { ThreadCommentPanel } from './views/thread-comment-panel';
+export type { IThreadCommentPanelProps } from './views/thread-comment-panel';
+export { ThreadCommentThree } from './views/thread-comment-tree';
+export type { IThreadCommentThreeProps } from './views/thread-comment-tree';
+

@@ -18,12 +18,14 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import { ThreadCommentModel } from '@univerjs/thread-comment';
 import React from 'react';
 import { DeleteSingle, MoreSingle } from '@univerjs/icons';
+import type { UniverInstanceType } from '@univerjs/core';
 import styles from './index.module.less';
 
 export interface IThreadCommentThreeProps {
     id: string;
     unitId: string;
     subUnitId: string;
+    type: UniverInstanceType;
 }
 
 export const ThreadCommentThree = (props: IThreadCommentThreeProps) => {

@@ -14,13 +14,43 @@
  * limitations under the License.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { useDependency } from '@wendellhu/redi/react-bindings';
+import { ThreadCommentModel } from '@univerjs/thread-comment';
+import type { UniverInstanceType } from '@univerjs/core';
+import { useObservable } from '@univerjs/ui';
+import { ThreadCommentThree } from '../thread-comment-tree';
 import styles from './index.module.less';
 
-export const ThreadCommentPanel = () => {
+export interface IThreadCommentPanelProps {
+    unitId: string;
+    subUnitId: string;
+    type: UniverInstanceType;
+}
+
+export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
+    const { unitId, subUnitId, type } = props;
+    const threadCommentModel = useDependency(ThreadCommentModel);
+    const [rootCommentIds$, setRootCommentIds$] = useState(() => threadCommentModel.getRootCommentIds$(unitId, subUnitId));
+    const rootCommentIds = useObservable(rootCommentIds$, threadCommentModel.getRootCommentIds(unitId, subUnitId));
+
+    useEffect(() => {
+        setRootCommentIds$(
+            threadCommentModel.getRootCommentIds$(unitId, subUnitId)
+        );
+    }, [unitId, subUnitId, threadCommentModel]);
+
     return (
         <div className={styles.ThreadCommentPanel}>
-
+            {rootCommentIds.map((id) => (
+                <ThreadCommentThree
+                    key={id}
+                    id={id}
+                    unitId={unitId}
+                    subUnitId={subUnitId}
+                    type={type}
+                />
+            ))}
         </div>
     );
 };

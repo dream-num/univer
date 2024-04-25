@@ -626,7 +626,7 @@ import { CustomFunctionController } from './controllers/custom-function.controll
 
 export class UniverSheetsCustomFunctionPlugin extends Plugin {
     static override pluginName = FORMULA_UI_PLUGIN_NAME
-    static override type = UniverInstanceType.SHEET;
+    static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(@Inject(Injector) override readonly _injector: Injector) {
         super();

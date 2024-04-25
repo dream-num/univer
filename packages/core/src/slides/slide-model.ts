@@ -20,8 +20,8 @@ import { DEFAULT_SLIDE } from '../types/const';
 import type { ISlideData, ISlidePage } from '../types/interfaces';
 import { PageType } from '../types/interfaces';
 
-export class SlideDataModel extends UnitModel<ISlideData, UniverInstanceType.SLIDE> {
-    override type: UniverInstanceType.SLIDE = UniverInstanceType.SLIDE;
+export class SlideDataModel extends UnitModel<ISlideData, UniverInstanceType.UNIVER_SLIDE> {
+    override type: UniverInstanceType.UNIVER_SLIDE = UniverInstanceType.UNIVER_SLIDE;
 
     private _snapshot: ISlideData;
 

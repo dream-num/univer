@@ -26,7 +26,7 @@ import { SheetsFilterRenderController } from './controllers/sheets-filter-render
 const NAME = 'UNIVER_SHEETS_FILTER_UI_PLUGIN';
 
 export class UniverSheetsFilterUIPlugin extends Plugin {
-    static override type = UniverInstanceType.SHEET;
+    static override type = UniverInstanceType.UNIVER_SHEET;
     static override pluginName = NAME;
 
     constructor(

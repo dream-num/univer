@@ -114,14 +114,14 @@ describe('Test commands used for change selections', () => {
 
     function getRowCount(): number {
         const currentService = get(IUniverInstanceService);
-        const workbook = currentService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+        const workbook = currentService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet();
         return worksheet.getRowCount();
     }
 
     function getColCount(): number {
         const currentService = get(IUniverInstanceService);
-        const workbook = currentService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+        const workbook = currentService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet();
         return worksheet.getColumnCount();
     }

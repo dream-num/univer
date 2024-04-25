@@ -69,7 +69,7 @@ export class DefinedNameController extends Disposable {
 
     private _changeUnitListener() {
         toDisposable(
-            this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.SHEET).subscribe(() => {
+            this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe(() => {
                 this._unRegisterDescriptions();
                 this._registerDescriptions();
             })
@@ -147,7 +147,7 @@ export class DefinedNameController extends Disposable {
     }
 
     private _getUnitIdAndSheetId() {
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         if (workbook == null) {
             return {};
         }

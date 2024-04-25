@@ -257,13 +257,13 @@ export class FormulaDataModel extends Disposable {
 
     initFormulaData() {
         // Load formula data from workbook config data.
-        const allSheets = this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.SHEET);
+        const allSheets = this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (allSheets.length === 0) {
             return;
         }
 
         // Since there is at least a sheet, there must be current univer sheet instance.
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const unitId = workbook.getUnitId();
         this._formulaData[unitId] = {};
 
@@ -277,7 +277,7 @@ export class FormulaDataModel extends Disposable {
     }
 
     getCalculateData() {
-        const unitAllSheet = this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.SHEET);
+        const unitAllSheet = this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
 
         const allUnitData: IUnitData = {};
 

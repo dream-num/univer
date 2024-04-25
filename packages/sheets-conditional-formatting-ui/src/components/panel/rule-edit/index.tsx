@@ -47,8 +47,8 @@ interface IRuleEditProps {
     onCancel: () => void;
 }
 
-const getUnitId = (univerInstanceService: IUniverInstanceService) => univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!.getUnitId();
-const getSubUnitId = (univerInstanceService: IUniverInstanceService) => univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!.getActiveSheet().getSheetId();
+const getUnitId = (univerInstanceService: IUniverInstanceService) => univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId();
+const getSubUnitId = (univerInstanceService: IUniverInstanceService) => univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet().getSheetId();
 
 export const RuleEdit = (props: IRuleEditProps) => {
     const localeService = useDependency(LocaleService);
@@ -184,7 +184,7 @@ export const RuleEdit = (props: IRuleEditProps) => {
     const handleSubmit = () => {
         const beforeSubmitResult = interceptorManager.fetchThroughInterceptors(interceptorManager.getInterceptPoints().beforeSubmit)(true, null);
         const getRanges = () => {
-            const worksheet = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!.getActiveSheet();
+            const worksheet = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet();
             const ranges = rangeResult.current.map((range) => setEndForRange(range, worksheet.getRowCount(), worksheet.getColumnCount()));
             const result = ranges.filter((range) => !(Number.isNaN(range.startRow) || Number.isNaN(range.startColumn)));
             return result;

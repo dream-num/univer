@@ -84,7 +84,7 @@ function createFilterCommandTestBed() {
 
     class SheetsFilterCommandTestPlugin extends Plugin {
         static override pluginName = 'sheets-filter-command-test';
-        static override type = UniverInstanceType.SHEET;
+        static override type = UniverInstanceType.UNIVER_SHEET;
         constructor(_config: unknown, @Inject(Injector) protected readonly _injector: Injector) {
             super();
         }

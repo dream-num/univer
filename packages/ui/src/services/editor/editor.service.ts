@@ -617,7 +617,7 @@ export class EditorService extends Disposable implements IEditorService, IDispos
     register(config: IEditorConfigParam, container: HTMLDivElement): IDisposable {
         const { initialSnapshot, editorUnitId, canvasStyle = {} } = config;
 
-        const documentDataModel = this._univerInstanceService.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.DOC, initialSnapshot || this._getBlank(editorUnitId));
+        const documentDataModel = this._univerInstanceService.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, initialSnapshot || this._getBlank(editorUnitId));
 
         let render = this._renderManagerService.getRenderById(editorUnitId);
 
@@ -664,9 +664,9 @@ export class EditorService extends Disposable implements IEditorService, IDispos
          * Compatible with the editor in the sheet scenario,
          * it is necessary to refocus back to the current sheet when unloading.
          */
-        const sheets = this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.SHEET);
+        const sheets = this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (sheets.length > 0) {
-            const current = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+            const current = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
             this._univerInstanceService.focusUnit(current.getUnitId());
         }
     }

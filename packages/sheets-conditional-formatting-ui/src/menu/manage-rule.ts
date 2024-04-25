@@ -44,7 +44,7 @@ export const FactoryManageConditionalFormattingRule = (componentManager: Compone
             new Observable<null>((commandSubscribe) => {
                 const disposable = commandService.onCommandExecuted((commandInfo) => {
                     const { id, params } = commandInfo;
-                    const unitId = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)?.getUnitId();
+                    const unitId = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getUnitId();
                     if (commandList.includes(id) && (params as { unitId: string }).unitId === unitId) {
                         commandSubscribe.next(null);
                     }
@@ -53,7 +53,7 @@ export const FactoryManageConditionalFormattingRule = (componentManager: Compone
             })
         ).pipe(debounceTime(16)).subscribe(() => {
             const ranges = selectionManagerService.getSelections()?.map((selection) => selection.range) || [];
-            const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET);
+            const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
             if (!workbook) return;
             const allRule = conditionalFormattingRuleModel.getSubunitRules(workbook.getUnitId(), workbook.getActiveSheet().getSheetId()) || [];
             const ruleList = allRule.filter((rule) => rule.ranges.some((ruleRange) => ranges.some((range) => Rectangle.intersects(range, ruleRange))));
@@ -65,7 +65,7 @@ export const FactoryManageConditionalFormattingRule = (componentManager: Compone
                 new Observable<null>((commandSubscribe) => {
                     const disposable = commandService.onCommandExecuted((commandInfo) => {
                         const { id, params } = commandInfo;
-                        const unitId = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)?.getUnitId();
+                        const unitId = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getUnitId();
                         if (commandList.includes(id) && (params as { unitId: string }).unitId === unitId) {
                             commandSubscribe.next(null);
                         }
@@ -73,7 +73,7 @@ export const FactoryManageConditionalFormattingRule = (componentManager: Compone
                     return () => disposable.dispose();
                 })
             ).pipe(debounceTime(16)).subscribe(() => {
-                const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET);
+                const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
                 if (!workbook) return;
                 const allRule = conditionalFormattingRuleModel.getSubunitRules(workbook.getUnitId(), workbook.getActiveSheet().getSheetId()) || [];
                 subscriber.next(!!allRule.length);
@@ -105,7 +105,7 @@ export const FactoryManageConditionalFormattingRule = (componentManager: Compone
             icon: key,
             tooltip: localeService.t('sheet.cf.title'),
             selections: selections$,
-            hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
+            hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         } as IMenuSelectorItem;
     };
 };

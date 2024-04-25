@@ -26,7 +26,7 @@ export type PluginCtor<T extends Plugin> = Ctor<T> & { type: UniverInstanceType;
 export abstract class Plugin extends Disposable {
     static pluginName: string;
 
-    static type: UniverInstanceType = UniverInstanceType.UNIVER;
+    static type: UniverInstanceType = UniverInstanceType.UNIVER_UNKNOWN;
 
     protected abstract _injector: Injector;
 

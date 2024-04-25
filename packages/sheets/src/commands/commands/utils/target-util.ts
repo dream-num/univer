@@ -23,7 +23,7 @@ export function getSheetCommandTargetWorkbook(univerInstanceService: IUniverInst
     const { unitId } = params;
     const workbook = unitId
         ? univerInstanceService.getUniverSheetInstance(unitId)
-        : univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET);
+        : univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
 
     if (!workbook) return null;
 
@@ -55,7 +55,7 @@ export function getSheetCommandTarget(univerInstanceService: IUniverInstanceServ
 
     const workbook = unitId
         ? univerInstanceService.getUniverSheetInstance(unitId)
-        : univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET);
+        : univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
     if (!workbook) return null;
 
     const worksheet = subUnitId ? workbook.getSheetBySheetId(subUnitId) : workbook.getActiveSheet();

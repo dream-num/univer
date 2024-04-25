@@ -88,21 +88,21 @@ describe('Test row col menu items', () => {
 
     function getRowCount(): number {
         const currentService = get(IUniverInstanceService);
-        const workbook = currentService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+        const workbook = currentService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet();
         return worksheet.getRowCount();
     }
 
     function getColCount(): number {
         const currentService = get(IUniverInstanceService);
-        const workbook = currentService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+        const workbook = currentService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet();
         return worksheet.getColumnCount();
     }
 
     async function selectRow(rowStart: number, rowEnd: number): Promise<boolean> {
         const currentService = get(IUniverInstanceService);
-        const workbook = currentService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+        const workbook = currentService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet();
         const endColumn = getColCount() - 1;
         return commandService.executeCommand<ISetSelectionsOperationParams, boolean>(SetSelectionsOperation.id, {
@@ -130,7 +130,7 @@ describe('Test row col menu items', () => {
 
     async function selectColumn(columnStart: number, columnEnd: number): Promise<boolean> {
         const currentService = get(IUniverInstanceService);
-        const workbook = currentService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+        const workbook = currentService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet();
         const endRow = getRowCount() - 1;
         return commandService.executeCommand<ISetSelectionsOperationParams, boolean>(SetSelectionsOperation.id, {

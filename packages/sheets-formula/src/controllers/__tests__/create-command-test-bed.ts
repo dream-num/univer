@@ -63,7 +63,7 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
 
     class TestPlugin extends Plugin {
         static override pluginName = 'test-plugin';
-        static override type = UniverInstanceType.SHEET;
+        static override type = UniverInstanceType.UNIVER_SHEET;
 
         private _formulaDataModel: FormulaDataModel | null = null;
 

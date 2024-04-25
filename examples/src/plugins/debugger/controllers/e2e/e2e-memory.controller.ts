@@ -51,7 +51,7 @@ export class E2EMemoryController {
 
     private async _loadAndRelease(id: number): Promise<void> {
         const unitId = `e2e${id}`;
-        this._univerInstanceService.createUnit(UniverInstanceType.SHEET, { ...DEFAULT_WORKBOOK_DATA_DEMO, id: unitId });
+        this._univerInstanceService.createUnit(UniverInstanceType.UNIVER_SHEET, { ...DEFAULT_WORKBOOK_DATA_DEMO, id: unitId });
         await timer(AWAIT_LOADING_TIMEOUT);
         this._univerInstanceService.disposeUnit(unitId);
         await timer(AWAIT_DISPOSING_TIMEOUT);

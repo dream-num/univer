@@ -53,7 +53,7 @@ describe('test editor', () => {
         const univerInstanceService = testBed.get(IUniverInstanceService);
         testBed.get(NumfmtEditorController);
         testBed.get(NumfmtCellContent);
-        workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+        workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         worksheet = workbook.getActiveSheet();
     });
 

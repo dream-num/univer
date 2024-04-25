@@ -34,7 +34,7 @@ export const SetEditable: ICommand = {
         } else {
             const univerPermissionService = accessor.get(UniverPermissionService);
             const univerInstanceService = accessor.get(IUniverInstanceService);
-            const unitId = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!.getUnitId();
+            const unitId = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId();
             const editable = univerPermissionService.getEditable(unitId);
             univerPermissionService.setEditable(unitId, !editable);
         }

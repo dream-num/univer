@@ -34,13 +34,13 @@ export class UniverPermissionService extends Disposable {
     }
 
     private _init() {
-        this._univerInstanceService.getTypeOfUnitAdded$(UniverInstanceType.SHEET).subscribe((workbook) => {
+        this._univerInstanceService.getTypeOfUnitAdded$(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => {
             const univerEditablePermission = new UniverEditablePermission(workbook.getUnitId());
             this._permissionService.addPermissionPoint(workbook.getUnitId(), univerEditablePermission);
         });
     }
 
-    getEditable(unitId = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.SHEET)?.getUnitId()) {
+    getEditable(unitId = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET)?.getUnitId()) {
         if (!unitId) {
             return;
         }

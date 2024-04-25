@@ -40,19 +40,19 @@ describe('Test SheetInterceptorService', () => {
 
     function getCell(row: number, col: number): Nullable<ICellData> {
         const cus = get(IUniverInstanceService);
-        const sheet = cus.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!.getActiveSheet()!;
+        const sheet = cus.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()!;
         return sheet.getCell(row, col);
     }
 
     function getRowFiltered(row: number): boolean {
         const cus = get(IUniverInstanceService);
-        const sheet = cus.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!.getActiveSheet()!;
+        const sheet = cus.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()!;
         return sheet.getRowFiltered(row);
     }
 
     function getRowRawVisible(row: number): boolean {
         const cus = get(IUniverInstanceService);
-        const sheet = cus.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!.getActiveSheet()!;
+        const sheet = cus.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()!;
         return sheet.getRowVisible(row);
     }
 
@@ -202,12 +202,12 @@ describe('Test SheetInterceptorService', () => {
     // it('Test SheetInterceptorService', () => {
     //     it('getLastRowWithContent', () => {
     //         const univerInstanceService = get(IUniverInstanceService);
-    //         const sheet = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!.getActiveSheet()!;
+    //         const sheet = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()!;
     //         expect(sheet.getLastRowWithContent()).toBe(3);
     //     });
     //     it('getLastColumnWithContent', () => {
     //         const univerInstanceService = get(IUniverInstanceService);
-    //         const sheet = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!.getActiveSheet()!;
+    //         const sheet = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()!;
     //         expect(sheet.getLastColumnWithContent()).toBe(3);
     //     });
     // });

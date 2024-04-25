@@ -96,7 +96,7 @@ univer.registerPlugin(UniverSheetsConditionalFormattingUIPlugin);
 
 // create univer sheet instance
 if (!IS_E2E) {
-    univer.createUnit(UniverInstanceType.SHEET, DEFAULT_WORKBOOK_DATA_DEMO);
+    univer.createUnit(UniverInstanceType.UNIVER_SHEET, DEFAULT_WORKBOOK_DATA_DEMO);
 }
 
 // Uncomment the following lines to test if the document is disposed correctly without memory leaks.
@@ -104,7 +104,7 @@ if (!IS_E2E) {
 //     univer.__getInjector().get(IUniverInstanceService).disposeUnit(DEFAULT_WORKBOOK_DATA_DEMO.id);
 // }, 5000);
 // setTimeout(() => {
-//     univer.createUnit(UniverInstanceType.SHEET, DEFAULT_WORKBOOK_DATA_DEMO);
+//     univer.createUnit(UniverInstanceType.UNIVER_SHEET, DEFAULT_WORKBOOK_DATA_DEMO);
 // }, 7000);
 
 

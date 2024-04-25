@@ -33,7 +33,7 @@ export function SmartToggleFilterMenuItemFactory(accessor: IAccessor): IMenuSele
         icon: 'FilterSingle',
         tooltip: 'sheets-filter.toolbar.smart-toggle-filter-tooltip',
         positions: [MenuPosition.TOOLBAR_START],
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         activated$: sheetsFilterService.activeFilterModel$.pipe(map((model) => !!model)),
     };
 }
@@ -47,7 +47,7 @@ export function ClearFilterCriteriaMenuItemFactory(accessor: IAccessor): IMenuBu
         type: MenuItemType.BUTTON,
         title: 'sheets-filter.toolbar.clear-filter-criteria',
         positions: [SmartToggleSheetsFilterCommand.id],
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: sheetsFilterService.activeFilterModel$.pipe(switchMap((model) => model?.hasCriteria$.pipe(map((m) => !m)) ?? of(true))),
     };
 }
@@ -61,7 +61,7 @@ export function ReCalcFilterMenuItemFactory(accessor: IAccessor): IMenuButtonIte
         type: MenuItemType.BUTTON,
         title: 'sheets-filter.toolbar.re-calc-filter-conditions',
         positions: [SmartToggleSheetsFilterCommand.id],
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: sheetsFilterService.activeFilterModel$.pipe(switchMap((model) => model?.hasCriteria$.pipe(map((m) => !m)) ?? of(true))),
     };
 }

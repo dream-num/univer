@@ -48,12 +48,12 @@ describe('Test set row height commands', () => {
     let commandService: ICommandService;
 
     function getRowHeight(row: number): number {
-        const worksheet = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!.getActiveSheet();
+        const worksheet = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet();
         return worksheet.getRowHeight(row);
     }
 
     function getRowIsAutoHeight(row: number): Nullable<BooleanNumber> {
-        const worksheet = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!.getActiveSheet();
+        const worksheet = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet();
         const rowManager = worksheet.getRowManager();
         const rowInfo = rowManager.getRow(row);
 
@@ -72,7 +72,7 @@ describe('Test set row height commands', () => {
         commandService.registerCommand(SetWorksheetRowHeightMutation);
         commandService.registerCommand(SetWorksheetRowIsAutoHeightMutation);
 
-        const worksheet = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!.getActiveSheet();
+        const worksheet = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet();
         const maxColumn = worksheet.getMaxColumns() - 1;
         const selectionManager = get(SelectionManagerService);
 

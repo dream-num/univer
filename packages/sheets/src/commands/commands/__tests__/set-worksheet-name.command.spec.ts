@@ -45,7 +45,7 @@ describe('Test set worksheet name commands', () => {
     describe('set worksheet name', () => {
         describe('set worksheet name', async () => {
             it('correct situation: ', async () => {
-                const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+                const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
                 if (!workbook) throw new Error('This is an error');
 
                 expect(

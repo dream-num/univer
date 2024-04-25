@@ -36,7 +36,7 @@ export function ZoomSlider() {
     const univerInstanceService = useDependency(IUniverInstanceService);
 
     const getCurrentZoom = useCallback(() => {
-        const currentZoom = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!.getActiveSheet().getZoomRatio() * 100 || 100;
+        const currentZoom = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet().getZoomRatio() * 100 || 100;
         return Math.round(currentZoom);
     }, [univerInstanceService]);
 
@@ -54,7 +54,7 @@ export function ZoomSlider() {
 
     function handleChange(value: number) {
         setZoom(value);
-        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook?.getActiveSheet();
         if (worksheet == null) {
             return;

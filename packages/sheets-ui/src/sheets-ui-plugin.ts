@@ -74,7 +74,7 @@ import { ForceStringAlertController } from './controllers/force-string-alert.con
 
 export class UniverSheetsUIPlugin extends Plugin {
     static override pluginName = 'SHEET_UI_PLUGIN_NAME';
-    static override type = UniverInstanceType.SHEET;
+    static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(
         _config: undefined,
@@ -159,13 +159,13 @@ export class UniverSheetsUIPlugin extends Plugin {
 
     private _registerRenderControllers(): void {
         ([HeaderFreezeRenderController, HeaderUnhideRenderController, HeaderResizeController]).forEach((controller) => {
-            this.disposeWithMe(this._renderManagerService.registerRenderControllers(UniverInstanceType.SHEET, controller));
+            this.disposeWithMe(this._renderManagerService.registerRenderControllers(UniverInstanceType.UNIVER_SHEET, controller));
         });
     }
 
     private _markSheetAsFocused() {
         const univerInstanceService = this._univerInstanceService;
-        univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.SHEET).pipe(filter((v) => !!v)).subscribe((workbook) => {
+        univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET).pipe(filter((v) => !!v)).subscribe((workbook) => {
             univerInstanceService.focusUnit(workbook!.getUnitId());
         });
     }

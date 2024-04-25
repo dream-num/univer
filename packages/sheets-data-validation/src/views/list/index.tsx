@@ -35,7 +35,7 @@ export const DataValidationList = memo(() => {
     const injector = useDependency(Injector);
     const dataValidationPanelService = useDependency(DataValidationPanelService);
     const workbook = useObservable(
-        () => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.SHEET),
+        () => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET),
         undefined,
         true,
         []

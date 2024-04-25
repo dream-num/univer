@@ -311,7 +311,7 @@ export function isReferenceStringWithEffectiveColumn(refString: string) {
 /**
  * implement getSheetIdByName
  * function getSheetIdByName(name: string) {
-        return univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)?.getSheetBySheetName(name)?.getSheetId() || '';
+        return univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getSheetBySheetName(name)?.getSheetId() || '';
     }
  */
 export function getRangeWithRefsString(refString: string, getSheetIdByName: (name: string) => string): IUnitRangeWithName[] {

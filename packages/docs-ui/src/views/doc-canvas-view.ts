@@ -53,11 +53,11 @@ export class DocCanvasView extends RxDisposable {
             this._create(unitId);
         });
 
-        this._univerInstanceService.getCurrentTypeOfUnit$(UniverInstanceType.DOC).pipe(takeUntil(this.dispose$)).subscribe((documentModel) => {
+        this._univerInstanceService.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_DOC).pipe(takeUntil(this.dispose$)).subscribe((documentModel) => {
             this._create(documentModel?.getUnitId());
         });
 
-        this._univerInstanceService.getAllUnitsForType<DocumentDataModel>(UniverInstanceType.DOC).forEach((documentModel) => {
+        this._univerInstanceService.getAllUnitsForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC).forEach((documentModel) => {
             this._create(documentModel.getUnitId());
         });
     }

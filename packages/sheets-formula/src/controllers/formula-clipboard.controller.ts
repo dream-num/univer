@@ -91,7 +91,7 @@ export class FormulaClipboardController extends Disposable {
         };
         const pastedRange = pasteTo.range;
         const matrix = data;
-        const workbook = this._currentUniverSheet.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+        const workbook = this._currentUniverSheet.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const unitId = workbook.getUnitId();
         const subUnitId = workbook.getActiveSheet().getSheetId();
 

@@ -115,7 +115,7 @@ export class SheetRenderController extends RxDisposable {
     }
 
     private _initSheetDisposeListener(): void {
-        this._univerInstanceService.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.SHEET)
+        this._univerInstanceService.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.UNIVER_SHEET)
             .pipe(takeUntil(this.dispose$))
             .subscribe((workbook) => {
                 const unitId = workbook.getUnitId();
@@ -127,7 +127,7 @@ export class SheetRenderController extends RxDisposable {
     private _initCommandListener(): void {
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
-                const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET);
+                const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
                 if (!workbook) return;
 
                 const unitId = workbook.getUnitId();

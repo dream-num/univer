@@ -40,7 +40,7 @@ const editorStyle: React.CSSProperties = {
  */
 export const TestEditorContainer = () => {
     const univerInstanceService = useDependency(IUniverInstanceService);
-    const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+    const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
     if (workbook == null) {
         return;
     }

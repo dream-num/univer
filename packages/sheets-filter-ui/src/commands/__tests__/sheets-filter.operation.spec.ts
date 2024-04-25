@@ -68,7 +68,7 @@ function createFilterOperationTestBed() {
     const get = injector.get.bind(injector);
 
     class SheetsFilterOperationTestPlugin extends Plugin {
-        static override type = UniverInstanceType.SHEET;
+        static override type = UniverInstanceType.UNIVER_SHEET;
         static override pluginName = 'sheets-filter-operation-test';
 
         constructor(_config: unknown, @Inject(Injector) protected readonly _injector: Injector) {

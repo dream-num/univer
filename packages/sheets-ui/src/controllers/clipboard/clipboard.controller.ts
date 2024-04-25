@@ -264,7 +264,7 @@ export class SheetClipboardController extends RxDisposable {
             },
             getFilteredOutRows(range: IRange) {
                 const { startRow, endRow } = range;
-                const worksheet = self._currentUniverSheet.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)?.getActiveSheet();
+                const worksheet = self._currentUniverSheet.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getActiveSheet();
                 const res: number[] = [];
                 if (!worksheet) {
                     return res;
@@ -670,7 +670,7 @@ export class SheetClipboardController extends RxDisposable {
                 };
             },
             onPasteColumns(pasteTo, colProperties, payload) {
-                const workbook = self._currentUniverSheet.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+                const workbook = self._currentUniverSheet.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
                 const unitId = workbook.getUnitId();
                 const subUnitId = workbook.getActiveSheet().getSheetId();
                 const redoMutations: IMutationInfo[] = [];
@@ -721,7 +721,7 @@ export class SheetClipboardController extends RxDisposable {
                 label: 'specialPaste.besidesBorder',
             },
             onPasteCells(pasteFrom, pasteTo, matrix, payload) {
-                const workbook = self._currentUniverSheet.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+                const workbook = self._currentUniverSheet.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
                 const redoMutationsInfo: IMutationInfo[] = [];
                 const undoMutationsInfo: IMutationInfo[] = [];
                 const { range, unitId, subUnitId } = pasteTo;

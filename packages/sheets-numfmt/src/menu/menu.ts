@@ -52,7 +52,7 @@ export const CurrencyMenuItem = (componentManager: ComponentManager) => {
             type: MenuItemType.BUTTON,
             group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
             positions: [MenuPosition.TOOLBAR_START],
-            hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
+            hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
             disabled$: getCurrentSheetDisabled$(accessor),
         };
     };
@@ -69,7 +69,7 @@ export const AddDecimalMenuItem = (componentManager: ComponentManager) => {
         type: MenuItemType.BUTTON,
         positions: [MenuPosition.TOOLBAR_START],
         group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: getCurrentSheetDisabled$(accessor),
     });
 };
@@ -84,7 +84,7 @@ export const SubtractDecimalMenuItem = (componentManager: ComponentManager) => {
         type: MenuItemType.BUTTON,
         group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
         positions: [MenuPosition.TOOLBAR_START],
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: getCurrentSheetDisabled$(accessor),
     });
 };
@@ -100,7 +100,7 @@ export const PercentMenuItem = (componentManager: ComponentManager) => {
         type: MenuItemType.BUTTON,
         group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
         positions: [MenuPosition.TOOLBAR_START],
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: getCurrentSheetDisabled$(accessor),
     });
 };
@@ -175,7 +175,7 @@ export const FactoryOtherMenuItem = (componentManager: ComponentManager) => {
                 },
             ],
             value$,
-            hidden$: getMenuHiddenObservable(_accessor, UniverInstanceType.SHEET),
+            hidden$: getMenuHiddenObservable(_accessor, UniverInstanceType.UNIVER_SHEET),
             disabled$: getCurrentSheetDisabled$(_accessor),
         } as IMenuSelectorItem;
     };

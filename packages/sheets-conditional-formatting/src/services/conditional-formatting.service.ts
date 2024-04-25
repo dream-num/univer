@@ -21,7 +21,6 @@ import { InsertColMutation, InsertRowMutation, MoveColsMutation, MoveRangeMutati
 import { Inject, Injector } from '@wendellhu/redi';
 import { Subject } from 'rxjs';
 import { filter } from 'rxjs/operators';
-import { UniverType } from '@univerjs/protocol';
 import type { IDeleteConditionalRuleMutationParams } from '../commands/mutations/delete-conditional-rule.mutation';
 import { DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory } from '../commands/mutations/delete-conditional-rule.mutation';
 import { ConditionalFormattingRuleModel } from '../models/conditional-formatting-rule-model';
@@ -142,7 +141,7 @@ export class ConditionalFormattingService extends Disposable {
         this.disposeWithMe(
             this._resourceManagerService.registerPluginResource<IRuleModelJson[keyof IRuleModelJson]>({
                 pluginName: SHEET_CONDITIONAL_FORMATTING_PLUGIN,
-                businesses: [UniverType.UNIVER_SHEET],
+                businesses: [UniverInstanceType.UNIVER_SHEET],
                 toJson: (unitID) => toJson(unitID),
                 parseJson: (json) => parseJson(json),
                 onUnLoad: (unitID) => {
@@ -396,5 +395,5 @@ export class ConditionalFormattingService extends Disposable {
     }
 }
 
-const getUnitId = (u: IUniverInstanceService) => u.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!.getUnitId();
-const getSubUnitId = (u: IUniverInstanceService) => u.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!.getActiveSheet().getSheetId();
+const getUnitId = (u: IUniverInstanceService) => u.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId();
+const getSubUnitId = (u: IUniverInstanceService) => u.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet().getSheetId();

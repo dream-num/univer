@@ -74,18 +74,18 @@ export class DataSyncPrimaryController extends RxDisposable {
     }
 
     private _init(): void {
-        this._univerInstanceService.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.SHEET).pipe(takeUntil(this.dispose$)).subscribe((sheet) => {
+        this._univerInstanceService.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.UNIVER_SHEET).pipe(takeUntil(this.dispose$)).subscribe((sheet) => {
             this._syncingUnits.add(sheet.getUnitId());
 
             // If a sheet is created, it should sync the data to the worker thread.
             this._remoteInstanceService.createInstance({
                 unitID: sheet.getUnitId(),
-                type: UniverInstanceType.SHEET,
+                type: UniverInstanceType.UNIVER_SHEET,
                 snapshot: sheet.getSnapshot(),
             });
         });
 
-        this._univerInstanceService.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.SHEET).pipe(takeUntil(this.dispose$)).subscribe((workbook) => {
+        this._univerInstanceService.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.UNIVER_SHEET).pipe(takeUntil(this.dispose$)).subscribe((workbook) => {
             this._syncingUnits.delete(workbook.getUnitId());
             // If a sheet is disposed, it should sync the data to the worker thread.
             this._remoteInstanceService.disposeInstance({

@@ -47,15 +47,15 @@ export class SheetPermissionService extends RxDisposable {
     }
 
     private _init() {
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         if (!workbook) return;
 
         this._interceptWorkbook(workbook);
-        this._univerInstanceService.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.SHEET)
+        this._univerInstanceService.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.UNIVER_SHEET)
             .pipe(takeUntil(this.dispose$))
             .subscribe((workbook) => this._interceptWorkbook(workbook));
 
-        this._univerInstanceService.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.SHEET)
+        this._univerInstanceService.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.UNIVER_SHEET)
             .pipe(takeUntil(this.dispose$))
             .subscribe((workbook) => this._disposableByUnit.get(workbook.getUnitId())?.dispose());
     }
@@ -90,10 +90,11 @@ export class SheetPermissionService extends RxDisposable {
         this._disposableByUnit.set(unitId, disposableCollection);
     }
 
+    // TODO@Gggpound: should get by unitId instead of the current one
     getEditable$(unitId?: string, sheetId?: string) {
         return of({ value: true, status: PermissionStatus.INIT });
 
-        // const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+        // const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         // if (!workbook) {
         // }
 
@@ -114,7 +115,7 @@ export class SheetPermissionService extends RxDisposable {
 
     getSheetEditable(unitId?: string, sheetId?: string) {
         return true;
-        // const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+        // const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         // if (!workbook) return false;
 
         // const _unitId = unitId || workbook.getUnitId();
@@ -127,7 +128,7 @@ export class SheetPermissionService extends RxDisposable {
     }
 
     setSheetEditable(v: boolean, unitId?: string, sheetId?: string) {
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         if (!workbook) return;
 
         const _unitId = unitId || workbook.getUnitId();

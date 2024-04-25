@@ -24,7 +24,7 @@ interface IActive {
 }
 
 function getActiveSheet$(univerInstanceService: IUniverInstanceService): Observable<Nullable<IActive>> {
-    return univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.SHEET).pipe(switchMap((workbook) =>
+    return univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET).pipe(switchMap((workbook) =>
         workbook
             ? workbook.activeSheet$.pipe(map((worksheet) => {
                 if (!worksheet) return null;

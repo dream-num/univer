@@ -30,7 +30,7 @@ export function ShortcutPanelMenuItemFactory(accessor: IAccessor): IMenuButtonIt
         icon: 'KeyboardSingle',
         type: MenuItemType.BUTTON,
         positions: [MenuPosition.TOOLBAR_START],
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         // disabled$: getCurrentSheetDisabled$(accessor),
     };
 }

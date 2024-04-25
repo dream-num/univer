@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-import { CellValueType } from '@univerjs/protocol';
 
 import type { Nullable } from '../shared';
 import { ObjectMatrix, Rectangle, Tools } from '../shared';
 import { createRowColIter } from '../shared/row-col-iter';
-import type { BooleanNumber } from '../types/enum';
+import { type BooleanNumber, CellValueType } from '../types/enum';
 import type { ICellData, ICellDataForSheetInterceptor, IFreeze, IRange, IWorksheetData } from '../types/interfaces';
 import { ColumnManager } from './column-manager';
 import { Range } from './range';

@@ -24,8 +24,9 @@ export type PluginCtor<T extends Plugin> = Ctor<T> & { type: UniverInstanceType;
  * Plug-in base class, all plug-ins must inherit from this base class. Provide basic methods.
  */
 export abstract class Plugin extends Disposable {
-    static pluginName: string = '';
-    static type: UniverInstanceType = UniverInstanceType.UNRECOGNIZED;
+    static pluginName: string;
+
+    static type: UniverInstanceType = UniverInstanceType.UNIVER;
 
     protected abstract _injector: Injector;
 

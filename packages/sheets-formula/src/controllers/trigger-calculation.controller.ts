@@ -15,12 +15,12 @@
  */
 
 import type { ICommandInfo, IUnitRange } from '@univerjs/core';
-import { Disposable, ICommandService, LifecycleStages, OnLifecycle, throttle, Tools } from '@univerjs/core';
+import { Disposable, ICommandService, LifecycleStages, OnLifecycle, throttle } from '@univerjs/core';
 import type {
     IDirtyUnitFeatureMap,
     IDirtyUnitOtherFormulaMap,
     IDirtyUnitSheetNameMap,
-    ISetFormulaCalculationNotificationMutation
+    ISetFormulaCalculationNotificationMutation,
 } from '@univerjs/engine-formula';
 import {
     FormulaDataModel,

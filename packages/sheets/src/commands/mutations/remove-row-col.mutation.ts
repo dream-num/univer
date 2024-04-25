@@ -72,14 +72,15 @@ export const RemoveRowMutation: IMutation<IRemoveRowsMutationParams> = {
             }
         }
 
+
         const rowCount = range.endRow - range.startRow + 1;
-        spliceArray(range.startRow, rowCount, rowPrimitive, filterOutRows);
+        spliceArray(range.startRow, rowCount, rowPrimitive);
 
         // remove cells contents by directly mutating worksheetCellMatrix
-        const cellMatrix = worksheet.getCellMatrix().getMatrix();
-        spliceArray(range.startRow, rowCount, cellMatrix, filterOutRows);
+        const cellMatrix = worksheet.getCellMatrix();
+        cellMatrix.removeRows(range.startRow, rowCount);
 
-        worksheet.setRowCount(worksheet.getRowCount() - rowCount + filterOutRows.length);
+        worksheet.setRowCount(worksheet.getRowCount() - rowCount);
 
         return true;
     },

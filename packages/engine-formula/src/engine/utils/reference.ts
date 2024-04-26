@@ -33,10 +33,17 @@ export interface IAbsoluteRefTypeForRange {
  * @param singleRefString for example A1 or B10,  not A1:B10
  */
 export function getAbsoluteRefTypeWithSingleString(singleRefString: string) {
-    const isColumnAbsolute = singleRefString[0] === '$';
+    let isColumnAbsolute = singleRefString[0] === '$';
     const remainChar = singleRefString.substring(1);
 
-    const isRowAbsolute = remainChar.indexOf('$') > -1;
+    let isRowAbsolute = remainChar.indexOf('$') > -1;
+
+
+    if (Tools.isStringNumber(remainChar) && isColumnAbsolute && !isRowAbsolute) {
+        isColumnAbsolute = false;
+        isRowAbsolute = true;
+    }
+
 
     if (isColumnAbsolute && isRowAbsolute) {
         return AbsoluteRefType.ALL;

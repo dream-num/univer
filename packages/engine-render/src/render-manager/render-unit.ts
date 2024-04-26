@@ -48,8 +48,8 @@ export interface IRenderContext<T extends UnitModel = UnitModel> extends IRender
 export class RenderUnit extends Disposable implements IRender {
     readonly isRenderUnit: true;
 
-    readonly unitId: string;
-    readonly type: UnitType;
+    get unitId(): string { return this._renderContext.unitId; }
+    get type(): UnitType { return this._renderContext.type; }
 
     private readonly _injector: Injector;
     private readonly _renderControllers: IRenderController[] = [];
@@ -75,7 +75,7 @@ export class RenderUnit extends Disposable implements IRender {
 
         this._renderContext = {
             unit: init.unit,
-            unitId: this.unitId,
+            unitId: init.unit.getUnitId(),
             type: init.unit.type,
             components: new Map(),
             mainComponent: null,

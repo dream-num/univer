@@ -33,7 +33,7 @@ jobs:
               run: pnpm build:e2e
 
             - name: Run Playwright Tests
-              run: pnpm dlx playwright test
+              run: pnpm exec playwright test
 
             - uses: actions/upload-artifact@v3
               if: always()

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ICommandService, Plugin } from '@univerjs/core';
+import { ICommandService, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { DataValidatorRegistryService } from './services/data-validator-registry.service';
@@ -28,6 +28,7 @@ const PLUGIN_NAME = 'data-validation';
 
 export class UniverDataValidationPlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;
+    static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(
         _config: unknown,

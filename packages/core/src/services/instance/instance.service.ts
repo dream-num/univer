@@ -166,20 +166,16 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
         return unit;
     }
 
-    getCurrentUniverSheetInstance<Workbook>(): Nullable<Workbook> {
-        return this.getCurrentUnitForType(UniverInstanceType.SHEET) as Nullable<Workbook>;
-    }
-
     getCurrentUniverDocInstance(): Nullable<DocumentDataModel> {
-        return this.getCurrentUnitForType(UniverInstanceType.DOC) as Nullable<DocumentDataModel>;
+        return this.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC) as Nullable<DocumentDataModel>;
     }
 
     getUniverDocInstance(unitId: string): Nullable<DocumentDataModel> {
-        return this.getUnit<DocumentDataModel>(unitId, UniverInstanceType.DOC);
+        return this.getUnit<DocumentDataModel>(unitId, UniverInstanceType.UNIVER_DOC);
     }
 
     getUniverSheetInstance(unitId: string): Nullable<Workbook> {
-        return this.getUnit<Workbook>(unitId, UniverInstanceType.SHEET);
+        return this.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
     }
 
     getAllUnitsForType<T>(type: UnitType): T[] {
@@ -187,7 +183,7 @@ export class UniverInstanceService extends Disposable implements IUniverInstance
     }
 
     changeDoc(unitId: string, doc: DocumentDataModel): void {
-        const allDocs = this.getAllUnitsForType<DocumentDataModel>(UniverInstanceType.DOC);
+        const allDocs = this.getAllUnitsForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC);
         const oldDoc = allDocs.find((doc) => doc.getUnitId() === unitId);
 
         if (oldDoc != null) {

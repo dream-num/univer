@@ -194,7 +194,9 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
         const item = this._renderMap.get(unitId);
         if (item != null) {
             this._disposeItem(item);
+            (item as RenderUnit).dispose();
         }
+
         this._renderMap.delete(unitId);
     }
 

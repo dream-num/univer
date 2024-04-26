@@ -22,7 +22,7 @@ import { interval, takeUntil, throttle } from 'rxjs';
 
 @OnLifecycle(LifecycleStages.Rendered, PerformanceMonitorController)
 export class PerformanceMonitorController extends RxDisposable {
-    private _documentType: UniverInstanceType = UniverInstanceType.UNIVER;
+    private _documentType: UniverInstanceType = UniverInstanceType.UNIVER_UNKNOWN;
     private _hasWatched = false;
     private _container!: HTMLDivElement;
     private _styleElement!: HTMLStyleElement;
@@ -87,14 +87,14 @@ export class PerformanceMonitorController extends RxDisposable {
         this._styleElement = document.createElement('style');
         document.head.appendChild(this._styleElement).innerText = style;
 
-        if (this._documentType === UniverInstanceType.DOC) {
+        if (this._documentType === UniverInstanceType.UNIVER_DOC) {
             this._docCanvasView.fps$
                 .pipe(takeUntil(this.dispose$))
                 .pipe(throttle(() => interval(THROTTLE_TIME)))
                 .subscribe((fps) => {
                     container.innerText = `FPS: ${fps}`;
                 });
-        } else if (this._documentType === UniverInstanceType.SHEET) {
+        } else if (this._documentType === UniverInstanceType.UNIVER_SHEET) {
             this._injector
                 .get(SheetCanvasView)
                 .fps$.pipe(takeUntil(this.dispose$))

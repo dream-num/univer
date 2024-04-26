@@ -84,10 +84,10 @@ export class DocSkeletonManagerService extends RxDisposable {
             this._setCurrent(docViewModel);
         });
 
-        this._univerInstanceService.getTypeOfUnitDisposed$(UniverInstanceType.DOC).pipe(takeUntil(this.dispose$)).subscribe((documentModel) => {
+        this._univerInstanceService.getTypeOfUnitDisposed$(UniverInstanceType.UNIVER_DOC).pipe(takeUntil(this.dispose$)).subscribe((documentModel) => {
             this._docSkeletonMap.delete(documentModel.getUnitId());
 
-            this._currentSkeletonUnitId = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.DOC)?.getUnitId() ?? '';
+            this._currentSkeletonUnitId = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC)?.getUnitId() ?? '';
         });
     }
 

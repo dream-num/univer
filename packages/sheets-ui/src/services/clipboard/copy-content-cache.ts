@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-import type { IRange, Nullable, ObjectMatrix } from '@univerjs/core';
+import type { Nullable, ObjectMatrix } from '@univerjs/core';
 import { LRUMap, Tools } from '@univerjs/core';
 
+import type { IDiscreteRange } from '../../controllers/utils/range-tools';
 import type { COPY_TYPE, ICellDataWithSpanInfo } from './type';
 
 const COPY_CONTENT_CACHE_LIMIT = 10;
@@ -25,7 +26,7 @@ const ID_LENGTH = 6;
 export interface ICopyContentCacheData {
     subUnitId: string;
     unitId: string;
-    range: IRange;
+    range: IDiscreteRange;
     copyType: COPY_TYPE;
     matrix: Nullable<ObjectMatrix<ICellDataWithSpanInfo>>;
 }

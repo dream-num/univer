@@ -1058,13 +1058,11 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderC
     private _themeChangeListener() {
         this._themeChange(this._themeService.getCurrentTheme());
         this.disposeWithMe(
-            toDisposable(
-                this._themeService.currentTheme$.subscribe((style) => {
-                    this._clearFreeze();
-                    this._themeChange(style);
-                    this._refreshCurrent();
-                })
-            )
+            this._themeService.currentTheme$.subscribe((style) => {
+                this._clearFreeze();
+                this._themeChange(style);
+                this._refreshCurrent();
+            })
         );
     }
 

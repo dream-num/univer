@@ -247,7 +247,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
     }
 
     function getSheetIdByName(name: string) {
-        return univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)?.getSheetBySheetName(name)?.getSheetId() || '';
+        return univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getSheetBySheetName(name)?.getSheetId() || '';
     }
 
     function handleTextValueChange(value: Nullable<string>) {

@@ -32,6 +32,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { ISheetClipboardService } from '../clipboard.service';
 import { COPY_TYPE } from '../type';
+import { discreteRangeToRange } from '../../../controllers/utils/range-tools';
 import { clipboardTestBed } from './clipboard-test-bed';
 import type { IClipboardItem } from './mock-clipboard';
 import { MockClipboard } from './mock-clipboard';
@@ -808,10 +809,10 @@ describe('Test clipboard', () => {
         it('cut value from A25 to B25', async () => {
             const unitId = 'test';
             const subUnitId = 'sheet1';
-            const fromRange = { startRow: 24, startColumn: 0, endRow: 24, endColumn: 0 };
+            const fromRange = { rows: [24], cols: [0] };
             const toRange = { startRow: 24, startColumn: 1, endRow: 24, endColumn: 1 };
             const copyContentCache = sheetClipboardService.copyContentCache();
-            const { matrixFragment, copyId } = (sheetClipboardService as any)._generateCopyContent(unitId, subUnitId, fromRange, []);
+            const { matrixFragment, copyId } = (sheetClipboardService as any)._generateCopyContent(unitId, subUnitId, discreteRangeToRange(fromRange), []);
 
             // cache the copy content for internal paste
             copyContentCache.set(copyId, {

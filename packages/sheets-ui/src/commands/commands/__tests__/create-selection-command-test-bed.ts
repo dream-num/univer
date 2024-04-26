@@ -30,8 +30,8 @@ import {
 } from '../set-frozen.command';
 import { ExpandSelectionCommand, MoveSelectionCommand, SelectAllCommand } from '../set-selection.command';
 
-export function createSelectionCommandTestBed(workbookConfig?: IWorkbookData) {
-    const { univer, get, sheet } = createCommandTestBed(workbookConfig || SIMPLE_SELECTION_WORKBOOK_DATA, [
+export function createSelectionCommandTestBed(workbookData?: IWorkbookData) {
+    const { univer, get, sheet } = createCommandTestBed(workbookData || SIMPLE_SELECTION_WORKBOOK_DATA, [
         [ShortcutExperienceService],
     ]);
 
@@ -47,8 +47,8 @@ export function createSelectionCommandTestBed(workbookConfig?: IWorkbookData) {
     };
 }
 
-export function createFrozenCommandTestBed(workbookConfig?: IWorkbookData) {
-    const { univer, get, sheet } = createCommandTestBed(workbookConfig || SIMPLE_SELECTION_WORKBOOK_DATA, [
+export function createFrozenCommandTestBed(workbookData?: IWorkbookData) {
+    const { univer, get, sheet } = createCommandTestBed(workbookData || SIMPLE_SELECTION_WORKBOOK_DATA, [
         [ShortcutExperienceService],
         [ScrollManagerService],
     ]);

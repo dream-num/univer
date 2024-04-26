@@ -607,6 +607,10 @@ export class ObjectMatrix<T> {
                 startRow = rowIndex;
             }
 
+            if (row == null) {
+                return;
+            }
+
             const rowSize = getArrayLength(row) - 1;
             if (rowSize > endColumn) {
                 endColumn = rowSize;

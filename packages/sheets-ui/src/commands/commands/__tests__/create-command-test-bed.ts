@@ -26,7 +26,7 @@ import {
     Univer,
     UniverInstanceType,
 } from '@univerjs/core';
-import { BorderStyleManagerService, SelectionManagerService, SheetInterceptorService } from '@univerjs/sheets';
+import { BorderStyleManagerService, SelectionManagerService, SheetInterceptorService, SheetPermissionService } from '@univerjs/sheets';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -76,13 +76,13 @@ export interface ITestBed {
     sheet: Workbook;
 }
 
-export function createCommandTestBed(workbookConfig?: IWorkbookData, dependencies?: Dependency[]): ITestBed {
+export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?: Dependency[]): ITestBed {
     const univer = new Univer();
     const injector = univer.__getInjector();
 
     class TestPlugin extends Plugin {
         static override pluginName = 'test-plugin';
-        static override type = UniverInstanceType.SHEET;
+        static override type = UniverInstanceType.UNIVER_SHEET;
 
         constructor(
             _config: undefined,
@@ -98,13 +98,14 @@ export function createCommandTestBed(workbookConfig?: IWorkbookData, dependencie
             injector.add([BorderStyleManagerService]);
             injector.add([SheetInterceptorService]);
             injector.add([LexerTreeBuilder]);
+            injector.add([SheetPermissionService]);
 
             dependencies?.forEach((d) => injector.add(d));
         }
     }
 
     univer.registerPlugin(TestPlugin);
-    const sheet = univer.createUniverSheet(workbookConfig || getTestWorkbookDataDemo());
+    const sheet = univer.createUniverSheet(workbookData || getTestWorkbookDataDemo());
 
     const univerInstanceService = injector.get(IUniverInstanceService);
     univerInstanceService.focusUnit('test');

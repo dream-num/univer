@@ -147,7 +147,7 @@ const getTestWorkbookData = (): IWorkbookData => {
         styles: {},
     };
 };
-export function createFunctionTestBed(workbookConfig?: IWorkbookData, dependencies?: Dependency[]) {
+export function createFunctionTestBed(workbookData?: IWorkbookData, dependencies?: Dependency[]) {
     const univer = new Univer();
     const injector = univer.__getInjector();
     const get = injector.get.bind(injector);
@@ -157,7 +157,7 @@ export function createFunctionTestBed(workbookConfig?: IWorkbookData, dependenci
      */
     class TestPlugin extends Plugin {
         static override pluginName = 'test-plugin';
-        static override type = UniverInstanceType.SHEET;
+        static override type = UniverInstanceType.UNIVER_SHEET;
 
         private _formulaDataModel: FormulaDataModel | null = null;
 
@@ -204,7 +204,7 @@ export function createFunctionTestBed(workbookConfig?: IWorkbookData, dependenci
     }
 
     univer.registerPlugin(TestPlugin);
-    const sheet = univer.createUniverSheet(workbookConfig || getTestWorkbookData());
+    const sheet = univer.createUniverSheet(workbookData || getTestWorkbookData());
 
     const univerInstanceService = get(IUniverInstanceService);
     univerInstanceService.focusUnit('test');
@@ -213,7 +213,7 @@ export function createFunctionTestBed(workbookConfig?: IWorkbookData, dependenci
     logService.setLogLevel(LogLevel.SILENT); // change this to `true` to debug tests via logs
 
     const sheetData: ISheetData = {};
-    const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+    const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
     const unitId = workbook.getUnitId();
     const sheetId = workbook.getActiveSheet().getSheetId();
     workbook.getSheets().forEach((sheet) => {

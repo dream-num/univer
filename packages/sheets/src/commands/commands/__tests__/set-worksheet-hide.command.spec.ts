@@ -52,7 +52,7 @@ describe('Test set worksheet hide commands', () => {
 
     describe('Set worksheet hide', () => {
         it('will set current active worksheet hidden', async () => {
-            const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+            const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
             if (!workbook) throw new Error('This is an error');
 
             const targetActiveSheet = workbook.getActiveSheet();

@@ -71,7 +71,7 @@ const PLUGIN_NAME = 'docs';
 
 export class UniverDocsPlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;
-    static override type = UniverInstanceType.DOC;
+    static override type = UniverInstanceType.UNIVER_DOC;
 
     private _config: IUniverDocsConfig;
 

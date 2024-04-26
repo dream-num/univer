@@ -113,7 +113,7 @@ export const RuleList = (props: IRuleListProps) => {
     const localeService = useDependency(LocaleService);
     const conditionalFormattingI18nController = useDependency(ConditionalFormattingI18nController);
 
-    const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+    const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
     const unitId = workbook.getUnitId();
     const worksheet = workbook.getActiveSheet();
     const subUnitId = worksheet.getSheetId();
@@ -176,7 +176,7 @@ export const RuleList = (props: IRuleListProps) => {
                 const commandList = [SetSelectionsOperation.id, AddConditionalRuleMutation.id, SetConditionalRuleMutation.id, DeleteConditionalRuleMutation.id, MoveConditionalRuleMutation.id];
                 const disposable = commandService.onCommandExecuted((commandInfo) => {
                     const { id, params } = commandInfo;
-                    const unitId = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!.getUnitId();
+                    const unitId = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId();
                     if (commandList.includes(id) && (params as { unitId: string }).unitId === unitId) {
                         commandSubscribe.next(null);
                     }
@@ -239,8 +239,8 @@ export const RuleList = (props: IRuleListProps) => {
     }, []);
 
     const handleDelete = (rule: IConditionFormattingRule) => {
-        const unitId = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!.getUnitId();
-        const subUnitId = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!.getActiveSheet().getSheetId();
+        const unitId = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId();
+        const subUnitId = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet().getSheetId();
         commandService.executeCommand(DeleteCfCommand.id, { unitId, subUnitId, cfId: rule.cfId } as IDeleteCfCommandParams);
     };
 
@@ -250,8 +250,8 @@ export const RuleList = (props: IRuleListProps) => {
 
     const handleDragStop = (_layout: unknown, from: { y: number }, to: { y: number }) => {
         draggingIdSet(-1);
-        const unitId = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!.getUnitId();
-        const subUnitId = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!.getActiveSheet().getSheetId();
+        const unitId = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId();
+        const subUnitId = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet().getSheetId();
         const getSaveIndex = (index: number) => {
             const length = ruleList.length;
             return Math.min(length - 1, Math.max(0, index));

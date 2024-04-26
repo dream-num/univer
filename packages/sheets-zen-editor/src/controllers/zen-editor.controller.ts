@@ -105,7 +105,7 @@ export class ZenEditorController extends RxDisposable {
             },
         };
 
-        return this._univerInstanceService.createUnit(UniverInstanceType.DOC, INITIAL_SNAPSHOT);
+        return this._univerInstanceService.createUnit(UniverInstanceType.UNIVER_DOC, INITIAL_SNAPSHOT);
     }
 
     // Listen to changes in the size of the zen editor container to set the size of the editor.

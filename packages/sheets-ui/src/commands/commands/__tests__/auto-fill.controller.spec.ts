@@ -333,7 +333,7 @@ describe('Test auto fill rules in controller', () => {
     describe('auto fill', () => {
         describe('auto fill the numbers', async () => {
             it('correct situation', async () => {
-                const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+                const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
                 if (!workbook) throw new Error('This is an error');
                 // test number
                 (autoFillController as any)._triggerAutoFill(
@@ -374,7 +374,7 @@ describe('Test auto fill rules in controller', () => {
 
         describe('auto fill the extend numbers', async () => {
             it('correct situation', async () => {
-                const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+                const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
                 if (!workbook) throw new Error('This is an error');
                 // test extend number
                 (autoFillController as any)._triggerAutoFill(
@@ -398,7 +398,7 @@ describe('Test auto fill rules in controller', () => {
 
         describe('auto fill the chinese numbers', async () => {
             it('correct situation', async () => {
-                const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+                const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
                 if (!workbook) throw new Error('This is an error');
                 // test chinese number
                 (autoFillController as any)._triggerAutoFill(
@@ -422,7 +422,7 @@ describe('Test auto fill rules in controller', () => {
 
         describe('auto fill the chinese week', async () => {
             it('correct situation', async () => {
-                const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+                const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
                 if (!workbook) throw new Error('This is an error');
 
                 // test chinese week
@@ -447,7 +447,7 @@ describe('Test auto fill rules in controller', () => {
 
         describe('auto fill the loop series', async () => {
             it('correct situation', async () => {
-                const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+                const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
                 if (!workbook) throw new Error('This is an error');
                 // test loop series
                 (autoFillController as any)._triggerAutoFill(
@@ -471,7 +471,7 @@ describe('Test auto fill rules in controller', () => {
 
         describe('auto fill the other string', async () => {
             it('correct situation', async () => {
-                const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+                const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
                 if (!workbook) throw new Error('This is an error');
                 // test other string
                 (autoFillController as any)._triggerAutoFill(
@@ -495,7 +495,7 @@ describe('Test auto fill rules in controller', () => {
 
         describe('auto fill the mixed mode', async () => {
             it('correct situation', async () => {
-                const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+                const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
                 if (!workbook) throw new Error('This is an error');
                 // test mixed mode
                 (autoFillController as any)._triggerAutoFill(
@@ -534,7 +534,7 @@ describe('Test auto fill rules in controller', () => {
 
         describe('auto fill the merged cell', async () => {
             it('test primary', async () => {
-                const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+                const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
                 if (!workbook) throw new Error('This is an error');
 
                 const selectionManagerService = get(SelectionManagerService);
@@ -584,7 +584,7 @@ describe('Test auto fill rules in controller', () => {
 
         describe('auto fill clear', async () => {
             it('test primary will move to upper left corner', async () => {
-                const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+                const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
                 if (!workbook) throw new Error('This is an error');
 
                 const selectionManagerService = get(SelectionManagerService);
@@ -636,7 +636,7 @@ describe('Test auto fill rules in controller', () => {
 
     describe('auto fill range is auto detected', async () => {
         it('correct situation', async () => {
-            const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+            const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
             if (!workbook) throw new Error('This is an error');
             // test other string
             (autoFillController as any)._handleDbClickFill({
@@ -664,7 +664,7 @@ describe('Test auto fill rules in controller', () => {
 
     describe('auto fill in left direction', async () => {
         it('correct situation', async () => {
-            const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+            const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
             if (!workbook) throw new Error('This is an error');
             // test other string
             (autoFillController as any)._triggerAutoFill(
@@ -696,7 +696,7 @@ describe('Test auto fill rules in controller', () => {
 
     describe('auto fill with equal ratio & style', async () => {
         it('correct situation', async () => {
-            const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+            const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
             if (!workbook) throw new Error('This is an error');
             // equal ratio
             (autoFillController as any)._triggerAutoFill(
@@ -744,7 +744,7 @@ describe('Test auto fill rules in controller', () => {
 
     describe('auto fill without format', async () => {
         it('correct situation', async () => {
-            const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+            const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
             if (!workbook) throw new Error('This is an error');
             // equal ratio
             (autoFillController as any)._triggerAutoFill(
@@ -811,7 +811,7 @@ describe('Test auto fill rules in controller', () => {
 
     describe('auto fill from single cell', async () => {
         it('correct situation', async () => {
-            const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+            const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
             if (!workbook) throw new Error('This is an error');
             // test right
             (autoFillController as any)._triggerAutoFill(

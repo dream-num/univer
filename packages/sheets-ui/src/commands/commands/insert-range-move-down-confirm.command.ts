@@ -43,7 +43,21 @@ export const InsertRangeMoveDownConfirmCommand: ICommand = {
         if (!range) {
             return false;
         }
-        range = { ...range, endRow: worksheet.getColumnCount() - 1 };
+        range = { ...range, endRow: worksheet.getRowCount() - 1 };
+
+        for (let i = range.startRow; i <= range.endRow; i++) {
+            if (worksheet.getRowFiltered(i)) {
+                const result = await confirmService.confirm({
+                    id: InsertRangeMoveDownConfirmCommand.id,
+                    title: { title: localeService.t('filter.confirm.error') },
+                    children: { title: localeService.t('filter.confirm.notAllowedToInsertRange') },
+                    confirmText: localeService.t('button.confirm'),
+                });
+                if (result) {
+                    return false;
+                }
+            }
+        }
 
         const getColLength = (range: IRange) => range.endColumn - range.startColumn;
         const mergeData = worksheet.getMergeData().find((mergeRange) => {
@@ -54,6 +68,7 @@ export const InsertRangeMoveDownConfirmCommand: ICommand = {
         if (!mergeData) {
             return commandService.executeCommand(InsertRangeMoveDownCommand.id);
         }
+
 
         const result = await confirmService.confirm({
             id: InsertRangeMoveDownConfirmCommand.id,

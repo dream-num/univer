@@ -23,7 +23,7 @@ export function moveRangeByOffset(range: IRange, refOffsetX: number, refOffsetY:
     const startAbsoluteRefType = newRange.startAbsoluteRefType || AbsoluteRefType.NONE;
     const endAbsoluteRefType = newRange.endAbsoluteRefType || AbsoluteRefType.NONE;
 
-    if (startAbsoluteRefType === AbsoluteRefType.ALL && endAbsoluteRefType === AbsoluteRefType.ALL) {
+    if (!ignoreAbsolute && startAbsoluteRefType === AbsoluteRefType.ALL && endAbsoluteRefType === AbsoluteRefType.ALL) {
         return newRange;
     }
 

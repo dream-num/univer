@@ -43,8 +43,8 @@ export function getWorksheetUID(workbook: Workbook, worksheet: Worksheet): strin
 /**
  * Access and create Univer Sheets files
  */
-export class Workbook extends UnitModel<IWorkbookData, UniverInstanceType.SHEET> {
-    override type: UniverInstanceType.SHEET = UniverInstanceType.SHEET;
+export class Workbook extends UnitModel<IWorkbookData, UniverInstanceType.UNIVER_SHEET> {
+    override type: UniverInstanceType.UNIVER_SHEET = UniverInstanceType.UNIVER_SHEET;
 
     private readonly _sheetCreated$ = new Subject<Worksheet>();
     readonly sheetCreated$ = this._sheetCreated$.asObservable();
@@ -166,7 +166,7 @@ export class Workbook extends UnitModel<IWorkbookData, UniverInstanceType.SHEET>
 
         sheets[id] = worksheetSnapshot;
         sheetOrder.splice(index, 0, id);
-        const worksheet = new Worksheet(worksheetSnapshot, this._styles);
+        const worksheet = new Worksheet(this._unitId, worksheetSnapshot, this._styles);
         this._worksheets.set(id, worksheet);
         this._sheetCreated$.next(worksheet);
 
@@ -538,7 +538,7 @@ export class Workbook extends UnitModel<IWorkbookData, UniverInstanceType.SHEET>
                 this._logService.debug('[Workbook]', `The worksheet name ${name} is duplicated, we changed it to ${worksheetSnapshot.name}. Please fix the problem in your snapshot.`);
             }
 
-            const worksheet = new Worksheet(worksheetSnapshot, this._styles);
+            const worksheet = new Worksheet(this._unitId, worksheetSnapshot, this._styles);
             _worksheets.set(sheetId, worksheet);
 
             if (!sheetOrder.includes(sheetId)) {

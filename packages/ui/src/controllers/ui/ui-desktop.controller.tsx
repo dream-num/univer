@@ -79,7 +79,7 @@ export class DesktopUIController extends Disposable implements IDesktopUIControl
                         if (!render.unitId) return;
 
                         const unitType = this._instanceService.getUnitType(render.unitId);
-                        if (unitType !== UniverInstanceType.SHEET) return;
+                        if (unitType !== UniverInstanceType.UNIVER_SHEET) return;
 
                         render.engine.setContainer(canvasElement);
                     }

@@ -49,16 +49,16 @@ export class DocViewModelManagerService extends RxDisposable {
 
     private _init() {
         this._univerInstanceService
-            .getCurrentTypeOfUnit$<DocumentDataModel>(UniverInstanceType.DOC)
+            .getCurrentTypeOfUnit$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC)
             .pipe(takeUntil(this.dispose$)).subscribe((documentModel) => {
                 this._create(documentModel);
             });
 
-        this._univerInstanceService.getAllUnitsForType<DocumentDataModel>(UniverInstanceType.DOC).forEach((documentModel) => {
+        this._univerInstanceService.getAllUnitsForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC).forEach((documentModel) => {
             this._create(documentModel);
         });
 
-        this._univerInstanceService.getTypeOfUnitDisposed$(UniverInstanceType.DOC).pipe(takeUntil(this.dispose$)).subscribe((documentModel) => {
+        this._univerInstanceService.getTypeOfUnitDisposed$(UniverInstanceType.UNIVER_DOC).pipe(takeUntil(this.dispose$)).subscribe((documentModel) => {
             this._docViewModelMap.delete(documentModel.getUnitId());
         });
     }

@@ -285,7 +285,7 @@ export class HeaderMenuController extends Disposable {
     }
 
     private _getSelectionOnColumn(column: number): ISetSelectionsOperationParams {
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet();
 
         return {

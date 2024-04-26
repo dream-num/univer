@@ -431,4 +431,56 @@ describe('lexer nodeMaker test', () => {
             expect(result).toStrictEqual('=SUM($A$1:$B$10) + LAMBDA(x, y, x*y*x)($A$1:$B$10,$A$10) + MAX($A$1:$B$10,SUM($A$2))');
         });
     });
+
+    describe('moveFormulaRefOffset', () => {
+        it('move all', () => {
+            const result = lexerTreeBuilder.moveFormulaRefOffset('=sum(A1:B1)', 1, 1, false);
+            expect(result).toStrictEqual('=sum(B2:C2)');
+        });
+
+        it('move not first column', () => {
+            const result = lexerTreeBuilder.moveFormulaRefOffset('=sum($A1:B1)', 1, 1, false);
+            expect(result).toStrictEqual('=sum($A2:C2)');
+        });
+
+        it('move not first row', () => {
+            const result = lexerTreeBuilder.moveFormulaRefOffset('=sum(A$1:$B1)', 1, 1, false);
+            expect(result).toStrictEqual('=sum(B$1:$B2)');
+        });
+
+        it('move only column', () => {
+            const result = lexerTreeBuilder.moveFormulaRefOffset('=sum(A:B)', 1, 1, false);
+            expect(result).toStrictEqual('=sum(B:C)');
+        });
+
+        it('move only column absolute end', () => {
+            const result = lexerTreeBuilder.moveFormulaRefOffset('=sum(A:$B)', 1, 1, false);
+            expect(result).toStrictEqual('=sum(B:$B)');
+        });
+
+        it('move only column absolute all', () => {
+            const result = lexerTreeBuilder.moveFormulaRefOffset('=sum($A:$B)', 1, 1, false);
+            expect(result).toStrictEqual('=sum($A:$B)');
+        });
+
+        it('move only row absolute end', () => {
+            const result = lexerTreeBuilder.moveFormulaRefOffset('=sum(1:$3)', 1, 1, false);
+            expect(result).toStrictEqual('=sum(2:$3)');
+        });
+
+        it('move only row absolute all', () => {
+            const result = lexerTreeBuilder.moveFormulaRefOffset('=sum($1:$3)', 1, 1, false);
+            expect(result).toStrictEqual('=sum($1:$3)');
+        });
+
+        it('move omit absolute all', () => {
+            const result = lexerTreeBuilder.moveFormulaRefOffset('=sum($A$1:$B$3)', 1, 1, true);
+            expect(result).toStrictEqual('=sum($B$2:$C$4)');
+        });
+
+        it('move omit absolute column', () => {
+            const result = lexerTreeBuilder.moveFormulaRefOffset('=sum(A$1:B$3)', 1, 1, true);
+            expect(result).toStrictEqual('=sum(B$2:C$4)');
+        });
+    });
 });

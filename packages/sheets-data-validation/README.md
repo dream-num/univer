@@ -58,5 +58,5 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
 }
 
 // load initial snapshot
-univer.createUnit(UniverInstanceType.SHEET, DEFAULT_WORKBOOK_DATA_DEMO);
+univer.createUnit(UniverInstanceType.UNIVER_SHEET, DEFAULT_WORKBOOK_DATA_DEMO);
 ```

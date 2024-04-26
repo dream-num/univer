@@ -51,7 +51,7 @@ export function getSheetObject(
 ): Nullable<ISheetObjectParam> {
     const workbook = univerInstanceService instanceof Workbook
         ? univerInstanceService
-        : univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET);
+        : univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
     if (!workbook) return null;
 
     const unitId = workbook.getUnitId();
@@ -72,7 +72,7 @@ export function getSheetObject(
         engine = renderManagerService.engine;
     }
 
-    if (!components) return null;
+    if (!components || !mainComponent) return null;
 
     const spreadsheet = mainComponent as Spreadsheet;
     const spreadsheetRowHeader = components.get(SHEET_VIEW_KEY.ROW) as SpreadsheetHeader;

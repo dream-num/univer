@@ -25,7 +25,7 @@ import { useObservable } from '../../components/hooks/observable';
  */
 export function useActiveWorkbook(): Nullable<Workbook> {
     const univerInstanceService = useDependency(IUniverInstanceService);
-    const activeWorkbook = useObservable(univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.SHEET));
+    const activeWorkbook = useObservable(univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET));
     return activeWorkbook;
 }
 

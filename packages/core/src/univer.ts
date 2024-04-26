@@ -103,27 +103,27 @@ export class Univer {
      * @deprecated use `createUnit` instead
      */
     createUniverSheet(data: Partial<IWorkbookData>): Workbook {
-        return this._univerInstanceService.createUnit<IWorkbookData, Workbook>(UniverInstanceType.SHEET, data);
+        return this._univerInstanceService.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, data);
     }
 
     /**
      * @deprecated use `createUnit` instead
      */
     createUniverDoc(data: Partial<IDocumentData>): DocumentDataModel {
-        return this._univerInstanceService.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.DOC, data);
+        return this._univerInstanceService.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, data);
     }
 
     /**
      * @deprecated use `createUnit` instead
      */
     createUniverSlide(data: Partial<ISlideData>): SlideDataModel {
-        return this._univerInstanceService.createUnit<ISlideData, SlideDataModel>(UniverInstanceType.SLIDE, data);
+        return this._univerInstanceService.createUnit<ISlideData, SlideDataModel>(UniverInstanceType.UNIVER_SLIDE, data);
     }
 
     private _init(injector: Injector): void {
-        this._univerInstanceService.registerCtorForType(UniverInstanceType.SHEET, Workbook);
-        this._univerInstanceService.registerCtorForType(UniverInstanceType.DOC, DocumentDataModel);
-        this._univerInstanceService.registerCtorForType(UniverInstanceType.SLIDE, SlideDataModel);
+        this._univerInstanceService.registerCtorForType(UniverInstanceType.UNIVER_SHEET, Workbook);
+        this._univerInstanceService.registerCtorForType(UniverInstanceType.UNIVER_DOC, DocumentDataModel);
+        this._univerInstanceService.registerCtorForType(UniverInstanceType.UNIVER_SLIDE, SlideDataModel);
 
         const univerInstanceService = injector.get(IUniverInstanceService) as UniverInstanceService;
         univerInstanceService.__setCreateHandler(

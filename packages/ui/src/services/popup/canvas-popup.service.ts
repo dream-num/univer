@@ -25,6 +25,7 @@ export interface IPopup {
     anchorRect$: Observable<IBoundRectNoAngle>;
     componentKey: string;
     onClickOutside?: (e: MouseEvent) => void;
+    closeOnSelfTarget?: boolean;
     excludeOutside?: HTMLElement[];
     unitId: string;
     subUnitId: string;

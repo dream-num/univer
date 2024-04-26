@@ -26,7 +26,7 @@ export const SLIDE_UI_PLUGIN_NAME = 'slides-ui';
 
 export class UniverSlidesUIPlugin extends Plugin {
     static override pluginName = SLIDE_UI_PLUGIN_NAME;
-    static override type = UniverInstanceType.SLIDE;
+    static override type = UniverInstanceType.UNIVER_SLIDE;
 
     constructor(
         _config: unknown,
@@ -52,7 +52,7 @@ export class UniverSlidesUIPlugin extends Plugin {
     private _markSlideAsFocused() {
         const currentService = this._univerInstanceService;
         try {
-            const slide = currentService.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.SLIDE)!;
+            const slide = currentService.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE)!;
             currentService.focusUnit(slide.getUnitId());
         } catch (e) {
         }

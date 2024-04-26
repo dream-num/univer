@@ -48,7 +48,9 @@ export interface IWorksheetData {
      * @defaultValue `BooleanNumber.FALSE`
      */
     hidden: BooleanNumber;
+
     freeze: IFreeze;
+
     rowCount: number;
     columnCount: number;
     zoomRatio: number;

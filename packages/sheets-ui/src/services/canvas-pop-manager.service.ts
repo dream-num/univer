@@ -36,6 +36,8 @@ export interface ICanvasPopup {
     direction?: 'vertical' | 'horizontal';
     offset?: [number, number];
     excludeOutside?: HTMLElement[];
+    /** Close the popup even if the outside element clicked is its target. */
+    closeOnSelfTarget?: boolean;
     extraProps?: Record<string, any>;
 }
 
@@ -183,7 +185,7 @@ export class SheetCanvasPopManagerService extends Disposable {
      * @returns disposable
      */
     attachPopupToObject(targetObject: BaseObject, popup: ICanvasPopup): IDisposable {
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet();
         const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();
@@ -227,7 +229,7 @@ export class SheetCanvasPopManagerService extends Disposable {
      * @returns disposable
      */
     attachPopupToCell(row: number, col: number, popup: ICanvasPopup, viewport?: Viewport): Nullable<IDisposable> {
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet();
         const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();

@@ -59,5 +59,5 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
 }
 
 // 加载初始snapshot
-univer.createUnit(UniverInstanceType.SHEET, DEFAULT_WORKBOOK_DATA_DEMO);
+univer.createUnit(UniverInstanceType.UNIVER_SHEET, DEFAULT_WORKBOOK_DATA_DEMO);
 ```

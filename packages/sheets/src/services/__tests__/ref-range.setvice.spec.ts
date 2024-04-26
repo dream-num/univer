@@ -65,7 +65,7 @@ describe('Test ref-range.service', () => {
         );
 
         const univerInstanceService = get(IUniverInstanceService);
-        workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+        workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         worksheet = workbook.getActiveSheet();
     });
     afterEach(() => {

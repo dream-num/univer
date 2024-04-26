@@ -114,28 +114,16 @@ describe('Test commands used for change selections', () => {
 
     function getRowCount(): number {
         const currentService = get(IUniverInstanceService);
-        const workbook = currentService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+        const workbook = currentService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet();
         return worksheet.getRowCount();
     }
 
     function getColCount(): number {
         const currentService = get(IUniverInstanceService);
-        const workbook = currentService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+        const workbook = currentService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet();
         return worksheet.getColumnCount();
-    }
-
-    function getRowVisible(row: number): boolean {
-        const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
-        const worksheet = workbook.getActiveSheet();
-        return worksheet.getRowVisible(row);
-    }
-
-    function getColVisible(col: number): boolean {
-        const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
-        const worksheet = workbook.getActiveSheet();
-        return worksheet.getColVisible(col);
     }
 
     function selectRow(rowStart: number, rowEnd: number): void {

@@ -28,7 +28,7 @@ const PLUGIN_NAME = 'data-validation';
 
 export class UniverDataValidationPlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;
-    static override type = UniverInstanceType.UNIVER;
+    static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(
         _config: unknown,

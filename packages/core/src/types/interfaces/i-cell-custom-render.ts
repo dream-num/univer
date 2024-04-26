@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+/* eslint-disable ts/no-explicit-any */
+
 import type { Nullable } from '../../shared';
 import type { ISelectionCellWithCoord } from './i-selection-data';
 import type { IStyleData } from './i-style-data';
@@ -31,6 +33,8 @@ export interface ICellRenderContext {
 
 /**
  * @debt This shouldn't exist in core package.
+ *
+ * @deprecated This interface is subject to change in the future.
  */
 export interface ICellCustomRender {
     drawWith(ctx: CanvasRenderingContext2D, info: ICellRenderContext, skeleton: any, spreadsheets: any): void;

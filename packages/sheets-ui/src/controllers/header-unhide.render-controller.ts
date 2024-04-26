@@ -160,9 +160,8 @@ export class HeaderUnhideRenderController extends RxDisposable {
                     hovered: false,
                     hasPrevious,
                     hasNext,
-                    left: position.startX - (hasPrevious ? UNHIDE_ICON_SIZE : 0),
-
                     top: 20 - UNHIDE_ICON_SIZE,
+                    left: position.startX - (hasPrevious ? UNHIDE_ICON_SIZE : 0),
                 },
                 () => this._commandService.executeCommand<ISetSpecificColsVisibleCommandParams>(
                     SetSpecificColsVisibleCommand.id,
@@ -177,6 +176,8 @@ export class HeaderUnhideRenderController extends RxDisposable {
 
         scene.addObjects(colShapes, SHEET_COMPONENT_UNHIDE_LAYER_INDEX);
         scene.addObjects(rowShapes, SHEET_COMPONENT_UNHIDE_LAYER_INDEX);
+        // 3. clear the previous shapes and update the shapes
+        this._clearShapes();
         this._shapes = { cols: colShapes, rows: rowShapes };
     }
 

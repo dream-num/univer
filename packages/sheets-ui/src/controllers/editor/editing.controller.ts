@@ -52,7 +52,7 @@ export class EditingController extends RxDisposable {
     }
 
     private _listenEditorBlur() {
-        this._univerInstanceService.getCurrentTypeOfUnit$(UniverInstanceType.DOC)
+        this._univerInstanceService.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_DOC)
             .pipe(takeUntil(this.dispose$))
             .subscribe((docDataModel) => {
                 if (docDataModel == null) {
@@ -84,7 +84,7 @@ export class EditingController extends RxDisposable {
          */
         const sheetData: ISheetData = {};
         this._univerInstanceService
-            .getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!
+            .getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!
             .getSheets()
             .forEach((sheet) => {
                 const sheetConfig = sheet.getConfig();

@@ -58,7 +58,7 @@ export class ConditionalFormattingIcon extends SheetExtension {
         Range.foreach(spreadsheetSkeleton.rowColumnSegment, (row, col) => {
             const cellData = worksheet.getCell(row, col) as IIconSetCellData;
             if (cellData?.iconSet) {
-                if (!worksheet.getColVisible(col) || !worksheet.getRowVisible(row)) {
+                if (!worksheet.getColVisible(col) || !worksheet.getRowRawVisible(row)) {
                     return;
                 }
 

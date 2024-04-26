@@ -46,8 +46,8 @@ interface IDrawingUpdateConfig {
     width: number;
 }
 
-class DocumentDataModelSimple extends UnitModel<IDocumentData, UniverInstanceType.DOC> {
-    override type: UniverInstanceType.DOC = UniverInstanceType.DOC;
+class DocumentDataModelSimple extends UnitModel<IDocumentData, UniverInstanceType.UNIVER_DOC> {
+    override type: UniverInstanceType.UNIVER_DOC = UniverInstanceType.UNIVER_DOC;
 
     override getUnitId(): string {
         throw new Error('Method not implemented.');

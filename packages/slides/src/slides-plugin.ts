@@ -31,7 +31,7 @@ const PLUGIN_NAME = 'slides';
 
 export class UniverSlidesPlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;
-    static override type = UniverInstanceType.SLIDE;
+    static override type = UniverInstanceType.UNIVER_SLIDE;
 
     private _config: IUniverSlidesConfig;
 

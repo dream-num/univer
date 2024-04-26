@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DEFAULT_DOCUMENT_SUB_COMPONENT_ID, Plugin, UniverInstanceType } from '@univerjs/core';
+import { DEFAULT_DOCUMENT_SUB_COMPONENT_ID, Plugin } from '@univerjs/core';
 import type { Dependency, Injector } from '@wendellhu/redi';
 
 import { ImageLoadController } from './controllers/image.load.controller';
@@ -26,8 +26,6 @@ const PLUGIN_NAME = 'IMAGE_PLUGIN';
 
 export class UniverImagePlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;
-
-    static override type = UniverInstanceType.UNIVER;
 
     constructor(
         _config: undefined,

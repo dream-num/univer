@@ -19,6 +19,7 @@ import type { CommandListener, DocumentDataModel, IDocumentData, IExecutionOptio
     Workbook } from '@univerjs/core';
 import {
     BorderStyleTypes,
+    debounce,
     ICommandService,
     IUniverInstanceService,
     toDisposable,
@@ -36,6 +37,7 @@ import { Inject, Injector, Quantity } from '@wendellhu/redi';
 import type { RenderComponentType, SheetComponent, SheetExtension } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SHEET_VIEW_KEY } from '@univerjs/sheets-ui';
+import { SetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
 import { FDocument } from './docs/f-document';
 import { FWorkbook } from './sheets/f-workbook';
 
@@ -57,13 +59,20 @@ export class FUniver {
     static BorderStyle = BorderStyleTypes;
     static WrapStrategy = WrapStrategy;
 
+    /**
+     * registerFunction may be executed multiple times, triggering multiple formula forced refreshes
+     */
+    private _debouncedFormulaCalculation: () => void;
+
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
         @ISocketService private readonly _ws: ISocketService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService
-    ) {}
+    ) {
+        this._initialize();
+    }
 
     /**
      * Create a new spreadsheet and get the API handler of that spreadsheet.
@@ -152,6 +161,9 @@ export class FUniver {
         }
 
         const functionsDisposable = registerFunctionService.registerFunctions(config);
+
+        // When the initialization workbook data already contains custom formulas, and then register the formula, you need to trigger a forced calculation to refresh the calculation results
+        this._debouncedFormulaCalculation();
 
         return toDisposable(() => {
             functionsDisposable.dispose();
@@ -303,6 +315,21 @@ export class FUniver {
         }
 
         return renderComponent;
+    }
+
+    private _initialize(): void {
+        this._debouncedFormulaCalculation = debounce(() => {
+            this._commandService.executeCommand(
+                SetFormulaCalculationStartMutation.id,
+                {
+                    commands: [],
+                    forceCalculation: true,
+                },
+                {
+                    onlyLocal: true,
+                }
+            );
+        }, 10);
     }
 
     // @endregion

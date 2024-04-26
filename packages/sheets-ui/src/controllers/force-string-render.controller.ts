@@ -15,7 +15,7 @@
  */
 
 
-import { CellValueType, isRealNum, LifecycleStages, OnLifecycle, RxDisposable, ThemeService } from '@univerjs/core';
+import { CellValueType, isRealNum, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
@@ -27,9 +27,7 @@ import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.
 export class ForceStringRenderController extends RxDisposable {
     constructor(
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
-        @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
-        @Inject(ThemeService) private readonly _themeService: ThemeService
-    ) {
+        @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService) {
         super();
         this._init();
     }
@@ -40,11 +38,10 @@ export class ForceStringRenderController extends RxDisposable {
 
 
     private _initViewModelIntercept() {
-        const color = this._themeService.getCurrentTheme().errorColor;
         const FORCE_STRING_MARK = {
-            tr: {
+            tl: {
                 size: 6,
-                color,
+                color: '#409f11',
             },
         };
 

@@ -226,7 +226,8 @@ export class TriggerCalculationController extends Disposable {
          * Assignment operation after formula calculation.
          */
         const debouncedPushTask = throttle(this._pushTask.bind(this), 300);
-        let startDependencyTimer: NodeJS.Timeout | null;
+        let startDependencyTimer: NodeJS.Timeout | null = null;
+        let needStartProgress = false;
         let formulaInsertTaskCount = false;
         let arrayFormulaInsertTaskCount = false;
 
@@ -248,22 +249,29 @@ export class TriggerCalculationController extends Disposable {
                     } = params.stageInfo;
 
                     if (stage === FormulaExecuteStageType.START_DEPENDENCY) {
+                        // Clear any existing timer to prevent duplicate executions
+                        if (startDependencyTimer !== null) {
+                            clearTimeout(startDependencyTimer);
+                            startDependencyTimer = null;
+                        }
+
                         // If the total calculation time exceeds 1s, a progress bar is displayed. The first progress shows 5%
                         startDependencyTimer = setTimeout(() => {
                             // Ignore progress deviations, and finally the complete method ensures the correct completion of the progress
                             this._progressService.insertTaskCount(100);
                             this._progressService.pushTask({ count: 5 });
+                            needStartProgress = true;
 
                             startDependencyTimer = null;
                         }, 1000);
                     } else if (stage === FormulaExecuteStageType.CURRENTLY_CALCULATING) {
-                        if (!formulaInsertTaskCount && !startDependencyTimer) {
+                        if (!formulaInsertTaskCount && needStartProgress) {
                             formulaInsertTaskCount = true;
                             this._progressService.insertTaskCount(totalFormulasToCalculate);
                         }
                         debouncedPushTask(completedFormulasCount);
                     } else if (stage === FormulaExecuteStageType.CURRENTLY_CALCULATING_ARRAY_FORMULA) {
-                        if (!arrayFormulaInsertTaskCount && !startDependencyTimer) {
+                        if (!arrayFormulaInsertTaskCount && needStartProgress) {
                             arrayFormulaInsertTaskCount = true;
                             this._progressService.insertTaskCount(totalArrayFormulasToCalculate);
                         }
@@ -319,6 +327,7 @@ export class TriggerCalculationController extends Disposable {
 
                         formulaInsertTaskCount = false;
                         arrayFormulaInsertTaskCount = false;
+                        needStartProgress = false;
                         this._formulaCalculationDoneCount = 0;
                     }
 

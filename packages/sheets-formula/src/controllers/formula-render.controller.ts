@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { LifecycleStages, OnLifecycle, RxDisposable, ThemeService } from '@univerjs/core';
+import { LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
@@ -24,9 +24,7 @@ import { extractFormulaError } from './utils/utils';
 export class FormulaRenderController extends RxDisposable {
     constructor(
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
-        @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService,
-        @Inject(ThemeService) private readonly _themeService: ThemeService
-    ) {
+        @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService) {
         super();
         this._init();
     }
@@ -36,11 +34,10 @@ export class FormulaRenderController extends RxDisposable {
     }
 
     private _initViewModelIntercept() {
-        const color = this._themeService.getCurrentTheme().errorColor;
         const FORMULA_ERROR_MARK = {
-            tr: {
+            tl: {
                 size: 6,
-                color,
+                color: '#409f11',
             },
         };
 

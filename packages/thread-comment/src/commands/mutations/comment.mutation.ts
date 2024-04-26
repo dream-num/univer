@@ -41,7 +41,7 @@ export const AddCommentMutation: ICommand<IAddCommentMutationParams> = {
 export interface IUpdateCommentPayload {
     commentId: string;
     text: string;
-    attachment?: string[];
+    attachments?: string[];
 }
 
 export interface IUpdateCommentMutationParams {

@@ -16,21 +16,29 @@
 
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
-import { Plugin } from '@univerjs/core';
+import { ICommandService, Plugin, UniverInstanceType } from '@univerjs/core';
+import { ThreadCommentUIPlugin } from '@univerjs/thread-comment-ui';
 import { SheetsThreadCommentController } from './controllers/sheets-thread-comment.controller';
 import { SheetsThreadCommentRefRangeController } from './controllers/sheets-thread-comment-ref-range.controller';
 import { SheetsThreadCommentModel } from './models/sheets-thread-comment.model';
 import { SheetsThreadCommentPopupService } from './services/sheets-thread-comment-popup.service';
 
-export class SheetsThreadPlugin extends Plugin {
+export const SHEETS_THREAD_COMMENT = 'SHEETS_THREAD_COMMENT';
+
+export class SheetsThreadPlugin extends ThreadCommentUIPlugin {
+    static override pluginName = SHEETS_THREAD_COMMENT;
+    static override type = UniverInstanceType.UNIVER_SHEET;
+
     constructor(
         _config: unknown,
-        @Inject(Injector) readonly _injector: Injector
+        @Inject(Injector) protected override _injector: Injector,
+        @Inject(ICommandService) protected override _commandService: ICommandService
     ) {
-        super();
+        super(_config, _injector, _commandService);
     }
 
-    override onStarting(): void {
+    override onStarting(injector: Injector): void {
+        super.onStarting(injector);
         ([
             [SheetsThreadCommentModel],
             [SheetsThreadCommentController],

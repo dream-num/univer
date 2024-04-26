@@ -24,7 +24,7 @@ import { AddCommentCommand, DeleteCommentCommand, ResolveCommentCommand, UpdateC
 
 export class ThreadCommentPlugin extends Plugin {
     static override pluginName = TC_PLUGIN_NAME;
-    static override type = UniverInstanceType.UNIVER;
+    static override type = UniverInstanceType.UNIVER_UNKNOWN;
 
     constructor(
         _config: unknown,

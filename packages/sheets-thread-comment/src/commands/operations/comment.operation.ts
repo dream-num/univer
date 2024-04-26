@@ -18,7 +18,9 @@ import type { ICommand, Workbook } from '@univerjs/core';
 import { CommandType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import type { ISheetLocation } from '@univerjs/sheets';
 import { SelectionManagerService } from '@univerjs/sheets';
+import { ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
 import { SheetsThreadCommentPopupService } from '../../services/sheets-thread-comment-popup.service';
+import { SheetsThreadCommentModel } from '../../models/sheets-thread-comment.model';
 
 export const ShowAddSheetCommentModalOperation: ICommand = {
     type: CommandType.OPERATION,
@@ -27,15 +29,17 @@ export const ShowAddSheetCommentModalOperation: ICommand = {
         const selectionManagerService = accessor.get(SelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const sheetsThreadCommentPopupService = accessor.get(SheetsThreadCommentPopupService);
+        const threadCommentPanelService = accessor.get(ThreadCommentPanelService);
         const activeCell = selectionManagerService.getFirst()?.primary;
         const current = selectionManagerService.getCurrent();
+        const model = accessor.get(SheetsThreadCommentModel);
 
         if (!current || !activeCell) {
             return false;
         }
 
         const { unitId, sheetId } = current;
-        const workbook = univerInstanceService.getUnit<Workbook>(current.unitId, UniverInstanceType.SHEET);
+        const workbook = univerInstanceService.getUnit<Workbook>(current.unitId, UniverInstanceType.UNIVER_SHEET);
         if (!workbook) {
             return false;
         }
@@ -54,6 +58,8 @@ export const ShowAddSheetCommentModalOperation: ICommand = {
         };
 
         sheetsThreadCommentPopupService.showPopup(location);
+        const rootId = model.getByLocation(unitId, sheetId, activeCell.actualRow, activeCell.startColumn);
+        threadCommentPanelService.setActiveComment(rootId);
         return true;
     },
 };

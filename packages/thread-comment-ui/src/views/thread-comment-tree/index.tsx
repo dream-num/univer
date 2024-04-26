@@ -15,57 +15,156 @@
  */
 
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import { ThreadCommentModel } from '@univerjs/thread-comment';
-import React from 'react';
+import type { IAddCommentCommandParams, IThreadComment, IUpdateCommentCommandParams } from '@univerjs/thread-comment';
+import { AddCommentCommand, ThreadCommentModel, UpdateCommentCommand } from '@univerjs/thread-comment';
+import React, { useState } from 'react';
 import { DeleteSingle, MoreSingle } from '@univerjs/icons';
-import type { UniverInstanceType } from '@univerjs/core';
+import { ICommandService, Tools, type UniverInstanceType } from '@univerjs/core';
+import { ThreadCommentEditor } from '../thread-comment-editor';
 import styles from './index.module.less';
 
-export interface IThreadCommentThreeProps {
-    id: string;
+export interface IThreadCommentTreeProps {
+    id?: string;
     unitId: string;
     subUnitId: string;
     type: UniverInstanceType;
+    ref: string;
+    personId: string;
 }
 
-export const ThreadCommentThree = (props: IThreadCommentThreeProps) => {
-    const { id, unitId, subUnitId } = props;
-    const threadCommentModel = useDependency(ThreadCommentModel);
-    const comments = threadCommentModel.getCommentWithChildren(unitId, subUnitId, id);
+export interface IThreadCommentItemProps {
+    item: IThreadComment;
+    unitId: string;
+    subUnitId: string;
+}
 
-    if (!comments) {
-        return null;
-    }
-    const renderComments = [comments.root, ...comments.children ?? []];
+const ThreadCommentItem = (props: IThreadCommentItemProps) => {
+    const { item, unitId, subUnitId } = props;
+    const [editing, setEditing] = useState(false);
+    const commandService = useDependency(ICommandService);
+
+    return (
+        <div className={styles.threadCommentItem}>
+            <img className={styles.threadCommentItemHead} />
+            <div className={styles.threadCommentItemTitle}>
+                {item.personId}
+                <div className={styles.threadCommentIcon}>
+                    <MoreSingle />
+                </div>
+            </div>
+            <div className={styles.threadCommentItemTime}>{item.dT}</div>
+            {editing
+                ? (
+                    <ThreadCommentEditor
+                        id={item.id}
+                        comment={item}
+                        onCancel={() => setEditing(false)}
+                        autoFocus={Boolean(item.id)}
+                        onSave={({ text, attachments }) => {
+                            setEditing(false);
+                            if (item.id) {
+                                commandService.executeCommand(
+                                    UpdateCommentCommand.id,
+                                    {
+                                        unitId,
+                                        subUnitId,
+                                        payload: {
+                                            commentId: item.id,
+                                            text,
+                                            attachments,
+                                        },
+                                    } as IUpdateCommentCommandParams
+                                );
+                            } else {
+                                commandService.executeCommand(
+                                    AddCommentCommand.id,
+                                    {
+                                        unitId,
+                                        subUnitId,
+                                        comment: {
+                                            ...item,
+                                            text,
+                                            attachments,
+                                            dT: new Date().toLocaleDateString(),
+                                            id: Tools.generateRandomId(),
+                                        },
+                                    } as IAddCommentCommandParams
+                                );
+                            }
+                        }}
+                    />
+                )
+                : <div className={styles.threadCommentItemContent}>{item.text}</div>}
+        </div>
+    );
+};
+
+export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
+    const { id, unitId, subUnitId, ref, personId } = props;
+    const threadCommentModel = useDependency(ThreadCommentModel);
+    const comments = id ? threadCommentModel.getCommentWithChildren(unitId, subUnitId, id) : null;
+    const commandService = useDependency(ICommandService);
+    const renderComments = [
+        ...comments ?
+            [comments.root] :
+            // mock empty comment
+            [{ id: '', text: '', personId, ref, dT: '' }],
+        ...comments?.children ?? [],
+    ];
+
 
     return (
         <div className={styles.threadComment}>
             <div className={styles.threadCommentTitle}>
                 <div className={styles.threadCommentTitlePosition}>
                     <div className={styles.threadCommentTitleHighlight} />
-                    {comments.root.ref}
+                    {ref}
                 </div>
-                <div>
-                    <div className={styles.threadCommentIcon}>
-                        <DeleteSingle />
-                    </div>
-                </div>
+                {comments
+                    ? (
+                        <div>
+                            <div className={styles.threadCommentIcon}>
+                                <DeleteSingle />
+                            </div>
+                        </div>
+                    )
+                    : null}
             </div>
             {renderComments.map(
                 (item) => (
-                    <div className={styles.threadCommentItem} key={item.id}>
-                        <img className={styles.threadCommentItemHead} />
-                        <div className={styles.threadCommentItemTitle}>
-                            {item.personId}
-                            <div className={styles.threadCommentIcon}>
-                                <MoreSingle />
-                            </div>
-                        </div>
-                        <div className={styles.threadCommentItemTime}>{item.dT}</div>
-                        <div className={styles.threadCommentItemContent}>{item.text}</div>
-                    </div>
+                    <ThreadCommentItem
+                        unitId={unitId}
+                        subUnitId={subUnitId}
+                        item={item}
+                        key={item.id}
+                    />
                 )
             )}
+            {comments
+                ? (
+                    <div>
+                        <ThreadCommentEditor
+                            onSave={({ text, attachments }) => {
+                                commandService.executeCommand(
+                                    AddCommentCommand.id,
+                                    {
+                                        unitId,
+                                        subUnitId,
+                                        comment: {
+                                            text,
+                                            attachments,
+                                            dT: new Date().toLocaleDateString(),
+                                            id: Tools.generateRandomId(),
+                                            ref,
+                                            personId,
+                                        },
+                                    } as IAddCommentCommandParams
+                                );
+                            }}
+                        />
+                    </div>
+                )
+                : null}
         </div>
     );
 };

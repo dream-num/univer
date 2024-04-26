@@ -14,4 +14,11 @@
  * limitations under the License.
  */
 
-export default {};
+export default {
+    sheetThreadComment: {
+        menu: {
+            addComment: '添加评论',
+            commentManagement: '评论管理',
+        },
+    },
+};

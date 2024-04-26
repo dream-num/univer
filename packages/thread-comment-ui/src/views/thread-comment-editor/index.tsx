@@ -16,7 +16,7 @@
 
 import type { IThreadComment } from '@univerjs/thread-comment';
 import { Button, Textarea } from '@univerjs/design';
-import React from 'react';
+import React, { useState } from 'react';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { LocaleService } from '@univerjs/core';
 import styles from './index.module.less';
@@ -25,34 +25,60 @@ import styles from './index.module.less';
 export interface IThreadCommentEditorProps {
     id?: string;
     comment?: Pick<IThreadComment, 'attachments' | 'text'>;
-    onChange?: (comment: Pick<IThreadComment, 'attachments' | 'text'>) => void;
+    onSave?: (comment: Pick<IThreadComment, 'attachments' | 'text'>) => void;
+    onCancel?: () => void;
+    autoFocus?: boolean;
 }
 
 export const ThreadCommentEditor = (props: IThreadCommentEditorProps) => {
-    const { comment, onChange, id } = props;
+    const { comment, onSave, id, onCancel } = props;
     const localeService = useDependency(LocaleService);
+    const [localComment, setLocalComment] = useState({ text: '', ...comment });
+    const [editing, setEditing] = useState(false);
 
     return (
         <div className={styles.threadCommentEditor}>
             <Textarea
+                className={styles.threadCommentEditorText}
                 placeholder={localeService.t('threadCommentUI.editor.placeholder')}
-                value={comment?.text}
+                value={localComment?.text}
                 onChange={(text) => {
-                    onChange?.({ ...comment, text });
+                    setLocalComment?.({ ...comment, text });
                 }}
                 autoSize={{
                     minRows: 1,
                     maxRows: 3,
                 }}
+                onFocus={() => {
+                    setEditing(true);
+                }}
             />
-            <div>
-                <Button>
-                    {localeService.t('threadCommentUI.editor.cancel')}
-                </Button>
-                <Button>
-                    {localeService.t(id ? 'threadCommentUI.editor.save' : 'threadCommentUI.editor.reply')}
-                </Button>
-            </div>
+            {editing
+                ? (
+                    <div className={styles.threadCommentEditorButtons}>
+                        <Button
+                            style={{ marginRight: 12 }}
+                            onClick={() => {
+                                onCancel?.();
+                                setEditing(false);
+                                setLocalComment({ text: '' });
+                            }}
+                        >
+                            {localeService.t('threadCommentUI.editor.cancel')}
+                        </Button>
+                        <Button
+                            disabled={!localComment.text}
+                            onClick={() => {
+                                onSave?.(localComment);
+                                setEditing(false);
+                                setLocalComment({ text: '' });
+                            }}
+                        >
+                            {localeService.t(id ? 'threadCommentUI.editor.save' : 'threadCommentUI.editor.reply')}
+                        </Button>
+                    </div>
+                )
+                : null}
         </div>
     );
 };

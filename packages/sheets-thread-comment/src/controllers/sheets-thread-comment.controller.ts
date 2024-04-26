@@ -14,23 +14,41 @@
  * limitations under the License.
  */
 
-import { Disposable } from '@univerjs/core';
-import { IMenuService } from '@univerjs/ui';
+import { Disposable, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { ComponentManager, IMenuService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
-import { threadCommentMenu } from './menu';
+import { SheetsThreadCommentCell } from '../views/sheets-thread-comment-cell';
+import { SHEETS_THREAD_COMMENT_MODAL, SHEETS_THREAD_COMMENT_PANEL } from '../types/const';
+import { SheetsThreadCommentPanel } from '../views/sheets-thread-comment-panel';
+import { threadCommentMenu, threadPanelMenu } from './menu';
 
+@OnLifecycle(LifecycleStages.Starting, SheetsThreadCommentController)
 export class SheetsThreadCommentController extends Disposable {
     constructor(
         @IMenuService private readonly _menuService: IMenuService,
-        @Inject(Injector) private readonly _injector: Injector
+        @Inject(Injector) private readonly _injector: Injector,
+        @Inject(ComponentManager) private readonly _componentManager: ComponentManager
     ) {
         super();
         this._initMenu();
+        this._initComponent();
     }
 
     private _initMenu() {
-        [threadCommentMenu].forEach((menu) => {
+        [
+            threadCommentMenu,
+            threadPanelMenu,
+        ].forEach((menu) => {
             this._menuService.addMenuItem(menu(this._injector));
+        });
+    }
+
+    private _initComponent() {
+        ([
+            [SHEETS_THREAD_COMMENT_MODAL, SheetsThreadCommentCell],
+            [SHEETS_THREAD_COMMENT_PANEL, SheetsThreadCommentPanel],
+        ] as const).forEach(([key, comp]) => {
+            this._componentManager.register(key, comp);
         });
     }
 }

@@ -87,7 +87,7 @@ export class SheetsThreadCommentModel extends Disposable {
         this.disposeWithMe(this._threadCommentModel.commentUpdate$.subscribe((update) => {
             const { unitId, subUnitId } = update;
             const type = this._univerInstanceService.getUnitType(unitId);
-            if (type !== UniverInstanceType.SHEET) {
+            if (type !== UniverInstanceType.UNIVER_SHEET) {
                 return;
             }
             switch (update.type) {
@@ -145,7 +145,7 @@ export class SheetsThreadCommentModel extends Disposable {
             this.commentUpdate$.subscribe((update) => {
                 const { unitId, subUnitId } = update;
                 const type = this._univerInstanceService.getUnitType(unitId);
-                if (type !== UniverInstanceType.SHEET) {
+                if (type !== UniverInstanceType.UNIVER_SHEET) {
                     return;
                 }
                 const { matrix, locationMap } = this._ensure(unitId, subUnitId);

@@ -130,7 +130,7 @@ export class ThreadCommentModel {
         }
         oldComment.updated = true;
         oldComment.text = payload.text;
-        oldComment.attachments = payload.attachment;
+        oldComment.attachments = payload.attachments;
 
         this._commentUpdate$.next({
             unitId,

@@ -24,7 +24,7 @@ import { ToggleSheetCommentPanelOperation } from './commands/operations/comment.
 
 export class ThreadCommentUIPlugin extends ThreadCommentPlugin {
     static override pluginName = PLUGIN_NAME;
-    static override type = UniverInstanceType.UNIVER;
+    static override type = UniverInstanceType.UNIVER_UNKNOWN;
 
     constructor(
         _config: unknown,

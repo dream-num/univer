@@ -14,11 +14,5 @@
  * limitations under the License.
  */
 
-export default {
-    sheetThreadComment: {
-        menu: {
-            addComment: 'Add Comment',
-            commentManagement: 'Comment Management',
-        },
-    },
-};
+export const SHEETS_THREAD_COMMENT_MODAL = 'SHEETS_THREAD_COMMENT_MODAL';
+export const SHEETS_THREAD_COMMENT_PANEL = 'SHEETS_THREAD_COMMENT_PANEL';

@@ -16,7 +16,7 @@
 
 import type { Nullable, UnitModel, UnitType } from '@univerjs/core';
 import { Disposable } from '@univerjs/core';
-import type { IDisposable, Injector } from '@wendellhu/redi';
+import type { DependencyIdentifier, IDisposable, Injector } from '@wendellhu/redi';
 import type { Engine } from '../engine';
 import type { Scene } from '../scene';
 import type { RenderComponentType } from './render-manager.service';
@@ -88,6 +88,13 @@ export class RenderUnit extends Disposable implements IRender {
     override dispose() {
         this._renderControllers.forEach((controller) => controller.dispose());
         this._renderControllers.length = 0;
+    }
+
+    /**
+     * Get render controller hold by this render unit.
+     */
+    with<T>(dependency: DependencyIdentifier<T>): T {
+        return this._injector.get(dependency);
     }
 
     addRenderControllers(ctors: IRenderControllerCtor[]) {

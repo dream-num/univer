@@ -52,6 +52,9 @@ import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.
 import type { ISheetObjectParam } from './utils/component-tools';
 import { getSheetObject } from './utils/component-tools';
 
+/**
+ * @deprecated refactor it to an `RenderController`.
+ */
 @OnLifecycle(LifecycleStages.Rendered, SelectionController)
 export class SelectionController extends Disposable {
     constructor(
@@ -453,10 +456,10 @@ export class SelectionController extends Disposable {
             if (param == null) {
                 return;
             }
+
             const { unitId, sheetId, skeleton } = param;
 
             const currentRender = this._renderManagerService.getRenderById(unitId);
-
             if (currentRender == null) {
                 return;
             }

@@ -105,6 +105,7 @@ export class UniverSheetsUIPlugin extends Plugin {
                 [ICellEditorManagerService, { useClass: CellEditorManagerService }],
                 [IFormulaEditorManagerService, { useClass: FormulaEditorManagerService }],
                 [IAutoFillService, { useClass: AutoFillService }],
+
                 [ScrollManagerService],
                 [SheetSkeletonManagerService],
                 [
@@ -120,6 +121,7 @@ export class UniverSheetsUIPlugin extends Plugin {
                 [CellAlertManagerService],
 
                 // controllers
+                // TODO@wzhudev: lots of controllers here should be refactored to RenderController
                 [ActiveWorksheetController],
                 [AutoHeightController],
                 [EditorBridgeController],
@@ -158,15 +160,21 @@ export class UniverSheetsUIPlugin extends Plugin {
     }
 
     private _registerRenderControllers(): void {
-        ([HeaderFreezeRenderController, HeaderUnhideRenderController, HeaderResizeController]).forEach((controller) => {
-            this.disposeWithMe(this._renderManagerService.registerRenderControllers(UniverInstanceType.UNIVER_SHEET, controller));
+        ([
+            HeaderFreezeRenderController,
+            HeaderUnhideRenderController,
+            HeaderResizeController,
+        ]).forEach((controller) => {
+            this.disposeWithMe(this._renderManagerService.registerRenderController(UniverInstanceType.UNIVER_SHEET, controller));
         });
     }
 
     private _markSheetAsFocused() {
         const univerInstanceService = this._univerInstanceService;
-        univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET).pipe(filter((v) => !!v)).subscribe((workbook) => {
-            univerInstanceService.focusUnit(workbook!.getUnitId());
-        });
+        univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET)
+            .pipe(filter((v) => !!v))
+            .subscribe((workbook) => {
+                univerInstanceService.focusUnit(workbook!.getUnitId());
+            });
     }
 }

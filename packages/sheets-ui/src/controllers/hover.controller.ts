@@ -32,10 +32,6 @@ export class HoverController extends Disposable {
         this._initPointerEvent();
     }
 
-    private _initScrollEvent() {
-        // this.
-    }
-
     private _initPointerEvent() {
         const currentRender = this._renderManagerService.getRenderById(
             this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId()

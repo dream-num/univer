@@ -36,7 +36,6 @@ export class SheetsThreadPlugin extends Plugin {
             [SheetsThreadCommentController],
             [SheetsThreadCommentRefRangeController],
 
-            [SheetsThreadCommentPanelService],
             [SheetsThreadCommentPopupService],
         ] as Dependency[]).forEach((dep) => {
             this._injector.add(dep);

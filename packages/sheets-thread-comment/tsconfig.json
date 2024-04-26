@@ -5,5 +5,5 @@
         "outDir": "lib/types"
     },
     "references": [{ "path": "./tsconfig.node.json" }],
-    "include": ["src", "src/plugin.ts", "../thread-comment-ui/src/services/thread-comment-panel.service.ts", "../thread-comment-ui/src/views", "../thread-comment-ui/src/types/const.ts"]
+    "include": ["src"]
 }

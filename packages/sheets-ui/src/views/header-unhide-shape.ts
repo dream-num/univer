@@ -29,8 +29,6 @@ export interface IHeaderUnhideShapeProps extends IShapeProps {
     type: HeaderUnhideShapeType;
     /** If the shape is hovered. If it's hovered it should have a border. */
     hovered: boolean;
-    /** If the shape is clicked, need to remove the icon */
-    clicked: boolean;
     /** This hidden position has previous rows/cols. */
     hasPrevious: boolean;
     /** This hidden position has succeeding rows/cols. */
@@ -44,7 +42,6 @@ export class HeaderUnhideShape<T extends IHeaderUnhideShapeProps = IHeaderUnhide
     private _size = UNHIDE_ICON_SIZE;
     private _iconRatio = UNHIDE_ARROW_RATIO;
     private _hovered = true;
-    private _clicked = false;
     private _hasPrevious = true;
     private _hasNext = true;
     private _unhideType!: HeaderUnhideShapeType;
@@ -57,10 +54,7 @@ export class HeaderUnhideShape<T extends IHeaderUnhideShapeProps = IHeaderUnhide
 
         this.onPointerEnterObserver.add(() => this.setShapeProps({ hovered: true }));
         this.onPointerLeaveObserver.add(() => this.setShapeProps({ hovered: false }));
-        this.onPointerDownObserver.add(() => {
-            onClick?.();
-            this._clicked = true;
-        });
+        this.onPointerDownObserver.add(() => onClick?.());
     }
 
     setShapeProps(props: Partial<IHeaderUnhideShapeProps>): void {
@@ -69,9 +63,6 @@ export class HeaderUnhideShape<T extends IHeaderUnhideShapeProps = IHeaderUnhide
         }
         if (props.hovered !== undefined) {
             this._hovered = props.hovered;
-        }
-        if (props.clicked !== undefined) {
-            this._clicked = props.clicked;
         }
         if (props.hasPrevious !== undefined) {
             this._hasPrevious = props.hasPrevious;
@@ -95,8 +86,6 @@ export class HeaderUnhideShape<T extends IHeaderUnhideShapeProps = IHeaderUnhide
     }
 
     private _drawOnRow(ctx: UniverRenderingContext): void {
-        if (this._clicked) return;
-
         if (this._hovered) {
             if (!this._hasNext || !this._hasPrevious) {
                 Rect.drawWith(ctx, {
@@ -153,8 +142,6 @@ export class HeaderUnhideShape<T extends IHeaderUnhideShapeProps = IHeaderUnhide
      * @param ctx
      */
     private _drawOnCol(ctx: UniverRenderingContext): void {
-        if (this._clicked) return;
-
         if (this._hovered) {
             if (!this._hasNext || !this._hasPrevious) {
                 Rect.drawWith(ctx, {

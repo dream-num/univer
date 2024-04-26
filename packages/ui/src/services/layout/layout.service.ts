@@ -23,7 +23,14 @@ import { IEditorService } from '../editor/editor.service';
 type FocusHandlerFn = (unitId: string) => void;
 
 export const FOCUSING_UNIVER = 'FOCUSING_UNIVER';
-const collectionOfCnForFocusableEle = ['univer-app-layout', 'univer-toolbar-btn', 'univer-menu-item', 'univer-button', 'univer-sheet-bar-btn'];
+const givingBackFocusElements = [
+    'univer-app-layout',
+    'univer-toolbar-btn',
+    'univer-menu-item',
+    'univer-button',
+    'univer-sheet-bar-btn',
+    'univer-render-canvas',
+];
 
 export interface ILayoutService {
     readonly isFocused: boolean;
@@ -148,8 +155,8 @@ export class DesktopLayoutService extends Disposable implements ILayoutService {
         this.disposeWithMe(
             fromEvent(window, 'focusin').subscribe((event) => {
                 const target = event.target as HTMLElement;
-                if (collectionOfCnForFocusableEle.some((item) => target.classList.contains(item))) {
-                    this._editorBlurListener();
+                if (givingBackFocusElements.some((item) => target.classList.contains(item))) {
+                    this._blurEditor();
                     queueMicrotask(() => this.focus());
                     return;
                 }
@@ -173,9 +180,9 @@ export class DesktopLayoutService extends Disposable implements ILayoutService {
         );
     }
 
-    private _editorBlurListener() {
+    private _blurEditor() {
         const focusEditor = this._editorService.getFocusEditor();
-        if (focusEditor && focusEditor.isSheetEditor() !== true) {
+        if (focusEditor?.isSheetEditor() !== true) {
             this._editorService.blur();
         }
     }

@@ -72,7 +72,7 @@ export function getSheetObject(
         engine = renderManagerService.engine;
     }
 
-    if (!components) return null;
+    if (!components || !mainComponent) return null;
 
     const spreadsheet = mainComponent as Spreadsheet;
     const spreadsheetRowHeader = components.get(SHEET_VIEW_KEY.ROW) as SpreadsheetHeader;

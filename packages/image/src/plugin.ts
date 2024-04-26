@@ -21,6 +21,7 @@ import { Inject, Injector } from '@wendellhu/redi';
 import { ImageLoadController } from './controllers/image.load.controller';
 import { ImageModel } from './models/image-model';
 import { IImageManagerService, ImageManagerService } from './services/image-manager.service';
+import { ImageController } from './controllers/image.controller';
 
 const PLUGIN_NAME = 'IMAGE_PLUGIN';
 
@@ -124,8 +125,8 @@ export class UniverImagePlugin extends Plugin {
             // services
             [IImageManagerService, { useClass: ImageManagerService }],
             // controllers
+            [ImageController],
             [ImageLoadController],
-            // [SharedController],
             // [IUIController, { useClass: DesktopUIController }],
         ];
 

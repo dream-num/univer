@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IRange, ITransformState, Nullable, Workbook } from '@univerjs/core';
+import type { IAbsoluteTransform, ICommandInfo, IRange, Nullable, Workbook } from '@univerjs/core';
 import { Disposable, ICommandService, IImageRemoteService, ImageSourceType, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
-import { IImageManagerService, ImageModel, SourceType } from '@univerjs/image';
+import { getImageSize, IImageManagerService } from '@univerjs/image';
 import type { ISheetDrawingPosition } from '@univerjs/sheets';
-import { InsertDrawingCommand, ISheetDrawingService, SelectionManagerService } from '@univerjs/sheets';
+import { ISheetDrawingService, SelectionManagerService } from '@univerjs/sheets';
 import { ISelectionRenderService } from '@univerjs/sheets-ui';
 import type { IInsertImageOperationParams } from '../commands/operations/insert-image.operation';
 import { InsertCellImageOperation, InsertFloatImageOperation } from '../commands/operations/insert-image.operation';
+import { InsertSheetImageCommand } from '../commands/commands/insert-sheet-image.command';
+
 
 const SHEET_IMAGE_WIDTH_LIMIT = 1000;
 const SHEET_IMAGE_HEIGHT_LIMIT = 1000;
@@ -89,9 +91,15 @@ export class SheetImageUpdateController extends Disposable {
             zIndex = drawingIds.length;
         }
 
-        const { imageId, width, height, imageSourceType } = imageParam;
+        const { imageId, imageSourceType } = imageParam;
 
         let { source } = imageParam;
+
+        if (imageSourceType === ImageSourceType.UUID) {
+            source = await this._imageRemoteService.getImage(imageId);
+        }
+
+        const { width, height } = await getImageSize(source);
 
         let scale = 1;
         if (width > SHEET_IMAGE_WIDTH_LIMIT || height > SHEET_IMAGE_HEIGHT_LIMIT) {
@@ -101,34 +109,23 @@ export class SheetImageUpdateController extends Disposable {
         }
 
 
-        if (imageSourceType !== ImageSourceType.BASE64) {
-            source = await this._imageRemoteService.getImage(imageId);
-        }
-
-        const model = new ImageModel({
-            imageId,
-            sourceType: SourceType.BASE64,
-            source,
-        });
-
-
-        this._imageManagerService.add({
-            unitId,
-            subUnitId,
-            imageId,
-            imageModel: model,
-        });
-
-
         const position = this._getImagePosition(width, height, scale);
 
         if (position == null) {
             return;
         }
 
+        this._imageManagerService.add({
+            unitId,
+            subUnitId,
+            imageId,
+            imageSourceType,
+            source,
+            transform: this._transformImagePositionToTransform(position, width, height),
+        });
 
-        this._commandService.executeCommand(InsertDrawingCommand.id, {
-            sheetTransform: this._transformImagePositionToTransform(position, width, height),
+
+        this._commandService.executeCommand(InsertSheetImageCommand.id, {
             originSize: {
                 width,
                 height,
@@ -142,7 +139,7 @@ export class SheetImageUpdateController extends Disposable {
     }
 
     private _getUnitInfo() {
-        const universheet = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET);
+        const universheet = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (universheet == null) {
             return;
         }
@@ -161,7 +158,7 @@ export class SheetImageUpdateController extends Disposable {
         };
     }
 
-    private _transformImagePositionToTransform(position: ISheetDrawingPosition, imageWidth: number, imageHeight: number): Nullable<ITransformState> {
+    private _transformImagePositionToTransform(position: ISheetDrawingPosition, imageWidth: number, imageHeight: number): Nullable<IAbsoluteTransform> {
         const { from, to } = position;
         const { column: fromColumn, columnOffset: fromColumnOffset, row: fromRow, rowOffset: fromRowOffset } = from;
         const { column: toColumn, columnOffset: toColumnOffset, row: toRow, rowOffset: toRowOffset } = to;

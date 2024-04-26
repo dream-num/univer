@@ -131,7 +131,7 @@ export class SheetsFilterRenderController extends RxDisposable {
         }
 
         const { scene } = renderer;
-        const { rangeWithCoord, style } = this._selectionRenderService.convertSelectionRangeToData({
+        const { rangeWithCoord, style } = this._selectionRenderService.attachSelectionWithCoord({
             range,
             primary: null,
             style: null,

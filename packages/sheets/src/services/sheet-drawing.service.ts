@@ -38,10 +38,6 @@ export interface ISheetDrawingParam {
     originSize: ISize;
     zIndex: number;
     groupId?: string;
-    /**
-     * absolute position on sheet, convert by From and To
-     */
-    absoluteTransform?: IAbsoluteTransform;
 }
 
 interface ISheetDrawingSearchParam {

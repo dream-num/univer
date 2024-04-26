@@ -44,19 +44,13 @@ export class ImageRemoteService implements IImageRemoteService {
                     reject(new Error('Image is null'));
                     return;
                 }
-                const imageObj = new Image();
-                imageObj.src = replaceSrc;
+
                 const imageId = Tools.generateRandomId(6);
-                imageObj.onload = function () {
-                    const { width, height } = imageObj;
-                    resolve({
-                        imageId,
-                        width,
-                        height,
-                        imageSourceType: ImageSourceType.BASE64,
-                        source: replaceSrc,
-                    });
-                };
+                resolve({
+                    imageId,
+                    imageSourceType: ImageSourceType.BASE64,
+                    source: replaceSrc,
+                });
             };
         });
     }

@@ -24,12 +24,7 @@ export interface ISrcRect {
     bottom?: number;
 }
 
-
-export interface IImageData {
-    imageId: string;
-    sourceType: ImageSourceType;
-    source: string;
-
+export interface IImageDataValue {
     /**
      * 20.1.8.55 srcRect (Source Rectangle)
      */
@@ -41,6 +36,13 @@ export interface IImageData {
     prstGeom?: PresetGeometryType;
 }
 
+
+export interface IImageData extends IImageDataValue {
+    imageId: string;
+    imageSourceType: ImageSourceType;
+    source: string;
+}
+
 export class ImageModel {
     private _imageShapeKey: Nullable<string>;
 
@@ -49,11 +51,18 @@ export class ImageModel {
     }
 
     get sourceType() {
-        return this._imageData.sourceType;
+        return this._imageData.imageSourceType;
     }
 
     get source() {
         return this._imageData.source;
+    }
+
+    update(param: IImageDataValue) {
+        this._imageData = {
+            ...this._imageData,
+            ...param,
+        };
     }
 
     getImageData() {

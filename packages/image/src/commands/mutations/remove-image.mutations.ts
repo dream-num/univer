@@ -16,16 +16,17 @@
 
 import type { IMutation, Workbook } from '@univerjs/core';
 import { CommandType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import { ISheetDrawingService, type ISheetDrawingServiceParam } from '../../services/sheet-drawing.service';
+import type { IImageManagerSearchParam } from '../../services/image-manager.service';
+import { IImageManagerService } from '../../services/image-manager.service';
 
 
-export const InsertDrawingMutation: IMutation<ISheetDrawingServiceParam> = {
-    id: 'sheet.mutation.insert-drawing',
+export const RemoveImageMutation: IMutation<IImageManagerSearchParam> = {
+    id: 'sheet.mutation.remove-image',
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
         const { unitId, subUnitId } = params;
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const sheetDrawingService = accessor.get(ISheetDrawingService);
+        const imageManagerService = accessor.get(IImageManagerService);
 
         const universheet = univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
         if (universheet == null) {
@@ -37,7 +38,7 @@ export const InsertDrawingMutation: IMutation<ISheetDrawingServiceParam> = {
             throw new Error('worksheet is null error!');
         }
 
-        sheetDrawingService.addDrawing(params);
+        imageManagerService.remove(params);
 
         return true;
     },

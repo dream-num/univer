@@ -14,11 +14,20 @@
  * limitations under the License.
  */
 
-export { getImageSize } from './utils/get-image-size';
+import type { ISize } from '@univerjs/core';
 
-export { UniverImagePlugin } from './plugin';
-export { ImageManagerService, IImageManagerService, type IImageManagerDataParam, type IImageManagerSearchParam } from './services/image-manager.service';
-export { ImageModel } from './models/image-model';
-export { InsertImageMutation } from './commands/mutations/insert-image.mutations';
-export { RemoveImageMutation } from './commands/mutations/remove-image.mutations';
-export { SetImageMutation } from './commands/mutations/set-image.mutations';
+export const getImageSize = async (src: string): Promise<Required<ISize>> => {
+    return new Promise((resolve, reject) => {
+        const image = new Image();
+        image.src = src;
+        image.onload = () => {
+            resolve({
+                width: image.width,
+                height: image.height,
+            });
+        };
+        image.onerror = (error) => {
+            reject(error);
+        };
+    });
+};

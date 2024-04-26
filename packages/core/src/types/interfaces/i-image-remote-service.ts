@@ -25,7 +25,7 @@ export enum ImageSourceType {
     BASE64 = 'BASE64',
 }
 
-export interface IImageRemoteServiceParam extends Required<ISize> {
+export interface IImageRemoteServiceParam {
     imageId: string;
     imageSourceType: ImageSourceType;
     source: string;

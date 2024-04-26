@@ -255,6 +255,9 @@ importers:
       '@univerjs/sheets-numfmt':
         specifier: workspace:*
         version: link:../packages/sheets-numfmt
+      '@univerjs/sheets-thread-comment':
+        specifier: workspace:*
+        version: link:../packages/sheets-thread-comment
       '@univerjs/sheets-ui':
         specifier: workspace:*
         version: link:../packages/sheets-ui
@@ -267,6 +270,12 @@ importers:
       '@univerjs/slides-ui':
         specifier: workspace:*
         version: link:../packages/slides-ui
+      '@univerjs/thread-comment':
+        specifier: workspace:*
+        version: link:../packages/thread-comment
+      '@univerjs/thread-comment-ui':
+        specifier: workspace:*
+        version: link:../packages/thread-comment-ui
       '@univerjs/ui':
         specifier: workspace:*
         version: link:../packages/ui

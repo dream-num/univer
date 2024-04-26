@@ -21,6 +21,7 @@ import { Inject, Injector } from '@wendellhu/redi';
 import { PLUGIN_NAME } from './types/const';
 import { ThreadCommentPanelService } from './services/thread-comment-panel.service';
 import { ToggleSheetCommentPanelOperation } from './commands/operations/comment.operations';
+import { ThreadCommentUIController } from './controllers/thread-comment-ui.controller';
 
 export class ThreadCommentUIPlugin extends ThreadCommentPlugin {
     static override pluginName = PLUGIN_NAME;
@@ -41,6 +42,7 @@ export class ThreadCommentUIPlugin extends ThreadCommentPlugin {
     override onStarting(injector: Injector): void {
         super.onStarting(injector);
         ([
+            [ThreadCommentUIController],
             [ThreadCommentPanelService],
         ] as Dependency[]).forEach((dep) => {
             injector.add(dep);

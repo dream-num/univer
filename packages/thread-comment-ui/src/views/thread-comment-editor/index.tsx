@@ -31,7 +31,7 @@ export interface IThreadCommentEditorProps {
 }
 
 export const ThreadCommentEditor = (props: IThreadCommentEditorProps) => {
-    const { comment, onSave, id, onCancel } = props;
+    const { comment, onSave, id, onCancel, autoFocus } = props;
     const localeService = useDependency(LocaleService);
     const [localComment, setLocalComment] = useState({ text: '', ...comment });
     const [editing, setEditing] = useState(false);
@@ -39,7 +39,8 @@ export const ThreadCommentEditor = (props: IThreadCommentEditorProps) => {
     return (
         <div className={styles.threadCommentEditor}>
             <Textarea
-                className={styles.threadCommentEditorText}
+                autoFocus={autoFocus}
+                style={{ width: '100%' }}
                 placeholder={localeService.t('threadCommentUI.editor.placeholder')}
                 value={localComment?.text}
                 onChange={(text) => {
@@ -67,6 +68,7 @@ export const ThreadCommentEditor = (props: IThreadCommentEditorProps) => {
                             {localeService.t('threadCommentUI.editor.cancel')}
                         </Button>
                         <Button
+                            type="primary"
                             disabled={!localComment.text}
                             onClick={() => {
                                 onSave?.(localComment);

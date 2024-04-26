@@ -33,10 +33,9 @@ export const threadCommentMenu = (accessor: IAccessor) => {
     return {
         id: ShowAddSheetCommentModalOperation.id,
         type: MenuItemType.BUTTON,
-        positions: [MenuPosition.TOOLBAR_START],
-        group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
+        positions: [MenuPosition.CONTEXT_MENU],
         icon: COMMENT_SINGLE,
-        tooltip: 'sheetThreadComment.menu.addComment',
+        title: 'sheetThreadComment.menu.addComment',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 };
@@ -45,7 +44,7 @@ export const threadPanelMenu = (accessor: IAccessor) => {
     return {
         id: ToggleSheetCommentPanelOperation.id,
         type: MenuItemType.BUTTON,
-        title: 'sheetThreadComment.menu.commentManagement',
+        tooltip: 'sheetThreadComment.menu.commentManagement',
         positions: MenuPosition.TOOLBAR_INSERT,
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };

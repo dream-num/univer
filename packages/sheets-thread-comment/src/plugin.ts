@@ -22,10 +22,11 @@ import { SheetsThreadCommentController } from './controllers/sheets-thread-comme
 import { SheetsThreadCommentRefRangeController } from './controllers/sheets-thread-comment-ref-range.controller';
 import { SheetsThreadCommentModel } from './models/sheets-thread-comment.model';
 import { SheetsThreadCommentPopupService } from './services/sheets-thread-comment-popup.service';
+import { ShowAddSheetCommentModalOperation } from './commands/operations/comment.operation';
 
 export const SHEETS_THREAD_COMMENT = 'SHEETS_THREAD_COMMENT';
 
-export class SheetsThreadPlugin extends ThreadCommentUIPlugin {
+export class UniverSheetsThreadCommentPlugin extends ThreadCommentUIPlugin {
     static override pluginName = SHEETS_THREAD_COMMENT;
     static override type = UniverInstanceType.UNIVER_SHEET;
 
@@ -47,6 +48,10 @@ export class SheetsThreadPlugin extends ThreadCommentUIPlugin {
             [SheetsThreadCommentPopupService],
         ] as Dependency[]).forEach((dep) => {
             this._injector.add(dep);
+        });
+
+        [ShowAddSheetCommentModalOperation].forEach((command) => {
+            this._commandService.registerCommand(command);
         });
     }
 }

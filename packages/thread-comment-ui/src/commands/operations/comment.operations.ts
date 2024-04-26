@@ -22,7 +22,7 @@ import { ThreadCommentPanelService } from '../../services/thread-comment-panel.s
 import { THREAD_COMMENT_PANEL } from '../../types/const';
 
 export const ToggleSheetCommentPanelOperation: ICommand = {
-    id: 'sheets.operation.toggle-comment-panel',
+    id: 'thread-comment-ui.operation.toggle-panel',
     type: CommandType.OPERATION,
     handler(accessor: IAccessor) {
         const sidebarService = accessor.get(ISidebarService);

@@ -34,7 +34,7 @@ import { UniverUIPlugin } from '@univerjs/ui';
 import { UniverDataValidationPlugin } from '@univerjs/data-validation';
 import { UniverSheetsDataValidationPlugin } from '@univerjs/sheets-data-validation';
 import { UniverSheetsConditionalFormattingUIPlugin } from '@univerjs/sheets-conditional-formatting-ui';
-
+import { UniverSheetsThreadCommentPlugin } from '@univerjs/sheets-thread-comment';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data/sheets/demo/default-workbook-data-demo';
 import { DebuggerPlugin } from '../plugins/debugger';
 import { locales } from './locales';
@@ -99,6 +99,7 @@ if (!IS_E2E) {
     univer.createUnit(UniverInstanceType.UNIVER_SHEET, DEFAULT_WORKBOOK_DATA_DEMO);
 }
 
+univer.registerPlugin(UniverSheetsThreadCommentPlugin);
 // Uncomment the following lines to test if the document is disposed correctly without memory leaks.
 // setTimeout(() => {
 //     univer.__getInjector().get(IUniverInstanceService).disposeUnit(DEFAULT_WORKBOOK_DATA_DEMO.id);
@@ -110,6 +111,7 @@ if (!IS_E2E) {
 
 // debugger plugin
 univer.registerPlugin(DebuggerPlugin);
+
 
 declare global {
     interface Window {

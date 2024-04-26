@@ -28,7 +28,7 @@ export type SheetCommentUpdate = CommentUpdate & {
 
 export class SheetsThreadCommentModel extends Disposable {
     private _matrixMap: Map<string, Map<string, ObjectMatrix<string>>> = new Map();
-    private _locationMap: Map<string, Map<string, Map<string, { row: number; column: number }>>>;
+    private _locationMap: Map<string, Map<string, Map<string, { row: number; column: number }>>> = new Map();
     private _commentUpdate$ = new Subject<SheetCommentUpdate>();
 
     commentUpdate$ = this._commentUpdate$.asObservable();

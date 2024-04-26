@@ -14,13 +14,24 @@
  * limitations under the License.
  */
 
-export default {
-    threadCommentUI: {
-        editor: {
-            placeholder: 'Reply or add others with @',
-            reply: '回复',
-            cancel: '取消',
-            save: '保存',
-        },
-    },
-};
+import { Disposable, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
+import { Inject } from '@wendellhu/redi';
+import { enUS, zhCN } from '../locales';
+
+@OnLifecycle(LifecycleStages.Starting, ThreadCommentUIController)
+export class ThreadCommentUIController extends Disposable {
+    constructor(
+        @Inject(LocaleService) private readonly _localeService: LocaleService
+    ) {
+        super();
+
+        this._initLocales();
+    }
+
+    private _initLocales() {
+        this._localeService.load({
+            zhCN,
+            enUS,
+        });
+    }
+}

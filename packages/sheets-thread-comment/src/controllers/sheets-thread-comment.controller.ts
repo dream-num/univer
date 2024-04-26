@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import { Disposable, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { Disposable, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
 import { ComponentManager, IMenuService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 import { SheetsThreadCommentCell } from '../views/sheets-thread-comment-cell';
 import { SHEETS_THREAD_COMMENT_MODAL, SHEETS_THREAD_COMMENT_PANEL } from '../types/const';
 import { SheetsThreadCommentPanel } from '../views/sheets-thread-comment-panel';
+import { enUS, zhCN } from '../locales';
 import { threadCommentMenu, threadPanelMenu } from './menu';
 
 @OnLifecycle(LifecycleStages.Starting, SheetsThreadCommentController)
@@ -27,11 +28,13 @@ export class SheetsThreadCommentController extends Disposable {
     constructor(
         @IMenuService private readonly _menuService: IMenuService,
         @Inject(Injector) private readonly _injector: Injector,
-        @Inject(ComponentManager) private readonly _componentManager: ComponentManager
+        @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
+        @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
         super();
         this._initMenu();
         this._initComponent();
+        this._initLocale();
     }
 
     private _initMenu() {
@@ -49,6 +52,13 @@ export class SheetsThreadCommentController extends Disposable {
             [SHEETS_THREAD_COMMENT_PANEL, SheetsThreadCommentPanel],
         ] as const).forEach(([key, comp]) => {
             this._componentManager.register(key, comp);
+        });
+    }
+
+    private _initLocale() {
+        this._localeService.load({
+            zhCN,
+            enUS,
         });
     }
 }

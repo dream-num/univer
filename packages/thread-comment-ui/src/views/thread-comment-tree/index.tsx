@@ -17,9 +17,10 @@
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import type { IAddCommentCommandParams, IThreadComment, IUpdateCommentCommandParams } from '@univerjs/thread-comment';
 import { AddCommentCommand, ThreadCommentModel, UpdateCommentCommand } from '@univerjs/thread-comment';
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { DeleteSingle, MoreSingle } from '@univerjs/icons';
 import { ICommandService, Tools, type UniverInstanceType } from '@univerjs/core';
+import { useObservable } from '@univerjs/ui';
 import { ThreadCommentEditor } from '../thread-comment-editor';
 import styles from './index.module.less';
 
@@ -28,8 +29,8 @@ export interface IThreadCommentTreeProps {
     unitId: string;
     subUnitId: string;
     type: UniverInstanceType;
-    ref: string;
-    personId: string;
+    refStr?: string;
+    personId?: string;
 }
 
 export interface IThreadCommentItemProps {
@@ -42,6 +43,12 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
     const { item, unitId, subUnitId } = props;
     const [editing, setEditing] = useState(false);
     const commandService = useDependency(ICommandService);
+
+    useEffect(() => {
+        if (!item.id) {
+            setEditing(true);
+        }
+    }, [item.id]);
 
     return (
         <div className={styles.threadCommentItem}>
@@ -59,7 +66,7 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                         id={item.id}
                         comment={item}
                         onCancel={() => setEditing(false)}
-                        autoFocus={Boolean(item.id)}
+                        autoFocus
                         onSave={({ text, attachments }) => {
                             setEditing(false);
                             if (item.id) {
@@ -100,15 +107,16 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
 };
 
 export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
-    const { id, unitId, subUnitId, ref, personId } = props;
+    const { id, unitId, subUnitId, refStr, personId } = props;
     const threadCommentModel = useDependency(ThreadCommentModel);
+    useObservable(threadCommentModel.commentMap$);
     const comments = id ? threadCommentModel.getCommentWithChildren(unitId, subUnitId, id) : null;
     const commandService = useDependency(ICommandService);
     const renderComments = [
         ...comments ?
             [comments.root] :
             // mock empty comment
-            [{ id: '', text: '', personId, ref, dT: '' }],
+            [{ id: '', text: '', personId: personId ?? '', ref: refStr ?? '', dT: '' }],
         ...comments?.children ?? [],
     ];
 
@@ -118,7 +126,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
             <div className={styles.threadCommentTitle}>
                 <div className={styles.threadCommentTitlePosition}>
                     <div className={styles.threadCommentTitleHighlight} />
-                    {ref}
+                    {refStr}
                 </div>
                 {comments
                     ? (
@@ -155,7 +163,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                                             attachments,
                                             dT: new Date().toLocaleDateString(),
                                             id: Tools.generateRandomId(),
-                                            ref,
+                                            ref: refStr,
                                             personId,
                                         },
                                     } as IAddCommentCommandParams

@@ -24,7 +24,7 @@ import { SheetsThreadCommentModel } from '../../models/sheets-thread-comment.mod
 
 export const ShowAddSheetCommentModalOperation: ICommand = {
     type: CommandType.OPERATION,
-    id: 'sheets.operation.toggle-comment-modal',
+    id: 'sheets.operation.show-comment-modal',
     handler(accessor) {
         const selectionManagerService = accessor.get(SelectionManagerService);
         const univerInstanceService = accessor.get(IUniverInstanceService);

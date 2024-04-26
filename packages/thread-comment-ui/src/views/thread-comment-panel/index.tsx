@@ -19,7 +19,7 @@ import { useDependency } from '@wendellhu/redi/react-bindings';
 import { ThreadCommentModel } from '@univerjs/thread-comment';
 import type { UniverInstanceType } from '@univerjs/core';
 import { useObservable } from '@univerjs/ui';
-import { ThreadCommentThree } from '../thread-comment-tree';
+import { ThreadCommentTree } from '../thread-comment-tree';
 import styles from './index.module.less';
 
 export interface IThreadCommentPanelProps {
@@ -43,7 +43,7 @@ export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
     return (
         <div className={styles.ThreadCommentPanel}>
             {rootCommentIds.map((id) => (
-                <ThreadCommentThree
+                <ThreadCommentTree
                     key={id}
                     id={id}
                     unitId={unitId}

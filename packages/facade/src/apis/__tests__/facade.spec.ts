@@ -23,7 +23,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { RenderComponentType, SheetComponent } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SHEET_VIEW_KEY } from '@univerjs/sheets-ui';
-import { RegisterFunctionMutation, UnregisterFunctionMutation } from '@univerjs/engine-formula';
+import { RegisterFunctionMutation, SetFormulaCalculationStartMutation, UnregisterFunctionMutation } from '@univerjs/engine-formula';
 import { IDescriptionService } from '@univerjs/sheets-formula';
 import type { FUniver } from '../facade';
 import { createTestBed } from './create-test-bed';
@@ -59,6 +59,7 @@ describe('Test FUniver', () => {
         commandService.registerCommand(RegisterFunctionMutation);
         commandService.registerCommand(UnregisterFunctionMutation);
         commandService.registerCommand(SetStyleCommand);
+        commandService.registerCommand(SetFormulaCalculationStartMutation);
 
         getValueByPosition = (
             startRow: number,

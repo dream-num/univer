@@ -114,14 +114,6 @@ export class FUniver {
     }
 
     /**
-     * Dispose the spreadsheet/document by the spreadsheet/document id.
-     * @param id
-     */
-    disposeUnit(id: string) {
-        this._univerInstanceService.disposeUnit(id);
-    }
-
-    /**
      * Get the currently focused Univer spreadsheet.
      * @returns the currently focused Univer spreadsheet.
      */

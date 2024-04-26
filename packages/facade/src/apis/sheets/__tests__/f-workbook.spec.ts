@@ -84,16 +84,6 @@ describe('Test FWorkbook', () => {
         };
     });
 
-    it('Workbook dispose', () => {
-        const workbook = univerAPI.getActiveWorkbook();
-
-        expect(workbook).toBeDefined();
-
-        workbook?.dispose();
-
-        expect(univerAPI.getActiveWorkbook()).toBeNull();
-    });
-
     it('Workbook getSheets', () => {
         const sheets = univerAPI.getActiveWorkbook()?.getSheets();
         expect(sheets).not.toBeNull();

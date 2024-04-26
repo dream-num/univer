@@ -49,13 +49,6 @@ export class FWorkbook {
         this.id = this._workbook.getUnitId();
     }
 
-    /**
-     * Dispose the workbook.
-     */
-    dispose() {
-        this._univerInstanceService.disposeUnit(this.id);
-    }
-
     getId(): string {
         return this.id;
     }

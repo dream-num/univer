@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-import { type IRange, Rectangle } from '@univerjs/core';
+import { type IRange, Rectangle, IScale } from '@univerjs/core';
 
 import { getCellByIndex } from '../../../basics/tools';
 import { ComponentExtension } from '../../extension';
 import type { SpreadsheetSkeleton } from '../sheet-skeleton';
+import { UniverRenderingContext } from '../../../context';
 
 export enum SHEET_EXTENSION_TYPE {
     GRID,

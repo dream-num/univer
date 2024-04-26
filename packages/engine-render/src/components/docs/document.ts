@@ -17,7 +17,7 @@
 
 import './extensions';
 
-import type { Nullable, Observer } from '@univerjs/core';
+import type { IRange, Nullable, Observer } from '@univerjs/core';
 import { CellValueType, HorizontalAlign, Observable, VerticalAlign, WrapStrategy } from '@univerjs/core';
 
 import { calculateRectRotate, getRotateOffsetAndFarthestHypotenuse } from '../../basics/draw';
@@ -165,7 +165,7 @@ export class Documents extends DocComponent {
         return (this.getScene() as Scene).getEngine();
     }
 
-    override draw(ctx: UniverRenderingContext, bounds?: IViewportBound) {
+    override draw(ctx: UniverRenderingContext, bounds?: IViewportInfo) {
         const skeletonData = this.getSkeleton()?.getSkeletonData();
 
         if (skeletonData == null) {

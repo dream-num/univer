@@ -27,13 +27,12 @@ import { SpreadsheetExtensionRegistry } from '../../extension';
 import type { IFontCacheItem } from '../interfaces';
 import type { SheetComponent } from '../sheet-component';
 import { getDocsSkeletonPageSize, type SpreadsheetSkeleton } from '../sheet-skeleton';
-import { VERTICAL_ROTATE_ANGLE } from '../../../basics/text-rotation';
 import { FIX_ONE_PIXEL_BLUR_OFFSET } from '../../../basics';
 import { SheetExtension } from './sheet-extension';
 
 const UNIQUE_KEY = 'DefaultFontExtension';
 
-const EXTENSION_Z_INDEX = 30;
+const EXTENSION_Z_INDEX = 45;
 export interface ISheetFontRenderExtension {
     fontRenderExtension?: {
         leftOffset?: number;
@@ -57,8 +56,10 @@ export class Font extends SheetExtension {
         ctx: UniverRenderingContext,
         parentScale: IScale,
         spreadsheetSkeleton: SpreadsheetSkeleton,
-        {viewRanges, diffRanges, checkOutOfViewBound, viewPortKey}: { viewRanges: IRange[], diffRanges?: IRange[], checkOutOfViewBound?: boolean, viewPortKey: string }
+        diffRanges: IRange[],
+        moreBoundsInfo: { viewRanges: IRange[]; checkOutOfViewBound?: boolean; viewPortKey: string }
     ) {
+        const { viewRanges = [], checkOutOfViewBound, viewPortKey } = moreBoundsInfo;
         const { stylesCache, dataMergeCache, overflowCache, worksheet } = spreadsheetSkeleton;
         const { font: fontList } = stylesCache;
         if (!spreadsheetSkeleton || !worksheet) {
@@ -79,7 +80,8 @@ export class Font extends SheetExtension {
         }
         ctx.save();
         const scale = this._getScale(parentScale);
-
+        let countAll = 0;
+        let count = 0;
         fontList &&
             Object.keys(fontList).forEach((fontFormat: string) => {
                 const fontObjectArray = fontList[fontFormat];
@@ -94,13 +96,14 @@ export class Font extends SheetExtension {
 
                 // eslint-disable-next-line complexity
                 fontObjectArray.forValue((rowIndex, columnIndex, docsConfig) => {
-                    if( checkOutOfViewBound ) {
+                    countAll++;
+                    if (checkOutOfViewBound) {
                         // 下方单元格 提前退出
-                        if(!inCurrentAndAboveViewRanges(viewRanges!, rowIndex, columnIndex)) {
+                        if (!inCurrentAndAboveViewRanges(viewRanges!, rowIndex, columnIndex)) {
                             return true;
                         }
                     } else {
-                        if(!inViewRanges(viewRanges!, rowIndex, columnIndex)) {
+                        if (!inViewRanges(viewRanges!, rowIndex, columnIndex)) {
                             return true;
                         }
                     }
@@ -122,8 +125,9 @@ export class Font extends SheetExtension {
                     // 合并后 font extension 在当前 viewBounds 中也走一次绘制
                     // 但是此刻还不能认为不在 viewRanges 内就退出
                     // 横向还可能存在 overflow, 因此此刻只能排除不在当前 row 的单元格
-                    const combineWithMergeRanges = mergeRangeIfIntersects(diffRanges || viewRanges, [mergeInfo]);
-                    if(!inRowViewRanges(combineWithMergeRanges, rowIndex)) {
+                    const mergeTo = diffRanges && diffRanges.length > 0 ? diffRanges : viewRanges;
+                    const combineWithMergeRanges = mergeRangeIfIntersects(mergeTo, [mergeInfo]);
+                    if (!inRowViewRanges(combineWithMergeRanges, rowIndex)) {
                         return true;
                     }
 
@@ -164,7 +168,7 @@ export class Font extends SheetExtension {
                     const { horizontalAlign, vertexAngle = 0, centerAngle = 0 } = docsConfig;
 
                     // 既不是溢出, 又不在当前 range 内(已考虑合并单元格带来的 range 扩展), 那么也退出
-                    if(!overflowRectangle && !inViewRanges(combineWithMergeRanges, rowIndex, columnIndex)) {
+                    if (!overflowRectangle && !inViewRanges(combineWithMergeRanges, rowIndex, columnIndex)) {
                         return true;
                     }
 
@@ -213,12 +217,12 @@ export class Font extends SheetExtension {
                                 cellHeight - 2 / scale
                             );
                             ctx.clip();
-                            ctx.clearRectForTexture(
-                                startX + 1 / scale,
-                                startY + 1 / scale,
-                                cellWidth - 2 / scale,
-                                cellHeight - 2 / scale
-                            );
+                            // ctx.clearRectForTexture(
+                            //     startX + 1 / scale,
+                            //     startY + 1 / scale,
+                            //     cellWidth - 2 / scale,
+                            //     cellHeight - 2 / scale
+                            // );
                         } else {
                             if (horizontalAlignOverFlow === HorizontalAlign.CENTER) {
                                 this._clipRectangle(
@@ -258,19 +262,20 @@ export class Font extends SheetExtension {
                     } else {
                         ctx.rectByPrecision(startX + 1 / scale, startY + 1 / scale, cellWidth - 2 / scale, cellHeight - 2 / scale);
                         ctx.clip();
-                        ctx.clearRectForTexture(
-                            startX + 1 / scale,
-                            startY + 1 / scale,
-                            cellWidth - 2 / scale,
-                            cellHeight - 2 / scale
-                        );
+                        // ctx.clearRectForTexture(
+                        //     startX + 1 / scale,
+                        //     startY + 1 / scale,
+                        //     cellWidth - 2 / scale,
+                        //     cellHeight - 2 / scale
+                        // );
                     }
-
+                    count++;
                     ctx.translate(startX + FIX_ONE_PIXEL_BLUR_OFFSET, startY + FIX_ONE_PIXEL_BLUR_OFFSET);
                     this._renderDocuments(ctx, docsConfig, startX, startY, endX, endY, rowIndex, columnIndex, overflowCache);
                     ctx.restore();
                 });
             });
+        console.log(' font', countAll, count);
         ctx.restore();
     }
 
@@ -346,7 +351,7 @@ export class Font extends SheetExtension {
 
         ctx.rectByPrecision(startX, startY, endX - startX, endY - startY);
         ctx.clip();
-        ctx.clearRectForTexture(startX, startY, endX - startX, endY - startY);
+        // ctx.clearRectForTexture(startX, startY, endX - startX, endY - startY);
     }
 }
 

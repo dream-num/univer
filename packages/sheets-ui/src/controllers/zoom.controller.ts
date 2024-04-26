@@ -155,7 +155,12 @@ export class ZoomController extends Disposable {
     private _updateViewZoom(zoomRatio: number) {
         const sheetObject = this._getSheetObject();
         sheetObject?.scene.scale(zoomRatio, zoomRatio);
-        sheetObject?.scene.getViewports().forEach(vp => vp.markForceDirty());
+        sheetObject?.scene.getViewports().forEach(vp => {
+
+            // 调整缩放级别后, 之前的 cache 应该废弃, 毕竟 viewBounds 大小和之前不一样了.
+            vp.resetPrevCacheBounds();
+            vp.markForceDirty()
+        });
         sheetObject?.spreadsheet.makeForceDirty();
     }
 

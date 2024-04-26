@@ -39,6 +39,7 @@ export class Border extends SheetExtension {
         ctx: UniverRenderingContext,
         parentScale: IScale,
         spreadsheetSkeleton: SpreadsheetSkeleton,
+        diff: IRange[],
         {viewRanges, diffRanges, checkOutOfViewBound}: { viewRanges?: IRange[], diffRanges?: IRange[], checkOutOfViewBound: boolean }
     ) {
         const { dataMergeCache, stylesCache, overflowCache } = spreadsheetSkeleton;

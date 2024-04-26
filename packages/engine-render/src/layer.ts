@@ -260,7 +260,9 @@ export class Layer extends Disposable {
         }
         const width = this._cacheCanvas.getWidth();
         const height = this._cacheCanvas.getHeight();
-        ctx.drawImage(this._cacheCanvas.getCanvasEle(), 0, 0, width, height);
+        if(width * height !== 0) {
+            ctx.drawImage(this._cacheCanvas.getCanvasEle(), 0, 0, width, height);
+        }
     }
 
     private _resizeCacheCanvas() {

@@ -18,20 +18,20 @@ import type { EventState, IPosition, IRange, Nullable } from '@univerjs/core';
 import { Observable, Tools } from '@univerjs/core';
 
 import type { BaseObject } from './base-object';
-import { RENDER_CLASS_TYPE } from './basics/const';
+import { FIX_ONE_PIXEL_BLUR_OFFSET, RENDER_CLASS_TYPE } from './basics/const';
 import type { IWheelEvent } from './basics/i-events';
 import { PointerInput } from './basics/i-events';
-import { fixLineWidthByScale, getScale, toPx } from './basics/tools';
+import { fixLineWidthByScale, toPx } from './basics/tools';
 import { Transform } from './basics/transform';
 import type { IBoundRectNoAngle, IViewportInfo } from './basics/vector2';
 import { Vector2 } from './basics/vector2';
 import { subtractViewportRange } from './basics/viewport-subtract';
+import { Canvas as UniverCanvas } from './canvas';
 import { Spreadsheet } from './components/sheets/spreadsheet';
 import type { UniverRenderingContext } from './context';
-import { Scene } from './scene';
+import type { Scene } from './scene';
 import type { BaseScrollBar } from './shape/base-scroll-bar';
 import type { ThinScene } from './thin-scene';
-import { Canvas as UniverCanvas } from './canvas';
 
 interface IViewPosition {
     top?: number;
@@ -81,34 +81,7 @@ enum SCROLL_TYPE {
 }
 
 const MOUSE_WHEEL_SPEED_SMOOTHING_FACTOR = 3;
-const BUFFER_EDGE_SIZE_X = 100;
-const BUFFER_EDGE_SIZE_Y = 50;
-export { BUFFER_EDGE_SIZE_X, BUFFER_EDGE_SIZE_Y };
-const bufferMap = {
-    'viewMain': {
-        BUFFER_EDGE_SIZE_X: 100,
-        BUFFER_EDGE_SIZE_Y: 50,
-    },
-    'viewMainTop': {
-        BUFFER_EDGE_SIZE_X: 100,
-        BUFFER_EDGE_SIZE_Y: 0,
-    },
-    'viewMainLeft': {
-        BUFFER_EDGE_SIZE_X: 0,
-        BUFFER_EDGE_SIZE_Y: 50,
-    },
-    'viewMainLeftTop': {
-        BUFFER_EDGE_SIZE_X: 0,
-        BUFFER_EDGE_SIZE_Y: 0,
-    }
-}
-const calcBufferSize = (viewPortKey: keyof typeof bufferMap) => {
-    return bufferMap[viewPortKey] || {
-        BUFFER_EDGE_SIZE_X: 0,
-        BUFFER_EDGE_SIZE_Y: 0,
-    };
-}
-export { calcBufferSize };
+
 export class Viewport {
     /**
      * scrollX means scroll x value for scrollbar in viewMain
@@ -126,7 +99,6 @@ export class Viewport {
      * use getActualScroll to get scrolling value for spreadsheet.
      */
     actualScrollX: number = 0;
-
     actualScrollY: number = 0;
 
     onMouseWheelObserver = new Observable<IWheelEvent>();
@@ -201,7 +173,7 @@ export class Viewport {
      * viewbound of cache area, cache area is slightly bigger than viewbound.
      */
     private _cacheBound: IBoundRectNoAngle;
-    private _preCacheBound: IBoundRectNoAngle;
+    private _preCacheBound: IBoundRectNoAngle | null;
 
     /**
      * bound of visible area
@@ -224,6 +196,7 @@ export class Viewport {
      */
     bufferEdgeX: number = 0;
     bufferEdgeY: number = 0;
+
 
     constructor(viewPortKey: string, scene: ThinScene, props?: IViewProps) {
         this._viewPortKey = viewPortKey;
@@ -831,6 +804,11 @@ export class Viewport {
 
 
         const viewBound = {
+            // 这里若对 top left 做 Math.floor 对 right bottom Math.ceil 操作, 放大后, 贴图会模糊
+            // top: parseFloat(topLeft.y.toFixed(3)),
+            // left: parseFloat(topLeft.x.toFixed(3)),
+            // right: parseFloat(bottomRight.x.toFixed(3)),
+            // bottom: parseFloat(bottomRight.y.toFixed(3)),
             top: topLeft.y,
             left: topLeft.x,
             right: bottomRight.x,
@@ -856,6 +834,7 @@ export class Viewport {
         const cacheViewPortPosition = this.expandBounds(viewPortPosition);
 
         let shouldCacheUpdate = this._shouldCacheUpdate(viewBound, this._preCacheBound, diffX, diffY);
+        // console.log('shouldCacheUpdate', this.viewPortKey, shouldCacheUpdate);
         if(shouldCacheUpdate) {
             diffCacheBounds = this._diffCacheBound(this._preCacheBound, cacheBound);
         }
@@ -1096,6 +1075,10 @@ export class Viewport {
         this._isForceDirty = state;
     }
 
+    resetPrevCacheBounds() {
+        this._preCacheBound = null;//this.expandBounds(this._viewBound);
+    }
+
     get isForceDirty() {
         return this._isForceDirty;
     }
@@ -1295,11 +1278,12 @@ export class Viewport {
     }
 
     expandBounds(value: {top:number, left: number, bottom: number, right: number}) {
+        const onePixelFix = FIX_ONE_PIXEL_BLUR_OFFSET * 2;
         return {
-            left: Math.max(this.leftOrigin, value.left - BUFFER_EDGE_SIZE_X),
-            top: Math.max(this.topOrigin, value.top - BUFFER_EDGE_SIZE_Y),
-            right: value.right + BUFFER_EDGE_SIZE_X,
-            bottom: value.bottom + BUFFER_EDGE_SIZE_Y,
+            left: Math.max(this.leftOrigin, value.left - this.bufferEdgeX) - onePixelFix,
+            top: Math.max(this.topOrigin, value.top - this.bufferEdgeY) - onePixelFix,
+            right: value.right + this.bufferEdgeX + onePixelFix,
+            bottom: value.bottom + this.bufferEdgeY + onePixelFix,
         } as IBoundRectNoAngle;
     }
 
@@ -1317,8 +1301,8 @@ export class Viewport {
         const viewBoundOutCacheArea = !(viewBound.right <= cacheBounds.right && viewBound.top >= cacheBounds.top
             && viewBound.left >= cacheBounds.left && viewBound.bottom <= cacheBounds.bottom) ? 0b01 : 0b00;
 
-        const edgeX = BUFFER_EDGE_SIZE_X / 2;
-        const edgeY = BUFFER_EDGE_SIZE_Y / 2;
+        const edgeX = this.bufferEdgeX / 2;
+        const edgeY = this.bufferEdgeY / 2;
         const nearEdge = (diffX < 0 && Math.abs(viewBound.right - cacheBounds.right) < edgeX ||
             diffX > 0 && Math.abs(viewBound.left - cacheBounds.left) < edgeX ||
             // 滚动条向上, 向上往回滚
@@ -1419,6 +1403,12 @@ export class Viewport {
                 left: Math.max(prevBound.left, currBound.left),
                 right: Math.min(prevBound.right, currBound.right)
             });
+        }
+        for (const bound of additionalAreas) {
+            bound.left = bound.left - this.bufferEdgeX;
+            bound.right = bound.right + this.bufferEdgeX;
+            bound.top = bound.top - this.bufferEdgeY;
+            bound.bottom = bound.bottom + this.bufferEdgeY;
         }
 
         return additionalAreas;

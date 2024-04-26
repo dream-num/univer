@@ -50,20 +50,7 @@ export class ComponentExtension<T, U, V> {
         return this.Z_INDEX;
     }
 
-    draw(ctx: UniverRenderingContext, parentScale: IScale, skeleton: T, {diffRanges, viewRanges, checkOutOfViewBound: checkOutOfViewBound}: {
-        diffRanges?: V,
-        /**
-         * 一般来说只需绘制可见区域
-         */
-        viewRanges?: V,
-        /**
-         * 绘制时是否考虑视野外的情况  一般来说, 除了 viewMainLeftTop 其他都需要为 true
-         * 对于 font 来说
-         * viewMainTop 要考虑来自左右两边单元格的溢出
-         * viewLeft 要考虑来自上方合并单元格
-         * viewMain 要考虑左右溢出和上方合并的单元格.
-         */
-        checkOutOfViewBound?: boolean}) {
+    draw(ctx: UniverRenderingContext, parentScale: IScale, skeleton: T, diffBounds?: V, more?: any) {
         /* abstract */
     }
 

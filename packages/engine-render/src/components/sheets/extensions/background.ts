@@ -25,7 +25,7 @@ import { SheetExtension } from './sheet-extension';
 
 const UNIQUE_KEY = 'DefaultBackgroundExtension';
 
-const DOC_EXTENSION_Z_INDEX = 40;
+const DOC_EXTENSION_Z_INDEX = 20;
 const PRINTING_Z_INDEX = 20;
 
 export class Background extends SheetExtension {
@@ -43,7 +43,8 @@ export class Background extends SheetExtension {
         ctx: UniverRenderingContext,
         parentScale: IScale,
         spreadsheetSkeleton: SpreadsheetSkeleton,
-        {viewRanges, diffRanges, checkOutOfViewBound}: { viewRanges?: IRange[], diffRanges?: IRange[], checkOutOfViewBound?: boolean }
+        diff: IRange[],
+        { viewRanges, diffRanges, checkOutOfViewBound }: { viewRanges?: IRange[]; diffRanges?: IRange[]; checkOutOfViewBound?: boolean }
     ) {
         const { stylesCache } = spreadsheetSkeleton;
         const { background, backgroundPositions } = stylesCache;
@@ -64,7 +65,7 @@ export class Background extends SheetExtension {
         }
         ctx.save();
 
-        ctx.setGlobalCompositeOperation('destination-over');
+        // ctx.setGlobalCompositeOperation('destination-over');
         background &&
             Object.keys(background).forEach((rgb: string) => {
                 const backgroundCache = background[rgb];
@@ -76,7 +77,8 @@ export class Background extends SheetExtension {
                     // 当前单元格不在视野范围内, 提前退出
                     // 和 font 不同的是, 不需要考虑合并单元格且单元格横跨 viewport 的情况.
                     // 因为即使合并后, 也会进入 forValue 迭代, 此刻单元格状态是 isMerged, 也能从 cellInfo 中获取颜色信息
-                    if(!inViewRanges(viewRanges!, rowIndex, columnIndex)) {
+                    // 同时, 后续绘制使用了 Path2D,  而不是 ctx.lineTo moveTo 这样的方式绘制, 效率上高很多, 不再有必要判断是否合并
+                    if (!inViewRanges(viewRanges!, rowIndex, columnIndex)) {
                         return true;
                     }
                     const cellInfo = backgroundPositions?.getValue(rowIndex, columnIndex);
@@ -84,10 +86,10 @@ export class Background extends SheetExtension {
                     if (cellInfo == null) {
                         return true;
                     }
-                    let { startY, endY, startX, endX } = cellInfo;
-                    const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
+                    const { startY, endY, startX, endX } = cellInfo;
+                    // const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
 
-                    // 合并后的单元格, 非左上角单元格(因为在)
+                    // // 合并后的单元格, 非左上角单元格(因为在)
                     // if (isMerged) {
                     //     return true;
                     // }
@@ -99,38 +101,12 @@ export class Background extends SheetExtension {
                     //     endX = mergeInfo.endX;
                     // }
 
-                    // 水平方向和 diffRange 没有交集就提前退出
-                    // 然而不能这么做  Y 方向滚动也可能存在问题
-                    // if (!this.isRowInDiffRanges(
-                    //         // {
-                    //         //     startRow: mergeInfo.startRow,
-                    //         //     endRow: mergeInfo.endRow,
-                    //         //     startColumn: mergeInfo.startColumn,
-                    //         //     endColumn: mergeInfo.endColumn,
-                    //         // },
-                    //         rowIndex,
-                    //         rowIndex,
-                    //         diffRanges
-                    //         // {
-                    //         //     startRow: rowIndex,
-                    //         //     endRow: rowIndex,
-                    //         //     startColumn: columnIndex,
-                    //         //     endColumn: columnIndex,
-                    //         // },
-                    //     )
-                    // ) {
-                    //     return true;
-                    // }
-
-                    backgroundPaths.rect(startX, startY, endX - startX, endY - startY)
-
+                    backgroundPaths.rect(startX, startY, endX - startX, endY - startY);
                 });
                 ctx.fill(backgroundPaths);
             });
         ctx.restore();
     }
-
-
 }
 
 SpreadsheetExtensionRegistry.add(Background);

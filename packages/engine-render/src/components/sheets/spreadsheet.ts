@@ -17,14 +17,13 @@
 import type { IRange, ISelectionCellWithCoord, Nullable, ObjectMatrix } from '@univerjs/core';
 import { BooleanNumber, sortRules } from '@univerjs/core';
 
-import type { BaseObject } from '../../base-object';
 
 import { FIX_ONE_PIXEL_BLUR_OFFSET, RENDER_CLASS_TYPE } from '../../basics/const';
 
 // import { clearLineByBorderType } from '../../basics/draw';
 import { getCellPositionByIndex, getColor } from '../../basics/tools';
 import type { IBoundRectNoAngle, IViewportInfo, Vector2 } from '../../basics/vector2';
-import { Canvas } from '../../canvas';
+import type { Canvas } from '../../canvas';
 import type { UniverRenderingContext } from '../../context';
 import type { Engine } from '../../engine';
 import type { Scene } from '../../scene';
@@ -82,7 +81,6 @@ export class Spreadsheet extends SheetComponent {
             // TODO:raku delete
             this.onIsAddedToParentObserver.add((parent) => {
                 window.scene = parent;
-
             });
         }
 
@@ -147,8 +145,13 @@ export class Spreadsheet extends SheetComponent {
         const viewRanges = [spreadsheetSkeleton.getRowColumnSegmentByViewBound(viewportInfo?.cacheBound)];
         const extensions = this.getExtensionsByOrder();
 
+        if ((viewportInfo?.viewPortKey === 'viewMainLeft')) {
+            // console.log(viewportInfo?.viewPortKey, 'diffRange count', diffRanges.length, 'diffY StartRow', diffRanges[0].startRow, 'diffY startColumn', diffRanges[0].startColumn , ':::::height', diffRanges[0].endRow - diffRanges[0].startRow,':::::width', diffRanges[0].endColumn - diffRanges[0].startColumn);
+            console.log(viewportInfo?.viewPortKey, 'diffRanges', diffRanges?.length && diffRanges?.[0], viewportInfo?.diffBounds.length && viewportInfo?.diffBounds[0]);
+        }
+
         for (const extension of extensions) {
-            extension.draw(ctx, parentScale, spreadsheetSkeleton, {
+            extension.draw(ctx, parentScale, spreadsheetSkeleton, diffRanges, {
                 viewRanges,
                 diffRanges,
                 checkOutOfViewBound: viewportInfo.allowCache, //!!bounds!.cacheCanvas,
@@ -247,7 +250,7 @@ export class Spreadsheet extends SheetComponent {
      */
     override makeDirty(state: boolean = true) {
         super.makeDirty(state);
-        if(state === false) {
+        if (state === false) {
             this._dirtyBounds = [];
         }
         return this;
@@ -265,162 +268,88 @@ export class Spreadsheet extends SheetComponent {
         const bufferEdgeSizeY = bufferEdgeY * scaleY / window.devicePixelRatio;
 
 
-        if (viewPortKey === 'viewMain') {
-            const cacheCtx = cacheCanvas.getContext();
-            cacheCtx.save();
+        const cacheCtx = cacheCanvas.getContext();
+        cacheCtx.save();
 
-            const { left, top, right, bottom } = viewPortPosition;
+        const { left, top, right, bottom } = viewPortPosition;
 
-            const dw = right - left + rowHeaderWidth;
-            const dh = bottom - top + columnHeaderHeight;
-
-
-            // 没有滚动
-            if (diffBounds.length === 0 || (diffX === 0 && diffY === 0) || isForceDirty) {
-                if (isDirty || isForceDirty) {
-                    cacheCtx.save();
-                    cacheCtx.setTransform(1, 0, 0, 1, 0, 0);
-                    cacheCanvas.clear();
-                    cacheCtx.restore();
-
-                    cacheCtx.save();
-                    // mainCtx.translateWithPrecision(rowHeaderWidth, columnHeaderHeight);
-                    // 所以 cacheCtx.setTransform 已经包含了 rowHeaderWidth + viewport + scroll 距离
-                    const m = mainCtx.getTransform();
-                    cacheCtx.setTransform(m.a,m.b, m.c, m.d, m.e, m.f);
-
-                    // leftOrigin 是 viewport 相对 sheetcorner 的偏移(不考虑缩放)
-                    // - (leftOrigin - bufferEdgeX)  ----> 简化
-                    cacheCtx.translate(-leftOrigin + bufferEdgeX, -topOrigin + bufferEdgeY);
-
-                    // extension 绘制时按照内容的左上角计算, 不考虑 rowHeaderWidth
-                    this.draw(cacheCtx, viewportBoundsInfo);
+        const dw = right - left + rowHeaderWidth;
+        const dh = bottom - top + columnHeaderHeight;
 
 
-                    cacheCtx.restore();
-                }
-                this._applyCacheFreeze(mainCtx, cacheCanvas, bufferEdgeSizeX, bufferEdgeSizeY, dw, dh, left, top, dw, dh);
-            } else {
-                if( isDirty ){
+        // 没有滚动
+        if (diffBounds.length === 0 || (diffX === 0 && diffY === 0) || isForceDirty) {
+            if (isDirty || isForceDirty) {
+                cacheCtx.save();
+                cacheCtx.setTransform(1, 0, 0, 1, 0, 0);
+                cacheCanvas.clear();
+                cacheCtx.restore();
 
-                    cacheCtx.save();
-                    cacheCtx.setTransform(1, 0, 0, 1, 0, 0);
-                    cacheCtx.globalCompositeOperation = 'copy';
-                    cacheCtx.drawImage(cacheCanvas.getCanvasEle(), diffX * scaleX, diffY * scaleY);
-                    cacheCtx.restore();
+                cacheCtx.save();
+                // mainCtx.translateWithPrecision(rowHeaderWidth, columnHeaderHeight);
+                // 所以 cacheCtx.setTransform 已经包含了 rowHeaderWidth + viewport + scroll 距离
+                const m = mainCtx.getTransform();
+                cacheCtx.setTransform(m.a, m.b, m.c, m.d, m.e, m.f);
 
-                    this._refreshIncrementalState = true;
+                // leftOrigin 是 viewport 相对 sheetcorner 的偏移(不考虑缩放)
+                // - (leftOrigin - bufferEdgeX)  ----> 简化
+                cacheCtx.translate(-leftOrigin + bufferEdgeX, -topOrigin + bufferEdgeY);
 
-                    // 绘制之前重设画笔位置到 spreadsheet 原点, 当没有滚动时, 这个值是 (rowHeaderWidth, colHeaderHeight)
-                    cacheCtx.setTransform(mainCtx.getTransform());
-                    cacheCtx.translate(-leftOrigin + bufferEdgeX, -topOrigin + bufferEdgeY);
-
-
-                    if (shouldCacheUpdate) {
-                        console.time('viewMain---222---222');
-                        for (const diffBound of diffCacheBounds) {
-                            cacheCtx.save();
-
-                            let { left: diffLeft, right: diffRight, bottom: diffBottom, top: diffTop } = diffBound;
-                            cacheCtx.beginPath();
-
-                            // 再次注意!  draw 的时候 ctx.translate 单元格偏移是相对 spreadsheet content
-                            // 但是 diffBounds 是包括 rowHeader 信息
-                            diffLeft -= bufferEdgeX; // 必须扩大范围 不然存在空白贴图
-                            diffTop -= bufferEdgeY;
-                            const x = diffLeft - (rowHeaderWidth) - FIX_ONE_PIXEL_BLUR_OFFSET * 2;
-                            const y = diffTop - columnHeaderHeight - FIX_ONE_PIXEL_BLUR_OFFSET * 2;
-                            const w = diffRight - diffLeft + (rowHeaderWidth) + FIX_ONE_PIXEL_BLUR_OFFSET * 2;
-                            const h = diffBottom - diffTop + columnHeaderHeight + FIX_ONE_PIXEL_BLUR_OFFSET * 2;
+                // extension 绘制时按照内容的左上角计算, 不考虑 rowHeaderWidth
+                this.draw(cacheCtx, viewportBoundsInfo);
 
 
-                            cacheCtx.rectByPrecision(x, y, w, h);
-                            cacheCtx.clip();
-
-                            this.draw(cacheCtx, {
-                                ...viewportBoundsInfo,
-                                diffBounds: [diffBound],
-                            });
-                            cacheCtx.restore();
-                        }
-                        console.time('viewMain---222---222');
-                    }
-                    this._refreshIncrementalState = false;
-
-                }
-                this._applyCacheFreeze(mainCtx, cacheCanvas, bufferEdgeSizeX, bufferEdgeSizeY, dw, dh, left, top, dw, dh);
-
+                cacheCtx.restore();
             }
-            cacheCtx.restore();
+            this._applyCacheFreeze(mainCtx, cacheCanvas, bufferEdgeSizeX, bufferEdgeSizeY, dw, dh, left, top, dw, dh);
         } else {
-            const cacheCtx = cacheCanvas.getContext();
-            cacheCtx.save();
-            const { left, top, right, bottom } = viewPortPosition;
-            const dw = right - left + rowHeaderWidth;
-            const dh = bottom - top + columnHeaderHeight;
+            if (isDirty) {
+                cacheCtx.save();
+                cacheCtx.setTransform(1, 0, 0, 1, 0, 0);
+                cacheCtx.globalCompositeOperation = 'copy';
+                cacheCtx.drawImage(cacheCanvas.getCanvasEle(), diffX * scaleX, diffY * scaleY);
+                cacheCtx.restore();
 
-            if (diffBounds.length === 0 || (diffX === 0 && diffY === 0) || isForceDirty) {
-                if (isDirty || isForceDirty || this.isForceDirty()) {
-                    cacheCtx.save();
-                    cacheCtx.setTransform(1, 0, 0, 1, 0, 0);
-                    cacheCanvas.clear();
-                    cacheCtx.restore();
+                this._refreshIncrementalState = true;
 
-                    cacheCtx.save();
-                    cacheCtx.setTransform(mainCtx.getTransform());
-                    cacheCtx.translate(-leftOrigin + bufferEdgeX, -topOrigin + bufferEdgeY);
+                // 绘制之前重设画笔位置到 spreadsheet 原点, 当没有滚动时, 这个值是 (rowHeaderWidth, colHeaderHeight)
+                cacheCtx.setTransform(mainCtx.getTransform());
+                cacheCtx.translate(-leftOrigin + bufferEdgeX, -topOrigin + bufferEdgeY);
 
 
-                    viewportBoundsInfo.viewBound = viewportBoundsInfo.cacheBound;
-                    this._draw(cacheCtx, viewportBoundsInfo);
+                if (shouldCacheUpdate) {
+                    for (const diffBound of diffCacheBounds) {
+                        cacheCtx.save();
 
-                    cacheCtx.restore();
-                }
-                this._applyCacheFreeze(mainCtx, cacheCanvas, bufferEdgeSizeX, bufferEdgeSizeY, dw, dh, left, top, dw, dh);
-            } else {
-                if(isDirty){
-                    cacheCtx.save();
-                    cacheCtx.setTransform(1, 0, 0, 1, 0, 0);
-                    cacheCtx.globalCompositeOperation = 'copy';
-                    cacheCtx.drawImage(cacheCanvas.getCanvasEle(), diffX * scaleX, diffY * scaleY);
-                    cacheCtx.restore();
+                        const { left: diffLeft, right: diffRight, bottom: diffBottom, top: diffTop } = diffBound;
+                        cacheCtx.beginPath();
 
-                    this._refreshIncrementalState = true;
-                    cacheCtx.setTransform(mainCtx.getTransform());
-                    cacheCtx.translate(-leftOrigin + bufferEdgeX, -topOrigin + bufferEdgeY);
+                        // 再次注意!  draw 的时候 ctx.translate 单元格偏移是相对 spreadsheet content
+                        // 但是 diffBounds 是包括 rowHeader 信息
+                        const onePixelFix = FIX_ONE_PIXEL_BLUR_OFFSET * 2;
+                        const x = Math.floor(diffLeft - (rowHeaderWidth) - onePixelFix);
+                        const y = Math.floor(diffTop - columnHeaderHeight - onePixelFix);
+                        const w = Math.ceil(diffRight - diffLeft + onePixelFix);
+                        const h = Math.ceil(diffBottom - diffTop + onePixelFix);
 
+                        cacheCtx.rectByPrecision(x, y, w, h);
+                        // cacheCtx.clearRect(x + 1, y + 1, w - 2, h - 2);
+                        // cacheCtx.clearRect(x, y, w, h);
+                        cacheCtx.clip();// 加上这个会有很细的白色边框线, 和上面是否 clearRect 无关
 
-
-                    if (shouldCacheUpdate) {
-                        for (const diffBound of diffCacheBounds) {
-                            let { left: diffLeft, right: diffRight, bottom: diffBottom, top: diffTop } = diffBound;
-                            cacheCtx.save();
-                            cacheCtx.beginPath();
-                            diffLeft -= bufferEdgeX; // 必须扩大范围 不然存在空白贴图
-                            diffTop -= bufferEdgeY;
-                            const x = diffLeft - (rowHeaderWidth) - FIX_ONE_PIXEL_BLUR_OFFSET * 2;
-                            const y = diffTop - columnHeaderHeight - FIX_ONE_PIXEL_BLUR_OFFSET * 2;
-                            const w = diffRight - diffLeft + (rowHeaderWidth) + FIX_ONE_PIXEL_BLUR_OFFSET * 2;
-                            const h = diffBottom - diffTop + columnHeaderHeight + FIX_ONE_PIXEL_BLUR_OFFSET * 2;
-
-
-                            cacheCtx.rectByPrecision(x, y, w, h);
-                            cacheCtx.clip();
-                            this.draw(cacheCtx, {
-                                ...viewportBoundsInfo,
-                                diffBounds: [diffBound],
-                            });
-                            cacheCtx.restore();
-                        }
+                        this.draw(cacheCtx, {
+                            ...viewportBoundsInfo,
+                            diffBounds: [diffBound],
+                        });
+                        cacheCtx.restore();
                     }
-
-                    this._refreshIncrementalState = false;
                 }
-                this._applyCacheFreeze(mainCtx, cacheCanvas, bufferEdgeSizeX, bufferEdgeSizeY, dw, dh, left, top, dw, dh);
+                this._refreshIncrementalState = false;
             }
+            this._applyCacheFreeze(mainCtx, cacheCanvas, bufferEdgeSizeX, bufferEdgeSizeY, dw, dh, left, top, dw, dh);
+
             cacheCtx.restore();
         }
-
     }
 
     override render(mainCtx: UniverRenderingContext, viewportInfo: IViewportInfo) {
@@ -438,7 +367,7 @@ export class Spreadsheet extends SheetComponent {
 
         if (
             (segment.startRow === -1 && segment.endRow === -1) ||
-            (segment.startColumn === -1 && segment.endColumn === -1)
+                (segment.startColumn === -1 && segment.endColumn === -1)
         ) {
             return;
         }
@@ -452,13 +381,13 @@ export class Spreadsheet extends SheetComponent {
         this._drawAuxiliary(mainCtx, viewportInfo);
 
         const { viewPortKey } = viewportInfo;
-        // scene --> layer, getObjects --> viewport.render(object) --> spreadsheet
-        // zIndex 0 spreadsheet  this.getObjectsByOrder() ---> [spreadsheet]
-        // zIndex 2 rowHeader & colHeader & freezeBorder this.getObjectsByOrder() ---> [SpreadsheetRowHeader, SpreadsheetColumnHeader, _Rect]
-        // zIndex 3 selection  this.getObjectsByOrder() ---> [group]
+            // scene --> layer, getObjects --> viewport.render(object) --> spreadsheet
+            // zIndex 0 spreadsheet  this.getObjectsByOrder() ---> [spreadsheet]
+            // zIndex 2 rowHeader & colHeader & freezeBorder this.getObjectsByOrder() ---> [SpreadsheetRowHeader, SpreadsheetColumnHeader, _Rect]
+            // zIndex 3 selection  this.getObjectsByOrder() ---> [group]
 
-        // SpreadsheetRowHeader SpreadsheetColumnHeader 并不在 spreadsheet 中处理
-        if(['viewMain', 'viewMainLeftTop', 'viewMainTop', 'viewMainLeft'].includes(viewPortKey)) {
+            // SpreadsheetRowHeader SpreadsheetColumnHeader 并不在 spreadsheet 中处理
+        if (['viewMain', 'viewMainLeftTop', 'viewMainTop', 'viewMainLeft'].includes(viewPortKey)) {
             if (viewportInfo && viewportInfo.cacheCanvas) {
                 this.renderByViewport(mainCtx, viewportInfo, spreadsheetSkeleton);
             } else {
@@ -506,7 +435,7 @@ export class Spreadsheet extends SheetComponent {
         mainCtx.save();
         mainCtx.setTransform(1, 0, 0, 1, 0, 0);
         cacheCtx.setTransform(1, 0, 0, 1, 0, 0);
-        mainCtx.globalCompositeOperation = "source-over";
+        mainCtx.globalCompositeOperation = 'source-over';
         mainCtx.drawImage(
             cacheCanvas.getCanvasEle(),
             sx * pixelRatio,

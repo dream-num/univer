@@ -35,7 +35,7 @@ export class Marker extends SheetExtension {
     override uKey: string = UNIQUE_KEY;
 
     override draw(ctx: UniverRenderingContext, parentScale: IScale, skeleton: SpreadsheetSkeleton,
-        {viewRanges, diffRanges, checkOutOfViewBound, viewPortKey}: { viewRanges: IRange[], diffRanges?: IRange[], checkOutOfViewBound?: boolean, viewPortKey: string }
+        diffRanges: IRange[]
     ): void {
         const { worksheet, rowColumnSegment } = skeleton;
         if (!worksheet) {

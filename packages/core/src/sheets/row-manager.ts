@@ -19,6 +19,7 @@ import type { Nullable } from '../shared/types';
 import { BooleanNumber } from '../types/enum';
 import type { IRange, IRowData, IWorksheetData } from '../types/interfaces';
 import { RANGE_TYPE } from '../types/interfaces';
+import type { SheetViewModel } from './view-model';
 
 /**
  * Manage configuration information of all rows, get row height, row length, set row height, etc.
@@ -28,6 +29,7 @@ export class RowManager {
 
     constructor(
         private readonly _config: IWorksheetData,
+        private readonly _viewModel: SheetViewModel,
         data: IObjectArrayPrimitiveType<Partial<IRowData>>
     ) {
         this._rowData = data;
@@ -112,7 +114,7 @@ export class RowManager {
         let startRow = -1;
 
         for (let i = start; i <= end; i++) {
-            const visible = this.getRowVisible(i);
+            const visible = this.getRowRawVisible(i);
             if (inHiddenRange && visible) {
                 inHiddenRange = false;
                 hiddenRows.push({
@@ -148,7 +150,7 @@ export class RowManager {
         let startRow = -1;
 
         for (let i = start; i <= end; i++) {
-            const visible = this.getRowVisible(i);
+            const visible = this.getRowRawVisible(i);
             if (inVisibleRange && !visible) {
                 inVisibleRange = false;
                 visibleRows.push({
@@ -171,13 +173,13 @@ export class RowManager {
         return visibleRows;
     }
 
-    getRowVisible(rowPos: number): boolean {
-        const row = this.getRow(rowPos);
-        if (!row) {
+    getRowRawVisible(row: number): boolean {
+        const rowData = this.getRow(row);
+        if (!rowData) {
             return true;
         }
 
-        return row.hd !== BooleanNumber.TRUE;
+        return rowData.hd !== BooleanNumber.TRUE;
     }
 
     /**

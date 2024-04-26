@@ -26,7 +26,7 @@ import { zhCN } from './locale';
 export interface IUniverSheetsZenEditorPluginConfig {}
 export class UniverSheetsZenEditorPlugin extends Plugin {
     static override pluginName = 'zen-editor';
-    static override type = UniverInstanceType.DOC;
+    static override type = UniverInstanceType.UNIVER_DOC;
 
     constructor(
         _config: IUniverSheetsZenEditorPluginConfig,

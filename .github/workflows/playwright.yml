@@ -26,7 +26,7 @@ jobs:
               uses: ./.github/actions/setup-node
 
             - name: Install Playwright Browsers
-              run: pnpm exec playwright install --with-deps
+              run: pnpm dlx playwright install --with-deps
 
             # build the example locally and run from the built files
             - name: Build E2E Client

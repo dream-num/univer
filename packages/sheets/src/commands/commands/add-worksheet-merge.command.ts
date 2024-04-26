@@ -188,7 +188,7 @@ export const AddWorksheetMergeAllCommand: ICommand = {
         }
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET);
+        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (!workbook) return false;
 
         const workSheet = workbook.getActiveSheet();
@@ -217,7 +217,7 @@ export const AddWorksheetMergeVerticalCommand: ICommand = {
         }
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET);
+        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (!workbook) return false;
 
         const workSheet = workbook.getActiveSheet();
@@ -247,7 +247,7 @@ export const AddWorksheetMergeHorizontalCommand: ICommand = {
         }
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET);
+        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (!workbook) return false;
 
         const workSheet = workbook.getActiveSheet();

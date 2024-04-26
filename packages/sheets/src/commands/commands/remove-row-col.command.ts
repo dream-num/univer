@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommand, IRange } from '@univerjs/core';
+import type { ICommand, IMutationInfo, IRange } from '@univerjs/core';
 import {
     CommandType,
     ICommandService,
@@ -55,13 +55,14 @@ export const RemoveRowCommand: ICommand<IRemoveRowColCommandParams> = {
 
     id: RemoveRowCommandId,
 
+    // eslint-disable-next-line max-lines-per-function
     handler: async (accessor: IAccessor, params?: IRemoveRowColCommandParams) => {
         const selectionManagerService = accessor.get(SelectionManagerService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
-        let range = params?.range;
-        if (!range) range = selectionManagerService.getLast()?.range;
-        if (!range) return false;
+        let totalRange = params?.range;
+        if (!totalRange) totalRange = selectionManagerService.getLast()?.range;
+        if (!totalRange) return false;
 
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const target = getSheetCommandTarget(univerInstanceService);
@@ -69,42 +70,75 @@ export const RemoveRowCommand: ICommand<IRemoveRowColCommandParams> = {
 
         const { workbook, worksheet, subUnitId, unitId } = target;
 
-        range = {
-            ...range,
+        totalRange = {
+            ...totalRange,
             startColumn: 0,
             endColumn: Math.max(worksheet.getMaxColumns() - 1, 0),
         };
 
-        // row count
-        const removeRowsParams: IRemoveRowsMutationParams = {
-            unitId,
-            subUnitId,
-            range,
-        };
 
-        const removedRows = worksheet.getCellMatrix().getSlice(range.startRow, range.endRow, 0, worksheet.getColumnCount() - 1);
-        const undoSetRangeValuesParams: ISetRangeValuesMutationParams = {
-            unitId,
-            subUnitId,
-            cellValue: removedRows.getMatrix(),
-        };
-        const undoRemoveRowsParams: IInsertRowMutationParams = RemoveRowsUndoMutationFactory(
-            removeRowsParams,
-            worksheet
-        );
+        const filterOutRowsInRemove: number[] = [];
+        for (let i = totalRange.startRow; i <= totalRange.endRow; i++) {
+            if (worksheet.getRowFiltered(i)) {
+                filterOutRowsInRemove.push(i);
+            }
+        }
+
+        const ranges: IRange[] = [];
+        if (filterOutRowsInRemove.length) {
+            const starts = [totalRange.startRow, ...filterOutRowsInRemove.map((r) => r + 1)];
+            const ends = [...filterOutRowsInRemove.map((r) => r - 1), totalRange.endRow];
+            for (let i = starts.length - 1; i >= 0; i--) {
+                if (starts[i] <= ends[i]) {
+                    ranges.push({
+                        startRow: starts[i],
+                        endRow: ends[i],
+                        startColumn: totalRange.startColumn,
+                        endColumn: totalRange.endColumn,
+                    });
+                }
+            }
+        } else {
+            ranges.push(totalRange);
+        }
+
+        const redos: IMutationInfo[] = [];
+        const undos: IMutationInfo[] = [];
+
+        ranges.forEach((range) => {
+            // row count
+            const removeRowsParams: IRemoveRowsMutationParams = {
+                unitId,
+                subUnitId,
+                range,
+            };
+            const removedRows = worksheet.getCellMatrix().getSlice(range.startRow, range.endRow, 0, worksheet.getColumnCount() - 1);
+            const undoSetRangeValuesParams: ISetRangeValuesMutationParams = {
+                unitId,
+                subUnitId,
+                cellValue: removedRows.getMatrix(),
+            };
+            const undoRemoveRowsParams: IInsertRowMutationParams = RemoveRowsUndoMutationFactory(
+                removeRowsParams,
+                worksheet
+            );
+
+            redos.push({ id: RemoveRowMutation.id, params: removeRowsParams });
+            undos.unshift({ id: InsertRowMutation.id, params: undoRemoveRowsParams }, { id: SetRangeValuesMutation.id, params: undoSetRangeValuesParams });
+        });
 
         const intercepted = sheetInterceptorService.onCommandExecute({
             id: RemoveRowCommand.id,
-            params: { range } as IRemoveRowColCommandParams,
+            params: { range: totalRange } as IRemoveRowColCommandParams,
         });
 
         const commandService = accessor.get(ICommandService);
         const result = sequenceExecute(
             [
                 ...(intercepted.preRedos ?? []),
-                { id: RemoveRowMutation.id, params: removeRowsParams },
+                ...redos,
                 ...intercepted.redos,
-                followSelectionOperation(range, workbook, worksheet),
+                followSelectionOperation(totalRange, workbook, worksheet),
             ],
             commandService
         );
@@ -112,8 +146,16 @@ export const RemoveRowCommand: ICommand<IRemoveRowColCommandParams> = {
         if (result.result) {
             accessor.get(IUndoRedoService).pushUndoRedo({
                 unitID: unitId,
-                undoMutations: [...(intercepted.preUndos ?? []), { id: InsertRowMutation.id, params: undoRemoveRowsParams }, { id: SetRangeValuesMutation.id, params: undoSetRangeValuesParams }, ...intercepted.undos],
-                redoMutations: [...(intercepted.preRedos ?? []), { id: RemoveRowMutation.id, params: removeRowsParams }, ...intercepted.redos],
+                undoMutations: [
+                    ...(intercepted.preUndos ?? []),
+                    ...undos,
+                    ...intercepted.undos,
+                ],
+                redoMutations: [
+                    ...(intercepted.preRedos ?? []),
+                    ...redos,
+                    ...intercepted.redos,
+                ],
             });
             return true;
         }

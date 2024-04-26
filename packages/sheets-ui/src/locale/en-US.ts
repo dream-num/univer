@@ -252,6 +252,12 @@ const locale: typeof zhCN = {
             dismantleMergeCellWaring: 'This will cause some merged cells to be split. Do you want to continue?',
         },
     },
+    filter: {
+        confirm: {
+            error: 'There was a problem',
+            notAllowedToInsertRange: 'Not allowed to move cells here until filter is cleared',
+        },
+    },
     textWrap: {
         overflow: 'Overflow',
         wrap: 'Wrap',

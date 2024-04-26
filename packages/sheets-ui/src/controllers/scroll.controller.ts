@@ -405,7 +405,7 @@ export class ScrollController extends Disposable {
             return false;
         }
 
-        const worksheet = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!.getActiveSheet();
+        const worksheet = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet();
         const {
             startColumn: freezeStartColumn,
             startRow: freezeStartRow,

@@ -71,7 +71,7 @@ export class SelectionController extends Disposable {
     }
 
     private _initialize() {
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet();
         const sheetObject = this._getSheetObject();
         if (sheetObject == null) {
@@ -109,7 +109,7 @@ export class SelectionController extends Disposable {
                     const { unitId } = item;
                     let { formulaOrRefString } = item;
 
-                    const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+                    const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
 
                     if (unitId !== workbook.getUnitId()) {
                         return;
@@ -376,7 +376,7 @@ export class SelectionController extends Disposable {
         }
         const lastSelection = params[params.length - 1];
 
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet();
 
         this._definedNamesService.setCurrentRange({
@@ -401,7 +401,7 @@ export class SelectionController extends Disposable {
     }
 
     private _move(selectionDataWithStyleList: ISelectionWithCoordAndStyle[], type: SelectionMoveType) {
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET);
+        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (!workbook) return;
 
         const unitId = workbook.getUnitId();
@@ -433,7 +433,7 @@ export class SelectionController extends Disposable {
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (updateCommandList.includes(command.id)) {
-                    const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+                    const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
                     const worksheet = workbook.getActiveSheet();
 
                     const params = command.params as ISetZoomRatioOperationParams;

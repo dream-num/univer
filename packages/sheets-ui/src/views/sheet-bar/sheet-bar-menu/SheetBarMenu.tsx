@@ -57,7 +57,7 @@ export function SheetBarMenu(props: ISheetBarMenuProps) {
     const univerInstanceService = useDependency(IUniverInstanceService);
     const commandService = useDependency(ICommandService);
     const sheetBarService = useDependency(ISheetBarService);
-    const workbook = useObservable(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.SHEET), null, false, []);
+    const workbook = useObservable(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), null, false, []);
 
     const handleClick = (item: ISheetBarMenuItem) => {
         const { sheetId } = item;

@@ -39,7 +39,21 @@ export const DeleteRangeMoveUpConfirmCommand: ICommand = {
         let range = selection[0].range;
         if (!range) return false;
 
-        range = { ...range, endRow: worksheet.getColumnCount() - 1 };
+        range = { ...range, endRow: worksheet.getRowCount() - 1 };
+
+        for (let i = range.startRow; i <= range.endRow; i++) {
+            if (worksheet.getRowFiltered(i)) {
+                const result = await confirmService.confirm({
+                    id: DeleteRangeMoveUpConfirmCommand.id,
+                    title: { title: localeService.t('filter.confirm.error') },
+                    children: { title: localeService.t('filter.confirm.notAllowedToInsertRange') },
+                    confirmText: localeService.t('button.confirm'),
+                });
+                if (result) {
+                    return false;
+                }
+            }
+        }
 
         const getColLength = (range: IRange) => range.endColumn - range.startColumn;
         const mergeData = worksheet.getMergeData().find((mergeRange) => {

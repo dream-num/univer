@@ -20,6 +20,8 @@ import { UniverDocsPlugin } from '@univerjs/docs';
 import { UniverDocsUIPlugin } from '@univerjs/docs-ui';
 import { UniverFormulaEnginePlugin } from '@univerjs/engine-formula';
 import { UniverRenderEnginePlugin } from '@univerjs/engine-render';
+import { UniverFindReplacePlugin } from '@univerjs/find-replace';
+import { UniverSheetsFilterPlugin } from '@univerjs/sheets-filter';
 import type { IUniverRPCMainThreadConfig } from '@univerjs/rpc';
 import { UniverRPCMainThreadPlugin } from '@univerjs/rpc';
 import { UniverSheetsPlugin } from '@univerjs/sheets';
@@ -33,8 +35,8 @@ import { UniverDataValidationPlugin } from '@univerjs/data-validation';
 import { UniverSheetsDataValidationPlugin } from '@univerjs/sheets-data-validation';
 import { UniverSheetsConditionalFormattingUIPlugin } from '@univerjs/sheets-conditional-formatting-ui';
 
-import { DebuggerPlugin } from '../plugins/debugger';
 import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data/sheets/demo/default-workbook-data-demo';
+import { DebuggerPlugin } from '../plugins/debugger';
 import { locales } from './locales';
 
 /* eslint-disable-next-line node/prefer-global/process */
@@ -69,7 +71,6 @@ univer.registerPlugin(UniverSheetsUIPlugin);
 // sheet feature plugins
 
 univer.registerPlugin(UniverSheetsNumfmtPlugin);
-univer.registerPlugin(DebuggerPlugin);
 univer.registerPlugin(UniverSheetsZenEditorPlugin);
 univer.registerPlugin(UniverFormulaEnginePlugin, {
     notExecuteFormula: true,
@@ -79,17 +80,23 @@ univer.registerPlugin(UniverRPCMainThreadPlugin, {
     workerURL: './worker.js',
 } as IUniverRPCMainThreadConfig);
 
+// find replace
+univer.registerPlugin(UniverFindReplacePlugin);
+univer.registerPlugin(UniverSheetsFindReplacePlugin);
+
 // data validation
 univer.registerPlugin(UniverDataValidationPlugin);
 univer.registerPlugin(UniverSheetsDataValidationPlugin);
-univer.registerPlugin(UniverSheetsFindReplacePlugin);
+
+// filter
+univer.registerPlugin(UniverSheetsFilterPlugin);
 
 // sheet condition formatting
 univer.registerPlugin(UniverSheetsConditionalFormattingUIPlugin);
 
 // create univer sheet instance
 if (!IS_E2E) {
-    univer.createUnit(UniverInstanceType.SHEET, DEFAULT_WORKBOOK_DATA_DEMO);
+    univer.createUnit(UniverInstanceType.UNIVER_SHEET, DEFAULT_WORKBOOK_DATA_DEMO);
 }
 
 // Uncomment the following lines to test if the document is disposed correctly without memory leaks.
@@ -97,8 +104,12 @@ if (!IS_E2E) {
 //     univer.__getInjector().get(IUniverInstanceService).disposeUnit(DEFAULT_WORKBOOK_DATA_DEMO.id);
 // }, 5000);
 // setTimeout(() => {
-//     univer.createUnit(UniverInstanceType.SHEET, DEFAULT_WORKBOOK_DATA_DEMO);
+//     univer.createUnit(UniverInstanceType.UNIVER_SHEET, DEFAULT_WORKBOOK_DATA_DEMO);
 // }, 7000);
+
+
+// debugger plugin
+univer.registerPlugin(DebuggerPlugin);
 
 declare global {
     interface Window {

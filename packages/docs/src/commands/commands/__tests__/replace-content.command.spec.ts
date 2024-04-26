@@ -62,7 +62,7 @@ describe('replace or cover content of document', () => {
 
     function getDataStream() {
         const univerInstanceService = get(IUniverInstanceService);
-        const docsModel = univerInstanceService.getUnit<DocumentDataModel>('test-doc', UniverInstanceType.DOC);
+        const docsModel = univerInstanceService.getUnit<DocumentDataModel>('test-doc', UniverInstanceType.UNIVER_DOC);
 
         if (docsModel?.body?.dataStream == null) {
             return '';

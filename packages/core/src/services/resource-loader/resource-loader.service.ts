@@ -15,7 +15,6 @@
  */
 
 import { Inject } from '@wendellhu/redi';
-import { UniverType } from '@univerjs/protocol';
 import type { Workbook } from '../../sheets/workbook';
 import type { IWorkbookData } from '../../types/interfaces';
 import type { IResourceHook } from '../resource-manager/type';
@@ -30,8 +29,6 @@ export class ResourceLoaderService extends Disposable implements IResourceLoader
     constructor(
         @Inject(IResourceManagerService) private readonly _resourceManagerService: IResourceManagerService,
         @Inject(IUniverInstanceService) private readonly _univerInstanceService: IUniverInstanceService
-
-
     ) {
         super();
         this._init();
@@ -41,15 +38,15 @@ export class ResourceLoaderService extends Disposable implements IResourceLoader
         const handleHookAdd = (hook: IResourceHook) => {
             hook.businesses.forEach((business) => {
                 switch (business) {
-                    case UniverType.UNRECOGNIZED:
-                    case UniverType.UNIVER_UNKNOWN:
-                    case UniverType.UNIVER_SLIDE:
-                    case UniverType.UNIVER_DOC: {
+                    case UniverInstanceType.UNRECOGNIZED:
+                    case UniverInstanceType.UNIVER_UNKNOWN:
+                    case UniverInstanceType.UNIVER_SLIDE:
+                    case UniverInstanceType.UNIVER_DOC: {
                         // TODO@gggpound: wait to support.
                         break;
                     }
-                    case UniverType.UNIVER_SHEET: {
-                        this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.SHEET).forEach((workbook) => {
+                    case UniverInstanceType.UNIVER_SHEET: {
+                        this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET).forEach((workbook) => {
                             const snapshotResource = workbook.getSnapshot().resources || [];
                             const plugin = snapshotResource.find((r) => r.name === hook.pluginName);
                             if (plugin) {
@@ -77,7 +74,7 @@ export class ResourceLoaderService extends Disposable implements IResourceLoader
 
         this.disposeWithMe(
             toDisposable(
-                this._univerInstanceService.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.SHEET).subscribe((workbook) => {
+                this._univerInstanceService.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => {
                     this._resourceManagerService.loadResources(workbook.getUnitId(), workbook.getSnapshot().resources);
                 })
             )
@@ -85,7 +82,7 @@ export class ResourceLoaderService extends Disposable implements IResourceLoader
 
         this.disposeWithMe(
             toDisposable(
-                this._univerInstanceService.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.SHEET).subscribe((workbook) => {
+                this._univerInstanceService.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => {
                     this._resourceManagerService.unloadResources(workbook.getUnitId());
                 })
             )

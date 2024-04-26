@@ -61,11 +61,11 @@ export class SheetInterceptorService extends Disposable {
 
         // When a workbook is created or a worksheet is added after when workbook is created,
         // `SheetInterceptorService` inject interceptors to worksheet instances to it.
-        this.disposeWithMe(this._univerInstanceService.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.SHEET).subscribe((workbook) => {
+        this.disposeWithMe(this._univerInstanceService.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => {
             this._interceptWorkbook(workbook);
         }));
 
-        this.disposeWithMe(this._univerInstanceService.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.SHEET).subscribe((workbook) =>
+        this.disposeWithMe(this._univerInstanceService.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) =>
             this._disposeWorkbookInterceptor(workbook)
         ));
 
@@ -80,11 +80,6 @@ export class SheetInterceptorService extends Disposable {
 
                 return rawData;
             },
-        });
-
-        this.intercept(INTERCEPTOR_POINT.PERMISSION, {
-            priority: -1,
-            handler: () => true,
         });
     }
 
@@ -150,16 +145,16 @@ export class SheetInterceptorService extends Disposable {
         const unitId = workbook.getUnitId();
 
         // eslint-disable-next-line ts/no-this-alias
-        const self = this;
+        const sheetInterceptorService = this;
         const interceptViewModel = (worksheet: Worksheet): void => {
             const subUnitId = worksheet.getSheetId();
             worksheet.__interceptViewModel((viewModel) => {
-                const disposableId = getWorksheetDisposableID(unitId, worksheet);
-
                 const sheetDisposables = new DisposableCollection();
-                const cellInterceptorDisposable = viewModel.registerCellContentInterceptor({
+                sheetInterceptorService._worksheetDisposables.set(getWorksheetDisposableID(unitId, worksheet), sheetDisposables);
+
+                sheetDisposables.add(viewModel.registerCellContentInterceptor({
                     getCell(row: number, col: number): Nullable<ICellData> {
-                        return self.fetchThroughInterceptors(INTERCEPTOR_POINT.CELL_CONTENT)(
+                        return sheetInterceptorService.fetchThroughInterceptors(INTERCEPTOR_POINT.CELL_CONTENT)(
                             worksheet.getCellRaw(row, col),
                             {
                                 unitId,
@@ -171,12 +166,22 @@ export class SheetInterceptorService extends Disposable {
                             }
                         );
                     },
-                });
+                }));
 
-                sheetDisposables.add(cellInterceptorDisposable);
-                sheetDisposables.add(toDisposable(() => self._workbookDisposables.delete(disposableId)));
-
-                self._worksheetDisposables.set(disposableId, sheetDisposables);
+                sheetDisposables.add(viewModel.registerRowFilteredInterceptor({
+                    getRowFiltered(row: number): boolean {
+                        return !!sheetInterceptorService.fetchThroughInterceptors(INTERCEPTOR_POINT.ROW_FILTERED)(
+                            false,
+                            {
+                                unitId,
+                                subUnitId,
+                                row,
+                                workbook,
+                                worksheet,
+                            }
+                        );
+                    },
+                }));
             });
         };
 

@@ -54,7 +54,7 @@ describe('Test inline format commands', () => {
 
     function getFormatValueAt(key: keyof IStyleBase, pos: number) {
         const univerInstanceService = get(IUniverInstanceService);
-        const docsModel = univerInstanceService.getUnit<DocumentDataModel>('test-doc', UniverInstanceType.DOC);
+        const docsModel = univerInstanceService.getUnit<DocumentDataModel>('test-doc', UniverInstanceType.UNIVER_DOC);
 
         if (docsModel?.body?.textRuns == null) {
             return;

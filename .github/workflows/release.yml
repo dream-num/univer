@@ -104,7 +104,7 @@ jobs:
             - name: 🚚 Install dependencies and build
               run: |
                   pnpm install
-                  pnpm run build
+                  pnpm build
 
             - name: Install Node.js
               uses: actions/setup-node@v4
@@ -139,7 +139,7 @@ jobs:
 
             #  ================= Deploy Demo =================
             - name: 📦 Build demo
-              run: pnpm run build:demo
+              run: pnpm build:demo
 
             - name: Copy demo to workspace
               run: |

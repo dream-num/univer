@@ -35,7 +35,6 @@ import {
     AddWorksheetMergeMutation,
     getAddMergeMutationRangeByType,
     getSheetCommandTarget,
-    INTERCEPTOR_POINT,
     RemoveMergeUndoMutationFactory,
     RemoveWorksheetMergeMutation,
     SelectionManagerService,
@@ -43,6 +42,7 @@ import {
     SetRangeValuesMutation,
     SetRangeValuesUndoMutationFactory,
     SheetInterceptorService,
+    SheetPermissionService,
 } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
 
@@ -111,11 +111,17 @@ export const ApplyFormatPainterCommand: ICommand = {
         if (!target) return false;
 
         const { worksheet, unitId, subUnitId } = target;
+        const sheetPermissionService = accessor.get(SheetPermissionService);
+
         const {
             styleValues: value,
             styleRange: range,
             mergeRanges,
         } = params;
+
+        if (!sheetPermissionService.getSheetEditable(unitId, subUnitId)) {
+            return false;
+        }
 
         const currentSelections = range ? [range] : selectionManagerService.getSelectionRanges();
         if (!currentSelections || !currentSelections.length) {
@@ -154,15 +160,6 @@ export const ApplyFormatPainterCommand: ICommand = {
             accessor,
             setRangeValuesMutationParams
         );
-
-        if (
-            !sheetInterceptorService.fetchThroughInterceptors(INTERCEPTOR_POINT.PERMISSION)(null, {
-                id: SetRangeValuesCommand.id,
-                params: setRangeValuesMutationParams,
-            })
-        ) {
-            return false;
-        }
 
         const setValueMutationResult = commandService.syncExecuteCommand(
             SetRangeValuesMutation.id,

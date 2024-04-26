@@ -75,26 +75,26 @@ describe('Test row col hide/unhine commands', () => {
 
     function getRowCount(): number {
         const currentService = get(IUniverInstanceService);
-        const workbook = currentService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+        const workbook = currentService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet();
         return worksheet.getRowCount();
     }
 
     function getColCount(): number {
         const currentService = get(IUniverInstanceService);
-        const workbook = currentService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+        const workbook = currentService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet();
         return worksheet.getColumnCount();
     }
 
-    function getRowVisible(row: number): boolean {
-        const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+    function getRowRawVisible(row: number): boolean {
+        const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet();
-        return worksheet.getRowVisible(row);
+        return worksheet.getRowRawVisible(row);
     }
 
     function getColVisible(col: number): boolean {
-        const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+        const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet();
         return worksheet.getColVisible(col);
     }
@@ -149,32 +149,32 @@ describe('Test row col hide/unhine commands', () => {
 
     describe('hide / unhide rows', () => {
         it('should work', async () => {
-            expect(getRowVisible(0)).toBeTruthy();
+            expect(getRowRawVisible(0)).toBeTruthy();
 
             selectRow(0, 0);
             await commandService.executeCommand(SetRowHiddenCommand.id);
-            expect(getRowVisible(0)).toBeFalsy();
+            expect(getRowRawVisible(0)).toBeFalsy();
 
             await commandService.executeCommand(UndoCommand.id);
-            expect(getRowVisible(0)).toBeTruthy();
+            expect(getRowRawVisible(0)).toBeTruthy();
 
             await commandService.executeCommand(RedoCommand.id);
-            expect(getRowVisible(0)).toBeFalsy();
+            expect(getRowRawVisible(0)).toBeFalsy();
 
             selectRow(2, 2);
             await commandService.executeCommand(SetRowHiddenCommand.id);
-            expect(getRowVisible(2)).toBeFalsy();
+            expect(getRowRawVisible(2)).toBeFalsy();
 
             // select a range and invoke unhide command will unhide all
             // hidden rows in the selected range
             selectRow(0, 7);
             await commandService.executeCommand(SetSelectedRowsVisibleCommand.id);
-            expect(getRowVisible(0)).toBeTruthy();
-            expect(getRowVisible(2)).toBeTruthy();
+            expect(getRowRawVisible(0)).toBeTruthy();
+            expect(getRowRawVisible(2)).toBeTruthy();
 
             await commandService.executeCommand(UndoCommand.id);
-            expect(getRowVisible(0)).toBeFalsy();
-            expect(getRowVisible(2)).toBeFalsy();
+            expect(getRowRawVisible(0)).toBeFalsy();
+            expect(getRowRawVisible(2)).toBeFalsy();
         });
     });
 

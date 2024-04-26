@@ -37,6 +37,7 @@ export interface IRectPopupProps {
 
     direction?: 'horizontal' | 'vertical';
 
+    closeOnSelfTarget?: boolean;
     onClickOutside?: (e: MouseEvent) => void;
 
     excludeOutside?: HTMLElement[];
@@ -77,7 +78,7 @@ const calcPopupPosition = (layout: IPopupLayoutInfo) => {
 };
 
 function RectPopup(props: IRectPopupProps) {
-    const { children, anchorRect, direction = 'vertical', onClickOutside, excludeOutside } = props;
+    const { children, anchorRect, direction = 'vertical', onClickOutside, excludeOutside, closeOnSelfTarget } = props;
     const nodeRef = useRef<HTMLElement>(null);
     const clickOtherFn = useEvent(onClickOutside ?? (() => { }));
 

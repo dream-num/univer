@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { PermissionService, Workbook } from '@univerjs/core';
+import type { Workbook } from '@univerjs/core';
 import {
     DisposableCollection,
     IPermissionService,
@@ -31,9 +31,6 @@ import { Inject } from '@wendellhu/redi';
 import { takeUntil } from 'rxjs/operators';
 
 import { of } from 'rxjs';
-import { SetRangeValuesCommand } from '../../commands/commands/set-range-values.command';
-import { INTERCEPTOR_POINT } from '../sheet-interceptor/interceptor-const';
-import { SheetInterceptorService } from '../sheet-interceptor/sheet-interceptor.service';
 import { SheetEditablePermission } from './permission-point';
 
 @OnLifecycle(LifecycleStages.Ready, SheetPermissionService)
@@ -41,31 +38,32 @@ export class SheetPermissionService extends RxDisposable {
     private _disposableByUnit = new Map<string, IDisposable>();
 
     constructor(
-        @Inject(IPermissionService) private _permissionService: PermissionService,
-        @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
-        @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService
+        @Inject(IPermissionService) private _permissionService: IPermissionService,
+        @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService
     ) {
         super();
+
         this._init();
-        this._interceptCommandPermission();
     }
 
     private _init() {
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         if (!workbook) return;
 
         this._interceptWorkbook(workbook);
-        this._univerInstanceService.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.SHEET).pipe(takeUntil(this.dispose$)).subscribe((workbook) => this._interceptWorkbook(workbook));
-        this._univerInstanceService.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.SHEET).pipe(takeUntil(this.dispose$)).subscribe((workbook) => {
-            const unitId = workbook.getUnitId();
-            this._disposableByUnit.get(unitId)?.dispose();
-            this._disposableByUnit.delete(unitId);
-        });
+        this._univerInstanceService.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.UNIVER_SHEET)
+            .pipe(takeUntil(this.dispose$))
+            .subscribe((workbook) => this._interceptWorkbook(workbook));
+
+        this._univerInstanceService.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.UNIVER_SHEET)
+            .pipe(takeUntil(this.dispose$))
+            .subscribe((workbook) => this._disposableByUnit.get(workbook.getUnitId())?.dispose());
     }
 
     private _interceptWorkbook(workbook: Workbook): void {
-        const disposableCollection = new DisposableCollection();
         const unitId = workbook.getUnitId();
+        const disposableCollection = new DisposableCollection();
+
         workbook.getSheets().forEach((worksheet) => {
             const subUnitId = worksheet.getSheetId();
             const sheetPermission = new SheetEditablePermission(unitId, subUnitId);
@@ -88,37 +86,15 @@ export class SheetPermissionService extends RxDisposable {
             })
         ));
 
+        disposableCollection.add(toDisposable(() => this._disposableByUnit.delete(unitId)));
         this._disposableByUnit.set(unitId, disposableCollection);
-    }
-
-    private _interceptCommandPermission() {
-        this.disposeWithMe(
-            this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.PERMISSION, {
-                priority: 99,
-                handler: (_value, commandInfo, next) => {
-                    const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
-                    const sheet = workbook?.getActiveSheet();
-                    const unitId = workbook?.getUnitId();
-                    const sheetId = sheet?.getSheetId();
-                    if (!unitId || !sheetId) {
-                        return false;
-                    }
-                    switch (commandInfo.id) {
-                        case SetRangeValuesCommand.id: {
-                            return this.getSheetEditable(unitId, sheetId);
-                        }
-                    }
-                    return next();
-                },
-            })
-        );
     }
 
     // TODO@Gggpound: should get by unitId instead of the current one
     getEditable$(unitId?: string, sheetId?: string) {
         return of({ value: true, status: PermissionStatus.INIT });
 
-        // const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+        // const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         // if (!workbook) {
         // }
 
@@ -139,7 +115,7 @@ export class SheetPermissionService extends RxDisposable {
 
     getSheetEditable(unitId?: string, sheetId?: string) {
         return true;
-        // const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+        // const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         // if (!workbook) return false;
 
         // const _unitId = unitId || workbook.getUnitId();
@@ -152,7 +128,7 @@ export class SheetPermissionService extends RxDisposable {
     }
 
     setSheetEditable(v: boolean, unitId?: string, sheetId?: string) {
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         if (!workbook) return;
 
         const _unitId = unitId || workbook.getUnitId();

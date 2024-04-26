@@ -102,7 +102,7 @@ export class NumfmtController extends Disposable implements INumfmtController {
         if (!range) {
             return false;
         }
-        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const sheet = workbook.getActiveSheet();
 
         const cellValue = sheet.getCellRaw(range.startRow, range.startColumn);
@@ -226,7 +226,7 @@ export class NumfmtController extends Disposable implements INumfmtController {
                         })
                     )
                     .subscribe(({ disposableCollection, selectionRanges }) => {
-                        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+                        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
                         this.openPanel();
                         disposableCollection.add(
                             this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {

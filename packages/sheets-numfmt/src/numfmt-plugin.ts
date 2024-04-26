@@ -28,7 +28,7 @@ import { UserHabitController } from './controllers/user-habit.controller';
 
 export class UniverSheetsNumfmtPlugin extends Plugin {
     static override pluginName = SHEET_NUMFMT_PLUGIN;
-    static override type = UniverInstanceType.SHEET;
+    static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(
         _config: unknown,

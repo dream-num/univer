@@ -19,11 +19,14 @@ import type { IMenuItemFactory } from '@univerjs/ui';
 import { ComponentManager, IMenuService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { AdditionAndSubtractionSingle } from '@univerjs/icons';
+import { AdditionAndSubtractionSingle, Insert } from '@univerjs/icons';
 import { UploadFileMenu } from '../views/upload-component/UploadFile';
 import { COMPONENT_UPLOAD_FILE_MENU } from '../views/upload-component/component-name';
 import { ImageMenuFactory, ImageUploadIcon, UploadCellImageMenuFactory, UploadFloatImageMenuFactory } from '../views/menu/image.menu';
 import { InsertCellImageOperation, InsertFloatImageOperation } from '../commands/operations/insert-image.operation';
+import { InsertSheetImageCommand } from '../commands/commands/insert-sheet-image.command';
+import { RemoveSheetImageCommand } from '../commands/commands/remove-sheet-image.command';
+import { SetSheetImageCommand } from '../commands/commands/set-sheet-image.command';
 
 @OnLifecycle(LifecycleStages.Rendered, SheetImageUIController)
 export class SheetImageUIController extends Disposable {
@@ -61,6 +64,9 @@ export class SheetImageUIController extends Disposable {
         [
             InsertFloatImageOperation,
             InsertCellImageOperation,
+            InsertSheetImageCommand,
+            RemoveSheetImageCommand,
+            SetSheetImageCommand,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 

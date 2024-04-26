@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { LocaleService, Plugin } from '@univerjs/core';
+import { LocaleService, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { SheetImageUIController } from './controllers/sheet-image.controller';
@@ -24,12 +24,14 @@ import { enUS, zhCN } from './locale';
 const PLUGIN_NAME = 'SHEETS_IMAGE_UI_PLUGIN';
 
 export class UniverSheetsImageUIPlugin extends Plugin {
+    static override type = UniverInstanceType.UNIVER_SHEET;
+    static override pluginName = PLUGIN_NAME;
     constructor(
         config: undefined,
         @Inject(Injector) protected _injector: Injector,
         @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
-        super(PLUGIN_NAME);
+        super();
 
         this._localeService.load({
             zhCN,

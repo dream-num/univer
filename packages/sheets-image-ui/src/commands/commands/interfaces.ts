@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-export { getImageSize } from './utils/get-image-size';
+import type { IImageManagerDataParam } from '@univerjs/image';
+import type { ISheetDrawingServiceParam } from '@univerjs/sheets';
 
-export { UniverImagePlugin } from './plugin';
-export { ImageManagerService, IImageManagerService, type IImageManagerDataParam, type IImageManagerSearchParam } from './services/image-manager.service';
-export { ImageModel } from './models/image-model';
-export { InsertImageMutation } from './commands/mutations/insert-image.mutations';
-export { RemoveImageMutation } from './commands/mutations/remove-image.mutations';
-export { SetImageMutation } from './commands/mutations/set-image.mutations';
+
+export interface IInsertDrawingCommandParam {
+    drawingParam: ISheetDrawingServiceParam;
+    imageParam: IImageManagerDataParam;
+}

@@ -14,39 +14,49 @@
  * limitations under the License.
  */
 
-import { ImageSourceType, type Nullable } from '@univerjs/core';
+import type { IAbsoluteTransform, Nullable } from '@univerjs/core';
+import { ImageSourceType } from '@univerjs/core';
 import type { IDisposable } from '@wendellhu/redi';
 import { createIdentifier } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
 import { Subject } from 'rxjs';
 
-import type { ImageModel } from '../models/image-model';
+import type { IImageData } from '../models/image-model';
+import { ImageModel } from '../models/image-model';
 
 
 export interface IImageManagerSearchParam {
     unitId: string;
     subUnitId: string; //sheetId, pageId and so on, it has a default name in doc business
     imageId: string;
+    transform?: Nullable<IAbsoluteTransform>;
 }
 
 export interface IImageManagerParam extends IImageManagerSearchParam {
     imageModel: ImageModel;
 }
 
+export interface IImageManagerDataParam extends IImageManagerSearchParam, IImageData {
+
+}
+
 export type ImageManagerInfo = Map<string, Map<string, Map<string, IImageManagerParam>>>;
 
 export interface IImageManagerService {
     readonly remove$: Observable<IImageManagerParam[]>;
-
-    readonly andOrUpdate$: Observable<IImageManagerSearchParam[]>;
+    readonly and$: Observable<IImageManagerParam[]>;
+    readonly update$: Observable<IImageManagerParam[]>;
 
     dispose(): void;
 
-    add(insertParam: IImageManagerParam): void;
-    batchAdd(insertParams: IImageManagerParam[]): void;
+    add(insertParam: IImageManagerDataParam): void;
+    batchAdd(insertParams: IImageManagerDataParam[]): void;
 
     remove(searchParam: IImageManagerSearchParam): void;
     batchRemove(removeParams: IImageManagerSearchParam[]): void;
+
+    update(updateParam: IImageManagerDataParam): void;
+    batchUpdate(updateParams: IImageManagerDataParam[]): void;
 
     setCurrent(searchParam: Nullable<IImageManagerSearchParam>): void;
     getCurrent(): Nullable<IImageManagerParam>;
@@ -72,21 +82,25 @@ export class ImageManagerService implements IDisposable, IImageManagerService {
     private readonly _remove$ = new Subject<IImageManagerParam[]>();
     readonly remove$ = this._remove$.asObservable();
 
-    private readonly _add$ = new Subject<IImageManagerSearchParam[]>();
-    readonly andOrUpdate$ = this._add$.asObservable();
+    private readonly _add$ = new Subject<IImageManagerParam[]>();
+    readonly and$ = this._add$.asObservable();
+
+    private readonly _update$ = new Subject<IImageManagerParam[]>();
+    readonly update$ = this._update$.asObservable();
 
     dispose(): void {
         this._remove$.complete();
         this._add$.complete();
+        this._update$.complete();
         this._imageManagerInfo.clear();
     }
 
-    add(insertParam: IImageManagerParam) {
+    add(insertParam: IImageManagerDataParam) {
         this._add$.next(this._addByParam(insertParam));
     }
 
-    batchAdd(insertParams: IImageManagerParam[]) {
-        const objects: IImageManagerSearchParam[] = [];
+    batchAdd(insertParams: IImageManagerDataParam[]) {
+        const objects: IImageManagerParam[] = [];
         insertParams.forEach((insertParam) => {
             objects.push(...this._addByParam(insertParam));
         });
@@ -105,6 +119,19 @@ export class ImageManagerService implements IDisposable, IImageManagerService {
         });
 
         this._remove$.next(objects);
+    }
+
+    update(updateParam: IImageManagerDataParam) {
+        this._update$.next(this._updateByParam(updateParam));
+    }
+
+    batchUpdate(updateParams: IImageManagerDataParam[]) {
+        const objects: IImageManagerParam[] = [];
+        updateParams.forEach((updateParam) => {
+            objects.push(...this._updateByParam(updateParam));
+        });
+
+        this._update$.next(objects);
     }
 
     setCurrent(searchParam: Nullable<IImageManagerSearchParam>) {
@@ -151,8 +178,8 @@ export class ImageManagerService implements IDisposable, IImageManagerService {
         return this._imageManagerInfo.get(unitId)?.get(subUnitId)?.get(imageId);
     }
 
-    private _addByParam(insertParam: IImageManagerParam): IImageManagerSearchParam[] {
-        const { unitId, subUnitId, imageId, imageModel } = insertParam;
+    private _addByParam(insertParam: IImageManagerDataParam): IImageManagerParam[] {
+        const { unitId, subUnitId, imageId, transform, srcRect, prstGeom, imageSourceType, source } = insertParam;
 
         if (!this._imageManagerInfo.has(unitId)) {
             this._imageManagerInfo.set(unitId, new Map());
@@ -164,9 +191,19 @@ export class ImageManagerService implements IDisposable, IImageManagerService {
             subComponentData.set(subUnitId, new Map());
         }
 
-        subComponentData.get(subUnitId)!.set(imageId, insertParam);
+        const model = new ImageModel({
+            imageId,
+            imageSourceType,
+            source,
+            srcRect,
+            prstGeom,
+        });
 
-        return [{ unitId, subUnitId, imageId }];
+        const param = { unitId, subUnitId, imageId, transform, imageModel: model };
+
+        subComponentData.get(subUnitId)!.set(imageId, param);
+
+        return [param];
     }
 
     private _removeByParam(searchParam: IImageManagerSearchParam): IImageManagerParam[] {
@@ -190,6 +227,32 @@ export class ImageManagerService implements IDisposable, IImageManagerService {
         subComponentObjects.delete(imageId);
 
         return [{ ...searchParam, imageModel: object.imageModel }];
+    }
+
+    private _updateByParam(updateParam: IImageManagerDataParam): IImageManagerParam[] {
+        const { unitId, subUnitId, imageId, srcRect, prstGeom, transform } = updateParam;
+
+        const subComponentObjects = this._imageManagerInfo.get(unitId)?.get(subUnitId);
+
+        if (subComponentObjects == null) {
+            return [];
+        }
+
+        const object = subComponentObjects.get(imageId);
+
+        if (object == null) {
+            return [];
+        }
+
+        const { imageModel } = object;
+
+        imageModel.update({ srcRect, prstGeom });
+
+        // const newObject = { ...object, ...updateParam };
+
+        // subComponentObjects.set(imageId, newObject);
+
+        return [{ unitId, subUnitId, imageId, transform, imageModel }];
     }
 }
 

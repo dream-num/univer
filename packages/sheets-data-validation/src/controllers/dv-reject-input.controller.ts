@@ -56,10 +56,9 @@ export class DataValidationRejectInputController extends Disposable {
                         return next(Promise.resolve(cell));
                     }
 
-                    const cellRaw = context.worksheet.getCellRaw(context.row, context.col);
                     const success = await validator.validator(
                         {
-                            value: getCellValueOrigin(cellRaw),
+                            value: getCellValueOrigin(cell),
                             row,
                             column: col,
                             unitId,

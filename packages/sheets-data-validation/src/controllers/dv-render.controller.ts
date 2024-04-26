@@ -173,7 +173,7 @@ export class DataValidationRenderController extends RxDisposable {
 
     private _initSkeletonChange() {
         const markSkeletonDirty = () => {
-            const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET);
+            const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
             if (!workbook) return;
 
             const unitId = workbook.getUnitId();

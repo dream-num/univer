@@ -83,11 +83,11 @@ export class DesktopLayoutService extends Disposable implements ILayoutService {
 
         let handler: Nullable<FocusHandlerFn>;
         if (currentFocused instanceof Workbook) {
-            handler = this._focusHandlers.get(UniverInstanceType.SHEET);
+            handler = this._focusHandlers.get(UniverInstanceType.UNIVER_SHEET);
         } else if (currentFocused instanceof DocumentDataModel) {
-            handler = this._focusHandlers.get(UniverInstanceType.DOC);
+            handler = this._focusHandlers.get(UniverInstanceType.UNIVER_DOC);
         } else if (currentFocused instanceof SlideDataModel) {
-            handler = this._focusHandlers.get(UniverInstanceType.SLIDE);
+            handler = this._focusHandlers.get(UniverInstanceType.UNIVER_SLIDE);
         }
 
         if (handler) {

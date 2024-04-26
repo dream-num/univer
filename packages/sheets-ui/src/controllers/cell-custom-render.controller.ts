@@ -45,7 +45,7 @@ export class CellCustomRenderController extends Disposable {
     private _initEventBinding() {
         const disposableCollection = new DisposableCollection();
         // eslint-disable-next-line max-lines-per-function
-        this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.SHEET).subscribe((workbook) => {
+        this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => {
             disposableCollection.dispose();
             if (workbook) {
                 const unitId = workbook.getUnitId();

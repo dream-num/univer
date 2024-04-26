@@ -145,7 +145,7 @@ export class RefRangeService extends Disposable {
     private _onRefRangeChange = () => {
         this._sheetInterceptorService.interceptCommand({
             getMutations: (command: EffectRefRangeParams) => {
-                const worksheet = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!.getActiveSheet();
+                const worksheet = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet();
                 const unitId = getUnitId(this._univerInstanceService);
                 const subUnitId = getSubUnitId(this._univerInstanceService);
                 const getEffectsCbList = () => {
@@ -367,11 +367,11 @@ export class RefRangeService extends Disposable {
 }
 
 function getUnitId(univerInstanceService: IUniverInstanceService) {
-    return univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!.getUnitId();
+    return univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId();
 }
 
 function getSubUnitId(univerInstanceService: IUniverInstanceService) {
-    return univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!.getActiveSheet().getSheetId();
+    return univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet().getSheetId();
 }
 
 function getSelectionRanges(selectionManagerService: SelectionManagerService) {

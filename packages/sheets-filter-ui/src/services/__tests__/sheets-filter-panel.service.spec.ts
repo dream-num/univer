@@ -47,7 +47,7 @@ function createSheetsFilterPanelServiceTestBed(workbookData: IWorkbookData) {
     const get = injector.get.bind(injector);
 
     class SheetsFilterPanelTestPlugin extends Plugin {
-        static override type = UniverInstanceType.SHEET;
+        static override type = UniverInstanceType.UNIVER_SHEET;
         static override pluginName = 'sheets-filter-panel-test';
 
         constructor(_config: unknown, @Inject(Injector) protected readonly _injector: Injector) {

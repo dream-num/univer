@@ -53,7 +53,7 @@ function createSheetsFilterMenuTestBed() {
     const get = injector.get.bind(injector);
 
     class TestPlugin extends Plugin {
-        static override type = UniverInstanceType.SHEET;
+        static override type = UniverInstanceType.UNIVER_SHEET;
         static override pluginName = 'test-plugin';
 
         constructor(_config: unknown, override readonly _injector: Injector) {

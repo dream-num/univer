@@ -90,7 +90,7 @@ export class FormatPainterController extends Disposable {
 
     private async _applyFormatPainter(range: IRange) {
         const { styles: stylesMatrix, merges } = this._formatPainterService.getSelectionFormat();
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const unitId = workbook.getUnitId();
         const subUnitId = workbook.getActiveSheet().getSheetId();
         if (!stylesMatrix) return;

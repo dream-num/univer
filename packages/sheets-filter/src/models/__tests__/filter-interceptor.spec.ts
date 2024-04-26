@@ -162,7 +162,7 @@ function createFilterTestUniver(dependencies?: Dependency[], workbookData?: IWor
      * This plugin hooks into Sheet's DI system to expose API to test scripts
      */
     class TestPlugin extends Plugin {
-        static override type = UniverInstanceType.SHEET;
+        static override type = UniverInstanceType.UNIVER_SHEET;
         static override pluginName = 'test-plugin';
 
         constructor(

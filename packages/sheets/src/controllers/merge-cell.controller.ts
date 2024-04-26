@@ -142,7 +142,7 @@ export class MergeCellController extends Disposable {
                     case ClearSelectionAllCommand.id:
                     case ClearSelectionFormatCommand.id: {
                         // TODO@Gggpound: get by unit id and subUnitId
-                        const workbook = self._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+                        const workbook = self._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
                         const unitId = workbook.getUnitId();
                         const worksheet = workbook.getActiveSheet();
                         const subUnitId = worksheet.getSheetId();
@@ -276,7 +276,7 @@ export class MergeCellController extends Disposable {
             })
         );
 
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         if (workbook) {
             const sheet = workbook.getActiveSheet();
             registerRefRange(workbook.getUnitId(), sheet.getSheetId());
@@ -1182,7 +1182,7 @@ function getWorkbook(univerInstanceService: IUniverInstanceService, unitId?: str
     if (unitId) {
         return univerInstanceService.getUniverSheetInstance(unitId);
     }
-    return univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+    return univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
 }
 
 function getWorksheet(workbook: Workbook, subUnitId?: string) {

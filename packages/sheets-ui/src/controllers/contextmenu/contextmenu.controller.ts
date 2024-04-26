@@ -52,7 +52,7 @@ export class SheetContextMenuController extends Disposable {
         @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService
     ) {
         super();
-        this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.SHEET).subscribe((workbook) => {
+        this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => {
             if (workbook) {
                 this._addListeners();
             }

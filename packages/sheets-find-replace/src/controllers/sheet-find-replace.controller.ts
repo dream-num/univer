@@ -903,7 +903,7 @@ class SheetsFindReplaceProvider extends Disposable implements IFindReplaceProvid
 
         // NOTE: If there are multi Workbook instances then we should create `SheetFindModel` for each of them.
         // But we don't need to implement that in the foreseeable future.
-        const currentWorkbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+        const currentWorkbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         if (currentWorkbook) {
             const sheetFind = this._injector.createInstance(SheetFindModel, currentWorkbook);
             this._findModelsByUnitId.set(currentWorkbook.getUnitId(), sheetFind);

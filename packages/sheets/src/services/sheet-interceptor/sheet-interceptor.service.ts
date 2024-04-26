@@ -61,11 +61,11 @@ export class SheetInterceptorService extends Disposable {
 
         // When a workbook is created or a worksheet is added after when workbook is created,
         // `SheetInterceptorService` inject interceptors to worksheet instances to it.
-        this.disposeWithMe(this._univerInstanceService.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.SHEET).subscribe((workbook) => {
+        this.disposeWithMe(this._univerInstanceService.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => {
             this._interceptWorkbook(workbook);
         }));
 
-        this.disposeWithMe(this._univerInstanceService.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.SHEET).subscribe((workbook) =>
+        this.disposeWithMe(this._univerInstanceService.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) =>
             this._disposeWorkbookInterceptor(workbook)
         ));
 

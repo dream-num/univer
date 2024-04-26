@@ -27,7 +27,7 @@ export function getDocObject(
     univerInstanceService: IUniverInstanceService,
     renderManagerService: IRenderManagerService
 ): Nullable<IDocObjectParam> {
-    const documentModel = univerInstanceService.getCurrentUnitForType(UniverInstanceType.DOC);
+    const documentModel = univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_DOC);
     if (!documentModel) {
         return null;
     }

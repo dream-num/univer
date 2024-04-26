@@ -24,7 +24,7 @@ const NAME = 'UNIVER_SHEETS_FIND_REPLACE_PLUGIN';
 
 export class UniverSheetsFindReplacePlugin extends Plugin {
     static override pluginName = NAME;
-    static override type = UniverInstanceType.SHEET;
+    static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(
         _config: unknown,

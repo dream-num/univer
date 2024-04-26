@@ -137,7 +137,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
             return false; // maybe we should notify user that there is no selection
         }
 
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet();
         const hooks = this._clipboardHooks;
 
@@ -366,7 +366,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         if (result) {
             // add to undo redo services
             this._undoRedoService.pushUndoRedo({
-                unitID: this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!.getUnitId(),
+                unitID: this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId(),
                 undoMutations: undoMutationsInfo,
                 redoMutations: redoMutationsInfo,
             });
@@ -717,7 +717,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
     }
 
     private _getPastingTarget() {
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet();
         const selection = this._selectionManagerService.getLast();
         return {
@@ -794,7 +794,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
         const destinationRows = endRow - startRow + 1;
         const destinationColumns = endColumn - startColumn + 1;
 
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET);
+        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         const worksheet = workbook?.getActiveSheet();
         if (!worksheet) {
             return null;
@@ -1004,7 +1004,7 @@ export class SheetClipboardService extends Disposable implements ISheetClipboard
      * @param range
      */
     private _topLeftCellsMatch(rowCount: number, colCount: number, range: { topRow: number; leftCol: number }): boolean {
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook?.getActiveSheet();
         if (!worksheet) {
             return false;

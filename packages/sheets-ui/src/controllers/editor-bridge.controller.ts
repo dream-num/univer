@@ -155,7 +155,7 @@ export class EditorBridgeController extends RxDisposable {
 
     private _initialChangeEditorListener() {
         this.disposeWithMe(
-            this._univerInstanceService.getCurrentTypeOfUnit$(UniverInstanceType.DOC).subscribe((documentDataModel) => {
+            this._univerInstanceService.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_DOC).subscribe((documentDataModel) => {
                 if (documentDataModel == null) {
                     return;
                 }
@@ -267,7 +267,7 @@ export class EditorBridgeController extends RxDisposable {
     }
 
     private _getCurrentUnitIdAndSheetId() {
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet();
         return {
             unitId: workbook.getUnitId(),

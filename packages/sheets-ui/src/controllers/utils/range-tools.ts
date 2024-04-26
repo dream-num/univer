@@ -26,8 +26,8 @@ export interface IDiscreteRange {
 export function rangeToDiscreteRange(range: IRange, accessor: IAccessor, unitId?: string, subUnitId?: string): IDiscreteRange | null {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const workbook = unitId
-        ? univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.SHEET)
-        : univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET);
+        ? univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET)
+        : univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
     const worksheet = subUnitId ? workbook?.getSheetBySheetId(subUnitId) : workbook?.getActiveSheet();
     if (!worksheet) {
         return null;

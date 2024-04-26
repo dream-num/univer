@@ -137,7 +137,7 @@ export function FormatPainterMenuItemFactory(accessor: IAccessor): IMenuButtonIt
                 status$.unsubscribe();
             };
         }),
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: getCurrentSheetDisabled$(accessor),
     };
 }
@@ -202,7 +202,7 @@ export function BoldMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
 
             return disposable.dispose;
         })),
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }
 
@@ -258,7 +258,7 @@ export function ItalicMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
             subscriber.next(isItalic === FontItalic.ITALIC);
             return disposable.dispose;
         })),
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }
 
@@ -315,7 +315,7 @@ export function UnderlineMenuItemFactory(accessor: IAccessor): IMenuButtonItem {
             return disposable.dispose;
         })),
 
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }
 
@@ -375,7 +375,7 @@ export function StrikeThroughMenuItemFactory(accessor: IAccessor): IMenuButtonIt
             subscriber.next(!!(st && st.s));
             return disposable.dispose;
         })),
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }
 
@@ -427,7 +427,7 @@ export function FontFamilySelectorMenuItemFactory(accessor: IAccessor): IMenuSel
             subscriber.next(ff ?? defaultValue);
             return disposable.dispose;
         })),
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }
 
@@ -494,7 +494,7 @@ export function FontSizeSelectorMenuItemFactory(accessor: IAccessor): IMenuSelec
 
             return disposable.dispose;
         })),
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 }
 
@@ -541,7 +541,7 @@ export function TextColorSelectorMenuItemFactory(accessor: IAccessor): IMenuSele
             subscriber.next(defaultColor);
             return disposable.dispose;
         }),
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: getCurrentSheetDisabled$(accessor),
     };
 }
@@ -588,7 +588,7 @@ export function BackgroundColorSelectorMenuItemFactory(accessor: IAccessor): IMe
             subscriber.next(defaultColor);
             return disposable.dispose;
         }),
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: getCurrentSheetDisabled$(accessor),
     };
 }
@@ -651,7 +651,7 @@ export function HorizontalAlignMenuItemFactory(accessor: IAccessor): IMenuSelect
 
             return disposable.dispose;
         })),
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: getCurrentSheetDisabled$(accessor),
     };
 }
@@ -714,7 +714,7 @@ export function VerticalAlignMenuItemFactory(accessor: IAccessor): IMenuSelector
 
             return disposable.dispose;
         })),
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: getCurrentSheetDisabled$(accessor),
     };
 }
@@ -777,7 +777,7 @@ export function WrapTextMenuItemFactory(accessor: IAccessor): IMenuSelectorItem<
 
             return disposable.dispose;
         })),
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: getCurrentSheetDisabled$(accessor),
     };
 }
@@ -863,7 +863,7 @@ export function TextRotateMenuItemFactory(accessor: IAccessor): IMenuSelectorIte
 
             return disposable.dispose;
         })),
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: getCurrentSheetDisabled$(accessor),
     };
 }

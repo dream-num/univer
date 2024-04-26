@@ -48,7 +48,7 @@ function createFilterStorybookBed(workbookData: IWorkbookData, locale: LocaleTyp
     const commandService = get(ICommandService);
 
     class TestPlugin extends Plugin {
-        static override type = UniverInstanceType.SHEET;
+        static override type = UniverInstanceType.UNIVER_SHEET;
         static override pluginName = 'test-plugin';
 
         constructor(_config: unknown, override readonly _injector: Injector) {

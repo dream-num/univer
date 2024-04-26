@@ -43,8 +43,8 @@ export function getWorksheetUID(workbook: Workbook, worksheet: Worksheet): strin
 /**
  * Access and create Univer Sheets files
  */
-export class Workbook extends UnitModel<IWorkbookData, UniverInstanceType.SHEET> {
-    override type: UniverInstanceType.SHEET = UniverInstanceType.SHEET;
+export class Workbook extends UnitModel<IWorkbookData, UniverInstanceType.UNIVER_SHEET> {
+    override type: UniverInstanceType.UNIVER_SHEET = UniverInstanceType.UNIVER_SHEET;
 
     private readonly _sheetCreated$ = new Subject<Worksheet>();
     readonly sheetCreated$ = this._sheetCreated$.asObservable();

@@ -101,7 +101,7 @@ describe('test cases in clipboard', () => {
 
     function getFormatValueAt(key: keyof IStyleBase, pos: number) {
         const univerInstanceService = get(IUniverInstanceService);
-        const docsModel = univerInstanceService.getUnit<DocumentDataModel>('test-doc', UniverInstanceType.DOC);
+        const docsModel = univerInstanceService.getUnit<DocumentDataModel>('test-doc', UniverInstanceType.UNIVER_DOC);
 
         if (docsModel?.body?.textRuns == null) {
             return;
@@ -118,7 +118,7 @@ describe('test cases in clipboard', () => {
 
     function getTextByPosition(start: number, end: number) {
         const univerInstanceService = get(IUniverInstanceService);
-        const docsModel = univerInstanceService.getUnit<DocumentDataModel>('test-doc', UniverInstanceType.DOC);
+        const docsModel = univerInstanceService.getUnit<DocumentDataModel>('test-doc', UniverInstanceType.UNIVER_DOC);
 
         return docsModel?.body?.dataStream.slice(start, end);
     }

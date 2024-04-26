@@ -51,7 +51,7 @@ interface IFormulaUIConfig {
 }
 export class UniverSheetsFormulaPlugin extends Plugin {
     static override pluginName = FORMULA_UI_PLUGIN_NAME;
-    static override type = UniverInstanceType.SHEET;
+    static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(
         private _config: Partial<IFormulaUIConfig>,

@@ -119,7 +119,7 @@ export class SheetsFilterService extends Disposable {
     private _updateActiveFilterModel() {
         let workbook: Nullable<Workbook>;
         try {
-            workbook = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.SHEET);
+            workbook = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET);
             if (!workbook) {
                 this._activeFilterModel$.next(null);
                 return;
@@ -148,7 +148,7 @@ export class SheetsFilterService extends Disposable {
                     .pipe(filter(([command]) => command.type === CommandType.MUTATION && FILTER_MUTATIONS.has(command.id))),
 
                 // source2: activte sheet changes
-                this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.SHEET)
+                this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET)
                     .pipe(switchMap((workbook) => workbook?.activeSheet$ ?? of(null)))
             ).subscribe(() => this._updateActiveFilterModel()));
     }

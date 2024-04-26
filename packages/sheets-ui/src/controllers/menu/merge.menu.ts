@@ -41,7 +41,7 @@ export function CellMergeMenuItemFactory(accessor: IAccessor): IMenuSelectorItem
         group: MenuGroup.TOOLBAR_LAYOUT,
         type: MenuItemType.SUBITEMS,
         // selections: [...MERGE_CHILDREN],
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: disabled$.pipe(
             combineLatestWith(selectionsHasCross$),
             map(([disable, hasCross]) => disable || hasCross)

@@ -25,8 +25,8 @@ export function getCurrentSheetDisabled$(accessor: IAccessor) {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const sheetPermissionService = accessor.get(SheetPermissionService);
 
-    const unitId = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)?.getUnitId();
-    const sheetId = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)?.getActiveSheet().getSheetId();
+    const unitId = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getUnitId();
+    const sheetId = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getActiveSheet().getSheetId();
 
     return sheetPermissionService.getEditable$(unitId, sheetId)?.pipe(map((e) => !e.value));
 }

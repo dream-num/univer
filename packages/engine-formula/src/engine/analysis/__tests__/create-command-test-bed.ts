@@ -234,7 +234,7 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
      */
     class TestPlugin extends Plugin {
         static override pluginName = 'test-plugin';
-        static override type = UniverInstanceType.SHEET;
+        static override type = UniverInstanceType.UNIVER_SHEET;
 
         private _formulaDataModel: FormulaDataModel | null = null;
 
@@ -265,7 +265,7 @@ export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?
     logService.setLogLevel(LogLevel.SILENT); // change this to `true` to debug tests via logs
 
     const sheetData: ISheetData = {};
-    const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+    const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
     const unitId = workbook.getUnitId();
     const sheetId = workbook.getActiveSheet().getSheetId();
     workbook.getSheets().forEach((sheet) => {

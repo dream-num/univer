@@ -51,7 +51,7 @@ export function getSheetObject(
 ): Nullable<ISheetObjectParam> {
     const workbook = univerInstanceService instanceof Workbook
         ? univerInstanceService
-        : univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET);
+        : univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
     if (!workbook) return null;
 
     const unitId = workbook.getUnitId();

@@ -219,7 +219,7 @@ export class DocEditorBridgeController extends Disposable {
         //     })
         // );
 
-        const currentUniverSheet = this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.SHEET);
+        const currentUniverSheet = this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         currentUniverSheet.forEach((unit) => {
             const unitId = unit.getUnitId();
             const render = this._renderManagerService.getRenderById(unitId);

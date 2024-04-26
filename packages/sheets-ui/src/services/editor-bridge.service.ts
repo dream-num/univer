@@ -229,7 +229,7 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         endX = skeleton.convertTransformToOffsetX(endX, scaleX, scrollXY);
         endY = skeleton.convertTransformToOffsetY(endY, scaleY, scrollXY);
 
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet();
         const location = {
             workbook,

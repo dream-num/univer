@@ -31,7 +31,7 @@ export const SidebarOperation: ICommand = {
         const sidebarService = accessor.get(ISidebarService);
         const editorService = accessor.get(IEditorService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const unit = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+        const unit = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         switch (params.value) {
             case 'open':
                 editorService.setOperationSheetUnitId(unit.getUnitId());

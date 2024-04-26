@@ -24,7 +24,7 @@ import { SheetsFilterController } from './controllers/sheets-fiter.controller';
 const NAME = 'UNIVER_SHEETS_FILTER_PLUGIN';
 
 export class UniverSheetsFilterPlugin extends Plugin {
-    static override type = UniverInstanceType.SHEET;
+    static override type = UniverInstanceType.UNIVER_SHEET;
     static override pluginName = NAME;
 
     constructor(_config: unknown, @Inject(Injector) protected readonly _injector: Injector) {

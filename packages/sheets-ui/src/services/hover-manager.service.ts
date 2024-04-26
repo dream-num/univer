@@ -55,7 +55,7 @@ export class HoverManagerService extends Disposable {
     }
 
     private _initCellDisposableListener(): void {
-        this.disposeWithMe(this._univerInstanceService.getCurrentTypeOfUnit$(UniverInstanceType.SHEET).subscribe((workbook) => {
+        this.disposeWithMe(this._univerInstanceService.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => {
             if (!workbook) this._currentCell$.next(null);
         }));
     }
@@ -64,7 +64,7 @@ export class HoverManagerService extends Disposable {
         if (!this._lastPosition) return;
 
         const { offsetX, offsetY } = this._lastPosition;
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET);
+        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (!workbook) {
             this._currentCell$.next(null);
             return;

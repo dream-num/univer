@@ -99,6 +99,16 @@ export const AutoFillPopupMenu: React.FC<{}> = () => {
 
     useEffect(() => {
         const disposable = toDisposable(
+            sheetSkeletonManagerService.currentSkeleton$.subscribe((skeleton) => {
+                if (skeleton) {
+                    setAnchor({ row: -1, col: -1 });
+                }
+            }));
+        return disposable.dispose;
+    }, [sheetSkeletonManagerService]);
+
+    useEffect(() => {
+        const disposable = toDisposable(
             autoFillService.menu$.subscribe((menu) => {
                 setMenu(menu.map((i) => ({ ...i, index: menu.indexOf(i) })));
             })

@@ -19,6 +19,8 @@ import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { SheetImageUIController } from './controllers/sheet-image.controller';
 import { enUS, zhCN } from './locale';
+import { SheetImageUpdateController } from './controllers/sheet-image-update.controller';
+import { SheetImageDataController } from './controllers/sheet-image-data.controller';
 
 
 const PLUGIN_NAME = 'SHEETS_IMAGE_UI_PLUGIN';
@@ -50,6 +52,8 @@ export class UniverSheetsImageUIPlugin extends Plugin {
 
             // controllers
             [SheetImageUIController],
+            [SheetImageUpdateController],
+            [SheetImageDataController],
 
         ];
 

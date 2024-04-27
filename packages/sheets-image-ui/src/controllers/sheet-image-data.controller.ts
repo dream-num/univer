@@ -27,8 +27,8 @@ import { COMPONENT_UPLOAD_FILE_MENU } from '../views/upload-component/component-
 import { ImageMenuFactory, ImageUploadIcon, UploadCellImageMenuFactory, UploadFloatImageMenuFactory } from '../views/menu/image.menu';
 import { InsertCellImageOperation, InsertFloatImageOperation } from '../commands/operations/insert-image.operation';
 
-@OnLifecycle(LifecycleStages.Rendered, SheetImageUIController)
-export class SheetImageUIController extends Disposable {
+@OnLifecycle(LifecycleStages.Rendered, SheetImageDataController)
+export class SheetImageDataController extends Disposable {
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,

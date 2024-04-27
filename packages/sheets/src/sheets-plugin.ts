@@ -30,6 +30,7 @@ import { RefRangeService } from './services/ref-range/ref-range.service';
 import { SelectionManagerService } from './services/selection-manager.service';
 import { SheetInterceptorService } from './services/sheet-interceptor/sheet-interceptor.service';
 import { DefinedNameDataController } from './controllers/defined-name-data.controller';
+import { ISheetDrawingService, SheetDrawingService } from './services/sheet-drawing.service';
 
 const PLUGIN_NAME = 'SHEET_PLUGIN';
 
@@ -67,6 +68,7 @@ export class UniverSheetsPlugin extends Plugin {
             [SheetPermissionService],
             [INumfmtService, { useClass: NumfmtService }],
             [SheetInterceptorService],
+            [ISheetDrawingService, { useClass: SheetDrawingService }],
 
             // controllers
             [BasicWorksheetController],

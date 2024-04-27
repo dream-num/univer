@@ -24,15 +24,13 @@ export interface IRemoveDrawingMutation {
     id: string;
 }
 
-export const RemoveDrawingMutation: IMutation<IRemoveDrawingMutation> = {
+export const RemoveDrawingMutation: IMutation<IRemoveDrawingMutation[]> = {
     id: 'sheet.mutation.remove-drawing',
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
-        const { unitId, subUnitId, id } = params;
-
         const sheetDrawingService = accessor.get(ISheetDrawingService);
 
-        sheetDrawingService.removeDrawing(unitId, subUnitId, id);
+        sheetDrawingService.batchRemoveDrawing(params);
 
         return true;
     },

@@ -74,6 +74,8 @@
     "devDependencies": {
         "@univerjs/core": "workspace:*",
         "@univerjs/design": "workspace:*",
+        "@univerjs/engine-render": "workspace:*",
+        "@univerjs/image": "workspace:*",
         "@univerjs/shared": "workspace:*",
         "@univerjs/ui": "workspace:*",
         "@wendellhu/redi": "^0.13.0",

@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-import { DEFAULT_DOCUMENT_SUB_COMPONENT_ID, ImageSourceType, LocaleService, Plugin } from '@univerjs/core';
+import { IImageRemoteService, LocaleService, Plugin } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { ImageLoadController } from './controllers/image.load.controller';
-import { ImageModel } from './models/image-model';
 import { IImageManagerService, ImageManagerService } from './services/image-manager.service';
 import { ImageController } from './controllers/image.controller';
+import { ImageRemoteService } from './services/image-remote.service';
 
 const PLUGIN_NAME = 'IMAGE_PLUGIN';
 
@@ -124,9 +123,10 @@ export class UniverImagePlugin extends Plugin {
             // [ZIndexManager],
             // services
             [IImageManagerService, { useClass: ImageManagerService }],
+            [IImageRemoteService, { useClass: ImageRemoteService }],
             // controllers
             [ImageController],
-            [ImageLoadController],
+            // [ImageLoadController],
             // [IUIController, { useClass: DesktopUIController }],
         ];
 

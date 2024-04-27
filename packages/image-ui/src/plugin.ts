@@ -17,17 +17,20 @@
 import { LocaleService, Plugin } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
+import { ImageUpdateController } from './controllers/image-update.controller';
 
 
 const PLUGIN_NAME = 'IMAGE_UI_PLUGIN';
 
 export class UniverImageUIPlugin extends Plugin {
+    static override pluginName = PLUGIN_NAME;
+
     constructor(
         config: undefined,
         @Inject(Injector) protected _injector: Injector,
         @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
-        super(PLUGIN_NAME);
+        super();
     }
 
     override onStarting(_injector: Injector): void {
@@ -40,7 +43,7 @@ export class UniverImageUIPlugin extends Plugin {
             // services
 
             // controllers
-
+            [ImageUpdateController],
 
         ];
 

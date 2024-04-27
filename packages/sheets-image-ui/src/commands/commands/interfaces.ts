@@ -18,7 +18,22 @@ import type { IImageManagerDataParam } from '@univerjs/image';
 import type { ISheetDrawingServiceParam } from '@univerjs/sheets';
 
 
-export interface IInsertDrawingCommandParam {
+export interface IDrawingCommandParams {
     drawingParam: ISheetDrawingServiceParam;
     imageParam: IImageManagerDataParam;
+}
+
+export interface IInsertDrawingCommandParams {
+    unitId: string;
+    drawings: IDrawingCommandParams[];
+}
+
+export interface ISetDrawingCommandParam {
+    oldDrawing: IDrawingCommandParams;
+    newDrawing: IDrawingCommandParams;
+}
+
+export interface ISetDrawingCommandParams {
+    unitId: string;
+    drawings: ISetDrawingCommandParam[];
 }

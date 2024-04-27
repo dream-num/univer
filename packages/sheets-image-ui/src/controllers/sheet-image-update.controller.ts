@@ -14,16 +14,18 @@
  * limitations under the License.
  */
 
-import type { IAbsoluteTransform, ICommandInfo, IRange, Nullable, Workbook } from '@univerjs/core';
+import type { ICommandInfo, IRange, ITransformState, Nullable, Workbook } from '@univerjs/core';
 import { Disposable, ICommandService, IImageRemoteService, ImageSourceType, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
+import type { IImageManagerDataParam } from '@univerjs/image';
 import { getImageSize, IImageManagerService } from '@univerjs/image';
-import type { ISheetDrawingPosition } from '@univerjs/sheets';
+import type { ISheetDrawingPosition, ISheetDrawingServiceParam } from '@univerjs/sheets';
 import { ISheetDrawingService, SelectionManagerService } from '@univerjs/sheets';
 import { ISelectionRenderService } from '@univerjs/sheets-ui';
 import type { IInsertImageOperationParams } from '../commands/operations/insert-image.operation';
 import { InsertCellImageOperation, InsertFloatImageOperation } from '../commands/operations/insert-image.operation';
 import { InsertSheetImageCommand } from '../commands/commands/insert-sheet-image.command';
+import type { IInsertDrawingCommandParams } from '../commands/commands/interfaces';
 
 
 const SHEET_IMAGE_WIDTH_LIMIT = 1000;
@@ -109,33 +111,41 @@ export class SheetImageUpdateController extends Disposable {
         }
 
 
-        const position = this._getImagePosition(width, height, scale);
+        const sheetTransform = this._getImagePosition(width, height, scale);
 
-        if (position == null) {
+        if (sheetTransform == null) {
             return;
         }
 
-        this._imageManagerService.add({
+        const imageDataParam: IImageManagerDataParam = {
             unitId,
             subUnitId,
             imageId,
             imageSourceType,
             source,
-            transform: this._transformImagePositionToTransform(position, width, height),
-        });
+            transform: this._transformImagePositionToTransform(sheetTransform, width, height),
+        };
 
-
-        this._commandService.executeCommand(InsertSheetImageCommand.id, {
+        const sheetDrawingParam: ISheetDrawingServiceParam = {
             originSize: {
                 width,
                 height,
             },
-            position,
+            sheetTransform,
             id: imageId,
             unitId,
             subUnitId,
             zIndex,
-        });
+        };
+
+
+        this._commandService.executeCommand(InsertSheetImageCommand.id, {
+            unitId,
+            drawings: [{
+                drawingParam: sheetDrawingParam,
+                imageParam: imageDataParam,
+            }],
+        } as IInsertDrawingCommandParams);
     }
 
     private _getUnitInfo() {
@@ -158,7 +168,7 @@ export class SheetImageUpdateController extends Disposable {
         };
     }
 
-    private _transformImagePositionToTransform(position: ISheetDrawingPosition, imageWidth: number, imageHeight: number): Nullable<IAbsoluteTransform> {
+    private _transformImagePositionToTransform(position: ISheetDrawingPosition, imageWidth: number, imageHeight: number): Nullable<ITransformState> {
         const { from, to } = position;
         const { column: fromColumn, columnOffset: fromColumnOffset, row: fromRow, rowOffset: fromRowOffset } = from;
         const { column: toColumn, columnOffset: toColumnOffset, row: toRow, rowOffset: toRowOffset } = to;

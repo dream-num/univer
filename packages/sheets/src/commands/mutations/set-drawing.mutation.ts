@@ -19,13 +19,13 @@ import { CommandType } from '@univerjs/core';
 import { ISheetDrawingService, type ISheetDrawingServiceUpdateParam } from '../../services/sheet-drawing.service';
 
 
-export const SetDrawingMutation: IMutation<ISheetDrawingServiceUpdateParam> = {
+export const SetDrawingMutation: IMutation<ISheetDrawingServiceUpdateParam[]> = {
     id: 'sheet.mutation.set-drawing',
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
         const sheetDrawingService = accessor.get(ISheetDrawingService);
 
-        sheetDrawingService.updateDrawing(params);
+        sheetDrawingService.batchUpdateDrawing(params);
 
         return true;
     },

@@ -128,6 +128,9 @@ import { SetRangeProtectionCommand } from '../commands/commands/set-range-protec
 import { AddRangeProtectionMutation } from '../commands/mutations/add-range-protection.mutation';
 import { DeleteRangeProtectionMutation } from '../commands/mutations/delete-range-protection.mutation';
 import { SetRangeProtectionMutation } from '../commands/mutations/set-range-protection.mutation';
+import { SetDrawingMutation } from '../commands/mutations/set-drawing.mutation';
+import { InsertDrawingMutation } from '../commands/mutations/insert-drawing.mutation';
+import { RemoveDrawingMutation } from '../commands/mutations/remove-drawing.mutation';
 import { MAX_CELL_PER_SHEET_DEFAULT, MAX_CELL_PER_SHEET_KEY } from './config/config';
 
 export interface IStyleTypeValue<T> {
@@ -254,6 +257,9 @@ export class BasicWorksheetController extends Disposable implements IDisposable 
             AddRangeProtectionMutation,
             DeleteRangeProtectionMutation,
             SetRangeProtectionMutation,
+            InsertDrawingMutation,
+            RemoveDrawingMutation,
+            SetDrawingMutation,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
 
         this._configService.setConfig(MAX_CELL_PER_SHEET_KEY, MAX_CELL_PER_SHEET_DEFAULT);

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IAbsoluteTransform, IOtherTransform, ISize, Nullable } from '@univerjs/core';
+import type { IOtherTransform, ISize, Nullable } from '@univerjs/core';
 import { Disposable } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
@@ -73,9 +73,9 @@ export interface ISheetDrawingService {
 
     batchAddDrawing(params: ISheetDrawingServiceParam[]): void;
 
-    removeDrawing(unitId: string, subUnitId: string, id: string): Nullable<ISheetDrawingServiceParam>;
+    removeDrawing(param: ISheetDrawingSearchParam): Nullable<ISheetDrawingServiceParam>;
 
-    batchRemoveDrawing(unitId: string, subUnitId: string, ids: string[]): ISheetDrawingServiceParam[];
+    batchRemoveDrawing(params: ISheetDrawingSearchParam[]): ISheetDrawingServiceParam[];
 
     focusDrawing(unitId: string, subUnitId: string, id: string): void;
 
@@ -127,7 +127,8 @@ export class SheetDrawingService extends Disposable implements ISheetDrawingServ
         this._add$.next(params);
     }
 
-    removeDrawing(unitId: string, subUnitId: string, id: string): Nullable<ISheetDrawingServiceParam> {
+    removeDrawing(param: ISheetDrawingSearchParam): Nullable<ISheetDrawingServiceParam> {
+        const { unitId, subUnitId, id } = param;
         const deleteItem = this._removeDrawing(unitId, subUnitId, id);
 
         deleteItem && this._remove$.next([deleteItem]);
@@ -135,9 +136,10 @@ export class SheetDrawingService extends Disposable implements ISheetDrawingServ
         return deleteItem;
     }
 
-    batchRemoveDrawing(unitId: string, subUnitId: string, ids: string[]): ISheetDrawingServiceParam[] {
+    batchRemoveDrawing(params: ISheetDrawingSearchParam[]): ISheetDrawingServiceParam[] {
         const deleteItems: ISheetDrawingServiceParam[] = [];
-        ids.forEach((id) => {
+        params.forEach((param) => {
+            const { unitId, subUnitId, id } = param;
             const deleteItem = this._removeDrawing(unitId, subUnitId, id);
             deleteItem && deleteItems.push(deleteItem);
         });

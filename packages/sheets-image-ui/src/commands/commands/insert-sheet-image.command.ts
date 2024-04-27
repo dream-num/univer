@@ -25,7 +25,7 @@ import { InsertImageMutation, RemoveImageMutation } from '@univerjs/image';
 
 import { InsertDrawingMutation, RemoveDrawingMutation } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
-import type { IInsertDrawingCommandParam } from './interfaces';
+import type { IInsertDrawingCommandParams } from './interfaces';
 
 
 /**
@@ -34,30 +34,36 @@ import type { IInsertDrawingCommandParam } from './interfaces';
 export const InsertSheetImageCommand: ICommand = {
     id: 'sheet.command.insert-sheet-image',
     type: CommandType.COMMAND,
-    handler: (accessor: IAccessor, params?: IInsertDrawingCommandParam) => {
+    handler: (accessor: IAccessor, params?: IInsertDrawingCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
 
         if (!params) return false;
 
-        const { drawingParam, imageParam } = params;
+        // const { drawingParam, imageParam } = params;
+
+        const drawings = params.drawings;
+
+        const drawingParams = drawings.map((param) => param.drawingParam);
+        const imageParams = drawings.map((param) => param.imageParam);
 
         // prepare do mutations
-
-        const { unitId, subUnitId, imageId } = imageParam;
-        const removeImageMutationParams = {
-            unitId, subUnitId, imageId,
-        };
+        const removeImageMutationParams = drawings.map((param) => {
+            const { unitId, subUnitId, imageId } = param.imageParam;
+            return { unitId, subUnitId, imageId };
+        });
 
         // execute do mutations and add undo mutations to undo stack if completed
-        let result = commandService.syncExecuteCommand(InsertDrawingMutation.id, drawingParam);
-        result = commandService.syncExecuteCommand(InsertImageMutation.id, imageParam);
+        const result1 = commandService.syncExecuteCommand(InsertDrawingMutation.id, drawingParams);
+        const result2 = commandService.syncExecuteCommand(InsertImageMutation.id, imageParams);
 
-        if (result) {
+        const unitId = params.unitId;
+
+        if (result1 && result2) {
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
-                undoMutations: [{ id: RemoveDrawingMutation.id, params: drawingParam }, { id: RemoveImageMutation.id, params: removeImageMutationParams }],
-                redoMutations: [{ id: InsertDrawingMutation.id, params: drawingParam }, { id: InsertImageMutation.id, params: imageParam }],
+                undoMutations: [{ id: RemoveDrawingMutation.id, params: drawingParams }, { id: RemoveImageMutation.id, params: removeImageMutationParams }],
+                redoMutations: [{ id: InsertDrawingMutation.id, params: drawingParams }, { id: InsertImageMutation.id, params: imageParams }],
             });
 
             return true;

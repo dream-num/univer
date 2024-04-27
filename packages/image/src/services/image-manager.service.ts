@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IAbsoluteTransform, Nullable } from '@univerjs/core';
+import type { ITransformState, Nullable } from '@univerjs/core';
 import { ImageSourceType } from '@univerjs/core';
 import type { IDisposable } from '@wendellhu/redi';
 import { createIdentifier } from '@wendellhu/redi';
@@ -25,18 +25,18 @@ import type { IImageData } from '../models/image-model';
 import { ImageModel } from '../models/image-model';
 
 
-export interface IImageManagerSearchParam {
+export interface IImageManagerBaseParam {
     unitId: string;
     subUnitId: string; //sheetId, pageId and so on, it has a default name in doc business
     imageId: string;
-    transform?: Nullable<IAbsoluteTransform>;
+    transform?: Nullable<ITransformState>;
 }
 
-export interface IImageManagerParam extends IImageManagerSearchParam {
+export interface IImageManagerParam extends IImageManagerBaseParam {
     imageModel: ImageModel;
 }
 
-export interface IImageManagerDataParam extends IImageManagerSearchParam, IImageData {
+export interface IImageManagerDataParam extends IImageManagerBaseParam, Partial<Omit<IImageData, 'imageId'>> {
 
 }
 
@@ -52,16 +52,16 @@ export interface IImageManagerService {
     add(insertParam: IImageManagerDataParam): void;
     batchAdd(insertParams: IImageManagerDataParam[]): void;
 
-    remove(searchParam: IImageManagerSearchParam): void;
-    batchRemove(removeParams: IImageManagerSearchParam[]): void;
+    remove(searchParam: IImageManagerBaseParam): void;
+    batchRemove(removeParams: IImageManagerBaseParam[]): void;
 
     update(updateParam: IImageManagerDataParam): void;
     batchUpdate(updateParams: IImageManagerDataParam[]): void;
 
-    setCurrent(searchParam: Nullable<IImageManagerSearchParam>): void;
+    setCurrent(searchParam: Nullable<IImageManagerBaseParam>): void;
     getCurrent(): Nullable<IImageManagerParam>;
 
-    getImageByParam(param: Nullable<IImageManagerSearchParam>): Nullable<IImageManagerParam>;
+    getImageByParam(param: Nullable<IImageManagerBaseParam>): Nullable<IImageManagerParam>;
 
     getImageByOKey(oKey: string): Nullable<IImageManagerParam>;
 
@@ -73,7 +73,7 @@ export interface IImageManagerService {
  *
  */
 export class ImageManagerService implements IDisposable, IImageManagerService {
-    private _current: Nullable<IImageManagerSearchParam> = null;
+    private _current: Nullable<IImageManagerBaseParam> = null;
 
     private _imageManagerInfo: ImageManagerInfo = new Map();
 
@@ -108,11 +108,11 @@ export class ImageManagerService implements IDisposable, IImageManagerService {
         this._add$.next(objects);
     }
 
-    remove(searchParam: IImageManagerSearchParam) {
+    remove(searchParam: IImageManagerBaseParam) {
         this._remove$.next(this._removeByParam(searchParam));
     }
 
-    batchRemove(removeParams: IImageManagerSearchParam[]) {
+    batchRemove(removeParams: IImageManagerBaseParam[]) {
         const objects: IImageManagerParam[] = [];
         removeParams.forEach((removeParam) => {
             objects.push(...this._removeByParam(removeParam));
@@ -134,7 +134,7 @@ export class ImageManagerService implements IDisposable, IImageManagerService {
         this._update$.next(objects);
     }
 
-    setCurrent(searchParam: Nullable<IImageManagerSearchParam>) {
+    setCurrent(searchParam: Nullable<IImageManagerBaseParam>) {
         this._current = searchParam;
     }
 
@@ -142,7 +142,7 @@ export class ImageManagerService implements IDisposable, IImageManagerService {
         return this._getCurrentBySearch(this._current);
     }
 
-    getImageByParam(param: Nullable<IImageManagerSearchParam>): Nullable<IImageManagerParam> {
+    getImageByParam(param: Nullable<IImageManagerBaseParam>): Nullable<IImageManagerParam> {
         return this._getCurrentBySearch(param);
     }
 
@@ -170,7 +170,7 @@ export class ImageManagerService implements IDisposable, IImageManagerService {
         return this._imageSourceCache.get(source);
     }
 
-    private _getCurrentBySearch(searchParam: Nullable<IImageManagerSearchParam>): Nullable<IImageManagerParam> {
+    private _getCurrentBySearch(searchParam: Nullable<IImageManagerBaseParam>): Nullable<IImageManagerParam> {
         if (searchParam == null) {
             return;
         }
@@ -179,7 +179,7 @@ export class ImageManagerService implements IDisposable, IImageManagerService {
     }
 
     private _addByParam(insertParam: IImageManagerDataParam): IImageManagerParam[] {
-        const { unitId, subUnitId, imageId, transform, srcRect, prstGeom, imageSourceType, source } = insertParam;
+        const { unitId, subUnitId, imageId, transform, srcRect, prstGeom, imageSourceType = ImageSourceType.BASE64, source = '' } = insertParam;
 
         if (!this._imageManagerInfo.has(unitId)) {
             this._imageManagerInfo.set(unitId, new Map());
@@ -206,7 +206,7 @@ export class ImageManagerService implements IDisposable, IImageManagerService {
         return [param];
     }
 
-    private _removeByParam(searchParam: IImageManagerSearchParam): IImageManagerParam[] {
+    private _removeByParam(searchParam: IImageManagerBaseParam): IImageManagerParam[] {
         if (searchParam == null) {
             return [];
         }

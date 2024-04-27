@@ -38,6 +38,7 @@ import { RangeProtectionRuleModel } from './model/range-protection-rule.model';
 
 import { RangeProtectionRefRangeService } from './services/permission/range-permission/range-protection.ref-range';
 import { RangeProtectionService } from './services/permission/range-permission/range-protection.service';
+import { ISheetDrawingService, SheetDrawingService } from './services/sheet-drawing.service';
 
 const PLUGIN_NAME = 'SHEET_PLUGIN';
 
@@ -76,6 +77,7 @@ export class UniverSheetsPlugin extends Plugin {
             [WorkbookPermissionService],
             [INumfmtService, { useClass: NumfmtService }],
             [SheetInterceptorService],
+            [ISheetDrawingService, { useClass: SheetDrawingService }],
 
             // controllers
             [BasicWorksheetController],

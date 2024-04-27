@@ -16,6 +16,7 @@
 
 import type { IDocumentSkeletonPage, ISkeletonResourceReference } from '../../../../../basics/i-document-skeleton-cached';
 import type { ISectionBreakConfig } from '../../../../../basics/interfaces';
+import type { ILayoutContext } from '../../tools';
 import { clearFontCreateConfigCache } from '../../tools';
 import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../../view-model/document-view-model';
@@ -24,6 +25,7 @@ import { lineBreaking } from './linebreaking';
 import { lineAdjustment } from './line-adjustment';
 
 export function dealWidthParagraph(
+    ctx: ILayoutContext,
     bodyModel: DocumentViewModel,
     paragraphNode: DataStreamTreeNode,
     curPage: IDocumentSkeletonPage,
@@ -49,6 +51,7 @@ export function dealWidthParagraph(
 
     // Step 2: Line Breaking.
     const allPages = lineBreaking(
+        ctx,
         shapedTextList,
         curPage,
         bodyModel,

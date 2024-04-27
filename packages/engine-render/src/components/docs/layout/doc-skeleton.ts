@@ -14,14 +14,8 @@
  * limitations under the License.
  */
 
-import type { ColumnSeparatorType, ISectionColumnProperties, LocaleService,
-    Nullable } from '@univerjs/core';
-import {
-    GridType,
-    PRESET_LIST_TYPE,
-    SectionType,
-} from '@univerjs/core';
-
+import type { ColumnSeparatorType, ISectionColumnProperties, LocaleService, Nullable } from '@univerjs/core';
+import { GridType, PRESET_LIST_TYPE, SectionType } from '@univerjs/core';
 import type {
     IDocumentSkeletonCached,
     IDocumentSkeletonGlyph,
@@ -37,7 +31,7 @@ import type { DocumentViewModel } from '../view-model/document-view-model';
 import type { ILayoutContext } from './tools';
 import { getLastPage, getNullSkeleton, prepareSectionBreakConfig, setPageParent, updateBlockIndex } from './tools';
 import { createSkeletonSection } from './model/section';
-import { dealWithSections } from './block/section';
+import { dealWithSection } from './block/section';
 import { createSkeletonPage } from './model/page';
 
 export enum DocumentSkeletonState {
@@ -51,6 +45,8 @@ export class DocumentSkeleton extends Skeleton {
     private _skeletonData: Nullable<IDocumentSkeletonCached>;
 
     private _findLiquid: Liquid = new Liquid();
+
+    private _iteratorCount = 0;
 
     constructor(
         private _docViewModel: DocumentViewModel,
@@ -86,6 +82,7 @@ export class DocumentSkeleton extends Skeleton {
         // const start = +new Date();
         this._skeletonData = this._createSkeleton(ctx, bounds);
         // console.log('skeleton calculate cost', +new Date() - start);
+        // console.log(this._skeletonData);
     }
 
     getSkeletonData() {
@@ -494,11 +491,11 @@ export class DocumentSkeleton extends Skeleton {
             skeleton,
             skeletonResourceReference,
             docsConfig,
-            layoutPointer: {
-                paragraph: null,
-                section: null,
+            layoutStartPointer: {
+                paragraphIndex: null,
             },
             isDirty: false,
+            drawingsCache: new Map(),
         };
     }
 
@@ -530,14 +527,30 @@ export class DocumentSkeleton extends Skeleton {
      * @returns view model: skeleton
      */
 
-    private _createSkeleton(ctx: ILayoutContext, _bounds?: IViewportBound) {
+    private _createSkeleton(ctx: ILayoutContext, _bounds?: IViewportBound): IDocumentSkeletonCached {
+        // console.log('createSkeleton: iterate ', this._iteratorCount, 'times');
         const { viewModel, skeleton, skeletonResourceReference } = ctx;
 
         const allSkeletonPages = skeleton.pages;
 
         viewModel.resetCache();
 
-        for (let i = 0, len = viewModel.children.length; i < len; i++) {
+        let startSectionIndex = 0;
+
+        if (ctx.layoutStartPointer.paragraphIndex != null) {
+            const { paragraphIndex } = ctx.layoutStartPointer;
+            for (let sectionIndex = 0; sectionIndex < viewModel.children.length; sectionIndex++) {
+                const sectionNode = viewModel.children[sectionIndex];
+                const { endIndex, startIndex } = sectionNode;
+                if (paragraphIndex >= startIndex && paragraphIndex <= endIndex) {
+                    startSectionIndex = sectionIndex;
+                    break;
+                }
+            }
+        }
+
+        // Loop the sections with the start section index.
+        for (let i = startSectionIndex, len = viewModel.children.length; i < len; i++) {
             const sectionNode = viewModel.children[i];
             const sectionBreakConfig = prepareSectionBreakConfig(i, ctx);
             const { sectionType, columnProperties, columnSeparatorType, sectionTypeNext } = sectionBreakConfig;
@@ -549,8 +562,9 @@ export class DocumentSkeleton extends Skeleton {
                 updateBlockIndex(allSkeletonPages);
                 this._addNewSectionByContinuous(curSkeletonPage, columnProperties!, columnSeparatorType!);
                 isContinuous = true;
-            } else {
+            } else if (ctx.layoutStartPointer.paragraphIndex == null) {
                 curSkeletonPage = createSkeletonPage(
+                    ctx,
                     sectionBreakConfig,
                     skeletonResourceReference,
                     curSkeletonPage?.pageNumber
@@ -558,7 +572,8 @@ export class DocumentSkeleton extends Skeleton {
             }
 
             // 计算页内布局，block 结构
-            const blockInfo = dealWithSections(
+            const { pages } = dealWithSection(
+                ctx,
                 viewModel,
                 sectionNode,
                 curSkeletonPage,
@@ -571,21 +586,34 @@ export class DocumentSkeleton extends Skeleton {
                 // TODO
             }
 
-            const { pages } = blockInfo;
-
-            if (isContinuous) {
+            if (isContinuous || (ctx.layoutStartPointer.paragraphIndex != null && !ctx.isDirty)) {
                 pages.splice(0, 1);
             }
 
             allSkeletonPages.push(...pages);
+
+            // The page needs to be reflowed due to floating objects.
+            if (ctx.isDirty) {
+                break;
+            }
         }
 
-        // 计算页和节的位置信息
-        updateBlockIndex(allSkeletonPages);
+        // TODO: 10 is too small?
+        if (ctx.isDirty && this._iteratorCount < 10) {
+            this._iteratorCount++;
+            return this._createSkeleton({
+                ...ctx,
+                isDirty: false,
+            }, _bounds);
+        } else {
+            // 计算页和节的位置信息
+            updateBlockIndex(allSkeletonPages);
 
-        setPageParent(allSkeletonPages, skeleton);
+            setPageParent(allSkeletonPages, skeleton);
+            this._iteratorCount = 0;
 
-        return skeleton;
+            return skeleton;
+        }
     }
 
     // 一页存在多个 section 的情况，仅在 SectionType.CONTINUOUS 的情况下出现

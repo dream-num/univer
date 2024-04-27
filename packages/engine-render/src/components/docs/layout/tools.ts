@@ -47,6 +47,7 @@ import type {
     IDocumentSkeletonCached,
     IDocumentSkeletonColumn,
     IDocumentSkeletonDivide,
+    IDocumentSkeletonDrawing,
     IDocumentSkeletonFontStyle,
     IDocumentSkeletonGlyph,
     IDocumentSkeletonLine,
@@ -792,15 +793,19 @@ export interface ILayoutContext {
     // The position coordinates of the layout,
     // which are used to indicate which section and paragraph are currently layout,
     // and used to support the starting point of the reflow when re-layout.
-    layoutPointer: {
-        paragraph: Nullable<DataStreamTreeNode>;
-        section: Nullable<DataStreamTreeNode>;
+    layoutStartPointer: {
+        paragraphIndex: Nullable<number>; // Layout from the beginning if the paragraphIndex is null.
     };
     // It is used to identify whether it is a re-layout,
-    // and if it is a re-layout, the skeleton needs to be backtracked to the layoutPointer states.
+    // and if it is a re-layout, the skeleton needs to be backtracked to the layoutStartPointer states.
     isDirty: boolean;
     // Used to store the resource of document and resource cache.
     skeletonResourceReference: ISkeletonResourceReference;
+    // Positioned float objects cache.
+    drawingsCache: Map<string, {
+        count: number;
+        drawing: IDocumentSkeletonDrawing;
+    }>;
 }
 
 const DEFAULT_SECTION_BREAK: ISectionBreak = {

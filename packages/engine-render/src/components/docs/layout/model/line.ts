@@ -234,7 +234,7 @@ export function setLineMarginBottom(line: IDocumentSkeletonLine, marginBottom: n
 // 获得文字内容后的行信息计算
 export function updateDivideInLine(line: IDocumentSkeletonLine) {}
 
-function _calculateSplit(
+export function _calculateSplit(
     drawing: IDocumentSkeletonDrawing,
     lineHeight: number,
     lineTop: number,

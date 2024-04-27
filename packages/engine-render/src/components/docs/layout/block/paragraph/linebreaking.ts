@@ -20,6 +20,7 @@ import { BreakType } from '../../../../../basics/i-document-skeleton-cached';
 import type { IDocumentSkeletonBullet, IDocumentSkeletonDrawing, IDocumentSkeletonPage, ISkeletonResourceReference } from '../../../../../basics/i-document-skeleton-cached';
 import { createSkeletonPage } from '../../model/page';
 import { setColumnFullState } from '../../model/section';
+import type { ILayoutContext } from '../../tools';
 import { getLastNotFullColumnInfo } from '../../tools';
 import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../../view-model/document-view-model';
@@ -110,6 +111,7 @@ function _getNextPageNumber(lastPage: IDocumentSkeletonPage) {
 }
 
 export function lineBreaking(
+    ctx: ILayoutContext,
     shapedTextList: IShapedText[],
     curPage: IDocumentSkeletonPage,
     bodyModel: DocumentViewModel,
@@ -181,6 +183,7 @@ export function lineBreaking(
             }
 
             allPages = layoutParagraph(
+                ctx,
                 glyphs,
                 allPages,
                 sectionBreakConfig,
@@ -195,6 +198,7 @@ export function lineBreaking(
             pushPending();
             allPages.push(
                 createSkeletonPage(
+                    ctx,
                     sectionBreakConfig,
                     skeletonResourceReference,
                     _getNextPageNumber(allPages[allPages.length - 1]),
@@ -215,6 +219,7 @@ export function lineBreaking(
             } else {
                 allPages.push(
                     createSkeletonPage(
+                        ctx,
                         sectionBreakConfig,
                         skeletonResourceReference,
                         _getNextPageNumber(lastPage),

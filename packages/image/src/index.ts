@@ -17,7 +17,7 @@
 export { getImageSize } from './utils/get-image-size';
 
 export { UniverImagePlugin } from './plugin';
-export { ImageManagerService, IImageManagerService, type IImageManagerDataParam, type IImageManagerSearchParam } from './services/image-manager.service';
+export { ImageManagerService, IImageManagerService, type IImageManagerDataParam, type IImageManagerBaseParam } from './services/image-manager.service';
 export { ImageModel } from './models/image-model';
 export { InsertImageMutation } from './commands/mutations/insert-image.mutations';
 export { RemoveImageMutation } from './commands/mutations/remove-image.mutations';

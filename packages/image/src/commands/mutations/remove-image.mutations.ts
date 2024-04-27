@@ -14,31 +14,19 @@
  * limitations under the License.
  */
 
-import type { IMutation, Workbook } from '@univerjs/core';
-import { CommandType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
-import type { IImageManagerSearchParam } from '../../services/image-manager.service';
+import type { IMutation } from '@univerjs/core';
+import { CommandType } from '@univerjs/core';
+import type { IImageManagerBaseParam } from '../../services/image-manager.service';
 import { IImageManagerService } from '../../services/image-manager.service';
 
 
-export const RemoveImageMutation: IMutation<IImageManagerSearchParam> = {
+export const RemoveImageMutation: IMutation<IImageManagerBaseParam[]> = {
     id: 'sheet.mutation.remove-image',
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
-        const { unitId, subUnitId } = params;
-        const univerInstanceService = accessor.get(IUniverInstanceService);
         const imageManagerService = accessor.get(IImageManagerService);
 
-        const universheet = univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
-        if (universheet == null) {
-            throw new Error('universheet is null error!');
-        }
-
-        const worksheet = universheet.getSheetBySheetId(subUnitId);
-        if (worksheet == null) {
-            throw new Error('worksheet is null error!');
-        }
-
-        imageManagerService.remove(params);
+        imageManagerService.batchRemove(params);
 
         return true;
     },

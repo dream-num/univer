@@ -50,8 +50,6 @@ export enum DocumentSkeletonState {
 export class DocumentSkeleton extends Skeleton {
     private _skeletonData: Nullable<IDocumentSkeletonCached>;
 
-    private _renderedBlockIdMap = new Map<string, boolean>();
-
     private _findLiquid: Liquid = new Liquid();
 
     constructor(

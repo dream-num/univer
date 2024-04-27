@@ -310,6 +310,7 @@ function __getBoundingBox(angle: number, left: number, width: number, top: numbe
     const rt = new Vector2(left + width, top);
     const rb = new Vector2(left + width, top + height);
     const boundingBox = transform.makeBoundingBoxFromPoints([lt, lb, rt, rb]); // 返回旋转后的点集合以及矩形选区
+
     return boundingBox;
 }
 

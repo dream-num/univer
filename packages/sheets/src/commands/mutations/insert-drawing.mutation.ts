@@ -14,30 +14,19 @@
  * limitations under the License.
  */
 
-import type { IMutation, Workbook } from '@univerjs/core';
-import { CommandType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
+import type { IMutation } from '@univerjs/core';
+import { CommandType } from '@univerjs/core';
 import { ISheetDrawingService, type ISheetDrawingServiceParam } from '../../services/sheet-drawing.service';
 
 
-export const InsertDrawingMutation: IMutation<ISheetDrawingServiceParam> = {
+export const InsertDrawingMutation: IMutation<ISheetDrawingServiceParam[]> = {
     id: 'sheet.mutation.insert-drawing',
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
-        const { unitId, subUnitId } = params;
-        const univerInstanceService = accessor.get(IUniverInstanceService);
         const sheetDrawingService = accessor.get(ISheetDrawingService);
 
-        const universheet = univerInstanceService.getUnit<Workbook>(unitId, UniverInstanceType.UNIVER_SHEET);
-        if (universheet == null) {
-            throw new Error('universheet is null error!');
-        }
 
-        const worksheet = universheet.getSheetBySheetId(subUnitId);
-        if (worksheet == null) {
-            throw new Error('worksheet is null error!');
-        }
-
-        sheetDrawingService.addDrawing(params);
+        sheetDrawingService.batchAddDrawing(params);
 
         return true;
     },

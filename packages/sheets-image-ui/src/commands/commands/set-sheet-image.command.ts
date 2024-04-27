@@ -24,14 +24,8 @@ import {
 import { SetDrawingMutation } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
 import { SetImageMutation } from '@univerjs/image';
-import type { IInsertDrawingCommandParam } from './interfaces';
+import type { ISetDrawingCommandParams } from './interfaces';
 
-
-export interface ISetDrawingCommandParams {
-    unitId: string;
-    oldDrawing: IInsertDrawingCommandParam;
-    newDrawing: IInsertDrawingCommandParam;
-}
 
 /**
  * The command to update defined name
@@ -45,18 +39,24 @@ export const SetSheetImageCommand: ICommand = {
 
         if (!params) return false;
 
-        const { unitId, oldDrawing, newDrawing } = params;
+        const { unitId, drawings } = params;
+
+        const newDrawingParams = drawings.map((param) => param.newDrawing.drawingParam);
+        const newImageParams = drawings.map((param) => param.newDrawing.imageParam);
+
+        const oldDrawingParams = drawings.map((param) => param.oldDrawing.drawingParam);
+        const oldImageParams = drawings.map((param) => param.oldDrawing.imageParam);
 
 
         // execute do mutations and add undo mutations to undo stack if completed
-        let result = commandService.syncExecuteCommand(SetDrawingMutation.id, newDrawing.drawingParam);
-        result = commandService.syncExecuteCommand(SetImageMutation.id, newDrawing.imageParam);
+        const result1 = commandService.syncExecuteCommand(SetDrawingMutation.id, newDrawingParams);
+        const result2 = commandService.syncExecuteCommand(SetImageMutation.id, newImageParams);
 
-        if (result) {
+        if (result1 && result2) {
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
-                undoMutations: [{ id: SetDrawingMutation.id, params: oldDrawing.drawingParam }, { id: SetImageMutation.id, params: oldDrawing.imageParam }],
-                redoMutations: [{ id: SetDrawingMutation.id, params: newDrawing.drawingParam }, { id: SetDrawingMutation.id, params: newDrawing.imageParam }],
+                undoMutations: [{ id: SetDrawingMutation.id, params: oldDrawingParams }, { id: SetImageMutation.id, params: oldImageParams }],
+                redoMutations: [{ id: SetDrawingMutation.id, params: newDrawingParams }, { id: SetDrawingMutation.id, params: newImageParams }],
             });
 
             return true;

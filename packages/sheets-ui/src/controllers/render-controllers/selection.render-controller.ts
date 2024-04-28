@@ -18,16 +18,12 @@ import type { ICommandInfo, Workbook } from '@univerjs/core';
 import {
     Disposable,
     ICommandService,
-    IUniverInstanceService,
-    LifecycleStages,
-    OnLifecycle,
     RANGE_TYPE,
     ThemeService,
     toDisposable,
-    UniverInstanceType,
 } from '@univerjs/core';
-import type { IMouseEvent, IPointerEvent, SpreadsheetSkeleton } from '@univerjs/engine-render';
-import { IRenderManagerService, ScrollTimerType, Vector2 } from '@univerjs/engine-render';
+import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderController, SpreadsheetSkeleton } from '@univerjs/engine-render';
+import { ScrollTimerType, Vector2 } from '@univerjs/engine-render';
 import type { ISelectionWithCoordAndStyle, ISelectionWithStyle } from '@univerjs/sheets';
 import {
     convertSelectionDataToRange,
@@ -44,37 +40,31 @@ import {
 import { Inject } from '@wendellhu/redi';
 
 import { deserializeRangeWithSheet, IDefinedNamesService, isReferenceStrings, operatorToken } from '@univerjs/engine-formula';
-import type { ISetZoomRatioOperationParams } from '../commands/operations/set-zoom-ratio.operation';
-import { SetZoomRatioOperation } from '../commands/operations/set-zoom-ratio.operation';
-import { VIEWPORT_KEY } from '../common/keys';
-import { ISelectionRenderService } from '../services/selection/selection-render.service';
-import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
-import type { ISheetObjectParam } from './utils/component-tools';
-import { getSheetObject } from './utils/component-tools';
+import type { ISetZoomRatioOperationParams } from '../../commands/operations/set-zoom-ratio.operation';
+import { SetZoomRatioOperation } from '../../commands/operations/set-zoom-ratio.operation';
+import { VIEWPORT_KEY } from '../../common/keys';
+import { ISelectionRenderService } from '../../services/selection/selection-render.service';
+import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
+import type { ISheetObjectParam } from '../utils/component-tools';
+import { getSheetObject } from '../utils/component-tools';
 
-/**
- * @deprecated refactor it to an `RenderController`.
- */
-@OnLifecycle(LifecycleStages.Rendered, SelectionController)
-export class SelectionController extends Disposable {
+export class SelectionRenderController extends Disposable implements IRenderController {
     constructor(
+        private readonly _context: IRenderContext<Workbook>,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @ISelectionRenderService
-        private readonly _selectionRenderService: ISelectionRenderService,
+        @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService,
         @Inject(ThemeService) private readonly _themeService: ThemeService,
         @IDefinedNamesService private readonly _definedNamesService: IDefinedNamesService
     ) {
         super();
 
-        this._initialize();
+        this._init();
     }
 
-    private _initialize() {
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+    private _init() {
+        const workbook = this._context.unit;
         const worksheet = workbook.getActiveSheet();
         const sheetObject = this._getSheetObject();
         if (sheetObject == null) {
@@ -112,7 +102,7 @@ export class SelectionController extends Disposable {
                     const { unitId } = item;
                     let { formulaOrRefString } = item;
 
-                    const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+                    const workbook = this._context.unit;
 
                     if (unitId !== workbook.getUnitId()) {
                         return;
@@ -379,7 +369,7 @@ export class SelectionController extends Disposable {
         }
         const lastSelection = params[params.length - 1];
 
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        const workbook = this._context.unit;
         const worksheet = workbook.getActiveSheet();
 
         this._definedNamesService.setCurrentRange({
@@ -404,7 +394,7 @@ export class SelectionController extends Disposable {
     }
 
     private _move(selectionDataWithStyleList: ISelectionWithCoordAndStyle[], type: SelectionMoveType) {
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        const workbook = this._context.unit;
         if (!workbook) return;
 
         const unitId = workbook.getUnitId();
@@ -427,7 +417,7 @@ export class SelectionController extends Disposable {
     }
 
     private _getSheetObject() {
-        return getSheetObject(this._univerInstanceService, this._renderManagerService);
+        return getSheetObject(this._context.unit, this._context);
     }
 
     private _initCommandListener() {
@@ -436,7 +426,7 @@ export class SelectionController extends Disposable {
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (updateCommandList.includes(command.id)) {
-                    const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+                    const workbook = this._context.unit;
                     const worksheet = workbook.getActiveSheet();
 
                     const params = command.params as ISetZoomRatioOperationParams;
@@ -458,13 +448,7 @@ export class SelectionController extends Disposable {
             }
 
             const { unitId, sheetId, skeleton } = param;
-
-            const currentRender = this._renderManagerService.getRenderById(unitId);
-            if (currentRender == null) {
-                return;
-            }
-
-            const { scene } = currentRender;
+            const { scene } = this._context;
 
             const viewportMain = scene.getViewport(VIEWPORT_KEY.VIEW_MAIN);
 

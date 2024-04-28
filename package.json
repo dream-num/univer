@@ -72,7 +72,8 @@
         "release-it": "^17.2.0",
         "serve": "^14.2.2",
         "turbo": "^1.13.2",
-        "typescript": "^5.4.5"
+        "typescript": "^5.4.5",
+        "vitest": "^1.5.0"
     },
     "lint-staged": {
         "*": "eslint --fix"

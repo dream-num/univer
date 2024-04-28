@@ -76,7 +76,7 @@ export class RenderUnit extends Disposable implements IRender {
         this._injector = parentInjector.createChild();
 
         this._renderContext = {
-            unit: init.unit,
+            unit: init.unit, // model
             unitId: init.unit.getUnitId(),
             type: init.unit.type,
             components: new Map(),

@@ -39,7 +39,6 @@ import { HeaderResizeController } from './controllers/render-controllers/header-
 import { HeaderUnhideRenderController } from './controllers/render-controllers/header-unhide.render-controller';
 import { MarkSelectionController } from './controllers/mark-selection.controller';
 import { MoveRangeController } from './controllers/move-range.controller';
-import { ScrollController } from './controllers/scroll.controller';
 import { SelectionController } from './controllers/selection.controller';
 import { SheetRenderController } from './controllers/sheet-render.controller';
 import { SheetUIController } from './controllers/sheet-ui.controller';
@@ -71,6 +70,7 @@ import { SheetCanvasPopManagerService } from './services/canvas-pop-manager.serv
 import { ForceStringRenderController } from './controllers/force-string-render.controller';
 import { ForceStringAlertController } from './controllers/force-string-alert.controller';
 import { SheetsZoomRenderController } from './controllers/render-controllers/zoom.render-controller';
+import { SheetsScrollRenderController } from './controllers/render-controllers/scroll.render-controller';
 
 export class UniverSheetsUIPlugin extends Plugin {
     static override pluginName = 'SHEET_UI_PLUGIN_NAME';
@@ -133,7 +133,6 @@ export class UniverSheetsUIPlugin extends Plugin {
                 [HeaderMoveController],
                 [HeaderResizeController],
                 [MoveRangeController],
-                [ScrollController],
                 [SelectionController],
                 [SheetClipboardController],
                 [SheetContextMenuController],
@@ -164,6 +163,7 @@ export class UniverSheetsUIPlugin extends Plugin {
             HeaderUnhideRenderController,
             HeaderResizeController,
             SheetsZoomRenderController,
+            SheetsScrollRenderController,
         ]).forEach((controller) => {
             this.disposeWithMe(this._renderManagerService.registerRenderController(UniverInstanceType.UNIVER_SHEET, controller));
         });

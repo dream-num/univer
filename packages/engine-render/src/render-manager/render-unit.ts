@@ -28,6 +28,8 @@ export interface IRender {
     mainComponent: Nullable<RenderComponentType>;
     components: Map<string, RenderComponentType>;
     isMainScene: boolean;
+
+    with<T>(dependency: DependencyIdentifier<T>): T;
 }
 
 // eslint-disable-next-line ts/no-explicit-any
@@ -37,7 +39,7 @@ export interface IRenderController extends IDisposable {}
 /**
  * This object encapsulates methods or properties to render each element.
  */
-export interface IRenderContext<T extends UnitModel = UnitModel> extends IRender {
+export interface IRenderContext<T extends UnitModel = UnitModel> extends Omit<IRender, 'with'> {
     unit: T;
     type: UnitType;
 }
@@ -102,8 +104,9 @@ export class RenderUnit extends Disposable implements IRender {
     }
 
     private _initControllers(ctors: IRenderControllerCtor[]): void {
-        ctors
-            .map((ctor) => this._injector.createInstance(ctor, this._renderContext))
-            .forEach((controller) => this._renderControllers.push(controller));
+        const j = this._injector;
+
+        ctors.forEach((ctor) => j.add([ctor, { useFactory: () => j.createInstance(ctor, this._renderContext) }]));
+        ctors.forEach((ctor) => j.get(ctor));
     }
 }

@@ -14,19 +14,13 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, Workbook } from '@univerjs/core';
+import type { Workbook } from '@univerjs/core';
 import { Disposable, ICommandService } from '@univerjs/core';
 import type { IRenderContext, IRenderController, IWheelEvent } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
 import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import { getSheetObject } from '../utils/component-tools';
-import { SetZoomRatioOperation } from '../../commands/operations/set-zoom-ratio.operation';
 import { SetZoomRatioCommand } from '../../commands/commands/set-zoom-ratio.command';
-
-interface ISetWorksheetMutationParams {
-    unitId: string;
-    subUnitId: string;
-}
 
 export class SheetsZoomRenderController extends Disposable implements IRenderController {
     constructor(
@@ -37,8 +31,19 @@ export class SheetsZoomRenderController extends Disposable implements IRenderCon
         super();
 
         this._skeletonListener();
-        this._commandExecutedListener();
         this._zoomEventBinding();
+    }
+
+    updateZoom(worksheetId: string, zoomRatio: number): boolean {
+        const worksheet = this._context.unit.getSheetBySheetId(worksheetId);
+        if (!worksheet) return false;
+
+        worksheet.getConfig().zoomRatio = zoomRatio;
+        if (worksheet === this._context.unit.getActiveSheet()) {
+            this._updateViewZoom(zoomRatio);
+        }
+
+        return true;
     }
 
     private _zoomEventBinding() {
@@ -90,26 +95,6 @@ export class SheetsZoomRenderController extends Disposable implements IRenderCon
         }));
     }
 
-    private _commandExecutedListener() {
-        const updateCommandList = [SetZoomRatioOperation.id];
-
-        this.disposeWithMe(
-            this._commandService.onCommandExecuted((command: ICommandInfo) => {
-                if (updateCommandList.includes(command.id)) {
-                    const workbook = this._context.unit;
-                    const worksheet = workbook.getActiveSheet();
-                    const params = command.params;
-                    const { unitId, subUnitId } = params as ISetWorksheetMutationParams;
-                    if (!(unitId === workbook.getUnitId() && subUnitId === worksheet.getSheetId())) {
-                        return;
-                    }
-
-                    const zoomRatio = worksheet.getConfig().zoomRatio || 1;
-                    this._updateViewZoom(zoomRatio);
-                }
-            })
-        );
-    }
 
     private _updateViewZoom(zoomRatio: number) {
         const sheetObject = this._getSheetObject();

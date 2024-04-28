@@ -35,8 +35,9 @@ import { UniverDataValidationPlugin } from '@univerjs/data-validation';
 import { UniverSheetsDataValidationPlugin } from '@univerjs/sheets-data-validation';
 import { UniverSheetsConditionalFormattingUIPlugin } from '@univerjs/sheets-conditional-formatting-ui';
 
-import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data/sheets/demo/default-workbook-data-demo';
+import { FUniver } from '@univerjs/facade';
 import { DebuggerPlugin } from '../plugins/debugger';
+import { DEFAULT_WORKBOOK_DATA_DEMO } from '../data/sheets/demo/default-workbook-data-demo';
 import { locales } from './locales';
 
 /* eslint-disable-next-line node/prefer-global/process */
@@ -114,6 +115,7 @@ univer.registerPlugin(DebuggerPlugin);
 declare global {
     interface Window {
         univer?: Univer;
+        univerAPI?: ReturnType<typeof FUniver.newAPI>;
     }
 }
 
@@ -125,3 +127,4 @@ setTimeout(() => {
 }, LOAD_LAZY_PLUGINS_TIMEOUT);
 
 window.univer = univer;
+window.univerAPI = FUniver.newAPI(univer);

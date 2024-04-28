@@ -635,7 +635,7 @@ export function getPositionVertical(
             }
             return absoluteTop;
         }
-    } else if (posOffset) {
+    } else if (posOffset != null) {
         let absoluteTop = 0;
         const { marginTop } = page;
 
@@ -657,7 +657,7 @@ export function getPositionVertical(
             absoluteTop = (isPageBreak ? 0 : blockAnchorTop == null ? lineTop : blockAnchorTop) + posOffset;
         }
         return absoluteTop;
-    } else if (percent) {
+    } else if (percent != null) {
         const { pageHeight, marginBottom, marginTop } = page;
         if (relativeFrom === ObjectRelativeFromV.TOP_MARGIN) {
             // TODO

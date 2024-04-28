@@ -15,7 +15,7 @@
  */
 
 import type { INumberUnit } from '@univerjs/core';
-import { BooleanNumber, DataStreamTreeTokenType, GridType, SpacingRule } from '@univerjs/core';
+import { BooleanNumber, DataStreamTreeTokenType, GridType, ObjectRelativeFromV, SpacingRule } from '@univerjs/core';
 import type {
     IDocumentSkeletonColumn,
     IDocumentSkeletonDrawing,
@@ -411,35 +411,8 @@ function _lineOperator(
         paragraphAffectSkeDrawings
     );
 
-    let findFirstDirtyLine = false;
-
-    if (drawings && drawings.size > 0) {
-        const page = column.parent?.parent;
-        if (page) {
-            lineIterator([page], (line) => {
-                const { lineHeight, top: lineTop } = line;
-                const width = column.width;
-                for (const drawing of drawings.values()) {
-                    if (ctx.drawingsCache.has(drawing.objectId)) {
-                        continue;
-                    }
-                    const split = _calculateSplit(drawing, lineHeight, lineTop, width);
-                    if (split && !findFirstDirtyLine) {
-                        // TODO: need to break the line iterator.
-                        ctx.isDirty = true;
-                        ctx.layoutStartPointer.paragraphIndex = line.paragraphIndex;
-                        findFirstDirtyLine = true;
-
-                        // TODO: update count.
-                        ctx.drawingsCache.set(drawing.objectId, {
-                            count: 0,
-                            drawing,
-                        });
-                        break;
-                    }
-                }
-            });
-        }
+    if (drawings != null) {
+        _reLayoutCheck(ctx, drawings, column);
     }
 
     __updateDrawingPosition(
@@ -507,6 +480,85 @@ function _lineOperator(
     newLine.parent = column;
     createAndUpdateBlockAnchor(paragraphIndex, newLine, lineTop, drawingAnchor);
     _divideOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, defaultSpanLineHeight);
+}
+
+function _reLayoutCheck(ctx: ILayoutContext, drawings: Map<string, IDocumentSkeletonDrawing>, column: IDocumentSkeletonColumn) {
+    const page = column.parent?.parent;
+
+    if (drawings.size === 0 || page == null) {
+        return;
+    }
+
+    let needBreakLineIterator = false;
+
+    lineIterator([page], (line) => {
+        const { lineHeight, top } = line;
+        const width = column.width;
+
+        if (needBreakLineIterator) {
+            return;
+        }
+
+        for (const drawing of drawings.values()) {
+            const posOffset = drawing.drawingOrigin.objectTransform.positionV.posOffset;
+            if (posOffset != null && posOffset >= 0) {
+                continue;
+            }
+
+            let targetDrawing = drawing;
+
+            if (ctx.drawingsCache.has(drawing.objectId)) {
+                const needRePosition = checkDrawingNeedRePosition(ctx, drawing);
+
+                if (needRePosition) {
+                    targetDrawing = ctx.drawingsCache.get(drawing.objectId)?.drawing ?? drawing;
+                } else {
+                    continue;
+                }
+            }
+
+            const split = _calculateSplit(targetDrawing, lineHeight, top, width);
+            if (split) {
+                // No need to loop next line.
+                needBreakLineIterator = true;
+                ctx.isDirty = true;
+                ctx.layoutStartPointer.paragraphIndex = Math.min(line.paragraphIndex, ctx.layoutStartPointer.paragraphIndex ?? Number.POSITIVE_INFINITY);
+
+                let drawingCache = ctx.drawingsCache.get(drawing.objectId);
+                if (drawingCache == null) {
+                    drawingCache = {
+                        count: 0,
+                        drawing,
+                    };
+
+                    ctx.drawingsCache.set(drawing.objectId, drawingCache);
+                }
+
+                drawingCache.count++;
+                drawingCache.drawing = drawing;
+            }
+        }
+    });
+}
+
+function checkDrawingNeedRePosition(ctx: ILayoutContext, drawing: IDocumentSkeletonDrawing) {
+    const { relativeFrom } = drawing.drawingOrigin.objectTransform.positionV;
+    const drawingCache = ctx.drawingsCache.get(drawing.objectId);
+
+    if (drawingCache == null) {
+        return false;
+    }
+
+    if (relativeFrom === ObjectRelativeFromV.PARAGRAPH || relativeFrom === ObjectRelativeFromV.LINE) {
+        const { count, drawing: prevDrawing } = drawingCache;
+        // Floating elements can be positioned no more than 5 times,
+        // and when the error is within 5 pixels, there is no need to re-layout
+        if (count < 5 && Math.abs(drawing.aTop - prevDrawing.aTop) > 5) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 function _columnOperator(
@@ -774,7 +826,9 @@ function __getDrawingPosition(
         drawings.set(drawing.objectId, drawing);
     }
 
-    // console.log(`lineTop: ${lineTop}, blockAnchorTop: ${blockAnchorTop}`, drawings);
+    // if (drawings.size) {
+    //     console.log(`lineTop: ${lineTop}, blockAnchorTop: ${blockAnchorTop}`, drawings);
+    // }
 
     return drawings;
 }

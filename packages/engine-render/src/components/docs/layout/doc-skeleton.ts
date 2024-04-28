@@ -41,6 +41,21 @@ export enum DocumentSkeletonState {
     INVALID = 'invalid',
 }
 
+function resetContext(ctx: ILayoutContext) {
+    ctx.isDirty = false;
+    ctx.skeleton.drawingAnchor?.clear();
+}
+
+function removeDupPages(ctx: ILayoutContext) {
+    const hash = new Set();
+    ctx.skeleton.pages = ctx.skeleton.pages.filter((page) => {
+        const hasPage = hash.has(page);
+        hash.add(page);
+
+        return !hasPage;
+    });
+}
+
 export class DocumentSkeleton extends Skeleton {
     private _skeletonData: Nullable<IDocumentSkeletonCached>;
 
@@ -585,7 +600,7 @@ export class DocumentSkeleton extends Skeleton {
                 // TODO
             }
 
-            if (isContinuous || (ctx.layoutStartPointer.paragraphIndex != null && !ctx.isDirty)) {
+            if (isContinuous) {
                 pages.splice(0, 1);
             }
 
@@ -600,18 +615,16 @@ export class DocumentSkeleton extends Skeleton {
         // TODO: 10 is too small?
         if (ctx.isDirty && this._iteratorCount < 10) {
             this._iteratorCount++;
-            // TODO: MOVE to reset ctx function.
-            ctx.skeleton.drawingAnchor?.clear();
-            return this._createSkeleton({
-                ...ctx,
-                isDirty: false,
-            }, _bounds);
+
+            resetContext(ctx);
+            return this._createSkeleton(ctx, _bounds);
         } else {
             // 计算页和节的位置信息
+            this._iteratorCount = 0;
+            removeDupPages(ctx);
             updateBlockIndex(allSkeletonPages);
 
             setPageParent(allSkeletonPages, skeleton);
-            this._iteratorCount = 0;
 
             return skeleton;
         }

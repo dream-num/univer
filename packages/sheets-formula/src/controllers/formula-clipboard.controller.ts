@@ -153,8 +153,11 @@ export function getSetCellFormulaMutations(
             return;
         }
 
+        if (copyInfo && copyInfo.pasteType === PREDEFINED_HOOK_NAME.SPECIAL_PASTE_VALUE) {
+            valueObject.v = value.v;
+        }
         // Directly reuse when there is a formula id
-        if (isFormulaId(originalFormulaId)) {
+        else if (isFormulaId(originalFormulaId)) {
             valueObject.si = originalFormulaId;
             valueObject.f = null;
             valueObject.v = null;

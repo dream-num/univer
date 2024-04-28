@@ -59,6 +59,17 @@ export class UniverImagePlugin extends Plugin {
             imageModel: model,
         });
 
+        const model2 = new ImageModel({
+            imageId: 'shapeTest2',
+            contentUrl: 'https://minio.cnbabylon.com/univer/slide/gartner-tech-2022.png',
+        });
+        imageManagerService.add({
+            unitId: 'd',
+            subUnitId: DEFAULT_DOCUMENT_SUB_COMPONENT_ID,
+            imageId: 'shapeTest2',
+            imageModel: model2,
+        });
+
         // imageProperties: {
         //     contentUrl: 'https://minio.cnbabylon.com/univer/slide/gartner-tech-2022.png',
         // },

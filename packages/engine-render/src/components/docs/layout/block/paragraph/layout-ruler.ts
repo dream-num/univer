@@ -415,6 +415,7 @@ function _lineOperator(
 
         const affectInlineDrawings = ctx.paragraphConfigCache.get(line.paragraphIndex)?.paragraphInlineSkeDrawings;
 
+        // Update inline drawings after the line is layout.
         if (affectInlineDrawings) {
             __updatePreLineDrawingPosition(line, paragraphInlineSkeDrawings);
         }
@@ -534,11 +535,6 @@ function _reLayoutCheck(ctx: ILayoutContext, drawings: Map<string, IDocumentSkel
         }
 
         for (const drawing of drawings.values()) {
-            const posOffset = drawing.drawingOrigin.objectTransform.positionV.posOffset;
-            if (posOffset != null && posOffset >= 0) {
-                continue;
-            }
-
             let targetDrawing = drawing;
 
             if (ctx.drawingsCache.has(drawing.objectId)) {

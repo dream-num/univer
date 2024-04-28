@@ -229,6 +229,8 @@ export class DocFloatingObjectController extends Disposable {
                 });
             });
 
+            this._liquid.restorePagePadding(page);
+
             this._liquid.translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
         }
 

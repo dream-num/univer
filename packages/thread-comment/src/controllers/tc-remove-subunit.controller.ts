@@ -39,21 +39,25 @@ export class ThreadCommentRemoveSubUnitController extends Disposable {
                 getMutations: (commandInfo) => {
                     if (commandInfo.id === RemoveSheetCommand.id) {
                         const params = commandInfo.params as IRemoveSheetCommandParams;
-                        const unitId = params.unitId || this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!.getUnitId();
-                        const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
+                        const workbook = params.unitId ? this._univerInstanceService.getUnit<Workbook>(params.unitId) : this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
                         if (!workbook) {
                             return { redos: [], undos: [] };
                         }
+                        const unitId = workbook.getUnitId();
                         const subUnitId = params.subUnitId || workbook.getActiveSheet().getSheetId();
                         const { commentMap } = this._threadCommentModel.ensureMap(unitId, subUnitId);
 
                         const ids = Array.from(commentMap.keys());
                         const comments = Array.from(commentMap.values());
-                        const redoParams: IDeleteCommentMutationParams = {
-                            unitId,
-                            subUnitId,
-                            commentIds: ids,
-                        };
+                        const redos = ids.map((id) => ({
+                            id: DeleteCommentMutation.id,
+                            params: {
+                                unitId,
+                                subUnitId,
+                                commentId: id,
+                            } as IDeleteCommentMutationParams,
+                        }));
+
                         const undos = comments.map((comment) => ({
                             id: AddCommentMutation.id,
                             params: {
@@ -63,13 +67,7 @@ export class ThreadCommentRemoveSubUnitController extends Disposable {
                             },
                         }));
 
-                        return {
-                            redos: [{
-                                id: DeleteCommentMutation.id,
-                                params: redoParams,
-                            }],
-                            undos,
-                        };
+                        return { redos, undos };
                     }
                     return { redos: [], undos: [] };
                 },

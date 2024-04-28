@@ -19,6 +19,7 @@ import React from 'react';
 import { SelectionManagerService } from '@univerjs/sheets';
 import { ThreadCommentTree } from '@univerjs/thread-comment-ui';
 import { Tools, UniverInstanceType } from '@univerjs/core';
+import { useObservable } from '@univerjs/ui';
 import { SheetsThreadCommentModel } from '../../models/sheets-thread-comment.model';
 
 export const SheetsThreadCommentCell = () => {
@@ -27,6 +28,7 @@ export const SheetsThreadCommentCell = () => {
 
     const selection = selectionManagerService.getFirst();
     const sheetThreadCommentModel = useDependency(SheetsThreadCommentModel);
+    useObservable(sheetThreadCommentModel.commentUpdate$);
     if (!current || !selection?.primary) {
         return null;
     }

@@ -44,7 +44,7 @@ export type CommentUpdate = {
 };
 
 export class ThreadCommentModel {
-    private _commentsMap: Map<string, Map<string, Map<string, IThreadComment>>> = new Map();
+    private _commentsMap: Record<string, Record<string, Record<string, IThreadComment>>> = {};
     private _commentsTreeMap: Map<string, Map<string, Map<string, string[]>>> = new Map();
     private _commentUpdate$ = new Subject<CommentUpdate>();
     private _commentsTreeMap$ = new Subject<Record<string, Record<string, Record<string, string[]>>>>();
@@ -55,17 +55,17 @@ export class ThreadCommentModel {
     commentMap$ = this._commentsMap$.asObservable();
 
     private _ensureCommentMap(unitId: string, subUnitId: string) {
-        let unitMap = this._commentsMap.get(unitId);
+        let unitMap = this._commentsMap[unitId];
 
         if (!unitMap) {
-            unitMap = new Map();
-            this._commentsMap.set(unitId, unitMap);
+            unitMap = {};
+            this._commentsMap[unitId] = unitMap;
         }
 
-        let subUnitMap = unitMap.get(subUnitId);
+        let subUnitMap = unitMap[subUnitId];
         if (!subUnitMap) {
-            subUnitMap = new Map();
-            unitMap.set(subUnitId, subUnitMap);
+            subUnitMap = {};
+            unitMap[subUnitId] = subUnitMap;
         }
 
         return subUnitMap;
@@ -86,6 +86,12 @@ export class ThreadCommentModel {
         }
 
         return subUnitMap;
+    }
+
+    private _refreshCommentsMap() {
+        this._commentsMap$.next({
+            ...this._commentsMap,
+        });
     }
 
     ensureMap(unitId: string, subUnitId: string) {
@@ -113,18 +119,19 @@ export class ThreadCommentModel {
             commentChildrenMap.set(comment.id, []);
         }
 
-        commentMap.set(comment.id, comment);
+        commentMap[comment.id] = comment;
         this._commentUpdate$.next({
             unitId,
             subUnitId,
             type: 'add',
             payload: comment,
         });
+        this._refreshCommentsMap();
     }
 
     updateComment(unitId: string, subUnitId: string, payload: IUpdateCommentPayload) {
         const { commentMap } = this.ensureMap(unitId, subUnitId);
-        const oldComment = commentMap.get(payload.commentId);
+        const oldComment = commentMap[payload.commentId];
         if (!oldComment) {
             return false;
         }
@@ -138,12 +145,13 @@ export class ThreadCommentModel {
             type: 'update',
             payload,
         });
+        this._refreshCommentsMap();
         return true;
     }
 
     updateCommentRef(unitId: string, subUnitId: string, payload: IUpdateCommentRefPayload) {
         const { commentMap } = this.ensureMap(unitId, subUnitId);
-        const oldComment = commentMap.get(payload.commentId);
+        const oldComment = commentMap[payload.commentId];
         if (!oldComment) {
             return false;
         }
@@ -156,23 +164,25 @@ export class ThreadCommentModel {
             type: 'updateRef',
             payload,
         });
+        this._refreshCommentsMap();
         return true;
     }
 
     resolveComment(unitId: string, subUnitId: string, commentId: string, resolved: boolean) {
         const { commentMap } = this.ensureMap(unitId, subUnitId);
-        const oldComment = commentMap.get(commentId);
+        const oldComment = commentMap[commentId];
         if (!oldComment) {
             return false;
         }
 
         oldComment.resolved = resolved;
+        this._refreshCommentsMap();
         return true;
     }
 
     getComment(unitId: string, subUnitId: string, commentId: string) {
         const { commentMap } = this.ensureMap(unitId, subUnitId);
-        return commentMap.get(commentId);
+        return commentMap[commentId];
     }
 
     getComment$(unitId: string, subUnitId: string, commentId: string) {
@@ -181,13 +191,13 @@ export class ThreadCommentModel {
 
     getCommentWithChildren(unitId: string, subUnitId: string, commentId: string) {
         const { commentMap, commentChildrenMap } = this.ensureMap(unitId, subUnitId);
-        const current = commentMap.get(commentId);
+        const current = commentMap[commentId];
         if (!current) {
             return undefined;
         }
 
         const children = commentChildrenMap.get(commentId) ?? [];
-        const childrenComments = children?.map((childId) => commentMap.get(childId)!);
+        const childrenComments = children?.map((childId) => commentMap[childId]!);
 
         return {
             root: current,
@@ -198,7 +208,7 @@ export class ThreadCommentModel {
 
     deleteComment(unitId: string, subUnitId: string, commentId: string) {
         const { commentMap, commentChildrenMap } = this.ensureMap(unitId, subUnitId);
-        const current = commentMap.get(commentId);
+        const current = commentMap[commentId];
         if (!current) {
             return;
         }
@@ -210,16 +220,16 @@ export class ThreadCommentModel {
             }
             const index = children.indexOf(commentId);
             children.splice(index, 1);
-            commentMap.delete(commentId);
+            delete commentMap[commentId];
         } else {
             const children = commentChildrenMap.get(commentId);
             if (!children) {
                 return;
             }
-            commentMap.delete(commentId);
+            delete commentMap[commentId];
             commentChildrenMap.delete(commentId);
             children.forEach((childId) => {
-                commentMap.delete(childId);
+                delete commentMap[childId];
             });
         }
 
@@ -232,26 +242,27 @@ export class ThreadCommentModel {
                 isRoot: !current.parentId,
             },
         });
+        this._refreshCommentsMap();
     }
 
     getUnit(unitId: string) {
-        const unitMap = this._commentsMap.get(unitId);
+        const unitMap = this._commentsMap[unitId];
         if (!unitMap) {
             return [];
         }
 
-        return Array.from(unitMap.entries()).map(([subUnitId, subUnitMap]) => [subUnitId, Array.from(subUnitMap.values())] as const);
+        return Array.from(Object.entries(unitMap)).map(([subUnitId, subUnitMap]) => [subUnitId, Array.from(Object.values(subUnitMap))] as const);
     }
 
     deleteUnit(unitId: string) {
-        const unitMap = this._commentsMap.get(unitId);
+        const unitMap = this._commentsMap[unitId];
         if (!unitMap) {
             return;
         }
 
 
-        unitMap.forEach((subUnitMap, subUnitId) => {
-            subUnitMap.forEach((comment) => {
+        Object.entries(unitMap).forEach(([subUnitId, subUnitMap]) => {
+            Object.values(subUnitMap).forEach((comment) => {
                 this.deleteComment(unitId, subUnitId, comment.id);
             });
         });

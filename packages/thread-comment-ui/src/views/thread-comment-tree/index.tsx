@@ -16,7 +16,7 @@
 
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import type { IAddCommentCommandParams, IThreadComment, IUpdateCommentCommandParams } from '@univerjs/thread-comment';
-import { AddCommentCommand, ThreadCommentModel, UpdateCommentCommand } from '@univerjs/thread-comment';
+import { AddCommentCommand, DeleteCommentCommand, DeleteCommentTreeCommand, ThreadCommentModel, UpdateCommentCommand } from '@univerjs/thread-comment';
 import React, { useEffect, useMemo, useState } from 'react';
 import { DeleteSingle, MoreSingle } from '@univerjs/icons';
 import { ICommandService, Tools, type UniverInstanceType } from '@univerjs/core';
@@ -44,6 +44,17 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
     const [editing, setEditing] = useState(false);
     const commandService = useDependency(ICommandService);
 
+    const handleDeleteItem = () => {
+        commandService.executeCommand(
+            DeleteCommentCommand.id,
+            {
+                unitId,
+                subUnitId,
+                commentId: item.id,
+            }
+        );
+    };
+
     useEffect(() => {
         if (!item.id) {
             setEditing(true);
@@ -56,7 +67,7 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
             <div className={styles.threadCommentItemTitle}>
                 {item.personId}
                 <div className={styles.threadCommentIcon}>
-                    <MoreSingle />
+                    <MoreSingle onClick={handleDeleteItem} />
                 </div>
             </div>
             <div className={styles.threadCommentItemTime}>{item.dT}</div>
@@ -121,6 +132,17 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
     ];
 
 
+    const handleDeleteRoot = () => {
+        commandService.executeCommand(
+            DeleteCommentTreeCommand.id,
+            {
+                unitId,
+                subUnitId,
+                commentId: id,
+            }
+        );
+    };
+
     return (
         <div className={styles.threadComment}>
             <div className={styles.threadCommentTitle}>
@@ -132,7 +154,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                     ? (
                         <div>
                             <div className={styles.threadCommentIcon}>
-                                <DeleteSingle />
+                                <DeleteSingle onClick={handleDeleteRoot} />
                             </div>
                         </div>
                     )
@@ -165,6 +187,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                                             id: Tools.generateRandomId(),
                                             ref: refStr,
                                             personId,
+                                            parentId: comments.root.id,
                                         },
                                     } as IAddCommentCommandParams
                                 );

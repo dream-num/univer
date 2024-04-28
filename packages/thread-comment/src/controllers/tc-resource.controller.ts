@@ -23,7 +23,7 @@ import type { IThreadComment } from '../types/interfaces/i-thread-comment';
 
 export type ThreadCommentJSON = Record<string, IThreadComment[]>;
 
-@OnLifecycle(LifecycleStages.Ready, ThreadCommentResourceController)
+@OnLifecycle(LifecycleStages.Starting, ThreadCommentResourceController)
 export class ThreadCommentResourceController extends Disposable {
     constructor(
         @IResourceManagerService private readonly _resourceManagerService: IResourceManagerService,

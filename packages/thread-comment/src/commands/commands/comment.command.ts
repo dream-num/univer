@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import { CommandType, type ICommand } from '@univerjs/core';
+import { CommandType, type ICommand, ICommandService, IUndoRedoService } from '@univerjs/core';
 import type { IThreadComment } from '../../types/interfaces/i-thread-comment';
 import { ThreadCommentModel } from '../../models/thread-comment.model';
-import type { IUpdateCommentPayload } from '../mutations/comment.mutation';
+import { AddCommentMutation, DeleteCommentMutation, type IUpdateCommentPayload, ResolveCommentMutation, UpdateCommentMutation } from '../mutations/comment.mutation';
 
 export interface IAddCommentCommandParams {
     unitId: string;
@@ -32,9 +32,27 @@ export const AddCommentCommand: ICommand<IAddCommentCommandParams> = {
         if (!params) {
             return false;
         }
-        const threadCommentModel = accessor.get(ThreadCommentModel);
+        const commandService = accessor.get(ICommandService);
+        const undoRedoService = accessor.get(IUndoRedoService);
         const { unitId, subUnitId, comment } = params;
-        threadCommentModel.addComment(unitId, subUnitId, comment);
+        const redo = {
+            id: AddCommentMutation.id,
+            params,
+        };
+        const undo = {
+            id: DeleteCommentMutation.id,
+            params: {
+                unitId,
+                subUnitId,
+                commentId: comment.id,
+            },
+        };
+        undoRedoService.pushUndoRedo({
+            undoMutations: [undo],
+            redoMutations: [redo],
+            unitID: unitId,
+        });
+        commandService.executeCommand(redo.id, redo.params);
         return true;
     },
 };
@@ -54,9 +72,44 @@ export const UpdateCommentCommand: ICommand<IUpdateCommentCommandParams> = {
         if (!params) {
             return false;
         }
-        const threadCommentModel = accessor.get(ThreadCommentModel);
         const { unitId, subUnitId, payload } = params;
-        threadCommentModel.updateComment(unitId, subUnitId, payload);
+        const commandService = accessor.get(ICommandService);
+        const undoRedoService = accessor.get(IUndoRedoService);
+        const threadCommentModel = accessor.get(ThreadCommentModel);
+        const currentComment = threadCommentModel.getComment(
+            unitId,
+            subUnitId,
+            payload.commentId
+        );
+
+        if (!currentComment) {
+            return false;
+        }
+
+        const redo = {
+            id: UpdateCommentMutation.id,
+            params,
+        };
+        const undo = {
+            id: UpdateCommentMutation.id,
+            params: {
+                unitId,
+                subUnitId,
+                payload: {
+                    commentId: payload.commentId,
+                    text: currentComment.text,
+                    attachments: currentComment.attachments,
+                    dT: currentComment.dT,
+                    updated: currentComment.updated,
+                },
+            },
+        };
+        undoRedoService.pushUndoRedo({
+            undoMutations: [undo],
+            redoMutations: [redo],
+            unitID: unitId,
+        });
+        commandService.executeCommand(redo.id, redo.params);
         return true;
     },
 };
@@ -66,22 +119,48 @@ export interface IUpdateCommentRefPayload {
     ref: string;
 }
 
-export interface IUpdateCommentPositionCommandParams {
+export interface IUpdateCommentRefCommandParams {
     unitId: string;
     subUnitId: string;
     payload: IUpdateCommentRefPayload;
 }
 
-export const UpdateCommentPositionCommand: ICommand<IUpdateCommentPositionCommandParams> = {
-    id: 'thread-comment.command.update-comment',
+export const UpdateCommentRefCommand: ICommand<IUpdateCommentRefCommandParams> = {
+    id: 'thread-comment.command.update-comment-ref',
     type: CommandType.MUTATION,
     handler(accessor, params) {
         if (!params) {
             return false;
         }
         const threadCommentModel = accessor.get(ThreadCommentModel);
+        const commandService = accessor.get(ICommandService);
+        const undoRedoService = accessor.get(IUndoRedoService);
         const { unitId, subUnitId, payload } = params;
-        threadCommentModel.updateCommentRef(unitId, subUnitId, payload);
+        const currentComment = threadCommentModel.getComment(unitId, subUnitId, payload.commentId);
+        if (!currentComment) {
+            return false;
+        }
+        const redo = {
+            id: UpdateCommentMutation.id,
+            params,
+        };
+        const undo = {
+            id: UpdateCommentMutation.id,
+            params: {
+                unitId,
+                subUnitId,
+                payload: {
+                    commentId: payload.commentId,
+                    ref: currentComment.ref,
+                },
+            },
+        };
+        undoRedoService.pushUndoRedo({
+            undoMutations: [undo],
+            redoMutations: [redo],
+            unitID: unitId,
+        });
+        commandService.executeCommand(redo.id, redo.params);
         return true;
     },
 };
@@ -101,9 +180,33 @@ export const ResolveCommentCommand: ICommand<IResolveCommentCommandParams> = {
         if (!params) {
             return false;
         }
+        const { unitId, subUnitId, commentId } = params;
         const threadCommentModel = accessor.get(ThreadCommentModel);
-        const { unitId, subUnitId, resolved, commentId } = params;
-        threadCommentModel.resolveComment(unitId, subUnitId, commentId, resolved);
+        const commandService = accessor.get(ICommandService);
+        const undoRedoService = accessor.get(IUndoRedoService);
+        const currentComment = threadCommentModel.getComment(unitId, subUnitId, commentId);
+
+        undoRedoService.pushUndoRedo({
+            redoMutations: [{
+                id: ResolveCommentMutation.id,
+                params,
+            }],
+            undoMutations: [{
+                id: ResolveCommentMutation.id,
+                params: {
+                    unitId,
+                    subUnitId,
+                    resolved: currentComment?.resolved,
+                    commentId,
+                },
+            }],
+            unitID: unitId,
+        });
+
+        commandService.executeCommand(
+            ResolveCommentMutation.id,
+            params
+        );
         return true;
     },
 };
@@ -123,8 +226,81 @@ export const DeleteCommentCommand: ICommand<IDeleteCommentCommandParams> = {
             return false;
         }
         const threadCommentModel = accessor.get(ThreadCommentModel);
+        const commandService = accessor.get(ICommandService);
+        const undoRedoService = accessor.get(IUndoRedoService);
+        const { unitId, subUnitId, commentId } = params;
+
+        const comment = threadCommentModel.getComment(unitId, subUnitId, commentId);
+        if (!comment) {
+            return false;
+        }
+        const redo = {
+            id: DeleteCommentMutation.id,
+            params,
+        };
+        const undo = {
+            id: AddCommentMutation.id,
+            params: {
+                unitId,
+                subUnitId,
+                comment,
+            },
+        };
+        undoRedoService.pushUndoRedo({
+            undoMutations: [undo],
+            redoMutations: [redo],
+            unitID: unitId,
+        });
+        commandService.executeCommand(redo.id, redo.params);
+        return true;
+    },
+};
+
+export interface IDeleteCommentTreeCommandParams {
+    unitId: string;
+    subUnitId: string;
+    commentId: string;
+}
+
+export const DeleteCommentTreeCommand: ICommand<IDeleteCommentCommandParams> = {
+    id: 'thread-comment.command.delete-comment-tree',
+    type: CommandType.MUTATION,
+    handler(accessor, params) {
+        if (!params) {
+            return false;
+        }
+        const threadCommentModel = accessor.get(ThreadCommentModel);
+        const undoRedoService = accessor.get(IUndoRedoService);
         const { unitId, subUnitId, commentId } = params;
         threadCommentModel.deleteComment(unitId, subUnitId, commentId);
+        const commentWithChildren = threadCommentModel.getCommentWithChildren(unitId, subUnitId, commentId);
+        if (!commentWithChildren) {
+            return false;
+        }
+        const redos = [commentWithChildren.root, ...commentWithChildren.children].map((item) => ({
+            id: DeleteCommentMutation.id,
+            params: {
+                unitId,
+                subUnitId,
+                commentId: item.id,
+            },
+        }));
+
+        const undos = [commentWithChildren.root, ...commentWithChildren.children].map((item) => ({
+            id: AddCommentMutation.id,
+            params: {
+                unitId,
+                subUnitId,
+                comment: item,
+            },
+        }));
+
+        undoRedoService.pushUndoRedo({
+            undoMutations: undos,
+            redoMutations: redos,
+            unitID: unitId,
+        });
+
         return true;
     },
 };

@@ -25,15 +25,22 @@ import type { IGlobalZoneService } from './global-zone.service';
 export class DesktopGlobalZoneService implements IGlobalZoneService {
     readonly visible$ = new Subject<boolean>();
     readonly componentKey$ = new Subject<string>();
+    private _componentKey = '';
+
 
     constructor(
         @Inject(ComponentManager)
         private readonly _componentManager: ComponentManager
     ) {}
 
+    get componentKey() {
+        return this._componentKey;
+    }
+
     set(key: string, component: ForwardRefExoticComponent<any>): IDisposable {
         this._componentManager.register(key, component);
         this.componentKey$.next(key);
+        this._componentKey = key;
 
         return toDisposable(() => {
             this._componentManager.delete(key);

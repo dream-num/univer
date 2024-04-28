@@ -600,6 +600,8 @@ export class DocumentSkeleton extends Skeleton {
         // TODO: 10 is too small?
         if (ctx.isDirty && this._iteratorCount < 10) {
             this._iteratorCount++;
+            // TODO: MOVE to reset ctx function.
+            ctx.skeleton.drawingAnchor?.clear();
             return this._createSkeleton({
                 ...ctx,
                 isDirty: false,

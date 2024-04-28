@@ -774,6 +774,8 @@ function __getDrawingPosition(
         drawings.set(drawing.objectId, drawing);
     }
 
+    // console.log(`lineTop: ${lineTop}, blockAnchorTop: ${blockAnchorTop}`, drawings);
+
     return drawings;
 }
 

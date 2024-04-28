@@ -16,7 +16,6 @@
 
 import type { Nullable } from '@univerjs/core';
 import { PageOrientType } from '@univerjs/core';
-
 import type {
     IDocumentSkeletonFooter,
     IDocumentSkeletonHeader,
@@ -25,7 +24,6 @@ import type {
 } from '../../../../basics/i-document-skeleton-cached';
 import { BreakType } from '../../../../basics/i-document-skeleton-cached';
 import type { ISectionBreakConfig } from '../../../../basics/interfaces';
-
 import { dealWithSection } from '../block/section';
 import type { DocumentViewModel } from '../../view-model/document-view-model';
 import type { ILayoutContext } from '../tools';
@@ -155,7 +153,7 @@ export function createSkeletonPage(
 }
 
 // 检测是否溢出了一页
-function checkPageOverflow(page: IDocumentSkeletonPage) {}
+function checkPageOverflow(page: IDocumentSkeletonPage) { }
 
 function _getNullPage() {
     return {

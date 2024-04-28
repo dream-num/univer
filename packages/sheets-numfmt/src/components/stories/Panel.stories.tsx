@@ -15,28 +15,16 @@
  */
 
 import type { Meta, StoryObj } from '@storybook/react';
-import { LocaleService, LocaleType, ThemeService } from '@univerjs/core';
+import { LocaleService, LocaleType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
-import { Injector } from '@wendellhu/redi';
-import { connectInjector, RediContext } from '@wendellhu/redi/react-bindings';
-import React, { useContext, useMemo, useState } from 'react';
+import { RediContext } from '@wendellhu/redi/react-bindings';
+import React, { useContext, useState } from 'react';
 
 import { enUS, zhCN } from '../../locale';
 import type { ISheetNumfmtPanelProps } from '../index';
 import { SheetNumfmtPanel } from '../index';
 import { UserHabitController } from '../../controllers/user-habit.controller';
 
-const Index = (props: any) => {
-    const inject = useMemo(() => new Injector([[LocaleService], [ThemeService]]), []);
-    const Wrap = useMemo(() => connectInjector(SheetNumfmtPanel, inject), []) as any;
-
-    useMemo(() => {
-        const localeService = inject.get(LocaleService);
-        localeService.load({ zhCN });
-    }, []);
-
-    return <Wrap {...props} />;
-};
 const meta: Meta = {
     title: 'numfmt',
     parameters: {
@@ -70,8 +58,7 @@ export const Test: StoryObj<ISheetNumfmtPanelProps> = {
             <RediContext.Provider value={{ injector: inject }}>
                 <SheetNumfmtPanel
                     value={{ defaultPattern: '', defaultValue: 123123, row: 2, col: 3 }}
-                    onChange={(pattern) => {
-                    }}
+                    onChange={(_pattern) => {}}
                 />
             </RediContext.Provider>
         );

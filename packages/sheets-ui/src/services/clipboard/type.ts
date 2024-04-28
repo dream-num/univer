@@ -15,6 +15,7 @@
  */
 
 import type { ICellData, IDocumentData, IMutationInfo, IRange, ObjectMatrix } from '@univerjs/core';
+import type { IDiscreteRange } from '../../controllers/utils/range-tools';
 
 export enum COPY_TYPE {
     COPY = 'COPY',
@@ -53,7 +54,7 @@ export interface IUniverSheetCopyDataModel {
 }
 
 export interface IPasteTarget {
-    pastedRange: IRange;
+    pastedRange: IDiscreteRange;
     subUnitId: string;
     unitId: string;
 }
@@ -66,6 +67,12 @@ export interface ICopyPastePayload {
 
 export interface ISheetRangeLocation {
     range: IRange;
+    subUnitId: string;
+    unitId: string;
+}
+
+export interface ISheetDiscreteRangeLocation {
+    range: IDiscreteRange;
     subUnitId: string;
     unitId: string;
 }
@@ -132,15 +139,15 @@ export interface ISheetClipboardHook {
      *
      * @returns if it block copying it should return false
      */
-    onBeforePaste?(pasteTo: ISheetRangeLocation): boolean;
+    onBeforePaste?(pasteTo: ISheetDiscreteRangeLocation): boolean;
     /**
      *
      * @param row
      * @param col
      */
     onPasteCells?(
-        pasteFrom: ISheetRangeLocation | null,
-        pasteTo: ISheetRangeLocation,
+        pasteFrom: ISheetDiscreteRangeLocation | null,
+        pasteTo: ISheetDiscreteRangeLocation,
         data: ObjectMatrix<ICellDataWithSpanInfo>,
         payload: ICopyPastePayload
     ): {
@@ -148,7 +155,7 @@ export interface ISheetClipboardHook {
         redos: IMutationInfo[];
     };
     onPasteRows?(
-        pasteTo: ISheetRangeLocation,
+        pasteTo: ISheetDiscreteRangeLocation,
         rowProperties: IClipboardPropertyItem[],
         payload: ICopyPastePayload
     ): {
@@ -156,7 +163,7 @@ export interface ISheetClipboardHook {
         redos: IMutationInfo[];
     };
     onPasteColumns?(
-        pasteTo: ISheetRangeLocation,
+        pasteTo: ISheetDiscreteRangeLocation,
         colProperties: IClipboardPropertyItem[],
         payload: ICopyPastePayload
     ): {
@@ -164,7 +171,7 @@ export interface ISheetClipboardHook {
         redos: IMutationInfo[];
     };
     onPastePlainText?(
-        pasteTo: ISheetRangeLocation,
+        pasteTo: ISheetDiscreteRangeLocation,
         text: string,
         payload: ICopyPastePayload
     ): {
@@ -177,5 +184,5 @@ export interface ISheetClipboardHook {
      * The callback would be called before the clipboard service decides what region need to be copied from or pasted to.
      * It would jump over these filtered rows when copying or pasting.
      */
-    getFilteredOutRows?(): number[];
+    getFilteredOutRows?(range: IRange): number[];
 }

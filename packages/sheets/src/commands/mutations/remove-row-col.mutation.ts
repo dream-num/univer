@@ -65,6 +65,14 @@ export const RemoveRowMutation: IMutation<IRemoveRowsMutationParams> = {
         const manager = worksheet.getRowManager();
         const rowPrimitive = manager.getRowData();
 
+        const filterOutRows = [];
+        for (let i = range.startRow; i <= range.endRow; i++) {
+            if (worksheet.getRowFiltered(i)) {
+                filterOutRows.push(i);
+            }
+        }
+
+
         const rowCount = range.endRow - range.startRow + 1;
         spliceArray(range.startRow, rowCount, rowPrimitive);
 

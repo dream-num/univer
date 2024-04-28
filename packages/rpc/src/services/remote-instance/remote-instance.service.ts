@@ -86,8 +86,8 @@ export class WebWorkerRemoteInstanceService implements IRemoteInstanceService {
         const { type, snapshot } = params;
         try {
             switch (type) {
-                case UniverInstanceType.SHEET:
-                    this._univerInstanceService.createUnit(UniverInstanceType.SHEET, snapshot);
+                case UniverInstanceType.UNIVER_SHEET:
+                    this._univerInstanceService.createUnit(UniverInstanceType.UNIVER_SHEET, snapshot);
                     return true;
                 default:
                     throw new Error(

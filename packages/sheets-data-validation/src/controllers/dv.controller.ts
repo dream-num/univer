@@ -78,7 +78,7 @@ export class DataValidationController extends RxDisposable {
 
     private _initInstanceChange() {
         const disposableCollection = new DisposableCollection();
-        this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.SHEET).subscribe((workbook) => {
+        this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => {
             disposableCollection.dispose();
             if (!workbook) {
                 return;
@@ -103,7 +103,7 @@ export class DataValidationController extends RxDisposable {
         this._sheetInterceptorService.interceptCommand({
             getMutations: (commandInfo) => {
                 if (commandInfo.id === ClearSelectionAllCommand.id) {
-                    const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+                    const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
                     const unitId = workbook.getUnitId();
                     const worksheet = workbook.getActiveSheet();
                     const subUnitId = worksheet.getSheetId();

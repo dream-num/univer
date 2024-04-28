@@ -14,21 +14,12 @@
  * limitations under the License.
  */
 
+import type { UniverType } from '@univerjs/protocol';
 import { Disposable } from '../shared';
 
-/**
- * Type of built-in univer document instances.
- */
-export enum UniverInstanceType {
-    UNIVER = 0,
-    DOC = 1,
-    SHEET = 2,
-    SLIDE = 3,
+export { UniverType as UniverInstanceType } from '@univerjs/protocol';
 
-    UNRECOGNIZED = -1,
-}
-
-export type UnitType = UniverInstanceType | number;
+export type UnitType = UniverType | number;
 
 export abstract class UnitModel<_D = object, T extends UnitType = UnitType> extends Disposable {
     abstract readonly type: T;

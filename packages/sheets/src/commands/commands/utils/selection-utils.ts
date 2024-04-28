@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import type { IRange, ISelectionCell, Workbook, Worksheet } from '@univerjs/core';
+import type { IRange, ISelectionCell, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import { RANGE_TYPE, Rectangle, selectionToArray } from '@univerjs/core';
 
 import { NORMAL_SELECTION_PLUGIN_NAME } from '../../../services/selection-manager.service';
 import type { ISetSelectionsOperationParams } from '../../operations/selection.operation';
 import { SetSelectionsOperation } from '../../operations/selection.operation';
+import type { ISelectionWithStyle } from '../../../basics/selection';
 
 export interface IExpandParams {
     left?: boolean;
@@ -195,3 +196,17 @@ export const followSelectionOperation = (range: IRange, workbook: Workbook, work
         selections: [{ range, primary: getPrimaryForRange(range, worksheet) }],
     } as ISetSelectionsOperationParams,
 });
+
+/**
+ * Examine if a selection only contains a single cell (a merged cell is considered as a single cell in this case).
+ * @param selection
+ * @returns `true` if the selection only contains a single cell.
+ */
+export function isSingleCellSelection(selection: Nullable<ISelectionWithStyle & { primary: ISelectionCell }>): boolean {
+    if (!selection) {
+        return false;
+    }
+
+    const { range, primary } = selection;
+    return Rectangle.equals(range, primary);
+}

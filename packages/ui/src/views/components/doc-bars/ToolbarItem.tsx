@@ -24,6 +24,7 @@ import React, { forwardRef, useEffect, useMemo, useState } from 'react';
 import type { Subscription } from 'rxjs';
 import { isObservable, Observable } from 'rxjs';
 
+import clsx from 'clsx';
 import { ComponentManager } from '../../../common/component-manager';
 import { CustomLabel } from '../../../components/custom-label/CustomLabel';
 import { useObservable } from '../../../components/hooks/observable';
@@ -80,14 +81,12 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem>, ref: 
             })
         );
 
-        if (props.type === MenuItemType.BUTTON) {
-            props.activated$ &&
-            subscriptions.push(
-                props.activated$.subscribe((activated) => {
-                    setActivated(activated);
-                })
-            );
-        }
+        props.activated$ &&
+        subscriptions.push(
+            props.activated$.subscribe((activated) => {
+                setActivated(activated);
+            })
+        );
 
         props.value$ &&
         subscriptions.push(
@@ -170,9 +169,10 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem>, ref: 
         return menuType === MenuItemType.BUTTON_SELECTOR
             ? (
                 <div
-                    className={`${styles.toolbarItemSelectButton} ${
-                        disabled ? styles.toolbarItemSelectButtonDisabled : ''
-                    }`}
+                    className={clsx(styles.toolbarItemSelectButton, {
+                        [styles.toolbarItemSelectButtonDisabled]: disabled,
+                        [styles.toolbarItemSelectButtonActivated]: activated,
+                    })}
                     data-disabled={disabled}
                 >
                     <div className={styles.toolbarItemSelectButtonLabel} onClick={handleClick}>
@@ -184,21 +184,34 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem>, ref: 
                             onChange={handleChange}
                         />
                     </div>
-                    {!disabled && (
-                        <Dropdown
-                            overlay={<Menu menuType={id} options={options} onOptionSelect={handleSelect} value={value} />}
-                            onVisibleChange={handleDropdownVisibleChange}
-                        >
+                    {!disabled
+                        ? (
+                            <Dropdown
+                                overlay={<Menu menuType={id} options={options} onOptionSelect={handleSelect} value={value} />}
+                                onVisibleChange={handleDropdownVisibleChange}
+                            >
+                                <div
+                                    className={clsx(styles.toolbarItemSelectButtonArrow, {
+                                        [styles.toolbarItemSelectButtonArrowDisabled]: disabled,
+                                        [styles.toolbarItemSelectButtonArrowActivated]: activated,
+                                    })}
+                                    data-disabled={disabled}
+                                >
+                                    <MoreDownSingle />
+                                </div>
+                            </Dropdown>
+                        )
+                        : (
                             <div
-                                className={`${styles.toolbarItemSelectButtonArrow} ${
-                                    disabled ? styles.toolbarItemSelectButtonArrowDisabled : ''
-                                }`}
+                                className={clsx(styles.toolbarItemSelectButtonArrow, {
+                                    [styles.toolbarItemSelectButtonArrowDisabled]: disabled,
+                                    [styles.toolbarItemSelectButtonArrowActivated]: activated,
+                                })}
                                 data-disabled={disabled}
                             >
                                 <MoreDownSingle />
                             </div>
-                        </Dropdown>
-                    )}
+                        )}
                 </div>
             )
             : !disabled
@@ -207,7 +220,12 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem>, ref: 
                         overlay={<Menu menuType={id} options={options} onOptionSelect={handleSelect} value={value} />}
                         onVisibleChange={handleDropdownVisibleChange}
                     >
-                        <div className={`${styles.toolbarItemSelect} ${disabled ? styles.toolbarItemSelectDisabled : ''}`}>
+                        <div
+                            className={clsx(styles.toolbarItemSelect, {
+                                [styles.toolbarItemSelectDisabled]: disabled,
+                                [styles.toolbarItemSelectActivated]: activated,
+                            })}
+                        >
                             <CustomLabel
                                 icon={iconToDisplay}
                                 title={title!}
@@ -216,9 +234,9 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem>, ref: 
                                 onChange={handleChange}
                             />
                             <div
-                                className={`${styles.toolbarItemSelectArrow} ${
-                                    disabled ? styles.toolbarItemSelectArrowDisabled : ''
-                                }`}
+                                className={clsx(styles.toolbarItemSelectArrow, {
+                                    [styles.toolbarItemSelectArrowDisabled]: disabled,
+                                })}
                             >
                                 <MoreDownSingle />
                             </div>
@@ -226,7 +244,12 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem>, ref: 
                     </Dropdown>
                 )
                 : (
-                    <div className={`${styles.toolbarItemSelect} ${disabled ? styles.toolbarItemSelectDisabled : ''}`}>
+                    <div
+                        className={clsx(styles.toolbarItemSelect, {
+                            [styles.toolbarItemSelectDisabled]: disabled,
+                            [styles.toolbarItemSelectActivated]: activated,
+                        })}
+                    >
                         <CustomLabel
                             icon={iconToDisplay}
                             title={title!}
@@ -235,9 +258,10 @@ export const ToolbarItem = forwardRef((props: IDisplayMenuItem<IMenuItem>, ref: 
                             onChange={handleChange}
                         />
                         <div
-                            className={`${styles.toolbarItemSelectArrow} ${
-                                disabled ? styles.toolbarItemSelectArrowDisabled : ''
-                            }`}
+                            className={clsx(styles.toolbarItemSelectArrow, {
+                                [styles.toolbarItemSelectArrowDisabled]: disabled,
+                                [styles.toolbarItemSelectArrowActivated]: activated,
+                            })}
                         >
                             <MoreDownSingle />
                         </div>

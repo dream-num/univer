@@ -43,7 +43,7 @@ export interface IUniverSheetsConfig {
  */
 export class UniverSheetsPlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;
-    static override type = UniverInstanceType.SHEET;
+    static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(
         private _config: IUniverSheetsConfig,

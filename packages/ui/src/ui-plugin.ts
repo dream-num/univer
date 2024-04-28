@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import type { IContextService } from '@univerjs/core';
-import { IConfigService, ILocalStorageService, LocaleService, Plugin, UniverInstanceType } from '@univerjs/core';
+import { IContextService, ILocalStorageService, LocaleService, Plugin } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -70,11 +69,10 @@ export const DISABLE_AUTO_FOCUS_KEY = 'DISABLE_AUTO_FOCUS';
  */
 export class UniverUIPlugin extends Plugin {
     static override pluginName = PLUGIN_NAME;
-    static override type = UniverInstanceType.UNIVER;
 
     constructor(
         private _config: Partial<IUniverUIConfig> = {},
-        @IConfigService private readonly _contextService: IContextService,
+        @IContextService private readonly _contextService: IContextService,
         @Inject(Injector) protected readonly _injector: Injector,
         @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {

@@ -35,7 +35,7 @@ export function SlideSideBar() {
     const renderManagerService = useDependency(IRenderManagerService);
 
     const slideBarRef = useRef<HTMLDivElement>(null);
-    const currentSlide = useObservable(univerInstanceService.getCurrentTypeOfUnit$<SlideDataModel>(UniverInstanceType.SLIDE));
+    const currentSlide = useObservable(univerInstanceService.getCurrentTypeOfUnit$<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE));
     const pages = currentSlide?.getPages();
     const pageOrder = currentSlide?.getPageOrder();
 

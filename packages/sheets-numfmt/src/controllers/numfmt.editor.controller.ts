@@ -201,7 +201,7 @@ export class NumfmtEditorController extends Disposable {
                 getMutations(command) {
                     switch (command.id) {
                         case SetRangeValuesCommand.id: {
-                            const workbook = self._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+                            const workbook = self._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
                             const unitId = workbook.getUnitId();
                             const subUnitId = workbook.getActiveSheet().getSheetId();
                             const list = self._collectEffectMutation.getEffects();

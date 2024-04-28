@@ -111,7 +111,7 @@ export class DocUIController extends Disposable {
     }
 
     private _initDocBackground() {
-        const firstDocUnitId = this._univerInstanceService.getAllUnitsForType<DocumentDataModel>(UniverInstanceType.DOC)[0].getUnitId();
+        const firstDocUnitId = this._univerInstanceService.getAllUnitsForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC)[0].getUnitId();
         if (firstDocUnitId == null) {
             return;
         }
@@ -126,7 +126,7 @@ export class DocUIController extends Disposable {
 
     private _initFocusHandler(): void {
         this.disposeWithMe(
-            this._layoutService.registerFocusHandler(UniverInstanceType.DOC, () => {
+            this._layoutService.registerFocusHandler(UniverInstanceType.UNIVER_DOC, () => {
                 const textSelectionManagerService = this._injector.get(ITextSelectionRenderManager);
                 textSelectionManagerService.focus();
             })

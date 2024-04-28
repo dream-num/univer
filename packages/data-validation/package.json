@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/data-validation",
-    "version": "0.1.7",
+    "version": "0.1.8",
     "private": false,
     "description": "Data validation library for Univer",
     "author": "DreamNum <developer@univer.ai>",
@@ -66,9 +66,6 @@
         "@univerjs/sheets": "workspace:*",
         "@wendellhu/redi": "^0.13.3",
         "rxjs": ">=7.0.0"
-    },
-    "dependencies": {
-        "@univerjs/protocol": "^0.1.19"
     },
     "devDependencies": {
         "@univerjs/core": "workspace:*",

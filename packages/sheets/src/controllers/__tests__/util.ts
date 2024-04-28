@@ -43,7 +43,7 @@ const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
     styles: {},
 };
 
-export function createTestBase(workbookConfig?: IWorkbookData, dependencies?: Dependency[]) {
+export function createTestBase(workbookData?: IWorkbookData, dependencies?: Dependency[]) {
     const univer = new Univer();
     const injector = univer.__getInjector();
     const get = injector.get.bind(injector);
@@ -53,7 +53,7 @@ export function createTestBase(workbookConfig?: IWorkbookData, dependencies?: De
      */
     class TestPlugin extends Plugin {
         static override pluginName = 'test-plugin';
-        static override type = UniverInstanceType.SHEET;
+        static override type = UniverInstanceType.UNIVER_SHEET;
 
         constructor(
             _config: undefined,
@@ -68,7 +68,7 @@ export function createTestBase(workbookConfig?: IWorkbookData, dependencies?: De
     }
 
     univer.registerPlugin(TestPlugin);
-    const sheet = univer.createUniverSheet(workbookConfig || TEST_WORKBOOK_DATA_DEMO);
+    const sheet = univer.createUniverSheet(workbookData || TEST_WORKBOOK_DATA_DEMO);
 
     const univerInstanceService = get(IUniverInstanceService);
     univerInstanceService.focusUnit('test');

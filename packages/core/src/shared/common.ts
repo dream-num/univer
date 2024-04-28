@@ -22,7 +22,7 @@ import {
     VerticalAlign,
     WrapStrategy,
 } from '../types/enum';
-import type { IRange } from '../types/interfaces';
+import { type IRange, RANGE_TYPE } from '../types/interfaces';
 import type { ICellData } from '../types/interfaces/i-cell-data';
 import type { IDocumentData } from '../types/interfaces/i-document-data';
 import type { IRangeWithCoord, ISelectionCell, ISelectionCellWithCoord } from '../types/interfaces/i-selection-data';
@@ -531,17 +531,21 @@ export function getDocsUpdateBody(model: IDocumentData, segmentId?: string) {
 }
 
 export function isValidRange(range: IRange): boolean {
-    const { startRow, endRow, startColumn, endColumn } = range;
+    const { startRow, endRow, startColumn, endColumn, rangeType } = range;
     if (
         startRow < 0
         || startColumn < 0
         || endRow < 0
         || endColumn < 0
-        || Number.isNaN(startRow)
-        || Number.isNaN(endRow)
-        || Number.isNaN(startColumn)
-        || Number.isNaN(endColumn)
     ) {
+        return false;
+    }
+
+    if (!(Number.isNaN(startRow) && Number.isNaN(endRow)) && rangeType === RANGE_TYPE.COLUMN) {
+        return false;
+    }
+
+    if (!(Number.isNaN(startColumn) && Number.isNaN(endColumn)) && rangeType === RANGE_TYPE.ROW) {
         return false;
     }
 

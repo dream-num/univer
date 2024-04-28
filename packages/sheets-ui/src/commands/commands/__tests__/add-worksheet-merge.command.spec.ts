@@ -350,7 +350,7 @@ describe('Test add worksheet merge commands', () => {
             ]);
             const commandService = get(ICommandService);
             const univerInstanceService = get(IUniverInstanceService);
-            const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+            const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
             const worksheet = workbook.getActiveSheet();
             const mergeData = worksheet.getConfig().mergeData;
             expect(mergeData.length).toBe(0);
@@ -445,7 +445,7 @@ describe('Test add worksheet merge commands', () => {
             ]);
             const commandService = get(ICommandService);
             const univerInstanceService = get(IUniverInstanceService);
-            const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+            const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
             const worksheet = workbook.getActiveSheet();
             const mergeData = worksheet.getConfig().mergeData;
             expect(mergeData.length).toBe(0);

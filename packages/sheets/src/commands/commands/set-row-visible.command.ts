@@ -127,7 +127,7 @@ export const SetSelectedRowsVisibleCommand: ICommand = {
             return false;
         }
 
-        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET);
+        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (!workbook) return false;
         const worksheet = workbook.getActiveSheet();
         if (!worksheet) return false;

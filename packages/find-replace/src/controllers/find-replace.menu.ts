@@ -32,7 +32,7 @@ export function FindReplaceMenuItemFactory(accessor: IAccessor): IMenuButtonItem
         group: MenuGroup.TOOLBAR_OTHERS,
         type: MenuItemType.BUTTON,
         positions: [MenuPosition.TOOLBAR_START],
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: combineLatest([
             contextService.subscribeContextValue$(EDITOR_ACTIVATED),
             contextService.subscribeContextValue$(FOCUSING_SHEET),

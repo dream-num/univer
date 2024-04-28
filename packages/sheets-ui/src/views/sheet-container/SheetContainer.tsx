@@ -30,7 +30,7 @@ import styles from './index.module.less';
 
 export function RenderSheetFooter() {
     const univerInstanceService = useDependency(IUniverInstanceService);
-    const workbook = useObservable(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.SHEET), null, false, []);
+    const workbook = useObservable(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), null, false, []);
     if (!workbook) return null;
 
     return (
@@ -44,7 +44,7 @@ export function RenderSheetFooter() {
 
 export function RenderSheetHeader() {
     const univerInstanceService = useDependency(IUniverInstanceService);
-    const workbook = useObservable(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.SHEET), null, false, []);
+    const workbook = useObservable(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), null, false, []);
     if (!workbook) return null;
 
     return (
@@ -56,7 +56,7 @@ export function RenderSheetHeader() {
 
 export function RenderSheetContent() {
     const univerInstanceService = useDependency(IUniverInstanceService);
-    const workbook = useObservable(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.SHEET), null, false, []);
+    const workbook = useObservable(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), null, false, []);
     if (!workbook) return null;
 
     return (

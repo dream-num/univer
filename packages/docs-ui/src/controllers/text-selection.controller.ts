@@ -182,9 +182,9 @@ export class TextSelectionController extends Disposable {
         /**
          * The object for selecting data in the editor is set to the current sheet.
          */
-        const sheetInstances = this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.SHEET);
+        const sheetInstances = this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (sheetInstances.length > 0) {
-            const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+            const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
             this._editorService.setOperationSheetUnitId(workbook.getUnitId());
             // this._editorService.setOperationSheetSubUnitId(workbook.getActiveSheet().getSheetId());
         }
@@ -241,7 +241,7 @@ export class TextSelectionController extends Disposable {
     }
 
     private _getDocObjectById(unitId: string) {
-        if (this._univerInstanceService.getUnitType(unitId) !== UniverInstanceType.DOC) {
+        if (this._univerInstanceService.getUnitType(unitId) !== UniverInstanceType.UNIVER_DOC) {
             return null;
         }
 

@@ -37,6 +37,7 @@ describe('Test FUniver', () => {
         endRow: number,
         endColumn: number
     ) => Nullable<ICellData>;
+
     let getStyleByPosition: (
         startRow: number,
         startColumn: number,
@@ -160,6 +161,7 @@ describe('Test FUniver', () => {
     it('Function createSocket', () => {
         expect(() => univerAPI.createSocket('URL')).toThrowError();
     });
+
 
     it('Function registerSheetRowHeaderExtension and unregisterSheetRowHeaderExtension', () => {
         const rowHeader = univerAPI.registerSheetRowHeaderExtension('test', new RowHeaderCustomExtension());

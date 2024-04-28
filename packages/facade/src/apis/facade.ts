@@ -67,27 +67,27 @@ export class FUniver {
 
     /**
      * Create a new spreadsheet and get the API handler of that spreadsheet.
-     * @param data the snapshot of the spreadsheet.
+     * @param data The snapshot of the spreadsheet.
      * @returns Spreadsheet API instance.
      */
     createUniverSheet(data: Partial<IWorkbookData>): FWorkbook {
-        const workbook = this._univerInstanceService.createUnit<IWorkbookData, Workbook>(UniverInstanceType.SHEET, data);
+        const workbook = this._univerInstanceService.createUnit<IWorkbookData, Workbook>(UniverInstanceType.UNIVER_SHEET, data);
         return this._injector.createInstance(FWorkbook, workbook);
     }
 
     /**
      * Create a new document and get the API handler of that document.
-     * @param data the snapshot of the document.
+     * @param data The snapshot of the document.
      * @returns Document API instance.
      */
     createUniverDoc(data: Partial<IDocumentData>): FDocument {
-        const document = this._univerInstanceService.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.DOC, data);
+        const document = this._univerInstanceService.createUnit<IDocumentData, DocumentDataModel>(UniverInstanceType.UNIVER_DOC, data);
         return this._injector.createInstance(FDocument, document);
     }
 
     /**
      * Get the spreadsheet API handler by the spreadsheet id.
-     * @param id the spreadsheet id.
+     * @param id The spreadsheet id.
      * @returns Spreadsheet API instance.
      */
     getUniverSheet(id: string): FWorkbook | null {
@@ -101,7 +101,7 @@ export class FUniver {
 
     /**
      * Get the document API handler by the document id.
-     * @param id the document id.
+     * @param id The document id.
      * @returns Document API instance.
      */
     getUniverDoc(id: string): FDocument | null {
@@ -118,7 +118,7 @@ export class FUniver {
      * @returns the currently focused Univer spreadsheet.
      */
     getActiveWorkbook(): FWorkbook | null {
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.SHEET)!;
+        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         if (!workbook) {
             return null;
         }

@@ -31,7 +31,7 @@ import { ConditionalFormattingFormulaMarkDirty } from './commands/mutations/form
 
 export class SheetsConditionalFormattingPlugin extends Plugin {
     static override pluginName = SHEET_CONDITIONAL_FORMATTING_PLUGIN;
-    static override type = UniverInstanceType.SHEET;
+    static override type = UniverInstanceType.UNIVER_SHEET;
 
     static readonly dependencyList: Dependency[] = [[ConditionalFormattingService], [ConditionalFormattingFormulaService], [ConditionalFormattingRuleModel], [ConditionalFormattingViewModel]];
     static readonly mutationList = [AddConditionalRuleMutation, DeleteConditionalRuleMutation, SetConditionalRuleMutation, MoveConditionalRuleMutation, ConditionalFormattingFormulaMarkDirty];

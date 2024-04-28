@@ -17,14 +17,14 @@
 import type { IDisposable } from '@wendellhu/redi';
 import { createIdentifier } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
-import type { UniverType } from '@univerjs/protocol';
+import type { UniverInstanceType } from '@univerjs/core';
 import type { IWorkbookData } from '../../types/interfaces/i-workbook-data';
 
 type IBusinessName = 'SHEET' | 'DOC';
 export type IResourceName = `${IBusinessName}_${string}_PLUGIN`;
 export interface IResourceHook<T = any> {
     pluginName: IResourceName;
-    businesses: UniverType[];
+    businesses: UniverInstanceType[];
     onLoad: (unitID: string, resource: T) => void;
     onUnLoad: (unitID: string) => void;
     toJson: (unitID: string) => string;

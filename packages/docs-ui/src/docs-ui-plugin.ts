@@ -59,7 +59,7 @@ import { BackScrollController } from './controllers/back-scroll.controller';
 
 export class UniverDocsUIPlugin extends Plugin {
     static override pluginName = DOC_UI_PLUGIN_NAME;
-    static override type = UniverInstanceType.DOC;
+    static override type = UniverInstanceType.UNIVER_DOC;
 
     constructor(
         private readonly _config: IUniverDocsUIConfig,

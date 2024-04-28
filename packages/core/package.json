@@ -1,8 +1,7 @@
 {
     "name": "@univerjs/core",
-    "version": "0.1.7",
+    "version": "0.1.8",
     "private": false,
-    "packageManager": "pnpm@9.0.5",
     "description": "Core library for Univer.",
     "author": "DreamNum <developer@univer.ai>",
     "license": "Apache-2.0",
@@ -68,7 +67,7 @@
         "rxjs": ">=7.0.0"
     },
     "dependencies": {
-        "@univerjs/protocol": "^0.1.19",
+        "@univerjs/protocol": "^0.1.20",
         "nanoid": "5.0.7",
         "numeral": "^2.0.6"
     },

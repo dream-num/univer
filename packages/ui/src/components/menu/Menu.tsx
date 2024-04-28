@@ -181,6 +181,7 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
     const menuItems = menuItem.id ? menuService.getMenuItems(menuItem.id) : [];
 
     const disabled = useObservable<boolean>(menuItem.disabled$, false);
+    const activated = useObservable<boolean>(menuItem.activated$, false);
     const hidden = useObservable(menuItem.hidden$, false);
     const value = useObservable<MenuItemDefaultValueType>(menuItem.value$);
     const [inputValue, setInputValue] = useState(value);
@@ -203,6 +204,9 @@ function MenuItem({ menuItem, onClick }: IMenuItemProps) {
                 key={item.id}
                 eventKey={item.id}
                 disabled={disabled}
+                className={clsx({
+                    [styles.menuItemActivated]: activated,
+                })}
                 onClick={() => {
                     onClick({ value: inputValue, id: item.id }); // merge cell
                 }}

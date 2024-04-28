@@ -24,14 +24,17 @@ export interface IRowData {
      * height in pixel
      */
     h?: number;
+
     /**
      * is current row self-adaptive to its content, use `ah` to set row height when true, else use `h`.
      */
     ia?: BooleanNumber; // pre name `isAutoHeight`
+
     /**
      * auto height
      */
     ah?: number;
+
     /**
      * hidden
      */

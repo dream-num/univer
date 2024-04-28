@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-conditional-formatting",
-    "version": "0.1.7",
+    "version": "0.1.8",
     "private": false,
     "description": "Conditional formatting plugin for Univer Sheets",
     "author": "DreamNum <developer@univer.ai>",
@@ -71,9 +71,6 @@
         "@wendellhu/redi": "^0.13.3",
         "dayjs": ">=1.11.0",
         "rxjs": ">=7.0.0"
-    },
-    "dependencies": {
-        "@univerjs/protocol": "^0.1.19"
     },
     "devDependencies": {
         "@univerjs/core": "workspace:*",

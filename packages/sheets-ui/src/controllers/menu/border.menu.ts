@@ -70,7 +70,7 @@ export function CellBorderSelectorMenuItemFactory(accessor: IAccessor): IMenuSel
             },
         ],
         value$: borderStyleManagerService.borderInfo$,
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$,
     };
 }

@@ -16,7 +16,6 @@
 
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
-import type { UniverType } from '@univerjs/protocol';
 import { type UnitType, UniverInstanceType } from '../../common/unit';
 import { PluginHolder } from './plugin-holder';
 import type { Plugin, PluginCtor } from './plugin';
@@ -54,7 +53,7 @@ export class PluginService implements IDisposable {
         this._scheduleInitPlugin();
 
         const { type } = plugin;
-        if (type === UniverInstanceType.UNIVER) {
+        if (type === UniverInstanceType.UNIVER_UNKNOWN) {
             this._pluginHolderForUniver.registerPlugin(plugin, config);
             this._pluginHolderForUniver.flush();
         } else {
@@ -64,7 +63,7 @@ export class PluginService implements IDisposable {
         }
     }
 
-    startPluginForType(type: UniverType): void {
+    startPluginForType(type: UniverInstanceType): void {
         const holder = this._ensurePluginHolderForType(type);
         holder.start();
     }

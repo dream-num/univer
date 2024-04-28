@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo } from '@univerjs/core';
+import type { ICommandInfo, IExecutionOptions } from '@univerjs/core';
 import { ICommandService, IUniverInstanceService, LocaleService, toDisposable } from '@univerjs/core';
 import { Dropdown } from '@univerjs/design';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { Autofill, CheckMarkSingle, MoreDownSingle } from '@univerjs/icons';
-import { MoveRangeMutation, SetWorksheetActiveOperation } from '@univerjs/sheets';
+import { InsertColMutation, InsertRowMutation, MoveColsMutation, MoveRangeMutation, MoveRowsMutation, RemoveColMutation, RemoveRowMutation, SetRangeValuesMutation, SetWorksheetActiveOperation, SetWorksheetColWidthMutation, SetWorksheetRowHeightMutation } from '@univerjs/sheets';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import clsx from 'clsx';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -84,13 +84,23 @@ export const AutoFillPopupMenu: React.FC<{}> = () => {
             AutoClearContentCommand.id,
             SetZoomRatioOperation.id,
             SetWorksheetActiveOperation.id,
+            SetRangeValuesMutation.id,
             MoveRangeMutation.id,
+            RemoveRowMutation.id,
+            RemoveColMutation.id,
+            InsertRowMutation.id,
+            InsertColMutation.id,
+            MoveRowsMutation.id,
+            MoveColsMutation.id,
+            SetWorksheetColWidthMutation.id,
+            SetWorksheetRowHeightMutation.id,
         ];
-        const disposable = commandService.onCommandExecuted((command: ICommandInfo) => {
+        const disposable = commandService.onCommandExecuted((command: ICommandInfo, options?: IExecutionOptions) => {
             if (command.id === SetScrollOperation.id) {
                 forceUpdate();
             }
-            if (endCommands.includes(command.id)) {
+            const fromCollab = options?.fromCollab;
+            if (endCommands.includes(command.id) && !fromCollab) {
                 setAnchor({ row: -1, col: -1 });
             }
         });
@@ -101,11 +111,11 @@ export const AutoFillPopupMenu: React.FC<{}> = () => {
         const disposable = toDisposable(
             sheetSkeletonManagerService.currentSkeleton$.subscribe((skeleton) => {
                 if (skeleton) {
-                    setAnchor({ row: -1, col: -1 });
+                    forceUpdate();
                 }
             }));
         return disposable.dispose;
-    }, [sheetSkeletonManagerService]);
+    }, [sheetSkeletonManagerService, forceUpdate]);
 
     useEffect(() => {
         const disposable = toDisposable(

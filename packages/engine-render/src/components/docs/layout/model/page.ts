@@ -223,8 +223,7 @@ function _createSkeletonHeader(
         headerOrFooter,
         headerOrFooter.children[0],
         areaPage,
-        headerConfig,
-        skeletonResourceReference
+        headerConfig
     ).pages[0];
 
     updateBlockIndex([page]);

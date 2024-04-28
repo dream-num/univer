@@ -17,13 +17,12 @@
 import type { IBullet, ICustomBlock, IDrawing, IDrawings, Nullable } from '@univerjs/core';
 import { DataStreamTreeTokenType, PositionedObjectLayoutType } from '@univerjs/core';
 import { BreakType } from '../../../../../basics/i-document-skeleton-cached';
-import type { IDocumentSkeletonBullet, IDocumentSkeletonDrawing, IDocumentSkeletonPage, ISkeletonResourceReference } from '../../../../../basics/i-document-skeleton-cached';
+import type { IDocumentSkeletonBullet, IDocumentSkeletonDrawing, IDocumentSkeletonPage } from '../../../../../basics/i-document-skeleton-cached';
 import { createSkeletonPage } from '../../model/page';
 import { setColumnFullState } from '../../model/section';
 import type { ILayoutContext } from '../../tools';
 import { getLastNotFullColumnInfo } from '../../tools';
 import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
-import type { DocumentViewModel } from '../../../view-model/document-view-model';
 import type { IParagraphConfig, ISectionBreakConfig } from '../../../../../basics/interfaces';
 import type { IShapedText } from './shaping';
 import { layoutParagraph } from './layout-ruler';
@@ -114,11 +113,10 @@ export function lineBreaking(
     ctx: ILayoutContext,
     shapedTextList: IShapedText[],
     curPage: IDocumentSkeletonPage,
-    bodyModel: DocumentViewModel,
     paragraphNode: DataStreamTreeNode,
-    sectionBreakConfig: ISectionBreakConfig,
-    skeletonResourceReference: ISkeletonResourceReference
+    sectionBreakConfig: ISectionBreakConfig
 ): IDocumentSkeletonPage[] {
+    const { viewModel, skeletonResourceReference } = ctx;
     const {
         lists,
         drawings = {},
@@ -127,7 +125,7 @@ export function lineBreaking(
 
     const { endIndex, blocks = [] } = paragraphNode;
 
-    const paragraph = bodyModel.getParagraph(endIndex) || { startIndex: 0 };
+    const paragraph = viewModel.getParagraph(endIndex) || { startIndex: 0 };
 
     const { paragraphStyle = {}, bullet } = paragraph;
 
@@ -158,7 +156,7 @@ export function lineBreaking(
 
     for (let i = 0, len = blocks.length; i < len; i++) {
         const charIndex = blocks[i];
-        const customBlock = bodyModel.getCustomBlock(charIndex);
+        const customBlock = viewModel.getCustomBlock(charIndex);
         if (customBlock == null) {
             continue;
         }

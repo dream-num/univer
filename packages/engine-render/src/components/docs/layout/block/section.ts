@@ -15,7 +15,7 @@
  */
 
 import { DataStreamTreeNodeType } from '@univerjs/core';
-import type { IDocumentSkeletonPage, ISkeletonResourceReference } from '../../../../basics/i-document-skeleton-cached';
+import type { IDocumentSkeletonPage } from '../../../../basics/i-document-skeleton-cached';
 import type { ISectionBreakConfig } from '../../../../basics/interfaces';
 import type { DataStreamTreeNode } from '../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../view-model/document-view-model';
@@ -25,11 +25,10 @@ import { dealWidthParagraph } from './paragraph/layout';
 
 export function dealWithSection(
     ctx: ILayoutContext,
-    bodyModel: DocumentViewModel,
+    viewModel: DocumentViewModel,
     sectionNode: DataStreamTreeNode,
     curPage: IDocumentSkeletonPage,
-    sectionBreakConfig: ISectionBreakConfig,
-    skeletonResourceReference: ISkeletonResourceReference
+    sectionBreakConfig: ISectionBreakConfig
 ) {
     const allCurrentSkeletonPages: IDocumentSkeletonPage[] = [];
     const renderedBlockIdMap = new Map<string, boolean>();
@@ -66,11 +65,10 @@ export function dealWithSection(
             // Paragraph 段落
             skeletonPages = dealWidthParagraph(
                 ctx,
-                bodyModel,
+                viewModel,
                 paragraphNode,
                 currentPageCache,
-                sectionBreakConfig,
-                skeletonResourceReference
+                sectionBreakConfig
             );
         } else if (paragraphNode.nodeType === DataStreamTreeNodeType.TABLE) {
             // Table 表格

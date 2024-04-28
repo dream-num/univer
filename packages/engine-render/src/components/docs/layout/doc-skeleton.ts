@@ -552,7 +552,7 @@ export class DocumentSkeleton extends Skeleton {
         // Loop the sections with the start section index.
         for (let i = startSectionIndex, len = viewModel.children.length; i < len; i++) {
             const sectionNode = viewModel.children[i];
-            const sectionBreakConfig = prepareSectionBreakConfig(i, ctx);
+            const sectionBreakConfig = prepareSectionBreakConfig(ctx, i);
             const { sectionType, columnProperties, columnSeparatorType, sectionTypeNext } = sectionBreakConfig;
 
             let curSkeletonPage = getLastPage(allSkeletonPages);
@@ -577,8 +577,7 @@ export class DocumentSkeleton extends Skeleton {
                 viewModel,
                 sectionNode,
                 curSkeletonPage,
-                sectionBreakConfig,
-                skeletonResourceReference
+                sectionBreakConfig
             );
 
             // todo: 当本节有多个列，且下一节为连续节类型的时候，需要按照列数分割，重新计算 lines

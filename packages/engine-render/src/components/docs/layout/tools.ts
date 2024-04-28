@@ -817,7 +817,7 @@ const DEFAULT_SECTION_BREAK: ISectionBreak = {
 
 export const DEFAULT_PAGE_SIZE = { width: Number.POSITIVE_INFINITY, height: Number.POSITIVE_INFINITY };
 
-export function prepareSectionBreakConfig(nodeIndex: number, ctx: ILayoutContext) {
+export function prepareSectionBreakConfig(ctx: ILayoutContext, nodeIndex: number) {
     const { viewModel, dataModel, docsConfig } = ctx;
     const sectionNode = viewModel.children[nodeIndex];
     const sectionBreak = viewModel.getSectionBreak(sectionNode.endIndex) || DEFAULT_SECTION_BREAK;

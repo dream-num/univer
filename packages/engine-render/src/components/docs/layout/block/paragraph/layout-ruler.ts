@@ -16,7 +16,6 @@
 
 import type { INumberUnit } from '@univerjs/core';
 import { BooleanNumber, DataStreamTreeTokenType, GridType, SpacingRule } from '@univerjs/core';
-
 import type {
     IDocumentSkeletonColumn,
     IDocumentSkeletonDrawing,
@@ -33,7 +32,6 @@ import {
     createSkeletonLine,
     setDivideFullState,
 } from '../../model/line';
-
 import { createSkeletonPage } from '../../model/page';
 import { setColumnFullState } from '../../model/section';
 import { addGlyphToDivide, createSkeletonBulletGlyph } from '../../model/glyph';

@@ -70,7 +70,7 @@ export function getDefaultOnPasteCellMutations(
         undoMutationsInfo.push(...setValuesUndos);
 
         // set styles
-        const { undos: setStyleUndos, redos: setStyleRedos } = getSetCellStyleMutations(pasteTo, data, accessor);
+        const { undos: setStyleUndos, redos: setStyleRedos } = getSetCellStyleMutations(pasteTo, data, accessor, true);
         redoMutationsInfo.push(...setStyleRedos);
         undoMutationsInfo.push(...setStyleUndos);
 
@@ -337,7 +337,8 @@ export function getSetCellValueMutations(
 export function getSetCellStyleMutations(
     pasteTo: ISheetDiscreteRangeLocation,
     matrix: ObjectMatrix<ICellDataWithSpanInfo>,
-    accessor: IAccessor
+    accessor: IAccessor,
+    withRichFormat = false
 ) {
     const redoMutationsInfo: IMutationInfo[] = [];
     const undoMutationsInfo: IMutationInfo[] = [];
@@ -350,7 +351,7 @@ export function getSetCellStyleMutations(
         const newValue: ICellData = {
             s: value.s,
         };
-        if (value.p?.body) {
+        if (withRichFormat && value.p?.body) {
             newValue.p = value.p;
         }
         const { row: actualRow, col: actualCol } = mapFunc(row, col);

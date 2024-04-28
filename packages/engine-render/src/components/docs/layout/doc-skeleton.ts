@@ -511,6 +511,8 @@ export class DocumentSkeleton extends Skeleton {
             },
             isDirty: false,
             drawingsCache: new Map(),
+            paragraphConfigCache: new Map(),
+            sectionBreakConfigCache: new Map(),
         };
     }
 
@@ -543,7 +545,7 @@ export class DocumentSkeleton extends Skeleton {
      */
 
     private _createSkeleton(ctx: ILayoutContext, _bounds?: IViewportBound): IDocumentSkeletonCached {
-        // console.log('createSkeleton: iterate ', this._iteratorCount, 'times');
+        console.log('createSkeleton: iterate ', this._iteratorCount, 'times');
         const { viewModel, skeleton, skeletonResourceReference } = ctx;
 
         const allSkeletonPages = skeleton.pages;
@@ -572,6 +574,8 @@ export class DocumentSkeleton extends Skeleton {
 
             let curSkeletonPage = getLastPage(allSkeletonPages);
             let isContinuous = false;
+
+            ctx.sectionBreakConfigCache.set(sectionNode.endIndex, sectionBreakConfig);
 
             if (sectionType === SectionType.CONTINUOUS) {
                 updateBlockIndex(allSkeletonPages);

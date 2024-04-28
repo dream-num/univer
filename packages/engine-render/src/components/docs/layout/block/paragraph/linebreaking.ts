@@ -144,15 +144,14 @@ export function lineBreaking(
         drawingAnchor,
     };
 
+    ctx.paragraphConfigCache.set(endIndex, paragraphConfig);
+
     const listLevelAncestors = _getListLevelAncestors(bullet, skeListLevel); // 取得列表所有 level 的缓存
     const bulletSkeleton = dealWithBullet(bullet, lists, listLevelAncestors, localeService); // 生成 bullet
 
     _updateListLevelAncestors(bullet, bulletSkeleton, skeListLevel); // 更新最新的 level 缓存列表
 
     paragraphConfig.bulletSkeleton = bulletSkeleton;
-
-    // TODO: @jocs, move cache to shaping or remove cache?
-    const customBlockCache = new Map<number, Nullable<ICustomBlock>>();
 
     for (let i = 0, len = blocks.length; i < len; i++) {
         const charIndex = blocks[i];
@@ -161,8 +160,7 @@ export function lineBreaking(
             continue;
         }
 
-        customBlockCache.set(charIndex, customBlock);
-        const blockId = customBlock.blockId;
+        const { blockId } = customBlock;
         const drawingOrigin = drawings[blockId];
         if (drawingOrigin.layoutType !== PositionedObjectLayoutType.INLINE) {
             paragraphAffectSkeDrawings.set(blockId, _getDrawingSkeletonFormat(drawingOrigin));

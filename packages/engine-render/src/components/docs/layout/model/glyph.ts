@@ -98,7 +98,7 @@ export function createSkeletonTabGlyph(config: IFontCreateConfig, glyphWidth?: n
 }
 
 // It is used to create inline custom blocks, such as inline images, to occupy placeholders in the layout.
-export function createSkeletonInlineCustomBlockGlyph(config: IFontCreateConfig, glyphWidth = 0, glyphHeight = 0, objectId = ''): IDocumentSkeletonGlyph {
+export function createSkeletonCustomBlockGlyph(config: IFontCreateConfig, glyphWidth = 0, glyphHeight = 0, objectId = ''): IDocumentSkeletonGlyph {
     const { fontStyle, textStyle } = config;
     const content = DT.CUSTOM_BLOCK;
 

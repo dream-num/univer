@@ -15,11 +15,11 @@
  */
 
 import type { IParagraphStyle, Nullable } from '@univerjs/core';
-import { BooleanNumber, DataStreamTreeTokenType, GridType, PositionedObjectLayoutType } from '@univerjs/core';
+import { BooleanNumber, DataStreamTreeTokenType, GridType, ObjectRelativeFromV, PositionedObjectLayoutType } from '@univerjs/core';
 import type { IDocumentSkeletonGlyph } from '../../../../../basics/i-document-skeleton-cached';
 import { LineBreaker } from '../../linebreak';
 import { tabLineBreakExtension } from '../../linebreak/extensions/tab-linebreak-extension';
-import { createSkeletonInlineCustomBlockGlyph, createSkeletonLetterGlyph, createSkeletonTabGlyph, glyphShrinkLeft, glyphShrinkRight } from '../../model/glyph';
+import { createSkeletonCustomBlockGlyph, createSkeletonLetterGlyph, createSkeletonTabGlyph, glyphShrinkLeft, glyphShrinkRight } from '../../model/glyph';
 import { getCharSpaceApply, getFontCreateConfig } from '../../tools';
 import type { DataStreamTreeNode } from '../../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../../view-model/document-view-model';
@@ -186,7 +186,9 @@ export function shaping(
                         if (drawingOrigin.layoutType === PositionedObjectLayoutType.INLINE) {
                             const { width, height } = drawingOrigin.objectTransform.size;
                             const { objectId } = drawingOrigin;
-                            newSpan = createSkeletonInlineCustomBlockGlyph(config, width, height, objectId);
+                            newSpan = createSkeletonCustomBlockGlyph(config, width, height, objectId);
+                        } else {
+                            newSpan = createSkeletonCustomBlockGlyph(config, 0, 0, drawingOrigin.objectId);
                         }
                     }
 

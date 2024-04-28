@@ -402,23 +402,23 @@ function _lineOperator(
     const headersDrawings = skeHeaders?.get(headerId)?.get(pageWidth)?.skeDrawings;
     const footersDrawings = skeFooters?.get(footerId)?.get(pageWidth)?.skeDrawings;
 
-    // 初始化paragraphAffectSkeDrawings的位置，drawing的布局参照Paragraph开始位置，如果段落中有换页的情况，换页之后的drawing参照位置是0， 0
-    const drawings = __getDrawingPosition(
-        lineTop,
-        lineHeight,
-        column,
-        drawingAnchor?.get(paragraphIndex)?.top,
-        paragraphAffectSkeDrawings
-    );
+    // Handle float object relative to line.
+    if (line) {
+        const drawingsInLine = _getCustomBlockIdsInLine(line);
+        if (drawingsInLine.length > 0) {
+            const affectDrawings = ctx.paragraphConfigCache.get(line.paragraphIndex)?.paragraphAffectSkeDrawings;
+            const relativeLineDrawings = ([...(affectDrawings?.values() ?? [])])
+                .filter((drawing) => drawing.drawingOrigin.objectTransform.positionV.relativeFrom === ObjectRelativeFromV.LINE);
 
-    if (drawings != null) {
-        _reLayoutCheck(ctx, drawings, column);
+            __updateAndPositionDrawings(ctx, line.top, line.lineHeight, column, relativeLineDrawings);
+        }
     }
 
-    __updateDrawingPosition(
-        column,
-        drawings
-    );
+    if (paragraphAffectSkeDrawings != null && paragraphAffectSkeDrawings.size > 0) {
+        const targetDrawings = [...paragraphAffectSkeDrawings.values()]
+            .filter((drawing) => drawing.drawingOrigin.objectTransform.positionV.relativeFrom !== ObjectRelativeFromV.LINE);
+        __updateAndPositionDrawings(ctx, lineTop, lineHeight, column, targetDrawings, drawingAnchor?.get(paragraphIndex)?.top);
+    }
 
     const newLineTop = calculateLineTopByDrawings(
         lineHeight,
@@ -480,6 +480,39 @@ function _lineOperator(
     newLine.parent = column;
     createAndUpdateBlockAnchor(paragraphIndex, newLine, lineTop, drawingAnchor);
     _divideOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, defaultSpanLineHeight);
+}
+
+function __updateAndPositionDrawings(ctx: ILayoutContext, lineTop: number, lineHeight: number, column: IDocumentSkeletonColumn, targetDrawings: IDocumentSkeletonDrawing[], drawingAnchorTop?: number) {
+    const drawings = __getDrawingPosition(
+        lineTop,
+        lineHeight,
+        column,
+        drawingAnchorTop,
+        targetDrawings
+    );
+
+    if (drawings != null) {
+        _reLayoutCheck(ctx, drawings, column);
+    }
+
+    __updateDrawingPosition(
+        column,
+        drawings
+    );
+}
+
+function _getCustomBlockIdsInLine(line: IDocumentSkeletonLine) {
+    const customBlockIds: string[] = [];
+
+    for (const divide of line.divides) {
+        for (const glyph of divide.glyphGroup) {
+            if (glyph.streamType === DataStreamTreeTokenType.CUSTOM_BLOCK) {
+                customBlockIds.push(glyph.objectId!);
+            }
+        }
+    }
+
+    return customBlockIds;
 }
 
 function _reLayoutCheck(ctx: ILayoutContext, drawings: Map<string, IDocumentSkeletonDrawing>, column: IDocumentSkeletonColumn) {
@@ -783,13 +816,12 @@ function __getDrawingPosition(
     lineHeight: number,
     column: IDocumentSkeletonColumn,
     blockAnchorTop?: number,
-    paragraphAffectSkeDrawings?: Map<string, IDocumentSkeletonDrawing>
+    needPositionDrawings: IDocumentSkeletonDrawing[] = []
 ) {
     const page = column.parent?.parent;
     if (
-        paragraphAffectSkeDrawings == null ||
         page == null ||
-        paragraphAffectSkeDrawings.size === 0
+        needPositionDrawings.length === 0
     ) {
         return;
     }
@@ -797,13 +829,7 @@ function __getDrawingPosition(
     const drawings: Map<string, IDocumentSkeletonDrawing> = new Map();
     const isPageBreak = __checkPageBreak(column);
 
-    // console.log('__updateDrawingPosition', lineTop, lineHeight, column, blockAnchorTop, paragraphAffectSkeDrawings);
-
-    for (const drawing of paragraphAffectSkeDrawings.values()) {
-        if (drawing == null) {
-            continue;
-        }
-
+    for (const drawing of needPositionDrawings) {
         const { initialState, drawingOrigin } = drawing;
 
         if (initialState || !drawingOrigin) {

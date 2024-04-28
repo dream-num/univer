@@ -806,6 +806,8 @@ export interface ILayoutContext {
         count: number;
         drawing: IDocumentSkeletonDrawing;
     }>;
+    paragraphConfigCache: Map<number, IParagraphConfig>;
+    sectionBreakConfigCache: Map<number, ISectionBreakConfig>;
 }
 
 const DEFAULT_SECTION_BREAK: ISectionBreak = {

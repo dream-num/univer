@@ -208,13 +208,9 @@ export class AutoFillController extends Disposable {
 
     // refill when apply type changed
     private _onApplyTypeChanged() {
-        this.disposeWithMe(
-            toDisposable(
-                this._autoFillService.applyType$.subscribe(() => {
-                    this._handleFillData();
-                })
-            )
-        );
+        this.disposeWithMe(this._autoFillService.applyType$.subscribe(() => {
+            this._handleFillData();
+        }));
     }
 
     private _triggerAutoFill(source: IRange, selection: IRange) {
@@ -370,11 +366,12 @@ export class AutoFillController extends Disposable {
         const {
             source,
             target,
-            unitId = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId(),
-            subUnitId = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet().getSheetId(),
+            unitId = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getUnitId(),
+            subUnitId = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getActiveSheet().getSheetId(),
         } = this._autoFillService.autoFillLocation || {};
+
         const direction = this._autoFillService.direction;
-        if (!source || !target) {
+        if (!source || !target || !unitId || !subUnitId) {
             return;
         }
 

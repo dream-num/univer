@@ -37,7 +37,6 @@ export interface IRenderManagerService extends IDisposable {
     createRender$: Observable<Nullable<string>>;
     createRenderWithParent(unitId: string, parentUnitId: string): IRender;
     createRender(unitId: string): IRender;
-    addRenderItem(unitId: string, item: IRender): void;
     removeRender(unitId: string): void;
     setCurrent(unitId: string): void;
     getRenderById(unitId: string): Nullable<IRender>;
@@ -61,7 +60,7 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
 
     private _currentUnitId: string = '';
 
-    private _renderMap: Map<string, IRender> = new Map();
+    private _renderMap: Map<string, RenderUnit> = new Map();
 
     private readonly _currentRender$ = new BehaviorSubject<Nullable<string>>(this._currentUnitId);
     readonly currentRender$ = this._currentRender$.asObservable();
@@ -197,11 +196,11 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
             };
         }
 
-        this.addRenderItem(unitId, renderUnit);
+        this._addRenderUnit(unitId, renderUnit);
         return renderUnit;
     }
 
-    addRenderItem(unitId: string, item: IRender) {
+    private _addRenderUnit(unitId: string, item: RenderUnit) {
         this._renderMap.set(unitId, item);
     }
 
@@ -209,7 +208,6 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
         const item = this._renderMap.get(unitId);
         if (item != null) {
             this._disposeItem(item);
-            (item as RenderUnit).dispose?.();
         }
 
         this._renderMap.delete(unitId);
@@ -233,7 +231,7 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
         return [...this.getRenderAll().values()][0];
     }
 
-    getRenderById(unitId: string): Nullable<IRender> {
+    getRenderById(unitId: string): Nullable<RenderUnit> {
         return this._renderMap.get(unitId);
     }
 
@@ -241,16 +239,15 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
         return this._renderMap;
     }
 
-    private _disposeItem(item: Nullable<IRender>, shouldDestroyEngine: boolean = true) {
+    private _disposeItem(item: Nullable<RenderUnit>, shouldDestroyEngine: boolean = true) {
         if (item == null) {
             return;
         }
-        const { engine, scene, components, mainComponent } = item;
-        components?.forEach((component) => {
-            component.dispose();
-        });
-        mainComponent?.dispose();
+
+        const { engine, scene, components } = item;
+        components?.forEach((component) => component.dispose());
         scene.dispose();
+        item.dispose();
 
         if (shouldDestroyEngine) {
             engine.dispose();

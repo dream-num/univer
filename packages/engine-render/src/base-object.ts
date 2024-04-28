@@ -15,7 +15,7 @@
  */
 
 import type { EventState, IKeyValue, Nullable, Observer } from '@univerjs/core';
-import { Observable } from '@univerjs/core';
+import { Disposable, Observable } from '@univerjs/core';
 
 import type { EVENT_TYPE } from './basics/const';
 import { CURSOR_TYPE, RENDER_CLASS_TYPE } from './basics/const';
@@ -43,7 +43,7 @@ export const BASE_OBJECT_ARRAY = [
     'strokeWidth',
 ];
 
-export abstract class BaseObject {
+export abstract class BaseObject extends Disposable {
     groupKey?: string;
 
     isInGroup: boolean = false;
@@ -133,6 +133,8 @@ export abstract class BaseObject {
     private _layer: Nullable<Layer>; // TODO: @DR-Univer. Belong to layer
 
     constructor(key?: string) {
+        super();
+
         if (key) {
             this._oKey = key;
         } else {
@@ -668,7 +670,9 @@ export abstract class BaseObject {
         return true;
     }
 
-    dispose() {
+    override dispose() {
+        super.dispose();
+
         this.onTransformChangeObservable.clear();
         this.onPointerDownObserver.clear();
         this.onPointerMoveObserver.clear();

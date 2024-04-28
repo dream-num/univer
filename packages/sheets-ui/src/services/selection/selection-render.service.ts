@@ -68,7 +68,9 @@ export interface ISelectionRenderService {
 
     addControlToCurrentByRangeData(data: ISelectionWithCoordAndStyle): void;
     updateControlForCurrentByRangeData(selections: ISelectionWithCoordAndStyle[]): void;
-    changeRuntime(skeleton: SpreadsheetSkeleton, scene: Scene, viewport?: Viewport): void;
+    changeRuntime(skeleton: Nullable<SpreadsheetSkeleton>, scene: Nullable<Scene>, viewport?: Viewport): void;
+
+    /** @deprecated This should not be provided by the selection render service. */
     getViewPort(): Viewport;
     getCurrentControls(): SelectionShape[];
     getActiveSelections(): Nullable<ISelection[]>;
@@ -105,6 +107,8 @@ export interface ISelectionRenderService {
  * you can adjust the style and performance of each selection area.
  * This service is used in conjunction with the SelectionManagerService
  * to implement functions related to the selection area in univer.
+ *
+ * @todo Refactor it to RenderController.
  */
 export class SelectionRenderService implements ISelectionRenderService {
     hasSelection: boolean = false;
@@ -188,7 +192,7 @@ export class SelectionRenderService implements ISelectionRenderService {
      */
     readonly selectionMoveStart$ = this._selectionMoveStart$.asObservable();
 
-    private _activeViewport!: Viewport;
+    private _activeViewport: Nullable<Viewport>;
 
     constructor(
         @Inject(ThemeService) private readonly _themeService: ThemeService,
@@ -264,7 +268,7 @@ export class SelectionRenderService implements ISelectionRenderService {
     }
 
     getViewPort() {
-        return this._activeViewport;
+        return this._activeViewport!;
     }
 
     /**
@@ -344,10 +348,10 @@ export class SelectionRenderService implements ISelectionRenderService {
         this._selectionMoveStart$.next(this.getSelectionDataWithStyle());
     }
 
-    changeRuntime(skeleton: SpreadsheetSkeleton, scene: Scene, viewport?: Viewport) {
+    changeRuntime(skeleton: Nullable<SpreadsheetSkeleton>, scene: Nullable<Scene>, viewport?: Viewport) {
         this._skeleton = skeleton;
         this._scene = scene;
-        this._activeViewport = viewport || scene.getViewports()[0];
+        this._activeViewport = viewport || scene?.getViewports()[0];
     }
 
     getSelectionDataWithStyle(): ISelectionWithCoordAndStyle[] {
@@ -1211,6 +1215,9 @@ export class SelectionRenderService implements ISelectionRenderService {
     }
 }
 
+/**
+ * @deprecated Should be refactored to RenderUnit.
+ */
 export const ISelectionRenderService = createIdentifier<SelectionRenderService>(
     'deprecated.univer.sheet.selection-render-service'
 );

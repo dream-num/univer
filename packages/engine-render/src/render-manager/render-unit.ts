@@ -54,7 +54,6 @@ export class RenderUnit extends Disposable implements IRender {
     get type(): UnitType { return this._renderContext.type; }
 
     private readonly _injector: Injector;
-    private readonly _renderControllers: IRenderController[] = [];
 
     private _renderContext: IRenderContext<UnitModel>;
     set isMainScene(is: boolean) { this._renderContext.isMainScene = is; }
@@ -88,8 +87,9 @@ export class RenderUnit extends Disposable implements IRender {
     }
 
     override dispose() {
-        this._renderControllers.forEach((controller) => controller.dispose());
-        this._renderControllers.length = 0;
+        this._injector.dispose();
+
+        super.dispose();
     }
 
     /**

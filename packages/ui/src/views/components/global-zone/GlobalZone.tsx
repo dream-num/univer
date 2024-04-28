@@ -26,7 +26,7 @@ import styles from './index.module.less';
 export function GlobalZone() {
     const globalZoneService = useDependency(IGlobalZoneService);
     const [visible, setVisible] = useState(false);
-    const componentKey = useObservable(globalZoneService.componentKey$);
+    const componentKey = useObservable(globalZoneService.componentKey$, globalZoneService.componentKey);
     const componentManager = useDependency(ComponentManager);
 
     const _className = clsx(styles.globalZone, styles.globalZoneOpen);
@@ -36,7 +36,7 @@ export function GlobalZone() {
         if (Component) {
             return Component;
         }
-    }, [componentKey]);
+    }, [componentKey, componentManager]);
 
     useEffect(() => {
         const subscription = globalZoneService.visible$.subscribe((val) => {

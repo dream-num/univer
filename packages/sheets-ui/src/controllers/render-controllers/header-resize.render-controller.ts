@@ -32,16 +32,16 @@ import type {
 import { DeltaColumnWidthCommand, DeltaRowHeightCommand, SetWorksheetRowIsAutoHeightCommand } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
-import { SHEET_COMPONENT_HEADER_LAYER_INDEX, VIEWPORT_KEY } from '../common/keys';
-import { IEditorBridgeService } from '../services/editor-bridge.service';
-import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
+import { SHEET_COMPONENT_HEADER_LAYER_INDEX, VIEWPORT_KEY } from '../../common/keys';
+import { IEditorBridgeService } from '../../services/editor-bridge.service';
+import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
 import {
     HEADER_MENU_SHAPE_THUMB_SIZE,
     HEADER_MENU_SHAPE_WIDTH_HEIGHT,
     HEADER_RESIZE_SHAPE_TYPE,
     HeaderMenuResizeShape,
-} from '../views/header-resize-shape';
-import { getCoordByOffset, getSheetObject, getTransformCoord } from './utils/component-tools';
+} from '../../views/header-resize-shape';
+import { getCoordByOffset, getSheetObject, getTransformCoord } from '../utils/component-tools';
 
 const HEADER_RESIZE_CONTROLLER_SHAPE_ROW = '__SpreadsheetHeaderResizeControllerShapeRow__';
 

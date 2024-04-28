@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import { Disposable, ICommandService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import { Disposable, ICommandService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import type { IDesktopUIController } from '@univerjs/ui';
 import { ComponentManager, DesktopUIPart, IMenuService, IShortcutService, IUIController } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 import { connectInjector } from '@wendellhu/redi/react-bindings';
 
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { SheetOnlyPasteFormulaCommand } from '../commands/commands/formula-clipboard.command';
 import { InsertFunctionCommand } from '../commands/commands/insert-function.command';
 import { SelectEditorFormulaOperation } from '../commands/operations/editor-formula.operation';
@@ -41,6 +42,7 @@ import {
     promptSelectionShortcutItemShift,
     singleEditorPromptSelectionShortcutItem,
 } from './shortcuts/prompt.shortcut';
+import { FormulaEditorShowController } from './formula-editor-show.controller';
 
 @OnLifecycle(LifecycleStages.Ready, FormulaUIController)
 export class FormulaUIController extends Disposable {
@@ -50,6 +52,7 @@ export class FormulaUIController extends Disposable {
         @ICommandService private readonly _commandService: ICommandService,
         @IShortcutService private readonly _shortcutService: IShortcutService,
         @IUIController private readonly _uiController: IDesktopUIController,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager
     ) {
         super();
@@ -62,6 +65,7 @@ export class FormulaUIController extends Disposable {
         this._registerMenus();
         this._registerShortcuts();
         this._registerComponents();
+        this._registerRenderControllers();
     }
 
     private _registerMenus(): void {
@@ -101,9 +105,13 @@ export class FormulaUIController extends Disposable {
 
     private _registerComponents(): void {
         this.disposeWithMe(
-            this.disposeWithMe(this._uiController.registerComponent(DesktopUIPart.CONTENT, () => connectInjector(RenderFormulaPromptContent, this._injector)))
+            this._uiController.registerComponent(DesktopUIPart.CONTENT, () => connectInjector(RenderFormulaPromptContent, this._injector))
         );
 
         this._componentManager.register(MORE_FUNCTIONS_COMPONENT, MoreFunctions);
+    }
+
+    private _registerRenderControllers(): void {
+        this.disposeWithMe(this._renderManagerService.registerRenderController(UniverInstanceType.UNIVER_SHEET, FormulaEditorShowController));
     }
 }

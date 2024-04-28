@@ -38,10 +38,10 @@ import {
 import { Inject } from '@wendellhu/redi';
 import { takeUntil } from 'rxjs';
 
-import { SHEET_COMPONENT_UNHIDE_LAYER_INDEX } from '../common/keys';
-import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
-import { HeaderUnhideShape, HeaderUnhideShapeType, UNHIDE_ICON_SIZE } from '../views/header-unhide-shape';
-import { getCoordByCell, getSheetObject } from './utils/component-tools';
+import { SHEET_COMPONENT_UNHIDE_LAYER_INDEX } from '../../common/keys';
+import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
+import { HeaderUnhideShape, HeaderUnhideShapeType, UNHIDE_ICON_SIZE } from '../../views/header-unhide-shape';
+import { getCoordByCell, getSheetObject } from '../utils/component-tools';
 
 const HEADER_UNHIDE_CONTROLLER_SHAPE = '__SpreadsheetHeaderUnhideSHAPEControllerShape__';
 

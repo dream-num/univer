@@ -32,11 +32,11 @@ import { FormulaEditorController } from './controllers/editor/formula-editor.con
 import { StartEditController } from './controllers/editor/start-edit.controller';
 import { EditorBridgeController } from './controllers/editor-bridge.controller';
 import { FormatPainterController } from './controllers/format-painter/format-painter.controller';
-import { HeaderFreezeRenderController } from './controllers/freeze.render-controller';
+import { HeaderFreezeRenderController } from './controllers/render-controllers/freeze.render-controller';
 import { HeaderMenuController } from './controllers/header-menu.controller';
 import { HeaderMoveController } from './controllers/header-move.controller';
-import { HeaderResizeController } from './controllers/header-resize.render-controller';
-import { HeaderUnhideRenderController } from './controllers/header-unhide.render-controller';
+import { HeaderResizeController } from './controllers/render-controllers/header-resize.render-controller';
+import { HeaderUnhideRenderController } from './controllers/render-controllers/header-unhide.render-controller';
 import { MarkSelectionController } from './controllers/mark-selection.controller';
 import { MoveRangeController } from './controllers/move-range.controller';
 import { ScrollController } from './controllers/scroll.controller';
@@ -44,7 +44,6 @@ import { SelectionController } from './controllers/selection.controller';
 import { SheetRenderController } from './controllers/sheet-render.controller';
 import { SheetUIController } from './controllers/sheet-ui.controller';
 import { StatusBarController } from './controllers/status-bar.controller';
-import { ZoomController } from './controllers/zoom.controller';
 import { zhCN } from './locale';
 import { AutoFillService, IAutoFillService } from './services/auto-fill/auto-fill.service';
 import { ISheetClipboardService, SheetClipboardService } from './services/clipboard/clipboard.service';
@@ -71,6 +70,7 @@ import { CellCustomRenderController } from './controllers/cell-custom-render.con
 import { SheetCanvasPopManagerService } from './services/canvas-pop-manager.service';
 import { ForceStringRenderController } from './controllers/force-string-render.controller';
 import { ForceStringAlertController } from './controllers/force-string-alert.controller';
+import { SheetsZoomRenderController } from './controllers/render-controllers/zoom.render-controller';
 
 export class UniverSheetsUIPlugin extends Plugin {
     static override pluginName = 'SHEET_UI_PLUGIN_NAME';
@@ -140,7 +140,6 @@ export class UniverSheetsUIPlugin extends Plugin {
                 [SheetRenderController],
                 [SheetUIController],
                 [StartEditController],
-                [ZoomController],
                 [AutoFillController],
                 [StatusBarController],
                 [EditingController],
@@ -164,6 +163,7 @@ export class UniverSheetsUIPlugin extends Plugin {
             HeaderFreezeRenderController,
             HeaderUnhideRenderController,
             HeaderResizeController,
+            SheetsZoomRenderController,
         ]).forEach((controller) => {
             this.disposeWithMe(this._renderManagerService.registerRenderController(UniverInstanceType.UNIVER_SHEET, controller));
         });

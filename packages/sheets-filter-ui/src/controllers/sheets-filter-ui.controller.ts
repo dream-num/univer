@@ -15,7 +15,7 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import { ICommandService, IContextService, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
+import { ICommandService, IContextService, LifecycleStages, OnLifecycle, RxDisposable, UniverInstanceType } from '@univerjs/core';
 import type { IMenuItemFactory } from '@univerjs/ui';
 import { ComponentManager, IMenuService, IShortcutService } from '@univerjs/ui';
 import type { IDisposable } from '@wendellhu/redi';
@@ -25,12 +25,14 @@ import { distinctUntilChanged } from 'rxjs';
 import { SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
 import { FilterSingle } from '@univerjs/icons';
 
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { ClearSheetsFilterCriteriaCommand, ReCalcSheetsFilterCommand, SetSheetsFilterCriteriaCommand, SmartToggleSheetsFilterCommand } from '../commands/sheets-filter.command';
 import { FilterPanel } from '../views/components/SheetsFilterPanel';
 import { ChangeFilterByOperation, CloseFilterPanelOperation, FILTER_PANEL_OPENED_KEY, OpenFilterPanelOperation } from '../commands/sheets-filter.operation';
 import { SheetsFilterPanelService } from '../services/sheets-filter-panel.service';
 import { SmartToggleFilterShortcut } from './sheets-filter.shortcut';
 import { ClearFilterCriteriaMenuItemFactory, ReCalcFilterMenuItemFactory, SmartToggleFilterMenuItemFactory } from './sheets-filter.menu';
+import { SheetsFilterRenderController } from './sheets-filter-render.controller';
 
 export const FILTER_PANEL_POPUP_KEY = 'FILTER_PANEL_POPUP';
 
@@ -44,6 +46,7 @@ export class SheetsFilterUIController extends RxDisposable {
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
         @Inject(SheetsFilterPanelService) private readonly _sheetsFilterPanelService: SheetsFilterPanelService,
         @Inject(SheetCanvasPopManagerService) private _sheetCanvasPopupService: SheetCanvasPopManagerService,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IShortcutService private readonly _shortcutService: IShortcutService,
         @ICommandService private readonly _commandService: ICommandService,
         @IMenuService private readonly _menuService: IMenuService,
@@ -55,6 +58,7 @@ export class SheetsFilterUIController extends RxDisposable {
         this._initShortcuts();
         this._initMenuItems();
         this._initUI();
+        this._initRenderControllers();
     }
 
     override dispose(): void {
@@ -107,6 +111,10 @@ export class SheetsFilterUIController extends RxDisposable {
                     this._closeFilterPopup();
                 }
             }));
+    }
+
+    private _initRenderControllers(): void {
+        this.disposeWithMe(this._renderManagerService.registerRenderController(UniverInstanceType.UNIVER_SHEET, SheetsFilterRenderController));
     }
 
     private _popupDisposable?: Nullable<IDisposable>;

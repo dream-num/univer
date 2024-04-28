@@ -804,10 +804,12 @@ export interface ILayoutContext {
     // Positioned float objects cache.
     drawingsCache: Map<string, {
         count: number;
+        page: IDocumentSkeletonPage;
         drawing: IDocumentSkeletonDrawing;
     }>;
     paragraphConfigCache: Map<number, IParagraphConfig>;
     sectionBreakConfigCache: Map<number, ISectionBreakConfig>;
+    paragraphsOpenNewPage: Set<number>;
 }
 
 const DEFAULT_SECTION_BREAK: ISectionBreak = {

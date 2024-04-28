@@ -20,6 +20,7 @@ import type { ISectionBreakConfig } from '../../../../basics/interfaces';
 import type { DataStreamTreeNode } from '../../view-model/data-stream-tree-node';
 import type { DocumentViewModel } from '../../view-model/document-view-model';
 import type { ILayoutContext } from '../tools';
+import { createSkeletonPage } from '../model/page';
 import { dealWithBlockError } from './block-error';
 import { dealWidthParagraph } from './paragraph/layout';
 
@@ -63,6 +64,14 @@ export function dealWithSection(
 
         if (paragraphNode.nodeType === DataStreamTreeNodeType.PARAGRAPH) {
             // Paragraph 段落
+            if (ctx.paragraphsOpenNewPage.has(paragraphNode.endIndex)) {
+                currentPageCache = createSkeletonPage(
+                    ctx,
+                    sectionBreakConfig,
+                    ctx.skeletonResourceReference,
+                    currentPageCache.pageNumber + 1
+                );
+            }
             skeletonPages = dealWidthParagraph(
                 ctx,
                 viewModel,

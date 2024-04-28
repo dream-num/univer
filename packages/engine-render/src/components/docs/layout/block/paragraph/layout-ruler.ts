@@ -410,7 +410,7 @@ function _lineOperator(
             const relativeLineDrawings = ([...(affectDrawings?.values() ?? [])])
                 .filter((drawing) => drawing.drawingOrigin.objectTransform.positionV.relativeFrom === ObjectRelativeFromV.LINE);
 
-            __updateAndPositionDrawings(ctx, line.top, line.lineHeight, column, relativeLineDrawings);
+            __updateAndPositionDrawings(ctx, line.top, line.lineHeight, column, relativeLineDrawings, line.paragraphIndex);
         }
 
         const affectInlineDrawings = ctx.paragraphConfigCache.get(line.paragraphIndex)?.paragraphInlineSkeDrawings;
@@ -424,7 +424,7 @@ function _lineOperator(
     if (paragraphAffectSkeDrawings != null && paragraphAffectSkeDrawings.size > 0) {
         const targetDrawings = [...paragraphAffectSkeDrawings.values()]
             .filter((drawing) => drawing.drawingOrigin.objectTransform.positionV.relativeFrom !== ObjectRelativeFromV.LINE);
-        __updateAndPositionDrawings(ctx, lineTop, lineHeight, column, targetDrawings, drawingAnchor?.get(paragraphIndex)?.top);
+        __updateAndPositionDrawings(ctx, lineTop, lineHeight, column, targetDrawings, paragraphConfig.paragraphIndex, drawingAnchor?.get(paragraphIndex)?.top);
     }
 
     const newLineTop = calculateLineTopByDrawings(
@@ -484,7 +484,15 @@ function _lineOperator(
     _divideOperator(ctx, glyphGroup, pages, sectionBreakConfig, paragraphConfig, paragraphStart, defaultSpanLineHeight);
 }
 
-function __updateAndPositionDrawings(ctx: ILayoutContext, lineTop: number, lineHeight: number, column: IDocumentSkeletonColumn, targetDrawings: IDocumentSkeletonDrawing[], drawingAnchorTop?: number) {
+function __updateAndPositionDrawings(
+    ctx: ILayoutContext,
+    lineTop: number,
+    lineHeight: number,
+    column: IDocumentSkeletonColumn,
+    targetDrawings: IDocumentSkeletonDrawing[],
+    paragraphIndex: number,
+    drawingAnchorTop?: number
+) {
     const drawings = __getDrawingPosition(
         lineTop,
         lineHeight,
@@ -494,7 +502,7 @@ function __updateAndPositionDrawings(ctx: ILayoutContext, lineTop: number, lineH
     );
 
     if (drawings != null) {
-        _reLayoutCheck(ctx, drawings, column);
+        _reLayoutCheck(ctx, drawings, column, paragraphIndex);
     }
 
     __updateDrawingPosition(
@@ -517,7 +525,12 @@ function _getCustomBlockIdsInLine(line: IDocumentSkeletonLine) {
     return customBlockIds;
 }
 
-function _reLayoutCheck(ctx: ILayoutContext, drawings: Map<string, IDocumentSkeletonDrawing>, column: IDocumentSkeletonColumn) {
+function _reLayoutCheck(
+    ctx: ILayoutContext,
+    drawings: Map<string, IDocumentSkeletonDrawing>,
+    column: IDocumentSkeletonColumn,
+    paragraphIndex: number
+) {
     const page = column.parent?.parent;
 
     if (drawings.size === 0 || page == null) {
@@ -525,6 +538,40 @@ function _reLayoutCheck(ctx: ILayoutContext, drawings: Map<string, IDocumentSkel
     }
 
     let needBreakLineIterator = false;
+
+    // Handle situations where an image anchor paragraph is squeezed to the next page.
+    for (const drawing of drawings.values()) {
+        const drawingCache = ctx.drawingsCache.get(drawing.objectId);
+        if (drawingCache == null) {
+            continue;
+        }
+        // TODO: 如何判断drawing是否在同一页？？？
+        const cachePageStartParagraphIndex = drawingCache.page.sections[0]?.columns[0]?.lines[0]?.paragraphIndex;
+        const startIndex = page.sections[0]?.columns[0]?.lines[0]?.paragraphIndex;
+        if (drawingCache.page && cachePageStartParagraphIndex && startIndex && cachePageStartParagraphIndex !== startIndex) {
+            drawingCache.page.skeDrawings.delete(drawing.objectId);
+
+            lineIterator([drawingCache.page], (line) => {
+                const { lineHeight, top } = line;
+                const width = line.parent?.width ?? 0;
+
+                if (needBreakLineIterator) {
+                    return;
+                }
+
+                const split = _calculateSplit(drawingCache.drawing, lineHeight, top, width);
+                if (split) {
+                    // No need to loop next line.
+                    needBreakLineIterator = true;
+                    ctx.isDirty = true;
+                    ctx.layoutStartPointer.paragraphIndex = Math.min(line.paragraphIndex, ctx.layoutStartPointer.paragraphIndex ?? Number.POSITIVE_INFINITY);
+                    ctx.paragraphsOpenNewPage.add(paragraphIndex);
+                }
+            });
+        }
+    }
+
+    needBreakLineIterator = false;
 
     lineIterator([page], (line) => {
         const { lineHeight, top } = line;
@@ -538,7 +585,7 @@ function _reLayoutCheck(ctx: ILayoutContext, drawings: Map<string, IDocumentSkel
             let targetDrawing = drawing;
 
             if (ctx.drawingsCache.has(drawing.objectId)) {
-                const needRePosition = checkDrawingNeedRePosition(ctx, drawing);
+                const needRePosition = checkRelativeDrawingNeedRePosition(ctx, drawing);
 
                 if (needRePosition) {
                     targetDrawing = ctx.drawingsCache.get(drawing.objectId)?.drawing ?? drawing;
@@ -559,6 +606,7 @@ function _reLayoutCheck(ctx: ILayoutContext, drawings: Map<string, IDocumentSkel
                     drawingCache = {
                         count: 0,
                         drawing,
+                        page,
                     };
 
                     ctx.drawingsCache.set(drawing.objectId, drawingCache);
@@ -566,12 +614,14 @@ function _reLayoutCheck(ctx: ILayoutContext, drawings: Map<string, IDocumentSkel
 
                 drawingCache.count++;
                 drawingCache.drawing = drawing;
+                drawingCache.page = page;
             }
         }
     });
 }
 
-function checkDrawingNeedRePosition(ctx: ILayoutContext, drawing: IDocumentSkeletonDrawing) {
+// Detect the relative positioning of the image, whether the position needs to be repositioned.
+function checkRelativeDrawingNeedRePosition(ctx: ILayoutContext, drawing: IDocumentSkeletonDrawing) {
     const { relativeFrom } = drawing.drawingOrigin.objectTransform.positionV;
     const drawingCache = ctx.drawingsCache.get(drawing.objectId);
 

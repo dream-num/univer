@@ -513,6 +513,7 @@ export class DocumentSkeleton extends Skeleton {
             drawingsCache: new Map(),
             paragraphConfigCache: new Map(),
             sectionBreakConfigCache: new Map(),
+            paragraphsOpenNewPage: new Set(),
         };
     }
 
@@ -545,7 +546,7 @@ export class DocumentSkeleton extends Skeleton {
      */
 
     private _createSkeleton(ctx: ILayoutContext, _bounds?: IViewportBound): IDocumentSkeletonCached {
-        console.log('createSkeleton: iterate ', this._iteratorCount, 'times');
+        // console.log('createSkeleton: iterate ', this._iteratorCount, 'times');
         const { viewModel, skeleton, skeletonResourceReference } = ctx;
 
         const allSkeletonPages = skeleton.pages;
@@ -629,6 +630,8 @@ export class DocumentSkeleton extends Skeleton {
             updateBlockIndex(allSkeletonPages);
 
             setPageParent(allSkeletonPages, skeleton);
+
+            // console.log(skeleton);
 
             return skeleton;
         }

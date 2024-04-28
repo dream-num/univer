@@ -40,7 +40,7 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                 },
                 angle: 0,
             },
-            layoutType: PositionedObjectLayoutType.WRAP_SQUARE,
+            layoutType: PositionedObjectLayoutType.INLINE,
             behindDoc: BooleanNumber.FALSE,
             wrapText: WrapTextType.BOTH_SIDES,
             distT: 0,

@@ -162,10 +162,7 @@ export class DocFloatingObjectController extends Disposable {
                         return;
                     }
 
-                    // TODO: @JOCS remove microtask.
-                    queueMicrotask(() => {
-                        this._refreshFloatingObject(unitId, skeleton, currentRender);
-                    });
+                    this._refreshFloatingObject(unitId, skeleton, currentRender);
 
                     // this.calculatePagePosition(currentRender);
                 }

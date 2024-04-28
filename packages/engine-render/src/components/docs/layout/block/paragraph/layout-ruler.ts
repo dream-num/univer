@@ -412,6 +412,12 @@ function _lineOperator(
 
             __updateAndPositionDrawings(ctx, line.top, line.lineHeight, column, relativeLineDrawings);
         }
+
+        const affectInlineDrawings = ctx.paragraphConfigCache.get(line.paragraphIndex)?.paragraphInlineSkeDrawings;
+
+        if (affectInlineDrawings) {
+            __updatePreLineDrawingPosition(line, paragraphInlineSkeDrawings);
+        }
     }
 
     if (paragraphAffectSkeDrawings != null && paragraphAffectSkeDrawings.size > 0) {
@@ -470,11 +476,6 @@ function _lineOperator(
         headersDrawings,
         footersDrawings
     );
-
-    // TODO: Use queueMicrotask to mark sure the new line is full? remove it later.
-    queueMicrotask(() => {
-        __updatePreLineDrawingPosition(newLine, paragraphInlineSkeDrawings);
-    });
 
     column.lines.push(newLine);
     newLine.parent = column;

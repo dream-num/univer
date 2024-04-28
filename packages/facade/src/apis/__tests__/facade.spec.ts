@@ -162,6 +162,7 @@ describe('Test FUniver', () => {
         expect(() => univerAPI.createSocket('URL')).toThrowError();
     });
 
+
     it('Function registerSheetRowHeaderExtension and unregisterSheetRowHeaderExtension', () => {
         const rowHeader = univerAPI.registerSheetRowHeaderExtension('test', new RowHeaderCustomExtension());
 

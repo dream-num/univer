@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import type { IContextService } from '@univerjs/core';
-import { IConfigService, ILocalStorageService, LocaleService, Plugin } from '@univerjs/core';
+import { IContextService, ILocalStorageService, LocaleService, Plugin } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -73,7 +72,7 @@ export class UniverUIPlugin extends Plugin {
 
     constructor(
         private _config: Partial<IUniverUIConfig> = {},
-        @IConfigService private readonly _contextService: IContextService,
+        @IContextService private readonly _contextService: IContextService,
         @Inject(Injector) protected readonly _injector: Injector,
         @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {

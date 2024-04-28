@@ -67,7 +67,7 @@ export class FUniver {
 
     /**
      * Create a new spreadsheet and get the API handler of that spreadsheet.
-     * @param data the snapshot of the spreadsheet.
+     * @param data The snapshot of the spreadsheet.
      * @returns Spreadsheet API instance.
      */
     createUniverSheet(data: Partial<IWorkbookData>): FWorkbook {
@@ -77,7 +77,7 @@ export class FUniver {
 
     /**
      * Create a new document and get the API handler of that document.
-     * @param data the snapshot of the document.
+     * @param data The snapshot of the document.
      * @returns Document API instance.
      */
     createUniverDoc(data: Partial<IDocumentData>): FDocument {
@@ -87,7 +87,7 @@ export class FUniver {
 
     /**
      * Get the spreadsheet API handler by the spreadsheet id.
-     * @param id the spreadsheet id.
+     * @param id The spreadsheet id.
      * @returns Spreadsheet API instance.
      */
     getUniverSheet(id: string): FWorkbook | null {
@@ -101,7 +101,7 @@ export class FUniver {
 
     /**
      * Get the document API handler by the document id.
-     * @param id the document id.
+     * @param id The document id.
      * @returns Document API instance.
      */
     getUniverDoc(id: string): FDocument | null {

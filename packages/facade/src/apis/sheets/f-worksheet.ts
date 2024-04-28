@@ -33,10 +33,18 @@ export class FWorksheet {
 
     /**
      * Returns the worksheet id
-     * @returns sheet id
+     * @returns The id of the worksheet
      */
     getSheetId(): string {
         return this._worksheet.getSheetId();
+    }
+
+    /**
+     * Returns the worksheet name
+     * @returns The name of the worksheet
+     */
+    getSheetName(): string {
+        return this._worksheet.getName();
     }
 
     getSelection(): FSelection | null {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellDataForSheetInterceptor, IPosition, ISelectionCell, Nullable } from '@univerjs/core';
+import type { ICellDataForSheetInterceptor, IPosition, ISelectionCell, Nullable, Workbook } from '@univerjs/core';
 import {
     createInterceptorKey,
     Disposable,
@@ -24,6 +24,7 @@ import {
     makeCellToSelection,
     ThemeService,
     toDisposable,
+    UniverInstanceType,
 } from '@univerjs/core';
 import type { Engine, IDocumentLayoutObject, Scene } from '@univerjs/engine-render';
 import { convertTextRotation, DeviceInputEventType, getCanvasOffsetByEngine } from '@univerjs/engine-render';
@@ -228,7 +229,7 @@ export class EditorBridgeService extends Disposable implements IEditorBridgeServ
         endX = skeleton.convertTransformToOffsetX(endX, scaleX, scrollXY);
         endY = skeleton.convertTransformToOffsetY(endY, scaleY, scrollXY);
 
-        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
+        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet();
         const location = {
             workbook,

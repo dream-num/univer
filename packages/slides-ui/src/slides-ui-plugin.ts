@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { IUniverInstanceService, LocaleService, Plugin, PluginType } from '@univerjs/core';
+import type { SlideDataModel } from '@univerjs/core';
+import { IUniverInstanceService, LocaleService, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -24,7 +25,8 @@ import { zhCN } from './locale';
 export const SLIDE_UI_PLUGIN_NAME = 'slides-ui';
 
 export class UniverSlidesUIPlugin extends Plugin {
-    static override type = PluginType.Slide;
+    static override pluginName = SLIDE_UI_PLUGIN_NAME;
+    static override type = UniverInstanceType.UNIVER_SLIDE;
 
     constructor(
         _config: unknown,
@@ -32,7 +34,7 @@ export class UniverSlidesUIPlugin extends Plugin {
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
-        super(SLIDE_UI_PLUGIN_NAME);
+        super();
     }
 
     override onStarting(injector: Injector): void {
@@ -50,8 +52,8 @@ export class UniverSlidesUIPlugin extends Plugin {
     private _markSlideAsFocused() {
         const currentService = this._univerInstanceService;
         try {
-            const slide = currentService.getCurrentUniverSlideInstance()!;
-            currentService.focusUniverInstance(slide.getUnitId());
+            const slide = currentService.getCurrentUnitForType<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE)!;
+            currentService.focusUnit(slide.getUnitId());
         } catch (e) {
         }
     }

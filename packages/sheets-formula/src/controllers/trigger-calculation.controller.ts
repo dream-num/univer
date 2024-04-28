@@ -15,19 +15,21 @@
  */
 
 import type { ICommandInfo, IUnitRange } from '@univerjs/core';
-import { Disposable, ICommandService, LifecycleStages, OnLifecycle, Tools } from '@univerjs/core';
+import { Disposable, ICommandService, LifecycleStages, OnLifecycle, throttle } from '@univerjs/core';
 import type {
     IDirtyUnitFeatureMap,
     IDirtyUnitOtherFormulaMap,
     IDirtyUnitSheetNameMap,
-    INumfmtItemMap,
-    ISetFormulaCalculationNotificationMutation } from '@univerjs/engine-formula';
+    ISetFormulaCalculationNotificationMutation,
+} from '@univerjs/engine-formula';
 import {
     FormulaDataModel,
     FormulaExecutedStateType,
+    FormulaExecuteStageType,
     IActiveDirtyManagerService,
     SetFormulaCalculationNotificationMutation,
-    SetFormulaCalculationStartMutation } from '@univerjs/engine-formula';
+    SetFormulaCalculationStartMutation,
+} from '@univerjs/engine-formula';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import {
     ClearSelectionFormatCommand,
@@ -36,6 +38,7 @@ import {
     SetRangeValuesMutation,
     SetStyleCommand,
 } from '@univerjs/sheets';
+import { IProgressService } from '@univerjs/ui';
 
 import { Inject } from '@wendellhu/redi';
 
@@ -49,11 +52,14 @@ export class TriggerCalculationController extends Disposable {
 
     private _startExecutionTime: number = 0;
 
+    private _formulaCalculationDoneCount: number = 0;
+
     constructor(
         @ICommandService private readonly _commandService: ICommandService,
         @IActiveDirtyManagerService private readonly _activeDirtyManagerService: IActiveDirtyManagerService,
         @Inject(INumfmtService) private readonly _numfmtService: INumfmtService,
-        @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel
+        @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel,
+        @Inject(IProgressService) private readonly _progressService: IProgressService
     ) {
         super();
 
@@ -134,7 +140,7 @@ export class TriggerCalculationController extends Disposable {
         const allDirtyUnitFeatureMap: IDirtyUnitFeatureMap = {};
         const allDirtyUnitOtherFormulaMap: IDirtyUnitOtherFormulaMap = {};
 
-        const numfmtItemMap: INumfmtItemMap = Tools.deepClone(this._formulaDataModel.getNumfmtItemMap());
+        // const numfmtItemMap: INumfmtItemMap = Tools.deepClone(this._formulaDataModel.getNumfmtItemMap());
 
         for (const command of commands) {
             const conversion = this._activeDirtyManagerService.get(command.id);
@@ -168,46 +174,13 @@ export class TriggerCalculationController extends Disposable {
             }
         }
 
-        // number format data
-        allDirtyRanges.forEach((dirtyRange) => {
-            const { unitId, sheetId } = dirtyRange;
-
-            if (numfmtItemMap[unitId] == null) {
-                numfmtItemMap[unitId] = {};
-            }
-
-            if (numfmtItemMap[unitId]![sheetId] == null) {
-                numfmtItemMap[unitId]![sheetId] = {};
-            }
-
-            const numfmtModel = this._numfmtService.getModel(unitId, sheetId);
-
-            if (!numfmtModel) return;
-
-            const refMode = this._numfmtService.getRefModel(unitId);
-
-            numfmtModel.forValue((row, col, numfmtValue) => {
-                if (numfmtValue && refMode) {
-                    const refValue = refMode.getValue(numfmtValue?.i, ['i']);
-
-                    if (!refValue) return;
-
-                    if (numfmtItemMap[unitId]![sheetId][row] == null) {
-                        numfmtItemMap[unitId]![sheetId][row] = {};
-                    }
-
-                    numfmtItemMap[unitId]![sheetId][row][col] = refValue.pattern;
-                }
-            });
-        });
-
         return {
             dirtyRanges: allDirtyRanges,
             dirtyNameMap: allDirtyNameMap,
             dirtyDefinedNameMap: allDirtyDefinedNameMap,
             dirtyUnitFeatureMap: allDirtyUnitFeatureMap,
             dirtyUnitOtherFormulaMap: allDirtyUnitOtherFormulaMap,
-            numfmtItemMap,
+            // numfmtItemMap,
         };
     }
 
@@ -242,7 +215,7 @@ export class TriggerCalculationController extends Disposable {
                 }
                 Object.keys(dirtyUnitFeatureOrOtherFormulaMap[unitId]![sheetId]).forEach((featureIdOrFormulaId) => {
                     allDirtyUnitFeatureOrOtherFormulaMap[unitId]![sheetId][featureIdOrFormulaId] =
-                    dirtyUnitFeatureOrOtherFormulaMap[unitId]![sheetId]![featureIdOrFormulaId] || false;
+                        dirtyUnitFeatureOrOtherFormulaMap[unitId]![sheetId]![featureIdOrFormulaId] || false;
                 });
             });
         });
@@ -252,6 +225,10 @@ export class TriggerCalculationController extends Disposable {
         /**
          * Assignment operation after formula calculation.
          */
+        const debouncedPushTask = throttle(this._pushTask.bind(this), 300);
+        let startDependencyTimer: NodeJS.Timeout | null;
+        let formulaInsertTaskCount = false;
+        let arrayFormulaInsertTaskCount = false;
 
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
@@ -269,15 +246,40 @@ export class TriggerCalculationController extends Disposable {
                         completedArrayFormulasCount,
                         stage,
                     } = params.stageInfo;
-                    if (totalArrayFormulasToCalculate > 0) {
-                        // console.log(
-                        //     `Stage ${stage} Array formula.There are ${totalArrayFormulasToCalculate} functions to be executed, ${completedArrayFormulasCount} complete.`
-                        // );
-                    } else {
-                        // console.log(
-                        //     `Stage ${stage} .There are ${totalFormulasToCalculate} functions to be executed, ${completedFormulasCount} complete.`
-                        // );
+
+                    if (stage === FormulaExecuteStageType.START_DEPENDENCY) {
+                        // If the total calculation time exceeds 1s, a progress bar is displayed. The first progress shows 5%
+                        startDependencyTimer = setTimeout(() => {
+                            // Ignore progress deviations, and finally the complete method ensures the correct completion of the progress
+                            this._progressService.insertTaskCount(100);
+                            this._progressService.pushTask({ count: 5 });
+
+                            startDependencyTimer = null;
+                        }, 1000);
+                    } else if (stage === FormulaExecuteStageType.CURRENTLY_CALCULATING) {
+                        if (!formulaInsertTaskCount && !startDependencyTimer) {
+                            formulaInsertTaskCount = true;
+                            this._progressService.insertTaskCount(totalFormulasToCalculate);
+                        }
+                        debouncedPushTask(completedFormulasCount);
+                    } else if (stage === FormulaExecuteStageType.CURRENTLY_CALCULATING_ARRAY_FORMULA) {
+                        if (!arrayFormulaInsertTaskCount && !startDependencyTimer) {
+                            arrayFormulaInsertTaskCount = true;
+                            this._progressService.insertTaskCount(totalArrayFormulasToCalculate);
+                        }
+                        debouncedPushTask(completedArrayFormulasCount);
                     }
+
+
+                    // if (totalArrayFormulasToCalculate > 0) {
+                    // console.warn(
+                    //     `Stage ${stage} Array formula.There are ${totalArrayFormulasToCalculate} functions to be executed, ${completedArrayFormulasCount} complete.`
+                    // );
+                    // } else {
+                    // console.warn(
+                    //     `Stage ${stage} .There are ${totalFormulasToCalculate} functions to be executed, ${completedFormulasCount} complete.`
+                    // );
+                    // }
                 } else {
                     const state = params.functionsExecutedState;
                     let result = '';
@@ -293,8 +295,7 @@ export class TriggerCalculationController extends Disposable {
                             this._executingCommandQueue = [];
                             break;
                         case FormulaExecutedStateType.SUCCESS:
-                            result = `Formula calculation succeeded, Total time consumed: ${
-                                performance.now() - this._startExecutionTime
+                            result = `Formula calculation succeeded, Total time consumed: ${performance.now() - this._startExecutionTime
                             } ms`;
                             this._executingCommandQueue = [];
                             break;
@@ -303,6 +304,25 @@ export class TriggerCalculationController extends Disposable {
                             this._executingCommandQueue = [];
                             break;
                     }
+
+                    if (startDependencyTimer) {
+                        // The total calculation time does not exceed 1s, and the progress bar is not displayed.
+                        clearTimeout(startDependencyTimer);
+                        startDependencyTimer = null;
+                    } else {
+                        //  Manually hide the progress bar to prevent the progress bar from not being hidden due to pushTask statistical errors
+                        if (state === FormulaExecutedStateType.SUCCESS) {
+                            this._progressService.complete();
+                        } else if (state === FormulaExecutedStateType.STOP_EXECUTION) {
+                            this._progressService.stop();
+                        }
+
+                        formulaInsertTaskCount = false;
+                        arrayFormulaInsertTaskCount = false;
+                        this._formulaCalculationDoneCount = 0;
+                    }
+
+
                     console.warn(`execution result${result}`);
                 }
             })
@@ -320,5 +340,15 @@ export class TriggerCalculationController extends Disposable {
                 onlyLocal: true,
             }
         );
+    }
+
+    /**
+     * Update progress by completed count
+     * @param completedCount
+     */
+    private _pushTask(completedCount: number) {
+        const count = completedCount - this._formulaCalculationDoneCount;
+        this._formulaCalculationDoneCount = completedCount;
+        this._progressService.pushTask({ count });
     }
 }

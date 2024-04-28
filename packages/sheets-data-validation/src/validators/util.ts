@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import { Range } from '@univerjs/core';
-import type { ICellData, IUnitRangeName, IUniverInstanceService, Nullable } from '@univerjs/core';
+import { Range, UniverInstanceType } from '@univerjs/core';
+import type { ICellData, IUnitRangeName, IUniverInstanceService, Nullable, Workbook } from '@univerjs/core';
 import { getCellValueOrigin } from '../utils/get-cell-data-origin';
 
 export function getSheetRangeValueSet(grid: IUnitRangeName, univerInstanceService: IUniverInstanceService, currUnitId: string, currSubUnitId: string) {
     const set = new Set<string>();
     const unitId = grid.unitId || currUnitId;
-    const workbook = univerInstanceService.getUniverSheetInstance(unitId) ?? univerInstanceService.getCurrentUniverSheetInstance()!;
+    const workbook = univerInstanceService.getUniverSheetInstance(unitId) ?? univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
     const worksheet = workbook.getSheetBySheetName(grid.sheetName) ?? workbook.getSheetBySheetId(currSubUnitId) ?? workbook.getActiveSheet();
     Range.foreach(grid.range, (row, col) => {
         const data = worksheet.getCellRaw(row, col);

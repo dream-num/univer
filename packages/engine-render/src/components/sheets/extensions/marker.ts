@@ -84,7 +84,7 @@ export class Marker extends SheetExtension {
             }
 
             // current cell is hidden
-            if (!worksheet.getColVisible(col) || !worksheet.getRowVisible(row)) {
+            if (!worksheet.getColVisible(col) || !worksheet.getRowRawVisible(row)) {
                 return;
             }
 

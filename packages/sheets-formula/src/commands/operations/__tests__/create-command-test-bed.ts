@@ -15,7 +15,7 @@
  */
 
 import type { IWorkbookData } from '@univerjs/core';
-import { ILogService, IUniverInstanceService, LocaleType, LogLevel, Plugin, PluginType, Univer } from '@univerjs/core';
+import { ILogService, IUniverInstanceService, LocaleType, LogLevel, Plugin, Univer, UniverInstanceType } from '@univerjs/core';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import { SelectionManagerService } from '@univerjs/sheets';
 import type { Dependency } from '@wendellhu/redi';
@@ -45,7 +45,7 @@ const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
     styles: {},
 };
 
-export function createCommandTestBed(workbookConfig?: IWorkbookData, dependencies?: Dependency[]) {
+export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?: Dependency[]) {
     const univer = new Univer();
     const injector = univer.__getInjector();
     const get = injector.get.bind(injector);
@@ -54,13 +54,14 @@ export function createCommandTestBed(workbookConfig?: IWorkbookData, dependencie
      * This plugin hooks into Sheet's DI system to expose API to test scripts
      */
     class TestPlugin extends Plugin {
-        static override type = PluginType.Sheet;
+        static override pluginName = 'test-plugin';
+        static override type = UniverInstanceType.UNIVER_SHEET;
 
         constructor(
             _config: undefined,
             @Inject(Injector) override readonly _injector: Injector
         ) {
-            super('test-plugin');
+            super();
 
             this._injector = _injector;
         }
@@ -77,10 +78,10 @@ export function createCommandTestBed(workbookConfig?: IWorkbookData, dependencie
     }
 
     univer.registerPlugin(TestPlugin);
-    const sheet = univer.createUniverSheet(workbookConfig || TEST_WORKBOOK_DATA_DEMO);
+    const sheet = univer.createUniverSheet(workbookData || TEST_WORKBOOK_DATA_DEMO);
 
     const univerInstanceService = get(IUniverInstanceService);
-    univerInstanceService.focusUniverInstance('test');
+    univerInstanceService.focusUnit('test');
 
     const logService = get(ILogService);
     logService.setLogLevel(LogLevel.SILENT); // change this to `LogLevel.VERBOSE` to debug tests via logs

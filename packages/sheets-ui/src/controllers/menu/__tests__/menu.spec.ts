@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
-import type { Univer } from '@univerjs/core';
+import type { IRange, Univer } from '@univerjs/core';
 import {
     DisposableCollection,
     ICommandService,
-    IUniverInstanceService,
     RANGE_TYPE,
-    toDisposable,
-    UniverPermissionService,
 } from '@univerjs/core';
 import {
     NORMAL_SELECTION_PLUGIN_NAME,
@@ -29,7 +26,6 @@ import {
     SetBoldCommand,
     SetRangeValuesMutation,
     SetStyleCommand,
-    SheetPermissionService,
 } from '@univerjs/sheets';
 import { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -37,7 +33,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { BoldMenuItemFactory } from '../menu';
 import { createMenuTestBed } from './create-menu-test-bed';
 
-describe('Test menu items', () => {
+describe('test menu items', () => {
     let univer: Univer;
     let get: Injector['get'];
     let commandService: ICommandService;
@@ -63,55 +59,45 @@ describe('Test menu items', () => {
         disposableCollection.dispose();
     });
 
-    it('Test bold menu item', async () => {
-        let activated = false;
-        let disabled = false;
-        const sheetPermissionService = get(SheetPermissionService);
-        const univerPermissionService = get(UniverPermissionService);
-        const univerInstanceService = get(IUniverInstanceService);
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance()!;
-        const worksheet = workbook.getActiveSheet();
-        const menuItem = get(Injector).invoke(BoldMenuItemFactory);
-        disposableCollection.add(toDisposable(menuItem.activated$!.subscribe((v: boolean) => (activated = v))));
-        disposableCollection.add(toDisposable(menuItem.disabled$!.subscribe((v: boolean) => (disabled = v))));
-        expect(activated).toBeFalsy();
-        expect(disabled).toBeFalsy();
-
+    function select(range: IRange) {
         const selectionManager = get(SelectionManagerService);
         selectionManager.setCurrentSelection({
             pluginName: NORMAL_SELECTION_PLUGIN_NAME,
             unitId: 'test',
             sheetId: 'sheet1',
         });
+
+        const { startColumn, startRow, endColumn, endRow } = range;
         selectionManager.add([
             {
-                range: { startRow: 0, startColumn: 0, endColumn: 0, endRow: 0, rangeType: RANGE_TYPE.NORMAL },
+                range: { startRow, startColumn, endColumn, endRow, rangeType: RANGE_TYPE.NORMAL },
                 primary: {
-                    startRow: 0,
-                    startColumn: 0,
-                    endColumn: 0,
-                    endRow: 0,
-                    actualRow: 0,
-                    actualColumn: 0,
+                    startRow,
+                    startColumn,
+                    endColumn,
+                    endRow,
+                    actualRow: startRow,
+                    actualColumn: startColumn,
                     isMerged: false,
                     isMergedMainCell: false,
                 },
                 style: null,
             },
         ]);
+    }
+
+    it('should "BoldMenu" change status correctly', async () => {
+        let activated = false;
+        let disabled = false;
+        const menuItem = get(Injector).invoke(BoldMenuItemFactory);
+        disposableCollection.add(menuItem.activated$!.subscribe((v: boolean) => (activated = v)));
+        disposableCollection.add(menuItem.disabled$!.subscribe((v: boolean) => (disabled = v)));
+        expect(activated).toBeFalsy();
+        expect(disabled).toBeFalsy();
+
+        select({ startRow: 0, startColumn: 0, endRow: 0, endColumn: 0 });
 
         expect(await commandService.executeCommand(SetBoldCommand.id)).toBeTruthy();
         expect(activated).toBe(true);
-
-        expect(sheetPermissionService.getSheetEditable(workbook.getUnitId(), worksheet.getSheetId())).toBe(true);
-        sheetPermissionService.setSheetEditable(false, workbook.getUnitId(), worksheet.getSheetId());
-        expect(sheetPermissionService.getSheetEditable()).toBe(false);
-        sheetPermissionService.setSheetEditable(true, workbook.getUnitId(), worksheet.getSheetId());
-        univerPermissionService.setEditable(workbook.getUnitId(), false);
-        expect(sheetPermissionService.getSheetEditable()).toBe(false);
-        expect(univerPermissionService.getEditable()).toBe(false);
-        univerPermissionService.setEditable(workbook.getUnitId(), true);
-        expect(univerPermissionService.getEditable()).toBe(true);
-        expect(sheetPermissionService.getSheetEditable()).toBe(true);
     });
 });

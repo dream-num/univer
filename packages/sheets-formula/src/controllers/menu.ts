@@ -61,7 +61,7 @@ export function InsertFunctionMenuItemFactory(accessor: IAccessor): IMenuItem {
                 icon: 'MinSingle',
             },
         ],
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: getCurrentSheetDisabled$(accessor),
     };
 }

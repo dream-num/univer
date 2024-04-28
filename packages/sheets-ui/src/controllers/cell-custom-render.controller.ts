@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICellCustomRender, ICellRenderContext, Nullable } from '@univerjs/core';
-import { Disposable, DisposableCollection, IUniverInstanceService, LifecycleStages, OnLifecycle, sortRules } from '@univerjs/core';
+import type { ICellCustomRender, ICellRenderContext, Nullable, Workbook } from '@univerjs/core';
+import { Disposable, DisposableCollection, IUniverInstanceService, LifecycleStages, OnLifecycle, sortRules, UniverInstanceType } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent, Spreadsheet } from '@univerjs/engine-render';
 import { IRenderManagerService, Vector2 } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
@@ -45,7 +45,7 @@ export class CellCustomRenderController extends Disposable {
     private _initEventBinding() {
         const disposableCollection = new DisposableCollection();
         // eslint-disable-next-line max-lines-per-function
-        this._univerInstanceService.currentSheet$.subscribe((workbook) => {
+        this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => {
             disposableCollection.dispose();
             if (workbook) {
                 const unitId = workbook.getUnitId();

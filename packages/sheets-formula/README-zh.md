@@ -617,7 +617,7 @@ Uniscript 底层使用了 `@univerjs/facade`，你也可以直接在项目中使
 首先 `plugin.ts` 中就不需要注册 `CustomFunctionController` 了，同级目录新建一个 `custom-function-plugin.ts`，专门用于注册 `CustomFunctionController`。
 
 ```ts
-import { Plugin, PluginType } from '@univerjs/core';
+import { Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -625,10 +625,11 @@ import { FORMULA_UI_PLUGIN_NAME } from './common/plugin-name';
 import { CustomFunctionController } from './controllers/custom-function.controller';
 
 export class UniverSheetsCustomFunctionPlugin extends Plugin {
-    static override type = PluginType.Sheet;
+    static override pluginName = FORMULA_UI_PLUGIN_NAME
+    static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(@Inject(Injector) override readonly _injector: Injector) {
-        super(FORMULA_UI_PLUGIN_NAME);
+        super();
     }
 
     initialize(): void {

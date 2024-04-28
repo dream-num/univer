@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IWorkbookData } from '@univerjs/core';
+import type { IWorkbookData, Workbook } from '@univerjs/core';
 import {
     CellValueType,
     ILogService,
@@ -23,8 +23,9 @@ import {
     LogLevel,
     ObjectMatrix,
     Plugin,
-    PluginType,
     Univer,
+    UniverInstanceType,
+
 } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
@@ -223,7 +224,7 @@ const TEST_WORKBOOK_DATA: IWorkbookData = {
     sheetOrder: [],
     styles: {},
 };
-export function createCommandTestBed(workbookConfig?: IWorkbookData, dependencies?: Dependency[]) {
+export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?: Dependency[]) {
     const univer = new Univer();
     const injector = univer.__getInjector();
     const get = injector.get.bind(injector);
@@ -232,7 +233,8 @@ export function createCommandTestBed(workbookConfig?: IWorkbookData, dependencie
      * This plugin hooks into Sheet's DI system to expose API to test scripts
      */
     class TestPlugin extends Plugin {
-        static override type = PluginType.Sheet;
+        static override pluginName = 'test-plugin';
+        static override type = UniverInstanceType.UNIVER_SHEET;
 
         private _formulaDataModel: FormulaDataModel | null = null;
 
@@ -240,7 +242,7 @@ export function createCommandTestBed(workbookConfig?: IWorkbookData, dependencie
             _config: undefined,
             @Inject(Injector) override readonly _injector: Injector
         ) {
-            super('test-plugin');
+            super();
         }
 
         override onStarting(injector: Injector): void {
@@ -254,16 +256,16 @@ export function createCommandTestBed(workbookConfig?: IWorkbookData, dependencie
     }
 
     univer.registerPlugin(TestPlugin);
-    const sheet = univer.createUniverSheet(workbookConfig || TEST_WORKBOOK_DATA);
+    const sheet = univer.createUniverSheet(workbookData || TEST_WORKBOOK_DATA);
 
     const univerInstanceService = get(IUniverInstanceService);
-    univerInstanceService.focusUniverInstance('test');
+    univerInstanceService.focusUnit('test');
 
     const logService = get(ILogService);
     logService.setLogLevel(LogLevel.SILENT); // change this to `true` to debug tests via logs
 
     const sheetData: ISheetData = {};
-    const workbook = univerInstanceService.getCurrentUniverSheetInstance()!;
+    const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
     const unitId = workbook.getUnitId();
     const sheetId = workbook.getActiveSheet().getSheetId();
     workbook.getSheets().forEach((sheet) => {

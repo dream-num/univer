@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { DocumentDataModel } from '@univerjs/core';
 import { Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import type { IDesktopUIController, IMenuItemFactory } from '@univerjs/ui';
 import { ComponentManager, DesktopUIPart, IEditorService, ILayoutService, IMenuService, IUIController } from '@univerjs/ui';
@@ -110,7 +111,7 @@ export class DocUIController extends Disposable {
     }
 
     private _initDocBackground() {
-        const firstDocUnitId = this._univerInstanceService.getAllUniverDocsInstance()[0].getUnitId();
+        const firstDocUnitId = this._univerInstanceService.getAllUnitsForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC)[0].getUnitId();
         if (firstDocUnitId == null) {
             return;
         }
@@ -125,7 +126,7 @@ export class DocUIController extends Disposable {
 
     private _initFocusHandler(): void {
         this.disposeWithMe(
-            this._layoutService.registerFocusHandler(UniverInstanceType.DOC, () => {
+            this._layoutService.registerFocusHandler(UniverInstanceType.UNIVER_DOC, () => {
                 const textSelectionManagerService = this._injector.get(ITextSelectionRenderManager);
                 textSelectionManagerService.focus();
             })

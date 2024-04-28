@@ -17,7 +17,8 @@
 import React, { useState } from 'react';
 
 import { RangeSelector, TextEditor } from '@univerjs/ui';
-import { createInternalEditorID, IUniverInstanceService } from '@univerjs/core';
+import type { Workbook } from '@univerjs/core';
+import { createInternalEditorID, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { Input } from '@univerjs/design';
 
@@ -39,7 +40,7 @@ const editorStyle: React.CSSProperties = {
  */
 export const TestEditorContainer = () => {
     const univerInstanceService = useDependency(IUniverInstanceService);
-    const workbook = univerInstanceService.getCurrentUniverSheetInstance()!;
+    const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
     if (workbook == null) {
         return;
     }

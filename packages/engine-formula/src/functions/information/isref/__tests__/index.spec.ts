@@ -166,7 +166,6 @@ describe('Test isref function', () => {
             formulaData: {},
             arrayFormulaCellData: {},
             forceCalculate: false,
-            numfmtItemMap: {},
             dirtyRanges: [],
             dirtyNameMap: {},
             dirtyDefinedNameMap: {},

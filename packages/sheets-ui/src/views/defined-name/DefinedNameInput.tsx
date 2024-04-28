@@ -17,8 +17,8 @@
 import React, { useEffect, useState } from 'react';
 
 import { RangeSelector, TextEditor } from '@univerjs/ui';
-import type { IUnitRange, Nullable } from '@univerjs/core';
-import { AbsoluteRefType, createInternalEditorID, IUniverInstanceService, LocaleService, Tools } from '@univerjs/core';
+import type { IUnitRange, Nullable, Workbook } from '@univerjs/core';
+import { AbsoluteRefType, createInternalEditorID, IUniverInstanceService, LocaleService, Tools, UniverInstanceType } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { Button, Input, Radio, RadioGroup, Select } from '@univerjs/design';
 import { IDefinedNamesService, type IDefinedNamesServiceParam, IFunctionService, isReferenceStrings, isReferenceStringWithEffectiveColumn, LexerTreeBuilder, operatorToken, serializeRangeToRefString } from '@univerjs/engine-formula';
@@ -56,7 +56,7 @@ export const DefinedNameInput = (props: IDefinedNameInputProps) => {
 
     } = props;
     const univerInstanceService = useDependency(IUniverInstanceService);
-    const workbook = univerInstanceService.getCurrentUniverSheetInstance()!;
+    const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
     const localeService = useDependency(LocaleService);
     const definedNamesService = useDependency(IDefinedNamesService);
     const functionService = useDependency(IFunctionService);

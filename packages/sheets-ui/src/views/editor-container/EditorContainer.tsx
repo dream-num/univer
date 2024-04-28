@@ -39,7 +39,7 @@ const EDITOR_DEFAULT_POSITION = {
  * Floating editor's container.
  * @returns
  */
-// eslint-disable-next-line max-lines-per-function
+
 export const EditorContainer: React.FC<ICellIEditorProps> = () => {
     const [state, setState] = useState({
         ...EDITOR_DEFAULT_POSITION,

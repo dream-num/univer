@@ -14,27 +14,73 @@
  * limitations under the License.
  */
 
-import { DataValidationRenderMode, DataValidationType, IUniverInstanceService, Tools } from '@univerjs/core';
-import type { CellValue, DataValidationOperator, IDataValidationRule, IDataValidationRuleBase, ISheetDataValidationRule, Nullable } from '@univerjs/core';
-import type { IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
+import { DataValidationRenderMode, DataValidationType, isFormulaString, IUniverInstanceService, Tools, UniverInstanceType } from '@univerjs/core';
+import type { CellValue, DataValidationOperator, ICellData, IDataValidationRule, IDataValidationRuleBase, ISheetDataValidationRule, Nullable, Workbook } from '@univerjs/core';
+import type { IBaseDataValidationWidget, IFormulaResult, IFormulaValidResult, IValidatorCellInfo } from '@univerjs/data-validation';
 import { BaseDataValidator } from '@univerjs/data-validation';
-import { deserializeRangeWithSheet, isReferenceStringWithEffectiveColumn } from '@univerjs/engine-formula';
+import { isReferenceString, LexerTreeBuilder, sequenceNodeType } from '@univerjs/engine-formula';
 import { LIST_FORMULA_INPUT_NAME } from '../views/formula-input';
 import { LIST_DROPDOWN_KEY } from '../views';
 import { DropdownWidget } from '../widgets/dropdown-widget';
 import { ListRenderModeInput } from '../views/render-mode';
-import { deserializeListOptions, getSheetRangeValueSet } from './util';
+import { DataValidationFormulaService } from '../services/dv-formula.service';
+import { getCellValueOrigin } from '../utils/get-cell-data-origin';
+import { deserializeListOptions } from './util';
+
+export function getRuleFormulaResultSet(result: Nullable<Nullable<ICellData>[][]>) {
+    if (!result) {
+        return [];
+    }
+    const resultSet = new Set<string>();
+    result.forEach(
+        (row) => {
+            row.forEach((cell) => {
+                const value = getCellValueOrigin(cell);
+                if (value !== null && value !== undefined) {
+                    resultSet.add(value.toString());
+                }
+            });
+        }
+    );
+
+    return [...resultSet];
+}
+
+const supportedFormula = [
+    'if',
+    'indirect',
+    'choose',
+    'offset',
+];
+
+// 1. must have REFERENCE or DEFINED_NAME node.
+// 2. only support some formula
+export function isValidListFormula(formula: string, lexer: LexerTreeBuilder) {
+    if (!isFormulaString(formula)) {
+        return true;
+    }
+
+    const isRefString = isReferenceString(formula.slice(1));
+    if (isRefString) {
+        return true;
+    }
+
+    const nodes = lexer.sequenceNodesBuilder(formula);
+
+    return (nodes) && nodes.some((node) => typeof node === 'object' && node.nodeType === sequenceNodeType.FUNCTION && supportedFormula.indexOf(node.token.toLowerCase()) > -1);
+}
 
 export class ListValidator extends BaseDataValidator {
+    protected formulaService = this.injector.get(DataValidationFormulaService);
+    private _lexer = this.injector.get(LexerTreeBuilder);
+
     id: string = DataValidationType.LIST;
     title: string = 'dataValidation.list.title';
     operators: DataValidationOperator[] = [];
     scopes: string | string[] = ['sheet'];
     formulaInput: string = LIST_FORMULA_INPUT_NAME;
 
-    private _univerInstanceService = this.injector.get(IUniverInstanceService);
-
-    override canvasRender = this.injector.createInstance(DropdownWidget);
+    override canvasRender: Nullable<IBaseDataValidationWidget> = this.injector.createInstance(DropdownWidget);
 
     override dropdown: string | undefined = LIST_DROPDOWN_KEY;
 
@@ -46,31 +92,37 @@ export class ListValidator extends BaseDataValidator {
 
     override validatorFormula(rule: IDataValidationRuleBase): IFormulaValidResult {
         const success = !Tools.isBlank(rule.formula1);
+        const valid = isValidListFormula(rule.formula1 ?? '', this._lexer);
 
         return {
-            success,
-            formula1: success ? undefined : this.localeService.t('dataValidation.validFail.list'),
+            success: Boolean(success && valid),
+            formula1: success
+                ? valid ?
+                    undefined :
+                    this.localeService.t('dataValidation.validFail.listInvalid')
+                : this.localeService.t('dataValidation.validFail.list'),
         };
     }
 
-    private _parseCellValue(cellValue: CellValue, rule: IDataValidationRule) {
+    parseCellValue(cellValue: CellValue) {
         const cellString = cellValue.toString();
         return deserializeListOptions(cellString);
     }
 
     override async parseFormula(rule: IDataValidationRule, unitId: string, subUnitId: string): Promise<IFormulaResult<string[] | undefined>> {
         const { formula1 = '' } = rule;
+        const results = await this.formulaService.getRuleFormulaResult(unitId, subUnitId, rule.uid);
 
         return {
-            formula1: isReferenceStringWithEffectiveColumn(formula1) ? getSheetRangeValueSet(deserializeRangeWithSheet(formula1), this._univerInstanceService, unitId, subUnitId) : deserializeListOptions(formula1),
+            formula1: isFormulaString(formula1) ? getRuleFormulaResultSet(results?.[0]?.result) : deserializeListOptions(formula1),
             formula2: undefined,
         };
     }
 
-    override async isValidType(cellInfo: IValidatorCellInfo<Nullable<CellValue>>, formula: IFormulaResult<any>, rule: IDataValidationRule): Promise<boolean> {
+    override async isValidType(cellInfo: IValidatorCellInfo<Nullable<CellValue>>, formula: IFormulaResult<string[] | undefined>, rule: IDataValidationRule): Promise<boolean> {
         const { value } = cellInfo;
-        const { formula1 } = formula;
-        const selected = this._parseCellValue(value!, rule);
+        const { formula1 = [] } = formula;
+        const selected = this.parseCellValue(value!);
         return selected.every((i) => formula1.includes(i));
     }
 
@@ -85,15 +137,28 @@ export class ListValidator extends BaseDataValidator {
     getList(rule: IDataValidationRule, currentUnitId?: string, currentSubUnitId?: string) {
         const { formula1 = '' } = rule;
         const univerInstanceService = this.injector.get(IUniverInstanceService);
-        const workbook = (currentUnitId ? univerInstanceService.getUniverSheetInstance(currentUnitId) : undefined) ?? univerInstanceService.getCurrentUniverSheetInstance();
+        const workbook = (currentUnitId ? univerInstanceService.getUniverSheetInstance(currentUnitId) : undefined) ?? univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (!workbook) return [];
 
         const worksheet = (currentSubUnitId ? workbook.getSheetBySheetId(currentSubUnitId) : undefined) ?? workbook.getActiveSheet();
         const unitId = workbook.getUnitId();
         const subUnitId = worksheet.getSheetId();
-        return isReferenceStringWithEffectiveColumn(formula1)
-            ? getSheetRangeValueSet(deserializeRangeWithSheet(formula1), this._univerInstanceService, unitId, subUnitId)
-            : deserializeListOptions(formula1);
+        const results = this.formulaService.getRuleFormulaResultSync(unitId, subUnitId, rule.uid);
+        return isFormulaString(formula1) ? getRuleFormulaResultSet(results?.[0]?.result) : deserializeListOptions(formula1);
+    }
+
+    async getListAsync(rule: IDataValidationRule, currentUnitId?: string, currentSubUnitId?: string) {
+        const { formula1 = '' } = rule;
+        const univerInstanceService = this.injector.get(IUniverInstanceService);
+        const workbook = (currentUnitId ? univerInstanceService.getUniverSheetInstance(currentUnitId) : undefined) ?? univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        if (!workbook) {
+            return [];
+        }
+        const worksheet = (currentSubUnitId ? workbook.getSheetBySheetId(currentSubUnitId) : undefined) ?? workbook.getActiveSheet();
+        const unitId = workbook.getUnitId();
+        const subUnitId = worksheet.getSheetId();
+        const results = await this.formulaService.getRuleFormulaResult(unitId, subUnitId, rule.uid);
+        return isFormulaString(formula1) ? getRuleFormulaResultSet(results?.[0]?.result) : deserializeListOptions(formula1);
     }
 
     getListWithColor(rule: IDataValidationRule, currentUnitId?: string, currentSubUnitId?: string) {

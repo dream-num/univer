@@ -14,23 +14,22 @@
  * limitations under the License.
  */
 
-import type { ICellData, ICommand, IObjectMatrixPrimitiveType, IRange } from '@univerjs/core';
+import type { ICellData, ICommand, IObjectMatrixPrimitiveType, IRange, Workbook } from '@univerjs/core';
 import {
     BooleanNumber,
     CommandType,
-    Dimension,
     Direction,
     ICommandService,
     IUndoRedoService,
     IUniverInstanceService,
     Range,
     sequenceExecute,
+    UniverInstanceType,
 } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
 import type {
     IInsertColMutationParams,
-    IInsertRangeMutationParams,
     IInsertRowMutationParams,
     IRemoveColMutationParams,
     IRemoveRowsMutationParams,
@@ -63,10 +62,11 @@ export interface IInsertRowCommandParams {
     cellValue?: IObjectMatrixPrimitiveType<ICellData>;
 }
 export const InsertRowCommandId = 'sheet.command.insert-row';
+
 /**
- * @internal
- *
  * this command and its interface should not be exported from index.ts
+ *
+ * @internal
  */
 export const InsertRowCommand: ICommand = {
     type: CommandType.COMMAND,
@@ -145,7 +145,7 @@ export const InsertRowBeforeCommand: ICommand = {
         }
 
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
+        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (!workbook) {
             return false;
         }
@@ -203,7 +203,7 @@ export const InsertRowAfterCommand: ICommand = {
         }
 
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
+        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (!workbook) {
             return false;
         }
@@ -251,7 +251,7 @@ export const InsertColCommand: ICommand<IInsertColCommandParams> = {
         const univerInstanceService = accessor.get(IUniverInstanceService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
-        const { range, direction, subUnitId, unitId, cellValue } = params;
+        const { range, direction, subUnitId, unitId } = params;
         const { startColumn, endColumn } = params.range;
         const workbook = univerInstanceService.getUniverSheetInstance(params.unitId)!;
         const worksheet = workbook.getSheetBySheetId(params.subUnitId)!;
@@ -273,13 +273,6 @@ export const InsertColCommand: ICommand<IInsertColCommandParams> = {
             insertColParams
         );
 
-        const insertRangeMutationParams: IInsertRangeMutationParams = {
-            unitId: params.unitId,
-            subUnitId: params.subUnitId,
-            range: params.range,
-            shiftDimension: Dimension.COLUMNS,
-            cellValue,
-        };
         const intercepted = sheetInterceptorService.onCommandExecute({
             id: InsertColCommand.id,
             params,
@@ -334,7 +327,7 @@ export const InsertColBeforeCommand: ICommand = {
         }
 
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
+        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (!workbook) {
             return false;
         }
@@ -390,7 +383,7 @@ export const InsertColAfterCommand: ICommand = {
         }
 
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
+        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (!workbook) {
             return false;
         }

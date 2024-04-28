@@ -20,7 +20,6 @@ import type { IAccessor } from '@wendellhu/redi';
 
 import { rangeMerge } from '../../basics/rangeMerge';
 import { createUniqueKey, groupByKey } from '../../basics/utils';
-import type { FormatType } from '../../services/numfmt/type';
 import { INumfmtService } from '../../services/numfmt/type';
 
 export const factorySetNumfmtUndoMutation = (accessor: IAccessor, option: ISetNumfmtMutationParams) => {
@@ -28,16 +27,14 @@ export const factorySetNumfmtUndoMutation = (accessor: IAccessor, option: ISetNu
     const { values, unitId, subUnitId } = option;
     const cells: ISetCellsNumfmt = [];
     const removeCells: IRange[] = [];
-    const model = numfmtService.getModel(unitId, subUnitId) || undefined;
     Object.keys(values).forEach((id) => {
         const value = values[id];
         value.ranges.forEach((range) => {
             Range.foreach(range, (row, col) => {
-                const oldNumfmt = numfmtService.getValue(unitId, subUnitId, row, col, model);
+                const oldNumfmt = numfmtService.getValue(unitId, subUnitId, row, col);
                 if (oldNumfmt) {
                     cells.push({
                         pattern: oldNumfmt.pattern,
-                        type: oldNumfmt.type,
                         row,
                         col,
                     });
@@ -81,7 +78,6 @@ export interface ISetNumfmtMutationParams {
     refMap: {
         [id: string]: {
             pattern: string;
-            type: FormatType;
         };
     };
     unitId: string;
@@ -111,7 +107,7 @@ export const SetNumfmtMutation: ICommand<ISetNumfmtMutationParams> = {
                 }
                 return result;
             },
-            [] as Array<{ pattern: string; type: FormatType; ranges: IRange[] }>
+            [] as Array<{ pattern: string; ranges: IRange[] }>
         );
         numfmtService.setValues(unitId, sheetId, setValues);
         return true;
@@ -140,14 +136,12 @@ export const factoryRemoveNumfmtUndoMutation = (accessor: IAccessor, option: IRe
     const numfmtService = accessor.get(INumfmtService);
     const { ranges, unitId, subUnitId } = option;
     const cells: ISetCellsNumfmt = [];
-    const model = numfmtService.getModel(unitId, subUnitId) || undefined;
     ranges.forEach((range) => {
         Range.foreach(range, (row, col) => {
-            const oldNumfmt = numfmtService.getValue(unitId, subUnitId, row, col, model);
+            const oldNumfmt = numfmtService.getValue(unitId, subUnitId, row, col);
             if (oldNumfmt) {
                 cells.push({
                     pattern: oldNumfmt.pattern,
-                    type: oldNumfmt.type,
                     row,
                     col,
                 });
@@ -164,7 +158,7 @@ export const factoryRemoveNumfmtUndoMutation = (accessor: IAccessor, option: IRe
     });
     return [{ id: SetNumfmtMutation.id, params }];
 };
-export type ISetCellsNumfmt = Array<{ pattern: string; type: FormatType; row: number; col: number }>;
+export type ISetCellsNumfmt = Array<{ pattern: string; row: number; col: number }>;
 export const transformCellsToRange = (
     unitId: string,
     subUnitId: string,
@@ -176,11 +170,9 @@ export const transformCellsToRange = (
     const getKey = createUniqueKey();
     Object.keys(group).forEach((pattern) => {
         const groupItem = group[pattern];
-        const firstOne = groupItem[0];
         const key = getKey();
         refMap[key] = {
             pattern,
-            type: firstOne.type,
         };
         groupItem.forEach((item) => {
             if (!values[key]) {

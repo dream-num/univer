@@ -19,7 +19,6 @@ import { CellValueType, Disposable, ICommandService, LifecycleStages, OnLifecycl
 import type { ISetArrayFormulaDataMutationParams } from '@univerjs/engine-formula';
 import { FormulaDataModel, SetArrayFormulaDataMutation } from '@univerjs/engine-formula';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
-import { getPatternPreview } from '@univerjs/sheets-numfmt';
 import { Inject } from '@wendellhu/redi';
 
 @OnLifecycle(LifecycleStages.Ready, ArrayFormulaDisplayController)
@@ -69,52 +68,47 @@ export class ArrayFormulaDisplayController extends Disposable {
                 handler: (cell, location, next) => {
                     const { unitId, subUnitId, row, col } = location;
                     const arrayFormulaCellData = this._formulaDataModel.getArrayFormulaCellData();
-                    const arrayFormulaRange = this._formulaDataModel.getArrayFormulaRange();
                     const cellData = arrayFormulaCellData?.[unitId]?.[subUnitId]?.[row]?.[col];
-                    const cellRange = arrayFormulaRange?.[unitId]?.[subUnitId]?.[row]?.[col];
                     if (cellData == null) {
                         return next(cell);
                     }
 
-                    if (cellRange != null && cellRange.startRow === row && cellRange.startColumn === col) {
-                        return next(cell);
-                    }
+                    // const numfmtItemMap = this._formulaDataModel.getNumfmtItemMap();
+                    // const numfmtItem = numfmtItemMap[unitId]?.[subUnitId]?.[row]?.[col];
 
-                    const numfmtItemMap = this._formulaDataModel.getNumfmtItemMap();
-                    const numfmtItem = numfmtItemMap[unitId]?.[subUnitId]?.[row]?.[col];
+                    // if (numfmtItem) {
+                    //     const value = cellData?.v;
+                    //     const type = cellData?.t;
 
-                    if (numfmtItem) {
-                        const value = cellData?.v;
-                        const type = cellData?.t;
+                    //     if (value == null || type !== CellValueType.NUMBER) {
+                    //         return next(cell);
+                    //     }
 
-                        if (value == null || type !== CellValueType.NUMBER) {
-                            return next(cell);
-                        }
+                    //     const info = getPatternPreview(numfmtItem, value as number);
 
-                        const info = getPatternPreview(numfmtItem, value as number);
+                    //     if (info.color) {
+                    //         const colorMap = this._themeService.getCurrentTheme();
+                    //         const color = colorMap[`${info.color}500`];
+                    //         return {
+                    //             ...cell,
+                    //             v: info.result,
+                    //             t: CellValueType.STRING,
+                    //             s: { cl: { rgb: color } },
+                    //         };
+                    //     }
 
-                        if (info.color) {
-                            const colorMap = this._themeService.getCurrentTheme();
-                            const color = colorMap[`${info.color}500`];
-                            return {
-                                ...cell,
-                                v: info.result,
-                                t: CellValueType.STRING,
-                                s: { cl: { rgb: color } },
-                            };
-                        }
+                    //     return {
+                    //         ...cell,
+                    //         v: info.result,
+                    //         t: CellValueType.STRING,
+                    //     };
+                    // }
 
-                        return {
-                            ...cell,
-                            v: info.result,
-                            t: CellValueType.STRING,
-                        };
-                    }
-
+                    // The cell in the upper left corner of the array formula also triggers the default value determination
                     if (cellData.v == null && cellData.t == null) {
                         return next({ ...cell,
                                       ...cellData,
-                                      v: 0,
+                                      v: 0, // Default value for empty cell
                                       t: CellValueType.NUMBER,
                         });
                     }

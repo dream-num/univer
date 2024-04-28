@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Nullable, Observer } from '@univerjs/core';
+import type { Nullable, Observer, Workbook } from '@univerjs/core';
 import {
     Disposable,
     ICommandService,
@@ -22,6 +22,7 @@ import {
     LifecycleStages,
     OnLifecycle,
     RANGE_TYPE,
+    UniverInstanceType,
 } from '@univerjs/core';
 import type { IMouseEvent, IPointerEvent } from '@univerjs/engine-render';
 import { CURSOR_TYPE, IRenderManagerService, Rect } from '@univerjs/engine-render';
@@ -284,7 +285,7 @@ export class HeaderMenuController extends Disposable {
     }
 
     private _getSelectionOnColumn(column: number): ISetSelectionsOperationParams {
-        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
+        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet();
 
         return {

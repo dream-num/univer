@@ -16,7 +16,8 @@
 
 import React, { useEffect, useState } from 'react';
 
-import { ICommandService, IUniverInstanceService, LocaleService } from '@univerjs/core';
+import type { Workbook } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import type { IDefinedNamesServiceParam } from '@univerjs/engine-formula';
 import { IDefinedNamesService } from '@univerjs/engine-formula';
@@ -32,7 +33,7 @@ export function DefinedNameOverlay(props: IDefinedNameOverlayProps) {
     const localeService = useDependency(LocaleService);
     const definedNamesService = useDependency(IDefinedNamesService);
     const univerInstanceService = useDependency(IUniverInstanceService);
-    const workbook = univerInstanceService.getCurrentUniverSheetInstance()!;
+    const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
     const unitId = workbook.getUnitId();
 
     const getDefinedNameMap = () => {

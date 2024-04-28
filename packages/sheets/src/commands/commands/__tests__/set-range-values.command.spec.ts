@@ -101,6 +101,7 @@ describe('Test set range values commands', () => {
     afterEach(() => {
         univer.dispose();
     });
+
     describe('set range values', () => {
         describe('correct situations', () => {
             it('will set range values when there is a selected range', async () => {
@@ -165,6 +166,51 @@ describe('Test set range values commands', () => {
                 // redo
                 expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
                 expect(getValue()).toStrictEqual(getParams().value);
+
+                // reset
+                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+            });
+
+            it('will set range values when there is a selected range, includes custom property', async () => {
+                function getParams() {
+                    const params: ISetRangeValuesCommandParams = {
+                        value: {
+                            v: 'a1',
+                            custom: {
+                                id: 1,
+                            },
+                        },
+                    };
+
+                    return params;
+                }
+
+                function getResultParams() {
+                    const params: ISetRangeValuesCommandParams = {
+                        value: {
+                            v: 'a1',
+                            t: CellValueType.STRING,
+                            custom: {
+                                id: 1,
+                            },
+                        },
+                    };
+
+                    return params;
+                }
+
+                expect(await commandService.executeCommand(SetRangeValuesCommand.id, getParams())).toBeTruthy();
+                expect(getValue()).toStrictEqual(getResultParams().value);
+                // undo
+                expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();
+                expect(getValue()).toStrictEqual({
+                    v: 'A1',
+                    t: CellValueType.STRING,
+                });
+
+                // redo
+                expect(await commandService.executeCommand(RedoCommand.id)).toBeTruthy();
+                expect(getValue()).toStrictEqual(getResultParams().value);
 
                 // reset
                 expect(await commandService.executeCommand(UndoCommand.id)).toBeTruthy();

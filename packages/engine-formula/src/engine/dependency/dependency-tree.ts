@@ -77,6 +77,8 @@ export class FormulaDependencyTree extends Disposable {
     private _state = FDtreeStateType.DEFAULT;
 
     override dispose(): void {
+        super.dispose();
+
         this.children.forEach((tree) => {
             tree.dispose();
         });
@@ -85,6 +87,10 @@ export class FormulaDependencyTree extends Disposable {
         this.parents = [];
 
         this.node?.dispose();
+    }
+
+    resetState() {
+        this._state = FDtreeStateType.DEFAULT;
     }
 
     setAdded() {
@@ -153,13 +159,7 @@ export class FormulaDependencyTree extends Disposable {
 
             const dependencyRanges = sheetRangeMap.get(sheetId)!;
             const excludedCell = unitExcludedCell?.[unitId]?.[sheetId];
-
-            let {
-                startRow: rangeStartRow,
-                endRow: rangeEndRow,
-                startColumn: rangeStartColumn,
-                endColumn: rangeEndColumn,
-            } = range;
+            let { startRow: rangeStartRow, endRow: rangeEndRow, startColumn: rangeStartColumn, endColumn: rangeEndColumn } = range;
 
             if (Number.isNaN(rangeStartRow)) {
                 rangeStartRow = 0;
@@ -259,6 +259,10 @@ export class FormulaDependencyTreeCache extends Disposable {
     }
 
     size() {
+        return this._cacheItems.size;
+    }
+
+    get length() {
         return this._cacheItems.size;
     }
 

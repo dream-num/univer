@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IMutationInfo } from '@univerjs/core';
+import type { IMutationInfo, Workbook } from '@univerjs/core';
 import {
     CommandType,
     ICommandService,
@@ -74,18 +74,18 @@ export class DataSyncPrimaryController extends RxDisposable {
     }
 
     private _init(): void {
-        this._univerInstanceService.sheetAdded$.pipe(takeUntil(this.dispose$)).subscribe((sheet) => {
+        this._univerInstanceService.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.UNIVER_SHEET).pipe(takeUntil(this.dispose$)).subscribe((sheet) => {
             this._syncingUnits.add(sheet.getUnitId());
 
             // If a sheet is created, it should sync the data to the worker thread.
             this._remoteInstanceService.createInstance({
                 unitID: sheet.getUnitId(),
-                type: UniverInstanceType.SHEET,
+                type: UniverInstanceType.UNIVER_SHEET,
                 snapshot: sheet.getSnapshot(),
             });
         });
 
-        this._univerInstanceService.sheetDisposed$.pipe(takeUntil(this.dispose$)).subscribe((workbook) => {
+        this._univerInstanceService.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.UNIVER_SHEET).pipe(takeUntil(this.dispose$)).subscribe((workbook) => {
             this._syncingUnits.delete(workbook.getUnitId());
             // If a sheet is disposed, it should sync the data to the worker thread.
             this._remoteInstanceService.disposeInstance({
@@ -97,9 +97,7 @@ export class DataSyncPrimaryController extends RxDisposable {
             // Mutations executed on the main thread should be synced to the worker thread.
             this._commandService.onCommandExecuted((commandInfo, options) => {
                 const { type, params } = commandInfo;
-                // TODO@wzhudev: use a universal way to get unitId
                 const unitID = (params as any)?.unitId || '';
-
                 if (
                     // only sync mutations to the worker thread
                     type === CommandType.MUTATION &&

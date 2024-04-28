@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { ICommandService, LocaleService, Plugin } from '@univerjs/core';
+import { ICommandService, LocaleService, Plugin, UniverInstanceType } from '@univerjs/core';
 import { type Dependency, Inject, Injector } from '@wendellhu/redi';
 import { DataValidationRenderController } from './controllers/dv-render.controller';
 import { DataValidationController } from './controllers/dv.controller';
@@ -24,7 +24,6 @@ import { AddSheetDataValidationAndOpenCommand, AddSheetDataValidationCommand, Up
 import { DataValidationCacheService } from './services/dv-cache.service';
 import { DataValidationFormulaService } from './services/dv-formula.service';
 import { DataValidationCustomFormulaService } from './services/dv-custom-formula.service';
-import { RegisterOtherFormulaService } from './services/register-formula.service';
 import { DataValidationRefRangeController } from './controllers/dv-ref-range.controller';
 import { enUS, zhCN } from './locale';
 import { DATA_VALIDATION_PLUGIN_NAME } from './common/const';
@@ -37,13 +36,16 @@ import { DataValidationRejectInputController } from './controllers/dv-reject-inp
 import { DataValidationPanelService } from './services/data-validation-panel.service';
 
 export class UniverSheetsDataValidationPlugin extends Plugin {
+    static override pluginName = DATA_VALIDATION_PLUGIN_NAME;
+    static override type = UniverInstanceType.UNIVER_SHEET;
+
     constructor(
         _config: unknown,
         @Inject(Injector) protected _injector: Injector,
         @ICommandService private readonly _commandService: ICommandService,
         @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
-        super(DATA_VALIDATION_PLUGIN_NAME);
+        super();
     }
 
     override onStarting(injector: Injector) {
@@ -53,7 +55,6 @@ export class UniverSheetsDataValidationPlugin extends Plugin {
             [DataValidationCacheService],
             [DataValidationFormulaService],
             [DataValidationCustomFormulaService],
-            [RegisterOtherFormulaService],
             [DataValidationDropdownManagerService],
 
             // controller

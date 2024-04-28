@@ -15,15 +15,15 @@
  */
 
 import type { DocumentDataModel, EventState, Nullable } from '@univerjs/core';
-import {
-    IConfigService,
+import { IConfigService,
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
     RxDisposable,
+    UniverInstanceType,
 } from '@univerjs/core';
 import { DOCS_COMPONENT_DEFAULT_Z_INDEX, DOCS_COMPONENT_HEADER_LAYER_INDEX, DOCS_COMPONENT_MAIN_LAYER_INDEX, DOCS_VIEW_KEY, VIEWPORT_KEY } from '@univerjs/docs';
-import type { IRender, IWheelEvent, RenderManagerService, Scene } from '@univerjs/engine-render';
+import type { IRender, IWheelEvent, Scene } from '@univerjs/engine-render';
 import { Documents, EVENT_TYPE, IRenderManagerService, Layer, ScrollBar, Viewport } from '@univerjs/engine-render';
 import { IEditorService } from '@univerjs/ui';
 import { BehaviorSubject, takeUntil } from 'rxjs';
@@ -39,7 +39,7 @@ export class DocCanvasView extends RxDisposable {
     readonly fps$ = this._fps$.asObservable();
 
     constructor(
-        @IRenderManagerService private readonly _renderManagerService: RenderManagerService,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IConfigService private readonly _configService: IConfigService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IEditorService private readonly _editorService: IEditorService
@@ -53,11 +53,11 @@ export class DocCanvasView extends RxDisposable {
             this._create(unitId);
         });
 
-        this._univerInstanceService.currentDoc$.pipe(takeUntil(this.dispose$)).subscribe((documentModel) => {
+        this._univerInstanceService.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_DOC).pipe(takeUntil(this.dispose$)).subscribe((documentModel) => {
             this._create(documentModel?.getUnitId());
         });
 
-        this._univerInstanceService.getAllUniverDocsInstance().forEach((documentModel) => {
+        this._univerInstanceService.getAllUnitsForType<DocumentDataModel>(UniverInstanceType.UNIVER_DOC).forEach((documentModel) => {
             this._create(documentModel.getUnitId());
         });
     }

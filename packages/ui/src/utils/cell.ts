@@ -32,6 +32,8 @@ import { textTrim } from './util';
 const PX_TO_PT_RATIO = 0.75;
 const MAX_FONT_SIZE = 78;
 const MIN_FONT_SIZE = 9;
+export const DEFAULT_BACKGROUND_COLOR_RGBA = 'rgba(0,0,0,0)';
+export const DEFAULT_BACKGROUND_COLOR_RGB = 'rgb(0,0,0)';
 
 // TODO: move to Utils
 /**
@@ -209,9 +211,12 @@ export function handleStringToStyle($dom?: HTMLElement, cssStyle: string = '') {
         else if (key === 'background' || key === 'background-color') {
             const backgroundColor = new ColorKit(value);
             if (backgroundColor) {
-                styleList.bg = {
-                    rgb: backgroundColor.toRgbString(),
-                };
+                const backgroundStr = backgroundColor.toRgbString();
+                if (backgroundStr !== DEFAULT_BACKGROUND_COLOR_RGBA && backgroundStr !== DEFAULT_BACKGROUND_COLOR_RGB) {
+                    styleList.bg = {
+                        rgb: backgroundColor.toRgbString(),
+                    };
+                }
             }
         }
 
@@ -388,6 +393,17 @@ export function handleStringToStyle($dom?: HTMLElement, cssStyle: string = '') {
                 styleList.tb = 1;
             }
         }
+
+        if (key === 'white-space') {
+            if (value === 'nowrap') {
+                styleList.tb = 1;
+            } else if (value === 'normal') {
+                styleList.tb = 3;
+            } else if (value === 'clip') {
+                styleList.tb = 2;
+            }
+        }
+
 
         if (key === 'border-color') {
             const colors = handleBorder(value, ')');

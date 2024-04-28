@@ -26,6 +26,7 @@ import type {
     IDocumentStyle,
 } from '../../types/interfaces/i-document-data';
 import type { IPaddingData } from '../../types/interfaces/i-style-data';
+import { UnitModel, UniverInstanceType } from '../../common/unit';
 import { updateAttributeByDelete } from './apply-utils/delete-apply';
 import { updateAttributeByInsert } from './apply-utils/insert-apply';
 import { updateAttribute } from './apply-utils/update-apply';
@@ -45,10 +46,18 @@ interface IDrawingUpdateConfig {
     width: number;
 }
 
-class DocumentDataModelSimple {
+class DocumentDataModelSimple extends UnitModel<IDocumentData, UniverInstanceType.UNIVER_DOC> {
+    override type: UniverInstanceType.UNIVER_DOC = UniverInstanceType.UNIVER_DOC;
+
+    override getUnitId(): string {
+        throw new Error('Method not implemented.');
+    }
+
     snapshot: IDocumentData;
 
     constructor(snapshot: Partial<IDocumentData>) {
+        super();
+
         this.snapshot = { ...DEFAULT_DOC, ...snapshot };
     }
 
@@ -216,7 +225,7 @@ export class DocumentDataModel extends DocumentDataModelSimple {
         this._initializeHeaderFooterModel();
     }
 
-    dispose() {
+    override dispose() {
         this.headerModelMap.forEach((header) => {
             header.dispose();
         });
@@ -262,7 +271,7 @@ export class DocumentDataModel extends DocumentDataModelSimple {
         return this as DocumentDataModel;
     }
 
-    getUnitId(): string {
+    override getUnitId(): string {
         return this._unitId;
     }
 

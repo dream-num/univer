@@ -16,7 +16,7 @@
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import type { Univer } from '../../basics/univer';
+import type { Univer } from '../../univer';
 import type { IWorkbookData } from '../../types/interfaces/i-workbook-data';
 import { LocaleType } from '../../types/enum/locale-type';
 import { extractPureTextFromCell, type Worksheet } from '../worksheet';
@@ -99,7 +99,7 @@ describe('test worksheet', () => {
             });
 
             const range: IRange = { startRow: 0, startColumn: 0, endRow: 1, endColumn: 2, rangeType: RANGE_TYPE.NORMAL };
-            const iterator1 = worksheet.iterateByRow(range);
+            const iterator1 = worksheet.iterateByRow(range)[Symbol.iterator]();
 
             const value1 = iterator1.next();
             expect(value1.done).toBeFalsy();
@@ -183,7 +183,7 @@ describe('test worksheet', () => {
             });
 
             const range: IRange = { startRow: 0, startColumn: 0, endRow: 2, endColumn: 2, rangeType: RANGE_TYPE.NORMAL };
-            const iterator1 = worksheet.iterateByColumn(range);
+            const iterator1 = worksheet.iterateByColumn(range)[Symbol.iterator]();
 
             const value1 = iterator1.next();
             expect(value1.done).toBeFalsy();

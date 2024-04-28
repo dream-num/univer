@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
+import type { ICellData, Nullable } from '@univerjs/core';
+import { CellValueType, isRealNum } from '@univerjs/core';
 import type { BaseReferenceObject, FunctionVariantType } from '../reference-object/base-reference-object';
 import type { ArrayValueObject } from '../value-object/array-value-object';
-import type { BaseValueObject } from '../value-object/base-value-object';
+import type { BaseValueObject, ErrorValueObject } from '../value-object/base-value-object';
 import { NumberValueObject } from '../value-object/primitive-object';
 
 export function convertTonNumber(valueObject: BaseValueObject) {
@@ -52,4 +54,77 @@ export function isSingleValueObject(valueObject: FunctionVariantType) {
     }
 
     return false;
+}
+
+/**
+ * Covert BaseValueObject to cell value
+ * @param objectValue
+ * @returns
+ */
+export function objectValueToCellValue(objectValue: Nullable<BaseValueObject>): ICellData | undefined {
+    const pattern = objectValue?.getPattern();
+    let cellWithStyle: ICellData = {};
+
+    if (pattern) {
+        cellWithStyle = {
+            s: {
+                n: {
+                    pattern,
+                },
+            },
+        };
+    }
+
+    if (objectValue == null) {
+        return {
+            v: null,
+            ...cellWithStyle,
+        };
+    }
+    if (objectValue.isError()) {
+        return {
+            v: (objectValue as ErrorValueObject).getErrorType() as string,
+            t: CellValueType.STRING,
+            ...cellWithStyle,
+        };
+    }
+    if (objectValue.isValueObject()) {
+        const vo = objectValue as BaseValueObject;
+        const v = vo.getValue();
+        if (vo.isNumber()) {
+            return {
+                v,
+                t: CellValueType.NUMBER,
+                ...cellWithStyle,
+            };
+        }
+        if (vo.isBoolean()) {
+            return {
+                v: v ? 1 : 0,
+                t: CellValueType.BOOLEAN,
+                ...cellWithStyle,
+            };
+        }
+        // String "00"
+        if (vo.isString() && isRealNum(v)) {
+            return {
+                v,
+                t: CellValueType.FORCE_STRING,
+                ...cellWithStyle,
+            };
+        }
+
+        if (vo.isNull()) {
+            return {
+                v: null,
+                ...cellWithStyle,
+            };
+        }
+
+        return {
+            v,
+            t: CellValueType.STRING,
+            ...cellWithStyle,
+        };
+    }
 }

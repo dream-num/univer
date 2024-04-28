@@ -16,8 +16,8 @@
 
 import React, { useEffect, useState } from 'react';
 
-import type { Nullable } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, LocaleService, Tools } from '@univerjs/core';
+import type { Nullable, Workbook } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, LocaleService, Tools, UniverInstanceType } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { CheckMarkSingle, DeleteSingle, IncreaseSingle } from '@univerjs/icons';
 import type { IDefinedNamesServiceParam } from '@univerjs/engine-formula';
@@ -32,7 +32,7 @@ import { SCOPE_WORKBOOK_VALUE } from './component-name';
 export const DefinedNameContainer = () => {
     const commandService = useDependency(ICommandService);
     const univerInstanceService = useDependency(IUniverInstanceService);
-    const workbook = univerInstanceService.getCurrentUniverSheetInstance()!;
+    const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
     const localeService = useDependency(LocaleService);
     const definedNamesService = useDependency(IDefinedNamesService);
     const selectionManagerService = useDependency(SelectionManagerService);

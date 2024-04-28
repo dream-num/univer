@@ -15,7 +15,7 @@
  */
 
 import type { IRange, Univer, Workbook, Worksheet } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -65,7 +65,7 @@ describe('Test ref-range.service', () => {
         );
 
         const univerInstanceService = get(IUniverInstanceService);
-        workbook = univerInstanceService.getCurrentUniverSheetInstance()!;
+        workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         worksheet = workbook.getActiveSheet();
     });
     afterEach(() => {

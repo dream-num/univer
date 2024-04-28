@@ -213,7 +213,7 @@ export class FormulaEditorShowController extends Disposable {
 
                     if (cell && cell.v == null && cell.t == null && cell.f != null) {
                         return next({ ...cell,
-                                      v: 0,
+                                      v: null, // Default value for empty cell, information displayed before calculation
                                       t: CellValueType.NUMBER,
                         });
                     }

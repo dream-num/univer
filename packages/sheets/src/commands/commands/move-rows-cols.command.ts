@@ -14,16 +14,18 @@
  * limitations under the License.
  */
 
-import type { ICommand, IRange } from '@univerjs/core';
+import type { ICommand, IRange, Workbook } from '@univerjs/core';
 import {
     CommandType,
     ErrorService,
     ICommandService,
     IUndoRedoService,
     IUniverInstanceService,
+    LocaleService,
     RANGE_TYPE,
     Rectangle,
     sequenceExecute,
+    UniverInstanceType,
 } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
@@ -72,7 +74,7 @@ export const MoveRowsCommand: ICommand<IMoveRowsCommandParams> = {
 
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
+        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (!workbook) {
             return false;
         }
@@ -85,17 +87,18 @@ export const MoveRowsCommand: ICommand<IMoveRowsCommandParams> = {
         const subUnitId = worksheet.getSheetId();
 
         const errorService = accessor.get(ErrorService);
+        const localeService = accessor.get(LocaleService);
         // Forbid action when some parts of a merged cell are selected.
         const rangeToMove = filteredSelections[0].range;
         const beforePrimary = filteredSelections[0].primary;
         const alignedRange = alignToMergedCellsBorders(rangeToMove, worksheet, false);
         if (!Rectangle.equals(rangeToMove, alignedRange)) {
-            errorService.emit('Only part of a merged cell is selected.');
+            errorService.emit(localeService.t('sheets.info.partOfCell'));
             return false;
         }
 
         if (rowAcrossMergedCell(toRow, worksheet)) {
-            errorService.emit('Across a merged cell.');
+            errorService.emit(localeService.t('sheets.info.acrossMergedCell'));
             return false;
         }
 
@@ -201,7 +204,7 @@ export const MoveColsCommand: ICommand<IMoveColsCommandParams> = {
 
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
         const univerInstanceService = accessor.get(IUniverInstanceService);
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
+        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (!workbook) {
             return false;
         }
@@ -214,17 +217,18 @@ export const MoveColsCommand: ICommand<IMoveColsCommandParams> = {
         const subUnitId = worksheet.getSheetId();
 
         const errorService = accessor.get(ErrorService);
+        const localeService = accessor.get(LocaleService);
         // Forbid action when some parts of a merged cell are selected.
         const rangeToMove = filteredSelections[0].range;
         const beforePrimary = filteredSelections[0].primary;
         const alignedRange = alignToMergedCellsBorders(rangeToMove, worksheet, false);
         if (!Rectangle.equals(rangeToMove, alignedRange)) {
-            errorService.emit('Only part of a merged cell is selected.');
+            errorService.emit(localeService.t('sheets.info.partOfCell'));
             return false;
         }
 
         if (columnAcrossMergedCell(toCol, worksheet)) {
-            errorService.emit('Across a merged cell.');
+            errorService.emit(localeService.t('sheets.info.acrossMergedCell'));
             return false;
         }
 

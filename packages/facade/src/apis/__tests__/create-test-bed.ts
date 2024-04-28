@@ -22,13 +22,13 @@ import {
     LocaleType,
     LogLevel,
     Plugin,
-    PluginType,
     ThemeService,
     Univer,
+    UniverInstanceType,
 } from '@univerjs/core';
 import { FunctionService, IFunctionService } from '@univerjs/engine-formula';
 import { ISocketService, WebSocketService } from '@univerjs/network';
-import { SelectionManagerService, SheetInterceptorService } from '@univerjs/sheets';
+import { SelectionManagerService, SheetInterceptorService, SheetPermissionService } from '@univerjs/sheets';
 import {
     DescriptionService,
     enUS,
@@ -81,23 +81,25 @@ export interface ITestBed {
     univerAPI: FUniver;
 }
 
-export function createTestBed(workbookConfig?: IWorkbookData, dependencies?: Dependency[]): ITestBed {
+export function createTestBed(workbookData?: IWorkbookData, dependencies?: Dependency[]): ITestBed {
     const univer = new Univer();
     const injector = univer.__getInjector();
 
     class TestPlugin extends Plugin {
-        static override type = PluginType.Sheet;
+        static override pluginName = 'test-plugin';
+        static override type = UniverInstanceType.UNIVER_SHEET;
 
         constructor(
             _config: undefined,
             @Inject(Injector) override readonly _injector: Injector
         ) {
-            super('test-plugin');
+            super();
         }
 
         override onStarting(injector: Injector): void {
             injector.add([SelectionManagerService]);
             injector.add([SheetInterceptorService]);
+            injector.add([SheetPermissionService]);
             injector.add([IRegisterFunctionService, { useClass: RegisterFunctionService }]);
             injector.add([
                 IDescriptionService,
@@ -130,10 +132,10 @@ export function createTestBed(workbookConfig?: IWorkbookData, dependencies?: Dep
     });
 
     univer.registerPlugin(TestPlugin);
-    const sheet = univer.createUniverSheet(workbookConfig || getTestWorkbookDataDemo());
+    const sheet = univer.createUniverSheet(workbookData || getTestWorkbookDataDemo());
 
     const univerInstanceService = injector.get(IUniverInstanceService);
-    univerInstanceService.focusUniverInstance('test');
+    univerInstanceService.focusUnit('test');
     const logService = injector.get(ILogService);
 
     logService.setLogLevel(LogLevel.SILENT); // change this to `LogLevel.VERBOSE` to debug tests via logs

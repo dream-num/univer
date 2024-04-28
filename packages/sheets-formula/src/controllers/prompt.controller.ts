@@ -15,12 +15,14 @@
  */
 
 import type {
+    DocumentDataModel,
     ICommandInfo,
     IRange,
     IRangeWithCoord,
     ITextRun,
+
     Nullable,
-} from '@univerjs/core';
+    Workbook } from '@univerjs/core';
 import {
     AbsoluteRefType,
     Direction,
@@ -40,6 +42,7 @@ import {
     ThemeService,
     toDisposable,
     Tools,
+    UniverInstanceType,
 } from '@univerjs/core';
 import {
     DocViewModelManagerService,
@@ -340,7 +343,7 @@ export class PromptController extends Disposable {
 
     private _initialChangeEditor() {
         this.disposeWithMe(
-            this._univerInstanceService.currentDoc$.subscribe((documentDataModel) => {
+            this._univerInstanceService.getCurrentTypeOfUnit$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC).subscribe((documentDataModel) => {
                 if (documentDataModel == null) {
                     return;
                 }
@@ -917,6 +920,7 @@ export class PromptController extends Disposable {
     private _buildTextRuns(sequenceNodes: Array<ISequenceNode | string>) {
         const textRuns: ITextRun[] = [];
         const refSelections: IRefSelection[] = [];
+        const themeColorMap = new Map<string, string>();
         let refColorIndex = 0;
 
         const offset = this._getCurrentBodyDataStreamAndOffset()?.offset || 0;
@@ -930,16 +934,20 @@ export class PromptController extends Disposable {
             const { startIndex, endIndex, nodeType, token } = node;
             let themeColor = '';
             if (nodeType === sequenceNodeType.REFERENCE) {
-                const colorIndex = refColorIndex % this._formulaRefColors.length;
-                themeColor = this._formulaRefColors[colorIndex];
+                if (themeColorMap.has(token)) {
+                    themeColor = themeColorMap.get(token)!;
+                } else {
+                    const colorIndex = refColorIndex % this._formulaRefColors.length;
+                    themeColor = this._formulaRefColors[colorIndex];
+                    themeColorMap.set(token, themeColor);
+                    refColorIndex++;
+                }
 
                 refSelections.push({
                     refIndex: i,
                     themeColor,
                     token,
                 });
-
-                refColorIndex++;
             } else if (nodeType === sequenceNodeType.NUMBER) {
                 themeColor = this._numberColor;
             } else if (nodeType === sequenceNodeType.STRING) {
@@ -1134,7 +1142,7 @@ export class PromptController extends Disposable {
         const current = this._sheetSkeletonManagerService.getCurrent();
 
         if (current == null) {
-            const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
+            const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
             const worksheet = workbook.getActiveSheet();
             return {
                 unitId: workbook.getUnitId(),

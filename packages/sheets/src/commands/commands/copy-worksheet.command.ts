@@ -54,7 +54,7 @@ export const CopySheetCommand: ICommand = {
 
         const { workbook, worksheet, unitId } = target;
         const config = Tools.deepClone(worksheet.getConfig());
-        config.name += localeService.t('sheets.sheetCopy'); // TODO: 文字国际化
+        config.name += localeService.t('sheets.tabs.sheetCopy');
         config.id = Tools.generateRandomId();
         const sheetIndex = workbook.getSheetIndex(worksheet);
 

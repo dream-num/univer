@@ -19,6 +19,7 @@ import { Inject } from '@wendellhu/redi';
 import { Disposable } from '../../shared';
 import { IUniverInstanceService } from '../instance/instance.service';
 import { LifecycleStages, OnLifecycle } from '../lifecycle/lifecycle';
+import { UniverInstanceType } from '../../common/unit';
 import { IPermissionService } from './permission.service';
 import { UniverEditablePermission } from './permission-point';
 
@@ -33,13 +34,13 @@ export class UniverPermissionService extends Disposable {
     }
 
     private _init() {
-        this._univerInstanceService.sheetAdded$.subscribe((workbook) => {
+        this._univerInstanceService.getTypeOfUnitAdded$(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => {
             const univerEditablePermission = new UniverEditablePermission(workbook.getUnitId());
             this._permissionService.addPermissionPoint(workbook.getUnitId(), univerEditablePermission);
         });
     }
 
-    getEditable(unitId = this._univerInstanceService.getCurrentUniverSheetInstance()?.getUnitId()) {
+    getEditable(unitId = this._univerInstanceService.getCurrentUnitForType(UniverInstanceType.UNIVER_SHEET)?.getUnitId()) {
         if (!unitId) {
             return;
         }

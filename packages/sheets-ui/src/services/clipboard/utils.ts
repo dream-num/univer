@@ -18,6 +18,7 @@ import { ObjectMatrix } from '@univerjs/core';
 import type { ICellData, IMutationInfo, IObjectMatrixPrimitiveType, IRange, Nullable } from '@univerjs/core';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { SetRangeValuesMutation } from '@univerjs/sheets';
+import type { IDiscreteRange } from '../../controllers/utils/range-tools';
 
 /**
  *
@@ -150,4 +151,32 @@ export function mergeSetRangeValues(mutations: IMutationInfo[]) {
         i += cursor;
     }
     return newMutations;
+}
+
+
+export function rangeIntersectWithDiscreteRange(range: IRange, discrete: IDiscreteRange) {
+    const { startRow, endRow, startColumn, endColumn } = range;
+    for (let i = startRow; i <= endRow; i++) {
+        for (let j = startColumn; j <= endColumn; j++) {
+            if (discrete.rows.includes(i) && discrete.cols.includes(j)) {
+                return true;
+            }
+        }
+    }
+}
+
+
+export function discreteRangeContainsRange(discrete: IDiscreteRange, range: IRange) {
+    const { startRow, endRow, startColumn, endColumn } = range;
+    for (let i = startRow; i <= endRow; i++) {
+        if (!discrete.rows.includes(i)) {
+            return false;
+        }
+    }
+    for (let j = startColumn; j <= endColumn; j++) {
+        if (!discrete.cols.includes(j)) {
+            return false;
+        }
+    }
+    return true;
 }

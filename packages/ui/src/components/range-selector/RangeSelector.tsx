@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IUnitRangeWithName, Nullable } from '@univerjs/core';
-import { IUniverInstanceService, LocaleService } from '@univerjs/core';
+import type { IUnitRangeWithName, Nullable, Workbook } from '@univerjs/core';
+import { IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { Button, Dialog, Input, Tooltip } from '@univerjs/design';
 import { CloseSingle, DeleteSingle, IncreaseSingle, SelectRangeSingle } from '@univerjs/icons';
 import { useDependency } from '@wendellhu/redi/react-bindings';
@@ -247,7 +247,7 @@ export function RangeSelector(props: IRangeSelectorProps) {
     }
 
     function getSheetIdByName(name: string) {
-        return univerInstanceService.getCurrentUniverSheetInstance()?.getSheetBySheetName(name)?.getSheetId() || '';
+        return univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getSheetBySheetName(name)?.getSheetId() || '';
     }
 
     function handleTextValueChange(value: Nullable<string>) {

@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { DataValidationStatus, Disposable, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
+import type { Workbook } from '@univerjs/core';
+import { DataValidationStatus, Disposable, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import { CellAlertManagerService, CellAlertType, HoverManagerService } from '@univerjs/sheets-ui';
 import { Inject } from '@wendellhu/redi';
 import type { BaseDataValidator } from '@univerjs/data-validation';
@@ -40,7 +41,7 @@ export class DataValidationAlertController extends Disposable {
     private _initCellAlertPopup() {
         this.disposeWithMe(this._hoverManagerService.currentCell$.subscribe((cellPos) => {
             if (cellPos) {
-                const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
+                const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
                 const worksheet = workbook.getActiveSheet();
                 const cellData = worksheet.getCell(cellPos.location.row, cellPos.location.col);
 

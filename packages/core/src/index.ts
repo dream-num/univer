@@ -16,9 +16,15 @@
 
 import { installShims } from './common/shims';
 
+export { type UnitType, UnitModel, UniverInstanceType } from './common/unit';
+export { Registry, RegistryAsMap } from './common/registry';
+export { Univer } from './univer';
+export { PluginHolder } from './services/plugin/plugin-holder';
 export { shallowEqual, isRangesEqual, isUnitRangesEqual } from './common/equal';
-export * from './basics';
+export { isNumeric, isSafeNumeric } from './common/number';
+export { isBooleanString } from './common/boolean';
 export { dedupe, remove, rotate, groupBy } from './common/array';
+export { mergeSets } from './common/set';
 export {
     DEFAULT_EMPTY_DOCUMENT_VALUE,
     DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY,
@@ -44,7 +50,8 @@ export { getBodySlice, composeBody } from './docs/data-model/text-x/utils';
 export { TextX } from './docs/data-model/text-x/text-x';
 export { replaceInDocumentBody } from './docs/data-model/replacement';
 export * from './observer';
-export { Plugin, PluginType } from './plugin/plugin';
+export { Plugin } from './services/plugin/plugin';
+export { PluginService } from './services/plugin/plugin.service';
 export {
     type CommandListener,
     CommandService,
@@ -75,7 +82,7 @@ export {
     type IFloatingObjectManagerSearchItemParam,
     IFloatingObjectManagerService,
 } from './services/floating-object/floating-object-manager.service';
-export { IUniverInstanceService, UniverInstanceType } from './services/instance/instance.service';
+export { IUniverInstanceService } from './services/instance/instance.service';
 export { LifecycleStages, OnLifecycle, runOnLifecycle } from './services/lifecycle/lifecycle';
 export { LifecycleService } from './services/lifecycle/lifecycle.service';
 export { ILocalStorageService } from './services/local-storage/local-storage.service';
@@ -109,10 +116,21 @@ export * from './shared';
 export { fromCallback } from './shared/rxjs';
 
 // #region sheet
+
 export type { IComposeInterceptors, IInterceptor, InterceptorHandler } from './common/interceptor';
 export { composeInterceptors, createInterceptorKey, InterceptorManager } from './common/interceptor';
 export { normalizeTextRuns } from './docs/data-model/apply-utils/common';
-export type { PluginCtor } from './plugin/plugin';
+export type { PluginCtor } from './services/plugin/plugin';
+export { type DependencyOverride, mergeOverrideWithDependencies } from './services/plugin/plugin-override';
+export * from './types/const';
+export * from './types/enum';
+export * from './types/interfaces';
+export { UniverInstanceService } from './services/instance/instance.service';
+export { LifecycleInitializerService } from './services/lifecycle/lifecycle.service';
+export { ConfigService } from './services/config/config.service';
+
+// #region sheet
+
 export { Range } from './sheets/range';
 export { Styles } from './sheets/styles';
 export {
@@ -133,13 +151,10 @@ export {
 export { SheetViewModel } from './sheets/view-model';
 export { getWorksheetUID, Workbook } from './sheets/workbook';
 export { Worksheet, extractPureTextFromCell } from './sheets/worksheet';
-export * from './slides/domain';
+export { SlideDataModel } from './slides/slide-model';
 export * from './types/const';
 export * from './types/enum';
 export * from './types/interfaces';
-export { UniverInstanceService } from './services/instance/instance.service';
-export { LifecycleInitializerService } from './services/lifecycle/lifecycle.service';
-export { ConfigService } from './services/config/config.service';
 export { ISnapshotServerService } from './services/snapshot/snapshot-server.service';
 export {
     transformSnapshotToWorkbookData,
@@ -156,6 +171,8 @@ export { getSheetBlocksFromSnapshot } from './services/snapshot/snapshot-transfo
 
 export { isBlackColor, isWhiteColor } from './shared/color/color-kit';
 export { cellToRange } from './shared/common';
+
+// #endregion
 
 export type { IDataValidationRule, IDataValidationRuleBase, IDataValidationRuleInfo, IDataValidationRuleOptions, ISheetDataValidationRule } from './types/interfaces/i-data-validation';
 export type { ICellCustomRender, ICellRenderContext } from './types/interfaces/i-cell-custom-render';

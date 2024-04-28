@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { IUniverInstanceService } from '@univerjs/core';
+import type { Workbook } from '@univerjs/core';
+import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 import { map } from 'rxjs';
 
@@ -24,8 +25,8 @@ export function getCurrentSheetDisabled$(accessor: IAccessor) {
     const univerInstanceService = accessor.get(IUniverInstanceService);
     const sheetPermissionService = accessor.get(SheetPermissionService);
 
-    const unitId = univerInstanceService.getCurrentUniverSheetInstance()?.getUnitId();
-    const sheetId = univerInstanceService.getCurrentUniverSheetInstance()?.getActiveSheet().getSheetId();
+    const unitId = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getUnitId();
+    const sheetId = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getActiveSheet().getSheetId();
 
     return sheetPermissionService.getEditable$(unitId, sheetId)?.pipe(map((e) => !e.value));
 }

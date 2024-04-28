@@ -23,11 +23,12 @@ import {
     RedoCommand,
     toDisposable,
     UndoCommand,
+    UniverInstanceType,
 } from '@univerjs/core';
 import type {
     ISheetCommandSharedParams,
 } from '@univerjs/sheets';
-import { InsertSheetCommand, SelectionManagerService, SetWorksheetActiveOperation } from '@univerjs/sheets';
+import { InsertSheetCommand, RemoveSheetCommand, SelectionManagerService, SetWorksheetActiveOperation } from '@univerjs/sheets';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -49,7 +50,7 @@ export class FWorkbook {
     }
 
     getId(): string {
-        return this._workbook.getUnitId();
+        return this.id;
     }
 
     getName(): string {
@@ -57,7 +58,7 @@ export class FWorkbook {
     }
 
     /**
-     * Returns workbook snapshot data, including conditional formatting, data validation, and other plugin data."
+     * Returns workbook snapshot data, including conditional formatting, data validation, and other plugin data.
      */
     getSnapshot(): IWorkbookData {
         const snapshot = this._resourceLoaderService.saveWorkbook(this._workbook);
@@ -78,6 +79,16 @@ export class FWorkbook {
     }
 
     /**
+     * Gets all the worksheets in this workbook
+     * @returns An array of all the worksheets in the workbook
+     */
+    getSheets() {
+        return this._workbook.getSheets().map((sheet) => {
+            return this._injector.createInstance(FWorksheet, this._workbook, sheet);
+        });
+    }
+
+    /**
      * Create a new worksheet and returns a handle to it.
      * @param name Name of the new sheet
      * @param rows How may rows would the new sheet have
@@ -92,12 +103,12 @@ export class FWorkbook {
         newSheet.id = name.toLowerCase().replace(/ /g, '-');
 
         this._commandService.syncExecuteCommand(InsertSheetCommand.id, {
-            unitId: this._workbook.getUnitId(),
+            unitId: this.id,
             index: this._workbook.getSheets().length,
             sheet: newSheet,
         });
         this._commandService.syncExecuteCommand(SetWorksheetActiveOperation.id, {
-            unitId: this._workbook.getUnitId(),
+            unitId: this.id,
             subUnitId: this._workbook.getSheets()[this._workbook.getSheets().length - 1].getSheetId(),
         });
 
@@ -106,8 +117,8 @@ export class FWorkbook {
 
     /**
      * Get a worksheet by sheet id.
-     * @param sheetId id of the worksheet
-     * @return the worksheet with given sheet id
+     * @param sheetId The id of the sheet to get.
+     * @return The worksheet with given sheet id
      */
     getSheetBySheetId(sheetId: string): FWorksheet | null {
         const worksheet = this._workbook.getSheetBySheetId(sheetId);
@@ -118,15 +129,76 @@ export class FWorkbook {
         return this._injector.createInstance(FWorksheet, this._workbook, worksheet);
     }
 
+    /**
+     * Get a worksheet by sheet name.
+     * @param name 	The name of the sheet to get.
+     * @returns The worksheet with given sheet name
+     */
+    getSheetByName(name: string): FWorksheet | null {
+        const worksheet = this._workbook.getSheetBySheetName(name);
+        if (!worksheet) {
+            return null;
+        }
+
+        return this._injector.createInstance(FWorksheet, this._workbook, worksheet);
+    }
+
+
+    /**
+     * Sets the given worksheet to be the active worksheet in the workbook.
+     * @param sheet The worksheet to set as the active worksheet.
+     * @returns The active worksheet
+     */
+    setActiveSheet(sheet: FWorksheet) {
+        this._commandService.syncExecuteCommand(SetWorksheetActiveOperation.id, {
+            unitId: this.id,
+            subUnitId: sheet.getSheetId(),
+        });
+
+        return sheet;
+    }
+
+    /**
+     * Inserts a new worksheet into the workbook.
+     * Using a default sheet name. The new sheet becomes the active sheet
+     * @returns The new sheet
+     */
+    insertSheet() {
+        this._commandService.syncExecuteCommand(InsertSheetCommand.id);
+
+        const unitId = this.id;
+        const subUnitId = this._workbook.getSheets()[this._workbook.getSheets().length - 1].getSheetId();
+
+        this._commandService.syncExecuteCommand(SetWorksheetActiveOperation.id, {
+            unitId,
+            subUnitId,
+        });
+
+        return this._injector.createInstance(FWorksheet, this._workbook, this._workbook.getActiveSheet());
+    }
+
+    /**
+     * Deletes the specified worksheet.
+     * @param sheet The worksheet to delete.
+     */
+    deleteSheet(sheet: FWorksheet) {
+        const unitId = this.id;
+        const subUnitId = sheet.getSheetId();
+        this._commandService.executeCommand(RemoveSheetCommand.id, {
+            unitId,
+            subUnitId,
+        });
+    }
+
     // #region editing
 
     undo(): Promise<boolean> {
-        this._univerInstanceService.focusUniverInstance(this.id);
+        this._univerInstanceService.focusUnit(this.id);
         return this._commandService.executeCommand(UndoCommand.id);
     }
 
     redo(): Promise<boolean> {
-        this._univerInstanceService.focusUniverInstance(this.id);
+        this._univerInstanceService.focusUnit(this.id);
         return this._commandService.executeCommand(RedoCommand.id);
     }
 
@@ -167,16 +239,16 @@ export class FWorkbook {
     onSelectionChange(callback: (selections: IRange[]) => void): IDisposable {
         return toDisposable(
             this._selectionManagerService.selectionMoveEnd$.subscribe((selections) => {
-                if (this._univerInstanceService.getCurrentUniverSheetInstance()!.getUnitId() !== this.id) {
+                if (this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId() !== this.id) {
                     return;
                 }
 
                 if (!selections?.length) {
                     callback([]);
+                } else {
+                    // TODO@wzhudev: filtered out ranges changes not other currently sheet
+                    callback(selections!.map((s) => s.range));
                 }
-
-                // TODO@wzhudev: filtered out ranges changes not other currently sheet
-                callback(selections!.map((s) => s.range));
             })
         );
     }

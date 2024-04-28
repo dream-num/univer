@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, LocaleService } from '@univerjs/core';
+import type { ICommandInfo, Workbook } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { Dropdown } from '@univerjs/design';
 import {
     InsertSheetMutation,
@@ -62,7 +62,7 @@ export function SheetBarTabs() {
     const editorBridgeService = useDependency(IEditorBridgeService);
     const injector = useInjector();
 
-    const workbook = univerInstanceService.getCurrentUniverSheetInstance()!;
+    const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
 
     useEffect(() => {
         statusInit();
@@ -161,7 +161,7 @@ export function SheetBarTabs() {
     };
 
     const nameRepeatCheck = (name: string) => {
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance()!;
+        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet();
         const currenSheetName = worksheet.getName();
         // TODO@Dushusir: no need trigger save

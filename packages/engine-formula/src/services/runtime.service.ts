@@ -15,13 +15,12 @@
  */
 
 import type { ICellData, IRange, Nullable } from '@univerjs/core';
-import { CellValueType, Disposable, isNullCell, isRealNum, ObjectMatrix } from '@univerjs/core';
+import { Disposable, isNullCell, ObjectMatrix } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
 
 import type {
     IArrayFormulaRangeType,
     IFeatureDirtyRangeType,
-    INumfmtItemMap,
     IRuntimeOtherUnitDataType,
     IRuntimeUnitDataType,
 } from '../basics/common';
@@ -31,6 +30,7 @@ import type { BaseAstNode } from '../engine/ast-node/base-ast-node';
 import type { BaseReferenceObject, FunctionVariantType } from '../engine/reference-object/base-reference-object';
 import type { ArrayValueObject } from '../engine/value-object/array-value-object';
 import { type BaseValueObject, ErrorValueObject } from '../engine/value-object/base-value-object';
+import { objectValueToCellValue } from '../engine/utils/value-object';
 import { IFormulaCurrentConfigService } from './current-data.service';
 
 /**
@@ -67,7 +67,6 @@ export interface IAllRuntimeData {
     functionsExecutedState: FormulaExecutedStateType;
     arrayFormulaCellData: IRuntimeUnitDataType;
     clearArrayFormulaCellData: IRuntimeUnitDataType;
-    numfmtItemMap: INumfmtItemMap;
 
     runtimeFeatureRange: { [featureId: string]: IFeatureDirtyRangeType };
     runtimeFeatureCellData: { [featureId: string]: IRuntimeUnitDataType };
@@ -195,8 +194,6 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
     private _runtimeArrayFormulaCellData: IRuntimeUnitDataType = {};
 
     private _runtimeClearArrayFormulaCellData: IRuntimeUnitDataType = {};
-
-    private _numfmtItemMap: INumfmtItemMap = {};
 
     private _runtimeFeatureRange: { [featureId: string]: IFeatureDirtyRangeType } = {};
 
@@ -334,7 +331,6 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         this._runtimeData = {};
         this._runtimeOtherData = {};
         this._unitArrayFormulaRange = {};
-        this._numfmtItemMap = {};
         this._runtimeArrayFormulaCellData = {};
         this._runtimeClearArrayFormulaCellData = {};
 
@@ -396,7 +392,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
             const objectValueRefOrArray = functionVariant as BaseReferenceObject | ArrayValueObject;
             const { startRow, startColumn } = objectValueRefOrArray.getRangePosition();
             objectValueRefOrArray.iterator((valueObject, rowIndex, columnIndex) => {
-                const value = this._objectValueToCellValue(valueObject);
+                const value = objectValueToCellValue(valueObject);
 
                 const row = rowIndex - startRow;
                 const column = columnIndex - startColumn;
@@ -407,7 +403,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
                 cellDatas[row][column] = value;
             });
         } else {
-            cellDatas = [[this._objectValueToCellValue(functionVariant as BaseValueObject)!]];
+            cellDatas = [[objectValueToCellValue(functionVariant as BaseValueObject)!]];
         }
 
         subComponentData![formulaId] = cellDatas;
@@ -434,16 +430,6 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
         if (this._unitArrayFormulaRange[unitId] == null) {
             this._unitArrayFormulaRange[unitId] = {};
         }
-
-        if (this._numfmtItemMap[unitId] == null) {
-            this._numfmtItemMap[unitId] = {};
-        }
-
-        if (this._numfmtItemMap[unitId]![sheetId] == null) {
-            this._numfmtItemMap[unitId]![sheetId] = {};
-        }
-
-        const numfmtItem = this._numfmtItemMap[unitId]![sheetId];
 
         const arrayFormulaRange = this._unitArrayFormulaRange[unitId]!;
 
@@ -493,15 +479,10 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
              */
             if (startRow === endRow && startColumn === endColumn) {
                 const firstCell = objectValueRefOrArray.getFirstCell();
-                const valueObject = this._objectValueToCellValue(firstCell);
+                // TODO @Dushusir set pattern style
+                const valueObject = objectValueToCellValue(firstCell);
                 sheetData.setValue(row, column, valueObject);
                 clearArrayUnitData.setValue(row, column, valueObject);
-
-                if (numfmtItem[row] == null) {
-                    numfmtItem[row] = {};
-                }
-
-                numfmtItem[row]![column] = firstCell.getPattern();
 
                 return;
             }
@@ -521,13 +502,13 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
                 this._checkIfArrayFormulaRangeHasData(unitId, sheetId, row, column, arrayRange) ||
                 this._checkIfArrayFormulaExceeded(rowCount, columnCount, arrayRange)
             ) {
-                const errorObject = this._objectValueToCellValue(ErrorValueObject.create(ErrorType.SPILL));
+                const errorObject = objectValueToCellValue(ErrorValueObject.create(ErrorType.SPILL));
                 sheetData.setValue(row, column, errorObject);
                 clearArrayUnitData.setValue(row, column, errorObject);
             } else {
                 const spillError = ErrorValueObject.create(ErrorType.SPILL);
                 objectValueRefOrArray.iterator((valueObject, rowIndex, columnIndex) => {
-                    const value = this._objectValueToCellValue(valueObject);
+                    const value = objectValueToCellValue(valueObject);
                     if (rowIndex === startRow && columnIndex === startColumn) {
                         /**
                          * If the referenced range contains an error in the spill of the array formula,
@@ -535,7 +516,7 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
                          */
                         if (valueObject != null && valueObject.isError() && valueObject.isEqualType(spillError)) {
                             clearArrayUnitData.setValue(row, column, {});
-                            sheetData.setValue(row, column, { ...this._objectValueToCellValue(spillError) });
+                            sheetData.setValue(row, column, { ...objectValueToCellValue(spillError) });
                             return false;
                         }
                         sheetData.setValue(row, column, { ...value });
@@ -545,26 +526,11 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
                     const currentColumn = columnIndex - startColumn + column;
 
                     arrayUnitData.setValue(currentRow, currentColumn, value);
-
-                    const pattern = valueObject?.getPattern();
-                    if (pattern) {
-                        if (numfmtItem[currentRow] == null) {
-                            numfmtItem[currentRow] = {};
-                        }
-
-                        numfmtItem[currentRow]![currentColumn] = pattern;
-                    }
                 });
             }
         } else {
-            const valueObject = this._objectValueToCellValue(functionVariant as BaseValueObject);
+            const valueObject = objectValueToCellValue(functionVariant as BaseValueObject);
             sheetData.setValue(row, column, valueObject);
-
-            if (numfmtItem[row] == null) {
-                numfmtItem[row] = {};
-            }
-
-            numfmtItem[row]![column] = functionVariant.getPattern();
 
             clearArrayUnitData.setValue(row, column, valueObject);
         }
@@ -576,10 +542,6 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
 
     getUnitArrayFormula() {
         return this._unitArrayFormulaRange;
-    }
-
-    getNumfmtItemMap() {
-        return this._numfmtItemMap;
     }
 
     getRuntimeOtherData() {
@@ -618,7 +580,6 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
             functionsExecutedState: this._functionsExecutedState,
             arrayFormulaCellData: this.getRuntimeArrayFormulaCellData(),
             clearArrayFormulaCellData: this.getRuntimeClearArrayFormulaCellData(),
-            numfmtItemMap: this.getNumfmtItemMap(),
 
             runtimeFeatureRange: this.getRuntimeFeatureRange(),
             runtimeFeatureCellData: this.getRuntimeFeatureCellData(),
@@ -637,47 +598,6 @@ export class FormulaRuntimeService extends Disposable implements IFormulaRuntime
 
             stage: this.getFormulaExecuteStage(),
         };
-    }
-
-    private _objectValueToCellValue(objectValue: Nullable<BaseValueObject>) {
-        if (objectValue == null) {
-            return {
-                v: null,
-            };
-        }
-        if (objectValue.isError()) {
-            return {
-                v: (objectValue as ErrorValueObject).getErrorType() as string,
-                t: CellValueType.STRING,
-            };
-        }
-        if (objectValue.isValueObject()) {
-            const vo = objectValue as BaseValueObject;
-            const v = vo.getValue();
-            if (vo.isNumber()) {
-                return {
-                    v,
-                    t: CellValueType.NUMBER,
-                };
-            }
-            if (vo.isBoolean()) {
-                return {
-                    v,
-                    t: CellValueType.BOOLEAN,
-                };
-            }
-            // String "00"
-            if (vo.isString() && isRealNum(v)) {
-                return {
-                    v,
-                    t: CellValueType.FORCE_STRING,
-                };
-            }
-            return {
-                v,
-                t: CellValueType.STRING,
-            };
-        }
     }
 
     private _checkIfArrayFormulaRangeHasData(

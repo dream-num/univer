@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IRange, Univer } from '@univerjs/core';
+import type { IRange, Univer, Workbook } from '@univerjs/core';
 import {
     ICommandService,
     IUniverInstanceService,
@@ -22,6 +22,7 @@ import {
     RANGE_TYPE,
     RedoCommand,
     UndoCommand,
+    UniverInstanceType,
 } from '@univerjs/core';
 import {
     AddWorksheetMergeMutation,
@@ -349,7 +350,7 @@ describe('Test add worksheet merge commands', () => {
             ]);
             const commandService = get(ICommandService);
             const univerInstanceService = get(IUniverInstanceService);
-            const workbook = univerInstanceService.getCurrentUniverSheetInstance()!;
+            const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
             const worksheet = workbook.getActiveSheet();
             const mergeData = worksheet.getConfig().mergeData;
             expect(mergeData.length).toBe(0);
@@ -444,7 +445,7 @@ describe('Test add worksheet merge commands', () => {
             ]);
             const commandService = get(ICommandService);
             const univerInstanceService = get(IUniverInstanceService);
-            const workbook = univerInstanceService.getCurrentUniverSheetInstance()!;
+            const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
             const worksheet = workbook.getActiveSheet();
             const mergeData = worksheet.getConfig().mergeData;
             expect(mergeData.length).toBe(0);

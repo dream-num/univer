@@ -24,11 +24,13 @@ import { FindReplaceService, IFindReplaceService } from './services/find-replace
 const PLUGIN_NAME = 'FIND_REPLACE';
 
 export class UniverFindReplacePlugin extends Plugin {
+    static override pluginName = PLUGIN_NAME;
+
     constructor(
         protected readonly _injector: Injector,
         @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
-        super(PLUGIN_NAME);
+        super();
 
         this._localeService.load({
             zhCN,

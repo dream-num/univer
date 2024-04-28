@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICommand } from '@univerjs/core';
-import { CommandType, IUniverInstanceService } from '@univerjs/core';
+import type { ICommand, Workbook } from '@univerjs/core';
+import { CommandType, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { IEditorBridgeService } from '@univerjs/sheets-ui';
 import { IZenZoneService, KeyCode } from '@univerjs/ui';
@@ -39,9 +39,9 @@ export const CancelZenEditCommand: ICommand = {
 
         zenZoneEditorService.close();
 
-        const currentSheetInstance = univerInstanceManager.getCurrentUniverSheetInstance();
+        const currentSheetInstance = univerInstanceManager.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (currentSheetInstance) {
-            univerInstanceManager.focusUniverInstance(currentSheetInstance.getUnitId());
+            univerInstanceManager.focusUnit(currentSheetInstance.getUnitId());
             editorBridgeService.refreshEditCellState();
 
             return true;
@@ -71,9 +71,9 @@ export const ConfirmZenEditCommand: ICommand = {
 
         zenZoneEditorService.close();
 
-        const currentSheetInstance = univerInstanceManager.getCurrentUniverSheetInstance();
+        const currentSheetInstance = univerInstanceManager.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (currentSheetInstance) {
-            univerInstanceManager.focusUniverInstance(currentSheetInstance.getUnitId());
+            univerInstanceManager.focusUnit(currentSheetInstance.getUnitId());
             editorBridgeService.refreshEditCellState();
             return true;
         }

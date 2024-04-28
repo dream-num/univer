@@ -30,5 +30,8 @@
 
     &-active {
         background-color: rgb(var(--grey-100));
+        &[disabled] {
+            color: rgba(var(--text-color), 0.25);
+        }
     }
 }

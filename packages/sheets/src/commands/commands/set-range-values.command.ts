@@ -28,7 +28,6 @@ import {
 import type { IAccessor } from '@wendellhu/redi';
 
 import { SelectionManagerService } from '../../services/selection-manager.service';
-import { INTERCEPTOR_POINT } from '../../services/sheet-interceptor/interceptor-const';
 import { SheetInterceptorService } from '../../services/sheet-interceptor/sheet-interceptor.service';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '../mutations/set-range-values.mutation';
 import type { ISheetCommandSharedParams } from '../utils/interface';
@@ -102,14 +101,14 @@ export const SetRangeValuesCommand: ICommand = {
         };
         const undoSetRangeValuesMutationParams = SetRangeValuesUndoMutationFactory(accessor, setRangeValuesMutationParams);
 
-        if (
-            !sheetInterceptorService.fetchThroughInterceptors(INTERCEPTOR_POINT.PERMISSION)(null, {
-                id: SetRangeValuesCommand.id,
-                params: setRangeValuesMutationParams,
-            })
-        ) {
-            return false;
-        }
+        // if (
+        //     !sheetInterceptorService.fetchThroughInterceptors(INTERCEPTOR_POINT.PERMISSION)(null, {
+        //         id: SetRangeValuesCommand.id,
+        //         params: setRangeValuesMutationParams,
+        //     })
+        // ) {
+        //     return false;
+        // }
 
         const setValueMutationResult = commandService.syncExecuteCommand(
             SetRangeValuesMutation.id,

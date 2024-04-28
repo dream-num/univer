@@ -29,6 +29,7 @@ export interface IFormulaInputProps {
     subUnitId: string;
     showError?: boolean;
     validResult?: IFormulaValidResult;
+    ruleId: string;
 }
 
 export type FormulaInputType = React.ComponentType<IFormulaInputProps>;

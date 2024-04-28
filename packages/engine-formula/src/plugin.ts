@@ -55,6 +55,8 @@ import { IOtherFormulaManagerService, OtherFormulaManagerService } from './servi
 import { FormulaRuntimeService, IFormulaRuntimeService } from './services/runtime.service';
 import { ISuperTableService, SuperTableService } from './services/super-table.service';
 import { ActiveDirtyManagerService, IActiveDirtyManagerService } from './services/active-dirty-manager.service';
+import { DependencyManagerService, IDependencyManagerService } from './services/dependency-manager.service';
+import { SetDependencyController } from './controller/set-dependency.controller';
 
 const PLUGIN_NAME = 'base-formula-engine';
 
@@ -64,11 +66,13 @@ interface IUniverFormulaEngine {
 }
 
 export class UniverFormulaEnginePlugin extends Plugin {
+    static override pluginName = PLUGIN_NAME;
+
     constructor(
         private _config: IUniverFormulaEngine,
         @Inject(Injector) protected override _injector: Injector
     ) {
-        super(PLUGIN_NAME);
+        super();
     }
 
     override onStarting(): void {
@@ -84,7 +88,6 @@ export class UniverFormulaEnginePlugin extends Plugin {
             [IDefinedNamesService, { useClass: DefinedNamesService }],
             [IActiveDirtyManagerService, { useClass: ActiveDirtyManagerService }],
             [ISuperTableService, { useClass: SuperTableService }],
-
 
             // Models
             [FormulaDataModel],
@@ -113,11 +116,13 @@ export class UniverFormulaEnginePlugin extends Plugin {
                 [IOtherFormulaManagerService, { useClass: OtherFormulaManagerService }],
                 [IFormulaRuntimeService, { useClass: FormulaRuntimeService }],
                 [IFormulaCurrentConfigService, { useClass: FormulaCurrentConfigService }],
+                [IDependencyManagerService, { useClass: DependencyManagerService }],
 
                 //Controller
                 [CalculateController],
                 [SetOtherFormulaController],
                 [RegisterFunctionController],
+                [SetDependencyController],
 
                 // Calculation engine
                 [FormulaDependencyGenerator],
@@ -139,9 +144,5 @@ export class UniverFormulaEnginePlugin extends Plugin {
         }
 
         dependencies.forEach((dependency) => this._injector.add(dependency));
-    }
-
-    override onReady(): void {
-        this._injector.get(FormulaDataModel).initFormulaData();
     }
 }

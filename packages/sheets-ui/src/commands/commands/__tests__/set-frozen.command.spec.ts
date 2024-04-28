@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { IFreeze, IWorkbookData, Univer } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, RANGE_TYPE } from '@univerjs/core';
+import type { IFreeze, IWorkbookData, Univer, Workbook } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, RANGE_TYPE, UniverInstanceType } from '@univerjs/core';
 import { NORMAL_SELECTION_PLUGIN_NAME, SelectionManagerService } from '@univerjs/sheets';
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -86,7 +86,7 @@ describe('Test commands used for change selections', () => {
 
     const getFreeze = () => {
         const currentService = get(IUniverInstanceService);
-        const workbook = currentService.getCurrentUniverSheetInstance()!;
+        const workbook = currentService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet();
         return worksheet.getConfig().freeze;
     };

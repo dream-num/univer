@@ -16,6 +16,25 @@
 
 /* eslint-disable max-lines-per-function */
 
+import {
+    BooleanNumber,
+    CellValueType,
+    DEFAULT_EMPTY_DOCUMENT_VALUE,
+    DocumentDataModel,
+    extractPureTextFromCell,
+    getColorStyle,
+    HorizontalAlign,
+    IContextService,
+    isEmptyCell,
+    isNullCell,
+    isWhiteColor,
+    LocaleService,
+    ObjectMatrix,
+    searchArray,
+    Tools,
+    VerticalAlign,
+    WrapStrategy,
+} from '@univerjs/core';
 import type {
     BorderStyleTypes,
     IBorderStyleData,
@@ -37,25 +56,6 @@ import type {
     Styles,
     TextDirection,
     Worksheet,
-} from '@univerjs/core';
-import {
-    BooleanNumber,
-    CellValueType,
-    DEFAULT_EMPTY_DOCUMENT_VALUE,
-    DocumentDataModel,
-    extractPureTextFromCell,
-    getColorStyle,
-    HorizontalAlign,
-    IContextService,
-    isEmptyCell,
-    isNullCell,
-    isWhiteColor,
-    LocaleService,
-    ObjectMatrix,
-    searchArray,
-    Tools,
-    VerticalAlign,
-    WrapStrategy,
 } from '@univerjs/core';
 
 import { Inject } from '@wendellhu/redi';
@@ -246,7 +246,11 @@ export class SpreadsheetSkeleton extends Skeleton {
 
     constructor(
         private _worksheet: Worksheet | undefined,
-        private _config: IWorksheetData,
+        /**
+         * @deprecated avoid use `IWorksheetData` directly, use API provided by `Worksheet`, otherwise
+         * `ViewModel` will be not working.
+         */
+        private _worksheetData: IWorksheetData,
         private _cellData: ObjectMatrix<Nullable<ICellData>>,
         private _styles: Styles,
         @Inject(LocaleService) _localeService: LocaleService,
@@ -304,7 +308,7 @@ export class SpreadsheetSkeleton extends Skeleton {
     }
 
     get mergeData() {
-        return this._config.mergeData;
+        return this._worksheetData.mergeData;
     }
 
     get rowHeaderWidthAndMarginLeft() {
@@ -377,7 +381,7 @@ export class SpreadsheetSkeleton extends Skeleton {
     }
 
     calculateSegment(bounds?: IViewportBound) {
-        if (!this._config) {
+        if (!this._worksheetData) {
             return;
         }
 
@@ -399,7 +403,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             return;
         }
 
-        const { mergeData } = this._config;
+        const { mergeData } = this._worksheetData;
 
         this._dataMergeCache = mergeData && this._getMergeCells(mergeData, this._rowColumnSegment);
 
@@ -422,7 +426,7 @@ export class SpreadsheetSkeleton extends Skeleton {
         }
 
         const results: IRowAutoHeightInfo[] = [];
-        const { mergeData, rowData } = this._config;
+        const { mergeData, rowData } = this._worksheetData;
         const rowObjectArray = rowData;
 
         for (const range of ranges) {
@@ -457,7 +461,7 @@ export class SpreadsheetSkeleton extends Skeleton {
 
     // TODO: auto height
     private _calculateRowAutoHeight(rowNum: number): number {
-        const { columnCount, columnData, mergeData, defaultRowHeight, defaultColumnWidth } = this._config;
+        const { columnCount, columnData, mergeData, defaultRowHeight, defaultColumnWidth } = this._worksheetData;
         let height = defaultRowHeight;
 
         const worksheet = this._worksheet;
@@ -544,7 +548,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             rowHeader,
             columnHeader,
             showGridlines,
-        } = this._config;
+        } = this._worksheetData;
         const { rowTotalHeight, rowHeightAccumulation } = this._generateRowMatrixCache(
             rowCount,
             rowData,
@@ -585,7 +589,7 @@ export class SpreadsheetSkeleton extends Skeleton {
      * @returns
      */
     getWorksheetConfig() {
-        return this._config;
+        return this._worksheetData;
     }
 
     getRowColumnSegmentByViewBound(bound?: IBoundRectNoAngle) {
@@ -593,7 +597,7 @@ export class SpreadsheetSkeleton extends Skeleton {
     }
 
     getMergeBounding(startRow: number, startColumn: number, endRow: number, endColumn: number) {
-        const mergeData = this._config.mergeData;
+        const mergeData = this._worksheetData.mergeData;
         if (!mergeData) {
             return {
                 startRow,
@@ -947,7 +951,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             column,
             rowHeightAccumulation,
             columnWidthAccumulation,
-            this._config.mergeData
+            this._worksheetData.mergeData
         );
         const { isMerged, isMergedMainCell } = primary;
         let { startY, endY, startX, endX, mergeInfo } = primary;
@@ -980,7 +984,7 @@ export class SpreadsheetSkeleton extends Skeleton {
             column,
             rowHeightAccumulation,
             columnWidthAccumulation,
-            this._config.mergeData
+            this._worksheetData.mergeData
         );
         const { isMerged, isMergedMainCell } = primary;
         const { startY, endY, startX, endX, mergeInfo } = primary;
@@ -1117,7 +1121,15 @@ export class SpreadsheetSkeleton extends Skeleton {
             const textStyle = this._getFontFormat(style);
             fontString = getFontStyleString(textStyle, this._localService).fontCache;
 
-            documentModel = this._getDocumentDataByStyle(extractPureTextFromCell(cell), textStyle, {
+            let cellText = extractPureTextFromCell(cell);
+
+            // Add a single quotation mark to the force string type. Don't add single quotation mark in extractPureTextFromCell, because copy and paste will be affected.
+            // edit mode when displayRawFormula is true
+            if (cell.t === CellValueType.FORCE_STRING && displayRawFormula) {
+                cellText = `'${cellText}`;
+            }
+
+            documentModel = this._getDocumentDataByStyle(cellText, textStyle, {
                 ...cellOtherConfig,
                 textRotation,
                 cellValueType: cell.t!,
@@ -1180,6 +1192,7 @@ export class SpreadsheetSkeleton extends Skeleton {
      * the text content of this cell can be drawn to both sides, not limited by the cell's width.
      * Overflow on the left or right is aligned according to the text's horizontal alignment.
      */
+    // eslint-disable-next-line complexity
     private _calculateOverflowCell(row: number, column: number, docsConfig: IFontCacheItem) {
         // wrap and angle handler
         const { documentSkeleton, vertexAngle = 0, centerAngle = 0, horizontalAlign, wrapStrategy } = docsConfig;
@@ -1385,12 +1398,14 @@ export class SpreadsheetSkeleton extends Skeleton {
         for (let r = 0; r < rowCount; r++) {
             let rowHeight = defaultRowHeight;
 
-            if (data[r] != null) {
+            if (this._worksheet?.getRowFiltered(r)) {
+                rowHeight = 0;
+            } else if (data[r] != null) {
                 const rowDataItem = data[r];
-
                 if (!rowDataItem) {
                     continue;
                 }
+
                 const { h = defaultRowHeight, ah, ia } = rowDataItem;
                 if ((ia == null || ia === BooleanNumber.TRUE) && typeof ah === 'number') {
                     rowHeight = ah;

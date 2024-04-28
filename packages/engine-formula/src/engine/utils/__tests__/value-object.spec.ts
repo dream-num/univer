@@ -16,8 +16,8 @@
 
 import { describe, expect, it } from 'vitest';
 
-import { cellToRange } from '@univerjs/core';
-import { convertTonNumber, isSingleValueObject } from '../value-object';
+import { cellToRange, CellValueType } from '@univerjs/core';
+import { convertTonNumber, isSingleValueObject, objectValueToCellValue } from '../value-object';
 import { BooleanValueObject, NullValueObject, NumberValueObject, StringValueObject } from '../../value-object/primitive-object';
 import { ErrorValueObject } from '../../value-object/base-value-object';
 import { ErrorType } from '../../../basics/error-type';
@@ -54,5 +54,15 @@ describe('Test object cover', () => {
         expect(isSingleValueObject(new ColumnReferenceObject('A:A'))).toBe(false);
         expect(isSingleValueObject(new RangeReferenceObject(cellToRange(0, 1)))).toBe(true);
         expect(isSingleValueObject(new RangeReferenceObject({ startRow: 0, endRow: 1, startColumn: 0, endColumn: 1 }))).toBe(false);
+    });
+
+    it('Function objectValueToCellValue', () => {
+        expect(objectValueToCellValue(NumberValueObject.create(1))).toStrictEqual({ v: 1, t: CellValueType.NUMBER });
+        expect(objectValueToCellValue(StringValueObject.create('Univer'))).toStrictEqual({ v: 'Univer', t: CellValueType.STRING });
+        expect(objectValueToCellValue(BooleanValueObject.create(true))).toStrictEqual({ v: 1, t: CellValueType.BOOLEAN });
+        expect(objectValueToCellValue(BooleanValueObject.create(false))).toStrictEqual({ v: 0, t: CellValueType.BOOLEAN });
+        expect(objectValueToCellValue(NullValueObject.create())).toStrictEqual({ v: null });
+        expect(objectValueToCellValue(null)).toStrictEqual({ v: null });
+        expect(objectValueToCellValue(ErrorValueObject.create(ErrorType.VALUE))).toStrictEqual({ v: ErrorType.VALUE, t: CellValueType.STRING });
     });
 });

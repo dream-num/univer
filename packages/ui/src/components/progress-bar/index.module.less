@@ -1,0 +1,15 @@
+@height: 4px;
+.progress-bar {
+    margin: 12px 8px 0 8px;
+
+    width: 160px;
+    height: @height;
+    background-color: rgb(var(--border-color));
+    border-radius: var(--border-radius-lg);
+
+    &-inner {
+        height: @height;
+        border-radius: var(--border-radius-lg);
+        transition: width 0.5s;
+    }
+}

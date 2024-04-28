@@ -31,7 +31,7 @@ import type {
     ITextStyle,
     Nullable,
 } from '@univerjs/core';
-import { CellValueType, CommandType, IUniverInstanceService, normalizeTextRuns, ObjectMatrix, Tools } from '@univerjs/core';
+import { CellValueType, CommandType, isBooleanString, isSafeNumeric, IUniverInstanceService, normalizeTextRuns, ObjectMatrix, Tools } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
 /** Params of `SetRangeValuesMutation` */
@@ -138,6 +138,10 @@ function setNull(value: Nullable<ICellData>) {
         value.s = null;
     }
 
+    if (value.custom === undefined) {
+        value.custom = null;
+    }
+
     return value;
 }
 
@@ -237,6 +241,10 @@ export const SetRangeValuesMutation: IMutation<ISetRangeValuesMutationParams, bo
                     if (!newVal.p && oldVal.p) {
                         mergeRichTextStyle(oldVal.p, newVal.s ? (newVal.s as Nullable<IStyleData>) : null);
                     }
+                }
+
+                if (newVal.custom !== undefined) {
+                    oldVal.custom = newVal.custom;
                 }
 
                 cellMatrix.setValue(row, col, Tools.removeNull(oldVal));
@@ -349,7 +357,7 @@ export function transformNormalKey(
     if (!newStyle || !Object.keys(newStyle).length) {
         return oldStyle;
     }
-    const backupStyle: { [key: string]: any } = oldStyle || {};
+    const backupStyle: Record<string, any> = oldStyle || {};
 
     for (const k in newStyle) {
         if (k === 'bd') {
@@ -402,7 +410,7 @@ export function mergeStyle(
     // don't operate
     if (newStyle === undefined) return oldStyle;
 
-    const backupStyle: { [key: string]: any } = Tools.deepClone(oldStyle) || {};
+    const backupStyle: Record<string, any> = Tools.deepClone(oldStyle) || {};
     if (!backupStyle) return;
     for (const k in newStyle) {
         if (isRichText && ['bd', 'tr', 'td', 'ht', 'vt', 'tb', 'pd'].includes(k)) {
@@ -526,21 +534,4 @@ export function mergeRichTextStyle(p: IDocumentData, newStyle: Nullable<IStyleDa
     }
 
     p.body.textRuns = normalizeTextRuns(newTextRuns);
-}
-
-function isNumeric(str: string) {
-    return /^-?\d+(\.\d+)?$/.test(str);
-}
-
-function isSafeNumeric(str: string) {
-    const numeric = isNumeric(str);
-    if (!numeric) {
-        return false;
-    }
-
-    return Number(str) <= Number.MAX_SAFE_INTEGER;
-}
-
-function isBooleanString(str: string) {
-    return str.toUpperCase() === 'TRUE' || str.toUpperCase() === 'FALSE';
 }

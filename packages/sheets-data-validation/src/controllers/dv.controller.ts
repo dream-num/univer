@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { DisposableCollection, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, toDisposable } from '@univerjs/core';
+import type { Workbook } from '@univerjs/core';
+import { DisposableCollection, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, toDisposable, UniverInstanceType } from '@univerjs/core';
 import { DataValidationModel, DataValidatorRegistryService } from '@univerjs/data-validation';
 import { Inject, Injector } from '@wendellhu/redi';
 import { DataValidationSingle } from '@univerjs/icons';
@@ -77,7 +78,7 @@ export class DataValidationController extends RxDisposable {
 
     private _initInstanceChange() {
         const disposableCollection = new DisposableCollection();
-        this._univerInstanceService.currentSheet$.subscribe((workbook) => {
+        this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => {
             disposableCollection.dispose();
             if (!workbook) {
                 return;
@@ -102,7 +103,7 @@ export class DataValidationController extends RxDisposable {
         this._sheetInterceptorService.interceptCommand({
             getMutations: (commandInfo) => {
                 if (commandInfo.id === ClearSelectionAllCommand.id) {
-                    const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
+                    const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
                     const unitId = workbook.getUnitId();
                     const worksheet = workbook.getActiveSheet();
                     const subUnitId = worksheet.getSheetId();

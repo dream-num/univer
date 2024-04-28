@@ -24,7 +24,8 @@ import { enUS as UniverSheetsFormulaEnUS } from '@univerjs/sheets-formula';
 import { enUS as UniverSheetsDataValidationEnUS } from '@univerjs/sheets-data-validation';
 import { enUS as UniverSheetsConditionalFormattingUIEnUS } from '@univerjs/sheets-conditional-formatting-ui';
 import { enUS as UniverSheetsZenEditorEnUS } from '@univerjs/sheets-zen-editor';
-import { enUS as UniverUiEnUS } from '@univerjs/ui';
+import { enUS as UniverUIEnUS } from '@univerjs/ui';
+import { enUS as UniverSheetsFilterUIEnUS } from '@univerjs/sheets-filter-ui';
 
 export const locales = {
     [LocaleType.EN_US]: Tools.deepMerge(
@@ -36,7 +37,8 @@ export const locales = {
         UniverSheetsDataValidationEnUS,
         UniverSheetsConditionalFormattingUIEnUS,
         UniverSheetsZenEditorEnUS,
-        UniverUiEnUS,
-        UniverDesignEnUS
+        UniverUIEnUS,
+        UniverDesignEnUS,
+        UniverSheetsFilterUIEnUS
     ),
 };

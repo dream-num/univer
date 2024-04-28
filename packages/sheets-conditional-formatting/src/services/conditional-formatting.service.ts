@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-import type { IMutationInfo, IRange } from '@univerjs/core';
-import { createInterceptorKey, Disposable, ICommandService, InterceptorManager, IResourceManagerService, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, Rectangle, Tools } from '@univerjs/core';
+import type { IMutationInfo, IRange, Workbook } from '@univerjs/core';
+import { createInterceptorKey, Disposable, ICommandService, InterceptorManager, IResourceManagerService, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, Rectangle, Tools, UniverInstanceType } from '@univerjs/core';
 import type { IInsertColMutationParams, IMoveColumnsMutationParams, IMoveRangeMutationParams, IMoveRowsMutationParams, IRemoveRowsMutationParams, IRemoveSheetCommandParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { InsertColMutation, InsertRowMutation, MoveColsMutation, MoveRangeMutation, MoveRowsMutation, RemoveColMutation, RemoveRowMutation, RemoveSheetCommand, SetRangeValuesMutation, SheetInterceptorService } from '@univerjs/sheets';
 import { Inject, Injector } from '@wendellhu/redi';
 import { Subject } from 'rxjs';
 import { filter } from 'rxjs/operators';
-import { UniverType } from '@univerjs/protocol';
 import type { IDeleteConditionalRuleMutationParams } from '../commands/mutations/delete-conditional-rule.mutation';
 import { DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory } from '../commands/mutations/delete-conditional-rule.mutation';
 import { ConditionalFormattingRuleModel } from '../models/conditional-formatting-rule-model';
@@ -40,7 +39,7 @@ type ComputeStatus = 'computing' | 'end' | 'error';
 
 interface IComputeCache { status: ComputeStatus };
 
-const beforeUpdateRuleResult = createInterceptorKey<{ subUnitId: string; unitId: string; cfId: string }>('conditional-formatting-before-update-rule-result');
+const beforeUpdateRuleResult = createInterceptorKey<{ subUnitId: string; unitId: string; cfId: string }, undefined>('conditional-formatting-before-update-rule-result');
 @OnLifecycle(LifecycleStages.Starting, ConditionalFormattingService)
 export class ConditionalFormattingService extends Disposable {
     // <unitId,<subUnitId,<cfId,IComputeCache>>>
@@ -142,7 +141,7 @@ export class ConditionalFormattingService extends Disposable {
         this.disposeWithMe(
             this._resourceManagerService.registerPluginResource<IRuleModelJson[keyof IRuleModelJson]>({
                 pluginName: SHEET_CONDITIONAL_FORMATTING_PLUGIN,
-                businesses: [UniverType.UNIVER_SHEET],
+                businesses: [UniverInstanceType.UNIVER_SHEET],
                 toJson: (unitID) => toJson(unitID),
                 parseJson: (json) => parseJson(json),
                 onUnLoad: (unitID) => {
@@ -396,5 +395,5 @@ export class ConditionalFormattingService extends Disposable {
     }
 }
 
-const getUnitId = (u: IUniverInstanceService) => u.getCurrentUniverSheetInstance()!.getUnitId();
-const getSubUnitId = (u: IUniverInstanceService) => u.getCurrentUniverSheetInstance()!.getActiveSheet().getSheetId();
+const getUnitId = (u: IUniverInstanceService) => u.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId();
+const getSubUnitId = (u: IUniverInstanceService) => u.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet().getSheetId();

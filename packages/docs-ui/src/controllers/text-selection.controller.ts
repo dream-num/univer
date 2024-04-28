@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, Nullable } from '@univerjs/core';
-import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle, toDisposable } from '@univerjs/core';
+import type { ICommandInfo, Nullable, Workbook } from '@univerjs/core';
+import { Disposable, ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle, toDisposable, UniverInstanceType } from '@univerjs/core';
 import type { Documents, IMouseEvent, IPointerEvent, RenderComponentType } from '@univerjs/engine-render';
 import { CURSOR_TYPE, IRenderManagerService, ITextSelectionRenderManager } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
@@ -117,7 +117,7 @@ export class TextSelectionController extends Disposable {
 
                     const currentDocInstance = this._univerInstanceService.getCurrentUniverDocInstance();
                     if (currentDocInstance?.getUnitId() !== unitId) {
-                        this._univerInstanceService.setCurrentUniverDocInstance(unitId);
+                        this._univerInstanceService.setCurrentUnitForType(unitId);
                     }
 
                     this._textSelectionRenderManager.eventTrigger(evt);
@@ -182,9 +182,9 @@ export class TextSelectionController extends Disposable {
         /**
          * The object for selecting data in the editor is set to the current sheet.
          */
-        const sheetInstances = this._univerInstanceService.getAllUniverSheetsInstance();
+        const sheetInstances = this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (sheetInstances.length > 0) {
-            const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
+            const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
             this._editorService.setOperationSheetUnitId(workbook.getUnitId());
             // this._editorService.setOperationSheetSubUnitId(workbook.getActiveSheet().getSheetId());
         }
@@ -241,6 +241,10 @@ export class TextSelectionController extends Disposable {
     }
 
     private _getDocObjectById(unitId: string) {
+        if (this._univerInstanceService.getUnitType(unitId) !== UniverInstanceType.UNIVER_DOC) {
+            return null;
+        }
+
         return getDocObjectById(unitId, this._renderManagerService);
     }
 }

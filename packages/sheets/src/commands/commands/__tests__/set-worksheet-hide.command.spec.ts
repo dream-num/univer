@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { Univer } from '@univerjs/core';
-import { BooleanNumber, ICommandService, IUniverInstanceService, RedoCommand, UndoCommand } from '@univerjs/core';
+import type { Univer, Workbook } from '@univerjs/core';
+import { BooleanNumber, ICommandService, IUniverInstanceService, RedoCommand, UndoCommand, UniverInstanceType } from '@univerjs/core';
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
@@ -52,7 +52,7 @@ describe('Test set worksheet hide commands', () => {
 
     describe('Set worksheet hide', () => {
         it('will set current active worksheet hidden', async () => {
-            const workbook = get(IUniverInstanceService).getCurrentUniverSheetInstance()!;
+            const workbook = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
             if (!workbook) throw new Error('This is an error');
 
             const targetActiveSheet = workbook.getActiveSheet();

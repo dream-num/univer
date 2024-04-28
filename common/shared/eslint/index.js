@@ -1,5 +1,6 @@
 exports.baseRules = {
     curly: ['error', 'multi-line'],
+    'eol-last': ['error', 'always'],
     'import/no-cycle': 'error',
     'import/no-self-import': 'error',
     'ts/no-explicit-any': 'warn',
@@ -36,6 +37,8 @@ exports.baseRules = {
             memberSyntaxSortOrder: ['none', 'all', 'multiple', 'single'],
         },
     ],
+    'react/no-unstable-context-value': 'warn',
+    'react/no-unstable-default-props': 'warn',
 
     // TODO: debatable rules
     'test/prefer-lowercase-title': 'off',

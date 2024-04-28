@@ -58,7 +58,6 @@ import { functionText } from '../functions/text/function-map';
 import { functionUniver } from '../functions/univer/function-map';
 import { functionWeb } from '../functions/web/function-map';
 import { IFunctionService } from '../services/function.service';
-import { SetNumfmtFormulaDataMutation } from '../commands/mutations/set-numfmt-formula-data.mutation';
 
 @OnLifecycle(LifecycleStages.Ready, FormulaController)
 export class FormulaController extends Disposable {
@@ -86,7 +85,6 @@ export class FormulaController extends Disposable {
             SetFormulaCalculationStopMutation,
             SetFormulaCalculationNotificationMutation,
             SetFormulaCalculationResultMutation,
-            SetNumfmtFormulaDataMutation,
 
             SetDefinedNameMutation,
             RemoveDefinedNameMutation,

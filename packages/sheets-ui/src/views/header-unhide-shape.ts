@@ -19,7 +19,7 @@ import { Rect, RegularPolygon, Shape } from '@univerjs/engine-render';
 
 import { HEADER_MENU_BACKGROUND_COLOR, HEADER_MENU_SHAPE_TRIANGLE_FILL } from './header-menu-shape';
 
-export const enum HeaderUnhideShapeType {
+export enum HeaderUnhideShapeType {
     ROW,
     COLUMN,
 }

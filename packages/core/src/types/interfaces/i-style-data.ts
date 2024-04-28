@@ -175,6 +175,11 @@ export interface IStyleBase {
      * (Subscript 下标 /Superscript上标 Text)
      */
     va?: Nullable<BaselineOffset>;
+
+    /**
+     * Numfmt pattern
+     */
+    n?: Nullable<{ pattern: string }>;
 }
 
 /**
@@ -205,4 +210,5 @@ export interface IStyleData extends IStyleBase {
      * padding
      */
     pd?: Nullable<IPaddingData>;
+
 }

@@ -16,10 +16,11 @@
 
 import type { CellValue, ISheetDataValidationRule, Nullable } from '@univerjs/core';
 import { DataValidationManager, DataValidatorRegistryService, UpdateRuleType } from '@univerjs/data-validation';
-import { DataValidationStatus, ObjectMatrix, Range } from '@univerjs/core';
+import { DataValidationStatus, DataValidationType, ObjectMatrix, Range } from '@univerjs/core';
 import type { IUpdateRulePayload } from '@univerjs/data-validation';
 import type { ISheetLocation } from '@univerjs/sheets';
 import type { Injector } from '@wendellhu/redi';
+import { isReferenceString } from '@univerjs/engine-formula';
 import type { IDataValidationResCache } from '../services/dv-cache.service';
 import { DataValidationCacheService } from '../services/dv-cache.service';
 import { DataValidationFormulaService } from '../services/dv-formula.service';
@@ -69,11 +70,30 @@ export class SheetDataValidationManager extends DataValidationManager<ISheetData
         this._ruleMatrix = new RuleMatrix(matrix);
     }
 
-    override addRule(rule: ISheetDataValidationRule, index?: number): void {
+
+    private _addRuleSideEffect(rule: ISheetDataValidationRule) {
+        const { unitId, subUnitId } = this;
+
+        if (rule.type === DataValidationType.LIST || rule.type === DataValidationType.LIST_MULTIPLE) {
+            if (isReferenceString(rule.formula1 ?? '')) {
+                // polyfill old-version ref-string, transform to formula
+                rule.formula1 = `=${rule.formula1}`;
+            }
+        }
+
         this._ruleMatrix.addRule(rule);
-        this._dataValidationCacheService.addRule(this.unitId, this.subUnitId, rule);
-        this._dataValidationFormulaService.addRule(this.unitId, this.subUnitId, rule.uid, rule.formula1, rule.formula2);
-        this._dataValidationCustomFormulaService.addRule(this.unitId, this.subUnitId, rule);
+        this._dataValidationCacheService.addRule(unitId, subUnitId, rule);
+        this._dataValidationFormulaService.addRule(unitId, subUnitId, rule.uid, rule.formula1, rule.formula2);
+        this._dataValidationCustomFormulaService.addRule(unitId, subUnitId, rule);
+    }
+
+    override addRule(rule: ISheetDataValidationRule | ISheetDataValidationRule[], index?: number): void {
+        const rules = Array.isArray(rule) ? rule : [rule];
+
+        rules.forEach((item) => {
+            this._addRuleSideEffect(item);
+        });
+
         super.addRule(rule, index);
     }
 

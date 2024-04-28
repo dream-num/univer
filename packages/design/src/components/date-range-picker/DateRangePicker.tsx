@@ -40,7 +40,7 @@ export function DateRangePicker(props: IDateRangePickerProps) {
 
     const { locale } = useContext(ConfigContext);
 
-    function handleChange(date: NoUndefinedRangeValueType<Dayjs>, dateString: [string, string]) {
+    function handleChange(date: NoUndefinedRangeValueType<Dayjs> | null, dateString: [string, string]) {
         if (Array.isArray(date) && Array.isArray(dateString)) {
             onChange(date, dateString);
         }

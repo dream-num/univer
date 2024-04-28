@@ -28,7 +28,6 @@ import { getMenuHiddenObservable, MenuGroup, MenuItemType, MenuPosition } from '
 import type { IAccessor } from '@wendellhu/redi';
 import { merge, Observable } from 'rxjs';
 
-import { FormulaDataModel } from '@univerjs/engine-formula';
 import { deriveStateFromActiveSheet$ } from '@univerjs/sheets-ui';
 import { MENU_OPTIONS } from '../base/const/MENU-OPTIONS';
 import { AddDecimalCommand } from '../commands/commands/add-decimal.command';
@@ -53,7 +52,7 @@ export const CurrencyMenuItem = (componentManager: ComponentManager) => {
             type: MenuItemType.BUTTON,
             group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
             positions: [MenuPosition.TOOLBAR_START],
-            hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
+            hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
             disabled$: getCurrentSheetDisabled$(accessor),
         };
     };
@@ -70,7 +69,7 @@ export const AddDecimalMenuItem = (componentManager: ComponentManager) => {
         type: MenuItemType.BUTTON,
         positions: [MenuPosition.TOOLBAR_START],
         group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: getCurrentSheetDisabled$(accessor),
     });
 };
@@ -85,7 +84,7 @@ export const SubtractDecimalMenuItem = (componentManager: ComponentManager) => {
         type: MenuItemType.BUTTON,
         group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
         positions: [MenuPosition.TOOLBAR_START],
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: getCurrentSheetDisabled$(accessor),
     });
 };
@@ -101,7 +100,7 @@ export const PercentMenuItem = (componentManager: ComponentManager) => {
         type: MenuItemType.BUTTON,
         group: MenuGroup.TOOLBAR_FORMULAS_INSERT,
         positions: [MenuPosition.TOOLBAR_START],
-        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.SHEET),
+        hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
         disabled$: getCurrentSheetDisabled$(accessor),
     });
 };
@@ -115,7 +114,6 @@ export const FactoryOtherMenuItem = (componentManager: ComponentManager) => {
 
     return (_accessor: IAccessor) => {
         const numfmtService = _accessor.get(INumfmtService);
-        const formulaDataModel = _accessor.get(FormulaDataModel);
         const univerInstanceService = _accessor.get(IUniverInstanceService);
         const commandService = _accessor.get(ICommandService);
         const localeService = _accessor.get(LocaleService);
@@ -141,9 +139,8 @@ export const FactoryOtherMenuItem = (componentManager: ComponentManager) => {
                     const col = range.startColumn;
 
                     const numfmtValue = numfmtService.getValue(workbook.getUnitId(), worksheet.getSheetId(), row, col);
-                    const numfmtValueByFormula = formulaDataModel.getNumfmtValue(workbook.getUnitId(), worksheet.getSheetId(), row, col);
 
-                    const pattern = numfmtValue?.pattern || numfmtValueByFormula;
+                    const pattern = numfmtValue?.pattern;
                     let value: string = localeService.t('sheet.numfmt.general');
 
                     if (pattern) {
@@ -178,7 +175,7 @@ export const FactoryOtherMenuItem = (componentManager: ComponentManager) => {
                 },
             ],
             value$,
-            hidden$: getMenuHiddenObservable(_accessor, UniverInstanceType.SHEET),
+            hidden$: getMenuHiddenObservable(_accessor, UniverInstanceType.UNIVER_SHEET),
             disabled$: getCurrentSheetDisabled$(_accessor),
         } as IMenuSelectorItem;
     };

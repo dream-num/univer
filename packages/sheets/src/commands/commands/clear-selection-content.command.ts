@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, ICommand, IObjectMatrixPrimitiveType, IRange } from '@univerjs/core';
+import type { ICellData, ICommand, IObjectMatrixPrimitiveType, IRange, Workbook } from '@univerjs/core';
 import {
     CommandType,
     ICommandService,
@@ -22,6 +22,7 @@ import {
     IUniverInstanceService,
     ObjectMatrix,
     sequenceExecute,
+    UniverInstanceType,
 } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
@@ -45,7 +46,7 @@ export const ClearSelectionContentCommand: ICommand = {
         const undoRedoService = accessor.get(IUndoRedoService);
         const sheetInterceptorService = accessor.get(SheetInterceptorService);
 
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
+        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (!workbook) return false;
 
         const unitId = workbook.getUnitId();

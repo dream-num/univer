@@ -251,6 +251,12 @@ const locale = {
             dismantleMergeCellWaring: '此操作会导致一些合并单元格被拆散，是否继续?',
         },
     },
+    filter: {
+        confirm: {
+            error: '出现了一个问题',
+            notAllowedToInsertRange: '要移动这些单元格，请清除该区域的筛选器',
+        },
+    },
     textWrap: {
         overflow: '溢出',
         wrap: '自动换行',
@@ -393,6 +399,7 @@ const locale = {
     },
     info: {
         tooltip: '提示',
+        error: '错误',
         notChangeMerge: '不能对合并单元格做部分更改',
         detailUpdate: '新打开',
         detailSave: '已恢复本地缓存',
@@ -422,10 +429,12 @@ const locale = {
         // eslint-disable-next-line no-template-curly-in-string
         pageInfoFull: '共${total}条，${totalPage}页，已显示全部数据',
         problem: '出现了一个问题',
+        forceStringInfo: '以文本形式存储的数字',
     },
     clipboard: {
         paste: {
             exceedMaxCells: '粘贴区域超出最大单元格数',
+            overlappingMergedCells: '粘贴区域与合并单元格重叠',
         },
         shortCutNotify: {
             title: '请使用快捷键粘贴',

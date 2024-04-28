@@ -23,9 +23,9 @@ import {
     LocaleType,
     LogLevel,
     Plugin,
-    PluginType,
     Tools,
     Univer,
+    UniverInstanceType,
 } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
@@ -34,6 +34,7 @@ import enUS from '../../../locale/en-US';
 import { BorderStyleManagerService } from '../../../services/border-style-manager.service';
 import { SelectionManagerService } from '../../../services/selection-manager.service';
 import { SheetInterceptorService } from '../../../services/sheet-interceptor/sheet-interceptor.service';
+import { SheetPermissionService } from '../../../services/permission';
 
 const TEST_WORKBOOK_DATA_DEMO: IWorkbookData = {
     id: 'test',
@@ -76,18 +77,19 @@ export interface ITestBed {
     sheet: Workbook;
 }
 
-export function createCommandTestBed(workbookConfig?: IWorkbookData, dependencies?: Dependency[]): ITestBed {
+export function createCommandTestBed(workbookData?: IWorkbookData, dependencies?: Dependency[]): ITestBed {
     const univer = new Univer();
     const injector = univer.__getInjector();
 
     class TestPlugin extends Plugin {
-        static override type = PluginType.Sheet;
+        static override pluginName = 'test-plugin';
+        static override type = UniverInstanceType.UNIVER_SHEET;
 
         constructor(
             _config: undefined,
             @Inject(Injector) override readonly _injector: Injector
         ) {
-            super('test-plugin');
+            super();
 
             this._injector = _injector;
         }
@@ -96,16 +98,17 @@ export function createCommandTestBed(workbookConfig?: IWorkbookData, dependencie
             injector.add([SelectionManagerService]);
             injector.add([BorderStyleManagerService]);
             injector.add([SheetInterceptorService]);
+            injector.add([SheetPermissionService]);
 
             dependencies?.forEach((d) => injector.add(d));
         }
     }
 
     univer.registerPlugin(TestPlugin);
-    const sheet = univer.createUniverSheet(Tools.deepClone(workbookConfig || TEST_WORKBOOK_DATA_DEMO));
+    const sheet = univer.createUniverSheet(Tools.deepClone(workbookData || TEST_WORKBOOK_DATA_DEMO));
 
     const univerInstanceService = injector.get(IUniverInstanceService);
-    univerInstanceService.focusUniverInstance('test');
+    univerInstanceService.focusUnit('test');
     const logService = injector.get(ILogService);
 
     logService.setLogLevel(LogLevel.SILENT); // change this to `LogLevel.VERBOSE` to debug tests via logs

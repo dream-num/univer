@@ -13958,9 +13958,25 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                         v: 'A Schedule of Items',
                     },
                 },
+                1: {
+                    0: {
+                        s: {
+                            n: {
+                                pattern: 'yyyy-mm-dd;@',
+                            },
+                        },
+                        v: 1,
+                    },
+                },
+                2: {
+                    0: {
+                        f: '=A2',
+                    },
+                },
                 5: {
                     5: {
                         s: 'uJSelZ11',
+                        v: 'sadf',
                     },
                     6: {
                         s: 'uJSelZ11',
@@ -13978,6 +13994,7 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                 6: {
                     5: {
                         s: 'uJSelZ22',
+                        v: '123123',
                     },
                     6: {
                         s: 'uJSelZ22',
@@ -13990,8 +14007,100 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                     },
                 },
                 10: {},
-                11: {},
+                11: {
+                    4: {
+                        v: 123,
+                        t: 2,
+                    },
+                },
+                12: {
+                    4: {
+                        v: '123tu',
+                        t: 1,
+                    },
+                    5: {
+                        v: 'sdfj',
+                        t: 1,
+                    },
+                },
+                13: {
+                    4: {
+                        v: 'ghj',
+                        t: 1,
+                    },
+                    5: {
+                        v: 'ghk',
+                        t: 1,
+                    },
+                },
+                17: {
+                    4: {
+                        v: 'fh',
+                        t: 1,
+                    },
+                    5: {
+                        v: 'jk',
+                        t: 1,
+                    },
+                },
+                18: {
+                    4: {
+                        v: 'dfg',
+                        t: 1,
+                    },
+                    5: {
+                        v: 'l',
+                        t: 1,
+                    },
+                },
+                19: {
+                    4: {
+                        v: 'sdfg',
+                        t: 1,
+                    },
+                    5: {
+                        v: 'h',
+                        t: 1,
+                    },
+                },
+                20: {
+                    4: {
+                        v: 'fdgh',
+                        t: 1,
+                    },
+                    5: {
+                        v: 345,
+                        t: 2,
+                    },
+                },
+                21: {
+                    4: {
+                        v: 'sgh',
+                        t: 1,
+                    },
+                    5: {
+                        v: 'fgs',
+                        t: 1,
+                    },
+                },
+                22: {
+                    4: {
+                        v: 'sdfh',
+                        t: 1,
+                    },
+                    5: {
+                        v: 'gth',
+                        t: 1,
+                    },
+                },
+                23: {
+                    5: {
+                        v: 'iop',
+                        t: 1,
+                    },
+                },
             },
+
             freeze: {
                 xSplit: 0,
                 ySplit: 0,
@@ -14004,6 +14113,21 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
             defaultRowHeight: 19,
             mergeData: [],
             rowData: {
+                11: {
+                    hd: 0,
+                    h: 19,
+                    ah: 19,
+                },
+                12: {
+                    hd: 0,
+                    h: 19,
+                    ah: 19,
+                },
+                13: {
+                    hd: 0,
+                    h: 19,
+                    ah: 19,
+                },
                 14: {
                     hd: 1,
                 },
@@ -14012,6 +14136,41 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                 },
                 16: {
                     hd: 1,
+                },
+                17: {
+                    hd: 0,
+                    h: 19,
+                    ah: 19,
+                },
+                18: {
+                    hd: 0,
+                    h: 19,
+                    ah: 19,
+                },
+                19: {
+                    hd: 0,
+                    h: 19,
+                    ah: 19,
+                },
+                20: {
+                    hd: 0,
+                    h: 19,
+                    ah: 19,
+                },
+                21: {
+                    hd: 0,
+                    h: 19,
+                    ah: 19,
+                },
+                22: {
+                    hd: 0,
+                    h: 19,
+                    ah: 19,
+                },
+                23: {
+                    hd: 0,
+                    h: 19,
+                    ah: 19,
                 },
             },
             columnData: {},
@@ -14024,7 +14183,9 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
                 height: 20,
                 hidden: 0,
             },
-            selections: ['A1'],
+            selections: [
+                'A1',
+            ],
             rightToLeft: 0,
         },
         'sheet-0010': {
@@ -23383,6 +23544,19 @@ export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
             name: DATA_VALIDATION_PLUGIN_NAME,
             data: JSON.stringify({
                 'sheet-0011': dataValidation,
+            }),
+        },
+        {
+            name: 'SHEET_AUTO_FILTER',
+            data: JSON.stringify({
+                'sheet-0011': {
+                    ref: {
+                        startRow: 11,
+                        endRow: 23,
+                        startColumn: 4,
+                        endColumn: 6,
+                    },
+                },
             }),
         },
     ],

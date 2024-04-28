@@ -15,7 +15,7 @@
  */
 
 import type { Nullable, Workbook, Worksheet } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, toDisposable } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, LifecycleStages, OnLifecycle, RxDisposable, toDisposable, UniverInstanceType } from '@univerjs/core';
 import type { IRender, IWheelEvent, Scene } from '@univerjs/engine-render';
 import {
     IRenderManagerService,
@@ -71,9 +71,9 @@ export class SheetCanvasView extends RxDisposable {
     }
 
     private _init() {
-        this._univerInstanceService.currentSheet$.pipe(takeUntil(this.dispose$)).subscribe((workbook) => this._create(workbook));
-        this._univerInstanceService.sheetDisposed$.pipe(takeUntil(this.dispose$)).subscribe((workbook) => this._dispose(workbook));
-        this._univerInstanceService.getAllUniverSheetsInstance().forEach((workbook) => this._create(workbook));
+        this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET).pipe(takeUntil(this.dispose$)).subscribe((workbook) => this._create(workbook));
+        this._univerInstanceService.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.UNIVER_SHEET).pipe(takeUntil(this.dispose$)).subscribe((workbook) => this._dispose(workbook));
+        this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET).forEach((workbook) => this._create(workbook));
     }
 
     private _dispose(workbook: Workbook) {
@@ -139,7 +139,7 @@ export class SheetCanvasView extends RxDisposable {
         this._renderManagerService.setCurrent(unitId);
     }
 
-    private _addComponent(currentRender: IRender, workbook: Workbook) {
+    private _addComponent(renderUnit: IRender, workbook: Workbook) {
         const scene = this._scene;
 
         const worksheet = workbook.getActiveSheet();
@@ -162,11 +162,11 @@ export class SheetCanvasView extends RxDisposable {
             strokeWidth: 1,
         });
 
-        currentRender.mainComponent = spreadsheet;
-        currentRender.components.set(SHEET_VIEW_KEY.MAIN, spreadsheet);
-        currentRender.components.set(SHEET_VIEW_KEY.ROW, spreadsheetRowHeader);
-        currentRender.components.set(SHEET_VIEW_KEY.COLUMN, spreadsheetColumnHeader);
-        currentRender.components.set(SHEET_VIEW_KEY.LEFT_TOP, SpreadsheetLeftTopPlaceholder);
+        renderUnit.mainComponent = spreadsheet;
+        renderUnit.components.set(SHEET_VIEW_KEY.MAIN, spreadsheet);
+        renderUnit.components.set(SHEET_VIEW_KEY.ROW, spreadsheetRowHeader);
+        renderUnit.components.set(SHEET_VIEW_KEY.COLUMN, spreadsheetColumnHeader);
+        renderUnit.components.set(SHEET_VIEW_KEY.LEFT_TOP, SpreadsheetLeftTopPlaceholder);
 
         scene.addObjects([spreadsheet], SHEET_COMPONENT_MAIN_LAYER_INDEX);
         scene.addObjects(

@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-import type { IContextService } from '@univerjs/core';
-import { IConfigService, ILocalStorageService, LocaleService, Plugin, PluginType } from '@univerjs/core';
+import { IContextService, ILocalStorageService, LocaleService, Plugin } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -54,6 +53,7 @@ import { DesktopZenZoneService } from './services/zen-zone/desktop-zen-zone.serv
 import { IZenZoneService } from './services/zen-zone/zen-zone.service';
 import { EditorService, IEditorService } from './services/editor/editor.service';
 import { IRangeSelectorService, RangeSelectorService } from './services/range-selector/range-selector.service';
+import { IProgressService, ProgressService } from './services/progress/progress.service';
 
 const PLUGIN_NAME = 'ui';
 
@@ -68,19 +68,17 @@ export const DISABLE_AUTO_FOCUS_KEY = 'DISABLE_AUTO_FOCUS';
  * UI plugin provides basic interaction with users. Including workbench (menus, UI parts, notifications etc.), copy paste, shortcut.
  */
 export class UniverUIPlugin extends Plugin {
-    static override type = PluginType.Univer;
+    static override pluginName = PLUGIN_NAME;
 
     constructor(
         private _config: Partial<IUniverUIConfig> = {},
-        @IConfigService private readonly _contextService: IContextService,
+        @IContextService private readonly _contextService: IContextService,
         @Inject(Injector) protected readonly _injector: Injector,
         @Inject(LocaleService) private readonly _localeService: LocaleService
     ) {
-        super(PLUGIN_NAME);
+        super();
 
-        this._localeService.load({
-            zhCN,
-        });
+        this._localeService.load({ zhCN });
 
         if (this._config.disableAutoFocus) {
             this._contextService.setContextValue(DISABLE_AUTO_FOCUS_KEY, true);
@@ -89,6 +87,7 @@ export class UniverUIPlugin extends Plugin {
 
     override onStarting(_injector: Injector): void {
         this._initDependencies(_injector);
+
         this._initUI();
     }
 
@@ -118,6 +117,7 @@ export class UniverUIPlugin extends Plugin {
             [IEditorService, { useClass: EditorService }],
             [IRangeSelectorService, { useClass: RangeSelectorService }],
             [ICanvasPopupService, { useClass: CanvasPopupService }],
+            [IProgressService, { useClass: ProgressService }],
             // controllers
             [IUIController, { useClass: DesktopUIController }],
             [SharedController],

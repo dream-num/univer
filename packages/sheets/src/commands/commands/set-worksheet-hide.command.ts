@@ -22,6 +22,7 @@ import {
     ICommandService,
     IUndoRedoService,
     IUniverInstanceService,
+    LocaleService,
 } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
@@ -41,6 +42,7 @@ export const SetWorksheetHideCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
         const errorService = accessor.get(ErrorService);
+        const localeService = accessor.get(LocaleService);
 
         const target = getSheetCommandTarget(accessor.get(IUniverInstanceService), params);
         if (!target) return false;
@@ -60,7 +62,7 @@ export const SetWorksheetHideCommand: ICommand = {
         const worksheets = workbook.getSheets();
         const visibleWorksheets = worksheets.filter((sheet) => sheet.getConfig().hidden === BooleanNumber.FALSE);
         if (visibleWorksheets.length === 1) {
-            errorService.emit('No visible sheet after you hide this.');
+            errorService.emit(localeService.t('sheets.info.hideSheet'));
             return false;
         }
 

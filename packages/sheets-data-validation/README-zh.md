@@ -24,7 +24,40 @@ pnpm add @univerjs/sheets-data-validation
 ### 注册插件
 
 ```typescript
+import { UniverDataValidationPlugin } from '@univerjs/data-validation';
 import { UniverSheetsDataValidationPlugin } from '@univerjs/sheets-data-validation';
 
+univer.registerPlugin(UniverDataValidationPlugin);
 univer.registerPlugin(UniverSheetsDataValidationPlugin);
+
+// 配置初始化数据验证数据
+// 定义: https://github.com/dream-num/univer/blob/dev/packages/core/src/types/interfaces/i-data-validation.ts#L48
+const dataValidation = [
+    {
+        uid: 'xxx-2',
+        type: DataValidationType.CHECKBOX,
+        ranges: [{
+            startRow: 6,
+            endRow: 10,
+            startColumn: 0,
+            endColumn: 5,
+        }],
+    },
+];
+
+export const DEFAULT_WORKBOOK_DATA_DEMO: IWorkbookData = {
+    id: 'workbook-01',
+    locale: LocaleType.ZH_CN,
+    name: 'UniverSheet Demo',
+    resource: [{
+        name: DATA_VALIDATION_PLUGIN_NAME,
+        data: JSON.stringify({
+            'sheetId-1': dataValidation,
+        }),
+    }]
+    // 其他配置省略
+}
+
+// 加载初始snapshot
+univer.createUnit(UniverInstanceType.UNIVER_SHEET, DEFAULT_WORKBOOK_DATA_DEMO);
 ```

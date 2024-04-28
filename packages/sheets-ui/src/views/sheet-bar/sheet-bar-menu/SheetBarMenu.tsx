@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo } from '@univerjs/core';
-import { BooleanNumber, DisposableCollection, ICommandService, IUniverInstanceService } from '@univerjs/core';
+import type { ICommandInfo, Workbook } from '@univerjs/core';
+import { BooleanNumber, DisposableCollection, ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { Dropdown } from '@univerjs/design';
 import { CheckMarkSingle, ConvertSingle, EyelashSingle } from '@univerjs/icons';
 import {
@@ -57,7 +57,7 @@ export function SheetBarMenu(props: ISheetBarMenuProps) {
     const univerInstanceService = useDependency(IUniverInstanceService);
     const commandService = useDependency(ICommandService);
     const sheetBarService = useDependency(ISheetBarService);
-    const workbook = useObservable(univerInstanceService.currentSheet$);
+    const workbook = useObservable(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), null, false, []);
 
     const handleClick = (item: ISheetBarMenuItem) => {
         const { sheetId } = item;

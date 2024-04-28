@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { Univer } from '@univerjs/core';
-import { ICommandService, IUniverInstanceService, RANGE_TYPE, RedoCommand, UndoCommand } from '@univerjs/core';
+import type { Univer, Workbook } from '@univerjs/core';
+import { ICommandService, IUniverInstanceService, RANGE_TYPE, RedoCommand, UndoCommand, UniverInstanceType } from '@univerjs/core';
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
@@ -31,7 +31,7 @@ describe('Test set col width commands', () => {
     let commandService: ICommandService;
 
     function getColumnWidth(col: number): number {
-        const worksheet = get(IUniverInstanceService).getCurrentUniverSheetInstance()!.getActiveSheet();
+        const worksheet = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet();
         return worksheet.getColumnWidth(col);
     }
 
@@ -45,7 +45,7 @@ describe('Test set col width commands', () => {
         commandService.registerCommand(SetColWidthCommand);
         commandService.registerCommand(SetWorksheetColWidthMutation);
 
-        const worksheet = get(IUniverInstanceService).getCurrentUniverSheetInstance()!.getActiveSheet();
+        const worksheet = get(IUniverInstanceService).getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet();
         const maxRow = worksheet.getMaxRows() - 1;
         const selectionManagerService = get(SelectionManagerService);
         selectionManagerService.setCurrentSelection({

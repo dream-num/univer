@@ -53,7 +53,7 @@ export class PermissionService extends Disposable implements IPermissionService 
     // private _init() {
     //     this.disposeWithMe(
     //         toDisposable(
-    //             this._univerInstanceService.sheetAdded$.subscribe((workbook) => {
+    //             this._univerInstanceService.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => {
     //                 this._resourceManagerService.registerPluginResource(workbook.getUnitId(), resourceKey, {
     //                     onChange: (unitID, value) => {
     //                         (value as PermissionPoint[]).forEach((permissionPoint) => {
@@ -72,7 +72,7 @@ export class PermissionService extends Disposable implements IPermissionService 
     //     );
     //     this.disposeWithMe(
     //         toDisposable(
-    //             this._univerInstanceService.sheetDisposed$.subscribe((workbook) => {
+    //             this._univerInstanceService.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => {
     //                 this._resourceManagerService.disposePluginResource(workbook.getUnitId(), resourceKey);
     //             })
     //         )

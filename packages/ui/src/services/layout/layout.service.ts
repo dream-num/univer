@@ -23,7 +23,14 @@ import { IEditorService } from '../editor/editor.service';
 type FocusHandlerFn = (unitId: string) => void;
 
 export const FOCUSING_UNIVER = 'FOCUSING_UNIVER';
-const collectionOfCnForFocusableEle = ['univer-app-layout', 'univer-toolbar-btn', 'univer-menu-item', 'univer-button', 'univer-sheet-bar-btn'];
+const givingBackFocusElements = [
+    'univer-app-layout',
+    'univer-toolbar-btn',
+    'univer-menu-item',
+    'univer-button',
+    'univer-sheet-bar-btn',
+    'univer-render-canvas',
+];
 
 export interface ILayoutService {
     readonly isFocused: boolean;
@@ -76,18 +83,18 @@ export class DesktopLayoutService extends Disposable implements ILayoutService {
     }
 
     focus(): void {
-        const currentFocused = this._univerInstanceService.getFocusedUniverInstance();
+        const currentFocused = this._univerInstanceService.getFocusedUnit();
         if (!currentFocused) {
             return;
         }
 
         let handler: Nullable<FocusHandlerFn>;
         if (currentFocused instanceof Workbook) {
-            handler = this._focusHandlers.get(UniverInstanceType.SHEET);
+            handler = this._focusHandlers.get(UniverInstanceType.UNIVER_SHEET);
         } else if (currentFocused instanceof DocumentDataModel) {
-            handler = this._focusHandlers.get(UniverInstanceType.DOC);
+            handler = this._focusHandlers.get(UniverInstanceType.UNIVER_DOC);
         } else if (currentFocused instanceof SlideDataModel) {
-            handler = this._focusHandlers.get(UniverInstanceType.SLIDE);
+            handler = this._focusHandlers.get(UniverInstanceType.UNIVER_SLIDE);
         }
 
         if (handler) {
@@ -148,8 +155,8 @@ export class DesktopLayoutService extends Disposable implements ILayoutService {
         this.disposeWithMe(
             fromEvent(window, 'focusin').subscribe((event) => {
                 const target = event.target as HTMLElement;
-                if (collectionOfCnForFocusableEle.some((item) => target.classList.contains(item))) {
-                    this._editorBlurListener();
+                if (givingBackFocusElements.some((item) => target.classList.contains(item))) {
+                    this._blurSheetEditor();
                     queueMicrotask(() => this.focus());
                     return;
                 }
@@ -167,13 +174,11 @@ export class DesktopLayoutService extends Disposable implements ILayoutService {
     }
 
     private _initEditorStatus(): void {
-        this._contextService.setContextValue(
-            FOCUSING_UNIVER_EDITOR,
-            getFocusingUniverEditorStatus()
-        );
+        this._contextService.setContextValue(FOCUSING_UNIVER_EDITOR, getFocusingUniverEditorStatus());
     }
 
-    private _editorBlurListener() {
+    private _blurSheetEditor() {
+        // NOTE: Note that the focus editor will not be docs' editor but calling `this._editorService.blur()` will blur doc's editor.
         const focusEditor = this._editorService.getFocusEditor();
         if (focusEditor && focusEditor.isSheetEditor() !== true) {
             this._editorService.blur();

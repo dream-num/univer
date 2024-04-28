@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IRange, Nullable } from '@univerjs/core';
+import type { IRange, Nullable, Workbook } from '@univerjs/core';
 import {
     CellValueType,
     Disposable,
@@ -22,6 +22,7 @@ import {
     LifecycleStages,
     OnLifecycle,
     toDisposable,
+    UniverInstanceType,
 } from '@univerjs/core';
 import numfmt from '@univerjs/engine-numfmt';
 import type {
@@ -146,6 +147,7 @@ export class NumfmtEditorController extends Disposable {
                                 context.row,
                                 context.col
                             );
+                            const currentNumfmtType = (currentNumfmtValue && getPatternType(currentNumfmtValue.pattern)) ?? '';
                             const clean = () => {
                                 currentNumfmtValue &&
                                     this._collectEffectMutation.add(
@@ -173,14 +175,13 @@ export class NumfmtEditorController extends Disposable {
                                         context.row,
                                         context.col,
                                         {
-                                            type: 'date',
                                             pattern: dateInfo.z,
                                         }
                                     );
                                     return { ...value, v, t: CellValueType.NUMBER };
                                 }
                             } else if (
-                                ['date', 'time', 'datetime'].includes(currentNumfmtValue?.type || '') ||
+                                ['date', 'time', 'datetime'].includes(currentNumfmtType) ||
                                 !isNumeric(content)
                             ) {
                                 clean();
@@ -200,7 +201,7 @@ export class NumfmtEditorController extends Disposable {
                 getMutations(command) {
                     switch (command.id) {
                         case SetRangeValuesCommand.id: {
-                            const workbook = self._univerInstanceService.getCurrentUniverSheetInstance()!;
+                            const workbook = self._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
                             const unitId = workbook.getUnitId();
                             const subUnitId = workbook.getActiveSheet().getSheetId();
                             const list = self._collectEffectMutation.getEffects();
@@ -216,7 +217,6 @@ export class NumfmtEditorController extends Disposable {
                                     row: item.row,
                                     col: item.col,
                                     pattern: item.value!.pattern,
-                                    type: item.value!.type,
                                 }));
                             const removeCells: IRange[] = list
                                 .filter((item) => !item.value?.pattern)
@@ -263,17 +263,6 @@ export class NumfmtEditorController extends Disposable {
         );
     }
 }
-
-const filterAtr = (obj: Record<string, any>, filterKey: string[]) => {
-    const keys = Object.keys(obj).filter((key) => !filterKey.includes(key));
-    return keys.reduce(
-        (pre, cur) => {
-            pre[cur] = obj[cur];
-            return pre;
-        },
-        {} as Record<string, any>
-    );
-};
 
 function isNumeric(str: string) {
     return /^-?\d+(\.\d+)?$/.test(str);

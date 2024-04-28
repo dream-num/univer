@@ -21,7 +21,7 @@ import { DeleteRangeMoveLeftCommand, DeleteRangeMoveUpCommand, InsertColCommand,
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { SetArrayFormulaDataMutation, SetFormulaDataMutation, SetNumfmtFormulaDataMutation } from '@univerjs/engine-formula';
+import { SetArrayFormulaDataMutation, SetFormulaDataMutation } from '@univerjs/engine-formula';
 import { UpdateFormulaController } from '../update-formula.controller';
 import { createCommandTestBed } from './create-command-test-bed';
 
@@ -145,7 +145,6 @@ describe('Test insert function operation', () => {
         commandService.registerCommand(SetRangeValuesMutation);
         commandService.registerCommand(SetFormulaDataMutation);
         commandService.registerCommand(SetArrayFormulaDataMutation);
-        commandService.registerCommand(SetNumfmtFormulaDataMutation);
 
         getValues = (
             startRow: number,

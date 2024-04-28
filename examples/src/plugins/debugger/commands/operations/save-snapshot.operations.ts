@@ -15,8 +15,8 @@
  */
 
 /* eslint-disable node/prefer-global/process */
-import type { ICommand, IStyleData, IWorkbookData } from '@univerjs/core';
-import { CommandType, IResourceLoaderService, IUniverInstanceService, ObjectMatrix } from '@univerjs/core';
+import type { ICommand, IStyleData, IWorkbookData, Workbook } from '@univerjs/core';
+import { CommandType, IResourceLoaderService, IUniverInstanceService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
 import { ExportController, RecordController } from '../../../local-save';
@@ -52,7 +52,7 @@ export const SaveSnapshotOptions: ICommand = {
         const exportController = accessor.get(ExportController);
         const recordController = accessor.get(RecordController);
 
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance()!;
+        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook.getActiveSheet();
         const snapshot = resourceLoaderService.saveWorkbook(workbook);
         const gitHash = process.env.GIT_COMMIT_HASH;

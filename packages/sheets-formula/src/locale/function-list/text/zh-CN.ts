@@ -266,7 +266,7 @@ export default {
         },
     },
     LOWER: {
-        description: '将文本转换为小写',
+        description: '将文本转换为小写。',
         abstract: '将文本转换为小写',
         links: [
             {
@@ -275,8 +275,10 @@ export default {
             },
         ],
         functionParameter: {
-            number1: { name: 'number1', detail: 'first' },
-            number2: { name: 'number2', detail: 'second' },
+            text: {
+                name: '文本',
+                detail: '要转换为小写字母的文本。 LOWER 不改变文本中的非字母字符。',
+            },
         },
     },
     MID: {

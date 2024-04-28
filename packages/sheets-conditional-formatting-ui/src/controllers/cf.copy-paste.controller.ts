@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IRange, Nullable } from '@univerjs/core';
+import type { IRange, Nullable, Workbook } from '@univerjs/core';
 import {
     Disposable,
     IUniverInstanceService,
@@ -24,11 +24,13 @@ import {
     Range,
     Rectangle,
     Tools,
+    UniverInstanceType,
 } from '@univerjs/core';
 import {
     createTopMatrixFromMatrix, findAllRectangle,
 } from '@univerjs/sheets';
-import { COPY_TYPE, getRepeatRange, ISheetClipboardService, PREDEFINED_HOOK_NAME } from '@univerjs/sheets-ui';
+import type { IDiscreteRange } from '@univerjs/sheets-ui';
+import { COPY_TYPE, getRepeatRange, ISheetClipboardService, PREDEFINED_HOOK_NAME, rangeToDiscreteRange, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
 import { Inject, Injector } from '@wendellhu/redi';
 import { AddConditionalRuleMutation, AddConditionalRuleMutationUndoFactory, ConditionalFormattingRuleModel, ConditionalFormattingViewModel, DeleteConditionalRuleMutation, DeleteConditionalRuleMutationUndoFactory, SetConditionalRuleMutation, setConditionalRuleMutationUndoFactory, SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '@univerjs/sheets-conditional-formatting';
 import type { IAddConditionalRuleMutationParams, IConditionalFormattingRuleConfig, IConditionFormattingRule, IDeleteConditionalRuleMutationParams, ISetConditionalRuleMutationParams } from '@univerjs/sheets-conditional-formatting';
@@ -86,23 +88,24 @@ export class ConditionalFormattingCopyPasteController extends Disposable {
         if (!model) {
             return;
         }
+        const accessor = {
+            get: this._injector.get.bind(this._injector),
+        };
+        const discreteRange = rangeToDiscreteRange(range, accessor, unitId, subUnitId);
+        if (!discreteRange) {
+            return;
+        }
+        const { rows, cols } = discreteRange;
         const cfIdSet: Set<string> = new Set();
-        Range.foreach(range, (row, col) => {
-            const cellCfList = this._conditionalFormattingViewModel.getCellCf(unitId, subUnitId, row, col, model);
-            if (!cellCfList) {
-                return;
-            }
-            const relativeRange = Rectangle.getRelativeRange(
-                {
-                    startRow: row,
-                    endRow: row,
-                    startColumn: col,
-                    endColumn: col,
-                },
-                range
-            );
-            cellCfList.cfList.forEach((item) => cfIdSet.add(item.cfId));
-            matrix.setValue(relativeRange.startRow, relativeRange.startColumn, cellCfList.cfList.map((item) => item.cfId));
+        rows.forEach((row, rowIndex) => {
+            cols.forEach((col, colIndex) => {
+                const cellCfList = this._conditionalFormattingViewModel.getCellCf(unitId, subUnitId, row, col, model);
+                if (!cellCfList) {
+                    return;
+                }
+                cellCfList.cfList.forEach((item) => cfIdSet.add(item.cfId));
+                matrix.setValue(rowIndex, colIndex, cellCfList.cfList.map((item) => item.cfId));
+            });
         });
         cfIdSet.forEach((cfId) => {
             const rule = this._conditionalFormattingRuleModel.getRule(unitId, subUnitId, cfId);
@@ -113,14 +116,14 @@ export class ConditionalFormattingCopyPasteController extends Disposable {
     }
 
     private _generateConditionalFormattingMutations(
-        pastedRange: IRange,
+        pastedRange: IDiscreteRange,
         copyInfo: {
             copyType: COPY_TYPE;
-            copyRange?: IRange;
+            copyRange?: IDiscreteRange;
             pasteType: string;
         }
     ) {
-        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
+        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const sheet = workbook.getActiveSheet();
         const unitId = workbook.getUnitId();
         const subUnitId = sheet.getSheetId();
@@ -142,11 +145,14 @@ export class ConditionalFormattingCopyPasteController extends Disposable {
         ) {
             return { redos: [], undos: [] };
         }
-        const repeatRange = getRepeatRange(copyInfo.copyRange, pastedRange, true);
+
+        const { ranges: [vCopyRange, vPastedRange], mapFunc } = virtualizeDiscreteRanges([copyInfo.copyRange, pastedRange]);
+        const repeatRange = getRepeatRange(vCopyRange, vPastedRange, true);
         const model = this._conditionalFormattingViewModel.getMatrix(unitId, subUnitId);
         const effectedConditionalFormattingRuleMatrix: Record<string, ObjectMatrix<1>> = {};
-        Range.foreach(pastedRange, (row, col) => {
-            const cellCfList = this._conditionalFormattingViewModel.getCellCf(unitId, subUnitId, row, col, model!);
+        Range.foreach(vPastedRange, (row, col) => {
+            const { row: realRow, col: realCol } = mapFunc(row, col);
+            const cellCfList = this._conditionalFormattingViewModel.getCellCf(unitId, subUnitId, realRow, realCol, model!);
             if (cellCfList) {
                 cellCfList.cfList.forEach((item) => {
                     if (!effectedConditionalFormattingRuleMatrix[item.cfId]) {
@@ -159,7 +165,7 @@ export class ConditionalFormattingCopyPasteController extends Disposable {
                             });
                         });
                     }
-                    effectedConditionalFormattingRuleMatrix[item.cfId].realDeleteValue(row, col);
+                    effectedConditionalFormattingRuleMatrix[item.cfId].realDeleteValue(realRow, realCol);
                 });
             }
         });
@@ -211,8 +217,8 @@ export class ConditionalFormattingCopyPasteController extends Disposable {
                     item.startRange
                 );
 
-                const _row = range.startRow;
-                const _col = range.startColumn;
+                const { row: _row, col: _col } = mapFunc(range.startRow, range.startColumn);
+
                 copyRangeCfIdList.forEach((cfId) => {
                     if (!effectedConditionalFormattingRuleMatrix[cfId]) {
                         const rule = getCurrentSheetCfRule(cfId);

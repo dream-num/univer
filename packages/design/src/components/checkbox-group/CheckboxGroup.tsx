@@ -73,7 +73,7 @@ export function CheckboxGroup(props: ICheckboxGroupProps) {
                     return React.cloneElement(child, {
                         key: index,
                         children: child.props.children,
-                        value: child.props.value,
+                        checked: child.props.value ? value.includes(child.props.value) : false,
                         disabled: disabled ?? child.props.disabled,
                         onChange: handleChange,
                     });

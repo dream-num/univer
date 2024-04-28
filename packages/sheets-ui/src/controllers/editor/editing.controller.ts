@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import type {
+    Workbook } from '@univerjs/core';
 import {
     DOCS_NORMAL_EDITOR_UNIT_ID_KEY,
     IUndoRedoService,
@@ -22,6 +24,7 @@ import {
     ObjectMatrix,
     OnLifecycle,
     RxDisposable,
+    UniverInstanceType,
 } from '@univerjs/core';
 import { getDocObject } from '@univerjs/docs';
 import type { ISheetData } from '@univerjs/engine-formula';
@@ -49,18 +52,20 @@ export class EditingController extends RxDisposable {
     }
 
     private _listenEditorBlur() {
-        this._univerInstanceService.currentDoc$.pipe(takeUntil(this.dispose$)).subscribe((docDataModel) => {
-            if (docDataModel == null) {
-                return;
-            }
+        this._univerInstanceService.getCurrentTypeOfUnit$(UniverInstanceType.UNIVER_DOC)
+            .pipe(takeUntil(this.dispose$))
+            .subscribe((docDataModel) => {
+                if (docDataModel == null) {
+                    return;
+                }
 
-            const unitId = docDataModel.getUnitId();
+                const unitId = docDataModel.getUnitId();
 
-            // Clear undo redo stack of cell editor when lose focus.
-            if (unitId !== DOCS_NORMAL_EDITOR_UNIT_ID_KEY) {
-                this._undoRedoService.clearUndoRedo(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
-            }
-        });
+                // Clear undo redo stack of cell editor when lose focus.
+                if (unitId !== DOCS_NORMAL_EDITOR_UNIT_ID_KEY) {
+                    this._undoRedoService.clearUndoRedo(DOCS_NORMAL_EDITOR_UNIT_ID_KEY);
+                }
+            });
     }
 
     private _initialNormalInput() {
@@ -79,7 +84,7 @@ export class EditingController extends RxDisposable {
          */
         const sheetData: ISheetData = {};
         this._univerInstanceService
-            .getCurrentUniverSheetInstance()!
+            .getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!
             .getSheets()
             .forEach((sheet) => {
                 const sheetConfig = sheet.getConfig();

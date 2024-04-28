@@ -21,7 +21,6 @@ import {
     IUniverInstanceService,
     LogLevel,
     Plugin,
-    PluginType,
     Univer,
 } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
@@ -88,7 +87,7 @@ const TEST_DOCUMENT_DATA_EN: IDocumentData = {
     },
 };
 
-export function createCommandTestBed(workbookConfig?: IDocumentData, dependencies?: Dependency[]) {
+export function createCommandTestBed(workbookData?: IDocumentData, dependencies?: Dependency[]) {
     const univer = new Univer();
     const injector = univer.__getInjector();
     const get = injector.get.bind(injector);
@@ -97,10 +96,10 @@ export function createCommandTestBed(workbookConfig?: IDocumentData, dependencie
      * This plugin hooks into Doc's DI system to expose API to test scripts
      */
     class TestPlugin extends Plugin {
-        static override type = PluginType.Univer;
+        static override pluginName = 'test-plugin';
 
         constructor(_config: undefined, @Inject(Injector) override readonly _injector: Injector) {
-            super('test-plugin');
+            super();
         }
 
         override onStarting(injector: Injector): void {
@@ -121,9 +120,9 @@ export function createCommandTestBed(workbookConfig?: IDocumentData, dependencie
 
     univer.registerPlugin(TestPlugin);
 
-    const doc = univer.createUniverDoc(workbookConfig || TEST_DOCUMENT_DATA_EN);
+    const doc = univer.createUniverDoc(workbookData || TEST_DOCUMENT_DATA_EN);
     const univerInstanceService = get(IUniverInstanceService);
-    univerInstanceService.focusUniverInstance('test-doc');
+    univerInstanceService.focusUnit('test-doc');
 
     const logService = get(ILogService);
     logService.setLogLevel(LogLevel.SILENT); // change this to `LogLevel.VERBOSE` to debug tests via logs

@@ -1,18 +1,28 @@
 {
     "$schema": "https://turbo.build/schema.json",
-    "extends": ["//"],
+    "extends": [
+        "//"
+    ],
     "pipeline": {
         "test": {
-            "cache": false
         },
+
         "coverage": {
             "cache": false
         },
-        "build": {},
+
+        "build": {
+            "cache": false
+        },
+
         "build:demo": {},
+
+        "build:e2e": {},
+
         "dev:demo": {
             "cache": false
         },
+
         "lint:types": {}
     }
 }

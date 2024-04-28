@@ -15,7 +15,7 @@
  */
 
 import type { Nullable, Workbook, Worksheet } from '@univerjs/core';
-import { IUniverInstanceService } from '@univerjs/core';
+import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 
 import { useObservable } from '../../components/hooks/observable';
@@ -25,7 +25,7 @@ import { useObservable } from '../../components/hooks/observable';
  */
 export function useActiveWorkbook(): Nullable<Workbook> {
     const univerInstanceService = useDependency(IUniverInstanceService);
-    const activeWorkbook = useObservable(univerInstanceService.currentSheet$);
+    const activeWorkbook = useObservable(univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET));
     return activeWorkbook;
 }
 

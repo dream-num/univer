@@ -148,6 +148,8 @@ export interface ICommandService {
         options?: IExecutionOptions
     ): Promise<R>;
 
+    hasCommand(id: string): boolean;
+
     syncExecuteCommand<P extends object = object, R = boolean>(id: string, params?: P, options?: IExecutionOptions): R;
 
     /**

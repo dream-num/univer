@@ -18,7 +18,7 @@ import type { Nullable } from '@univerjs/core';
 import { DEFAULT_EMPTY_DOCUMENT_VALUE, DOCS_FORMULA_BAR_EDITOR_UNIT_ID_KEY, HorizontalAlign, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import { DeviceInputEventType } from '@univerjs/engine-render';
 import { CheckMarkSingle, CloseSingle, DropdownSingle, FxSingle } from '@univerjs/icons';
-import { KeyCode, TextEditor } from '@univerjs/ui';
+import { KeyCode, ProgressBar, TextEditor } from '@univerjs/ui';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import clsx from 'clsx';
 import React, { useEffect, useState } from 'react';
@@ -175,6 +175,8 @@ export function FormulaBar() {
                     </div>
                 </div>
             </div>
+
+            <ProgressBar />
         </div>
     );
 }

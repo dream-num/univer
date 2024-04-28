@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, IRange } from '@univerjs/core';
+import type { ICellData, IRange, Workbook } from '@univerjs/core';
 import {
     Disposable,
     ICommandService,
@@ -22,6 +22,7 @@ import {
     LifecycleStages,
     OnLifecycle,
     toDisposable,
+    UniverInstanceType,
 } from '@univerjs/core';
 import { CURSOR_TYPE, IRenderManagerService } from '@univerjs/engine-render';
 
@@ -89,7 +90,7 @@ export class FormatPainterController extends Disposable {
 
     private async _applyFormatPainter(range: IRange) {
         const { styles: stylesMatrix, merges } = this._formatPainterService.getSelectionFormat();
-        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
+        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const unitId = workbook.getUnitId();
         const subUnitId = workbook.getActiveSheet().getSheetId();
         if (!stylesMatrix) return;

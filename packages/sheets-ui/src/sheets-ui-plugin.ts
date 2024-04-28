@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import { IUniverInstanceService, LocaleService, Plugin, PluginType } from '@univerjs/core';
+import type { Workbook } from '@univerjs/core';
+import { IUniverInstanceService, LocaleService, Plugin, UniverInstanceType } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { filter } from 'rxjs/operators';
 
-import { SHEET_UI_PLUGIN_NAME } from './basics';
+import { IRenderManagerService } from '@univerjs/engine-render';
 import { ActiveWorksheetController } from './controllers/active-worksheet/active-worksheet.controller';
 import { AutoFillController } from './controllers/auto-fill.controller';
 import { AutoHeightController } from './controllers/auto-height.controller';
@@ -31,11 +32,11 @@ import { FormulaEditorController } from './controllers/editor/formula-editor.con
 import { StartEditController } from './controllers/editor/start-edit.controller';
 import { EditorBridgeController } from './controllers/editor-bridge.controller';
 import { FormatPainterController } from './controllers/format-painter/format-painter.controller';
-import { FreezeController } from './controllers/freeze.controller';
+import { HeaderFreezeRenderController } from './controllers/freeze.render-controller';
 import { HeaderMenuController } from './controllers/header-menu.controller';
 import { HeaderMoveController } from './controllers/header-move.controller';
-import { HeaderResizeController } from './controllers/header-resize.controller';
-import { HeaderUnhideController } from './controllers/header-unhide.controller';
+import { HeaderResizeController } from './controllers/header-resize.render-controller';
+import { HeaderUnhideRenderController } from './controllers/header-unhide.render-controller';
 import { MarkSelectionController } from './controllers/mark-selection.controller';
 import { MoveRangeController } from './controllers/move-range.controller';
 import { ScrollController } from './controllers/scroll.controller';
@@ -68,17 +69,21 @@ import { CellAlertManagerService } from './services/cell-alert-manager.service';
 import { CellAlertController } from './controllers/cell-alert.controller';
 import { CellCustomRenderController } from './controllers/cell-custom-render.controller';
 import { SheetCanvasPopManagerService } from './services/canvas-pop-manager.service';
+import { ForceStringRenderController } from './controllers/force-string-render.controller';
+import { ForceStringAlertController } from './controllers/force-string-alert.controller';
 
 export class UniverSheetsUIPlugin extends Plugin {
-    static override type = PluginType.Sheet;
+    static override pluginName = 'SHEET_UI_PLUGIN_NAME';
+    static override type = UniverInstanceType.UNIVER_SHEET;
 
     constructor(
-        config: undefined,
+        _config: undefined,
         @Inject(Injector) override readonly _injector: Injector,
         @Inject(LocaleService) private readonly _localeService: LocaleService,
+        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
     ) {
-        super(SHEET_UI_PLUGIN_NAME);
+        super();
 
         this._localeService.load({
             zhCN,
@@ -121,12 +126,10 @@ export class UniverSheetsUIPlugin extends Plugin {
                 [EndEditController],
                 [FormulaEditorController],
                 [FormatPainterController],
-                [FreezeController],
+                [HeaderFreezeRenderController],
                 [HeaderMenuController],
                 [HeaderMoveController],
                 [HeaderResizeController],
-                [HeaderUnhideController],
-                // [InitializeEditorController],
                 [MoveRangeController],
                 [ScrollController],
                 [SelectionController],
@@ -143,18 +146,27 @@ export class UniverSheetsUIPlugin extends Plugin {
                 [HoverController],
                 [CellAlertController],
                 [CellCustomRenderController],
+                [ForceStringRenderController],
+                [ForceStringAlertController],
             ] as Dependency[]
         ).forEach((d) => injector.add(d));
     }
 
     override onReady(): void {
         this._markSheetAsFocused();
+        this._registerRenderControllers();
+    }
+
+    private _registerRenderControllers(): void {
+        ([HeaderFreezeRenderController, HeaderUnhideRenderController, HeaderResizeController]).forEach((controller) => {
+            this.disposeWithMe(this._renderManagerService.registerRenderControllers(UniverInstanceType.UNIVER_SHEET, controller));
+        });
     }
 
     private _markSheetAsFocused() {
         const univerInstanceService = this._univerInstanceService;
-        univerInstanceService.currentSheet$.pipe(filter((v) => !!v)).subscribe((workbook) => {
-            univerInstanceService.focusUniverInstance(workbook!.getUnitId());
+        univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET).pipe(filter((v) => !!v)).subscribe((workbook) => {
+            univerInstanceService.focusUnit(workbook!.getUnitId());
         });
     }
 }

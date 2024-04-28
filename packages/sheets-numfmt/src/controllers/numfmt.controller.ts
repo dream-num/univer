@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IRange } from '@univerjs/core';
+import type { IRange, Workbook } from '@univerjs/core';
 import {
     CellValueType,
     Disposable,
@@ -27,16 +27,13 @@ import {
     Range,
     ThemeService,
     toDisposable,
+    UniverInstanceType,
 } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import type { IRemoveNumfmtMutationParams, ISetNumfmtMutationParams } from '@univerjs/sheets';
+import type { ISetNumfmtMutationParams } from '@univerjs/sheets';
 import {
-    ClearSelectionAllCommand,
-    ClearSelectionFormatCommand,
-    factoryRemoveNumfmtUndoMutation,
     INTERCEPTOR_POINT,
     INumfmtService,
-    rangeMerge,
     RemoveNumfmtMutation,
     SelectionManagerService,
     SetNumfmtMutation,
@@ -44,7 +41,7 @@ import {
 } from '@univerjs/sheets';
 import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { ComponentManager, ISidebarService } from '@univerjs/ui';
-import { Inject, Injector } from '@wendellhu/redi';
+import { Inject } from '@wendellhu/redi';
 import { combineLatest, merge, Observable } from 'rxjs';
 import { debounceTime, map, switchMap, tap } from 'rxjs/operators';
 
@@ -74,7 +71,6 @@ export class NumfmtController extends Disposable implements INumfmtController {
     constructor(
         @Inject(SheetInterceptorService) private _sheetInterceptorService: SheetInterceptorService,
         @Inject(ThemeService) private _themeService: ThemeService,
-        @Inject(Injector) private _injector: Injector,
         @Inject(IUniverInstanceService) private _univerInstanceService: IUniverInstanceService,
         @Inject(SheetSkeletonManagerService) private _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @Inject(ICommandService) private _commandService: ICommandService,
@@ -86,7 +82,6 @@ export class NumfmtController extends Disposable implements INumfmtController {
         @Inject(LocaleService) private _localeService: LocaleService
     ) {
         super();
-        this._initInterceptorCommands();
         this._initRealTimeRenderingInterceptor();
         this._initPanel();
         this._initCommands();
@@ -107,7 +102,7 @@ export class NumfmtController extends Disposable implements INumfmtController {
         if (!range) {
             return false;
         }
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance()!;
+        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const sheet = workbook.getActiveSheet();
 
         const cellValue = sheet.getCellRaw(range.startRow, range.startColumn);
@@ -185,56 +180,6 @@ export class NumfmtController extends Disposable implements INumfmtController {
         this._componentManager.register(SHEET_NUMFMT_PLUGIN, SheetNumfmtPanel);
     }
 
-    private _initInterceptorCommands() {
-        const self = this;
-        this.disposeWithMe(
-            this._sheetInterceptorService.interceptCommand({
-                getMutations(command) {
-                    switch (command.id) {
-                        case ClearSelectionAllCommand.id:
-                        case ClearSelectionFormatCommand.id: {
-                            const workbook = self._univerInstanceService.getCurrentUniverSheetInstance()!;
-                            const unitId = workbook.getUnitId();
-                            const subUnitId = workbook.getActiveSheet().getSheetId();
-                            const selections = self._selectionManagerService.getSelectionRanges();
-                            if (!selections?.length) {
-                                break;
-                            }
-                            const redos: IRemoveNumfmtMutationParams = {
-                                unitId,
-                                subUnitId,
-                                ranges: [],
-                            };
-                            const numfmtModel = self._numfmtService.getModel(unitId, subUnitId);
-                            selections.forEach((range) => {
-                                Range.foreach(range, (row, col) => {
-                                    if (numfmtModel?.getValue(row, col)) {
-                                        redos.ranges.push({
-                                            startColumn: col,
-                                            endColumn: col,
-                                            startRow: row,
-                                            endRow: row,
-                                        });
-                                    }
-                                });
-                            });
-                            redos.ranges = rangeMerge(redos.ranges);
-                            const undos = factoryRemoveNumfmtUndoMutation(self._injector, redos);
-                            return {
-                                redos: [{ id: RemoveNumfmtMutation.id, params: redos }],
-                                undos,
-                            };
-                        }
-                    }
-                    return {
-                        redos: [],
-                        undos: [],
-                    };
-                },
-            })
-        );
-    }
-
     private _initRealTimeRenderingInterceptor() {
         const isPanelOpenObserver = new Observable<boolean>((subscribe) => {
             this._commandService.onCommandExecuted((commandInfo) => {
@@ -281,7 +226,7 @@ export class NumfmtController extends Disposable implements INumfmtController {
                         })
                     )
                     .subscribe(({ disposableCollection, selectionRanges }) => {
-                        const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
+                        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
                         this.openPanel();
                         disposableCollection.add(
                             this._sheetInterceptorService.intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
@@ -351,8 +296,7 @@ export class NumfmtController extends Disposable implements INumfmtController {
                         return () => {
                             disposable.dispose();
                         };
-                    }),
-                    this._numfmtService.modelReplace$
+                    })
                 )
                     .pipe(debounceTime(16))
                     .subscribe((unitId) => {

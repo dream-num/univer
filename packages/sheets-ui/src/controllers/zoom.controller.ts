@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo } from '@univerjs/core';
+import type { ICommandInfo, Workbook } from '@univerjs/core';
 import {
     Disposable,
     ICommandService,
@@ -22,6 +22,7 @@ import {
     LifecycleStages,
     OnLifecycle,
     toDisposable,
+    UniverInstanceType,
 } from '@univerjs/core';
 import type { IWheelEvent } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
@@ -90,7 +91,7 @@ export class ZoomController extends Disposable {
                         ratioDelta /= 2;
                     }
 
-                    const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
+                    const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
                     const sheet = workbook.getActiveSheet();
                     const currentRatio = sheet.getZoomRatio();
                     let nextRatio = +Number.parseFloat(`${currentRatio + ratioDelta}`).toFixed(1);
@@ -116,7 +117,7 @@ export class ZoomController extends Disposable {
                         return;
                     }
 
-                    const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
+                    const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
 
                     const worksheet = workbook.getActiveSheet();
 
@@ -134,7 +135,7 @@ export class ZoomController extends Disposable {
         this.disposeWithMe(
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (updateCommandList.includes(command.id)) {
-                    const workbook = this._univerInstanceService.getCurrentUniverSheetInstance()!;
+                    const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
                     const worksheet = workbook.getActiveSheet();
 
                     const params = command.params;

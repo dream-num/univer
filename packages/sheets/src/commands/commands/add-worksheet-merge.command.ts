@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, ICommand, IMutationInfo, IRange, Nullable, Worksheet } from '@univerjs/core';
+import type { ICellData, ICommand, IMutationInfo, IRange, Nullable, Workbook, Worksheet } from '@univerjs/core';
 import {
     CommandType,
     Dimension,
@@ -23,6 +23,7 @@ import {
     IUniverInstanceService,
     ObjectMatrix,
     sequenceExecute,
+    UniverInstanceType,
 } from '@univerjs/core';
 import type { IAccessor } from '@wendellhu/redi';
 
@@ -187,7 +188,7 @@ export const AddWorksheetMergeAllCommand: ICommand = {
         }
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
+        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (!workbook) return false;
 
         const workSheet = workbook.getActiveSheet();
@@ -216,7 +217,7 @@ export const AddWorksheetMergeVerticalCommand: ICommand = {
         }
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
+        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (!workbook) return false;
 
         const workSheet = workbook.getActiveSheet();
@@ -246,7 +247,7 @@ export const AddWorksheetMergeHorizontalCommand: ICommand = {
         }
         const univerInstanceService = accessor.get(IUniverInstanceService);
 
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance();
+        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
         if (!workbook) return false;
 
         const workSheet = workbook.getActiveSheet();

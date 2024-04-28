@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICellData, IMutationInfo, IRange } from '@univerjs/core';
+import type { ICellData, IMutationInfo, Workbook } from '@univerjs/core';
 import {
     Disposable,
     isFormulaId,
@@ -24,12 +24,13 @@ import {
     ObjectMatrix,
     OnLifecycle,
     Tools,
+    UniverInstanceType,
 } from '@univerjs/core';
 import { LexerTreeBuilder } from '@univerjs/engine-formula';
 import type { ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { SetRangeValuesMutation, SetRangeValuesUndoMutationFactory } from '@univerjs/sheets';
-import type { ICellDataWithSpanInfo, ICopyPastePayload, ISheetClipboardHook, ISheetRangeLocation } from '@univerjs/sheets-ui';
 import { COPY_TYPE, ISheetClipboardService, PREDEFINED_HOOK_NAME } from '@univerjs/sheets-ui';
+import type { ICellDataWithSpanInfo, ICopyPastePayload, IDiscreteRange, ISheetClipboardHook, ISheetDiscreteRangeLocation } from '@univerjs/sheets-ui';
 import type { IAccessor } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -77,8 +78,8 @@ export class FormulaClipboardController extends Disposable {
     }
 
     private _onPasteCells(
-        pasteFrom: ISheetRangeLocation | null,
-        pasteTo: ISheetRangeLocation,
+        pasteFrom: ISheetDiscreteRangeLocation | null,
+        pasteTo: ISheetDiscreteRangeLocation,
         data: ObjectMatrix<ICellDataWithSpanInfo>,
         payload: ICopyPastePayload,
         isSpecialPaste: boolean
@@ -90,7 +91,7 @@ export class FormulaClipboardController extends Disposable {
         };
         const pastedRange = pasteTo.range;
         const matrix = data;
-        const workbook = this._currentUniverSheet.getCurrentUniverSheetInstance()!;
+        const workbook = this._currentUniverSheet.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const unitId = workbook.getUnitId();
         const subUnitId = workbook.getActiveSheet().getSheetId();
 
@@ -110,12 +111,12 @@ export class FormulaClipboardController extends Disposable {
 export function getSetCellFormulaMutations(
     unitId: string,
     subUnitId: string,
-    range: IRange,
+    range: IDiscreteRange,
     matrix: ObjectMatrix<ICellDataWithSpanInfo>,
     accessor: IAccessor,
     copyInfo: {
         copyType: COPY_TYPE;
-        copyRange?: IRange;
+        copyRange?: IDiscreteRange;
         pasteType: string;
     },
     lexerTreeBuilder: LexerTreeBuilder,
@@ -123,7 +124,6 @@ export function getSetCellFormulaMutations(
 ) {
     const redoMutationsInfo: IMutationInfo[] = [];
     const undoMutationsInfo: IMutationInfo[] = [];
-    const { startColumn, startRow } = range;
 
     const valueMatrix = new ObjectMatrix<ICellData>();
     const formulaIdMap = new Map<string, string>();
@@ -131,16 +131,11 @@ export function getSetCellFormulaMutations(
     let copyRowLength = 0;
     let copyColumnLength = 0;
 
-    let copyRangeStartRow = 0;
-    let copyRangeStartColumn = 0;
-
-    if (copyInfo) {
+    if (copyInfo && copyInfo.copyRange) {
         const { copyType, copyRange } = copyInfo;
         if (copyType === COPY_TYPE.COPY && copyRange) {
-            copyRangeStartRow = copyRange.startRow;
-            copyRangeStartColumn = copyRange.startColumn;
-            copyRowLength = copyRange.endRow - copyRangeStartRow + 1;
-            copyColumnLength = copyRange.endColumn - copyRangeStartColumn + 1;
+            copyRowLength = copyRange.rows.length;
+            copyColumnLength = copyRange.cols.length;
         }
     }
 
@@ -175,8 +170,10 @@ export function getSetCellFormulaMutations(
                 formulaId = Tools.generateRandomId(6);
                 formulaIdMap.set(index, formulaId);
 
-                const offsetX = col + startColumn - (copyRangeStartColumn + colIndex);
-                const offsetY = row + startRow - (copyRangeStartRow + rowIndex);
+                const copyX = copyInfo?.copyRange ? copyInfo?.copyRange?.cols[colIndex] : colIndex;
+                const copyY = copyInfo?.copyRange ? copyInfo?.copyRange?.rows[rowIndex] : rowIndex;
+                const offsetX = range.cols[col] - copyX;
+                const offsetY = range.rows[row] - copyY;
                 const shiftedFormula = lexerTreeBuilder.moveFormulaRefOffset(originalFormula, offsetX, offsetY);
 
                 valueObject.si = formulaId;
@@ -192,7 +189,7 @@ export function getSetCellFormulaMutations(
             }
         }
 
-        valueMatrix.setValue(row + startRow, col + startColumn, valueObject);
+        valueMatrix.setValue(range.rows[row], range.cols[col], valueObject);
     });
     // set cell value and style
     const setValuesMutation: ISetRangeValuesMutationParams = {

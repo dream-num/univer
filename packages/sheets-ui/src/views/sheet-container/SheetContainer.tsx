@@ -15,7 +15,8 @@
  */
 
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import { IUniverInstanceService } from '@univerjs/core';
+import type { Workbook } from '@univerjs/core';
+import { IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import React from 'react';
 import { useObservable } from '@univerjs/ui';
 
@@ -29,7 +30,7 @@ import styles from './index.module.less';
 
 export function RenderSheetFooter() {
     const univerInstanceService = useDependency(IUniverInstanceService);
-    const workbook = useObservable(univerInstanceService.currentSheet$);
+    const workbook = useObservable(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), null, false, []);
     if (!workbook) return null;
 
     return (
@@ -43,17 +44,19 @@ export function RenderSheetFooter() {
 
 export function RenderSheetHeader() {
     const univerInstanceService = useDependency(IUniverInstanceService);
-    const workbook = useObservable(univerInstanceService.currentSheet$);
+    const workbook = useObservable(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), null, false, []);
     if (!workbook) return null;
 
     return (
-        <FormulaBar />
+        <>
+            <FormulaBar />
+        </>
     );
 }
 
 export function RenderSheetContent() {
     const univerInstanceService = useDependency(IUniverInstanceService);
-    const workbook = useObservable(univerInstanceService.currentSheet$);
+    const workbook = useObservable(() => univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET), null, false, []);
     if (!workbook) return null;
 
     return (

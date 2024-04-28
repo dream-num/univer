@@ -69,11 +69,8 @@ describe('Test paste with formula', () => {
             const unitId = 'test';
             const subUnitId = 'sheet1';
             const range = {
-                startRow: 12,
-                startColumn: 2,
-                endRow: 12,
-                endColumn: 3,
-                rangeType: 0,
+                rows: [12],
+                cols: [2, 3],
             };
             const matrix = new ObjectMatrix<ICellDataWithSpanInfo>({
                 0: {
@@ -94,11 +91,8 @@ describe('Test paste with formula', () => {
 
             const copyInfo = {
                 copyRange: {
-                    startRow: 0,
-                    startColumn: 2,
-                    endRow: 0,
-                    endColumn: 3,
-                    rangeType: 0,
+                    rows: [0],
+                    cols: [2, 3],
                 },
                 copyType: COPY_TYPE.COPY,
                 pasteType: PREDEFINED_HOOK_NAME.DEFAULT_PASTE,
@@ -174,11 +168,8 @@ describe('Test paste with formula', () => {
             const unitId = 'test';
             const subUnitId = 'sheet1';
             const range = {
-                startRow: 5,
-                startColumn: 5,
-                endRow: 8,
-                endColumn: 8,
-                rangeType: 0,
+                rows: [5, 6, 7, 8],
+                cols: [5, 6, 7, 8],
             };
             const matrix = new ObjectMatrix<ICellDataWithSpanInfo>({
                 0: {
@@ -326,11 +317,8 @@ describe('Test paste with formula', () => {
             const copyInfo = {
                 copyType: COPY_TYPE.COPY,
                 copyRange: {
-                    startRow: 0,
-                    startColumn: 5,
-                    endRow: 3,
-                    endColumn: 8,
-                    rangeType: 0,
+                    rows: [0, 1, 2, 3],
+                    cols: [5, 6, 7, 8],
                 },
                 pasteType: PREDEFINED_HOOK_NAME.DEFAULT_PASTE,
             };

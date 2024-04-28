@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-import type { IMutationInfo, IRange } from '@univerjs/core';
-import { Disposable, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, Range, Rectangle } from '@univerjs/core';
+import type { IMutationInfo, IRange, Workbook } from '@univerjs/core';
+import { Disposable, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, Range, Rectangle, UniverInstanceType } from '@univerjs/core';
 import { createTopMatrixFromMatrix, findAllRectangle } from '@univerjs/sheets';
 
-import type { ISheetAutoFillHook } from '@univerjs/sheets-ui';
-import { APPLY_TYPE, getAutoFillRepeatRange, IAutoFillService } from '@univerjs/sheets-ui';
+import type { IDiscreteRange, ISheetAutoFillHook } from '@univerjs/sheets-ui';
+import { APPLY_TYPE, getAutoFillRepeatRange, IAutoFillService, virtualizeDiscreteRanges } from '@univerjs/sheets-ui';
 import { Inject, Injector } from '@wendellhu/redi';
 import { ConditionalFormattingRuleModel, ConditionalFormattingViewModel, SetConditionalRuleMutation, setConditionalRuleMutationUndoFactory, SHEET_CONDITIONAL_FORMATTING_PLUGIN } from '@univerjs/sheets-conditional-formatting';
 import type { ISetConditionalRuleMutationParams } from '@univerjs/sheets-conditional-formatting';
@@ -40,16 +40,19 @@ export class ConditionalFormattingAutoFillController extends Disposable {
         this._initAutoFill();
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _initAutoFill() {
         const noopReturnFunc = () => ({ redos: [], undos: [] });
+        // eslint-disable-next-line max-lines-per-function
         const loopFunc = (
             sourceStartCell: { row: number; col: number },
             targetStartCell: { row: number; col: number },
             relativeRange: IRange,
-            matrixMap: Map<string, ObjectMatrix<1>>
+            matrixMap: Map<string, ObjectMatrix<1>>,
+            mapFunc: (row: number, col: number) => ({ row: number; col: number })
         ) => {
-            const unitId = this._univerInstanceService.getCurrentUniverSheetInstance()!.getUnitId();
-            const subUnitId = this._univerInstanceService.getCurrentUniverSheetInstance()!.getActiveSheet().getSheetId();
+            const unitId = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId();
+            const subUnitId = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet().getSheetId();
             const sourceRange = {
                 startRow: sourceStartCell.row,
                 startColumn: sourceStartCell.col,
@@ -82,18 +85,19 @@ export class ConditionalFormattingAutoFillController extends Disposable {
                     },
                     targetRange
                 );
+                const { row: sourceRow, col: sourceCol } = mapFunc(sourcePositionRange.startRow, sourcePositionRange.startColumn);
                 const sourceCellCf = this._conditionalFormattingViewModel.getCellCf(
                     unitId,
                     subUnitId,
-                    sourcePositionRange.startRow,
-                    sourcePositionRange.startColumn
+                    sourceRow,
+                    sourceCol
                 );
-
+                const { row: targetRow, col: targetCol } = mapFunc(targetPositionRange.startRow, targetPositionRange.startColumn);
                 const targetCellCf = this._conditionalFormattingViewModel.getCellCf(
                     unitId,
                     subUnitId,
-                    targetPositionRange.startRow,
-                    targetPositionRange.startColumn
+                    targetRow,
+                    targetCol
                 );
                 if (targetCellCf) {
                     targetCellCf.cfList.forEach((cf) => {
@@ -111,7 +115,7 @@ export class ConditionalFormattingAutoFillController extends Disposable {
                             });
                             matrixMap.set(cf.cfId, matrix);
                         }
-                        matrix!.realDeleteValue(targetPositionRange.startRow, targetPositionRange.startColumn);
+                        matrix!.realDeleteValue(targetRow, targetCol);
                     });
                 }
 
@@ -131,26 +135,35 @@ export class ConditionalFormattingAutoFillController extends Disposable {
                             });
                             matrixMap.set(cf.cfId, matrix);
                         }
-                        matrix!.setValue(targetPositionRange.startRow, targetPositionRange.startColumn, 1);
+                        matrix!.setValue(targetRow, targetCol, 1);
                     });
                 }
             });
         };
-        const generalApplyFunc = (sourceRange: IRange, targetRange: IRange) => {
-            const unitId = this._univerInstanceService.getCurrentUniverSheetInstance()!.getUnitId();
-            const subUnitId = this._univerInstanceService.getCurrentUniverSheetInstance()!.getActiveSheet().getSheetId();
+
+        const generalApplyFunc = (sourceRange: IDiscreteRange, targetRange: IDiscreteRange) => {
+            const unitId = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getUnitId();
+            const subUnitId = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getActiveSheet().getSheetId();
             const matrixMap: Map<string, ObjectMatrix<1>> = new Map();
 
             const redos: IMutationInfo[] = [];
             const undos: IMutationInfo[] = [];
+            if (!unitId || !subUnitId) {
+                return noopReturnFunc();
+            }
+
+            const virtualRange = virtualizeDiscreteRanges([sourceRange, targetRange]);
+            const [vSourceRange, vTargetRange] = virtualRange.ranges;
+            const { mapFunc } = virtualRange;
 
             const sourceStartCell = {
-                row: sourceRange.startRow,
-                col: sourceRange.startColumn,
+                row: vSourceRange.startRow,
+                col: vSourceRange.startColumn,
             };
-            const repeats = getAutoFillRepeatRange(sourceRange, targetRange);
+
+            const repeats = getAutoFillRepeatRange(vSourceRange, vTargetRange);
             repeats.forEach((repeat) => {
-                loopFunc(sourceStartCell, repeat.repeatStartCell, repeat.relativeRange, matrixMap);
+                loopFunc(sourceStartCell, repeat.repeatStartCell, repeat.relativeRange, matrixMap, mapFunc);
             });
             matrixMap.forEach((item, cfId) => {
                 const rule = this._conditionalFormattingRuleModel.getRule(unitId, subUnitId, cfId);
@@ -169,20 +182,19 @@ export class ConditionalFormattingAutoFillController extends Disposable {
                 redos,
             };
         };
+
         const hook: ISheetAutoFillHook = {
             id: SHEET_CONDITIONAL_FORMATTING_PLUGIN,
             onFillData: (location, direction, applyType) => {
-                if (
-                    applyType === APPLY_TYPE.COPY ||
-                    applyType === APPLY_TYPE.ONLY_FORMAT ||
-                    applyType === APPLY_TYPE.SERIES
-                ) {
+                if (applyType === APPLY_TYPE.COPY || applyType === APPLY_TYPE.ONLY_FORMAT || applyType === APPLY_TYPE.SERIES) {
                     const { source, target } = location;
                     return generalApplyFunc(source, target);
                 }
+
                 return noopReturnFunc();
             },
         };
+
         this.disposeWithMe(this._autoFillService.addHook(hook));
     }
 }

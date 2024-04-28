@@ -71,8 +71,8 @@ interface IMenuItemBase<V> {
     /** In what menu should the item display. */
     positions: OneOrMany<MenuPosition | string>;
 
-    /** @deprecated this type seems unnecessary */
     type: MenuItemType;
+
     /**
      * Custom label component id.
      */
@@ -127,6 +127,9 @@ export interface IMenuSelectorItem<V = MenuItemDefaultValueType, T = undefined> 
     // 一个是其他 menu 的 id，直接渲染成其他的 menu
     /** Options or IDs of registered components. */
     selections?: Array<IValueOption<T>> | Observable<Array<IValueOption<T>>>;
+
+    /** If `type` is `MenuItemType.BUTTON_SELECTOR`, this determines if the button is activated. */
+    activated$?: Observable<boolean>;
 }
 
 export function isMenuSelectorItem<T extends MenuItemDefaultValueType>(v: IMenuItem): v is IMenuSelectorItem<T> {

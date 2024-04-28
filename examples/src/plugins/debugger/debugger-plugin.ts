@@ -14,47 +14,39 @@
  * limitations under the License.
  */
 
-import { LocaleService, Plugin, PluginType } from '@univerjs/core';
+import { Plugin } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
 import { DebuggerController } from './controllers/debugger.controller';
 import { PerformanceMonitorController } from './controllers/performance-monitor.controller';
+import { E2EMemoryController } from './controllers/e2e/e2e-memory.controller';
 
-export interface IDebuggerPluginConfig {}
+export interface IDebuggerPluginConfig { }
 
 export class DebuggerPlugin extends Plugin {
-    static override type = PluginType.Doc;
+    static override pluginName = 'debugger';
 
     private _debuggerController!: DebuggerController;
 
     constructor(
-        config: IDebuggerPluginConfig,
-        @Inject(Injector) override readonly _injector: Injector,
-        @Inject(LocaleService) private readonly _localeService: LocaleService
+        _config: IDebuggerPluginConfig,
+        @Inject(Injector) override readonly _injector: Injector
     ) {
-        super('debugger');
-        this._initializeDependencies(_injector);
+        super();
     }
 
-    initialize(): void {
-        this._debuggerController = this._injector.createInstance(DebuggerController);
-        this._injector.add([DebuggerController, { useValue: this._debuggerController }]);
-
-        this.registerExtension();
-    }
-
-    registerExtension() {}
-
-    private _initializeDependencies(injector: Injector) {
-        ([[PerformanceMonitorController]] as Dependency[]).forEach((d) => injector.add(d));
+    override onStarting(injector: Injector): void {
+        ([
+            [PerformanceMonitorController],
+            [E2EMemoryController],
+        ] as Dependency[]).forEach((d) => injector.add(d));
     }
 
     override onRendered(): void {
-        this.initialize();
+        this._injector.add([DebuggerController]);
+        this._debuggerController = this._injector.get(DebuggerController);
     }
-
-    override onDestroy(): void {}
 
     getDebuggerController() {
         return this._debuggerController;

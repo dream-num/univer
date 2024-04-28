@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle } from '@univerjs/core';
+import type { Workbook } from '@univerjs/core';
+import { Disposable, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import type { IRemoveSheetCommandParams } from '@univerjs/sheets';
 import { RemoveSheetCommand, SheetInterceptorService } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
@@ -39,7 +40,7 @@ export class DataValidationSheetController extends Disposable {
                 getMutations: (commandInfo) => {
                     if (commandInfo.id === RemoveSheetCommand.id) {
                         const params = commandInfo.params as IRemoveSheetCommandParams;
-                        const unitId = params.unitId || this._univerInstanceService.getCurrentUniverSheetInstance()!.getUnitId();
+                        const unitId = params.unitId || this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId();
                         const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
                         if (!workbook) {
                             return { redos: [], undos: [] };

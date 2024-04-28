@@ -19,7 +19,6 @@ import { BehaviorSubject, Subject } from 'rxjs';
 import { ILogService } from '../services/log/log.service';
 import type { Nullable } from '../shared';
 import { Tools } from '../shared';
-import { Disposable } from '../shared/lifecycle';
 import { DEFAULT_RANGE_ARRAY } from '../types/const';
 import { BooleanNumber } from '../types/enum';
 import type {
@@ -32,6 +31,7 @@ import type {
     IWorkbookData,
     IWorksheetData,
 } from '../types/interfaces';
+import { UnitModel, UniverInstanceType } from '../common/unit';
 import { Styles } from './styles';
 import { Worksheet } from './worksheet';
 import { getEmptySnapshot } from './empty-snapshot';
@@ -43,7 +43,9 @@ export function getWorksheetUID(workbook: Workbook, worksheet: Worksheet): strin
 /**
  * Access and create Univer Sheets files
  */
-export class Workbook extends Disposable {
+export class Workbook extends UnitModel<IWorkbookData, UniverInstanceType.UNIVER_SHEET> {
+    override type: UniverInstanceType.UNIVER_SHEET = UniverInstanceType.UNIVER_SHEET;
+
     private readonly _sheetCreated$ = new Subject<Worksheet>();
     readonly sheetCreated$ = this._sheetCreated$.asObservable();
 
@@ -164,7 +166,7 @@ export class Workbook extends Disposable {
 
         sheets[id] = worksheetSnapshot;
         sheetOrder.splice(index, 0, id);
-        const worksheet = new Worksheet(worksheetSnapshot, this._styles);
+        const worksheet = new Worksheet(this._unitId, worksheetSnapshot, this._styles);
         this._worksheets.set(id, worksheet);
         this._sheetCreated$.next(worksheet);
 
@@ -536,7 +538,7 @@ export class Workbook extends Disposable {
                 this._logService.debug('[Workbook]', `The worksheet name ${name} is duplicated, we changed it to ${worksheetSnapshot.name}. Please fix the problem in your snapshot.`);
             }
 
-            const worksheet = new Worksheet(worksheetSnapshot, this._styles);
+            const worksheet = new Worksheet(this._unitId, worksheetSnapshot, this._styles);
             _worksheets.set(sheetId, worksheet);
 
             if (!sheetOrder.includes(sheetId)) {

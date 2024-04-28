@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import type {
+    Workbook } from '@univerjs/core';
 import {
     Disposable,
     IUniverInstanceService,
@@ -21,6 +23,7 @@ import {
     OnLifecycle,
     RANGE_TYPE,
     toDisposable,
+    UniverInstanceType,
 } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { SelectionManagerService } from '@univerjs/sheets';
@@ -49,7 +52,7 @@ export class SheetContextMenuController extends Disposable {
         @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService
     ) {
         super();
-        this._univerInstanceService.currentSheet$.subscribe((workbook) => {
+        this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => {
             if (workbook) {
                 this._addListeners();
             }

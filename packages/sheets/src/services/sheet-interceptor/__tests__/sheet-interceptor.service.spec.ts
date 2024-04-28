@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import type { ICellData, Nullable, Univer } from '@univerjs/core';
-import { createInterceptorKey, IUniverInstanceService } from '@univerjs/core';
+import type { ICellData, Nullable, Univer, Workbook } from '@univerjs/core';
+import { createInterceptorKey, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import type { Injector } from '@wendellhu/redi';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
@@ -40,11 +40,23 @@ describe('Test SheetInterceptorService', () => {
 
     function getCell(row: number, col: number): Nullable<ICellData> {
         const cus = get(IUniverInstanceService);
-        const sheet = cus.getCurrentUniverSheetInstance()!.getActiveSheet()!;
+        const sheet = cus.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()!;
         return sheet.getCell(row, col);
     }
 
-    describe('Test intercept getting cell content', () => {
+    function getRowFiltered(row: number): boolean {
+        const cus = get(IUniverInstanceService);
+        const sheet = cus.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()!;
+        return sheet.getRowFiltered(row);
+    }
+
+    function getRowRawVisible(row: number): boolean {
+        const cus = get(IUniverInstanceService);
+        const sheet = cus.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()!;
+        return sheet.getRowVisible(row);
+    }
+
+    describe('Test intercepting getting cell content', () => {
         it('should intercept cells and merge result if next is called', () => {
             get(SheetInterceptorService).intercept(INTERCEPTOR_POINT.CELL_CONTENT, {
                 priority: 100,
@@ -75,6 +87,39 @@ describe('Test SheetInterceptorService', () => {
 
             expect(getCell(0, 0)).toEqual({ v: 'intercepted' });
             expect(getCell(0, 1)).toEqual({ v: 'A2' });
+        });
+    });
+
+    describe('Test intercepting getting row filtered', () => {
+        it('should return not filtered when no interceptor is registered', () => {
+            expect(getRowFiltered(1)).toBeFalsy();
+        });
+
+        it('should return filtered according to the interceptor when it is registed', () => {
+            let realFiltered = false;
+
+            get(SheetInterceptorService).intercept(INTERCEPTOR_POINT.ROW_FILTERED, {
+                handler(filtered, location, next) {
+                    if (filtered) {
+                        return true;
+                    }
+
+                    if (realFiltered && location.row === 1) {
+                        return true;
+                    }
+
+                    return next();
+                },
+            });
+
+            expect(getRowFiltered(1)).toBeFalsy();
+            expect(getRowRawVisible(1)).toBeTruthy();
+
+            realFiltered = true;
+            expect(getRowFiltered(1)).toBeTruthy();
+            expect(getRowRawVisible(1)).toBeFalsy();
+            expect(getRowFiltered(2)).toBeFalsy();
+            expect(getRowRawVisible(2)).toBeTruthy();
         });
     });
 
@@ -157,12 +202,12 @@ describe('Test SheetInterceptorService', () => {
     // it('Test SheetInterceptorService', () => {
     //     it('getLastRowWithContent', () => {
     //         const univerInstanceService = get(IUniverInstanceService);
-    //         const sheet = univerInstanceService.getCurrentUniverSheetInstance()!.getActiveSheet()!;
+    //         const sheet = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()!;
     //         expect(sheet.getLastRowWithContent()).toBe(3);
     //     });
     //     it('getLastColumnWithContent', () => {
     //         const univerInstanceService = get(IUniverInstanceService);
-    //         const sheet = univerInstanceService.getCurrentUniverSheetInstance()!.getActiveSheet()!;
+    //         const sheet = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet()!;
     //         expect(sheet.getLastColumnWithContent()).toBe(3);
     //     });
     // });

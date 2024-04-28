@@ -15,8 +15,8 @@
  */
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import type { IRange, IUnitRange } from '@univerjs/core';
-import { createInternalEditorID, ICommandService, InterceptorManager, IUniverInstanceService, LocaleService } from '@univerjs/core';
+import type { IRange, IUnitRange, Workbook } from '@univerjs/core';
+import { createInternalEditorID, ICommandService, InterceptorManager, IUniverInstanceService, LocaleService, UniverInstanceType } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { serializeRange } from '@univerjs/engine-formula';
 import { Button, Select } from '@univerjs/design';
@@ -47,8 +47,8 @@ interface IRuleEditProps {
     onCancel: () => void;
 }
 
-const getUnitId = (univerInstanceService: IUniverInstanceService) => univerInstanceService.getCurrentUniverSheetInstance()!.getUnitId();
-const getSubUnitId = (univerInstanceService: IUniverInstanceService) => univerInstanceService.getCurrentUniverSheetInstance()!.getActiveSheet().getSheetId();
+const getUnitId = (univerInstanceService: IUniverInstanceService) => univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getUnitId();
+const getSubUnitId = (univerInstanceService: IUniverInstanceService) => univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet().getSheetId();
 
 export const RuleEdit = (props: IRuleEditProps) => {
     const localeService = useDependency(LocaleService);
@@ -60,11 +60,13 @@ export const RuleEdit = (props: IRuleEditProps) => {
     const subUnitId = getSubUnitId(univerInstanceService);
 
     const rangeResult = useRef<IRange[]>(props.rule?.ranges ?? []);
+
     const rangeString = useMemo(() => {
         let ranges = props.rule?.ranges;
         if (!ranges?.length) {
             ranges = selectionManagerService.getSelectionRanges() ?? [];
         }
+        rangeResult.current = ranges;
         if (!ranges?.length) {
             return '';
         }
@@ -182,7 +184,7 @@ export const RuleEdit = (props: IRuleEditProps) => {
     const handleSubmit = () => {
         const beforeSubmitResult = interceptorManager.fetchThroughInterceptors(interceptorManager.getInterceptPoints().beforeSubmit)(true, null);
         const getRanges = () => {
-            const worksheet = univerInstanceService.getCurrentUniverSheetInstance()!.getActiveSheet();
+            const worksheet = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet();
             const ranges = rangeResult.current.map((range) => setEndForRange(range, worksheet.getRowCount(), worksheet.getColumnCount()));
             const result = ranges.filter((range) => !(Number.isNaN(range.startRow) || Number.isNaN(range.startColumn)));
             return result;

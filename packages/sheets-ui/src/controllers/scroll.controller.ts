@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IFreeze, IRange, IWorksheetData, Nullable } from '@univerjs/core';
+import type { IFreeze, IRange, IWorksheetData, Nullable, Workbook } from '@univerjs/core';
 import {
     Direction,
     Disposable,
@@ -23,6 +23,7 @@ import {
     LifecycleStages,
     OnLifecycle,
     toDisposable,
+    UniverInstanceType,
 } from '@univerjs/core';
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { ScrollToCellOperation, SelectionManagerService } from '@univerjs/sheets';
@@ -404,7 +405,7 @@ export class ScrollController extends Disposable {
             return false;
         }
 
-        const worksheet = this._univerInstanceService.getCurrentUniverSheetInstance()!.getActiveSheet();
+        const worksheet = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet();
         const {
             startColumn: freezeStartColumn,
             startRow: freezeStartRow,

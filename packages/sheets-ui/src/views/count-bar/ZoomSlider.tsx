@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 
+import type { Workbook } from '@univerjs/core';
 import {
     ICommandService,
     IUniverInstanceService,
+    UniverInstanceType,
 } from '@univerjs/core';
 import { Slider } from '@univerjs/design';
 import { SetWorksheetActivateCommand } from '@univerjs/sheets';
@@ -34,7 +36,7 @@ export function ZoomSlider() {
     const univerInstanceService = useDependency(IUniverInstanceService);
 
     const getCurrentZoom = useCallback(() => {
-        const currentZoom = univerInstanceService.getCurrentUniverSheetInstance()!.getActiveSheet().getZoomRatio() * 100 || 100;
+        const currentZoom = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet().getZoomRatio() * 100 || 100;
         return Math.round(currentZoom);
     }, [univerInstanceService]);
 
@@ -52,7 +54,7 @@ export function ZoomSlider() {
 
     function handleChange(value: number) {
         setZoom(value);
-        const workbook = univerInstanceService.getCurrentUniverSheetInstance()!;
+        const workbook = univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
         const worksheet = workbook?.getActiveSheet();
         if (worksheet == null) {
             return;

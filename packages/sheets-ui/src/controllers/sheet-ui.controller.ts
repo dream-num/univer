@@ -474,7 +474,7 @@ export class SheetUIController extends Disposable {
 
     private _initFocusHandler(): void {
         this.disposeWithMe(
-            this._layoutService.registerFocusHandler(UniverInstanceType.SHEET, (_unitId: string) => {
+            this._layoutService.registerFocusHandler(UniverInstanceType.UNIVER_SHEET, (_unitId: string) => {
                 // DEBT: `_unitId` is not used hence we cannot support Univer mode now
                 const textSelectionManagerService = this._injector.get(ITextSelectionRenderManager);
                 textSelectionManagerService.focus();

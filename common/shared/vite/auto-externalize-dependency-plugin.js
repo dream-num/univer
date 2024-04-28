@@ -11,7 +11,7 @@ exports.autoExternalizeDependency = function autoExternalizeDependency() {
         '@wendellhu/redi': {
             global: '@wendellhu/redi',
             name: '@wendellhu/redi',
-            version: '0.13.0',
+            version: '^0.13.3',
         },
         '@wendellhu/redi/react-bindings': {
             global: '@wendellhu/redi/react-bindings',
@@ -22,6 +22,11 @@ exports.autoExternalizeDependency = function autoExternalizeDependency() {
             global: 'clsx',
             name: 'clsx',
             version: '>=2.0.0',
+        },
+        dayjs: {
+            global: 'dayjs',
+            name: 'dayjs',
+            version: '>=1.11.0',
         },
         lodash: {
             global: 'lodash',

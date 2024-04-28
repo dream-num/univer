@@ -42,8 +42,8 @@
         "@wendellhu/redi": "^0.13.3",
         "clsx": "^2.1.1",
         "monaco-editor": "0.47.0",
-        "react": "^18.2.0",
-        "react-dom": "^18.2.0",
+        "react": "18.2.0",
+        "react-dom": "18.2.0",
         "react-mosaic-component": "^6.1.0",
         "rxjs": "^7.8.1",
         "vue": "^3.4.21"

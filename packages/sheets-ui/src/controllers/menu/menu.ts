@@ -680,7 +680,7 @@ export function VerticalAlignMenuItemFactory(accessor: IAccessor): IMenuSelector
 
     return {
         id: SetVerticalTextAlignCommand.id,
-        icon: VERTICAL_ALIGN_CHILDREN[0].icon,
+        icon: VERTICAL_ALIGN_CHILDREN[2].icon,
         tooltip: 'toolbar.verticalAlignMode.main',
         group: MenuGroup.TOOLBAR_LAYOUT,
         type: MenuItemType.SELECTOR,

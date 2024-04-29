@@ -49,15 +49,16 @@ export class FormatPainterRenderController extends Disposable implements IRender
     }
 
     private _bindFormatPainterStatus() {
-        this._formatPainterService.status$.subscribe((status) => {
-            const scene = this._context.scene;
-            if (!scene) return;
-            if (status !== FormatPainterStatus.OFF) {
-                scene.setDefaultCursor(CURSOR_TYPE.CELL);
-            } else {
-                scene.setDefaultCursor(CURSOR_TYPE.DEFAULT);
-            }
-        });
+        this.disposeWithMe(
+            toDisposable(this._formatPainterService.status$.subscribe((status) => {
+                const scene = this._context.scene;
+                if (!scene) return;
+                if (status !== FormatPainterStatus.OFF) {
+                    scene.setDefaultCursor(CURSOR_TYPE.CELL);
+                } else {
+                    scene.setDefaultCursor(CURSOR_TYPE.DEFAULT);
+                }
+            })));
     }
 
     private _commandExecutedListener() {

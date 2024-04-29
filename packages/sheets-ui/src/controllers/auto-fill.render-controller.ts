@@ -99,6 +99,12 @@ export class AutoFillRenderController extends Disposable implements IRenderContr
         this._init();
     }
 
+    override dispose(): void {
+        super.dispose();
+        this._copyData = [];
+        this._beforeApplyData = [];
+    }
+
     private _init() {
         this._initDefaultHook();
         this._onSelectionControlFillChanged();

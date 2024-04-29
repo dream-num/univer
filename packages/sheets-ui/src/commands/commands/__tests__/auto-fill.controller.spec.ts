@@ -38,7 +38,7 @@ import type { Injector } from '@wendellhu/redi';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
-import { AutoFillController } from '../../../controllers/auto-fill.controller';
+import { AutoFillRenderController } from '../../../controllers/auto-fill.render-controller';
 import { AutoFillService, IAutoFillService } from '../../../services/auto-fill/auto-fill.service';
 import { APPLY_TYPE } from '../../../services/auto-fill/type';
 import { EditorBridgeService, IEditorBridgeService } from '../../../services/editor-bridge.service';
@@ -258,7 +258,7 @@ describe('Test auto fill rules in controller', () => {
     let univer: Univer;
     let get: Injector['get'];
     let commandService: ICommandService;
-    let autoFillController: AutoFillController;
+    let autoFillController: AutoFillRenderController;
     let themeService: ThemeService;
     let getValues: (
         startRow: number,
@@ -283,7 +283,7 @@ describe('Test auto fill rules in controller', () => {
             [IEditorService, { useClass: EditorService }],
             [IRenderManagerService, { useClass: RenderManagerService }],
             [SheetSkeletonManagerService],
-            [AutoFillController],
+            [AutoFillRenderController],
         ]);
         univer = testBed.univer;
         get = testBed.get;
@@ -291,7 +291,7 @@ describe('Test auto fill rules in controller', () => {
         commandService = get(ICommandService);
         themeService = get(ThemeService);
         themeService.setTheme(theme);
-        autoFillController = get(AutoFillController);
+        autoFillController = get(AutoFillRenderController);
         selectionManagerService = get(SelectionManagerService);
         selectionManagerService.setCurrentSelection({
             pluginName: NORMAL_SELECTION_PLUGIN_NAME,

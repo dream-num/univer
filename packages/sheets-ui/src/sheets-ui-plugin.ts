@@ -22,7 +22,7 @@ import { filter } from 'rxjs/operators';
 
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { ActiveWorksheetController } from './controllers/active-worksheet/active-worksheet.controller';
-import { AutoFillRenderController } from './controllers/auto-fill.controller';
+import { AutoFillRenderController } from './controllers/auto-fill.render-controller';
 import { AutoHeightController } from './controllers/auto-height.controller';
 import { SheetClipboardController } from './controllers/clipboard/clipboard.controller';
 import { SheetContextMenuController } from './controllers/contextmenu/contextmenu.controller';
@@ -31,7 +31,7 @@ import { EndEditController } from './controllers/editor/end-edit.controller';
 import { FormulaEditorController } from './controllers/editor/formula-editor.controller';
 import { StartEditController } from './controllers/editor/start-edit.controller';
 import { EditorBridgeController } from './controllers/editor-bridge.controller';
-import { FormatPainterRenderController } from './controllers/format-painter/format-painter.controller';
+import { FormatPainterRenderController } from './controllers/format-painter/format-painter.render-controller';
 import { HeaderFreezeRenderController } from './controllers/render-controllers/freeze.render-controller';
 import { HeaderMenuController } from './controllers/header-menu.controller';
 import { HeaderMoveController } from './controllers/header-move.controller';

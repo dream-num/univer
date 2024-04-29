@@ -40,7 +40,7 @@ import type { Injector } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { FormatPainterController } from '../../../controllers/format-painter/format-painter.controller';
+import { FormatPainterRenderController } from '../../../controllers/format-painter/format-painter.render-controller';
 import { FormatPainterService, IFormatPainterService } from '../../../services/format-painter/format-painter.service';
 import { SetFormatPainterOperation } from '../../operations/set-format-painter.operation';
 import {
@@ -211,7 +211,7 @@ describe('Test format painter rules in controller', () => {
     let get: Injector['get'];
     let commandService: ICommandService;
     let themeService: ThemeService;
-    let formatPainterController: FormatPainterController;
+    let formatPainterController: FormatPainterRenderController;
 
     beforeEach(() => {
         const testBed = createCommandTestBed(TEST_WORKBOOK_DATA, [
@@ -219,7 +219,7 @@ describe('Test format painter rules in controller', () => {
             [IFormatPainterService, { useClass: FormatPainterService }],
             [ISelectionRenderService, { useClass: SelectionRenderService }],
             [IRenderManagerService, { useClass: RenderManagerService }],
-            [FormatPainterController],
+            [FormatPainterRenderController],
         ]);
         univer = testBed.univer;
         get = testBed.get;
@@ -228,7 +228,7 @@ describe('Test format painter rules in controller', () => {
         themeService = get(ThemeService);
         themeService.setTheme(theme);
 
-        formatPainterController = get(FormatPainterController);
+        formatPainterController = get(FormatPainterRenderController);
         commandService.registerCommand(SetFormatPainterOperation);
         commandService.registerCommand(SetInfiniteFormatPainterCommand);
         commandService.registerCommand(SetOnceFormatPainterCommand);

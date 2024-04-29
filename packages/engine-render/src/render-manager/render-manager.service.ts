@@ -172,15 +172,30 @@ export class RenderManagerService extends Disposable implements IRenderManagerSe
         });
 
         const unit = this._univerInstanceService.getUnit(unitId)!;
-        const type = this._univerInstanceService.getUnitType(unitId);
-        const ctors = this._getRenderControllersForType(type);
-        const renderUnit = new RenderUnit(this._injector, {
-            unit,
-            engine,
-            scene,
-            isMainScene,
-        });
-        renderUnit.addRenderControllers(ctors);
+        let renderUnit: IRender;
+
+        if (unit) {
+            const type = this._univerInstanceService.getUnitType(unitId);
+            const ctors = this._getRenderControllersForType(type);
+            renderUnit = new RenderUnit(this._injector, {
+                unit,
+                engine,
+                scene,
+                isMainScene,
+            });
+
+            (renderUnit as RenderUnit).addRenderControllers(ctors);
+        } else {
+            // For slide pages
+            renderUnit = {
+                unitId,
+                engine,
+                scene,
+                mainComponent: null,
+                components: new Map(),
+                isMainScene,
+            };
+        }
 
         this.addRenderItem(unitId, renderUnit);
         return renderUnit;

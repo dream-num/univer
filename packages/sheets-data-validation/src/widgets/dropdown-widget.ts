@@ -16,9 +16,9 @@
 
 import { BooleanNumber, DataValidationRenderMode, DEFAULT_EMPTY_DOCUMENT_VALUE, DocumentDataModel, HorizontalAlign, ICommandService, LocaleService, Tools, VerticalAlign, WrapStrategy } from '@univerjs/core';
 import type { ICellRenderContext, IDocumentData, IPaddingData, IStyleData, Nullable } from '@univerjs/core';
-import { Documents, DocumentSkeleton, DocumentViewModel, getDocsSkeletonPageSize, type IMouseEvent, type IPointerEvent, Rect, type SpreadsheetSkeleton, type UniverRenderingContext2D } from '@univerjs/engine-render';
+import { Documents, DocumentSkeleton, DocumentViewModel, getDocsSkeletonPageSize, type IMouseEvent, type IPointerEvent, type ISheetFontRenderExtension, Rect, type SpreadsheetSkeleton, type UniverRenderingContext2D } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
-import { DataValidationModel, DataValidatorRegistryService, type IBaseDataValidationWidget } from '@univerjs/data-validation';
+import type { IBaseDataValidationWidget } from '@univerjs/data-validation';
 import { getCellValueOrigin } from '../utils/get-cell-data-origin';
 import { type IShowDataValidationDropdownParams, ShowDataValidationDropdown } from '../commands/operations/data-validation.operation';
 import { DROP_DOWN_DEFAULT_COLOR } from '../common/const';
@@ -129,9 +129,7 @@ export class DropdownWidget implements IBaseDataValidationWidget {
 
     constructor(
         @Inject(LocaleService) private readonly _localeService: LocaleService,
-        @ICommandService private readonly _commandService: ICommandService,
-        @Inject(DataValidationModel) private readonly _dataValidationModel: DataValidationModel,
-        @Inject(DataValidatorRegistryService) private readonly _dataValidatorRegistryService: DataValidatorRegistryService
+        @ICommandService private readonly _commandService: ICommandService
     ) { }
 
     zIndex?: number | undefined;
@@ -174,16 +172,16 @@ export class DropdownWidget implements IBaseDataValidationWidget {
         ctx.restore();
     }
 
+    // eslint-disable-next-line max-lines-per-function, complexity
     drawWith(ctx: UniverRenderingContext2D, info: ICellRenderContext, skeleton: SpreadsheetSkeleton): void {
         const { primaryWithCoord, row, col, style, data, subUnitId } = info;
-        const cellBounding = primaryWithCoord.isMergedMainCell ? primaryWithCoord.mergeInfo : primaryWithCoord;
-        const cellWidth = cellBounding.endX - cellBounding.startX;
-        const cellHeight = cellBounding.endY - cellBounding.startY;
-        const map = this._ensureMap(subUnitId);
-        const key = this._generateKey(row, col);
+        const _cellBounding = primaryWithCoord.isMergedMainCell ? primaryWithCoord.mergeInfo : primaryWithCoord;
 
         const rule = data.dataValidation?.rule;
         const validator = data.dataValidation?.validator as ListValidator;
+        // @ts-ignore
+        const fontRenderExtension = data.fontRenderExtension as ISheetFontRenderExtension['fontRenderExtension'];
+        const { leftOffset = 0, rightOffset = 0, topOffset = 0, downOffset = 0 } = fontRenderExtension || {};
 
         if (!rule || !validator) {
             return;
@@ -192,6 +190,19 @@ export class DropdownWidget implements IBaseDataValidationWidget {
         if (!validator.skipDefaultFontRender(rule)) {
             return;
         }
+
+        const cellBounding = {
+            startX: _cellBounding.startX + leftOffset,
+            endX: _cellBounding.endX - rightOffset,
+            startY: _cellBounding.startY + topOffset,
+            endY: _cellBounding.endY - downOffset,
+
+        };
+        const cellWidth = cellBounding.endX - cellBounding.startX;
+        const cellHeight = cellBounding.endY - cellBounding.startY;
+        const map = this._ensureMap(subUnitId);
+        const key = this._generateKey(row, col);
+
 
         const list = validator.getListWithColor(rule);
         const value = getCellValueOrigin(data);
@@ -348,10 +359,11 @@ export class DropdownWidget implements IBaseDataValidationWidget {
 
     calcCellAutoHeight(info: ICellRenderContext): number | undefined {
         const { primaryWithCoord, style, data } = info;
-        const cellBounding = primaryWithCoord.isMergedMainCell ? primaryWithCoord.mergeInfo : primaryWithCoord;
-        const cellWidth = cellBounding.endX - cellBounding.startX;
-        const value = getCellValueOrigin(data);
-        const valueStr = `${value ?? ''}`;
+        const _cellBounding = primaryWithCoord.isMergedMainCell ? primaryWithCoord.mergeInfo : primaryWithCoord;
+
+        // @ts-ignore
+        const fontRenderExtension = data.fontRenderExtension as ISheetFontRenderExtension['fontRenderExtension'];
+        const { leftOffset = 0, rightOffset = 0, topOffset = 0, downOffset = 0 } = fontRenderExtension || {};
 
         const rule = data.dataValidation?.rule;
 
@@ -362,6 +374,17 @@ export class DropdownWidget implements IBaseDataValidationWidget {
         if (rule.renderMode === DataValidationRenderMode.TEXT) {
             return undefined;
         }
+
+        const cellBounding = {
+            startX: _cellBounding.startX + leftOffset,
+            endX: _cellBounding.endX - rightOffset,
+            startY: _cellBounding.startY + topOffset,
+            endY: _cellBounding.endY - downOffset,
+
+        };
+        const cellWidth = cellBounding.endX - cellBounding.startX;
+        const value = getCellValueOrigin(data);
+        const valueStr = `${value ?? ''}`;
 
         let { tb } = style || {};
 
@@ -393,7 +416,6 @@ export class DropdownWidget implements IBaseDataValidationWidget {
             }
 
             documentSkeleton.calculate();
-            documentSkeleton.getActualSize();
             const textLayout = getDocsSkeletonPageSize(documentSkeleton)!;
 
             const {

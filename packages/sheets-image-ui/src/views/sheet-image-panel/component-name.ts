@@ -14,3 +14,4 @@
  * limitations under the License.
  */
 
+export const COMPONENT_SHEET_IMAGE_PANEL = 'COMPONENT_SHEET_IMAGE_PANEL';

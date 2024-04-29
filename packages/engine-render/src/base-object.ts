@@ -126,7 +126,6 @@ export abstract class BaseObject extends Disposable {
 
     private _cursor: CURSOR_TYPE = CURSOR_TYPE.DEFAULT;
 
-    private _isTransformer = false;
 
     private _forceRender = false;
 
@@ -248,9 +247,6 @@ export abstract class BaseObject extends Disposable {
         return this._debounceParentDirty;
     }
 
-    get isTransformer() {
-        return this._isTransformer;
-    }
 
     get cursor() {
         return this._cursor;
@@ -280,9 +276,6 @@ export abstract class BaseObject extends Disposable {
         this._debounceParentDirty = state;
     }
 
-    set isTransformer(state: boolean) {
-        this._isTransformer = state;
-    }
 
     set cursor(val: CURSOR_TYPE) {
         this.setCursor(val);
@@ -751,6 +744,18 @@ export abstract class BaseObject extends Disposable {
 
     getObjects(): BaseObject[] {
         return [];
+    }
+
+    getLayerIndex() {
+        return this._layer.zIndex;
+    }
+
+    applyTransform() {
+        this.getScene()?.attachTransformerTo(this);
+    }
+
+    removeTransform() {
+        this.getScene()?.detachTransformerFrom(this);
     }
 
     protected _getInverseCoord(coord: Vector2) {

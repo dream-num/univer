@@ -88,10 +88,26 @@ export class ThreadCommentModel {
         return subUnitMap;
     }
 
-    private _refreshCommentsMap() {
+    private _refreshCommentsMap$() {
         this._commentsMap$.next({
             ...this._commentsMap,
         });
+    }
+
+    private _refreshCommentsTreeMap$() {
+        const map: Record<string, Record<string, Record<string, string[]>>> = {};
+        this._commentsTreeMap.forEach((unit, unitId) => {
+            map[unitId] = {};
+            const unitRecord = map[unitId];
+            unit.forEach((subUnit, subUnitId) => {
+                unitRecord[subUnitId] = {};
+                const subUnitRecord = unitRecord[subUnitId];
+                subUnit.forEach((children, key) => {
+                    subUnitRecord[key] = children;
+                });
+            });
+        });
+        this._commentsTreeMap$.next(map);
     }
 
     ensureMap(unitId: string, subUnitId: string) {
@@ -126,7 +142,8 @@ export class ThreadCommentModel {
             type: 'add',
             payload: comment,
         });
-        this._refreshCommentsMap();
+        this._refreshCommentsMap$();
+        this._refreshCommentsTreeMap$();
     }
 
     updateComment(unitId: string, subUnitId: string, payload: IUpdateCommentPayload) {
@@ -145,7 +162,8 @@ export class ThreadCommentModel {
             type: 'update',
             payload,
         });
-        this._refreshCommentsMap();
+        this._refreshCommentsMap$();
+        this._refreshCommentsTreeMap$();
         return true;
     }
 
@@ -164,7 +182,8 @@ export class ThreadCommentModel {
             type: 'updateRef',
             payload,
         });
-        this._refreshCommentsMap();
+        this._refreshCommentsMap$();
+        this._refreshCommentsTreeMap$();
         return true;
     }
 
@@ -176,7 +195,8 @@ export class ThreadCommentModel {
         }
 
         oldComment.resolved = resolved;
-        this._refreshCommentsMap();
+        this._refreshCommentsMap$();
+        this._refreshCommentsTreeMap$();
         return true;
     }
 
@@ -242,7 +262,8 @@ export class ThreadCommentModel {
                 isRoot: !current.parentId,
             },
         });
-        this._refreshCommentsMap();
+        this._refreshCommentsMap$();
+        this._refreshCommentsTreeMap$();
     }
 
     getUnit(unitId: string) {

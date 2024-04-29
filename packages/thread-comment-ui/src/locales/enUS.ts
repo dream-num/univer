@@ -16,6 +16,9 @@
 
 export default {
     threadCommentUI: {
+        panel: {
+            title: 'Comment Management',
+        },
         editor: {
             placeholder: 'Reply or add others with @',
             reply: 'Reply',

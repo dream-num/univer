@@ -15,7 +15,11 @@
  */
 
 export default {
+
     threadCommentUI: {
+        panel: {
+            title: '评论管理',
+        },
         editor: {
             placeholder: 'Reply or add others with @',
             reply: '回复',

@@ -14,27 +14,19 @@
  * limitations under the License.
  */
 
-import { ComponentManager, getMenuHiddenObservable, MenuGroup, MenuItemType, MenuPosition } from '@univerjs/ui';
+import { getMenuHiddenObservable, MenuItemType, MenuPosition } from '@univerjs/ui';
 import type { IAccessor } from '@wendellhu/redi';
 import { ToggleSheetCommentPanelOperation } from '@univerjs/thread-comment-ui';
 import { UniverInstanceType } from '@univerjs/core';
-import { CommentSingle } from '@univerjs/icons';
 import { ShowAddSheetCommentModalOperation } from '../commands/operations/comment.operation';
+import { COMMENT_SINGLE_ICON } from '../types/const';
 
 export const threadCommentMenu = (accessor: IAccessor) => {
-    const componentManager = accessor.get(ComponentManager);
-    const COMMENT_SINGLE = 'comment-single';
-
-    componentManager.register(
-        COMMENT_SINGLE,
-        CommentSingle
-    );
-
     return {
         id: ShowAddSheetCommentModalOperation.id,
         type: MenuItemType.BUTTON,
         positions: [MenuPosition.CONTEXT_MENU],
-        icon: COMMENT_SINGLE,
+        icon: COMMENT_SINGLE_ICON,
         title: 'sheetThreadComment.menu.addComment',
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
@@ -44,8 +36,9 @@ export const threadPanelMenu = (accessor: IAccessor) => {
     return {
         id: ToggleSheetCommentPanelOperation.id,
         type: MenuItemType.BUTTON,
+        icon: COMMENT_SINGLE_ICON,
         tooltip: 'sheetThreadComment.menu.commentManagement',
-        positions: MenuPosition.TOOLBAR_INSERT,
+        positions: MenuPosition.TOOLBAR_START,
         hidden$: getMenuHiddenObservable(accessor, UniverInstanceType.UNIVER_SHEET),
     };
 };

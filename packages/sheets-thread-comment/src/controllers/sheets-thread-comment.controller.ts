@@ -17,8 +17,10 @@
 import { Disposable, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
 import { ComponentManager, IMenuService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
+import { CommentSingle } from '@univerjs/icons';
+import { THREAD_COMMENT_PANEL } from '@univerjs/thread-comment-ui';
 import { SheetsThreadCommentCell } from '../views/sheets-thread-comment-cell';
-import { SHEETS_THREAD_COMMENT_MODAL, SHEETS_THREAD_COMMENT_PANEL } from '../types/const';
+import { COMMENT_SINGLE_ICON, SHEETS_THREAD_COMMENT_MODAL } from '../types/const';
 import { SheetsThreadCommentPanel } from '../views/sheets-thread-comment-panel';
 import { enUS, zhCN } from '../locales';
 import { threadCommentMenu, threadPanelMenu } from './menu';
@@ -49,7 +51,8 @@ export class SheetsThreadCommentController extends Disposable {
     private _initComponent() {
         ([
             [SHEETS_THREAD_COMMENT_MODAL, SheetsThreadCommentCell],
-            [SHEETS_THREAD_COMMENT_PANEL, SheetsThreadCommentPanel],
+            [THREAD_COMMENT_PANEL, SheetsThreadCommentPanel],
+            [COMMENT_SINGLE_ICON, CommentSingle],
         ] as const).forEach(([key, comp]) => {
             this._componentManager.register(key, comp);
         });

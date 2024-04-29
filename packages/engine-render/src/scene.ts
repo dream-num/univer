@@ -93,7 +93,7 @@ export class Scene extends ThinScene {
             )
         );
 
-        if(!window.sceneMap) {
+        if (!window.sceneMap) {
             window.sceneMap = new Map();
         }
         window.sceneMap.set(sceneKey, this);
@@ -465,7 +465,7 @@ export class Scene extends ThinScene {
     override removeViewport(key: string) {
         for (let i = 0, len = this._viewports.length; i < len; i++) {
             const viewport = this._viewports[i];
-            if (viewport.viewPortKey === key) {
+            if (viewport.viewportKey === key) {
                 this._viewports.splice(i, 1);
                 return viewport;
             }
@@ -477,12 +477,12 @@ export class Scene extends ThinScene {
     }
 
     getSpreadSheetViewports() {
-        return this.getViewports().filter( v=> ['viewMain', 'viewMainLeftTop', 'viewMainTop', 'viewMainLeft'].includes(v.viewPortKey ))
+        return this.getViewports().filter((v) => ['viewMain', 'viewMainLeftTop', 'viewMainTop', 'viewMainLeft'].includes(v.viewportKey));
     }
 
     getViewport(key: string) {
         for (const viewport of this._viewports) {
-            if (viewport.viewPortKey === key) {
+            if (viewport.viewportKey === key) {
                 return viewport;
             }
         }

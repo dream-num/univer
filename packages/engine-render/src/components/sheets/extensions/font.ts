@@ -80,8 +80,6 @@ export class Font extends SheetExtension {
         }
         ctx.save();
         const scale = this._getScale(parentScale);
-        let countAll = 0;
-        let count = 0;
         fontList &&
             Object.keys(fontList).forEach((fontFormat: string) => {
                 const fontObjectArray = fontList[fontFormat];
@@ -92,14 +90,13 @@ export class Font extends SheetExtension {
                 // viewMain 要考虑左右溢出和上方合并的单元格的内容
                 // 因此, 在 viewBounds 中的下方的单元格 ---> 提前退出
                 // 而 viewMainLeftTop 不受 viewBounds 之外的影响, 因此视野外的单元格提前退出
-                // 此外, 不是溢出, 又不在视野内可以提前退出
+                // 此外, 不是溢出, 又不在视野内可以提前退出 (视野需要考虑合并单元格带来的影响)
 
                 // eslint-disable-next-line complexity
                 fontObjectArray.forValue((rowIndex, columnIndex, docsConfig) => {
-                    countAll++;
                     if (checkOutOfViewBound) {
                         // 下方单元格 提前退出
-                        if (!inCurrentAndAboveViewRanges(viewRanges!, rowIndex, columnIndex)) {
+                        if (!inCurrentAndAboveViewRanges(viewRanges!, rowIndex)) {
                             return true;
                         }
                     } else {
@@ -167,7 +164,7 @@ export class Font extends SheetExtension {
                     const overflowRectangle = overflowCache.getValue(rowIndex, columnIndex);
                     const { horizontalAlign, vertexAngle = 0, centerAngle = 0 } = docsConfig;
 
-                    // 既不是溢出, 又不在当前 range 内(已考虑合并单元格带来的 range 扩展), 那么也退出
+                    // 既不是溢出, 又不在当前 range 内, 那么提前退出(已考虑合并单元格带来的 range 扩展)
                     if (!overflowRectangle && !inViewRanges(combineWithMergeRanges, rowIndex, columnIndex)) {
                         return true;
                     }
@@ -225,7 +222,7 @@ export class Font extends SheetExtension {
                             // );
                         } else {
                             if (horizontalAlignOverFlow === HorizontalAlign.CENTER) {
-                                this._clipRectangle(
+                                this._clipRectangleForOverflow(
                                     ctx,
                                     startRow,
                                     endRow,
@@ -236,7 +233,7 @@ export class Font extends SheetExtension {
                                     columnWidthAccumulation
                                 );
                             } else if (horizontalAlignOverFlow === HorizontalAlign.RIGHT) {
-                                this._clipRectangle(
+                                this._clipRectangleForOverflow(
                                     ctx,
                                     startRow,
                                     rowIndex,
@@ -247,7 +244,7 @@ export class Font extends SheetExtension {
                                     columnWidthAccumulation
                                 );
                             } else {
-                                this._clipRectangle(
+                                this._clipRectangleForOverflow(
                                     ctx,
                                     rowIndex,
                                     endRow,
@@ -269,13 +266,11 @@ export class Font extends SheetExtension {
                         //     cellHeight - 2 / scale
                         // );
                     }
-                    count++;
                     ctx.translate(startX + FIX_ONE_PIXEL_BLUR_OFFSET, startY + FIX_ONE_PIXEL_BLUR_OFFSET);
                     this._renderDocuments(ctx, docsConfig, startX, startY, endX, endY, rowIndex, columnIndex, overflowCache);
                     ctx.restore();
                 });
             });
-        console.log(' font', countAll, count);
         ctx.restore();
     }
 
@@ -333,7 +328,7 @@ export class Font extends SheetExtension {
         documents.changeSkeleton(documentSkeleton).render(ctx);
     }
 
-    private _clipRectangle(
+    private _clipRectangleForOverflow(
         ctx: UniverRenderingContext,
         startRow: number,
         endRow: number,
@@ -351,7 +346,7 @@ export class Font extends SheetExtension {
 
         ctx.rectByPrecision(startX, startY, endX - startX, endY - startY);
         ctx.clip();
-        // ctx.clearRectForTexture(startX, startY, endX - startX, endY - startY);
+        ctx.clearRectForTexture(startX, startY, endX - startX, endY - startY);
     }
 }
 

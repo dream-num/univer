@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, Workbook, IRange } from '@univerjs/core';
+import type { ICommandInfo, IRange, Workbook } from '@univerjs/core';
 import {
     CommandType,
     ICommandService,
@@ -24,10 +24,10 @@ import {
     OnLifecycle,
     RxDisposable,
     toDisposable,
-    UniverInstanceType,
     Tools,
+    UniverInstanceType,
 } from '@univerjs/core';
-import type { Rect, SpreadsheetColumnHeader, SpreadsheetRowHeader, Engine, SpreadsheetSkeleton, IBoundRectNoAngle, Viewport, IBounds, IViewportBounds } from '@univerjs/engine-render';
+import type { Engine, IBoundRectNoAngle, IBounds, IViewportBounds, Rect, SpreadsheetColumnHeader, SpreadsheetRowHeader, SpreadsheetSkeleton, Viewport } from '@univerjs/engine-render';
 import { IRenderManagerService, RENDER_RAW_FORMULA_KEY, Spreadsheet } from '@univerjs/engine-render';
 import {
     COMMAND_LISTENER_SKELETON_CHANGE,
@@ -165,7 +165,6 @@ export class SheetRenderController extends RxDisposable {
                         sheetId,
                         commandId: command.id,
                     });
-
                 } else if (COMMAND_LISTENER_VALUE_CHANGE.includes(command.id)) {
                     this._sheetSkeletonManagerService.reCalculate();
                 }
@@ -192,26 +191,25 @@ export class SheetRenderController extends RxDisposable {
 
     private _markSpreadsheetDirty(unitId: string, command: ICommandInfo) {
         const currentRender = this._renderManagerService.getRenderById(unitId);
-        if(!currentRender) return;
+        if (!currentRender) return;
         const { mainComponent: spreadsheet, components, engine, scene } = currentRender;
-        if(spreadsheet) {
+        if (spreadsheet) {
             spreadsheet.makeDirty(); // refresh spreadsheet
         }
         scene.makeDirty();
-        if(!command.params) return;
+        if (!command.params) return;
         const cmdParams = command.params as Record<string, any>;
         const viewports = scene.getSpreadSheetViewports();
         // 还有个概念和这个很像， SetRangeValuesCommand
-        if(command.id === SetRangeValuesMutation.id && cmdParams.cellValue) {
-
+        if (command.id === SetRangeValuesMutation.id && cmdParams.cellValue) {
             // TODO command.params 数据结构有很多种
-            const dirtyRange:IRange = this._cellValueToRange(cmdParams.cellValue);
+            const dirtyRange: IRange = this._cellValueToRange(cmdParams.cellValue);
             const dirtyBounds = this._rangeToBounds([dirtyRange]);
             this.markViewportDirty(viewports, dirtyBounds);
             (spreadsheet as Spreadsheet).setDirtyArea(dirtyBounds);
         }
 
-        if(command.id === MoveRangeMutation.id && cmdParams.from && cmdParams.to) {
+        if (command.id === MoveRangeMutation.id && cmdParams.from && cmdParams.to) {
             const fromRange = this._cellValueToRange(cmdParams.from.value);
             const toRange = this._cellValueToRange(cmdParams.to.value);
             const dirtyBounds = this._rangeToBounds([fromRange, toRange]);
@@ -220,26 +218,32 @@ export class SheetRenderController extends RxDisposable {
         }
     }
 
+    /**
+     * cellValue data structure:
+     * {[row]: { [col]: value}}
+     * @param cellValue
+     * @returns
+     */
     private _cellValueToRange(cellValue: Record<number, Record<number, object>>) {
-        let rows = Object.keys(cellValue).map(Number);
-        let columns = [];
+        const rows = Object.keys(cellValue).map(Number);
+        const columns = [];
 
-        for (let [row, columnObj] of Object.entries(cellValue)) {
-          for (let column in columnObj) {
-            columns.push(Number(column));
-          }
+        for (const [row, columnObj] of Object.entries(cellValue)) {
+            for (const column in columnObj) {
+                columns.push(Number(column));
+            }
         }
 
-        let startRow = Math.min(...rows);
-        let endRow = Math.max(...rows);
-        let startColumn = Math.min(...columns);
-        let endColumn = Math.max(...columns);
+        const startRow = Math.min(...rows);
+        const endRow = Math.max(...rows);
+        const startColumn = Math.min(...columns);
+        const endColumn = Math.max(...columns);
 
         return {
-          startRow: startRow,
-          endRow: endRow,
-          startColumn: startColumn,
-          endColumn: endColumn
+            startRow,
+            endRow,
+            startColumn,
+            endColumn,
         } as IRange;
     }
 
@@ -248,22 +252,23 @@ export class SheetRenderController extends RxDisposable {
 
         const { rowHeightAccumulation, columnWidthAccumulation, rowHeaderWidth, columnHeaderHeight } = sk;
         // rowHeightAccumulation 已经表示的是行底部的高度
-        const dirtyBounds:IViewportBounds[] = [];
-        for (let r of ranges) {
-            let { startRow, endRow, startColumn, endColumn } = r;
-            let top = startRow == 0 ? 0: rowHeightAccumulation[startRow -1] + columnHeaderHeight;
-            let bottom = rowHeightAccumulation[endRow] + columnHeaderHeight;
-            let left = startColumn == 0 ? 0 : columnWidthAccumulation[startColumn -1] + rowHeaderWidth;
-            let right = columnWidthAccumulation[endColumn] + rowHeaderWidth;
-            dirtyBounds.push({top, left, bottom, right, width: right - left, height: bottom - top});
+        const dirtyBounds: IViewportBounds[] = [];
+        for (const r of ranges) {
+            const { startRow, endRow, startColumn, endColumn } = r;
+            const top = startRow === 0 ? 0 : rowHeightAccumulation[startRow - 1] + columnHeaderHeight;
+            const bottom = rowHeightAccumulation[endRow] + columnHeaderHeight;
+            const left = startColumn === 0 ? 0 : columnWidthAccumulation[startColumn - 1] + rowHeaderWidth;
+            const right = columnWidthAccumulation[endColumn] + rowHeaderWidth;
+            dirtyBounds.push({ top, left, bottom, right, width: right - left, height: bottom - top });
         }
         return dirtyBounds;
     }
 
-    private markViewportDirty(viewports: Viewport[], dirtyBounds:IViewportBounds[]) {
-        for (const vp of viewports) {
-            for(const b of dirtyBounds) {
-                if(Tools.hasIntersectionBetweenTwoBounds(vp.cacheBound, b)) {
+    private markViewportDirty(viewports: Viewport[], dirtyBounds: IViewportBounds[]) {
+        const activeViewports = viewports.filter((vp) => vp.isActive);
+        for (const vp of activeViewports) {
+            for (const b of dirtyBounds) {
+                if (Tools.hasIntersectionBetweenTwoBounds(vp.cacheBound, b)) {
                     vp.markDirty(true);
                 }
             }

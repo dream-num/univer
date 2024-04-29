@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { type IRange, Rectangle, IScale } from '@univerjs/core';
+import { type IRange, IScale, Rectangle } from '@univerjs/core';
 
 import { getCellByIndex } from '../../../basics/tools';
 import { ComponentExtension } from '../../extension';
@@ -155,9 +155,13 @@ export class SheetExtension extends ComponentExtension<SpreadsheetSkeleton, SHEE
 
         for (const range of diffRanges) {
             const { startRow, endRow } = range;
-            // if (row >= startRow && row <= endRow) {
-            //     return true;
-            // }
+            if (curStartRow >= startRow && curStartRow <= endRow) {
+                return true;
+            }
+            if (curEndRow >= startRow && curEndRow <= endRow) {
+                return true;
+            }
+
             const isIntersect = Rectangle.intersects(
                 {
                     startRow: curStartRow,

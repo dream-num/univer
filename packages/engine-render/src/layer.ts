@@ -199,25 +199,26 @@ export class Layer extends Disposable {
 
     render(parentCtx?: UniverRenderingContext, isMaxLayer = false) {
         const mainCtx = parentCtx || this._scene.getEngine()?.getCanvas().getContext();
+        if (mainCtx) {
+            if (this._allowCache && this._cacheCanvas) {
+                if (this.isDirty()) {
+                    const ctx = this._cacheCanvas.getContext();
 
-        if (this._allowCache && this._cacheCanvas) {
-            if (this.isDirty()) {
-                const ctx = this._cacheCanvas.getContext();
+                    this._cacheCanvas.clear();
 
-                this._cacheCanvas.clear();
+                    ctx.save();
 
-                ctx.save();
+                    ctx.setTransform(mainCtx.getTransform());
+                    this._draw(ctx, isMaxLayer);
 
-                ctx.setTransform(mainCtx.getTransform());
-                this._draw(ctx, isMaxLayer);
-
-                ctx.restore();
+                    ctx.restore();
+                }
+                this._applyCache(mainCtx);
+            } else {
+                mainCtx.save();
+                this._draw(mainCtx, isMaxLayer);
+                mainCtx.restore();
             }
-            this._applyCache(mainCtx);
-        } else {
-            mainCtx.save();
-            this._draw(mainCtx, isMaxLayer);
-            mainCtx.restore();
         }
 
         this.makeDirty(false);
@@ -240,7 +241,7 @@ export class Layer extends Disposable {
         this._cacheCanvas = new Canvas();
         this.disposeWithMe(
             toDisposable(
-                this._scene.getEngine().onTransformChangeObservable.add(() => {
+                this._scene.getEngine()?.onTransformChangeObservable.add(() => {
                     this._resizeCacheCanvas();
                 })
             )
@@ -250,7 +251,7 @@ export class Layer extends Disposable {
     private _draw(mainCtx: UniverRenderingContext, isMaxLayer: boolean) {
         const viewports = this._scene.getViewports();
         for (const [index, vp] of viewports.entries()) {
-            vp.render(mainCtx, this.getObjectsByOrder(), isMaxLayer, index === viewports.length -1)
+            vp.render(mainCtx, this.getObjectsByOrder(), isMaxLayer, index === viewports.length - 1);
         }
     }
 
@@ -260,14 +261,17 @@ export class Layer extends Disposable {
         }
         const width = this._cacheCanvas.getWidth();
         const height = this._cacheCanvas.getHeight();
-        if(width * height !== 0) {
+        // it throw an error if canvas size is zero, and canvas size is zero when viewport isActive is false.
+        if (width !== 0 && height !== 0) {
             ctx.drawImage(this._cacheCanvas.getCanvasEle(), 0, 0, width, height);
         }
     }
 
     private _resizeCacheCanvas() {
         const engine = this._scene.getEngine();
-        this._cacheCanvas?.setSize(engine.width, engine.height);
+        if (engine) {
+            this._cacheCanvas?.setSize(engine.width, engine.height);
+        }
         this.makeDirty(true);
     }
 

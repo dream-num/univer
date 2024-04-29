@@ -769,41 +769,46 @@ export function pixelToPt(px: number) {
  * @param colIndex
  * @returns
  */
-export function inViewRanges( ranges:IRange[], rowIndex: number, colIndex: number) {
+export function inViewRanges(ranges: IRange[], rowIndex: number, colIndex: number) {
     for (const range of ranges) {
-        if(rowIndex >= range.startRow && rowIndex <= range.endRow && colIndex >= range.startColumn && colIndex <= range.endColumn)
-        return true;
+        if (rowIndex >= range.startRow && rowIndex <= range.endRow && colIndex >= range.startColumn && colIndex <= range.endColumn) { return true; }
     }
     return false;
 }
 
-export function inLeftAndAboveViewRanges( ranges:IRange[], rowIndex: number, colIndex: number) {
+export function inLeftAndAboveViewRanges(ranges: IRange[], rowIndex: number, colIndex: number) {
     for (const range of ranges) {
-        if(rowIndex > range.endRow || colIndex > range.endColumn)
-        return false;
-    }
-    return true;
-}
-
-export function inCurrentAndAboveViewRanges( ranges:IRange[], rowIndex: number, colIndex: number) {
-    for (const range of ranges) {
-        if(rowIndex > range.endRow)
-        return false;
+        if (rowIndex > range.endRow || colIndex > range.endColumn) { return false; }
     }
     return true;
 }
 
 /**
- * 在任意一个 rowRange 中
+ * 在非下方区域中
  * @param ranges
  * @param rowIndex
  * @returns
  */
-export function inRowViewRanges( ranges:IRange[], rowIndex: number) {
+export function inCurrentAndAboveViewRanges(ranges: IRange[], rowIndex: number) {
+    for (const range of ranges) {
+        if (rowIndex > range.endRow) { return false; }
+    }
+    return true;
+}
+
+/**
+ * row 在任意一个 Range 中
+ * @param ranges
+ * @param rowIndex
+ * @returns
+ */
+export function inRowViewRanges(ranges: IRange[], rowIndex: number) {
     let flag = false;
     for (const range of ranges) {
-        if(rowIndex >= range.startRow && rowIndex <= range.endRow)
-        flag = true;
+        if (rowIndex >= range.startRow && rowIndex <= range.endRow) {
+            flag = true;
+            break;
+        }
     }
     return flag;
 }
@@ -812,10 +817,10 @@ export function inRowViewRanges( ranges:IRange[], rowIndex: number) {
  * 如果 range 有相交, 那么扩展到第一个 range 中.
  * @param ranges
  */
-export function mergeRangeIfIntersects(mainRanges: IRange[], ranges:IRange[]) {
-    for(const mainRange of mainRanges) {
+export function mergeRangeIfIntersects(mainRanges: IRange[], ranges: IRange[]) {
+    for (const mainRange of mainRanges) {
         for (const range of ranges) {
-            if(Rectangle.intersects(mainRange, range)) {
+            if (Rectangle.intersects(mainRange, range)) {
                 mainRange.startRow = Math.min(mainRange.startRow, range.startRow);
                 mainRange.endRow = Math.max(mainRange.endRow, range.endRow);
                 mainRange.startColumn = Math.min(mainRange.startColumn, range.startColumn);
@@ -833,5 +838,5 @@ export function clampRanges(range: IRange) {
         startColumn: Math.max(0, range.startColumn),
         endRow: Math.max(0, range.endRow),
         endColumn: Math.max(0, range.endColumn),
-    }
+    };
 }

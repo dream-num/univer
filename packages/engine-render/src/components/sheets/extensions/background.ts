@@ -25,6 +25,10 @@ import { SheetExtension } from './sheet-extension';
 
 const UNIQUE_KEY = 'DefaultBackgroundExtension';
 
+/**
+ * in prev version background ext is higer than font ext. now turing back lower than font ext.
+ * font ext zindex is 45.
+ */
 const DOC_EXTENSION_Z_INDEX = 20;
 const PRINTING_Z_INDEX = 20;
 
@@ -43,8 +47,8 @@ export class Background extends SheetExtension {
         ctx: UniverRenderingContext,
         parentScale: IScale,
         spreadsheetSkeleton: SpreadsheetSkeleton,
-        diff: IRange[],
-        { viewRanges, diffRanges, checkOutOfViewBound }: { viewRanges?: IRange[]; diffRanges?: IRange[]; checkOutOfViewBound?: boolean }
+        diffRanges: IRange[],
+        { viewRanges }: { viewRanges?: IRange[]; diffRanges?: IRange[]; checkOutOfViewBound?: boolean }
     ) {
         const { stylesCache } = spreadsheetSkeleton;
         const { background, backgroundPositions } = stylesCache;
@@ -64,7 +68,6 @@ export class Background extends SheetExtension {
             return;
         }
         ctx.save();
-
         // ctx.setGlobalCompositeOperation('destination-over');
         background &&
             Object.keys(background).forEach((rgb: string) => {

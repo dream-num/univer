@@ -47,15 +47,6 @@ export class Spreadsheet extends SheetComponent {
 
     private _fontExtension!: Font;
 
-    private _cacheCanvas!: Canvas;
-    private _cacheCanvasTop!: Canvas;
-    private _cacheCanvasLeft!: Canvas;
-    private _cacheCanvasLeftTop!: Canvas;
-    private _cacheCanvasMap: Map<string, Canvas> = new Map();
-
-    /**
-     * 增量更新
-     */
     private _refreshIncrementalState = false;
 
     private _forceDirty = false;
@@ -77,17 +68,9 @@ export class Spreadsheet extends SheetComponent {
         private _allowCache: boolean = true
     ) {
         super(oKey, spreadsheetSkeleton);
-        if (this._allowCache) {
-            // TODO:raku delete
-            this.onIsAddedToParentObserver.add((parent) => {
-                window.scene = parent;
-            });
-        }
-
         this._initialDefaultExtension();
-        this.makeDirty(true);
 
-        window.spreadsheet = this;
+        this.makeDirty(true);
     }
 
     get backgroundExtension() {
@@ -121,14 +104,15 @@ export class Spreadsheet extends SheetComponent {
         super.dispose();
         this._documents.dispose();
         this._documents = null as unknown as Documents;
-        this._cacheCanvas?.dispose();
-        this._cacheCanvas = null as unknown as Canvas;
+        // cacheCanvas 已经移动到 viewport 中了, cacheCanvas 的 dispose 在 viewport@dispose 中处理
+        // this._cacheCanvas?.dispose();
+        // this._cacheCanvas = null as unknown as Canvas;
         this._backgroundExtension = null as unknown as Background;
         this._borderExtension = null as unknown as Border;
         this._fontExtension = null as unknown as Font;
     }
 
-    override draw(ctx: UniverRenderingContext, bounds?: IViewportBound) {
+    override draw(ctx: UniverRenderingContext, viewportInfo: IViewportInfo) {
         // const { parent = { scaleX: 1, scaleY: 1 } } = this;
         // const mergeData = this.getMergeData();
         // const showGridlines = this.getShowGridlines() || 1;
@@ -145,16 +129,11 @@ export class Spreadsheet extends SheetComponent {
         const viewRanges = [spreadsheetSkeleton.getRowColumnSegmentByViewBound(viewportInfo?.cacheBound)];
         const extensions = this.getExtensionsByOrder();
 
-        if ((viewportInfo?.viewPortKey === 'viewMainLeft')) {
-            // console.log(viewportInfo?.viewPortKey, 'diffRange count', diffRanges.length, 'diffY StartRow', diffRanges[0].startRow, 'diffY startColumn', diffRanges[0].startColumn , ':::::height', diffRanges[0].endRow - diffRanges[0].startRow,':::::width', diffRanges[0].endColumn - diffRanges[0].startColumn);
-            console.log(viewportInfo?.viewPortKey, 'diffRanges', diffRanges?.length && diffRanges?.[0], viewportInfo?.diffBounds.length && viewportInfo?.diffBounds[0]);
-        }
-
         for (const extension of extensions) {
             extension.draw(ctx, parentScale, spreadsheetSkeleton, diffRanges, {
                 viewRanges,
                 diffRanges,
-                checkOutOfViewBound: viewportInfo.allowCache, //!!bounds!.cacheCanvas,
+                checkOutOfViewBound: viewportInfo.allowCache,
             });
         }
     }
@@ -177,10 +156,6 @@ export class Spreadsheet extends SheetComponent {
         if (!spreadsheetSkeleton) {
             return;
         }
-
-        // this.onPointerDownObserver.add((evt) => {
-        //     evt.offsetX;
-        // });
         const { rowHeightAccumulation, columnWidthAccumulation, rowHeaderWidth, columnHeaderHeight } =
             spreadsheetSkeleton;
 
@@ -227,7 +202,7 @@ export class Spreadsheet extends SheetComponent {
     }
 
     /**
-     * canvas resize & zoom
+     * canvas resize & zoom would call forceDirty
      * @param state
      */
     makeForceDirty(state = true) {
@@ -261,7 +236,7 @@ export class Spreadsheet extends SheetComponent {
     }
 
     renderByViewport(mainCtx: UniverRenderingContext, viewportBoundsInfo: IViewportInfo, spreadsheetSkeleton: SpreadsheetSkeleton) {
-        const { viewBound, cacheBound: cacheBounds, diffBounds, diffCacheBounds, diffX, diffY, viewPortPosition, viewPortKey, isDirty, isForceDirty, shouldCacheUpdate, cacheCanvas, leftOrigin, topOrigin, bufferEdgeX, bufferEdgeY } = viewportBoundsInfo as Required<IViewportInfo>;
+        const { diffBounds, diffX, diffY, viewPortPosition, isDirty, isForceDirty, cacheCanvas, leftOrigin, topOrigin, bufferEdgeX, bufferEdgeY } = viewportBoundsInfo as Required<IViewportInfo>;
         const { rowHeaderWidth, columnHeaderHeight } = spreadsheetSkeleton;
         const { a: scaleX = 1, d: scaleY = 1 } = mainCtx.getTransform();
         const bufferEdgeSizeX = bufferEdgeX * scaleX / window.devicePixelRatio;
@@ -280,76 +255,108 @@ export class Spreadsheet extends SheetComponent {
         // 没有滚动
         if (diffBounds.length === 0 || (diffX === 0 && diffY === 0) || isForceDirty) {
             if (isDirty || isForceDirty) {
-                cacheCtx.save();
-                cacheCtx.setTransform(1, 0, 0, 1, 0, 0);
-                cacheCanvas.clear();
-                cacheCtx.restore();
-
-                cacheCtx.save();
-                // mainCtx.translateWithPrecision(rowHeaderWidth, columnHeaderHeight);
-                // 所以 cacheCtx.setTransform 已经包含了 rowHeaderWidth + viewport + scroll 距离
-                const m = mainCtx.getTransform();
-                cacheCtx.setTransform(m.a, m.b, m.c, m.d, m.e, m.f);
-
-                // leftOrigin 是 viewport 相对 sheetcorner 的偏移(不考虑缩放)
-                // - (leftOrigin - bufferEdgeX)  ----> 简化
-                cacheCtx.translate(-leftOrigin + bufferEdgeX, -topOrigin + bufferEdgeY);
-
-                // extension 绘制时按照内容的左上角计算, 不考虑 rowHeaderWidth
-                this.draw(cacheCtx, viewportBoundsInfo);
-
-
-                cacheCtx.restore();
+                this.refreshCacheCanvas(viewportBoundsInfo, { cacheCanvas, cacheCtx, mainCtx, topOrigin, leftOrigin, bufferEdgeX, bufferEdgeY });
             }
             this._applyCacheFreeze(mainCtx, cacheCanvas, bufferEdgeSizeX, bufferEdgeSizeY, dw, dh, left, top, dw, dh);
         } else {
             if (isDirty) {
-                cacheCtx.save();
-                cacheCtx.setTransform(1, 0, 0, 1, 0, 0);
-                cacheCtx.globalCompositeOperation = 'copy';
-                cacheCtx.drawImage(cacheCanvas.getCanvasEle(), diffX * scaleX, diffY * scaleY);
-                cacheCtx.restore();
-
-                this._refreshIncrementalState = true;
-
-                // 绘制之前重设画笔位置到 spreadsheet 原点, 当没有滚动时, 这个值是 (rowHeaderWidth, colHeaderHeight)
-                cacheCtx.setTransform(mainCtx.getTransform());
-                cacheCtx.translate(-leftOrigin + bufferEdgeX, -topOrigin + bufferEdgeY);
-
-
-                if (shouldCacheUpdate) {
-                    for (const diffBound of diffCacheBounds) {
-                        cacheCtx.save();
-
-                        const { left: diffLeft, right: diffRight, bottom: diffBottom, top: diffTop } = diffBound;
-                        cacheCtx.beginPath();
-
-                        // 再次注意!  draw 的时候 ctx.translate 单元格偏移是相对 spreadsheet content
-                        // 但是 diffBounds 是包括 rowHeader 信息
-                        const onePixelFix = FIX_ONE_PIXEL_BLUR_OFFSET * 2;
-                        const x = Math.floor(diffLeft - (rowHeaderWidth) - onePixelFix);
-                        const y = Math.floor(diffTop - columnHeaderHeight - onePixelFix);
-                        const w = Math.ceil(diffRight - diffLeft + onePixelFix);
-                        const h = Math.ceil(diffBottom - diffTop + onePixelFix);
-
-                        cacheCtx.rectByPrecision(x, y, w, h);
-                        // cacheCtx.clearRect(x + 1, y + 1, w - 2, h - 2);
-                        // cacheCtx.clearRect(x, y, w, h);
-                        cacheCtx.clip();// 加上这个会有很细的白色边框线, 和上面是否 clearRect 无关
-
-                        this.draw(cacheCtx, {
-                            ...viewportBoundsInfo,
-                            diffBounds: [diffBound],
-                        });
-                        cacheCtx.restore();
-                    }
-                }
-                this._refreshIncrementalState = false;
+                this.paintNewAreaOfCacheCanvas(viewportBoundsInfo, {
+                    cacheCanvas, cacheCtx, mainCtx, topOrigin, leftOrigin, bufferEdgeX, bufferEdgeY, scaleX, scaleY, columnHeaderHeight, rowHeaderWidth,
+                });
             }
             this._applyCacheFreeze(mainCtx, cacheCanvas, bufferEdgeSizeX, bufferEdgeSizeY, dw, dh, left, top, dw, dh);
-
-            cacheCtx.restore();
         }
+        cacheCtx.restore();
+    }
+
+    paintNewAreaOfCacheCanvas(viewportBoundsInfo: IViewportInfo, param: {
+        cacheCanvas: Canvas; cacheCtx: UniverRenderingContext; mainCtx: UniverRenderingContext;
+        topOrigin: number;
+        leftOrigin: number;
+        bufferEdgeX: number;
+        bufferEdgeY: number;
+        rowHeaderWidth: number;
+        columnHeaderHeight: number;
+        scaleX: number;
+        scaleY: number;
+    }) {
+        const { cacheCanvas, cacheCtx, mainCtx, topOrigin, leftOrigin, bufferEdgeX, bufferEdgeY, scaleX, scaleY, columnHeaderHeight, rowHeaderWidth } = param;
+        const { shouldCacheUpdate, diffCacheBounds, diffX, diffY } = viewportBoundsInfo;
+
+        cacheCtx.save();
+        cacheCtx.setTransform(1, 0, 0, 1, 0, 0);
+        cacheCtx.globalCompositeOperation = 'copy';
+        cacheCtx.drawImage(cacheCanvas.getCanvasEle(), diffX * scaleX, diffY * scaleY);
+        cacheCtx.restore();
+
+        this._refreshIncrementalState = true;
+
+        // 绘制之前重设画笔位置到 spreadsheet 原点, 当没有滚动时, 这个值是 (rowHeaderWidth, colHeaderHeight)
+        const m = mainCtx.getTransform();
+        cacheCtx.setTransform(m.a, m.b, m.c, m.d, m.e, m.f);
+        cacheCtx.translate(-leftOrigin + bufferEdgeX, -topOrigin + bufferEdgeY);
+        if (shouldCacheUpdate) {
+            for (const diffBound of diffCacheBounds) {
+                cacheCtx.save();
+
+                const { left: diffLeft, right: diffRight, bottom: diffBottom, top: diffTop } = diffBound;
+
+                // this.draw 的时候 ctx.translate 单元格偏移是相对 spreadsheet content
+                // 但是 diffBounds 包括 rowHeader 信息, 因此绘制前需要减去行头列头的偏移
+                const onePixelFix = FIX_ONE_PIXEL_BLUR_OFFSET * 0;
+                const x = diffLeft - rowHeaderWidth - onePixelFix;
+                const y = diffTop - columnHeaderHeight - onePixelFix;
+                const w = diffRight - diffLeft + onePixelFix;
+                const h = diffBottom - diffTop + onePixelFix;
+                cacheCtx.rect(x, y, w, h);
+                // 使用 clearRect 后, 很浅很细的白色线(even not zoom has blank line)
+                // cacheCtx.save();
+                // const m = cacheCtx.getTransform();
+                // cacheCtx.setTransform(1, 0, 0, 1, m.e, m.f);
+                // cacheCtx.clearRect(Math.ceil(x * m.a), y * m.a, Math.floor(w * m.a), h * m.a);
+                // cacheCtx.restore();
+
+                // 这里需要 clip 的原因是避免重复绘制 (否则文字有毛刺)
+                cacheCtx.clip();
+                this.draw(cacheCtx, {
+                    ...viewportBoundsInfo,
+                    diffBounds: [diffBound],
+                });
+                cacheCtx.restore();
+            }
+        }
+        this._refreshIncrementalState = false;
+    }
+
+
+    /**
+     * 整个 viewport 重绘
+     */
+    refreshCacheCanvas(viewportBoundsInfo: IViewportInfo, param: {
+        cacheCanvas: Canvas; cacheCtx: UniverRenderingContext; mainCtx: UniverRenderingContext;
+        topOrigin: number;
+        leftOrigin: number;
+        bufferEdgeX: number;
+        bufferEdgeY: number;
+    }) {
+        const { cacheCanvas, cacheCtx, mainCtx, topOrigin, leftOrigin, bufferEdgeX, bufferEdgeY } = param;
+        cacheCtx.save();
+        cacheCtx.setTransform(1, 0, 0, 1, 0, 0);
+        cacheCanvas.clear();
+        cacheCtx.restore();
+
+        cacheCtx.save();
+        // 所以 cacheCtx.setTransform 已经包含了 rowHeaderWidth + viewport + scroll 距离
+        const m = mainCtx.getTransform();
+        cacheCtx.setTransform(m.a, m.b, m.c, m.d, m.e, m.f);
+
+        // leftOrigin 是 viewport 相对 sheetcorner 的偏移(不考虑缩放)
+        // - (leftOrigin - bufferEdgeX)  ----> 简化
+        cacheCtx.translate(-leftOrigin + bufferEdgeX, -topOrigin + bufferEdgeY);
+
+        // extension 绘制时按照内容的左上角计算, 不考虑 rowHeaderWidth
+        this.draw(cacheCtx, viewportBoundsInfo);
+        cacheCtx.restore();
     }
 
     override render(mainCtx: UniverRenderingContext, viewportInfo: IViewportInfo) {
@@ -359,7 +366,10 @@ export class Spreadsheet extends SheetComponent {
         }
 
         const spreadsheetSkeleton = this.getSkeleton();
-        if (!spreadsheetSkeleton) return;
+
+        if (!spreadsheetSkeleton) {
+            return;
+        }
 
         spreadsheetSkeleton.calculateWithoutClearingCache(viewportInfo);
 
@@ -585,48 +595,6 @@ export class Spreadsheet extends SheetComponent {
             ctx.closePathByEnv();
             ctx.stroke();
         }
-        // console.log('xx2', scaleX, scaleY, columnTotalWidth, rowTotalHeight, rowHeightAccumulation, columnWidthAccumulation);
-
-        // border?.forValue((rowIndex, columnIndex, borderCaches) => {
-        //     if (!borderCaches) {
-        //         return true;
-        //     }
-
-        //     const cellInfo = spreadsheetSkeleton.getCellByIndexWithNoHeader(rowIndex, columnIndex);
-
-        //     let { startY, endY, startX, endX } = cellInfo;
-        //     const { isMerged, isMergedMainCell, mergeInfo } = cellInfo;
-
-        //     if (isMerged) {
-        //         return true;
-        //     }
-
-        //     if (isMergedMainCell) {
-        //         startY = mergeInfo.startY;
-        //         endY = mergeInfo.endY;
-        //         startX = mergeInfo.startX;
-        //         endX = mergeInfo.endX;
-        //     }
-
-        //     if (!(mergeInfo.startRow >= rowStart && mergeInfo.endRow <= rowEnd)) {
-        //         return true;
-        //     }
-
-        //     for (const key in borderCaches) {
-        //         const { type } = borderCaches[key] as BorderCacheItem;
-
-        //         clearLineByBorderType(ctx, type, { startX, startY, endX, endY });
-        //     }
-        // });
-
-        // Clearing the dashed line issue caused by overlaid auxiliary lines and strokes
-        // merge cell
-        // this._clearRectangle(ctx, rowHeightAccumulation, columnWidthAccumulation, dataMergeCache);
-
-        // overflow cell
-        // this._clearRectangle(ctx, rowHeightAccumulation, columnWidthAccumulation, overflowCache.toNativeArray());
-
-        // this._clearBackground(ctx, backgroundPositions);
 
         ctx.restore();
     }

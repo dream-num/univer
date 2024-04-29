@@ -156,6 +156,7 @@ export function lineBreaking(
     for (let i = 0, len = blocks.length; i < len; i++) {
         const charIndex = blocks[i];
         const customBlock = viewModel.getCustomBlock(charIndex);
+        console.log(charIndex, customBlock);
         if (customBlock == null) {
             continue;
         }

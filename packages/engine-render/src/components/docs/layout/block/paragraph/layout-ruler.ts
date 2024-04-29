@@ -414,10 +414,9 @@ function _lineOperator(
         }
 
         const affectInlineDrawings = ctx.paragraphConfigCache.get(line.paragraphIndex)?.paragraphInlineSkeDrawings;
-
         // Update inline drawings after the line is layout.
-        if (affectInlineDrawings) {
-            __updatePreLineDrawingPosition(line, paragraphInlineSkeDrawings);
+        if (affectInlineDrawings && affectInlineDrawings.size > 0) {
+            __updatePreLineDrawingPosition(line, affectInlineDrawings);
         }
     }
 
@@ -545,7 +544,7 @@ function _reLayoutCheck(
         if (drawingCache == null) {
             continue;
         }
-        // TODO: 如何判断drawing是否在同一页？？？
+        // TODO: 如何判断 drawing 是否在同一页？？？
         const cachePageStartParagraphIndex = drawingCache.page.sections[0]?.columns[0]?.lines[0]?.paragraphIndex;
         const startIndex = page.sections[0]?.columns[0]?.lines[0]?.paragraphIndex;
         if (drawingCache.page && cachePageStartParagraphIndex && startIndex && cachePageStartParagraphIndex !== startIndex) {

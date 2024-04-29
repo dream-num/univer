@@ -247,6 +247,9 @@ export function ListFormulaInput(props: IFormulaInputProps) {
     };
 
     useEffect(() => {
+        if (isFormulaStr === '1') {
+            return;
+        }
         const labelSet = new Set<string>();
         const finalList: { color: string; label: string }[] = [];
         strList.map((item) => {
@@ -271,7 +274,7 @@ export function ListFormulaInput(props: IFormulaInputProps) {
             formula1: serializeListOptions(finalList.map((item) => item.label)),
             formula2: finalList.map((item) => item.color === DROP_DOWN_DEFAULT_COLOR ? '' : item.color).join(','),
         });
-    }, [strList, onChange]);
+    }, [strList, onChange, isFormulaStr]);
 
     const updateFormula = useMemo(
         () =>

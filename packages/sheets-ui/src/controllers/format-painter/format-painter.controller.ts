@@ -18,13 +18,10 @@ import type { ICellData, IRange, Workbook } from '@univerjs/core';
 import {
     Disposable,
     ICommandService,
-    IUniverInstanceService,
-    LifecycleStages,
-    OnLifecycle,
     toDisposable,
-    UniverInstanceType,
 } from '@univerjs/core';
-import { CURSOR_TYPE, IRenderManagerService } from '@univerjs/engine-render';
+import type { IRenderContext, IRenderController } from '@univerjs/engine-render';
+import { CURSOR_TYPE } from '@univerjs/engine-render';
 
 import type { IApplyFormatPainterCommandParams } from '../../commands/commands/set-format-painter.command';
 import {
@@ -33,15 +30,12 @@ import {
 } from '../../commands/commands/set-format-painter.command';
 import { FormatPainterStatus, IFormatPainterService } from '../../services/format-painter/format-painter.service';
 import { ISelectionRenderService } from '../../services/selection/selection-render.service';
-import { getSheetObject } from '../utils/component-tools';
 
-@OnLifecycle(LifecycleStages.Rendered, FormatPainterController)
-export class FormatPainterController extends Disposable {
+export class FormatPainterRenderController extends Disposable implements IRenderController {
     constructor(
+        private readonly _context: IRenderContext<Workbook>,
         @ICommandService private readonly _commandService: ICommandService,
         @IFormatPainterService private readonly _formatPainterService: IFormatPainterService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService
     ) {
         super();
@@ -56,7 +50,7 @@ export class FormatPainterController extends Disposable {
 
     private _bindFormatPainterStatus() {
         this._formatPainterService.status$.subscribe((status) => {
-            const { scene } = this._getSheetObject() || {};
+            const scene = this._context.scene;
             if (!scene) return;
             if (status !== FormatPainterStatus.OFF) {
                 scene.setDefaultCursor(CURSOR_TYPE.CELL);
@@ -90,7 +84,7 @@ export class FormatPainterController extends Disposable {
 
     private async _applyFormatPainter(range: IRange) {
         const { styles: stylesMatrix, merges } = this._formatPainterService.getSelectionFormat();
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+        const workbook = this._context.unit;
         const unitId = workbook.getUnitId();
         const subUnitId = workbook.getActiveSheet().getSheetId();
         if (!stylesMatrix) return;
@@ -146,9 +140,5 @@ export class FormatPainterController extends Disposable {
         };
 
         await this._commandService.executeCommand(ApplyFormatPainterCommand.id, ApplyFormatPainterCommandParams);
-    }
-
-    private _getSheetObject() {
-        return getSheetObject(this._univerInstanceService, this._renderManagerService);
     }
 }

@@ -27,7 +27,7 @@ export const iconGroup: { title: string; group: { name: string; list: string[] }
             { name: '4Arrows', list: [ICON_MAP.arrow['up-green'], ICON_MAP.arrow['rightAndUp-gold'], ICON_MAP.arrow['rightAndDown-gold'], ICON_MAP.arrow['down-red']] },
             { name: '4ArrowsGray', list: [ICON_MAP.arrow['up-gray'], ICON_MAP.arrow['rightAndUp-gray'], ICON_MAP.arrow['rightAndDown-gray'], ICON_MAP.arrow['down-gray']] },
             { name: '5Arrows', list: [ICON_MAP.arrow['up-green'], ICON_MAP.arrow['rightAndUp-gold'], ICON_MAP.arrow['right-gold'], ICON_MAP.arrow['rightAndDown-gold'], ICON_MAP.arrow['down-red']] },
-            { name: '5ArrowsGray', list: [ICON_MAP.arrow['up-gray'], ICON_MAP.arrow['rightAndUp-gray'], ICON_MAP.arrow['right-gray'], ICON_MAP.arrow['rightAndDown-gray'], ICON_MAP.arrow['up-gray']] },
+            { name: '5ArrowsGray', list: [ICON_MAP.arrow['up-gray'], ICON_MAP.arrow['rightAndUp-gray'], ICON_MAP.arrow['right-gray'], ICON_MAP.arrow['rightAndDown-gray'], ICON_MAP.arrow['down-gray']] },
             { name: '3Triangles', list: [ICON_MAP.shape.up, ICON_MAP.shape.cross, ICON_MAP.shape.down] },
         ],
     },

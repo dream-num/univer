@@ -413,6 +413,9 @@ export class DropdownWidget implements IBaseDataValidationWidget {
         if (!validation || !dropdownInfo) {
             return false;
         }
+        if (validation.rule.renderMode === DataValidationRenderMode.TEXT) {
+            return false;
+        }
         const { top, left, width, height } = dropdownInfo;
         const { x, y } = position;
 

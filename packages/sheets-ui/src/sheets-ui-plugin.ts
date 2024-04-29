@@ -22,7 +22,7 @@ import { filter } from 'rxjs/operators';
 
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { ActiveWorksheetController } from './controllers/active-worksheet/active-worksheet.controller';
-import { AutoFillController } from './controllers/auto-fill.controller';
+import { AutoFillRenderController } from './controllers/auto-fill.controller';
 import { AutoHeightController } from './controllers/auto-height.controller';
 import { SheetClipboardController } from './controllers/clipboard/clipboard.controller';
 import { SheetContextMenuController } from './controllers/contextmenu/contextmenu.controller';
@@ -135,7 +135,6 @@ export class UniverSheetsUIPlugin extends Plugin {
                 [SheetRenderController],
                 [SheetUIController],
                 [StartEditController],
-                [AutoFillController],
                 [StatusBarController],
                 [EditingController],
                 [MarkSelectionController],
@@ -162,6 +161,7 @@ export class UniverSheetsUIPlugin extends Plugin {
             SheetsScrollRenderController,
             SelectionRenderController,
             FormatPainterRenderController,
+            AutoFillRenderController,
         ]).forEach((controller) => {
             this.disposeWithMe(this._renderManagerService.registerRenderController(UniverInstanceType.UNIVER_SHEET, controller));
         });

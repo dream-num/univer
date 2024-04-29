@@ -21,16 +21,13 @@ import {
     DisposableCollection,
     ICommandService,
     IUndoRedoService,
-    IUniverInstanceService,
-    LifecycleStages,
     ObjectMatrix,
-    OnLifecycle,
     RANGE_TYPE,
     Rectangle,
     toDisposable,
     Tools,
-    UniverInstanceType,
 } from '@univerjs/core';
+import type { IRenderContext, IRenderController } from '@univerjs/engine-render';
 import { DeviceInputEventType, getCellInfoInMergeData } from '@univerjs/engine-render';
 import type {
     IAddWorksheetMergeMutationParams,
@@ -71,14 +68,13 @@ import { ISelectionRenderService } from '../services/selection/selection-render.
 import type { IDiscreteRange } from './utils/range-tools';
 import { discreteRangeToRange, generateNullCellValue, rangeToDiscreteRange } from './utils/range-tools';
 
-@OnLifecycle(LifecycleStages.Steady, AutoFillController)
-export class AutoFillController extends Disposable {
+export class AutoFillRenderController extends Disposable implements IRenderController {
     private _beforeApplyData: Array<Array<Nullable<ICellData>>> = [];
 
     private _copyData: ICopyDataPiece[] = [];
     private _defaultHook: ISheetAutoFillHook;
     constructor(
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
+        private readonly _context: IRenderContext<Workbook>,
         @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
         @ICommandService private readonly _commandService: ICommandService,
         @IUndoRedoService private readonly _undoRedoService: IUndoRedoService,
@@ -275,7 +271,7 @@ export class AutoFillController extends Disposable {
             return;
         }
 
-        const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET);
+        const workbook = this._context.unit;
         if (!workbook) return;
 
         const unitId = workbook.getUnitId();
@@ -322,7 +318,7 @@ export class AutoFillController extends Disposable {
 
     private _detectFillRange(source: IRange) {
         const { startRow, endRow, startColumn, endColumn } = source;
-        const worksheet = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getActiveSheet();
+        const worksheet = this._context.unit.getActiveSheet();
         if (!worksheet) {
             return source;
         }
@@ -366,8 +362,8 @@ export class AutoFillController extends Disposable {
         const {
             source,
             target,
-            unitId = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getUnitId(),
-            subUnitId = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)?.getActiveSheet().getSheetId(),
+            unitId = this._context.unit.getUnitId(),
+            subUnitId = this._context.unit?.getActiveSheet().getSheetId(),
         } = this._autoFillService.autoFillLocation || {};
 
         const direction = this._autoFillService.direction;
@@ -530,14 +526,7 @@ export class AutoFillController extends Disposable {
     }
 
     private _getCopyData(source: IDiscreteRange, direction: Direction) {
-        // const {
-        //     startRow: copyStartRow,
-        //     startColumn: copyStartColumn,
-        //     endRow: copyEndRow,
-        //     endColumn: copyEndColumn,
-        // } = source;
-        const currentCellDatas = this._univerInstanceService
-            .getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!
+        const currentCellDatas = this._context.unit
             .getActiveSheet()
             .getCellMatrix();
         const rules = this._autoFillService.getRules();
@@ -607,7 +596,7 @@ export class AutoFillController extends Disposable {
     }
 
     private _getMergeApplyData(source: IRange, target: IRange, direction: Direction, csLen: number) {
-        const mergeData = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getActiveSheet().getMergeData();
+        const mergeData = this._context.unit!.getActiveSheet().getMergeData();
         const applyMergeRanges = [];
         for (let i = source.startRow; i <= source.endRow; i++) {
             for (let j = source.startColumn; j <= source.endColumn; j++) {
@@ -679,8 +668,7 @@ export class AutoFillController extends Disposable {
     private _presetAndCacheData(location: IAutoFillLocation, direction: Direction) {
         const { source, target } = location;
         // cache original data of apply range
-        const currentCellDatas = this._univerInstanceService
-            .getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!
+        const currentCellDatas = this._context.unit
             .getActiveSheet()
             .getCellMatrix();
         // cache the original data in currentCellDatas in apply range for later use / refill
@@ -775,7 +763,7 @@ export class AutoFillController extends Disposable {
 
         // deal with styles
         let applyMergeRanges: IRange[] = [];
-        const style = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!.getStyles();
+        const style = this._context.unit.getStyles();
         if (hasStyle) {
             applyMergeRanges = this._getMergeApplyData(sourceRange, targetRange, direction, csLen);
             applyDatas.forEach((row) => {
@@ -816,8 +804,7 @@ export class AutoFillController extends Disposable {
         };
         // delete cross merge
         const deleteMergeRanges: IRange[] = [];
-        const mergeData = this._univerInstanceService
-            .getUniverSheetInstance(unitId)
+        const mergeData = this._context.unit
             ?.getSheetBySheetId(subUnitId)
             ?.getMergeData();
         if (mergeData) {

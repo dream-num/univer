@@ -45,7 +45,6 @@ import type { Vector2 } from './vector2';
 export interface IObjectFullState extends ITransformState {
     strokeWidth?: number;
     zIndex?: number;
-    isTransformer?: boolean;
     forceRender?: boolean;
     debounceParentDirty?: boolean;
 }

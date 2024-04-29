@@ -56,8 +56,6 @@ export class Scene extends ThinScene {
      */
     private _transformer: Nullable<Transformer>;
 
-    private _transformerOpenState = false;
-
     /** @hidden */
     private _inputManager: Nullable<InputManager>;
 
@@ -502,30 +500,32 @@ export class Scene extends ThinScene {
         });
     }
 
-    openTransformer(config?: ITransformerConfig) {
+    override attachTransformerTo(o: BaseObject) {
         if (!this._transformer) {
-            this._transformer = new Transformer(this, config);
-        }
-        this._transformerOpenState = true;
-    }
-
-    closeTransformer(isDestroyed = false) {
-        if (isDestroyed) {
-            this._transformer = null;
-        }
-
-        this._transformerOpenState = false;
-    }
-
-    override applyTransformer(o: BaseObject) {
-        if (!this._transformerOpenState) {
-            return;
+            this.initTransformer();
         }
 
         this._transformer?.attachTo(o);
     }
 
+
+    override detachTransformerFrom(o: BaseObject) {
+        this._transformer?.detachFrom(o);
+    }
+
+    initTransformer(config?: ITransformerConfig) {
+        if (this._transformer) {
+            this._transformer.resetProps(config);
+            return;
+        }
+
+        this._transformer = new Transformer(this, config);
+    }
+
     getTransformer() {
+        if (!this._transformer) {
+            this.initTransformer();
+        }
         return this._transformer;
     }
 
@@ -716,7 +716,7 @@ export class Scene extends ThinScene {
                 continue;
             }
             let svCoord = svCoordOrigin;
-            if (o.isInGroup && o.parent.classType === RENDER_CLASS_TYPE.GROUP) {
+            if (o.isInGroup && o.parent?.classType === RENDER_CLASS_TYPE.GROUP) {
                 const { cumLeft, cumTop } = this._getGroupCumLeftRight(o);
                 svCoord = svCoord.clone().add(Vector2.FromArray([-cumLeft, -cumTop]));
             }

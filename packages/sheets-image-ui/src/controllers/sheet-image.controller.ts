@@ -27,6 +27,9 @@ import { InsertCellImageOperation, InsertFloatImageOperation } from '../commands
 import { InsertSheetImageCommand } from '../commands/commands/insert-sheet-image.command';
 import { RemoveSheetImageCommand } from '../commands/commands/remove-sheet-image.command';
 import { SetSheetImageCommand } from '../commands/commands/set-sheet-image.command';
+import { COMPONENT_SHEET_IMAGE_PANEL } from '../views/sheet-image-panel/component-name';
+import { SheetImagePanel } from '../views/sheet-image-panel/SheetImagePanel';
+import { SidebarSheetImageOperation } from '../commands/operations/open-image-panel.operation';
 
 @OnLifecycle(LifecycleStages.Rendered, SheetImageUIController)
 export class SheetImageUIController extends Disposable {
@@ -45,6 +48,7 @@ export class SheetImageUIController extends Disposable {
         const componentManager = this._componentManager;
         this.disposeWithMe(componentManager.register(ImageUploadIcon, AdditionAndSubtractionSingle));
         this.disposeWithMe(componentManager.register(COMPONENT_UPLOAD_FILE_MENU, UploadFileMenu));
+        this.disposeWithMe(componentManager.register(COMPONENT_SHEET_IMAGE_PANEL, SheetImagePanel));
     }
 
     private _initMenus(): void {
@@ -67,6 +71,7 @@ export class SheetImageUIController extends Disposable {
             InsertSheetImageCommand,
             RemoveSheetImageCommand,
             SetSheetImageCommand,
+            SidebarSheetImageOperation,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 

@@ -27,20 +27,20 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
             description: 'test shape',
             objectTransform: {
                 size: {
-                    width: 1484 * 0.2,
-                    height: 864 * 0.2,
+                    width: 1484 * 0.12,
+                    height: 864 * 0.15,
                 },
                 positionH: {
                     relativeFrom: ObjectRelativeFromH.COLUMN,
                     posOffset: 100,
                 },
                 positionV: {
-                    relativeFrom: ObjectRelativeFromV.PARAGRAPH,
-                    posOffset: 0,
+                    relativeFrom: ObjectRelativeFromV.PAGE,
+                    posOffset: 130,
                 },
                 angle: 0,
             },
-            layoutType: PositionedObjectLayoutType.INLINE,
+            layoutType: PositionedObjectLayoutType.WRAP_TOP_AND_BOTTOM,
             behindDoc: BooleanNumber.FALSE,
             wrapText: WrapTextType.BOTH_SIDES,
             distT: 0,
@@ -62,8 +62,8 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
                     posOffset: 100,
                 },
                 positionV: {
-                    relativeFrom: ObjectRelativeFromV.PAGE,
-                    posOffset: 220,
+                    relativeFrom: ObjectRelativeFromV.PARAGRAPH,
+                    posOffset: 20,
                 },
                 angle: 0,
             },
@@ -716,14 +716,14 @@ export const DEFAULT_DOCUMENT_DATA_CN: IDocumentData = {
             },
         ],
         customBlocks: [
-            // {
-            //     startIndex: 189,
-            //     blockId: 'shapeTest1',
-            // },
             {
-                startIndex: 367,
-                blockId: 'shapeTest2',
+                startIndex: 189,
+                blockId: 'shapeTest1',
             },
+            // {
+            //     startIndex: 367,
+            //     blockId: 'shapeTest2',
+            // },
             // {
             //     startIndex: 489,
             //     blockId: 'shapeTest3',

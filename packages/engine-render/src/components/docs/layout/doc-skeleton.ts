@@ -547,7 +547,7 @@ export class DocumentSkeleton extends Skeleton {
      */
 
     private _createSkeleton(ctx: ILayoutContext, _bounds?: IViewportBound): IDocumentSkeletonCached {
-        // console.log('createSkeleton: iterate ', this._iteratorCount, 'times');
+        console.log('createSkeleton: iterate ', this._iteratorCount, 'times');
         const { viewModel, skeleton, skeletonResourceReference } = ctx;
 
         const allSkeletonPages = skeleton.pages;
@@ -556,12 +556,16 @@ export class DocumentSkeleton extends Skeleton {
 
         let startSectionIndex = 0;
 
-        if (ctx.layoutStartPointer.paragraphIndex != null) {
-            const { paragraphIndex } = ctx.layoutStartPointer;
+        const layoutAnchor = ctx.layoutStartPointer.paragraphIndex;
+
+        // Reset layoutStartPointer.
+        ctx.layoutStartPointer.paragraphIndex = null;
+
+        if (layoutAnchor != null) {
             for (let sectionIndex = 0; sectionIndex < viewModel.children.length; sectionIndex++) {
                 const sectionNode = viewModel.children[sectionIndex];
                 const { endIndex, startIndex } = sectionNode;
-                if (paragraphIndex >= startIndex && paragraphIndex <= endIndex) {
+                if (layoutAnchor >= startIndex && layoutAnchor <= endIndex) {
                     startSectionIndex = sectionIndex;
                     break;
                 }
@@ -583,7 +587,7 @@ export class DocumentSkeleton extends Skeleton {
                 updateBlockIndex(allSkeletonPages);
                 this._addNewSectionByContinuous(curSkeletonPage, columnProperties!, columnSeparatorType!);
                 isContinuous = true;
-            } else if (ctx.layoutStartPointer.paragraphIndex == null) {
+            } else if (layoutAnchor == null) {
                 curSkeletonPage = createSkeletonPage(
                     ctx,
                     sectionBreakConfig,
@@ -598,7 +602,8 @@ export class DocumentSkeleton extends Skeleton {
                 viewModel,
                 sectionNode,
                 curSkeletonPage,
-                sectionBreakConfig
+                sectionBreakConfig,
+                layoutAnchor
             );
 
             // todo: 当本节有多个列，且下一节为连续节类型的时候，需要按照列数分割，重新计算 lines
@@ -631,7 +636,7 @@ export class DocumentSkeleton extends Skeleton {
             updateBlockIndex(skeleton.pages);
 
             setPageParent(skeleton.pages, skeleton);
-
+            // console.log(skeleton);
             return skeleton;
         }
     }

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import type { Nullable } from '@univerjs/core';
 import { DataStreamTreeNodeType } from '@univerjs/core';
 import type { IDocumentSkeletonPage } from '../../../../basics/i-document-skeleton-cached';
 import type { ISectionBreakConfig } from '../../../../basics/interfaces';
@@ -29,20 +30,20 @@ export function dealWithSection(
     viewModel: DocumentViewModel,
     sectionNode: DataStreamTreeNode,
     curPage: IDocumentSkeletonPage,
-    sectionBreakConfig: ISectionBreakConfig
+    sectionBreakConfig: ISectionBreakConfig,
+    layoutAnchor: Nullable<number>
 ) {
     const allCurrentSkeletonPages: IDocumentSkeletonPage[] = [];
     const renderedBlockIdMap = new Map<string, boolean>();
 
     let paragraphStartIndex = 0;
 
-    if (ctx.layoutStartPointer.paragraphIndex != null) {
-        const { paragraphIndex } = ctx.layoutStartPointer;
+    if (layoutAnchor != null) {
         const { startIndex, endIndex } = sectionNode;
-        if (paragraphIndex >= startIndex && paragraphIndex <= endIndex) {
+        if (layoutAnchor >= startIndex && layoutAnchor <= endIndex) {
             for (let pi = 0; pi < sectionNode.children.length; pi++) {
                 const paragraph = sectionNode.children[pi];
-                if (paragraph.endIndex === paragraphIndex) {
+                if (paragraph.endIndex === layoutAnchor) {
                     paragraphStartIndex = pi;
                     break;
                 }

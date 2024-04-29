@@ -15,7 +15,7 @@
  */
 
 import type { INumberUnit } from '@univerjs/core';
-import { BooleanNumber, DataStreamTreeTokenType, GridType, ObjectRelativeFromV, SpacingRule } from '@univerjs/core';
+import { BooleanNumber, DataStreamTreeTokenType, GridType, ObjectRelativeFromV, PositionedObjectLayoutType, SpacingRule } from '@univerjs/core';
 import type {
     IDocumentSkeletonColumn,
     IDocumentSkeletonDrawing,
@@ -26,8 +26,8 @@ import type {
 import { GlyphType, LineType } from '../../../../../basics/i-document-skeleton-cached';
 import type { IParagraphConfig, ISectionBreakConfig } from '../../../../../basics/interfaces';
 import {
-    _calculateSplit,
     calculateLineTopByDrawings,
+    collisionDetection,
     createAndUpdateBlockAnchor,
     createSkeletonLine,
     setDivideFullState,
@@ -492,6 +492,10 @@ function __updateAndPositionDrawings(
     paragraphIndex: number,
     drawingAnchorTop?: number
 ) {
+    if (targetDrawings.length === 0) {
+        return;
+    }
+
     const drawings = __getDrawingPosition(
         lineTop,
         lineHeight,
@@ -500,9 +504,11 @@ function __updateAndPositionDrawings(
         targetDrawings
     );
 
-    if (drawings != null) {
-        _reLayoutCheck(ctx, drawings, column, paragraphIndex);
+    if (drawings == null || drawings.size === 0) {
+        return;
     }
+
+    _reLayoutCheck(ctx, drawings, column, paragraphIndex);
 
     __updateDrawingPosition(
         column,
@@ -531,9 +537,10 @@ function _reLayoutCheck(
     paragraphIndex: number
 ) {
     const page = column.parent?.parent;
+    const needUpdatedDrawings = new Map([...drawings]);
 
     if (drawings.size === 0 || page == null) {
-        return;
+        return drawings;
     }
 
     let needBreakLineIterator = false;
@@ -558,8 +565,8 @@ function _reLayoutCheck(
                     return;
                 }
 
-                const split = _calculateSplit(drawingCache.drawing, lineHeight, top, width);
-                if (split) {
+                const collision = collisionDetection(drawingCache.drawing, lineHeight, top, width);
+                if (collision) {
                     // No need to loop next line.
                     needBreakLineIterator = true;
                     ctx.isDirty = true;
@@ -593,10 +600,12 @@ function _reLayoutCheck(
                 }
             }
 
-            const split = _calculateSplit(targetDrawing, lineHeight, top, width);
-            if (split) {
+            const collision = collisionDetection(targetDrawing, lineHeight, top, width);
+            // console.log(line.top + line.lineHeight, line.divides[0].glyphGroup[0].content);
+            if (collision) {
                 // No need to loop next line.
                 needBreakLineIterator = true;
+
                 ctx.isDirty = true;
                 ctx.layoutStartPointer.paragraphIndex = Math.min(line.paragraphIndex, ctx.layoutStartPointer.paragraphIndex ?? Number.POSITIVE_INFINITY);
 
@@ -617,6 +626,8 @@ function _reLayoutCheck(
             }
         }
     });
+
+    return needUpdatedDrawings;
 }
 
 // Detect the relative positioning of the image, whether the position needs to be repositioned.
@@ -878,7 +889,7 @@ function __getDrawingPosition(
     for (const drawing of needPositionDrawings) {
         const { initialState, drawingOrigin } = drawing;
 
-        if (initialState || !drawingOrigin) {
+        if (!drawingOrigin) {
             continue;
         }
 
@@ -913,7 +924,22 @@ function __updateDrawingPosition(
 ) {
     const page = column.parent?.parent;
     if (drawings != null && drawings.size !== 0 && page != null) {
-        page.skeDrawings = new Map([...page.skeDrawings, ...drawings]);
+        for (const drawing of drawings.values()) {
+            const originDrawing = page.skeDrawings.get(drawing.objectId);
+
+            if (originDrawing) {
+                // If it's a layout that splits the text up and down,
+                // choose an image that is closer to the bottom for the layout
+                if (originDrawing.drawingOrigin.layoutType === PositionedObjectLayoutType.WRAP_TOP_AND_BOTTOM) {
+                    const lowerDrawing = originDrawing.aTop > drawing.aTop ? originDrawing : drawing;
+                    page.skeDrawings.set(drawing.objectId, lowerDrawing);
+                } else {
+                    page.skeDrawings.set(drawing.objectId, drawing);
+                }
+            } else {
+                page.skeDrawings.set(drawing.objectId, drawing);
+            }
+        }
     }
 }
 

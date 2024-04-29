@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IBullet, ICustomBlock, IDrawing, IDrawings, Nullable } from '@univerjs/core';
+import type { IBullet, IDrawing, IDrawings, Nullable } from '@univerjs/core';
 import { DataStreamTreeTokenType, PositionedObjectLayoutType } from '@univerjs/core';
 import { BreakType } from '../../../../../basics/i-document-skeleton-cached';
 import type { IDocumentSkeletonBullet, IDocumentSkeletonDrawing, IDocumentSkeletonPage } from '../../../../../basics/i-document-skeleton-cached';
@@ -156,7 +156,7 @@ export function lineBreaking(
     for (let i = 0, len = blocks.length; i < len; i++) {
         const charIndex = blocks[i];
         const customBlock = viewModel.getCustomBlock(charIndex);
-        console.log(charIndex, customBlock);
+
         if (customBlock == null) {
             continue;
         }

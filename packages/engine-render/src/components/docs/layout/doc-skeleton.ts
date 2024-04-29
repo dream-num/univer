@@ -48,6 +48,7 @@ function resetContext(ctx: ILayoutContext) {
 
 function removeDupPages(ctx: ILayoutContext) {
     const hash = new Set();
+
     ctx.skeleton.pages = ctx.skeleton.pages.filter((page) => {
         const hasPage = hash.has(page);
         hash.add(page);
@@ -627,11 +628,9 @@ export class DocumentSkeleton extends Skeleton {
             // 计算页和节的位置信息
             this._iteratorCount = 0;
             removeDupPages(ctx);
-            updateBlockIndex(allSkeletonPages);
+            updateBlockIndex(skeleton.pages);
 
-            setPageParent(allSkeletonPages, skeleton);
-
-            // console.log(skeleton);
+            setPageParent(skeleton.pages, skeleton);
 
             return skeleton;
         }

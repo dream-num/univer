@@ -23,7 +23,6 @@ import {
 import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderController, SpreadsheetColumnHeader, SpreadsheetHeader } from '@univerjs/engine-render';
 import {
     CURSOR_TYPE,
-    IRenderManagerService,
     Rect,
     ScrollTimer,
     ScrollTimerType,
@@ -114,7 +113,6 @@ export class HeaderMoveRenderController extends Disposable implements IRenderCon
     constructor(
         private readonly _context: IRenderContext<Workbook>,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ICommandService private readonly _commandService: ICommandService,
         @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
         @Inject(SelectionManagerService) private readonly _selectionManagerService: SelectionManagerService

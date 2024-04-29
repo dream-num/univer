@@ -67,6 +67,7 @@ export class SpreadsheetAdaptor extends ObjectAdaptor {
         return this;
     }
 
+    // eslint-disable-next-line max-lines-per-function
     override convert(pageElement: IPageElement, mainScene: Scene) {
         const {
             id,
@@ -123,7 +124,6 @@ export class SpreadsheetAdaptor extends ObjectAdaptor {
             skewY,
             flipX,
             flipY,
-            isTransformer: true,
             forceRender: true,
         });
         const scene = new Scene(SHEET_VIEW_KEY.SCENE + id, sv, {
@@ -154,6 +154,7 @@ export class SpreadsheetAdaptor extends ObjectAdaptor {
         return sv;
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _updateViewport(
         id: string,
         rowHeaderWidth: number,
@@ -189,7 +190,7 @@ export class SpreadsheetAdaptor extends ObjectAdaptor {
             isWheelPreventDefaultX: true,
         });
 
-        new Viewport(SHEET_VIEW_KEY.VIEW_LEFT_TOP + id, scene, {
+        const VIEW_LEFT_TOP = new Viewport(SHEET_VIEW_KEY.VIEW_LEFT_TOP + id, scene, {
             left: 0,
             top: 0,
             width: rowHeaderWidthScale,

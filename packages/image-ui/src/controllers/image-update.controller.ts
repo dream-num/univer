@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { Image, IRenderManagerService } from '@univerjs/engine-render';
+import { DRAWING_OBJECT_LAYER_INDEX, Image, IRenderManagerService } from '@univerjs/engine-render';
 import {
     Disposable,
     ICommandService,
@@ -91,8 +91,7 @@ export class ImageUpdateController extends Disposable {
 
                     imageModel.setKey(imageShapeKey);
 
-                    const imageConfig: IImageProps = {
-                        left, top, width, height, zIndex: 11, isTransformer: true };
+                    const imageConfig: IImageProps = { left, top, width, height, zIndex: 11 };
 
 
                     const imageNativeCache = this._imageManagerService.getImageSourceCache(imageModel);
@@ -107,11 +106,7 @@ export class ImageUpdateController extends Disposable {
 
                     this._imageManagerService.addImageSourceCache(imageModel, image.getNative());
 
-                    if (!scene.getTransformer()) {
-                        scene.openTransformer();
-                    }
-
-                    scene.addObject(image);
+                    scene.addObject(image, DRAWING_OBJECT_LAYER_INDEX).attachTransformerTo(image);
 
                     if (!sceneList.includes(scene)) {
                         sceneList.push(scene);
@@ -120,7 +115,6 @@ export class ImageUpdateController extends Disposable {
 
                 sceneList.forEach((scene) => {
                     this._addListenerOnImage(scene);
-                    scene.closeTransformer();
                 });
             })
         );

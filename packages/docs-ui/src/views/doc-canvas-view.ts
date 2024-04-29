@@ -112,8 +112,6 @@ export class DocCanvasView extends RxDisposable {
 
         const { scene, engine } = currentRender;
 
-        scene.openTransformer();
-
         this._scene = scene;
 
         const viewMain = new Viewport(VIEWPORT_KEY.VIEW_MAIN, scene, {

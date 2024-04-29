@@ -214,7 +214,9 @@ export abstract class ThinScene extends Disposable {
 
     setObjectBehavior(o: BaseObject) {}
 
-    applyTransformer(o: BaseObject) {}
+    attachTransformerTo(o: BaseObject) {}
+
+    detachTransformerFrom(o: BaseObject) {}
 
     makeDirtyNoParent(state: boolean = true) {
         return this;

@@ -117,8 +117,6 @@ export class SheetCanvasView extends RxDisposable {
 
         const { scene, engine } = currentRender;
 
-        scene.openTransformer();
-
         this._scene = scene;
 
         scene.addLayer(new Layer(scene, [], 0), new Layer(scene, [], 2));
@@ -199,12 +197,12 @@ export class SheetCanvasView extends RxDisposable {
             isWheelPreventDefaultX: true,
         });
 
-        new Viewport(VIEWPORT_KEY.VIEW_ROW_TOP, scene, {
+        const VIEW_ROW_TOP = new Viewport(VIEWPORT_KEY.VIEW_ROW_TOP, scene, {
             active: false,
             isWheelPreventDefaultX: true,
         });
 
-        new Viewport(VIEWPORT_KEY.VIEW_ROW_BOTTOM, scene, {
+        const VIEW_ROW_BOTTOM = new Viewport(VIEWPORT_KEY.VIEW_ROW_BOTTOM, scene, {
             left: 0,
             top: columnHeader.height,
             bottom: 0,
@@ -212,12 +210,12 @@ export class SheetCanvasView extends RxDisposable {
             isWheelPreventDefaultX: true,
         });
 
-        new Viewport(VIEWPORT_KEY.VIEW_COLUMN_LEFT, scene, {
+        const VIEW_COLUMN_LEFT = new Viewport(VIEWPORT_KEY.VIEW_COLUMN_LEFT, scene, {
             active: false,
             isWheelPreventDefaultX: true,
         });
 
-        new Viewport(VIEWPORT_KEY.VIEW_COLUMN_RIGHT, scene, {
+        const VIEW_COLUMN_RIGHT = new Viewport(VIEWPORT_KEY.VIEW_COLUMN_RIGHT, scene, {
             left: rowHeader.width,
             top: 0,
             height: columnHeader.height,
@@ -225,7 +223,7 @@ export class SheetCanvasView extends RxDisposable {
             isWheelPreventDefaultX: true,
         });
 
-        new Viewport(VIEWPORT_KEY.VIEW_LEFT_TOP, scene, {
+        const VIEW_LEFT_TOP = new Viewport(VIEWPORT_KEY.VIEW_LEFT_TOP, scene, {
             left: 0,
             top: 0,
             width: rowHeader.width,
@@ -233,29 +231,40 @@ export class SheetCanvasView extends RxDisposable {
             isWheelPreventDefaultX: true,
         });
 
-        new Viewport(VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP, scene, {
+        const VIEW_MAIN_LEFT_TOP = new Viewport(VIEWPORT_KEY.VIEW_MAIN_LEFT_TOP, scene, {
             isWheelPreventDefaultX: true,
             active: false,
         });
 
-        new Viewport(VIEWPORT_KEY.VIEW_MAIN_LEFT, scene, {
+        const VIEW_MAIN_LEFT = new Viewport(VIEWPORT_KEY.VIEW_MAIN_LEFT, scene, {
             isWheelPreventDefaultX: true,
             active: false,
         });
 
-        new Viewport(VIEWPORT_KEY.VIEW_MAIN_TOP, scene, {
+        const VIEW_MAIN_TOP = new Viewport(VIEWPORT_KEY.VIEW_MAIN_TOP, scene, {
             isWheelPreventDefaultX: true,
             active: false,
         });
 
-        // mouse scroll
+        this._initMouseWheel(viewMain);
+
+
+        // create a scroll bar
+        const scrollBar = new ScrollBar(viewMain);
+
+        scene.attachControl();
+
+        return viewMain;
+    }
+
+    // mouse scroll
+    private _initMouseWheel(viewMain: Viewport) {
         this.disposeWithMe(
             toDisposable(
-                scene.onMouseWheelObserver.add((evt: IWheelEvent, state) => {
+                this._scene.onMouseWheelObserver.add((evt: IWheelEvent, state) => {
                     if (evt.ctrlKey) {
                         return;
                     }
-
                     let offsetX = 0;
                     let offsetY = 0;
 
@@ -272,8 +281,7 @@ export class SheetCanvasView extends RxDisposable {
                         }
                         this._commandService.executeCommand(SetScrollRelativeCommand.id, { offsetX });
 
-                        // 临界点时执行浏览器行为
-                        if (scene.getParent().classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
+                        if (this._scene.getParent().classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
                             if (!isLimitedStore?.isLimitedX) {
                                 state.stopPropagation();
                             }
@@ -296,8 +304,7 @@ export class SheetCanvasView extends RxDisposable {
                             }
                             this._commandService.executeCommand(SetScrollRelativeCommand.id, { offsetX });
 
-                            // 临界点时执行浏览器行为
-                            if (scene.getParent().classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
+                            if (this._scene.getParent().classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
                                 if (!isLimitedStore?.isLimitedX) {
                                     state.stopPropagation();
                                 }
@@ -314,8 +321,7 @@ export class SheetCanvasView extends RxDisposable {
                             }
                             this._commandService.executeCommand(SetScrollRelativeCommand.id, { offsetY });
 
-                            // 临界点时执行浏览器行为
-                            if (scene.getParent().classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
+                            if (this._scene.getParent().classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
                                 if (!isLimitedStore?.isLimitedY) {
                                     state.stopPropagation();
                                 }
@@ -326,21 +332,10 @@ export class SheetCanvasView extends RxDisposable {
                             }
                         }
                     }
-                    if (evt.inputIndex === PointerInput.MouseWheelZ) {
-                        // TODO
-                        // ...
-                    }
 
                     this._scene.makeDirty(true);
                 })
             )
         );
-
-        // create a scroll bar
-        new ScrollBar(viewMain);
-
-        scene.attachControl();
-
-        return viewMain;
     }
 }

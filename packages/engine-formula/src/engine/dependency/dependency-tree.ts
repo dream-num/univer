@@ -153,7 +153,6 @@ export class FormulaDependencyTree extends Disposable {
             }
 
             const sheetRangeMap = dependencyRangeList.get(unitId)!;
-
             if (!sheetRangeMap.has(sheetId)) {
                 continue;
             }
@@ -199,7 +198,6 @@ export class FormulaDependencyTree extends Disposable {
                 }
             }
         }
-
         return false;
     }
 

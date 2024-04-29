@@ -33,7 +33,7 @@ import { StartEditController } from './controllers/editor/start-edit.controller'
 import { EditorBridgeController } from './controllers/editor-bridge.controller';
 import { FormatPainterRenderController } from './controllers/render-controllers/format-painter.render-controller';
 import { HeaderFreezeRenderController } from './controllers/render-controllers/freeze.render-controller';
-import { HeaderMenuController } from './controllers/header-menu.controller';
+import { HeaderMenuRenderController } from './controllers/render-controllers/header-menu.render-controller';
 import { HeaderMoveController } from './controllers/header-move.controller';
 import { HeaderResizeRenderController } from './controllers/render-controllers/header-resize.render-controller';
 import { HeaderUnhideRenderController } from './controllers/render-controllers/header-unhide.render-controller';
@@ -127,7 +127,6 @@ export class UniverSheetsUIPlugin extends Plugin {
                 [EndEditController],
                 [FormulaEditorController],
                 [HeaderFreezeRenderController],
-                [HeaderMenuController],
                 [HeaderMoveController],
                 [SheetClipboardController],
                 [SheetContextMenuController],
@@ -161,6 +160,7 @@ export class UniverSheetsUIPlugin extends Plugin {
             SelectionRenderController,
             FormatPainterRenderController,
             AutoFillRenderController,
+            HeaderMenuRenderController,
         ]).forEach((controller) => {
             this.disposeWithMe(this._renderManagerService.registerRenderController(UniverInstanceType.UNIVER_SHEET, controller));
         });

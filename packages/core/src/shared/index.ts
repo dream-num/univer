@@ -41,3 +41,4 @@ export * from './debounce';
 export * from './clipboard';
 export { queryObjectMatrix } from './object-matrix-query';
 export { moveRangeByOffset } from './range';
+export { afterInitApply } from './after-init-apply';

@@ -38,7 +38,7 @@ import type { Injector } from '@wendellhu/redi';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { IRenderManagerService, RenderManagerService } from '@univerjs/engine-render';
-import { AutoFillRenderController } from '../../../controllers/auto-fill.render-controller';
+import { AutoFillRenderController } from '../../../controllers/render-controllers/auto-fill.render-controller';
 import { AutoFillService, IAutoFillService } from '../../../services/auto-fill/auto-fill.service';
 import { APPLY_TYPE } from '../../../services/auto-fill/type';
 import { EditorBridgeService, IEditorBridgeService } from '../../../services/editor-bridge.service';

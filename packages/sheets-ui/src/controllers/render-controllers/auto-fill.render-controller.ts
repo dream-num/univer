@@ -50,10 +50,10 @@ import {
 } from '@univerjs/sheets';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { AutoClearContentCommand, AutoFillCommand } from '../commands/commands/auto-fill.command';
-import { IAutoFillService } from '../services/auto-fill/auto-fill.service';
-import { otherRule } from '../services/auto-fill/rules';
-import { fillCopy, fillCopyStyles, getDataIndex, getLenS } from '../services/auto-fill/tools';
+import { AutoClearContentCommand, AutoFillCommand } from '../../commands/commands/auto-fill.command';
+import { IAutoFillService } from '../../services/auto-fill/auto-fill.service';
+import { otherRule } from '../../services/auto-fill/rules';
+import { fillCopy, fillCopyStyles, getDataIndex, getLenS } from '../../services/auto-fill/tools';
 import type {
     APPLY_FUNCTIONS,
     IAutoFillLocation,
@@ -61,12 +61,12 @@ import type {
     ICopyDataPiece,
     IRuleConfirmedData,
     ISheetAutoFillHook,
-} from '../services/auto-fill/type';
-import { APPLY_TYPE, AutoFillHookType, DATA_TYPE } from '../services/auto-fill/type';
-import { IEditorBridgeService } from '../services/editor-bridge.service';
-import { ISelectionRenderService } from '../services/selection/selection-render.service';
-import type { IDiscreteRange } from './utils/range-tools';
-import { discreteRangeToRange, generateNullCellValue, rangeToDiscreteRange } from './utils/range-tools';
+} from '../../services/auto-fill/type';
+import { APPLY_TYPE, AutoFillHookType, DATA_TYPE } from '../../services/auto-fill/type';
+import { IEditorBridgeService } from '../../services/editor-bridge.service';
+import { ISelectionRenderService } from '../../services/selection/selection-render.service';
+import type { IDiscreteRange } from '../utils/range-tools';
+import { discreteRangeToRange, generateNullCellValue, rangeToDiscreteRange } from '../utils/range-tools';
 
 export class AutoFillRenderController extends Disposable implements IRenderController {
     private _beforeApplyData: Array<Array<Nullable<ICellData>>> = [];

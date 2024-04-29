@@ -37,7 +37,7 @@ export {
     type ISetScrollRelativeCommandParams,
 } from './commands/commands/set-scroll.command';
 export { VIEWPORT_KEY } from './common/keys';
-export { AutoFillRenderController } from './controllers/auto-fill.render-controller';
+export { AutoFillRenderController } from './controllers/render-controllers/auto-fill.render-controller';
 export { CellCustomRenderController } from './controllers/cell-custom-render.controller';
 export { PASTE_SPECIAL_MENU_ID } from './controllers/menu/menu';
 export { whenFormulaEditorActivated } from './controllers/shortcuts/utils';

@@ -40,7 +40,7 @@ import type { Injector } from '@wendellhu/redi';
 import { BehaviorSubject } from 'rxjs';
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { FormatPainterRenderController } from '../../../controllers/format-painter/format-painter.render-controller';
+import { FormatPainterRenderController } from '../../../controllers/render-controllers/format-painter.render-controller';
 import { FormatPainterService, IFormatPainterService } from '../../../services/format-painter/format-painter.service';
 import { SetFormatPainterOperation } from '../../operations/set-format-painter.operation';
 import {

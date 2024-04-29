@@ -22,7 +22,7 @@ import { filter } from 'rxjs/operators';
 
 import { IRenderManagerService } from '@univerjs/engine-render';
 import { ActiveWorksheetController } from './controllers/active-worksheet/active-worksheet.controller';
-import { AutoFillRenderController } from './controllers/auto-fill.render-controller';
+import { AutoFillRenderController } from './controllers/render-controllers/auto-fill.render-controller';
 import { AutoHeightController } from './controllers/auto-height.controller';
 import { SheetClipboardController } from './controllers/clipboard/clipboard.controller';
 import { SheetContextMenuController } from './controllers/contextmenu/contextmenu.controller';
@@ -31,11 +31,11 @@ import { EndEditController } from './controllers/editor/end-edit.controller';
 import { FormulaEditorController } from './controllers/editor/formula-editor.controller';
 import { StartEditController } from './controllers/editor/start-edit.controller';
 import { EditorBridgeController } from './controllers/editor-bridge.controller';
-import { FormatPainterRenderController } from './controllers/format-painter/format-painter.render-controller';
+import { FormatPainterRenderController } from './controllers/render-controllers/format-painter.render-controller';
 import { HeaderFreezeRenderController } from './controllers/render-controllers/freeze.render-controller';
 import { HeaderMenuController } from './controllers/header-menu.controller';
 import { HeaderMoveController } from './controllers/header-move.controller';
-import { HeaderResizeController } from './controllers/render-controllers/header-resize.render-controller';
+import { HeaderResizeRenderController } from './controllers/render-controllers/header-resize.render-controller';
 import { HeaderUnhideRenderController } from './controllers/render-controllers/header-unhide.render-controller';
 import { MarkSelectionController } from './controllers/mark-selection.controller';
 import { SelectionRenderController } from './controllers/render-controllers/selection.render-controller';
@@ -129,7 +129,6 @@ export class UniverSheetsUIPlugin extends Plugin {
                 [HeaderFreezeRenderController],
                 [HeaderMenuController],
                 [HeaderMoveController],
-                [HeaderResizeController],
                 [SheetClipboardController],
                 [SheetContextMenuController],
                 [SheetRenderController],
@@ -156,7 +155,7 @@ export class UniverSheetsUIPlugin extends Plugin {
         ([
             HeaderFreezeRenderController,
             HeaderUnhideRenderController,
-            HeaderResizeController,
+            HeaderResizeRenderController,
             SheetsZoomRenderController,
             SheetsScrollRenderController,
             SelectionRenderController,

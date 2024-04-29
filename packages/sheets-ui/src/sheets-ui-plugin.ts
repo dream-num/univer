@@ -25,7 +25,7 @@ import { ActiveWorksheetController } from './controllers/active-worksheet/active
 import { AutoFillRenderController } from './controllers/render-controllers/auto-fill.render-controller';
 import { AutoHeightController } from './controllers/auto-height.controller';
 import { SheetClipboardController } from './controllers/clipboard/clipboard.controller';
-import { SheetContextMenuController } from './controllers/contextmenu/contextmenu.controller';
+import { SheetContextMenuRenderController } from './controllers/contextmenu/contextmenu.controller';
 import { EditingController } from './controllers/editor/editing.controller';
 import { EndEditController } from './controllers/editor/end-edit.controller';
 import { FormulaEditorController } from './controllers/editor/formula-editor.controller';
@@ -34,7 +34,7 @@ import { EditorBridgeController } from './controllers/editor-bridge.controller';
 import { FormatPainterRenderController } from './controllers/render-controllers/format-painter.render-controller';
 import { HeaderFreezeRenderController } from './controllers/render-controllers/freeze.render-controller';
 import { HeaderMenuRenderController } from './controllers/render-controllers/header-menu.render-controller';
-import { HeaderMoveController } from './controllers/header-move.controller';
+import { HeaderMoveRenderController } from './controllers/render-controllers/header-move.render-controller';
 import { HeaderResizeRenderController } from './controllers/render-controllers/header-resize.render-controller';
 import { HeaderUnhideRenderController } from './controllers/render-controllers/header-unhide.render-controller';
 import { MarkSelectionController } from './controllers/mark-selection.controller';
@@ -127,9 +127,7 @@ export class UniverSheetsUIPlugin extends Plugin {
                 [EndEditController],
                 [FormulaEditorController],
                 [HeaderFreezeRenderController],
-                [HeaderMoveController],
                 [SheetClipboardController],
-                [SheetContextMenuController],
                 [SheetRenderController],
                 [SheetUIController],
                 [StartEditController],
@@ -161,6 +159,8 @@ export class UniverSheetsUIPlugin extends Plugin {
             FormatPainterRenderController,
             AutoFillRenderController,
             HeaderMenuRenderController,
+            HeaderMoveRenderController,
+            SheetContextMenuRenderController,
         ]).forEach((controller) => {
             this.disposeWithMe(this._renderManagerService.registerRenderController(UniverInstanceType.UNIVER_SHEET, controller));
         });

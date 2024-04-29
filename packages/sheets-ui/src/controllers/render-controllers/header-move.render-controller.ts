@@ -14,16 +14,13 @@
  * limitations under the License.
  */
 
-import type { Nullable, Observer } from '@univerjs/core';
+import type { Nullable, Observer, Workbook } from '@univerjs/core';
 import {
     Disposable,
     ICommandService,
-    IUniverInstanceService,
-    LifecycleStages,
-    OnLifecycle,
     RANGE_TYPE,
 } from '@univerjs/core';
-import type { IMouseEvent, IPointerEvent } from '@univerjs/engine-render';
+import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderController, SpreadsheetColumnHeader, SpreadsheetHeader } from '@univerjs/engine-render';
 import {
     CURSOR_TYPE,
     IRenderManagerService,
@@ -41,11 +38,10 @@ import {
 } from '@univerjs/sheets';
 import { Inject } from '@wendellhu/redi';
 
-import { SHEET_COMPONENT_HEADER_LAYER_INDEX, VIEWPORT_KEY } from '../common/keys';
-import { ISelectionRenderService } from '../services/selection/selection-render.service';
-import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
-import type { ISheetObjectParam } from './utils/component-tools';
-import { getCoordByOffset, getSheetObject } from './utils/component-tools';
+import { SHEET_COMPONENT_HEADER_LAYER_INDEX, SHEET_VIEW_KEY, VIEWPORT_KEY } from '../../common/keys';
+import { ISelectionRenderService } from '../../services/selection/selection-render.service';
+import { SheetSkeletonManagerService } from '../../services/sheet-skeleton-manager.service';
+import { getCoordByOffset } from '../utils/component-tools';
 
 const HEADER_MOVE_CONTROLLER_BACKGROUND = '__SpreadsheetHeaderMoveControllerBackground__';
 
@@ -62,8 +58,7 @@ enum HEADER_MOVE_TYPE {
     COLUMN,
 }
 
-@OnLifecycle(LifecycleStages.Rendered, HeaderMoveController)
-export class HeaderMoveController extends Disposable {
+export class HeaderMoveRenderController extends Disposable implements IRenderController {
     private _startOffsetX: number = Number.NEGATIVE_INFINITY;
 
     private _startOffsetY: number = Number.NEGATIVE_INFINITY;
@@ -71,8 +66,6 @@ export class HeaderMoveController extends Disposable {
     private _moveHelperBackgroundShape: Nullable<Rect>;
 
     private _moveHelperLineShape: Nullable<Rect>;
-
-    private _sheetObject!: ISheetObjectParam;
 
     private _rowOrColumnDownObservers: Array<Nullable<Observer<IPointerEvent | IMouseEvent>>> = [];
 
@@ -98,12 +91,9 @@ export class HeaderMoveController extends Disposable {
         this._moveHelperBackgroundShape?.dispose();
         this._moveHelperLineShape?.dispose();
 
-        const sheetObject = this._getSheetObject();
-        if (sheetObject == null) {
-            return;
-        }
-
-        const { spreadsheetRowHeader, spreadsheetColumnHeader, scene } = sheetObject;
+        const spreadsheetColumnHeader = this._context.components.get(SHEET_VIEW_KEY.COLUMN) as SpreadsheetColumnHeader;
+        const spreadsheetRowHeader = this._context.components.get(SHEET_VIEW_KEY.ROW) as SpreadsheetHeader;
+        const scene = this._context.scene;
 
         [
             ...this._rowOrColumnDownObservers,
@@ -122,8 +112,8 @@ export class HeaderMoveController extends Disposable {
     }
 
     constructor(
+        private readonly _context: IRenderContext<Workbook>,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @ICommandService private readonly _commandService: ICommandService,
         @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
@@ -135,21 +125,15 @@ export class HeaderMoveController extends Disposable {
     }
 
     private _initialize() {
-        const sheetObject = this._getSheetObject();
-        if (sheetObject == null) {
-            return;
-        }
-
-        this._sheetObject = sheetObject;
-
         this._initialRowOrColumn(HEADER_MOVE_TYPE.ROW);
 
         this._initialRowOrColumn(HEADER_MOVE_TYPE.COLUMN);
     }
 
     private _initialRowOrColumn(initialType: HEADER_MOVE_TYPE = HEADER_MOVE_TYPE.ROW) {
-        const { spreadsheetColumnHeader, spreadsheetRowHeader, scene } = this._sheetObject;
-
+        const spreadsheetColumnHeader = this._context.components.get(SHEET_VIEW_KEY.COLUMN) as SpreadsheetColumnHeader;
+        const spreadsheetRowHeader = this._context.components.get(SHEET_VIEW_KEY.ROW) as SpreadsheetHeader;
+        const scene = this._context.scene;
         const eventBindingObject =
             initialType === HEADER_MOVE_TYPE.ROW ? spreadsheetRowHeader : spreadsheetColumnHeader;
 
@@ -357,8 +341,7 @@ export class HeaderMoveController extends Disposable {
         },
         initialType: HEADER_MOVE_TYPE
     ) {
-        const { scene } = this._sheetObject;
-
+        const scene = this._context.scene;
         const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
         if (skeleton == null) {
             return;
@@ -506,7 +489,7 @@ export class HeaderMoveController extends Disposable {
     }
 
     private _clearObserverEvent() {
-        const { scene } = this._sheetObject;
+        const scene = this._context.scene;
         scene.onPointerMoveObserver.remove(this._moveObserver);
         scene.onPointerUpObserver.remove(this._upObserver);
         this._moveObserver = null;
@@ -514,7 +497,7 @@ export class HeaderMoveController extends Disposable {
     }
 
     private _newBackgroundAndLine() {
-        const { scene } = this._sheetObject;
+        const scene = this._context.scene;
         this._moveHelperBackgroundShape = new Rect(HEADER_MOVE_CONTROLLER_BACKGROUND, {
             fill: HEADER_MOVE_CONTROLLER_BACKGROUND_FILL,
             evented: false,
@@ -535,9 +518,5 @@ export class HeaderMoveController extends Disposable {
     private _disposeBackgroundAndLine() {
         this._moveHelperBackgroundShape?.dispose();
         this._moveHelperLineShape?.dispose();
-    }
-
-    private _getSheetObject() {
-        return getSheetObject(this._univerInstanceService, this._renderManagerService);
     }
 }

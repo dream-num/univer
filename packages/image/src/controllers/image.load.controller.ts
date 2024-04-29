@@ -112,7 +112,7 @@ export class ImageLoadController extends Disposable {
                         imageModel.setKey(imageShapeKey);
 
                         const imageConfig: IImageProps = {
-                            left, top, width, height, zIndex: 11, isTransformer: true };
+                            left, top, width, height, zIndex: 11 };
 
 
                         const imageNativeCache = this._imageManagerService.getImageSourceCache(imageModel);
@@ -140,7 +140,6 @@ export class ImageLoadController extends Disposable {
 
                     sceneList.forEach((scene) => {
                         this._addListenerOnImage(scene);
-                        scene.closeTransformer();
                     });
                 })
             )

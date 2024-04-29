@@ -106,7 +106,6 @@ export class DocsAdaptor extends ObjectAdaptor {
             skewY,
             flipX,
             flipY,
-            isTransformer: true,
         });
         const scene = new Scene(DOCS_VIEW_KEY.SCENE + id, sv);
 
@@ -214,7 +213,6 @@ export class DocsAdaptor extends ObjectAdaptor {
                     width,
                     height,
                     zIndex: 11,
-                    isTransformer: true,
                 });
 
                 pageMarginCache.set(drawing.objectId, {
@@ -232,8 +230,12 @@ export class DocsAdaptor extends ObjectAdaptor {
                 documents.pageMarginTop
             );
         }
-        scene.openTransformer();
+
         scene.addObjects(objectList);
+        objectList.forEach((object) => {
+            scene.attachTransformerTo(object);
+        });
+
         scene.getTransformer()?.onChangingObservable.add((state) => {
             const { objects } = state;
 
@@ -258,8 +260,6 @@ export class DocsAdaptor extends ObjectAdaptor {
 
             documentSkeleton?.calculate();
         });
-        scene.closeTransformer();
-
         this._calculatePagePosition(documents, scene, viewMain);
 
         return sv;

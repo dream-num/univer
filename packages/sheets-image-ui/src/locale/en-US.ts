@@ -22,6 +22,10 @@ const locale = {
             float: 'Float Image',
             cell: 'Cell Image',
         },
+
+        panel: {
+            title: 'Edit Image',
+        },
     },
 };
 

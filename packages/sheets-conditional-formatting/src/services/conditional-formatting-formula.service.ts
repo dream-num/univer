@@ -15,7 +15,7 @@
  */
 
 import type { ICellData, Nullable, ObjectMatrix } from '@univerjs/core';
-import { Disposable, ICommandService, RefAlias, toDisposable, Tools } from '@univerjs/core';
+import { BooleanNumber, CellValueType, Disposable, ICommandService, RefAlias, toDisposable, Tools } from '@univerjs/core';
 import { Inject, Injector } from '@wendellhu/redi';
 import type { IRemoveOtherFormulaMutationParams, ISetFormulaCalculationResultMutation, ISetOtherFormulaMutationParams } from '@univerjs/engine-formula';
 import { IActiveDirtyManagerService, RemoveOtherFormulaMutation,
@@ -43,6 +43,9 @@ export enum FormulaResultStatus {
 
 const getResultFromFormula = (formulaResult: Nullable<ICellData>[][]) => {
     const v = formulaResult && formulaResult[0] && formulaResult[0][0];
+    if (v?.t === CellValueType.BOOLEAN) {
+        return v.v === BooleanNumber.TRUE || v.v === true;
+    }
     return v ? v.v : false;
 };
 // TODO: @Gggpound

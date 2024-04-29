@@ -24,6 +24,10 @@ const locale: typeof enUS = {
             float: '浮动图片',
             cell: '单元格图片',
         },
+
+        panel: {
+            title: '编辑图片',
+        },
     },
 };
 

@@ -17,7 +17,7 @@
 import type { IRangeWithCoord, ISelectionCellWithCoord, Nullable, ThemeService } from '@univerjs/core';
 import { ColorKit, Disposable, RANGE_TYPE, toDisposable } from '@univerjs/core';
 import type { Scene } from '@univerjs/engine-render';
-import { cancelRequestFrame, DEFAULT_SELECTION_LAYER_INDEX, FIX_ONE_PIXEL_BLUR_OFFSET, Group, Rect, requestNewFrame, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
+import { cancelRequestFrame, FIX_ONE_PIXEL_BLUR_OFFSET, Group, Rect, requestNewFrame, TRANSFORM_CHANGE_OBSERVABLE_TYPE } from '@univerjs/engine-render';
 import type { ISelectionStyle, ISelectionWidgetConfig, ISelectionWithCoordAndStyle } from '@univerjs/sheets';
 import {
     getNormalSelectionStyle,
@@ -26,7 +26,7 @@ import {
 } from '@univerjs/sheets';
 import { BehaviorSubject, Subject } from 'rxjs';
 
-import { SHEET_COMPONENT_SELECTION_LAYER_INDEX } from '../../common/keys';
+import { SHEET_COMPONENT_HEADER_SELECTION_LAYER_INDEX, SHEET_COMPONENT_SELECTION_LAYER_INDEX } from '../../common/keys';
 import { SelectionRenderModel } from './selection-render-model';
 
 enum SELECTION_MANAGER_KEY {
@@ -385,6 +385,7 @@ export class SelectionShape extends Disposable {
      *
      * inner update
      */
+    // eslint-disable-next-line max-lines-per-function
     private _updateControl(style: Nullable<ISelectionStyle>, rowHeaderWidth: number, columnHeaderHeight: number) {
         const { startX, startY, endX, endY } = this._selectionModel;
         const defaultStyle = this._defaultStyle;
@@ -590,27 +591,15 @@ export class SelectionShape extends Disposable {
             stroke: '#fff',
         });
 
-        const shapes = [
-            this._fillControl,
-            this._leftControl,
-            this._rightControl,
-            this._topControl,
-            this._bottomControl,
-            this._backgroundControlTop,
-            this._backgroundControlMiddleLeft,
-            this._backgroundControlMiddleRight,
-            this._backgroundControlBottom,
-            this._dashRect,
+        const shapes = [this._fillControl, this._leftControl, this._rightControl, this._topControl,
+            this._bottomControl, this._backgroundControlTop, this._backgroundControlMiddleLeft,
+            this._backgroundControlMiddleRight, this._backgroundControlBottom, this._dashRect,
         ];
 
         this._widgetRects = this._initialWidget();
-
         this._selectionShape = new Group(SELECTION_MANAGER_KEY.Selection + zIndex, ...shapes, ...this._widgetRects);
-
         this._selectionShape.hide();
-
         this._selectionShape.evented = false;
-
         this._selectionShape.zIndex = zIndex;
 
         const scene = this.getScene();
@@ -679,7 +668,7 @@ export class SelectionShape extends Disposable {
         this._columnHeaderGroup.zIndex = zIndex;
 
         const scene = this.getScene();
-        scene.addObjects([this._rowHeaderGroup, this._columnHeaderGroup], DEFAULT_SELECTION_LAYER_INDEX);
+        scene.addObjects([this._rowHeaderGroup, this._columnHeaderGroup], SHEET_COMPONENT_HEADER_SELECTION_LAYER_INDEX);
     }
 
     private _initialWidget() {
@@ -728,13 +717,8 @@ export class SelectionShape extends Disposable {
         ];
     }
 
-    private _updateBackgroundTitle(
-        style: Nullable<ISelectionStyle>,
-        rowHeaderWidth: number,
-        columnHeaderHeight: number
-    ) {
+    private _updateBackgroundTitle(style: Nullable<ISelectionStyle>, rowHeaderWidth: number, columnHeaderHeight: number) {
         const { startX, startY, endX, endY, rangeType } = this._selectionModel;
-
         const defaultStyle = this._defaultStyle;
 
         if (style == null) {
@@ -744,14 +728,8 @@ export class SelectionShape extends Disposable {
         const scale = this._getScale();
 
         const {
-            stroke,
-            hasRowHeader,
-            rowHeaderFill = defaultStyle.rowHeaderFill!,
-            rowHeaderStroke = defaultStyle.rowHeaderStroke!,
-
-            hasColumnHeader,
-            columnHeaderFill = defaultStyle.columnHeaderFill!,
-            columnHeaderStroke = defaultStyle.columnHeaderStroke!,
+            stroke, hasRowHeader, rowHeaderFill = defaultStyle.rowHeaderFill!, rowHeaderStroke = defaultStyle.rowHeaderStroke!,
+            hasColumnHeader, columnHeaderFill = defaultStyle.columnHeaderFill!, columnHeaderStroke = defaultStyle.columnHeaderStroke!,
         } = style;
 
         let {
@@ -829,13 +807,9 @@ export class SelectionShape extends Disposable {
         }
 
         const scale = this._getScale();
-
         const { fill = defaultStyle.fill! } = style;
-
         let { strokeWidth = defaultStyle.strokeWidth! } = style;
-
         strokeWidth /= scale;
-
         const highlightSelection = this._selectionModel.highlightToSelection();
 
         if (!highlightSelection) {
@@ -848,7 +822,6 @@ export class SelectionShape extends Disposable {
         }
 
         const { startX: h_startX, startY: h_startY, endX: h_endX, endY: h_endY } = highlightSelection;
-
         const strokeOffset = strokeWidth / 2;
 
         const topConfig = {
@@ -907,152 +880,77 @@ export class SelectionShape extends Disposable {
 
     private _updateWidgets(style: Nullable<ISelectionStyle>) {
         const { startX, startY, endX, endY } = this._selectionModel;
-
         const defaultStyle = this._defaultStyle;
 
         if (style == null) {
             style = defaultStyle;
         }
 
-        const {
-            stroke = defaultStyle.stroke!,
-            widgets = defaultStyle.widgets!,
-            widgetStroke = defaultStyle.widgetStroke!,
-        } = style;
-
+        const { stroke = defaultStyle.stroke!, widgets = defaultStyle.widgets!, widgetStroke = defaultStyle.widgetStroke! } = style;
         const scale = this._getScale();
-
         let { widgetSize = defaultStyle.widgetSize!, widgetStrokeWidth = defaultStyle.widgetStrokeWidth! } = style;
 
         widgetSize /= scale;
-
         widgetStrokeWidth /= scale;
 
-        const position = {
-            left: -widgetSize / 2 + widgetStrokeWidth / 2,
-            center: (endX - startX) / 2 - widgetSize / 2 + widgetStrokeWidth / 2,
-            right: endX - startX - widgetSize / 2 + widgetStrokeWidth / 2,
-            top: -widgetSize / 2,
-            middle: (endY - startY) / 2 - widgetSize / 2,
-            bottom: endY - startY - widgetSize / 2 + widgetStrokeWidth / 2,
-        };
-
+        const position = { left: -widgetSize / 2 + widgetStrokeWidth / 2, center: (endX - startX) / 2 - widgetSize / 2 + widgetStrokeWidth / 2, right: endX - startX - widgetSize / 2 + widgetStrokeWidth / 2, top: -widgetSize / 2, middle: (endY - startY) / 2 - widgetSize / 2, bottom: endY - startY - widgetSize / 2 + widgetStrokeWidth / 2 };
         const size = widgetSize - widgetStrokeWidth;
 
         this._widgetRects.forEach((widget) => {
-            widget.setProps({
-                fill: stroke,
-                stroke: widgetStroke,
-            });
+            widget.setProps({ fill: stroke, stroke: widgetStroke });
         });
 
         if (widgets.tl === true) {
-            this._topLeftWidget.transformByState({
-                height: size,
-                width: size,
-                left: position.left,
-                top: position.top,
-                strokeWidth: widgetStrokeWidth,
-            });
-
+            this._topLeftWidget.transformByState({ height: size, width: size, left: position.left, top: position.top, strokeWidth: widgetStrokeWidth });
             this._topLeftWidget.show();
         } else {
             this._topLeftWidget.hide();
         }
 
         if (widgets.tc === true) {
-            this._topCenterWidget.transformByState({
-                height: size,
-                width: size,
-                left: position.center,
-                top: position.top,
-                strokeWidth: widgetStrokeWidth,
-            });
-
+            this._topCenterWidget.transformByState({ height: size, width: size, left: position.center, top: position.top, strokeWidth: widgetStrokeWidth });
             this._topCenterWidget.show();
         } else {
             this._topCenterWidget.hide();
         }
 
         if (widgets.tr === true) {
-            this._topRightWidget.transformByState({
-                height: size,
-                width: size,
-                left: position.right,
-                top: position.top,
-                strokeWidth: widgetStrokeWidth,
-            });
-
+            this._topRightWidget.transformByState({ height: size, width: size, left: position.right, top: position.top, strokeWidth: widgetStrokeWidth });
             this._topRightWidget.show();
         } else {
             this._topRightWidget.hide();
         }
 
         if (widgets.ml === true) {
-            this._middleLeftWidget.transformByState({
-                height: size,
-                width: size,
-                left: position.left,
-                top: position.middle,
-                strokeWidth: widgetStrokeWidth,
-            });
-
+            this._middleLeftWidget.transformByState({ height: size, width: size, left: position.left, top: position.middle, strokeWidth: widgetStrokeWidth });
             this._middleLeftWidget.show();
         } else {
             this._middleLeftWidget.hide();
         }
 
         if (widgets.mr === true) {
-            this._middleRightWidget.transformByState({
-                height: size,
-                width: size,
-                left: position.right,
-                top: position.middle,
-                strokeWidth: widgetStrokeWidth,
-            });
-
+            this._middleRightWidget.transformByState({ height: size, width: size, left: position.right, top: position.middle, strokeWidth: widgetStrokeWidth });
             this._middleRightWidget.show();
         } else {
             this._middleRightWidget.hide();
         }
 
         if (widgets.bl === true) {
-            this._bottomLeftWidget.transformByState({
-                height: size,
-                width: size,
-                left: position.left,
-                top: position.bottom,
-                strokeWidth: widgetStrokeWidth,
-            });
-
+            this._bottomLeftWidget.transformByState({ height: size, width: size, left: position.left, top: position.bottom, strokeWidth: widgetStrokeWidth });
             this._bottomLeftWidget.show();
         } else {
             this._bottomLeftWidget.hide();
         }
 
         if (widgets.bc === true) {
-            this._bottomCenterWidget.transformByState({
-                height: size,
-                width: size,
-                left: position.center,
-                top: position.bottom,
-                strokeWidth: widgetStrokeWidth,
-            });
-
+            this._bottomCenterWidget.transformByState({ height: size, width: size, left: position.center, top: position.bottom, strokeWidth: widgetStrokeWidth });
             this._bottomCenterWidget.show();
         } else {
             this._bottomCenterWidget.hide();
         }
 
         if (widgets.br === true) {
-            this._bottomRightWidget.transformByState({
-                height: size,
-                width: size,
-                left: position.right,
-                top: position.bottom,
-                strokeWidth: widgetStrokeWidth,
-            });
-
+            this._bottomRightWidget.transformByState({ height: size, width: size, left: position.right, top: position.bottom, strokeWidth: widgetStrokeWidth });
             this._bottomRightWidget.show();
         } else {
             this._bottomRightWidget.hide();

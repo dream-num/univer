@@ -76,6 +76,8 @@ interface IChangeObserverConfig {
     type: MoveObserverType;
 }
 
+const DEFAULT_TRANSFORMER_LAYER_INDEX = 2;
+
 export interface ITransformerConfig {
     hoverEnabled?: boolean;
     hoverEnterFunc?: Nullable<(e: IPointerEvent | IMouseEvent) => void>;
@@ -146,7 +148,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
     borderDash: number[] = [];
 
-    borderSpacing = 10;
+    borderSpacing = 0;
 
     anchorFill = 'rgb(255,255,255)';
 
@@ -207,11 +209,17 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
     private _selectedObjectMap = new Map<string, BaseObject>();
 
+    private _observerObjectMap = new Map<string, Nullable<Observer<IPointerEvent | IMouseEvent>>>();
+
     constructor(
         private _scene: ThinScene,
         config?: ITransformerConfig
     ) {
         super();
+        this._initialProps(config);
+    }
+
+    resetProps(config?: ITransformerConfig) {
         this._initialProps(config);
     }
 
@@ -224,68 +232,75 @@ export class Transformer extends Disposable implements ITransformerConfig {
     }
 
     attachTo(applyObject: BaseObject) {
-        if (!applyObject.isTransformer) {
-            return;
-        }
-
         if (this.hoverEnabled) {
             this.hoverEnterFunc && applyObject.onPointerEnterObserver.add(this.hoverEnterFunc);
             this.hoverLeaveFunc && applyObject.onPointerLeaveObserver.add(this.hoverLeaveFunc);
         }
 
-        this.disposeWithMe(
-            toDisposable(
-                applyObject.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
-                    const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
-                    this._startOffsetX = evtOffsetX;
-                    this._startOffsetY = evtOffsetY;
+        const observer = applyObject.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
+            const { offsetX: evtOffsetX, offsetY: evtOffsetY } = evt;
+            this._startOffsetX = evtOffsetX;
+            this._startOffsetY = evtOffsetY;
 
-                    const scene = this._getTopScene();
+            const scene = this._getTopScene();
 
-                    if (!scene) {
-                        return;
-                    }
+            if (!scene) {
+                return;
+            }
 
-                    this._addCancelObserver(scene);
+            this._addCancelObserver(scene);
 
-                    scene.disableEvent();
+            scene.disableEvent();
 
-                    const scrollTimer = ScrollTimer.create(scene);
-                    scrollTimer.startScroll(evtOffsetX, evtOffsetY);
+            const scrollTimer = ScrollTimer.create(scene);
+            scrollTimer.startScroll(evtOffsetX, evtOffsetY);
 
-                    const { scrollX, scrollY } = getCurrentScrollXY(scrollTimer);
+            const { scrollX, scrollY } = getCurrentScrollXY(scrollTimer);
 
-                    this._viewportScrollX = scrollX;
-                    this._viewportScrollY = scrollY;
+            this._viewportScrollX = scrollX;
+            this._viewportScrollY = scrollY;
 
-                    this._updateActiveObjectList(applyObject, evt);
+            this._updateActiveObjectList(applyObject, evt);
 
-                    this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
-                        const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
-                        this._moving(moveOffsetX, moveOffsetY, scrollTimer);
-                        this._hideControl();
-                        scrollTimer.scrolling(moveOffsetX, moveOffsetY, () => {
-                            this._moving(moveOffsetX, moveOffsetY, scrollTimer);
-                        });
-                    });
+            this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
+                const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
+                this._moving(moveOffsetX, moveOffsetY, scrollTimer);
+                this._hideControl();
+                scrollTimer.scrolling(moveOffsetX, moveOffsetY, () => {
+                    this._moving(moveOffsetX, moveOffsetY, scrollTimer);
+                });
+            });
 
-                    this._upObserver = scene.onPointerUpObserver.add(() => {
-                        scene.onPointerMoveObserver.remove(this._moveObserver);
-                        scene.onPointerUpObserver.remove(this._upObserver);
-                        scene.enableEvent();
-                        this._updateControl();
-                        scrollTimer.dispose();
+            this._upObserver = scene.onPointerUpObserver.add(() => {
+                scene.onPointerMoveObserver.remove(this._moveObserver);
+                scene.onPointerUpObserver.remove(this._upObserver);
+                scene.enableEvent();
+                this._updateControl();
+                scrollTimer.dispose();
 
-                        this.onChangeEndObservable.notifyObservers({
-                            objects: this._selectedObjectMap,
-                            type: MoveObserverType.MOVE_END,
-                        });
-                    });
+                this.onChangeEndObservable.notifyObservers({
+                    objects: this._selectedObjectMap,
+                    type: MoveObserverType.MOVE_END,
+                });
+            });
 
-                    state.stopPropagation();
-                })
-            )
-        );
+            state.stopPropagation();
+        });
+
+        this.disposeWithMe(toDisposable(observer));
+
+        this._observerObjectMap.set(applyObject.oKey, observer);
+
+        return applyObject;
+    }
+
+    detachFrom(applyObject: BaseObject) {
+        const observer = this._observerObjectMap.get(applyObject.oKey);
+
+        if (observer) {
+            observer.dispose();
+            this._observerObjectMap.delete(applyObject.oKey);
+        }
 
         return applyObject;
     }
@@ -750,6 +765,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
         const { left, top, height, width, angle, scaleX, scaleY, skewX, skewY, flipX, flipY } = applyObject.getState();
         const oKey = applyObject.oKey;
         const zIndex = this._selectedObjectMap.size;
+        const layerIndex = applyObject.getLayerIndex() || DEFAULT_TRANSFORMER_LAYER_INDEX;
 
         const groupElements: BaseObject[] = [];
 
@@ -775,28 +791,17 @@ export class Transformer extends Disposable implements ITransformerConfig {
                 width
             );
             const rotateLine = new Rect(`${TransformerManagerType.ROTATE_LINE}_${zIndex}`, {
-                zIndex: zIndex - 1,
-                evented: false,
-                left: lineLeft,
-                top: lineTop,
-                height: this.rotateAnchorOffset,
-                width: 1,
-                strokeWidth: this.borderStrokeWidth,
-                stroke: this.borderStroke,
-            });
+                zIndex: zIndex - 1, evented: false, left: lineLeft,
+                top: lineTop, height: this.rotateAnchorOffset, width: 1,
+                strokeWidth: this.borderStrokeWidth, stroke: this.borderStroke });
 
             const { left, top } = this._getRotateAnchorPosition(TransformerManagerType.ROTATE, height, width);
+
             const cursor = this._getRotateAnchorCursor(TransformerManagerType.ROTATE);
+
             const rotate = new Rect(`${TransformerManagerType.ROTATE}_${zIndex}`, {
-                zIndex: zIndex - 1,
-                left,
-                top,
-                height: this.rotateSize,
-                width: this.rotateSize,
-                radius: this.rotateCornerRadius,
-                strokeWidth: this.borderStrokeWidth * 2,
-                stroke: this.borderStroke,
-            });
+                zIndex: zIndex - 1, left, top, height: this.rotateSize, width: this.rotateSize,
+                radius: this.rotateCornerRadius, strokeWidth: this.borderStrokeWidth * 2, stroke: this.borderStroke });
             this._attachEventToRotate(rotate);
             this._attachHover(rotate, cursor, CURSOR_TYPE.DEFAULT);
             groupElements.push(rotateLine, rotate);
@@ -821,13 +826,10 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
         transformerControl.evented = false;
 
-        transformerControl.transformByState({
-            left,
-            top,
-        });
+        transformerControl.transformByState({ left, top });
 
         const scene = this.getScene();
-        scene.addObject(transformerControl, 2);
+        scene.addObject(transformerControl, layerIndex);
 
         this._transformerControlMap.set(oKey, transformerControl);
 

@@ -80,7 +80,6 @@ export class ShapeAdaptor extends ObjectAdaptor {
                 skewY,
                 flipX,
                 flipY,
-                isTransformer: true,
                 forceRender: true,
                 ...strokeStyle,
             });
@@ -101,7 +100,6 @@ export class ShapeAdaptor extends ObjectAdaptor {
                 skewY,
                 flipX,
                 flipY,
-                isTransformer: true,
                 forceRender: true,
                 radius,
                 ...strokeStyle,

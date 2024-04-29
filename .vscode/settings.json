@@ -128,6 +128,7 @@
     // Disable the default formatter, use eslint instead
     "prettier.enable": false,
     "editor.formatOnSave": false,
+    "search.followSymlinks": false,
 
     // Auto fix
     "editor.codeActionsOnSave": {

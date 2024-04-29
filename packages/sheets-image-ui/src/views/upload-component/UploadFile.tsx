@@ -19,6 +19,7 @@ import { ICommandService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React, { useRef } from 'react';
 import type { ICustomComponentProps } from '@univerjs/ui';
+import { ALLOW_IMAGE_LIST } from '@univerjs/image';
 import { InsertCellImageOperation, InsertFloatImageOperation } from '../../commands/operations/insert-image.operation';
 import styles from './index.module.less';
 import { UploadFileType } from './component-name';
@@ -38,6 +39,8 @@ export const UploadFileMenu = (props: IUploadFileProps) => {
     const handleButtonClick = () => {
         fileInputRef.current?.click();
     };
+
+    const imageAccept = ALLOW_IMAGE_LIST.map((image) => `.${image.replace('image/', '')}`).join(',');
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files ? event.target.files[0] : null;
@@ -63,6 +66,7 @@ export const UploadFileMenu = (props: IUploadFileProps) => {
                 className={styles.uploadFileMenuInput}
                 ref={fileInputRef}
                 onChange={handleFileChange}
+                accept={imageAccept}
             />
         </div>
     );

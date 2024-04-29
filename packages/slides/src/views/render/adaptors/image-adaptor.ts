@@ -70,7 +70,6 @@ export class ImageAdaptor extends ObjectAdaptor {
             skewY,
             flipX,
             flipY,
-            isTransformer: true,
             forceRender: true,
         });
     }

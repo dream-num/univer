@@ -42,8 +42,9 @@ import {
 } from '@univerjs/sheets';
 import type { ISetNumfmtCommandParams } from '@univerjs/sheets-numfmt';
 import { SetNumfmtCommand } from '@univerjs/sheets-numfmt';
-import { Inject, Injector } from '@wendellhu/redi';
 
+import { FormulaDataModel } from '@univerjs/engine-formula';
+import { Inject } from '@wendellhu/redi';
 import type { FHorizontalAlignment, FVerticalAlignment } from './utils';
 import {
     covertCellValue,
@@ -63,8 +64,8 @@ export class FRange {
         private readonly _workbook: Workbook,
         private readonly _worksheet: Worksheet,
         private readonly _range: IRange,
-        @Inject(Injector) private readonly _injector: Injector,
-        @ICommandService private readonly _commandService: ICommandService
+        @ICommandService private readonly _commandService: ICommandService,
+        @Inject(FormulaDataModel) private readonly _formulaDataModel: FormulaDataModel
     ) { }
 
     getRow(): number {
@@ -107,6 +108,31 @@ export class FRange {
 
     getValue(): CellValue | null {
         return this._worksheet.getCell(this._range.startRow, this._range.startColumn)?.v ?? null;
+    }
+
+    /**
+     * Returns the formulas (A1 notation) for the cells in the range. Entries in the 2D array are empty strings for cells with no formula.
+     * @returns A two-dimensional array of formulas in string format.
+     */
+    getFormulas(): string[][] {
+        const formulas: string[][] = [];
+
+        const { startRow, endRow, startColumn, endColumn } = this._range;
+        const sheetId = this._worksheet.getSheetId();
+        const unitId = this._workbook.getUnitId();
+
+        for (let row = startRow; row <= endRow; row++) {
+            const rowFormulas: string[] = [];
+
+            for (let col = startColumn; col <= endColumn; col++) {
+                const formulaString = this._formulaDataModel.getFormulaStringByCell(row, col, sheetId, unitId);
+                rowFormulas.push(formulaString || '');
+            }
+
+            formulas.push(rowFormulas);
+        }
+
+        return formulas;
     }
 
     getWrap(): boolean {

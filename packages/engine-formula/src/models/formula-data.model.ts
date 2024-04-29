@@ -499,6 +499,50 @@ export class FormulaDataModel extends Disposable {
 
         return formulaIdMap;
     }
+
+    getFormulaStringByCell(row: number, column: number, sheetId: string, unitId: string) {
+        const formulaDataItem = this.getFormulaDataItem(row, column, sheetId, unitId);
+
+        if (formulaDataItem == null) {
+            return null;
+        }
+
+        const { f, si, x = 0, y = 0 } = formulaDataItem;
+
+        // x and y support negative numbers. Negative numbers appear when the drop-down fill moves up or to the left.
+        if (si != null && (x !== 0 || y !== 0)) {
+            let formulaString = '';
+            if (f.length > 0) {
+                formulaString = f;
+            } else {
+                const originItem = this.getFormulaItemBySId(
+                    si,
+                    sheetId,
+                    unitId
+                );
+
+                if (originItem == null || originItem.f.length === 0) {
+                    return null;
+                }
+
+                formulaString = originItem.f;
+            }
+
+            formulaString = this._lexerTreeBuilder.moveFormulaRefOffset(
+                formulaString,
+                x,
+                y
+            );
+
+            return formulaString;
+        }
+
+        if (isFormulaString(f)) {
+            return f;
+        }
+
+        return null;
+    }
 }
 
 export function initSheetFormulaData(

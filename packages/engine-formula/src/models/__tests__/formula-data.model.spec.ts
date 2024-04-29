@@ -350,6 +350,27 @@ describe('Test formula data model', () => {
                 expect(formulaData).toStrictEqual(result);
             });
         });
+
+        describe('getFormulaStringByCell', () => {
+            it('get formula string by cell', () => {
+                formulaDataModel.initFormulaData();
+
+                const unitId = 'test';
+                const sheetId = 'sheet1';
+
+                const result = [
+                    ['=SUM(A1)'],
+                    ['=SUM(A2)'],
+                    ['=SUM(A3)'],
+                    ['=SUM(A4)'],
+                ];
+
+                for (let i = 0; i < 4; i++) {
+                    const formulaString = formulaDataModel.getFormulaStringByCell(i, 3, sheetId, unitId);
+                    expect(formulaString).toBe(result[i][0]);
+                }
+            });
+        });
     });
 
     describe('function initSheetFormulaData', () => {

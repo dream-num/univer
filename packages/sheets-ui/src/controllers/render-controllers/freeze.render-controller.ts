@@ -185,11 +185,11 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderC
         const config = freezeConfig ?? this._getFreeze();
         if (config == null) return null;
 
-        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton!;
+        const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
 
         const { startRow: freezeRow, startColumn: freezeColumn } = config;
         const position = this._getPositionByIndex(freezeRow, freezeColumn);
-        if (position == null) return null;
+        if (position == null || skeleton == null) return null;
 
         const sheetObject = this._getSheetObject()!;
         const engine = sheetObject.engine;
@@ -224,13 +224,8 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderC
             const FREEZE_OFFSET = FREEZE_SIZE;
 
             this._rowFreezeHeaderRect = new Rect(FREEZE_ROW_HEADER_NAME, {
-                fill: this._freezeNormalHeaderColor,
-                width: rowHeaderWidthAndMarginLeft,
-                height: FREEZE_SIZE,
-                left: 0,
-                top: startY - FREEZE_OFFSET,
-                zIndex: 3,
-            });
+                fill: this._freezeNormalHeaderColor, width: rowHeaderWidthAndMarginLeft,
+                height: FREEZE_SIZE, left: 0, top: startY - FREEZE_OFFSET, zIndex: 3 });
 
             let fill = this._freezeNormalHeaderColor;
             if (freezeRow === -1 || freezeRow === 0) {
@@ -255,13 +250,8 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderC
             const FREEZE_OFFSET = FREEZE_SIZE;
 
             this._columnFreezeHeaderRect = new Rect(FREEZE_COLUMN_HEADER_NAME, {
-                fill: this._freezeNormalHeaderColor,
-                width: FREEZE_SIZE,
-                height: columnHeaderHeightAndMarginTop,
-                left: startX - FREEZE_OFFSET,
-                top: 0,
-                zIndex: 3,
-            });
+                fill: this._freezeNormalHeaderColor, width: FREEZE_SIZE, height: columnHeaderHeightAndMarginTop,
+                left: startX - FREEZE_OFFSET, top: 0, zIndex: 3 });
 
             let fill = this._freezeNormalHeaderColor;
             if (freezeColumn === -1 || freezeColumn === 0) {
@@ -277,10 +267,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderC
                 zIndex: 3,
             });
 
-            scene.addObjects(
-                [this._columnFreezeHeaderRect, this._columnFreezeMainRect],
-                SHEET_COMPONENT_HEADER_LAYER_INDEX
-            );
+            scene.addObjects([this._columnFreezeHeaderRect, this._columnFreezeMainRect], SHEET_COMPONENT_HEADER_LAYER_INDEX);
         }
 
         this._eventBinding(freezeDirectionType);
@@ -712,6 +699,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderC
         );
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _updateViewport(
         row: number = -1,
         column: number = -1,
@@ -1088,9 +1076,11 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderC
         this._freezeHoverColor = style.grey500;
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _interceptorCommands() {
         this.disposeWithMe(
             this._sheetInterceptorService.interceptCommand({
+                // eslint-disable-next-line complexity, max-lines-per-function
                 getMutations: (command) => {
                     const empty = {
                         redos: [],
@@ -1329,12 +1319,12 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderC
         const updateCommandList = [SetFrozenMutation.id, SetZoomRatioOperation.id];
 
         this.disposeWithMe(
+            // eslint-disable-next-line complexity
             this._commandService.onCommandExecuted((command: ICommandInfo) => {
                 if (updateCommandList.includes(command.id)) {
                     const lastFreeze = this._lastFreeze;
                     const workbook = this._context.unit;
                     const worksheet = workbook.getActiveSheet();
-
                     const params = command.params as ISetFrozenMutationParams;
                     const { unitId, subUnitId } = params;
                     if (!(unitId === workbook.getUnitId() && subUnitId === worksheet.getSheetId())) {
@@ -1343,7 +1333,6 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderC
 
                     const freeze = worksheet.getConfig().freeze;
                     this._lastFreeze = freeze;
-
                     if (freeze == null) {
                         return;
                     }
@@ -1351,51 +1340,34 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderC
                     let resetScroll = ResetScrollType.NONE;
 
                     const { startRow = -1, startColumn = -1, ySplit = 0, xSplit = 0 } = freeze;
-
                     if (!lastFreeze || lastFreeze.startRow !== startRow || lastFreeze.ySplit !== ySplit) {
                         resetScroll |= ResetScrollType.Y;
                     }
-
                     if (!lastFreeze || lastFreeze.startColumn !== startColumn || lastFreeze.xSplit !== xSplit) {
                         resetScroll |= ResetScrollType.X;
                     }
-
                     if (params.resetScroll === false) {
                         resetScroll = ResetScrollType.NONE;
                     }
-
                     this._refreshFreeze(startRow, startColumn, ySplit, xSplit, resetScroll);
                 } else if (command.id === SetWorksheetRowHeightMutation.id) {
                     const freeze = this._getFreeze();
-                    if (
-                        command.params &&
-                        freeze &&
-                        (command.params as ISetWorksheetRowHeightMutationParams).ranges.some(
-                            (i) => i.startRow < freeze.startRow
-                        )
-                    ) {
+                    const isRefresh = freeze && (command.params as ISetWorksheetRowHeightMutationParams).ranges.some((i) => i.startRow < freeze.startRow);
+                    if (command.params && isRefresh) {
                         this._refreshCurrent();
                     }
                 } else if (command.id === SetWorksheetColWidthMutation.id) {
                     const freeze = this._getFreeze();
-                    if (
-                        command.params &&
-                        freeze &&
-                        (command.params as ISetWorksheetColWidthMutationParams).ranges.some(
-                            (i) => i.startColumn < freeze.startColumn
-                        )
-                    ) {
+                    if (command.params && freeze && (command.params as ISetWorksheetColWidthMutationParams).ranges.some(
+                        (i) => i.startColumn < freeze.startColumn
+                    )) {
                         this._refreshCurrent();
                     }
                 } else if (command.id === SetWorksheetRowAutoHeightMutation.id) {
                     const params = command.params as ISetWorksheetRowAutoHeightMutationParams;
                     const freeze = this._getFreeze();
 
-                    if (
-                        freeze &&
-                        freeze.startRow > -1 &&
-                        params.rowsAutoHeightInfo.some((info) => info.row < freeze.startRow)
-                    ) {
+                    if (freeze && freeze.startRow > -1 && params.rowsAutoHeightInfo.some((info) => info.row < freeze.startRow)) {
                         const subscription = this._sheetSkeletonManagerService.currentSkeleton$.subscribe(() => {
                             this._refreshCurrent();
                             setTimeout(() => {
@@ -1407,11 +1379,7 @@ export class HeaderFreezeRenderController extends Disposable implements IRenderC
                     const params = command.params as ISetColHiddenMutationParams;
                     const freeze = this._getFreeze();
                     const ranges = params.ranges;
-                    if (
-                        freeze &&
-                        freeze.startColumn > -1 &&
-                        ranges.some((range) => range.startColumn < freeze.startColumn)
-                    ) {
+                    if (freeze && freeze.startColumn > -1 && ranges.some((range) => range.startColumn < freeze.startColumn)) {
                         this._refreshCurrent();
                     }
                 } else if (command.id === SetRowHiddenMutation.id || command.id === SetRowVisibleMutation.id) {

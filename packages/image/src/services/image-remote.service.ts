@@ -17,7 +17,7 @@
 import type { IImageRemoteService, IImageRemoteServiceParam, Nullable } from '@univerjs/core';
 import { ImageSourceType, Tools } from '@univerjs/core';
 
-const ALLOW_IMAGE_LIST = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/bmp'];
+export const ALLOW_IMAGE_LIST = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/bmp'];
 
 const ALLOW_IMAGE_SIZE = 5 * 1024 * 1024;
 

@@ -36,12 +36,15 @@ export enum VIEWPORT_KEY {
 
 export const SHEET_COMPONENT_MAIN_LAYER_INDEX = 0;
 
-export const SHEET_COMPONENT_HEADER_LAYER_INDEX = 2;
+export const SHEET_COMPONENT_SELECTION_LAYER_INDEX = 1;
 
-export const SHEET_COMPONENT_SELECTION_LAYER_INDEX = 3;
+export const SHEET_COMPONENT_HEADER_LAYER_INDEX = 10;
+
 
 export const SHEET_ZOOM_RANGE = [10, 400];
 
-export const SHEET_COMPONENT_UNHIDE_LAYER_INDEX = 1001;
+export const SHEET_COMPONENT_HEADER_SELECTION_LAYER_INDEX = 11;
+
+export const SHEET_COMPONENT_UNHIDE_LAYER_INDEX = 12;
 
 // TODO@wzhudev: there should be a global zIndex layer fo sheet selections

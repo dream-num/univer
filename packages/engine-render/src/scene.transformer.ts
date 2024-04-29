@@ -262,7 +262,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
             this._updateActiveObjectList(applyObject, evt);
 
-            this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
+            const moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
                 const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
                 this._moving(moveOffsetX, moveOffsetY, scrollTimer);
                 this._hideControl();
@@ -271,9 +271,11 @@ export class Transformer extends Disposable implements ITransformerConfig {
                 });
             });
 
-            this._upObserver = scene.onPointerUpObserver.add(() => {
-                scene.onPointerMoveObserver.remove(this._moveObserver);
-                scene.onPointerUpObserver.remove(this._upObserver);
+            const upObserver = scene.onPointerUpObserver.add(() => {
+                // scene.onPointerMoveObserver.remove(this._moveObserver);
+                // scene.onPointerUpObserver.remove(this._upObserver);
+                moveObserver?.dispose();
+                upObserver?.dispose();
                 scene.enableEvent();
                 this._updateControl();
                 scrollTimer.dispose();
@@ -390,23 +392,19 @@ export class Transformer extends Disposable implements ITransformerConfig {
         this._selectedObjectMap.forEach((moveObject) => {
             // console.log(moveLeft + moveObject.width, moveTop + moveObject.height);
             const { left, top, width, height } = moveObject;
-            const state: ITransformState = {};
+            let state: ITransformState = {};
+            const aspectRatio = width / height;
 
             switch (type) {
                 case TransformerManagerType.RESIZE_LT:
-                    state.left = left + moveLeft;
-                    state.top = top + moveTop;
-                    state.width = width - moveLeft;
-                    state.height = height - moveTop;
+                    state = this._resizeLeftTop(moveObject, moveLeft, moveTop, aspectRatio);
                     break;
                 case TransformerManagerType.RESIZE_CT:
                     state.top = top + moveTop;
                     state.height = height - moveTop;
                     break;
                 case TransformerManagerType.RESIZE_RT:
-                    state.top = top + moveTop;
-                    state.width = width + moveLeft;
-                    state.height = height - moveTop;
+                    state = this._resizeRightTop(moveObject, moveLeft, moveTop, aspectRatio);
                     break;
                 case TransformerManagerType.RESIZE_LM:
                     state.left = left + moveLeft;
@@ -416,16 +414,13 @@ export class Transformer extends Disposable implements ITransformerConfig {
                     state.width = moveLeft + width;
                     break;
                 case TransformerManagerType.RESIZE_LB:
-                    state.left = left + moveLeft;
-                    state.width = width - moveLeft;
-                    state.height = height + moveTop;
+                    state = this._resizeLeftBottom(moveObject, moveLeft, moveTop, aspectRatio);
                     break;
                 case TransformerManagerType.RESIZE_CB:
                     state.height = moveTop + height;
                     break;
                 case TransformerManagerType.RESIZE_RB:
-                    state.width = moveLeft + width;
-                    state.height = moveTop + height;
+                    state = this._resizeRightBottom(moveObject, moveLeft, moveTop, aspectRatio);
                     break;
             }
             moveObject.transformByState(state);
@@ -442,6 +437,89 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
         this._startOffsetX = x;
         this._startOffsetY = y;
+    }
+
+    private _resizeLeftTop(moveObject: BaseObject, moveLeft: number, moveTop: number, aspectRatio: number): ITransformState {
+        const { left, top, width, height } = moveObject.getState();
+
+        const { moveLeft: moveLeftFix, moveTop: moveTopFix } = this._fixMoveLtRb(moveLeft, moveTop, aspectRatio);
+
+        return {
+            left: left + moveLeftFix,
+            top: top + moveTopFix,
+            width: width - moveLeftFix,
+            height: height - moveTopFix,
+        };
+    }
+
+    private _resizeRightBottom(moveObject: BaseObject, moveLeft: number, moveTop: number, aspectRatio: number): ITransformState {
+        const { left, top, width, height } = moveObject.getState();
+
+        const { moveLeft: moveLeftFix, moveTop: moveTopFix } = this._fixMoveLtRb(moveLeft, moveTop, aspectRatio);
+
+        return {
+            width: width + moveLeftFix,
+            height: height + moveTopFix,
+        };
+    }
+
+    private _resizeLeftBottom(moveObject: BaseObject, moveLeft: number, moveTop: number, aspectRatio: number): ITransformState {
+        const { left, top, width, height } = moveObject.getState();
+
+        const { moveLeft: moveLeftFix, moveTop: moveTopFix } = this._fixMoveLbRt(moveLeft, moveTop, aspectRatio);
+
+        return {
+            left: left + moveLeftFix,
+            width: width - moveLeftFix,
+            height: height + moveTopFix,
+        };
+    }
+
+    private _resizeRightTop(moveObject: BaseObject, moveLeft: number, moveTop: number, aspectRatio: number): ITransformState {
+        const { left, top, width, height } = moveObject.getState();
+
+        const { moveLeft: moveLeftFix, moveTop: moveTopFix } = this._fixMoveLbRt(moveLeft, moveTop, aspectRatio);
+
+        return {
+            top: top + moveTopFix,
+            width: width + moveLeftFix,
+            height: height - moveTopFix,
+        };
+    }
+
+
+    private _fixMoveLtRb(moveLeft: number, moveTop: number, aspectRatio: number) {
+        let moveLeftFix = moveLeft;
+        let moveTopFix = moveTop;
+
+
+        if (moveLeftFix / moveTopFix > aspectRatio) {
+            moveTopFix = moveLeftFix / aspectRatio;
+        } else {
+            moveLeftFix = moveTopFix * aspectRatio;
+        }
+
+        return {
+            moveLeft: moveLeftFix,
+            moveTop: moveTopFix,
+        };
+    }
+
+    private _fixMoveLbRt(moveLeft: number, moveTop: number, aspectRatio: number) {
+        let moveLeftFix = moveLeft;
+        let moveTopFix = moveTop;
+
+
+        if (Math.abs(moveLeftFix / moveTopFix) > aspectRatio) {
+            moveTopFix = -moveLeftFix / aspectRatio;
+        } else {
+            moveLeftFix = -moveTopFix * aspectRatio;
+        }
+
+        return {
+            moveLeft: moveLeftFix,
+            moveTop: moveTopFix,
+        };
     }
 
     private _attachEventToAnchor(anchor: Rect, type = TransformerManagerType.RESIZE_LT) {
@@ -764,7 +842,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
     private _createControl(applyObject: BaseObject) {
         const { left, top, height, width, angle, scaleX, scaleY, skewX, skewY, flipX, flipY } = applyObject.getState();
         const oKey = applyObject.oKey;
-        const zIndex = this._selectedObjectMap.size;
+        const zIndex = this._selectedObjectMap.size + applyObject.zIndex + 1;
         const layerIndex = applyObject.getLayerIndex() || DEFAULT_TRANSFORMER_LAYER_INDEX;
 
         const groupElements: BaseObject[] = [];

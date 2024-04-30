@@ -149,7 +149,7 @@ export class TextLengthValidator extends BaseDataValidator<number> {
         const max = Math.max(formula1, formula2);
         const min = Math.min(formula1, formula2);
 
-        return cellValue >= min && cellValue <= max;
+        return cellValue < min || cellValue > max;
     }
 
     override async validatorIsGreaterThan(cellInfo: IValidatorCellInfo<number>, formula: IFormulaResult, rule: IDataValidationRule): Promise<boolean> {

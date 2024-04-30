@@ -169,7 +169,7 @@ export class DateValidator extends BaseDataValidator<Dayjs> {
         if (!date1 || !date2) {
             return false;
         }
-        const min = date1.isAfter(date2) ? date1 : date2;
+        const min = date1.isAfter(date2) ? date2 : date1;
         const max = min === date1 ? date2 : date1;
         return cellValue.isBefore(min) || cellValue.isAfter(max);
     }

@@ -15,7 +15,7 @@
  */
 
 import React, { useState } from 'react';
-import { ICommandService } from '@univerjs/core';
+import { DataValidationErrorStyle, ICommandService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { DatePanel } from '@univerjs/design';
 import { SetRangeValuesCommand } from '@univerjs/sheets';
@@ -23,12 +23,14 @@ import dayjs from 'dayjs';
 import type { IDropdownComponentProps } from '../../services/dropdown-manager.service';
 import type { DateValidator } from '../../validators';
 import { getCellValueOrigin } from '../../utils/get-cell-data-origin';
+import { DataValidationRejectInputController } from '../../controllers/dv-reject-input.controller';
 import styles from './index.module.less';
 
 export function DateDropdown(props: IDropdownComponentProps) {
     const { location, hideFn } = props;
     const { worksheet, row, col, unitId, subUnitId } = location;
     const commandService = useDependency(ICommandService);
+    const rejectInputController = useDependency(DataValidationRejectInputController);
     const [localDate, setLocalDate] = useState<dayjs.Dayjs>();
     if (!worksheet) {
         return null;
@@ -50,25 +52,38 @@ export function DateDropdown(props: IDropdownComponentProps) {
         <div className={styles.dvDateDropdown}>
             <DatePanel
                 pickerValue={localDate ?? date}
-                onSelect={(newValue) => {
+                onSelect={async (newValue) => {
                     const newValueStr = newValue.format('YYYY/MM/DD');
-                    commandService.executeCommand(SetRangeValuesCommand.id, {
-                        unitId,
-                        subUnitId,
-                        range: {
-                            startColumn: col,
-                            endColumn: col,
-                            startRow: row,
-                            endRow: row,
-                        },
-                        value: {
-                            v: newValueStr,
-                            p: null,
-                            f: null,
-                            si: null,
+                    if (
+                        rule.errorStyle !== DataValidationErrorStyle.STOP ||
+                        (await validator.validator({
+                            value: newValueStr,
+                            unitId,
+                            subUnitId,
+                            row,
+                            column: col,
+                        }, rule))
+                    ) {
+                        commandService.executeCommand(SetRangeValuesCommand.id, {
+                            unitId,
+                            subUnitId,
+                            range: {
+                                startColumn: col,
+                                endColumn: col,
+                                startRow: row,
+                                endRow: row,
+                            },
+                            value: {
+                                v: newValueStr,
+                                p: null,
+                                f: null,
+                                si: null,
 
-                        },
-                    });
+                            },
+                        });
+                    } else {
+                        rejectInputController.showReject(validator.getRuleFinalError(rule));
+                    }
                     hideFn();
                 }}
                 onPanelChange={(value) => {

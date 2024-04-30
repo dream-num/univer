@@ -124,8 +124,9 @@ const dataValidation = [
             startColumn: 3,
             endColumn: 5,
         }],
-        operator: DataValidationOperator.GREATER_THAN,
-        formula1: '100',
+        operator: DataValidationOperator.NOT_BETWEEN,
+        formula1: '2024/04/10',
+        formula2: '2024/10/10',
         errorStyle: DataValidationErrorStyle.STOP,
     },
     {

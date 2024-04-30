@@ -145,7 +145,7 @@ export class WholeValidator extends BaseDataValidator<number> {
 
         const start = Math.min(formula1, formula2);
         const end = Math.max(formula1, formula2);
-        return cellInfo.value < start && cellInfo.value > end;
+        return cellInfo.value < start || cellInfo.value > end;
     }
 
     override async validatorIsGreaterThan(cellInfo: IValidatorCellInfo<number>, formula: IFormulaResult, _rule: IDataValidationRule) {

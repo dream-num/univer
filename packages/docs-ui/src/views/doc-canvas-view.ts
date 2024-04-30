@@ -22,9 +22,9 @@ import { IConfigService,
     RxDisposable,
     UniverInstanceType,
 } from '@univerjs/core';
-import { DOCS_COMPONENT_DEFAULT_Z_INDEX, DOCS_COMPONENT_HEADER_LAYER_INDEX, DOCS_COMPONENT_MAIN_LAYER_INDEX, DOCS_VIEW_KEY, VIEWPORT_KEY } from '@univerjs/docs';
+import { DOCS_COMPONENT_BACKGROUND_LAYER_INDEX, DOCS_COMPONENT_DEFAULT_Z_INDEX, DOCS_COMPONENT_HEADER_LAYER_INDEX, DOCS_COMPONENT_MAIN_LAYER_INDEX, DOCS_VIEW_KEY, VIEWPORT_KEY } from '@univerjs/docs';
 import type { IRender, IWheelEvent, Scene } from '@univerjs/engine-render';
-import { Documents, EVENT_TYPE, IRenderManagerService, Layer, ScrollBar, Viewport } from '@univerjs/engine-render';
+import { DocBackground, Documents, EVENT_TYPE, IRenderManagerService, Layer, ScrollBar, Viewport } from '@univerjs/engine-render';
 import { IEditorService } from '@univerjs/ui';
 import { BehaviorSubject, takeUntil } from 'rxjs';
 
@@ -181,17 +181,24 @@ export class DocCanvasView extends RxDisposable {
     private _addComponent(currentRender: IRender) {
         const scene = this._scene;
         const documentModel = this._currentDocumentModel;
-        const documents = new Documents(DOCS_VIEW_KEY.MAIN, undefined, {
+        const config = {
             pageMarginLeft: documentModel.documentStyle.marginLeft || 0,
             pageMarginTop: documentModel.documentStyle.marginTop || 0,
-        });
+        };
+        const documents = new Documents(DOCS_VIEW_KEY.MAIN, undefined, config);
+
+        const docBackground = new DocBackground(DOCS_VIEW_KEY.BACKGROUND, undefined, config);
 
         documents.zIndex = DOCS_COMPONENT_DEFAULT_Z_INDEX;
 
+        docBackground.zIndex = DOCS_COMPONENT_DEFAULT_Z_INDEX;
+
         currentRender.mainComponent = documents;
         currentRender.components.set(DOCS_VIEW_KEY.MAIN, documents);
+        currentRender.components.set(DOCS_VIEW_KEY.BACKGROUND, docBackground);
 
         scene.addObjects([documents], DOCS_COMPONENT_MAIN_LAYER_INDEX);
+        scene.addObjects([docBackground], DOCS_COMPONENT_BACKGROUND_LAYER_INDEX);
 
         if (this._editorService.getEditor(documentModel.getUnitId()) == null) {
             scene.enableLayerCache(DOCS_COMPONENT_MAIN_LAYER_INDEX);

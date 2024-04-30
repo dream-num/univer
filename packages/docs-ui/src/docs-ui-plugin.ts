@@ -52,7 +52,6 @@ import { DocEditorBridgeController } from './controllers/doc-editor-bridge.contr
 import { DocRenderController } from './controllers/doc-render.controller';
 import { DocCanvasView } from './views/doc-canvas-view';
 import { DocFloatingObjectController } from './controllers/doc-floating-object.controller';
-import { PageRenderController } from './controllers/page-render.controller';
 import { ZoomController } from './controllers/zoom.controller';
 import { TextSelectionController } from './controllers/text-selection.controller';
 import { BackScrollController } from './controllers/back-scroll.controller';
@@ -110,7 +109,6 @@ export class UniverDocsUIPlugin extends Plugin {
             [DocEditorBridgeController],
             [DocRenderController],
             [DocFloatingObjectController],
-            [PageRenderController],
             [ZoomController],
             [TextSelectionController],
             [BackScrollController],

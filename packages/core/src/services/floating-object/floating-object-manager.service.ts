@@ -34,6 +34,8 @@ export interface IFloatingObjectManagerSearchItemParam extends IFloatingObjectMa
 }
 
 export interface IFloatingObjectManagerParam extends IFloatingObjectManagerSearchItemParam {
+    // TODO: Maybe it shouldn't be here？
+    behindText?: boolean; // If it's true, put the float object behind the text, otherwise, put it in front of the text.
     floatingObject: ITransformState;
 }
 
@@ -164,7 +166,7 @@ export class FloatingObjectManagerService implements IDisposable, IFloatingObjec
     }
 
     private _addByParam(insertParam: IFloatingObjectManagerParam): IFloatingObjectManagerParam[] {
-        const { unitId, subUnitId, floatingObject, floatingObjectId } = insertParam;
+        const { unitId, subUnitId, floatingObject, floatingObjectId, behindText } = insertParam;
 
         if (!this._managerInfo.has(unitId)) {
             this._managerInfo.set(unitId, new Map());
@@ -178,7 +180,7 @@ export class FloatingObjectManagerService implements IDisposable, IFloatingObjec
 
         subComponentData.get(subUnitId)!.set(floatingObjectId, floatingObject);
 
-        return [{ unitId, subUnitId, floatingObjectId, floatingObject }];
+        return [{ unitId, subUnitId, floatingObjectId, floatingObject, behindText }];
     }
 
     private _clearByParam(param: IFloatingObjectManagerSearchParam): IFloatingObjectManagerParam[] {

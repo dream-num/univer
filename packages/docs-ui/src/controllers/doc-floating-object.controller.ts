@@ -16,6 +16,7 @@
 
 import type { ICommandInfo, IFloatingObjectManagerParam } from '@univerjs/core';
 import {
+    BooleanNumber,
     DEFAULT_DOCUMENT_SUB_COMPONENT_ID,
     Disposable,
     ICommandService,
@@ -23,6 +24,7 @@ import {
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
+    PositionedObjectLayoutType,
 } from '@univerjs/core';
 import type { IRichTextEditingMutationParams } from '@univerjs/docs';
 import { DocSkeletonManagerService, RichTextEditingMutation, SetDocZoomRatioOperation } from '@univerjs/docs';
@@ -124,6 +126,7 @@ export class DocFloatingObjectController extends Disposable {
 
             const docsComponent = mainComponent as Documents;
 
+            // TODO: Why NEED change skeleton here?
             docsComponent.changeSkeleton(documentSkeleton);
 
             this._refreshFloatingObject(unitId, documentSkeleton, currentRender);
@@ -185,7 +188,7 @@ export class DocFloatingObjectController extends Disposable {
 
         const { pages } = skeletonData;
 
-        const Objects: IFloatingObjectManagerParam[] = [];
+        const floatObjects: IFloatingObjectManagerParam[] = [];
 
         const { scaleX, scaleY } = scene.getAncestorScale();
 
@@ -209,12 +212,14 @@ export class DocFloatingObjectController extends Disposable {
             this._liquid.translatePagePadding(page);
 
             skeDrawings.forEach((drawing) => {
-                const { aLeft, aTop, height, width, objectId } = drawing;
+                const { aLeft, aTop, height, width, objectId, drawingOrigin } = drawing;
+                const behindText = drawingOrigin.layoutType === PositionedObjectLayoutType.WRAP_NONE && drawingOrigin.behindDoc === BooleanNumber.TRUE;
 
-                Objects.push({
+                floatObjects.push({
                     unitId,
                     subUnitId: DEFAULT_DOCUMENT_SUB_COMPONENT_ID,
                     floatingObjectId: objectId,
+                    behindText,
                     floatingObject: {
                         left: aLeft + docsLeft + this._liquid.x,
                         top: aTop + docsTop + this._liquid.y,
@@ -234,6 +239,6 @@ export class DocFloatingObjectController extends Disposable {
             this._liquid.translatePage(page, pageLayoutType, pageMarginLeft, pageMarginTop);
         }
 
-        this._floatingObjectManagerService.batchAddOrUpdate(Objects);
+        this._floatingObjectManagerService.batchAddOrUpdate(floatObjects);
     }
 }

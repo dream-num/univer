@@ -15,10 +15,12 @@
  */
 
 import type { Nullable } from '@univerjs/core';
-import type { Documents, Engine, IRenderManagerService, Scene } from '@univerjs/engine-render';
+import { DOCS_VIEW_KEY } from '@univerjs/docs';
+import type { DocBackground, Documents, Engine, IRenderManagerService, Scene } from '@univerjs/engine-render';
 
 export interface IDocObjectParam {
     document: Documents;
+    docBackground: DocBackground;
     scene: Scene;
     engine: Engine;
 }
@@ -37,12 +39,14 @@ export function getEditorObject(
         return;
     }
 
-    const { mainComponent, scene, engine } = currentRender;
+    const { mainComponent, scene, engine, components } = currentRender;
 
     const document = mainComponent as Documents;
+    const docBackground = components.get(DOCS_VIEW_KEY.BACKGROUND) as DocBackground;
 
     return {
         document,
+        docBackground,
         scene,
         engine,
     };

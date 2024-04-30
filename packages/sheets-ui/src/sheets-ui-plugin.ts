@@ -25,7 +25,6 @@ import { ActiveWorksheetController } from './controllers/active-worksheet/active
 import { AutoFillRenderController } from './controllers/render-controllers/auto-fill.render-controller';
 import { AutoHeightController } from './controllers/auto-height.controller';
 import { SheetClipboardController } from './controllers/clipboard/clipboard.controller';
-import { SheetContextMenuRenderController } from './controllers/contextmenu/contextmenu.controller';
 import { EditingController } from './controllers/editor/editing.controller';
 import { EndEditController } from './controllers/editor/end-edit.controller';
 import { FormulaEditorController } from './controllers/editor/formula-editor.controller';
@@ -70,6 +69,7 @@ import { ForceStringRenderController } from './controllers/force-string-render.c
 import { ForceStringAlertController } from './controllers/force-string-alert.controller';
 import { SheetsZoomRenderController } from './controllers/render-controllers/zoom.render-controller';
 import { SheetsScrollRenderController } from './controllers/render-controllers/scroll.render-controller';
+import { SheetContextMenuRenderController } from './controllers/render-controllers/contextmenu.render-controller';
 
 export class UniverSheetsUIPlugin extends Plugin {
     static override pluginName = 'SHEET_UI_PLUGIN_NAME';

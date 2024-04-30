@@ -49,6 +49,7 @@ import { PluginService } from './services/plugin/plugin.service';
 import type { Plugin, PluginCtor } from './services/plugin/plugin';
 import type { DependencyOverride } from './services/plugin/plugin-override';
 import { mergeOverrideWithDependencies } from './services/plugin/plugin-override';
+import { UserManagerService } from './services/user-manager/user-manager.service';
 
 export class Univer {
     private _startedTypes = new Set<UnitType>();
@@ -170,6 +171,7 @@ function createUniverInjector(parentInjector?: Injector, override?: DependencyOv
         [LifecycleInitializerService],
         [UniverPermissionService],
         [PluginService],
+        [UserManagerService],
 
         // abstract services
         [IUniverInstanceService, { useClass: UniverInstanceService }],

@@ -74,17 +74,27 @@ export class DropdownMultipleWidget implements IBaseDataValidationWidget {
     // eslint-disable-next-line max-lines-per-function
     drawWith(ctx: UniverRenderingContext2D, info: ICellRenderContext, skeleton: SpreadsheetSkeleton, spreadsheets: Spreadsheet): void {
         const { primaryWithCoord, row, col, style, data, subUnitId } = info;
-        const cellBounding = primaryWithCoord.isMergedMainCell ? primaryWithCoord.mergeInfo : primaryWithCoord;
-        const validation = data.dataValidation;
-        const cellWidth = cellBounding.endX - cellBounding.startX;
-        const cellHeight = cellBounding.endY - cellBounding.startY;
+        const _cellBounding = primaryWithCoord.isMergedMainCell ? primaryWithCoord.mergeInfo : primaryWithCoord;
 
+        // @ts-ignore
+        const fontRenderExtension = data.fontRenderExtension as ISheetFontRenderExtension['fontRenderExtension'];
+        const { leftOffset = 0, rightOffset = 0, topOffset = 0, downOffset = 0 } = fontRenderExtension || {};
+
+        const validation = data.dataValidation;
         const map = this._ensureMap(subUnitId);
         const key = this._generateKey(row, col);
 
         if (!validation) {
             return;
         }
+        const cellBounding = {
+            startX: _cellBounding.startX + leftOffset,
+            endX: _cellBounding.endX - rightOffset,
+            startY: _cellBounding.startY + topOffset,
+            endY: _cellBounding.endY - downOffset,
+        };
+        const cellWidth = cellBounding.endX - cellBounding.startX;
+        const cellHeight = cellBounding.endY - cellBounding.startY;
         const { cl } = style || {};
         const color = (typeof cl === 'object' ? cl?.rgb : cl) ?? '#000';
         const fontStyle = getFontStyleString(style ?? undefined);
@@ -157,7 +167,16 @@ export class DropdownMultipleWidget implements IBaseDataValidationWidget {
 
     calcCellAutoHeight(info: ICellRenderContext): number | undefined {
         const { primaryWithCoord, style, data } = info;
-        const cellBounding = primaryWithCoord.isMergedMainCell ? primaryWithCoord.mergeInfo : primaryWithCoord;
+        // @ts-ignore
+        const fontRenderExtension = data.fontRenderExtension as ISheetFontRenderExtension['fontRenderExtension'];
+        const { leftOffset = 0, rightOffset = 0, topOffset = 0, downOffset = 0 } = fontRenderExtension || {};
+        const _cellBounding = primaryWithCoord.isMergedMainCell ? primaryWithCoord.mergeInfo : primaryWithCoord;
+        const cellBounding = {
+            startX: _cellBounding.startX + leftOffset,
+            endX: _cellBounding.endX - rightOffset,
+            startY: _cellBounding.startY + topOffset,
+            endY: _cellBounding.endY - downOffset,
+        };
         const validation = data.dataValidation;
         if (!validation) {
             return undefined;

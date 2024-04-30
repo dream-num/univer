@@ -16,16 +16,19 @@
 
 
 import { CellValueType, isRealNum, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
+import type { Workbook } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
+import type { IRenderContext, IRenderController } from '@univerjs/engine-render';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
 /**
  * @todo RenderUnit
  */
 @OnLifecycle(LifecycleStages.Rendered, ForceStringRenderController)
-export class ForceStringRenderController extends RxDisposable {
+export class ForceStringRenderController extends RxDisposable implements IRenderController {
     constructor(
+        private readonly _context: IRenderContext<Workbook>,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService) {
         super();
@@ -35,7 +38,6 @@ export class ForceStringRenderController extends RxDisposable {
     private _init() {
         this._initViewModelIntercept();
     }
-
 
     private _initViewModelIntercept() {
         const FORCE_STRING_MARK = {

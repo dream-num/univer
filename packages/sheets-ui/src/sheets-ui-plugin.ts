@@ -59,7 +59,7 @@ import { SheetSkeletonManagerService } from './services/sheet-skeleton-manager.s
 import { ShortcutExperienceService } from './services/shortcut-experience.service';
 import { IStatusBarService, StatusBarService } from './services/status-bar.service';
 import { SheetCanvasView } from './views/sheet-canvas-view';
-import { HoverController } from './controllers/hover.controller';
+import { HoverRenderController } from './controllers/hover-render.controller';
 import { HoverManagerService } from './services/hover-manager.service';
 import { CellAlertManagerService } from './services/cell-alert-manager.service';
 import { CellAlertRenderController } from './controllers/cell-alert.controller';
@@ -133,7 +133,6 @@ export class UniverSheetsUIPlugin extends Plugin {
                 [StartEditController],
                 [StatusBarController],
                 [EditingController],
-                [HoverController],
                 [CellCustomRenderController],
                 [ForceStringRenderController],
             ] as Dependency[]
@@ -160,6 +159,7 @@ export class UniverSheetsUIPlugin extends Plugin {
             CellAlertRenderController,
             ForceStringAlertRenderController,
             MarkSelectionRenderController,
+            HoverRenderController,
             SheetContextMenuRenderController,
         ]).forEach((controller) => {
             this.disposeWithMe(this._renderManagerService.registerRenderController(UniverInstanceType.UNIVER_SHEET, controller));

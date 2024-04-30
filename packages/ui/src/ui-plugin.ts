@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { IContextService, ILocalStorageService, LocaleService, Plugin } from '@univerjs/core';
+import type { DependencyOverride } from '@univerjs/core';
+import { IContextService, ILocalStorageService, LocaleService, mergeOverrideWithDependencies, Plugin } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
@@ -60,6 +61,8 @@ const PLUGIN_NAME = 'ui';
 export interface IUniverUIConfig extends IWorkbenchOptions {
     /** Disable auto focus when Univer bootstraps. */
     disableAutoFocus?: true;
+
+    override?: DependencyOverride;
 }
 
 export const DISABLE_AUTO_FOCUS_KEY = 'DISABLE_AUTO_FOCUS';
@@ -92,8 +95,7 @@ export class UniverUIPlugin extends Plugin {
     }
 
     private _initDependencies(injector: Injector): void {
-        const dependencies: Dependency[] = [
-            // legacy managers - deprecated
+        const dependencies: Dependency[] = mergeOverrideWithDependencies([
             [ComponentManager],
             [ZIndexManager],
 
@@ -118,12 +120,13 @@ export class UniverUIPlugin extends Plugin {
             [IRangeSelectorService, { useClass: RangeSelectorService }],
             [ICanvasPopupService, { useClass: CanvasPopupService }],
             [IProgressService, { useClass: ProgressService }],
+
             // controllers
             [IUIController, { useClass: DesktopUIController }],
             [SharedController],
             [ErrorController],
             [ShortcutPanelController],
-        ];
+        ], this._config.override);
 
         dependencies.forEach((dependency) => injector.add(dependency));
     }

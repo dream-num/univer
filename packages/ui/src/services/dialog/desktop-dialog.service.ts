@@ -61,7 +61,7 @@ export class DesktopDialogService extends Disposable implements IDialogService {
         this._dialogOptions$.next([...this._dialogOptions]);
     }
 
-    getObservableDialog() {
+    getDialogs$() {
         return this._dialogOptions$;
     }
 }

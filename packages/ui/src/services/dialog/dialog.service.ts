@@ -16,7 +16,7 @@
 
 import type { IDisposable } from '@wendellhu/redi';
 import { createIdentifier } from '@wendellhu/redi';
-import type { Subject } from 'rxjs';
+import type { Observable } from 'rxjs';
 
 import type { IDialogPartMethodOptions } from '../../views/components/dialog-part/interface';
 
@@ -24,5 +24,5 @@ export const IDialogService = createIdentifier<IDialogService>('univer.ui.dialog
 export interface IDialogService {
     open(params: IDialogPartMethodOptions): IDisposable;
     close(id: string): void;
-    getObservableDialog(): Subject<IDialogPartMethodOptions[]>;
+    getDialogs$(): Observable<IDialogPartMethodOptions[]>;
 }

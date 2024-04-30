@@ -16,7 +16,7 @@
 
 import type { Nullable } from '@univerjs/core';
 import { Disposable, DisposableCollection } from '@univerjs/core';
-import type { ISheetLocation } from '@univerjs/sheets';
+import type { ISheetLocationBase } from '@univerjs/sheets';
 import { SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
 import { IZenZoneService } from '@univerjs/ui';
 import { type IDisposable, Inject } from '@wendellhu/redi';
@@ -25,8 +25,8 @@ import { SHEETS_THREAD_COMMENT_MODAL } from '../types/const';
 
 export class SheetsThreadCommentPopupService extends Disposable {
     private _lastPopup: Nullable<IDisposable> = null;
-    private _activePopup: Nullable<ISheetLocation>;
-    private _activePopup$ = new Subject<Nullable<ISheetLocation>>();
+    private _activePopup: Nullable<ISheetLocationBase>;
+    private _activePopup$ = new Subject<Nullable<ISheetLocationBase>>();
 
     activePopup$ = this._activePopup$.asObservable();
 
@@ -41,7 +41,7 @@ export class SheetsThreadCommentPopupService extends Disposable {
         super();
     }
 
-    showPopup(location: ISheetLocation, onHide?: () => void) {
+    showPopup(location: ISheetLocationBase, onHide?: () => void) {
         const { row, col } = location;
 
         this._lastPopup && this._lastPopup.dispose();

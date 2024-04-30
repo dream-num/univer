@@ -202,7 +202,7 @@ export class ThreadCommentModel {
 
     getComment(unitId: string, subUnitId: string, commentId: string) {
         const { commentMap } = this.ensureMap(unitId, subUnitId);
-        return commentMap[commentId];
+        return commentMap[commentId] as IThreadComment | undefined;
     }
 
     getComment$(unitId: string, subUnitId: string, commentId: string) {

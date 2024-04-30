@@ -14,15 +14,19 @@
  * limitations under the License.
  */
 
-import { Disposable, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
+import { Disposable, ICommandService, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
 import { ComponentManager, IMenuService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 import { CommentSingle } from '@univerjs/icons';
 import { THREAD_COMMENT_PANEL } from '@univerjs/thread-comment-ui';
+import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
+import { SelectionManagerService, SetSelectionsOperation } from '@univerjs/sheets';
 import { SheetsThreadCommentCell } from '../views/sheets-thread-comment-cell';
 import { COMMENT_SINGLE_ICON, SHEETS_THREAD_COMMENT_MODAL } from '../types/const';
 import { SheetsThreadCommentPanel } from '../views/sheets-thread-comment-panel';
 import { enUS, zhCN } from '../locales';
+import { SheetsThreadCommentPopupService } from '../services/sheets-thread-comment-popup.service';
+import { SheetsThreadCommentModel } from '../models/sheets-thread-comment.model';
 import { threadCommentMenu, threadPanelMenu } from './menu';
 
 @OnLifecycle(LifecycleStages.Starting, SheetsThreadCommentController)
@@ -31,12 +35,41 @@ export class SheetsThreadCommentController extends Disposable {
         @IMenuService private readonly _menuService: IMenuService,
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
-        @Inject(LocaleService) private readonly _localeService: LocaleService
+        @Inject(LocaleService) private readonly _localeService: LocaleService,
+        @Inject(ICommandService) private readonly _commandService: ICommandService,
+        @Inject(SheetsThreadCommentPopupService) private readonly _sheetsThreadCommentPopupService: SheetsThreadCommentPopupService,
+        @Inject(SheetsThreadCommentModel) private readonly _sheetsThreadCommentModel: SheetsThreadCommentModel
     ) {
         super();
         this._initMenu();
         this._initComponent();
         this._initLocale();
+        this._initCommandListener();
+    }
+
+    private _initCommandListener() {
+        this._commandService.onCommandExecuted((commandInfo) => {
+            if (commandInfo.id === SetSelectionsOperation.id) {
+                const params = commandInfo.params as ISetSelectionsOperationParams;
+
+                if (params.selections[0].primary) {
+                    const unitId = params.unitId;
+                    const subUnitId = params.subUnitId;
+                    const row = params.selections[0].primary.actualRow;
+                    const col = params.selections[0].primary.actualColumn;
+                    if (!this._sheetsThreadCommentModel.showCommentMarker(unitId, subUnitId, row, col)) {
+                        return;
+                    }
+
+                    this._sheetsThreadCommentPopupService.showPopup({
+                        unitId,
+                        subUnitId,
+                        row,
+                        col,
+                    });
+                }
+            }
+        });
     }
 
     private _initMenu() {

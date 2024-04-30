@@ -228,4 +228,18 @@ export class SheetsThreadCommentModel extends Disposable {
         }
         return this._threadCommentModel.getCommentWithChildren(unitId, subUnitId, commentId);
     }
+
+    showCommentMarker(unitId: string, subUnitId: string, row: number, column: number) {
+        const commentId = this.getByLocation(unitId, subUnitId, row, column);
+        if (!commentId) {
+            return false;
+        }
+
+        const comment = this.getComment(unitId, subUnitId, commentId);
+        if (comment && !comment.resolved) {
+            return true;
+        }
+
+        return false;
+    }
 }

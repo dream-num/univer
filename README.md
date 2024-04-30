@@ -37,7 +37,7 @@
 
 ## Introduction
 
-Univer is a set of enterprise document and data collaboration solutions, integrating spreadsheets, documents, and slides.
+Univer is an open-source alternative to Google Sheets, Slides, and Docs.
 
 Highlights:
 

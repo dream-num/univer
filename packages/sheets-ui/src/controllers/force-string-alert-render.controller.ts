@@ -15,17 +15,19 @@
  */
 
 import type { Workbook } from '@univerjs/core';
-import { CellValueType, Disposable, isRealNum, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import { CellValueType, Disposable, isRealNum, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle } from '@univerjs/core';
 
 import { Inject } from '@wendellhu/redi';
+import type { IRenderContext, IRenderController } from '@univerjs/engine-render';
 import { HoverManagerService } from '../services/hover-manager.service';
 import { CellAlertManagerService, CellAlertType } from '../services/cell-alert-manager.service';
 
 const ALERT_KEY = 'SHEET_FORCE_STRING_ALERT';
 
-@OnLifecycle(LifecycleStages.Rendered, ForceStringAlertController)
-export class ForceStringAlertController extends Disposable {
+@OnLifecycle(LifecycleStages.Rendered, ForceStringAlertRenderController)
+export class ForceStringAlertRenderController extends Disposable implements IRenderController {
     constructor(
+        private readonly _context: IRenderContext<Workbook>,
         @Inject(HoverManagerService) private readonly _hoverManagerService: HoverManagerService,
         @Inject(CellAlertManagerService) private readonly _cellAlertManagerService: CellAlertManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
@@ -42,7 +44,7 @@ export class ForceStringAlertController extends Disposable {
     private _initCellAlertPopup() {
         this.disposeWithMe(this._hoverManagerService.currentCell$.subscribe((cellPos) => {
             if (cellPos) {
-                const workbook = this._univerInstanceService.getCurrentUnitForType<Workbook>(UniverInstanceType.UNIVER_SHEET)!;
+                const workbook = this._context.unit;
                 const worksheet = workbook.getActiveSheet();
                 const cellData = worksheet.getCell(cellPos.location.row, cellPos.location.col);
 

@@ -29,14 +29,12 @@ export function DialogPart() {
     const [dialogOptions, setDialogOptions] = useState<IDialogPartMethodOptions[]>([]);
 
     useEffect(() => {
-        const dialog$ = dialogService.getObservableDialog();
+        const dialog$ = dialogService.getDialogs$();
         const subscription = dialog$.subscribe((options: IDialogPartMethodOptions[]) => {
             setDialogOptions(options);
         });
 
-        return () => {
-            subscription.unsubscribe();
-        };
+        return () => subscription.unsubscribe();
     }, [dialogService]);
 
     const attrs = dialogOptions.map((options) => {

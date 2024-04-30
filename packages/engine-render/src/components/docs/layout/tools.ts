@@ -353,6 +353,10 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
                         // Use to fix issue: https://github.com/dream-num/univer/issues/2002
                         // Because the Chinese punctuation marks at the beginning and end of the line are squeezed and narrowed,
                         // the extruded width needs to be added when calculating the overall width.
+                        if (glyphGroup.length === 0) {
+                            continue;
+                        }
+
                         if (glyphGroup[0].xOffset !== 0 && i === divideLength - 1) {
                             actualWidth -= glyphGroup[0].xOffset;
                         }
@@ -364,10 +368,6 @@ export function updateBlockIndex(pages: IDocumentSkeletonPage[], start: number =
                             //     actualWidth += divide.width;
                             // }
                             actualWidth += divide.left;
-                        }
-
-                        if (glyphGroup.length === 0) {
-                            continue;
                         }
 
                         divide.st = divStartIndex + 1;

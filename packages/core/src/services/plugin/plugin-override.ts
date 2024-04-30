@@ -14,33 +14,25 @@
  * limitations under the License.
  */
 
-/* eslint-disable ts/no-explicit-any */
+import type { Dependency, DependencyIdentifier, DependencyItem } from '@wendellhu/redi';
 
-import type { Dependency, DependencyItem, IdentifierDecorator } from '@wendellhu/redi';
+export type NullableDependencyPair<T> = [DependencyIdentifier<T>, DependencyItem<T> | null];
 
 /**
- * Overrides the dependencies definited in the plugin. Only dependencies that are identified by `IdentifierDecorator` can be overridden.
+ * Overrides the dependencies defined in the plugin. Only dependencies that are identified by `IdentifierDecorator` can be overridden.
  * If you override a dependency with `null`, the original dependency will be removed.
  */
-export type DependencyOverride = [identifier: IdentifierDecorator<any>, DependencyItem<any> | null][];
+// eslint-disable-next-line ts/no-explicit-any
+export type DependencyOverride = NullableDependencyPair<any>[];
 
 export function mergeOverrideWithDependencies(dependencies: Dependency[], override?: DependencyOverride): Dependency[] {
-    if (!override) {
-        return dependencies;
-    }
+    if (!override) return dependencies;
 
     const result: Dependency[] = [];
     for (const dependency of dependencies) {
-        if (dependency.length === 1) {
-            result.push(dependency);
-            continue;
-        }
-
         const overrideItem = override.find(([identifier]) => identifier === dependency[0]);
         if (overrideItem) {
-            if (overrideItem[1] === null) {
-                continue;
-            }
+            if (overrideItem[1] === null) continue;
             result.push([dependency[0], overrideItem[1]]);
         } else {
             result.push(dependency);

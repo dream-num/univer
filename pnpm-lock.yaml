@@ -31,7 +31,7 @@ importers:
         version: 8.0.1(release-it@17.2.0(typescript@5.4.5))
       '@storybook/react':
         specifier: 8.0.9
-        version: 8.0.9(react-dom@18.3.0(react@18.3.0))(react@18.3.0)(typescript@5.4.5)
+        version: 8.0.9(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.4.5)
       '@types/node':
         specifier: ^20.12.7
         version: 20.12.7
@@ -75,11 +75,11 @@ importers:
         specifier: ^15.2.2
         version: 15.2.2
       react:
-        specifier: ^18.2.0
-        version: 18.3.0
+        specifier: 18.2.0
+        version: 18.2.0
       react-dom:
-        specifier: ^18.2.0
-        version: 18.3.0(react@18.3.0)
+        specifier: 18.2.0
+        version: 18.2.0(react@18.2.0)
       release-it:
         specifier: ^17.2.0
         version: 17.2.0(typescript@5.4.5)
@@ -102,8 +102,8 @@ importers:
         specifier: ^4.2.1
         version: 4.2.1(vite@5.2.10(@types/node@20.12.7)(less@4.2.0)(sass@1.72.0)(terser@5.30.4))
       '@vitest/coverage-istanbul':
-        specifier: ^1.5.0
-        version: 1.5.1(vitest@1.5.0(@types/node@20.12.7)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.4))
+        specifier: ^1.5.2
+        version: 1.5.2(vitest@1.5.2(@types/node@20.12.7)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.4))
       happy-dom:
         specifier: 13.3.8
         version: 13.3.8
@@ -117,23 +117,23 @@ importers:
         specifier: ^3.9.0
         version: 3.9.0(@types/node@20.12.7)(rollup@4.16.4)(typescript@5.4.5)(vite@5.2.10(@types/node@20.12.7)(less@4.2.0)(sass@1.72.0)(terser@5.30.4))
       vitest:
-        specifier: ^1.5.0
-        version: 1.5.0(@types/node@20.12.7)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.4)
+        specifier: ^1.5.2
+        version: 1.5.2(@types/node@20.12.7)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.4)
 
   common/storybook:
     dependencies:
       '@chromatic-com/storybook':
         specifier: ^1.3.3
-        version: 1.3.3(react@18.3.0)
+        version: 1.3.3(react@18.2.0)
       '@storybook/addon-essentials':
         specifier: 8.0.9
-        version: 8.0.9(@types/react@18.3.0)(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+        version: 8.0.9(@types/react@18.3.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@storybook/addon-interactions':
         specifier: 8.0.9
         version: 8.0.9(vitest@1.5.2(@types/node@20.12.7)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.4))
       '@storybook/addon-links':
         specifier: 8.0.9
-        version: 8.0.9(react@18.3.0)
+        version: 8.0.9(react@18.2.0)
       '@storybook/addon-styling-webpack':
         specifier: ^1.0.0
         version: 1.0.0(webpack@5.91.0(@swc/core@1.4.11)(esbuild@0.20.2))
@@ -142,16 +142,16 @@ importers:
         version: 1.0.2(webpack@5.91.0(@swc/core@1.4.11)(esbuild@0.20.2))
       '@storybook/blocks':
         specifier: 8.0.9
-        version: 8.0.9(@types/react@18.3.0)(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+        version: 8.0.9(@types/react@18.3.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@storybook/icons':
         specifier: ^1.2.9
-        version: 1.2.9(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+        version: 1.2.9(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@storybook/react':
         specifier: 8.0.9
-        version: 8.0.9(react-dom@18.3.0(react@18.3.0))(react@18.3.0)(typescript@5.4.5)
+        version: 8.0.9(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.4.5)
       '@storybook/react-webpack5':
         specifier: 8.0.9
-        version: 8.0.9(@swc/core@1.4.11)(esbuild@0.20.2)(react-dom@18.3.0(react@18.3.0))(react@18.3.0)(typescript@5.4.5)
+        version: 8.0.9(@swc/core@1.4.11)(esbuild@0.20.2)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.4.5)
       '@storybook/types':
         specifier: ^8.0.9
         version: 8.0.9
@@ -175,7 +175,7 @@ importers:
         version: 12.2.0(less@4.2.0)(webpack@5.91.0(@swc/core@1.4.11)(esbuild@0.20.2))
       storybook:
         specifier: 8.0.9
-        version: 8.0.9(@babel/preset-env@7.24.4(@babel/core@7.24.4))(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+        version: 8.0.9(@babel/preset-env@7.24.4(@babel/core@7.24.4))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       storybook-addon-swc:
         specifier: ^1.2.0
         version: 1.2.0(@swc/core@1.4.11)(terser-webpack-plugin@5.3.10(@swc/core@1.4.11)(esbuild@0.20.2)(webpack@5.91.0(@swc/core@1.4.11)(esbuild@0.20.2)))(webpack@5.91.0(@swc/core@1.4.11)(esbuild@0.20.2))
@@ -224,7 +224,7 @@ importers:
         version: link:../packages/find-replace
       '@univerjs/icons':
         specifier: ^0.1.44
-        version: 0.1.44(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+        version: 0.1.44(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@univerjs/image':
         specifier: workspace:*
         version: link:../packages/image
@@ -295,14 +295,14 @@ importers:
         specifier: 0.47.0
         version: 0.47.0
       react:
-        specifier: ^18.2.0
-        version: 18.3.0
+        specifier: 18.2.0
+        version: 18.2.0
       react-dom:
-        specifier: ^18.2.0
-        version: 18.3.0(react@18.3.0)
+        specifier: 18.2.0
+        version: 18.2.0(react@18.2.0)
       react-mosaic-component:
         specifier: ^6.1.0
-        version: 6.1.0(@types/node@20.12.7)(@types/react@18.3.0)(dnd-core@16.0.1)(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+        version: 6.1.0(@types/node@20.12.7)(@types/react@18.3.0)(dnd-core@16.0.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -412,59 +412,59 @@ importers:
     dependencies:
       '@rc-component/color-picker':
         specifier: ^1.5.3
-        version: 1.5.3(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+        version: 1.5.3(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@rc-component/trigger':
         specifier: ^1.18.3
-        version: 1.18.3(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+        version: 1.18.3(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@univerjs/icons':
         specifier: ^0.1.44
-        version: 0.1.44(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+        version: 0.1.44(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       rc-dialog:
         specifier: ^9.4.0
-        version: 9.4.0(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+        version: 9.4.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       rc-dropdown:
         specifier: ^4.2.0
-        version: 4.2.0(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+        version: 4.2.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       rc-input:
         specifier: ^1.4.5
-        version: 1.4.5(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+        version: 1.4.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       rc-input-number:
         specifier: ^9.0.0
-        version: 9.0.0(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+        version: 9.0.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       rc-menu:
         specifier: ^9.13.0
-        version: 9.13.0(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+        version: 9.13.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       rc-picker:
         specifier: ^4.3.0
-        version: 4.3.0(dayjs@1.11.10)(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+        version: 4.3.0(dayjs@1.11.10)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       rc-segmented:
         specifier: ^2.3.0
-        version: 2.3.0(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+        version: 2.3.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       rc-select:
         specifier: ^14.13.0
-        version: 14.13.0(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+        version: 14.13.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       rc-textarea:
         specifier: ^1.6.3
-        version: 1.6.3(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+        version: 1.6.3(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       rc-tooltip:
         specifier: ^6.2.0
-        version: 6.2.0(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+        version: 6.2.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       rc-util:
         specifier: ^5.39.1
-        version: 5.39.1(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+        version: 5.39.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       react-draggable:
         specifier: ^4.4.6
-        version: 4.4.6(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+        version: 4.4.6(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       react-grid-layout:
         specifier: ^1.4.4
-        version: 1.4.4(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+        version: 1.4.4(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       react-transition-group:
         specifier: ^4.4.5
-        version: 4.4.5(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+        version: 4.4.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
     devDependencies:
       '@testing-library/react':
         specifier: ^14.2.2
-        version: 14.2.2(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+        version: 14.2.2(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@types/react':
         specifier: ^18.2.79
         version: 18.3.0
@@ -490,11 +490,11 @@ importers:
         specifier: ^4.2.0
         version: 4.2.0
       react:
-        specifier: ^18.2.0
-        version: 18.3.0
+        specifier: 18.2.0
+        version: 18.2.0
       react-dom:
-        specifier: ^18.2.0
-        version: 18.3.0(react@18.3.0)
+        specifier: 18.2.0
+        version: 18.2.0(react@18.2.0)
       typescript:
         specifier: ^5.4.5
         version: 5.4.5
@@ -562,8 +562,8 @@ importers:
         specifier: ^4.2.0
         version: 4.2.0
       react:
-        specifier: ^18.2.0
-        version: 18.3.0
+        specifier: 18.2.0
+        version: 18.2.0
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -728,7 +728,7 @@ importers:
     dependencies:
       '@univerjs/icons':
         specifier: ^0.1.44
-        version: 0.1.44(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+        version: 0.1.44(react-dom@18.3.0(react@18.2.0))(react@18.2.0)
     devDependencies:
       '@types/react':
         specifier: ^18.2.79
@@ -758,8 +758,8 @@ importers:
         specifier: ^4.2.0
         version: 4.2.0
       react:
-        specifier: ^18.2.0
-        version: 18.3.0
+        specifier: 18.2.0
+        version: 18.2.0
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -777,7 +777,7 @@ importers:
     dependencies:
       '@univerjs/icons':
         specifier: ^0.1.44
-        version: 0.1.44(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+        version: 0.1.44(react-dom@18.3.0(react@18.2.0))(react@18.2.0)
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -804,8 +804,8 @@ importers:
         specifier: ^4.2.0
         version: 4.2.0
       react:
-        specifier: ^18.2.0
-        version: 18.3.0
+        specifier: 18.2.0
+        version: 18.2.0
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -946,7 +946,7 @@ importers:
     dependencies:
       '@univerjs/icons':
         specifier: ^0.1.44
-        version: 0.1.44(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+        version: 0.1.44(react-dom@18.3.0(react@18.2.0))(react@18.2.0)
       '@univerjs/sheets-conditional-formatting':
         specifier: workspace:*
         version: link:../sheets-conditional-formatting
@@ -958,13 +958,13 @@ importers:
         version: 4.3.2
       react-dom:
         specifier: ^16.9.0 || ^17.0.0 || ^18.0.0
-        version: 18.3.0(react@18.3.0)
+        version: 18.3.0(react@18.2.0)
       react-grid-layout:
         specifier: ^1.4.4
-        version: 1.4.4(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+        version: 1.4.4(react-dom@18.3.0(react@18.2.0))(react@18.2.0)
       react-resizable:
         specifier: ^3.0.5
-        version: 3.0.5(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+        version: 3.0.5(react-dom@18.3.0(react@18.2.0))(react@18.2.0)
     devDependencies:
       '@types/lodash.get':
         specifier: ^4.4.9
@@ -1012,8 +1012,8 @@ importers:
         specifier: ^4.2.0
         version: 4.2.0
       react:
-        specifier: ^18.2.0
-        version: 18.3.0
+        specifier: 18.2.0
+        version: 18.2.0
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -1031,7 +1031,7 @@ importers:
     dependencies:
       '@univerjs/icons':
         specifier: ^0.1.44
-        version: 0.1.44(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+        version: 0.1.44(react-dom@18.3.0(react@18.2.0))(react@18.2.0)
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -1076,8 +1076,8 @@ importers:
         specifier: ^4.2.0
         version: 4.2.0
       react:
-        specifier: ^18.2.0
-        version: 18.3.0
+        specifier: 18.2.0
+        version: 18.2.0
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -1122,13 +1122,13 @@ importers:
     dependencies:
       '@univerjs/icons':
         specifier: ^0.1.44
-        version: 0.1.44(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+        version: 0.1.44(react-dom@18.3.0(react@18.2.0))(react@18.2.0)
       rc-virtual-list:
         specifier: ^3.11.5
-        version: 3.11.5(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+        version: 3.11.5(react-dom@18.3.0(react@18.2.0))(react@18.2.0)
       react-dom:
         specifier: ^16.9.0 || ^17.0.0 || ^18.0.0
-        version: 18.3.0(react@18.3.0)
+        version: 18.3.0(react@18.2.0)
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -1164,8 +1164,8 @@ importers:
         specifier: ^4.2.0
         version: 4.2.0
       react:
-        specifier: ^18.2.0
-        version: 18.3.0
+        specifier: 18.2.0
+        version: 18.2.0
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -1222,7 +1222,7 @@ importers:
     dependencies:
       '@univerjs/icons':
         specifier: ^0.1.44
-        version: 0.1.44(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+        version: 0.1.44(react-dom@18.3.0(react@18.2.0))(react@18.2.0)
     devDependencies:
       '@types/react':
         specifier: ^18.2.79
@@ -1267,8 +1267,8 @@ importers:
         specifier: ^4.2.0
         version: 4.2.0
       react:
-        specifier: ^18.2.0
-        version: 18.3.0
+        specifier: 18.2.0
+        version: 18.2.0
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -1286,7 +1286,7 @@ importers:
     dependencies:
       '@univerjs/icons':
         specifier: ^0.1.44
-        version: 0.1.44(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+        version: 0.1.44(react-dom@18.3.0(react@18.2.0))(react@18.2.0)
     devDependencies:
       '@types/react':
         specifier: ^18.2.79
@@ -1325,8 +1325,8 @@ importers:
         specifier: ^4.2.0
         version: 4.2.0
       react:
-        specifier: ^18.2.0
-        version: 18.3.0
+        specifier: 18.2.0
+        version: 18.2.0
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -1405,7 +1405,7 @@ importers:
         version: link:../docs-ui
       '@univerjs/icons':
         specifier: ^0.1.44
-        version: 0.1.44(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+        version: 0.1.44(react-dom@18.3.0(react@18.2.0))(react@18.2.0)
     devDependencies:
       '@types/react':
         specifier: ^18.2.79
@@ -1447,8 +1447,8 @@ importers:
         specifier: ^4.2.0
         version: 4.2.0
       react:
-        specifier: ^18.2.0
-        version: 18.3.0
+        specifier: 18.2.0
+        version: 18.2.0
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -1466,7 +1466,7 @@ importers:
     dependencies:
       '@univerjs/icons':
         specifier: ^0.1.44
-        version: 0.1.44(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+        version: 0.1.44(react-dom@18.3.0(react@18.2.0))(react@18.2.0)
     devDependencies:
       '@univerjs/core':
         specifier: workspace:*
@@ -1499,8 +1499,8 @@ importers:
         specifier: ^4.2.0
         version: 4.2.0
       react:
-        specifier: ^18.2.0
-        version: 18.3.0
+        specifier: 18.2.0
+        version: 18.2.0
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -1571,8 +1571,8 @@ importers:
         specifier: ^4.2.0
         version: 4.2.0
       react:
-        specifier: ^18.2.0
-        version: 18.3.0
+        specifier: 18.2.0
+        version: 18.2.0
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -1691,16 +1691,16 @@ importers:
     dependencies:
       '@univerjs/icons':
         specifier: ^0.1.44
-        version: 0.1.44(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+        version: 0.1.44(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       localforage:
         specifier: ^1.10.0
         version: 1.10.0
       rc-notification:
         specifier: ^5.4.0
-        version: 5.4.0(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+        version: 5.4.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       rc-util:
         specifier: ^5.39.1
-        version: 5.39.1(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+        version: 5.39.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
     optionalDependencies:
       vue:
         specifier: '>=3.0.0'
@@ -1708,10 +1708,10 @@ importers:
     devDependencies:
       '@testing-library/react':
         specifier: ^14.2.2
-        version: 14.2.2(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+        version: 14.2.2(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@testing-library/react-hooks':
         specifier: ^8.0.1
-        version: 8.0.1(@types/react@18.3.0)(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+        version: 8.0.1(@types/react@18.3.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@types/react':
         specifier: ^18.2.79
         version: 18.3.0
@@ -1746,11 +1746,11 @@ importers:
         specifier: ^4.2.0
         version: 4.2.0
       react:
-        specifier: ^18.2.0
-        version: 18.3.0
+        specifier: 18.2.0
+        version: 18.2.0
       react-dom:
-        specifier: ^18.2.0
-        version: 18.3.0(react@18.3.0)
+        specifier: 18.2.0
+        version: 18.2.0(react@18.2.0)
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -1866,11 +1866,11 @@ importers:
         specifier: 0.48.0
         version: 0.48.0
       react:
-        specifier: ^18.2.0
-        version: 18.3.0
+        specifier: 18.2.0
+        version: 18.2.0
       react-dom:
-        specifier: ^18.2.0
-        version: 18.3.0(react@18.3.0)
+        specifier: 18.2.0
+        version: 18.2.0(react@18.2.0)
       rxjs:
         specifier: ^7.8.1
         version: 7.8.1
@@ -3093,17 +3093,12 @@ packages:
     resolution: {integrity: sha512-ZXRY4jNvVgSVQ8DL3LTcakaAtXwTVUxE81hslsyD2AtoXW/wVob10HkOJ1X/pAlcI7D+2YoZKg5do8G/w6RYgA==, tarball: https://r2.cnpmjs.org/@istanbuljs/schema/-/schema-0.1.3.tgz}
     engines: {node: '>=8'}
 
-  '@istanbuljs/schema@https://r2.cnpmjs.org/@istanbuljs/schema/-/schema-0.1.3.tgz':
-    resolution: {integrity: sha512-ZXRY4jNvVgSVQ8DL3LTcakaAtXwTVUxE81hslsyD2AtoXW/wVob10HkOJ1X/pAlcI7D+2YoZKg5do8G/w6RYgA==, tarball: https://r2.cnpmjs.org/@istanbuljs/schema/-/schema-0.1.3.tgz}
-    version: 0.1.3
-    engines: {node: '>=8'}
-
   '@javascript-obfuscator/escodegen@2.3.0':
     resolution: {integrity: sha512-QVXwMIKqYMl3KwtTirYIA6gOCiJ0ZDtptXqAv/8KWLG9uQU2fZqTVy7a/A5RvcoZhbDoFfveTxuGxJ5ibzQtkw==}
     engines: {node: '>=6.0'}
 
   '@javascript-obfuscator/estraverse@5.4.0':
-    resolution: {integrity: sha512-CZFX7UZVN9VopGbjTx4UXaXsi9ewoM1buL0kY7j1ftYdSs7p2spv9opxFjHlQ/QGTgh4UqufYqJJ0WKLml7b6w==}
+    resolution: {integrity: sha512-CZFX7UZVN9VopGbjTx4UXaXsi9ewoM1buL0kY7j1ftYdSs7p2spv9opxFjHlQ/QGTgh4UqufYqJJ0WKLml7b6w==, tarball: https://r2.cnpmjs.org/@javascript-obfuscator/estraverse/-/estraverse-5.4.0.tgz}
     engines: {node: '>=4.0'}
 
   '@jest/schemas@29.6.3':
@@ -4525,7 +4520,7 @@ packages:
     engines: {node: '>= 0.4'}
 
   array-differ@3.0.0:
-    resolution: {integrity: sha512-THtfYS6KtME/yIAhKjZ2ul7XI96lQGHRputJQHO80LAWQnuGP4iCIN8vdMRboGbIEYBwU33q8Tch1os2+X0kMg==}
+    resolution: {integrity: sha512-THtfYS6KtME/yIAhKjZ2ul7XI96lQGHRputJQHO80LAWQnuGP4iCIN8vdMRboGbIEYBwU33q8Tch1os2+X0kMg==, tarball: https://r2.cnpmjs.org/array-differ/-/array-differ-3.0.0.tgz}
     engines: {node: '>=8'}
 
   array-flatten@https://r2.cnpmjs.org/array-flatten/-/array-flatten-1.1.1.tgz:
@@ -4570,11 +4565,11 @@ packages:
     engines: {node: '>= 0.4'}
 
   arrify@2.0.1:
-    resolution: {integrity: sha512-3duEwti880xqi4eAMN8AyR4a0ByT90zoYdLlevfrvU43vb0YZwZVfxOgxWrLXXXpyugL0hNZc9G6BiB5B3nUug==}
+    resolution: {integrity: sha512-3duEwti880xqi4eAMN8AyR4a0ByT90zoYdLlevfrvU43vb0YZwZVfxOgxWrLXXXpyugL0hNZc9G6BiB5B3nUug==, tarball: https://r2.cnpmjs.org/arrify/-/arrify-2.0.1.tgz}
     engines: {node: '>=8'}
 
   assert@2.0.0:
-    resolution: {integrity: sha512-se5Cd+js9dXJnu6Ag2JFc00t+HmHOen+8Q+L7O9zI0PqQXr20uk2J0XQqMxZEeo5U50o8Nvmmx7dZrl+Ufr35A==}
+    resolution: {integrity: sha512-se5Cd+js9dXJnu6Ag2JFc00t+HmHOen+8Q+L7O9zI0PqQXr20uk2J0XQqMxZEeo5U50o8Nvmmx7dZrl+Ufr35A==, tarball: https://r2.cnpmjs.org/assert/-/assert-2.0.0.tgz}
 
   assert@2.1.0:
     resolution: {integrity: sha512-eLHpSK/Y4nhMJ07gDaAzoX/XAKS8PSaojml3M0DM4JpV1LAi5JOJ/p6H/XWrl8L+DzVEvVCW1z3vWAaB9oTsQw==}
@@ -4780,7 +4775,7 @@ packages:
     engines: {node: '>=8'}
 
   chalk@4.1.2:
-    resolution: {integrity: sha512-oKnbhFyRIXpUuez8iBMmyEa4nbj4IOQyuhc/wy9kY7/WVPcwIO9VA668Pu8RkO7+0G76SLROeyw9CpQ061i4mA==}
+    resolution: {integrity: sha512-oKnbhFyRIXpUuez8iBMmyEa4nbj4IOQyuhc/wy9kY7/WVPcwIO9VA668Pu8RkO7+0G76SLROeyw9CpQ061i4mA==, tarball: https://r2.cnpmjs.org/chalk/-/chalk-4.1.2.tgz}
     engines: {node: '>=10'}
 
   chalk@5.0.1:
@@ -4794,6 +4789,13 @@ packages:
   chalk@https://r2.cnpmjs.org/chalk/-/chalk-4.1.2.tgz:
     resolution: {integrity: sha512-oKnbhFyRIXpUuez8iBMmyEa4nbj4IOQyuhc/wy9kY7/WVPcwIO9VA668Pu8RkO7+0G76SLROeyw9CpQ061i4mA==, tarball: https://r2.cnpmjs.org/chalk/-/chalk-4.1.2.tgz}
     version: 4.1.2
+    engines: {node: '>=10'}
+
+  chance@1.1.9:
+    resolution: {integrity: sha512-TfxnA/DcZXRTA4OekA2zL9GH8qscbbl6X0ZqU4tXhGveVY/mXWvEQLt5GwZcYXTEyEFflVtj+pG8nc8EwSm1RQ==}
+
+  char-regex@1.0.2:
+    resolution: {integrity: sha512-kWWXztvZ5SBQV+eRgKFeh8q5sLuZY2+8WUIzlxWVTg+oGwY14qylx1KbKzHd8P6ZYkAg0xyIDU9JMHhyJMZ1jw==, tarball: https://r2.cnpmjs.org/char-regex/-/char-regex-1.0.2.tgz}
     engines: {node: '>=10'}
 
   character-entities-legacy@1.1.4:
@@ -4810,7 +4812,7 @@ packages:
     version: 0.7.0
 
   charenc@0.0.2:
-    resolution: {integrity: sha512-yrLQ/yVUFXkzg7EDQsPieE/53+0RlaWTs+wBrvW36cyilJ2SaDWfl4Yj7MtLTXleV9uEKefbAGUPv2/iWSooRA==}
+    resolution: {integrity: sha512-yrLQ/yVUFXkzg7EDQsPieE/53+0RlaWTs+wBrvW36cyilJ2SaDWfl4Yj7MtLTXleV9uEKefbAGUPv2/iWSooRA==, tarball: https://r2.cnpmjs.org/charenc/-/charenc-0.0.2.tgz}
 
   check-error@1.0.3:
     resolution: {integrity: sha512-iKEoDYaRmd1mxM90a2OEfWhjsjPpYPuQ+lMYsoxB126+t8fw7ySEO48nmDg5COTjxDI65/Y2OWpeEHk3ZOe8zg==}
@@ -5169,6 +5171,9 @@ packages:
     resolution: {integrity: sha512-iRDPJKUPVEND7dHPO8rkbOnPpyDygcDFtWjpeWNCgy8WP2rXcxXL8TskReQl6OrB2G7+UJrags1q15Fudc7G6w==, tarball: https://r2.cnpmjs.org/cross-spawn/-/cross-spawn-7.0.3.tgz}
     version: 7.0.3
     engines: {node: '>= 8'}
+
+  crypt@0.0.2:
+    resolution: {integrity: sha512-mCxBlsHFYh9C+HVpiEacem8FEBnMXgU9gy4zmNC+SXAZNB/1idgp/aulFJ4FgCi7GPEVbfyng092GqL2k2rmow==, tarball: https://r2.cnpmjs.org/crypt/-/crypt-0.0.2.tgz}
 
   crypto-random-string@2.0.0:
     resolution: {integrity: sha512-v1plID3y9r/lPhviJ1wrXpLeyUIGAZ2SHNYTEapm7/8A9nLPoyvVp3RK/EPFqn5kEznyWgYZNsRtYYIWbuG8KA==, tarball: https://r2.cnpmjs.org/crypto-random-string/-/crypto-random-string-2.0.0.tgz}
@@ -5597,7 +5602,7 @@ packages:
     engines: {node: '>= 0.4'}
 
   es6-object-assign@1.1.0:
-    resolution: {integrity: sha512-MEl9uirslVwqQU369iHNWZXsI8yaZYGg/D65aOgZkeyFJwHYSxilf7rQzXKI7DdDuBPrBXbfk3sl9hJhmd5AUw==}
+    resolution: {integrity: sha512-MEl9uirslVwqQU369iHNWZXsI8yaZYGg/D65aOgZkeyFJwHYSxilf7rQzXKI7DdDuBPrBXbfk3sl9hJhmd5AUw==, tarball: https://r2.cnpmjs.org/es6-object-assign/-/es6-object-assign-1.1.0.tgz}
 
   esbuild-android-64@0.14.54:
     resolution: {integrity: sha512-Tz2++Aqqz0rJ7kYBfz+iqyE3QMycD4vk7LBRyWaAVFgFtQ/O8EJOnVmTOiDWYZ/uYzB4kvP+bqejYdVKzE5lAQ==}
@@ -6026,8 +6031,16 @@ packages:
     resolution: {integrity: sha512-2NxwbF/hZ0KpepYN0cNbo+FN6XoK7GaHlQhgx/hIZl6Va0bF45RQOOwhLIy8lQDbuCiadSLCBnH2CFYquit5bw==, tarball: https://r2.cnpmjs.org/eslint-scope/-/eslint-scope-5.1.1.tgz}
     engines: {node: '>=8.0.0'}
 
+  eslint-scope@7.1.1:
+    resolution: {integrity: sha512-QKQM/UXpIiHcLqJ5AOyIW7XZmzjkzQXYE54n1++wb0u9V/abW3l9uQnxX8Z5Xd18xyKIMTUAyQ0k1e8pz6LUrw==}
+    engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
+
   eslint-scope@7.2.2:
     resolution: {integrity: sha512-dOt21O7lTMhDM+X9mB4GX+DZrZtCUJPL/wlcTqxyrx5IvO0IYtILdtrQGQp+8n5S0gwSVmOf9NQrjMOgfQZlIg==}
+    engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
+
+  eslint-visitor-keys@3.3.0:
+    resolution: {integrity: sha512-mQ+suqKJVyeuwGYHAdjMFqjCyfl8+Ldnxuyp3ldiMBFKkvytrXUZWaiPCEav8qDHKty44bD+qV1IP4T+w+xXRA==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
 
   eslint-visitor-keys@3.4.3:
@@ -6701,7 +6714,7 @@ packages:
     engines: {node: '>= 0.10'}
 
   inversify@6.0.1:
-    resolution: {integrity: sha512-B3ex30927698TJENHR++8FfEaJGqoWOgI6ZY5Ht/nLUsFCwHn6akbwtnUAPCgUepAnTpe2qHxhDNjoKLyz6rgQ==}
+    resolution: {integrity: sha512-B3ex30927698TJENHR++8FfEaJGqoWOgI6ZY5Ht/nLUsFCwHn6akbwtnUAPCgUepAnTpe2qHxhDNjoKLyz6rgQ==, tarball: https://r2.cnpmjs.org/inversify/-/inversify-6.0.1.tgz}
 
   ip-address@9.0.5:
     resolution: {integrity: sha512-zHtQzGojZXTwZTHQqra+ETKd4Sn3vgi7uBmlPoXVWZqYvuKmtI0l/VZTjqGmJY9x88GGOaZ9+G9ES8hC4T4X8g==}
@@ -6755,7 +6768,7 @@ packages:
     engines: {node: '>= 0.4'}
 
   is-buffer@1.1.6:
-    resolution: {integrity: sha512-NcdALwpXkTm5Zvvbk7owOUSvVvBKDgKP5/ewfXEznmQFfs4ZRmanOeKBTjRVjka3QFoN6XJ+9F3USqfHqTaU5w==}
+    resolution: {integrity: sha512-NcdALwpXkTm5Zvvbk7owOUSvVvBKDgKP5/ewfXEznmQFfs4ZRmanOeKBTjRVjka3QFoN6XJ+9F3USqfHqTaU5w==, tarball: https://r2.cnpmjs.org/is-buffer/-/is-buffer-1.1.6.tgz}
 
   is-builtin-module@3.2.1:
     resolution: {integrity: sha512-BSLE3HnV2syZ0FK0iMA/yUGplUeMmNz4AW5fnTunbCIqZi4vG3WjJT9FHMy5D69xmAYBHXQhJdALdpwVxV501A==}
@@ -7076,7 +7089,7 @@ packages:
     resolution: {integrity: sha512-8wb9Yw966OSxApiCt0K3yNJL8pnNeIv+OEq2YMidz4FKP6nonSRoOXc80iXY4JaN2FC11B9qsNmDsm+ZOfMROA==, tarball: https://r2.cnpmjs.org/jju/-/jju-1.4.0.tgz}
 
   js-string-escape@1.0.1:
-    resolution: {integrity: sha512-Smw4xcfIQ5LVjAOuJCvN/zIodzA/BBSsluuoSykP+lUvScIi4U6RJLfwHet5cxFnCswUjISV8oAXaqaJDY3chg==}
+    resolution: {integrity: sha512-Smw4xcfIQ5LVjAOuJCvN/zIodzA/BBSsluuoSykP+lUvScIi4U6RJLfwHet5cxFnCswUjISV8oAXaqaJDY3chg==, tarball: https://r2.cnpmjs.org/js-string-escape/-/js-string-escape-1.0.1.tgz}
     engines: {node: '>= 0.8'}
 
   js-tokens@4.0.0:
@@ -7231,7 +7244,7 @@ packages:
     engines: {node: '>=6'}
 
   levn@0.3.0:
-    resolution: {integrity: sha512-0OO4y2iOHix2W6ujICbKIaEQXvFQHue65vUG3pb5EUomzPI90z9hsA1VsO/dbIIpC53J8gxM9Q4Oho0jrCM/yA==}
+    resolution: {integrity: sha512-0OO4y2iOHix2W6ujICbKIaEQXvFQHue65vUG3pb5EUomzPI90z9hsA1VsO/dbIIpC53J8gxM9Q4Oho0jrCM/yA==, tarball: https://r2.cnpmjs.org/levn/-/levn-0.3.0.tgz}
     engines: {node: '>= 0.8.0'}
 
   levn@0.4.1:
@@ -7434,10 +7447,6 @@ packages:
     resolution: {integrity: sha512-g3FeP20LNwhALb/6Cz6Dd4F2ngze0jz7tbzrD2wAV+o9FeNHe4rL+yK2md0J/fiSf1sa1ADhXqi5+oVwOM/eGw==, tarball: https://r2.cnpmjs.org/make-dir/-/make-dir-3.1.0.tgz}
     engines: {node: '>=8'}
 
-  make-dir@2.1.0:
-    resolution: {integrity: sha512-LS9X+dc8KLxXCb8dni79fLIIUA5VyZoyjSMCwTluaXA0o27cCK0bhXkpgw+sTXVpPy/lSO57ilRixqk0vDmtRA==}
-    engines: {node: '>=6'}
-
   make-dir@4.0.0:
     resolution: {integrity: sha512-hXdUTZYIVOt1Ex//jAQi+wTZZpUpwBj/0QsOzqegb3rGMMeJiSEu5xLHnYfBrRV4RH2+OCSOO95Is/7x1WJ4bw==}
     engines: {node: '>=10'}
@@ -7458,6 +7467,9 @@ packages:
   matcher-collection@2.0.1:
     resolution: {integrity: sha512-daE62nS2ZQsDg9raM0IlZzLmI2u+7ZapXBwdoeBUKAYERPDDIc0qNqA8E0Rp2D+gspKR7BgIFP52GeujaGXWeQ==, tarball: https://r2.cnpmjs.org/matcher-collection/-/matcher-collection-2.0.1.tgz}
     engines: {node: 6.* || 8.* || >= 10.*}
+
+  md5@2.3.0:
+    resolution: {integrity: sha512-T1GITYmFaKuO91vxyoQMFETst+O71VUPEU3ze5GNzDm0OWdP8v1ziTaAEPUr/3kLsY3Sftgz242A1SetQiDL7g==}
 
   mdast-util-from-markdown@0.8.5:
     resolution: {integrity: sha512-2hkTXtYYnr+NubD/g6KGBS/0mFmBcifAsI0yIWRiRo0PjVs6SSOSOdtzbp6kSGnShDN6G5aWZpKQ2lWRy27mWQ==, tarball: https://r2.cnpmjs.org/mdast-util-from-markdown/-/mdast-util-from-markdown-0.8.5.tgz}
@@ -7611,6 +7623,11 @@ packages:
     engines: {node: '>=10'}
     hasBin: true
 
+  mkdirp@2.1.3:
+    resolution: {integrity: sha512-sjAkg21peAG9HS+Dkx7hlG9Ztx7HLeKnvB3NQRcu/mltCVmvkF0pisbiTSfDVYTT86XEfZrTUosLdZLStquZUw==}
+    engines: {node: '>=10'}
+    hasBin: true
+
   mlly@1.6.1:
     resolution: {integrity: sha512-vLgaHvaeunuOXHSmEbZ9izxPx3USsk8KCQ8iC+aTlp5sKRSoZvwhHh5L9VbKSaVC6sJDqbyohIS76E2VmHIPAA==}
 
@@ -7641,7 +7658,7 @@ packages:
     resolution: {integrity: sha512-ckmWDJjphvd/FvZawgygcUeQCxzvohjFO5RxTjj4eq8kw359gFF3E1brjfI+viLMxss5JrHTDRHZvu2/tuy0Qg==}
 
   multimatch@5.0.0:
-    resolution: {integrity: sha512-ypMKuglUrZUD99Tk2bUQ+xNQj43lPEfAeX2o9cTteAmShXy2VHDJpuwu1o0xqoKCt9jLVAvwyFKdLTPXKAfJyA==}
+    resolution: {integrity: sha512-ypMKuglUrZUD99Tk2bUQ+xNQj43lPEfAeX2o9cTteAmShXy2VHDJpuwu1o0xqoKCt9jLVAvwyFKdLTPXKAfJyA==, tarball: https://r2.cnpmjs.org/multimatch/-/multimatch-5.0.0.tgz}
     engines: {node: '>=10'}
 
   mute-stream@1.0.0:
@@ -7853,7 +7870,7 @@ packages:
     engines: {node: '>=12'}
 
   opencollective-postinstall@2.0.3:
-    resolution: {integrity: sha512-8AV/sCtuzUeTo8gQK5qDZzARrulB3egtLzFgteqB2tcT4Mw7B8Kt7JcDHmltjz6FOAHsvTevk70gZEbhM4ZS9Q==}
+    resolution: {integrity: sha512-8AV/sCtuzUeTo8gQK5qDZzARrulB3egtLzFgteqB2tcT4Mw7B8Kt7JcDHmltjz6FOAHsvTevk70gZEbhM4ZS9Q==, tarball: https://r2.cnpmjs.org/opencollective-postinstall/-/opencollective-postinstall-2.0.3.tgz}
     hasBin: true
 
   opentype.js@1.3.4:
@@ -7862,7 +7879,7 @@ packages:
     hasBin: true
 
   optionator@0.8.3:
-    resolution: {integrity: sha512-+IW9pACdk3XWmmTXG8m3upGUJst5XRGzxMRjXzAuJ1XnIFNvfhjjIuYkDvysnPQ7qzqVzLt78BCruntqRhWQbA==}
+    resolution: {integrity: sha512-+IW9pACdk3XWmmTXG8m3upGUJst5XRGzxMRjXzAuJ1XnIFNvfhjjIuYkDvysnPQ7qzqVzLt78BCruntqRhWQbA==, tarball: https://r2.cnpmjs.org/optionator/-/optionator-0.8.3.tgz}
     engines: {node: '>= 0.8.0'}
 
   optionator@0.9.3:
@@ -8093,9 +8110,6 @@ packages:
   picocolors@1.0.0:
     resolution: {integrity: sha512-1fygroTLlHu66zi26VoTDv8yRgm0Fccecssto+MhsZ0D/DGW2sm8E8AjW7NU5VVTRt5GxbeZ5qBuJr+HyLYkjQ==, tarball: https://r2.cnpmjs.org/picocolors/-/picocolors-1.0.0.tgz}
 
-  picocolors@1.0.0:
-    resolution: {integrity: sha512-1fygroTLlHu66zi26VoTDv8yRgm0Fccecssto+MhsZ0D/DGW2sm8E8AjW7NU5VVTRt5GxbeZ5qBuJr+HyLYkjQ==}
-
   picocolors@https://r2.cnpmjs.org/picocolors/-/picocolors-1.0.0.tgz:
     resolution: {integrity: sha512-1fygroTLlHu66zi26VoTDv8yRgm0Fccecssto+MhsZ0D/DGW2sm8E8AjW7NU5VVTRt5GxbeZ5qBuJr+HyLYkjQ==, tarball: https://r2.cnpmjs.org/picocolors/-/picocolors-1.0.0.tgz}
     version: 1.0.0
@@ -8199,7 +8213,7 @@ packages:
     engines: {node: ^10 || ^12 || >=14}
 
   prelude-ls@1.1.2:
-    resolution: {integrity: sha512-ESF23V4SKG6lVSGZgYNpbsiaAkdab6ZgOxe52p7+Kid3W3u3bxR4Vfd/o21dmN7jSt0IwgZ4v5MUd26FEtXE9w==}
+    resolution: {integrity: sha512-ESF23V4SKG6lVSGZgYNpbsiaAkdab6ZgOxe52p7+Kid3W3u3bxR4Vfd/o21dmN7jSt0IwgZ4v5MUd26FEtXE9w==, tarball: https://r2.cnpmjs.org/prelude-ls/-/prelude-ls-1.1.2.tgz}
     engines: {node: '>= 0.8.0'}
 
   prelude-ls@1.2.1:
@@ -8241,10 +8255,6 @@ packages:
 
   process@0.11.10:
     resolution: {integrity: sha512-cdGef/drWFoydD1JsMzuFf8100nZl+GT+yacc2bEced5f9Rjk4z+WtFUTBu9PhOi9j/jfmBPu0mMEY4wIdAF8A==, tarball: https://r2.cnpmjs.org/process/-/process-0.11.10.tgz}
-    engines: {node: '>= 0.6.0'}
-
-  process@0.11.10:
-    resolution: {integrity: sha512-cdGef/drWFoydD1JsMzuFf8100nZl+GT+yacc2bEced5f9Rjk4z+WtFUTBu9PhOi9j/jfmBPu0mMEY4wIdAF8A==}
     engines: {node: '>= 0.6.0'}
 
   process@https://r2.cnpmjs.org/process/-/process-0.11.10.tgz:
@@ -8543,6 +8553,11 @@ packages:
     resolution: {integrity: sha512-i8aF1nyKInZnANZ4uZrH49qn1paRgBZ7wZiCNBMnenlPzEv0mRl+ShpTVEI6wZNl8sSc79xZkivtgLKQArcanQ==}
     engines: {node: '>=16.14.0'}
 
+  react-dom@18.2.0:
+    resolution: {integrity: sha512-6IMTriUmvsjHUjNtEDudZfuDQUoWXVxKHhlEGSk81n4YFS+r/Kl99wXiwlVXtPBtJenozv2P+hxDsw9eA7Xo6g==}
+    peerDependencies:
+      react: ^18.2.0
+
   react-dom@18.3.0:
     resolution: {integrity: sha512-zaKdLBftQJnvb7FtDIpZtsAIb2MZU087RM8bRDZU8LVCCFYjPTsDZJNFUWPcVz3HFSN1n/caxi0ca4B/aaVQGQ==}
     peerDependencies:
@@ -8604,6 +8619,10 @@ packages:
       react: '>=16.6.0'
       react-dom: '>=16.6.0'
 
+  react@18.2.0:
+    resolution: {integrity: sha512-/3IjMdb2L9QbBdWiW5e3P2/npwMBaU9mHCSCUzNln0ZCYbcfTsGbTJrU/kGemdH2IWmB2ioZ+zkxtmq6g09fGQ==}
+    engines: {node: '>=0.10.0'}
+
   react@18.3.0:
     resolution: {integrity: sha512-RPutkJftSAldDibyrjuku7q11d3oy6wKOyPe5K1HA/HwwrXcEqBdHsLypkC2FFYjP7bPUa6gbzSBhw4sY2JcDg==}
     engines: {node: '>=0.10.0'}
@@ -8663,7 +8682,7 @@ packages:
     resolution: {integrity: sha512-LAUYz4lc+Do8/g7aeRa8JkyDErK6ekstQaqWQrNRW//MY1TvCEpMtpTWvlQ+FPbWCx+Xixu/6SHt5N0HR+SB4w==}
 
   reflect-metadata@0.1.13:
-    resolution: {integrity: sha512-Ts1Y/anZELhSsjMcU605fU9RE4Oi3p5ORujwbIKXfWa+0Zxs510Qrmrce5/Jowq3cHSZSJqBjypxmHarc+vEWg==}
+    resolution: {integrity: sha512-Ts1Y/anZELhSsjMcU605fU9RE4Oi3p5ORujwbIKXfWa+0Zxs510Qrmrce5/Jowq3cHSZSJqBjypxmHarc+vEWg==, tarball: https://r2.cnpmjs.org/reflect-metadata/-/reflect-metadata-0.1.13.tgz}
 
   reflect.getprototypeof@1.0.6:
     resolution: {integrity: sha512-fmfw4XgoDke3kdI6h4xcUz1dG8uaiv5q9gcEwLS4Pnth2kxT+GZ7YehS1JTMGBQmtV7Y4GFGbs2re2NqhdozUg==}
@@ -9131,7 +9150,7 @@ packages:
     resolution: {integrity: sha512-kJUvRUFK49aub+a7T1nNE66EJbZBMnBgoC1UbCZ5n6bsZKBRga4KgBRTMn/pFkeCZSYtNeSyMxPDM0AXWELk2A==, tarball: https://r2.cnpmjs.org/string-hash/-/string-hash-1.1.3.tgz}
 
   string-template@1.0.0:
-    resolution: {integrity: sha512-SLqR3GBUXuoPP5MmYtD7ompvXiG87QjT6lzOszyXjTM86Uu7At7vNnt2xgyTLq5o9T4IxTYFyGxcULqpsmsfdg==}
+    resolution: {integrity: sha512-SLqR3GBUXuoPP5MmYtD7ompvXiG87QjT6lzOszyXjTM86Uu7At7vNnt2xgyTLq5o9T4IxTYFyGxcULqpsmsfdg==, tarball: https://r2.cnpmjs.org/string-template/-/string-template-1.0.0.tgz}
 
   string-ts@2.1.0:
     resolution: {integrity: sha512-YpGEBxS3Qw1De+RO3Gdrsx2gwYU9b7WmPtKhRLTTKc3oKzbOxqGDYLRGkNeIXLL4BGVZMXY49hPpzP3RAwUFAA==}
@@ -9178,7 +9197,7 @@ packages:
     resolution: {integrity: sha512-hkRX8U1WjJFd8LsDJ2yQ/wWWxaopEsABU1XfkM8A+j0+85JAGppt16cr1Whg6KIbb4okU6Mql6BOj+uup/wKeA==, tarball: https://r2.cnpmjs.org/string_decoder/-/string_decoder-1.3.0.tgz}
 
   stringz@2.1.0:
-    resolution: {integrity: sha512-KlywLT+MZ+v0IRepfMxRtnSvDCMc3nR1qqCs3m/qIbSOWkNZYT8XHQA31rS3TnKp0c5xjZu3M4GY/2aRKSi/6A==}
+    resolution: {integrity: sha512-KlywLT+MZ+v0IRepfMxRtnSvDCMc3nR1qqCs3m/qIbSOWkNZYT8XHQA31rS3TnKp0c5xjZu3M4GY/2aRKSi/6A==, tarball: https://r2.cnpmjs.org/stringz/-/stringz-2.1.0.tgz}
 
   strip-ansi@6.0.1:
     resolution: {integrity: sha512-Y38VPSHcqkFrCpFnQ9vuSXmquuv5oXOKpGeT6aGrr3o3Gc9AlVa6JBfUSOCnbxGGZF+/0ooI7KrPuUSztUdU5A==, tarball: https://r2.cnpmjs.org/strip-ansi/-/strip-ansi-6.0.1.tgz}
@@ -9347,9 +9366,8 @@ packages:
     engines: {node: '>=10'}
     hasBin: true
 
-  test-exclude@https://r2.cnpmjs.org/test-exclude/-/test-exclude-6.0.0.tgz:
+  test-exclude@6.0.0:
     resolution: {integrity: sha512-cAGWPIyOHU6zlmg88jwm7VRyXnMN7iV68OGAbYDk/Mh/xC/pzVPlQtY6ngoIH/5/tciuhGfvESU8GrHrcxD56w==, tarball: https://r2.cnpmjs.org/test-exclude/-/test-exclude-6.0.0.tgz}
-    version: 6.0.0
     engines: {node: '>=8'}
 
   text-extensions@2.4.0:
@@ -9488,7 +9506,7 @@ packages:
     resolution: {integrity: sha512-PZBtLYcCLtEcjL14Fzb1gSxPBeL7nWvGhO5ZFPGqziCcr8uvHp0NDmdjBchp6KHL+tExcg0m3NISmKxhU394dA==, tarball: https://r2.cnpmjs.org/tween-functions/-/tween-functions-1.2.0.tgz}
 
   type-check@0.3.2:
-    resolution: {integrity: sha512-ZCmOJdvOWDBYJlzAoFkC+Q0+bUyEOS1ltgp1MGU03fqHG+dbi9tBFU2Rd9QKiDZFAYrhPh2JUf7rZRIuHRKtOg==}
+    resolution: {integrity: sha512-ZCmOJdvOWDBYJlzAoFkC+Q0+bUyEOS1ltgp1MGU03fqHG+dbi9tBFU2Rd9QKiDZFAYrhPh2JUf7rZRIuHRKtOg==, tarball: https://r2.cnpmjs.org/type-check/-/type-check-0.3.2.tgz}
     engines: {node: '>= 0.8.0'}
 
   type-check@0.4.0:
@@ -10017,10 +10035,6 @@ packages:
 
   wrap-ansi@7.0.0:
     resolution: {integrity: sha512-YVGIj2kamLSTxw6NsZjoBxfSwsn0ycdesmc4p+Q21c5zPuZ1pl+NfxVdxPtdHvmNVOQ6XSYG4AUtyt/Fi7D16Q==, tarball: https://r2.cnpmjs.org/wrap-ansi/-/wrap-ansi-7.0.0.tgz}
-    engines: {node: '>=10'}
-
-  wrap-ansi@7.0.0:
-    resolution: {integrity: sha512-YVGIj2kamLSTxw6NsZjoBxfSwsn0ycdesmc4p+Q21c5zPuZ1pl+NfxVdxPtdHvmNVOQ6XSYG4AUtyt/Fi7D16Q==}
     engines: {node: '>=10'}
 
   wrap-ansi@8.1.0:
@@ -10968,12 +10982,12 @@ snapshots:
 
   '@base2/pretty-print-object@https://r2.cnpmjs.org/@base2/pretty-print-object/-/pretty-print-object-1.0.1.tgz': {}
 
-  '@chromatic-com/storybook@1.3.3(react@18.3.0)':
+  '@chromatic-com/storybook@1.3.3(react@18.2.0)':
     dependencies:
       chromatic: 11.3.0
       filesize: 10.1.1
       jsonfile: https://r2.cnpmjs.org/jsonfile/-/jsonfile-6.1.0.tgz
-      react-confetti: 6.1.0(react@18.3.0)
+      react-confetti: 6.1.0(react@18.2.0)
       strip-ansi: 7.1.0
     transitivePeerDependencies:
       - '@chromatic-com/cypress'
@@ -11120,9 +11134,9 @@ snapshots:
       tslib: 2.6.2
     optional: true
 
-  '@emotion/use-insertion-effect-with-fallbacks@1.0.1(react@18.3.0)':
+  '@emotion/use-insertion-effect-with-fallbacks@1.0.1(react@18.2.0)':
     dependencies:
-      react: 18.3.0
+      react: 18.2.0
 
   '@es-joy/jsdoccomment@0.42.0':
     dependencies:
@@ -11442,8 +11456,6 @@ snapshots:
 
   '@istanbuljs/schema@0.1.3': {}
 
-  '@istanbuljs/schema@0.1.3': {}
-
   '@javascript-obfuscator/escodegen@2.3.0':
     dependencies:
       '@javascript-obfuscator/estraverse': 5.4.0
@@ -11487,11 +11499,11 @@ snapshots:
     dependencies:
       call-bind: 1.0.7
 
-  '@mdx-js/react@3.0.1(@types/react@18.3.0)(react@18.3.0)':
+  '@mdx-js/react@3.0.1(@types/react@18.3.0)(react@18.2.0)':
     dependencies:
       '@types/mdx': 2.0.13
       '@types/react': 18.3.0
-      react: 18.3.0
+      react: 18.2.0
 
   '@microsoft/api-extractor-model@7.28.13(@types/node@20.12.7)':
     dependencies:
@@ -11659,63 +11671,63 @@ snapshots:
 
   '@protobufjs/utf8@1.1.0': {}
 
-  '@radix-ui/react-compose-refs@1.0.1(@types/react@18.3.0)(react@18.3.0)':
+  '@radix-ui/react-compose-refs@1.0.1(@types/react@18.3.0)(react@18.2.0)':
     dependencies:
       '@babel/runtime': 7.24.4
-      react: 18.3.0
+      react: 18.2.0
     optionalDependencies:
       '@types/react': 18.3.0
 
-  '@radix-ui/react-slot@1.0.2(@types/react@18.3.0)(react@18.3.0)':
+  '@radix-ui/react-slot@1.0.2(@types/react@18.3.0)(react@18.2.0)':
     dependencies:
       '@babel/runtime': 7.24.4
-      '@radix-ui/react-compose-refs': 1.0.1(@types/react@18.3.0)(react@18.3.0)
-      react: 18.3.0
+      '@radix-ui/react-compose-refs': 1.0.1(@types/react@18.3.0)(react@18.2.0)
+      react: 18.2.0
     optionalDependencies:
       '@types/react': 18.3.0
 
-  '@rc-component/color-picker@1.5.3(react-dom@18.3.0(react@18.3.0))(react@18.3.0)':
+  '@rc-component/color-picker@1.5.3(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
       '@babel/runtime': 7.24.4
       '@ctrl/tinycolor': 3.6.1
       classnames: 2.5.1
-      rc-util: 5.39.1(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
-      react: 18.3.0
-      react-dom: 18.3.0(react@18.3.0)
+      rc-util: 5.39.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
 
   '@rc-component/mini-decimal@1.1.0':
     dependencies:
       '@babel/runtime': 7.24.4
 
-  '@rc-component/portal@1.1.2(react-dom@18.3.0(react@18.3.0))(react@18.3.0)':
+  '@rc-component/portal@1.1.2(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
       '@babel/runtime': 7.24.4
       classnames: 2.5.1
-      rc-util: 5.39.1(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
-      react: 18.3.0
-      react-dom: 18.3.0(react@18.3.0)
+      rc-util: 5.39.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
 
-  '@rc-component/trigger@1.18.3(react-dom@18.3.0(react@18.3.0))(react@18.3.0)':
+  '@rc-component/trigger@1.18.3(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
       '@babel/runtime': 7.24.4
-      '@rc-component/portal': 1.1.2(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+      '@rc-component/portal': 1.1.2(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       classnames: 2.5.1
-      rc-motion: 2.9.0(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
-      rc-resize-observer: 1.4.0(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
-      rc-util: 5.39.1(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
-      react: 18.3.0
-      react-dom: 18.3.0(react@18.3.0)
+      rc-motion: 2.9.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      rc-resize-observer: 1.4.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      rc-util: 5.39.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
 
-  '@rc-component/trigger@2.0.0(react-dom@18.3.0(react@18.3.0))(react@18.3.0)':
+  '@rc-component/trigger@2.0.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
       '@babel/runtime': 7.24.4
-      '@rc-component/portal': 1.1.2(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+      '@rc-component/portal': 1.1.2(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       classnames: 2.5.1
-      rc-motion: 2.9.0(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
-      rc-resize-observer: 1.4.0(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
-      rc-util: 5.39.1(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
-      react: 18.3.0
-      react-dom: 18.3.0(react@18.3.0)
+      rc-motion: 2.9.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      rc-resize-observer: 1.4.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      rc-util: 5.39.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
 
   '@react-dnd/asap@5.0.2': {}
 
@@ -11851,9 +11863,9 @@ snapshots:
       memoizerific: 1.11.3
       ts-dedent: 2.2.0
 
-  '@storybook/addon-controls@8.0.9(@types/react@18.3.0)(react-dom@18.3.0(react@18.3.0))(react@18.3.0)':
+  '@storybook/addon-controls@8.0.9(@types/react@18.3.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
-      '@storybook/blocks': 8.0.9(@types/react@18.3.0)(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+      '@storybook/blocks': 8.0.9(@types/react@18.3.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       lodash: https://r2.cnpmjs.org/lodash/-/lodash-4.17.21.tgz
       ts-dedent: https://r2.cnpmjs.org/ts-dedent/-/ts-dedent-2.2.0.tgz
     transitivePeerDependencies:
@@ -11866,22 +11878,22 @@ snapshots:
   '@storybook/addon-docs@8.0.9':
     dependencies:
       '@babel/core': 7.24.4
-      '@mdx-js/react': 3.0.1(@types/react@18.3.0)(react@18.3.0)
-      '@storybook/blocks': 8.0.9(@types/react@18.3.0)(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+      '@mdx-js/react': 3.0.1(@types/react@18.3.0)(react@18.2.0)
+      '@storybook/blocks': 8.0.9(@types/react@18.3.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@storybook/client-logger': 8.0.9
-      '@storybook/components': 8.0.9(@types/react@18.3.0)(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+      '@storybook/components': 8.0.9(@types/react@18.3.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@storybook/csf-plugin': 8.0.9
       '@storybook/csf-tools': 8.0.9
       '@storybook/global': 5.0.0
       '@storybook/node-logger': 8.0.9
       '@storybook/preview-api': 8.0.9
-      '@storybook/react-dom-shim': 8.0.9(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
-      '@storybook/theming': 8.0.9(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+      '@storybook/react-dom-shim': 8.0.9(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@storybook/theming': 8.0.9(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@storybook/types': 8.0.9
       '@types/react': 18.3.0
       fs-extra: 11.2.0
-      react: 18.3.0
-      react-dom: 18.3.0(react@18.3.0)
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
       rehype-external-links: 3.0.0
       rehype-slug: 6.0.0
       ts-dedent: 2.2.0
@@ -11889,11 +11901,11 @@ snapshots:
       - encoding
       - supports-color
 
-  '@storybook/addon-essentials@8.0.9(@types/react@18.3.0)(react-dom@18.3.0(react@18.3.0))(react@18.3.0)':
+  '@storybook/addon-essentials@8.0.9(@types/react@18.3.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
       '@storybook/addon-actions': 8.0.9
       '@storybook/addon-backgrounds': 8.0.9
-      '@storybook/addon-controls': 8.0.9(@types/react@18.3.0)(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+      '@storybook/addon-controls': 8.0.9(@types/react@18.3.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@storybook/addon-docs': 8.0.9
       '@storybook/addon-highlight': 8.0.9
       '@storybook/addon-measure': 8.0.9
@@ -11901,7 +11913,7 @@ snapshots:
       '@storybook/addon-toolbars': 8.0.9
       '@storybook/addon-viewport': 8.0.9
       '@storybook/core-common': 8.0.9
-      '@storybook/manager-api': 8.0.9(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+      '@storybook/manager-api': 8.0.9(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@storybook/node-logger': 8.0.9
       '@storybook/preview-api': 8.0.9
       ts-dedent: https://r2.cnpmjs.org/ts-dedent/-/ts-dedent-2.2.0.tgz
@@ -11931,13 +11943,13 @@ snapshots:
       - jest
       - vitest
 
-  '@storybook/addon-links@8.0.9(react@18.3.0)':
+  '@storybook/addon-links@8.0.9(react@18.2.0)':
     dependencies:
       '@storybook/csf': 0.1.5
       '@storybook/global': 5.0.0
       ts-dedent: 2.2.0
     optionalDependencies:
-      react: 18.3.0
+      react: 18.2.0
 
   '@storybook/addon-measure@8.0.9':
     dependencies:
@@ -11968,35 +11980,35 @@ snapshots:
       - '@swc/helpers'
       - webpack
 
-  '@storybook/blocks@8.0.9(@types/react@18.3.0)(react-dom@18.3.0(react@18.3.0))(react@18.3.0)':
+  '@storybook/blocks@8.0.9(@types/react@18.3.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
       '@storybook/channels': 8.0.9
       '@storybook/client-logger': 8.0.9
-      '@storybook/components': 8.0.9(@types/react@18.3.0)(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+      '@storybook/components': 8.0.9(@types/react@18.3.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@storybook/core-events': 8.0.9
       '@storybook/csf': 0.1.5
       '@storybook/docs-tools': 8.0.9
       '@storybook/global': 5.0.0
-      '@storybook/icons': 1.2.9(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
-      '@storybook/manager-api': 8.0.9(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+      '@storybook/icons': 1.2.9(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@storybook/manager-api': 8.0.9(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@storybook/preview-api': 8.0.9
-      '@storybook/theming': 8.0.9(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+      '@storybook/theming': 8.0.9(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@storybook/types': 8.0.9
       '@types/lodash': 4.17.0
       color-convert: https://r2.cnpmjs.org/color-convert/-/color-convert-2.0.1.tgz
       dequal: 2.0.3
       lodash: https://r2.cnpmjs.org/lodash/-/lodash-4.17.21.tgz
-      markdown-to-jsx: 7.3.2(react@18.3.0)
+      markdown-to-jsx: 7.3.2(react@18.2.0)
       memoizerific: https://r2.cnpmjs.org/memoizerific/-/memoizerific-1.11.3.tgz
       polished: 4.3.1
-      react-colorful: 5.6.1(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+      react-colorful: 5.6.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       telejson: 7.2.0
       tocbot: 4.27.13
       ts-dedent: https://r2.cnpmjs.org/ts-dedent/-/ts-dedent-2.2.0.tgz
       util-deprecate: https://r2.cnpmjs.org/util-deprecate/-/util-deprecate-1.0.2.tgz
     optionalDependencies:
-      react: 18.3.0
-      react-dom: 18.3.0(react@18.3.0)
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
     transitivePeerDependencies:
       - '@types/react'
       - encoding
@@ -12077,7 +12089,7 @@ snapshots:
       telejson: 7.2.0
       tiny-invariant: 1.3.3
 
-  '@storybook/cli@8.0.9(@babel/preset-env@7.24.4(@babel/core@7.24.4))(react-dom@18.3.0(react@18.3.0))(react@18.3.0)':
+  '@storybook/cli@8.0.9(@babel/preset-env@7.24.4(@babel/core@7.24.4))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
       '@babel/core': 7.24.4
       '@babel/types': 7.24.0
@@ -12085,7 +12097,7 @@ snapshots:
       '@storybook/codemod': 8.0.9
       '@storybook/core-common': 8.0.9
       '@storybook/core-events': 8.0.9
-      '@storybook/core-server': 8.0.9(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+      '@storybook/core-server': 8.0.9(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@storybook/csf-tools': 8.0.9
       '@storybook/node-logger': 8.0.9
       '@storybook/telemetry': 8.0.9
@@ -12148,18 +12160,18 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@storybook/components@8.0.9(@types/react@18.3.0)(react-dom@18.3.0(react@18.3.0))(react@18.3.0)':
+  '@storybook/components@8.0.9(@types/react@18.3.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
-      '@radix-ui/react-slot': 1.0.2(@types/react@18.3.0)(react@18.3.0)
+      '@radix-ui/react-slot': 1.0.2(@types/react@18.3.0)(react@18.2.0)
       '@storybook/client-logger': 8.0.9
       '@storybook/csf': 0.1.5
       '@storybook/global': 5.0.0
-      '@storybook/icons': 1.2.9(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
-      '@storybook/theming': 8.0.9(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+      '@storybook/icons': 1.2.9(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@storybook/theming': 8.0.9(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@storybook/types': 8.0.9
       memoizerific: https://r2.cnpmjs.org/memoizerific/-/memoizerific-1.11.3.tgz
-      react: 18.3.0
-      react-dom: 18.3.0(react@18.3.0)
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
       util-deprecate: https://r2.cnpmjs.org/util-deprecate/-/util-deprecate-1.0.2.tgz
     transitivePeerDependencies:
       - '@types/react'
@@ -12202,7 +12214,7 @@ snapshots:
     dependencies:
       ts-dedent: 2.2.0
 
-  '@storybook/core-server@8.0.9(react-dom@18.3.0(react@18.3.0))(react@18.3.0)':
+  '@storybook/core-server@8.0.9(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
       '@aw-web-design/x-default-browser': 1.4.126
       '@babel/core': 7.24.4
@@ -12216,7 +12228,7 @@ snapshots:
       '@storybook/docs-mdx': 3.0.0
       '@storybook/global': 5.0.0
       '@storybook/manager': 8.0.9
-      '@storybook/manager-api': 8.0.9(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+      '@storybook/manager-api': 8.0.9(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@storybook/node-logger': 8.0.9
       '@storybook/preview-api': 8.0.9
       '@storybook/telemetry': 8.0.9
@@ -12309,10 +12321,10 @@ snapshots:
 
   '@storybook/global@5.0.0': {}
 
-  '@storybook/icons@1.2.9(react-dom@18.3.0(react@18.3.0))(react@18.3.0)':
+  '@storybook/icons@1.2.9(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
-      react: 18.3.0
-      react-dom: 18.3.0(react@18.3.0)
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
 
   '@storybook/instrumenter@8.0.9':
     dependencies:
@@ -12324,16 +12336,16 @@ snapshots:
       '@vitest/utils': 1.5.2
       util: 0.12.5
 
-  '@storybook/manager-api@8.0.9(react-dom@18.3.0(react@18.3.0))(react@18.3.0)':
+  '@storybook/manager-api@8.0.9(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
       '@storybook/channels': 8.0.9
       '@storybook/client-logger': 8.0.9
       '@storybook/core-events': 8.0.9
       '@storybook/csf': 0.1.5
       '@storybook/global': 5.0.0
-      '@storybook/icons': 1.2.9(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+      '@storybook/icons': 1.2.9(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@storybook/router': 8.0.9
-      '@storybook/theming': 8.0.9(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+      '@storybook/theming': 8.0.9(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@storybook/types': 8.0.9
       dequal: 2.0.3
       lodash: https://r2.cnpmjs.org/lodash/-/lodash-4.17.21.tgz
@@ -12349,21 +12361,21 @@ snapshots:
 
   '@storybook/node-logger@8.0.9': {}
 
-  '@storybook/preset-react-webpack@8.0.9(@swc/core@1.4.11)(esbuild@0.20.2)(react-dom@18.3.0(react@18.3.0))(react@18.3.0)(typescript@5.4.5)':
+  '@storybook/preset-react-webpack@8.0.9(@swc/core@1.4.11)(esbuild@0.20.2)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.4.5)':
     dependencies:
       '@storybook/core-webpack': 8.0.9
       '@storybook/docs-tools': 8.0.9
       '@storybook/node-logger': 8.0.9
-      '@storybook/react': 8.0.9(react-dom@18.3.0(react@18.3.0))(react@18.3.0)(typescript@5.4.5)
+      '@storybook/react': 8.0.9(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.4.5)
       '@storybook/react-docgen-typescript-plugin': 1.0.6--canary.9.0c3f3b7.0(typescript@5.4.5)(webpack@5.91.0(@swc/core@1.4.11)(esbuild@0.20.2))
       '@types/node': 18.19.31
       '@types/semver': 7.5.8
       find-up: https://r2.cnpmjs.org/find-up/-/find-up-5.0.0.tgz
       fs-extra: 11.2.0
       magic-string: 0.30.10
-      react: 18.3.0
+      react: 18.2.0
       react-docgen: 7.0.3
-      react-dom: 18.3.0(react@18.3.0)
+      react-dom: 18.2.0(react@18.2.0)
       resolve: 1.22.8
       semver: 7.6.0
       tsconfig-paths: 4.2.0
@@ -12411,19 +12423,19 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@storybook/react-dom-shim@8.0.9(react-dom@18.3.0(react@18.3.0))(react@18.3.0)':
+  '@storybook/react-dom-shim@8.0.9(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
-      react: 18.3.0
-      react-dom: 18.3.0(react@18.3.0)
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
 
-  '@storybook/react-webpack5@8.0.9(@swc/core@1.4.11)(esbuild@0.20.2)(react-dom@18.3.0(react@18.3.0))(react@18.3.0)(typescript@5.4.5)':
+  '@storybook/react-webpack5@8.0.9(@swc/core@1.4.11)(esbuild@0.20.2)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.4.5)':
     dependencies:
       '@storybook/builder-webpack5': 8.0.9(@swc/core@1.4.11)(esbuild@0.20.2)(typescript@5.4.5)
-      '@storybook/preset-react-webpack': 8.0.9(@swc/core@1.4.11)(esbuild@0.20.2)(react-dom@18.3.0(react@18.3.0))(react@18.3.0)(typescript@5.4.5)
-      '@storybook/react': 8.0.9(react-dom@18.3.0(react@18.3.0))(react@18.3.0)(typescript@5.4.5)
+      '@storybook/preset-react-webpack': 8.0.9(@swc/core@1.4.11)(esbuild@0.20.2)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.4.5)
+      '@storybook/react': 8.0.9(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.4.5)
       '@types/node': 18.19.31
-      react: 18.3.0
-      react-dom: 18.3.0(react@18.3.0)
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
     optionalDependencies:
       typescript: 5.4.5
     transitivePeerDependencies:
@@ -12435,13 +12447,13 @@ snapshots:
       - uglify-js
       - webpack-cli
 
-  '@storybook/react@8.0.9(react-dom@18.3.0(react@18.3.0))(react@18.3.0)(typescript@5.4.5)':
+  '@storybook/react@8.0.9(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(typescript@5.4.5)':
     dependencies:
       '@storybook/client-logger': 8.0.9
       '@storybook/docs-tools': 8.0.9
       '@storybook/global': 5.0.0
       '@storybook/preview-api': 8.0.9
-      '@storybook/react-dom-shim': 8.0.9(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+      '@storybook/react-dom-shim': 8.0.9(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       '@storybook/types': 8.0.9
       '@types/escodegen': https://r2.cnpmjs.org/@types/escodegen/-/escodegen-0.0.6.tgz
       '@types/estree': 0.0.51
@@ -12453,9 +12465,9 @@ snapshots:
       html-tags: 3.3.1
       lodash: https://r2.cnpmjs.org/lodash/-/lodash-4.17.21.tgz
       prop-types: 15.8.1
-      react: 18.3.0
-      react-dom: 18.3.0(react@18.3.0)
-      react-element-to-jsx-string: 15.0.0(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+      react-element-to-jsx-string: 15.0.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       semver: 7.6.0
       ts-dedent: https://r2.cnpmjs.org/ts-dedent/-/ts-dedent-2.2.0.tgz
       type-fest: 2.19.0
@@ -12505,15 +12517,15 @@ snapshots:
       - jest
       - vitest
 
-  '@storybook/theming@8.0.9(react-dom@18.3.0(react@18.3.0))(react@18.3.0)':
+  '@storybook/theming@8.0.9(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
-      '@emotion/use-insertion-effect-with-fallbacks': 1.0.1(react@18.3.0)
+      '@emotion/use-insertion-effect-with-fallbacks': 1.0.1(react@18.2.0)
       '@storybook/client-logger': 8.0.9
       '@storybook/global': 5.0.0
       memoizerific: https://r2.cnpmjs.org/memoizerific/-/memoizerific-1.11.3.tgz
     optionalDependencies:
-      react: 18.3.0
-      react-dom: 18.3.0(react@18.3.0)
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
 
   '@storybook/types@8.0.9':
     dependencies:
@@ -12649,22 +12661,22 @@ snapshots:
     optionalDependencies:
       vitest: 1.5.2(@types/node@20.12.7)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.4)
 
-  '@testing-library/react-hooks@8.0.1(@types/react@18.3.0)(react-dom@18.3.0(react@18.3.0))(react@18.3.0)':
+  '@testing-library/react-hooks@8.0.1(@types/react@18.3.0)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
       '@babel/runtime': 7.24.4
-      react: 18.3.0
-      react-error-boundary: 3.1.4(react@18.3.0)
+      react: 18.2.0
+      react-error-boundary: 3.1.4(react@18.2.0)
     optionalDependencies:
       '@types/react': 18.3.0
-      react-dom: 18.3.0(react@18.3.0)
+      react-dom: 18.2.0(react@18.2.0)
 
-  '@testing-library/react@14.2.2(react-dom@18.3.0(react@18.3.0))(react@18.3.0)':
+  '@testing-library/react@14.2.2(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
     dependencies:
       '@babel/runtime': 7.24.4
       '@testing-library/dom': 9.3.4
       '@types/react-dom': 18.3.0
-      react: 18.3.0
-      react-dom: 18.3.0(react@18.3.0)
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
 
   '@testing-library/user-event@14.5.2(@testing-library/dom@9.3.4)':
     dependencies:
@@ -12860,6 +12872,8 @@ snapshots:
 
   '@types/uuid@9.0.8': {}
 
+  '@types/validator@13.11.9': {}
+
   '@typescript-eslint/eslint-plugin@7.7.1(@typescript-eslint/parser@7.7.1(eslint@8.57.0)(typescript@5.4.5))(eslint@8.57.0)(typescript@5.4.5)':
     dependencies:
       '@eslint-community/regexpp': 4.10.0
@@ -13044,6 +13058,16 @@ snapshots:
 
   '@univerjs/icons-svg@0.1.44': {}
 
+  '@univerjs/icons@0.1.44(react-dom@18.2.0(react@18.2.0))(react@18.2.0)':
+    dependencies:
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+
+  '@univerjs/icons@0.1.44(react-dom@18.3.0(react@18.2.0))(react@18.2.0)':
+    dependencies:
+      react: 18.2.0
+      react-dom: 18.3.0(react@18.2.0)
+
   '@univerjs/icons@0.1.44(react-dom@18.3.0(react@18.3.0))(react@18.3.0)':
     dependencies:
       react: 18.3.0
@@ -13065,7 +13089,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@vitest/coverage-istanbul@1.5.1(vitest@1.5.0(@types/node@20.12.7)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.4))':
+  '@vitest/coverage-istanbul@1.5.2(vitest@1.5.2(@types/node@20.12.7)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.4))':
     dependencies:
       debug: 4.3.4
       istanbul-lib-coverage: 3.2.2
@@ -13074,9 +13098,9 @@ snapshots:
       istanbul-lib-source-maps: 5.0.4
       istanbul-reports: 3.1.7
       magicast: 0.3.4
-      picocolors: https://r2.cnpmjs.org/picocolors/-/picocolors-1.0.0.tgz
-      test-exclude: https://r2.cnpmjs.org/test-exclude/-/test-exclude-6.0.0.tgz
-      vitest: 1.5.0(@types/node@20.12.7)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.4)
+      picocolors: 1.0.0
+      test-exclude: 6.0.0
+      vitest: 1.5.2(@types/node@20.12.7)(happy-dom@13.3.8)(jsdom@24.0.0)(less@4.2.0)(sass@1.72.0)(terser@5.30.4)
     transitivePeerDependencies:
       - supports-color
 
@@ -13804,6 +13828,10 @@ snapshots:
       ansi-styles: https://r2.cnpmjs.org/ansi-styles/-/ansi-styles-4.3.0.tgz
       supports-color: https://r2.cnpmjs.org/supports-color/-/supports-color-7.2.0.tgz
 
+  chance@1.1.9: {}
+
+  char-regex@1.0.2: {}
+
   character-entities-legacy@1.1.4: {}
 
   character-entities@1.2.4: {}
@@ -14163,6 +14191,8 @@ snapshots:
       path-key: https://r2.cnpmjs.org/path-key/-/path-key-3.1.1.tgz
       shebang-command: https://r2.cnpmjs.org/shebang-command/-/shebang-command-2.0.0.tgz
       which: https://r2.cnpmjs.org/which/-/which-2.0.2.tgz
+
+  crypt@0.0.2: {}
 
   crypto-random-string@2.0.0: {}
 
@@ -15139,10 +15169,17 @@ snapshots:
       esrecurse: 4.3.0
       estraverse: 4.3.0
 
+  eslint-scope@7.1.1:
+    dependencies:
+      esrecurse: 4.3.0
+      estraverse: 5.3.0
+
   eslint-scope@7.2.2:
     dependencies:
       esrecurse: 4.3.0
       estraverse: 5.3.0
+
+  eslint-visitor-keys@3.3.0: {}
 
   eslint-visitor-keys@3.4.3: {}
 
@@ -16641,14 +16678,20 @@ snapshots:
 
   map-or-similar@https://r2.cnpmjs.org/map-or-similar/-/map-or-similar-1.5.0.tgz: {}
 
-  markdown-to-jsx@7.3.2(react@18.3.0):
+  markdown-to-jsx@7.3.2(react@18.2.0):
     dependencies:
-      react: 18.3.0
+      react: 18.2.0
 
   matcher-collection@2.0.1:
     dependencies:
       '@types/minimatch': 3.0.5
       minimatch: 3.0.8
+
+  md5@2.3.0:
+    dependencies:
+      charenc: 0.0.2
+      crypt: 0.0.2
+      is-buffer: 1.1.6
 
   mdast-util-from-markdown@0.8.5:
     dependencies:
@@ -16768,6 +16811,8 @@ snapshots:
   mkdirp-classic@0.5.3: {}
 
   mkdirp@1.0.4: {}
+
+  mkdirp@2.1.3: {}
 
   mlly@1.6.1:
     dependencies:
@@ -17240,8 +17285,6 @@ snapshots:
 
   picocolors@1.0.0: {}
 
-  picocolors@1.0.0: {}
-
   picocolors@https://r2.cnpmjs.org/picocolors/-/picocolors-1.0.0.tgz: {}
 
   picomatch@2.3.1: {}
@@ -17366,8 +17409,6 @@ snapshots:
   pretty-hrtime@https://r2.cnpmjs.org/pretty-hrtime/-/pretty-hrtime-1.0.3.tgz: {}
 
   process-nextick-args@2.0.1: {}
-
-  process@0.11.10: {}
 
   process@0.11.10: {}
 
@@ -17496,165 +17537,181 @@ snapshots:
       iconv-lite: 0.4.24
       unpipe: https://r2.cnpmjs.org/unpipe/-/unpipe-1.0.0.tgz
 
-  rc-dialog@9.4.0(react-dom@18.3.0(react@18.3.0))(react@18.3.0):
+  rc-dialog@9.4.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
     dependencies:
       '@babel/runtime': 7.24.4
-      '@rc-component/portal': 1.1.2(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+      '@rc-component/portal': 1.1.2(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       classnames: 2.5.1
-      rc-motion: 2.9.0(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
-      rc-util: 5.39.1(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
-      react: 18.3.0
-      react-dom: 18.3.0(react@18.3.0)
+      rc-motion: 2.9.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      rc-util: 5.39.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
 
-  rc-dropdown@4.2.0(react-dom@18.3.0(react@18.3.0))(react@18.3.0):
+  rc-dropdown@4.2.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
     dependencies:
       '@babel/runtime': 7.24.4
-      '@rc-component/trigger': 2.0.0(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+      '@rc-component/trigger': 2.0.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       classnames: 2.5.1
-      rc-util: 5.39.1(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
-      react: 18.3.0
-      react-dom: 18.3.0(react@18.3.0)
+      rc-util: 5.39.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
 
-  rc-input-number@9.0.0(react-dom@18.3.0(react@18.3.0))(react@18.3.0):
+  rc-input-number@9.0.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
     dependencies:
       '@babel/runtime': 7.24.4
       '@rc-component/mini-decimal': 1.1.0
       classnames: 2.5.1
-      rc-input: 1.4.5(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
-      rc-util: 5.39.1(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
-      react: 18.3.0
-      react-dom: 18.3.0(react@18.3.0)
+      rc-input: 1.4.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      rc-util: 5.39.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
 
-  rc-input@1.4.5(react-dom@18.3.0(react@18.3.0))(react@18.3.0):
+  rc-input@1.4.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
     dependencies:
       '@babel/runtime': 7.24.4
       classnames: 2.5.1
-      rc-util: 5.39.1(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
-      react: 18.3.0
-      react-dom: 18.3.0(react@18.3.0)
+      rc-util: 5.39.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
 
-  rc-menu@9.13.0(react-dom@18.3.0(react@18.3.0))(react@18.3.0):
+  rc-menu@9.13.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
     dependencies:
       '@babel/runtime': 7.24.4
-      '@rc-component/trigger': 2.0.0(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+      '@rc-component/trigger': 2.0.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       classnames: 2.5.1
-      rc-motion: 2.9.0(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
-      rc-overflow: 1.3.2(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
-      rc-util: 5.39.1(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
-      react: 18.3.0
-      react-dom: 18.3.0(react@18.3.0)
+      rc-motion: 2.9.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      rc-overflow: 1.3.2(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      rc-util: 5.39.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
 
-  rc-motion@2.9.0(react-dom@18.3.0(react@18.3.0))(react@18.3.0):
-    dependencies:
-      '@babel/runtime': 7.24.4
-      classnames: 2.5.1
-      rc-util: 5.39.1(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
-      react: 18.3.0
-      react-dom: 18.3.0(react@18.3.0)
-
-  rc-notification@5.4.0(react-dom@18.3.0(react@18.3.0))(react@18.3.0):
+  rc-motion@2.9.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
     dependencies:
       '@babel/runtime': 7.24.4
       classnames: 2.5.1
-      rc-motion: 2.9.0(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
-      rc-util: 5.39.1(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
-      react: 18.3.0
-      react-dom: 18.3.0(react@18.3.0)
+      rc-util: 5.39.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
 
-  rc-overflow@1.3.2(react-dom@18.3.0(react@18.3.0))(react@18.3.0):
+  rc-notification@5.4.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
     dependencies:
       '@babel/runtime': 7.24.4
       classnames: 2.5.1
-      rc-resize-observer: 1.4.0(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
-      rc-util: 5.39.1(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
-      react: 18.3.0
-      react-dom: 18.3.0(react@18.3.0)
+      rc-motion: 2.9.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      rc-util: 5.39.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
 
-  rc-picker@4.3.0(dayjs@1.11.10)(react-dom@18.3.0(react@18.3.0))(react@18.3.0):
+  rc-overflow@1.3.2(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
     dependencies:
       '@babel/runtime': 7.24.4
-      '@rc-component/trigger': 2.0.0(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
       classnames: 2.5.1
-      rc-overflow: 1.3.2(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
-      rc-resize-observer: 1.4.0(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
-      rc-util: 5.39.1(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
-      react: 18.3.0
-      react-dom: 18.3.0(react@18.3.0)
+      rc-resize-observer: 1.4.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      rc-util: 5.39.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+
+  rc-picker@4.3.0(dayjs@1.11.10)(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
+    dependencies:
+      '@babel/runtime': 7.24.4
+      '@rc-component/trigger': 2.0.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      classnames: 2.5.1
+      rc-overflow: 1.3.2(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      rc-resize-observer: 1.4.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      rc-util: 5.39.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
     optionalDependencies:
       dayjs: 1.11.10
 
-  rc-resize-observer@1.4.0(react-dom@18.3.0(react@18.3.0))(react@18.3.0):
+  rc-resize-observer@1.4.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
     dependencies:
       '@babel/runtime': 7.24.4
       classnames: 2.5.1
-      rc-util: 5.39.1(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
-      react: 18.3.0
-      react-dom: 18.3.0(react@18.3.0)
+      rc-util: 5.39.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
       resize-observer-polyfill: 1.5.1
 
-  rc-segmented@2.3.0(react-dom@18.3.0(react@18.3.0))(react@18.3.0):
+  rc-resize-observer@1.4.0(react-dom@18.3.0(react@18.2.0))(react@18.2.0):
     dependencies:
       '@babel/runtime': 7.24.4
       classnames: 2.5.1
-      rc-motion: 2.9.0(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
-      rc-util: 5.39.1(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
-      react: 18.3.0
-      react-dom: 18.3.0(react@18.3.0)
+      rc-util: 5.39.1(react-dom@18.3.0(react@18.2.0))(react@18.2.0)
+      react: 18.2.0
+      react-dom: 18.3.0(react@18.2.0)
+      resize-observer-polyfill: 1.5.1
 
-  rc-select@14.13.0(react-dom@18.3.0(react@18.3.0))(react@18.3.0):
-    dependencies:
-      '@babel/runtime': 7.24.4
-      '@rc-component/trigger': 2.0.0(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
-      classnames: 2.5.1
-      rc-motion: 2.9.0(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
-      rc-overflow: 1.3.2(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
-      rc-util: 5.39.1(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
-      rc-virtual-list: 3.11.4(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
-      react: 18.3.0
-      react-dom: 18.3.0(react@18.3.0)
-
-  rc-textarea@1.6.3(react-dom@18.3.0(react@18.3.0))(react@18.3.0):
+  rc-segmented@2.3.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
     dependencies:
       '@babel/runtime': 7.24.4
       classnames: 2.5.1
-      rc-input: 1.4.5(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
-      rc-resize-observer: 1.4.0(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
-      rc-util: 5.39.1(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
-      react: 18.3.0
-      react-dom: 18.3.0(react@18.3.0)
+      rc-motion: 2.9.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      rc-util: 5.39.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
 
-  rc-tooltip@6.2.0(react-dom@18.3.0(react@18.3.0))(react@18.3.0):
+  rc-select@14.13.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
     dependencies:
       '@babel/runtime': 7.24.4
-      '@rc-component/trigger': 2.0.0(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+      '@rc-component/trigger': 2.0.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       classnames: 2.5.1
-      react: 18.3.0
-      react-dom: 18.3.0(react@18.3.0)
+      rc-motion: 2.9.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      rc-overflow: 1.3.2(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      rc-util: 5.39.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      rc-virtual-list: 3.11.4(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
 
-  rc-util@5.39.1(react-dom@18.3.0(react@18.3.0))(react@18.3.0):
+  rc-textarea@1.6.3(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
     dependencies:
       '@babel/runtime': 7.24.4
-      react: 18.3.0
-      react-dom: 18.3.0(react@18.3.0)
+      classnames: 2.5.1
+      rc-input: 1.4.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      rc-resize-observer: 1.4.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      rc-util: 5.39.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+
+  rc-tooltip@6.2.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
+    dependencies:
+      '@babel/runtime': 7.24.4
+      '@rc-component/trigger': 2.0.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      classnames: 2.5.1
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+
+  rc-util@5.39.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
+    dependencies:
+      '@babel/runtime': 7.24.4
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
       react-is: 18.2.0
 
-  rc-virtual-list@3.11.4(react-dom@18.3.0(react@18.3.0))(react@18.3.0):
+  rc-util@5.39.1(react-dom@18.3.0(react@18.2.0))(react@18.2.0):
     dependencies:
       '@babel/runtime': 7.24.4
-      classnames: 2.5.1
-      rc-resize-observer: 1.4.0(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
-      rc-util: 5.39.1(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
-      react: 18.3.0
-      react-dom: 18.3.0(react@18.3.0)
+      react: 18.2.0
+      react-dom: 18.3.0(react@18.2.0)
+      react-is: 18.2.0
 
-  rc-virtual-list@3.11.5(react-dom@18.3.0(react@18.3.0))(react@18.3.0):
+  rc-virtual-list@3.11.4(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
     dependencies:
       '@babel/runtime': 7.24.4
       classnames: 2.5.1
-      rc-resize-observer: 1.4.0(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
-      rc-util: 5.39.1(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
-      react: 18.3.0
-      react-dom: 18.3.0(react@18.3.0)
+      rc-resize-observer: 1.4.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      rc-util: 5.39.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+
+  rc-virtual-list@3.11.5(react-dom@18.3.0(react@18.2.0))(react@18.2.0):
+    dependencies:
+      '@babel/runtime': 7.24.4
+      classnames: 2.5.1
+      rc-resize-observer: 1.4.0(react-dom@18.3.0(react@18.2.0))(react@18.2.0)
+      rc-util: 5.39.1(react-dom@18.3.0(react@18.2.0))(react@18.2.0)
+      react: 18.2.0
+      react-dom: 18.3.0(react@18.2.0)
 
   rc@1.2.8:
     dependencies:
@@ -17671,47 +17728,47 @@ snapshots:
     transitivePeerDependencies:
       - dnd-core
 
-  react-colorful@5.6.1(react-dom@18.3.0(react@18.3.0))(react@18.3.0):
+  react-colorful@5.6.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
     dependencies:
-      react: 18.3.0
-      react-dom: 18.3.0(react@18.3.0)
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
 
-  react-confetti@6.1.0(react@18.3.0):
+  react-confetti@6.1.0(react@18.2.0):
     dependencies:
-      react: 18.3.0
+      react: 18.2.0
       tween-functions: 1.2.0
 
   react-dnd-html5-backend@16.0.1:
     dependencies:
       dnd-core: 16.0.1
 
-  react-dnd-multi-backend@8.0.3(dnd-core@16.0.1)(react-dnd@16.0.1(@types/node@20.12.7)(@types/react@18.3.0)(react@18.3.0))(react-dom@18.3.0(react@18.3.0))(react@18.3.0):
+  react-dnd-multi-backend@8.0.3(dnd-core@16.0.1)(react-dnd@16.0.1(@types/node@20.12.7)(@types/react@18.3.0)(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
     dependencies:
       dnd-core: 16.0.1
       dnd-multi-backend: 8.0.3(dnd-core@16.0.1)
-      react: 18.3.0
-      react-dnd: 16.0.1(@types/node@20.12.7)(@types/react@18.3.0)(react@18.3.0)
-      react-dnd-preview: 8.0.3(react-dnd@16.0.1(@types/node@20.12.7)(@types/react@18.3.0)(react@18.3.0))(react@18.3.0)
-      react-dom: 18.3.0(react@18.3.0)
+      react: 18.2.0
+      react-dnd: 16.0.1(@types/node@20.12.7)(@types/react@18.3.0)(react@18.2.0)
+      react-dnd-preview: 8.0.3(react-dnd@16.0.1(@types/node@20.12.7)(@types/react@18.3.0)(react@18.2.0))(react@18.2.0)
+      react-dom: 18.2.0(react@18.2.0)
 
-  react-dnd-preview@8.0.3(react-dnd@16.0.1(@types/node@20.12.7)(@types/react@18.3.0)(react@18.3.0))(react@18.3.0):
+  react-dnd-preview@8.0.3(react-dnd@16.0.1(@types/node@20.12.7)(@types/react@18.3.0)(react@18.2.0))(react@18.2.0):
     dependencies:
-      react: 18.3.0
-      react-dnd: 16.0.1(@types/node@20.12.7)(@types/react@18.3.0)(react@18.3.0)
+      react: 18.2.0
+      react-dnd: 16.0.1(@types/node@20.12.7)(@types/react@18.3.0)(react@18.2.0)
 
   react-dnd-touch-backend@16.0.1:
     dependencies:
       '@react-dnd/invariant': 4.0.2
       dnd-core: 16.0.1
 
-  react-dnd@16.0.1(@types/node@20.12.7)(@types/react@18.3.0)(react@18.3.0):
+  react-dnd@16.0.1(@types/node@20.12.7)(@types/react@18.3.0)(react@18.2.0):
     dependencies:
       '@react-dnd/invariant': 4.0.2
       '@react-dnd/shallowequal': 4.0.2
       dnd-core: 16.0.1
       fast-deep-equal: 3.1.3
       hoist-non-react-statics: 3.3.2
-      react: 18.3.0
+      react: 18.2.0
     optionalDependencies:
       '@types/node': 20.12.7
       '@types/react': 18.3.0
@@ -17735,41 +17792,71 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  react-dom@18.2.0(react@18.2.0):
+    dependencies:
+      loose-envify: 1.4.0
+      react: 18.2.0
+      scheduler: 0.23.1
+
+  react-dom@18.3.0(react@18.2.0):
+    dependencies:
+      loose-envify: 1.4.0
+      react: 18.2.0
+      scheduler: 0.23.1
+
   react-dom@18.3.0(react@18.3.0):
     dependencies:
       loose-envify: 1.4.0
       react: 18.3.0
       scheduler: 0.23.1
 
-  react-draggable@4.4.6(react-dom@18.3.0(react@18.3.0))(react@18.3.0):
+  react-draggable@4.4.6(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
     dependencies:
       clsx: 1.2.1
       prop-types: 15.8.1
-      react: 18.3.0
-      react-dom: 18.3.0(react@18.3.0)
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
 
-  react-element-to-jsx-string@15.0.0(react-dom@18.3.0(react@18.3.0))(react@18.3.0):
+  react-draggable@4.4.6(react-dom@18.3.0(react@18.2.0))(react@18.2.0):
+    dependencies:
+      clsx: 1.2.1
+      prop-types: 15.8.1
+      react: 18.2.0
+      react-dom: 18.3.0(react@18.2.0)
+
+  react-element-to-jsx-string@15.0.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
     dependencies:
       '@base2/pretty-print-object': https://r2.cnpmjs.org/@base2/pretty-print-object/-/pretty-print-object-1.0.1.tgz
       is-plain-object: https://r2.cnpmjs.org/is-plain-object/-/is-plain-object-5.0.0.tgz
-      react: 18.3.0
-      react-dom: 18.3.0(react@18.3.0)
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
       react-is: 18.1.0
 
-  react-error-boundary@3.1.4(react@18.3.0):
+  react-error-boundary@3.1.4(react@18.2.0):
     dependencies:
       '@babel/runtime': 7.24.4
-      react: 18.3.0
+      react: 18.2.0
 
-  react-grid-layout@1.4.4(react-dom@18.3.0(react@18.3.0))(react@18.3.0):
+  react-grid-layout@1.4.4(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
     dependencies:
       clsx: 2.1.1
       fast-equals: 4.0.3
       prop-types: 15.8.1
-      react: 18.3.0
-      react-dom: 18.3.0(react@18.3.0)
-      react-draggable: 4.4.6(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
-      react-resizable: 3.0.5(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+      react-draggable: 4.4.6(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      react-resizable: 3.0.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      resize-observer-polyfill: https://r2.cnpmjs.org/resize-observer-polyfill/-/resize-observer-polyfill-1.5.1.tgz
+
+  react-grid-layout@1.4.4(react-dom@18.3.0(react@18.2.0))(react@18.2.0):
+    dependencies:
+      clsx: 2.1.1
+      fast-equals: 4.0.3
+      prop-types: 15.8.1
+      react: 18.2.0
+      react-dom: 18.3.0(react@18.2.0)
+      react-draggable: 4.4.6(react-dom@18.3.0(react@18.2.0))(react@18.2.0)
+      react-resizable: 3.0.5(react-dom@18.3.0(react@18.2.0))(react@18.2.0)
       resize-observer-polyfill: https://r2.cnpmjs.org/resize-observer-polyfill/-/resize-observer-polyfill-1.5.1.tgz
 
   react-is@16.13.1: {}
@@ -17780,17 +17867,17 @@ snapshots:
 
   react-is@18.2.0: {}
 
-  react-mosaic-component@6.1.0(@types/node@20.12.7)(@types/react@18.3.0)(dnd-core@16.0.1)(react-dom@18.3.0(react@18.3.0))(react@18.3.0):
+  react-mosaic-component@6.1.0(@types/node@20.12.7)(@types/react@18.3.0)(dnd-core@16.0.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
     dependencies:
       classnames: 2.5.1
       immutability-helper: 3.1.1
       lodash: 4.17.21
       prop-types: 15.8.1
       rdndmb-html5-to-touch: 8.0.3(dnd-core@16.0.1)
-      react: 18.3.0
-      react-dnd: 16.0.1(@types/node@20.12.7)(@types/react@18.3.0)(react@18.3.0)
+      react: 18.2.0
+      react-dnd: 16.0.1(@types/node@20.12.7)(@types/react@18.3.0)(react@18.2.0)
       react-dnd-html5-backend: 16.0.1
-      react-dnd-multi-backend: 8.0.3(dnd-core@16.0.1)(react-dnd@16.0.1(@types/node@20.12.7)(@types/react@18.3.0)(react@18.3.0))(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+      react-dnd-multi-backend: 8.0.3(dnd-core@16.0.1)(react-dnd@16.0.1(@types/node@20.12.7)(@types/react@18.3.0)(react@18.2.0))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       react-dnd-touch-backend: 16.0.1
       uuid: 9.0.1
     transitivePeerDependencies:
@@ -17802,22 +17889,34 @@ snapshots:
 
   react-refresh@0.14.1: {}
 
-  react-resizable@3.0.5(react-dom@18.3.0(react@18.3.0))(react@18.3.0):
+  react-resizable@3.0.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
     dependencies:
       prop-types: 15.8.1
-      react: 18.3.0
-      react-draggable: 4.4.6(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+      react: 18.2.0
+      react-draggable: 4.4.6(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
     transitivePeerDependencies:
       - react-dom
 
-  react-transition-group@4.4.5(react-dom@18.3.0(react@18.3.0))(react@18.3.0):
+  react-resizable@3.0.5(react-dom@18.3.0(react@18.2.0))(react@18.2.0):
+    dependencies:
+      prop-types: 15.8.1
+      react: 18.2.0
+      react-draggable: 4.4.6(react-dom@18.3.0(react@18.2.0))(react@18.2.0)
+    transitivePeerDependencies:
+      - react-dom
+
+  react-transition-group@4.4.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
     dependencies:
       '@babel/runtime': 7.24.4
       dom-helpers: 5.2.1
       loose-envify: 1.4.0
       prop-types: 15.8.1
-      react: 18.3.0
-      react-dom: 18.3.0(react@18.3.0)
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+
+  react@18.2.0:
+    dependencies:
+      loose-envify: 1.4.0
 
   react@18.3.0:
     dependencies:
@@ -18450,9 +18549,9 @@ snapshots:
       terser-webpack-plugin: 5.3.10(@swc/core@1.4.11)(esbuild@0.20.2)(webpack@5.91.0(@swc/core@1.4.11)(esbuild@0.20.2))
       webpack: 5.91.0(@swc/core@1.4.11)(esbuild@0.20.2)
 
-  storybook@8.0.9(@babel/preset-env@7.24.4(@babel/core@7.24.4))(react-dom@18.3.0(react@18.3.0))(react@18.3.0):
+  storybook@8.0.9(@babel/preset-env@7.24.4(@babel/core@7.24.4))(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
     dependencies:
-      '@storybook/cli': 8.0.9(@babel/preset-env@7.24.4(@babel/core@7.24.4))(react-dom@18.3.0(react@18.3.0))(react@18.3.0)
+      '@storybook/cli': 8.0.9(@babel/preset-env@7.24.4(@babel/core@7.24.4))(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
     transitivePeerDependencies:
       - '@babel/preset-env'
       - bufferutil
@@ -18539,6 +18638,10 @@ snapshots:
   string_decoder@1.3.0:
     dependencies:
       safe-buffer: 5.2.1
+
+  stringz@2.1.0:
+    dependencies:
+      char-regex: 1.0.2
 
   strip-ansi@6.0.1:
     dependencies:
@@ -18697,7 +18800,7 @@ snapshots:
     dependencies:
       '@istanbuljs/schema': 0.1.3
       glob: 7.2.3
-      minimatch: 3.0.8
+      minimatch: 3.1.2
 
   text-extensions@2.4.0: {}
 

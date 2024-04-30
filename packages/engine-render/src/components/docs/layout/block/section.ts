@@ -97,7 +97,7 @@ export function dealWithSection(
     }
 
     if (ctx.isDirty && ctx.layoutStartPointer.paragraphIndex != null) {
-        // TODO: rollback the skeleton to the layout start point.
+        // Rollback the skeleton to the layout start point.
         _rollbackPages(ctx.layoutStartPointer.paragraphIndex, allCurrentSkeletonPages);
     }
 

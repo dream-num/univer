@@ -897,10 +897,10 @@ function __getDrawingPosition(
         const { positionH, positionV, size, angle } = objectTransform;
         const { width = 0, height = 0 } = size;
 
-        drawing.aLeft = getPositionHorizon(positionH, column, page, width, isPageBreak) || 0;
+        drawing.aLeft = getPositionHorizon(positionH, column, page, width, isPageBreak) ?? 0;
         drawing.aTop = getPositionVertical(
             positionV, page, lineTop, lineHeight, height, blockAnchorTop, isPageBreak
-        ) || 0;
+        ) ?? 0;
         drawing.width = width;
         drawing.height = height;
         drawing.angle = angle;

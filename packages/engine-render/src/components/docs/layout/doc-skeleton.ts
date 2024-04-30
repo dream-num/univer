@@ -547,7 +547,7 @@ export class DocumentSkeleton extends Skeleton {
      */
 
     private _createSkeleton(ctx: ILayoutContext, _bounds?: IViewportBound): IDocumentSkeletonCached {
-        console.log('createSkeleton: iterate ', this._iteratorCount, 'times');
+        // console.log('createSkeleton: iterate ', this._iteratorCount, 'times');
         const { viewModel, skeleton, skeletonResourceReference } = ctx;
 
         const allSkeletonPages = skeleton.pages;
@@ -587,7 +587,7 @@ export class DocumentSkeleton extends Skeleton {
                 updateBlockIndex(allSkeletonPages);
                 this._addNewSectionByContinuous(curSkeletonPage, columnProperties!, columnSeparatorType!);
                 isContinuous = true;
-            } else if (layoutAnchor == null) {
+            } else if (layoutAnchor == null || curSkeletonPage == null) {
                 curSkeletonPage = createSkeletonPage(
                     ctx,
                     sectionBreakConfig,

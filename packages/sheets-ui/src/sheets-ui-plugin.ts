@@ -133,7 +133,6 @@ export class UniverSheetsUIPlugin extends Plugin {
                 [StartEditController],
                 [StatusBarController],
                 [EditingController],
-                [CellCustomRenderController],
             ] as Dependency[]
         ).forEach((d) => injector.add(d));
     }
@@ -160,6 +159,7 @@ export class UniverSheetsUIPlugin extends Plugin {
             MarkSelectionRenderController,
             HoverRenderController,
             ForceStringRenderController,
+            CellCustomRenderController,
             SheetContextMenuRenderController,
         ]).forEach((controller) => {
             this.disposeWithMe(this._renderManagerService.registerRenderController(UniverInstanceType.UNIVER_SHEET, controller));

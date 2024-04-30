@@ -25,7 +25,7 @@ import type { IObjectFullState, ISceneTransformState, ITransformChangeState } fr
 import { TRANSFORM_CHANGE_OBSERVABLE_TYPE } from './basics/interfaces';
 import { precisionTo, requestNewFrame } from './basics/tools';
 import { Transform } from './basics/transform';
-import { Vector2 } from './basics/vector2';
+import type { Vector2 } from './basics/vector2';
 import type { UniverRenderingContext } from './context';
 import { Layer } from './layer';
 import type { ITransformerConfig } from './scene.transformer';
@@ -108,6 +108,24 @@ export class Scene extends ThinScene {
             pScale = (p as SceneViewer).ancestorScaleY;
         }
         return this.scaleY * pScale;
+    }
+
+    get ancestorLeft() {
+        const p = this.getParent();
+        let pOffsetX = 0;
+        if (p.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
+            pOffsetX = (p as SceneViewer).ancestorLeft;
+        }
+        return pOffsetX;
+    }
+
+    get ancestorTop() {
+        const p = this.getParent();
+        let pOffsetY = 0;
+        if (p.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {
+            pOffsetY = (p as SceneViewer).ancestorTop;
+        }
+        return pOffsetY;
     }
 
     set cursor(val: CURSOR_TYPE) {
@@ -724,11 +742,11 @@ export class Scene extends ThinScene {
             if (!o.visible || !o.evented || o.classType === RENDER_CLASS_TYPE.GROUP) {
                 continue;
             }
-            let svCoord = svCoordOrigin;
-            if (o.isInGroup && o.parent?.classType === RENDER_CLASS_TYPE.GROUP) {
-                const { cumLeft, cumTop } = this._getGroupCumLeftRight(o);
-                svCoord = svCoord.clone().add(Vector2.FromArray([-cumLeft, -cumTop]));
-            }
+            const svCoord = svCoordOrigin;
+            // if (o.isInGroup && o.parent?.classType === RENDER_CLASS_TYPE.GROUP) {
+            //     const { cumLeft, cumTop } = this._getGroupCumLeftRight(o);
+            //     svCoord = svCoord.clone().add(Vector2.FromArray([-cumLeft, -cumTop]));
+            // }
 
             if (o.isHit(svCoord)) {
                 if (o.classType === RENDER_CLASS_TYPE.SCENE_VIEWER) {

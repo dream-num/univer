@@ -140,7 +140,19 @@ export abstract class BaseObject {
     }
 
     get transform() {
-        return this._transform;
+        const transform = this._transform.clone();
+        /**
+         * If the object is center rotated, the coordinate needs to be rotated back to the original position.
+         */
+        if (this._angle !== 0) {
+            const cx = (this.width + this.strokeWidth) / 2;
+            const cy = (this.height + this.strokeWidth) / 2;
+            transform.rotate(-this._angle);
+            transform.translate(cx, cy);
+            transform.rotate(this.angle);
+            transform.translate(-cx, -cy);
+        }
+        return transform;
     }
 
     get topOrigin() {
@@ -203,6 +215,22 @@ export abstract class BaseObject {
     get ancestorScaleY() {
         const pScale: number = this.getParent()?.ancestorScaleY || 1;
         return this.scaleY * pScale;
+    }
+
+    get ancestorLeft() {
+        return this.left + (this.getParent()?.ancestorLeft || 0);
+    }
+
+    get ancestorTop() {
+        return this.top + (this.getParent()?.ancestorTop || 0);
+    }
+
+    get ancestorTransform() {
+        const parent = this.getParent();
+        if (this.isInGroup && parent?.classType === RENDER_CLASS_TYPE.GROUP) {
+            return parent?.ancestorTransform.multiply(this.transform);
+        }
+        return this.transform;
     }
 
     get skewX() {
@@ -754,8 +782,9 @@ export abstract class BaseObject {
         this.getScene()?.detachTransformerFrom(this);
     }
 
+
     protected _getInverseCoord(coord: Vector2) {
-        return this._transform.clone().invert().applyPoint(coord);
+        return this.ancestorTransform.invert().applyPoint(coord);
     }
 
     protected _setTransForm() {

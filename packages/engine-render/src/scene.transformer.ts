@@ -24,7 +24,10 @@ import { getCurrentScrollXY } from './basics/scroll-xy';
 import { Group } from './group';
 import { ScrollTimer } from './scroll-timer';
 import { Rect } from './shape/rect';
-import type { ThinScene } from './thin-scene';
+
+import { radToDeg } from './basics/tools';
+import type { Scene } from './scene';
+import { Vector2 } from './basics/vector2';
 
 enum TransformerManagerType {
     RESIZE_LT = '__SpreadsheetTransformerResizeLT__',
@@ -73,6 +76,7 @@ interface IChangeObserverConfig {
     objects: Map<string, BaseObject>;
     moveX?: number;
     moveY?: number;
+    angle?: number;
     type: MoveObserverType;
 }
 
@@ -212,7 +216,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
     private _observerObjectMap = new Map<string, Nullable<Observer<IPointerEvent | IMouseEvent>>>();
 
     constructor(
-        private _scene: ThinScene,
+        private _scene: Scene,
         config?: ITransformerConfig
     ) {
         super();
@@ -347,34 +351,6 @@ export class Transformer extends Disposable implements ITransformerConfig {
         });
     }
 
-    private _updateControlChildren() {
-        this._updateControlIterator((control, applyObject) => {
-            const { left, top, width, height, scaleX, scaleY } = applyObject.getState();
-            const children = control.getObjects();
-            children.forEach((o: BaseObject) => {
-                const key = o.oKey;
-                const type = this._checkTransformerType(key);
-
-                if (!type) {
-                    return true;
-                }
-
-                if (type === TransformerManagerType.OUTLINE) {
-                    o.transformByState(this._getOutlinePosition(width, height, scaleX, scaleY));
-                } else {
-                    const { left, top } = this._getRotateAnchorPosition(type, height, width);
-                    o.transformByState({
-                        left,
-                        top,
-                    });
-                }
-            });
-            control.transformByState({
-                left,
-                top,
-            });
-        });
-    }
 
     private _anchorMoving(
         type: TransformerManagerType,
@@ -425,8 +401,6 @@ export class Transformer extends Disposable implements ITransformerConfig {
             }
             moveObject.transformByState(state);
         });
-
-        this._updateControlChildren();
 
         this.onChangingObservable.notifyObservers({
             objects: this._selectedObjectMap,
@@ -522,7 +496,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
         };
     }
 
-    private _attachEventToAnchor(anchor: Rect, type = TransformerManagerType.RESIZE_LT) {
+    private _attachEventToAnchor(anchor: Rect, type = TransformerManagerType.RESIZE_LT, applyObject: BaseObject) {
         this.disposeWithMe(
             toDisposable(
                 anchor.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
@@ -547,7 +521,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
                     this._viewportScrollY = scrollY;
 
                     const cursor = this._getRotateAnchorCursor(type);
-
+                    this._clearControl();
                     this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
                         const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
                         this._anchorMoving(type, moveOffsetX, moveOffsetY, scrollTimer);
@@ -563,7 +537,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
                         scene.enableEvent();
                         scene.resetCursor();
                         scrollTimer.dispose();
-
+                        this._createControl(applyObject);
                         this.onChangeEndObservable.notifyObservers({
                             objects: this._selectedObjectMap,
                             type: MoveObserverType.MOVE_END,
@@ -576,7 +550,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
         );
     }
 
-    private _attachEventToRotate(rotateControl: Rect) {
+    private _attachEventToRotate(rotateControl: Rect, applyObject: BaseObject) {
         this.disposeWithMe(
             toDisposable(
                 rotateControl.onPointerDownObserver.add((evt: IPointerEvent | IMouseEvent, state) => {
@@ -584,31 +558,75 @@ export class Transformer extends Disposable implements ITransformerConfig {
                     this._startOffsetX = evtOffsetX;
                     this._startOffsetY = evtOffsetY;
 
-                    const scene = this._getTopScene();
+                    const topScene = this._getTopScene() as Scene;
 
-                    if (scene == null) {
+                    if (topScene == null) {
                         return;
                     }
 
-                    scene.disableEvent();
+                    topScene.disableEvent();
 
-                    this._viewportScrollX = scrollX;
-                    this._viewportScrollY = scrollY;
+                    const viewportActualXY = topScene.getScrollXYByRelativeCoords(Vector2.create(evtOffsetX, evtOffsetY));
 
-                    // this._moveObserver = scene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
-                    //     const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
-                    // });
+                    this._viewportScrollX = viewportActualXY.x;
+                    this._viewportScrollY = viewportActualXY.y;
 
-                    this._upObserver = scene.onPointerUpObserver.add(() => {
-                        scene.onPointerMoveObserver.remove(this._moveObserver);
-                        scene.onPointerUpObserver.remove(this._upObserver);
-                        scene.enableEvent();
+                    const cursor = this._getRotateAnchorCursor(TransformerManagerType.ROTATE_LINE);
+
+                    const { ancestorLeft, ancestorTop, width, height, angle: agentOrigin } = applyObject;
+
+                    const centerX = (width / 2) + ancestorLeft;
+                    const centerY = (height / 2) + ancestorTop;
+                    this._clearControl();
+
+                    const moveObserver = topScene.onPointerMoveObserver.add((moveEvt: IPointerEvent | IMouseEvent) => {
+                        const { offsetX: moveOffsetX, offsetY: moveOffsetY } = moveEvt;
+                        this._rotateMoving(moveOffsetX, moveOffsetY, centerX, centerY, agentOrigin);
+                        topScene.setCursor(cursor);
+                    });
+
+                    const upObserver = topScene.onPointerUpObserver.add(() => {
+                        moveObserver?.dispose();
+                        upObserver?.dispose();
+                        topScene.enableEvent();
+                        topScene.resetCursor();
+                        this._createControl(applyObject);
                     });
 
                     state.stopPropagation();
                 })
             )
         );
+    }
+
+    private _rotateMoving(moveOffsetX: number, moveOffsetY: number, centerX: number, centerY: number, agentOrigin: number) {
+        const angle1 = Math.atan2(
+            moveOffsetY + this._viewportScrollY + -centerY,
+            moveOffsetX + this._viewportScrollX - centerX
+        );
+
+        const angle2 = Math.atan2(
+            this._startOffsetY + this._viewportScrollY - centerY,
+            this._startOffsetX + this._viewportScrollX - centerX
+        );
+
+
+        let angle = agentOrigin + radToDeg(angle1 - angle2);
+
+        if (angle < 0) {
+            angle = 360 + angle;
+        }
+        angle %= 360;
+
+        this._selectedObjectMap.forEach((moveObject) => {
+            moveObject.transformByState({ angle });
+        });
+
+        this.onChangingObservable.notifyObservers({
+            objects: this._selectedObjectMap,
+            angle,
+            type: MoveObserverType.MOVING,
+        });
     }
 
     private _getOutlinePosition(width: number, height: number, scaleX: number, scaleY: number) {
@@ -840,16 +858,14 @@ export class Transformer extends Disposable implements ITransformerConfig {
     }
 
     private _createControl(applyObject: BaseObject) {
-        const { left, top, height, width, angle, scaleX, scaleY, skewX, skewY, flipX, flipY } = applyObject.getState();
+        const { left, top, height, width, angle, scaleX, scaleY, ancestorLeft, ancestorTop, skewX, skewY, flipX, flipY } = applyObject;
         const oKey = applyObject.oKey;
         const zIndex = this._selectedObjectMap.size + applyObject.zIndex + 1;
         const layerIndex = applyObject.getLayerIndex() || DEFAULT_TRANSFORMER_LAYER_INDEX;
-
         const groupElements: BaseObject[] = [];
+        const centerX = width / 2;
+        const centerY = height / 2;
 
-        // width *= scaleX;
-
-        // height *= scaleY;
 
         if (this.borderEnabled) {
             const outline = new Rect(`${TransformerManagerType.OUTLINE}_${zIndex}`, {
@@ -868,6 +884,12 @@ export class Transformer extends Disposable implements ITransformerConfig {
                 height,
                 width
             );
+
+            // const rotateLinePos = new Vector2(lineLeft, lineTop);
+            // rotateLinePos.rotateByPoint(angle, Vector2.create(centerX, centerY));
+            // lineLeft = rotateLinePos.x;
+            // lineTop = rotateLinePos.y;
+
             const rotateLine = new Rect(`${TransformerManagerType.ROTATE_LINE}_${zIndex}`, {
                 zIndex: zIndex - 1, evented: false, left: lineLeft,
                 top: lineTop, height: this.rotateAnchorOffset, width: 1,
@@ -880,7 +902,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
             const rotate = new Rect(`${TransformerManagerType.ROTATE}_${zIndex}`, {
                 zIndex: zIndex - 1, left, top, height: this.rotateSize, width: this.rotateSize,
                 radius: this.rotateCornerRadius, strokeWidth: this.borderStrokeWidth * 2, stroke: this.borderStroke });
-            this._attachEventToRotate(rotate);
+            this._attachEventToRotate(rotate, applyObject);
             this._attachHover(rotate, cursor, CURSOR_TYPE.DEFAULT);
             groupElements.push(rotateLine, rotate);
         }
@@ -893,24 +915,18 @@ export class Transformer extends Disposable implements ITransformerConfig {
                 }
                 const type = TransformerManagerTypeArray[i];
                 const anchor = this._createResizeAnchor(type, applyObject, zIndex);
-                this._attachEventToAnchor(anchor, type);
+                this._attachEventToAnchor(anchor, type, applyObject);
                 groupElements.push(anchor);
             }
         }
 
         const transformerControl = new Group(`${TransformerManagerType.GROUP}_${zIndex}`, ...groupElements);
-
         transformerControl.zIndex = zIndex;
-
         transformerControl.evented = false;
-
-        transformerControl.transformByState({ left, top });
-
+        transformerControl.transformByState({ height, width, left, top, angle });
         const scene = this.getScene();
         scene.addObject(transformerControl, layerIndex);
-
         this._transformerControlMap.set(oKey, transformerControl);
-
         this.onCreateControlObservable.notifyObservers(transformerControl);
 
         return transformerControl;
@@ -918,7 +934,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
 
     private _getTopScene() {
         const currentScene = this.getScene();
-        return currentScene.getEngine()?.activeScene as ThinScene | null;
+        return currentScene.getEngine()?.activeScene as Nullable<Scene>;
     }
 
     private _moving(moveOffsetX: number, moveOffsetY: number, scrollTimer: ScrollTimer) {
@@ -957,7 +973,7 @@ export class Transformer extends Disposable implements ITransformerConfig {
         this._createControl(applyObject);
     }
 
-    private _addCancelObserver(scene: ThinScene) {
+    private _addCancelObserver(scene: Scene) {
         scene.onPointerDownObserver.remove(this._cancelFocusObserver);
         this._cancelFocusObserver = scene.onPointerDownObserver.add(() => {
             this._selectedObjectMap.clear();

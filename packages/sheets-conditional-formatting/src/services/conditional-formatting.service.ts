@@ -42,9 +42,8 @@ interface IComputeCache { status: ComputeStatus };
 const beforeUpdateRuleResult = createInterceptorKey<{ subUnitId: string; unitId: string; cfId: string }, undefined>('conditional-formatting-before-update-rule-result');
 @OnLifecycle(LifecycleStages.Starting, ConditionalFormattingService)
 export class ConditionalFormattingService extends Disposable {
-    // <unitId,<subUnitId,<cfId,IComputeCache>>>
-
     private _afterInitApplyPromise: Promise<void>;
+    // <unitId,<subUnitId,<cfId,IComputeCache>>>
     private _ruleCacheMap: Map<string, Map<string, Map<string, IComputeCache>>> = new Map();
 
     private _ruleComputeStatus$: Subject<{ status: ComputeStatus; result?: ObjectMatrix<any>; unitId: string; subUnitId: string; cfId: string }> = new Subject();
@@ -372,19 +371,22 @@ export class ConditionalFormattingService extends Disposable {
                 result.forValue((row, col, value) => {
                     this._conditionalFormattingViewModel.setCellCfRuleCache(unitId, subUnitId, row, col, cfId, value);
                 });
-                this._deleteComputeCache(unitId, subUnitId, cfId);
             }
         }));
     }
 
     private async _handleCalculateUnit(unitId: string, subUnitId: string, rule: IConditionFormattingRule) {
+        await this._afterInitApplyPromise;
+        // We need to perform a secondary verification, as the rule may have been deleted after initApply.
+        if (!this._conditionalFormattingRuleModel.getRule(unitId, subUnitId, rule.cfId)) {
+            return;
+        }
         const workbook = this._univerInstanceService.getUnit<Workbook>(unitId);
         const worksheet = workbook?.getSheetBySheetId(subUnitId);
         let cache = this._getComputedCache(unitId, subUnitId, rule.cfId);
-        if (cache && cache.status === 'computing') {
+        if (cache && ['computing', 'end'].includes(cache.status)) {
             return;
         }
-        await this._afterInitApplyPromise;
         if (!cache) {
             cache = { status: 'computing' };
             this._setComputedCache(unitId, subUnitId, rule.cfId, cache);

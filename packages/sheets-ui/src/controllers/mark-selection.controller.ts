@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo } from '@univerjs/core';
+import type { ICommandInfo, Workbook } from '@univerjs/core';
 import { Disposable, ICommandService, LifecycleStages, OnLifecycle, toDisposable } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
 
+import type { IRenderContext, IRenderController } from '@univerjs/engine-render';
 import { SetCellEditVisibleOperation } from '../commands/operations/cell-edit.operation';
 import { IMarkSelectionService } from '../services/mark-selection/mark-selection.service';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
 
-@OnLifecycle(LifecycleStages.Steady, MarkSelectionController)
-export class MarkSelectionController extends Disposable {
+@OnLifecycle(LifecycleStages.Steady, MarkSelectionRenderController)
+export class MarkSelectionRenderController extends Disposable implements IRenderController {
     constructor(
+        private readonly _context: IRenderContext<Workbook>,
         @Inject(IMarkSelectionService) private _markSelectionService: IMarkSelectionService,
         @ICommandService private _commandService: ICommandService,
         @Inject(SheetSkeletonManagerService) private _sheetSkeletonManagerService: SheetSkeletonManagerService

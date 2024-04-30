@@ -36,7 +36,7 @@ import { HeaderMenuRenderController } from './controllers/render-controllers/hea
 import { HeaderMoveRenderController } from './controllers/render-controllers/header-move.render-controller';
 import { HeaderResizeRenderController } from './controllers/render-controllers/header-resize.render-controller';
 import { HeaderUnhideRenderController } from './controllers/render-controllers/header-unhide.render-controller';
-import { MarkSelectionController } from './controllers/mark-selection.controller';
+import { MarkSelectionRenderController } from './controllers/mark-selection.controller';
 import { SelectionRenderController } from './controllers/render-controllers/selection.render-controller';
 import { SheetRenderController } from './controllers/sheet-render.controller';
 import { SheetUIController } from './controllers/sheet-ui.controller';
@@ -133,7 +133,6 @@ export class UniverSheetsUIPlugin extends Plugin {
                 [StartEditController],
                 [StatusBarController],
                 [EditingController],
-                [MarkSelectionController],
                 [HoverController],
                 [CellCustomRenderController],
                 [ForceStringRenderController],
@@ -160,6 +159,7 @@ export class UniverSheetsUIPlugin extends Plugin {
             HeaderMoveRenderController,
             CellAlertRenderController,
             ForceStringAlertRenderController,
+            MarkSelectionRenderController,
             SheetContextMenuRenderController,
         ]).forEach((controller) => {
             this.disposeWithMe(this._renderManagerService.registerRenderController(UniverInstanceType.UNIVER_SHEET, controller));

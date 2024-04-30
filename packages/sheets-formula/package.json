@@ -1,6 +1,6 @@
 {
     "name": "@univerjs/sheets-formula",
-    "version": "0.1.8",
+    "version": "0.1.9",
     "private": false,
     "author": "DreamNum <developer@univer.ai>",
     "license": "Apache-2.0",
@@ -89,7 +89,7 @@
         "@vitejs/plugin-react": "^4.2.1",
         "@wendellhu/redi": "^0.13.3",
         "less": "^4.2.0",
-        "react": "^18.2.0",
+        "react": "18.2.0",
         "rxjs": "^7.8.1",
         "typescript": "^5.4.5",
         "vite": "^5.2.10",

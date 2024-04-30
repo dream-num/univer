@@ -26,6 +26,7 @@ describe('Test conditional formatting service', () => {
     beforeEach(() => {
         testBed && testBed.univer.dispose();
         testBed = createTestBed();
+        (testBed.getConditionalFormattingService() as any)._afterInitApplyPromise = Promise.resolve();
     });
 
     describe('Test highlight', () => {

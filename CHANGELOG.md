@@ -1,5 +1,22 @@
 
 
+## [0.1.9](https://github.com/dream-num/univer/compare/v0.1.8...v0.1.9) (2024-04-29)
+
+
+### Bug Fixes
+
+* fix doc editor cannot focus ([ab4fe64](https://github.com/dream-num/univer/commit/ab4fe643ecc02180fb408c8f23ed06ff05660a3c))
+* global-zone componentKey initial value error ([#2100](https://github.com/dream-num/univer/issues/2100)) ([2404690](https://github.com/dream-num/univer/commit/240469054c462a6404c4bb40c3a9c6e1a743d28c))
+* **sheet-formula:** store themeColor to reuse ([#2079](https://github.com/dream-num/univer/issues/2079)) ([6c2e1d3](https://github.com/dream-num/univer/commit/6c2e1d3225d2fd18b5a3473f8ccbfc9193ae9595))
+* **sheet:** set bottom by default for vertical align ([#1929](https://github.com/dream-num/univer/issues/1929)) ([392f320](https://github.com/dream-num/univer/commit/392f320d98440ee20143e84d1508c35f28b21732))
+* skeleton change will remove autofill popupmenu ([#2092](https://github.com/dream-num/univer/issues/2092)) ([5b80ca7](https://github.com/dream-num/univer/commit/5b80ca734e9dc1cd14948a6110a9fa00049993f7))
+* **ui:** fix close ui plugin config and focus capturing ([#2086](https://github.com/dream-num/univer/issues/2086)) ([4a360f7](https://github.com/dream-num/univer/commit/4a360f7edb7c8af8d5e50707a260a497b9520a2e)), closes [#1914](https://github.com/dream-num/univer/issues/1914) [#1967](https://github.com/dream-num/univer/issues/1967)
+
+
+### Features
+
+* **facade:** workbook and worksheet operation ([#2076](https://github.com/dream-num/univer/issues/2076)) ([2daefd7](https://github.com/dream-num/univer/commit/2daefd7f82b642182663abe4a58f3578bc017399))
+
 ## [0.1.8](https://github.com/dream-num/univer/compare/v0.1.7...v0.1.8) (2024-04-26)
 
 

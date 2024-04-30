@@ -247,6 +247,9 @@ export function ListFormulaInput(props: IFormulaInputProps) {
     };
 
     useEffect(() => {
+        if (isFormulaStr === '1') {
+            return;
+        }
         const labelSet = new Set<string>();
         const finalList: { color: string; label: string }[] = [];
         strList.map((item) => {
@@ -271,7 +274,7 @@ export function ListFormulaInput(props: IFormulaInputProps) {
             formula1: serializeListOptions(finalList.map((item) => item.label)),
             formula2: finalList.map((item) => item.color === DROP_DOWN_DEFAULT_COLOR ? '' : item.color).join(','),
         });
-    }, [strList, onChange]);
+    }, [strList, onChange, isFormulaStr, formulaStrCopy, refColors]);
 
     const updateFormula = useMemo(
         () =>
@@ -296,7 +299,19 @@ export function ListFormulaInput(props: IFormulaInputProps) {
     return (
         <>
             <FormLayout label={localeService.t('dataValidation.list.options')}>
-                <RadioGroup value={isFormulaStr} onChange={(v) => setIsFormulaStr(v as string)}>
+                <RadioGroup
+                    value={isFormulaStr}
+                    onChange={(v) => {
+                        setIsFormulaStr(v as string);
+                        setFormulaStr(formulaStrCopy);
+                        if (v === '1') {
+                            onChange({
+                                formula1: formulaStrCopy === '=' ? '' : formulaStrCopy,
+                                formula2: refColors.join(','),
+                            });
+                        }
+                    }}
+                >
                     <Radio value="0">{localeService.t('dataValidation.list.customOptions')}</Radio>
                     <Radio value="1">{localeService.t('dataValidation.list.refOptions')}</Radio>
                 </RadioGroup>

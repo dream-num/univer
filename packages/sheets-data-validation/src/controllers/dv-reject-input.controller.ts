@@ -78,7 +78,7 @@ export class DataValidationRejectInputController extends Disposable {
                         },
                         id: 'reject-input-dialog',
                         children: {
-                            title: validator.generateRuleErrorMessage(rule),
+                            title: validator.getRuleFinalError(rule),
                         },
                         footer: {
                             title: React.createElement(
@@ -98,5 +98,31 @@ export class DataValidationRejectInputController extends Disposable {
                 },
             }
         );
+    }
+
+    showReject(title: string) {
+        this._dialogService.open({
+            width: 368,
+            title: {
+                title: this._localeService.t('dataValidation.alert.title'),
+            },
+            id: 'reject-input-dialog',
+            children: {
+                title,
+            },
+            footer: {
+                title: React.createElement(
+                    Button,
+                    {
+                        type: 'primary',
+                        onClick: () => this._dialogService.close('reject-input-dialog'),
+                    },
+                    this._localeService.t('dataValidation.alert.ok')
+                ),
+            },
+            onClose: () => {
+                this._dialogService.close('reject-input-dialog');
+            },
+        });
     }
 }

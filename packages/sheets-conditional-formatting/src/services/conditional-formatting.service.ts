@@ -15,7 +15,7 @@
  */
 
 import type { IMutationInfo, IRange, Workbook } from '@univerjs/core';
-import { createInterceptorKey, Disposable, ICommandService, InterceptorManager, IResourceManagerService, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, Rectangle, Tools, UniverInstanceType } from '@univerjs/core';
+import { afterInitApply, createInterceptorKey, Disposable, ICommandService, InterceptorManager, IResourceManagerService, IUniverInstanceService, LifecycleStages, ObjectMatrix, OnLifecycle, Rectangle, Tools, UniverInstanceType } from '@univerjs/core';
 import type { IInsertColMutationParams, IMoveColumnsMutationParams, IMoveRangeMutationParams, IMoveRowsMutationParams, IRemoveRowsMutationParams, IRemoveSheetCommandParams, ISetRangeValuesMutationParams } from '@univerjs/sheets';
 import { InsertColMutation, InsertRowMutation, MoveColsMutation, MoveRangeMutation, MoveRowsMutation, RemoveColMutation, RemoveRowMutation, RemoveSheetCommand, SetRangeValuesMutation, SheetInterceptorService } from '@univerjs/sheets';
 import { Inject, Injector } from '@wendellhu/redi';
@@ -43,6 +43,8 @@ const beforeUpdateRuleResult = createInterceptorKey<{ subUnitId: string; unitId:
 @OnLifecycle(LifecycleStages.Starting, ConditionalFormattingService)
 export class ConditionalFormattingService extends Disposable {
     // <unitId,<subUnitId,<cfId,IComputeCache>>>
+
+    private _afterInitApplyPromise: Promise<void>;
     private _ruleCacheMap: Map<string, Map<string, Map<string, IComputeCache>>> = new Map();
 
     private _ruleComputeStatus$: Subject<{ status: ComputeStatus; result?: ObjectMatrix<any>; unitId: string; subUnitId: string; cfId: string }> = new Subject();
@@ -71,6 +73,7 @@ export class ConditionalFormattingService extends Disposable {
         this._registerCalculationUnit(colorScaleCellCalculateUnit);
         this._registerCalculationUnit(highlightCellCalculateUnit);
         this._registerCalculationUnit(iconSetCalculateUnit);
+        this._afterInitApplyPromise = afterInitApply(_commandService);
     }
 
     public composeStyle(unitId: string, subUnitId: string, row: number, col: number) {
@@ -375,12 +378,13 @@ export class ConditionalFormattingService extends Disposable {
     }
 
     private async _handleCalculateUnit(unitId: string, subUnitId: string, rule: IConditionFormattingRule) {
-        const workbook = this._univerInstanceService.getUniverSheetInstance(unitId);
+        const workbook = this._univerInstanceService.getUnit<Workbook>(unitId);
         const worksheet = workbook?.getSheetBySheetId(subUnitId);
         let cache = this._getComputedCache(unitId, subUnitId, rule.cfId);
         if (cache && cache.status === 'computing') {
             return;
         }
+        await this._afterInitApplyPromise;
         if (!cache) {
             cache = { status: 'computing' };
             this._setComputedCache(unitId, subUnitId, rule.cfId, cache);

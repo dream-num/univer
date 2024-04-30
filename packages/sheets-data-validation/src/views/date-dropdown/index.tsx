@@ -15,7 +15,7 @@
  */
 
 import React, { useState } from 'react';
-import { ICommandService } from '@univerjs/core';
+import { DataValidationErrorStyle, ICommandService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { DatePanel } from '@univerjs/design';
 import { SetRangeValuesCommand } from '@univerjs/sheets';
@@ -55,13 +55,14 @@ export function DateDropdown(props: IDropdownComponentProps) {
                 onSelect={async (newValue) => {
                     const newValueStr = newValue.format('YYYY/MM/DD');
                     if (
-                        await validator.validator({
+                        rule.errorStyle !== DataValidationErrorStyle.STOP ||
+                        (await validator.validator({
                             value: newValueStr,
                             unitId,
                             subUnitId,
                             row,
                             column: col,
-                        }, rule)
+                        }, rule))
                     ) {
                         commandService.executeCommand(SetRangeValuesCommand.id, {
                             unitId,

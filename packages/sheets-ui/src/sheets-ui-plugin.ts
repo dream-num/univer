@@ -62,11 +62,11 @@ import { SheetCanvasView } from './views/sheet-canvas-view';
 import { HoverController } from './controllers/hover.controller';
 import { HoverManagerService } from './services/hover-manager.service';
 import { CellAlertManagerService } from './services/cell-alert-manager.service';
-import { CellAlertController } from './controllers/cell-alert.controller';
+import { CellAlertRenderController } from './controllers/cell-alert.controller';
 import { CellCustomRenderController } from './controllers/cell-custom-render.controller';
 import { SheetCanvasPopManagerService } from './services/canvas-pop-manager.service';
 import { ForceStringRenderController } from './controllers/force-string-render.controller';
-import { ForceStringAlertController } from './controllers/force-string-alert.controller';
+import { ForceStringAlertRenderController } from './controllers/force-string-alert-render.controller';
 import { SheetsZoomRenderController } from './controllers/render-controllers/zoom.render-controller';
 import { SheetsScrollRenderController } from './controllers/render-controllers/scroll.render-controller';
 import { SheetContextMenuRenderController } from './controllers/render-controllers/contextmenu.render-controller';
@@ -135,10 +135,8 @@ export class UniverSheetsUIPlugin extends Plugin {
                 [EditingController],
                 [MarkSelectionController],
                 [HoverController],
-                [CellAlertController],
                 [CellCustomRenderController],
                 [ForceStringRenderController],
-                [ForceStringAlertController],
             ] as Dependency[]
         ).forEach((d) => injector.add(d));
     }
@@ -160,6 +158,8 @@ export class UniverSheetsUIPlugin extends Plugin {
             AutoFillRenderController,
             HeaderMenuRenderController,
             HeaderMoveRenderController,
+            CellAlertRenderController,
+            ForceStringAlertRenderController,
             SheetContextMenuRenderController,
         ]).forEach((controller) => {
             this.disposeWithMe(this._renderManagerService.registerRenderController(UniverInstanceType.UNIVER_SHEET, controller));

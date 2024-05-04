@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-import type { IImageManagerDataParam } from '@univerjs/image';
+
+import type { IDrawingParam } from '@univerjs/core';
 import type { ISheetDrawingServiceParam } from '@univerjs/sheets';
 
 
 export interface IDrawingCommandParams {
-    drawingParam: ISheetDrawingServiceParam;
-    imageParam: IImageManagerDataParam;
+    sheetDrawingParam: ISheetDrawingServiceParam;
+    drawingParam: IDrawingParam;
 }
 
 export interface IInsertDrawingCommandParams {
@@ -28,9 +29,15 @@ export interface IInsertDrawingCommandParams {
     drawings: IDrawingCommandParams[];
 }
 
+
+export interface IPartialDrawingCommandParam {
+    sheetDrawingParam?: Partial<ISheetDrawingServiceParam>;
+    drawingParam?: Partial<IDrawingParam>;
+}
+
 export interface ISetDrawingCommandParam {
-    oldDrawing: IDrawingCommandParams;
-    newDrawing: IDrawingCommandParams;
+    newDrawing: IPartialDrawingCommandParam;
+    oldDrawing: IPartialDrawingCommandParam;
 }
 
 export interface ISetDrawingCommandParams {

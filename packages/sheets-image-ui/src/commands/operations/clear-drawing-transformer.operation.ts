@@ -14,16 +14,21 @@
  * limitations under the License.
  */
 
-import type enUS from './en-US';
+import type { IMutation } from '@univerjs/core';
+import { CommandType } from '@univerjs/core';
+import { IRenderManagerService } from '@univerjs/engine-render';
 
-const locale: typeof enUS = {
-    'image-popup': {
-        replace: '替换',
-        delete: '删除',
-        edit: '编辑',
-        crop: '裁剪',
-        reset: '重置大小',
+
+export const ClearSheetDrawingTransformerOperation: IMutation<string[]> = {
+    id: 'sheet.operation.clear-drawing-transformer',
+    type: CommandType.MUTATION,
+    handler: (accessor, params) => {
+        const renderManagerService = accessor.get(IRenderManagerService);
+
+        params.forEach((unitId) => {
+            renderManagerService.getRenderById(unitId)?.scene.getTransformer()?.clearSelectedObjects();
+        });
+
+        return true;
     },
 };
-
-export default locale;

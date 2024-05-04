@@ -15,18 +15,17 @@
  */
 
 import type { IMutation } from '@univerjs/core';
-import { CommandType } from '@univerjs/core';
-import type { IImageManagerDataParam } from '../../services/image-manager.service';
-import { IImageManagerService } from '../../services/image-manager.service';
+import { CommandType, IDrawingManagerService } from '@univerjs/core';
+import type { IImageData } from '../../models/image-model-interface';
 
 
-export const SetImageMutation: IMutation<IImageManagerDataParam[]> = {
+export const SetImageMutation: IMutation<IImageData[]> = {
     id: 'sheet.mutation.set-image',
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
-        const imageManagerService = accessor.get(IImageManagerService);
+        const drawingManagerService = accessor.get(IDrawingManagerService);
 
-        imageManagerService.batchUpdate(params);
+        drawingManagerService.batchUpdate(params);
 
         return true;
     },

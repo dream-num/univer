@@ -21,6 +21,7 @@ import { SheetImageUIController } from './controllers/sheet-image.controller';
 import { enUS, zhCN } from './locale';
 import { SheetImageUpdateController } from './controllers/sheet-image-update.controller';
 import { SheetImageDataController } from './controllers/sheet-image-data.controller';
+import { ImagePopupMenuController } from './controllers/image-popup-menu.controller';
 
 
 const PLUGIN_NAME = 'SHEETS_IMAGE_UI_PLUGIN';
@@ -54,6 +55,7 @@ export class UniverSheetsImageUIPlugin extends Plugin {
             [SheetImageUIController],
             [SheetImageUpdateController],
             [SheetImageDataController],
+            [ImagePopupMenuController],
 
         ];
 

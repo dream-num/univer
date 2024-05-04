@@ -15,7 +15,7 @@
  */
 
 import type { ISlideData } from '@univerjs/core';
-import { PageElementType, PageType, ShapeType } from '@univerjs/core';
+import { BasicShapes, PageElementType, PageType } from '@univerjs/core';
 
 import { DEFAULT_SECOND_PAGE } from './default-pages/page2';
 import { DEFAULT_THIRD_PAGE } from './default-pages/page3';
@@ -70,7 +70,7 @@ export function generateUnlimitedSlideData(ratio: number = 1, slideData?: ISlide
                             description: '',
                             type: PageElementType.SHAPE,
                             shape: {
-                                shapeType: ShapeType.RECTANGLE,
+                                shapeType: BasicShapes.Rect,
                                 text: '',
                                 shapeProperties: {
                                     shapeBackgroundFill: {
@@ -109,7 +109,7 @@ export function generateUnlimitedSlideData(ratio: number = 1, slideData?: ISlide
                             description: '',
                             type: PageElementType.SHAPE,
                             shape: {
-                                shapeType: ShapeType.RECTANGLE,
+                                shapeType: BasicShapes.Rect,
                                 text: '',
                                 shapeProperties: {
                                     shapeBackgroundFill: {

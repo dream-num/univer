@@ -18,7 +18,6 @@ import { IImageRemoteService, LocaleService, Plugin } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 
-import { IImageManagerService, ImageManagerService } from './services/image-manager.service';
 import { ImageController } from './controllers/image.controller';
 import { ImageRemoteService } from './services/image-remote.service';
 
@@ -122,7 +121,7 @@ export class UniverImagePlugin extends Plugin {
             // [ComponentManager],
             // [ZIndexManager],
             // services
-            [IImageManagerService, { useClass: ImageManagerService }],
+            // [IImageManagerService, { useClass: ImageManagerService }],
             [IImageRemoteService, { useClass: ImageRemoteService }],
             // controllers
             [ImageController],

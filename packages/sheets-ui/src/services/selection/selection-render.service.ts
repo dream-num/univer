@@ -750,6 +750,8 @@ export class SelectionRenderService implements ISelectionRenderService {
 
         this._addCancelObserver();
 
+        scene.getTransformer()?.clearSelectedObjects();
+
         if (rangeType === RANGE_TYPE.ROW || rangeType === RANGE_TYPE.COLUMN) {
             this._moving(newEvtOffsetX, newEvtOffsetY, selectionControl, rangeType);
         }

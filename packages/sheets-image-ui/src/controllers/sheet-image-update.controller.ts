@@ -15,17 +15,19 @@
  */
 
 import type { ICommandInfo, IRange, ITransformState, Nullable, Workbook } from '@univerjs/core';
-import { Disposable, ICommandService, IImageRemoteService, ImageSourceType, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
+import { Disposable, DrawingTypeEnum, ICommandService, IDrawingManagerService, IImageRemoteService, ImageSourceType, IUniverInstanceService, LifecycleStages, OnLifecycle, UniverInstanceType } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
-import type { IImageManagerDataParam } from '@univerjs/image';
-import { getImageSize, IImageManagerService } from '@univerjs/image';
+import type { IImageData } from '@univerjs/image';
+import { getImageSize } from '@univerjs/image';
 import type { ISheetDrawingPosition, ISheetDrawingServiceParam } from '@univerjs/sheets';
 import { ISheetDrawingService, SelectionManagerService } from '@univerjs/sheets';
 import { ISelectionRenderService } from '@univerjs/sheets-ui';
 import type { IInsertImageOperationParams } from '../commands/operations/insert-image.operation';
 import { InsertCellImageOperation, InsertFloatImageOperation } from '../commands/operations/insert-image.operation';
 import { InsertSheetImageCommand } from '../commands/commands/insert-sheet-image.command';
-import type { IInsertDrawingCommandParams } from '../commands/commands/interfaces';
+import type { IDrawingCommandParams, IInsertDrawingCommandParams, IPartialDrawingCommandParam, ISetDrawingCommandParam, ISetDrawingCommandParams } from '../commands/commands/interfaces';
+import { SetSheetImageCommand } from '../commands/commands/set-sheet-image.command';
+import { RemoveSheetImageCommand } from '../commands/commands/remove-sheet-image.command';
 
 
 const SHEET_IMAGE_WIDTH_LIMIT = 1000;
@@ -40,7 +42,7 @@ export class SheetImageUpdateController extends Disposable {
         @ISelectionRenderService private readonly _selectionRenderService: ISelectionRenderService,
         @IImageRemoteService private readonly _imageRemoteService: IImageRemoteService,
         @ISheetDrawingService private readonly _sheetDrawingService: ISheetDrawingService,
-        @IImageManagerService private readonly _imageManagerService: IImageManagerService
+        @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService
     ) {
         super();
 
@@ -49,6 +51,8 @@ export class SheetImageUpdateController extends Disposable {
 
     private _init(): void {
         this._initCommandListeners();
+
+        this._updateImageListener();
     }
 
     /**
@@ -57,14 +61,17 @@ export class SheetImageUpdateController extends Disposable {
     private _initCommandListeners() {
         this.disposeWithMe(
             this._commandService.onCommandExecuted(async (command: ICommandInfo) => {
-                const params = command.params as IInsertImageOperationParams;
-                if (params.file == null) {
-                    return;
-                }
-                if (command.id === InsertCellImageOperation.id) {
-                    await this._insertCellImage(params.file);
-                } else if (command.id === InsertFloatImageOperation.id) {
-                    await this._insertFloatImage(params.file);
+                if (command.id === InsertCellImageOperation.id || command.id === InsertFloatImageOperation.id) {
+                    const params = command.params as IInsertImageOperationParams;
+                    if (params.file == null) {
+                        return;
+                    }
+
+                    if (command.id === InsertCellImageOperation.id) {
+                        await this._insertCellImage(params.file);
+                    } else {
+                        await this._insertFloatImage(params.file);
+                    }
                 }
             })
         );
@@ -86,12 +93,12 @@ export class SheetImageUpdateController extends Disposable {
         }
         const { unitId, subUnitId } = info;
 
-        const currentAllDrawing = this._sheetDrawingService.getDrawingMap(unitId, subUnitId);
-        let zIndex = 0;
-        if (currentAllDrawing && Object.keys(currentAllDrawing).length > 0) {
-            const drawingIds = Object.keys(currentAllDrawing);
-            zIndex = drawingIds.length;
-        }
+        // const currentAllDrawing = this._sheetDrawingService.getDrawingMap(unitId, subUnitId);
+        // let zIndex = 0;
+        // if (currentAllDrawing && Object.keys(currentAllDrawing).length > 0) {
+        //     const drawingIds = Object.keys(currentAllDrawing);
+        //     zIndex = drawingIds.length;
+        // }
 
         const { imageId, imageSourceType } = imageParam;
 
@@ -117,13 +124,14 @@ export class SheetImageUpdateController extends Disposable {
             return;
         }
 
-        const imageDataParam: IImageManagerDataParam = {
+        const imageDrawingDataParam: IImageData = {
             unitId,
             subUnitId,
-            imageId,
+            drawingId: imageId,
+            drawingType: DrawingTypeEnum.DRAWING_IMAGE,
             imageSourceType,
             source,
-            transform: this._transformImagePositionToTransform(sheetTransform, width, height),
+            transform: this._transformImagePositionToTransform(sheetTransform),
         };
 
         const sheetDrawingParam: ISheetDrawingServiceParam = {
@@ -132,18 +140,17 @@ export class SheetImageUpdateController extends Disposable {
                 height,
             },
             sheetTransform,
-            id: imageId,
+            drawingId: imageId,
             unitId,
             subUnitId,
-            zIndex,
         };
 
 
         this._commandService.executeCommand(InsertSheetImageCommand.id, {
             unitId,
             drawings: [{
-                drawingParam: sheetDrawingParam,
-                imageParam: imageDataParam,
+                sheetDrawingParam,
+                drawingParam: imageDrawingDataParam,
             }],
         } as IInsertDrawingCommandParams);
     }
@@ -168,7 +175,7 @@ export class SheetImageUpdateController extends Disposable {
         };
     }
 
-    private _transformImagePositionToTransform(position: ISheetDrawingPosition, imageWidth: number, imageHeight: number): Nullable<ITransformState> {
+    private _transformImagePositionToTransform(position: ISheetDrawingPosition): Nullable<ITransformState> {
         const { from, to } = position;
         const { column: fromColumn, columnOffset: fromColumnOffset, row: fromRow, rowOffset: fromRowOffset } = from;
         const { column: toColumn, columnOffset: toColumnOffset, row: toRow, rowOffset: toRowOffset } = to;
@@ -211,8 +218,6 @@ export class SheetImageUpdateController extends Disposable {
             top,
             width,
             height,
-            scaleX: imageWidth / width,
-            scaleY: imageHeight / height,
         };
     }
 
@@ -263,7 +268,119 @@ export class SheetImageUpdateController extends Disposable {
     }
 
     private _updateImageListener() {
+        this._drawingManagerService.extraUpdate$.subscribe((params) => {
+            const drawings: ISetDrawingCommandParam[] = [];
 
+            if (params.length === 0) {
+                return;
+            }
+
+            (params as IImageData[]).forEach((param) => {
+                const { unitId, subUnitId, drawingId, drawingType, transform } = param;
+                if (transform == null) {
+                    return;
+                }
+
+                const sheetDrawing = this._sheetDrawingService.getDrawingItem({ unitId, subUnitId, drawingId });
+
+                const imageDrawing = this._drawingManagerService.getDrawingByParam({ unitId, subUnitId, drawingId, drawingType });
+
+                if (sheetDrawing == null || imageDrawing == null) {
+                    return;
+                }
+
+                const sheetTransform = this._transformToImagePosition(transform);
+
+                if (sheetTransform == null) {
+                    return;
+                }
+
+                const oldDrawing: IPartialDrawingCommandParam = {
+                    sheetDrawingParam: { ...sheetDrawing },
+                    drawingParam: { ...imageDrawing },
+                };
+
+                const newDrawing: IPartialDrawingCommandParam = {
+                    sheetDrawingParam: {
+                        sheetTransform: { ...sheetTransform },
+                        unitId, subUnitId, drawingId,
+                    },
+                    drawingParam: {
+                        unitId, subUnitId, drawingId, drawingType,
+                        transform: { ...transform, ...this._transformImagePositionToTransform(sheetTransform) },
+                    },
+                };
+
+
+                drawings.push({
+                    newDrawing,
+                    oldDrawing,
+                });
+            });
+
+            if (drawings.length > 0) {
+                this._commandService.executeCommand(SetSheetImageCommand.id, {
+                    unitId: params[0].unitId,
+                    drawings,
+                } as ISetDrawingCommandParams);
+            }
+        });
+    }
+
+     // use transform and originSize convert to  ISheetDrawingPosition
+    private _transformToImagePosition(transform: ITransformState): Nullable<ISheetDrawingPosition> {
+        const { left = 0, top = 0, width = 0, height = 0 } = transform;
+
+        // const selections = this._selectionManagerService.getSelections();
+        // let range: IRange = {
+        //     startRow: 0,
+        //     endRow: 0,
+        //     startColumn: 0,
+        //     endColumn: 0,
+        // };
+        // if (selections && selections.length > 0) {
+        //     range = selections[selections.length - 1].range;
+        // }
+
+        // const rangeWithCoord = this._selectionRenderService.attachRangeWithCoord(range);
+        // if (rangeWithCoord == null) {
+        //     return;
+        // }
+
+        // const { startColumn, startRow, startX, startY } = rangeWithCoord;
+
+        const startSelectionCell = this._selectionRenderService.getSelectionCellByPosition(left, top);
+
+        if (startSelectionCell == null) {
+            return;
+        }
+
+        const from = {
+            column: startSelectionCell.actualColumn,
+            columnOffset: left - startSelectionCell.startX,
+            row: startSelectionCell.actualRow,
+            rowOffset: top - startSelectionCell.startY,
+        };
+
+
+        const endSelectionCell = this._selectionRenderService.getSelectionCellByPosition(left + width, top + height);
+
+
+        if (endSelectionCell == null) {
+            return;
+        }
+
+        const to = {
+            column: endSelectionCell.actualColumn,
+            columnOffset: left + width - endSelectionCell.startX,
+            row: endSelectionCell.actualRow,
+            rowOffset: top + height - endSelectionCell.startY,
+        };
+
+        return {
+            from,
+            to,
+        };
     }
 
     private _removeImageListener() {

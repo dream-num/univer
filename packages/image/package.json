@@ -62,7 +62,6 @@
     },
     "peerDependencies": {
         "@univerjs/core": "workspace:*",
-        "@univerjs/engine-render": "workspace:*",
         "@wendellhu/redi": "^0.13.3",
         "rxjs": ">=7.0.0"
     },
@@ -71,11 +70,8 @@
     },
     "devDependencies": {
         "@univerjs/core": "workspace:*",
-        "@univerjs/design": "workspace:*",
-        "@univerjs/engine-render": "workspace:*",
         "@univerjs/shared": "workspace:*",
         "@univerjs/sheets": "workspace:*",
-        "@univerjs/ui": "workspace:*",
         "@wendellhu/redi": "^0.13.3",
         "less": "^4.2.0",
         "react": "18.2.0",

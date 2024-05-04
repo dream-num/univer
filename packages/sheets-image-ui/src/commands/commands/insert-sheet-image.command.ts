@@ -25,6 +25,7 @@ import { InsertImageMutation, RemoveImageMutation } from '@univerjs/image';
 
 import { InsertDrawingMutation, RemoveDrawingMutation } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
+import { ClearSheetDrawingTransformerOperation } from '../operations/clear-drawing-transformer.operation';
 import type { IInsertDrawingCommandParams } from './interfaces';
 
 
@@ -44,26 +45,35 @@ export const InsertSheetImageCommand: ICommand = {
 
         const drawings = params.drawings;
 
-        const drawingParams = drawings.map((param) => param.drawingParam);
-        const imageParams = drawings.map((param) => param.imageParam);
+        const sheetDrawingParams = drawings.map((param) => param.sheetDrawingParam);
+        const imageDrawingParams = drawings.map((param) => param.drawingParam);
+        const unitIds: string[] = drawings.map((param) => param.sheetDrawingParam.unitId);
 
         // prepare do mutations
         const removeImageMutationParams = drawings.map((param) => {
-            const { unitId, subUnitId, imageId } = param.imageParam;
-            return { unitId, subUnitId, imageId };
+            const { unitId, subUnitId, drawingId, drawingType } = param.drawingParam;
+            return { unitId, subUnitId, drawingId, drawingType };
         });
 
         // execute do mutations and add undo mutations to undo stack if completed
-        const result1 = commandService.syncExecuteCommand(InsertDrawingMutation.id, drawingParams);
-        const result2 = commandService.syncExecuteCommand(InsertImageMutation.id, imageParams);
+        const result1 = commandService.syncExecuteCommand(InsertDrawingMutation.id, sheetDrawingParams);
+        const result2 = commandService.syncExecuteCommand(InsertImageMutation.id, imageDrawingParams);
 
         const unitId = params.unitId;
 
         if (result1 && result2) {
             undoRedoService.pushUndoRedo({
                 unitID: unitId,
-                undoMutations: [{ id: RemoveDrawingMutation.id, params: drawingParams }, { id: RemoveImageMutation.id, params: removeImageMutationParams }],
-                redoMutations: [{ id: InsertDrawingMutation.id, params: drawingParams }, { id: InsertImageMutation.id, params: imageParams }],
+                undoMutations: [
+                    { id: RemoveDrawingMutation.id, params: sheetDrawingParams },
+                    { id: RemoveImageMutation.id, params: removeImageMutationParams },
+                    { id: ClearSheetDrawingTransformerOperation.id, params: unitIds },
+                ],
+                redoMutations: [
+                    { id: InsertDrawingMutation.id, params: sheetDrawingParams },
+                    { id: InsertImageMutation.id, params: imageDrawingParams },
+                    { id: ClearSheetDrawingTransformerOperation.id, params: unitIds },
+                ],
             });
 
             return true;

@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
-import type { ICommandInfo, IDrawingManagerParam } from '@univerjs/core';
+import type { ICommandInfo, IDrawingParam, Nullable } from '@univerjs/core';
 import {
     Disposable,
+    DrawingTypeEnum,
     ICommandService,
     IDrawingManagerService,
+    IImageRemoteService,
+    ImageSourceType,
     IUniverInstanceService,
     LifecycleStages,
     OnLifecycle,
@@ -26,8 +29,7 @@ import {
 } from '@univerjs/core';
 import type { IImageProps, Scene } from '@univerjs/engine-render';
 import { Image, IRenderManagerService } from '@univerjs/engine-render';
-
-import { IImageManagerService } from '../services/image-manager.service';
+import type { IImageData } from '../models/image-model-interface';
 
 const IMAGE_DEFAULT_LAYER_INDEX = 11;
 const IMAGE_BEHIND_TEXT_LAYER_INDEX = 1;
@@ -38,8 +40,8 @@ export class ImageLoadController extends Disposable {
         @IUniverInstanceService private readonly _currentUniverService: IUniverInstanceService,
         @ICommandService private readonly _commandService: ICommandService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @IImageManagerService private readonly _imageManagerService: IImageManagerService,
-        @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService
+        @IDrawingManagerService private readonly _drawingManagerService: IDrawingManagerService,
+        @IImageRemoteService private readonly _imageRemoteService: IImageRemoteService
     ) {
         super();
 
@@ -71,10 +73,10 @@ export class ImageLoadController extends Disposable {
     private _drawingListener() {
         this.disposeWithMe(
             toDisposable(
-                this._drawingManagerService.andOrUpdate$.subscribe((params) => {
+                this._drawingManagerService.add$.subscribe((params) => {
                     const sceneList: Scene[] = [];
-                    params.forEach((param) => {
-                        const { unitId, subUnitId, drawingId, drawing } = param;
+                    (params as IImageData[]).forEach((param) => {
+                        const { unitId, subUnitId, drawingId, transform, zIndex } = param;
 
                         const renderObject = this._renderManagerService.getRenderById(unitId);
 
@@ -84,19 +86,23 @@ export class ImageLoadController extends Disposable {
                             return true;
                         }
 
-                        const searchParam = { unitId, subUnitId, imageId: drawingId };
-
-
-                        const imageParam = this._imageManagerService.getImageByParam(searchParam);
-
-                        if (imageParam == null) {
+                        if (transform == null) {
                             return true;
                         }
 
-                        const imageModel = imageParam.imageModel;
+                        // const searchParam = { unitId, subUnitId, imageId: drawingId };
 
 
-                        const { left, top, width, height, angle, flipX, flipY, skewX, skewY } = drawing;
+                        // const imageParam = this._imageManagerService.getImageByParam(searchParam);
+
+                        // if (imageParam == null) {
+                        //     return true;
+                        // }
+
+                        // const imageModel = imageParam.imageModel;
+
+
+                        const { left, top, width, height, angle, flipX, flipY, skewX, skewY } = transform;
 
                         const imageShapeKey = `${unitId}-${subUnitId}-${drawingId}`;
 
@@ -109,23 +115,22 @@ export class ImageLoadController extends Disposable {
 
                         // this._imageRenderService.add(imageShapeKey, searchParam);
 
-                        imageModel.setKey(imageShapeKey);
+                        // imageModel.setKey(imageShapeKey);
 
-                        const imageConfig: IImageProps = {
-                            left, top, width, height, zIndex: 11 };
+                        const imageConfig: IImageProps = { left, top, width, height, zIndex: zIndex || 0 };
 
 
-                        const imageNativeCache = this._imageManagerService.getImageSourceCache(imageModel);
+                        const imageNativeCache = this._getImageSourceCache(param);
                         if (imageNativeCache != null) {
                             imageConfig.image = imageNativeCache;
                         } else {
-                            imageConfig.url = imageModel.source;
+                            imageConfig.url = param.source;
                         }
 
                         const image = new Image(imageShapeKey, imageConfig);
 
 
-                        this._imageManagerService.addImageSourceCache(imageModel, image.getNative());
+                        this._addImageSourceCache(param, image.getNative());
 
                         if (!scene.getTransformer()) {
                             scene.openTransformer();
@@ -151,23 +156,24 @@ export class ImageLoadController extends Disposable {
             const { objects } = state;
 
             // const { docsLeft, docsTop } = documents;
-            const params: IDrawingManagerParam[] = [];
+            const params: IDrawingParam[] = [];
             objects.forEach((object) => {
                 const { oKey, left, top, height, width } = object;
 
-                const searchParam = this._imageManagerService.getImageByOKey(oKey);
+                const searchParam = this._drawingManagerService.getDrawingOKey(oKey);
 
                 if (searchParam == null) {
                     return true;
                 }
 
-                const { unitId, subUnitId, imageId } = searchParam;
+                const { unitId, subUnitId, drawingId } = searchParam;
 
                 params.push({
                     unitId,
                     subUnitId,
-                    drawingId: imageId,
-                    drawing: {
+                    drawingId,
+                    drawingType: DrawingTypeEnum.DRAWING_IMAGE,
+                    transform: {
                         left,
                         top,
                         height,
@@ -189,7 +195,29 @@ export class ImageLoadController extends Disposable {
                 // });
             });
 
-            this._drawingManagerService.pluginUpdateRefresh(params);
+            this._drawingManagerService.updateNotification(params);
         });
+    }
+
+    private _imageSourceCache: Map<string, HTMLImageElement> = new Map();
+
+
+    private _addImageSourceCache(imageData: IImageData, imageSource: Nullable<HTMLImageElement>) {
+        const { source, imageSourceType } = imageData;
+        if (imageSourceType === ImageSourceType.BASE64 || imageSource == null) {
+            return;
+        }
+
+        this._imageSourceCache.set(source, imageSource);
+    }
+
+    private _getImageSourceCache(imageData: IImageData): Nullable<HTMLImageElement> {
+        const { source, imageSourceType } = imageData;
+
+        if (imageSourceType === ImageSourceType.BASE64) {
+            return;
+        }
+
+        return this._imageSourceCache.get(source);
     }
 }

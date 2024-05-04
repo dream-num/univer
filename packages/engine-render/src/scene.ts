@@ -549,10 +549,14 @@ export class Scene extends ThinScene {
         this._transformer = new Transformer(this, config);
     }
 
-    getTransformer() {
+    getTransformerByCreate() {
         if (!this._transformer) {
             this.initTransformer();
         }
+        return this._transformer!;
+    }
+
+    getTransformer() {
         return this._transformer;
     }
 

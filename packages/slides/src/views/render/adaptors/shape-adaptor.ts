@@ -15,7 +15,7 @@
  */
 
 import type { IPageElement } from '@univerjs/core';
-import { getColorStyle, PageElementType, ShapeType } from '@univerjs/core';
+import { BasicShapes, getColorStyle, PageElementType } from '@univerjs/core';
 import { Rect } from '@univerjs/engine-render';
 import type { Injector } from '@wendellhu/redi';
 
@@ -65,7 +65,7 @@ export class ShapeAdaptor extends ObjectAdaptor {
             strokeStyle.stroke = getColorStyle(outlineFill) || 'rgba(0,0,0,1)';
         }
 
-        if (shapeType === ShapeType.RECTANGLE) {
+        if (shapeType === BasicShapes.Rect) {
             return new Rect(id, {
                 fill,
                 top,
@@ -84,7 +84,7 @@ export class ShapeAdaptor extends ObjectAdaptor {
                 ...strokeStyle,
             });
         }
-        if (shapeType === ShapeType.ROUND_RECTANGLE) {
+        if (shapeType === BasicShapes.RoundRect) {
             const radius = shapeProperties?.radius || 0;
             return new Rect(id, {
                 fill,

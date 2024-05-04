@@ -14,19 +14,17 @@
  * limitations under the License.
  */
 
-import type { IMutation } from '@univerjs/core';
-import { CommandType } from '@univerjs/core';
-import type { IImageManagerBaseParam } from '../../services/image-manager.service';
-import { IImageManagerService } from '../../services/image-manager.service';
+import type { IDrawingSearch, IMutation } from '@univerjs/core';
+import { CommandType, IDrawingManagerService } from '@univerjs/core';
 
 
-export const RemoveImageMutation: IMutation<IImageManagerBaseParam[]> = {
+export const RemoveImageMutation: IMutation<IDrawingSearch[]> = {
     id: 'sheet.mutation.remove-image',
     type: CommandType.MUTATION,
     handler: (accessor, params) => {
-        const imageManagerService = accessor.get(IImageManagerService);
+        const drawingManagerService = accessor.get(IDrawingManagerService);
 
-        imageManagerService.batchRemove(params);
+        drawingManagerService.batchRemove(params);
 
         return true;
     },

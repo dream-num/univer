@@ -29,6 +29,13 @@ const locale: typeof enUS = {
             title: '编辑图片',
         },
     },
+    'image-popup': {
+        replace: '替换',
+        delete: '删除',
+        edit: '编辑',
+        crop: '裁剪',
+        reset: '重置大小',
+    },
 };
 
 export default locale;

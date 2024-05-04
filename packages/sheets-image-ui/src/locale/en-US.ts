@@ -27,6 +27,13 @@ const locale = {
             title: 'Edit Image',
         },
     },
+    'image-popup': {
+        replace: 'Replace',
+        delete: 'Delete',
+        edit: 'Edit',
+        crop: 'Crop',
+        reset: 'Reset Size',
+    },
 };
 
 export default locale;

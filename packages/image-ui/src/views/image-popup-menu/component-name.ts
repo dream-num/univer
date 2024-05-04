@@ -14,16 +14,5 @@
  * limitations under the License.
  */
 
-import type enUS from './en-US';
+export const COMPONENT_IMAGE_POPUP_MENU = 'COMPONENT_IMAGE_POPUP_MENU';
 
-const locale: typeof enUS = {
-    'image-popup': {
-        replace: '替换',
-        delete: '删除',
-        edit: '编辑',
-        crop: '裁剪',
-        reset: '重置大小',
-    },
-};
-
-export default locale;

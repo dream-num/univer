@@ -31,3 +31,4 @@ export * from './shape-type';
 export * from './sheet-types';
 export * from './text-style';
 export * from './theme-color-type';
+export * from './prst-geom-type';

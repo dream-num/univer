@@ -78,8 +78,10 @@ export type { IOffset, IScale, ISize, ITransformState, IOtherTransform, IAbsolut
 export {
     DEFAULT_DOCUMENT_SUB_COMPONENT_ID,
     DrawingManagerService,
-    type IDrawingManagerParam,
-    type IDrawingManagerSearchItemParam,
+    type DrawingType,
+    DrawingTypeEnum,
+    type IDrawingSearch,
+    type IDrawingParam,
     IDrawingManagerService,
 } from './services/drawing/drawing-manager.service';
 export { IUniverInstanceService } from './services/instance/instance.service';

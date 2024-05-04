@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 
-import { toDisposable } from '@univerjs/core';
 import type { IMessageMethodOptions, IMessageProps } from '@univerjs/design';
 import { Message } from '@univerjs/design';
 import type { IDisposable } from '@wendellhu/redi';
@@ -33,8 +32,10 @@ export class DesktopMessageService implements IMessageService {
     show(options: IMessageMethodOptions & Omit<IMessageProps, 'key'>): IDisposable {
         const { type, ...rest } = options;
 
-        this.message && this.message[type](rest);
+        if (!this.message) {
+            throw new Error('[DesktopMessageService]: no message implementation!');
+        }
 
-        return toDisposable(() => {});
+        return this.message[type](rest);
     }
 }

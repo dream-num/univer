@@ -16,15 +16,11 @@
 
 import type { IMutation } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
+import type { ISheetDrawingSearchParam } from '../../services/sheet-drawing.service';
 import { ISheetDrawingService } from '../../services/sheet-drawing.service';
 
-export interface IRemoveDrawingMutation {
-    unitId: string;
-    subUnitId: string;
-    id: string;
-}
 
-export const RemoveDrawingMutation: IMutation<IRemoveDrawingMutation[]> = {
+export const RemoveDrawingMutation: IMutation<ISheetDrawingSearchParam[]> = {
     id: 'sheet.mutation.remove-drawing',
     type: CommandType.MUTATION,
     handler: (accessor, params) => {

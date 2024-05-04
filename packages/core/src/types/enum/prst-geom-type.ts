@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-enum BasicShapes {
+export enum BasicShapes {
     Line = 'line',
     LineInv = 'lineInv',
     Triangle = 'triangle',
@@ -47,7 +47,7 @@ enum BasicShapes {
     Ellipse = 'ellipse',
 }
 
-enum ArrowsAndMarkers {
+export enum ArrowsAndMarkersShapes {
     RightArrow = 'rightArrow',
     LeftArrow = 'leftArrow',
     UpArrow = 'upArrow',
@@ -66,7 +66,7 @@ enum ArrowsAndMarkers {
     LeftRightCircularArrow = 'leftRightCircularArrow',
 }
 
-enum OtherShapes {
+export enum OtherShapes {
     Plaque = 'plaque',
     Can = 'can',
     Cube = 'cube',
@@ -77,7 +77,7 @@ enum OtherShapes {
     FoldedCorner = 'foldedCorner',
 }
 
-enum SpecialShapes {
+export enum SpecialShapes {
     SmileyFace = 'smileyFace',
     Heart = 'heart',
     LightningBolt = 'lightningBolt',
@@ -119,6 +119,6 @@ enum SpecialShapes {
 /**
  * 20.1.9.18 prstGeom (Preset geometry)
  */
-export type ShapeType = BasicShapes | ArrowsAndMarkers | OtherShapes | SpecialShapes;
+export type ShapeType = BasicShapes | ArrowsAndMarkersShapes | OtherShapes | SpecialShapes;
 export type PresetGeometryType = ShapeType | 'custom';
 

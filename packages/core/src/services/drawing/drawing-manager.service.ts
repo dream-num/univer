@@ -16,208 +16,233 @@
 
 import type { IDisposable } from '@wendellhu/redi';
 import { createIdentifier } from '@wendellhu/redi';
-import type { Observable } from 'rxjs';
-import { Subject } from 'rxjs';
-
+import { type Observable, Subject } from 'rxjs';
 import type { Nullable } from '../../common/type-util';
 import type { ITransformState } from './drawing-interfaces';
 
 export const DEFAULT_DOCUMENT_SUB_COMPONENT_ID = '__default_document_sub_component_id20231101__';
 
-export interface IDrawingManagerSearchParam {
-    unitId: string;
-    subUnitId: string; //sheetId, pageId and so on, it has a default name in doc business
+
+export enum DrawingTypeEnum {
+    UNRECOGNIZED = -1,
+    DRAWING_IMAGE = 0,
+    DRAWING_SHAPE = 1,
+    DRAWING_CHART = 2,
+    DRAWING_TABLE = 3,
+    DRAWING_UNIT = 4,
 }
 
-export interface IDrawingManagerSearchItemParam extends IDrawingManagerSearchParam {
+export type DrawingType = DrawingTypeEnum | number;
+
+export interface IDrawingSearch {
+    drawingType: DrawingType;
+    unitId: string;
+    subUnitId: string; //sheetId, pageId and so on, it has a default name in doc business
     drawingId: string;
 }
 
-export interface IDrawingManagerParam extends IDrawingManagerSearchItemParam {
-    drawing: ITransformState;
+export interface IDrawingParam extends IDrawingSearch {
+    transform?: Nullable<ITransformState>;
+    zIndex?: number;
+    groupId?: string;
 }
 
-export type Drawings = Map<string, ITransformState>;
 
-//{ [unitId: string]: { [sheetId: string]: ISelectionWithCoord[] } }
-export type IDrawingManagerInfo = Map<string, Map<string, Drawings>>;
+export interface IDrawingMap {
+    [unitId: string]: IDrawingSubunitMap;
+}
+
+export interface IDrawingSubunitMap {
+    [subUnitId: string]: IDrawingMapItem;
+}
+
+export interface IDrawingMapItem {
+    [drawingId: string]: IDrawingParam;
+}
+
 
 export interface IDrawingManagerService {
-    readonly remove$: Observable<IDrawingManagerParam[]>;
-
-    readonly andOrUpdate$: Observable<IDrawingManagerParam[]>;
-
-    readonly pluginUpdate$: Observable<IDrawingManagerParam[]>;
-
-    getDrawing(searchItem: IDrawingManagerSearchItemParam): Nullable<ITransformState>;
-
-    getDrawings(search: IDrawingManagerSearchParam): Nullable<Drawings>;
+    readonly remove$: Observable<IDrawingParam[]>;
+    readonly add$: Observable<IDrawingParam[]>;
+    readonly update$: Observable<IDrawingParam[]>;
+    readonly extraUpdate$: Observable<IDrawingParam[]>;
 
     dispose(): void;
 
-    clear(search: IDrawingManagerSearchParam): void;
+    add<T extends IDrawingParam>(insertParam: T): void;
+    batchAdd<T extends IDrawingParam>(insertParams: T[]): void;
 
-    addOrUpdate(insertParam: IDrawingManagerParam): void;
+    remove(searchParam: IDrawingSearch): void;
+    batchRemove(removeParams: IDrawingSearch[]): void;
 
-    remove(searchItem: IDrawingManagerSearchItemParam): void;
+    update<T extends IDrawingParam>(updateParam: T): void;
+    batchUpdate<T extends IDrawingParam>(updateParams: T[]): void;
 
-    BatchAddOrUpdate(insertParam: IDrawingManagerParam[]): void;
+    extraUpdateNotification<T extends IDrawingParam>(updateParams: T[]): void;
 
-    remove(searchItem: IDrawingManagerSearchItemParam): void;
+    getDrawingByParam<T extends IDrawingParam>(param: Nullable<IDrawingSearch>): Nullable<T>;
 
-    pluginUpdateRefresh(searchObjects: IDrawingManagerParam[]): void;
+    getDrawingOKey<T extends IDrawingParam>(oKey: string): Nullable<T>;
 }
 
 /**
- * This service is primarily used for the management of 'univer' floating objects,
- * decoupling common configurations such as position, volume,
- * and rotation of the floating objects from the core business.
- * This allows plugins to be reused across multiple core businesses.
  *
- * Floating elements in spreadsheets need to stay synchronized with the grid layout,
- * and inserting rows and columns will change their position;
- * Floating elements in documents need to stay synchronized with the text layout and can affect the text layout;
- * Floating elements in slides are more flexible but support settings such as animations.
- *
- * Please open the architecture diagram with TLDraw.
- * https://github.com/dream-num/univer/blob/db227563b4df65572dd4fceebecdbd9f27fa7a39/docs/selection%20architecture%20design.tldr
  */
 export class DrawingManagerService implements IDisposable, IDrawingManagerService {
-    private readonly _managerInfo: IDrawingManagerInfo = new Map();
+    private _drawingManagerInfo: { [drawingType: DrawingType]: IDrawingMap } = {};
 
-    /**
-     * The deletion action is triggered and broadcasted within the core business plugin.
-     * Upon receiving the deletion broadcast, the plugin executes the plugin command logic.
-     */
-    private readonly _remove$ = new Subject<IDrawingManagerParam[]>();
+    private readonly _remove$ = new Subject<IDrawingParam[]>();
     readonly remove$ = this._remove$.asObservable();
 
-    /**
-     * Addition and updates are also triggered and broadcasted within the core business plugin.
-     * Upon receiving the update broadcast, the plugin updates the location of its business components.
-     */
-    private readonly _andOrUpdate$ = new Subject<IDrawingManagerParam[]>();
-    readonly andOrUpdate$ = this._andOrUpdate$.asObservable();
+    private readonly _add$ = new Subject<IDrawingParam[]>();
+    readonly add$ = this._add$.asObservable();
 
-    /**
-     * The position, width, and height of the plugin's business components can be changed by the user through interface operations.
-     * Here, it is necessary to notify the core business plugin to update the relevant location model.
-     * The logic converges in the core business plugin.
-     */
-    private readonly _pluginUpdate$ = new Subject<IDrawingManagerParam[]>();
-    readonly pluginUpdate$ = this._pluginUpdate$.asObservable();
+    private readonly _update$ = new Subject<IDrawingParam[]>();
+    readonly update$ = this._update$.asObservable();
 
-    getDrawing(searchItem: IDrawingManagerSearchItemParam): Nullable<ITransformState> {
-        return this._getDrawing(searchItem);
-    }
-
-    getDrawings(search: IDrawingManagerSearchParam): Nullable<Drawings> {
-        return this._getDrawings(search);
-    }
+    private readonly _extraUpdate$ = new Subject<IDrawingParam[]>();
+    readonly extraUpdate$ = this._extraUpdate$.asObservable();
 
     dispose(): void {
         this._remove$.complete();
-        this._andOrUpdate$.complete();
-        this._pluginUpdate$.complete();
-        this._managerInfo.clear();
+        this._add$.complete();
+        this._update$.complete();
+        this._drawingManagerInfo = {};
     }
 
-    clear(search: IDrawingManagerSearchParam): void {
-        const searchObjects = this._clearByParam(search);
-        this._remove$.next(searchObjects);
+    add<T extends IDrawingParam>(insertParam: T) {
+        this._add$.next(this._addByParam(insertParam));
     }
 
-    addOrUpdate(insertParam: IDrawingManagerParam): void {
-        const searchObjects = this._addByParam(insertParam);
-        this._andOrUpdate$.next(searchObjects);
-    }
-
-    BatchAddOrUpdate(insertParams: IDrawingManagerParam[]): void {
-        const searchObjects: IDrawingManagerParam[] = [];
+    batchAdd<T extends IDrawingParam>(insertParams: T[]) {
+        const objects: T[] = [];
         insertParams.forEach((insertParam) => {
-            searchObjects.push(...this._addByParam(insertParam));
-        });
-        this._andOrUpdate$.next(searchObjects);
-    }
-
-    remove(searchItem: IDrawingManagerSearchItemParam): void {
-        const searchObjects = this._removeByParam(searchItem);
-        this._remove$.next(searchObjects);
-    }
-
-    pluginUpdateRefresh(updateObjects: IDrawingManagerParam[]) {
-        this._pluginUpdate$.next(updateObjects);
-    }
-
-    private _getDrawings(param: Nullable<IDrawingManagerSearchParam>) {
-        if (param == null) {
-            return;
-        }
-        const { unitId, subUnitId } = param;
-        return this._managerInfo.get(unitId)?.get(subUnitId);
-    }
-
-    private _getDrawing(param: Nullable<IDrawingManagerSearchItemParam>) {
-        if (param == null) {
-            return;
-        }
-        const { unitId, subUnitId, drawingId } = param;
-        return this._managerInfo.get(unitId)?.get(subUnitId)?.get(drawingId);
-    }
-
-    private _addByParam(insertParam: IDrawingManagerParam): IDrawingManagerParam[] {
-        const { unitId, subUnitId, drawing, drawingId } = insertParam;
-
-        if (!this._managerInfo.has(unitId)) {
-            this._managerInfo.set(unitId, new Map());
-        }
-
-        const subComponentData = this._managerInfo.get(unitId)!;
-
-        if (!subComponentData.has(subUnitId)) {
-            subComponentData.set(subUnitId, new Map());
-        }
-
-        subComponentData.get(subUnitId)!.set(drawingId, drawing);
-
-        return [{ unitId, subUnitId, drawingId, drawing }];
-    }
-
-    private _clearByParam(param: IDrawingManagerSearchParam): IDrawingManagerParam[] {
-        const drawings = this._getDrawings(param);
-
-        const { unitId, subUnitId } = param;
-
-        const refreshObjects: IDrawingManagerParam[] = [];
-
-        drawings?.forEach((value, key) => {
-            refreshObjects.push({
-                unitId,
-                subUnitId,
-                drawingId: key,
-                drawing: value,
-            });
+            objects.push(...this._addByParam(insertParam));
         });
 
-        drawings?.clear();
-
-        return refreshObjects;
+        this._add$.next(objects);
     }
 
-    private _removeByParam(param: IDrawingManagerSearchItemParam): IDrawingManagerParam[] {
-        const drawings = this._getDrawings(param);
-        const item = drawings?.get(param.drawingId);
+    remove<T extends IDrawingParam>(searchParam: IDrawingSearch) {
+        this._remove$.next(this._removeByParam<T>(searchParam));
+    }
 
-        if (item == null) {
+    batchRemove<T extends IDrawingParam>(removeParams: IDrawingSearch[]) {
+        const objects: IDrawingParam[] = [];
+        removeParams.forEach((removeParam) => {
+            objects.push(...this._removeByParam<T>(removeParam));
+        });
+
+        this._remove$.next(objects);
+    }
+
+    update<T extends IDrawingParam>(updateParam: T) {
+        this._update$.next(this._updateByParam<T>(updateParam));
+    }
+
+    batchUpdate<T extends IDrawingParam>(updateParams: T[]) {
+        const objects: T[] = [];
+        updateParams.forEach((updateParam) => {
+            objects.push(...this._updateByParam<T>(updateParam));
+        });
+
+        this._update$.next(objects);
+    }
+
+    extraUpdateNotification<T extends IDrawingParam>(updateParams: T[]) {
+        this._extraUpdate$.next(updateParams);
+    }
+
+    // setCurrent(searchParam: Nullable<IImageManagerBaseParam>) {
+    //     this._current = searchParam;
+    // }
+
+    // getCurrent(): Nullable<IImageManagerParam> {
+    //     return this._getCurrentBySearch(this._current);
+    // }
+
+    getDrawingByParam<T extends IDrawingParam>(param: Nullable<IDrawingSearch>): Nullable<T> {
+        return this._getCurrentBySearch<T>(param);
+    }
+
+    getDrawingOKey<T extends IDrawingParam>(oKey: string): Nullable<T> {
+        const [unitId, subUnitId, drawingId, drawingType] = oKey.split('#-#');
+        return this._getCurrentBySearch<T>({ unitId, subUnitId, drawingId, drawingType: Number.parseInt(drawingType) });
+    }
+
+    private _getCurrentBySearch<T extends IDrawingParam>(searchParam: Nullable<IDrawingSearch>): Nullable<T> {
+        if (searchParam == null) {
+            return;
+        }
+        const { unitId, subUnitId, drawingId, drawingType } = searchParam;
+        return this._drawingManagerInfo[drawingType]?.[unitId]?.[subUnitId]?.[drawingId] as T;
+    }
+
+    private _addByParam<T extends IDrawingParam>(insertParam: T): T[] {
+        const { unitId, subUnitId, drawingId, drawingType } = insertParam;
+
+        if (!this._drawingManagerInfo[drawingType]) {
+            this._drawingManagerInfo[drawingType] = {};
+        }
+
+        if (!this._drawingManagerInfo[drawingType][unitId]) {
+            this._drawingManagerInfo[drawingType][unitId] = {};
+        }
+
+        if (!this._drawingManagerInfo[drawingType][unitId][subUnitId]) {
+            this._drawingManagerInfo[drawingType][unitId][subUnitId] = {};
+        }
+
+        this._drawingManagerInfo[drawingType][unitId][subUnitId][drawingId] = insertParam;
+
+        return [insertParam];
+    }
+
+    private _removeByParam<T extends IDrawingParam>(searchParam: Nullable<IDrawingSearch>): T[] {
+        if (searchParam == null) {
+            return [];
+        }
+        const { unitId, subUnitId, drawingId, drawingType } = searchParam;
+
+        const subComponentObjects = this._drawingManagerInfo[drawingType]?.[unitId]?.[subUnitId];
+
+        if (subComponentObjects == null) {
             return [];
         }
 
-        drawings?.delete(param.drawingId);
+        const object = subComponentObjects[drawingId] as T;
 
-        return [{ ...param, drawing: item }];
+        if (object == null) {
+            return [];
+        }
+
+        delete subComponentObjects[drawingId];
+
+        return [object];
+    }
+
+    private _updateByParam<T extends IDrawingParam>(updateParam: T): T[] {
+        const { unitId, subUnitId, drawingId, drawingType } = updateParam;
+
+        const subComponentObjects = this._drawingManagerInfo[drawingType]?.[unitId]?.[subUnitId];
+
+        if (subComponentObjects == null) {
+            return [];
+        }
+
+        const object = subComponentObjects[drawingId] as T;
+
+        if (object == null) {
+            return [];
+        }
+
+        const newObject = { ...object, ...updateParam };
+
+        subComponentObjects[drawingId] = newObject;
+
+        return [newObject];
     }
 }
 
-export const IDrawingManagerService = createIdentifier<IDrawingManagerService>(
-    'univer.drawing.service'
-);
+export const IDrawingManagerService = createIdentifier<IDrawingManagerService>('univer.plugin.drawing-manager.service');
+

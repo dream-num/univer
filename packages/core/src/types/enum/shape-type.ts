@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-export enum ShapeType {
+export enum ShapeType_backup {
     TYPE_UNSPECIFIED, //The shape type that is not predefined.
     TEXT_BOX, //Text box shape.
     RECTANGLE, //Rectangle shape. Corresponds to ECMA-376 ST_ShapeType 'rect'.

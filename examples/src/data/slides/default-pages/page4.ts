@@ -15,7 +15,7 @@
  */
 
 import type { IWorksheetData } from '@univerjs/core';
-import { PageElementType, PageType, ShapeType } from '@univerjs/core';
+import { BasicShapes, PageElementType, PageType } from '@univerjs/core';
 
 import { SLIDE_WORKBOOK_DATA } from '../../sheets/slide-workbook-data';
 
@@ -43,7 +43,7 @@ export const DEFAULT_FORTH_PAGE = {
             description: '',
             type: PageElementType.SHAPE,
             shape: {
-                shapeType: ShapeType.RECTANGLE,
+                shapeType: BasicShapes.Rect,
                 text: '',
                 shapeProperties: {
                     shapeBackgroundFill: {

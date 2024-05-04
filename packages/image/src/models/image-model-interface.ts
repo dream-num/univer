@@ -14,16 +14,31 @@
  * limitations under the License.
  */
 
-import type enUS from './en-US';
+import type { IDrawingParam, ImageSourceType, PresetGeometryType } from '@univerjs/core';
 
-const locale: typeof enUS = {
-    'image-popup': {
-        replace: '替换',
-        delete: '删除',
-        edit: '编辑',
-        crop: '裁剪',
-        reset: '重置大小',
-    },
-};
+export interface ISrcRect {
+    left?: number;
+    top?: number;
+    right?: number;
+    bottom?: number;
+}
 
-export default locale;
+export interface IImageDataValue {
+
+}
+
+export interface IImageData extends IDrawingParam {
+    imageSourceType: ImageSourceType;
+    source: string;
+
+    /**
+     * 20.1.8.55 srcRect (Source Rectangle)
+     */
+    srcRect?: ISrcRect;
+
+    /**
+     * 20.1.9.18 prstGeom (Preset geometry)
+     */
+    prstGeom?: PresetGeometryType;
+}
+

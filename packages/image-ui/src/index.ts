@@ -14,4 +14,7 @@
  * limitations under the License.
  */
 
+export { ImagePopupMenu } from './views/image-popup-menu/ImagePopupMenu';
+export { COMPONENT_IMAGE_POPUP_MENU } from './views/image-popup-menu/component-name';
 export { UniverImageUIPlugin } from './plugin';
+

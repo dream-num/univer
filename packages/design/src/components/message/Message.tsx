@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+/* eslint-disable react-refresh/only-export-components */
+
 import { ErrorSingle, SuccessSingle, WarningSingle } from '@univerjs/icons';
 import { render } from 'rc-util/lib/React/render';
 import React from 'react';
@@ -84,12 +86,13 @@ const MessageContainer = (props: { messages: IMessageProps[] }) => {
 };
 
 export class Message {
-    private _div: HTMLDivElement;
-    private _messages: IMessageProps[] = [];
+    protected _container: HTMLDivElement;
+
+    protected _messages: IMessageProps[] = [];
 
     constructor(container: HTMLElement) {
-        this._div = document.createElement('div');
-        container.appendChild(this._div);
+        this._container = document.createElement('div');
+        container.appendChild(this._container);
 
         this.render();
     }
@@ -117,7 +120,7 @@ export class Message {
     }
 
     render() {
-        render(<MessageContainer messages={this._messages} />, this._div);
+        render(<MessageContainer messages={this._messages} />, this._container);
     }
 
     success(options: IMessageMethodOptions): IDisposable {

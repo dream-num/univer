@@ -30,12 +30,11 @@ export class DesktopMessageService implements IMessageService {
     }
 
     show(options: IMessageMethodOptions & Omit<IMessageProps, 'key'>): IDisposable {
-        const { type, ...rest } = options;
-
         if (!this.message) {
             throw new Error('[DesktopMessageService]: no message implementation!');
         }
 
+        const { type, ...rest } = options;
         return this.message[type](rest);
     }
 }

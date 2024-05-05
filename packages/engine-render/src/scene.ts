@@ -28,13 +28,13 @@ import { Transform } from './basics/transform';
 import type { Vector2 } from './basics/vector2';
 import type { UniverRenderingContext } from './context';
 import { Layer } from './layer';
-import type { ITransformerConfig } from './scene.transformer';
 import { Transformer } from './scene.transformer';
 import { InputManager } from './scene.input-manager';
 import type { SceneViewer } from './scene-viewer';
 import type { ThinEngine } from './thin-engine';
 import { ThinScene } from './thin-scene';
 import type { Viewport } from './viewport';
+import type { ITransformerConfig } from './basics/transformer-config';
 
 export class Scene extends ThinScene {
     private _layers: Layer[] = [];

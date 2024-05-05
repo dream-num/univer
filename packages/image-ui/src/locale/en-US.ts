@@ -22,6 +22,47 @@ const locale = {
         crop: 'Crop',
         reset: 'Reset Size',
     },
+    'image-panel': {
+        arrange: {
+            title: 'Arrange',
+            forward: 'Bring Forward',
+            backward: 'Send Backward',
+            front: 'Bring to Front',
+            back: 'Send to Back',
+        },
+        transform: {
+            title: 'Transform',
+            rotate: 'Rotate (°)',
+            x: 'X (px)',
+            y: 'Y (px)',
+            width: 'Width (px)',
+            height: 'Height (px)',
+            lock: 'Lock Ratio (%)',
+        },
+        crop: {
+            title: 'Crop',
+            start: 'Start Crop',
+            mode: 'Free',
+        },
+        group: {
+            title: 'Group',
+            group: 'Group',
+            reGroup: 'Regroup',
+            unGroup: 'Ungroup',
+        },
+        align: {
+            title: 'Align',
+            default: 'Select Align Type',
+            left: 'Align Left',
+            center: 'Align Center',
+            right: 'Align Right',
+            top: 'Align Top',
+            middle: 'Align Middle',
+            bottom: 'Align Bottom',
+            horizon: 'Distribute Horizontally ',
+            vertical: 'Distribute Vertically ',
+        },
+    },
 };
 
 export default locale;

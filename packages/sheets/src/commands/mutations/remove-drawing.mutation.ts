@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-import type { IMutation } from '@univerjs/core';
+import type { IDrawingSearch, IMutation } from '@univerjs/core';
 import { CommandType } from '@univerjs/core';
-import type { ISheetDrawingSearchParam } from '../../services/sheet-drawing.service';
 import { ISheetDrawingService } from '../../services/sheet-drawing.service';
 
 
-export const RemoveDrawingMutation: IMutation<ISheetDrawingSearchParam[]> = {
+export const RemoveDrawingMutation: IMutation<IDrawingSearch[]> = {
     id: 'sheet.mutation.remove-drawing',
     type: CommandType.MUTATION,
     handler: (accessor, params) => {

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IOtherTransform, ISize, Nullable } from '@univerjs/core';
+import type { DrawingType, IDrawingSearch, IOtherTransform, ISize, Nullable } from '@univerjs/core';
 import { Disposable } from '@univerjs/core';
 import { createIdentifier } from '@wendellhu/redi';
 import type { Observable } from 'rxjs';
@@ -38,18 +38,12 @@ export interface ISheetDrawingParam {
     originSize: ISize;
 }
 
-export interface ISheetDrawingSearchParam {
-    unitId: string;
-    subUnitId: string;
-    drawingId: string;
-}
 
-
-export interface ISheetDrawingServiceParam extends ISheetDrawingSearchParam, ISheetDrawingParam {
+export interface ISheetDrawingServiceParam extends IDrawingSearch, ISheetDrawingParam {
 
 }
 
-export interface ISheetDrawingServiceUpdateParam extends ISheetDrawingSearchParam, Partial<ISheetDrawingParam> {
+export interface ISheetDrawingServiceUpdateParam extends IDrawingSearch, Partial<ISheetDrawingParam> {
 
 }
 
@@ -68,33 +62,28 @@ export interface IISheetDrawingMapItem {
 
 export interface ISheetDrawingService {
     addDrawing(param: ISheetDrawingServiceParam): void;
-
     batchAddDrawing(params: ISheetDrawingServiceParam[]): void;
 
-    removeDrawing(param: ISheetDrawingSearchParam): Nullable<ISheetDrawingServiceParam>;
+    removeDrawing(param: IDrawingSearch): Nullable<ISheetDrawingServiceParam>;
+    batchRemoveDrawing(params: IDrawingSearch[]): ISheetDrawingServiceParam[];
 
-    batchRemoveDrawing(params: ISheetDrawingSearchParam[]): ISheetDrawingServiceParam[];
-
-    focusDrawing(unitId: string, subUnitId: string, drawingId: string): void;
+    focusDrawing(param: Nullable<IDrawingSearch>): void;
+    getFocusDrawings(): ISheetDrawingServiceParam[];
 
     updateDrawing(param: ISheetDrawingServiceUpdateParam): void;
-
     batchUpdateDrawing(params: ISheetDrawingServiceUpdateParam[]): void;
 
-    getDrawingMap(unitId: string, subUnitId: string): Nullable<IISheetDrawingMapItem>;
-
-    getDrawingItem(param: ISheetDrawingSearchParam): Nullable<ISheetDrawingServiceParam>;
+    getDrawingMap(unitId: string, subUnitId: string, drawingType: DrawingType): Nullable<IISheetDrawingMapItem>;
+    getDrawingItem(param: IDrawingSearch): Nullable<ISheetDrawingServiceParam>;
 
     add$: Observable<ISheetDrawingServiceParam[]>;
-
     remove$: Observable<ISheetDrawingServiceParam[]>;
-
     update$: Observable<ISheetDrawingServiceUpdateParam[]>;
 
 }
 
 export class SheetDrawingService extends Disposable implements ISheetDrawingService {
-    private _drawingMap: ISheetDrawingMap = {};
+    private _drawingMap: { [drawingType: DrawingType]: ISheetDrawingMap } = {};
 
     private _focusDrawings: ISheetDrawingServiceParam[] = [];
 
@@ -111,13 +100,13 @@ export class SheetDrawingService extends Disposable implements ISheetDrawingServ
     focus$: Observable<ISheetDrawingServiceParam[]> = this._focus$.asObservable();
 
 
-    getDrawingMap(unitId: string, subUnitId: string): Nullable<IISheetDrawingMapItem> {
-        return this._drawingMap[unitId]?.[subUnitId];
+    getDrawingMap(unitId: string, subUnitId: string, drawingType: DrawingType): Nullable<IISheetDrawingMapItem> {
+        return this._drawingMap[drawingType]?.[unitId]?.[subUnitId];
     }
 
-    getDrawingItem(param: ISheetDrawingSearchParam): Nullable<ISheetDrawingServiceParam> {
-        const { unitId, subUnitId, drawingId } = param;
-        return this._drawingMap[unitId]?.[subUnitId]?.[drawingId];
+    getDrawingItem(param: IDrawingSearch): Nullable<ISheetDrawingServiceParam> {
+        const { unitId, subUnitId, drawingId, drawingType } = param;
+        return this._drawingMap[drawingType]?.[unitId]?.[subUnitId]?.[drawingId];
     }
 
     addDrawing(param: ISheetDrawingServiceParam): void {
@@ -132,20 +121,18 @@ export class SheetDrawingService extends Disposable implements ISheetDrawingServ
         this._add$.next(params);
     }
 
-    removeDrawing(param: ISheetDrawingSearchParam): Nullable<ISheetDrawingServiceParam> {
-        const { unitId, subUnitId, drawingId } = param;
-        const deleteItem = this._removeDrawing(unitId, subUnitId, drawingId);
+    removeDrawing(param: IDrawingSearch): Nullable<ISheetDrawingServiceParam> {
+        const deleteItem = this._removeDrawing(param);
 
         deleteItem && this._remove$.next([deleteItem]);
 
         return deleteItem;
     }
 
-    batchRemoveDrawing(params: ISheetDrawingSearchParam[]): ISheetDrawingServiceParam[] {
+    batchRemoveDrawing(params: IDrawingSearch[]): ISheetDrawingServiceParam[] {
         const deleteItems: ISheetDrawingServiceParam[] = [];
         params.forEach((param) => {
-            const { unitId, subUnitId, drawingId } = param;
-            const deleteItem = this._removeDrawing(unitId, subUnitId, drawingId);
+            const deleteItem = this._removeDrawing(param);
             deleteItem && deleteItems.push(deleteItem);
         });
         return deleteItems;
@@ -163,45 +150,74 @@ export class SheetDrawingService extends Disposable implements ISheetDrawingServ
         this._update$.next(params);
     }
 
-    focusDrawing(unitId: string, subUnitId: string, drawingId: string): void {
-        const item = this._drawingMap[unitId]?.[subUnitId]?.[drawingId];
+    focusDrawing(param: Nullable<IDrawingSearch>): void {
+        if (param == null) {
+            this._focusDrawings = [];
+            this._focus$.next([]);
+            return;
+        }
+        const { unitId, subUnitId, drawingId, drawingType } = param;
+        const item = this._drawingMap[drawingType]?.[unitId]?.[subUnitId]?.[drawingId];
         if (item == null) {
+            this._focusDrawings = [];
+            this._focus$.next([]);
             return;
         }
         this._focusDrawings.push(item);
         this._focus$.next([item]);
     }
 
+    getFocusDrawings() {
+        return this._focusDrawings;
+    }
+
     private _updateDrawing(param: ISheetDrawingServiceUpdateParam): void {
-        const { unitId, subUnitId, drawingId } = param;
-        if (!this._drawingMap[unitId] || !this._drawingMap[unitId][subUnitId]) {
+        const { unitId, subUnitId, drawingId, drawingType } = param;
+
+        if (!this._drawingMap[drawingType]) {
             return;
         }
-        const item = this._drawingMap[unitId][subUnitId][drawingId];
+
+        const drawingMapUnit = this._drawingMap[drawingType];
+
+        if (!drawingMapUnit[unitId] || !drawingMapUnit[unitId][subUnitId]) {
+            return;
+        }
+        const item = drawingMapUnit[unitId][subUnitId][drawingId];
         if (item == null) {
             return;
         }
-        this._drawingMap[unitId][subUnitId][drawingId] = { ...item, ...param };
+        drawingMapUnit[unitId][subUnitId][drawingId] = { ...item, ...param };
     }
 
 
     private _addDrawing(param: ISheetDrawingServiceParam): void {
-        const { unitId, subUnitId } = param;
-        if (!this._drawingMap[unitId]) {
-            this._drawingMap[unitId] = {};
+        const { unitId, subUnitId, drawingId, drawingType } = param;
+        if (!this._drawingMap[drawingType]) {
+            this._drawingMap[drawingType] = {};
         }
-        if (!this._drawingMap[unitId][subUnitId]) {
-            this._drawingMap[unitId][subUnitId] = {};
+        if (!this._drawingMap[drawingType][unitId]) {
+            this._drawingMap[drawingType][unitId] = {};
         }
-        this._drawingMap[unitId][subUnitId][param.drawingId] = param;
+        if (!this._drawingMap[drawingType][unitId][subUnitId]) {
+            this._drawingMap[drawingType][unitId][subUnitId] = {};
+        }
+        this._drawingMap[drawingType][unitId][subUnitId][drawingId] = param;
     }
 
-    private _removeDrawing(unitId: string, subUnitId: string, drawingId: string): Nullable<ISheetDrawingServiceParam> {
-        if (!this._drawingMap[unitId] || !this._drawingMap[unitId][subUnitId]) {
+    private _removeDrawing(param: IDrawingSearch): Nullable<ISheetDrawingServiceParam> {
+        const { unitId, subUnitId, drawingId, drawingType } = param;
+        if (!this._drawingMap[drawingType]) {
             return;
         }
-        const deleteItem = this._drawingMap[unitId][subUnitId][drawingId];
-        delete this._drawingMap[unitId][subUnitId][drawingId];
+
+        const drawingMapUnit = this._drawingMap[drawingType];
+
+        if (!drawingMapUnit[unitId] || !drawingMapUnit[unitId][subUnitId]) {
+            return;
+        }
+        const deleteItem = drawingMapUnit[unitId][subUnitId][drawingId];
+        delete drawingMapUnit[unitId][subUnitId][drawingId];
         return deleteItem;
     }
 }

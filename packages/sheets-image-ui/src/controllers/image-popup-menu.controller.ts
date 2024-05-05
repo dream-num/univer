@@ -15,7 +15,7 @@
  */
 
 import type { Nullable, Workbook } from '@univerjs/core';
-import { DrawingTypeEnum, IDrawingManagerService, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle, RxDisposable, toDisposable, UniverInstanceType } from '@univerjs/core';
+import { DrawingTypeEnum, ICommandService, IDrawingManagerService, IUniverInstanceService, LifecycleStages, LocaleService, OnLifecycle, RxDisposable, toDisposable, UniverInstanceType } from '@univerjs/core';
 import type { IDisposable } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import type { BaseObject } from '@univerjs/engine-render';
@@ -23,8 +23,9 @@ import { IRenderManagerService } from '@univerjs/engine-render';
 import { COMPONENT_IMAGE_POPUP_MENU } from '@univerjs/image-ui';
 import { SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
 import { takeUntil } from 'rxjs';
-import { RemoveImageMutation } from '@univerjs/image';
 import { SidebarSheetImageOperation } from '../commands/operations/open-image-panel.operation';
+import { RemoveSheetImageCommand } from '../commands/commands/remove-sheet-image.command';
+import { EditSheetImageOperation } from '../commands/operations/edit-sheet-image.operation';
 
 @OnLifecycle(LifecycleStages.Rendered, ImagePopupMenuController)
 export class ImagePopupMenuController extends RxDisposable {
@@ -36,7 +37,8 @@ export class ImagePopupMenuController extends RxDisposable {
         @Inject(SheetCanvasPopManagerService) private readonly _canvasPopManagerService: SheetCanvasPopManagerService,
         @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
         @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService,
-        @Inject(LocaleService) private readonly _localeService: LocaleService
+        @Inject(LocaleService) private readonly _localeService: LocaleService,
+        @ICommandService private readonly _commandService: ICommandService
 
     ) {
         super();
@@ -116,8 +118,12 @@ export class ImagePopupMenuController extends RxDisposable {
 
         this.disposeWithMe(
             toDisposable(
-                transformer.onClearControlObservable.add(() => {
+                transformer.onClearControlObservable.add((changeSelf) => {
                     disposePopups.forEach((dispose) => dispose.dispose());
+
+                    if (changeSelf === true) {
+                        this._commandService.executeCommand(SidebarSheetImageOperation.id, { value: 'close' });
+                    }
                 })
             )
         );
@@ -127,28 +133,28 @@ export class ImagePopupMenuController extends RxDisposable {
         const drawingType = DrawingTypeEnum.DRAWING_IMAGE;
         return [
             {
-                label: this._localeService.t('image-popup.edit'),
+                label: 'image-popup.edit',
                 index: 0,
-                commandId: SidebarSheetImageOperation.id,
-                commandParams: [{ unitId, subUnitId, drawingId, drawingType }],
+                commandId: EditSheetImageOperation.id,
+                commandParams: { unitId, subUnitId, drawingId, drawingType },
                 disable: false,
             },
             {
-                label: this._localeService.t('image-popup.delete'),
+                label: 'image-popup.delete',
                 index: 1,
-                commandId: RemoveImageMutation.id,
-                commandParams: [{ unitId, subUnitId, drawingId, drawingType }],
+                commandId: RemoveSheetImageCommand.id,
+                commandParams: { unitId, drawings: [{ unitId, subUnitId, drawingId, drawingType }] },
                 disable: false,
             },
             {
-                label: this._localeService.t('image-popup.crop'),
+                label: 'image-popup.crop',
                 index: 2,
                 commandId: 'image.crop',
                 commandParams: [{ unitId, subUnitId, drawingId, drawingType }],
                 disable: false,
             },
             {
-                label: this._localeService.t('image-popup.reset'),
+                label: 'image-popup.reset',
                 index: 3,
                 commandId: 'image.reset',
                 commandParams: [{ unitId, subUnitId, drawingId, drawingType }],

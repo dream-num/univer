@@ -72,6 +72,8 @@ export class ImageUpdateController extends Disposable {
         );
     }
 
+    private _sceneListenerOnImageMap: WeakSet<Scene> = new WeakSet();
+
     private _drawingAddListener() {
         this.disposeWithMe(
             this._drawingManagerService.add$.subscribe((params) => {
@@ -125,7 +127,11 @@ export class ImageUpdateController extends Disposable {
                 });
 
                 sceneList.forEach((scene) => {
+                    if (this._sceneListenerOnImageMap.has(scene)) {
+                        return;
+                    }
                     this._addListenerOnImage(scene);
+                    this._sceneListenerOnImageMap.add(scene);
                 });
             })
         );

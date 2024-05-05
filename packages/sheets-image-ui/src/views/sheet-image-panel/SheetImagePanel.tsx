@@ -14,32 +14,32 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
+import type { IDrawingParam, Nullable } from '@univerjs/core';
 import { ICommandService } from '@univerjs/core';
 import { useDependency } from '@wendellhu/redi/react-bindings';
-import React, { useRef } from 'react';
-import type { ICustomComponentProps } from '@univerjs/ui';
-import { ALLOW_IMAGE_LIST } from '@univerjs/image';
+import React, { useRef, useState } from 'react';
+import { ImageCommonPanel } from '@univerjs/image-ui';
+import { ISheetDrawingService } from '@univerjs/sheets';
 
 
-export interface ISheetImagePanelProps {
-
-}
-
-
-export const SheetImagePanel = (props: ISheetImagePanelProps) => {
+export const SheetImagePanel = () => {
     const commandService = useDependency(ICommandService);
+    const sheetDrawingService = useDependency(ISheetDrawingService);
+    const drawing = sheetDrawingService.getFocusDrawings()[0];
 
+    if (drawing == null) {
+        return;
+    }
+
+    const { unitId, subUnitId, drawingId, drawingType } = drawing;
+    const props = {
+        unitId, subUnitId, drawingId, drawingType,
+    };
 
     return (
-        <>
-            <div>
-                <h1></h1>
-            </div>
-            <div>
-                <h1></h1>
-            </div>
-        </>
+        <div className="container">
+            <ImageCommonPanel {...props} />
+        </div>
     );
 };
 

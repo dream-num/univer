@@ -143,6 +143,7 @@ export class SheetImageUpdateController extends Disposable {
             drawingId: imageId,
             unitId,
             subUnitId,
+            drawingType: DrawingTypeEnum.DRAWING_IMAGE,
         };
 
 
@@ -281,7 +282,7 @@ export class SheetImageUpdateController extends Disposable {
                     return;
                 }
 
-                const sheetDrawing = this._sheetDrawingService.getDrawingItem({ unitId, subUnitId, drawingId });
+                const sheetDrawing = this._sheetDrawingService.getDrawingItem({ unitId, subUnitId, drawingId, drawingType });
 
                 const imageDrawing = this._drawingManagerService.getDrawingByParam({ unitId, subUnitId, drawingId, drawingType });
 
@@ -289,7 +290,8 @@ export class SheetImageUpdateController extends Disposable {
                     return;
                 }
 
-                const sheetTransform = this._transformToImagePosition(transform);
+
+                const sheetTransform = this._transformToImagePosition({ ...imageDrawing.transform, ...transform });
 
                 if (sheetTransform == null) {
                     return;

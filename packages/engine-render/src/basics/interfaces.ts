@@ -41,12 +41,14 @@ import type {
     IDocumentSkeletonHeader,
 } from './i-document-skeleton-cached';
 import type { Vector2 } from './vector2';
+import type { ITransformerConfig } from './transformer-config';
 
 export interface IObjectFullState extends ITransformState {
     strokeWidth?: number;
     zIndex?: number;
     forceRender?: boolean;
     debounceParentDirty?: boolean;
+    transformerConfig?: ITransformerConfig;
 }
 
 export interface IRect extends ISize, IOffset {

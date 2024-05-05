@@ -27,6 +27,7 @@ import { Transform } from './basics/transform';
 import type { IViewportBound, Vector2 } from './basics/vector2';
 import type { UniverRenderingContext } from './context';
 import type { Layer } from './layer';
+import type { ITransformerConfig } from './basics/transformer-config';
 
 export const BASE_OBJECT_ARRAY = [
     'top',
@@ -126,6 +127,7 @@ export abstract class BaseObject extends Disposable {
 
     private _cursor: CURSOR_TYPE = CURSOR_TYPE.DEFAULT;
 
+    private _transformerConfig: ITransformerConfig;
 
     private _forceRender = false;
 
@@ -363,6 +365,14 @@ export abstract class BaseObject extends Disposable {
 
     protected set skewY(skewY: number) {
         this._skewY = skewY;
+    }
+
+    get transformerConfig() {
+        return this._transformerConfig;
+    }
+
+    set transformerConfig(config: ITransformerConfig) {
+        this._transformerConfig = config;
     }
 
     makeDirty(state: boolean = true) {

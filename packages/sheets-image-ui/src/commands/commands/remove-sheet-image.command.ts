@@ -14,18 +14,20 @@
  * limitations under the License.
  */
 
-import type { ICommand } from '@univerjs/core';
+import type { ICommand, IDrawingParam } from '@univerjs/core';
 import {
     CommandType,
     ICommandService,
+    IDrawingManagerService,
     IUndoRedoService,
 } from '@univerjs/core';
 
-import { InsertDrawingMutation, RemoveDrawingMutation } from '@univerjs/sheets';
+import type { ISheetDrawingServiceParam } from '@univerjs/sheets';
+import { InsertDrawingMutation, ISheetDrawingService, RemoveDrawingMutation } from '@univerjs/sheets';
 import type { IAccessor } from '@wendellhu/redi';
 import { InsertImageMutation, RemoveImageMutation } from '@univerjs/image';
 import { ClearSheetDrawingTransformerOperation } from '../operations/clear-drawing-transformer.operation';
-import type { IInsertDrawingCommandParams } from './interfaces';
+import type { IDeleteDrawingCommandParams, IInsertDrawingCommandParams } from './interfaces';
 
 
 /**
@@ -34,24 +36,48 @@ import type { IInsertDrawingCommandParams } from './interfaces';
 export const RemoveSheetImageCommand: ICommand = {
     id: 'sheet.command.remove-sheet-image',
     type: CommandType.COMMAND,
-    handler: (accessor: IAccessor, params?: IInsertDrawingCommandParams) => {
+    handler: (accessor: IAccessor, params?: IDeleteDrawingCommandParams) => {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
 
+        const sheetDrawingService = accessor.get(ISheetDrawingService);
+        const drawingManagerService = accessor.get(IDrawingManagerService);
+
+
         if (!params) return false;
 
-        const drawings = params.drawings;
+        const { unitId, drawings } = params;
 
-        const sheetDrawingParams = drawings.map((param) => param.sheetDrawingParam);
-        const imageDrawingParams = drawings.map((param) => param.drawingParam);
-        const unitIds: string[] = drawings.map((param) => param.sheetDrawingParam.unitId);
+        const sheetDrawingParams: ISheetDrawingServiceParam[] = [];
+        const imageDrawingParams: IDrawingParam[] = [];
+        const removeImageMutationParams = drawings;
+        const unitIds: string[] = [];
+
+        drawings.forEach((param) => {
+            const { unitId, subUnitId, drawingId, drawingType } = param;
+
+            unitIds.push(unitId);
+
+            const oldSheetDrawing = sheetDrawingService.getDrawingItem({ unitId, subUnitId, drawingId, drawingType });
+            if (oldSheetDrawing) {
+                sheetDrawingParams.push(oldSheetDrawing);
+            }
+
+            const oldImageDrawing = drawingManagerService.getDrawingByParam({ unitId, subUnitId, drawingId, drawingType });
+            if (oldImageDrawing) {
+                imageDrawingParams.push(oldImageDrawing);
+            }
+        });
+
+        // const sheetDrawingParams = drawings.map((param) => param.sheetDrawingParam);
+        // const imageDrawingParams = drawings.map((param) => param.drawingParam);
+        // const unitIds: string[] = drawings.map((param) => param.sheetDrawingParam.unitId);
 
         // prepare do mutations
-        const removeImageMutationParams = drawings.map((param) => {
-            const { unitId, subUnitId, drawingId, drawingType } = param.drawingParam;
-            return { unitId, subUnitId, drawingId, drawingType };
-        });
-        const unitId = params.unitId;
+        // const removeImageMutationParams = drawings.map((param) => {
+        //     const { unitId, subUnitId, drawingId, drawingType } = param.drawingParam;
+        //     return { unitId, subUnitId, drawingId, drawingType };
+        // });
 
 
         // execute do mutations and add undo mutations to undo stack if completed

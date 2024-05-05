@@ -71,10 +71,10 @@ export class ImageLoadController extends Disposable {
     }
 
     private _drawingListener() {
+        const sceneList: Scene[] = [];
         this.disposeWithMe(
             toDisposable(
                 this._drawingManagerService.add$.subscribe((params) => {
-                    const sceneList: Scene[] = [];
                     (params as IImageData[]).forEach((param) => {
                         const { unitId, subUnitId, drawingId, transform, zIndex } = param;
 

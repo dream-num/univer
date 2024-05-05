@@ -41,9 +41,6 @@ export const SetSheetImageCommand: ICommand = {
         const commandService = accessor.get(ICommandService);
         const undoRedoService = accessor.get(IUndoRedoService);
 
-        const sheetDrawingService = accessor.get(ISheetDrawingService);
-        const drawingManagerService = accessor.get(IDrawingManagerService);
-
 
         if (!params) return false;
 
@@ -100,7 +97,6 @@ export const SetSheetImageCommand: ICommand = {
                 undoMutations: [
                     { id: SetImageMutation.id, params: oldImageDrawingParams },
                     { id: SetDrawingMutation.id, params: oldSheetDrawingParams },
-
                     { id: ClearSheetDrawingTransformerOperation.id, params: [unitId] },
                 ],
                 redoMutations: [

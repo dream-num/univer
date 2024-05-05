@@ -15,7 +15,7 @@
  */
 
 
-import type { IDrawingParam } from '@univerjs/core';
+import type { DrawingTypeEnum, IDrawingParam } from '@univerjs/core';
 import type { ISheetDrawingServiceParam } from '@univerjs/sheets';
 
 
@@ -27,6 +27,18 @@ export interface IDrawingCommandParams {
 export interface IInsertDrawingCommandParams {
     unitId: string;
     drawings: IDrawingCommandParams[];
+}
+
+export interface IDeleteDrawingCommandParam {
+    unitId: string;
+    subUnitId: string;
+    drawingId: string;
+    drawingType: DrawingTypeEnum;
+}
+
+export interface IDeleteDrawingCommandParams {
+    unitId: string;
+    drawings: IDeleteDrawingCommandParam[];
 }
 
 

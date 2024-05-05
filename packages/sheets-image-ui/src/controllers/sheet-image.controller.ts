@@ -31,6 +31,7 @@ import { COMPONENT_SHEET_IMAGE_PANEL } from '../views/sheet-image-panel/componen
 import { SheetImagePanel } from '../views/sheet-image-panel/SheetImagePanel';
 import { SidebarSheetImageOperation } from '../commands/operations/open-image-panel.operation';
 import { ClearSheetDrawingTransformerOperation } from '../commands/operations/clear-drawing-transformer.operation';
+import { EditSheetImageOperation } from '../commands/operations/edit-sheet-image.operation';
 
 @OnLifecycle(LifecycleStages.Rendered, SheetImageUIController)
 export class SheetImageUIController extends Disposable {
@@ -74,6 +75,7 @@ export class SheetImageUIController extends Disposable {
             SetSheetImageCommand,
             SidebarSheetImageOperation,
             ClearSheetDrawingTransformerOperation,
+            EditSheetImageOperation,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 

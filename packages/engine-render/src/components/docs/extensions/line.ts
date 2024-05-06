@@ -43,7 +43,7 @@ export class Line extends docExtension {
             return;
         }
 
-        const { contentHeight = 0, asc } = line;
+        const { asc, dsc } = line;
         const { ts: textStyle, bBox } = span;
         if (!textStyle) {
             return;
@@ -58,7 +58,7 @@ export class Line extends docExtension {
         const { ul: underline, st: strikethrough, ol: overline, va: baselineOffset } = textStyle;
 
         if (underline) {
-            const startY = contentHeight + DEFAULT_OFFSET_SPACING - 3;
+            const startY = asc + dsc;
 
             this._drawLine(ctx, span, underline, startY, scale);
         }

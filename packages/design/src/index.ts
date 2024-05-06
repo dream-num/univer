@@ -62,3 +62,4 @@ export { type ILocale } from './locale/interface';
 export { defaultTheme, greenTheme, themeInstance } from './themes';
 export { DraggableList, type IDraggableListProps } from './components/draggable-list';
 export { Textarea, type ITextareaProps } from './components/textarea';
+export { Mentions, type IMentionsProps } from './components/mentions';

@@ -14,16 +14,19 @@
  * limitations under the License.
  */
 
-import { Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
+
+type ActiveCommentInfo = { unitId: string; subUnitId: string; commentId: string } | undefined;
 
 export class ThreadCommentPanelService {
     private _panelVisible = false;
-    private _panelVisible$ = new Subject<boolean>();
+    private _panelVisible$ = new BehaviorSubject<boolean>(false);
 
-    private _activeCommentId: string | undefined;
-    private _activeCommentId$ = new Subject<string | undefined>();
+    private _activeCommentId: ActiveCommentInfo;
+    private _activeCommentId$ = new BehaviorSubject<ActiveCommentInfo>(undefined);
 
     panelVisible$ = this._panelVisible$.asObservable();
+    activeCommentId$ = this._activeCommentId$.asObservable();
 
     get panelVisible() {
         return this._panelVisible;
@@ -38,8 +41,8 @@ export class ThreadCommentPanelService {
         this._panelVisible$.next(visible);
     }
 
-    setActiveComment(commentId: string | undefined) {
-        this._activeCommentId = commentId;
-        this._activeCommentId$.next(commentId);
+    setActiveComment(commentInfo: ActiveCommentInfo) {
+        this._activeCommentId = commentInfo;
+        this._activeCommentId$.next(commentInfo);
     }
 }

@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 import { Disposable, IUniverInstanceService, ObjectMatrix, UniverInstanceType } from '@univerjs/core';
 import type { CommentUpdate } from '@univerjs/thread-comment';
 import { ThreadCommentModel } from '@univerjs/thread-comment';
@@ -83,16 +84,28 @@ export class SheetsThreadCommentModel extends Disposable {
         return { matrix, locationMap };
     }
 
+    // eslint-disable-next-line max-lines-per-function
     private _initUpdateTransform() {
+        // eslint-disable-next-line max-lines-per-function
         this.disposeWithMe(this._threadCommentModel.commentUpdate$.subscribe((update) => {
             const { unitId, subUnitId } = update;
             const type = this._univerInstanceService.getUnitType(unitId);
             if (type !== UniverInstanceType.UNIVER_SHEET) {
                 return;
             }
+            const { matrix, locationMap } = this._ensure(unitId, subUnitId);
             switch (update.type) {
                 case 'add': {
                     const location = singleReferenceToGrid(update.payload.ref);
+                    const parentId = update.payload.parentId;
+                    const { row, column } = location;
+                    const commentId = update.payload.id;
+
+                    if (!parentId && row >= 0 && column >= 0) {
+                        matrix.setValue(row, column, commentId);
+                        locationMap.set(commentId, { row, column });
+                    }
+
                     this._commentUpdate$.next({
                         ...update,
                         ...location,
@@ -100,12 +113,22 @@ export class SheetsThreadCommentModel extends Disposable {
                     break;
                 }
                 case 'delete': {
-                    const { commentId } = update.payload;
+                    const { commentId, isRoot } = update.payload;
                     const comment = this._threadCommentModel.getComment(unitId, subUnitId, commentId);
                     if (!comment) {
                         return;
                     }
                     const location = singleReferenceToGrid(comment.ref);
+                    if (isRoot) {
+                        const comment = this._threadCommentModel.getComment(unitId, subUnitId, commentId);
+                        if (!comment) {
+                            return;
+                        }
+                        const { row, column } = location;
+                        if (row >= 0 && column >= 0) {
+                            matrix.realDeleteValue(row, column);
+                        }
+                    }
                     this._commentUpdate$.next({
                         ...update,
                         ...location,
@@ -127,6 +150,22 @@ export class SheetsThreadCommentModel extends Disposable {
                 }
                 case 'updateRef': {
                     const location = singleReferenceToGrid(update.payload.ref);
+                    const { commentId } = update.payload;
+                    const currentLoc = locationMap.get(commentId);
+                    if (!currentLoc) {
+                        return;
+                    }
+                    const { row, column } = currentLoc;
+                    const currentCommentId = matrix.getValue(row, column);
+                    if (currentCommentId === commentId) {
+                        matrix.realDeleteValue(row, column);
+                        locationMap.delete(commentId);
+                    }
+                    if (location.row >= 0 && location.column >= 0) {
+                        matrix.setValue(location.row, location.column, commentId);
+                        locationMap.set(commentId, { row: location.row, column: location.column });
+                    }
+
                     this._commentUpdate$.next({
                         ...update,
                         ...location,
@@ -140,79 +179,15 @@ export class SheetsThreadCommentModel extends Disposable {
         }));
     }
 
-    private _initModel() {
-        this.disposeWithMe(
-            this.commentUpdate$.subscribe((update) => {
-                const { unitId, subUnitId } = update;
-                const type = this._univerInstanceService.getUnitType(unitId);
-                if (type !== UniverInstanceType.UNIVER_SHEET) {
-                    return;
-                }
-                const { matrix, locationMap } = this._ensure(unitId, subUnitId);
-                switch (update.type) {
-                    case 'add': {
-                        const parentId = update.payload.parentId;
-                        const { row, column } = update;
-                        const commentId = update.payload.id;
-
-                        if (!parentId && row >= 0 && column >= 0) {
-                            matrix.setValue(row, column, commentId);
-                            locationMap.set(commentId, { row, column });
-                        }
-
-                        break;
-                    }
-                    case 'delete': {
-                        const { commentId, isRoot } = update.payload;
-                        if (isRoot) {
-                            const comment = this._threadCommentModel.getComment(unitId, subUnitId, commentId);
-                            if (!comment) {
-                                return;
-                            }
-                            const { row, column } = update;
-                            if (row >= 0 && column >= 0) {
-                                matrix.realDeleteValue(row, column);
-                            }
-                        }
-                        break;
-                    }
-                    case 'update': {
-                        break;
-                    }
-
-                    case 'updateRef': {
-                        const { commentId } = update.payload;
-                        const currentLoc = locationMap.get(commentId);
-                        if (!currentLoc) {
-                            return;
-                        }
-                        const { row, column } = currentLoc;
-                        const currentCommentId = matrix.getValue(row, column);
-                        if (currentCommentId === commentId) {
-                            matrix.realDeleteValue(row, column);
-                            locationMap.delete(commentId);
-                        }
-                        if (update.row >= 0 && update.column >= 0) {
-                            matrix.setValue(update.row, update.column, commentId);
-                            locationMap.set(commentId, { row: update.row, column: update.column });
-                        }
-                        break;
-                    }
-                    default:
-                        break;
-                }
-            })
-        );
-    }
 
     private _init() {
         this._initUpdateTransform();
-        this._initModel();
     }
 
 
     getByLocation(unitId: string, subUnitId: string, row: number, column: number): string | undefined {
         const matrix = this._ensureCommentMatrix(unitId, subUnitId);
+
         return matrix.getValue(row, column);
     }
 

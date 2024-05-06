@@ -59,7 +59,13 @@ export const ShowAddSheetCommentModalOperation: ICommand = {
 
         sheetsThreadCommentPopupService.showPopup(location);
         const rootId = model.getByLocation(unitId, sheetId, activeCell.actualRow, activeCell.startColumn);
-        threadCommentPanelService.setActiveComment(rootId);
+        if (rootId) {
+            threadCommentPanelService.setActiveComment({
+                unitId,
+                subUnitId: sheetId,
+                commentId: rootId,
+            });
+        }
         return true;
     },
 };

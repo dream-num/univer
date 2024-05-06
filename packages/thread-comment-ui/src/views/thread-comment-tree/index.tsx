@@ -17,7 +17,7 @@
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import type { IAddCommentCommandParams, IThreadComment, IUpdateCommentCommandParams } from '@univerjs/thread-comment';
 import { AddCommentCommand, DeleteCommentCommand, DeleteCommentTreeCommand, ThreadCommentModel, UpdateCommentCommand } from '@univerjs/thread-comment';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { DeleteSingle, MoreSingle } from '@univerjs/icons';
 import { ICommandService, Tools, type UniverInstanceType } from '@univerjs/core';
 import { useObservable } from '@univerjs/ui';
@@ -31,17 +31,22 @@ export interface IThreadCommentTreeProps {
     type: UniverInstanceType;
     refStr?: string;
     personId?: string;
+    showEdit?: boolean;
+    onClick?: () => void;
+    showHighlight?: boolean;
 }
 
 export interface IThreadCommentItemProps {
     item: IThreadComment;
     unitId: string;
     subUnitId: string;
+    onEditingChange?: (editing: boolean) => void;
+    editing?: boolean;
+    onClick?: () => void;
 }
 
 const ThreadCommentItem = (props: IThreadCommentItemProps) => {
-    const { item, unitId, subUnitId } = props;
-    const [editing, setEditing] = useState(false);
+    const { item, unitId, subUnitId, editing, onEditingChange } = props;
     const commandService = useDependency(ICommandService);
 
     const handleDeleteItem = () => {
@@ -55,11 +60,6 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
         );
     };
 
-    useEffect(() => {
-        if (!item.id) {
-            setEditing(true);
-        }
-    }, [item.id]);
 
     return (
         <div className={styles.threadCommentItem}>
@@ -76,50 +76,38 @@ const ThreadCommentItem = (props: IThreadCommentItemProps) => {
                     <ThreadCommentEditor
                         id={item.id}
                         comment={item}
-                        onCancel={() => setEditing(false)}
+                        onCancel={() => onEditingChange?.(false)}
                         autoFocus
                         onSave={({ text, attachments }) => {
-                            setEditing(false);
-                            if (item.id) {
-                                commandService.executeCommand(
-                                    UpdateCommentCommand.id,
-                                    {
-                                        unitId,
-                                        subUnitId,
-                                        payload: {
-                                            commentId: item.id,
-                                            text,
-                                            attachments,
-                                        },
-                                    } as IUpdateCommentCommandParams
-                                );
-                            } else {
-                                commandService.executeCommand(
-                                    AddCommentCommand.id,
-                                    {
-                                        unitId,
-                                        subUnitId,
-                                        comment: {
-                                            ...item,
-                                            text,
-                                            attachments,
-                                            dT: new Date().toLocaleDateString(),
-                                            id: Tools.generateRandomId(),
-                                        },
-                                    } as IAddCommentCommandParams
-                                );
-                            }
+                            onEditingChange?.(false);
+                            commandService.executeCommand(
+                                UpdateCommentCommand.id,
+                                {
+                                    unitId,
+                                    subUnitId,
+                                    payload: {
+                                        commentId: item.id,
+                                        text,
+                                        attachments,
+                                    },
+                                } as IUpdateCommentCommandParams
+                            );
                         }}
                     />
                 )
-                : <div className={styles.threadCommentItemContent}>{item.text}</div>}
+                : (
+                    <div className={styles.threadCommentItemContent}>
+                        {item.text}
+                    </div>
+                )}
         </div>
     );
 };
 
 export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
-    const { id, unitId, subUnitId, refStr, personId } = props;
+    const { id, unitId, subUnitId, refStr, personId, showEdit = true, onClick, showHighlight } = props;
     const threadCommentModel = useDependency(ThreadCommentModel);
+    const [editingId, setEditingId] = useState('');
     useObservable(threadCommentModel.commentMap$);
     const comments = id ? threadCommentModel.getCommentWithChildren(unitId, subUnitId, id) : null;
     const commandService = useDependency(ICommandService);
@@ -127,7 +115,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
         ...comments ?
             [comments.root] :
             // mock empty comment
-            [{ id: '', text: '', personId: personId ?? '', ref: refStr ?? '', dT: '' }],
+            [{ id: 'mock', text: '', personId: personId ?? '', ref: refStr ?? '', dT: '' }],
         ...comments?.children ?? [],
     ];
 
@@ -144,11 +132,12 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
     };
 
     return (
-        <div className={styles.threadComment}>
+        <div className={styles.threadComment} onClick={onClick}>
+            {showHighlight ? <div className={styles.threadCommentHighlight} /> : null}
             <div className={styles.threadCommentTitle}>
                 <div className={styles.threadCommentTitlePosition}>
                     <div className={styles.threadCommentTitleHighlight} />
-                    {refStr}
+                    {refStr || comments?.root.ref}
                 </div>
                 {comments
                     ? (
@@ -167,10 +156,18 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                         subUnitId={subUnitId}
                         item={item}
                         key={item.id}
+                        editing={editingId === item.id}
+                        onEditingChange={(editing) => {
+                            if (editing) {
+                                setEditingId(item.id);
+                            } else {
+                                setEditingId('');
+                            }
+                        }}
                     />
                 )
             )}
-            {comments
+            {showEdit && !editingId
                 ? (
                     <div>
                         <ThreadCommentEditor
@@ -187,7 +184,7 @@ export const ThreadCommentTree = (props: IThreadCommentTreeProps) => {
                                             id: Tools.generateRandomId(),
                                             ref: refStr,
                                             personId,
-                                            parentId: comments.root.id,
+                                            parentId: comments?.root.id,
                                         },
                                     } as IAddCommentCommandParams
                                 );

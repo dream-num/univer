@@ -16,33 +16,29 @@
 
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import React from 'react';
-import { SelectionManagerService } from '@univerjs/sheets';
 import { ThreadCommentTree } from '@univerjs/thread-comment-ui';
 import { Tools, UniverInstanceType } from '@univerjs/core';
 import { useObservable } from '@univerjs/ui';
 import { SheetsThreadCommentModel } from '../../models/sheets-thread-comment.model';
+import { SheetsThreadCommentPopupService } from '../../services/sheets-thread-comment-popup.service';
 
 export const SheetsThreadCommentCell = () => {
-    const selectionManagerService = useDependency(SelectionManagerService);
-    const current = selectionManagerService.getCurrent();
-
-    const selection = selectionManagerService.getFirst();
+    const sheetsThreadCommentPopupService = useDependency(SheetsThreadCommentPopupService);
+    const activePopup = useObservable(sheetsThreadCommentPopupService.activePopup$);
     const sheetThreadCommentModel = useDependency(SheetsThreadCommentModel);
     useObservable(sheetThreadCommentModel.commentUpdate$);
-    if (!current || !selection?.primary) {
+    if (!activePopup) {
         return null;
     }
-    const { unitId, sheetId } = current;
-    const { actualColumn, actualRow } = selection.primary;
-
-    const rootId = sheetThreadCommentModel.getByLocation(unitId, sheetId, actualRow, actualColumn);
-    const ref = `${Tools.chatAtABC(actualColumn)}${actualRow + 1}`;
+    const { row, col, unitId, subUnitId } = activePopup;
+    const rootId = sheetThreadCommentModel.getByLocation(unitId, subUnitId, row, col);
+    const ref = `${Tools.chatAtABC(col)}${row + 1}`;
 
     return (
         <ThreadCommentTree
             id={rootId}
             unitId={unitId}
-            subUnitId={sheetId}
+            subUnitId={subUnitId}
             type={UniverInstanceType.UNIVER_SHEET}
             refStr={ref}
             personId=""

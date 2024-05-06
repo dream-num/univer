@@ -416,6 +416,9 @@ importers:
       '@rc-component/trigger':
         specifier: ^1.18.3
         version: 1.18.3(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      '@types/react-mentions':
+        specifier: ^4.1.13
+        version: 4.1.13
       '@univerjs/icons':
         specifier: ^0.1.44
         version: 0.1.44(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -458,6 +461,9 @@ importers:
       react-grid-layout:
         specifier: ^1.4.4
         version: 1.4.4(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      react-mentions:
+        specifier: ^4.4.10
+        version: 4.4.10(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       react-transition-group:
         specifier: ^4.4.5
         version: 4.4.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -2622,6 +2628,9 @@ packages:
     resolution: {integrity: sha512-+BIznRzyqBf+2wCTxcKE3wDjfGeCoVE61KSHGpkzqrLi8qxqFwBeUFyId2cxkTmm55fzDGnm0+yCxaxygrLUnQ==}
     engines: {node: '>=6.9.0'}
 
+  '@babel/runtime@7.4.5':
+    resolution: {integrity: sha512-TuI4qpWZP6lGOGIuGWtp9sPluqYICmbk8T/1vpSysqJxRPkudh/ofFWyqdcMsDf2s7KvDL4/YHgKyvcS3g9CJQ==, tarball: https://r2.cnpmjs.org/@babel/runtime/-/runtime-7.4.5.tgz}
+
   '@babel/template@7.24.0':
     resolution: {integrity: sha512-Bkf2q8lMB0AFpX0NFEqSbx1OkTHf0f+0j82mkw+ZpzBnkk7e9Ql0891vlfgi+kHwOk8tQjiQHpqh4LaSa0fKEA==}
     engines: {node: '>=6.9.0'}
@@ -4031,6 +4040,9 @@ packages:
 
   '@types/react-grid-layout@1.3.5':
     resolution: {integrity: sha512-WH/po1gcEcoR6y857yAnPGug+ZhkF4PaTUxgAbwfeSH/QOgVSakKHBXoPGad/sEznmkiaK3pqHk+etdWisoeBQ==}
+
+  '@types/react-mentions@4.1.13':
+    resolution: {integrity: sha512-kRulAAjlmhCtsJ9bapO0foocknaE/rEuFKpmFEU81fBfnXZmZNBaJ9J/DBjwigT3WDHjQVUmYoi5sxEXrcdzAw==}
 
   '@types/react-transition-group@4.4.10':
     resolution: {integrity: sha512-hT/+s0VQs2ojCX823m60m5f0sL5idt9SO6Tj6Dg+rdphGPIeJbJ6CxvBYkgkGKrYeDjvIpKTR38UzmtHJOGW3Q==}
@@ -6930,6 +6942,9 @@ packages:
     version: 1.4.0
     engines: {node: '>= 0.10'}
 
+  invariant@2.2.4:
+    resolution: {integrity: sha512-phJfQVBuaJM5raOpJjSfkiD6BpbCE4Ns//LaXl6wGYtUBY83nWS6Rf9tXm2e8VaK60JEjYldbPif/A2B1C2gNA==, tarball: https://r2.cnpmjs.org/invariant/-/invariant-2.2.4.tgz}
+
   inversify@6.0.1:
     resolution: {integrity: sha512-B3ex30927698TJENHR++8FfEaJGqoWOgI6ZY5Ht/nLUsFCwHn6akbwtnUAPCgUepAnTpe2qHxhDNjoKLyz6rgQ==}
 
@@ -7772,7 +7787,7 @@ packages:
     resolution: {integrity: sha512-ZbrP1Qxnpoes8sz47AM0z08U+jW6TyRgZzcWy3Ma3vDhJttwMwAFDMMQFobwdBxByBD46JYmxRzeF7w2+wJEuw==}
 
   make-dir@2.1.0:
-    resolution: {integrity: sha512-LS9X+dc8KLxXCb8dni79fLIIUA5VyZoyjSMCwTluaXA0o27cCK0bhXkpgw+sTXVpPy/lSO57ilRixqk0vDmtRA==}
+    resolution: {integrity: sha512-LS9X+dc8KLxXCb8dni79fLIIUA5VyZoyjSMCwTluaXA0o27cCK0bhXkpgw+sTXVpPy/lSO57ilRixqk0vDmtRA==, tarball: https://r2.cnpmjs.org/make-dir/-/make-dir-2.1.0.tgz}
     engines: {node: '>=6'}
 
   make-dir@4.0.0:
@@ -8973,6 +8988,12 @@ packages:
     resolution: {integrity: sha512-w2GsyukL62IJnlaff/nRegPQR94C/XXamvMWmSHRJ4y7Ts/4ocGRmTHvOs8PSE6pB3dWOrD/nueuU5sduBsQ4w==, tarball: https://r2.cnpmjs.org/react-is/-/react-is-17.0.2.tgz}
     version: 17.0.2
 
+  react-mentions@4.4.10:
+    resolution: {integrity: sha512-JHiQlgF1oSZR7VYPjq32wy97z1w1oE4x10EuhKjPr4WUKhVzG1uFQhQjKqjQkbVqJrmahf+ldgBTv36NrkpKpA==}
+    peerDependencies:
+      react: '>=16.8.3'
+      react-dom: '>=16.8.3'
+
   react-mosaic-component@6.1.0:
     resolution: {integrity: sha512-iWrNUSdW6HK9SB6kaj7/auvIGZWlyEFR8ulQKC9lskY047uluo5ur4fiuZTNroUTZvGqL02AiLzBBj1+et8RZA==}
     peerDependencies:
@@ -9057,6 +9078,9 @@ packages:
   regenerate@https://r2.cnpmjs.org/regenerate/-/regenerate-1.4.2.tgz:
     resolution: {integrity: sha512-zrceR/XhGYU/d/opr2EKO7aRHUeiBI8qjtfHqADTwZd6Szfy16la6kqD0MIUs5z5hx6AaKa+PixpPrR289+I0A==, tarball: https://r2.cnpmjs.org/regenerate/-/regenerate-1.4.2.tgz}
     version: 1.4.2
+
+  regenerator-runtime@0.13.11:
+    resolution: {integrity: sha512-kY1AZVr2Ra+t+piVaJ4gxaFaReZVH40AKNo7UCX6W+dEwBo/2oZJzqfuN1qLq1oL45o56cPaTXELwrTh8Fpggg==}
 
   regenerator-runtime@0.14.1:
     resolution: {integrity: sha512-dYnhHh0nJoMfnkZs6GmmhFknAGRrLznOu5nc9ML+EJxGvrx6H7teuevqVqCuPcPK//3eDrrjQhehXVx9cnkGdw==}
@@ -9445,7 +9469,7 @@ packages:
     resolution: {integrity: sha512-uBHU3L3czsIyYXKX88fdrGovxdSCoTGDRZ6SYXtSRxLZUzHg5P/66Ht6uoUlHu9EZod+inXhKo3qQgwXUT/y1w==}
 
   source-map@0.6.1:
-    resolution: {integrity: sha512-UjgapumWlbMhkBgzT7Ykc5YXUT46F0iKu8SGXq0bcwP5dz/h0Plj6enJqjz1Zbq2l5WaqYnrVbwWOWMyF3F47g==}
+    resolution: {integrity: sha512-UjgapumWlbMhkBgzT7Ykc5YXUT46F0iKu8SGXq0bcwP5dz/h0Plj6enJqjz1Zbq2l5WaqYnrVbwWOWMyF3F47g==, tarball: https://r2.cnpmjs.org/source-map/-/source-map-0.6.1.tgz}
     engines: {node: '>=0.10.0'}
 
   source-map@https://r2.cnpmjs.org/source-map/-/source-map-0.6.1.tgz:
@@ -9652,6 +9676,11 @@ packages:
     engines: {node: '>= 12.13.0'}
     peerDependencies:
       webpack: ^5.0.0
+
+  substyle@9.4.1:
+    resolution: {integrity: sha512-VOngeq/W1/UkxiGzeqVvDbGDPM8XgUyJVWjrqeh+GgKqspEPiLYndK+XRcsKUHM5Muz/++1ctJ1QCF/OqRiKWA==, tarball: https://r2.cnpmjs.org/substyle/-/substyle-9.4.1.tgz}
+    peerDependencies:
+      react: '>=16.8.3'
 
   supports-color@5.5.0:
     resolution: {integrity: sha512-QjVjwdXIt408MIiAqCX4oUKsgU2EqAGzs2Ppkm4aQYbjm+ZEWEcW4SfFNTr4uMNZma0ey4f5lgLrkB0aX0QMow==}
@@ -11379,6 +11408,10 @@ snapshots:
   '@babel/runtime@7.24.1':
     dependencies:
       regenerator-runtime: 0.14.1
+
+  '@babel/runtime@7.4.5':
+    dependencies:
+      regenerator-runtime: 0.13.11
 
   '@babel/template@7.24.0':
     dependencies:
@@ -13263,6 +13296,10 @@ snapshots:
       '@types/react': 18.2.79
 
   '@types/react-grid-layout@1.3.5':
+    dependencies:
+      '@types/react': 18.2.79
+
+  '@types/react-mentions@4.1.13':
     dependencies:
       '@types/react': 18.2.79
 
@@ -16536,6 +16573,10 @@ snapshots:
 
   interpret@https://r2.cnpmjs.org/interpret/-/interpret-1.4.0.tgz: {}
 
+  invariant@2.2.4:
+    dependencies:
+      loose-envify: 1.4.0
+
   inversify@6.0.1: {}
 
   ip-address@9.0.5:
@@ -18448,6 +18489,15 @@ snapshots:
 
   react-is@https://r2.cnpmjs.org/react-is/-/react-is-17.0.2.tgz: {}
 
+  react-mentions@4.4.10(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
+    dependencies:
+      '@babel/runtime': 7.4.5
+      invariant: 2.2.4
+      prop-types: 15.8.1
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+      substyle: 9.4.1(react@18.2.0)
+
   react-mosaic-component@6.1.0(@types/node@20.12.7)(@types/react@18.2.79)(dnd-core@16.0.1)(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
     dependencies:
       classnames: 2.5.1
@@ -18575,6 +18625,8 @@ snapshots:
       regenerate: https://r2.cnpmjs.org/regenerate/-/regenerate-1.4.2.tgz
 
   regenerate@https://r2.cnpmjs.org/regenerate/-/regenerate-1.4.2.tgz: {}
+
+  regenerator-runtime@0.13.11: {}
 
   regenerator-runtime@0.14.1: {}
 
@@ -19251,6 +19303,12 @@ snapshots:
   style-loader@3.3.4(webpack@5.91.0(@swc/core@1.4.11)(esbuild@0.20.2)):
     dependencies:
       webpack: 5.91.0(@swc/core@1.4.11)(esbuild@0.20.2)
+
+  substyle@9.4.1(react@18.2.0):
+    dependencies:
+      '@babel/runtime': 7.24.1
+      invariant: 2.2.4
+      react: 18.2.0
 
   supports-color@5.5.0:
     dependencies:

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { map, Subject } from 'rxjs';
+import { BehaviorSubject, map, Subject } from 'rxjs';
 import type { IThreadComment } from '../types/interfaces/i-thread-comment';
 import type { IUpdateCommentPayload, IUpdateCommentRefPayload } from '../commands/mutations/comment.mutation';
 
@@ -47,8 +47,8 @@ export class ThreadCommentModel {
     private _commentsMap: Record<string, Record<string, Record<string, IThreadComment>>> = {};
     private _commentsTreeMap: Map<string, Map<string, Map<string, string[]>>> = new Map();
     private _commentUpdate$ = new Subject<CommentUpdate>();
-    private _commentsTreeMap$ = new Subject<Record<string, Record<string, Record<string, string[]>>>>();
-    private _commentsMap$ = new Subject<Record<string, Record<string, Record<string, IThreadComment>>>>();
+    private _commentsTreeMap$ = new BehaviorSubject<Record<string, Record<string, Record<string, string[]>>>>({});
+    private _commentsMap$ = new BehaviorSubject<Record<string, Record<string, Record<string, IThreadComment>>>>({});
 
     commentUpdate$ = this._commentUpdate$.asObservable();
     commentTreeMap$ = this._commentsTreeMap$.asObservable();
@@ -296,7 +296,7 @@ export class ThreadCommentModel {
 
     getRootCommentIds$(unitId: string, subUnitId: string) {
         return this._commentsTreeMap$.pipe(map(
-            (tree) => Object.keys(tree[unitId][subUnitId])
+            (tree) => Object.keys(tree[unitId]?.[subUnitId])
         ));
     }
 }

@@ -18,9 +18,10 @@ import { Disposable, ICommandService, LifecycleStages, LocaleService, OnLifecycl
 import { ComponentManager, IMenuService } from '@univerjs/ui';
 import { Inject, Injector } from '@wendellhu/redi';
 import { CommentSingle } from '@univerjs/icons';
-import { THREAD_COMMENT_PANEL } from '@univerjs/thread-comment-ui';
+import { THREAD_COMMENT_PANEL, ThreadCommentPanelService } from '@univerjs/thread-comment-ui';
 import type { ISetSelectionsOperationParams } from '@univerjs/sheets';
-import { SelectionManagerService, SetSelectionsOperation } from '@univerjs/sheets';
+import { SelectionMoveType, SetSelectionsOperation } from '@univerjs/sheets';
+import { singleReferenceToGrid } from '@univerjs/engine-formula';
 import { SheetsThreadCommentCell } from '../views/sheets-thread-comment-cell';
 import { COMMENT_SINGLE_ICON, SHEETS_THREAD_COMMENT_MODAL } from '../types/const';
 import { SheetsThreadCommentPanel } from '../views/sheets-thread-comment-panel';
@@ -38,13 +39,15 @@ export class SheetsThreadCommentController extends Disposable {
         @Inject(LocaleService) private readonly _localeService: LocaleService,
         @Inject(ICommandService) private readonly _commandService: ICommandService,
         @Inject(SheetsThreadCommentPopupService) private readonly _sheetsThreadCommentPopupService: SheetsThreadCommentPopupService,
-        @Inject(SheetsThreadCommentModel) private readonly _sheetsThreadCommentModel: SheetsThreadCommentModel
+        @Inject(SheetsThreadCommentModel) private readonly _sheetsThreadCommentModel: SheetsThreadCommentModel,
+        @Inject(ThreadCommentPanelService) private readonly _threadCommentPanelService: ThreadCommentPanelService
     ) {
         super();
         this._initMenu();
         this._initComponent();
         this._initLocale();
         this._initCommandListener();
+        this._initPanelListener();
     }
 
     private _initCommandListener() {
@@ -52,7 +55,7 @@ export class SheetsThreadCommentController extends Disposable {
             if (commandInfo.id === SetSelectionsOperation.id) {
                 const params = commandInfo.params as ISetSelectionsOperationParams;
 
-                if (params.selections[0].primary) {
+                if (params.type === SelectionMoveType.MOVE_END && params.selections[0].primary) {
                     const unitId = params.unitId;
                     const subUnitId = params.subUnitId;
                     const row = params.selections[0].primary.actualRow;
@@ -71,6 +74,7 @@ export class SheetsThreadCommentController extends Disposable {
             }
         });
     }
+
 
     private _initMenu() {
         [
@@ -96,5 +100,25 @@ export class SheetsThreadCommentController extends Disposable {
             zhCN,
             enUS,
         });
+    }
+
+    private _initPanelListener() {
+        this.disposeWithMe(this._threadCommentPanelService.activeCommentId$.subscribe((commentInfo) => {
+            if (commentInfo) {
+                const { unitId, subUnitId, commentId } = commentInfo;
+                const comment = this._sheetsThreadCommentModel.getComment(unitId, subUnitId, commentId);
+                if (!comment) {
+                    return;
+                }
+
+                const location = singleReferenceToGrid(comment.ref);
+                this._sheetsThreadCommentPopupService.showPopup({
+                    unitId,
+                    subUnitId,
+                    row: location.row,
+                    col: location.column,
+                });
+            }
+        }));
     }
 }

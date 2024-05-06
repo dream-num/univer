@@ -20,6 +20,7 @@ import { ThreadCommentModel } from '@univerjs/thread-comment';
 import type { UniverInstanceType } from '@univerjs/core';
 import { useObservable } from '@univerjs/ui';
 import { ThreadCommentTree } from '../thread-comment-tree';
+import { ThreadCommentPanelService } from '../../services/thread-comment-panel.service';
 import styles from './index.module.less';
 
 export interface IThreadCommentPanelProps {
@@ -31,24 +32,35 @@ export interface IThreadCommentPanelProps {
 export const ThreadCommentPanel = (props: IThreadCommentPanelProps) => {
     const { unitId, subUnitId, type } = props;
     const threadCommentModel = useDependency(ThreadCommentModel);
-    const [rootCommentIds$, setRootCommentIds$] = useState(() => threadCommentModel.getRootCommentIds$(unitId, subUnitId));
-    const rootCommentIds = useObservable(rootCommentIds$, threadCommentModel.getRootCommentIds(unitId, subUnitId));
+    const [rootCommentIds, setRootCommentIds] = useState(() => threadCommentModel.getRootCommentIds(unitId, subUnitId));
+    const panelService = useDependency(ThreadCommentPanelService);
+    const activeCommentId = useObservable(panelService.activeCommentId$);
+    const update = useObservable(threadCommentModel.commentUpdate$);
 
     useEffect(() => {
-        setRootCommentIds$(
-            threadCommentModel.getRootCommentIds$(unitId, subUnitId)
+        setRootCommentIds(
+            threadCommentModel.getRootCommentIds(unitId, subUnitId)
         );
-    }, [unitId, subUnitId, threadCommentModel]);
+    }, [unitId, subUnitId, threadCommentModel, update]);
 
     return (
-        <div className={styles.ThreadCommentPanel}>
-            {rootCommentIds.map((id) => (
+        <div className={styles.threadCommentPanel}>
+            {rootCommentIds?.map((id) => (
                 <ThreadCommentTree
                     key={id}
                     id={id}
                     unitId={unitId}
                     subUnitId={subUnitId}
                     type={type}
+                    showEdit={activeCommentId?.commentId === id}
+                    showHighlight={activeCommentId?.commentId === id}
+                    onClick={() => {
+                        panelService.setActiveComment({
+                            unitId,
+                            subUnitId,
+                            commentId: id,
+                        });
+                    }}
                 />
             ))}
         </div>

@@ -103,7 +103,7 @@ function RectPopup(props: IRectPopupProps) {
             )
         );
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     [
         anchorRect.left,
         anchorRect.top,
@@ -114,7 +114,14 @@ function RectPopup(props: IRectPopupProps) {
 
     useEffect(() => {
         const handleClickOther = (e: MouseEvent) => {
-            if (excludeOutside && (excludeOutside.indexOf(e.target as any) > -1)) {
+            if (
+                excludeOutside &&
+                (
+                    (excludeOutside.indexOf(e.target as any) > -1) ||
+                    excludeOutside.some((item) => item.contains(e.target as any)
+                    )
+                )
+            ) {
                 return;
             }
 

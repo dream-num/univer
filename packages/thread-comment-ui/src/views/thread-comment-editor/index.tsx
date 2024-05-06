@@ -15,7 +15,7 @@
  */
 
 import type { IThreadComment } from '@univerjs/thread-comment';
-import { Button, Textarea } from '@univerjs/design';
+import { Button, Mentions } from '@univerjs/design';
 import React, { useState } from 'react';
 import { useDependency } from '@wendellhu/redi/react-bindings';
 import { LocaleService } from '@univerjs/core';
@@ -37,23 +37,27 @@ export const ThreadCommentEditor = (props: IThreadCommentEditorProps) => {
     const [editing, setEditing] = useState(false);
 
     return (
-        <div className={styles.threadCommentEditor}>
-            <Textarea
+        <div className={styles.threadCommentEditor} onClick={(e) => e.preventDefault()}>
+            <Mentions
                 autoFocus={autoFocus}
                 style={{ width: '100%' }}
                 placeholder={localeService.t('threadCommentUI.editor.placeholder')}
                 value={localComment?.text}
-                onChange={(text) => {
-                    setLocalComment?.({ ...comment, text });
-                }}
-                autoSize={{
-                    minRows: 1,
-                    maxRows: 3,
+                onChange={(e) => {
+                    setLocalComment?.({ ...comment, text: e.target.value });
                 }}
                 onFocus={() => {
                     setEditing(true);
                 }}
-            />
+            >
+                <Mentions.Mention
+                    trigger="@"
+                    data={[{
+                        id: '11',
+                        display: 'zhangwei',
+                    }]}
+                />
+            </Mentions>
             {editing
                 ? (
                     <div className={styles.threadCommentEditorButtons}>

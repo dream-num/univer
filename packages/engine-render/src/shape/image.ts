@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Nullable } from '@univerjs/core';
+import type { ISrcRect, Nullable, PresetGeometryType } from '@univerjs/core';
 
 import type { UniverRenderingContext } from '../context';
 import type { IShapeProps } from './shape';
@@ -29,12 +29,23 @@ export interface IImageProps extends IShapeProps {
     fail?: () => void;
     autoWidth?: boolean;
     autoHeight?: boolean;
+    /**
+     * 20.1.8.55 srcRect (Source Rectangle)
+     */
+    srcRect?: ISrcRect;
+
+    /**
+     * 20.1.9.18 prstGeom (Preset geometry)
+     */
+    prstGeom?: PresetGeometryType;
 }
 
 export class Image extends Shape<IImageProps> {
     protected _props: IImageProps;
 
     protected _native: Nullable<HTMLImageElement>;
+
+    private _renderByCrop: boolean = true;
 
     constructor(id: string, config: IImageProps) {
         super(id, config);
@@ -85,12 +96,28 @@ export class Image extends Shape<IImageProps> {
         return new Image(id, { url, success: callback });
     }
 
+    get srcRect() {
+        return this._props.srcRect;
+    }
+
+    get prstGeom() {
+        return this._props.prstGeom;
+    }
+
     getPictureProps(): IImageProps {
         return this._props;
     }
 
     getNative(): Nullable<HTMLImageElement> {
         return this._native;
+    }
+
+    closeRenderByCrop() {
+        this._renderByCrop = false;
+    }
+
+    openRenderByCrop() {
+        this._renderByCrop = true;
     }
 
     protected override _draw(ctx: UniverRenderingContext) {

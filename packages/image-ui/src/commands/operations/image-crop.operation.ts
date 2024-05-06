@@ -14,9 +14,23 @@
  * limitations under the License.
  */
 
-export { CloseImageCropOperation, OpenImageCropOperation } from './commands/operations/image-crop.operation';
-export { ImageCommonPanel } from './views/panel/ImageCommonPanel';
-export { ImagePopupMenu } from './views/image-popup-menu/ImagePopupMenu';
-export { COMPONENT_IMAGE_POPUP_MENU } from './views/image-popup-menu/component-name';
-export { UniverImageUIPlugin } from './plugin';
+import type { IDrawingSearch, IOperation } from '@univerjs/core';
+import { CommandType, IDrawingManagerService } from '@univerjs/core';
+
+
+export const OpenImageCropOperation: IOperation<IDrawingSearch> = {
+    id: 'sheet.operation.open-image-crop',
+    type: CommandType.OPERATION,
+    handler: (accessor, params) => {
+        return true;
+    },
+};
+
+export const CloseImageCropOperation: IOperation<IDrawingSearch> = {
+    id: 'sheet.operation.close-image-crop',
+    type: CommandType.OPERATION,
+    handler: (accessor, params) => {
+        return true;
+    },
+};
 

@@ -18,7 +18,8 @@ import { LocaleService, Plugin } from '@univerjs/core';
 import type { Dependency } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import { ImageUpdateController } from './controllers/image-update.controller';
-import { SheetImageUIController } from './controllers/image-ui.controller';
+import { ImageUIController } from './controllers/image-ui.controller';
+import { ImageCropperController } from './controllers/image-cropper.controller';
 
 
 const PLUGIN_NAME = 'IMAGE_UI_PLUGIN';
@@ -45,7 +46,8 @@ export class UniverImageUIPlugin extends Plugin {
 
             // controllers
             [ImageUpdateController],
-            [SheetImageUIController],
+            [ImageUIController],
+            [ImageCropperController],
 
         ];
 

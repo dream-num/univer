@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-
+export { checkIfMove } from './check-if-move';
 export * from './array-search';
 export * from './blob';
 export * from './color/color';

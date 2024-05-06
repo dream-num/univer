@@ -65,7 +65,7 @@ export class SpreadsheetColumnHeader extends SpreadsheetHeader {
     }
 
     override isHit(coord: Vector2): boolean {
-        const oCoord = this._getInverseCoord(coord);
+        const oCoord = this.getInverseCoord(coord);
         const skeleton = this.getSkeleton();
         if (!skeleton) {
             return false;

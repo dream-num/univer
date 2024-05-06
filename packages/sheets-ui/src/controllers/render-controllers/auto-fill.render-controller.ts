@@ -86,7 +86,8 @@ export class AutoFillRenderController extends Disposable implements IRenderContr
     ) {
         super();
         this._defaultHook = {
-            id: 'default',
+            id: `default-${this._context.unitId}`,
+            bindUnit: this._context.unitId,
             type: AutoFillHookType.Default,
             priority: 0,
             onBeforeFillData: (location: IAutoFillLocation, direction: Direction) => {
@@ -103,6 +104,7 @@ export class AutoFillRenderController extends Disposable implements IRenderContr
         super.dispose();
         this._copyData = [];
         this._beforeApplyData = [];
+        this._autoFillService.disposeUnit(this._context.unitId);
     }
 
     private _init() {
@@ -115,7 +117,7 @@ export class AutoFillRenderController extends Disposable implements IRenderContr
     }
 
     private _initDefaultHook() {
-        this._autoFillService.addHook(this._defaultHook);
+        this.disposeWithMe(this._autoFillService.addHook(this._defaultHook));
     }
 
     private _onSelectionControlFillChanged() {
@@ -282,7 +284,6 @@ export class AutoFillRenderController extends Disposable implements IRenderContr
 
         const unitId = workbook.getUnitId();
         const subUnitId = workbook.getActiveSheet().getSheetId();
-        this._autoFillService.direction = direction;
         const accessor = {
             get: this._injector.get.bind(this._injector),
         };
@@ -292,14 +293,18 @@ export class AutoFillRenderController extends Disposable implements IRenderContr
         if (!autoFillSource || !autoFillTarget) {
             return;
         }
-        this._autoFillService.autoFillLocation = {
-            source: autoFillSource,
-            target: autoFillTarget,
-            unitId,
-            subUnitId,
-        };
 
-        const activeHooks = this._autoFillService.getActiveHooks();
+        this._autoFillService.setAutoFillInfo(this._context.unitId, {
+            location: {
+                source: autoFillSource,
+                target: autoFillTarget,
+                unitId,
+                subUnitId,
+            },
+            direction,
+        });
+
+        const activeHooks = this._autoFillService.getActiveHooks(this._context.unitId);
         activeHooks.forEach((hook) => {
             hook?.onBeforeFillData?.({ source: autoFillSource, target: autoFillTarget, unitId, subUnitId }, direction!);
         });
@@ -365,21 +370,25 @@ export class AutoFillRenderController extends Disposable implements IRenderContr
     }
 
     private _handleFillData() {
+        const autoFillInfo = this._autoFillService.getAutoFillInfo(this._context.unitId);
+        if (!autoFillInfo) {
+            return;
+        }
         const {
             source,
             target,
             unitId = this._context.unit.getUnitId(),
             subUnitId = this._context.unit?.getActiveSheet().getSheetId(),
-        } = this._autoFillService.autoFillLocation || {};
+        } = autoFillInfo.location || {};
 
-        const direction = this._autoFillService.direction;
+        const direction = autoFillInfo.direction;
         if (!source || !target || !unitId || !subUnitId) {
             return;
         }
 
         const selection = Rectangle.union(discreteRangeToRange(source), discreteRangeToRange(target));
         const applyType = this._autoFillService.applyType;
-        const activeHooks = this._autoFillService.getActiveHooks();
+        const activeHooks = this._autoFillService.getActiveHooks(this._context.unitId);
 
         this._commandService.syncExecuteCommand(SetSelectionsOperation.id, {
             selections: [
@@ -421,7 +430,9 @@ export class AutoFillRenderController extends Disposable implements IRenderContr
         activeHooks.forEach((hook) => {
             hook.onAfterFillData?.({ source, target, unitId, subUnitId }, direction, applyType);
         });
-        this._autoFillService.setShowMenu(true);
+        this._autoFillService.setAutoFillInfo(this._context.unitId, {
+            showMenu: true,
+        });
     }
 
     // calc apply data according to copy data and direction

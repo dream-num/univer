@@ -128,9 +128,12 @@ export const AutoFillPopupMenu: React.FC<{}> = () => {
 
     useEffect(() => {
         const disposable = toDisposable(
-            autoFillService.showMenu$.subscribe((show) => {
-                const { source, target } = autoFillService.autoFillLocation || { source: null, target: null };
-                if (show && source && target) {
+            autoFillService.activeUnit$.subscribe((unitId: string | null) => {
+                if (!unitId) return;
+                const autoFillInfo = autoFillService.getAutoFillInfo(unitId);
+                if (!autoFillInfo) return;
+                const { source, target } = autoFillInfo.location || { source: null, target: null };
+                if (autoFillInfo.showMenu && source && target) {
                     const lastRow = Math.max(source.rows[source.rows.length - 1], target.rows[target.rows.length - 1]);
                     const lastCol = Math.max(source.cols[source.cols.length - 1], target.cols[target.cols.length - 1]);
                     setAnchor({ row: lastRow, col: lastCol });

@@ -16,6 +16,7 @@
 
 import type { ICommandInfo, IDrawingParam, ITransformState, Nullable } from '@univerjs/core';
 import {
+    checkIfMove,
     Disposable,
     DrawingTypeEnum,
     ICommandService,
@@ -29,7 +30,7 @@ import {
 } from '@univerjs/core';
 import type { BaseObject, IImageProps, Scene } from '@univerjs/engine-render';
 import { DRAWING_OBJECT_LAYER_INDEX, Image, IRenderManagerService } from '@univerjs/engine-render';
-import type { IImageData } from '@univerjs/image';
+import { getImageShapeKeyByDrawingSearch, type IImageData } from '@univerjs/image';
 
 
 @OnLifecycle(LifecycleStages.Rendered, ImageUpdateController)
@@ -95,7 +96,7 @@ export class ImageUpdateController extends Disposable {
 
                     const { left, top, width, height, angle, flipX, flipY, skewX, skewY } = transform;
 
-                    const imageShapeKey = `${unitId}#-#${subUnitId}#-#${drawingId}#-#${DrawingTypeEnum.DRAWING_IMAGE}`;
+                    const imageShapeKey = getImageShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId, drawingType: DrawingTypeEnum.DRAWING_IMAGE });
 
                     const imageShape = scene.getObject(imageShapeKey);
 
@@ -152,7 +153,7 @@ export class ImageUpdateController extends Disposable {
                         return true;
                     }
 
-                    const imageShapeKey = `${unitId}#-#${subUnitId}#-#${drawingId}#-#${DrawingTypeEnum.DRAWING_IMAGE}`;
+                    const imageShapeKey = getImageShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId, drawingType: DrawingTypeEnum.DRAWING_IMAGE });
 
                     const imageShape = scene.getObject(imageShapeKey);
 
@@ -186,7 +187,7 @@ export class ImageUpdateController extends Disposable {
 
                     const { left = 0, top = 0, width = 0, height = 0, angle = 0, flipX = false, flipY = false, skewX = 0, skewY = 0 } = transform;
 
-                    const imageShapeKey = `${unitId}#-#${subUnitId}#-#${drawingId}#-#${DrawingTypeEnum.DRAWING_IMAGE}`;
+                    const imageShapeKey = getImageShapeKeyByDrawingSearch({ unitId, subUnitId, drawingId, drawingType: DrawingTypeEnum.DRAWING_IMAGE });
 
                     const imageShape = scene.getObject(imageShapeKey);
 
@@ -200,30 +201,13 @@ export class ImageUpdateController extends Disposable {
         );
     }
 
-    private _checkIfMove(transform: Nullable<ITransformState>, previousTransform: Nullable<ITransformState>): boolean {
-        if (previousTransform == null || transform == null) {
-            return true;
-        }
-
-        const { left: leftPrev = 0, top: topPrev = 0, height: heightPrev = 0, width: widthPrev = 0, angle: anglePrev = 0 } = previousTransform;
-        const { left = 0, top = 0, height = 0, width = 0, angle = 0 } = transform;
-
-        const allWidth = width;
-        const allHeight = height;
-
-        const allWidthPrev = widthPrev;
-        const allHeightPrev = heightPrev;
-
-        return Math.abs(left - leftPrev) > 0.5 || Math.abs(top - topPrev) > 0.5 || Math.abs(allWidth - allWidthPrev) > 0.5 || Math.abs(allHeight - allHeightPrev) > 0.5 || Math.abs(angle - anglePrev) > 0.1;
-    }
-
     private _filterUpdateParams(params: Nullable<IDrawingParam>[], startTransforms: Nullable<ITransformState[]>) {
         return params.filter((param, index) => {
             if (param == null) {
                 return false;
             }
             const { transform } = param;
-            return this._checkIfMove(transform, startTransforms?.[index]);
+            return checkIfMove(transform, startTransforms?.[index]);
         }) as IDrawingParam[];
     }
 
@@ -233,41 +217,58 @@ export class ImageUpdateController extends Disposable {
 
         let startTransforms: Nullable<ITransformState[]> = null;
 
-        transformer.onChangeStartObservable.add((state) => {
-            const { objects } = state;
-            startTransforms = Array.from(objects.values()).map((object) => {
-                const { left, top, height, width, angle } = object;
-                return { left, top, height, width, angle };
-            });
-        });
+        this.disposeWithMe(
+            toDisposable(
+                transformer.onChangeStartObservable.add((state) => {
+                    const { objects } = state;
+                    const objectArray = Array.from(objects.values());
+                    startTransforms = objectArray.filter((object) => object instanceof Image).map((object) => {
+                        const { left, top, height, width, angle } = object;
+                        return { left, top, height, width, angle };
+                    });
+                })
+            )
+        );
 
-        transformer.onChangingObservable.add((state) => {
-            const { objects } = state;
-            const params = this._getUpdateParams(objects);
-            if (params.length > 0) {
-                // this._drawingManagerService.batchUpdate(params.filter((param) => {
-                //     if (param == null) {
-                //         return false;
-                //     }
-                //     return true;
-                // }) as IDrawingParam[]);
-            }
-        });
+        this.disposeWithMe(
+            toDisposable(
+                transformer.onChangingObservable.add((state) => {
+                    const { objects } = state;
+                    const params = this._getUpdateParams(objects);
+                    if (params.length > 0) {
+                        // this._drawingManagerService.batchUpdate(params.filter((param) => {
+                        //     if (param == null) {
+                        //         return false;
+                        //     }
+                        //     return true;
+                        // }) as IDrawingParam[]);
+                    }
+                })
+            )
+        );
 
-        transformer.onChangeEndObservable.add((state) => {
-            const { objects } = state;
-            const params = this._filterUpdateParams(this._getUpdateParams(objects), startTransforms);
+        this.disposeWithMe(
+            toDisposable(
+                transformer.onChangeEndObservable.add((state) => {
+                    const { objects } = state;
+                    const params = this._filterUpdateParams(this._getUpdateParams(objects), startTransforms);
 
-            if (params.length > 0) {
-                // this._drawingManagerService.batchUpdate(params);
-                this._drawingManagerService.extraUpdateNotification(params);
-            }
-        });
+                    if (params.length > 0) {
+                        // this._drawingManagerService.batchUpdate(params);
+                        this._drawingManagerService.extraUpdateNotification(params);
+                    }
+                })
+            )
+        );
     }
 
     private _getUpdateParams(objects: Map<string, BaseObject>): Nullable<IDrawingParam>[] {
         const params: Nullable<IDrawingParam>[] = [];
         objects.forEach((object) => {
+            if (object instanceof Image === false) {
+                return true;
+            }
+
             const { oKey, left, top, height, width, angle } = object;
 
             const searchParam = this._drawingManagerService.getDrawingOKey(oKey);

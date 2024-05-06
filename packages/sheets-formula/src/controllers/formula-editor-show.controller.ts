@@ -86,43 +86,10 @@ export class FormulaEditorShowController extends Disposable {
 
                             let cellInfo: Nullable<ICellDataForSheetInterceptor> = null;
 
-                            const formulaDataItem = this._formulaDataModel.getFormulaDataItem(
-                                row,
-                                col,
-                                subUnitId,
-                                unitId
-                            );
+                            const formulaString = this._formulaDataModel.getFormulaStringByCell(row, col, subUnitId, unitId);
 
-                            if (formulaDataItem != null) {
-                                const { f, si, x = 0, y = 0 } = formulaDataItem;
-
-                                // x and y support negative numbers. Negative numbers appear when the drop-down fill moves up or to the left.
-                                if (si != null && (x !== 0 || y !== 0)) {
-                                    let formulaString = '';
-                                    if (f.length > 0) {
-                                        formulaString = f;
-                                    } else {
-                                        const originItem = this._formulaDataModel.getFormulaItemBySId(
-                                            si,
-                                            subUnitId,
-                                            unitId
-                                        );
-
-                                        if (originItem == null || originItem.f.length === 0) {
-                                            return next(value);
-                                        }
-
-                                        formulaString = originItem.f;
-                                    }
-
-                                    const newFormulaString = this._lexerTreeBuilder.moveFormulaRefOffset(
-                                        formulaString,
-                                        x,
-                                        y
-                                    );
-
-                                    cellInfo = { f: newFormulaString };
-                                }
+                            if (formulaString !== null) {
+                                cellInfo = { f: formulaString };
                             }
 
                             /**

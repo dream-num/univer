@@ -20,6 +20,7 @@ import { SetHorizontalTextAlignCommand, SetRangeValuesCommand, SetRangeValuesMut
 import type { Injector } from '@wendellhu/redi';
 import { beforeEach, describe, expect, it } from 'vitest';
 
+import { FormulaDataModel } from '@univerjs/engine-formula';
 import type { FUniver } from '../../facade';
 import { createTestBed } from '../../__tests__/create-test-bed';
 
@@ -192,6 +193,21 @@ describe('Test FRange', () => {
 
         activeSheet?.getRange(0, 0, 2, 2)?.setFontWeight('bold');
         expect(range?.getCellStyleData()?.bl).toBe(1);
+    });
+
+    it('Range getFormulas', () => {
+        const formulaDataModel = get(FormulaDataModel);
+        formulaDataModel.initFormulaData();
+
+        const activeSheet = univerAPI.getActiveWorkbook()?.getActiveSheet();
+        const formulas = activeSheet?.getRange(0, 3, 5, 1)?.getFormulas();
+        expect(formulas).toStrictEqual([
+            ['=SUM(A1)'],
+            ['=SUM(A2)'],
+            ['=SUM(A3)'],
+            ['=SUM(A4)'],
+            [''],
+        ]);
     });
 
     it('Range setFontWeight', () => {

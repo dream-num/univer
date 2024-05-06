@@ -37,6 +37,11 @@ export interface IOtherTransform {
     flipY?: boolean;
 }
 
+export interface ISrcRect extends IOffset {
+    right?: number;
+    bottom?: number;
+}
+
 export interface IAbsoluteTransform extends ISize, IOffset, IScale {
 
 }

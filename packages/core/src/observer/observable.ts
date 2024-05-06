@@ -366,6 +366,9 @@ export class Observable<T> {
      * Clear the list of observers
      */
     clear(): void {
+        this._observers.forEach((observer) => {
+            observer.dispose();
+        });
         this._observers = new Array<Observer<T>>();
         this._onObserverAdded = null;
     }

@@ -46,35 +46,23 @@ export const BASE_OBJECT_ARRAY = [
 
 export abstract class BaseObject extends Disposable {
     groupKey?: string;
-
     isInGroup: boolean = false;
 
     onTransformChangeObservable = new Observable<ITransformChangeState>();
-
     onPointerDownObserver = new Observable<IPointerEvent | IMouseEvent>();
-
     onPointerMoveObserver = new Observable<IPointerEvent | IMouseEvent>();
-
     onPointerUpObserver = new Observable<IPointerEvent | IMouseEvent>();
-
     onDblclickObserver = new Observable<IPointerEvent | IMouseEvent>();
-
     onTripleClickObserver = new Observable<IPointerEvent | IMouseEvent>();
-
     onMouseWheelObserver = new Observable<IWheelEvent>();
     // onKeyDownObservable = new Observable<IKeyboardEvent>();
     // onKeyUpObservable = new Observable<IKeyboardEvent>();
 
     onPointerOutObserver = new Observable<IPointerEvent | IMouseEvent>();
-
     onPointerLeaveObserver = new Observable<IPointerEvent | IMouseEvent>();
-
     onPointerOverObserver = new Observable<IPointerEvent | IMouseEvent>();
-
     onPointerEnterObserver = new Observable<IPointerEvent | IMouseEvent>();
-
     onIsAddedToParentObserver = new Observable<any>();
-
     onDisposeObserver = new Observable<BaseObject>();
 
     protected _oKey: string;
@@ -82,33 +70,26 @@ export abstract class BaseObject extends Disposable {
     protected _dirty: boolean = true;
 
     private _top: number = 0;
-
     private _topOrigin: number | string = 0;
 
     private _left: number = 0;
-
     private _leftOrigin: number | string = 0;
 
     private _width: number = 0;
-
     private _widthOrigin: number | string = 0;
 
     private _height: number = 0;
-
     private _heightOrigin: number | string = 0;
 
     private _angle: number = 0;
 
     private _scaleX: number = 1;
-
     private _scaleY: number = 1;
 
     private _skewX: number = 0;
-
     private _skewY: number = 0;
 
     private _flipX: boolean = false;
-
     private _flipY: boolean = false;
 
     private _strokeWidth: number = 0;
@@ -579,7 +560,7 @@ export abstract class BaseObject extends Disposable {
     }
 
     isHit(coord: Vector2) {
-        const oCoord = this._getInverseCoord(coord);
+        const oCoord = this.getInverseCoord(coord);
         if (
             oCoord.x >= -this.strokeWidth / 2 &&
             oCoord.x <= this.width + this.strokeWidth / 2 &&
@@ -785,6 +766,9 @@ export abstract class BaseObject extends Disposable {
     }
 
     getLayerIndex() {
+        if (this._layer == null) {
+            return 1;
+        }
         return this._layer.zIndex;
     }
 
@@ -796,8 +780,7 @@ export abstract class BaseObject extends Disposable {
         this.getScene()?.detachTransformerFrom(this);
     }
 
-
-    protected _getInverseCoord(coord: Vector2) {
+    getInverseCoord(coord: Vector2): Vector2 {
         return this.ancestorTransform.invert().applyPoint(coord);
     }
 

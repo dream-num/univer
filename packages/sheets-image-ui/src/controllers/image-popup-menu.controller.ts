@@ -20,7 +20,7 @@ import type { IDisposable } from '@wendellhu/redi';
 import { Inject, Injector } from '@wendellhu/redi';
 import type { BaseObject } from '@univerjs/engine-render';
 import { IRenderManagerService } from '@univerjs/engine-render';
-import { COMPONENT_IMAGE_POPUP_MENU } from '@univerjs/image-ui';
+import { COMPONENT_IMAGE_POPUP_MENU, OpenImageCropOperation } from '@univerjs/image-ui';
 import { SheetCanvasPopManagerService } from '@univerjs/sheets-ui';
 import { takeUntil } from 'rxjs';
 import { SidebarSheetImageOperation } from '../commands/operations/open-image-panel.operation';
@@ -149,8 +149,8 @@ export class ImagePopupMenuController extends RxDisposable {
             {
                 label: 'image-popup.crop',
                 index: 2,
-                commandId: 'image.crop',
-                commandParams: [{ unitId, subUnitId, drawingId, drawingType }],
+                commandId: OpenImageCropOperation.id,
+                commandParams: { unitId, subUnitId, drawingId, drawingType },
                 disable: false,
             },
             {

@@ -15,7 +15,7 @@
  */
 
 import type { IParagraphStyle, Nullable } from '@univerjs/core';
-import { BooleanNumber, DataStreamTreeTokenType, GridType, ObjectRelativeFromV, PositionedObjectLayoutType } from '@univerjs/core';
+import { BooleanNumber, DataStreamTreeTokenType, GridType, PositionedObjectLayoutType } from '@univerjs/core';
 import type { IDocumentSkeletonGlyph } from '../../../../../basics/i-document-skeleton-cached';
 import { LineBreaker } from '../../linebreak';
 import { tabLineBreakExtension } from '../../linebreak/extensions/tab-linebreak-extension';

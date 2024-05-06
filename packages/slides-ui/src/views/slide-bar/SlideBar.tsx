@@ -15,6 +15,7 @@
  */
 
 import type { SlideDataModel } from '@univerjs/core';
+import clsx from 'clsx';
 import { ICommandService, IUniverInstanceService, UniverInstanceType } from '@univerjs/core';
 import type { RefObject } from 'react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
@@ -50,10 +51,6 @@ export function SlideSideBar() {
 
     const slideList = pageOrder.map((id) => pages[id]);
 
-    const isPageActivated = useCallback((page: string) => {
-        return false;
-    }, []);
-
     const [divRefs, setDivRefs] = useState<RefObject<HTMLDivElement>[]>([]);
 
     useEffect(() => {
@@ -83,7 +80,9 @@ export function SlideSideBar() {
                 {slideList.map((item, index) => (
                     <div
                         key={index}
-                        className={`${styles.slideBarItem} ${isPageActivated(item.id)}`}
+                        className={clsx(styles.slideBarItem, {
+                            [styles.slideBarItemActive]: false, // TODO: If the slide is active, add the class slideBarItemActive
+                        })}
                         onClick={() => activatePage(item.id)}
                     >
                         <span>{index + 1}</span>

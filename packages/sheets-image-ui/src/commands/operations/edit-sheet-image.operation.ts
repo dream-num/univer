@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { ICommand, IDrawingSearch } from '@univerjs/core';
+import type { IDrawingSearch, IOperation } from '@univerjs/core';
 import {
     CommandType,
     ICommandService,
@@ -25,9 +25,9 @@ import type { IAccessor } from '@wendellhu/redi';
 import { SidebarSheetImageOperation } from './open-image-panel.operation';
 
 
-export const EditSheetImageOperation: ICommand = {
+export const EditSheetImageOperation: IOperation<IDrawingSearch> = {
     id: 'sheet.operation.edit-sheet-image',
-    type: CommandType.COMMAND,
+    type: CommandType.OPERATION,
     handler: (accessor: IAccessor, params?: IDrawingSearch) => {
         const sheetDrawingService = accessor.get(ISheetDrawingService);
         const commandService = accessor.get(ICommandService);

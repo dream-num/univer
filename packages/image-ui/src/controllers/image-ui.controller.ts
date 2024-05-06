@@ -22,9 +22,10 @@ import { COMPONENT_IMAGE_POPUP_MENU } from '../views/image-popup-menu/component-
 import { ImagePopupMenu } from '../views/image-popup-menu/ImagePopupMenu';
 import zhCN from '../locale/zh-CN';
 import enUS from '../locale/en-US';
+import { CloseImageCropOperation, OpenImageCropOperation } from '../commands/operations/image-crop.operation';
 
-@OnLifecycle(LifecycleStages.Rendered, SheetImageUIController)
-export class SheetImageUIController extends Disposable {
+@OnLifecycle(LifecycleStages.Rendered, ImageUIController)
+export class ImageUIController extends Disposable {
     constructor(
         @Inject(Injector) private readonly _injector: Injector,
         @Inject(ComponentManager) private readonly _componentManager: ComponentManager,
@@ -60,7 +61,8 @@ export class SheetImageUIController extends Disposable {
 
     private _initCommands() {
         [
-
+            OpenImageCropOperation,
+            CloseImageCropOperation,
         ].forEach((command) => this.disposeWithMe(this._commandService.registerCommand(command)));
     }
 

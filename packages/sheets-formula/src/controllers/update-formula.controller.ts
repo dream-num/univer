@@ -15,11 +15,13 @@
  */
 
 import type {
+    DocumentDataModel,
     ICommandInfo,
     IExecutionOptions,
     IRange,
     IUnitRange,
     Nullable,
+    SlideDataModel,
     Workbook,
 } from '@univerjs/core';
 import {
@@ -32,6 +34,7 @@ import {
     OnLifecycle,
     RANGE_TYPE,
     Rectangle,
+    toDisposable,
     Tools,
     UniverInstanceType,
 } from '@univerjs/core';
@@ -103,6 +106,7 @@ import {
 } from '@univerjs/sheets';
 import { Inject, Injector } from '@wendellhu/redi';
 
+import { map, merge } from 'rxjs';
 import type { IRefRangeWithPosition } from './utils/offset-formula-data';
 import { removeFormulaData } from './utils/offset-formula-data';
 import { getFormulaReferenceMoveUndoRedo } from './utils/ref-range-formula';
@@ -202,11 +206,33 @@ export class UpdateFormulaController extends Disposable {
                     }
                     this._handleSetRangeValuesMutation(params as ISetRangeValuesMutationParams);
                 } else if (command.id === RemoveSheetMutation.id) {
-                    this._handleRemoveSheetMutation(command.params as IRemoveSheetMutationParams);
+                    const { subUnitId: sheetId, unitId } = command.params as IRemoveSheetMutationParams;
+                    this._handleRemoveSheetMutation(unitId, sheetId);
                 } else if (command.id === InsertSheetMutation.id) {
                     this._handleInsertSheetMutation(command.params as IInsertSheetMutationParams);
                 }
             })
+        );
+
+        // When a unit is added or removed, update the formula data
+        this.disposeWithMe(
+            toDisposable(
+                merge(
+                    this._univerInstanceService.getTypeOfUnitAdded$<Workbook>(UniverInstanceType.UNIVER_SHEET),
+                    this._univerInstanceService.getTypeOfUnitAdded$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC),
+                    this._univerInstanceService.getTypeOfUnitAdded$<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE)
+                ).subscribe((unit) => this._handleUnitAdded(unit))
+            )
+        );
+
+        this.disposeWithMe(
+            toDisposable(
+                merge(
+                    this._univerInstanceService.getTypeOfUnitDisposed$<Workbook>(UniverInstanceType.UNIVER_SHEET).pipe(map((sheet) => sheet.getUnitId())),
+                    this._univerInstanceService.getTypeOfUnitDisposed$<DocumentDataModel>(UniverInstanceType.UNIVER_DOC).pipe(map((doc) => doc.getUnitId())),
+                    this._univerInstanceService.getTypeOfUnitDisposed$<SlideDataModel>(UniverInstanceType.UNIVER_SLIDE).pipe(map((slide) => slide.getUnitId()))
+                ).subscribe((id) => this._handleRemoveSheetMutation(id))
+            )
         );
     }
 
@@ -250,9 +276,7 @@ export class UpdateFormulaController extends Disposable {
         );
     }
 
-    private _handleRemoveSheetMutation(params: IRemoveSheetMutationParams) {
-        const { subUnitId: sheetId, unitId } = params;
-
+    private _handleRemoveSheetMutation(unitId: string, sheetId?: string) {
         const formulaData = this._formulaDataModel.getFormulaData();
         const newFormulaData = removeFormulaData(formulaData, unitId, sheetId);
 
@@ -295,6 +319,41 @@ export class UpdateFormulaController extends Disposable {
         const { id: sheetId, cellData } = sheet;
         const cellMatrix = new ObjectMatrix(cellData);
         const newFormulaData = initSheetFormulaData(formulaData, unitId, sheetId, cellMatrix);
+
+        this._commandService.executeCommand(
+            SetFormulaDataMutation.id,
+            {
+                formulaData: newFormulaData,
+            },
+            {
+                onlyLocal: true,
+            }
+        );
+    }
+
+    private _handleUnitAdded(unit: Workbook | DocumentDataModel | SlideDataModel) {
+        const formulaData = this._formulaDataModel.getFormulaData();
+        const unitId = unit.getUnitId();
+        const unitType = unit.type;
+        const newFormulaData: IFormulaData = {
+            [unitId]: {},
+        };
+
+        if (unitType === UniverInstanceType.UNIVER_SHEET) {
+            const worksheets = unit.getSheets();
+            worksheets.forEach((worksheet) => {
+                const cellMatrix = worksheet.getCellMatrix();
+                const sheetId = worksheet.getSheetId();
+
+                const currentSheetData = initSheetFormulaData(formulaData, unitId, sheetId, cellMatrix);
+
+                newFormulaData[unitId]![sheetId] = currentSheetData[unitId]?.[sheetId];
+            });
+        } else if (unitType === UniverInstanceType.UNIVER_DOC) {
+            // TODO@Dushusir add doc formula data
+        } else if (unitType === UniverInstanceType.UNIVER_SLIDE) {
+            // TODO@Dushusir add slide formula data
+        }
 
         this._commandService.executeCommand(
             SetFormulaDataMutation.id,

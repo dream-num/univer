@@ -218,7 +218,8 @@ export class EndEditController extends Disposable {
                  * When closing the editor, switch to the current tab of the editor.
                  */
                 if (workbookId === unitId && sheetId !== worksheetId && this._editorBridgeService.isForceKeepVisible()) {
-                    this._commandService.executeCommand(SetWorksheetActivateCommand.id, {
+                    // SetWorksheetActivateCommand handler uses Promise
+                    await this._commandService.executeCommand(SetWorksheetActivateCommand.id, {
                         subUnitId: sheetId,
                         unitId,
                     });

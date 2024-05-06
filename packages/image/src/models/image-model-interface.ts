@@ -14,14 +14,8 @@
  * limitations under the License.
  */
 
-import type { IDrawingParam, ImageSourceType, PresetGeometryType } from '@univerjs/core';
+import type { IDrawingParam, ImageSourceType, ISrcRect, PresetGeometryType } from '@univerjs/core';
 
-export interface ISrcRect {
-    left?: number;
-    top?: number;
-    right?: number;
-    bottom?: number;
-}
 
 export interface IImageDataValue {
 

@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-
+export { getImageShapeKeyByDrawingSearch } from './utils/get-image-shape-key';
 export { getImageSize } from './utils/get-image-size';
-
 export { UniverImagePlugin } from './plugin';
 export { type IImageData } from './models/image-model-interface';
 export { InsertImageMutation } from './commands/mutations/insert-image.mutations';
 export { RemoveImageMutation } from './commands/mutations/remove-image.mutations';
 export { SetImageMutation } from './commands/mutations/set-image.mutations';
 export { ALLOW_IMAGE_LIST } from './services/image-remote.service';
+

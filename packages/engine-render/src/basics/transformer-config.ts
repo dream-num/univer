@@ -19,6 +19,9 @@ import type { BaseObject } from '../base-object';
 import type { IMouseEvent, IPointerEvent } from './i-events';
 
 export interface ITransformerConfig {
+    // for image copper
+    isCropper?: boolean;
+
     hoverEnabled?: boolean;
     hoverEnterFunc?: Nullable<(e: IPointerEvent | IMouseEvent) => void>;
     hoverLeaveFunc?: Nullable<(e: IPointerEvent | IMouseEvent) => void>;
@@ -34,7 +37,7 @@ export interface ITransformerConfig {
     borderStroke?: string;
     borderStrokeWidth?: number;
     borderDash?: number[];
-    borderSpacing: number;
+    borderSpacing?: number;
 
     resizeEnabled?: boolean;
     enabledAnchors?: number[];

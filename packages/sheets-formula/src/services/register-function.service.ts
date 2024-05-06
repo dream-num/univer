@@ -15,9 +15,10 @@
  */
 
 import type { ILocales } from '@univerjs/core';
-import { Disposable, LocaleService } from '@univerjs/core';
+import { Disposable, LocaleService, toDisposable } from '@univerjs/core';
 import type { IFunctionInfo } from '@univerjs/engine-formula';
 import { FunctionType, IFunctionService } from '@univerjs/engine-formula';
+import type { IDisposable } from '@wendellhu/redi';
 import { createIdentifier, Inject } from '@wendellhu/redi';
 
 import { IDescriptionService } from './description.service';
@@ -64,9 +65,7 @@ export interface IRegisterFunctionService {
      * register descriptions
      * @param functionList
      */
-    registerFunctions(params: IRegisterFunctionParams): void;
-
-    unregisterFunctions(params: IUnregisterFunctionParams): void;
+    registerFunctions(params: IRegisterFunctionParams): IDisposable;
 }
 
 export const IRegisterFunctionService = createIdentifier<IRegisterFunctionService>(
@@ -84,17 +83,19 @@ export class RegisterFunctionService extends Disposable implements IRegisterFunc
         super();
     }
 
-    registerFunctions(params: IRegisterFunctionParams) {
+    registerFunctions(params: IRegisterFunctionParams): IDisposable {
         const { locales, description, calculate } = params;
 
         // i18n
         if (locales) {
+            // dispose is not supported yet
             this._localeService.load(locales);
         }
 
+        let descriptionDisposable: IDisposable;
         // description
         if (description) {
-            this._descriptionService.registerDescriptions(description);
+            descriptionDisposable = this._descriptionService.registerDescriptions(description);
         } else {
             const descriptionList: IFunctionInfo[] = calculate.map(([func, functionName, functionIntroduction]) => {
                 return {
@@ -106,21 +107,15 @@ export class RegisterFunctionService extends Disposable implements IRegisterFunc
                 };
             });
 
-            this._functionService.registerDescriptions(...descriptionList);
+            descriptionDisposable = this._functionService.registerDescriptions(...descriptionList);
         }
 
         // calculation
-        this._formulaCustomFunctionService.registerFunctions(calculate);
-    }
+        const functionsDisposable = this._formulaCustomFunctionService.registerFunctions(calculate);
 
-    unregisterFunctions(params: IUnregisterFunctionParams) {
-        const { localeKeys, functionNames } = params;
-
-        // remove i18n, @Dushusir: after localeService has remove method
-        // localeKeys && this._localeService.remove(localeKeys);
-
-        this._descriptionService.unregisterDescriptions(functionNames);
-
-        this._formulaCustomFunctionService.unregisterFunctions(functionNames);
+        return toDisposable(() => {
+            functionsDisposable.dispose();
+            descriptionDisposable.dispose();
+        });
     }
 }

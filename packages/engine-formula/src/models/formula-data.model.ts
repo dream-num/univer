@@ -50,6 +50,8 @@ export class FormulaDataModel extends Disposable {
         @Inject(LexerTreeBuilder) private readonly _lexerTreeBuilder: LexerTreeBuilder
     ) {
         super();
+
+        this.initFormulaData();
     }
 
     clearPreviousArrayFormulaCellData(clearArrayFormulaCellData: IRuntimeUnitDataType) {
@@ -255,6 +257,10 @@ export class FormulaDataModel extends Disposable {
         }
     }
 
+    /**
+     * Cache all formulas on the snapshot to the formula model
+     * @returns
+     */
     initFormulaData() {
         // Load formula data from workbook config data.
         const allSheets = this._univerInstanceService.getAllUnitsForType<Workbook>(UniverInstanceType.UNIVER_SHEET);

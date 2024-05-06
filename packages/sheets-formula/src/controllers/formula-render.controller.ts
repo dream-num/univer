@@ -14,17 +14,14 @@
  * limitations under the License.
  */
 
-
-import { CellValueType, isRealNum, LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
+import { LifecycleStages, OnLifecycle, RxDisposable } from '@univerjs/core';
 import { Inject } from '@wendellhu/redi';
+import { SheetSkeletonManagerService } from '@univerjs/sheets-ui';
 import { INTERCEPTOR_POINT, SheetInterceptorService } from '@univerjs/sheets';
-import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
+import { extractFormulaError } from './utils/utils';
 
-/**
- * @todo RenderUnit
- */
-@OnLifecycle(LifecycleStages.Rendered, ForceStringRenderController)
-export class ForceStringRenderController extends RxDisposable {
+@OnLifecycle(LifecycleStages.Rendered, FormulaRenderController)
+export class FormulaRenderController extends RxDisposable {
     constructor(
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
         @Inject(SheetInterceptorService) private readonly _sheetInterceptorService: SheetInterceptorService) {
@@ -36,9 +33,8 @@ export class ForceStringRenderController extends RxDisposable {
         this._initViewModelIntercept();
     }
 
-
     private _initViewModelIntercept() {
-        const FORCE_STRING_MARK = {
+        const FORMULA_ERROR_MARK = {
             tl: {
                 size: 6,
                 color: '#409f11',
@@ -49,30 +45,25 @@ export class ForceStringRenderController extends RxDisposable {
             this._sheetInterceptorService.intercept(
                 INTERCEPTOR_POINT.CELL_CONTENT,
                 {
-
                     handler: (cell, pos, next) => {
                         const skeleton = this._sheetSkeletonManagerService.getCurrent()?.skeleton;
                         if (!skeleton) {
                             return next(cell);
                         }
 
-                        const cellRaw = pos.worksheet.getCellRaw(pos.row, pos.col);
+                        const errorType = extractFormulaError(cell);
 
-                        if (!cellRaw || cellRaw.v === null || cellRaw.v === undefined) {
+                        if (!errorType) {
                             return next(cell);
                         }
 
-                        if (cell?.t === CellValueType.FORCE_STRING && isRealNum(cellRaw.v)) {
-                            return next({
-                                ...cell,
-                                markers: {
-                                    ...cell?.markers,
-                                    ...FORCE_STRING_MARK,
-                                },
-                            });
-                        }
-
-                        return next(cell);
+                        return next({
+                            ...cell,
+                            markers: {
+                                ...cell?.markers,
+                                ...FORMULA_ERROR_MARK,
+                            },
+                        });
                     },
                 }
             )

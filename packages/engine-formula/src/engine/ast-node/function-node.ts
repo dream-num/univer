@@ -31,7 +31,7 @@ import type {
     NodeValueType,
 } from '../reference-object/base-reference-object';
 import { ArrayValueObject, transformToValueObject, ValueObjectFactory } from '../value-object/array-value-object';
-import type { BaseValueObject } from '../value-object/base-value-object';
+import { type BaseValueObject, ErrorValueObject } from '../value-object/base-value-object';
 import { prefixHandler } from '../utils/prefixHandler';
 import { IDefinedNamesService } from '../../services/defined-names.service';
 import { BaseAstNode, ErrorNode } from './base-ast-node';
@@ -178,6 +178,12 @@ export class FunctionNode extends BaseAstNode {
     }
 
     private _calculate(variants: BaseValueObject[]) {
+        // Check the number of parameters
+        const { minParams, maxParams } = this._functionExecutor;
+        if (minParams !== -1 && maxParams !== -1 && (variants.length < minParams || variants.length > maxParams)) {
+            return ErrorValueObject.create(ErrorType.NA);
+        }
+
         let resultVariant: NodeValueType;
 
         this._setRefInfo();

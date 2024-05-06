@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
+/* eslint-disable react-refresh/only-export-components */
+
 import { ErrorSingle, SuccessSingle, WarningSingle } from '@univerjs/icons';
 import { render } from 'rc-util/lib/React/render';
 import React from 'react';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
+import type { IDisposable } from '../../type';
 
 import styles from './index.module.less';
 
@@ -83,17 +86,18 @@ const MessageContainer = (props: { messages: IMessageProps[] }) => {
 };
 
 export class Message {
-    private _div: HTMLDivElement;
-    private _messages: IMessageProps[] = [];
+    protected _container: HTMLDivElement;
+
+    protected _messages: IMessageProps[] = [];
 
     constructor(container: HTMLElement) {
-        this._div = document.createElement('div');
-        container.appendChild(this._div);
+        this._container = document.createElement('div');
+        container.appendChild(this._container);
 
         this.render();
     }
 
-    append(type: MessageType, options: IMessageMethodOptions) {
+    append(type: MessageType, options: IMessageMethodOptions): IDisposable {
         const { content, delay = 3000 } = options;
         const key = Date.now();
 
@@ -103,11 +107,10 @@ export class Message {
             content,
         });
 
-        setTimeout(() => {
-            this.teardown(key);
-        }, delay);
-
         this.render();
+
+        setTimeout(() => this.teardown(key), delay);
+        return { dispose: () => this.teardown(key) };
     }
 
     teardown(key: number) {
@@ -117,18 +120,18 @@ export class Message {
     }
 
     render() {
-        render(<MessageContainer messages={this._messages} />, this._div);
+        render(<MessageContainer messages={this._messages} />, this._container);
     }
 
-    success(options: IMessageMethodOptions) {
-        this.append(MessageType.Success, options);
+    success(options: IMessageMethodOptions): IDisposable {
+        return this.append(MessageType.Success, options);
     }
 
-    warning(options: IMessageMethodOptions) {
-        this.append(MessageType.Warning, options);
+    warning(options: IMessageMethodOptions): IDisposable {
+        return this.append(MessageType.Warning, options);
     }
 
-    error(options: IMessageMethodOptions) {
-        this.append(MessageType.Error, options);
+    error(options: IMessageMethodOptions): IDisposable {
+        return this.append(MessageType.Error, options);
     }
 }

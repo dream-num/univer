@@ -64,7 +64,7 @@ export function FormulaBar() {
             paragraphLineGapDefault: 0,
             renderConfig: {
                 horizontalAlign: HorizontalAlign.UNSPECIFIED,
-                verticalAlign: VerticalAlign.UNSPECIFIED,
+                verticalAlign: VerticalAlign.TOP,
                 centerAngle: 0,
                 vertexAngle: 0,
                 wrapStrategy: WrapStrategy.WRAP,

@@ -30,6 +30,8 @@ export class Layer extends Disposable {
 
     protected _dirty: boolean = true;
 
+    private _debounceParentTimeout: Nullable<() => void>;
+
     constructor(
         private _scene: ThinScene,
         objects: BaseObject[] = [],
@@ -211,6 +213,14 @@ export class Layer extends Disposable {
         return this;
     }
 
+    set debounceParentTimeout(func: () => void) {
+        this._debounceParentTimeout = func;
+    }
+
+    get debounceParentTimeout(): Nullable<() => void> {
+        return this._debounceParentTimeout;
+    }
+
     private _layerBehavior(o: BaseObject) {
         this.disposeWithMe(
             toDisposable(
@@ -264,6 +274,8 @@ export class Layer extends Disposable {
             o.dispose();
         });
         this.clear();
+
+        this._debounceParentTimeout = null;
 
         this._cacheCanvas?.dispose();
         this._cacheCanvas = null;

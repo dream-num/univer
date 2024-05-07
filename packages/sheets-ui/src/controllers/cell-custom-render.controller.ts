@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-import type { ICellCustomRender, ICellRenderContext, Nullable, Workbook } from '@univerjs/core';
+import type { ICellCustomRender, ICellRenderContext, Nullable, UniverInstanceService, Workbook } from '@univerjs/core';
 import { Disposable, DisposableCollection, IUniverInstanceService, LifecycleStages, OnLifecycle, sortRules } from '@univerjs/core';
-import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderController, Spreadsheet } from '@univerjs/engine-render';
+import type { IMouseEvent, IPointerEvent, IRenderContext, IRenderController, RenderManagerService, Spreadsheet } from '@univerjs/engine-render';
 import { IRenderManagerService, Vector2 } from '@univerjs/engine-render';
 import { Inject } from '@wendellhu/redi';
 import { SheetSkeletonManagerService } from '../services/sheet-skeleton-manager.service';
+
 
 /**
  * @todo RenderUnit
@@ -34,20 +35,19 @@ export class CellCustomRenderController extends Disposable implements IRenderCon
     constructor(
         private readonly _context: IRenderContext<Workbook>,
         @Inject(SheetSkeletonManagerService) private readonly _sheetSkeletonManagerService: SheetSkeletonManagerService,
-        @IRenderManagerService private readonly _renderManagerService: IRenderManagerService,
-        @IUniverInstanceService private readonly _univerInstanceService: IUniverInstanceService
+        @IRenderManagerService private readonly _renderManagerService: RenderManagerService,
+        @IUniverInstanceService private readonly _univerInstanceService: UniverInstanceService
     ) {
         super();
-
         this._initEventBinding();
     }
+
 
     // eslint-disable-next-line max-lines-per-function
     private _initEventBinding() {
         const disposableCollection = new DisposableCollection();
 
         const workbook = this._context.unit;
-        // this._univerInstanceService.getCurrentTypeOfUnit$<Workbook>(UniverInstanceType.UNIVER_SHEET).subscribe((workbook) => {
         disposableCollection.dispose();
         if (workbook) {
             const unitId = workbook.getUnitId();
@@ -165,7 +165,6 @@ export class CellCustomRenderController extends Disposable implements IRenderCon
                 moveDisposable && disposableCollection.add(moveDisposable);
             }
         }
-        // });
 
         this.disposeWithMe(disposableCollection);
     }
